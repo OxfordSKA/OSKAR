@@ -4,22 +4,20 @@
 <configuration type="sky" version="2.0">
 
     <header>
-        <description></description>
-        <comment></comment>
-        <date></date>
-        <author></author>
     </header>
 
+    <!-- How to deal with polarisation ??! -->
 
-    <configuration levels="2">
-        <level id="0" elements="2">
-            <element id="0" coord1="-1.59629" coord2="1.56587" coordUnit="rad"
-                    coordType="horizontal" spectrumId="0"/>
-            <element id="1" coord1="-2.12599" coord2="0.523599" coordUnit="rad"
-                    coordType="horizontal" spectrumId="0"/>
-        </level>
-        <level id="1" elements="1">
-            <element id="0" size="2">1,1</element>
-        </level>
+    <sources>
+        <source id="0" ra="-1.59629" dec="1.56587"  spectrumId="0" />
+        <source id="1" ra="-2.12599" dec="0.523599" spectrumId="0" />
+        <source id="2" az="-2.6"     el="1.2004"    spectrumId="1" />
+    </sources>
+
+    <spectra>
+        <frequencies channels="2" start="" increment=""/>
+        <spectrum id="0" channelsAmps="1,1"/>
+        <spectrum id="1" channelsAmps="1,2"/>
+    </spectra>
 
 </configuration>
