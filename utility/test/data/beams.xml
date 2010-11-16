@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE oskar>
+
+<configuration type="beams" version="2.0">
+
+    <header>
+    </header>
+
+    <tile>
+        <beam id="0" az="1.5708" el="1.53589" />
+        <beam id="1" az="3.14159" el="1.53589" />
+        <beam id="2" az="-1.5708" el="1.53589" />
+    </tile>
+
+    <station>
+        <beam id="0" az="2.03444" el="1.53176" parent="0" />
+        <beam id="1" az="2.3562" el="1.54611" parent="0" />
+        <beam id="2" az="1.5708" el="1.53588" parent="0" />
+        <beam id="3" az="1.10715" el="1.53176" parent="1" />
+        <beam id="4" az="0.785399" el="1.54611" parent="1" />
+        <beam id="5" az="3.14159" el="1.55334" parent="1" />
+        <beam id="6" az="1.5708" el="1.55334" parent="1" />
+        <beam id="7" az="3.14159" el="1.5708" parent="2" />
+        <beam id="8" az="-1.5708" el="1.55334" parent="2" />
+        <beam id="9" az="0.00" el="1.55334" parent="2" />
+    </station>
+
+</configuration>
