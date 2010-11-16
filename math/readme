@@ -1,0 +1,3 @@
+core - basic math utility functions (mostly C like interface)
+modules - more complex math modules combining functionality from core math
+with a higher level interface.
