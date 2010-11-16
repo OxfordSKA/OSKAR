@@ -1,44 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE oskar>
 
-<data type="station" version="2.0">
+<configuration type="simulation" version="2.0">
 
-    <antennas generated="false">
-        <antenna id="0"  x="-0.225" y="-0.225" include="attributeSet1"/>
-        <antenna id="1"  x="-0.075" y="-0.225" attributeSet="set1"/>
-        <antenna id="2"  x="0.075"  y="-0.225" attributeSet="1"/>
-        <antenna id="3"  x="0.225"  y="-0.225" attributeSet="1"/>
-        <antenna id="4"  x="-0.225" y="-0.075" attributeSet="1"/>
-        <antenna id="5"  x="-0.075" y="-0.075" attributeSet="1"/>
-        <antenna id="6"  x="0.075"  y="-0.075" attributeSet="1"/>
-        <antenna id="7"  x="0.225"  y="-0.075" attributeSet="1"/>
-        <antenna id="8"  x="-0.225" y="0.075"  attributeSet="1"/>
-        <antenna id="9"  x="-0.075" y="0.075"  attributeSet="1"/>
-        <antenna id="10" x="0.075"  y="0.075"  attributeSet="1"/>
-        <antenna id="11" x="0.225"  y="0.075"  attributeSet="1"/>
-        <antenna id="12" x="-0.225" y="0.225"  attributeSet="1"/>
-        <antenna id="13" x="-0.075" y="0.225"  attributeSet="1"/>
-        <antenna id="14" x="0.075"  y="0.225"  attributeSet="1"/>
-        <antenna id="15" x="0.225"  y="0.225"  attributeSet="1"/>
-    </antennas>
+    <header>
+    </header>
 
-    <tiles>
-        <tile id="0" x="0.0" y="11.1" antennas="0,1,2,3,4,5"/>
-        <tile id="1" antennas="6,7,8..15"/>
-    </tiles>
+    <mode type="beamPattern" />
+    <beamPattern>
+        <centralLongitude value="0" />
+        <centralLatitude value="90" />
+        <sizeLongitude value="10" />
+        <sizeLatitude value="10" />
+        <resolution value="0.1" />
+        <useTangentPlane value="true" />
+    </beamPattern>
+    <processing directory="/home/user/oskar/output/"
+        nBeamformingLevels="2">
+        <packMessages value="true" size="0" />
+        <sky processors="0" />
+        <antennas processors="1" />
+        <beamforming level="1" weightsUpdateRatio="1">
+            <beamformer processors="1" />
+            <weights processors="0" />
+        </beamforming>
+        <beamforming level="2" weightsUpdateRatio="1">
+            <beamformer processors="1" save="ascii" />
+            <weights processors="0" />
+        </beamforming>
+    </processing>
+    <channeliser sampleRate="1" bufferLength="10">
+        <frequencies number="5">2e+08,4e+08,6e+08,8e+08,1e+09
+        </frequencies>
+        <channels number="5">0,1,2,3,4</channels>
+    </channeliser>
+    <polarisation type="horizontal" />
+    <dataQuantisationLevels value="0" />
+    <observation>
+        <stationLongitude value="0" />
+        <stationLatitude value="51.75" />
+        <startTime value="0" />
+        <observationLength value="1" />
+    </observation>
 
-    <station>
-        <longitude value="11.0"/>
-        <latitude value="11.0"/>
-    </station>
 
 
-    <attributeSets>
-        <set1>
-            <attribute elementPattern="fileName.dat"/>
-            <attribute gain="1.0" gainErrorPercent="5"/>
-            <attribute phase="0.0" phaseErrorPercent="10"/>
-        </set1>
-    </attributeSets>
-
-</data>
+</configuration>
