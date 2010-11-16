@@ -13,8 +13,6 @@
     </processing>
 
     <observation>
-        <stationLongitude value="0" />
-        <stationLatitude value="51.75" />
         <startTime value="0" />
         <observationLength value="1" />
         <polarisation type="horizontal" />

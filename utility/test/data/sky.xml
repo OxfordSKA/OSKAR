@@ -15,7 +15,7 @@
     </sources>
 
     <spectra>
-        <frequencies channels="2" start="" increment=""/>
+        <frequencies channels="2" start="1.0e6" increment="1.0e2"/>
         <spectrum id="0" channelsAmps="1,1"/>
         <spectrum id="1" channelsAmps="1,2"/>
     </spectra>
