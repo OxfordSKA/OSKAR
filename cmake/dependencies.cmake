@@ -47,12 +47,17 @@ endif (MKL_FOUND)
 
 
 # == Cuda
-set(CUDA_SDK_ROOT_DIR /usr/local/cudaSDK/) # <== might need to change this
+#set(CUDA_SDK_ROOT_DIR /usr/local/cudaSDK/) # <== might need to change this
+find_package(CUDA 2.1 REQUIRED)
 set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 set(CUDA_BUILD_EMULATION OFF) # should be default off anyway.
-#set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--ptxas-options=-v)
-find_package(CUDA 2.1 REQUIRED)
-set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2;--compiler-options;-pedantic)
+
+if(CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
+    set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2)
+else(CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
+    set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g)
+endif(CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
+
 
 # === Set global project include directories.
 include_directories(
