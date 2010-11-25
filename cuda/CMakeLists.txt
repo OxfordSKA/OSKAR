@@ -4,6 +4,7 @@
 
 set(cuda_SRC
     src/vectorAdd.cu
+    src/beamPattern.cu
 )
 
 CUDA_ADD_library(cuda ${cuda_SRC})

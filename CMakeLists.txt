@@ -21,7 +21,7 @@ include(compilerOptions)
 # === Recurse into sub-diretories.
 #add_subdirectory(data)
 #add_subdirectory(utility)
-#add_subdirectory(math)
+add_subdirectory(math)
 add_subdirectory(cuda)
 #add_subdirectory(mpi)
 #add_subdirectory(widgets)

@@ -7,11 +7,12 @@
 # ==============================================================================
 set(math_core_test_SRC
     src/CppUnitMain.cpp
+    src/SphericalPositionsTest.cpp
 )
 
 include_directories()
 
-add_executable(mathCoreTest ${data_test_SRC})
+add_executable(mathCoreTest ${math_core_test_SRC})
 
 target_link_libraries(mathCoreTest
     math-core
@@ -22,17 +23,17 @@ target_link_libraries(mathCoreTest
 
 # QTest
 # ==============================================================================
-set(math_core_qtest_MOC_SRC
-)
+#set(math_core_qtest_MOC_SRC
+#)
 
-set(math_core_qtest_SRC
-)
+#set(math_core_qtest_SRC
+#)
 
-qt4_wrap_cpp(math_core_qtest_SRC ${math_core_qtest_MOC_SRC})
+#qt4_wrap_cpp(math_core_qtest_SRC ${math_core_qtest_MOC_SRC})
 
-add_executable(mathCoreQTest ${math_core_qtest_SRC})
+#add_executable(mathCoreQTest ${math_core_qtest_SRC})
 
-target_link_libraries(mathCoreQTest
-    math-core
-    ${QT_QTTEST_LIBRARY}
-)
+#target_link_libraries(mathCoreQTest
+#    math-core
+#    ${QT_QTTEST_LIBRARY}
+#)

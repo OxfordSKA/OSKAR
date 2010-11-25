@@ -4,6 +4,6 @@
 #include "cuda/CudaEclipse.h"
 #include "cuda/CudaTypes.h"
 
-void vectorAddMethod();
+void vectorAdd();
 
 #endif // OSKAR_CUDA_VECTOR_ADD_H

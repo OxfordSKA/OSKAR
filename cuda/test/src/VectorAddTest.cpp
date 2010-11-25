@@ -28,5 +28,5 @@ void VectorAddTest::tearDown()
 
 void VectorAddTest::test_method()
 {
-    vectorAddMethod();
+    vectorAdd();
 }

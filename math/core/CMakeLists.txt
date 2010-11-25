@@ -3,6 +3,7 @@
 #
 
 set(math_core_SRC
+    src/dummy.cpp
 )
 
 include_directories()
