@@ -3,8 +3,14 @@
 #
 
 set(cuda_SRC
-    src/vectorAdd.cu
+    # CUDA kernels:
+    src/_antennaSignals.cu
+    src/_beamPattern.cu
+    src/_generateWeights.cu
+    # Callable functions:
+    src/antennaSignals.cu
     src/beamPattern.cu
+    src/vectorAdd.cu
 )
 
 CUDA_ADD_library(cuda ${cuda_SRC})
