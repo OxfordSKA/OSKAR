@@ -1,7 +1,4 @@
 #include "cuda/beamPattern.h"
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
 
 #ifndef M_PI
 #define M_PI 3.1415926535
@@ -82,7 +79,7 @@ void beamPattern(const int na, const float* ax, const float* ay,
     _generateWeights <<<wBlocks, wThreadsPerBlock>>> (
             na, axd, ayd, weights, cosBeamEl, cosBeamAz, sinBeamAz, k);
 
-    // Invoke kernel to compute the beam pattern.
+    // Invoke kernel to compute the beam pattern on the device.
     int threadsPerBlock = 384;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
     _beamPattern <<<blocks, threadsPerBlock>>> (na, axd, ayd, weights,
@@ -103,11 +100,15 @@ void beamPattern(const int na, const float* ax, const float* ay,
 
 /**
  * @details
- * Weights generator CUDA kernel.
- *
- * This produces the complex antenna beamforming weights for the given
- * direction, and stores them in device memory.
+ * This CUDA kernel produces the complex antenna beamforming weights for the
+ * given direction, and stores them in device memory.
  * Each thread generates the complex weight for a single antenna.
+ *
+ * The number of floating-point operations performed by this kernel is:
+ * \li Sines and cosines: 2 * na.
+ * \li Multiplies: 4 * na.
+ * \li Divides: 2 * na.
+ * \li Additions / subtractions: na.
  *
  * @param[in] na Number of antennas.
  * @param[in] ax Array of antenna x positions.
@@ -136,7 +137,32 @@ __global__ void _generateWeights(const int na, const float* ax, const float* ay,
 
 /**
  * @details
- * Beam pattern computation kernel.
+ * This CUDA kernel evaluates the beam pattern for the given antenna
+ * positions and weights vector, using the supplied positions of the test
+ * source.
+ *
+ * Each thread evaluates a single pixel of the beam pattern, looping over
+ * all the antennas while performing a complex multiply-accumulate with the
+ * required beamforming weights.
+ *
+ * The computed beam pattern is returned in the \p image array, which
+ * must be pre-sized to length 2*ns. The values in the \p image array
+ * are alternate (real, imag) pairs for each test source position.
+ *
+ * The number of floating-point operations performed by this kernel is:
+ * \li Sines and cosines: ns * (2 * na + 3).
+ * \li Multiplies: 8 * ns * na.
+ * \li Additions / subtractions: 5 * ns * na.
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions.
+ * @param[in] ay Array of antenna y positions.
+ * @param[in] weights Array of complex antenna weights (length na).
+ * @param[in] ns The number of test source positions.
+ * @param[in] slon The longitude coordinates of the test source.
+ * @param[in] slat The latitude coordinates of the test source.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] image The computed beam pattern (see note, above).
  */
 __global__ void _beamPattern(const int na, const float* ax, const float* ay,
         const float2* weights, const int ns, const float* slon, const float* slat,
@@ -159,12 +185,12 @@ __global__ void _beamPattern(const int na, const float* ax, const float* ay,
         // Calculate the geometric phase from the source.
         const float phase = GEOMETRIC_PHASE(ax[a], ay[a],
                 cosEl, sinAz, cosAz, k);
-        float2 signal = make_float2(cosf(phase), sinf(phase));
+        const float2 signal = make_float2(cosf(phase), sinf(phase));
 
-        // Perform complex MAC.
-        float2 w = weights[a];
-        image[s].x += (signal.x * w.x - signal.y * w.y); // RE*RE-IM*IM
-        image[s].y += (signal.y * w.x + signal.x * w.y); // IM*RE+RE*IM
+        // Perform complex multiply-accumulate.
+        const float2 w = weights[a];
+        image[s].x += (signal.x * w.x - signal.y * w.y); // RE*RE - IM*IM
+        image[s].y += (signal.y * w.x + signal.x * w.y); // IM*RE + RE*IM
     }
 }
 
