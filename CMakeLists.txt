@@ -12,11 +12,11 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 # === Append the src/cmake directory to the module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
 
-# === Set dependencies.
-include(dependencies)
-
 # === Set compiler options.
 include(compilerOptions)
+
+# === Set dependencies.
+include(dependencies)
 
 # === Recurse into sub-diretories.
 #add_subdirectory(data)

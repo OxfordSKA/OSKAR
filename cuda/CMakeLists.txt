@@ -19,6 +19,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 
 target_link_libraries(cuda
     ${CUDA_LIBRARIES}
+    ${QT_QTCORE_LIBRARY}
 )
 
 
