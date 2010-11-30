@@ -4,36 +4,41 @@
 /**
  * @details
  * This CUDA kernel produces the complex antenna beamforming weights for the
- * given direction, and stores them in device memory.
- * Each thread generates the complex weight for a single antenna.
+ * given directions, and stores them in device memory.
+ * Each thread generates the complex weights for a single antenna and a single
+ * beam direction.
  *
  * The number of floating-point operations performed by this kernel is:
- * \li Sines and cosines: 2 * na.
- * \li Multiplies: 4 * na.
- * \li Divides: 2 * na.
- * \li Additions / subtractions: na.
+ * \li Sines and cosines: 2 * na * nb.
+ * \li Multiplies: 4 * na * nb.
+ * \li Divides: 2 * na * nb.
+ * \li Additions / subtractions: na * nb.
  *
  * @param[in] na Number of antennas.
  * @param[in] ax Array of antenna x positions.
  * @param[in] ay Array of antenna y positions.
- * @param[out] weights Array of generated complex antenna weights (length na).
- * @param[in] cosBeamEl Cosine of the beam elevation.
- * @param[in] cosBeamAz Cosine of the beam azimuth.
- * @param[in] sinBeamAz Sine of the beam azimuth.
+ * @param[in] nb Number of beams.
+ * @param[in] cbe Cosine of all beam elevations.
+ * @param[in] cba Cosine of all beam azimuths.
+ * @param[in] sba Sine of all beam azimuths.
  * @param[in] k Wavenumber.
+ * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
  */
 __global__
 void _generateWeights(const int na, const float* ax, const float* ay,
-        float2* weights, const float cosBeamEl, const float cosBeamAz,
-        const float sinBeamAz, const float k)
+        const int nb, const float* cbe, const float* cba, const float* sba,
+        const float k, float2* weights)
 {
-    // Get the antenna ID that this thread is working on.
-    const int a = blockDim.x * blockIdx.x + threadIdx.x;
-    if (a >= na) return; // Return if the index is out of range.
+    // Get the antenna and beam ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x; // Thread index.
+    const int a = i % na; // Antenna index.
+    const int b = i / na; // Beam index.
+    if (a >= na || b >= nb) return; // Return if either index is out of range.
 
     // Compute the geometric phase of the beam direction.
     const float phase = -GEOMETRIC_PHASE(ax[a], ay[a],
-            cosBeamEl, sinBeamAz, cosBeamAz, k);
-    weights[a].x = cosf(phase) / na; // Normalised real part.
-    weights[a].y = sinf(phase) / na; // Normalised imaginary part.
+            cbe[b], sba[b], cba[b], k);
+    const int w = a + b*na;
+    weights[w].x = cosf(phase) / na; // Normalised real part.
+    weights[w].y = sinf(phase) / na; // Normalised imaginary part.
 }

@@ -10,7 +10,7 @@
 /// CUDA kernel to generate beamforming weights.
 __global__
 void _generateWeights(const int na, const float* ax, const float* ay,
-        float2* weights, const float cosBeamEl, const float cosBeamAz,
-        const float sinBeamAz, const float k);
+        const int nb, const float* cbe, const float* cba, const float* sba,
+        const float k, float2* weights);
 
 #endif // _GENERATE_WEIGHTS_H

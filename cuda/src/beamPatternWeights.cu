@@ -39,7 +39,7 @@ void beamPatternWeights(const int na, const float* ax, const float* ay,
 
     // Allocate memory for antenna positions, antenna weights,
     // test source positions and pixel values on the device.
-    float *axd, *ayd, *slond, *slatd;
+    float *axd, *ayd, *slond, *slatd, *sbad, *cbad, *cbed;
     float2 *weights, *pix;
     cudaMalloc((void**)&axd, na * sizeof(float));
     cudaMalloc((void**)&ayd, na * sizeof(float));
@@ -47,18 +47,24 @@ void beamPatternWeights(const int na, const float* ax, const float* ay,
     cudaMalloc((void**)&slond, ns * sizeof(float));
     cudaMalloc((void**)&slatd, ns * sizeof(float));
     cudaMalloc((void**)&pix, ns * sizeof(float2));
+    cudaMalloc((void**)&sbad, 1 * sizeof(float));
+    cudaMalloc((void**)&cbad, 1 * sizeof(float));
+    cudaMalloc((void**)&cbed, 1 * sizeof(float));
 
     // Copy antenna positions and test source positions to device.
     cudaMemcpy(axd, ax, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(slond, slon, ns * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(slatd, slat, ns * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(sbad, &sinBeamAz, 1 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(cbad, &cosBeamAz, 1 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(cbed, &cosBeamEl, 1 * sizeof(float), cudaMemcpyHostToDevice);
 
     // Invoke kernel to compute antenna weights on the device.
     int wThreadsPerBlock = 256;
     int wBlocks = (na + wThreadsPerBlock - 1) / wThreadsPerBlock;
     _generateWeights <<<wBlocks, wThreadsPerBlock>>> (
-            na, axd, ayd, weights, cosBeamEl, cosBeamAz, sinBeamAz, k);
+            na, axd, ayd, 1, cbed, cbad, sbad, k, weights);
 
     // Invoke kernel to compute the beam pattern on the device.
     int threadsPerBlock = 384;
@@ -80,4 +86,7 @@ void beamPatternWeights(const int na, const float* ax, const float* ay,
     cudaFree(slond);
     cudaFree(slatd);
     cudaFree(pix);
+    cudaFree(sbad);
+    cudaFree(cbad);
+    cudaFree(cbed);
 }
