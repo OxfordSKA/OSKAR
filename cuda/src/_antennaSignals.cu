@@ -37,8 +37,10 @@ void _antennaSignals(const int na, const float* ax, const float* ay,
     const int a = blockDim.x * blockIdx.x + threadIdx.x;
     if (a >= na) return; // Return if the index is out of range.
 
+    // Initialise shared memory to hold complex antenna signal.
+    sharedMem[threadIdx.x] = make_float2(0.0, 0.0);
+
     // Loop over all sources.
-    signals[a] = make_float2(0.0, 0.0);
     for (int s = 0; s < ns; ++s) {
         // Get the source position (could do with major optimisation here!).
         const float az = slon[s];
@@ -52,8 +54,12 @@ void _antennaSignals(const int na, const float* ax, const float* ay,
                 cosEl, sinAz, cosAz, k);
 
         // Perform complex multiply-accumulate.
-        signals[a].x += (samp[s] * cosf(phase));
-        signals[a].y += (samp[s] * sinf(phase));
+        sharedMem[threadIdx.x].x += (samp[s] * cosf(phase));
+        sharedMem[threadIdx.x].y += (samp[s] * sinf(phase));
     }
+
+    // Copy shared memory back into global memory.
+    signals[a].x = sharedMem[threadIdx.x].x;
+    signals[a].y = sharedMem[threadIdx.x].y;
 }
 

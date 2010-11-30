@@ -20,7 +20,9 @@
  * @param[in] na Number of antennas.
  * @param[in] ax Array of antenna x positions.
  * @param[in] ay Array of antenna y positions.
- * @param[in] weights Array of complex antenna weights (length na).
+ * @param[in] cosBeamEl Cosine of beam elevation.
+ * @param[in] cosBeamAz Cosine of beam azimuth.
+ * @param[in] sinBeamAz Sine of beam azimuth.
  * @param[in] ns The number of test source positions.
  * @param[in] slon The longitude coordinates of the test source.
  * @param[in] slat The latitude coordinates of the test source.
