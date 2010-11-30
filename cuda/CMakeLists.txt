@@ -5,11 +5,13 @@
 set(cuda_SRC
     # CUDA kernels:
     src/_antennaSignals.cu
-    src/_beamPattern.cu
+    src/_beamPatternDirect.cu
+    src/_beamPatternWeights.cu
     src/_generateWeights.cu
     # Callable functions:
     src/antennaSignals.cu
-    src/beamPattern.cu
+    src/beamPatternDirect.cu
+    src/beamPatternWeights.cu
     src/vectorAdd.cu
 )
 

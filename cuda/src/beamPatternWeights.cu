@@ -1,13 +1,12 @@
-#include "cuda/beamPattern.h"
-#include "cuda/_beamPattern.h"
+#include "cuda/beamPatternWeights.h"
+#include "cuda/_beamPatternWeights.h"
 #include "cuda/_generateWeights.h"
-
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
+#include <cstdio>
 
 /**
  * @details
- * Computes a beam pattern using CUDA.
+ * Computes a beam pattern using CUDA, generating the beamforming weights
+ * separately.
  *
  * The function must be supplied with the antenna x- and y-positions, the
  * test source longitude and latitude positions, the beam direction, and
@@ -28,7 +27,7 @@
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-void beamPattern(const int na, const float* ax, const float* ay,
+void beamPatternWeights(const int na, const float* ax, const float* ay,
         const int ns, const float* slon, const float* slat,
         const float ba, const float be, const float k,
         float* image)
@@ -56,24 +55,20 @@ void beamPattern(const int na, const float* ax, const float* ay,
     cudaMemcpy(slatd, slat, ns * sizeof(float), cudaMemcpyHostToDevice);
 
     // Invoke kernel to compute antenna weights on the device.
-//    int wThreadsPerBlock = 256;
-//    int wBlocks = (na + wThreadsPerBlock - 1) / wThreadsPerBlock;
-//    _generateWeights <<<wBlocks, wThreadsPerBlock>>> (
-//            na, axd, ayd, weights, cosBeamEl, cosBeamAz, sinBeamAz, k);
+    int wThreadsPerBlock = 256;
+    int wBlocks = (na + wThreadsPerBlock - 1) / wThreadsPerBlock;
+    _generateWeights <<<wBlocks, wThreadsPerBlock>>> (
+            na, axd, ayd, weights, cosBeamEl, cosBeamAz, sinBeamAz, k);
 
     // Invoke kernel to compute the beam pattern on the device.
     int threadsPerBlock = 384;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    TIMER_START
-//    _beamPattern2 <<<blocks, threadsPerBlock>>> (na, axd, ayd, weights,
-//            ns, slond, slatd, k, pix);
-    _beamPattern3 <<<blocks, threadsPerBlock, threadsPerBlock * sizeof(float2)>>> (na, axd, ayd, cosBeamEl, cosBeamAz, sinBeamAz,
-            ns, slond, slatd, k, pix);
+    size_t sharedMem = threadsPerBlock * sizeof(float2);
+    _beamPatternWeights <<<blocks, threadsPerBlock, sharedMem>>>
+            (na, axd, ayd, weights, ns, slond, slatd, k, pix);
     cudaError_t err = cudaPeekAtLastError();
-    const char* msg = cudaGetErrorString(err);
-    printf("Error message: %s\n", msg);
-    cudaThreadSynchronize();
-    TIMER_STOP("Generated beam pattern")
+    if (err != cudaSuccess)
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
 
     // Copy result from device memory to host memory.
     cudaMemcpy(image, pix, ns * sizeof(float2), cudaMemcpyDeviceToHost);
