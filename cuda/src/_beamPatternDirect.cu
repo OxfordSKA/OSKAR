@@ -57,11 +57,11 @@ void _beamPatternDirect(const int na, const float* ax, const float* ay,
         // Calculate the geometric phase of the beam direction.
         // (Faster to recompute it here than look it up from global memory.)
         phaseBeam = -GEOMETRIC_PHASE(x, y, cosBeamEl, sinBeamAz, cosBeamAz, k);
-        sincosf(phaseBeam, &w.x, &w.y);
+        sincosf(phaseBeam, &w.y, &w.x);
 
         // Calculate the geometric phase from the source.
         phaseSrc = GEOMETRIC_PHASE(x, y, cosEl, sinAz, cosAz, k);
-        sincosf(phaseSrc, &signal.x, &signal.y);
+        sincosf(phaseSrc, &signal.y, &signal.x);
 
         // Perform complex multiply-accumulate.
         sharedMem[threadIdx.x].x += (signal.x * w.x - signal.y * w.y); // RE*RE - IM*IM

@@ -55,7 +55,7 @@ void _beamPatternWeights(const int na, const float* ax, const float* ay,
         // Calculate the geometric phase from the source.
         const float phaseSrc = GEOMETRIC_PHASE(ax[a], ay[a],
                 cosEl, sinAz, cosAz, k);
-        sincosf(phaseSrc, &signal.x, &signal.y);
+        sincosf(phaseSrc, &signal.y, &signal.x);
 
         // Perform complex multiply-accumulate.
         w = weights[a];
