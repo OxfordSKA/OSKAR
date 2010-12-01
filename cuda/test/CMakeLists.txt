@@ -7,7 +7,7 @@
 # ==============================================================================
 set(data_test_SRC
     src/CppUnitMain.cpp
-    #src/VectorAddTest.cpp
+    src/VectorAddTest.cpp
     src/BeamPatternTest.cpp
 )
 
