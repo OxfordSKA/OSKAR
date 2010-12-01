@@ -1,5 +1,5 @@
-#include "cuda/beamPatternDirect.h"
-#include "cuda/_beamPatternDirect.h"
+#include "cuda/beamPattern2dHorizontalGeometric.h"
+#include "cuda/_beamPattern2dHorizontalGeometric.h"
 #include <cstdio>
 
 /**
@@ -26,10 +26,9 @@
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-void beamPatternDirect(const int na, const float* ax, const float* ay,
-        const int ns, const float* slon, const float* slat,
-        const float ba, const float be, const float k,
-        float* image)
+void beamPattern2dHorizontalGeometric(const int na, const float* ax,
+        const float* ay, const int ns, const float* slon, const float* slat,
+        const float ba, const float be, const float k, float* image)
 {
     // Precompute.
     float sinBeamAz = sin(ba);
@@ -56,7 +55,7 @@ void beamPatternDirect(const int na, const float* ax, const float* ay,
     int threadsPerBlock = 384;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
     size_t sharedMem = threadsPerBlock * sizeof(float2);
-    _beamPatternDirect <<<blocks, threadsPerBlock, sharedMem>>>
+    _beamPattern2dHorizontalGeometric <<<blocks, threadsPerBlock, sharedMem>>>
         (na, axd, ayd, cosBeamEl, cosBeamAz, sinBeamAz, ns, slond, slatd, k, pix);
     cudaError_t err = cudaPeekAtLastError();
     if (err != cudaSuccess)

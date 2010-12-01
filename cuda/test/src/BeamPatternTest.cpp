@@ -1,6 +1,6 @@
 #include "cuda/test/BeamPatternTest.h"
-#include "cuda/beamPatternDirect.h"
-#include "cuda/beamPatternWeights.h"
+#include "cuda/beamPattern2dHorizontalGeometric.h"
+#include "cuda/beamPattern2dHorizontalWeights.h"
 #include "math/core/SphericalPositions.h"
 #include <cmath>
 #include <vector>
@@ -69,13 +69,13 @@ void BeamPatternTest::test_direct()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    beamPatternDirect(na*na, &ax[0], &ay[0], ns, &slon[0], &slat[0],
-            beamAz * DEG2RAD, beamEl * DEG2RAD, 2 * M_PI * (freq / C_0),
-            &image[0]);
+    beamPattern2dHorizontalGeometric(na*na, &ax[0], &ay[0], ns, &slon[0],
+            &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
+            2 * M_PI * (freq / C_0), &image[0]);
     TIMER_STOP("Finished beam pattern (direct)");
 
     // Write image data to file.
-    FILE* file = fopen("beamPatternDirect.dat", "w");
+    FILE* file = fopen("beamPattern2dHorizontalGeometric.dat", "w");
     for (unsigned s = 0; s < ns; ++s) {
         fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
                 slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
@@ -117,13 +117,13 @@ void BeamPatternTest::test_weights()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    beamPatternWeights(na*na, &ax[0], &ay[0], ns, &slon[0], &slat[0],
-            beamAz * DEG2RAD, beamEl * DEG2RAD, 2 * M_PI * (freq / C_0),
-            &image[0]);
+    beamPattern2dHorizontalWeights(na*na, &ax[0], &ay[0], ns, &slon[0],
+            &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
+            2 * M_PI * (freq / C_0), &image[0]);
     TIMER_STOP("Finished beam pattern (separate weights)");
 
     // Write image data to file.
-    FILE* file = fopen("beamPatternWeights.dat", "w");
+    FILE* file = fopen("beamPattern2dHorizontalWeights.dat", "w");
     for (unsigned s = 0; s < ns; ++s) {
         fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
                 slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);

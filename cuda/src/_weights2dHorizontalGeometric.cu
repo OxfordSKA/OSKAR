@@ -1,4 +1,4 @@
-#include "cuda/_generateWeights.h"
+#include "cuda/_weights2dHorizontalGeometric.h"
 #include "math/core/phase.h"
 
 /**
@@ -15,17 +15,17 @@
  * \li Additions / subtractions: na * nb.
  *
  * @param[in] na Number of antennas.
- * @param[in] ax Array of antenna x positions.
- * @param[in] ay Array of antenna y positions.
+ * @param[in] ax Array of antenna x positions in metres.
+ * @param[in] ay Array of antenna y positions in metres.
  * @param[in] nb Number of beams.
  * @param[in] cbe Cosine of all beam elevations.
  * @param[in] cba Cosine of all beam azimuths.
  * @param[in] sba Sine of all beam azimuths.
- * @param[in] k Wavenumber.
+ * @param[in] k The wavenumber (rad / m).
  * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
  */
 __global__
-void _generateWeights(const int na, const float* ax, const float* ay,
+void _weights2dHorizontalGeometric(const int na, const float* ax, const float* ay,
         const int nb, const float* cbe, const float* cba, const float* sba,
         const float k, float2* weights)
 {
@@ -36,7 +36,7 @@ void _generateWeights(const int na, const float* ax, const float* ay,
     if (a >= na || b >= nb) return; // Return if either index is out of range.
 
     // Compute the geometric phase of the beam direction.
-    const float phase = -GEOMETRIC_PHASE(ax[a], ay[a],
+    const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
             cbe[b], sba[b], cba[b], k);
     const int w = a + b*na;
     weights[w].x = cosf(phase) / na; // Normalised real part.

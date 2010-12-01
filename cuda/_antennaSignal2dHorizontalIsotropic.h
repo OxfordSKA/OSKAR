@@ -1,0 +1,19 @@
+#ifndef OSKAR__ANTENNA_SIGNAL_2D_HORIZONTAL_ISOTROPIC_H
+#define OSKAR__ANTENNA_SIGNAL_2D_HORIZONTAL_ISOTROPIC_H
+
+#include "cuda/CudaEclipse.h"
+
+/**
+ * @file _antennaSignal2dHorizontalIsotropic.h
+ */
+
+// Shared memory pointer used by the kernel.
+extern __shared__ float2 sharedMem[];
+
+/// CUDA kernel to compute antenna signals.
+__global__
+void _antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
+        const float* ay, const int ns, const float* samp, const float3* strig,
+        const float k, float2* signals);
+
+#endif // OSKAR__ANTENNA_SIGNAL_2D_HORIZONTAL_ISOTROPIC_H

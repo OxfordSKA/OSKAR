@@ -1,6 +1,6 @@
-#include "cuda/beamPatternWeights.h"
-#include "cuda/_beamPatternWeights.h"
-#include "cuda/_generateWeights.h"
+#include "cuda/beamPattern2dHorizontalWeights.h"
+#include "cuda/_beamPattern2dHorizontalWeights.h"
+#include "cuda/_weights2dHorizontalGeometric.h"
 #include <cstdio>
 
 /**
@@ -27,10 +27,9 @@
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-void beamPatternWeights(const int na, const float* ax, const float* ay,
-        const int ns, const float* slon, const float* slat,
-        const float ba, const float be, const float k,
-        float* image)
+void beamPattern2dHorizontalWeights(const int na, const float* ax,
+        const float* ay, const int ns, const float* slon, const float* slat,
+        const float ba, const float be, const float k, float* image)
 {
     // Precompute.
     float sinBeamAz = sin(ba);
@@ -63,14 +62,14 @@ void beamPatternWeights(const int na, const float* ax, const float* ay,
     // Invoke kernel to compute antenna weights on the device.
     int wThreadsPerBlock = 256;
     int wBlocks = (na + wThreadsPerBlock - 1) / wThreadsPerBlock;
-    _generateWeights <<<wBlocks, wThreadsPerBlock>>> (
+    _weights2dHorizontalGeometric <<<wBlocks, wThreadsPerBlock>>> (
             na, axd, ayd, 1, cbed, cbad, sbad, k, weights);
 
     // Invoke kernel to compute the beam pattern on the device.
     int threadsPerBlock = 384;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
     size_t sharedMem = threadsPerBlock * sizeof(float2);
-    _beamPatternWeights <<<blocks, threadsPerBlock, sharedMem>>>
+    _beamPattern2dHorizontalWeights <<<blocks, threadsPerBlock, sharedMem>>>
             (na, axd, ayd, weights, ns, slond, slatd, k, pix);
     cudaError_t err = cudaPeekAtLastError();
     if (err != cudaSuccess)

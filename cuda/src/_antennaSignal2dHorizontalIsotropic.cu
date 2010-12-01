@@ -1,4 +1,4 @@
-#include "cuda/_antennaSignals.h"
+#include "cuda/_antennaSignal2dHorizontalIsotropic.h"
 #include "math/core/phase.h"
 
 /**
@@ -8,6 +8,13 @@
  *
  * Each thread evaluates the signal for a single antenna, looping over
  * all the sources.
+ *
+ * The cosine and sine of the source azimuths, and the cosine
+ * of the elevations, must be given as triplets in the \p strig array:
+ *
+ * strig.x = {cosine azimuth}
+ * strig.y = {sine azimuth}
+ * strig.z = {cosine elevation}
  *
  * The computed antenna signals are returned in the \p signals array, which
  * must be pre-sized to length 2*na. The values in the \p signals array
@@ -19,43 +26,41 @@
  * \li Additions / subtractions:
  *
  * @param[in] na Number of antennas.
- * @param[in] ax Array of antenna x positions.
- * @param[in] ay Array of antenna y positions.
+ * @param[in] ax Array of antenna x positions in metres.
+ * @param[in] ay Array of antenna y positions in metres.
  * @param[in] ns The number of source positions.
  * @param[in] samp The source amplitudes.
- * @param[in] slon The source longitude coordinates in radians.
- * @param[in] slat The source latitude coordinates in radians.
+ * @param[in] strig The cosine and sine of the source coordinates.
  * @param[in] k The wavenumber (rad / m).
  * @param[out] signals The computed antenna signals (see note, above).
  */
 __global__
-void _antennaSignals(const int na, const float* ax, const float* ay,
-        const int ns, const float* samp, const float* slon, const float* slat,
+void _antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
+        const float* ay, const int ns, const float* samp, const float3* strig,
         const float k, float2* signals)
 {
     // Get the antenna ID that this thread is working on.
     const int a = blockDim.x * blockIdx.x + threadIdx.x;
     if (a >= na) return; // Return if the index is out of range.
 
+    // Get the antenna position.
+    const float x = ax[a];
+    const float y = ay[a];
+
     // Initialise shared memory to hold complex antenna signal.
     sharedMem[threadIdx.x] = make_float2(0.0, 0.0);
 
     // Loop over all sources.
+    float sinPhase, cosPhase;
     for (int s = 0; s < ns; ++s) {
-        // Get the source position (could do with major optimisation here!).
-        const float az = slon[s];
-        const float el = slat[s];
-        const float cosAz = cosf(az);
-        const float sinAz = sinf(az);
-        const float cosEl = cosf(el);
-
         // Calculate the geometric phase from the source.
-        const float phase = GEOMETRIC_PHASE(ax[a], ay[a],
-                cosEl, sinAz, cosAz, k);
+        const float phase = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
+                strig[s].z, strig[s].y, strig[s].x, k);
 
         // Perform complex multiply-accumulate.
-        sharedMem[threadIdx.x].x += (samp[s] * cosf(phase));
-        sharedMem[threadIdx.x].y += (samp[s] * sinf(phase));
+        sincosf(phase, &sinPhase, &cosPhase);
+        sharedMem[threadIdx.x].x += (samp[s] * cosPhase);
+        sharedMem[threadIdx.x].y += (samp[s] * sinPhase);
     }
 
     // Copy shared memory back into global memory.

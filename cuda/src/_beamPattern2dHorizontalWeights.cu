@@ -1,4 +1,4 @@
-#include "cuda/_beamPatternWeights.h"
+#include "cuda/_beamPattern2dHorizontalWeights.h"
 #include "math/core/phase.h"
 
 /**
@@ -21,27 +21,27 @@
  * \li Additions / subtractions: 5 * ns * na.
  *
  * @param[in] na Number of antennas.
- * @param[in] ax Array of antenna x positions.
- * @param[in] ay Array of antenna y positions.
+ * @param[in] ax Array of antenna x positions in metres.
+ * @param[in] ay Array of antenna y positions in metres.
  * @param[in] weights Array of complex antenna weights (length na).
  * @param[in] ns The number of test source positions.
- * @param[in] slon The longitude coordinates of the test source.
- * @param[in] slat The latitude coordinates of the test source.
+ * @param[in] saz The azimuth coordinates of the test source in radians.
+ * @param[in] sel The elevation coordinates of the test source in radians.
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
 __global__
-void _beamPatternWeights(const int na, const float* ax, const float* ay,
-        const float2* weights, const int ns, const float* slon, const float* slat,
-        const float k, float2* image)
+void _beamPattern2dHorizontalWeights(const int na, const float* ax,
+        const float* ay, const float2* weights, const int ns,
+        const float* saz, const float* sel, const float k, float2* image)
 {
     // Get the pixel (source position) ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
     if (s >= ns) return; // Return if the index is out of range.
 
     // Get the source position.
-    const float az = slon[s];
-    const float el = slat[s];
+    const float az = saz[s];
+    const float el = sel[s];
     const float cosEl = cosf(el);
     const float sinAz = sinf(az);
     const float cosAz = cosf(az);
@@ -53,7 +53,7 @@ void _beamPatternWeights(const int na, const float* ax, const float* ay,
     // Loop over all antennas.
     for (int a = 0; a < na; ++a) {
         // Calculate the geometric phase from the source.
-        const float phaseSrc = GEOMETRIC_PHASE(ax[a], ay[a],
+        const float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
                 cosEl, sinAz, cosAz, k);
         sincosf(phaseSrc, &signal.y, &signal.x);
 

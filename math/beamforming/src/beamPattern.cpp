@@ -63,7 +63,7 @@ void _generateWeights(const int na, const float* ax, const float* ay,
     // Loop over antennas.
     for (int a = 0; a < na; ++a) {
         // Compute the geometric phase of the beam direction.
-        const float phase = -GEOMETRIC_PHASE(ax[a], ay[a],
+        const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
                 cosBeamEl, sinBeamAz, cosBeamAz, k);
         weights[2*a + 0] = cos(phase) / na; // Normalised real part.
         weights[2*a + 1] = sin(phase) / na; // Normalised imaginary part.
@@ -91,7 +91,7 @@ void _beamPattern(const int na, const float* ax, const float* ay,
         image[2*s + 1] = 0.0;
         for (int a = 0; a < na; ++a) {
             // Calculate the geometric phase from the source.
-            const float phase = GEOMETRIC_PHASE(ax[a], ay[a],
+            const float phase = GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
                     cosEl, sinAz, cosAz, k);
             float signal[2];
             signal[0] = cos(phase);

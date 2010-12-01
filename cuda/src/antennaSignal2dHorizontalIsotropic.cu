@@ -1,5 +1,5 @@
-#include "cuda/antennaSignals.h"
-#include "cuda/_antennaSignals.h"
+#include "cuda/antennaSignal2dHorizontalIsotropic.h"
+#include "cuda/_antennaSignal2dHorizontalIsotropic.h"
 
 /**
  * @details
@@ -22,9 +22,9 @@
  * @param[in] k The wavenumber (rad / m).
  * @param[out] signals The computed antenna signals (see note, above).
  */
-void antennaSignals(const int na, const float* ax, const float* ay,
-        const int ns, const float* samp, const float* slon, const float* slat,
-        const float k, float* signals)
+void antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
+        const float* ay, const int ns, const float* samp, const float* slon,
+        const float* slat, const float k, float* signals)
 {
     // Allocate memory for antenna positions, source positions
     // and antenna signals on the device.
@@ -47,8 +47,8 @@ void antennaSignals(const int na, const float* ax, const float* ay,
     // Invoke kernel to compute antenna signals on the device.
     int threadsPerBlock = 384;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    _antennaSignals <<<blocks, threadsPerBlock>>> (na, axd, ayd,
-            ns, sampd, slond, slatd, k, sig);
+//    _antennaSignal2dHorizontalIsotropic <<<blocks, threadsPerBlock>>> (na, axd, ayd,
+//            ns, sampd, slond, slatd, k, sig);
 
     // Copy result from device memory to host memory.
     cudaMemcpy(signals, sig, ns * sizeof(float2), cudaMemcpyDeviceToHost);

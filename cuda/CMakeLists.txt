@@ -4,14 +4,16 @@
 
 set(cuda_SRC
     # CUDA kernels:
-    src/_antennaSignals.cu
-    src/_beamPatternDirect.cu
-    src/_beamPatternWeights.cu
-    src/_generateWeights.cu
+    src/_antennaSignal2dHorizontalIsotropic.cu
+    src/_beamPattern2dHorizontalGeometric.cu
+    src/_beamPattern2dHorizontalWeights.cu
+    src/_equatorialToHorizontalGeneric.cu
+    src/_precompute2dHorizontalTrig.cu
+    src/_weights2dHorizontalGeometric.cu
     # Callable functions:
-    src/antennaSignals.cu
-    src/beamPatternDirect.cu
-    src/beamPatternWeights.cu
+    src/antennaSignal2dHorizontalIsotropic.cu
+    src/beamPattern2dHorizontalGeometric.cu
+    src/beamPattern2dHorizontalWeights.cu
     src/vectorAdd.cu
 )
 
