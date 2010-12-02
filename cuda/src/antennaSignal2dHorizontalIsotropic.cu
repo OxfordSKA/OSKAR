@@ -67,6 +67,8 @@ void antennaSignal2dHorizontalIsotropic(const unsigned na, const float* ax,
     unsigned threadsPerBlock = 384;
     unsigned blocks = (na + threadsPerBlock - 1) / threadsPerBlock;
 //    size_t sharedMem = threadsPerBlock * sizeof(float2);
+//    _antennaSignal2dHorizontalIsotropic <<<blocks, threadsPerBlock, sharedMem>>>
+//            (na, axd, ayd, ns, sampd, strigd, k, sig);
     unsigned maxSourcesPerBlock = 384;
     size_t sharedMem = threadsPerBlock * sizeof(float2)
             + maxSourcesPerBlock * sizeof(float4);
