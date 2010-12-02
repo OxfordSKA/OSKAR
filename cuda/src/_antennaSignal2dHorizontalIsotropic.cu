@@ -4,7 +4,8 @@
 /**
  * @details
  * This CUDA kernel evaluates the antenna signals for the given source and
- * antenna positions.
+ * antenna positions. It requires (8 * number_of_threads_per_block) bytes
+ * of shared memory to be preallocated by the caller.
  *
  * Each thread evaluates the signal for a single antenna, looping over
  * all the sources.
@@ -66,5 +67,93 @@ void _antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
     // Copy shared memory back into global memory.
     signals[a].x = sharedMem[threadIdx.x].x;
     signals[a].y = sharedMem[threadIdx.x].y;
+}
+
+__device__
+void roundRobin(unsigned int numerator, unsigned int denominator, unsigned int condition,
+        unsigned int& number, unsigned int& start)
+{
+    number = numerator / denominator;
+    unsigned int remainder = numerator % denominator;
+    if (condition < remainder) number++;
+    start = number * condition;
+    if (condition >= remainder) start += remainder;
+}
+
+/**
+ * @details
+ * Same as above, but using manual caching of source data into shared memory.
+ */
+__global__
+void _antennaSignal2dHorizontalIsotropicCached(const unsigned int na,
+        const float* ax, const float* ay, const unsigned int ns, const float* samp,
+        const float3* strig, const float k, const unsigned int maxSourcesPerBlock,
+        float2* signals)
+{
+    // Get the antenna ID that this thread is working on.
+    const unsigned int a = blockDim.x * blockIdx.x + threadIdx.x;
+    float x = 0.0, y = 0.0, phase, sinPhase, cosPhase;
+    if (a < na) {
+        // Get the antenna position.
+        x = ax[a];
+        y = ay[a];
+    }
+
+    // Initialise shared memory to hold complex antenna signal.
+    float2* lsignal = (float2*) sharedMem;
+    float4* lsrc = (float4*) (&sharedMem[blockDim.x]);
+    lsignal[threadIdx.x] = make_float2(0.0, 0.0);
+
+    // Precompute source loops.
+    unsigned int blocks = ns / maxSourcesPerBlock;
+    if (ns % maxSourcesPerBlock) blocks++;
+    for (unsigned int block = 0; block < blocks; ++block) {
+        const unsigned int sourceStart = block * maxSourcesPerBlock;
+        unsigned int sourcesInBlock = ns - sourceStart;
+        if (sourcesInBlock > maxSourcesPerBlock) {
+            sourcesInBlock = maxSourcesPerBlock;
+        }
+
+        // There are blockDim.x threads available - need to copy
+        // sourcesInBlock pieces of data.
+//        unsigned int number, start;
+//        roundRobin(sourcesInBlock, blockDim.x, threadIdx.x, number, start);
+//        for (unsigned int i = 0; i < number; ++i) {
+//            const unsigned int sl = i + start; // local source index
+//            const unsigned int sg = sl + sourceStart; // global source index
+//            lsrc[sl].x = strig[sg].x;
+//            lsrc[sl].y = strig[sg].y;
+//            lsrc[sl].z = strig[sg].z;
+//            lsrc[sl].w = samp[sg];
+//        }
+        if (threadIdx.x == 0) {
+            for (unsigned int i = 0; i < sourcesInBlock; ++i) {
+                const unsigned int sg = i + sourceStart; // global source index
+                lsrc[i].x = strig[sg].x;
+                lsrc[i].y = strig[sg].y;
+                lsrc[i].z = strig[sg].z;
+                lsrc[i].w = samp[sg];
+            }
+        }
+        __syncthreads();
+
+        // Loop over sources in block.
+        for (unsigned int s = 0; s < sourcesInBlock; ++s) {
+            // Calculate the geometric phase from the source.
+            phase = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
+                    lsrc[s].z, lsrc[s].y, lsrc[s].x, k);
+
+            // Perform complex multiply-accumulate.
+            sincosf(phase, &sinPhase, &cosPhase);
+            lsignal[threadIdx.x].x += (lsrc[s].w * cosPhase);
+            lsignal[threadIdx.x].y += (lsrc[s].w * sinPhase);
+        }
+    }
+
+    // Copy shared memory back into global memory.
+    if (a < na) {
+        signals[a].x = lsignal[threadIdx.x].x;
+        signals[a].y = lsignal[threadIdx.x].y;
+    }
 }
 
