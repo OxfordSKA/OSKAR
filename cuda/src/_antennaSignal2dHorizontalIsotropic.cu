@@ -1,4 +1,5 @@
 #include "cuda/_antennaSignal2dHorizontalIsotropic.h"
+#include "cuda/src/_roundRobin.cu"
 #include "math/core/phase.h"
 
 /**
@@ -69,17 +70,6 @@ void _antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
     signals[a].y = sharedMem[threadIdx.x].y;
 }
 
-__device__
-void roundRobin(unsigned numerator, unsigned denominator, unsigned condition,
-        unsigned& number, unsigned& start)
-{
-    number = numerator / denominator;
-    unsigned remainder = numerator % denominator;
-    if (condition < remainder) number++;
-    start = number * condition;
-    if (condition >= remainder) start += remainder;
-}
-
 /**
  * @details
  * Same as above, but using manual caching of source data into shared memory.
@@ -118,7 +108,7 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
         // There are blockDim.x threads available - need to copy
         // sourcesInBlock pieces of data from global memory.
         unsigned number, start;
-        roundRobin(sourcesInBlock, blockDim.x, threadIdx.x, number, start);
+        _roundRobin(sourcesInBlock, blockDim.x, threadIdx.x, number, start);
         for (unsigned i = 0; i < number; ++i) {
             const unsigned sl = i + start; // local source index
             const unsigned sg = sl + sourceStart; // global source index
@@ -152,7 +142,7 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
             lsignal[threadIdx.x].y += (lsrc[s].w * sinPhase);
         }
 
-        // Must synchronise before loading in a new block of sources.
+        // Must synchronise again before loading in a new block of sources.
         __syncthreads();
     }
 

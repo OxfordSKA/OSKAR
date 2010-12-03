@@ -1,8 +1,11 @@
 #include "cuda/antennaSignal2dHorizontalIsotropic.h"
 #include "cuda/_antennaSignal2dHorizontalIsotropic.h"
 #include "cuda/_precompute2dHorizontalTrig.h"
-#include <vector>
 #include <cstdio>
+#include <vector>
+
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
 
 /**
  * @details
@@ -45,7 +48,7 @@ void antennaSignal2dHorizontalIsotropic(const unsigned na, const float* ax,
     cudaMalloc((void**)&sposd, ns * sizeof(float2));
     cudaMalloc((void**)&strigd, ns * sizeof(float3));
 
-    // Copy antenna positions and test source positions to device.
+    // Copy antenna positions and source positions to device.
     cudaMemcpy(axd, ax, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(sposd, &spos[0], ns * sizeof(float2), cudaMemcpyHostToDevice);

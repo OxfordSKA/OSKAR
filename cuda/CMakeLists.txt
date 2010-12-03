@@ -9,9 +9,12 @@ set(cuda_SRC
     src/_beamPattern2dHorizontalWeights.cu
     src/_equatorialToHorizontalGeneric.cu
     src/_precompute2dHorizontalTrig.cu
+    src/_roundRobin.cu
     src/_weights2dHorizontalGeometric.cu
     # Callable functions:
     src/antennaSignal2dHorizontalIsotropic.cu
+    src/beamformer2dHorizontalIsotropicGeometric.cu
+    src/beamformerMatrixVector.cu
     src/beamPattern2dHorizontalGeometric.cu
     src/beamPattern2dHorizontalWeights.cu
     src/vectorAdd.cu
@@ -22,6 +25,7 @@ CUDA_ADD_library(cuda ${cuda_SRC})
 include_directories(${CUDA_INCLUDE_DIRS})
 
 target_link_libraries(cuda
+    ${CUDA_CUBLAS_LIBRARIES}
     ${CUDA_LIBRARIES}
     ${QT_QTCORE_LIBRARY}
 )
