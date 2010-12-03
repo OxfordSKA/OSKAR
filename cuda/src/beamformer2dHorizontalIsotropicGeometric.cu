@@ -53,29 +53,30 @@ void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
     cudaMalloc((void**)&sposd, ns * sizeof(float2));
     cudaMalloc((void**)&bposd, nb * sizeof(float2));
     cudaMalloc((void**)&strigd, ns * sizeof(float3));
-    cudaMalloc((void**)&btrigd, nb * sizeof(float3));
     cudaMalloc((void**)&signalsd, na * sizeof(float2));
-    cudaMalloc((void**)&beamsd, nb * sizeof(float2));
-    cudaMalloc((void**)&weightsd, na * nb * sizeof(float2));
 
-    // Copy antenna positions and source positions to device.
+    // Copy antenna positions, source positions and beam positions to device.
     cudaMemcpy(axd, ax, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(sampd, samp, ns * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(sposd, &spos[0], ns * sizeof(float2), cudaMemcpyHostToDevice);
     cudaMemcpy(bposd, &bpos[0], nb * sizeof(float2), cudaMemcpyHostToDevice);
 
+    // Set the maximum number of beams the device can compute at once.
+    const unsigned maxBeams = 1000;
+
+    // Allocate enough memory for the beams and weights blocks.
+    cudaMalloc((void**)&weightsd, na * maxBeams * sizeof(float2));
+    cudaMalloc((void**)&btrigd, maxBeams * sizeof(float3));
+    cudaMalloc((void**)&beamsd, maxBeams * sizeof(float2));
+
     // Set threads per block.
     unsigned threadsPerBlock = 384;
-    cudaError_t err;
 
-    // Invoke kernels to precompute source and beam positions on the device.
+    // Invoke kernel to precompute source positions on the device.
     unsigned sBlocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    unsigned bBlocks = (nb + threadsPerBlock - 1) / threadsPerBlock;
     _precompute2dHorizontalTrig <<<sBlocks, threadsPerBlock>>>
             (ns, sposd, strigd);
-    _precompute2dHorizontalTrig <<<bBlocks, threadsPerBlock>>>
-            (nb, bposd, btrigd);
 
     // Invoke kernel to compute antenna signals on the device.
     unsigned aBlocks = (na + threadsPerBlock - 1) / threadsPerBlock;
@@ -86,23 +87,38 @@ void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
             threadsPerBlock, aSharedMem>>>
             (na, axd, ayd, ns, sampd, strigd, k, maxSourcesPerBlock, signalsd);
 
-    // Invoke kernel to compute beamforming weights on the device.
-    unsigned wBlocks = (na*nb + threadsPerBlock - 1) / threadsPerBlock;
-    _weights2dHorizontalGeometric <<<wBlocks, threadsPerBlock>>> (
-            na, axd, ayd, nb, btrigd, k, weightsd);
+    // Start beamforming loop.
+    // There may not be enough memory to allocate a weights matrix big enough,
+    // so we divide it up and only compute (at most) maxBeams at once.
+    unsigned blocks = nb / maxBeams;
+    if (nb % maxBeams) blocks++;
+    for (unsigned block = 0; block < blocks; ++block) {
+        const unsigned beamStart = block * maxBeams;
+        unsigned beamsInBlock = nb - beamStart;
+        if (beamsInBlock > maxBeams) {
+            beamsInBlock = maxBeams;
+        }
 
-    err = cudaPeekAtLastError();
-    if (err != cudaSuccess)
-        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+        // Invoke kernel to precompute the beam positions on the device.
+        unsigned bBlocks = (beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
+        _precompute2dHorizontalTrig <<<bBlocks, threadsPerBlock>>>
+                (beamsInBlock, &bposd[beamStart], btrigd);
 
-    // Call cuBLAS function to perform the matrix-vector multiplication.
-    // Note that cuBLAS calls use Fortran-ordering (column major) for their
-    // matrices, so we use the transpose here.
-    cublasCgemv('t', na, nb, make_float2(1.0, 0.0),
-            weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
+        // Invoke kernel to compute beamforming weights on the device.
+        unsigned wBlocks = (na*beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
+        _weights2dHorizontalGeometric <<<wBlocks, threadsPerBlock>>> (
+                na, axd, ayd, beamsInBlock, btrigd, k, weightsd);
 
-    // Copy result from device memory to host memory.
-    cudaMemcpy(beams, beamsd, nb * sizeof(float2), cudaMemcpyDeviceToHost);
+        // Call cuBLAS function to perform the matrix-vector multiplication.
+        // Note that cuBLAS calls use Fortran-ordering (column major) for their
+        // matrices, so we use the transpose here.
+        cublasCgemv('t', na, beamsInBlock, make_float2(1.0, 0.0),
+                weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
+
+        // Copy result from device memory to host memory.
+        cudaMemcpy(&beams[2*beamStart], beamsd, beamsInBlock * sizeof(float2),
+                cudaMemcpyDeviceToHost);
+    }
 
     // Free device memory.
     cudaFree(axd);

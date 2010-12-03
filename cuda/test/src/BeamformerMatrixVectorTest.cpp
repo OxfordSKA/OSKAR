@@ -89,8 +89,8 @@ void BeamformerMatrixVectorTest::test_method()
     float centreEl = 50; // Beam elevation.
     SphericalPositions<float> posSrc (
             centreAz * DEG2RAD, centreEl * DEG2RAD, // Centre.
-            10 * DEG2RAD, 10 * DEG2RAD, // Half-widths.
-            5 * DEG2RAD, 5 * DEG2RAD); // Spacings.
+            20 * DEG2RAD, 20 * DEG2RAD, // Half-widths.
+            10 * DEG2RAD, 10 * DEG2RAD); // Spacings.
     unsigned ns = posSrc.generate(0, 0); // No. of sources.
     std::vector<float> slon(ns), slat(ns);
     posSrc.generate(&slon[0], &slat[0]);
@@ -101,8 +101,8 @@ void BeamformerMatrixVectorTest::test_method()
     // Generate some beam positions.
     SphericalPositions<float> posBeam (
             centreAz * DEG2RAD, centreEl * DEG2RAD, // Centre.
-            10 * DEG2RAD, 10 * DEG2RAD, // Half-widths.
-            0.5 * DEG2RAD, 0.5 * DEG2RAD); // Spacings.
+            30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
+            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
     unsigned nb = posBeam.generate(0, 0); // No. of beams.
     std::vector<float> blon(nb), blat(nb);
     posBeam.generate(&blon[0], &blat[0]);
