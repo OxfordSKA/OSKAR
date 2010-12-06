@@ -81,10 +81,31 @@ void _weights2dHorizontalGeometric(const int na, const float* ax, const float* a
     const int b = i / na; // Beam index.
     if (a >= na || b >= nb) return; // Return if either index is out of range.
 
+    // Determine which antennas and beams this thread block is doing.
+    const int blockStart = blockDim.x * blockIdx.x;
+    const int blockEnd = blockStart + blockDim.x - 1;
+    const int antStart = blockStart % na;
+    const int beamStart = blockStart / na;
+    const int nBeams = blockEnd / na - beamStart + 1;
+
+    __shared__ float3 beamCache[20];
+    for (int bi = threadIdx.x; bi < nBeams; bi += blockDim.x) {
+        beamCache[bi] = trig[beamStart + bi];
+    }
+
+    __syncthreads();
+
     // Compute the geometric phase of the beam direction.
+    const int bi = b - beamStart;
+    float sinPhase, cosPhase;
     const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
-            trig[b].z, trig[b].y, trig[b].x, k);
-    const int w = a + b*na;
-    weights[w].x = cosf(phase) / na; // Normalised real part.
-    weights[w].y = sinf(phase) / na; // Normalised imaginary part.
+            beamCache[bi].z, beamCache[bi].y, beamCache[bi].x, k);
+    sincosf(phase, &sinPhase, &cosPhase);
+
+    __shared__ float2 weightsCache[384];
+    weightsCache[threadIdx.x].x = cosPhase / na; // Normalised real part.
+    weightsCache[threadIdx.x].y = sinPhase / na; // Normalised imaginary part.
+
+    const int w = threadIdx.x + antStart + beamStart*na;
+    weights[w] = weightsCache[threadIdx.x];
 }
