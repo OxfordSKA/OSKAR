@@ -8,6 +8,8 @@
 set(math_core_test_SRC
     src/CppUnitMain.cpp
     src/SphericalPositionsTest.cpp
+    src/Matrix3Test.cpp
+    src/Matrix4Test.cpp
 )
 
 include_directories()

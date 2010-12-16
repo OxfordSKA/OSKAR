@@ -1,0 +1,52 @@
+#ifndef MATRIX4_TEST_H
+#define MATRIX4_TEST_H
+
+/**
+ * @file Matrix4Test.h
+ */
+
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Matrix4Test : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Matrix4Test);
+        CPPUNIT_TEST(test_identity);
+        CPPUNIT_TEST(test_multiply);
+        CPPUNIT_TEST(test_rotation);
+        CPPUNIT_TEST(test_translation);
+        CPPUNIT_TEST(test_scale);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test identity.
+        void test_identity();
+
+        /// Test multiply.
+        void test_multiply();
+
+        /// Test rotation.
+        void test_rotation();
+
+        /// Test translation.
+        void test_translation();
+
+        /// Test scale.
+        void test_scale();
+};
+
+#endif // MATRIX4_TEST_H

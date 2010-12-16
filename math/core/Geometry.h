@@ -25,6 +25,18 @@ public:
     static inline void cartesianToHorizontal(const T x, const T y, const T z,
             T& az, T& el);
 
+    /// Computes the polarisation vectors in Cartesian coordinates.
+    template<typename T>
+    static inline void polarisationEquatorialCartesian(const T polAlpha,
+            const T polDelta, const T alpha, const T delta,
+            const T coords[6]);
+
+    /// Rotates a point by an angle around an arbitrary axis.
+    template<typename T>
+    static inline void rotate(const T cosA, const T sinA,
+            const T ax, const T ay, const T az,
+            const T x0, const T y0, const T z0, T& x, T& y, T& z);
+
     /// Rotates a point by an angle around the x-axis.
     template<typename T>
     static inline void rotateX(const T cosA, const T sinA,
@@ -39,6 +51,16 @@ public:
     template<typename T>
     static inline void rotateZ(const T cosA, const T sinA,
             const T x0, const T y0, const T z0, T& x, T& y, T& z);
+
+    /// Computes the 3x3 rotation matrix for a given axis and angle.
+    template<typename T>
+    static inline void rotationMatrix3(const T cosA, const T sinA,
+            const T ax, const T ay, const T az, T m[9]);
+
+    /// Computes the 4x4 rotation matrix for a given axis and angle.
+    template<typename T>
+    static inline void rotationMatrix4(const T cosA, const T sinA,
+            const T ax, const T ay, const T az, T m[16]);
 
     /// Returns the sign of a number.
     template<typename T>
@@ -130,6 +152,57 @@ void Geometry::cartesianToHorizontal(const T x, const T y, const T z,
 {
     az = atan2(x, y);
     el = atan2(z, sqrt(x * x + y * y) );
+}
+
+/**
+ * @details
+ * Rotate a point by an angle around an arbitrary axis, using the matrix:
+ *
+ * \f{equation}{
+ *       M = \left[\begin{array}{ccc}
+ *               xx(1-c)+c  & xy(1-c)-zs & xz(1-c)+ys \\
+ *               yx(1-c)+zs & yy(1-c)+c  & yz(1-c)-xs \\
+ *               xz(1-c)-ys & yz(1-c)+xs & zz(1-c)+c  \\
+ *           \end{array}\right]
+ * \f}
+ *
+ * where \f$x\f$ is the \f$x\f$-component of the rotation axis,
+ * \f$y\f$ is the \f$y\f$-component of the rotation axis and
+ * \f$z\f$ is the \f$z\f$-component of the rotation axis.
+ *
+ * The axis must be normalised to length 1 prior to calling this function.
+ *
+ * @param[in] cosA Cosine angle of rotation.
+ * @param[in] sinA Sine angle of rotation.
+ * @param[in] ax   Axis x-component.
+ * @param[in] ay   Axis y-component.
+ * @param[in] az   Axis z-component.
+ * @param[in] x0   Original x-coordinate.
+ * @param[in] y0   Original y-coordinate.
+ * @param[in] z0   Original z-coordinate.
+ * @param[out] x   New x-coordinate.
+ * @param[out] y   New y-coordinate.
+ * @param[out] z   New z-coordinate.
+ */
+template<typename T>
+void Geometry::rotate(const T cosA, const T sinA,
+        const T ax, const T ay, const T az,
+        const T x0, const T y0, const T z0, T& x, T& y, T& z)
+{
+    const T d = 1 - cosA;
+    const T xx = d * ax * ax + cosA;
+    const T xy = d * ax * ay;
+    const T xz = d * ax * az;
+    const T yy = d * ay * ay + cosA;
+    const T yz = d * ay * az;
+    const T zz = d * az * az + cosA;
+    const T xs = ax * sinA;
+    const T ys = ay * sinA;
+    const T zs = az * sinA;
+
+    x = x0 * xx          + y0 * (xy - zs)   + z0 * (xz + ys);
+    y = x0 * (xy + zs)   + y0 * yy          + z0 * (yz - xs);
+    z = x0 * (xz - ys)   + y0 * (yz + xs)   + z0 * zz;
 }
 
 /**
