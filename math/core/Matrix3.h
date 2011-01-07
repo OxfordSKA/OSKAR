@@ -9,6 +9,14 @@
 
 #include <cmath>
 
+#ifndef __device__
+#define __device__
+#endif
+
+#ifndef __host__
+#define __host__
+#endif
+
 /**
  * @brief Functions to work with 3x3 matrices.
  *
@@ -20,62 +28,62 @@ class Matrix3
 {
 public:
     /// Returns the identity matrix.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void identity(T matrix[9]);
 
     /// Multiplies two 3x3 matrices together.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void multiplyMatrix3(T result[9],
             const T a[9], const T b[9]);
 
     /// Multiplies a 3-vector by a 3x3 matrix.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void multiplyVector3(T result[3],
             const T m[9], const T v[3]);
 
     /// Returns a matrix for a rotation about a normalised arbitrary axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotation(T matrix[9], const T axis[3],
             const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation around the x-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationX(T matrix[9], const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation around the y-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationY(T matrix[9], const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation around the z-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationZ(T matrix[9], const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation about a normalised arbitrary axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotation(T matrix[9], const T axis[3], const T angle);
 
     /// Returns a matrix for a rotation around the x-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationX(T matrix[9], const T angle);
 
     /// Returns a matrix for a rotation around the y-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationY(T matrix[9], const T angle);
 
     /// Returns a matrix for a rotation around the z-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationZ(T matrix[9], const T angle);
 
     /// Returns a matrix for independent scaling in 3 dimensions.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void scaling(T matrix[9], const T scale[3]);
 
     /// Returns a matrix for uniform scaling in 3 dimensions.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void scaling(T matrix[9], const T scale);
 
     /// Sets the matrix contents to the given parameters.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void set(T matrix[9],
             const T, const T, const T,
             const T, const T, const T,
@@ -90,7 +98,7 @@ public:
  * @details
  * Returns the identity matrix.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::identity(T matrix[9])
 {
     set<T>(matrix,
@@ -103,7 +111,7 @@ void Matrix3::identity(T matrix[9])
  * @details
  * Multiplies the two 3x3 matrices together, to give result = a * b.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::multiplyMatrix3(T result[9], const T a[9], const T b[9])
 {
 #define MMUL(R, C) (b[R]*a[C] + b[R+3]*a[C+1] + b[R+6]*a[C+2])
@@ -118,7 +126,7 @@ void Matrix3::multiplyMatrix3(T result[9], const T a[9], const T b[9])
  * @details
  * Multiplies a 3-vector by a 3x3 matrix.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::multiplyVector3(T result[3], const T m[9], const T v[3])
 {
     result[0] = m[0]*v[0] + m[3]*v[1] + m[6]*v[2];
@@ -149,7 +157,7 @@ void Matrix3::multiplyVector3(T result[3], const T m[9], const T v[3])
  * @param[in]  c  Cosine angle of rotation.
  * @param[in]  s  Sine angle of rotation.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotation(T matrix[9], const T a[3], const T c, const T s)
 {
     const T d = 1 - c;
@@ -174,7 +182,7 @@ void Matrix3::rotation(T matrix[9], const T a[3], const T c, const T s)
  * Returns a matrix for a rotation by an \e angle around the \e axis.
  * The axis must be already normalised.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotation(T matrix[9], const T axis[3], const T angle)
 {
     const T c = (T) cos(angle);
@@ -187,7 +195,7 @@ void Matrix3::rotation(T matrix[9], const T axis[3], const T angle)
  * Returns a matrix for a rotation about the x-axis by an angle with
  * cosine \e c and sine \e s.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotationX(T matrix[9], const T c, const T s)
 {
     set<T>(matrix,
@@ -200,7 +208,7 @@ void Matrix3::rotationX(T matrix[9], const T c, const T s)
  * @details
  * Returns a matrix for a rotation by an \e angle about the x-axis.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotationX(T matrix[9], const T angle)
 {
     const T c = (T) cos(angle);
@@ -213,7 +221,7 @@ void Matrix3::rotationX(T matrix[9], const T angle)
  * Returns a matrix for a rotation about the y-axis by an angle with
  * cosine \e c and sine \e s.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotationY(T matrix[9], const T c, const T s)
 {
     set<T>(matrix,
@@ -226,7 +234,7 @@ void Matrix3::rotationY(T matrix[9], const T c, const T s)
  * @details
  * Returns a matrix for a rotation by an \e angle about the y-axis.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotationY(T matrix[9], const T angle)
 {
     const T c = (T) cos(angle);
@@ -239,7 +247,7 @@ void Matrix3::rotationY(T matrix[9], const T angle)
  * Returns a matrix for a rotation about the z-axis by an angle with
  * cosine \e c and sine \e s.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotationZ(T matrix[9], const T c, const T s)
 {
     set<T>(matrix,
@@ -252,7 +260,7 @@ void Matrix3::rotationZ(T matrix[9], const T c, const T s)
  * @details
  * Returns a matrix for a rotation by an \e angle about the z-axis.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::rotationZ(T matrix[9], const T angle)
 {
     const T c = (T) cos(angle);
@@ -277,7 +285,7 @@ void Matrix3::rotationZ(T matrix[9], const T angle)
  *
  * @param[in]  s The scale 3-vector.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::scaling(T matrix[9], const T s[3])
 {
     set<T>(matrix,
@@ -290,7 +298,7 @@ void Matrix3::scaling(T matrix[9], const T s[3])
  * @details
  * Returns a matrix for uniform scaling by \e scale in 3 dimensions.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::scaling(T matrix[9], const T scale)
 {
     T vec[3] = {scale, scale, scale};
@@ -302,7 +310,7 @@ void Matrix3::scaling(T matrix[9], const T scale)
  * Sets the contents of the matrix.
  * Note that the elements are given in column-major (FORTRAN) order.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix3::set(T matrix[9],
         const T a, const T b, const T c,
         const T d, const T e, const T f,

@@ -9,6 +9,14 @@
 
 #include <cmath>
 
+#ifndef __device__
+#define __device__
+#endif
+
+#ifndef __host__
+#define __host__
+#endif
+
 /**
  * @brief Functions to work with 4x4 matrices.
  *
@@ -20,71 +28,71 @@ class Matrix4
 {
 public:
     /// Sets up a 4x4 matrix from a 3x3 matrix.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void fromMatrix3(T matrix[16], const T in[9]);
 
     /// Returns the identity matrix.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void identity(T matrix[16]);
 
     /// Multiplies two 4x4 matrices together.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void multiplyMatrix4(T result[16],
             const T a[16], const T b[16]);
 
     /// Multiplies a 3-vector by a 4x4 matrix.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void multiplyVector3(T result[3],
             const T m[16], const T v[3]);
 
     /// Multiplies a 4-vector by a 4x4 matrix.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void multiplyVector4(T result[4],
             const T m[16], const T v[4]);
 
     /// Returns a matrix for a rotation about a normalised arbitrary axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotation(T matrix[16], const T axis[3],
             const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation around the x-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationX(T matrix[16], const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation around the y-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationY(T matrix[16], const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation around the z-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationZ(T matrix[16], const T cosA, const T sinA);
 
     /// Returns a matrix for a rotation about a normalised arbitrary axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotation(T matrix[16], const T axis[3], const T angle);
 
     /// Returns a matrix for a rotation around the x-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationX(T matrix[16], const T angle);
 
     /// Returns a matrix for a rotation around the y-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationY(T matrix[16], const T angle);
 
     /// Returns a matrix for a rotation around the z-axis.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void rotationZ(T matrix[16], const T angle);
 
     /// Returns a matrix for independent scaling in 3 dimensions.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void scaling(T matrix[16], const T scale[3]);
 
     /// Returns a matrix for uniform scaling in 3 dimensions.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void scaling(T matrix[16], const T scale);
 
     /// Sets the matrix contents to the given parameters.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void set(T matrix[16],
             const T, const T, const T, const T,
             const T, const T, const T, const T,
@@ -92,7 +100,7 @@ public:
             const T, const T, const T, const T);
 
     /// Returns a translation matrix for the given vector.
-    template<typename T>
+    template<typename T> __device__ __host__
     static inline void translation(T matrix[16], const T v[3]);
 };
 
@@ -104,7 +112,7 @@ public:
  * @details
  * Sets up a 4x4 matrix from a 3x3 matrix.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::fromMatrix3(T matrix[16], const T in[9])
 {
     set<T>(matrix,
@@ -118,7 +126,7 @@ void Matrix4::fromMatrix3(T matrix[16], const T in[9])
  * @details
  * Returns the identity matrix.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::identity(T matrix[16])
 {
     set<T>(matrix,
@@ -132,7 +140,7 @@ void Matrix4::identity(T matrix[16])
  * @details
  * Multiplies the two 4x4 matrices together, to give result = a * b.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::multiplyMatrix4(T result[16], const T a[16], const T b[16])
 {
 #define MMUL(R, C) (b[R]*a[C] + b[R+4]*a[C+1] + b[R+8]*a[C+2] + b[R+12]*a[C+3])
@@ -148,7 +156,7 @@ void Matrix4::multiplyMatrix4(T result[16], const T a[16], const T b[16])
  * @details
  * Multiplies a 3-vector by a 4x4 matrix.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::multiplyVector3(T result[3], const T m[16], const T v[3])
 {
     result[0] = m[0]*v[0] + m[4]*v[1] + m[8]*v[2]  + m[12];
@@ -160,7 +168,7 @@ void Matrix4::multiplyVector3(T result[3], const T m[16], const T v[3])
  * @details
  * Multiplies a 4-vector by a 4x4 matrix.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::multiplyVector4(T result[4], const T m[16], const T v[4])
 {
     result[0] = m[0]*v[0] + m[4]*v[1] +  m[8]*v[2] + m[12]*v[3];
@@ -188,7 +196,7 @@ void Matrix4::multiplyVector4(T result[4], const T m[16], const T v[4])
  *
  * @param[in] v The translation 3-vector.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::translation(T matrix[16], const T v[3])
 {
     set<T>(matrix,
@@ -222,7 +230,7 @@ void Matrix4::translation(T matrix[16], const T v[3])
  * @param[in]  c  Cosine angle of rotation.
  * @param[in]  s  Sine angle of rotation.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotation(T matrix[16], const T a[3], const T c, const T s)
 {
     const T d = 1 - c;
@@ -248,7 +256,7 @@ void Matrix4::rotation(T matrix[16], const T a[3], const T c, const T s)
  * Returns a matrix for a rotation by an \e angle around the \e axis.
  * The axis must be already normalised.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotation(T matrix[16], const T axis[3], const T angle)
 {
     const T c = (T) cos(angle);
@@ -261,7 +269,7 @@ void Matrix4::rotation(T matrix[16], const T axis[3], const T angle)
  * Returns a matrix for a rotation about the x-axis by an angle with
  * cosine \e c and sine \e s.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotationX(T matrix[16], const T c, const T s)
 {
     set<T>(matrix,
@@ -275,7 +283,7 @@ void Matrix4::rotationX(T matrix[16], const T c, const T s)
  * @details
  * Returns a matrix for a rotation by an \e angle about the x-axis.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotationX(T matrix[16], const T angle)
 {
     const T c = (T) cos(angle);
@@ -288,7 +296,7 @@ void Matrix4::rotationX(T matrix[16], const T angle)
  * Returns a matrix for a rotation about the y-axis by an angle with
  * cosine \e c and sine \e s.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotationY(T matrix[16], const T c, const T s)
 {
     set<T>(matrix,
@@ -302,7 +310,7 @@ void Matrix4::rotationY(T matrix[16], const T c, const T s)
  * @details
  * Returns a matrix for a rotation by an \e angle about the y-axis.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotationY(T matrix[16], const T angle)
 {
     const T c = (T) cos(angle);
@@ -315,7 +323,7 @@ void Matrix4::rotationY(T matrix[16], const T angle)
  * Returns a matrix for a rotation about the z-axis by an angle with
  * cosine \e c and sine \e s.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotationZ(T matrix[16], const T c, const T s)
 {
     set<T>(matrix,
@@ -329,7 +337,7 @@ void Matrix4::rotationZ(T matrix[16], const T c, const T s)
  * @details
  * Returns a matrix for a rotation by an \e angle about the z-axis.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::rotationZ(T matrix[16], const T angle)
 {
     const T c = (T) cos(angle);
@@ -355,7 +363,7 @@ void Matrix4::rotationZ(T matrix[16], const T angle)
  *
  * @param[in]  s The scale 3-vector.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::scaling(T matrix[16], const T s[3])
 {
     set<T>(matrix,
@@ -369,7 +377,7 @@ void Matrix4::scaling(T matrix[16], const T s[3])
  * @details
  * Returns a matrix for uniform scaling by \e scale in 3 dimensions.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::scaling(T matrix[16], const T scale)
 {
     T vec[3] = {scale, scale, scale};
@@ -381,7 +389,7 @@ void Matrix4::scaling(T matrix[16], const T scale)
  * Sets the contents of the matrix.
  * Note that the elements are given in column-major (FORTRAN) order.
  */
-template<typename T>
+template<typename T> __device__ __host__
 void Matrix4::set(T matrix[16],
         const T a, const T b, const T c, const T d,
         const T e, const T f, const T g, const T h,
