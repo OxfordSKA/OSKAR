@@ -1,5 +1,4 @@
 #include "cuda/_antennaSignal2dHorizontalIsotropic.h"
-#include "cuda/src/_roundRobin.cu"
 #include "math/core/phase.h"
 
 /**
@@ -82,12 +81,11 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
 {
     // Get the antenna ID that this thread is working on.
     const unsigned a = blockDim.x * blockIdx.x + threadIdx.x;
-    float x = 0.0, y = 0.0, phase, sinPhase, cosPhase;
-    if (a < na) {
-        // Get the antenna position.
-        x = ax[a];
-        y = ay[a];
-    }
+    if (a >= na) return;
+
+    // Get the antenna position.
+    float x = ax[a], y = ay[a];
+    float phase, sinPhase, cosPhase;
 
     // Initialise shared memory to hold complex antenna signal.
     float2* lsignal = (float2*) sharedMem;
@@ -96,8 +94,7 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
 
     // Divide source list up into blocks, and cache the contents of each block
     // in shared memory before using it to accumulate the antenna signal.
-    unsigned blocks = ns / maxSourcesPerBlock;
-    if (ns % maxSourcesPerBlock) blocks++;
+    unsigned blocks = (ns + maxSourcesPerBlock - 1) / maxSourcesPerBlock;
     for (unsigned block = 0; block < blocks; ++block) {
         const unsigned sourceStart = block * maxSourcesPerBlock;
         unsigned sourcesInBlock = ns - sourceStart;
@@ -107,25 +104,13 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
 
         // There are blockDim.x threads available - need to copy
         // sourcesInBlock pieces of data from global memory.
-        unsigned number, start;
-        _roundRobin(sourcesInBlock, blockDim.x, threadIdx.x, number, start);
-        for (unsigned i = 0; i < number; ++i) {
-            const unsigned sl = i + start; // local source index
-            const unsigned sg = sl + sourceStart; // global source index
-            lsrc[sl].x = strig[sg].x;
-            lsrc[sl].y = strig[sg].y;
-            lsrc[sl].z = strig[sg].z;
-            lsrc[sl].w = samp[sg];
+        for (unsigned t = threadIdx.x; t < sourcesInBlock; t += blockDim.x) {
+            const unsigned sg = t + sourceStart; // global source index
+            lsrc[t].x = strig[sg].x;
+            lsrc[t].y = strig[sg].y;
+            lsrc[t].z = strig[sg].z;
+            lsrc[t].w = samp[sg];
         }
-//        if (threadIdx.x == 0) {
-//            for (unsigned i = 0; i < sourcesInBlock; ++i) {
-//                const unsigned sg = i + sourceStart; // global source index
-//                lsrc[i].x = strig[sg].x;
-//                lsrc[i].y = strig[sg].y;
-//                lsrc[i].z = strig[sg].z;
-//                lsrc[i].w = samp[sg];
-//            }
-//        }
 
         // Must synchronise before computing the signal from these sources.
         __syncthreads();
@@ -147,9 +132,6 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
     }
 
     // Copy shared memory back into global memory.
-    if (a < na) {
-        signals[a].x = lsignal[threadIdx.x].x;
-        signals[a].y = lsignal[threadIdx.x].y;
-    }
+    signals[a].x = lsignal[threadIdx.x].x;
+    signals[a].y = lsignal[threadIdx.x].y;
 }
-

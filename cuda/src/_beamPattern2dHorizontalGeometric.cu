@@ -30,13 +30,14 @@
  * @param[out] image The computed beam pattern (see note, above).
  */
 __global__
-void _beamPattern2dHorizontalGeometric(const int na, const float* ax,
+void _beamPattern2dHorizontalGeometric(const unsigned na, const float* ax,
         const float* ay, const float cosBeamEl, const float cosBeamAz,
-        const float sinBeamAz, const int ns, const float* saz,
-        const float* sel, const float k, float2* image)
+        const float sinBeamAz, const unsigned ns, const float* saz,
+        const float* sel, const float k, const unsigned maxAntennasPerBlock,
+        float2* image)
 {
     // Get the pixel (source position) ID that this thread is working on.
-    const int s = blockDim.x * blockIdx.x + threadIdx.x;
+    const unsigned s = blockDim.x * blockIdx.x + threadIdx.x;
     if (s >= ns) return; // Return if the index is out of range.
 
     // Get the source position.
@@ -47,31 +48,58 @@ void _beamPattern2dHorizontalGeometric(const int na, const float* ax,
     const float cosAz = cosf(az);
 
     // Initialise shared memory to hold complex pixel amplitude.
-    sharedMem[threadIdx.x] = make_float2(0.0, 0.0);
+    float2* lpixel = (float2*) sharedMem;
+    float2* lant = (float2*) (&sharedMem[blockDim.x]);
+    lpixel[threadIdx.x] = make_float2(0.0, 0.0);
     float2 w, signal;
-    float phaseBeam, phaseSrc, x, y;
+    float phaseBeam = 0.0, phaseSrc = 0.0, x = 0.0, y = 0.0;
 
-    // Loop over all antennas.
-    for (int a = 0; a < na; ++a) {
-        // Get the antenna position from global memory.
-        x = ax[a]; y = ay[a];
+    // Cache a block of antenna positions into shared memory.
+    unsigned blocks = (na + maxAntennasPerBlock - 1) / maxAntennasPerBlock;
+    for (unsigned block = 0; block < blocks; ++block) {
+        const unsigned antennaStart = block * maxAntennasPerBlock;
+        unsigned antennasInBlock = na - antennaStart;
+        if (antennasInBlock > maxAntennasPerBlock) {
+            antennasInBlock = maxAntennasPerBlock;
+        }
 
-        // Calculate the geometric phase of the beam direction.
-        // (Faster to recompute it here than look it up from global memory.)
-        phaseBeam = -GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
-                cosBeamEl, sinBeamAz, cosBeamAz, k);
-        sincosf(phaseBeam, &w.y, &w.x);
+        // There are blockDim.x threads available - need to copy
+        // antennasInBlock pieces of data from global memory.
+        for (unsigned t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
+            lant[t].x = ax[antennaStart + t];
+            lant[t].y = ay[antennaStart + t];
+        }
 
-        // Calculate the geometric phase from the source.
-        phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k);
-        sincosf(phaseSrc, &signal.y, &signal.x);
+        // Must synchronise before computing the signal for these antennas.
+        __syncthreads();
 
-        // Perform complex multiply-accumulate.
-        sharedMem[threadIdx.x].x += (signal.x * w.x - signal.y * w.y); // RE*RE - IM*IM
-        sharedMem[threadIdx.x].y += (signal.y * w.x + signal.x * w.y); // IM*RE + RE*IM
+        // Loop over antennas in block.
+        for (unsigned a = 0; a < antennasInBlock; ++a) {
+            // Get the antenna position from shared memory.
+            x = lant[a].x;
+            y = lant[a].y;
+
+            // Calculate the geometric phase of the beam direction.
+            // (Faster to recompute it than look it up from global memory.)
+            phaseBeam = -GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
+                    cosBeamEl, sinBeamAz, cosBeamAz, k);
+            sincosf(phaseBeam, &w.y, &w.x);
+
+            // Calculate the geometric phase from the source.
+            phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
+                    cosEl, sinAz, cosAz, k);
+            sincosf(phaseSrc, &signal.y, &signal.x);
+
+            // Perform complex multiply-accumulate.
+            lpixel[threadIdx.x].x += (signal.x * w.x - signal.y * w.y);
+            lpixel[threadIdx.x].y += (signal.y * w.x + signal.x * w.y);
+        }
+
+        // Must synchronise again before loading in a new block of antennas.
+        __syncthreads();
     }
 
     // Copy shared memory back into global memory.
-    image[s].x = sharedMem[threadIdx.x].x / na;
-    image[s].y = sharedMem[threadIdx.x].y / na;
+    image[s].x = lpixel[threadIdx.x].x / na;
+    image[s].y = lpixel[threadIdx.x].y / na;
 }

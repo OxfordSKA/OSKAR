@@ -52,11 +52,13 @@ void beamPattern2dHorizontalGeometric(const int na, const float* ax,
     cudaMemcpy(slatd, slat, ns * sizeof(float), cudaMemcpyHostToDevice);
 
     // Invoke kernel to compute the beam pattern on the device.
-    int threadsPerBlock = 384;
+    int threadsPerBlock = 256;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    size_t sharedMem = threadsPerBlock * sizeof(float2);
+    int maxAntennasPerBlock = 1500;
+    size_t sharedMem = (threadsPerBlock + maxAntennasPerBlock) * sizeof(float2);
     _beamPattern2dHorizontalGeometric <<<blocks, threadsPerBlock, sharedMem>>>
-        (na, axd, ayd, cosBeamEl, cosBeamAz, sinBeamAz, ns, slond, slatd, k, pix);
+            (na, axd, ayd, cosBeamEl, cosBeamAz, sinBeamAz, ns, slond, slatd, k,
+                    maxAntennasPerBlock, pix);
     cudaError_t err = cudaPeekAtLastError();
     if (err != cudaSuccess)
         printf("CUDA Error: %s\n", cudaGetErrorString(err));
