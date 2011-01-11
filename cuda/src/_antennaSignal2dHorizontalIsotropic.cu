@@ -1,6 +1,9 @@
 #include "cuda/_antennaSignal2dHorizontalIsotropic.h"
 #include "math/core/phase.h"
 
+// Shared memory pointer used by the kernel.
+extern __shared__ float2 smem[];
+
 /**
  * @details
  * This CUDA kernel evaluates the antenna signals for the given source and
@@ -49,7 +52,7 @@ void _antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
     const float y = ay[a];
 
     // Initialise shared memory to hold complex antenna signal.
-    sharedMem[threadIdx.x] = make_float2(0.0, 0.0);
+    smem[threadIdx.x] = make_float2(0.0, 0.0);
 
     // Loop over all sources.
     float sinPhase, cosPhase;
@@ -60,13 +63,13 @@ void _antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
 
         // Perform complex multiply-accumulate.
         sincosf(phase, &sinPhase, &cosPhase);
-        sharedMem[threadIdx.x].x += (samp[s] * cosPhase);
-        sharedMem[threadIdx.x].y += (samp[s] * sinPhase);
+        smem[threadIdx.x].x += (samp[s] * cosPhase);
+        smem[threadIdx.x].y += (samp[s] * sinPhase);
     }
 
     // Copy shared memory back into global memory.
-    signals[a].x = sharedMem[threadIdx.x].x;
-    signals[a].y = sharedMem[threadIdx.x].y;
+    signals[a].x = smem[threadIdx.x].x;
+    signals[a].y = smem[threadIdx.x].y;
 }
 
 /**
@@ -88,8 +91,8 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
     float phase, sinPhase, cosPhase;
 
     // Initialise shared memory to hold complex antenna signal.
-    float2* lsignal = (float2*) sharedMem;
-    float4* lsrc = (float4*) (&sharedMem[blockDim.x]);
+    float2* lsignal = smem;
+    float4* lsrc = (float4*) (&smem[blockDim.x]);
     lsignal[threadIdx.x] = make_float2(0.0, 0.0);
 
     // Divide source list up into blocks, and cache the contents of each block

@@ -66,11 +66,14 @@ void beamPattern2dHorizontalWeights(const int na, const float* ax,
             na, axd, ayd, 1, cbed, cbad, sbad, k, weights);
 
     // Invoke kernel to compute the beam pattern on the device.
-    int threadsPerBlock = 384;
+    int threadsPerBlock = 256;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    size_t sharedMem = threadsPerBlock * sizeof(float2);
+    int maxAntennasPerBlock = 750;
+    size_t sharedMem = (threadsPerBlock + 2 * maxAntennasPerBlock)
+            * sizeof(float2);
     _beamPattern2dHorizontalWeights <<<blocks, threadsPerBlock, sharedMem>>>
-            (na, axd, ayd, weights, ns, slond, slatd, k, pix);
+            (na, axd, ayd, weights, ns, slond, slatd, k,
+                    maxAntennasPerBlock, pix);
     cudaError_t err = cudaPeekAtLastError();
     if (err != cudaSuccess)
         printf("CUDA Error: %s\n", cudaGetErrorString(err));

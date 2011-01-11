@@ -7,9 +7,6 @@
  * @file _antennaSignal2dHorizontalIsotropic.h
  */
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float2 sharedMem[];
-
 /// CUDA kernel to compute antenna signals.
 __global__
 void _antennaSignal2dHorizontalIsotropic(const int na, const float* ax,

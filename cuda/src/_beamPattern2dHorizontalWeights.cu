@@ -1,6 +1,9 @@
 #include "cuda/_beamPattern2dHorizontalWeights.h"
 #include "math/core/phase.h"
 
+// Shared memory pointer used by the kernel.
+extern __shared__ float2 smem[];
+
 /**
  * @details
  * This CUDA kernel evaluates the beam pattern for the given antenna
@@ -33,7 +36,8 @@
 __global__
 void _beamPattern2dHorizontalWeights(const int na, const float* ax,
         const float* ay, const float2* weights, const int ns,
-        const float* saz, const float* sel, const float k, float2* image)
+        const float* saz, const float* sel, const float k,
+        const unsigned maxAntennasPerBlock, float2* image)
 {
     // Get the pixel (source position) ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
@@ -46,24 +50,53 @@ void _beamPattern2dHorizontalWeights(const int na, const float* ax,
     const float sinAz = sinf(az);
     const float cosAz = cosf(az);
 
-    // Initialise shared memory to hold complex pixel amplitude.
-    sharedMem[threadIdx.x] = make_float2(0.0, 0.0);
+    // Initialise shared memory cache to hold complex pixel amplitude.
+    float2* lpixel = smem;
+    float2* lant = (float2*) (&smem[blockDim.x]);
+    float2* lweight = (float2*) (&smem[blockDim.x + maxAntennasPerBlock]);
+    lpixel[threadIdx.x] = make_float2(0.0, 0.0);
     float2 w, signal;
+    float phaseSrc = 0.0;
 
-    // Loop over all antennas.
-    for (int a = 0; a < na; ++a) {
-        // Calculate the geometric phase from the source.
-        const float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
-                cosEl, sinAz, cosAz, k);
-        sincosf(phaseSrc, &signal.y, &signal.x);
+    // Cache a block of antenna positions and weights into shared memory.
+    unsigned blocks = (na + maxAntennasPerBlock - 1) / maxAntennasPerBlock;
+    for (unsigned block = 0; block < blocks; ++block) {
+        const unsigned antennaStart = block * maxAntennasPerBlock;
+        unsigned antennasInBlock = na - antennaStart;
+        if (antennasInBlock > maxAntennasPerBlock) {
+            antennasInBlock = maxAntennasPerBlock;
+        }
 
-        // Perform complex multiply-accumulate.
-        w = weights[a];
-        sharedMem[threadIdx.x].x += (signal.x * w.x - signal.y * w.y); // RE*RE - IM*IM
-        sharedMem[threadIdx.x].y += (signal.y * w.x + signal.x * w.y); // IM*RE + RE*IM
+        // There are blockDim.x threads available - need to copy
+        // antennasInBlock pieces of data from global memory.
+        for (unsigned t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
+            const unsigned ag = antennaStart + t; // Global antenna index.
+            lant[t].x = ax[ag];
+            lant[t].y = ay[ag];
+            lweight[t] = weights[ag];
+        }
+
+        // Must synchronise before computing the signal for these antennas.
+        __syncthreads();
+
+        // Loop over antennas in block.
+        for (unsigned a = 0; a < antennasInBlock; ++a) {
+            // Calculate the geometric phase from the source.
+            phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(lant[a].x, lant[a].y,
+                    cosEl, sinAz, cosAz, k);
+            sincosf(phaseSrc, &signal.y, &signal.x);
+
+            // Perform complex multiply-accumulate.
+            w = lweight[a];
+            lpixel[threadIdx.x].x += (signal.x * w.x - signal.y * w.y);
+            lpixel[threadIdx.x].y += (signal.y * w.x + signal.x * w.y);
+        }
+
+        // Must synchronise again before loading in a new block of antennas.
+        __syncthreads();
     }
 
     // Copy shared memory back into global memory.
-    image[s].x = sharedMem[threadIdx.x].x;
-    image[s].y = sharedMem[threadIdx.x].y;
+    image[s].x = lpixel[threadIdx.x].x;
+    image[s].y = lpixel[threadIdx.x].y;
 }

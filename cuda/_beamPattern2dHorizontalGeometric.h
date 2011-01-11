@@ -7,9 +7,6 @@
  * @file _beamPattern2dHorizontalGeometric.h
  */
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float2 sharedMem[];
-
 /// CUDA kernel to compute a beam pattern directly, for the given direction.
 __global__
 void _beamPattern2dHorizontalGeometric(const unsigned na, const float* ax,

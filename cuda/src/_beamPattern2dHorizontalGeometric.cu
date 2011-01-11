@@ -1,6 +1,9 @@
 #include "cuda/_beamPattern2dHorizontalGeometric.h"
 #include "math/core/phase.h"
 
+// Shared memory pointer used by the kernel.
+extern __shared__ float2 smem[];
+
 /**
  * @details
  * This CUDA kernel evaluates the beam pattern for the given antenna
@@ -47,9 +50,9 @@ void _beamPattern2dHorizontalGeometric(const unsigned na, const float* ax,
     const float sinAz = sinf(az);
     const float cosAz = cosf(az);
 
-    // Initialise shared memory to hold complex pixel amplitude.
-    float2* lpixel = (float2*) sharedMem;
-    float2* lant = (float2*) (&sharedMem[blockDim.x]);
+    // Initialise shared memory cache to hold complex pixel amplitude.
+    float2* lpixel = smem;
+    float2* lant = (float2*) (&smem[blockDim.x]);
     lpixel[threadIdx.x] = make_float2(0.0, 0.0);
     float2 w, signal;
     float phaseBeam = 0.0, phaseSrc = 0.0, x = 0.0, y = 0.0;
