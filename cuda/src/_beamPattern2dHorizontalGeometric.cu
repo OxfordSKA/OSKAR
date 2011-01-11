@@ -13,8 +13,7 @@ extern __shared__ float2 smem[];
  * Each thread evaluates a single pixel of the beam pattern, looping over
  * all the antennas while performing a complex multiply-accumulate with the
  * required beamforming weights, which are computed by the kernel for the
- * given beam direction. In some cases (using older cards), this is faster
- * than looking up the weights in global memory.
+ * given beam direction.
  *
  * The computed beam pattern is returned in the \p image array, which
  * must be pre-sized to length 2*ns. The values in the \p image array
@@ -83,7 +82,6 @@ void _beamPattern2dHorizontalGeometric(const unsigned na, const float* ax,
             y = lant[a].y;
 
             // Calculate the geometric phase of the beam direction.
-            // (Faster to recompute it than look it up from global memory.)
             phaseBeam = -GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
                     cosBeamEl, sinBeamAz, cosBeamAz, k);
             sincosf(phaseBeam, &w.y, &w.x);

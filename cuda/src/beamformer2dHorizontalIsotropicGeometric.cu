@@ -93,8 +93,7 @@ void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
     // Start beamforming loop.
     // There may not be enough memory to allocate a weights matrix big enough,
     // so we divide it up and only compute (at most) maxBeams at once.
-    unsigned blocks = nb / maxBeams;
-    if (nb % maxBeams) blocks++;
+    unsigned blocks = (nb + maxBeams - 1) / maxBeams;
     for (unsigned block = 0; block < blocks; ++block) {
         const unsigned beamStart = block * maxBeams;
         unsigned beamsInBlock = nb - beamStart;
