@@ -54,7 +54,7 @@ void beamPattern2dHorizontalGeometric(const int na, const float* ax,
     // Invoke kernel to compute the beam pattern on the device.
     int threadsPerBlock = 256;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    int maxAntennasPerBlock = 1500;
+    int maxAntennasPerBlock = 1504;
     size_t sharedMem = (threadsPerBlock + maxAntennasPerBlock) * sizeof(float2);
     _beamPattern2dHorizontalGeometric <<<blocks, threadsPerBlock, sharedMem>>>
             (na, axd, ayd, cosBeamEl, cosBeamAz, sinBeamAz, ns, slond, slatd, k,

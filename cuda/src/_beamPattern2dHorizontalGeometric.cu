@@ -32,68 +32,69 @@ extern __shared__ float2 smem[];
  * @param[out] image The computed beam pattern (see note, above).
  */
 __global__
-void _beamPattern2dHorizontalGeometric(const unsigned na, const float* ax,
+void _beamPattern2dHorizontalGeometric(const int na, const float* ax,
         const float* ay, const float cosBeamEl, const float cosBeamAz,
-        const float sinBeamAz, const unsigned ns, const float* saz,
-        const float* sel, const float k, const unsigned maxAntennasPerBlock,
+        const float sinBeamAz, const int ns, const float* saz,
+        const float* sel, const float k, const int maxAntennasPerBlock,
         float2* image)
 {
     // Get the pixel (source position) ID that this thread is working on.
-    const unsigned s = blockDim.x * blockIdx.x + threadIdx.x;
-    if (s >= ns) return; // Return if the index is out of range.
+    const int s = blockDim.x * blockIdx.x + threadIdx.x;
 
     // Get the source position.
-    const float az = saz[s];
-    const float el = sel[s];
-    const float cosEl = cosf(el);
-    const float sinAz = sinf(az);
-    const float cosAz = cosf(az);
+    // (NB. Cannot exit on index condition, as all threads are needed later).
+    float az = 0.0f, el = 0.0f, sinAz, cosAz, cosEl;
+    if (s < ns) {
+        az = saz[s];
+        el = sel[s];
+    }
+    cosEl = cosf(el);
+    sincosf(az, &sinAz, &cosAz);
 
     // Initialise shared memory cache to hold complex pixel amplitude.
-    float2* lpixel = smem;
-    float2* lant = (float2*) (&smem[blockDim.x]);
-    lpixel[threadIdx.x] = make_float2(0.0, 0.0);
+    float2* cpx = smem; // Cached pixel values.
+    float2* cap = (float2*) (&smem[blockDim.x]); // Cached antenna positions.
+    cpx[threadIdx.x] = make_float2(0.0f, 0.0f);  // Clear pixel value.
     float2 w, signal;
-    float phaseBeam = 0.0, phaseSrc = 0.0, x = 0.0, y = 0.0;
 
     // Cache a block of antenna positions into shared memory.
-    unsigned blocks = (na + maxAntennasPerBlock - 1) / maxAntennasPerBlock;
-    for (unsigned block = 0; block < blocks; ++block) {
-        const unsigned antennaStart = block * maxAntennasPerBlock;
-        unsigned antennasInBlock = na - antennaStart;
+    int blocks = (na + maxAntennasPerBlock - 1) / maxAntennasPerBlock;
+    for (int block = 0; block < blocks; ++block) {
+        const int antennaStart = block * maxAntennasPerBlock;
+        int antennasInBlock = na - antennaStart;
         if (antennasInBlock > maxAntennasPerBlock) {
             antennasInBlock = maxAntennasPerBlock;
         }
 
         // There are blockDim.x threads available - need to copy
         // antennasInBlock pieces of data from global memory.
-        for (unsigned t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
-            lant[t].x = ax[antennaStart + t];
-            lant[t].y = ay[antennaStart + t];
+        for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
+            cap[t].x = ax[antennaStart + t];
+            cap[t].y = ay[antennaStart + t];
         }
 
         // Must synchronise before computing the signal for these antennas.
         __syncthreads();
 
         // Loop over antennas in block.
-        for (unsigned a = 0; a < antennasInBlock; ++a) {
+        for (int a = 0; a < antennasInBlock; ++a) {
             // Get the antenna position from shared memory.
-            x = lant[a].x;
-            y = lant[a].y;
+            const float x = cap[a].x;
+            const float y = cap[a].y;
 
             // Calculate the geometric phase of the beam direction.
-            phaseBeam = -GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
+            const float phaseBeam = -GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
                     cosBeamEl, sinBeamAz, cosBeamAz, k);
-            sincosf(phaseBeam, &w.y, &w.x);
+            __sincosf(phaseBeam, &w.y, &w.x);
 
             // Calculate the geometric phase from the source.
-            phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
+            const float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
                     cosEl, sinAz, cosAz, k);
-            sincosf(phaseSrc, &signal.y, &signal.x);
+            __sincosf(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
-            lpixel[threadIdx.x].x += (signal.x * w.x - signal.y * w.y);
-            lpixel[threadIdx.x].y += (signal.y * w.x + signal.x * w.y);
+            cpx[threadIdx.x].x += (signal.x * w.x - signal.y * w.y);
+            cpx[threadIdx.x].y += (signal.y * w.x + signal.x * w.y);
         }
 
         // Must synchronise again before loading in a new block of antennas.
@@ -101,6 +102,8 @@ void _beamPattern2dHorizontalGeometric(const unsigned na, const float* ax,
     }
 
     // Copy shared memory back into global memory.
-    image[s].x = lpixel[threadIdx.x].x / na;
-    image[s].y = lpixel[threadIdx.x].y / na;
+    if (s < ns) {
+        image[s].x = cpx[threadIdx.x].x / na;
+        image[s].y = cpx[threadIdx.x].y / na;
+    }
 }
