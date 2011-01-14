@@ -84,16 +84,19 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
 {
     // Get the antenna ID that this thread is working on.
     const unsigned a = blockDim.x * blockIdx.x + threadIdx.x;
-    if (a >= na) return;
 
     // Get the antenna position.
-    float x = ax[a], y = ay[a];
-    float phase, sinPhase, cosPhase;
+    // (NB. Cannot exit on index condition, as all threads are needed later).
+    float x = 0.0f, y = 0.0f;
+    if (a < na) {
+        x = ax[a];
+        y = ay[a];
+    }
 
     // Initialise shared memory to hold complex antenna signal.
-    float2* lsignal = smem;
-    float4* lsrc = (float4*) (&smem[blockDim.x]);
-    lsignal[threadIdx.x] = make_float2(0.0, 0.0);
+    float2* csig = smem;
+    float4* csrc = (float4*) (&smem[blockDim.x]);
+    csig[threadIdx.x] = make_float2(0.0f, 0.0f);
 
     // Divide source list up into blocks, and cache the contents of each block
     // in shared memory before using it to accumulate the antenna signal.
@@ -109,10 +112,10 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
         // sourcesInBlock pieces of data from global memory.
         for (unsigned t = threadIdx.x; t < sourcesInBlock; t += blockDim.x) {
             const unsigned sg = t + sourceStart; // global source index
-            lsrc[t].x = strig[sg].x;
-            lsrc[t].y = strig[sg].y;
-            lsrc[t].z = strig[sg].z;
-            lsrc[t].w = samp[sg];
+            csrc[t].x = strig[sg].x;
+            csrc[t].y = strig[sg].y;
+            csrc[t].z = strig[sg].z;
+            csrc[t].w = samp[sg];
         }
 
         // Must synchronise before computing the signal from these sources.
@@ -121,13 +124,14 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
         // Loop over sources in block.
         for (unsigned s = 0; s < sourcesInBlock; ++s) {
             // Calculate the geometric phase from the source.
-            phase = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
-                    lsrc[s].z, lsrc[s].y, lsrc[s].x, k);
+            const float phase = GEOMETRIC_PHASE_2D_HORIZONTAL(x, y,
+                    csrc[s].z, csrc[s].y, csrc[s].x, k);
 
             // Perform complex multiply-accumulate.
-            sincosf(phase, &sinPhase, &cosPhase);
-            lsignal[threadIdx.x].x += (lsrc[s].w * cosPhase);
-            lsignal[threadIdx.x].y += (lsrc[s].w * sinPhase);
+            float sinPhase, cosPhase;
+            __sincosf(phase, &sinPhase, &cosPhase);
+            csig[threadIdx.x].x += (csrc[s].w * cosPhase);
+            csig[threadIdx.x].y += (csrc[s].w * sinPhase);
         }
 
         // Must synchronise again before loading in a new block of sources.
@@ -135,6 +139,6 @@ void _antennaSignal2dHorizontalIsotropicCached(const unsigned na,
     }
 
     // Copy shared memory back into global memory.
-    signals[a].x = lsignal[threadIdx.x].x;
-    signals[a].y = lsignal[threadIdx.x].y;
+    if (a < na)
+        signals[a] = csig[threadIdx.x];
 }
