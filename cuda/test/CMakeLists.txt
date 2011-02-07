@@ -9,6 +9,7 @@ set(data_test_SRC
     src/CppUnitMain.cpp
     src/VectorAddTest.cpp
     src/BeamPatternTest.cpp
+    src/BeamPatternRandomTest.cpp
     src/AntennaSignalTest.cpp
     src/BeamformerMatrixVectorTest.cpp
 )

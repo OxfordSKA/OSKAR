@@ -43,9 +43,6 @@ void beamPattern2dHorizontalWeights(const int na, const float* ax,
     cudaMalloc((void**)&axd, na * sizeof(float));
     cudaMalloc((void**)&ayd, na * sizeof(float));
     cudaMalloc((void**)&weights, na * sizeof(float2));
-    cudaMalloc((void**)&slond, ns * sizeof(float));
-    cudaMalloc((void**)&slatd, ns * sizeof(float));
-    cudaMalloc((void**)&pix, ns * sizeof(float2));
     cudaMalloc((void**)&sbad, 1 * sizeof(float));
     cudaMalloc((void**)&cbad, 1 * sizeof(float));
     cudaMalloc((void**)&cbed, 1 * sizeof(float));
@@ -53,8 +50,6 @@ void beamPattern2dHorizontalWeights(const int na, const float* ax,
     // Copy antenna positions and test source positions to device.
     cudaMemcpy(axd, ax, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(slond, slon, ns * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(slatd, slat, ns * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(sbad, &sinBeamAz, 1 * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(cbad, &cosBeamAz, 1 * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(cbed, &cosBeamEl, 1 * sizeof(float), cudaMemcpyHostToDevice);
@@ -66,22 +61,45 @@ void beamPattern2dHorizontalWeights(const int na, const float* ax,
             na, axd, ayd, 1, cbed, cbad, sbad, k, weights);
     cudaThreadSynchronize();
 
-    // Invoke kernel to compute the beam pattern on the device.
-    int threadsPerBlock = 256;
-    int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    int maxAntennasPerBlock = 864; // Should be multiple of 16.
-    size_t sharedMem = (threadsPerBlock + 2 * maxAntennasPerBlock)
-            * sizeof(float2);
-    _beamPattern2dHorizontalWeights <<<blocks, threadsPerBlock, sharedMem>>>
-            (na, axd, ayd, weights, ns, slond, slatd, k,
-                    maxAntennasPerBlock, pix);
-    cudaThreadSynchronize();
-    cudaError_t err = cudaPeekAtLastError();
-    if (err != cudaSuccess)
-        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    // Divide up the source (pixel) list into manageable chunks.
+    int nsMax = 100000;
+    int chunks = (ns + nsMax - 1) / nsMax;
 
-    // Copy result from device memory to host memory.
-    cudaMemcpy(image, pix, ns * sizeof(float2), cudaMemcpyDeviceToHost);
+    // Allocate memory for source position chunk on the device.
+    cudaMalloc((void**)&slond, nsMax * sizeof(float));
+    cudaMalloc((void**)&slatd, nsMax * sizeof(float));
+    cudaMalloc((void**)&pix, nsMax * sizeof(float2));
+
+    // Loop over pixel chunks.
+    for (int chunk = 0; chunk < chunks; ++chunk) {
+        const int srcStart = chunk * nsMax;
+        int srcInBlock = ns - srcStart;
+        if (srcInBlock > nsMax) srcInBlock = nsMax;
+
+        // Copy test source positions for this chunk to the device.
+        cudaMemcpy(slond, slon + srcStart, srcInBlock * sizeof(float),
+                cudaMemcpyHostToDevice);
+        cudaMemcpy(slatd, slat + srcStart, srcInBlock * sizeof(float),
+                cudaMemcpyHostToDevice);
+
+        // Invoke kernel to compute the (partial) beam pattern on the device.
+        int threadsPerBlock = 256;
+        int blocks = (srcInBlock + threadsPerBlock - 1) / threadsPerBlock;
+        int maxAntennasPerBlock = 864; // Should be multiple of 16.
+        size_t sharedMem = (threadsPerBlock + 2 * maxAntennasPerBlock)
+                    * sizeof(float2);
+        _beamPattern2dHorizontalWeights <<<blocks, threadsPerBlock, sharedMem>>>
+                (na, axd, ayd, weights, srcInBlock, slond, slatd, k,
+                        maxAntennasPerBlock, pix);
+        cudaThreadSynchronize();
+        cudaError_t err = cudaPeekAtLastError();
+        if (err != cudaSuccess)
+            printf("CUDA Error: %s\n", cudaGetErrorString(err));
+
+        // Copy (partial) result from device memory to host memory.
+        cudaMemcpy(image + 2 * srcStart, pix, srcInBlock * sizeof(float2),
+                cudaMemcpyDeviceToHost);
+    }
 
     // Free device memory.
     cudaFree(axd);
