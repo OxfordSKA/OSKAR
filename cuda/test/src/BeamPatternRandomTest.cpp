@@ -3,6 +3,7 @@
 #include "cuda/beamPattern2dHorizontalWeights.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
+#include "math/core/Matrix3.h"
 #include <cmath>
 #include <vector>
 
@@ -45,11 +46,16 @@ void BeamPatternRandomTest::test()
     // Generate array of antenna positions.
     int seed = 10;
     float radius = 15; // metres. (was 125)
-    float xs = 1.4, ys = 1.4, xe = 0.2, ye = 0.2; // separations, errors.
+    float xs = 1.4, ys = 1.4, xe = 0.0, ye = 0.0; // separations, errors.
 
-    int na = GridPositions::circular<float>(seed, radius, xs, ys, xe, ye, 0, 0);
-    std::vector<float> ax(na), ay(na); // Antenna (x,y) positions.
+    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
     GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+
+    // Rotate around z.
+    float matrix[9];
+    Matrix3::rotationZ(matrix, float(15 * DEG2RAD));
+    Matrix3::transformPoints(matrix, na, &ax[0], &ay[0], &az[0]);
 
     // Write antenna positions to file.
     FILE* file = fopen("arrayRandom.dat", "w");

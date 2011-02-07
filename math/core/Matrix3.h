@@ -88,6 +88,11 @@ public:
             const T, const T, const T,
             const T, const T, const T,
             const T, const T, const T);
+
+    /// Transforms the coordinates of the given 3D points.
+    template<typename T> __device__ __host__
+    static inline void transformPoints(const T matrix[9],
+            const int n, T* x, T* y, T* z);
 };
 
 /*=============================================================================
@@ -319,6 +324,31 @@ void Matrix3::set(T matrix[9],
     matrix[0] = a; matrix[3] = d; matrix[6] = g;
     matrix[1] = b; matrix[4] = e; matrix[7] = h;
     matrix[2] = c; matrix[5] = f; matrix[8] = i;
+}
+
+/**
+ * @details
+ * Transforms the given points by the given matrix.
+ *
+ * @param[in] matrix The matrix to use for the transform.
+ * @param[in] n      The number of points.
+ * @param[in,out]    The point x-coordinates.
+ * @param[in,out]    The point y-coordinates.
+ * @param[in,out]    The point z-coordinates.
+ */
+template<typename T> __device__ __host__
+void Matrix3::transformPoints(const T matrix[9],
+        const int n, T* x, T* y, T* z)
+{
+    for (int i = 0; i < n; ++i) {
+        T v[3];
+        v[0] = x[i];
+        v[1] = y[i];
+        v[2] = z[i];
+        x[i] = matrix[0]*v[0] + matrix[3]*v[1] + matrix[6]*v[2];
+        y[i] = matrix[1]*v[0] + matrix[4]*v[1] + matrix[7]*v[2];
+        z[i] = matrix[2]*v[0] + matrix[5]*v[1] + matrix[8]*v[2];
+    }
 }
 
 #endif /* OSKAR_MATRIX3_H_ */

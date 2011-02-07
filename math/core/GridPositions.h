@@ -35,7 +35,7 @@ public:
  */
 template<typename T>
 int GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
-        T* gx, T* gy)
+        T* gx = 0, T* gy = 0)
 {
     // Seed the random number generator.
     T r1, r2;
