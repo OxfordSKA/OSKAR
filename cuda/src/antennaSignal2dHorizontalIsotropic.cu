@@ -29,11 +29,12 @@
 #include "cuda/antennaSignal2dHorizontalIsotropic.h"
 #include "cuda/_antennaSignal2dHorizontalIsotropic.h"
 #include "cuda/_precompute2dHorizontalTrig.h"
-#include <cstdio>
-#include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @details
@@ -56,13 +57,15 @@
  * @param[in] k The wavenumber (rad / m).
  * @param[out] signals The computed antenna signals (see note, above).
  */
-void antennaSignal2dHorizontalIsotropic(const unsigned na, const float* ax,
-        const float* ay, const unsigned ns, const float* samp,
+void antennaSignal2dHorizontalIsotropic(const int na, const float* ax,
+        const float* ay, const int ns, const float* samp,
         const float* slon, const float* slat, const float k, float* signals)
 {
     // Create source position pairs in host memory.
-    std::vector<float2> spos(ns);
-    for (unsigned i = 0; i < ns; ++i) spos[i] = make_float2(slon[i], slat[i]);
+    float2* spos = (float2*)calloc(ns, sizeof(float2));
+    int i = 0;
+    for (i = 0; i < ns; ++i)
+        spos[i] = make_float2(slon[i], slat[i]);
 
     // Allocate memory for antenna positions, source positions
     // and antenna signals on the device.
@@ -79,15 +82,15 @@ void antennaSignal2dHorizontalIsotropic(const unsigned na, const float* ax,
     // Copy antenna positions and source positions to device.
     cudaMemcpy(axd, ax, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(sposd, &spos[0], ns * sizeof(float2), cudaMemcpyHostToDevice);
+    cudaMemcpy(sposd, spos, ns * sizeof(float2), cudaMemcpyHostToDevice);
     cudaMemcpy(sampd, samp, ns * sizeof(float), cudaMemcpyHostToDevice);
 
     // Error code.
     cudaError_t err;
 
     // Invoke kernel to precompute source positions on the device.
-    unsigned sThreadsPerBlock = 384;
-    unsigned sBlocks = (ns + sThreadsPerBlock - 1) / sThreadsPerBlock;
+    int sThreadsPerBlock = 384;
+    int sBlocks = (ns + sThreadsPerBlock - 1) / sThreadsPerBlock;
     _precompute2dHorizontalTrig <<<sBlocks, sThreadsPerBlock>>>
             (ns, sposd, strigd);
     err = cudaPeekAtLastError();
@@ -95,15 +98,12 @@ void antennaSignal2dHorizontalIsotropic(const unsigned na, const float* ax,
         printf("CUDA Error: %s\n", cudaGetErrorString(err));
 
     // Invoke kernel to compute antenna signals on the device.
-    unsigned threadsPerBlock = 384;
-    unsigned blocks = (na + threadsPerBlock - 1) / threadsPerBlock;
-//    size_t sharedMem = threadsPerBlock * sizeof(float2);
-//    _antennaSignal2dHorizontalIsotropic <<<blocks, threadsPerBlock, sharedMem>>>
-//            (na, axd, ayd, ns, sampd, strigd, k, sig);
-    unsigned maxSourcesPerBlock = 384;
+    int threadsPerBlock = 384;
+    int blocks = (na + threadsPerBlock - 1) / threadsPerBlock;
+    int maxSourcesPerBlock = 384;
     size_t sharedMem = threadsPerBlock * sizeof(float2)
             + maxSourcesPerBlock * sizeof(float4);
-    _antennaSignal2dHorizontalIsotropicCached <<<blocks, threadsPerBlock, sharedMem>>>
+    _antennaSignal2dHorizontalIsotropic <<<blocks, threadsPerBlock, sharedMem>>>
             (na, axd, ayd, ns, sampd, strigd, k, maxSourcesPerBlock, sig);
     err = cudaPeekAtLastError();
     if (err != cudaSuccess)
@@ -119,4 +119,11 @@ void antennaSignal2dHorizontalIsotropic(const unsigned na, const float* ax,
     cudaFree(sig);
     cudaFree(sposd);
     cudaFree(strigd);
+
+    // Free host memory.
+    free(spos);
 }
+
+#ifdef __cplusplus
+}
+#endif

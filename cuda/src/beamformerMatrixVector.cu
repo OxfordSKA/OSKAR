@@ -27,8 +27,11 @@
  */
 
 #include "cuda/beamformerMatrixVector.h"
-#include <cstdio>
 #include <cublas.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @details
@@ -79,3 +82,7 @@ void beamformerMatrixVector(const unsigned na, const unsigned nb,
     // Shut down cuBLAS.
     cublasShutdown();
 }
+
+#ifdef __cplusplus
+}
+#endif

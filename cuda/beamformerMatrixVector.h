@@ -36,8 +36,16 @@
 #include "cuda/CudaEclipse.h"
 #include "cuda/CudaTypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// Computes beams using CUDA.
 void beamformerMatrixVector(const unsigned na, const unsigned nb,
         const float* signals, const float* weights, float* beams);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // OSKAR_CUDA_BEAMFORMER_MATRIX_VECTOR_H

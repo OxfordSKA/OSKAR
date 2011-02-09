@@ -29,7 +29,11 @@
 #include "cuda/beamPattern2dHorizontalWeights.h"
 #include "cuda/_beamPattern2dHorizontalWeights.h"
 #include "cuda/_weights2dHorizontalGeometric.h"
-#include <cstdio>
+#include <stdio.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @details
@@ -91,7 +95,7 @@ void beamPattern2dHorizontalWeights(const int na, const float* ax,
 
     // Divide up the source (pixel) list into manageable chunks.
     int nsMax = 100000;
-    int chunks = (ns + nsMax - 1) / nsMax;
+    int chunk = 0, chunks = (ns + nsMax - 1) / nsMax;
 
     // Allocate memory for source position chunk on the device.
     cudaMalloc((void**)&slond, nsMax * sizeof(float));
@@ -99,7 +103,7 @@ void beamPattern2dHorizontalWeights(const int na, const float* ax,
     cudaMalloc((void**)&pix, nsMax * sizeof(float2));
 
     // Loop over pixel chunks.
-    for (int chunk = 0; chunk < chunks; ++chunk) {
+    for (chunk = 0; chunk < chunks; ++chunk) {
         const int srcStart = chunk * nsMax;
         int srcInBlock = ns - srcStart;
         if (srcInBlock > nsMax) srcInBlock = nsMax;
@@ -140,3 +144,7 @@ void beamPattern2dHorizontalWeights(const int na, const float* ax,
     cudaFree(cbad);
     cudaFree(cbed);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -18,14 +18,13 @@ set(cuda_SRC
     src/vectorAdd.cu
 )
 
-CUDA_ADD_library(cuda ${cuda_SRC})
+CUDA_ADD_library(oskar_cuda ${cuda_SRC} SHARED)
 
 include_directories(${CUDA_INCLUDE_DIRS})
 
-target_link_libraries(cuda
+target_link_libraries(oskar_cuda
     ${CUDA_CUBLAS_LIBRARIES}
     ${CUDA_LIBRARIES}
-    ${QT_QTCORE_LIBRARY}
 )
 
 

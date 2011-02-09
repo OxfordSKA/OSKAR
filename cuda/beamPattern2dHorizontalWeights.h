@@ -36,9 +36,17 @@
 #include "cuda/CudaEclipse.h"
 #include "cuda/CudaTypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// Computes a beam pattern using CUDA.
 void beamPattern2dHorizontalWeights(const int na, const float* ax,
         const float* ay, const int ns, const float* slon, const float* slat,
         const float ba, const float be, const float k, float* image);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // OSKAR_CUDA_BEAM_PATTERN_2D_HORIZONTAL_WEIGHTS_H

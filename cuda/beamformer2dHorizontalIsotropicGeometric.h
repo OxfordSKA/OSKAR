@@ -36,10 +36,18 @@
 #include "cuda/CudaEclipse.h"
 #include "cuda/CudaTypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// Computes beams using CUDA.
-void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
-        const float* ax, const float* ay, const unsigned ns, const float* samp,
-        const float* slon, const float* slat, const unsigned nb,
+void beamformer2dHorizontalIsotropicGeometric(const int na,
+        const float* ax, const float* ay, const int ns, const float* samp,
+        const float* slon, const float* slat, const int nb,
         const float* blon, const float* blat, const float k, float* beams);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // OSKAR_CUDA_BEAMFORMER_2D_HORIZONTAL_ISOTROPIC_GEOMETRIC_H

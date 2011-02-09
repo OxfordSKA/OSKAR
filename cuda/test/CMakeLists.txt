@@ -19,6 +19,6 @@ include_directories()
 add_executable(cudaTest ${data_test_SRC})
 
 target_link_libraries(cudaTest
-    cuda
+    oskar_cuda
     ${CPPUNIT_LIBRARIES}
 )

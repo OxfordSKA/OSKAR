@@ -31,12 +31,16 @@
 #include "cuda/_antennaSignal2dHorizontalIsotropic.h"
 #include "cuda/_weights2dHorizontalGeometric.h"
 
-#include <vector>
-#include <cstdio>
+#include <stdlib.h>
+#include <stdio.h>
 #include <cublas.h>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @details
@@ -59,18 +63,22 @@
  * @param[in] k The wavenumber (rad / m).
  * @param[out] beams The complex vector of output beams (length nb).
  */
-void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
-        const float* ax, const float* ay, const unsigned ns, const float* samp,
-        const float* slon, const float* slat, const unsigned nb,
+void beamformer2dHorizontalIsotropicGeometric(const int na,
+        const float* ax, const float* ay, const int ns, const float* samp,
+        const float* slon, const float* slat, const int nb,
         const float* blon, const float* blat, const float k, float* beams)
 {
     // Initialise cuBLAS.
     cublasInit();
 
     // Create source and beam position pairs in host memory.
-    std::vector<float2> spos(ns), bpos(nb);
-    for (unsigned i = 0; i < ns; ++i) spos[i] = make_float2(slon[i], slat[i]);
-    for (unsigned i = 0; i < nb; ++i) bpos[i] = make_float2(blon[i], blat[i]);
+    float2* spos = (float2*)calloc(ns, sizeof(float2));
+    float2* bpos = (float2*)calloc(nb, sizeof(float2));
+    int i;
+    for (i = 0; i < ns; ++i)
+        spos[i] = make_float2(slon[i], slat[i]);
+    for (i = 0; i < nb; ++i)
+        bpos[i] = make_float2(blon[i], blat[i]);
 
     // Allocate memory for antenna positions, source positions,
     // beam positions,
@@ -94,7 +102,7 @@ void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
     cudaMemcpy(bposd, &bpos[0], nb * sizeof(float2), cudaMemcpyHostToDevice);
 
     // Set the maximum number of beams the device can compute at once.
-    const unsigned maxBeams = 1000;
+    const int maxBeams = 1000;
 
     // Allocate enough memory for the beams and weights blocks.
     cudaMalloc((void**)&weightsd, na * maxBeams * sizeof(float2));
@@ -102,40 +110,40 @@ void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
     cudaMalloc((void**)&beamsd, maxBeams * sizeof(float2));
 
     // Set threads per block.
-    unsigned threadsPerBlock = 384;
+    int threadsPerBlock = 384;
 
     // Invoke kernel to precompute source positions on the device.
-    unsigned sBlocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
+    int sBlocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
     _precompute2dHorizontalTrig <<<sBlocks, threadsPerBlock>>>
             (ns, sposd, strigd);
 
     // Invoke kernel to compute antenna signals on the device.
-    unsigned aBlocks = (na + threadsPerBlock - 1) / threadsPerBlock;
-    unsigned maxSourcesPerBlock = 384;
+    int aBlocks = (na + threadsPerBlock - 1) / threadsPerBlock;
+    int maxSourcesPerBlock = 384;
     size_t aSharedMem = threadsPerBlock * sizeof(float2)
             + maxSourcesPerBlock * sizeof(float4);
-    _antennaSignal2dHorizontalIsotropicCached <<<aBlocks,
+    _antennaSignal2dHorizontalIsotropic <<<aBlocks,
             threadsPerBlock, aSharedMem>>>
             (na, axd, ayd, ns, sampd, strigd, k, maxSourcesPerBlock, signalsd);
 
     // Start beamforming loop.
     // There may not be enough memory to allocate a weights matrix big enough,
     // so we divide it up and only compute (at most) maxBeams at once.
-    unsigned blocks = (nb + maxBeams - 1) / maxBeams;
-    for (unsigned block = 0; block < blocks; ++block) {
-        const unsigned beamStart = block * maxBeams;
-        unsigned beamsInBlock = nb - beamStart;
+    int block = 0, blocks = (nb + maxBeams - 1) / maxBeams;
+    for (block = 0; block < blocks; ++block) {
+        const int beamStart = block * maxBeams;
+        int beamsInBlock = nb - beamStart;
         if (beamsInBlock > maxBeams) {
             beamsInBlock = maxBeams;
         }
 
         // Invoke kernel to precompute the beam positions on the device.
-        unsigned bBlocks = (beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
+        int bBlocks = (beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
         _precompute2dHorizontalTrig <<<bBlocks, threadsPerBlock>>>
                 (beamsInBlock, &bposd[beamStart], btrigd);
 
         // Invoke kernel to compute beamforming weights on the device.
-        unsigned wBlocks = (na*beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
+        int wBlocks = (na*beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
         TIMER_START
         _weights2dHorizontalGeometric <<<wBlocks, threadsPerBlock>>> (
                 na, axd, ayd, beamsInBlock, btrigd, k, weightsd);
@@ -167,6 +175,14 @@ void beamformer2dHorizontalIsotropicGeometric(const unsigned na,
     cudaFree(weightsd);
     cudaFree(beamsd);
 
+    // Free host memory.
+    free(spos);
+    free(bpos);
+
     // Shut down cuBLAS.
     cublasShutdown();
 }
+
+#ifdef __cplusplus
+}
+#endif
