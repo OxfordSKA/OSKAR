@@ -19,6 +19,7 @@ class BeamPatternRandomTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(BeamPatternRandomTest);
         CPPUNIT_TEST(test);
+        CPPUNIT_TEST(test_scattered);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -31,6 +32,9 @@ class BeamPatternRandomTest : public CppUnit::TestFixture
     public:
         /// Test method.
         void test();
+
+        /// Test method.
+        void test_scattered();
 };
 
 #endif // BEAM_PATTERN_RANDOM_TEST_H
