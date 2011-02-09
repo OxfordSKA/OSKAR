@@ -30,7 +30,7 @@
 #define OSKAR_CUDA_BEAM_PATTERN_2D_HORIZONTAL_GEOMETRIC_H
 
 /**
- * @file beamPattern2dHorizontalWeights.h
+ * @file beamPattern2dHorizontalGeometric.h
  */
 
 #include "cuda/CudaEclipse.h"
