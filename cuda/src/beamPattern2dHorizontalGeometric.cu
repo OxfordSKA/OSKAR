@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/beamPattern2dHorizontalWeights.h"
+#include "cuda/beamPattern2dHorizontalGeometric.h"
 #include "cuda/_beamPattern2dHorizontalWeights.h"
 #include "cuda/_weights2dHorizontalGeometric.h"
 #include <stdio.h>
@@ -37,8 +37,8 @@ extern "C" {
 
 /**
  * @details
- * Computes a beam pattern using CUDA, generating the beamforming weights
- * separately.
+ * Computes a beam pattern using CUDA, generating the geometric beamforming
+ * weights separately.
  *
  * The function must be supplied with the antenna x- and y-positions, the
  * test source longitude and latitude positions, the beam direction, and
@@ -59,7 +59,7 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-void beamPattern2dHorizontalWeights(const int na, const float* ax,
+void beamPattern2dHorizontalGeometric(const int na, const float* ax,
         const float* ay, const int ns, const float* slon, const float* slat,
         const float ba, const float be, const float k, float* image)
 {

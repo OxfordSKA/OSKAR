@@ -14,7 +14,7 @@ set(cuda_SRC
     src/antennaSignal2dHorizontalIsotropic.cu
     src/beamformer2dHorizontalIsotropicGeometric.cu
     src/beamformerMatrixVector.cu
-    src/beamPattern2dHorizontalWeights.cu
+    src/beamPattern2dHorizontalGeometric.cu
     src/vectorAdd.cu
 )
 

@@ -26,43 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BEAM_PATTERN_RANDOM_TEST_H
-#define BEAM_PATTERN_RANDOM_TEST_H
+#ifndef OSKAR_CUDA_BEAM_PATTERN_2D_HORIZONTAL_GEOMETRIC_H
+#define OSKAR_CUDA_BEAM_PATTERN_2D_HORIZONTAL_GEOMETRIC_H
 
 /**
- * @file BeamPatternRandomTest.h
+ * @file beamPattern2dHorizontalWeights.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "cuda/CudaEclipse.h"
+#include "cuda/CudaTypes.h"
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class BeamPatternRandomTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(BeamPatternRandomTest);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST(test_scattered);
-        CPPUNIT_TEST_SUITE_END();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+/// Computes a beam pattern using CUDA.
+void beamPattern2dHorizontalGeometric(const int na, const float* ax,
+        const float* ay, const int ns, const float* slon, const float* slat,
+        const float ba, const float be, const float k, float* image);
 
-        /// Clean up after the test run.
-        void tearDown();
+#ifdef __cplusplus
+}
+#endif
 
-    public:
-        /// Test method.
-        void test();
-
-        /// Test method.
-        void test_scattered();
-};
-
-#endif // BEAM_PATTERN_RANDOM_TEST_H
+#endif // OSKAR_CUDA_BEAM_PATTERN_2D_HORIZONTAL_GEOMETRIC_H

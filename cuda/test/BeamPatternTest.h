@@ -46,8 +46,10 @@ class BeamPatternTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(BeamPatternTest);
-        CPPUNIT_TEST(test_weights);
-        CPPUNIT_TEST(test_weights_random);
+        CPPUNIT_TEST(test_regular);
+        CPPUNIT_TEST(test_random);
+        CPPUNIT_TEST(test_perturbed);
+        CPPUNIT_TEST(test_scattered);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -59,10 +61,16 @@ class BeamPatternTest : public CppUnit::TestFixture
 
     public:
         /// Test method.
-        void test_weights();
+        void test_regular();
 
         /// Test method.
-        void test_weights_random();
+        void test_perturbed();
+
+        /// Test method.
+        void test_scattered();
+
+        /// Test method.
+        void test_random();
 };
 
 #endif // BEAM_PATTERN_TEST_H
