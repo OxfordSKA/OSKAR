@@ -32,6 +32,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "cuda/CudaEclipse.h"
+#include "cuda/CudaTypes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

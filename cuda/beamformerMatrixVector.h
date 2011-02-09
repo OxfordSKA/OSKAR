@@ -33,9 +33,6 @@
  * @file beamformerMatrixVector.h
  */
 
-#include "cuda/CudaEclipse.h"
-#include "cuda/CudaTypes.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

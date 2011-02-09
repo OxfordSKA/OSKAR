@@ -31,6 +31,9 @@
 #include "cuda/_weights2dHorizontalGeometric.h"
 #include <stdio.h>
 
+#include "cuda/CudaEclipse.h"
+#include "cuda/CudaTypes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

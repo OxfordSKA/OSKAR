@@ -27,6 +27,10 @@
  */
 
 #include "cuda/vectorAdd.h"
+
+#include "cuda/CudaEclipse.h"
+#include "cuda/CudaTypes.h"
+
 #include <cstdio>
 #include <cstdlib>
 

@@ -35,6 +35,9 @@
 #include <stdio.h>
 #include <cublas.h>
 
+#include "cuda/CudaEclipse.h"
+#include "cuda/CudaTypes.h"
+
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
 

@@ -29,6 +29,9 @@
 #include "cuda/beamformerMatrixVector.h"
 #include <cublas.h>
 
+#include "cuda/CudaEclipse.h"
+#include "cuda/CudaTypes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
