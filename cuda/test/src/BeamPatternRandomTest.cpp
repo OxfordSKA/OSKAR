@@ -1,5 +1,4 @@
 #include "cuda/test/BeamPatternRandomTest.h"
-#include "cuda/beamPattern2dHorizontalGeometric.h"
 #include "cuda/beamPattern2dHorizontalWeights.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
