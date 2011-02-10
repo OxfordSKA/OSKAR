@@ -117,6 +117,299 @@ void BeamPatternTest::test_regular()
  * @details
  * Tests beam pattern creation using CUDA.
  */
+void BeamPatternTest::test_superStation()
+{
+    // Generate array of antenna positions.
+    int seed = 10;
+    float radius = 21.2; // metres.
+    float xs = 0.375, ys = 0.375, xe = 0.0, ye = 0.0; // separations, errors.
+
+    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    printf("Super-station contains %d antennas.\n", na);
+    std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
+    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+
+    // Rotate around z.
+    float matrix[9];
+    Matrix3::rotationZ(matrix, float(0 * DEG2RAD));
+    Matrix3::transformPoints(matrix, na, &ax[0], &ay[0], &az[0]);
+
+    // Write antenna positions to file.
+    FILE* file = fopen("arraySuperStation.dat", "w");
+    for (int a = 0; a < na; ++a) {
+        fprintf(file, "%12.3f%12.3f\n", ax[a], ay[a]);
+    }
+    fclose(file);
+
+    // Set beam direction.
+    float beamAz = 0;  // Beam azimuth.
+    float beamEl = 90; // Beam elevation.
+
+    // Generate test source positions for a square image.
+//    SphericalPositions<float> pos (
+//            beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
+//            30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
+//            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
+
+    // Generate test source positions for the hemisphere.
+    SphericalPositions<float> pos (
+            180 * DEG2RAD, 45 * DEG2RAD, // Centre.
+            180 * DEG2RAD, 45 * DEG2RAD, // Half-widths.
+            //0.03 * DEG2RAD, 0.03 * DEG2RAD, // Spacings.
+            0.2 * DEG2RAD, 0.2 * DEG2RAD, // Spacings.
+            0.0, true, false, true, true,
+            SphericalPositions<float>::PROJECTION_NONE);
+
+    int ns = 1 + pos.generate(0, 0); // No. of sources (add a point at zenith).
+    std::vector<float> slon(ns), slat(ns);
+    slon[0] = 0; slat[0] = 90 * DEG2RAD; // Add a point at zenith.
+    pos.generate(&slon[1], &slat[1]); // Add a point at zenith.
+    std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
+
+    // Call CUDA beam pattern generator.
+//    float freq[] = {70, 115, 150, 200, 240, 300, 400, 450}; // MHz.
+    float freq[] = {240, 400, 450}; // MHz.
+    const int nf = sizeof(freq) / sizeof(float); // Number of frequencies.
+    for (int f = 0; f < nf; ++f) {
+        TIMER_START
+        beamPattern2dHorizontalGeometric(na, &ax[0], &ay[0], ns, &slon[0],
+                &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
+                2 * M_PI * (freq[f] * 1e6 / C_0), &image[0]);
+        TIMER_STOP("Finished beam pattern (%.0f MHz, super-station)", freq[f]);
+
+        // Write image data to file.
+        char fname[200];
+        snprintf(fname, 200, "beamPatternSuperStation_%.0f.dat", freq[f]);
+        file = fopen(fname, "w");
+        for (int s = 0; s < ns; ++s) {
+            fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
+                    slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
+        }
+        fclose(file);
+    }
+
+}
+
+/**
+ * @details
+ * Tests beam pattern creation using CUDA.
+ */
+void BeamPatternTest::test_satStation()
+{
+    // Generate array of antenna positions.
+    int seed = 10;
+    float radius = 28.5; // metres.
+    float xs = 1.5, ys = 1.5, xe = 0.0, ye = 0.0; // separations, errors.
+
+    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    printf("Satellite-station contains %d antennas.\n", na);
+    std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
+    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+
+    // Rotate around z.
+    float matrix[9];
+    Matrix3::rotationZ(matrix, float(0 * DEG2RAD));
+    Matrix3::transformPoints(matrix, na, &ax[0], &ay[0], &az[0]);
+
+    // Write antenna positions to file.
+    FILE* file = fopen("arraySatStation.dat", "w");
+    for (int a = 0; a < na; ++a) {
+        fprintf(file, "%12.3f%12.3f\n", ax[a], ay[a]);
+    }
+    fclose(file);
+
+    // Set beam direction.
+    float beamAz = 0;  // Beam azimuth.
+    float beamEl = 90; // Beam elevation.
+
+    // Generate test source positions for a square image.
+//    SphericalPositions<float> pos (
+//            beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
+//            30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
+//            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
+
+    // Generate test source positions for the hemisphere.
+    SphericalPositions<float> pos (
+            180 * DEG2RAD, 45 * DEG2RAD, // Centre.
+            180 * DEG2RAD, 45 * DEG2RAD, // Half-widths.
+            //0.03 * DEG2RAD, 0.03 * DEG2RAD, // Spacings.
+            0.2 * DEG2RAD, 0.2 * DEG2RAD, // Spacings.
+            0.0, true, false, true, true,
+            SphericalPositions<float>::PROJECTION_NONE);
+
+    int ns = 1 + pos.generate(0, 0); // No. of sources (add a point at zenith).
+    std::vector<float> slon(ns), slat(ns);
+    slon[0] = 0; slat[0] = 90 * DEG2RAD; // Add a point at zenith.
+    pos.generate(&slon[1], &slat[1]); // Add a point at zenith.
+    std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
+
+    // Call CUDA beam pattern generator.
+//    float freq[] = {70, 115, 150, 200, 240, 300, 400, 450}; // MHz.
+    float freq[] = {240, 400, 450}; // MHz.
+    const int nf = sizeof(freq) / sizeof(float); // Number of frequencies.
+    for (int f = 0; f < nf; ++f) {
+        TIMER_START
+        beamPattern2dHorizontalGeometric(na, &ax[0], &ay[0], ns, &slon[0],
+                &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
+                2 * M_PI * (freq[f] * 1e6 / C_0), &image[0]);
+        TIMER_STOP("Finished beam pattern (%.0f MHz, sat-station)", freq[f]);
+
+        // Write image data to file.
+        char fname[200];
+        snprintf(fname, 200, "beamPatternSatStation_%.0f.dat", freq[f]);
+        file = fopen(fname, "w");
+        for (int s = 0; s < ns; ++s) {
+            fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
+                    slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
+        }
+        fclose(file);
+    }
+}
+
+/**
+ * @details
+ * Tests beam pattern creation using CUDA.
+    fwrite(&ns, sizeof(int), 1, file);
+    fwrite((void*)slon, sizeof(float), ns, file);
+    fwrite((void*)slat, sizeof(float), ns, file);
+    fwrite((void*)image, sizeof(float), 2 * ns, file);
+ */
+void BeamPatternTest::test_satStations()
+{
+    // Set beam direction.
+    float beamAz = 0;  // Beam azimuth.
+    float beamEl = 90; // Beam elevation.
+
+    // Set up test source positions for the hemisphere.
+    float slat[] = {0.41708,1.0712,1.3863,3.8721,4.4689,4.8555,5.3802,6.8269,
+            6.837,7.0358,7.3013,7.5439,7.5992,7.6964,8.6809,9.5987,10.001,
+            10.008,10.568,10.71,11.099,11.692,11.878,12.246,12.476,13.046,
+            13.099,13.436,13.714,14.596,14.635,14.908,15.209,15.364,16.366,
+            16.516,16.552,16.633,16.819,17.006,17.529,17.694,18.697,19.957,
+            20.143,20.333,20.49,20.608,20.744,21.13,21.592,21.596,21.752,
+            21.917,22.598,22.885,22.959,23.176,23.226,23.388,23.599,23.667,
+            23.742,24.842,25.726,26.669,26.701,27.112,27.571,27.999,28.009,
+            28.69,30.341,30.395,30.635,31.499,31.565,31.586,31.649,31.784,
+            33.164,33.232,34.075,34.24,34.34,35.076,35.98,36.163,36.352,
+            36.785,37.554,38.175,38.719,38.827,39.213,39.227,39.498,39.841,
+            40.103,40.211,40.549,40.583,42.245,42.383,42.596,43.811,44.033,
+            44.079,44.178,44.853,45.536,45.707,45.766,45.969,46.192,47.568,
+            47.772,47.954,48.451,49.231,49.249,49.475,49.487,49.514,51.104,
+            51.194,51.769,52.173,52.674,52.674,52.834,53.541,54.178,54.256,
+            55.444,55.985,56.023,56.306,57.989,58.168,58.297,58.42,58.867,
+            58.959,61.173,61.81,62.029,62.917,63.843,64.009,65.855,67.022,
+            67.334,67.614,67.836,67.922,68.148,68.897,69.742,69.814,70.125,
+            70.22,70.223,71.486,71.535,71.568,72.006,73.042,73.286,73.557,
+            73.586,73.907,74.324,74.775,75.665,75.988,76.773,78.183,78.236,
+            78.835,80.181,81.005,81.244,81.439,81.958,82.2,82.547,83.104,
+            83.634,83.645,84.061,84.51,84.785,85.031,86.052,86.336,86.377,
+            86.571,88.177,89.652};
+    float slon[] = {94.494,288.37,10.519,334.39,262.92,175.9,208.27,85.422,
+            165.19,346.71,196.85,187.61,83.374,176,224.66,244.49,142.39,132.28,
+            355.67,13.586,318.66,328.78,286.63,35.536,94.274,120.73,244.7,
+            49.159,259.64,38.434,235.35,177.9,280.46,257.41,325.34,320.73,
+            120.3,251.55,71.212,10.995,267.87,180.01,172.77,325.7,219.55,
+            222.36,309.4,289.98,207.62,65.852,86.376,319.14,10.323,176.36,
+            60.454,352.33,256.57,180.17,169.59,21.463,245.51,15.275,25.72,
+            187.79,34.823,294.53,294.32,260.08,53.952,237.46,186.69,350.27,
+            233.64,288.12,163.37,155.66,297.11,30.049,47.942,62.42,140.74,
+            299.3,289.21,21.77,143.73,189.68,150.05,236.47,226.07,105.11,
+            155.39,5.5754,354.26,60.181,38.238,134.07,71.323,176.29,122.22,
+            342.59,331.32,18.964,265.63,96.883,152.22,197.23,339.39,150.39,
+            353.9,108.52,252.4,239.88,194.09,251.32,239.95,64.128,46.085,
+            359.67,61.604,11.736,202.03,317.47,240.9,68.556,132.81,165.86,
+            353.39,56.306,307.99,232.12,135.46,68.733,154.17,173.53,43.42,
+            212.22,81.428,138.46,209.88,90.65,104.56,222.15,95.501,296.78,
+            353.76,262.89,123.8,210.26,38.797,326.27,316.68,294.39,93.862,
+            213.97,8.1045,153.09,112.58,58.135,64.356,152.24,33.923,215.47,
+            169.53,250.54,251.96,229.87,12.097,24.77,115.06,191.11,235.6,
+            146.74,295.19,258.61,348.71,191.28,117.05,38.027,219.95,280.37,
+            152.44,32.696,95.93,55.316,101.16,158.43,189.77,164.67,315.13,
+            186.5,339.7,229.58,344.77,86.655,243.4,104.06,241.85,250.25,
+            24.477,91.724};
+    int ns = sizeof(slon) / sizeof(float);
+    for (int s = 0; s < ns; ++s) {
+        slon[s] *= DEG2RAD;
+        slat[s] *= DEG2RAD;
+    }
+    std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
+
+    srand(10);
+    FILE* output = fopen("output.dat", "w");
+    float freq = 400; // MHz.
+    for (int station = 0; station < 50; ++station) {
+        // Generate array of antenna positions.
+        int seed = rand();
+        float radius = 28.5; // metres.
+        float xs = 1.5, ys = 1.5, xe = 0.3, ye = 0.3; // separations, errors.
+
+        int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+        printf("Satellite-station %d contains %d antennas.\n", station, na);
+        std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
+        GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+
+        // Write antenna positions to file.
+        char fname[200];
+        snprintf(fname, 200, "arraySatStation%02d.dat", station);
+        FILE* file = fopen(fname, "w");
+        for (int a = 0; a < na; ++a) {
+            fprintf(file, "%12.3f%12.3f\n", ax[a], ay[a]);
+        }
+        fclose(file);
+
+        // Call CUDA beam pattern generator.
+        TIMER_START
+        beamPattern2dHorizontalGeometric(na, &ax[0], &ay[0], ns, &slon[0],
+                &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
+                2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+        TIMER_STOP("Finished beam points (station %d)", station);
+
+        // Write image data to file.
+        for (int s = 0; s < ns; ++s) {
+            fprintf(output, "%14.5f%14.5f%17.5e%17.5e\n",
+                    slon[s] * RAD2DEG, slat[s] * RAD2DEG,
+                    image[2*s], image[2*s+1]);
+        }
+    }
+
+    // Do the same for the super-station.
+    // Generate array of antenna positions.
+    int seed = rand();
+    float radius = 21.2; // metres.
+    float xs = 0.375, ys = 0.375, xe = 0.0, ye = 0.0; // separations, errors.
+
+    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    printf("Super-station contains %d antennas.\n", na);
+    std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
+    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+
+    // Write antenna positions to file.
+    FILE* file = fopen("arraySupStation.dat", "w");
+    for (int a = 0; a < na; ++a) {
+        fprintf(file, "%12.3f%12.3f\n", ax[a], ay[a]);
+    }
+    fclose(file);
+
+    // Call CUDA beam pattern generator.
+    TIMER_START
+    beamPattern2dHorizontalGeometric(na, &ax[0], &ay[0], ns, &slon[0],
+            &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
+            2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+    TIMER_STOP("Finished beam points (super-station)");
+
+    // Write image data to file.
+    for (int s = 0; s < ns; ++s) {
+        fprintf(output, "%14.5f%14.5f%17.5e%17.5e\n",
+                slon[s] * RAD2DEG, slat[s] * RAD2DEG,
+                image[2*s], image[2*s+1]);
+    }
+    fclose(output);
+}
+
+/**
+ * @details
+ * Tests beam pattern creation using CUDA.
+ */
 void BeamPatternTest::test_perturbed()
 {
     // Generate array of antenna positions.

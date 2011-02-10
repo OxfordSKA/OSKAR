@@ -147,20 +147,20 @@ void beamformer2dHorizontalIsotropicGeometric(const int na,
 
         // Invoke kernel to compute beamforming weights on the device.
         int wBlocks = (na*beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
-        TIMER_START
+//        TIMER_START
         _weights2dHorizontalGeometric <<<wBlocks, threadsPerBlock>>> (
                 na, axd, ayd, beamsInBlock, btrigd, k, weightsd);
         cudaThreadSynchronize();
-        TIMER_STOP("Finished weights")
+//        TIMER_STOP("Finished weights")
 
         // Call cuBLAS function to perform the matrix-vector multiplication.
         // Note that cuBLAS calls use Fortran-ordering (column major) for their
         // matrices, so we use the transpose here.
-        TIMER_START
+//        TIMER_START
         cublasCgemv('t', na, beamsInBlock, make_float2(1.0, 0.0),
                 weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
         cudaThreadSynchronize();
-        TIMER_STOP("Finished matrix-vector")
+//        TIMER_STOP("Finished matrix-vector")
 
         // Copy result from device memory to host memory.
         cudaMemcpy(&beams[2*beamStart], beamsd, beamsInBlock * sizeof(float2),
