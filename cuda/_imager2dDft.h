@@ -37,7 +37,7 @@
 
 /// CUDA kernel to compute an image using a simple 2D DFT.
 __global__
-void _imager2dDft(const int nv, const float* u, const float* v,
+void _imager2dDft(int nv, const float* u, const float* v,
         const float2* vis, const int np, const float* pl, const float* pm,
         const int maxVisPerBlock, float* image);
 

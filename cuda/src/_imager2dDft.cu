@@ -61,7 +61,7 @@ extern __shared__ float2 smem[];
  * @param[out] image The computed image (see note, above).
  */
 __global__
-void _imager2dDft(const int nv, const float* u, const float* v,
+void _imager2dDft(int nv, const float* u, const float* v,
         const float2* vis, const int np, const float* pl, const float* pm,
         const int maxVisPerBlock, float* image)
 {
@@ -110,7 +110,7 @@ void _imager2dDft(const int nv, const float* u, const float* v,
             __sincosf(a, &weight.y, &weight.x);
 
             // Perform complex multiply-accumulate.
-            // Image is real, so only need to evaluate the real part.
+            // Image is real, so should only need to evaluate the real part.
             cpx[threadIdx.x] += cvs[v].x * weight.x - cvs[v].y * weight.y;
         }
 
@@ -120,5 +120,8 @@ void _imager2dDft(const int nv, const float* u, const float* v,
 
     // Copy shared memory back into global memory.
     if (p < np)
-        image[p] = cpx[threadIdx.x] / (float)nv;
+        if (hypotf(l, m) > 1.0f)
+            image[p] = 0.0f;
+        else
+            image[p] = cpx[threadIdx.x] / (float)nv;
 }

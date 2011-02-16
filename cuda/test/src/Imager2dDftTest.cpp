@@ -85,7 +85,7 @@ void Imager2dDftTest::test()
     float dm = 1.0 / nm;
     float sl = M_PI;
     float sm = M_PI;
-    std::vector<float> image(nl * nm);
+    std::vector<float> image(nl * nm, 0.0);
     TIMER_START
     imager2dDft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
     TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)
@@ -108,7 +108,7 @@ void Imager2dDftTest::test()
 void Imager2dDftTest::test_large()
 {
     // Set up some visibilities.
-    const int nv = 100000;
+    const int nv = 4560;
     std::vector<float> vis(2 * nv, 0.0), u(nv, 0.0), v(nv, 0.0);
 
     u[0] = 1.0f;
@@ -117,13 +117,13 @@ void Imager2dDftTest::test_large()
     vis[1] = 1.0f; // imag.
 
     // Image the visibilities.
-    int nl = 1024;
-    int nm = 1024;
+    int nl = 512;
+    int nm = 512;
     float dl = 1.0 / nl;
     float dm = 1.0 / nm;
     float sl = M_PI;
     float sm = M_PI;
-    std::vector<float> image(nl * nm);
+    std::vector<float> image(nl * nm, 0.0);
     TIMER_START
     imager2dDft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
     TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)

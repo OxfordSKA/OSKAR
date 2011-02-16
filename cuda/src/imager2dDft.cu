@@ -82,11 +82,11 @@ void imager2dDft(const int nv, const float* u, const float* v,
     float l, m; // Pixel coordinates.
     for (j = 0; j < nm; ++j) {
         // Image m-coordinate.
-        m = (j - centreM) * dm * sm / M_PI;
+        m = 2.0 * (j - centreM) * dm * sm / M_PI;
 
         for (i = 0; i < nl; ++i) {
             // Image l-coordinate.
-            l = (i - centreL) * dl * sl / M_PI;
+            l = 2.0 * (i - centreL) * dl * sl / M_PI;
 
             // Image pixel index.
             k = i + j * nl;
