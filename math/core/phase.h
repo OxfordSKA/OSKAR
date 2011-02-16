@@ -43,6 +43,16 @@
 
 /**
  * @brief
+ * Inline function macro used to compute the 3D geometric phase
+ * for the horizontal (azimuth/elevation) coordinate system.
+ *
+ * TODO needs checking!
+ */
+#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
+        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+
+/**
+ * @brief
  * Inline function macro used to compute the 2D geometric phase
  * for the spherical (theta/phi) coordinate system.
  */

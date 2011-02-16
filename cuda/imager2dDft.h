@@ -26,71 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BEAM_PATTERN_TEST_H
-#define BEAM_PATTERN_TEST_H
+#ifndef OSKAR_CUDA_IMAGER_2D_DFT_H
+#define OSKAR_CUDA_IMAGER_2D_DFT_H
 
 /**
- * @file BeamPatternTest.h
+ * @file imager2dDft.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class BeamPatternTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(BeamPatternTest);
-//        CPPUNIT_TEST(test_regular);
-//        CPPUNIT_TEST(test_superStation);
-//        CPPUNIT_TEST(test_satStation);
-//        CPPUNIT_TEST(test_stations200);
-//        CPPUNIT_TEST(test_stations2000);
-        CPPUNIT_TEST(test_stations4000);
-//        CPPUNIT_TEST(test_random);
-//        CPPUNIT_TEST(test_perturbed);
-//        CPPUNIT_TEST(test_scattered);
-        CPPUNIT_TEST_SUITE_END();
+/// Computes an image using CUDA.
+void imager2dDft(const int nv, const float* u, const float* v,
+        const float* vis, const int nl, const int nm,
+        const float dl, const float dm, const float sl, const float sm,
+        float* image);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+#ifdef __cplusplus
+}
+#endif
 
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
-        void test_regular();
-
-        /// Test method.
-        void test_superStation();
-
-        /// Test method.
-        void test_satStation();
-
-        /// Test method.
-        void test_stations200();
-
-        /// Test method.
-        void test_stations2000();
-
-        /// Test method.
-        void test_stations4000();
-
-        /// Test method.
-        void test_perturbed();
-
-        /// Test method.
-        void test_scattered();
-
-        /// Test method.
-        void test_random();
-};
-
-#endif // BEAM_PATTERN_TEST_H
+#endif // OSKAR_CUDA_IMAGER_2D_DFT_H

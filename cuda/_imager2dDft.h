@@ -26,71 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BEAM_PATTERN_TEST_H
-#define BEAM_PATTERN_TEST_H
+#ifndef OSKAR__IMAGER_2D_DFT_H
+#define OSKAR__IMAGER_2D_DFT_H
+
+#include "cuda/CudaEclipse.h"
 
 /**
- * @file BeamPatternTest.h
+ * @file _imager2dDft.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+/// CUDA kernel to compute an image using a simple 2D DFT.
+__global__
+void _imager2dDft(const int nv, const float* u, const float* v,
+        const float2* vis, const int np, const float* pl, const float* pm,
+        const int maxVisPerBlock, float* image);
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class BeamPatternTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(BeamPatternTest);
-//        CPPUNIT_TEST(test_regular);
-//        CPPUNIT_TEST(test_superStation);
-//        CPPUNIT_TEST(test_satStation);
-//        CPPUNIT_TEST(test_stations200);
-//        CPPUNIT_TEST(test_stations2000);
-        CPPUNIT_TEST(test_stations4000);
-//        CPPUNIT_TEST(test_random);
-//        CPPUNIT_TEST(test_perturbed);
-//        CPPUNIT_TEST(test_scattered);
-        CPPUNIT_TEST_SUITE_END();
-
-    public:
-        /// Set up context before running a test.
-        void setUp();
-
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
-        void test_regular();
-
-        /// Test method.
-        void test_superStation();
-
-        /// Test method.
-        void test_satStation();
-
-        /// Test method.
-        void test_stations200();
-
-        /// Test method.
-        void test_stations2000();
-
-        /// Test method.
-        void test_stations4000();
-
-        /// Test method.
-        void test_perturbed();
-
-        /// Test method.
-        void test_scattered();
-
-        /// Test method.
-        void test_random();
-};
-
-#endif // BEAM_PATTERN_TEST_H
+#endif // OSKAR__IMAGER_2D_DFT_H

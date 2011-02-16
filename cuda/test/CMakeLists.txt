@@ -11,6 +11,7 @@ set(data_test_SRC
     src/BeamPatternTest.cpp
     src/AntennaSignalTest.cpp
     src/BeamformerMatrixVectorTest.cpp
+    src/Imager2dDftTest.cpp
 )
 
 include_directories()

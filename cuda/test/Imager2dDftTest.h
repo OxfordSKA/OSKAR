@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BEAM_PATTERN_TEST_H
-#define BEAM_PATTERN_TEST_H
+#ifndef IMAGER_2D_DFT_TEST_H
+#define IMAGER_2D_DFT_TEST_H
 
 /**
- * @file BeamPatternTest.h
+ * @file Imager2dDftTest.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,19 +42,12 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class BeamPatternTest : public CppUnit::TestFixture
+class Imager2dDftTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(BeamPatternTest);
-//        CPPUNIT_TEST(test_regular);
-//        CPPUNIT_TEST(test_superStation);
-//        CPPUNIT_TEST(test_satStation);
-//        CPPUNIT_TEST(test_stations200);
-//        CPPUNIT_TEST(test_stations2000);
-        CPPUNIT_TEST(test_stations4000);
-//        CPPUNIT_TEST(test_random);
-//        CPPUNIT_TEST(test_perturbed);
-//        CPPUNIT_TEST(test_scattered);
+        CPPUNIT_TEST_SUITE(Imager2dDftTest);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST(test_large);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -66,31 +59,10 @@ class BeamPatternTest : public CppUnit::TestFixture
 
     public:
         /// Test method.
-        void test_regular();
+        void test();
 
         /// Test method.
-        void test_superStation();
-
-        /// Test method.
-        void test_satStation();
-
-        /// Test method.
-        void test_stations200();
-
-        /// Test method.
-        void test_stations2000();
-
-        /// Test method.
-        void test_stations4000();
-
-        /// Test method.
-        void test_perturbed();
-
-        /// Test method.
-        void test_scattered();
-
-        /// Test method.
-        void test_random();
+        void test_large();
 };
 
-#endif // BEAM_PATTERN_TEST_H
+#endif // IMAGER_2D_DFT_TEST_H
