@@ -37,9 +37,9 @@
 extern "C" {
 #endif
 
-void oskar_cuda_bp2hig(const int na, const float* ax, const float* ay,
-        const int ns, const float* slon, const float* slat,
-        const float ba, const float be, const float k, float* image)
+void oskar_cuda_bp2hig(int na, const float* ax, const float* ay,
+        int ns, const float* slon, const float* slat,
+        float ba, float be, float k, float* image)
 {
     // Precompute.
     float sinBeamAz = sin(ba);
