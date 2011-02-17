@@ -26,37 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_CUDA_BFMV_H_
+#define OSKAR_CUDA_BFMV_H_
 
 /**
- * @file phase.h
+ * @file oskar_cuda_bfmv.h
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * Computes beams using CUDA.
  *
- * TODO needs checking!
+ * @details
+ * Computes beams using CUDA.
+ *
+ * The computed beams are returned in the \p beams array, which
+ * must be pre-sized to length 2*nb. The values in the \p beams array
+ * are alternate (real, imag) pairs for each beam.
+ *
+ * @param[in] na The number of antennas.
+ * @param[in] nb The number of beams to form.
+ * @param[in] signals The vector of complex antenna signals (length na).
+ * @param[in] weights The matrix of complex beamforming weights
+ *                    (na columns, nb rows).
+ * @param[out] beams The complex vector of output beams (length nb).
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+void oskar_cuda_bfmv(const unsigned na, const unsigned nb,
+        const float* signals, const float* weights, float* beams);
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+#ifdef __cplusplus
+}
+#endif
 
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_CUDA_BFMV_H_

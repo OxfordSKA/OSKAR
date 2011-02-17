@@ -1,0 +1,27 @@
+File: cuda/readme
+===============================================================================
+
+This folder contains C-callable CUDA routines and CUDA kernels used in
+oskar-lib.
+
+
+cuda/
+-------------------------------------------------------------------------------
+oskar_cuda_as2hi        : antenna signal 2D horizontal isotropic
+oskar_cuda_bf2hig       : beamformer 2D horizontal isotropic geometric
+oskar_cuda_bfmv         : beamformer matrix vector
+oskar_cuda_bp2hig       : beam pattern 2D horizontal isotropic geometric
+oskar_cuda_bp2hcgg      : (reserved) beam pattern 2D horizontal common gaussian geometric
+oskar_cuda_bp2hugg      : (reserved) beam pattern 2D horizontal unique gaussian geometric
+oskar_cuda_im2dft       : imager 2D DFT
+
+
+cuda/kernels/
+-------------------------------------------------------------------------------
+oskar_cudak_as2hi       : antenna signal 2D horizontal isotropic
+oskar_cudak_bp2hiw      : beam pattern 2D horizontal isotropic weights
+oskar_cudak_eq2hg       : equatorial to horizontal generic
+oskar_cudak_im2dft      : imager 2D DFT
+oskar_cudak_pc2ht       : pre-compute 2D horizontal trig
+oskar_cudak_wt2hg       : weights 2D horizontal geometric
+

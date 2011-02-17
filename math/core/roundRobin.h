@@ -26,37 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_ROUND_ROBIN_H
+#define OSKAR_ROUND_ROBIN_H
 
 /**
- * @file phase.h
+ * @file roundRobin.h
  */
 
 /**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * @details
+ * Distributes a number of \p items among a number of \p resources
+ * (e.g. threads, or processes), and returns the \p number of items
+ * and \p start item index (zero-based) for the current resource \p rank
+ * (also zero-based).
  *
- * TODO needs checking!
+ * @param[in] items The number of items to distribute.
+ * @param[in] resources The number of resources available.
+ * @param[in] rank The index of this resource.
+ * @param[out] number The number of items that this resource must process.
+ * @param[out] start The start item index that this resource must process.
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+static inline void roundRobin(unsigned items, unsigned resources,
+        unsigned rank, unsigned& number, unsigned& start)
+{
+    number = items / resources;
+    unsigned remainder = items % resources;
+    if (rank < remainder) number++;
+    start = number * rank;
+    if (rank >= remainder) start += remainder;
+}
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
-
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_ROUND_ROBIN_H

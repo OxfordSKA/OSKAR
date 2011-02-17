@@ -26,37 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_CUDAK_EQ2HG_H_
+#define OSKAR_CUDAK_EQ2HG_H_
 
 /**
- * @file phase.h
+ * @file oskar_cudak_eq2hg.h
  */
+
+#include "cuda/CudaEclipse.h"
 
 /**
  * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * CUDA kernel to compute local source positions.
  *
- * TODO needs checking!
+ * @details
+ * This CUDA kernel transforms sources specified in a generic equatorial
+ * system (RA, Dec) to local horizontal coordinates (azimuth, elevation).
+ *
+ * Each thread operates on a single source. The source positions are
+ * specified as (RA, Dec) pairs in the \p radec array:
+ *
+ * radec.x = {RA}
+ * radec.y = {Dec}
+ *
+ * The output \p azel array contains the azimuth and elevation pairs for each
+ * source:
+ *
+ * azel.x = {azimuth}
+ * azel.y = {elevation}
+ *
+ * The number of floating-point operations performed by this kernel is:
+ * \li Sines and cosines: 4 * ns.
+ * \li Arctangents: 2 * ns.
+ * \li Multiplies: 8 * ns.
+ * \li Additions / subtractions: 4 * ns.
+ * \li Square roots: ns.
+ *
+ * @param[in] ns The number of source positions.
+ * @param[in] radec The RA and Declination source coordinates in radians.
+ * @param[in] cosLat The cosine of the geographic latitude.
+ * @param[in] sinLat The sine of the geographic latitude.
+ * @param[in] lst The Local Sidereal Time (= ST + geographic longitude) in radians.
+ * @param[out] azel The azimuth and elevation source coordinates in radians.
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+__global__
+void oskar_cudak_eq2hg(const int ns, const float2* radec,
+        const float cosLat, const float sinLat, const float lst, float2* azel);
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
-
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_CUDAK_EQ2HG_H_

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MATH_BEAMPATTERN_H_
-#define MATH_BEAMPATTERN_H_
+#ifndef OSKAR_MATH_BEAM_PATTERN_H_
+#define OSKAR_MATH_BEAM_PATTERN_H_
 
 /**
  * @file beamPattern.h
@@ -39,4 +39,4 @@ void beamPattern(const int na, const float* ax, const float* ay,
         const float ba, const float be, const float k,
         float* image);
 
-#endif /* MATH_BEAMPATTERN_H_ */
+#endif // OSKAR_MATH_BEAM_PATTERN_H_

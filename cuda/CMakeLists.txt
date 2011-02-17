@@ -4,19 +4,18 @@
 
 set(cuda_SRC
     # CUDA kernels:
-    src/_antennaSignal2dHorizontalIsotropic.cu
-    src/_beamPattern2dHorizontalWeights.cu
-    src/_equatorialToHorizontalGeneric.cu
-    src/_imager2dDft.cu
-    src/_precompute2dHorizontalTrig.cu
-    src/_roundRobin.cu
-    src/_weights2dHorizontalGeometric.cu
+    kernels/src/oskar_cudak_as2hi.cu
+    kernels/src/oskar_cudak_bp2hiw.cu
+    kernels/src/oskar_cudak_eq2hg.cu
+    kernels/src/oskar_cudak_im2dft.cu
+    kernels/src/oskar_cudak_pc2ht.cu
+    kernels/src/oskar_cudak_wt2hg.cu
     # Callable functions:
-    src/antennaSignal2dHorizontalIsotropic.cu
-    src/beamformer2dHorizontalIsotropicGeometric.cu
-    src/beamformerMatrixVector.cu
-    src/beamPattern2dHorizontalGeometric.cu
-    src/imager2dDft.cu
+    src/oskar_cuda_as2hi.cu
+    src/oskar_cuda_bf2hig.cu
+    src/oskar_cuda_bfmv.cu
+    src/oskar_cuda_bp2hig.cu
+    src/oskar_cuda_im2dft.cu
     src/vectorAdd.cu
 )
 

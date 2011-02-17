@@ -26,37 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#include "cuda/kernels/oskar_cudak_eq2hg.h"
 
-/**
- * @file phase.h
- */
+__global__
+void oskar_cudak_eq2hg(const int ns, const float2* radec,
+        const float cosLat, const float sinLat, const float lst, float2* azel)
+{
+    // Get the source ID that this thread is working on.
+    const int s = blockDim.x * blockIdx.x + threadIdx.x;
+    if (s >= ns) return; // Return if the index is out of range.
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
+    // Copy source coordinates from global memory.
+    float2 src = radec[s];
 
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- *
- * TODO needs checking!
- */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+    // Precompute.
+    float cosDec, sinDec, cosHA, sinHA;
+    const float hourAngle = lst - src.x; // LST - RA
+    sincosf(src.y, &sinDec, &cosDec);
+    sincosf(hourAngle, &sinHA, &cosHA);
+    const float f = cosDec * cosHA;
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
-
-#endif // OSKAR_PHASE_H_
+    // Find azimuth and elevation.
+    const float Y1 = -cosDec * sinHA;
+    const float X1 = cosLat * sinDec - sinLat * f;
+    const float Y2 = sinLat * sinDec + cosLat * f;
+    const float X2 = hypotf(X1, Y1); // sqrtf(X1*X1 + Y1*Y1);
+    azel[s].x = atan2f(Y1, X1);
+    azel[s].y = atan2f(Y2, X2);
+}

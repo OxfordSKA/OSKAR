@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GEOMETRY_H_
-#define GEOMETRY_H_
+#ifndef OSKAR_GEOMETRY_H_
+#define OSKAR_GEOMETRY_H_
 
 #include <cmath>
 
@@ -482,4 +482,4 @@ bool Geometry::tangentPlaneToSphericalOrthographic (
     return true;
 }
 
-#endif /* GEOMETRY_H_ */
+#endif // OSKAR_GEOMETRY_H_

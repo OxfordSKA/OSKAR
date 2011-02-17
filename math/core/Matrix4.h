@@ -430,4 +430,4 @@ void Matrix4::set(T matrix[16],
     matrix[3] = d; matrix[7] = h; matrix[11] = l; matrix[15] = p;
 }
 
-#endif /* OSKAR_MATRIX4_H_ */
+#endif // OSKAR_MATRIX4_H_

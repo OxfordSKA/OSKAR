@@ -26,37 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_CUDA_IM2DFT_H_
+#define OSKAR_CUDA_IM2DFT_H_
 
 /**
- * @file phase.h
+ * @file oskar_cuda_im2dft.h
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * Computes an image using CUDA.
  *
- * TODO needs checking!
+ * @details
+ * Computes a real image from a set of complex visibilities, using CUDA to
+ * evaluate a 2D Direct Fourier Transform (DFT).
+ *
+ * The computed image is returned in the \p image array, which
+ * must be pre-sized to length (nl * nm). The fastest-varying dimension is
+ * along l.
+ *
+ * The image is assumed to be completely real: conjugated copies of the
+ * visibilities should therefore NOT be supplied.
+ *
+ * @param[in] nv No. of independent visibilities (excluding Hermitian copy).
+ * @param[in] u Array of visibility u coordinates in wavelengths (length nv).
+ * @param[in] v Array of visibility v coordinates in wavelengths (length nv).
+ * @param[in] vis Array of complex visibilities (length 2 * nv; see note, above).
+ * @param[in] nl The image dimension.
+ * @param[in] nm The image dimension.
+ * @param[in] dl The pixel size (cellsize) in radians.
+ * @param[in] dm The pixel size (cellsize) in radians.
+ * @param[in] sl The field of view in radians (full sky = pi).
+ * @param[in] sm The field of view in radians (full sky = pi).
+ * @param[out] image The computed image (see note, above).
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+void oskar_cuda_im2dft(const int nv, const float* u, const float* v,
+        const float* vis, const int nl, const int nm,
+        const float dl, const float dm, const float sl, const float sm,
+        float* image);
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+#ifdef __cplusplus
+}
+#endif
 
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_CUDA_IM2DFT_H_

@@ -26,37 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef CUDA_VECTOR_ADD_TEST_H
+#define CUDA_VECTOR_ADD_TEST_H
 
 /**
- * @file phase.h
+ * @file CudaVectorAddTest.h
  */
+
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * @class
  */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
 
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- *
- * TODO needs checking!
- */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+class CudaVectorAddTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE( CudaVectorAddTest );
+        CPPUNIT_TEST( test_method );
+        CPPUNIT_TEST_SUITE_END();
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+    public:
+        void setUp();
+        void tearDown();
 
-#endif // OSKAR_PHASE_H_
+        // Test Methods
+        void test_method();
+
+    public:
+        CudaVectorAddTest();
+        ~CudaVectorAddTest();
+
+    private:
+};
+
+#endif // CUDA_VECTOR_ADD_TEST_H

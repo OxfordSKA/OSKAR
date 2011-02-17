@@ -26,37 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef CUDA_BEAMFORMER_MATRIX_VECTOR_TEST_H_
+#define CUDA_BEAMFORMER_MATRIX_VECTOR_TEST_H_
 
 /**
- * @file phase.h
+ * @file CudaBeamformerMatrixVectorTest.h
  */
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * @brief Unit test class that uses CppUnit.
  *
- * TODO needs checking!
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+class CudaBeamformerMatrixVectorTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(CudaBeamformerMatrixVectorTest);
+        CPPUNIT_TEST(test_basicMatrixVector);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+    public:
+        /// Set up context before running a test.
+        void setUp();
 
-#endif // OSKAR_PHASE_H_
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test basic complex matrix-vector multiplication.
+        void test_basicMatrixVector();
+
+        /// Test method.
+        void test_method();
+};
+
+#endif // CUDA_BEAMFORMER_MATRIX_VECTOR_TEST_H_

@@ -379,4 +379,4 @@ void Matrix3::transformPoints(const T matrix[9],
     }
 }
 
-#endif /* OSKAR_MATRIX3_H_ */
+#endif // OSKAR_MATRIX3_H_

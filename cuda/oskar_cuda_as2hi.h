@@ -26,37 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_CUDA_AS2HI_H_
+#define OSKAR_CUDA_AS2HI_H_
 
 /**
- * @file phase.h
+ * @file oskar_cuda_as2hi.h
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * Computes antenna signals using CUDA.
  *
- * TODO needs checking!
+ * @details
+ * Computes complex antenna signals using CUDA using a direct Fourier summation
+ * over the sources.
+ *
+ * The function must be supplied with the antenna x- and y-positions, the
+ * source amplitudes, longitude and latitude positions, and the wavenumber.
+ *
+ * The computed antenna signals are returned in the \p signals array, which
+ * must be pre-sized to length 2*na. The values in the \p signals array
+ * are alternate (real, imag) pairs for each antenna.
+ *
+ * @param[in] na The number of antennas.
+ * @param[in] ax The antenna x-positions in metres.
+ * @param[in] ay The antenna y-positions in metres.
+ * @param[in] ns The number of source positions.
+ * @param[in] samp The source amplitudes.
+ * @param[in] slon The source longitude coordinates in radians.
+ * @param[in] slat The source latitude coordinates in radians.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] signals The computed antenna signals (see note, above).
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+void oskar_cuda_as2hi(const int na, const float* ax, const float* ay,
+        const int ns, const float* samp, const float* slon, const float* slat,
+        const float k, float* signals);
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+#ifdef __cplusplus
+}
+#endif
 
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_CUDA_AS2HI_H_

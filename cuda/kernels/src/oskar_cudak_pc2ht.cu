@@ -26,37 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#include "cuda/kernels/oskar_cudak_pc2ht.h"
 
-/**
- * @file phase.h
- */
+__global__
+void oskar_cudak_pc2ht(const int ns, const float2* spos, float3* trig)
+{
+    // Get the source ID that this thread is working on.
+    const int s = blockDim.x * blockIdx.x + threadIdx.x;
+    if (s >= ns) return; // Return if the index is out of range.
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- *
- * TODO needs checking!
- */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
-
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
-
-#endif // OSKAR_PHASE_H_
+    trig[s].x = cosf(spos[s].x);
+    trig[s].y = sinf(spos[s].x);
+    trig[s].z = cosf(spos[s].y);
+}

@@ -26,37 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_CUDAK_PC2HT_H_
+#define OSKAR_CUDAK_PC2HT_H_
 
 /**
- * @file phase.h
+ * @file oskar_cudak_pc2ht.h
  */
+
+#include "cuda/CudaEclipse.h"
 
 /**
  * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * CUDA kernel to compute source position trigonometry.
  *
- * TODO needs checking!
+ * @details
+ * This CUDA kernel precomputes the required trigonometry for the given
+ * source positions in (azimuth, elevation).
+ *
+ * Each thread operates on a single source.
+ *
+ * The source positions are specified as (azimuth, elevation) pairs in the
+ * \p spos array:
+ *
+ * spos.x = {azimuth}
+ * spos.y = {elevation}
+ *
+ * The output \p trig array contains triplets of the following pre-computed
+ * trigonometry:
+ *
+ * trig.x = {cosine azimuth}
+ * trig.y = {sine azimuth}
+ * trig.z = {cosine elevation}
+ *
+ * This kernel can be used to prepare a source distribution to generate
+ * antenna signals for a 2D antenna array.
+ *
+ * @param[in] ns The number of source positions.
+ * @param[in] spos The azimuth and elevation source coordinates in radians.
+ * @param[out] trig The cosine and sine of the source azimuth and elevation
+ *                   coordinates.
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+__global__
+void oskar_cudak_pc2ht(const int ns, const float2* spos, float3* trig);
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
-
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_CUDAK_PC2HT_H_

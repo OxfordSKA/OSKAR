@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERPBILINEAR_H_
-#define INTERPBILINEAR_H_
+#ifndef OSKAR_INTERP_BILINEAR_H_
+#define OSKAR_INTERP_BILINEAR_H_
 
 #include <cmath>
 
@@ -179,4 +179,4 @@ static T InterpBilinear::_interpolate(T x1, T x2, T y1, T y2,
     return (s * dinv);
 }
 
-#endif /* INTERPBILINEAR_H_ */
+#endif // OSKAR_INTERP_BILINEAR_H_

@@ -26,37 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#include "cuda/oskar_cuda_bfmv.h"
+#include <cublas.h>
 
-/**
- * @file phase.h
- */
+#include "cuda/CudaEclipse.h"
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- *
- * TODO needs checking!
- */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+void oskar_cuda_bfmv(const unsigned na, const unsigned nb,
+        const float* signals, const float* weights, float* beams)
+{
+    // Initialise cuBLAS.
+    cublasInit();
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+    // Allocate memory for antenna signals and beamforming weights
+    // on the device.
+    float2 *signalsd, *weightsd, *beamsd;
+    cudaMalloc((void**)&signalsd, na * sizeof(float2));
+    cudaMalloc((void**)&beamsd, nb * sizeof(float2));
+    cudaMalloc((void**)&weightsd, na * nb * sizeof(float2));
 
-#endif // OSKAR_PHASE_H_
+    // Copy antenna signals and beamforming weights to the device.
+    cudaMemcpy(signalsd, signals, na * sizeof(float2), cudaMemcpyHostToDevice);
+    cudaMemcpy(weightsd, weights, na * nb * sizeof(float2), cudaMemcpyHostToDevice);
+
+    // Call cuBLAS function to perform the matrix-vector multiplication.
+    // Note that cuBLAS calls use Fortran-ordering (column major) for their
+    // matrices, so we use the transpose here.
+    cublasCgemv('t', na, nb, make_float2(1.0, 0.0),
+            weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
+
+    // Copy result from device memory to host memory.
+    cudaMemcpy(beams, beamsd, nb * sizeof(float2), cudaMemcpyDeviceToHost);
+
+    // Free device memory.
+    cudaFree(signalsd);
+    cudaFree(weightsd);
+    cudaFree(beamsd);
+
+    // Shut down cuBLAS.
+    cublasShutdown();
+}
+
+#ifdef __cplusplus
+}
+#endif

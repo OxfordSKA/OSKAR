@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPHERICALPOSITIONS_H_
-#define SPHERICALPOSITIONS_H_
+#ifndef OSKAR_SPHERICAL_POSITIONS_H_
+#define OSKAR_SPHERICAL_POSITIONS_H_
 
 #include <cmath>
 #include "math/core/Geometry.h"
@@ -220,4 +220,4 @@ unsigned SphericalPositions<T>::generate(T* longitudes, T* latitudes) const
     return nTotal;
 }
 
-#endif /* SPHERICALPOSITIONS_H_ */
+#endif // OSKAR_SPHERICAL_POSITIONS_H_

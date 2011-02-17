@@ -7,11 +7,11 @@
 # ==============================================================================
 set(data_test_SRC
     src/CppUnitMain.cpp
-    src/VectorAddTest.cpp
-    src/BeamPatternTest.cpp
-    src/AntennaSignalTest.cpp
-    src/BeamformerMatrixVectorTest.cpp
-    src/Imager2dDftTest.cpp
+    src/CudaVectorAddTest.cpp
+    src/CudaBeamPatternTest.cpp
+    src/CudaAntennaSignalTest.cpp
+    src/CudaBeamformerMatrixVectorTest.cpp
+    src/CudaImagerDftTest.cpp
 )
 
 include_directories()

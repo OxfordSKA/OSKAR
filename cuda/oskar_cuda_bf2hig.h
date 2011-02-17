@@ -26,37 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_CUDA_BF2HIG_H_
+#define OSKAR_CUDA_BF2HIG_H_
 
 /**
- * @file phase.h
+ * @file oskar_cuda_bf2hig.h
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * Computes beams using CUDA.
  *
- * TODO needs checking!
+ * @details
+ * Computes beams using CUDA.
+ *
+ * The computed beams are returned in the \p beams array, which
+ * must be pre-sized to length 2*nb. The values in the \p beams array
+ * are alternate (real, imag) pairs for each beam.
+ *
+ * @param[in] na The number of antennas.
+ * @param[in] ax The antenna x-positions in metres.
+ * @param[in] ay The antenna y-positions in metres.
+ * @param[in] ns The number of sources.
+ * @param[in] samp The source amplitudes.
+ * @param[in] slon The source longitude coordinates in radians.
+ * @param[in] slat The source latitude coordinates in radians.
+ * @param[in] nb The number of beams to form.
+ * @param[in] blon The source longitude coordinates in radians.
+ * @param[in] blat The source latitude coordinates in radians.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] beams The complex vector of output beams (length nb).
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+void oskar_cuda_bf2hig(const int na, const float* ax, const float* ay,
+        const int ns, const float* samp, const float* slon, const float* slat,
+        const int nb, const float* blon, const float* blat, const float k,
+        float* beams);
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+#ifdef __cplusplus
+}
+#endif
 
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_CUDA_BF2HIG_H_

@@ -26,37 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_CUDA_BP2HIG_H_
+#define OSKAR_CUDA_BP2HIG_H_
 
 /**
- * @file phase.h
+ * @file oskar_cuda_bp2hig.h
  */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_HORIZONTAL(x, y, cosEl, sinAz, cosAz, k) \
-        (-k * cosEl * (x * sinAz + y * cosAz))
-
-/**
- * @brief
- * Inline function macro used to compute the 3D geometric phase
- * for the horizontal (azimuth/elevation) coordinate system.
+ * Computes a beam pattern using CUDA in the horizontal coordinate system.
  *
- * TODO needs checking!
+ * @details
+ * Computes a beam pattern using CUDA, assuming isotropic antennas,
+ * generating the geometric beamforming weights separately.
+ *
+ * The function must be supplied with the antenna x- and y-positions, the
+ * test source longitude and latitude positions, the beam direction, and
+ * the wavenumber.
+ *
+ * The computed beam pattern is returned in the \p image array, which
+ * must be pre-sized to length 2*ns. The values in the \p image array
+ * are alternate (real, imag) pairs for each position of the test source.
+ *
+ * @param[in] na The number of antennas.
+ * @param[in] ax The antenna x-positions in metres.
+ * @param[in] ay The antenna y-positions in metres.
+ * @param[in] ns The number of test source positions.
+ * @param[in] slon The longitude coordinates of the test source.
+ * @param[in] slat The latitude coordinates of the test source.
+ * @param[in] ba The beam azimuth direction in radians
+ * @param[in] be The beam elevation direction in radians.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] image The computed beam pattern (see note, above).
  */
-#define GEOMETRIC_PHASE_3D_HORIZONTAL(x, y, z, sinEl, cosEl, sinAz, cosAz, k) \
-        (-k * (cosEl * (x * sinAz + y * cosAz) + z * sinEl))
+void oskar_cuda_bp2hig(const int na, const float* ax, const float* ay,
+        const int ns, const float* slon, const float* slat,
+        const float ba, const float be, const float k, float* image);
 
-/**
- * @brief
- * Inline function macro used to compute the 2D geometric phase
- * for the spherical (theta/phi) coordinate system.
- */
-#define GEOMETRIC_PHASE_2D_SPHERICAL(x, y, sinTheta, cosPhi, sinPhi, k) \
-        (-k * sinTheta * (x * cosPhi + y * sinPhi))
+#ifdef __cplusplus
+}
+#endif
 
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_CUDA_BP2HIG_H_
