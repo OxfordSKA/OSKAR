@@ -26,47 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CUDA_IMAGER_DFT_TEST_H_
-#define CUDA_IMAGER_DFT_TEST_H_
+#ifndef OSKAR_CUDA_IM2DFTLM_H_
+#define OSKAR_CUDA_IM2DFTLM_H_
 
 /**
- * @file CudaImagerDftTest.h
+ * @file oskar_cuda_im2dftlm.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Computes an image using CUDA.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * Computes a real image from a set of complex visibilities, using CUDA to
+ * evaluate a 2D Direct Fourier Transform (DFT).
+ *
+ * The computed image is returned in the \p image array, which
+ * must be pre-sized to length (nl * nm). The fastest-varying dimension is
+ * along l.
+ *
+ * The image is assumed to be completely real: conjugated copies of the
+ * visibilities should therefore NOT be supplied.
+ *
+ * @param[in] nv No. of independent visibilities (excluding Hermitian copy).
+ * @param[in] u Array of visibility u coordinates in wavelengths (length nv).
+ * @param[in] v Array of visibility v coordinates in wavelengths (length nv).
+ * @param[in] vis Array of complex visibilities (length 2 * nv; see note, above).
+ * @param[in] nl The image dimension.
+ * @param[in] nm The image dimension.
+ * @param[in] l Vector of l-positions (whole sky is +1 to -1).
+ * @param[in] m Vector of m-positions (whole sky is +1 to -1).
+ * @param[out] image The computed image (see note, above).
  */
-class CudaImagerDftTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(CudaImagerDftTest);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST(testlm);
-        CPPUNIT_TEST(test_large);
-        CPPUNIT_TEST_SUITE_END();
+void oskar_cuda_im2dftlm(int nv, const float* u, const float* v,
+        const float* vis, int nl, int nm, const float* l, const float* m,
+        float* image);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+#ifdef __cplusplus
+}
+#endif
 
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
-        void test();
-
-        /// Test method.
-        void testlm();
-
-        /// Test method.
-        void test_large();
-};
-
-#endif // CUDA_IMAGER_DFT_TEST_H_
+#endif // OSKAR_CUDA_IM2DFTLM_H_

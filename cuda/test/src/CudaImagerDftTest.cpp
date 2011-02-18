@@ -28,6 +28,7 @@
 
 #include "cuda/test/CudaImagerDftTest.h"
 #include "cuda/oskar_cuda_im2dft.h"
+#include "cuda/oskar_cuda_im2dftlm.h"
 #include <cstdio>
 #include <cmath>
 #include <vector>
@@ -92,6 +93,46 @@ void CudaImagerDftTest::test()
 
     // Write image file.
     FILE* file = fopen("output.txt", "w");
+    for (int j = 0; j < nm; ++j) {
+        for (int i = 0; i < nl; ++i) {
+            fprintf(file, "%.5e ", image[i + j * nl]);
+        }
+        fprintf(file, "\n");
+    }
+    fclose(file);
+}
+
+/**
+ * @details
+ * Tests 2D DFT CUDA imager.
+ */
+void CudaImagerDftTest::testlm()
+{
+    // Set up some visibilities.
+    const int nv = 1;
+    std::vector<float> vis(2 * nv, 0.0), u(nv, 0.0), v(nv, 0.0);
+
+    u[0] = 1.0f;
+    v[0] = 1.0f;
+    vis[0] = 1.0f; // real.
+    vis[1] = 0.0f; // imag.
+
+    // Image the visibilities.
+    int nl = 32;
+    int nm = 32;
+    std::vector<float> l(nl, 0.0);
+    std::vector<float> m(nm, 0.0);
+    int centreL = floor(nl / 2.0f);
+    int centreM = floor(nm / 2.0f);
+    for (int i = 0; i < nl; ++i) l[i] = 2.0 * (i - centreL) / nl;
+    for (int i = 0; i < nm; ++i) m[i] = 2.0 * (i - centreM) / nm;
+    std::vector<float> image(nl * nm, 0.0);
+    TIMER_START
+    oskar_cuda_im2dftlm(nv, &u[0], &v[0], &vis[0], nl, nm, &l[0], &m[0], &image[0]);
+    TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)
+
+    // Write image file.
+    FILE* file = fopen("outputlm.txt", "w");
     for (int j = 0; j < nm; ++j) {
         for (int i = 0; i < nl; ++i) {
             fprintf(file, "%.5e ", image[i + j * nl]);

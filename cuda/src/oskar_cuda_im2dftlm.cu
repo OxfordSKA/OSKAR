@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_im2dft.h"
+#include "cuda/oskar_cuda_im2dftlm.h"
 #include "cuda/kernels/oskar_cudak_im2dft.h"
 #include <stdio.h>
 
@@ -40,32 +40,22 @@ extern "C" {
 #define M_PI 3.1415926535
 #endif
 
-void oskar_cuda_im2dft(int nv, const float* u, const float* v,
-        const float* vis, int nl, int nm, float dl, float dm,
-        float sl, float sm, float* image)
+void oskar_cuda_im2dftlm(int nv, const float* u, const float* v,
+        const float* vis, int nl, int nm, const float* l, const float* m,
+        float* image)
 {
-    // Get the centre pixel in L and M.
-    const int centreL = floor(nl / 2.0f);
-    const int centreM = floor(nm / 2.0f);
-
-    // Create and allocate memory for the pixel positions.
+    // Create and allocate memory for all the pixel positions.
     const int np = nl * nm; // Number of pixels in image.
     float* pl = (float*)malloc(np * sizeof(float));
     float* pm = (float*)malloc(np * sizeof(float));
     int i, j, k; // Indices.
-    float l, m; // Pixel coordinates.
+
+    // Generate grid from l,m vectors.
     for (j = 0; j < nm; ++j) {
-        // Image m-coordinate.
-        m = 2.0 * (j - centreM) * dm * sm / M_PI;
-
         for (i = 0; i < nl; ++i) {
-            // Image l-coordinate.
-            l = 2.0 * (i - centreL) * dl * sl / M_PI;
-
-            // Image pixel index.
-            k = i + j * nl;
-            pl[k] = l;
-            pm[k] = m;
+            k = i + j * nl; // Image pixel index.
+            pl[k] = l[i];
+            pm[k] = m[j];
         }
     }
 

@@ -64,10 +64,9 @@ extern "C" {
  * @param[in] sm The field of view in radians (full sky = pi).
  * @param[out] image The computed image (see note, above).
  */
-void oskar_cuda_im2dft(const int nv, const float* u, const float* v,
-        const float* vis, const int nl, const int nm,
-        const float dl, const float dm, const float sl, const float sm,
-        float* image);
+void oskar_cuda_im2dft(int nv, const float* u, const float* v,
+        const float* vis, int nl, int nm, float dl, float dm,
+        float sl, float sm, float* image);
 
 #ifdef __cplusplus
 }
