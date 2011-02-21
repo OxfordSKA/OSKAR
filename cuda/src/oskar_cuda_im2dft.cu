@@ -103,11 +103,10 @@ void oskar_cuda_im2dft(int nv, const float* u, const float* v,
                 cudaMemcpyHostToDevice);
 
         // Invoke kernel to compute the (partial) image on the device.
-        int threadsPerBlock = 256;
+        int threadsPerBlock = 384;
         int blocks = (pixInBlock + threadsPerBlock - 1) / threadsPerBlock;
         int maxVisPerBlock = 896; // Should be multiple of 16.
-        size_t sharedMem = (threadsPerBlock + 2 * maxVisPerBlock)
-                    * sizeof(float2);
+        size_t sharedMem = 2 * maxVisPerBlock * sizeof(float2);
         oskar_cudak_im2dft <<<blocks, threadsPerBlock, sharedMem>>>
                 (nv, ud, vd, visd, pixInBlock, pld, pmd, maxVisPerBlock, pix);
         cudaThreadSynchronize();

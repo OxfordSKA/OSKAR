@@ -53,19 +53,17 @@ void oskar_cudak_bp2hiw(const int na, const float* ax, const float* ay,
 
     // Initialise shared memory caches.
     // Antenna positions are cached as float2 for speed increase.
-    float2* cpx = smem; // Cached pixel values.
-    float2* cwt = cpx + blockDim.x; // Cached antenna weights.
+    float2 cpx = make_float2(0.0f, 0.0f); // Clear pixel value.
+    float2* cwt = smem; // Cached antenna weights.
     float2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions.
-    cpx[threadIdx.x] = make_float2(0.0f, 0.0f); // Clear pixel value.
 
     // Cache a block of antenna positions and weights into shared memory.
     int blocks = (na + maxAntennasPerBlock - 1) / maxAntennasPerBlock;
     for (int block = 0; block < blocks; ++block) {
         const int antennaStart = block * maxAntennasPerBlock;
         int antennasInBlock = na - antennaStart;
-        if (antennasInBlock > maxAntennasPerBlock) {
+        if (antennasInBlock > maxAntennasPerBlock)
             antennasInBlock = maxAntennasPerBlock;
-        }
 
         // There are blockDim.x threads available - need to copy
         // antennasInBlock pieces of data from global memory.
@@ -88,15 +86,15 @@ void oskar_cudak_bp2hiw(const int na, const float* ax, const float* ay,
             __sincosf(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
-            cpx[threadIdx.x].x += (signal.x * w.x - signal.y * w.y);
-            cpx[threadIdx.x].y += (signal.y * w.x + signal.x * w.y);
+            cpx.x += (signal.x * w.x - signal.y * w.y);
+            cpx.y += (signal.y * w.x + signal.x * w.y);
         }
 
         // Must synchronise again before loading in a new block of antennas.
         __syncthreads();
     }
 
-    // Copy shared memory back into global memory.
+    // Copy result into global memory.
     if (s < ns)
-        image[s] = cpx[threadIdx.x];
+        image[s] = cpx;
 }

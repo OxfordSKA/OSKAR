@@ -28,29 +28,37 @@
 
 #include "cuda/kernels/oskar_cudak_eq2hg.h"
 
+// Shared memory pointer used by the kernel.
+extern __shared__ float2 smem[];
+
 __global__
-void oskar_cudak_eq2hg(const int ns, const float2* radec,
-        const float cosLat, const float sinLat, const float lst, float2* azel)
+void oskar_cudak_eq2hg(int ns, const float2* radec,
+        float cosLat, float sinLat, float lst, float2* azel)
 {
     // Get the source ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
-    if (s >= ns) return; // Return if the index is out of range.
 
-    // Copy source coordinates from global memory.
-    float2 src = radec[s];
-
-    // Precompute.
-    float cosDec, sinDec, cosHA, sinHA;
-    const float hourAngle = lst - src.x; // LST - RA
-    sincosf(src.y, &sinDec, &cosDec);
-    sincosf(hourAngle, &sinHA, &cosHA);
-    const float f = cosDec * cosHA;
+    // Copy source equatorial coordinates from global memory.
+    float2 src;
+    if (s < ns)
+    	src = radec[s];
+    __syncthreads(); // Coalesce memory accesses.
 
     // Find azimuth and elevation.
-    const float Y1 = -cosDec * sinHA;
-    const float X1 = cosLat * sinDec - sinLat * f;
-    const float Y2 = sinLat * sinDec + cosLat * f;
-    const float X2 = hypotf(X1, Y1); // sqrtf(X1*X1 + Y1*Y1);
-    azel[s].x = atan2f(Y1, X1);
-    azel[s].y = atan2f(Y2, X2);
+    float cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
+    t = lst - src.x; // HA = LST - RA
+    __sincosf(src.y, &sinDec, &cosDec);
+    __sincosf(t, &sinHA, &cosHA);
+    t = cosDec * cosHA;
+    X1 = cosLat * sinDec - sinLat * t;
+    Y2 = sinLat * sinDec + cosLat * t;
+    t = -cosDec * sinHA;
+    src.x = atan2f(t, X1); // Azimuth.
+    t = hypotf(X1, t);
+    src.y = atan2f(Y2, t); // Elevation.
+
+    // Copy source horizontal coordinates into global memory.
+    __syncthreads(); // Coalesce memory accesses.
+    if (s < ns)
+    	azel[s] = src;
 }

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CUDA_BEAM_PATTERN_TEST_H_
-#define CUDA_BEAM_PATTERN_TEST_H_
+#ifndef CUDA_EQUATORIAL_TO_HORIZONTAL_TEST_H_
+#define CUDA_EQUATORIAL_TO_HORIZONTAL_TEST_H_
 
 /**
- * @file CudaBeamPatternTest.h
+ * @file CudaEquatorialToHorizontalTest.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,19 +42,12 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class CudaBeamPatternTest : public CppUnit::TestFixture
+class CudaEquatorialToHorizontalTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(CudaBeamPatternTest);
-        CPPUNIT_TEST(test_regular);
-//        CPPUNIT_TEST(test_superStation);
-//        CPPUNIT_TEST(test_satStation);
-//        CPPUNIT_TEST(test_stations200);
-//        CPPUNIT_TEST(test_stations2000);
-//        CPPUNIT_TEST(test_stations4000);
-//        CPPUNIT_TEST(test_random);
-//        CPPUNIT_TEST(test_perturbed);
-//        CPPUNIT_TEST(test_scattered);
+        CPPUNIT_TEST_SUITE(CudaEquatorialToHorizontalTest);
+        CPPUNIT_TEST(test_separate);
+        CPPUNIT_TEST(test_interleaved);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -66,31 +59,10 @@ class CudaBeamPatternTest : public CppUnit::TestFixture
 
     public:
         /// Test method.
-        void test_regular();
+        void test_separate();
 
         /// Test method.
-        void test_superStation();
-
-        /// Test method.
-        void test_satStation();
-
-        /// Test method.
-        void test_stations200();
-
-        /// Test method.
-        void test_stations2000();
-
-        /// Test method.
-        void test_stations4000();
-
-        /// Test method.
-        void test_perturbed();
-
-        /// Test method.
-        void test_scattered();
-
-        /// Test method.
-        void test_random();
+        void test_interleaved();
 };
 
-#endif // CUDA_BEAM_PATTERN_TEST_H_
+#endif // CUDA_EQUATORIAL_TO_HORIZONTAL_TEST_H_

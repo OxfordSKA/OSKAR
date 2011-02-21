@@ -43,6 +43,9 @@
  * This CUDA kernel transforms sources specified in a generic equatorial
  * system (RA, Dec) to local horizontal coordinates (azimuth, elevation).
  *
+ * The kernel requires (threads per block) * sizeof(float2) bytes of
+ * shared memory.
+ *
  * Each thread operates on a single source. The source positions are
  * specified as (RA, Dec) pairs in the \p radec array:
  *
@@ -70,7 +73,12 @@
  * @param[out] azel The azimuth and elevation source coordinates in radians.
  */
 __global__
-void oskar_cudak_eq2hg(const int ns, const float2* radec,
-        const float cosLat, const float sinLat, const float lst, float2* azel);
+void oskar_cudak_eq2hg(int ns, const float2* radec,
+        float cosLat, float sinLat, float lst, float2* azel);
+
+// Unoptimised version.
+__global__
+void oskar_cudak_eq2hgu(int ns, const float2* radec,
+        float cosLat, float sinLat, float lst, float2* azel);
 
 #endif // OSKAR_CUDAK_EQ2HG_H_

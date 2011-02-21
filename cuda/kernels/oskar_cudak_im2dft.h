@@ -50,8 +50,8 @@
  * completely real: conjugated copies of the visibilities should therefore NOT
  * be supplied to this kernel.
  *
- * The kernel requires (4 * maxVisPerBlock + blockDim.x) * sizeof(float) bytes
- * of shared memory.
+ * The kernel requires (4 * maxVisPerBlock) * sizeof(float) bytes of
+ * shared memory.
  *
  * @param[in] nv No. of independent visibilities (excluding Hermitian copy).
  * @param[in] u Array of visibility u coordinates in wavelengths (length nv).

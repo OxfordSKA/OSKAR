@@ -109,7 +109,7 @@ void CudaImagerDftTest::test()
 void CudaImagerDftTest::testlm()
 {
     // Set up some visibilities.
-    const int nv = 1;
+    const int nv = 10000;
     std::vector<float> vis(2 * nv, 0.0), u(nv, 0.0), v(nv, 0.0);
 
     u[0] = 1.0f;
@@ -118,8 +118,8 @@ void CudaImagerDftTest::testlm()
     vis[1] = 0.0f; // imag.
 
     // Image the visibilities.
-    int nl = 32;
-    int nm = 32;
+    int nl = 61;
+    int nm = 61;
     std::vector<float> l(nl, 0.0);
     std::vector<float> m(nm, 0.0);
     int centreL = floor(nl / 2.0f);
@@ -149,7 +149,7 @@ void CudaImagerDftTest::testlm()
 void CudaImagerDftTest::test_large()
 {
     // Set up some visibilities.
-    const int nv = 4560;
+    const int nv = 10000;
     std::vector<float> vis(2 * nv, 0.0), u(nv, 0.0), v(nv, 0.0);
 
     u[0] = 1.0f;
@@ -158,8 +158,8 @@ void CudaImagerDftTest::test_large()
     vis[1] = 1.0f; // imag.
 
     // Image the visibilities.
-    int nl = 512;
-    int nm = 512;
+    int nl = 301;
+    int nm = 301;
     float dl = 1.0 / nl;
     float dm = 1.0 / nm;
     float sl = M_PI;

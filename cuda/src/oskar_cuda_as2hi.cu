@@ -81,8 +81,7 @@ void oskar_cuda_as2hi(const int na, const float* ax, const float* ay,
     int threadsPerBlock = 384;
     int blocks = (na + threadsPerBlock - 1) / threadsPerBlock;
     int maxSourcesPerBlock = 384;
-    size_t sharedMem = threadsPerBlock * sizeof(float2)
-            + maxSourcesPerBlock * sizeof(float4);
+    size_t sharedMem = maxSourcesPerBlock * sizeof(float4);
     oskar_cudak_as2hi <<<blocks, threadsPerBlock, sharedMem>>>
             (na, axd, ayd, ns, sampd, strigd, k, maxSourcesPerBlock, sig);
     err = cudaPeekAtLastError();

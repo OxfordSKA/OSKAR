@@ -101,8 +101,7 @@ void oskar_cuda_bf2hig(const int na, const float* ax, const float* ay,
     // Invoke kernel to compute antenna signals on the device.
     int aBlocks = (na + threadsPerBlock - 1) / threadsPerBlock;
     int maxSourcesPerBlock = 384;
-    size_t aSharedMem = threadsPerBlock * sizeof(float2)
-            + maxSourcesPerBlock * sizeof(float4);
+    size_t aSharedMem = maxSourcesPerBlock * sizeof(float4);
     oskar_cudak_as2hi <<<aBlocks,
             threadsPerBlock, aSharedMem>>>
             (na, axd, ayd, ns, sampd, strigd, k, maxSourcesPerBlock, signalsd);

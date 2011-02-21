@@ -49,9 +49,8 @@ void oskar_cudak_as2hi(const int na, const float* ax, const float* ay,
     }
 
     // Initialise shared memory to hold complex antenna signal.
-    float2* csig = smem;
-    float4* csrc = (float4*) (&smem[blockDim.x]);
-    csig[threadIdx.x] = make_float2(0.0f, 0.0f);
+    float2 csig = make_float2(0.0f, 0.0f);
+    float4* csrc = (float4*) smem;
 
     // Divide source list up into blocks, and cache the contents of each block
     // in shared memory before using it to accumulate the antenna signal.
@@ -59,9 +58,8 @@ void oskar_cudak_as2hi(const int na, const float* ax, const float* ay,
     for (int block = 0; block < blocks; ++block) {
         const int sourceStart = block * maxSourcesPerBlock;
         int sourcesInBlock = ns - sourceStart;
-        if (sourcesInBlock > maxSourcesPerBlock) {
+        if (sourcesInBlock > maxSourcesPerBlock)
             sourcesInBlock = maxSourcesPerBlock;
-        }
 
         // There are blockDim.x threads available - need to copy
         // sourcesInBlock pieces of data from global memory.
@@ -85,15 +83,15 @@ void oskar_cudak_as2hi(const int na, const float* ax, const float* ay,
             // Perform complex multiply-accumulate.
             float sinPhase, cosPhase;
             __sincosf(phase, &sinPhase, &cosPhase);
-            csig[threadIdx.x].x += (csrc[s].w * cosPhase);
-            csig[threadIdx.x].y += (csrc[s].w * sinPhase);
+            csig.x += (csrc[s].w * cosPhase);
+            csig.y += (csrc[s].w * sinPhase);
         }
 
         // Must synchronise again before loading in a new block of sources.
         __syncthreads();
     }
 
-    // Copy shared memory back into global memory.
+    // Copy result into global memory.
     if (a < na)
-        signals[a] = csig[threadIdx.x];
+        signals[a] = csig;
 }

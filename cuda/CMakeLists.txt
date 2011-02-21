@@ -15,6 +15,7 @@ set(cuda_SRC
     src/oskar_cuda_bf2hig.cu
     src/oskar_cuda_bfmv.cu
     src/oskar_cuda_bp2hig.cu
+    src/oskar_cuda_eq2hg.cu
     src/oskar_cuda_im2dft.cu
     src/oskar_cuda_im2dftlm.cu
     src/vectorAdd.cu

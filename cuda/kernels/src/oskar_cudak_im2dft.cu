@@ -52,10 +52,8 @@ void oskar_cudak_im2dft(int nv, const float* u, const float* v,
     }
 
     // Initialise shared memory caches.
-    float2* cvs = smem; // Cached visibilities.
-    float2* cuv = cvs + maxVisPerBlock; // Cached u,v-coordinates.
-    float*  cpx = (float*)(cuv + maxVisPerBlock); // Cached pixel values.
-    cpx[threadIdx.x] = 0.0f; // Clear pixel value.
+    float4* c = (float4*) smem; // Speed increase over two float2s.
+    float cpx = 0.0f; // Pixel value.
 
     // Cache a block of visibilities and u,v-coordinates into shared memory.
     const int blocks = (nv + maxVisPerBlock - 1) / maxVisPerBlock;
@@ -69,34 +67,44 @@ void oskar_cudak_im2dft(int nv, const float* u, const float* v,
         // visInBlock pieces of data from global memory.
         for (int t = threadIdx.x; t < visInBlock; t += blockDim.x) {
             const int vg = visStart + t; // Global visibility index.
-            cvs[t] = vis[vg];
-            cuv[t].x = u[vg];
-            cuv[t].y = v[vg];
+            c[t].x = u[vg];
+            c[t].y = v[vg];
+            c[t].z = vis[vg].x;
+            c[t].w = vis[vg].y;
         }
 
         // Must synchronise before computing the signal for these visibilities.
         __syncthreads();
 
+        // Pre-multiply.
+        for (int t = threadIdx.x; t < visInBlock; t += blockDim.x) {
+        	c[t].x *= M_2PI;
+        	c[t].y *= M_2PI;
+        }
+
+        __syncthreads();
+
         // Loop over visibilities in block.
         for (int v = 0; v < visInBlock; ++v) {
             // Calculate the complex DFT weight.
-            float2 weight;
-            const float a = M_2PI * (cuv[v].x * l + cuv[v].y * m); // u*l + v*m
+        	float4 cc = c[v];
+        	float2 weight;
+        	float a = cc.x * l + cc.y * m; // u*l + v*m
             __sincosf(a, &weight.y, &weight.x);
 
             // Perform complex multiply-accumulate.
             // Image is real, so should only need to evaluate the real part.
-            cpx[threadIdx.x] += cvs[v].x * weight.x - cvs[v].y * weight.y;
+            cpx += cc.z * weight.x - cc.w * weight.y; // RE*RE - IM*IM
         }
 
         // Must synchronise again before loading in a new block of visibilities.
         __syncthreads();
     }
 
-    // Copy shared memory back into global memory.
+    // Copy result into global memory.
     if (p < np)
         if (hypotf(l, m) > 1.0f)
             image[p] = 0.0f;
         else
-            image[p] = cpx[threadIdx.x] / (float)nv;
+            image[p] = cpx / (float)nv;
 }

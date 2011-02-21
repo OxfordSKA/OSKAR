@@ -96,8 +96,7 @@ void oskar_cuda_bp2hig(int na, const float* ax, const float* ay,
         int threadsPerBlock = 256;
         int blocks = (srcInBlock + threadsPerBlock - 1) / threadsPerBlock;
         int maxAntennasPerBlock = 864; // Should be multiple of 16.
-        size_t sharedMem = (threadsPerBlock + 2 * maxAntennasPerBlock)
-                    * sizeof(float2);
+        size_t sharedMem = 2 * maxAntennasPerBlock * sizeof(float2);
         oskar_cudak_bp2hiw <<<blocks, threadsPerBlock, sharedMem>>>
                 (na, axd, ayd, weights, srcInBlock, slond, slatd, k,
                         maxAntennasPerBlock, pix);

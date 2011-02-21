@@ -12,6 +12,7 @@ set(data_test_SRC
     src/CudaAntennaSignalTest.cpp
     src/CudaBeamformerMatrixVectorTest.cpp
     src/CudaImagerDftTest.cpp
+    src/CudaEquatorialToHorizontalTest.cpp
 )
 
 include_directories()
