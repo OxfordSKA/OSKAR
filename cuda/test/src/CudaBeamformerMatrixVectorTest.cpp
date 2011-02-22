@@ -84,13 +84,10 @@ void CudaBeamformerMatrixVectorTest::test_basicMatrixVector()
     // Perform matrix-matrix multiply.
     oskar_cuda_bfmv(na, nb, &signals[0], &weights[0], &beams[0]);
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(44.0, beams[0], 0.01);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(98.0, beams[2], 0.01);
-
-    printf("\n");
-    for (unsigned i = 0, b = 0; b < nb; i += 2, b++) {
-        printf("Beam %5d : (%4.1f, %4.1f)\n", b, beams[i], beams[i + 1]);
-    }
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(44.0, beams[0], 1e-5);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,  beams[1], 1e-5);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(98.0, beams[2], 1e-5);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,  beams[3], 1e-5);
 }
 
 /**
