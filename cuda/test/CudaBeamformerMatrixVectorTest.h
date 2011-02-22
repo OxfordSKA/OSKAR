@@ -47,7 +47,7 @@ class CudaBeamformerMatrixVectorTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(CudaBeamformerMatrixVectorTest);
         CPPUNIT_TEST(test_basicMatrixVector);
-//        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_method);
         CPPUNIT_TEST_SUITE_END();
 
     public:

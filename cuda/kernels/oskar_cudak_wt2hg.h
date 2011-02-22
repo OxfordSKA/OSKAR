@@ -45,43 +45,15 @@
  * Each thread generates the complex weights for a single antenna and a single
  * beam direction.
  *
- * The number of floating-point operations performed by this kernel is:
- * \li Sines and cosines: 2 * na * nb.
- * \li Multiplies: 4 * na * nb.
- * \li Divides: 2 * na * nb.
- * \li Additions / subtractions: na * nb.
- *
- * @param[in] na Number of antennas.
- * @param[in] ax Array of antenna x positions in metres.
- * @param[in] ay Array of antenna y positions in metres.
- * @param[in] nb Number of beams.
- * @param[in] cbe Cosine of all beam elevations.
- * @param[in] cba Cosine of all beam azimuths.
- * @param[in] sba Sine of all beam azimuths.
- * @param[in] k The wavenumber (rad / m).
- * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
- */
-__global__
-void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
-        const int nb, const float* cbe, const float* cba, const float* sba,
-        const float k, float2* weights);
-
-/**
- * @brief
- * CUDA kernel to generate beamforming weights.
- *
- * @details
- * This CUDA kernel produces the complex antenna beamforming weights for the
- * given directions, and stores them in device memory.
- * Each thread generates the complex weights for a single antenna and a single
- * beam direction.
- *
  * The input \p trig array contains triplets of the following pre-computed
  * trigonometry:
  *
  * trig.x = {cosine azimuth}
  * trig.y = {sine azimuth}
  * trig.z = {cosine elevation}
+ *
+ * The kernel requires blockDim.x * sizeof(float2) +
+ * blockDim.y * sizeof(float3) bytes of shared memory.
  *
  * The number of floating-point operations performed by this kernel is:
  * \li Sines and cosines: 2 * na * nb.

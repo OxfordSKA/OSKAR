@@ -29,60 +29,47 @@
 #include "cuda/kernels/oskar_cudak_wt2hg.h"
 #include "math/core/phase.h"
 
-__global__
-void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
-        const int nb, const float* cbe, const float* cba, const float* sba,
-        const float k, float2* weights)
-{
-    // Get the antenna and beam ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x; // Thread index.
-    const int a = i % na; // Antenna index.
-    const int b = i / na; // Beam index.
-    if (a >= na || b >= nb) return; // Return if either index is out of range.
-
-    // Compute the geometric phase of the beam direction.
-    const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
-            cbe[b], sba[b], cba[b], k);
-    const int w = a + b*na;
-    weights[w].x = cosf(phase) / na; // Normalised real part.
-    weights[w].y = sinf(phase) / na; // Normalised imaginary part.
-}
+// Shared memory pointer used by the kernel.
+extern __shared__ float smem[];
 
 __global__
 void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
         const int nb, const float3* trig, const float k, float2* weights)
 {
-    // Get the antenna and beam ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x; // Thread index.
-    const int a = i % na; // Antenna index.
-    const int b = i / na; // Beam index.
-    if (a >= na || b >= nb) return; // Return if either index is out of range.
+    const int tx = threadIdx.x;
+    const int ty = threadIdx.y;
+    const int a = blockDim.x * blockIdx.x + tx; // Antenna index.
+    const int b = blockDim.y * blockIdx.y + ty; // Beam index.
 
-    // Determine which antennas and beams this thread block is doing.
-    const int blockStart = blockDim.x * blockIdx.x;
-    const int blockEnd = blockStart + blockDim.x - 1;
-    const int antStart = blockStart % na;
-    const int beamStart = blockStart / na;
-    const int nBeams = blockEnd / na - beamStart + 1;
-
-    __shared__ float3 beamCache[20];
-    for (int bi = threadIdx.x; bi < nBeams; bi += blockDim.x) {
-        beamCache[bi] = trig[beamStart + bi];
+    // Cache antenna and beam data from global memory,
+    // avoiding shared memory bank conflicts.
+    float* cax = smem;
+    float* cay = &cax[blockDim.x];
+    float* cbz = &cay[blockDim.x];
+    float* cby = &cbz[blockDim.y];
+    float* cbx = &cby[blockDim.y];
+    if (a < na) {
+        cax[tx] = ax[a];
+        cay[tx] = ay[a];
     }
-
+    if (b < nb) {
+        cbx[ty] = trig[b].x;
+        cby[ty] = trig[b].y;
+        cbz[ty] = trig[b].z;
+    }
     __syncthreads();
 
     // Compute the geometric phase of the beam direction.
-    const int bi = b - beamStart;
-    float sinPhase, cosPhase;
-    const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(ax[a], ay[a],
-            beamCache[bi].z, beamCache[bi].y, beamCache[bi].x, k);
-    sincosf(phase, &sinPhase, &cosPhase);
+    float2 weight;
+    const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(cax[tx], cay[tx],
+            cbz[ty], cby[ty], cbx[ty], k);
+    __sincosf(phase, &weight.y, &weight.x);
+    weight.x /= na; // Normalised real part.
+    weight.y /= na; // Normalised imaginary part.
 
-    __shared__ float2 weightsCache[384];
-    weightsCache[threadIdx.x].x = cosPhase / na; // Normalised real part.
-    weightsCache[threadIdx.x].y = sinPhase / na; // Normalised imaginary part.
-
-    const int w = threadIdx.x + antStart + beamStart*na;
-    weights[w] = weightsCache[threadIdx.x];
+    // Write result to global memory.
+    if (a < na && b < nb) {
+        const int w = a + na * b;
+        weights[w] = weight;
+    }
 }

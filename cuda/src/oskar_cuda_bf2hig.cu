@@ -44,9 +44,9 @@
 extern "C" {
 #endif
 
-void oskar_cuda_bf2hig(const int na, const float* ax, const float* ay,
-        const int ns, const float* samp, const float* slon, const float* slat,
-        const int nb, const float* blon, const float* blat, const float k,
+void oskar_cuda_bf2hig(int na, const float* ax, const float* ay,
+        int ns, const float* samp, const float* slon, const float* slat,
+        int nb, const float* blon, const float* blat, float k,
         float* beams)
 {
     // Initialise cuBLAS.
@@ -113,9 +113,8 @@ void oskar_cuda_bf2hig(const int na, const float* ax, const float* ay,
     for (block = 0; block < blocks; ++block) {
         const int beamStart = block * maxBeams;
         int beamsInBlock = nb - beamStart;
-        if (beamsInBlock > maxBeams) {
+        if (beamsInBlock > maxBeams)
             beamsInBlock = maxBeams;
-        }
 
         // Invoke kernel to precompute the beam positions on the device.
         int bBlocks = (beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
@@ -123,12 +122,14 @@ void oskar_cuda_bf2hig(const int na, const float* ax, const float* ay,
                 (beamsInBlock, &bposd[beamStart], btrigd);
 
         // Invoke kernel to compute beamforming weights on the device.
-        int wBlocks = (na*beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
-//        TIMER_START
-        oskar_cudak_wt2hg <<<wBlocks, threadsPerBlock>>> (
+        dim3 wThreads(16, 16); // Antennas, beams.
+        dim3 wBlocks((na + wThreads.x - 1) / wThreads.x,
+                (beamsInBlock + wThreads.y - 1) / wThreads.y);
+        size_t wSharedMem = wThreads.x * sizeof(float2)
+                + wThreads.y * sizeof(float3);
+        oskar_cudak_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
                 na, axd, ayd, beamsInBlock, btrigd, k, weightsd);
         cudaThreadSynchronize();
-//        TIMER_STOP("Finished weights")
 
         // Call cuBLAS function to perform the matrix-vector multiplication.
         // Note that cuBLAS calls use Fortran-ordering (column major) for their

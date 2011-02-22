@@ -42,33 +42,29 @@ void oskar_cuda_bp2hig(int na, const float* ax, const float* ay,
         float ba, float be, float k, float* image)
 {
     // Precompute.
-    float sinBeamAz = sin(ba);
-    float cosBeamAz = cos(ba);
-    float cosBeamEl = cos(be);
+    float3 trig = make_float3(cos(ba), sin(ba), cos(be));
 
     // Allocate memory for antenna positions, antenna weights,
     // test source positions and pixel values on the device.
-    float *axd, *ayd, *slond, *slatd, *sbad, *cbad, *cbed;
+    float *axd, *ayd, *slond, *slatd;
     float2 *weights, *pix;
+    float3 *trigd;
     cudaMalloc((void**)&axd, na * sizeof(float));
     cudaMalloc((void**)&ayd, na * sizeof(float));
     cudaMalloc((void**)&weights, na * sizeof(float2));
-    cudaMalloc((void**)&sbad, 1 * sizeof(float));
-    cudaMalloc((void**)&cbad, 1 * sizeof(float));
-    cudaMalloc((void**)&cbed, 1 * sizeof(float));
+    cudaMalloc((void**)&trigd, 1 * sizeof(float3));
 
-    // Copy antenna positions and test source positions to device.
+    // Copy antenna positions and beam geometry to device.
     cudaMemcpy(axd, ax, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(sbad, &sinBeamAz, 1 * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(cbad, &cosBeamAz, 1 * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(cbed, &cosBeamEl, 1 * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(trigd, &trig, 1 * sizeof(float3), cudaMemcpyHostToDevice);
 
     // Invoke kernel to compute antenna weights on the device.
-    int wThreadsPerBlock = 256;
-    int wBlocks = (na + wThreadsPerBlock - 1) / wThreadsPerBlock;
-    oskar_cudak_wt2hg <<<wBlocks, wThreadsPerBlock>>> (
-            na, axd, ayd, 1, cbed, cbad, sbad, k, weights);
+    dim3 wThreads(256, 1);
+    dim3 wBlocks((na + wThreads.x - 1) / wThreads.x, 1);
+    size_t wSharedMem = wThreads.x * sizeof(float2) + sizeof(float3);
+    oskar_cudak_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
+            na, axd, ayd, 1, trigd, k, weights);
     cudaThreadSynchronize();
 
     // Divide up the source (pixel) list into manageable chunks.
@@ -117,9 +113,7 @@ void oskar_cuda_bp2hig(int na, const float* ax, const float* ay,
     cudaFree(slond);
     cudaFree(slatd);
     cudaFree(pix);
-    cudaFree(sbad);
-    cudaFree(cbad);
-    cudaFree(cbed);
+    cudaFree(trigd);
 }
 
 #ifdef __cplusplus
