@@ -28,9 +28,6 @@
 
 #include "cuda/kernels/oskar_cudak_eq2hg.h"
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float2 smem[];
-
 __global__
 void oskar_cudak_eq2hg(int ns, const float2* radec,
         float cosLat, float sinLat, float lst, float2* azel)

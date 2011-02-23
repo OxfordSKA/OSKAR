@@ -76,9 +76,4 @@ __global__
 void oskar_cudak_eq2hg(int ns, const float2* radec,
         float cosLat, float sinLat, float lst, float2* azel);
 
-// Unoptimised version.
-__global__
-void oskar_cudak_eq2hgu(int ns, const float2* radec,
-        float cosLat, float sinLat, float lst, float2* azel);
-
 #endif // OSKAR_CUDAK_EQ2HG_H_

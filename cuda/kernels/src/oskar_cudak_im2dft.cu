@@ -29,7 +29,7 @@
 #include "cuda/kernels/oskar_cudak_im2dft.h"
 
 // Shared memory pointer used by the kernel.
-extern __shared__ float2 smem[];
+extern __shared__ float4 c[];
 
 #ifndef M_2PI
 #define M_2PI 6.283185307f
@@ -45,36 +45,27 @@ void oskar_cudak_im2dft(int nv, const float* u, const float* v,
 
     // Get the pixel position.
     // (NB. Cannot exit on index condition, as all threads are needed later).
-    float l = 0.0f, m = 0.0f;
+    float cpx = 0.0f, l = 0.0f, m = 0.0f;
     if (p < np) {
         l = pl[p];
         m = pm[p];
     }
 
-    // Initialise shared memory caches.
-    float4* c = (float4*) smem; // Speed increase over two float2s.
-    float cpx = 0.0f; // Pixel value.
-
     // Cache a block of visibilities and u,v-coordinates into shared memory.
-    const int blocks = (nv + maxVisPerBlock - 1) / maxVisPerBlock;
-    for (int block = 0; block < blocks; ++block) {
-        const int visStart = block * maxVisPerBlock;
-        int visInBlock = nv - visStart;
+    for (int vs = 0; vs < nv; vs += maxVisPerBlock) {
+        int visInBlock = nv - vs;
         if (visInBlock > maxVisPerBlock)
             visInBlock = maxVisPerBlock;
 
         // There are blockDim.x threads available - need to copy
         // visInBlock pieces of data from global memory.
         for (int t = threadIdx.x; t < visInBlock; t += blockDim.x) {
-            const int vg = visStart + t; // Global visibility index.
-            c[t].x = u[vg];
-            c[t].y = v[vg];
-            c[t].z = vis[vg].x;
-            c[t].w = vis[vg].y;
+            const int g = vs + t; // Global visibility index.
+            c[t].x = u[g];
+            c[t].y = v[g];
+            c[t].z = vis[g].x;
+            c[t].w = vis[g].y;
         }
-
-        // Must synchronise before computing the signal for these visibilities.
-        __syncthreads();
 
         // Pre-multiply.
         for (int t = threadIdx.x; t < visInBlock; t += blockDim.x) {
@@ -82,6 +73,7 @@ void oskar_cudak_im2dft(int nv, const float* u, const float* v,
         	c[t].y *= M_2PI;
         }
 
+        // Must synchronise before computing the signal for these visibilities.
         __syncthreads();
 
         // Loop over visibilities in block.

@@ -74,7 +74,7 @@ void CudaEquatorialToHorizontalTest::test_separate()
     SphericalPositions<float> pos (
             0 * DEG2RAD, 90 * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
-            0.05 * DEG2RAD, 0.05 * DEG2RAD); // Spacings.
+            0.5 * DEG2RAD, 0.5 * DEG2RAD); // Spacings.
     int ns = pos.generate(0, 0); // No. of sources.
 	std::vector<float> ra(ns, 0.0), dec(ns, 0.0);
     pos.generate(&ra[0], &dec[0]);
@@ -107,7 +107,7 @@ void CudaEquatorialToHorizontalTest::test_interleaved()
     SphericalPositions<float> pos (
             0 * DEG2RAD, 90 * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
-            0.05 * DEG2RAD, 0.05 * DEG2RAD); // Spacings.
+            0.5 * DEG2RAD, 0.5 * DEG2RAD); // Spacings.
     int ns = pos.generate(0, 0); // No. of sources.
 	std::vector<float> ra(ns, 0.0), dec(ns, 0.0), radec(2 * ns);
     pos.generate(&ra[0], &dec[0]);

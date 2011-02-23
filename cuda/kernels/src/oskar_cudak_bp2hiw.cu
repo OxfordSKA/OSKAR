@@ -58,17 +58,15 @@ void oskar_cudak_bp2hiw(const int na, const float* ax, const float* ay,
     float2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions.
 
     // Cache a block of antenna positions and weights into shared memory.
-    int blocks = (na + maxAntennasPerBlock - 1) / maxAntennasPerBlock;
-    for (int block = 0; block < blocks; ++block) {
-        const int antennaStart = block * maxAntennasPerBlock;
-        int antennasInBlock = na - antennaStart;
+    for (int as = 0; as < na; as += maxAntennasPerBlock) {
+        int antennasInBlock = na - as;
         if (antennasInBlock > maxAntennasPerBlock)
             antennasInBlock = maxAntennasPerBlock;
 
         // There are blockDim.x threads available - need to copy
         // antennasInBlock pieces of data from global memory.
         for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
-            const int ag = antennaStart + t; // Global antenna index.
+            const int ag = as + t; // Global antenna index.
             cwt[t] = weights[ag];
             cap[t].x = ax[ag];
             cap[t].y = ay[ag];

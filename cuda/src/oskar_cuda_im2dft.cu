@@ -108,7 +108,7 @@ void oskar_cuda_im2dft(int nv, const float* u, const float* v,
         int maxVisPerBlock = 896; // Should be multiple of 16.
         size_t sharedMem = 2 * maxVisPerBlock * sizeof(float2);
         oskar_cudak_im2dft <<<blocks, threadsPerBlock, sharedMem>>>
-                (nv, ud, vd, visd, pixInBlock, pld, pmd, maxVisPerBlock, pix);
+        		(nv, ud, vd, visd, pixInBlock, pld, pmd, maxVisPerBlock, pix);
         cudaThreadSynchronize();
         cudaError_t err = cudaPeekAtLastError();
         if (err != cudaSuccess)
