@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_RP3LEG_H_
-#define OSKAR_CUDAK_RP3LEG_H_
+#ifndef OSKAR_CUDAK_RPW3LEG_H_
+#define OSKAR_CUDAK_RPW3LEG_H_
 
 /**
- * @file oskar_cudak_rp3leg.h
+ * @file oskar_cudak_rpw3leg.h
  */
 
 #include "cuda/CudaEclipse.h"
@@ -61,8 +61,8 @@
  * @param[out] phases The computed phases (see note, above).
  */
 __global__
-void oskar_cudak_rp3leg(const int na, const float* ax, const float* ay,
+void oskar_cudak_rpw3leg(const int na, const float* ax, const float* ay,
         const float* az, const float2 scha0, const float2 scdec0, const int ns,
         const float* ha, const float* dec, const float k, float2* phases);
 
-#endif // OSKAR_CUDAK_RP3LEG_H_
+#endif // OSKAR_CUDAK_RPW3LEG_H_

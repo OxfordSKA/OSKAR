@@ -26,21 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDA_RPW3LEG_H_
+#define OSKAR_CUDA_RPW3LEG_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cuda_rpw3leg.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * Computes weights corresponding to relative geometric phases using CUDA.
+ *
+ * @details
+ * Computes phase of each source relative to tracking centre.
+ *
+ * Returns a complex matrix of dimension (ns x na) containing
+ * the complex exponential of the geometric path length difference in
+ * wavenumbers relative to the phase tracking centre, for every source and
+ * station.
+ *
+ * The output weights matrix must be pre-sized to (2 * ns * na).
+ * The source index is the fastest varying dimension.
+ *
+ * @param[in] na Number of antennas or stations.
+ * @param[in] ax Array of local equatorial antenna x-coordinates in metres.
+ * @param[in] ay Array of local equatorial antenna y-coordinates in metres.
+ * @param[in] az Array of local equatorial antenna z-coordinates in metres.
+ * @param[in] ns Number of sources.
+ * @param[in] ha Array of source Hour Angle coordinates in radians.
+ * @param[in] dec Array of source Declination coordinates in radians.
+ * @param[in] ha0 Hour Angle of the phase tracking centre in radians.
+ * @param[in] dec0 Declination of the phase tracking centre in radians.
+ * @param[in] k Wavenumber in radians / metre.
+ * @param[out] weights The matrix of geometric phase weights (see note, above).
+ */
+void oskar_cuda_rpw3leg(int na, float* ax, float* ay, float* az, int ns,
+        float* ha, float* dec, float ha0, float dec0, float k, float* weights);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_CUDA_RPW3LEG_H_

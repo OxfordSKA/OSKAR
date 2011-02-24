@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_rp3leg.h"
+#include "cuda/kernels/oskar_cudak_rpw3leg.h"
 #include "math/core/phase.h"
 
 // Shared memory pointer used by the kernel.
 extern __shared__ float smem[];
 
 __global__
-void oskar_cudak_rp3leg(const int na, const float* ax, const float* ay,
+void oskar_cudak_rpw3leg(const int na, const float* ax, const float* ay,
         const float* az, const float2 scha0, const float2 scdec0, const int ns,
-        const float* ha, const float* dec, const float k, float2* phases)
+        const float* ha, const float* dec, const float k, float2* weights)
 {
     const int tx = threadIdx.x;
     const int ty = threadIdx.y;
@@ -50,32 +50,34 @@ void oskar_cudak_rp3leg(const int na, const float* ax, const float* ay,
     float* cay = &cax[blockDim.y];
     float* caz = &cay[blockDim.y];
     if (s < ns) {
-        cax[tx] = ax[a];
-        cay[tx] = ay[a];
-        caz[tx] = az[a];
+        cha[tx] = ha[s];
+        cdc[tx] = dec[s];
     }
     if (a < na) {
-        cbx[ty] = trig[b].x;
-        cby[ty] = trig[b].y;
-        cbz[ty] = trig[b].z;
+        cax[ty] = ax[a];
+        cay[ty] = ay[a];
+        caz[ty] = az[a];
     }
     __syncthreads();
 
     // Compute the geometric phase of the reference direction.
-    const float phase0 = GEOMETRIC_PHASE_3D_LOCAL_EQUATORIAL(cax[tx], cay[tx],
-            caz[tx], scdec0.x, scdec0.y, scha0.x, scha0.y, k);
+    const float phase0 = GEOMETRIC_PHASE_3D_LOCAL_EQUATORIAL_K(
+            cax[ty], cay[ty], caz[ty], scdec0.x, scdec0.y, scha0.x, scha0.y);
 
     // Compute the geometric phase of the source direction.
-    float2 weight;
-    const float phase = GEOMETRIC_PHASE_3D_LOCAL_EQUATORIAL(cax[tx], cay[tx],
-            caz[tx], csd[ty], ccd[ty], csh[ty], cch[ty], k);
-    __sincosf(phase, &weight.y, &weight.x);
-    weight.x /= na; // Normalised real part.
-    weight.y /= na; // Normalised imaginary part.
+    float2 sha, sdc, weight;
+    __sincosf(cha[tx], &sha.x, &sha.y);
+    __sincosf(cdc[tx], &sdc.x, &sdc.y);
+    const float phase = GEOMETRIC_PHASE_3D_LOCAL_EQUATORIAL_K(
+            cax[ty], cay[ty], caz[ty], sdc.x, sdc.y, sha.x, sha.y);
+
+    // Compute the relative phase.
+    const float arg = k * (phase - phase0);
+    __sincosf(arg, &weight.y, &weight.x);
 
     // Write result to global memory.
-    if (a < na && b < nb) {
+    if (s < ns && a < na) {
         const int w = s + ns * a;
-        phases[w] = weight;
+        weights[w] = weight;
     }
 }

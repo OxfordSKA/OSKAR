@@ -10,6 +10,7 @@ set(cuda_SRC
     kernels/src/oskar_cudak_im2dft.cu
     kernels/src/oskar_cudak_le2hg.cu
     kernels/src/oskar_cudak_pc2ht.cu
+    kernels/src/oskar_cudak_rpw3leg.cu
     kernels/src/oskar_cudak_wt2hg.cu
     # Callable functions:
     src/oskar_cuda_as2hi.cu
@@ -20,6 +21,7 @@ set(cuda_SRC
     src/oskar_cuda_im2dft.cu
     src/oskar_cuda_im2dftlm.cu
     src/oskar_cuda_le2hg.cu
+    src/oskar_cuda_rpw3leg.cu
     src/vectorAdd.cu
 )
 
