@@ -38,9 +38,9 @@
 extern "C" {
 #endif
 
-void oskar_cuda_as2hi(const int na, const float* ax, const float* ay,
-        const int ns, const float* samp, const float* slon, const float* slat,
-        const float k, float* signals)
+void oskar_cuda_as2hi(int na, const float* ax, const float* ay,
+        int ns, const float* samp, const float* slon, const float* slat,
+        float k, float* signals)
 {
     // Create source position pairs in host memory.
     float2* spos = (float2*)calloc(ns, sizeof(float2));

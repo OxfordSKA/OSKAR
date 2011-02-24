@@ -26,50 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_bfmv.h"
-#include <cublas.h>
+#ifndef OSKAR_CUDAK_LE2HG_H_
+#define OSKAR_CUDAK_LE2HG_H_
+
+/**
+ * @file oskar_cudak_le2hg.h
+ */
 
 #include "cuda/CudaEclipse.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @brief
+ * CUDA kernel to compute local source positions.
+ *
+ * @details
+ * This CUDA kernel transforms sources specified in a local equatorial
+ * system (HA, Dec) to local horizontal coordinates (azimuth, elevation).
+ *
+ * Each thread operates on a single source. The source positions are
+ * specified as (HA, Dec) pairs in the \p hadec array:
+ *
+ * hadec.x = {HA}
+ * hadec.y = {Dec}
+ *
+ * The output \p azel array contains the azimuth and elevation pairs for each
+ * source:
+ *
+ * azel.x = {azimuth}
+ * azel.y = {elevation}
+ *
+ * The number of floating-point operations performed by this kernel is:
+ * \li Sines and cosines: 4 * ns.
+ * \li Arctangents: 2 * ns.
+ * \li Multiplies: 8 * ns.
+ * \li Additions / subtractions: 3 * ns.
+ * \li Square roots: ns.
+ *
+ * @param[in] ns The number of source positions.
+ * @param[in] hadec The HA and Declination source coordinates in radians.
+ * @param[in] cosLat The cosine of the geographic latitude.
+ * @param[in] sinLat The sine of the geographic latitude.
+ * @param[out] azel The azimuth and elevation source coordinates in radians.
+ */
+__global__
+void oskar_cudak_le2hg(int ns, const float2* radec,
+        float cosLat, float sinLat, float2* azel);
 
-void oskar_cuda_bfmv(int na, int nb, const float* signals,
-        const float* weights, float* beams)
-{
-    // Initialise cuBLAS.
-    cublasInit();
-
-    // Allocate memory for antenna signals and beamforming weights
-    // on the device.
-    float2 *signalsd, *weightsd, *beamsd;
-    cudaMalloc((void**)&signalsd, na * sizeof(float2));
-    cudaMalloc((void**)&beamsd, nb * sizeof(float2));
-    cudaMalloc((void**)&weightsd, na * nb * sizeof(float2));
-
-    // Copy antenna signals and beamforming weights to the device.
-    cudaMemcpy(signalsd, signals, na * sizeof(float2), cudaMemcpyHostToDevice);
-    cudaMemcpy(weightsd, weights, na * nb * sizeof(float2), cudaMemcpyHostToDevice);
-
-    // Call cuBLAS function to perform the matrix-vector multiplication.
-    // Note that cuBLAS calls use Fortran-ordering (column major) for their
-    // matrices, so we use the transpose here.
-    cublasCgemv('t', na, nb, make_float2(1.0, 0.0),
-            weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
-
-    // Copy result from device memory to host memory.
-    cudaMemcpy(beams, beamsd, nb * sizeof(float2), cudaMemcpyDeviceToHost);
-
-    // Free device memory.
-    cudaFree(signalsd);
-    cudaFree(weightsd);
-    cudaFree(beamsd);
-
-    // Shut down cuBLAS.
-    cublasShutdown();
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif // OSKAR_CUDAK_LE2HG_H_

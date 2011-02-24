@@ -26,50 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_bfmv.h"
-#include <cublas.h>
+#include "cuda/kernels/oskar_cudak_le2hg.h"
 
-#include "cuda/CudaEclipse.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void oskar_cuda_bfmv(int na, int nb, const float* signals,
-        const float* weights, float* beams)
+__global__
+void oskar_cudak_le2hg(int ns, const float2* hadec,
+        float cosLat, float sinLat, float2* azel)
 {
-    // Initialise cuBLAS.
-    cublasInit();
+    // Get the source ID that this thread is working on.
+    const int s = blockDim.x * blockIdx.x + threadIdx.x;
 
-    // Allocate memory for antenna signals and beamforming weights
-    // on the device.
-    float2 *signalsd, *weightsd, *beamsd;
-    cudaMalloc((void**)&signalsd, na * sizeof(float2));
-    cudaMalloc((void**)&beamsd, nb * sizeof(float2));
-    cudaMalloc((void**)&weightsd, na * nb * sizeof(float2));
+    // Copy source local equatorial coordinates from global memory.
+    float2 src;
+    if (s < ns)
+        src = hadec[s];
+    __syncthreads(); // Coalesce memory accesses.
 
-    // Copy antenna signals and beamforming weights to the device.
-    cudaMemcpy(signalsd, signals, na * sizeof(float2), cudaMemcpyHostToDevice);
-    cudaMemcpy(weightsd, weights, na * nb * sizeof(float2), cudaMemcpyHostToDevice);
+    // Find azimuth and elevation.
+    float cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
+    __sincosf(src.x, &sinHA, &cosHA);
+    __sincosf(src.y, &sinDec, &cosDec);
+    t = cosDec * cosHA;
+    X1 = cosLat * sinDec - sinLat * t;
+    Y2 = sinLat * sinDec + cosLat * t;
+    t = -cosDec * sinHA;
+    src.x = atan2f(t, X1); // Azimuth.
+    t = hypotf(X1, t);
+    src.y = atan2f(Y2, t); // Elevation.
 
-    // Call cuBLAS function to perform the matrix-vector multiplication.
-    // Note that cuBLAS calls use Fortran-ordering (column major) for their
-    // matrices, so we use the transpose here.
-    cublasCgemv('t', na, nb, make_float2(1.0, 0.0),
-            weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
-
-    // Copy result from device memory to host memory.
-    cudaMemcpy(beams, beamsd, nb * sizeof(float2), cudaMemcpyDeviceToHost);
-
-    // Free device memory.
-    cudaFree(signalsd);
-    cudaFree(weightsd);
-    cudaFree(beamsd);
-
-    // Shut down cuBLAS.
-    cublasShutdown();
+    // Copy source horizontal coordinates into global memory.
+    __syncthreads(); // Coalesce memory accesses.
+    if (s < ns)
+        azel[s] = src;
 }
-
-#ifdef __cplusplus
-}
-#endif

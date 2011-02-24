@@ -26,50 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_bfmv.h"
-#include <cublas.h>
+#ifndef OSKAR_CUDA_H_
+#define OSKAR_CUDA_H_
 
-#include "cuda/CudaEclipse.h"
+/**
+ * @file oskar_cuda.h
+ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "oskar_cuda_as2hi.h"
+#include "oskar_cuda_bf2hig.h"
+#include "oskar_cuda_bfmv.h"
+#include "oskar_cuda_bp2hig.h"
+#include "oskar_cuda_eq2hg.h"
+#include "oskar_cuda_im2dft.h"
+#include "oskar_cuda_im2dftlm.h"
+#include "oskar_cuda_le2hg.h"
 
-void oskar_cuda_bfmv(int na, int nb, const float* signals,
-        const float* weights, float* beams)
-{
-    // Initialise cuBLAS.
-    cublasInit();
-
-    // Allocate memory for antenna signals and beamforming weights
-    // on the device.
-    float2 *signalsd, *weightsd, *beamsd;
-    cudaMalloc((void**)&signalsd, na * sizeof(float2));
-    cudaMalloc((void**)&beamsd, nb * sizeof(float2));
-    cudaMalloc((void**)&weightsd, na * nb * sizeof(float2));
-
-    // Copy antenna signals and beamforming weights to the device.
-    cudaMemcpy(signalsd, signals, na * sizeof(float2), cudaMemcpyHostToDevice);
-    cudaMemcpy(weightsd, weights, na * nb * sizeof(float2), cudaMemcpyHostToDevice);
-
-    // Call cuBLAS function to perform the matrix-vector multiplication.
-    // Note that cuBLAS calls use Fortran-ordering (column major) for their
-    // matrices, so we use the transpose here.
-    cublasCgemv('t', na, nb, make_float2(1.0, 0.0),
-            weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
-
-    // Copy result from device memory to host memory.
-    cudaMemcpy(beams, beamsd, nb * sizeof(float2), cudaMemcpyDeviceToHost);
-
-    // Free device memory.
-    cudaFree(signalsd);
-    cudaFree(weightsd);
-    cudaFree(beamsd);
-
-    // Shut down cuBLAS.
-    cublasShutdown();
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif // OSKAR_CUDA_H_
