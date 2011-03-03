@@ -9,6 +9,7 @@ set(data_test_SRC
     src/CppUnitMain.cpp
     src/CudaVectorAddTest.cpp
     src/CudaBeamPatternTest.cpp
+    src/CudaBeamPatternGaussianTest.cpp
     src/CudaAntennaSignalTest.cpp
     src/CudaBeamformerMatrixVectorTest.cpp
     src/CudaImagerDftTest.cpp

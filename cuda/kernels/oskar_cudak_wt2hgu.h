@@ -26,26 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAK_WT2HGU_H_
+#define OSKAR_CUDAK_WT2HGU_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudak_wt2hgu.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#include "cuda/CudaEclipse.h"
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * CUDA kernel to generate un-normalised geometric beamforming weights.
+ *
+ * @details
+ * This CUDA kernel produces the complex antenna beamforming weights for the
+ * given directions, and stores them in device memory.
+ * The weights are NOT normalised by the number of antennas.
+ *
+ * Each thread generates the complex weights for a single antenna and a single
+ * beam direction.
+ *
+ * The input \p trig array contains triplets of the following pre-computed
+ * trigonometry:
+ *
+ * trig.x = {cosine azimuth}
+ * trig.y = {sine azimuth}
+ * trig.z = {cosine elevation}
+ *
+ * The kernel requires blockDim.x * sizeof(float2) +
+ * blockDim.y * sizeof(float3) bytes of shared memory.
+ *
+ * The number of floating-point operations performed by this kernel is:
+ * \li Sines and cosines: 2 * na * nb.
+ * \li Multiplies: 4 * na * nb.
+ * \li Divides: 2 * na * nb.
+ * \li Additions / subtractions: na * nb.
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions in metres.
+ * @param[in] ay Array of antenna y positions in metres.
+ * @param[in] nb Number of beams.
+ * @param[in] trig Precomputed trigonometry for all beam positions.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
+ */
+__global__
+void oskar_cudak_wt2hgu(const int na, const float* ax, const float* ay,
+        const int nb, const float3* trig, const float k, float2* weights);
+
+#endif // OSKAR_CUDAK_WT2HGU_H_

@@ -26,26 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#include "cuda/kernels/oskar_cudak_wt2hgu.h"
+#include "math/core/phase.h"
 
-/**
- * @file oskar_cuda.h
- */
+// Shared memory pointer used by the kernel.
+extern __shared__ float smem[];
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+__global__
+void oskar_cudak_wt2hgu(const int na, const float* ax, const float* ay,
+        const int nb, const float3* trig, const float k, float2* weights)
+{
+    const int tx = threadIdx.x;
+    const int ty = threadIdx.y;
+    const int a = blockDim.x * blockIdx.x + tx; // Antenna index.
+    const int b = blockDim.y * blockIdx.y + ty; // Beam index.
 
-#endif // OSKAR_CUDA_H_
+    // Cache antenna and beam data from global memory,
+    // avoiding shared memory bank conflicts.
+    float* cax = smem;
+    float* cay = &cax[blockDim.x];
+    float* cbz = &cay[blockDim.x];
+    float* cby = &cbz[blockDim.y];
+    float* cbx = &cby[blockDim.y];
+    if (a < na) {
+        cax[tx] = ax[a];
+        cay[tx] = ay[a];
+    }
+    if (b < nb) {
+        cbx[ty] = trig[b].x;
+        cby[ty] = trig[b].y;
+        cbz[ty] = trig[b].z;
+    }
+    __syncthreads();
+
+    // Compute the geometric phase of the beam direction.
+    float2 weight;
+    const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(cax[tx], cay[tx],
+            cbz[ty], cby[ty], cbx[ty], k);
+    __sincosf(phase, &weight.y, &weight.x);
+    // Do NOT normalise.
+
+    // Write result to global memory.
+    if (a < na && b < nb) {
+        const int w = a + na * b;
+        weights[w] = weight;
+    }
+}

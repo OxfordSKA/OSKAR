@@ -26,26 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef CUDA_BEAM_PATTERN_GAUSSIAN_TEST_H_
+#define CUDA_BEAM_PATTERN_GAUSSIAN_TEST_H_
 
 /**
- * @file oskar_cuda.h
+ * @file CudaBeamPatternGaussianTest.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class CudaBeamPatternGaussianTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(CudaBeamPatternGaussianTest);
+        CPPUNIT_TEST(test_singleElement);
+        CPPUNIT_TEST(test_commonNormalised);
+        CPPUNIT_TEST(test_commonNormalised1d);
+        CPPUNIT_TEST(test_uniqueNormalised);
+        CPPUNIT_TEST(test_uniqueNormalised1d);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test_singleElement();
+
+        /// Test method.
+        void test_commonNormalised();
+
+        /// Test method.
+        void test_commonNormalised1d();
+
+        /// Test method.
+        void test_uniqueNormalised();
+
+        /// Test method.
+        void test_uniqueNormalised1d();
+};
+
+#endif // CUDA_BEAM_PATTERN_GAUSSIAN_TEST_H_
