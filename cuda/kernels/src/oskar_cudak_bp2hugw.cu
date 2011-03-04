@@ -90,7 +90,9 @@ void oskar_cudak_bp2hugw(const int na, const float* ax, const float* ay,
             __sincosf(arg, &signal.y, &signal.x);
 
             // Calculate the antenna gain in the direction of the source.
-            arg = cab[a].y * __expf(-zd2 * cab[a].x);
+            arg = 0.0f; // Prevent underflows.
+            if (zd2 * cab[a].x < 30.0f)
+                arg = cab[a].y * __expf(-zd2 * cab[a].x);
             signal.x *= arg;
             signal.y *= arg;
 

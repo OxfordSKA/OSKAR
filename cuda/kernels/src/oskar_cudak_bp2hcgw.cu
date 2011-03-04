@@ -45,14 +45,19 @@ void oskar_cudak_bp2hcgw(const int na, const float* ax, const float* ay,
 
     // Get the source position.
     // (NB. Cannot exit on index condition, as all threads are needed later).
-    float az = 0.0f, el = 0.0f, zd2 = 0.0f, sinAz, cosAz, cosEl;
+    float az = 0.0f, el = 0.0f, sinAz, cosAz, cosEl;
     if (s < ns) {
         az = saz[s];
         el = sel[s];
     }
-    zd2 = __powf(PI2 - el, 2.0f); // Source zenith distance squared.
     cosEl = __cosf(el);
     __sincosf(az, &sinAz, &cosAz);
+
+    // Get the antenna gain.
+    float zd2 = __powf(PI2 - el, 2.0f); // Source zenith distance squared.
+    float gain = 0.0f; // Prevent underflows (huge speed difference!).
+    if (aw * zd2 < 30.0f)
+        gain =  ag * __expf(-zd2 * aw);
 
     // Initialise shared memory caches.
     // Antenna positions are cached as float2 for speed increase.
@@ -86,10 +91,9 @@ void oskar_cudak_bp2hcgw(const int na, const float* ax, const float* ay,
                     cap[a].y, cosEl, sinAz, cosAz, k);
             __sincosf(arg, &signal.y, &signal.x);
 
-            // Calculate the antenna gain in the direction of the source.
-            arg = ag * __expf(-zd2 * aw);
-            signal.x *= arg;
-            signal.y *= arg;
+            // Multiply by the antenna gain in the direction of the source.
+            signal.x *= gain;
+            signal.y *= gain;
 
             // Perform complex multiply-accumulate.
             cpx.x += (signal.x * w.x - signal.y * w.y);
