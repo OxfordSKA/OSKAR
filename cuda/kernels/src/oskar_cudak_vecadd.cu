@@ -27,7 +27,6 @@
  */
 
 #include "cuda/kernels/oskar_cudak_vecadd.h"
-#include "math/core/phase.h"
 
 // Vector addition kernel.
 __global__

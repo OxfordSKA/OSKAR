@@ -28,6 +28,7 @@
 
 #include "cuda/oskar_cuda_vecadd.h"
 #include "cuda/kernels/oskar_cudak_vecadd.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,11 +50,15 @@ void oskar_cuda_vecadd(int n, const float* a, const float* b, float* c)
     int threadsPerBlock = 256;
     int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
     oskar_cudak_vecadd <<<blocksPerGrid, threadsPerBlock>>> (n, da, db, dc);
+    cudaThreadSynchronize();
+    cudaError_t err = cudaPeekAtLastError();
+    if (err != cudaSuccess)
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
 
     // Copy result from device memory to host memory.
     cudaMemcpy(c, dc, n * sizeof(float), cudaMemcpyDeviceToHost);
 
-    // Free device and host memory.
+    // Free device memory.
     if (da) cudaFree(da);
     if (db) cudaFree(db);
     if (dc) cudaFree(dc);

@@ -51,7 +51,7 @@ void CudaVectorAddTest::tearDown()
 
 /**
  * @details
- * Tests 2D DFT CUDA imager.
+ * Tests vector addition using CUDA.
  */
 void CudaVectorAddTest::test_method()
 {
@@ -83,6 +83,7 @@ void CudaVectorAddTest::test_method()
     // Pass or fail.
     if (i != n) {
         printf("FAILED.\n");
+        printf("i= %d, a[i]= %f, b[i]= %f, c[i]= %f\n", i, a[i], b[i], c[i]);
         CPPUNIT_FAIL("Vector addition test failed.");
     } else {
         printf("PASSED.\n");
