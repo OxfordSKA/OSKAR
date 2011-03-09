@@ -13,6 +13,7 @@ set(cuda_SRC
     kernels/src/oskar_cudak_le2hg.cu
     kernels/src/oskar_cudak_pc2ht.cu
     kernels/src/oskar_cudak_rpw3leg.cu
+    kernels/src/oskar_cudak_vecadd.cu
     kernels/src/oskar_cudak_wt2hg.cu
     kernels/src/oskar_cudak_wt2hgu.cu
     # Callable functions:
@@ -30,7 +31,7 @@ set(cuda_SRC
     src/oskar_cuda_im2dftlm.cu
     src/oskar_cuda_le2hg.cu
     src/oskar_cuda_rpw3leg.cu
-    src/vectorAdd.cu
+    src/oskar_cuda_vecadd.cu
 )
 
 CUDA_ADD_library(oskar_cuda ${cuda_SRC} SHARED)

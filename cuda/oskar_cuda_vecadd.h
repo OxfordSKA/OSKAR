@@ -26,9 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_VECTOR_ADD_H
-#define OSKAR_CUDA_VECTOR_ADD_H
+#ifndef OSKAR_CUDA_VECADD_H
+#define OSKAR_CUDA_VECADD_H
 
-void vectorAdd();
+/**
+ * @file oskar_cuda_vecadd.h
+ */
 
-#endif // OSKAR_CUDA_VECTOR_ADD_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Adds two vectors together using CUDA.
+ *
+ * @details
+ * This function adds two vectors together using the graphics card.
+ * It is used primarily for testing.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
+ */
+void oskar_cuda_vecadd(int n, const float* a, const float* b, float* c);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_CUDA_VECADD_H

@@ -36,14 +36,17 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @class
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-
 class CudaVectorAddTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE( CudaVectorAddTest );
-        CPPUNIT_TEST( test_method );
+        CPPUNIT_TEST_SUITE(CudaVectorAddTest);
+        CPPUNIT_TEST(test_method);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -52,12 +55,6 @@ class CudaVectorAddTest : public CppUnit::TestFixture
 
         // Test Methods
         void test_method();
-
-    public:
-        CudaVectorAddTest();
-        ~CudaVectorAddTest();
-
-    private:
 };
 
 #endif // CUDA_VECTOR_ADD_TEST_H

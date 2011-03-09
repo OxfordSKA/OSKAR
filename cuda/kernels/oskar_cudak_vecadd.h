@@ -26,65 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/test/CudaVectorAddTest.h"
-#include "cuda/oskar_cuda_vecadd.h"
-#include <cmath>
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(CudaVectorAddTest);
+#ifndef OSKAR_CUDAK_VECADD_H_
+#define OSKAR_CUDAK_VECADD_H_
 
 /**
- * @details
- * Sets up the context before running each test method.
+ * @file oskar_cudak_vecadd.h
  */
-void CudaVectorAddTest::setUp()
-{
-}
+
+#include "cuda/CudaEclipse.h"
 
 /**
+ * @brief
+ * CUDA kernel to add two vectors together.
+ *
  * @details
- * Clean up routine called after each test is run.
+ * This CUDA kernel adds two vectors together using the graphics card.
+ * It is used primarily for testing.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
  */
-void CudaVectorAddTest::tearDown()
-{
-}
+__global__
+void oskar_cudak_vecadd(int n, const float* a, const float* b, float* c);
 
-/**
- * @details
- * Tests 2D DFT CUDA imager.
- */
-void CudaVectorAddTest::test_method()
-{
-    printf("Vector addition test... ");
-
-    // Define number of elements in vectors.
-    int n = 50000;
-
-    // Allocate vectors.
-    std::vector<float> a(n), b(n), c(n, 0.0f);
-
-    // Fill input vectors with random numbers.
-    for (int i = 0; i < n; ++i) {
-        a[i] = rand() / (float)RAND_MAX;
-        b[i] = rand() / (float)RAND_MAX;
-    }
-
-    // Add the two vectors.
-    oskar_cuda_vecadd(n, &a[0], &b[0], &c[0]);
-
-    // Verify result.
-    int i;
-    for (i = 0; i < n; ++i) {
-        float sum = a[i] + b[i];
-        if (fabs(c[i] - sum) > 1e-5)
-            break;
-    }
-
-    // Pass or fail.
-    if (i != n) {
-        printf("FAILED.\n");
-        CPPUNIT_FAIL("Vector addition test failed.");
-    } else {
-        printf("PASSED.\n");
-    }
-}
+#endif // OSKAR_CUDAK_VECADD_H_
