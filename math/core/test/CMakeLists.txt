@@ -17,7 +17,7 @@ include_directories()
 add_executable(mathCoreTest ${math_core_test_SRC})
 
 target_link_libraries(mathCoreTest
-    math-core
+    #math-core
     ${CPPUNIT_LIBRARIES}
 )
 
