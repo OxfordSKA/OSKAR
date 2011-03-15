@@ -39,8 +39,8 @@ extern "C" {
 #endif
 
 void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
-        const float* x2, const float* y2, int ns, const float* slon,
-        const float* slat, float ba1, float be1, float ba2, float be2,
+        const float* x2, const float* y2, int ns, const float* sa,
+        const float* se, float ba1, float be1, float ba2, float be2,
         float k, float* image)
 {
     // Find total number of antennas.
@@ -57,7 +57,7 @@ void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
 
     // Allocate memory for antenna positions, antenna weights,
     // test source positions and pixel values on the device.
-    float *x1d, *y1d, *x2d, *y2d, *slond, *slatd;
+    float *x1d, *y1d, *x2d, *y2d, *sad, *sed;
     float2 *weights, *imaged, *signalsd;
     float3 *trig1d, *trig2d;
     cudaMalloc((void**)&x1d, na * sizeof(float));
@@ -81,8 +81,8 @@ void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
     int chunk = 0, chunks = (ns + nsMax - 1) / nsMax;
 
     // Allocate memory for source position chunk on the device.
-    cudaMalloc((void**)&slond, nsMax * sizeof(float));
-    cudaMalloc((void**)&slatd, nsMax * sizeof(float));
+    cudaMalloc((void**)&sad, nsMax * sizeof(float));
+    cudaMalloc((void**)&sed, nsMax * sizeof(float));
     cudaMalloc((void**)&imaged, nsMax * sizeof(float2));
     cudaMalloc((void**)&signalsd, n2 * nsMax * sizeof(float2));
     cudaThreadSynchronize();
@@ -98,9 +98,9 @@ void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
         if (srcInBlock > nsMax) srcInBlock = nsMax;
 
         // Copy test source positions for this chunk to the device.
-        cudaMemcpy(slond, slon + srcStart, srcInBlock * sizeof(float),
+        cudaMemcpy(sad, sa + srcStart, srcInBlock * sizeof(float),
                 cudaMemcpyHostToDevice);
-        cudaMemcpy(slatd, slat + srcStart, srcInBlock * sizeof(float),
+        cudaMemcpy(sed, se + srcStart, srcInBlock * sizeof(float),
                 cudaMemcpyHostToDevice);
 
         // Loop over tiles.
@@ -111,7 +111,7 @@ void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
             int nat = n1[t];
             float* x1td = x1d + antCount;
             float* y1td = y1d + antCount;
-            float2* signalstd = signalsd + t * nsMax;
+            float2* signalstd = signalsd + t * srcInBlock;
 
             // Invoke kernel to compute antenna weights on the device.
             dim3 wThreads(256, 1);
@@ -130,7 +130,7 @@ void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
             int maxAntennasPerBlock = 864; // Should be multiple of 16.
             size_t sharedMem = 2 * maxAntennasPerBlock * sizeof(float2);
             oskar_cudak_bp2hiw <<<blocks, threadsPerBlock, sharedMem>>>
-                    (nat, x1td, y1td, weights, srcInBlock, slond, slatd, k,
+                    (nat, x1td, y1td, weights, srcInBlock, sad, sed, k,
                             maxAntennasPerBlock, signalstd);
             cudaThreadSynchronize();
             err = cudaPeekAtLastError();
@@ -156,7 +156,7 @@ void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
         int maxAntennasPerBlock = 512; // Should be multiple of 16.
         size_t sharedMem = 3 * maxAntennasPerBlock * sizeof(float2);
         oskar_cudak_bp2hiws <<<blocks, threadsPerBlock, sharedMem>>>
-                (n2, x2d, y2d, weights, signalsd, nsMax, srcInBlock, slond, slatd, k,
+                (n2, x2d, y2d, weights, signalsd, srcInBlock, srcInBlock, sad, sed, k,
                         maxAntennasPerBlock, imaged);
         cudaThreadSynchronize();
         cudaError_t err = cudaPeekAtLastError();
@@ -174,8 +174,8 @@ void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
     cudaFree(x2d);
     cudaFree(y2d);
     cudaFree(weights);
-    cudaFree(slond);
-    cudaFree(slatd);
+    cudaFree(sad);
+    cudaFree(sed);
     cudaFree(imaged);
     cudaFree(trig1d);
     cudaFree(trig2d);

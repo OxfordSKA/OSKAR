@@ -50,9 +50,9 @@ extern "C" {
  * test source longitude and latitude positions, the beam direction, and
  * the wavenumber.
  *
- * The \p x1 and \p x2 are effectively two-dimensional arrays of \p n2 by \p n1 elements,
- * with the length
- * of the fastest-varying dimension given by the value of n1.
+ * The \p x1 and \p x2 are effectively two-dimensional arrays of \p n2 by \p n1
+ * elements, with the length of the fastest-varying dimension given by the
+ * value of n1.
  *
  * The computed beam pattern is returned in the \p image array, which
  * must be pre-sized to length 2*ns. The values in the \p image array
@@ -65,8 +65,8 @@ extern "C" {
  * @param[in] x2 The tile x-positions for each tile in metres, relative to station centre.
  * @param[in] y2 The tile y-positions for each tile in metres, relative to station centre.
  * @param[in] ns The number of test source positions.
- * @param[in] slon The longitude coordinates of the test source.
- * @param[in] slat The latitude coordinates of the test source.
+ * @param[in] sa The azimuth coordinates of the test source in radians.
+ * @param[in] se The elevation coordinates of the test source in radians.
  * @param[in] ba1 The tile beam azimuth direction in radians
  * @param[in] be1 The tile beam elevation direction in radians.
  * @param[in] ba2 The station beam azimuth direction in radians
@@ -75,8 +75,8 @@ extern "C" {
  * @param[out] image The computed beam pattern (see note, above).
  */
 void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
-        const float* x2, const float* y2, int ns, const float* slon,
-        const float* slat, float ba1, float be1, float ba2, float be2,
+        const float* x2, const float* y2, int ns, const float* sa,
+        const float* se, float ba1, float be1, float ba2, float be2,
         float k, float* image);
 
 #ifdef __cplusplus

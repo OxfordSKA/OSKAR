@@ -55,8 +55,8 @@ void oskar_cudak_bp2hiws(const int na, const float* ax, const float* ay,
     // Antenna positions are cached as float2 for speed increase.
     float2 cpx = make_float2(0.0f, 0.0f); // Clear pixel value.
     float2* cwt = smem; // Cached antenna weights.
-    float2* csg = cwt + maxAntennasPerBlock; // Cached antenna signals.
-    float2* cap = csg + maxAntennasPerBlock; // Cached antenna positions.
+//    float2* csg = cwt + maxAntennasPerBlock; // Cached antenna signals.
+    float2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions.
 
     // Cache a block of antenna positions and weights into shared memory.
     for (int as = 0; as < na; as += maxAntennasPerBlock) {
@@ -69,7 +69,7 @@ void oskar_cudak_bp2hiws(const int na, const float* ax, const float* ay,
         for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
             const int ag = as + t; // Global antenna index.
             cwt[t] = weights[ag];
-            csg[t] = signals[ag * sigStride + s];
+            //csg[t] = signals[ag * sigStride + s];
             cap[t].x = ax[ag];
             cap[t].y = ay[ag];
         }
@@ -80,7 +80,9 @@ void oskar_cudak_bp2hiws(const int na, const float* ax, const float* ay,
         // Loop over antennas in block.
         for (int a = 0; a < antennasInBlock; ++a) {
             // Get the signal and the weight.
-            float2 signal = csg[a], w = cwt[a];
+            const int ag = as + a; // Global antenna index.
+            if (ag >= na) continue;
+            float2 signal = signals[ag * sigStride + s], w = cwt[a];
 
             float2 srcSig;
             float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(cap[a].x,
