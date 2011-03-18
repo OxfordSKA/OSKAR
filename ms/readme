@@ -6,11 +6,18 @@ This folder contains the source code for the library module: oskar_ms
 The library provides a high level interface for writing measurement sets.
 
 Library dependencies:
-    casacore (components: ms, measures, tables, scimath, scimath_f, casa)
-    fftw3 (float, double and threads version of the library)
+    casacore
+
+    (the following might be needed for a shared version of casacore)
     cfitsio
+    wcs
     lapack
     blas
+    fftw3
+    fftw3_threads
+    fftw3f
+    fftw3f_threads
+    pthread
     dl
 
 
