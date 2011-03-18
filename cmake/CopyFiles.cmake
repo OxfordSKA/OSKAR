@@ -21,4 +21,4 @@ macro(copy_files GLOBPAT DESTINATION target)
         add_custom_command(TARGET ${target} COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst})
     endforeach(FILENAME)
 
-endmacro(copy_files)
+endmacro()

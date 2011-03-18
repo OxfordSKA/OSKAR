@@ -36,7 +36,7 @@ set(cuda_SRC
     src/oskar_cuda_vecadd.cu
 )
 
-CUDA_ADD_library(oskar_cuda ${cuda_SRC} SHARED)
+CUDA_ADD_library(oskar_cuda ${cuda_SRC})
 
 include_directories(${CUDA_INCLUDE_DIRS})
 
@@ -45,6 +45,7 @@ target_link_libraries(oskar_cuda
     ${CUDA_LIBRARIES}
 )
 
+install(TARGETS oskar_cuda LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
 # === Adds a special command to clean nvcc generated files.
 cuda_build_clean_target()

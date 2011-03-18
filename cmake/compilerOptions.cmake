@@ -1,9 +1,9 @@
 # === Set the build type to release if not otherwise specified.
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE release)
-endif(NOT CMAKE_BUILD_TYPE)
+endif()
 
-set(BUILD_SHARED_LIBS false)
+set(BUILD_SHARED_LIBS true)
 
 if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
@@ -18,7 +18,7 @@ if(CMAKE_COMPILER_IS_GNUCC)
     #add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     #add_definitions(-Wfloat-equal)
 
-else (CMAKE_COMPILER_IS_GNUCC)
+else()
     #set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xHost -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     #set(CMAKE_CXX_FLAGS_RELEASE "-O2 -xHost -funroll-loops -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
@@ -43,5 +43,5 @@ else (CMAKE_COMPILER_IS_GNUCC)
     add_definitions(-ww111)
     add_definitions(-ww1572)
 
-endif(CMAKE_COMPILER_IS_GNUCC)
+endif()
 
