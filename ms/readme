@@ -1,0 +1,17 @@
+src/ms/readme
+
+Description:
+================================================================================
+This folder contains the source code for the library module: oskar_ms
+The library provides a high level interface for writing measurement sets.
+
+Library dependencies:
+    casacore (components: ms, measures, tables, scimath, scimath_f, casa)
+    fftw3 (float, double and threads version of the library)
+    cfitsio
+    lapack
+    blas
+    dl
+
+
+
