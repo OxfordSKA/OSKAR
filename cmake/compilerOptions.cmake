@@ -56,3 +56,10 @@ if(CUDA_FOUND)
         set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g)
     endif()
 endif()
+
+
+# === Set some include directories at the project level.
+include_directories(${oskar-lib_SOURCE_DIR} ${QT_INCLUDE_DIR})
+if (CFitsio_FOUND)
+    include_directories(${CFITSIO_INCLUDE_DIR})
+endif()

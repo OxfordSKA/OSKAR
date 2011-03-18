@@ -29,7 +29,7 @@ include(compilerOptions)
 include(dependencies)
 
 # === Recurse into sub-diretories.
-#add_subdirectory(math)
+add_subdirectory(math)
 #add_subdirectory(data)
 #add_subdirectory(utility)
 #add_subdirectory(mpi)
@@ -39,11 +39,13 @@ if (CUDA_FOUND)
     add_subdirectory(cuda)
 endif()
 if(CASACORE_FOUND)
-    #add_subdirectory(ms)
+    add_subdirectory(ms)
 endif()
 
 
+
+# === Packaging (make package)
 set(CPACK_GENERATOR "DEB" "TGZ")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "oskar-team")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcuda, libcudart")
+#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcuda, libcudart")
 include(CPack)

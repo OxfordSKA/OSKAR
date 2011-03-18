@@ -1,5 +1,5 @@
 #
-# src/math
+# src/math/CMakeLists.txt
 #
 
 add_subdirectory(core)

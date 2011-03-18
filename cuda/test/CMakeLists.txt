@@ -2,7 +2,6 @@
 # src/cuda/test
 #
 
-
 # CppUnit
 # ==============================================================================
 set(data_test_SRC
@@ -17,11 +16,7 @@ set(data_test_SRC
     src/CudaEquatorialToHorizontalTest.cpp
 )
 
-include_directories()
-
-add_executable(cudaTest ${data_test_SRC})
-
-target_link_libraries(cudaTest
-    oskar_cuda
-    ${CPPUNIT_LIBRARIES}
-)
+if (CppUnit_FOUND)
+    add_executable(cudaTest ${data_test_SRC})
+    target_link_libraries(cudaTest oskar_cuda ${CPPUNIT_LIBRARIES})
+endif()

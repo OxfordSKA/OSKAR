@@ -1,5 +1,5 @@
 # - Find casacore
-# 
+#
 # Find the native CASACORE includes and library
 #
 #  CASACORE_INCLUDE_DIR  - where to find casacore.h, etc.
@@ -25,21 +25,20 @@ if(LAPACK_FOUND)
 
 FIND_PATH(CASACORE_INCLUDE_DIR casacore)
 
-SET(CASACORE_NAMES 
-    casa_images 
-    casa_mirlib 
-    casa_components 
-    casa_coordinates 
-    casa_lattices 
+SET(CASACORE_NAMES
+    casa_images
+    casa_mirlib
+    casa_components
+    casa_coordinates
+    casa_lattices
     casa_msfits
     casa_ms
     casa_fits
-    casa_measures 
-    casa_tables 
-    casa_scimath 
-    casa_scimath_f 
+    casa_measures
+    casa_tables
+    casa_scimath
+    casa_scimath_f
     casa_casa
-    casa_images
 )
 FOREACH( lib ${CASACORE_NAMES} )
     FIND_LIBRARY(CASACORE_LIBRARY_${lib} NAMES ${lib} PATHS ENV CASACORE_LIBRARY_PATH )

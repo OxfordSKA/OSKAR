@@ -1,9 +1,24 @@
-File: cuda/readme
+File: src/cuda/readme
 ===============================================================================
 
-This folder contains C-callable CUDA routines and CUDA kernels used in
-oskar-lib.
+Description:
+===============================================================================
+This folder contains source code for the library module: oskar_cuda
+This library provides math routines written in CUDA for execution on the GPU.
 
+
+Library dependencies:
+    cuda
+    cudart
+    cublas
+
+
+
+Source code naming conventions:
+================================================================================
+Source code consists of C-callable CUDA routines and CUDA kernels. C-callable
+functions can be found in the top level of the src/cuda directory and CUDA
+kernels are found in the kernels directory.
 
 cuda/
 -------------------------------------------------------------------------------
@@ -24,4 +39,3 @@ oskar_cudak_eq2hg       : equatorial to horizontal generic
 oskar_cudak_im2dft      : imager 2D DFT
 oskar_cudak_pc2ht       : pre-compute 2D horizontal trig
 oskar_cudak_wt2hg       : weights 2D horizontal geometric
-
