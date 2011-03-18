@@ -29,7 +29,7 @@ include(compilerOptions)
 include(dependencies)
 
 # === Recurse into sub-diretories.
-add_subdirectory(math)
+#add_subdirectory(math)
 #add_subdirectory(data)
 #add_subdirectory(utility)
 #add_subdirectory(mpi)

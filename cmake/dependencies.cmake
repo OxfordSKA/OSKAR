@@ -17,12 +17,12 @@
 
 find_package(Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtTest REQUIRED)
 find_package(Qwt5 QUIET)
-find_package(FFTW3 REQUIRED)
-find_package(CFitsio REQUIRED)
-find_package(Boost REQUIRED)
+find_package(FFTW3 QUIET)
+find_package(CFitsio QUIET)
+find_package(Boost QUIET)
 find_package(OpenMP REQUIRED)
 find_package(MPI QUIET)
-find_package(CppUnit REQUIRED)
+find_package(CppUnit QUIET)
 find_package(CUDA 2.1 QUIET)
 find_package(CasaCore QUIET)
 
@@ -46,35 +46,25 @@ if(NOT DEFINED oskar_mkl)
     set(pelican_mkl true)
 endif(NOT DEFINED oskar_mkl)
 
+set(OSKAR_MATH_LIBS_FOUND false)
 if(oskar_mkl)
     find_package(MKL QUIET)
 endif()
-
 if(MKL_FOUND)
+	set(OSKAR_MATH_LIBS_FOUND true)
     add_definitions(-DUSING_MKL)
     set(oskar_math_libs ${MKL_LIBRARIES})
     set(oskar_mkl true)
     include_directories(${MKL_INCLUDE_DIR})
     message(STATUS "FoundMKL: ${oskar_math_libs}")
 else()
-    find_package(CBLAS REQUIRED)
-    find_package(LAPACK REQUIRED)
+    find_package(CBLAS QUIET)
+    find_package(LAPACK QUIET)
     set(oskar_math_libs ${LAPACK_LIBRARIES} ${CBLAS_LIBRARIES})
+	if (CBLAS_FOUND AND LAPACK_FOUND)
+		set(OSKAR_MATH_LIBS_FOUND true)
+	endif()
 endif()
-
-
-# == Cuda
-#set(CUDA_SDK_ROOT_DIR /usr/local/cudaSDK/) # <== might need to change this
-if(CUDA_FOUND)
-    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-    set(CUDA_BUILD_EMULATION OFF) # should be default off anyway.
-    if(CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2)
-    else()
-        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g)
-    endif()
-endif()
-
 
 # === Set global project include directories.
 include_directories(

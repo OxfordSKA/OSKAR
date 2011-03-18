@@ -45,7 +45,7 @@ target_link_libraries(oskar_cuda
     ${CUDA_LIBRARIES}
 )
 
-install(TARGETS oskar_cuda LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+#install(TARGETS oskar_cuda LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
 # === Adds a special command to clean nvcc generated files.
 cuda_build_clean_target()

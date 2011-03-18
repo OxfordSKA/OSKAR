@@ -5,6 +5,7 @@ endif()
 
 set(BUILD_SHARED_LIBS true)
 
+# == C++ compiler.
 if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
@@ -45,3 +46,13 @@ else()
 
 endif()
 
+# == Cuda
+if(CUDA_FOUND)
+    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+    set(CUDA_BUILD_EMULATION OFF)
+    if(CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
+        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2)
+    else()
+        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g)
+    endif()
+endif()
