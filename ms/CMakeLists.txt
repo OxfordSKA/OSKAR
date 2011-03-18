@@ -1,5 +1,5 @@
 #
-# src/ms
+# src/ms/CMakeLists.txt
 #
 
 set(ms_SRC
@@ -7,10 +7,9 @@ set(ms_SRC
     src/MsCreate.cpp
 )
 
-add_library(oskar_ms ${ms_SRC} SHARED)
-
-include_directories(${CUDA_INCLUDE_DIRS})
-
+include_directories(${CASACORE_INCLUDE_DIR}/casacore)
+add_library(oskar_ms ${ms_SRC})
+target_link_libraries(oskar_ms ${CASACORE_LIBRARIES})
 
 # === Recurse into test subdirectory.
 add_subdirectory(test)

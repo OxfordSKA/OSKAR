@@ -26,7 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "MsCreate.h"
+#include "ms/MsCreate.h"
+
 #include <ms/MeasurementSets.h>
 #include <tables/Tables.h>
 
@@ -263,7 +264,7 @@ void MsCreate::addBand(int np, int nc, double refFrequency,
     Vector<double> endFreqs = chanFreqs + chanWidths / 2.0;
     double totalBandwidth = max(endFreqs) - min(startFreqs);
 
-    // Add a row to the SPECTRAL_WINDOW subtable.
+    // Add a row to the SPECTRAL_WINDOW sub-table.
     _ms->spectralWindow().addRow();
     _msc->spectralWindow().measFreqRef().put(row, MFrequency::TOPO);
     _msc->spectralWindow().chanFreq().put(row, chanFreqs);

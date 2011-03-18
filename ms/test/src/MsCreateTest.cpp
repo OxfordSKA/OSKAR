@@ -27,6 +27,7 @@
  */
 
 #include "ms/test/MsCreateTest.h"
+#include "ms/MsCreate.h"
 
 using namespace oskar;
 

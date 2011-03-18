@@ -40,6 +40,10 @@ class MSColumns;
 class MSMainColumns;
 }
 
+#include <casa/Arrays/Vector.h>
+
+#include <vector>
+
 namespace oskar {
 
 /**
@@ -71,7 +75,8 @@ class MsCreate
 {
 public:
     /// Constructs an empty measurement set with the given filename.
-    MsCreate(const char* filename, double mjdStart, double exposure, double interval);
+    MsCreate(const char* filename, double mjdStart, double exposure,
+            double interval);
 
     /// Destroys the MsCreate class.
     ~MsCreate();
@@ -92,8 +97,8 @@ public:
 private:
     /// Adds a band to the Measurement Set.
     void addBand(int np, int nc, double refFrequency,
-            const Vector<double>& chanFreqs,
-            const Vector<double>& chanWidths);
+            const casa::Vector<double>& chanFreqs,
+            const casa::Vector<double>& chanWidths);
 
     /// Adds the given number of polarisations.
     void addPolarisation(int np);
@@ -115,5 +120,4 @@ private:
 };
 
 } // namespace oskar
-
 #endif // OSKAR_MS_CREATE_MS_H_
