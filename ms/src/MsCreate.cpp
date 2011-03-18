@@ -104,7 +104,7 @@ MsCreate::~MsCreate()
  * @details
  * Adds the supplied list of antenna positions to the ANTENNA table.
  */
-void MsCreate::addAntennas(int na, float* ax, float* ay, float* az)
+void MsCreate::addAntennas(int na, float* /*ax*/, float* /*ay*/, float* /*az*/)
 {
     // Add rows to the ANTENNA subtable.
     int startRow = _ms->antenna().nrow();

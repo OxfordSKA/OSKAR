@@ -9,7 +9,10 @@ set(ms_SRC
 
 include_directories(${CASACORE_INCLUDE_DIR}/casacore)
 add_library(oskar_ms ${ms_SRC})
+set_target_properties(oskar_ms PROPERTIES COMPILE_FLAGS "-Wno-cast-qual")
+#set_target_properties(oskar_ms PROPERTIES COMPILE_FLAGS "-w")
 target_link_libraries(oskar_ms ${CASACORE_LIBRARIES})
+
 
 # === Recurse into test subdirectory.
 add_subdirectory(test)
