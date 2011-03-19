@@ -21,4 +21,20 @@ Library dependencies:
     dl
 
 
+Building casacore.
+===============================================================================
+A single libcasacore.so can be built using the current source release using the
+command:
+    make libcasacore
+(note this is not using scons but makefile that can be found in the top level
+source directory)
+
+Simply using
+    make
+will build a single set of the shared module libraries.
+
+otherwise see: http://code.google.com/p/casacore/wiki/BuildInstructions
+for build instructions using scons.
+
+
 
