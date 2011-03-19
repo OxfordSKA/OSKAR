@@ -55,7 +55,8 @@ MsCreate::MsCreate(const char* filename,
     MS::addColumnToDesc(desc, MS::DATA); // For visibilities.
     MS::addColumnToDesc(desc, MS::MODEL_DATA);
     MS::addColumnToDesc(desc, MS::CORRECTED_DATA);
-    MS::addColumnToDesc(desc, MS::IMAGING_WEIGHT);
+    // NOTE: http://listmgr.cv.nrao.edu/pipermail/casa-framework/2010-August/001861.html
+    //MS::addColumnToDesc(desc, MS::IMAGING_WEIGHT);
     SetupNewTable newTab(filename, desc, Table::New);
 
     // Create the MeasurementSet.
@@ -217,7 +218,8 @@ void MsCreate::addVisibilities(int nv, float* vu, float* vv, float* vw,
         _msmc->flag().put(row, flag);
         _msmc->weight().put(row, weight);
         _msmc->sigma().put(row, sigma);
-        _msmc->imagingWeight().put(row, imagingWeight);
+        //NOTE: http://listmgr.cv.nrao.edu/pipermail/casa-framework/2010-August/001861.html
+        //_msmc->imagingWeight().put(row, imagingWeight);
         _msmc->exposure().put(row, _exposure);
         _msmc->interval().put(row, _interval);
         _msmc->time().put(row, _mjdTimeStart * 86400
