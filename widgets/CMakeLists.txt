@@ -40,8 +40,15 @@ if (QtGui_FOUND)
 endif()
 
 
-add_subdirectory(test)
 
 if (Qwt5_FOUND)
     add_subdirectory(plotting)
 endif()
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN "src" EXCLUDE
+    PATTERN "test" EXCLUDE)
+
+add_subdirectory(test)

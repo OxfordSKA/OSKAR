@@ -26,5 +26,7 @@ add_library(oskar_widgets_plotting ${widgets_plotting_SRC})
 target_link_libraries(oskar_widgets_plotting ${QT_QTCORE_LIBRARY}
     ${QT_QTGUI_LIBRARY} ${Qwt5_Qt4_LIBRARY})
 
+install(TARGETS oskar_widgets_plotting LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+
 # Recurse into test subdirectory.
 add_subdirectory(test)

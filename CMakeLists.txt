@@ -7,7 +7,8 @@ project(oskar-lib CXX C)
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 
 # === Project version.
-# (todo)
+set(oskar-lib_VERSION_MAJOR 0)
+set(oskar-lib_VERSION_MINOR 0)
 
 # === Append the src/cmake directory to the module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
@@ -16,6 +17,10 @@ list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
 # Note: the install directory prefix is set by CMAKE_INSTALL_PRFEIX.
 if (NOT OSKAR_LIB_INSTALL_DIR)
     set(OSKAR_LIB_INSTALL_DIR "lib")
+endif()
+
+if (NOT OSKAR_INCLUDE_INSTALL_DIR)
+    set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar")
 endif()
 
 if (NOT OSKAR_BIN_INSTALL_DIR)
@@ -42,7 +47,8 @@ if(CASACORE_FOUND)
     add_subdirectory(ms)
 endif()
 
-
+# === install target for library headers.
+install(FILES "oskar.h" DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
 
 # === Packaging (make package)
 set(CPACK_GENERATOR "DEB" "TGZ")

@@ -42,6 +42,12 @@ cuda_add_library(oskar_cuda ${cuda_SRC})
 target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
 
 install(TARGETS oskar_cuda LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN "src" EXCLUDE
+    PATTERN "kernels" EXCLUDE
+    PATTERN "test" EXCLUDE)
 
 # === Adds a special command to clean nvcc generated files.
 cuda_build_clean_target()

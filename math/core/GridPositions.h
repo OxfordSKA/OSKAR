@@ -38,6 +38,10 @@
 #include <cmath>
 #include "math/core/Random.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 /**
  * @brief Class used for generating positions on a grid.
  *
@@ -51,6 +55,17 @@ public:
     /// Generates positions on a (randomised) grid within a circle.
     template<typename T>
     static int circular(int seed, T radius, T xs, T ys, T xe, T ye, T* x, T* y);
+
+    /// Generates positions in an Archimedean spiral. ( r = r0 + b * theta )
+    template <typename T>
+    static void spiralArchimedean(const unsigned n, T * x, T * y,
+            const float rMax, const float r0, const float nRevs,
+            const float thetaStartDeg);
+
+    /// Generates positions in an Log spiral. ( r = a * exp(b * theta) )
+    template <typename T>
+    static void spiralLog(const unsigned n, T * x, T * y, const float rMax,
+            const float a, const float nRevs, const float thetaStartDeg);
 };
 
 /*=============================================================================
@@ -92,6 +107,67 @@ int GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
         }
     }
     return counter;
+}
+
+
+/**
+ * Generates positions on a Archimedean spiral.
+ *
+ * @param n[in]             Number of points to generate.
+ * @param x[out]            Coordinate of points in the x direction.
+ * @param y[out]            Coordinate of points in the y direction
+ * @param rMax[in]          Maximum radius of the spiral (default 1.0)
+ * @param r0[in]            Minimum radius of the spiral (default 0.0)
+ * @param nRevs[in]         Number of revolutions of the spiral (default 1.0)
+ * @param thetaStartDeg[in] Start angle for spiral positions (default 0.0)
+ */
+template <typename T>
+void GridPositions::spiralArchimedean(const unsigned n, T * x, T * y,
+        const float rMax = 1.0f, const float r0 = 0.0f, const float nRevs = 1.0f,
+        const float thetaStartDeg = 0.0f)
+{
+    const float deg2rad = M_PI / 180.0f;
+    const float thetaIncDeg = (360.0f * nRevs) / (float)(n - 1);
+    const float thetaMaxDeg = thetaStartDeg + thetaIncDeg * (n - 1);
+    const float b = (rMax - r0) / (thetaMaxDeg * deg2rad);
+    for (unsigned i = 0; i < n; ++i)
+    {
+        const T thetaRads = (thetaStartDeg + (T)i * thetaIncDeg) * deg2rad;
+        const T r = r0 + b * thetaRads;
+        x[i] = r * std::cos(thetaRads);
+        y[i] = r * std::sin(thetaRads);
+    }
+}
+
+
+/**
+ * Generates positions in a log spiral.
+ *
+ * @param n[in]                 Number of points to generate.
+ * @param x[out]                x coordinates on the spiral.
+ * @param y[out]                y coordinates on the spiral.
+ * @param rMax[in]              Maximum radius of the spiral.
+ * @param a[in]
+ * @param b[in]
+ * @param nRevs[in]             Number of revolutions/
+ * @param thetaStartDeg[in]     Start position angle.
+ */
+template <typename T>
+void GridPositions::spiralLog(const unsigned n, T * x, T * y,
+        const float rMax = 1.0f, const float a = 0.1f, const float nRevs = 1.0f,
+        const float thetaStartDeg = 0.0f)
+{
+    const float deg2rad = M_PI / 180.0f;
+    const float thetaIncDeg = (360.0f * nRevs) / (float)(n - 1);
+    const float thetaMaxDeg = thetaStartDeg + thetaIncDeg * (n - 1);
+    const float b = std::log(rMax / a) / (thetaMaxDeg * deg2rad);
+    for (unsigned i = 0; i < n; ++i)
+    {
+        T thetaRad = (thetaStartDeg + (T)i * thetaIncDeg) * deg2rad;
+        T r = a * std::exp(b * thetaRad);
+        x[i] = r * std::cos(thetaRad);
+        y[i] = r * std::sin(thetaRad);
+    }
 }
 
 #endif // OSKAR_GRID_POSITIONS_H_
