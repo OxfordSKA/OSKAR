@@ -26,20 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ms/test/MsCreateTest.h"
+#include "ms/test/MsAppendTest.h"
 #include "ms/MsCreate.h"
-#include "ms/oskar_ms_create_vis1.h"
+#include "ms/MsAppend.h"
+#include "ms/oskar_ms_create_empty.h"
+#include "ms/oskar_ms_create_meta1.h"
+#include "ms/oskar_ms_append_vis1.h"
 
 using namespace oskar;
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(MsCreateTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(MsAppendTest);
 
 /**
  * @details
  * Sets up the context before running each test method.
  */
-void MsCreateTest::setUp()
+void MsAppendTest::setUp()
 {
 }
 
@@ -47,51 +50,26 @@ void MsCreateTest::setUp()
  * @details
  * Clean up routine called after each test is run.
  */
-void MsCreateTest::tearDown()
+void MsAppendTest::tearDown()
 {
 }
 
 /**
  * @details
- * Tests creation of simple measurement set.
+ * Tests appending visibilities to a measurement set.
  */
-void MsCreateTest::test()
+void MsAppendTest::test()
 {
-    // Create the MsCreate object, passing it the filename.
-    MsCreate ms("simple.ms", (2455632.20209 - 2400000.5), 90, 90);
-
-    // Add some dummy antenna positions.
-    float ax[] = {0, 0, 0};
-    float ay[] = {0, 0, 0};
-    float az[] = {0, 0, 0};
-    int na = sizeof(ax) / sizeof(float);
-    ms.addAntennas(na, ax, ay, az);
-
-    // Add the Right Ascension & Declination of field centre.
-    ms.addField(0, 1.570796);
-
-    // Add frequency band.
-    ms.addBand(0, 1, 400e6, 1.0);
-
-    // Add test visibilities (don't include conjugated versions).
-    float u[] = {1000.0, 2000.01, 156.03};
-    float v[] = {0.0, -241.02, 1678.04};
-    float w[] = {0.0, -56.0, 145.0};
-    float vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
-    int ant1[] = {0, 0, 1};
-    int ant2[] = {1, 2, 2};
-    int nv = sizeof(u) / sizeof(float);
-    ms.addVisibilities(1, nv, u, v, w, vis, ant1, ant2);
 }
 
 /**
  * @details
- * Tests creation of simple measurement set using the C binding.
+ * Tests appending to a measurement set using the C binding.
  */
-void MsCreateTest::test_c()
+void MsAppendTest::test_c()
 {
     // Define filename and metadata.
-    const char filename[] = "simple_c.ms";
+    const char filename[] = "append_c.ms";
     double mjd = 2455632.20209 - 2400000.5;
     double exposure = 90;
     double interval = 90;
@@ -114,6 +92,7 @@ void MsCreateTest::test_c()
     int ant2[] = {1, 2, 2};
     int nv = sizeof(u) / sizeof(float);
 
-    oskar_ms_create_vis1(filename, mjd, exposure, interval, ra, dec,
-            na, ax, ay, az, nv, u, v, w, vis, ant1, ant2, freq);
+    oskar_ms_create_meta1(filename, mjd, ra, dec, na, ax, ay, az, freq);
+    oskar_ms_append_vis1(filename, mjd, exposure, interval,
+            nv, u, v, w, vis, ant1, ant2);
 }

@@ -3,8 +3,13 @@
 #
 
 set(ms_SRC
-    #src/oskar_ms_create_uvw1.cu
+    src/MsAppend.cpp
     src/MsCreate.cpp
+    src/MsManip.cpp
+    src/oskar_ms_append_vis1.cpp
+    src/oskar_ms_create_empty.cpp
+    src/oskar_ms_create_meta1.cpp
+    src/oskar_ms_create_vis1.cpp
 )
 
 include_directories(${CASACORE_INCLUDE_DIR}/casacore)

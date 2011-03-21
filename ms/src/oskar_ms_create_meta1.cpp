@@ -26,27 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#include "ms/oskar_ms_create_meta1.h"
+#include "ms/MsCreate.h"
 
-/**
- * @file oskar_cuda.h
- */
+void oskar_ms_create_meta1(const char* name, double mjd, double ra, double dec,
+        int na, const float* ax, const float* ay, const float* az, double freq)
+{
+    // Create the MsCreate object, passing it the filename.
+    oskar::MsCreate ms(name, mjd, 0, 0);
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+    // Add antenna positions.
+    ms.addAntennas(na, ax, ay, az);
 
-#endif // OSKAR_CUDA_H_
+    // Add the Right Ascension & Declination of field centre.
+    ms.addField(ra, dec);
+
+    // Add polarisation.
+    ms.addPolarisation(1);
+
+    // Add frequency band.
+    ms.addBand(0, 1, freq, 1.0);
+}

@@ -7,6 +7,7 @@
 set(ms_test_SRC
     src/CppUnitMain.cpp
     src/MsCreateTest.cpp
+    src/MsAppendTest.cpp
 )
 
 if (CPPUNIT_FOUND)

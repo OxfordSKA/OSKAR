@@ -26,27 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_MS_CREATE_VIS_EMPTY_H_
+#define OSKAR_MS_CREATE_VIS_EMPTY_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_ms_create_empty.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * Creates an empty Measurement Set.
+ *
+ * @details
+ * This functions creates an empty Measurement Set.
+ *
+ * @param[in] name The name of the output Measurement Set directory.
+ */
+void oskar_ms_create_empty(const char* name);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_MS_CREATE_VIS_EMPTY_H_

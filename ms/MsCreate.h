@@ -33,16 +33,7 @@
  * @file MsCreate.h
  */
 
-// CASA declarations.
-namespace casa {
-class MeasurementSet;
-class MSColumns;
-class MSMainColumns;
-}
-
-#include <casa/Arrays/Vector.h>
-
-#include <vector>
+#include "ms/MsManip.h"
 
 namespace oskar {
 
@@ -63,15 +54,18 @@ namespace oskar {
        // Add the Right Ascension & Declination of field centre.
        ms.addField(0, 0);
 
+       // Add a polarisation.
+       ms.addPolarisation(np);
+
        // Add frequency band.
-       ms.addBand(1, 1, 400e6, 1.0);
+       ms.addBand(polid, 1, 400e6, 1.0);
 
        // Add the visibilities.
        // Note that u,v,w coordinates are in metres.
-       ms.addVisibilities(nv, u, v, w, vis);
+       ms.addVisibilities(np, nv, u, v, w, vis, ant1, ant2);
  * </endcode>
  */
-class MsCreate
+class MsCreate : public MsManip
 {
 public:
     /// Constructs an empty measurement set with the given filename.
@@ -80,44 +74,8 @@ public:
 
     /// Destroys the MsCreate class.
     ~MsCreate();
-
-    /// Adds antennas to the ANTENNA table.
-    void addAntennas(int na, float* ax, float* ay, float* az);
-
-    /// Adds a band to the Measurement Set.
-    void addBand(int np, int nc, double refFrequency, double chanWidth);
-
-    /// Adds a field to the FIELD table.
-    void addField(double ra, double dec, const char* name = 0);
-
-    /// Adds visibilities to the main table.
-    void addVisibilities(int nv, float* u, float* v, float* w, float* vis,
-        int* ant1, int* ant2);
-
-private:
-    /// Adds a band to the Measurement Set.
-    void addBand(int np, int nc, double refFrequency,
-            const casa::Vector<double>& chanFreqs,
-            const casa::Vector<double>& chanWidths);
-
-    /// Adds the given number of polarisations.
-    void addPolarisation(int np);
-
-    /// Fills the observation sub-table.
-    void fillObservation();
-
-private:
-    casa::MeasurementSet* _ms;   ///< Pointer to the created Measurement Set.
-    casa::MSColumns* _msc;       ///< Pointer to the sub-tables.
-    casa::MSMainColumns* _msmc;  ///< Pointer to the main columns.
-    std::vector<int> _npol;      ///< Number of polarisations in each band.
-    std::vector<int> _nchan;     ///< Number of channels in each band.
-    std::vector<int> _polid;     ///< Polarisation ID for each band.
-    int _nBlocksAdded;           ///< The number of visibility blocks added.
-    double _mjdTimeStart;        ///< Modified Julian Date of the start time.
-    double _exposure;            ///< For visibility data.
-    double _interval;            ///< For visibility data.
 };
 
 } // namespace oskar
+
 #endif // OSKAR_MS_CREATE_MS_H_

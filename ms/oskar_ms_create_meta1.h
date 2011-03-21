@@ -26,27 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_MS_CREATE_VIS_META1_H_
+#define OSKAR_MS_CREATE_VIS_META1_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_ms_create_meta1.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * Creates a Measurement Set from the supplied visibilities and (u,v,w)
+ * coordinates.
+ *
+ * @details
+ * This functions creates a Measurement Set from the supplied visibilities
+ * and (u,v,w) coordinates for a single polarisation.
+ *
+ * @param[in] name The name of the output Measurement Set directory.
+ * @param[in] mjd The Modified Julian Date of the start time.
+ * @param[in] ra The Right Ascension of the field centre in radians.
+ * @param[in] dec The Declination of the field centre in radians.
+ * @param[in] na The number of antennas or stations in the interferometer.
+ * @param[in] ax The antenna x positions in metres, in ITRS frame (length na).
+ * @param[in] ay The antenna y positions in metres, in ITRS frame (length na).
+ * @param[in] az The antenna z positions in metres, in ITRS frame (length na).
+ * @param[in] freq The observing frequency, in Hertz.
+ */
+void oskar_ms_create_meta1(const char* name, double mjd, double ra, double dec,
+        int na, const float* ax, const float* ay, const float* az, double freq);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_MS_CREATE_VIS_META1_H_

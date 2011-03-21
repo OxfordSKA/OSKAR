@@ -47,6 +47,7 @@ class MsCreateTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(MsCreateTest);
         CPPUNIT_TEST(test);
+        CPPUNIT_TEST(test_c);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -59,6 +60,9 @@ class MsCreateTest : public CppUnit::TestFixture
     public:
         /// Test method.
         void test();
+
+        /// Test method.
+        void test_c();
 };
 
 #endif // MS_CREATE_TEST_H_

@@ -26,27 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_MS_APPEND_VIS1_H_
+#define OSKAR_MS_APPEND_VIS1_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_ms_append_vis1.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * Adds the supplied visibilities and (u,v,w) coordinates to a Measurement Set.
+ *
+ * @details
+ * This functions appends to a Measurement Set using the supplied visibilities
+ * and (u,v,w) coordinates for a single polarisation.
+ *
+ * @param[in] name The name of the Measurement Set directory.
+ * @param[in] mjd The Modified Julian Date of the start time.
+ * @param[in] exposure The visibility exposure length in seconds.
+ * @param[in] interval The visibility interval length in seconds.
+ * @param[in] nv The number of visibilities to add.
+ * @param[in] u The visibility u coordinates in metres (length nv).
+ * @param[in] v The visibility v coordinates in metres (length nv).
+ * @param[in] w The visibility w coordinates in metres (length nv).
+ * @param[in] vis The complex visibility values (length 2*nv).
+ * @param[in] ant1 The index of antenna 1 for the baselines (length nv).
+ * @param[in] ant2 The index of antenna 2 for the baselines (length nv).
+ */
+void oskar_ms_append_vis1(const char* name, double mjd, double exposure,
+        double interval, int nv, const float* u, const float* v,
+        const float* w, const float* vis, const int* ant1, const int* ant2);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_MS_APPEND_VIS1_H_

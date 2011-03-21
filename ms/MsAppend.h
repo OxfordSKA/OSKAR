@@ -26,27 +26,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_MS_APPEND_MS_H_
+#define OSKAR_MS_APPEND_MS_H_
 
 /**
- * @file oskar_cuda.h
+ * @file MsAppend.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#include "ms/MsManip.h"
 
-#endif // OSKAR_CUDA_H_
+namespace oskar {
+
+/**
+ * @brief
+ * Utility class for appending to an existing Measurement Set.
+ *
+ * @details
+ * This class is used to easily append to a Measurement Set.
+ * It should be used as follows:
+ * <code>
+       // Create the MsAppend object, passing it the filename.
+       MsAppend ms("simple.ms", start, exposure, interval);
+
+       // Add the antenna positions.
+       ms.addAntennas(na, ax, ay, az);
+
+       // Add the Right Ascension & Declination of field centre.
+       ms.addField(0, 0);
+
+       // Add a polarisation.
+       ms.addPolarisation(np);
+
+       // Add frequency band.
+       ms.addBand(polid, 1, 400e6, 1.0);
+
+       // Add the visibilities.
+       // Note that u,v,w coordinates are in metres.
+       ms.addVisibilities(np, nv, u, v, w, vis, ant1, ant2);
+ * </endcode>
+ */
+class MsAppend : public MsManip
+{
+public:
+    /// Constructs an empty measurement set with the given filename.
+    MsAppend(const char* filename, double mjdStart, double exposure,
+            double interval);
+
+    /// Destroys the MsAppend class.
+    ~MsAppend();
+};
+
+} // namespace oskar
+
+#endif // OSKAR_MS_APPEND_MS_H_

@@ -26,27 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef MS_APPEND_TEST_H_
+#define MS_APPEND_TEST_H_
 
 /**
- * @file oskar_cuda.h
+ * @file MsAppendTest.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class MsAppendTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(MsAppendTest);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST(test_c);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test();
+
+        /// Test method.
+        void test_c();
+};
+
+#endif // MS_APPEND_TEST_H_
