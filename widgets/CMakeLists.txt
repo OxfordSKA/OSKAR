@@ -3,16 +3,20 @@
 #
 
 
-set(widgets_MOC_SRC
-)
-
-set(widgets_UI_FORMS
-)
-
-set(widgets_SRC
-)
-
 if (QtGui_FOUND)
+
+    set(widgets_MOC_SRC
+        #
+    )
+
+    set(widgets_UI_FORMS
+        #
+    )
+
+    set(widgets_SRC
+        #
+    )
+
     # Include the current binary directory for the purposes of compiled forms.
     include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -36,5 +40,8 @@ if (QtGui_FOUND)
 endif()
 
 
-
 add_subdirectory(test)
+
+if (Qwt5_FOUND)
+    add_subdirectory(plotting)
+endif()
