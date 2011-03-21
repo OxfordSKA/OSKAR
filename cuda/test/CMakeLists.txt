@@ -16,7 +16,7 @@ set(data_test_SRC
     src/CudaEquatorialToHorizontalTest.cpp
 )
 
-if (CppUnit_FOUND)
+if (CPPUNIT_FOUND)
     add_executable(cudaTest ${data_test_SRC})
     target_link_libraries(cudaTest oskar_cuda ${CPPUNIT_LIBRARIES})
 endif()
