@@ -12,6 +12,7 @@ set(ms_SRC
     src/oskar_ms_create_meta1.cpp
     src/oskar_ms_create_vis1.cpp
 )
+set(ms_SRC "${ms_SRC}" PARENT_SCOPE)
 
 # === Macros to build the oskar-lib ms module.
 include_directories(${CASACORE_INCLUDE_DIR}/casacore)

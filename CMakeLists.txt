@@ -1,6 +1,7 @@
 #
-# /src (top level CMakeLists.txt)
+# src/CMakeLists.txt (top level CMakeLists.txt)
 #
+#==============================================================================
 
 # === Set the project name and specify the required CMAKE version.
 project(oskar-lib CXX C)

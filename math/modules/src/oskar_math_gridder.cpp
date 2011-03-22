@@ -50,7 +50,7 @@ float oskar_math_gridder1(unsigned n, const float * x, const float * y,
         // Scale the input coordinates to grid space.
         float xScaled = x[i] / pixelSize;
         if (xScaled > 0.0f) xScaled = -xScaled;
-        if (uScaled > cRadius) continue;
+        if (xScaled > cRadius) continue;
         float yScaled = y[i] / pixelSize;
 
         // Round to the closest grid cell.
@@ -66,8 +66,8 @@ float oskar_math_gridder1(unsigned n, const float * x, const float * y,
         const float yOffset = (float)yGrid - yScaled;
 
         // Kernel offset.
-        const int ixConvFunc = _roundHalfDown0(xDelta) + cCentre;
-        const int iyConvFunc = _roundHalfDown0(yDelta) + cCentre;
+        const int ixConvFunc = _roundHalfDown0(xOffset) + cCentre;
+        const int iyConvFunc = _roundHalfDown0(yOffset) + cCentre;
 
         for (unsigned y = 0; y < cSize; ++y)
         {
@@ -83,12 +83,12 @@ float oskar_math_gridder1(unsigned n, const float * x, const float * y,
                 const float re = cFunc[cIdx] * amp[i].real();
                 const float im = cFunc[cIdx] * amp[i].imag();
                 grid[gIdx] += Complex(re, im);
-                gridSum += cFunc[cIdx];
+                *gridSum += cFunc[cIdx];
             }
         }
     }
 
-    return gridSum;
+    return *gridSum;
 }
 
 } // namespace oskar

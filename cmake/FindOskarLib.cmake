@@ -53,7 +53,13 @@
 # General variables.
 #
 ##############################
-set(OSKAR_MODULES ms cuda widgets math)
+set(OSKAR_MODULES
+    ms
+    cuda
+    math
+    widgets
+    widgets_plotting
+)
 
 
 
@@ -64,28 +70,32 @@ set(OSKAR_MODULES ms cuda widgets math)
 ##############################
 
 # Check version against that specified.
-set(OSKAR_INSTALLED_VERSION_TOO_OLD false)
+#set(OSKAR_INSTALLED_VERSION_TOO_OLD false)
+
+#message("OSKAR MIN VERSION ${OSKAR_MIN_VERSION}")
 
 # We need at least version 0.0.0!
-if (NOT OSKAR_MIN_VERSION)
-    set(OSKAR_MIN_VERSION "0.0.0")
-endif ()
+#if (NOT OSKAR_MIN_VERSION)
+#    set(OSKAR_MIN_VERSION "0.0.0")
+#endif ()
+
+#message("OSKAR MIN VERSION ${OSKAR_MIN_VERSION}")
 
 # Now parse the parts of the user given version string into variables
-string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" req_oskar_major_vers
-    "${OSKAR_MIN_VERSION}")
-if (NOT req_oskar_major_ver)
-    message(FATAL_ERROR "Invalid version of oskar-lib string was given:
-            \"${OSKAR_MIN_VERSION}\", expected e.g. \"0.1.2\"")
-endif ()
+#string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" req_oskar_major_vers
+#    "${OSKAR_MIN_VERSION}")
+#if (NOT req_oskar_major_ver)
+#    message(FATAL_ERROR "Invalid version of oskar-lib string was given:
+#            \"${OSKAR_MIN_VERSION}\", expected e.g. \"0.1.2\"")
+#endif ()
 
 # Now parse the parts of the user given version string into variables
-string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_oskar_major_vers
-     "${OSKAR_MIN_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_oskar_minor_vers
-    "${OSKAR_MIN_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_oskar_patch_vers
-    "${OSKAR_MIN_VERSION}")
+#string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" req_oskar_major_vers
+#     "${OSKAR_MIN_VERSION}")
+#string(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" req_oskar_minor_vers
+#    "${OSKAR_MIN_VERSION}")
+#string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" req_oskar_patch_vers
+#    "${OSKAR_MIN_VERSION}")
 
 # Get the version string from the library...?
 
@@ -125,9 +135,17 @@ mark_as_advanced(OSKAR_INCLUDE_DIR)
 
 foreach (module ${OSKAR_MODULES})
     string(TOUPPER ${module} _upper_oskar_module)
-    find_library(OSKAR_${_upper_oskar_module}_LIBRARY NAMES "oskar_${module}")
-    list(APPEND OSKAR_LIBRARIES ${OSKAR_${_upper_oskar_module}_LIBRARY})
+    set(lib_name "oskar_${module}")
+    find_library(OSKAR_${_upper_oskar_module}_LIBRARY NAMES ${lib_name})
+    #message("----- ${lib_name}: ${OSKAR_${_upper_oskar_module}_LIBRARY}")
+    if (${OSKAR_${_upper_oskar_module}_LIBRARY} MATCHES OSKAR_${_upper_oskar_module}_LIBRARY-NOTFOUND)
+        #message("oops")
+    else()
+        list(APPEND OSKAR_LIBRARIES ${OSKAR_${_upper_oskar_module}_LIBRARY})
+    endif ()
 endforeach ()
+
+#message("**** ${OSKAR_LIBRARIES}")
 
 mark_as_advanced(OSKAR_LIBRARIES)
 

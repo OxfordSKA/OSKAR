@@ -37,7 +37,7 @@ typedef std::complex<float> Complex;
 namespace oskar {
 
 
-void oskar_math_gridder1(unsigned n, const float * x, const float * y,
+float oskar_math_gridder1(unsigned n, const float * x, const float * y,
         const Complex * amp, unsigned cSupport, unsigned cOversample,
         const float * cFunc, unsigned gSize, float pixelSize,
         Complex * grid, float * gridSum);
