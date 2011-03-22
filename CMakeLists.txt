@@ -9,6 +9,8 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 # === Project version.
 set(oskar-lib_VERSION_MAJOR 0)
 set(oskar-lib_VERSION_MINOR 0)
+set(oskar-lib_VERSION_PATCH 0)
+set(oskar-lib_SOVERSION "${oskar-lib_VERSION_MAJOR}.${oskar-lib_VERSION_MINOR}.${oskar-lib_VERSION_PATCH}")
 
 # === Append the src/cmake directory to the module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
@@ -47,7 +49,7 @@ if(CASACORE_FOUND)
     add_subdirectory(ms)
 endif()
 
-# === install target for library headers.
+# === Install target for library header.
 install(FILES "oskar.h" DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
 
 # === Packaging (make package)
