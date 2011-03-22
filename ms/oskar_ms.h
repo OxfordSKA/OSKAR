@@ -26,47 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MS_APPEND_TEST_H_
-#define MS_APPEND_TEST_H_
+#ifndef OSKAR_MS_H_
+#define OSKAR_MS_H_
 
 /**
- * @file MsAppendTest.h
+ * @file oskar_ms.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_ms_append_vis1.h"
+#include "oskar_ms_create_empty.h"
+#include "oskar_ms_create_meta1.h"
+#include "oskar_ms_create_vis1.h"
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class MsAppendTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(MsAppendTest);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST(test_c);
-        CPPUNIT_TEST(test_large);
-        CPPUNIT_TEST_SUITE_END();
-
-    public:
-        /// Set up context before running a test.
-        void setUp();
-
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
-        void test();
-
-        /// Test method.
-        void test_c();
-
-        /// Test method.
-        void test_large();
-};
-
-#endif // MS_APPEND_TEST_H_
+#endif // OSKAR_MS_H_

@@ -32,6 +32,10 @@
 #include "ms/oskar_ms_create_empty.h"
 #include "ms/oskar_ms_create_meta1.h"
 #include "ms/oskar_ms_append_vis1.h"
+#include <vector>
+
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
 
 using namespace oskar;
 
@@ -95,4 +99,45 @@ void MsAppendTest::test_c()
     oskar_ms_create_meta1(filename, mjd, ra, dec, na, ax, ay, az, freq);
     oskar_ms_append_vis1(filename, mjd, exposure, interval,
             nv, u, v, w, vis, ant1, ant2);
+}
+
+/**
+ * @details
+ * Tests appending to a large measurement set using the C binding.
+ */
+void MsAppendTest::test_large()
+{
+    // Define filename and metadata.
+    const char filename[] = "append_large.ms";
+    double mjd = 2455632.20209 - 2400000.5;
+    double exposure = 90;
+    double interval = 90;
+    double ra = 0;
+    double dec = 1.570796;
+    double freq = 400e6;
+
+    // Define antenna positions.
+    float ax[] = {0, 0, 0};
+    float ay[] = {0, 0, 0};
+    float az[] = {0, 0, 0};
+    int na = sizeof(ax) / sizeof(float);
+
+    // Create the MS with the metadata
+    oskar_ms_create_meta1(filename, mjd, ra, dec, na, ax, ay, az, freq);
+
+    // Define visibilities.
+    int nv = 1000;
+    std::vector<float> u(nv, 0.0f), v(nv, 0.0f), w(nv, 0.0f);
+    std::vector<float> vis(2*nv, 0.0f);
+    std::vector<int> ant1(nv, 0), ant2(nv, 0);
+
+    // Append to MS.
+    TIMER_START
+    int blocks = 100;
+    for (int b = 0; b < blocks; ++b) {
+        oskar_ms_append_vis1(filename, mjd, exposure, interval,
+                nv, &u[0], &v[0], &w[0], &vis[0], &ant1[0], &ant2[0]);
+    }
+    TIMER_STOP("Finished creating measurement set (%d visibilities)",
+            nv * blocks)
 }
