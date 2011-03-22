@@ -5,7 +5,8 @@
 
 # === Source files for the math modules sub-module.
 set(math_modules_SRC
-    src/oskar_math_gridder.cpp
+    src/Gridder.cpp
+    src/GriddingKernels.cpp
 )
 set(math_modules_SRC "${math_modules_SRC}" PARENT_SCOPE)
 

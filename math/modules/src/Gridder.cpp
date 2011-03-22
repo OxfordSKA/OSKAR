@@ -26,36 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/modules/oskar_math_gridder.h"
+#include "math/modules/Gridder.h"
+#include "math/core/Rounding.h"
+#include <iostream>
 
 using namespace std;
 
 namespace oskar {
 
-float oskar_math_gridder1(unsigned n, const float * x, const float * y,
-        const Complex * amp, unsigned cSupport, unsigned cOversample,
-        const float * cFunc, unsigned gSize, float pixelSize,
-        Complex * grid, float * gridSum)
+float Gridder::oskar_math_gridder1(const unsigned n, const float * x,
+        const float * y, const Complex * amp, const unsigned cSupport,
+        unsigned cOversample, const float * cFunc, const unsigned gSize,
+        const float pixelSize, Complex * grid, float * gridSum)
 {
+    *gridSum = 0.0f;
+
+    if (x == 0 || y == 0 || amp == 0 || cFunc == 0 || grid == 0)
+    {
+        cerr << "ERROR: oskar_math_gridder1() Input data error." << endl;
+        return *gridSum;
+    }
+
     const unsigned gCentre = (unsigned) floor((float)gSize / 2.0f);
     const unsigned gSizeX = (unsigned) ceil((float)gSize / 2.0) + 1;
-    const unsigned cSize = (cSupport * 2 + 1);
-    const unsigned cCentre = (unsigned) floor((float)cSize / 2.0f);
-    const float cRadius = (float)(cSupport * 2 + 1) / 2.0f;
-    *gridSum = 0.0f;
+    const unsigned cSize = cSupport * 2 + 1;
+    const unsigned cCentre = (unsigned) floor((float)(cSize * cOversample) / 2.0f);
+    const float cRadius = (float)cSize / 2.0f;
 
     // Loop over data points and apply them to the grid.
     for (unsigned i = 0; i < n; ++i)
     {
         // Scale the input coordinates to grid space.
         float xScaled = x[i] / pixelSize;
-        if (xScaled > 0.0f) xScaled = -xScaled;
-        if (xScaled > cRadius) continue;
         float yScaled = y[i] / pixelSize;
 
         // Round to the closest grid cell.
-        const int xGrid = _roundHalfUp0(xScaled);
-        const int yGrid = _roundHalfUp0(yScaled);
+        const int xGrid = roundHalfUp0(xScaled);
+        const int yGrid = roundHalfUp0(yScaled);
 
         // Index into the grid array.
         const unsigned ixGrid = xGrid + gCentre;
@@ -66,19 +73,35 @@ float oskar_math_gridder1(unsigned n, const float * x, const float * y,
         const float yOffset = (float)yGrid - yScaled;
 
         // Kernel offset.
-        const int ixConvFunc = _roundHalfDown0(xOffset) + cCentre;
-        const int iyConvFunc = _roundHalfDown0(yOffset) + cCentre;
+        const float xDelta = xOffset * (float)cOversample;
+        const float yDelta = yOffset * (float)cOversample;
+
+        // Kernel offset.
+        const int ixConvFunc = roundHalfDown0(xOffset) + cCentre;
+        const int iyConvFunc = roundHalfDown0(yOffset) + cCentre;
+
+        cout << "---------------" << endl;
+        cout << "x[" << i << "] = " << x[i] << endl;
+        cout << "xScaled     = " << xScaled << endl;
+        cout << "xGrid       = " << xGrid << endl;
+        cout << "ixGrid      = " << ixGrid << endl;
+        cout << "xOffset     = " << xOffset << endl;
+        cout << "xDelta      = " << xDelta << endl;
+        cout << "ixConvFunc  = " << ixConvFunc << endl;
 
         for (unsigned y = 0; y < cSize; ++y)
         {
             for (unsigned x = 0; x < cSize; ++x)
             {
-                const unsigned gx = xGrid + x - cSupport;
-                const unsigned gy = yGrid + y - cSupport;
-                const unsigned cy = iyConvFunc + y * cOversample;
-                const unsigned cx = ixConvFunc + x * cOversample;
-                const unsigned cIdx = cy * (cSize * cOversample) + cx;
+                const unsigned gx = ixGrid - cSupport + x;
+                const unsigned gy = iyGrid - cSupport + y;
                 const unsigned gIdx = gy * gSize + gx;
+                cout << "-- gx, gy = " << gx << ", " << gy << endl;
+
+
+                const unsigned cy = iyConvFunc + (y - cSupport) * cOversample;
+                const unsigned cx = ixConvFunc + (x - cSupport) * cOversample;
+                const unsigned cIdx = cy * (cSize * cOversample) + cx;
 
                 const float re = cFunc[cIdx] * amp[i].real();
                 const float im = cFunc[cIdx] * amp[i].imag();

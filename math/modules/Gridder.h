@@ -36,41 +36,14 @@ typedef std::complex<float> Complex;
 
 namespace oskar {
 
-
-float oskar_math_gridder1(unsigned n, const float * x, const float * y,
-        const Complex * amp, unsigned cSupport, unsigned cOversample,
-        const float * cFunc, unsigned gSize, float pixelSize,
-        Complex * grid, float * gridSum);
-
-
-template <typename T> T _roundHalfUp(const T& x)
+class Gridder
 {
-    return std::floor(x + 0.5);
-}
-
-template <typename T> T _roundHalfUp0(const T & x)
-{
-    T result = _roundHalfUp(std::fabs(x));
-    return (x < 0.0) ? -result:result;
-}
-
-
-template <typename T> T _roundHalfDown(const T & x)
-{
-    return std::ceil(x - 0.5);
-}
-
-
-// this would also work... faster?
-// -----
-// (x > 0.0) ? floor(x) + centre : floor(x) + centre + 1;
-// else centre;
-// ------
-template <typename T> T _roundHalfDown0(const T & x)
-{
-    T result = _roundHalfDown(std::fabs(x));
-    return (x < 0.0) ? -result : result;
-}
+    public:
+        static float oskar_math_gridder1(const unsigned n, const float * x,
+                const float * y, const Complex * amp, const unsigned cSupport,
+                unsigned cOversample, const float * cFunc, const unsigned gSize,
+                const float pixelSize, Complex * grid, float * gridSum);
+};
 
 
 } // namespace oskar
