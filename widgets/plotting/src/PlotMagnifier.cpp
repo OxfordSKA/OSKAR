@@ -1,10 +1,7 @@
 #include "widgets/plotting/PlotMagnifier.h"
+
 #include <QtGui/QMouseEvent>
 #include <QtGui/QWheelEvent>
-
-#include <iostream>
-using namespace std;
-
 
 namespace oskar {
 
@@ -34,9 +31,7 @@ void PlotMagnifier::widgetWheelEvent(QWheelEvent * e)
     // function to do nothing.
     if (e->modifiers() == Qt::ShiftModifier)
     {
-        //cout << e->delta() << endl;
         rescale((e->delta() > 0.0) ? 1.1 : 0.9);
-        //rescale(2.0);
     }
 }
 

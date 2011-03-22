@@ -38,6 +38,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
 #include <QtCore/QString>
+#include <QtCore/QObject>
 
 #include <vector>
 
@@ -64,6 +65,7 @@ class ColourMap : public QObject
 
     public:
         ColourMap() {}
+
         virtual ~ColourMap() {};
 
     public:

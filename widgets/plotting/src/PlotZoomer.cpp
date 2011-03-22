@@ -16,7 +16,7 @@ PlotZoomer::PlotZoomer(QwtPlotCanvas * canvas)
     // Select a zoom rectangle.
     setMousePattern(QwtEventPattern::MouseSelect1, Qt::LeftButton);
 
-    // Unzoom to initial size.
+    // Reset zoom to initial size.
     setMousePattern(QwtEventPattern::MouseSelect2, Qt::RightButton, Qt::ControlModifier);
     setKeyPattern(QwtEventPattern::KeyHome, Qt::Key_Q);
 

@@ -1,24 +1,21 @@
 #
-# src/widgets/plotting/test
+# src/widgets/plotting/test/CMakeLists.txt
 #
+#===============================================================================
 
+
+# === CppUnit unit testing.
 set(plotting_test_SRC
     src/CppUnitMain.cpp
 )
-
-include_directories(${QT_QTCORE_INCLUDE_DIR})
-
 add_executable(plottingTest ${plotting_test_SRC})
-
 target_link_libraries(plottingTest
     oskar_widgets_plotting
     ${CPPUNIT_LIBRARIES}
     ${QT_QTCORE_LIBRARY}
 )
 
-
-# ==============================================================================
-
+# === QtTest unit testing.
 qt4_wrap_cpp(plotting_test_MOC QTestPlotWidget.h)
 add_executable(qtest_plotWidget ${plotting_test_MOC})
 target_link_libraries(qtest_plotWidget

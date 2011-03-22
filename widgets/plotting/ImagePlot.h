@@ -33,8 +33,10 @@
  * @file ImagePlot.h
  */
 
-#include <qwt_plot_spectrogram.h>
 #include "widgets/plotting/ImagePlotData.h"
+
+#include <qwt_plot_spectrogram.h>
+
 #include <vector>
 
 namespace oskar {
