@@ -8,7 +8,7 @@
 #  CASACORE_LIBRARIES    - List of libraries when using casacore.
 #  CASACORE_FOUND        - True if casacore found.
 
-# http://www.mail-archive.com/cmake@cmake.org/msg26187.html
+
 #message("========== version: ${CasaCore_FIND_VERSION}")
 #message("========== ver major: ${CasaCore_FIND_VERSION_MAJOR}")
 #message("========== ver minor: ${CasaCore_FIND_VERSION_MINOR}")
@@ -16,16 +16,22 @@
 #message("========== exact: ${CasaCore_VERSION_EXACT}")
 #message("========== required: ${CasaCore_FIND_REQUIRED}")
 
-include(FindPkgConfig)
-pkg_check_modules(CFITSIO cfitsio>=3.0 REQUIRED)
-pkg_check_modules(WCSLIB wcslib>=4.7 REQUIRED)
+#include(FindPkgConfig)
+#pkg_check_modules(CFITSIO cfitsio>=3.0 REQUIRED)
+#pkg_check_modules(WCSLIB wcslib>=4.7 REQUIRED)
 
+#find_library(TEST_LIB NAMES oskar_ms
+#    PATHS
+#)
 
 IF (CASACORE_INCLUDE_DIR)
     # Already in cache, be silent
     SET(CASACORE_FIND_QUIETLY TRUE)
 ENDIF (CASACORE_INCLUDE_DIR)
 
+
+### mmm probably need to find the other deps too....
+### see: http://usg.lofar.org/websvn/filedetails.php?repname=repos+1&path=%2Fcode%2Ftrunk%2Fdevel_common%2Fcmake%2FFindCASACORE.cmake&rev=1513&sc=1
 if(CASACORE_FIND_QUIETLY OR NOT CASACORE_FIND_REQUIRED)
   find_package(LAPACK)
 else(CASACORE_FIND_QUIETLY OR NOT CASACORE_FIND_REQUIRED)
