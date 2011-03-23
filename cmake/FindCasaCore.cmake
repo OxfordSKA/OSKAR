@@ -8,6 +8,18 @@
 #  CASACORE_LIBRARIES    - List of libraries when using casacore.
 #  CASACORE_FOUND        - True if casacore found.
 
+# http://www.mail-archive.com/cmake@cmake.org/msg26187.html
+#message("========== version: ${CasaCore_FIND_VERSION}")
+#message("========== ver major: ${CasaCore_FIND_VERSION_MAJOR}")
+#message("========== ver minor: ${CasaCore_FIND_VERSION_MINOR}")
+#message("========== ver path: ${CasaCore_FIND_VERSION_PATCH}")
+#message("========== exact: ${CasaCore_VERSION_EXACT}")
+#message("========== required: ${CasaCore_FIND_REQUIRED}")
+
+include(FindPkgConfig)
+pkg_check_modules(CFITSIO cfitsio>=3.0 REQUIRED)
+pkg_check_modules(WCSLIB wcslib>=4.7 REQUIRED)
+
 
 IF (CASACORE_INCLUDE_DIR)
     # Already in cache, be silent
@@ -50,10 +62,11 @@ endif(LAPACK_FOUND)
 
 # handle the QUIETLY and REQUIRED arguments and set CASACORE_FOUND to TRUE if.
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleCompat)
+INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CASACORE DEFAULT_MSG CASACORE_LIBRARIES CASACORE_INCLUDE_DIR)
 
 IF(CASACORE_FOUND)
 ELSE(CASACORE_FOUND)
     SET( CASACORE_LIBRARIES )
 ENDIF(CASACORE_FOUND)
+

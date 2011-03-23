@@ -30,7 +30,7 @@ find_package(CppUnit QUIET)
 find_package(FFTW3 QUIET)
 find_package(Boost QUIET)
 
-find_package(CasaCore QUIET)
+find_package(CasaCore 1.0.0 QUIET)
 find_package(CFitsio QUIET)
 
 set(OSKAR_MATH_LIBS_FOUND false)
