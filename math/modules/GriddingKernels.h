@@ -40,9 +40,13 @@ class GriddingKernels
         static void exp2D(const unsigned support, const unsigned oversample,
                 const float sigma, float * cFunc);
 
-//        static float expSinc1D(const float r);
-//
-//        static void expSinc2D();
+        static float expSinc1D(const float r);
+
+        static void expSinc2D(const unsigned support, const unsigned oversample,
+                float * cFunc);
+
+    private:
+        static float _expSinc(const float x, const float y);
 };
 
 

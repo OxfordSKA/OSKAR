@@ -27,8 +27,13 @@
  */
 
 #include "math/modules/GriddingKernels.h"
+#include "math/core/FloatingPointCompare.h"
 
 #include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 using namespace std;
 
@@ -60,6 +65,69 @@ void GriddingKernels::exp2D(const unsigned support,
         }
     }
 }
+
+
+
+float GriddingKernels::expSinc1D(const float r)
+{
+    return 1.0f;
+}
+
+
+
+void GriddingKernels::expSinc2D(const unsigned support,
+        const unsigned oversample, float * cFunc)
+{
+    const int size = (2 * support + 1) * oversample;
+    const float inc = 1.0f / (float)oversample;
+    const int centre = (size - 1) / 2;
+
+    for (int j = 0; j < size; ++j)
+    {
+        for (int i = 0; i < size; ++i)
+        {
+            const float y = (j - centre) * inc;
+            const float x = (i - centre) * inc;
+            cFunc[j * size + i] = _expSinc(x, y);
+        }
+    }
+}
+
+
+float GriddingKernels::_expSinc(const float x, const float y)
+{
+    const float p1 = M_PI / 1.55f;
+    const float p2 = 1.0f / 2.52f;
+    const float p3 = 2.0f;
+
+    const float x2 = pow((fabs(x) * p2), p3);
+    const float y2 = pow((fabs(y) * p2), p3);
+    const float r2 = x2 + y2;
+    const float ampExp = exp(-r2);
+
+    float ampSinc = 0.0f;
+
+    if ( isEqual(x, 0.0f) && isEqual(y, 0.0f) )
+    {
+        ampSinc = 1.0f;
+    }
+    else if (isEqual(x, 0.0f))
+    {
+        ampSinc = sin(y * p1) / (y * p1);
+    }
+    else if (isEqual(y, 0.0f))
+    {
+        ampSinc = sin(x * p1) / (x * p1);
+    }
+    else
+    {
+        ampSinc = sin(x * p1) * sin(y * p1);
+        ampSinc /= (x * p1 * y * p1);
+    }
+
+    return (ampExp * ampSinc);
+}
+
 
 
 } // namespace oskar
