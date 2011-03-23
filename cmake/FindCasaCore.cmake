@@ -1,5 +1,5 @@
 # - Find casacore
-#
+#==============================================================================
 # Find the native CASACORE includes and library
 #
 #  CASACORE_INCLUDE_DIR  - where to find casacore.h, etc.
@@ -7,72 +7,84 @@
 #                          search for libraries
 #  CASACORE_LIBRARIES    - List of libraries when using casacore.
 #  CASACORE_FOUND        - True if casacore found.
+#==============================================================================
+#
+# Required external packages:
+#   gfortran
+#   cfitsio3
+#   wcs
+#   blas
+#   fftw3
+#   fftw3f
+#
+# Casacore dependencies between sub-packages:
+# http://usg.lofar.org/wiki/doku.php?id=software:packages:casacore:dependency_of_the_packages
+#
+#==============================================================================
+#
+# Issues:
+#   - Near lack of handling of external libraries.
+#   - No handling of interdependance of modules.
+#   - Exporting of module libraries? (with useful names)
+#   - Include dir not set? (module include directories?)
+#   - Single library mode?
+#   - Library versions?
+#
+#==============================================================================
 
 
-#message("========== version: ${CasaCore_FIND_VERSION}")
-#message("========== ver major: ${CasaCore_FIND_VERSION_MAJOR}")
-#message("========== ver minor: ${CasaCore_FIND_VERSION_MINOR}")
-#message("========== ver path: ${CasaCore_FIND_VERSION_PATCH}")
-#message("========== exact: ${CasaCore_VERSION_EXACT}")
-#message("========== required: ${CasaCore_FIND_REQUIRED}")
-
-#include(FindPkgConfig)
-#pkg_check_modules(CFITSIO cfitsio>=3.0 REQUIRED)
-#pkg_check_modules(WCSLIB wcslib>=4.7 REQUIRED)
-
-#find_library(TEST_LIB NAMES oskar_ms
-#    PATHS
-#)
-
-IF (CASACORE_INCLUDE_DIR)
-    # Already in cache, be silent
-    SET(CASACORE_FIND_QUIETLY TRUE)
-ENDIF (CASACORE_INCLUDE_DIR)
-
-
-### mmm probably need to find the other deps too....
-### see: http://usg.lofar.org/websvn/filedetails.php?repname=repos+1&path=%2Fcode%2Ftrunk%2Fdevel_common%2Fcmake%2FFindCASACORE.cmake&rev=1513&sc=1
-if(CASACORE_FIND_QUIETLY OR NOT CASACORE_FIND_REQUIRED)
-  find_package(LAPACK)
-else(CASACORE_FIND_QUIETLY OR NOT CASACORE_FIND_REQUIRED)
-  find_package(LAPACK REQUIRED)
-endif(CASACORE_FIND_QUIETLY OR NOT CASACORE_FIND_REQUIRED)
-
-if(LAPACK_FOUND)
-  set(CASACORE_LINKER_FLAGS ${LAPACK_LINKER_FLAGS})
-
-FIND_PATH(CASACORE_INCLUDE_DIR casacore)
-
-SET(CASACORE_NAMES
-    casa_images
-    casa_mirlib
+set(casacore_modules
+    casa_casa
     casa_components
     casa_coordinates
+    casa_fits
+    casa_images
     casa_lattices
+#    casa_measures_f ??!
+    casa_measures
+    casa_mirlib
     casa_msfits
     casa_ms
-    casa_fits
-    casa_measures
-    casa_tables
-    casa_scimath
     casa_scimath_f
-    casa_casa
+    casa_scimath
+    casa_tables
 )
-FOREACH( lib ${CASACORE_NAMES} )
-    FIND_LIBRARY(CASACORE_LIBRARY_${lib} NAMES ${lib} PATHS ENV CASACORE_LIBRARY_PATH )
-    MARK_AS_ADVANCED(CASACORE_LIBRARY_${lib})
-    LIST(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${lib}})
-ENDFOREACH(lib)
-LIST(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
-endif(LAPACK_FOUND)
+
+# Already in cache, be silent
+if (CASACORE_INCLUDE_DIR)
+    set (CASACORE_FIND_QUIETLY TRUE)
+endif (CASACORE_INCLUDE_DIR)
+
+if (CASACORE_FIND_QUIETLY OR NOT CASACORE_FIND_REQUIRED)
+  find_package(LAPACK)
+else ()
+  find_package(LAPACK REQUIRED)
+endif ()
+
+
+# mmm this only works by luck by the looks of things...!
+if (LAPACK_FOUND)
+    set(CASACORE_LINKER_FLAGS ${LAPACK_LINKER_FLAGS})
+    find_path(CASACORE_INCLUDE_DIR casacore)
+
+    foreach (module ${casacore_modules})
+        find_library(CASACORE_LIBRARY_${module} NAMES ${module}
+            PATHS ENV CASACORE_LIBRARY_PATH)
+        mark_as_advanced(CASACORE_LIBRARY_${module})
+        list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
+    endforeach ()
+
+    list(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
+endif (LAPACK_FOUND)
 
 # handle the QUIETLY and REQUIRED arguments and set CASACORE_FOUND to TRUE if.
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CASACORE DEFAULT_MSG CASACORE_LIBRARIES CASACORE_INCLUDE_DIR)
 
-IF(CASACORE_FOUND)
-ELSE(CASACORE_FOUND)
-    SET( CASACORE_LIBRARIES )
-ENDIF(CASACORE_FOUND)
+if (CASACORE_FOUND)
+    #
+else ()
+    set(CASACORE_LIBRARIES)
+endif ()
 
