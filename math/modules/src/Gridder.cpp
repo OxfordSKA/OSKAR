@@ -48,10 +48,10 @@ float Gridder::oskar_math_gridder1(const unsigned n, const float * x,
     }
 
     const unsigned gCentre = (unsigned) floor((float)gSize / 2.0f);
-    const unsigned gSizeX = (unsigned) ceil((float)gSize / 2.0) + 1;
+    //const unsigned gSizeX = (unsigned) ceil((float)gSize / 2.0) + 1;
     const unsigned cSize = cSupport * 2 + 1;
     const unsigned cCentre = (unsigned) floor((float)(cSize * cOversample) / 2.0f);
-    const float cRadius = (float)cSize / 2.0f;
+    //const float cRadius = (float)cSize / 2.0f;
 
     // Loop over data points and apply them to the grid.
     for (unsigned i = 0; i < n; ++i)
@@ -73,8 +73,8 @@ float Gridder::oskar_math_gridder1(const unsigned n, const float * x,
         const float yOffset = (float)yGrid - yScaled;
 
         // Kernel offset.
-        const float xDelta = xOffset * (float)cOversample;
-        const float yDelta = yOffset * (float)cOversample;
+//        const float xDelta = xOffset * (float)cOversample;
+//        const float yDelta = yOffset * (float)cOversample;
 
         // Kernel offset.
         const int ixConvFunc = roundHalfDown0(xOffset) + cCentre;
@@ -86,7 +86,7 @@ float Gridder::oskar_math_gridder1(const unsigned n, const float * x,
         cout << "xGrid       = " << xGrid << endl;
         cout << "ixGrid      = " << ixGrid << endl;
         cout << "xOffset     = " << xOffset << endl;
-        cout << "xDelta      = " << xDelta << endl;
+//        cout << "xDelta      = " << xDelta << endl;
         cout << "ixConvFunc  = " << ixConvFunc << endl;
 
         for (unsigned y = 0; y < cSize; ++y)
