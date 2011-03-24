@@ -37,21 +37,14 @@ include(compilerOptions)
 include(dependencies)
 
 # === Recurse into sub-diretories.
-add_subdirectory(math)
-#add_subdirectory(data)
-#add_subdirectory(utility)
-#add_subdirectory(mpi)
-add_subdirectory(widgets)
 #add_subdirectory(apps)
-if (CUDA_FOUND)
-    add_subdirectory(cuda)
-endif()
-if(CASACORE_FOUND)
-    add_subdirectory(ms)
-endif()
+add_subdirectory(cuda)
+#add_subdirectory(data)
+add_subdirectory(math)
+add_subdirectory(ms)
+#add_subdirectory(utility)
+add_subdirectory(widgets)
 
-# === Install target for library header.
-install(FILES "oskar.h" DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR})
 
 # === Packaging (make package) info: dpkg -I oskar-lib-0.0.0-Linux.deb
 # http://wiki.clug.org.za/wiki/How_do_I_install_a_.deb_file_I_downloaded_without_compromising_dependencies%3F

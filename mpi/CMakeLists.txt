@@ -1,3 +1,0 @@
-#
-# src/mpi/CMakeLists.txt
-#

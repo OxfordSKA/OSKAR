@@ -12,7 +12,6 @@ if (Qwt5_FOUND)
     add_subdirectory(plotting)
 endif()
 
-
 # === Delegates sub-module.
 #add_subdirectory(delegates)
 
