@@ -16,16 +16,19 @@ namespace oskar {
  * Set the data to plot as an image.
  *
  * @param[in]   data    Vector of image data to plot.
- * @param[in]   sizex   Size of the x dimension of the image.
- * @param[in]   sizey   Size of the y dimension of the image.
+ * @param[in]   nx   Size of the x dimension of the image.
+ * @param[in]   ny   Size of the y dimension of the image.
  */
-void ImagePlot::setImageArray(const float* data, unsigned nX, unsigned nY,
+void ImagePlot::setImageArray(const float * data, unsigned nx, unsigned ny,
         double xmin, double xmax, double ymin, double ymax)
 {
-    if (!data)
-        throw QString("ImagePlot::setImageArray(): Data error.");
+    if (data == 0)
+    {
+        cerr << "ImagePlot::setImageArray(): Input data error." << endl;
+        return;
+    }
 
-    _data.setData(data, nX, nY);
+    _data.setData(data, nx, ny);
     _data.setRangeX(xmin, xmax);
     _data.setRangeY(ymin, ymax);
     setData(_data);
@@ -41,8 +44,6 @@ void ImagePlot::setAmpRangeAuto()
 {
     _range = data().range();
 
-    //cout << "amp range = " << _range.minValue() << " " << _range.maxValue() << endl;
-
     // If the min = max add 0.1 to the min range
     if (approxEqual(_range.minValue(), _range.maxValue()))
     {
@@ -57,7 +58,7 @@ void ImagePlot::setAmpRangeAuto()
  *
  * @param[in]   on  Bool flag controlling display of coutours.
  */
-void ImagePlot::showContours(bool on)
+void ImagePlot::showContours(const bool on)
 {
     setDisplayMode(QwtPlotSpectrogram::ContourMode, on);
 }
@@ -69,7 +70,7 @@ void ImagePlot::showContours(bool on)
  *
  * @param[in]   on  Bool flag controlling display of the image.
  */
-void ImagePlot::setDisplayImage(bool on)
+void ImagePlot::setDisplayImage(const bool on)
 {
     setDisplayMode(QwtPlotSpectrogram::ImageMode, on);
     setDefaultContourPen(on ? QPen() : QPen(Qt::NoPen));
@@ -82,7 +83,7 @@ void ImagePlot::setDisplayImage(bool on)
  *
  * @param[in]   nlevels   Number of contours levels to plot.
  */
-void ImagePlot::setupContours(unsigned nlevels)
+void ImagePlot::setupContours(const unsigned nlevels)
 {
     double range = _range.width();
     double step = range / double(nlevels + 1);

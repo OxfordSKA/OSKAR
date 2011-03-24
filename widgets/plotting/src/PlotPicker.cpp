@@ -47,23 +47,6 @@ void PlotPicker::setSelectionType(unsigned type)
     }
 }
 
-
-///**
-//* @details
-//* Function to translate a pixel position into a string
-//*/
-//QwtText PlotPicker::trackerText(const QPoint& pos) const
-//{
-//    QColor colour(Qt::white);
-//    colour.setAlpha(230);
-//    const float x = pos.x();
-//    const float y = pos.y();
-//    QwtText text = QString::number(x,'f',4) + ", " + QString::number(y,'f',4);
-//    text.setBackgroundBrush(QBrush(colour));
-//    return text;
-//}
-
-
 /**
 * @details
 * Function to translate a pixel position into a string

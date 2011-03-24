@@ -61,29 +61,26 @@ class ImagePlot : public QwtPlotSpectrogram
 
     public:
         /// Set Image plot data.
-        void setImageArray(const float* data, unsigned nX, unsigned nY,
+        void setImageArray(const float * data, unsigned nx, unsigned ny,
                 double xmin, double xmax, double ymin, double ymax);
-
-        /// Set the amplitude range.
-        void setAmpRange(double min, double max);
-
-        /// Returns the amplitude range.
-        QwtDoubleInterval& ampRange() { return _range; }
-
-        /// Returns the amplitude range.
-        const QwtDoubleInterval& ampRange() const { return _range; }
 
         /// Set the amplitude range to auto.
         void setAmpRangeAuto();
 
         /// Show contours on the image plot.
-        void showContours(bool on);
+        void showContours(const bool on);
 
         /// Set the image display mode.
-        void setDisplayImage(bool on);
+        void setDisplayImage(const bool on);
 
         /// Setup contour levels.
-        void setupContours(unsigned nLevels);
+        void setupContours(const unsigned nLevels);
+
+        /// Returns the amplitude range.
+        QwtDoubleInterval& ampRange() { return _range; }
+
+        /// Returns the amplitude range (const overload).
+        const QwtDoubleInterval& ampRange() const { return _range; }
 
     private:
         ImagePlotData _data;        ///< Image plot data object.

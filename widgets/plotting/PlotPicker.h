@@ -64,7 +64,6 @@ class PlotPicker : public QwtPlotPicker
 
     protected:
         /// Returns the tracker text.
-//        virtual QwtText trackerText(const QPoint&) const;
         virtual QwtText trackerText(const QwtDoublePoint&) const;
 };
 
