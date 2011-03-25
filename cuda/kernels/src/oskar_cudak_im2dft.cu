@@ -69,8 +69,8 @@ void oskar_cudak_im2dft(int nv, const float* u, const float* v,
 
         // Pre-multiply.
         for (int t = threadIdx.x; t < visInBlock; t += blockDim.x) {
-        	c[t].x *= M_2PI;
-        	c[t].y *= M_2PI;
+            c[t].x *= M_2PI;
+            c[t].y *= M_2PI;
         }
 
         // Must synchronise before computing the signal for these visibilities.
@@ -79,10 +79,10 @@ void oskar_cudak_im2dft(int nv, const float* u, const float* v,
         // Loop over visibilities in block.
         for (int v = 0; v < visInBlock; ++v) {
             // Calculate the complex DFT weight.
-        	float4 cc = c[v];
-        	float2 weight;
-        	float a = cc.x * l + cc.y * m; // u*l + v*m
-            __sincosf(a, &weight.y, &weight.x);
+            float4 cc = c[v];
+            float2 weight;
+            float a = cc.x * l + cc.y * m; // u*l + v*m
+            sincosf(a, &weight.y, &weight.x);
 
             // Perform complex multiply-accumulate.
             // Image is real, so should only need to evaluate the real part.

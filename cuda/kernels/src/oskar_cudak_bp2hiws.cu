@@ -83,7 +83,7 @@ void oskar_cudak_bp2hiws(const int na, const float* ax, const float* ay,
             float2 srcSig;
             float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(cap[a].x,
                     cap[a].y, cosEl, sinAz, cosAz, k);
-            __sincosf(phaseSrc, &srcSig.y, &srcSig.x);
+            sincosf(phaseSrc, &srcSig.y, &srcSig.x);
 
             float2 signalNew;
             signalNew.x = (signal.x * srcSig.x - signal.y * srcSig.y);

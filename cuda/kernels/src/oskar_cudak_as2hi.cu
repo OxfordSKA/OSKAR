@@ -82,7 +82,7 @@ void oskar_cudak_as2hi(const int na, const float* ax, const float* ay,
 
             // Perform complex multiply-accumulate.
             float sinPhase, cosPhase;
-            __sincosf(phase, &sinPhase, &cosPhase);
+            sincosf(phase, &sinPhase, &cosPhase);
             csig.x += (csrc[s].w * cosPhase);
             csig.y += (csrc[s].w * sinPhase);
         }

@@ -81,7 +81,7 @@ void oskar_cudak_bp2hiw(const int na, const float* ax, const float* ay,
             float2 signal, w = cwt[a];
             float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(cap[a].x,
                     cap[a].y, cosEl, sinAz, cosAz, k);
-            __sincosf(phaseSrc, &signal.y, &signal.x);
+            sincosf(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
             cpx.x += (signal.x * w.x - signal.y * w.y);

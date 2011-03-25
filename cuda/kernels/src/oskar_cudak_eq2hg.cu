@@ -38,14 +38,14 @@ void oskar_cudak_eq2hg(int ns, const float2* radec,
     // Copy source equatorial coordinates from global memory.
     float2 src;
     if (s < ns)
-    	src = radec[s];
+        src = radec[s];
     __syncthreads(); // Coalesce memory accesses.
 
     // Find azimuth and elevation.
     float cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
     t = lst - src.x; // HA = LST - RA
-    __sincosf(src.y, &sinDec, &cosDec);
-    __sincosf(t, &sinHA, &cosHA);
+    sincosf(src.y, &sinDec, &cosDec);
+    sincosf(t, &sinHA, &cosHA);
     t = cosDec * cosHA;
     X1 = cosLat * sinDec - sinLat * t;
     Y2 = sinLat * sinDec + cosLat * t;
@@ -57,5 +57,5 @@ void oskar_cudak_eq2hg(int ns, const float2* radec,
     // Copy source horizontal coordinates into global memory.
     __syncthreads(); // Coalesce memory accesses.
     if (s < ns)
-    	azel[s] = src;
+        azel[s] = src;
 }

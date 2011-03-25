@@ -66,14 +66,14 @@ void oskar_cudak_rpw3leg(const int na, const float* ax, const float* ay,
 
     // Compute the geometric phase of the source direction.
     float2 sha, sdc, weight;
-    __sincosf(cha[tx], &sha.x, &sha.y);
-    __sincosf(cdc[tx], &sdc.x, &sdc.y);
+    sincosf(cha[tx], &sha.x, &sha.y);
+    sincosf(cdc[tx], &sdc.x, &sdc.y);
     const float phase = GEOMETRIC_PHASE_3D_LOCAL_EQUATORIAL_K(
             cax[ty], cay[ty], caz[ty], sdc.x, sdc.y, sha.x, sha.y);
 
     // Compute the relative phase.
     const float arg = k * (phase - phase0);
-    __sincosf(arg, &weight.y, &weight.x);
+    sincosf(arg, &weight.y, &weight.x);
 
     // Write result to global memory.
     if (s < ns && a < na) {

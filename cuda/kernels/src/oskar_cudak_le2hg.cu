@@ -43,8 +43,8 @@ void oskar_cudak_le2hg(int ns, const float2* hadec,
 
     // Find azimuth and elevation.
     float cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
-    __sincosf(src.x, &sinHA, &cosHA);
-    __sincosf(src.y, &sinDec, &cosDec);
+    sincosf(src.x, &sinHA, &cosHA);
+    sincosf(src.y, &sinDec, &cosDec);
     t = cosDec * cosHA;
     X1 = cosLat * sinDec - sinLat * t;
     Y2 = sinLat * sinDec + cosLat * t;

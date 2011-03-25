@@ -63,7 +63,7 @@ void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
     float2 weight;
     const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(cax[tx], cay[tx],
             cbz[ty], cby[ty], cbx[ty], k);
-    __sincosf(phase, &weight.y, &weight.x);
+    sincosf(phase, &weight.y, &weight.x);
     weight.x /= na; // Normalised real part.
     weight.y /= na; // Normalised imaginary part.
 
