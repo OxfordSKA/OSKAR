@@ -44,6 +44,7 @@
 #include "oskar_cuda_bp2huggu.h"
 #include "oskar_cuda_eq2hg.h"
 #include "oskar_cuda_hbp2hig.h"
+#include "oskar_cuda_hbp2higu.h"
 #include "oskar_cuda_im2dft.h"
 #include "oskar_cuda_im2dftlm.h"
 #include "oskar_cuda_le2hg.h"
