@@ -34,20 +34,20 @@
 
 
 set(casacore_modules
-    casa_casa
+    casa_images
+    casa_mirlib
     casa_components
     casa_coordinates
-    casa_fits
-    casa_images
     casa_lattices
-#    casa_measures_f ??!
-    casa_measures
-    casa_mirlib
     casa_msfits
     casa_ms
-    casa_scimath_f
-    casa_scimath
+    casa_fits
+    casa_measures
     casa_tables
+    casa_scimath
+    casa_scimath_f
+    casa_casa
+    #casa_images
 )
 
 # Already in cache, be silent
