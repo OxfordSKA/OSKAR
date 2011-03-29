@@ -72,7 +72,7 @@ void oskar_cudak_rpw3leg(const int na, const float* ax, const float* ay,
             cax[ty], cay[ty], caz[ty], sdc.x, sdc.y, sha.x, sha.y);
 
     // Compute the relative phase.
-    const float arg = k * (phase - phase0);
+    const float arg = -k * (phase - phase0);
     sincosf(arg, &weight.y, &weight.x);
 
     // Write result to global memory.
