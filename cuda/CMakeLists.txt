@@ -37,6 +37,7 @@ if (CUDA_FOUND)
     # === Macros to build the oskar-lib cuda module.
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_cuda.dir/src)
     include_directories(${CUDA_INCLUDE_DIRS})
+
     cuda_add_library(oskar_cuda ${cuda_SRC})
     target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
 

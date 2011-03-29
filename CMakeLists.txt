@@ -30,11 +30,11 @@ if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
 
-# === Set compiler options.
-include(compilerOptions)
-
 # === Set dependencies.
 include(dependencies)
+
+# === Set compiler options.
+include(compilerOptions)
 
 # === Recurse into sub-diretories.
 #add_subdirectory(apps)
