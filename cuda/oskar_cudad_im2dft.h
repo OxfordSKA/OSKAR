@@ -26,41 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAD_IM2DFT_H_
+#define OSKAR_CUDAD_IM2DFT_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudad_im2dft.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * Computes an image using CUDA.
+ *
+ * @details
+ * Computes a real image from a set of complex visibilities, using CUDA to
+ * evaluate a 2D Direct Fourier Transform (DFT).
+ *
+ * The computed image is returned in the \p image array, which
+ * must be pre-sized to length (nl * nm). The fastest-varying dimension is
+ * along l.
+ *
+ * The image is assumed to be completely real: conjugated copies of the
+ * visibilities should therefore NOT be supplied.
+ *
+ * @param[in] nv No. of independent visibilities (excluding Hermitian copy).
+ * @param[in] u Array of visibility u coordinates in wavelengths (length nv).
+ * @param[in] v Array of visibility v coordinates in wavelengths (length nv).
+ * @param[in] vis Array of complex visibilities (length 2 * nv; see note, above).
+ * @param[in] nl The image dimension.
+ * @param[in] nm The image dimension.
+ * @param[in] dl The pixel size (cellsize) in radians.
+ * @param[in] dm The pixel size (cellsize) in radians.
+ * @param[in] sl The field of view in radians (full sky = pi).
+ * @param[in] sm The field of view in radians (full sky = pi).
+ * @param[out] image The computed image (see note, above).
+ */
+void oskar_cudad_im2dft(int nv, const double* u, const double* v,
+        const double* vis, int nl, int nm, double dl, double dm,
+        double sl, double sm, double* image);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_CUDAD_IM2DFT_H_

@@ -26,41 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAKD_RPW3LEG_H_
+#define OSKAR_CUDAKD_RPW3LEG_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudakd_rpw3leg.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
+#include "cuda/CudaEclipse.h"
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * CUDA kernel to compute relative geometric phases of specified sources.
+ *
+ * @details
+ * This CUDA kernel computes the geometric phases of all the specified sources
+ * at the specified antenna positions, relative to the phase reference position
+ * in the local equatorial system.
+ *
+ * The output \p phases array must be pre-sized to length (2 * ns * na), and
+ * contains (cosine, sine) pairs of the phase for every source at every
+ * antenna.
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions in metres (length na).
+ * @param[in] ay Array of antenna y positions in metres (length na).
+ * @param[in] az Array of antenna z positions in metres (length na).
+ * @param[in] scha0 The sine and cosine of the phase reference Hour Angle.
+ * @param[in] scdec0 The sine and cosine of the phase reference Declination.
+ * @param[in] ns The number of source positions.
+ * @param[in] ha The source Hour Angle coordinates in radians (length ns).
+ * @param[in] dec The source Declination coordinates in radians (length ns).
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] phases The computed phases (see note, above).
+ */
+__global__
+void oskar_cudakd_rpw3leg(const int na, const double* ax, const double* ay,
+        const double* az, const double2 scha0, const double2 scdec0, const int ns,
+        const double* ha, const double* dec, const double k, double2* phases);
+
+#endif // OSKAR_CUDAKD_RPW3LEG_H_

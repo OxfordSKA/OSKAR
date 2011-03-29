@@ -26,41 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#include "cuda/kernels/oskar_cudakd_wt2hg.h"
+#include "math/core/phase.h"
 
-/**
- * @file oskar_cuda.h
- */
+// Shared memory pointer used by the kernel.
+extern __shared__ double smem[];
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
+__global__
+void oskar_cudakd_wt2hg(const int na, const double* ax, const double* ay,
+        const int nb, const double3* trig, const double k, double2* weights)
+{
+    const int tx = threadIdx.x;
+    const int ty = threadIdx.y;
+    const int a = blockDim.x * blockIdx.x + tx; // Antenna index.
+    const int b = blockDim.y * blockIdx.y + ty; // Beam index.
 
-#endif // OSKAR_CUDA_H_
+    // Cache antenna and beam data from global memory,
+    // avoiding shared memory bank conflicts.
+    double* cax = smem;
+    double* cay = &cax[blockDim.x];
+    double* cbz = &cay[blockDim.x];
+    double* cby = &cbz[blockDim.y];
+    double* cbx = &cby[blockDim.y];
+    if (a < na) {
+        cax[tx] = ax[a];
+        cay[tx] = ay[a];
+    }
+    if (b < nb) {
+        cbx[ty] = trig[b].x;
+        cby[ty] = trig[b].y;
+        cbz[ty] = trig[b].z;
+    }
+    __syncthreads();
+
+    // Compute the geometric phase of the beam direction.
+    double2 weight;
+    const double phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(cax[tx], cay[tx],
+            cbz[ty], cby[ty], cbx[ty], k);
+    sincos(phase, &weight.y, &weight.x);
+    weight.x /= na; // Normalised real part.
+    weight.y /= na; // Normalised imaginary part.
+
+    // Write result to global memory.
+    if (a < na && b < nb) {
+        const int w = a + na * b;
+        weights[w] = weight;
+    }
+}

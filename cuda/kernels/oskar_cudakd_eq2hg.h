@@ -26,41 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAKD_EQ2HG_H_
+#define OSKAR_CUDAKD_EQ2HG_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudakd_eq2hg.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
+#include "cuda/CudaEclipse.h"
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * CUDA kernel to compute local source positions.
+ *
+ * @details
+ * This CUDA kernel transforms sources specified in a generic equatorial
+ * system (RA, Dec) to local horizontal coordinates (azimuth, elevation).
+ *
+ * The kernel requires (threads per block) * sizeof(double2) bytes of
+ * shared memory.
+ *
+ * Each thread operates on a single source. The source positions are
+ * specified as (RA, Dec) pairs in the \p radec array:
+ *
+ * radec.x = {RA}
+ * radec.y = {Dec}
+ *
+ * The output \p azel array contains the azimuth and elevation pairs for each
+ * source:
+ *
+ * azel.x = {azimuth}
+ * azel.y = {elevation}
+ *
+ * The number of doubleing-point operations performed by this kernel is:
+ * \li Sines and cosines: 4 * ns.
+ * \li Arctangents: 2 * ns.
+ * \li Multiplies: 8 * ns.
+ * \li Additions / subtractions: 4 * ns.
+ * \li Square roots: ns.
+ *
+ * @param[in] ns The number of source positions.
+ * @param[in] radec The RA and Declination source coordinates in radians.
+ * @param[in] cosLat The cosine of the geographic latitude.
+ * @param[in] sinLat The sine of the geographic latitude.
+ * @param[in] lst The Local Sidereal Time (= ST + geographic longitude) in radians.
+ * @param[out] azel The azimuth and elevation source coordinates in radians.
+ */
+__global__
+void oskar_cudakd_eq2hg(int ns, const double2* radec,
+        double cosLat, double sinLat, double lst, double2* azel);
+
+#endif // OSKAR_CUDAKD_EQ2HG_H_

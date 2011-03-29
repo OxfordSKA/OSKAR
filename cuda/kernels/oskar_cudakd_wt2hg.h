@@ -26,41 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAKD_WT2HG_H_
+#define OSKAR_CUDAKD_WT2HG_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudakd_wt2hg.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
+#include "cuda/CudaEclipse.h"
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * CUDA kernel to generate beamforming weights.
+ *
+ * @details
+ * This CUDA kernel produces the complex antenna beamforming weights for the
+ * given directions, and stores them in device memory.
+ * Each thread generates the complex weights for a single antenna and a single
+ * beam direction.
+ *
+ * The input \p trig array contains triplets of the following pre-computed
+ * trigonometry:
+ *
+ * trig.x = {cosine azimuth}
+ * trig.y = {sine azimuth}
+ * trig.z = {cosine elevation}
+ *
+ * The kernel requires blockDim.x * sizeof(double2) +
+ * blockDim.y * sizeof(double3) bytes of shared memory.
+ *
+ * The number of doubleing-point operations performed by this kernel is:
+ * \li Sines and cosines: 2 * na * nb.
+ * \li Multiplies: 4 * na * nb.
+ * \li Divides: 2 * na * nb.
+ * \li Additions / subtractions: na * nb.
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions in metres.
+ * @param[in] ay Array of antenna y positions in metres.
+ * @param[in] nb Number of beams.
+ * @param[in] trig Precomputed trigonometry for all beam positions.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
+ */
+__global__
+void oskar_cudakd_wt2hg(const int na, const double* ax, const double* ay,
+        const int nb, const double3* trig, const double k, double2* weights);
+
+#endif // OSKAR_CUDAKD_WT2HG_H_
