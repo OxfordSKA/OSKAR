@@ -32,7 +32,7 @@
 extern __shared__ double4 c[];
 
 #ifndef M_2PI
-#define M_2PI 6.283185307
+#define M_2PI 6.283185307179586476925
 #endif
 
 __global__
