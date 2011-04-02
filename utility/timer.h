@@ -3,7 +3,12 @@
 
 #include <ctime>
 #include <cstdio>
-#include "sys/time.h"
+
+#ifdef _WIN32
+    #undef TIMER_ENABLE
+#else
+    #include "sys/time.h"
+#endif
 
 /**
  * @brief
@@ -48,3 +53,4 @@
 #endif
 
 #endif // TIMER_H_
+#endif
