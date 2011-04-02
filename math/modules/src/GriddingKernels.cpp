@@ -105,28 +105,36 @@ float GriddingKernels::_expSinc(const float x, const float y)
     const float y2 = pow((fabs(y) * p2), p3);
     const float r2 = x2 + y2;
     const float ampExp = exp(-r2);
+    const float r = sqrt(r2);
 
-    float ampSinc = 0.0f;
-
-    if ( isEqual(x, 0.0f) && isEqual(y, 0.0f) )
+    float ampSinc = sin(r * p1) / (r * p1);
+    if (isEqual(r, 0.0f))
     {
         ampSinc = 1.0f;
     }
-    else if (isEqual(x, 0.0f))
-    {
-        ampSinc = sin(y * p1) / (y * p1);
-    }
-    else if (isEqual(y, 0.0f))
-    {
-        ampSinc = sin(x * p1) / (x * p1);
-    }
-    else
-    {
-        ampSinc = sin(x * p1) * sin(y * p1);
-        ampSinc /= (x * p1 * y * p1);
-    }
+
+
+//    float ampSinc = 0.0f;
+//    if ( isEqual(x, 0.0f) && isEqual(y, 0.0f) )
+//    {
+//        ampSinc = 1.0f;
+//    }
+//    else if (isEqual(x, 0.0f))
+//    {
+//        ampSinc = sin(y * p1) / (y * p1);
+//    }
+//    else if (isEqual(y, 0.0f))
+//    {
+//        ampSinc = sin(x * p1) / (x * p1);
+//    }
+//    else
+//    {
+//        ampSinc = sin(x * p1) * sin(y * p1);
+//        ampSinc /= (x * p1 * y * p1);
+//    }
 
     return (ampExp * ampSinc);
+    //return (ampSinc);
 }
 
 
