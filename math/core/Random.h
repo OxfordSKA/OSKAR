@@ -36,6 +36,7 @@
  */
 
 #include <cmath>
+#include <cstdlib>
 
 /**
  * @brief
