@@ -55,17 +55,19 @@ if (CUDA_FOUND)
     target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
 
     # === Install configuration for the oskar-lib cuda module.
-    install(TARGETS oskar_cuda LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-    set_target_properties(oskar_cuda PROPERTIES
-        SOVERSION ${oskar-lib_SOVERSION})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN "src" EXCLUDE
-        PATTERN ".svn" EXCLUDE
-        PATTERN "kernels" EXCLUDE
-        PATTERN "test" EXCLUDE)
-
+	if (NOT WIN32)
+		install(TARGETS oskar_cuda LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+		set_target_properties(oskar_cuda PROPERTIES
+			SOVERSION ${oskar-lib_SOVERSION})
+		install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+			FILES_MATCHING PATTERN "*.h"
+			PATTERN "src" EXCLUDE
+			PATTERN ".svn" EXCLUDE
+			PATTERN "kernels" EXCLUDE
+			PATTERN "test" EXCLUDE)
+	endif ()
+	
     # === Add a target for clean of nvcc generated files.
     cuda_build_clean_target()
 

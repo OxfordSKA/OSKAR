@@ -36,14 +36,16 @@ target_link_libraries(oskar_math
 )
 
 # === Install target for the oskar-lib math library module.
-install(TARGETS oskar_math LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-set_target_properties(oskar_math PROPERTIES
-    SOVERSION ${oskar-lib_SOVERSION})
+if (NOT WIN32)
+	install(TARGETS oskar_math LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+	set_target_properties(oskar_math PROPERTIES
+		SOVERSION ${oskar-lib_SOVERSION})
+	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+		FILES_MATCHING PATTERN "*.h"
+		PATTERN "src" EXCLUDE
+		PATTERN "test" EXCLUDE
+		PATTERN ".svn" EXCLUDE)
+endif ()
 
-# === Install target for oskar-lib math header files.
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN "src" EXCLUDE
-    PATTERN "test" EXCLUDE
-    PATTERN ".svn" EXCLUDE)
+

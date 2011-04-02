@@ -21,7 +21,7 @@ find_package(Qt4 4.4.3 COMPONENTS QtGui QtXml QtOpenGL QtTest QUIET)
 
 find_package(Qwt5 QUIET)
 
-find_package(OpenMP REQUIRED)
+find_package(OpenMP QUIET)
 find_package(CUDA 2.1 QUIET)
 find_package(MPI QUIET)
 
@@ -30,7 +30,7 @@ find_package(CppUnit QUIET)
 find_package(FFTW3 QUIET)
 find_package(Boost QUIET)
 
-find_package(CasaCore 1.0.0 QUIET)
+find_package(CasaCore QUIET)
 find_package(CFitsio QUIET)
 
 set(OSKAR_MATH_LIBS_FOUND false)
