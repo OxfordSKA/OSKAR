@@ -32,7 +32,7 @@
 #
 #==============================================================================
 
-
+# NOTE: This order is important for static version of the library... don't mess with it!
 set(casacore_modules
     casa_images
     casa_mirlib
