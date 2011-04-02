@@ -6,7 +6,8 @@ endif()
 set(BUILD_SHARED_LIBS true)
 
 # == C++ compiler.
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
+	message("INFO: Setting compiler flags for gcc/g++.")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
     add_definitions(-Wall -Wextra -pedantic -std=c++0x)
@@ -19,7 +20,8 @@ if(CMAKE_COMPILER_IS_GNUCC)
     #add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     #add_definitions(-Wfloat-equal)
 
-else()
+elseif (NOT WIN32) # INTEL COMPILER
+	message("INFO: Setting compiler flags for icc/icpc.")
     #set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xHost -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     #set(CMAKE_CXX_FLAGS_RELEASE "-O2 -xHost -funroll-loops -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
@@ -44,7 +46,11 @@ else()
     add_definitions(-ww111)
     add_definitions(-ww1572)
 
-endif()
+elseif (MSVC) # visual studio compiler.
+	message("INFO: Settings for compiler MSVC")
+else ()
+	message("INFO: Unknown compiler...")
+endif ()
 
 # == Cuda
 if(CUDA_FOUND)
