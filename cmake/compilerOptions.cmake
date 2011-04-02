@@ -48,6 +48,9 @@ elseif (NOT WIN32) # INTEL COMPILER
 
 elseif (MSVC) # visual studio compiler.
 	message("INFO: Settings for compiler MSVC")
+	#set(CMAKE_CXX_FLAGS_RELEASE "/wd4100 ")
+	add_definitions(/wd4100)
+	
 else ()
 	message("INFO: Unknown compiler...")
 endif ()
@@ -57,9 +60,17 @@ if(CUDA_FOUND)
     set(CUDA_PROPAGATE_HOST_FLAGS OFF)
     set(CUDA_BUILD_EMULATION OFF)
     if(CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2;-arch sm_13)
+		if (CMAKE_COMPILER_IS_GNUCC)
+			set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2;-arch sm_13)
+		else () # some other compiler that dosnt understand -g / -O2 etc.
+			set(CUDA_NVCC_FLAGS -arch sm_13)
+		endif ()
     else()
-        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g;-arch sm_13)
+		if (CMAKE_COMPILER_IS_GNUCC)
+			set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g;-arch sm_13)
+		else ()
+			set(CUDA_NVCC_FLAGS -arch sm_13)
+		endif ()	
     endif()
 endif()
 
