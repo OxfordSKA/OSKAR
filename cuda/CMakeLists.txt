@@ -29,19 +29,20 @@ if (CUDA_FOUND)
         src/oskar_cuda_le2hg.cu
         src/oskar_cuda_rpw3leg.cu
         src/oskar_cuda_vecadd.cu
-        src/oskar_cudad_bp2hcgg.cu
-        src/oskar_cudad_bp2hcggu.cu
-        src/oskar_cudad_bp2hig.cu
-        src/oskar_cudad_bp2higu.cu
-        src/oskar_cudad_bp2hugg.cu
-        src/oskar_cudad_bp2huggu.cu
-        src/oskar_cudad_eq2hg.cu
-        src/oskar_cudad_hbp2hig.cu
-        src/oskar_cudad_hbp2higu.cu
-        src/oskar_cudad_im2dft.cu
-        src/oskar_cudad_im2dftlm.cu
-        src/oskar_cudad_le2hg.cu
-        src/oskar_cudad_rpw3leg.cu
+
+        #src/oskar_cudad_bp2hcgg.cu
+        #src/oskar_cudad_bp2hcggu.cu
+        #src/oskar_cudad_bp2hig.cu
+        #src/oskar_cudad_bp2higu.cu
+        #src/oskar_cudad_bp2hugg.cu
+        #src/oskar_cudad_bp2huggu.cu
+        #src/oskar_cudad_eq2hg.cu
+        #src/oskar_cudad_hbp2hig.cu
+        #src/oskar_cudad_hbp2higu.cu
+        #src/oskar_cudad_im2dft.cu
+        #src/oskar_cudad_im2dftlm.cu
+        #src/oskar_cudad_le2hg.cu
+        #src/oskar_cudad_rpw3leg.cu
     )
     foreach (file ${cuda_kernels_SRC})
         list(APPEND cuda_SRC kernels/${file})
