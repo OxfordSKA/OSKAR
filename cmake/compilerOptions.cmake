@@ -7,7 +7,7 @@ set(BUILD_SHARED_LIBS true)
 
 # == C++ compiler.
 if(CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
-	message("INFO: Setting compiler flags for gcc/g++.")
+    message("INFO: Setting compiler flags for gcc/g++.")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 
     add_definitions(-Wall -Wextra -pedantic -std=c++0x)
@@ -21,7 +21,7 @@ if(CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     #add_definitions(-Wfloat-equal)
 
 elseif (NOT WIN32) # INTEL COMPILER
-	message("INFO: Setting compiler flags for icc/icpc.")
+    message("INFO: Setting compiler flags for icc/icpc.")
     #set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xHost -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     #set(CMAKE_CXX_FLAGS_RELEASE "-O2 -xHost -funroll-loops -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
@@ -47,26 +47,42 @@ elseif (NOT WIN32) # INTEL COMPILER
     add_definitions(-ww1572)
 
 elseif (MSVC) # visual studio compiler.
-	message("INFO: Settings for compiler MSVC")
-	#set(CMAKE_CXX_FLAGS_RELEASE "/wd4100 ")
-	add_definitions(/wd4100)
-	
+    message("INFO: Settings for compiler MSVC")
+    #set(CMAKE_CXX_FLAGS_RELEASE "/wd4100 ")
+    add_definitions(/wd4100)
+
 else ()
-	message("INFO: Unknown compiler...")
+    message("INFO: Unknown compiler...")
 endif ()
 
 # == Cuda
-if(CUDA_FOUND)
+if (CUDA_FOUND)
+    # Use a seperate set of flags for CUDA.
     set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-    set(CUDA_BUILD_EMULATION OFF)
-    if(CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-        #set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2;-arch sm_13)
-        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O2)
-    else()
-        #set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g;-arch sm_13)
-        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;--compiler-options;-O0;--compiler-options;-g)
-    endif()
-endif()
+
+    # Default flags.
+    set(CUDA_NVCC_FLAGS --compiler-options;-Wall;)
+
+    # Build mode specific flags.
+    if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
+        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
+        list(APPEND CUDA_NVCC_FLAGS -O2;)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
+    else ()
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O0;)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-g;)
+        list(APPEND CUDA_NVCC_FLAGS -G;)
+        list(APPEND CUDA_NVCC_FLAGS -O0;)
+        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v')
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
+    endif ()
+
+endif ()
 
 
 # === Set some include directories at the project level.
