@@ -80,14 +80,14 @@ float Gridder::oskar_math_gridder1(const unsigned n, const float * x,
         const int ixConvFunc = roundHalfDown0(xOffset) + cCentre;
         const int iyConvFunc = roundHalfDown0(yOffset) + cCentre;
 
-        cout << "---------------" << endl;
-        cout << "x[" << i << "] = " << x[i] << endl;
-        cout << "xScaled     = " << xScaled << endl;
-        cout << "xGrid       = " << xGrid << endl;
-        cout << "ixGrid      = " << ixGrid << endl;
-        cout << "xOffset     = " << xOffset << endl;
-//        cout << "xDelta      = " << xDelta << endl;
-        cout << "ixConvFunc  = " << ixConvFunc << endl;
+//        cout << "---------------" << endl;
+//        cout << "x[" << i << "] = " << x[i] << endl;
+//        cout << "xScaled     = " << xScaled << endl;
+//        cout << "xGrid       = " << xGrid << endl;
+//        cout << "ixGrid      = " << ixGrid << endl;
+//        cout << "xOffset     = " << xOffset << endl;
+////        cout << "xDelta      = " << xDelta << endl;
+//        cout << "ixConvFunc  = " << ixConvFunc << endl;
 
         for (unsigned y = 0; y < cSize; ++y)
         {
@@ -96,7 +96,7 @@ float Gridder::oskar_math_gridder1(const unsigned n, const float * x,
                 const unsigned gx = ixGrid - cSupport + x;
                 const unsigned gy = iyGrid - cSupport + y;
                 const unsigned gIdx = gy * gSize + gx;
-                cout << "-- gx, gy = " << gx << ", " << gy << endl;
+//                cout << "-- gx, gy = " << gx << ", " << gy << endl;
 
 
                 const unsigned cy = iyConvFunc + (y - cSupport) * cOversample;

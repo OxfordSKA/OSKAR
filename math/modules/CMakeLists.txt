@@ -7,6 +7,7 @@
 set(math_modules_SRC
     src/Gridder.cpp
     src/GriddingKernels.cpp
+    src/FFTW_Utility.cpp
 )
 set(math_modules_SRC "${math_modules_SRC}" PARENT_SCOPE)
 
