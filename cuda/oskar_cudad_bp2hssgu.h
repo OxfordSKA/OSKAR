@@ -26,53 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_BP2HUGW_H_
-#define OSKAR_CUDAK_BP2HUGW_H_
+#ifndef OSKAR_CUDAD_BP2HSSGU_H_
+#define OSKAR_CUDAD_BP2HSSGU_H_
 
 /**
- * @file oskar_cudak_bp2hugw.h
+ * @file oskar_cudad_bp2hssgu.h
  */
 
-#include "cuda/CudaEclipse.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * CUDA kernel to compute a beam pattern using the given weights vector.
+ * Computes a beam pattern using CUDA in the horizontal coordinate system.
  *
  * @details
- * This CUDA kernel evaluates the beam pattern for the given antenna
- * positions and weights vector, using the supplied positions of the test
- * source. The response from each antenna is modelled as a Gaussian that
- * is azimuthally symmetric around the zenith.
+ * Computes a beam pattern using CUDA, assuming antennas with a sine-squared-
+ * elevation response, generating the geometric beamforming weights separately.
+ * The beamforming weights are NOT normalised to the number of antennas.
  *
- * The supplied antenna beam widths should be the value of
- * (1.0 / (2 * sigma^2)), where sigma is the Gaussian standard deviation in
- * radians.
- *
- * Each thread evaluates a single pixel of the beam pattern, looping over
- * all the antennas while performing a complex multiply-accumulate with the
- * required beamforming weights.
+ * The function must be supplied with the antenna x- and y-positions, the
+ * test source longitude and latitude positions, the beam direction, and
+ * the wavenumber.
  *
  * The computed beam pattern is returned in the \p image array, which
  * must be pre-sized to length 2*ns. The values in the \p image array
- * are alternate (real, imag) pairs for each test source position.
+ * are alternate (real, imag) pairs for each position of the test source.
  *
- * @param[in] na Number of antennas.
- * @param[in] ax Array of antenna x positions in metres.
- * @param[in] ay Array of antenna y positions in metres.
- * @param[in] aw Array of antenna beam widths (see note, above).
- * @param[in] ag Array of antenna Gaussian peak amplitudes.
- * @param[in] weights Array of complex antenna weights (length na).
+ * @param[in] na The number of antennas.
+ * @param[in] ax The antenna x-positions in metres.
+ * @param[in] ay The antenna y-positions in metres.
  * @param[in] ns The number of test source positions.
- * @param[in] saz The azimuth coordinates of the test source in radians.
- * @param[in] sel The elevation coordinates of the test source in radians.
+ * @param[in] slon The longitude coordinates of the test source.
+ * @param[in] slat The latitude coordinates of the test source.
+ * @param[in] ba The beam azimuth direction in radians
+ * @param[in] be The beam elevation direction in radians.
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-__global__
-void oskar_cudak_bp2hugw(const int na, const float* ax, const float* ay,
-        const float* aw, const float* ag, const float2* weights, const int ns,
-        const float* saz, const float* sel, const float k,
-        const int maxAntennasPerBlock, float2* image);
+void oskar_cudad_bp2hssgu(int na, const double* ax, const double* ay,
+        int ns, const double* slon, const double* slat,
+        double ba, double be, double k, double* image);
 
-#endif // OSKAR_CUDAK_BP2HUGW_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_CUDAD_BP2HSSGU_H_

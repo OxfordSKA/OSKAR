@@ -43,7 +43,7 @@
  * This CUDA kernel evaluates the beam pattern for the given antenna
  * positions and weights vector, using the supplied positions of the test
  * source. The response from each antenna is modelled as a Gaussian that
- * is spherically symmetric around the zenith.
+ * is azimuthally symmetric around the zenith.
  *
  * The supplied antenna beam width should be the value of
  * (1.0 / (2 * sigma^2)), where sigma is the Gaussian standard deviation in

@@ -1,5 +1,5 @@
 if (NOT DEPENDENCIES_FOUND)
-	message(FATAL_ERROR "Please include dependencies.cmake before this script!")
+    message(FATAL_ERROR "Please include dependencies.cmake before this script!")
 endif ()
 
 # === Set the build type to release if not otherwise specified.
@@ -11,7 +11,7 @@ message("*****************************************************************")
 if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
     message("** NOTE: Building in release Mode!")
 else ()
-	message("** NOTE: Building in debug Mode!")	
+    message("** NOTE: Building in debug Mode!")
 endif()
 message("*****************************************************************")
 
@@ -43,10 +43,10 @@ elseif (NOT WIN32)
     add_definitions(-ww111)  # Promote remark 111 to warning.
     add_definitions(-ww1572) # Promote remark 1572 to warning.
 
-# === Microsoft visual studio compiler.	
+# === Microsoft visual studio compiler.
 elseif (MSVC) # visual studio compiler.
     add_definitions(/wd4100)
-	
+
 # === No compiler found.
 else ()
     message("INFO: Unknown compiler...")
@@ -55,35 +55,35 @@ endif ()
 # === Cuda
 if (CUDA_FOUND)
     # Use a seperate set of flags for CUDA.
-	if (NOT MSVC)
-		set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-	endif ()
+    if (NOT MSVC)
+        set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+    endif ()
 
     # Default flags.
-	if (NOT WIN32)
-		set(CUDA_NVCC_FLAGS --compiler-options;-Wall;)
-	endif ()
+    if (NOT WIN32)
+        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;)
+    endif ()
 
     # Build mode specific flags.
     if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-		if (MSVC)
-			list(APPEND CUDA_NVCC_FLAGS --compiler-options;/wd4100;)
-		else ()
-			list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
-		endif ()
-		list(APPEND CUDA_NVCC_FLAGS -O2;)
-		list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
-		list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
+        if (MSVC)
+            list(APPEND CUDA_NVCC_FLAGS --compiler-options;/wd4100;)
+        else ()
+            list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
+        endif ()
+        list(APPEND CUDA_NVCC_FLAGS -O2;)
+        #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
     else ()
-		if (NOT MSVC)
-			list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O0;)
-			list(APPEND CUDA_NVCC_FLAGS --compiler-options;-g;)
-		endif ()
-		list(APPEND CUDA_NVCC_FLAGS -G;)
-		list(APPEND CUDA_NVCC_FLAGS -O0;)
-        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v')
+        if (NOT MSVC)
+            list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O0;)
+            list(APPEND CUDA_NVCC_FLAGS --compiler-options;-g;)
+        endif ()
+        list(APPEND CUDA_NVCC_FLAGS -G;)
+        list(APPEND CUDA_NVCC_FLAGS -O0;)
+        #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v')
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)

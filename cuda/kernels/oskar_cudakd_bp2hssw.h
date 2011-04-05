@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_BP2HUGW_H_
-#define OSKAR_CUDAK_BP2HUGW_H_
+#ifndef OSKAR_CUDAKD_BP2HSSW_H_
+#define OSKAR_CUDAKD_BP2HSSW_H_
 
 /**
- * @file oskar_cudak_bp2hugw.h
+ * @file oskar_cudakd_bp2hssw.h
  */
 
 #include "cuda/CudaEclipse.h"
@@ -42,12 +42,8 @@
  * @details
  * This CUDA kernel evaluates the beam pattern for the given antenna
  * positions and weights vector, using the supplied positions of the test
- * source. The response from each antenna is modelled as a Gaussian that
- * is azimuthally symmetric around the zenith.
- *
- * The supplied antenna beam widths should be the value of
- * (1.0 / (2 * sigma^2)), where sigma is the Gaussian standard deviation in
- * radians.
+ * source. The response from each antenna is modelled as a sine-squared
+ * function that is azimuthally symmetric around the zenith.
  *
  * Each thread evaluates a single pixel of the beam pattern, looping over
  * all the antennas while performing a complex multiply-accumulate with the
@@ -57,11 +53,14 @@
  * must be pre-sized to length 2*ns. The values in the \p image array
  * are alternate (real, imag) pairs for each test source position.
  *
+ * The number of floating-point operations performed by this kernel is:
+ * \li Sines and cosines: ns * (2 * na + 3).
+ * \li Multiplies: 8 * ns * na.
+ * \li Additions / subtractions: 5 * ns * na.
+ *
  * @param[in] na Number of antennas.
  * @param[in] ax Array of antenna x positions in metres.
  * @param[in] ay Array of antenna y positions in metres.
- * @param[in] aw Array of antenna beam widths (see note, above).
- * @param[in] ag Array of antenna Gaussian peak amplitudes.
  * @param[in] weights Array of complex antenna weights (length na).
  * @param[in] ns The number of test source positions.
  * @param[in] saz The azimuth coordinates of the test source in radians.
@@ -70,9 +69,9 @@
  * @param[out] image The computed beam pattern (see note, above).
  */
 __global__
-void oskar_cudak_bp2hugw(const int na, const float* ax, const float* ay,
-        const float* aw, const float* ag, const float2* weights, const int ns,
-        const float* saz, const float* sel, const float k,
-        const int maxAntennasPerBlock, float2* image);
+void oskar_cudakd_bp2hssw(const int na, const double* ax, const double* ay,
+        const double2* weights, const int ns, const double* saz,
+        const double* sel, const double k, const int maxAntennasPerBlock,
+        double2* image);
 
-#endif // OSKAR_CUDAK_BP2HUGW_H_
+#endif // OSKAR_CUDAKD_BP2HSSW_H_

@@ -10,6 +10,7 @@ set(data_test_SRC
     src/CudaBeamPatternTest.cpp
     src/CudaHierarchicalBeamPatternTest.cpp
     src/CudaBeamPatternGaussianTest.cpp
+    src/CudaBeamPatternSineTest.cpp
     src/CudaAntennaSignalTest.cpp
     src/CudaBeamformerMatrixVectorTest.cpp
     src/CudaImagerDftTest.cpp

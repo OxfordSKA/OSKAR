@@ -19,6 +19,10 @@ if (CUDA_FOUND)
         src/oskar_cuda_bp2hcggu.cu
         src/oskar_cuda_bp2hig.cu
         src/oskar_cuda_bp2higu.cu
+        src/oskar_cuda_bp2hsg.cu
+        src/oskar_cuda_bp2hsgu.cu
+        src/oskar_cuda_bp2hssg.cu
+        src/oskar_cuda_bp2hssgu.cu
         src/oskar_cuda_bp2hugg.cu
         src/oskar_cuda_bp2huggu.cu
         src/oskar_cuda_eq2hg.cu
@@ -35,6 +39,10 @@ if (CUDA_FOUND)
         src/oskar_cudad_bp2hcggu.cu
         src/oskar_cudad_bp2hig.cu
         src/oskar_cudad_bp2higu.cu
+        src/oskar_cudad_bp2hsg.cu
+        src/oskar_cudad_bp2hsgu.cu
+        src/oskar_cudad_bp2hssg.cu
+        src/oskar_cudad_bp2hssgu.cu
         src/oskar_cudad_bp2hugg.cu
         src/oskar_cudad_bp2huggu.cu
         src/oskar_cudad_eq2hg.cu

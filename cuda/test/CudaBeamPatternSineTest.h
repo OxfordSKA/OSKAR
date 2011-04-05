@@ -26,49 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef CUDA_BEAM_PATTERN_SINE_TEST_H_
+#define CUDA_BEAM_PATTERN_SINE_TEST_H_
 
 /**
- * @file oskar_cuda.h
+ * @file CudaBeamPatternSineTest.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hsg.h"
-#include "oskar_cuda_bp2hsgu.h"
-#include "oskar_cuda_bp2hssg.h"
-#include "oskar_cuda_bp2hssgu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hsg.h"
-#include "oskar_cudad_bp2hsgu.h"
-#include "oskar_cudad_bp2hssg.h"
-#include "oskar_cudad_bp2hssgu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class CudaBeamPatternSineTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(CudaBeamPatternSineTest);
+        CPPUNIT_TEST(test_singleElement);
+        CPPUNIT_TEST(test_sineNormalised);
+        CPPUNIT_TEST(test_sineSquaredNormalised);
+        CPPUNIT_TEST(test_sineUnnormalised);
+        CPPUNIT_TEST(test_sineSquaredUnnormalised);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test_singleElement();
+
+        /// Test method.
+        void test_sineNormalised();
+
+        /// Test method.
+        void test_sineSquaredNormalised();
+
+        /// Test method.
+        void test_sineUnnormalised();
+
+        /// Test method.
+        void test_sineSquaredUnnormalised();
+};
+
+#endif // CUDA_BEAM_PATTERN_SINE_TEST_H_

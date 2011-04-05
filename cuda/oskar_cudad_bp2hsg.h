@@ -26,49 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAD_BP2HSG_H_
+#define OSKAR_CUDAD_BP2HSG_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudad_bp2hsg.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hsg.h"
-#include "oskar_cuda_bp2hsgu.h"
-#include "oskar_cuda_bp2hssg.h"
-#include "oskar_cuda_bp2hssgu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hsg.h"
-#include "oskar_cudad_bp2hsgu.h"
-#include "oskar_cudad_bp2hssg.h"
-#include "oskar_cudad_bp2hssgu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * Computes a beam pattern using CUDA in the horizontal coordinate system.
+ *
+ * @details
+ * Computes a beam pattern using CUDA, assuming antennas with a sine-elevation
+ * response, generating the geometric beamforming weights separately.
+ *
+ * The function must be supplied with the antenna x- and y-positions, the
+ * test source longitude and latitude positions, the beam direction, and
+ * the wavenumber.
+ *
+ * The computed beam pattern is returned in the \p image array, which
+ * must be pre-sized to length 2*ns. The values in the \p image array
+ * are alternate (real, imag) pairs for each position of the test source.
+ *
+ * @param[in] na The number of antennas.
+ * @param[in] ax The antenna x-positions in metres.
+ * @param[in] ay The antenna y-positions in metres.
+ * @param[in] ns The number of test source positions.
+ * @param[in] slon The longitude coordinates of the test source.
+ * @param[in] slat The latitude coordinates of the test source.
+ * @param[in] ba The beam azimuth direction in radians
+ * @param[in] be The beam elevation direction in radians.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] image The computed beam pattern (see note, above).
+ */
+void oskar_cudad_bp2hsg(int na, const double* ax, const double* ay,
+        int ns, const double* slon, const double* slat,
+        double ba, double be, double k, double* image);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_CUDAD_BP2HSG_H_

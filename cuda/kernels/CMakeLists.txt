@@ -7,6 +7,8 @@ set(cuda_kernels_SRC
     src/oskar_cudak_as2hi.cu
     src/oskar_cudak_bp2hiw.cu
     src/oskar_cudak_bp2hiws.cu
+    src/oskar_cudak_bp2hssw.cu
+    src/oskar_cudak_bp2hsw.cu
     src/oskar_cudak_bp2hugw.cu
     src/oskar_cudak_bp2hcgw.cu
     src/oskar_cudak_eq2hg.cu
@@ -20,6 +22,8 @@ set(cuda_kernels_SRC
 
     src/oskar_cudakd_bp2hiw.cu
     src/oskar_cudakd_bp2hiws.cu
+    src/oskar_cudakd_bp2hssw.cu
+    src/oskar_cudakd_bp2hsw.cu
     src/oskar_cudakd_bp2hugw.cu
     src/oskar_cudakd_bp2hcgw.cu
     src/oskar_cudakd_eq2hg.cu

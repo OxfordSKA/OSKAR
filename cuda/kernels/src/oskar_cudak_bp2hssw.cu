@@ -26,19 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_bp2hcgw.h"
+#include "cuda/kernels/oskar_cudak_bp2hssw.h"
 #include "math/core/phase.h"
 
 // Shared memory pointer used by the kernel.
 extern __shared__ float2 smem[];
 
-#define PI2 1.570796327f
-
 __global__
-void oskar_cudak_bp2hcgw(const int na, const float* ax, const float* ay,
-        const float aw, const float ag, const float2* weights, const int ns,
-        const float* saz, const float* sel, const float k,
-        const int maxAntennasPerBlock, float2* image)
+void oskar_cudak_bp2hssw(const int na, const float* ax, const float* ay,
+        const float2* weights, const int ns, const float* saz,
+        const float* sel, const float k, const int maxAntennasPerBlock,
+        float2* image)
 {
     // Get the pixel (source position) ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
@@ -68,10 +66,10 @@ void oskar_cudak_bp2hcgw(const int na, const float* ax, const float* ay,
         // There are blockDim.x threads available - need to copy
         // antennasInBlock pieces of data from global memory.
         for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
-            const int g = as + t; // Global antenna index.
-            cwt[t] = weights[g];
-            cap[t].x = ax[g];
-            cap[t].y = ay[g];
+            const int ag = as + t; // Global antenna index.
+            cwt[t] = weights[ag];
+            cap[t].x = ax[ag];
+            cap[t].y = ay[ag];
         }
 
         // Must synchronise before computing the signal for these antennas.
@@ -81,9 +79,9 @@ void oskar_cudak_bp2hcgw(const int na, const float* ax, const float* ay,
         for (int a = 0; a < antennasInBlock; ++a) {
             // Calculate the geometric phase from the source.
             float2 signal, w = cwt[a];
-            float arg = GEOMETRIC_PHASE_2D_HORIZONTAL(cap[a].x,
+            float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(cap[a].x,
                     cap[a].y, cosEl, sinAz, cosAz, k);
-            sincosf(arg, &signal.y, &signal.x);
+            sincosf(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
             cpx.x += (signal.x * w.x - signal.y * w.y);
@@ -94,13 +92,9 @@ void oskar_cudak_bp2hcgw(const int na, const float* ax, const float* ay,
         __syncthreads();
     }
 
-    // Get the common antenna gain.
-    float zd2 = powf(PI2 - el, 2.0f); // Source zenith distance squared.
-    float gain = 0.0f; // Prevent underflows (huge speed difference!).
-    if (aw * zd2 < 30.0f)
-        gain =  ag * expf(-zd2 * aw);
-
     // Multiply by the common antenna gain in the direction of the source.
+    float gain = sinf(el);
+    gain *= gain; // Sin-squared.
     cpx.x *= gain;
     cpx.y *= gain;
 
