@@ -42,7 +42,7 @@ extern "C" {
 #define M_PI 3.1415926535f
 #endif
 
-DllExport void oskar_cuda_im2dft(int nv, const float* u, const float* v,
+void oskar_cuda_im2dft(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, float dl, float dm,
         float sl, float sm, float* image)
 {
