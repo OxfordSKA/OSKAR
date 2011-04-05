@@ -33,7 +33,7 @@
  * @file oskar_cuda_im2dft.h
  */
 
-#include "cuda/oskar_cuda_windows.h"
+#include "oskar_cuda_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
