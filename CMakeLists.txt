@@ -40,10 +40,10 @@ include(compilerOptions)
 #add_subdirectory(apps)
 add_subdirectory(cuda)
 #add_subdirectory(data)
-add_subdirectory(math)
-add_subdirectory(ms)
+#add_subdirectory(math)
+#add_subdirectory(ms)
 #add_subdirectory(utility)
-add_subdirectory(widgets)
+#add_subdirectory(widgets)
 
 
 # === Packaging (make package) info: dpkg -I oskar-lib-0.0.0-Linux.deb

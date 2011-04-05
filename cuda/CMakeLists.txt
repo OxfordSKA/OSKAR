@@ -12,38 +12,38 @@ if (CUDA_FOUND)
     # === Create list of source files for the oskar-lib cuda module.
     set(cuda_SRC
         # single precision functions
-        src/oskar_cuda_as2hi.cu
-        src/oskar_cuda_bf2hig.cu
-        src/oskar_cuda_bfmv.cu
-        src/oskar_cuda_bp2hcgg.cu
-        src/oskar_cuda_bp2hcggu.cu
-        src/oskar_cuda_bp2hig.cu
-        src/oskar_cuda_bp2higu.cu
-        src/oskar_cuda_bp2hugg.cu
-        src/oskar_cuda_bp2huggu.cu
-        src/oskar_cuda_eq2hg.cu
-        src/oskar_cuda_hbp2hig.cu
-        src/oskar_cuda_hbp2higu.cu
+        #src/oskar_cuda_as2hi.cu
+        #src/oskar_cuda_bf2hig.cu
+        #src/oskar_cuda_bfmv.cu
+        #src/oskar_cuda_bp2hcgg.cu
+        #src/oskar_cuda_bp2hcggu.cu
+        #src/oskar_cuda_bp2hig.cu
+        #src/oskar_cuda_bp2higu.cu
+        #src/oskar_cuda_bp2hugg.cu
+        #src/oskar_cuda_bp2huggu.cu
+        #src/oskar_cuda_eq2hg.cu
+        #src/oskar_cuda_hbp2hig.cu
+        #src/oskar_cuda_hbp2higu.cu
         src/oskar_cuda_im2dft.cu
-        src/oskar_cuda_im2dftlm.cu
-        src/oskar_cuda_le2hg.cu
-        src/oskar_cuda_rpw3leg.cu
-        src/oskar_cuda_vecadd.cu
+        #src/oskar_cuda_im2dftlm.cu
+        #src/oskar_cuda_le2hg.cu
+        #src/oskar_cuda_rpw3leg.cu
+        #src/oskar_cuda_vecadd.cu
 
         # double precision functions
-        src/oskar_cudad_bp2hcgg.cu
-        src/oskar_cudad_bp2hcggu.cu
-        src/oskar_cudad_bp2hig.cu
-        src/oskar_cudad_bp2higu.cu
-        src/oskar_cudad_bp2hugg.cu
-        src/oskar_cudad_bp2huggu.cu
-        src/oskar_cudad_eq2hg.cu
-        src/oskar_cudad_hbp2hig.cu
-        src/oskar_cudad_hbp2higu.cu
-        src/oskar_cudad_im2dft.cu
-        src/oskar_cudad_im2dftlm.cu
-        src/oskar_cudad_le2hg.cu
-        src/oskar_cudad_rpw3leg.cu
+        #src/oskar_cudad_bp2hcgg.cu
+        #src/oskar_cudad_bp2hcggu.cu
+        #src/oskar_cudad_bp2hig.cu
+        #src/oskar_cudad_bp2higu.cu
+        #src/oskar_cudad_bp2hugg.cu
+        #src/oskar_cudad_bp2huggu.cu
+        #src/oskar_cudad_eq2hg.cu
+        #src/oskar_cudad_hbp2hig.cu
+        #src/oskar_cudad_hbp2higu.cu
+        #src/oskar_cudad_im2dft.cu
+        #src/oskar_cudad_im2dftlm.cu
+        #src/oskar_cudad_le2hg.cu
+        #src/oskar_cudad_rpw3leg.cu
     )
     foreach (file ${cuda_kernels_SRC})
         list(APPEND cuda_SRC kernels/${file})
@@ -53,7 +53,7 @@ if (CUDA_FOUND)
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_cuda.dir/src)
     include_directories(${CUDA_INCLUDE_DIRS})
 
-    cuda_add_library(oskar_cuda ${cuda_SRC})
+    cuda_add_library(oskar_cuda SHARED ${cuda_SRC})
     target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
 
     # === Install configuration for the oskar-lib cuda module.

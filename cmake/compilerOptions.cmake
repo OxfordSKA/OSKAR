@@ -1,15 +1,25 @@
+if (NOT DEPENDENCIES_FOUND)
+	message(FATAL_ERROR "Please include dependencies.cmake before this script!")
+endif ()
+
 # === Set the build type to release if not otherwise specified.
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE release)
 endif()
 
+message("*****************************************************************")
+if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
+    message("** NOTE: Building in release Mode!")
+else ()
+	message("** NOTE: Building in debug Mode!")	
+endif()
+message("*****************************************************************")
+
 set(BUILD_SHARED_LIBS true)
 
-# == C++ compiler.
-if(CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
-    message("INFO: Setting compiler flags for gcc/g++.")
+# === GNU C++ compiler.
+if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-
     add_definitions(-Wall -Wextra -pedantic -std=c++0x)
     add_definitions(-Wcast-align)
     add_definitions(-Wcast-qual)
@@ -20,69 +30,65 @@ if(CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     #add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     #add_definitions(-Wfloat-equal)
 
-elseif (NOT WIN32) # INTEL COMPILER
-    message("INFO: Setting compiler flags for icc/icpc.")
-    #set(CMAKE_CXX_FLAGS_RELEASE "-O3 -xHost -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    #set(CMAKE_CXX_FLAGS_RELEASE "-O2 -xHost -funroll-loops -ipo -no-prec-div -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+# === Intel compiler.
+elseif (NOT WIN32)
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    #add_definitions(-vec-report3)
-
-    # Enable warning flags.
-    # --------------------
     add_definitions(-Wall -Wcheck)
-    #add_definitions(-Weffc++)
-
-    # Suppress remarks and warnings.
-    # -----------------------------
     add_definitions(-wd1418) # External function with no prior declaration.
     add_definitions(-wd1419) # External declaration in primary source file.
     add_definitions(-wd383)  # Value copied to temporary, reference to temporary used.
     add_definitions(-wd444)  # Destructor for base class not virtual.
     add_definitions(-wd981)  # Operands are evaluated in unspecified order.
     add_definitions(-wd177)  # Variable declared by never referenced.
+    add_definitions(-ww111)  # Promote remark 111 to warning.
+    add_definitions(-ww1572) # Promote remark 1572 to warning.
 
-    # Promote remarks to warnings.
-    # ----------------------------
-    add_definitions(-ww111)
-    add_definitions(-ww1572)
-
+# === Microsoft visual studio compiler.	
 elseif (MSVC) # visual studio compiler.
-    message("INFO: Settings for compiler MSVC")
-    #set(CMAKE_CXX_FLAGS_RELEASE "/wd4100 ")
     add_definitions(/wd4100)
-
+	
+# === No compiler found.
 else ()
     message("INFO: Unknown compiler...")
 endif ()
 
-# == Cuda
+# === Cuda
 if (CUDA_FOUND)
     # Use a seperate set of flags for CUDA.
-    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+	if (NOT MSVC)
+		set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+	endif ()
 
     # Default flags.
-    set(CUDA_NVCC_FLAGS --compiler-options;-Wall;)
+	if (NOT WIN32)
+		set(CUDA_NVCC_FLAGS --compiler-options;-Wall;)
+	endif ()
 
     # Build mode specific flags.
     if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
-        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
-        list(APPEND CUDA_NVCC_FLAGS -O2;)
-        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
+		if (MSVC)
+			list(APPEND CUDA_NVCC_FLAGS --compiler-options;/wd4100;)
+		else ()
+			list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
+		endif ()
+		list(APPEND CUDA_NVCC_FLAGS -O2;)
+		list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
+		list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
     else ()
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O0;)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-g;)
-        list(APPEND CUDA_NVCC_FLAGS -G;)
-        list(APPEND CUDA_NVCC_FLAGS -O0;)
+		if (NOT MSVC)
+			list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O0;)
+			list(APPEND CUDA_NVCC_FLAGS --compiler-options;-g;)
+		endif ()
+		list(APPEND CUDA_NVCC_FLAGS -G;)
+		list(APPEND CUDA_NVCC_FLAGS -O0;)
         list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v')
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
     endif ()
-
-endif ()
+endif (CUDA_FOUND)
 
 
 # === Set some include directories at the project level.

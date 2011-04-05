@@ -16,10 +16,11 @@
 #
 
 # note: 4.4.3 is just chosen for illustration at the moment.
-find_package(Qt4 4.4.3 COMPONENTS QtCore REQUIRED)
-find_package(Qt4 4.4.3 COMPONENTS QtGui QtXml QtOpenGL QtTest QUIET)
+find_package(Qt4 4.4.3 COMPONENTS QtCore QtGui QtXml QtOpenGL QtTest QUIET)
 
-find_package(Qwt5 QUIET)
+if (QT_FOUND)
+	find_package(Qwt5 QUIET)
+endif ()
 
 find_package(OpenMP QUIET)
 find_package(CUDA 2.1 QUIET)
@@ -58,6 +59,11 @@ endif ()
 
 
 # === Print some warning messages if key library modules will be disabled.
+if (NOT QT_QTCORE_FOUND)
+    message("*****************************************************************")
+    message("** WARNING: QT Core not found. ")
+    message("*****************************************************************")
+endif()
 
 if (NOT CUDA_FOUND)
     message("*****************************************************************")
@@ -72,3 +78,5 @@ if (NOT CASACORE_FOUND)
         "Unable to build OSKAR measurement set library!")
     message("*****************************************************************")
 endif()
+
+set(DEPENDENCIES_FOUND TRUE)

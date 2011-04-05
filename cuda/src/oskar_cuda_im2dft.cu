@@ -29,24 +29,26 @@
 #include "cuda/oskar_cuda_im2dft.h"
 #include "cuda/kernels/oskar_cudak_im2dft.h"
 #include <stdio.h>
+#include <math.h>
 
 #include "cuda/CudaEclipse.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifndef M_PI
-#define M_PI 3.1415926535
+#define M_PI 3.1415926535f
 #endif
 
-void oskar_cuda_im2dft(int nv, const float* u, const float* v,
+DllExport void oskar_cuda_im2dft(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, float dl, float dm,
         float sl, float sm, float* image)
 {
     // Get the centre pixel in L and M.
-    const int centreL = floor(nl / 2.0f);
-    const int centreM = floor(nm / 2.0f);
+    const int centreL = (int)floor(nl / 2.0f);
+    const int centreM = (int)floor(nm / 2.0f);
 
     // Create and allocate memory for the pixel positions.
     const int np = nl * nm; // Number of pixels in image.
@@ -56,11 +58,11 @@ void oskar_cuda_im2dft(int nv, const float* u, const float* v,
     float l, m; // Pixel coordinates.
     for (j = 0; j < nm; ++j) {
         // Image m-coordinate.
-        m = 2.0 * (j - centreM) * dm * sm / M_PI;
+        m = 2.0f * (j - centreM) * dm * sm / M_PI;
 
         for (i = 0; i < nl; ++i) {
             // Image l-coordinate.
-            l = 2.0 * (i - centreL) * dl * sl / M_PI;
+            l = 2.0f * (i - centreL) * dl * sl / M_PI;
 
             // Image pixel index.
             k = i + j * nl;
