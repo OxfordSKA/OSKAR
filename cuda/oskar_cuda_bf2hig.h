@@ -33,6 +33,8 @@
  * @file oskar_cuda_bf2hig.h
  */
 
+#include "oskar_cuda_windows.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,7 +63,7 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] beams The complex vector of output beams (length nb).
  */
-void oskar_cuda_bf2hig(int na, const float* ax, const float* ay,
+DllExport void oskar_cuda_bf2hig(int na, const float* ax, const float* ay,
         int ns, const float* samp, const float* slon, const float* slat,
         int nb, const float* blon, const float* blat, float k,
         float* beams);

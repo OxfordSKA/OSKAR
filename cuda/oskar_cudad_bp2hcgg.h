@@ -33,6 +33,8 @@
  * @file oskar_cudad_bp2hcgg.h
  */
 
+#include "oskar_cuda_windows.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -66,7 +68,7 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-void oskar_cudad_bp2hcgg(int na, const double* ax, const double* ay,
+DllExport void oskar_cudad_bp2hcgg(int na, const double* ax, const double* ay,
         double aw, double ag, int ns, const double* slon, const double* slat,
         double ba, double be, double k, double* image);
 

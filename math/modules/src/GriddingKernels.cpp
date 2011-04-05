@@ -94,7 +94,6 @@ void GriddingKernels::expSinc2D(const unsigned support,
 }
 
 
-// todo: change this to be a exp-sinc based on radius rather than x,y
 float GriddingKernels::_expSinc(const float x, const float y)
 {
     const float p1 = M_PI / 1.55f;

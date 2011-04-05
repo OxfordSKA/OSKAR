@@ -33,6 +33,8 @@
  * @file oskar_cudad_im2dft.h
  */
 
+#include "oskar_cuda_windows.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -64,7 +66,7 @@ extern "C" {
  * @param[in] sm The field of view in radians (full sky = pi).
  * @param[out] image The computed image (see note, above).
  */
-void oskar_cudad_im2dft(int nv, const double* u, const double* v,
+DllExport void oskar_cudad_im2dft(int nv, const double* u, const double* v,
         const double* vis, int nl, int nm, double dl, double dm,
         double sl, double sm, double* image);
 

@@ -33,6 +33,8 @@
  * @file oskar_cuda_im2dftlm.h
  */
 
+#include "oskar_cuda_windows.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -62,7 +64,7 @@ extern "C" {
  * @param[in] m Vector of m-positions (whole sky is +1 to -1).
  * @param[out] image The computed image (see note, above).
  */
-void oskar_cuda_im2dftlm(int nv, const float* u, const float* v,
+DllExport void oskar_cuda_im2dftlm(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, const float* l, const float* m,
         float* image);
 

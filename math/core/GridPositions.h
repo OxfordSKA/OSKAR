@@ -76,7 +76,7 @@ public:
  * @details
  * Generates positions on a (randomised) grid within a circle.
  *
- * FIXME: input variable names! ???
+ * FIXME! input variable names! ???
  */
 template<typename T>
 int GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,

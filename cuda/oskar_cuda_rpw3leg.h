@@ -33,6 +33,8 @@
  * @file oskar_cuda_rpw3leg.h
  */
 
+#include "oskar_cuda_windows.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -64,8 +66,9 @@ extern "C" {
  * @param[in] k Wavenumber in radians / metre.
  * @param[out] weights The matrix of geometric phase weights (see note, above).
  */
-void oskar_cuda_rpw3leg(int na, float* ax, float* ay, float* az, int ns,
-        float* ha, float* dec, float ha0, float dec0, float k, float* weights);
+DllExport void oskar_cuda_rpw3leg(int na, float* ax, float* ay, float* az,
+		int ns, float* ha, float* dec, float ha0, float dec0, float k,
+		float* weights);
 
 #ifdef __cplusplus
 }

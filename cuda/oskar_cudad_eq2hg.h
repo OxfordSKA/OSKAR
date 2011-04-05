@@ -33,6 +33,8 @@
  * @file oskar_cudad_eq2hg.h
  */
 
+#include "oskar_cuda_windows.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -69,8 +71,9 @@ extern "C" {
  * @param[out] azel The azimuths, or horizontal coordinates in radians.
  * @param[out] el The elevations, or NULL (depending on opt).
  */
-void oskar_cudad_eq2hg(char opt, int ns, const double* radec, const double* dec,
-        double cosLat, double sinLat, double lst, double* azel, double* el);
+DllExport void oskar_cudad_eq2hg(char opt, int ns, const double* radec,
+		const double* dec, double cosLat, double sinLat, double lst,
+		double* azel, double* el);
 
 #ifdef __cplusplus
 }

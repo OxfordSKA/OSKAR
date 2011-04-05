@@ -19,15 +19,15 @@ list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
 # === Install directories for oskar-lib components.
 # Note: the install directory prefix is set by CMAKE_INSTALL_PRFEIX.
 if (NOT OSKAR_LIB_INSTALL_DIR)
-    set(OSKAR_LIB_INSTALL_DIR "lib")
+	set(OSKAR_LIB_INSTALL_DIR "${CMAKE_PROJECT_NAME}/lib")
 endif()
 
 if (NOT OSKAR_INCLUDE_INSTALL_DIR)
-    set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar")
+    set(OSKAR_INCLUDE_INSTALL_DIR "${CMAKE_PROJECT_NAME}/include")
 endif()
 
 if (NOT OSKAR_BIN_INSTALL_DIR)
-    set(OSKAR_BIN_INSTALL_DIR "bin")
+    set(OSKAR_BIN_INSTALL_DIR "${CMAKE_PROJECT_NAME}/bin")
 endif()
 
 # === Set dependencies.
@@ -40,10 +40,12 @@ include(compilerOptions)
 #add_subdirectory(apps)
 add_subdirectory(cuda)
 #add_subdirectory(data)
-add_subdirectory(math)
-add_subdirectory(ms)
-add_subdirectory(utility)
-add_subdirectory(widgets)
+if (NOT WIN32)
+	add_subdirectory(math)
+	add_subdirectory(ms)
+	add_subdirectory(utility)
+	add_subdirectory(widgets)
+endif ()
 
 
 # === Packaging (make package) info: dpkg -I oskar-lib-0.0.0-Linux.deb

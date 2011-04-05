@@ -28,6 +28,7 @@
 
 #ifndef OSKAR_CUDA_BP2HUGG_H_
 #define OSKAR_CUDA_BP2HUGG_H_
+// FIXME! this is the same ifndef as oskar_cuda_bp2hugg (without the 'u')
 
 /**
  * @file oskar_cuda_bp2hugg.h
@@ -36,6 +37,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "oskar_cuda_windows.h"
 
 /**
  * @brief
@@ -67,7 +70,7 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-void oskar_cuda_bp2hugg(int na, const float* ax, const float* ay,
+DllExport void oskar_cuda_bp2hugg(int na, const float* ax, const float* ay,
         const float* aw, const float* ag, int ns, const float* slon,
         const float* slat, float ba, float be, float k, float* image);
 
