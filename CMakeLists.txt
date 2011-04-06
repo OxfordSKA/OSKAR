@@ -57,6 +57,10 @@ endif ()
 #### FIXME: Move all the packaging stuff to a separate cmake script.
 # include(packaging)
 # - move the top level cmake so that we can install scripts, external libs etc.
+# - will also need to sort out the install of dependencies.
+#    - on windows just provide copies of the dll's with the install...
+#    - on linux same? or rely on packages.... (bad idea if we need certain
+#      versions of external libs)
 ################################################################################
 # === Packaging (make package) info: dpkg -I oskar-lib-0.0.0-Linux.deb
 # http://wiki.clug.org.za/wiki/How_do_I_install_a_.deb_file_I_downloaded_without_compromising_dependencies%3F
