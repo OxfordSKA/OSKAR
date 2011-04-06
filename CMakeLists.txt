@@ -39,8 +39,8 @@ include(compilerOptions)
 # === Recurse into sub-diretories.
 #add_subdirectory(apps)
 add_subdirectory(cuda)
-#add_subdirectory(data)
-if (NOT WIN32)
+if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
+	add_subdirectory(data)
 	add_subdirectory(math)
 	add_subdirectory(ms)
 	add_subdirectory(utility)

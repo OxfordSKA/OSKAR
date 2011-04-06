@@ -19,14 +19,25 @@
 find_package(Qt4 4.4.3 COMPONENTS QtCore QtGui QtXml QtOpenGL QtTest QUIET)
 
 if (QT_FOUND)
+	if (WIN32)
+		set(QWT_INCLUDES ${CMAKE_SOURCE_DIR}/../include/qwt-5.2.2/)
+		set(QWT_LIBRARY_DIR ${CMAKE_SOURCE_DIR}/../lib/qwt-5.2.2/)
+	endif ()
 	find_package(Qwt5 QUIET)
+	#message("************* ${Qwt5_Qt4_LIBRARY}")
+	#message("************* ${Qwt5_INCLUDE_DIR}")
 endif ()
 
 find_package(OpenMP QUIET)
 find_package(CUDA 2.1 QUIET)
 find_package(MPI QUIET)
 
+if (WIN32)
+	set(CPPUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/../include/cppunit-1.12.1/)
+	set(CPPUNIT_LIB_DIR ${CMAKE_SOURCE_DIR}/../lib/cppunit-1.12.1/)
+endif()
 find_package(CppUnit QUIET)
+#message("============ ${CPPUNIT_INCLUDE_DIR}")
 
 find_package(FFTW3 QUIET)
 find_package(Boost QUIET)
@@ -69,6 +80,20 @@ if (NOT CUDA_FOUND)
     message("*****************************************************************")
     message("** WARNING: CUDA not found: "
         "Unable to build OSKAR CUDA library!")
+    message("*****************************************************************")
+endif()
+
+if (NOT Qwt5_FOUND)
+    message("*****************************************************************")
+    message("** WARNING: Qwt5 not found: "
+        "Unable to build plotting widgets library!")
+    message("*****************************************************************")
+endif()
+
+if (NOT CPPUNIT_FOUND)
+    message("*****************************************************************")
+    message("** WARNING: CppUnit not found: "
+        "Unable to build unit testing binaries!")
     message("*****************************************************************")
 endif()
 

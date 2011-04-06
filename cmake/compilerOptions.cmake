@@ -45,7 +45,10 @@ elseif (NOT WIN32)
 
 # === Microsoft visual studio compiler.
 elseif (MSVC) # visual studio compiler.
-    add_definitions(/wd4100)
+    add_definitions(/wd4100) # NEED TO FIX ALL THESE!
+	add_definitions(/wd4305) # NEED TO FIX ALL THESE!
+	add_definitions(/wd4244) # NEED TO FIX ALL THESE!
+	add_definitions(-DQWT_DLL)
 
 # === No compiler found.
 else ()

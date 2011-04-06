@@ -12,10 +12,11 @@ set(math_beamforming_test_SRC
 )
 
 if (CppUnit_FOUND)
+	include_directories(${CPPUNIT_INCLUDE_DIR})
     add_executable(beamformingTest ${math_beamforming_test_SRC})
     set_target_properties(beamformingTest PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+        #LINK_FLAGS "${OpenMP_CXX_FLAGS}"
     )
     target_link_libraries(beamformingTest math_beamforming ${CPPUNIT_LIBRARIES})
 endif()

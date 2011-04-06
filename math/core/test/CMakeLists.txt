@@ -12,6 +12,7 @@ set(math_core_test_SRC
 )
 
 if (CPPUNIT_FOUND)
+	include_directories(${CPPUNIT_INCLUDE_DIR})
     add_executable(mathCoreTest ${math_core_test_SRC})
     target_link_libraries(mathCoreTest ${CPPUNIT_LIBRARIES})
 endif()

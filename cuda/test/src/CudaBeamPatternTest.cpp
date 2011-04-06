@@ -179,6 +179,7 @@ void CudaBeamPatternTest::test_superStation()
 
         // Write image data to file.
         char fname[200];
+        // FIXME! snprintf is a c++0x feature so not supported by MSVC!!
         snprintf(fname, 200, "beamPatternSuperStation_%.0f.dat", freq[f]);
         file = fopen(fname, "w");
         for (int s = 0; s < ns; ++s) {
