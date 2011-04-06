@@ -144,7 +144,7 @@ foreach (module ${OSKAR_MODULES})
         /usr/local/lib/
         /usr/local/oskar-lib/lib/
         /usr/oskar-lib/lib/
-    )
+        )
     #message("----- ${lib_name}: ${OSKAR_${_upper_oskar_module}_LIBRARY}")
     if (${OSKAR_${_upper_oskar_module}_LIBRARY} MATCHES OSKAR_${_upper_oskar_module}_LIBRARY-NOTFOUND)
         #message("oops")
