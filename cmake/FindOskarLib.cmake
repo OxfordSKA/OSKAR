@@ -110,6 +110,8 @@ find_path(OSKAR_INCLUDE_DIR oskar
           PATHS
           /usr/include/
           /usr/local/include/
+          /usr/local/oskar-lib/include/
+          /usr/oskar-lib/include/
 )
 
 
@@ -136,7 +138,13 @@ mark_as_advanced(OSKAR_INCLUDE_DIR)
 foreach (module ${OSKAR_MODULES})
     string(TOUPPER ${module} _upper_oskar_module)
     set(lib_name "oskar_${module}")
-    find_library(OSKAR_${_upper_oskar_module}_LIBRARY NAMES ${lib_name})
+    find_library(OSKAR_${_upper_oskar_module}_LIBRARY NAMES ${lib_name}
+        PATHS
+        /usr/lib/
+        /usr/local/lib/
+        /usr/local/oskar-lib/lib/
+        /usr/oskar-lib/lib/
+    )
     #message("----- ${lib_name}: ${OSKAR_${_upper_oskar_module}_LIBRARY}")
     if (${OSKAR_${_upper_oskar_module}_LIBRARY} MATCHES OSKAR_${_upper_oskar_module}_LIBRARY-NOTFOUND)
         #message("oops")

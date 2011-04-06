@@ -19,7 +19,7 @@ list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
 # === Install directories for oskar-lib components.
 # Note: the install directory prefix is set by CMAKE_INSTALL_PRFEIX.
 if (NOT OSKAR_LIB_INSTALL_DIR)
-	set(OSKAR_LIB_INSTALL_DIR "${CMAKE_PROJECT_NAME}/lib")
+    set(OSKAR_LIB_INSTALL_DIR "${CMAKE_PROJECT_NAME}/lib")
 endif()
 
 if (NOT OSKAR_INCLUDE_INSTALL_DIR)
@@ -38,13 +38,13 @@ include(compilerOptions)
 
 # === Recurse into sub-diretories.
 #add_subdirectory(apps)
+#add_subdirectory(data)
 add_subdirectory(cuda)
 if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
-	add_subdirectory(data)
-	add_subdirectory(math)
-	add_subdirectory(ms)
-	add_subdirectory(utility)
-	add_subdirectory(widgets)
+    add_subdirectory(math)
+    add_subdirectory(ms)
+    add_subdirectory(utility)
+    add_subdirectory(widgets)
 endif ()
 
 
