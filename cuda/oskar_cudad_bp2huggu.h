@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAD_BP2HUGG_H_
-#define OSKAR_CUDAD_BP2HUGG_H_
+#ifndef OSKAR_CUDAD_BP2HUGGU_H_
+#define OSKAR_CUDAD_BP2HUGGU_H_
 
 /**
- * @file oskar_cudad_bp2hugg.h
+ * @file oskar_cudad_bp2huggu.h
  */
 
 #include "oskar_cuda_windows.h"
@@ -69,7 +69,7 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-DllExport void oskar_cudad_bp2hugg(int na, const double* ax, const double* ay,
+DllExport void oskar_cudad_bp2huggu(int na, const double* ax, const double* ay,
         const double* aw, const double* ag, int ns, const double* slon,
         const double* slat, double ba, double be, double k, double* image);
 

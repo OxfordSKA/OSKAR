@@ -18,6 +18,7 @@ if (CUDA_FOUND)
         src/oskar_cuda_bp2hcgg.cu
         src/oskar_cuda_bp2hcggu.cu
         src/oskar_cuda_bp2hig.cu
+        src/oskar_cuda_bp2higau.cu
         src/oskar_cuda_bp2higu.cu
         src/oskar_cuda_bp2hsg.cu
         src/oskar_cuda_bp2hsgu.cu
@@ -62,11 +63,11 @@ if (CUDA_FOUND)
     include_directories(${CUDA_INCLUDE_DIRS})
 
     cuda_add_library(oskar_cuda SHARED ${cuda_SRC})
-	set_target_properties(oskar_cuda PROPERTIES PREFIX "lib")
+    set_target_properties(oskar_cuda PROPERTIES PREFIX "lib")
     target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
 
     # === Install configuration for the oskar-lib cuda module.
-	install(TARGETS oskar_cuda DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    install(TARGETS oskar_cuda DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     set_target_properties(oskar_cuda PROPERTIES
         SOVERSION ${oskar-lib_SOVERSION})
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

@@ -26,51 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAK_HANN_H_
+#define OSKAR_CUDAK_HANN_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudak_hann.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higau.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hsg.h"
-#include "oskar_cuda_bp2hsgu.h"
-#include "oskar_cuda_bp2hssg.h"
-#include "oskar_cuda_bp2hssgu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#include "cuda/CudaEclipse.h"
 
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hsg.h"
-#include "oskar_cudad_bp2hsgu.h"
-#include "oskar_cudad_bp2hssg.h"
-#include "oskar_cudad_bp2hssgu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * CUDA kernel to apply a hann apodisation into beamforing weights.
+ *
+ * @details
+ * http://mathworld.wolfram.com/HanningFunction.html
+ *
+ * weights matrix dimensions = weights[b][a]
+ *
+ * @param[in] na    Number of antennas.
+ * @param[in] ax    Antenna x positions (metres).
+ * @param[in] ay    Antenna y positions (metres).
+ * @param[in] nb    Number of beam directions.
+ * @param[in] fwhm  Full with at half maximum of the hann window.
+ * @param[in/out] weights Weights matrix to which to apply apodisation.
+ */
+__global__
+void oskar_cudak_hann(const unsigned na, const float * ax, const float * ay,
+        const unsigned nb, const float fwhm, float2 * weights);
+
+#endif // OSKAR_CUDAK_HANN_H_

@@ -26,51 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
 
-/**
- * @file oskar_cuda.h
- */
+#include "cuda/kernels/oskar_cudak_hann.h"
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
-#include "oskar_cuda_bp2hcgg.h"
-#include "oskar_cuda_bp2hcggu.h"
-#include "oskar_cuda_bp2hig.h"
-#include "oskar_cuda_bp2higau.h"
-#include "oskar_cuda_bp2higu.h"
-#include "oskar_cuda_bp2hsg.h"
-#include "oskar_cuda_bp2hsgu.h"
-#include "oskar_cuda_bp2hssg.h"
-#include "oskar_cuda_bp2hssgu.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2huggu.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_hbp2higu.h"
-#include "oskar_cuda_im2dft.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846f
+#endif
 
-#include "oskar_cudad_bp2hcgg.h"
-#include "oskar_cudad_bp2hcggu.h"
-#include "oskar_cudad_bp2hig.h"
-#include "oskar_cudad_bp2higu.h"
-#include "oskar_cudad_bp2hsg.h"
-#include "oskar_cudad_bp2hsgu.h"
-#include "oskar_cudad_bp2hssg.h"
-#include "oskar_cudad_bp2hssgu.h"
-#include "oskar_cudad_bp2hugg.h"
-#include "oskar_cudad_bp2huggu.h"
-#include "oskar_cudad_eq2hg.h"
-#include "oskar_cudad_hbp2hig.h"
-#include "oskar_cudad_hbp2higu.h"
-#include "oskar_cudad_im2dft.h"
-#include "oskar_cudad_im2dftlm.h"
-#include "oskar_cudad_le2hg.h"
-#include "oskar_cudad_rpw3leg.h"
 
-#endif // OSKAR_CUDA_H_
+// Note: Each thread applies the apodisation to one antenna for all beams.
+
+__global__
+void oskar_cudak_hann(const unsigned na, const float * ax, const float * ay,
+        const unsigned nb, const float fwhm, float2 * weights)
+{
+    // Antenna index being processed by the thread.
+    const int a = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Return if the thread antenna id is greater than the number of antennas!
+    if (a > na) return;
+
+    // Calculate Hanning weight for the given antenna radius.
+    const float r = sqrtf(ax[a] * ax[a] + ay[a] * ay[a]);
+    const float weight = 0.5 * (1 + cos((M_PI * r) / fwhm));
+
+    // Loop over beam directions for the antenna and apply apodisation.
+    for (int b = 0; b < nb; ++b)
+    {
+        const int idx = b * na + a;
+        weights[idx].x *= weight;
+        weights[idx].y *= weight;
+    }
+}
