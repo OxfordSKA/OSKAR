@@ -179,8 +179,7 @@ void CudaBeamPatternTest::test_superStation()
 
         // Write image data to file.
         char fname[200];
-        // FIXME! snprintf is a c++0x feature so not supported by MSVC!!
-        snprintf(fname, 200, "beamPatternSuperStation_%.0f.dat", freq[f]);
+        sprintf(fname, "beamPatternSuperStation_%.0f.dat", freq[f]);
         file = fopen(fname, "w");
         for (int s = 0; s < ns; ++s) {
             fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
@@ -257,7 +256,7 @@ void CudaBeamPatternTest::test_satStation()
 
         // Write image data to file.
         char fname[200];
-        snprintf(fname, 200, "beamPatternSatStation_%.0f.dat", freq[f]);
+        sprintf(fname, "beamPatternSatStation_%.0f.dat", freq[f]);
         file = fopen(fname, "w");
         for (int s = 0; s < ns; ++s) {
             fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
@@ -351,7 +350,7 @@ void CudaBeamPatternTest::test_stations200()
 
         // Write antenna positions to file.
         char fname[200];
-        snprintf(fname, 200, "arraySatStation%02d.dat", station);
+        sprintf(fname, "arraySatStation%02d.dat", station);
         FILE* file = fopen(fname, "w");
         for (int a = 0; a < na; ++a) {
             fprintf(file, "%12.3f%12.3f\n", ax[a], ay[a]);
@@ -880,7 +879,7 @@ void CudaBeamPatternTest::test_stations2000()
 
         // Write antenna positions to file.
         char fname[200];
-        snprintf(fname, 200, "arraySatStation%02d.dat", station);
+        sprintf(fname, "arraySatStation%02d.dat", station);
         FILE* file = fopen(fname, "w");
         for (int a = 0; a < na; ++a) {
             fprintf(file, "%12.3f%12.3f\n", ax[a], ay[a]);
@@ -972,7 +971,7 @@ void CudaBeamPatternTest::test_stations4000()
 
         // Write antenna positions to file.
         char fname[200];
-        snprintf(fname, 200, "arraySatStation%02d.dat", station);
+        sprintf(fname, "arraySatStation%02d.dat", station);
         FILE* file = fopen(fname, "w");
         for (int a = 0; a < na; ++a) {
             fprintf(file, "%12.3f%12.3f\n", ax[a], ay[a]);
@@ -1092,7 +1091,7 @@ void CudaBeamPatternTest::test_perturbed()
 
         // Write image data to file.
         char fname[200];
-        snprintf(fname, 200, "beamPattern_%.0f.dat", freq[f]);
+        sprintf(fname, "beamPattern_%.0f.dat", freq[f]);
         file = fopen(fname, "w");
         for (int s = 0; s < ns; ++s) {
             fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
@@ -1162,7 +1161,7 @@ void CudaBeamPatternTest::test_scattered()
 
         // Write image data to file.
         char fname[200];
-        snprintf(fname, 200, "beamPatternScattered_%.0f.dat", freq[f]);
+        sprintf(fname, "beamPatternScattered_%.0f.dat", freq[f]);
         file = fopen(fname, "w");
         for (int s = 0; s < ns; ++s) {
             fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
