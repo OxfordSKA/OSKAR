@@ -19,16 +19,21 @@ list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
 # === Install directories for oskar-lib components.
 # Note: the install directory prefix is set by CMAKE_INSTALL_PRFEIX.
 if (NOT OSKAR_LIB_INSTALL_DIR)
-    set(OSKAR_LIB_INSTALL_DIR "${CMAKE_PROJECT_NAME}/lib")
+	set(OSKAR_LIB_INSTALL_DIR "lib")
 endif()
 
 if (NOT OSKAR_INCLUDE_INSTALL_DIR)
-    set(OSKAR_INCLUDE_INSTALL_DIR "${CMAKE_PROJECT_NAME}/include")
+    set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar")
 endif()
 
 if (NOT OSKAR_BIN_INSTALL_DIR)
-    set(OSKAR_BIN_INSTALL_DIR "${CMAKE_PROJECT_NAME}/bin")
+    set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
+
+if (NOT OSKAR_SCRIPTS_INSTALL_DIR)
+    set(OSKAR_BIN_INSTALL_DIR "scripts")
+endif()
+
 
 # === Set dependencies.
 include(dependencies)
@@ -52,13 +57,18 @@ endif ()
 # http://wiki.clug.org.za/wiki/How_do_I_install_a_.deb_file_I_downloaded_without_compromising_dependencies%3F
 # dpkg-scanpackages . /dev/null | gzip -c -9 > Packages.gz
 # deb file:///home/debs /
-set(CPACK_GENERATOR "DEB" "TGZ")
+
 set(CPACK_PACKAGE_VENDOR "Oxford e-Research Centre, University of Oxford.")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OSKAR developer team.")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open SKA Radio Telescope library.")
 set(CPACK_PACKAGE_VERSION ${oskar-lib_SOVERSION})
-set(CPACK_DEBIAN_PACKAGE_VERSION ${oskar-lib_SOVERSION})
-set(CPACK_DEBIAN_PACKAGE_SECTION "Science")
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcfitsio3 (>=3.0), libqt4-dev (>=4.5)")
+if (WIN32)
+	set(CPACK_GENERATOR "NSIS")
+elseif ()
+	set(CPACK_GENERATOR "DEB" "TGZ")
+	set(CPACK_DEBIAN_PACKAGE_VERSION ${oskar-lib_SOVERSION})
+	set(CPACK_DEBIAN_PACKAGE_SECTION "Science")
+	set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+	set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcfitsio3 (>=3.0), libqt4-dev (>=4.5)")
+endif ()
 include(CPack)
