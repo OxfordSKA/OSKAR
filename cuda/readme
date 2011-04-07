@@ -26,8 +26,8 @@ oskar_cuda_as2hi        : antenna signal 2D horizontal isotropic
 oskar_cuda_bf2hig       : beamformer 2D horizontal isotropic geometric
 oskar_cuda_bfmv         : beamformer matrix vector
 oskar_cuda_bp2hig       : beam pattern 2D horizontal isotropic geometric
-oskar_cuda_bp2hcgg      : (reserved) beam pattern 2D horizontal common gaussian geometric
-oskar_cuda_bp2hugg      : (reserved) beam pattern 2D horizontal unique gaussian geometric
+oskar_cuda_bp2hcgg      : beam pattern 2D horizontal common gaussian geometric
+oskar_cuda_bp2hugg      : beam pattern 2D horizontal unique gaussian geometric
 oskar_cuda_im2dft       : imager 2D DFT
 
 
@@ -39,3 +39,40 @@ oskar_cudak_eq2hg       : equatorial to horizontal generic
 oskar_cudak_im2dft      : imager 2D DFT
 oskar_cudak_pc2ht       : pre-compute 2D horizontal trig
 oskar_cudak_wt2hg       : weights 2D horizontal geometric
+
+
+
+
+
+
+
+2d Beam pattern wrapper functions under review
+==============================================
+bp2hcggu  = horizontal, antenna pattern = common gaussian, geometric, un-normalised
+bp2higau  = horizontal, isotropic, geometric weights, apodisation, un-normalised.
+bp2higu   = horizontal, antenna pattern = sin, geometric weights, unnormalised.
+bp2hsgu   = horizontal, antenna pattern = sin, geometric weights, unnormalised.
+bp2hssgu  = horizontal, antenna pattern = sin^2, geometric weights, un-normalised.
+bp2huggu  = horizontal, antenna pattern = unique gaussian per antenna, geometric weights, un-normalised.
+
+
+Proposals
+=========
+1. Removed normalised version : (removes 10 functions)
+Un-normalised versions can be very simply normalised outside the function either
+on the host code or using a gpu call to some scaling function (probably blas).
+
+2.
+
+
+removed functions:
+
+wrappers:
+bp2hcgg   = horizontal, antenna pattern = common gaussian, geometric, normalised
+bp2hig    = horizontal, antenna pattern = sin, geometric weights, normalised.
+bp2hsg    = horizontal, antenna pattern = sin, geometric weights, normalised.
+bp2hugg   = horizontal, antenna pattern = unique gaussian per antenna, geometric weights, normalised.
+bp2hssg   = horizontal, antenna pattern = sin^2, geometric weights.
+
+kernels:
+oskar_cudak_wt2hg
