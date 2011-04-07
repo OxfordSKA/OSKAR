@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_wt2hgu.h"
+#include "cuda/kernels/oskar_cudak_wt2hg.h"
 #include "math/core/phase.h"
 
 // Shared memory pointer used by the kernel.
 extern __shared__ float smem[];
 
 __global__
-void oskar_cudak_wt2hgu(const int na, const float* ax, const float* ay,
+void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
         const int nb, const float3* trig, const float k, float2* weights)
 {
     const int tx = threadIdx.x;

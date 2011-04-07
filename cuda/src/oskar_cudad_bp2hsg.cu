@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cudad_bp2huggu.h"
-#include "cuda/kernels/oskar_cudakd_bp2hugw.h"
-#include "cuda/kernels/oskar_cudakd_wt2hgu.h"
+#include "cuda/oskar_cudad_bp2hsg.h"
+#include "cuda/kernels/oskar_cudakd_bp2hsw.h"
+#include "cuda/kernels/oskar_cudakd_wt2hg.h"
 #include <stdio.h>
 
 #include "cuda/CudaEclipse.h"
@@ -37,43 +37,33 @@
 extern "C" {
 #endif
 
-void oskar_cudad_bp2huggu(int na, const double* ax, const double* ay,
-        const double* aw, const double* ag, int ns, const double* slon,
-        const double* slat, double ba, double be, double k, double* image)
+void oskar_cudad_bp2hsg(int na, const double* ax, const double* ay,
+        int ns, const double* slon, const double* slat,
+        double ba, double be, double k, double* image)
 {
     // Precompute.
     double3 trig = make_double3(cos(ba), sin(ba), cos(be));
 
-    // Allocate memory for antenna data, antenna weights,
+    // Allocate memory for antenna positions, antenna weights,
     // test source positions and pixel values on the device.
-    double *axd, *ayd, *awd, *agd, *slond, *slatd;
+    double *axd, *ayd, *slond, *slatd;
     double2 *weights, *pix;
     double3 *trigd;
     cudaMalloc((void**)&axd, na * sizeof(double));
     cudaMalloc((void**)&ayd, na * sizeof(double));
-    cudaMalloc((void**)&awd, na * sizeof(double));
-    cudaMalloc((void**)&agd, na * sizeof(double));
     cudaMalloc((void**)&weights, na * sizeof(double2));
     cudaMalloc((void**)&trigd, 1 * sizeof(double3));
 
-    // Precompute antenna beam width parameters.
-    double* awh = (double*)malloc(na * sizeof(double));
-    for (int a = 0; a < na; ++a) {
-        awh[a] = 2.772588 / (aw[a] * aw[a]); // 4 ln2 / (FWHM^2)
-    }
-
-    // Copy antenna data and beam geometry to device.
+    // Copy antenna positions and beam geometry to device.
     cudaMemcpy(axd, ax, na * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(awd, awh, na * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(agd, ag, na * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(trigd, &trig, 1 * sizeof(double3), cudaMemcpyHostToDevice);
 
     // Invoke kernel to compute unnormalised antenna weights on the device.
     dim3 wThreads(256, 1);
     dim3 wBlocks((na + wThreads.x - 1) / wThreads.x, 1);
     size_t wSharedMem = wThreads.x * sizeof(double2) + sizeof(double3);
-    oskar_cudakd_wt2hgu <<<wBlocks, wThreads, wSharedMem>>> (
+    oskar_cudakd_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
             na, axd, ayd, 1, trigd, k, weights);
     cudaThreadSynchronize();
 
@@ -101,10 +91,10 @@ void oskar_cudad_bp2huggu(int na, const double* ax, const double* ay,
         // Invoke kernel to compute the (partial) beam pattern on the device.
         int threadsPerBlock = 256;
         int blocks = (srcInBlock + threadsPerBlock - 1) / threadsPerBlock;
-        int maxAntennasPerBlock = 640; // Should be multiple of 16.
-        size_t sharedMem = 3 * maxAntennasPerBlock * sizeof(double2);
-        oskar_cudakd_bp2hugw <<<blocks, threadsPerBlock, sharedMem>>>
-                (na, axd, ayd, awd, agd, weights, srcInBlock, slond, slatd, k,
+        int maxAntennasPerBlock = 864; // Should be multiple of 16.
+        size_t sharedMem = 2 * maxAntennasPerBlock * sizeof(double2);
+        oskar_cudakd_bp2hsw <<<blocks, threadsPerBlock, sharedMem>>>
+                (na, axd, ayd, weights, srcInBlock, slond, slatd, k,
                         maxAntennasPerBlock, pix);
         cudaThreadSynchronize();
         cudaError_t err = cudaPeekAtLastError();
@@ -116,14 +106,9 @@ void oskar_cudad_bp2huggu(int na, const double* ax, const double* ay,
                 cudaMemcpyDeviceToHost);
     }
 
-    // Free host memory.
-    free(awh);
-
     // Free device memory.
     cudaFree(axd);
     cudaFree(ayd);
-    cudaFree(awd);
-    cudaFree(agd);
     cudaFree(weights);
     cudaFree(slond);
     cudaFree(slatd);

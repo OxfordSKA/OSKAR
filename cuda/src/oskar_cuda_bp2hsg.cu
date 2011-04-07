@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_bp2hssgu.h"
-#include "cuda/kernels/oskar_cudak_bp2hssw.h"
-#include "cuda/kernels/oskar_cudak_wt2hgu.h"
+#include "cuda/oskar_cuda_bp2hsg.h"
+#include "cuda/kernels/oskar_cudak_bp2hsw.h"
+#include "cuda/kernels/oskar_cudak_wt2hg.h"
 #include <stdio.h>
 
 #include "cuda/CudaEclipse.h"
@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-void oskar_cuda_bp2hssgu(int na, const float* ax, const float* ay,
+void oskar_cuda_bp2hsg(int na, const float* ax, const float* ay,
         int ns, const float* slon, const float* slat,
         float ba, float be, float k, float* image)
 {
@@ -63,7 +63,7 @@ void oskar_cuda_bp2hssgu(int na, const float* ax, const float* ay,
     dim3 wThreads(256, 1);
     dim3 wBlocks((na + wThreads.x - 1) / wThreads.x, 1);
     size_t wSharedMem = wThreads.x * sizeof(float2) + sizeof(float3);
-    oskar_cudak_wt2hgu <<<wBlocks, wThreads, wSharedMem>>> (
+    oskar_cudak_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
             na, axd, ayd, 1, trigd, k, weights);
     cudaThreadSynchronize();
 
@@ -93,7 +93,7 @@ void oskar_cuda_bp2hssgu(int na, const float* ax, const float* ay,
         int blocks = (srcInBlock + threadsPerBlock - 1) / threadsPerBlock;
         int maxAntennasPerBlock = 864; // Should be multiple of 16.
         size_t sharedMem = 2 * maxAntennasPerBlock * sizeof(float2);
-        oskar_cudak_bp2hssw <<<blocks, threadsPerBlock, sharedMem>>>
+        oskar_cudak_bp2hsw <<<blocks, threadsPerBlock, sharedMem>>>
                 (na, axd, ayd, weights, srcInBlock, slond, slatd, k,
                         maxAntennasPerBlock, pix);
         cudaThreadSynchronize();

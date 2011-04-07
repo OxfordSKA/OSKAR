@@ -28,9 +28,7 @@
 
 #include "cuda/test/CudaBeamPatternSineTest.h"
 #include "cuda/oskar_cuda_bp2hsg.h"
-#include "cuda/oskar_cuda_bp2hsgu.h"
 #include "cuda/oskar_cuda_bp2hssg.h"
-#include "cuda/oskar_cuda_bp2hssgu.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
 #include "math/core/Matrix3.h"
@@ -260,7 +258,7 @@ void CudaBeamPatternSineTest::test_sineUnnormalised()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hsgu(na*na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cuda_bp2hsg(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
             2 * M_PI * (freq / C_0), &image[0]);
     TIMER_STOP("Finished sine beam pattern "
@@ -306,7 +304,7 @@ void CudaBeamPatternSineTest::test_sineSquaredUnnormalised()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hssgu(na*na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cuda_bp2hssg(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
             2 * M_PI * (freq / C_0), &image[0]);
     TIMER_STOP("Finished sine-squared beam pattern "

@@ -26,53 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAKD_WT2HGU_H_
-#define OSKAR_CUDAKD_WT2HGU_H_
+#ifndef OSKAR_CUDA_BP2HIG_H_
+#define OSKAR_CUDA_BP2HIG_H_
 
 /**
- * @file oskar_cudakd_wt2hgu.h
+ * @file oskar_cuda_bp2hig.h
  */
 
-#include "cuda/CudaEclipse.h"
+#include "oskar_cuda_windows.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * CUDA kernel to generate un-normalised geometric beamforming weights.
+ * Computes a beam pattern using CUDA in the horizontal coordinate system.
  *
  * @details
- * This CUDA kernel produces the complex antenna beamforming weights for the
- * given directions, and stores them in device memory.
- * The weights are NOT normalised by the number of antennas.
+ * Computes a beam pattern using CUDA, assuming isotropic antennas,
+ * generating the geometric beamforming weights separately.
+ * The beamforming weights are NOT normalised to the number of antennas.
  *
- * Each thread generates the complex weights for a single antenna and a single
- * beam direction.
+ * The function must be supplied with the antenna x- and y-positions, the
+ * test source longitude and latitude positions, the beam direction, and
+ * the wavenumber.
  *
- * The input \p trig array contains triplets of the following pre-computed
- * trigonometry:
+ * The computed beam pattern is returned in the \p image array, which
+ * must be pre-sized to length 2*ns. The values in the \p image array
+ * are alternate (real, imag) pairs for each position of the test source.
  *
- * trig.x = {cosine azimuth}
- * trig.y = {sine azimuth}
- * trig.z = {cosine elevation}
- *
- * The kernel requires blockDim.x * sizeof(double2) +
- * blockDim.y * sizeof(double3) bytes of shared memory.
- *
- * The number of doubleing-point operations performed by this kernel is:
- * \li Sines and cosines: 2 * na * nb.
- * \li Multiplies: 4 * na * nb.
- * \li Divides: 2 * na * nb.
- * \li Additions / subtractions: na * nb.
- *
- * @param[in] na Number of antennas.
- * @param[in] ax Array of antenna x positions in metres.
- * @param[in] ay Array of antenna y positions in metres.
- * @param[in] nb Number of beams.
- * @param[in] trig Precomputed trigonometry for all beam positions.
+ * @param[in] na The number of antennas.
+ * @param[in] ax The antenna x-positions in metres.
+ * @param[in] ay The antenna y-positions in metres.
+ * @param[in] ns The number of test source positions.
+ * @param[in] slon The longitude coordinates of the test source.
+ * @param[in] slat The latitude coordinates of the test source.
+ * @param[in] ba The beam azimuth direction in radians
+ * @param[in] be The beam elevation direction in radians.
  * @param[in] k The wavenumber (rad / m).
- * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
+ * @param[out] image The computed beam pattern (see note, above).
  */
-__global__
-void oskar_cudakd_wt2hgu(const int na, const double* ax, const double* ay,
-        const int nb, const double3* trig, const double k, double2* weights);
+DllExport void oskar_cuda_bp2hig(int na, const float* ax, const float* ay,
+        int ns, const float* slon, const float* slat,
+        float ba, float be, float k, float* image);
 
-#endif // OSKAR_CUDAKD_WT2HGU_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_CUDA_BP2HIG_H_

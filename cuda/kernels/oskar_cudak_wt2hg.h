@@ -30,7 +30,7 @@
 #define OSKAR_CUDAK_WT2HGU_H_
 
 /**
- * @file oskar_cudak_wt2hgu.h
+ * @file oskar_cudak_wt2hg.h
  */
 
 #include "cuda/CudaEclipse.h"
@@ -72,7 +72,7 @@
  * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
  */
 __global__
-void oskar_cudak_wt2hgu(const int na, const float* ax, const float* ay,
+void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
         const int nb, const float3* trig, const float k, float2* weights);
 
 #endif // OSKAR_CUDAK_WT2HGU_H_

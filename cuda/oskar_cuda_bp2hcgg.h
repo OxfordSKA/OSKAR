@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAD_BP2HIGU_H_
-#define OSKAR_CUDAD_BP2HIGU_H_
+#ifndef OSKAR_CUDA_BP2HCGG_H_
+#define OSKAR_CUDA_BP2HCGG_H_
 
 /**
- * @file oskar_cudad_bp2higu.h
+ * @file oskar_cuda_bp2hcgg.h
  */
 
 #include "oskar_cuda_windows.h"
@@ -44,13 +44,13 @@ extern "C" {
  * Computes a beam pattern using CUDA in the horizontal coordinate system.
  *
  * @details
- * Computes a beam pattern using CUDA, assuming isotropic antennas,
- * generating the geometric beamforming weights separately.
+ * Computes a beam pattern using CUDA, assuming each antenna has the same
+ * Gaussian beam, generating the geometric beamforming weights separately.
  * The beamforming weights are NOT normalised to the number of antennas.
  *
  * The function must be supplied with the antenna x- and y-positions, the
- * test source longitude and latitude positions, the beam direction, and
- * the wavenumber.
+ * antenna gain and beam-width, the test source longitude and latitude
+ * positions, the beam direction, and the wavenumber.
  *
  * The computed beam pattern is returned in the \p image array, which
  * must be pre-sized to length 2*ns. The values in the \p image array
@@ -59,6 +59,8 @@ extern "C" {
  * @param[in] na The number of antennas.
  * @param[in] ax The antenna x-positions in metres.
  * @param[in] ay The antenna y-positions in metres.
+ * @param[in] aw The antenna beam full-width half-maximum in radians.
+ * @param[in] ag The antenna Gaussian peak amplitude.
  * @param[in] ns The number of test source positions.
  * @param[in] slon The longitude coordinates of the test source.
  * @param[in] slat The latitude coordinates of the test source.
@@ -67,12 +69,12 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-DllExport void oskar_cudad_bp2higu(int na, const double* ax, const double* ay,
-        int ns, const double* slon, const double* slat,
-        double ba, double be, double k, double* image);
+DllExport void oskar_cuda_bp2hcgg(int na, const float* ax, const float* ay,
+        float aw, float ag, int ns, const float* slon, const float* slat,
+        float ba, float be, float k, float* image);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_CUDAD_BP2HIGU_H_
+#endif // OSKAR_CUDA_BP2HCGG_H_

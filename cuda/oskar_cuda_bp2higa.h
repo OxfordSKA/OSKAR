@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAD_BP2HSGU_H_
-#define OSKAR_CUDAD_BP2HSGU_H_
+#ifndef OSKAR_CUDA_BP2HIGA_H_
+#define OSKAR_CUDA_BP2HIGA_H_
 
 /**
- * @file oskar_cudad_bp2hsgu.h
+ * @file oskar_cuda_bp2higa.h
  */
 
 #include "oskar_cuda_windows.h"
@@ -43,9 +43,11 @@ extern "C" {
  * @brief
  * Computes a beam pattern using CUDA in the horizontal coordinate system.
  *
+ * !!!USING APPODISATION!!!!
+ *
  * @details
- * Computes a beam pattern using CUDA, assuming antennas with a sine-elevation
- * response, generating the geometric beamforming weights separately.
+ * Computes a beam pattern using CUDA, assuming isotropic antennas,
+ * generating the geometric beamforming weights separately.
  * The beamforming weights are NOT normalised to the number of antennas.
  *
  * The function must be supplied with the antenna x- and y-positions, the
@@ -56,6 +58,12 @@ extern "C" {
  * must be pre-sized to length 2*ns. The values in the \p image array
  * are alternate (real, imag) pairs for each position of the test source.
  *
+ * Apodisation of antennas is selected though the value of \p apFn which defines
+ * the apodisation function applied. apFn takes the values:
+ *      0 - No appodisation
+ *      1 - Hanning Function. http://mathworld.wolfram.com/HanningFunction.html
+ *
+ *
  * @param[in] na The number of antennas.
  * @param[in] ax The antenna x-positions in metres.
  * @param[in] ay The antenna y-positions in metres.
@@ -65,14 +73,24 @@ extern "C" {
  * @param[in] ba The beam azimuth direction in radians
  * @param[in] be The beam elevation direction in radians.
  * @param[in] k The wavenumber (rad / m).
+ * @param[in] apFn The apodisation function type.
  * @param[out] image The computed beam pattern (see note, above).
+ *
+ * @return error code
  */
-DllExport void oskar_cudad_bp2hsgu(int na, const double* ax, const double* ay,
-        int ns, const double* slon, const double* slat,
-        double ba, double be, double k, double* image);
+DllExport int oskar_cuda_bp2higa(int na, const float* ax, const float* ay,
+        int ns, const float* slon, const float* slat,
+        float ba, float be, float k, int apFn, float* image);
+
+
+enum {
+    apFn_none = 0,
+    apFn_hann = 1
+};
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_CUDAD_BP2HSGU_H_
+#endif // OSKAR_CUDA_BP2HIG_H_

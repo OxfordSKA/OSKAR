@@ -29,7 +29,7 @@
 #include "cuda/oskar_cuda_hbp2higu.h"
 #include "cuda/kernels/oskar_cudak_bp2hiw.h"
 #include "cuda/kernels/oskar_cudak_bp2hiws.h"
-#include "cuda/kernels/oskar_cudak_wt2hgu.h"
+#include "cuda/kernels/oskar_cudak_wt2hg.h"
 #include <stdio.h>
 
 #include "cuda/CudaEclipse.h"
@@ -117,7 +117,7 @@ void oskar_cuda_hbp2higu(int n2, int* n1, const float* x1, const float* y1,
             dim3 wThreads(256, 1);
             dim3 wBlocks((nat + wThreads.x - 1) / wThreads.x, 1);
             size_t wSharedMem = wThreads.x * sizeof(float2) + sizeof(float3);
-            oskar_cudak_wt2hgu <<<wBlocks, wThreads, wSharedMem>>> (
+            oskar_cudak_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
                     nat, x1td, y1td, 1, trig1d, k, weights);
             cudaThreadSynchronize();
             cudaError_t err = cudaPeekAtLastError();
@@ -145,7 +145,7 @@ void oskar_cuda_hbp2higu(int n2, int* n1, const float* x1, const float* y1,
         dim3 wThreads(256, 1);
         dim3 wBlocks((n2 + wThreads.x - 1) / wThreads.x, 1);
         size_t wSharedMem = wThreads.x * sizeof(float2) + sizeof(float3);
-        oskar_cudak_wt2hgu <<<wBlocks, wThreads, wSharedMem>>> (
+        oskar_cudak_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
                 n2, x2d, y2d, 1, trig2d, k, weights);
         cudaThreadSynchronize();
 

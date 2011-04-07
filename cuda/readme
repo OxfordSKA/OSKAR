@@ -76,3 +76,9 @@ bp2hssg   = horizontal, antenna pattern = sin^2, geometric weights.
 
 kernels:
 oskar_cudak_wt2hg
+
+
+
+TODO:
+====
+check normalisation on hierarchical bp ...hbp2.... file. UNNORMALISED VERSIONS

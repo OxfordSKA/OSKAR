@@ -26,10 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_bp2hcggu.h"
-#include "cuda/kernels/oskar_cudak_bp2hcgw.h"
-#include "cuda/kernels/oskar_cudak_wt2hgu.h"
+#include "cuda/oskar_cuda_bp2higa.h"
+#include "cuda/kernels/oskar_cudak_bp2hiw.h"
+#include "cuda/kernels/oskar_cudak_wt2hg.h"
+#include "cuda/kernels/oskar_cudak_hann.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include "cuda/CudaEclipse.h"
 
@@ -37,14 +40,16 @@
 extern "C" {
 #endif
 
-void oskar_cuda_bp2hcggu(int na, const float* ax, const float* ay,
-        float aw, float ag, int ns, const float* slon, const float* slat,
-        float ba, float be, float k, float* image)
+int oskar_cuda_bp2higa(int na, const float* ax, const float* ay,
+        int ns, const float* slon, const float* slat,
+        float ba, float be, float k, int apFn, float* image)
 {
+    const int nb = 1; // Number of beams == 1 as this is a beam pattern!.
+
     // Precompute.
     float3 trig = make_float3(cos(ba), sin(ba), cos(be));
 
-    // Allocate memory for antenna data, antenna weights,
+    // Allocate memory for antenna positions, antenna weights,
     // test source positions and pixel values on the device.
     float *axd, *ayd, *slond, *slatd;
     float2 *weights, *pix;
@@ -54,10 +59,7 @@ void oskar_cuda_bp2hcggu(int na, const float* ax, const float* ay,
     cudaMalloc((void**)&weights, na * sizeof(float2));
     cudaMalloc((void**)&trigd, 1 * sizeof(float3));
 
-    // Precompute antenna beam width parameter.
-    aw = 2.772588 / (aw * aw); // 4 ln2 / (FWHM^2)
-
-    // Copy antenna data and beam geometry to device.
+    // Copy antenna positions and beam geometry to device.
     cudaMemcpy(axd, ax, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(ayd, ay, na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(trigd, &trig, 1 * sizeof(float3), cudaMemcpyHostToDevice);
@@ -66,9 +68,37 @@ void oskar_cuda_bp2hcggu(int na, const float* ax, const float* ay,
     dim3 wThreads(256, 1);
     dim3 wBlocks((na + wThreads.x - 1) / wThreads.x, 1);
     size_t wSharedMem = wThreads.x * sizeof(float2) + sizeof(float3);
-    oskar_cudak_wt2hgu <<<wBlocks, wThreads, wSharedMem>>> (
-            na, axd, ayd, 1, trigd, k, weights);
+    oskar_cudak_wt2hg <<< wBlocks, wThreads, wSharedMem >>> (
+            na, axd, ayd, nb, trigd, k, weights);
     cudaThreadSynchronize();
+
+    // Invoke kernel to modify the weights by an apodistion function.
+    float rMax = 0.0f;
+    for (int a = 0; a < na; ++a)
+    {
+        const float r = sqrtf(ax[a] * ax[a] + ay[a] * ay[a]);
+        if (r > rMax) rMax = r;
+    }
+    const int aThreads = 256;
+    const int aBlocks = (int) ceil((float)na / (float)aThreads);
+    switch (apFn)
+    {
+        case apFn_none:
+            break;
+        case apFn_hann:
+        {
+            const float fwhm = rMax;
+            oskar_cudak_hann <<< aBlocks, aThreads >>> (na, axd, ayd, nb,
+                    fwhm, weights);
+            break;
+        }
+        default:
+        {
+            printf("ERROR: Undefined apodisation function.\n");
+            return EXIT_FAILURE;
+        }
+    };
+
 
     // Divide up the source (pixel) list into manageable chunks.
     int nsMax = 100000;
@@ -94,10 +124,10 @@ void oskar_cuda_bp2hcggu(int na, const float* ax, const float* ay,
         // Invoke kernel to compute the (partial) beam pattern on the device.
         int threadsPerBlock = 256;
         int blocks = (srcInBlock + threadsPerBlock - 1) / threadsPerBlock;
-        int maxAntennasPerBlock = 896; // Should be multiple of 16.
+        int maxAntennasPerBlock = 864; // Should be multiple of 16.
         size_t sharedMem = 2 * maxAntennasPerBlock * sizeof(float2);
-        oskar_cudak_bp2hcgw <<<blocks, threadsPerBlock, sharedMem>>>
-                (na, axd, ayd, aw, ag, weights, srcInBlock, slond, slatd, k,
+        oskar_cudak_bp2hiw <<<blocks, threadsPerBlock, sharedMem>>>
+                (na, axd, ayd, weights, srcInBlock, slond, slatd, k,
                         maxAntennasPerBlock, pix);
         cudaThreadSynchronize();
         cudaError_t err = cudaPeekAtLastError();
@@ -117,6 +147,8 @@ void oskar_cuda_bp2hcggu(int na, const float* ax, const float* ay,
     cudaFree(slatd);
     cudaFree(pix);
     cudaFree(trigd);
+
+    return EXIT_SUCCESS;
 }
 
 #ifdef __cplusplus

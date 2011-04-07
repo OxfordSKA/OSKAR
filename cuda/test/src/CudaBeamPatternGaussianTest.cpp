@@ -27,10 +27,8 @@
  */
 
 #include "cuda/test/CudaBeamPatternGaussianTest.h"
-#include "cuda/oskar_cuda_bp2hcgg.h"
-#include "cuda/oskar_cuda_bp2hcggu.h"
 #include "cuda/oskar_cuda_bp2hugg.h"
-#include "cuda/oskar_cuda_bp2huggu.h"
+#include "cuda/oskar_cuda_bp2hcgg.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
 #include "math/core/Matrix3.h"
