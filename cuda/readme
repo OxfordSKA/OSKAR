@@ -42,6 +42,46 @@ oskar_cudak_wt2hg       : weights 2D horizontal geometric
 
 
 
+================================================================================
+================================================================================
+================================================================================
+
+Testing and refactor.
+---------------------
+
+Aims:
+--------------------------------------------------------------------------------
+- Improvements in clarity to find things:
+    - Group code into subfolders for utility, imaging, simulation?
+    - Remove redundant functions.
+
+- Improve testing.
+    - need both correctness and performance.
+    - Test level one funtions i.e. weights generation etc.
+
+- Sort out handling of cuda errors more strictly.
+    - needed for error codes in matlab.
+    - needed for deployment so unexpected errors do not occur.
+
+- Improve deployment support for the library work out fully how a deplyed
+version of the library can be used from matlab.
+
+- Split into a clear level 1 and level 2 functions.
+    - Level 1 functions (pretty much kernels) should be exposed by wrappers.
+        - scale array etc.
+    - Level 2 should reuse a lot more level 1.
+    - Better support of switching from double to single precision.
+
+
+-----------------------------------------------------
+
+- Beam pattern E jones calculation is a level 2 function.
+    - Uses functions:
+        - Weights generation
+        - Some form of appodisation
+        - ....
+    - Therefore interface should be ...
+
 
 
 
@@ -80,5 +120,5 @@ oskar_cudak_wt2hg
 
 
 TODO:
-====
+=====
 check normalisation on hierarchical bp ...hbp2.... file. UNNORMALISED VERSIONS
