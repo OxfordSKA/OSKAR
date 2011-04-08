@@ -49,11 +49,18 @@ oskar_cudak_wt2hg       : weights 2D horizontal geometric
 Testing and refactor.
 ---------------------
 
+
 Aims:
 --------------------------------------------------------------------------------
+- Define a source code convension:
+    - see: http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Namespaces
+    - This seems pretty good.
+
 - Improvements in clarity to find things:
     - Group code into subfolders for utility, imaging, simulation?
     - Remove redundant functions.
+    - Rename variables in the interface to be more verbose.
+        - names should be simple for a new reader of the code!
 
 - Improve testing.
     - need both correctness and performance.
@@ -65,12 +72,28 @@ Aims:
 
 - Improve deployment support for the library work out fully how a deplyed
 version of the library can be used from matlab.
+    - Components in the install targets for windows installer.
+    - No real need to add oskar_cuda prefixes to source code as
+        - 1. uniqueness of filename can be inforced by a folder path
+        - ie
+            oskar_cuda_foo.h
+          can be just
+            /oskar/cuda/foo.h
+        - No real need for unique function names either
+        - Its *very* *very* unlikely that someone will also have a function
+        for example called e_jones_horizontal() in the *same* code base.
+
 
 - Split into a clear level 1 and level 2 functions.
     - Level 1 functions (pretty much kernels) should be exposed by wrappers.
         - scale array etc.
     - Level 2 should reuse a lot more level 1.
     - Better support of switching from double to single precision.
+    - what level 2 / level 3 is implemented in matlab rather than than in C/C++
+       - move more level 2 / 3 to C/C++ classes/ functions when they are stable.
+
+
+
 
 
 -----------------------------------------------------
@@ -81,6 +104,83 @@ version of the library can be used from matlab.
         - Some form of appodisation
         - ....
     - Therefore interface should be ...
+
+
+==============================================
+naming ideas for level 2:
+
+Beampatterns.
+    - does it ever make sense for the beampattern to be not in horizontal
+      coordinates?
+    - are there any other form of weights than geometric before modifiction?
+        - ie by nulling or appodisation.
+    - dont really need 2d/3d specifier as this should be obvious
+      based on the fact that we are not specifying x,y *and* z!
+
+
+- simulation/eJones_isotropic_antennas.h
+
+
+    // this includes isotropic where the element pattern id sets this.
+
+    = eJones_functional_element_pattern(
+        const unsigned num_antennas,
+        const float * antennas_x,
+        const float * antennas_y,
+        const float frequency,
+        const float * azimuth,
+        const float * elevation,
+        const int * element_patterns,    // vector of enum values for each antenna (if length 1 all antennas are the same)
+        const int apodisation_function,   // enum
+        complex * eJones // return value
+      );
+
+
+
+
+    // Need a version for numerical patterns as these probably have to
+    // be handled a bit differently.
+
+    = eJones_numerical_element_pattern(
+        const unsigned num_antennas,
+        const float * antennas_x,
+        const float * antennas_y,
+        const float frequency,
+        const float * azimuth,
+        const float * elevation,
+        ...
+        const float * element_pattern,   // some form of element pattern.
+        ....
+        const int apodisation_function,   // enum
+        complex * eJones // return value
+      );
+
+
+
+    // level 3 function?
+    = beampattern_function_element_pattern(
+        const unsigned num_antennas,
+        const float * antennas_x,
+        const float * antennas_y,
+        const float frequency,
+        const unsigned num_pixels,
+        const float field_of_view,
+        const int apoisation_function,
+        const int * element_pattern,
+        complex * beampattern
+     );
+
+
+- simulation/eJones_nulls.h
+
+
+
+
+
+
+
+
+
 
 
 
