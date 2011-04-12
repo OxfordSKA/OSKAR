@@ -26,18 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CUDA_ECLIPSE_H_
-#define CUDA_ECLIPSE_H_
+#include "math/synthesis/oskar_math_synthesis_xyz2uvw.h"
+#include <math.h>
+#include <stdlib.h>
 
-/**
- * @file CudaEclipse.h
- */
-
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __shared__
-    #define __constant__
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#endif // CUDA_ECLIPSE_H_
+void oskar_math_synthesis_xyz2uvw(int na, const float* x, const float* y,
+        const float* z, float ha0, float dec0, float* u, float* v, float* w)
+{
+    float sinHa0 = sin(ha0);
+    float cosHa0 = cos(ha0);
+    float sinDec0 = sin(dec0);
+    float cosDec0 = cos(dec0);
+
+    int a = 0;
+    for (a = 0; a < na; ++a) {
+        u[a] =  x[a] * sinHa0         + y[a] * cosHa0;
+        v[a] = -x[a] * sinDec0*cosHa0 + y[a] * sinDec0*sinHa0 + z[a] * cosDec0;
+        w[a] =  x[a] * cosDec0*cosHa0 - y[a] * cosDec0*sinHa0 + z[a] * sinDec0;
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif

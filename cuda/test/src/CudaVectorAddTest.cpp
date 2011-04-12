@@ -29,6 +29,7 @@
 #include "cuda/test/CudaVectorAddTest.h"
 #include "cuda/oskar_cuda_vecadd.h"
 #include <cmath>
+#include <cstdlib>
 
 // Register the test class.
 CPPUNIT_TEST_SUITE_REGISTRATION(CudaVectorAddTest);

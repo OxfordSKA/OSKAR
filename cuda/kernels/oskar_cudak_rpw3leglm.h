@@ -26,18 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CUDA_ECLIPSE_H_
-#define CUDA_ECLIPSE_H_
+#ifndef OSKAR_CUDAK_RPW3LEGLM_H_
+#define OSKAR_CUDAK_RPW3LEGLM_H_
 
 /**
- * @file CudaEclipse.h
+ * @file oskar_cudak_rpw3leglm.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __shared__
-    #define __constant__
-#endif
+#include "cuda/CudaEclipse.h"
 
-#endif // CUDA_ECLIPSE_H_
+/**
+ * @brief
+ * CUDA kernel to compute relative geometric phases of specified sources.
+ *
+ * @details
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions in metres (length na).
+ * @param[in] ay Array of antenna y positions in metres (length na).
+ * @param[in] az Array of antenna z positions in metres (length na).
+ * @param[in] scha0 The sine and cosine of the phase reference Hour Angle.
+ * @param[in] scdec0 The sine and cosine of the phase reference Declination.
+ * @param[in] ns The number of source positions.
+ * @param[in] ha The source Hour Angle coordinates in radians (length ns).
+ * @param[in] dec The source Declination coordinates in radians (length ns).
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] phases The computed phases (see note, above).
+ */
+__global__
+void oskar_cudak_rpw3leglm(const int na, const float* ax, const float* ay,
+        const float* az, const float2 scha0, const float2 scdec0, const int ns,
+        const float* ha, const float* dec, const float k, float2* weights);
+
+#endif // OSKAR_CUDAK_RPW3LEGLM_H_

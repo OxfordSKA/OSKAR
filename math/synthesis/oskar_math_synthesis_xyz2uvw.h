@@ -26,18 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CUDA_ECLIPSE_H_
-#define CUDA_ECLIPSE_H_
+#ifndef OSKAR_MATH_SYNTHESIS_XYZ2UVW_H_
+#define OSKAR_MATH_SYNTHESIS_XYZ2UVW_H_
 
 /**
- * @file CudaEclipse.h
+ * @file oskar_math_synthesis_xyz2uvw.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __shared__
-    #define __constant__
+#include "math/oskar_math_windows.h"
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#endif // CUDA_ECLIPSE_H_
+/**
+ * @brief
+ * Transforms station (x,y,z) coordinates to (u,v,w) coordinates
+ * (single precision).
+ *
+ * @details
+ * Given the hour angle and declination of the phase tracking centre, this
+ * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
+ *
+ * Single precision is assumed throughout.
+ *
+ * @param[in] na The number of antennas.
+ * @param[in] ax The station x-positions (length na).
+ * @param[in] ay The station y-positions (length na).
+ * @param[in] az The station z-positions (length na).
+ * @param[in] ha0 The hour angle of the phase tracking centre in radians.
+ * @param[in] dec0 The declination of the phase tracking centre in radians.
+ * @param[out] u The station u-positions (length na).
+ * @param[out] v The station v-positions (length na).
+ * @param[out] w The station w-positions (length na).
+ */
+DllExport void oskar_math_synthesis_xyz2uvw(int na, const float* x, const float* y,
+        const float* z, float ha0, float dec0, float* u, float* v, float* w);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_MATH_SYNTHESIS_XYZ2UVW_H_

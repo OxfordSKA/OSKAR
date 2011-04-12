@@ -26,18 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CUDA_ECLIPSE_H_
-#define CUDA_ECLIPSE_H_
+#ifndef OSKAR_MATH_WINDOWS_H_
+#define OSKAR_MATH_WINDOWS_H_
 
-/**
- * @file CudaEclipse.h
- */
+//
+// Macro used for creating windows the library.
+// Note: should only be needed in header files.
+//
+// The __declspec(dllexport) modifier enables the method to
+// be exported by the DLL so that it can be used by other applications.
+//
+// Usage examples:
+//  DllExport void foo();
+//  static DllExport double add(double a, double b);
+//
+// For more information see:
+// http://msdn.microsoft.com/en-us/library/a90k134d(v=VS.90).aspx
+//
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __shared__
-    #define __constant__
+#ifdef _WIN32
+    #ifdef oskar_math_EXPORTS
+        #ifndef DllExport
+            #define DllExport __declspec(dllexport)
+        #endif
+    #else
+        #ifndef DllExport
+            #define DllExport
+        #endif
+    #endif
+#else
+    #ifndef DllExport
+        #define DllExport
+    #endif
 #endif
 
-#endif // CUDA_ECLIPSE_H_
+#endif

@@ -20,7 +20,8 @@ set(BUILD_SHARED_LIBS true)
 # === GNU C++ compiler.
 if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    add_definitions(-Wall -Wextra -pedantic -std=c++0x)
+#    add_definitions(-Wall -Wextra -pedantic -std=c++0x)
+    add_definitions(-Wall -Wextra)
     add_definitions(-Wcast-align)
     add_definitions(-Wcast-qual)
     add_definitions(-Wdisabled-optimization)
@@ -46,9 +47,9 @@ elseif (NOT WIN32)
 # === Microsoft visual studio compiler.
 elseif (MSVC) # visual studio compiler.
     add_definitions(/wd4100) # NEED TO FIX ALL THESE!
-	add_definitions(/wd4305) # NEED TO FIX ALL THESE!
-	add_definitions(/wd4244) # NEED TO FIX ALL THESE!
-	add_definitions(-DQWT_DLL)
+    add_definitions(/wd4305) # NEED TO FIX ALL THESE!
+    add_definitions(/wd4244) # NEED TO FIX ALL THESE!
+    add_definitions(-DQWT_DLL)
 
 # === No compiler found.
 else ()

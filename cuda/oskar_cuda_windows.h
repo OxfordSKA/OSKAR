@@ -39,19 +39,25 @@
 // Usage examples:
 //  DllExport void foo();
 //  static DllExport double add(double a, double b);
-// 
+//
 // For more information see:
 // http://msdn.microsoft.com/en-us/library/a90k134d(v=VS.90).aspx
 //
 
 #ifdef _WIN32
     #ifdef oskar_cuda_EXPORTS
-        #define DllExport __declspec(dllexport)
+        #ifndef DllExport
+            #define DllExport __declspec(dllexport)
+        #endif
     #else
-        #define DllExport
+        #ifndef DllExport
+            #define DllExport
+        #endif
     #endif
 #else
-    #define DllExport
+    #ifndef DllExport
+        #define DllExport
+    #endif
 #endif
 
 #endif
