@@ -26,46 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_rpw3leglm.h"
-#include "math/core/phase.h"
+#include "modules/cuda/test/ModuleCudaCorrelatorTest.h"
+#include "modules/cuda/oskar_modules_cuda_correlator_lm.h"
+#include <cmath>
+#include <cstdlib>
+#include <vector>
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float smem[];
+#ifndef M_PI
+#define M_PI 3.14159265358979f
+#endif
 
-// Station u,v,w coordinates are obtained via constant memory.
+#define C_0 299792458
 
-__global__
-void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
-        const float* m, const float* n, const float k, float2* weights)
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(ModuleCudaCorrelatorTest);
+
+/**
+ * @details
+ * Sets up the context before running each test method.
+ */
+void ModuleCudaCorrelatorTest::setUp()
 {
-    const int tx = threadIdx.x;
-    const int ty = threadIdx.y;
-    const int s = blockDim.x * blockIdx.x + tx; // Source index.
-    const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
+}
 
-    // Get antenna u,v,w coordinates from constant memory.
-    float u = uvwd[a];
-    float v = uvwd[a + na];
-    float w = uvwd[a + 2*na];
+/**
+ * @details
+ * Clean up routine called after each test is run.
+ */
+void ModuleCudaCorrelatorTest::tearDown()
+{
+}
 
-    // Cache source data from global memory.
-    float* cl = smem;
-    float* cm = &cl[blockDim.x];
-    float* cn = &cm[blockDim.x];
-    if (s < ns && ty == 0) {
-        cl[tx] = l[s];
-        cm[tx] = m[s];
-        cn[tx] = n[s];
-    }
-    __syncthreads();
+/**
+ * @details
+ * Tests vector addition using CUDA.
+ */
+void ModuleCudaCorrelatorTest::test_method()
+{
+    int ns = 10;
+    int na = 5;
+    float ra0 = 0.0f;
+    float dec0 = M_PI / 2.0f;
+    float lst0 = 0.0f;
+    int nsdt = 10;
+    float sdt = 0.1;
+    float freq = 400e6;
+    float k = 2 * M_PI * freq / C_0;
 
-    float arg = k * (u * cl[tx] + v * cm[tx] + w * cn[tx]);
-    float2 weight;
-    sincosf(arg, &weight.y, &weight.x);
-
-    // Write result to global memory.
-    if (s < ns && a < na) {
-        const int w = s + ns * a;
-        weights[w] = weight;
-    }
+    std::vector<float> l(ns, 0.0f), m(ns, 0.0f);
+    std::vector<float> ax(na, 0.0f), ay(na, 0.0f), az(na, 0.0f);
+    std::vector<float> bsqrt(ns, 0.0f);
+    std::vector<float> e(ns * na * 2, 0.0f);
+    std::vector<float> vis(na * na * 2, 0.0f);
+    oskar_modules_cuda_correlator_lm(na, &ax[0], &ay[0], &az[0],
+            ns, &l[0], &m[0], &bsqrt[0], &e[0], ra0, dec0, lst0, nsdt, sdt, k,
+            &vis[0], 0, 0, 0);
 }

@@ -35,6 +35,7 @@ include_directories(${QT_QTCORE_INCLUDE_DIR})
 add_library(oskar_math ${math_SRC})
 set_target_properties(oskar_math PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 target_link_libraries(oskar_math
     ${QT_QTCORE_LIBRARY}

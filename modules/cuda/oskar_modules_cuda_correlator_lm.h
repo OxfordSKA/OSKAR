@@ -33,7 +33,7 @@
  * @file oskar_cuda_rpw3leg.h
  */
 
-#include "oskar_cuda_windows.h"
+//#include "oskar_cuda_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,33 +41,33 @@ extern "C" {
 
 /**
  * @brief
- * Computes weights corresponding to relative geometric phases using CUDA.
+ * Computes complex visibility matrix.
  *
  * @details
- * Computes phase of each source relative to tracking centre.
- *
- * Returns a complex matrix of dimension (ns x na) containing
- * the complex exponential of the geometric path length difference in
- * wavenumbers relative to the phase tracking centre, for every source and
- * station.
- *
- * The output weights matrix must be pre-sized to (2 * ns * na).
- * The source index is the fastest varying dimension.
+ * Computes complex visibility matrix.
  *
  * @param[in] na Number of antennas or stations.
- * @param[in] ax Array of local equatorial antenna x-coordinates in metres.
- * @param[in] ay Array of local equatorial antenna y-coordinates in metres.
- * @param[in] az Array of local equatorial antenna z-coordinates in metres.
+ * @param[in] ax Array of local equatorial station x-positions in metres.
+ * @param[in] ay Array of local equatorial station y-positions in metres.
+ * @param[in] az Array of local equatorial station z-positions in metres.
  * @param[in] ns Number of sources.
- * @param[in] ha Array of source Hour Angle coordinates in radians.
- * @param[in] dec Array of source Declination coordinates in radians.
- * @param[in] ha0 Hour Angle of the phase tracking centre in radians.
+ * @param[in] l Array of source l-positions in radians.
+ * @param[in] m Array of source m-positions in radians.
+ * @param[in] bsqrt Array of square root of source brightnesses.
+ * @param[in] e Station beam E-Jones (see note, above).
+ * @param[in] ra0 Right Ascension of the phase tracking centre in radians.
  * @param[in] dec0 Declination of the phase tracking centre in radians.
+ * @param[in] lst0 The local sidereal time at the start of the correlator dump.
+ * @param[in] nsdt The number of averaging cycles to do.
+ * @param[in] sdt The time interval between averages in seconds.
  * @param[in] k Wavenumber in radians / metre.
- * @param[out] weights The matrix of geometric phase weights (see note, above).
+ * @param[out] vis The complex matrix of visibilities (see note, above).
+ * @param[out] u Array of station u-positions in metres.
+ * @param[out] v Array of station v-positions in metres.
+ * @param[out] w Array of station w-positions in metres.
  */
-DllExport
-void oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
+//DllExport
+int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
         const float* az, int ns, const float* l, const float* m,
         const float* bsqrt, const float* e, float ra0, float dec0,
         float lst0, int nsdt, float sdt, float k, float* vis, float* u,

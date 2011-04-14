@@ -60,8 +60,9 @@ extern "C" {
  * @param[out] v The station v-positions (length na).
  * @param[out] w The station w-positions (length na).
  */
-DllExport void oskar_math_synthesis_xyz2uvw(int na, const float* x, const float* y,
-        const float* z, float ha0, float dec0, float* u, float* v, float* w);
+DllExport void oskar_math_synthesis_xyz2uvw(int na, const float* x,
+        const float* y, const float* z, float ha0, float dec0, float* u,
+        float* v, float* w);
 
 #ifdef __cplusplus
 }

@@ -26,46 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_rpw3leglm.h"
-#include "math/core/phase.h"
+#ifndef OSKAR_MODULES_CUDA_H_
+#define OSKAR_MODULES_CUDA_H_
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float smem[];
+/**
+ * @file oskar_modules_cuda.h
+ */
 
-// Station u,v,w coordinates are obtained via constant memory.
+#include "oskar_modules_cuda_correlator_lm.h"
 
-__global__
-void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
-        const float* m, const float* n, const float k, float2* weights)
-{
-    const int tx = threadIdx.x;
-    const int ty = threadIdx.y;
-    const int s = blockDim.x * blockIdx.x + tx; // Source index.
-    const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
-
-    // Get antenna u,v,w coordinates from constant memory.
-    float u = uvwd[a];
-    float v = uvwd[a + na];
-    float w = uvwd[a + 2*na];
-
-    // Cache source data from global memory.
-    float* cl = smem;
-    float* cm = &cl[blockDim.x];
-    float* cn = &cm[blockDim.x];
-    if (s < ns && ty == 0) {
-        cl[tx] = l[s];
-        cm[tx] = m[s];
-        cn[tx] = n[s];
-    }
-    __syncthreads();
-
-    float arg = k * (u * cl[tx] + v * cm[tx] + w * cn[tx]);
-    float2 weight;
-    sincosf(arg, &weight.y, &weight.x);
-
-    // Write result to global memory.
-    if (s < ns && a < na) {
-        const int w = s + ns * a;
-        weights[w] = weight;
-    }
-}
+#endif // OSKAR_MODULES_CUDA_H_

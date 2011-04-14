@@ -19,6 +19,11 @@ target_link_libraries(oskar_modules
     oskar_cuda
     oskar_math
 )
+set_target_properties(oskar_modules PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+)
+
 
 # === Install configuration for the oskar-lib cuda module.
 install(TARGETS oskar_modules DESTINATION ${OSKAR_LIB_INSTALL_DIR})

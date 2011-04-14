@@ -26,46 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_rpw3leglm.h"
-#include "math/core/phase.h"
+#ifndef MODULE_CUDA_CORRELATOR_TEST_H
+#define MODULE_CUDA_CORRELATOR_TEST_H
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float smem[];
+/**
+ * @file ModuleCudaCorrelatorTest.h
+ */
 
-// Station u,v,w coordinates are obtained via constant memory.
+#include <cppunit/extensions/HelperMacros.h>
 
-__global__
-void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
-        const float* m, const float* n, const float k, float2* weights)
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class ModuleCudaCorrelatorTest : public CppUnit::TestFixture
 {
-    const int tx = threadIdx.x;
-    const int ty = threadIdx.y;
-    const int s = blockDim.x * blockIdx.x + tx; // Source index.
-    const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
+    public:
+        CPPUNIT_TEST_SUITE(ModuleCudaCorrelatorTest);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-    // Get antenna u,v,w coordinates from constant memory.
-    float u = uvwd[a];
-    float v = uvwd[a + na];
-    float w = uvwd[a + 2*na];
+    public:
+        void setUp();
+        void tearDown();
 
-    // Cache source data from global memory.
-    float* cl = smem;
-    float* cm = &cl[blockDim.x];
-    float* cn = &cm[blockDim.x];
-    if (s < ns && ty == 0) {
-        cl[tx] = l[s];
-        cm[tx] = m[s];
-        cn[tx] = n[s];
-    }
-    __syncthreads();
+        // Test Methods
+        void test_method();
+};
 
-    float arg = k * (u * cl[tx] + v * cm[tx] + w * cn[tx]);
-    float2 weight;
-    sincosf(arg, &weight.y, &weight.x);
-
-    // Write result to global memory.
-    if (s < ns && a < na) {
-        const int w = s + ns * a;
-        weights[w] = weight;
-    }
-}
+#endif // MODULE_CUDA_CORRELATOR_TEST_H

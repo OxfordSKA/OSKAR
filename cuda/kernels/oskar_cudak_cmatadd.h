@@ -26,46 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_rpw3leglm.h"
-#include "math/core/phase.h"
+#ifndef OSKAR_CUDAK_CMATADD_H_
+#define OSKAR_CUDAK_CMATADD_H_
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float smem[];
+/**
+ * @file oskar_cudak_cmatadd.h
+ */
 
-// Station u,v,w coordinates are obtained via constant memory.
+#include "cuda/CudaEclipse.h"
 
+/**
+ * @brief
+ * CUDA kernel to add two complex matrices together, element-wise.
+ *
+ * @details
+ * This CUDA kernel add the elements of two complex matrices together
+ * using the graphics card.
+ *
+ * All matrices must be of the same size.
+ *
+ * @param[in] n1 Size of the fastest varying dimension.
+ * @param[in] n2 Size of the slowest varying dimension.
+ * @param[in] a First input matrix.
+ * @param[in] b Second input matrix.
+ * @param[out] c Output matrix.
+ */
 __global__
-void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
-        const float* m, const float* n, const float k, float2* weights)
-{
-    const int tx = threadIdx.x;
-    const int ty = threadIdx.y;
-    const int s = blockDim.x * blockIdx.x + tx; // Source index.
-    const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
+void oskar_cudak_cmatadd(int n1, int n2, const float2* a, const float2* b,
+        float2* c);
 
-    // Get antenna u,v,w coordinates from constant memory.
-    float u = uvwd[a];
-    float v = uvwd[a + na];
-    float w = uvwd[a + 2*na];
-
-    // Cache source data from global memory.
-    float* cl = smem;
-    float* cm = &cl[blockDim.x];
-    float* cn = &cm[blockDim.x];
-    if (s < ns && ty == 0) {
-        cl[tx] = l[s];
-        cm[tx] = m[s];
-        cn[tx] = n[s];
-    }
-    __syncthreads();
-
-    float arg = k * (u * cl[tx] + v * cm[tx] + w * cn[tx]);
-    float2 weight;
-    sincosf(arg, &weight.y, &weight.x);
-
-    // Write result to global memory.
-    if (s < ns && a < na) {
-        const int w = s + ns * a;
-        weights[w] = weight;
-    }
-}
+#endif // OSKAR_CUDAK_CMATADD_H_

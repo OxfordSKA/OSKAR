@@ -14,12 +14,17 @@ set(cuda_kernels_SRC
     src/oskar_cudak_bp2hugw.cu
     src/oskar_cudak_bp2hcgw.cu
 
+    src/oskar_cudak_cmatadd.cu
+    src/oskar_cudak_cmatmul.cu
+    src/oskar_cudak_cmatset.cu
+
     src/oskar_cudak_eq2hg.cu
     src/oskar_cudak_hann.cu
     src/oskar_cudak_im2dft.cu
     src/oskar_cudak_le2hg.cu
     src/oskar_cudak_pc2ht.cu
     src/oskar_cudak_rpw3leg.cu
+    src/oskar_cudak_rpw3leglm.cu
     src/oskar_cudak_vecadd.cu
 
     src/oskar_cudak_wt2hg.cu

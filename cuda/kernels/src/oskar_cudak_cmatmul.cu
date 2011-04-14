@@ -26,46 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_rpw3leglm.h"
-#include "math/core/phase.h"
-
-// Shared memory pointer used by the kernel.
-extern __shared__ float smem[];
-
-// Station u,v,w coordinates are obtained via constant memory.
+#include "cuda/kernels/oskar_cudak_cmatmul.h"
 
 __global__
-void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
-        const float* m, const float* n, const float k, float2* weights)
+void oskar_cudak_cmatmul(int n1, int n2, const float2* a, const float2* b,
+        float2* c)
 {
-    const int tx = threadIdx.x;
-    const int ty = threadIdx.y;
-    const int s = blockDim.x * blockIdx.x + tx; // Source index.
-    const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
+    int i = blockDim.x * blockIdx.x + threadIdx.x; // Fastest varying.
+    int j = blockDim.y * blockIdx.y + threadIdx.y; // Slowest varying.
+    if (i < n1 && j < n2)
+    {
+        // Compute matrix index.
+        int idx = i + j * n1;
 
-    // Get antenna u,v,w coordinates from constant memory.
-    float u = uvwd[a];
-    float v = uvwd[a + na];
-    float w = uvwd[a + 2*na];
+        // Cache the input data.
+        float2 ac = a[idx];
+        float2 bc = b[idx];
 
-    // Cache source data from global memory.
-    float* cl = smem;
-    float* cm = &cl[blockDim.x];
-    float* cn = &cm[blockDim.x];
-    if (s < ns && ty == 0) {
-        cl[tx] = l[s];
-        cm[tx] = m[s];
-        cn[tx] = n[s];
-    }
-    __syncthreads();
-
-    float arg = k * (u * cl[tx] + v * cm[tx] + w * cn[tx]);
-    float2 weight;
-    sincosf(arg, &weight.y, &weight.x);
-
-    // Write result to global memory.
-    if (s < ns && a < na) {
-        const int w = s + ns * a;
-        weights[w] = weight;
+        // Complex multiply.
+        float2 cc;
+        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
+        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
+        c[idx] = cc;
     }
 }

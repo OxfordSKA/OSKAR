@@ -35,6 +35,9 @@
 
 #include "cuda/CudaEclipse.h"
 
+// Constant memory pointer used by the kernel.
+__constant__ float uvwd[15872];
+
 /**
  * @brief
  * CUDA kernel to compute relative geometric phases of specified sources.
@@ -54,8 +57,7 @@
  * @param[out] phases The computed phases (see note, above).
  */
 __global__
-void oskar_cudak_rpw3leglm(const int na, const float* ax, const float* ay,
-        const float* az, const float2 scha0, const float2 scdec0, const int ns,
-        const float* ha, const float* dec, const float k, float2* weights);
+void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
+        const float* m, const float* n, const float k, float2* weights);
 
 #endif // OSKAR_CUDAK_RPW3LEGLM_H_

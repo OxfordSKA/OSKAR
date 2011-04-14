@@ -18,6 +18,9 @@ if (CUDA_FOUND)
 
     cuda_add_library(oskar_modules_cuda SHARED ${modules_cuda_SRC})
     set_target_properties(oskar_modules_cuda PROPERTIES PREFIX "lib")
+    set_target_properties(oskar_modules_cuda PROPERTIES
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    )
     target_link_libraries(oskar_modules_cuda
         ${CUDA_CUBLAS_LIBRARIES}
         oskar_cuda
@@ -39,6 +42,6 @@ if (CUDA_FOUND)
     #cuda_build_clean_target()
 
     # === Recurse into test subdirectory.
-    #add_subdirectory(test)
+    add_subdirectory(test)
 
 endif (CUDA_FOUND)
