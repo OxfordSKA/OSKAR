@@ -32,34 +32,36 @@
 // Shared memory pointer used by the kernel.
 extern __shared__ float smem[];
 
-// Station u,v,w coordinates are obtained via constant memory.
-
 __global__
-void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
-        const float* m, const float* n, const float k, float2* weights)
+void oskar_cudak_rpw3leglm(const int na, const float* uvw, const int ns,
+        const float* l, const float* m, const float* n, const float k,
+        float2* weights)
 {
     const int tx = threadIdx.x;
     const int ty = threadIdx.y;
     const int s = blockDim.x * blockIdx.x + tx; // Source index.
     const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
 
-    // Get antenna u,v,w coordinates from constant memory.
-    float u = uvwd[a];
-    float v = uvwd[a + na];
-    float w = uvwd[a + 2*na];
-
-    // Cache source data from global memory.
+    // Cache source and antenna data from global memory.
     float* cl = smem;
     float* cm = &cl[blockDim.x];
     float* cn = &cm[blockDim.x];
+    float* cu = &cn[blockDim.x];
+    float* cv = &cu[blockDim.y];
+    float* cw = &cv[blockDim.y];
     if (s < ns && ty == 0) {
         cl[tx] = l[s];
         cm[tx] = m[s];
         cn[tx] = n[s];
     }
+    if (a < na && tx == 0) {
+        cu[ty] = uvw[a];
+        cv[ty] = uvw[a + na];
+        cw[ty] = uvw[a + 2*na];
+    }
     __syncthreads();
 
-    float arg = k * (u * cl[tx] + v * cm[tx] + w * cn[tx]);
+    float arg = k * (cu[ty] * cl[tx] + cv[ty] * cm[tx] + cw[ty] * cn[tx]);
     float2 weight;
     sincosf(arg, &weight.y, &weight.x);
 

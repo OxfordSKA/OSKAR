@@ -35,29 +35,28 @@
 
 #include "cuda/CudaEclipse.h"
 
-// Constant memory pointer used by the kernel.
-__constant__ float uvwd[15872];
-
 /**
  * @brief
  * CUDA kernel to compute relative geometric phases of specified sources.
  *
  * @details
+ * The antenna u,v,w coordinates must be supplied in a matrix of size (3, na),
+ * where all the u-coordinates are given first, then all v, then all w.
+ *
+ * The complex phase weights are returned in a matrix of size (ns, na).
  *
  * @param[in] na Number of antennas.
- * @param[in] ax Array of antenna x positions in metres (length na).
- * @param[in] ay Array of antenna y positions in metres (length na).
- * @param[in] az Array of antenna z positions in metres (length na).
- * @param[in] scha0 The sine and cosine of the phase reference Hour Angle.
- * @param[in] scdec0 The sine and cosine of the phase reference Declination.
+ * @param[in] uvw Antenna u,v,w coordinates (see note, above).
  * @param[in] ns The number of source positions.
- * @param[in] ha The source Hour Angle coordinates in radians (length ns).
- * @param[in] dec The source Declination coordinates in radians (length ns).
+ * @param[in] l The source l-coordinates (length ns).
+ * @param[in] m The source m-coordinates (length ns).
+ * @param[in] n The source n-coordinates (length ns).
  * @param[in] k The wavenumber (rad / m).
- * @param[out] phases The computed phases (see note, above).
+ * @param[out] weights The computed complex phase weights (see note, above).
  */
 __global__
-void oskar_cudak_rpw3leglm(const int na, const int ns, const float* l,
-        const float* m, const float* n, const float k, float2* weights);
+void oskar_cudak_rpw3leglm(const int na, const float* uvw, const int ns,
+        const float* l, const float* m, const float* n, const float k,
+        float2* weights);
 
 #endif // OSKAR_CUDAK_RPW3LEGLM_H_

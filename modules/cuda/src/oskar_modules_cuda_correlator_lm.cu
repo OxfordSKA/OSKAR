@@ -33,6 +33,7 @@
 #include "cuda/kernels/oskar_cudak_cmatset.h"
 #include "math/synthesis/oskar_math_synthesis_xyz2uvw.h"
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <cublas.h>
 
@@ -53,17 +54,17 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
         float* v, float* w)
 {
     // Initialise.
-    cudaError_t err = cudaSuccess;
-    cublasStatus cubError;
+    cudaError_t errCuda = cudaSuccess;
+    cublasStatus errCublas = CUBLAS_STATUS_SUCCESS;
     float lst, ha0;
     float2 czero = make_float2(0.0, 0.0);
-    int i, a;
+    int i, a, retVal = 0;
     cublasInit();
 
     // Set up thread blocks.
     dim3 kThd(64, 4); // Sources, antennas.
     dim3 kBlk((ns + kThd.x - 1) / kThd.x, (na + kThd.y - 1) / kThd.y);
-    size_t sMem = kThd.x * sizeof(float3);
+    size_t sMem = (kThd.x + kThd.y) * sizeof(float3);
     dim3 mThd(64, 4); // Sources, antennas.
     dim3 mBlk((ns + mThd.x - 1) / mThd.x, (na + mThd.y - 1) / mThd.y);
     dim3 vThd(16, 16); // Antennas, antennas.
@@ -71,21 +72,23 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
 
     // Compute the source n-coordinates from l and m.
     float* n = (float*)malloc(ns * sizeof(float));
+    float r = 0.0f;
     for (i = 0; i < ns; ++i)
     {
-        n[i] = sqrt(1.0f - l[i]*l[i] - m[i]*m[i]) - 1.0f;
+        r = l[i]*l[i] + m[i]*m[i];
+        n[i] = (r < 1.0f) ? sqrt(1.0f - r) - 1.0f : -1.0f;
     }
 
     // Scale source brightnesses (in Bsqrt) by station beams (in E).
-    float* eb = (float*)malloc(ns * na * sizeof(float2));
+    float2* eb = (float2*)malloc(ns * na * sizeof(float2));
     for (a = 0; a < na; ++a)
     {
         for (i = 0; i < ns; ++i)
         {
             int idx = i + a * ns;
             float bs = bsqrt[i];
-            eb[idx + 0] = e[idx + 0] * bs; // Real
-            eb[idx + 1] = e[idx + 1] * bs; // Imag
+            eb[idx].x = e[2*idx + 0] * bs; // Real
+            eb[idx].y = e[2*idx + 1] * bs; // Imag
         }
     }
 
@@ -94,7 +97,7 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
 
     // Allocate memory for source coordinates and visibility matrix on the
     // device.
-    float *ld, *md, *nd;
+    float *ld, *md, *nd, *uvwd;
     float2 *visd, *visw, *kmat, *emat;
     cudaMalloc((void**)&ld, ns * sizeof(float));
     cudaMalloc((void**)&md, ns * sizeof(float));
@@ -103,9 +106,10 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
     cudaMalloc((void**)&visw, na * na * sizeof(float2));
     cudaMalloc((void**)&kmat, ns * na * sizeof(float2));
     cudaMalloc((void**)&emat, ns * na * sizeof(float2));
+    cudaMalloc((void**)&uvwd, 3 * na * sizeof(float));
     cudaThreadSynchronize();
-    err = cudaPeekAtLastError();
-    if (err != cudaSuccess) goto stop;
+    errCuda = cudaPeekAtLastError();
+    if (errCuda != cudaSuccess) goto stop;
 
     // Copy source coordinates to device.
     cudaMemcpy(ld, l, ns * sizeof(float), cudaMemcpyHostToDevice);
@@ -118,8 +122,8 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
     // Clear visibility matrix.
     oskar_cudak_cmatset <<<vBlk, vThd>>> (na, na, czero, visd);
     cudaThreadSynchronize();
-    err = cudaPeekAtLastError();
-    if (err != cudaSuccess) goto stop;
+    errCuda = cudaPeekAtLastError();
+    if (errCuda != cudaSuccess) goto stop;
 
     // Loop over integrations.
     for (i = 0; i < nsdt; ++i)
@@ -132,57 +136,58 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
         oskar_math_synthesis_xyz2uvw(na, ax, ay, az, ha0, dec0,
                 &uvw[0], &uvw[na], &uvw[2*na]);
 
-        // Copy u,v,w coordinates to constant memory.
-        cudaMemcpyToSymbol(uvwd, uvw, na * 3 * sizeof(float));
-        cudaThreadSynchronize();
-        err = cudaPeekAtLastError();
-        if (err != cudaSuccess) goto stop;
+        memcpy(u, &uvw[0], na * sizeof(float));
+        memcpy(v, &uvw[na], na * sizeof(float));
+        memcpy(w, &uvw[2*na], na * sizeof(float));
+
+        // Copy u,v,w coordinates to device.
+        cudaMemcpy(uvwd, uvw, na * 3 * sizeof(float), cudaMemcpyHostToDevice);
 
         // Compute K-matrix.
         oskar_cudak_rpw3leglm <<<kBlk, kThd, sMem>>> (
-                na, ns, ld, md, nd, k, kmat);
+                na, uvwd, ns, ld, md, nd, k, kmat);
         cudaThreadSynchronize();
-        err = cudaPeekAtLastError();
-        if (err != cudaSuccess) goto stop;
+        errCuda = cudaPeekAtLastError();
+        if (errCuda != cudaSuccess) goto stop;
 
         // Perform complex matrix element multiply.
         oskar_cudak_cmatmul <<<mBlk, mThd>>> (
                 ns, na, kmat, emat, kmat);
         cudaThreadSynchronize();
-        err = cudaPeekAtLastError();
-        if (err != cudaSuccess) goto stop;
+        errCuda = cudaPeekAtLastError();
+        if (errCuda != cudaSuccess) goto stop;
 
         // Perform matrix-matrix multiply (reduction).
         cublasCgemm('c', 'n', na, na, ns, make_float2(1.0, 0.0),
-                kmat, ns, kmat, ns, make_float2(0.0, 0.0), visw, na);
-        cubError = cublasGetError();
-        if (cubError != CUBLAS_STATUS_SUCCESS) {
-            err = (cudaError_t)cubError;
-            goto stop;
-        }
+                kmat, ns, kmat, ns, czero, visw, na);
+        errCublas = cublasGetError();
+        if (errCublas != CUBLAS_STATUS_SUCCESS) goto stop;
 
         // Accumulate visibility matrix.
-        oskar_cudak_cmatadd <<<vBlk, vThd>>> (ns, na, visd, visw, visd);
+        oskar_cudak_cmatadd <<<vBlk, vThd>>> (na, na, visd, visw, visd);
         cudaThreadSynchronize();
-        err = cudaPeekAtLastError();
-        if (err != cudaSuccess) goto stop;
+        errCuda = cudaPeekAtLastError();
+        if (errCuda != cudaSuccess) goto stop;
     }
 
     // Scale result.
     cublasCscal(na * na, make_float2(1.0 / nsdt, 0.0), visd, 1);
-    cubError = cublasGetError();
-    if (cubError != CUBLAS_STATUS_SUCCESS) {
-        err = (cudaError_t)cubError;
-        goto stop;
-    }
+    errCublas = cublasGetError();
+    if (errCublas != CUBLAS_STATUS_SUCCESS) goto stop;
 
     // Copy result to host.
     cudaMemcpy(vis, visd, na * na * sizeof(float2), cudaMemcpyDeviceToHost);
 
     // Clean up before exit.
     stop:
-    if (err != cudaSuccess)
-        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+    if (errCuda != cudaSuccess) {
+        retVal = errCuda;
+        printf("CUDA Error: %s\n", cudaGetErrorString(errCuda));
+    }
+    if (errCublas != CUBLAS_STATUS_SUCCESS) {
+        retVal = errCublas;
+        printf("CUBLAS Error: Code %d\n", errCublas);
+    }
 
     // Free host memory.
     free(eb);
@@ -192,6 +197,7 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
     // Free device memory.
     cudaFree(kmat);
     cudaFree(emat);
+    cudaFree(uvwd);
     cudaFree(ld);
     cudaFree(md);
     cudaFree(nd);
@@ -200,7 +206,7 @@ int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
 
     // Shutdown.
     cublasShutdown();
-    return err;
+    return retVal;
 }
 
 #ifdef __cplusplus
