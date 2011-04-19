@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void oskar_cuda_bfmv(int na, int nb, const float* signals,
+void oskar_cudaf_bfmv(int na, int nb, const float* signals,
         const float* weights, float* beams)
 {
     // Initialise cuBLAS.

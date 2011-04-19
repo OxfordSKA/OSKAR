@@ -39,79 +39,158 @@
 extern "C" {
 #endif
 
-void oskar_cuda_eq2hg(char opt, int ns, const float* radec, const float* dec,
+// Single precision.
+
+void oskar_cudaf_eq2hg(char opt, int ns, const float* radec, const float* dec,
         float cosLat, float sinLat, float lst, float* azel, float* el)
 {
-	// Device pointers.
-	float2 *radecd, *azeld;
-	if (opt == 'D' || opt == 'd') {
-		radecd = (float2*)radec;
-		azeld = (float2*)azel;
-	}
-	else {
-		// Allocate device memory.
-		cudaMalloc((void**)&radecd, ns * sizeof(float2));
-		cudaMalloc((void**)&azeld,  ns * sizeof(float2));
-	}
+    // Device pointers.
+    float2 *radecd, *azeld;
+    if (opt == 'D' || opt == 'd') {
+        radecd = (float2*)radec;
+        azeld = (float2*)azel;
+    }
+    else {
+        // Allocate device memory.
+        cudaMalloc((void**)&radecd, ns * sizeof(float2));
+        cudaMalloc((void**)&azeld,  ns * sizeof(float2));
+    }
 
-	// Host pointers.
-	float *radech, *azelh;
-	if (opt == 'S' || opt == 's') {
-		// Allocate host memory.
-		radech = (float*)malloc(2 * ns * sizeof(float));
-		azelh  = (float*)malloc(2 * ns * sizeof(float));
+    // Host pointers.
+    float *radech, *azelh;
+    if (opt == 'S' || opt == 's') {
+        // Allocate host memory.
+        radech = (float*)malloc(2 * ns * sizeof(float));
+        azelh  = (float*)malloc(2 * ns * sizeof(float));
 
-		// Interleave coordinates.
-		for (int i = 0; i < ns; ++i) {
-			radech[2 * i + 0] = radec[i];
-			radech[2 * i + 1] = dec[i];
-		}
-	}
-	else {
-		radech = (float*)radec;
-		azelh = (float*)azel;
-	}
+        // Interleave coordinates.
+        for (int i = 0; i < ns; ++i) {
+            radech[2 * i + 0] = radec[i];
+            radech[2 * i + 1] = dec[i];
+        }
+    }
+    else {
+        radech = (float*)radec;
+        azelh = (float*)azel;
+    }
 
-	// Copy host memory to device if required.
-	if (!(opt == 'D' || opt == 'd')) {
-		cudaMemcpy(radecd, radech, ns * sizeof(float2),
-				cudaMemcpyHostToDevice);
-	}
+    // Copy host memory to device if required.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaMemcpy(radecd, radech, ns * sizeof(float2),
+                cudaMemcpyHostToDevice);
+    }
 
-	// Invoke kernel to compute horizontal coordinates on the device.
+    // Invoke kernel to compute horizontal coordinates on the device.
     int threadsPerBlock = 512;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
     size_t sharedMem = threadsPerBlock * sizeof(float2);
-    oskar_cudak_eq2hg <<<blocks, threadsPerBlock, sharedMem>>>
+    oskar_cudakf_eq2hg <<<blocks, threadsPerBlock, sharedMem>>>
             (ns, radecd, cosLat, sinLat, lst, azeld);
     cudaThreadSynchronize();
     cudaError_t err = cudaPeekAtLastError();
     if (err != cudaSuccess)
         printf("CUDA Error: %s\n", cudaGetErrorString(err));
 
-	// Copy device memory to host if required.
-	if (!(opt == 'D' || opt == 'd')) {
-		cudaMemcpy(azelh, azeld, ns * sizeof(float2),
-				cudaMemcpyDeviceToHost);
-	}
+    // Copy device memory to host if required.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaMemcpy(azelh, azeld, ns * sizeof(float2),
+                cudaMemcpyDeviceToHost);
+    }
 
-	// Separate coordinates if required.
-	if (opt == 'S' || opt == 's') {
-		for (int i = 0; i < ns; ++i) {
-			azel[i] = azelh[2 * i + 0];
-			el[i]   = azelh[2 * i + 1];
-		}
-	}
+    // Separate coordinates if required.
+    if (opt == 'S' || opt == 's') {
+        for (int i = 0; i < ns; ++i) {
+            azel[i] = azelh[2 * i + 0];
+            el[i]   = azelh[2 * i + 1];
+        }
+    }
 
-	// Free memory if allocated.
-	if (!(opt == 'D' || opt == 'd')) {
-		cudaFree(radecd);
-		cudaFree(azeld);
-	}
-	if (opt == 'S' || opt == 's') {
-		free(radech);
-		free(azelh);
-	}
+    // Free memory if allocated.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaFree(radecd);
+        cudaFree(azeld);
+    }
+    if (opt == 'S' || opt == 's') {
+        free(radech);
+        free(azelh);
+    }
+}
+
+// Double precision.
+
+void oskar_cudad_eq2hg(char opt, int ns, const double* radec, const double* dec,
+        double cosLat, double sinLat, double lst, double* azel, double* el)
+{
+    // Device pointers.
+    double2 *radecd, *azeld;
+    if (opt == 'D' || opt == 'd') {
+        radecd = (double2*)radec;
+        azeld = (double2*)azel;
+    }
+    else {
+        // Allocate device memory.
+        cudaMalloc((void**)&radecd, ns * sizeof(double2));
+        cudaMalloc((void**)&azeld,  ns * sizeof(double2));
+    }
+
+    // Host pointers.
+    double *radech, *azelh;
+    if (opt == 'S' || opt == 's') {
+        // Allocate host memory.
+        radech = (double*)malloc(2 * ns * sizeof(double));
+        azelh  = (double*)malloc(2 * ns * sizeof(double));
+
+        // Interleave coordinates.
+        for (int i = 0; i < ns; ++i) {
+            radech[2 * i + 0] = radec[i];
+            radech[2 * i + 1] = dec[i];
+        }
+    }
+    else {
+        radech = (double*)radec;
+        azelh = (double*)azel;
+    }
+
+    // Copy host memory to device if required.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaMemcpy(radecd, radech, ns * sizeof(double2),
+                cudaMemcpyHostToDevice);
+    }
+
+    // Invoke kernel to compute horizontal coordinates on the device.
+    int threadsPerBlock = 512;
+    int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
+    size_t sharedMem = threadsPerBlock * sizeof(double2);
+    oskar_cudakd_eq2hg <<<blocks, threadsPerBlock, sharedMem>>>
+            (ns, radecd, cosLat, sinLat, lst, azeld);
+    cudaThreadSynchronize();
+    cudaError_t err = cudaPeekAtLastError();
+    if (err != cudaSuccess)
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+
+    // Copy device memory to host if required.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaMemcpy(azelh, azeld, ns * sizeof(double2),
+                cudaMemcpyDeviceToHost);
+    }
+
+    // Separate coordinates if required.
+    if (opt == 'S' || opt == 's') {
+        for (int i = 0; i < ns; ++i) {
+            azel[i] = azelh[2 * i + 0];
+            el[i]   = azelh[2 * i + 1];
+        }
+    }
+
+    // Free memory if allocated.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaFree(radecd);
+        cudaFree(azeld);
+    }
+    if (opt == 'S' || opt == 's') {
+        free(radech);
+        free(azelh);
+    }
 }
 
 #ifdef __cplusplus

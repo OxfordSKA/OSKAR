@@ -28,7 +28,7 @@
 
 #include "cuda/test/CudaBeamPatternGaussianTest.h"
 #include "cuda/oskar_cuda_bp2hugg.h"
-#include "cuda/oskar_cuda_bp2hcgg.h"
+#include "cuda/oskar_cuda_bp2hc.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
 #include "math/core/Matrix3.h"
@@ -101,9 +101,9 @@ void CudaBeamPatternGaussianTest::test_singleElement()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hcgg(na*na, &ax[0], &ay[0], aw, ag, ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, atype_gaussian, ag, aw, &image[0]);
     TIMER_STOP("Finished Gaussian beam pattern "
             "(single element, %d points)", ns);
 
@@ -152,9 +152,9 @@ void CudaBeamPatternGaussianTest::test_commonNormalised()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hcgg(na*na, &ax[0], &ay[0], aw, ag, ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, atype_gaussian, ag, aw, &image[0]);
     TIMER_STOP("Finished common Gaussian beam pattern "
             "(%d element regular array, %d points)", na*na, ns);
 
@@ -200,9 +200,9 @@ void CudaBeamPatternGaussianTest::test_commonNormalised1d()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hcgg(na, &ax[0], &ay[0], aw, ag, ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, atype_gaussian, ag, aw, &image[0]);
     TIMER_STOP("Finished common Gaussian beam pattern "
             "(%d element regular array, %d points)", na, ns);
 
@@ -252,7 +252,7 @@ void CudaBeamPatternGaussianTest::test_uniqueNormalised()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hugg(na*na, &ax[0], &ay[0], &aw[0], &ag[0], ns, &slon[0],
+    oskar_cudaf_bp2hugg(na*na, &ax[0], &ay[0], &aw[0], &ag[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
             2 * M_PI * (freq / C_0), &image[0]);
     TIMER_STOP("Finished unique Gaussian beam pattern "
@@ -301,7 +301,7 @@ void CudaBeamPatternGaussianTest::test_uniqueNormalised1d()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hugg(na, &ax[0], &ay[0], &aw[0], &ag[0], ns, &slon[0],
+    oskar_cudaf_bp2hugg(na, &ax[0], &ay[0], &aw[0], &ag[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
             2 * M_PI * (freq / C_0), &image[0]);
     TIMER_STOP("Finished unique Gaussian beam pattern "

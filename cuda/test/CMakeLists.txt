@@ -6,8 +6,7 @@
 set(cuda_test_SRC
     src/CppUnitMain.cpp
     src/CudaVectorAddTest.cpp
-    src/CudaMatrixManipTest.cu
-    #src/CudaBeamPatternTest.cpp
+    src/CudaBeamPatternTest.cpp
     src/CudaHierarchicalBeamPatternTest.cpp
     src/CudaBeamPatternGaussianTest.cpp
     src/CudaBeamPatternSineTest.cpp

@@ -33,7 +33,7 @@
 #include <vector>
 
 #ifndef M_PI
-#define M_PI 3.14159265358979f
+#define M_PI 3.14159265358979
 #endif
 
 #define C_0 299792458
@@ -65,20 +65,21 @@ void ModuleCudaCorrelatorTest::test_method()
 {
     int ns = 10;
     int na = 5;
-    float ra0 = 0.0f;
-    float dec0 = M_PI / 2.0f;
-    float lst0 = 0.0f;
+    double ra0 = 0.0;
+    double dec0 = M_PI / 2.0;
+    double lst0 = 0.0;
     int nsdt = 10;
-    float sdt = 0.1;
-    float freq = 400e6;
-    float k = 2 * M_PI * freq / C_0;
+    double sdt = 0.1;
+    double freq = 400e6;
+    double k = 2 * M_PI * freq / C_0;
 
-    std::vector<float> l(ns, 0.0f), m(ns, 0.0f);
-    std::vector<float> ax(na, 0.0f), ay(na, 0.0f), az(na, 0.0f);
-    std::vector<float> bsqrt(ns, 0.0f);
-    std::vector<float> e(ns * na * 2, 0.0f);
-    std::vector<float> vis(na * na * 2, 0.0f);
-    oskar_modules_cuda_correlator_lm(na, &ax[0], &ay[0], &az[0],
+    std::vector<double> l(ns, 0.0), m(ns, 0.0);
+    std::vector<double> ax(na, 0.0), ay(na, 0.0), az(na, 0.0);
+    std::vector<double> bsqrt(ns, 0.0);
+    std::vector<double> e(ns * na * 2, 0.0);
+    std::vector<double> vis(na * na * 2, 0.0);
+    std::vector<double> u(na, 0.0), v(na, 0.0), w(na, 0.0);
+    oskar_modules_cudad_correlator_lm(na, &ax[0], &ay[0], &az[0],
             ns, &l[0], &m[0], &bsqrt[0], &e[0], ra0, dec0, lst0, nsdt, sdt, k,
-            &vis[0], 0, 0, 0);
+            &vis[0], &u[0], &v[0], &w[0]);
 }

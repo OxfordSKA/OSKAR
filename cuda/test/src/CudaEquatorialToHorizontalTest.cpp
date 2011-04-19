@@ -85,7 +85,7 @@ void CudaEquatorialToHorizontalTest::test_separate()
 	const float lon = 45 * DEG2RAD;
 	float lst = 0 + lon;
     TIMER_START
-    oskar_cuda_eq2hg('s', ns, &ra[0], &dec[0],
+    oskar_cudaf_eq2hg('s', ns, &ra[0], &dec[0],
     		cos(lat), sin(lat), lst, &az[0], &el[0]);
     TIMER_STOP("Finished equatorial to horizontal (separate, %d points)", ns)
 
@@ -124,7 +124,7 @@ void CudaEquatorialToHorizontalTest::test_interleaved()
 	const float lon = 45 * DEG2RAD;
 	float lst = 0 + lon;
     TIMER_START
-    oskar_cuda_eq2hg('i', ns, &radec[0], 0,
+    oskar_cudaf_eq2hg('i', ns, &radec[0], 0,
     		cos(lat), sin(lat), lst, &azel[0], 0);
     TIMER_STOP("Finished equatorial to horizontal "
     		"(interleaved, %d points)", ns)

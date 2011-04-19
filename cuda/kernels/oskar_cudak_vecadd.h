@@ -49,6 +49,6 @@
  * @param[out] c Output vector.
  */
 __global__
-void oskar_cudak_vecadd(int n, const float* a, const float* b, float* c);
+void oskar_cudakf_vecadd(int n, const float* a, const float* b, float* c);
 
 #endif // OSKAR_CUDAK_VECADD_H_

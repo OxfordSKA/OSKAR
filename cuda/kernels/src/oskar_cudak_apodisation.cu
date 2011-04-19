@@ -27,28 +27,50 @@
  */
 
 
-#include "cuda/kernels/oskar_cudak_hann.h"
+#include "cuda/kernels/oskar_cudak_apodisation.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
 #endif
 
-
 // Note: Each thread applies the apodisation to one antenna for all beams.
 
+// Single precision kernels.
+
 __global__
-void oskar_cudak_hann(const unsigned na, const float * ax, const float * ay,
-        const unsigned nb, const float fwhm, float2 * weights)
+void oskar_cudakf_apodisation_hann(const int na, const float* ax,
+        const float* ay, const int nb, const float fwhm, float2* weights)
 {
     // Antenna index being processed by the thread.
     const int a = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // Return if the thread antenna id is greater than the number of antennas!
     if (a > na) return;
 
-    // Calculate Hanning weight for the given antenna radius.
+    // Calculate Hann weight for the given antenna radius.
     const float r = sqrtf(ax[a] * ax[a] + ay[a] * ay[a]);
-    const float weight = 0.5 * (1 + cos((M_PI * r) / fwhm));
+    const float weight = 0.5 * (1 + cosf((M_PI * r) / fwhm));
+
+    // Loop over beam directions for the antenna and apply apodisation.
+    for (int b = 0; b < nb; ++b)
+    {
+        const int idx = b * na + a;
+        weights[idx].x *= weight;
+        weights[idx].y *= weight;
+    }
+}
+
+// Double precision kernels.
+
+__global__
+void oskar_cudakd_apodisation_hann(const int na, const double* ax,
+        const double* ay, const int nb, const double fwhm, double2* weights)
+{
+    // Antenna index being processed by the thread.
+    const int a = blockIdx.x * blockDim.x + threadIdx.x;
+    if (a > na) return;
+
+    // Calculate Hann weight for the given antenna radius.
+    const double r = sqrt(ax[a] * ax[a] + ay[a] * ay[a]);
+    const double weight = 0.5 * (1 + cos((M_PI * r) / fwhm));
 
     // Loop over beam directions for the antenna and apply apodisation.
     for (int b = 0; b < nb; ++b)

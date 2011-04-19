@@ -37,7 +37,8 @@
 
 /**
  * @brief
- * CUDA kernel to generate un-normalised geometric beamforming weights.
+ * CUDA kernel to generate un-normalised geometric beamforming weights
+ * (single precision).
  *
  * @details
  * This CUDA kernel produces the complex antenna beamforming weights for the
@@ -72,7 +73,48 @@
  * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
  */
 __global__
-void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
+void oskar_cudakf_wt2hg(const int na, const float* ax, const float* ay,
         const int nb, const float3* trig, const float k, float2* weights);
+
+/**
+ * @brief
+ * CUDA kernel to generate un-normalised geometric beamforming weights
+ * (double precision).
+ *
+ * @details
+ * This CUDA kernel produces the complex antenna beamforming weights for the
+ * given directions, and stores them in device memory.
+ * The weights are NOT normalised by the number of antennas.
+ *
+ * Each thread generates the complex weights for a single antenna and a single
+ * beam direction.
+ *
+ * The input \p trig array contains triplets of the following pre-computed
+ * trigonometry:
+ *
+ * trig.x = {cosine azimuth}
+ * trig.y = {sine azimuth}
+ * trig.z = {cosine elevation}
+ *
+ * The kernel requires blockDim.x * sizeof(double2) +
+ * blockDim.y * sizeof(double3) bytes of shared memory.
+ *
+ * The number of doubleing-point operations performed by this kernel is:
+ * \li Sines and cosines: 2 * na * nb.
+ * \li Multiplies: 4 * na * nb.
+ * \li Divides: 2 * na * nb.
+ * \li Additions / subtractions: na * nb.
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions in metres.
+ * @param[in] ay Array of antenna y positions in metres.
+ * @param[in] nb Number of beams.
+ * @param[in] trig Precomputed trigonometry for all beam positions.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] weights Matrix of complex antenna weights (na columns, nb rows).
+ */
+__global__
+void oskar_cudakd_wt2hg(const int na, const double* ax, const double* ay,
+        const int nb, const double3* trig, const double k, double2* weights);
 
 #endif // OSKAR_CUDAK_WT2HGU_H_

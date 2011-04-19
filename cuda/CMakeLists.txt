@@ -11,41 +11,20 @@ if (CUDA_FOUND)
 
     # === Create list of source files for the oskar-lib cuda module.
     set(cuda_SRC
-        # single precision functions
         src/oskar_cuda_as2hi.cu
         src/oskar_cuda_bf2hig.cu
         src/oskar_cuda_bfmv.cu
 
-        src/oskar_cuda_bp2hcgg.cu
-        src/oskar_cuda_bp2higa.cu
-        src/oskar_cuda_bp2hig.cu
-        src/oskar_cuda_bp2hsg.cu
-        src/oskar_cuda_bp2hssg.cu
+        src/oskar_cuda_bp2hc.cu
         src/oskar_cuda_bp2hugg.cu
 
         src/oskar_cuda_eq2hg.cu
         src/oskar_cuda_hbp2hig.cu
-        src/oskar_cuda_hbp2higu.cu
         src/oskar_cuda_im2dft.cu
         src/oskar_cuda_im2dftlm.cu
         src/oskar_cuda_le2hg.cu
         src/oskar_cuda_rpw3leg.cu
         src/oskar_cuda_vecadd.cu
-
-        # double precision functions
-        src/oskar_cudad_bp2hcgg.cu
-        src/oskar_cudad_bp2hig.cu
-        src/oskar_cudad_bp2hsg.cu
-        src/oskar_cudad_bp2hssg.cu
-        src/oskar_cudad_bp2hugg.cu
-
-        src/oskar_cudad_eq2hg.cu
-        src/oskar_cudad_hbp2hig.cu
-        src/oskar_cudad_hbp2higu.cu
-        src/oskar_cudad_im2dft.cu
-        src/oskar_cudad_im2dftlm.cu
-        src/oskar_cudad_le2hg.cu
-        src/oskar_cudad_rpw3leg.cu
     )
     foreach (file ${cuda_kernels_SRC})
         list(APPEND cuda_SRC kernels/${file})

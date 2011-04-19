@@ -28,8 +28,10 @@
 
 #include "cuda/kernels/oskar_cudak_eq2hg.h"
 
+// Single precision.
+
 __global__
-void oskar_cudak_eq2hg(int ns, const float2* radec,
+void oskar_cudakf_eq2hg(int ns, const float2* radec,
         float cosLat, float sinLat, float lst, float2* azel)
 {
     // Get the source ID that this thread is working on.
@@ -53,6 +55,40 @@ void oskar_cudak_eq2hg(int ns, const float2* radec,
     src.x = atan2f(t, X1); // Azimuth.
     t = hypotf(X1, t);
     src.y = atan2f(Y2, t); // Elevation.
+
+    // Copy source horizontal coordinates into global memory.
+    __syncthreads(); // Coalesce memory accesses.
+    if (s < ns)
+        azel[s] = src;
+}
+
+// Double precision.
+
+__global__
+void oskar_cudakd_eq2hg(int ns, const double2* radec,
+        double cosLat, double sinLat, double lst, double2* azel)
+{
+    // Get the source ID that this thread is working on.
+    const int s = blockDim.x * blockIdx.x + threadIdx.x;
+
+    // Copy source equatorial coordinates from global memory.
+    double2 src;
+    if (s < ns)
+        src = radec[s];
+    __syncthreads(); // Coalesce memory accesses.
+
+    // Find azimuth and elevation.
+    double cosDec, sinDec, cosHA, sinHA, t, X1, Y2;
+    t = lst - src.x; // HA = LST - RA
+    sincos(src.y, &sinDec, &cosDec);
+    sincos(t, &sinHA, &cosHA);
+    t = cosDec * cosHA;
+    X1 = cosLat * sinDec - sinLat * t;
+    Y2 = sinLat * sinDec + cosLat * t;
+    t = -cosDec * sinHA;
+    src.x = atan2(t, X1); // Azimuth.
+    t = hypot(X1, t);
+    src.y = atan2(Y2, t); // Elevation.
 
     // Copy source horizontal coordinates into global memory.
     __syncthreads(); // Coalesce memory accesses.

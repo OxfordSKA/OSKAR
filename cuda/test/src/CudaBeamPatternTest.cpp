@@ -27,7 +27,7 @@
  */
 
 #include "cuda/test/CudaBeamPatternTest.h"
-#include "cuda/oskar_cuda_bp2hig.h"
+#include "cuda/oskar_cuda_bp2hc.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
 #include "math/core/Matrix3.h"
@@ -98,9 +98,9 @@ void CudaBeamPatternTest::test_regular()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hig(na*na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
     TIMER_STOP("Finished beam pattern (%d element regular array, %d points)",
             na*na, ns);
 
@@ -172,9 +172,9 @@ void CudaBeamPatternTest::test_superStation()
     const int nf = sizeof(freq) / sizeof(float); // Number of frequencies.
     for (int f = 0; f < nf; ++f) {
         TIMER_START
-        oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+        oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
                 &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-                2 * M_PI * (freq[f] * 1e6 / C_0), &image[0]);
+                2 * M_PI * (freq[f] * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
         TIMER_STOP("Finished beam pattern (%.0f MHz, super-station)", freq[f]);
 
         // Write image data to file.
@@ -249,9 +249,9 @@ void CudaBeamPatternTest::test_satStation()
     const int nf = sizeof(freq) / sizeof(float); // Number of frequencies.
     for (int f = 0; f < nf; ++f) {
         TIMER_START
-        oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+        oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
                 &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-                2 * M_PI * (freq[f] * 1e6 / C_0), &image[0]);
+                2 * M_PI * (freq[f] * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
         TIMER_STOP("Finished beam pattern (%.0f MHz, sat-station)", freq[f]);
 
         // Write image data to file.
@@ -359,9 +359,9 @@ void CudaBeamPatternTest::test_stations200()
 
         // Call CUDA beam pattern generator.
         TIMER_START
-        oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+        oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
                 &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-                2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+                2 * M_PI * (freq * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
         TIMER_STOP("Finished beam points (station %d)", station);
 
         // Write image data to file.
@@ -392,9 +392,9 @@ void CudaBeamPatternTest::test_stations200()
 
     // Call CUDA beam pattern generator.
     TIMER_START
-    oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+            2 * M_PI * (freq * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
     TIMER_STOP("Finished beam points (super-station)");
 
     // Write image data to file.
@@ -888,9 +888,9 @@ void CudaBeamPatternTest::test_stations2000()
 
         // Call CUDA beam pattern generator.
         TIMER_START
-        oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+        oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
                 &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-                2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+                2 * M_PI * (freq * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
         TIMER_STOP("Finished beam points (station %d)", station);
 
         // Write image data to file.
@@ -921,9 +921,9 @@ void CudaBeamPatternTest::test_stations2000()
 
     // Call CUDA beam pattern generator.
     TIMER_START
-    oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+            2 * M_PI * (freq * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
     TIMER_STOP("Finished beam points (super-station)");
 
     // Write image data to file.
@@ -980,9 +980,9 @@ void CudaBeamPatternTest::test_stations4000()
 
         // Call CUDA beam pattern generator.
         TIMER_START
-        oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+        oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
                 &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-                2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+                2 * M_PI * (freq * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
         TIMER_STOP("Finished beam points (station %d)", station);
 
         // Write image data to file.
@@ -1013,9 +1013,9 @@ void CudaBeamPatternTest::test_stations4000()
 
     // Call CUDA beam pattern generator.
     TIMER_START
-    oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq * 1e6 / C_0), &image[0]);
+            2 * M_PI * (freq * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
     TIMER_STOP("Finished beam points (super-station)");
 
     // Write image data to file.
@@ -1084,9 +1084,9 @@ void CudaBeamPatternTest::test_perturbed()
     float freq[] = {70, 115, 150, 200, 240, 300, 450}; // Frequencies in MHz.
     for (int f = 0; f < nf; ++f) {
         TIMER_START
-        oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+        oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
                 &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-                2 * M_PI * (freq[f] * 1e6 / C_0), &image[0]);
+                2 * M_PI * (freq[f] * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
         TIMER_STOP("Finished beam pattern (%.0f MHz)", freq[f]);
 
         // Write image data to file.
@@ -1154,9 +1154,9 @@ void CudaBeamPatternTest::test_scattered()
     float freq[] = {70, 115, 150, 200, 240, 300, 450}; // Frequencies in MHz.
     for (int f = 0; f < nf; ++f) {
         TIMER_START
-        oskar_cuda_bp2hig(na, &ax[0], &ay[0], ns, &slon[0],
+        oskar_cudaf_bp2hc(na, &ax[0], &ay[0], ns, &slon[0],
                 &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-                2 * M_PI * (freq[f] * 1e6 / C_0), &image[0]);
+                2 * M_PI * (freq[f] * 1e6 / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
         TIMER_STOP("Finished beam pattern (%.0f MHz)", freq[f]);
 
         // Write image data to file.
@@ -1432,9 +1432,9 @@ void CudaBeamPatternTest::test_random()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hig(na, ax, ay, ns, &slon[0],
+    oskar_cudaf_bp2hc(na, ax, ay, ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
     TIMER_STOP("Finished beam pattern (1000 element random array, %d points)",
             ns);
 

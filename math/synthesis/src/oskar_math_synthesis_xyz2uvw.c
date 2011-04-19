@@ -34,19 +34,41 @@
 extern "C" {
 #endif
 
-void oskar_math_synthesis_xyz2uvw(int na, const float* x, const float* y,
-        const float* z, float ha0, float dec0, float* u, float* v, float* w)
+// Single precision.
+
+void oskar_math_synthesisf_xyz2uvw(int na, const float* x, const float* y,
+        const float* z, double ha0, double dec0, float* u, float* v,
+        float* w)
 {
-    float sinHa0 = sin(ha0);
-    float cosHa0 = cos(ha0);
-    float sinDec0 = sin(dec0);
-    float cosDec0 = cos(dec0);
+    double sinHa0 = sin(ha0);
+    double cosHa0 = cos(ha0);
+    double sinDec0 = sin(dec0);
+    double cosDec0 = cos(dec0);
 
     int a = 0;
     for (a = 0; a < na; ++a) {
-        u[a] =  x[a] * sinHa0         + y[a] * cosHa0;
-        v[a] = -x[a] * sinDec0*cosHa0 + y[a] * sinDec0*sinHa0 + z[a] * cosDec0;
-        w[a] =  x[a] * cosDec0*cosHa0 - y[a] * cosDec0*sinHa0 + z[a] * sinDec0;
+        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
+        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
+        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
+    }
+}
+
+// Double precision.
+
+void oskar_math_synthesisd_xyz2uvw(int na, const double* x, const double* y,
+        const double* z, double ha0, double dec0, double* u, double* v,
+        double* w)
+{
+    double sinHa0 = sin(ha0);
+    double cosHa0 = cos(ha0);
+    double sinDec0 = sin(dec0);
+    double cosDec0 = cos(dec0);
+
+    int a = 0;
+    for (a = 0; a < na; ++a) {
+        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
+        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
+        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
     }
 }
 

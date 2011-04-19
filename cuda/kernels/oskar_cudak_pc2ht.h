@@ -37,7 +37,7 @@
 
 /**
  * @brief
- * CUDA kernel to compute source position trigonometry.
+ * CUDA kernel to compute source position trigonometry (single precision).
  *
  * @details
  * This CUDA kernel precomputes the required trigonometry for the given
@@ -67,6 +67,40 @@
  *                   coordinates.
  */
 __global__
-void oskar_cudak_pc2ht(const int ns, const float2* spos, float3* trig);
+void oskar_cudakf_pc2ht(const int ns, const float2* spos, float3* trig);
+
+/**
+ * @brief
+ * CUDA kernel to compute source position trigonometry (double precision).
+ *
+ * @details
+ * This CUDA kernel precomputes the required trigonometry for the given
+ * source positions in (azimuth, elevation).
+ *
+ * Each thread operates on a single source.
+ *
+ * The source positions are specified as (azimuth, elevation) pairs in the
+ * \p spos array:
+ *
+ * spos.x = {azimuth}
+ * spos.y = {elevation}
+ *
+ * The output \p trig array contains triplets of the following pre-computed
+ * trigonometry:
+ *
+ * trig.x = {cosine azimuth}
+ * trig.y = {sine azimuth}
+ * trig.z = {cosine elevation}
+ *
+ * This kernel can be used to prepare a source distribution to generate
+ * antenna signals for a 2D antenna array.
+ *
+ * @param[in] ns The number of source positions.
+ * @param[in] spos The azimuth and elevation source coordinates in radians.
+ * @param[out] trig The cosine and sine of the source azimuth and elevation
+ *                   coordinates.
+ */
+__global__
+void oskar_cudakd_pc2ht(const int ns, const double2* spos, double3* trig);
 
 #endif // OSKAR_CUDAK_PC2HT_H_

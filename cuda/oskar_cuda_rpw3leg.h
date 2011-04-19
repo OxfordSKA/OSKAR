@@ -41,7 +41,8 @@ extern "C" {
 
 /**
  * @brief
- * Computes weights corresponding to relative geometric phases using CUDA.
+ * Computes weights corresponding to relative geometric phases using CUDA
+ * (single precision).
  *
  * @details
  * Computes phase of each source relative to tracking centre.
@@ -66,9 +67,41 @@ extern "C" {
  * @param[in] k Wavenumber in radians / metre.
  * @param[out] weights The matrix of geometric phase weights (see note, above).
  */
-DllExport void oskar_cuda_rpw3leg(int na, float* ax, float* ay, float* az,
-		int ns, float* ha, float* dec, float ha0, float dec0, float k,
-		float* weights);
+DllExport void oskar_cudaf_rpw3leg(int na, float* ax, float* ay, float* az,
+        int ns, float* ha, float* dec, float ha0, float dec0, float k,
+        float* weights);
+
+/**
+ * @brief
+ * Computes weights corresponding to relative geometric phases using CUDA
+ * (double precision).
+ *
+ * @details
+ * Computes phase of each source relative to tracking centre.
+ *
+ * Returns a complex matrix of dimension (ns x na) containing
+ * the complex exponential of the geometric path length difference in
+ * wavenumbers relative to the phase tracking centre, for every source and
+ * station.
+ *
+ * The output weights matrix must be pre-sized to (2 * ns * na).
+ * The source index is the fastest varying dimension.
+ *
+ * @param[in] na Number of antennas or stations.
+ * @param[in] ax Array of local equatorial antenna x-coordinates in metres.
+ * @param[in] ay Array of local equatorial antenna y-coordinates in metres.
+ * @param[in] az Array of local equatorial antenna z-coordinates in metres.
+ * @param[in] ns Number of sources.
+ * @param[in] ha Array of source Hour Angle coordinates in radians.
+ * @param[in] dec Array of source Declination coordinates in radians.
+ * @param[in] ha0 Hour Angle of the phase tracking centre in radians.
+ * @param[in] dec0 Declination of the phase tracking centre in radians.
+ * @param[in] k Wavenumber in radians / metre.
+ * @param[out] weights The matrix of geometric phase weights (see note, above).
+ */
+DllExport void oskar_cudad_rpw3leg(int na, double* ax, double* ay, double* az,
+        int ns, double* ha, double* dec, double ha0, double dec0, double k,
+        double* weights);
 
 #ifdef __cplusplus
 }

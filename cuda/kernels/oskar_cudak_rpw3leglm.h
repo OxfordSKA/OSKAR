@@ -37,7 +37,8 @@
 
 /**
  * @brief
- * CUDA kernel to compute relative geometric phases of specified sources.
+ * CUDA kernel to compute relative geometric phases of specified sources
+ * (single precision).
  *
  * @details
  * The antenna u,v,w coordinates must be supplied in a matrix of size (3, na),
@@ -55,8 +56,33 @@
  * @param[out] weights The computed complex phase weights (see note, above).
  */
 __global__
-void oskar_cudak_rpw3leglm(const int na, const float* uvw, const int ns,
+void oskar_cudakf_rpw3leglm(const int na, const float* uvw, const int ns,
         const float* l, const float* m, const float* n, const float k,
         float2* weights);
+
+/**
+ * @brief
+ * CUDA kernel to compute relative geometric phases of specified sources
+ * (double precision).
+ *
+ * @details
+ * The antenna u,v,w coordinates must be supplied in a matrix of size (3, na),
+ * where all the u-coordinates are given first, then all v, then all w.
+ *
+ * The complex phase weights are returned in a matrix of size (ns, na).
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] uvw Antenna u,v,w coordinates (see note, above).
+ * @param[in] ns The number of source positions.
+ * @param[in] l The source l-coordinates (length ns).
+ * @param[in] m The source m-coordinates (length ns).
+ * @param[in] n The source n-coordinates (length ns).
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] weights The computed complex phase weights (see note, above).
+ */
+__global__
+void oskar_cudakd_rpw3leglm(const int na, const double* uvw, const int ns,
+        const double* l, const double* m, const double* n, const double k,
+        double2* weights);
 
 #endif // OSKAR_CUDAK_RPW3LEGLM_H_

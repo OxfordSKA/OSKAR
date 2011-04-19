@@ -52,7 +52,7 @@ extern "C" {
  * @param[in] b Second input vector.
  * @param[out] c Output vector.
  */
-DllExport void oskar_cuda_vecadd(int n, const float* a, const float* b,
+DllExport void oskar_cudaf_vecadd(int n, const float* a, const float* b,
 		float* c);
 
 #ifdef __cplusplus

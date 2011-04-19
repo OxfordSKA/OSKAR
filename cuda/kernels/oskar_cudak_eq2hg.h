@@ -37,7 +37,7 @@
 
 /**
  * @brief
- * CUDA kernel to compute local source positions.
+ * CUDA kernel to compute local source positions (single precision).
  *
  * @details
  * This CUDA kernel transforms sources specified in a generic equatorial
@@ -73,7 +73,48 @@
  * @param[out] azel The azimuth and elevation source coordinates in radians.
  */
 __global__
-void oskar_cudak_eq2hg(int ns, const float2* radec,
+void oskar_cudakf_eq2hg(int ns, const float2* radec,
         float cosLat, float sinLat, float lst, float2* azel);
+
+/**
+ * @brief
+ * CUDA kernel to compute local source positions (double precision).
+ *
+ * @details
+ * This CUDA kernel transforms sources specified in a generic equatorial
+ * system (RA, Dec) to local horizontal coordinates (azimuth, elevation).
+ *
+ * The kernel requires (threads per block) * sizeof(double2) bytes of
+ * shared memory.
+ *
+ * Each thread operates on a single source. The source positions are
+ * specified as (RA, Dec) pairs in the \p radec array:
+ *
+ * radec.x = {RA}
+ * radec.y = {Dec}
+ *
+ * The output \p azel array contains the azimuth and elevation pairs for each
+ * source:
+ *
+ * azel.x = {azimuth}
+ * azel.y = {elevation}
+ *
+ * The number of doubleing-point operations performed by this kernel is:
+ * \li Sines and cosines: 4 * ns.
+ * \li Arctangents: 2 * ns.
+ * \li Multiplies: 8 * ns.
+ * \li Additions / subtractions: 4 * ns.
+ * \li Square roots: ns.
+ *
+ * @param[in] ns The number of source positions.
+ * @param[in] radec The RA and Declination source coordinates in radians.
+ * @param[in] cosLat The cosine of the geographic latitude.
+ * @param[in] sinLat The sine of the geographic latitude.
+ * @param[in] lst The Local Sidereal Time (= ST + geographic longitude) in radians.
+ * @param[out] azel The azimuth and elevation source coordinates in radians.
+ */
+__global__
+void oskar_cudakd_eq2hg(int ns, const double2* radec,
+        double cosLat, double sinLat, double lst, double2* azel);
 
 #endif // OSKAR_CUDAK_EQ2HG_H_

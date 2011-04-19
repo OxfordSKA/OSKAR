@@ -41,7 +41,8 @@ extern "C" {
 
 /**
  * @brief
- * Transforms local equatorial to horizontal coordinates using CUDA.
+ * Transforms local equatorial to horizontal coordinates using CUDA
+ * (single precision).
  *
  * @details
  * Transforms local equatorial to horizontal coordinates using CUDA.
@@ -70,8 +71,44 @@ extern "C" {
  * @param[out] azel The azimuths, or horizontal coordinates in radians.
  * @param[out] el The elevations, or NULL (depending on opt).
  */
-DllExport void oskar_cuda_le2hg(char opt, int ns, const float* hadec,
-		const float* dec, float cosLat, float sinLat, float* azel, float* el);
+DllExport void oskar_cudaf_le2hg(char opt, int ns, const float* hadec,
+        const float* dec, float cosLat, float sinLat, float* azel, float* el);
+
+/**
+ * @brief
+ * Transforms local equatorial to horizontal coordinates using CUDA
+ * (double precision).
+ *
+ * @details
+ * Transforms local equatorial to horizontal coordinates using CUDA.
+ *
+ * Coordinates can be either in device memory or in host memory (separately
+ * or interleaved). The \p opt parameter must be used to specify the location:
+ *
+ * - If \p opt = 'd' then \p hadec is a pointer to a block of memory on the
+ *   device of length (2 * ns) and contains interleaved (HA, Dec) coordinate
+ *   pairs. The \p azel parameter is then also a device pointer to an array
+ *   of length (2 * ns) that will contain the horizontal coordinates.
+ *   No extra copying is done in this case.
+ * - If \p opt = 'i' then the arrays are interleaved as above,
+ *   except in host memory.
+ * - If \p opt = 's' then both \p hadec and \p dec are pointers to blocks of
+ *   memory on the host, each of length ns, containing separate (HA, Dec)
+ *   coordinates. The \p azel and \p el parameters are then also host pointers
+ *   to arrays of length ns that will contain separate horizontal coordinates.
+ *
+ * @param[in] opt Memory option (see notes, above).
+ * @param[in] ns No. of source coordinates.
+ * @param[in] hadec The right ascensions, or equatorial coordinates in radians.
+ * @param[in] dec The declinations, or NULL (depending on opt).
+ * @param[in] cosLat The cosine of the observer's geographic latitude.
+ * @param[in] sinLat The sine of the observer's geographic latitude.
+ * @param[out] azel The azimuths, or horizontal coordinates in radians.
+ * @param[out] el The elevations, or NULL (depending on opt).
+ */
+DllExport void oskar_cudad_le2hg(char opt, int ns, const double* hadec,
+        const double* dec, double cosLat, double sinLat, double* azel,
+        double* el);
 
 #ifdef __cplusplus
 }

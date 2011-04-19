@@ -37,7 +37,8 @@
 
 /**
  * @brief
- * CUDA kernel to compute relative geometric phases of specified sources.
+ * CUDA kernel to compute relative geometric phases of specified sources
+ * (single precision).
  *
  * @details
  * This CUDA kernel computes the geometric phases of all the specified sources
@@ -61,8 +62,39 @@
  * @param[out] phases The computed phases (see note, above).
  */
 __global__
-void oskar_cudak_rpw3leg(const int na, const float* ax, const float* ay,
+void oskar_cudakf_rpw3leg(const int na, const float* ax, const float* ay,
         const float* az, const float2 scha0, const float2 scdec0, const int ns,
         const float* ha, const float* dec, const float k, float2* phases);
+
+/**
+ * @brief
+ * CUDA kernel to compute relative geometric phases of specified sources
+ * (double precision).
+ *
+ * @details
+ * This CUDA kernel computes the geometric phases of all the specified sources
+ * at the specified antenna positions, relative to the phase reference position
+ * in the local equatorial system.
+ *
+ * The output \p phases array must be pre-sized to length (2 * ns * na), and
+ * contains (cosine, sine) pairs of the phase for every source at every
+ * antenna.
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions in metres (length na).
+ * @param[in] ay Array of antenna y positions in metres (length na).
+ * @param[in] az Array of antenna z positions in metres (length na).
+ * @param[in] scha0 The sine and cosine of the phase reference Hour Angle.
+ * @param[in] scdec0 The sine and cosine of the phase reference Declination.
+ * @param[in] ns The number of source positions.
+ * @param[in] ha The source Hour Angle coordinates in radians (length ns).
+ * @param[in] dec The source Declination coordinates in radians (length ns).
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] phases The computed phases (see note, above).
+ */
+__global__
+void oskar_cudakd_rpw3leg(const int na, const double* ax, const double* ay,
+        const double* az, const double2 scha0, const double2 scdec0, const int ns,
+        const double* ha, const double* dec, const double k, double2* phases);
 
 #endif // OSKAR_CUDAK_RPW3LEG_H_

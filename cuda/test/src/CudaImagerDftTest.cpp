@@ -88,7 +88,7 @@ void CudaImagerDftTest::test()
     float sm = M_PI;
     std::vector<float> image(nl * nm, 0.0);
     TIMER_START
-    oskar_cuda_im2dft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
+    oskar_cudaf_im2dft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
     TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)
 
     // Write image file.
@@ -128,7 +128,7 @@ void CudaImagerDftTest::testlm()
     for (int i = 0; i < nm; ++i) m[i] = 2.0 * (i - centreM) / nm;
     std::vector<float> image(nl * nm, 0.0);
     TIMER_START
-    oskar_cuda_im2dftlm(nv, &u[0], &v[0], &vis[0], nl, nm, &l[0], &m[0], &image[0]);
+    oskar_cudaf_im2dftlm(nv, &u[0], &v[0], &vis[0], nl, nm, &l[0], &m[0], &image[0]);
     TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)
 
     // Write image file.
@@ -166,7 +166,7 @@ void CudaImagerDftTest::test_large()
     float sm = M_PI;
     std::vector<float> image(nl * nm, 0.0);
     TIMER_START
-    oskar_cuda_im2dft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
+    oskar_cudaf_im2dft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
     TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)
 
     // Write image file.

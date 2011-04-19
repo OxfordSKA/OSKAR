@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-void oskar_cuda_vecadd(int n, const float* a, const float* b, float* c)
+void oskar_cudaf_vecadd(int n, const float* a, const float* b, float* c)
 {
     // Allocate vectors in device memory.
     float *da, *db, *dc;
@@ -49,7 +49,7 @@ void oskar_cuda_vecadd(int n, const float* a, const float* b, float* c)
     // Invoke kernel.
     int threadsPerBlock = 256;
     int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
-    oskar_cudak_vecadd <<<blocksPerGrid, threadsPerBlock>>> (n, da, db, dc);
+    oskar_cudakf_vecadd <<<blocksPerGrid, threadsPerBlock>>> (n, da, db, dc);
     cudaThreadSynchronize();
     cudaError_t err = cudaPeekAtLastError();
     if (err != cudaSuccess)

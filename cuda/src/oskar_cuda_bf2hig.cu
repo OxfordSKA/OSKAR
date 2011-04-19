@@ -44,7 +44,7 @@
 extern "C" {
 #endif
 
-void oskar_cuda_bf2hig(int na, const float* ax, const float* ay,
+void oskar_cudaf_bf2hig(int na, const float* ax, const float* ay,
         int ns, const float* samp, const float* slon, const float* slat,
         int nb, const float* blon, const float* blat, float k,
         float* beams)
@@ -95,14 +95,14 @@ void oskar_cuda_bf2hig(int na, const float* ax, const float* ay,
 
     // Invoke kernel to precompute source positions on the device.
     int sBlocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
-    oskar_cudak_pc2ht <<<sBlocks, threadsPerBlock>>>
+    oskar_cudakf_pc2ht <<<sBlocks, threadsPerBlock>>>
             (ns, sposd, strigd);
 
     // Invoke kernel to compute antenna signals on the device.
     int aBlocks = (na + threadsPerBlock - 1) / threadsPerBlock;
     int maxSourcesPerBlock = 384;
     size_t aSharedMem = maxSourcesPerBlock * sizeof(float4);
-    oskar_cudak_as2hi <<<aBlocks,
+    oskar_cudakf_as2hi <<<aBlocks,
             threadsPerBlock, aSharedMem>>>
             (na, axd, ayd, ns, sampd, strigd, k, maxSourcesPerBlock, signalsd);
 
@@ -118,7 +118,7 @@ void oskar_cuda_bf2hig(int na, const float* ax, const float* ay,
 
         // Invoke kernel to precompute the beam positions on the device.
         int bBlocks = (beamsInBlock + threadsPerBlock - 1) / threadsPerBlock;
-        oskar_cudak_pc2ht <<<bBlocks, threadsPerBlock>>>
+        oskar_cudakf_pc2ht <<<bBlocks, threadsPerBlock>>>
                 (beamsInBlock, &bposd[beamStart], btrigd);
 
         // Invoke kernel to compute beamforming weights on the device.
@@ -127,7 +127,7 @@ void oskar_cuda_bf2hig(int na, const float* ax, const float* ay,
                 (beamsInBlock + wThreads.y - 1) / wThreads.y);
         size_t wSharedMem = wThreads.x * sizeof(float2)
                 + wThreads.y * sizeof(float3);
-        oskar_cudak_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
+        oskar_cudakf_wt2hg <<<wBlocks, wThreads, wSharedMem>>> (
                 na, axd, ayd, beamsInBlock, btrigd, k, weightsd);
         cudaThreadSynchronize();
 

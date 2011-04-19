@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @brief
- * Computes complex visibility matrix.
+ * Computes complex visibility matrix (single precision).
  *
  * @details
  * Computes complex visibility matrix.
@@ -67,11 +67,45 @@ extern "C" {
  * @param[out] w Array of station w-positions in metres.
  */
 //DllExport
-int oskar_modules_cuda_correlator_lm(int na, const float* ax, const float* ay,
+int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
         const float* az, int ns, const float* l, const float* m,
         const float* bsqrt, const float* e, float ra0, float dec0,
         float lst0, int nsdt, float sdt, float k, float* vis, float* u,
         float* v, float* w);
+
+/**
+ * @brief
+ * Computes complex visibility matrix (double precision).
+ *
+ * @details
+ * Computes complex visibility matrix.
+ *
+ * @param[in] na Number of antennas or stations.
+ * @param[in] ax Array of local equatorial station x-positions in metres.
+ * @param[in] ay Array of local equatorial station y-positions in metres.
+ * @param[in] az Array of local equatorial station z-positions in metres.
+ * @param[in] ns Number of sources.
+ * @param[in] l Array of source l-positions in radians.
+ * @param[in] m Array of source m-positions in radians.
+ * @param[in] bsqrt Array of square root of source brightnesses.
+ * @param[in] e Station beam E-Jones (see note, above).
+ * @param[in] ra0 Right Ascension of the phase tracking centre in radians.
+ * @param[in] dec0 Declination of the phase tracking centre in radians.
+ * @param[in] lst0 The local sidereal time at the start of the correlator dump.
+ * @param[in] nsdt The number of averaging cycles to do.
+ * @param[in] sdt The time interval between averages in seconds.
+ * @param[in] k Wavenumber in radians / metre.
+ * @param[out] vis The complex matrix of visibilities (see note, above).
+ * @param[out] u Array of station u-positions in metres.
+ * @param[out] v Array of station v-positions in metres.
+ * @param[out] w Array of station w-positions in metres.
+ */
+//DllExport
+int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay,
+        const double* az, int ns, const double* l, const double* m,
+        const double* bsqrt, const double* e, double ra0, double dec0,
+        double lst0, int nsdt, double sdt, double k, double* vis, double* u,
+        double* v, double* w);
 
 #ifdef __cplusplus
 }

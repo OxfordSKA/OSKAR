@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @brief
- * Computes an image using CUDA.
+ * Computes an image using CUDA (single precision).
  *
  * @details
  * Computes a real image from a set of complex visibilities, using CUDA to
@@ -66,9 +66,40 @@ extern "C" {
  * @param[in] sm The field of view in radians (full sky = pi).
  * @param[out] image The computed image (see note, above).
  */
-DllExport void oskar_cuda_im2dft(int nv, const float* u, const float* v,
+DllExport void oskar_cudaf_im2dft(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, float dl, float dm,
         float sl, float sm, float* image);
+
+/**
+ * @brief
+ * Computes an image using CUDA (double precision).
+ *
+ * @details
+ * Computes a real image from a set of complex visibilities, using CUDA to
+ * evaluate a 2D Direct Fourier Transform (DFT).
+ *
+ * The computed image is returned in the \p image array, which
+ * must be pre-sized to length (nl * nm). The fastest-varying dimension is
+ * along l.
+ *
+ * The image is assumed to be completely real: conjugated copies of the
+ * visibilities should therefore NOT be supplied.
+ *
+ * @param[in] nv No. of independent visibilities (excluding Hermitian copy).
+ * @param[in] u Array of visibility u coordinates in wavelengths (length nv).
+ * @param[in] v Array of visibility v coordinates in wavelengths (length nv).
+ * @param[in] vis Array of complex visibilities (length 2 * nv; see note, above).
+ * @param[in] nl The image dimension.
+ * @param[in] nm The image dimension.
+ * @param[in] dl The pixel size (cellsize) in radians.
+ * @param[in] dm The pixel size (cellsize) in radians.
+ * @param[in] sl The field of view in radians (full sky = pi).
+ * @param[in] sm The field of view in radians (full sky = pi).
+ * @param[out] image The computed image (see note, above).
+ */
+DllExport void oskar_cudad_im2dft(int nv, const double* u, const double* v,
+        const double* vis, int nl, int nm, double dl, double dm,
+        double sl, double sm, double* image);
 
 #ifdef __cplusplus
 }

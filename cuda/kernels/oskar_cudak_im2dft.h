@@ -37,7 +37,7 @@
 
 /**
  * @brief
- * CUDA kernel to compute an image using a simple 2D DFT.
+ * CUDA kernel to compute an image using a simple 2D DFT (single precision).
  *
  * @details
  * This CUDA kernel computes a real image from a set of complex visibilities,
@@ -64,8 +64,41 @@
  * @param[out] image The computed image (see note, above).
  */
 __global__
-void oskar_cudak_im2dft(int nv, const float* u, const float* v,
+void oskar_cudakf_im2dft(int nv, const float* u, const float* v,
         const float2* vis, const int np, const float* pl, const float* pm,
         const int maxVisPerBlock, float* image);
+
+/**
+ * @brief
+ * CUDA kernel to compute an image using a simple 2D DFT (double precision).
+ *
+ * @details
+ * This CUDA kernel computes a real image from a set of complex visibilities,
+ * using a 2D Direct Fourier Transform (DFT).
+ *
+ * The computed image is returned in the \p image array, which
+ * must be pre-sized to length \p np.
+ *
+ * Each thread evaluates a single pixel of the image, which is assumed to be
+ * completely real: conjugated copies of the visibilities should therefore NOT
+ * be supplied to this kernel.
+ *
+ * The kernel requires (4 * maxVisPerBlock) * sizeof(double) bytes of
+ * shared memory.
+ *
+ * @param[in] nv No. of independent visibilities (excluding Hermitian copy).
+ * @param[in] u Array of visibility u coordinates in wavelengths (length nv).
+ * @param[in] v Array of visibility v coordinates in wavelengths (length nv).
+ * @param[in] vis Array of complex visibilities (length nv; see note, above).
+ * @param[in] np The number of pixels in the image.
+ * @param[in] pl The pixel l-positions on the orthographic tangent plane.
+ * @param[in] pm The pixel m-positions on the orthographic tangent plane.
+ * @param[in] maxVisPerBlock Maximum visibilities per block (multiple of 16).
+ * @param[out] image The computed image (see note, above).
+ */
+__global__
+void oskar_cudakd_im2dft(int nv, const double* u, const double* v,
+        const double2* vis, const int np, const double* pl, const double* pm,
+        const int maxVisPerBlock, double* image);
 
 #endif // OSKAR_CUDAK_IM2DFT_H_

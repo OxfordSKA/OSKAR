@@ -29,11 +29,13 @@
 #include "cuda/kernels/oskar_cudak_wt2hg.h"
 #include "math/core/phase.h"
 
+// Single precision.
+
 // Shared memory pointer used by the kernel.
 extern __shared__ float smem[];
 
 __global__
-void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
+void oskar_cudakf_wt2hg(const int na, const float* ax, const float* ay,
         const int nb, const float3* trig, const float k, float2* weights)
 {
     const int tx = threadIdx.x;
@@ -64,6 +66,52 @@ void oskar_cudak_wt2hg(const int na, const float* ax, const float* ay,
     const float phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(cax[tx], cay[tx],
             cbz[ty], cby[ty], cbx[ty], k);
     sincosf(phase, &weight.y, &weight.x);
+    // Do NOT normalise.
+
+    // Write result to global memory.
+    if (a < na && b < nb) {
+        const int w = a + na * b;
+        weights[w] = weight;
+    }
+}
+
+// Double precision.
+
+// Shared memory pointer used by the kernel.
+extern __shared__ double smemd[];
+
+__global__
+void oskar_cudakd_wt2hg(const int na, const double* ax, const double* ay,
+        const int nb, const double3* trig, const double k, double2* weights)
+{
+    const int tx = threadIdx.x;
+    const int ty = threadIdx.y;
+    const int a = blockDim.x * blockIdx.x + tx; // Antenna index.
+    const int b = blockDim.y * blockIdx.y + ty; // Beam index.
+
+    // Cache antenna and beam data from global memory,
+    // avoiding shared memory bank conflicts.
+    double* cax = smemd;
+    double* cay = &cax[blockDim.x];
+    double* cbz = &cay[blockDim.x];
+    double* cby = &cbz[blockDim.y];
+    double* cbx = &cby[blockDim.y];
+    if (a < na) {
+        cax[tx] = ax[a];
+        cay[tx] = ay[a];
+    }
+    if (b < nb) {
+        cbx[ty] = trig[b].x;
+        cby[ty] = trig[b].y;
+        cbz[ty] = trig[b].z;
+    }
+    __syncthreads();
+
+    // Compute the geometric phase of the beam direction.
+    double2 weight;
+    const double phase = -GEOMETRIC_PHASE_2D_HORIZONTAL(cax[tx], cay[tx],
+            cbz[ty], cby[ty], cbx[ty], k);
+    sincos(phase, &weight.y, &weight.x);
     // Do NOT normalise.
 
     // Write result to global memory.

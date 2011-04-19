@@ -28,6 +28,8 @@
 
 #include "cuda/kernels/oskar_cudak_im2dft.h"
 
+// Single precision.
+
 // Shared memory pointer used by the kernel.
 extern __shared__ float4 c[];
 
@@ -36,7 +38,7 @@ extern __shared__ float4 c[];
 #endif
 
 __global__
-void oskar_cudak_im2dft(int nv, const float* u, const float* v,
+void oskar_cudakf_im2dft(int nv, const float* u, const float* v,
         const float2* vis, const int np, const float* pl, const float* pm,
         const int maxVisPerBlock, float* image)
 {
@@ -99,4 +101,79 @@ void oskar_cudak_im2dft(int nv, const float* u, const float* v,
             image[p] = 0.0f;
         else
             image[p] = cpx / (float)nv;
+}
+
+// Double precision.
+
+// Shared memory pointer used by the kernel.
+extern __shared__ double4 cd[];
+
+#ifndef M_2PI_D
+#define M_2PI_D 6.283185307179586476925
+#endif
+
+__global__
+void oskar_cudakd_im2dft(int nv, const double* u, const double* v,
+        const double2* vis, const int np, const double* pl, const double* pm,
+        const int maxVisPerBlock, double* image)
+{
+    // Get the pixel ID that this thread is working on.
+    const int p = blockDim.x * blockIdx.x + threadIdx.x;
+
+    // Get the pixel position.
+    // (NB. Cannot exit on index condition, as all threads are needed later).
+    double cpx = 0.0, l = 0.0, m = 0.0;
+    if (p < np) {
+        l = pl[p];
+        m = pm[p];
+    }
+
+    // Cache a block of visibilities and u,v-coordinates into shared memory.
+    for (int vs = 0; vs < nv; vs += maxVisPerBlock) {
+        int visInBlock = nv - vs;
+        if (visInBlock > maxVisPerBlock)
+            visInBlock = maxVisPerBlock;
+
+        // There are blockDim.x threads available - need to copy
+        // visInBlock pieces of data from global memory.
+        for (int t = threadIdx.x; t < visInBlock; t += blockDim.x) {
+            const int g = vs + t; // Global visibility index.
+            cd[t].x = u[g];
+            cd[t].y = v[g];
+            cd[t].z = vis[g].x;
+            cd[t].w = vis[g].y;
+        }
+
+        // Pre-multiply.
+        for (int t = threadIdx.x; t < visInBlock; t += blockDim.x) {
+            cd[t].x *= M_2PI_D;
+            cd[t].y *= M_2PI_D;
+        }
+
+        // Must synchronise before computing the signal for these visibilities.
+        __syncthreads();
+
+        // Loop over visibilities in block.
+        for (int v = 0; v < visInBlock; ++v) {
+            // Calculate the complex DFT weight.
+            double4 cc = cd[v];
+            double2 weight;
+            double a = cc.x * l + cc.y * m; // u*l + v*m
+            sincos(a, &weight.y, &weight.x);
+
+            // Perform complex multiply-accumulate.
+            // Image is real, so should only need to evaluate the real part.
+            cpx += cc.z * weight.x - cc.w * weight.y; // RE*RE - IM*IM
+        }
+
+        // Must synchronise again before loading in a new block of visibilities.
+        __syncthreads();
+    }
+
+    // Copy result into global memory.
+    if (p < np)
+        if (hypot(l, m) > 1.0)
+            image[p] = 0.0;
+        else
+            image[p] = cpx / (double)nv;
 }

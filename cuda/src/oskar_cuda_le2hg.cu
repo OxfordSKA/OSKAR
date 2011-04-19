@@ -39,7 +39,9 @@
 extern "C" {
 #endif
 
-void oskar_cuda_le2hg(char opt, int ns, const float* hadec, const float* dec,
+// Single precision.
+
+void oskar_cudaf_le2hg(char opt, int ns, const float* hadec, const float* dec,
         float cosLat, float sinLat, float* azel, float* el)
 {
     // Device pointers.
@@ -82,7 +84,7 @@ void oskar_cuda_le2hg(char opt, int ns, const float* hadec, const float* dec,
     int threadsPerBlock = 512;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
     size_t sharedMem = threadsPerBlock * sizeof(float2);
-    oskar_cudak_le2hg <<<blocks, threadsPerBlock, sharedMem>>>
+    oskar_cudakf_le2hg <<<blocks, threadsPerBlock, sharedMem>>>
             (ns, hadecd, cosLat, sinLat, azeld);
     cudaThreadSynchronize();
     cudaError_t err = cudaPeekAtLastError();
@@ -92,6 +94,83 @@ void oskar_cuda_le2hg(char opt, int ns, const float* hadec, const float* dec,
     // Copy device memory to host if required.
     if (!(opt == 'D' || opt == 'd')) {
         cudaMemcpy(azelh, azeld, ns * sizeof(float2),
+                cudaMemcpyDeviceToHost);
+    }
+
+    // Separate coordinates if required.
+    if (opt == 'S' || opt == 's') {
+        for (int i = 0; i < ns; ++i) {
+            azel[i] = azelh[2 * i + 0];
+            el[i]   = azelh[2 * i + 1];
+        }
+    }
+
+    // Free memory if allocated.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaFree(hadecd);
+        cudaFree(azeld);
+    }
+    if (opt == 'S' || opt == 's') {
+        free(hadech);
+        free(azelh);
+    }
+}
+
+// Double precision.
+
+void oskar_cudad_le2hg(char opt, int ns, const double* hadec, const double* dec,
+        double cosLat, double sinLat, double* azel, double* el)
+{
+    // Device pointers.
+    double2 *hadecd, *azeld;
+    if (opt == 'D' || opt == 'd') {
+        hadecd = (double2*)hadec;
+        azeld = (double2*)azel;
+    }
+    else {
+        // Allocate device memory.
+        cudaMalloc((void**)&hadecd, ns * sizeof(double2));
+        cudaMalloc((void**)&azeld,  ns * sizeof(double2));
+    }
+
+    // Host pointers.
+    double *hadech, *azelh;
+    if (opt == 'S' || opt == 's') {
+        // Allocate host memory.
+        hadech = (double*)malloc(2 * ns * sizeof(double));
+        azelh  = (double*)malloc(2 * ns * sizeof(double));
+
+        // Interleave coordinates.
+        for (int i = 0; i < ns; ++i) {
+            hadech[2 * i + 0] = hadec[i];
+            hadech[2 * i + 1] = dec[i];
+        }
+    }
+    else {
+        hadech = (double*)hadec;
+        azelh = (double*)azel;
+    }
+
+    // Copy host memory to device if required.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaMemcpy(hadecd, hadech, ns * sizeof(double2),
+                cudaMemcpyHostToDevice);
+    }
+
+    // Invoke kernel to compute horizontal coordinates on the device.
+    int threadsPerBlock = 512;
+    int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
+    size_t sharedMem = threadsPerBlock * sizeof(double2);
+    oskar_cudakd_le2hg <<<blocks, threadsPerBlock, sharedMem>>>
+            (ns, hadecd, cosLat, sinLat, azeld);
+    cudaThreadSynchronize();
+    cudaError_t err = cudaPeekAtLastError();
+    if (err != cudaSuccess)
+        printf("CUDA Error: %s\n", cudaGetErrorString(err));
+
+    // Copy device memory to host if required.
+    if (!(opt == 'D' || opt == 'd')) {
+        cudaMemcpy(azelh, azeld, ns * sizeof(double2),
                 cudaMemcpyDeviceToHost);
     }
 

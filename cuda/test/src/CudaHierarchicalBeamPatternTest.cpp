@@ -147,7 +147,7 @@ void CudaHierarchicalBeamPatternTest::test_regular()
     const float k = 2 * M_PI * (freq / C_0); // Wavenumber.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_hbp2hig(nt2, &nav[0], &ax[0], &ay[0], &tx[0], &ty[0],
+    oskar_cudaf_hbp2hig(nt2, &nav[0], &ax[0], &ay[0], &tx[0], &ty[0],
             ns, &sa[0], &se[0], tileBeamAz, tileBeamEl,
             stationBeamAz, stationBeamEl, k, &image[0]);
     TIMER_STOP("Finished hierarchical pattern (%d element regular array, %d points)",

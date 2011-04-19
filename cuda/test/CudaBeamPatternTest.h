@@ -47,14 +47,14 @@ class CudaBeamPatternTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(CudaBeamPatternTest);
         CPPUNIT_TEST(test_regular);
-//        CPPUNIT_TEST(test_superStation);
-//        CPPUNIT_TEST(test_satStation);
-//        CPPUNIT_TEST(test_stations200);
-//        CPPUNIT_TEST(test_stations2000);
-//        CPPUNIT_TEST(test_stations4000);
-//        CPPUNIT_TEST(test_random);
-//        CPPUNIT_TEST(test_perturbed);
-//        CPPUNIT_TEST(test_scattered);
+        CPPUNIT_TEST(test_superStation);
+        CPPUNIT_TEST(test_satStation);
+        CPPUNIT_TEST(test_stations200);
+        CPPUNIT_TEST(test_stations2000);
+        CPPUNIT_TEST(test_stations4000);
+        CPPUNIT_TEST(test_random);
+        CPPUNIT_TEST(test_perturbed);
+        CPPUNIT_TEST(test_scattered);
         CPPUNIT_TEST_SUITE_END();
 
     public:

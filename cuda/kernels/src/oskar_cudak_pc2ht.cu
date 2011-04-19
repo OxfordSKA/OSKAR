@@ -28,8 +28,10 @@
 
 #include "cuda/kernels/oskar_cudak_pc2ht.h"
 
+// Single precision.
+
 __global__
-void oskar_cudak_pc2ht(const int ns, const float2* spos, float3* trig)
+void oskar_cudakf_pc2ht(const int ns, const float2* spos, float3* trig)
 {
     // Get the source ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
@@ -38,4 +40,18 @@ void oskar_cudak_pc2ht(const int ns, const float2* spos, float3* trig)
     trig[s].x = cosf(spos[s].x);
     trig[s].y = sinf(spos[s].x);
     trig[s].z = cosf(spos[s].y);
+}
+
+// Double precision.
+
+__global__
+void oskar_cudakd_pc2ht(const int ns, const double2* spos, double3* trig)
+{
+    // Get the source ID that this thread is working on.
+    const int s = blockDim.x * blockIdx.x + threadIdx.x;
+    if (s >= ns) return; // Return if the index is out of range.
+
+    trig[s].x = cos(spos[s].x);
+    trig[s].y = sin(spos[s].x);
+    trig[s].z = cos(spos[s].y);
 }

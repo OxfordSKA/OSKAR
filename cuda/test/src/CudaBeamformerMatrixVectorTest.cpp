@@ -82,7 +82,7 @@ void CudaBeamformerMatrixVectorTest::test_basicMatrixVector()
     for (unsigned i = 0; i < na * nb * 2; i += 2) weights[i] = i + 2;
 
     // Perform matrix-matrix multiply.
-    oskar_cuda_bfmv(na, nb, &signals[0], &weights[0], &beams[0]);
+    oskar_cudaf_bfmv(na, nb, &signals[0], &weights[0], &beams[0]);
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(44.0, beams[0], 1e-5);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,  beams[1], 1e-5);
@@ -136,7 +136,7 @@ void CudaBeamformerMatrixVectorTest::test_method()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> beams(nb * 2); // Beam real & imaginary values.
     TIMER_START
-    oskar_cuda_bf2hig(na*na, &ax[0], &ay[0], ns, &samp[0],
+    oskar_cudaf_bf2hig(na*na, &ax[0], &ay[0], ns, &samp[0],
             &slon[0], &slat[0], nb, &blon[0], &blat[0],
             2 * M_PI * (freq / C_0), &beams[0]);
     TIMER_STOP("Finished beamforming "

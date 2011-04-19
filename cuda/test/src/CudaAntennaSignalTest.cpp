@@ -99,7 +99,7 @@ void CudaAntennaSignalTest::test_method()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> signals(na*na * 2); // Antenna signal real & imaginary values.
     TIMER_START
-    oskar_cuda_as2hi(na*na, &ax[0], &ay[0], ns, &samp[0], &slon[0], &slat[0],
+    oskar_cudaf_as2hi(na*na, &ax[0], &ay[0], ns, &samp[0], &slon[0], &slat[0],
             2 * M_PI * (freq / C_0), &signals[0]);
     TIMER_STOP("Finished antenna signal generation "
             "(%d antennas, %d sources)", na*na, ns);

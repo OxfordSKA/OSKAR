@@ -36,11 +36,13 @@
 extern "C" {
 #endif
 
+// Single precision.
+
 #ifndef M_PI
 #define M_PI 3.1415926535
 #endif
 
-void oskar_cuda_im2dftlm(int nv, const float* u, const float* v,
+void oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, const float* l, const float* m,
         float* image)
 {
@@ -97,7 +99,7 @@ void oskar_cuda_im2dftlm(int nv, const float* u, const float* v,
         int blocks = (pixInBlock + threadsPerBlock - 1) / threadsPerBlock;
         int maxVisPerBlock = 896; // Should be multiple of 16.
         size_t sharedMem = 2 * maxVisPerBlock * sizeof(float2);
-        oskar_cudak_im2dft <<<blocks, threadsPerBlock, sharedMem>>>
+        oskar_cudakf_im2dft <<<blocks, threadsPerBlock, sharedMem>>>
                 (nv, ud, vd, visd, pixInBlock, pld, pmd, maxVisPerBlock, pix);
         cudaThreadSynchronize();
         cudaError_t err = cudaPeekAtLastError();
@@ -106,6 +108,94 @@ void oskar_cuda_im2dftlm(int nv, const float* u, const float* v,
 
         // Copy (partial) result from device memory to host memory.
         cudaMemcpy(image + pixStart, pix, pixInBlock * sizeof(float),
+                cudaMemcpyDeviceToHost);
+    }
+
+    // Free device memory.
+    cudaFree(ud);
+    cudaFree(vd);
+    cudaFree(visd);
+    cudaFree(pld);
+    cudaFree(pmd);
+    cudaFree(pix);
+
+    // Free host memory.
+    free(pm);
+    free(pl);
+}
+
+// Double precision.
+
+#ifndef M_PI_D
+#define M_PI_D 3.1415926535
+#endif
+
+void oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
+        const double* vis, int nl, int nm, const double* l, const double* m,
+        double* image)
+{
+    // Create and allocate memory for all the pixel positions.
+    const int np = nl * nm; // Number of pixels in image.
+    double* pl = (double*)malloc(np * sizeof(double));
+    double* pm = (double*)malloc(np * sizeof(double));
+    int i, j, k; // Indices.
+
+    // Generate grid from l,m vectors.
+    for (j = 0; j < nm; ++j) {
+        for (i = 0; i < nl; ++i) {
+            k = i + j * nl; // Image pixel index.
+            pl[k] = l[i];
+            pm[k] = m[j];
+        }
+    }
+
+    // Allocate memory for visibilities and u,v-coordinates on the device.
+    double *ud, *vd, *pld, *pmd, *pix;
+    double2 *visd;
+    cudaMalloc((void**)&ud, nv * sizeof(double));
+    cudaMalloc((void**)&vd, nv * sizeof(double));
+    cudaMalloc((void**)&visd, nv * sizeof(double2));
+
+    // Copy visibilities and u,v-coordinates to device.
+    cudaMemcpy(ud, u, nv * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(vd, v, nv * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(visd, vis, nv * sizeof(double2), cudaMemcpyHostToDevice);
+
+    // Divide up the pixel list into manageable chunks.
+    int npMax = 100000;
+    int chunk = 0, chunks = (np + npMax - 1) / npMax;
+
+    // Allocate memory for pixel position chunk on the device.
+    cudaMalloc((void**)&pld, npMax * sizeof(double));
+    cudaMalloc((void**)&pmd, npMax * sizeof(double));
+    cudaMalloc((void**)&pix, npMax * sizeof(double));
+
+    // Loop over pixel chunks.
+    for (chunk = 0; chunk < chunks; ++chunk) {
+        const int pixStart = chunk * npMax;
+        int pixInBlock = np - pixStart;
+        if (pixInBlock > npMax) pixInBlock = npMax;
+
+        // Copy test source positions for this chunk to the device.
+        cudaMemcpy(pld, pl + pixStart, pixInBlock * sizeof(double),
+                cudaMemcpyHostToDevice);
+        cudaMemcpy(pmd, pm + pixStart, pixInBlock * sizeof(double),
+                cudaMemcpyHostToDevice);
+
+        // Invoke kernel to compute the (partial) image on the device.
+        int threadsPerBlock = 384;
+        int blocks = (pixInBlock + threadsPerBlock - 1) / threadsPerBlock;
+        int maxVisPerBlock = 896; // Should be multiple of 16.
+        size_t sharedMem = 2 * maxVisPerBlock * sizeof(double2);
+        oskar_cudakd_im2dft <<<blocks, threadsPerBlock, sharedMem>>>
+                (nv, ud, vd, visd, pixInBlock, pld, pmd, maxVisPerBlock, pix);
+        cudaThreadSynchronize();
+        cudaError_t err = cudaPeekAtLastError();
+        if (err != cudaSuccess)
+            printf("CUDA Error: %s\n", cudaGetErrorString(err));
+
+        // Copy (partial) result from device memory to host memory.
+        cudaMemcpy(image + pixStart, pix, pixInBlock * sizeof(double),
                 cudaMemcpyDeviceToHost);
     }
 

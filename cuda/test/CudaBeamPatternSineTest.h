@@ -47,10 +47,8 @@ class CudaBeamPatternSineTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(CudaBeamPatternSineTest);
         CPPUNIT_TEST(test_singleElement);
-        CPPUNIT_TEST(test_sineNormalised);
-        CPPUNIT_TEST(test_sineSquaredNormalised);
-        CPPUNIT_TEST(test_sineUnnormalised);
-        CPPUNIT_TEST(test_sineSquaredUnnormalised);
+        CPPUNIT_TEST(test_sine);
+        CPPUNIT_TEST(test_sineSquared);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -65,16 +63,10 @@ class CudaBeamPatternSineTest : public CppUnit::TestFixture
         void test_singleElement();
 
         /// Test method.
-        void test_sineNormalised();
+        void test_sine();
 
         /// Test method.
-        void test_sineSquaredNormalised();
-
-        /// Test method.
-        void test_sineUnnormalised();
-
-        /// Test method.
-        void test_sineSquaredUnnormalised();
+        void test_sineSquared();
 };
 
 #endif // CUDA_BEAM_PATTERN_SINE_TEST_H_

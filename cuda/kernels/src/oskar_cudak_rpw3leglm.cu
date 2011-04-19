@@ -29,11 +29,13 @@
 #include "cuda/kernels/oskar_cudak_rpw3leglm.h"
 #include "math/core/phase.h"
 
+// Single precision.
+
 // Shared memory pointer used by the kernel.
 extern __shared__ float smem[];
 
 __global__
-void oskar_cudak_rpw3leglm(const int na, const float* uvw, const int ns,
+void oskar_cudakf_rpw3leglm(const int na, const float* uvw, const int ns,
         const float* l, const float* m, const float* n, const float k,
         float2* weights)
 {
@@ -64,6 +66,51 @@ void oskar_cudak_rpw3leglm(const int na, const float* uvw, const int ns,
     float arg = k * (cu[ty] * cl[tx] + cv[ty] * cm[tx] + cw[ty] * cn[tx]);
     float2 weight;
     sincosf(arg, &weight.y, &weight.x);
+
+    // Write result to global memory.
+    if (s < ns && a < na) {
+        const int w = s + ns * a;
+        weights[w] = weight;
+    }
+}
+
+// Double precision.
+
+// Shared memory pointer used by the kernel.
+extern __shared__ double smemd[];
+
+__global__
+void oskar_cudakd_rpw3leglm(const int na, const double* uvw, const int ns,
+        const double* l, const double* m, const double* n, const double k,
+        double2* weights)
+{
+    const int tx = threadIdx.x;
+    const int ty = threadIdx.y;
+    const int s = blockDim.x * blockIdx.x + tx; // Source index.
+    const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
+
+    // Cache source and antenna data from global memory.
+    double* cl = smemd;
+    double* cm = &cl[blockDim.x];
+    double* cn = &cm[blockDim.x];
+    double* cu = &cn[blockDim.x];
+    double* cv = &cu[blockDim.y];
+    double* cw = &cv[blockDim.y];
+    if (s < ns && ty == 0) {
+        cl[tx] = l[s];
+        cm[tx] = m[s];
+        cn[tx] = n[s];
+    }
+    if (a < na && tx == 0) {
+        cu[ty] = uvw[a];
+        cv[ty] = uvw[a + na];
+        cw[ty] = uvw[a + 2*na];
+    }
+    __syncthreads();
+
+    double arg = k * (cu[ty] * cl[tx] + cv[ty] * cm[tx] + cw[ty] * cn[tx]);
+    double2 weight;
+    sincos(arg, &weight.y, &weight.x);
 
     // Write result to global memory.
     if (s < ns && a < na) {

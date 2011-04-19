@@ -27,8 +27,7 @@
  */
 
 #include "cuda/test/CudaBeamPatternSineTest.h"
-#include "cuda/oskar_cuda_bp2hsg.h"
-#include "cuda/oskar_cuda_bp2hssg.h"
+#include "cuda/oskar_cuda_bp2hc.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
 #include "math/core/Matrix3.h"
@@ -99,14 +98,15 @@ void CudaBeamPatternSineTest::test_singleElement()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hsg(na*na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, atype_sin_elevation,
+            1.0, 0.0, &image[0]);
     TIMER_STOP("Finished sine beam pattern "
             "(single element, %d points)", ns);
 
     // Write image data to file.
-    FILE* file = fopen("antPatternSine2dHorizontalGeometricNorm.dat", "w");
+    FILE* file = fopen("antPatternSine2dHorizontalGeometric.dat", "w");
     for (unsigned s = 0; s < ns; ++s) {
         fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
                 slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
@@ -114,14 +114,15 @@ void CudaBeamPatternSineTest::test_singleElement()
     fclose(file);
 
     TIMER_START
-    oskar_cuda_bp2hssg(na*na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, atype_sin2_elevation,
+            1.0, 0.0, &image[0]);
     TIMER_STOP("Finished sine-squared beam pattern "
             "(single element, %d points)", ns);
 
     // Write image data to file.
-    file = fopen("antPatternSineSquared2dHorizontalGeometricNorm.dat", "w");
+    file = fopen("antPatternSineSquared2dHorizontalGeometric.dat", "w");
     for (unsigned s = 0; s < ns; ++s) {
         fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
                 slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
@@ -133,7 +134,7 @@ void CudaBeamPatternSineTest::test_singleElement()
  * @details
  * Tests beam pattern creation using CUDA.
  */
-void CudaBeamPatternSineTest::test_sineNormalised()
+void CudaBeamPatternSineTest::test_sine()
 {
     // Generate square array of antenna positions.
     const int na = 100;
@@ -163,14 +164,15 @@ void CudaBeamPatternSineTest::test_sineNormalised()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hsg(na*na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, atype_sin_elevation,
+            1.0, 0.0, &image[0]);
     TIMER_STOP("Finished sine beam pattern "
             "(%d element regular array, %d points)", na*na, ns);
 
     // Write image data to file.
-    FILE* file = fopen("beamPatternSine2dHorizontalGeometricNorm.dat", "w");
+    FILE* file = fopen("beamPatternSine2dHorizontalGeometric.dat", "w");
     for (unsigned s = 0; s < ns; ++s) {
         fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
                 slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
@@ -182,7 +184,7 @@ void CudaBeamPatternSineTest::test_sineNormalised()
  * @details
  * Tests beam pattern creation using CUDA.
  */
-void CudaBeamPatternSineTest::test_sineSquaredNormalised()
+void CudaBeamPatternSineTest::test_sineSquared()
 {
     // Generate linear array of antenna positions.
     const int na = 100;
@@ -209,113 +211,18 @@ void CudaBeamPatternSineTest::test_sineSquaredNormalised()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
     TIMER_START
-    oskar_cuda_bp2hssg(na*na, &ax[0], &ay[0], ns, &slon[0],
+    oskar_cudaf_bp2hc(na*na, &ax[0], &ay[0], ns, &slon[0],
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
+            2 * M_PI * (freq / C_0), 0, atype_sin2_elevation,
+            1.0, 0.0, &image[0]);
     TIMER_STOP("Finished sine-squared beam pattern "
             "(%d element regular array, %d points)", na, ns);
 
     // Write image data to file.
-    FILE* file = fopen("beamPatternSineSquared1dHorizontalGeometricNorm.dat", "w");
+    FILE* file = fopen("beamPatternSineSquared1dHorizontalGeometric.dat", "w");
     for (unsigned s = 0; s < ns; ++s) {
         fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
                 slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
     }
     fclose(file);
 }
-
-/**
- * @details
- * Tests beam pattern creation using CUDA.
- */
-void CudaBeamPatternSineTest::test_sineUnnormalised()
-{
-    // Generate square array of antenna positions.
-    const int na = 100;
-    const float sep = 0.15; // Antenna separation, metres.
-    const float halfArraySize = (na - 1) * sep / 2.0;
-    std::vector<float> ax(na * na), ay(na * na); // Antenna (x,y) positions.
-    for (int x = 0; x < na; ++x) {
-        for (int y = 0; y < na; ++y) {
-            int i = y + x * na;
-            ax[i] = x * sep - halfArraySize;
-            ay[i] = y * sep - halfArraySize;
-        }
-    }
-
-    // Generate test source positions.
-    float beamAz = 0;  // Beam azimuth.
-    float beamEl = 75; // Beam elevation.
-    SphericalPositions<float> pos (
-            beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
-            30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
-            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
-    unsigned ns = pos.generate(0, 0); // No. of sources.
-    std::vector<float> slon(ns), slat(ns);
-    pos.generate(&slon[0], &slat[0]);
-
-    // Call CUDA beam pattern generator.
-    float freq = 1e9; // Observing frequency, Hertz.
-    std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
-    TIMER_START
-    oskar_cuda_bp2hsg(na*na, &ax[0], &ay[0], ns, &slon[0],
-            &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
-    TIMER_STOP("Finished sine beam pattern "
-            "(%d element regular array, %d points)", na*na, ns);
-
-    // Write image data to file.
-    FILE* file = fopen("beamPatternSine2dHorizontalGeometricUnnorm.dat", "w");
-    for (unsigned s = 0; s < ns; ++s) {
-        fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
-                slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
-    }
-    fclose(file);
-}
-
-/**
- * @details
- * Tests beam pattern creation using CUDA.
- */
-void CudaBeamPatternSineTest::test_sineSquaredUnnormalised()
-{
-    // Generate linear array of antenna positions.
-    const int na = 100;
-    const float sep = 0.15; // Antenna separation, metres.
-    const float halfArraySize = (na - 1) * sep / 2.0;
-    std::vector<float> ax(na), ay(na); // Antenna (x,y) positions.
-    for (int x = 0; x < na; ++x) {
-        ax[x] = x * sep - halfArraySize;
-        ay[x] = 0;
-    }
-
-    // Generate test source positions.
-    float beamAz = 0;  // Beam azimuth.
-    float beamEl = 90; // Beam elevation.
-    SphericalPositions<float> pos (
-            beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
-            30 * DEG2RAD, 0 * DEG2RAD, // Half-widths.
-            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
-    unsigned ns = pos.generate(0, 0); // No. of sources.
-    std::vector<float> slon(ns), slat(ns);
-    pos.generate(&slon[0], &slat[0]);
-
-    // Call CUDA beam pattern generator.
-    float freq = 1e9; // Observing frequency, Hertz.
-    std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
-    TIMER_START
-    oskar_cuda_bp2hssg(na*na, &ax[0], &ay[0], ns, &slon[0],
-            &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
-            2 * M_PI * (freq / C_0), &image[0]);
-    TIMER_STOP("Finished sine-squared beam pattern "
-            "(%d element regular array, %d points)", na, ns);
-
-    // Write image data to file.
-    FILE* file = fopen("beamPatternSineSquared1dHorizontalGeometricUnnorm.dat", "w");
-    for (unsigned s = 0; s < ns; ++s) {
-        fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
-                slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
-    }
-    fclose(file);
-}
-

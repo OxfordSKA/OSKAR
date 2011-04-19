@@ -57,7 +57,7 @@ extern "C" {
  *                    (na columns, nb rows).
  * @param[out] beams The complex vector of output beams (length nb).
  */
-DllExport void oskar_cuda_bfmv(int na, int nb, const float* signals,
+DllExport void oskar_cudaf_bfmv(int na, int nb, const float* signals,
         const float* weights, float* beams);
 
 #ifdef __cplusplus

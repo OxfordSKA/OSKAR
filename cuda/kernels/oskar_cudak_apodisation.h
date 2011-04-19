@@ -26,33 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_CMATADD_H_
-#define OSKAR_CUDAK_CMATADD_H_
+#ifndef OSKAR_CUDAK_APODISATION_H_
+#define OSKAR_CUDAK_APODISATION_H_
 
 /**
- * @file oskar_cudak_cmatadd.h
+ * @file oskar_cudak_apodisation.h
  */
 
 #include "cuda/CudaEclipse.h"
 
 /**
  * @brief
- * CUDA kernel to add two complex matrices together, element-wise.
+ * CUDA kernel to apply a Hann apodisation to beamforming weights
+ * (single precision).
  *
  * @details
- * This CUDA kernel add the elements of two complex matrices together
- * using the graphics card.
+ * http://mathworld.wolfram.com/HanningFunction.html
  *
- * All matrices must be of the same size.
+ * weights matrix dimensions = weights[b][a]
  *
- * @param[in] n1 Size of the fastest varying dimension.
- * @param[in] n2 Size of the slowest varying dimension.
- * @param[in] a First input matrix.
- * @param[in] b Second input matrix.
- * @param[out] c Output matrix.
+ * @param[in] na    Number of antennas.
+ * @param[in] ax    Antenna x positions (metres).
+ * @param[in] ay    Antenna y positions (metres).
+ * @param[in] nb    Number of beam directions.
+ * @param[in] fwhm  Full with at half maximum of the Hann window.
+ * @param[in/out] weights Weights matrix to which to apply apodisation.
  */
 __global__
-void oskar_cudak_cmatadd(int n1, int n2, const float2* a, const float2* b,
-        float2* c);
+void oskar_cudakf_apodisation_hann(const int na, const float* ax,
+        const float* ay, const int nb, const float fwhm, float2* weights);
 
-#endif // OSKAR_CUDAK_CMATADD_H_
+/**
+ * @brief
+ * CUDA kernel to apply a Hann apodisation to beamforming weights
+ * (double precision).
+ *
+ * @details
+ * http://mathworld.wolfram.com/HanningFunction.html
+ *
+ * weights matrix dimensions = weights[b][a]
+ *
+ * @param[in] na    Number of antennas.
+ * @param[in] ax    Antenna x positions (metres).
+ * @param[in] ay    Antenna y positions (metres).
+ * @param[in] nb    Number of beam directions.
+ * @param[in] fwhm  Full with at half maximum of the Hann window.
+ * @param[in/out] weights Weights matrix to which to apply apodisation.
+ */
+__global__
+void oskar_cudakd_apodisation_hann(const int na, const double* ax,
+        const double* ay, const int nb, const double fwhm, double2* weights);
+
+#endif // OSKAR_CUDAK_APODISATION_H_

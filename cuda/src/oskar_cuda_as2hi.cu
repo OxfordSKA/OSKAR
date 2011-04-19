@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-void oskar_cuda_as2hi(int na, const float* ax, const float* ay,
+void oskar_cudaf_as2hi(int na, const float* ax, const float* ay,
         int ns, const float* samp, const float* slon, const float* slat,
         float k, float* signals)
 {
@@ -72,7 +72,7 @@ void oskar_cuda_as2hi(int na, const float* ax, const float* ay,
     // Invoke kernel to pre-compute source positions on the device.
     int sThreadsPerBlock = 384;
     int sBlocks = (ns + sThreadsPerBlock - 1) / sThreadsPerBlock;
-    oskar_cudak_pc2ht <<<sBlocks, sThreadsPerBlock>>> (ns, sposd, strigd);
+    oskar_cudakf_pc2ht <<<sBlocks, sThreadsPerBlock>>> (ns, sposd, strigd);
     err = cudaPeekAtLastError();
     if (err != cudaSuccess)
         printf("CUDA Error: %s\n", cudaGetErrorString(err));
@@ -82,7 +82,7 @@ void oskar_cuda_as2hi(int na, const float* ax, const float* ay,
     int blocks = (na + threadsPerBlock - 1) / threadsPerBlock;
     int maxSourcesPerBlock = 384;
     size_t sharedMem = maxSourcesPerBlock * sizeof(float4);
-    oskar_cudak_as2hi <<<blocks, threadsPerBlock, sharedMem>>>
+    oskar_cudakf_as2hi <<<blocks, threadsPerBlock, sharedMem>>>
             (na, axd, ayd, ns, sampd, strigd, k, maxSourcesPerBlock, sig);
     err = cudaPeekAtLastError();
     if (err != cudaSuccess)

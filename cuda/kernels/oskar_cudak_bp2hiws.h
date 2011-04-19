@@ -38,7 +38,7 @@
 /**
  * @brief
  * CUDA kernel to compute a beam pattern using the given weights and signal
- * vectors.
+ * vectors (single precision).
  *
  * @details
  * This CUDA kernel evaluates the beam pattern for the given antenna
@@ -70,9 +70,49 @@
  * @param[out] image The computed beam pattern (see note, above).
  */
 __global__
-void oskar_cudak_bp2hiws(const int na, const float* ax, const float* ay,
+void oskar_cudakf_bp2hiws(const int na, const float* ax, const float* ay,
         const float2* weights, const float2* signals, const int sigStride,
         const int ns, const float* saz, const float* sel, const float k,
         const int maxAntennasPerBlock, float2* image);
+
+/**
+ * @brief
+ * CUDA kernel to compute a beam pattern using the given weights and signal
+ * vectors (double precision).
+ *
+ * @details
+ * This CUDA kernel evaluates the beam pattern for the given antenna
+ * positions and weights vector, using the supplied positions of the test
+ * source.
+ *
+ * Each thread evaluates a single pixel of the beam pattern, looping over
+ * all the antennas while performing a complex multiply-accumulate with the
+ * required beamforming weights.
+ *
+ * The computed beam pattern is returned in the \p image array, which
+ * must be pre-sized to length 2*ns. The values in the \p image array
+ * are alternate (real, imag) pairs for each test source position.
+ *
+ * The number of doubleing-point operations performed by this kernel is:
+ * \li Sines and cosines: ns * (2 * na + 3).
+ * \li Multiplies: 8 * ns * na.
+ * \li Additions / subtractions: 5 * ns * na.
+ *
+ * @param[in] na Number of antennas.
+ * @param[in] ax Array of antenna x positions in metres.
+ * @param[in] ay Array of antenna y positions in metres.
+ * @param[in] weights Array of complex antenna weights (length na).
+ * @param[in] signals Array of complex antenna signals (length na).
+ * @param[in] ns The number of test source positions.
+ * @param[in] saz The azimuth coordinates of the test source in radians.
+ * @param[in] sel The elevation coordinates of the test source in radians.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] image The computed beam pattern (see note, above).
+ */
+__global__
+void oskar_cudakd_bp2hiws(const int na, const double* ax, const double* ay,
+        const double2* weights, const double2* signals, const int sigStride,
+        const int ns, const double* saz, const double* sel, const double k,
+        const int maxAntennasPerBlock, double2* image);
 
 #endif // OSKAR_CUDAK_BP2HIWS_H_

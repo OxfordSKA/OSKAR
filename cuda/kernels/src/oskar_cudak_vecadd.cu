@@ -30,7 +30,7 @@
 
 // Vector addition kernel.
 __global__
-void oskar_cudak_vecadd(int n, const float* a, const float* b, float* c)
+void oskar_cudakf_vecadd(int n, const float* a, const float* b, float* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)

@@ -29,11 +29,13 @@
 #include "cuda/kernels/oskar_cudak_rpw3leg.h"
 #include "math/core/phase.h"
 
+// Single precision.
+
 // Shared memory pointer used by the kernel.
 extern __shared__ float smem[];
 
 __global__
-void oskar_cudak_rpw3leg(const int na, const float* ax, const float* ay,
+void oskar_cudakf_rpw3leg(const int na, const float* ax, const float* ay,
         const float* az, const float2 scha0, const float2 scdec0, const int ns,
         const float* ha, const float* dec, const float k, float2* weights)
 {
@@ -74,6 +76,61 @@ void oskar_cudak_rpw3leg(const int na, const float* ax, const float* ay,
     // Compute the relative phase.
     const float arg = -k * (phase - phase0);
     sincosf(arg, &weight.y, &weight.x);
+
+    // Write result to global memory.
+    if (s < ns && a < na) {
+        const int w = s + ns * a;
+        weights[w] = weight;
+    }
+}
+
+// Double precision.
+
+// Shared memory pointer used by the kernel.
+extern __shared__ double smemd[];
+
+__global__
+void oskar_cudakd_rpw3leg(const int na, const double* ax, const double* ay,
+        const double* az, const double2 scha0, const double2 scdec0, const int ns,
+        const double* ha, const double* dec, const double k, double2* weights)
+{
+    const int tx = threadIdx.x;
+    const int ty = threadIdx.y;
+    const int s = blockDim.x * blockIdx.x + tx; // Source index.
+    const int a = blockDim.y * blockIdx.y + ty; // Antenna index.
+
+    // Cache source and antenna data from global memory,
+    // avoiding shared memory bank conflicts.
+    double* cha = smemd;
+    double* cdc = &cha[blockDim.x];
+    double* cax = &cdc[blockDim.x];
+    double* cay = &cax[blockDim.y];
+    double* caz = &cay[blockDim.y];
+    if (s < ns) {
+        cha[tx] = ha[s];
+        cdc[tx] = dec[s];
+    }
+    if (a < na) {
+        cax[ty] = ax[a];
+        cay[ty] = ay[a];
+        caz[ty] = az[a];
+    }
+    __syncthreads();
+
+    // Compute the geometric phase of the reference direction.
+    const double phase0 = GEOMETRIC_PHASE_3D_LOCAL_EQUATORIAL_K(
+            cax[ty], cay[ty], caz[ty], scdec0.x, scdec0.y, scha0.x, scha0.y);
+
+    // Compute the geometric phase of the source direction.
+    double2 sha, sdc, weight;
+    sincos(cha[tx], &sha.x, &sha.y);
+    sincos(cdc[tx], &sdc.x, &sdc.y);
+    const double phase = GEOMETRIC_PHASE_3D_LOCAL_EQUATORIAL_K(
+            cax[ty], cay[ty], caz[ty], sdc.x, sdc.y, sha.x, sha.y);
+
+    // Compute the relative phase.
+    const double arg = -k * (phase - phase0);
+    sincos(arg, &weight.y, &weight.x);
 
     // Write result to global memory.
     if (s < ns && a < na) {

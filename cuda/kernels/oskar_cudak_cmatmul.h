@@ -37,7 +37,8 @@
 
 /**
  * @brief
- * CUDA kernel to multiply two complex matrices together, element-wise.
+ * CUDA kernel to multiply two complex matrices together, element-wise
+ * (single precision).
  *
  * @details
  * This CUDA kernel multiplies the elements of two complex matrices together
@@ -52,7 +53,28 @@
  * @param[out] c Output matrix.
  */
 __global__
-void oskar_cudak_cmatmul(int n1, int n2, const float2* a, const float2* b,
+void oskar_cudakf_cmatmul(int n1, int n2, const float2* a, const float2* b,
         float2* c);
+
+/**
+ * @brief
+ * CUDA kernel to multiply two complex matrices together, element-wise
+ * (double precision).
+ *
+ * @details
+ * This CUDA kernel multiplies the elements of two complex matrices together
+ * using the graphics card.
+ *
+ * All matrices must be of the same size.
+ *
+ * @param[in] n1 Size of the fastest varying dimension.
+ * @param[in] n2 Size of the slowest varying dimension.
+ * @param[in] a First input matrix.
+ * @param[in] b Second input matrix.
+ * @param[out] c Output matrix.
+ */
+__global__
+void oskar_cudakd_cmatmul(int n1, int n2, const double2* a, const double2* b,
+        double2* c);
 
 #endif // OSKAR_CUDAK_CMATMUL_H_

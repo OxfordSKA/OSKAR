@@ -71,7 +71,7 @@ void CudaVectorAddTest::test_method()
     }
 
     // Add the two vectors.
-    oskar_cuda_vecadd(n, &a[0], &b[0], &c[0]);
+    oskar_cudaf_vecadd(n, &a[0], &b[0], &c[0]);
 
     // Verify result.
     int i;

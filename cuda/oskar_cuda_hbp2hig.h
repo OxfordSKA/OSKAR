@@ -30,7 +30,7 @@
 #define OSKAR_CUDA_HBP2HIG_H_
 
 /**
- * @file oskar_cuda_bp2hig.h
+ * @file oskar_cuda_hbp2hig.h
  */
 
 #include "oskar_cuda_windows.h"
@@ -42,11 +42,12 @@ extern "C" {
 /**
  * @brief
  * Computes a hierarchical (tile/station) beam pattern using CUDA in the
- * horizontal coordinate system.
+ * horizontal coordinate system (single precision).
  *
  * @details
  * Computes a beam pattern using CUDA, assuming isotropic antennas,
  * generating the geometric beamforming weights separately.
+ * The beamforming weights are NOT normalised to the number of antennas.
  *
  * The function must be supplied with the antenna x- and y-positions, the
  * test source longitude and latitude positions, the beam direction, and
@@ -76,10 +77,53 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-DllExport void oskar_cuda_hbp2hig(int n2, int* n1, const float* x1, const float* y1,
-        const float* x2, const float* y2, int ns, const float* sa,
-        const float* se, float ba1, float be1, float ba2, float be2,
-        float k, float* image);
+DllExport void oskar_cudaf_hbp2hig(int n2, int* n1, const float* x1,
+        const float* y1, const float* x2, const float* y2, int ns,
+        const float* sa, const float* se, float ba1, float be1, float ba2,
+        float be2, float k, float* image);
+
+/**
+ * @brief
+ * Computes a hierarchical (tile/station) beam pattern using CUDA in the
+ * horizontal coordinate system (double precision).
+ *
+ * @details
+ * Computes a beam pattern using CUDA, assuming isotropic antennas,
+ * generating the geometric beamforming weights separately.
+ * The beamforming weights are NOT normalised to the number of antennas.
+ *
+ * The function must be supplied with the antenna x- and y-positions, the
+ * test source longitude and latitude positions, the beam direction, and
+ * the wavenumber.
+ *
+ * The \p x1 and \p x2 are effectively two-dimensional arrays of \p n2 by \p n1
+ * elements, with the length of the fastest-varying dimension given by the
+ * value of n1.
+ *
+ * The computed beam pattern is returned in the \p image array, which
+ * must be pre-sized to length 2*ns. The values in the \p image array
+ * are alternate (real, imag) pairs for each position of the test source.
+ *
+ * @param[in] n2 The number of tiles.
+ * @param[in] n1 An array containing the number of antennas in each tile.
+ * @param[in] x1 The antenna x-positions for each tile in metres, relative to tile centres.
+ * @param[in] y1 The antenna y-positions for each tile in metres, relative to tile centres.
+ * @param[in] x2 The tile x-positions for each tile in metres, relative to station centre.
+ * @param[in] y2 The tile y-positions for each tile in metres, relative to station centre.
+ * @param[in] ns The number of test source positions.
+ * @param[in] sa The azimuth coordinates of the test source in radians.
+ * @param[in] se The elevation coordinates of the test source in radians.
+ * @param[in] ba1 The tile beam azimuth direction in radians
+ * @param[in] be1 The tile beam elevation direction in radians.
+ * @param[in] ba2 The station beam azimuth direction in radians
+ * @param[in] be2 The station beam elevation direction in radians.
+ * @param[in] k The wavenumber (rad / m).
+ * @param[out] image The computed beam pattern (see note, above).
+ */
+DllExport void oskar_cudad_hbp2hig(int n2, int* n1, const double* x1,
+        const double* y1, const double* x2, const double* y2, int ns,
+        const double* sa, const double* se, double ba1, double be1, double ba2,
+        double be2, double k, double* image);
 
 #ifdef __cplusplus
 }

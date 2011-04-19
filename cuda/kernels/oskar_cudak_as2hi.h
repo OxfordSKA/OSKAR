@@ -68,7 +68,7 @@
  * @param[out] signals The computed antenna signals (see note, above).
  */
 __global__
-void oskar_cudak_as2hi(const int na, const float* ax, const float* ay,
+void oskar_cudakf_as2hi(const int na, const float* ax, const float* ay,
         const int ns, const float* samp, const float3* strig, const float k,
         const int maxSourcesPerBlock, float2* signals);
 
