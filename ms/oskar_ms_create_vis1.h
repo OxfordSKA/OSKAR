@@ -43,7 +43,7 @@ extern "C" {
  * coordinates.
  *
  * @details
- * This functions creates a Measurement Set from the supplied visibilities
+ * This function creates a Measurement Set from the supplied visibilities
  * and (u,v,w) coordinates for a single polarisation.
  *
  * @param[in] name The name of the output Measurement Set directory.

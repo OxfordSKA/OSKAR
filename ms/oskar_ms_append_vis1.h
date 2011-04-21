@@ -42,8 +42,10 @@ extern "C" {
  * Adds the supplied visibilities and (u,v,w) coordinates to a Measurement Set.
  *
  * @details
- * This functions appends to a Measurement Set using the supplied visibilities
+ * This function appends to a Measurement Set using the supplied visibilities
  * and (u,v,w) coordinates for a single polarisation.
+ *
+ * The visibilities and (u,v,w) coordinates are appended to the main table.
  *
  * @param[in] name The name of the Measurement Set directory.
  * @param[in] mjd The Modified Julian Date of the start time.

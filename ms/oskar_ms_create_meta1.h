@@ -39,12 +39,12 @@ extern "C" {
 
 /**
  * @brief
- * Creates a Measurement Set from the supplied visibilities and (u,v,w)
- * coordinates.
+ * Creates a blank (template) Measurement Set using the supplied meta-data.
  *
  * @details
- * This functions creates a Measurement Set from the supplied visibilities
- * and (u,v,w) coordinates for a single polarisation.
+ * This function creates an almost empty Measurement Set using only the
+ * supplied meta-data. The meta-data values are written into the relevant
+ * sub-tables, but the main table will be blank.
  *
  * @param[in] name The name of the output Measurement Set directory.
  * @param[in] mjd The Modified Julian Date of the start time.

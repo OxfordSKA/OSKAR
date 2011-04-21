@@ -42,7 +42,7 @@ extern "C" {
  * Creates an empty Measurement Set.
  *
  * @details
- * This functions creates an empty Measurement Set.
+ * This function creates an empty Measurement Set.
  *
  * @param[in] name The name of the output Measurement Set directory.
  */
