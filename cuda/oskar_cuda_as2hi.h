@@ -64,7 +64,8 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] signals The computed antenna signals (see note, above).
  */
-DllExport void oskar_cudaf_as2hi(int na, const float* ax, const float* ay,
+DllExport
+void oskar_cudaf_as2hi(int na, const float* ax, const float* ay,
         int ns, const float* samp, const float* slon, const float* slat,
         float k, float* signals);
 

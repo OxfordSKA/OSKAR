@@ -71,7 +71,8 @@ extern "C" {
  * @param[out] azel The azimuths, or horizontal coordinates in radians.
  * @param[out] el The elevations, or NULL (depending on opt).
  */
-DllExport void oskar_cudaf_le2hg(char opt, int ns, const float* hadec,
+DllExport
+void oskar_cudaf_le2hg(char opt, int ns, const float* hadec,
         const float* dec, float cosLat, float sinLat, float* azel, float* el);
 
 /**
@@ -106,7 +107,8 @@ DllExport void oskar_cudaf_le2hg(char opt, int ns, const float* hadec,
  * @param[out] azel The azimuths, or horizontal coordinates in radians.
  * @param[out] el The elevations, or NULL (depending on opt).
  */
-DllExport void oskar_cudad_le2hg(char opt, int ns, const double* hadec,
+DllExport
+void oskar_cudad_le2hg(char opt, int ns, const double* hadec,
         const double* dec, double cosLat, double sinLat, double* azel,
         double* el);
 

@@ -66,7 +66,8 @@ extern "C" {
  * @param[in] sm The field of view in radians (full sky = pi).
  * @param[out] image The computed image (see note, above).
  */
-DllExport void oskar_cudaf_im2dft(int nv, const float* u, const float* v,
+DllExport
+void oskar_cudaf_im2dft(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, float dl, float dm,
         float sl, float sm, float* image);
 
@@ -97,7 +98,8 @@ DllExport void oskar_cudaf_im2dft(int nv, const float* u, const float* v,
  * @param[in] sm The field of view in radians (full sky = pi).
  * @param[out] image The computed image (see note, above).
  */
-DllExport void oskar_cudad_im2dft(int nv, const double* u, const double* v,
+DllExport
+void oskar_cudad_im2dft(int nv, const double* u, const double* v,
         const double* vis, int nl, int nm, double dl, double dm,
         double sl, double sm, double* image);
 

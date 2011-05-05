@@ -48,8 +48,6 @@ extern "C" {
  * Given the hour angle and declination of the phase tracking centre, this
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
  *
- * Single precision is assumed throughout.
- *
  * @param[in] na The number of antennas.
  * @param[in] ax The station x-positions (length na).
  * @param[in] ay The station y-positions (length na).
@@ -60,7 +58,8 @@ extern "C" {
  * @param[out] v The station v-positions (length na).
  * @param[out] w The station w-positions (length na).
  */
-DllExport void oskar_math_synthesisf_xyz2uvw(int na, const float* x,
+DllExport
+void oskar_math_synthesisf_xyz2uvw(int na, const float* x,
         const float* y, const float* z, double ha0, double dec0, float* u,
         float* v, float* w);
 
@@ -73,8 +72,6 @@ DllExport void oskar_math_synthesisf_xyz2uvw(int na, const float* x,
  * Given the hour angle and declination of the phase tracking centre, this
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
  *
- * Single precision is assumed throughout.
- *
  * @param[in] na The number of antennas.
  * @param[in] ax The station x-positions (length na).
  * @param[in] ay The station y-positions (length na).
@@ -85,7 +82,8 @@ DllExport void oskar_math_synthesisf_xyz2uvw(int na, const float* x,
  * @param[out] v The station v-positions (length na).
  * @param[out] w The station w-positions (length na).
  */
-DllExport void oskar_math_synthesisd_xyz2uvw(int na, const double* x,
+DllExport
+void oskar_math_synthesisd_xyz2uvw(int na, const double* x,
         const double* y, const double* z, double ha0, double dec0, double* u,
         double* v, double* w);
 

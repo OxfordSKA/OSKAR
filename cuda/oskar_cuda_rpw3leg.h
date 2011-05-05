@@ -67,7 +67,8 @@ extern "C" {
  * @param[in] k Wavenumber in radians / metre.
  * @param[out] weights The matrix of geometric phase weights (see note, above).
  */
-DllExport void oskar_cudaf_rpw3leg(int na, float* ax, float* ay, float* az,
+DllExport
+void oskar_cudaf_rpw3leg(int na, float* ax, float* ay, float* az,
         int ns, float* ha, float* dec, float ha0, float dec0, float k,
         float* weights);
 
@@ -99,7 +100,8 @@ DllExport void oskar_cudaf_rpw3leg(int na, float* ax, float* ay, float* az,
  * @param[in] k Wavenumber in radians / metre.
  * @param[out] weights The matrix of geometric phase weights (see note, above).
  */
-DllExport void oskar_cudad_rpw3leg(int na, double* ax, double* ay, double* az,
+DllExport
+void oskar_cudad_rpw3leg(int na, double* ax, double* ay, double* az,
         int ns, double* ha, double* dec, double ha0, double dec0, double k,
         double* weights);
 
