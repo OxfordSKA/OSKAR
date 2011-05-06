@@ -36,6 +36,7 @@
 #include "oskar_cuda_as2hi.h"
 #include "oskar_cuda_bf2hig.h"
 #include "oskar_cuda_bfmv.h"
+#include "oskar_cuda_bp2hc.h"
 #include "oskar_cuda_bp2hugg.h"
 #include "oskar_cuda_eq2hg.h"
 #include "oskar_cuda_hbp2hig.h"
