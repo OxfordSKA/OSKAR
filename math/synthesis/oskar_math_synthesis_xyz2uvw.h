@@ -33,7 +33,7 @@
  * @file oskar_math_synthesis_xyz2uvw.h
  */
 
-//#include "oskar_math_windows.h"
+#include "oskar_math_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +58,7 @@ extern "C" {
  * @param[out] v The station v-positions (length na).
  * @param[out] w The station w-positions (length na).
  */
-//DllExport
+DllExport
 void oskar_math_synthesisf_xyz2uvw(int na, const float* x,
         const float* y, const float* z, double ha0, double dec0, float* u,
         float* v, float* w);
@@ -82,7 +82,7 @@ void oskar_math_synthesisf_xyz2uvw(int na, const float* x,
  * @param[out] v The station v-positions (length na).
  * @param[out] w The station w-positions (length na).
  */
-//DllExport
+DllExport
 void oskar_math_synthesisd_xyz2uvw(int na, const double* x,
         const double* y, const double* z, double ha0, double dec0, double* u,
         double* v, double* w);

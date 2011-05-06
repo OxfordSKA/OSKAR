@@ -33,7 +33,7 @@
  * @file oskar_modules_cuda_correlator_lm.h
  */
 
-//#include "oskar_modules_windows.h"
+#include "oskar_modules_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,7 +68,7 @@ extern "C" {
  * @param[out] v Array of baseline v-positions in metres (see note, above).
  * @param[out] w Array of baseline w-positions in metres (see note, above).
  */
-//DllExport
+DllExport
 int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
         const float* az, int ns, const float* l, const float* m,
         const float* bsqrt, const float* e, float ra0, float dec0,
@@ -104,7 +104,7 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
  * @param[out] v Array of baseline v-positions in metres.
  * @param[out] w Array of baseline w-positions in metres.
  */
-//DllExport
+DllExport
 int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay,
         const double* az, int ns, const double* l, const double* m,
         const double* bsqrt, const double* e, double ra0, double dec0,

@@ -33,7 +33,7 @@
  * @file oskar_math_core_ctrimat.h
  */
 
-//#include "oskar_math_windows.h"
+#include "oskar_math_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +51,7 @@ extern "C" {
  * @param[in] a The matrix (length 2 * n * n).
  * @param[out] b The triangular half (length 2 * (n * (n - 1) / 2)).
  */
-//DllExport
+DllExport
 void oskar_math_coref_ctrimat(int n, const float* a, float* b);
 
 /**
@@ -66,7 +66,7 @@ void oskar_math_coref_ctrimat(int n, const float* a, float* b);
  * @param[in] a The matrix (length 2 * n * n).
  * @param[out] b The triangular half (length 2 * (n * (n - 1) / 2)).
  */
-//DllExport
+DllExport
 void oskar_math_cored_ctrimat(int n, const double* a, double* b);
 
 #ifdef __cplusplus

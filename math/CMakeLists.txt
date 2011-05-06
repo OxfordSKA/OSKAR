@@ -4,6 +4,8 @@
 #==============================================================================
 
 # === Recurse into the oskar-lib beamforming math sub-module.
+include_directories(${oskar-lib_SOURCE_DIR}/math)
+
 add_subdirectory(beamforming)
 
 # === Recurse into the oskar-lib core math sub-module.
@@ -12,7 +14,7 @@ add_subdirectory(core)
 # === Recurse into the oskar-lib modules math sub-module.
 add_subdirectory(modules)
 
-# === Recurse into the oskar-lib modules math sub-module.
+# === Recurse into the oskar-lib synthesis math sub-module.
 add_subdirectory(synthesis)
 
 # === Get list of source files required to build the math module.

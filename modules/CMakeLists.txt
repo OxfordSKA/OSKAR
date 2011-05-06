@@ -2,7 +2,10 @@
 # src/modules/CMakeLists.txt
 #
 #==============================================================================
-
+include_directories(
+    ${oskar-lib_SOURCE_DIR}/modules
+    ${oskar-lib_SOURCE_DIR}/math
+)
 add_subdirectory(cuda)
 
 # === Get list of source files required to build the math module.
@@ -12,7 +15,6 @@ foreach (file ${modules_cuda_SRC})
 endforeach ()
 
 # === Macros to build the oskar-lib math module.
-include_directories(${CUDA_INCLUDE_DIRS})
 cuda_add_library(oskar_modules ${modules_SRC})
 target_link_libraries(oskar_modules
     ${CUDA_CUBLAS_LIBRARIES}
