@@ -26,10 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_rpw3leg.h"
+#include "modules/cuda/oskar_modules_cuda_correlator_lm.h"
+
 #include "cuda/kernels/oskar_cudak_rpw3leglm.h"
 #include "cuda/kernels/oskar_cudak_cmatmul.h"
+#include "math/core/oskar_math_core_ctrimat.h"
+#include "math/synthesis/oskar_math_synthesis_baselines.h"
 #include "math/synthesis/oskar_math_synthesis_xyz2uvw.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -92,8 +96,9 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
         }
     }
 
-    // Allocate host memory for station u,v,w coordinates.
+    // Allocate host memory for station u,v,w coordinates and visibility matrix.
     float* uvw = (float*)malloc(na * 3 * sizeof(float));
+    float* vism = (float*)malloc(na * na * sizeof(float2));
 
     // Allocate memory for source coordinates and visibility matrix on the
     // device.
@@ -159,11 +164,18 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
     if (errCublas != CUBLAS_STATUS_SUCCESS) goto stop;
 
     // Copy result to host.
-    cudaMemcpy(vis, visd, na * na * sizeof(float2), cudaMemcpyDeviceToHost);
+    cudaMemcpy(vism, visd, na * na * sizeof(float2), cudaMemcpyDeviceToHost);
 
-    // Copy u,v,w coordinates of mid-point to output arrays.
+    // Extract triangular half.
+    oskar_math_coref_ctrimat(na, vism, vis);
+
+    // Copy u,v,w baseline coordinates of mid-point to output arrays.
     lst = lst0 + 2 * M_PI * ((nsdt - 1) / 2.0f) * sdt / 86400.0f;
-    oskar_math_synthesisf_xyz2uvw(na, ax, ay, az, lst - ra0, dec0, u, v, w);
+    ha0 = lst - ra0;
+    oskar_math_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
+            &uvw[0], &uvw[na], &uvw[2*na]);
+    oskar_math_synthesisf_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
+            u, v, w);
 
     // Clean up before exit.
     stop:
@@ -179,8 +191,9 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
     }
 
     // Free host memory.
-    free(eb);
+    free(vism);
     free(uvw);
+    free(eb);
     free(n);
 
     // Free device memory.
@@ -248,8 +261,9 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
         }
     }
 
-    // Allocate host memory for station u,v,w coordinates.
+    // Allocate host memory for station u,v,w coordinates and visibility matrix.
     double* uvw = (double*)malloc(na * 3 * sizeof(double));
+    double* vism = (double*)malloc(na * na * sizeof(double2));
 
     // Allocate memory for source coordinates and visibility matrix on the
     // device.
@@ -315,11 +329,18 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
     if (errCublas != CUBLAS_STATUS_SUCCESS) goto stop;
 
     // Copy result to host.
-    cudaMemcpy(vis, visd, na * na * sizeof(double2), cudaMemcpyDeviceToHost);
+    cudaMemcpy(vism, visd, na * na * sizeof(double2), cudaMemcpyDeviceToHost);
 
-    // Copy u,v,w coordinates of mid-point to output arrays.
+    // Extract triangular half.
+    oskar_math_cored_ctrimat(na, vism, vis);
+
+    // Copy u,v,w baseline coordinates of mid-point to output arrays.
     lst = lst0 + 2 * M_PI_D * ((nsdt - 1) / 2.0) * sdt / 86400.0;
-    oskar_math_synthesisd_xyz2uvw(na, ax, ay, az, lst - ra0, dec0, u, v, w);
+    ha0 = lst - ra0;
+    oskar_math_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
+            &uvw[0], &uvw[na], &uvw[2*na]);
+    oskar_math_synthesisd_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
+            u, v, w);
 
     // Clean up before exit.
     stop:
@@ -335,8 +356,9 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
     }
 
     // Free host memory.
-    free(eb);
+    free(vism);
     free(uvw);
+    free(eb);
     free(n);
 
     // Free device memory.

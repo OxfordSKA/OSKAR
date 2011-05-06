@@ -30,10 +30,10 @@
 #define OSKAR_MODULES_CUDA_CORRELATOR_LM_H_
 
 /**
- * @file oskar_cuda_rpw3leg.h
+ * @file oskar_modules_cuda_correlator_lm.h
  */
 
-//#include "oskar_cuda_windows.h"
+//#include "oskar_modules_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,10 +41,12 @@ extern "C" {
 
 /**
  * @brief
- * Computes complex visibility matrix (single precision).
+ * Computes complex visibilities (single precision).
  *
  * @details
- * Computes complex visibility matrix.
+ * Computes complex visibilities.
+ * The visibilities and their (u,v,w) coordinates are returned in arrays of
+ * length na * (na - 1) / 2, so the Hermitian conjugate is not included.
  *
  * @param[in] na Number of antennas or stations.
  * @param[in] ax Array of local equatorial station x-positions in metres.
@@ -61,10 +63,10 @@ extern "C" {
  * @param[in] nsdt The number of averaging cycles to do.
  * @param[in] sdt The time interval between averages in seconds.
  * @param[in] k Wavenumber in radians / metre.
- * @param[out] vis The complex matrix of visibilities (see note, above).
- * @param[out] u Array of station u-positions in metres.
- * @param[out] v Array of station v-positions in metres.
- * @param[out] w Array of station w-positions in metres.
+ * @param[out] vis The complex visibilities (see note, above).
+ * @param[out] u Array of baseline u-positions in metres (see note, above).
+ * @param[out] v Array of baseline v-positions in metres (see note, above).
+ * @param[out] w Array of baseline w-positions in metres (see note, above).
  */
 //DllExport
 int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
@@ -75,10 +77,12 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
 
 /**
  * @brief
- * Computes complex visibility matrix (double precision).
+ * Computes complex visibilities (double precision).
  *
  * @details
- * Computes complex visibility matrix.
+ * Computes complex visibilities.
+ * The visibilities and their (u,v,w) coordinates are returned in arrays of
+ * length na * (na - 1) / 2, so the Hermitian conjugate is not included.
  *
  * @param[in] na Number of antennas or stations.
  * @param[in] ax Array of local equatorial station x-positions in metres.
@@ -95,10 +99,10 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
  * @param[in] nsdt The number of averaging cycles to do.
  * @param[in] sdt The time interval between averages in seconds.
  * @param[in] k Wavenumber in radians / metre.
- * @param[out] vis The complex matrix of visibilities (see note, above).
- * @param[out] u Array of station u-positions in metres.
- * @param[out] v Array of station v-positions in metres.
- * @param[out] w Array of station w-positions in metres.
+ * @param[out] vis The complex visibilities (see note, above).
+ * @param[out] u Array of baseline u-positions in metres.
+ * @param[out] v Array of baseline v-positions in metres.
+ * @param[out] w Array of baseline w-positions in metres.
  */
 //DllExport
 int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay,

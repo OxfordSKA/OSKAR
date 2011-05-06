@@ -31,14 +31,10 @@ foreach (file ${math_synthesis_SRC})
 endforeach ()
 
 # === Macros to build the oskar-lib math module.
-include_directories(${QT_QTCORE_INCLUDE_DIR})
 add_library(oskar_math ${math_SRC})
 set_target_properties(oskar_math PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
-target_link_libraries(oskar_math
-    ${QT_QTCORE_LIBRARY}
 )
 
 # === Install target for the oskar-lib math library module.
@@ -53,5 +49,3 @@ if (NOT WIN32)
         PATTERN "test" EXCLUDE
         PATTERN ".svn" EXCLUDE)
 endif ()
-
-
