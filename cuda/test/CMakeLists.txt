@@ -11,7 +11,7 @@ set(cuda_test_SRC
     src/CudaBeamPatternGaussianTest.cpp
     src/CudaBeamPatternSineTest.cpp
     src/CudaAntennaSignalTest.cpp
-    src/CudaBeamformerMatrixVectorTest.cpp
+    src/CudaBeamformerMatrixVectorTest.cu
     src/CudaImagerDftTest.cpp
     src/CudaEquatorialToHorizontalTest.cpp
 )

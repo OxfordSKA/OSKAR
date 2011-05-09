@@ -99,7 +99,7 @@ void oskar_cudakf_wt2hg(const int na, const float* ax, const float* ay,
  * The kernel requires blockDim.x * sizeof(double2) +
  * blockDim.y * sizeof(double3) bytes of shared memory.
  *
- * The number of doubleing-point operations performed by this kernel is:
+ * The number of floating-point operations performed by this kernel is:
  * \li Sines and cosines: 2 * na * nb.
  * \li Multiplies: 4 * na * nb.
  * \li Divides: 2 * na * nb.

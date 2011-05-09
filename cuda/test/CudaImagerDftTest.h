@@ -47,8 +47,6 @@ class CudaImagerDftTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(CudaImagerDftTest);
         CPPUNIT_TEST(test);
-        CPPUNIT_TEST(testlm);
-        CPPUNIT_TEST(test_large);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -61,12 +59,6 @@ class CudaImagerDftTest : public CppUnit::TestFixture
     public:
         /// Test method.
         void test();
-
-        /// Test method.
-        void testlm();
-
-        /// Test method.
-        void test_large();
 };
 
 #endif // CUDA_IMAGER_DFT_TEST_H_

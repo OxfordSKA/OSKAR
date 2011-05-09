@@ -90,7 +90,7 @@ void oskar_cudakf_bp2hiw(const int na, const float* ax, const float* ay,
  * must be pre-sized to length 2*ns. The values in the \p image array
  * are alternate (real, imag) pairs for each test source position.
  *
- * The number of doubleing-point operations performed by this kernel is:
+ * The number of floating-point operations performed by this kernel is:
  * \li Sines and cosines: ns * (2 * na + 3).
  * \li Multiplies: 8 * ns * na.
  * \li Additions / subtractions: 5 * ns * na.

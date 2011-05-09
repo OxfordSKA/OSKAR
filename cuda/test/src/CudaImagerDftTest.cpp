@@ -27,7 +27,6 @@
  */
 
 #include "cuda/test/CudaImagerDftTest.h"
-#include "cuda/oskar_cuda_im2dft.h"
 #include "cuda/oskar_cuda_im2dftlm.h"
 #include <cstdio>
 #include <cmath>
@@ -71,44 +70,6 @@ void CudaImagerDftTest::tearDown()
 void CudaImagerDftTest::test()
 {
     // Set up some visibilities.
-    const int nv = 1;
-    std::vector<float> vis(2 * nv, 0.0), u(nv, 0.0), v(nv, 0.0);
-
-    u[0] = 1.0f;
-    v[0] = 1.0f;
-    vis[0] = 1.0f; // real.
-    vis[1] = 1.0f; // imag.
-
-    // Image the visibilities.
-    int nl = 32;
-    int nm = 32;
-    float dl = 1.0 / nl;
-    float dm = 1.0 / nm;
-    float sl = M_PI;
-    float sm = M_PI;
-    std::vector<float> image(nl * nm, 0.0);
-    TIMER_START
-    oskar_cudaf_im2dft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
-    TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)
-
-    // Write image file.
-    FILE* file = fopen("output.txt", "w");
-    for (int j = 0; j < nm; ++j) {
-        for (int i = 0; i < nl; ++i) {
-            fprintf(file, "%.5e ", image[i + j * nl]);
-        }
-        fprintf(file, "\n");
-    }
-    fclose(file);
-}
-
-/**
- * @details
- * Tests 2D DFT CUDA imager.
- */
-void CudaImagerDftTest::testlm()
-{
-    // Set up some visibilities.
     const int nv = 10000;
     std::vector<float> vis(2 * nv, 0.0), u(nv, 0.0), v(nv, 0.0);
 
@@ -118,8 +79,8 @@ void CudaImagerDftTest::testlm()
     vis[1] = 0.0f; // imag.
 
     // Image the visibilities.
-    int nl = 61;
-    int nm = 61;
+    int nl = 301;
+    int nm = 301;
     std::vector<float> l(nl, 0.0);
     std::vector<float> m(nm, 0.0);
     int centreL = floor(nl / 2.0f);
@@ -133,44 +94,6 @@ void CudaImagerDftTest::testlm()
 
     // Write image file.
     FILE* file = fopen("outputlm.txt", "w");
-    for (int j = 0; j < nm; ++j) {
-        for (int i = 0; i < nl; ++i) {
-            fprintf(file, "%.5e ", image[i + j * nl]);
-        }
-        fprintf(file, "\n");
-    }
-    fclose(file);
-}
-
-/**
- * @details
- * Tests 2D DFT CUDA imager.
- */
-void CudaImagerDftTest::test_large()
-{
-    // Set up some visibilities.
-    const int nv = 10000;
-    std::vector<float> vis(2 * nv, 0.0), u(nv, 0.0), v(nv, 0.0);
-
-    u[0] = 1.0f;
-    v[0] = 1.0f;
-    vis[0] = 1.0f; // real.
-    vis[1] = 1.0f; // imag.
-
-    // Image the visibilities.
-    int nl = 301;
-    int nm = 301;
-    float dl = 1.0 / nl;
-    float dm = 1.0 / nm;
-    float sl = M_PI;
-    float sm = M_PI;
-    std::vector<float> image(nl * nm, 0.0);
-    TIMER_START
-    oskar_cudaf_im2dft(nv, &u[0], &v[0], &vis[0], nl, nm, dl, dm, sl, sm, &image[0]);
-    TIMER_STOP("Finished DFT imager (%d x %d, %d visibilities)", nl, nm, nv)
-
-    // Write image file.
-    FILE* file = fopen("output_large.txt", "w");
     for (int j = 0; j < nm; ++j) {
         for (int i = 0; i < nl; ++i) {
             fprintf(file, "%.5e ", image[i + j * nl]);

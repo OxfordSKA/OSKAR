@@ -13,14 +13,12 @@ if (CUDA_FOUND)
     set(cuda_SRC
         src/oskar_cuda_as2hi.cu
         src/oskar_cuda_bf2hig.cu
-        src/oskar_cuda_bfmv.cu
 
         src/oskar_cuda_bp2hc.cu
         src/oskar_cuda_bp2hugg.cu
 
         src/oskar_cuda_eq2hg.cu
         src/oskar_cuda_hbp2hig.cu
-        src/oskar_cuda_im2dft.cu
         src/oskar_cuda_im2dftlm.cu
         src/oskar_cuda_le2hg.cu
         src/oskar_cuda_rpw3leg.cu

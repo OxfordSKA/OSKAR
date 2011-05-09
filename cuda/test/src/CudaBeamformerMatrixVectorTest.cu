@@ -27,12 +27,13 @@
  */
 
 #include "cuda/test/CudaBeamformerMatrixVectorTest.h"
-#include "cuda/oskar_cuda_bfmv.h"
 #include "cuda/oskar_cuda_bf2hig.h"
 #include "math/core/SphericalPositions.h"
+#include <cstdlib>
 #include <cstdio>
 #include <cmath>
 #include <vector>
+#include <cublas.h>
 
 #ifndef M_PI
 #define M_PI 3.1415926535
@@ -74,20 +75,55 @@ void CudaBeamformerMatrixVectorTest::test_basicMatrixVector()
     unsigned nb = 2;
 
     // Allocate memory for signals, weights and beams.
-    std::vector<float> signals(na * 2, 0.0), beams(nb * 2, 0.0);
-    std::vector<float> weights(na * nb * 2, 0.0);
+    float* signals = (float*)calloc(na * 2, sizeof(float));
+    float* beams   = (float*)calloc(nb * 2, sizeof(float));
+    float* weights = (float*)calloc(na * nb * 2, sizeof(float));
 
     // Fill signal and weights arrays.
     for (unsigned i = 0; i < na * 2; i += 2) signals[i] = i + 1;
     for (unsigned i = 0; i < na * nb * 2; i += 2) weights[i] = i + 2;
 
     // Perform matrix-matrix multiply.
-    oskar_cudaf_bfmv(na, nb, &signals[0], &weights[0], &beams[0]);
+    // Initialise cuBLAS.
+    cublasInit();
+
+    // Allocate memory for antenna signals and beamforming weights
+    // on the device.
+    float2 *signalsd, *weightsd, *beamsd;
+    cudaMalloc((void**)&signalsd, na * sizeof(float2));
+    cudaMalloc((void**)&beamsd, nb * sizeof(float2));
+    cudaMalloc((void**)&weightsd, na * nb * sizeof(float2));
+
+    // Copy antenna signals and beamforming weights to the device.
+    cudaMemcpy(signalsd, signals, na * sizeof(float2), cudaMemcpyHostToDevice);
+    cudaMemcpy(weightsd, weights, na * nb * sizeof(float2), cudaMemcpyHostToDevice);
+
+    // Call cuBLAS function to perform the matrix-vector multiplication.
+    // Note that cuBLAS calls use Fortran-ordering (column major) for their
+    // matrices, so we use the transpose here.
+    cublasCgemv('t', na, nb, make_float2(1.0, 0.0),
+            weightsd, na, signalsd, 1, make_float2(0.0, 0.0), beamsd, 1);
+
+    // Copy result from device memory to host memory.
+    cudaMemcpy(beams, beamsd, nb * sizeof(float2), cudaMemcpyDeviceToHost);
+
+    // Free device memory.
+    cudaFree(signalsd);
+    cudaFree(weightsd);
+    cudaFree(beamsd);
+
+    // Shut down cuBLAS.
+    cublasShutdown();
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(44.0, beams[0], 1e-5);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,  beams[1], 1e-5);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(98.0, beams[2], 1e-5);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,  beams[3], 1e-5);
+
+    // Free host memory.
+    free(signals);
+    free(beams);
+    free(weights);
 }
 
 /**

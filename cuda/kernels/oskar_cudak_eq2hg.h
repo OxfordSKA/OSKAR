@@ -99,7 +99,7 @@ void oskar_cudakf_eq2hg(int ns, const float2* radec,
  * azel.x = {azimuth}
  * azel.y = {elevation}
  *
- * The number of doubleing-point operations performed by this kernel is:
+ * The number of floating-point operations performed by this kernel is:
  * \li Sines and cosines: 4 * ns.
  * \li Arctangents: 2 * ns.
  * \li Multiplies: 8 * ns.
