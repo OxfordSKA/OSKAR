@@ -65,6 +65,7 @@ Questions:
 General goals:
 --------------
 - Improvements in clarity to find things:
+    - Get rid of cryptic naming.
     - Group code into sub-folders (e.g. utility, imaging, simulation)
     - Rename variables in the interface to be more verbose.
         - names should be simple for a new reader of the code!
@@ -121,3 +122,43 @@ Todo:
       == If this is getting too complicated split into several stages.
       == And write a wrapper for the simple stages if it is helpful.
       ->> this will lead to an interface which can be easily described as...
+      
+3. Go though all of the functions and check
+    = What they do
+    = How can they be better classified.
+    = How can they be better named.
+     
+==============================================================================
+ 
+
+Name mapping:
+===============================================================================
+Aims:
+= How can we make the names more descriptive without being overly long?
+= Are all of the descriptive terms really needed?
+   - afterall it is impossible to have everything in the name...?    
+= Can we find some common properties to take out of the name?
+
+
+---------------------------------------------------------------------------
+- as2hi   => (a)ntenna (s)ignals (2)-dimensional (h)orizontal (i)sotropic.
+     == What does this do exactly?
+        - seems to call 2 kernel functions:
+            - source position calculation ... what for?
+            - compute antenna signals using...
+     == How many other antenna signal generator functions are there?
+        - Embedded element patterns?
+        - Inject noise?
+     == Possible names?
+        - calculate_antenna_signals()
+            - need for 1- or 3-d versions? (could be folder?)
+            - need to specify horizontal?  (could be folder?)
+            - need to specify isotropic?   (could be folder?)
+        - antenna_signals_2d_horizontal_isotropic()
+---------------------------------------------------------------------------     
+       
+
+- bf2hig  => (b)eam (f)ormer (2)-dimensional (h)orizontal (i)sotropic (g)eometric
+    
+ 
+ 
