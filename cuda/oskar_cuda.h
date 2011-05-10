@@ -35,12 +35,10 @@
 
 #include "oskar_cuda_as2hi.h"
 #include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bfmv.h"
 #include "oskar_cuda_bp2hc.h"
 #include "oskar_cuda_bp2hugg.h"
 #include "oskar_cuda_eq2hg.h"
 #include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dft.h"
 #include "oskar_cuda_im2dftlm.h"
 #include "oskar_cuda_le2hg.h"
 #include "oskar_cuda_rpw3leg.h"
