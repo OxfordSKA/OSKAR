@@ -26,22 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAK_VECMUL_H_
+#define OSKAR_CUDAK_VECMUL_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudak_vecmul.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bp2hc.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2hwcr.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#include "cuda/CudaEclipse.h"
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * CUDA kernel to multiply two real vectors together (single precision).
+ *
+ * @details
+ * This CUDA kernel multiplies two vectors together element-wise using the
+ * graphics card.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
+ */
+__global__
+void oskar_cudakf_vecmul(int n, const float* a, const float* b, float* c);
+
+/**
+ * @brief
+ * CUDA kernel to multiply two real vectors together (double precision).
+ *
+ * @details
+ * This CUDA kernel multiplies two vectors together element-wise using the
+ * graphics card.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
+ */
+__global__
+void oskar_cudakd_vecmul(int n, const double* a, const double* b, double* c);
+
+#endif // OSKAR_CUDAK_VECMUL_H_

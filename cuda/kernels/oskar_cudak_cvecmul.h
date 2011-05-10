@@ -26,22 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDAK_CVECMUL_H_
+#define OSKAR_CUDAK_CVECMUL_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cudak_cvecmul.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bp2hc.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2hwcr.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+#include "cuda/CudaEclipse.h"
 
-#endif // OSKAR_CUDA_H_
+/**
+ * @brief
+ * CUDA kernel to multiply two complex vectors together, element-wise
+ * (single precision).
+ *
+ * @details
+ * This CUDA kernel multiplies the elements of two complex vectors together
+ * using the graphics card.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
+ */
+__global__
+void oskar_cudakf_cvecmul(int n, const float2* a, const float2* b, float2* c);
+
+/**
+ * @brief
+ * CUDA kernel to multiply two complex vectors together, element-wise
+ * (double precision).
+ *
+ * @details
+ * This CUDA kernel multiplies the elements of two complex vectors together
+ * using the graphics card.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
+ */
+__global__
+void oskar_cudakd_cvecmul(int n, const double2* a, const double2* b,
+        double2* c);
+
+#endif // OSKAR_CUDAK_CVECMUL_H_

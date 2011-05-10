@@ -26,22 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#include "cuda/kernels/oskar_cudak_cvecset.h"
 
-/**
- * @file oskar_cuda.h
- */
+// Single precision.
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bp2hc.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2hwcr.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+__global__
+void oskar_cudakf_cvecset(int n, const float2 alpha, float2* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        c[i] = alpha;
+    }
+}
 
-#endif // OSKAR_CUDA_H_
+// Double precision.
+
+__global__
+void oskar_cudakd_cvecset(int n, const double2 alpha, double2* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        c[i] = alpha;
+    }
+}

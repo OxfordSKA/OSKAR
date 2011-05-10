@@ -26,22 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#include "cuda/kernels/oskar_cudak_cvecmul.h"
 
-/**
- * @file oskar_cuda.h
- */
+// Single precision.
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bp2hc.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2hwcr.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_rpw3leg.h"
+__global__
+void oskar_cudakf_cvecmul(int n, const float2* a, const float2* b, float2* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        // Cache the input data.
+        float2 ac = a[i];
+        float2 bc = b[i];
 
-#endif // OSKAR_CUDA_H_
+        // Complex multiply.
+        float2 cc;
+        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
+        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
+
+        c[i] = cc;
+    }
+}
+
+// Double precision.
+
+__global__
+void oskar_cudakd_cvecmul(int n, const double2* a, const double2* b,
+        double2* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        // Cache the input data.
+        double2 ac = a[i];
+        double2 bc = b[i];
+
+        // Complex multiply.
+        double2 cc;
+        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
+        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
+
+        c[i] = cc;
+    }
+}

@@ -16,6 +16,7 @@ if (CUDA_FOUND)
 
         src/oskar_cuda_bp2hc.cu
         src/oskar_cuda_bp2hugg.cu
+        src/oskar_cuda_bp2hwcr.cu
 
         src/oskar_cuda_eq2hg.cu
         src/oskar_cuda_hbp2hig.cu
