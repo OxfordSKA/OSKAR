@@ -26,23 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#ifndef OSKAR_CUDA_MALLOC_H_
+#define OSKAR_CUDA_MALLOC_H_
 
 /**
- * @file oskar_cuda.h
+ * @file oskar_cuda_malloc.h
  */
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bp2hc.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2hwcr.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_malloc.h"
-#include "oskar_cuda_rpw3leg.h"
+#include "oskar_cuda_windows.h"
 
-#endif // OSKAR_CUDA_H_
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Allocates memory on the graphics card.
+ *
+ * @details
+ * This function allocates a block of memory on the graphics card and returns
+ * a pointer to it.
+ *
+ * @param[in,out] ptr Pointer to memory block.
+ * @param[in] size Size (in bytes) of block to allocate.
+ */
+DllExport
+void oskar_cuda_malloc(void** ptr, unsigned size);
+
+/**
+ * @brief
+ * Allocates memory on the graphics card.
+ *
+ * @details
+ * This function allocates a block of memory on the graphics card and returns
+ * a pointer to it.
+ *
+ * @param[in,out] ptr Pointer to memory block.
+ * @param[in] n Number of items to allocate.
+ */
+DllExport
+void oskar_cuda_malloc_float(float** ptr, unsigned n);
+
+/**
+ * @brief
+ * Frees memory on the graphics card.
+ *
+ * @details
+ * This function frees a block of memory on the graphics card.
+ *
+ * @param[in] n Number of elements.
+ */
+DllExport
+void oskar_cuda_free(void* ptr);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_CUDA_MALLOC_H_

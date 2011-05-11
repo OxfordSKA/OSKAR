@@ -26,23 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_H_
-#define OSKAR_CUDA_H_
+#include "cuda/oskar_cuda_malloc.h"
 
-/**
- * @file oskar_cuda.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "oskar_cuda_as2hi.h"
-#include "oskar_cuda_bf2hig.h"
-#include "oskar_cuda_bp2hc.h"
-#include "oskar_cuda_bp2hugg.h"
-#include "oskar_cuda_bp2hwcr.h"
-#include "oskar_cuda_eq2hg.h"
-#include "oskar_cuda_hbp2hig.h"
-#include "oskar_cuda_im2dftlm.h"
-#include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_malloc.h"
-#include "oskar_cuda_rpw3leg.h"
+void oskar_cuda_malloc(void** ptr, unsigned size)
+{
+    cudaMalloc(ptr, size);
+}
 
-#endif // OSKAR_CUDA_H_
+void oskar_cuda_malloc_float(float** ptr, unsigned n)
+{
+    cudaMalloc(ptr, n * sizeof(float));
+}
+
+void oskar_cuda_free(void* ptr)
+{
+    cudaFree(ptr);
+}
+
+#ifdef __cplusplus
+}
+#endif
