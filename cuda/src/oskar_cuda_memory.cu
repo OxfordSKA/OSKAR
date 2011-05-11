@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_malloc.h"
+#include "cuda/oskar_cuda_memory.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,9 +37,65 @@ void oskar_cuda_malloc(void** ptr, unsigned size)
     cudaMalloc(ptr, size);
 }
 
+void oskar_cuda_malloc_double(double** ptr, unsigned n)
+{
+    cudaMalloc((void**)ptr, n * sizeof(double));
+}
+
 void oskar_cuda_malloc_float(float** ptr, unsigned n)
 {
-    cudaMalloc(ptr, n * sizeof(float));
+    cudaMalloc((void**)ptr, n * sizeof(float));
+}
+
+void oskar_cuda_malloc_int(int** ptr, unsigned n)
+{
+    cudaMalloc((void**)ptr, n * sizeof(int));
+}
+
+void oskar_cuda_memcpy_h2d(void* dest, const void* src, unsigned size)
+{
+    cudaMemcpy(dest, src, size, cudaMemcpyHostToDevice);
+}
+
+void oskar_cuda_memcpy_h2d_double(double* dest, const double* src, unsigned n)
+{
+    cudaMemcpy((void*)dest, (const void*)src, n * sizeof(double),
+            cudaMemcpyHostToDevice);
+}
+
+void oskar_cuda_memcpy_h2d_float(float* dest, const float* src, unsigned n)
+{
+    cudaMemcpy((void*)dest, (const void*)src, n * sizeof(float),
+            cudaMemcpyHostToDevice);
+}
+
+void oskar_cuda_memcpy_h2d_int(int* dest, const int* src, unsigned n)
+{
+    cudaMemcpy((void*)dest, (const void*)src, n * sizeof(int),
+            cudaMemcpyHostToDevice);
+}
+
+void oskar_cuda_memcpy_d2h(void* dest, const void* src, unsigned size)
+{
+    cudaMemcpy(dest, src, size, cudaMemcpyDeviceToHost);
+}
+
+void oskar_cuda_memcpy_d2h_double(double* dest, const double* src, unsigned n)
+{
+    cudaMemcpy((void*)dest, (const void*)src, n * sizeof(double),
+            cudaMemcpyDeviceToHost);
+}
+
+void oskar_cuda_memcpy_d2h_float(float* dest, const float* src, unsigned n)
+{
+    cudaMemcpy((void*)dest, (const void*)src, n * sizeof(float),
+            cudaMemcpyDeviceToHost);
+}
+
+void oskar_cuda_memcpy_d2h_int(int* dest, const int* src, unsigned n)
+{
+    cudaMemcpy((void*)dest, (const void*)src, n * sizeof(int),
+            cudaMemcpyDeviceToHost);
 }
 
 void oskar_cuda_free(void* ptr)

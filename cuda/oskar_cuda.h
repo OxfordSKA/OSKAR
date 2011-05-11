@@ -42,7 +42,7 @@
 #include "oskar_cuda_hbp2hig.h"
 #include "oskar_cuda_im2dftlm.h"
 #include "oskar_cuda_le2hg.h"
-#include "oskar_cuda_malloc.h"
+#include "oskar_cuda_memory.h"
 #include "oskar_cuda_rpw3leg.h"
 
 #endif // OSKAR_CUDA_H_

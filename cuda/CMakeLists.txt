@@ -23,7 +23,7 @@ if (CUDA_FOUND)
         src/oskar_cuda_im2dftlm.cu
         src/oskar_cuda_le2hg.cu
 
-        src/oskar_cuda_malloc.cu
+        src/oskar_cuda_memory.cu
 
         src/oskar_cuda_rpw3leg.cu
         src/oskar_cuda_vecadd.cu
