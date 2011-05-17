@@ -13,6 +13,9 @@ set(modules_SRC)
 foreach (file ${modules_cuda_SRC})
     list(APPEND modules_SRC cuda/${file})
 endforeach ()
+#foreach (file ${modules_sky_SRC})
+#    list(APPEND modules_SRC sky/${file})
+#endforeach ()
 
 # === Macros to build the oskar-lib math module.
 cuda_add_library(oskar_modules ${modules_SRC})

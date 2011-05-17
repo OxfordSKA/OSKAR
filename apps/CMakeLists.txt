@@ -1,3 +1,0 @@
-#
-# src/apps/CMakeLists.txt
-#
