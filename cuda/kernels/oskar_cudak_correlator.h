@@ -26,14 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MODULES_CUDA_H_
-#define OSKAR_MODULES_CUDA_H_
+#ifndef OSKAR_CUDAK_CORRELATOR_H_
+#define OSKAR_CUDAK_CORRELATOR_H_
 
 /**
- * @file oskar_modules_cuda.h
+ * @file oskar_cudak_correlator.h
  */
 
-#include "oskar_modules_cuda_correlator_lm.h"
-#include "oskar_modules_cuda_correlator_lm_bw.h"
+#include "cuda/CudaEclipse.h"
 
-#endif // OSKAR_MODULES_CUDA_H_
+/**
+ * @brief
+ *
+ * @details
+ *
+ */
+__global__
+void oskar_cudakf_correlator(int ns, int na, const float2* k,
+        const float* lmdist, const float* uvdist, float2* vis);
+
+/**
+ * @brief
+ *
+ * @details
+ *
+ */
+__global__
+void oskar_cudakd_correlator(int ns, int na, const double2* k,
+        const double* lmdist, const double* uvdist, double2* vis);
+
+#endif // OSKAR_CUDAK_CORRELATOR_H_

@@ -11,6 +11,7 @@ set(cuda_kernels_SRC
     src/oskar_cudak_bp2hiws.cu
     src/oskar_cudak_bp2hugw.cu
     src/oskar_cudak_cmatmul.cu
+    src/oskar_cudak_correlator.cu
     src/oskar_cudak_crvecmul.cu
     src/oskar_cudak_cvecmul.cu
     src/oskar_cudak_cvecset.cu
