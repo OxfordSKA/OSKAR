@@ -201,7 +201,7 @@ int oskar_cudad_bp2hc(int na, const double* ax, const double* ay,
     cudaError_t errCuda = cudaSuccess;
     int i, a, csize, retVal = 0;
     const int nb = 1; // Number of beams is 1, since this is a beam pattern.
-    const int naMax = 864; // Should be multiple of 16.
+    const int naMax = 432; // Should be multiple of 16.
     const int nsMax = 100000; // Maximum number of sources per iteration.
     double r, rmax = 0.0; // Station radius.
 

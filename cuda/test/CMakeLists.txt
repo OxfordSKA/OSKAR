@@ -7,13 +7,13 @@ set(cuda_test_SRC
     src/CppUnitMain.cpp
     src/CudaVectorAddTest.cpp
     src/CudaBeamPatternTest.cpp
-    src/CudaHierarchicalBeamPatternTest.cpp
-    src/CudaBeamPatternGaussianTest.cpp
-    src/CudaBeamPatternSineTest.cpp
-    src/CudaAntennaSignalTest.cpp
-    src/CudaBeamformerMatrixVectorTest.cu
-    src/CudaImagerDftTest.cpp
-    src/CudaEquatorialToHorizontalTest.cpp
+    #src/CudaHierarchicalBeamPatternTest.cpp
+    #src/CudaBeamPatternGaussianTest.cpp
+    #src/CudaBeamPatternSineTest.cpp
+    #src/CudaAntennaSignalTest.cpp
+    #src/CudaBeamformerMatrixVectorTest.cu
+    #src/CudaImagerDftTest.cpp
+    #src/CudaEquatorialToHorizontalTest.cpp
 )
 
 if (CPPUNIT_FOUND)
