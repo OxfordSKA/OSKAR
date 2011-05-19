@@ -9,5 +9,9 @@ set(sky_test_SRC
 )
 
 add_executable(skyTest ${sky_test_SRC})
-target_link_libraries(skyTest oskar_sky ${CPPUNIT_LIBRARIES})
+target_link_libraries(skyTest
+    oskar_sky
+    ${QT_QTCORE_LIBRARY}
+    ${CPPUNIT_LIBRARIES}
+)
 

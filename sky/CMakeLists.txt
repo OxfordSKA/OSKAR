@@ -3,6 +3,8 @@
 #
 #==============================================================================
 
+include_directories(${QT_INCLUDE_DIR})
+
 # === Create list of source files for the oskar-lib sky module.
 set(sky_SRC
     src/generate_random_sources.cpp

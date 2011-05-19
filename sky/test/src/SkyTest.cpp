@@ -29,8 +29,11 @@
 #include "sky/test/SkyTest.h"
 #include "sky/generate_random_sources.h"
 
+#include <QtCore/QTime>
+
 #include <vector>
 #include <cstdlib>
+#include <cmath>
 using namespace std;
 
 
@@ -57,13 +60,15 @@ void SkyTest::tearDown()
  */
 void SkyTest::test_rand()
 {
-    const unsigned n = 10;
+    const unsigned n = 50000;
     const unsigned seed = 0;
     srand(seed);
     for (unsigned i = 0; i < n; ++i)
     {
-        const double r = (double)rand() / (double)RAND_MAX;
-        //CPPUNIT_ASSERT_DOUBLES_EQUAL()
+        const double r1 = (double)rand() / (double)RAND_MAX;
+        const double r2 = (double)rand() / (double)RAND_MAX;
+        CPPUNIT_ASSERT( r1 >= 0.0 && r1 <= 1.0);
+        CPPUNIT_ASSERT( fabs(r1 - r2) > 1.0e-10 );
     }
 }
 
@@ -73,9 +78,11 @@ void SkyTest::test_rand()
  */
 void SkyTest::test_method()
 {
-    const unsigned num_sources = 20;
+    unsigned num_sources = 5;
     const double inner_radius = 1.0;
     const double outer_radius = 180.0;
+    const double ra0 = 0.0;
+    const double dec0 = M_PI / 2.0;
 
     const double brightness_min = 1.0e-2;
     const double brightness_max = 1.0e4;
@@ -84,7 +91,32 @@ void SkyTest::test_method()
     vector<double> dec(num_sources);
     vector<double> brightness(num_sources);
 
-    generate_random_sources(num_sources, inner_radius, outer_radius,
-            brightness_min, brightness_max, distribution_power,
+    generate_random_sources(num_sources, brightness_min, brightness_max,
+            distribution_power, &ra[0], &dec[0], &brightness[0], 0);
+
+    std::vector<double> dist(num_sources);
+    source_distance(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
+
+    cout <<  endl;
+    cout << "= Before: " << endl;
+    for (unsigned i = 0; i < num_sources; ++i)
+    {
+        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+    }
+    cout <<  endl;
+
+    filter_sources_by_radius(&num_sources, inner_radius, outer_radius, ra0, dec0,
             &ra[0], &dec[0], &brightness[0]);
+
+    source_distance(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
+    cout << "= After: " << endl;
+    for (unsigned i = 0; i < num_sources; ++i)
+    {
+        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+    }
 }
+
+
+
+
+

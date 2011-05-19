@@ -46,6 +46,7 @@ class SkyTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(SkyTest);
+        CPPUNIT_TEST(test_rand);
         CPPUNIT_TEST(test_method);
         CPPUNIT_TEST_SUITE_END();
 
