@@ -114,6 +114,7 @@ void source_distance(const unsigned num_sources, const double * ra,
 }
 
 
+
 void reorder_sources(const unsigned num_sources, const unsigned * indices,
         double * ra, double * dec, double * brightness)
 {
