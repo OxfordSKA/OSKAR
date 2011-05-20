@@ -38,6 +38,7 @@
 #include "oskar_cuda_bp2hc.h"
 #include "oskar_cuda_bp2hugg.h"
 #include "oskar_cuda_bp2hwcr.h"
+#include "oskar_cuda_bp2phc.h"
 #include "oskar_cuda_eq2hg.h"
 #include "oskar_cuda_hbp2hig.h"
 #include "oskar_cuda_im2dftlm.h"

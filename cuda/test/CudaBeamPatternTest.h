@@ -57,6 +57,8 @@ class CudaBeamPatternTest : public CppUnit::TestFixture
 //        CPPUNIT_TEST(test_scattered);
         CPPUNIT_TEST(test_single_precision);
         CPPUNIT_TEST(test_double_precision);
+        CPPUNIT_TEST(test_single_precision_precomputed);
+        CPPUNIT_TEST(test_double_precision_precomputed);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -99,6 +101,12 @@ class CudaBeamPatternTest : public CppUnit::TestFixture
 
         /// Test method.
         void test_double_precision();
+
+        /// Test method.
+        void test_single_precision_precomputed();
+
+        /// Test method.
+        void test_double_precision_precomputed();
 };
 
 #endif // CUDA_BEAM_PATTERN_TEST_H_

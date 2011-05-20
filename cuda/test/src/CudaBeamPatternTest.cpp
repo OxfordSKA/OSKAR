@@ -28,6 +28,7 @@
 
 #include "cuda/test/CudaBeamPatternTest.h"
 #include "cuda/oskar_cuda_bp2hc.h"
+#include "cuda/oskar_cuda_bp2phc.h"
 #include "math/core/SphericalPositions.h"
 #include "math/core/GridPositions.h"
 #include "math/core/Matrix3.h"
@@ -1525,5 +1526,111 @@ void CudaBeamPatternTest::test_double_precision()
             &slat[0], beamAz * DEG2RAD, beamEl * DEG2RAD,
             2 * M_PI * (freq / C_0), 0, 0, 1.0f, 0.0f, &image[0]);
     TIMER_STOP("Finished beam pattern (double precision)");
+
+    // Write image data to file.
+    FILE* file = fopen("doublePrecision.dat", "w");
+    for (unsigned s = 0; s < ns; ++s) {
+        fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
+                slon[s] * RAD2DEG, slat[s] * RAD2DEG, image[2*s], image[2*s+1]);
+    }
+    fclose(file);
+}
+
+/**
+ * @details
+ * Tests beam pattern creation using CUDA.
+ */
+void CudaBeamPatternTest::test_single_precision_precomputed()
+{
+    // Generate square array of antenna positions in wavenumbers.
+    float freq = 1e9; // Observing frequency, Hertz.
+    float k = 2 * M_PI * (freq / C_0);
+    const int na = 100;
+    const float sep = 0.15; // Antenna separation, metres.
+    const float halfArraySize = (na - 1) * sep / 2.0;
+    std::vector<float> ax(na * na), ay(na * na); // Antenna (x,y) positions.
+    for (int x = 0; x < na; ++x) {
+        for (int y = 0; y < na; ++y) {
+            int i = y + x * na;
+            ax[i] = k * x * sep - halfArraySize;
+            ay[i] = k * y * sep - halfArraySize;
+        }
+    }
+
+    // Generate test source positions.
+    float beamAz = 0;  // Beam azimuth.
+    float beamEl = 50; // Beam elevation.
+    SphericalPositions<float> pos (
+            beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
+            30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
+            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
+    unsigned ns = pos.generate(0, 0); // No. of sources.
+    std::vector<float> az(ns), el(ns), cace(ns), sace(ns);
+    pos.generate(&az[0], &el[0]);
+    for (unsigned i = 0; i < ns; ++i) {
+        float ce = cos(el[i]);
+        cace[i] = cos(az[i]) * ce;
+        sace[i] = sin(az[i]) * ce;
+    }
+
+    // Call CUDA beam pattern generator.
+    std::vector<float> image(ns * 2); // Beam pattern real & imaginary values.
+    TIMER_START
+    oskar_cudaf_bp2phc(na*na, &ax[0], &ay[0], ns, &cace[0], &sace[0],
+            beamAz * DEG2RAD, beamEl * DEG2RAD, &image[0]);
+    TIMER_STOP("Finished beam pattern (float precision, precomputed trig)");
+}
+
+/**
+ * @details
+ * Tests beam pattern creation using CUDA.
+ */
+void CudaBeamPatternTest::test_double_precision_precomputed()
+{
+    // Generate square array of antenna positions in wavenumbers.
+    double freq = 1e9; // Observing frequency, Hertz.
+    double k = 2 * M_PI * (freq / C_0);
+    const int na = 100;
+    const double sep = 0.15; // Antenna separation, metres.
+    const double halfArraySize = (na - 1) * sep / 2.0;
+    std::vector<double> ax(na * na), ay(na * na); // Antenna (x,y) positions.
+    for (int x = 0; x < na; ++x) {
+        for (int y = 0; y < na; ++y) {
+            int i = y + x * na;
+            ax[i] = k * x * sep - halfArraySize;
+            ay[i] = k * y * sep - halfArraySize;
+        }
+    }
+
+    // Generate test source positions.
+    double beamAz = 0;  // Beam azimuth.
+    double beamEl = 50; // Beam elevation.
+    SphericalPositions<double> pos (
+            beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
+            30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
+            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
+    unsigned ns = pos.generate(0, 0); // No. of sources.
+    std::vector<double> az(ns), el(ns), cace(ns), sace(ns);
+    pos.generate(&az[0], &el[0]);
+    for (unsigned i = 0; i < ns; ++i) {
+        double ce = cos(el[i]);
+        cace[i] = cos(az[i]) * ce;
+        sace[i] = sin(az[i]) * ce;
+    }
+
+    // Call CUDA beam pattern generator.
+    std::vector<double> image(ns * 2); // Beam pattern real & imaginary values.
+    TIMER_START
+    oskar_cudad_bp2phc(na*na, &ax[0], &ay[0], ns, &cace[0], &sace[0],
+            beamAz * DEG2RAD, beamEl * DEG2RAD, &image[0]);
+    TIMER_STOP("Finished beam pattern (double precision, precomputed trig)");
+
+    // Write image data to file.
+    FILE* file = fopen("doublePrecisionPrecomputed.dat", "w");
+    for (unsigned s = 0; s < ns; ++s) {
+        fprintf(file, "%12.3f%12.3f%16.4e%16.4e\n",
+                az[s] * RAD2DEG, el[s] * RAD2DEG, image[2*s], image[2*s+1]);
+    }
+    fclose(file);
 }
 

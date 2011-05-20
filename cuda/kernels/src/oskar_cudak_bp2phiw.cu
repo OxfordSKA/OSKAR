@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_bp2hiw.h"
+#include "cuda/kernels/oskar_cudak_bp2phiw.h"
 #include "math/core/phase.h"
 
 // Single precision.
@@ -35,23 +35,21 @@
 extern __shared__ float2 smem[];
 
 __global__
-void oskar_cudakf_bp2hiw(const int na, const float* ax, const float* ay,
-        const float2* weights, const int ns, const float* saz,
-        const float* sel, const float k, const int maxAntennasPerBlock,
-        float2* image)
+void oskar_cudakf_bp2phiw(const int na, const float* ax, const float* ay,
+        const float2* weights, const int ns, const float* scace,
+        const float* ssace, const int maxAntennasPerBlock, float2* image)
 {
     // Get the pixel (source position) ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
 
     // Get the source position.
     // (NB. Cannot exit on index condition, as all threads are needed later).
-    float az = 0.0f, el = 0.0f, sinAz, cosAz, cosEl;
-    if (s < ns) {
-        az = saz[s];
-        el = sel[s];
+    float sinAzCosEl = 0.0f, cosAzCosEl = 0.0f;
+    if (s < ns)
+    {
+        cosAzCosEl = scace[s];
+        sinAzCosEl = ssace[s];
     }
-    cosEl = cosf(el);
-    sincosf(az, &sinAz, &cosAz);
 
     // Initialise shared memory caches.
     // Antenna positions are cached as float2 for speed increase.
@@ -60,14 +58,16 @@ void oskar_cudakf_bp2hiw(const int na, const float* ax, const float* ay,
     float2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions.
 
     // Cache a block of antenna positions and weights into shared memory.
-    for (int as = 0; as < na; as += maxAntennasPerBlock) {
+    for (int as = 0; as < na; as += maxAntennasPerBlock)
+    {
         int antennasInBlock = na - as;
         if (antennasInBlock > maxAntennasPerBlock)
             antennasInBlock = maxAntennasPerBlock;
 
         // There are blockDim.x threads available - need to copy
         // antennasInBlock pieces of data from global memory.
-        for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
+        for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x)
+        {
             const int ag = as + t; // Global antenna index.
             cwt[t] = weights[ag];
             cap[t].x = ax[ag];
@@ -78,11 +78,11 @@ void oskar_cudakf_bp2hiw(const int na, const float* ax, const float* ay,
         __syncthreads();
 
         // Loop over antennas in block.
-        for (int a = 0; a < antennasInBlock; ++a) {
+        for (int a = 0; a < antennasInBlock; ++a)
+        {
             // Calculate the geometric phase from the source.
             float2 signal, w = cwt[a];
-            float phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(cap[a].x,
-                    cap[a].y, cosEl, sinAz, cosAz, k);
+            float phaseSrc = -(cap[a].x * sinAzCosEl + cap[a].y * cosAzCosEl);
             sincosf(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
@@ -107,60 +107,64 @@ void oskar_cudakf_bp2hiw(const int na, const float* ax, const float* ay,
 extern __shared__ double2 smemd[];
 
 __global__
-void oskar_cudakd_bp2hiw(const int na, const double* ax, const double* ay,
-        const double2* weights, const int ns, const double* saz,
-        const double* sel, const double k, const int maxAntennasPerBlock,
-        double2* image)
+void oskar_cudakd_bp2phiw(const int na, const double* ax, const double* ay,
+        const double2* weights, const int ns, const double* scace,
+        const double* ssace, const int maxAntennasPerBlock, double2* image)
 {
     // Get the pixel (source position) ID that this thread is working on.
     const int s = blockDim.x * blockIdx.x + threadIdx.x;
 
     // Get the source position.
     // (NB. Cannot exit on index condition, as all threads are needed later).
-    double az = 0.0, el = 0.0, sinAz, cosAz, cosEl;
-    if (s < ns) {
-        az = saz[s];
-        el = sel[s];
+    double sinAzCosEl = 0.0, cosAzCosEl = 0.0;
+    if (s < ns)
+    {
+        cosAzCosEl = scace[s];
+        sinAzCosEl = ssace[s];
     }
-    cosEl = cos(el);
-    sincos(az, &sinAz, &cosAz);
 
     // Initialise shared memory caches.
     // Antenna positions are cached as double2 for speed increase.
     double2 cpx = make_double2(0.0, 0.0); // Clear pixel value.
     double2* cwt = smemd; // Cached antenna weights.
-    double2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions.
+    double2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions. (Old)
+//    double2* csincos = cwt + maxAntennasPerBlock; // New.
 
     // Cache a block of antenna positions and weights into shared memory.
-    for (int as = 0; as < na; as += maxAntennasPerBlock) {
+    for (int as = 0; as < na; as += maxAntennasPerBlock)
+    {
         int antennasInBlock = na - as;
         if (antennasInBlock > maxAntennasPerBlock)
             antennasInBlock = maxAntennasPerBlock;
 
         // There are blockDim.x threads available - need to copy
         // antennasInBlock pieces of data from global memory.
-        for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x) {
+        for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x)
+        {
             const int ag = as + t; // Global antenna index.
+//            double phaseSrc = -(ax[ag] * sinAzCosEl + ay[ag] * cosAzCosEl); // New.
+//            sincos(phaseSrc, &csincos[t].y, &csincos[t].x); // New.
             cwt[t] = weights[ag];
-            cap[t].x = ax[ag];
-            cap[t].y = ay[ag];
+            cap[t].x = ax[ag]; // Old.
+            cap[t].y = ay[ag]; // Old.
         }
 
         // Must synchronise before computing the signal for these antennas.
         __syncthreads();
 
         // Loop over antennas in block.
-        for (int a = 0; a < antennasInBlock; ++a) {
+        for (int a = 0; a < antennasInBlock; ++a)
+        {
             // Calculate the geometric phase from the source.
+//            double2 signal = csincos[a], w = cwt[a]; // New.
             double2 signal, w = cwt[a];
-            double phaseSrc = GEOMETRIC_PHASE_2D_HORIZONTAL(cap[a].x,
-                    cap[a].y, cosEl, sinAz, cosAz, k);
+            double phaseSrc = -(cap[a].x * sinAzCosEl + cap[a].y * cosAzCosEl);
             sincos(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
             cpx.x += (signal.x * w.x);
-            cpx.x -= (signal.y * w.y);
             cpx.y += (signal.y * w.x);
+            cpx.x -= (signal.y * w.y);
             cpx.y += (signal.x * w.y);
         }
 
