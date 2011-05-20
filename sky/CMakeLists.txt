@@ -7,7 +7,11 @@ include_directories(${QT_INCLUDE_DIR})
 
 # === Create list of source files for the oskar-lib sky module.
 set(sky_SRC
+    src/angles_from_lm.cpp
+    src/filter_sources_by_flux.cpp
+    src/filter_sources_by_radius.cpp
     src/generate_random_sources.cpp
+    src/rotate_sources.cpp
 )
 set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 

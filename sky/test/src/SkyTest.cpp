@@ -27,13 +27,19 @@
  */
 
 #include "sky/test/SkyTest.h"
+
+#include "sky/angles_from_lm.h"
+#include "sky/filter_sources_by_radius.h"
 #include "sky/generate_random_sources.h"
+#include "sky/rotate_sources.h"
 
 #include <QtCore/QTime>
 
 #include <vector>
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
+#include <iomanip>
 using namespace std;
 
 
@@ -76,7 +82,27 @@ void SkyTest::test_rand()
 /**
  * @details
  */
-void SkyTest::test_method()
+void SkyTest::test_generate_random()
+{
+    unsigned num_sources = 5;
+    const double brightness_min = 1.0e-2;
+    const double brightness_max = 1.0e4;
+    const double distribution_power = -2.0;
+
+    vector<double> ra(num_sources);
+    vector<double> dec(num_sources);
+    vector<double> brightness(num_sources);
+
+    generate_random_sources(num_sources, brightness_min, brightness_max,
+            distribution_power, &ra[0], &dec[0], &brightness[0], 0);
+}
+
+
+
+/**
+ * @details
+ */
+void SkyTest::test_distance_filter()
 {
     unsigned num_sources = 5;
     const double inner_radius = 1.0;
@@ -95,28 +121,107 @@ void SkyTest::test_method()
             distribution_power, &ra[0], &dec[0], &brightness[0], 0);
 
     std::vector<double> dist(num_sources);
-    source_distance(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
+    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
 
-    cout <<  endl;
-    cout << "= Before: " << endl;
-    for (unsigned i = 0; i < num_sources; ++i)
-    {
-        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
-    }
-    cout <<  endl;
+//    cout <<  endl;
+//    cout << "= Before: " << endl;
+//    for (unsigned i = 0; i < num_sources; ++i)
+//    {
+//        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+//    }
+//    cout <<  endl;
 
     filter_sources_by_radius(&num_sources, inner_radius, outer_radius, ra0, dec0,
             &ra[0], &dec[0], &brightness[0]);
 
-    source_distance(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
-    cout << "= After: " << endl;
-    for (unsigned i = 0; i < num_sources; ++i)
-    {
-        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
-    }
+    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
+//    cout << "= After: " << endl;
+//    for (unsigned i = 0; i < num_sources; ++i)
+//    {
+//        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+//    }
+}
+
+void SkyTest::test_rotate()
+{
+    double M[9] = {
+            7, 3,  1,
+            9, 11, 21,
+            2, 1,  4
+    };
+    double v[3] = { 0, 1, 2 };
+    mult_matrix_vector(M, v);
+
+//    cout << endl;
+//    cout << 0 << " " << v[0] << endl;
+//    cout << 1 << " " << v[1] << endl;
+//    cout << 2 << " " << v[2] << endl;
 }
 
 
+void SkyTest::test_rotate_sources()
+{
+    const unsigned num_sources = 3;
+    const double ra0 = 0;
+    const double dec0 = 30 * M_PI / 180.0;
+    std::vector<double> ra(num_sources);
+    std::vector<double> dec(num_sources);
+    std::vector<double> brightness(num_sources);
 
+    generate_random_sources(num_sources, 1.0, 1.0, -2.0, &ra[0], &dec[0],
+            &brightness[0], 0);
+//    std::vector<double> dist(num_sources);
+//    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0],
+//            0, M_PI / 2.0, &dist[0]);
+//    cout << "= Before: " << endl;
+//    for (unsigned i = 0; i < num_sources; ++i)
+//    {
+//        cout << setw(2) << " [" << i << "] ";
+//        cout << setprecision(4) << fixed << setw(6) << dist[i] << " " ;
+//        cout << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+//    }
 
+    rotate_sources_to_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0);
+
+//    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
+//    cout << "= After: " << endl;
+//    for (unsigned i = 0; i < num_sources; ++i)
+//    {
+//        cout << " [" << i << "] " << dist[i] << " " ;
+//        cout << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+//    }
+}
+
+void SkyTest::test_angles_from_lm()
+{
+    const unsigned num_positions = 4;
+    std::vector<double> l(num_positions);
+    std::vector<double> m(num_positions);
+    std::vector<double> ra(num_positions);
+    std::vector<double> dec(num_positions);
+    const double ra0 = 0.0;
+    const double dec0 = 90.0 * (M_PI / 180.0);
+
+    l[0] = 0.0;
+    m[0] = 0.0;
+
+    l[1] = 0.0;
+    m[1] = sin(45.0 * M_PI / 180.0);
+
+    l[2] = sin(5.0 * M_PI / 180.0);
+    m[2] = sin(5.0 * M_PI / 180.0);
+
+    l[3] = sin(-1.5 * M_PI / 180.0);
+    m[3] = 0.0;//sin(5.0 * M_PI / 180.0);
+
+    angles_from_lm(num_positions, ra0, dec0, &l[0], &m[0], &ra[0], &dec[0]);
+
+    cout << endl;
+    for (unsigned i = 0; i < num_positions; ++i)
+    {
+        cout << setprecision(8);
+        cout << "(ra, dec) = " << ra[i] * (180.0 / M_PI);
+        cout << ", " << dec[i] * (180.0 / M_PI) << endl;
+    }
+}
 

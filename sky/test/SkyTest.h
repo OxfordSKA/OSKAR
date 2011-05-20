@@ -47,7 +47,11 @@ class SkyTest : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(SkyTest);
         CPPUNIT_TEST(test_rand);
-        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_generate_random);
+        CPPUNIT_TEST(test_distance_filter);
+        CPPUNIT_TEST(test_rotate);
+        CPPUNIT_TEST(test_rotate_sources);
+        CPPUNIT_TEST(test_angles_from_lm);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -58,10 +62,13 @@ class SkyTest : public CppUnit::TestFixture
         void tearDown();
 
     public:
-        /// Test method.
+        /// Test methods.
         void test_rand();
-
-        void test_method();
+        void test_generate_random();
+        void test_distance_filter();
+        void test_rotate();
+        void test_rotate_sources();
+        void test_angles_from_lm();
 };
 
 // Register the test class.

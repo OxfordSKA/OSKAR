@@ -17,32 +17,43 @@ endif()
 
 
 # === Main widgets module.
-set(widgets_MOC_SRC
+
+# Include the current binary directory for the purposes of compiled forms.
+include_directories(
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${QT_INCLUDE_DIR}
+    ${QT_QTCORE_INCLUDE_DIR} # needed for ui compiled headers
+    ${QT_QTGUI_INCLUDE_DIR}  # needed for ui compiled headers
 )
 
 set(widgets_UI_FORMS
+#    forms/ConfigOptionsTable.ui
+)
+#qt4_wrap_ui(widgets_UI_H ${widgets_UI_FORMS})
+
+set(widgets_MOC_SRC
+    ConfigOptionsTable.h
 )
 
 set(widgets_SRC
+    src/ConfigOptionsTable.cpp
 )
-
-# Include the current binary directory for the purposes of compiled forms.
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Compile UI forms and MOC headers.
 qt4_wrap_cpp(widgets_MOC ${widgets_MOC_SRC})
-qt4_wrap_ui(widgets_UI_H ${WIDGETS_UI_FORMS})
 
 # Create the widgets library.
-#add_library(widgets ${widgets_SRC} ${widgets_UI_H} ${widgets_MOC})
+add_library(oskar_widgets
+    ${widgets_SRC} 
+    ${widgets_UI_H} 
+    ${widgets_MOC}
+)
 
 # Link the widgets library with dependencies.
-#target_link_libraries(widgets
-#    utility
-#    data
-#    ${QT_QTCORE_LIBRARY}
-#    ${QT_QTGUI_LIBRARY}
-#)
+target_link_libraries(oskar_widgets
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTGUI_LIBRARY}
+)
 
 # === Recurse into test directory.
 add_subdirectory(test)
