@@ -81,7 +81,7 @@ void oskar_cudakf_correlator(int ns, int na, const float2* k,
     // Accumulate (could optimise this).
     if (threadIdx.x == 0)
     {
-        float2 temp;
+        float2 temp = make_float2(0.0f, 0.0f);
         for (int i = 0; i < blockDim.x; ++i)
         {
             temp.x += smem[i].x;
@@ -145,7 +145,7 @@ void oskar_cudakd_correlator(int ns, int na, const double2* k,
     // Accumulate (could optimise this).
     if (threadIdx.x == 0)
     {
-        double2 temp;
+        double2 temp = make_double2(0.0, 0.0);
         for (int i = 0; i < blockDim.x; ++i)
         {
             temp.x += smemd[i].x;
