@@ -65,7 +65,7 @@ extern "C" {
  * @param[out] image The computed image (see note, above).
  */
 DllExport
-void oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
+int oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, const float* l, const float* m,
         float* image);
 
@@ -95,7 +95,7 @@ void oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
  * @param[out] image The computed image (see note, above).
  */
 DllExport
-void oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
+int oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
         const double* vis, int nl, int nm, const double* l, const double* m,
         double* image);
 

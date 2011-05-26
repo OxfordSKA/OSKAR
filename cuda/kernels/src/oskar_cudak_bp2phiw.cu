@@ -82,14 +82,14 @@ void oskar_cudakf_bp2phiw(const int na, const float* ax, const float* ay,
         {
             // Calculate the geometric phase from the source.
             float2 signal, w = cwt[a];
-            float phaseSrc = -(cap[a].x * sinAzCosEl + cap[a].y * cosAzCosEl);
+            float phaseSrc = sinAzCosEl * cap[a].x + cosAzCosEl * cap[a].y;
             sincosf(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
-            cpx.x += (signal.x * w.x);
-            cpx.x -= (signal.y * w.y);
-            cpx.y += (signal.y * w.x);
-            cpx.y += (signal.x * w.y);
+            cpx.x += signal.x * w.x;
+            cpx.y -= signal.y * w.x;
+            cpx.x += signal.y * w.y;
+            cpx.y += signal.x * w.y;
         }
 
         // Must synchronise again before loading in a new block of antennas.
@@ -127,8 +127,7 @@ void oskar_cudakd_bp2phiw(const int na, const double* ax, const double* ay,
     // Antenna positions are cached as double2 for speed increase.
     double2 cpx = make_double2(0.0, 0.0); // Clear pixel value.
     double2* cwt = smemd; // Cached antenna weights.
-    double2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions. (Old)
-//    double2* csincos = cwt + maxAntennasPerBlock; // New.
+    double2* cap = cwt + maxAntennasPerBlock; // Cached antenna positions.
 
     // Cache a block of antenna positions and weights into shared memory.
     for (int as = 0; as < na; as += maxAntennasPerBlock)
@@ -142,11 +141,9 @@ void oskar_cudakd_bp2phiw(const int na, const double* ax, const double* ay,
         for (int t = threadIdx.x; t < antennasInBlock; t += blockDim.x)
         {
             const int ag = as + t; // Global antenna index.
-//            double phaseSrc = -(ax[ag] * sinAzCosEl + ay[ag] * cosAzCosEl); // New.
-//            sincos(phaseSrc, &csincos[t].y, &csincos[t].x); // New.
             cwt[t] = weights[ag];
-            cap[t].x = ax[ag]; // Old.
-            cap[t].y = ay[ag]; // Old.
+            cap[t].x = ax[ag];
+            cap[t].y = ay[ag];
         }
 
         // Must synchronise before computing the signal for these antennas.
@@ -156,16 +153,15 @@ void oskar_cudakd_bp2phiw(const int na, const double* ax, const double* ay,
         for (int a = 0; a < antennasInBlock; ++a)
         {
             // Calculate the geometric phase from the source.
-//            double2 signal = csincos[a], w = cwt[a]; // New.
             double2 signal, w = cwt[a];
-            double phaseSrc = -(cap[a].x * sinAzCosEl + cap[a].y * cosAzCosEl);
+            double phaseSrc = sinAzCosEl * cap[a].x + cosAzCosEl * cap[a].y;
             sincos(phaseSrc, &signal.y, &signal.x);
 
             // Perform complex multiply-accumulate.
-            cpx.x += (signal.x * w.x);
-            cpx.y += (signal.y * w.x);
-            cpx.x -= (signal.y * w.y);
-            cpx.y += (signal.x * w.y);
+            cpx.x += signal.x * w.x;
+            cpx.y -= signal.y * w.x;
+            cpx.x += signal.y * w.y;
+            cpx.y += signal.x * w.y;
         }
 
         // Must synchronise again before loading in a new block of antennas.

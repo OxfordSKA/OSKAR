@@ -38,15 +38,13 @@ extern "C" {
 
 // Single precision.
 
-#ifndef M_PI
-#define M_PI 3.1415926535
-#endif
-
-void oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
+int oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
         const float* vis, int nl, int nm, const float* l, const float* m,
         float* image)
 {
     // Create and allocate memory for all the pixel positions.
+    cudaError_t errCuda = cudaSuccess;
+    int retVal = 0;
     const int np = nl * nm; // Number of pixels in image.
     float* pl = (float*)malloc(np * sizeof(float));
     float* pm = (float*)malloc(np * sizeof(float));
@@ -74,7 +72,7 @@ void oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
     cudaMemcpy(visd, vis, nv * sizeof(float2), cudaMemcpyHostToDevice);
 
     // Divide up the pixel list into manageable chunks.
-    int npMax = 100000;
+    int npMax = 65536;
     int chunk = 0, chunks = (np + npMax - 1) / npMax;
 
     // Allocate memory for pixel position chunk on the device.
@@ -102,13 +100,20 @@ void oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
         oskar_cudakf_im2dft <<<blocks, threadsPerBlock, sharedMem>>>
                 (nv, ud, vd, visd, pixInBlock, pld, pmd, maxVisPerBlock, pix);
         cudaThreadSynchronize();
-        cudaError_t err = cudaPeekAtLastError();
-        if (err != cudaSuccess)
-            printf("CUDA Error: %s\n", cudaGetErrorString(err));
+        errCuda = cudaPeekAtLastError();
+        if (errCuda != cudaSuccess) goto stop;
 
         // Copy (partial) result from device memory to host memory.
         cudaMemcpy(image + pixStart, pix, pixInBlock * sizeof(float),
                 cudaMemcpyDeviceToHost);
+    }
+
+    // Clean up before exit.
+    stop:
+    if (errCuda != cudaSuccess)
+    {
+        retVal = errCuda;
+        printf("CUDA Error: %s\n", cudaGetErrorString(errCuda));
     }
 
     // Free device memory.
@@ -122,19 +127,19 @@ void oskar_cudaf_im2dftlm(int nv, const float* u, const float* v,
     // Free host memory.
     free(pm);
     free(pl);
+
+    return retVal;
 }
 
 // Double precision.
 
-#ifndef M_PI_D
-#define M_PI_D 3.1415926535
-#endif
-
-void oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
+int oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
         const double* vis, int nl, int nm, const double* l, const double* m,
         double* image)
 {
     // Create and allocate memory for all the pixel positions.
+    cudaError_t errCuda = cudaSuccess;
+    int retVal = 0;
     const int np = nl * nm; // Number of pixels in image.
     double* pl = (double*)malloc(np * sizeof(double));
     double* pm = (double*)malloc(np * sizeof(double));
@@ -162,7 +167,7 @@ void oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
     cudaMemcpy(visd, vis, nv * sizeof(double2), cudaMemcpyHostToDevice);
 
     // Divide up the pixel list into manageable chunks.
-    int npMax = 100000;
+    int npMax = 65536;
     int chunk = 0, chunks = (np + npMax - 1) / npMax;
 
     // Allocate memory for pixel position chunk on the device.
@@ -190,13 +195,20 @@ void oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
         oskar_cudakd_im2dft <<<blocks, threadsPerBlock, sharedMem>>>
                 (nv, ud, vd, visd, pixInBlock, pld, pmd, maxVisPerBlock, pix);
         cudaThreadSynchronize();
-        cudaError_t err = cudaPeekAtLastError();
-        if (err != cudaSuccess)
-            printf("CUDA Error: %s\n", cudaGetErrorString(err));
+        errCuda = cudaPeekAtLastError();
+        if (errCuda != cudaSuccess) goto stop;
 
         // Copy (partial) result from device memory to host memory.
         cudaMemcpy(image + pixStart, pix, pixInBlock * sizeof(double),
                 cudaMemcpyDeviceToHost);
+    }
+
+    // Clean up before exit.
+    stop:
+    if (errCuda != cudaSuccess)
+    {
+        retVal = errCuda;
+        printf("CUDA Error: %s\n", cudaGetErrorString(errCuda));
     }
 
     // Free device memory.
@@ -210,6 +222,8 @@ void oskar_cudad_im2dftlm(int nv, const double* u, const double* v,
     // Free host memory.
     free(pm);
     free(pl);
+
+    return retVal;
 }
 
 #ifdef __cplusplus

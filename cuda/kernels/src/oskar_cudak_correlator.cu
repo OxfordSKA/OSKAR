@@ -55,7 +55,7 @@ void oskar_cudakf_correlator(int ns, int na, const float2* k,
 
     // Determine 1D index.
     int ajp = aj - 1;
-    int idx = aj*(na-1) - ajp*(ajp + 1)/2 + ai - aj - 1;
+    int idx = aj*(na-1) - ajp*aj/2 + ai - aj - 1;
 
     // Get pointers to both source vectors for station i and j.
     const float2* sti = &k[ns * ai];
@@ -119,7 +119,7 @@ void oskar_cudakd_correlator(int ns, int na, const double2* k,
 
     // Determine 1D index.
     int ajp = aj - 1;
-    int idx = aj*(na-1) - ajp*(ajp + 1)/2 + ai - aj - 1;
+    int idx = aj*(na-1) - ajp*aj/2 + ai - aj - 1;
 
     // Get pointers to both source vectors for station i and j.
     const double2* sti = &k[ns * ai];
