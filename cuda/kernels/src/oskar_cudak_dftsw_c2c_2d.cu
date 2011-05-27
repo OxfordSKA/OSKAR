@@ -26,21 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_dft_c2r_2d.h"
+#include "cuda/kernels/oskar_cudak_dftsw_c2c_2d.h"
 
 // Single precision.
 
 // Shared memory pointer used by the kernel.
-extern __shared__ float4 c[];
+extern __shared__ float2 smem[];
 
 __global__
-void oskar_cudakf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
-        const float2* data_in, const int n_out, const float* x_out,
-        const float* y_out, const int max_in_chunk, float* output)
+void oskar_cudakf_dftsw_c2c_2d(const int n_in, const float* x_in,
+        const float* y_in, const float2* weights_in, const int n_out,
+        const float* x_out, const float* y_out, const int max_in_chunk,
+        const float2* data, float2* output)
 {
     // Get the output position (pixel) ID that this thread is working on.
     const int i_out = blockDim.x * blockIdx.x + threadIdx.x;
-    float out = 0.0f; // Clear output value.
+    float2 out = make_float2(0.0f, 0.0f); // Clear output value.
 
     // Get the output position.
     // (NB. Cannot exit on index condition, as all threads are needed later.)
@@ -51,7 +52,12 @@ void oskar_cudakf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
         yp_out = y_out[i_out];
     }
 
-    // Cache a chunk of input data and positions into shared memory.
+    // Initialise shared memory caches.
+    // Input positions are cached as float2 for speed increase.
+    float2* cw = smem; // Cached input weights.
+    float2* cp = cw + max_in_chunk; // Cached input positions.
+
+    // Cache a chunk of input positions and weights into shared memory.
     for (int start = 0; start < n_in; start += max_in_chunk)
     {
         int chunk_size = n_in - start;
@@ -63,30 +69,44 @@ void oskar_cudakf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
         for (int t = threadIdx.x; t < chunk_size; t += blockDim.x)
         {
             const int g = start + t; // Global input index.
-            c[t].x = x_in[g];
-            c[t].y = y_in[g];
-            c[t].z = data_in[g].x;
-            c[t].w = data_in[g].y;
+            cw[t] = weights_in[g];
+            cp[t].x = x_in[g];
+            cp[t].y = y_in[g];
         }
 
         // Must synchronise before computing partial output for these inputs.
         __syncthreads();
 
-        // Loop over input block.
-        for (int i = 0; i < chunk_size; ++i)
+        // Loop over input chunk.
+        if (i_out < n_out)
         {
-            // Calculate the complex DFT weight.
-            float2 weight;
-            float a = c[i].x * xp_out + c[i].y * yp_out;
-            sincosf(a, &weight.y, &weight.x);
+            for (int i = 0; i < chunk_size; ++i)
+            {
+                // Calculate the phase for the output position.
+                float2 temp;
+                float phase = xp_out * cp[i].x + yp_out * cp[i].y;
+                sincosf(phase, &temp.y, &temp.x);
 
-            // Perform complex multiply-accumulate.
-            // Output is real, so only evaluate the real part.
-            out += c[i].z * weight.x; // RE*RE
-            out -= c[i].w * weight.y; // IM*IM
+                // Modify (multiply) the input signal by the computed phase.
+                float2 signal;
+                float2 in = data[(start + i) * n_out + i_out];
+                signal.x = in.x * temp.x;
+                signal.x += in.y * temp.y;
+                signal.y = in.y * temp.x;
+                signal.y -= in.x * temp.y;
+
+                // Get the DFT weight.
+                temp = cw[i];
+
+                // Perform complex multiply-accumulate.
+                out.x += signal.x * temp.x;
+                out.x -= signal.y * temp.y;
+                out.y += signal.y * temp.x;
+                out.y += signal.x * temp.y;
+            }
         }
 
-        // Must synchronise again before loading in a new input block.
+        // Must synchronise again before loading in a new input chunk.
         __syncthreads();
     }
 
@@ -98,16 +118,17 @@ void oskar_cudakf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
 // Double precision.
 
 // Shared memory pointer used by the kernel.
-extern __shared__ double4 cd[];
+extern __shared__ double2 smemd[];
 
 __global__
-void oskar_cudakd_dft_c2r_2d(int n_in, const double* x_in, const double* y_in,
-        const double2* data_in, const int n_out, const double* x_out,
-        const double* y_out, const int max_in_chunk, double* output)
+void oskar_cudakd_dftsw_c2c_2d(const int n_in, const double* x_in,
+        const double* y_in, const double2* weights_in, const int n_out,
+        const double* x_out, const double* y_out, const int max_in_chunk,
+        const double2* data, double2* output)
 {
     // Get the output position (pixel) ID that this thread is working on.
     const int i_out = blockDim.x * blockIdx.x + threadIdx.x;
-    double out = 0.0; // Clear output value.
+    double2 out = make_double2(0.0, 0.0); // Clear output value.
 
     // Get the output position.
     // (NB. Cannot exit on index condition, as all threads are needed later.)
@@ -118,7 +139,12 @@ void oskar_cudakd_dft_c2r_2d(int n_in, const double* x_in, const double* y_in,
         yp_out = y_out[i_out];
     }
 
-    // Cache a chunk of input data and positions into shared memory.
+    // Initialise shared memory caches.
+    // Input positions are cached as double2 for speed increase.
+    double2* cw = smemd; // Cached input weights.
+    double2* cp = cw + max_in_chunk; // Cached input positions.
+
+    // Cache a chunk of input positions and weights into shared memory.
     for (int start = 0; start < n_in; start += max_in_chunk)
     {
         int chunk_size = n_in - start;
@@ -130,30 +156,44 @@ void oskar_cudakd_dft_c2r_2d(int n_in, const double* x_in, const double* y_in,
         for (int t = threadIdx.x; t < chunk_size; t += blockDim.x)
         {
             const int g = start + t; // Global input index.
-            cd[t].x = x_in[g];
-            cd[t].y = y_in[g];
-            cd[t].z = data_in[g].x;
-            cd[t].w = data_in[g].y;
+            cw[t] = weights_in[g];
+            cp[t].x = x_in[g];
+            cp[t].y = y_in[g];
         }
 
         // Must synchronise before computing partial output for these inputs.
         __syncthreads();
 
-        // Loop over input block.
-        for (int i = 0; i < chunk_size; ++i)
+        // Loop over input chunk.
+        if (i_out < n_out)
         {
-            // Calculate the complex DFT weight.
-            double2 weight;
-            double a = cd[i].x * xp_out + cd[i].y * yp_out;
-            sincos(a, &weight.y, &weight.x);
+            for (int i = 0; i < chunk_size; ++i)
+            {
+                // Calculate the phase for the output position.
+                double2 temp;
+                double phase = xp_out * cp[i].x + yp_out * cp[i].y;
+                sincos(phase, &temp.y, &temp.x);
 
-            // Perform complex multiply-accumulate.
-            // Output is real, so only evaluate the real part.
-            out += cd[i].z * weight.x; // RE*RE
-            out -= cd[i].w * weight.y; // IM*IM
+                // Modify (multiply) the input signal by the computed phase.
+                double2 signal;
+                double2 in = data[(start + i) * n_out + i_out];
+                signal.x = in.x * temp.x;
+                signal.x += in.y * temp.y;
+                signal.y = in.y * temp.x;
+                signal.y -= in.x * temp.y;
+
+                // Get the DFT weight.
+                temp = cw[i];
+
+                // Perform complex multiply-accumulate.
+                out.x += signal.x * temp.x;
+                out.x -= signal.y * temp.y;
+                out.y += signal.y * temp.x;
+                out.y += signal.x * temp.y;
+            }
         }
 
-        // Must synchronise again before loading in a new input block.
+        // Must synchronise again before loading in a new input chunk.
         __syncthreads();
     }
 
