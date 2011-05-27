@@ -49,3 +49,34 @@ void angles_from_lm(const unsigned num_positions, const double ra0,
 }
 
 
+/**
+ * Returns the right ascension and declination of the supplied array of
+ * cosine directions (l and m).
+ *
+ * @param[in]  num_positions Number of positions to evaluate.
+ * @param[in]  l             Array of positions in cosine space.
+ * @param[in]  m             Array of positions in cosine space.
+ * @param[out] ra            Array of Right Ascension values, in radians.
+ * @param[out] dec           Array of Declination values, in radians.
+ */
+void angles_from_lm_unrotated(const unsigned num_positions, const double * l,
+        const double * m, double * ra, double * dec)
+{
+    // Loop over l, m positions and evaluate the Ra, Dec values.
+    for (unsigned i = 0; i < num_positions; ++i)
+    {
+        const double p = sqrt(m[i] * m[i] + l[i] * l[i]);
+        const double c = asin(p);
+
+        const double y = l[i] * sin(c);
+        const double x = m[i] * sin(c);
+        ra[i] = atan2(y, x);
+
+        // Catch divide by zero error at the field centre.
+        if (fabs(p) < numeric_limits<double>::epsilon())
+            dec[i] = M_PI / 2.0;
+        else
+            dec[i] = asin( cos(c) / p);
+    }
+}
+

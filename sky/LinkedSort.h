@@ -74,8 +74,6 @@ void LinkedSort::lSort(const unsigned n, T0 * values, T1 * linked1,
     reorder<T3>(n, linked3, &indices[0]);
 }
 
-
-
 /// Sort values and return sorted values and corresponding indices.
 template <typename T>
 void LinkedSort::sortIndices(const unsigned n, T * values, unsigned * indices)
@@ -109,9 +107,6 @@ void LinkedSort::reorder(const unsigned n, T * values, const unsigned * indices)
     }
     memcpy((void*)values, (const void*)&temp[0], n * sizeof(T));
 }
-
-
-
 
 /// Comparison function for sorting indices.
 template <typename T>
