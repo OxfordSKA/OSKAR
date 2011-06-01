@@ -63,6 +63,8 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
     double lst, ha0; // Must be double.
     float2 one = make_float2(1.0f, 0.0f);
     int i, a, retVal = 0;
+    double tIncCentre, tInc;
+    double tOffset = (double)sdt / 2.0;
     cublasInit();
 
     // Set up thread blocks.
@@ -128,7 +130,8 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
     for (i = 0; i < nsdt; ++i)
     {
         // Compute the current LST and hour angle of the phase centre.
-        lst = lst0 + 2 * M_PI * i * sdt / 86400.0;
+        tInc = i * sdt + tOffset;
+        lst = lst0 + 2 * M_PI * tInc / 86400.0;
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
@@ -170,7 +173,9 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
     oskar_math_coref_ctrimat(na, vism, vis);
 
     // Copy u,v,w baseline coordinates of mid-point to output arrays.
-    lst = lst0 + 2 * M_PI * ((nsdt - 1) / 2.0f) * sdt / 86400.0f;
+    // FIXME: probably don't need to return UVW from this function?
+    tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
+    lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
     oskar_math_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
             &uvw[0], &uvw[na], &uvw[2*na]);
@@ -228,6 +233,8 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
     double lst, ha0;
     double2 one = make_double2(1.0, 0.0);
     int i, a, retVal = 0;
+    double tIncCentre, tInc;
+    double tOffset = (double)sdt / 2.0;
     cublasInit();
 
     // Set up thread blocks.
@@ -293,7 +300,8 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
     for (i = 0; i < nsdt; ++i)
     {
         // Compute the current LST and hour angle of the phase centre.
-        lst = lst0 + 2 * M_PI_D * i * sdt / 86400.0;
+        tInc = i * sdt + tOffset;
+        lst = lst0 + 2 * M_PI * tInc / 86400.0;
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
@@ -335,7 +343,9 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
     oskar_math_cored_ctrimat(na, vism, vis);
 
     // Copy u,v,w baseline coordinates of mid-point to output arrays.
-    lst = lst0 + 2 * M_PI_D * ((nsdt - 1) / 2.0) * sdt / 86400.0;
+    // FIXME: probably don't need to return UVW from this function?
+    tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
+    lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
     oskar_math_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
             &uvw[0], &uvw[na], &uvw[2*na]);
