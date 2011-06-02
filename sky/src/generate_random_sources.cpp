@@ -5,7 +5,23 @@
 
 using namespace std;
 
-// http://mathworld.wolfram.com/RandomNumber.html
+/**
+ * @details
+ * Generates a set of sources at random positions on the sky with a brightness
+ * distribution according to a power law.
+ *
+ * Power law random numbers generated according to:
+ * http://mathworld.wolfram.com/RandomNumber.html
+ *
+ * @param[in]  num_sources         The number of sources to generate.
+ * @param[in]  brightness_min      The minimum source flux
+ * @param[in]  brightness_max
+ * @param[in]  distribution_power
+ * @param[out] ra
+ * @param[out] dec
+ * @param[out] brightness
+ * @param[in]  seed
+ */
 void generate_random_sources(const unsigned num_sources,
         const double brightness_min, const double brightness_max,
         const double distribution_power, double * ra, double * dec,
