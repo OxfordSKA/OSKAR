@@ -26,54 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_cmatmul.h"
+#include "cuda/kernels/oskar_cudak_vec_mul_rr.h"
 
 // Single precision.
 
 __global__
-void oskar_cudakf_cmatmul(int n1, int n2, const float2* a, const float2* b,
-        float2* c)
+void oskar_cudakf_vec_mul_rr(int n, const float* a, const float* b, float* c)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x; // Fastest varying.
-    int j = blockDim.y * blockIdx.y + threadIdx.y; // Slowest varying.
-    if (i < n1 && j < n2)
-    {
-        // Compute matrix index.
-        int idx = i + j * n1;
-
-        // Cache the input data.
-        float2 ac = a[idx];
-        float2 bc = b[idx];
-
-        // Complex multiply.
-        float2 cc;
-        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
-        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
-        c[idx] = cc;
-    }
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+        c[i] = a[i] * b[i];
 }
 
 // Double precision.
 
 __global__
-void oskar_cudakd_cmatmul(int n1, int n2, const double2* a, const double2* b,
-        double2* c)
+void oskar_cudakd_vec_mul_rr(int n, const double* a, const double* b, double* c)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x; // Fastest varying.
-    int j = blockDim.y * blockIdx.y + threadIdx.y; // Slowest varying.
-    if (i < n1 && j < n2)
-    {
-        // Compute matrix index.
-        int idx = i + j * n1;
-
-        // Cache the input data.
-        double2 ac = a[idx];
-        double2 bc = b[idx];
-
-        // Complex multiply.
-        double2 cc;
-        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
-        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
-        c[idx] = cc;
-    }
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+        c[i] = a[i] * b[i];
 }

@@ -29,7 +29,7 @@
 #include "modules/cuda/oskar_modules_cuda_correlator_lm.h"
 
 #include "cuda/kernels/oskar_cudak_rpw3leglm.h"
-#include "cuda/kernels/oskar_cudak_cmatmul.h"
+#include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
 #include "math/core/oskar_math_core_ctrimat.h"
 #include "math/synthesis/oskar_math_synthesis_baselines.h"
 #include "math/synthesis/oskar_math_synthesis_xyz2uvw.h"
@@ -149,7 +149,7 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
         if (errCuda != cudaSuccess) goto stop;
 
         // Perform complex matrix element multiply.
-        oskar_cudakf_cmatmul <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
+        oskar_cudakf_mat_mul_cc <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;
@@ -319,7 +319,7 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
         if (errCuda != cudaSuccess) goto stop;
 
         // Perform complex matrix element multiply.
-        oskar_cudakd_cmatmul <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
+        oskar_cudakd_mat_mul_cc <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;

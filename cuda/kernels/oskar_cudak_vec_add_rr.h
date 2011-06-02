@@ -26,28 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_cvecset.h"
+#ifndef OSKAR_CUDAK_VEC_ADD_RR_H_
+#define OSKAR_CUDAK_VEC_ADD_RR_H_
 
-// Single precision.
+/**
+ * @file oskar_cudak_vec_add_rr.h
+ */
 
+#ifdef __CDT_PARSER__
+    #define __global__
+    #define __device__
+    #define __shared__
+    #define __constant__
+#endif
+
+/**
+ * @brief
+ * CUDA kernel to add two real vectors together (single precision).
+ *
+ * @details
+ * This CUDA kernel adds two real vectors together using the graphics card.
+ * It is used primarily for testing.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
+ */
 __global__
-void oskar_cudakf_cvecset(int n, const float2 alpha, float2* c)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i < n)
-    {
-        c[i] = alpha;
-    }
-}
+void oskar_cudakf_vec_add_rr(int n, const float* a, const float* b, float* c);
 
-// Double precision.
-
-__global__
-void oskar_cudakd_cvecset(int n, const double2 alpha, double2* c)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i < n)
-    {
-        c[i] = alpha;
-    }
-}
+#endif // OSKAR_CUDAK_VEC_ADD_RR_H_

@@ -26,41 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_CVECSET_H_
-#define OSKAR_CUDAK_CVECSET_H_
+#ifndef OSKAR_CUDAK_VEC_MUL_CC_H_
+#define OSKAR_CUDAK_VEC_MUL_CC_H_
 
 /**
- * @file oskar_cudak_cvecset.h
+ * @file oskar_cudak_vec_mul_cc.h
  */
 
 #include "cuda/CudaEclipse.h"
 
 /**
  * @brief
- * CUDA kernel to set the contents of a complex vector (single precision).
+ * CUDA kernel to multiply two complex vectors together, element-wise
+ * (single precision).
  *
  * @details
- * This CUDA kernel sets the contents of a complex vector.
+ * This CUDA kernel multiplies the elements of two complex vectors together
+ * using the graphics card.
  *
  * @param[in] n Number of elements in all vectors.
- * @param[in] alpha Scalar complex number.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
  * @param[out] c Output vector.
  */
 __global__
-void oskar_cudakf_cvecset(int n, const float2 alpha, float2* c);
+void oskar_cudakf_vec_mul_cc(int n, const float2* a, const float2* b, float2* c);
 
 /**
  * @brief
- * CUDA kernel to set the contents of a complex vector (double precision).
+ * CUDA kernel to multiply two complex vectors together, element-wise
+ * (double precision).
  *
  * @details
- * This CUDA kernel sets the contents of a complex vector.
+ * This CUDA kernel multiplies the elements of two complex vectors together
+ * using the graphics card.
  *
  * @param[in] n Number of elements in all vectors.
- * @param[in] alpha Scalar complex number.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
  * @param[out] c Output vector.
  */
 __global__
-void oskar_cudakd_cvecset(int n, const double2 alpha, double2* c);
+void oskar_cudakd_vec_mul_cc(int n, const double2* a, const double2* b,
+        double2* c);
 
-#endif // OSKAR_CUDAK_CVECSET_H_
+#endif // OSKAR_CUDAK_VEC_MUL_CC_H_

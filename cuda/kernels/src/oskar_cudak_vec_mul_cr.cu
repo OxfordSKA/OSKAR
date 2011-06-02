@@ -26,24 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_vecmul.h"
+#include "cuda/kernels/oskar_cudak_vec_mul_cr.h"
 
 // Single precision.
 
 __global__
-void oskar_cudakf_vecmul(int n, const float* a, const float* b, float* c)
+void oskar_cudakf_vec_mul_cr(int n, const float2* a, const float* b, float2* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
-        c[i] = a[i] * b[i];
+    {
+        // Cache the input data.
+        float2 ac = a[i];
+        float bc = b[i];
+
+        // Multiply.
+        float2 cc;
+        cc.x = ac.x * bc;
+        cc.y = ac.y * bc;
+
+        c[i] = cc;
+    }
 }
 
 // Double precision.
 
 __global__
-void oskar_cudakd_vecmul(int n, const double* a, const double* b, double* c)
+void oskar_cudakd_vec_mul_cr(int n, const double2* a, const double* b,
+        double2* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
-        c[i] = a[i] * b[i];
+    {
+        // Cache the input data.
+        double2 ac = a[i];
+        double bc = b[i];
+
+        // Multiply.
+        double2 cc;
+        cc.x = ac.x * bc;
+        cc.y = ac.y * bc;
+
+        c[i] = cc;
+    }
 }

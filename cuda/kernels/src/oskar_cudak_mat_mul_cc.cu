@@ -26,45 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_VECMUL_H_
-#define OSKAR_CUDAK_VECMUL_H_
+#include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
 
-/**
- * @file oskar_cudak_vecmul.h
- */
+// Single precision.
 
-#include "cuda/CudaEclipse.h"
-
-/**
- * @brief
- * CUDA kernel to multiply two real vectors together (single precision).
- *
- * @details
- * This CUDA kernel multiplies two vectors together element-wise using the
- * graphics card.
- *
- * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
- * @param[out] c Output vector.
- */
 __global__
-void oskar_cudakf_vecmul(int n, const float* a, const float* b, float* c);
+void oskar_cudakf_mat_mul_cc(int n1, int n2, const float2* a, const float2* b,
+        float2* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x; // Fastest varying.
+    int j = blockDim.y * blockIdx.y + threadIdx.y; // Slowest varying.
+    if (i < n1 && j < n2)
+    {
+        // Compute matrix index.
+        int idx = i + j * n1;
 
-/**
- * @brief
- * CUDA kernel to multiply two real vectors together (double precision).
- *
- * @details
- * This CUDA kernel multiplies two vectors together element-wise using the
- * graphics card.
- *
- * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
- * @param[out] c Output vector.
- */
+        // Cache the input data.
+        float2 ac = a[idx];
+        float2 bc = b[idx];
+
+        // Complex multiply.
+        float2 cc;
+        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
+        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
+        c[idx] = cc;
+    }
+}
+
+// Double precision.
+
 __global__
-void oskar_cudakd_vecmul(int n, const double* a, const double* b, double* c);
+void oskar_cudakd_mat_mul_cc(int n1, int n2, const double2* a, const double2* b,
+        double2* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x; // Fastest varying.
+    int j = blockDim.y * blockIdx.y + threadIdx.y; // Slowest varying.
+    if (i < n1 && j < n2)
+    {
+        // Compute matrix index.
+        int idx = i + j * n1;
 
-#endif // OSKAR_CUDAK_VECMUL_H_
+        // Cache the input data.
+        double2 ac = a[idx];
+        double2 bc = b[idx];
+
+        // Complex multiply.
+        double2 cc;
+        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
+        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
+        c[idx] = cc;
+    }
+}

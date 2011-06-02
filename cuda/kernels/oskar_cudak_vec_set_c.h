@@ -26,29 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_VECADD_H_
-#define OSKAR_CUDAK_VECADD_H_
+#ifndef OSKAR_CUDAK_VEC_SET_C_H_
+#define OSKAR_CUDAK_VEC_SET_C_H_
 
 /**
- * @file oskar_cudak_vecadd.h
+ * @file oskar_cudak_vec_set_c.h
  */
 
 #include "cuda/CudaEclipse.h"
 
 /**
  * @brief
- * CUDA kernel to add two vectors together.
+ * CUDA kernel to set the contents of a complex vector (single precision).
  *
  * @details
- * This CUDA kernel adds two vectors together using the graphics card.
- * It is used primarily for testing.
+ * This CUDA kernel sets the contents of a complex vector.
  *
  * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
+ * @param[in] alpha Scalar complex number.
  * @param[out] c Output vector.
  */
 __global__
-void oskar_cudakf_vecadd(int n, const float* a, const float* b, float* c);
+void oskar_cudakf_vec_set_c(int n, const float2 alpha, float2* c);
 
-#endif // OSKAR_CUDAK_VECADD_H_
+/**
+ * @brief
+ * CUDA kernel to set the contents of a complex vector (double precision).
+ *
+ * @details
+ * This CUDA kernel sets the contents of a complex vector.
+ *
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] alpha Scalar complex number.
+ * @param[out] c Output vector.
+ */
+__global__
+void oskar_cudakd_vec_set_c(int n, const double2 alpha, double2* c);
+
+#endif // OSKAR_CUDAK_VEC_SET_C_H_

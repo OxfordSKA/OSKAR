@@ -26,24 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_crvecmul.h"
+#include "cuda/kernels/oskar_cudak_vec_mul_cc.h"
 
 // Single precision.
 
 __global__
-void oskar_cudakf_crvecmul(int n, const float2* a, const float* b, float2* c)
+void oskar_cudakf_vec_mul_cc(int n, const float2* a, const float2* b, float2* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
     {
         // Cache the input data.
         float2 ac = a[i];
-        float bc = b[i];
+        float2 bc = b[i];
 
-        // Multiply.
+        // Complex multiply.
         float2 cc;
-        cc.x = ac.x * bc;
-        cc.y = ac.y * bc;
+        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
+        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
 
         c[i] = cc;
     }
@@ -52,7 +52,7 @@ void oskar_cudakf_crvecmul(int n, const float2* a, const float* b, float2* c)
 // Double precision.
 
 __global__
-void oskar_cudakd_crvecmul(int n, const double2* a, const double* b,
+void oskar_cudakd_vec_mul_cc(int n, const double2* a, const double2* b,
         double2* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -60,12 +60,12 @@ void oskar_cudakd_crvecmul(int n, const double2* a, const double* b,
     {
         // Cache the input data.
         double2 ac = a[i];
-        double bc = b[i];
+        double2 bc = b[i];
 
-        // Multiply.
+        // Complex multiply.
         double2 cc;
-        cc.x = ac.x * bc;
-        cc.y = ac.y * bc;
+        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
+        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
 
         c[i] = cc;
     }

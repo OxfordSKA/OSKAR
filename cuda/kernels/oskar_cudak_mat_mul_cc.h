@@ -26,13 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_vecadd.h"
+#ifndef OSKAR_CUDAK_MAT_MUL_CC_H_
+#define OSKAR_CUDAK_MAT_MUL_CC_H_
 
-// Vector addition kernel.
+/**
+ * @file oskar_cudak_mat_mul_cc.h
+ */
+
+#include "cuda/CudaEclipse.h"
+
+/**
+ * @brief
+ * CUDA kernel to multiply two complex matrices together, element-wise
+ * (single precision).
+ *
+ * @details
+ * This CUDA kernel multiplies the elements of two complex matrices together
+ * using the graphics card.
+ *
+ * All matrices must be of the same size.
+ *
+ * @param[in] n1 Size of the fastest varying dimension.
+ * @param[in] n2 Size of the slowest varying dimension.
+ * @param[in] a First input matrix.
+ * @param[in] b Second input matrix.
+ * @param[out] c Output matrix.
+ */
 __global__
-void oskar_cudakf_vecadd(int n, const float* a, const float* b, float* c)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i < n)
-        c[i] = a[i] + b[i];
-}
+void oskar_cudakf_mat_mul_cc(int n1, int n2, const float2* a, const float2* b,
+        float2* c);
+
+/**
+ * @brief
+ * CUDA kernel to multiply two complex matrices together, element-wise
+ * (double precision).
+ *
+ * @details
+ * This CUDA kernel multiplies the elements of two complex matrices together
+ * using the graphics card.
+ *
+ * All matrices must be of the same size.
+ *
+ * @param[in] n1 Size of the fastest varying dimension.
+ * @param[in] n2 Size of the slowest varying dimension.
+ * @param[in] a First input matrix.
+ * @param[in] b Second input matrix.
+ * @param[out] c Output matrix.
+ */
+__global__
+void oskar_cudakd_mat_mul_cc(int n1, int n2, const double2* a, const double2* b,
+        double2* c);
+
+#endif // OSKAR_CUDAK_MAT_MUL_CC_H_

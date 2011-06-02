@@ -26,48 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_CRVECMUL_H_
-#define OSKAR_CUDAK_CRVECMUL_H_
+#include "cuda/kernels/oskar_cudak_vec_add_rr.h"
 
-/**
- * @file oskar_cudak_crvecmul.h
- */
-
-#include "cuda/CudaEclipse.h"
-
-/**
- * @brief
- * CUDA kernel to multiply a complex and a real vector together, element-wise
- * (single precision).
- *
- * @details
- * This CUDA kernel multiplies the elements of two vectors together (one
- * complex, one real) using the graphics card.
- *
- * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
- * @param[out] c Output vector.
- */
+// Vector addition kernel.
 __global__
-void oskar_cudakf_crvecmul(int n, const float2* a, const float* b, float2* c);
-
-/**
- * @brief
- * CUDA kernel to multiply a complex and a real vector together, element-wise
- * (double precision).
- *
- * @details
- * This CUDA kernel multiplies the elements of two vectors together (one
- * complex, one real) using the graphics card.
- *
- * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
- * @param[out] c Output vector.
- */
-__global__
-void oskar_cudakd_crvecmul(int n, const double2* a, const double* b,
-        double2* c);
-
-#endif // OSKAR_CUDAK_CRVECMUL_H_
+void oskar_cudakf_vec_add_rr(int n, const float* a, const float* b, float* c)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+        c[i] = a[i] + b[i];
+}

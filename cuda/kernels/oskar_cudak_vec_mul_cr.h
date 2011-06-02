@@ -26,55 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_CMATMUL_H_
-#define OSKAR_CUDAK_CMATMUL_H_
+#ifndef OSKAR_CUDAK_VEC_MUL_CR_H_
+#define OSKAR_CUDAK_VEC_MUL_CR_H_
 
 /**
- * @file oskar_cudak_cmatmul.h
+ * @file oskar_cudak_vec_mul_cr.h
  */
 
 #include "cuda/CudaEclipse.h"
 
 /**
  * @brief
- * CUDA kernel to multiply two complex matrices together, element-wise
+ * CUDA kernel to multiply a complex and a real vector together, element-wise
  * (single precision).
  *
  * @details
- * This CUDA kernel multiplies the elements of two complex matrices together
- * using the graphics card.
+ * This CUDA kernel multiplies the elements of two vectors together (one
+ * complex, one real) using the graphics card.
  *
- * All matrices must be of the same size.
- *
- * @param[in] n1 Size of the fastest varying dimension.
- * @param[in] n2 Size of the slowest varying dimension.
- * @param[in] a First input matrix.
- * @param[in] b Second input matrix.
- * @param[out] c Output matrix.
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
  */
 __global__
-void oskar_cudakf_cmatmul(int n1, int n2, const float2* a, const float2* b,
-        float2* c);
+void oskar_cudakf_vec_mul_cr(int n, const float2* a, const float* b, float2* c);
 
 /**
  * @brief
- * CUDA kernel to multiply two complex matrices together, element-wise
+ * CUDA kernel to multiply a complex and a real vector together, element-wise
  * (double precision).
  *
  * @details
- * This CUDA kernel multiplies the elements of two complex matrices together
- * using the graphics card.
+ * This CUDA kernel multiplies the elements of two vectors together (one
+ * complex, one real) using the graphics card.
  *
- * All matrices must be of the same size.
- *
- * @param[in] n1 Size of the fastest varying dimension.
- * @param[in] n2 Size of the slowest varying dimension.
- * @param[in] a First input matrix.
- * @param[in] b Second input matrix.
- * @param[out] c Output matrix.
+ * @param[in] n Number of elements in all vectors.
+ * @param[in] a First input vector.
+ * @param[in] b Second input vector.
+ * @param[out] c Output vector.
  */
 __global__
-void oskar_cudakd_cmatmul(int n1, int n2, const double2* a, const double2* b,
+void oskar_cudakd_vec_mul_cr(int n, const double2* a, const double* b,
         double2* c);
 
-#endif // OSKAR_CUDAK_CMATMUL_H_
+#endif // OSKAR_CUDAK_VEC_MUL_CR_H_
