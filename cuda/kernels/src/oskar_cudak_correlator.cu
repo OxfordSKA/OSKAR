@@ -30,19 +30,20 @@
 
 // Single precision.
 
+#define ONE_OVER_2C 1.66782047599076024788E-9   // 1 / (2c)
+#define ONE_OVER_2Cf 1.66782047599076024788E-9f // 1 / (2c)
+
 extern __shared__ float2 smem[];
 
 __device__ float sincf(float a)
 {
-    if (a == 0.0f) return 1.0f;
-    else return sinf(a) / a;
-//    float b = a + 1.0e-7;
-//    return sinf(b) / b;
+    return (a == 0.0f) ? 1.0f : sinf(a) / a;
 }
 
 __global__
-void oskar_cudakf_correlator(int ns, int na, const float2* k,
-        const float* lmdist, const float* uvdist, float2* vis)
+void oskar_cudakf_correlator(const int ns, const int na, const float2* k,
+        const float* u, const float* v, const float* l, const float* m,
+        const float lambda_bandwidth, float2* vis)
 {
     // Determine which index into the visibility matrix this thread block
     // is generating.
@@ -53,9 +54,14 @@ void oskar_cudakf_correlator(int ns, int na, const float2* k,
     // visibility matrix.
     if (aj >= ai) return;
 
-    // Determine 1D index.
-    int ajp = aj - 1;
-    int idx = aj*(na-1) - ajp*aj/2 + ai - aj - 1;
+    // Determine UV-distance for baseline (common per thread block).
+    __device__ __shared__ float uu, vv;
+    if (threadIdx.x == 0)
+    {
+        uu = ONE_OVER_2Cf * lambda_bandwidth * (u[ai] - u[aj]);
+        vv = ONE_OVER_2Cf * lambda_bandwidth * (v[ai] - v[aj]);
+    }
+    __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
     const float2* sti = &k[ns * ai];
@@ -65,7 +71,7 @@ void oskar_cudakf_correlator(int ns, int na, const float2* k,
     smem[threadIdx.x] = make_float2(0.0f, 0.0f);
     for (int t = threadIdx.x; t < ns; t += blockDim.x)
     {
-        float rb = sincf(lmdist[t] * uvdist[idx]);
+        float rb = sincf(uu * l[t] + vv * m[t]);
         float2 temp;
         float2 stit = sti[t];
         float2 stjt = stj[t];
@@ -87,6 +93,11 @@ void oskar_cudakf_correlator(int ns, int na, const float2* k,
             temp.x += smem[i].x;
             temp.y += smem[i].y;
         }
+
+        // Determine 1D index.
+        int idx = aj*(na-1) - (aj-1)*aj/2 + ai - aj - 1;
+
+        // Modify existing visibility.
         vis[idx].x += temp.x;
         vis[idx].y += temp.y;
     }
@@ -98,15 +109,13 @@ extern __shared__ double2 smemd[];
 
 __device__ double sinc(double a)
 {
-    if (a == 0.0) return 1.0;
-    else return sin(a) / a;
-//    double b = a + 2.0e-17;
-//    return sin(b) / b;
+    return (a == 0.0) ? 1.0 : sin(a) / a;
 }
 
 __global__
-void oskar_cudakd_correlator(int ns, int na, const double2* k,
-        const double* lmdist, const double* uvdist, double2* vis)
+void oskar_cudakd_correlator(const int ns, const int na, const double2* k,
+        const double* u, const double* v, const double* l, const double* m,
+        const double lambda_bandwidth, double2* vis)
 {
     // Determine which index into the visibility matrix this thread block
     // is generating.
@@ -117,9 +126,14 @@ void oskar_cudakd_correlator(int ns, int na, const double2* k,
     // visibility matrix.
     if (aj >= ai) return;
 
-    // Determine 1D index.
-    int ajp = aj - 1;
-    int idx = aj*(na-1) - ajp*aj/2 + ai - aj - 1;
+    // Determine UV-distance for baseline (common per thread block).
+    __device__ __shared__ float uu, vv;
+    if (threadIdx.x == 0)
+    {
+        uu = ONE_OVER_2C * lambda_bandwidth * (u[ai] - u[aj]);
+        vv = ONE_OVER_2C * lambda_bandwidth * (v[ai] - v[aj]);
+    }
+    __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
     const double2* sti = &k[ns * ai];
@@ -129,7 +143,7 @@ void oskar_cudakd_correlator(int ns, int na, const double2* k,
     smemd[threadIdx.x] = make_double2(0.0, 0.0);
     for (int t = threadIdx.x; t < ns; t += blockDim.x)
     {
-        double rb = sincf(lmdist[t] * uvdist[idx]);
+        double rb = sinc(uu * l[t] + vv * m[t]);
         double2 temp;
         double2 stit = sti[t];
         double2 stjt = stj[t];
@@ -151,6 +165,11 @@ void oskar_cudakd_correlator(int ns, int na, const double2* k,
             temp.x += smemd[i].x;
             temp.y += smemd[i].y;
         }
+
+        // Determine 1D index.
+        int idx = aj*(na-1) - (aj-1)*aj/2 + ai - aj - 1;
+
+        // Modify existing visibility.
         vis[idx].x += temp.x;
         vis[idx].y += temp.y;
     }

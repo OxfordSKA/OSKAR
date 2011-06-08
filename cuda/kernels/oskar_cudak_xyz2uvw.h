@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_VEC_SET_C_H_
-#define OSKAR_CUDAK_VEC_SET_C_H_
+#ifndef OSKAR_CUDAK_XYZ2UVW_H_
+#define OSKAR_CUDAK_XYZ2UVW_H_
 
 /**
- * @file oskar_cudak_vec_set_c.h
+ * @file oskar_cudak_xyz2uvw.h
  */
 
 #ifdef __CDT_PARSER__
@@ -42,30 +42,48 @@
 
 /**
  * @brief
- * CUDA kernel to set the contents of a complex vector (single precision).
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (single precision).
  *
  * @details
- * This CUDA kernel sets the contents of a complex vector.
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (single precision).
  *
- * @param[in] n Number of elements in all vectors.
- * @param[in] alpha Scalar complex number.
- * @param[out] c Output vector.
+ * @param[in] n    Number of stations.
+ * @param[in] x    Station x positions.
+ * @param[in] x    Station y positions.
+ * @param[in] z    Station z positions.
+ * @param[in] ha0  Hour angle of phase centre (radians).
+ * @param[in] dec0 Declination of phase centre (radians).
+ * @param[out] u   Station u positions.
+ * @param[out] v   Station v positions.
+ * @param[out] w   Station w positions.
  */
 __global__
-void oskar_cudakf_vec_set_c(int n, const float2 alpha, float2* c);
+void oskar_cudakf_xyz2uvw(int n, const float* x, const float* y,
+        const float* z, float ha0, float dec0, float* u, float* v, float* w);
 
 /**
  * @brief
- * CUDA kernel to set the contents of a complex vector (double precision).
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (double precision).
  *
  * @details
- * This CUDA kernel sets the contents of a complex vector.
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (double precision).
  *
- * @param[in] n Number of elements in all vectors.
- * @param[in] alpha Scalar complex number.
- * @param[out] c Output vector.
+ * @param[in] n    Number of stations.
+ * @param[in] x    Station x positions.
+ * @param[in] x    Station y positions.
+ * @param[in] z    Station z positions.
+ * @param[in] ha0  Hour angle of phase centre (radians).
+ * @param[in] dec0 Declination of phase centre (radians).
+ * @param[out] u   Station u positions.
+ * @param[out] v   Station v positions.
+ * @param[out] w   Station w positions.
  */
 __global__
-void oskar_cudakd_vec_set_c(int n, const double2 alpha, double2* c);
+void oskar_cudakd_xyz2uvw(int n, const double* x, const double* y,
+        const double* z, double ha0, double dec0, double* u, double* v, double* w);
 
-#endif // OSKAR_CUDAK_VEC_SET_C_H_
+#endif // OSKAR_CUDAK_XYZ2UVW_H_

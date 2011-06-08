@@ -31,6 +31,7 @@ set(cuda_kernels_SRC
     src/oskar_cudak_vec_set_c.cu
     src/oskar_cudak_wt2hg.cu
     src/oskar_cudak_wt2phg.cu
+    src/oskar_cudak_xyz2uvw.cu
 )
 set(cuda_kernels_SRC "${cuda_kernels_SRC}" PARENT_SCOPE)
 

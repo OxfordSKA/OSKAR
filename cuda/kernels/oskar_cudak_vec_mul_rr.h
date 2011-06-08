@@ -33,7 +33,12 @@
  * @file oskar_cudak_vec_mul_rr.h
  */
 
-#include "cuda/CudaEclipse.h"
+#ifdef __CDT_PARSER__
+    #define __global__
+    #define __device__
+    #define __shared__
+    #define __constant__
+#endif
 
 /**
  * @brief

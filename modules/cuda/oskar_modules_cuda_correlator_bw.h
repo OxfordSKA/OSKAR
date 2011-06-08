@@ -45,35 +45,37 @@ extern "C" {
  *
  * @details
  * Computes complex visibilities.
- * The visibilities and their (u,v,w) coordinates are returned in arrays of
- * length na * (na - 1) / 2, so the Hermitian conjugate is not included.
+ *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
+ * The visibilities are returned in an array of length na * (na - 1) / 2,
+ * so the Hermitian conjugate is not included.
  *
  * @param[in] na Number of antennas or stations.
- * @param[in] ax Array of local equatorial station x-positions in metres.
- * @param[in] ay Array of local equatorial station y-positions in metres.
- * @param[in] az Array of local equatorial station z-positions in metres.
+ * @param[in] ax Array of local equatorial station x-positions in wavenumbers.
+ * @param[in] ay Array of local equatorial station y-positions in wavenumbers.
+ * @param[in] az Array of local equatorial station z-positions in wavenumbers.
  * @param[in] ns Number of sources.
- * @param[in] l Array of source l-positions in radians.
- * @param[in] m Array of source m-positions in radians.
- * @param[in] bsqrt Array of square root of source brightnesses.
- * @param[in] e Station beam E-Jones (see note, above).
+ * @param[in] l Array of source l-positions.
+ * @param[in] m Array of source m-positions.
+ * @param[in] n Array of source n-positions (see note, above).
+ * @param[in] eb Matrix of E * sqrt(B) (see note, above).
  * @param[in] ra0 Right Ascension of the phase tracking centre in radians.
  * @param[in] dec0 Declination of the phase tracking centre in radians.
  * @param[in] lst0 The local sidereal time at the start of the correlator dump.
  * @param[in] nsdt The number of averaging cycles to do.
  * @param[in] sdt The time interval between averages in seconds.
- * @param[in] k Wavenumber in radians / metre.
- * @param[out] vis The complex visibilities (see note, above).
- * @param[out] u Array of baseline u-positions in metres (see note, above).
- * @param[out] v Array of baseline v-positions in metres (see note, above).
- * @param[out] w Array of baseline w-positions in metres (see note, above).
+ * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
+ * @param[in,out] vis The complex visibilities (see note, above).
+ * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
 int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
-        const float* m, const float* bsqrt, const float* e, float ra0,
-        float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
-        float* vis, float* u, float* v, float* w);
+        const float* m, const float* n, const float* eb, float ra0,
+        float dec0, float lst0, int nsdt, float sdt,
+        float lambda_bandwidth, float* vis, float* work);
 
 /**
  * @brief
@@ -81,35 +83,37 @@ int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
  *
  * @details
  * Computes complex visibilities.
+ *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
  * The visibilities and their (u,v,w) coordinates are returned in arrays of
  * length na * (na - 1) / 2, so the Hermitian conjugate is not included.
  *
  * @param[in] na Number of antennas or stations.
- * @param[in] ax Array of local equatorial station x-positions in metres.
- * @param[in] ay Array of local equatorial station y-positions in metres.
- * @param[in] az Array of local equatorial station z-positions in metres.
+ * @param[in] ax Array of local equatorial station x-positions in wavenumbers.
+ * @param[in] ay Array of local equatorial station y-positions in wavenumbers.
+ * @param[in] az Array of local equatorial station z-positions in wavenumbers.
  * @param[in] ns Number of sources.
- * @param[in] l Array of source l-positions in radians.
- * @param[in] m Array of source m-positions in radians.
- * @param[in] bsqrt Array of square root of source brightnesses.
- * @param[in] e Station beam E-Jones (see note, above).
+ * @param[in] l Array of source l-positions.
+ * @param[in] m Array of source m-positions.
+ * @param[in] n Array of source n-positions (see note, above).
+ * @param[in] eb Matrix of E * sqrt(B) (see note, above).
  * @param[in] ra0 Right Ascension of the phase tracking centre in radians.
  * @param[in] dec0 Declination of the phase tracking centre in radians.
  * @param[in] lst0 The local sidereal time at the start of the correlator dump.
  * @param[in] nsdt The number of averaging cycles to do.
  * @param[in] sdt The time interval between averages in seconds.
- * @param[in] k Wavenumber in radians / metre.
- * @param[out] vis The complex visibilities (see note, above).
- * @param[out] u Array of baseline u-positions in metres.
- * @param[out] v Array of baseline v-positions in metres.
- * @param[out] w Array of baseline w-positions in metres.
+ * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
+ * @param[in,out] vis The complex visibilities (see note, above).
+ * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
 int oskar_modules_cudad_correlator_bw(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
-        const double* m, const double* bsqrt, const double* e, double ra0,
-        double dec0, double lst0, int nsdt, double sdt, double k,
-        double bandwidth, double* vis, double* u, double* v, double* w);
+        const double* m, const double* n, const double* eb, double ra0,
+        double dec0, double lst0, int nsdt, double sdt,
+        double lambda_bandwidth, double* vis, double* work);
 
 #ifdef __cplusplus
 }

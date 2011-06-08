@@ -8,6 +8,7 @@ if (CUDA_FOUND)
 
     # === Create list of source files for the oskar-lib cuda module.
     set(modules_cuda_SRC
+        src/oskar_modules_cuda_correlator_bw.cu
         src/oskar_modules_cuda_correlator_lm.cu
         src/oskar_modules_cuda_correlator_lm_bw.cu
     )

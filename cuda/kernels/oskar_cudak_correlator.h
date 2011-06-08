@@ -33,26 +33,51 @@
  * @file oskar_cudak_correlator.h
  */
 
-#include "cuda/CudaEclipse.h"
+#ifdef __CDT_PARSER__
+    #define __global__
+    #define __device__
+    #define __shared__
+    #define __constant__
+#endif
 
 /**
  * @brief
  *
  * @details
  *
+ * @param[in] ns               Number of sources.
+ * @param[in] na               Number of stations.
+ * @param[in] k                Complex input matrix (ns rows, na columns).
+ * @param[in] u                Station u-coordinates in wavenumbers.
+ * @param[in] v                Station v-coordinates in wavenumbers.
+ * @param[in] l                Distance from phase centre for each source.
+ * @param[in] m                Distance from phase centre for each source.
+ * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
+ * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__
-void oskar_cudakf_correlator(int ns, int na, const float2* k,
-        const float* lmdist, const float* uvdist, float2* vis);
+void oskar_cudakf_correlator(const int ns, const int na, const float2* k,
+        const float* u, const float* v, const float* l, const float* m,
+        const float lambda_bandwidth, float2* vis);
 
 /**
  * @brief
  *
  * @details
  *
+ * @param[in] ns               Number of sources.
+ * @param[in] na               Number of stations.
+ * @param[in] k                Complex input matrix (ns rows, na columns).
+ * @param[in] u                Station u-coordinates in wavenumbers.
+ * @param[in] v                Station v-coordinates in wavenumbers.
+ * @param[in] l                Distance from phase centre for each source.
+ * @param[in] m                Distance from phase centre for each source.
+ * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
+ * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__
-void oskar_cudakd_correlator(int ns, int na, const double2* k,
-        const double* lmdist, const double* uvdist, double2* vis);
+void oskar_cudakd_correlator(const int ns, const int na, const double2* k,
+        const double* u, const double* v, const double* l, const double* m,
+        const double lambda_bandwidth, double2* vis);
 
 #endif // OSKAR_CUDAK_CORRELATOR_H_
