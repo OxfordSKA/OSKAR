@@ -34,6 +34,7 @@
 #include <cmath>
 #include <cassert> // disable asserts with #define NDEBUG before this include.
 #include <cstdio>
+#include <limits>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -44,6 +45,7 @@ using namespace std;
 namespace oskar {
 
 WProjConvFunc::WProjConvFunc()
+: _size(0)
 {
 }
 
@@ -52,98 +54,149 @@ WProjConvFunc::~WProjConvFunc()
 }
 
 
-void WProjConvFunc::generateLM(const unsigned size, const unsigned sizeLM,
-        const unsigned iStart, const float pixelSizeLM_rads,
-        const float w, const float taperFactor)
+void WProjConvFunc::generateLM(const unsigned innerSize, const unsigned padding,
+        const float pixelSizeLM_rads, const float w, const float taperFactor)
 {
-    if (_convFunc.size() != size * size)
-        _convFunc.resize(size * size);
+    // Resize the function if needed.
+    _size = innerSize * padding;
+    if (_convFunc.size() != _size * _size)
+        _convFunc.resize(_size * _size, Complex(0.0, 0.0));
 
     // Generate the LM plane phase screen.
-    _wFuncLMPadded(size, sizeLM, iStart, pixelSizeLM_rads, w, &_convFunc[0]);
+    _wFuncLMPadded(innerSize, _size, pixelSizeLM_rads, w, &_convFunc[0]);
 
     // Apply the image plane taper.
-    _applyExpTaper(size, sizeLM, iStart, taperFactor, &_convFunc[0]);
+    _applyExpTaper(innerSize, _size, taperFactor, &_convFunc[0]);
 }
 
 
 
-void WProjConvFunc::generateUV(const unsigned size, const unsigned sizeLM,
-        const unsigned iStart, const float pixelSizeLM_rads,
-        const float w, const float taperFactor, const float /*cutoff*/)
+void WProjConvFunc::generateUV(const unsigned innerSize, const unsigned padding,
+        const float pixelSizeLM_rads, const float w,
+        const float taperFactor, const float cutoff)
 {
-    if (_convFunc.size() != size * size)
-        _convFunc.resize(size * size);
+    // ==== Resize the function if needed.
+    _size = innerSize * padding;
+    if (_convFunc.size() != _size * _size)
+        _convFunc.resize(_size * _size, Complex(0.0, 0.0));
 
-    // Generate the LM plane phase screen.
-    _wFuncLMPadded(size, sizeLM, iStart, pixelSizeLM_rads, w, &_convFunc[0]);
+    // ==== Generate the LM plane phase screen.
+    _wFuncLMPadded(innerSize, _size, pixelSizeLM_rads, w, &_convFunc[0]);
 
-    // Apply the image plane taper function.
-    _applyExpTaper(size, sizeLM, iStart, taperFactor, &_convFunc[0]);
+    // ==== Apply the image plane taper function.
+    _applyExpTaper(innerSize, _size, taperFactor, &_convFunc[0]);
 
-    // FFT to UV plane.
-    _cfft2d(size, &_convFunc[0]);
+    // ==== FFT to UV plane.
+    _cfft2d(_size, &_convFunc[0]);
 
-    // Normalise
+    // ==== Normalise
+    float max = _findMax(_size, &_convFunc[0]);
+    _scale(_size * _size, &_convFunc[0], 1.0f / max);
 
-    // Reshape the function at the cutoff level.
-
-
-}
-
-
-
-void WProjConvFunc::_wFuncLMPadded(const unsigned size, const unsigned sizeLM,
-        const unsigned iStart, const float pixelSizeLM_rads,
-        const float w, Complex * convFunc)
-{
-    const unsigned iCentre = (unsigned) floor((float)sizeLM / 2.0f);
-    const float twoPiW = M_PI * 2.0 * w;
-
-//    const float r2_max = 2 * (iCentre * pixelSizeLM_rads) * (iCentre * pixelSizeLM_rads);
-
-    // Note: needs to start at 1 to keep the function symmetric!.
-    // This is needed not to mess up the FFT of this function.
-#pragma omp parallel for
-    for (unsigned j = 1; j < sizeLM; ++j)
+    // ==== Find the index at the cutoff level.
+    // Search along the centre row going outwards from the centre.
+    int cutoffIndex = -1;
+    for (unsigned i = _size/2; i < _size; ++i)
     {
-        for (unsigned i = 1; i < sizeLM; ++i)
+        const int idx = (_size / 2) * _size + i;
+//        printf("%d %f\n", i - _size/2, abs(_convFunc[idx]));
+        if (abs(_convFunc[idx]) < cutoff)
         {
-            const int idx = (j + iStart) * size + iStart + i;
+            cutoffIndex = i - _size/2;
+            break;
+        }
+    }
+    printf("= cutoff index = %d\n", cutoffIndex);
+
+    // ==== Convert cutoff level index to grid pixel space.
+    // TODO: better way to do this using only half the size?
+    // Maximum possible number of pixels in the convolution function.
+    unsigned maxPixels = (unsigned) floor((float)_size / (float) padding);
+    // Convolution functions need to be odd sized.
+    if (maxPixels % 2 == 0) maxPixels--;
+    const unsigned maxRadius = (maxPixels - 1) / 2;
+
+    // Cutoff radius in grid pixels.
+    int cutoffPixelRadius = 0;
+
+    // Catch for when cutoff index isn't found.
+    if (cutoffIndex == -1)
+    {
+        fprintf(stderr, "WProjConvFunc::generateUV(): Cutoff level not found!");
+        cutoffPixelRadius = 1;
+    }
+
+    // Everything is good.
+    else
+    {
+        cutoffPixelRadius = (int) ceil((float)cutoffIndex / (float) padding);
+    }
+
+    // Set upper limit to radius. TODO(should this ever happen?)
+    if (cutoffPixelRadius > (int)maxRadius)
+        cutoffPixelRadius = maxRadius;
+
+    // Set the minimum number of pixels.
+    if (cutoffPixelRadius < 2)
+    {
+        fprintf(stderr, "WProjConvFunc::generateUV(): "
+                "Cutoff radius too small, defaulting to minimum size of 2.");
+        cutoffPixelRadius = 2;
+    }
+
+    // ====  Reshape to a number of grid pixels.
+    // TODO!
+}
+
+
+
+void WProjConvFunc::_wFuncLMPadded(const unsigned innerSize, const unsigned size,
+        const float pixelSizeLM_rads, const float w, Complex * convFunc)
+{
+    const unsigned centre = (unsigned)ceil((float)size / 2.0f);
+    const int radius = innerSize / 2.0f;
+    const float twoPiW = M_PI * 2.0 * w;
+    const float max_r2 = (radius * pixelSizeLM_rads) * (radius * pixelSizeLM_rads);
+
+    for (int j = -radius; j <= radius; ++j)
+    {
+        for (int i = -radius; i <= radius; ++i)
+        {
+            const int idx = ((j + centre) * size) + centre + i;
             assert(idx < (int)size * size);
 
-            const float m = ((float)j - iCentre) * pixelSizeLM_rads;
-            const float l = ((float)i - iCentre) * pixelSizeLM_rads;
+            const float m = (float)j * pixelSizeLM_rads;
+            const float l = (float)i * pixelSizeLM_rads;
             const float r2 = (l * l) + (m * m);
-//            printf("%f\n", r2);
             assert(r2 < 1.0f);
 
-            const float phase = -twoPiW * (sqrt(1.0f - r2) - 1.0f);
-            convFunc[idx] = Complex(cos(phase), sin(phase));
+            // TODO: mmm not sure if this is a good idea...
+            if (r2 < max_r2)
+            {
+                const float phase = -twoPiW * (sqrt(1.0f - r2) - 1.0f);
+                convFunc[idx] = Complex(cos(phase), sin(phase));
+            }
         }
     }
 }
 
 
 
-void WProjConvFunc::_applyExpTaper(const unsigned size, const unsigned sizeLM,
-        const unsigned iStart, const float taperFactor, Complex * convFunc)
+void WProjConvFunc::_applyExpTaper(const unsigned innerSize, const unsigned size,
+        const float taperFactor, Complex * convFunc)
 {
-    const unsigned iCentre = (unsigned) floor((float)sizeLM / 2.0f);
+    const unsigned centre = (unsigned)ceil((float)size / 2.0f);
+    const int radius = innerSize / 2.0f;
 
-    // Note: needs to start at 1 to keep the function symmetric!.
-    // This is needed not to mess up the FFT of this function.
-#pragma omp parallel for
-    for (unsigned j = 1; j < sizeLM; ++j)
+    for (int j = -radius; j <= radius; ++j)
     {
-        for (unsigned i = 1; i < sizeLM; ++i)
+        for (int i = -radius; i <= radius; ++i)
         {
-            const int idx = (j + iStart) * size + iStart + i;
+            const int idx = ((j + centre) * size) + centre + i;
             assert(idx < (int)size * size);
 
-            const float x = (float)i - iCentre;
-            const float y = (float)j - iCentre;
-
+            const float x = (float)i;
+            const float y = (float)j;
             const float x2 = x * x;
             const float y2 = y * y;
             const float taper = exp(-(x2 + y2) * taperFactor);
@@ -152,8 +205,6 @@ void WProjConvFunc::_applyExpTaper(const unsigned size, const unsigned sizeLM,
         }
     }
 }
-
-
 
 // TODO(optimisation): Don't recreate the fftw plane each time this is called.
 void WProjConvFunc::_cfft2d(const unsigned size, Complex * convFunc)
@@ -168,5 +219,20 @@ void WProjConvFunc::_cfft2d(const unsigned size, Complex * convFunc)
     FFTUtility::fftPhase(size, size, convFunc);
 }
 
+float WProjConvFunc::_findMax(const unsigned size, Complex * convFunc)
+{
+    // TODO(optimisation): Can just use the mid point?
+    float convmax = -numeric_limits<float>::max();
+    for (unsigned i = 0; i < _size * _size; ++i)
+        convmax = max(convmax, abs(_convFunc[i]));
+    return convmax;
+}
+
+
+void WProjConvFunc::_scale(const unsigned size, Complex * convFunc, const float value)
+{
+    for (unsigned i = 0; i < size; ++i)
+        convFunc[i] *= value;
+}
 
 } // namespace oskar

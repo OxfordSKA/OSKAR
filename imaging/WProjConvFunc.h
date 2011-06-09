@@ -50,29 +50,35 @@ class WProjConvFunc
         ~WProjConvFunc();
 
     public:
-        Complex * values() { return  &_convFunc[0]; }
+        Complex const * values() const { return  &_convFunc[0]; }
 
-        void generateLM(const unsigned size, const unsigned sizeLM,
-                const unsigned iStart, const float pixelSizeLM_rads,
+        unsigned size() const { return _size; }
+
+    public:
+        void generateLM(const unsigned innerSize, const unsigned padding,
+                const float pixelSizeLM_rads,
                 const float w, const float taperFactor);
 
-        void generateUV(const unsigned size, const unsigned sizeLM,
-                const unsigned iStart, const float pixelSizeLM_rads,
-                const float w, const float taperFactor, const float cutoff);
+        void generateUV(const unsigned innerSize, const unsigned padding,
+                const float pixelSizeLM_rads, const float w,
+                const float taperFactor, const float cutoff);
 
     private:
-        void _wFuncLMPadded(const unsigned size, const unsigned sizeLM,
-                const unsigned iStart, const float pixelSizeLM_rads,
-                const float w, Complex * convFunc);
+        void _wFuncLMPadded(const unsigned innerSize, const unsigned size,
+                const float pixelSizeLM_rads, const float w, Complex * convFunc);
 
-        void _applyExpTaper(const unsigned size, const unsigned sizeLM,
-                const unsigned iStart, const float taperFactor,
-                Complex * convFunc);
+        void _applyExpTaper(const unsigned innerSize, const unsigned size,
+                const float taperFactor, Complex * convFunc);
 
         void _cfft2d(const unsigned size, Complex * convFunc);
 
+        float _findMax(const unsigned size, Complex * convFunc);
+
+        void _scale(const unsigned size, Complex * convFunc, const float value);
+
     private:
         std::vector<Complex> _convFunc;
+        unsigned _size;
 };
 
 
