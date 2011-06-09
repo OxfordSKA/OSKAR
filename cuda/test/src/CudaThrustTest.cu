@@ -90,7 +90,7 @@ void CudaThrustTest::test_method()
     cudaMemcpy(d_a, &a[0], n * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_b, &b[0], n * sizeof(float), cudaMemcpyHostToDevice);
 
-    int repeats = 50;
+    int repeats = 5;
 
     thrust::device_ptr<float> out;
     TIMER_START
@@ -102,10 +102,10 @@ void CudaThrustTest::test_method()
     }
     TIMER_STOP("Finished Thrust GPU copy_if (%d iterations of %d elements)",
             repeats, n)
-    ptrdiff_t diff = out - thrust::device_pointer_cast(d_c);
-    std::cout << "Number of elements copied: " << diff << std::endl;
+    int num_copied = out - thrust::device_pointer_cast(d_c);
+    std::cout << "Number of elements copied: " << num_copied << std::endl;
 
-    cudaMemcpy(&c[0], d_c, n * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&c[0], d_c, num_copied * sizeof(float), cudaMemcpyDeviceToHost);
 
 //    std::cout << "A (data): \n";
 //    for (int i = 0; i < n; ++i)
@@ -114,7 +114,7 @@ void CudaThrustTest::test_method()
 //    for (int i = 0; i < n; ++i)
 //        std::cout << b[i] << std::endl;
 //    std::cout << "\nC (output): \n";
-//    for (int i = 0; i < n; ++i)
+//    for (int i = 0; i < num_copied; ++i)
 //        std::cout << c[i] << std::endl;
 
     TIMER_START
