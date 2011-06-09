@@ -1,8 +1,9 @@
-#include "math/modules/FFTW_Utility.h"
+#include "imaging/FFTUtility.h"
 
 namespace oskar {
 
-Complex * FFT::fftPhase(const unsigned nx, const unsigned ny, Complex * data)
+Complex * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
+        Complex * data)
 {
     for (unsigned j = 0; j < ny; ++j)
     {

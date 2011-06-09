@@ -1,22 +1,19 @@
-#ifndef FFTW_UTILITY_H_
-#define FFTW_UTILITY_H_
+#ifndef FFT_UTILITY_H_
+#define FFT_UTILITY_H_
 
-#include <complex>
+#include "imaging/oskar_types.h"
 #include <fftw3.h>
-
-typedef std::complex<float> Complex;
 
 namespace oskar {
 
-class FFT
+class FFTUtility
 {
     public:
         static Complex * fftPhase(const unsigned nx, const unsigned ny,
                 Complex * data);
-
 };
 
 
 
 } // namespace oskar
-#endif // FFTW_UTILITY_H_
+#endif // FFT_UTILITY_H_

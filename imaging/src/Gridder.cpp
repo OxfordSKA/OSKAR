@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/modules/Gridder.h"
+#include "imaging/Gridder.h"
 #include "math/core/Rounding.h"
 #include <iostream>
 

@@ -102,5 +102,4 @@ void reorder_sources(const unsigned num_sources, const unsigned * indices,
     for (unsigned i = 0; i < num_sources; ++i)
         tempPtr[i] = brightness[indices[i]];
     memcpy(brightness, tempPtr, num_sources * sizeof(double));
-
 }

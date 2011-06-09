@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/modules/GriddingKernels.h"
+#include "imaging/ConvFunc.h"
 #include "math/core/FloatingPointCompare.h"
 
 #include <cmath>
@@ -39,13 +39,28 @@ using namespace std;
 
 namespace oskar {
 
-float GriddingKernels::exp1D(const float /*r2*/, const float /*sigma*/)
+
+ConvFunc::ConvFunc()
+{
+}
+
+
+ConvFunc::~ConvFunc()
+{
+}
+
+
+float ConvFunc::exp(const float /*r2*/, const float /*sigma*/)
 {
     return 1.0f;
 }
 
+float ConvFunc::expSinc(const float /*r*/)
+{
+    return 1.0f;
+}
 
-void GriddingKernels::exp2D(const unsigned support,
+void ConvFunc::exp2D(const unsigned support,
         const unsigned oversample, const float sigma, float * cFunc)
 {
     const int size = (2 * support + 1) * oversample;
@@ -68,14 +83,10 @@ void GriddingKernels::exp2D(const unsigned support,
 
 
 
-float GriddingKernels::expSinc1D(const float /*r*/)
-{
-    return 1.0f;
-}
 
 
 
-void GriddingKernels::expSinc2D(const unsigned support,
+void ConvFunc::expSinc2D(const unsigned support,
         const unsigned oversample, float * cFunc)
 {
     const int size = (2 * support + 1) * oversample;
@@ -94,7 +105,7 @@ void GriddingKernels::expSinc2D(const unsigned support,
 }
 
 
-float GriddingKernels::_expSinc(const float x, const float y)
+float ConvFunc::_expSinc(const float x, const float y)
 {
     const float p1 = M_PI / 1.55f;
     const float p2 = 1.0f / 2.52f;

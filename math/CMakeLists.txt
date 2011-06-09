@@ -11,9 +11,6 @@ add_subdirectory(beamforming)
 # === Recurse into the oskar-lib core math sub-module.
 add_subdirectory(core)
 
-# === Recurse into the oskar-lib modules math sub-module.
-add_subdirectory(modules)
-
 # === Recurse into the oskar-lib synthesis math sub-module.
 add_subdirectory(synthesis)
 

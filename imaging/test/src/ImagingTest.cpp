@@ -26,30 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_GRIDDING_KERNELS_H_
-#define OSKAR_MATH_GRIDDING_KERNELS_H_
+#include "imaging/test/ImagingTest.h"
 
-namespace oskar {
+#include "imaging/ConvFunc.h"
+
+#include <QtCore/QTime>
+
+#include <vector>
+#include <cstdlib>
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+using namespace std;
 
 
-class GriddingKernels
+/**
+ * @details
+ * Sets up the context before running each test method.
+ */
+void ImagingTest::setUp()
 {
-    public:
-        static float exp1D(const float r, const float sigma = 1.0f);
+}
 
-        static void exp2D(const unsigned support, const unsigned oversample,
-                const float sigma, float * cFunc);
-
-        static float expSinc1D(const float r);
-
-        static void expSinc2D(const unsigned support, const unsigned oversample,
-                float * cFunc);
-
-    private:
-        static float _expSinc(const float x, const float y);
-};
+/**
+ * @details
+ * Clean up routine called after each test is run.
+ */
+void ImagingTest::tearDown()
+{
+}
 
 
+/**
+ * @details
+ */
+void ImagingTest::test_convFunc()
+{
 
-} // namespace oskar
-#endif // OSKAR_MATH_GRIDDING_KERNELS_H_
+
+}
+
+
+
+/**
+ * @details
+ */
+void ImagingTest::test_wproj_convFunc()
+{
+
+}
+
+

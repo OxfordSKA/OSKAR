@@ -34,7 +34,6 @@ if (NOT OSKAR_SCRIPTS_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "scripts")
 endif()
 
-
 # === Set dependencies.
 include(dependencies)
 
@@ -45,6 +44,7 @@ include(compilerOptions)
 add_subdirectory(cuda)
 if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
     add_subdirectory(sky)
+    add_subdirectory(imaging)
     add_subdirectory(math)
     add_subdirectory(modules)
     add_subdirectory(ms)
@@ -53,8 +53,9 @@ if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
 endif ()
 
 
-
+####
 #### FIXME: Move all the packaging stuff to a separate cmake script.
+####
 # include(packaging)
 # - move the top level cmake so that we can install scripts, external libs etc.
 # - will also need to sort out the install of dependencies.
