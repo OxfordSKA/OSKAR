@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MODULES_CUDA_CORRELATOR_BW_H_
-#define OSKAR_MODULES_CUDA_CORRELATOR_BW_H_
+#ifndef OSKAR_SYNTHESIS_CUDA_CORRELATOR_H_
+#define OSKAR_SYNTHESIS_CUDA_CORRELATOR_H_
 
 /**
- * @file oskar_modules_cuda_correlator_bw.h
+ * @file oskar_synthesis_cuda_correlator.h
  */
 
-#include "oskar_modules_windows.h"
+#include "oskar_synthesis_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,7 +71,7 @@ extern "C" {
  * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
-int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
+int oskar_synthesis_cudaf_correlator(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* n, const float* eb, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
@@ -109,7 +109,7 @@ int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
  * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
-int oskar_modules_cudad_correlator_bw(int na, const double* ax,
+int oskar_synthesis_cudad_correlator(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* n, const double* eb, double ra0,
         double dec0, double lst0, int nsdt, double sdt,
@@ -119,4 +119,4 @@ int oskar_modules_cudad_correlator_bw(int na, const double* ax,
 }
 #endif
 
-#endif // OSKAR_MODULES_CUDA_CORRELATOR_BW_H_
+#endif // OSKAR_SYNTHESIS_CUDA_CORRELATOR_H_

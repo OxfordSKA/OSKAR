@@ -26,12 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "modules/cuda/oskar_modules_cuda_correlator_bw.h"
+#include "synthesis/oskar_synthesis_cuda_correlator.h"
 
-#include "cuda/kernels/oskar_cudak_dftw_3d_seq_out.h"
-#include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
-#include "cuda/kernels/oskar_cudak_correlator.h"
-#include "cuda/kernels/oskar_cudak_xyz2uvw.h"
+#include "math/cudak/oskar_math_cudak_dftw_3d_seq_out.h"
+#include "math/cudak/oskar_math_cudak_mat_mul_cc.h"
+#include "synthesis/cudak/oskar_synthesis_cudak_correlator.h"
+#include "synthesis/cudak/oskar_synthesis_cudak_xyz2uvw.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ extern "C" {
 
 // Single precision.
 
-int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
+int oskar_synthesis_cudaf_correlator(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* n, const float* eb, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
@@ -80,27 +80,28 @@ int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
         double ha0 = lst - ra0; // Must be double.
 
         // Compute the station u,v,w coordinates.
-        oskar_cudakf_xyz2uvw <<<rThd, rBlk>>>
+        oskar_synthesis_cudakf_xyz2uvw <<<rThd, rBlk>>>
                 (na, ax, ay, az, ha0, dec0, u, v, w);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Compute K-matrix of 3D DFT weights.
-        oskar_cudakf_dftw_3d_seq_out <<<kBlk, kThd, sMem>>>
+        oskar_math_cudakf_dftw_3d_seq_out <<<kBlk, kThd, sMem>>>
                 (na, u, v, w, ns, l, m, n, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Perform complex matrix element multiply of K with E * B.
-        oskar_cudakf_mat_mul_cc <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
+        oskar_math_cudakf_mat_mul_cc <<<mBlk, mThd>>>
+                (ns, na, kmat, emat, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
-        oskar_cudakf_correlator <<<vBlk, vThd, vsMem>>>
+        oskar_synthesis_cudakf_correlator <<<vBlk, vThd, vsMem>>>
                 (ns, na, kmat, u, v, l, m, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
@@ -112,7 +113,7 @@ int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
 
 // Double precision.
 
-int oskar_modules_cudad_correlator_bw(int na, const double* ax,
+int oskar_synthesis_cudad_correlator(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* n, const double* eb, double ra0,
         double dec0, double lst0, int nsdt, double sdt,
@@ -149,27 +150,28 @@ int oskar_modules_cudad_correlator_bw(int na, const double* ax,
         double ha0 = lst - ra0; // Must be double.
 
         // Compute the station u,v,w coordinates.
-        oskar_cudakd_xyz2uvw <<<rThd, rBlk>>>
+        oskar_synthesis_cudakd_xyz2uvw <<<rThd, rBlk>>>
                 (na, ax, ay, az, ha0, dec0, u, v, w);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Compute K-matrix of 3D DFT weights.
-        oskar_cudakd_dftw_3d_seq_out <<<kBlk, kThd, sMem>>>
+        oskar_math_cudakd_dftw_3d_seq_out <<<kBlk, kThd, sMem>>>
                 (na, u, v, w, ns, l, m, n, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Perform complex matrix element multiply of K with E * B.
-        oskar_cudakd_mat_mul_cc <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
+        oskar_math_cudakd_mat_mul_cc <<<mBlk, mThd>>>
+                (ns, na, kmat, emat, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
-        oskar_cudakd_correlator <<<vBlk, vThd, vsMem>>>
+        oskar_synthesis_cudakd_correlator <<<vBlk, vThd, vsMem>>>
                 (ns, na, kmat, u, v, l, m, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();

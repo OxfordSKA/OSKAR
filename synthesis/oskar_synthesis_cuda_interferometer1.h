@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MODULES_CUDA_CORRELATOR_BW_H_
-#define OSKAR_MODULES_CUDA_CORRELATOR_BW_H_
+#ifndef OSKAR_SYNTHESIS_CUDA_INTERFEROMETER1_H_
+#define OSKAR_SYNTHESIS_CUDA_INTERFEROMETER1_H_
 
 /**
- * @file oskar_modules_cuda_correlator_bw.h
+ * @file oskar_synthesis_cuda_interferometer1.h
  */
 
-#include "oskar_modules_windows.h"
+#include "oskar_synthesis_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,16 +41,11 @@ extern "C" {
 
 /**
  * @brief
- * Computes complex visibilities (single precision).
  *
  * @details
- * Computes complex visibilities.
  *
  * Note that all pointers are device pointers, and must not be dereferenced
  * in host code.
- *
- * The visibilities are returned in an array of length na * (na - 1) / 2,
- * so the Hermitian conjugate is not included.
  *
  * @param[in] na Number of antennas or stations.
  * @param[in] ax Array of local equatorial station x-positions in wavenumbers.
@@ -71,7 +66,7 @@ extern "C" {
  * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
-int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
+int oskar_synthesis_cudaf_interferometer1(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* n, const float* eb, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
@@ -79,44 +74,17 @@ int oskar_modules_cudaf_correlator_bw(int na, const float* ax,
 
 /**
  * @brief
- * Computes complex visibilities (double precision).
  *
  * @details
- * Computes complex visibilities.
  *
  * Note that all pointers are device pointers, and must not be dereferenced
  * in host code.
- *
- * The visibilities and their (u,v,w) coordinates are returned in arrays of
- * length na * (na - 1) / 2, so the Hermitian conjugate is not included.
- *
- * @param[in] na Number of antennas or stations.
- * @param[in] ax Array of local equatorial station x-positions in wavenumbers.
- * @param[in] ay Array of local equatorial station y-positions in wavenumbers.
- * @param[in] az Array of local equatorial station z-positions in wavenumbers.
- * @param[in] ns Number of sources.
- * @param[in] l Array of source l-positions.
- * @param[in] m Array of source m-positions.
- * @param[in] n Array of source n-positions (see note, above).
- * @param[in] eb Matrix of E * sqrt(B) (see note, above).
- * @param[in] ra0 Right Ascension of the phase tracking centre in radians.
- * @param[in] dec0 Declination of the phase tracking centre in radians.
- * @param[in] lst0 The local sidereal time at the start of the correlator dump.
- * @param[in] nsdt The number of averaging cycles to do.
- * @param[in] sdt The time interval between averages in seconds.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis The complex visibilities (see note, above).
- * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
-int oskar_modules_cudad_correlator_bw(int na, const double* ax,
-        const double* ay, const double* az, int ns, const double* l,
-        const double* m, const double* n, const double* eb, double ra0,
-        double dec0, double lst0, int nsdt, double sdt,
-        double lambda_bandwidth, double* vis, double* work);
+int oskar_synthesis_cudad_interferometer1();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_MODULES_CUDA_CORRELATOR_BW_H_
+#endif // OSKAR_SYNTHESIS_CUDA_INTERFEROMETER1_H_

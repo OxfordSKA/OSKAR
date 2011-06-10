@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "modules/cuda/oskar_modules_cuda_interferometer.h"
-#include "modules/cuda/oskar_modules_cuda_correlator_bw.h"
+#include "synthesis/oskar_synthesis_cuda_interferometer1.h"
+#include "synthesis/oskar_synthesis_cuda_correlator.h"
 
-#include "cuda/kernels/oskar_cudak_dftw_3d_seq_out.h"
-#include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
-#include "cuda/kernels/oskar_cudak_correlator.h"
-#include "cuda/kernels/oskar_cudak_xyz2uvw.h"
+#include "math/cudak/oskar_math_cudak_dftw_3d_seq_out.h"
+#include "math/cudak/oskar_math_cudak_mat_mul_cc.h"
+#include "synthesis/cudak/oskar_synthesis_cudak_correlator.h"
+#include "synthesis/cudak/oskar_synthesis_cudak_xyz2uvw.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +46,7 @@ extern "C" {
 
 // Single precision.
 
-int oskar_modules_cudaf_interferometer1(int na, const float* ax,
+int oskar_synthesis_cudaf_interferometer1(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* ra,
         const float* dec, const float* brightness, const int* nas,
         const float* asx, const float* asy, float ra0, float dec0,
@@ -81,7 +81,7 @@ int oskar_modules_cudaf_interferometer1(int na, const float* ax,
         // phase centre.
 
         // Evaluate and average visibility fringes for a fixed E-Jones.
-        oskar_modules_cudaf_correlator_bw(na, ax, ay, az, ns, l, m, n,
+        oskar_synthesis_cudaf_correlator(na, ax, ay, az, ns, l, m, n,
                 eb, ra0, dec0, lst0, nsdt, sdt, lambda_bandwidth, vis, cwork);
     }
 
@@ -94,11 +94,7 @@ int oskar_modules_cudaf_interferometer1(int na, const float* ax,
 
 // Double precision.
 
-int oskar_modules_cudad_interferometer1(int na, const double* ax,
-        const double* ay, const double* az, int ns, const double* l,
-        const double* m, const double* n, const double* eb, double ra0,
-        double dec0, double lst0, int nsdt, double sdt,
-        double lambda_bandwidth, double* vis, double* work)
+int oskar_synthesis_cudad_interferometer1()
 {
     return 0;
 }
