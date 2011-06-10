@@ -35,6 +35,7 @@
 #include <cassert> // disable asserts with #define NDEBUG before this include.
 #include <cstdio>
 #include <limits>
+#include <cstring>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -63,17 +64,17 @@ void WProjConvFunc::generateLM(const unsigned innerSize, const unsigned padding,
         _convFunc.resize(_size * _size, Complex(0.0, 0.0));
 
     // Generate the LM plane phase screen.
-    _wFuncLMPadded(innerSize, _size, pixelSizeLM_rads, w, &_convFunc[0]);
+    wFuncLMPadded(innerSize, _size, pixelSizeLM_rads, w, &_convFunc[0]);
 
     // Apply the image plane taper.
-    _applyExpTaper(innerSize, _size, taperFactor, &_convFunc[0]);
+    applyExpTaper(innerSize, _size, taperFactor, &_convFunc[0]);
 }
 
 
 
 void WProjConvFunc::generateUV(const unsigned innerSize, const unsigned padding,
         const float pixelSizeLM_rads, const float w,
-        const float taperFactor, const float cutoff)
+        const float taperFactor, const float cutoff, const bool reorder)
 {
     // ==== Resize the function if needed.
     _size = innerSize * padding;
@@ -81,80 +82,42 @@ void WProjConvFunc::generateUV(const unsigned innerSize, const unsigned padding,
         _convFunc.resize(_size * _size, Complex(0.0, 0.0));
 
     // ==== Generate the LM plane phase screen.
-    _wFuncLMPadded(innerSize, _size, pixelSizeLM_rads, w, &_convFunc[0]);
+    wFuncLMPadded(innerSize, _size, pixelSizeLM_rads, w, &_convFunc[0]);
 
     // ==== Apply the image plane taper function.
-    _applyExpTaper(innerSize, _size, taperFactor, &_convFunc[0]);
+    applyExpTaper(innerSize, _size, taperFactor, &_convFunc[0]);
 
     // ==== FFT to UV plane.
-    _cfft2d(_size, &_convFunc[0]);
+    cfft2d(_size, &_convFunc[0]);
 
     // ==== Normalise
-    float max = _findMax(_size, &_convFunc[0]);
-    _scale(_size * _size, &_convFunc[0], 1.0f / max);
+    float max = findMax(_size, &_convFunc[0]);
+    scale(_size * _size, &_convFunc[0], 1.0f / max);
 
-    // ==== Find the index at the cutoff level.
-    // Search along the centre row going outwards from the centre.
-    int cutoffIndex = -1;
-    for (unsigned i = _size/2; i < _size; ++i)
-    {
-        const int idx = (_size / 2) * _size + i;
-//        printf("%d %f\n", i - _size/2, abs(_convFunc[idx]));
-        if (abs(_convFunc[idx]) < cutoff)
-        {
-            cutoffIndex = i - _size/2;
-            break;
-        }
-    }
-    printf("= cutoff index = %d\n", cutoffIndex);
+    // ==== Find the index into the kernel at the cutoff level.
+    const int cutoffIndex = findCutoffIndex(_size, &_convFunc[0], cutoff);
 
     // ==== Convert cutoff level index to grid pixel space.
-    // TODO: better way to do this using only half the size?
-    // Maximum possible number of pixels in the convolution function.
-    unsigned maxPixels = (unsigned) floor((float)_size / (float) padding);
-    // Convolution functions need to be odd sized.
-    if (maxPixels % 2 == 0) maxPixels--;
-    const unsigned maxRadius = (maxPixels - 1) / 2;
-
-    // Cutoff radius in grid pixels.
-    int cutoffPixelRadius = 0;
-
-    // Catch for when cutoff index isn't found.
-    if (cutoffIndex == -1)
-    {
-        fprintf(stderr, "WProjConvFunc::generateUV(): Cutoff level not found!");
-        cutoffPixelRadius = 1;
-    }
-
-    // Everything is good.
-    else
-    {
-        cutoffPixelRadius = (int) ceil((float)cutoffIndex / (float) padding);
-    }
-
-    // Set upper limit to radius. TODO(should this ever happen?)
-    if (cutoffPixelRadius > (int)maxRadius)
-        cutoffPixelRadius = maxRadius;
-
-    // Set the minimum number of pixels.
-    if (cutoffPixelRadius < 2)
-    {
-        fprintf(stderr, "WProjConvFunc::generateUV(): "
-                "Cutoff radius too small, defaulting to minimum size of 2.");
-        cutoffPixelRadius = 2;
-    }
+    const unsigned cutoffPixelRadius = evaluateCutoffPixelRadius(_size, padding,
+            cutoffIndex);
 
     // ====  Reshape to a number of grid pixels.
-    // TODO!
+    reshape(cutoffPixelRadius, padding);
+
+
+    // ==== Reorder convolution function memory (to make loading in gridding more
+    // efficient?)
+    if (reorder)
+        reorder_memory(padding, _size, &_convFunc[0]);
 }
 
 
 
-void WProjConvFunc::_wFuncLMPadded(const unsigned innerSize, const unsigned size,
-        const float pixelSizeLM_rads, const float w, Complex * convFunc)
+void WProjConvFunc::wFuncLMPadded(const unsigned innerSize, const unsigned size,
+        const float pixelSizeLM_rads, const float w, Complex * convFunc) const
 {
-    const unsigned centre = (unsigned)ceil((float)size / 2.0f);
-    const int radius = innerSize / 2.0f;
+    const unsigned centre = size / 2;
+    const int radius = innerSize / 2;
     const float twoPiW = M_PI * 2.0 * w;
     const float max_r2 = (radius * pixelSizeLM_rads) * (radius * pixelSizeLM_rads);
 
@@ -181,12 +144,11 @@ void WProjConvFunc::_wFuncLMPadded(const unsigned innerSize, const unsigned size
 }
 
 
-
-void WProjConvFunc::_applyExpTaper(const unsigned innerSize, const unsigned size,
-        const float taperFactor, Complex * convFunc)
+void WProjConvFunc::applyExpTaper(const unsigned innerSize, const unsigned size,
+        const float taperFactor, Complex * convFunc) const
 {
-    const unsigned centre = (unsigned)ceil((float)size / 2.0f);
-    const int radius = innerSize / 2.0f;
+    const unsigned centre = size / 2;
+    const int radius = innerSize / 2;
 
     for (int j = -radius; j <= radius; ++j)
     {
@@ -201,13 +163,15 @@ void WProjConvFunc::_applyExpTaper(const unsigned innerSize, const unsigned size
             const float y2 = y * y;
             const float taper = exp(-(x2 + y2) * taperFactor);
 
+            //convFunc[idx] = Complex(1.0f, 0.0f);//taper;
             convFunc[idx] *= taper;
         }
     }
 }
 
+
 // TODO(optimisation): Don't recreate the fftw plane each time this is called.
-void WProjConvFunc::_cfft2d(const unsigned size, Complex * convFunc)
+void WProjConvFunc::cfft2d(const unsigned size, Complex * convFunc) const
 {
     FFTUtility::fftPhase(size, size, convFunc);
     fftwf_complex * c = reinterpret_cast<fftwf_complex*>(convFunc);
@@ -219,20 +183,130 @@ void WProjConvFunc::_cfft2d(const unsigned size, Complex * convFunc)
     FFTUtility::fftPhase(size, size, convFunc);
 }
 
-float WProjConvFunc::_findMax(const unsigned size, Complex * convFunc)
+
+float WProjConvFunc::findMax(const unsigned size, Complex * convFunc) const
 {
     // TODO(optimisation): Can just use the mid point?
     float convmax = -numeric_limits<float>::max();
-    for (unsigned i = 0; i < _size * _size; ++i)
-        convmax = max(convmax, abs(_convFunc[i]));
+    for (unsigned i = 0; i < size * size; ++i)
+        convmax = max(convmax, abs(convFunc[i]));
     return convmax;
 }
 
 
-void WProjConvFunc::_scale(const unsigned size, Complex * convFunc, const float value)
+void WProjConvFunc::scale(const unsigned size, Complex * convFunc,
+        const float value) const
 {
     for (unsigned i = 0; i < size; ++i)
         convFunc[i] *= value;
 }
+
+
+int WProjConvFunc::findCutoffIndex(const unsigned size,
+        const Complex * convFunc, const float cutoff) const
+{
+    int cutoffIndex = -1;
+    for (unsigned i = size/2; i < size; ++i)
+    {
+        const int idx = (size / 2) * size + i;
+        if (abs(convFunc[idx]) < cutoff)
+        {
+            cutoffIndex = i - size/2;
+            break;
+        }
+    }
+    return cutoffIndex;
+}
+
+
+unsigned WProjConvFunc::evaluateCutoffPixelRadius(const unsigned size,
+        const unsigned padding, const int cutoffIndex, const unsigned minRadius)
+{
+    // TODO(better way to do this using only half the size?)
+    // Maximum possible number of pixels in the convolution function.
+    unsigned maxPixels = (unsigned) floor((float)size / (float) padding);
+    // Convolution functions need to be odd sized.
+    if (maxPixels % 2 == 0) maxPixels--;
+    const unsigned maxRadius = (maxPixels - 1) / 2;
+
+    // Cutoff radius in grid pixels.
+    unsigned cutoffPixelRadius = 0;
+
+    // Catch for when cutoff index isn't found.
+    if (cutoffIndex == -1)
+    {
+        fprintf(stderr, "WProjConvFunc::generateUV(): Cutoff level not found!\n");
+        cutoffPixelRadius = 1;
+    }
+
+    // Everything is good.
+    else
+    {
+        cutoffPixelRadius = (int) ceil((float)cutoffIndex / (float) padding);
+    }
+
+    // Set upper limit to radius. TODO(should this ever happen?)
+    if (cutoffPixelRadius > maxRadius)
+        cutoffPixelRadius = maxRadius;
+
+    // Set the minimum number of pixels.
+    if (cutoffPixelRadius < minRadius)
+    {
+        fprintf(stderr, "WProjConvFunc::generateUV(): "
+                "Cutoff radius too small, defaulting to minimum size of 2.\n");
+        cutoffPixelRadius = minRadius;
+    }
+    return cutoffPixelRadius;
+}
+
+
+void WProjConvFunc::reshape(const unsigned cutoffPixelRadius,
+        const unsigned padding)
+{
+    const unsigned cut_size = (cutoffPixelRadius * 2 + 1) * padding;
+    vector<Complex> temp(cut_size * cut_size);
+    const size_t num_bytes_row = cut_size * sizeof(Complex);
+    const unsigned start_index = (_size / 2) - (int)floor((float) cut_size / 2.0f);
+
+    for (unsigned j = 0; j < cut_size; ++j)
+    {
+        const unsigned from_index = (j + start_index) * _size + start_index;
+        const Complex * from = &_convFunc[from_index];
+        Complex * to = &temp[j * cut_size];
+        memcpy((void*)to, (const void*)from, num_bytes_row);
+    }
+    _convFunc.resize(cut_size * cut_size);
+    _size = cut_size;
+    memcpy((void*)&_convFunc[0], (const void*)&temp[0], num_bytes_row * cut_size);
+}
+
+
+
+void WProjConvFunc::reorder_memory(const unsigned padding, const unsigned size,
+        Complex * convFunc)
+{
+    const unsigned size_pixels = size / padding;
+    const unsigned num_pixels = size_pixels * size_pixels;
+    vector<Complex> temp(size * size);
+    Complex * t = &temp[0];
+    for (unsigned j = 0; j < size_pixels; ++j)
+    {
+        for (unsigned q = 0; q < padding; ++q)
+        {
+            for (unsigned i = 0; i < size_pixels; ++i)
+            {
+                for (unsigned p = 0; p < padding; ++p)
+                {
+                    const unsigned from_idx = (j * padding + q) * size + (i * padding + p);
+                    const unsigned to_idx = (q * padding + p) * num_pixels + j * size_pixels + i;
+                    t[to_idx] = convFunc[from_idx];
+//                  printf("%d -> %d\n", from_idx, to_idx);
+                }
+            }
+        }
+    }
+    memcpy((void*)convFunc, (const void*)t, size * size * sizeof(Complex));
+}
+
 
 } // namespace oskar

@@ -61,20 +61,34 @@ class WProjConvFunc
 
         void generateUV(const unsigned innerSize, const unsigned padding,
                 const float pixelSizeLM_rads, const float w,
-                const float taperFactor, const float cutoff);
+                const float taperFactor, const float cutoff,
+                const bool reorder = false);
 
     private:
-        void _wFuncLMPadded(const unsigned innerSize, const unsigned size,
-                const float pixelSizeLM_rads, const float w, Complex * convFunc);
+        void wFuncLMPadded(const unsigned innerSize, const unsigned size,
+                const float pixelSizeLM_rads, const float w,
+                Complex * convFunc) const;
 
-        void _applyExpTaper(const unsigned innerSize, const unsigned size,
-                const float taperFactor, Complex * convFunc);
+        void applyExpTaper(const unsigned innerSize, const unsigned size,
+                const float taperFactor, Complex * convFunc) const;
 
-        void _cfft2d(const unsigned size, Complex * convFunc);
+        void cfft2d(const unsigned size, Complex * convFunc) const;
 
-        float _findMax(const unsigned size, Complex * convFunc);
+        float findMax(const unsigned size, Complex * convFunc) const;
 
-        void _scale(const unsigned size, Complex * convFunc, const float value);
+        void scale(const unsigned size, Complex * convFunc, const float value) const;
+
+        int findCutoffIndex(const unsigned size, const Complex * convFunc,
+                const float cutoff) const;
+
+        unsigned evaluateCutoffPixelRadius(const unsigned size,
+                const unsigned padding, const int cutoffIndex,
+                const unsigned minRadius = 2);
+
+        void reshape(const unsigned cutoffPixelRadius, const unsigned padding);
+
+        void reorder_memory(const unsigned padding, const unsigned size,
+                Complex * convFunc);
 
     private:
         std::vector<Complex> _convFunc;

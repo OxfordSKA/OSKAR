@@ -7,7 +7,7 @@ Complex * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
 {
     for (unsigned j = 0; j < ny; ++j)
     {
-        for (unsigned i = 0; i < ny; ++i)
+        for (unsigned i = 0; i < nx; ++i)
         {
             if ( (i + j) % 2 )
             {

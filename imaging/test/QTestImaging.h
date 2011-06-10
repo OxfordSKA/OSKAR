@@ -111,18 +111,20 @@ class QTestImaging : public QObject
 
         void wprojConvFunc()
         {
-            const unsigned innerSize = 128; // needs to be even
-            const unsigned padding = 2;   // can be even or odd.
-            const float imageWidthLM_rads = 10.0f * (M_PI / 180.0f);
-            const float pixelSizeLM_rads = imageWidthLM_rads / (float)innerSize;
+            const unsigned innerSize = 128;   // has to be even. (TODO: handle odd and even differently)
+            const unsigned padding   = 5;   // can be odd or even
+            const float imageWidthLM_rads = 5.0f * (M_PI / 180.0f);
+            const float pixelSizeLM_rads  = imageWidthLM_rads / (float)innerSize;
 
-            const float w = 500.0f;
+            const float w = 15000.0f;
             const float taperWidth = 0.2;
             const float sigma = taperWidth * (float)innerSize;
             const float sigma2 = sigma * sigma;
             const float taperFactor = 1.0f / (2.0f * sigma2);
 
-            const float cutoff = 0.001; // 0.1%
+            const float cutoff = 0.01; // 0.1%
+
+            const bool reorder = true;
 
             // Generate the convolution function.
             WProjConvFunc cLM;
@@ -130,15 +132,24 @@ class QTestImaging : public QObject
 
             WProjConvFunc cUV;
             cUV.generateUV(innerSize, padding, pixelSizeLM_rads, w, taperFactor,
-                    cutoff);
+                    cutoff, reorder);
 
             // Plot the convolution function.
             _p.push_back(new PlotWidget);
             _p.back()->plotImage(cLM.size(), cLM.values(), PlotWidget::RE, "WProjConvFunc LM Real");
             _p.push_back(new PlotWidget);
-            _p.back()->plotImage(cUV.size(), cUV.values(), PlotWidget::ABS, "WProjConvFunc UV Real");
+            _p.back()->plotImage(cUV.size(), cUV.values(), PlotWidget::RE, "WProjConvFunc UV Real");
         }
 
+
+//        void ConvFuncReorder()
+//        {
+//            WProjConvFunc c;
+//            const unsigned padding = 2;
+//            const unsigned size = 3 * padding;
+//            std::vector<Complex> data(size * size);
+//            c.reorder_memory(padding, size, &data[0]);
+//        }
 
     private:
         std::vector<PlotWidget*> _p;
