@@ -27,7 +27,7 @@
  */
 
 
-#include "cuda/kernels/oskar_cudak_apodisation.h"
+#include "beamforming/cudak/oskar_bf_cudak_apodisation.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
@@ -38,7 +38,7 @@
 // Single precision kernels.
 
 __global__
-void oskar_cudakf_apodisation_hann(const int na, const float* ax,
+void oskar_bf_cudakf_apodisation_hann(const int na, const float* ax,
         const float* ay, const int nb, const float fwhm, float2* weights)
 {
     // Antenna index being processed by the thread.
@@ -61,7 +61,7 @@ void oskar_cudakf_apodisation_hann(const int na, const float* ax,
 // Double precision kernels.
 
 __global__
-void oskar_cudakd_apodisation_hann(const int na, const double* ax,
+void oskar_bf_cudakd_apodisation_hann(const int na, const double* ax,
         const double* ay, const int nb, const double fwhm, double2* weights)
 {
     // Antenna index being processed by the thread.

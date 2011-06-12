@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_bp2hugw.h"
-#include "math/core/phase.h"
+#include "beamforming/cudak/oskar_bf_cudak_bp2hugw.h"
+#include "math/oskar_math_phase.h"
 
 // Shared memory pointer used by the kernel.
 extern __shared__ float2 smem[];
@@ -35,7 +35,7 @@ extern __shared__ float2 smem[];
 #define PI2 1.570796327f
 
 __global__
-void oskar_cudakf_bp2hugw(const int na, const float* ax, const float* ay,
+void oskar_bf_cudakf_bp2hugw(const int na, const float* ax, const float* ay,
         const float* aw, const float* ag, const float2* weights, const int ns,
         const float* saz, const float* sel, const float k,
         const int maxAntennasPerBlock, float2* image)
@@ -116,7 +116,7 @@ extern __shared__ double2 smemd[];
 #define PI2_D 1.570796327
 
 __global__
-void oskar_cudakd_bp2hugw(const int na, const double* ax, const double* ay,
+void oskar_bf_cudakd_bp2hugw(const int na, const double* ax, const double* ay,
         const double* aw, const double* ag, const double2* weights, const int ns,
         const double* saz, const double* sel, const double k,
         const int maxAntennasPerBlock, double2* image)

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_dftw_3d_seq_out.h"
+#include "math/cudak/oskar_math_cudak_dftw_3d_seq_out.h"
 
 // Single precision.
 
@@ -34,7 +34,7 @@
 extern __shared__ float smem[];
 
 __global__
-void oskar_cudakf_dftw_3d_seq_out(const int n_in, const float* x_in,
+void oskar_math_cudakf_dftw_3d_seq_out(const int n_in, const float* x_in,
         const float* y_in, const float* z_in, const int n_out,
         const float* x_out, const float* y_out, const float* z_out,
         float2* weights)
@@ -85,7 +85,7 @@ void oskar_cudakf_dftw_3d_seq_out(const int n_in, const float* x_in,
 extern __shared__ double smemd[];
 
 __global__
-void oskar_cudakd_dftw_3d_seq_out(const int n_in, const double* x_in,
+void oskar_math_cudakd_dftw_3d_seq_out(const int n_in, const double* x_in,
         const double* y_in, const double* z_in, const int n_out,
         const double* x_out, const double* y_out, const double* z_out,
         double2* weights)

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_antenna.h"
+#include "beamforming/cudak/oskar_bf_cudak_antenna.h"
 
 #define PI_2_F 1.57079633f
 #define PI_2_D 1.5707963267948966
@@ -34,7 +34,7 @@
 // Single precision kernels.
 
 __global__
-void oskar_cudakf_antenna_gaussian(const int ns, const float* se,
+void oskar_bf_cudakf_antenna_gaussian(const int ns, const float* se,
         float ag, float aw, float2* image)
 {
     // Pixel index being processed by the thread.
@@ -51,7 +51,7 @@ void oskar_cudakf_antenna_gaussian(const int ns, const float* se,
 }
 
 __global__
-void oskar_cudakf_antenna_sine(const int ns, const float* se, float2* image)
+void oskar_bf_cudakf_antenna_sine(const int ns, const float* se, float2* image)
 {
     // Pixel index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
@@ -63,7 +63,7 @@ void oskar_cudakf_antenna_sine(const int ns, const float* se, float2* image)
 }
 
 __global__
-void oskar_cudakf_antenna_sine_squared(const int ns, const float* se,
+void oskar_bf_cudakf_antenna_sine_squared(const int ns, const float* se,
         float2* image)
 {
     // Pixel index being processed by the thread.
@@ -78,7 +78,7 @@ void oskar_cudakf_antenna_sine_squared(const int ns, const float* se,
 // Double precision kernels.
 
 __global__
-void oskar_cudakd_antenna_gaussian(const int ns, const double* se,
+void oskar_bf_cudakd_antenna_gaussian(const int ns, const double* se,
         double ag, double aw, double2* image)
 {
     // Pixel index being processed by the thread.
@@ -95,7 +95,7 @@ void oskar_cudakd_antenna_gaussian(const int ns, const double* se,
 }
 
 __global__
-void oskar_cudakd_antenna_sine(const int ns, const double* se, double2* image)
+void oskar_bf_cudakd_antenna_sine(const int ns, const double* se, double2* image)
 {
     // Pixel index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
@@ -107,7 +107,7 @@ void oskar_cudakd_antenna_sine(const int ns, const double* se, double2* image)
 }
 
 __global__
-void oskar_cudakd_antenna_sine_squared(const int ns, const double* se,
+void oskar_bf_cudakd_antenna_sine_squared(const int ns, const double* se,
         double2* image)
 {
     // Pixel index being processed by the thread.

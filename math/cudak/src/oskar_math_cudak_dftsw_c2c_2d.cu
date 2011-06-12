@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_dftsw_c2c_2d.h"
+#include "math/cudak/oskar_math_cudak_dftsw_c2c_2d.h"
 
 // Single precision.
 
@@ -34,7 +34,7 @@
 extern __shared__ float2 smem[];
 
 __global__
-void oskar_cudakf_dftsw_c2c_2d(const int n_in, const float* x_in,
+void oskar_math_cudakf_dftsw_c2c_2d(const int n_in, const float* x_in,
         const float* y_in, const float2* weights_in, const int n_out,
         const float* x_out, const float* y_out, const int max_in_chunk,
         const float2* data, float2* output)
@@ -121,7 +121,7 @@ void oskar_cudakf_dftsw_c2c_2d(const int n_in, const float* x_in,
 extern __shared__ double2 smemd[];
 
 __global__
-void oskar_cudakd_dftsw_c2c_2d(const int n_in, const double* x_in,
+void oskar_math_cudakd_dftsw_c2c_2d(const int n_in, const double* x_in,
         const double* y_in, const double2* weights_in, const int n_out,
         const double* x_out, const double* y_out, const int max_in_chunk,
         const double2* data, double2* output)

@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
+#include "math/cudak/oskar_math_cudak_mat_mul_cc.h"
 
 // Single precision.
 
 __global__
-void oskar_cudakf_mat_mul_cc(int n1, int n2, const float2* a, const float2* b,
-        float2* c)
+void oskar_math_cudakf_mat_mul_cc(int n1, int n2, const float2* a,
+		const float2* b, float2* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x; // Fastest varying.
     int j = blockDim.y * blockIdx.y + threadIdx.y; // Slowest varying.
@@ -56,8 +56,8 @@ void oskar_cudakf_mat_mul_cc(int n1, int n2, const float2* a, const float2* b,
 // Double precision.
 
 __global__
-void oskar_cudakd_mat_mul_cc(int n1, int n2, const double2* a, const double2* b,
-        double2* c)
+void oskar_math_cudakd_mat_mul_cc(int n1, int n2, const double2* a,
+		const double2* b, double2* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x; // Fastest varying.
     int j = blockDim.y * blockIdx.y + threadIdx.y; // Slowest varying.

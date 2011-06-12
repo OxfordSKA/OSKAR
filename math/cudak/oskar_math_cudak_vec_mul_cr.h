@@ -26,19 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_VEC_MUL_CR_H_
-#define OSKAR_CUDAK_VEC_MUL_CR_H_
+#ifndef OSKAR_MATH_CUDAK_VEC_MUL_CR_H_
+#define OSKAR_MATH_CUDAK_VEC_MUL_CR_H_
 
 /**
- * @file oskar_cudak_vec_mul_cr.h
+ * @file oskar_math_cudak_vec_mul_cr.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __shared__
-    #define __constant__
-#endif
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -55,7 +50,8 @@
  * @param[out] c Output vector.
  */
 __global__
-void oskar_cudakf_vec_mul_cr(int n, const float2* a, const float* b, float2* c);
+void oskar_math_cudakf_vec_mul_cr(int n, const float2* a, const float* b,
+		float2* c);
 
 /**
  * @brief
@@ -72,7 +68,7 @@ void oskar_cudakf_vec_mul_cr(int n, const float2* a, const float* b, float2* c);
  * @param[out] c Output vector.
  */
 __global__
-void oskar_cudakd_vec_mul_cr(int n, const double2* a, const double* b,
+void oskar_math_cudakd_vec_mul_cr(int n, const double2* a, const double* b,
         double2* c);
 
-#endif // OSKAR_CUDAK_VEC_MUL_CR_H_
+#endif // OSKAR_MATH_CUDAK_VEC_MUL_CR_H_

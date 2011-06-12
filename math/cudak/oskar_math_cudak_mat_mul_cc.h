@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_MAT_MUL_CC_H_
-#define OSKAR_CUDAK_MAT_MUL_CC_H_
+#ifndef OSKAR_MATH_CUDAK_MAT_MUL_CC_H_
+#define OSKAR_MATH_CUDAK_MAT_MUL_CC_H_
 
 /**
- * @file oskar_cudak_mat_mul_cc.h
+ * @file oskar_math_cudak_mat_mul_cc.h
  */
 
-#include "cuda/CudaEclipse.h"
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -53,8 +53,8 @@
  * @param[out] c Output matrix.
  */
 __global__
-void oskar_cudakf_mat_mul_cc(int n1, int n2, const float2* a, const float2* b,
-        float2* c);
+void oskar_math_cudakf_mat_mul_cc(int n1, int n2, const float2* a,
+		const float2* b, float2* c);
 
 /**
  * @brief
@@ -74,7 +74,7 @@ void oskar_cudakf_mat_mul_cc(int n1, int n2, const float2* a, const float2* b,
  * @param[out] c Output matrix.
  */
 __global__
-void oskar_cudakd_mat_mul_cc(int n1, int n2, const double2* a, const double2* b,
-        double2* c);
+void oskar_math_cudakd_mat_mul_cc(int n1, int n2, const double2* a,
+		const double2* b, double2* c);
 
-#endif // OSKAR_CUDAK_MAT_MUL_CC_H_
+#endif // OSKAR_MATH_CUDAK_MAT_MUL_CC_H_

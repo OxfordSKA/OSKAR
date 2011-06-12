@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_vec_add_rr.h"
+#include "math/cudak/oskar_math_cudak_vec_add_rr.h"
 
 // Vector addition kernel.
 __global__
-void oskar_cudakf_vec_add_rr(int n, const float* a, const float* b, float* c)
+void oskar_math_cudakf_vec_add_rr(int n, const float* a, const float* b,
+		float* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)

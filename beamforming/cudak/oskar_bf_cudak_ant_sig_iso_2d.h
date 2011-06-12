@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_AS2HI_H_
-#define OSKAR_CUDAK_AS2HI_H_
+#ifndef OSKAR_BF_CUDAK_ANT_SIG_ISO_2D_H_
+#define OSKAR_BF_CUDAK_ANT_SIG_ISO_2D_H_
 
 /**
- * @file oskar_cudak_as2hi.h
+ * @file oskar_bf_cudak_ant_sig_iso_2d.h
  */
 
-#include "cuda/CudaEclipse.h"
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -68,8 +68,8 @@
  * @param[out] signals The computed antenna signals (see note, above).
  */
 __global__
-void oskar_cudakf_as2hi(const int na, const float* ax, const float* ay,
-        const int ns, const float* samp, const float3* strig, const float k,
-        const int maxSourcesPerBlock, float2* signals);
+void oskar_bf_cudakf_ant_sig_iso_2d(const int na, const float* ax,
+		const float* ay, const int ns, const float* samp, const float3* strig,
+		const float k, const int maxSourcesPerBlock, float2* signals);
 
-#endif // OSKAR_CUDAK_AS2HI_H_
+#endif // OSKAR_BF_CUDAK_ANT_SIG_ISO_2D_H_

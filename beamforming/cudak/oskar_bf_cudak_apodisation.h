@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_APODISATION_H_
-#define OSKAR_CUDAK_APODISATION_H_
+#ifndef OSKAR_BF_CUDAK_APODISATION_H_
+#define OSKAR_BF_CUDAK_APODISATION_H_
 
 /**
- * @file oskar_cudak_apodisation.h
+ * @file oskar_bf_cudak_apodisation.h
  */
 
-#include "cuda/CudaEclipse.h"
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -53,7 +53,7 @@
  * @param[in/out] weights Weights matrix to which to apply apodisation.
  */
 __global__
-void oskar_cudakf_apodisation_hann(const int na, const float* ax,
+void oskar_bf_cudakf_apodisation_hann(const int na, const float* ax,
         const float* ay, const int nb, const float fwhm, float2* weights);
 
 /**
@@ -74,7 +74,7 @@ void oskar_cudakf_apodisation_hann(const int na, const float* ax,
  * @param[in/out] weights Weights matrix to which to apply apodisation.
  */
 __global__
-void oskar_cudakd_apodisation_hann(const int na, const double* ax,
+void oskar_bf_cudakd_apodisation_hann(const int na, const double* ax,
         const double* ay, const int nb, const double fwhm, double2* weights);
 
-#endif // OSKAR_CUDAK_APODISATION_H_
+#endif // OSKAR_BF_CUDAK_APODISATION_H_

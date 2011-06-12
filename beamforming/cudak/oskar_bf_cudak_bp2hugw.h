@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_BP2HUGW_H_
-#define OSKAR_CUDAK_BP2HUGW_H_
+#ifndef OSKAR_BF_CUDAK_BP2HUGW_H_
+#define OSKAR_BF_CUDAK_BP2HUGW_H_
 
 /**
- * @file oskar_cudak_bp2hugw.h
+ * @file oskar_bf_cudak_bp2hugw.h
  */
 
-#include "cuda/CudaEclipse.h"
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -71,7 +71,7 @@
  * @param[out] image The computed beam pattern (see note, above).
  */
 __global__
-void oskar_cudakf_bp2hugw(const int na, const float* ax, const float* ay,
+void oskar_bf_cudakf_bp2hugw(const int na, const float* ax, const float* ay,
         const float* aw, const float* ag, const float2* weights, const int ns,
         const float* saz, const float* sel, const float k,
         const int maxAntennasPerBlock, float2* image);
@@ -112,9 +112,9 @@ void oskar_cudakf_bp2hugw(const int na, const float* ax, const float* ay,
  * @param[out] image The computed beam pattern (see note, above).
  */
 __global__
-void oskar_cudakd_bp2hugw(const int na, const double* ax, const double* ay,
+void oskar_bf_cudakd_bp2hugw(const int na, const double* ax, const double* ay,
         const double* aw, const double* ag, const double2* weights, const int ns,
         const double* saz, const double* sel, const double k,
         const int maxAntennasPerBlock, double2* image);
 
-#endif // OSKAR_CUDAK_BP2HUGW_H_
+#endif // OSKAR_BF_CUDAK_BP2HUGW_H_

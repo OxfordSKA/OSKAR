@@ -26,19 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_DFTW_3D_SEQ_OUT_H_
-#define OSKAR_CUDAK_DFTW_3D_SEQ_OUT_H_
+#ifndef OSKAR_MATH_CUDAK_DFTW_3D_SEQ_OUT_H_
+#define OSKAR_MATH_CUDAK_DFTW_3D_SEQ_OUT_H_
 
 /**
- * @file oskar_cudak_dftw_3d_seq_out.h
+ * @file oskar_math_cudak_dftw_3d_seq_out.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __shared__
-    #define __constant__
-#endif
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -65,7 +60,7 @@
  * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
  */
 __global__
-void oskar_cudakf_dftw_3d_seq_out(const int n_in, const float* x_in,
+void oskar_math_cudakf_dftw_3d_seq_out(const int n_in, const float* x_in,
         const float* y_in, const float* z_in, const int n_out,
         const float* x_out, const float* y_out, const float* z_out,
         float2* weights);
@@ -95,9 +90,9 @@ void oskar_cudakf_dftw_3d_seq_out(const int n_in, const float* x_in,
  * @param[out] weights Matrix of complex DFT weights (n_in columns, n_out rows).
  */
 __global__
-void oskar_cudakd_dftw_3d_seq_out(const int n_in, const double* x_in,
+void oskar_math_cudakd_dftw_3d_seq_out(const int n_in, const double* x_in,
         const double* y_in, const double* z_in, const int n_out,
         const double* x_out, const double* y_out, const double* z_out,
         double2* weights);
 
-#endif // OSKAR_CUDAK_DFTW_3D_SEQ_OUT_H_
+#endif // OSKAR_MATH_CUDAK_DFTW_3D_SEQ_OUT_H_

@@ -26,19 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_XYZ2UVW_H_
-#define OSKAR_CUDAK_XYZ2UVW_H_
+#ifndef OSKAR_SYNTHESIS_CUDAK_XYZ2UVW_H_
+#define OSKAR_SYNTHESIS_CUDAK_XYZ2UVW_H_
 
 /**
- * @file oskar_cudak_xyz2uvw.h
+ * @file oskar_synthesis_cudak_xyz2uvw.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __shared__
-    #define __constant__
-#endif
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -60,7 +55,7 @@
  * @param[out] w   Station w positions.
  */
 __global__
-void oskar_cudakf_xyz2uvw(int n, const float* x, const float* y,
+void oskar_synthesis_cudakf_xyz2uvw(int n, const float* x, const float* y,
         const float* z, float ha0, float dec0, float* u, float* v, float* w);
 
 /**
@@ -83,7 +78,8 @@ void oskar_cudakf_xyz2uvw(int n, const float* x, const float* y,
  * @param[out] w   Station w positions.
  */
 __global__
-void oskar_cudakd_xyz2uvw(int n, const double* x, const double* y,
-        const double* z, double ha0, double dec0, double* u, double* v, double* w);
+void oskar_synthesis_cudakd_xyz2uvw(int n, const double* x, const double* y,
+        const double* z, double ha0, double dec0, double* u, double* v,
+        double* w);
 
-#endif // OSKAR_CUDAK_XYZ2UVW_H_
+#endif // OSKAR_SYNTHESIS_CUDAK_XYZ2UVW_H_

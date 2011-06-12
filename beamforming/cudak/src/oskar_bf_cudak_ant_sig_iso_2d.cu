@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_as2hi.h"
-#include "math/core/phase.h"
+#include "beamforming/cudak/oskar_bf_cudak_ant_sig_iso_2d.h"
+#include "math/oskar_math_phase.h"
 
 // Shared memory pointer used by the kernel.
 extern __shared__ float2 smem[];
 
 __global__
-void oskar_cudakf_as2hi(const int na, const float* ax, const float* ay,
-        const int ns, const float* samp, const float3* strig, const float k,
-        const int maxSourcesPerBlock, float2* signals)
+void oskar_bf_cudakf_ant_sig_iso_2d(const int na, const float* ax,
+		const float* ay, const int ns, const float* samp, const float3* strig,
+		const float k, const int maxSourcesPerBlock, float2* signals)
 {
     // Get the antenna ID that this thread is working on.
     const int a = blockDim.x * blockIdx.x + threadIdx.x;

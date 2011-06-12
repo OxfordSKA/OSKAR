@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_ANTENNA_H_
-#define OSKAR_CUDAK_ANTENNA_H_
+#ifndef OSKAR_BF_CUDAK_ANTENNA_H_
+#define OSKAR_BF_CUDAK_ANTENNA_H_
 
 /**
- * @file oskar_cudak_antenna.h
+ * @file oskar_bf_cudak_antenna.h
  */
 
-#include "cuda/CudaEclipse.h"
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
@@ -51,7 +51,7 @@
  * @param[in,out] image Beam pattern data to which to apply antenna response.
  */
 __global__
-void oskar_cudakf_antenna_gaussian(const int ns, const float* se,
+void oskar_bf_cudakf_antenna_gaussian(const int ns, const float* se,
         float ag, float aw, float2* image);
 
 /**
@@ -68,7 +68,7 @@ void oskar_cudakf_antenna_gaussian(const int ns, const float* se,
  * @param[in,out] image Beam pattern data to which to apply antenna response.
  */
 __global__
-void oskar_cudakf_antenna_sine(const int ns, const float* se, float2* image);
+void oskar_bf_cudakf_antenna_sine(const int ns, const float* se, float2* image);
 
 /**
  * @brief
@@ -84,7 +84,7 @@ void oskar_cudakf_antenna_sine(const int ns, const float* se, float2* image);
  * @param[in,out] image Beam pattern data to which to apply antenna response.
  */
 __global__
-void oskar_cudakf_antenna_sine_squared(const int ns, const float* se,
+void oskar_bf_cudakf_antenna_sine_squared(const int ns, const float* se,
         float2* image);
 
 /**
@@ -103,7 +103,7 @@ void oskar_cudakf_antenna_sine_squared(const int ns, const float* se,
  * @param[in,out] image Beam pattern data to which to apply antenna response.
  */
 __global__
-void oskar_cudakd_antenna_gaussian(const int ns, const double* se,
+void oskar_bf_cudakd_antenna_gaussian(const int ns, const double* se,
         double ag, double aw, double2* image);
 
 /**
@@ -120,7 +120,7 @@ void oskar_cudakd_antenna_gaussian(const int ns, const double* se,
  * @param[in,out] image Beam pattern data to which to apply antenna response.
  */
 __global__
-void oskar_cudakd_antenna_sine(const int ns, const double* se,
+void oskar_bf_cudakd_antenna_sine(const int ns, const double* se,
         double2* image);
 
 /**
@@ -137,7 +137,7 @@ void oskar_cudakd_antenna_sine(const int ns, const double* se,
  * @param[in,out] image Beam pattern data to which to apply antenna response.
  */
 __global__
-void oskar_cudakd_antenna_sine_squared(const int ns, const double* se,
+void oskar_bf_cudakd_antenna_sine_squared(const int ns, const double* se,
         double2* image);
 
-#endif // OSKAR_CUDAK_ANTENNA_H_
+#endif // OSKAR_BF_CUDAK_ANTENNA_H_

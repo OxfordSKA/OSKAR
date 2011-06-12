@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PHASE_H_
-#define OSKAR_PHASE_H_
+#ifndef OSKAR_MATH_PHASE_H_
+#define OSKAR_MATH_PHASE_H_
 
 /**
- * @file phase.h
+ * @file oskar_math_phase.h
  */
 
 /**
@@ -165,4 +165,4 @@
         sinDec, cosDec, sinHA, cosHA) \
         (-(cosDec * (x * cosHA - y * sinHA) + z * sinDec))
 
-#endif // OSKAR_PHASE_H_
+#endif // OSKAR_MATH_PHASE_H_

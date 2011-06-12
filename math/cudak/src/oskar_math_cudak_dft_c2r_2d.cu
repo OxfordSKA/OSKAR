@@ -26,17 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_dft_c2r_2d.h"
-
-// Single precision.
+#include "math/cudak/oskar_math_cudak_dft_c2r_2d.h"
 
 // Shared memory pointer used by the kernel.
 extern __shared__ float4 c[];
 
+// Single precision.
+
 __global__
-void oskar_cudakf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
-        const float2* data_in, const int n_out, const float* x_out,
-        const float* y_out, const int max_in_chunk, float* output)
+void oskar_math_cudakf_dft_c2r_2d(int n_in, const float* x_in,
+		const float* y_in, const float2* data_in, const int n_out,
+		const float* x_out, const float* y_out, const int max_in_chunk,
+		float* output)
 {
     // Get the output position (pixel) ID that this thread is working on.
     const int i_out = blockDim.x * blockIdx.x + threadIdx.x;
@@ -95,15 +96,16 @@ void oskar_cudakf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
         output[i_out] = out;
 }
 
-// Double precision.
-
 // Shared memory pointer used by the kernel.
 extern __shared__ double4 cd[];
 
+// Double precision.
+
 __global__
-void oskar_cudakd_dft_c2r_2d(int n_in, const double* x_in, const double* y_in,
-        const double2* data_in, const int n_out, const double* x_out,
-        const double* y_out, const int max_in_chunk, double* output)
+void oskar_math_cudakd_dft_c2r_2d(int n_in, const double* x_in,
+		const double* y_in, const double2* data_in, const int n_out,
+		const double* x_out, const double* y_out, const int max_in_chunk,
+		double* output)
 {
     // Get the output position (pixel) ID that this thread is working on.
     const int i_out = blockDim.x * blockIdx.x + threadIdx.x;

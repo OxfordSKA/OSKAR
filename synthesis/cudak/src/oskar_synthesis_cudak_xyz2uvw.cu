@@ -31,7 +31,7 @@
 // Single precision.
 
 __global__
-void oskar_cudakf_xyz2uvw(int n, const float* x, const float* y,
+void oskar_synthesis_cudakf_xyz2uvw(int n, const float* x, const float* y,
         const float* z, float ha0, float dec0, float* u, float* v, float* w)
 {
     // Pre-compute sine and cosine of input angles.
@@ -67,7 +67,7 @@ void oskar_cudakf_xyz2uvw(int n, const float* x, const float* y,
 // Double precision.
 
 __global__
-void oskar_cudakd_xyz2uvw(int n, const double* x, const double* y,
+void oskar_synthesis_cudakd_xyz2uvw(int n, const double* x, const double* y,
         const double* z, double ha0, double dec0, double* u, double* v,
         double* w)
 {

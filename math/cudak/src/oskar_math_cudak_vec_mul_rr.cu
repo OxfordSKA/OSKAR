@@ -26,12 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/kernels/oskar_cudak_vec_mul_rr.h"
+#include "math/cudak/oskar_math_cudak_vec_mul_rr.h"
 
 // Single precision.
 
 __global__
-void oskar_cudakf_vec_mul_rr(int n, const float* a, const float* b, float* c)
+void oskar_math_cudakf_vec_mul_rr(int n, const float* a, const float* b,
+		float* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
@@ -41,7 +42,8 @@ void oskar_cudakf_vec_mul_rr(int n, const float* a, const float* b, float* c)
 // Double precision.
 
 __global__
-void oskar_cudakd_vec_mul_rr(int n, const double* a, const double* b, double* c)
+void oskar_math_cudakd_vec_mul_rr(int n, const double* a, const double* b,
+		double* c)
 {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
