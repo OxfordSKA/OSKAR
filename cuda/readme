@@ -1,3 +1,11 @@
+
+
+
+
+
+NOTE: This folder and its contents will soon be deprecated!
+
+
 File: src/cuda/readme
 ===============================================================================
 
@@ -46,12 +54,12 @@ NOTES: Testing and refactoring
 
 Overall principle:
 ------------------
-Variable and function names should be as exact as possible. If a comment is 
+Variable and function names should be as exact as possible. If a comment is
 required to describe it, the function is either doing too much, or the name
 can be clearer.
 The goal is to have code that reads like a story. Changing variable and function
 names and breaking them down into several functions if necessary to achieve
-this goal. 
+this goal.
 
 Questions:
 ----------
@@ -71,7 +79,7 @@ General goals:
         - names should be simple for a new reader of the code!
     - No real need to add "oskar_cuda" prefixes to source code:
         - Adding the prefix adds extremely little to the ease of use of the
-          library and readability of the code.          
+          library and readability of the code.
         - Modularity and be expressed thought a folder structure.
         - Its *very* unlikely that users will have functions with the same names
           as OSKAR library function calls.
@@ -84,7 +92,7 @@ General goals:
             #endif
           And from Matlab this is a non issue as functions are called
           indirectly via calllib() anyway.
-            
+
 - Improve testing.
     - Need both correctness and performance.
     - Simple tests of level-one functions.
@@ -96,7 +104,7 @@ General goals:
 - Improve deployment support.
     - Windows version DllExport macros.
     - Work out how best to include headers in an installed environment.
-   
+
 ==============================================================================
 
 
@@ -107,10 +115,10 @@ Todo:
 
 1. Brainstorm more logical groupings for the simulator.
 
-2. Come up with a descriptive narrative for what each function should do with 
+2. Come up with a descriptive narrative for what each function should do with
    the goal to come up with some better naming schemes and how to split up
    functions.
-   e.g.   
+   e.g.
    == e-jones evaluation function (better to call beam pattern?)
    == single level function. (rather than hierarchical)
    == generates the beam pattern in horizontal coordinates (is there any other?!)
@@ -122,21 +130,21 @@ Todo:
       == If this is getting too complicated split into several stages.
       == And write a wrapper for the simple stages if it is helpful.
       ->> this will lead to an interface which can be easily described as...
-      
+
 3. Go though all of the functions and check
     = What they do
     = How can they be better classified.
     = How can they be better named.
-     
+
 ==============================================================================
- 
+
 
 Name mapping:
 ===============================================================================
 Aims:
 = How can we make the names more descriptive without being overly long?
 = Are all of the descriptive terms really needed?
-   - afterall it is impossible to have everything in the name...?    
+   - afterall it is impossible to have everything in the name...?
 = Can we find some common properties to take out of the name?
 
 
@@ -155,10 +163,9 @@ Aims:
             - need to specify horizontal?  (could be folder?)
             - need to specify isotropic?   (could be folder?)
         - antenna_signals_2d_horizontal_isotropic()
----------------------------------------------------------------------------     
-       
+---------------------------------------------------------------------------
+
 
 - bf2hig  => (b)eam (f)ormer (2)-dimensional (h)orizontal (i)sotropic (g)eometric
-    
- 
- 
+
+
