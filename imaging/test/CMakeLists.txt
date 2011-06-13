@@ -27,12 +27,52 @@ target_link_libraries(imagingTest
 
 # === QtTest unit testing.
 if (QT_QTTEST_FOUND)
-    qt4_wrap_cpp(imaging_test_MOC QTestImaging.h)
-    add_executable(qtest_Imaging ${imaging_test_MOC})
-    target_link_libraries(qtest_Imaging
+    # WProjConvFunc test.
+    qt4_wrap_cpp(WProjConvFunc_test_MOC
+        QTestWProjConvFunc.h
+    )
+    add_executable(qtest_WProjConvFunc ${WProjConvFunc_test_MOC})
+    target_link_libraries(qtest_WProjConvFunc
         oskar_imaging
         oskar_widgets_plotting
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )
+
+    # ConvFunc test.
+    qt4_wrap_cpp(convFunc_test_MOC
+        QTestConvFunc.h
+    )
+    add_executable(qtest_ConvFunc ${convFunc_test_MOC})
+    target_link_libraries(qtest_ConvFunc
+        oskar_imaging
+        oskar_widgets_plotting
+        ${QT_QTTEST_LIBRARY}
+        ${QT_QTGUI_LIBRARY}
+    )
+
+    # Gridding test.
+    qt4_wrap_cpp(gridding_test_MOC
+        QTestGridding.h
+    )
+    add_executable(qtest_Gridder ${gridding_test_MOC})
+    target_link_libraries(qtest_Gridder
+        oskar_imaging
+        oskar_widgets_plotting
+        ${QT_QTTEST_LIBRARY}
+        ${QT_QTGUI_LIBRARY}
+    )
+
+    # Grid Image (standard -2d- kernel)
+    qt4_wrap_cpp(standard_grid_image_test_MOC
+        QTestStandardGridImage.h
+    )
+    add_executable(qtest_standard_grid_image ${standard_grid_image_test_MOC})
+    target_link_libraries(qtest_standard_grid_image
+        oskar_imaging
+        oskar_widgets_plotting
+        ${QT_QTTEST_LIBRARY}
+        ${QT_QTGUI_LIBRARY}
+    )
+
 endif ()

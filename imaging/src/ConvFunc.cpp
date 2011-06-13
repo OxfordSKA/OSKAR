@@ -27,9 +27,10 @@
  */
 
 #include "imaging/ConvFunc.h"
-#include "math/core/FloatingPointCompare.h"
+#include "imaging/floating_point_compare.h"
 
 #include <cmath>
+#include <cstring>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -41,6 +42,7 @@ namespace oskar {
 
 
 ConvFunc::ConvFunc()
+: _size(0), _support(0), _oversample(0)
 {
 }
 
@@ -50,103 +52,175 @@ ConvFunc::~ConvFunc()
 }
 
 
-float ConvFunc::exp(const float /*r2*/, const float /*sigma*/)
-{
-    return 1.0f;
-}
 
-float ConvFunc::expSinc(const float /*r*/)
+void ConvFunc::pillbox(const unsigned support, const unsigned oversample,
+        const float width)
 {
-    return 1.0f;
-}
+    const unsigned size = (support * 2 + 1) * oversample;
+    const int centre = size / 2;
+    const float inc = 1.0f / static_cast<float>(oversample);
 
-void ConvFunc::exp2D(const unsigned support,
-        const unsigned oversample, const float sigma, float * cFunc)
-{
-    const int size = (2 * support + 1) * oversample;
-    const int centre = (size - 1) / 2;
-    const float inc = 1.0f / (float)oversample;
-    const float p1 = 1.0f / (2.0f * sigma * sigma);
-
-    for (int j = 0; j < size; ++j)
+    if (_size != size)
     {
-        for (int i = 0; i < size; ++i)
-        {
-            const float y = float(j - centre) * inc;
-            const float x = float(i - centre) * inc;
-            const float r2 = x * x + y * y;
+        _convFunc.resize(size);
+        _size =  size;
+    }
 
-            cFunc[j * size + i] = exp(-r2 / p1);
-        }
+    float * amp = &_convFunc[0];
+    _oversample = oversample;
+    _support = support;
+
+    for (int i = 0; i < static_cast<int>(size); ++i)
+    {
+        const float x = static_cast<float>(i - centre) * inc;
+        const float abs_x = fabs(x);
+
+        if (abs_x > width)
+            amp[i] = 0.0f;
+
+        else if (isEqual<float>(abs_x, width))
+            amp[i] = 0.5f;
+
+        else
+            amp[i] = 1.0f;
+    }
+
+}
+
+
+
+void ConvFunc::exp(const unsigned support, const unsigned oversample)
+{
+    const unsigned size = (support * 2 + 1) * oversample;
+    const float inc = 1.0f / static_cast<float>(oversample);
+    const int centre = size / 2;
+
+    if (_size != size)
+    {
+        _convFunc.resize(size);
+        _size =  size;
+    }
+    _oversample = oversample;
+    _support = support;
+
+    float * amp = &_convFunc[0];
+
+    // AIPS 'CONVFN.FOR' values.
+    const float p1 = 1.0f / 1.55f;
+    const float p2 = 2.52f;
+
+    for (int i = 0; i < static_cast<int>(size); ++i)
+    {
+        const float x = static_cast<float>(i - centre) * inc;
+        const float x2 = pow((fabs(x) * p1), p2);
+        amp[i] = std::exp(-x2);
     }
 }
 
 
 
 
-
-
-void ConvFunc::expSinc2D(const unsigned support,
-        const unsigned oversample, float * cFunc)
+void ConvFunc::sinc(const unsigned support, const unsigned oversample)
 {
-    const int size = (2 * support + 1) * oversample;
-    const float inc = 1.0f / (float)oversample;
-    const int centre = (size - 1) / 2;
+    const unsigned size = (support * 2 + 1) * oversample;
+    const float inc = 1.0f / static_cast<float>(oversample);
+    const int centre = size / 2;
+    const float x_max = 3.0f; // AIPS = 3.0f
 
-    for (int j = 0; j < size; ++j)
+    if (_size != size)
     {
-        for (int i = 0; i < size; ++i)
+        _convFunc.resize(size, 0.0f);
+        _size =  size;
+    }
+
+    float * amp = &_convFunc[0];
+    _oversample = oversample;
+    _support = support;
+
+    const float p1 = 1.0f / 1.55f;
+
+    for (int i = 0; i < static_cast<int>(size); ++i)
+    {
+        const float x = static_cast<float>(i - centre) * inc;
+        const float abs_x = fabs(x);
+
+        if (isEqual<float>(abs_x, 0.0f))
+            amp[i] = 1.0f;
+
+        else if (abs_x < x_max)
         {
-            const float y = (j - centre) * inc;
-            const float x = (i - centre) * inc;
-            cFunc[j * size + i] = _expSinc(x, y);
+            const float arg = p1 * abs_x;
+            amp[i] = sin(arg) / arg;
         }
     }
 }
 
 
-float ConvFunc::_expSinc(const float x, const float y)
+
+void ConvFunc::expSinc(const unsigned support, const unsigned oversample)
 {
+    const unsigned size = (support * 2 + 1) * oversample;
+    const float inc = 1.0f / static_cast<float>(oversample);
+    const int centre = size / 2;
+    const float x_max = 3.0f; // AIPS = 3.0f
+
+    if (_size != size)
+    {
+        _convFunc.resize(size, 0.0f);
+        _size =  size;
+    }
+
+    float * amp = &_convFunc[0];
+    _oversample = oversample;
+    _support = support;
+
     const float p1 = M_PI / 1.55f;
     const float p2 = 1.0f / 2.52f;
     const float p3 = 2.0f;
 
-    const float x2 = pow((fabs(x) * p2), p3);
-    const float y2 = pow((fabs(y) * p2), p3);
-    const float r2 = x2 + y2;
-    const float ampExp = exp(-r2);
-    const float r = sqrt(r2);
-
-    float ampSinc = sin(r * p1) / (r * p1);
-    if (isEqual(r, 0.0f))
+    for (int i = 0; i < static_cast<int>(size); ++i)
     {
-        ampSinc = 1.0f;
+        const float x = static_cast<float>(i - centre) * inc;
+        const float abs_x = fabs(x);
+
+        if (abs_x < inc)
+        {
+            amp[i] = 1.0f;
+        }
+
+        else if (abs_x < x_max)
+        {
+            const float arg = p1 * abs_x;
+            const float ampSinc = sin(arg) / arg;
+            const float ampExp = std::exp(-pow((fabs(x) * p2), p3));
+            amp[i] = ampExp * ampSinc;
+        }
     }
-
-
-//    float ampSinc = 0.0f;
-//    if ( isEqual(x, 0.0f) && isEqual(y, 0.0f) )
-//    {
-//        ampSinc = 1.0f;
-//    }
-//    else if (isEqual(x, 0.0f))
-//    {
-//        ampSinc = sin(y * p1) / (y * p1);
-//    }
-//    else if (isEqual(y, 0.0f))
-//    {
-//        ampSinc = sin(x * p1) / (x * p1);
-//    }
-//    else
-//    {
-//        ampSinc = sin(x * p1) * sin(y * p1);
-//        ampSinc /= (x * p1 * y * p1);
-//    }
-
-    return (ampExp * ampSinc);
-    //return (ampSinc);
 }
 
 
+void ConvFunc::spherodial()
+{
+    // TODO!
+}
+
+
+void ConvFunc::makeConvFuncImage()
+{
+    std::vector<float> temp(_size * _size);
+    float * t = &temp[0];
+    float * c = &_convFunc[0];
+    for (unsigned j = 0; j < _size; ++j)
+    {
+        for (unsigned i = 0; i < _size; ++i)
+        {
+            t[j * _size + i] = c[j] * c[i];
+        }
+    }
+    _convFunc.resize(_size * _size);
+
+    memcpy((void*)&_convFunc[0], (const void*)&temp[0],
+            temp.size() * sizeof(float));
+}
 
 } // namespace oskar

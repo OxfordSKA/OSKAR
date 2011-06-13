@@ -29,20 +29,45 @@
 #ifndef OSKAR_MATH_GRIDDER_H_
 #define OSKAR_MATH_GRIDDER_H_
 
-#include <complex>
-#include <cmath>
-
-typedef std::complex<float> Complex;
+#include "imaging/oskar_types.h"
 
 namespace oskar {
 
 class Gridder
 {
     public:
-        static float oskar_math_gridder1(const unsigned n, const float * x,
-                const float * y, const Complex * amp, const unsigned cSupport,
-                unsigned cOversample, const float * cFunc, const unsigned gSize,
-                const float pixelSize, Complex * grid, float * gridSum);
+        // Standard gridding.
+        void grid_standard(const unsigned num_data,
+                const float * data_x,
+                const float * data_y,
+                const Complex * data_amp,
+                const unsigned support,
+                const unsigned oversample,
+                const float * conv_func,
+                const unsigned grid_size,
+                const float pixel_size,
+                Complex * grid,
+                float * grid_sum);
+
+        // Standard degridding.
+        void degrid_standard();
+
+        // WProjection gridding.
+
+
+        // WProjection degridding.
+
+    public:
+        void calculate_offset(const float x, const float pixel_size,
+                const unsigned oversample, int * x_grid,
+                int * x_conv_func);
+
+    private:
+        // Round away from zero (symmetric about zero).
+        float round_away_from_zero(const float x);
+
+        // Round towards from zero (symmetric about zero).
+        float round_towards_zero(const float x);
 };
 
 

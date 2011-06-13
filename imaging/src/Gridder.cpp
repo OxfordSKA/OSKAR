@@ -28,91 +28,115 @@
 
 #include "imaging/Gridder.h"
 #include "math/core/Rounding.h"
-#include <iostream>
+
+#include <cstdio>
+#include <cmath>
 
 using namespace std;
 
 namespace oskar {
 
-float Gridder::oskar_math_gridder1(const unsigned n, const float * x,
-        const float * y, const Complex * amp, const unsigned cSupport,
-        unsigned cOversample, const float * cFunc, const unsigned gSize,
-        const float pixelSize, Complex * grid, float * gridSum)
+void Gridder::grid_standard(
+        const unsigned num_data,
+        const float * data_x,
+        const float * data_y,
+        const Complex * data_amp,
+        const unsigned support,
+        const unsigned oversample,
+        const float * conv_func,
+        const unsigned grid_size,
+        const float pixel_size,
+        Complex * grid,
+        float * grid_sum)
 {
-    *gridSum = 0.0f;
+    *grid_sum = 0.0f;
 
-    if (x == 0 || y == 0 || amp == 0 || cFunc == 0 || grid == 0)
-    {
-        cerr << "ERROR: oskar_math_gridder1() Input data error." << endl;
-        return *gridSum;
-    }
+    const unsigned gcentre = (unsigned) floor((float)grid_size / 2.0f);
+    const unsigned csize = (support * 2) + 1;
+    const unsigned ccentre = (unsigned) floor((float)(csize * oversample) / 2.0f);
 
-    const unsigned gCentre = (unsigned) floor((float)gSize / 2.0f);
-    //const unsigned gSizeX = (unsigned) ceil((float)gSize / 2.0) + 1;
-    const unsigned cSize = cSupport * 2 + 1;
-    const unsigned cCentre = (unsigned) floor((float)(cSize * cOversample) / 2.0f);
-    //const float cRadius = (float)cSize / 2.0f;
+    int x_grid, x_conv_func, y_grid, y_conv_func;
 
     // Loop over data points and apply them to the grid.
-    for (unsigned i = 0; i < n; ++i)
+    for (unsigned i = 0; i < num_data; ++i)
     {
-        // Scale the input coordinates to grid space.
-        float xScaled = x[i] / pixelSize;
-        float yScaled = y[i] / pixelSize;
+        calculate_offset(data_x[i], pixel_size, oversample, &x_grid, &x_conv_func);
+        calculate_offset(data_y[i], pixel_size, oversample, &y_grid, &y_conv_func);
 
-        // Round to the closest grid cell.
-        const int xGrid = roundHalfUp0(xScaled);
-        const int yGrid = roundHalfUp0(yScaled);
+        x_grid += gcentre;
+        y_grid += gcentre;
+        x_conv_func += ccentre;
+        y_conv_func += ccentre;
 
-        // Index into the grid array.
-        const unsigned ixGrid = xGrid + gCentre;
-        const unsigned iyGrid = yGrid + gCentre;
+        const float aRe = data_amp[i].real();
+        const float aIm = data_amp[i].imag();
 
-        // Scaled distance from the nearest grid point.
-        const float xOffset = (float)xGrid - xScaled;
-        const float yOffset = (float)yGrid - yScaled;
-
-        // Kernel offset.
-//        const float xDelta = xOffset * (float)cOversample;
-//        const float yDelta = yOffset * (float)cOversample;
-
-        // Kernel offset.
-        const int ixConvFunc = roundHalfDown0(xOffset) + cCentre;
-        const int iyConvFunc = roundHalfDown0(yOffset) + cCentre;
-
-//        cout << "---------------" << endl;
-//        cout << "x[" << i << "] = " << x[i] << endl;
-//        cout << "xScaled     = " << xScaled << endl;
-//        cout << "xGrid       = " << xGrid << endl;
-//        cout << "ixGrid      = " << ixGrid << endl;
-//        cout << "xOffset     = " << xOffset << endl;
-////        cout << "xDelta      = " << xDelta << endl;
-//        cout << "ixConvFunc  = " << ixConvFunc << endl;
-
-        for (unsigned y = 0; y < cSize; ++y)
+        for (int iy = -(int)support; iy <= (int)support; ++iy)
         {
-            for (unsigned x = 0; x < cSize; ++x)
+            for (int ix = -(int)support; ix <= (int)support; ++ix)
             {
-                const unsigned gx = ixGrid - cSupport + x;
-                const unsigned gy = iyGrid - cSupport + y;
-                const unsigned gIdx = gy * gSize + gx;
-//                cout << "-- gx, gy = " << gx << ", " << gy << endl;
+                const int cx = (ix * (int)oversample) + x_conv_func;
+                const int cy = (iy * (int)oversample) + y_conv_func;
+                const float c = conv_func[cx] * conv_func[cy];
 
+                const int gx = x_grid + ix;
+                const int gy = y_grid + iy;
 
-                const unsigned cy = iyConvFunc + (y - cSupport) * cOversample;
-                const unsigned cx = ixConvFunc + (x - cSupport) * cOversample;
-                const unsigned cIdx = cy * (cSize * cOversample) + cx;
+                grid[gy * grid_size + gx] += Complex(c * aRe, c * aIm);
 
-                const float re = cFunc[cIdx] * amp[i].real();
-                const float im = cFunc[cIdx] * amp[i].imag();
-                grid[gIdx] += Complex(re, im);
-                *gridSum += cFunc[cIdx];
+                *grid_sum += c;
             }
         }
     }
-
-    return *gridSum;
 }
+
+
+void Gridder::degrid_standard()
+{
+}
+
+
+
+void Gridder::calculate_offset(const float x, const float pixel_size,
+        const unsigned oversample, int * x_grid,
+        int * x_conv_func)
+{
+    // Scale the input coordinates to grid space.
+    const float xScaled = x / pixel_size;
+
+    // Evaluate the closest grid cell.
+    *x_grid = (int)round_towards_zero(xScaled);
+
+    // Float distance from data point to nearest grid cell.
+    const float grid_delta = (*x_grid - xScaled);
+
+    // Increment in the convolution function look-up table.
+    const float conv_inc = 1.0f / static_cast<float>(oversample);
+
+    // Evaluate the index of the convolution kernel at the closest grid cell.
+    const float conv_delta = grid_delta / conv_inc;
+    *x_conv_func = (int)round_towards_zero(conv_delta);
+
+//    printf("conv_inc   = %f\n", conv_inc);
+//    printf("grid_delta = %f\n", grid_delta);
+//    printf("conv_delta = %f\n", conv_delta);
+//    printf("conv_x     = %d\n", *x_conv_func);
+}
+
+
+
+
+float Gridder::round_away_from_zero(const float x)
+{
+    return (x > 0.0f) ? std::floor(x + 0.5) : std::ceil(x - 0.5);
+}
+
+
+float Gridder::round_towards_zero(const float x)
+{
+    return (x > 0.0f) ? std::ceil(x - 0.5) : std::floor(x + 0.5);
+}
+
 
 } // namespace oskar
 

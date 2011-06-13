@@ -29,6 +29,8 @@
 #ifndef CONV_FUNC_H_
 #define CONV_FUNC_H_
 
+#include <vector>
+
 namespace oskar {
 
 /**
@@ -37,9 +39,6 @@ namespace oskar {
  * @brief
  *
  * @details
- * TODO(1) This should be a 1D evaluation used in a separable way.
- *    i.e. C(x,y) = C(x) * C(y)
- * TODO(2) Sort out interface in terms of radius, over-sample e.t.c.
  */
 
 class ConvFunc
@@ -49,25 +48,35 @@ class ConvFunc
         ~ConvFunc();
 
     public:
-//        static float pillbox();
+        float const * values() const { return  &_convFunc[0]; }
 
-        static float exp(const float r, const float sigma = 1.0f);
+        unsigned size() const { return _size; }
 
-//        static float sinc();
+        unsigned support() const { return _support; }
 
-        static float expSinc(const float r);
-
-//        static float spherodial();
+        unsigned oversample() const { return _oversample; }
 
     public:
-        // FIXME: remove 2d versions in favour of separable functions...
-        static void exp2D(const unsigned support, const unsigned oversample,
-                const float sigma, float * cFunc);
-        static void expSinc2D(const unsigned support, const unsigned oversample,
-                float * cFunc);
+
+        void pillbox(const unsigned support, const unsigned oversample,
+                const float width = 1.0f);
+
+        void exp(const unsigned support, const unsigned oversample);
+
+        void sinc(const unsigned support, const unsigned oversample);
+
+        void expSinc(const unsigned support, const unsigned oversample);
+
+        void spherodial(); // TODO!
+
+    public:
+        void makeConvFuncImage();
 
     private:
-        static float _expSinc(const float x, const float y);
+        std::vector<float> _convFunc;
+        unsigned _size;
+        unsigned _support;
+        unsigned _oversample;
 };
 
 

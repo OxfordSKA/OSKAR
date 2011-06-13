@@ -1,12 +1,11 @@
-#ifndef QTEST_IMAGING_H_
-#define QTEST_IMAGING_H_
+#ifndef QTEST_WPROJ_CONV_FUNC_H_
+#define QTEST_WPROJ_CONV_FUNC_H_
 
 /**
- * @file QTestImaging.h
+ * @file QTestWProjConvFunc.h
  */
 
 #include "widgets/plotting/PlotWidget.h"
-#include "imaging/ConvFunc.h"
 #include "imaging/WProjConvFunc.h"
 #include "imaging/oskar_types.h"
 
@@ -24,20 +23,20 @@ using namespace oskar;
 using namespace std;
 
 /**
- * @class QTestimaging
+ * @class QTestWProjConvFunc
  *
  * @brief
  *
  * @details
  */
 
-class QTestImaging : public QObject
+class QTestWProjConvFunc : public QObject
 {
         Q_OBJECT
 
     public:
-        QTestImaging() {}
-        ~QTestImaging()
+        QTestWProjConvFunc() {}
+        ~QTestWProjConvFunc()
         {
             for (unsigned i = 0; i < _p.size(); ++i)
                 delete _p[i];
@@ -124,7 +123,7 @@ class QTestImaging : public QObject
 
             const float cutoff = 0.01; // 0.1%
 
-            const bool reorder = true;
+            const bool reorder = false;
 
             // Generate the convolution function.
             WProjConvFunc cLM;
@@ -159,10 +158,10 @@ class QTestImaging : public QObject
 int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
-    QTestImaging test;
+    QTestWProjConvFunc test;
     QTest::qExec(&test, argc, argv);
     return app.exec();
 }
 
 
-#endif // QTEST_IMAGING_H_
+#endif // QTEST_WPROJ_CONV_FUNC_H_
