@@ -45,30 +45,30 @@ void GridCorrection::computeCorrection(ConvFunc & c, const unsigned grid_size)
 
     const float f = 1.0f / float(c_oversample);
 
+    for (int i = 0; i < static_cast<int>(grid_size); ++i)
+    {
+        const float x = (static_cast<float>(i - g_centre)) * g_inc;
+        const float abs_x = fabs(x);
+//        printf("x = %f %f\n", x, abs_x);
+
+        if (isEqual<float>(abs_x, 0.0f))
+            correction[i] = 1.0f;
+        else
+        {
+            const float arg = M_PI * abs_x * f;
+            correction[i] = sin(arg) / arg;
+        }
+    }
+
     for (unsigned j = 0; j < grid_size; ++j)
     {
-        const float x = ((float)j - g_centre) / float(grid_size);
+        const float x = (((float)j - g_centre)) / float(grid_size);
         for (unsigned i = 0; i < c_size; ++i)
         {
             const float arg = 2 * M_PI * x * c_x[i];
             correction[j] += convFunc[i] * cos(arg);
         }
     }
-
-//    for (int i = 0; i < static_cast<int>(grid_size); ++i)
-//    {
-//        const float x = (static_cast<float>(i - g_centre)) * g_inc;
-//        const float abs_x = fabs(x);
-////        printf("x = %f %f\n", x, abs_x);
-//
-//        if (isEqual<float>(abs_x, 0.0f))
-//            correction[i] *= 1.0f;
-//        else
-//        {
-//            const float arg = M_PI * abs_x * f;
-//            correction[i] *= sin(arg) / arg;
-//        }
-//    }
 
     float max = findMax();
     for (unsigned i = 0; i < grid_size; ++i)
