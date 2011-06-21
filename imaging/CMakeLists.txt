@@ -11,6 +11,7 @@ if (FFTW3_FOUND)
     set(imaging_SRC
         src/ConvFunc.cpp
         src/FFTUtility.cpp
+        src/GridCorrection.cpp
         src/Gridder.cpp
         src/WProjConvFunc.cpp
     )

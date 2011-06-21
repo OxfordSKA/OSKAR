@@ -10,6 +10,7 @@
 #include "imaging/Gridder.h"
 #include "imaging/FFTUtility.h"
 #include "imaging/oskar_types.h"
+#include "imaging/GridCorrection.h"
 
 #include <QtGui/QApplication>
 #include <QtCore/QObject>
@@ -60,6 +61,15 @@ class QTestStandardGridImage : public QObject
             //c.expSinc(support, oversample);
 //            c.sinc(support, oversample);
 
+//            {
+//                ConvFunc c1;
+//                //c1.expSinc(support, oversample);
+//                c1.exp(support, oversample);
+//                c1.makeConvFuncImage();
+//                _p.push_back(new PlotWidget);
+//                _p.back()->plotImage(c1.size(), c1.values(), "conv fn.");
+//            }
+
             // Data.
             vector<float> x;
             vector<float> y;
@@ -72,11 +82,11 @@ class QTestStandardGridImage : public QObject
             }
 
 //            {
-//                x.push_back(2.0f);
+//                x.push_back(5.0f);
 //                y.push_back(0.0f);
 //                amp.push_back(Complex(1.0f, 0.0f));
 //
-//                x.push_back(-2.0f);
+//                x.push_back(-5.0f);
 //                y.push_back(0.0f);
 //                amp.push_back(Complex(1.0f, 0.0f));
 //            }
@@ -84,7 +94,7 @@ class QTestStandardGridImage : public QObject
             const unsigned num_data = x.size();
 
             // Grid.
-            const unsigned grid_size = 128;
+            const unsigned grid_size = 32;
             vector<Complex> grid(grid_size * grid_size, Complex(0.0f, 0.0f));
             float grid_sum = 0.0;
             const float pixel_size = 1.0;
@@ -119,13 +129,55 @@ class QTestStandardGridImage : public QObject
             // Grid correct (use a 1d dft?)
             // C = C(x) * C(y)
             // FT(C) = ...
-            // see AIPS Q/SUB/NOTST/GRDTAB.FOR ...
+            // see AIPS ${VER}/Q/SUB/NOTST/GRDTAB.FOR ...
+            //          ${VER}/Q/DEV/PSAP/QRFT.FOR
+            //          ${VER}/Q/SUB/NOTST/GRDCOR.FOR <<--- this is good...
             // see CASA code/synthesis/MeasurementComponents/GridFT.cc
             //                       ----   line 318
             //    casacore/scimath/Mathmatrics/ConvolveGridder.h
             //    casacore/scimath/Mathmatrics/Gridder.h
+            GridCorrection gc;
+            gc.computeCorrection(c, grid_size);
+//            vector<float> xx(grid_size);
+//            for (unsigned i = 0; i < grid_size; ++i)
+//                xx[i] = float(i);
+//            _p.push_back(new PlotWidget);
+//            _p.back()->plotCurve(gc.size(), gc.values(), &xx[0], "correction");
+
+            gc.make2D();
+            const float * grid_correction = gc.values();
+            _p.push_back(new PlotWidget);
+            _p.back()->plotImage(grid_size, grid_correction, "correction");
+
+//            vector<float> ctest(grid_size * grid_size, 0.0f);
+//            for (unsigned j = 0; j < grid_size; ++j)
+//            {
+//                for (unsigned i = 0; i < grid_size; ++i)
+//                {
+//                    const unsigned idx = j * grid_size + i;
+//                    ctest[idx] = image[idx] - grid_correction[idx];
+//                }
+//            }
+//            _p.push_back(new PlotWidget);
+//            _p.back()->plotImage(grid_size, &ctest[0], "im - corr");
 
 
+            for (unsigned j = 0; j < grid_size; ++j)
+            {
+                for (unsigned i = 0; i < grid_size; ++i)
+                {
+                    const unsigned idx = j * grid_size + i;
+                    const float c = 1.0f / grid_correction[idx];
+//                    printf("%d %f %f %f\n", idx, c, image[idx], grid_correction[idx]);
+//                    if (fabs(c) < 1.0e2f)
+//                    {
+                    image[idx] *= c;
+//                    }
+                }
+            }
+
+            _p.push_back(new PlotWidget);
+            _p.back()->plotImage(grid_size, &image[0], "c image");
         }
 
 

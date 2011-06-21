@@ -106,6 +106,7 @@ void Gridder::calculate_offset(const float x, const float pixel_size,
 
     // Evaluate the closest grid cell.
     *x_grid = (int)round_towards_zero(xScaled);
+    //*x_grid = (int)round_away_from_zero(xScaled);
 
     // Float distance from data point to nearest grid cell.
     const float grid_delta = (*x_grid - xScaled);
@@ -116,6 +117,7 @@ void Gridder::calculate_offset(const float x, const float pixel_size,
     // Evaluate the index of the convolution kernel at the closest grid cell.
     const float conv_delta = grid_delta / conv_inc;
     *x_conv_func = (int)round_towards_zero(conv_delta);
+    //*x_conv_func = (int)round_away_from_zero(conv_delta);
 
 //    printf("conv_inc   = %f\n", conv_inc);
 //    printf("grid_delta = %f\n", grid_delta);

@@ -31,6 +31,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <cstdio>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -106,12 +107,16 @@ void ConvFunc::exp(const unsigned support, const unsigned oversample)
     float * amp = &_convFunc[0];
 
     // AIPS 'CONVFN.FOR' values.
-    const float p1 = 1.0f / 1.55f;
-    const float p2 = 2.52f;
+//    const float p1 = 1.0f / 1.55f;
+//    const float p2 = 2.52f;
+    const float p1 = 1.0f;
+    const float p2 = 2.0f;
+
 
     for (int i = 0; i < static_cast<int>(size); ++i)
     {
         const float x = static_cast<float>(i - centre) * inc;
+        printf("%f\n", x);
         const float x2 = pow((fabs(x) * p1), p2);
         amp[i] = std::exp(-x2);
     }
@@ -162,7 +167,7 @@ void ConvFunc::expSinc(const unsigned support, const unsigned oversample)
     const unsigned size = (support * 2 + 1) * oversample;
     const float inc = 1.0f / static_cast<float>(oversample);
     const int centre = size / 2;
-    const float x_max = 3.0f; // AIPS = 3.0f
+    const float x_max = 4.0f; // AIPS = 3.0f
 
     if (_size != size)
     {
@@ -203,6 +208,7 @@ void ConvFunc::spherodial()
 {
     // TODO!
 }
+
 
 
 void ConvFunc::makeConvFuncImage()

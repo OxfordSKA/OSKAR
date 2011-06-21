@@ -44,32 +44,45 @@ namespace oskar {
 class ConvFunc
 {
     public:
+        /// Constructor.
         ConvFunc();
+        /// Destructor.
         ~ConvFunc();
 
     public:
+        /// Return a pointer to the gridding kernel data.
         float const * values() const { return  &_convFunc[0]; }
 
+        /// Return the size of the gridding kernel.
         unsigned size() const { return _size; }
 
+        /// Return the support radius of the gridding kernel.
         unsigned support() const { return _support; }
 
+        /// Return the number of pixels per cell (oversample).
         unsigned oversample() const { return _oversample; }
 
     public:
-
+        /// Generate a pill-box gridding kernel.
         void pillbox(const unsigned support, const unsigned oversample,
                 const float width = 1.0f);
 
+        /// Generate a Gaussian gridding kernel.
         void exp(const unsigned support, const unsigned oversample);
 
+        /// Generate a Sinc gridding kernel.
         void sinc(const unsigned support, const unsigned oversample);
 
+        /// Generate a Gaussian times Sinc gridding kernel.
         void expSinc(const unsigned support, const unsigned oversample);
 
+        /// Generate a spheroidal gridding kernel.
         void spherodial(); // TODO!
 
     public:
+        // NOTE(For testing only)
+        // (might be better to have this function outside not part of this
+        // class as it modifies convolution function to make it 2D)
         void makeConvFuncImage();
 
     private:
@@ -78,8 +91,6 @@ class ConvFunc
         unsigned _support;
         unsigned _oversample;
 };
-
-
 
 } // namespace oskar
 #endif // CONV_FUNC_H_
