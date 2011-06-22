@@ -30,12 +30,16 @@ fftwf_complex * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
     {
         for (unsigned i = 0; i < nx; ++i)
         {
-            if ( (i + j) % 2 )
-            {
-                const unsigned idx = j * nx + i;
-                data[idx][0] = -data[idx][0];
-                data[idx][1] = -data[idx][1];
-            }
+            const unsigned idx = j * nx + i;
+            const int f = (int)pow(-1.0, i + j);
+            data[idx][0] *= f;
+            data[idx][1] *= f;
+//            if ( (i + j) % 2 )
+//            {
+//                const unsigned idx = j * nx + i;
+//                data[idx][0] = -data[idx][0];
+//                data[idx][1] = -data[idx][1];
+//            }
         }
     }
     return data;

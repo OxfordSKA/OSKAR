@@ -82,6 +82,8 @@ class ImagePlot : public QwtPlotSpectrogram
         /// Returns the amplitude range (const overload).
         const QwtDoubleInterval& ampRange() const { return _range; }
 
+        const ImagePlotData * getData() const { return &_data; }
+
     private:
         ImagePlotData _data;        ///< Image plot data object.
         QwtDoubleInterval _range;   ///< Image plot amplitude range.

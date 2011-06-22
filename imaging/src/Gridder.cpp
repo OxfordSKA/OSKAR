@@ -47,9 +47,9 @@ void Gridder::grid_standard(
         const unsigned grid_size,
         const float pixel_size,
         Complex * grid,
-        float * grid_sum)
+        double * grid_sum)
 {
-    *grid_sum = 0.0f;
+    *grid_sum = 0.0;
 
     const unsigned gcentre = (unsigned) floor((float)grid_size / 2.0f);
     const unsigned csize = (support * 2) + 1;
@@ -84,7 +84,7 @@ void Gridder::grid_standard(
 
                 grid[gy * grid_size + gx] += Complex(c * aRe, c * aIm);
 
-                *grid_sum += c;
+                *grid_sum += (double)c;
             }
         }
     }
@@ -105,6 +105,7 @@ void Gridder::calculate_offset(const float x, const float pixel_size,
     const float xScaled = x / pixel_size;
 
     // Evaluate the closest grid cell.
+//    *x_grid = int(xScaled);
     *x_grid = (int)round_towards_zero(xScaled);
     //*x_grid = (int)round_away_from_zero(xScaled);
 
@@ -116,6 +117,7 @@ void Gridder::calculate_offset(const float x, const float pixel_size,
 
     // Evaluate the index of the convolution kernel at the closest grid cell.
     const float conv_delta = grid_delta / conv_inc;
+    //*x_conv_func = int(conv_delta);
     *x_conv_func = (int)round_towards_zero(conv_delta);
     //*x_conv_func = (int)round_away_from_zero(conv_delta);
 

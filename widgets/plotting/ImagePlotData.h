@@ -79,6 +79,20 @@ class ImagePlotData: public QwtRasterData
         /// Set the y range to display.
         void setRangeY(double min, double max);
 
+        int column(double x) const;
+        int row(double y) const;
+
+
+        QwtDoubleInterval xRange() const { return _xRange; }
+        QwtDoubleInterval yRange() const { return _yRange; }
+        QwtDoubleInterval ampRange() const { return _ampRange; }
+
+        unsigned sizeX() const { return _sizeX; }
+        unsigned sizeY() const { return _sizeY; }
+
+        double intervalX() const { return _intervalX; }
+        double intervalY() const { return _intervalY; }
+
     public:
         /// Return the value at a raster position (override of pure virtual
         /// method).

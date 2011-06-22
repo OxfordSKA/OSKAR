@@ -181,7 +181,7 @@ class QTestGridding : public QObject
             // Grid.
             const unsigned grid_size = 40;
             vector<Complex> grid(grid_size * grid_size, Complex(0.0f, 0.0f));
-            float grid_sum = 0.0;
+            double grid_sum = 0.0;
             const float pixel_size = 1.0;
 
             // Gridding.

@@ -97,6 +97,10 @@ class PlotWidget : public QwtPlot
                 const float * x = 0, const QString & title = "",
                 bool append = false);
 
+        /// Plot a curve (wrapper to above function).
+        void plotCurve(const unsigned nPoints, const float * y,
+                const QString & title = "", bool append = false);
+
         /// Plot an image
         void plotImage(float const * data, unsigned nX, unsigned nY,
                 double xMin, double xMax, double yMin, double yMax,

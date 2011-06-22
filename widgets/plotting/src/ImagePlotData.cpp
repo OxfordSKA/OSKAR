@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+#include <cstdio>
 
 using namespace std;
 
@@ -98,6 +99,27 @@ double ImagePlotData::value(double x, double y) const
 
     return _data[row * _sizeX + col];
 }
+
+
+int ImagePlotData::column(double x) const
+{
+    if (x > _xRange.maxValue() || x < _xRange.minValue()) return -1;
+    int col = int((x - _xRange.minValue()) / _intervalX);
+    if (col >= (int)_sizeX) col--;
+    return col;
+}
+
+
+
+int ImagePlotData::row(double y) const
+{
+    if (y > _yRange.maxValue() || y < _yRange.minValue()) return -1;
+    int row = int((y - _yRange.minValue()) / _intervalY);
+    if (row >= (int)_sizeY) row--;
+    return row;
+}
+
+
 
 
 /**

@@ -47,7 +47,7 @@ class Gridder
                 const unsigned grid_size,
                 const float pixel_size,
                 Complex * grid,
-                float * grid_sum);
+                double * grid_sum);
 
         // Standard degridding.
         void degrid_standard();

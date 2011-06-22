@@ -52,51 +52,49 @@ class QTestStandardGridImage : public QObject
         void image1()
         {
             const unsigned support = 3;
-            const unsigned oversample = 99;
+            const unsigned oversample = 49;
 
             // Convolution function.
             ConvFunc c;
             //c.pillbox(support, oversample);
-            c.exp(support, oversample);
-            //c.expSinc(support, oversample);
+            //c.exp(support, oversample);
+            c.expSinc(support, oversample);
 //            c.sinc(support, oversample);
 
-//            {
-//                ConvFunc c1;
-//                //c1.expSinc(support, oversample);
-//                c1.exp(support, oversample);
-//                c1.makeConvFuncImage();
-//                _p.push_back(new PlotWidget);
-//                _p.back()->plotImage(c1.size(), c1.values(), "conv fn.");
-//            }
+            {
+                ConvFunc c1 = c;
+                c1.makeConvFuncImage();
+                _p.push_back(new PlotWidget);
+                _p.back()->plotImage(c1.size(), c1.values(), "conv fn.");
+            }
 
             // Data.
             vector<float> x;
             vector<float> y;
             vector<Complex> amp;
 
-            {
-                x.push_back(0.0f);
-                y.push_back(0.0f);
-                amp.push_back(Complex(1.0f, 0.0f));
-            }
-
 //            {
-//                x.push_back(5.0f);
-//                y.push_back(0.0f);
-//                amp.push_back(Complex(1.0f, 0.0f));
-//
-//                x.push_back(-5.0f);
+//                x.push_back(0.0f);
 //                y.push_back(0.0f);
 //                amp.push_back(Complex(1.0f, 0.0f));
 //            }
 
+            {
+                x.push_back(5.15f);
+                y.push_back(0.0f);
+                amp.push_back(Complex(1.0f, 0.0f));
+
+                x.push_back(-5.15f);
+                y.push_back(0.0f);
+                amp.push_back(Complex(1.0f, 0.0f));
+            }
+
             const unsigned num_data = x.size();
 
             // Grid.
-            const unsigned grid_size = 32;
+            const unsigned grid_size = 2048;
             vector<Complex> grid(grid_size * grid_size, Complex(0.0f, 0.0f));
-            float grid_sum = 0.0;
+            double grid_sum = 0.0;
             const float pixel_size = 1.0;
 
             // Gridding.
@@ -149,17 +147,17 @@ class QTestStandardGridImage : public QObject
             _p.push_back(new PlotWidget);
             _p.back()->plotImage(grid_size, grid_correction, "correction");
 
-//            vector<float> ctest(grid_size * grid_size, 0.0f);
-//            for (unsigned j = 0; j < grid_size; ++j)
-//            {
-//                for (unsigned i = 0; i < grid_size; ++i)
-//                {
-//                    const unsigned idx = j * grid_size + i;
-//                    ctest[idx] = image[idx] - grid_correction[idx];
-//                }
-//            }
-//            _p.push_back(new PlotWidget);
-//            _p.back()->plotImage(grid_size, &ctest[0], "im - corr");
+            vector<float> ctest(grid_size * grid_size, 0.0f);
+            for (unsigned j = 0; j < grid_size; ++j)
+            {
+                for (unsigned i = 0; i < grid_size; ++i)
+                {
+                    const unsigned idx = j * grid_size + i;
+                    ctest[idx] = grid_correction[idx] - image[idx];
+                }
+            }
+            _p.push_back(new PlotWidget);
+            _p.back()->plotImage(grid_size, &ctest[0], "corr - im");
 
 
             for (unsigned j = 0; j < grid_size; ++j)
@@ -167,14 +165,26 @@ class QTestStandardGridImage : public QObject
                 for (unsigned i = 0; i < grid_size; ++i)
                 {
                     const unsigned idx = j * grid_size + i;
-                    const float c = 1.0f / grid_correction[idx];
+//                    const double c = 1.0f / grid_correction[idx];
 //                    printf("%d %f %f %f\n", idx, c, image[idx], grid_correction[idx]);
-//                    if (fabs(c) < 1.0e2f)
+//                    if (fabs(c) < 1.0e5f)
 //                    {
-                    image[idx] *= c;
+                    image[idx] /= grid_correction[idx];
 //                    }
                 }
             }
+
+
+            float c_image_max = -numeric_limits<float>::max();
+            float c_image_min = numeric_limits<float>::max();
+            for (unsigned i = 0; i < grid_size * grid_size; ++i)
+            {
+                c_image_max = max<float>(c_image_max, image[i]);
+                c_image_min = min<float>(c_image_min, image[i]);
+            }
+            printf("c image max = %f\n", c_image_max);
+            printf("c image min = %f\n", c_image_min);
+
 
             _p.push_back(new PlotWidget);
             _p.back()->plotImage(grid_size, &image[0], "c image");

@@ -95,6 +95,8 @@ void ConvFunc::exp(const unsigned support, const unsigned oversample)
     const unsigned size = (support * 2 + 1) * oversample;
     const float inc = 1.0f / static_cast<float>(oversample);
     const int centre = size / 2;
+    const float x_max = 3.0f;
+
 
     if (_size != size)
     {
@@ -106,19 +108,18 @@ void ConvFunc::exp(const unsigned support, const unsigned oversample)
 
     float * amp = &_convFunc[0];
 
-    // AIPS 'CONVFN.FOR' values.
-//    const float p1 = 1.0f / 1.55f;
-//    const float p2 = 2.52f;
     const float p1 = 1.0f;
     const float p2 = 2.0f;
-
 
     for (int i = 0; i < static_cast<int>(size); ++i)
     {
         const float x = static_cast<float>(i - centre) * inc;
-        printf("%f\n", x);
-        const float x2 = pow((fabs(x) * p1), p2);
-        amp[i] = std::exp(-x2);
+        const float abs_x = fabs(x);
+        const float x2 = pow(abs_x * p1, p2);
+        if (abs_x < x_max)
+            amp[i] = std::exp(-x2);
+        else
+            amp[i] = 0.0f;
     }
 }
 
@@ -130,7 +131,7 @@ void ConvFunc::sinc(const unsigned support, const unsigned oversample)
     const unsigned size = (support * 2 + 1) * oversample;
     const float inc = 1.0f / static_cast<float>(oversample);
     const int centre = size / 2;
-    const float x_max = 3.0f; // AIPS = 3.0f
+    const float x_max = 3.0f;
 
     if (_size != size)
     {
@@ -142,7 +143,7 @@ void ConvFunc::sinc(const unsigned support, const unsigned oversample)
     _oversample = oversample;
     _support = support;
 
-    const float p1 = 1.0f / 1.55f;
+    const float p1 = M_PI;
 
     for (int i = 0; i < static_cast<int>(size); ++i)
     {
@@ -167,7 +168,7 @@ void ConvFunc::expSinc(const unsigned support, const unsigned oversample)
     const unsigned size = (support * 2 + 1) * oversample;
     const float inc = 1.0f / static_cast<float>(oversample);
     const int centre = size / 2;
-    const float x_max = 4.0f; // AIPS = 3.0f
+    const float x_max = 3.0f;
 
     if (_size != size)
     {
@@ -192,13 +193,15 @@ void ConvFunc::expSinc(const unsigned support, const unsigned oversample)
         {
             amp[i] = 1.0f;
         }
-
+//        else
         else if (abs_x < x_max)
         {
             const float arg = p1 * abs_x;
             const float ampSinc = sin(arg) / arg;
+
             const float ampExp = std::exp(-pow((fabs(x) * p2), p3));
             amp[i] = ampExp * ampSinc;
+            //amp[i] = ampSinc;
         }
     }
 }

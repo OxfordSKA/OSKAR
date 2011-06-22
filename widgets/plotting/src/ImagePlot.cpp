@@ -28,9 +28,9 @@ void ImagePlot::setImageArray(const float * data, unsigned nx, unsigned ny,
         return;
     }
 
-    _data.setData(data, nx, ny);
     _data.setRangeX(xmin, xmax);
     _data.setRangeY(ymin, ymax);
+    _data.setData(data, nx, ny);
     setData(_data);
     setAmpRangeAuto();
 }

@@ -215,12 +215,20 @@ void PlotWidget::plotCurve(const unsigned nPoints, const float * y,
     vector<double> _x(nPoints), _y(nPoints);
     for (unsigned i = 0; i < nPoints; ++i)
     {
-        _x[i] = (x == 0) ? (double)i : (double)x[i];
+        _x[i] = (x == NULL) ? (double)i : (double)x[i];
         _y[i] = (double)y[i];
     }
     plotCurve(nPoints, &_x[0], &_y[0], false, false, append);
     setTitle(title);
     setWindowTitle(title);
+}
+
+
+
+void PlotWidget::plotCurve(const unsigned nPoints, const float * y,
+        const QString & title, bool append)
+{
+    plotCurve(nPoints, y, NULL, title, append);
 }
 
 
@@ -236,11 +244,9 @@ void PlotWidget::plotImage(const float * data, unsigned nX, unsigned nY,
         return;
     }
 
-    // Detach the curve from the widget.
+    // Detach all curves plot items from the plot widget.
     for (unsigned i = 0; i < _curve.size(); ++i)
-    {
         _curve[i]->detach();
-    }
 
     // Set the range and data array of the image plot.
     _image.setImageArray(data, nX, nY, xMin, xMax, yMin, yMax);
@@ -771,7 +777,14 @@ void PlotWidget::keyPressEvent(QKeyEvent* event)
             toggleGrid();
 
         else if (event->key() == Qt::Key_F5)
+        {
+            _colourMap.update();
+            _oldx = 0;
+            _oldy = 0;
+            _zoomer->zoom(_zoomer->zoomBase());
+            //_magnifier->rescale(1.0);
             replot();
+        }
 
         else if (event->key() == Qt::Key_T)
             menuSetTitle();
@@ -835,7 +848,6 @@ void PlotWidget::keyPressEvent(QKeyEvent* event)
             h += "[shift] + wheel\tMagnify plot.\n";
 
             QMessageBox::information(this, "Key-bindings help", h);
-
         }
     }
 }

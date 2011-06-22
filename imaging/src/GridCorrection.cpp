@@ -43,8 +43,9 @@ void GridCorrection::computeCorrection(ConvFunc & c, const unsigned grid_size)
     _size = grid_size;
     float * correction = &_correction[0];
 
+    // Sinc term sinc(pi * f * x) / (pi * f * x).
+    vector<float> fsinc(grid_size);
     const float f = 1.0f / float(c_oversample);
-
     for (int i = 0; i < static_cast<int>(grid_size); ++i)
     {
         const float x = (static_cast<float>(i - g_centre)) * g_inc;
@@ -52,23 +53,28 @@ void GridCorrection::computeCorrection(ConvFunc & c, const unsigned grid_size)
 //        printf("x = %f %f\n", x, abs_x);
 
         if (isEqual<float>(abs_x, 0.0f))
-            correction[i] = 1.0f;
+            fsinc[i] = 1.0f;
         else
         {
-            const float arg = M_PI * abs_x * f;
-            correction[i] = sin(arg) / arg;
+            const float arg = M_PI * f * abs_x;
+            fsinc[i] = sin(arg) / arg;
         }
     }
 
-    for (unsigned j = 0; j < grid_size; ++j)
+    // DFT of convolution function.
+    vector<float> csinc(grid_size);
+    for (unsigned i = 0; i < grid_size; ++i)
     {
-        const float x = (((float)j - g_centre)) / float(grid_size);
-        for (unsigned i = 0; i < c_size; ++i)
+        const float x = (((float)i - g_centre)) / float(grid_size);
+        for (unsigned j = 0; j < c_size; ++j)
         {
-            const float arg = 2 * M_PI * x * c_x[i];
-            correction[j] += convFunc[i] * cos(arg);
+            const float arg = -2 * M_PI * x * c_x[j];
+            csinc[i] += convFunc[j] * cos(arg);
         }
     }
+
+    for (unsigned i = 0; i < grid_size; ++i)
+        correction[i] = fsinc[i] * csinc[i];
 
     float max = findMax();
     for (unsigned i = 0; i < grid_size; ++i)
