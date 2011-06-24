@@ -30,7 +30,7 @@
 #include "ms/MsCreate.h"
 
 void oskar_ms_create_meta1(const char* name, double mjd, double ra, double dec,
-        int na, const float* ax, const float* ay, const float* az, double freq)
+        int na, const double* ax, const double* ay, const double* az, double freq)
 {
     // Create the MsCreate object, passing it the filename.
     oskar::MsCreate ms(name, mjd, 0, 0);

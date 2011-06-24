@@ -82,23 +82,27 @@ void MsAppendTest::test_c()
     double freq = 400e6;
 
     // Define antenna positions.
-    float ax[] = {0, 0, 0};
-    float ay[] = {0, 0, 0};
-    float az[] = {0, 0, 0};
-    int na = sizeof(ax) / sizeof(float);
+    double ax[] = {0, 0, 0};
+    double ay[] = {0, 0, 0};
+    double az[] = {0, 0, 0};
+    int na = sizeof(ax) / sizeof(double);
 
     // Define visibilities.
-    float u[] = {1000.0, 2000.01, 156.03};
-    float v[] = {0.0, -241.02, 1678.04};
-    float w[] = {0.0, -56.0, 145.0};
-    float vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
+    double u[] = {1000.0, 2000.01, 156.03};
+    double v[] = {0.0, -241.02, 1678.04};
+    double w[] = {0.0, -56.0, 145.0};
+    double vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
     int ant1[] = {0, 0, 1};
     int ant2[] = {1, 2, 2};
-    int nv = sizeof(u) / sizeof(float);
+    int nv = sizeof(u) / sizeof(double);
+
+    std::vector<double> times(nv, 0.0f);
+    for (int i = 0; i < nv; ++i)
+        times[i] = i * 0.01;
 
     oskar_ms_create_meta1(filename, mjd, ra, dec, na, ax, ay, az, freq);
     oskar_ms_append_vis1(filename, mjd, exposure, interval,
-            nv, u, v, w, vis, ant1, ant2);
+            nv, u, v, w, vis, ant1, ant2, &times[0]);
 }
 
 /**
@@ -117,26 +121,29 @@ void MsAppendTest::test_large()
     double freq = 400e6;
 
     // Define antenna positions.
-    float ax[] = {0, 0, 0};
-    float ay[] = {0, 0, 0};
-    float az[] = {0, 0, 0};
-    int na = sizeof(ax) / sizeof(float);
+    double ax[] = {0, 0, 0};
+    double ay[] = {0, 0, 0};
+    double az[] = {0, 0, 0};
+    int na = sizeof(ax) / sizeof(double);
 
     // Create the MS with the metadata
     oskar_ms_create_meta1(filename, mjd, ra, dec, na, ax, ay, az, freq);
 
     // Define visibilities.
     int nv = 1000;
-    std::vector<float> u(nv, 0.0f), v(nv, 0.0f), w(nv, 0.0f);
-    std::vector<float> vis(2*nv, 0.0f);
+    std::vector<double> u(nv, 0.0f), v(nv, 0.0f), w(nv, 0.0f);
+    std::vector<double> vis(2*nv, 0.0f);
     std::vector<int> ant1(nv, 0), ant2(nv, 0);
+    std::vector<double> times(nv, 0.0f);
+    for (int i = 0; i < nv; ++i)
+        times[i] = i * 0.01;
 
     // Append to MS.
     TIMER_START
     int blocks = 100;
     for (int b = 0; b < blocks; ++b) {
         oskar_ms_append_vis1(filename, mjd, exposure, interval,
-                nv, &u[0], &v[0], &w[0], &vis[0], &ant1[0], &ant2[0]);
+                nv, &u[0], &v[0], &w[0], &vis[0], &ant1[0], &ant2[0], &times[0]);
     }
     TIMER_STOP("Finished creating measurement set (%d visibilities)",
             nv * blocks)

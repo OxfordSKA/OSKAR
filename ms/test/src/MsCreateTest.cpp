@@ -61,10 +61,10 @@ void MsCreateTest::test()
     MsCreate ms("simple.ms", (2455632.20209 - 2400000.5), 90, 90);
 
     // Add some dummy antenna positions.
-    float ax[] = {0, 0, 0};
-    float ay[] = {0, 0, 0};
-    float az[] = {0, 0, 0};
-    int na = sizeof(ax) / sizeof(float);
+    double ax[] = {0, 0, 0};
+    double ay[] = {0, 0, 0};
+    double az[] = {0, 0, 0};
+    int na = sizeof(ax) / sizeof(double);
     ms.addAntennas(na, ax, ay, az);
 
     // Add the Right Ascension & Declination of field centre.
@@ -74,13 +74,13 @@ void MsCreateTest::test()
     ms.addBand(0, 1, 400e6, 1.0);
 
     // Add test visibilities (don't include conjugated versions).
-    float u[] = {1000.0, 2000.01, 156.03};
-    float v[] = {0.0, -241.02, 1678.04};
-    float w[] = {0.0, -56.0, 145.0};
-    float vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
+    double u[] = {1000.0, 2000.01, 156.03};
+    double v[] = {0.0, -241.02, 1678.04};
+    double w[] = {0.0, -56.0, 145.0};
+    double vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
     int ant1[] = {0, 0, 1};
     int ant2[] = {1, 2, 2};
-    int nv = sizeof(u) / sizeof(float);
+    int nv = sizeof(u) / sizeof(double);
     ms.addVisibilities(1, nv, u, v, w, vis, ant1, ant2);
 }
 
@@ -100,19 +100,19 @@ void MsCreateTest::test_c()
     double freq = 400e6;
 
     // Define antenna positions.
-    float ax[] = {0, 0, 0};
-    float ay[] = {0, 0, 0};
-    float az[] = {0, 0, 0};
-    int na = sizeof(ax) / sizeof(float);
+    double ax[] = {0, 0, 0};
+    double ay[] = {0, 0, 0};
+    double az[] = {0, 0, 0};
+    int na = sizeof(ax) / sizeof(double);
 
     // Define visibilities.
-    float u[] = {1000.0, 2000.01, 156.03};
-    float v[] = {0.0, -241.02, 1678.04};
-    float w[] = {0.0, -56.0, 145.0};
-    float vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
+    double u[] = {1000.0, 2000.01, 156.03};
+    double v[] = {0.0, -241.02, 1678.04};
+    double w[] = {0.0, -56.0, 145.0};
+    double vis[] = {1.0, 0.0, 0.00, 0.0, 0.00, 0.0};
     int ant1[] = {0, 0, 1};
     int ant2[] = {1, 2, 2};
-    int nv = sizeof(u) / sizeof(float);
+    int nv = sizeof(u) / sizeof(double);
 
     oskar_ms_create_vis1(filename, mjd, exposure, interval, ra, dec,
             na, ax, ay, az, nv, u, v, w, vis, ant1, ant2, freq);

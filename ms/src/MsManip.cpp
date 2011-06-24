@@ -82,8 +82,8 @@ MsManip::~MsManip()
  * @details
  * Adds the supplied list of antenna positions to the ANTENNA table.
  */
-void MsManip::addAntennas(int na, const float* ax, const float* ay,
-        const float* az)
+void MsManip::addAntennas(int na, const double* ax, const double* ay,
+        const double* az)
 {
     // Add rows to the ANTENNA subtable.
     int startRow = _ms->antenna().nrow();
@@ -195,8 +195,8 @@ void MsManip::addPolarisation(int np)
  * @details
  * Adds the given list of visibilities.
  */
-void MsManip::addVisibilities(int np, int nv, const float* vu, const float* vv,
-        const float* vw, const float* vis, const int* ant1, const int* ant2)
+void MsManip::addVisibilities(int np, int nv, const double* vu, const double* vv,
+        const double* vw, const double* vis, const int* ant1, const int* ant2)
 {
     // Allocate storage for a (u,v,w) coordinate,
     // a visibility, a visibility weight, and a flag.
@@ -245,6 +245,59 @@ void MsManip::addVisibilities(int np, int nv, const float* vu, const float* vv,
     }
     _nBlocksAdded++;
 }
+
+
+/// Adds visibilities to the main table.
+void MsManip::addVisibilities(int np, int nv, const double* vu, const double* vv,
+        const double* vw, const double* vis, const int* ant1,
+        const int* ant2, const double* times)
+{
+    // Allocate storage for a (u,v,w) coordinate,
+    // a visibility, a visibility weight, and a flag.
+    Vector<Double> uvw(3);
+    Matrix<Complex> vism(np, 1);
+    Matrix<Bool> flag(np, 1, false);
+    Vector<Float> weight(np, 1.0);
+    Vector<Float> sigma(np, 1.0);
+
+    // Add enough rows to the main table.
+    int startRow = _ms->nrow();
+    _ms->addRow(nv);
+
+    // Loop over rows / visibilities.
+    for (int v = 0; v < nv; ++v) {
+        int row = v + startRow;
+
+        // Add the u,v,w coordinates.
+        uvw(0) = vu[v]; uvw(1) = vv[v]; uvw(2) = vw[v];
+        _msmc->uvw().put(row, uvw);
+
+        // Loop over polarisations.
+        for (int p = 0; p < np; ++p) {
+            int b = 2 * (np * v + p);
+            vism(p, 0) = Complex(vis[b], vis[b + 1]);
+        }
+        // Add the visibilities.
+        _msmc->data().put(row, vism);
+        _msmc->modelData().put(row, vism);
+        _msmc->correctedData().put(row, vism);
+
+        // Add the antenna pairs.
+        _msmc->antenna1().put(row, ant1[v]);
+        _msmc->antenna2().put(row, ant2[v]);
+
+        // Add remaining meta-data.
+        _msmc->flag().put(row, flag);
+        _msmc->weight().put(row, weight);
+        _msmc->sigma().put(row, sigma);
+        _msmc->exposure().put(row, _exposure);
+        _msmc->interval().put(row, _interval);
+        _msmc->time().put(row, times[v]);
+        _msmc->timeCentroid().put(row, times[v]);
+    }
+    _nBlocksAdded++;
+}
+
 
 /*=============================================================================
  * Protected Members

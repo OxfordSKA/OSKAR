@@ -87,8 +87,8 @@ public:
     ~MsManip();
 
     /// Adds antennas to the ANTENNA table.
-    void addAntennas(int na, const float* ax, const float* ay,
-            const float* az);
+    void addAntennas(int na, const double* ax, const double* ay,
+            const double* az);
 
     /// Adds a band to the Measurement Set.
     void addBand(int polid, int nc, double refFrequency, double chanWidth);
@@ -100,9 +100,14 @@ public:
     void addPolarisation(int np);
 
     /// Adds visibilities to the main table.
-    void addVisibilities(int np, int nv, const float* vu, const float* vv,
-            const float* vw, const float* vis, const int* ant1,
+    void addVisibilities(int np, int nv, const double* vu, const double* vv,
+            const double* vw, const double* vis, const int* ant1,
             const int* ant2);
+
+    /// Adds visibilities to the main table.
+    void addVisibilities(int np, int nv, const double* vu, const double* vv,
+            const double* vw, const double* vis, const int* ant1,
+            const int* ant2, const double* times);
 
     /// Creates a new measurement set.
     void create(const char* filename);

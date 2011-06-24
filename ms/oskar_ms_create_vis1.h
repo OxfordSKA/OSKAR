@@ -66,9 +66,9 @@ extern "C" {
  * @param[in] freq The observing frequency, in Hertz.
  */
 void oskar_ms_create_vis1(const char* name, double mjd, double exposure,
-        double interval, double ra, double dec, int na, const float* ax,
-        const float* ay, const float* az, int nv, const float* u,
-        const float* v, const float* w, const float* vis, const int* ant1,
+        double interval, double ra, double dec, int na, const double* ax,
+        const double* ay, const double* az, int nv, const double* u,
+        const double* v, const double* w, const double* vis, const int* ant1,
         const int* ant2, double freq);
 
 #ifdef __cplusplus

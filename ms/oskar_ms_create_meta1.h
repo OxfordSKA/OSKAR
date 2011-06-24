@@ -57,7 +57,7 @@ extern "C" {
  * @param[in] freq The observing frequency, in Hertz.
  */
 void oskar_ms_create_meta1(const char* name, double mjd, double ra, double dec,
-        int na, const float* ax, const float* ay, const float* az, double freq);
+        int na, const double* ax, const double* ay, const double* az, double freq);
 
 #ifdef __cplusplus
 }

@@ -58,10 +58,13 @@ extern "C" {
  * @param[in] vis The complex visibility values (length 2*nv).
  * @param[in] ant1 The index of antenna 1 for the baselines (length nv).
  * @param[in] ant2 The index of antenna 2 for the baselines (length nv).
+ * @param[in] times The times at which each visibility is taken.
  */
 void oskar_ms_append_vis1(const char* name, double mjd, double exposure,
-        double interval, int nv, const float* u, const float* v,
-        const float* w, const float* vis, const int* ant1, const int* ant2);
+        double interval, int nv, const double* u, const double* v,
+        const double* w, const double* vis, const int* ant1, const int* ant2,
+        const double* times);
+
 
 #ifdef __cplusplus
 }
