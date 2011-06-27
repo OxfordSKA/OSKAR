@@ -48,3 +48,6 @@ if (NOT WIN32)
         PATTERN "test" EXCLUDE
         PATTERN ".svn" EXCLUDE)
 endif ()
+
+# === Recurse into test directory.
+add_subdirectory(test)

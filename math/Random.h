@@ -51,11 +51,11 @@ class Random
 public:
     /// Generates a random number from a uniform distribution.
     template<typename T>
-    static T uniform(int seed);
+    static T uniform(int seed = -1);
 
     /// Generates a random number from a Gaussian distribution.
     template<typename T>
-    static T gaussian(int seed, T* out1, T* out2);
+    static T gaussian(T* out1, T* out2, int seed = -1);
 };
 
 /*=============================================================================
@@ -83,12 +83,12 @@ T Random::uniform(int seed)
  * Generates a random number from a Gaussian distribution with zero mean
  * and unit variance.
  *
- * @param[in] seed If greater than 0, use this as a seed for the generator.
  * @param[out] out1 The first random number.
  * @param[out] out2 The second random number.
+ * @param[in] seed If greater than 0, use this as a seed for the generator.
  */
 template<typename T>
-T Random::gaussian(int seed, T* x, T* y)
+T Random::gaussian(T* x, T* y, int seed)
 {
     if (seed > 0) srand(seed);
     T r2;
