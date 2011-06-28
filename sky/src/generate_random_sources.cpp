@@ -36,9 +36,9 @@ void generate_random_sources(const unsigned num_sources,
     // generate random sources.
     for (unsigned i = 0; i < num_sources; ++i)
     {
-        const double r1 = (double)rand() / (double)RAND_MAX;
-        const double r2 = (double)rand() / (double)RAND_MAX;
-        const double r3 = (double)rand() / (double)RAND_MAX;
+        const double r1 = (double)rand() / ((double)RAND_MAX + 1.0);
+        const double r2 = (double)rand() / ((double)RAND_MAX + 1.0);
+        const double r3 = (double)rand() / ((double)RAND_MAX + 1.0);
         dec[i] = M_PI / 2.0 - acos(2.0 * r1 - 1);
         ra[i] = 2.0 * M_PI * r2;
         const double b0 = pow(brightness_min, p);

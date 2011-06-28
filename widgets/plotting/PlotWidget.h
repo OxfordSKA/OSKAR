@@ -88,18 +88,9 @@ class PlotWidget : public QwtPlot
         void clear();
 
         /// Plot a curve.
-        void plotCurve(const unsigned nPoints, double const * xData,
-                double const * yData, const bool reverseX = false,
+        void plotCurve(const unsigned nPoints, double const * x,
+                double const * y, const bool reverseX = false,
                 const bool reverseY = false, bool append = false);
-
-        /// Plot a curve (wrapper to above function).
-        void plotCurve(const unsigned nPoints, const float * y,
-                const float * x = 0, const QString & title = "",
-                bool append = false);
-
-        /// Plot a curve (wrapper to above function).
-        void plotCurve(const unsigned nPoints, const float * y,
-                const QString & title = "", bool append = false);
 
         /// Plot an image
         void plotImage(float const * data, unsigned nX, unsigned nY,

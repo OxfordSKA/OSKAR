@@ -119,13 +119,18 @@ class QTestConvFunc : public QObject
             ConvFunc c;
             c.expSinc(support, oversample);
 
-            vector<float> x(c.size());
+            vector<double> x(c.size()), y(c.size());
             for (unsigned i = 0; i < c.size(); ++i)
-                x[i] = static_cast<float>(i);
+            {
+                x[i] = static_cast<double>(i);
+                y[i] = static_cast<double>(c.values()[i]);
+            }
+
 
             // Plot the convolution function.
             _p.push_back(new PlotWidget);
-            _p.back()->plotCurve(c.size(), c.values(), &x[0], "exp-sinc 1D", false);
+            _p.back()->plotCurve(c.size(), &x[0], &y[0]);
+            _p.back()->setTitle("exp sinc 1D");
 
             c.makeConvFuncImage();
             _p.push_back(new PlotWidget);

@@ -51,3 +51,5 @@ endif ()
 
 # === Recurse into test directory.
 add_subdirectory(test)
+
+add_subdirectory(matlab)

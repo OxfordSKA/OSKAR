@@ -68,6 +68,7 @@ else ()
     endif()
 endif ()
 
+find_package(Matlab)
 
 # === Print some warning messages if key library modules will be disabled.
 if (NOT QT_QTCORE_FOUND)
@@ -103,5 +104,14 @@ if (NOT CASACORE_FOUND)
         "Unable to build OSKAR measurement set library!")
     message("*****************************************************************")
 endif()
+
+
+if (NOT MATLAB_FOUND)
+    message("*****************************************************************")
+    message("** WARNING: MATLAB not found: "
+        "Unable to compile MATLAB mex functions!")
+    message("*****************************************************************")
+endif()
+
 
 set(DEPENDENCIES_FOUND TRUE)

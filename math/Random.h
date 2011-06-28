@@ -38,6 +38,11 @@
 #include <cmath>
 #include <cstdlib>
 
+using std::log;
+using std::pow;
+using std::exp;
+using std::abs;
+
 /**
  * @brief
  * Class containing functions for generating random numbers.
@@ -56,6 +61,14 @@ public:
     /// Generates a random number from a Gaussian distribution.
     template<typename T>
     static T gaussian(T* out1, T* out2, int seed = -1);
+
+    template<typename T>
+    static T power_law(const T min, const T max, const T power,
+            const int seed = -1);
+
+    template<typename T>
+    static T broken_power_law(const T min, const T max, const T threshold,
+            const T power1, const T power2, const int seed = -1);
 };
 
 /*=============================================================================
@@ -75,7 +88,7 @@ T Random::uniform(int seed)
 {
     // Seed the random number generator if required.
     if (seed > 0) srand(seed);
-    return (T)rand() / (RAND_MAX + 1.0);
+    return (T)rand() / ((T)RAND_MAX + 1.0);
 }
 
 /**
@@ -109,5 +122,62 @@ T Random::gaussian(T* x, T* y, int seed)
     // Return the first random number.
     return *x;
 }
+
+
+template<typename T>
+T Random::power_law(const T min, const T max, const T power,
+        const int seed)
+{
+    if (seed > 0) srand(seed);
+    const T r = (T)rand() / ((T)RAND_MAX + 1.0);
+    const T b0 = std::pow(min, power + 1);
+    const T b1 = std::pow(max, power + 1);
+    return std::pow( ((b1 - b0) * r + b0), (1.0 / (power + 1)));
+}
+
+
+template<typename T>
+T Random::broken_power_law(const T min, const T max, const T threshold,
+        const T power1, const T power2, const int seed)
+{
+    if (seed > 0) srand(seed);
+
+    const T b0 = std::pow(threshold, (power1 - power2));
+    const T pow1 = power1 + 1.0;
+    const T pow2 = power2 + 1.0;
+    const T powinv1 = 1.0 / pow1;
+    const T powinv2 = 1.0 / pow2;
+
+    T b1, b2;
+
+    if (power1 == -1)
+        b1 = log(threshold) - log(min);
+    else
+        b1 = powinv1 * (pow(threshold, pow1) - pow(min, pow2));
+
+    if (power2 == -1)
+        b2 = b0 * (log(max) - log(threshold));
+    else
+        b2 = b0 * powinv2 * (pow(max, pow2) - pow(threshold, pow2));
+
+    const T r = (T)rand() / ((T)RAND_MAX + 1.0);
+    const T b = -b1 + r * (b2 + b1);
+    if (b > 0)
+    {
+        if (power2 == -1.0)
+            return threshold * exp(b / b0);
+        else
+            return pow((b * (pow2/b0) + pow(threshold, pow2)), powinv2);
+    }
+    else
+    {
+        if (power1 == -1.0)
+            return threshold * exp(-abs(b));
+        else
+            return pow( (pow(threshold, pow1) - abs(b) * pow1) , powinv1);
+    }
+}
+
+
 
 #endif // OSKAR_RANDOM_H_

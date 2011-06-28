@@ -38,6 +38,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QVector>
 #include <QtTest/QtTest>
+#include <QtCore/QTime>
 
 
 #include "math/Random.h"
@@ -64,7 +65,7 @@ class QTest_Random : public QObject
     private slots:
         void uniform()
         {
-            const unsigned n = 100;
+            const unsigned n = 10000;
             QVector<double> rand(n);
             QVector<double> x(n, 0.0);
             rand[0] = Random::uniform<float>(1);
@@ -75,28 +76,86 @@ class QTest_Random : public QObject
             }
 
             _p.push_back(new PlotWidget);
-            _p.back()->plotCurve(n, rand.constData(), x.constData(), "uniform");
+            _p.back()->plotCurve(n, x.constData(), rand.constData());
             _p.back()->setTitle("Uniform");
         }
 
         void gaussian()
         {
-//            const unsigned n = 100;
-//            QVector<double> rand(n);
-//            QVector<double> x(n, 0.0);
-//            rand[0] = Random::gaussian<float>(1);
-//            for (int i = 1; i < rand.size(); ++i)
-//            {
-//                rand[i] = Random::gaussian<float>();
-//                x[i] = static_cast<double>(i);
-//            }
-//
-//            _p.push_back(new PlotWidget);
-//            _p.back()->plotCurve(n, rand.constData(), x.constData(), "Gaussian");
-//            _p.back()->setTitle("Gaussian");
+            const unsigned n = 10000;
+            QVector<double> rand(n);
+            QVector<double> x(n, 0.0);
+            double r1, r2;
+            Random::gaussian<double>(&r1, &r2, 1);
+            rand[0] = r1;
+            rand[1] = r2;
+            x[0] = 0.0;
+            x[1] = 1.0;
+            for (int i = 2; i < rand.size(); i+=2)
+            {
+                Random::gaussian<double>(&r1, &r2);
+                rand[i    ] = r1;
+                rand[i + 1] = r2;
+                x[i] = static_cast<double>(i);
+                x[i + 1] = static_cast<double>(i);
+            }
+
+            _p.push_back(new PlotWidget);
+            _p.back()->plotCurve(n, x.constData(), rand.constData());
+            _p.back()->setTitle("Gaussian");
         }
 
+        void power_law()
+        {
+            const unsigned n = 10000;
+            const double min = 1.0e-2;
+            const double max = 1.0e4;
+            const double power = -1.2;
+            QVector<double> rand(n);
+            QVector<double> x(n, 0.0);
+            rand[0] = Random::power_law<double>(min, max, power, 1);
+            for (int i = 1; i < rand.size(); ++i)
+            {
+                rand[i] = Random::power_law<double>(min, max, power);
+                x[i] = static_cast<double>(i);
+            }
 
+            _p.push_back(new PlotWidget);
+            _p.back()->plotCurve(n, x.constData(), rand.constData());
+            _p.back()->setTitle("Power law");
+        }
+
+        void broken_power_law()
+        {
+            const unsigned n = 1250000;
+            const double min = 1.0e-2;
+            const double max = 1.0e4;
+            const double threshold = 0.88;
+            const double power1 = -2.0;
+            const double power2 = -4.0;
+
+//            QVector<double> x(n, 0.0);
+
+            QTime t;
+            t.start();
+            {
+                QVector<double> rand(n);
+                rand[0] = Random::broken_power_law<double>(min, max,
+                        threshold, power1, power2, 1);
+                for (int i = 1; i < rand.size(); ++i)
+                {
+                    rand[i] = Random::broken_power_law<double>(min, max,
+                            threshold, power1, power2);
+                }
+            }
+            printf("Time taken for %d samples = %f sec.\n",
+                    n, t.elapsed() / 1.0e3);
+
+//                x[i] = static_cast<double>(i);
+//            _p.push_back(new PlotWidget);
+//            _p.back()->plotCurve(n, x.constData(), rand.constData());
+//            _p.back()->setTitle("Broken power law");
+        }
 
     private:
         std::vector<PlotWidget*> _p;

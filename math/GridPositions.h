@@ -75,8 +75,6 @@ public:
 /**
  * @details
  * Generates positions on a (randomised) grid within a circle.
- *
- * FIXME! input variable names! ???
  */
 template<typename T>
 int GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
@@ -84,7 +82,7 @@ int GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
 {
     // Seed the random number generator.
     T r1, r2;
-    Random::gaussian<T>(seed, &r1, &r2);
+    Random::gaussian<T>(&r1, &r2, seed);
 
     int nx = 2.0 * radius / xs;
     int ny = 2.0 * radius / ys;
@@ -96,7 +94,7 @@ int GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
             T y = iy * ys - (ny - 1) * ys / 2;
 
             // Modify grid position by random numbers.
-            Random::gaussian<T>(0, &r1, &r2);
+            Random::gaussian<T>(&r1, &r2);
             x += xe * r1;
             y += ye * r2;
 

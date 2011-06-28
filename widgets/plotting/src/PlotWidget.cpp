@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <cmath>
 #include <vector>
+#include <cstdio>
 using namespace std;
 
 namespace oskar {
@@ -206,29 +207,6 @@ void PlotWidget::plotCurve(const unsigned nPoints, const double * xData,
 
     // Attach the curve to the plot widget.
     c->attach(this);
-}
-
-
-void PlotWidget::plotCurve(const unsigned nPoints, const float * y,
-        const float * x, const QString & title, bool append)
-{
-    vector<double> _x(nPoints), _y(nPoints);
-    for (unsigned i = 0; i < nPoints; ++i)
-    {
-        _x[i] = (x == NULL) ? (double)i : (double)x[i];
-        _y[i] = (double)y[i];
-    }
-    plotCurve(nPoints, &_x[0], &_y[0], false, false, append);
-    setTitle(title);
-    setWindowTitle(title);
-}
-
-
-
-void PlotWidget::plotCurve(const unsigned nPoints, const float * y,
-        const QString & title, bool append)
-{
-    plotCurve(nPoints, y, NULL, title, append);
 }
 
 
