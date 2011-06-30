@@ -76,3 +76,16 @@ if (QT_QTTEST_FOUND)
     )
 
 endif ()
+
+
+if (CFITSIO_FOUND)
+    include_directories(${CFITSIO_INCLUDE_DIR})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    add_executable(write_uvfits src/write_uvfits.cpp)
+    target_link_libraries(write_uvfits
+        ${CFITSIO_LIBRARIES}
+        ${QT_QTCORE_LIBRARY}
+    )
+endif ()
+
+
