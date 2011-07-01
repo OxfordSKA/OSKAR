@@ -57,8 +57,8 @@ class QTestStandardGridImage : public QObject
             // Convolution function.
             ConvFunc c;
             //c.pillbox(support, oversample);
-            //c.exp(support, oversample);
-            c.expSinc(support, oversample);
+            c.exp(support, oversample);
+//            c.expSinc(support, oversample);
 //            c.sinc(support, oversample);
 
             {
@@ -80,11 +80,11 @@ class QTestStandardGridImage : public QObject
 //            }
 
             {
-                x.push_back(5.15f);
+                x.push_back(5.0f);
                 y.push_back(0.0f);
                 amp.push_back(Complex(1.0f, 0.0f));
 
-                x.push_back(-5.15f);
+                x.push_back(-5.0f);
                 y.push_back(0.0f);
                 amp.push_back(Complex(1.0f, 0.0f));
             }
@@ -92,7 +92,7 @@ class QTestStandardGridImage : public QObject
             const unsigned num_data = x.size();
 
             // Grid.
-            const unsigned grid_size = 2048;
+            const unsigned grid_size = 1000;
             vector<Complex> grid(grid_size * grid_size, Complex(0.0f, 0.0f));
             double grid_sum = 0.0;
             const float pixel_size = 1.0;
