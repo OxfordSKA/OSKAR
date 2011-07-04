@@ -4,233 +4,246 @@
 #include <cstdio>
 
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QVector>
 
+namespace oskar {
 
-void write_uvfits()
+UVFitsWriter::UVFitsWriter()
 {
-    fitsfile * fptr;
-    const char * filename = "test.fits";
-    int status = 0;
+    _fptr = NULL;
+    _filename = QString::null;
+    _status = 0;
+    // Number of decimal places for double keywords.
+    _decimals = 10;
+    // Number of axes (6 are required, a 7th (BAND axis) is optional).
+    _num_axis = 6;
+    // Axis dimensions.
+    _axis_dim.resize(_num_axis);
+    // Number of parameters.
+    // 1. UU        (u baseline coordinate)
+    // 2. VV        (v baseline coordinate)
+    // 3. WW        (w baseline coordinate)
+    // 4. DATE      (Julian date)
+    // 5. BASELINE  (Baseline number = ant1 * 256 + ant2)
+    _num_param = 5;
+    _num_vis = 0;
+}
 
-    // Remove file if already exists as fits_create_file does no overwrite.
-    if (QFile::exists(QString(filename)))
+
+UVFitsWriter::~UVFitsWriter()
+{
+    close_file();
+}
+
+
+void UVFitsWriter::open_file(const QString & filename, const bool replace)
+{
+    if (QFile::exists(filename) && replace == true)
     {
-        printf("WARNING: removing fits file = '%s'\n", filename);
+        printf("UVFitsWriter: Removing existing fits file '%s'\n",
+                filename.toLatin1().data());
         QFile::remove(filename);
     }
+    _filename = filename;
+    // Create and open a new empty output FITS file.
+    fits_create_file(&_fptr, filename.toLatin1().data(), &_status);
+    check_status("Opening file");
+}
 
-    // Create the fits file to write to.
-    if (fits_create_file(&fptr, filename, &status))
-        ffrprt(stderr, status);
+
+void UVFitsWriter::close_file()
+{
+    if (_fptr != NULL)
+    {
+        fits_close_file(_fptr, &_status);
+        _filename = QString::null;
+    }
+    check_status();
+}
 
 
-    // Write header.
-    // ========================================================================
-    int decimals = 9; // number of decimals for header values.
+void UVFitsWriter::write_header(const long long num_vis)
+{
+    // TODO: check if file is open.
 
-    int simple = TRUE;
-    int bitpix = FLOAT_IMG; // -32 - AIPS dosn't use double!
-    int naxis = 6; //
+    _num_vis = num_vis;
 
-    int ncomplex = 3; // Re, Im, Weight
-    int nstokes = 1;  // I only
-    int nfreqs = 1;   // 1 freq. only
-    int nra = 1;      // num ra pointings
-    int ndec = 1;     // num dec pointings
-    QVector<long> naxes(naxis);
-    naxes[0] = 0; // No standard image just group
-    naxes[1] = ncomplex; // CTYPE2 = Complex (re, im, wgt)
-    naxes[2] = nstokes; // CTYPE3 = STOKES (1 = I only)
-    naxes[3] = nfreqs; // CTYPE4 = FREQ
-    naxes[4] = nra; // CTYPE5 = RA (pointing)
-    naxes[5] = ndec; // CTYPE5 = DEC (pointing)
-    long long gcount = 1; // number of groups (i.e. visibilities)
-    long long pcount = 6; // number of parameters per group.
-                          // UU, VV, WW, DATE, DATE, BASELINE
-    int extend = FALSE;    // This is the antenna file
-    fits_write_grphdr(fptr, simple, bitpix, naxis, naxes.data(), pcount, gcount,
-            extend, &status);
+    // Write the required groups header.
+    write_groups_header(_num_vis);
+    check_status();
 
-    fits_write_date(fptr, &status);
+    // Extra stuff...
+    fits_write_date(_fptr, &_status);
+    char key[FLEN_KEYWORD];
+    char value[FLEN_VALUE];
+    strcpy(key, "TELESCOP");
+    strcpy(value, "OSKAR SKA P1");
+    fits_write_key_str(_fptr,  key, value, NULL, &_status);
+    strcpy(key, "BUNIT");
+    strcpy(value, "JY");
+    fits_write_key_str(_fptr, key, value, "Units of flux", &_status);
+    fits_write_key_dbl(_fptr, "EQUINOX", 2000.0, _decimals,
+            "Epoch of RA DEC", &_status);
+    fits_write_key_dbl(_fptr, "OBSRA", 0.0, _decimals,
+            "Antenna pointing RA", &_status);
+    fits_write_key_dbl(_fptr, "OBSDEC", 40.0, _decimals,
+            "Antenna pointing DEC", &_status);
 
-    char * str_key = "TELESCOP";
-    char * str_val = "SKA_P1";
-    char * str_comment = "";
-    fits_write_key_str(fptr, str_key, str_val, str_comment, &status);
+    // Axis description headers (NOTE: axis 1 = empty).
+    write_axis_header(2, "COMPLEX", "1=real, 2=imag, 3=weight", 1.0, 1.0, 1.0, 1.0);
+    write_axis_header(3, "STOKES", "1=I", 1.0, 1.0, 1.0, 1.0);
+    write_axis_header(4, "FREQ", "Frequency in Hz.", 600.0e6, 100.0e6, 1.0, 0.0);
+    write_axis_header(5, "RA", "Right Ascension in deg.", 0.0, 0.0, 1.0, 1.0);
+    write_axis_header(6, "DEC", "Declination in deg.", 90.0, 0.0, 1.0, 1.0);
+    check_status();
 
-    fits_write_key_str(fptr, "BUNIT", "JY", "Units of flux", &status);
+    // Parameter headers.
+    double freq = 600.0e6;
+    double invFreq = 1.0 / freq;
+    write_param_header(1, "UU--",     "", invFreq, 0.0);
+    write_param_header(2, "VV--",     "", invFreq, 0.0);
+    write_param_header(3, "WW--",     "", invFreq, 0.0);
+    write_param_header(4, "DATE",     "", 1.0,     2451544.5);
+    write_param_header(5, "BASELINE", "", 1.0,     0.0);
+    check_status();
 
-    fits_write_key_dbl(fptr, "EQUINOX", 2000.0, decimals,
-            "Epoch of RA DEC", &status);
 
-    fits_write_key_dbl(fptr, "OBSRA", 0.0, decimals,
-            "Antenna pointing RA", &status);
+    // Write a name that is picked up by AIPS.
+    char name[FLEN_COMMENT];
+    QFileInfo file(_filename);
+    QString im_name = "AIPS   IMNAME='" + file.baseName().toUpper() + "'";
+    im_name.resize(FLEN_COMMENT - 1);
+    strcpy(name, im_name.toLatin1().data());
+    fits_write_history(_fptr, name, &_status);
+}
 
-    fits_write_key_dbl(fptr, "OBSDEC", 40.0, decimals,
-            "Antenna pointing DEC", &status);
+void UVFitsWriter::write_groups_header(const long num_stokes,
+        const long num_freqs, const long num_ra, const long num_dec)
+{
+    // TODO: check if file is open.
 
-    // Axis parameter header keys
-    QStringList ctype;
-    ctype << "COMPLEX" << "STOKES" << "FREQ" << "RA" << "DEC";
-    QStringList ctype_comment;
-    ctype_comment << "1=real,2=imag,3=weight" << "-1=RR, -2=LL, -3=RL, -4=LR"
-            << "Frequency in Hz" << "Right Ascension in deg."
-            << "Declination in deg.";
-    QList<double> crval;
-    crval << 1.0 << -1.0 << 600.0e6 << 0.0 << 90.0;
-    QList<double> cdelt;
-    cdelt << 1.0 << -1.0 << 100e6 << 0.0 << 0.0;
-    QList<double> crpix;
-    crpix << 1.0 << 1.0 << 1.0 << 1.0 << 1.0;
-    QList<double> crota;
-    crota << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
+    int simple = TRUE;          // This file does conform to FITS standard.
+    int bitpix = FLOAT_IMG;     // FLOAT_IMG=-32: AIPS dosn't use double!
+    int extend = TRUE;          // Allow use of extensions.
+                                // Note: TRUE does not require extensions.
 
-    QString key;
+    _axis_dim[0] = 0;           // No standard image just group
+    _axis_dim[1] = 3;           // (required) real, imaginary, weight.
+    _axis_dim[2] = num_stokes;  // (required) Stokes parameters.
+    _axis_dim[3] = num_freqs;   // (required) Frequency (spectral channel).
+    _axis_dim[4] = num_ra;      // (required) Right ascension of phase centre.
+    _axis_dim[5] = num_dec;     // (required) Declination of phase centre.
+
+    long long gcount = _num_vis;     // number of groups (i.e. visibilities)
+    long long pcount = _num_param;  // Number of parameters per group.
+
+    // Write random groups description header.
+    fits_write_grphdr(_fptr, simple, bitpix, _num_axis, _axis_dim.data(),
+            pcount, gcount, extend, &_status);
+
+//    // Remove the two comment lines added at the end of the groups section.
+//    fits_delete_key(_fptr, "COMMENT", &_status);
+//    fits_delete_key(_fptr, "COMMENT", &_status);
+
+    // Check the CFITSIO error status.
+    check_status();
+}
+
+
+
+
+
+void UVFitsWriter::write_axis_header(const int id, const QString & ctype,
+        const QString & comment, const double crval, const double cdelt,
+        const double crpix, const double crota)
+{
+    // TODO: check if file is open.
+
+    // Write the axis header.
     char s_key[FLEN_KEYWORD];
     char s_value[FLEN_VALUE];
     char s_comment[FLEN_COMMENT];
 
-    for (int i = 0; i < naxis - 1; ++i)
-    {
-        strcpy(s_value, ctype[i].toLatin1().data());
-        strcpy(s_comment, ctype_comment[i].toLatin1().data());
-        strcpy(s_key, QString("CTYPE%1").arg(i+2).toLatin1().data());
-        fits_write_key_str(fptr, s_key, s_value, s_comment,
-                &status);
+    fits_make_keyn("CTYPE", id, s_key, &_status);
+    strcpy(s_value, ctype.toLatin1().data());
+    strcpy(s_comment, comment.toLatin1().data());
+    fits_write_key_str(_fptr, s_key, s_value, s_comment, &_status);
 
-        key = "CRVAL" + QString::number(i+2);
-        strcpy(s_key, key.toLatin1().data());
-        fits_write_key_dbl(fptr, s_key, crval[i], decimals, "", &status);
+    fits_make_keyn("CRVAL", id, s_key, &_status);
+    fits_write_key_dbl(_fptr, s_key, crval, _decimals, NULL, &_status);
 
-        key = "CDELT" + QString::number(i+2);
-        strcpy(s_key, key.toLatin1().data());
-        fits_write_key_dbl(fptr, s_key, cdelt[i], decimals, "", &status);
+    fits_make_keyn("CDELT", id, s_key, &_status);
+    fits_write_key_dbl(_fptr, s_key, cdelt, _decimals, NULL, &_status);
 
-        key = "CRPIX" + QString::number(i+2);
-        strcpy(s_key, key.toLatin1().data());
-        fits_write_key_dbl(fptr, s_key, crpix[i], decimals, "", &status);
+    fits_make_keyn("CRPIX", id, s_key, &_status);
+    fits_write_key_dbl(_fptr, s_key, crpix, _decimals, NULL, &_status);
 
-        key = "CROTA" + QString::number(i+2);
-        strcpy(s_key, key.toLatin1().data());
-        fits_write_key_dbl(fptr, s_key, crota[i], decimals, "", &status);
-    }
+    fits_make_keyn("CROTA", id, s_key, &_status);
+    fits_write_key_dbl(_fptr, s_key, crota, _decimals, NULL, &_status);
+}
 
 
-    // Group parameter header keys
-    QStringList ptype;
-    ptype << "UU--" << "VV--" << "WW--" << "DATE" << "DATE" << "BASELINE";
-    QList<double> pscal;
-    double freq = 600e6;
-    double invfreq = 1.0 / freq;
-    pscal << invfreq << invfreq << invfreq << 1.0 << 1.0 << 1.0;
-    QList<double> pzero;
-    pzero << 0.0 << 0.0 << 0.0 << 2451544.5 << 0.0 << 0.0;
-    for (int i = 0; i < pcount; ++i)
-    {
-        key = "PTYPE" + QString::number(i+1);
-        strcpy(s_key, key.toLatin1().data());
-        strcpy(s_value, ptype[i].toLatin1().data());
-        fits_write_key_str(fptr, s_key, s_value, "", &status);
 
-        key = "PSCAL" + QString::number(i+1);
-        strcpy(s_key, key.toLatin1().data());
-        fits_write_key_dbl(fptr, s_key, pscal[i], decimals, "", &status);
+void UVFitsWriter::write_param_header(const int id, const QString & type,
+        const QString & comment, const double scale, const double zero)
+{
+    // TODO: check if file is open.
 
-        key = "PZERO" + QString::number(i+1);
-        strcpy(s_key, key.toLatin1().data());
-        fits_write_key_dbl(fptr, s_key, pzero[i], decimals, "", &status);
-    }
+    // Write the parameter header.
+    char s_key[FLEN_KEYWORD];
+    char s_value[FLEN_VALUE];
+    char s_comment[FLEN_COMMENT];
 
-//    // Write a single double key.
-//    const char * keyname = "TEST";
-//    double value = 1.0;
-//    const char * comment = "hello!";
-//    fits_write_key_dbl(fptr, keyname, value, decimals, comment, &status);
-//
-//    // EXAMPLE: Write a vector of keys.
-//    const char * keyroot = "KEYROOT";
-//    int nstart = 1;
-//    int nkeys = 3;
-//    QVector<double> values(nkeys);
-//    values[0] = 1.0;
-//    values[1] = 2.0;
-//    values[2] = 3.0;
-//    char ** comments = NULL;
-//    fits_write_keys_dbl(fptr, keyroot, nstart, nkeys, values.data(), decimals,
-//            comments, &status);
-//
-//
-//    // Write a history line.
-//    const char * history = "Those who cannot remember the past are condemned "
-//            " to repeat it";
-//    fits_write_history(fptr, history, &status);
+    fits_make_keyn("PTYPE", id, s_key, &_status);
+    strcpy(s_value, type.toLatin1().data());
+    strcpy(s_comment, comment.toLatin1().data());
+    fits_write_key_str(_fptr, s_key, s_value, s_comment, &_status);
 
-    // Write data
-    // ========================================================================
+    fits_make_keyn("PSCAL", id, s_key, &_status);
+    fits_write_key_dbl(_fptr, s_key, scale, _decimals, NULL, &_status);
+
+    fits_make_keyn("PZERO", id, s_key, &_status);
+    fits_write_key_dbl(_fptr, s_key, zero, _decimals, NULL, &_status);
+}
 
 
-    // Parameters
-    QVector<float> u(gcount, 0.0);
-    QVector<float> v(gcount, 0.0);
-    QVector<float> w(gcount, 0.0);
-    QVector<float> date1(gcount, 0.0);
-    QVector<float> date2(gcount, 0.0);
-    QVector<float> baseline(gcount, 0.0); // 256 * ant1 + ant2
+int UVFitsWriter::num_amps_per_group()
+{
+    int n = 1;
+    for (int i = 1; i < _num_axis; ++i)
+        n *= _axis_dim[i];
+    return n;
+}
 
-    u[0] = 1000.0;
-    baseline[0] = 256.0 * 1.0 + 2.0;
 
-    // Data.
-    QVector<float> vis_re(gcount, 0.0);
-    QVector<float> vis_im(gcount, 0.0);
-    QVector<float> vis_wgt(gcount, 0.0);
+void UVFitsWriter::write_data(const float * u, const float * v,
+        const float * w, const float * date, const float * baseline,
+        const float * re, const float * im, const float * wgt)
+{
+    // TODO: check file is open for writing...
 
-    vis_re[0] = 1.0;
-    vis_wgt[0] = 1.0;
 
-    //
-    QVector<long> naxes2(naxis - 1);
-    for (int i = 0; i < naxis - 1; ++i)
-    {
-        naxes2[i] = naxes[i+1];
-        printf("naxes %d = %d\n", i + 1, naxes2[i]);
-    }
+    // Setup compressed axis dimensions vector.
+    QVector<long> naxes(_num_axis - 1);
+    for (int i = 0; i < _num_axis - 1; ++i)
+        naxes[i] = _axis_dim[i+1];
 
-    QVector<long> fpixel(naxis, 1);
-    QVector<long> lpixel(naxes2);
+    QVector<long> fpixel(_num_axis, 1);
+    QVector<long> lpixel(naxes);
 
-    fpixel[0] = 1; // Complex
-    fpixel[0] = 3;
-
-    fpixel[1] = 1; // Stokes
-    fpixel[1] = 1;
-
-    fpixel[2] = 1; // Freq
-    fpixel[2] = 1;
-
-    fpixel[3] = 1; // Ra
-    fpixel[3] = 1;
-
-    fpixel[4] = 1; //Dec
-    fpixel[4] = 1;
-
-    int num_values_per_group = 1;
-    for (int i = 0; i < naxis - 1; ++i)
-        num_values_per_group *= naxes2[i];
-    printf("num values per group = %d\n", num_values_per_group);
+    int num_values_per_group = num_amps_per_group();
+    printf("num values per group = %i\n", num_values_per_group);
 
     long firstelem = 1;
-    long nelements = pcount;
+    long nelements = _num_param;
 
-    QVector<float> p_temp(pcount);
+    QVector<float> p_temp(_num_param);
     QVector<float> g_temp(num_values_per_group);
 
-
-
-    for (int i = 0; i < gcount; ++i)
+    for (int i = 0; i < _num_vis; ++i)
     {
         long group = (long)i + 1;
 
@@ -238,38 +251,78 @@ void write_uvfits()
         p_temp[0] = u[i];
         p_temp[1] = v[i];
         p_temp[2] = w[i];
-        p_temp[3] = date1[i];
-        p_temp[4] = date2[i];
-        p_temp[5] = baseline[i];
-        printf("- writing group %d\n", group);
-        for (int j = 0; j < nelements; ++j)
-            printf("   param %d = %f\n", j+1, p_temp[j]);
+        p_temp[3] = date[i];
+        p_temp[4] = baseline[i];
 
-        fits_write_grppar_flt(fptr, group, firstelem, nelements,
-                p_temp.data(), &status);
-        ffrprt(stderr, status);
+        printf("- writing group %li\n", group);
+        for (int j = 0; j < nelements; ++j)
+            printf("   param %i = %f\n", j+1, p_temp[j]);
+
+        fits_write_grppar_flt(_fptr, group, firstelem, nelements,
+                p_temp.data(), &_status);
+        check_status();
 
         // Write the data.
-        g_temp[0] = vis_re[i];
-        g_temp[1] = vis_im[i];
-        g_temp[2] = vis_wgt[i];
+        g_temp[0] = re[i];
+        g_temp[1] = im[i];
+        g_temp[2] = wgt[i];
+
         for (int j = 0; j < num_values_per_group; ++j)
-            printf("   data %d = %f\n", j+1, g_temp[j]);
+            printf("   data %i = %f\n", j+1, g_temp[j]);
 
-        fits_write_subset_flt(fptr, group, naxis-1, naxes2.data(),
-                fpixel.data(), lpixel.data(), g_temp.data(), &status);
-        ffrprt(stderr, status);
+        fits_write_subset_flt(_fptr, group, naxes.size(), naxes.data(),
+                fpixel.data(), lpixel.data(), g_temp.data(), &_status);
+
+        check_status();
     }
-
-
-    // Close the file.
-    fits_close_file(fptr, &status);
 }
+
+
+void UVFitsWriter::check_status(const QString & message)
+{
+    // No status error, return.
+    if (!_status) return;
+
+    fprintf(stderr, "%s\n", QString(80, '*').toLatin1().data());
+    // Print user supplied message.
+    if (!message.isNull())
+        fprintf(stderr, "UVFitsWriter !ERROR!: %s.\n", message.toLatin1().data());
+
+    // Print the CFITSIO error message.
+    fits_report_error(stderr, _status);
+    fprintf(stderr, "%s\n", QString(80, '*').toLatin1().data());
+}
+
+} // namespace oskar
 
 
 int main(int /*argc*/, char ** /*argv*/)
 {
-    write_uvfits();
+    oskar::UVFitsWriter writer;
+    writer.open_file("hello.fits");
+
+    int nvis = 1;
+    writer.write_header(nvis);
+
+    int num_amps_per_vis = writer.num_amps_per_group();
+    int namps = nvis * num_amps_per_vis;
+
+    QVector<float> u(nvis, 0.0);
+    QVector<float> v(nvis, 0.0);
+    QVector<float> w(nvis, 0.0);
+    QVector<float> date(nvis, 0.0);
+    QVector<float> baseline(nvis, 0.0);
+    QVector<float> re(namps, 0.0);
+    QVector<float> im(namps, 0.0);
+    QVector<float> wgt(namps, 0.0);
+
+    baseline[0] = 1.0 * 256.0 + 2.0;
+    u[0] = 1050.0;
+    re[0] = 1.0;
+
+    writer.write_data(u.constData(), v.constData(), w.constData(), date.constData(),
+            baseline.constData(), re.constData(), im.constData(),
+            wgt.constData());
 
     return EXIT_SUCCESS;
 }
