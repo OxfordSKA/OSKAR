@@ -31,7 +31,7 @@
 // Single precision.
 
 __global__
-void oskar_math_cudakf_sph_to_lm(const int n, const float* lambda,
+void oskar_math_cudakf_sph_to_lm(const int np, const float* lambda,
         const float* phi, const float lambda0, const float cosPhi0,
         const float sinPhi0, float* l, float* m)
 {
@@ -40,7 +40,7 @@ void oskar_math_cudakf_sph_to_lm(const int n, const float* lambda,
 
     // Copy the input data from global memory.
     float cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi;
-    if (s < ns)
+    if (s < np)
     {
         relLambda = lambda[s];
         pphi = phi[s];
@@ -57,7 +57,7 @@ void oskar_math_cudakf_sph_to_lm(const int n, const float* lambda,
 
     // Output data.
     __syncthreads(); // Coalesce memory accesses.
-    if (s < ns)
+    if (s < np)
     {
         l[s] = ll;
         m[s] = mm;
@@ -67,7 +67,7 @@ void oskar_math_cudakf_sph_to_lm(const int n, const float* lambda,
 // Double precision.
 
 __global__
-void oskar_math_cudakd_sph_to_lm(const int n, const double* lambda,
+void oskar_math_cudakd_sph_to_lm(const int np, const double* lambda,
         const double* phi, const double lambda0, const double cosPhi0,
         const double sinPhi0, double* l, double* m)
 {
@@ -76,7 +76,7 @@ void oskar_math_cudakd_sph_to_lm(const int n, const double* lambda,
 
     // Copy the input data from global memory.
     double cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi;
-    if (s < ns)
+    if (s < np)
     {
         relLambda = lambda[s];
         pphi = phi[s];
@@ -93,7 +93,7 @@ void oskar_math_cudakd_sph_to_lm(const int n, const double* lambda,
 
     // Output data.
     __syncthreads(); // Coalesce memory accesses.
-    if (s < ns)
+    if (s < np)
     {
         l[s] = ll;
         m[s] = mm;

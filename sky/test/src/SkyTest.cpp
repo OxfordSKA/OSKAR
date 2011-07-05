@@ -33,8 +33,6 @@
 #include "sky/generate_random_sources.h"
 #include "sky/rotate_sources.h"
 
-#include <QtCore/QTime>
-
 #include <vector>
 #include <cstdlib>
 #include <cmath>

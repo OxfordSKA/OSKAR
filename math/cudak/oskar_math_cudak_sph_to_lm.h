@@ -43,7 +43,7 @@
  * Projects spherical coordinates at the specified tangent point using the
  * orthographic tangent-plane projection.
  *
- * @param[in] n       Number of positions.
+ * @param[in] np      Number of positions.
  * @param[in] lamda   Longitude positions in radians.
  * @param[in] phi     Latitude positions in radians.
  * @param[in] lambd0  Centre longitude position in radians.
@@ -53,7 +53,7 @@
  * @param[out] m      Projected m-position.
  */
 __global__
-void oskar_math_cudakf_sph_to_lm(const int n, const float* lambda,
+void oskar_math_cudakf_sph_to_lm(const int np, const float* lambda,
         const float* phi, const float lambda0, const float cosPhi0,
         const float sinPhi0, float* l, float* m);
 
@@ -65,7 +65,7 @@ void oskar_math_cudakf_sph_to_lm(const int n, const float* lambda,
  * Projects spherical coordinates at the specified tangent point using the
  * orthographic tangent-plane projection.
  *
- * @param[in] n       Number of positions.
+ * @param[in] np      Number of positions.
  * @param[in] lamda   Longitude positions in radians.
  * @param[in] phi     Latitude positions in radians.
  * @param[in] lambd0  Centre longitude position in radians.
@@ -75,8 +75,8 @@ void oskar_math_cudakf_sph_to_lm(const int n, const float* lambda,
  * @param[out] m      Projected m-position.
  */
 __global__
-void oskar_math_cudakd_sph_to_lm(const int n, const float* lambda,
-        const float* phi, const float lambda0, const float cosPhi0,
-        const float sinPhi0, float* l, float* m);
+void oskar_math_cudakd_sph_to_lm(const int np, const double* lambda,
+        const double* phi, const double lambda0, const double cosPhi0,
+        const double sinPhi0, double* l, double* m);
 
 #endif // OSKAR_MATH_CUDAK_SPH_TO_LM_H_

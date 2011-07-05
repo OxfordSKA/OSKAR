@@ -3,9 +3,24 @@
 #
 #==============================================================================
 
-# === Recurse into the oskar-lib beamforming math sub-module.
 include_directories(${oskar-lib_SOURCE_DIR}/math)
 
+# Add the source files in this directory.
+set(math_SRC
+    src/oskar_math_mat_tri_c.c
+)
+
+# If CUDA is present, then add the kernels directory.
+if (CUDA_FOUND)
+    add_subdirectory(cudak)
+    foreach (file ${math_cuda_kernels_SRC})
+        list(APPEND math_SRC cudak/${file})
+    endforeach ()
+endif ()
+
+
+############ DEPRECATED SECTION ############
+# === Recurse into the oskar-lib beamforming math sub-module.
 add_subdirectory(beamforming)
 
 # === Recurse into the oskar-lib core math sub-module.
@@ -15,7 +30,6 @@ add_subdirectory(core)
 add_subdirectory(synthesis)
 
 # === Get list of source files required to build the math module.
-set(math_SRC)
 foreach (file ${math_beamforming_SRC})
     list(APPEND math_SRC beamforming/${file})
 endforeach ()
@@ -28,9 +42,17 @@ endforeach ()
 foreach (file ${math_synthesis_SRC})
     list(APPEND math_SRC synthesis/${file})
 endforeach ()
+############ END DEPRECATED SECTION ############
+
+
 
 # === Macros to build the oskar-lib math module.
-add_library(oskar_math ${math_SRC})
+if (CUDA_FOUND)
+    cuda_add_library(oskar_math ${math_SRC})
+else ()
+    add_library(oskar_math ${math_SRC})
+endif ()
+
 set_target_properties(oskar_math PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"

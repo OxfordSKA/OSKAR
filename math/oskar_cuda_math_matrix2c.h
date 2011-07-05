@@ -26,51 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_MAT_TRI_C_H_
-#define OSKAR_MATH_MAT_TRI_C_H_
+#ifndef OSKAR_CUDA_MATH_MATRIX2C_H_
+#define OSKAR_CUDA_MATH_MATRIX2C_H_
+
+#include "vector_types.h"
 
 /**
- * @file oskar_math_mat_tri_c.h
+ * @file oskar_cuda_math_matrix2c.h
  */
 
-#include "oskar_math_windows.h"
-
-#ifdef __cplusplus
 extern "C" {
-#endif
 
 /**
  * @brief
- * Extracts the triangular half of a complex matrix (single precision).
+ * Complex 2x2 matrix (single precision).
  *
  * @details
- * This function extracts the triangular half of a complex square matrix.
- * The diagonals are excluded.
+ * Structure used to hold data for a complex 2x2 matrix.
+ * The elements are arranged as:
  *
- * @param[in] n The matrix dimension (matrix is n-by-n).
- * @param[in] a The matrix (length 2 * n * n).
- * @param[out] b The triangular half (length 2 * (n * (n - 1) / 2)).
+ *   ( a  b )
+ *   ( c  d )
  */
-DllExport
-void oskar_mathf_mat_tri_c(int n, const float* a, float* b);
+struct __align__(16) Matrix2cf
+{
+    float2 a;
+    float2 b;
+    float2 c;
+    float2 d;
+};
 
 /**
  * @brief
- * Extracts the triangular half of a complex matrix (double precision).
+ * Complex 2x2 matrix (double precision).
  *
  * @details
- * This function extracts the triangular half of a complex square matrix.
- * The diagonals are excluded.
+ * Structure used to hold data for a complex 2x2 matrix.
+ * The elements are arranged as:
  *
- * @param[in] n The matrix dimension (matrix is n-by-n).
- * @param[in] a The matrix (length 2 * n * n).
- * @param[out] b The triangular half (length 2 * (n * (n - 1) / 2)).
+ *   ( a  b )
+ *   ( c  d )
  */
-DllExport
-void oskar_mathd_mat_tri_c(int n, const double* a, double* b);
+struct __align__(16) Matrix2cd
+{
+    double2 a;
+    double2 b;
+    double2 c;
+    double2 d;
+};
 
-#ifdef __cplusplus
 }
-#endif
 
-#endif // OSKAR_MATH_MAT_TRI_C_H_
+#endif // OSKAR_CUDA_MATH_MATRIX2C_H_

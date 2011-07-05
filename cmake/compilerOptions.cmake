@@ -9,9 +9,9 @@ endif()
 
 message("*****************************************************************")
 if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-    message("** NOTE: Building in release Mode!")
+    message("** NOTE: Building in release mode!")
 else ()
-    message("** NOTE: Building in debug Mode!")
+    message("** NOTE: Building in debug mode!")
 endif()
 message("*****************************************************************")
 
@@ -58,7 +58,7 @@ endif ()
 
 # === Cuda
 if (CUDA_FOUND)
-    # Use a seperate set of flags for CUDA.
+    # Use a separate set of flags for CUDA.
     if (NOT MSVC)
         set(CUDA_PROPAGATE_HOST_FLAGS OFF)
     endif ()
@@ -80,6 +80,7 @@ if (CUDA_FOUND)
         #list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
         #list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_21)
     else ()
         if (NOT MSVC)
             list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O0;)
@@ -91,6 +92,7 @@ if (CUDA_FOUND)
         #list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
         #list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
+        list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_21)
     endif ()
 endif (CUDA_FOUND)
 

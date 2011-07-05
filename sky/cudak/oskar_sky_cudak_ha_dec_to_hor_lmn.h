@@ -89,7 +89,8 @@ void oskar_sky_cudakf_ha_dec_to_hor_lmn(int ns, const float* ha,
  * @param[out] n The source n-coordinates (see above).
  */
 __global__
-void oskar_sky_cudakd_ha_dec_to_hor_lmn(int ns, const double2* radec,
-        double cosLat, double sinLat, double2* azel);
+void oskar_sky_cudakd_ha_dec_to_hor_lmn(int ns, const double* ha,
+        const double* dec, double cosLat, double sinLat, double* l, double* m,
+        double* n);
 
 #endif // OSKAR_SKY_CUDAK_HA_DEC_TO_HOR_LMN_H_
