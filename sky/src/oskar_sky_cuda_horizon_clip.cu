@@ -28,12 +28,11 @@
 
 #include "sky/oskar_sky_cuda_horizon_clip.h"
 #include "sky/oskar_sky_cuda_ra_dec_to_hor_lmn.h"
-#include "sky/cudak/oskar_sky_cudak_ha_dec_to_hor_lmn.h"
-#include "math/cudak/oskar_math_cudak_sph_to_lm.h"
-#include "math/cudak/oskar_math_cudak_vec_sub_sr.h"
+#include "sky/oskar_sky_cuda_ra_dec_to_relative_lmn.h"
 
 #include <thrust/device_vector.h> // Must be included before thrust/copy.h
 #include <thrust/copy.h>
+#include <thrust/remove.h>
 
 // Single precision.
 
@@ -42,73 +41,73 @@ struct is_positive_f {
     bool operator()(const float x) {return x > 0.0f;}
 };
 
+struct is_negative_f {
+    __host__ __device__
+    bool operator()(const float x) {return x <= 0.0f;}
+};
+
 int oskar_sky_cudaf_horizon_clip(int n_in, const float* in_I,
         const float* in_Q, const float* in_U, const float* in_V,
-        const float* ra, const float* dec, float ra0, float dec0,
-        float lst, float lat, int* n_out, float* out_I, float* out_Q,
-        float* out_U, float* out_V, float* eq_l, float* eq_m,
-        float* hor_l, float* hor_m, float* work)
+        const float* in_ra, const float* in_dec, float lst, float lat,
+        int* n_out, float* out_I, float* out_Q, float* out_U, float* out_V,
+        float* out_ra, float* out_dec, float* hor_l, float* hor_m,
+        float* hor_n)
 {
-    // Determine horizontal l,m,n positions (temporaries in eq_l, eq_m).
-    float* hor_n = work;
+    // Determine horizontal l,m,n positions.
     int rv = oskar_sky_cudaf_ra_dec_to_hor_lmn
-            (n_in, ra, dec, lst, lat, eq_l, eq_m, hor_n);
+            (n_in, in_ra, in_dec, lst, lat, hor_l, hor_m, hor_n);
     if (rv) return rv;
 
     // Determine which sources are above the horizon, and copy them out.
     thrust::device_ptr<float> out = thrust::copy_if(
-            thrust::device_pointer_cast(eq_l),         // Input start.
-            thrust::device_pointer_cast(eq_l + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(hor_l), is_positive_f());
-    thrust::copy_if(
-            thrust::device_pointer_cast(eq_m),         // Input start.
-            thrust::device_pointer_cast(eq_m + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(hor_m), is_positive_f());
-    thrust::copy_if(
             thrust::device_pointer_cast(in_I),         // Input start.
             thrust::device_pointer_cast(in_I + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_I), is_positive_f());
     thrust::copy_if(
             thrust::device_pointer_cast(in_Q),         // Input start.
             thrust::device_pointer_cast(in_Q + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_Q), is_positive_f());
     thrust::copy_if(
             thrust::device_pointer_cast(in_U),         // Input start.
             thrust::device_pointer_cast(in_U + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_U), is_positive_f());
     thrust::copy_if(
             thrust::device_pointer_cast(in_V),         // Input start.
             thrust::device_pointer_cast(in_V + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_V), is_positive_f());
     thrust::copy_if(
-            thrust::device_pointer_cast(ra),           // Input start.
-            thrust::device_pointer_cast(ra + n_in),    // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(eq_l), is_positive_f());
+            thrust::device_pointer_cast(in_ra),        // Input start.
+            thrust::device_pointer_cast(in_ra + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            thrust::device_pointer_cast(out_ra), is_positive_f());
     thrust::copy_if(
-            thrust::device_pointer_cast(dec),          // Input start.
-            thrust::device_pointer_cast(dec + n_in),   // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(eq_m), is_positive_f());
+            thrust::device_pointer_cast(in_dec),       // Input start.
+            thrust::device_pointer_cast(in_dec + n_in),// Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            thrust::device_pointer_cast(out_dec), is_positive_f());
+    thrust::remove_if(
+            thrust::device_pointer_cast(hor_l),        // Input start.
+            thrust::device_pointer_cast(hor_l + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            is_negative_f());
+    thrust::remove_if(
+            thrust::device_pointer_cast(hor_m),        // Input start.
+            thrust::device_pointer_cast(hor_m + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            is_negative_f());
 
-    // Compute l,m direction cosines of visible source RA, Dec
-    // relative to phase centre.
-    *n_out = out - thrust::device_pointer_cast(hor_l);
-    const int n_thd = 256;
-    const int n_blk = (*n_out + n_thd - 1) / n_thd;
-    const float cosDec0 = cosf(dec0);
-    const float sinDec0 = sinf(dec0);
-    oskar_math_cudakf_sph_to_lm <<< n_blk, n_thd >>>
-            (*n_out, eq_l, eq_m, ra0, cosDec0, sinDec0, eq_l, eq_m);
-    cudaDeviceSynchronize();
-    cudaError_t errCuda = cudaPeekAtLastError();
-    if (errCuda != cudaSuccess) return errCuda;
+    // Compact the stencil last.
+    thrust::remove_if(
+            thrust::device_pointer_cast(hor_n),        // Input start.
+            thrust::device_pointer_cast(hor_n + n_in), // Input end.
+            is_negative_f());
+
+    // Get the number of sources above the horizon.
+    *n_out = out - thrust::device_pointer_cast(out_I);
 
     return 0;
 }
@@ -120,73 +119,73 @@ struct is_positive_d {
     bool operator()(const double x) {return x > 0.0;}
 };
 
+struct is_negative_d {
+    __host__ __device__
+    bool operator()(const double x) {return x <= 0.0;}
+};
+
 int oskar_sky_cudad_horizon_clip(int n_in, const double* in_I,
         const double* in_Q, const double* in_U, const double* in_V,
-        const double* ra, const double* dec, double ra0, double dec0,
-        double lst, double lat, int* n_out, double* out_I, double* out_Q,
-        double* out_U, double* out_V, double* eq_l, double* eq_m,
-        double* hor_l, double* hor_m, double* work)
+        const double* in_ra, const double* in_dec, double lst, double lat,
+        int* n_out, double* out_I, double* out_Q, double* out_U, double* out_V,
+        double* out_ra, double* out_dec, double* hor_l, double* hor_m,
+        double* hor_n)
 {
-    // Determine horizontal l,m,n positions (temporaries in eq_l, eq_m).
-    double* hor_n = work;
+    // Determine horizontal l,m,n positions.
     int rv = oskar_sky_cudad_ra_dec_to_hor_lmn
-            (n_in, ra, dec, lst, lat, eq_l, eq_m, hor_n);
+            (n_in, in_ra, in_dec, lst, lat, hor_l, hor_m, hor_n);
     if (rv) return rv;
 
     // Determine which sources are above the horizon, and copy them out.
     thrust::device_ptr<double> out = thrust::copy_if(
-            thrust::device_pointer_cast(eq_l),         // Input start.
-            thrust::device_pointer_cast(eq_l + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(hor_l), is_positive_d());
-    thrust::copy_if(
-            thrust::device_pointer_cast(eq_m),         // Input start.
-            thrust::device_pointer_cast(eq_m + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(hor_m), is_positive_d());
-    thrust::copy_if(
             thrust::device_pointer_cast(in_I),         // Input start.
             thrust::device_pointer_cast(in_I + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_I), is_positive_d());
     thrust::copy_if(
             thrust::device_pointer_cast(in_Q),         // Input start.
             thrust::device_pointer_cast(in_Q + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_Q), is_positive_d());
     thrust::copy_if(
             thrust::device_pointer_cast(in_U),         // Input start.
             thrust::device_pointer_cast(in_U + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_U), is_positive_d());
     thrust::copy_if(
             thrust::device_pointer_cast(in_V),         // Input start.
             thrust::device_pointer_cast(in_V + n_in),  // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
+            thrust::device_pointer_cast(hor_n),        // Stencil.
             thrust::device_pointer_cast(out_V), is_positive_d());
     thrust::copy_if(
-            thrust::device_pointer_cast(ra),           // Input start.
-            thrust::device_pointer_cast(ra + n_in),    // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(eq_l), is_positive_d());
+            thrust::device_pointer_cast(in_ra),        // Input start.
+            thrust::device_pointer_cast(in_ra + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            thrust::device_pointer_cast(out_ra), is_positive_d());
     thrust::copy_if(
-            thrust::device_pointer_cast(dec),          // Input start.
-            thrust::device_pointer_cast(dec + n_in),   // Input end.
-            thrust::device_pointer_cast(hor_n),        // Stencil
-            thrust::device_pointer_cast(eq_m), is_positive_d());
+            thrust::device_pointer_cast(in_dec),       // Input start.
+            thrust::device_pointer_cast(in_dec + n_in),// Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            thrust::device_pointer_cast(out_dec), is_positive_d());
+    thrust::remove_if(
+            thrust::device_pointer_cast(hor_l),        // Input start.
+            thrust::device_pointer_cast(hor_l + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            is_negative_d());
+    thrust::remove_if(
+            thrust::device_pointer_cast(hor_m),        // Input start.
+            thrust::device_pointer_cast(hor_m + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),        // Stencil.
+            is_negative_d());
 
-    // Compute l,m direction cosines of visible source RA, Dec
-    // relative to phase centre.
-    *n_out = out - thrust::device_pointer_cast(hor_l);
-    const int n_thd = 256;
-    const int n_blk = (*n_out + n_thd - 1) / n_thd;
-    const double cosDec0 = cos(dec0);
-    const double sinDec0 = sin(dec0);
-    oskar_math_cudakd_sph_to_lm <<< n_blk, n_thd >>>
-            (*n_out, eq_l, eq_m, ra0, cosDec0, sinDec0, eq_l, eq_m);
-    cudaDeviceSynchronize();
-    cudaError_t errCuda = cudaPeekAtLastError();
-    if (errCuda != cudaSuccess) return errCuda;
+    // Compact the stencil last.
+    thrust::remove_if(
+            thrust::device_pointer_cast(hor_n),        // Input start.
+            thrust::device_pointer_cast(hor_n + n_in), // Input end.
+            is_negative_d());
+
+    // Get the number of sources above the horizon.
+    *n_out = out - thrust::device_pointer_cast(out_I);
 
     return 0;
 }

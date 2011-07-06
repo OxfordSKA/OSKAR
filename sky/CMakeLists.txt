@@ -25,6 +25,7 @@ if (CUDA_FOUND)
     set(sky_SRC ${sky_SRC}
         src/oskar_sky_cuda_horizon_clip.cu
         src/oskar_sky_cuda_ra_dec_to_hor_lmn.cu
+        src/oskar_sky_cuda_ra_dec_to_relative_lmn.cu
     )
 
     # Build the library with CUDA.

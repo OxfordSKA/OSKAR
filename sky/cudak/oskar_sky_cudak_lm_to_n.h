@@ -26,55 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_MATH_MATRIX2C_H_
-#define OSKAR_CUDA_MATH_MATRIX2C_H_
-
-#include "vector_types.h"
+#ifndef OSKAR_SKY_CUDAK_LM_TO_N_H_
+#define OSKAR_SKY_CUDAK_LM_TO_N_H_
 
 /**
- * @file oskar_cuda_math_matrix2c.h
+ * @file oskar_sky_cudak_lm_to_n.h
  */
 
-extern "C" {
+#include "utility/oskar_util_cuda_eclipse.h"
 
 /**
  * @brief
- * Complex 2x2 matrix (single precision).
+ * CUDA kernel compute n-direction cosines from l and m (single precision).
  *
  * @details
- * Structure used to hold data for a complex 2x2 matrix.
- * The elements are arranged as:
+ * This CUDA kernel computes the n-direction cosines from the l,m-positions,
+ * using the relation n = sqrt(1 - l*l - m*m) - 1.
  *
- *   ( a  b )
- *   ( c  d )
+ * @param[in] n     The number of points.
+ * @param[out] p_l  The l-direction-cosines.
+ * @param[out] p_m  The m-direction-cosines.
+ * @param[out] p_n  The n-direction-cosines.
  */
-struct __align__(16) Matrix2cf
-{
-    float2 a;
-    float2 b;
-    float2 c;
-    float2 d;
-};
+__global__
+void oskar_sky_cudakf_lm_to_n(int n, const float* p_l, const float* p_m,
+        float* p_n);
 
 /**
  * @brief
- * Complex 2x2 matrix (double precision).
+ * CUDA kernel compute n-direction cosines from l and m (double precision).
  *
  * @details
- * Structure used to hold data for a complex 2x2 matrix.
- * The elements are arranged as:
+ * This CUDA kernel computes the n-direction cosines from the l,m-positions,
+ * using the relation n = sqrt(1 - l*l - m*m) - 1.
  *
- *   ( a  b )
- *   ( c  d )
+ * @param[in] n     The number of points.
+ * @param[out] p_l  The l-direction-cosines.
+ * @param[out] p_m  The m-direction-cosines.
+ * @param[out] p_n  The n-direction-cosines.
  */
-struct __align__(16) Matrix2cd
-{
-    double2 a;
-    double2 b;
-    double2 c;
-    double2 d;
-};
+__global__
+void oskar_sky_cudakd_lm_to_n(int n, const double* p_l, const double* p_m,
+        double* p_n);
 
-}
-
-#endif // OSKAR_CUDA_MATH_MATRIX2C_H_
+#endif // OSKAR_SKY_CUDAK_LM_TO_N_H_
