@@ -26,19 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_CUDA_ECLIPSE_H_
-#define OSKAR_UTIL_CUDA_ECLIPSE_H_
+#ifndef CUDA_INTERP_BILINEAR_TEST_H_
+#define CUDA_INTERP_BILINEAR_TEST_H_
 
 /**
- * @file oskar_util_cuda_eclipse.h
+ * @file CudaInterpBilinearTest.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-	#define __host__
-    #define __shared__
-    #define __constant__
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
-#endif // OSKAR_UTIL_CUDA_ECLIPSE_H_
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class CudaInterpBilinearTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(CudaInterpBilinearTest);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test_method();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(CudaInterpBilinearTest);
+
+#endif // CUDA_INTERP_BILINEAR_TEST_H_

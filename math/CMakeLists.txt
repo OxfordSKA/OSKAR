@@ -10,12 +10,15 @@ set(math_SRC
     src/oskar_math_mat_tri_c.c
 )
 
-# If CUDA is present, then add the kernels directory.
+# If CUDA is present, then add the kernels directory and the CUDA sources.
 if (CUDA_FOUND)
     add_subdirectory(cudak)
     foreach (file ${math_cuda_kernels_SRC})
         list(APPEND math_SRC cudak/${file})
     endforeach ()
+    set(math_SRC ${math_SRC}
+        src/oskar_math_cuda_interp_bilinear.cu
+    )
 endif ()
 
 

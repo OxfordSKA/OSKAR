@@ -11,8 +11,18 @@ if (CPPUNIT_FOUND)
         src/RandomTest.cpp
     )
 
+    if (CUDA_FOUND)
+        set(math_test_SRC ${math_test_SRC}
+            src/CudaInterpBilinearTest.cu
+        )
+    endif()
+
     include_directories(${CPPUNIT_INCLUDE_DIR})
-    add_executable(mathTest ${math_test_SRC})
+    if (CUDA_FOUND)
+        cuda_add_executable(mathTest ${math_test_SRC})
+    else()
+        add_executable(mathTest ${math_test_SRC})
+    endif()
     set_target_properties(mathTest PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         #LINK_FLAGS "${OpenMP_CXX_FLAGS}"
