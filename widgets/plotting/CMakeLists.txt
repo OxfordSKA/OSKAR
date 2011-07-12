@@ -4,10 +4,10 @@
 #===============================================================================
 
 include_directories(
-	${Qwt5_INCLUDE_DIR} 
-	${QT_INCLUDE_DIR}
+    ${Qwt5_INCLUDE_DIR}
+    ${QT_INCLUDE_DIR}
     ${QT_QTCORE_INCLUDE_DIR}
-	${QT_QTGUI_INCLUDE_DIR}
+    ${QT_QTGUI_INCLUDE_DIR}
 )
 
 set(widgets_plotting_MOC
@@ -29,12 +29,11 @@ set(widgets_plotting_SRC
 # === Macros to build the oskar-lib plotting widget sub-module.
 qt4_wrap_cpp(widgets_plotting_SRC ${widgets_plotting_MOC})
 add_library(oskar_widgets_plotting SHARED ${widgets_plotting_SRC})
-target_link_libraries(oskar_widgets_plotting 
-	${QT_QTCORE_LIBRARY}
+target_link_libraries(oskar_widgets_plotting
+    ${QT_QTCORE_LIBRARY}
     ${QT_QTGUI_LIBRARY}
-	${Qwt5_Qt4_LIBRARY}
+    ${Qwt5_Qt4_LIBRARY}
 )
-
 
 
 # === Install target for plotting widgets sub-module.
