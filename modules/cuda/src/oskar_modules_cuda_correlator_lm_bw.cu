@@ -31,7 +31,7 @@
 #include "cuda/kernels/oskar_cudak_dftw_3d_seq_out.h"
 #include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
 #include "cuda/kernels/oskar_cudak_correlator.h"
-#include "math/core/oskar_math_core_ctrimat.h"
+#include "math/oskar_math_mat_tri_c.h"
 #include "interferometry/oskar_synthesis_baselines.h"
 #include "interferometry/oskar_synthesis_xyz2uvw.h"
 

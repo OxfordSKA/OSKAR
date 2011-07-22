@@ -30,7 +30,7 @@
 
 #include "cuda/kernels/oskar_cudak_rpw3leglm.h"
 #include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
-#include "math/core/oskar_math_core_ctrimat.h"
+#include "math/oskar_math_mat_tri_c.h"
 #include "interferometry/oskar_synthesis_baselines.h"
 #include "interferometry/oskar_synthesis_xyz2uvw.h"
 
@@ -170,7 +170,7 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
     cudaMemcpy(vism, visd, na * na * sizeof(float2), cudaMemcpyDeviceToHost);
 
     // Extract triangular half.
-    oskar_math_coref_ctrimat(na, vism, vis);
+    oskar_mathf_mat_tri_c(na, vism, vis);
 
     // Copy u,v,w baseline coordinates of mid-point to output arrays.
     // FIXME: probably don't need to return UVW from this function?
@@ -340,7 +340,7 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
     cudaMemcpy(vism, visd, na * na * sizeof(double2), cudaMemcpyDeviceToHost);
 
     // Extract triangular half.
-    oskar_math_cored_ctrimat(na, vism, vis);
+    oskar_mathd_mat_tri_c(na, vism, vis);
 
     // Copy u,v,w baseline coordinates of mid-point to output arrays.
     // FIXME: probably don't need to return UVW from this function?

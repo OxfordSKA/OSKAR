@@ -20,19 +20,6 @@ set(math_SRC ${math_SRC}
 )
 
 
-
-############ DEPRECATED SECTION ############
-# === Recurse into the oskar-lib core math sub-module.
-add_subdirectory(core)
-
-# === Get list of source files required to build the math module.
-foreach (file ${math_core_SRC})
-    list(APPEND math_SRC core/${file})
-endforeach ()
-############ END DEPRECATED SECTION ############
-
-
-
 # === Macros to build the oskar-lib math module.
 if (CUDA_FOUND)
     cuda_add_library(oskar_math ${math_SRC})
