@@ -50,6 +50,7 @@ if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
     add_subdirectory(ms)
     add_subdirectory(utility)
     add_subdirectory(widgets)
+    add_subdirectory(interferometry)
 endif ()
 
 

@@ -32,8 +32,8 @@
 #include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
 #include "cuda/kernels/oskar_cudak_correlator.h"
 #include "math/core/oskar_math_core_ctrimat.h"
-#include "math/synthesis/oskar_math_synthesis_baselines.h"
-#include "math/synthesis/oskar_math_synthesis_xyz2uvw.h"
+#include "interferometry/oskar_synthesis_baselines.h"
+#include "interferometry/oskar_synthesis_xyz2uvw.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -138,10 +138,9 @@ int oskar_modules_cudaf_correlator_lm_bw(int na, const float* ax,
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
-    oskar_math_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
-            &uvw[0], &uvw[na], &uvw[2*na]);
-    oskar_math_synthesisf_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
-            u, v, w);
+    oskar_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0, &uvw[0], &uvw[na],
+            &uvw[2*na]);
+    oskar_synthesisf_baselines(na, &uvw[0], &uvw[na], &uvw[2*na], u, v, w);
 
     // Loop over integrations.
     for (i = 0; i < nsdt; ++i)
@@ -152,8 +151,8 @@ int oskar_modules_cudaf_correlator_lm_bw(int na, const float* ax,
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
-        oskar_math_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
-                &uvw[0], &uvw[na], &uvw[2*na]);
+        oskar_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0, &uvw[0], &uvw[na],
+                &uvw[2*na]);
 
         // Multiply station u,v,w coordinates by 2 pi / lambda.
         for (a = 0; a < na; ++a)
@@ -313,9 +312,9 @@ int oskar_modules_cudad_correlator_lm_bw(int na, const double* ax,
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
-    oskar_math_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
+    oskar_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
             &uvw[0], &uvw[na], &uvw[2*na]);
-    oskar_math_synthesisd_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
+    oskar_synthesisd_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
             u, v, w);
 
     // Loop over integrations.
@@ -327,7 +326,7 @@ int oskar_modules_cudad_correlator_lm_bw(int na, const double* ax,
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
-        oskar_math_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
+        oskar_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
                 &uvw[0], &uvw[na], &uvw[2*na]);
 
         // Multiply station u,v,w coordinates by 2 pi / lambda.

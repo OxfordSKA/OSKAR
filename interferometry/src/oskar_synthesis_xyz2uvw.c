@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "synthesis/oskar_synthesis_xyz2uvw.h"
+#include "interferometry/oskar_synthesis_xyz2uvw.h"
 #include <math.h>
 
 #ifdef __cplusplus

@@ -23,6 +23,7 @@ target_link_libraries(oskar_modules
     ${CUDA_CUBLAS_LIBRARIES}
     oskar_cuda
     oskar_math
+    oskar_interferometry
 )
 set_target_properties(oskar_modules PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"

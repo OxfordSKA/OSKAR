@@ -31,8 +31,8 @@
 #include "cuda/kernels/oskar_cudak_rpw3leglm.h"
 #include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
 #include "math/core/oskar_math_core_ctrimat.h"
-#include "math/synthesis/oskar_math_synthesis_baselines.h"
-#include "math/synthesis/oskar_math_synthesis_xyz2uvw.h"
+#include "interferometry/oskar_synthesis_baselines.h"
+#include "interferometry/oskar_synthesis_xyz2uvw.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -135,7 +135,7 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
-        oskar_math_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
+        oskar_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
                 &uvw[0], &uvw[na], &uvw[2*na]);
 
         // Copy u,v,w coordinates to device.
@@ -177,9 +177,9 @@ int oskar_modules_cudaf_correlator_lm(int na, const float* ax, const float* ay,
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
-    oskar_math_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
+    oskar_synthesisf_xyz2uvw(na, ax, ay, az, ha0, dec0,
             &uvw[0], &uvw[na], &uvw[2*na]);
-    oskar_math_synthesisf_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
+    oskar_synthesisf_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
             u, v, w);
 
     // Clean up before exit.
@@ -305,7 +305,7 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
-        oskar_math_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
+        oskar_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
                 &uvw[0], &uvw[na], &uvw[2*na]);
 
         // Copy u,v,w coordinates to device.
@@ -347,9 +347,9 @@ int oskar_modules_cudad_correlator_lm(int na, const double* ax, const double* ay
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
-    oskar_math_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
+    oskar_synthesisd_xyz2uvw(na, ax, ay, az, ha0, dec0,
             &uvw[0], &uvw[na], &uvw[2*na]);
-    oskar_math_synthesisd_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
+    oskar_synthesisd_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
             u, v, w);
 
     // Clean up before exit.

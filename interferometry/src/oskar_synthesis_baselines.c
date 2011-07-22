@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "synthesis/oskar_synthesis_baselines.h"
+#include "interferometry/oskar_synthesis_baselines.h"
 
 #ifdef __cplusplus
 extern "C" {

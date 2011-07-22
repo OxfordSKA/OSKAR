@@ -25,21 +25,9 @@ set(math_SRC ${math_SRC}
 # === Recurse into the oskar-lib core math sub-module.
 add_subdirectory(core)
 
-# === Recurse into the oskar-lib synthesis math sub-module.
-add_subdirectory(synthesis)
-
 # === Get list of source files required to build the math module.
-foreach (file ${math_beamforming_SRC})
-    list(APPEND math_SRC beamforming/${file})
-endforeach ()
 foreach (file ${math_core_SRC})
     list(APPEND math_SRC core/${file})
-endforeach ()
-foreach (file ${math_modules_SRC})
-    list(APPEND math_SRC modules/${file})
-endforeach ()
-foreach (file ${math_synthesis_SRC})
-    list(APPEND math_SRC synthesis/${file})
 endforeach ()
 ############ END DEPRECATED SECTION ############
 

@@ -23,6 +23,7 @@ if (CUDA_FOUND)
     )
     target_link_libraries(oskar_modules_cuda
         ${CUDA_CUBLAS_LIBRARIES}
+        oskar_interferometry
         oskar_cuda
         oskar_math
     )
