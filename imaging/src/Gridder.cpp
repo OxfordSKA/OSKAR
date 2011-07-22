@@ -27,7 +27,7 @@
  */
 
 #include "imaging/Gridder.h"
-#include "math/core/Rounding.h"
+#include "math/Rounding.h"
 
 #include <cstdio>
 #include <cmath>

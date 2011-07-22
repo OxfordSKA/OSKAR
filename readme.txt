@@ -9,7 +9,7 @@ Top level folder structure for oskar-lib.
 
 src
  |--- antennas         : Evaluation of antenna Jones matrix, interpolation of
- |                      antenna patterns.
+ |                       antenna patterns.
  |
  |--- beamforming      : Evaluation of beam pattern, E Jones.
  |
