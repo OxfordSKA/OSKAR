@@ -41,51 +41,59 @@
 template<typename T>
 class SphericalPositions
 {
-public:
-    /// Projection type.
-    enum {
-        PROJECTION_NONE,
-        PROJECTION_SIN,
-        PROJECTION_TAN,
-        PROJECTION_ARC
-    };
+    public:
+        /// Projection type.
+        enum {
+            PROJECTION_NONE,
+            PROJECTION_SIN,
+            PROJECTION_TAN,
+            PROJECTION_ARC
+        };
 
-    /// Constructs a data structure for spherical position generation.
-    SphericalPositions(const T centreLon, const T centreLat,
-            const T sizeLon, const T sizeLat, const T sepLon, const T sepLat,
-            const T rho = 0,
-            const bool forceConstSep = true,
-            const bool setCentreAfter = false,
-            const bool forceCentrePoint = true,
-            const bool forceToEdges = false,
-            const int projectionType = PROJECTION_SIN);
+        /// Constructs a data structure for spherical position generation.
+        SphericalPositions(const T centreLon, const T centreLat,
+                const T sizeLon, const T sizeLat, const T sepLon,
+                const T sepLat,
+                const T rho = 0,
+                const bool forceConstSep = true,
+                const bool setCentreAfter = false,
+                const bool forceCentrePoint = true,
+                const bool forceToEdges = false,
+                const int projectionType = PROJECTION_SIN);
 
-    /// Generate the positions.
-    unsigned generate(T* longitudes, T* latitudes) const;
+        /// Generate the positions.
+        unsigned generate(T* longitudes, T* latitudes) const;
 
-private:
-    // Parameters.
-    T _lon0;
-    T _lat0;
-    T _sizeLon;
-    T _sizeLat;
-    T _sepLon;
-    T _sepLat;
-    T _rho;
-    bool _forceConstSep;
-    bool _setCentreAfter;
-    bool _forceCentrePoint;
-    bool _forceToEdges;
-    int _projectionType;
+    private:
+        // Parameters.
+        T _lon0;
+        T _lat0;
+        T _sizeLon;
+        T _sizeLat;
+        T _sepLon;
+        T _sepLat;
+        T _rho;
+        bool _forceConstSep;
+        bool _setCentreAfter;
+        bool _forceCentrePoint;
+        bool _forceToEdges;
+        int _projectionType;
 
-    // Cached sines and cosines.
-    T _sinLon0;
-    T _cosLon0;
-    T _sinLat0;
-    T _cosLat0;
-    T _sinRho;
-    T _cosRho;
+        // Cached sines and cosines.
+        T _sinLon0;
+        T _cosLon0;
+        T _sinLat0;
+        T _cosLat0;
+        T _sinRho;
+        T _cosRho;
 };
+
+
+
+
+
+//==============================================================================
+//==============================================================================
 
 /**
  * @details
@@ -142,7 +150,8 @@ unsigned SphericalPositions<T>::generate(T* longitudes, T* latitudes) const
 
     // Set local centre, used only by these loops.
     T x0 = 0, y0 = 0;
-    if (!_setCentreAfter && !_projectionType) {
+    if (!_setCentreAfter && !_projectionType)
+    {
         x0 = _lon0;
         y0 = _lat0;
     }
@@ -155,12 +164,14 @@ unsigned SphericalPositions<T>::generate(T* longitudes, T* latitudes) const
     T begY = y0 + extentY / 2;
 
     // Loop over y (latitude).
-    for (int iY = 0; iY < nY; iY++) {
+    for (int iY = 0; iY < nY; iY++)
+    {
         T y = (nY == 1) ? begY : begY - iY * extentY / (nY - 1);
 
         // Compute cos(latitude) factor.
         T factor = 1;
-        if (_forceConstSep && !_projectionType) {
+        if (_forceConstSep && !_projectionType)
+        {
             factor = cos(y);
             factor = (factor == 0) ? 1 : 1.0 / factor;
         }
@@ -177,30 +188,41 @@ unsigned SphericalPositions<T>::generate(T* longitudes, T* latitudes) const
             T x = (nX == 1) ? begX : begX - iX * extentX / (nX - 1);
 
             // Get beam coordinates.
-            if (!_projectionType) {
+            if (!_projectionType)
+            {
                 lon = x;
                 lat = y;
-            } else {
+            }
+            else
+            {
                 // Calculate L and M direction cosines.
                 T L = x * _cosRho - y * _sinRho;
                 T M = x * _sinRho + y * _cosRho;
 
                 // Find which projection to use.
-                if (_projectionType == PROJECTION_TAN) {
-                    Geometry::tangentPlaneToSphericalGnomonic<T>(L, M,
-                            lon, lat, _lon0, _sinLat0, _cosLat0);
-                } else if (_projectionType == PROJECTION_SIN) {
+                if (_projectionType == PROJECTION_TAN)
+                {
+                    Geometry::tangentPlaneToSphericalGnomonic<T>(L, M, lon, lat,
+                            _lon0, _sinLat0, _cosLat0);
+                }
+                else if (_projectionType == PROJECTION_SIN)
+                {
                     if (!Geometry::tangentPlaneToSphericalOrthographic<T>(L,
-                            M, lon, lat, _lon0, _sinLat0, _cosLat0)) continue;
-                } else if (_projectionType == PROJECTION_ARC) {
+                            M, lon, lat, _lon0, _sinLat0, _cosLat0))
+                        continue;
+                }
+                else if (_projectionType == PROJECTION_ARC)
+                {
                     Geometry::tangentPlaneToSphericalAzimuthalEquidistant<T>(
                             L, M, lon, lat, _lon0, _sinLat0, _cosLat0);
                 }
             }
 
             // Store the beam coordinates if arrays exist.
-            if (longitudes && latitudes) {
-                if (_setCentreAfter && !_projectionType) {
+            if (longitudes && latitudes)
+            {
+                if (_setCentreAfter && !_projectionType)
+                {
                     // Set real centre, if needed.
                     T xt, yt, zt;
                     Geometry::cartesianFromHorizontal<T>(lon, lat, xt, yt, zt);

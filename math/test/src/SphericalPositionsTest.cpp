@@ -26,19 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/core/test/SphericalPositionsTest.h"
-#include "math/core/SphericalPositions.h"
+#include "math/test/SphericalPositionsTest.h"
+#include "math/SphericalPositions.h"
 #include <cmath>
 #include <vector>
 
 #ifndef M_PI
-#define M_PI 3.1415926535
+#define M_PI 3.14159265358979323846
 #endif
 
 #define DEG2RAD (M_PI / 180.0)
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(SphericalPositionsTest);
+
 
 /**
  * @details

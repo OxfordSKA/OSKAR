@@ -65,4 +65,7 @@ class SphericalPositionsTest : public CppUnit::TestFixture
         void test_generate13x13();
 };
 
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(SphericalPositionsTest);
+
 #endif // SPHERICAL_POSITIONS_TEST_H
