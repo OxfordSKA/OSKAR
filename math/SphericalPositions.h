@@ -30,7 +30,7 @@
 #define OSKAR_SPHERICAL_POSITIONS_H_
 
 #include <cmath>
-#include "math/core/Geometry.h"
+#include "math/Geometry.h"
 
 /**
  * @brief Class used for generating positions on a sphere.

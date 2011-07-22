@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/core/test/Matrix3Test.h"
-#include "math/core/Matrix3.h"
+#include "math/test/Matrix3Test.h"
+#include "math/Matrix3.h"
 #include <cmath>
 #include <vector>
 

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/core/test/Matrix4Test.h"
-#include "math/core/Matrix4.h"
+#include "math/test/Matrix4Test.h"
+#include "math/Matrix4.h"
 #include <cmath>
 #include <vector>
 

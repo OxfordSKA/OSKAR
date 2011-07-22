@@ -1,5 +1,5 @@
 #
-# src/math/beamforming/test
+# src/beamforming/test
 #
 
 
@@ -7,19 +7,22 @@
 # CppUnit
 # ==============================================================================
 if (CPPUNIT_FOUND)
-    set(math_beamforming_test_SRC
+
+    set(beamforming_test_SRC
         src/CppUnitMain.cpp
         src/BeamPatternTest.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
-    add_executable(beamformingTest ${math_beamforming_test_SRC})
+
+    add_executable(beamformingTest ${beamforming_test_SRC})
+
     set_target_properties(beamformingTest PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        #LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-    )
+        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
     target_link_libraries(beamformingTest
-        oskar_math_beamforming
-        ${CPPUNIT_LIBRARIES}
-    )
+        oskar_beamforming
+        ${CPPUNIT_LIBRARIES})
+
 endif()

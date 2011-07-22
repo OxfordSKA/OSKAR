@@ -1,6 +1,6 @@
 #include "widgets/plotting/ImagePlot.h"
 
-#include "math/core/FloatingPointCompare.h"
+#include "math/FloatingPointCompare.h"
 #include <QtCore/QString>
 #include <QtGui/QColor>
 #include <QtGui/QPen>

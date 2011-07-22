@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/beamforming/beamPattern.h"
+#include "beamforming/beamPattern.h"
 #include "math/core/phase.h"
 #include <cmath>
 #include <vector>

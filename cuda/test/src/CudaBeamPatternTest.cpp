@@ -29,8 +29,8 @@
 #include "cuda/test/CudaBeamPatternTest.h"
 #include "cuda/oskar_cuda_bp2hc.h"
 #include "cuda/oskar_cuda_bp2phc.h"
-#include "math/core/SphericalPositions.h"
-#include "math/core/GridPositions.h"
+#include "math/SphericalPositions.h"
+#include "math/GridPositions.h"
 #include "math/core/Matrix3.h"
 #include <cmath>
 #include <vector>

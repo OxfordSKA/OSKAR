@@ -9,5 +9,3 @@ set(math_core_SRC
 )
 set(math_core_SRC "${math_core_SRC}" PARENT_SCOPE)
 
-# === Recurse into test subdirectory.
-add_subdirectory(test)

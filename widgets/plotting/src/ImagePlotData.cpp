@@ -1,5 +1,5 @@
 #include "widgets/plotting/ImagePlotData.h"
-#include "math/core/FloatingPointCompare.h"
+#include "math/FloatingPointCompare.h"
 
 #include <QtCore/QString>
 

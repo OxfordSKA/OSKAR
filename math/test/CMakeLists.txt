@@ -8,25 +8,18 @@ if (CPPUNIT_FOUND)
 
     set(math_test_SRC
         src/CppUnitMain.cpp
+        src/CudaInterpBilinearTest.cu
         src/RandomTest.cpp
+        src/Matrix3Test.cpp
+        src/Matrix4Test.cpp
     )
-
-    if (CUDA_FOUND)
-        set(math_test_SRC ${math_test_SRC}
-            src/CudaInterpBilinearTest.cu
-        )
-    endif()
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
-    if (CUDA_FOUND)
-        cuda_add_executable(mathTest ${math_test_SRC})
-    else()
-        add_executable(mathTest ${math_test_SRC})
-    endif()
+    cuda_add_executable(mathTest ${math_test_SRC})
     set_target_properties(mathTest PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        #LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-    )
+        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
     target_link_libraries(mathTest
         oskar_math
         ${CPPUNIT_LIBRARIES}
@@ -34,7 +27,9 @@ if (CPPUNIT_FOUND)
 endif()
 
 
-# === QtTest unit testing.
+
+# QtTest
+# ==============================================================================
 if (QT_QTTEST_FOUND)
 
     include_directories(
@@ -44,10 +39,7 @@ if (QT_QTTEST_FOUND)
         ${QT_QTGUI_INCLUDE_DIR}
     )
 
-    # Random test.
-    qt4_wrap_cpp(QTest_Random_MOC
-        QTest_Random.h
-    )
+    qt4_wrap_cpp(QTest_Random_MOC QTest_Random.h)
     add_executable(qtest_Random ${QTest_Random_MOC})
     target_link_libraries(qtest_Random
         oskar_math

@@ -10,22 +10,18 @@ set(math_SRC
     src/oskar_math_mat_tri_c.c
 )
 
-# If CUDA is present, then add the kernels directory and the CUDA sources.
-if (CUDA_FOUND)
-    add_subdirectory(cudak)
-    foreach (file ${math_cuda_kernels_SRC})
-        list(APPEND math_SRC cudak/${file})
-    endforeach ()
-    set(math_SRC ${math_SRC}
-        src/oskar_math_cuda_interp_bilinear.cu
-    )
-endif ()
+
+add_subdirectory(cudak)
+foreach (file ${math_cuda_kernels_SRC})
+    list(APPEND math_SRC cudak/${file})
+endforeach ()
+set(math_SRC ${math_SRC}
+    src/oskar_math_cuda_interp_bilinear.cu
+)
+
 
 
 ############ DEPRECATED SECTION ############
-# === Recurse into the oskar-lib beamforming math sub-module.
-add_subdirectory(beamforming)
-
 # === Recurse into the oskar-lib core math sub-module.
 add_subdirectory(core)
 
