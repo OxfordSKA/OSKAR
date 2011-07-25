@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SYNTHESIS_BASELINES_H_
-#define OSKAR_SYNTHESIS_BASELINES_H_
+#ifndef OSKAR_INTERFEROMETRY_BASELINES_H_
+#define OSKAR_INTERFEROMETRY_BASELINES_H_
 
 /**
- * @file oskar_synthesis_baselines.h
+ * @file oskar_interometry_baselines.h
  */
 
-#include "oskar_synthesis_windows.h"
+#include "oskar_interferometry_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +59,7 @@ extern "C" {
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).
  */
 DllExport
-void oskar_synthesisf_baselines(int na, const float* au,
+void oskar_interferometryf_baselines(int na, const float* au,
         const float* av, const float* aw, float* bu, float* bv, float* bw);
 
 /**
@@ -82,11 +82,11 @@ void oskar_synthesisf_baselines(int na, const float* au,
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).
  */
 DllExport
-void oskar_synthesisd_baselines(int na, const double* au,
+void oskar_interferometryd_baselines(int na, const double* au,
         const double* av, const double* aw, double* bu, double* bv, double* bw);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_SYNTHESIS_BASELINES_H_
+#endif // OSKAR_INTERFEROMETRY_BASELINES_H_

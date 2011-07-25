@@ -19,7 +19,7 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     if (num_inputs != 6)
     {
         mexPrintf("Number of arguments != 6\n");
-        mexErrMsgTxt("plong lat] = (centre long, centre_lat, size_long, "
+        mexErrMsgTxt("[long lat] = (centre long, centre_lat, size_long, "
                 "size_lat, sep_long, sep_lat) [degrees]");
     }
 
@@ -42,9 +42,9 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     bool force_constant_sep = true;
     bool set_centre_after   = false;
     bool force_centre_point = true;
-    bool force_to_edges     = false;
-    int projection_type     = SphericalPositions<double>::PROJECTION_SIN;
-    //int projection_type     = SphericalPositions<double>::PROJECTION_NONE;
+    bool force_to_edges     = true;
+    //int projection_type     = SphericalPositions<double>::PROJECTION_SIN;
+    int projection_type     = SphericalPositions<double>::PROJECTION_NONE;
 
     mexPrintf("Inputs: %d\n", num_inputs);
     mexPrintf("     centre_long = %f (rads)\n", centre_long);

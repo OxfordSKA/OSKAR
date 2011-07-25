@@ -32,4 +32,16 @@ if (FFTW3_FOUND)
     # === Recurse into test subdirectory.
     add_subdirectory(test)
 
+    if (NOT WIN32)
+    install(TARGETS oskar_imaging LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    set_target_properties(oskar_imaging PROPERTIES
+        SOVERSION ${oskar-lib_SOVERSION})
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN "src" EXCLUDE
+        PATTERN "test" EXCLUDE
+        PATTERN ".svn" EXCLUDE)
+    endif ()
+
 endif (FFTW3_FOUND)

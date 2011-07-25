@@ -3,10 +3,10 @@
 #
 #==============================================================================
 
-# Matlab mex funtion
+# ==== Matlab mex funtions
 if (MATLAB_FOUND)
 
-    # Broken power law.
+    # ==== Broken power law.
     set(MATLAB_MEXFILE_EXT mexa64)
     include_directories(${MATLAB_INCLUDE_DIR})
     add_library(oskar_random_bpl SHARED oskar_random_bpl.cpp mexFunction.def)
@@ -14,7 +14,7 @@ if (MATLAB_FOUND)
     set_target_properties(oskar_random_bpl PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}")
 
-    # Spherical positions.
+    # ==== Spherical positions.
     set(MATLAB_MEXFILE_EXT mexa64)
     include_directories(${MATLAB_INCLUDE_DIR})
     add_library(oskar_spherical_positions SHARED oskar_spherical_positions.cpp
@@ -22,6 +22,12 @@ if (MATLAB_FOUND)
     target_link_libraries(oskar_spherical_positions oskar_math ${MATLAB_LIBRARIES})
     set_target_properties(oskar_spherical_positions PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}")
+
+    # ==== Install targets
+    if (NOT WIN32)
+        install(TARGETS oskar_random_bpl          DESTINATION ${OSKAR_MATLAB_INSTALL_DIR})
+        install(TARGETS oskar_spherical_positions DESTINATION ${OSKAR_MATLAB_INSTALL_DIR})
+    endif ()
 
 endif (MATLAB_FOUND)
 

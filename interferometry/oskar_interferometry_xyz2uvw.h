@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SYNTHESIS_XYZ2UVW_H_
-#define OSKAR_SYNTHESIS_XYZ2UVW_H_
+#ifndef OSKAR_INTERFEROMETRY_XYZ2UVW_H_
+#define OSKAR_INTERFEROMETRY_XYZ2UVW_H_
 
 /**
- * @file oskar_synthesis_xyz2uvw.h
+ * @file oskar_interferometry_xyz2uvw.h
  */
 
-#include "oskar_synthesis_windows.h"
+#include "oskar_interferometry_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,18 +48,18 @@ extern "C" {
  * Given the hour angle and declination of the phase tracking centre, this
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
  *
- * @param[in] na The number of antennas.
- * @param[in] ax The station x-positions (length na).
- * @param[in] ay The station y-positions (length na).
- * @param[in] az The station z-positions (length na).
- * @param[in] ha0 The hour angle of the phase tracking centre in radians.
- * @param[in] dec0 The declination of the phase tracking centre in radians.
- * @param[out] u The station u-positions (length na).
- * @param[out] v The station v-positions (length na).
- * @param[out] w The station w-positions (length na).
+ * @param[in]  na   The number of antennas.
+ * @param[in]  ax   The station x-positions (length na).
+ * @param[in]  ay   The station y-positions (length na).
+ * @param[in]  az   The station z-positions (length na).
+ * @param[in]  ha0  The hour angle of the phase tracking centre in radians.
+ * @param[in]  dec0 The declination of the phase tracking centre in radians.
+ * @param[out] u    The station u-positions (length na).
+ * @param[out] v    The station v-positions (length na).
+ * @param[out] w    The station w-positions (length na).
  */
 DllExport
-void oskar_synthesisf_xyz2uvw(int na, const float* x,
+void oskar_interferometryf_xyz2uvw(int na, const float* x,
         const float* y, const float* z, double ha0, double dec0, float* u,
         float* v, float* w);
 
@@ -72,18 +72,18 @@ void oskar_synthesisf_xyz2uvw(int na, const float* x,
  * Given the hour angle and declination of the phase tracking centre, this
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
  *
- * @param[in] na The number of antennas.
- * @param[in] ax The station x-positions (length na).
- * @param[in] ay The station y-positions (length na).
- * @param[in] az The station z-positions (length na).
- * @param[in] ha0 The hour angle of the phase tracking centre in radians.
- * @param[in] dec0 The declination of the phase tracking centre in radians.
- * @param[out] u The station u-positions (length na).
- * @param[out] v The station v-positions (length na).
- * @param[out] w The station w-positions (length na).
+ * @param[in]  na   The number of antennas.
+ * @param[in]  ax   The station x-positions (length na).
+ * @param[in]  ay   The station y-positions (length na).
+ * @param[in]  az   The station z-positions (length na).
+ * @param[in]  ha0  The hour angle of the phase tracking centre in radians.
+ * @param[in]  dec0 The declination of the phase tracking centre in radians.
+ * @param[out] u    The station u-positions (length na).
+ * @param[out] v    The station v-positions (length na).
+ * @param[out] w    The station w-positions (length na).
  */
 DllExport
-void oskar_synthesisd_xyz2uvw(int na, const double* x,
+void oskar_interferometryd_xyz2uvw(int na, const double* x,
         const double* y, const double* z, double ha0, double dec0, double* u,
         double* v, double* w);
 
@@ -91,4 +91,4 @@ void oskar_synthesisd_xyz2uvw(int na, const double* x,
 }
 #endif
 
-#endif // OSKAR_SYNTHESIS_XYZ2UVW_H_
+#endif // OSKAR_INTERFEROMETRY_XYZ2UVW_H_

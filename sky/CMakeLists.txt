@@ -13,33 +13,39 @@ set(sky_SRC
     src/generate_random_sources.cpp
     src/rotate_sources.cpp
 )
+set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 
-# If CUDA is present, then add the kernels directory.
-if (CUDA_FOUND)
-    add_subdirectory(cudak)
-    foreach (file ${sky_cuda_kernels_SRC})
-        list(APPEND sky_SRC cudak/${file})
-    endforeach ()
 
-    # Add the CUDA source files.
-    set(sky_SRC ${sky_SRC}
-        src/oskar_sky_cuda_horizon_clip.cu
-        src/oskar_sky_cuda_ra_dec_to_hor_lmn.cu
-        src/oskar_sky_cuda_ra_dec_to_relative_lmn.cu
-    )
+add_subdirectory(cudak)
+foreach (file ${sky_cuda_kernels_SRC})
+    list(APPEND sky_SRC cudak/${file})
+endforeach ()
 
-    # Build the library with CUDA.
-    cuda_add_library(oskar_sky SHARED ${sky_SRC})
-else ()
-    # Build the library normally.
-    add_library(oskar_sky SHARED ${sky_SRC})
-endif ()
+# Add the CUDA source files.
+set(sky_SRC ${sky_SRC}
+    src/oskar_sky_cuda_horizon_clip.cu
+    src/oskar_sky_cuda_ra_dec_to_hor_lmn.cu
+    src/oskar_sky_cuda_ra_dec_to_relative_lmn.cu
+)
+
+# Build the library with CUDA.
+cuda_add_library(oskar_sky SHARED ${sky_SRC})
 
 # Link the OSKAR math library.
 target_link_libraries(oskar_sky oskar_math)
 
-# Set the source list to be in the parent scope.
-set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
+
+if (NOT WIN32)
+    install(TARGETS oskar_sky LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    set_target_properties(oskar_sky PROPERTIES
+        SOVERSION ${oskar-lib_SOVERSION})
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN "src" EXCLUDE
+        PATTERN "test" EXCLUDE
+        PATTERN ".svn" EXCLUDE)
+endif ()
 
 # Recurse into test subdirectory.
 add_subdirectory(test)

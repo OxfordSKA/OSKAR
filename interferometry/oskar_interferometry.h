@@ -26,13 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_H_
-#define OSKAR_MATH_H_
+#ifndef OSKAR_INTERFEROMETRY_H_
+#define OSKAR_INTERFEROMETRY_H_
 
 /**
- * @file oskar_math.h
+ * @file oskar_interferometry.h
  */
 
-#include "oskar_math_mat_tri_c.h"
+#include "oskar_interferometry_baselines.h"
+#include "oskar_interferometry_xyz2uvw.h"
 
-#endif // OSKAR_MATH_H_
+#endif // OSKAR_INTERFEROMETRY_H_

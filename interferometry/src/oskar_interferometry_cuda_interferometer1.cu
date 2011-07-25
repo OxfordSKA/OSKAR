@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "synthesis/oskar_synthesis_cuda_interferometer1.h"
-#include "synthesis/oskar_synthesis_cuda_correlator.h"
+#include "interferometry/oskar_interferometry_cuda_interferometer1.h"
+#include "interferometry/oskar_interferometry_cuda_correlator.h"
 
 #include "math/cudak/oskar_math_cudak_dftw_3d_seq_out.h"
 #include "math/cudak/oskar_math_cudak_mat_mul_cc.h"
-#include "synthesis/cudak/oskar_synthesis_cudak_correlator.h"
-#include "synthesis/cudak/oskar_synthesis_cudak_xyz2uvw.h"
+#include "interferometry/cudak/oskar_interferometry_cudak_correlator.h"
+#include "interferometry/cudak/oskar_interferometry_cudak_xyz2uvw.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +46,7 @@ extern "C" {
 
 // Single precision.
 
-int oskar_synthesis_cudaf_interferometer1(int na, const float* ax,
+int oskar_interferometry_cudaf_interferometer1(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* ra,
         const float* dec, const float* brightness, const int* nas,
         const float* asx, const float* asy, float ra0, float dec0,
@@ -94,8 +94,9 @@ int oskar_synthesis_cudaf_interferometer1(int na, const float* ax,
 
 // Double precision.
 
-int oskar_synthesis_cudad_interferometer1()
+int oskar_interferometry_cudad_interferometer1()
 {
+    /// FIXME?!
     return 0;
 }
 

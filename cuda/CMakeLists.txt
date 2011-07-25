@@ -44,7 +44,7 @@ if (CUDA_FOUND)
     target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
 
     # === Install configuration for the oskar-lib cuda module.
-    install(TARGETS oskar_cuda DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    install(TARGETS oskar_cuda DESTINATION ${OSKAR_LIB_INSTALL_DIR} CONFIGURATIONS RELEASE)
     set_target_properties(oskar_cuda PROPERTIES
         SOVERSION ${oskar-lib_SOVERSION})
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

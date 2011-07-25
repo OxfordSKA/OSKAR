@@ -28,7 +28,7 @@
 
 #include "cuda/test/CudaBeamformerMatrixVectorTest.h"
 #include "cuda/oskar_cuda_bf2hig.h"
-#include "math/core/SphericalPositions.h"
+#include "math/SphericalPositions.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
