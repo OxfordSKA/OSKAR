@@ -19,6 +19,8 @@ set_target_properties(oskar_interferometry PROPERTIES
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
 )
 
+set_target_properties(oskar_interferometry PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 if (NOT WIN32)
     install(TARGETS oskar_interferometry LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})

@@ -22,10 +22,11 @@ if (CASACORE_FOUND)
     include_directories(${CASACORE_INCLUDE_DIR}/casacore)
     add_library(oskar_ms ${ms_SRC})
     set_target_properties(oskar_ms PROPERTIES COMPILE_FLAGS "-Wno-cast-qual")
+    set_target_properties(oskar_ms PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     target_link_libraries(oskar_ms ${CASACORE_LIBRARIES})
 
     # === Install configuration for the oskar-lib ms module.
-    install(TARGETS oskar_ms LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    install(TARGETS oskar_ms DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     set_target_properties(oskar_ms PROPERTIES
         SOVERSION ${oskar-lib_SOVERSION})
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

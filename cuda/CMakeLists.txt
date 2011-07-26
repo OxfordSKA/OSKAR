@@ -41,6 +41,7 @@ if (CUDA_FOUND)
 
     cuda_add_library(oskar_cuda SHARED ${cuda_SRC})
     set_target_properties(oskar_cuda PROPERTIES PREFIX "lib")
+    set_target_properties(oskar_cuda PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
 
     # === Install configuration for the oskar-lib cuda module.

@@ -21,16 +21,17 @@ set(math_SRC ${math_SRC}
 
 
 # === Macros to build the oskar-lib math module.
-if (CUDA_FOUND)
-    cuda_add_library(oskar_math ${math_SRC})
-else ()
-    add_library(oskar_math ${math_SRC})
-endif ()
-
+cuda_add_library(oskar_math ${math_SRC})
 set_target_properties(oskar_math PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+target_link_libraries(oskar_math
+    ${CUDA_CUBLAS_LIBRARIES}
+    ${CUDA_LIBRARIES})
+set_target_properties(oskar_math PROPERTIES
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib
+    INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # === Install target for the oskar-lib math library module.
 if (NOT WIN32)

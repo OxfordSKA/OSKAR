@@ -27,6 +27,10 @@ if (MATLAB_FOUND)
     if (NOT WIN32)
         install(TARGETS oskar_random_bpl          DESTINATION ${OSKAR_MATLAB_INSTALL_DIR})
         install(TARGETS oskar_spherical_positions DESTINATION ${OSKAR_MATLAB_INSTALL_DIR})
+        install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/.."
+            FILES_MATCHING PATTERN "*.m"
+            PATTERN ".svn" EXCLUDE)
     endif ()
 
 endif (MATLAB_FOUND)

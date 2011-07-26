@@ -21,6 +21,7 @@ if (CUDA_FOUND)
     set_target_properties(oskar_modules_cuda PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     )
+    set_target_properties(oskar_modules_cuda PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     target_link_libraries(oskar_modules_cuda
         ${CUDA_CUBLAS_LIBRARIES}
         oskar_interferometry

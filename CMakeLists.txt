@@ -20,9 +20,6 @@ list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
 
 # === Install directories for oskar-lib components.
 # Note: the install directory prefix is set by CMAKE_INSTALL_PRFEIX.
-if (NOT CMAKE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX "test") # FIXME: THIS IS JUST FOR TESTING
-endif()
 
 if (NOT OSKAR_LIB_INSTALL_DIR)
     set(OSKAR_LIB_INSTALL_DIR "lib")
@@ -36,12 +33,8 @@ if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
 
-if (NOT OSKAR_SCRIPTS_INSTALL_DIR)
-    set(OSKAR_BIN_INSTALL_DIR "scripts")
-endif()
-
 if (NOT OSKAR_MATLAB_INSTALL_DIR)
-    set(OSKAR_MATLAB_INSTALL_DIR "matlab")
+    set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
 endif()
 
 # === Set dependencies.
