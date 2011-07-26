@@ -38,7 +38,7 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
 //    bool force_to_edges     = *mxGetLogicals(input[10]);
 //    int projection_type     = (int)mxGetScalar(input[11]);
 
-    double rho              = 0.0;
+    double rho              = 0.0; // rotation angle in radians?
     bool force_constant_sep = true;
     bool set_centre_after   = false;
     bool force_centre_point = true;
