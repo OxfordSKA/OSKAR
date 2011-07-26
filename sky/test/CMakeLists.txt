@@ -6,6 +6,7 @@
 set(sky_test_SRC
     src/CppUnitMain.cpp
     src/SkyTest.cpp
+    src/EquatorialToHorizontalTest.cpp
 )
 
 add_executable(skyTest ${sky_test_SRC})

@@ -12,6 +12,7 @@ set(sky_SRC
     src/filter_sources_by_radius.cpp
     src/generate_random_sources.cpp
     src/rotate_sources.cpp
+    src/oskar_sky_date_time_to_mjd.cpp
 )
 set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 

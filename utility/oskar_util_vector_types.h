@@ -62,6 +62,24 @@ struct __align__(8) float2
 typedef struct float2 float2;
 #endif
 
+#if !defined(__VECTOR_TYPES_H__) && !defined(__CUDACC__)
+/**
+ * @brief
+ * Three-element structure (single precision).
+ *
+ * @details
+ * Structure used to hold data for a length-3 vector.
+ * This must be compatible with the CUDA float3 type.
+ */
+struct float3
+{
+    float x;
+    float y;
+    float z;
+};
+typedef struct float3 float3;
+#endif
+
 /**
  * @brief
  * Two-element complex structure (single precision).
@@ -111,6 +129,24 @@ struct __align__(16) double2
     double y;
 };
 typedef struct double2 double2;
+#endif
+
+#if !defined(__VECTOR_TYPES_H__) && !defined(__CUDACC__)
+/**
+ * @brief
+ * Three-element structure (double precision).
+ *
+ * @details
+ * Structure used to hold data for a length-3 vector.
+ * This must be compatible with the CUDA double3 type.
+ */
+struct double3
+{
+    double x;
+    double y;
+    double z;
+};
+typedef struct double3 double3;
 #endif
 
 /**
