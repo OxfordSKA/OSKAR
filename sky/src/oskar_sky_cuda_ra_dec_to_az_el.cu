@@ -26,21 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_date_time_to_mjd.h"
+#include "sky/oskar_sky_cuda_ra_dec_to_hor_lmn.h"
+#include "sky/cudak/oskar_sky_cudak_ra_dec_to_hor_lmn.h"
+#include "sky/cudak/oskar_sky_cudak_hor_lmn_to_az_el.h"
+
+// Single precision.
+
+int oskar_sky_cudaf_ra_dec_to_az_el(int n, const float* ra,
+        const float* dec, float lst, float lat, float* az, float* el,
+        float* work)
+{
+    // Determine horizontal coordinates.
+    const int n_thd = 512;
+    const int n_blk = (n + n_thd - 1) / n_thd;
+    float cosLat = cosf(lat);
+    float sinLat = sinf(lat);
+    oskar_sky_cudakf_ra_dec_to_hor_lmn <<< n_blk, n_thd >>> (n, ra, dec,
+            cosLat, sinLat, lst, az, el, work);
+    oskar_sky_cudakf_hor_lmn_to_az_el <<< n_blk, n_thd >>> (n, az, el, work,
+            az, el);
+    cudaDeviceSynchronize();
+    cudaError_t errCuda = cudaPeekAtLastError();
+    if (errCuda != cudaSuccess) return errCuda;
+
+    return 0;
+}
 
 // Double precision.
 
-double oskar_skyd_date_time_to_mjd(int year, int month, int day,
-        double day_fraction)
+int oskar_sky_cudad_ra_dec_to_az_el(int n, const double* ra,
+        const double* dec, double lst, double lat, double* az, double* el,
+        double* work)
 {
-    // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - month) / 12;
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
-            + (y / 400) - 32045;
+    // Determine horizontal coordinates.
+    const int n_thd = 512;
+    const int n_blk = (n + n_thd - 1) / n_thd;
+    float cosLat = cos(lat);
+    float sinLat = sin(lat);
+    oskar_sky_cudakd_ra_dec_to_hor_lmn <<< n_blk, n_thd >>> (n, ra, dec,
+            cosLat, sinLat, lst, az, el, work);
+    oskar_sky_cudakd_hor_lmn_to_az_el <<< n_blk, n_thd >>> (n, az, el, work,
+            az, el);
+    cudaDeviceSynchronize();
+    cudaError_t errCuda = cudaPeekAtLastError();
+    if (errCuda != cudaSuccess) return errCuda;
 
-    // Compute day fraction (floating-point division).
-    day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
+    return 0;
 }

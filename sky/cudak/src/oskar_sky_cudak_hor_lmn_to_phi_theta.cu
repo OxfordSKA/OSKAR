@@ -26,21 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_date_time_to_mjd.h"
+#include "sky/cudak/oskar_sky_cudak_hor_lmn_to_phi_theta.h"
+
+// Single precision.
+
+__global__
+void oskar_sky_cudakf_hor_lmn_to_phi_theta(int n, const float* p_l,
+        const float* p_m, const float* p_n, float* phi, float* theta)
+{
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    // Get the data.
+    float x = p_l[i];
+    float y = p_m[i];
+    float z = p_n[i];
+    __syncthreads();
+
+    // Cartesian to spherical.
+    float p = atan2f(y, x); // Phi.
+    x = sqrtf(x*x + y*y);
+    y = atan2f(x, z); // Theta.
+    phi[i] = p;
+    theta[i] = y;
+}
 
 // Double precision.
 
-double oskar_skyd_date_time_to_mjd(int year, int month, int day,
-        double day_fraction)
+__global__
+void oskar_sky_cudakd_hor_lmn_to_phi_theta(int n, const double* p_l,
+        const double* p_m, const double* p_n, double* phi, double* theta)
 {
-    // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - month) / 12;
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
-            + (y / 400) - 32045;
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
-    // Compute day fraction (floating-point division).
-    day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
+    // Get the data.
+    double x = p_l[i];
+    double y = p_m[i];
+    double z = p_n[i];
+    __syncthreads();
+
+    // Cartesian to spherical.
+    double p = atan2(y, x); // Phi.
+    x = sqrt(x*x + y*y);
+    y = atan2(x, z); // Theta.
+    phi[i] = p;
+    theta[i] = y;
 }

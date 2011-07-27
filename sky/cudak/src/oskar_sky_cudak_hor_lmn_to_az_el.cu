@@ -26,52 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/test/EquatorialToHorizontalTest.h"
+#include "sky/cudak/oskar_sky_cudak_hor_lmn_to_az_el.h"
 
-#include "sky/oskar_sky_icrs_to_hor_fast_inline.h"
-#include "sky/oskar_sky_date_time_to_mjd.h"
-#include <cmath>
-#include <cstdio>
+// Single precision.
 
-/**
- * @details
- * Sets up the context before running each test method.
- */
-void EquatorialToHorizontalTest::setUp()
+__global__
+void oskar_sky_cudakf_hor_lmn_to_az_el(int n, const float* p_l,
+        const float* p_m, const float* p_n, float* az, float* el)
 {
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    // Get the data.
+    float x = p_l[i];
+    float y = p_m[i];
+    float z = p_n[i];
+    __syncthreads();
+
+    // Cartesian to spherical.
+    float a = atan2f(x, y); // Azimuth.
+    x = sqrtf(x*x + y*y);
+    y = atan2f(z, x); // Elevation.
+    az[i] = a;
+    el[i] = y;
 }
 
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void EquatorialToHorizontalTest::tearDown()
+// Double precision.
+
+__global__
+void oskar_sky_cudakd_hor_lmn_to_az_el(int n, const double* p_l,
+        const double* p_m, const double* p_n, double* az, double* el)
 {
-}
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
-/**
- * @details
- * Test conversion of J2000 to horizontal coordinates.
- */
-void EquatorialToHorizontalTest::test()
-{
-    double latitude = -31.91666667 * M_PI / 180.0;
-    double longitude = 21.0 * M_PI / 180.0;
-    double cosLat = cos(latitude);
-    double sinLat = sin(latitude);
+    // Get the data.
+    double x = p_l[i];
+    double y = p_m[i];
+    double z = p_n[i];
+    __syncthreads();
 
-    // Set time-dependent celestial parameter data.
-    CelestialData cel;
-    double mjdUt1 = oskar_skyd_date_time_to_mjd(2018, 9, 12, 1.5/24);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(58373.0625, mjdUt1, 1e-4);
-    oskar_skyd_set_celestial_parameters_inline(&cel, longitude, mjdUt1);
-
-    // Convert.
-    double ra = 60.9 * M_PI / 180.0;   //  04h 03m 36s
-    double dec = -34.8 * M_PI / 180.0; // -34d 48' 00''
-    double a, e;
-    oskar_skyd_icrs_to_hor_fast_inline(&cel, cosLat, sinLat, 0.0, ra, dec,
-            &a, &e);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(104.53, a * 180.0 / M_PI, 0.01);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(67.69,  e * 180.0 / M_PI, 0.01);
+    // Cartesian to spherical.
+    double a = atan2(x, y); // Azimuth.
+    x = sqrt(x*x + y*y);
+    y = atan2(z, x); // Elevation.
+    az[i] = a;
+    el[i] = y;
 }

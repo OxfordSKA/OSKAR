@@ -62,7 +62,7 @@ Libraries built
                         : Dependencies: CUDA(4.0+), CUBLAS, Thrust
 
 * oskar_imaging         : Imaging library (& post processing)
-                        : Dependencies: FFTW
+                        : Dependencies: CUDA(4.0+), CUFFT, FFTW
 
 * oskar_ms              : Measurement set writer
                         : Dependencies: CASA (ms)

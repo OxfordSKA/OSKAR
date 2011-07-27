@@ -26,21 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_date_time_to_mjd.h"
+#include "sky/oskar_sky_mjd_to_gmst.h"
+#include <math.h>
+
+#ifndef M_2PI
+#define M_2PI 6.28318530717958647693
+#endif
 
 // Double precision.
 
-double oskar_skyd_date_time_to_mjd(int year, int month, int day,
-        double day_fraction)
-{
-    // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - month) / 12;
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
-            + (y / 400) - 32045;
+// Seconds to radians.
+#define SEC2RAD 7.2722052166430399038487e-5
 
-    // Compute day fraction (floating-point division).
-    day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
+double oskar_skyd_mjd_to_gmst(double mjd)
+{
+    // Days from J2000.0.
+    double d = mjd - 51544.5;
+
+    // Centuries from J2000.0.
+    double t = d / 36525.0;
+
+    // GMST at this time.
+    double gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
+                    (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
+
+    // Range check (0 to 2pi).
+    t = fmod(gmst, M_2PI);
+    return (t >= 0.0) ? t : t + M_2PI;
 }

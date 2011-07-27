@@ -6,13 +6,11 @@
 set(sky_test_SRC
     src/CppUnitMain.cpp
     src/SkyTest.cpp
-    src/EquatorialToHorizontalTest.cpp
+    src/EquatorialToHorizontalTest.cu
 )
 
-add_executable(skyTest ${sky_test_SRC})
+cuda_add_executable(skyTest ${sky_test_SRC})
 target_link_libraries(skyTest
     oskar_sky
-    ${QT_QTCORE_LIBRARY}
     ${CPPUNIT_LIBRARIES}
 )
-

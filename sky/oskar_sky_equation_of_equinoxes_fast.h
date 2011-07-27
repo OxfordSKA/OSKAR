@@ -26,21 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_date_time_to_mjd.h"
+#ifndef OSKAR_SKY_EQUATION_OF_EQUINOXES_FAST_H_
+#define OSKAR_SKY_EQUATION_OF_EQUINOXES_FAST_H_
 
-// Double precision.
+/**
+ * @file oskar_sky_equation_of_equinoxes_fast.h
+ */
 
-double oskar_skyd_date_time_to_mjd(int year, int month, int day,
-        double day_fraction)
-{
-    // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - month) / 12;
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
-            + (y / 400) - 32045;
+#include "oskar_sky_windows.h"
 
-    // Compute day fraction (floating-point division).
-    day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Compute the equation of the equinoxes for the supplied MJD(UT1)
+ * (double precision).
+ *
+ * @details
+ * This function computes the equation of the equinoxes in radians, for the
+ * supplied MJD(UT1). Only first-order terms (the longitude of the ascending
+ * node of the Moon, and the mean longitude of the Sun) are used for the
+ * nutation calculation.
+ *
+ * @param[in] mjd  The MJD(UT1).
+ *
+ * @return The equation of the equinoxes in radians.
+ */
+DllExport
+double oskar_skyd_equation_of_equinoxes_fast(double mjd);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_SKY_EQUATION_OF_EQUINOXES_FAST_H_

@@ -26,21 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_date_time_to_mjd.h"
+#ifndef OSKAR_SKY_MJD_TO_GMST_H_
+#define OSKAR_SKY_MJD_TO_GMST_H_
 
-// Double precision.
+/**
+ * @file oskar_sky_mjd_to_gmst.h
+ */
 
-double oskar_skyd_date_time_to_mjd(int year, int month, int day,
-        double day_fraction)
-{
-    // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - month) / 12;
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
-            + (y / 400) - 32045;
+#include "oskar_sky_windows.h"
 
-    // Compute day fraction (floating-point division).
-    day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Convert MJD(UT1) to Greenwich Mean Sidereal Time (double precision).
+ *
+ * @details
+ * This function converts MJD(UT1) to the Greenwich Mean Sidereal Time.
+ *
+ * @param[in] mjd  The MJD(UT1).
+ *
+ * @return The Greenwich Mean Sidereal Time in radians.
+ */
+DllExport
+double oskar_skyd_mjd_to_gmst(double mjd);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_SKY_MJD_TO_GMST_H_
