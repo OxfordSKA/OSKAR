@@ -18,6 +18,7 @@ endforeach ()
 set(math_SRC ${math_SRC}
     src/oskar_math_cuda_interp_bilinear.cu
 )
+set(math_SRC "${math_SRC}" PARENT_SCOPE)
 
 
 # === Macros to build the oskar-lib math module.
@@ -44,7 +45,7 @@ if (NOT WIN32)
         PATTERN "src" EXCLUDE
         PATTERN "test" EXCLUDE
         PATTERN ".svn" EXCLUDE)
-endif ()
+endif()
 
 # === Recurse into test directory.
 add_subdirectory(test)

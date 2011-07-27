@@ -46,6 +46,7 @@ include(compilerOptions)
 # === Recurse into sub-diretories.
 add_subdirectory(cuda)
 if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
+    add_subdirectory(beamforming)
     add_subdirectory(sky)
     add_subdirectory(imaging)
     add_subdirectory(math)
@@ -55,6 +56,70 @@ if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
     add_subdirectory(widgets)
     add_subdirectory(interferometry)
 endif ()
+
+
+
+
+# ==== Build single oskar library.
+foreach (file ${beamforming_SRC})
+    list(APPEND oskar_SRC beamforming/${file})
+endforeach ()
+foreach (file ${cuda_SRC})
+    list(APPEND oskar_SRC cuda/${file})
+endforeach ()
+foreach (file ${interferometry_SRC})
+    list(APPEND oskar_SRC interferometry/${file})
+endforeach ()
+foreach (file ${math_SRC})
+    list(APPEND oskar_SRC math/${file})
+endforeach ()
+foreach (file ${modules_SRC})
+    list(APPEND oskar_SRC modules/${file})
+endforeach ()
+foreach (file ${sky_SRC})
+    list(APPEND oskar_SRC sky/${file})
+endforeach ()
+foreach (file ${utility_SRC})
+    list(APPEND oskar_SRC utility/${file})
+endforeach ()
+
+#message("=============")
+#foreach (file ${oskar_SRC})
+#    message(">>>>>>>>>> ${file}")
+#endforeach()
+#message("=============")
+
+include_directories(${oskar-lib_SOURCE_DIR}/beamforming)
+include_directories(${oskar-lib_SOURCE_DIR}/cuda)
+include_directories(${oskar-lib_SOURCE_DIR}/interferometry)
+include_directories(${oskar-lib_SOURCE_DIR}/math)
+include_directories(${oskar-lib_SOURCE_DIR}/modules)
+include_directories(${oskar-lib_SOURCE_DIR}/sky)
+include_directories(${oskar-lib_SOURCE_DIR}/utility)
+
+cuda_add_library(oskar ${oskar_SRC})
+set_target_properties(oskar PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+target_link_libraries(oskar
+    ${CUDA_CUBLAS_LIBRARIES}
+    ${CUDA_LIBRARIES})
+set_target_properties(oskar PROPERTIES
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib
+    INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+if (NOT WIN32)
+    install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    set_target_properties(oskar PROPERTIES
+        SOVERSION ${oskar-lib_SOVERSION})
+endif()
+
+
+
+
+
+
+
 
 
 

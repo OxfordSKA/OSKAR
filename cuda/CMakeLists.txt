@@ -27,14 +27,13 @@ if (CUDA_FOUND)
         src/oskar_cuda_im2dftlm.cu
         src/oskar_cuda_le2hg.cu
 
-        src/oskar_cuda_memory.cu
-
         src/oskar_cuda_rpw3leg.cu
         src/oskar_cuda_vecadd.cu
     )
     foreach (file ${cuda_kernels_SRC})
         list(APPEND cuda_SRC kernels/${file})
     endforeach ()
+    set(cuda_SRC "${cuda_SRC}" PARENT_SCOPE)
 
     # === Macros to build the oskar-lib cuda module.
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_cuda.dir/src)

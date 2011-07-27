@@ -10,6 +10,7 @@ set(interferometry_SRC
     src/oskar_interferometry_baselines.c
     src/oskar_interferometry_xyz2uvw.c
 )
+set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)
 
 cuda_add_library(oskar_interferometry ${interferometry_SRC})
 

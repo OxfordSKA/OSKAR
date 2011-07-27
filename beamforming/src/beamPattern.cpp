@@ -27,7 +27,7 @@
  */
 
 #include "beamforming/beamPattern.h"
-#include "math/core/phase.h"
+#include "math/oskar_math_phase.h"
 #include <cmath>
 #include <vector>
 
