@@ -110,17 +110,17 @@ set_target_properties(oskar PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib
     INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-if (NOT WIN32)
-    install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-    set_target_properties(oskar PROPERTIES
-        SOVERSION ${oskar-lib_SOVERSION})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN "src" EXCLUDE
-        PATTERN "test" EXCLUDE
-        PATTERN ".svn" EXCLUDE)
-endif()
+install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+set_target_properties(oskar PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
+install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
+    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN "src" EXCLUDE
+    PATTERN "test" EXCLUDE
+    PATTERN "matlab" EXCLUDE
+    PATTERN "python" EXCLUDE
+    PATTERN ".svn" EXCLUDE)
+
 
 
 

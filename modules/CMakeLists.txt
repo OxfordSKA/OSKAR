@@ -13,29 +13,30 @@ set(modules_SRC)
 foreach (file ${modules_cuda_SRC})
     list(APPEND modules_SRC cuda/${file})
 endforeach ()
+
 set(modules_SRC "${modules_SRC}" PARENT_SCOPE)
 
 # === Macros to build the oskar-lib math module.
-cuda_add_library(oskar_modules ${modules_SRC})
-target_link_libraries(oskar_modules
-    ${CUDA_CUBLAS_LIBRARIES}
-    oskar_cuda
-    oskar_math
-    oskar_interferometry
-)
-set_target_properties(oskar_modules PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-)
-set_target_properties(oskar_modules PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-
+#cuda_add_library(oskar_modules ${modules_SRC})
+#target_link_libraries(oskar_modules
+#    ${CUDA_CUBLAS_LIBRARIES}
+#    oskar_cuda
+#    oskar_math
+#    oskar_interferometry
+#)
+#set_target_properties(oskar_modules PROPERTIES
+#    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+#    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+#)
+#set_target_properties(oskar_modules PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+#
 # === Install configuration for the oskar-lib cuda module.
-install(TARGETS oskar_modules DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-set_target_properties(oskar_modules PROPERTIES
-    SOVERSION ${oskar-lib_SOVERSION})
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN "src" EXCLUDE
-    PATTERN ".svn" EXCLUDE
-    PATTERN "test" EXCLUDE)
+#install(TARGETS oskar_modules DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+#set_target_properties(oskar_modules PROPERTIES
+#    SOVERSION ${oskar-lib_SOVERSION})
+#install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+#    FILES_MATCHING PATTERN "*.h"
+#    PATTERN "src" EXCLUDE
+#    PATTERN ".svn" EXCLUDE
+#    PATTERN "test" EXCLUDE)

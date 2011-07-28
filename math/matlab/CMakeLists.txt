@@ -10,7 +10,7 @@ if (MATLAB_FOUND)
     set(MATLAB_MEXFILE_EXT mexa64)
     include_directories(${MATLAB_INCLUDE_DIR})
     add_library(oskar_random_bpl SHARED oskar_random_bpl.cpp mexFunction.def)
-    target_link_libraries(oskar_random_bpl oskar_math ${MATLAB_LIBRARIES})
+    target_link_libraries(oskar_random_bpl oskar ${MATLAB_LIBRARIES})
     set_target_properties(oskar_random_bpl PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}")
 
@@ -19,7 +19,7 @@ if (MATLAB_FOUND)
     include_directories(${MATLAB_INCLUDE_DIR})
     add_library(oskar_spherical_positions SHARED oskar_spherical_positions.cpp
         mexFunction.def)
-    target_link_libraries(oskar_spherical_positions oskar_math ${MATLAB_LIBRARIES})
+    target_link_libraries(oskar_spherical_positions oskar ${MATLAB_LIBRARIES})
     set_target_properties(oskar_spherical_positions PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}")
 

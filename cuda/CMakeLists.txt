@@ -36,27 +36,27 @@ if (CUDA_FOUND)
     set(cuda_SRC "${cuda_SRC}" PARENT_SCOPE)
 
     # === Macros to build the oskar-lib cuda module.
-    set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_cuda.dir/src)
-
-    cuda_add_library(oskar_cuda SHARED ${cuda_SRC})
-    set_target_properties(oskar_cuda PROPERTIES PREFIX "lib")
-    set_target_properties(oskar_cuda PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-    target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
-
+#    set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_cuda.dir/src)
+#
+#    cuda_add_library(oskar_cuda SHARED ${cuda_SRC})
+#    set_target_properties(oskar_cuda PROPERTIES PREFIX "lib")
+#    set_target_properties(oskar_cuda PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+#    target_link_libraries(oskar_cuda ${CUDA_CUBLAS_LIBRARIES})
+#
     # === Install configuration for the oskar-lib cuda module.
-    install(TARGETS oskar_cuda DESTINATION ${OSKAR_LIB_INSTALL_DIR} CONFIGURATIONS RELEASE)
-    set_target_properties(oskar_cuda PROPERTIES
-        SOVERSION ${oskar-lib_SOVERSION})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN "src" EXCLUDE
-        PATTERN ".svn" EXCLUDE
-        PATTERN "kernels" EXCLUDE
-        PATTERN "test" EXCLUDE)
-
+#    install(TARGETS oskar_cuda DESTINATION ${OSKAR_LIB_INSTALL_DIR} CONFIGURATIONS RELEASE)
+#    set_target_properties(oskar_cuda PROPERTIES
+#        SOVERSION ${oskar-lib_SOVERSION})
+#    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+#        FILES_MATCHING PATTERN "*.h"
+#        PATTERN "src" EXCLUDE
+#        PATTERN ".svn" EXCLUDE
+#        PATTERN "kernels" EXCLUDE
+#        PATTERN "test" EXCLUDE)
+#
     # === Add a target for clean of nvcc generated files.
-    cuda_build_clean_target()
+#    cuda_build_clean_target()
 
     # === Recurse into test subdirectory.
     add_subdirectory(test)

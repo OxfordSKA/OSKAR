@@ -21,7 +21,7 @@ if (CPPUNIT_FOUND)
         LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
     target_link_libraries(mathTest
-        oskar_math
+        oskar
         ${CPPUNIT_LIBRARIES}
     )
 endif()
@@ -42,7 +42,7 @@ if (QT_QTTEST_FOUND)
     qt4_wrap_cpp(QTest_Random_MOC QTest_Random.h)
     add_executable(qtest_Random ${QTest_Random_MOC})
     target_link_libraries(qtest_Random
-        oskar_math
+        oskar
         oskar_widgets_plotting
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}

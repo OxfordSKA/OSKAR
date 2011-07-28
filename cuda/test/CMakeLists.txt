@@ -23,5 +23,5 @@ if (CPPUNIT_FOUND)
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
     cuda_add_executable(cudaTest ${cuda_test_SRC})
-    target_link_libraries(cudaTest oskar_cuda ${CPPUNIT_LIBRARIES})
+    target_link_libraries(cudaTest oskar ${CPPUNIT_LIBRARIES})
 endif()
