@@ -30,6 +30,10 @@
 #include "sky/cudak/oskar_sky_cudak_ha_dec_to_hor_lmn.h"
 #include "math/cudak/oskar_math_cudak_vec_sub_sr.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Single precision.
 
 int oskar_sky_cudaf_ra_dec_to_hor_lmn(int n, const float* ra,
@@ -77,3 +81,7 @@ int oskar_sky_cudad_ra_dec_to_hor_lmn(int n, const double* ra,
 
     return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

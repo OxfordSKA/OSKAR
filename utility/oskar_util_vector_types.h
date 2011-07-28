@@ -42,6 +42,8 @@ extern "C" {
 #define __align__(n) __attribute__((aligned(n)))
 #elif defined(_WIN32)
 #define __align__(n) __declspec(align(n))
+#else
+#define __align__(n)
 #endif
 #endif
 

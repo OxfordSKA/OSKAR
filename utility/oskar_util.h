@@ -26,40 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "modules/cuda/test/ModuleCudaCorrelatorTest.h"
-#include <cmath>
-#include <cstdlib>
-#include <vector>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979
-#endif
-
-#define C_0 299792458
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(ModuleCudaCorrelatorTest);
+#ifndef OSKAR_UTIL_H_
+#define OSKAR_UTIL_H_
 
 /**
- * @details
- * Sets up the context before running each test method.
+ * @file oskar_util.h
  */
-void ModuleCudaCorrelatorTest::setUp()
-{
-}
 
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void ModuleCudaCorrelatorTest::tearDown()
-{
-}
+#include "utility/oskar_util_vector_types.h"
+#include "utility/oskar_util_cuda_memory.h"
 
-/**
- * @details
- * Tests vector addition using CUDA.
- */
-void ModuleCudaCorrelatorTest::test_method()
-{
-}
+#endif // OSKAR_UTIL_H_

@@ -26,40 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "modules/cuda/test/ModuleCudaCorrelatorTest.h"
-#include <cmath>
-#include <cstdlib>
-#include <vector>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979
-#endif
-
-#define C_0 299792458
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(ModuleCudaCorrelatorTest);
+#ifndef OSKAR_SKY_H_
+#define OSKAR_SKY_H_
 
 /**
- * @details
- * Sets up the context before running each test method.
+ * @file oskar_sky.h
  */
-void ModuleCudaCorrelatorTest::setUp()
-{
-}
 
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void ModuleCudaCorrelatorTest::tearDown()
-{
-}
+#include "sky/oskar_sky_cuda_horizon_clip.h"
+#include "sky/oskar_sky_cuda_ra_dec_to_az_el.h"
+#include "sky/oskar_sky_cuda_ra_dec_to_hor_lmn.h"
+#include "sky/oskar_sky_cuda_ra_dec_to_relative_lmn.h"
+#include "sky/oskar_sky_date_time_to_mjd.h"
+#include "sky/oskar_sky_equation_of_equinoxes_fast.h"
+#include "sky/oskar_sky_mjd_to_gmst.h"
+#include "sky/oskar_sky_mjd_to_last_fast.h"
+#include "sky/oskar_sky_mjd_to_lmst.h"
 
-/**
- * @details
- * Tests vector addition using CUDA.
- */
-void ModuleCudaCorrelatorTest::test_method()
-{
-}
+#endif // OSKAR_SKY_H_

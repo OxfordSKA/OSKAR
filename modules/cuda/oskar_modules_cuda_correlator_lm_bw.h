@@ -33,7 +33,7 @@
  * @file oskar_modules_cuda_correlator_lm_bw.h
  */
 
-#include "oskar_modules_windows.h"
+#include "modules/oskar_modules_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

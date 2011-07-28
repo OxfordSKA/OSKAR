@@ -33,7 +33,6 @@
  * @file oskar_modules_cuda.h
  */
 
-#include "oskar_modules_cuda_correlator_lm.h"
 #include "oskar_modules_cuda_correlator_lm_bw.h"
 
 #endif // OSKAR_MODULES_CUDA_H_

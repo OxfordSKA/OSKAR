@@ -22,13 +22,14 @@ set(sky_SRC
     src/oskar_sky_mjd_to_lmst.cpp
     src/rotate_sources.cpp
 )
-set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 
 # Add the CUDA kernels.
 add_subdirectory(cudak)
 foreach (file ${sky_cuda_kernels_SRC})
     list(APPEND sky_SRC cudak/${file})
 endforeach ()
+
+set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 
 # Build the library with CUDA.
 cuda_add_library(oskar_sky SHARED ${sky_SRC})
