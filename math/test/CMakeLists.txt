@@ -1,9 +1,8 @@
 #
-# src/math/test
+# src/math/test/CMakeLists.txt
 #
 
-# CppUnit
-# ==============================================================================
+# ==== CppUnit
 if (CPPUNIT_FOUND)
 
     set(math_test_SRC
@@ -28,8 +27,7 @@ endif()
 
 
 
-# QtTest
-# ==============================================================================
+# ==== QtTest
 if (QT_QTTEST_FOUND)
 
     include_directories(
@@ -43,7 +41,7 @@ if (QT_QTTEST_FOUND)
     add_executable(qtest_Random ${QTest_Random_MOC})
     target_link_libraries(qtest_Random
         oskar
-        oskar_widgets_plotting
+        oskar_widgets
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )

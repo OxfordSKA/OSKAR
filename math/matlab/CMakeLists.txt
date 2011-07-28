@@ -1,7 +1,6 @@
 #
 # src/math/matlab/CMakeLists.txt
 #
-#==============================================================================
 
 # ==== Matlab mex funtions
 if (MATLAB_FOUND)

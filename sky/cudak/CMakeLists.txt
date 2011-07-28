@@ -1,7 +1,6 @@
 #
 # src/sky/cudak/CMakeLists.txt
 #
-#==============================================================================
 
 set(sky_cuda_kernels_SRC
     src/oskar_sky_cudak_ha_dec_to_az_el.cu

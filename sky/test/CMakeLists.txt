@@ -2,15 +2,16 @@
 # src/sky/test/CMakeLists.txt
 #
 
-# CppUnit
-set(sky_test_SRC
-    src/CppUnitMain.cpp
-    src/SkyTest.cpp
-    src/EquatorialToHorizontalTest.cu
-)
+# CppUnit tests.
+if (CPPUNIT_FOUND)
 
-cuda_add_executable(skyTest ${sky_test_SRC})
-target_link_libraries(skyTest
-    oskar
-    ${CPPUNIT_LIBRARIES}
-)
+    set(sky_test_SRC
+        src/CppUnitMain.cpp
+        src/SkyTest.cpp
+        src/EquatorialToHorizontalTest.cu
+    )
+
+    cuda_add_executable(skyTest ${sky_test_SRC})
+    target_link_libraries(skyTest oskar ${CPPUNIT_LIBRARIES})
+
+endif ()

@@ -1,49 +1,42 @@
 #
 # src/CMakeLists.txt (top level CMakeLists.txt)
 #
-#==============================================================================
 
-# === Set the project name and specify the required CMAKE version.
+# ==== Set the project name and specify the required CMAKE version.
 project(oskar-lib CXX C)
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 
-# === Project version.
+# ==== Project version.
 set(oskar-lib_VERSION_MAJOR 0)
 set(oskar-lib_VERSION_MINOR 0)
 set(oskar-lib_VERSION_PATCH 0)
 set(oskar-lib_SOVERSION "${oskar-lib_VERSION_MAJOR}.${oskar-lib_VERSION_MINOR}.${oskar-lib_VERSION_PATCH}")
 
-# === Append the src/cmake directory to the module path.
+# ==== Append the src/cmake directory to the module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${oskar-lib_SOURCE_DIR}/cmake)
 
-
-
-# === Install directories for oskar-lib components.
+# ==== Install directories for oskar-lib components.
 # Note: the install directory prefix is set by CMAKE_INSTALL_PRFEIX.
-
 if (NOT OSKAR_LIB_INSTALL_DIR)
     set(OSKAR_LIB_INSTALL_DIR "lib")
 endif()
-
 if (NOT OSKAR_INCLUDE_INSTALL_DIR)
     set(OSKAR_INCLUDE_INSTALL_DIR "include/oskar")
 endif()
-
 if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
-
 if (NOT OSKAR_MATLAB_INSTALL_DIR)
     set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
 endif()
 
-# === Set dependencies.
+# ==== Set dependencies.
 include(dependencies)
 
-# === Set compiler options.
+# ==== Set compiler options.
 include(compilerOptions)
 
-# === Recurse into sub-diretories.
+# ==== Recurse into sub-diretories.
 add_subdirectory(cuda)
 if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
     add_subdirectory(beamforming)
@@ -56,9 +49,6 @@ if (NOT WIN32) # Note: need to fix the __declspec(dllexport) for windows dll's
     add_subdirectory(widgets)
     add_subdirectory(interferometry)
 endif ()
-
-
-
 
 # ==== Build single oskar library.
 foreach (file ${beamforming_SRC})
@@ -83,11 +73,11 @@ foreach (file ${utility_SRC})
     list(APPEND oskar_SRC utility/${file})
 endforeach ()
 
-message("=============")
-foreach (file ${oskar_SRC})
-    message(">>>>>>>>>> ${file}")
-endforeach()
-message("=============")
+#message("=============")
+#foreach (file ${oskar_SRC})
+#    message(">>>>>>>>>> ${file}")
+#endforeach()
+#message("=============")
 
 include_directories(${oskar-lib_SOURCE_DIR}/beamforming)
 include_directories(${oskar-lib_SOURCE_DIR}/cuda)
@@ -97,21 +87,17 @@ include_directories(${oskar-lib_SOURCE_DIR}/modules)
 include_directories(${oskar-lib_SOURCE_DIR}/sky)
 include_directories(${oskar-lib_SOURCE_DIR}/utility)
 
-
 set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar.dir/src)
 cuda_add_library(oskar ${oskar_SRC})
 set_target_properties(oskar PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-target_link_libraries(oskar
-    ${CUDA_CUBLAS_LIBRARIES}
-    ${CUDA_LIBRARIES})
-set_target_properties(oskar PROPERTIES
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib
-    INSTALL_RPATH_USE_LINK_PATH TRUE)
-
+target_link_libraries(oskar ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
+set_target_properties(oskar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 set_target_properties(oskar PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
+
+
 install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
     FILES_MATCHING PATTERN "*.h"
@@ -120,16 +106,6 @@ install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
     PATTERN "matlab" EXCLUDE
     PATTERN "python" EXCLUDE
     PATTERN ".svn" EXCLUDE)
-
-
-
-
-
-
-
-
-
-
 
 
 ####

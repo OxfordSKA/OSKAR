@@ -18,7 +18,7 @@ set(imaging_test_SRC
 add_executable(imagingTest ${imaging_test_SRC})
 target_link_libraries(imagingTest
     oskar_imaging
-    oskar_widgets_plotting
+    oskar_widgets
     ${QT_QTCORE_LIBRARY}
     ${CPPUNIT_LIBRARIES}
 )
@@ -34,7 +34,7 @@ if (QT_QTTEST_FOUND)
     add_executable(qtest_WProjConvFunc ${WProjConvFunc_test_MOC})
     target_link_libraries(qtest_WProjConvFunc
         oskar_imaging
-        oskar_widgets_plotting
+        oskar_widgets
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )
@@ -46,7 +46,7 @@ if (QT_QTTEST_FOUND)
     add_executable(qtest_ConvFunc ${convFunc_test_MOC})
     target_link_libraries(qtest_ConvFunc
         oskar_imaging
-        oskar_widgets_plotting
+        oskar_widgets
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )
@@ -58,7 +58,7 @@ if (QT_QTTEST_FOUND)
     add_executable(qtest_Gridder ${gridding_test_MOC})
     target_link_libraries(qtest_Gridder
         oskar_imaging
-        oskar_widgets_plotting
+        oskar_widgets
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )
@@ -70,7 +70,7 @@ if (QT_QTTEST_FOUND)
     add_executable(qtest_standard_grid_image ${standard_grid_image_test_MOC})
     target_link_libraries(qtest_standard_grid_image
         oskar_imaging
-        oskar_widgets_plotting
+        oskar_widgets
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )

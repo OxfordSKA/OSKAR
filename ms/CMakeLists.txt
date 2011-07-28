@@ -1,12 +1,11 @@
 #
 # src/ms/CMakeLists.txt
 #
-#==============================================================================
 
 # Only build this module if CasaCore is found.
 if (CASACORE_FOUND)
 
-    # === Source files required for the ms module
+    # ==== Source files required for the ms module
     set(ms_SRC
         src/MsAppend.cpp
         src/MsCreate.cpp
@@ -18,25 +17,18 @@ if (CASACORE_FOUND)
     )
     set(ms_SRC "${ms_SRC}" PARENT_SCOPE)
 
-    # === Macros to build the oskar-lib ms module.
+    # ==== Macros to build the oskar-lib ms module.
     include_directories(${CASACORE_INCLUDE_DIR}/casacore)
     add_library(oskar_ms ${ms_SRC})
     set_target_properties(oskar_ms PROPERTIES COMPILE_FLAGS "-Wno-cast-qual")
     set_target_properties(oskar_ms PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     target_link_libraries(oskar_ms ${CASACORE_LIBRARIES})
 
-    # === Install configuration for the oskar-lib ms module.
+    # ==== Install configuration for the oskar-lib ms module.
     install(TARGETS oskar_ms DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-    set_target_properties(oskar_ms PROPERTIES
-        SOVERSION ${oskar-lib_SOVERSION})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN "src" EXCLUDE
-        PATTERN "test" EXCLUDE
-        PATTERN ".svn" EXCLUDE)
+    set_target_properties(oskar_ms PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
 
-    # === Recurse into test subdirectory.
+    # ==== Recurse into test subdirectory.
     add_subdirectory(test)
 
 endif (CASACORE_FOUND)

@@ -1,7 +1,6 @@
 #
 # src/math/cudak/CMakeLists.txt
 #
-#==============================================================================
 
 set(math_cuda_kernels_SRC
     src/oskar_math_cudak_dft_c2r_2d.cu
