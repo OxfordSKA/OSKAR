@@ -60,8 +60,8 @@ void oskar_sky_cudakf_ha_dec_to_hor_lmn(int ns, const float* ha,
     __syncthreads(); // Coalesce memory accesses.
     if (s < ns)
     {
-        l[s] = X1; // Horizontal x-component.
-        m[s] = t;  // Horizontal y-component.
+        l[s] = t;  // Horizontal x-component.
+        m[s] = X1; // Horizontal y-component.
         n[s] = Y2; // Horizontal z-component.
     }
 }
@@ -98,8 +98,8 @@ void oskar_sky_cudakd_ha_dec_to_hor_lmn(int ns, const double* ha,
     __syncthreads(); // Coalesce memory accesses.
     if (s < ns)
     {
-        l[s] = X1; // Horizontal x-component.
-        m[s] = t;  // Horizontal y-component.
+        l[s] = t;  // Horizontal x-component.
+        m[s] = X1; // Horizontal y-component.
         n[s] = Y2; // Horizontal z-component.
     }
 }

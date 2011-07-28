@@ -111,14 +111,15 @@ void EquatorialToHorizontalTest::test_last()
     cudaMemcpy(d_ra, &ra, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_dec, &dec, sizeof(double), cudaMemcpyHostToDevice);
 
-    // FIXME linking fails here??!
-//    int ecode = oskar_sky_cudad_ra_dec_to_az_el(1, d_ra, d_dec, last, latitude,
-//            d_az, d_el, d_work);
+    int ecode = oskar_sky_cudad_ra_dec_to_az_el(1, d_ra, d_dec, last, latitude,
+            d_az, d_el, d_work);
+    if (ecode)
+    	CPPUNIT_FAIL("CUDA Error");
 
     // Copy output coordinates to host.
     double a, e;
-    cudaMemcpy(&a, &d_az, sizeof(double), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&e, &d_el, sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&a, d_az, sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(&e, d_el, sizeof(double), cudaMemcpyDeviceToHost);
 
     // Free device memory.
     cudaFree(d_ra);
