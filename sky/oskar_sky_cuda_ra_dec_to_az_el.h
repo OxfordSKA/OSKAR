@@ -33,7 +33,7 @@
  * @file oskar_sky_cuda_ra_dec_to_az_el.h
  */
 
-#include "oskar_sky_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

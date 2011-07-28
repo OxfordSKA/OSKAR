@@ -73,12 +73,6 @@ foreach (file ${utility_SRC})
     list(APPEND oskar_SRC utility/${file})
 endforeach ()
 
-#message("=============")
-#foreach (file ${oskar_SRC})
-#    message(">>>>>>>>>> ${file}")
-#endforeach()
-#message("=============")
-
 include_directories(${oskar-lib_SOURCE_DIR}/beamforming)
 include_directories(${oskar-lib_SOURCE_DIR}/cuda)
 include_directories(${oskar-lib_SOURCE_DIR}/interferometry)
@@ -96,7 +90,7 @@ target_link_libraries(oskar ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
 set_target_properties(oskar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 set_target_properties(oskar PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
-
+cuda_build_clean_target()
 
 install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
@@ -106,6 +100,8 @@ install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
     PATTERN "matlab" EXCLUDE
     PATTERN "python" EXCLUDE
     PATTERN ".svn" EXCLUDE)
+
+
 
 
 ####

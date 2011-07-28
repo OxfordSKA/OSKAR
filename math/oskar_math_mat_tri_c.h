@@ -33,7 +33,7 @@
  * @file oskar_math_mat_tri_c.h
  */
 
-#include "oskar_math_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

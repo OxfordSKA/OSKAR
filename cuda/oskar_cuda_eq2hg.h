@@ -33,7 +33,7 @@
  * @file oskar_cuda_eq2hg.h
  */
 
-#include "oskar_cuda_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

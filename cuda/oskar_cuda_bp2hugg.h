@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-#include "oskar_cuda_windows.h"
+#include "oskar_windows.h"
 
 /**
  * @brief

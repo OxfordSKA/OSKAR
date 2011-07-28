@@ -33,7 +33,7 @@
  * @file oskar_util_cuda_memory.h
  */
 
-#include "utility/oskar_util_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

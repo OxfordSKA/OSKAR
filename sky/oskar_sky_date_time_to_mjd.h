@@ -33,7 +33,7 @@
  * @file oskar_sky_date_time_to_mjd.h
  */
 
-#include "oskar_sky_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

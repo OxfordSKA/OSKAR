@@ -33,7 +33,7 @@
  * @file oskar_sky_equation_of_equinoxes_fast.h
  */
 
-#include "oskar_sky_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

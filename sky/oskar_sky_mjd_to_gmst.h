@@ -33,7 +33,7 @@
  * @file oskar_sky_mjd_to_gmst.h
  */
 
-#include "oskar_sky_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

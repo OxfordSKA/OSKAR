@@ -33,7 +33,7 @@
  * @file oskar_interferometry_xyz2uvw.h
  */
 
-#include "oskar_interferometry_windows.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {

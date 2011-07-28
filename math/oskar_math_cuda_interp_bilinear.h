@@ -33,7 +33,7 @@
  * @file oskar_math_cuda_interp_bilinear.h
  */
 
-#include "oskar_math_windows.h"
+#include "oskar_windows.h"
 #include "utility/oskar_util_vector_types.h"
 
 #ifdef __cplusplus
@@ -66,7 +66,7 @@ extern "C" {
  */
 DllExport
 int oskar_math_cuda_interp_bilinear_float(int width, int height, int pitch,
-		const float* input, int n, const float2* pos, float* output);
+        const float* input, int n, const float2* pos, float* output);
 
 /**
  * @brief
@@ -94,7 +94,7 @@ int oskar_math_cuda_interp_bilinear_float(int width, int height, int pitch,
  */
 DllExport
 int oskar_math_cuda_interp_bilinear_complex(int width, int height, int pitch,
-		const float2* input, int n, const float2* pos, float2* output);
+        const float2* input, int n, const float2* pos, float2* output);
 
 
 #ifdef __cplusplus

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_WINDOWS_H_
-#define OSKAR_UTIL_WINDOWS_H_
+#ifndef OSKAR_WINDOWS_H_
+#define OSKAR_WINDOWS_H_
 
 //
 // Macro used for creating windows the library.
@@ -45,7 +45,7 @@
 //
 
 #ifdef _WIN32
-    #ifdef oskar_utility_EXPORTS
+    #ifdef oskar_EXPORTS
         #ifndef DllExport
             #define DllExport __declspec(dllexport)
         #endif
@@ -60,4 +60,4 @@
     #endif
 #endif
 
-#endif
+#endif // OSKAR_WINDOWS_H_

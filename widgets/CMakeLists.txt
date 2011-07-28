@@ -39,7 +39,3 @@ if (Qwt5_FOUND)
 
 endif()
 
-
-
-
-
