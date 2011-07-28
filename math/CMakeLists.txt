@@ -22,6 +22,7 @@ set(math_SRC "${math_SRC}" PARENT_SCOPE)
 
 
 # === Macros to build the oskar-lib math module.
+set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_math.dir/src)
 cuda_add_library(oskar_math ${math_SRC})
 set_target_properties(oskar_math PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"

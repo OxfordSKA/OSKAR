@@ -97,6 +97,8 @@ include_directories(${oskar-lib_SOURCE_DIR}/modules)
 include_directories(${oskar-lib_SOURCE_DIR}/sky)
 include_directories(${oskar-lib_SOURCE_DIR}/utility)
 
+
+set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar.dir/src)
 cuda_add_library(oskar ${oskar_SRC})
 set_target_properties(oskar PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
@@ -112,6 +114,12 @@ if (NOT WIN32)
     install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     set_target_properties(oskar PROPERTIES
         SOVERSION ${oskar-lib_SOVERSION})
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN "src" EXCLUDE
+        PATTERN "test" EXCLUDE
+        PATTERN ".svn" EXCLUDE)
 endif()
 
 
