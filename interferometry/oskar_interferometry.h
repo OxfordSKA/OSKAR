@@ -33,7 +33,8 @@
  * @file oskar_interferometry.h
  */
 
-#include "oskar_interferometry_baselines.h"
-#include "oskar_interferometry_xyz2uvw.h"
+#include "oskar_compute_baselines.h"
+#include "oskar_cuda_correlator_lm_bw.h"
+#include "oskar_xyz2uvw.h"
 
 #endif // OSKAR_INTERFEROMETRY_H_

@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_interferometry_cuda_interferometer1.h"
-#include "interferometry/oskar_interferometry_cuda_correlator.h"
+#include "interferometry/oskar_cuda_interferometer1.h"
+#include "interferometry/oskar_cuda_correlator.h"
 
 #include "math/cudak/oskar_math_cudak_dftw_3d_seq_out.h"
 #include "math/cudak/oskar_math_cudak_mat_mul_cc.h"
-#include "interferometry/cudak/oskar_interferometry_cudak_correlator.h"
-#include "interferometry/cudak/oskar_interferometry_cudak_xyz2uvw.h"
+#include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "interferometry/cudak/oskar_cudak_xyz2uvw.h"
 
 #ifdef __cplusplus
 extern "C" {

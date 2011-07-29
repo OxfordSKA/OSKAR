@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SYNTHESIS_CUDAK_CORRELATOR_H_
-#define OSKAR_SYNTHESIS_CUDAK_CORRELATOR_H_
+#ifndef OSKAR_INTERFEROMETRY_CUDAK_CORRELATOR_H_
+#define OSKAR_INTERFEROMETRY_CUDAK_CORRELATOR_H_
 
 /**
- * @file oskar_synthesis_cudak_correlator.h
+ * @file oskar_cudak_correlator.h
  */
 
 #include "utility/oskar_util_cuda_eclipse.h"
@@ -51,7 +51,7 @@
  * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__
-void oskar_synthesis_cudakf_correlator(const int ns, const int na,
+void oskar_cudakf_correlator(const int ns, const int na,
         const float2* k, const float* u, const float* v, const float* l,
         const float* m, const float lambda_bandwidth, float2* vis);
 
@@ -71,8 +71,8 @@ void oskar_synthesis_cudakf_correlator(const int ns, const int na,
  * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__
-void oskar_synthesis_cudakd_correlator(const int ns, const int na,
+void oskar_cudakd_correlator(const int ns, const int na,
         const double2* k, const double* u, const double* v, const double* l,
         const double* m, const double lambda_bandwidth, double2* vis);
 
-#endif // OSKAR_SYNTHESIS_CUDAK_CORRELATOR_H_
+#endif // OSKAR_INTERFEROMETRY_CUDAK_CORRELATOR_H_

@@ -30,7 +30,7 @@
 #define OSKAR_INTERFEROMETRY_XYZ2UVW_H_
 
 /**
- * @file oskar_interferometry_xyz2uvw.h
+ * @file oskar_xyz2uvw.h
  */
 
 #include "oskar_windows.h"

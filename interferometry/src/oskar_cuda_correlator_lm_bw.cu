@@ -26,14 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "modules/cuda/oskar_modules_cuda_correlator_lm_bw.h"
+#include "interferometry/oskar_cuda_correlator_lm_bw.h"
 
 #include "cuda/kernels/oskar_cudak_dftw_3d_seq_out.h"
 #include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
 #include "cuda/kernels/oskar_cudak_correlator.h"
 #include "math/oskar_math_mat_tri_c.h"
-#include "interferometry/oskar_interferometry_baselines.h"
-#include "interferometry/oskar_interferometry_xyz2uvw.h"
+#include "interferometry/oskar_compute_baselines.h"
+#include "interferometry/oskar_xyz2uvw.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +54,7 @@ extern "C" {
 
 // Single precision.
 
-int oskar_modules_cudaf_correlator_lm_bw(int na, const float* ax,
+int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* bsqrt, const float* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
@@ -228,7 +228,7 @@ int oskar_modules_cudaf_correlator_lm_bw(int na, const float* ax,
 
 // Double precision.
 
-int oskar_modules_cudad_correlator_lm_bw(int na, const double* ax,
+int oskar_cudad_correlator_lm_bw(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* bsqrt, const double* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt, double k,

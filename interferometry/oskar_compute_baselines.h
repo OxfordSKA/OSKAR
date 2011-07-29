@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETRY_BASELINES_H_
-#define OSKAR_INTERFEROMETRY_BASELINES_H_
+#ifndef OSKAR_INTERFEROMETRY_COMPUTE_BASELINES_H_
+#define OSKAR_INTERFEROMETRY_COMPUTE_BASELINES_H_
 
 /**
- * @file oskar_interometry_baselines.h
+ * @file oskar_compute_baselines.h
  */
 
 #include "oskar_windows.h"
@@ -89,4 +89,4 @@ void oskar_interferometryd_baselines(int na, const double* au,
 }
 #endif
 
-#endif // OSKAR_INTERFEROMETRY_BASELINES_H_
+#endif // OSKAR_INTERFEROMETRY_COMPUTE_BASELINES_H_

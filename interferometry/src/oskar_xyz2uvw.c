@@ -26,7 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_interferometry_baselines.h"
+#include "interferometry/oskar_xyz2uvw.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,35 +35,39 @@ extern "C" {
 
 // Single precision.
 
-void oskar_interferometryf_baselines(int na, const float* au,
-        const float* av, const float* aw, float* bu, float* bv, float* bw)
+void oskar_interferometryf_xyz2uvw(int na, const float* x, const float* y,
+        const float* z, double ha0, double dec0, float* u, float* v,
+        float* w)
 {
-    int a1, a2, b = 0; // Station and baseline indices.
-    for (a1 = 0; a1 < na; ++a1)
-    {
-        for (a2 = a1 + 1; a2 < na; ++a2, ++b)
-        {
-            bu[b] = au[a2] - au[a1];
-            bv[b] = av[a2] - av[a1];
-            bw[b] = aw[a2] - aw[a1];
-        }
+    double sinHa0  = sin(ha0);
+    double cosHa0  = cos(ha0);
+    double sinDec0 = sin(dec0);
+    double cosDec0 = cos(dec0);
+
+    int a = 0;
+    for (a = 0; a < na; ++a) {
+        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
+        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
+        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
     }
 }
 
 // Double precision.
 
-void oskar_interferometryd_baselines(int na, const double* au,
-        const double* av, const double* aw, double* bu, double* bv, double* bw)
+void oskar_interferometryd_xyz2uvw(int na, const double* x, const double* y,
+        const double* z, double ha0, double dec0, double* u, double* v,
+        double* w)
 {
-    int a1, a2, b = 0; // Station and baseline indices.
-    for (a1 = 0; a1 < na; ++a1)
-    {
-        for (a2 = a1 + 1; a2 < na; ++a2, ++b)
-        {
-            bu[b] = au[a2] - au[a1];
-            bv[b] = av[a2] - av[a1];
-            bw[b] = aw[a2] - aw[a1];
-        }
+    double sinHa0  = sin(ha0);
+    double cosHa0  = cos(ha0);
+    double sinDec0 = sin(dec0);
+    double cosDec0 = cos(dec0);
+
+    int a = 0;
+    for (a = 0; a < na; ++a) {
+        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
+        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
+        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
     }
 }
 

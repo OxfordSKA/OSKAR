@@ -26,17 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_H_
-#define OSKAR_H_
+#include "interferometry/oskar_compute_baselines.h"
 
-/**
- * @file oskar.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "cuda/oskar_cuda.h" // Deprecated!
-#include "interferometry/oskar_interferometry.h"
-#include "math/oskar_math.h"
-#include "sky/oskar_sky.h"
-#include "utility/oskar_util.h"
+// Single precision.
 
-#endif // OSKAR_H_
+void oskar_interferometryf_baselines(int na, const float* au,
+        const float* av, const float* aw, float* bu, float* bv, float* bw)
+{
+    int a1, a2, b = 0; // Station and baseline indices.
+    for (a1 = 0; a1 < na; ++a1)
+    {
+        for (a2 = a1 + 1; a2 < na; ++a2, ++b)
+        {
+            bu[b] = au[a2] - au[a1];
+            bv[b] = av[a2] - av[a1];
+            bw[b] = aw[a2] - aw[a1];
+        }
+    }
+}
+
+// Double precision.
+
+void oskar_interferometryd_baselines(int na, const double* au,
+        const double* av, const double* aw, double* bu, double* bv, double* bw)
+{
+    int a1, a2, b = 0; // Station and baseline indices.
+    for (a1 = 0; a1 < na; ++a1)
+    {
+        for (a2 = a1 + 1; a2 < na; ++a2, ++b)
+        {
+            bu[b] = au[a2] - au[a1];
+            bv[b] = av[a2] - av[a1];
+            bw[b] = aw[a2] - aw[a1];
+        }
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif

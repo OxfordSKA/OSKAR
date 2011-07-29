@@ -26,51 +26,77 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_interferometry_xyz2uvw.h"
-#include <math.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "interferometry/cudak/oskar_cudak_xyz2uvw.h"
 
 // Single precision.
 
-void oskar_interferometryf_xyz2uvw(int na, const float* x, const float* y,
-        const float* z, double ha0, double dec0, float* u, float* v,
-        float* w)
+__global__
+void oskar_cudakf_xyz2uvw(int n, const float* x, const float* y,
+        const float* z, float ha0, float dec0, float* u, float* v, float* w)
 {
-    double sinHa0  = sin(ha0);
-    double cosHa0  = cos(ha0);
-    double sinDec0 = sin(dec0);
-    double cosDec0 = cos(dec0);
-
-    int a = 0;
-    for (a = 0; a < na; ++a) {
-        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
-        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
-        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
+    // Pre-compute sine and cosine of input angles.
+    __device__ __shared__ float sinHa0, cosHa0, sinDec0, cosDec0;
+    if (threadIdx.x == 0)
+    {
+        sincosf(ha0, &sinHa0, &cosHa0);
+        sincosf(dec0, &sinDec0, &cosDec0);
     }
+    __syncthreads();
+
+    // Get station ID.
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    // Cache input coordinates.
+    float cx = x[i], cy = y[i], cz = z[i], cv, cw, t;
+
+    // Do the rotation.
+    t = cx * cosHa0;
+    t -= cy * sinHa0;
+    cv = cz * cosDec0;
+    cv -= sinDec0 * t;
+    cw = cosDec0 * t;
+    cw += cz * sinDec0;
+    t =  cx * sinHa0;
+    t += cy * cosHa0;
+    u[i] = t;
+    v[i] = cv;
+    w[i] = cw;
 }
 
 // Double precision.
 
-void oskar_interferometryd_xyz2uvw(int na, const double* x, const double* y,
+__global__
+void oskar_cudakd_xyz2uvw(int n, const double* x, const double* y,
         const double* z, double ha0, double dec0, double* u, double* v,
         double* w)
 {
-    double sinHa0  = sin(ha0);
-    double cosHa0  = cos(ha0);
-    double sinDec0 = sin(dec0);
-    double cosDec0 = cos(dec0);
-
-    int a = 0;
-    for (a = 0; a < na; ++a) {
-        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
-        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
-        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
+    // Pre-compute sine and cosine of input angles.
+    __device__ __shared__ double sinHa0, cosHa0, sinDec0, cosDec0;
+    if (threadIdx.x == 0)
+    {
+        sincos(ha0, &sinHa0, &cosHa0);
+        sincos(dec0, &sinDec0, &cosDec0);
     }
-}
+    __syncthreads();
 
-#ifdef __cplusplus
+    // Get station ID.
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    // Cache input coordinates.
+    double cx = x[i], cy = y[i], cz = z[i], cv, cw, t;
+
+    // Do the rotation.
+    t = cx * cosHa0;
+    t -= cy * sinHa0;
+    cv = cz * cosDec0;
+    cv -= sinDec0 * t;
+    cw = cosDec0 * t;
+    cw += cz * sinDec0;
+    t =  cx * sinHa0;
+    t += cy * cosHa0;
+    u[i] = t;
+    v[i] = cv;
+    w[i] = cw;
 }
-#endif

@@ -1,10 +1,11 @@
 #
-# src/modules/cuda/test
+# src/interferometry/test/CMakeLists.txt
 #
 
 # CppUnit
 # ==============================================================================
 if (CPPUNIT_FOUND)
+
     set(modules_cuda_test_SRC
         src/CppUnitMain.cpp
         src/ModuleCudaCorrelatorTest.cpp

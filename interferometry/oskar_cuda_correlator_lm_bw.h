@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MODULES_CUDA_CORRELATOR_LM_BW_H_
-#define OSKAR_MODULES_CUDA_CORRELATOR_LM_BW_H_
+#ifndef OSKAR_INTERFEROMETRY_CUDA_CORRELATOR_LM_BW_H_
+#define OSKAR_INTERFEROMETRY_CUDA_CORRELATOR_LM_BW_H_
 
 /**
- * @file oskar_modules_cuda_correlator_lm_bw.h
+ * @file oskar_cuda_correlator_lm_bw.h
  */
 
 #include "oskar_windows.h"
@@ -69,11 +69,12 @@ extern "C" {
  * @param[out] w Array of baseline w-positions in metres (see note, above).
  */
 DllExport
-int oskar_modules_cudaf_correlator_lm_bw(int na, const float* ax,
+int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* bsqrt, const float* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
         float* vis, float* u, float* v, float* w);
+
 
 /**
  * @brief
@@ -105,7 +106,7 @@ int oskar_modules_cudaf_correlator_lm_bw(int na, const float* ax,
  * @param[out] w Array of baseline w-positions in metres.
  */
 DllExport
-int oskar_modules_cudad_correlator_lm_bw(int na, const double* ax,
+int oskar_cudad_correlator_lm_bw(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* bsqrt, const double* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt, double k,
@@ -115,4 +116,4 @@ int oskar_modules_cudad_correlator_lm_bw(int na, const double* ax,
 }
 #endif
 
-#endif // OSKAR_MODULES_CUDA_CORRELATOR_LM_BW_H_
+#endif // OSKAR_INTERFEROMETRY_CUDA_CORRELATOR_LM_BW_H_
