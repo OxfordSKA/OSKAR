@@ -13,7 +13,7 @@ set(interferometry_SRC
     # C/C++ interface
     src/oskar_compute_baselines.c
     src/oskar_cuda_correlator_lm_bw.cu
-    #src/oskar_cuda_correlator.cu
+    src/oskar_cuda_correlator_scalar.cu
     #src/oskar_cuda_interferometer1.cu
     src/oskar_xyz2uvw.c
 )
