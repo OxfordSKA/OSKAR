@@ -28,7 +28,6 @@
 
 #include "cuda/test/CudaAntennaSignalTest.h"
 #include "cuda/oskar_cuda_as2hi.h"
-#include "math/core/SphericalPositions.h"
 #include <cmath>
 #include <vector>
 

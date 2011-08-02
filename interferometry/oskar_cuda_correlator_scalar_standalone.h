@@ -26,40 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/test/ModuleCudaCorrelatorTest.h"
-#include <cmath>
-#include <cstdlib>
-#include <vector>
+#ifndef OSKAR_CUDA_CORRELATOR_SCALAR_STANDALONE_H_
+#define OSKAR_CUDA_CORRELATOR_SCALAR_STANDALONE_H_
 
-#ifndef M_PI
-#define M_PI 3.14159265358979
+/**
+ * @file oskar_cuda_correlator_scalar_standalone.h
+ */
+
+
+#include "oskar_windows.h"
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define C_0 299792458
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(ModuleCudaCorrelatorTest);
 
 /**
+ * @brief
+ * Computes complex visibilities (single precision).
+ *
  * @details
- * Sets up the context before running each test method.
+ *
+ * @param[in] num_antennas Number of antennas or stations.
  */
-void ModuleCudaCorrelatorTest::setUp()
-{
-}
+DllExport
+int oskar_cudaf_correlator_scalar_standalone(const int num_antennas,
+        const float* antenna_x, const float* antenna_y, const float* antenna_z,
+        const int num_sources, const float* source_l, const float* source_m,
+        const float* b_sqrt, const float* e, const float ra0, const float dec0,
+        const float lst0, const int nsdt, const float std, const float k,
+        const float lambda_bandwidth, float* vis);
+
 
 /**
+ * @brief
+ * Allocates memory for use with
+ *
  * @details
- * Clean up routine called after each test is run.
+ *
+ * @param[in] num_antennas The number of antennas/ stations to be correlated.
+ * @param[in] num_sources  The number of sources to be correlated.
  */
-void ModuleCudaCorrelatorTest::tearDown()
-{
-}
+DllExport
+int oskar_cudaf_correlator_scalar_allocate_memory(const unsigned num_antennas,
+        const unsigned num_sources, float* d_antenna_x, float* d_antenna_y,
+        float* d_antenna_z, float* d_source_l, float* d_source_m,
+        float* d_source_n, float* d_eb, float* d_work);
 
-/**
- * @details
- * Tests vector addition using CUDA.
- */
-void ModuleCudaCorrelatorTest::test_method()
-{
+
+
+
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_CUDA_CORRELATOR_SCALAR_STANDALONE_H_

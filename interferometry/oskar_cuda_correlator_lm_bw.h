@@ -31,6 +31,7 @@
 
 /**
  * @file oskar_cuda_correlator_lm_bw.h
+ * @note DEPRECATED
  */
 
 #include "oskar_windows.h"

@@ -26,40 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/test/ModuleCudaCorrelatorTest.h"
-#include <cmath>
-#include <cstdlib>
-#include <vector>
+#ifndef OSKAR_SKY_ANGLES_FROM_LM_H_
+#define OSKAR_SKY_ANGLES_FROM_LM_H_
 
-#ifndef M_PI
-#define M_PI 3.14159265358979
-#endif
-
-#define C_0 299792458
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(ModuleCudaCorrelatorTest);
 
 /**
+ * @brief
+ *
  * @details
- * Sets up the context before running each test method.
+ *
+ * @param num_positions
+ * @param ra0
+ * @param dec0
+ * @param l
+ * @param m
+ * @param ra
+ * @param dec
  */
-void ModuleCudaCorrelatorTest::setUp()
-{
-}
+void oskar_angles_from_lm(const unsigned num_positions, const double ra0,
+        const double dec0, const double * l, const double * m, double * ra,
+        double * dec);
+
 
 /**
+ * @brief
+ *
  * @details
- * Clean up routine called after each test is run.
+ *
+ * @param num_positions
+ * @param l
+ * @param m
+ * @param ra
+ * @param dec
  */
-void ModuleCudaCorrelatorTest::tearDown()
-{
-}
+void oskar_angles_from_lm_unrotated(const unsigned num_positions,const double * l,
+        const double * m, double * ra, double * dec);
 
-/**
- * @details
- * Tests vector addition using CUDA.
- */
-void ModuleCudaCorrelatorTest::test_method()
-{
-}
+#endif // OSKAR_SKY_ANGLES_FROM_LM_H_

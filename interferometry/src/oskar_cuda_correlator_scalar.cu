@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 // Single precision.
-int oskar_interferometry_cudaf_correlator(int na, const float* ax,
+int oskar_cudaf_correlator_scalar(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* n, const float* eb, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
@@ -115,7 +115,7 @@ int oskar_interferometry_cudaf_correlator(int na, const float* ax,
 
 
 // Double precision.
-int oskar_interferometry_cudad_correlator(int na, const double* ax,
+int oskar_cudad_correlator_scalar(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* n, const double* eb, double ra0,
         double dec0, double lst0, int nsdt, double sdt,

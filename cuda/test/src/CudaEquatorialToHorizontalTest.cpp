@@ -28,7 +28,7 @@
 
 #include "cuda/test/CudaEquatorialToHorizontalTest.h"
 #include "cuda/oskar_cuda_eq2hg.h"
-#include "math/core/SphericalPositions.h"
+#include "math/SphericalPositions.h"
 #include <cstdio>
 #include <cmath>
 #include <vector>

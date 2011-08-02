@@ -6,7 +6,9 @@ include_directories(${oskar-lib_SOURCE_DIR}/math)
 
 # ==== Add the source files in this directory.
 set(sky_SRC
-    src/angles_from_lm.cpp
+    src/oskar_angles_from_lm.cpp
+    src/oskar_rotate_sources.cpp
+
     src/filter_sources_by_flux.cpp
     src/filter_sources_by_radius.cpp
     src/generate_random_sources.cpp
@@ -19,7 +21,7 @@ set(sky_SRC
     src/oskar_sky_mjd_to_gmst.cpp
     src/oskar_sky_mjd_to_last_fast.cpp
     src/oskar_sky_mjd_to_lmst.cpp
-    src/rotate_sources.cpp
+
 )
 
 # ==== Add the CUDA kernels.

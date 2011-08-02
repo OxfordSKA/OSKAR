@@ -19,7 +19,7 @@ unsigned filter_sources_by_flux(unsigned * num_sources,
     // the positions of the original indices.
     std::vector<unsigned> indices(*num_sources);
     unsigned * idx = &indices[0];
-    LinkedSort::sortIndices(*num_sources, brightness, idx);
+    oskar_LinkedSort::sortIndices(*num_sources, brightness, idx);
 
     // Find the indices of the sorted radial distance distance array
     // corresponding to the inner and outer radius.

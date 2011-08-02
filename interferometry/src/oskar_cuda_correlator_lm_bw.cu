@@ -39,6 +39,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <cublas.h>
+#include <math.h>
 
 #include "cuda/CudaEclipse.h"
 
@@ -53,7 +54,6 @@ extern "C" {
 
 
 // Single precision.
-
 int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* bsqrt, const float* e, float ra0,
@@ -226,8 +226,8 @@ int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
     return retVal;
 }
 
-// Double precision.
 
+// Double precision.
 int oskar_cudad_correlator_lm_bw(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* bsqrt, const double* e, double ra0,

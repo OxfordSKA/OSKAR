@@ -26,40 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/test/ModuleCudaCorrelatorTest.h"
-#include <cmath>
-#include <cstdlib>
-#include <vector>
+#ifndef OSKAR_SKY_MODEL_H_
+#define OSKAR_SKY_Model_H_
 
-#ifndef M_PI
-#define M_PI 3.14159265358979
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#define C_0 299792458
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(ModuleCudaCorrelatorTest);
-
-/**
- * @details
- * Sets up the context before running each test method.
- */
-void ModuleCudaCorrelatorTest::setUp()
+struct oskar_SkyModel
 {
-}
+    unsigned num_sources;
 
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void ModuleCudaCorrelatorTest::tearDown()
-{
-}
+    // Global sky model.
+    float * RA;
+    float * Dec;
+    float * I;
+    float * Q;
+    float * U;
+    float * V;
 
-/**
- * @details
- * Tests vector addition using CUDA.
- */
-void ModuleCudaCorrelatorTest::test_method()
-{
+    // Local Sky model.
+    float * hor_l;
+    float * hor_m;
+    float * hor_n;
+};
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_SKY_MODEL_H_

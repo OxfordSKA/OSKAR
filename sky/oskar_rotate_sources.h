@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MODULES_CUDA_H_
-#define OSKAR_MODULES_CUDA_H_
+#ifndef OSKAR_SKY_ROTATE_SOURCES_H_
+#define OSKAR_SKY_ROTATE_SOURCES_H_
 
-/**
- * @file oskar_modules_cuda.h
- */
+void oskar_rotate_sources_to_phase_centre(const unsigned num_sources,
+        double * ra, double * dec, const double ra0, const double dec0);
 
-#include "oskar_modules_cuda_correlator_lm_bw.h"
+void oskar_mult_matrix_vector(const double * M, double * v);
 
-#endif // OSKAR_MODULES_CUDA_H_
+
+#endif // OSKAR_SKY_ROTATE_SOURCES_H_

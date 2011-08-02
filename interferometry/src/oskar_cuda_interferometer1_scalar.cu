@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_cuda_interferometer1.h"
+#include "interferometry/oskar_cuda_interferometer1_scalar.h"
 #include "interferometry/oskar_cuda_correlator_scalar.h"
 
 #include "math/cudak/oskar_math_cudak_dftw_3d_seq_out.h"
@@ -44,61 +44,65 @@ extern "C" {
 
 #define SEC_PER_DAY 86400.0
 
-// Single precision.
+int oskar_cudad_interferometer1(
+        unsigned num_antennas,
+        const float* antenna_x,
+        const float* antenna_y,
+        const float* antenna_z,
 
-int oskar_interferometry_cudaf_interferometer1(int na, const float* ax,
-        const float* ay, const float* az, int ns, const float* ra,
-        const float* dec, const float* brightness, const int* nas,
-        const float* asx, const float* asy, float ra0, float dec0,
-        float t_vis_start, float dt_vis_ave, int num_vis_ave, int nsdt,
-        float sdt, float lambda_bandwidth, float* u, float* v, float* w,
-        float* vis, float* ework, float* swork, float* cwork)
+        unsigned num_sources,
+        const float* source_l,
+        const float* source_m,
+        const float* source_n,
+        const float* eb,
+
+        float ra0,
+        float dec0,
+        float lst0,
+
+        const unsigned nsdt,
+        float sdt,
+        float lambda_bandwidth,
+
+        float* vis,
+        float* work)
 {
-    // Initialise.
-    const double dt_vis_ave_offset = dt_vis_ave / 2.0;
+    cudaError_t cuda_error = cudaSuccess;
 
-    // Clear the visibilities.
-    cudaMemset(vis, 0, sizeof(float2) * na * (na - 1) / 2);
+    // 1. Allocate GPU memory for antennas and transfer to the device.
+    // TODO
 
-    // Loop over full visibility averages.
-    for (int j = 0; j < num_vis_ave; ++j)
+    // 2. Allocate GPU memory for stations and transfer to device.
+    // TODO
+
+    // 3. Allocate GPU memory for source model and transfer to device.
+    // TODO
+
+
+    // 4. Loop over number of visibility snapshots.
+    for (int j = 0; j < num_vis_snapshots; ++j)
     {
-        // Time step value.
-        double t_ave_start = t_vis_start + j * dt_vis_ave;
-        double t_ave = t_ave_start + dt_vis_ave_offset;
+        // 5. Evaluate LST from UTC.
 
-        // Compute the local sidereal time in radians.
-        double lst = 2 * M_PI * t_ave / SEC_PER_DAY;
 
-        // Determine which sources are above the horizon.
+        // 6. Loop over evaluations of the visibility average with changing E-Jones
+        // within the dump
+        for (int i = 0; i < num_vis_averages; ++i)
+        // 6. Find sources above horizon.
 
-        // Compute hour angle, azimuth and elevation of phase tracking centre.
+        // 7. Evaluate E-Jones for each source position per station.
 
-        // Compute E-Jones (station beam) for each visible source and station
-        // geometry.
+        // 8.
 
-        // Determine direction cosines of visible sources relative to
-        // phase centre.
 
-        // Evaluate and average visibility fringes for a fixed E-Jones.
-        oskar_synthesis_cudaf_correlator(na, ax, ay, az, ns, l, m, n,
-                eb, ra0, dec0, lst0, nsdt, sdt, lambda_bandwidth, vis, cwork);
     }
 
-    // Divide visibilities by loop counter.
 
-    // Generate u,v,w coordinates for visibility dump.
 
-    return 0;
+    return cuda_error;
 }
 
-// Double precision.
 
-int oskar_interferometry_cudad_interferometer1()
-{
-    /// FIXME?!
-    return 0;
-}
 
 #ifdef __cplusplus
 }

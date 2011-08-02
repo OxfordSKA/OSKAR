@@ -28,9 +28,6 @@
 
 #include "cuda/test/CudaHierarchicalBeamPatternTest.h"
 #include "cuda/oskar_cuda_hbp2hig.h"
-#include "math/core/SphericalPositions.h"
-#include "math/core/GridPositions.h"
-#include "math/core/Matrix3.h"
 #include <cmath>
 #include <vector>
 

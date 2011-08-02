@@ -50,10 +50,10 @@ extern "C" {
  *
  * The output arrays must be pre-sized to length na * (na - 1) / 2.
  *
- * @param[in] na The number of stations.
- * @param[in] au The station u-positions (length na).
- * @param[in] av The station v-positions (length na).
- * @param[in] aw The station w-positions (length na).
+ * @param[in]  na The number of stations.
+ * @param[in]  au The station u-positions (length na).
+ * @param[in]  av The station v-positions (length na).
+ * @param[in]  aw The station w-positions (length na).
  * @param[out] bu The baseline u-positions (length na * (na - 1) / 2).
  * @param[out] bv The baseline v-positions (length na * (na - 1) / 2).
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).
@@ -73,10 +73,10 @@ void oskar_interferometryf_baselines(int na, const float* au,
  *
  * The output arrays must be pre-sized to length na * (na - 1) / 2.
  *
- * @param[in] na The number of stations.
- * @param[in] au The station u-positions (length na).
- * @param[in] av The station v-positions (length na).
- * @param[in] aw The station w-positions (length na).
+ * @param[in]  na The number of stations.
+ * @param[in]  au The station u-positions (length na).
+ * @param[in]  av The station v-positions (length na).
+ * @param[in]  aw The station w-positions (length na).
  * @param[out] bu The baseline u-positions (length na * (na - 1) / 2).
  * @param[out] bv The baseline v-positions (length na * (na - 1) / 2).
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).

@@ -6,42 +6,39 @@
 #  CPPUNIT_FOUND       - True if cppunit found.
 
 # Already in cache, be silent
-IF (CPPUNIT_INCLUDE_DIR)
-    SET(CPPUNIT_FIND_QUIETLY TRUE)
-ENDIF (CPPUNIT_INCLUDE_DIR)
+if (CPPUNIT_INCLUDE_DIR)
+    set(CPPUNIT_FIND_QUIETLY TRUE)
+endif (CPPUNIT_INCLUDE_DIR)
 
-FIND_PATH(CPPUNIT_INCLUDE_DIR cppunit
-	PATHS 
-	/usr/include/
-	/usr/include/cppunit
-	/usr/include/libcppunit
-	${CPPUNIT_INCLUDES}
-	#${CPPUNIT_INCLUDES}/cppunit
+find_path(CPPUNIT_INCLUDE_DIR cppunit
+    PATHS
+    /usr/include/
+    /usr/include/cppunit
+    /usr/include/libcppunit
+    ${CPPUNIT_INCLUDES}
 )
 
+set(CPPUNIT_NAMES cppunit cppunit_dll)
 
-SET(CPPUNIT_NAMES cppunit cppunit_dll)
-FOREACH( lib ${CPPUNIT_NAMES} )
-    FIND_LIBRARY(CPPUNIT_LIBRARY_${lib} NAMES ${lib} PATHS ${CPPUNIT_LIB_DIR})
-	if (NOT ${CPPUNIT_LIBRARY_${lib}} MATCHES "CPPUNIT_LIBRARY_${lib}-NOTFOUND")
-		LIST(APPEND CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY_${lib}})
+foreach( lib ${CPPUNIT_NAMES} )
+    find_library(CPPUNIT_LIBRARY_${lib}
+        NAMES ${lib}
+        PATHS
+        ${CPPUNIT_LIB_DIR})
+    if (NOT ${CPPUNIT_LIBRARY_${lib}} MATCHES "CPPUNIT_LIBRARY_${lib}-NOTFOUND")
+        list(APPEND CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY_${lib}})
     endif ()
-ENDFOREACH(lib)
-
-
+endforeach(lib)
 
 # handle the QUIETLY and REQUIRED arguments and set CPPUNIT_FOUND to TRUE if.
 # all listed variables are TRUE
-INCLUDE(FindPackageHandleCompat)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CppUnit DEFAULT_MSG CPPUNIT_LIBRARIES CPPUNIT_INCLUDE_DIR)
-#message("---------------------- ${CPPUNIT_INCLUDE_DIR}")
-#message("---------------------- ${CPPUNIT_LIBRARIES}")
-#message("---------------------- ${CPPUNIT_FOUND}")
 
 
-IF(NOT CPPUNIT_FOUND)
-    SET( CPPUNIT_LIBRARIES )
-ENDIF(NOT CPPUNIT_FOUND)
+if(NOT CPPUNIT_FOUND)
+    set( CPPUNIT_LIBRARIES )
+endif(NOT CPPUNIT_FOUND)
 
-MARK_AS_ADVANCED(CPPUNIT_LIBRARIES CPPUNIT_INCLUDE_DIR)
+mark_as_advanced(CPPUNIT_LIBRARIES CPPUNIT_INCLUDE_DIR)
 

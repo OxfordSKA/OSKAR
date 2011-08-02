@@ -1,4 +1,4 @@
-#include "sky/angles_from_lm.h"
+#include "sky/oskar_angles_from_lm.h"
 
 #include <limits>
 #include <cmath>
@@ -23,7 +23,7 @@ using std::fabs;
  * @param[out] ra            Array of Right Ascension values, in radians.
  * @param[out] dec           Array of Declination values, in radians.
  */
-void angles_from_lm(const unsigned num_positions, const double ra0,
+void oskar_angles_from_lm(const unsigned num_positions, const double ra0,
         const double dec0, const double * l, const double * m, double * ra,
         double * dec)
 {
@@ -59,7 +59,7 @@ void angles_from_lm(const unsigned num_positions, const double ra0,
  * @param[out] ra            Array of Right Ascension values, in radians.
  * @param[out] dec           Array of Declination values, in radians.
  */
-void angles_from_lm_unrotated(const unsigned num_positions, const double * l,
+void oskar_angles_from_lm_unrotated(const unsigned num_positions, const double * l,
         const double * m, double * ra, double * dec)
 {
     // Loop over l, m positions and evaluate the Ra, Dec values.

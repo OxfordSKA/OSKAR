@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_H_
-#define OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_H_
+#ifndef OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_SCALAR_H_
+#define OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_SCALAR_H_
 
 /**
- * @file oskar_interferometry_cuda_interferometer1.h
- * @note DEPRECATED
+ * @file oskar_interferometry_cuda_interferometer1_scalar.h
  */
 
 #include "oskar_windows.h"
@@ -44,9 +43,6 @@ extern "C" {
  * @brief
  *
  * @details
- *
- * Note that all pointers are device pointers, and must not be dereferenced
- * in host code.
  *
  * @param[in] na   Number of antennas or stations.
  * @param[in] ax   Array of local equatorial station x-positions in wavenumbers.
@@ -67,25 +63,33 @@ extern "C" {
  * @param[in,out]  work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
-int oskar_interferometry_cudaf_interferometer1(int na, const float* ax,
-        const float* ay, const float* az, int ns, const float* l,
-        const float* m, const float* n, const float* eb, float ra0,
-        float dec0, float lst0, int nsdt, float sdt,
-        float lambda_bandwidth, float* vis, float* work);
+int oskar_cudad_interferometer1_scalar(
 
-/**
- * @brief
- *
- * @details
- *
- * Note that all pointers are device pointers, and must not be dereferenced
- * in host code.
- */
-DllExport
-int oskar_interferometry_cudad_interferometer1();
+        unsigned num_antennas,
+        const float* antenna_x,
+        const float* antenna_y,
+        const float* antenna_z,
+
+        unsigned num_sources,
+        const float* source_l,
+        const float* source_m,
+        const float* source_n,
+        const float* eb,
+
+        float ra0,
+        float dec0,
+        float lst0,
+
+        const unsigned nsdt,
+        float sdt,
+        float lambda_bandwidth,
+
+        float* vis,
+        float* work);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_H_
+#endif // OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_SCALAR_H_

@@ -1,4 +1,4 @@
-#include "sky/rotate_sources.h"
+#include "sky/oskar_rotate_sources.h"
 
 #include <cstring>
 #include <cmath>
@@ -7,7 +7,7 @@ using std::sin;
 using std::atan2;
 using std::sqrt;
 
-void rotate_sources_to_phase_centre(const unsigned num_sources,
+void oskar_rotate_sources_to_phase_centre(const unsigned num_sources,
         double * ra, double * dec, const double ra0, const double dec0)
 {
     // Construct the rotation matrix.
@@ -46,7 +46,7 @@ void rotate_sources_to_phase_centre(const unsigned num_sources,
 }
 
 
-void mult_matrix_vector(const double * M, double * v)
+void oskar_mult_matrix_vector(const double * M, double * v)
 {
     double s[3];
     s[0] = (M[0] * v[0]) + (M[1] * v[1]) + (M[2] * v[2]);
