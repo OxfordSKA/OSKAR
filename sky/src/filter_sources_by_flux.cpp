@@ -1,7 +1,7 @@
 #include "sky/filter_sources_by_flux.h"
 #include "sky/filter_sources_by_radius.h"
 
-#include "sky/LinkedSort.h"
+#include "sky/oskar_LinkedSort.h"
 
 #include <cstdlib>
 #include <cmath>

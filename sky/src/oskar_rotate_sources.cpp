@@ -38,7 +38,7 @@ void oskar_rotate_sources_to_phase_centre(const unsigned num_sources,
         s[1] = cos(dec[i]) * sin(ra[i]); // y
         s[2] = sin(dec[i]);              // z
 
-        mult_matrix_vector(rotation_matrix, s);
+        oskar_mult_matrix_vector(rotation_matrix, s);
 
         ra[i] = atan2( s[1], s[0] );
         dec[i] = atan2( s[2], sqrt(s[0] * s[0] + s[1] * s[1]) );

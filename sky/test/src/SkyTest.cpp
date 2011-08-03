@@ -28,10 +28,11 @@
 
 #include "sky/test/SkyTest.h"
 
-#include "sky/angles_from_lm.h"
+#include "sky/oskar_angles_from_lm.h"
+#include "sky/oskar_rotate_sources.h"
+
 #include "sky/filter_sources_by_radius.h"
 #include "sky/generate_random_sources.h"
-#include "sky/rotate_sources.h"
 
 #include <vector>
 #include <cstdlib>
@@ -148,7 +149,7 @@ void SkyTest::test_rotate()
             2, 1,  4
     };
     double v[3] = { 0, 1, 2 };
-    mult_matrix_vector(M, v);
+    oskar_mult_matrix_vector(M, v);
 
 //    cout << endl;
 //    cout << 0 << " " << v[0] << endl;
@@ -179,7 +180,7 @@ void SkyTest::test_rotate_sources()
 //        cout << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
 //    }
 
-    rotate_sources_to_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0);
+    oskar_rotate_sources_to_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0);
 
 //    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
 //    cout << "= After: " << endl;
@@ -212,7 +213,7 @@ void SkyTest::test_angles_from_lm()
     l[3] = sin(-1.5 * M_PI / 180.0);
     m[3] = 0.0;//sin(5.0 * M_PI / 180.0);
 
-    angles_from_lm(num_positions, ra0, dec0, &l[0], &m[0], &ra[0], &dec[0]);
+    oskar_angles_from_lm(num_positions, ra0, dec0, &l[0], &m[0], &ra[0], &dec[0]);
 
     cout << endl;
     for (unsigned i = 0; i < num_positions; ++i)
