@@ -6,6 +6,11 @@
 # ==== Plotting widgets sub-module.
 if (Qwt5_FOUND)
 
+    include_directories(${Qwt5_INCLUDE_DIR})
+    include_directories(${QT_INCLUDE_DIR})
+    include_directories(${QT_QTCORE_INCLUDE_DIR})
+    include_directories(${QT_QTGUI_INCLUDE_DIR})
+
     add_subdirectory(plotting)
 
     # ==== Concatenate source code for widget subfolders.
@@ -17,11 +22,6 @@ if (Qwt5_FOUND)
     endforeach ()
     qt4_wrap_cpp(widgets_SRC ${widgets_MOC_SRC})
 
-    # ==== Build the widgets library.
-    include_directories(${Qwt5_INCLUDE_DIR})
-    include_directories(${QT_INCLUDE_DIR})
-    include_directories(${QT_QTCORE_INCLUDE_DIR})
-    include_directories(${QT_QTGUI_INCLUDE_DIR})
 
     add_library(oskar_widgets SHARED ${widgets_SRC})
     target_link_libraries(oskar_widgets
