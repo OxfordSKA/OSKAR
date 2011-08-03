@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "beamforming/beamPattern.h"
+#include "beamforming/oskar_beamPattern.h"
 #include "math/oskar_math_phase.h"
 #include <cmath>
 #include <vector>
@@ -62,7 +62,7 @@ void _beamPattern(const int na, const float* ax, const float* ay,
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-void beamPattern(const int na, const float* ax, const float* ay,
+void oskar_beamPattern(const int na, const float* ax, const float* ay,
         const int ns, const float* slon, const float* slat,
         const float ba, const float be, const float k,
         float* image)

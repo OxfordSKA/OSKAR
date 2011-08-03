@@ -34,7 +34,7 @@
  */
 
 /// Computes a beam pattern using multi-threading.
-void beamPattern(const int na, const float* ax, const float* ay,
+void oskar_beamPattern(const int na, const float* ax, const float* ay,
         const int ns, const float* slon, const float* slat,
         const float ba, const float be, const float k,
         float* image);

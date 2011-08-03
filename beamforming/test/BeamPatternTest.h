@@ -61,4 +61,7 @@ class BeamPatternTest : public CppUnit::TestFixture
         void test_method();
 };
 
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(BeamPatternTest);
+
 #endif // BEAM_PATTERN_TEST_H
