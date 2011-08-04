@@ -1,4 +1,4 @@
-if (NOT DEPENDENCIES_FOUND)
+if (NOT CHECKED_DEPENDENCIES)
     message(FATAL_ERROR "Please include dependencies.cmake before this script!")
 endif ()
 
@@ -95,6 +95,18 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_21)
     endif ()
 endif (CUDA_FOUND)
+
+
+# === MATLAB mex functions.
+if (MATLAB_FOUND)
+    if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        set(MATLAB_MEXFILE_EXT mexmaci64)
+    else ()
+        set(MATLAB_MEXFILE_EXT mexa64)
+        set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread -fPIC")
+    endif ()
+    include_directories(${MATLAB_INCLUDE_DIR})
+endif ()
 
 
 # === Set some include directories at the project level.

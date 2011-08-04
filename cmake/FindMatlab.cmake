@@ -85,6 +85,11 @@ ELSE( WIN32 )
     PATHS
     ${MATLAB_ROOT}
     )
+  find_library(MATLAB_MAT_LIBRARY
+    mat
+    PATHS
+    ${MATLAB_ROOT}
+    )
   find_library(MATLAB_MX_LIBRARY
     mx
     PATHS
@@ -112,6 +117,7 @@ ENDIF(WIN32)
 # This is common to UNIX and Win32:
 SET(MATLAB_LIBRARIES
   ${MATLAB_MEX_LIBRARY}
+  ${MATLAB_MAT_LIBRARY}
   ${MATLAB_MX_LIBRARY}
   ${MATLAB_ENG_LIBRARY}
 )

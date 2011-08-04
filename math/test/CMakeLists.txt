@@ -28,7 +28,7 @@ endif()
 
 
 # ==== QtTest
-if (QT_QTTEST_FOUND)
+if (QT_QTTEST_FOUND AND BUILD_OSKAR_WIDGETS)
 
     include_directories(
         ${Qwt5_INCLUDE_DIR}

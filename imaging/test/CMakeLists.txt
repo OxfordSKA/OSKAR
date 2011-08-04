@@ -2,35 +2,32 @@
 # src/imaging/test/CMakeLists.txt
 #
 
-include_directories(
-    ${Qwt5_INCLUDE_DIR}
-    ${QT_INCLUDE_DIR}
-    ${QT_QTCORE_INCLUDE_DIR}
-    ${QT_QTGUI_INCLUDE_DIR}
-)
+if (CPPUNIT_FOUND AND BUILD_OSKAR_WIDGETS)
 
-# CppUnit
-set(imaging_test_SRC
-    src/CppUnitMain.cpp
-    src/ImagingTest.cpp
-)
+    include_directories(${Qwt5_INCLUDE_DIR})
+    include_directories(${QT_INCLUDE_DIR})
+    include_directories(${QT_QTCORE_INCLUDE_DIR})
+    include_directories(${QT_QTGUI_INCLUDE_DIR})
 
-add_executable(imagingTest ${imaging_test_SRC})
-target_link_libraries(imagingTest
-    oskar_imaging
-    oskar_widgets
-    ${QT_QTCORE_LIBRARY}
-    ${CPPUNIT_LIBRARIES}
-)
-
-
-
-# === QtTest unit testing.
-if (QT_QTTEST_FOUND)
-    # WProjConvFunc test.
-    qt4_wrap_cpp(WProjConvFunc_test_MOC
-        QTestWProjConvFunc.h
+    set(imaging_test_SRC
+        src/CppUnitMain.cpp
+        src/ImagingTest.cpp
     )
+
+    add_executable(imagingTest ${imaging_test_SRC})
+    target_link_libraries(imagingTest
+        oskar_imaging
+        oskar_widgets
+        ${QT_QTCORE_LIBRARY}
+        ${CPPUNIT_LIBRARIES}
+    )
+
+endif()
+
+
+if (QT_QTTEST_FOUND AND BUILD_OSKAR_WIDGETS)
+    # WProjConvFunc test.
+    qt4_wrap_cpp(WProjConvFunc_test_MOC QTestWProjConvFunc.h)
     add_executable(qtest_WProjConvFunc ${WProjConvFunc_test_MOC})
     target_link_libraries(qtest_WProjConvFunc
         oskar_imaging
@@ -40,9 +37,7 @@ if (QT_QTTEST_FOUND)
     )
 
     # ConvFunc test.
-    qt4_wrap_cpp(convFunc_test_MOC
-        QTestConvFunc.h
-    )
+    qt4_wrap_cpp(convFunc_test_MOC QTestConvFunc.h)
     add_executable(qtest_ConvFunc ${convFunc_test_MOC})
     target_link_libraries(qtest_ConvFunc
         oskar_imaging
@@ -52,9 +47,7 @@ if (QT_QTTEST_FOUND)
     )
 
     # Gridding test.
-    qt4_wrap_cpp(gridding_test_MOC
-        QTestGridding.h
-    )
+    qt4_wrap_cpp(gridding_test_MOC QTestGridding.h)
     add_executable(qtest_Gridder ${gridding_test_MOC})
     target_link_libraries(qtest_Gridder
         oskar_imaging
@@ -74,7 +67,6 @@ if (QT_QTTEST_FOUND)
         ${QT_QTTEST_LIBRARY}
         ${QT_QTGUI_LIBRARY}
     )
-
 endif ()
 
 

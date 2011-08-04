@@ -3,10 +3,8 @@
 #
 
 
-
-# CppUnit
-# ==============================================================================
 if (CPPUNIT_FOUND)
+
     include_directories(${CPPUNIT_INCLUDE_DIR})
 
     set(beamforming_test_SRC

@@ -44,28 +44,35 @@ extern "C" {
 
 #define SEC_PER_DAY 86400.0
 
-int oskar_cudad_interferometer1(
-        unsigned num_antennas,
-        const float* antenna_x,
-        const float* antenna_y,
-        const float* antenna_z,
+int oskar_cudad_interferometer1_scalar(
 
-        unsigned num_sources,
-        const float* source_l,
-        const float* source_m,
-        const float* source_n,
-        const float* eb,
+        const unsigned * num_antennas,
+        const float * antenna_x, // FIXME: mmm better way to represent this
+        const float * antenna_z, // === make sure it links to matlab.
+        const float * antenna_y,
 
-        float ra0,
-        float dec0,
-        float lst0,
+        const unsigned num_stations,
+        const float * station_x,
+        const float * station_y,
+        const float * station_z,
 
+        const unsigned num_sources,
+        const float * source_l,
+        const float * source_m,
+        const float * source_n,
+        const float * eb,
+
+        const float ra0,
+        const float dec0,
+
+        const float start_date_utc,
         const unsigned nsdt,
-        float sdt,
-        float lambda_bandwidth,
+        const float sdt,
 
-        float* vis,
-        float* work)
+        const float lambda_bandwidth,
+
+        float * vis,
+        float * work)
 {
     cudaError_t cuda_error = cudaSuccess;
 
@@ -83,20 +90,31 @@ int oskar_cudad_interferometer1(
     for (int j = 0; j < num_vis_snapshots; ++j)
     {
         // 5. Evaluate LST from UTC.
-
+        // TODO
 
         // 6. Loop over evaluations of the visibility average with changing E-Jones
         // within the dump
         for (int i = 0; i < num_vis_averages; ++i)
-        // 6. Find sources above horizon.
+        {
+            // 6. Find sources above horizon.
+            // TODO
 
-        // 7. Evaluate E-Jones for each source position per station.
+            // 7. Evaluate E-Jones for each source position per station.
+            // TODO: optimisation if all stations are the same?
+            //for each station
+            //      oskar_cudad_bp2hc() <=== move this to beamforming folder.
 
-        // 8.
+            // 8. Correlator which updates phase matrix.
+            // TODO
+            // oskar_cudad_correlator_sclar()
 
+            // 9. Accumulate visibilities.
+            // TODO
+        }
 
+        // 10. Dump a new set of visibilities including baseline coordinates.
+        // TODO
     }
-
 
 
     return cuda_error;

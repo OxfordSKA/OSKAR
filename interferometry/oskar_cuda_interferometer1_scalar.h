@@ -65,27 +65,33 @@ extern "C" {
 DllExport
 int oskar_cudad_interferometer1_scalar(
 
-        unsigned num_antennas,
-        const float* antenna_x,
-        const float* antenna_y,
-        const float* antenna_z,
+        const unsigned * num_antennas,
+        const float * antenna_x,
+        const float * antenna_z,
+        const float * antenna_y,
 
-        unsigned num_sources,
-        const float* source_l,
-        const float* source_m,
-        const float* source_n,
-        const float* eb,
+        const unsigned num_stations,
+        const float * station_x,
+        const float * station_y,
+        const float * station_z,
 
-        float ra0,
-        float dec0,
-        float lst0,
+        const unsigned num_sources,
+        const float * source_l,
+        const float * source_m,
+        const float * source_n,
+        const float * eb,
 
+        const float ra0,
+        const float dec0,
+
+        const float start_date_utc,
         const unsigned nsdt,
-        float sdt,
-        float lambda_bandwidth,
+        const float sdt,
 
-        float* vis,
-        float* work);
+        const float lambda_bandwidth,
+
+        float * vis,
+        float * work);
 
 
 #ifdef __cplusplus

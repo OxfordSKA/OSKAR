@@ -2,8 +2,6 @@
 # src/interferometry/test/CMakeLists.txt
 #
 
-# CppUnit
-# ==============================================================================
 if (CPPUNIT_FOUND)
 
     set(modules_cuda_test_SRC
@@ -15,5 +13,7 @@ if (CPPUNIT_FOUND)
     add_executable(modulesCudaTest ${modules_cuda_test_SRC})
     target_link_libraries(modulesCudaTest
         oskar
-        ${CPPUNIT_LIBRARIES})
+        ${CPPUNIT_LIBRARIES}
+    )
+
 endif()

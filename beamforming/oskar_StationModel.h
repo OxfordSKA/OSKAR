@@ -26,33 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_H_
-#define OSKAR_SKY_Model_H_
+#ifndef OSKAR_STATION_MODEL_H_
+#define OSKAR_STATION_MODEL_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_SkyModel
+struct oskar_StationModel
 {
-    unsigned num_sources;
+    unsigned num_antennas;
 
-    // Global sky model.
-    float * RA;
-    float * Dec;
-    float * I;
-    float * Q;
-    float * U;
-    float * V;
-
-    // Local Sky model.
-    float * hor_l;
-    float * hor_m;
-    float * hor_n;
+    double * antenna_x;
+    double * antenna_y;
+    double * antenna_z;
 };
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_SKY_MODEL_H_
+#endif // OSKAR_STATION_MODEL_H_

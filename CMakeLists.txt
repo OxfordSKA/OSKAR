@@ -30,61 +30,81 @@ if (NOT OSKAR_MATLAB_INSTALL_DIR)
     set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
 endif()
 
-# ==== Set dependencies.
-include(dependencies)
+# ==== Defaults as to which libraries are build.
+if (NOT DEFINED BUILD_OSKAR)
+    set(BUILD_OSKAR TRUE)
+endif ()
 
-# ==== Set compiler options.
+if (NOT DEFINED BUILD_OSKAR_MS)
+    set(BUILD_OSKAR_MS TRUE)
+endif ()
+
+if (NOT DEFINED BUILD_OSKAR_IMAGING)
+    set(BUILD_OSKAR_IMAGING TRUE)
+endif ()
+
+if (NOT DEFINED BUILD_OSKAR_WIDGETS)
+    set(BUILD_OSKAR_WIDGETS TRUE)
+endif ()
+
+# ==== Set dependencies and compiler options.
+include(dependencies)
 include(compilerOptions)
 
-# ==== Recurse into sub-diretories.
-add_subdirectory(beamforming)
-add_subdirectory(cuda)
-add_subdirectory(imaging)
-add_subdirectory(interferometry)
-add_subdirectory(math)
-add_subdirectory(ms)
-add_subdirectory(sky)
-add_subdirectory(utility)
-add_subdirectory(widgets)
-
 # ==== Build single oskar library.
-foreach (file ${beamforming_SRC})
-    list(APPEND oskar_SRC beamforming/${file})
-endforeach ()
-foreach (file ${cuda_SRC})
-    list(APPEND oskar_SRC cuda/${file})
-endforeach ()
-foreach (file ${interferometry_SRC})
-    list(APPEND oskar_SRC interferometry/${file})
-endforeach ()
-foreach (file ${math_SRC})
-    list(APPEND oskar_SRC math/${file})
-endforeach ()
-foreach (file ${sky_SRC})
-    list(APPEND oskar_SRC sky/${file})
-endforeach ()
-foreach (file ${utility_SRC})
-    list(APPEND oskar_SRC utility/${file})
-endforeach ()
+if (BUILD_OSKAR)
+    add_subdirectory(beamforming)
+    add_subdirectory(cuda)
+    add_subdirectory(interferometry)
+    add_subdirectory(math)
+    add_subdirectory(sky)
+    add_subdirectory(utility)
+    foreach (file ${beamforming_SRC})
+        list(APPEND oskar_SRC beamforming/${file})
+    endforeach ()
+    foreach (file ${cuda_SRC})
+        list(APPEND oskar_SRC cuda/${file})
+    endforeach ()
+    foreach (file ${interferometry_SRC})
+        list(APPEND oskar_SRC interferometry/${file})
+    endforeach ()
+    foreach (file ${math_SRC})
+        list(APPEND oskar_SRC math/${file})
+    endforeach ()
+    foreach (file ${sky_SRC})
+        list(APPEND oskar_SRC sky/${file})
+    endforeach ()
+    foreach (file ${utility_SRC})
+        list(APPEND oskar_SRC utility/${file})
+    endforeach ()
 
-include_directories(${oskar-lib_SOURCE_DIR}/beamforming)
-include_directories(${oskar-lib_SOURCE_DIR}/cuda)
-include_directories(${oskar-lib_SOURCE_DIR}/interferometry)
-include_directories(${oskar-lib_SOURCE_DIR}/math)
-include_directories(${oskar-lib_SOURCE_DIR}/sky)
-include_directories(${oskar-lib_SOURCE_DIR}/utility)
+    set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar.dir/src)
+    cuda_add_library(oskar ${oskar_SRC})
+    set_target_properties(oskar PROPERTIES
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+    target_link_libraries(oskar ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
+    set_target_properties(oskar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+    install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    set_target_properties(oskar PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
+    cuda_build_clean_target()
+endif (BUILD_OSKAR)
 
-set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar.dir/src)
-cuda_add_library(oskar ${oskar_SRC})
-set_target_properties(oskar PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-target_link_libraries(oskar ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
-set_target_properties(oskar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-set_target_properties(oskar PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
-cuda_build_clean_target()
 
+# ==== Build other oskar libraries.
+if (BUILD_OSKAR_IMAGING)
+    add_subdirectory(imaging)
+endif ()
+if (BUILD_OSKAR_MS)
+    add_subdirectory(ms)
+endif ()
+if (BUILD_OSKAR_WIDGETS)
+    add_subdirectory(widgets)
+endif ()
+
+
+
+# ==== Install header tree.
 install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
     DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
     FILES_MATCHING PATTERN "*.h"
@@ -93,6 +113,15 @@ install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
     PATTERN "matlab" EXCLUDE
     PATTERN "python" EXCLUDE
     PATTERN ".svn" EXCLUDE)
+
+
+
+
+
+
+
+
+
 
 
 
