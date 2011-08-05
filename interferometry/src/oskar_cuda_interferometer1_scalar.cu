@@ -31,12 +31,12 @@
 
 #include "math/cudak/oskar_math_cudak_dftw_3d_seq_out.h"
 #include "math/cudak/oskar_math_cudak_mat_mul_cc.h"
+
 #include "interferometry/cudak/oskar_cudak_correlator.h"
 #include "interferometry/cudak/oskar_cudak_xyz2uvw.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstdio>
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -44,46 +44,74 @@ extern "C" {
 
 #define SEC_PER_DAY 86400.0
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+//------------------------------------------------------------------------------
+void oskar_cudad_copy_telescope_to_gpu(const struct TelescopeModel * h_telescope,
+        struct TelescopeModel * d_telescope);
+
+void oskar_cudad_copy_stations_to_gpu(const struct StationModel * h_stations,
+        const unsigned num_stations, struct StationModel * d_stations);
+
+void oskar_cudad_copy_sky_to_gpu(const struct SkyModel * h_sky,
+        struct SkyModel * d_sky);
+//------------------------------------------------------------------------------
+
+
+
 int oskar_cudad_interferometer1_scalar(
 
-        const unsigned * num_antennas,
-        const float * antenna_x, // FIXME: mmm better way to represent this
-        const float * antenna_z, // === make sure it links to matlab.
-        const float * antenna_y,
+        const struct TelescopeModel telescope, // NOTE: In ITRS coordinates
 
-        const unsigned num_stations,
-        const float * station_x,
-        const float * station_y,
-        const float * station_z,
+        const struct StationModel * stations,
 
-        const unsigned num_sources,
-        const float * source_l,
-        const float * source_m,
-        const float * source_n,
-        const float * eb,
+        const struct SkyModel sky,
 
-        const float ra0,
-        const float dec0,
+        const double ra0_rads,
+        const double dec0_rads,
 
-        const float start_date_utc,
+        const double start_date_utc,
         const unsigned nsdt,
-        const float sdt,
+        const double sdt,
 
-        const float lambda_bandwidth,
+        const double lambda_bandwidth,
 
-        float * vis,
-        float * work)
-{
+        double * vis // FIXME float2?
+){
     cudaError_t cuda_error = cudaSuccess;
 
-    // 1. Allocate GPU memory for antennas and transfer to the device.
-    // TODO
+    // === Evaluate number of stations and number of baselines.
+    const unsigned num_stations = telescope.num_antennas;
+    const unsigned num_baselines = num_stations * (num_stations - 1) / 2;
 
-    // 2. Allocate GPU memory for stations and transfer to device.
-    // TODO
+    // === Allocate device memory for telescope and transfer to device.
+    struct TelescopeModel d_telescope;
+    oskar_cudad_copy_telescope_to_gpu(&telescope, &d_telescope);
 
-    // 3. Allocate GPU memory for source model and transfer to device.
-    // TODO
+    // === Allocate device memory for antennas and transfer to the device.
+    size_t mem_size = num_stations * sizeof(StationModel);
+    struct StationModel * d_stations = (StationModel*)malloc(mem_size);
+    oskar_cudad_copy_stations_to_gpu(stations, num_stations, d_stations);
+
+    // === Allocate device memory for source model and transfer to device.
+    struct SkyModel d_sky;
+    oskar_cudad_copy_sky_to_gpu(&sky, &d_sky);
+
+
+
+
+
+
+
+
+
+    // TODO: Transform the station positions to the local equatorial system.
+    //[X, Y, Z] = horizon_plane_to_itrs(Xh, Yh, lat);
+
+    int num_vis_snapshots = 0;
+    int num_vis_averages = 0;
 
 
     // 4. Loop over number of visibility snapshots.
@@ -117,9 +145,57 @@ int oskar_cudad_interferometer1_scalar(
     }
 
 
-    return cuda_error;
+    return (int)cuda_error;
 }
 
+
+
+
+void oskar_cudad_copy_telescope_to_gpu(const struct TelescopeModel * h_telescope,
+        struct TelescopeModel * d_telescope)
+{
+    size_t mem_size = h_telescope->num_antennas * sizeof(double);
+
+    d_telescope->num_antennas = h_telescope->num_antennas;
+
+    cudaMalloc((void**)&(d_telescope->antenna_x), mem_size);
+    cudaMalloc((void**)&(d_telescope->antenna_y), mem_size);
+    cudaMalloc((void**)&(d_telescope->antenna_z), mem_size);
+
+    cudaMemcpy(d_telescope->antenna_x, h_telescope->antenna_x, mem_size,
+            cudaMemcpyHostToDevice);
+    cudaMemcpy(d_telescope->antenna_y, h_telescope->antenna_y, mem_size,
+            cudaMemcpyHostToDevice);
+    cudaMemcpy(d_telescope->antenna_z, h_telescope->antenna_z, mem_size,
+            cudaMemcpyHostToDevice);
+}
+
+
+void oskar_cudad_copy_stations_to_gpu(const struct StationModel * h_stations,
+        const unsigned num_stations, struct StationModel * d_stations)
+{
+    // Allocate and copy memory for each station.
+    for (unsigned i = 0; i < num_stations; ++i)
+    {
+        d_stations[i].num_antennas = h_stations[i].num_antennas;
+
+        size_t mem_size = d_stations[i].num_antennas * sizeof(double);
+        cudaMalloc((void**)&(d_stations[i].antenna_x), mem_size);
+        cudaMalloc((void**)&(d_stations[i].antenna_y), mem_size);
+
+        cudaMemcpy(d_stations[i].antenna_x, h_stations[i].antenna_x, mem_size,
+                cudaMemcpyHostToDevice);
+        cudaMemcpy(d_stations[i].antenna_y, h_stations[i].antenna_y, mem_size,
+                cudaMemcpyHostToDevice);
+    }
+}
+
+
+void oskar_cudad_copy_sky_to_gpu(const struct SkyModel * h_sky,
+        struct SkyModel * d_sky)
+{
+    // TODO: work out what needs to be in here...
+}
 
 
 #ifdef __cplusplus

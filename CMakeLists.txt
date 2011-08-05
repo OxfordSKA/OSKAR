@@ -32,19 +32,19 @@ endif()
 
 # ==== Defaults as to which libraries are build.
 if (NOT DEFINED BUILD_OSKAR)
-    set(BUILD_OSKAR TRUE)
+    set(BUILD_OSKAR ON)
 endif ()
 
 if (NOT DEFINED BUILD_OSKAR_MS)
-    set(BUILD_OSKAR_MS TRUE)
+    set(BUILD_OSKAR_MS OFF)
 endif ()
 
 if (NOT DEFINED BUILD_OSKAR_IMAGING)
-    set(BUILD_OSKAR_IMAGING TRUE)
+    set(BUILD_OSKAR_IMAGING OFF)
 endif ()
 
 if (NOT DEFINED BUILD_OSKAR_WIDGETS)
-    set(BUILD_OSKAR_WIDGETS TRUE)
+    set(BUILD_OSKAR_WIDGETS OFF)
 endif ()
 
 # ==== Set dependencies and compiler options.

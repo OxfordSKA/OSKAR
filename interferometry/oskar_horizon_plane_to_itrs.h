@@ -26,25 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#ifndef OSKAR_HORIZON_PLANE_TO_ITRS_H_
+#define OSKAR_HORIZON_PLANE_TO_ITRS_H_
+
+/**
+ * @file oskar_horizon_plane_to_itrs.h
+ */
+
+#include "oskar_windows.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct StationModel
-{
-    unsigned num_antennas;
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z; // NOTE: not currently used!
-};
+/**
+ * @brief
+ *
+ * @details
+ */
+DllExport
+void oskar_horizon_plane_to_itrs(const unsigned num_antennas,
+        const double * x_horizon, const double * y_horizon,
+        const double latitude, double * x, double * y, double * z);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_H_
+
+#endif // OSKAR_HORIZON_PLANE_TO_ITRS_H_

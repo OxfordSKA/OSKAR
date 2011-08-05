@@ -35,6 +35,10 @@
 
 #include "oskar_windows.h"
 
+#include "sky/oskar_SkyModel.h"
+#include "beamforming/oskar_StationModel.h"
+#include "interferometry/oskar_TelescopeModel.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -65,33 +69,22 @@ extern "C" {
 DllExport
 int oskar_cudad_interferometer1_scalar(
 
-        const unsigned * num_antennas,
-        const float * antenna_x,
-        const float * antenna_z,
-        const float * antenna_y,
+        const struct TelescopeModel telescope,
 
-        const unsigned num_stations,
-        const float * station_x,
-        const float * station_y,
-        const float * station_z,
+        const struct StationModel * stations,
 
-        const unsigned num_sources,
-        const float * source_l,
-        const float * source_m,
-        const float * source_n,
-        const float * eb,
+        const struct SkyModel sky,
 
-        const float ra0,
-        const float dec0,
+        const double ra0_rads,
+        const double dec0_rads,
 
-        const float start_date_utc,
+        const double start_date_utc,
         const unsigned nsdt,
-        const float sdt,
+        const double sdt,
 
-        const float lambda_bandwidth,
+        const double lambda_bandwidth,
 
-        float * vis,
-        float * work);
+        double * vis);
 
 
 #ifdef __cplusplus

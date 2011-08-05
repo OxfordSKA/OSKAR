@@ -27,13 +27,13 @@
  */
 
 #ifndef OSKAR_SKY_MODEL_H_
-#define OSKAR_SKY_Model_H_
+#define OSKAR_SKY_MODEL_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_SkyModel
+struct SkyModel
 {
     unsigned num_sources;
 
@@ -44,6 +44,7 @@ struct oskar_SkyModel
     double * Q;
     double * U;
     double * V;
+    double * brightness; // FIXME <--- vector form...
 
     // Local Sky model.
     double * hor_l;

@@ -26,25 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#include "interferometry/oskar_horizon_plane_to_itrs.h"
+
+#include <cmath>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct StationModel
+void oskar_horizon_plane_to_itrs(const unsigned num_antennas,
+        const double * x_horizon, const double * y_horizon,
+        const double latitude, double * x, double * y, double * z)
 {
-    unsigned num_antennas;
+    const double sinLat = sin(latitude);
+    const double cosLat = cos(latitude);
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z; // NOTE: not currently used!
-};
-
+    for (unsigned i = 0; i < num_antennas; ++i)
+    {
+        x[i] = -y_horizon[i] * sinLat;
+        y[i] =  x_horizon[i];
+        z[i] =  y_horizon[i] * cosLat;
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // OSKAR_STATION_MODEL_H_

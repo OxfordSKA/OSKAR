@@ -14,6 +14,8 @@ set(interferometry_SRC
     src/oskar_cuda_correlator_lm_bw.cu
     src/oskar_cuda_correlator_scalar.cu
     #src/oskar_cuda_interferometer1.cu
+    src/oskar_cuda_interferometer1_scalar.cu
+    src/oskar_horizon_plane_to_itrs.cpp
     src/oskar_xyz2uvw.c
 )
 set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)

@@ -26,20 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#ifndef OSKAR_TELESCOPEMODEL_H_
+#define OSKAR_TELESCOPEMODEL_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct StationModel
+struct TelescopeModel
 {
     unsigned num_antennas;
 
     double * antenna_x;
     double * antenna_y;
-    double * antenna_z; // NOTE: not currently used!
+    double * antenna_z; // NOTE: currently not used.
 };
 
 
@@ -47,4 +47,5 @@ struct StationModel
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_H_
+
+#endif // OSKAR_TELESCOPEMODEL_H_
