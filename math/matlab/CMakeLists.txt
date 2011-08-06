@@ -5,8 +5,13 @@
 # ==== Matlab mex funtions
 if (MATLAB_FOUND)
 
+    #message("======== ${CUDA_INCLUDE_DIRS}")
+    include_directories(${CUDA_INCLUDE_DIRS})
+  
     # ==== Broken power law.
-    add_library(oskar_random_bpl SHARED oskar_random_bpl.cpp mexFunction.def)
+    cuda_add_library(oskar_random_bpl SHARED oskar_random_bpl.cpp mexFunction.def)
+    #message("========== ${MATLAB_LIBRARIES}")
+    #message("========== ${MATLAB_CXX_FLAGS}")
     target_link_libraries(oskar_random_bpl oskar ${MATLAB_LIBRARIES})
     set_target_properties(oskar_random_bpl PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}"
@@ -16,7 +21,7 @@ if (MATLAB_FOUND)
     install(TARGETS oskar_random_bpl DESTINATION ${OSKAR_MATLAB_INSTALL_DIR})
 
     # ==== Spherical positions.
-    add_library(oskar_spherical_positions SHARED oskar_spherical_positions.cpp
+    cuda_add_library(oskar_spherical_positions SHARED oskar_spherical_positions.cpp
         mexFunction.def)
     target_link_libraries(oskar_spherical_positions oskar ${MATLAB_LIBRARIES})
     set_target_properties(oskar_spherical_positions PROPERTIES

@@ -69,6 +69,7 @@ ELSE( WIN32 )
   ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
     # AMD64:
     SET(MATLAB_ROOT
+      /Applications/MATLAB_R2011a.app/bin/maci64
       $ENV{MATLAB_ROOT}/bin/glnxa64/
       /usr/local/MATLAB/R2011a/bin/glnxa64/
       /usr/local/matlab/bin/glnxa64/
@@ -103,6 +104,7 @@ ELSE( WIN32 )
   find_path(MATLAB_INCLUDE_DIR
     "mex.h"
     PATHS
+    /Applications/MATLAB_R2011a.app/extern/include/
     $ENV{MATLAB_ROOT}/extern/include/
     /usr/local/MATLAB/R2011a/extern/include
     /usr/local/matlab/extern/include/
