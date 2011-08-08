@@ -54,7 +54,7 @@ DllExport
 int oskar_interferometer1_scalar_d(
         const oskar_TelescopeModel telescope, // NOTE: In ITRS coordinates
         const oskar_StationModel * stations,
-        const oskar_SkyModel sky,
+        const oskar_SkyModelGlobal_d sky,
         const double ra0_rad,
         const double dec0_rad,
         const double start_mjd_utc,

@@ -33,24 +33,59 @@
 extern "C" {
 #endif
 
-struct oskar_SkyModel
+struct oskar_SkyModelGlobal_f
 {
-    unsigned num_sources;
-
-    // Global sky model.
-    double * RA;
-    double * Dec;
-    double * I;
-    double * Q;
-    double * U;
-    double * V;
-
-    // Local Sky model.
-    double * hor_l;
-    double * hor_m;
-    double * hor_n;
+    int num_sources;
+    float* RA;              ///< The source Right Ascensions in radians.
+    float* Dec;             ///< The source Declinations in radians.
+    float* I;               ///< The source Stokes I values.
+    float* Q;               ///< The source Stokes Q values.
+    float* U;               ///< The source Stokes U values.
+    float* V;               ///< The source Stokes V values.
 };
-typedef struct oskar_SkyModel oskar_SkyModel;
+typedef struct oskar_SkyModelGlobal_f oskar_SkyModelGlobal_f;
+
+struct oskar_SkyModelLocal_f
+{
+    int num_sources;
+    float* RA;              ///< The source Right Ascensions in radians.
+    float* Dec;             ///< The source Declinations in radians.
+    float* I;               ///< The source Stokes I values.
+    float* Q;               ///< The source Stokes Q values.
+    float* U;               ///< The source Stokes U values.
+    float* V;               ///< The source Stokes V values.
+    float* hor_l;           ///< The source horizontal l-direction-cosines.
+    float* hor_m;           ///< The source horizontal m-direction-cosines.
+    float* hor_n;           ///< The source horizontal n-direction-cosines.
+};
+typedef struct oskar_SkyModelLocal_f oskar_SkyModelLocal_f;
+
+struct oskar_SkyModelGlobal_d
+{
+    int num_sources;
+    double* RA;              ///< The source Right Ascensions in radians.
+    double* Dec;             ///< The source Declinations in radians.
+    double* I;               ///< The source Stokes I values.
+    double* Q;               ///< The source Stokes Q values.
+    double* U;               ///< The source Stokes U values.
+    double* V;               ///< The source Stokes V values.
+};
+typedef struct oskar_SkyModelGlobal_d oskar_SkyModelGlobal_d;
+
+struct oskar_SkyModelLocal_d
+{
+    int num_sources;
+    double* RA;              ///< The source Right Ascensions in radians.
+    double* Dec;             ///< The source Declinations in radians.
+    double* I;               ///< The source Stokes I values.
+    double* Q;               ///< The source Stokes Q values.
+    double* U;               ///< The source Stokes U values.
+    double* V;               ///< The source Stokes V values.
+    double* hor_l;           ///< The source horizontal l-direction-cosines.
+    double* hor_m;           ///< The source horizontal m-direction-cosines.
+    double* hor_n;           ///< The source horizontal n-direction-cosines.
+};
+typedef struct oskar_SkyModelLocal_d oskar_SkyModelLocal_d;
 
 #ifdef __cplusplus
 }

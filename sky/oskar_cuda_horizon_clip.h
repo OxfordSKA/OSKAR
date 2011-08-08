@@ -33,6 +33,7 @@
  * @file oskar_cuda_horizon_clip.h
  */
 
+#include "sky/oskar_SkyModel.h"
 #include "oskar_windows.h"
 
 #ifdef __cplusplus
@@ -48,37 +49,14 @@ extern "C" {
  * arrays containing the source coordinates and brightnesses for those
  * sources.
  *
- * All arrays (including the output arrays) should be of length n_in, but
- * the number of sources above the horizon is returned in n_out, and only the
- * first n_out elements of the output arrays should be used.
- *
- * @param[in] n_in     The number of input sources in the sky model.
- * @param[in] in_I     The input source Stokes I values.
- * @param[in] in_Q     The input source Stokes Q values.
- * @param[in] in_U     The input source Stokes U values.
- * @param[in] in_V     The input source Stokes V values.
- * @param[in] in_ra    The input source Right Ascensions in radians.
- * @param[in] in_dec   The input source Declinations in radians.
+ * @param[in] global   The input global sky model.
  * @param[in] lst      The current local sidereal time in radians.
  * @param[in] lat      The geographic latitude of the observer.
- * @param[out] n_out   The number of sources above the horizon.
- * @param[out] out_I   The output source Stokes I values.
- * @param[out] out_Q   The output source Stokes Q values.
- * @param[out] out_U   The output source Stokes U values.
- * @param[out] out_V   The output source Stokes V values.
- * @param[out] out_ra  The input source Right Ascensions in radians.
- * @param[out] out_dec The input source Declinations in radians.
- * @param[out] hor_l   The source l-direction-cosines in the horizontal system.
- * @param[out] hor_m   The source m-direction-cosines in the horizontal system.
- * @param[out] hor_n   The source n-direction-cosines in the horizontal system.
+ * @param[out] local   The output local sky model.
  */
 DllExport
-int oskar_cuda_horizon_clip_f(int n_in, const float* in_I,
-        const float* in_Q, const float* in_U, const float* in_V,
-        const float* in_ra, const float* in_dec, float lst, float lat,
-        int* n_out, float* out_I, float* out_Q, float* out_U, float* out_V,
-        float* out_ra, float* out_dec, float* hor_l, float* hor_m,
-        float* hor_n);
+int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* global, float lst,
+        float lat, oskar_SkyModelLocal_f* local);
 
 /**
  * @brief
@@ -89,37 +67,14 @@ int oskar_cuda_horizon_clip_f(int n_in, const float* in_I,
  * arrays containing the source coordinates and brightnesses for those
  * sources.
  *
- * All arrays (including the output arrays) should be of length n_in, but
- * the number of sources above the horizon is returned in n_out, and only the
- * first n_out elements of the output arrays should be used.
- *
- * @param[in] n_in     The number of input sources in the sky model.
- * @param[in] in_I     The input source Stokes I values.
- * @param[in] in_Q     The input source Stokes Q values.
- * @param[in] in_U     The input source Stokes U values.
- * @param[in] in_V     The input source Stokes V values.
- * @param[in] in_ra    The input source Right Ascensions in radians.
- * @param[in] in_dec   The input source Declinations in radians.
+ * @param[in] global   The input global sky model.
  * @param[in] lst      The current local sidereal time in radians.
  * @param[in] lat      The geographic latitude of the observer.
- * @param[out] n_out   The number of sources above the horizon.
- * @param[out] out_I   The output source Stokes I values.
- * @param[out] out_Q   The output source Stokes Q values.
- * @param[out] out_U   The output source Stokes U values.
- * @param[out] out_V   The output source Stokes V values.
- * @param[out] out_ra  The input source Right Ascensions in radians.
- * @param[out] out_dec The input source Declinations in radians.
- * @param[out] hor_l   The source l-direction-cosines in the horizontal system.
- * @param[out] hor_m   The source m-direction-cosines in the horizontal system.
- * @param[out] hor_n   The source n-direction-cosines in the horizontal system.
+ * @param[out] local   The output local sky model.
  */
 DllExport
-int oskar_cuda_horizon_clip_d(int n_in, const double* in_I,
-        const double* in_Q, const double* in_U, const double* in_V,
-        const double* in_ra, const double* in_dec, double lst, double lat,
-        int* n_out, double* out_I, double* out_Q, double* out_U, double* out_V,
-        double* out_ra, double* out_dec, double* hor_l, double* hor_m,
-        double* hor_n);
+int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* global, double lst,
+        double lat, oskar_SkyModelLocal_d* local);
 
 #ifdef __cplusplus
 }

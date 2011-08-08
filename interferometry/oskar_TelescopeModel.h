@@ -36,16 +36,16 @@ extern "C" {
 struct oskar_TelescopeModel
 {
     unsigned num_antennas;
-
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z; // NOTE: currently not used.
+    double* antenna_x;
+    double* antenna_y;
+    double* antenna_z;
+    double longitude;
+    double latitude;
 };
 typedef struct oskar_TelescopeModel oskar_TelescopeModel;
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif // OSKAR_TELESCOPEMODEL_H_
