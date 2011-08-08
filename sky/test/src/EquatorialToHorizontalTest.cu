@@ -28,10 +28,10 @@
 
 #include "sky/test/EquatorialToHorizontalTest.h"
 
-#include "sky/oskar_sky_icrs_to_hor_fast_inline.h"
-#include "sky/oskar_sky_date_time_to_mjd.h"
-#include "sky/oskar_sky_mjd_to_last_fast.h"
-#include "sky/oskar_sky_cuda_ra_dec_to_az_el.h"
+#include "sky/oskar_icrs_to_hor_fast_inline.h"
+#include "sky/oskar_date_time_to_mjd.h"
+#include "sky/oskar_mjd_to_last_fast.h"
+#include "sky/oskar_cuda_ra_dec_to_az_el.h"
 #include <cmath>
 #include <cstdio>
 
@@ -64,7 +64,7 @@ void EquatorialToHorizontalTest::test()
 
     // Set time-dependent celestial parameter data.
     CelestialData cel;
-    double mjdUt1 = oskar_skyd_date_time_to_mjd(2018, 9, 12, 1.5/24);
+    double mjdUt1 = oskar_date_time_to_mjd_d(2018, 9, 12, 1.5/24);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(58373.0625, mjdUt1, 1e-4);
     oskar_skyd_set_celestial_parameters_inline(&cel, longitude, mjdUt1);
 
@@ -72,7 +72,7 @@ void EquatorialToHorizontalTest::test()
     double ra = 60.9 * M_PI / 180.0;   //  04h 03m 36s
     double dec = -34.8 * M_PI / 180.0; // -34d 48' 00''
     double a, e;
-    oskar_skyd_icrs_to_hor_fast_inline(&cel, cosLat, sinLat, 0.0, ra, dec,
+    oskar_icrs_to_hor_fast_inline_d(&cel, cosLat, sinLat, 0.0, ra, dec,
             &a, &e);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(104.53, a * 180.0 / M_PI, 0.01);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(67.69,  e * 180.0 / M_PI, 0.01);
@@ -89,11 +89,11 @@ void EquatorialToHorizontalTest::test_last()
     double longitude = 21.0 * M_PI / 180.0;
 
     // Get MJD(UT1).
-    double mjdUt1 = oskar_skyd_date_time_to_mjd(2018, 9, 12, 1.5/24);
+    double mjdUt1 = oskar_date_time_to_mjd_d(2018, 9, 12, 1.5/24);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(58373.0625, mjdUt1, 1e-4);
 
     // Get Local Apparent Sidereal Time.
-    double last = oskar_skyd_mjd_to_last_fast(mjdUt1, longitude);
+    double last = oskar_mjd_to_last_fast_d(mjdUt1, longitude);
 
     // Convert.
     double ra = 60.9 * M_PI / 180.0;   //  04h 03m 36s
@@ -111,10 +111,10 @@ void EquatorialToHorizontalTest::test_last()
     cudaMemcpy(d_ra, &ra, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_dec, &dec, sizeof(double), cudaMemcpyHostToDevice);
 
-    int ecode = oskar_sky_cudad_ra_dec_to_az_el(1, d_ra, d_dec, last, latitude,
+    int ecode = oskar_cuda_ra_dec_to_az_el_d(1, d_ra, d_dec, last, latitude,
             d_az, d_el, d_work);
     if (ecode)
-    	CPPUNIT_FAIL("CUDA Error");
+        CPPUNIT_FAIL("CUDA Error");
 
     // Copy output coordinates to host.
     double a, e;

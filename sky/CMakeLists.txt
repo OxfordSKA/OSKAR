@@ -12,16 +12,15 @@ set(sky_SRC
     src/filter_sources_by_flux.cpp
     src/filter_sources_by_radius.cpp
     src/generate_random_sources.cpp
-    src/oskar_sky_cuda_horizon_clip.cu
-    src/oskar_sky_cuda_ra_dec_to_az_el.cu
-    src/oskar_sky_cuda_ra_dec_to_hor_lmn.cu
-    src/oskar_sky_cuda_ra_dec_to_relative_lmn.cu
-    src/oskar_sky_date_time_to_mjd.cpp
-    src/oskar_sky_equation_of_equinoxes_fast.cpp
-    src/oskar_sky_mjd_to_gmst.cpp
-    src/oskar_sky_mjd_to_last_fast.cpp
-    src/oskar_sky_mjd_to_lmst.cpp
-
+    src/oskar_cuda_horizon_clip.cu
+    src/oskar_cuda_ra_dec_to_az_el.cu
+    src/oskar_cuda_ra_dec_to_hor_lmn.cu
+    src/oskar_cuda_ra_dec_to_relative_lmn.cu
+    src/oskar_date_time_to_mjd.cpp
+    src/oskar_equation_of_equinoxes_fast.cpp
+    src/oskar_mjd_to_gmst.cpp
+    src/oskar_mjd_to_last_fast.cpp
+    src/oskar_mjd_to_lmst.cpp
 )
 
 # ==== Add the CUDA kernels.
