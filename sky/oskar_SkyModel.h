@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-struct SkyModel
+struct oskar_SkyModel
 {
     unsigned num_sources;
 
@@ -50,6 +50,7 @@ struct SkyModel
     double * hor_m;
     double * hor_n;
 };
+typedef struct oskar_SkyModel oskar_SkyModel;
 
 #ifdef __cplusplus
 }

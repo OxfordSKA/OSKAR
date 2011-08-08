@@ -41,7 +41,7 @@ struct oskar_TelescopeModel
     double * antenna_y;
     double * antenna_z; // NOTE: currently not used.
 };
-
+typedef struct oskar_TelescopeModel oskar_TelescopeModel;
 
 #ifdef __cplusplus
 }

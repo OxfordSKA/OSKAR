@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_SCALAR_H_
-#define OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_SCALAR_H_
+#ifndef OSKAR_CUDA_INTERFEROMETER1_SCALAR_H_
+#define OSKAR_CUDA_INTERFEROMETER1_SCALAR_H_
 
 /**
- * @file oskar_interferometry_cuda_interferometer1_scalar.h
+ * @file oskar_cuda_interferometer1_scalar.h
  */
 
 #include "oskar_windows.h"
@@ -73,7 +73,7 @@ int oskar_interferometer1_scalar_d(
 
         const struct oskar_StationModel * stations,
 
-        const struct SkyModel sky,
+        const struct oskar_SkyModel sky,
 
         const double ra0_rads,
         const double dec0_rads,
@@ -91,4 +91,4 @@ int oskar_interferometer1_scalar_d(
 }
 #endif
 
-#endif // OSKAR_INTERFEROMETRY_CUDA_INTERFEROMETER1_SCALAR_H_
+#endif // OSKAR_CUDA_INTERFEROMETER1_SCALAR_H_

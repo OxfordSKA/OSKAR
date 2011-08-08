@@ -49,36 +49,32 @@ extern "C" {
 #endif
 
 //------------------------------------------------------------------------------
-void oskar_cudad_copy_telescope_to_gpu(const struct oskar_TelescopeModel * h_telescope,
-        struct oskar_TelescopeModel * d_telescope);
+void oskar_cuda_copy_telescope_to_gpu_d(const oskar_TelescopeModel * h_telescope,
+        oskar_TelescopeModel * hd_telescope);
 
-void oskar_cudad_copy_stations_to_gpu(const struct oskar_StationModel * h_stations,
-        const unsigned num_stations, struct oskar_StationModel * d_stations);
+void oskar_cuda_copy_stations_to_gpu_d(const oskar_StationModel * h_stations,
+        const unsigned num_stations, oskar_StationModel * hd_stations);
 
-void oskar_cudad_copy_sky_to_gpu(const struct SkyModel * h_sky,
-        struct SkyModel * d_sky);
+void oskar_cuda_copy_sky_to_gpu_d(const oskar_SkyModel * h_sky,
+        oskar_SkyModel * hd_sky);
 //------------------------------------------------------------------------------
 
 
 
 int oskar_interferometer1_scalar_d(
-
-        const struct oskar_TelescopeModel telescope, // NOTE: In ITRS coordinates
-
-        const struct oskar_StationModel * stations,
-
-        const struct SkyModel sky,
-
-        const double ra0_rads,
-        const double dec0_rads,
-
-        const double start_date_utc,
-        const unsigned nsdt,
-        const double sdt,
-
-        const double lambda_bandwidth,
-
-        double * vis // FIXME float2?
+        const oskar_TelescopeModel telescope, // NOTE: In ITRS coordinates
+        const oskar_StationModel * stations,
+        const oskar_SkyModel sky,
+        const double ra0_rad,
+        const double dec0_rad,
+        const double start_mjd_utc,
+        const double obs_length_days,
+        const unsigned n_vis_dumps,
+        const unsigned n_vis_ave,
+        const unsigned n_fringe_ave,
+        const double freq,
+        const double bandwidth,
+        double2 * vis
 ){
     cudaError_t cuda_error = cudaSuccess;
 
@@ -88,16 +84,16 @@ int oskar_interferometer1_scalar_d(
 
     // === Allocate device memory for telescope and transfer to device.
     struct oskar_TelescopeModel hd_telescope;
-    oskar_cudad_copy_telescope_to_gpu(&telescope, &hd_telescope);
+    oskar_cuda_copy_telescope_to_gpu_d(&telescope, &hd_telescope);
 
     // === Allocate device memory for antennas and transfer to the device.
     size_t mem_size = num_stations * sizeof(oskar_StationModel);
     struct oskar_StationModel * hd_stations = (oskar_StationModel*)malloc(mem_size);
-    oskar_cudad_copy_stations_to_gpu(stations, num_stations, hd_stations);
+    oskar_cuda_copy_stations_to_gpu_d(stations, num_stations, hd_stations);
 
     // === Allocate device memory for source model and transfer to device.
-    struct SkyModel hd_sky;
-    oskar_cudad_copy_sky_to_gpu(&sky, &hd_sky);
+    struct oskar_SkyModel hd_sky;
+    oskar_cuda_copy_sky_to_gpu_d(&sky, &hd_sky);
 
 
 
@@ -146,7 +142,7 @@ int oskar_interferometer1_scalar_d(
 
 
 
-void oskar_cudad_copy_telescope_to_gpu(const struct oskar_TelescopeModel * h_telescope,
+void oskar_cuda_copy_telescope_to_gpu_d(const struct oskar_TelescopeModel * h_telescope,
         struct oskar_TelescopeModel * d_telescope)
 {
     size_t mem_size = h_telescope->num_antennas * sizeof(double);
@@ -166,7 +162,7 @@ void oskar_cudad_copy_telescope_to_gpu(const struct oskar_TelescopeModel * h_tel
 }
 
 
-void oskar_cudad_copy_stations_to_gpu(const struct oskar_StationModel * h_stations,
+void oskar_cuda_copy_stations_to_gpu_d(const struct oskar_StationModel * h_stations,
         const unsigned num_stations, struct oskar_StationModel * d_stations)
 {
     // Allocate and copy memory for each station.
@@ -186,8 +182,8 @@ void oskar_cudad_copy_stations_to_gpu(const struct oskar_StationModel * h_statio
 }
 
 
-void oskar_cudad_copy_sky_to_gpu(const struct SkyModel * h_sky,
-        struct SkyModel * d_sky)
+void oskar_cuda_copy_sky_to_gpu_d(const struct oskar_SkyModel * h_sky,
+        struct oskar_SkyModel * d_sky)
 {
     // TODO: work out what needs to be in here...
 }
