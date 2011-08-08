@@ -27,8 +27,8 @@
  */
 
 #include "cuda/oskar_cuda_dft_o2c_2d.h"
-#include "cuda/kernels/oskar_cudak_dftw_o2c_2d.h"
-#include "cuda/kernels/oskar_cudak_dftw_2d_seq_in.h"
+#include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
+#include "math/cudak/oskar_cudak_dftw_2d_seq_in.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,7 +55,7 @@ int oskar_cudaf_dft_o2c_2d(int n_in, const float* x_in, const float* y_in,
     size_t bSmem = 2 * max_in_chunk * sizeof(float2);
 
     // Invoke kernel to compute unnormalised DFT weights.
-    oskar_cudakf_dftw_2d_seq_in <<< wBlk, wThd, wSmem >>>
+    oskar_cudak_dftw_2d_seq_in_f <<< wBlk, wThd, wSmem >>>
             (n_in, x_in, y_in, 1, (const float*)&x_centre,
                     (const float*)&y_centre, weights);
     cudaThreadSynchronize();
@@ -70,7 +70,7 @@ int oskar_cudaf_dft_o2c_2d(int n_in, const float* x_in, const float* y_in,
 
         // Invoke kernel to compute the (partial) DFT on the device.
         int bBlk = (chunk_size + bThd - 1) / bThd;
-        oskar_cudakf_dftw_o2c_2d <<< bBlk, bThd, bSmem >>>
+        oskar_cudak_dftw_o2c_2d_f <<< bBlk, bThd, bSmem >>>
                 (n_in, x_in, y_in, weights, chunk_size, x_out + start,
                         y_out + start, max_in_chunk, out + start);
         cudaThreadSynchronize();
@@ -102,7 +102,7 @@ int oskar_cudad_dft_o2c_2d(int n_in, const double* x_in, const double* y_in,
     size_t bSmem = 2 * max_in_chunk * sizeof(double2);
 
     // Invoke kernel to compute unnormalised DFT weights.
-    oskar_cudakd_dftw_2d_seq_in <<< wBlk, wThd, wSmem >>>
+    oskar_cudak_dftw_2d_seq_in_d <<< wBlk, wThd, wSmem >>>
             (n_in, x_in, y_in, 1, (const double*)&x_centre,
                     (const double*)&y_centre, weights);
     cudaThreadSynchronize();
@@ -117,7 +117,7 @@ int oskar_cudad_dft_o2c_2d(int n_in, const double* x_in, const double* y_in,
 
         // Invoke kernel to compute the (partial) DFT on the device.
         int bBlk = (chunk_size + bThd - 1) / bThd;
-        oskar_cudakd_dftw_o2c_2d <<< bBlk, bThd, bSmem >>>
+        oskar_cudak_dftw_o2c_2d_d <<< bBlk, bThd, bSmem >>>
                 (n_in, x_in, y_in, weights, chunk_size, x_out + start,
                         y_out + start, max_in_chunk, out + start);
         cudaThreadSynchronize();

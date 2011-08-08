@@ -70,7 +70,7 @@ extern "C" {
  * @param[out] w Array of baseline w-positions in metres (see note, above).
  */
 DllExport
-int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
+int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* bsqrt, const float* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
@@ -107,7 +107,7 @@ int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
  * @param[out] w Array of baseline w-positions in metres.
  */
 DllExport
-int oskar_cudad_correlator_lm_bw(int na, const double* ax,
+int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* bsqrt, const double* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt, double k,

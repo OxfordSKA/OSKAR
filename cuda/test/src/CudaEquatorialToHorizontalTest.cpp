@@ -28,7 +28,7 @@
 
 #include "cuda/test/CudaEquatorialToHorizontalTest.h"
 #include "cuda/oskar_cuda_eq2hg.h"
-#include "math/SphericalPositions.h"
+#include "math/oskar_SphericalPositions.h"
 #include <cstdio>
 #include <cmath>
 #include <vector>
@@ -70,29 +70,29 @@ void CudaEquatorialToHorizontalTest::tearDown()
  */
 void CudaEquatorialToHorizontalTest::test_separate()
 {
-	// Generate some equatorial coordinates.
-    SphericalPositions<float> pos (
+    // Generate some equatorial coordinates.
+    oskar_SphericalPositions<float> pos (
             0 * DEG2RAD, 90 * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.5 * DEG2RAD, 0.5 * DEG2RAD); // Spacings.
     int ns = pos.generate(0, 0); // No. of sources.
-	std::vector<float> ra(ns, 0.0), dec(ns, 0.0);
+    std::vector<float> ra(ns, 0.0), dec(ns, 0.0);
     pos.generate(&ra[0], &dec[0]);
 
     // Transform to horizontal.
-	std::vector<float> az(ns, 0.0), el(ns, 0.0);
-	const float lat = 30 * DEG2RAD;
-	const float lon = 45 * DEG2RAD;
-	float lst = 0 + lon;
+    std::vector<float> az(ns, 0.0), el(ns, 0.0);
+    const float lat = 30 * DEG2RAD;
+    const float lon = 45 * DEG2RAD;
+    float lst = 0 + lon;
     TIMER_START
     oskar_cudaf_eq2hg('s', ns, &ra[0], &dec[0],
-    		cos(lat), sin(lat), lst, &az[0], &el[0]);
+            cos(lat), sin(lat), lst, &az[0], &el[0]);
     TIMER_STOP("Finished equatorial to horizontal (separate, %d points)", ns)
 
     // Write image file.
     FILE* file = fopen("points_separate.txt", "w");
     for (int i = 0; i < ns; ++i) {
-    	fprintf(file, "%8.3f %8.3f\n", az[i] * RAD2DEG, el[i] * RAD2DEG);
+        fprintf(file, "%8.3f %8.3f\n", az[i] * RAD2DEG, el[i] * RAD2DEG);
     }
     fclose(file);
 }
@@ -103,37 +103,37 @@ void CudaEquatorialToHorizontalTest::test_separate()
  */
 void CudaEquatorialToHorizontalTest::test_interleaved()
 {
-	// Generate some equatorial coordinates.
-    SphericalPositions<float> pos (
+    // Generate some equatorial coordinates.
+    oskar_SphericalPositions<float> pos (
             0 * DEG2RAD, 90 * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.5 * DEG2RAD, 0.5 * DEG2RAD); // Spacings.
     int ns = pos.generate(0, 0); // No. of sources.
-	std::vector<float> ra(ns, 0.0), dec(ns, 0.0), radec(2 * ns);
+    std::vector<float> ra(ns, 0.0), dec(ns, 0.0), radec(2 * ns);
     pos.generate(&ra[0], &dec[0]);
 
-	// Interleave coordinates.
-	for (int i = 0; i < ns; ++i) {
-		radec[2 * i + 0] = ra[i];
-		radec[2 * i + 1] = dec[i];
-	}
+    // Interleave coordinates.
+    for (int i = 0; i < ns; ++i) {
+        radec[2 * i + 0] = ra[i];
+        radec[2 * i + 1] = dec[i];
+    }
 
     // Transform to horizontal.
-	std::vector<float> azel(2 * ns, 0.0);
-	const float lat = 30 * DEG2RAD;
-	const float lon = 45 * DEG2RAD;
-	float lst = 0 + lon;
+    std::vector<float> azel(2 * ns, 0.0);
+    const float lat = 30 * DEG2RAD;
+    const float lon = 45 * DEG2RAD;
+    float lst = 0 + lon;
     TIMER_START
     oskar_cudaf_eq2hg('i', ns, &radec[0], 0,
-    		cos(lat), sin(lat), lst, &azel[0], 0);
+            cos(lat), sin(lat), lst, &azel[0], 0);
     TIMER_STOP("Finished equatorial to horizontal "
-    		"(interleaved, %d points)", ns)
+            "(interleaved, %d points)", ns)
 
     // Write image file.
     FILE* file = fopen("points_interleaved.txt", "w");
     for (int i = 0; i < ns; ++i) {
-    	fprintf(file, "%8.3f %8.3f\n", azel[2 * i + 0] * RAD2DEG,
-    			 azel[2 * i + 1] * RAD2DEG);
+        fprintf(file, "%8.3f %8.3f\n", azel[2 * i + 0] * RAD2DEG,
+                 azel[2 * i + 1] * RAD2DEG);
     }
     fclose(file);
 }

@@ -9,14 +9,14 @@ add_subdirectory(cudak)
 
 # Add the source files in this directory.
 set(math_SRC
-    src/oskar_math_mat_tri_c.c
+    src/oskar_mat_tri_c.c
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})
 endforeach ()
 
 set(math_SRC ${math_SRC}
-    src/oskar_math_cuda_interp_bilinear.cu
+    src/oskar_cuda_interp_bilinear.cu
 )
 set(math_SRC "${math_SRC}" PARENT_SCOPE)
 

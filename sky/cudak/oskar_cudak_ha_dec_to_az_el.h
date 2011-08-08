@@ -33,7 +33,7 @@
  * @file oskar_cudak_ha_dec_to_az_el.h
  */
 
-#include "utility/oskar_util_cuda_eclipse.h"
+#include "utility/oskar_cuda_eclipse.h"
 
 /**
  * @brief

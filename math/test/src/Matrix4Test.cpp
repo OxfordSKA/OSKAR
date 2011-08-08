@@ -27,7 +27,7 @@
  */
 
 #include "math/test/Matrix4Test.h"
-#include "math/Matrix4.h"
+#include "math/oskar_Matrix4.h"
 #include <cmath>
 #include <vector>
 

@@ -27,7 +27,7 @@
  */
 
 #include "imaging/Gridder.h"
-#include "math/Rounding.h"
+#include "math/oskar_Rounding.h"
 
 #include <cstdio>
 #include <cmath>

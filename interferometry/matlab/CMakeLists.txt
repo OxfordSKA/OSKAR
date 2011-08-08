@@ -6,7 +6,7 @@
 if (MATLAB_FOUND)
 
     add_library(interferometer1_scalar SHARED
-        oskar_cuda_interferometer1_scalar_mex.cpp
+        oskar_interferometer1_scalar_mex.cpp
         mexFunction.def)
     target_link_libraries(interferometer1_scalar oskar ${MATLAB_LIBRARIES})
     set_target_properties(interferometer1_scalar PROPERTIES

@@ -5,7 +5,7 @@
  * @file QTestWProjConvFunc.h
  */
 
-#include "widgets/plotting/PlotWidget.h"
+#include "widgets/plotting/oskar_PlotWidget.h"
 #include "imaging/WProjConvFunc.h"
 #include "imaging/oskar_types.h"
 

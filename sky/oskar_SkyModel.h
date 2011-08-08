@@ -44,7 +44,6 @@ struct SkyModel
     double * Q;
     double * U;
     double * V;
-    double * brightness; // FIXME <--- vector form...
 
     // Local Sky model.
     double * hor_l;

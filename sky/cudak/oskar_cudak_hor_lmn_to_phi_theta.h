@@ -33,7 +33,7 @@
  * @file oskar_cudak_hor_lmn_to_phi_theta.h
  */
 
-#include "utility/oskar_util_cuda_eclipse.h"
+#include "utility/oskar_cuda_eclipse.h"
 
 /**
  * @brief

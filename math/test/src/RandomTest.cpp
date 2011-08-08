@@ -27,7 +27,7 @@
  */
 
 #include "math/test/RandomTest.h"
-#include "math/Random.h"
+#include "math/oskar_Random.h"
 
 #include <cmath>
 #include <vector>
@@ -55,8 +55,8 @@ void RandomTest::tearDown()
  */
 void RandomTest::test_uniform()
 {
-    printf("%f\n", Random::uniform<float>(1));
-    printf("%f\n", Random::uniform<float>());
-    printf("%f\n", Random::uniform<float>());
+    printf("%f\n", oskar_Random::uniform<float>(1));
+    printf("%f\n", oskar_Random::uniform<float>());
+    printf("%f\n", oskar_Random::uniform<float>());
 }
 

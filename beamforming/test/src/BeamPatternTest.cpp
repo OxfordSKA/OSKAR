@@ -28,7 +28,7 @@
 
 #include "beamforming/test/BeamPatternTest.h"
 #include "beamforming/oskar_beamPattern.h"
-#include "math/SphericalPositions.h"
+#include "math/oskar_SphericalPositions.h"
 
 #include <cmath>
 #include <vector>
@@ -88,7 +88,7 @@ void BeamPatternTest::test_method()
     // ==== Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 50; // Beam elevation.
-    SphericalPositions<float> pos(
+    oskar_SphericalPositions<float> pos(
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.

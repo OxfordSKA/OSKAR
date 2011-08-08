@@ -71,7 +71,7 @@ extern "C" {
  * @param[in,out] work  Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
-int oskar_cudaf_correlator_scalar(int na, const float* ax,
+int oskar_cuda_correlator_scalar_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* n, const float* eb, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
@@ -109,7 +109,7 @@ int oskar_cudaf_correlator_scalar(int na, const float* ax,
  * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
-int oskar_cudad_correlator_scalar(int na, const double* ax,
+int oskar_cuda_correlator_scalar_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* n, const double* eb, double ra0,
         double dec0, double lst0, int nsdt, double sdt,

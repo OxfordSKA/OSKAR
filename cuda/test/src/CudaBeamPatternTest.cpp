@@ -29,9 +29,9 @@
 #include "cuda/test/CudaBeamPatternTest.h"
 #include "cuda/oskar_cuda_bp2hc.h"
 #include "cuda/oskar_cuda_bp2phc.h"
-#include "math/SphericalPositions.h"
-#include "math/GridPositions.h"
-#include "math/Matrix3.h"
+#include "math/oskar_SphericalPositions.h"
+#include "math/oskar_GridPositions.h"
+#include "math/oskar_Matrix3.h"
 #include <cmath>
 #include <vector>
 
@@ -87,7 +87,7 @@ void CudaBeamPatternTest::test_regular()
     // Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 50; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
@@ -125,10 +125,10 @@ void CudaBeamPatternTest::test_superStation()
     float radius = 21.2; // metres.
     float xs = 0.375, ys = 0.375, xe = 0.0, ye = 0.0; // separations, errors.
 
-    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
     printf("Super-station contains %d antennas.\n", na);
     std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+    oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
     // Rotate around z.
     float matrix[9];
@@ -153,13 +153,13 @@ void CudaBeamPatternTest::test_superStation()
 //            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
 
     // Generate test source positions for the hemisphere.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             180 * DEG2RAD, 45 * DEG2RAD, // Centre.
             180 * DEG2RAD, 45 * DEG2RAD, // Half-widths.
             //0.03 * DEG2RAD, 0.03 * DEG2RAD, // Spacings.
             0.2 * DEG2RAD, 0.2 * DEG2RAD, // Spacings.
             0.0, true, false, true, true,
-            SphericalPositions<float>::PROJECTION_NONE);
+            oskar_SphericalPositions<float>::PROJECTION_NONE);
 
     int ns = 1 + pos.generate(0, 0); // No. of sources (add a point at zenith).
     std::vector<float> slon(ns), slat(ns);
@@ -202,10 +202,10 @@ void CudaBeamPatternTest::test_satStation()
     float radius = 28.5; // metres.
     float xs = 1.5, ys = 1.5, xe = 0.0, ye = 0.0; // separations, errors.
 
-    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
     printf("Satellite-station contains %d antennas.\n", na);
     std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+    oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
     // Rotate around z.
     float matrix[9];
@@ -230,13 +230,13 @@ void CudaBeamPatternTest::test_satStation()
 //            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
 
     // Generate test source positions for the hemisphere.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             180 * DEG2RAD, 45 * DEG2RAD, // Centre.
             180 * DEG2RAD, 45 * DEG2RAD, // Half-widths.
             //0.03 * DEG2RAD, 0.03 * DEG2RAD, // Spacings.
             0.2 * DEG2RAD, 0.2 * DEG2RAD, // Spacings.
             0.0, true, false, true, true,
-            SphericalPositions<float>::PROJECTION_NONE);
+            oskar_SphericalPositions<float>::PROJECTION_NONE);
 
     int ns = 1 + pos.generate(0, 0); // No. of sources (add a point at zenith).
     std::vector<float> slon(ns), slat(ns);
@@ -344,10 +344,10 @@ void CudaBeamPatternTest::test_stations200()
         float radius = 28.5; // metres.
         float xs = 1.5, ys = 1.5, xe = 0.3, ye = 0.3; // separations, errors.
 
-        int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+        int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
         printf("Satellite-station %d contains %d antennas.\n", station, na);
         std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-        GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+        oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
         // Write antenna positions to file.
         char fname[200];
@@ -379,10 +379,10 @@ void CudaBeamPatternTest::test_stations200()
     float radius = 21.2; // metres.
     float xs = 0.375, ys = 0.375, xe = 0.0, ye = 0.0; // separations, errors.
 
-    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
     printf("Super-station contains %d antennas.\n", na);
     std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+    oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
     // Write antenna positions to file.
     FILE* file = fopen("arraySupStation.dat", "w");
@@ -873,10 +873,10 @@ void CudaBeamPatternTest::test_stations2000()
         float radius = 28.5; // metres.
         float xs = 1.5, ys = 1.5, xe = 0.3, ye = 0.3; // separations, errors.
 
-        int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+        int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
         printf("Satellite-station %d contains %d antennas.\n", station, na);
         std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-        GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+        oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
         // Write antenna positions to file.
         char fname[200];
@@ -908,10 +908,10 @@ void CudaBeamPatternTest::test_stations2000()
     float radius = 21.2; // metres.
     float xs = 0.375, ys = 0.375, xe = 0.0, ye = 0.0; // separations, errors.
 
-    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
     printf("Super-station contains %d antennas.\n", na);
     std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+    oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
     // Write antenna positions to file.
     FILE* file = fopen("arraySupStation.dat", "w");
@@ -965,10 +965,10 @@ void CudaBeamPatternTest::test_stations4000()
         float radius = 28.5; // metres.
         float xs = 1.5, ys = 1.5, xe = 0.3, ye = 0.3; // separations, errors.
 
-        int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+        int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
         printf("Satellite-station %d contains %d antennas.\n", station, na);
         std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-        GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+        oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
         // Write antenna positions to file.
         char fname[200];
@@ -1000,10 +1000,10 @@ void CudaBeamPatternTest::test_stations4000()
     float radius = 21.2; // metres.
     float xs = 0.375, ys = 0.375, xe = 0.0, ye = 0.0; // separations, errors.
 
-    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
     printf("Super-station contains %d antennas.\n", na);
     std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+    oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
     // Write antenna positions to file.
     FILE* file = fopen("arraySupStation.dat", "w");
@@ -1039,9 +1039,9 @@ void CudaBeamPatternTest::test_perturbed()
     float radius = 15; // metres. (was 125)
     float xs = 1.4, ys = 1.4, xe = 0.3, ye = 0.3; // separations, errors.
 
-    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
     std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+    oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
     // Rotate around z.
     float matrix[9];
@@ -1066,13 +1066,13 @@ void CudaBeamPatternTest::test_perturbed()
 //            0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
 
     // Generate test source positions for the hemisphere.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             180 * DEG2RAD, 45 * DEG2RAD, // Centre.
             180 * DEG2RAD, 45 * DEG2RAD, // Half-widths.
             //0.03 * DEG2RAD, 0.03 * DEG2RAD, // Spacings.
             0.2 * DEG2RAD, 0.2 * DEG2RAD, // Spacings.
             0.0, true, false, true, true,
-            SphericalPositions<float>::PROJECTION_NONE);
+            oskar_SphericalPositions<float>::PROJECTION_NONE);
 
     int ns = 1 + pos.generate(0, 0); // No. of sources (add a point at zenith).
     std::vector<float> slon(ns), slat(ns);
@@ -1113,9 +1113,9 @@ void CudaBeamPatternTest::test_scattered()
     float radius = 15; // metres. (was 125)
     float xs = 1.4, ys = 1.4, xe = 0.3, ye = 0.3; // separations, errors.
 
-    int na = GridPositions::circular(seed, radius, xs, ys, xe, ye);
+    int na = oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye);
     std::vector<float> ax(na), ay(na), az(na); // Antenna positions.
-    GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
+    oskar_GridPositions::circular(seed, radius, xs, ys, xe, ye, &ax[0], &ay[0]);
 
     // Rotate around z.
     float matrix[9];
@@ -1421,7 +1421,7 @@ void CudaBeamPatternTest::test_random()
     // Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 50; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.1 * DEG2RAD, 0.1 * DEG2RAD); // Spacings.
@@ -1470,7 +1470,7 @@ void CudaBeamPatternTest::test_single_precision()
     // Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 50; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
@@ -1510,7 +1510,7 @@ void CudaBeamPatternTest::test_double_precision()
     // Generate test source positions.
     double beamAz = 0;  // Beam azimuth.
     double beamEl = 50; // Beam elevation.
-    SphericalPositions<double> pos (
+    oskar_SphericalPositions<double> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
@@ -1560,7 +1560,7 @@ void CudaBeamPatternTest::test_single_precision_precomputed()
     // Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 50; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
@@ -1605,7 +1605,7 @@ void CudaBeamPatternTest::test_double_precision_precomputed()
     // Generate test source positions.
     double beamAz = 0;  // Beam azimuth.
     double beamEl = 50; // Beam elevation.
-    SphericalPositions<double> pos (
+    oskar_SphericalPositions<double> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.

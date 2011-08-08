@@ -1,5 +1,5 @@
 #include <mex.h>
-#include "math/SphericalPositions.h"
+#include "math/oskar_SphericalPositions.h"
 #include <vector>
 #include <cmath>
 
@@ -44,7 +44,7 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     bool force_centre_point = true;
     bool force_to_edges     = true;
     //int projection_type     = SphericalPositions<double>::PROJECTION_SIN;
-    int projection_type     = SphericalPositions<double>::PROJECTION_NONE;
+    int projection_type     = oskar_SphericalPositions<double>::PROJECTION_NONE;
 
     mexPrintf("Inputs: %d\n", num_inputs);
     mexPrintf("     centre_long = %f (rads)\n", centre_long);
@@ -55,7 +55,7 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     mexPrintf("     sep_lat     = %f (rads)\n", sep_lat);
 
     // Setup.
-    SphericalPositions<double> positions(centre_long, centre_lat,
+    oskar_SphericalPositions<double> positions(centre_long, centre_lat,
             size_long, size_lat, // Half-widths ?!
             sep_long, sep_lat,
             rho, force_constant_sep, set_centre_after,
@@ -65,7 +65,6 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     // Dry run to find out how many points.
     unsigned points = positions.generate(0, 0);
 
-
     // Allocate memory for output.
     mexPrintf("num points = %i\n", points);
     int rows = 1;
@@ -74,7 +73,6 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     output[1] = mxCreateNumericMatrix(rows, cols, mxDOUBLE_CLASS, mxREAL);
     double * longitudes = mxGetPr(output[0]);
     double * latitudes  = mxGetPr(output[1]);
-
 
     // Generate points. (TODO? allocate memory inside this function?)
     positions.generate(&longitudes[0], &latitudes[0]);

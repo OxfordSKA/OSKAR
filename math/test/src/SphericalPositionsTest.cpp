@@ -27,7 +27,7 @@
  */
 
 #include "math/test/SphericalPositionsTest.h"
-#include "math/SphericalPositions.h"
+#include "math/oskar_SphericalPositions.h"
 #include <cmath>
 #include <vector>
 
@@ -61,7 +61,7 @@ void SphericalPositionsTest::tearDown()
  */
 void SphericalPositionsTest::test_create()
 {
-    SphericalPositions<float> posGen(0, 90 * DEG2RAD,
+    oskar_SphericalPositions<float> posGen(0, 90 * DEG2RAD,
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths
             0.5 * DEG2RAD, 0.5 * DEG2RAD);
 }
@@ -72,7 +72,7 @@ void SphericalPositionsTest::test_create()
  */
 void SphericalPositionsTest::test_generate13x13()
 {
-    SphericalPositions<float> posGen(0, 90 * DEG2RAD,
+    oskar_SphericalPositions<float> posGen(0, 90 * DEG2RAD,
             2 * DEG2RAD, 2 * DEG2RAD, // Half-widths
             0.3 * DEG2RAD, 0.3 * DEG2RAD);
 

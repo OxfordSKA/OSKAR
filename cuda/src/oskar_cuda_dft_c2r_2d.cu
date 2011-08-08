@@ -27,7 +27,7 @@
  */
 
 #include "cuda/oskar_cuda_dft_c2r_2d.h"
-#include "cuda/kernels/oskar_cudak_dft_c2r_2d.h"
+#include "math/cudak/oskar_cudak_dft_c2r_2d.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +54,7 @@ int oskar_cudaf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
 
         // Invoke kernel to compute the (partial) DFT on the device.
         const int blk = (chunk_size + thd - 1) / thd;
-        oskar_cudakf_dft_c2r_2d <<< blk, thd, shared >>>
+        oskar_cudak_dft_c2r_2d_f <<< blk, thd, shared >>>
                 (n_in, x_in, y_in, data, chunk_size, x_out + start,
                         y_out + start, max_in_chunk, output + start);
         cudaThreadSynchronize();
@@ -86,7 +86,7 @@ int oskar_cudad_dft_c2r_2d(int n_in, const double* x_in, const double* y_in,
 
         // Invoke kernel to compute the (partial) DFT on the device.
         const int blk = (chunk_size + thd - 1) / thd;
-        oskar_cudakd_dft_c2r_2d <<< blk, thd, shared >>>
+        oskar_cudak_dft_c2r_2d_d <<< blk, thd, shared >>>
                 (n_in, x_in, y_in, data, chunk_size, x_out + start,
                         y_out + start, max_in_chunk, output + start);
         cudaThreadSynchronize();

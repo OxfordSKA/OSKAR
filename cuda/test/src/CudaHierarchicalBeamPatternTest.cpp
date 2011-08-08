@@ -131,7 +131,7 @@ void CudaHierarchicalBeamPatternTest::test_regular()
     float tileBeamEl = 50 * DEG2RAD; // Beam elevation.
 
     // Generate test source positions.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             stationBeamAz, stationBeamEl, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.

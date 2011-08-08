@@ -27,7 +27,7 @@
  */
 
 #include "math/test/CudaInterpBilinearTest.h"
-#include "math/oskar_math_cuda_interp_bilinear.h"
+#include "math/oskar_cuda_interp_bilinear.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -54,81 +54,81 @@ void CudaInterpBilinearTest::tearDown()
  */
 void CudaInterpBilinearTest::test_method()
 {
-	int width = 3;
-	int height = 3;
-	float data[] = {
-			0.1, 0.8, 1.0,
-			0.5, 2.0, 0.6,
-			0.2, 1.1, 0.7
-	};
+    int width = 3;
+    int height = 3;
+    float data[] = {
+            0.1, 0.8, 1.0,
+            0.5, 2.0, 0.6,
+            0.2, 1.1, 0.7
+    };
 
-	// Set up positions.
-	int factor = 40;
-	int nw = width * factor;
-	int nh = height * factor;
-	int n = nw * nh;
-	float2* pos = (float2*)malloc(n * sizeof(float2));
-	for (int i = 0, h = 0; h < nh; h++)
-	{
-		for (int w = 0; w < nw; w++)
-		{
-			pos[i].x = 0.5 + (width - 1) * float(w) / float(nw-1);
-			pos[i].y = 0.5 + (height - 1) * float(h) / float(nh-1);
+    // Set up positions.
+    int factor = 40;
+    int nw = width * factor;
+    int nh = height * factor;
+    int n = nw * nh;
+    float2* pos = (float2*)malloc(n * sizeof(float2));
+    for (int i = 0, h = 0; h < nh; h++)
+    {
+        for (int w = 0; w < nw; w++)
+        {
+            pos[i].x = 0.5 + (width - 1) * float(w) / float(nw-1);
+            pos[i].y = 0.5 + (height - 1) * float(h) / float(nh-1);
 //			printf("%5d %10.4f %10.4f\n", i, pos[i].x, pos[i].y);
-			i++;
-		}
-	}
+            i++;
+        }
+    }
 
-	// Copy data to device.
-	float* data_d;
-	size_t pitch;
-	cudaMallocPitch((void**)&data_d, &pitch, width, height);
-	cudaMemcpy2D(data_d, pitch, data, width * sizeof(float),
-			width * sizeof(float), height, cudaMemcpyHostToDevice);
+    // Copy data to device.
+    float* data_d;
+    size_t pitch;
+    cudaMallocPitch((void**)&data_d, &pitch, width, height);
+    cudaMemcpy2D(data_d, pitch, data, width * sizeof(float),
+            width * sizeof(float), height, cudaMemcpyHostToDevice);
 
-	// Copy positions to device.
-	float2* pos_d;
-	cudaMalloc((void**)&pos_d, n * sizeof(float2));
-	cudaMemcpy(pos_d, pos, n * sizeof(float2), cudaMemcpyHostToDevice);
+    // Copy positions to device.
+    float2* pos_d;
+    cudaMalloc((void**)&pos_d, n * sizeof(float2));
+    cudaMemcpy(pos_d, pos, n * sizeof(float2), cudaMemcpyHostToDevice);
 
-	// Allocate result.
-	float* output = (float*)malloc(n * sizeof(float));
-	float* output_d;
-	cudaMalloc((void**)&output_d, n * sizeof(float));
+    // Allocate result.
+    float* output = (float*)malloc(n * sizeof(float));
+    float* output_d;
+    cudaMalloc((void**)&output_d, n * sizeof(float));
 
-	// Interpolate.
-	printf("Starting interpolation...\n");
-	int err;
-	TIMER_START
-	err = oskar_math_cuda_interp_bilinear_float(width, height, pitch,
-			data_d, n, pos_d, output_d);
-	TIMER_STOP("Finished interpolation (%d points)", n)
-	if (err != 0)
-		printf("CUDA error, code %d\n", err);
-	else
-		printf("Interpolation successful!\n");
+    // Interpolate.
+    printf("Starting interpolation...\n");
+    int err;
+    TIMER_START
+    err = oskar_cuda_interp_bilinear_float(width, height, pitch,
+            data_d, n, pos_d, output_d);
+    TIMER_STOP("Finished interpolation (%d points)", n)
+    if (err != 0)
+        printf("CUDA error, code %d\n", err);
+    else
+        printf("Interpolation successful!\n");
 
-	// Copy result back.
-	cudaMemcpy(output, output_d, n * sizeof(float), cudaMemcpyDeviceToHost);
+    // Copy result back.
+    cudaMemcpy(output, output_d, n * sizeof(float), cudaMemcpyDeviceToHost);
 
-	// Print result to file.
-	FILE* file = fopen("bilinear_interp_test.dat", "w");
-	for (int i = 0, h = 0; h < height * factor; h++)
-	{
-		for (int w = 0; w < width * factor; w++)
-		{
-			fprintf(file, "%6.3f", output[i]);
-			i++;
-		}
-		fprintf(file, "\n");
-	}
-	fclose(file);
+    // Print result to file.
+    FILE* file = fopen("bilinear_interp_test.dat", "w");
+    for (int i = 0, h = 0; h < height * factor; h++)
+    {
+        for (int w = 0; w < width * factor; w++)
+        {
+            fprintf(file, "%6.3f", output[i]);
+            i++;
+        }
+        fprintf(file, "\n");
+    }
+    fclose(file);
 
-	// Free memory.
-	free(output);
-	free(pos);
-	cudaFree(output_d);
-	cudaFree(pos_d);
-	cudaFree(data_d);
+    // Free memory.
+    free(output);
+    free(pos);
+    cudaFree(output_d);
+    cudaFree(pos_d);
+    cudaFree(data_d);
 }
 

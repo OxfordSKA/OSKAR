@@ -27,7 +27,7 @@
  */
 
 #include "cuda/kernels/oskar_cudak_bp2hugw.h"
-#include "math/oskar_math_phase.h"
+#include "math/oskar_phase.h"
 
 // Shared memory pointer used by the kernel.
 extern __shared__ float2 smem[];

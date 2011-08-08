@@ -40,9 +40,8 @@
 #include <QtTest/QtTest>
 #include <QtCore/QTime>
 
-
-#include "math/Random.h"
-#include "widgets/plotting/PlotWidget.h"
+#include "math/oskar_Random.h"
+#include "widgets/plotting/oskar_PlotWidget.h"
 
 using namespace oskar;
 
@@ -68,10 +67,10 @@ class QTest_Random : public QObject
             const unsigned n = 10000;
             QVector<double> rand(n);
             QVector<double> x(n, 0.0);
-            rand[0] = Random::uniform<float>(1);
+            rand[0] = oskar_Random::uniform<float>(1);
             for (int i = 1; i < rand.size(); ++i)
             {
-                rand[i] = Random::uniform<float>();
+                rand[i] = oskar_Random::uniform<float>();
                 x[i] = static_cast<double>(i);
             }
 
@@ -86,14 +85,14 @@ class QTest_Random : public QObject
             QVector<double> rand(n);
             QVector<double> x(n, 0.0);
             double r1, r2;
-            Random::gaussian<double>(&r1, &r2, 1);
+            oskar_Random::gaussian<double>(&r1, &r2, 1);
             rand[0] = r1;
             rand[1] = r2;
             x[0] = 0.0;
             x[1] = 1.0;
             for (int i = 2; i < rand.size(); i+=2)
             {
-                Random::gaussian<double>(&r1, &r2);
+                oskar_Random::gaussian<double>(&r1, &r2);
                 rand[i    ] = r1;
                 rand[i + 1] = r2;
                 x[i] = static_cast<double>(i);
@@ -113,10 +112,10 @@ class QTest_Random : public QObject
             const double power = -1.2;
             QVector<double> rand(n);
             QVector<double> x(n, 0.0);
-            rand[0] = Random::power_law<double>(min, max, power, 1);
+            rand[0] = oskar_Random::power_law<double>(min, max, power, 1);
             for (int i = 1; i < rand.size(); ++i)
             {
-                rand[i] = Random::power_law<double>(min, max, power);
+                rand[i] = oskar_Random::power_law<double>(min, max, power);
                 x[i] = static_cast<double>(i);
             }
 
@@ -140,11 +139,11 @@ class QTest_Random : public QObject
             t.start();
             {
                 QVector<double> rand(n);
-                rand[0] = Random::broken_power_law<double>(min, max,
+                rand[0] = oskar_Random::broken_power_law<double>(min, max,
                         threshold, power1, power2, 1);
                 for (int i = 1; i < rand.size(); ++i)
                 {
-                    rand[i] = Random::broken_power_law<double>(min, max,
+                    rand[i] = oskar_Random::broken_power_law<double>(min, max,
                             threshold, power1, power2);
                 }
             }

@@ -34,7 +34,7 @@ extern "C" {
 
 // Single precision.
 
-void oskar_interferometryf_baselines(int na, const float* au,
+void oskar_compute_baselines_f(int na, const float* au,
         const float* av, const float* aw, float* bu, float* bv, float* bw)
 {
     int a1, a2, b = 0; // Station and baseline indices.
@@ -51,7 +51,7 @@ void oskar_interferometryf_baselines(int na, const float* au,
 
 // Double precision.
 
-void oskar_interferometryd_baselines(int na, const double* au,
+void oskar_compute_baselines_d(int na, const double* au,
         const double* av, const double* aw, double* bu, double* bv, double* bw)
 {
     int a1, a2, b = 0; // Station and baseline indices.

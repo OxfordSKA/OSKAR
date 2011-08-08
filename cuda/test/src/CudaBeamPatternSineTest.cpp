@@ -28,9 +28,9 @@
 
 #include "cuda/test/CudaBeamPatternSineTest.h"
 #include "cuda/oskar_cuda_bp2hc.h"
-#include "math/SphericalPositions.h"
-#include "math/GridPositions.h"
-#include "math/Matrix3.h"
+#include "math/oskar_SphericalPositions.h"
+#include "math/oskar_GridPositions.h"
+#include "math/oskar_Matrix3.h"
 #include <cmath>
 #include <vector>
 
@@ -86,7 +86,7 @@ void CudaBeamPatternSineTest::test_singleElement()
     // Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 90; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
@@ -152,7 +152,7 @@ void CudaBeamPatternSineTest::test_sine()
     // Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 75; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.
@@ -199,7 +199,7 @@ void CudaBeamPatternSineTest::test_sineSquared()
     // Generate test source positions.
     float beamAz = 0;  // Beam azimuth.
     float beamEl = 90; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             beamAz * DEG2RAD, beamEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 0 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.

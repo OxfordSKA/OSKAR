@@ -3,20 +3,20 @@
 #
 
 set(widgets_plotting_MOC
-    ColourMap.h
-    PlotWidget.h
+    oskar_ColourMap.h
+    oskar_PlotWidget.h
 )
 set(widgets_plotting_MOC "${widgets_plotting_MOC}" PARENT_SCOPE)
 
 set(widgets_plotting_SRC
-    src/ColourMap.cpp
-    src/ImagePlot.cpp
-    src/ImagePlotData.cpp
-    src/PlotMagnifier.cpp
-    src/PlotPanner.cpp
-    src/PlotPicker.cpp
-    src/PlotWidget.cpp
-    src/PlotZoomer.cpp
+    src/oskar_ColourMap.cpp
+    src/oskar_ImagePlot.cpp
+    src/oskar_ImagePlotData.cpp
+    src/oskar_PlotMagnifier.cpp
+    src/oskar_PlotPanner.cpp
+    src/oskar_PlotPicker.cpp
+    src/oskar_PlotWidget.cpp
+    src/oskar_PlotZoomer.cpp
 )
 set(widgets_plotting_SRC "${widgets_plotting_SRC}" PARENT_SCOPE)
 

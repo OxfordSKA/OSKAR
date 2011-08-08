@@ -33,14 +33,14 @@
  * @file oskar_sky.h
  */
 
-#include "sky/oskar_sky_cuda_horizon_clip.h"
-#include "sky/oskar_sky_cuda_ra_dec_to_az_el.h"
-#include "sky/oskar_sky_cuda_ra_dec_to_hor_lmn.h"
-#include "sky/oskar_sky_cuda_ra_dec_to_relative_lmn.h"
-#include "sky/oskar_sky_date_time_to_mjd.h"
-#include "sky/oskar_sky_equation_of_equinoxes_fast.h"
-#include "sky/oskar_sky_mjd_to_gmst.h"
-#include "sky/oskar_sky_mjd_to_last_fast.h"
-#include "sky/oskar_sky_mjd_to_lmst.h"
+#include "sky/oskar_cuda_horizon_clip.h"
+#include "sky/oskar_cuda_ra_dec_to_az_el.h"
+#include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
+#include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
+#include "sky/oskar_date_time_to_mjd.h"
+#include "sky/oskar_equation_of_equinoxes_fast.h"
+#include "sky/oskar_mjd_to_gmst.h"
+#include "sky/oskar_mjd_to_last_fast.h"
+#include "sky/oskar_mjd_to_lmst.h"
 
 #endif // OSKAR_SKY_H_

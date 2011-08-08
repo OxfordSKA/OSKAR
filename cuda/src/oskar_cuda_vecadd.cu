@@ -27,7 +27,7 @@
  */
 
 #include "cuda/oskar_cuda_vecadd.h"
-#include "cuda/kernels/oskar_cudak_vec_add_rr.h"
+#include "math/cudak/oskar_cudak_vec_add_rr.h"
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -49,7 +49,7 @@ void oskar_cudaf_vecadd(int n, const float* a, const float* b, float* c)
     // Invoke kernel.
     int threadsPerBlock = 256;
     int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
-    oskar_cudakf_vec_add_rr <<<blocksPerGrid, threadsPerBlock>>>
+    oskar_cudak_vec_add_rr_f <<<blocksPerGrid, threadsPerBlock>>>
             (n, da, db, dc);
     cudaThreadSynchronize();
     cudaError_t err = cudaPeekAtLastError();

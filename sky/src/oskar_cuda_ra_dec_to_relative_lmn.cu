@@ -27,7 +27,7 @@
  */
 
 #include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
-#include "math/cudak/oskar_math_cudak_sph_to_lm.h"
+#include "math/cudak/oskar_cudak_sph_to_lm.h"
 #include "sky/cudak/oskar_cudak_lm_to_n.h"
 
 // Single precision.
@@ -41,7 +41,7 @@ int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* ra,
     const int n_blk = (n + n_thd - 1) / n_thd;
     const float cosDec0 = cosf(dec0);
     const float sinDec0 = sinf(dec0);
-    oskar_math_cudakf_sph_to_lm <<< n_blk, n_thd >>>
+    oskar_cudak_sph_to_lm_f <<< n_blk, n_thd >>>
             (n, ra, dec, ra0, cosDec0, sinDec0, p_l, p_m);
     cudaDeviceSynchronize();
     cudaError_t errCuda = cudaPeekAtLastError();
@@ -67,7 +67,7 @@ int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* ra,
     const int n_blk = (n + n_thd - 1) / n_thd;
     const double cosDec0 = cos(dec0);
     const double sinDec0 = sin(dec0);
-    oskar_math_cudakd_sph_to_lm <<< n_blk, n_thd >>>
+    oskar_cudak_sph_to_lm_d <<< n_blk, n_thd >>>
             (n, ra, dec, ra0, cosDec0, sinDec0, p_l, p_m);
     cudaDeviceSynchronize();
     cudaError_t errCuda = cudaPeekAtLastError();

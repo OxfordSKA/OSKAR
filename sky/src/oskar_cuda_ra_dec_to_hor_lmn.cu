@@ -28,7 +28,7 @@
 
 #include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
 #include "sky/cudak/oskar_cudak_ha_dec_to_hor_lmn.h"
-#include "math/cudak/oskar_math_cudak_vec_sub_sr.h"
+#include "math/cudak/oskar_cudak_vec_sub_sr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,7 +44,7 @@ int oskar_cuda_ra_dec_to_hor_lmn_f(int n, const float* ra,
     float* ha = hor_n; // Temporary.
     const int n_thd = 256;
     const int n_blk_in = (n + n_thd - 1) / n_thd;
-    oskar_math_cudakf_vec_sub_sr <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
+    oskar_cudak_vec_sub_sr_f <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
 
     // Determine horizontal l,m,n positions (destroys contents of ha).
     float cosLat = cosf(lat);
@@ -68,7 +68,7 @@ int oskar_cuda_ra_dec_to_hor_lmn_d(int n, const double* ra,
     double* ha = hor_n; // Temporary.
     const int n_thd = 256;
     const int n_blk_in = (n + n_thd - 1) / n_thd;
-    oskar_math_cudakd_vec_sub_sr <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
+    oskar_cudak_vec_sub_sr_d <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
 
     // Determine horizontal l,m,n positions (destroys contents of ha).
     double cosLat = cos(lat);

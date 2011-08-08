@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-struct StationModel
+struct oskar_StationModel
 {
     unsigned num_antennas;
 

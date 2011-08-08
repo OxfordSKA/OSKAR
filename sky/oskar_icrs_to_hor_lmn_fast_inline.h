@@ -33,7 +33,7 @@
  * @file oskar_icrs_to_hor_fast_inline.h
  */
 
-#include "utility/oskar_util_cuda_eclipse.h"
+#include "utility/oskar_cuda_eclipse.h"
 #include <math.h>
 
 #ifdef __cplusplus

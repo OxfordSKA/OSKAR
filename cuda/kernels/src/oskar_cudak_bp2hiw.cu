@@ -27,7 +27,7 @@
  */
 
 #include "cuda/kernels/oskar_cudak_bp2hiw.h"
-#include "math/oskar_math_phase.h"
+#include "math/oskar_phase.h"
 
 // Single precision.
 

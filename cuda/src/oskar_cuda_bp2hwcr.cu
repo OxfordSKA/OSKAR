@@ -28,8 +28,8 @@
 
 #include "cuda/oskar_cuda_bp2hwcr.h"
 #include "cuda/kernels/oskar_cudak_bp2hiw.h"
-#include "cuda/kernels/oskar_cudak_vec_mul_cr.h"
-#include "cuda/kernels/oskar_cudak_vec_mul_cc.h"
+#include "math/cudak/oskar_cudak_vec_mul_cr.h"
+#include "math/cudak/oskar_cudak_vec_mul_cc.h"
 #include "cuda/kernels/oskar_cudak_wt2hg.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -115,7 +115,7 @@ int oskar_cudaf_bp2hwcr(int ad, int na, const float* ax, const float* ay,
                 cudaMemcpy(awd, aw, na * sizeof(float2),
                         cudaMemcpyHostToDevice);
             }
-            oskar_cudakf_vec_mul_cc <<< wBlk, wThd >>> (na, awd, wts, wts);
+            oskar_cudak_vec_mul_cc_f <<< wBlk, wThd >>> (na, awd, wts, wts);
             cudaThreadSynchronize();
             errCuda = cudaPeekAtLastError();
             if (errCuda != cudaSuccess) goto stop;
@@ -169,7 +169,7 @@ int oskar_cudaf_bp2hwcr(int ad, int na, const float* ax, const float* ay,
         {
             cudaMemcpy(ard, ar + i, csize * sizeof(float),
                     cudaMemcpyHostToDevice);
-            oskar_cudakf_vec_mul_cr <<< bBlk, bThd >>>
+            oskar_cudak_vec_mul_cr_f <<< bBlk, bThd >>>
                     (csize, imaged, ard, imaged);
         }
 
@@ -280,7 +280,7 @@ int oskar_cudad_bp2hwcr(int ad, int na, const double* ax, const double* ay,
                 cudaMemcpy(awd, aw, na * sizeof(double2),
                         cudaMemcpyHostToDevice);
             }
-            oskar_cudakd_vec_mul_cc <<< wBlk, wThd >>> (na, awd, wts, wts);
+            oskar_cudak_vec_mul_cc_d <<< wBlk, wThd >>> (na, awd, wts, wts);
             cudaThreadSynchronize();
             errCuda = cudaPeekAtLastError();
             if (errCuda != cudaSuccess) goto stop;
@@ -334,7 +334,7 @@ int oskar_cudad_bp2hwcr(int ad, int na, const double* ax, const double* ay,
         {
             cudaMemcpy(ard, ar + i, csize * sizeof(double),
                     cudaMemcpyHostToDevice);
-            oskar_cudakd_vec_mul_cr <<< bBlk, bThd >>>
+            oskar_cudak_vec_mul_cr_d <<< bBlk, bThd >>>
                     (csize, imaged, ard, imaged);
         }
 

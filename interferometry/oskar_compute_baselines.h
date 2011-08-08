@@ -59,7 +59,7 @@ extern "C" {
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).
  */
 DllExport
-void oskar_interferometryf_baselines(int na, const float* au,
+void oskar_compute_baselines_f(int na, const float* au,
         const float* av, const float* aw, float* bu, float* bv, float* bw);
 
 /**
@@ -82,7 +82,7 @@ void oskar_interferometryf_baselines(int na, const float* au,
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).
  */
 DllExport
-void oskar_interferometryd_baselines(int na, const double* au,
+void oskar_compute_baselines_d(int na, const double* au,
         const double* av, const double* aw, double* bu, double* bv, double* bw);
 
 #ifdef __cplusplus

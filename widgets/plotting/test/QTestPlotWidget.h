@@ -5,7 +5,7 @@
 * @file QTestPlotWidget.h
 */
 
-#include "widgets/plotting/PlotWidget.h"
+#include "widgets/plotting/oskar_PlotWidget.h"
 
 #include <qwt_symbol.h>
 

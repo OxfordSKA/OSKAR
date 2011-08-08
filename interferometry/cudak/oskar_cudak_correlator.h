@@ -33,7 +33,7 @@
  * @file oskar_cudak_correlator.h
  */
 
-#include "utility/oskar_util_cuda_eclipse.h"
+#include "utility/oskar_cuda_eclipse.h"
 
 /**
  * @brief
@@ -51,7 +51,7 @@
  * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__
-void oskar_cudakf_correlator(const int ns, const int na,
+void oskar_cudak_correlator_f(const int ns, const int na,
         const float2* k, const float* u, const float* v, const float* l,
         const float* m, const float lambda_bandwidth, float2* vis);
 
@@ -71,7 +71,7 @@ void oskar_cudakf_correlator(const int ns, const int na,
  * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__
-void oskar_cudakd_correlator(const int ns, const int na,
+void oskar_cudak_correlator_d(const int ns, const int na,
         const double2* k, const double* u, const double* v, const double* l,
         const double* m, const double lambda_bandwidth, double2* vis);
 

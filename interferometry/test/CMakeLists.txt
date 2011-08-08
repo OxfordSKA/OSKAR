@@ -4,14 +4,14 @@
 
 if (CPPUNIT_FOUND)
 
-    set(modules_cuda_test_SRC
+    set(interferometry_cuda_test_SRC
         src/CppUnitMain.cpp
         src/ModuleCudaCorrelatorTest.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
-    add_executable(modulesCudaTest ${modules_cuda_test_SRC})
-    target_link_libraries(modulesCudaTest
+    add_executable(interferometryCudaTest ${interferometry_cuda_test_SRC})
+    target_link_libraries(interferometryCudaTest
         oskar
         ${CPPUNIT_LIBRARIES}
     )

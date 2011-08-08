@@ -4,7 +4,7 @@
 
 # ==== Set the project name and specify the required CMAKE version.
 project(oskar-lib CXX C)
-cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # ==== Project version.
 set(oskar-lib_VERSION_MAJOR 0)
@@ -36,15 +36,15 @@ if (NOT DEFINED BUILD_OSKAR)
 endif ()
 
 if (NOT DEFINED BUILD_OSKAR_MS)
-    set(BUILD_OSKAR_MS OFF)
+    set(BUILD_OSKAR_MS ON)
 endif ()
 
 if (NOT DEFINED BUILD_OSKAR_IMAGING)
-    set(BUILD_OSKAR_IMAGING OFF)
+    set(BUILD_OSKAR_IMAGING ON)
 endif ()
 
 if (NOT DEFINED BUILD_OSKAR_WIDGETS)
-    set(BUILD_OSKAR_WIDGETS OFF)
+    set(BUILD_OSKAR_WIDGETS ON)
 endif ()
 
 # ==== Set dependencies and compiler options.

@@ -83,7 +83,7 @@ void CudaAntennaSignalTest::test_method()
     // Generate some source positions.
     float centreAz = 0;  // Beam azimuth.
     float centreEl = 50; // Beam elevation.
-    SphericalPositions<float> pos (
+    oskar_SphericalPositions<float> pos (
             centreAz * DEG2RAD, centreEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             1 * DEG2RAD, 1 * DEG2RAD); // Spacings.
@@ -98,7 +98,7 @@ void CudaAntennaSignalTest::test_method()
     float freq = 1e9; // Observing frequency, Hertz.
     std::vector<float> signals(na*na * 2); // Antenna signal real & imaginary values.
     TIMER_START
-    oskar_cudaf_as2hi(na*na, &ax[0], &ay[0], ns, &samp[0], &slon[0], &slat[0],
+    oskar_cuda_as2hi_f(na*na, &ax[0], &ay[0], ns, &samp[0], &slon[0], &slat[0],
             2 * M_PI * (freq / C_0), &signals[0]);
     TIMER_STOP("Finished antenna signal generation "
             "(%d antennas, %d sources)", na*na, ns);

@@ -34,7 +34,7 @@
  */
 
 #include "sky/oskar_icrs_to_hor_lmn_fast_inline.h"
-#include "utility/oskar_util_cuda_eclipse.h"
+#include "utility/oskar_cuda_eclipse.h"
 
 #ifdef __cplusplus
 extern "C" {

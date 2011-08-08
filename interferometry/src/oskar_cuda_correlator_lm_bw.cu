@@ -28,12 +28,12 @@
 
 #include "interferometry/oskar_cuda_correlator_lm_bw.h"
 
-#include "cuda/kernels/oskar_cudak_dftw_3d_seq_out.h"
-#include "cuda/kernels/oskar_cudak_mat_mul_cc.h"
-#include "cuda/kernels/oskar_cudak_correlator.h"
-#include "math/oskar_math_mat_tri_c.h"
+#include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
+#include "math/cudak/oskar_cudak_mat_mul_cc.h"
+#include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "math/oskar_mat_tri_c.h"
 #include "interferometry/oskar_compute_baselines.h"
-#include "interferometry/oskar_xyz2uvw.h"
+#include "interferometry/oskar_xyz_to_uvw.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +54,7 @@ extern "C" {
 
 
 // Single precision.
-int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
+int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* bsqrt, const float* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
@@ -138,9 +138,9 @@ int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
-    oskar_interferometryf_xyz2uvw(na, ax, ay, az, ha0, dec0, &uvw[0], &uvw[na],
+    oskar_xyz_to_uvw_f(na, ax, ay, az, ha0, dec0, &uvw[0], &uvw[na],
             &uvw[2*na]);
-    oskar_interferometryf_baselines(na, &uvw[0], &uvw[na], &uvw[2*na], u, v, w);
+    oskar_compute_baselines_f(na, &uvw[0], &uvw[na], &uvw[2*na], u, v, w);
 
     // Loop over integrations.
     for (i = 0; i < nsdt; ++i)
@@ -151,7 +151,7 @@ int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
-        oskar_interferometryf_xyz2uvw(na, ax, ay, az, ha0, dec0, &uvw[0], &uvw[na],
+        oskar_xyz_to_uvw_f(na, ax, ay, az, ha0, dec0, &uvw[0], &uvw[na],
                 &uvw[2*na]);
 
         // Multiply station u,v,w coordinates by 2 pi / lambda.
@@ -166,20 +166,20 @@ int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
         cudaMemcpy(uvwd, uvw, na * 3 * sizeof(float), cudaMemcpyHostToDevice);
 
         // Compute K-matrix.
-        oskar_cudakf_dftw_3d_seq_out <<<kBlk, kThd, sMem>>> (
+        oskar_cudak_dftw_3d_seq_out_f <<<kBlk, kThd, sMem>>> (
                 na, &uvwd[0], &uvwd[na], &uvwd[2*na], ns, ld, md, nd, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;
 
         // Perform complex matrix element multiply.
-        oskar_cudakf_mat_mul_cc <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
+        oskar_cudak_mat_mul_cc_f <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;
 
         // Call the correlator kernel.
-        oskar_cudakf_correlator <<<vBlk, vThd, vsMem>>> (
+        oskar_cudak_correlator_f <<<vBlk, vThd, vsMem>>> (
                 ns, na, kmat, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
@@ -228,7 +228,7 @@ int oskar_cudaf_correlator_lm_bw(int na, const float* ax,
 
 
 // Double precision.
-int oskar_cudad_correlator_lm_bw(int na, const double* ax,
+int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* bsqrt, const double* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt, double k,
@@ -312,9 +312,9 @@ int oskar_cudad_correlator_lm_bw(int na, const double* ax,
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
-    oskar_interferometryd_xyz2uvw(na, ax, ay, az, ha0, dec0,
+    oskar_xyz_to_uvw_d(na, ax, ay, az, ha0, dec0,
             &uvw[0], &uvw[na], &uvw[2*na]);
-    oskar_interferometryd_baselines(na, &uvw[0], &uvw[na], &uvw[2*na],
+    oskar_compute_baselines_d(na, &uvw[0], &uvw[na], &uvw[2*na],
             u, v, w);
 
     // Loop over integrations.
@@ -326,7 +326,7 @@ int oskar_cudad_correlator_lm_bw(int na, const double* ax,
         ha0 = lst - ra0;
 
         // Compute the station u,v,w coordinates.
-        oskar_interferometryd_xyz2uvw(na, ax, ay, az, ha0, dec0,
+        oskar_xyz_to_uvw_d(na, ax, ay, az, ha0, dec0,
                 &uvw[0], &uvw[na], &uvw[2*na]);
 
         // Multiply station u,v,w coordinates by 2 pi / lambda.
@@ -341,20 +341,20 @@ int oskar_cudad_correlator_lm_bw(int na, const double* ax,
         cudaMemcpy(uvwd, uvw, na * 3 * sizeof(double), cudaMemcpyHostToDevice);
 
         // Compute K-matrix.
-        oskar_cudakd_dftw_3d_seq_out <<<kBlk, kThd, sMem>>> (
+        oskar_cudak_dftw_3d_seq_out_d <<<kBlk, kThd, sMem>>> (
                 na, &uvwd[0], &uvwd[na], &uvwd[2*na], ns, ld, md, nd, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;
 
         // Perform complex matrix element multiply.
-        oskar_cudakd_mat_mul_cc <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
+        oskar_cudak_mat_mul_cc_d <<<mBlk, mThd>>> (ns, na, kmat, emat, kmat);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;
 
         // Call the correlator kernel.
-        oskar_cudakd_correlator <<<vBlk, vThd, vsMem>>> (
+        oskar_cudak_correlator_d <<<vBlk, vThd, vsMem>>> (
                 ns, na, kmat, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();

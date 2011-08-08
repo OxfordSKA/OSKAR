@@ -33,7 +33,7 @@
  * @file oskar_util.h
  */
 
-#include "utility/oskar_util_vector_types.h"
-#include "utility/oskar_util_cuda_memory.h"
+#include "utility/oskar_vector_types.h"
+#include "utility/oskar_cuda_memory.h"
 
 #endif // OSKAR_UTIL_H_

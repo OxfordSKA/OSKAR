@@ -33,6 +33,6 @@
  * @file oskar_math.h
  */
 
-#include "oskar_math_mat_tri_c.h"
+#include "oskar_mat_tri_c.h"
 
 #endif // OSKAR_MATH_H_

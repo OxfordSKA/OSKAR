@@ -28,7 +28,7 @@
 
 #include "cuda/test/CudaBeamformerMatrixVectorTest.h"
 #include "cuda/oskar_cuda_bf2hig.h"
-#include "math/SphericalPositions.h"
+#include "math/oskar_SphericalPositions.h"
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
@@ -148,7 +148,7 @@ void CudaBeamformerMatrixVectorTest::test_method()
     // Generate some source positions.
     float centreAz = 0;  // Beam azimuth.
     float centreEl = 50; // Beam elevation.
-    SphericalPositions<float> posSrc (
+    oskar_SphericalPositions<float> posSrc (
             centreAz * DEG2RAD, centreEl * DEG2RAD, // Centre.
             20 * DEG2RAD, 20 * DEG2RAD, // Half-widths.
             10 * DEG2RAD, 10 * DEG2RAD); // Spacings.
@@ -160,7 +160,7 @@ void CudaBeamformerMatrixVectorTest::test_method()
     std::vector<float> samp(ns, 1.0);
 
     // Generate some beam positions.
-    SphericalPositions<float> posBeam (
+    oskar_SphericalPositions<float> posBeam (
             centreAz * DEG2RAD, centreEl * DEG2RAD, // Centre.
             30 * DEG2RAD, 30 * DEG2RAD, // Half-widths.
             0.2 * DEG2RAD, 0.2 * DEG2RAD); // Spacings.

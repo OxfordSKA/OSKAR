@@ -5,7 +5,7 @@
  * @file QTestConvFunc.h
  */
 
-#include "widgets/plotting/PlotWidget.h"
+#include "widgets/plotting/oskar_PlotWidget.h"
 #include "imaging/ConvFunc.h"
 #include "imaging/oskar_types.h"
 
