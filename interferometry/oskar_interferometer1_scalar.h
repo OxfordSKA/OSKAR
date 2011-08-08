@@ -36,8 +36,9 @@
 #include "oskar_windows.h"
 
 #include "sky/oskar_SkyModel.h"
-#include "beamforming/oskar_StationModel.h"
+#include "station/oskar_StationModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,43 +49,22 @@ extern "C" {
  *
  * @details
  *
- * @param[in] na   Number of antennas or stations.
- * @param[in] ax   Array of local equatorial station x-positions in wavenumbers.
- * @param[in] ay   Array of local equatorial station y-positions in wavenumbers.
- * @param[in] az   Array of local equatorial station z-positions in wavenumbers.
- * @param[in] ns   Number of sources.
- * @param[in] l    Array of source l-positions.
- * @param[in] m    Array of source m-positions.
- * @param[in] n    Array of source n-positions (see note, above).
- * @param[in] eb   Matrix of E * sqrt(B) (see note, above).
- * @param[in] ra0  Right Ascension of the phase tracking centre in radians.
- * @param[in] dec0 Declination of the phase tracking centre in radians.
- * @param[in] lst0 The local sidereal time at the start of the correlator dump.
- * @param[in] nsdt The number of averaging cycles to do.
- * @param[in] sdt  The time interval between averages in seconds.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out]  vis The complex visibilities (see note, above).
- * @param[in,out]  work Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
 int oskar_interferometer1_scalar_d(
-
-        const struct oskar_TelescopeModel telescope,
-
-        const struct oskar_StationModel * stations,
-
-        const struct oskar_SkyModel sky,
-
-        const double ra0_rads,
-        const double dec0_rads,
-
-        const double start_date_utc,
-        const unsigned nsdt,
-        const double sdt,
-
-        const double lambda_bandwidth,
-
-        double * vis);
+        const oskar_TelescopeModel telescope, // NOTE: In ITRS coordinates
+        const oskar_StationModel * stations,
+        const oskar_SkyModel sky,
+        const double ra0_rad,
+        const double dec0_rad,
+        const double start_mjd_utc,
+        const double obs_length_days,
+        const unsigned n_vis_dumps,
+        const unsigned n_vis_ave,
+        const unsigned n_fringe_ave,
+        const double freq,
+        const double bandwidth,
+        double2 * vis);
 
 
 #ifdef __cplusplus

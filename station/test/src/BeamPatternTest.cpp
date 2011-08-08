@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "beamforming/test/BeamPatternTest.h"
-#include "beamforming/oskar_beamPattern.h"
+#include "station/test/BeamPatternTest.h"
+#include "station/oskar_beamPattern.h"
 #include "math/oskar_SphericalPositions.h"
 
 #include <cmath>

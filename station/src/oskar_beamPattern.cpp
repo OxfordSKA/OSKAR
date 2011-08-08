@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "beamforming/oskar_beamPattern.h"
+#include "station/oskar_beamPattern.h"
 #include "math/oskar_phase.h"
 #include <cmath>
 #include <vector>

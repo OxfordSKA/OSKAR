@@ -7,7 +7,7 @@
 #include "interferometry/oskar_horizon_plane_to_itrs.h"
 
 #include "interferometry/oskar_TelescopeModel.h"
-#include "beamforming/oskar_StationModel.h"
+#include "station/oskar_StationModel.h"
 #include "sky/oskar_SkyModel.h"
 
 #ifndef M_PI
