@@ -1,11 +1,13 @@
 #include "widgets/plotting/oskar_ImagePlot.h"
 
-#include "math/oskar_FloatingPointCompare.h"
 #include <QtCore/QString>
 #include <QtGui/QColor>
 #include <QtGui/QPen>
 
+#include <cmath>
+#include <limits>
 #include <iostream>
+
 using namespace std;
 
 namespace oskar {
@@ -44,11 +46,11 @@ void ImagePlot::setAmpRangeAuto()
 {
     _range = data().range();
 
-    // If the min = max add 0.1 to the min range
-    if (approxEqual(_range.minValue(), _range.maxValue()))
-    {
-        _range = QwtDoubleInterval(_range.minValue(), _range.minValue() + 1.0e-6);
-    }
+    // If the min == max add a small amount the range to fix a number of errors.
+    double min = _range.minValue();
+    double max = _range.maxValue();
+    if (fabs(max - min) < numeric_limits<double>::epsilon())
+        _range = QwtDoubleInterval(min, min + 1.0e-6);
 }
 
 

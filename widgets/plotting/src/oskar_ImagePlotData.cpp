@@ -1,5 +1,4 @@
 #include "widgets/plotting/oskar_ImagePlotData.h"
-#include "math/oskar_FloatingPointCompare.h"
 
 #include <QtCore/QString>
 
@@ -136,7 +135,8 @@ void ImagePlotData::_findAmpRange()
         max = std::max<double>(_data[i], max);
     }
 
-    if (approxEqual(min, max)) max = min + 1.0e-6;
+    if (fabs(max - min) < numeric_limits<double>::epsilon())
+        max = min + 1.0e-6;
 
     _ampRange.setMaxValue(max);
     _ampRange.setMinValue(min);
