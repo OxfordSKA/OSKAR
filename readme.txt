@@ -1,4 +1,4 @@
-oskar-lib repository structure (last update: 12 July 2011)
+oskar-lib repository structure (last update: 8 Aug 2011)
 ================================================================================
 
 
@@ -8,10 +8,8 @@ Top level src folder structure:
 Top level folder structure for oskar-lib.
 
 src
- |--- antennas         : Evaluation of antenna Jones matrix, interpolation of
- |                       antenna patterns.
- |
- |--- beamforming      : Evaluation of beam pattern, E Jones.
+ |--- station          : Evaluation of beam pattern (E Jones),
+ |                       station level processing, antenna level processing.
  |
  |--- cmake            : Build system macros.
  |
@@ -82,4 +80,7 @@ Matlab interface
 Python interface
 ================================================================================
 (Currently a placeholder - potentially useful as an interface with CASA)
+
+
+
 

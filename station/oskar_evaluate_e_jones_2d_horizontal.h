@@ -26,58 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_HORIZON_CLIP_H_
-#define OSKAR_CUDA_HORIZON_CLIP_H_
+#ifndef OSKAR_EVALUATE_E_JONES_2D_HORIZONTAL_H_
+#define OSKAR_EVALUATE_E_JONES_2D_HORIZONTAL_H_
 
 /**
- * @file oskar_cuda_horizon_clip.h
+ * @file oskar_cuda_bp2hc.h
  */
 
-#include "sky/oskar_SkyModel.h"
 #include "oskar_windows.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Clips sources below the horizon (single precision).
- *
- * @details
- * This function determines which sources are above the horizon, and fills
- * arrays containing the source coordinates and brightnesses for those
- * sources.
- *
- * @param[in]  global  The input global sky model.
- * @param[in]  lst     The current local sidereal time in radians.
- * @param[in]  lat     The geographic latitude of the observer.
- * @param[out] local   The output local sky model.
- */
-DllExport
-int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* global, float lst,
-        float lat, oskar_SkyModelLocal_f* local);
+struct oskar_StationModel;
+struct oskar_SkyModelLocal_d;
 
 /**
  * @brief
- * Clips sources below the horizon (double precision).
  *
  * @details
- * This function determines which sources are above the horizon, and fills
- * arrays containing the source coordinates and brightnesses for those
- * sources.
  *
- * @param[in]  global  The input global sky model.
- * @param[in]  lst     The current local sidereal time in radians.
- * @param[in]  lat     The geographic latitude of the observer.
- * @param[out] local   The output local sky model.
+ * @return
  */
 DllExport
-int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* global, double lst,
-        double lat, oskar_SkyModelLocal_d* local);
+int oskar_evaluate_e_jones_2d_horizontal_f();
+
+
+/**
+ * @brief
+ *
+ * @details
+ *
+ * @return
+ */
+DllExport
+int oskar_evaluate_e_jones_2d_horizontal_d(
+        const oskar_StationModel* hd_station,
+        const double h_beam_l,
+        const double h_beam_m,
+        const oskar_SkyModelLocal_d* hd_sky,
+        double2* d_weights_work, // FIXME memory for weights. (num_antennas * sizeof(double2))
+        double2* d_e_jones);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_CUDA_HORIZON_CLIP_H_
+#endif // OSKAR_EVALUATE_E_JONES_2D_HORIZONTAL_H_
