@@ -158,7 +158,7 @@ void oskar_cudad_le2hg(char opt, int ns, const double* hadec, const double* dec,
     }
 
     // Invoke kernel to compute horizontal coordinates on the device.
-    int threadsPerBlock = 512;
+    int threadsPerBlock = 256;
     int blocks = (ns + threadsPerBlock - 1) / threadsPerBlock;
     size_t sharedMem = threadsPerBlock * sizeof(double2);
     oskar_cudakd_le2hg <<<blocks, threadsPerBlock, sharedMem>>>

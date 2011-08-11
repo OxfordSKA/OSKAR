@@ -34,6 +34,7 @@
 #include "cuda/kernels/oskar_cudak_wt2hg.h"
 
 #include "station/oskar_StationModel.h"
+#include "sky/oskar_SkyModel.h"
 
 #include "utility/oskar_cuda_eclipse.h"
 
@@ -88,8 +89,9 @@ int oskar_evaluate_e_jones_2d_horizontal_d(
     cudaMemcpy(d_beam_m, &h_beam_m, sizeof(double), cudaMemcpyHostToDevice);
 
     // === Generate dft weights.
-    oskar_cudak_dftw_2d_seq_in_d(num_antennas, d_antenna_x, d_antenna_y,
-            num_beams, d_beam_l, d_beam_m, d_weights_work);
+    oskar_cudak_dftw_2d_seq_in_d<<<grid_dim, block_dim, weights_shared_mem_size >>>
+            (num_antennas, d_antenna_x, d_antenna_y, num_beams, d_beam_l,
+                    d_beam_m, d_weights_work);
 
     // === Evaluate beam pattern for each source.
     const int naMax = 432;    // Should be multiple of 16.
