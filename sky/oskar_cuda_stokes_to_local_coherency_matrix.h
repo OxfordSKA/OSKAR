@@ -26,12 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_lmst.h"
-#include "sky/oskar_mjd_to_gmst.h"
+#ifndef OSKAR_CUDA_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
+#define OSKAR_CUDA_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
 
-// Double precision.
+/**
+ * @file oskar_cuda_stokes_to_local_coherency_matrix.h
+ */
 
-double oskar_mjd_to_lmst_d(double mjd, double lon)
-{
-    return oskar_mjd_to_gmst_d(mjd) + lon;
+#include "oskar_windows.h"
+#include "sky/oskar_SkyModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Convert source Stokes parameters to local coherency matrix
+ * (single precision).
+ *
+ * @details
+ * This function converts the source Stokes parameters in the local sky model
+ * to the local source coherency matrix.
+ */
+DllExport
+int oskar_cuda_stokes_to_local_coherency_matrix_f(float lst, float lat,
+		oskar_SkyModelLocal_f* hd_sky);
+
+/**
+ * @brief
+ * Convert source Stokes parameters to local coherency matrix
+ * (double precision).
+ *
+ * @details
+ * This function converts the source Stokes parameters in the local sky model
+ * to the local source coherency matrix.
+ */
+DllExport
+int oskar_cuda_stokes_to_local_coherency_matrix_d(double lst, double lat,
+		oskar_SkyModelLocal_d* hd_sky);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_CUDA_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_

@@ -26,31 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_gmst.h"
-#include <math.h>
+#include "sky/oskar_cuda_stokes_to_local_coherency_matrix.h"
+#include "sky/cudak/oskar_cudak_stokes_to_local_coherency_matrix.h"
 
-#ifndef M_2PI
-#define M_2PI 6.28318530717958647693
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+// Single precision.
+
+int oskar_cuda_stokes_to_local_coherency_matrix_f(float lst, float lat,
+		oskar_SkyModelLocal_f* hd_sky)
+{
+	// Precompute latitude trigonometry.
+	float cos_lat = cosf(lat);
+	float sin_lat = sinf(lat);
+
+	// Set up thread and block dimensions.
+	const int n = hd_sky->num_sources;
+    const int n_thd = 256;
+    const int n_blk = (n + n_thd - 1) / n_thd;
+
+    // Compute the local coherency matrix.
+	oskar_cudak_stokes_to_local_coherency_matrix_f <<< n_blk, n_thd >>> (n,
+			hd_sky->RA, hd_sky->Dec, hd_sky->I, hd_sky->Q, hd_sky->U,
+			hd_sky->V, cos_lat, sin_lat, lst, hd_sky->B);
+    cudaDeviceSynchronize();
+
+	return cudaPeekAtLastError();
+}
 
 // Double precision.
 
-// Seconds to radians.
-#define SEC2RAD 7.2722052166430399038487e-5
-
-double oskar_mjd_to_gmst_d(double mjd)
+int oskar_cuda_stokes_to_local_coherency_matrix_d(double lst, double lat,
+		oskar_SkyModelLocal_d* hd_sky)
 {
-    // Days from J2000.0.
-    double d = mjd - 51544.5;
+	// Precompute latitude trigonometry.
+	double cos_lat = cos(lat);
+	double sin_lat = sin(lat);
 
-    // Centuries from J2000.0.
-    double t = d / 36525.0;
+	// Set up thread and block dimensions.
+	const int n = hd_sky->num_sources;
+    const int n_thd = 256;
+    const int n_blk = (n + n_thd - 1) / n_thd;
 
-    // GMST at this time.
-    double gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
-                    (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
+    // Compute the local coherency matrix.
+	oskar_cudak_stokes_to_local_coherency_matrix_d <<< n_blk, n_thd >>> (n,
+			hd_sky->RA, hd_sky->Dec, hd_sky->I, hd_sky->Q, hd_sky->U,
+			hd_sky->V, cos_lat, sin_lat, lst, hd_sky->B);
+    cudaDeviceSynchronize();
 
-    // Range check (0 to 2pi).
-    t = fmod(gmst, M_2PI);
-    return (t >= 0.0) ? t : t + M_2PI;
+	return cudaPeekAtLastError();
 }
+
+#ifdef __cplusplus
+}
+#endif

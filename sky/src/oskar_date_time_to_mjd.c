@@ -26,30 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_equation_of_equinoxes_fast.h"
-#include <math.h>
+#include "sky/oskar_date_time_to_mjd.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Double precision.
 
-#define DEG2RAD 0.0174532925199432957692
-#define HOUR2RAD 0.261799387799149436539
-
-double oskar_equation_of_equinoxes_fast_d(double mjd)
+double oskar_date_time_to_mjd_d(int year, int month, int day,
+        double day_fraction)
 {
-    // Days from J2000.0.
-    double d = mjd - 51544.5;
+    // Compute Julian Day Number (Note: all integer division).
+    int a = (14 - month) / 12;
+    int y = year + 4800 - a;
+    int m = month + 12 * a - 3;
+    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
+            + (y / 400) - 32045;
 
-    // Longitude of ascending node of the Moon.
-    double omega = (125.04 - 0.052954 * d) * DEG2RAD;
-
-    // Mean Longitude of the Sun.
-    double L = (280.47 + 0.98565 * d) * DEG2RAD;
-
-    // eqeq = delta_psi * cos(epsilon).
-    double delta_psi = -0.000319 * sin(omega) - 0.000024 * sin(2.0 * L);
-    double epsilon = (23.4393 - 0.0000004 * d) * DEG2RAD;
-
-    // Return equation of equinoxes in radians.
-    double eqeq = delta_psi * cos(epsilon) * HOUR2RAD;
-    return eqeq;
+    // Compute day fraction (floating-point division).
+    day_fraction -= 0.5;
+    return jdn + day_fraction - 2400000.5;
 }
+
+#ifdef __cplusplus
+}
+#endif

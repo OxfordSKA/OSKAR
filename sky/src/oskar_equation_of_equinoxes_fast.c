@@ -26,58 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_HORIZON_CLIP_H_
-#define OSKAR_CUDA_HORIZON_CLIP_H_
-
-/**
- * @file oskar_cuda_horizon_clip.h
- */
-
-#include "sky/oskar_SkyModel.h"
-#include "oskar_windows.h"
+#include "sky/oskar_equation_of_equinoxes_fast.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Clips sources below the horizon (single precision).
- *
- * @details
- * This function determines which sources are above the horizon, and fills
- * arrays containing the source coordinates and brightnesses for those
- * sources.
- *
- * @param[in]  hd_global The input global sky model.
- * @param[in]  lst       The current local sidereal time in radians.
- * @param[in]  lat       The geographic latitude of the observer.
- * @param[out] hd_local  The output local sky model.
- */
-DllExport
-int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
-		float lst, float lat, oskar_SkyModelLocal_f* hd_local);
+// Double precision.
 
-/**
- * @brief
- * Clips sources below the horizon (double precision).
- *
- * @details
- * This function determines which sources are above the horizon, and fills
- * arrays containing the source coordinates and brightnesses for those
- * sources.
- *
- * @param[in]  hd_global The input global sky model.
- * @param[in]  lst       The current local sidereal time in radians.
- * @param[in]  lat       The geographic latitude of the observer.
- * @param[out] hd_local  The output local sky model.
- */
-DllExport
-int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
-		double lst, double lat, oskar_SkyModelLocal_d* hd_local);
+#define DEG2RAD 0.0174532925199432957692
+#define HOUR2RAD 0.261799387799149436539
+
+double oskar_equation_of_equinoxes_fast_d(double mjd)
+{
+    // Days from J2000.0.
+    double d = mjd - 51544.5;
+
+    // Longitude of ascending node of the Moon.
+    double omega = (125.04 - 0.052954 * d) * DEG2RAD;
+
+    // Mean Longitude of the Sun.
+    double L = (280.47 + 0.98565 * d) * DEG2RAD;
+
+    // eqeq = delta_psi * cos(epsilon).
+    double delta_psi = -0.000319 * sin(omega) - 0.000024 * sin(2.0 * L);
+    double epsilon = (23.4393 - 0.0000004 * d) * DEG2RAD;
+
+    // Return equation of equinoxes in radians.
+    double eqeq = delta_psi * cos(epsilon) * HOUR2RAD;
+    return eqeq;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // OSKAR_CUDA_HORIZON_CLIP_H_

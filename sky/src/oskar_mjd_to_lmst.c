@@ -26,21 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_date_time_to_mjd.h"
+#include "sky/oskar_mjd_to_lmst.h"
+#include "sky/oskar_mjd_to_gmst.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Double precision.
 
-double oskar_date_time_to_mjd_d(int year, int month, int day,
-        double day_fraction)
+double oskar_mjd_to_lmst_d(double mjd, double lon)
 {
-    // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - month) / 12;
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
-            + (y / 400) - 32045;
-
-    // Compute day fraction (floating-point division).
-    day_fraction -= 0.5;
-    return jdn + day_fraction - 2400000.5;
+    return oskar_mjd_to_gmst_d(mjd) + lon;
 }
+
+#ifdef __cplusplus
+}
+#endif

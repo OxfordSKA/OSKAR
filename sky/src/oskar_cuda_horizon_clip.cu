@@ -46,27 +46,30 @@ struct is_negative_f {
     bool operator()(const float x) {return x <= 0.0f;}
 };
 
-int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* global, float lst,
-        float lat, oskar_SkyModelLocal_f* local)
+#ifdef __cplusplus
+extern "C"
+#endif
+int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
+		float lst, float lat, oskar_SkyModelLocal_f* hd_local)
 {
     // Extract pointers out of the structures.
-    int n_in = global->num_sources;
-    const float* in_I = global->I;
-    const float* in_Q = global->Q;
-    const float* in_U = global->U;
-    const float* in_V = global->V;
-    const float* in_ra = global->RA;
-    const float* in_dec = global->Dec;
-    int* n_out = &local->num_sources;
-    float* out_I = local->I;
-    float* out_Q = local->Q;
-    float* out_U = local->U;
-    float* out_V = local->V;
-    float* out_ra = local->RA;
-    float* out_dec = local->Dec;
-    float* hor_l = local->hor_l;
-    float* hor_m = local->hor_m;
-    float* hor_n = local->hor_n;
+    int n_in = hd_global->num_sources;
+    const float* in_I = hd_global->I;
+    const float* in_Q = hd_global->Q;
+    const float* in_U = hd_global->U;
+    const float* in_V = hd_global->V;
+    const float* in_ra = hd_global->RA;
+    const float* in_dec = hd_global->Dec;
+    int* n_out = &hd_local->num_sources;
+    float* out_I = hd_local->I;
+    float* out_Q = hd_local->Q;
+    float* out_U = hd_local->U;
+    float* out_V = hd_local->V;
+    float* out_ra = hd_local->RA;
+    float* out_dec = hd_local->Dec;
+    float* hor_l = hd_local->hor_l;
+    float* hor_m = hd_local->hor_m;
+    float* hor_n = hd_local->hor_n;
 
     // Determine horizontal l,m,n positions.
     int rv = oskar_cuda_ra_dec_to_hor_lmn_f
@@ -139,27 +142,30 @@ struct is_negative_d {
     bool operator()(const double x) {return x <= 0.0;}
 };
 
-int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* global, double lst,
-        double lat, oskar_SkyModelLocal_d* local)
+#ifdef __cplusplus
+extern "C"
+#endif
+int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
+		double lst, double lat, oskar_SkyModelLocal_d* hd_local)
 {
     // Extract pointers out of the structures.
-    int n_in = global->num_sources;
-    const double* in_I = global->I;
-    const double* in_Q = global->Q;
-    const double* in_U = global->U;
-    const double* in_V = global->V;
-    const double* in_ra = global->RA;
-    const double* in_dec = global->Dec;
-    int* n_out = &local->num_sources;
-    double* out_I = local->I;
-    double* out_Q = local->Q;
-    double* out_U = local->U;
-    double* out_V = local->V;
-    double* out_ra = local->RA;
-    double* out_dec = local->Dec;
-    double* hor_l = local->hor_l;
-    double* hor_m = local->hor_m;
-    double* hor_n = local->hor_n;
+    int n_in = hd_global->num_sources;
+    const double* in_I = hd_global->I;
+    const double* in_Q = hd_global->Q;
+    const double* in_U = hd_global->U;
+    const double* in_V = hd_global->V;
+    const double* in_ra = hd_global->RA;
+    const double* in_dec = hd_global->Dec;
+    int* n_out = &hd_local->num_sources;
+    double* out_I = hd_local->I;
+    double* out_Q = hd_local->Q;
+    double* out_U = hd_local->U;
+    double* out_V = hd_local->V;
+    double* out_ra = hd_local->RA;
+    double* out_dec = hd_local->Dec;
+    double* hor_l = hd_local->hor_l;
+    double* hor_m = hd_local->hor_m;
+    double* hor_n = hd_local->hor_n;
 
     // Determine horizontal l,m,n positions.
     int rv = oskar_cuda_ra_dec_to_hor_lmn_d

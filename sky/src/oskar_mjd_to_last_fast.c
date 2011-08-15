@@ -26,24 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_stokes_to_local_field_vectors.h"
+#include "sky/oskar_mjd_to_last_fast.h"
+#include "sky/oskar_mjd_to_lmst.h"
+#include "sky/oskar_equation_of_equinoxes_fast.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Single precision.
-
-void oskar_stokes_to_local_field_vectors_f()
-{
-
-}
-
 // Double precision.
 
-void oskar_stokes_to_local_field_vectors_d()
+double oskar_mjd_to_last_fast_d(double mjd, double lon)
 {
-
+    return oskar_mjd_to_lmst_d(mjd, lon) +
+            oskar_equation_of_equinoxes_fast_d(mjd);
 }
 
 #ifdef __cplusplus

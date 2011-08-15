@@ -26,14 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STOKES_TO_LOCAL_FIELD_VECTORS_H_
-#define OSKAR_STOKES_TO_LOCAL_FIELD_VECTORS_H_
+#ifndef OSKAR_CUDA_COMPUTE_LOCAL_SKY_H_
+#define OSKAR_CUDA_COMPUTE_LOCAL_SKY_H_
 
 /**
- * @file oskar_stokes_to_local_field_vectors.h
+ * @file oskar_cuda_compute_local_sky.h
  */
 
 #include "oskar_windows.h"
+#include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,30 +42,38 @@ extern "C" {
 
 /**
  * @brief
- * Convert source Stokes parameters to average electric field vectors
+ * Computes the local sky model from the global sky model.
  * (single precision).
  *
  * @details
- * This function converts the source Stokes parameters in the local sky model
- * to average vector electric field amplitudes.
+ *
+ * @param[in]  hd_global The input global sky model.
+ * @param[in]  lst       The current local sidereal time in radians.
+ * @param[in]  lat       The geographic latitude of the observer.
+ * @param[out] hd_local  The output local sky model.
  */
 DllExport
-void oskar_stokes_to_local_field_vectors_f();
+int oskar_cuda_compute_local_sky_f(const oskar_SkyModelGlobal_f* hd_global,
+		float lst, float lat, oskar_SkyModelLocal_f* hd_local);
 
 /**
  * @brief
- * Convert source Stokes parameters to average electric field vectors
+ * Computes the local sky model from the global sky model.
  * (double precision).
  *
  * @details
- * This function converts the source Stokes parameters in the local sky model
- * to average vector electric field amplitudes.
+ *
+ * @param[in]  hd_global The input global sky model.
+ * @param[in]  lst       The current local sidereal time in radians.
+ * @param[in]  lat       The geographic latitude of the observer.
+ * @param[out] hd_local  The output local sky model.
  */
 DllExport
-void oskar_stokes_to_local_field_vectors_d();
+int oskar_cuda_compute_local_sky_d(const oskar_SkyModelGlobal_d* hd_global,
+		double lst, double lat, oskar_SkyModelLocal_d* hd_local);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_STOKES_TO_LOCAL_FIELD_VECTORS_H_
+#endif // OSKAR_CUDA_COMPUTE_LOCAL_SKY_H_

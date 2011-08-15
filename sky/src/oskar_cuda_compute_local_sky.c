@@ -26,14 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_last_fast.h"
-#include "sky/oskar_mjd_to_lmst.h"
-#include "sky/oskar_equation_of_equinoxes_fast.h"
+#include "sky/oskar_cuda_compute_local_sky.h"
+#include "sky/oskar_cuda_horizon_clip.h"
+#include "sky/oskar_cuda_stokes_to_local_coherency_matrix.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Single precision.
+
+int oskar_cuda_compute_local_sky_f(const oskar_SkyModelGlobal_f* hd_global,
+		float lst, float lat, oskar_SkyModelLocal_f* hd_local)
+{
+	// Initialise error code.
+	int err = 0;
+
+	// Clip sources below the horizon.
+	err = oskar_cuda_horizon_clip_f(hd_global, lst, lat, hd_local);
+	if (err) return err;
+
+	// Compute the source coherency matrix.
+	err = oskar_cuda_stokes_to_local_coherency_matrix_f(lst, lat, hd_local);
+	return err;
+}
 
 // Double precision.
 
-double oskar_mjd_to_last_fast_d(double mjd, double lon)
+int oskar_cuda_compute_local_sky_d(const oskar_SkyModelGlobal_d* hd_global,
+		double lst, double lat, oskar_SkyModelLocal_d* hd_local)
 {
-    return oskar_mjd_to_lmst_d(mjd, lon) +
-            oskar_equation_of_equinoxes_fast_d(mjd);
+	// Initialise error code.
+	int err = 0;
+
+	// Clip sources below the horizon.
+	err = oskar_cuda_horizon_clip_d(hd_global, lst, lat, hd_local);
+	if (err) return err;
+
+	// Compute the source coherency matrix.
+	err = oskar_cuda_stokes_to_local_coherency_matrix_d(lst, lat, hd_local);
+	return err;
 }
+
+#ifdef __cplusplus
+}
+#endif

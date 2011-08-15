@@ -26,58 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_HORIZON_CLIP_H_
-#define OSKAR_CUDA_HORIZON_CLIP_H_
-
-/**
- * @file oskar_cuda_horizon_clip.h
- */
-
-#include "sky/oskar_SkyModel.h"
-#include "oskar_windows.h"
+#include "sky/oskar_mjd_to_gmst.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Clips sources below the horizon (single precision).
- *
- * @details
- * This function determines which sources are above the horizon, and fills
- * arrays containing the source coordinates and brightnesses for those
- * sources.
- *
- * @param[in]  hd_global The input global sky model.
- * @param[in]  lst       The current local sidereal time in radians.
- * @param[in]  lat       The geographic latitude of the observer.
- * @param[out] hd_local  The output local sky model.
- */
-DllExport
-int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
-		float lst, float lat, oskar_SkyModelLocal_f* hd_local);
+// Double precision.
 
-/**
- * @brief
- * Clips sources below the horizon (double precision).
- *
- * @details
- * This function determines which sources are above the horizon, and fills
- * arrays containing the source coordinates and brightnesses for those
- * sources.
- *
- * @param[in]  hd_global The input global sky model.
- * @param[in]  lst       The current local sidereal time in radians.
- * @param[in]  lat       The geographic latitude of the observer.
- * @param[out] hd_local  The output local sky model.
- */
-DllExport
-int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
-		double lst, double lat, oskar_SkyModelLocal_d* hd_local);
+// Seconds to radians.
+#define SEC2RAD 7.2722052166430399038487e-5
+
+#ifndef M_2PI
+#define M_2PI 6.28318530717958647693
+#endif
+
+double oskar_mjd_to_gmst_d(double mjd)
+{
+    // Days from J2000.0.
+    double d = mjd - 51544.5;
+
+    // Centuries from J2000.0.
+    double t = d / 36525.0;
+
+    // GMST at this time.
+    double gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
+                    (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
+
+    // Range check (0 to 2pi).
+    t = fmod(gmst, M_2PI);
+    return (t >= 0.0) ? t : t + M_2PI;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // OSKAR_CUDA_HORIZON_CLIP_H_
