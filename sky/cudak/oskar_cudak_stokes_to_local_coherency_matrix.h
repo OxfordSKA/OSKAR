@@ -26,18 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_STOKES_TO_LOCAL_FIELD_VECTORS_H_
-#define OSKAR_CUDAK_STOKES_TO_LOCAL_FIELD_VECTORS_H_
+#ifndef OSKAR_CUDAK_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
+#define OSKAR_CUDAK_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
 
 /**
- * @file oskar_cudak_stokes_to_local_field_vectors.h
+ * @file oskar_cudak_stokes_to_local_coherency_matrix.h
  */
 
 #include "utility/oskar_cuda_eclipse.h"
+#include "utility/oskar_vector_types.h"
 
 /**
  * @brief
- * CUDA kernel to compute average source local electric field vector amplitudes
+ * CUDA kernel to compute average source local coherency matrix
  * (single precision).
  *
  * @details
@@ -58,13 +59,14 @@
  * @param[in] n The source n-coordinates (see above).
  */
 __global__
-void oskar_cudak_stokes_to_local_field_vectors_f(int ns, const float* ra,
-        const float* dec, float cosLat, float sinLat, float lst,
-        float* l, float* m, float* n);
+void oskar_cudak_stokes_to_local_coherency_matrix_f(int ns, const float* ra,
+        const float* dec, const float* stokes_I, const float* stokes_Q,
+        const float* stokes_U, const float* stokes_V, float cos_lat,
+        float sin_lat, float lst, float4c* coherency_matrix);
 
 /**
  * @brief
- * CUDA kernel to compute average source local electric field vector amplitudes
+ * CUDA kernel to compute average source local coherency matrix
  * (double precision).
  *
  * @details
@@ -85,8 +87,9 @@ void oskar_cudak_stokes_to_local_field_vectors_f(int ns, const float* ra,
  * @param[out] n The source n-coordinates (see above).
  */
 __global__
-void oskar_cudak_stokes_to_local_field_vectors_d(int ns, const double* ra,
-        const double* dec, double cosLat, double sinLat, double lst,
-        double* l, double* m, double* n);
+void oskar_cudak_stokes_to_local_coherency_matrix_d(int ns, const double* ra,
+        const double* dec, const double* stokes_I, const double* stokes_Q,
+        const double* stokes_U, const double* stokes_V, double cos_lat,
+        double sin_lat, double lst, double4c* coherency_matrix);
 
-#endif // OSKAR_CUDAK_STOKES_TO_LOCAL_FIELD_VECTORS_H_
+#endif // OSKAR_CUDAK_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
