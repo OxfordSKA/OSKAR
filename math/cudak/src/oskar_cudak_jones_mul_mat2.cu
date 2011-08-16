@@ -26,20 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_CUDA_ECLIPSE_H_
-#define OSKAR_UTIL_CUDA_ECLIPSE_H_
+#include "math/cudak/oskar_cudak_jones_mul_mat2.h"
+#include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 
-/**
- * @file oskar_util_cuda_eclipse.h
- */
+// Single precision.
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __host__
-    #define __shared__
-    #define __constant__
-    #define __forceinline__
-#endif
+__global__
+void oskar_cudak_jones_mul_mat2_f(int n, const float4c* j1,
+        const float4c* j2, float4c* m)
+{
+    // Get the array index ID that this thread is working on.
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
 
-#endif // OSKAR_UTIL_CUDA_ECLIPSE_H_
+    // Get the data from global memory.
+    float4c c_j1, c_j2, c_m;
+    if (i < n)
+    {
+        c_j1 = j1[i];
+        c_j2 = j2[i];
+    }
+    __syncthreads();
+
+    // Multiply the two complex matrices.
+    oskar_cudaf_mul_mat2c_mat2c_f(c_j1, c_j2, c_m);
+
+    // Copy result back to global memory.
+    __syncthreads();
+    if (i < n)
+        m[i] = c_m;
+}
+
+// Double precision.
+
+__global__
+void oskar_cudak_jones_mul_mat2_d(int n, const double4c* j1,
+        const double4c* j2, double4c* m)
+{
+    // Get the array index ID that this thread is working on.
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    // Get the data from global memory.
+    double4c c_j1, c_j2, c_m;
+    if (i < n)
+    {
+        c_j1 = j1[i];
+        c_j2 = j2[i];
+    }
+    __syncthreads();
+
+    // Multiply the two complex matrices.
+    oskar_cudaf_mul_mat2c_mat2c_d(c_j1, c_j2, c_m);
+
+    // Copy result back to global memory.
+    __syncthreads();
+    if (i < n)
+        m[i] = c_m;
+}

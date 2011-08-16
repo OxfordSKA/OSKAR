@@ -26,20 +26,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_CUDA_ECLIPSE_H_
-#define OSKAR_UTIL_CUDA_ECLIPSE_H_
+#ifndef CUDA_JONES_MULTIPLY_TEST_H_
+#define CUDA_JONES_MULTIPLY_TEST_H_
 
 /**
- * @file oskar_util_cuda_eclipse.h
+ * @file CudaJonesMultiplyTest.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __host__
-    #define __shared__
-    #define __constant__
-    #define __forceinline__
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
-#endif // OSKAR_UTIL_CUDA_ECLIPSE_H_
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class CudaJonesMultiplyTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(CudaJonesMultiplyTest);
+        CPPUNIT_TEST(test_mat1_c2);
+        CPPUNIT_TEST(test_mat2_c2);
+        CPPUNIT_TEST(test_mat2_f);
+        CPPUNIT_TEST(test_mat2_d);
+        CPPUNIT_TEST(test_mat2_blas_f);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test_mat1_c2();
+
+        /// Test method.
+        void test_mat2_c2();
+
+        /// Test method.
+        void test_mat2_f();
+
+        /// Test method.
+        void test_mat2_d();
+
+        /// Test method.
+        void test_mat2_blas_f();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(CudaJonesMultiplyTest);
+
+#endif // CUDA_JONES_MULTIPLY_TEST_H_

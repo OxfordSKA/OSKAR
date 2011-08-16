@@ -26,20 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_CUDA_ECLIPSE_H_
-#define OSKAR_UTIL_CUDA_ECLIPSE_H_
+#ifndef OSKAR_CUDAF_MUL_C_C_H_
+#define OSKAR_CUDAF_MUL_C_C_H_
 
 /**
- * @file oskar_util_cuda_eclipse.h
+ * @file oskar_cudaf_mul_c_c.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __host__
-    #define __shared__
-    #define __constant__
-    #define __forceinline__
-#endif
+#include "utility/oskar_cuda_eclipse.h"
 
-#endif // OSKAR_UTIL_CUDA_ECLIPSE_H_
+/**
+ * @brief
+ * CUDA device function to multiply two complex numbers (single precision).
+ *
+ * @details
+ * This inline device function multiplies together two complex numbers.
+ *
+ * @param[in] a The first complex number.
+ * @param[in] b The second complex number.
+ * @param[out] out The output complex number.
+ */
+__device__ __forceinline__ void oskar_cudaf_mul_c_c_f(const float2& a,
+        const float2& b, float2& out)
+{
+    // Multiply complex numbers a and b.
+    out.x = a.x * b.x - a.y * b.y; // RE*RE - IM*IM
+    out.y = a.x * b.y + a.y * b.x; // RE*IM + IM*RE
+}
+
+/**
+ * @brief
+ * CUDA device function to multiply two complex numbers (double precision).
+ *
+ * @details
+ * This inline device function multiplies together two complex numbers.
+ *
+ * @param[in] a The first complex number.
+ * @param[in] b The second complex number.
+ * @param[out] out The output complex number.
+ */
+__device__ __forceinline__ void oskar_cudaf_mul_c_c_d(const double2& a,
+        const double2& b, double2& out)
+{
+    // Multiply complex numbers a and b.
+    out.x = a.x * b.x - a.y * b.y; // RE*RE - IM*IM
+    out.y = a.x * b.y + a.y * b.x; // RE*IM + IM*RE
+}
+
+#endif // OSKAR_CUDAF_MUL_C_C_H_

@@ -26,20 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_CUDA_ECLIPSE_H_
-#define OSKAR_UTIL_CUDA_ECLIPSE_H_
+#ifndef OSKAR_CUDAK_JONES_MUL_MAT2_H_
+#define OSKAR_CUDAK_JONES_MUL_MAT2_H_
 
 /**
- * @file oskar_util_cuda_eclipse.h
+ * @file oskar_cudak_jones_mul_mat2.h
  */
 
-#ifdef __CDT_PARSER__
-    #define __global__
-    #define __device__
-    #define __host__
-    #define __shared__
-    #define __constant__
-    #define __forceinline__
-#endif
+#include "utility/oskar_cuda_eclipse.h"
+#include "utility/oskar_vector_types.h"
 
-#endif // OSKAR_UTIL_CUDA_ECLIPSE_H_
+/**
+ * @brief
+ * CUDA kernel to multiply together two Jones matrices (single precision).
+ *
+ * @details
+ * This kernel multiplies together two complex Jones matrices to give a new
+ * Jones matrix.
+ *
+ * The matrix multiplication is done in the order M = (J1 * J2).
+ *
+ * @param[in] n  The size of the input arrays.
+ * @param[in] j1 Array of first input Jones matrices.
+ * @param[in] j2 Array of second input Jones matrices.
+ * @param[out] m Array of output Jones matrices.
+ */
+__global__
+void oskar_cudak_jones_mul_mat2_f(int n, const float4c* j1,
+        const float4c* j2, float4c* m);
+
+/**
+ * @brief
+ * CUDA kernel to multiply together two Jones matrices (double precision).
+ *
+ * @details
+ * This kernel multiplies together two complex Jones matrices to give a new
+ * Jones matrix.
+ *
+ * The matrix multiplication is done in the order M = (J1 * J2).
+ *
+ * @param[in] n  The size of the input arrays.
+ * @param[in] j1 Array of first input Jones matrices.
+ * @param[in] j2 Array of second input Jones matrices.
+ * @param[out] m Array of output Jones matrices.
+ */
+__global__
+void oskar_cudak_jones_mul_mat2_d(int n, const double4c* j1,
+        const double4c* j2, double4c* m);
+
+#endif // OSKAR_CUDAK_JONES_MUL_MAT2_H_
