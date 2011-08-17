@@ -45,16 +45,17 @@ void LoadStationsTest::test_load()
 
     // Create temp station directory.
     int num_stations = 25;
+    int num_antennas = 10;
     QDir dir;
     dir.mkdir(QString(path));
-    for (int i = 0; i < num_stations; ++i)
+    for (int j = 0; j < num_stations; ++j)
     {
         QString station_name = "station_" +
-                QString("0000" + QString::number(i)).right(4) + ".dat";
+                QString("0000" + QString::number(j)).right(4) + ".dat";
         QFile file(QString(path) + QDir::separator() + station_name);
         file.open(QIODevice::WriteOnly);
         QTextStream out(&file);
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < num_antennas; ++i)
         {
             out << (float)i + i/10.0 << "," << (float)i - i/10.0 << endl;
         }
@@ -62,12 +63,22 @@ void LoadStationsTest::test_load()
         file.close();
     }
 
-
+    // Load the stations.
     oskar_StationModel * stations;
-    num_stations = oskar_load_stations(path, &stations);
+    int num_stations_loaded = oskar_load_stations(path, &stations);
 
-
-
+    // Check the data loaded correctly.
+    CPPUNIT_ASSERT_EQUAL(num_stations, num_stations_loaded);
+    double err = 1.0e-6;
+    for (int j = 0; j < num_stations; ++j)
+    {
+        CPPUNIT_ASSERT_EQUAL(num_antennas, (int)stations[j].num_antennas);
+        for (int i = 0; i < num_antennas; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i/10.0, stations[j].antenna_x[i], err);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i/10.0, stations[j].antenna_y[i], err);
+        }
+    }
 
     // Remove the test directory.
     dir.setPath(QString(path));

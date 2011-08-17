@@ -26,37 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_LOAD_TELESCOPE_H_
+#define OSKAR_LOAD_TELESCOPE_H_
 
-#include "apps/oskar_load_stations.h"
+/**
+ * @file oskar_load_telescope.h
+ */
 
-#include "utility/oskar_load_csv_coordinates.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFileInfoList>
+/**
+ * @brief
+ * Loads a telescope station coordinates file into a telescope model structure.
+ *
+ * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
+ * @param[out] telescope  Pointer to telescope model structure.
+ */
+void oskar_load_telescope(const char* file_path, oskar_TelescopeModel* telescope);
 
-#include <cstdio>
-#include <cstdlib>
-
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations)
-{
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
-
-    for (int i = 0; i < files.size(); ++i)
-    {
-        oskar_StationModel * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
-    }
-
-    return num_stations;
-}
-
+#endif // OSKAR_LOAD_TELESCOPE_H_

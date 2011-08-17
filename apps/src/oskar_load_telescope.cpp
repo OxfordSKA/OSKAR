@@ -27,36 +27,11 @@
  */
 
 
-#include "apps/oskar_load_stations.h"
-
+#include "apps/oskar_load_telescope.h"
 #include "utility/oskar_load_csv_coordinates.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFileInfoList>
-
-#include <cstdio>
-#include <cstdlib>
-
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations)
+void oskar_load_telescope(const char* file_path, oskar_TelescopeModel* telescope)
 {
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
-
-    for (int i = 0; i < files.size(); ++i)
-    {
-        oskar_StationModel * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
-    }
-
-    return num_stations;
+    oskar_load_csv_coordinates(file_path, &telescope->num_antennas,
+            &telescope->antenna_x, &telescope->antenna_y);
 }
-

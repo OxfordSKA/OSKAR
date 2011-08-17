@@ -28,7 +28,6 @@
 
 #include "utility/test/LoadCoordinatesTest.h"
 #include "utility/oskar_load_csv_coordinates.h"
-#include "station/oskar_StationModel.h"
 
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
@@ -43,22 +42,27 @@ void LoadCoordinates::test_load()
         return;
 
     QTextStream out(&file);
-    for (int i = 0; i < 10; ++i)
+    int num_coords = 10;
+    for (int i = 0; i < num_coords; ++i)
     {
         out << (float)i + i/10.0 << "," << (float)i - i/10.0 << endl;
     }
     file.close();
 
 
-    oskar_StationModel station;
-    oskar_load_csv_coordinates(filename, &station.num_antennas,
-            &station.antenna_x, &station.antenna_y);
+    double* x;
+    double* y;
+    unsigned n;
+    oskar_load_csv_coordinates(filename, &n, &x, &y);
 
-    printf("num antennas = %i\n", station.num_antennas);
-    for (unsigned i = 0; i < station.num_antennas; ++i)
+    // Check the data loaded correctly.
+    CPPUNIT_ASSERT_EQUAL(num_coords, (int)n);
+    for (int i = 0; i < num_coords; ++i)
     {
-        printf("%f %f\n", station.antenna_x[i], station.antenna_y[i]);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i / 10.0, x[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i / 10.0, y[i], 1.0e-6);
     }
 
+    // Cleanup.
     QFile::remove(filename);
 }

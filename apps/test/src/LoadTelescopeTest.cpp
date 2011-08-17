@@ -26,37 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "apps/test/LoadTelescopeTest.h"
+#include "apps/oskar_load_telescope.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
-#include "apps/oskar_load_stations.h"
-
-#include "utility/oskar_load_csv_coordinates.h"
-
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
 #include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFileInfoList>
+#include <QtCore/QStringList>
+#include <QtCore/QTextStream>
 
 #include <cstdio>
-#include <cstdlib>
 
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations)
+void LoadTelescopeTest::test_load()
 {
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
-
-    for (int i = 0; i < files.size(); ++i)
+    const char* filename = "temp_telescope.dat";
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+    QTextStream out(&file);
+    int num_stations = 10;
+    for (int i = 0; i < num_stations; ++i)
     {
-        oskar_StationModel * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
+        out << (float)i + i/10.0 << "," << (float)i - i/10.0 << endl;
+    }
+    file.close();
+
+    oskar_TelescopeModel telescope;
+    oskar_load_telescope(filename, &telescope);
+
+    // Check the data loaded correctly.
+    CPPUNIT_ASSERT_EQUAL(num_stations, (int)telescope.num_antennas);
+    for (int i = 0; i < num_stations; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i / 10.0, telescope.antenna_x[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i / 10.0, telescope.antenna_y[i], 1.0e-6);
     }
 
-    return num_stations;
+    QFile::remove(filename);
 }
-

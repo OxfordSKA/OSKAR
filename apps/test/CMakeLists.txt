@@ -10,6 +10,7 @@ if (CPPUNIT_FOUND)
     set(apps_test_SRC
         src/CppUnitMain.cpp
         src/LoadStationsTest.cpp
+        src/LoadTelescopeTest.cpp
     )
 
     add_executable(appsTest ${apps_test_SRC})
