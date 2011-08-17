@@ -26,25 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#include "apps/test/LoadStationsTest.h"
+#include "apps/oskar_load_stations.h"
+#include "station/oskar_StationModel.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <QtCore/QFile>
+#include <QtCore/QDir>
+#include <QtCore/QStringList>
+#include <QtCore/QTextStream>
+#include <QtCore/QFileInfo>
+#include <QtCore/QFileInfoList>
 
-struct oskar_StationModel
+#include <cstdio>
+
+void LoadStationsTest::test_load()
 {
-    unsigned num_antennas;
+    const char* path = "temp_test_stations";
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z;
-};
+    // Create temp station directory.
+    int num_stations = 25;
+    QDir dir;
+    dir.mkdir(QString(path));
+    for (int i = 0; i < num_stations; ++i)
+    {
+        QString station_name = "station_" +
+                QString("0000" + QString::number(i)).right(4) + ".dat";
+        QFile file(QString(path) + QDir::separator() + station_name);
+        file.open(QIODevice::WriteOnly);
+        QTextStream out(&file);
+        for (int i = 0; i < 10; ++i)
+        {
+            out << (float)i + i/10.0 << "," << (float)i - i/10.0 << endl;
+        }
+        file.flush();
+        file.close();
+    }
 
 
-#ifdef __cplusplus
+    oskar_StationModel * stations;
+    num_stations = oskar_load_stations(path, &stations);
+
+
+
+
+    // Remove the test directory.
+    dir.setPath(QString(path));
+    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
+    for (int i = 0; i < files.size(); ++i)
+        QFile::remove(files.at(i).absoluteFilePath());
+    dir.rmdir(dir.absolutePath());
 }
-#endif
-
-#endif // OSKAR_STATION_MODEL_H_

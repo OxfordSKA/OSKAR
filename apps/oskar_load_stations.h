@@ -26,25 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef OSKAR_LOAD_STATIONS_H_
+#define OSKAR_LOAD_STATIONS_H_
 
-struct oskar_StationModel
-{
-    unsigned num_antennas;
+#include "station/oskar_StationModel.h"
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z;
-};
+unsigned oskar_load_stations(const char* directory, oskar_StationModel** stations);
 
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // OSKAR_STATION_MODEL_H_
+#endif // OSKAR_LOAD_STATIONS_H_

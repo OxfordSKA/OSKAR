@@ -26,25 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#ifndef LOAD_STATIONS_TEST_H_
+#define LOAD_STATIONS_TEST_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file LoadStationsTest.h
+ */
 
-struct oskar_StationModel
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class LoadStationsTest : public CppUnit::TestFixture
 {
-    unsigned num_antennas;
+    public:
+        CPPUNIT_TEST_SUITE(LoadStationsTest);
+        CPPUNIT_TEST(test_load);
+        CPPUNIT_TEST_SUITE_END();
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z;
+    public:
+        /// Test method.
+        void test_load();
 };
 
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(LoadStationsTest);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // OSKAR_STATION_MODEL_H_
+#endif // LOAD_STATIONS_TEST_H_

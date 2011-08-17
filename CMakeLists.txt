@@ -47,9 +47,16 @@ if (NOT DEFINED BUILD_OSKAR_WIDGETS)
     set(BUILD_OSKAR_WIDGETS ON)
 endif ()
 
+if (NOT DEFINED BUILD_OSKAR_APPS)
+    set(BUILD_OSKAR_APPS ON)
+endif()
+
+
 # ==== Set dependencies and compiler options.
 include(dependencies)
 include(compilerOptions)
+
+enable_testing()
 
 # ==== Build single oskar library.
 if (BUILD_OSKAR)
@@ -83,7 +90,10 @@ if (BUILD_OSKAR)
     set_target_properties(oskar PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-    target_link_libraries(oskar ${CUDA_CUBLAS_LIBRARIES} ${CUDA_LIBRARIES})
+    target_link_libraries(oskar
+        ${CUDA_LIBRARIES}
+        ${CUDA_CUBLAS_LIBRARIES}
+    )
     set_target_properties(oskar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     install(TARGETS oskar LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     set_target_properties(oskar PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
@@ -101,7 +111,9 @@ endif ()
 if (BUILD_OSKAR_WIDGETS)
     add_subdirectory(widgets)
 endif ()
-
+if (BUILD_OSKAR_APPS)
+    add_subdirectory(apps)
+endif ()
 
 
 # ==== Install header tree.
@@ -113,6 +125,25 @@ install(DIRECTORY "${oskar-lib_SOURCE_DIR}/."
     PATTERN "matlab" EXCLUDE
     PATTERN "python" EXCLUDE
     PATTERN ".svn" EXCLUDE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

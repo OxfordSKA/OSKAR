@@ -22,6 +22,8 @@ if (CPPUNIT_FOUND AND BUILD_OSKAR_WIDGETS)
         ${CPPUNIT_LIBRARIES}
     )
 
+    add_test(imagingTest imagingTest)
+
 endif()
 
 

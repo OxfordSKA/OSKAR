@@ -26,25 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#ifndef OSKAR_LOAD_CSV_COORDINATES_H_
+#define OSKAR_LOAD_CSV_COORDINATES_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file oskar_load_csv_coordinates.h
+ */
 
-struct oskar_StationModel
-{
-    unsigned num_antennas;
+/**
+ * @brief
+ * Loads a comma separated list of 2-dimensional co-ordinates from a plain text
+ * file.
+ *
+ * @details
+ * A plain text file containing a comma separated list of co-ordinates (x,y)
+ * is loaded into the provided pointers.
+ *
+ * *************************************************************************
+ * !WARNING! This function will allocate memory for loaded arrays internally.
+ * **************************************************************************
+ *
+ * Usage:
+ * To read a text file containing 4 sets of coordinates represented as pairs of
+ * comma separated values. e.g.
+ * \verbatim
+ *      1.0, 2.0
+ *      1.1, 2.1
+ *      1.2, 2.2
+ *      1.3, 2.3
+ * \endverbatim
+ *
+ * The following code will load the coordinates into memory.
+ * \code
+ *      double* x = NULL;
+ *      double* y = NULL;
+ *      unsigned num = 0;
+ *      oskar_load_csv_coordinates("filename.dat", &num, &x, &y);
+ * \endcode
+ *
+ * @param[in]  filename Filename of the csv coordinates file.
+ * @param[out] n        Pointer to number of coordinates loaded.
+ * @param[out] x        Pointer to array of x coordinates loaded.
+ * @param[out] y        Pointer to array of y coordinates loaded.
+ * @return Number of coordinates loaded.
+ */
+int oskar_load_csv_coordinates(const char* filename, unsigned* n,
+        double** x, double** y);
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z;
-};
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // OSKAR_STATION_MODEL_H_
+#endif // OSKAR_LOAD_CSV_COORDINATES_H_

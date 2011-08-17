@@ -26,25 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "apps/oskar_load_stations.h"
 
-struct oskar_StationModel
+#include "utility/oskar_load_csv_coordinates.h"
+
+#include <QtCore/QDir>
+#include <QtCore/QStringList>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
+#include <QtCore/QFileInfoList>
+
+#include <cstdio>
+#include <cstdlib>
+
+unsigned oskar_load_stations(const char* path, oskar_StationModel** stations)
 {
-    unsigned num_antennas;
+    int num_stations = 0;
+    QDir dir;
+    dir.setPath(QString(path));
+    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
+    num_stations = files.size();
+    *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z;
-};
+    for (int i = 0; i < files.size(); ++i)
+    {
+        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
+        double*  ax = (*stations)[i].antenna_x;
+        double*  ay = (*stations)[i].antenna_y;
+        unsigned* n = &((*stations)[i].num_antennas);
+        oskar_load_csv_coordinates(filename, n, &ax, &ay);
+    }
 
-
-#ifdef __cplusplus
+    return num_stations;
 }
-#endif
 
-#endif // OSKAR_STATION_MODEL_H_

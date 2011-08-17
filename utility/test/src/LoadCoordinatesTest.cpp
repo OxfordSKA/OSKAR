@@ -26,25 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#include "utility/test/LoadCoordinatesTest.h"
+#include "utility/oskar_load_csv_coordinates.h"
+#include "station/oskar_StationModel.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
 
-struct oskar_StationModel
+#include <iostream>
+
+void LoadCoordinates::test_load()
 {
-    unsigned num_antennas;
+    const char* filename = "temp_coordinates.dat";
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
 
-    double * antenna_x;
-    double * antenna_y;
-    double * antenna_z;
-};
+    QTextStream out(&file);
+    for (int i = 0; i < 10; ++i)
+    {
+        out << (float)i + i/10.0 << "," << (float)i - i/10.0 << endl;
+    }
+    file.close();
 
 
-#ifdef __cplusplus
+    oskar_StationModel station;
+    oskar_load_csv_coordinates(filename, &station.num_antennas,
+            &station.antenna_x, &station.antenna_y);
+
+    printf("num antennas = %i\n", station.num_antennas);
+    for (unsigned i = 0; i < station.num_antennas; ++i)
+    {
+        printf("%f %f\n", station.antenna_x[i], station.antenna_y[i]);
+    }
+
+    QFile::remove(filename);
 }
-#endif
-
-#endif // OSKAR_STATION_MODEL_H_

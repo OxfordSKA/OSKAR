@@ -24,6 +24,8 @@ if (CPPUNIT_FOUND)
         oskar
         ${CPPUNIT_LIBRARIES}
     )
+
+    add_test(mathTest mathTest)
 endif()
 
 

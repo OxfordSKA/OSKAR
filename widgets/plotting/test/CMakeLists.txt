@@ -18,6 +18,8 @@ if (CPPUNIT_FOUND)
         oskar_widgets
         ${CPPUNIT_LIBRARIES}
         ${QT_QTCORE_LIBRARY})
+
+    add_test(plottingTest plottingTest)
 endif ()
 
 # ==== QtTest unit testing.

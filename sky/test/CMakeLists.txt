@@ -14,4 +14,6 @@ if (CPPUNIT_FOUND)
     cuda_add_executable(skyTest ${sky_test_SRC})
     target_link_libraries(skyTest oskar ${CPPUNIT_LIBRARIES})
 
+    add_test(skyTest skyTest)
+
 endif ()

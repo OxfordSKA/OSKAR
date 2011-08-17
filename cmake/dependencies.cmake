@@ -61,7 +61,7 @@ if (NOT CUDA_FOUND)
     message("** WARNING: CUDA not found: "
             "Unable to build OSKAR library!")
     message("*****************************************************************")
-    set(BUILD_OSKAR FALSE)
+    set(BUILD_OSKAR OFF)
 endif ()
 
 if (NOT MATLAB_FOUND)
@@ -73,10 +73,11 @@ endif()
 
 if (NOT QT4_FOUND)
     message("*****************************************************************")
-    message("** WARNING: QT4 not found. ")
+    message("** WARNING: QT4 not found.")
     message("*****************************************************************")
-    set(BUILD_OSKAR_WIDGETS FALSE)
-    set(BUILD_OSKAR_IMAGING FALSE)
+    set(BUILD_OSKAR_WIDGETS OFF)
+    set(BUILD_OSKAR_IMAGING OFF)
+    set(BUILD_OSKAR_APPS    OFF)
 endif()
 
 if (NOT Qwt5_FOUND)
@@ -84,7 +85,7 @@ if (NOT Qwt5_FOUND)
     message("** WARNING: Qwt5 not found: "
         "Unable to build plotting widgets library!")
     message("*****************************************************************")
-    set(BUILD_OSKAR_WIDGETS FALSE)
+    set(BUILD_OSKAR_WIDGETS OFF)
 endif()
 
 if (NOT CASACORE_FOUND)
@@ -92,7 +93,7 @@ if (NOT CASACORE_FOUND)
     message("** WARNING: CasaCore not found: "
         "Unable to build OSKAR measurement set library!")
     message("*****************************************************************")
-    set(BUILD_OSKAR_MS FALSE)
+    set(BUILD_OSKAR_MS OFF)
 endif()
 
 if (NOT FFTW3_FOUND)
@@ -100,7 +101,7 @@ if (NOT FFTW3_FOUND)
     message("** WARNING: FFTW3 not found: "
             "Unable to build imaging library!")
     message("*****************************************************************")
-    set(BUILD_OSKAR_IMAGING FALSE)
+    set(BUILD_OSKAR_IMAGING OFF)
 endif ()
 
 if (NOT CPPUNIT_FOUND)
@@ -110,6 +111,9 @@ if (NOT CPPUNIT_FOUND)
     message("*****************************************************************")
 endif()
 
+if (NOT BUILD_OSKAR)
+    set(BUILD_OSKAR_PLATFORM OFF)
+endif()
 
 
 # ==== Prints a message saying which libraries are being built.
@@ -124,6 +128,9 @@ if (BUILD_OSKAR_IMAGING)
 endif ()
 if (BUILD_OSKAR_WIDGETS)
     message("==> Building 'liboskar_widgets'")
+endif ()
+if (BUILD_OSKAR_APPS)
+    message("==> Building oskar applicaitons")
 endif ()
 
 # ==== Set a flag to tell cmake that dependencies have been checked.

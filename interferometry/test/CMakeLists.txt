@@ -16,4 +16,6 @@ if (CPPUNIT_FOUND)
         ${CPPUNIT_LIBRARIES}
     )
 
+    add_test(interferometryTest interferometryCudaTest)
+
 endif()
