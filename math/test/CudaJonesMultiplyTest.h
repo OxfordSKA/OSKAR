@@ -50,7 +50,6 @@ class CudaJonesMultiplyTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_mat2_c2);
         CPPUNIT_TEST(test_mat2_f);
         CPPUNIT_TEST(test_mat2_d);
-        CPPUNIT_TEST(test_mat2_blas_f);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -72,9 +71,6 @@ class CudaJonesMultiplyTest : public CppUnit::TestFixture
 
         /// Test method.
         void test_mat2_d();
-
-        /// Test method.
-        void test_mat2_blas_f();
 };
 
 // Register the test class.

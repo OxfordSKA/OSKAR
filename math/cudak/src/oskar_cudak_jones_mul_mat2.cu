@@ -45,13 +45,11 @@ void oskar_cudak_jones_mul_mat2_f(int n, const float4c* j1,
         c_j1 = j1[i];
         c_j2 = j2[i];
     }
-    __syncthreads();
 
     // Multiply the two complex matrices.
     oskar_cudaf_mul_mat2c_mat2c_f(c_j1, c_j2, c_m);
 
     // Copy result back to global memory.
-    __syncthreads();
     if (i < n)
         m[i] = c_m;
 }
@@ -72,13 +70,11 @@ void oskar_cudak_jones_mul_mat2_d(int n, const double4c* j1,
         c_j1 = j1[i];
         c_j2 = j2[i];
     }
-    __syncthreads();
 
     // Multiply the two complex matrices.
     oskar_cudaf_mul_mat2c_mat2c_d(c_j1, c_j2, c_m);
 
     // Copy result back to global memory.
-    __syncthreads();
     if (i < n)
         m[i] = c_m;
 }
