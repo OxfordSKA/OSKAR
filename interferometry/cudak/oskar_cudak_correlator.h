@@ -34,6 +34,7 @@
  */
 
 #include "utility/oskar_cuda_eclipse.h"
+#include "utility/oskar_vector_types.h"
 
 /**
  * @brief
@@ -42,7 +43,6 @@
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] k                Complex input matrix (ns rows, na columns).
  * @param[in] u                Station u-coordinates in wavenumbers.
  * @param[in] v                Station v-coordinates in wavenumbers.
  * @param[in] l                Distance from phase centre for each source.
@@ -52,8 +52,9 @@
  */
 __global__
 void oskar_cudak_correlator_f(const int ns, const int na,
-        const float2* k, const float* u, const float* v, const float* l,
-        const float* m, const float lambda_bandwidth, float2* vis);
+		const float4c* j1, const float4c* b, const float4c* j2,
+		const float* u, const float* v, const float* l, const float* m,
+		const float lambda_bandwidth, float4c* vis);
 
 /**
  * @brief
@@ -62,7 +63,6 @@ void oskar_cudak_correlator_f(const int ns, const int na,
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] k                Complex input matrix (ns rows, na columns).
  * @param[in] u                Station u-coordinates in wavenumbers.
  * @param[in] v                Station v-coordinates in wavenumbers.
  * @param[in] l                Distance from phase centre for each source.
