@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
 
 // Single precision.
 
@@ -41,7 +41,7 @@ __device__ float sincf(float a)
 }
 
 __global__
-void oskar_cudak_correlator_f(const int ns, const int na,
+void oskar_cudak_correlator_scalar_f(const int ns, const int na,
         const float2* k, const float* u, const float* v, const float* l,
         const float* m, const float lambda_bandwidth, float2* vis)
 {
@@ -113,7 +113,7 @@ __device__ double sinc(double a)
 }
 
 __global__
-void oskar_cudak_correlator_d(const int ns, const int na,
+void oskar_cudak_correlator_scalar_d(const int ns, const int na,
         const double2* k, const double* u, const double* v, const double* l,
         const double* m, const double lambda_bandwidth, double2* vis)
 {

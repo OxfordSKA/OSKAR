@@ -30,7 +30,7 @@
 
 #include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
 #include "math/cudak/oskar_cudak_mat_mul_cc.h"
-#include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
 #include "math/oskar_mat_tri_c.h"
 #include "interferometry/oskar_compute_baselines.h"
 #include "interferometry/oskar_xyz_to_uvw.h"
@@ -179,7 +179,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
         if (errCuda != cudaSuccess) goto stop;
 
         // Call the correlator kernel.
-        oskar_cudak_correlator_f <<<vBlk, vThd, vsMem>>> (
+        oskar_cudak_correlator_scalar_f <<<vBlk, vThd, vsMem>>> (
                 ns, na, kmat, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
@@ -354,7 +354,7 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         if (errCuda != cudaSuccess) goto stop;
 
         // Call the correlator kernel.
-        oskar_cudak_correlator_d <<<vBlk, vThd, vsMem>>> (
+        oskar_cudak_correlator_scalar_d <<<vBlk, vThd, vsMem>>> (
                 ns, na, kmat, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();

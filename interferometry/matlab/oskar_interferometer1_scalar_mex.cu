@@ -11,28 +11,6 @@
 #include "station/oskar_StationModel.h"
 #include "sky/oskar_SkyModel.h"
 
-
-#include "interferometry/oskar_interferometer1_scalar.h"
-#include "interferometry/oskar_cuda_correlator_scalar.h"
-#include "interferometry/cudak/oskar_cudak_correlator.h"
-#include "interferometry/cudak/oskar_cudak_xyz_to_uvw.h"
-#include "interferometry/oskar_compute_baselines.h"
-#include "interferometry/oskar_xyz_to_uvw.h"
-
-
-#include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
-#include "math/cudak/oskar_cudak_mat_mul_cc.h"
-#include "math/cudak/oskar_cudak_vec_mul_cr.h"
-
-#include "sky/oskar_cuda_horizon_clip.h"
-#include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
-#include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
-
-#include "station/oskar_evaluate_e_jones_2d_horizontal.h"
-
-#include "sky/oskar_mjd_to_last_fast.h"
-
-
 #include <cstdio>
 #include <cmath>
 

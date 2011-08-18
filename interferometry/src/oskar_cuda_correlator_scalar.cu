@@ -28,7 +28,7 @@
 
 #include "interferometry/oskar_cuda_correlator_scalar.h"
 
-#include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
 #include "interferometry/cudak/oskar_cudak_xyz_to_uvw.h"
 
 #include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
@@ -82,28 +82,28 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
         // Compute the station u,v,w coordinates.
         oskar_cudak_xyz_to_uvw_f <<<rThd, rBlk>>>
                 (na, ax, ay, az, ha0, dec0, u, v, w);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Compute K-matrix of 3D DFT weights.
         oskar_cudak_dftw_3d_seq_out_f <<<kBlk, kThd, sMem>>>
                 (na, u, v, w, ns, l, m, n, kmat);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Perform complex matrix element multiply of K with E * B.
         oskar_cudak_mat_mul_cc_f <<<mBlk, mThd>>>
                 (ns, na, kmat, emat, kmat);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
-        oskar_cudak_correlator_f <<<vBlk, vThd, vsMem>>>
+        oskar_cudak_correlator_scalar_f <<<vBlk, vThd, vsMem>>>
                 (ns, na, kmat, u, v, l, m, lambda_bandwidth, visd);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
     }
@@ -154,28 +154,28 @@ int oskar_cuda_correlator_scalar_d(int na, const double* ax,
         // Compute the station u,v,w coordinates.
         oskar_cudak_xyz_to_uvw_d <<<rThd, rBlk>>>
                 (na, ax, ay, az, ha0, dec0, u, v, w);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Compute K-matrix of 3D DFT weights.
         oskar_cudak_dftw_3d_seq_out_d <<<kBlk, kThd, sMem>>>
                 (na, u, v, w, ns, l, m, n, kmat);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Perform complex matrix element multiply of K with E * B.
         oskar_cudak_mat_mul_cc_d <<<mBlk, mThd>>>
                 (ns, na, kmat, emat, kmat);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
-        oskar_cudak_correlator_d <<<vBlk, vThd, vsMem>>>
+        oskar_cudak_correlator_scalar_d <<<vBlk, vThd, vsMem>>>
                 (ns, na, kmat, u, v, l, m, lambda_bandwidth, visd);
-        cudaThreadSynchronize();
+        cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
     }

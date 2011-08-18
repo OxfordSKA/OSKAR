@@ -28,7 +28,7 @@
 
 #include "interferometry/oskar_interferometer1_scalar.h"
 #include "interferometry/oskar_cuda_correlator_scalar.h"
-#include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
 #include "interferometry/cudak/oskar_cudak_xyz_to_uvw.h"
 #include "interferometry/oskar_compute_baselines.h"
 #include "interferometry/oskar_xyz_to_uvw.h"
@@ -168,8 +168,8 @@ int oskar_interferometer1_scalar_d(
     cudaMalloc((void**)&d_vis, mem_size_vis);
 
     // === Allocate device memory for correlator work buffer.
-    double2* d_vis_work;
-    size_t mem_size_work = 2 * sky.num_sources * num_stations + 3 * num_stations * sizeof(double2);
+    double* d_vis_work;
+    size_t mem_size_work = (2 * sky.num_sources * num_stations + 3 * num_stations) * sizeof(double);
     cudaMalloc((void**)&d_vis_work, mem_size_work);
 
     // === Calculate time increments.
@@ -227,7 +227,7 @@ int oskar_interferometer1_scalar_d(
                     hd_sky_local.num_sources, d_l, d_m, d_n,
                     (const double*)d_e_jones, ra0_rad, dec0_rad, lst_start,
                     num_fringe_ave, dt_days * SEC_PER_DAY, lambda * bandwidth,
-                    (double*)d_vis, (double*)d_vis_work);
+                    (double*)d_vis, d_vis_work);
         }
 
         // copy back the vis dump into host memory.

@@ -6,7 +6,7 @@
 # ==== Add the source files in this directory.
 set(interferometry_SRC
     # CUDA kernels
-    cudak/src/oskar_cudak_correlator.cu
+    cudak/src/oskar_cudak_correlator_scalar.cu
     cudak/src/oskar_cudak_xyz_to_uvw.cu
 
     # C/C++ interface
