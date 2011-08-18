@@ -26,37 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sky/test/LoadSourcesTest.h"
+#include "sky/oskar_load_sources.h"
+#include "sky/oskar_SkyModel.h"
 
-#include "apps/oskar_load_stations.h"
-
-#include "utility/oskar_load_csv_coordinates_2d.h"
-
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFileInfoList>
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
 
 #include <cstdio>
 #include <cstdlib>
 
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations)
+void LoadSourcesTest::test_load()
 {
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
-
-    for (int i = 0; i < files.size(); ++i)
+    const char* filename = "temp_sources.dat";
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
+    int num_sources = 1000000;
+    for (int i = 0; i < num_sources; ++i)
     {
-        oskar_StationModel * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates_2d(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
+        if (i % 10 == 0) fprintf(file, "# some comment!\n");
+        fprintf(file, "%lf %lf %lf %lf %lf %lf\n", i/10.0, i/20.0, 0.0, 1.0,
+                2.0, 3.0);
+    }
+    fclose(file);
+
+    oskar_SkyModelGlobal_d sky;
+    TIMER_START
+    oskar_load_sources(filename, &sky);
+    TIMER_STOP("Loaded %i sources", sky.num_sources)
+
+    // Cleanup.
+    remove(filename);
+
+    const double deg2rad = 0.0174532925199432957692;
+
+    // Check the data loaded correctly.
+    CPPUNIT_ASSERT_EQUAL(num_sources, (int)sky.num_sources);
+    for (int i = 0; i < num_sources; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0 * deg2rad, sky.RA[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0 * deg2rad, sky.Dec[i], 1.0e-6);
     }
 
-    return num_stations;
 }
-

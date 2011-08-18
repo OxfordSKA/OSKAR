@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_CSV_COORDINATES_H_
-#define OSKAR_LOAD_CSV_COORDINATES_H_
+#ifndef OSKAR_LOAD_CSV_COORDINATES_2D_H_
+#define OSKAR_LOAD_CSV_COORDINATES_2D_H_
 
 /**
- * @file oskar_load_csv_coordinates.h
+ * @file oskar_load_csv_coordinates_2d.h
  */
 
 #include "oskar_windows.h"
@@ -76,11 +76,12 @@ extern "C" {
  * @param[out] y        Pointer to array of y coordinates loaded.
  * @return Number of coordinates loaded.
  */
-int oskar_load_csv_coordinates(const char* filename, unsigned* n,
+DllExport
+int oskar_load_csv_coordinates_2d(const char* filename, unsigned* n,
         double** x, double** y);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_LOAD_CSV_COORDINATES_H_
+#endif // OSKAR_LOAD_CSV_COORDINATES_2D_H_

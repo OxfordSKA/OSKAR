@@ -9,6 +9,7 @@ if (CPPUNIT_FOUND)
         src/CppUnitMain.cpp
         src/SkyTest.cpp
         src/EquatorialToHorizontalTest.cu
+        src/LoadSourcesTest.cpp
     )
 
     cuda_add_executable(skyTest ${sky_test_SRC})

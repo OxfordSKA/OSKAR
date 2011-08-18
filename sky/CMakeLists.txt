@@ -20,6 +20,7 @@ set(sky_SRC
     src/oskar_cuda_stokes_to_local_coherency_matrix.cu
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
+    src/oskar_load_sources.c
     src/oskar_mjd_to_gmst.c
     src/oskar_mjd_to_last_fast.c
     src/oskar_mjd_to_lmst.c

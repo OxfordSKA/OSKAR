@@ -87,7 +87,6 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
             obs_start_mjd_utc, obs_length_days, num_vis_dumps, num_vis_ave,
             num_fringe_ave, freq, bandwidth, vis_temp, u, v, w);
 
-
     for (int i = 0; i < cols; ++i)
     {
         vis_re[i] = vis_temp[i].x;

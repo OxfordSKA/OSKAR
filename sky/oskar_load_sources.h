@@ -26,37 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_LOAD_SOURCES_H_
+#define OSKAR_LOAD_SOURCES_H_
 
-#include "apps/oskar_load_stations.h"
+/**
+ * @file oskar_load_sources.h
+ */
 
-#include "utility/oskar_load_csv_coordinates_2d.h"
+#include "oskar_windows.h"
+#include "sky/oskar_SkyModel.h"
 
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFileInfoList>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cstdio>
-#include <cstdlib>
 
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations)
-{
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
+/**
+ * @brief
+ * Loads sources from a plain text source file.
+ *
+ * @param[in]  file_path  Path to the a source list file.
+ * @param[out] sky        Pointer to global sky model structure.
+ */
+DllExport
+void oskar_load_sources(const char* file_path, oskar_SkyModelGlobal_d* sky);
 
-    for (int i = 0; i < files.size(); ++i)
-    {
-        oskar_StationModel * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates_2d(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
-    }
 
-    return num_stations;
+#ifdef __cplusplus
 }
+#endif
 
+#endif // OSKAR_LOAD_SOURCES_H_

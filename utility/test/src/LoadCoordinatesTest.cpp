@@ -27,37 +27,31 @@
  */
 
 #include "utility/test/LoadCoordinatesTest.h"
-#include "utility/oskar_load_csv_coordinates.h"
+#include "utility/oskar_load_csv_coordinates_2d.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
 
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
+#include <cstdio>
+#include <cstdlib>
 
-#include <iostream>
-
-void LoadCoordinates::test_load()
+void LoadCoordinatesTest::test_load()
 {
     const char* filename = "temp_coordinates.dat";
-    QFile file(filename);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return;
-
-    QTextStream out(&file);
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
     int num_coords = 100000;
     for (int i = 0; i < num_coords; ++i)
     {
-        out << i/10.0 << "," << i/20.0 << endl;
+        fprintf(file, "%lf,%lf\n", i/10.0, i/20.0);
     }
-    file.close();
-
+    fclose(file);
 
     double* x = NULL;
     double* y = NULL;
     unsigned n;
     TIMER_START
-    oskar_load_csv_coordinates(filename, &n, &x, &y);
+    oskar_load_csv_coordinates_2d(filename, &n, &x, &y);
     TIMER_STOP("Loaded %d coordinate pairs", n)
 
     // Check the data loaded correctly.
@@ -69,5 +63,5 @@ void LoadCoordinates::test_load()
     }
 
     // Cleanup.
-    QFile::remove(filename);
+    remove(filename);
 }

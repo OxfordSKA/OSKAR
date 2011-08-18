@@ -42,10 +42,10 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class LoadCoordinates : public CppUnit::TestFixture
+class LoadCoordinatesTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(LoadCoordinates);
+        CPPUNIT_TEST_SUITE(LoadCoordinatesTest);
         CPPUNIT_TEST(test_load);
         CPPUNIT_TEST_SUITE_END();
 
@@ -55,6 +55,6 @@ class LoadCoordinates : public CppUnit::TestFixture
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(LoadCoordinates);
+CPPUNIT_TEST_SUITE_REGISTRATION(LoadCoordinatesTest);
 
 #endif // LOAD_COORDINATES_TEST_H_

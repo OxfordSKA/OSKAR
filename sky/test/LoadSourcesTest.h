@@ -26,37 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef LOAD_SOURCES_TEST_H_
+#define LOAD_SOURCES_TEST_H_
 
-#include "apps/oskar_load_stations.h"
+/**
+ * @file LoadSourcesTest.h
+ */
 
-#include "utility/oskar_load_csv_coordinates_2d.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-#include <QtCore/QDir>
-#include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFileInfoList>
-
-#include <cstdio>
-#include <cstdlib>
-
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations)
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class LoadSourcesTest : public CppUnit::TestFixture
 {
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
+    public:
+        CPPUNIT_TEST_SUITE(LoadSourcesTest);
+        CPPUNIT_TEST(test_load);
+        CPPUNIT_TEST_SUITE_END();
 
-    for (int i = 0; i < files.size(); ++i)
-    {
-        oskar_StationModel * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates_2d(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
-    }
+    public:
+        /// Test method.
+        void test_load();
+};
 
-    return num_stations;
-}
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(LoadSourcesTest);
 
+#endif // LOAD_SOURCES_TEST_H_
