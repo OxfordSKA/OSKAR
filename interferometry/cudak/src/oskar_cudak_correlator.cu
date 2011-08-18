@@ -26,53 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_CORRELATOR_SCALAR_H_
-#define OSKAR_CUDAK_CORRELATOR_SCALAR_H_
+#include "interferometry/cudak/oskar_cudak_correlator.h"
 
-/**
- * @file oskar_cudak_correlator_scalar.h
- */
+// Single precision.
 
-#include "utility/oskar_cuda_eclipse.h"
+#define ONE_OVER_2C 1.66782047599076024788E-9   // 1 / (2c)
+#define ONE_OVER_2Cf 1.66782047599076024788E-9f // 1 / (2c)
 
-/**
- * @brief
- *
- * @details
- *
- * @param[in] ns               Number of sources.
- * @param[in] na               Number of stations.
- * @param[in] k                Complex input matrix (ns rows, na columns).
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
- * @param[in] l                Distance from phase centre for each source.
- * @param[in] m                Distance from phase centre for each source.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis          Modified output complex visibilities.
- */
+extern __shared__ float2 smem[];
+
+__device__ __forceinline__ float sincf(float a)
+{
+    return (a == 0.0f) ? 1.0f : sinf(a) / a;
+}
+
 __global__
-void oskar_cudak_correlator_scalar_f(const int ns, const int na,
+void oskar_cudak_correlator_f(const int ns, const int na,
         const float2* k, const float* u, const float* v, const float* l,
-        const float* m, const float lambda_bandwidth, float2* vis);
+        const float* m, const float lambda_bandwidth, float2* vis)
+{
+    // Determine which index into the visibility matrix this thread block
+    // is generating.
+    int ai = blockIdx.x; // Column index.
+    int aj = blockIdx.y; // Row index.
 
-/**
- * @brief
- *
- * @details
- *
- * @param[in] ns               Number of sources.
- * @param[in] na               Number of stations.
- * @param[in] k                Complex input matrix (ns rows, na columns).
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
- * @param[in] l                Distance from phase centre for each source.
- * @param[in] m                Distance from phase centre for each source.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis          Modified output complex visibilities.
- */
+    // Return immediately if we're in the lower triangular half of the
+    // visibility matrix.
+    if (aj >= ai) return;
+
+}
+
+// Double precision.
+
+extern __shared__ double2 smemd[];
+
+__device__ __forceinline__ double sinc(double a)
+{
+    return (a == 0.0) ? 1.0 : sin(a) / a;
+}
+
 __global__
-void oskar_cudak_correlator_scalar_d(const int ns, const int na,
+void oskar_cudak_correlator_d(const int ns, const int na,
         const double2* k, const double* u, const double* v, const double* l,
-        const double* m, const double lambda_bandwidth, double2* vis);
-
-#endif // OSKAR_CUDAK_CORRELATOR_SCALAR_H_
+        const double* m, const double lambda_bandwidth, double2* vis)
+{
+}

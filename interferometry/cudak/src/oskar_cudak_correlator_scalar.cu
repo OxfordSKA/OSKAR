@@ -35,7 +35,7 @@
 
 extern __shared__ float2 smem[];
 
-__device__ float sincf(float a)
+__device__ __forceinline__ float sincf(float a)
 {
     return (a == 0.0f) ? 1.0f : sinf(a) / a;
 }
@@ -107,7 +107,7 @@ void oskar_cudak_correlator_scalar_f(const int ns, const int na,
 
 extern __shared__ double2 smemd[];
 
-__device__ double sinc(double a)
+__device__ __forceinline__ double sinc(double a)
 {
     return (a == 0.0) ? 1.0 : sin(a) / a;
 }
