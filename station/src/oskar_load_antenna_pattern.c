@@ -20,7 +20,7 @@ int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data)
     if (file == NULL) return 1;
 
     // Initialise the flags and local data.
-    int n = 0, a = 0;
+    int n = 0;
     float inc_theta = 0.0f, inc_phi = 0.0f;
     float theta = 0.0f, phi = 0.0f, p_theta = 0.0f, p_phi = 0.0f;
     float abs_theta, phase_theta, abs_phi, phase_phi;
@@ -33,11 +33,14 @@ int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data)
     const char* dbi = strstr(line, "dBi"); // Check for presence of "dBi".
 
     // Loop over and read each line in the file.
-    while ((a = fscanf(file, "%f %f %*f %f %f %f %f %*f", &theta, &phi,
-            &abs_theta, &phase_theta, &abs_phi, &phase_phi)) != EOF)
+    while (fgets(line, sizeof(line), file))
     {
-        // Check that the data was read correctly.
-        if (a == 0) continue;
+        // Parse the line.
+        int a = sscanf(line, "%f %f %*f %f %f %f %f %*f", &theta, &phi,
+                    &abs_theta, &phase_theta, &abs_phi, &phase_phi);
+
+        // Check that data was read correctly.
+        if (a != 6) continue;
 
         // Ignore any data below horizon.
         if (theta > 90.0) continue;
@@ -96,8 +99,8 @@ int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data)
 
     // Store number of points in arrays.
     data->n_points = n;
-    data->n_theta = round(n_theta); // Must round to nearest integer.
-    data->n_phi = round(n_phi); // Must round to nearest integer.
+    data->n_theta = 1 + round(n_theta); // Must round to nearest integer.
+    data->n_phi = 1 + round(n_phi); // Must round to nearest integer.
     data->min_theta = min_theta;
     data->min_phi = min_phi;
     data->max_theta = max_theta;
