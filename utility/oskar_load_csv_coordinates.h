@@ -33,6 +33,12 @@
  * @file oskar_load_csv_coordinates.h
  */
 
+#include "oskar_windows.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief
  * Loads a comma separated list of 2-dimensional co-ordinates from a plain text
@@ -72,5 +78,9 @@
  */
 int oskar_load_csv_coordinates(const char* filename, unsigned* n,
         double** x, double** y);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // OSKAR_LOAD_CSV_COORDINATES_H_

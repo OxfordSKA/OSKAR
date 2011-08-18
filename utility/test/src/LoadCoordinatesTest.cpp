@@ -29,6 +29,9 @@
 #include "utility/test/LoadCoordinatesTest.h"
 #include "utility/oskar_load_csv_coordinates.h"
 
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
+
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
 
@@ -42,25 +45,27 @@ void LoadCoordinates::test_load()
         return;
 
     QTextStream out(&file);
-    int num_coords = 10;
+    int num_coords = 100000;
     for (int i = 0; i < num_coords; ++i)
     {
-        out << (float)i + i/10.0 << "," << (float)i - i/10.0 << endl;
+        out << i/10.0 << "," << i/20.0 << endl;
     }
     file.close();
 
 
-    double* x;
-    double* y;
+    double* x = NULL;
+    double* y = NULL;
     unsigned n;
+    TIMER_START
     oskar_load_csv_coordinates(filename, &n, &x, &y);
+    TIMER_STOP("Loaded %d coordinate pairs", n)
 
     // Check the data loaded correctly.
     CPPUNIT_ASSERT_EQUAL(num_coords, (int)n);
     for (int i = 0; i < num_coords; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i / 10.0, x[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i / 10.0, y[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0, x[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0, y[i], 1.0e-6);
     }
 
     // Cleanup.
