@@ -45,7 +45,7 @@ endif ()
 
 # ==== Find dependencies.
 find_package(CUDA 4.0 QUIET)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     find_package(Qt4 4.5.0 COMPONENTS QtCore QtGui QtXml QtOpenGL QtTest QUIET)
     find_package(Qwt5 QUIET)
 endif ()
