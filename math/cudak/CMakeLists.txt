@@ -18,6 +18,7 @@ set(math_cuda_kernels_SRC
     src/oskar_cudak_vec_mul_cc.cu
     src/oskar_cudak_vec_mul_cr.cu
     src/oskar_cudak_vec_mul_rr.cu
+    src/oskar_cudak_vec_scale_rr.cu
     src/oskar_cudak_vec_set_c.cu
     src/oskar_cudak_vec_sub_rr.cu
     src/oskar_cudak_vec_sub_sr.cu
