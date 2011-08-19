@@ -32,6 +32,12 @@ int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data)
     if (!fgets(line, sizeof(line), file)) return 1;
     const char* dbi = strstr(line, "dBi"); // Check for presence of "dBi".
 
+    // Initalise pointers to NULL.
+    data->g_phi = NULL;
+    data->g_theta = NULL;
+    data->phi = NULL;
+    data->theta = NULL;
+
     // Loop over and read each line in the file.
     while (fgets(line, sizeof(line), file))
     {
