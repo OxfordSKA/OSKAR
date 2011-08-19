@@ -41,44 +41,46 @@ __device__ __forceinline__ float sincf(float a)
     return (a == 0.0f) ? 1.0f : sinf(a) / a;
 }
 
+#define AI blockIdx.x // Column index.
+#define AJ blockIdx.y // Row index.
+
 __global__
 void oskar_cudak_correlator_f(const int ns, const int na,
-		const float4c* j1, const float4c* b, const float4c* j2,
-		const float* u, const float* v, const float* l, const float* m,
-		const float lambda_bandwidth, float4c* vis)
+        const float4c* j1, const float4c* b, const float4c* j2,
+        const float* u, const float* v, const float* l, const float* m,
+        const float lambda_bandwidth, float4c* vis)
 {
-    // Determine which index into the visibility matrix this thread block
-    // is generating.
-    int ai = blockIdx.x; // Column index.
-    int aj = blockIdx.y; // Row index.
-
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
-    if (aj >= ai) return;
+    if (AJ >= AI) return;
 
-    // Determine UV-distance for baseline (common per thread block).
-    __device__ __shared__ float uu, vv;
+    // Common things per thread block.
+    __shared__ float uu, vv;
+    __shared__ const float4c *sti, *stj;
     if (threadIdx.x == 0)
     {
-        uu = ONE_OVER_2Cf * lambda_bandwidth * (u[ai] - u[aj]);
-        vv = ONE_OVER_2Cf * lambda_bandwidth * (v[ai] - v[aj]);
+        // Determine UV-distance for baseline (common per thread block).
+        uu = ONE_OVER_2Cf * lambda_bandwidth * (u[AI] - u[AJ]);
+        vv = ONE_OVER_2Cf * lambda_bandwidth * (v[AI] - v[AJ]);
+
+        // Get pointers to both source vectors for station i and j.
+        sti = &j1[ns * AI];
+        stj = &j2[ns * AJ];
     }
     __syncthreads();
 
-    // Get pointers to both source vectors for station i and j.
-    const float4c* sti = &j1[ns * ai];
-    const float4c* stj = &j2[ns * aj];
-
     // Initialise shared memory.
-    smem[threadIdx.x].a = make_float2(0.0f, 0.0f);
-    smem[threadIdx.x].b = make_float2(0.0f, 0.0f);
-    smem[threadIdx.x].c = make_float2(0.0f, 0.0f);
-    smem[threadIdx.x].d = make_float2(0.0f, 0.0f);
+    {
+        smem[threadIdx.x].a = make_float2(0.0f, 0.0f);
+        smem[threadIdx.x].b = make_float2(0.0f, 0.0f);
+        smem[threadIdx.x].c = make_float2(0.0f, 0.0f);
+        smem[threadIdx.x].d = make_float2(0.0f, 0.0f);
+    }
 
     // Each thread loops over a subset of the sources.
     for (int t = threadIdx.x; t < ns; t += blockDim.x)
     {
-    	// Multiply first Jones matrix with source coherency matrix.
+        // Multiply first Jones matrix with source coherency matrix.
         float4c c_a, c_b, c_c;
         c_a = sti[t];
         c_b = b[t];
@@ -101,7 +103,39 @@ void oskar_cudak_correlator_f(const int ns, const int na,
     }
     __syncthreads();
 
-    // TODO Accumulate.
+    // Accumulate (could optimise this).
+    if (threadIdx.x == 0)
+    {
+        float4c temp;
+        temp.a = make_float2(0.0f, 0.0f);
+        temp.b = make_float2(0.0f, 0.0f);
+        temp.c = make_float2(0.0f, 0.0f);
+        temp.d = make_float2(0.0f, 0.0f);
+        for (int i = 0; i < blockDim.x; ++i)
+        {
+            temp.a.x += smem[i].a.x;
+            temp.a.y += smem[i].a.y;
+            temp.b.x += smem[i].b.x;
+            temp.b.y += smem[i].b.y;
+            temp.c.x += smem[i].c.x;
+            temp.c.y += smem[i].c.y;
+            temp.d.x += smem[i].d.x;
+            temp.d.y += smem[i].d.y;
+        }
+
+        // Determine 1D index.
+        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+
+        // Modify existing visibility.
+        vis[idx].a.x += temp.a.x;
+        vis[idx].a.y += temp.a.y;
+        vis[idx].b.x += temp.b.x;
+        vis[idx].b.y += temp.b.y;
+        vis[idx].c.x += temp.c.x;
+        vis[idx].c.y += temp.c.y;
+        vis[idx].d.x += temp.d.x;
+        vis[idx].d.y += temp.d.y;
+    }
 }
 
 // Double precision.
