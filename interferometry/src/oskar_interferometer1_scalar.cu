@@ -37,6 +37,7 @@
 #include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
 #include "math/cudak/oskar_cudak_mat_mul_cc.h"
 #include "math/cudak/oskar_cudak_vec_mul_cr.h"
+#include "math/cudak/oskar_cudak_vec_scale_rr.h"
 
 #include "sky/oskar_cuda_horizon_clip.h"
 #include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
@@ -55,78 +56,86 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define SEC_PER_DAY 86400.0
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Private functions.
-//------------------------------------------------------------------------------
-//void copy_telescope_to_gpu_d(const oskar_TelescopeModel* h_telescope,
-//        oskar_TelescopeModel* hd_telescope);
-//
-//void copy_stations_to_gpu_d(const oskar_StationModel* h_stations,
-//        const unsigned num_stations, oskar_StationModel* hd_stations);
-//
-//void copy_global_sky_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
-//        oskar_SkyModelGlobal_d* d_sky);
-//
-//void alloc_local_sky_d(int num_sources, oskar_SkyModelLocal_d* hd_sky);
-//
-//void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
-//        const oskar_StationModel* stations, double2** d_weights);
-//
-//void evaluate_e_jones(const unsigned num_stations,
-//        const oskar_StationModel* hd_stations,
-//        const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
-//        const double h_beam_m, double2* d_weights_work, double2* d_e_jones);
-//
-//void mult_e_jones_by_source_field_amp(const unsigned num_stations,
-//        const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
-//
-//void evaluate_beam_horizontal_lm(double ra0_rad, double dec0_rad, double lst_rad,
-//        double lat_rad, double* l, double* m);
-//
-//void correlate(const oskar_TelescopeModel* hd_telescope,
-//        const oskar_SkyModelLocal_d* hd_sky, const double2* d_e_jones,
-//        const double ra0_deg, const double dec0_deg, const double lst_start,
-//        const int num_fringe_ave, const double dt_days, const double lambda,
-//        const double bandwidtgh, double2* d_vis, double* work);
-//
-//------------------------------------------------------------------------------
 
+// =============================================================================
+void copy_telescope_to_gpu_d(const oskar_TelescopeModel* h_telescope,
+        oskar_TelescopeModel* hd_telescope);
+
+void scale_telescope_coords_to_wavenumbers(oskar_TelescopeModel* hd_telescope,
+        const double wavenumber);
+
+void copy_stations_to_gpu_d(const oskar_StationModel* h_stations,
+        const unsigned num_stations, oskar_StationModel* hd_stations);
+
+void scale_station_coords_to_wavenumbers(const unsigned num_stations,
+        oskar_StationModel* hd_stations, const double wavenumber);
+
+void copy_global_sky_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
+        oskar_SkyModelGlobal_d* d_sky);
+
+void alloc_local_sky_d(int num_sources, oskar_SkyModelLocal_d* hd_sky);
+
+void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
+        const oskar_StationModel* stations, double2** d_weights);
+
+void evaluate_e_jones(const unsigned num_stations,
+        const oskar_StationModel* hd_stations,
+        const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
+        const double h_beam_m, double2* d_weights_work, double2* d_e_jones);
+
+void mult_e_jones_by_source_field_amp(const unsigned num_stations,
+        const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
+
+void evaluate_beam_horizontal_lm(double ra0_rad, double dec0_rad, double lst_rad,
+        double lat_rad, double* l, double* m);
+
+void correlate(const oskar_TelescopeModel* hd_telescope,
+        const oskar_SkyModelLocal_d* hd_sky, const double2* d_e_jones,
+        const double ra0_deg, const double dec0_deg, const double lst_start,
+        const int num_fringe_ave, const double dt_days, const double lambda,
+        const double bandwidtgh, double2* d_vis, double* work);
+// =============================================================================
 
 
 int oskar_interferometer1_scalar_d(
-        const oskar_TelescopeModel telescope, // NOTE: Already in ITRS coordinates
-        const oskar_StationModel * stations,  // FIXME: PUT THESE IN WAVENUMBER UNITS (2 * pi * x / lambda)
+        const oskar_TelescopeModel telescope,
+        const oskar_StationModel * stations,
         const oskar_SkyModelGlobal_d sky,
+
         const double ra0_rad,
         const double dec0_rad,
         const double obs_start_mjd_utc,
         const double obs_length_days,
+
         const unsigned num_vis_dumps,
         const unsigned num_vis_ave,
         const unsigned num_fringe_ave,
-        const double freq,
+        const double frequency,
         const double bandwidth,
-        double2 * h_vis, // NOTE: Passed to the function as preallocated memory.
-        double* h_u,     // NOTE: Passed to the function as preallocated memory.
-        double* h_v,     // NOTE: Passed to the function as preallocated memory.
-        double* h_w      // NOTE: Passed to the function as preallocated memory.
+
+        double2 * h_vis,
+        double* h_u,
+        double* h_v,
+        double* h_w
 ){
+    const double sec_per_day = 86400.0;
+
     // === Evaluate number of stations and number of baselines.
     const unsigned num_stations = telescope.num_antennas;
     const unsigned num_baselines = num_stations * (num_stations - 1) / 2;
 
-    const double lambda = 299792458.0 / freq;
+    const double lambda = 299792458.0 / frequency;
+    const double wavenumber = 2.0 * M_PI / lambda;
+
 
     // === Allocate device memory for telescope and transfer to device.
     oskar_TelescopeModel hd_telescope;
     copy_telescope_to_gpu_d(&telescope, &hd_telescope);
+    scale_telescope_coords_to_wavenumbers(&hd_telescope, wavenumber);
 
     // === Allocate memory to hold station uvw coordinates.
     double* station_u = (double*)malloc(num_stations * sizeof(double));
@@ -135,8 +144,9 @@ int oskar_interferometer1_scalar_d(
 
     // === Allocate device memory for antennas and transfer to the device.
     size_t mem_size = num_stations * sizeof(oskar_StationModel);
-    oskar_StationModel * hd_stations = (oskar_StationModel*)malloc(mem_size);
+    oskar_StationModel* hd_stations = (oskar_StationModel*)malloc(mem_size);
     copy_stations_to_gpu_d(stations, num_stations, hd_stations);
+    scale_station_coords_to_wavenumbers(num_stations, hd_stations, wavenumber);
 
     // === Allocate device memory for source model and transfer to device.
     oskar_SkyModelGlobal_d hd_sky_global;
@@ -221,12 +231,13 @@ int oskar_interferometer1_scalar_d(
                     d_l, d_m, d_n);
 
             // Correlator which updates phase matrix.
-            double lst_start = oskar_mjd_to_last_fast_d(t_ave_start, telescope.longitude);
+            double lst_start = oskar_mjd_to_last_fast_d(t_ave_start,
+                    telescope.longitude);
             oskar_cuda_correlator_scalar_d(num_stations, hd_telescope.antenna_x,
                     hd_telescope.antenna_y, hd_telescope.antenna_z,
                     hd_sky_local.num_sources, d_l, d_m, d_n,
                     (const double*)d_e_jones, ra0_rad, dec0_rad, lst_start,
-                    num_fringe_ave, dt_days * SEC_PER_DAY, lambda * bandwidth,
+                    num_fringe_ave, dt_days * sec_per_day, lambda * bandwidth,
                     (double*)d_vis, d_vis_work);
         }
 
@@ -318,6 +329,21 @@ void copy_telescope_to_gpu_d(const oskar_TelescopeModel * h_telescope,
 }
 
 
+void scale_telescope_coords_to_wavenumbers(oskar_TelescopeModel* hd_telescope,
+        const double wavenumber)
+{
+    int num_stations = hd_telescope->num_antennas;
+    int num_threads = 256;
+    int num_blocks  = (int)ceil((double) num_stations / num_threads);
+    oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
+            (num_stations, wavenumber, hd_telescope->antenna_x);
+    oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
+            (num_stations, wavenumber, hd_telescope->antenna_y);
+    oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
+            (num_stations, wavenumber, hd_telescope->antenna_z);
+}
+
+
 void copy_stations_to_gpu_d(const oskar_StationModel * h_stations,
         const unsigned num_stations, oskar_StationModel * hd_stations)
 {
@@ -334,6 +360,22 @@ void copy_stations_to_gpu_d(const oskar_StationModel * h_stations,
                 cudaMemcpyHostToDevice);
         cudaMemcpy(hd_stations[i].antenna_y, h_stations[i].antenna_y, mem_size,
                 cudaMemcpyHostToDevice);
+    }
+}
+
+
+void scale_station_coords_to_wavenumbers(const unsigned num_stations,
+        oskar_StationModel* hd_stations, const double wavenumber)
+{
+    int num_threads = 256;
+    for (unsigned i = 0; i < num_stations; ++i)
+    {
+        int num_antennas = hd_stations[i].num_antennas;
+        int num_blocks  = (int)ceil((double) num_antennas / num_threads);
+        oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
+                (num_antennas, wavenumber, hd_stations[i].antenna_x);
+        oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
+                (num_antennas, wavenumber, hd_stations[i].antenna_y);
     }
 }
 
@@ -419,7 +461,6 @@ void mult_e_jones_by_source_field_amp(const unsigned num_stations,
                 (num_sources, d_e_jones_station, hd_sky->I, d_e_jones_station);
     }
 }
-
 
 
 void evaluate_beam_horizontal_lm(double ra0_rad, double dec0_rad, double lst_rad,

@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     }
 
     QSettings settings(settings_file, QSettings::IniFormat);
-    QString sky_file       = settings.value("sky/source_file").toString();
+    QString sky_file        = settings.value("sky/source_file").toString();
 
     QString telescope_file  = settings.value("telescope/layout_file").toString();
     double latitude         = settings.value("telescope/latitude").toDouble();
@@ -89,7 +89,6 @@ int main(int argc, char** argv)
 
     printf("= Number of sources in model = %i\n", sky.num_sources);
 
-
     // Load telescope layout.
     oskar_TelescopeModel telescope;
     telescope.latitude  = latitude;
@@ -100,7 +99,6 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     oskar_load_telescope(telescope_file.toLatin1().data(), &telescope);
-    // FIXME convert stations to wavenumbers ???
 
     // Load station layouts.
     oskar_StationModel* stations;
@@ -110,8 +108,6 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     unsigned num_stations = oskar_load_stations(station_dir.toLatin1().data(), &stations);
-    // FIXME convert stations to wavenumbers.
-
 
     // Check load worked.
     if (num_stations != telescope.num_antennas)
@@ -146,7 +142,6 @@ int main(int argc, char** argv)
 //        printf("% -10.3f % -10.3f % -10.3f % -10.3f % -10.3f\n",
 //                u[i], v[i], w[i], vis[i].x, vis[i].y);
 //    }
-
 
     // Write memory out.
     FILE * file;

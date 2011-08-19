@@ -44,11 +44,7 @@ struct oskar_StationModel;
 struct oskar_SkyModelLocal_d;
 
 /**
- * @brief
- *
- * @details
- *
- * @return
+ * NOTE: This function still needs to be written!
  */
 DllExport
 int oskar_evaluate_e_jones_2d_horizontal_f();
@@ -56,10 +52,34 @@ int oskar_evaluate_e_jones_2d_horizontal_f();
 
 /**
  * @brief
+ * Function to evaluate the scalar E-Jones (beam pattern) for each source
+ * in a local sky model for a specified station array geometry.
  *
  * @details
+ * - The arrays d_weights_work and d_e_jones must be pre-allocated on the
+ *   device to the following sizes:
+ *      - d_weights_work: hd_station.num_antennas * sizeof(double2)
+ *      - d_e_jones:      hd_sky.num_sources * sizeof(double2)
  *
- * @return
+ * - The beam phase centre coordinates are specified in horizontal lm
+ *   and these can be converted from ra, dec using the function:
+ *      - evaluate_beam_horizontal_lm() (FIXME: this currently only exists
+ *        as a private function in oskar_interferometer1_scalar)
+ *
+ *
+ * @param[in]  hd_station       Pointer to host structure containing device
+ *                              pointers to the station antenna coordinates.
+ * @param[in]  h_beam_l         Beam phase centre coordinate in horizontal lm
+ *                              units.
+ * @param[in]  h_beam_m         Beam phase centre coordinate in horizontal lm
+ *                              units.
+ * @param[in]  hd_sky           Pointer to host structure holding device pointers
+ *                              to the local sky model.
+ * @param[in]  d_weights_work   Work array for beamforming phase weights.
+ * @param[out] d_e_jones        Array containing the E-Jones evaluated for each
+ *                              source position.
+ *
+ * @return CUDA error code.
  */
 DllExport
 int oskar_evaluate_e_jones_2d_horizontal_d(
@@ -67,7 +87,7 @@ int oskar_evaluate_e_jones_2d_horizontal_d(
         const double h_beam_l,
         const double h_beam_m,
         const oskar_SkyModelLocal_d* hd_sky,
-        double2* d_weights_work, // FIXME memory for weights. (num_antennas * sizeof(double2))
+        double2* d_weights_work,
         double2* d_e_jones);
 
 

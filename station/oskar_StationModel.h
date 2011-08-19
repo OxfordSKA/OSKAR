@@ -39,7 +39,7 @@ struct oskar_StationModel
 
     double * antenna_x;
     double * antenna_y;
-    double * antenna_z;
+    //double * antenna_z;
 };
 
 

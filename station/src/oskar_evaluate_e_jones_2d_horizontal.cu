@@ -65,12 +65,12 @@ int oskar_evaluate_e_jones_2d_horizontal_d(
         const double h_beam_l,
         const double h_beam_m,
         const oskar_SkyModelLocal_d* hd_sky,
-        double2* d_weights_work, // FIXME memory for weights. (num_antennas * sizeof(double2))
+        double2* d_weights_work,
         double2* d_e_jones
 ){
     // === Initialise.
-    const int num_beams = 1;  // Number of beams is 1, (this is a beam pattern).
-    const int num_antennas = hd_station->num_antennas;
+    const int num_beams        = 1; // == 1 as this is a beam pattern!
+    const int num_antennas     = hd_station->num_antennas;
     const double * d_antenna_x = hd_station->antenna_x;
     const double * d_antenna_y = hd_station->antenna_y;
 
@@ -78,18 +78,17 @@ int oskar_evaluate_e_jones_2d_horizontal_d(
     int num_antennas_per_block = 256;
     dim3 block_dim(num_antennas_per_block, num_beams);  // (antennas, beams).
     dim3 grid_dim((num_antennas + block_dim.x - 1) / block_dim.x, 1);
-    size_t weights_shared_mem_size = (block_dim.x + block_dim.y) * sizeof(double2);
+    size_t shared_mem_size = (block_dim.x + block_dim.y) * sizeof(double2);
 
-    // TODO: pass down device pointers though function args.?!
     // NOTE: maybe have version of weights generator passes by copy?
     double *d_beam_l, *d_beam_m; // beam position direction cosines.
-    cudaMalloc((void**)&d_beam_l, sizeof(double));
-    cudaMalloc((void**)&d_beam_m, sizeof(double));
+    cudaMalloc(&d_beam_l, sizeof(double));
+    cudaMalloc(&d_beam_m, sizeof(double));
     cudaMemcpy(d_beam_l, &h_beam_l, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_beam_m, &h_beam_m, sizeof(double), cudaMemcpyHostToDevice);
 
     // === Generate dft weights.
-    oskar_cudak_dftw_2d_seq_in_d<<<grid_dim, block_dim, weights_shared_mem_size >>>
+    oskar_cudak_dftw_2d_seq_in_d<<<grid_dim, block_dim, shared_mem_size >>>
             (num_antennas, d_antenna_x, d_antenna_y, num_beams, d_beam_l,
                     d_beam_m, d_weights_work);
 
@@ -98,8 +97,8 @@ int oskar_evaluate_e_jones_2d_horizontal_d(
     const int bThd = 256;     // Beam pattern generator (source positions).
     int bBlk = 0;             // Number of thread blocks for beam pattern computed later.
     bBlk = (hd_sky->num_sources + bThd - 1) / bThd;
-    size_t bSmem = 2 * naMax * sizeof(double2);
-    oskar_cudak_dftw_o2c_2d_d <<< bBlk, bThd, bSmem >>>
+    shared_mem_size = 2 * naMax * sizeof(double2);
+    oskar_cudak_dftw_o2c_2d_d <<< bBlk, bThd, shared_mem_size >>>
             (num_antennas, d_antenna_x, d_antenna_y,
             d_weights_work, hd_sky->num_sources, hd_sky->hor_l, hd_sky->hor_m,
             naMax, d_e_jones);
@@ -111,6 +110,7 @@ int oskar_evaluate_e_jones_2d_horizontal_d(
     // === Check error code.
     cudaDeviceSynchronize();
 
+    // === Return any CUDA error.
     return cudaPeekAtLastError();
 }
 

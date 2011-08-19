@@ -44,15 +44,62 @@
 extern "C" {
 #endif
 
+
 /**
  * @brief
+ * Function to evaluate the interferometer response of a number of
+ * aperture array stations to a point source sky model consisting of sources
+ * specified by a scalar brightness.
  *
  * @details
+ * The telescope geometry, described by the oskar_TelescopeModel structure
+ * is expected to be ITRS co-ordinates in units of metres. The function
+ * oskar_horizon_plane_to_itrs() can be used to convert from horizon plane
+ * coordinates to the ITRS system.
  *
+ * Station aperture array geometry, described by the oskar_StationModel
+ * structure array must also be specified in metres.
+ *
+ * See the OSKAR memo 1 for a more detailed description of the co-ordinate system
+ * used.
+ *
+ * The visibility amplitudes and baseline coordinates are returned in arrays
+ * which must be pre-allocated to a length:
+ *      number of baselines x number of visibility dumps
+ *
+ *
+ * @param[in]  telescope         Telescope model structure with station
+ *                               co-ordinates in ITRS coordinates, in metres.
+ * @param[in]  stations          Array of station model structures containing
+ *                               array coordinates, in metres.
+ * @param[in]  sky               Global sky model structure.
+ * @param[in]  ra0_rad           RA of the pointing phase centre, in radians.
+ * @param[in]  dec0_rad          Declination of the pointing phase centre,
+ *                               in radians.
+ * @param[in]  start_mjd_utc     Start date of the observation in modified
+ *                               Julian days UTC.
+ * @param[in]  obs_length_days   Observation length in days.
+ * @param[in]  n_vis_dumps       Number of visibility dumps (made by the
+ *                               coorelator) to make during the observation time.
+ * @param[in]  n_vis_ave         Number of averages of the full visibility
+ *                               evaluation per visibility dump. Both
+ *                               the interferometer phase and beam-pattern
+ *                               (E-Jones) is updated for each evaluation.
+ * @param[in]  n_fringe_ave      Number of averages per full visibility average
+ *                               where only the interferometer phase is updated
+ *                               (with a fixed beam-pattern / E-Jones)
+ * @param[in]  frequency         Observation frequency, in Hz.
+ * @param[in]  bandwidth         Observation channel bandwidth, in Hz.
+ * @param[out] h_vis             Array of visibilities.
+ * @param[out] h_u               Array of baseline u coordinates, in metres.
+ * @param[out] h_v               Array of baseline v coordinates, in metres.
+ * @param[out] h_w               Array of baseline w coordinates, in metres.
+ *
+ * @return
  */
 DllExport
 int oskar_interferometer1_scalar_d(
-        const oskar_TelescopeModel telescope, // NOTE: In ITRS coordinates
+        const oskar_TelescopeModel telescope,
         const oskar_StationModel * stations,
         const oskar_SkyModelGlobal_d sky,
         const double ra0_rad,
@@ -62,45 +109,13 @@ int oskar_interferometer1_scalar_d(
         const unsigned n_vis_dumps,
         const unsigned n_vis_ave,
         const unsigned n_fringe_ave,
-        const double freq,
+        const double frequency,
         const double bandwidth,
-        double2 * h_vis, // NOTE: Passed to the function as preallocated memory.
-        double* h_u,     // NOTE: Passed to the function as preallocated memory.
-        double* h_v,     // NOTE: Passed to the function as preallocated memory.
-        double* h_w      // NOTE: Passed to the function as preallocated memory.
+        double2 * vis,
+        double* u,
+        double* v,
+        double* w
 );
-
-
-void copy_telescope_to_gpu_d(const oskar_TelescopeModel* h_telescope,
-        oskar_TelescopeModel* hd_telescope);
-
-void copy_stations_to_gpu_d(const oskar_StationModel* h_stations,
-        const unsigned num_stations, oskar_StationModel* hd_stations);
-
-void copy_global_sky_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
-        oskar_SkyModelGlobal_d* d_sky);
-
-void alloc_local_sky_d(int num_sources, oskar_SkyModelLocal_d* hd_sky);
-
-void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
-        const oskar_StationModel* stations, double2** d_weights);
-
-void evaluate_e_jones(const unsigned num_stations,
-        const oskar_StationModel* hd_stations,
-        const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
-        const double h_beam_m, double2* d_weights_work, double2* d_e_jones);
-
-void mult_e_jones_by_source_field_amp(const unsigned num_stations,
-        const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
-
-void evaluate_beam_horizontal_lm(double ra0_rad, double dec0_rad, double lst_rad,
-        double lat_rad, double* l, double* m);
-
-void correlate(const oskar_TelescopeModel* hd_telescope,
-        const oskar_SkyModelLocal_d* hd_sky, const double2* d_e_jones,
-        const double ra0_deg, const double dec0_deg, const double lst_start,
-        const int num_fringe_ave, const double dt_days, const double lambda,
-        const double bandwidtgh, double2* d_vis, double* work);
 
 
 #ifdef __cplusplus

@@ -49,6 +49,9 @@
  * The kernel requires (blockDim.x + blockDim.y) * sizeof(float2)
  * bytes of shared memory.
  *
+ * Note: input x,y positions for spatial DFT weights should be in wavenumber
+ * units.
+ *
  * @param[in] n_in     Number of input points.
  * @param[in] x_in     Array of input x positions.
  * @param[in] y_in     Array of input y positions.
@@ -75,6 +78,9 @@ void oskar_cudak_dftw_2d_seq_in_f(const int n_in, const float* x_in,
  *
  * The kernel requires (blockDim.x + blockDim.y) * sizeof(double2)
  * bytes of shared memory.
+ *
+ * Note: input x,y positions for spatial DFT weights should be in wavenumber
+ * units.
  *
  * @param[in] n_in     Number of input points.
  * @param[in] x_in     Array of input x positions.
