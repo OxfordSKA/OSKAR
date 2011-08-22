@@ -70,10 +70,14 @@ void CudaInterpBilinearTest::test_method()
     float2* pos = (float2*)malloc(n * sizeof(float2));
     for (int i = 0, h = 0; h < nh; h++)
     {
+    	float h_frac = float(h) / float(nh-1);
         for (int w = 0; w < nw; w++)
         {
-            pos[i].x = 0.5 + (width - 1) * float(w) / float(nw-1);
-            pos[i].y = 0.5 + (height - 1) * float(h) / float(nh-1);
+        	float w_frac = float(w) / float(nw-1);
+//            pos[i].x = 0.5 + (width - 1) * w_frac;
+//            pos[i].y = 0.5 + (height - 1) * h_frac;
+        	pos[i].x = (0.5 + (width - 1) * w_frac) / float(width);
+        	pos[i].y = (0.5 + (height - 1) * h_frac) / float(height);
 //			printf("%5d %10.4f %10.4f\n", i, pos[i].x, pos[i].y);
             i++;
         }

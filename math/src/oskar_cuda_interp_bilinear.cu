@@ -73,7 +73,7 @@ int oskar_math_cuda_interp_bilinear(int width, int height, int pitch,
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<T>();
     texture<T, 2>& ref = texture_ref<T>();
     ref.filterMode = cudaFilterModeLinear;
-    ref.normalized = false;
+    ref.normalized = true;
     cudaError_t errCuda = cudaBindTexture2D(0, &ref, input, &channelDesc,
             width, height, pitch);
     if (errCuda != cudaSuccess) return errCuda;
