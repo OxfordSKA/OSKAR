@@ -213,7 +213,7 @@ void SkyTest::test_angles_from_lm()
     l[3] = sin(-1.5 * M_PI / 180.0);
     m[3] = 0.0;//sin(5.0 * M_PI / 180.0);
 
-    oskar_angles_from_lm(num_positions, ra0, dec0, &l[0], &m[0], &ra[0], &dec[0]);
+    oskar_angles_from_lm_d(num_positions, ra0, dec0, &l[0], &m[0], &ra[0], &dec[0]);
 
     cout << endl;
     for (unsigned i = 0; i < num_positions; ++i)

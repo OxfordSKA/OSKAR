@@ -6,7 +6,7 @@ include_directories(${oskar-lib_SOURCE_DIR}/math)
 
 # ==== Add the source files in this directory.
 set(sky_SRC
-    src/oskar_angles_from_lm.cpp
+    src/oskar_angles_from_lm.c
     src/oskar_rotate_sources.cpp
 
     src/filter_sources_by_flux.cpp

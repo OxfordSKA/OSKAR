@@ -26,41 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ANGLES_FROM_LM_H_
-#define OSKAR_ANGLES_FROM_LM_H_
+#include "sky/oskar_angles_from_lm.h"
 
-/**
- * @file oskar_angles_from_lm.h
- */
-
-#include "oskar_windows.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Convert direction cosines to angles (double precision).
- *
- * @details
- * Returns the longitude and latitude of the supplied array of
- * direction cosines (l and m).
- *
- * @param[in]  num_positions Number of positions to evaluate.
- * @param[in]  lon0          Longitude of the field centre, in radians.
- * @param[in]  lat0          Latitude of the field centre, in radians.
- * @param[in]  l             Array of positions in cosine space.
- * @param[in]  m             Array of positions in cosine space.
- * @param[out] lon           Array of longitude values, in radians.
- * @param[out] lat           Array of latitude values, in radians.
- */
-DllExport
+// Double precision.
+
 void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
-        const double* l, const double* m, double* lon, double* lat);
+        const double* l, const double* m, double* lon, double* lat)
+{
+    const double sinLat0 = sin(lat0);
+    const double cosLat0 = cos(lat0);
+
+    // Loop over l, m positions and evaluate the longitude and latitude values.
+    int i;
+    for (i = 0; i < num_positions; ++i)
+    {
+        double ll = l[i], mm = m[i];
+        double w = sqrt(1.0 - ll*ll - mm*mm);
+        lat[i] = asin(w * sinLat0 + mm * cosLat0);
+        lon[i] = lon0 + atan2(ll, cosLat0 * w - mm * sinLat0);
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // OSKAR_ANGLES_FROM_LM_H_
