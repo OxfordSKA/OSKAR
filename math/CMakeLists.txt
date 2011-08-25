@@ -10,6 +10,7 @@ add_subdirectory(cudak)
 # Add the source files in this directory.
 set(math_SRC
     src/oskar_mat_tri_c.c
+    src/oskar_cuda_dft_c2r_2d.cu
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})

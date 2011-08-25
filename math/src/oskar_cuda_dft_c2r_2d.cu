@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cuda/oskar_cuda_dft_c2r_2d.h"
+#include "math/oskar_cuda_dft_c2r_2d.h"
 #include "math/cudak/oskar_cudak_dft_c2r_2d.h"
 
 #ifdef __cplusplus
@@ -34,8 +34,7 @@ extern "C" {
 #endif
 
 // Single precision.
-
-int oskar_cudaf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
+int oskar_cuda_dft_c2r_2d_f(int n_in, const float* x_in, const float* y_in,
         const float* data_in, int n_out, const float* x_out,
         const float* y_out, float* output)
 {
@@ -66,8 +65,7 @@ int oskar_cudaf_dft_c2r_2d(int n_in, const float* x_in, const float* y_in,
 }
 
 // Double precision.
-
-int oskar_cudad_dft_c2r_2d(int n_in, const double* x_in, const double* y_in,
+int oskar_cuda_dft_c2r_2d_d(int n_in, const double* x_in, const double* y_in,
         const double* data_in, int n_out, const double* x_out,
         const double* y_out, double* output)
 {
