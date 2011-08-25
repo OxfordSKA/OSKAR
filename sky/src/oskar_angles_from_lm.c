@@ -35,7 +35,6 @@ extern "C" {
 #endif
 
 // Double precision.
-
 void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
         const double* l, const double* m, double* lon, double* lat)
 {

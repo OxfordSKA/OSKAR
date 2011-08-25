@@ -43,8 +43,23 @@ extern "C" {
 
 /**
  * @brief
+ * Convert antenna coordinates to ITRS system.
  *
  * @details
+ *
+ * Transform the station positions to the local equatorial system.
+ * x-coordinates is towards the local Meridian, y-coordinates to the East,
+ * and z-coordinates to the North Pole.
+ *
+ * see Thompson, Swenson & Moran (ch4, p86)
+ *
+ * @param[in]  num_antennas  Number of antennas/ stations.
+ * @param[in]  x_horizon     Vector of horizontal station x-positions, in metres.
+ * @param[in]  y_horizon     Vector of horizontal station y-positions, in metres.
+ * @param[in]  latitude      Telescope latitude, in radians.
+ * @param[out] x             Vector of ITRS x-positions, in metres.
+ * @param[out] y             Vector of ITRS x-positions, in metres.
+ * @param[out] z             Vector of ITRS x-positions, in metres.
  */
 DllExport
 void oskar_horizon_plane_to_itrs(const unsigned num_antennas,
