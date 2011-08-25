@@ -15,7 +15,6 @@ set(cuda_SRC
     src/oskar_cuda_bp2hwcr.cu
     src/oskar_cuda_bp2phc.cu
 
-    src/oskar_cuda_dft_c2r_2d.cu
     src/oskar_cuda_dft_o2c_2d.cu
 
     src/oskar_cuda_eq2hg.cu
