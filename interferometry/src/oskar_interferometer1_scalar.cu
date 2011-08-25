@@ -131,7 +131,6 @@ int oskar_interferometer1_scalar_d(
     const double lambda = 299792458.0 / frequency;
     const double wavenumber = 2.0 * M_PI / lambda;
 
-
     // === Allocate device memory for telescope and transfer to device.
     oskar_TelescopeModel hd_telescope;
     copy_telescope_to_gpu_d(&telescope, &hd_telescope);
@@ -193,6 +192,8 @@ int oskar_interferometer1_scalar_d(
     // === Loop over number of visibility snapshots.
     for (unsigned j = 0; j < num_vis_dumps; ++j)
     {
+        printf("--> simulating visibility snapshot %i of %i ...\n", j+1, num_vis_dumps);
+
         // Start time for the visibility dump (in mjd utc)
         double t_vis_dump_start = obs_start_mjd_utc + (j * dt_vis_days);
 
@@ -211,6 +212,12 @@ int oskar_interferometer1_scalar_d(
             // Find sources above horizon.
             oskar_cuda_horizon_clip_d(&hd_sky_global, lst, telescope.latitude,
                     &hd_sky_local);
+
+            if (hd_sky_local.num_sources == 0)
+            {
+                fprintf(stderr, "WARNING: no sources above horizon! (this will fail!)\n");
+
+            }
 
             // Evaulate horizontal horizontal lm for the beam phase centre.
             double h_beam_l, h_beam_m;
@@ -384,38 +391,37 @@ void copy_global_sky_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
         oskar_SkyModelGlobal_d* hd_sky)
 {
     // Allocate memory for arrays in structure.
-    size_t bytes = h_sky->num_sources * sizeof(double);
+    size_t bytes        = h_sky->num_sources * sizeof(double);
     hd_sky->num_sources = h_sky->num_sources;
 
-    cudaMalloc((void**)&(hd_sky->RA), bytes);
-    cudaMalloc((void**)&(hd_sky->Dec), bytes);
-    cudaMalloc((void**)&(hd_sky->I), bytes);
-    cudaMalloc((void**)&(hd_sky->Q), bytes);
-    cudaMalloc((void**)&(hd_sky->U), bytes);
-    cudaMalloc((void**)&(hd_sky->V), bytes);
+    cudaMalloc((void**)&hd_sky->RA,  bytes);
+    cudaMalloc((void**)&hd_sky->Dec, bytes);
+    cudaMalloc((void**)&hd_sky->I,   bytes);
+    cudaMalloc((void**)&hd_sky->Q,   bytes);
+    cudaMalloc((void**)&hd_sky->U,   bytes);
+    cudaMalloc((void**)&hd_sky->V,   bytes);
 
     // Copy arrays to device.
-    cudaMemcpy(hd_sky->RA, h_sky->RA, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->RA,  h_sky->RA,  bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(hd_sky->Dec, h_sky->Dec, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_sky->I, h_sky->I, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_sky->Q, h_sky->Q, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_sky->U, h_sky->U, bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_sky->V, h_sky->V, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->I,   h_sky->I,   bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->Q,   h_sky->Q,   bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->U,   h_sky->U,   bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->V,   h_sky->V,   bytes, cudaMemcpyHostToDevice);
 }
 
 void alloc_local_sky_d(int num_sources, oskar_SkyModelLocal_d* d_sky)
 {
     size_t bytes = num_sources * sizeof(double);
-
-    cudaMalloc((void**)&(d_sky->RA), bytes);
-    cudaMalloc((void**)&(d_sky->Dec), bytes);
-    cudaMalloc((void**)&(d_sky->I), bytes);
-    cudaMalloc((void**)&(d_sky->Q), bytes);
-    cudaMalloc((void**)&(d_sky->U), bytes);
-    cudaMalloc((void**)&(d_sky->V), bytes);
-    cudaMalloc((void**)&(d_sky->hor_l), bytes);
-    cudaMalloc((void**)&(d_sky->hor_m), bytes);
-    cudaMalloc((void**)&(d_sky->hor_n), bytes);
+    cudaMalloc((void**)&d_sky->RA,    bytes);
+    cudaMalloc((void**)&d_sky->Dec,   bytes);
+    cudaMalloc((void**)&d_sky->I,     bytes);
+    cudaMalloc((void**)&d_sky->Q,     bytes);
+    cudaMalloc((void**)&d_sky->U,     bytes);
+    cudaMalloc((void**)&d_sky->V,     bytes);
+    cudaMalloc((void**)&d_sky->hor_l, bytes);
+    cudaMalloc((void**)&d_sky->hor_m, bytes);
+    cudaMalloc((void**)&d_sky->hor_n, bytes);
 }
 
 
