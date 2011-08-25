@@ -60,7 +60,9 @@ void oskar_load_sources(const char* file_path, oskar_SkyModelGlobal_d* sky)
             continue;
 
         // Load source co-ordinates.
-        sscanf(line, "%lf %lf %lf %lf %lf %lf", &ra, &dec, &I, &Q, &U, &V);
+        int read = sscanf(line, "%lf %lf %lf %lf %lf %lf", &ra, &dec, &I, &Q, &U, &V);
+        if (read != 6)
+            continue;
 
         // Convert coordinates to radians.
         ra  *= deg2rad;
