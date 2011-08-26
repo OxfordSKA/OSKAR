@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
-#define OSKAR_CUDA_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
+#ifndef OSKAR_CUDA_TRANSFORM_TO_LOCAL_STOKES_H_
+#define OSKAR_CUDA_TRANSFORM_TO_LOCAL_STOKES_H_
 
 /**
- * @file oskar_cuda_stokes_to_local_coherency_matrix.h
+ * @file oskar_cuda_transform_to_local_stokes.h
  */
 
 #include "oskar_windows.h"
-#include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,32 +41,48 @@ extern "C" {
 
 /**
  * @brief
- * Convert source Stokes parameters to local coherency matrix
+ * Convert equatorial Stokes parameters to local Stokes parameters
  * (single precision).
  *
  * @details
- * This function converts the source Stokes parameters in the local sky model
- * to the local source coherency matrix.
+ * This function converts the source Stokes parameters from the equatorial
+ * frame to the local horizontal frame.
+ *
+ * @param[in] ns       The number of sources.
+ * @param[in] d_ra     The source Right Ascension positions in radians.
+ * @param[in] d_dec    The source Declination positions in radians.
+ * @param[in] lst      The local sidereal time.
+ * @param[in] lat      The geographic latitude.
+ * @param[in,out] d_Q  The original and transformed Stokes Q parameters.
+ * @param[in,out] d_U  The original and transformed Stokes U parameters.
  */
 DllExport
-int oskar_cuda_stokes_to_local_coherency_matrix_f(float lst, float lat,
-		oskar_SkyModelLocal_f* hd_sky);
+int oskar_cuda_transform_to_local_stokes_f(int ns, const float* d_ra,
+        const float* d_dec, float lst, float lat, float* d_Q, float* d_U);
 
 /**
  * @brief
- * Convert source Stokes parameters to local coherency matrix
+ * Convert equatorial Stokes parameters to local Stokes parameters
  * (double precision).
  *
  * @details
- * This function converts the source Stokes parameters in the local sky model
- * to the local source coherency matrix.
+ * This function converts the source Stokes parameters from the equatorial
+ * frame to the local horizontal frame.
+ *
+ * @param[in] ns       The number of sources.
+ * @param[in] d_ra     The source Right Ascension positions in radians.
+ * @param[in] d_dec    The source Declination positions in radians.
+ * @param[in] lst      The local sidereal time.
+ * @param[in] lat      The geographic latitude.
+ * @param[in,out] d_Q  The original and transformed Stokes Q parameters.
+ * @param[in,out] d_U  The original and transformed Stokes U parameters.
  */
 DllExport
-int oskar_cuda_stokes_to_local_coherency_matrix_d(double lst, double lat,
-		oskar_SkyModelLocal_d* hd_sky);
+int oskar_cuda_transform_to_local_stokes_d(int ns, const double* d_ra,
+        const double* d_dec, double lst, double lat, double* d_Q, double* d_U);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_CUDA_STOKES_TO_LOCAL_COHERENCY_MATRIX_H_
+#endif // OSKAR_CUDA_TRANSFORM_TO_LOCAL_STOKES_H_

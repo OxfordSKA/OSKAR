@@ -17,7 +17,7 @@ set(sky_SRC
     src/oskar_cuda_ra_dec_to_az_el.cu
     src/oskar_cuda_ra_dec_to_hor_lmn.cu
     src/oskar_cuda_ra_dec_to_relative_lmn.cu
-    src/oskar_cuda_stokes_to_local_coherency_matrix.cu
+    src/oskar_cuda_transform_to_local_stokes.cu
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
     src/oskar_load_sources.c

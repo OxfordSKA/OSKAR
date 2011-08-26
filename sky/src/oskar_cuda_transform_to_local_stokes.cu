@@ -26,57 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_cuda_stokes_to_local_coherency_matrix.h"
-#include "sky/cudak/oskar_cudak_stokes_to_local_coherency_matrix.h"
+#include "sky/oskar_cuda_transform_to_local_stokes.h"
+#include "sky/cudak/oskar_cudak_transform_to_local_stokes.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Single precision.
-
-int oskar_cuda_stokes_to_local_coherency_matrix_f(float lst, float lat,
-		oskar_SkyModelLocal_f* hd_sky)
+int oskar_cuda_transform_to_local_stokes_f(int ns, const float* d_ra,
+        const float* d_dec, float lst, float lat, float* d_Q, float* d_U)
 {
-	// Precompute latitude trigonometry.
-	float cos_lat = cosf(lat);
-	float sin_lat = sinf(lat);
+    // Precompute latitude trigonometry.
+    float cos_lat = cosf(lat);
+    float sin_lat = sinf(lat);
 
-	// Set up thread and block dimensions.
-	const int n = hd_sky->num_sources;
+    // Set up thread and block dimensions.
     const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
+    const int n_blk = (ns + n_thd - 1) / n_thd;
 
-    // Compute the local coherency matrix.
-	oskar_cudak_stokes_to_local_coherency_matrix_f <<< n_blk, n_thd >>> (n,
-			hd_sky->RA, hd_sky->Dec, hd_sky->I, hd_sky->Q, hd_sky->U,
-			hd_sky->V, cos_lat, sin_lat, lst, hd_sky->B);
+    // Compute the local Stokes parameters.
+    oskar_cudak_transform_to_local_stokes_f <<< n_blk, n_thd >>> (ns,
+            d_ra, d_dec, cos_lat, sin_lat, lst, d_Q, d_U);
     cudaDeviceSynchronize();
 
-	return cudaPeekAtLastError();
+    return cudaPeekAtLastError();
 }
 
 // Double precision.
-
-int oskar_cuda_stokes_to_local_coherency_matrix_d(double lst, double lat,
-		oskar_SkyModelLocal_d* hd_sky)
+int oskar_cuda_transform_to_local_stokes_d(int ns, const double* d_ra,
+        const double* d_dec, double lst, double lat, double* d_Q, double* d_U)
 {
-	// Precompute latitude trigonometry.
-	double cos_lat = cos(lat);
-	double sin_lat = sin(lat);
+    // Precompute latitude trigonometry.
+    double cos_lat = cos(lat);
+    double sin_lat = sin(lat);
 
-	// Set up thread and block dimensions.
-	const int n = hd_sky->num_sources;
+    // Set up thread and block dimensions.
     const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
+    const int n_blk = (ns + n_thd - 1) / n_thd;
 
     // Compute the local coherency matrix.
-	oskar_cudak_stokes_to_local_coherency_matrix_d <<< n_blk, n_thd >>> (n,
-			hd_sky->RA, hd_sky->Dec, hd_sky->I, hd_sky->Q, hd_sky->U,
-			hd_sky->V, cos_lat, sin_lat, lst, hd_sky->B);
+    oskar_cudak_transform_to_local_stokes_d <<< n_blk, n_thd >>> (ns,
+            d_ra, d_dec, cos_lat, sin_lat, lst, d_Q, d_U);
     cudaDeviceSynchronize();
 
-	return cudaPeekAtLastError();
+    return cudaPeekAtLastError();
 }
 
 #ifdef __cplusplus

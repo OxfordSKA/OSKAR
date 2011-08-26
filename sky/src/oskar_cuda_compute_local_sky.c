@@ -28,44 +28,44 @@
 
 #include "sky/oskar_cuda_compute_local_sky.h"
 #include "sky/oskar_cuda_horizon_clip.h"
-#include "sky/oskar_cuda_stokes_to_local_coherency_matrix.h"
+#include "sky/oskar_cuda_transform_to_local_stokes.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Single precision.
-
 int oskar_cuda_compute_local_sky_f(const oskar_SkyModelGlobal_f* hd_global,
-		float lst, float lat, oskar_SkyModelLocal_f* hd_local)
+        float lst, float lat, oskar_SkyModelLocal_f* hd_local)
 {
-	// Initialise error code.
-	int err = 0;
+    // Initialise error code.
+    int err = 0;
 
-	// Clip sources below the horizon.
-	err = oskar_cuda_horizon_clip_f(hd_global, lst, lat, hd_local);
-	if (err) return err;
+    // Clip sources below the horizon.
+    err = oskar_cuda_horizon_clip_f(hd_global, lst, lat, hd_local);
+    if (err) return err;
 
-	// Compute the source coherency matrix.
-	err = oskar_cuda_stokes_to_local_coherency_matrix_f(lst, lat, hd_local);
-	return err;
+    // Compute the local Stokes parameters.
+    err = oskar_cuda_transform_to_local_stokes_f(hd_local->num_sources,
+            hd_local->RA, hd_local->Dec, lst, lat, hd_local->Q, hd_local->U);
+    return err;
 }
 
 // Double precision.
-
 int oskar_cuda_compute_local_sky_d(const oskar_SkyModelGlobal_d* hd_global,
-		double lst, double lat, oskar_SkyModelLocal_d* hd_local)
+        double lst, double lat, oskar_SkyModelLocal_d* hd_local)
 {
-	// Initialise error code.
-	int err = 0;
+    // Initialise error code.
+    int err = 0;
 
-	// Clip sources below the horizon.
-	err = oskar_cuda_horizon_clip_d(hd_global, lst, lat, hd_local);
-	if (err) return err;
+    // Clip sources below the horizon.
+    err = oskar_cuda_horizon_clip_d(hd_global, lst, lat, hd_local);
+    if (err) return err;
 
-	// Compute the source coherency matrix.
-	err = oskar_cuda_stokes_to_local_coherency_matrix_d(lst, lat, hd_local);
-	return err;
+    // Compute the local Stokes parameters.
+    err = oskar_cuda_transform_to_local_stokes_d(hd_local->num_sources,
+            hd_local->RA, hd_local->Dec, lst, lat, hd_local->Q, hd_local->U);
+    return err;
 }
 
 #ifdef __cplusplus
