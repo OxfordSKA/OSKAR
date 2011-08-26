@@ -32,9 +32,9 @@
 
 // Single precision.
 
-int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* ra,
-        const float* dec, float ra0, float dec0, float* p_l, float* p_m,
-        float* p_n)
+int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* d_ra,
+        const float* d_dec, float ra0, float dec0, float* d_l, float* d_m,
+        float* d_n)
 {
     // Compute l,m-direction-cosines of RA, Dec relative to reference point.
     const int n_thd = 256;
@@ -42,13 +42,13 @@ int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* ra,
     const float cosDec0 = cosf(dec0);
     const float sinDec0 = sinf(dec0);
     oskar_cudak_sph_to_lm_f <<< n_blk, n_thd >>>
-            (n, ra, dec, ra0, cosDec0, sinDec0, p_l, p_m);
+            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
     cudaDeviceSynchronize();
     cudaError_t errCuda = cudaPeekAtLastError();
     if (errCuda != cudaSuccess) return errCuda;
 
     // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_f <<< n_blk, n_thd >>> (n, p_l, p_m, p_n);
+    oskar_cudak_lm_to_n_f <<< n_blk, n_thd >>> (n, d_l, d_m, d_n);
     cudaDeviceSynchronize();
     errCuda = cudaPeekAtLastError();
     if (errCuda != cudaSuccess) return errCuda;
@@ -58,9 +58,9 @@ int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* ra,
 
 // Double precision.
 
-int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* ra,
-        const double* dec, double ra0, double dec0, double* p_l, double* p_m,
-        double* p_n)
+int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* d_ra,
+        const double* d_dec, double ra0, double dec0, double* d_l, double* d_m,
+        double* d_n)
 {
     // Compute l,m-direction-cosines of RA, Dec relative to reference point.
     const int n_thd = 256;
@@ -68,13 +68,13 @@ int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* ra,
     const double cosDec0 = cos(dec0);
     const double sinDec0 = sin(dec0);
     oskar_cudak_sph_to_lm_d <<< n_blk, n_thd >>>
-            (n, ra, dec, ra0, cosDec0, sinDec0, p_l, p_m);
+            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
     cudaDeviceSynchronize();
     cudaError_t errCuda = cudaPeekAtLastError();
     if (errCuda != cudaSuccess) return errCuda;
 
     // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_d <<< n_blk, n_thd >>> (n, p_l, p_m, p_n);
+    oskar_cudak_lm_to_n_d <<< n_blk, n_thd >>> (n, d_l, d_m, d_n);
     cudaDeviceSynchronize();
     errCuda = cudaPeekAtLastError();
     if (errCuda != cudaSuccess) return errCuda;

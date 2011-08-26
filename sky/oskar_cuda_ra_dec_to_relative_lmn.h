@@ -50,18 +50,18 @@ extern "C" {
  * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
  *
  * @param[in] n      The number of points.
- * @param[in] ra     The input position Right Ascensions in radians.
- * @param[in] dec    The input position Declinations in radians.
+ * @param[in] d_ra     The input position Right Ascensions in radians.
+ * @param[in] d_dec    The input position Declinations in radians.
  * @param[in] ra0    The Right Ascension of the reference point in radians.
  * @param[in] dec0   The Declination of the reference point in radians.
- * @param[out] p_l   The l-direction-cosines relative to the reference point.
- * @param[out] p_m   The m-direction-cosines relative to the reference point.
- * @param[out] p_n   The n-direction-cosines relative to the reference point.
+ * @param[out] d_l   The l-direction-cosines relative to the reference point.
+ * @param[out] d_m   The m-direction-cosines relative to the reference point.
+ * @param[out] d_n   The n-direction-cosines relative to the reference point.
  */
 DllExport
-int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* ra,
-        const float* dec, float ra0, float dec0, float* p_l, float* p_m,
-        float* p_n);
+int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* d_ra,
+        const float* d_dec, float ra0, float dec0, float* d_l, float* d_m,
+        float* d_n);
 
 /**
  * @brief
@@ -74,18 +74,18 @@ int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* ra,
  * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
  *
  * @param[in] n      The number of points.
- * @param[in] ra     The input position Right Ascensions in radians.
- * @param[in] dec    The input position Declinations in radians.
+ * @param[in] d_ra     The input position Right Ascensions in radians.
+ * @param[in] d_dec    The input position Declinations in radians.
  * @param[in] ra0    The Right Ascension of the reference point in radians.
  * @param[in] dec0   The Declination of the reference point in radians.
- * @param[out] p_l   The l-direction-cosines relative to the reference point.
- * @param[out] p_m   The m-direction-cosines relative to the reference point.
- * @param[out] p_n   The n-direction-cosines relative to the reference point.
+ * @param[out] d_l   The l-direction-cosines relative to the reference point.
+ * @param[out] d_m   The m-direction-cosines relative to the reference point.
+ * @param[out] d_n   The n-direction-cosines relative to the reference point.
  */
 DllExport
-int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* ra,
-        const double* dec, double ra0, double dec0, double* p_l, double* p_m,
-        double* p_n);
+int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* d_ra,
+        const double* d_dec, double ra0, double dec0, double* d_l, double* d_m,
+        double* d_n);
 
 #ifdef __cplusplus
 }
