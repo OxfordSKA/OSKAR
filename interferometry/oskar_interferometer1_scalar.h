@@ -90,6 +90,7 @@ extern "C" {
  *                               (with a fixed beam-pattern / E-Jones)
  * @param[in]  frequency         Observation frequency, in Hz.
  * @param[in]  bandwidth         Observation channel bandwidth, in Hz.
+ * @param[in]  disable_e_jones   Disable evaluation of station beam (i.e. set to 1)
  * @param[out] h_vis             Array of visibilities.
  * @param[out] h_u               Array of baseline u coordinates, in metres.
  * @param[out] h_v               Array of baseline v coordinates, in metres.
@@ -111,6 +112,7 @@ int oskar_interferometer1_scalar_d(
         const unsigned n_fringe_ave,
         const double frequency,
         const double bandwidth,
+        const bool disable_e_jones,
         double2 * vis,
         double* u,
         double* v,

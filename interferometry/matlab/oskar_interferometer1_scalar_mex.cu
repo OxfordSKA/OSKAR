@@ -63,6 +63,7 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
     int num_fringe_ave       = (int)mxGetScalar(input[9]);
     double freq              = mxGetScalar(input[10]);
     double bandwidth         = mxGetScalar(input[11]);
+    bool disable_e_jones = false;
 
     // Setup output arrays.
     const int num_baselines = telescope.num_antennas * (telescope.num_antennas-1) / 2;
@@ -85,7 +86,7 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
 
     int err = oskar_interferometer1_scalar_d(telescope, stations, sky, ra0_rad, dec0_rad,
             obs_start_mjd_utc, obs_length_days, num_vis_dumps, num_vis_ave,
-            num_fringe_ave, freq, bandwidth, vis_temp, u, v, w);
+            num_fringe_ave, freq, bandwidth, disable_e_jones, vis_temp, u, v, w);
 
     for (int i = 0; i < cols; ++i)
     {

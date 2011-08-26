@@ -41,6 +41,8 @@ struct oskar_TelescopeModel
     double* antenna_z; // NOTE: used after conversion to ITRS coordinates.
     double longitude;
     double latitude;
+
+    bool identical_stations; // true if all stations are identical
 };
 typedef struct oskar_TelescopeModel oskar_TelescopeModel;
 

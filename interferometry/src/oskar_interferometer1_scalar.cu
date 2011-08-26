@@ -38,6 +38,7 @@
 #include "math/cudak/oskar_cudak_mat_mul_cc.h"
 #include "math/cudak/oskar_cudak_vec_mul_cr.h"
 #include "math/cudak/oskar_cudak_vec_scale_rr.h"
+#include "math/cudak/oskar_cudak_vec_set_c.h"
 
 #include "sky/oskar_cuda_horizon_clip.h"
 #include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
@@ -85,7 +86,8 @@ void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
 void evaluate_e_jones(const unsigned num_stations,
         const oskar_StationModel* hd_stations,
         const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
-        const double h_beam_m, double2* d_weights_work, double2* d_e_jones);
+        const double h_beam_m, double2* d_weights_work,
+        bool disable, bool identical_stations, double2* d_e_jones);
 
 void mult_e_jones_by_source_field_amp(const unsigned num_stations,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
@@ -116,6 +118,8 @@ int oskar_interferometer1_scalar_d(
         const unsigned num_fringe_ave,
         const double frequency,
         const double bandwidth,
+
+        const bool disable_e_jones,
 
         double2 * h_vis,
         double* h_u,
@@ -149,7 +153,13 @@ int oskar_interferometer1_scalar_d(
 
     // === Allocate device memory for source model and transfer to device.
     oskar_SkyModelGlobal_d hd_sky_global;
+    for (int i = 0; i < sky.num_sources; ++i)
+    {
+        sky.I[i] = sqrt(sky.I[i]);
+    }
     copy_global_sky_to_gpu_d(&sky, &hd_sky_global);
+
+//    double2* temp = (double2*) malloc(num_stations * sky.num_sources * sizeof(double2));
 
     // === Allocate local sky structure.
     oskar_SkyModelLocal_d hd_sky_local;
@@ -177,9 +187,10 @@ int oskar_interferometer1_scalar_d(
     cudaMalloc((void**)&d_vis, mem_size_vis);
 
     // === Allocate device memory for correlator work buffer.
-    double* d_vis_work;
-    size_t mem_size_work = (2 * sky.num_sources * num_stations + 3 * num_stations) * sizeof(double);
-    cudaMalloc((void**)&d_vis_work, mem_size_work);
+    double* d_work_uvw;
+    cudaMalloc((void**)&d_work_uvw, 3 * num_stations * sizeof(double));
+    double2* d_work_k;
+    cudaMalloc((void**)&d_work_k, num_stations * hd_sky_global.num_sources *  sizeof(double2));
 
     // === Calculate time increments.
     unsigned total_samples   = num_vis_dumps * num_fringe_ave * num_vis_ave;
@@ -226,7 +237,9 @@ int oskar_interferometer1_scalar_d(
 
             // Evaluate E-Jones for each source position per station
             evaluate_e_jones(num_stations, hd_stations, &hd_sky_local,
-                    h_beam_l, h_beam_m, d_weights_work, d_e_jones);
+                    h_beam_l, h_beam_m, d_weights_work, disable_e_jones,
+                    telescope.identical_stations, d_e_jones);
+
 
             // Multiply e-jones by source brightness.
             mult_e_jones_by_source_field_amp(num_stations, &hd_sky_local, d_e_jones);
@@ -237,21 +250,27 @@ int oskar_interferometer1_scalar_d(
                     hd_sky_local.RA, hd_sky_local.Dec, ra0_rad, dec0_rad,
                     d_l, d_m, d_n);
 
+//            cudaMemcpy(temp, d_e_jones, num_stations * hd_sky_local.num_sources * sizeof(double2),
+//                cudaMemcpyDeviceToHost);
+//            printf("%i %i %f %f\n", j, i, temp[0].x, temp[0].y);
+
             // Correlator which updates phase matrix.
             double lst_start = oskar_mjd_to_last_fast_d(t_ave_start,
                     telescope.longitude);
             oskar_cuda_correlator_scalar_d(num_stations, hd_telescope.antenna_x,
                     hd_telescope.antenna_y, hd_telescope.antenna_z,
                     hd_sky_local.num_sources, d_l, d_m, d_n,
-                    (const double*)d_e_jones, ra0_rad, dec0_rad, lst_start,
+                    d_e_jones, ra0_rad, dec0_rad, lst_start,
                     num_fringe_ave, dt_days * sec_per_day, lambda * bandwidth,
-                    (double*)d_vis, d_vis_work);
+                    d_work_k, d_work_uvw, d_vis);
         }
 
         // copy back the vis dump into host memory.
         double2* vis = &h_vis[num_baselines * j];
         cudaMemcpy((void*)vis, (const void*)d_vis, mem_size_vis,
                 cudaMemcpyDeviceToHost);
+
+//        printf("%f %f\n", vis[0].x, vis[0].y);
 
         // Evaluate baseline coordinates for the visibility dump.
         double* u = &h_u[num_baselines * j];
@@ -308,7 +327,8 @@ int oskar_interferometer1_scalar_d(
 
     cudaFree(d_vis);
 
-    cudaFree(d_vis_work);
+    cudaFree(d_work_uvw);
+    cudaFree(d_work_k);
 
     return (int)cudaPeekAtLastError();
 }
@@ -441,14 +461,39 @@ void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
 void evaluate_e_jones(const unsigned num_stations,
         const oskar_StationModel * hd_stations,
         const oskar_SkyModelLocal_d * hd_sky, const double h_beam_l,
-        const double h_beam_m, double2 * d_weights_work, double2 * d_e_jones)
+        const double h_beam_m, double2 * d_weights_work,
+        bool disable, bool identical_stations, double2 * d_e_jones)
 {
-    for (unsigned i = 0; i < num_stations; ++i)
+    if (disable)
     {
-        double2 * d_e_jones_station = d_e_jones + i * hd_sky->num_sources;
-        const oskar_StationModel * station = &hd_stations[i];
-        oskar_evaluate_e_jones_2d_horizontal_d(station, h_beam_l, h_beam_m,
-                hd_sky, d_weights_work, d_e_jones_station);
+        int num_threads = 128;
+        int values = num_stations * hd_sky->num_sources;
+        int num_blocks = (values + num_threads - 1) / num_threads;
+        oskar_cudak_vec_set_c_d <<< num_blocks, num_threads >>>
+                (values, make_double2(1.0, 0.0), d_e_jones);
+    }
+    else if (identical_stations)
+    {
+        double2 * d_e_jones_station0 = d_e_jones;
+        const oskar_StationModel * station0 = &hd_stations[0];
+        oskar_evaluate_e_jones_2d_horizontal_d(station0, h_beam_l, h_beam_m,
+                hd_sky, d_weights_work, d_e_jones_station0);
+        for (unsigned i = 1; i < num_stations; ++i)
+        {
+            double2 * d_e_jones_station = d_e_jones + i * hd_sky->num_sources;
+            cudaMemcpy(d_e_jones_station, d_e_jones_station0,
+                    sizeof(double2) * hd_sky->num_sources, cudaMemcpyDeviceToDevice);
+        }
+    }
+    else
+    {
+        for (unsigned i = 0; i < num_stations; ++i)
+        {
+            double2 * d_e_jones_station = d_e_jones + i * hd_sky->num_sources;
+            const oskar_StationModel * station = &hd_stations[i];
+            oskar_evaluate_e_jones_2d_horizontal_d(station, h_beam_l, h_beam_m,
+                    hd_sky, d_weights_work, d_e_jones_station);
+        }
     }
 }
 

@@ -34,6 +34,8 @@
 #include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
 #include "math/cudak/oskar_cudak_mat_mul_cc.h"
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,17 +47,14 @@ extern "C" {
 // Single precision.
 int oskar_cuda_correlator_scalar_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
-        const float* m, const float* n, const float* eb, float ra0,
+        const float* m, const float* n, const float2* eb, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
-        float lambda_bandwidth, float* vis, float* work)
+        float lambda_bandwidth, float2* work_k, float* work_uvw, float2* vis)
 {
     // Initialise.
     cudaError_t errCuda = cudaSuccess;
     double tOffset = (double)sdt / 2.0;
-    const float2* emat = (float2*)eb;
-    float2* kmat = (float2*)work;
-    float2* visd = (float2*)vis;
-    float* u = (float*)(kmat + (ns * na));
+    float* u = work_uvw;
     float* v = u + na;
     float* w = v + na;
 
@@ -88,21 +87,21 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
 
         // Compute K-matrix of 3D DFT weights.
         oskar_cudak_dftw_3d_seq_out_f <<<kBlk, kThd, sMem>>>
-                (na, u, v, w, ns, l, m, n, kmat);
+                (na, u, v, w, ns, l, m, n, work_k);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Perform complex matrix element multiply of K with E * B.
         oskar_cudak_mat_mul_cc_f <<<mBlk, mThd>>>
-                (ns, na, kmat, emat, kmat);
+                (ns, na, work_k, eb, work_k);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
         oskar_cudak_correlator_scalar_f <<<vBlk, vThd, vsMem>>>
-                (ns, na, kmat, u, v, l, m, lambda_bandwidth, visd);
+                (ns, na, work_k, u, v, l, m, lambda_bandwidth, vis);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
@@ -117,17 +116,14 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
 // Double precision.
 int oskar_cuda_correlator_scalar_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
-        const double* m, const double* n, const double* eb, double ra0,
+        const double* m, const double* n, const double2* eb, double ra0,
         double dec0, double lst0, int nsdt, double sdt,
-        double lambda_bandwidth, double* vis, double* work)
+        double lambda_bandwidth, double2* work_k, double* work_uvw, double2* vis)
 {
     // Initialise.
     cudaError_t errCuda = cudaSuccess;
     double tOffset = (double)sdt / 2.0;
-    const double2* emat = (double2*)eb;
-    double2* kmat = (double2*)work;
-    double2* visd = (double2*)vis;
-    double* u = (double*)(kmat + (ns * na));
+    double* u = work_uvw;
     double* v = u + na;
     double* w = v + na;
 
@@ -160,21 +156,20 @@ int oskar_cuda_correlator_scalar_d(int na, const double* ax,
 
         // Compute K-matrix of 3D DFT weights.
         oskar_cudak_dftw_3d_seq_out_d <<<kBlk, kThd, sMem>>>
-                (na, u, v, w, ns, l, m, n, kmat);
+                (na, u, v, w, ns, l, m, n, work_k);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Perform complex matrix element multiply of K with E * B.
-        oskar_cudak_mat_mul_cc_d <<<mBlk, mThd>>>
-                (ns, na, kmat, emat, kmat);
+        oskar_cudak_mat_mul_cc_d <<<mBlk, mThd>>> (ns, na, work_k, eb, work_k);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
         oskar_cudak_correlator_scalar_d <<<vBlk, vThd, vsMem>>>
-                (ns, na, kmat, u, v, l, m, lambda_bandwidth, visd);
+                (ns, na, work_k, u, v, l, m, lambda_bandwidth, vis);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;

@@ -67,15 +67,16 @@ extern "C" {
  * @param[in] nsdt  The number of averaging cycles to do.
  * @param[in] sdt   The time interval between averages in seconds.
  * @param[in] lambda_bandwidth   Wavelength (m) times bandwidth (Hz).
+ * @param[in] work_k  Work array for phase matrix (ns * na).
+ * @param[in] work_uvw Work array for uvw coordinates (3*na)
  * @param[in,out] vis   The complex visibilities (see note, above).
- * @param[in,out] work  Work array of size 2 * ns * na + 3 * na.
  */
 DllExport
 int oskar_cuda_correlator_scalar_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
-        const float* m, const float* n, const float* eb, float ra0,
+        const float* m, const float* n, const float2* eb, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
-        float lambda_bandwidth, float* vis, float* work);
+        float lambda_bandwidth, float2* work_k, float* work_uvw, float2* vis);
 
 /**
  * @brief
@@ -105,16 +106,16 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
  * @param[in] nsdt The number of averaging cycles to do.
  * @param[in] sdt The time interval between averages in seconds.
  * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis The complex visibilities (see note, above).
- * @param[in,out] work Work array of size 2 * ns * na + 3 * na.
+ * @param[in] work_k  Work array for phase matrix (ns * na).
+ * @param[in] work_uvw Work array for uvw coordinates (3*na)
+ * @param[out] vis The complex visibilities (see note, above).
  */
 DllExport
 int oskar_cuda_correlator_scalar_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
-        const double* m, const double* n, const double* eb, double ra0,
+        const double* m, const double* n, const double2* eb, double ra0,
         double dec0, double lst0, int nsdt, double sdt,
-        double lambda_bandwidth, double* vis, double* work);
-
+        double lambda_bandwidth, double2* work_k, double* work_uvw, double2* vis);
 #ifdef __cplusplus
 }
 #endif
