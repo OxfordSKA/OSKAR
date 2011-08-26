@@ -26,25 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_TELESCOPE_H_
-#define OSKAR_LOAD_TELESCOPE_H_
+#ifndef VIS_DATA_TEST_H_
+#define VIS_DATA_TEST_H_
 
 /**
- * @file oskar_load_telescope.h
+ * @file VisDataTest.h
  */
 
-#include "interferometry/oskar_TelescopeModel.h"
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Loads a telescope station coordinates file into a telescope model structure.
+ * @brief Unit test class that uses CppUnit.
  *
- * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
- * @param[in]  longitude  Telescope longitude, in radians.
- * @param[in]  latitude   Telescope latitude, in radians.
- * @param[out] telescope  Pointer to telescope model structure.
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-void oskar_load_telescope(const char* file_path, const double longitude_rad,
-        const double latitude_rad, oskar_TelescopeModel* telescope);
+class VisDataTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(VisDataTest);
+        CPPUNIT_TEST(test_load);
+        CPPUNIT_TEST_SUITE_END();
 
-#endif // OSKAR_LOAD_TELESCOPE_H_
+    public:
+        /// Test method.
+        void test_load();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(VisDataTest);
+
+#endif // VIS_DATA_TEST_H_

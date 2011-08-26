@@ -31,19 +31,26 @@
 #include "utility/oskar_load_csv_coordinates_2d.h"
 #include "interferometry/oskar_horizon_plane_to_itrs.h"
 #include <stdlib.h>
+#include <stdio.h>
 
-void oskar_load_telescope(const char* file_path, oskar_TelescopeModel* telescope)
+void oskar_load_telescope(const char* file_path, const double longitude_rad,
+        const double latitude_rad, oskar_TelescopeModel* telescope)
 {
-    double* x_temp;
-    double* y_temp;
-    unsigned n;
+    double* x_temp = NULL;
+    double* y_temp = NULL;
+    unsigned n = 0;
     oskar_load_csv_coordinates_2d(file_path, &n, &x_temp, &y_temp);
 
+    telescope->latitude  = latitude_rad;
+    telescope->longitude = longitude_rad;
     telescope->num_antennas = n;
     size_t mem_size = n * sizeof(double);
     telescope->antenna_x = (double*)malloc(mem_size);
     telescope->antenna_y = (double*)malloc(mem_size);
     telescope->antenna_z = (double*)malloc(mem_size);
+
+    if (telescope->num_antennas == 0)
+        fprintf(stderr, "ERROR: no antennas found when loading telescope!\n");
 
     // Convert horizon x, y coordinates to ITRS (local equatorial system)
     oskar_horizon_plane_to_itrs(n, x_temp, y_temp, telescope->latitude,

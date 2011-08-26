@@ -26,25 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_TELESCOPE_H_
-#define OSKAR_LOAD_TELESCOPE_H_
+#ifndef OSKAR_VISDATA_H_
+#define OSKAR_VISDATA_H_
 
-/**
- * @file oskar_load_telescope.h
- */
+#include "utility/oskar_vector_types.h"
+#include <vector>
 
-#include "interferometry/oskar_TelescopeModel.h"
+class oskar_VisData
+{
+    public:
+        oskar_VisData(const unsigned num_stations, const unsigned num_vis_dumps);
+        ~oskar_VisData();
 
-/**
- * @brief
- * Loads a telescope station coordinates file into a telescope model structure.
- *
- * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
- * @param[in]  longitude  Telescope longitude, in radians.
- * @param[in]  latitude   Telescope latitude, in radians.
- * @param[out] telescope  Pointer to telescope model structure.
- */
-void oskar_load_telescope(const char* file_path, const double longitude_rad,
-        const double latitude_rad, oskar_TelescopeModel* telescope);
+    public:
+        void write(const char* filename);
 
-#endif // OSKAR_LOAD_TELESCOPE_H_
+        void load(const char* filename);
+
+        double* u() { return &_u[0]; }
+        double* v() { return &_v[0]; }
+        double* w() { return &_w[0]; }
+        double2* vis() { return &_vis[0]; }
+
+        unsigned size() const { return _num_vis_coordinates; }
+        unsigned num_baselines() const { return _num_baselines; }
+
+    private:
+        unsigned _num_baselines;
+        unsigned _num_vis_coordinates;
+        std::vector<double>  _u;
+        std::vector<double>  _v;
+        std::vector<double>  _w;
+        std::vector<double2> _vis;
+};
+
+
+#endif // OSKAR_VISDATA_H_

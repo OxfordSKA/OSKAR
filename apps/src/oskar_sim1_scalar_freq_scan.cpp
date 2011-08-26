@@ -41,30 +41,38 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 #include <QtCore/QTime>
 
 int main(int argc, char** argv)
 {
     // $> oskar_sim1_scalar settings_file.txt
-    if (argc != 2)
+    if (argc != 5)
     {
         fprintf(stderr, "ERROR: missing command line arguments\n");
-        fprintf(stderr, "Usage:  $ sim1_scalar [settings file]\n");
+        fprintf(stderr, "Usage:  $ sim1_scalar [settings file] [start freq] [freq inc] [num freq steps]\n");
         return EXIT_FAILURE;
     }
 
-    bool disable_e_jones = true;
+    bool disable_e_jones = false;
 
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
     settings.print();
 
+    double freq_start  = atof(argv[2]);
+    double freq_inc    = atof(argv[3]);
+    int num_freq_steps = atoi(argv[4]);
+    printf("freq start     = %f\n", freq_start);
+    printf("freq inc       = %f\n", freq_inc);
+    printf("num freq steps = %i\n", num_freq_steps);
+
+
     // =========================================================================
     // Load sky model.
     oskar_SkyModelGlobal_d sky;
     oskar_load_sources(settings.sky_file().toLatin1().data(), &sky);
-
 
     // Load telescope layout.
     oskar_TelescopeModel telescope;
@@ -85,33 +93,65 @@ int main(int argc, char** argv)
     }
     // =========================================================================
 
-    oskar_VisData vis(num_stations, settings.num_vis_dumps());
 
-    QTime timer;
-    timer.start();
-    int err = oskar_interferometer1_scalar_d(telescope, stations, sky,
-            settings.ra0_rad(),
-            settings.dec0_rad(),
-            settings.obs_start_mjc_utc(),
-            settings.obs_length_days(),
-            settings.num_vis_dumps(),
-            settings.num_vis_ave(),
-            settings.num_fringe_ave(),
-            settings.frequency(),
-            settings.channel_bandwidth(),
-            disable_e_jones,
-            vis.vis(),
-            vis.u(),
-            vis.v(),
-            vis.w());
+    for (int i = 0; i < num_freq_steps; ++i)
+    {
+        double frequency = freq_start + i * freq_inc;
+        printf("simulation with freq %e\n", frequency);
 
-    printf("= Completed simulation after %f seconds. [error code = %i]\n",
-            timer.elapsed() / 1.0e3, err);
+        oskar_SkyModelGlobal_d sky_temp;
+        sky_temp.num_sources = sky.num_sources;
+        sky_temp.Dec = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.RA = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.I = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.Q = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.U = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.V = (double*) malloc(sky.num_sources * sizeof(double));
+        memcpy(sky_temp.Dec, sky.Dec, sky.num_sources * sizeof(double));
+        memcpy(sky_temp.RA,  sky.RA, sky.num_sources * sizeof(double));
+        memcpy(sky_temp.I,   sky.I, sky.num_sources * sizeof(double));
+        for (int s = 0; s < sky.num_sources; ++s)
+        {
+            sky_temp.I[s] = 1.0e6 * pow(frequency, -0.7);
+//            printf("%i %f\n", s, sky_temp.I[s]);
+        }
 
-    printf("= number of visibility points generated = %i\n",
-            vis.size());
+        oskar_VisData vis(num_stations, settings.num_vis_dumps());
 
-    vis.write(settings.output_file().toLatin1().data());
+        QTime timer;
+        timer.start();
+        int err = oskar_interferometer1_scalar_d(telescope, stations, sky_temp,
+                settings.ra0_rad(),
+                settings.dec0_rad(),
+                settings.obs_start_mjc_utc(),
+                settings.obs_length_days(),
+                settings.num_vis_dumps(),
+                settings.num_vis_ave(),
+                settings.num_fringe_ave(),
+                frequency,
+                settings.channel_bandwidth(),
+                disable_e_jones,
+                vis.vis(),
+                vis.u(),
+                vis.v(),
+                vis.w());
+
+        printf("= Completed simulation (%i of %i) after %f seconds. [error code = %i]\n",
+                i+1, num_freq_steps, timer.elapsed() / 1.0e3, err);
+
+        printf("= number of visibility points generated = %i\n",
+                vis.size());
+
+        QString outfile = "freq_scan_test_f_" + QString::number(frequency)+".dat";
+        vis.write(outfile.toLatin1().data());
+
+        free(sky_temp.RA);
+        free(sky_temp.Dec);
+        free(sky_temp.I);
+        free(sky_temp.Q);
+        free(sky_temp.U);
+        free(sky_temp.V);
+    }
 
     // =========================================================================
     // Free memory.

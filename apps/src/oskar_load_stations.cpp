@@ -39,8 +39,10 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations)
+unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations,
+        bool* idential_stations)
 {
     int num_stations = 0;
     QDir dir;
@@ -49,12 +51,48 @@ unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations
     num_stations = files.size();
     *stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
 
-    for (int i = 0; i < files.size(); ++i)
+    for (int i = 0; i < num_stations; ++i)
     {
         oskar_StationModel * s = &(*stations)[i];
         const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
         oskar_load_csv_coordinates_2d(filename, &s->num_antennas,
                 &s->antenna_x, &s->antenna_y);
+    }
+
+    // Check if stations are all the same.
+    *idential_stations = true;
+    // 1. Check if they have the same number of antennas.
+    int num_antennas_station0 = (*stations)[0].num_antennas;
+    for (int j = 0; j < num_stations; ++j)
+    {
+        oskar_StationModel * s = &(*stations)[j];
+        if (s->num_antennas != num_antennas_station0)
+        {
+            *idential_stations = false;
+            break;
+        }
+    }
+
+    // 2. Check if the positions are are the same.
+    bool done = false;
+    oskar_StationModel* station0 = &(*stations)[0];
+    if (*idential_stations)
+    {
+        for (int j = 0; j < num_stations; ++j)
+        {
+            oskar_StationModel * s = &(*stations)[j];
+            for (int i = 0; i < s->num_antennas; ++i)
+            {
+                if (station0->antenna_x[i] != s->antenna_x[i] ||
+                        station0->antenna_y[i] != s->antenna_y[i])
+                {
+                    *idential_stations = false;
+                    done = true;
+                    break;
+                }
+            }
+            if (done) break;
+        }
     }
 
     return num_stations;

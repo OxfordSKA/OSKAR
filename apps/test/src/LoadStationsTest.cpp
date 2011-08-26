@@ -65,7 +65,9 @@ void LoadStationsTest::test_load()
 
     // Load the stations.
     oskar_StationModel * stations;
-    int num_stations_loaded = oskar_load_stations(path, &stations);
+    bool idential_stations;
+    int num_stations_loaded = oskar_load_stations(path, &stations,
+            &idential_stations);
 
     // Check the data loaded correctly.
     CPPUNIT_ASSERT_EQUAL(num_stations, num_stations_loaded);
@@ -79,6 +81,7 @@ void LoadStationsTest::test_load()
             CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i/10.0, stations[j].antenna_y[i], err);
         }
     }
+    CPPUNIT_ASSERT_EQUAL(true, idential_stations);
 
     // Remove the test directory.
     dir.setPath(QString(path));

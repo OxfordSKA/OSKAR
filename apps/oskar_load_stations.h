@@ -46,6 +46,7 @@
  * @param[in]  dir_path  Path to a directory of station files.
  * @param[out] stations  Pointer to an array to station model structures.
  */
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations);
+unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations,
+        bool* idential_stations);
 
 #endif // OSKAR_LOAD_STATIONS_H_

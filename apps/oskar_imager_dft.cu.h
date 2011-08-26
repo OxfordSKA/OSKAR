@@ -26,25 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_TELESCOPE_H_
-#define OSKAR_LOAD_TELESCOPE_H_
+#ifndef OSKAR_IMAGER_DFT_H_
+#define OSKAR_IMAGER_DFT_H_
 
 /**
- * @file oskar_load_telescope.h
+ * @file oskar_imager_dft.cu.h
  */
 
-#include "interferometry/oskar_TelescopeModel.h"
+#include "oskar_windows.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * Loads a telescope station coordinates file into a telescope model structure.
  *
- * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
- * @param[in]  longitude  Telescope longitude, in radians.
- * @param[in]  latitude   Telescope latitude, in radians.
- * @param[out] telescope  Pointer to telescope model structure.
+ * @details
+ *
+ * @param[in]  num_vis      Number of visibility values.
+ * @param[in]  vis          Complex visibility amplitude.
+ * @param[in]  u            Baseline u co-ordinate, in metres!
+ * @param[in]  v            Baseline v co-ordinate, in metres!
+ * @param[in]  frequency    Frequency, in Hz.
+ * @param[in]  image_size   Number of image pixels along each dimension.
+ * @param[in]  l            Image l coordinates.
+ * @param[out] image        Image array, must be pre allocated to a size of
+ *                          num_pixels * num_pixels.
+ *
+ * @return CUDA error code.
  */
-void oskar_load_telescope(const char* file_path, const double longitude_rad,
-        const double latitude_rad, oskar_TelescopeModel* telescope);
+DllExport
+int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
+        double* v, const double frequency, const unsigned image_size,
+        const double* l, double* image);
 
-#endif // OSKAR_LOAD_TELESCOPE_H_
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_IMAGER_DFT_H_
