@@ -52,9 +52,10 @@
  */
 __global__
 void oskar_cudak_correlator_f(const int ns, const int na,
-		const float4c* j1, const float4c* b, const float4c* j2,
-		const float* u, const float* v, const float* l, const float* m,
-		const float lambda_bandwidth, float4c* vis);
+        const float4c* jones, const float* source_I, const float* source_Q,
+        const float* source_U, const float* source_V, const float* u,
+        const float* v, const float* l, const float* m,
+        const float lambda_bandwidth, float4c* vis);
 
 /**
  * @brief
@@ -72,7 +73,9 @@ void oskar_cudak_correlator_f(const int ns, const int na,
  */
 __global__
 void oskar_cudak_correlator_d(const int ns, const int na,
-        const double2* k, const double* u, const double* v, const double* l,
-        const double* m, const double lambda_bandwidth, double2* vis);
+        const double4c* jones, const double* source_I, const double* source_Q,
+        const double* source_U, const double* source_V, const double* u,
+        const double* v, const double* l, const double* m,
+        const double lambda_bandwidth, double4c* vis);
 
 #endif // OSKAR_CUDAK_CORRELATOR_H_

@@ -30,67 +30,51 @@
 #include "math/cudak/oskar_cudaf_mul_c_c.h"
 
 // Single precision.
-
 __global__
 void oskar_cudak_jones_mul_c2_f(int n, const float2* s1,
         const float2* s2, float4c* m)
 {
     // Get the array index ID that this thread is working on.
     int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
     // Get the data from global memory.
-    float2 c_s1, c_s2;
     float4c c_m;
-    if (i < n)
-    {
-        c_s1 = s1[i];
-        c_s2 = s2[i];
-    }
-    __syncthreads();
+    float2 c_s1 = s1[i];
+    float2 c_s2 = s2[i];
 
     // Multiply the two complex numbers and store them in a Jones matrix.
-    float2 t;
-    oskar_cudaf_mul_c_c_f(c_s1, c_s2, t);
-    c_m.a = t;
+    oskar_cudaf_mul_c_c_f(c_s1, c_s2);
+    c_m.a = c_s1;
     c_m.b = make_float2(0.0f, 0.0f);
     c_m.c = make_float2(0.0f, 0.0f);
-    c_m.d = t;
+    c_m.d = c_s1;
 
     // Copy result back to global memory.
-    __syncthreads();
-    if (i < n)
-        m[i] = c_m;
+    m[i] = c_m;
 }
 
 // Double precision.
-
 __global__
 void oskar_cudak_jones_mul_c2_d(int n, const double2* s1,
         const double2* s2, double4c* m)
 {
     // Get the array index ID that this thread is working on.
     int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
     // Get the data from global memory.
-    double2 c_s1, c_s2;
     double4c c_m;
-    if (i < n)
-    {
-        c_s1 = s1[i];
-        c_s2 = s2[i];
-    }
-    __syncthreads();
+    double2 c_s1 = s1[i];
+    double2 c_s2 = s2[i];
 
     // Multiply the two complex numbers and store them in a Jones matrix.
-    double2 t;
-    oskar_cudaf_mul_c_c_d(c_s1, c_s2, t);
-    c_m.a = t;
+    oskar_cudaf_mul_c_c_d(c_s1, c_s2);
+    c_m.a = c_s1;
     c_m.b = make_double2(0.0, 0.0);
     c_m.c = make_double2(0.0, 0.0);
-    c_m.d = t;
+    c_m.d = c_s1;
 
     // Copy result back to global memory.
-    __syncthreads();
-    if (i < n)
-        m[i] = c_m;
+    m[i] = c_m;
 }

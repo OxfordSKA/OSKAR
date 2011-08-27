@@ -50,8 +50,33 @@ __device__ __forceinline__ void oskar_cudaf_mul_c_c_f(const float2& a,
         const float2& b, float2& out)
 {
     // Multiply complex numbers a and b.
-    out.x = a.x * b.x - a.y * b.y; // RE*RE - IM*IM
-    out.y = a.x * b.y + a.y * b.x; // RE*IM + IM*RE
+    out.x = a.x * b.x;
+    out.y = a.x * b.y;
+    out.x -= a.y * b.y; // RE*RE - IM*IM
+    out.y += a.y * b.x; // RE*IM + IM*RE
+}
+
+/**
+ * @brief
+ * CUDA device function to multiply two complex numbers (single precision).
+ *
+ * @details
+ * This inline device function multiplies together two complex numbers.
+ *
+ * @param[in,out] a On input, the first complex number; on output, the result.
+ * @param[in] b The second complex number.
+ */
+__device__ __forceinline__ void oskar_cudaf_mul_c_c_f(float2& a,
+        const float2& b)
+{
+    // Copy input a.
+    float2 a1 = a;
+
+    // Multiply complex numbers a and b.
+    a.x *= b.x;
+    a.y = a1.x * b.y;
+    a.x -= a1.y * b.y; // RE*RE - IM*IM
+    a.y += a1.y * b.x; // RE*IM + IM*RE
 }
 
 /**
@@ -69,8 +94,33 @@ __device__ __forceinline__ void oskar_cudaf_mul_c_c_d(const double2& a,
         const double2& b, double2& out)
 {
     // Multiply complex numbers a and b.
-    out.x = a.x * b.x - a.y * b.y; // RE*RE - IM*IM
-    out.y = a.x * b.y + a.y * b.x; // RE*IM + IM*RE
+    out.x = a.x * b.x;
+    out.y = a.x * b.y;
+    out.x -= a.y * b.y; // RE*RE - IM*IM
+    out.y += a.y * b.x; // RE*IM + IM*RE
+}
+
+/**
+ * @brief
+ * CUDA device function to multiply two complex numbers (double precision).
+ *
+ * @details
+ * This inline device function multiplies together two complex numbers.
+ *
+ * @param[in,out] a On input, the first complex number; on output, the result.
+ * @param[in] b The second complex number.
+ */
+__device__ __forceinline__ void oskar_cudaf_mul_c_c_d(double2& a,
+        const double2& b)
+{
+    // Copy input a.
+    double2 a1 = a;
+
+    // Multiply complex numbers a and b.
+    a.x *= b.x;
+    a.y = a1.x * b.y;
+    a.x -= a1.y * b.y; // RE*RE - IM*IM
+    a.y += a1.y * b.x; // RE*IM + IM*RE
 }
 
 #endif // OSKAR_CUDAF_MUL_C_C_H_

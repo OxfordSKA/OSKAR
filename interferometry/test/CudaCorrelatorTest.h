@@ -26,54 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAF_MUL_MAT2C_MAT2C_HERMITIAN_H_
-#define OSKAR_CUDAF_MUL_MAT2C_MAT2C_HERMITIAN_H_
+#ifndef CUDA_CORRELATOR_TEST_H
+#define CUDA_CORRELATOR_TEST_H
 
 /**
- * @file oskar_cudaf_mul_mat2c_mat2c_hermitian.h
+ * @file CudaCorrelatorTest.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
-#include "math/cudak/oskar_cudaf_mul_c_c.h"
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * CUDA device function to multiply two complex 2x2 matrices (single precision).
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- * This inline device function multiplies together two complex 2x2 matrices.
- * The Hermitian conjugate of the second matrix is taken before the
- * multiplication.
- *
- * Matrix multiplication is done in the order M = M1 * M2^H.
- *
- * @param[in] m1 The first complex matrix.
- * @param[in] m2 The second complex matrix.
- * @param[out] m The output complex number.
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-__device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2c_hermitian_f(
-        const float4c& m1, const float4c& m2, float4c& m)
+class CudaCorrelatorTest : public CppUnit::TestFixture
 {
-}
+    public:
+        CPPUNIT_TEST_SUITE(CudaCorrelatorTest);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-/**
- * @brief
- * CUDA device function to multiply two complex 2x2 matrices (double precision).
- *
- * @details
- * This inline device function multiplies together two complex 2x2 matrices.
- * The Hermitian conjugate of the second matrix is taken before the
- * multiplication.
- *
- * Matrix multiplication is done in the order M = M1 * M2^H.
- *
- * @param[in] m1 The first complex matrix.
- * @param[in] m2 The second complex matrix.
- * @param[out] m The output complex number.
- */
-__device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2c_hermitian_d(
-        const double4c& m1, const double4c& m2, double4c& m)
-{
-}
+    public:
+        void setUp();
+        void tearDown();
 
-#endif // OSKAR_CUDAF_MUL_MAT2C_MAT2C_HERMITIAN_H_
+        // Test Methods
+        void test_method();
+};
+
+#endif // CUDA_CORRELATOR_TEST_H

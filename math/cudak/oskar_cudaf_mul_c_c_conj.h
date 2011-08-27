@@ -51,8 +51,34 @@ __device__ __forceinline__ void oskar_cudaf_mul_c_c_conj_f(const float2& a,
         const float2& b, float2& out)
 {
     // Multiply complex numbers a and conjugate(b).
-    out.x = a.x * b.x + a.y * b.y; // RE*RE + IM*IM
-    out.y = a.y * b.x - a.x * b.y; // IM*RE - RE*IM
+    out.x = a.x * b.x;
+    out.y = a.y * b.x;
+    out.x += a.y * b.y; // RE*RE + IM*IM
+    out.y -= a.x * b.y; // IM*RE - RE*IM
+}
+
+/**
+ * @brief
+ * CUDA device function to multiply two complex numbers (single precision).
+ *
+ * @details
+ * This inline device function multiplies together two complex numbers, taking
+ * the complex conjugate of the second one first.
+ *
+ * @param[in,out] a On input, the first complex number; on output, the result.
+ * @param[in] b The second complex number.
+ */
+__device__ __forceinline__ void oskar_cudaf_mul_c_c_conj_f(float2& a,
+        const float2& b)
+{
+    // Copy input a.
+    float2 a1 = a;
+
+    // Multiply complex numbers a and conjugate(b).
+    a.x *= b.x;
+    a.y = a1.y * b.x;
+    a.x += a1.y * b.y; // RE*RE + IM*IM
+    a.y -= a1.x * b.y; // IM*RE - RE*IM
 }
 
 /**
@@ -71,8 +97,34 @@ __device__ __forceinline__ void oskar_cudaf_mul_c_c_conj_d(const double2& a,
         const double2& b, double2& out)
 {
     // Multiply complex numbers a and conjugate(b).
-    out.x = a.x * b.x + a.y * b.y; // RE*RE + IM*IM
-    out.y = a.y * b.x - a.x * b.y; // IM*RE - RE*IM
+    out.x = a.x * b.x;
+    out.y = a.y * b.x;
+    out.x += a.y * b.y; // RE*RE + IM*IM
+    out.y -= a.x * b.y; // IM*RE - RE*IM
+}
+
+/**
+ * @brief
+ * CUDA device function to multiply two complex numbers (double precision).
+ *
+ * @details
+ * This inline device function multiplies together two complex numbers, taking
+ * the complex conjugate of the second one first.
+ *
+ * @param[in,out] a On input, the first complex number; on output, the result.
+ * @param[in] b The second complex number.
+ */
+__device__ __forceinline__ void oskar_cudaf_mul_c_c_conj_d(double2& a,
+        const double2& b)
+{
+    // Copy input a.
+    double2 a1 = a;
+
+    // Multiply complex numbers a and conjugate(b).
+    a.x *= b.x;
+    a.y = a1.y * b.x;
+    a.x += a1.y * b.y; // RE*RE + IM*IM
+    a.y -= a1.x * b.y; // IM*RE - RE*IM
 }
 
 #endif // OSKAR_CUDAF_MUL_C_C_CONJ_H_

@@ -46,22 +46,16 @@
  * and a complex 2x2 matrix to give a new complex 2x2 matrix.
  *
  * @param[in] a The complex scalar number.
- * @param[in] m The complex 2x2 matrix.
- * @param[out] out The output complex 2x2 matrix.
+ * @param[in,out] m On input, the complex 2x2 matrix; on output, the result.
  */
 __device__ __forceinline__ void oskar_cudaf_mul_c_mat2c_f(const float2& a,
-        const float4c& m, float4c& out)
+        float4c& m)
 {
     // Multiply matrix by complex scalar.
-    float2 t;
-    oskar_cudaf_mul_c_c_f(m.a, a, t);
-    out.a = t;
-    oskar_cudaf_mul_c_c_f(m.b, a, t);
-    out.b = t;
-    oskar_cudaf_mul_c_c_f(m.c, a, t);
-    out.c = t;
-    oskar_cudaf_mul_c_c_f(m.d, a, t);
-    out.d = t;
+    oskar_cudaf_mul_c_c_f(m.a, a);
+    oskar_cudaf_mul_c_c_f(m.b, a);
+    oskar_cudaf_mul_c_c_f(m.c, a);
+    oskar_cudaf_mul_c_c_f(m.d, a);
 }
 
 /**
@@ -74,22 +68,16 @@ __device__ __forceinline__ void oskar_cudaf_mul_c_mat2c_f(const float2& a,
  * and a complex 2x2 matrix to give a new complex 2x2 matrix.
  *
  * @param[in] a The complex scalar number.
- * @param[in] m The complex 2x2 matrix.
- * @param[out] out The output complex 2x2 matrix.
+ * @param[in,out] m On input, the complex 2x2 matrix; on output, the result.
  */
 __device__ __forceinline__ void oskar_cudaf_mul_c_mat2c_d(const double2& a,
-        const double4c& m, double4c& out)
+        double4c& m)
 {
     // Multiply matrix by complex scalar.
-    double2 t;
-    oskar_cudaf_mul_c_c_d(m.a, a, t);
-    out.a = t;
-    oskar_cudaf_mul_c_c_d(m.b, a, t);
-    out.b = t;
-    oskar_cudaf_mul_c_c_d(m.c, a, t);
-    out.c = t;
-    oskar_cudaf_mul_c_c_d(m.d, a, t);
-    out.d = t;
+    oskar_cudaf_mul_c_c_d(m.a, a);
+    oskar_cudaf_mul_c_c_d(m.b, a);
+    oskar_cudaf_mul_c_c_d(m.c, a);
+    oskar_cudaf_mul_c_c_d(m.d, a);
 }
 
 #endif // OSKAR_CUDAF_MUL_C_MAT2C_H_

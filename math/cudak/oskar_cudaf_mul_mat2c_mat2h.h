@@ -26,104 +26,135 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAF_MUL_MAT2C_MAT2C_H_
-#define OSKAR_CUDAF_MUL_MAT2C_MAT2C_H_
+#ifndef OSKAR_CUDAF_MUL_MAT2C_MAT2H_H_
+#define OSKAR_CUDAF_MUL_MAT2C_MAT2H_H_
 
 /**
- * @file oskar_cudaf_mul_mat2c_mat2c.h
+ * @file oskar_cudaf_mul_mat2c_mat2h.h
  */
 
 #include "utility/oskar_cuda_eclipse.h"
 #include "math/cudak/oskar_cudaf_mul_c_c.h"
+#include "math/cudak/oskar_cudaf_mul_c_c_conj.h"
 
 /**
  * @brief
- * CUDA device function to multiply two complex 2x2 matrices (single precision).
+ * CUDA device function to multiply a complex 2x2 matrix and a
+ * Hermitian 2x2 matrix (single precision).
  *
  * @details
- * This inline device function multiplies together two complex 2x2 matrices.
+ * This inline device function multiplies together two complex 2x2 matrices,
+ * where the second one is Hermitian.
+ *
+ * The second matrix is represented as four (non-complex) scalars in a float4
+ * data type, where the elements of the structure must be as follows:
+ *
+ *   ( x   y + iz )
+ *   ( -     w    )
  *
  * Matrix multiplication is done in the order M1 = M1 * M2.
  *
  * @param[in,out] m1 On input, the first complex matrix; on output, the result.
  * @param[in]     m2 The second complex matrix.
  */
-__device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2c_f(
-        float4c& m1, const float4c& m2)
+__device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2h_f(
+        float4c& m1, const float4& m2)
 {
     // Before anything else, copy a and c from the input matrix.
     float2 a = m1.a;
     float2 c = m1.c;
+
+    // Declare temporaries.
+    const float2 bb = make_float2(m2.y, m2.z); // Diagonal term, y + iz.
     float2 t;
 
     // First, evaluate result a.
-    oskar_cudaf_mul_c_c_f(m1.a, m2.a); // a1 a2 + b1 c2
-    oskar_cudaf_mul_c_c_f(m1.b, m2.c, t);
-    m1.a.x += t.x; // Real part.
-    m1.a.y += t.y; // Imag part.
+    m1.a.x *= m2.x;
+    m1.a.y *= m2.x;
+    oskar_cudaf_mul_c_c_conj_f(m1.b, bb, t);
+    m1.a.x += t.x;
+    m1.a.y += t.y;
 
     // Second, evaluate result c.
-    oskar_cudaf_mul_c_c_f(m1.c, m2.a); // c1 a2 + d1 c2
-    oskar_cudaf_mul_c_c_f(m1.d, m2.c, t);
-    m1.c.x += t.x; // Real part.
-    m1.c.y += t.y; // Imag part.
+    m1.c.x *= m2.x;
+    m1.c.y *= m2.x;
+    oskar_cudaf_mul_c_c_conj_f(m1.d, bb, t);
+    m1.c.x += t.x;
+    m1.c.y += t.y;
 
     // Third, evaluate result b.
-    oskar_cudaf_mul_c_c_f(m1.b, m2.d); // a1 b2 + b1 d2
-    oskar_cudaf_mul_c_c_f(a, m2.b, t);
-    m1.b.x += t.x; // Real part.
-    m1.b.y += t.y; // Imag part.
+    m1.b.x *= m2.w;
+    m1.b.y *= m2.w;
+    oskar_cudaf_mul_c_c_f(a, bb, t);
+    m1.b.x += t.x;
+    m1.b.y += t.y;
 
     // Fourth, evaluate result d.
-    oskar_cudaf_mul_c_c_f(m1.d, m2.d); // c1 b2 + d1 d2
-    oskar_cudaf_mul_c_c_f(c, m2.b, t);
-    m1.d.x += t.x; // Real part.
-    m1.d.y += t.y; // Imag part.
+    m1.d.x *= m2.w;
+    m1.d.y *= m2.w;
+    oskar_cudaf_mul_c_c_f(c, bb, t);
+    m1.d.x += t.x;
+    m1.d.y += t.y;
 }
 
 /**
  * @brief
- * CUDA device function to multiply two complex 2x2 matrices (double precision).
+ * CUDA device function to multiply a complex 2x2 matrix and a
+ * Hermitian 2x2 matrix (double precision).
  *
  * @details
- * This inline device function multiplies together two complex 2x2 matrices.
+ * This inline device function multiplies together two complex 2x2 matrices,
+ * where the second one is Hermitian.
+ *
+ * The second matrix is represented as four (non-complex) scalars in a float4
+ * data type, where the elements of the structure must be as follows:
+ *
+ *   ( x   y + iz )
+ *   ( -     w    )
  *
  * Matrix multiplication is done in the order M1 = M1 * M2.
  *
  * @param[in,out] m1 On input, the first complex matrix; on output, the result.
  * @param[in]     m2 The second complex matrix.
  */
-__device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2c_d(
-        double4c& m1, const double4c& m2)
+__device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2h_d(
+        double4c& m1, const double4& m2)
 {
     // Before anything else, copy a and c from the input matrix.
     double2 a = m1.a;
     double2 c = m1.c;
+
+    // Declare temporaries.
+    const double2 bb = make_double2(m2.y, m2.z); // Diagonal term, y + iz.
     double2 t;
 
     // First, evaluate result a.
-    oskar_cudaf_mul_c_c_d(m1.a, m2.a); // a1 a2 + b1 c2
-    oskar_cudaf_mul_c_c_d(m1.b, m2.c, t);
-    m1.a.x += t.x; // Real part.
-    m1.a.y += t.y; // Imag part.
+    m1.a.x *= m2.x;
+    m1.a.y *= m2.x;
+    oskar_cudaf_mul_c_c_conj_d(m1.b, bb, t);
+    m1.a.x += t.x;
+    m1.a.y += t.y;
 
     // Second, evaluate result c.
-    oskar_cudaf_mul_c_c_d(m1.c, m2.a); // c1 a2 + d1 c2
-    oskar_cudaf_mul_c_c_d(m1.d, m2.c, t);
-    m1.c.x += t.x; // Real part.
-    m1.c.y += t.y; // Imag part.
+    m1.c.x *= m2.x;
+    m1.c.y *= m2.x;
+    oskar_cudaf_mul_c_c_conj_d(m1.d, bb, t);
+    m1.c.x += t.x;
+    m1.c.y += t.y;
 
     // Third, evaluate result b.
-    oskar_cudaf_mul_c_c_d(m1.b, m2.d); // a1 b2 + b1 d2
-    oskar_cudaf_mul_c_c_d(a, m2.b, t);
-    m1.b.x += t.x; // Real part.
-    m1.b.y += t.y; // Imag part.
+    m1.b.x *= m2.w;
+    m1.b.y *= m2.w;
+    oskar_cudaf_mul_c_c_d(a, bb, t);
+    m1.b.x += t.x;
+    m1.b.y += t.y;
 
     // Fourth, evaluate result d.
-    oskar_cudaf_mul_c_c_d(m1.d, m2.d); // c1 b2 + d1 d2
-    oskar_cudaf_mul_c_c_d(c, m2.b, t);
-    m1.d.x += t.x; // Real part.
-    m1.d.y += t.y; // Imag part.
+    m1.d.x *= m2.w;
+    m1.d.y *= m2.w;
+    oskar_cudaf_mul_c_c_d(c, bb, t);
+    m1.d.x += t.x;
+    m1.d.y += t.y;
 }
 
-#endif // OSKAR_CUDAF_MUL_MAT2C_MAT2C_H_
+#endif // OSKAR_CUDAF_MUL_MAT2C_MAT2H_H_

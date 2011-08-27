@@ -30,51 +30,41 @@
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 
 // Single precision.
-
 __global__
 void oskar_cudak_jones_mul_mat2_f(int n, const float4c* j1,
         const float4c* j2, float4c* m)
 {
     // Get the array index ID that this thread is working on.
     int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
     // Get the data from global memory.
-    float4c c_j1, c_j2, c_m;
-    if (i < n)
-    {
-        c_j1 = j1[i];
-        c_j2 = j2[i];
-    }
+    float4c c_j1 = j1[i];
+    float4c c_j2 = j2[i];
 
     // Multiply the two complex matrices.
-    oskar_cudaf_mul_mat2c_mat2c_f(c_j1, c_j2, c_m);
+    oskar_cudaf_mul_mat2c_mat2c_f(c_j1, c_j2);
 
     // Copy result back to global memory.
-    if (i < n)
-        m[i] = c_m;
+    m[i] = c_j1;
 }
 
 // Double precision.
-
 __global__
 void oskar_cudak_jones_mul_mat2_d(int n, const double4c* j1,
         const double4c* j2, double4c* m)
 {
     // Get the array index ID that this thread is working on.
     int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
     // Get the data from global memory.
-    double4c c_j1, c_j2, c_m;
-    if (i < n)
-    {
-        c_j1 = j1[i];
-        c_j2 = j2[i];
-    }
+    double4c c_j1 = j1[i];
+    double4c c_j2 = j2[i];
 
     // Multiply the two complex matrices.
-    oskar_cudaf_mul_mat2c_mat2c_d(c_j1, c_j2, c_m);
+    oskar_cudaf_mul_mat2c_mat2c_d(c_j1, c_j2);
 
     // Copy result back to global memory.
-    if (i < n)
-        m[i] = c_m;
+    m[i] = c_j1;
 }

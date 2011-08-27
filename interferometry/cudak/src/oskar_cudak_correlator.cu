@@ -28,6 +28,8 @@
 
 #include "interferometry/cudak/oskar_cudak_correlator.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
+#include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
+#include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian.h"
 
 // Single precision.
 
@@ -46,8 +48,9 @@ __device__ __forceinline__ float sincf(float a)
 
 __global__
 void oskar_cudak_correlator_f(const int ns, const int na,
-        const float4c* j1, const float4c* b, const float4c* j2,
-        const float* u, const float* v, const float* l, const float* m,
+        const float4c* jones, const float* source_I, const float* source_Q,
+        const float* source_U, const float* source_V, const float* u,
+        const float* v, const float* l, const float* m,
         const float lambda_bandwidth, float4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
@@ -64,8 +67,8 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         vv = ONE_OVER_2Cf * lambda_bandwidth * (v[AI] - v[AJ]);
 
         // Get pointers to both source vectors for station i and j.
-        sti = &j1[ns * AI];
-        stj = &j2[ns * AJ];
+        sti = &jones[ns * AI];
+        stj = &jones[ns * AJ];
     }
     __syncthreads();
 
@@ -80,15 +83,24 @@ void oskar_cudak_correlator_f(const int ns, const int na,
     // Each thread loops over a subset of the sources.
     for (int t = threadIdx.x; t < ns; t += blockDim.x)
     {
+        // Construct source brightness matrix.
+        float4 source_B;
+        {
+            float s_I = source_I[t];
+            float s_Q = source_Q[t];
+            source_B.x = s_I + s_Q;
+            source_B.y = source_U[t];
+            source_B.z = source_V[t];
+            source_B.w = s_I - s_Q;
+        }
+
         // Multiply first Jones matrix with source coherency matrix.
-        float4c c_a, c_b, c_c;
-        c_a = sti[t];
-        c_b = b[t];
-        oskar_cudaf_mul_mat2c_mat2c_f(c_a, c_b, c_c);
+        float4c c_a = sti[t];
+        oskar_cudaf_mul_mat2c_mat2h_f(c_a, source_B);
 
         // Multiply result with second (Hermitian transposed) Jones matrix.
-        c_b = stj[t];
-        oskar_cudaf_mul_mat2c_mat2c_f(c_c, c_b, c_a);
+        float4c c_b = stj[t];
+        oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian_f(c_a, c_b);
 
         // Multiply result by bandwidth-smearing term.
         float rb = sincf(uu * l[t] + vv * m[t]);
@@ -96,8 +108,6 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         smem[threadIdx.x].a.y += c_a.a.y * rb;
         smem[threadIdx.x].b.x += c_a.b.x * rb;
         smem[threadIdx.x].b.y += c_a.b.y * rb;
-        smem[threadIdx.x].c.x += c_a.c.x * rb;
-        smem[threadIdx.x].c.y += c_a.c.y * rb;
         smem[threadIdx.x].d.x += c_a.d.x * rb;
         smem[threadIdx.x].d.y += c_a.d.y * rb;
     }
@@ -109,7 +119,6 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         float4c temp;
         temp.a = make_float2(0.0f, 0.0f);
         temp.b = make_float2(0.0f, 0.0f);
-        temp.c = make_float2(0.0f, 0.0f);
         temp.d = make_float2(0.0f, 0.0f);
         for (int i = 0; i < blockDim.x; ++i)
         {
@@ -117,8 +126,6 @@ void oskar_cudak_correlator_f(const int ns, const int na,
             temp.a.y += smem[i].a.y;
             temp.b.x += smem[i].b.x;
             temp.b.y += smem[i].b.y;
-            temp.c.x += smem[i].c.x;
-            temp.c.y += smem[i].c.y;
             temp.d.x += smem[i].d.x;
             temp.d.y += smem[i].d.y;
         }
@@ -131,8 +138,6 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         vis[idx].a.y += temp.a.y;
         vis[idx].b.x += temp.b.x;
         vis[idx].b.y += temp.b.y;
-        vis[idx].c.x += temp.c.x;
-        vis[idx].c.y += temp.c.y;
         vis[idx].d.x += temp.d.x;
         vis[idx].d.y += temp.d.y;
     }
@@ -149,7 +154,9 @@ __device__ __forceinline__ double sinc(double a)
 
 __global__
 void oskar_cudak_correlator_d(const int ns, const int na,
-        const double2* k, const double* u, const double* v, const double* l,
-        const double* m, const double lambda_bandwidth, double2* vis)
+        const double4c* jones, const double* source_I, const double* source_Q,
+        const double* source_U, const double* source_V, const double* u,
+        const double* v, const double* l, const double* m,
+        const double lambda_bandwidth, double4c* vis)
 {
 }

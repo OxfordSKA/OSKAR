@@ -65,7 +65,7 @@ int oskar_cuda_transform_to_local_stokes_d(int ns, const double* d_ra,
     const int n_thd = 256;
     const int n_blk = (ns + n_thd - 1) / n_thd;
 
-    // Compute the local coherency matrix.
+    // Compute the local Stokes parameters.
     oskar_cudak_transform_to_local_stokes_d <<< n_blk, n_thd >>> (ns,
             d_ra, d_dec, cos_lat, sin_lat, lst, d_Q, d_U);
     cudaDeviceSynchronize();

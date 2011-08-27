@@ -32,71 +32,53 @@
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 
 // Single precision.
-
 __global__
 void oskar_cudak_jones_mul_mat2_c2_f(int n, const float4c* j1,
         const float4c* j2, const float2* s1, const float2* s2, float4c* m)
 {
     // Get the array index ID that this thread is working on.
     int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
     // Get the data from global memory.
-    float4c c_j1, c_j2, c_m;
-    float2 c_s1, c_s2;
-    if (i < n)
-    {
-        c_j1 = j1[i];
-        c_j2 = j2[i];
-        c_s1 = s1[i];
-        c_s2 = s2[i];
-    }
-    __syncthreads();
+    float4c c_j1 = j1[i];
+    float4c c_j2 = j2[i];
+    float2 c_s1 = s1[i];
+    float2 c_s2 = s2[i];
 
     // Matrix-matrix multiply.
-    oskar_cudaf_mul_mat2c_mat2c_f(c_j1, c_j2, c_m);
+    oskar_cudaf_mul_mat2c_mat2c_f(c_j1, c_j2);
 
     // Multiply result by complex scalars.
-    float2 t;
-    oskar_cudaf_mul_c_c_f(c_s1, c_s2, t);
-    oskar_cudaf_mul_c_mat2c_f(t, c_m, c_m);
+    oskar_cudaf_mul_c_c_f(c_s1, c_s2);
+    oskar_cudaf_mul_c_mat2c_f(c_s1, c_j1);
 
     // Copy result back to global memory.
-    __syncthreads();
-    if (i < n)
-        m[i] = c_m;
+    m[i] = c_j1;
 }
 
 // Double precision.
-
 __global__
 void oskar_cudak_jones_mul_mat2_c2_d(int n, const double4c* j1,
         const double4c* j2, const double2* s1, const double2* s2, double4c* m)
 {
     // Get the array index ID that this thread is working on.
     int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
     // Get the data from global memory.
-    double4c c_j1, c_j2, c_m;
-    double2 c_s1, c_s2;
-    if (i < n)
-    {
-        c_j1 = j1[i];
-        c_j2 = j2[i];
-        c_s1 = s1[i];
-        c_s2 = s2[i];
-    }
-    __syncthreads();
+    double4c c_j1 = j1[i];
+    double4c c_j2 = j2[i];
+    double2 c_s1 = s1[i];
+    double2 c_s2 = s2[i];
 
     // Matrix-matrix multiply.
-    oskar_cudaf_mul_mat2c_mat2c_d(c_j1, c_j2, c_m);
+    oskar_cudaf_mul_mat2c_mat2c_d(c_j1, c_j2);
 
     // Multiply result by complex scalars.
-    double2 t;
-    oskar_cudaf_mul_c_c_d(c_s1, c_s2, t);
-    oskar_cudaf_mul_c_mat2c_d(t, c_m, c_m);
+    oskar_cudaf_mul_c_c_d(c_s1, c_s2);
+    oskar_cudaf_mul_c_mat2c_d(c_s1, c_j1);
 
     // Copy result back to global memory.
-    __syncthreads();
-    if (i < n)
-        m[i] = c_m;
+    m[i] = c_j1;
 }
