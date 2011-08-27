@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAF_MUL_MAT2C_MAT2C_CONJ_TRANS_TO_HERMITIAN_H_
-#define OSKAR_CUDAF_MUL_MAT2C_MAT2C_CONJ_TRANS_TO_HERMITIAN_H_
+#ifndef OSKAR_CUDAF_MUL_MAT2C_MAT2C_CONJ_TRANS_H_
+#define OSKAR_CUDAF_MUL_MAT2C_MAT2C_CONJ_TRANS_H_
 
 /**
- * @file oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian.h
+ * @file oskar_cudaf_mul_mat2c_mat2c_conj_trans.h
  */
 
 #include "utility/oskar_cuda_eclipse.h"
@@ -39,19 +39,12 @@
 /**
  * @brief
  * CUDA device function to multiply two complex 2x2 matrices, first taking the
- * conjugate transpose of the second, and only evaluating the non-zero terms
- * of the Hermitian result (single precision).
+ * conjugate transpose of the second (single precision).
  *
  * @details
  * This inline device function multiplies together two complex 2x2 matrices.
  * The Hermitian conjugate of the second matrix is taken before the
- * multiplication, and the result is assumed to be Hermitian, so only the
- * relevant terms are evaluated.
- *
- * The output is of the form:
- *
- *   ( a  b )
- *   ( -  d )
+ * multiplication.
  *
  * Matrix multiplication is done in the order M1 = M1 * M2^H.
  *
@@ -59,52 +52,48 @@
  * @param[in] m2 The second complex matrix.
  */
 __device__ __forceinline__
-void oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian_f(
+void oskar_cudaf_mul_mat2c_mat2c_conj_trans_f(
         float4c& m1, const float4c& m2)
 {
     // Before anything else, copy a and c from the input matrix.
     float2 a = m1.a;
     float2 c = m1.c;
+    float2 t;
 
-    // First, evaluate result a, using c1 as a temporary.
+    // First, evaluate result a.
     oskar_cudaf_mul_c_c_conj_f(m1.a, m2.a);
-    oskar_cudaf_mul_c_c_conj_f(m1.b, m2.b, m1.c);
-    m1.a.x += m1.c.x;
-    m1.a.y += m1.c.y;
+    oskar_cudaf_mul_c_c_conj_f(m1.b, m2.b, t);
+    m1.a.x += t.x;
+    m1.a.y += t.y;
 
-    // Second, evaluate result b, using c1 as a temporary.
+    // Second, evaluate result c.
+    oskar_cudaf_mul_c_c_conj_f(m1.c, m2.a);
+    oskar_cudaf_mul_c_c_conj_f(m1.d, m2.b, t);
+    m1.c.x += t.x;
+    m1.c.y += t.y;
+
+    // Third, evaluate result b.
     oskar_cudaf_mul_c_c_conj_f(m1.b, m2.d);
-    oskar_cudaf_mul_c_c_conj_f(a, m2.c, m1.c);
-    m1.b.x += m1.c.x;
-    m1.b.y += m1.c.y;
+    oskar_cudaf_mul_c_c_conj_f(a, m2.c, t);
+    m1.b.x += t.x;
+    m1.b.y += t.y;
 
-    // Third, evaluate result d, using c1 as a temporary.
+    // Fourth, evaluate result d.
     oskar_cudaf_mul_c_c_conj_f(m1.d, m2.d);
-    oskar_cudaf_mul_c_c_conj_f(c, m2.c, m1.c);
-    m1.d.x += m1.c.x;
-    m1.d.y += m1.c.y;
-
-    // Set m1.c to zero.
-    m1.c.x = 0.0f;
-    m1.c.y = 0.0f;
+    oskar_cudaf_mul_c_c_conj_f(c, m2.c, t);
+    m1.d.x += t.x;
+    m1.d.y += t.y;
 }
 
 /**
  * @brief
  * CUDA device function to multiply two complex 2x2 matrices, first taking the
- * conjugate transpose of the second, and only evaluating the non-zero terms
- * of the Hermitian result (double precision).
+ * conjugate transpose of the second (double precision).
  *
  * @details
  * This inline device function multiplies together two complex 2x2 matrices.
  * The Hermitian conjugate of the second matrix is taken before the
- * multiplication, and the result is assumed to be Hermitian, so only the
- * relevant terms are evaluated.
- *
- * The output is of the form:
- *
- *   ( a  b )
- *   ( -  d )
+ * multiplication.
  *
  * Matrix multiplication is done in the order M1 = M1 * M2^H.
  *
@@ -112,34 +101,37 @@ void oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian_f(
  * @param[in] m2 The second complex matrix.
  */
 __device__ __forceinline__
-void oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian_d(
+void oskar_cudaf_mul_mat2c_mat2c_conj_trans_d(
         double4c& m1, const double4c& m2)
 {
     // Before anything else, copy a and c from the input matrix.
     double2 a = m1.a;
     double2 c = m1.c;
+    double2 t;
 
-    // First, evaluate result a, using c1 as a temporary.
+    // First, evaluate result a.
     oskar_cudaf_mul_c_c_conj_d(m1.a, m2.a);
-    oskar_cudaf_mul_c_c_conj_d(m1.b, m2.b, m1.c);
-    m1.a.x += m1.c.x;
-    m1.a.y += m1.c.y;
+    oskar_cudaf_mul_c_c_conj_d(m1.b, m2.b, t);
+    m1.a.x += t.x;
+    m1.a.y += t.y;
 
-    // Second, evaluate result b, using c1 as a temporary.
+    // Second, evaluate result c.
+    oskar_cudaf_mul_c_c_conj_d(m1.c, m2.a);
+    oskar_cudaf_mul_c_c_conj_d(m1.d, m2.b, t);
+    m1.c.x += t.x;
+    m1.c.y += t.y;
+
+    // Third, evaluate result b.
     oskar_cudaf_mul_c_c_conj_d(m1.b, m2.d);
-    oskar_cudaf_mul_c_c_conj_d(a, m2.c, m1.c);
-    m1.b.x += m1.c.x;
-    m1.b.y += m1.c.y;
+    oskar_cudaf_mul_c_c_conj_d(a, m2.c, t);
+    m1.b.x += t.x;
+    m1.b.y += t.y;
 
-    // Third, evaluate result d, using c1 as a temporary.
+    // Fourth, evaluate result d.
     oskar_cudaf_mul_c_c_conj_d(m1.d, m2.d);
-    oskar_cudaf_mul_c_c_conj_d(c, m2.c, m1.c);
-    m1.d.x += m1.c.x;
-    m1.d.y += m1.c.y;
-
-    // Set m1.c to zero.
-    m1.c.x = 0.0;
-    m1.c.y = 0.0;
+    oskar_cudaf_mul_c_c_conj_d(c, m2.c, t);
+    m1.d.x += t.x;
+    m1.d.y += t.y;
 }
 
-#endif // OSKAR_CUDAF_MUL_MAT2C_MAT2C_CONJ_TRANS_TO_HERMITIAN_H_
+#endif // OSKAR_CUDAF_MUL_MAT2C_MAT2C_CONJ_TRANS_H_

@@ -29,7 +29,7 @@
 #include "interferometry/cudak/oskar_cudak_correlator.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
-#include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian.h"
+#include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans.h"
 
 // Single precision.
 
@@ -100,7 +100,7 @@ void oskar_cudak_correlator_f(const int ns, const int na,
 
         // Multiply result with second (Hermitian transposed) Jones matrix.
         float4c c_b = stj[t];
-        oskar_cudaf_mul_mat2c_mat2c_conj_trans_to_hermitian_f(c_a, c_b);
+        oskar_cudaf_mul_mat2c_mat2c_conj_trans_f(c_a, c_b);
 
         // Multiply result by bandwidth-smearing term.
         float rb = sincf(uu * l[t] + vv * m[t]);
@@ -108,6 +108,8 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         smem[threadIdx.x].a.y += c_a.a.y * rb;
         smem[threadIdx.x].b.x += c_a.b.x * rb;
         smem[threadIdx.x].b.y += c_a.b.y * rb;
+        smem[threadIdx.x].c.x += c_a.c.x * rb;
+        smem[threadIdx.x].c.y += c_a.c.y * rb;
         smem[threadIdx.x].d.x += c_a.d.x * rb;
         smem[threadIdx.x].d.y += c_a.d.y * rb;
     }
@@ -119,6 +121,7 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         float4c temp;
         temp.a = make_float2(0.0f, 0.0f);
         temp.b = make_float2(0.0f, 0.0f);
+        temp.c = make_float2(0.0f, 0.0f);
         temp.d = make_float2(0.0f, 0.0f);
         for (int i = 0; i < blockDim.x; ++i)
         {
@@ -126,6 +129,8 @@ void oskar_cudak_correlator_f(const int ns, const int na,
             temp.a.y += smem[i].a.y;
             temp.b.x += smem[i].b.x;
             temp.b.y += smem[i].b.y;
+            temp.c.x += smem[i].c.x;
+            temp.c.y += smem[i].c.y;
             temp.d.x += smem[i].d.x;
             temp.d.y += smem[i].d.y;
         }
@@ -138,6 +143,8 @@ void oskar_cudak_correlator_f(const int ns, const int na,
         vis[idx].a.y += temp.a.y;
         vis[idx].b.x += temp.b.x;
         vis[idx].b.y += temp.b.y;
+        vis[idx].c.x += temp.c.x;
+        vis[idx].c.y += temp.c.y;
         vis[idx].d.x += temp.d.x;
         vis[idx].d.y += temp.d.y;
     }
@@ -145,7 +152,7 @@ void oskar_cudak_correlator_f(const int ns, const int na,
 
 // Double precision.
 
-extern __shared__ double2 smemd[];
+extern __shared__ double4c smemd[];
 
 __device__ __forceinline__ double sinc(double a)
 {
@@ -159,4 +166,99 @@ void oskar_cudak_correlator_d(const int ns, const int na,
         const double* v, const double* l, const double* m,
         const double lambda_bandwidth, double4c* vis)
 {
+    // Return immediately if we're in the lower triangular half of the
+    // visibility matrix.
+    if (AJ >= AI) return;
+
+    // Common things per thread block.
+    __shared__ double uu, vv;
+    __shared__ const double4c *sti, *stj;
+    if (threadIdx.x == 0)
+    {
+        // Determine UV-distance for baseline (common per thread block).
+        uu = ONE_OVER_2Cf * lambda_bandwidth * (u[AI] - u[AJ]);
+        vv = ONE_OVER_2Cf * lambda_bandwidth * (v[AI] - v[AJ]);
+
+        // Get pointers to both source vectors for station i and j.
+        sti = &jones[ns * AI];
+        stj = &jones[ns * AJ];
+    }
+    __syncthreads();
+
+    // Initialise shared memory.
+    {
+        smemd[threadIdx.x].a = make_double2(0.0, 0.0);
+        smemd[threadIdx.x].b = make_double2(0.0, 0.0);
+        smemd[threadIdx.x].c = make_double2(0.0, 0.0);
+        smemd[threadIdx.x].d = make_double2(0.0, 0.0);
+    }
+
+    // Each thread loops over a subset of the sources.
+    for (int t = threadIdx.x; t < ns; t += blockDim.x)
+    {
+        // Construct source brightness matrix.
+        double4 source_B;
+        {
+            double s_I = source_I[t];
+            double s_Q = source_Q[t];
+            source_B.x = s_I + s_Q;
+            source_B.y = source_U[t];
+            source_B.z = source_V[t];
+            source_B.w = s_I - s_Q;
+        }
+
+        // Multiply first Jones matrix with source coherency matrix.
+        double4c c_a = sti[t];
+        oskar_cudaf_mul_mat2c_mat2h_d(c_a, source_B);
+
+        // Multiply result with second (Hermitian transposed) Jones matrix.
+        double4c c_b = stj[t];
+        oskar_cudaf_mul_mat2c_mat2c_conj_trans_d(c_a, c_b);
+
+        // Multiply result by bandwidth-smearing term.
+        double rb = sinc(uu * l[t] + vv * m[t]);
+        smemd[threadIdx.x].a.x += c_a.a.x * rb;
+        smemd[threadIdx.x].a.y += c_a.a.y * rb;
+        smemd[threadIdx.x].b.x += c_a.b.x * rb;
+        smemd[threadIdx.x].b.y += c_a.b.y * rb;
+        smemd[threadIdx.x].c.x += c_a.c.x * rb;
+        smemd[threadIdx.x].c.y += c_a.c.y * rb;
+        smemd[threadIdx.x].d.x += c_a.d.x * rb;
+        smemd[threadIdx.x].d.y += c_a.d.y * rb;
+    }
+    __syncthreads();
+
+    // Accumulate (could optimise this).
+    if (threadIdx.x == 0)
+    {
+        double4c temp;
+        temp.a = make_double2(0.0, 0.0);
+        temp.b = make_double2(0.0, 0.0);
+        temp.c = make_double2(0.0, 0.0);
+        temp.d = make_double2(0.0, 0.0);
+        for (int i = 0; i < blockDim.x; ++i)
+        {
+            temp.a.x += smemd[i].a.x;
+            temp.a.y += smemd[i].a.y;
+            temp.b.x += smemd[i].b.x;
+            temp.b.y += smemd[i].b.y;
+            temp.c.x += smemd[i].c.x;
+            temp.c.y += smemd[i].c.y;
+            temp.d.x += smemd[i].d.x;
+            temp.d.y += smemd[i].d.y;
+        }
+
+        // Determine 1D index.
+        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+
+        // Modify existing visibility.
+        vis[idx].a.x += temp.a.x;
+        vis[idx].a.y += temp.a.y;
+        vis[idx].b.x += temp.b.x;
+        vis[idx].b.y += temp.b.y;
+        vis[idx].c.x += temp.c.x;
+        vis[idx].c.y += temp.c.y;
+        vis[idx].d.x += temp.d.x;
+        vis[idx].d.y += temp.d.y;
+    }
 }
