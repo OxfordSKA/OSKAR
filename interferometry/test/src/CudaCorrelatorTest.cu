@@ -58,9 +58,9 @@ void CudaCorrelatorTest::tearDown()
  * @details
  * Tests correlator kernel.
  */
-void CudaCorrelatorTest::test_method()
+void CudaCorrelatorTest::test_kernel_float()
 {
-    int ns = 100;
+    int ns = 50000;
     int na = 25;
     int nb = na * (na - 1) / 2;
     float lambda_bandwidth = 0.0f;
@@ -137,6 +137,106 @@ void CudaCorrelatorTest::test_method()
 
     // Copy memory back to host.
     cudaMemcpy(&h_vis[0], d_vis, nb * sizeof(float4c), cudaMemcpyDeviceToHost);
+
+    // Free device memory.
+    cudaFree(d_I);
+    cudaFree(d_Q);
+    cudaFree(d_U);
+    cudaFree(d_V);
+    cudaFree(d_l);
+    cudaFree(d_m);
+    cudaFree(d_u);
+    cudaFree(d_v);
+    cudaFree(d_jones);
+    cudaFree(d_vis);
+
+    // Check contents of memory.
+
+}
+
+/**
+ * @details
+ * Tests correlator kernel.
+ */
+void CudaCorrelatorTest::test_kernel_double()
+{
+    int ns = 50000;
+    int na = 25;
+    int nb = na * (na - 1) / 2;
+    double lambda_bandwidth = 0.0;
+    std::vector<double> h_I(ns);
+    std::vector<double> h_Q(ns);
+    std::vector<double> h_U(ns);
+    std::vector<double> h_V(ns);
+    std::vector<double> h_l(ns);
+    std::vector<double> h_m(ns);
+    std::vector<double> h_u(na);
+    std::vector<double> h_v(na);
+    std::vector<double4c> h_vis(nb);
+    std::vector<double4c> h_jones(ns * na);
+
+    for (int s = 0; s < ns; ++s)
+    {
+        h_I[0] = 2.0 * (s+1);
+        h_Q[0] = 0.5 * (s+1);
+        h_U[0] = 0.3 * (s+1);
+        h_V[0] = 0.1 * (s+1);
+    }
+
+    for (int a = 0; a < na; ++a)
+    {
+        for (int s = 0; s < ns; ++s)
+        {
+            int i = s + a * ns;
+            h_jones[i].a = make_double2(double(8*i + 0), double(8*i + 1));
+            h_jones[i].b = make_double2(double(8*i + 2), double(8*i + 3));
+            h_jones[i].c = make_double2(double(8*i + 4), double(8*i + 5));
+            h_jones[i].d = make_double2(double(8*i + 6), double(8*i + 7));
+        }
+    }
+
+    // Allocate device memory.
+    double *d_I, *d_Q, *d_U, *d_V, *d_l, *d_m, *d_u, *d_v;
+    double4c *d_jones, *d_vis;
+    cudaMalloc((void**)&d_I, ns * sizeof(double));
+    cudaMalloc((void**)&d_Q, ns * sizeof(double));
+    cudaMalloc((void**)&d_U, ns * sizeof(double));
+    cudaMalloc((void**)&d_V, ns * sizeof(double));
+    cudaMalloc((void**)&d_l, ns * sizeof(double));
+    cudaMalloc((void**)&d_m, ns * sizeof(double));
+    cudaMalloc((void**)&d_u, na * sizeof(double));
+    cudaMalloc((void**)&d_v, na * sizeof(double));
+    cudaMalloc((void**)&d_jones, ns * na * sizeof(double4c));
+    cudaMalloc((void**)&d_vis, nb * sizeof(double4c));
+    cudaMemcpy(d_I, &h_I[0], ns * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_Q, &h_Q[0], ns * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_U, &h_U[0], ns * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_V, &h_V[0], ns * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_l, &h_l[0], ns * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_m, &h_m[0], ns * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_u, &h_u[0], na * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_v, &h_v[0], na * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_jones, &h_jones[0], ns * na * sizeof(double4c),
+            cudaMemcpyHostToDevice);
+
+    // Call the correlator kernel.
+    dim3 vThd(256, 1); // Antennas, antennas.
+    dim3 vBlk(na, na);
+    size_t vsMem = vThd.x * sizeof(double4c);
+    TIMER_START
+    oskar_cudak_correlator_d <<<vBlk, vThd, vsMem>>> (ns, na, d_jones,
+            d_I, d_Q, d_U, d_V, d_u, d_v, d_l, d_m, lambda_bandwidth, d_vis);
+    cudaDeviceSynchronize();
+    TIMER_STOP("Finished correlator kernel, %d sources", ns)
+    int err = cudaPeekAtLastError();
+    if (err)
+    {
+        printf("CUDA Error, code %d\n", err);
+        CPPUNIT_FAIL("CUDA Error");
+    }
+
+    // Copy memory back to host.
+    cudaMemcpy(&h_vis[0], d_vis, nb * sizeof(double4c), cudaMemcpyDeviceToHost);
 
     // Free device memory.
     cudaFree(d_I);

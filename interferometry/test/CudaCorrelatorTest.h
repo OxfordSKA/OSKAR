@@ -46,7 +46,8 @@ class CudaCorrelatorTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(CudaCorrelatorTest);
-        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_kernel_float);
+        CPPUNIT_TEST(test_kernel_double);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -54,7 +55,10 @@ class CudaCorrelatorTest : public CppUnit::TestFixture
         void tearDown();
 
         // Test Methods
-        void test_method();
+        void test_kernel_float();
+
+        // Test Methods
+        void test_kernel_double();
 };
 
 #endif // CUDA_CORRELATOR_TEST_H

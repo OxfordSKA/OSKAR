@@ -77,7 +77,7 @@ void CudaJonesMultiplyTest::test_mat2_c2()
 void CudaJonesMultiplyTest::test_mat2_f()
 {
     // Size of matrix arrays.
-    int n = 5000000;
+    int n = 500000;
     float4c* h_m1 = (float4c*)malloc(n * sizeof(float4c));
     float4c* h_m2 = (float4c*)malloc(n * sizeof(float4c));
     float4c* h_result = (float4c*)malloc(n * sizeof(float4c));
@@ -160,7 +160,7 @@ void CudaJonesMultiplyTest::test_mat2_f()
 void CudaJonesMultiplyTest::test_mat2_d()
 {
     // Size of matrix arrays.
-    int n = 5000000;
+    int n = 500000;
     double4c* h_m1 = (double4c*)malloc(n * sizeof(double4c));
     double4c* h_m2 = (double4c*)malloc(n * sizeof(double4c));
     double4c* h_result = (double4c*)malloc(n * sizeof(double4c));
