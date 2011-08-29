@@ -43,6 +43,7 @@
 #include "sky/oskar_cuda_horizon_clip.h"
 #include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
 #include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
+#include "sky/oskar_ra_dec_to_hor_lmn.h"
 
 #include "station/oskar_evaluate_e_jones_2d_horizontal.h"
 
@@ -91,9 +92,6 @@ void evaluate_e_jones(const unsigned num_stations,
 
 void mult_e_jones_by_source_field_amp(const unsigned num_stations,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
-
-void evaluate_beam_horizontal_lm(double ra0_rad, double dec0_rad, double lst_rad,
-        double lat_rad, double* l, double* m);
 
 void correlate(const oskar_TelescopeModel* hd_telescope,
         const oskar_SkyModelLocal_d* hd_sky, const double2* d_e_jones,
@@ -158,8 +156,6 @@ int oskar_interferometer1_scalar_d(
         sky.I[i] = sqrt(sky.I[i]);
     }
     copy_global_sky_to_gpu_d(&sky, &hd_sky_global);
-
-//    double2* temp = (double2*) malloc(num_stations * sky.num_sources * sizeof(double2));
 
     // === Allocate local sky structure.
     oskar_SkyModelLocal_d hd_sky_local;
@@ -230,10 +226,10 @@ int oskar_interferometer1_scalar_d(
 
             }
 
-            // Evaulate horizontal horizontal lm for the beam phase centre.
-            double h_beam_l, h_beam_m;
-            evaluate_beam_horizontal_lm(ra0_rad, dec0_rad, lst,
-                    telescope.latitude, &h_beam_l, &h_beam_m);
+            // Evaluate horizontal lm for the beam phase centre.
+            double h_beam_l, h_beam_m, h_beam_n;
+            oskar_ra_dec_to_hor_lmn_d(1, &ra0_rad, &dec0_rad, lst,
+            		telescope.latitude, &h_beam_l, &h_beam_m, &h_beam_n);
 
             // Evaluate E-Jones for each source position per station
             evaluate_e_jones(num_stations, hd_stations, &hd_sky_local,
@@ -250,10 +246,6 @@ int oskar_interferometer1_scalar_d(
                     hd_sky_local.RA, hd_sky_local.Dec, ra0_rad, dec0_rad,
                     d_l, d_m, d_n);
 
-//            cudaMemcpy(temp, d_e_jones, num_stations * hd_sky_local.num_sources * sizeof(double2),
-//                cudaMemcpyDeviceToHost);
-//            printf("%i %i %f %f\n", j, i, temp[0].x, temp[0].y);
-
             // Correlator which updates phase matrix.
             double lst_start = oskar_mjd_to_last_fast_d(t_ave_start,
                     telescope.longitude);
@@ -269,8 +261,6 @@ int oskar_interferometer1_scalar_d(
         double2* vis = &h_vis[num_baselines * j];
         cudaMemcpy((void*)vis, (const void*)d_vis, mem_size_vis,
                 cudaMemcpyDeviceToHost);
-
-//        printf("%f %f\n", vis[0].x, vis[0].y);
 
         // Evaluate baseline coordinates for the visibility dump.
         double* u = &h_u[num_baselines * j];
@@ -511,15 +501,6 @@ void mult_e_jones_by_source_field_amp(const unsigned num_stations,
         oskar_cudak_vec_mul_cr_d <<< num_blocks, num_threads >>>
                 (num_sources, d_e_jones_station, hd_sky->I, d_e_jones_station);
     }
-}
-
-
-void evaluate_beam_horizontal_lm(double ra0_rad, double dec0_rad, double lst_rad,
-        double lat_rad, double * l, double * m)
-{
-    double ha = lst_rad - ra0_rad;
-    *l = -cos(dec0_rad) * sin(ha);
-    *m = cos(lat_rad) * sin(dec0_rad) - sin(lat_rad) * cos(dec0_rad) * cos(ha);
 }
 
 
