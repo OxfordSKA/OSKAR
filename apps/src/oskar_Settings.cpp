@@ -34,8 +34,11 @@
 #include <cstdio>
 #include <cstdlib>
 
-oskar_Settings::oskar_Settings()
+oskar_Settings::oskar_Settings(const QString& filename)
 {
+	// Load the settings file, if one is provided.
+	if (!filename.isEmpty())
+		load(filename);
 }
 
 oskar_Settings::~oskar_Settings()
@@ -49,7 +52,7 @@ int oskar_Settings::load(const QString& filename)
     // Check the settings file exists.
     if (!QFileInfo(filename).isFile())
     {
-        fprintf(stderr, "ERROR: specified settings file doesn't exist!\n");
+        fprintf(stderr, "ERROR: Specified settings file doesn't exist!\n");
         return FALSE;
     }
 
@@ -64,6 +67,7 @@ int oskar_Settings::load(const QString& filename)
     _longitude_deg     = settings.value("telescope/longitude_deg").toDouble();
 
     _station_dir       = settings.value("station/station_directory").toString();
+    _disable_station_beam = settings.value("station/disable_station_beam").toBool();
 
     _frequency         = settings.value("observation/frequency").toDouble();
     _channel_bandwidth = settings.value("observation/channel_bandwidth").toDouble();
@@ -83,19 +87,19 @@ int oskar_Settings::check()
 {
     if (!QFileInfo(_sky_file).isFile())
     {
-        fprintf(stderr, "ERROR: sky file doesn't exist!\n");
+        fprintf(stderr, "ERROR: Sky file doesn't exist!\n");
         return FALSE;
     }
 
     if (!QFileInfo(_telescope_file).isFile())
     {
-        fprintf(stderr, "ERROR: telescope layout file doesn't exist!\n");
+        fprintf(stderr, "ERROR: Telescope layout file doesn't exist!\n");
         return FALSE;
     }
 
     if (!QFileInfo(_station_dir).isDir())
     {
-        fprintf(stderr, "ERROR: station directory doesn't exist!\n");
+        fprintf(stderr, "ERROR: Station directory doesn't exist!\n");
         return FALSE;
     }
     return TRUE;
@@ -105,21 +109,22 @@ int oskar_Settings::check()
 void oskar_Settings::print()
 {
     printf("\n");
-    printf("= settings (%s)\n", _filename.toLatin1().data());
+    printf("= Settings (%s)\n", _filename.toLatin1().data());
     printf("  - Sky file               = %s\n", _sky_file.toLatin1().data());
     printf("  - Stations directory     = %s\n", _station_dir.toLatin1().data());
+    printf("  - Station beam disabled  = %s\n", _disable_station_beam ? "true" : "false");
     printf("  - Telescope file         = %s\n", _telescope_file.toLatin1().data());
     printf("  - Frequency (Hz)         = %e\n", _frequency);
     printf("  - Channel bandwidth (Hz) = %f\n", _channel_bandwidth);
-    printf("  - Ra0 (deg)              = %f\n", _ra0_deg);
-    printf("  - Dec0 (deg)             = %f\n", _dec0_deg);
+    printf("  - Phase centre RA (deg)  = %f\n", _ra0_deg);
+    printf("  - Phase centre Dec (deg) = %f\n", _dec0_deg);
     printf("  - Latitude (deg)         = %f\n", _latitude_deg);
     printf("  - Longitude (deg)        = %f\n", _longitude_deg);
     printf("  - Obs. length (sec)      = %f\n", _obs_length_sec);
-    printf("  - Obs. start (mjd)       = %f\n", _obs_start_mjd_utc);
-    printf("  - num_vis_dumps          = %i\n", _num_vis_dumps);
-    printf("  - num_vis_ave            = %i\n", _num_vis_ave);
-    printf("  - num_fringe_ave         = %i\n", _num_fringe_ave);
+    printf("  - Obs. start (MJD)       = %f\n", _obs_start_mjd_utc);
+    printf("  - Num. visibility dumps  = %i\n", _num_vis_dumps);
+    printf("  - Num. visibility ave.   = %i\n", _num_vis_ave);
+    printf("  - Num. fringe ave.       = %i\n", _num_fringe_ave);
     printf("  - Output file            = %s\n", _output_file.toLatin1().data());
     printf("\n");
 }

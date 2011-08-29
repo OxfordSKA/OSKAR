@@ -50,12 +50,10 @@ int main(int argc, char** argv)
     // $> oskar_sim1_scalar settings_file.txt
     if (argc != 5)
     {
-        fprintf(stderr, "ERROR: missing command line arguments\n");
+        fprintf(stderr, "ERROR: Missing command line arguments.\n");
         fprintf(stderr, "Usage:  $ sim1_scalar [settings file] [start freq] [freq inc] [num freq steps]\n");
         return EXIT_FAILURE;
     }
-
-    bool disable_e_jones = false;
 
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
@@ -88,7 +86,7 @@ int main(int argc, char** argv)
     // Check load worked.
     if (num_stations != telescope.num_antennas)
     {
-        fprintf(stderr, "ERROR: Error loading telescope geometry\n");
+        fprintf(stderr, "ERROR: Error loading telescope geometry.\n");
         return EXIT_FAILURE;
     }
     // =========================================================================
@@ -130,17 +128,16 @@ int main(int argc, char** argv)
                 settings.num_fringe_ave(),
                 frequency,
                 settings.channel_bandwidth(),
-                disable_e_jones,
+                settings.disable_station_beam(),
                 vis.vis(),
                 vis.u(),
                 vis.v(),
                 vis.w());
 
-        printf("= Completed simulation (%i of %i) after %f seconds. [error code = %i]\n",
+        printf("= Completed simulation (%i of %i) after %f seconds [error code: %i].\n",
                 i+1, num_freq_steps, timer.elapsed() / 1.0e3, err);
 
-        printf("= number of visibility points generated = %i\n",
-                vis.size());
+        printf("= Number of visibility points generated: %i\n", vis.size());
 
         QString outfile = "freq_scan_test_f_" + QString::number(frequency)+".dat";
         vis.write(outfile.toLatin1().data());

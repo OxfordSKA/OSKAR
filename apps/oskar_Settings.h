@@ -35,7 +35,7 @@
 class oskar_Settings
 {
     public:
-        oskar_Settings();
+        oskar_Settings(const QString& filename = QString());
         ~oskar_Settings();
 
     public:
@@ -57,6 +57,7 @@ class oskar_Settings
         double latitude_rad() const { return _latitude_deg * deg2rad; }
 
         QString station_dir() const { return _station_dir; }
+        bool disable_station_beam() const { return _disable_station_beam; }
 
         double frequency() const { return _frequency; }
         double channel_bandwidth() const { return _channel_bandwidth; }
@@ -86,6 +87,7 @@ class oskar_Settings
         double _latitude_deg;
 
         QString _station_dir;
+        bool _disable_station_beam;
 
         double _frequency;
         double _channel_bandwidth;
