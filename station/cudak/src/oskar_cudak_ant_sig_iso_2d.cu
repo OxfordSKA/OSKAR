@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "beamforming/cudak/oskar_cudak_ant_sig_iso_2d.h"
+#include "station/cudak/oskar_cudak_ant_sig_iso_2d.h"
 #include "math/oskar_phase.h"
 
 // Shared memory pointer used by the kernel.

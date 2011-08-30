@@ -51,6 +51,10 @@ if (NOT DEFINED BUILD_OSKAR_APPS)
     set(BUILD_OSKAR_APPS ON)
 endif()
 
+# ==== Default CUDA architecture target.
+if (NOT CUDA_ARCH)
+    set(CUDA_ARCH 2.1)
+endif ()
 
 # ==== Set dependencies and compiler options.
 include(dependencies)

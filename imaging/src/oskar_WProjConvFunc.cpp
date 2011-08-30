@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/WProjConvFunc.h"
-#include "imaging/FFTUtility.h"
+#include "imaging/oskar_WProjConvFunc.h"
+#include "imaging/oskar_FFTUtility.h"
 
 #include "fftw3.h"
 

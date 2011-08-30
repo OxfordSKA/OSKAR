@@ -6,11 +6,11 @@ include_directories(${QT_INCLUDE_DIR})
 
 # ==== Create list of source files for the oskar-lib imaging module.
 set(imaging_SRC
-    src/ConvFunc.cpp
-    src/FFTUtility.cpp
-    src/GridCorrection.cpp
-    src/Gridder.cpp
-    src/WProjConvFunc.cpp
+    src/oskar_ConvFunc.cpp
+    src/oskar_FFTUtility.cpp
+    src/oskar_GridCorrection.cpp
+    src/oskar_Gridder.cpp
+    src/oskar_WProjConvFunc.cpp
 )
 set(imaging_SRC "${imaging_SRC}" PARENT_SCOPE)
 

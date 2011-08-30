@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/Gridder.h"
+#include "imaging/oskar_Gridder.h"
 #include "math/oskar_Rounding.h"
 
 #include <cstdio>

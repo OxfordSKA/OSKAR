@@ -1,4 +1,4 @@
-#include "imaging/FFTUtility.h"
+#include "imaging/oskar_FFTUtility.h"
 
 #include <cstring>
 #include <fftw3.h>

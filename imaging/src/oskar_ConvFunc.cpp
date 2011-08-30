@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/ConvFunc.h"
+#include "imaging/oskar_ConvFunc.h"
 #include "imaging/floating_point_compare.h"
 
 #include <cmath>

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "beamforming/cudak/oskar_cudak_antenna.h"
+#include "station/cudak/oskar_cudak_antenna.h"
 
 #define PI_2_F 1.57079633f
 #define PI_2_D 1.5707963267948966

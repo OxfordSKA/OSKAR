@@ -2,12 +2,12 @@
 #define QTEST_GRIDDING_H_
 
 /**
- * @file QTestGridding.h
+ * @file QTest_Gridding.h
  */
 
 #include "widgets/plotting/oskar_PlotWidget.h"
-#include "imaging/ConvFunc.h"
-#include "imaging/Gridder.h"
+#include "imaging/oskar_ConvFunc.h"
+#include "imaging/oskar_Gridder.h"
 #include "imaging/oskar_types.h"
 
 #include <QtGui/QApplication>

@@ -2,11 +2,11 @@
 #define QTEST_WPROJ_CONV_FUNC_H_
 
 /**
- * @file QTestWProjConvFunc.h
+ * @file QTest_WProjConvFunc.h
  */
 
 #include "widgets/plotting/oskar_PlotWidget.h"
-#include "imaging/WProjConvFunc.h"
+#include "imaging/oskar_WProjConvFunc.h"
 #include "imaging/oskar_types.h"
 
 #include <QtGui/QApplication>

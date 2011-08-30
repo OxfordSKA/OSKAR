@@ -44,7 +44,7 @@ if (WIN32)
 endif ()
 
 # ==== Find dependencies.
-find_package(CUDA 4.0 QUIET)
+find_package(CUDA 4.0)
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     find_package(Qt4 4.5.0 COMPONENTS QtCore QtGui QtXml QtOpenGL QtTest QUIET)
     find_package(Qwt5 QUIET)
@@ -55,7 +55,6 @@ find_package(FFTW3 QUIET)
 find_package(CasaCore QUIET)
 find_package(CFitsio QUIET)
 find_package(Matlab QUIET)
-
 
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)

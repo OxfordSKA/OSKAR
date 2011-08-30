@@ -33,7 +33,7 @@ if (QT_QTTEST_FOUND)
     if (BUILD_OSKAR_WIDGETS)
 
         # WProjConvFunc test.
-        qt4_wrap_cpp(WProjConvFunc_test_MOC QTestWProjConvFunc.h)
+        qt4_wrap_cpp(WProjConvFunc_test_MOC QTest_WProjConvFunc.h)
         add_executable(qtest_WProjConvFunc ${WProjConvFunc_test_MOC})
         target_link_libraries(qtest_WProjConvFunc
             oskar_imaging
@@ -43,7 +43,7 @@ if (QT_QTTEST_FOUND)
         )
 
         # ConvFunc test.
-        qt4_wrap_cpp(convFunc_test_MOC QTestConvFunc.h)
+        qt4_wrap_cpp(convFunc_test_MOC QTest_ConvFunc.h)
         add_executable(qtest_ConvFunc ${convFunc_test_MOC})
         target_link_libraries(qtest_ConvFunc
             oskar_imaging
@@ -53,7 +53,7 @@ if (QT_QTTEST_FOUND)
         )
 
         # Gridding test.
-        qt4_wrap_cpp(gridding_test_MOC QTestGridding.h)
+        qt4_wrap_cpp(gridding_test_MOC QTest_Gridding.h)
         add_executable(qtest_Gridder ${gridding_test_MOC})
         target_link_libraries(qtest_Gridder
             oskar_imaging
@@ -63,9 +63,7 @@ if (QT_QTTEST_FOUND)
         )
 
         # Grid Image (standard -2d- kernel)
-        qt4_wrap_cpp(standard_grid_image_test_MOC
-            QTestStandardGridImage.h
-        )
+        qt4_wrap_cpp(standard_grid_image_test_MOC QTest_StandardGridImage.h)
         add_executable(qtest_standard_grid_image ${standard_grid_image_test_MOC})
         target_link_libraries(qtest_standard_grid_image
             oskar_imaging

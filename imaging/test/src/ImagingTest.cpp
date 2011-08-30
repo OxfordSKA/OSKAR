@@ -28,7 +28,7 @@
 
 #include "imaging/test/ImagingTest.h"
 
-#include "imaging/ConvFunc.h"
+#include "imaging/oskar_ConvFunc.h"
 
 #include <QtCore/QTime>
 

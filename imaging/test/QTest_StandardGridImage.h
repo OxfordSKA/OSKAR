@@ -2,15 +2,15 @@
 #define QTEST_STANDARD_GRID_IMAGE_H_
 
 /**
- * @file QTestStandardGridImage.h
+ * @file QTest_StandardGridImage.h
  */
 
 #include "widgets/plotting/oskar_PlotWidget.h"
-#include "imaging/ConvFunc.h"
-#include "imaging/Gridder.h"
-#include "imaging/FFTUtility.h"
+#include "imaging/oskar_ConvFunc.h"
+#include "imaging/oskar_Gridder.h"
+#include "imaging/oskar_FFTUtility.h"
 #include "imaging/oskar_types.h"
-#include "imaging/GridCorrection.h"
+#include "imaging/oskar_GridCorrection.h"
 
 #include <QtGui/QApplication>
 #include <QtCore/QObject>
@@ -27,7 +27,7 @@ using namespace oskar;
 using namespace std;
 
 /**
- * @class QTestStandardGridImage.h
+ * @class QTest_StandardGridImage.h
  *
  * @brief
  *

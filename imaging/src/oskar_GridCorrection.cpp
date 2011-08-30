@@ -1,5 +1,5 @@
-#include "imaging/GridCorrection.h"
-#include "imaging/ConvFunc.h"
+#include "imaging/oskar_GridCorrection.h"
+#include "imaging/oskar_ConvFunc.h"
 #include "imaging/floating_point_compare.h"
 
 #include <cstdio>
