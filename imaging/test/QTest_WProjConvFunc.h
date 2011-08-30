@@ -7,7 +7,6 @@
 
 #include "widgets/plotting/oskar_PlotWidget.h"
 #include "imaging/oskar_WProjConvFunc.h"
-#include "imaging/oskar_types.h"
 
 #include <QtGui/QApplication>
 #include <QtCore/QObject>

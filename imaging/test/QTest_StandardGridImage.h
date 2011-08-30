@@ -9,7 +9,6 @@
 #include "imaging/oskar_ConvFunc.h"
 #include "imaging/oskar_Gridder.h"
 #include "imaging/oskar_FFTUtility.h"
-#include "imaging/oskar_types.h"
 #include "imaging/oskar_GridCorrection.h"
 
 #include <QtGui/QApplication>
@@ -51,6 +50,8 @@ class QTestStandardGridImage : public QObject
 
         void image1()
         {
+            typedef std::complex<float> Complex;
+
             const unsigned support = 3;
             const unsigned oversample = 49;
 

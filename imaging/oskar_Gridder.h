@@ -29,13 +29,15 @@
 #ifndef OSKAR_MATH_GRIDDER_H_
 #define OSKAR_MATH_GRIDDER_H_
 
-#include "imaging/oskar_types.h"
+#include <complex>
 
 namespace oskar {
 
 class Gridder
 {
     public:
+        typedef std::complex<float> Complex;
+
         // Standard gridding.
         void grid_standard(const unsigned num_data,
                 const float * data_x,

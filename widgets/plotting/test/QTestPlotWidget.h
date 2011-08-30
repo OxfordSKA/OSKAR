@@ -10,6 +10,7 @@
 #include <qwt_symbol.h>
 
 #include <QtGui/QApplication>
+#include <QtGui/QWidget>
 #include <QtCore/QObject>
 #include <QtTest/QtTest>
 #include <QtGui/QMainWindow>
@@ -89,12 +90,12 @@ class QTestPlotWidget : public QObject
                 }
             }
 
-            _p2->resize(500, 500);
-            _p2->show();
+            _p2->resize(500, 500);  // This method is inherited from QWidget.
+            _p2->show();            // This method is inherited from QWidget.
             try {
                 _p2->plotImage(&data[0], nX, nY, 0, 100.0, 0, 100.0);
             }
-            catch (QString err) {
+            catch (const QString& err) {
                 std::cout << err.toStdString() << std::endl;
             }
 

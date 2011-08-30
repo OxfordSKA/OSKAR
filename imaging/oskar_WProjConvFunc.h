@@ -30,7 +30,7 @@
 #define WPROJ_CONV_FUNC_H_
 
 #include <vector>
-#include "imaging/oskar_types.h"
+#include <complex>
 
 namespace oskar {
 
@@ -46,6 +46,8 @@ namespace oskar {
 class WProjConvFunc
 {
     public:
+        typedef std::complex<float> Complex;
+
         WProjConvFunc();
         ~WProjConvFunc();
 

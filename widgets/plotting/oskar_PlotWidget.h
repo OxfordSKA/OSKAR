@@ -38,6 +38,8 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QString>
+#include <QtGui/QWidget>
+#include <QtGui/QFrame>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -48,6 +50,8 @@
 using std::vector;
 
 class QMenu;
+class QFrame;
+class QWidget;
 class QAction;
 class QwtScaleWidget;
 class QwtPlotGrid;

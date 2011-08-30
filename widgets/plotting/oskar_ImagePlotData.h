@@ -64,7 +64,7 @@ class ImagePlotData: public QwtRasterData
         ImagePlotData() : QwtRasterData() {}
 
         /// Destroys the image plot data object.
-        ~ImagePlotData() {}
+        virtual ~ImagePlotData() {}
 
     public:
         /// Set the data to be held in the raster.

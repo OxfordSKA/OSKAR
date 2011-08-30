@@ -51,8 +51,8 @@ PlotWidget::PlotWidget(QWidget* parent)
     // Setup the plot zoomer.
     _setZoomer();
 
-//    // Set the curve style (in this case no line, just black crosses).
-//    setCurveStyle();
+    //    // Set the curve style (in this case no line, just black crosses).
+    //    setCurveStyle();
 
     // Setup the plot Picker.
     _picker = new PlotPicker(canvas());
@@ -66,7 +66,7 @@ PlotWidget::PlotWidget(QWidget* parent)
     if (!isVisible()) setVisible(true);
 
     // what does this do? - its from the spectrogram example...
-//    plotLayout()->setAlignCanvasToScales(true);
+    //    plotLayout()->setAlignCanvasToScales(true);
 
     // Settings for stand alone mode (i.e not embedded in a parent widget).
     if (parent == 0)
@@ -181,13 +181,13 @@ void PlotWidget::plotCurve(const unsigned nPoints, const double * xData,
     }
     else if (append == false)
     {
-//        for (unsigned i = 0; i < _curve.size();  ++i)
-//            delete _curve[i];
-//        _curve.push_back(new QwtPlotCurve);
-//        setCurveStyle(0);
+        //        for (unsigned i = 0; i < _curve.size();  ++i)
+        //            delete _curve[i];
+        //        _curve.push_back(new QwtPlotCurve);
+        //        setCurveStyle(0);
         c = _curve[0];
     }
-//    QwtPlotCurve * c = _curve[_curve.size() - 1];
+    //    QwtPlotCurve * c = _curve[_curve.size() - 1];
     c->setData(xData, yData, nPoints);
 
     if (append == false)
@@ -271,8 +271,8 @@ void PlotWidget::plotImage(const unsigned size, float const * data,
 }
 
 
-void PlotWidget::plotImage(const unsigned size, const Complex * data,
-                const c_type type, const QString & title)
+void PlotWidget::plotImage(const unsigned size, const Complex* data,
+        const c_type type, const QString & title)
 {
     const unsigned nX = size;
     const unsigned nY = size;
@@ -286,13 +286,17 @@ void PlotWidget::plotImage(const unsigned size, const Complex * data,
         switch (type)
         {
             case RE:
-                image[i] = data[i].real(); break;
+                image[i] = real(data[i]);
+                break;
             case IM:
-                image[i] = data[i].imag(); break;
+                image[i] = imag(data[i]);
+                break;
             case ABS:
-                image[i] = abs(data[i]); break;
+                image[i] = abs(data[i]);
+                break;
             case PHASE:
-                image[i] = arg(data[i]); break;
+                image[i] = arg(data[i]);
+                break;
             case SQRT:
                 image[i] = abs(sqrt(data[i])); break;
             default:
@@ -314,7 +318,7 @@ void PlotWidget::savePNG(QString fileName, unsigned sizeX, unsigned sizeY)
 {
     if (fileName.isEmpty())
     {
-        fileName = QFileDialog::getSaveFileName(this,
+        fileName = QFileDialog::getSaveFileName((QWidget*)this,
                 "Save plot widget as PNG: file name", QString(), "(*.png)");
     }
 
@@ -341,7 +345,7 @@ void PlotWidget::savePDF(QString fileName, unsigned sizeX, unsigned sizeY)
 {
     if (fileName.isEmpty())
     {
-        fileName = QFileDialog::getSaveFileName(this,
+        fileName = QFileDialog::getSaveFileName((QWidget*)this,
                 "Save plot widget as PDF: file name", QString(), "(*.pdf)");
     }
 
@@ -455,7 +459,7 @@ void PlotWidget::updateZoomBase()
 void PlotWidget::menuSetTitle()
 {
     bool ok = false;
-    QString text = QInputDialog::getText(this, "Set Plot Title", "Title: ",
+    QString text = QInputDialog::getText((QWidget*)this, "Set Plot Title", "Title: ",
             QLineEdit::Normal, title().text(), &ok);
 
     if (ok && text.isEmpty()) setTitle("");
@@ -497,7 +501,7 @@ void PlotWidget::setXLabel(const QString& text)
 void PlotWidget::menuSetXLabel()
 {
     bool ok = false;
-    QString t = QInputDialog::getText(this, "Set X Label", "Label: ",
+    QString t = QInputDialog::getText((QWidget*)this, "Set X Label", "Label: ",
             QLineEdit::Normal, axisTitle(QwtPlot::xBottom).text(), &ok);
     if (ok && t.isEmpty()) setAxisTitle(QwtPlot::xBottom, "");
     if (ok && !t.isEmpty()) setXLabel(t);
@@ -509,7 +513,7 @@ void PlotWidget::menuSetXLabel()
 void PlotWidget::menuSetYLabel()
 {
     bool ok = false;
-    QString t = QInputDialog::getText(this, "Set Y Label", "Label: ",
+    QString t = QInputDialog::getText((QWidget*)this, "Set Y Label", "Label: ",
             QLineEdit::Normal, axisTitle(QwtPlot::yLeft).text(), &ok);
 
     if (ok && t.isEmpty()) setAxisTitle(QwtPlot::yLeft, "");
@@ -721,6 +725,8 @@ void PlotWidget::mouseReleaseEvent(QMouseEvent* event)
  */
 void PlotWidget::keyPressEvent(QKeyEvent* event)
 {
+    QWidget* widget = (QWidget*)this;
+
     // Keys with shift modifier.
     if (event->modifiers() == Qt::ShiftModifier)
     {
@@ -742,10 +748,10 @@ void PlotWidget::keyPressEvent(QKeyEvent* event)
         if (event->key() == Qt::Key_C)
         {
             if (parentWidget() == 0)
-                close();
+                widget->close();
         }
         else if (event->key() == Qt::Key_X)
-            close();
+            widget->close();
 
     }
     // Unmodified keys.
@@ -779,7 +785,7 @@ void PlotWidget::keyPressEvent(QKeyEvent* event)
         else if (event->key() == Qt::Key_Escape)
         {
             if (parentWidget() == 0)
-                close();
+                widget->close();
         }
 
         else if (event->key() == Qt::Key_F1)
@@ -825,7 +831,7 @@ void PlotWidget::keyPressEvent(QKeyEvent* event)
             h += "middle-drag\t\tPan plot.\n";
             h += "[shift] + wheel\tMagnify plot.\n";
 
-            QMessageBox::information(this, "Key-bindings help", h);
+            QMessageBox::information((QWidget*)this, "Key-bindings help", h);
         }
     }
 }

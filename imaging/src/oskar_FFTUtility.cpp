@@ -5,8 +5,8 @@
 
 namespace oskar {
 
-Complex * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
-        Complex * data)
+std::complex<float> * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
+        std::complex<float>* data)
 {
     for (unsigned j = 0; j < ny; ++j)
     {
@@ -64,8 +64,8 @@ float * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
 
 
 
-float * FFTUtility::fft_c2r_2d(const unsigned size, const Complex * in,
-        float * out)
+float * FFTUtility::fft_c2r_2d(const unsigned size, const std::complex<float>* in,
+        float* out)
 {
     // Copy grid to half complex section.
     const unsigned csize = size / 2 + 1;
@@ -93,10 +93,6 @@ float * FFTUtility::fft_c2r_2d(const unsigned size, const Complex * in,
 
     return out;
 }
-
-
-
-
 
 
 } // namespace oskar

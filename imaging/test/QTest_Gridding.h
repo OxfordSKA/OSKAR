@@ -8,7 +8,6 @@
 #include "widgets/plotting/oskar_PlotWidget.h"
 #include "imaging/oskar_ConvFunc.h"
 #include "imaging/oskar_Gridder.h"
-#include "imaging/oskar_types.h"
 
 #include <QtGui/QApplication>
 #include <QtCore/QObject>
@@ -19,6 +18,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <complex>
 
 using namespace oskar;
 using namespace std;
@@ -159,6 +159,8 @@ class QTestGridding : public QObject
 //            c.exp(support, oversample);
             //c.expSinc(support, oversample);
             //c.sinc(support, oversample);
+
+            typedef std::complex<float> Complex;
 
             // Data.
             const unsigned num_data = 3;
