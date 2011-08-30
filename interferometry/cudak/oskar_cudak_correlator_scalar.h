@@ -42,7 +42,7 @@
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] k                Complex input matrix (ns rows, na columns).
+ * @param[in] jones            Complex input matrix (ns rows, na columns).
  * @param[in] u                Station u-coordinates in wavenumbers.
  * @param[in] v                Station v-coordinates in wavenumbers.
  * @param[in] l                Distance from phase centre for each source.
@@ -52,7 +52,7 @@
  */
 __global__
 void oskar_cudak_correlator_scalar_f(const int ns, const int na,
-        const float2* k, const float* u, const float* v, const float* l,
+        const float2* jones, const float* u, const float* v, const float* l,
         const float* m, const float lambda_bandwidth, float2* vis);
 
 /**
@@ -62,7 +62,7 @@ void oskar_cudak_correlator_scalar_f(const int ns, const int na,
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] k                Complex input matrix (ns rows, na columns).
+ * @param[in] jones            Complex input matrix (ns rows, na columns).
  * @param[in] u                Station u-coordinates in wavenumbers.
  * @param[in] v                Station v-coordinates in wavenumbers.
  * @param[in] l                Distance from phase centre for each source.
@@ -72,7 +72,7 @@ void oskar_cudak_correlator_scalar_f(const int ns, const int na,
  */
 __global__
 void oskar_cudak_correlator_scalar_d(const int ns, const int na,
-        const double2* k, const double* u, const double* v, const double* l,
+        const double2* jones, const double* u, const double* v, const double* l,
         const double* m, const double lambda_bandwidth, double2* vis);
 
 #endif // OSKAR_CUDAK_CORRELATOR_SCALAR_H_

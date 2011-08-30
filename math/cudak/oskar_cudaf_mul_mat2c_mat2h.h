@@ -46,11 +46,12 @@
  * This inline device function multiplies together two complex 2x2 matrices,
  * where the second one is Hermitian.
  *
- * The second matrix is represented as four (non-complex) scalars in a float4
- * data type, where the elements of the structure must be as follows:
+ * The second matrix is assumed to contain values as follows:
  *
- *   ( x   y + iz )
- *   ( -     w    )
+ *   ( a   b )
+ *   ( -   d )
+ *
+ * and a and d must both be real.
  *
  * Matrix multiplication is done in the order M1 = M1 * M2.
  *
@@ -58,41 +59,40 @@
  * @param[in]     m2 The second complex matrix.
  */
 __device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2h_f(
-        float4c& m1, const float4& m2)
+        float4c& m1, const float4c& m2)
 {
     // Before anything else, copy a and c from the input matrix.
     float2 a = m1.a;
     float2 c = m1.c;
 
     // Declare temporaries.
-    const float2 bb = make_float2(m2.y, m2.z); // Diagonal term, y + iz.
     float2 t;
 
     // First, evaluate result a.
-    m1.a.x *= m2.x;
-    m1.a.y *= m2.x;
-    oskar_cudaf_mul_c_c_conj_f(m1.b, bb, t);
+    m1.a.x *= m2.a.x;
+    m1.a.y *= m2.a.x;
+    oskar_cudaf_mul_c_c_conj_f(m1.b, m2.b, t);
     m1.a.x += t.x;
     m1.a.y += t.y;
 
     // Second, evaluate result c.
-    m1.c.x *= m2.x;
-    m1.c.y *= m2.x;
-    oskar_cudaf_mul_c_c_conj_f(m1.d, bb, t);
+    m1.c.x *= m2.a.x;
+    m1.c.y *= m2.a.x;
+    oskar_cudaf_mul_c_c_conj_f(m1.d, m2.b, t);
     m1.c.x += t.x;
     m1.c.y += t.y;
 
     // Third, evaluate result b.
-    m1.b.x *= m2.w;
-    m1.b.y *= m2.w;
-    oskar_cudaf_mul_c_c_f(a, bb, t);
+    m1.b.x *= m2.d.x;
+    m1.b.y *= m2.d.x;
+    oskar_cudaf_mul_c_c_f(a, m2.b, t);
     m1.b.x += t.x;
     m1.b.y += t.y;
 
     // Fourth, evaluate result d.
-    m1.d.x *= m2.w;
-    m1.d.y *= m2.w;
-    oskar_cudaf_mul_c_c_f(c, bb, t);
+    m1.d.x *= m2.d.x;
+    m1.d.y *= m2.d.x;
+    oskar_cudaf_mul_c_c_f(c, m2.b, t);
     m1.d.x += t.x;
     m1.d.y += t.y;
 }
@@ -106,11 +106,12 @@ __device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2h_f(
  * This inline device function multiplies together two complex 2x2 matrices,
  * where the second one is Hermitian.
  *
- * The second matrix is represented as four (non-complex) scalars in a float4
- * data type, where the elements of the structure must be as follows:
+ * The second matrix is assumed to contain values as follows:
  *
- *   ( x   y + iz )
- *   ( -     w    )
+ *   ( a   b )
+ *   ( -   d )
+ *
+ * and a and d must both be real.
  *
  * Matrix multiplication is done in the order M1 = M1 * M2.
  *
@@ -118,41 +119,40 @@ __device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2h_f(
  * @param[in]     m2 The second complex matrix.
  */
 __device__ __forceinline__ void oskar_cudaf_mul_mat2c_mat2h_d(
-        double4c& m1, const double4& m2)
+        double4c& m1, const double4c& m2)
 {
     // Before anything else, copy a and c from the input matrix.
     double2 a = m1.a;
     double2 c = m1.c;
 
     // Declare temporaries.
-    const double2 bb = make_double2(m2.y, m2.z); // Diagonal term, y + iz.
     double2 t;
 
     // First, evaluate result a.
-    m1.a.x *= m2.x;
-    m1.a.y *= m2.x;
-    oskar_cudaf_mul_c_c_conj_d(m1.b, bb, t);
+    m1.a.x *= m2.a.x;
+    m1.a.y *= m2.a.x;
+    oskar_cudaf_mul_c_c_conj_d(m1.b, m2.b, t);
     m1.a.x += t.x;
     m1.a.y += t.y;
 
     // Second, evaluate result c.
-    m1.c.x *= m2.x;
-    m1.c.y *= m2.x;
-    oskar_cudaf_mul_c_c_conj_d(m1.d, bb, t);
+    m1.c.x *= m2.a.x;
+    m1.c.y *= m2.a.x;
+    oskar_cudaf_mul_c_c_conj_d(m1.d, m2.b, t);
     m1.c.x += t.x;
     m1.c.y += t.y;
 
     // Third, evaluate result b.
-    m1.b.x *= m2.w;
-    m1.b.y *= m2.w;
-    oskar_cudaf_mul_c_c_d(a, bb, t);
+    m1.b.x *= m2.d.x;
+    m1.b.y *= m2.d.x;
+    oskar_cudaf_mul_c_c_d(a, m2.b, t);
     m1.b.x += t.x;
     m1.b.y += t.y;
 
     // Fourth, evaluate result d.
-    m1.d.x *= m2.w;
-    m1.d.y *= m2.w;
-    oskar_cudaf_mul_c_c_d(c, bb, t);
+    m1.d.x *= m2.d.x;
+    m1.d.y *= m2.d.x;
+    oskar_cudaf_mul_c_c_d(c, m2.b, t);
     m1.d.x += t.x;
     m1.d.y += t.y;
 }
