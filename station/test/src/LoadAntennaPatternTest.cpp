@@ -141,24 +141,18 @@ void LoadAntennaPatternTest::test_method()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0 * M_PI / 180.0, pattern.inc_phi, 1e-6);
 
     // Check the contents of the first row.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, pattern.theta[0], 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, pattern.phi[0], 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(3.770844212e-1, pattern.g_theta[0].x, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-3.556198490e-1, pattern.g_theta[0].y, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(6.446807267, pattern.g_phi[0].x, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1.374663044, pattern.g_phi[0].y, 1e-6);
 
     // Check the contents of row 15.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(40.0 * M_PI / 180.0, pattern.theta[14], 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0 * M_PI / 180.0, pattern.phi[14], 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0192064, pattern.g_theta[14].x, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.90594407, pattern.g_theta[14].y, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.013445964, pattern.g_phi[14].x, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.151916707, pattern.g_phi[14].y, 1e-6);
 
     // Check the contents of the last row.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(90.0 * M_PI / 180.0, pattern.theta[29], 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0 * M_PI / 180.0, pattern.phi[29], 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.05954787, pattern.g_theta[29].x, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.018560778, pattern.g_theta[29].y, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(4.208770322e-6, pattern.g_phi[29].x, 1e-6);

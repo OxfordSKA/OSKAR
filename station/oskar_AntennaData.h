@@ -35,19 +35,27 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Structure to hold antenna field pattern data.
+ *
+ * @details
+ * This structure holds the complex gain of an antenna as a function of theta
+ * and phi. The 2D data can be interpolated easily using the additional
+ * meta-data.
+ *
+ * The theta coordinate is assumed to be the fastest-varying dimension.
+ */
 struct oskar_AntennaData
 {
     int n_points;     ///< Total number of points in all arrays.
     int n_phi;        ///< Number of points in the phi direction.
     int n_theta;      ///< Number of points in the theta direction.
-    float min_theta;  ///< Minimum value of theta, in radians.
-    float min_phi;    ///< Minimum value of phi, in radians.
-    float max_theta;  ///< Maximum value of theta, in radians.
-    float max_phi;    ///< Maximum value of phi, in radians.
     float inc_phi;    ///< Increment in the phi direction, in radians.
     float inc_theta;  ///< Increment in the theta direction, in radians.
-    float* phi;       ///< Array of phi coordinates.
-    float* theta;     ///< Array of theta coordinates.
+    float max_phi;    ///< Maximum value of phi, in radians.
+    float max_theta;  ///< Maximum value of theta, in radians.
+    float min_phi;    ///< Minimum value of phi, in radians.
+    float min_theta;  ///< Minimum value of theta, in radians.
     float2* g_phi;    ///< Response in phi direction at coordinates (re,im).
     float2* g_theta;  ///< Response in theta direction at coordinates (re,im).
 };

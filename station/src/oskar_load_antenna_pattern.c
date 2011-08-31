@@ -32,11 +32,9 @@ int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data)
     if (!fgets(line, sizeof(line), file)) return 1;
     const char* dbi = strstr(line, "dBi"); // Check for presence of "dBi".
 
-    // Initalise pointers to NULL.
+    // Initialise pointers to NULL.
     data->g_phi = NULL;
     data->g_theta = NULL;
-    data->phi = NULL;
-    data->theta = NULL;
 
     // Loop over and read each line in the file.
     while (fgets(line, sizeof(line), file))
@@ -69,15 +67,11 @@ int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data)
         if (n % 100 == 0)
         {
             int size = (n + 100) * sizeof(float);
-            data->theta   = (float*) realloc(data->theta, size);
-            data->phi     = (float*) realloc(data->phi, size);
             data->g_theta = (float2*) realloc(data->g_theta, 2*size);
             data->g_phi   = (float2*) realloc(data->g_phi, 2*size);
         }
 
         // Store the coordinates in radians.
-        data->theta[n] = theta;
-        data->phi[n] = phi;
         p_theta = theta;
         p_phi = phi;
 
