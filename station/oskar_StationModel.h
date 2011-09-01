@@ -36,11 +36,11 @@ extern "C" {
 struct oskar_StationModel
 {
     unsigned num_antennas;
-
-    double * antenna_x;
-    double * antenna_y;
+    double*  antenna_x;
+    double*  antenna_y;
     //double * antenna_z;
 };
+typedef struct oskar_StationModel oskar_StationModel;
 
 
 #ifdef __cplusplus
