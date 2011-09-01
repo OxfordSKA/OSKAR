@@ -70,7 +70,6 @@ class QTestPlotWidget : public QObject
             std::vector<double> yPlot(y.begin(), y.end());
 
             _p1->resize(500, 500);
-            _p1->show();
             _p1->plotCurve(nPoints, &xPlot[0], &yPlot[0]);
             _p1->setPlotTitle("Curve plot");
             //_p1->showGrid(true);
@@ -91,7 +90,6 @@ class QTestPlotWidget : public QObject
             }
 
             _p2->resize(500, 500);  // This method is inherited from QWidget.
-            _p2->show();            // This method is inherited from QWidget.
             try {
                 _p2->plotImage(&data[0], nX, nY, 0, 100.0, 0, 100.0);
             }
@@ -146,7 +144,6 @@ class QTestPlotWidget : public QObject
         void empty()
         {
             _p3->resize(500, 500);
-            _p3->show();
         }
 
     private:
