@@ -53,25 +53,44 @@ inline __device__ __host__ texture<float2, 2>& texture_ref<float2>()
 }
 
 // Kernel.
-template <typename T>
-__global__ void oskar_bilinear_kernel(int n, const float2* pos, T* out)
+template <typename InputType, typename CoordType, typename OutputType>
+__global__ void oskar_bilinear_kernel(int n, const CoordType* pos_x,
+        const CoordType* pos_y, OutputType* out)
 {
     const int i = __mul24(blockIdx.x, blockDim.x) + threadIdx.x;
     if (i < n)
     {
-        float2 p = pos[i];
-        out[i] = tex2D(texture_ref<T>(), p.x, p.y);
+        CoordType p_x = pos_x[i];
+        CoordType p_y = pos_y[i];
+        out[i] = tex2D(texture_ref<InputType>(), p_x, p_y);
+    }
+}
+
+// Kernel template specialisation for complex double output.
+template <>
+__global__ void oskar_bilinear_kernel<float2, double, double2>(int n,
+        const double* pos_x, const double* pos_y, double2* out)
+{
+    const int i = __mul24(blockIdx.x, blockDim.x) + threadIdx.x;
+    if (i < n)
+    {
+        float p_x = pos_x[i];
+        float p_y = pos_y[i];
+        float2 t1 = tex2D(texture_ref<float2>(), p_x, p_y);
+        double2 t2 = make_double2(t1.x, t1.y);
+        out[i] = t2;
     }
 }
 
 // Kernel wrapper.
-template <typename T>
+template <typename InputType, typename CoordType, typename OutputType>
 int oskar_math_cuda_interp_bilinear(int width, int height, int pitch,
-        const T* input, int n, const float2* pos, T* output)
+        const InputType* input, int n, const CoordType* pos_x,
+        const CoordType* pos_y, OutputType* output)
 {
     // Prepare the texture reference from the look-up table.
-    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<T>();
-    texture<T, 2>& ref = texture_ref<T>();
+    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<InputType>();
+    texture<InputType, 2>& ref = texture_ref<InputType>();
     ref.filterMode = cudaFilterModeLinear;
     ref.normalized = true;
     cudaError_t errCuda = cudaBindTexture2D(0, &ref, input, &channelDesc,
@@ -81,7 +100,8 @@ int oskar_math_cuda_interp_bilinear(int width, int height, int pitch,
     // Launch the kernel.
     const int thd = 768;
     const int blk = (n + thd - 1) / thd;
-    oskar_bilinear_kernel<T> <<< blk, thd >>> (n, pos, output);
+    oskar_bilinear_kernel<InputType, CoordType, OutputType> <<< blk, thd >>>
+            (n, pos_x, pos_y, output);
     cudaDeviceSynchronize();
     errCuda = cudaPeekAtLastError();
     if (errCuda != cudaSuccess) return errCuda;
@@ -93,16 +113,38 @@ int oskar_math_cuda_interp_bilinear(int width, int height, int pitch,
     return 0;
 }
 
-int oskar_cuda_interp_bilinear_float(int width, int height, int pitch,
-        const float* input, int n, const float2* pos, float* output)
+extern "C"
+int oskar_cuda_interp_bilinear_f(int width, int height, int pitch,
+        const float* input, int n, const float* pos_x, const float* pos_y,
+        float* output)
 {
-    return oskar_math_cuda_interp_bilinear<float>(width, height, pitch, input,
-            n, pos, output);
+    return oskar_math_cuda_interp_bilinear<float, float, float>(width,
+            height, pitch, input, n, pos_x, pos_y, output);
 }
 
-int oskar_cuda_interp_bilinear_complex(int width, int height, int pitch,
-        const float2* input, int n, const float2* pos, float2* output)
+extern "C"
+int oskar_cuda_interp_bilinear_complex_f(int width, int height, int pitch,
+        const float2* input, int n, const float* pos_x, const float* pos_y,
+        float2* output)
 {
-    return oskar_math_cuda_interp_bilinear<float2>(width, height, pitch, input,
-                n, pos, output);
+    return oskar_math_cuda_interp_bilinear<float2, float, float2>(width,
+            height, pitch, input, n, pos_x, pos_y, output);
+}
+
+extern "C"
+int oskar_cuda_interp_bilinear_d(int width, int height, int pitch,
+        const float* input, int n, const double* pos_x, const double* pos_y,
+        double* output)
+{
+    return oskar_math_cuda_interp_bilinear<float, double, double>(width,
+            height, pitch, input, n, pos_x, pos_y, output);
+}
+
+extern "C"
+int oskar_cuda_interp_bilinear_complex_d(int width, int height, int pitch,
+        const float2* input, int n, const double* pos_x, const double* pos_y,
+        double2* output)
+{
+    return oskar_math_cuda_interp_bilinear<float2, double, double2>(width,
+            height, pitch, input, n, pos_x, pos_y, output);
 }

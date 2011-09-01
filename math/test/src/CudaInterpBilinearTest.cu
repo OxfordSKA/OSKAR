@@ -67,53 +67,55 @@ void CudaInterpBilinearTest::test_method()
     int nw = width * factor;
     int nh = height * factor;
     int n = nw * nh;
-    float2* pos = (float2*)malloc(n * sizeof(float2));
+    float* pos_x = (float*)malloc(n * sizeof(float));
+    float* pos_y = (float*)malloc(n * sizeof(float));
     for (int i = 0, h = 0; h < nh; h++)
     {
-    	float h_frac = float(h) / float(nh-1);
+        float h_frac = float(h) / float(nh-1);
         for (int w = 0; w < nw; w++)
         {
-        	float w_frac = float(w) / float(nw-1);
-//            pos[i].x = 0.5 + (width - 1) * w_frac;
-//            pos[i].y = 0.5 + (height - 1) * h_frac;
-        	pos[i].x = (0.5 + (width - 1) * w_frac) / float(width);
-        	pos[i].y = (0.5 + (height - 1) * h_frac) / float(height);
+            float w_frac = float(w) / float(nw-1);
+//            pos_x[i] = 0.5 + (width - 1) * w_frac;
+//            pos_y[i] = 0.5 + (height - 1) * h_frac;
+            pos_x[i] = (0.5 + (width - 1) * w_frac) / float(width);
+            pos_y[i] = (0.5 + (height - 1) * h_frac) / float(height);
 //			printf("%5d %10.4f %10.4f\n", i, pos[i].x, pos[i].y);
             i++;
         }
     }
 
     // Copy data to device.
-    float* data_d;
+    float* d_data;
     size_t pitch;
-    cudaMallocPitch((void**)&data_d, &pitch, width, height);
-    cudaMemcpy2D(data_d, pitch, data, width * sizeof(float),
+    cudaMallocPitch((void**)&d_data, &pitch, width, height);
+    cudaMemcpy2D(d_data, pitch, data, width * sizeof(float),
             width * sizeof(float), height, cudaMemcpyHostToDevice);
 
     // Copy positions to device.
-    float2* pos_d;
-    cudaMalloc((void**)&pos_d, n * sizeof(float2));
-    cudaMemcpy(pos_d, pos, n * sizeof(float2), cudaMemcpyHostToDevice);
+    float *d_pos_x, *d_pos_y;
+    cudaMalloc((void**)&d_pos_x, n * sizeof(float));
+    cudaMalloc((void**)&d_pos_y, n * sizeof(float));
+    cudaMemcpy(d_pos_x, pos_x, n * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_pos_y, pos_y, n * sizeof(float), cudaMemcpyHostToDevice);
 
     // Allocate result.
     float* output = (float*)malloc(n * sizeof(float));
-    float* output_d;
-    cudaMalloc((void**)&output_d, n * sizeof(float));
+    float* d_output;
+    cudaMalloc((void**)&d_output, n * sizeof(float));
 
     // Interpolate.
-    printf("Starting interpolation...\n");
     int err;
     TIMER_START
-    err = oskar_cuda_interp_bilinear_float(width, height, pitch,
-            data_d, n, pos_d, output_d);
+    err = oskar_cuda_interp_bilinear_f(width, height, pitch,
+            d_data, n, d_pos_x, d_pos_y, d_output);
     TIMER_STOP("Finished interpolation (%d points)", n)
     if (err != 0)
         printf("CUDA error, code %d\n", err);
     else
-        printf("Interpolation successful!\n");
+        printf("Interpolation successful.\n");
 
     // Copy result back.
-    cudaMemcpy(output, output_d, n * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(output, d_output, n * sizeof(float), cudaMemcpyDeviceToHost);
 
     // Print result to file.
     FILE* file = fopen("bilinear_interp_test.dat", "w");
@@ -130,9 +132,11 @@ void CudaInterpBilinearTest::test_method()
 
     // Free memory.
     free(output);
-    free(pos);
-    cudaFree(output_d);
-    cudaFree(pos_d);
-    cudaFree(data_d);
+    free(pos_x);
+    free(pos_y);
+    cudaFree(d_output);
+    cudaFree(d_pos_x);
+    cudaFree(d_pos_y);
+    cudaFree(d_data);
 }
 

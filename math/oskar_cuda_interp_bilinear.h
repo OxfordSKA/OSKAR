@@ -65,8 +65,9 @@ extern "C" {
  * @param[out] output Interpolated output data.
  */
 DllExport
-int oskar_cuda_interp_bilinear_float(int width, int height, int pitch,
-        const float* input, int n, const float2* pos, float* output);
+int oskar_cuda_interp_bilinear_f(int width, int height, int pitch,
+        const float* input, int n, const float* pos_x, const float* pos_y,
+        float* output);
 
 /**
  * @brief
@@ -93,8 +94,9 @@ int oskar_cuda_interp_bilinear_float(int width, int height, int pitch,
  * @param[out] output Interpolated output data.
  */
 DllExport
-int oskar_cuda_interp_bilinear_complex(int width, int height, int pitch,
-        const float2* input, int n, const float2* pos, float2* output);
+int oskar_cuda_interp_bilinear_complex_f(int width, int height, int pitch,
+        const float2* input, int n, const float* pos_x, const float* pos_y,
+        float2* output);
 
 
 #ifdef __cplusplus
