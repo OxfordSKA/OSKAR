@@ -31,9 +31,7 @@
 
 #include <complex>
 
-namespace oskar {
-
-class Gridder
+class oskar_StandardGridder
 {
     public:
         typedef std::complex<float> Complex;
@@ -54,11 +52,6 @@ class Gridder
         // Standard degridding.
         void degrid_standard();
 
-        // WProjection gridding.
-
-
-        // WProjection degridding.
-
     public:
         void calculate_offset(const float x, const float pixel_size,
                 const unsigned oversample, int * x_grid,
@@ -73,5 +66,4 @@ class Gridder
 };
 
 
-} // namespace oskar
 #endif // OSKAR_MATH_GRIDDER_H_

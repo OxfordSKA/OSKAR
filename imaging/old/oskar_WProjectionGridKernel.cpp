@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_WProjConvFunc.h"
+#include "imaging/oskar_WProjectionGridKernel.h"
 #include "imaging/oskar_FFTUtility.h"
 
 #include "fftw3.h"
@@ -43,19 +43,17 @@
 
 using namespace std;
 
-namespace oskar {
-
-WProjConvFunc::WProjConvFunc()
+oskar_WProjectionGridKernel::oskar_WProjectionGridKernel()
 : _size(0)
 {
 }
 
-WProjConvFunc::~WProjConvFunc()
+oskar_WProjectionGridKernel::~oskar_WProjectionGridKernel()
 {
 }
 
 
-void WProjConvFunc::generateLM(const unsigned innerSize, const unsigned padding,
+void oskar_WProjectionGridKernel::generateLM(const unsigned innerSize, const unsigned padding,
         const float pixelSizeLM_rads, const float w, const float taperFactor)
 {
     // Resize the function if needed.
@@ -72,7 +70,7 @@ void WProjConvFunc::generateLM(const unsigned innerSize, const unsigned padding,
 
 
 
-void WProjConvFunc::generateUV(const unsigned innerSize, const unsigned padding,
+void oskar_WProjectionGridKernel::generateUV(const unsigned innerSize, const unsigned padding,
         const float pixelSizeLM_rads, const float w,
         const float taperFactor, const float cutoff, const bool reorder)
 {
@@ -113,7 +111,7 @@ void WProjConvFunc::generateUV(const unsigned innerSize, const unsigned padding,
 
 
 
-void WProjConvFunc::wFuncLMPadded(const unsigned innerSize, const unsigned size,
+void oskar_WProjectionGridKernel::wFuncLMPadded(const unsigned innerSize, const unsigned size,
         const float pixelSizeLM_rads, const float w, Complex * convFunc) const
 {
     const unsigned centre = size / 2;
@@ -144,7 +142,7 @@ void WProjConvFunc::wFuncLMPadded(const unsigned innerSize, const unsigned size,
 }
 
 
-void WProjConvFunc::applyExpTaper(const unsigned innerSize, const unsigned size,
+void oskar_WProjectionGridKernel::applyExpTaper(const unsigned innerSize, const unsigned size,
         const float taperFactor, Complex * convFunc) const
 {
     const unsigned centre = size / 2;
@@ -171,7 +169,7 @@ void WProjConvFunc::applyExpTaper(const unsigned innerSize, const unsigned size,
 
 
 // TODO(optimisation): Don't recreate the fftw plane each time this is called.
-void WProjConvFunc::cfft2d(const unsigned size, Complex * convFunc) const
+void oskar_WProjectionGridKernel::cfft2d(const unsigned size, Complex * convFunc) const
 {
     FFTUtility::fftPhase(size, size, convFunc);
     fftwf_complex * c = reinterpret_cast<fftwf_complex*>(convFunc);
@@ -184,7 +182,7 @@ void WProjConvFunc::cfft2d(const unsigned size, Complex * convFunc) const
 }
 
 
-float WProjConvFunc::findMax(const unsigned size, Complex * convFunc) const
+float oskar_WProjectionGridKernel::findMax(const unsigned size, Complex * convFunc) const
 {
     // TODO(optimisation): Can just use the mid point?
     float convmax = -numeric_limits<float>::max();
@@ -194,7 +192,7 @@ float WProjConvFunc::findMax(const unsigned size, Complex * convFunc) const
 }
 
 
-void WProjConvFunc::scale(const unsigned size, Complex * convFunc,
+void oskar_WProjectionGridKernel::scale(const unsigned size, Complex * convFunc,
         const float value) const
 {
     for (unsigned i = 0; i < size; ++i)
@@ -202,7 +200,7 @@ void WProjConvFunc::scale(const unsigned size, Complex * convFunc,
 }
 
 
-int WProjConvFunc::findCutoffIndex(const unsigned size,
+int oskar_WProjectionGridKernel::findCutoffIndex(const unsigned size,
         const Complex * convFunc, const float cutoff) const
 {
     int cutoffIndex = -1;
@@ -219,7 +217,7 @@ int WProjConvFunc::findCutoffIndex(const unsigned size,
 }
 
 
-unsigned WProjConvFunc::evaluateCutoffPixelRadius(const unsigned size,
+unsigned oskar_WProjectionGridKernel::evaluateCutoffPixelRadius(const unsigned size,
         const unsigned padding, const int cutoffIndex, const unsigned minRadius)
 {
     // TODO(better way to do this using only half the size?)
@@ -260,7 +258,7 @@ unsigned WProjConvFunc::evaluateCutoffPixelRadius(const unsigned size,
 }
 
 
-void WProjConvFunc::reshape(const unsigned cutoffPixelRadius,
+void oskar_WProjectionGridKernel::reshape(const unsigned cutoffPixelRadius,
         const unsigned padding)
 {
     const unsigned cut_size = (cutoffPixelRadius * 2 + 1) * padding;
@@ -282,7 +280,7 @@ void WProjConvFunc::reshape(const unsigned cutoffPixelRadius,
 
 
 
-void WProjConvFunc::reorder_memory(const unsigned padding, const unsigned size,
+void oskar_WProjectionGridKernel::reorder_memory(const unsigned padding, const unsigned size,
         Complex * convFunc)
 {
     const unsigned size_pixels = size / padding;
@@ -307,6 +305,3 @@ void WProjConvFunc::reorder_memory(const unsigned padding, const unsigned size,
     }
     memcpy((void*)convFunc, (const void*)t, size * size * sizeof(Complex));
 }
-
-
-} // namespace oskar

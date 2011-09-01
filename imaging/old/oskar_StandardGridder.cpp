@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_Gridder.h"
+#include "imaging/oskar_StandardGridder.h"
 #include "math/oskar_Rounding.h"
 
 #include <cstdio>
@@ -34,9 +34,7 @@
 
 using namespace std;
 
-namespace oskar {
-
-void Gridder::grid_standard(
+void oskar_StandardGridder::grid_standard(
         const unsigned num_data,
         const float * data_x,
         const float * data_y,
@@ -68,8 +66,8 @@ void Gridder::grid_standard(
         x_conv_func += ccentre;
         y_conv_func += ccentre;
 
-        const float aRe = data_amp[i].real();
-        const float aIm = data_amp[i].imag();
+        const float aRe = real(data_amp[i]);
+        const float aIm = imag(data_amp[i]);
 
         for (int iy = -(int)support; iy <= (int)support; ++iy)
         {
@@ -91,13 +89,13 @@ void Gridder::grid_standard(
 }
 
 
-void Gridder::degrid_standard()
+void oskar_StandardGridder::degrid_standard()
 {
 }
 
 
 
-void Gridder::calculate_offset(const float x, const float pixel_size,
+void oskar_StandardGridder::calculate_offset(const float x, const float pixel_size,
         const unsigned oversample, int * x_grid,
         int * x_conv_func)
 {
@@ -130,17 +128,14 @@ void Gridder::calculate_offset(const float x, const float pixel_size,
 
 
 
-float Gridder::round_away_from_zero(const float x)
+float oskar_StandardGridder::round_away_from_zero(const float x)
 {
     return (x > 0.0f) ? std::floor(x + 0.5) : std::ceil(x - 0.5);
 }
 
 
-float Gridder::round_towards_zero(const float x)
+float oskar_StandardGridder::round_towards_zero(const float x)
 {
     return (x > 0.0f) ? std::ceil(x - 0.5) : std::floor(x + 0.5);
 }
-
-
-} // namespace oskar
 

@@ -26,13 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef WPROJ_CONV_FUNC_H_
-#define WPROJ_CONV_FUNC_H_
+#ifndef OSKAR_WPROJECTION_GRID_KERNEL_H_
+#define OSKAR_WPROJECTION_GRID_KERNEL_H_
 
 #include <vector>
 #include <complex>
-
-namespace oskar {
 
 /**
  * @class WProjConvFunc
@@ -43,13 +41,13 @@ namespace oskar {
  * @details
  */
 
-class WProjConvFunc
+class oskar_WProjectionGridKernel
 {
     public:
         typedef std::complex<float> Complex;
 
-        WProjConvFunc();
-        ~WProjConvFunc();
+        oskar_WProjectionGridKernel();
+        ~oskar_WProjectionGridKernel();
 
     public:
         Complex const * values() const { return  &_convFunc[0]; }
@@ -97,7 +95,4 @@ class WProjConvFunc
         unsigned _size;
 };
 
-
-
-} // namespace oskar
-#endif // WPROJ_CONV_FUNC_H_
+#endif // OSKAR_WPROJECTION_GRID_KERNEL_H_

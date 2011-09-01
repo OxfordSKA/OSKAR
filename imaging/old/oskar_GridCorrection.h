@@ -26,71 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CONV_FUNC_H_
-#define CONV_FUNC_H_
+#ifndef GRID_CORRECTION_H_
+#define GRID_CORRECTION_H_
 
 #include <vector>
 
-namespace oskar {
+// forward class declarations.
+class oskar_StandardGridKernels;
 
 /**
- * @class ConvFunc
+ * @class GridCorrection
  *
  * @brief
+ * Computes the grid correction.
  *
  * @details
  */
 
-class ConvFunc
+class GridCorrection
 {
     public:
-        /// Constructor.
-        ConvFunc();
-        /// Destructor.
-        ~ConvFunc();
+        void computeCorrection(oskar_StandardGridKernels & c, const unsigned grid_size);
+
+        void make2D();
 
     public:
-        /// Return a pointer to the gridding kernel data.
-        float const * values() const { return  &_convFunc[0]; }
-
-        /// Return the size of the gridding kernel.
+        const float * values() const { return &_correction[0]; }
         unsigned size() const { return _size; }
 
-        /// Return the support radius of the gridding kernel.
-        unsigned support() const { return _support; }
-
-        /// Return the number of pixels per cell (oversample).
-        unsigned oversample() const { return _oversample; }
-
-    public:
-        /// Generate a pill-box gridding kernel.
-        void pillbox(const unsigned support, const unsigned oversample,
-                const float width = 1.0f);
-
-        /// Generate a Gaussian gridding kernel.
-        void exp(const unsigned support, const unsigned oversample);
-
-        /// Generate a Sinc gridding kernel.
-        void sinc(const unsigned support, const unsigned oversample);
-
-        /// Generate a Gaussian times Sinc gridding kernel.
-        void expSinc(const unsigned support, const unsigned oversample);
-
-        /// Generate a spheroidal gridding kernel.
-        void spherodial(); // TODO!
-
-    public:
-        // NOTE(For testing only)
-        // (might be better to have this function outside not part of this
-        // class as it modifies convolution function to make it 2D)
-        void makeConvFuncImage();
 
     private:
-        std::vector<float> _convFunc;
+        float findMax();
+
+    private:
+        std::vector<float> _correction;
         unsigned _size;
-        unsigned _support;
-        unsigned _oversample;
 };
 
-} // namespace oskar
-#endif // CONV_FUNC_H_
+
+#endif // GRID_CORRECTION_H_
