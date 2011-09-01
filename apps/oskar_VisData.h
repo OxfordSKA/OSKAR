@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISDATA_H_
-#define OSKAR_VISDATA_H_
+#ifndef OSKAR_VISDATA_CLASS_H_
+#define OSKAR_VISDATA_CLASS_H_
 
 #include "utility/oskar_vector_types.h"
 #include <vector>
@@ -61,4 +61,4 @@ class oskar_VisData
 };
 
 
-#endif // OSKAR_VISDATA_H_
+#endif // OSKAR_VISDATA_CLASS_H_
