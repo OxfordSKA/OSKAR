@@ -20,6 +20,7 @@ set(BUILD_SHARED_LIBS true)
 # === GNU C++ compiler.
 if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_C_FLAGS_RELEASE "-O3 -std=c99 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 #    add_definitions(-Wall -Wextra -pedantic -std=c++0x)
     add_definitions(-Wall -Wextra)
     add_definitions(-Wcast-align)
