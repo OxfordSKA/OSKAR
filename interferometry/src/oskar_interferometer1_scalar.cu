@@ -45,7 +45,7 @@
 #include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
 
-#include "station/oskar_evaluate_e_jones_2d_horizontal.h"
+#include "station/oskar_evaluate_station_beam.h"
 
 #include "sky/oskar_mjd_to_last_fast.h"
 
@@ -229,7 +229,7 @@ int oskar_interferometer1_scalar_d(
             // Evaluate horizontal lm for the beam phase centre.
             double h_beam_l, h_beam_m, h_beam_n;
             oskar_ra_dec_to_hor_lmn_d(1, &ra0_rad, &dec0_rad, lst,
-            		telescope.latitude, &h_beam_l, &h_beam_m, &h_beam_n);
+                    telescope.latitude, &h_beam_l, &h_beam_m, &h_beam_n);
 
             // Evaluate E-Jones for each source position per station
             evaluate_e_jones(num_stations, hd_stations, &hd_sky_local,
@@ -466,7 +466,7 @@ void evaluate_e_jones(const unsigned num_stations,
     {
         double2 * d_e_jones_station0 = d_e_jones;
         const oskar_StationModel * station0 = &hd_stations[0];
-        oskar_evaluate_e_jones_2d_horizontal_d(station0, h_beam_l, h_beam_m,
+        oskar_evaluate_station_beam_d(station0, h_beam_l, h_beam_m,
                 hd_sky, d_weights_work, d_e_jones_station0);
         for (unsigned i = 1; i < num_stations; ++i)
         {
@@ -481,7 +481,7 @@ void evaluate_e_jones(const unsigned num_stations,
         {
             double2 * d_e_jones_station = d_e_jones + i * hd_sky->num_sources;
             const oskar_StationModel * station = &hd_stations[i];
-            oskar_evaluate_e_jones_2d_horizontal_d(station, h_beam_l, h_beam_m,
+            oskar_evaluate_station_beam_d(station, h_beam_l, h_beam_m,
                     hd_sky, d_weights_work, d_e_jones_station);
         }
     }

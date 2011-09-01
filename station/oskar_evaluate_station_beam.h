@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_E_JONES_2D_HORIZONTAL_H_
-#define OSKAR_EVALUATE_E_JONES_2D_HORIZONTAL_H_
+#ifndef OSKAR_EVALUATE_STATION_BEAM_H_
+#define OSKAR_EVALUATE_STATION_BEAM_H_
 
 /**
- * @file oskar_cuda_bp2hc.h
+ * @file oskar_evaluate_station_beam.h
  */
 
 #include "oskar_windows.h"
@@ -47,7 +47,7 @@ struct oskar_SkyModelLocal_d;
  * NOTE: This function still needs to be written!
  */
 DllExport
-int oskar_evaluate_e_jones_2d_horizontal_f();
+int oskar_evaluate_station_beam_f();
 
 
 /**
@@ -82,7 +82,7 @@ int oskar_evaluate_e_jones_2d_horizontal_f();
  * @return CUDA error code.
  */
 DllExport
-int oskar_evaluate_e_jones_2d_horizontal_d(
+int oskar_evaluate_station_beam_d(
         const oskar_StationModel* hd_station,
         const double h_beam_l,
         const double h_beam_m,
@@ -95,4 +95,4 @@ int oskar_evaluate_e_jones_2d_horizontal_d(
 }
 #endif
 
-#endif // OSKAR_EVALUATE_E_JONES_2D_HORIZONTAL_H_
+#endif // OSKAR_EVALUATE_STATION_BEAM_H_

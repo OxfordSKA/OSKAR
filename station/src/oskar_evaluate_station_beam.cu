@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_e_jones_2d_horizontal.h"
+#include "station/oskar_evaluate_station_beam.h"
 
 #include "cuda/kernels/oskar_cudak_antenna.h"
 #include "cuda/kernels/oskar_cudak_apodisation.h"
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 // Single precision.
-int oskar_evaluate_e_jones_2d_horizontal_f()
+int oskar_evaluate_station_beam_f()
 {
     cudaError_t cuda_error = cudaSuccess;
 
@@ -60,7 +60,7 @@ int oskar_evaluate_e_jones_2d_horizontal_f()
 
 
 // Double precision.
-int oskar_evaluate_e_jones_2d_horizontal_d(
+int oskar_evaluate_station_beam_d(
         const oskar_StationModel* hd_station,
         const double h_beam_l,
         const double h_beam_m,
