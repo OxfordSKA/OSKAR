@@ -3,7 +3,7 @@
 #
 
 set(fits_SRC
-    src/write_uvfits.cpp
+    src/oskar_write_uvfits.c
 )
 set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
 
