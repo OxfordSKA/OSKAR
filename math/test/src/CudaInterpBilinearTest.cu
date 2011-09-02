@@ -106,8 +106,8 @@ void CudaInterpBilinearTest::test_method()
     // Interpolate.
     int err;
     TIMER_START
-    err = oskar_cuda_interp_bilinear_f(width, height, pitch,
-            d_data, n, d_pos_x, d_pos_y, d_output);
+    err = oskar_cuda_interp_bilinear_f(width, height, pitch, d_data, n, d_pos_x,
+            d_pos_y, d_output);
     TIMER_STOP("Finished interpolation (%d points)", n)
     if (err != 0)
         printf("CUDA error, code %d\n", err);

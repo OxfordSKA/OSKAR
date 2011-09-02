@@ -39,22 +39,6 @@
 
 /**
  * @details
- * Sets up the context before running each test method.
- */
-void CudaJonesMultiplyTest::setUp()
-{
-}
-
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void CudaJonesMultiplyTest::tearDown()
-{
-}
-
-/**
- * @details
  * Tests multiplication of Jones matrices using CUDA.
  */
 void CudaJonesMultiplyTest::test_mat1_c2()
@@ -114,7 +98,7 @@ void CudaJonesMultiplyTest::test_mat2_f()
     TIMER_START
     oskar_cudak_jones_mul_mat2_f <<< n_blk, n_thd >>> (n, d_m1, d_m2, d_result);
     cudaDeviceSynchronize();
-    TIMER_STOP("Finished Jones matrix multiplication (single), %d matrices", n)
+    TIMER_STOP("Finished Jones matrix multiplication (float), %d matrices", n)
     int err = cudaPeekAtLastError();
     if (err)
     {

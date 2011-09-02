@@ -53,13 +53,6 @@ class CudaJonesMultiplyTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        /// Set up context before running a test.
-        void setUp();
-
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
         /// Test method.
         void test_mat1_c2();
 

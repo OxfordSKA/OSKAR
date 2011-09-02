@@ -28,31 +28,13 @@
 
 #include "interferometry/test/CudaCorrelatorTest.h"
 #include "interferometry/cudak/oskar_cudak_correlator.h"
+#include "utility/oskar_vector_types.h"
 #include <cmath>
 #include <cstdlib>
 #include <vector>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(CudaCorrelatorTest);
-
-/**
- * @details
- * Sets up the context before running each test method.
- */
-void CudaCorrelatorTest::setUp()
-{
-}
-
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void CudaCorrelatorTest::tearDown()
-{
-}
 
 /**
  * @details
@@ -127,7 +109,7 @@ void CudaCorrelatorTest::test_kernel_float()
     oskar_cudak_correlator_f <<<vBlk, vThd, vsMem>>> (ns, na, d_jones,
             d_I, d_Q, d_U, d_V, d_u, d_v, d_l, d_m, lambda_bandwidth, d_vis);
     cudaDeviceSynchronize();
-    TIMER_STOP("Finished correlator kernel, %d sources", ns)
+    TIMER_STOP("Finished correlator kernel (float), %d sources", ns)
     int err = cudaPeekAtLastError();
     if (err)
     {
@@ -220,14 +202,14 @@ void CudaCorrelatorTest::test_kernel_double()
             cudaMemcpyHostToDevice);
 
     // Call the correlator kernel.
-    dim3 vThd(256, 1); // Antennas, antennas.
+    dim3 vThd(192, 1); // Antennas, antennas. (NOTE: changed from 256 to 192 for 1.3 arch)
     dim3 vBlk(na, na);
     size_t vsMem = vThd.x * sizeof(double4c);
     TIMER_START
     oskar_cudak_correlator_d <<<vBlk, vThd, vsMem>>> (ns, na, d_jones,
             d_I, d_Q, d_U, d_V, d_u, d_v, d_l, d_m, lambda_bandwidth, d_vis);
     cudaDeviceSynchronize();
-    TIMER_STOP("Finished correlator kernel, %d sources", ns)
+    TIMER_STOP("Finished correlator kernel (double), %d sources", ns)
     int err = cudaPeekAtLastError();
     if (err)
     {
@@ -249,7 +231,4 @@ void CudaCorrelatorTest::test_kernel_double()
     cudaFree(d_v);
     cudaFree(d_jones);
     cudaFree(d_vis);
-
-    // Check contents of memory.
-
 }

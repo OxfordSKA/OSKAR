@@ -51,14 +51,14 @@ class CudaCorrelatorTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        void setUp();
-        void tearDown();
-
         // Test Methods
         void test_kernel_float();
 
         // Test Methods
         void test_kernel_double();
 };
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(CudaCorrelatorTest);
 
 #endif // CUDA_CORRELATOR_TEST_H

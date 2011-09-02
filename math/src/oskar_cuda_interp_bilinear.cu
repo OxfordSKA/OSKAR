@@ -98,7 +98,8 @@ int oskar_math_cuda_interp_bilinear(int width, int height, int pitch,
     if (errCuda != cudaSuccess) return errCuda;
 
     // Launch the kernel.
-    const int thd = 768;
+    //const int thd = 768;
+    const int thd = 512; // 768 dosn't work with CUDA 1.3
     const int blk = (n + thd - 1) / thd;
     oskar_bilinear_kernel<InputType, CoordType, OutputType> <<< blk, thd >>>
             (n, pos_x, pos_y, output);
