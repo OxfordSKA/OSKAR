@@ -30,7 +30,7 @@
 #define OSKAR_UTIL_VECTOR_TYPES_H_
 
 /**
- * @file oskar_util_vector_types.h
+ * @file oskar_vector_types.h
  */
 
 #ifdef __cplusplus

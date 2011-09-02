@@ -1,4 +1,4 @@
-#include "write_uvfits.h"
+#include "fits/write_uvfits.h"
 #include <fitsio.h>
 #include <cstdlib>
 #include <cstdio>

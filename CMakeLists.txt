@@ -51,6 +51,11 @@ if (NOT DEFINED BUILD_OSKAR_APPS)
     set(BUILD_OSKAR_APPS ON)
 endif()
 
+if (NOT DEFINED BUILD_OSKAR_FITS)
+    set(BUILD_OSKAR_FITS ON)
+endif ()
+
+
 # ==== Default CUDA architecture target.
 if (NOT CUDA_ARCH)
     set(CUDA_ARCH 2.1)
@@ -89,6 +94,7 @@ if (BUILD_OSKAR)
         list(APPEND oskar_SRC utility/${file})
     endforeach ()
 
+    include_directories(${CUDA_INCLUDE_DIRS})
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar.dir/src)
     cuda_add_library(oskar ${oskar_SRC})
     set_target_properties(oskar PROPERTIES
@@ -117,6 +123,9 @@ if (BUILD_OSKAR_WIDGETS)
 endif ()
 if (BUILD_OSKAR_APPS)
     add_subdirectory(apps)
+endif ()
+if (BUILD_OSKAR_FITS)
+    add_subdirectory(fits)
 endif ()
 
 

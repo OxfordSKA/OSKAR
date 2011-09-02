@@ -66,7 +66,7 @@ unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations
     for (int j = 0; j < num_stations; ++j)
     {
         oskar_StationModel * s = &(*stations)[j];
-        if (s->num_antennas != num_antennas_station0)
+        if ((int)s->num_antennas != num_antennas_station0)
         {
             *idential_stations = false;
             break;
@@ -81,7 +81,7 @@ unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations
         for (int j = 0; j < num_stations; ++j)
         {
             oskar_StationModel * s = &(*stations)[j];
-            for (int i = 0; i < s->num_antennas; ++i)
+            for (int i = 0; i < (int)s->num_antennas; ++i)
             {
                 if (station0->antenna_x[i] != s->antenna_x[i] ||
                         station0->antenna_y[i] != s->antenna_y[i])
