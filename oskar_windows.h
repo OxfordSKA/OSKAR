@@ -43,8 +43,13 @@
 // For more information see:
 // http://msdn.microsoft.com/en-us/library/a90k134d(v=VS.90).aspx
 //
+//
+// FIXME: Change DllExport to OSKAR_EXPORT or OSKAR_EXTERN to be more generic?
+// FIXME: Change oskar_windows.h to oskar_global.h?
+// FIXME: Add oskar version info as in Qt, Qwt global headers?
+//
 
-#ifdef _WIN32
+#if (defined(_WIN32) || defined(__WIN32__))
     #ifdef oskar_EXPORTS
         #ifndef DllExport
             #define DllExport __declspec(dllexport)
