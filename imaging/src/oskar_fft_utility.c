@@ -26,101 +26,95 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_FFTUtility.h"
+#include "imaging/oskar_fft_utility.h"
 
-#include <cstring>
-#include <fftw3.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-namespace oskar {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-std::complex<float> * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
-        std::complex<float>* data)
+void oskar_fft_shift_z(const unsigned nx, const unsigned ny, double2* data)
 {
     for (unsigned j = 0; j < ny; ++j)
     {
         for (unsigned i = 0; i < nx; ++i)
         {
-            if ( (i + j) % 2 )
+            if ((i + j) % 2)
             {
-                const unsigned idx = j * nx + i;
-                data[idx] = -data[idx];
+                data[j * nx + i].x = -data[j * nx + i].x;
+                data[j * nx + i].y = -data[j * nx + i].y;
             }
         }
     }
-    return data;
 }
 
 
-fftwf_complex * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
-        fftwf_complex * data)
+void oskar_fft_shift_d(const unsigned nx, const unsigned ny, double* data)
 {
     for (unsigned j = 0; j < ny; ++j)
     {
         for (unsigned i = 0; i < nx; ++i)
         {
-            const unsigned idx = j * nx + i;
-            const int f = (int)pow(-1.0, i + j);
-            data[idx][0] *= f;
-            data[idx][1] *= f;
-//            if ( (i + j) % 2 )
+            // FIXME both equivalent... which is faster
+            data[j * nx + i] *= (int) pow(-1, i + j);
+//            if ((i + j) % 2)
 //            {
-//                const unsigned idx = j * nx + i;
-//                data[idx][0] = -data[idx][0];
-//                data[idx][1] = -data[idx][1];
+//                data[j * nx + i] = -data[j * nx + i];
 //            }
         }
     }
-    return data;
 }
 
-float * FFTUtility::fftPhase(const unsigned nx, const unsigned ny,
-        float * data)
+
+void oskar_fft_shift_fftz(const unsigned nx, const unsigned ny, fftw_complex* data)
 {
     for (unsigned j = 0; j < ny; ++j)
     {
         for (unsigned i = 0; i < nx; ++i)
         {
-            if ( (i + j) % 2 )
-            {
-                const unsigned idx = j * nx + i;
-                data[idx] = -data[idx];
-            }
+            // FIXME both equivalent... which is faster
+            int factor = (int) pow(-1, i + j);
+            data[j * nx + i][0] *= factor;
+            data[j * nx + i][1] *= factor;
+//            if ((i + j) % 2)
+//            {
+//                data[j * nx + i][0] = -data[j * nx + i][0];
+//                data[j * nx + i][1] = -data[j * nx + i][1];
+//            }
         }
     }
-    return data;
 }
 
 
-
-float * FFTUtility::fft_c2r_2d(const unsigned size, const std::complex<float>* in,
-        float* out)
+void oskar_fft_z2r_2d(const unsigned size, const double2* in, double* out)
 {
-    // Copy grid to half complex section.
-    const unsigned csize = size / 2 + 1;
-    const size_t num_bytes = size * csize * sizeof(fftwf_complex);
-    const fftwf_complex * cin = reinterpret_cast<const fftwf_complex*>(in);
-    fftwf_complex * hcin = (fftwf_complex*) fftwf_malloc(num_bytes);
-
+    // Convert to half complex form.
+    // see:
+    // www.fftw.org/fftw3_doc/Multi_002dDimensional-DFTs-of-Real-Data.html#Multi_002dDimensional-DFTs-of-Real-Data
+    unsigned size_hc = (size / 2) + 1;
+    size_t mem_size = size * size_hc * sizeof(fftw_complex);
+    fftw_complex* fft_in_hc = (fftw_complex*) fftw_malloc(mem_size);
     for (unsigned j = 0; j < size; ++j)
     {
-        const fftwf_complex * to = &hcin[j * csize];
-        const fftwf_complex * from = &cin[j * size];
-        memcpy((void*)to, (const void*)from, csize * sizeof(fftwf_complex));
+        const void* from = &in[j * size];
+        void* to         = &fft_in_hc[j * size_hc];
+        memcpy(to, from, size_hc * sizeof(fftw_complex));
     }
 
-    // FFT.
-    FFTUtility::fftPhase(csize, size, hcin);
+    oskar_fft_shift_fftz(size_hc, size, fft_in_hc);
     unsigned int flags = FFTW_ESTIMATE;
-    fftwf_plan plan = fftwf_plan_dft_c2r_2d(size, size, hcin, out, flags);
+    fftw_plan plan = fftw_plan_dft_c2r_2d(size, size, fft_in_hc, out, flags);
+    fftw_execute(plan);
+    oskar_fft_shift_d(size, size, out);
 
-    fftwf_execute(plan);
-    FFTUtility::fftPhase(size, size, out);
-
-    fftwf_free(hcin);
-    fftwf_destroy_plan(plan);
-
-    return out;
+    fftw_free(fft_in_hc);
+    fftw_destroy_plan(plan);
 }
 
-
-} // namespace oskar
+#ifdef __cplusplus
+}
+#endif

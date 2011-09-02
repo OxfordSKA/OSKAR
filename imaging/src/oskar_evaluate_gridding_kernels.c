@@ -38,11 +38,11 @@
 #endif
 
 #ifndef MAX
-    #define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
+#define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #endif
 
 #ifndef MIN
-    #define MIN( a, b ) ( ((a) < (b)) ? (a) : (b) )
+#define MIN( a, b ) ( ((a) < (b)) ? (a) : (b) )
 #endif
 
 
@@ -55,12 +55,12 @@ void oskar_initialise_kernel_d(const double radius, oskar_GridKernel_d* kernel)
 {
     kernel->radius     = radius;
     kernel->num_cells  = MAX(kernel->radius, 1.0) * 2 + 1;
-    kernel->oversample = 10;
+    kernel->oversample = 100;
     kernel->oversample = (kernel->oversample / 2) * 2;
     kernel->size       = kernel->num_cells * kernel->oversample + 1;
     kernel->centre     = kernel->oversample / 2 * kernel->num_cells;
     kernel->xinc       = 1.0 / kernel->oversample;
-    kernel->values     = (double*) malloc(kernel->size * sizeof(double));
+    kernel->amp     = (double*) malloc(kernel->size * sizeof(double));
 //    printf("radius     = %f\n", kernel->radius);
 //    printf("num cells  = %i\n", kernel->num_cells);
 //    printf("oversample = %i\n", kernel->oversample);
@@ -85,11 +85,11 @@ void oskar_evaluate_pillbox_d(oskar_GridKernel_d* kernel)
         const double x    = (i - (int)kernel->centre) * kernel->xinc;
         const double absx = fabs(x);
         if (fabs(absx - kernel->radius) < DBL_EPSILON)
-            kernel->values[i] = 0.5;
+            kernel->amp[i] = 0.5;
         else if (absx > kernel->radius)
-            kernel->values[i] = 0.0;
+            kernel->amp[i] = 0.0;
         else
-            kernel->values[i] = 1.0;
+            kernel->amp[i] = 1.0;
     }
 }
 
@@ -107,13 +107,13 @@ void oskar_evaluate_exp_sinc_d(oskar_GridKernel_d* kernel)
         const double x    = (i - (int)kernel->size /2) * kernel->xinc;
         const double absx = fabs(x);
 
-        kernel->values[i] = 0.0;
+        kernel->amp[i] = 0.0;
 
         if (absx < kernel->xinc)
-            kernel->values[i] = 1.0;
+            kernel->amp[i] = 1.0;
 
         else if (absx < kernel->radius)
-            kernel->values[i] = sin(x * p1) / (x * p1) * exp(-pow(absx * p2, p3));
+            kernel->amp[i] = sin(x * p1) / (x * p1) * exp(-pow(absx * p2, p3));
     }
 }
 
@@ -130,18 +130,18 @@ void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
     //double param2 = 0.0; // related to alpha (0.0 = recommended?)
 
     oskar_initialise_kernel_d(param1, kernel);
-    memset(kernel->values, 0, kernel->size * sizeof(double));
+    memset(kernel->amp, 0, kernel->size * sizeof(double));
 
     // TODO: check these!
+    int iAlpha = 1;
     // alpha[iAlpha] = {0, 1/2, 1, 3/2, 2}
     //int iAlpha = MAX(0, MIN(4, 2.0 * param2 + 1.1));
-    int iAlpha = 0;
     //int im = MAX(3, MIN(7, 2.0 * param1 + 0.1));
     //int im = 5;
 //    printf("iAlpha = %i, im = %i\n", iAlpha, im);
 
-    //int nmax = kernel->radius / kernel->xinc + 0.1;
-    int nmax = kernel->centre;
+    int nmax = kernel->radius / kernel->xinc + 0.1;
+    //int nmax = kernel->centre;
 //    printf("nmax = %i\n", nmax);
 
     // Evaluate function.
@@ -151,12 +151,12 @@ void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
         double value = 0.0;
         spheroidal_d(iAlpha, 0, eta, &value);
         const int index = kernel->centre + i;
-        kernel->values[index] = value;
+        kernel->amp[index] = value;
     }
 
     // Fill in the other half.
     for (int i = 0; i < (int)kernel->centre-1; ++i)
-        kernel->values[kernel->centre - i] = kernel->values[kernel->centre + i];
+        kernel->amp[kernel->centre - i] = kernel->amp[kernel->centre + i];
 }
 
 

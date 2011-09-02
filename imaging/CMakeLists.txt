@@ -7,13 +7,11 @@
 # ==== Create list of source files for the oskar-lib imaging module.
 set(imaging_SRC
     src/oskar_evaluate_gridding_kernels.c
+    src/oskar_fft_imager.c
+    src/oskar_fft_utility.c
     src/oskar_gridding.c
-
-#   src/oskar_FFTUtility.cpp
-#   src/oskar_GridCorrection.cpp
-#   src/oskar_StandardGridder.cpp
-#   src/oskar_WProjectionGridKernel.cpp
-#   src/oskar_WProjectionGridder.cpp
+    src/oskar_grid_correct.c
+    src/oskar_VisGrid.c
 )
 #set(imaging_SRC "${imaging_SRC}" PARENT_SCOPE)
 
@@ -23,7 +21,9 @@ set_target_properties(oskar_imaging PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 target_link_libraries(oskar_imaging
-    ${FFTW3_FFTWF_LIBRARY})
+    ${FFTW3_FFTWF_LIBRARY}
+    ${FFTW3_FFTW_LIBRARY}
+)
 set_target_properties(oskar_imaging PROPERTIES PREFIX "lib")
 
 #install(TARGETS oskar_imaging LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})

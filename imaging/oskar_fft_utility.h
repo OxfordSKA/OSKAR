@@ -26,29 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef FFT_UTILITY_H_
-#define FFT_UTILITY_H_
+#ifndef OSKAR_FFT_UTILITY_H_
+#define OSKAR_FFT_UTILITY_H_
 
+#include "oskar_windows.h"
+#include "utility/oskar_vector_types.h"
 #include <fftw3.h>
-#include <complex>
 
-namespace oskar {
+/**
+ * @file oskar_fft_utility.h
+ */
 
-class FFTUtility
-{
-    public:
-        static std::complex<float>* fftPhase(const unsigned nx, const unsigned ny,
-                std::complex<float>* data);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        static fftwf_complex * fftPhase(const unsigned nx, const unsigned ny,
-                fftwf_complex * data);
+DllExport
+void oskar_fft_shift_z(const unsigned nx, const unsigned ny, double2* data);
 
-        static float * fftPhase(const unsigned nx, const unsigned ny,
-                float * data);
+DllExport
+void oskar_fft_shift_d(const unsigned nx, const unsigned ny, double* data);
 
-        static float * fft_c2r_2d(const unsigned size, const std::complex<float> * in,
-                float * out);
-};
+DllExport
+void oskar_fft_shift_fftz(const unsigned nx, const unsigned ny, fftw_complex* data);
 
-} // namespace oskar
-#endif // FFT_UTILITY_H_
+DllExport
+void oskar_fft_z2r_2d(const unsigned size, const double2* in, double* out);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_FFT_UTILITY_H_

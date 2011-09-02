@@ -35,6 +35,14 @@
 extern "C" {
 #endif
 
+//enum oskar_GridKernelType {
+//    PILLBOX,
+//    EXP_SINC,
+//    SPHEROIDAL,
+//    WPROJ
+//};
+//typedef enum oskar_GridKernelType oskar_GridKernelType;
+
 struct oskar_GridKernel_d
 {
     double  radius;
@@ -43,11 +51,9 @@ struct oskar_GridKernel_d
     int     size;
     int     centre;
     double  xinc;
-    double* values;
+    double* amp;
 };
 typedef struct oskar_GridKernel_d oskar_GridKernel_d;
-
-
 
 struct oskar_WProjGridKernel_d
 {
@@ -57,7 +63,7 @@ struct oskar_WProjGridKernel_d
     int      size;
     int      centre;
     double   xinc;
-    double2* values;
+    double2* amp;
 };
 typedef struct oskar_WProjGridKernel_d oskar_WProjGridKernel_d;
 
@@ -65,69 +71,5 @@ typedef struct oskar_WProjGridKernel_d oskar_WProjGridKernel_d;
 #ifdef __cplusplus
 }
 #endif
-
-
-//
-//
-//#include <vector>
-//
-///**
-// * @class oskar_GridKernel
-// *
-// * @brief
-// *
-// * @details
-// */
-//
-//template <class T>
-//class oskar_GridKernel
-//{
-//    public:
-//        /// Constructor.
-//        oskar_GridKernel() : _size(0), _support(0), _oversample(0) {}
-//
-//        /// Destructor.
-//        ~oskar_GridKernel() {}
-//
-//    public:
-//        /// Return a pointer to the gridding kernel data.
-//        const T* values() const { return  &_values[0]; }
-//
-//        /// Return the size of the gridding kernel.
-//        unsigned size() const { return _size; }
-//
-//        /// Return the support radius of the gridding kernel.
-//        unsigned support() const { return _support; }
-//
-//        /// Return the number of pixels per cell (oversample).
-//        unsigned oversample() const { return _oversample; }
-//
-//    public:
-//        /// Generate a pill-box gridding kernel.
-//        void pillbox(const unsigned support, const unsigned oversample);
-//
-//        /// Generate a Gaussian gridding kernel.
-//        void exp(const unsigned support, const unsigned oversample);
-//
-//        /// Generate a Sinc gridding kernel.
-//        void sinc(const unsigned support, const unsigned oversample);
-//
-//        /// Generate a Gaussian times Sinc gridding kernel.
-//        void exp_sinc(const unsigned support, const unsigned oversample);
-//
-//    public:
-//        // NOTE(For testing only)
-//        // WARNING: assumes image has already been declare to size:
-//        //      _size * _size * sizeof(T)
-//        void create_grid_kernel_image(T* image) const;
-//
-//    private:
-//        unsigned _size;
-//        unsigned _support;
-//        unsigned _oversample;
-//        std::vector<T> _values;
-//};
-
-
 
 #endif // OSKAR_GRID_KERNEL_H_

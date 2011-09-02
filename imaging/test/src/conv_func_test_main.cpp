@@ -29,7 +29,7 @@ int main(int argc, char** argv)
     {
         for (int i = 0; i <  kernel.size; ++i)
         {
-            image1[j * kernel.size + i] = kernel.values[j] * kernel.values[i];
+            image1[j * kernel.size + i] = kernel.amp[j] * kernel.amp[i];
         }
     }
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     plot1.plotImage(&image1[0], kernel.size, kernel.size, 0.0, kernel.size, 0.0, kernel.size);
 
     PlotWidget plot2;
-    plot2.plotCurve(kernel.size, &x[0], kernel.values);
+    plot2.plotCurve(kernel.size, &x[0], kernel.amp);
 
     return app.exec();
 }

@@ -48,7 +48,7 @@ double oskar_grid_standard(const oskar_VisData_d* vis,
     double grid_sum = 0.0;
 
     int support  = (kernel->num_cells - 1) / 2;
-    int g_centre = grid->grid_dim / 2.0; // FIXME odd / even? floor() ?
+    int g_centre = grid->size / 2.0; // FIXME odd / even? floor() ?
     int ix_grid, iy_grid, ix_kernel, iy_kernel;
 
     for (int i = 0; i < vis->num_samples; ++i)
@@ -68,15 +68,19 @@ double oskar_grid_standard(const oskar_VisData_d* vis,
 
         for (int iy = -support; iy <= support; ++iy)
         {
+            const int gy = iy + iy_grid;
+            if (gy >= grid->size) continue;
+
             for (int ix = -support; ix <= support; ++ix)
             {
+                const int gx = ix + ix_grid;
+                if (gx >= grid->size) continue;
+
+                const int g_idx = gy * grid->size + gx;
+
                 const int kx = (ix * kernel->oversample) + ix_kernel;
                 const int ky = (iy * kernel->oversample) + iy_kernel;
-                const double kamp = kernel->values[kx] * kernel->values[ky];
-
-                const int gx = ix + ix_grid;
-                const int gy = iy + iy_grid;
-                const int g_idx = gy * grid->grid_dim + gx;
+                const double kamp = kernel->amp[kx] * kernel->amp[ky];
 
                 grid->amp[g_idx].x += kamp * vis_re;
                 grid->amp[g_idx].y += kamp * vis_im;

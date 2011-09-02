@@ -31,11 +31,13 @@
 #define OSKAR_EVALUATE_GRIDDING_KERNEL_H_
 
 #include "imaging/oskar_GridKernel.h"
+#include "oskar_windows.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+DllExport
 void oskar_initialise_kernel_d(const double radius, oskar_GridKernel_d* kernel);
 
 /**
@@ -47,6 +49,7 @@ void oskar_initialise_kernel_d(const double radius, oskar_GridKernel_d* kernel);
  *
  * @param[out] kernel       Pointer to a structure holding the gridding kernel.
  */
+DllExport
 void oskar_evaluate_pillbox_d(oskar_GridKernel_d* kernel);
 
 /**
@@ -59,6 +62,7 @@ void oskar_evaluate_pillbox_d(oskar_GridKernel_d* kernel);
  *
  * @param[out] kernel       Pointer to a structure holding the gridding kernel.
  */
+DllExport
 void oskar_evaluate_exp_sinc_d(oskar_GridKernel_d* kernel);
 
 
@@ -71,9 +75,17 @@ void oskar_evaluate_exp_sinc_d(oskar_GridKernel_d* kernel);
  *
  * @param[out] kernel       Pointer to a structure holding the gridding kernel.
  */
+DllExport
 void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel);
 
 
+/**
+ * @brief
+ * Evaluates the amplitude of a spheroid wave function at a particular
+ * value of ...
+ *       see AIPS/<VERSION>/APL/SUB/NOTST/SPHFN.FOR
+ */
+DllExport
 void spheroidal_d(int iAlpha, int iflag, double eta, double* value);
 
 

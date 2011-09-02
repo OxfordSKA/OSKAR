@@ -26,42 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRID_CORRECTION_H_
-#define GRID_CORRECTION_H_
+#include "imaging/oskar_VisGrid.h"
 
-#include <vector>
+#include "stdlib.h"
+#include "string.h"
 
-// forward class declarations.
-class oskar_StandardGridKernels;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * @class GridCorrection
- *
- * @brief
- * Computes the grid correction.
- *
- * @details
- */
-
-class GridCorrection
+void oskar_allocate_vis_grid_d(const unsigned grid_size, oskar_VisGrid_d* grid)
 {
-    public:
-        void computeCorrection(oskar_StandardGridKernels & c, const unsigned grid_size);
-
-        void make2D();
-
-    public:
-        const float * values() const { return &_correction[0]; }
-        unsigned size() const { return _size; }
+    grid->size = grid_size;
+    grid->amp = (double2*) malloc(grid_size * grid_size * sizeof(double2));
+    memset(grid->amp, 0, grid_size * grid_size * sizeof(double2));
+}
 
 
-    private:
-        float findMax();
+void oskar_free_vis_grid_d(oskar_VisGrid_d* grid)
+{
+    grid->size = 0;
+    free(grid->amp);
+}
 
-    private:
-        std::vector<float> _correction;
-        unsigned _size;
-};
+#ifdef __cplusplus
+}
+#endif
 
-
-#endif // GRID_CORRECTION_H_

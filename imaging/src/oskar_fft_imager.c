@@ -26,43 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef IMAGING_TEST_H_
-#define IMAGING_TEST_H_
+#include "imaging/oskar_fft_imager.h"
 
-/**
- * @file ImagingTest.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class ImagingTest : public CppUnit::TestFixture
+void oskar_fft_imager(const oskar_VisData_d* vis, const double image_size,
+        const double cell_size, double* image)
 {
-    public:
-        CPPUNIT_TEST_SUITE(ImagingTest);
-        CPPUNIT_TEST_SUITE_END();
-
-    public:
-        /// Set up context before running a test.
-        void setUp();
-
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test methods.
-        void test_convFunc();
-        void test_wproj_convFunc();
-};
 
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(ImagingTest);
+}
 
-#endif // IMAGER_TEST_H_
+#ifdef __cplusplus
+}
+#endif
+

@@ -26,6 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_WProjectionGridder.h"
+#ifndef OSKAR_FFT_IMAGER_H_
+#define OSKAR_FFT_IMAGER_H_
 
+/**
+ * @file oskar_fft_imager.h
+ */
 
+#include "interferometry/oskar_VisData.h"
+#include "oskar_windows.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+DllExport
+void oskar_fft_imager(const oskar_VisData_d* vis, const double image_size,
+        const double cell_size, double* image);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_FFT_IMAGER_H_

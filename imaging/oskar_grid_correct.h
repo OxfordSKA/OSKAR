@@ -26,44 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_GRIDDER_H_
-#define OSKAR_MATH_GRIDDER_H_
+#ifndef OSKAR_GRID_CORRECT_H_
+#define OSKAR_GRID_CORRECT_H_
 
-#include <complex>
+/**
+ * @file oskar_grid_correct.h
+ */
 
-class oskar_StandardGridder
-{
-    public:
-        typedef std::complex<float> Complex;
+#include "oskar_windows.h"
+#include "imaging/oskar_GridKernel.h"
 
-        // Standard gridding.
-        void grid_standard(const unsigned num_data,
-                const float * data_x,
-                const float * data_y,
-                const Complex * data_amp,
-                const unsigned support,
-                const unsigned oversample,
-                const float * conv_func,
-                const unsigned grid_size,
-                const float pixel_size,
-                Complex * grid,
-                double * grid_sum);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-        // Standard degridding.
-        void degrid_standard();
-
-    public:
-        void calculate_offset(const float x, const float pixel_size,
-                const unsigned oversample, int * x_grid,
-                int * x_conv_func);
-
-    private:
-        // Round away from zero (symmetric about zero).
-        float round_away_from_zero(const float x);
-
-        // Round towards from zero (symmetric about zero).
-        float round_towards_zero(const float x);
-};
+DllExport
+void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
+        const unsigned grid_size, double** correction);
 
 
-#endif // OSKAR_MATH_GRIDDER_H_
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_GRID_CORRECT_H_
