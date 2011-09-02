@@ -41,7 +41,7 @@ void LoadSourcesTest::test_load()
     const char* filename = "temp_sources.dat";
     FILE* file = fopen(filename, "w");
     if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
-    int num_sources = 1000000;
+    int num_sources = 1000;
     for (int i = 0; i < num_sources; ++i)
     {
         if (i % 10 == 0) fprintf(file, "# some comment!\n");
