@@ -33,11 +33,11 @@
 
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_interferometer1_scalar.h"
+#include "interferometry/oskar_VisData.h"
 
 #include "apps/oskar_load_telescope.h"
 #include "apps/oskar_load_stations.h"
 #include "apps/oskar_Settings.h"
-#include "apps/oskar_VisData.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -114,11 +114,16 @@ int main(int argc, char** argv)
 //            printf("%i %f\n", s, sky_temp.I[s]);
         }
 
-        oskar_VisData vis(num_stations, settings.num_vis_dumps());
+        oskar_VisData_d vis;
+        int num_baselines = num_stations * (num_stations-1) / 2;
+        oskar_allocate_vis_data_d(num_baselines * settings.num_vis_dumps(), &vis);
 
         QTime timer;
         timer.start();
-        int err = oskar_interferometer1_scalar_d(telescope, stations, sky_temp,
+        int err = oskar_interferometer1_scalar_d(
+                telescope,
+                stations,
+                sky_temp,
                 settings.ra0_rad(),
                 settings.dec0_rad(),
                 settings.obs_start_mjc_utc(),
@@ -129,18 +134,18 @@ int main(int argc, char** argv)
                 frequency,
                 settings.channel_bandwidth(),
                 settings.disable_station_beam(),
-                vis.vis(),
-                vis.u(),
-                vis.v(),
-                vis.w());
+                vis.amp,
+                vis.u,
+                vis.v,
+                vis.w);
 
         printf("= Completed simulation (%i of %i) after %f seconds [error code: %i].\n",
                 i+1, num_freq_steps, timer.elapsed() / 1.0e3, err);
 
-        printf("= Number of visibility points generated: %i\n", vis.size());
+        printf("= Number of visibility points generated: %i\n", vis.num_samples);
 
         QString outfile = "freq_scan_test_f_" + QString::number(frequency)+".dat";
-        vis.write(outfile.toLatin1().data());
+        oskar_write_vis_data_d(outfile.toLatin1().data(), &vis);
 
         free(sky_temp.RA);
         free(sky_temp.Dec);
@@ -148,6 +153,8 @@ int main(int argc, char** argv)
         free(sky_temp.Q);
         free(sky_temp.U);
         free(sky_temp.V);
+
+        oskar_free_vis_data_d(&vis);
     }
 
     // =========================================================================

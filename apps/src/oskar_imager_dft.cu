@@ -48,7 +48,6 @@ int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
     // Convert baselines to wavenumber units. -- TODO do this on the GPU.
     for (unsigned i = 0; i < num_vis; ++i)
     {
-        //printf("*** %f %f %f\n", frequency, vis[i].x, vis[i].y);
         u[i] *= wavenumber;
         v[i] *= wavenumber;
     }

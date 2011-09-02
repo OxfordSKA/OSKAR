@@ -27,7 +27,7 @@
  */
 
 #include "apps/test/VisDataTest.h"
-#include "apps/oskar_VisData.h"
+#include "interferometry/oskar_VisData.h"
 
 #include <QtCore/QFile>
 #include <cstdio>
@@ -36,53 +36,46 @@ void VisDataTest::test_load()
 {
     const unsigned num_stations  = 25;
     const unsigned num_vis_dumps = 100;
-    oskar_VisData data_in(num_stations, num_vis_dumps);
-    const unsigned num_baselines = data_in.num_baselines();
-
-    double* u_in    = data_in.u();
-    double* v_in    = data_in.v();
-    double* w_in    = data_in.w();
-    double2* vis_in = data_in.vis();
+    oskar_VisData_d data_in;
+    const unsigned num_baselines = num_stations * (num_stations - 1) /2;
+    oskar_allocate_vis_data_d(num_baselines * num_vis_dumps, &data_in);
 
     for (unsigned j = 0; j < num_vis_dumps; ++j)
     {
         for (unsigned i = 0; i < num_baselines; ++i)
         {
             const unsigned index = j * num_baselines + i;
-            u_in[index]     = (double)j;
-            v_in[index]     = (double)j + 1.0;
-            w_in[index]     = (double)j + 2.0;
-            vis_in[index].x = (double)1.0;
-            vis_in[index].y = (double)1.5;
+            data_in.u[index]     = (double)j;
+            data_in.v[index]     = (double)j + 1.0;
+            data_in.w[index]     = (double)j + 2.0;
+            data_in.amp[index].x = (double)1.0;
+            data_in.amp[index].y = (double)1.5;
         }
     }
 
     const char* filename = "temp_vis_data.dat";
-    data_in.write(filename);
+    oskar_write_vis_data_d(filename, &data_in);
 
-    oskar_VisData data_out(0, 0);
-    data_out.load(filename);
+    oskar_VisData_d data_out;
+    oskar_load_vis_data_d(filename, &data_out);
 
-    CPPUNIT_ASSERT_EQUAL(data_in.size(), data_out.size());
-
-    double* u_out    = data_out.u();
-    double* v_out    = data_out.v();
-    double* w_out    = data_out.w();
-    double2* vis_out = data_out.vis();
+    CPPUNIT_ASSERT_EQUAL(data_in.num_samples, data_out.num_samples);
 
     for (unsigned j = 0; j < num_vis_dumps; ++j)
     {
         for (unsigned i = 0; i < num_baselines; ++i)
         {
             const unsigned index = j * num_baselines + i;
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(u_in[index], u_out[index], 1e-6);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(v_in[index], v_out[index], 1e-6);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(w_in[index], w_out[index], 1e-6);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(w_in[index], w_out[index], 1e-6);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(vis_in[index].x, vis_out[index].x, 1e-6);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(vis_in[index].y, vis_out[index].y, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(data_in.u[index], data_out.u[index], 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(data_in.v[index], data_out.v[index], 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(data_in.w[index], data_out.w[index], 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(data_in.amp[index].x, data_out.amp[index].x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(data_in.amp[index].y, data_out.amp[index].y, 1e-6);
         }
     }
+
+    oskar_free_vis_data_d(&data_in);
+    oskar_free_vis_data_d(&data_out);
 
     QFile::remove(QString(filename));
 }

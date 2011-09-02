@@ -28,12 +28,12 @@
 
 
 
-#include "apps/oskar_VisData.h"
 #include "apps/oskar_Settings.h"
 #include "apps/oskar_load_telescope.h"
 #include "apps/oskar_imager_dft.cu.h"
 
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_VisData.h"
 #include "utility/oskar_vector_types.h"
 
 #include "widgets/plotting/oskar_PlotWidget.h"
@@ -80,8 +80,8 @@ int main(int argc, char** argv)
             settings.longitude_rad(), settings.latitude_rad(), &telescope);
 
     // Load data file.
-    oskar_VisData data(telescope.num_antennas, settings.num_vis_dumps());
-    data.load(settings.output_file().toLatin1().data());
+    oskar_VisData_d vis;
+    oskar_load_vis_data_d(settings.output_file().toLatin1().data(), &vis);
 
     std::vector<double> l(image_size);
     double lmax = sin((fov_deg / 2) * M_PI / 180.0);
@@ -93,12 +93,9 @@ int main(int argc, char** argv)
 
     std::vector<double> image(image_size * image_size);
 
-    printf("num_vis = %i\n", data.size());
-    double2* vis = data.vis();
-    double* u = data.u();
-    double* v = data.v();
+    printf("num_vis = %i\n", vis.num_samples);
 
-    int err = oskar_imager_dft_d(data.size(), vis, u, v,
+    int err = oskar_imager_dft_d(vis.num_samples, vis.amp, vis.u, vis.v,
             settings.frequency(), image_size, &l[0], &image[0]);
 
     if (err != 0)
@@ -114,24 +111,16 @@ int main(int argc, char** argv)
     // plot image
     QApplication app(argc, argv);
     PlotWidget plot2;
-    plot2.resize(500, 500);
-    plot2.show();
-    plot2.plotCurve(data.size(), data.u(), data.v());
+    plot2.plotCurve(vis.num_samples, vis.u, vis.v);
 
     PlotWidget plot1;
-    plot1.resize(500, 500);
-    plot1.show();
-    try {
-        plot1.plotImage(&image_f[0], image_size, image_size, 0, image_size, 0, image_size, true);
-    }
-    catch (const QString& error)
-    {
-        fprintf(stderr, "ERROR: plotting image failed: %s\n",
-                error.toLatin1().data());
-        return EXIT_FAILURE;
-    }
+    plot1.plotImage(&image_f[0], image_size, image_size, 0, image_size, 0, image_size, true);
 
-    return app.exec();
+    int status = app.exec();
+
+    oskar_free_vis_data_d(&vis);
+
+    return status;
 }
 
 

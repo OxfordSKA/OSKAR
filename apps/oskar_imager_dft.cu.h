@@ -34,6 +34,7 @@
  */
 
 #include "oskar_windows.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {

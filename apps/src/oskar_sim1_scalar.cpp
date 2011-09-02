@@ -33,11 +33,11 @@
 
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_interferometer1_scalar.h"
+#include "interferometry/oskar_VisData.h"
 
 #include "apps/oskar_load_telescope.h"
 #include "apps/oskar_load_stations.h"
 #include "apps/oskar_Settings.h"
-#include "apps/oskar_VisData.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -63,7 +63,6 @@ int main(int argc, char** argv)
     oskar_SkyModelGlobal_d sky;
     oskar_load_sources(settings.sky_file().toLatin1().data(), &sky);
 
-
     // Load telescope layout.
     oskar_TelescopeModel telescope;
     oskar_load_telescope(settings.telescope_file().toLatin1().data(),
@@ -83,7 +82,9 @@ int main(int argc, char** argv)
     }
     // =========================================================================
 
-    oskar_VisData vis(num_stations, settings.num_vis_dumps());
+    oskar_VisData_d vis;
+    int num_baselines = num_stations * (num_stations-1) / 2;
+    oskar_allocate_vis_data_d(num_baselines * settings.num_vis_dumps(), &vis);
 
     QTime timer;
     timer.start();
@@ -98,17 +99,17 @@ int main(int argc, char** argv)
             settings.frequency(),
             settings.channel_bandwidth(),
             settings.disable_station_beam(),
-            vis.vis(),
-            vis.u(),
-            vis.v(),
-            vis.w());
+            vis.amp,
+            vis.u,
+            vis.v,
+            vis.w);
 
     printf("= Completed simulation after %f seconds [error code: %i].\n",
             timer.elapsed() / 1.0e3, err);
 
-    printf("= Number of visibility points generated: %i\n", vis.size());
+    printf("= Number of visibility points generated: %i\n", vis.num_samples);
 
-    vis.write(settings.output_file().toLatin1().data());
+    oskar_write_vis_data_d(settings.output_file().toLatin1().data(), &vis);
 
     // =========================================================================
     // Free memory.
@@ -118,6 +119,8 @@ int main(int argc, char** argv)
     free(sky.Q);
     free(sky.U);
     free(sky.V);
+
+    oskar_free_vis_data_d(&vis);
 
     free(telescope.antenna_x);
     free(telescope.antenna_y);

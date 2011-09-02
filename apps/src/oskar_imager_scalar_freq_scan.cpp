@@ -28,12 +28,12 @@
 
 
 
-#include "apps/oskar_VisData.h"
 #include "apps/oskar_Settings.h"
 #include "apps/oskar_load_telescope.h"
 #include "apps/oskar_imager_dft.cu.h"
 
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_VisData.h"
 #include "utility/oskar_vector_types.h"
 
 #include "widgets/plotting/oskar_PlotWidget.h"
@@ -111,21 +111,19 @@ int main(int argc, char** argv)
 
         // Load data file for the frequency.
         QString datafile = "freq_scan_test_f_" + QString::number(frequency)+".dat";
-        oskar_VisData data(telescope.num_antennas, settings.num_vis_dumps());
-        data.load(datafile.toLatin1().data());
-        printf("num vis = %i\n", data.size());
+        oskar_VisData_d vis;
+        oskar_load_vis_data_d(datafile.toLatin1().data(), &vis);
+        printf("num vis = %i\n", vis.num_samples);
 
         for (int t = 0; t < num_snapshots; ++t)
         {
-//            printf("snapshot %i\n", t);
-            unsigned num_vis_snapshot = num_baselines * num_dumps_per_snapshot;
-            double2* vis = data.vis() + (t * num_vis_snapshot);
-            double* u    = data.u()   + (t * num_vis_snapshot);
-            double* v    = data.v()   + (t * num_vis_snapshot);
-//            printf("%f %f %f %f\n", u[0], v[0], vis[0].x, vis[0].y);
+            unsigned num_samples = num_baselines * num_dumps_per_snapshot;
+            double2* amp = &vis.amp[t * num_samples];
+            double* u    = &vis.u[t * num_samples];
+            double* v    = &vis.v[t * num_samples];
 
             std::vector<double> image(image_size * image_size, 0.0);
-            int err = oskar_imager_dft_d(num_vis_snapshot, vis, u, v,
+            int err = oskar_imager_dft_d(num_samples, amp, u, v,
                     frequency, image_size, &l[0], &image[0]);
 
             if (err != 0)
@@ -149,8 +147,8 @@ int main(int argc, char** argv)
             }
             fwrite(&image[0], sizeof(double), image_size * image_size, file);
             fclose(file);
-
         }
+        oskar_free_vis_data_d(&vis);
     }
 
     FILE* file;

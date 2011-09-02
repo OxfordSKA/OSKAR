@@ -6,8 +6,6 @@ set(apps_SRC
     src/oskar_load_stations.cpp
     src/oskar_load_telescope.cpp
     src/oskar_Settings.cpp
-    src/oskar_VisData.cpp
-
     src/oskar_imager_dft.cu
 )
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
