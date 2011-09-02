@@ -96,7 +96,9 @@ double ImagePlotData::value(double x, double y) const
     unsigned row = unsigned((y - _yRange.minValue()) / _intervalY);
     if (row >= _sizeY) row--;
 
-    return _data[row * _sizeX + col];
+    double value = _data[row * _sizeX + col];
+    return value;
+//    return std::numeric_limits<double>::quiet_NaN();
 }
 
 

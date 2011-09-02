@@ -82,7 +82,6 @@ class ImagePlotData: public QwtRasterData
         int column(double x) const;
         int row(double y) const;
 
-
         QwtDoubleInterval xRange() const { return _xRange; }
         QwtDoubleInterval yRange() const { return _yRange; }
         QwtDoubleInterval ampRange() const { return _ampRange; }

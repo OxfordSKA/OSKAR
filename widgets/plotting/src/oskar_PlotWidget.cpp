@@ -247,10 +247,12 @@ void PlotWidget::plotImage(const float * data, unsigned nX, unsigned nY,
     // Attach the image plot to the widget.
     _image.attach(this);
 
-    // Enable the colour scale.
-    double zMin = _image.ampRange().minValue();
-    double zMax = _image.ampRange().maxValue();
+      // Enable the colour scale.
+//    double zMin = _image.ampRange().minValue();
+//    double zMax = _image.ampRange().maxValue();
 
+    double zMin = 0.0;
+    double zMax = 1.0;
     setAxisScale(QwtPlot::yRight, zMin, zMax);
     enableColourScale(true);
 }
