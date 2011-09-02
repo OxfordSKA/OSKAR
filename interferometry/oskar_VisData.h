@@ -29,6 +29,7 @@
 #ifndef OSKAR_VIS_DATA_H_
 #define OSKAR_VIS_DATA_H_
 
+#include "oskar_windows.h"
 #include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
@@ -44,6 +45,47 @@ struct oskar_VisData_d
     double2* amp;
 };
 typedef struct oskar_VisData_d oskar_VisData_d;
+
+
+/**
+ * @brief Allocate memory for the specified oskar_VisData_d structure.
+ *
+ * @param[in] num_samples   Number of visibility samples to allocate. This is
+ *                          usually num_baselines * num_snapshots
+ * @param[in] vis           Pointer to a oskar_VisData_d structure.
+ */
+DllExport
+void oskar_allocate_vis_data_d(const unsigned num_samples, oskar_VisData_d* vis);
+
+/**
+ * @brief Free memory held in the specified oskar_VisData_d structure.
+ *
+ * @param[in] vis          Pointer to a oskar_VisData_d structure.
+ */
+DllExport
+void oskar_free_vis_data_d(oskar_VisData_d* vis);
+
+/**
+ * @brief Writes a oskar_VisData_d structure to the specified file.
+ *
+ * @param[in] filename    Filename to write to.
+ * @param[in] vis         Pointer to oskar_VisData_d structure to be written.
+ */
+DllExport
+void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis);
+
+/**
+ * @brief Loads a oskar_VisData_d structure from the specified file.
+ *
+ * @details
+ * note: This function will allocate memory for the oskar_VisData_d structure
+ * internally.
+ *
+ * @param[in]  filename  Filename holding the oskar_VisData_d data to load.
+ * @param[out] vis       Structure holding the loaded data.
+ */
+DllExport
+void oskar_load_vis_data_d(const char* filename, oskar_VisData_d* vis);
 
 #ifdef __cplusplus
 }
