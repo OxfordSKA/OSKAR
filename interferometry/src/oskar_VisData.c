@@ -40,15 +40,15 @@ void oskar_allocate_vis_data_d(const unsigned num_samples, oskar_VisData_d* vis)
 {
     vis->num_samples = num_samples;
 
-    vis->u   = (double*)  malloc(vis->num_samples * sizeof(double));
-    vis->v   = (double*)  malloc(vis->num_samples * sizeof(double));
-    vis->w   = (double*)  malloc(vis->num_samples * sizeof(double));
-    vis->amp = (double2*) malloc(vis->num_samples * sizeof(double2));
+    vis->u      = (double*)  malloc(vis->num_samples * sizeof(double));
+    vis->v      = (double*)  malloc(vis->num_samples * sizeof(double));
+    vis->w      = (double*)  malloc(vis->num_samples * sizeof(double));
+    vis->amp    = (double2*) malloc(vis->num_samples * sizeof(double2));
 
-    memset(vis->u,   0, vis->num_samples * sizeof(double));
-    memset(vis->v,   0, vis->num_samples * sizeof(double));
-    memset(vis->w,   0, vis->num_samples * sizeof(double));
-    memset(vis->amp, 0, vis->num_samples * sizeof(double2));
+    memset(vis->u,      0, vis->num_samples * sizeof(double));
+    memset(vis->v,      0, vis->num_samples * sizeof(double));
+    memset(vis->w,      0, vis->num_samples * sizeof(double));
+    memset(vis->amp,    0, vis->num_samples * sizeof(double2));
 }
 
 

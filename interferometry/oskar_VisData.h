@@ -36,12 +36,14 @@
 extern "C" {
 #endif
 
+// FIXME: This is very much a scalar oskar representation: ref UVFITS or polarised version...!?
 struct oskar_VisData_d
 {
     int      num_samples;
-    double*  u;     // in meters
-    double*  v;     // in meters
-    double*  w;     // in meters
+    double*  u;
+    double*  v;
+    double*  w;
+
     double2* amp;
 };
 typedef struct oskar_VisData_d oskar_VisData_d;
