@@ -26,59 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WRITE_UVFITS_H_
-#define OSKAR_WRITE_UVFITS_H_
+
+#ifndef OSKAR_IMAGE_FITS_WRITER_H_
+#define OSKAR_IMAGE_FITS_WRITER_H_
 
 /**
- * @file oskar_write_uvfits.h
+ * @file oskar_image_fits_writer_h_
  */
 
-#include "oskar_windows.h"
-#include "fits/oskar_uvfits_data.h"
-#include "interferometry/oskar_VisData.h"
-#include <fitsio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-DllExport
-void oskar_uvfits_open(const char* filename, oskar_uvfits* fits);
-
-DllExport
-void oskar_check_fits_status(const int status, const char* message);
-
-DllExport
-void oskar_close_uvfits_file(fitsfile* fits_file);
-
-DllExport
-void oskar_write_groups_header(fitsfile* fits_file, const long long num_vis);
-
-DllExport
-void oskar_write_header(fitsfile* fits_file, const char* filename, double ra0,
-        double dec0, double frequency0, double date0);
-
-DllExport
-void oskar_write_axis_header(fitsfile* fits_file, const int id,
-        const char* ctype, const char* comment, const double crval,
-        const double cdelt, const double crpix, const double crota);
-
-DllExport
-void oskar_write_param_header(fitsfile* fits_file, const int id,
-        const char* type, const char* comment, const double scale,
-        const double zero);
-
-DllExport
-void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline);
-
-DllExport
-int oskar_uvfits_baseline_id(int ant1, int ant2);
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // OSKAR_WRITE_UV_FITS
+#endif // OSKAR_IMAGE_FITS_WRITER_H_

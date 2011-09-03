@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/oskar_write_uvfits.h"
-#include "fits/oskar_uvfits_data.h"
+#include "fits/oskar_uvfits_writer.h"
 
 
 #include <stdlib.h>
