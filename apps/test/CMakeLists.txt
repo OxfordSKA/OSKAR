@@ -30,3 +30,13 @@ if (CPPUNIT_FOUND)
 
 endif()
 
+if (BUILD_OSKAR_WIDGETS)
+    add_executable(imager_dft_test src/imager_dft_test.cpp)
+    target_link_libraries(imager_dft_test
+        oskar_apps
+        oskar_widgets
+        oskar
+        ${QT_QTCORE_LIBRARY}
+        ${QT_QTGUI_LIBRARY}
+    )
+endif ()
