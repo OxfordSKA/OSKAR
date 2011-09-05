@@ -106,7 +106,7 @@ if (CUDA_FOUND)
     else()
         message(WARNING "*** CUDA_ARCH ${CUDA_ARCH} not recognised! ***")
     endif()
-
+    add_definitions(-DCUDA_ARCH=${CUDA_ARCH})
 endif (CUDA_FOUND)
 
 
