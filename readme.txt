@@ -8,10 +8,12 @@ Top level src folder structure:
 Top level folder structure for oskar-lib.
 
 src
- |--- station          : Evaluation of beam pattern (E Jones),
- |                       station level processing, antenna level processing.
+ |--- apps             : Application utility library and various applications
+ |                       which make use of the rest of oskar.
  |
  |--- cmake            : Build system macros.
+ |
+ |--- fits             : FITS format interface library.
  |
  |--- imaging          : FFT imager, simple post processing (CLEAN).
  |
@@ -24,11 +26,13 @@ src
  |--- sky              : Sky generators, global to local coordinate conversion,
  |                       horizon clipping.
  |
+ |--- station          : Evaluation of beam pattern (E Jones),
+ |                       station level processing, antenna level processing.
+ |
  |--- utility          : Global headers, timer.
  |
  |--- widgets          : Qt widgets, plotting, GUI components.
- |
- |--- (uvfits)         : reserved placeholder for UVFITS output module.
+
 
 
 
@@ -63,12 +67,15 @@ Libraries built
                         : Dependencies: CUDA(4.0+), CUFFT, FFTW
 
 * oskar_ms              : Measurement set writer
-                        : Dependencies: CASA (ms)
+                        : Dependencies: casacore.
 
 * oskar_widgets         : Qt Widget set (plotting, general widgets)
                         : Dependencies: Qt4, Qwt5-Qt4
 
-* (oskar_uvfits)        : (placeholder) UVFITS writer.
+* oskar_apps            : Application utility library.
+                        : Dependencies: oskar_widgets, oskar, Qt, Qwt5-Qt4
+
+* oskar_fits            : FITS interface library.
                         : Dependencies: CFITSIO
 
 
