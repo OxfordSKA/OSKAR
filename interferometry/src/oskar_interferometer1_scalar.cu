@@ -62,18 +62,17 @@
 extern "C" {
 #endif
 
-
 // =============================================================================
 void copy_telescope_to_gpu_d(const oskar_TelescopeModel* h_telescope,
         oskar_TelescopeModel* hd_telescope);
 
-void scale_telescope_coords_to_wavenumbers(oskar_TelescopeModel* hd_telescope,
+void scale_telescope_coords_to_wavenumbers_d(oskar_TelescopeModel* hd_telescope,
         const double wavenumber);
 
 void copy_stations_to_gpu_d(const oskar_StationModel* h_stations,
         const unsigned num_stations, oskar_StationModel* hd_stations);
 
-void scale_station_coords_to_wavenumbers(const unsigned num_stations,
+void scale_station_coords_to_wavenumbers_d(const unsigned num_stations,
         oskar_StationModel* hd_stations, const double wavenumber);
 
 void copy_global_sky_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
@@ -81,16 +80,16 @@ void copy_global_sky_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
 
 void alloc_local_sky_d(int num_sources, oskar_SkyModelLocal_d* hd_sky);
 
-void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
+void alloc_beamforming_weights_buffer_d(const unsigned num_stations,
         const oskar_StationModel* stations, double2** d_weights);
 
-void evaluate_e_jones(const unsigned num_stations,
+void evaluate_station_beams_d(const unsigned num_stations,
         const oskar_StationModel* hd_stations,
         const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
         const double h_beam_m, double2* d_weights_work,
         bool disable, bool identical_stations, double2* d_e_jones);
 
-void mult_e_jones_by_source_field_amp(const unsigned num_stations,
+void mult_e_jones_by_source_field_amp_d(const unsigned num_stations,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
 
 void correlate(const oskar_TelescopeModel* hd_telescope,
@@ -136,7 +135,7 @@ int oskar_interferometer1_scalar_d(
     // === Allocate device memory for telescope and transfer to device.
     oskar_TelescopeModel hd_telescope;
     copy_telescope_to_gpu_d(&telescope, &hd_telescope);
-    scale_telescope_coords_to_wavenumbers(&hd_telescope, wavenumber);
+    scale_telescope_coords_to_wavenumbers_d(&hd_telescope, wavenumber);
 
     // === Allocate memory to hold station uvw coordinates.
     double* station_u = (double*)malloc(num_stations * sizeof(double));
@@ -147,7 +146,7 @@ int oskar_interferometer1_scalar_d(
     size_t mem_size = num_stations * sizeof(oskar_StationModel);
     oskar_StationModel* hd_stations = (oskar_StationModel*)malloc(mem_size);
     copy_stations_to_gpu_d(stations, num_stations, hd_stations);
-    scale_station_coords_to_wavenumbers(num_stations, hd_stations, wavenumber);
+    scale_station_coords_to_wavenumbers_d(num_stations, hd_stations, wavenumber);
 
     // === Allocate device memory for source model and transfer to device.
     oskar_SkyModelGlobal_d hd_sky_global;
@@ -168,7 +167,7 @@ int oskar_interferometer1_scalar_d(
 
     // === Allocate device memory for beamforming weights buffer.
     double2* d_weights_work;
-    alloc_beamforming_weights_work_buffer(telescope.num_antennas, stations,
+    alloc_beamforming_weights_buffer_d(telescope.num_antennas, stations,
             &d_weights_work);
 
     // === Allocate device memory for source positions in relative lmn coordinates.
@@ -232,13 +231,13 @@ int oskar_interferometer1_scalar_d(
                     telescope.latitude, &h_beam_l, &h_beam_m, &h_beam_n);
 
             // Evaluate E-Jones for each source position per station
-            evaluate_e_jones(num_stations, hd_stations, &hd_sky_local,
+            evaluate_station_beams_d(num_stations, hd_stations, &hd_sky_local,
                     h_beam_l, h_beam_m, d_weights_work, disable_e_jones,
                     telescope.identical_stations, d_e_jones);
 
 
             // Multiply e-jones by source brightness.
-            mult_e_jones_by_source_field_amp(num_stations, &hd_sky_local, d_e_jones);
+            mult_e_jones_by_source_field_amp_d(num_stations, &hd_sky_local, d_e_jones);
 
             // Convert source positions in ra, dec to lmn relative to the phase
             // centre.
@@ -324,8 +323,6 @@ int oskar_interferometer1_scalar_d(
 }
 
 
-
-
 void copy_telescope_to_gpu_d(const oskar_TelescopeModel * h_telescope,
         oskar_TelescopeModel * hd_telescope)
 {
@@ -346,7 +343,7 @@ void copy_telescope_to_gpu_d(const oskar_TelescopeModel * h_telescope,
 }
 
 
-void scale_telescope_coords_to_wavenumbers(oskar_TelescopeModel* hd_telescope,
+void scale_telescope_coords_to_wavenumbers_d(oskar_TelescopeModel* hd_telescope,
         const double wavenumber)
 {
     int num_stations = hd_telescope->num_antennas;
@@ -381,7 +378,7 @@ void copy_stations_to_gpu_d(const oskar_StationModel * h_stations,
 }
 
 
-void scale_station_coords_to_wavenumbers(const unsigned num_stations,
+void scale_station_coords_to_wavenumbers_d(const unsigned num_stations,
         oskar_StationModel* hd_stations, const double wavenumber)
 {
     int num_threads = 256;
@@ -395,7 +392,6 @@ void scale_station_coords_to_wavenumbers(const unsigned num_stations,
                 (num_antennas, wavenumber, hd_stations[i].antenna_y);
     }
 }
-
 
 void copy_global_sky_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
         oskar_SkyModelGlobal_d* hd_sky)
@@ -435,7 +431,7 @@ void alloc_local_sky_d(int num_sources, oskar_SkyModelLocal_d* d_sky)
 }
 
 
-void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
+void alloc_beamforming_weights_buffer_d(const unsigned num_stations,
         const oskar_StationModel* stations, double2** d_weights)
 {
     unsigned num_antennas_max = 0;
@@ -448,7 +444,7 @@ void alloc_beamforming_weights_work_buffer(const unsigned num_stations,
 }
 
 
-void evaluate_e_jones(const unsigned num_stations,
+void evaluate_station_beams_d(const unsigned num_stations,
         const oskar_StationModel * hd_stations,
         const oskar_SkyModelLocal_d * hd_sky, const double h_beam_l,
         const double h_beam_m, double2 * d_weights_work,
@@ -488,7 +484,7 @@ void evaluate_e_jones(const unsigned num_stations,
 }
 
 
-void mult_e_jones_by_source_field_amp(const unsigned num_stations,
+void mult_e_jones_by_source_field_amp_d(const unsigned num_stations,
         const oskar_SkyModelLocal_d* hd_sky, double2 * d_e_jones)
 {
     int num_sources = hd_sky->num_sources;
