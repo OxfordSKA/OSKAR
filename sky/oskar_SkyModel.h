@@ -29,9 +29,15 @@
 #ifndef OSKAR_SKY_MODEL_H_
 #define OSKAR_SKY_MODEL_H_
 
+/**
+ * @file oskar_SkyModel.h
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "oskar_windows.h"
 
 struct oskar_SkyModelGlobal_f
 {
