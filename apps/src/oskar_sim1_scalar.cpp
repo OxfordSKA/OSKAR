@@ -38,6 +38,7 @@
 #include "apps/oskar_load_telescope.h"
 #include "apps/oskar_load_stations.h"
 #include "apps/oskar_Settings.h"
+#include "apps/oskar_write_ms.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -91,7 +92,7 @@ int main(int argc, char** argv)
     int err = oskar_interferometer1_scalar_d(telescope, stations, sky,
             settings.ra0_rad(),
             settings.dec0_rad(),
-            settings.obs_start_mjc_utc(),
+            settings.obs_start_mjd_utc(),
             settings.obs_length_days(),
             settings.num_vis_dumps(),
             settings.num_vis_ave(),
@@ -110,6 +111,9 @@ int main(int argc, char** argv)
     printf("= Number of visibility points generated: %i\n", vis.num_samples);
 
     oskar_write_vis_data_d(settings.output_file().toLatin1().data(), &vis);
+
+    QString ms_file = settings.output_file() + ".ms";
+    oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis, true);
 
     // =========================================================================
     // Free memory.

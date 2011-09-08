@@ -126,7 +126,7 @@ int main(int argc, char** argv)
                 sky_temp,
                 settings.ra0_rad(),
                 settings.dec0_rad(),
-                settings.obs_start_mjc_utc(),
+                settings.obs_start_mjd_utc(),
                 settings.obs_length_days(),
                 settings.num_vis_dumps(),
                 settings.num_vis_ave(),

@@ -36,9 +36,13 @@
 
 oskar_Settings::oskar_Settings(const QString& filename)
 {
-	// Load the settings file, if one is provided.
-	if (!filename.isEmpty())
-		load(filename);
+    _disable_station_beam = false;
+    _num_vis_ave    = 0;
+    _num_fringe_ave = 0;
+
+    // Load the settings file, if one is provided.
+    if (!filename.isEmpty())
+        load(filename);
 }
 
 oskar_Settings::~oskar_Settings()
@@ -83,7 +87,7 @@ int oskar_Settings::load(const QString& filename)
     return check();
 }
 
-int oskar_Settings::check()
+int oskar_Settings::check() const
 {
     if (!QFileInfo(_sky_file).isFile())
     {
@@ -106,7 +110,7 @@ int oskar_Settings::check()
 }
 
 
-void oskar_Settings::print()
+void oskar_Settings::print() const
 {
     printf("\n");
     printf("= Settings (%s)\n", _filename.toLatin1().data());

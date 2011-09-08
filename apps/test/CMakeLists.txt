@@ -30,6 +30,16 @@ if (CPPUNIT_FOUND)
 
 endif()
 
+
+# TEST BINARY: write_ms_test
+add_executable(write_ms_test src/WriteMS_Test.cpp)
+target_link_libraries(write_ms_test
+    oskar
+    oskar_apps
+    ${QT_QTCORE_LIBRARIES}
+)
+
+
 if (BUILD_OSKAR_WIDGETS)
     add_executable(imager_dft_test src/imager_dft_test.cpp)
     target_link_libraries(imager_dft_test
