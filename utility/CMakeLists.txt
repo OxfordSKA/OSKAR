@@ -9,5 +9,7 @@ set(utility_SRC
 )
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 
+add_subdirectory(matlab)
+
 # === Recurse into test directory.
 add_subdirectory(test)
