@@ -51,7 +51,7 @@ void LoadCoordinatesTest::test_load()
     double* y = NULL;
     unsigned n;
     TIMER_START
-    oskar_load_csv_coordinates_2d(filename, &n, &x, &y);
+    oskar_load_csv_coordinates_2d_d(filename, &n, &x, &y);
     TIMER_STOP("Loaded %d coordinate pairs", n)
 
     // Check the data loaded correctly.

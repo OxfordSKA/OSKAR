@@ -29,19 +29,48 @@
 #ifndef OSKAR_STATION_MODEL_H_
 #define OSKAR_STATION_MODEL_H_
 
+#include "oskar_windows.h"
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_StationModel
+struct oskar_StationModel_d
 {
     unsigned num_antennas;
     double*  antenna_x;
     double*  antenna_y;
     //double * antenna_z;
 };
-typedef struct oskar_StationModel oskar_StationModel;
+typedef struct oskar_StationModel_d oskar_StationModel_d;
 
+struct oskar_StationModel_f
+{
+    unsigned num_antennas;
+    float*   antenna_x;
+    float*   antenna_y;
+    //double * antenna_z;
+};
+typedef struct oskar_StationModel_f oskar_StationModel_f;
+
+//----- Utility functions -----------------------------------------------------
+DllExport
+void oskar_copy_stations_to_device_d(const oskar_StationModel_d* h_stations,
+        const unsigned num_stations, oskar_StationModel_d* hd_stations);
+
+DllExport
+void oskar_copy_stations_to_device_f(const oskar_StationModel_f* h_stations,
+        const unsigned num_stations, oskar_StationModel_f* hd_stations);
+
+DllExport
+void oskar_scale_station_coords_d(const unsigned num_stations,
+        oskar_StationModel_d* hd_stations, const double value);
+
+DllExport
+void oskar_scale_station_coords_f(const unsigned num_stations,
+        oskar_StationModel_f* hd_stations, const float value);
+//------------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }

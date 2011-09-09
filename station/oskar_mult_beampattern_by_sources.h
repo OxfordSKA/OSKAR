@@ -26,25 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_TELESCOPE_H_
-#define OSKAR_LOAD_TELESCOPE_H_
+#ifndef OSKAR_MULT_BEAMPATTERN_BY_SOURCES_H_
+#define OSKAR_MULT_BEAMPATTERN_BY_SOURCES_H_
 
 /**
- * @file oskar_load_telescope.h
+ * @file oskar_mult_beampattern_by_sources.h
  */
 
-#include "interferometry/oskar_TelescopeModel.h"
+#include "oskar_windows.h"
+#include "sky/oskar_SkyModel.h"
+#include "utility/oskar_vector_types.h"
 
-/**
- * @brief
- * Loads a telescope station coordinates file into a telescope model structure.
- *
- * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
- * @param[in]  longitude  Telescope longitude, in radians.
- * @param[in]  latitude   Telescope latitude, in radians.
- * @param[out] telescope  Pointer to telescope model structure.
- */
-void oskar_load_telescope(const char* file_path, const double longitude_rad,
-        const double latitude_rad, oskar_TelescopeModel* telescope);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif // OSKAR_LOAD_TELESCOPE_H_
+DllExport
+void oskar_mult_beampattern_by_source_field_amp_d(const unsigned num_stations,
+        const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
+
+DllExport
+void oskar_mult_beampattern_by_source_field_amp_f(const unsigned num_stations,
+        const oskar_SkyModelLocal_f* hd_sky, float2* d_e_jones);
+
+#ifdef __cplusplus
+}
+#endif
+#endif // OSKAR_MULT_BEAMPATTERN_BY_SOURCES_H_

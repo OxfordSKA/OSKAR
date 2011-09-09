@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/test/LoadStationsTest.h"
-#include "apps/oskar_load_stations.h"
+#include "apps/lib/test/LoadStationsTest.h"
+#include "apps/lib/oskar_load_stations.h"
 #include "station/oskar_StationModel.h"
 
 #include <QtCore/QFile>
@@ -64,9 +64,9 @@ void LoadStationsTest::test_load()
     }
 
     // Load the stations.
-    oskar_StationModel * stations;
+    oskar_StationModel_d * stations;
     bool idential_stations;
-    int num_stations_loaded = oskar_load_stations(path, &stations,
+    int num_stations_loaded = oskar_load_stations_d(path, &stations,
             &idential_stations);
 
     // Check the data loaded correctly.

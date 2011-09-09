@@ -27,7 +27,7 @@
  */
 
 
-#include "apps/oskar_imager_dft.cu.h"
+#include "apps/lib/oskar_imager_dft.cu.h"
 #include "math/oskar_cuda_dft_c2r_2d.h"
 #include "utility/oskar_vector_types.h"
 

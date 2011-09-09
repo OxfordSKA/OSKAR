@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/test/VisDataTest.h"
+#include "apps/lib/test/VisDataTest.h"
 #include "interferometry/oskar_VisData.h"
 
 #include <QtCore/QFile>

@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void oskar_load_sources(const char* file_path, oskar_SkyModelGlobal_d* sky)
+void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
 {
     // Open the file.
     FILE* file = fopen(file_path, "r");
@@ -90,6 +90,66 @@ void oskar_load_sources(const char* file_path, oskar_SkyModelGlobal_d* sky)
     }
     fclose(file);
 }
+
+
+
+void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
+{
+    // Open the file.
+    FILE* file = fopen(file_path, "r");
+    if (file == NULL) return;
+
+    const float deg2rad = 0.0174532925199432957692f;
+    sky->num_sources = 0;
+    sky->RA  = NULL;
+    sky->Dec = NULL;
+    sky->I   = NULL;
+    sky->Q   = NULL;
+    sky->U   = NULL;
+    sky->V   = NULL;
+
+    float ra, dec, I, Q, U, V;
+
+    char line[1024];
+    while (fgets(line, sizeof(line), file))
+    {
+        // Ignore comment lines (lines starting with '#')
+        if (line[0] == '#')
+            continue;
+
+        // Load source co-ordinates.
+        int read = sscanf(line, "%f %f %f %f %f %f", &ra, &dec, &I, &Q, &U, &V);
+        if (read != 6)
+            continue;
+
+        // Convert coordinates to radians.
+        ra  *= deg2rad;
+        dec *= deg2rad;
+
+        // Ensure enough space in arrays.
+        if (sky->num_sources % 100 == 0)
+        {
+            size_t mem_size = ((sky->num_sources) + 100) * sizeof(float);
+            sky->RA  = (float*) realloc(sky->RA,  mem_size);
+            sky->Dec = (float*) realloc(sky->Dec, mem_size);
+            sky->I   = (float*) realloc(sky->I,   mem_size);
+            sky->Q   = (float*) realloc(sky->Q,   mem_size);
+            sky->U   = (float*) realloc(sky->U,   mem_size);
+            sky->V   = (float*) realloc(sky->V,   mem_size);
+        }
+
+        sky->RA[sky->num_sources]  = ra;
+        sky->Dec[sky->num_sources] = dec;
+        sky->I[sky->num_sources]   = I;
+        sky->Q[sky->num_sources]   = Q;
+        sky->U[sky->num_sources]   = U;
+        sky->V[sky->num_sources]   = V;
+        sky->num_sources++;
+    }
+    fclose(file);
+}
+
+
 
 #ifdef __cplusplus
 }

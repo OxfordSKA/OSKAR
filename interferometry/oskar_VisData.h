@@ -43,10 +43,21 @@ struct oskar_VisData_d
     double*  u;
     double*  v;
     double*  w;
-
     double2* amp;
 };
 typedef struct oskar_VisData_d oskar_VisData_d;
+
+
+struct oskar_VisData_f
+{
+    int      num_samples;
+    float*   u;
+    float*   v;
+    float*   w;
+    float2*  amp;
+};
+typedef struct oskar_VisData_f oskar_VisData_f;
+
 
 
 /**

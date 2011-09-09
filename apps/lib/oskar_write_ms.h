@@ -26,27 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_WRITE_MS_H_
+#define OSKAR_WRITE_MS_H_
 
-#ifndef OSKAR_LOAD_STATIONS_H_
-#define OSKAR_LOAD_STATIONS_H_
-
-/**
- * @file oskar_load_stations.h
- */
-
-#include "station/oskar_StationModel.h"
 
 /**
- * @brief
- * Loads a directory of station (coordinate) files into an array of station
- * model structures.
- *
- * TODO: confirm if the dir_path needs to be relative or absolute...
- *
- * @param[in]  dir_path  Path to a directory of station files.
- * @param[out] stations  Pointer to an array to station model structures.
+ * @file oskar_write_ms.h
  */
-unsigned oskar_load_stations(const char* dir_path, oskar_StationModel** stations,
-        bool* idential_stations);
 
-#endif // OSKAR_LOAD_STATIONS_H_
+#include "oskar_windows.h"
+#include "apps/lib/oskar_Settings.h"
+#include "interferometry/oskar_VisData.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+DllExport
+void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
+        const oskar_VisData_d* vis, const bool overwrite = true);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_WRITE_MS_H_

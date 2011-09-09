@@ -34,21 +34,13 @@
  */
 
 #include "oskar_windows.h"
+#include "sky/oskar_SkyModel.h"
+#include "station/oskar_StationModel.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct oskar_StationModel;
-struct oskar_SkyModelLocal_d;
-
-/**
- * NOTE: This function still needs to be written!
- */
-DllExport
-int oskar_evaluate_station_beam_f();
-
 
 /**
  * @brief
@@ -82,13 +74,31 @@ int oskar_evaluate_station_beam_f();
  * @return CUDA error code.
  */
 DllExport
-int oskar_evaluate_station_beam_d(
-        const oskar_StationModel* hd_station,
-        const double h_beam_l,
-        const double h_beam_m,
-        const oskar_SkyModelLocal_d* hd_sky,
-        double2* d_weights_work,
+int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
+        const double h_beam_l, const double h_beam_m,
+        const oskar_SkyModelLocal_d* hd_sky, double2* d_weights_work,
         double2* d_e_jones);
+
+
+DllExport
+void oskar_evaluate_station_beams_d(const unsigned num_stations,
+        const oskar_StationModel_d* hd_stations,
+        const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
+        const double h_beam_m, double2* d_weights_work,
+        bool disable, bool identical_stations, double2* d_e_jones);
+
+DllExport
+int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
+        const float h_beam_l, const float h_beam_m,
+        const oskar_SkyModelLocal_f* hd_sky, float2* d_weights_work,
+        float2* d_e_jones);
+
+DllExport
+void oskar_evaluate_station_beams_f(const unsigned num_stations,
+        const oskar_StationModel_f* hd_stations,
+        const oskar_SkyModelLocal_f* hd_sky, const float h_beam_l,
+        const float h_beam_m, float2* d_weights_work,
+        bool disable, bool identical_stations, float2* d_e_jones);
 
 
 #ifdef __cplusplus

@@ -26,73 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_cuda_device_info.h"
 
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <driver_types.h>
+#ifndef OSKAR_LOAD_STATIONS_H_
+#define OSKAR_LOAD_STATIONS_H_
 
-#include <stdio.h>
+/**
+ * @file oskar_load_stations.h
+ */
+
+#include "oskar_windows.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_get_cuda_arch(const int deviceId, int* major, int* minor)
-{
-    int device_count = 0;
-    cudaError_t error = cudaGetDeviceCount(&device_count);
+/**
+ * @brief
+ * Loads a directory of station (coordinate) files into an array of station
+ * model structures.
+ *
+ * TODO: confirm if the dir_path needs to be relative or absolute...
+ *
+ * @param[in]  dir_path  Path to a directory of station files.
+ * @param[out] stations  Pointer to an array to station model structures.
+ */
+DllExport
+unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stations,
+        bool* idential_stations);
 
-    if (error != cudaSuccess)
-    {
-        fprintf(stderr, "CUDA ERROR[%i]: cudaGetDeviceCount() return %s\n",
-                error, cudaGetErrorString(error));
-        return;
-    }
-
-
-    if (deviceId > device_count - 1)
-    {
-        fprintf(stderr, "ERROR: Device ID out of range!\n");
-        return;
-    }
-
-    cudaDeviceProp device_prop;
-    cudaGetDeviceProperties(&device_prop, deviceId);
-    *major = device_prop.major;
-    *minor = device_prop.minor;
-}
-
-
-bool oskar_cuda_device_supports_double(const int deviceId)
-{
-    int device_count = 0;
-    cudaError_t error = cudaGetDeviceCount(&device_count);
-
-    if (error != cudaSuccess)
-    {
-        fprintf(stderr, "CUDA ERROR[%i]: cudaGetDeviceCount() return %s\n",
-                error, cudaGetErrorString(error));
-        return false;
-    }
-
-    cudaDeviceProp device_prop;
-    cudaGetDeviceProperties(&device_prop, deviceId);
-
-    int major = device_prop.major;
-    int minor = device_prop.minor;
-
-    if (major >= 2)
-        return true;
-    else if (minor >= 3)
-        return true;
-    else
-        return false;
-}
-
+DllExport
+unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stations,
+        bool* idential_stations);
 
 #ifdef __cplusplus
 }
 #endif
-
-
+#endif // OSKAR_LOAD_STATIONS_H_

@@ -1,4 +1,4 @@
-#include "apps/oskar_imager_dft.cu.h"
+#include "apps/lib/oskar_imager_dft.cu.h"
 #include "interferometry/oskar_VisData.h"
 
 #include "widgets/plotting/oskar_PlotWidget.h"

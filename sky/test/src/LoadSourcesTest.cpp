@@ -52,7 +52,7 @@ void LoadSourcesTest::test_load()
 
     oskar_SkyModelGlobal_d sky;
     TIMER_START
-    oskar_load_sources(filename, &sky);
+    oskar_load_sources_d(filename, &sky);
     TIMER_STOP("Loaded %i sources", sky.num_sources)
 
     // Cleanup.

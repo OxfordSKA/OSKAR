@@ -78,7 +78,7 @@ if (CUDA_FOUND)
             list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
         endif ()
         list(APPEND CUDA_NVCC_FLAGS -O2;)
-        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
+        #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
 
         #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-dlcm=cg)
     else ()

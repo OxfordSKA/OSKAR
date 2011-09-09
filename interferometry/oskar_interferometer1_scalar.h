@@ -39,6 +39,7 @@
 #include "station/oskar_StationModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "utility/oskar_vector_types.h"
+#include "interferometry/oskar_VisData.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,25 +101,40 @@ extern "C" {
  */
 DllExport
 int oskar_interferometer1_scalar_d(
-        const oskar_TelescopeModel telescope,
-        const oskar_StationModel * stations,
+        const oskar_TelescopeModel_d telescope,
+        const oskar_StationModel_d * stations,
         const oskar_SkyModelGlobal_d sky,
         const double ra0_rad,
         const double dec0_rad,
-        const double start_mjd_utc,
+        const double obs_start_mjd_utc,
         const double obs_length_days,
-        const unsigned n_vis_dumps,
-        const unsigned n_vis_ave,
-        const unsigned n_fringe_ave,
+        const unsigned num_vis_dumps,
+        const unsigned num_vis_ave,
+        const unsigned num_fringe_ave,
         const double frequency,
         const double bandwidth,
         const bool disable_e_jones,
-        double2 * vis,
-        double* u,
-        double* v,
-        double* w
+        oskar_VisData_d* vis
 );
 
+
+DllExport
+int oskar_interferometer1_scalar_f(
+        const oskar_TelescopeModel_f telescope,
+        const oskar_StationModel_f * stations,
+        const oskar_SkyModelGlobal_f sky,
+        const float ra0_rad,
+        const float dec0_rad,
+        const float obs_start_mjd_utc,
+        const float obs_length_days,
+        const unsigned num_vis_dumps,
+        const unsigned num_vis_ave,
+        const unsigned num_fringe_ave,
+        const float frequency,
+        const float bandwidth,
+        const bool disable_e_jones,
+        oskar_VisData_f* vis
+);
 
 #ifdef __cplusplus
 }

@@ -16,6 +16,7 @@ set(interferometry_SRC
     src/oskar_cuda_correlator_scalar.cu
     src/oskar_interferometer1_scalar.cu
     src/oskar_horizon_plane_to_itrs.cpp
+    src/oskar_TelescopeModel.cu
     src/oskar_VisData.c
     src/oskar_xyz_to_uvw.c
 )

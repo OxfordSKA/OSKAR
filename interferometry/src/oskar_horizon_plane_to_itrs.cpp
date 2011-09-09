@@ -34,12 +34,28 @@
 extern "C" {
 #endif
 
-void oskar_horizon_plane_to_itrs(const unsigned num_antennas,
+void oskar_horizon_plane_to_itrs_d(const unsigned num_antennas,
         const double * x_horizon, const double * y_horizon,
         const double latitude, double * x, double * y, double * z)
 {
     const double sinLat = sin(latitude);
     const double cosLat = cos(latitude);
+
+    for (unsigned i = 0; i < num_antennas; ++i)
+    {
+        x[i] = -y_horizon[i] * sinLat;
+        y[i] =  x_horizon[i];
+        z[i] =  y_horizon[i] * cosLat;
+    }
+}
+
+
+void oskar_horizon_plane_to_itrs_f(const unsigned num_antennas,
+        const float* x_horizon, const float* y_horizon,
+        const float latitude, float* x, float* y, float* z)
+{
+    const float sinLat = sinf(latitude);
+    const float cosLat = cosf(latitude);
 
     for (unsigned i = 0; i < num_antennas; ++i)
     {

@@ -41,6 +41,10 @@ target_link_libraries(write_ms_test
 
 
 if (BUILD_OSKAR_WIDGETS)
+    include_directories(${Qwt5_INCLUDE_DIR})
+    include_directories(${QT_QTGUI_INCLUDE_DIR})
+    include_directories(${QT_INCLUDE_DIR})
+    include_directories(${QT_QTCORE_INCLUDE_DIR})
     add_executable(imager_dft_test src/imager_dft_test.cpp)
     target_link_libraries(imager_dft_test
         oskar_apps

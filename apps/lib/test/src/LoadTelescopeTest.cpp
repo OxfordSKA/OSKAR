@@ -26,33 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_VisData.h"
-#include "apps/oskar_Settings.h"
-#include "apps/oskar_write_ms.h"
-#include "apps/oskar_file_utils.h"
+#include "apps/lib/test/LoadTelescopeTest.h"
+#include "apps/lib/oskar_load_telescope.h"
+#include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_horizon_plane_to_itrs.h"
 
 #include <QtCore/QFile>
-#include <QtCore/QString>
-#include <QtCore/QTextStream>
 #include <QtCore/QStringList>
+#include <QtCore/QTextStream>
 
 #include <cstdio>
-#include <cstdlib>
-#include <vector>
 
-using namespace std;
-
-int main(int /*argc*/, char** /*argv*/)
+void LoadTelescopeTest::test_load()
 {
-    // Create a telescope data file with one antenna.
-    QString telescope_file = "temp_telescope.dat";
-    QFile file(telescope_file);
+    // Generate some test data.
+    const char* filename = "temp_telescope.dat";
+    QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return EXIT_FAILURE;
+        return;
     QTextStream out(&file);
     int num_stations = 10;
-    vector<double> x_horizon(num_stations);
-    vector<double> y_horizon(num_stations);
+    double* x_horizon = new double[num_stations];
+    double* y_horizon = new double[num_stations];
     for (int i = 0; i < num_stations; ++i)
     {
         x_horizon[i] = (float)i + i/10.0;
@@ -61,44 +56,35 @@ int main(int /*argc*/, char** /*argv*/)
     }
     file.close();
 
-    // Create some visibility data to write.
-    oskar_VisData_d vis;
-    int num_baselines = num_stations * (num_stations - 1) / 2;
-    int num_dumps     = 2;
-    int num_samples   = num_baselines * num_dumps;
-    oskar_allocate_vis_data_d(num_samples, &vis);
-    for (int i = 0; i < num_samples; ++i)
+
+    // Load the telescope file.
+    double longitude_rad = 0.0;
+    double latitude_rad  = 0.0;
+    oskar_TelescopeModel_d telescope;
+    oskar_load_telescope_d(filename, longitude_rad, latitude_rad, &telescope);
+
+    // Convert input test horizon coordinates to ITRS.
+    double* x_itrs = new double[num_stations];
+    double* y_itrs = new double[num_stations];
+    double* z_itrs = new double[num_stations];
+    oskar_horizon_plane_to_itrs_d(num_stations, x_horizon, y_horizon, latitude_rad,
+            x_itrs, y_itrs, z_itrs);
+
+    // Check the data loaded correctly.
+    CPPUNIT_ASSERT_EQUAL(num_stations, (int)telescope.num_antennas);
+    for (int i = 0; i < num_stations; ++i)
     {
-        vis.u[i]     = (double)i;
-        vis.v[i]     = (double)i + 0.1;
-        vis.w[i]     = (double)i + 0.2;
-        vis.amp[i].x = 1.0 + (double)i / 1000.0;
-        vis.amp[i].y = 0.0;
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(x_itrs[i], telescope.antenna_x[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(y_itrs[i], telescope.antenna_y[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(z_itrs[i], telescope.antenna_z[i], 1.0e-6);
     }
 
+    // Cleanup.
+    delete[] x_horizon;
+    delete[] y_horizon;
+    delete[] x_itrs;
+    delete[] y_itrs;
+    delete[] z_itrs;
 
-    // Construct the required settings.
-    oskar_Settings settings;
-    settings.set_ra0_deg(0.0);
-    settings.set_dec0_deg(90.0);
-    settings.set_frequency(250e6);
-    settings.set_obs_Start_mjd_utc(0.0);
-    settings.set_obs_length_sec(60.0 * 2.0);
-    settings.set_telescope_file(telescope_file);
-    settings.set_longitude_deg(0.0);
-    settings.set_latitude_deg(90.0);
-    settings.set_num_vis_dumps(num_dumps);
-
-    // Write the MS.
-    const char* ms_path = "temp_test.ms";
-    oskar_write_ms_d(ms_path, &settings, &vis);
-
-    // Free memory.
-    oskar_free_vis_data_d(&vis);
-
-    // Cleanup temporary files.
-    QFile::remove(telescope_file);
-
-    return EXIT_SUCCESS;
+    QFile::remove(filename);
 }
-

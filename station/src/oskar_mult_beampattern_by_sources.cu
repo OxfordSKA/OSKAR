@@ -26,36 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "station/oskar_mult_beampattern_by_sources.h"
+#include "math/cudak/oskar_cudak_vec_mul_cr.h"
 
-#include "apps/oskar_load_telescope.h"
-#include "utility/oskar_load_csv_coordinates_2d.h"
-#include "interferometry/oskar_horizon_plane_to_itrs.h"
-#include <stdlib.h>
-#include <stdio.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void oskar_load_telescope(const char* file_path, const double longitude_rad,
-        const double latitude_rad, oskar_TelescopeModel* telescope)
+void oskar_mult_beampattern_by_source_field_amp_d(const unsigned num_stations,
+        const oskar_SkyModelLocal_d* hd_sky, double2 * d_e_jones)
 {
-    double* x_temp = NULL;
-    double* y_temp = NULL;
-    unsigned n = 0;
-    oskar_load_csv_coordinates_2d(file_path, &n, &x_temp, &y_temp);
+    int num_sources = hd_sky->num_sources;
+    int num_threads = 256;
+    int num_blocks  = (int)ceil((double) num_sources / num_threads);
 
-    telescope->latitude  = latitude_rad;
-    telescope->longitude = longitude_rad;
-    telescope->num_antennas = n;
-    size_t mem_size = n * sizeof(double);
-    telescope->antenna_x = (double*)malloc(mem_size);
-    telescope->antenna_y = (double*)malloc(mem_size);
-    telescope->antenna_z = (double*)malloc(mem_size);
-
-    if (telescope->num_antennas == 0)
-        fprintf(stderr, "ERROR: no antennas found when loading telescope!\n");
-
-    // Convert horizon x, y coordinates to ITRS (local equatorial system)
-    oskar_horizon_plane_to_itrs(n, x_temp, y_temp, telescope->latitude,
-            telescope->antenna_x, telescope->antenna_y, telescope->antenna_z);
-
-    free(x_temp);
-    free(y_temp);
+    for (unsigned i = 0; i < num_stations; ++i)
+    {
+        double2* d_e_jones_station = d_e_jones + i * num_sources;
+        oskar_cudak_vec_mul_cr_d <<< num_blocks, num_threads >>>
+                (num_sources, d_e_jones_station, hd_sky->I, d_e_jones_station);
+    }
 }
+
+
+void oskar_mult_beampattern_by_source_field_amp_f(const unsigned num_stations,
+        const oskar_SkyModelLocal_f* hd_sky, float2* d_e_jones)
+{
+    int num_sources = hd_sky->num_sources;
+    int num_threads = 256;
+    int num_blocks  = (int)ceilf((float) num_sources / num_threads);
+
+    for (unsigned i = 0; i < num_stations; ++i)
+    {
+        float2* d_e_jones_station = d_e_jones + i * num_sources;
+        oskar_cudak_vec_mul_cr_f <<< num_blocks, num_threads >>>
+                (num_sources, d_e_jones_station, hd_sky->I, d_e_jones_station);
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif

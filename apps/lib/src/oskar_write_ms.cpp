@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_write_ms.h"
-#include "apps/oskar_load_telescope.h"
-#include "apps/oskar_file_utils.h"
+#include "apps/lib/oskar_write_ms.h"
+#include "apps/lib/oskar_load_telescope.h"
+#include "apps/lib/oskar_file_utils.h"
 #include "ms/oskar_ms.h"
 #include "interferometry/oskar_TelescopeModel.h"
 
@@ -79,8 +79,8 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
     double frequency = settings->frequency();
 
     // Load telescope model to get station/antenna positions.
-    oskar_TelescopeModel telescope;
-    oskar_load_telescope(settings->telescope_file().toLatin1().data(),
+    oskar_TelescopeModel_d telescope;
+    oskar_load_telescope_d(settings->telescope_file().toLatin1().data(),
             settings->longitude_rad(), settings->latitude_rad(), &telescope);
 
     // Create the measurement set.

@@ -77,8 +77,12 @@ extern "C" {
  * @return Number of coordinates loaded.
  */
 DllExport
-int oskar_load_csv_coordinates_2d(const char* filename, unsigned* n,
+int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
         double** x, double** y);
+
+DllExport
+int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
+        float** x, float** y);
 
 #ifdef __cplusplus
 }

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_Settings.h"
+#include "apps/lib/oskar_Settings.h"
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QSettings>

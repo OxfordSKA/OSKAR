@@ -29,22 +29,62 @@
 #ifndef OSKAR_TELESCOPEMODEL_H_
 #define OSKAR_TELESCOPEMODEL_H_
 
+#include "oskar_windows.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_TelescopeModel
+struct oskar_TelescopeModel_d
 {
     unsigned num_antennas;
-    double* antenna_x;
-    double* antenna_y;
-    double* antenna_z; // NOTE: used after conversion to ITRS coordinates.
-    double longitude;
-    double latitude;
-
-    bool identical_stations; // true if all stations are identical
+    double*  antenna_x;
+    double*  antenna_y;
+    double*  antenna_z; // NOTE: used after conversion to ITRS coordinates.
+    double   longitude;
+    double   latitude;
+    bool     identical_stations; // true if all stations are identical
 };
-typedef struct oskar_TelescopeModel oskar_TelescopeModel;
+typedef struct oskar_TelescopeModel_d oskar_TelescopeModel_d;
+
+
+
+struct oskar_TelescopeModel_f
+{
+    unsigned num_antennas;
+    float*   antenna_x;
+    float*   antenna_y;
+    float*   antenna_z; // NOTE: used after conversion to ITRS coordinates.
+    float    longitude;
+    float    latitude;
+    bool     identical_stations; // true if all stations are identical
+};
+typedef struct oskar_TelescopeModel_f oskar_TelescopeModel_f;
+
+
+//--- Utility functions --------------------------------------------------------
+DllExport
+void oskar_copy_telescope_to_device_d(const oskar_TelescopeModel_d* h_telescope,
+        oskar_TelescopeModel_d* hd_telescope);
+
+DllExport
+void oskar_copy_telescope_to_device_f(const oskar_TelescopeModel_f* h_telescope,
+        oskar_TelescopeModel_f* hd_telescope);
+
+DllExport
+void oskar_scale_device_telescope_coords_d(oskar_TelescopeModel_d* hd_telescope,
+        const double value);
+
+DllExport
+void oskar_scale_device_telescope_coords_f(oskar_TelescopeModel_f* hd_telescope,
+        const float value);
+
+DllExport
+void oskar_free_device_telescope_d(oskar_TelescopeModel_d* hd_telescope);
+
+DllExport
+void oskar_free_device_telescope_f(oskar_TelescopeModel_f* hd_telescope);
+//------------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }

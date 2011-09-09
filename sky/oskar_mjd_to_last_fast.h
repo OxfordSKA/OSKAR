@@ -54,6 +54,9 @@ extern "C" {
 DllExport
 double oskar_mjd_to_last_fast_d(double mjd, double lon);
 
+DllExport
+float oskar_mjd_to_last_fast_f(float mjd, float lon);
+
 #ifdef __cplusplus
 }
 #endif

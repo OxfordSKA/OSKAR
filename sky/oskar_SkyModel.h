@@ -33,11 +33,12 @@
  * @file oskar_SkyModel.h
  */
 
+#include "oskar_windows.h"
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "oskar_windows.h"
 
 struct oskar_SkyModelGlobal_f
 {
@@ -50,6 +51,19 @@ struct oskar_SkyModelGlobal_f
     float* V;           ///< The source equatorial Stokes V values.
 };
 typedef struct oskar_SkyModelGlobal_f oskar_SkyModelGlobal_f;
+
+
+struct oskar_SkyModelGlobal_d
+{
+    int num_sources;
+    double* RA;         ///< The source Right Ascensions in radians.
+    double* Dec;        ///< The source Declinations in radians.
+    double* I;          ///< The source equatorial Stokes I values.
+    double* Q;          ///< The source equatorial Stokes Q values.
+    double* U;          ///< The source equatorial Stokes U values.
+    double* V;          ///< The source equatorial Stokes V values.
+};
+typedef struct oskar_SkyModelGlobal_d oskar_SkyModelGlobal_d;
 
 struct oskar_SkyModelLocal_f
 {
@@ -66,18 +80,6 @@ struct oskar_SkyModelLocal_f
 };
 typedef struct oskar_SkyModelLocal_f oskar_SkyModelLocal_f;
 
-struct oskar_SkyModelGlobal_d
-{
-    int num_sources;
-    double* RA;         ///< The source Right Ascensions in radians.
-    double* Dec;        ///< The source Declinations in radians.
-    double* I;          ///< The source equatorial Stokes I values.
-    double* Q;          ///< The source equatorial Stokes Q values.
-    double* U;          ///< The source equatorial Stokes U values.
-    double* V;          ///< The source equatorial Stokes V values.
-};
-typedef struct oskar_SkyModelGlobal_d oskar_SkyModelGlobal_d;
-
 struct oskar_SkyModelLocal_d
 {
     int num_sources;
@@ -92,6 +94,38 @@ struct oskar_SkyModelLocal_d
     double* hor_n;      ///< The source horizontal n-direction-cosines.
 };
 typedef struct oskar_SkyModelLocal_d oskar_SkyModelLocal_d;
+
+
+
+// ---------- Utility functions ------------------------------------------------
+DllExport
+void oskar_copy_gobal_sky_to_device_d(const oskar_SkyModelGlobal_d* h_sky,
+        oskar_SkyModelGlobal_d* hd_sky);
+
+DllExport
+void oskar_copy_gobal_sky_to_device_f(const oskar_SkyModelGlobal_f* h_sky,
+        oskar_SkyModelGlobal_f* hd_sky);
+
+DllExport
+void oskar_allocate_device_local_sky_d(const int num_sources,
+        oskar_SkyModelLocal_d* hd_sky);
+
+DllExport
+void oskar_allocate_device_local_sky_f(const int num_sources,
+        oskar_SkyModelLocal_f* hd_sky);
+
+DllExport
+void oskar_free_device_global_sky_d(oskar_SkyModelGlobal_d* hd_sky);
+
+DllExport
+void oskar_free_device_global_sky_f(oskar_SkyModelGlobal_f* hd_sky);
+
+DllExport
+void oskar_free_device_local_sky_d(oskar_SkyModelLocal_d* hd_sky);
+
+DllExport
+void oskar_free_device_local_sky_f(oskar_SkyModelLocal_f* hd_sky);
+// -----------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }

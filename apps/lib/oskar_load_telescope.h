@@ -26,28 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WRITE_MS_H_
-#define OSKAR_WRITE_MS_H_
+#ifndef OSKAR_LOAD_TELESCOPE_H_
+#define OSKAR_LOAD_TELESCOPE_H_
+
+/**
+ * @file oskar_load_telescope.h
+ */
+
+#include "interferometry/oskar_TelescopeModel.h"
+
+/**
+ * @brief Loads a telescope station coordinates file into a telescope model
+ * structure. (double precision)
+ *
+ * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
+ * @param[in]  longitude  Telescope longitude, in radians.
+ * @param[in]  latitude   Telescope latitude, in radians.
+ * @param[out] telescope  Pointer to telescope model structure.
+ */
+void oskar_load_telescope_d(const char* file_path, const double longitude_rad,
+        const double latitude_rad, oskar_TelescopeModel_d* telescope);
 
 
 /**
- * @file oskar_write_ms.h
+ * @brief Loads a telescope station coordinates file into a telescope model
+ * structure. (single/float precision)
+
+ *
+ * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
+ * @param[in]  longitude  Telescope longitude, in radians.
+ * @param[in]  latitude   Telescope latitude, in radians.
+ * @param[out] telescope  Pointer to telescope model structure.
  */
+void oskar_load_telescope_f(const char* file_path, const float longitude_rad,
+        const float latitude_rad, oskar_TelescopeModel_f* telescope);
 
-#include "oskar_windows.h"
-#include "apps/oskar_Settings.h"
-#include "interferometry/oskar_VisData.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-DllExport
-void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_d* vis, const bool overwrite = true);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // OSKAR_WRITE_MS_H_
+#endif // OSKAR_LOAD_TELESCOPE_H_

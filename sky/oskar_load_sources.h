@@ -42,14 +42,24 @@ extern "C" {
 
 
 /**
- * @brief
- * Loads sources from a plain text source file.
+ * @brief Loads sources from a plain text source file. (double precision).
  *
  * @param[in]  file_path  Path to the a source list file.
  * @param[out] sky        Pointer to global sky model structure.
  */
 DllExport
-void oskar_load_sources(const char* file_path, oskar_SkyModelGlobal_d* sky);
+void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky);
+
+
+/**
+ * @brief Loads sources from a plain text source file. (single/float precision).
+ *
+ * @param[in]  file_path  Path to the a source list file.
+ * @param[out] sky        Pointer to global sky model structure.
+ */
+DllExport
+void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky);
+
 
 
 #ifdef __cplusplus

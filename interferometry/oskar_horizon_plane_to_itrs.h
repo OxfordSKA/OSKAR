@@ -62,9 +62,15 @@ extern "C" {
  * @param[out] z             Vector of ITRS x-positions, in metres.
  */
 DllExport
-void oskar_horizon_plane_to_itrs(const unsigned num_antennas,
-        const double * x_horizon, const double * y_horizon,
-        const double latitude, double * x, double * y, double * z);
+void oskar_horizon_plane_to_itrs_d(const unsigned num_antennas,
+        const double* x_horizon, const double* y_horizon,
+        const double latitude, double* x, double* y, double* z);
+
+
+DllExport
+void oskar_horizon_plane_to_itrs_f(const unsigned num_antennas,
+        const float* x_horizon, const float* y_horizon,
+        const float latitude, float* x, float* y, float* z);
 
 
 #ifdef __cplusplus

@@ -22,8 +22,8 @@
 #define SEC_PER_DAY 86400.0
 
 
-void getTelescopeModel(const mxArray * matlab_struct, oskar_TelescopeModel * model);
-void getStationModels(const mxArray * matlab_struct, oskar_StationModel * model);
+void getTelescopeModel(const mxArray * matlab_struct, oskar_TelescopeModel_d * model);
+void getStationModels(const mxArray * matlab_struct, oskar_StationModel_d * model);
 void getGlobalSkyModel(const mxArray * m_struct, oskar_SkyModelGlobal_d * model);
 
 // Entry function.
@@ -40,14 +40,14 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
     }
 
     // ==== Construct telescope model structure from MATLAB structure.
-    oskar_TelescopeModel telescope;
+    oskar_TelescopeModel_d telescope;
     getTelescopeModel(input[0], &telescope);
 
     // ==== Construct array of station models from MATLAB structure.
     if (mxGetN(input[1]) != telescope.num_antennas)
         mexErrMsgTxt("Dimension mismatch between telescope model and station models");
-    size_t mem_size = telescope.num_antennas * sizeof(oskar_StationModel);
-    oskar_StationModel * stations = (oskar_StationModel*) malloc(mem_size);
+    size_t mem_size = telescope.num_antennas * sizeof(oskar_StationModel_d);
+    oskar_StationModel_d * stations = (oskar_StationModel_d*) malloc(mem_size);
     getStationModels(input[1], stations);
 
     // ==== Construct global sky model from matlab structure.
@@ -75,23 +75,22 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
     output[2] = mxCreateNumericMatrix(rows, cols, mxDOUBLE_CLASS, mxREAL);
     output[3] = mxCreateNumericMatrix(rows, cols, mxDOUBLE_CLASS, mxREAL);
 
-
-    //double2* vis = (double2*)mxGetPr(output[0]);
+    oskar_VisData_d vis;
     double * vis_re = mxGetPr(output[0]);
     double * vis_im = mxGetPi(output[0]);
-    double* u = mxGetPr(output[1]);
-    double* v = mxGetPr(output[2]);
-    double* w = mxGetPr(output[3]);
-    double2 * vis_temp = (double2*)malloc(cols * sizeof(double2));
+    vis.u           = mxGetPr(output[1]);
+    vis.v           = mxGetPr(output[2]);
+    vis.w           = mxGetPr(output[3]);
+    vis.amp         = (double2*)malloc(cols * sizeof(double2));
 
     int err = oskar_interferometer1_scalar_d(telescope, stations, sky, ra0_rad, dec0_rad,
             obs_start_mjd_utc, obs_length_days, num_vis_dumps, num_vis_ave,
-            num_fringe_ave, freq, bandwidth, disable_e_jones, vis_temp, u, v, w);
+            num_fringe_ave, freq, bandwidth, disable_e_jones, &vis);
 
     for (int i = 0; i < cols; ++i)
     {
-        vis_re[i] = vis_temp[i].x;
-        vis_im[i] = vis_temp[i].y;
+        vis_re[i] = vis.amp[i].x;
+        vis_im[i] = vis.amp[i].y;
     }
 
     mexPrintf("error %i\n", err);
@@ -101,12 +100,12 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
     free(telescope.antenna_y);
     free(telescope.antenna_z);
     free(stations);
-    free(vis_temp);
+    free(vis.amp);
 }
 
 
 
-void getTelescopeModel(const mxArray * matlab_struct, oskar_TelescopeModel * model)
+void getTelescopeModel(const mxArray * matlab_struct, oskar_TelescopeModel_d * model)
 {
     // TODO parse structure properly - i.e. check fields etc.
     if (!mxIsStruct(matlab_struct))
@@ -125,11 +124,11 @@ void getTelescopeModel(const mxArray * matlab_struct, oskar_TelescopeModel * mod
     model->antenna_z = (double*)malloc(mem_size);
 
     // Convert horizon x, y coordinates to ITRS (local equatorial system)
-    oskar_horizon_plane_to_itrs(num_antennas, xh, yh, lat, model->antenna_x,
+    oskar_horizon_plane_to_itrs_d(num_antennas, xh, yh, lat, model->antenna_x,
             model->antenna_y, model->antenna_z);
 }
 
-void getStationModels(const mxArray * matlab_struct, oskar_StationModel * model)
+void getStationModels(const mxArray * matlab_struct, oskar_StationModel_d * model)
 {
     if (!mxIsStruct(matlab_struct))
         mexErrMsgTxt("Input must be a matlab struct");

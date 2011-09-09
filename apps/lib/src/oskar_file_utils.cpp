@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/oskar_file_utils.h"
+#include "apps/lib/oskar_file_utils.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>

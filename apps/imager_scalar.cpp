@@ -28,9 +28,9 @@
 
 
 
-#include "apps/oskar_Settings.h"
-#include "apps/oskar_load_telescope.h"
-#include "apps/oskar_imager_dft.cu.h"
+#include "apps/lib/oskar_Settings.h"
+#include "apps/lib/oskar_load_telescope.h"
+#include "apps/lib/oskar_imager_dft.cu.h"
 
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_VisData.h"
@@ -74,8 +74,8 @@ int main(int argc, char** argv)
     double lmax         = sin((fov_deg / 2) * M_PI / 180.0);
     double inc          = (2.0 * lmax) / (image_size - 1);
 
-    oskar_TelescopeModel telescope;
-    oskar_load_telescope(settings.telescope_file().toLatin1().data(),
+    oskar_TelescopeModel_d telescope;
+    oskar_load_telescope_d(settings.telescope_file().toLatin1().data(),
             settings.longitude_rad(), settings.latitude_rad(), &telescope);
 
     // Load data file.
