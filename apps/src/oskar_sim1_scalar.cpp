@@ -40,6 +40,8 @@
 #include "apps/oskar_Settings.h"
 #include "apps/oskar_write_ms.h"
 
+#include "utility/oskar_cuda_device_info.h"
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -58,6 +60,7 @@ int main(int argc, char** argv)
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
     settings.print();
+
 
     // =========================================================================
     // Load sky model.
