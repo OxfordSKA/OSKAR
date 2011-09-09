@@ -126,6 +126,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
    free(times);
 }
 
+
 #ifdef __cplusplus
 }
 #endif

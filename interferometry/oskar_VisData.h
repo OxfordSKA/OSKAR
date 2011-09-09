@@ -70,6 +70,10 @@ typedef struct oskar_VisData_f oskar_VisData_f;
 DllExport
 void oskar_allocate_vis_data_d(const unsigned num_samples, oskar_VisData_d* vis);
 
+DllExport
+void oskar_allocate_vis_data_f(const unsigned num_samples, oskar_VisData_f* vis);
+
+
 /**
  * @brief Free memory held in the specified oskar_VisData_d structure.
  *
@@ -77,6 +81,9 @@ void oskar_allocate_vis_data_d(const unsigned num_samples, oskar_VisData_d* vis)
  */
 DllExport
 void oskar_free_vis_data_d(oskar_VisData_d* vis);
+
+DllExport
+void oskar_free_vis_data_f(oskar_VisData_f* vis);
 
 /**
  * @brief Writes a oskar_VisData_d structure to the specified file.
@@ -86,6 +93,10 @@ void oskar_free_vis_data_d(oskar_VisData_d* vis);
  */
 DllExport
 void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis);
+
+DllExport
+void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis);
+
 
 /**
  * @brief Loads a oskar_VisData_d structure from the specified file.
@@ -99,6 +110,9 @@ void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis);
  */
 DllExport
 void oskar_load_vis_data_d(const char* filename, oskar_VisData_d* vis);
+
+DllExport
+void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis);
 
 #ifdef __cplusplus
 }

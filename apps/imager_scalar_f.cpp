@@ -40,6 +40,7 @@
 #include "widgets/plotting/oskar_ImagePlot.h"
 
 #include <QtGui/QApplication>
+#include <QtCore/QTime>
 
 #include "qwt_scale_widget.h"
 
@@ -74,13 +75,13 @@ int main(int argc, char** argv)
     double lmax         = sin((fov_deg / 2) * M_PI / 180.0);
     double inc          = (2.0 * lmax) / (image_size - 1);
 
-    oskar_TelescopeModel_d telescope;
-    oskar_load_telescope_d(settings.telescope_file().toLatin1().data(),
+    oskar_TelescopeModel_f telescope;
+    oskar_load_telescope_f(settings.telescope_file().toLatin1().data(),
             settings.longitude_rad(), settings.latitude_rad(), &telescope);
 
     // Load data file.
-    oskar_VisData_d vis;
-    oskar_load_vis_data_d(settings.output_file().toLatin1().data(), &vis);
+    oskar_VisData_f vis;
+    oskar_load_vis_data_f(settings.output_file().toLatin1().data(), &vis);
 
     printf("- num vis samples     = %i\n", vis.num_samples);
     printf("- field of view (deg) = %f\n", fov_deg);
@@ -88,28 +89,27 @@ int main(int argc, char** argv)
     printf("- cellsize (arcsec)   = %f\n", asin(inc) * (180.0 / M_PI) * 3600.0);
     printf("\n");
 
-    std::vector<double> l(image_size);
+    std::vector<float> l(image_size);
     for (unsigned i = 0; i < image_size; ++i)
         l[i] = -lmax + i * inc;
-    std::vector<double> image(image_size * image_size);
-    int err = oskar_imager_dft_d(vis.num_samples, vis.amp, vis.u, vis.v,
+    std::vector<float> image(image_size * image_size);
+    QTime timer;
+    timer.start();
+    int err = oskar_imager_dft_f(vis.num_samples, vis.amp, vis.u, vis.v,
             settings.frequency(), image_size, &l[0], &image[0]);
-
+    printf("= Completed imaging after %f seconds [error code: %i].\n",
+            timer.elapsed() / 1.0e3, err);
     if (err != 0)
     {
         fprintf(stderr, "ERROR: CUDA dft imager failed with error = %i\n", err);
         return EXIT_FAILURE;
     }
 
-    std::vector<float> image_f(image_size * image_size);
-    for (unsigned i = 0; i < image_size * image_size; ++i)
-        image_f[i] = (float)image[i];
-
     // plotting.
     QApplication app(argc, argv);
 
     PlotWidget plot1;
-    plot1.plotImage(&image_f[0], image_size, image_size, -fov_deg/2, fov_deg/2,
+    plot1.plotImage(&image[0], image_size, image_size, -fov_deg/2, fov_deg/2,
             -fov_deg/2, fov_deg/2);
     plot1.resize(700, 600);
     plot1.setTitle("Dirty image");
@@ -117,14 +117,10 @@ int main(int argc, char** argv)
     plot1.setYLabel("Relative Declination (deg)");
     plot1.setScaleLabel("Jy/beam");
 
-//    PlotWidget plot2;
-//    plot2.plotCurve(vis.num_samples, vis.u, vis.v);
-
     int status = app.exec();
 
-
     // Cleanup.
-    oskar_free_vis_data_d(&vis);
+    oskar_free_vis_data_f(&vis);
 
     return status;
 }

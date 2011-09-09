@@ -63,6 +63,13 @@ int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
         const double* l, double* image);
 
 
+DllExport
+int oskar_imager_dft_f(const unsigned num_vis, const float2* vis, float* u,
+        float* v, const float frequency, const unsigned image_size,
+        const float* l, float* image);
+
+
+
 #ifdef __cplusplus
 }
 #endif

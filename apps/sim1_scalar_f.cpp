@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     if (argc != 2)
     {
         fprintf(stderr, "ERROR: Missing command line arguments.\n");
-        fprintf(stderr, "Usage:  $ sim1_scalar_d [settings file]\n");
+        fprintf(stderr, "Usage:  $ sim1_scalar_f [settings file]\n");
         return EXIT_FAILURE;
     }
 
@@ -64,18 +64,18 @@ int main(int argc, char** argv)
 
     // =========================================================================
     // Load sky model.
-    oskar_SkyModelGlobal_d sky;
-    oskar_load_sources_d(settings.sky_file().toLatin1().data(), &sky);
+    oskar_SkyModelGlobal_f sky;
+    oskar_load_sources_f(settings.sky_file().toLatin1().data(), &sky);
 
     // Load telescope layout.
-    oskar_TelescopeModel_d telescope;
-    oskar_load_telescope_d(settings.telescope_file().toLatin1().data(),
+    oskar_TelescopeModel_f telescope;
+    oskar_load_telescope_f(settings.telescope_file().toLatin1().data(),
             settings.longitude_rad(), settings.latitude_rad(), &telescope);
 
     // Load station layouts.
-    oskar_StationModel_d* stations;
+    oskar_StationModel_f* stations;
     const char* station_dir = settings.station_dir().toLatin1().data();
-    unsigned num_stations = oskar_load_stations_d(station_dir, &stations,
+    unsigned num_stations = oskar_load_stations_f(station_dir, &stations,
             &telescope.identical_stations);
 
     // Check load worked.
@@ -86,13 +86,13 @@ int main(int argc, char** argv)
     }
     // =========================================================================
 
-    oskar_VisData_d vis;
+    oskar_VisData_f vis;
     int num_baselines = num_stations * (num_stations-1) / 2;
-    oskar_allocate_vis_data_d(num_baselines * settings.num_vis_dumps(), &vis);
+    oskar_allocate_vis_data_f(num_baselines * settings.num_vis_dumps(), &vis);
 
     QTime timer;
     timer.start();
-    int err = oskar_interferometer1_scalar_d(telescope, stations, sky,
+    int err = oskar_interferometer1_scalar_f(telescope, stations, sky,
             settings.ra0_rad(),
             settings.dec0_rad(),
             settings.obs_start_mjd_utc(),
@@ -110,10 +110,22 @@ int main(int argc, char** argv)
 
     printf("= Number of visibility points generated: %i\n", vis.num_samples);
 
-    oskar_write_vis_data_d(settings.output_file().toLatin1().data(), &vis);
+    oskar_write_vis_data_f(settings.output_file().toLatin1().data(), &vis);
 
-    QString ms_file = settings.output_file() + ".ms";
-    oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis, true);
+//    QString ms_file = settings.output_file() + ".ms";
+//    oskar_VisData_d vis_d;
+//    oskar_allocate_vis_data_d(vis.num_samples, &vis_d);
+//    vis_d.num_samples = vis.num_samples;
+//    for (int i = 0; i < vis.num_samples; ++i)
+//    {
+//        vis_d.u[i]     = (double)vis.u[i];
+//        vis_d.v[i]     = (double)vis.v[i];
+//        vis_d.w[i]     = (double)vis.w[i];
+//        vis_d.amp[i].x = (double)vis.amp[i].x;
+//        vis_d.amp[i].y = (double)vis.amp[i].y;
+//    }
+//    oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis_d, true);
+//    oskar_free_vis_data_d(&vis_d);
 
     // =========================================================================
     // Free memory.
@@ -124,7 +136,7 @@ int main(int argc, char** argv)
     free(sky.U);
     free(sky.V);
 
-    oskar_free_vis_data_d(&vis);
+    oskar_free_vis_data_f(&vis);
 
     free(telescope.antenna_x);
     free(telescope.antenna_y);

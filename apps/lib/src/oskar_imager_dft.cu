@@ -119,6 +119,90 @@ int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
     return err;
 }
 
+int oskar_imager_dft_f(const unsigned num_vis, const float2* vis, float* u,
+        float* v, const float frequency, const unsigned image_size,
+        const float* l, float* image)
+{
+    const float c_0 = 299792458.0f;
+    const float wavelength = c_0 / frequency;
+    const float wavenumber = 2.0f * M_PI / wavelength;
+
+    // Convert baselines to wavenumber units. -- TODO do this on the GPU.
+    for (unsigned i = 0; i < num_vis; ++i)
+    {
+        u[i] *= wavenumber;
+        v[i] *= wavenumber;
+    }
+
+    // Setup device memory.
+    size_t mem_size_coords = num_vis * sizeof(float);
+    float* d_u = NULL;
+    cudaMalloc((void**)&d_u, mem_size_coords);
+    cudaMemcpy(d_u, u, mem_size_coords, cudaMemcpyHostToDevice);
+
+    float* d_v = NULL;
+    cudaMalloc((void**)&d_v, mem_size_coords);
+    cudaMemcpy(d_v, v, mem_size_coords, cudaMemcpyHostToDevice);
+
+    float2* d_vis = NULL;
+    size_t mem_size_vis = num_vis * sizeof(float2);
+    cudaMalloc((void**)&d_vis, mem_size_vis);
+    cudaMemcpy(d_vis, vis, mem_size_vis, cudaMemcpyHostToDevice);
+
+    unsigned num_pixels = image_size * image_size;
+    size_t mem_size_image = num_pixels * sizeof(float);
+
+    // l, m positions of pixels (equivalent to MATLAB meshgrid)
+    float* l_2d = (float*) malloc(mem_size_image);
+    float* m_2d = (float*) malloc(mem_size_image);
+    for (unsigned j = 0; j < image_size; ++j)
+    {
+        for (unsigned i = 0; i < image_size; ++i)
+        {
+            l_2d[j * image_size + i] = l[i];
+            m_2d[i * image_size + j] = l[image_size-1-i];
+        }
+    }
+
+    float* d_image = NULL;
+    cudaMalloc((void**)&d_image, mem_size_image);
+
+    float* d_l = NULL;
+    cudaMalloc((void**)&d_l, mem_size_image);
+    cudaMemcpy(d_l, l_2d, mem_size_image, cudaMemcpyHostToDevice);
+
+    float* d_m = NULL;
+    cudaMalloc((void**)&d_m, mem_size_image);
+    cudaMemcpy(d_m, m_2d, mem_size_image, cudaMemcpyHostToDevice);
+
+    // Call dft.
+    int err = oskar_cuda_dft_c2r_2d_f(num_vis, d_u, d_v, (float*)d_vis,
+            num_pixels, d_l, d_m, d_image);
+
+    // Copy back image to host memory.
+    cudaMemcpy(image, d_image, mem_size_image, cudaMemcpyDeviceToHost);
+
+    for (unsigned i = 0; i < num_pixels; ++i)
+    {
+        image[i] /= (float)num_vis;
+    }
+
+    cudaFree(d_image);
+    cudaFree(d_l);
+    cudaFree(d_m);
+
+    cudaFree(d_u);
+    cudaFree(d_v);
+    cudaFree(d_vis);
+
+    free(l_2d);
+    free(m_2d);
+
+    return err;
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif
