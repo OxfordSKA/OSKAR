@@ -116,7 +116,6 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
         for (int i = 0; i < num_baselines; ++i)
             times[j * num_baselines + i] = t;
     }
-
     oskar_ms_append_vis1(ms_path, mjd_start, exposure, interval, vis->num_samples,
             vis->u, vis->v, vis->w, (double*)vis->amp, baseline_ant_1,
             baseline_ant_2, times);

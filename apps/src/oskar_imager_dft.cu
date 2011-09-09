@@ -70,6 +70,7 @@ int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
     unsigned num_pixels = image_size * image_size;
     size_t mem_size_image = num_pixels * sizeof(double);
 
+    // l, m positions of pixels (equivalent to MATLAB meshgrid)
     double* l_2d = (double*) malloc(mem_size_image);
     double* m_2d = (double*) malloc(mem_size_image);
     for (unsigned j = 0; j < image_size; ++j)
@@ -77,7 +78,7 @@ int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
         for (unsigned i = 0; i < image_size; ++i)
         {
             l_2d[j * image_size + i] = l[i];
-            m_2d[i * image_size + j] = l[i];
+            m_2d[i * image_size + j] = l[image_size-1-i];
         }
     }
 

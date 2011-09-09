@@ -41,6 +41,8 @@
 
 #include <QtGui/QApplication>
 
+#include "qwt_scale_widget.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
@@ -66,14 +68,11 @@ int main(int argc, char** argv)
     // Load settings file.
     oskar_Settings settings;
     settings.load(QString(argv[1]));
-//    settings.print();
 
     double fov_deg      = atof(argv[2]);
     unsigned image_size = atoi(argv[3]);
-
-    printf("field of view (deg) = %f\n", fov_deg);
-    printf("image size          = %i\n", image_size);
-    printf("\n");
+    double lmax         = sin((fov_deg / 2) * M_PI / 180.0);
+    double inc          = (2.0 * lmax) / (image_size - 1);
 
     oskar_TelescopeModel telescope;
     oskar_load_telescope(settings.telescope_file().toLatin1().data(),
@@ -83,18 +82,16 @@ int main(int argc, char** argv)
     oskar_VisData_d vis;
     oskar_load_vis_data_d(settings.output_file().toLatin1().data(), &vis);
 
+    printf("- num vis samples     = %i\n", vis.num_samples);
+    printf("- field of view (deg) = %f\n", fov_deg);
+    printf("- image size          = %i\n", image_size);
+    printf("- cellsize (arcsec)   = %f\n", asin(inc) * (180.0 / M_PI) * 3600.0);
+    printf("\n");
+
     std::vector<double> l(image_size);
-    double lmax = sin((fov_deg / 2) * M_PI / 180.0);
-    double inc  = (2.0 * lmax) / (image_size - 1);
     for (unsigned i = 0; i < image_size; ++i)
-    {
         l[i] = -lmax + i * inc;
-    }
-
     std::vector<double> image(image_size * image_size);
-
-    printf("num_vis = %i\n", vis.num_samples);
-
     int err = oskar_imager_dft_d(vis.num_samples, vis.amp, vis.u, vis.v,
             settings.frequency(), image_size, &l[0], &image[0]);
 
@@ -108,16 +105,25 @@ int main(int argc, char** argv)
     for (unsigned i = 0; i < image_size * image_size; ++i)
         image_f[i] = (float)image[i];
 
-    // plot image
+    // plotting.
     QApplication app(argc, argv);
-    PlotWidget plot2;
-    plot2.plotCurve(vis.num_samples, vis.u, vis.v);
 
     PlotWidget plot1;
-    plot1.plotImage(&image_f[0], image_size, image_size, 0, image_size, 0, image_size, true);
+    plot1.plotImage(&image_f[0], image_size, image_size, -fov_deg/2, fov_deg/2,
+            -fov_deg/2, fov_deg/2);
+    plot1.resize(700, 600);
+    plot1.setTitle("Dirty image");
+    plot1.setXLabel("Relative Right Ascension (deg)");
+    plot1.setYLabel("Relative Declination (deg)");
+    plot1.setScaleLabel("Jy/beam");
+
+//    PlotWidget plot2;
+//    plot2.plotCurve(vis.num_samples, vis.u, vis.v);
 
     int status = app.exec();
 
+
+    // Cleanup.
     oskar_free_vis_data_d(&vis);
 
     return status;
