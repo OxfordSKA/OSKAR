@@ -14,14 +14,13 @@ set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
 
 # ==== Macros to build the oskar-lib platform module.
 include_directories(${QT_INCLUDE_DIR})
-cuda_add_library(oskar_apps SHARED ${apps_SRC})
-target_link_libraries(oskar_apps ${QT_QTCORE_LIBRARY} oskar oskar_ms)
+include_directories(${CUDA_INCLUDE_DIRS})
+set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.dir/src)
+cuda_add_library(oskar_apps ${apps_SRC})
+target_link_libraries(oskar_apps oskar oskar_ms ${CASACORE_LIBRARIES}
+    ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 set_target_properties(oskar_apps PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(oskar_apps PROPERTIES COMPILE_FLAGS "-Wno-cast-qual")
 set_target_properties(oskar_apps PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-target_link_libraries(oskar_apps ${CASACORE_LIBRARIES})
-
-# ==== Install configuration for the oskar_apps library.
 install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 set_target_properties(oskar_apps PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
 
