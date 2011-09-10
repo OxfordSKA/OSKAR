@@ -143,7 +143,7 @@ if (BUILD_OSKAR_FITS)
     message("==> Building 'liboskar_fits'")
 endif ()
 if (BUILD_OSKAR_APPS)
-    message("==> Building oskar applicaitons")
+    message("==> Building 'liboskar_apps' and oskar applicaitons")
 endif ()
 
 # ==== Set a flag to tell cmake that dependencies have been checked.
