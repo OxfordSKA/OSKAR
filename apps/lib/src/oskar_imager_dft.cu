@@ -32,6 +32,11 @@
 #include "utility/oskar_vector_types.h"
 
 #include <stdio.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -197,6 +202,12 @@ int oskar_imager_dft_f(const unsigned num_vis, const float2* vis, float* u,
 
     free(l_2d);
     free(m_2d);
+
+    if (err != cudaSuccess)
+    {
+        fprintf(stderr, "CUDA ERROR [%i] oskar_imager_dft(): %s.\n",
+                err, cudaGetErrorString((cudaError_t)err));
+    }
 
     return err;
 }
