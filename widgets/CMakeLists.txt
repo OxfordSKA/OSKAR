@@ -30,10 +30,14 @@ if (Qwt5_FOUND)
     qt4_wrap_cpp(widgets_SRC ${widgets_MOC_SRC})
 
     add_library(oskar_widgets SHARED ${widgets_SRC})
-    target_link_libraries(oskar_widgets ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${Qwt5_Qt4_LIBRARY})
+    target_link_libraries(oskar_widgets ${QT_QTCORE_LIBRARY}
+        ${QT_QTGUI_LIBRARY} ${Qwt5_Qt4_LIBRARY})
     set_target_properties(oskar_widgets PROPERTIES
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib
         INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+    # Tests
+    add_subdirectory(test)
 
     # Install target for plotting widgets sub-module.
     set_target_properties(oskar_widgets PROPERTIES
@@ -41,4 +45,5 @@ if (Qwt5_FOUND)
     install(TARGETS oskar_widgets DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
 endif()
+
 
