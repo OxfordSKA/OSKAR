@@ -4,6 +4,7 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QModelIndex>
 #include <QtCore/QVariant>
+#include <QtCore/QStringList>
 
 class oskar_TreeItem;
 

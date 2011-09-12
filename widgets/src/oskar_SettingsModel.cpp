@@ -159,7 +159,7 @@ void oskar_SettingsModel::_setupModelData(const QStringList& lines,
             }
 
             // Append a new item to the current parent's list of children.
-            parents.last()->appendChild(new TreeItem(columnData, parents.last()));
+            parents.last()->appendChild(new oskar_TreeItem(columnData, parents.last()));
         }
 
         number++;
