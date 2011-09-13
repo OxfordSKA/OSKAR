@@ -30,6 +30,8 @@
 #include "sky/cudak/oskar_cudak_ra_dec_to_hor_lmn.h"
 #include "sky/cudak/oskar_cudak_hor_lmn_to_az_el.h"
 
+#include "math.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -40,7 +42,7 @@ int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
         float* d_az, float* d_el)
 {
     // Determine horizontal coordinates.
-    const int n_thd = 512;
+    const int n_thd = 128;
     const int n_blk = (n + n_thd - 1) / n_thd;
     float cosLat = cosf(lat);
     float sinLat = sinf(lat);
@@ -49,8 +51,7 @@ int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
     oskar_cudak_hor_lmn_to_az_el_f <<< n_blk, n_thd >>> (n, d_az, d_el, d_work,
             d_az, d_el);
     cudaDeviceSynchronize();
-    cudaError_t errCuda = cudaPeekAtLastError();
-    return (int)errCuda;
+    return (int)cudaPeekAtLastError();
 }
 
 // Double precision.
@@ -59,7 +60,7 @@ int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
         double* d_az, double* d_el)
 {
     // Determine horizontal coordinates.
-    const int n_thd = 512;
+    const int n_thd = 128;
     const int n_blk = (n + n_thd - 1) / n_thd;
     float cosLat = cos(lat);
     float sinLat = sin(lat);
@@ -68,8 +69,7 @@ int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
     oskar_cudak_hor_lmn_to_az_el_d <<< n_blk, n_thd >>> (n, d_az, d_el, d_work,
             d_az, d_el);
     cudaDeviceSynchronize();
-    cudaError_t errCuda = cudaPeekAtLastError();
-    return (int)errCuda;
+    return (int)cudaPeekAtLastError();
 }
 
 #ifdef __cplusplus
