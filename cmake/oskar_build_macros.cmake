@@ -8,7 +8,15 @@ macro(oskar_mex name source)
     # TODO: Add critical fail on matlab not found.
     # TODO: Add critical fail on not having set other required variables.
 
-    cuda_add_library(${name} SHARED ${source} mex_function.def)
+    get_filename_component(ext ${source} EXT)
+    if (${ext} STREQUAL ".cpp" OR ${ext} STREQUAL "*.c")
+        add_library(${name} SHARED ${source} mex_function.def)
+    elseif (${ext} STREQUAL ".cu")  
+        cuda_add_library(${name} SHARED ${source} mex_function.def)
+    else ()
+        message(CRITICAL "MEX EXTENSION UNRECOGNISED!")  
+    endif ()
+    
     target_link_libraries(${name} oskar ${MATLAB_LIBRARIES})
     set_target_properties(${name} PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}"
@@ -23,3 +31,4 @@ macro(oskar_mex name source)
         PATTERN ".svn" EXCLUDE)
 
 endmacro(oskar_mex)
+

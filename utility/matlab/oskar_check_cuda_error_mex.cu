@@ -1,5 +1,6 @@
 #include <mex.h>
 #include <string>
+#include <cuda_runtime_api.h>
 
 // Interface function - can call anything from here...
 //

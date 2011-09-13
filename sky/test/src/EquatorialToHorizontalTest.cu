@@ -114,7 +114,12 @@ void EquatorialToHorizontalTest::test_last()
     int ecode = oskar_cuda_ra_dec_to_az_el_d(1, d_ra, d_dec, last, latitude,
             d_work, d_az, d_el);
     if (ecode)
+    {
+        fprintf(stderr, "ERROR: oskar_cuda_ra_dec_to_az_el_d() "
+                "returned error code %i: %s.\n", ecode,
+                cudaGetErrorString((cudaError_t)ecode));
         CPPUNIT_FAIL("CUDA Error");
+    }
 
     // Copy output coordinates to host.
     double a, e;
