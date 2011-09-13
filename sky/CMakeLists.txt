@@ -4,7 +4,7 @@
 
 include_directories(${oskar-lib_SOURCE_DIR}/math)
 
-# ==== Add the source files in this directory.
+# Add the source files in this directory.
 set(sky_SRC
     src/oskar_angles_from_lm.c
     src/oskar_rotate_sources.cpp
@@ -29,7 +29,7 @@ set(sky_SRC
     src/oskar_SkyModel.cu
 )
 
-# ==== Add the CUDA kernels.
+# Add the CUDA kernels.
 add_subdirectory(cudak)
 foreach (file ${sky_cuda_kernels_SRC})
     list(APPEND sky_SRC cudak/${file})
@@ -37,5 +37,8 @@ endforeach ()
 
 set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 
-# ==== Recurse into test subdirectory.
+# Build MATLAB mex functions.
+add_subdirectory(matlab)
+
+# Build tests.
 add_subdirectory(test)

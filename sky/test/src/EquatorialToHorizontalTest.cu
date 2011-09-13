@@ -112,7 +112,7 @@ void EquatorialToHorizontalTest::test_last()
     cudaMemcpy(d_dec, &dec, sizeof(double), cudaMemcpyHostToDevice);
 
     int ecode = oskar_cuda_ra_dec_to_az_el_d(1, d_ra, d_dec, last, latitude,
-            d_az, d_el, d_work);
+            d_work, d_az, d_el);
     if (ecode)
         CPPUNIT_FAIL("CUDA Error");
 

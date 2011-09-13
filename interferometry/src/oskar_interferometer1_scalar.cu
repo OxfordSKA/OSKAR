@@ -28,16 +28,8 @@
 
 #include "interferometry/oskar_interferometer1_scalar.h"
 #include "interferometry/oskar_cuda_correlator_scalar.h"
-#include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
-#include "interferometry/cudak/oskar_cudak_xyz_to_uvw.h"
 #include "interferometry/oskar_compute_baselines.h"
 #include "interferometry/oskar_xyz_to_uvw.h"
-
-//#include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
-//#include "math/cudak/oskar_cudak_mat_mul_cc.h"
-//#include "math/cudak/oskar_cudak_vec_mul_cr.h"
-//#include "math/cudak/oskar_cudak_vec_scale_rr.h"
-//#include "math/cudak/oskar_cudak_vec_set_c.h"
 
 #include "sky/oskar_cuda_horizon_clip.h"
 #include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
@@ -162,7 +154,8 @@ int oskar_interferometer1_scalar_d(
     // === Loop over number of visibility snapshots.
     for (unsigned j = 0; j < num_vis_dumps; ++j)
     {
-        printf("--> simulating visibility snapshot %i of %i ...\n", j+1, num_vis_dumps);
+        printf("--> simulating visibility snapshot %i of %i ...\n", j+1,
+                num_vis_dumps);
 
         // Start time for the visibility dump (in mjd utc)
         double t_vis_dump_start = obs_start_mjd_utc + (j * dt_vis_days);
@@ -184,10 +177,7 @@ int oskar_interferometer1_scalar_d(
                     &hd_sky_local);
 
             if (hd_sky_local.num_sources == 0)
-            {
                 fprintf(stderr, "WARNING: no sources above horizon! (this will fail!)\n");
-
-            }
 
             // Evaluate horizontal lm for the beam phase centre.
             double h_beam_l, h_beam_m, h_beam_n;
@@ -238,9 +228,10 @@ int oskar_interferometer1_scalar_d(
                 u, v, w);
     }
 
-
     // free memory
     oskar_free_device_telescope_d(&hd_telescope);
+    oskar_free_device_global_sky_d(&hd_sky_global);
+    oskar_free_device_local_sky_d(&hd_sky_local);
     free(station_u);
     free(station_v);
     free(station_w);
@@ -250,29 +241,22 @@ int oskar_interferometer1_scalar_d(
         cudaFree(hd_stations[i].antenna_y);
     }
     free(hd_stations);
-
-    oskar_free_device_global_sky_d(&hd_sky_global);
-    oskar_free_device_local_sky_d(&hd_sky_local);
-
     cudaFree(d_e_jones);
     cudaFree(d_weights_work);
-
     cudaFree(d_l);
     cudaFree(d_m);
     cudaFree(d_n);
-
     cudaFree(d_vis);
-
     cudaFree(d_work_uvw);
     cudaFree(d_work_k);
 
+    // Catch any CUDA errors and return
     cudaError_t error = cudaPeekAtLastError();
     if (error != cudaSuccess)
     {
         fprintf(stderr, "CUDA ERROR [%i] from oskar_interferometer1_scalar(): %s\n",
                 (int)error, cudaGetErrorString(error));
     }
-
     return (int)error;
 }
 

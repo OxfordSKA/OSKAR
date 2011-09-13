@@ -56,13 +56,13 @@ int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_weights_work,
         double2* d_e_jones)
 {
-    // === Initialise.
+    // Initialise.
     const int num_beams       = 1; // == 1 as this is a beam pattern!
     const int num_antennas    = hd_station->num_antennas;
     const double* d_antenna_x = hd_station->antenna_x;
     const double* d_antenna_y = hd_station->antenna_y;
 
-    // === Invoke kernel to compute unnormalised, geometric antenna weights.
+    // Invoke kernel to compute unnormalised, geometric antenna weights.
     int num_antennas_per_block = 256;
     dim3 block_dim(num_antennas_per_block, num_beams);  // (antennas, beams).
     dim3 grid_dim((num_antennas + block_dim.x - 1) / block_dim.x, 1);
@@ -75,12 +75,12 @@ int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
     cudaMemcpy(d_beam_l, &h_beam_l, sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(d_beam_m, &h_beam_m, sizeof(double), cudaMemcpyHostToDevice);
 
-    // === Generate dft weights.
+    // Generate dft weights.
     oskar_cudak_dftw_2d_seq_in_d<<<grid_dim, block_dim, shared_mem_size >>>
             (num_antennas, d_antenna_x, d_antenna_y, num_beams, d_beam_l,
                     d_beam_m, d_weights_work);
 
-    // === Evaluate beam pattern for each source.
+    // Evaluate beam pattern for each source.
     const int naMax = 432;    // Should be multiple of 16.
     const int bThd = 256;     // Beam pattern generator (source positions).
     int bBlk = 0;             // Number of thread blocks for beam pattern computed later.
@@ -91,18 +91,67 @@ int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
             d_weights_work, hd_sky->num_sources, hd_sky->hor_l, hd_sky->hor_m,
             naMax, d_e_jones);
 
-    // === Free device memory.
+    // Free device memory.
     cudaFree(d_beam_l);
     cudaFree(d_beam_m);
 
-    // === Check error code.
+    // Check error code.
     cudaDeviceSynchronize();
 
-    // === Return any CUDA error.
+    // Return any CUDA error.
     return cudaPeekAtLastError();
 }
 
+int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
+        const float h_beam_l, const float h_beam_m,
+        const oskar_SkyModelLocal_f* hd_sky, float2* d_weights_work,
+        float2* d_e_jones)
+{
+    // Initialise.
+      const int num_beams      = 1; // == 1 as this is a beam pattern!
+      const int num_antennas   = hd_station->num_antennas;
+      const float* d_antenna_x = hd_station->antenna_x;
+      const float* d_antenna_y = hd_station->antenna_y;
 
+      // Invoke kernel to compute unnormalised, geometric antenna weights.
+      int num_antennas_per_block = 256;
+      dim3 block_dim(num_antennas_per_block, num_beams);  // (antennas, beams).
+      dim3 grid_dim((num_antennas + block_dim.x - 1) / block_dim.x, 1);
+      size_t shared_mem_size = (block_dim.x + block_dim.y) * sizeof(float2);
+
+      // NOTE: maybe have version of weights generator passes by copy?
+      float *d_beam_l, *d_beam_m; // beam position direction cosines.
+      cudaMalloc(&d_beam_l, sizeof(float));
+      cudaMalloc(&d_beam_m, sizeof(float));
+      cudaMemcpy(d_beam_l, &h_beam_l, sizeof(float), cudaMemcpyHostToDevice);
+      cudaMemcpy(d_beam_m, &h_beam_m, sizeof(float), cudaMemcpyHostToDevice);
+
+      // Generate dft weights.
+      oskar_cudak_dftw_2d_seq_in_f<<<grid_dim, block_dim, shared_mem_size >>>
+              (num_antennas, d_antenna_x, d_antenna_y, num_beams, d_beam_l,
+                      d_beam_m, d_weights_work);
+
+      // Evaluate beam pattern for each source.
+      const int naMax = 432;    // Should be multiple of 16.
+      const int bThd = 256;     // Beam pattern generator (source positions).
+      int bBlk = 0;             // Number of thread blocks for beam pattern computed later.
+      bBlk = (hd_sky->num_sources + bThd - 1) / bThd;
+      shared_mem_size = 2 * naMax * sizeof(float2);
+      oskar_cudak_dftw_o2c_2d_f <<< bBlk, bThd, shared_mem_size >>>
+              (num_antennas, d_antenna_x, d_antenna_y,
+              d_weights_work, hd_sky->num_sources, hd_sky->hor_l, hd_sky->hor_m,
+              naMax, d_e_jones);
+
+      // Free device memory.
+      cudaFree(d_beam_l);
+      cudaFree(d_beam_m);
+
+      // Check error code.
+      cudaDeviceSynchronize();
+
+      // Return any CUDA error.
+      return cudaPeekAtLastError();
+}
 
 
 void oskar_evaluate_station_beams_d(const unsigned num_stations,
@@ -111,6 +160,7 @@ void oskar_evaluate_station_beams_d(const unsigned num_stations,
         const double h_beam_m, double2* d_weights_work,
         bool disable, bool identical_stations, double2* d_e_jones)
 {
+    // Station beam disabled.
     if (disable)
     {
         int num_threads = 128;
@@ -119,6 +169,7 @@ void oskar_evaluate_station_beams_d(const unsigned num_stations,
         oskar_cudak_vec_set_c_d <<< num_blocks, num_threads >>>
                 (values, make_double2(1.0, 0.0), d_e_jones);
     }
+    // All stations identical.
     else if (identical_stations)
     {
         double2 * d_e_jones_station0 = d_e_jones;
@@ -144,66 +195,6 @@ void oskar_evaluate_station_beams_d(const unsigned num_stations,
         }
     }
 }
-
-
-
-
-int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
-        const float h_beam_l, const float h_beam_m,
-        const oskar_SkyModelLocal_f* hd_sky, float2* d_weights_work,
-        float2* d_e_jones)
-{
-    // === Initialise.
-      const int num_beams      = 1; // == 1 as this is a beam pattern!
-      const int num_antennas   = hd_station->num_antennas;
-      const float* d_antenna_x = hd_station->antenna_x;
-      const float* d_antenna_y = hd_station->antenna_y;
-
-      // === Invoke kernel to compute unnormalised, geometric antenna weights.
-      int num_antennas_per_block = 256;
-      dim3 block_dim(num_antennas_per_block, num_beams);  // (antennas, beams).
-      dim3 grid_dim((num_antennas + block_dim.x - 1) / block_dim.x, 1);
-      size_t shared_mem_size = (block_dim.x + block_dim.y) * sizeof(float2);
-
-      // NOTE: maybe have version of weights generator passes by copy?
-      float *d_beam_l, *d_beam_m; // beam position direction cosines.
-      cudaMalloc(&d_beam_l, sizeof(float));
-      cudaMalloc(&d_beam_m, sizeof(float));
-      cudaMemcpy(d_beam_l, &h_beam_l, sizeof(float), cudaMemcpyHostToDevice);
-      cudaMemcpy(d_beam_m, &h_beam_m, sizeof(float), cudaMemcpyHostToDevice);
-
-      // === Generate dft weights.
-      oskar_cudak_dftw_2d_seq_in_f<<<grid_dim, block_dim, shared_mem_size >>>
-              (num_antennas, d_antenna_x, d_antenna_y, num_beams, d_beam_l,
-                      d_beam_m, d_weights_work);
-
-      // === Evaluate beam pattern for each source.
-      const int naMax = 432;    // Should be multiple of 16.
-      const int bThd = 256;     // Beam pattern generator (source positions).
-      int bBlk = 0;             // Number of thread blocks for beam pattern computed later.
-      bBlk = (hd_sky->num_sources + bThd - 1) / bThd;
-      shared_mem_size = 2 * naMax * sizeof(float2);
-      oskar_cudak_dftw_o2c_2d_f <<< bBlk, bThd, shared_mem_size >>>
-              (num_antennas, d_antenna_x, d_antenna_y,
-              d_weights_work, hd_sky->num_sources, hd_sky->hor_l, hd_sky->hor_m,
-              naMax, d_e_jones);
-
-      // === Free device memory.
-      cudaFree(d_beam_l);
-      cudaFree(d_beam_m);
-
-      // === Check error code.
-      cudaDeviceSynchronize();
-
-      // === Return any CUDA error.
-      return cudaPeekAtLastError();
-}
-
-
-
-
-
-
 
 
 void oskar_evaluate_station_beams_f(const unsigned num_stations,

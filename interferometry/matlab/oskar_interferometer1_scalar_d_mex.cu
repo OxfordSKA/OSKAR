@@ -1,9 +1,5 @@
 #include <mex.h>
 
-#include <vector>
-#include <cmath>
-#include <cstring>
-
 #include "interferometry/oskar_interferometer1_scalar.h"
 #include "interferometry/oskar_horizon_plane_to_itrs.h"
 
@@ -11,9 +7,9 @@
 #include "station/oskar_StationModel.h"
 #include "sky/oskar_SkyModel.h"
 
-#include <cstdio>
-#include <cmath>
-
+#include <math.h>
+#include <string.h>
+#include <stdio.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -36,7 +32,7 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
         mexPrintf("(telescope, stations, sky, ra0_rad, dec0_red, start_mjd_utc,"
                  "obs length days, num_vis_dumps, num_vis_ave, num_fringe_ave,"
                  "freq, bandwidth)");
-        mexErrMsgTxt("Three inputs required.");
+        mexErrMsgTxt("Twelve inputs required.");
     }
 
     // ==== Construct telescope model structure from MATLAB structure.

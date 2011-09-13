@@ -61,13 +61,8 @@ extern "C" {
  * Station aperture array geometry, described by the oskar_StationModel
  * structure array must also be specified in metres.
  *
- * See the OSKAR memo 1 for a more detailed description of the co-ordinate system
- * used.
- *
- * The visibility amplitudes and baseline coordinates are returned in arrays
- * which must be pre-allocated to a length:
- *      number of baselines x number of visibility dumps
- *
+ * See the OSKAR memo 1 for a more detailed description of the co-ordinate
+ * system used.
  *
  * @param[in]  telescope         Telescope model structure with station
  *                               co-ordinates in ITRS coordinates, in metres.
@@ -77,27 +72,25 @@ extern "C" {
  * @param[in]  ra0_rad           RA of the pointing phase centre, in radians.
  * @param[in]  dec0_rad          Declination of the pointing phase centre,
  *                               in radians.
- * @param[in]  start_mjd_utc     Start date of the observation in modified
- *                               Julian days UTC.
+ * @param[in]  obs_start_mjd_utc Start date of the observation, in modified
+ *                               Julian days (UTC).
  * @param[in]  obs_length_days   Observation length in days.
- * @param[in]  n_vis_dumps       Number of visibility dumps (made by the
- *                               coorelator) to make during the observation time.
- * @param[in]  n_vis_ave         Number of averages of the full visibility
+ * @param[in]  num_vis_dumps     Number of visibility dumps (made by the
+ *                               correlator) to make during the observation time.
+ * @param[in]  num_vis_ave       Number of averages of the full visibility
  *                               evaluation per visibility dump. Both
  *                               the interferometer phase and beam-pattern
  *                               (E-Jones) is updated for each evaluation.
- * @param[in]  n_fringe_ave      Number of averages per full visibility average
+ * @param[in]  num_fringe_ave    Number of averages per full visibility average
  *                               where only the interferometer phase is updated
  *                               (with a fixed beam-pattern / E-Jones)
  * @param[in]  frequency         Observation frequency, in Hz.
  * @param[in]  bandwidth         Observation channel bandwidth, in Hz.
  * @param[in]  disable_e_jones   Disable evaluation of station beam (i.e. set to 1)
- * @param[out] h_vis             Array of visibilities.
- * @param[out] h_u               Array of baseline u coordinates, in metres.
- * @param[out] h_v               Array of baseline v coordinates, in metres.
- * @param[out] h_w               Array of baseline w coordinates, in metres.
+ * @param[out] vis               Structure holding visibility amplitudes and
+ *                               baseline co-ordinates.
  *
- * @return
+ * @return CUDA error code.
  */
 DllExport
 int oskar_interferometer1_scalar_d(
@@ -118,6 +111,12 @@ int oskar_interferometer1_scalar_d(
 );
 
 
+
+
+/**
+ * @brief
+ * Single precision implementation of above function.
+ */
 DllExport
 int oskar_interferometer1_scalar_f(
         const oskar_TelescopeModel_f telescope,

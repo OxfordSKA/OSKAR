@@ -14,13 +14,15 @@ void mexFunction(int /*num_outputs*/, mxArray** output, int num_inputs,
     if (num_inputs != 0)
         mexErrMsgTxt("ERROR: Not expecting any arguments.");
 
-    mwSize n_dims = 1;
+    mwSize n_dims  = 1;
     mwSize dims[1] = {1};
     output[0] = mxCreateNumericArray(n_dims, dims, mxINT32_CLASS, mxREAL);
     cudaError_t* error = (cudaError_t*) mxGetPr(output[0]);
+
     *error = cudaSuccess;
+    cudaDeviceSynchronize();
     *error = cudaPeekAtLastError();
-    *error = (cudaError_t)3;
+
     const char* error_string = cudaGetErrorString(*error);
     if (*error != cudaSuccess)
         mexPrintf("CUDA ERROR[%i]: %s.\n", (int)*error, error_string);

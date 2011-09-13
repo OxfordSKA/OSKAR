@@ -5,13 +5,10 @@
 # ==== Matlab mex funtions
 if (MATLAB_FOUND)
 
-    #message("======== ${CUDA_INCLUDE_DIRS}")
     include_directories(${CUDA_INCLUDE_DIRS})
-  
+
     # ==== Broken power law.
     cuda_add_library(oskar_random_bpl SHARED oskar_random_bpl.cpp mexFunction.def)
-    #message("========== ${MATLAB_LIBRARIES}")
-    #message("========== ${MATLAB_CXX_FLAGS}")
     target_link_libraries(oskar_random_bpl oskar ${MATLAB_LIBRARIES})
     set_target_properties(oskar_random_bpl PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}"

@@ -47,41 +47,45 @@ extern "C" {
  * This function computes the azimuth and elevation of the specified points
  * in the horizontal coordinate system.
  *
- * @param[in] n      The number of points.
- * @param[in] ra     The input Right Ascensions in radians.
- * @param[in] dec    The input Declinations in radians.
- * @param[in] lst    The current local sidereal time in radians.
- * @param[in] lat    The geographic latitude of the observer.
- * @param[out] az    The azimuths in radians.
- * @param[out] el    The elevations in radians.
- * @param[in] work   Work array of length n.
+ * NOTE: all pointers are device pointers!
+ *
+ * @param[in]  n       The number of points.
+ * @param[in]  d_ra    The input Right Ascensions, in radians.
+ * @param[in]  d_dec   The input Declinations, in radians.
+ * @param[in]  lst     The current local sidereal time, in radians.
+ * @param[in]  lat     The geographic latitude of the observer.
+ * @param[in]  d_work  Work array of length n.
+ * @param[out] d_az    The azimuths, in radians.
+ * @param[out] d_el    The elevations, in radians.
  */
 DllExport
-int oskar_cuda_ra_dec_to_az_el_f(int n, const float* ra,
-        const float* dec, float lst, float lat, float* az, float* el,
-        float* work);
+int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
+        const float* d_dec, float lst, float lat, float* d_work,
+        float* d_az, float* d_el);
 
 /**
  * @brief
  * Equatorial to horizontal coordinates (double precision).
  *
+ * NOTE: all pointers are device pointers!
+ *
  * @details
  * This function computes the azimuth and elevation of the specified points
  * in the horizontal coordinate system.
  *
- * @param[in] n      The number of points.
- * @param[in] ra     The input Right Ascensions in radians.
- * @param[in] dec    The input Declinations in radians.
- * @param[in] lst    The current local sidereal time in radians.
- * @param[in] lat    The geographic latitude of the observer.
- * @param[out] az    The azimuths in radians.
- * @param[out] el    The elevations in radians.
- * @param[in] work   Work array of length n.
+ * @param[in]  n       The number of points.
+ * @param[in]  d_ra    The input Right Ascensions, in radians.
+ * @param[in]  d_dec   The input Declinations, in radians.
+ * @param[in]  lst     The current local sidereal time, in radians.
+ * @param[in]  lat     The geographic latitude of the observer.
+ * @param[in]  d_work  Work array of length n.
+ * @param[out] d_az    The azimuths, in radians.
+ * @param[out] d_el    The elevations, in radians.
  */
 DllExport
-int oskar_cuda_ra_dec_to_az_el_d(int n, const double* ra,
-        const double* dec, double lst, double lat, double* az, double* el,
-        double* work);
+int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
+        const double* d_dec, double lst, double lat, double* d_work,
+        double* d_az, double* d_el);
 
 #ifdef __cplusplus
 }

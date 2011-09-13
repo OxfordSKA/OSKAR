@@ -79,7 +79,35 @@ int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_weights_work,
         double2* d_e_jones);
 
+/**
+ * @brief
+ * Single precision version of function above.
+ */
+DllExport
+int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
+        const float h_beam_l, const float h_beam_m,
+        const oskar_SkyModelLocal_f* hd_sky, float2* d_weights_work,
+        float2* d_e_jones);
 
+/**
+ * @brief
+ * Evaluates the station beam response for a local sky model for a number of
+ * stations.
+ *
+ * @param[in]  num_stations          The number of stations evaluated.
+ * @param[in]  hd_stations           Array of structures holding station coordinates.
+ * @param[in]  hd_sky                Structure holding the local sky model.
+ * @param[in]  h_beam_l              Beam phase centre coordinate in horizontal
+ *                                   lm units.
+ * @param[in]  h_beam_m              Beam phase centre coordinate in horizontal
+ *                                   lm units.
+ * @param[in]  d_weights_work        Work buffer for beamforming weights.
+ * @param[in]  disable               Flag to disable evaulation of the station
+ *                                   beams.
+ * @param[in]  identical_stations    Flag to indicate that all stations share
+ *                                   identical layouts.
+ * @param[out] d_e_jones             Array of beam pattern values.
+ */
 DllExport
 void oskar_evaluate_station_beams_d(const unsigned num_stations,
         const oskar_StationModel_d* hd_stations,
@@ -87,12 +115,10 @@ void oskar_evaluate_station_beams_d(const unsigned num_stations,
         const double h_beam_m, double2* d_weights_work,
         bool disable, bool identical_stations, double2* d_e_jones);
 
-DllExport
-int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
-        const float h_beam_l, const float h_beam_m,
-        const oskar_SkyModelLocal_f* hd_sky, float2* d_weights_work,
-        float2* d_e_jones);
-
+/**
+ * @brief
+ * Single precision version of function above.
+ */
 DllExport
 void oskar_evaluate_station_beams_f(const unsigned num_stations,
         const oskar_StationModel_f* hd_stations,

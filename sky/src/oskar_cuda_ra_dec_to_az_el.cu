@@ -35,47 +35,41 @@ extern "C" {
 #endif
 
 // Single precision.
-
-int oskar_cuda_ra_dec_to_az_el_f(int n, const float* ra,
-        const float* dec, float lst, float lat, float* az, float* el,
-        float* work)
+int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
+        const float* d_dec, float lst, float lat, float* d_work,
+        float* d_az, float* d_el)
 {
     // Determine horizontal coordinates.
     const int n_thd = 512;
     const int n_blk = (n + n_thd - 1) / n_thd;
     float cosLat = cosf(lat);
     float sinLat = sinf(lat);
-    oskar_cudak_ra_dec_to_hor_lmn_f <<< n_blk, n_thd >>> (n, ra, dec,
-            cosLat, sinLat, lst, az, el, work);
-    oskar_cudak_hor_lmn_to_az_el_f <<< n_blk, n_thd >>> (n, az, el, work,
-            az, el);
+    oskar_cudak_ra_dec_to_hor_lmn_f <<< n_blk, n_thd >>> (n, d_ra, d_dec,
+            cosLat, sinLat, lst, d_az, d_el, d_work);
+    oskar_cudak_hor_lmn_to_az_el_f <<< n_blk, n_thd >>> (n, d_az, d_el, d_work,
+            d_az, d_el);
     cudaDeviceSynchronize();
     cudaError_t errCuda = cudaPeekAtLastError();
-    if (errCuda != cudaSuccess) return errCuda;
-
-    return 0;
+    return (int)errCuda;
 }
 
 // Double precision.
-
-int oskar_cuda_ra_dec_to_az_el_d(int n, const double* ra,
-        const double* dec, double lst, double lat, double* az, double* el,
-        double* work)
+int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
+        const double* d_dec, double lst, double lat, double* d_work,
+        double* d_az, double* d_el)
 {
     // Determine horizontal coordinates.
     const int n_thd = 512;
     const int n_blk = (n + n_thd - 1) / n_thd;
     float cosLat = cos(lat);
     float sinLat = sin(lat);
-    oskar_cudak_ra_dec_to_hor_lmn_d <<< n_blk, n_thd >>> (n, ra, dec,
-            cosLat, sinLat, lst, az, el, work);
-    oskar_cudak_hor_lmn_to_az_el_d <<< n_blk, n_thd >>> (n, az, el, work,
-            az, el);
+    oskar_cudak_ra_dec_to_hor_lmn_d <<< n_blk, n_thd >>> (n, d_ra, d_dec,
+            cosLat, sinLat, lst, d_az, d_el, d_work);
+    oskar_cudak_hor_lmn_to_az_el_d <<< n_blk, n_thd >>> (n, d_az, d_el, d_work,
+            d_az, d_el);
     cudaDeviceSynchronize();
     cudaError_t errCuda = cudaPeekAtLastError();
-    if (errCuda != cudaSuccess) return errCuda;
-
-    return 0;
+    return (int)errCuda;
 }
 
 #ifdef __cplusplus
