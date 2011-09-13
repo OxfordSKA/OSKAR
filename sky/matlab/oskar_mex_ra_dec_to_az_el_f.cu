@@ -20,51 +20,19 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
     float lst = (float) mxGetScalar(input[2]);
     float lat = (float) mxGetScalar(input[3]);
 
-//    mexPrintf("- ra  = %f\n", ra);
-//    mexPrintf("- dec = %f\n", dec);
-//    mexPrintf("- lst = %f\n", lst);
-//    mexPrintf("- lat = %f\n", lat);
-
-    int n = 1;
     mwSize n_dims  = 1;
-    mwSize dims[1] = {n};
+    mwSize dims[1] = {1};
     output[0] = mxCreateNumericArray(n_dims, dims, mxDOUBLE_CLASS, mxREAL);
     output[1] = mxCreateNumericArray(n_dims, dims, mxDOUBLE_CLASS, mxREAL);
     double* az = (double*) mxGetPr(output[0]);
     double* el = (double*) mxGetPr(output[1]);
 
-    size_t mem_size = n * sizeof(float);
-    float* d_ra;
-    cudaMalloc((void**)&d_ra, mem_size);
-    cudaMemcpy(d_ra, &ra, mem_size, cudaMemcpyHostToDevice);
-    float* d_dec;
-    cudaMalloc((void**)&d_dec, mem_size);
-    cudaMemcpy(d_dec, &dec, mem_size, cudaMemcpyHostToDevice);
-    float* d_az;
-    cudaMalloc((void**)&d_az, mem_size);
-    float* d_el;
-    cudaMalloc((void**)&d_el, mem_size);
-    float* d_work;
-    cudaMalloc((void**)&d_work, mem_size);
-
     float az_temp, el_temp;
     int error = (int)cudaSuccess;
-    error = oskar_cuda_ra_dec_to_az_el_f(n, d_ra, d_dec, lst, lat, d_work,
-            d_az, d_el);
-//    mexPrintf("error code = %i\n", error);
-    cudaMemcpy(&az_temp, d_az, mem_size, cudaMemcpyDeviceToHost);
-    cudaMemcpy(&el_temp, d_el, mem_size, cudaMemcpyDeviceToHost);
+    error = oskar_ra_dec_to_az_el_f(ra, dec, lst, lat, &az_temp, &el_temp);
 
-    *az = (double)az_temp;
-    *el = (double)el_temp;
-//    mexPrintf("- az = %f\n", *az);
-//    mexPrintf("- el = %f\n", *el);
-
-    cudaFree(d_ra);
-    cudaFree(d_dec);
-    cudaFree(d_az);
-    cudaFree(d_el);
-    cudaFree(d_work);
+    *az = az_temp;
+    *el = el_temp;
 
     if (error != cudaSuccess)
     {

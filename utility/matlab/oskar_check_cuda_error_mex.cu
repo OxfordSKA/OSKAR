@@ -25,5 +25,7 @@ void mexFunction(int /*num_outputs*/, mxArray** output, int num_inputs,
 
     const char* error_string = cudaGetErrorString(*error);
     if (*error != cudaSuccess)
+    {
         mexPrintf("CUDA ERROR[%i]: %s.\n", (int)*error, error_string);
+    }
 }

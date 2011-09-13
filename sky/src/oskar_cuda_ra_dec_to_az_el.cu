@@ -54,6 +54,32 @@ int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
     return (int)cudaPeekAtLastError();
 }
 
+
+int oskar_ra_dec_to_az_el_f(const float ra, const float dec, const float lst,
+        const float lat, float* az, float* el)
+{
+    const size_t mem_size = sizeof(float);
+    float *d_ra, *d_dec, *d_az, *d_el, *d_work;
+    cudaMalloc((void**)&d_ra,   mem_size);
+    cudaMalloc((void**)&d_dec,  mem_size);
+    cudaMalloc((void**)&d_work, mem_size);
+    cudaMalloc((void**)&d_az,   mem_size);
+    cudaMalloc((void**)&d_el,   mem_size);
+    cudaMemcpy(d_ra,  &ra,  mem_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_dec, &dec, mem_size, cudaMemcpyHostToDevice);
+    oskar_cuda_ra_dec_to_az_el_f(1, d_ra, d_dec, lst, lat, d_work, d_az, d_el);
+    cudaMemcpy(az, d_az, mem_size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(el, d_el, mem_size, cudaMemcpyDeviceToHost);
+    cudaFree(d_ra);
+    cudaFree(d_dec);
+    cudaFree(d_work);
+    cudaFree(d_az);
+    cudaFree(d_el);
+    return (int)cudaPeekAtLastError();
+}
+
+
+
 // Double precision.
 int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
         const double* d_dec, double lst, double lat, double* d_work,
@@ -71,6 +97,31 @@ int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
     cudaDeviceSynchronize();
     return (int)cudaPeekAtLastError();
 }
+
+
+int oskar_ra_dec_to_az_el_d(const double ra, const double dec, const double lst,
+        const double lat, double* az, double* el)
+{
+    const size_t mem_size = sizeof(double);
+    double *d_ra, *d_dec, *d_az, *d_el, *d_work;
+    cudaMalloc((void**)&d_ra,   mem_size);
+    cudaMalloc((void**)&d_dec,  mem_size);
+    cudaMalloc((void**)&d_work, mem_size);
+    cudaMalloc((void**)&d_az,   mem_size);
+    cudaMalloc((void**)&d_el,   mem_size);
+    cudaMemcpy(d_ra,  &ra,  mem_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_dec, &dec, mem_size, cudaMemcpyHostToDevice);
+    oskar_cuda_ra_dec_to_az_el_d(1, d_ra, d_dec, lst, lat, d_work, d_az, d_el);
+    cudaMemcpy(az, d_az, mem_size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(el, d_el, mem_size, cudaMemcpyDeviceToHost);
+    cudaFree(d_ra);
+    cudaFree(d_dec);
+    cudaFree(d_work);
+    cudaFree(d_az);
+    cudaFree(d_el);
+    return (int)cudaPeekAtLastError();
+}
+
 
 #ifdef __cplusplus
 }

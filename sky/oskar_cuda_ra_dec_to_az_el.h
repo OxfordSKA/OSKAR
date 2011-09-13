@@ -63,6 +63,11 @@ int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
         const float* d_dec, float lst, float lat, float* d_work,
         float* d_az, float* d_el);
 
+
+DllExport
+int oskar_ra_dec_to_az_el_f(const float ra, const float dec, const float lst,
+        const float lat, float* az, float* el);
+
 /**
  * @brief
  * Equatorial to horizontal coordinates (double precision).
@@ -86,6 +91,11 @@ DllExport
 int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
         const double* d_dec, double lst, double lat, double* d_work,
         double* d_az, double* d_el);
+
+DllExport
+int oskar_ra_dec_to_az_el_d(const double ra, const double dec, const double lst,
+        const double lat, double* az, double* el);
+
 
 #ifdef __cplusplus
 }
