@@ -33,7 +33,6 @@ extern "C" {
 #endif
 
 // Double precision.
-
 double oskar_date_time_to_mjd_d(int year, int month, int day,
         double day_fraction)
 {
