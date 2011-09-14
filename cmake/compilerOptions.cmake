@@ -15,12 +15,12 @@ else ()
 endif()
 message("*****************************************************************")
 
-set(BUILD_SHARED_LIBS true)
+set(BUILD_SHARED_LIBS ON)
 
 # === GNU C++ compiler.
 if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    set(CMAKE_C_FLAGS_RELEASE "-O3 -std=c99 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_C_FLAGS_RELEASE "-O3 -fPIC -std=c99 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
 #    add_definitions(-Wall -Wextra -pedantic -std=c++0x)
     add_definitions(-Wall -Wextra)
     add_definitions(-Wcast-align)
@@ -34,7 +34,7 @@ if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
 
 # === Intel compiler.
 elseif (NOT WIN32)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     add_definitions(-Wall -Wcheck)
     add_definitions(-wd1418) # External function with no prior declaration.
     add_definitions(-wd1419) # External declaration in primary source file.
@@ -78,6 +78,7 @@ if (CUDA_FOUND)
             list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
         endif ()
         list(APPEND CUDA_NVCC_FLAGS -O2;)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-fPIC;)
         #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
 
         #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-dlcm=cg)
@@ -88,6 +89,7 @@ if (CUDA_FOUND)
         endif ()
         list(APPEND CUDA_NVCC_FLAGS -g;)
         list(APPEND CUDA_NVCC_FLAGS -O0;)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-fPIC;)
         #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v')
     endif ()
 

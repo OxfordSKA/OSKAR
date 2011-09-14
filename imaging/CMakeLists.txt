@@ -16,7 +16,7 @@ set(imaging_SRC
 #set(imaging_SRC "${imaging_SRC}" PARENT_SCOPE)
 
 # ==== Build the oskar-lib imaging module.
-add_library(oskar_imaging SHARED ${imaging_SRC})
+add_library(oskar_imaging ${imaging_SRC})
 set_target_properties(oskar_imaging PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")

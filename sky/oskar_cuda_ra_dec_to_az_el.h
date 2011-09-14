@@ -64,6 +64,9 @@ int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
         float* d_az, float* d_el);
 
 
+/**
+ * Wrapper function to oskar_cuda_ra_dec_to_az_el_f()
+ */
 DllExport
 int oskar_ra_dec_to_az_el_f(const float ra, const float dec, const float lst,
         const float lat, float* az, float* el);
@@ -92,6 +95,9 @@ int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
         const double* d_dec, double lst, double lat, double* d_work,
         double* d_az, double* d_el);
 
+/**
+ * Wrapper function to oskar_cuda_ra_dec_to_az_el_d()
+ */
 DllExport
 int oskar_ra_dec_to_az_el_d(const double ra, const double dec, const double lst,
         const double lat, double* az, double* el);
