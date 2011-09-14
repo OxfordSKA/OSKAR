@@ -31,6 +31,7 @@
 #include "math/cudak/oskar_cudak_jones_mul_mat2_c2.h"
 #include "math/cudak/oskar_cudak_jones_mul_mat2.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_cuda_device_info.h"
 
 #include <cublas.h>
 
@@ -143,6 +144,9 @@ void CudaJonesMultiplyTest::test_mat2_f()
  */
 void CudaJonesMultiplyTest::test_mat2_d()
 {
+    if (!oskar_cuda_device_supports_double(0))
+        return;
+
     // Size of matrix arrays.
     int n = 500000;
     double4c* h_m1 = (double4c*)malloc(n * sizeof(double4c));

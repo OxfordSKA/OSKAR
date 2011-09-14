@@ -29,8 +29,11 @@
 #include "interferometry/test/CudaCorrelatorTest.h"
 #include "interferometry/cudak/oskar_cudak_correlator.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_cuda_device_info.h"
+
 #include <cmath>
 #include <cstdlib>
+#include <cstdio>
 #include <vector>
 
 #define TIMER_ENABLE 1
@@ -100,9 +103,24 @@ void CudaCorrelatorTest::test_kernel_float()
     cudaMemcpy(d_v, &h_v[0], na * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(d_jones, &h_jones[0], ns * na * sizeof(float4c),
             cudaMemcpyHostToDevice);
+    int err = cudaPeekAtLastError();
+    if (err)
+    {
+        fprintf(stderr, "CUDA ERROR[%d]: %s.\n", err,
+                cudaGetErrorString((cudaError_t)err));
+        CPPUNIT_FAIL("CUDA Error allocating memory.");
+    }
 
     // Call the correlator kernel.
-    dim3 vThd(256, 1); // Antennas, antennas.
+    int cu_arch_major, cu_arch_minor;
+    oskar_get_cuda_arch(0, &cu_arch_major, &cu_arch_minor);
+    int num_threads = 0;
+    if (cu_arch_major < 2 && cu_arch_minor < 3)
+        num_threads = 128;
+    else
+        num_threads = 256;
+
+    dim3 vThd(num_threads, 1); // Antennas, antennas.
     dim3 vBlk(na, na);
     size_t vsMem = vThd.x * sizeof(float4c);
     TIMER_START
@@ -110,11 +128,12 @@ void CudaCorrelatorTest::test_kernel_float()
             d_I, d_Q, d_U, d_V, d_u, d_v, d_l, d_m, lambda_bandwidth, d_vis);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished correlator kernel (float), %d sources", ns)
-    int err = cudaPeekAtLastError();
+    err = cudaPeekAtLastError();
     if (err)
     {
-        printf("CUDA Error, code %d\n", err);
-        CPPUNIT_FAIL("CUDA Error");
+        fprintf(stderr, "CUDA ERROR[%d]: %s.\n", err,
+                cudaGetErrorString((cudaError_t)err));
+        CPPUNIT_FAIL("CUDA Error from oskar_cudak_correlator_f().");
     }
 
     // Copy memory back to host.
@@ -133,7 +152,7 @@ void CudaCorrelatorTest::test_kernel_float()
     cudaFree(d_vis);
 
     // Check contents of memory.
-
+    // TODO?
 }
 
 /**
@@ -142,6 +161,9 @@ void CudaCorrelatorTest::test_kernel_float()
  */
 void CudaCorrelatorTest::test_kernel_double()
 {
+    if (!oskar_cuda_device_supports_double(0))
+        return;
+
     int ns = 50000;
     int na = 25;
     int nb = na * (na - 1) / 2;
@@ -213,7 +235,8 @@ void CudaCorrelatorTest::test_kernel_double()
     int err = cudaPeekAtLastError();
     if (err)
     {
-        printf("CUDA Error, code %d\n", err);
+        fprintf(stderr, "CUDA ERROR[%d]: %s.\n", err,
+                cudaGetErrorString((cudaError_t)err));
         CPPUNIT_FAIL("CUDA Error");
     }
 
