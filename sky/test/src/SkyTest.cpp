@@ -31,8 +31,8 @@
 #include "sky/oskar_angles_from_lm.h"
 #include "sky/oskar_rotate_sources.h"
 
-#include "sky/filter_sources_by_radius.h"
-#include "sky/generate_random_sources.h"
+#include "sky/oskar_filter_sources_by_radius.h"
+#include "sky/oskar_generate_random_sources.h"
 
 #include <vector>
 #include <cstdlib>

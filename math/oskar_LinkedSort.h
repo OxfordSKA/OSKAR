@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_LINKED_SORT_H_
-#define OSKAR_SKY_LINKED_SORT_H_
+#ifndef OSKAR_MATH_LINKED_SORT_H_
+#define OSKAR_MATH_LINKED_SORT_H_
 
 /**
  * @file oskar_LinkedSort.h
@@ -143,4 +143,4 @@ bool oskar_LinkedSort::_compare(const Pair<T>& l, const Pair<T>& r)
     return l.value < r.value;
 }
 
-#endif // OSKAR_SKY_LINKED_SORT_H_
+#endif // OSKAR_MATH_LINKED_SORT_H_

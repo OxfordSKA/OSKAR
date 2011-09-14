@@ -47,9 +47,9 @@ extern "C" {
  * This function converts MJD(UT1) to the Local Apparent Sidereal Time.
  *
  * @param[in] mjd  The MJD(UT1).
- * @param[in] lon  The site longitude (east-positive) in radians.
+ * @param[in] lon  The site longitude (east-positive), in radians.
  *
- * @return The Local Apparent Sidereal Time in radians.
+ * @return The Local Apparent Sidereal Time, in radians.
  */
 DllExport
 double oskar_mjd_to_last_fast_d(double mjd, double lon);

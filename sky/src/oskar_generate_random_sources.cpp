@@ -1,4 +1,4 @@
-#include "sky/generate_random_sources.h"
+#include "sky/oskar_generate_random_sources.h"
 
 #include <cstdlib>
 #include <cmath>

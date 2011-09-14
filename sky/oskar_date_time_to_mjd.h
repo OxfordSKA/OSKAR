@@ -45,6 +45,7 @@ extern "C" {
  *
  * @details
  * This function converts a UTC date and time into a Modified Julian Date.
+ * (MJD = JD - 2400000.5)
  *
  * @param[in] year          The UTC year.
  * @param[in] month         The UTC month.

@@ -9,9 +9,9 @@ set(sky_SRC
     src/oskar_angles_from_lm.c
     src/oskar_rotate_sources.cpp
 
-    src/filter_sources_by_flux.cpp
-    src/filter_sources_by_radius.cpp
-    src/generate_random_sources.cpp
+    src/oskar_filter_sources_by_flux.cpp
+    src/oskar_filter_sources_by_radius.cpp
+    src/oskar_generate_random_sources.cpp
     src/oskar_cuda_compute_local_sky.c
     src/oskar_cuda_horizon_clip.cu
     src/oskar_cuda_ra_dec_to_az_el.cu

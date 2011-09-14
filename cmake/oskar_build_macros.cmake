@@ -9,7 +9,7 @@
 # Macro to build and install oskar mex functions.
 macro(oskar_mex name source)
 
-    message("= INFO: Building mex function: ${name} (${source})")
+    #message("= INFO: Building mex function: ${name} (${source})")
 
     # TODO: Add script to find MATLAB and MATLAB_FOUND guard?
     # TODO: Add critical fail on matlab not found.
@@ -20,12 +20,12 @@ macro(oskar_mex name source)
     get_filename_component(ext ${source} EXT)
     if (${ext} STREQUAL ".cpp" OR ${ext} STREQUAL "*.c")
         add_library(${name} SHARED ${source} mex_function.def)
-    elseif (${ext} STREQUAL ".cu")  
+    elseif (${ext} STREQUAL ".cu")
         cuda_add_library(${name} SHARED ${source} mex_function.def)
     else ()
-        message(CRITICAL "OSKAR_MEX: UNRECOGNISED SOURCE FILE EXTENSION!")  
+        message(CRITICAL "OSKAR_MEX: UNRECOGNISED SOURCE FILE EXTENSION!")
     endif ()
-    
+
     target_link_libraries(${name} oskar ${MATLAB_LIBRARIES})
     set_target_properties(${name} PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}"

@@ -2,11 +2,6 @@
 
 #include "sky/oskar_cuda_ra_dec_to_az_el.h"
 
-#include <math.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
         const mxArray ** input)
 {
