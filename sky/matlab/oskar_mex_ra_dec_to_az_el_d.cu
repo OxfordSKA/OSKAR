@@ -5,7 +5,7 @@
 void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
         const mxArray ** input)
 {
-    cudaDeviceReset();
+//    cudaDeviceReset();
 
     // Parse Inputs.
     if (num_inputs != 4)

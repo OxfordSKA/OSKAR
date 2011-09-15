@@ -5,6 +5,8 @@
 void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
         const mxArray ** input)
 {
+//    cudaDeviceReset();
+
     // Parse Inputs.
     if (num_inputs != 4)
         mexErrMsgTxt("Four inputs required ==> (ra_rad, dec_rad, lst_rad, lat_rad)");

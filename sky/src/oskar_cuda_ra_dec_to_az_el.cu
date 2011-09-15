@@ -31,6 +31,7 @@
 #include "sky/cudak/oskar_cudak_hor_lmn_to_az_el.h"
 
 #include "math.h"
+#include "stdio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -102,13 +103,14 @@ int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
 int oskar_ra_dec_to_az_el_d(const double ra, const double dec, const double lst,
         const double lat, double* az, double* el)
 {
-    const size_t mem_size = sizeof(double);
+    const size_t mem_size = sizeof(double) * 100;
     double *d_ra, *d_dec, *d_az, *d_el, *d_work;
     cudaMalloc((void**)&d_ra,   mem_size);
     cudaMalloc((void**)&d_dec,  mem_size);
     cudaMalloc((void**)&d_work, mem_size);
     cudaMalloc((void**)&d_az,   mem_size);
     cudaMalloc((void**)&d_el,   mem_size);
+    printf("%i\n", (int)cudaPeekAtLastError());
     cudaMemcpy(d_ra,  &ra,  mem_size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_dec, &dec, mem_size, cudaMemcpyHostToDevice);
     oskar_cuda_ra_dec_to_az_el_d(1, d_ra, d_dec, lst, lat, d_work, d_az, d_el);

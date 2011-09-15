@@ -138,3 +138,24 @@ void EquatorialToHorizontalTest::test_last()
 //    CPPUNIT_ASSERT_DOUBLES_EQUAL(104.53, a * 180.0 / M_PI, 0.01);
 //    CPPUNIT_ASSERT_DOUBLES_EQUAL(67.69,  e * 180.0 / M_PI, 0.01);
 }
+
+
+
+void EquatorialToHorizontalTest::test_wrapper()
+{
+    double ra = 0, dec = 0, lst = 0, lat = 0, az = 0, el = 0;
+    int error = 0;
+    for (int i = 0; i < 100; ++i)
+    {
+        printf("--- %i\n", i);
+        error = oskar_ra_dec_to_az_el_d(ra, dec, lst, lat, &az, &el);
+        //if (i%1000 == 0)
+        //    printf("%i\n", i);
+        if (error != cudaSuccess)
+        {
+            printf("eeek! %i error = %i\n", i, error);
+            break;
+        }
+    }
+    printf("done\n");
+}
