@@ -29,7 +29,7 @@ macro(oskar_mex name source)
     target_link_libraries(${name} oskar ${MATLAB_LIBRARIES})
     set_target_properties(${name} PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}"
-        INSTALL_RPATH ${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE
         COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
         LINK_FLAGS ${MATLAB_CXX_FLAGS})
