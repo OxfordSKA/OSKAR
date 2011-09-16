@@ -67,8 +67,15 @@ class oskar_Settings
         void set_disable_station_beam(const bool value)
         { _disable_station_beam = value; }
 
-        double frequency() const { return _frequency; }
-        void set_frequency(const double value) { _frequency = value; }
+
+        double frequency(const unsigned channel)
+        { return _start_frequency + channel * _frequency_inc; }
+        double start_frequency() const { return _start_frequency; }
+        void set_start_frequency(const double value) { _start_frequency = value; }
+        unsigned num_channels() const { return _num_channels; }
+        void set_num_channels(const unsigned value) { _num_channels = value; }
+        double frequency_inc() const { return _frequency_inc; }
+        void set_frequency_inc(const double value) { _frequency_inc = value; }
         double channel_bandwidth() const { return _channel_bandwidth; }
         void set_channel_bandwidth(const double value) { _channel_bandwidth = value; }
         double ra0_deg() const { return _ra0_deg; }
@@ -77,7 +84,6 @@ class oskar_Settings
         void set_dec0_deg(const double value) { _dec0_deg = value; }
         double ra0_rad() const { return _ra0_deg * deg2rad; }
         double dec0_rad() const { return _dec0_deg * deg2rad; }
-
         double obs_length_sec() const { return _obs_length_sec; }
         void set_obs_length_sec(const double value) { _obs_length_sec = value; }
         double obs_length_days() const
@@ -92,8 +98,19 @@ class oskar_Settings
         unsigned num_fringe_ave() const { return _num_fringe_ave; }
         void set_num_fringe_ave(const unsigned value) { _num_fringe_ave = value; }
 
+        bool double_precision() { return _prec_double; }
+
         QString output_file() const { return _output_file; }
         void set_output_file(const QString& value) { _output_file = value; }
+
+        double fov_deg() const { return _fov_deg; }
+        void set_fov_deg(const double value) { r_fov_deg = value; }
+        unsigned image_size() const { return _image_size; }
+        void set_image_size(const unsigned value) { _image_size = value; }
+        bool image_snapshots() const { return _image_snapshots; }
+        void set_image_snapshots(const bool value) { _image_snapshots = value; }
+        QString image_filename() const { return _image_filename; }
+        void set_image_filename(const QString& value)  { _image_filename = value; }
 
     private:
         QString _filename;
@@ -107,7 +124,9 @@ class oskar_Settings
         QString _station_dir;
         bool _disable_station_beam;
 
-        double _frequency;
+        double _start_frequency;
+        unsigned _num_channels;
+        double _frequency_inc;
         double _channel_bandwidth;
         double _ra0_deg;
         double _dec0_deg;
@@ -118,7 +137,14 @@ class oskar_Settings
         unsigned _num_vis_ave;
         unsigned _num_fringe_ave;
 
+        bool _prec_double;
+
         QString _output_file;
+
+        double _fov_deg;
+        unsigned _image_size;
+        bool _image_snapshots;
+        QString _image_filename;
 };
 
 #endif // OSKAR_SETTINGS_H_

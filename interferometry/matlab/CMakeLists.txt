@@ -5,6 +5,6 @@
 # ==== Matlab mex funtions
 if (MATLAB_FOUND)
     include(oskar_build_macros)
-    oskar_mex(oskar_interferometer1_scalar_d oskar_interferometer1_scalar_d_mex.cpp)   
+    oskar_mex(oskar_interferometer1_scalar_d oskar_mex_interferometer1_scalar_d.cpp)
 endif (MATLAB_FOUND)
 

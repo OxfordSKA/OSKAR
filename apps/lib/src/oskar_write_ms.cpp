@@ -76,7 +76,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
     double mjd_start = settings->obs_start_mjd_utc();
     double ra0_rad   = settings->ra0_rad();
     double dec0_rad  = settings->dec0_rad();
-    double frequency = settings->frequency();
+    double frequency = settings->start_frequency();
 
     // Load telescope model to get station/antenna positions.
     oskar_TelescopeModel_d telescope;

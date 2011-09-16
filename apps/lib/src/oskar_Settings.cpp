@@ -73,7 +73,9 @@ int oskar_Settings::load(const QString& filename)
     _station_dir       = settings.value("station/station_directory").toString();
     _disable_station_beam = settings.value("station/disable_station_beam").toBool();
 
-    _frequency         = settings.value("observation/frequency").toDouble();
+    _start_frequency   = settings.value("observation/start_frequency").toDouble();
+    _num_channels      = settings.value("observation/num_channels").toUInt();
+    _frequency_inc     = settings.value("observation/frequency_inc").toDouble();
     _channel_bandwidth = settings.value("observation/channel_bandwidth").toDouble();
     _ra0_deg           = settings.value("observation/phase_centre_ra_deg").toDouble();
     _dec0_deg          = settings.value("observation/phase_centre_dec_deg").toDouble();
@@ -83,6 +85,13 @@ int oskar_Settings::load(const QString& filename)
     _num_vis_dumps     = settings.value("observation/num_vis_dumps").toUInt();
     _num_vis_ave       = settings.value("observation/num_vis_ave").toUInt();
     _num_fringe_ave    = settings.value("observation/num_fringe_ave").toUInt();
+
+    _prec_double       = settings.value("global/double_precision").toBool();
+
+    _fov_deg           = settings.value("imaging/fov_deg").toDouble();
+    _image_size        = settings.value("imaging/image_size").toUInt();
+    _image_snapshots   = settings.value("imaging/image_snapshots").toBool();
+    _image_filename    = settings.value("imaging/image_filename").toString();
 
     return check();
 }
@@ -106,6 +115,7 @@ int oskar_Settings::check() const
         fprintf(stderr, "ERROR: Station directory doesn't exist!\n");
         return FALSE;
     }
+
     return TRUE;
 }
 
@@ -118,7 +128,9 @@ void oskar_Settings::print() const
     printf("  - Stations directory     = %s\n", _station_dir.toLatin1().data());
     printf("  - Station beam disabled  = %s\n", _disable_station_beam ? "true" : "false");
     printf("  - Telescope file         = %s\n", _telescope_file.toLatin1().data());
-    printf("  - Frequency (Hz)         = %e\n", _frequency);
+    printf("  - Frequency (Hz)         = %e\n", _start_frequency);
+    printf("  - Frequency inc (Hz)     = %e\n", _frequency_inc);
+    printf("  - Num. channels          = %u\n", _num_channels);
     printf("  - Channel bandwidth (Hz) = %f\n", _channel_bandwidth);
     printf("  - Phase centre RA (deg)  = %f\n", _ra0_deg);
     printf("  - Phase centre Dec (deg) = %f\n", _dec0_deg);
@@ -129,6 +141,7 @@ void oskar_Settings::print() const
     printf("  - Num. visibility dumps  = %i\n", _num_vis_dumps);
     printf("  - Num. visibility ave.   = %i\n", _num_vis_ave);
     printf("  - Num. fringe ave.       = %i\n", _num_fringe_ave);
+    printf("  - Double precision       = %i\n", _prec_double);
     printf("  - Output file            = %s\n", _output_file.toLatin1().data());
     printf("\n");
 }

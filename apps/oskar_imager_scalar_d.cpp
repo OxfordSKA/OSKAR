@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     QTime timer;
     timer.start();
     int err = oskar_imager_dft_d(vis.num_samples, vis.amp, vis.u, vis.v,
-            settings.frequency(), image_size, &l[0], &image[0]);
+            settings.frequency(0), image_size, &l[0], &image[0]);
     printf("= Completed imaging after %f seconds [error code: %i].\n",
             timer.elapsed() / 1.0e3, err);
     if (err != 0)
