@@ -143,19 +143,20 @@ void EquatorialToHorizontalTest::test_last()
 
 void EquatorialToHorizontalTest::test_wrapper()
 {
+    printf("--- EquatorialToHorizontalTest::test_wrapper() ---\n");
     double ra = 0, dec = 0, lst = 0, lat = 0, az = 0, el = 0;
     int error = 0;
-    for (int i = 0; i < 100; ++i)
+    for (int j = 0; j < 100000; ++j)
     {
-        printf("--- %i\n", i);
         error = oskar_ra_dec_to_az_el_d(ra, dec, lst, lat, &az, &el);
-        //if (i%1000 == 0)
-        //    printf("%i\n", i);
+        if (j % 1000 == 0)
+            printf("run[%i] error = %i\n", j, error);
         if (error != cudaSuccess)
         {
-            printf("eeek! %i error = %i\n", i, error);
+            printf("eeek! %i error = %i: %s\n", j, error,
+                    cudaGetErrorString((cudaError_t)error));
             break;
         }
     }
-    printf("done\n");
+    printf("--- done ---\n");
 }

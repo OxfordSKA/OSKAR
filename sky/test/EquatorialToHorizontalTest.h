@@ -48,7 +48,7 @@ class EquatorialToHorizontalTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(EquatorialToHorizontalTest);
         CPPUNIT_TEST(test);
         CPPUNIT_TEST(test_last);
-        CPPUNIT_TEST(test_wrapper);
+        //CPPUNIT_TEST(test_wrapper);
         CPPUNIT_TEST_SUITE_END();
 
     public:
