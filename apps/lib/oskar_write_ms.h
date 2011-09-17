@@ -46,6 +46,11 @@ DllExport
 void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
         const oskar_VisData_d* vis, const bool overwrite = true);
 
+DllExport
+void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
+        const oskar_VisData_f* vis, const bool overwrite = true);
+
+
 #ifdef __cplusplus
 }
 #endif

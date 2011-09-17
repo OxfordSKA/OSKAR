@@ -30,8 +30,49 @@
 #define OSKAR_SETTINGS_H_
 
 #include <QtCore/QString>
+#include <QtCore/QSettings>
+
+/// Container class for image settings group.
+class oskar_ImageSettings
+{
+    public:
+        void load(const QSettings& settings);
+
+    public:
+        double fov_deg() const { return _fov_deg; }
+        void set_fov_deg(const double value) { _fov_deg = value; }
+
+        unsigned size() const { return _size; }
+        void set_size(const unsigned value) { _size = value; }
+
+        bool make_snapshots() const { return _make_snapshots; }
+        void set_make_snapshots(const bool value) { _make_snapshots = value; }
+
+        unsigned dumps_per_snapshot() const { return _dumps_per_snapshot; }
+        void set_dumps_per_snapshot(const unsigned value) { _dumps_per_snapshot = value; }
+
+        bool scan_frequencies() const { return _scan_frequencies; }
+        void set_scan_frequencies(const bool value) { _scan_frequencies = value; }
+
+        QString filename() const { return _filename; }
+        void set_filename(const QString& value)  { _filename = value; }
+
+    private:
+        double   _fov_deg;
+        unsigned _size;
+        bool     _make_snapshots;
+        unsigned _dumps_per_snapshot;
+        bool     _scan_frequencies;
+        QString  _filename;
+};
 
 
+/**
+ *FIXME
+ *FIXME store settings categories in separate classes / structures.
+ *FIXME i.e. settings.image.fov_deg();
+ *FIXME
+ */
 class oskar_Settings
 {
     public:
@@ -68,7 +109,7 @@ class oskar_Settings
         { _disable_station_beam = value; }
 
 
-        double frequency(const unsigned channel)
+        double frequency(const unsigned channel) const
         { return _start_frequency + channel * _frequency_inc; }
         double start_frequency() const { return _start_frequency; }
         void set_start_frequency(const double value) { _start_frequency = value; }
@@ -100,17 +141,14 @@ class oskar_Settings
 
         bool double_precision() { return _prec_double; }
 
-        QString output_file() const { return _output_file; }
-        void set_output_file(const QString& value) { _output_file = value; }
+        QString oskar_vis_filename() const { return _oskar_vis_filename; }
+        void set_oskar_vis_filename(const QString& value)
+        { _oskar_vis_filename = value; }
+        QString ms_filename() const { return _ms_filename; }
+        void set_ms_filename(const QString& value) { _ms_filename = value; }
 
-        double fov_deg() const { return _fov_deg; }
-        void set_fov_deg(const double value) { r_fov_deg = value; }
-        unsigned image_size() const { return _image_size; }
-        void set_image_size(const unsigned value) { _image_size = value; }
-        bool image_snapshots() const { return _image_snapshots; }
-        void set_image_snapshots(const bool value) { _image_snapshots = value; }
-        QString image_filename() const { return _image_filename; }
-        void set_image_filename(const QString& value)  { _image_filename = value; }
+        const oskar_ImageSettings& image() const { return _image; }
+        oskar_ImageSettings& image() { return _image; }
 
     private:
         QString _filename;
@@ -139,12 +177,10 @@ class oskar_Settings
 
         bool _prec_double;
 
-        QString _output_file;
+        QString _oskar_vis_filename;
+        QString _ms_filename;
 
-        double _fov_deg;
-        unsigned _image_size;
-        bool _image_snapshots;
-        QString _image_filename;
+        oskar_ImageSettings _image;
 };
 
 #endif // OSKAR_SETTINGS_H_

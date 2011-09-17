@@ -34,6 +34,24 @@
 #include <cstdio>
 #include <cstdlib>
 
+
+void oskar_ImageSettings::load(const QSettings& settings)
+{
+    _fov_deg            = settings.value("imaging/fov_deg").toDouble();
+    _size               = settings.value("imaging/image_size").toUInt();
+    _make_snapshots     = settings.value("imaging/make_snapshots").toBool();
+    _dumps_per_snapshot = settings.value("imaging/dumps_per_snapshot").toUInt();
+    _scan_frequencies   = settings.value("imaging/scan_frequencies").toBool();
+    _filename           = settings.value("imaging/image_filename").toString();
+}
+
+
+
+
+//=============================================================================
+
+
+
 oskar_Settings::oskar_Settings(const QString& filename)
 {
     _disable_station_beam = false;
@@ -81,17 +99,15 @@ int oskar_Settings::load(const QString& filename)
     _dec0_deg          = settings.value("observation/phase_centre_dec_deg").toDouble();
     _obs_length_sec    = settings.value("observation/length_seconds").toDouble();
     _obs_start_mjd_utc = settings.value("observation/start_mjd_utc").toDouble();
-    _output_file       = settings.value("observation/output_file").toString();
+    _oskar_vis_filename= settings.value("observation/oskar_vis_filename", "").toString();
+    _ms_filename       = settings.value("observation/ms_filename", "").toString();
     _num_vis_dumps     = settings.value("observation/num_vis_dumps").toUInt();
     _num_vis_ave       = settings.value("observation/num_vis_ave").toUInt();
     _num_fringe_ave    = settings.value("observation/num_fringe_ave").toUInt();
 
     _prec_double       = settings.value("global/double_precision").toBool();
 
-    _fov_deg           = settings.value("imaging/fov_deg").toDouble();
-    _image_size        = settings.value("imaging/image_size").toUInt();
-    _image_snapshots   = settings.value("imaging/image_snapshots").toBool();
-    _image_filename    = settings.value("imaging/image_filename").toString();
+    _image.load(settings);
 
     return check();
 }
@@ -142,7 +158,8 @@ void oskar_Settings::print() const
     printf("  - Num. visibility ave.   = %i\n", _num_vis_ave);
     printf("  - Num. fringe ave.       = %i\n", _num_fringe_ave);
     printf("  - Double precision       = %i\n", _prec_double);
-    printf("  - Output file            = %s\n", _output_file.toLatin1().data());
+    printf("  - Oskar visibility file  = %s\n", _oskar_vis_filename.toLatin1().data());
+    printf("  - MS file                = %s\n", _ms_filename.toLatin1().data());
     printf("\n");
 }
 

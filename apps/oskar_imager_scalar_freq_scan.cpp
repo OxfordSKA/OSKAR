@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     if (argc != 7)
     {
         fprintf(stderr, "ERROR: missing command line arguments\n");
-        fprintf(stderr, "Usage:  $ imager_scalar [settings file] [field of view (deg)] [num pixels] [start freq] [freq inc] [num freq steps]\n");
+        fprintf(stderr, "Usage:  $ imager_scalar [settings file]\n");
         return EXIT_FAILURE;
     }
 
@@ -67,12 +67,8 @@ int main(int argc, char** argv)
     oskar_Settings settings;
     settings.load(QString(argv[1]));
 
-    double fov_deg       = atof(argv[2]);
-    unsigned image_size  = atoi(argv[3]);
-    double freq_start    = atof(argv[4]);
-    double freq_inc      = atof(argv[5]);
-    int num_freq_steps   = atoi(argv[6]);
-
+    double fov_deg = settings.image().fov_deg();
+    unsigned image_size = settings.image().size();
     printf("field of view (deg) = %f\n", fov_deg);
     printf("image size          = %i\n", image_size);
     printf("\n");
@@ -90,8 +86,11 @@ int main(int argc, char** argv)
         l[i] = -lmax + i * inc;
     }
 
+
+    int num_dumps_per_snapshot = settings.image().dumps_per_snapshot();
+    int num_channels           = settings.num_channels();
+
     int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
-    int num_dumps_per_snapshot = 2;
     int num_snapshots = (int)settings.num_vis_dumps() / num_dumps_per_snapshot;
     if ((int)settings.num_vis_dumps() % num_dumps_per_snapshot != 0)
         fprintf(stderr, "ERROR: eek!\n");
@@ -101,12 +100,12 @@ int main(int argc, char** argv)
     int centre = floor(image_size / 2.0);
     printf("centre = %i\n", centre);
 
-    vector<double> peak_amp(num_freq_steps * num_snapshots);
+    vector<double> peak_amp(num_channels * num_snapshots);
 
     // Loop over freqs and make images.
-    for (int i = 0; i < num_freq_steps; ++i)
+    for (int i = 0; i < num_channels; ++i)
     {
-        double frequency = freq_start + i * freq_inc;
+        double frequency = settings.frequency(i);
         printf("imaging simulation of freq %e\n", frequency);
 
         // Load data file for the frequency.
@@ -159,7 +158,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "ERROR: Failed to open amps file.\n");
         return EXIT_FAILURE;
     }
-    fwrite(&peak_amp[0], sizeof(double), num_freq_steps * num_snapshots, file);
+    fwrite(&peak_amp[0], sizeof(double), num_channels * num_snapshots, file);
     fclose(file);
 
     return EXIT_SUCCESS;

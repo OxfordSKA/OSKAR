@@ -44,8 +44,14 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 #include <QtCore/QTime>
+
+
+int sim1_d(const oskar_Settings& settings);
+int sim1_f(const oskar_Settings& settings);
+
 
 int main(int argc, char** argv)
 {
@@ -53,7 +59,7 @@ int main(int argc, char** argv)
     if (argc != 2)
     {
         fprintf(stderr, "ERROR: Missing command line arguments.\n");
-        fprintf(stderr, "Usage:  $ sim1_scalar_d [settings file]\n");
+        fprintf(stderr, "Usage:  $ oskar_sim1_scalar [settings file]\n");
         return EXIT_FAILURE;
     }
 
@@ -61,145 +67,234 @@ int main(int argc, char** argv)
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
     settings.print();
 
-    int error_code = 0;
     QTime timer;
     timer.start();
 
+    // Double precision.
     if (settings.double_precision())
     {
-        // Load sky model.
-        oskar_SkyModelGlobal_d sky;
-        oskar_load_sources_d(settings.sky_file().toLatin1().data(), &sky);
+        sim1_d(settings);
+    }
 
-        // Load telescope layout.
-        oskar_TelescopeModel_d telescope;
-        oskar_load_telescope_d(settings.telescope_file().toLatin1().data(),
-                settings.longitude_rad(), settings.latitude_rad(), &telescope);
+    // Single precision.
+    else
+    {
+        sim1_f(settings);
+    }
 
-        // Load station layouts.
-        oskar_StationModel_d* stations;
-        const char* station_dir = settings.station_dir().toLatin1().data();
-        unsigned num_stations = oskar_load_stations_d(station_dir, &stations,
-                &telescope.identical_stations);
+    printf("= Completed simulation after %f seconds.\n", timer.elapsed() / 1.0e3);
 
-        if (num_stations != telescope.num_antennas)
+    return EXIT_SUCCESS;
+}
+
+
+
+int sim1_d(const oskar_Settings& settings)
+{
+    // ============== Load input data =========================================
+    oskar_SkyModelGlobal_d sky;
+    oskar_load_sources_d(settings.sky_file().toLatin1().data(), &sky);
+    oskar_TelescopeModel_d telescope;
+    oskar_load_telescope_d(settings.telescope_file().toLatin1().data(),
+            settings.longitude_rad(), settings.latitude_rad(), &telescope);
+    oskar_StationModel_d* stations;
+    const char* station_dir = settings.station_dir().toLatin1().data();
+    unsigned num_stations = oskar_load_stations_d(station_dir, &stations,
+            &telescope.identical_stations);
+    if (num_stations != telescope.num_antennas)
+    {
+        fprintf(stderr, "ERROR: Error loading telescope geometry.\n");
+        return EXIT_FAILURE;
+    }
+
+    // ============== Simulation loop =========================================
+    int error_code = 0;
+    for (unsigned i = 0; i < settings.num_channels(); ++i)
+    {
+        double frequency = settings.frequency(i);
+        printf("frequency = %e\n", frequency);
+
+        // Allocate memory for frequency sacled sky model.
+        oskar_SkyModelGlobal_d sky_temp;
+        sky_temp.num_sources = sky.num_sources;
+        sky_temp.Dec = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.RA  = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.I   = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.Q   = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.U   = (double*) malloc(sky.num_sources * sizeof(double));
+        sky_temp.V   = (double*) malloc(sky.num_sources * sizeof(double));
+        memcpy(sky_temp.Dec, sky.Dec, sky.num_sources * sizeof(double));
+        memcpy(sky_temp.RA,  sky.RA,  sky.num_sources * sizeof(double));
+        memcpy(sky_temp.I,   sky.I,   sky.num_sources * sizeof(double));
+        for (int s = 0; s < sky.num_sources; ++s)
         {
-            fprintf(stderr, "ERROR: Error loading telescope geometry.\n");
-            return EXIT_FAILURE;
+//            sky_temp.I[s] = 1.0e6 * pow(frequency, -0.7);
+            sky_temp.I[s] *= pow(frequency / settings.start_frequency(), -0.7);
         }
 
+        // Allocate visibility data.
         oskar_VisData_d vis;
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_d(num_baselines * settings.num_vis_dumps(), &vis);
 
-        for (unsigned i = 0; i < settings.num_channels(); ++i)
-        {
-            double frequency = settings.frequency(i);
-            error_code = oskar_interferometer1_scalar_d(telescope, stations, sky,
-                    settings.ra0_rad(),
-                    settings.dec0_rad(),
-                    settings.obs_start_mjd_utc(),
-                    settings.obs_length_days(),
-                    settings.num_vis_dumps(),
-                    settings.num_vis_ave(),
-                    settings.num_fringe_ave(),
-                    frequency,
-                    settings.channel_bandwidth(),
-                    settings.disable_station_beam(),
-                    &vis);
-        }
+        error_code = oskar_interferometer1_scalar_d(telescope, stations, sky,
+                settings.ra0_rad(), settings.dec0_rad(),
+                settings.obs_start_mjd_utc(), settings.obs_length_days(),
+                settings.num_vis_dumps(), settings.num_vis_ave(),
+                settings.num_fringe_ave(), frequency, settings.channel_bandwidth(),
+                settings.disable_station_beam(), &vis);
+
         printf("= Number of visibility points generated: %i\n", vis.num_samples);
-        oskar_write_vis_data_d(settings.output_file().toLatin1().data(), &vis);
-        QString ms_file = settings.output_file() + ".ms";
-        oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis, true);
+
+        // Write vis binary file.
+        if (!settings.oskar_vis_filename().isEmpty())
+        {
+            QString vis_file = settings.oskar_vis_filename() + "_channel_" + QString::number(i) + ".dat";
+            printf("= Writing oskar vis data file: %s.\n",
+                    vis_file.toLatin1().data());
+            oskar_write_vis_data_d(vis_file.toLatin1().data(), &vis);
+        }
+
+        // Write MS.
+        if (!settings.ms_filename().isEmpty())
+        {
+            QString ms_file = settings.ms_filename() + "_channel_" + QString::number(i) + ".ms";
+            printf("= Writing ms: %s.\n", ms_file.toLatin1().data());
+            oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis, true);
+        }
+
+        free(sky_temp.RA);
+        free(sky_temp.Dec);
+        free(sky_temp.I);
+        free(sky_temp.Q);
+        free(sky_temp.U);
+        free(sky_temp.V);
         oskar_free_vis_data_d(&vis);
-
-        // Free memory.
-        free(sky.RA);
-        free(sky.Dec);
-        free(sky.I);
-        free(sky.Q);
-        free(sky.U);
-        free(sky.V);
-
-        free(telescope.antenna_x);
-        free(telescope.antenna_y);
-        free(telescope.antenna_z);
-
-        for (unsigned i = 0; i < num_stations; ++i)
-        {
-            free(stations[i].antenna_x);
-            free(stations[i].antenna_y);
-        }
     }
-    else
+
+    // ============== Cleanup =================================================
+    free(sky.RA);
+    free(sky.Dec);
+    free(sky.I);
+    free(sky.Q);
+    free(sky.U);
+    free(sky.V);
+    free(telescope.antenna_x);
+    free(telescope.antenna_y);
+    free(telescope.antenna_z);
+    for (unsigned i = 0; i < num_stations; ++i)
     {
-        // Load sky model.
-        oskar_SkyModelGlobal_f sky;
-        oskar_load_sources_f(settings.sky_file().toLatin1().data(), &sky);
+        free(stations[i].antenna_x);
+        free(stations[i].antenna_y);
+    }
+    free(stations);
 
-        // Load telescope layout.
-        oskar_TelescopeModel_f telescope;
-        oskar_load_telescope_f(settings.telescope_file().toLatin1().data(),
-                settings.longitude_rad(), settings.latitude_rad(), &telescope);
+    return EXIT_SUCCESS;
+}
 
-        // Load station layouts.
-        oskar_StationModel_f* stations;
-        const char* station_dir = settings.station_dir().toLatin1().data();
-        unsigned num_stations = oskar_load_stations_f(station_dir, &stations,
-                &telescope.identical_stations);
 
-        if (num_stations != telescope.num_antennas)
+
+
+int sim1_f(const oskar_Settings& settings)
+{
+    // ============== Load input data =========================================
+    oskar_SkyModelGlobal_f sky;
+    oskar_load_sources_f(settings.sky_file().toLatin1().data(), &sky);
+    oskar_TelescopeModel_f telescope;
+    oskar_load_telescope_f(settings.telescope_file().toLatin1().data(),
+            settings.longitude_rad(), settings.latitude_rad(), &telescope);
+    oskar_StationModel_f* stations;
+    const char* station_dir = settings.station_dir().toLatin1().data();
+    unsigned num_stations = oskar_load_stations_f(station_dir, &stations,
+            &telescope.identical_stations);
+    if (num_stations != telescope.num_antennas)
+    {
+        fprintf(stderr, "ERROR: Error loading telescope geometry.\n");
+        return EXIT_FAILURE;
+    }
+
+    // ============== Simulation loop =========================================
+    int error_code = 0;
+    for (unsigned i = 0; i < settings.num_channels(); ++i)
+    {
+        float frequency = settings.frequency(i);
+        printf("frequency = %e\n", frequency);
+
+        // Allocate memory for frequency sacled sky model.
+        oskar_SkyModelGlobal_f sky_temp;
+        sky_temp.num_sources = sky.num_sources;
+        sky_temp.Dec = (float*) malloc(sky.num_sources * sizeof(float));
+        sky_temp.RA  = (float*) malloc(sky.num_sources * sizeof(float));
+        sky_temp.I   = (float*) malloc(sky.num_sources * sizeof(float));
+        sky_temp.Q   = (float*) malloc(sky.num_sources * sizeof(float));
+        sky_temp.U   = (float*) malloc(sky.num_sources * sizeof(float));
+        sky_temp.V   = (float*) malloc(sky.num_sources * sizeof(float));
+        memcpy(sky_temp.Dec, sky.Dec,  sky.num_sources * sizeof(float));
+        memcpy(sky_temp.RA,  sky.RA,   sky.num_sources * sizeof(float));
+        memcpy(sky_temp.I,   sky.I,    sky.num_sources * sizeof(float));
+        for (int s = 0; s < sky.num_sources; ++s)
         {
-            fprintf(stderr, "ERROR: Error loading telescope geometry.\n");
-            return EXIT_FAILURE;
+//            sky_temp.I[s] = 1.0e6 * pow(frequency, -0.7);
+            sky_temp.I[s] *= powf(frequency / settings.start_frequency(), -0.7);
         }
 
+        // Allocate visibility data.
         oskar_VisData_f vis;
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_f(num_baselines * settings.num_vis_dumps(), &vis);
 
-        for (unsigned i = 0; i < settings.num_channels(); ++i)
-        {
-            float frequency = settings.frequency(i);
-            error_code = oskar_interferometer1_scalar_f(
-                    telescope, stations, sky,
-                    settings.ra0_rad(),
-                    settings.dec0_rad(),
-                    settings.obs_start_mjd_utc(),
-                    settings.obs_length_days(),
-                    settings.num_vis_dumps(),
-                    settings.num_vis_ave(),
-                    settings.num_fringe_ave(),
-                    frequency,
-                    settings.channel_bandwidth(),
-                    settings.disable_station_beam(),
-                    &vis);
-        }
+        error_code = oskar_interferometer1_scalar_f(telescope, stations, sky,
+                settings.ra0_rad(), settings.dec0_rad(),
+                settings.obs_start_mjd_utc(), settings.obs_length_days(),
+                settings.num_vis_dumps(), settings.num_vis_ave(),
+                settings.num_fringe_ave(), frequency, settings.channel_bandwidth(),
+                settings.disable_station_beam(), &vis);
+
         printf("= Number of visibility points generated: %i\n", vis.num_samples);
-        oskar_write_vis_data_f(settings.output_file().toLatin1().data(), &vis);
-        oskar_free_vis_data_f(&vis);
 
-        // Free memory.
-        free(sky.RA);
-        free(sky.Dec);
-        free(sky.I);
-        free(sky.Q);
-        free(sky.U);
-        free(sky.V);
-
-        free(telescope.antenna_x);
-        free(telescope.antenna_y);
-        free(telescope.antenna_z);
-
-        for (unsigned i = 0; i < num_stations; ++i)
+        // Write vis binary file.
+        if (!settings.oskar_vis_filename().isEmpty())
         {
-            free(stations[i].antenna_x);
-            free(stations[i].antenna_y);
+            QString vis_file = settings.oskar_vis_filename() + "_channel_" + QString::number(i) + ".dat";
+            printf("= Writing oskar vis data file: %s.\n",
+                    vis_file.toLatin1().data());
+            oskar_write_vis_data_f(vis_file.toLatin1().data(), &vis);
         }
+
+        // Write MS.
+        if (!settings.ms_filename().isEmpty())
+        {
+            QString ms_file = settings.ms_filename() + "_channel_" + QString::number(i) + ".ms";
+            printf("= Writing ms: %s.\n", ms_file.toLatin1().data());
+            oskar_write_ms_f(ms_file.toLatin1().data(), &settings, &vis, true);
+        }
+
+        free(sky_temp.RA);
+        free(sky_temp.Dec);
+        free(sky_temp.I);
+        free(sky_temp.Q);
+        free(sky_temp.U);
+        free(sky_temp.V);
+        oskar_free_vis_data_f(&vis);
     }
-    printf("= Completed simulation after %f seconds [error code: %i].\n",
-            timer.elapsed() / 1.0e3, error_code);
+
+    // ============== Cleanup =================================================
+    free(sky.RA);
+    free(sky.Dec);
+    free(sky.I);
+    free(sky.Q);
+    free(sky.U);
+    free(sky.V);
+    free(telescope.antenna_x);
+    free(telescope.antenna_y);
+    free(telescope.antenna_z);
+    for (unsigned i = 0; i < num_stations; ++i)
+    {
+        free(stations[i].antenna_x);
+        free(stations[i].antenna_y);
+    }
+    free(stations);
 
     return EXIT_SUCCESS;
 }
+

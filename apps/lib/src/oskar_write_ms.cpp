@@ -127,6 +127,27 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
 }
 
 
+void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
+        const oskar_VisData_f* vis, const bool overwrite)
+{
+    oskar_VisData_d temp_vis;
+    oskar_allocate_vis_data_d(vis->num_samples, &temp_vis);
+    for (int i = 0; i < vis->num_samples; ++i)
+    {
+        temp_vis.u[i]     = (double)vis->u[i];
+        temp_vis.v[i]     = (double)vis->v[i];
+        temp_vis.w[i]     = (double)vis->w[i];
+        temp_vis.amp[i].x = (double)vis->amp[i].x;
+        temp_vis.amp[i].y = (double)vis->amp[i].y;
+    }
+
+    oskar_write_ms_d(ms_path, settings, &temp_vis, overwrite);
+
+    oskar_free_vis_data_d(&temp_vis);
+}
+
+
+
 #ifdef __cplusplus
 }
 #endif
