@@ -79,17 +79,17 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Construct the required settings.
     oskar_Settings settings;
-    settings.set_ra0_deg(0.0);
-    settings.set_dec0_deg(90.0);
-    settings.set_start_frequency(250e6);
-    settings.set_num_channels(1);
-    settings.set_frequency_inc(0.0);
-    settings.set_obs_Start_mjd_utc(0.0);
-    settings.set_obs_length_sec(60.0 * 2.0);
+    settings.obs().set_ra0_deg(0.0);
+    settings.obs().set_dec0_deg(90.0);
+    settings.obs().set_start_frequency(250e6);
+    settings.obs().set_num_channels(1);
+    settings.obs().set_frequency_inc(0.0);
+    settings.obs().set_obs_Start_mjd_utc(0.0);
+    settings.obs().set_obs_length_sec(60.0 * 2.0);
+    settings.obs().set_num_vis_dumps(num_dumps);
     settings.set_telescope_file(telescope_file);
     settings.set_longitude_deg(0.0);
     settings.set_latitude_deg(90.0);
-    settings.set_num_vis_dumps(num_dumps);
 
     // Write the MS.
     const char* ms_path = "temp_test.ms";

@@ -6,6 +6,8 @@ set(apps_SRC
     src/oskar_load_stations.cpp
     src/oskar_load_telescope.cpp
     src/oskar_Settings.cpp
+    src/oskar_SettingsImage.cpp
+    src/oskar_SettingsObservation.cpp
     src/oskar_imager_dft.cu
     src/oskar_write_ms.cpp
     src/oskar_file_utils.cpp

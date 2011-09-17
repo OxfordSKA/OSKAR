@@ -131,12 +131,12 @@ int imager_d(const oskar_Settings& settings)
         l[i] = -lmax + i * inc;
 
 
-    int num_channels  = settings.num_channels();
+    int num_channels  = settings.obs().num_channels();
     int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
     int num_dumps_per_snapshot = settings.image().make_snapshots() ?
-            settings.image().dumps_per_snapshot() : settings.num_vis_dumps();
-    int num_snapshots = (int)settings.num_vis_dumps() / num_dumps_per_snapshot;
-    if ((int)settings.num_vis_dumps() % num_dumps_per_snapshot != 0)
+            settings.image().dumps_per_snapshot() : settings.obs().num_vis_dumps();
+    int num_snapshots = (int)settings.obs().num_vis_dumps() / num_dumps_per_snapshot;
+    if ((int)settings.obs().num_vis_dumps() % num_dumps_per_snapshot != 0)
         fprintf(stderr, "ERROR: eek!\n");
 
     // Array of peak amplitudes.
@@ -145,11 +145,11 @@ int imager_d(const oskar_Settings& settings)
     // Loop over freqs. and make images.
     for (int i = 0; i < num_channels; ++i)
     {
-        double frequency = settings.frequency(i);
+        double frequency = settings.obs().frequency(i);
         printf("== imaging simulation of freq %e\n", frequency);
 
         // Load data file for the frequency.
-        QString vis_file = settings.oskar_vis_filename()
+        QString vis_file = settings.obs().oskar_vis_filename()
                 + "_channel_" + QString::number(i) + ".dat";
         oskar_VisData_d vis;
         oskar_load_vis_data_d(vis_file.toLatin1().data(), &vis);
@@ -226,17 +226,17 @@ int imager_f(const oskar_Settings& settings)
 
     // Image coordinates.
     std::vector<float> l(image_size);
-    float lmax = sinf((fov_deg / 2.0f) * M_PI / 180.0f);
+    float lmax = sin((fov_deg / 2.0f) * M_PI / 180.0f);
     float inc  = (2.0f * lmax) / (image_size - 1);
     for (unsigned i = 0; i < image_size; ++i)
         l[i] = -lmax + i * inc;
 
-    int num_channels  = settings.num_channels();
+    int num_channels  = settings.obs().num_channels();
     int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
     int num_dumps_per_snapshot = settings.image().make_snapshots() ?
-            settings.image().dumps_per_snapshot() : settings.num_vis_dumps();
-    int num_snapshots = (int)settings.num_vis_dumps() / num_dumps_per_snapshot;
-    if ((int)settings.num_vis_dumps() % num_dumps_per_snapshot != 0)
+            settings.image().dumps_per_snapshot() : settings.obs().num_vis_dumps();
+    int num_snapshots = (int)settings.obs().num_vis_dumps() / num_dumps_per_snapshot;
+    if ((int)settings.obs().num_vis_dumps() % num_dumps_per_snapshot != 0)
         fprintf(stderr, "ERROR: eek!\n");
 
     // Array of peak amplitudes.
@@ -245,11 +245,11 @@ int imager_f(const oskar_Settings& settings)
     // Loop over freqs. and make images.
     for (int i = 0; i < num_channels; ++i)
     {
-        float frequency = settings.frequency(i);
+        float frequency = settings.obs().frequency(i);
         printf("== imaging simulation of freq %e\n", frequency);
 
         // Load data file for the frequency.
-        QString vis_file = settings.oskar_vis_filename()
+        QString vis_file = settings.obs().oskar_vis_filename()
                 + "_channel_" + QString::number(i) + ".dat";
         oskar_VisData_f vis;
         oskar_load_vis_data_f(vis_file.toLatin1().data(), &vis);
