@@ -43,8 +43,16 @@ void oskar_SettingsObservation::load(const QSettings& settings)
     _channel_bandwidth = settings.value("observation/channel_bandwidth").toDouble();
     _ra0_deg           = settings.value("observation/phase_centre_ra_deg").toDouble();
     _dec0_deg          = settings.value("observation/phase_centre_dec_deg").toDouble();
+
+    _start_time_utc_year   = settings.value("observation/start_time_utc_year").toUInt();
+    _start_time_utc_month  = settings.value("observation/start_time_utc_month").toUInt();
+    _start_time_utc_day    = settings.value("observation/start_time_utc_day").toUInt();
+    _start_time_utc_hour   = settings.value("observation/start_time_utc_hour").toUInt();
+    _start_time_utc_minute = settings.value("observation/start_time_utc_minute").toUInt();
+    _start_time_utc_second = settings.value("observation/start_time_utc_second").toDouble();
+
+    _start_time_utc_mjd = settings.value("observation/start_time_utc_mjd").toDouble();
     _obs_length_sec    = settings.value("observation/length_seconds").toDouble();
-    _obs_start_mjd_utc = settings.value("observation/start_mjd_utc").toDouble();
     _oskar_vis_filename= settings.value("observation/oskar_vis_filename", "").toString();
     _ms_filename       = settings.value("observation/ms_filename", "").toString();
     _num_vis_dumps     = settings.value("observation/num_vis_dumps").toUInt();

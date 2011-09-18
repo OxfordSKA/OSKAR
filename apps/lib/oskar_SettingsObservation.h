@@ -63,13 +63,26 @@ class oskar_SettingsObservation
         void set_dec0_deg(const double value) { _dec0_deg = value; }
         double dec0_rad() const { return _dec0_deg * deg2rad; }
 
+        unsigned start_time_utc_year() const { return _start_time_utc_year; }
+        void set_start_time_utc_year(const unsigned value) { _start_time_utc_year = value; }
+        unsigned start_time_utc_month() const { return _start_time_utc_month; }
+        void set_start_time_utc_month(const unsigned value) { _start_time_utc_month = value; }
+        unsigned start_time_utc_day() const { return _start_time_utc_day; }
+        void set_start_time_utc_day(const unsigned value) { _start_time_utc_day = value; }
+        unsigned start_time_utc_hour() const { return _start_time_utc_hour; }
+        void set_start_time_utc_hour(const unsigned value) { _start_time_utc_hour = value; }
+        unsigned start_time_utc_minute() const { return _start_time_utc_minute; }
+        void set_start_time_utc_minute(const unsigned value) { _start_time_utc_minute = value; }
+        double start_time_utc_second() const { return _start_time_utc_second; }
+        void set_start_time_utc_second(const double value) { _start_time_utc_second = value; }
+
+        double start_time_utc_mjd() const { return _start_time_utc_mjd; }
+        void set_start_time_utc_mjd(const double value) { _start_time_utc_mjd = value; }
+
         double obs_length_sec() const { return _obs_length_sec; }
         void set_obs_length_sec(const double value) { _obs_length_sec = value; }
         double obs_length_days() const
         { return _obs_length_sec / (24.0 * 60.0 * 60.0); }
-
-        double obs_start_mjd_utc() const { return _obs_start_mjd_utc; }
-        void set_obs_Start_mjd_utc(const double value) { _obs_start_mjd_utc = value; }
 
         unsigned num_vis_dumps() const { return _num_vis_dumps; }
         void set_num_vis_dumps(const unsigned value) { _num_vis_dumps = value; }
@@ -94,8 +107,16 @@ class oskar_SettingsObservation
         double   _channel_bandwidth;
         double   _ra0_deg;
         double   _dec0_deg;
+
+        unsigned _start_time_utc_year;
+        unsigned _start_time_utc_month;
+        unsigned _start_time_utc_day;
+        unsigned _start_time_utc_hour;
+        unsigned _start_time_utc_minute;
+        double   _start_time_utc_second;
+        double   _start_time_utc_mjd;
         double   _obs_length_sec;
-        double   _obs_start_mjd_utc;
+
         unsigned _num_vis_dumps;
         unsigned _num_vis_ave;
         unsigned _num_fringe_ave;

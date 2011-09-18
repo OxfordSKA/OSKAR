@@ -84,7 +84,7 @@ int main(int /*argc*/, char** /*argv*/)
     settings.obs().set_start_frequency(250e6);
     settings.obs().set_num_channels(1);
     settings.obs().set_frequency_inc(0.0);
-    settings.obs().set_obs_Start_mjd_utc(0.0);
+    settings.obs().set_start_time_utc_mjd(0.0);
     settings.obs().set_obs_length_sec(60.0 * 2.0);
     settings.obs().set_num_vis_dumps(num_dumps);
     settings.set_telescope_file(telescope_file);

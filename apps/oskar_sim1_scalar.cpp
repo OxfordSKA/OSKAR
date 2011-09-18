@@ -141,7 +141,7 @@ int sim1_d(const oskar_Settings& settings)
 
         error_code = oskar_interferometer1_scalar_d(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
-                settings.obs().obs_start_mjd_utc(), settings.obs().obs_length_days(),
+                settings.obs().start_time_utc_mjd(), settings.obs().obs_length_days(),
                 settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
                 settings.obs().num_fringe_ave(), frequency,
                 settings.obs().channel_bandwidth(),
@@ -248,7 +248,7 @@ int sim1_f(const oskar_Settings& settings)
 
         error_code = oskar_interferometer1_scalar_f(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
-                settings.obs().obs_start_mjd_utc(), settings.obs().obs_length_days(),
+                settings.obs().start_time_utc_mjd(), settings.obs().obs_length_days(),
                 settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
                 settings.obs().num_fringe_ave(), frequency, settings.obs().channel_bandwidth(),
                 settings.disable_station_beam(), &vis);

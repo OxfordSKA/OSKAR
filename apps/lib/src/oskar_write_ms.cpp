@@ -73,7 +73,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
     }
 
     // Make local copies of settings.
-    double mjd_start = settings->obs().obs_start_mjd_utc();
+    double mjd_start = settings->obs().start_time_utc_mjd();
     double ra0_rad   = settings->obs().ra0_rad();
     double dec0_rad  = settings->obs().dec0_rad();
     double frequency = settings->obs().start_frequency();
