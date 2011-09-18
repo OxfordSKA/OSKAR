@@ -1,5 +1,5 @@
 if (NOT CHECKED_DEPENDENCIES)
-    message(FATAL_ERROR "Please include dependencies.cmake before this script!")
+    message(FATAL_ERROR "Please include oskar_dependencies.cmake before this script!")
 endif ()
 
 # === Set the build type to release if not otherwise specified.
@@ -7,13 +7,13 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE release)
 endif()
 
-message("*****************************************************************")
+message("================================================================================")
 if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-    message("** NOTE: Building in release mode!")
+    message("-- INFO: Building in release mode.")
 else ()
-    message("** NOTE: Building in debug mode!")
+    message("-- INFO: Building in debug mode.")
 endif()
-message("*****************************************************************")
+message("================================================================================")
 
 set(BUILD_SHARED_LIBS ON)
 
@@ -56,7 +56,7 @@ elseif (MSVC) # visual studio compiler.
 
 # === No compiler found.
 else ()
-    message("INFO: Unknown compiler...")
+    message("-- INFO: Unknown compiler.")
 endif ()
 
 # === Cuda
@@ -95,24 +95,24 @@ if (CUDA_FOUND)
         #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v')
     endif ()
 
-    message("=================================================================")
+    message("================================================================================")
     if (CUDA_ARCH MATCHES 1.1)
-        message("= INFO: Building CUDA device code for architecture 1.1")
+        message("-- INFO: Building CUDA device code for architecture 1.1")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_11,code=sm_11)
     elseif (CUDA_ARCH MATCHES 1.3)
-        message("= INFO: Building CUDA device code for architecture 1.3")
+        message("-- INFO: Building CUDA device code for architecture 1.3")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_13,code=sm_13)
     elseif (CUDA_ARCH MATCHES 2.0)
-        message("= INFO: Building CUDA device code for architecture 2.0")
+        message("-- INFO: Building CUDA device code for architecture 2.0")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_20)
     elseif (CUDA_ARCH MATCHES 2.1)
-        message("= INFO: Building CUDA device code for architecture 2.1 (default)")
-        message("= INFO: Run cmake with -DCUDA_ARCH=<arch> to set a different target.")
+        message("-- INFO: Building CUDA device code for architecture 2.1 (default)")
+        message("-- INFO: Run cmake with -DCUDA_ARCH=<arch> to set a different target.")
         list(APPEND CUDA_NVCC_FLAGS -gencode arch=compute_20,code=sm_21)
     else()
-        message(WARNING "= WARNING: CUDA_ARCH ${CUDA_ARCH} not recognised! ***")
+        message(WARNING "-- WARNING: CUDA_ARCH ${CUDA_ARCH} not recognised!")
     endif()
-    message("=================================================================")
+    message("================================================================================")
     add_definitions(-DCUDA_ARCH=${CUDA_ARCH})
 endif (CUDA_FOUND)
 

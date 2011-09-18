@@ -62,8 +62,8 @@ if (NOT CUDA_ARCH)
 endif ()
 
 # ==== Set dependencies and compiler options.
-include(dependencies)
-include(compilerOptions)
+include(oskar_dependencies)
+include(oskar_compiler_options)
 
 enable_testing()
 

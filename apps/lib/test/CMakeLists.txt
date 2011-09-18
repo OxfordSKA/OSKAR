@@ -32,12 +32,14 @@ endif()
 
 
 # TEST BINARY: write_ms_test
-add_executable(write_ms_test src/WriteMS_Test.cpp)
-target_link_libraries(write_ms_test
-    oskar
-    oskar_apps
-    ${QT_QTCORE_LIBRARIES}
-)
+if (BUILD_OSKAR_MS)
+    add_executable(write_ms_test src/WriteMS_Test.cpp)
+    target_link_libraries(write_ms_test
+        oskar
+        oskar_apps
+        ${QT_QTCORE_LIBRARIES}
+    )
+endif()
 
 
 if (BUILD_OSKAR_WIDGETS)

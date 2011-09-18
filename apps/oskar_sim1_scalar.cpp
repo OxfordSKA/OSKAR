@@ -38,7 +38,10 @@
 #include "apps/lib/oskar_load_telescope.h"
 #include "apps/lib/oskar_load_stations.h"
 #include "apps/lib/oskar_Settings.h"
+
+#ifndef OSKAR_NO_MS
 #include "apps/lib/oskar_write_ms.h"
+#endif
 
 #include "utility/oskar_cuda_device_info.h"
 
@@ -114,9 +117,9 @@ int sim1_d(const oskar_Settings& settings)
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
         double frequency = settings.obs().frequency(i);
-        printf("frequency = %e\n", frequency);
+        printf("- Frequency: %e\n", frequency);
 
-        // Allocate memory for frequency sacled sky model.
+        // Allocate memory for frequency scaled sky model.
         oskar_SkyModelGlobal_d sky_temp;
         sky_temp.num_sources = sky.num_sources;
         sky_temp.Dec = (double*) malloc(sky.num_sources * sizeof(double));
@@ -149,22 +152,24 @@ int sim1_d(const oskar_Settings& settings)
 
         printf("= Number of visibility points generated: %i\n", vis.num_samples);
 
-        // Write vis binary file.
+        // Write visibility binary file.
         if (!settings.obs().oskar_vis_filename().isEmpty())
         {
             QString vis_file = settings.obs().oskar_vis_filename() + "_channel_" + QString::number(i) + ".dat";
-            printf("= Writing oskar vis data file: %s.\n",
+            printf("= Writing OSKAR visibility data file: %s\n",
                     vis_file.toLatin1().data());
             oskar_write_vis_data_d(vis_file.toLatin1().data(), &vis);
         }
 
         // Write MS.
+#ifndef OSKAR_NO_MS
         if (!settings.obs().ms_filename().isEmpty())
         {
             QString ms_file = settings.obs().ms_filename() + "_channel_" + QString::number(i) + ".ms";
-            printf("= Writing ms: %s.\n", ms_file.toLatin1().data());
+            printf("= Writing Measurement Set: %s\n", ms_file.toLatin1().data());
             oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis, true);
         }
+#endif
 
         free(sky_temp.RA);
         free(sky_temp.Dec);
@@ -221,9 +226,9 @@ int sim1_f(const oskar_Settings& settings)
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
         float frequency = settings.obs().frequency(i);
-        printf("frequency = %e\n", frequency);
+        printf("- Frequency: %e\n", frequency);
 
-        // Allocate memory for frequency sacled sky model.
+        // Allocate memory for frequency scaled sky model.
         oskar_SkyModelGlobal_f sky_temp;
         sky_temp.num_sources = sky.num_sources;
         sky_temp.Dec = (float*) malloc(sky.num_sources * sizeof(float));
@@ -255,22 +260,24 @@ int sim1_f(const oskar_Settings& settings)
 
         printf("= Number of visibility points generated: %i\n", vis.num_samples);
 
-        // Write vis binary file.
+        // Write visibility binary file.
         if (!settings.obs().oskar_vis_filename().isEmpty())
         {
             QString vis_file = settings.obs().oskar_vis_filename() + "_channel_" + QString::number(i) + ".dat";
-            printf("= Writing oskar vis data file: %s.\n",
+            printf("= Writing OSKAR visibility data file: %s\n",
                     vis_file.toLatin1().data());
             oskar_write_vis_data_f(vis_file.toLatin1().data(), &vis);
         }
 
         // Write MS.
+#ifndef OSKAR_NO_MS
         if (!settings.obs().ms_filename().isEmpty())
         {
             QString ms_file = settings.obs().ms_filename() + "_channel_" + QString::number(i) + ".ms";
-            printf("= Writing ms: %s.\n", ms_file.toLatin1().data());
+            printf("= Writing Measurement Set: %s\n", ms_file.toLatin1().data());
             oskar_write_ms_f(ms_file.toLatin1().data(), &settings, &vis, true);
         }
+#endif
 
         free(sky_temp.RA);
         free(sky_temp.Dec);
