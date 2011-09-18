@@ -46,12 +46,16 @@ class LoadCoordinatesTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(LoadCoordinatesTest);
-        CPPUNIT_TEST(test_load);
+        CPPUNIT_TEST(test_load_2d);
+        CPPUNIT_TEST(test_load_3d);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
-        void test_load();
+        void test_load_2d();
+
+        /// Test method.
+        void test_load_3d();
 };
 
 // Register the test class.
