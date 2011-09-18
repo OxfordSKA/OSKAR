@@ -54,29 +54,47 @@ inline __device__ __host__ texture<float2, 2>& texture_ref<float2>()
 
 // Kernel.
 template <typename InputType, typename CoordType, typename OutputType>
-__global__ void oskar_bilinear_kernel(int n, const CoordType* pos_x,
+__global__ void oskar_cudak_interp_bilinear(const CoordType size_x,
+		const CoordType size_y, const int n, const CoordType* pos_x,
         const CoordType* pos_y, OutputType* out)
 {
     const int i = __mul24(blockIdx.x, blockDim.x) + threadIdx.x;
     if (i < n)
     {
+    	// Get normalised coordinates from global memory.
         CoordType p_x = pos_x[i];
         CoordType p_y = pos_y[i];
+
+        // Re-scale coordinates to allow for 0.5-pixel offsets.
+        p_x = ((CoordType)0.5 + (size_x - 1) * p_x) / (CoordType)size_x;
+        p_y = ((CoordType)0.5 + (size_y - 1) * p_y) / (CoordType)size_y;
+
+        // Perform interpolated texture lookup.
         out[i] = tex2D(texture_ref<InputType>(), p_x, p_y);
     }
 }
 
 // Kernel template specialisation for complex double output.
 template <>
-__global__ void oskar_bilinear_kernel<float2, double, double2>(int n,
+__global__ void oskar_cudak_interp_bilinear<float2, double, double2>(
+		const double size_x, const double size_y, const int n,
         const double* pos_x, const double* pos_y, double2* out)
 {
     const int i = __mul24(blockIdx.x, blockDim.x) + threadIdx.x;
     if (i < n)
     {
-        float p_x = pos_x[i];
-        float p_y = pos_y[i];
+    	// Get normalised coordinates from global memory.
+        float p_x = (float)pos_x[i];
+        float p_y = (float)pos_y[i];
+
+        // Re-scale coordinates to allow for 0.5-pixel offsets.
+        p_x = (0.5f + (size_x - 1) * p_x) / (float)size_x;
+        p_y = (0.5f + (size_y - 1) * p_y) / (float)size_y;
+
+        // Perform interpolated texture lookup.
         float2 t1 = tex2D(texture_ref<float2>(), p_x, p_y);
+
+        // Promote result to double.
         double2 t2 = make_double2(t1.x, t1.y);
         out[i] = t2;
     }
@@ -84,7 +102,7 @@ __global__ void oskar_bilinear_kernel<float2, double, double2>(int n,
 
 // Kernel wrapper.
 template <typename InputType, typename CoordType, typename OutputType>
-int oskar_math_cuda_interp_bilinear(int width, int height, int pitch,
+int oskar_cuda_interp_bilinear(int size_x, int size_y, int pitch,
         const InputType* input, int n, const CoordType* pos_x,
         const CoordType* pos_y, OutputType* output)
 {
@@ -93,59 +111,63 @@ int oskar_math_cuda_interp_bilinear(int width, int height, int pitch,
     texture<InputType, 2>& ref = texture_ref<InputType>();
     ref.filterMode = cudaFilterModeLinear;
     ref.normalized = true;
+    ref.addressMode[0] = cudaAddressModeClamp;
+    ref.addressMode[1] = cudaAddressModeClamp;
+    ref.addressMode[2] = cudaAddressModeClamp;
     cudaError_t errCuda = cudaBindTexture2D(0, &ref, input, &channelDesc,
-            width, height, pitch);
+            size_x, size_y, pitch);
     if (errCuda != cudaSuccess) return errCuda;
 
     // Launch the kernel.
-    //const int thd = 768;
-    const int thd = 512; // 768 dosn't work with CUDA 1.3
+    const int thd = 512; // Using more than this won't work with CUDA 1.3.
     const int blk = (n + thd - 1) / thd;
-    oskar_bilinear_kernel<InputType, CoordType, OutputType> <<< blk, thd >>>
-            (n, pos_x, pos_y, output);
+    oskar_cudak_interp_bilinear<InputType, CoordType, OutputType> <<<blk, thd>>>
+    		(size_x, size_y, n, pos_x, pos_y, output);
     cudaDeviceSynchronize();
-    errCuda = cudaPeekAtLastError();
-    if (errCuda != cudaSuccess) return errCuda;
 
     // Unbind texture.
     cudaUnbindTexture(&ref);
 
-    // Return 0 on success.
-    return 0;
+    // Return error code.
+    return cudaPeekAtLastError();
 }
 
+// Single precision.
 extern "C"
-int oskar_cuda_interp_bilinear_f(int width, int height, int pitch,
+int oskar_cuda_interp_bilinear_f(int size_x, int size_y, int pitch,
         const float* input, int n, const float* pos_x, const float* pos_y,
         float* output)
 {
-    return oskar_math_cuda_interp_bilinear<float, float, float>(width,
-            height, pitch, input, n, pos_x, pos_y, output);
+    return oskar_cuda_interp_bilinear<float, float, float>(size_x,
+            size_y, pitch, input, n, pos_x, pos_y, output);
 }
 
+// Single precision complex.
 extern "C"
-int oskar_cuda_interp_bilinear_complex_f(int width, int height, int pitch,
+int oskar_cuda_interp_bilinear_c(int size_x, int size_y, int pitch,
         const float2* input, int n, const float* pos_x, const float* pos_y,
         float2* output)
 {
-    return oskar_math_cuda_interp_bilinear<float2, float, float2>(width,
-            height, pitch, input, n, pos_x, pos_y, output);
+    return oskar_cuda_interp_bilinear<float2, float, float2>(size_x,
+            size_y, pitch, input, n, pos_x, pos_y, output);
 }
 
+// Double precision.
 extern "C"
-int oskar_cuda_interp_bilinear_d(int width, int height, int pitch,
+int oskar_cuda_interp_bilinear_d(int size_x, int size_y, int pitch,
         const float* input, int n, const double* pos_x, const double* pos_y,
         double* output)
 {
-    return oskar_math_cuda_interp_bilinear<float, double, double>(width,
-            height, pitch, input, n, pos_x, pos_y, output);
+    return oskar_cuda_interp_bilinear<float, double, double>(size_x,
+    		size_y, pitch, input, n, pos_x, pos_y, output);
 }
 
+// Double precision complex.
 extern "C"
-int oskar_cuda_interp_bilinear_complex_d(int width, int height, int pitch,
+int oskar_cuda_interp_bilinear_z(int size_x, int size_y, int pitch,
         const float2* input, int n, const double* pos_x, const double* pos_y,
         double2* output)
 {
-    return oskar_math_cuda_interp_bilinear<float2, double, double2>(width,
-            height, pitch, input, n, pos_x, pos_y, output);
+    return oskar_cuda_interp_bilinear<float2, double, double2>(size_x,
+    		size_y, pitch, input, n, pos_x, pos_y, output);
 }

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_CUDA_INTERP_BILINEAR_H_
-#define OSKAR_MATH_CUDA_INTERP_BILINEAR_H_
+#ifndef OSKAR_CUDA_INTERP_BILINEAR_H_
+#define OSKAR_CUDA_INTERP_BILINEAR_H_
 
 /**
- * @file oskar_math_cuda_interp_bilinear.h
+ * @file oskar_cuda_interp_bilinear.h
  */
 
 #include "oskar_windows.h"
@@ -65,7 +65,7 @@ extern "C" {
  * @param[out] output Interpolated output data.
  */
 DllExport
-int oskar_cuda_interp_bilinear_f(int width, int height, int pitch,
+int oskar_cuda_interp_bilinear_f(int size_x, int size_y, int pitch,
         const float* input, int n, const float* pos_x, const float* pos_y,
         float* output);
 
@@ -94,13 +94,12 @@ int oskar_cuda_interp_bilinear_f(int width, int height, int pitch,
  * @param[out] output Interpolated output data.
  */
 DllExport
-int oskar_cuda_interp_bilinear_complex_f(int width, int height, int pitch,
+int oskar_cuda_interp_bilinear_c(int size_x, int size_y, int pitch,
         const float2* input, int n, const float* pos_x, const float* pos_y,
         float2* output);
-
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_MATH_CUDA_INTERP_BILINEAR_H_
+#endif // OSKAR_CUDA_INTERP_BILINEAR_H_

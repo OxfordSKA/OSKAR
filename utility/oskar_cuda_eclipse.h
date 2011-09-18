@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_CUDA_ECLIPSE_H_
-#define OSKAR_UTIL_CUDA_ECLIPSE_H_
+#ifndef OSKAR_CUDA_MACROS_H_
+#define OSKAR_CUDA_MACROS_H_
 
 /**
- * @file oskar_util_cuda_eclipse.h
+ * @file oskar_cuda_macros.h
  */
 
 #ifdef __CDT_PARSER__
@@ -40,6 +40,9 @@
     #define __shared__
     #define __constant__
     #define __forceinline__
+	#define OSKAR_CUDAK_CONF(...)
+#else
+	#define OSKAR_CUDAK_CONF(...) <<< __VA_ARGS__ >>>
 #endif
 
-#endif // OSKAR_UTIL_CUDA_ECLIPSE_H_
+#endif // OSKAR_CUDA_MACROS_H_
