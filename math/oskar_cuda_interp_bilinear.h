@@ -42,61 +42,127 @@ extern "C" {
 
 /**
  * @brief
- * Performs bilinear interpolation of real data.
+ * Performs bilinear interpolation (single precision real).
  *
  * @details
  * This function performs bilinear interpolation using the native
  * texture interpolation capabilities of the graphics hardware.
  *
- * Note that the input data must have been previously allocated using
- * cudaMallocPitch().
+ * Note that the input data must have been allocated using cudaMallocPitch().
  *
- * The positions are specified in the input \p pos array, which contains
- * (x, y) coordinate pairs in units of (width, height) respectively.
- * The range is (0, width - 1), (0, height - 1), and the centre of the first
- * element is at (0.5, 0.5).
+ * The positions are specified in the input \p pos_x and \p pos_y arrays, which
+ * contain normalised (x, y) coordinates. The coordinates must both be in the
+ * range [0.0, 1.0), and correspond to the full range of the input texture
+ * dimensions. <b>Note that any coordinate values outside this range will be
+ * clamped.</b>
  *
- * @param[in] width   Width (fastest varying dimension) of lookup table.
- * @param[in] height  Height (slowest varying dimension) of lookup table.
- * @param[in] pitch   Memory pitch of input, as returned by cudaMallocPitch().
- * @param[in] input   Input lookup table, as returned by cudaMallocPitch().
- * @param[in] n       Number of output (interpolated) points.
- * @param[in] pos     Positions of output points.
- * @param[out] output Interpolated output data.
+ * @param[in] size_x    Width (fastest varying dimension) of lookup table.
+ * @param[in] size_y    Height (slowest varying dimension) of lookup table.
+ * @param[in] pitch     Memory pitch of input, as returned by cudaMallocPitch().
+ * @param[in] d_input   Lookup table pointer, as returned by cudaMallocPitch().
+ * @param[in] n         Number of output (interpolated) points.
+ * @param[in] d_pos_x   The x-positions of the output points.
+ * @param[in] d_pos_y   The y-positions of the output points.
+ * @param[out] d_output Interpolated output data.
  */
 DllExport
 int oskar_cuda_interp_bilinear_f(int size_x, int size_y, int pitch,
-        const float* input, int n, const float* pos_x, const float* pos_y,
-        float* output);
+        const float* d_input, int n, const float* d_pos_x,
+        const float* d_pos_y, float* d_output);
 
 /**
  * @brief
- * Performs bilinear interpolation of complex data.
+ * Performs bilinear interpolation (single precision complex).
  *
  * @details
- * This function performs bilinear interpolation of complex data using the
- * native texture interpolation capabilities of the graphics hardware.
+ * This function performs bilinear interpolation using the native
+ * texture interpolation capabilities of the graphics hardware.
  *
- * Note that the input data must have been previously allocated using
- * cudaMallocPitch().
+ * Note that the input data must have been allocated using cudaMallocPitch().
  *
- * The positions are specified in the input \p pos array, which contains
- * (x, y) coordinate pairs in units of (width, height) respectively.
- * The range is (0, width - 1), (0, height - 1), and the centre of the first
- * element is at (0.5, 0.5).
+ * The positions are specified in the input \p pos_x and \p pos_y arrays, which
+ * contain normalised (x, y) coordinates. The coordinates must both be in the
+ * range [0.0, 1.0), and correspond to the full range of the input texture
+ * dimensions. <b>Note that any coordinate values outside this range will be
+ * clamped.</b>
  *
- * @param[in] width   Width (fastest varying dimension) of lookup table.
- * @param[in] height  Height (slowest varying dimension) of lookup table.
- * @param[in] pitch   Memory pitch of input, as returned by cudaMallocPitch().
- * @param[in] input   Input lookup table, as returned by cudaMallocPitch().
- * @param[in] n       Number of output (interpolated) points.
- * @param[in] pos     Positions of output points.
- * @param[out] output Interpolated output data.
+ * @param[in] size_x    Width (fastest varying dimension) of lookup table.
+ * @param[in] size_y    Height (slowest varying dimension) of lookup table.
+ * @param[in] pitch     Memory pitch of input, as returned by cudaMallocPitch().
+ * @param[in] d_input   Lookup table pointer, as returned by cudaMallocPitch().
+ * @param[in] n         Number of output (interpolated) points.
+ * @param[in] d_pos_x   The x-positions of the output points.
+ * @param[in] d_pos_y   The y-positions of the output points.
+ * @param[out] d_output Interpolated output data.
  */
 DllExport
 int oskar_cuda_interp_bilinear_c(int size_x, int size_y, int pitch,
-        const float2* input, int n, const float* pos_x, const float* pos_y,
-        float2* output);
+        const float2* d_input, int n, const float* d_pos_x,
+        const float* d_pos_y, float2* d_output);
+
+/**
+ * @brief
+ * Performs bilinear interpolation (double precision).
+ *
+ * @details
+ * This function performs bilinear interpolation using the native
+ * texture interpolation capabilities of the graphics hardware. <b>Although the
+ * data returned is in double precision, current architecture limitations mean
+ * that the interpolation itself is still carried out in single precision.</b>
+ *
+ * Note that the input data must have been allocated using cudaMallocPitch().
+ *
+ * The positions are specified in the input \p pos_x and \p pos_y arrays, which
+ * contain normalised (x, y) coordinates. The coordinates must both be in the
+ * range [0.0, 1.0), and correspond to the full range of the input texture
+ * dimensions. <b>Note that any coordinate values outside this range will be
+ * clamped.</b>
+ *
+ * @param[in] size_x    Width (fastest varying dimension) of lookup table.
+ * @param[in] size_y    Height (slowest varying dimension) of lookup table.
+ * @param[in] pitch     Memory pitch of input, as returned by cudaMallocPitch().
+ * @param[in] d_input   Lookup table pointer, as returned by cudaMallocPitch().
+ * @param[in] n         Number of output (interpolated) points.
+ * @param[in] d_pos_x   The x-positions of the output points.
+ * @param[in] d_pos_y   The y-positions of the output points.
+ * @param[out] d_output Interpolated output data.
+ */
+DllExport
+int oskar_cuda_interp_bilinear_d(int size_x, int size_y, int pitch,
+        const float* d_input, int n, const double* d_pos_x,
+        const double* d_pos_y, double* d_output);
+
+/**
+ * @brief
+ * Performs bilinear interpolation (double precision complex).
+ *
+ * @details
+ * This function performs bilinear interpolation using the native
+ * texture interpolation capabilities of the graphics hardware. <b>Although the
+ * data returned is in double precision, current architecture limitations mean
+ * that the interpolation itself is still carried out in single precision.</b>
+ *
+ * Note that the input data must have been allocated using cudaMallocPitch().
+ *
+ * The positions are specified in the input \p pos_x and \p pos_y arrays, which
+ * contain normalised (x, y) coordinates. The coordinates must both be in the
+ * range [0.0, 1.0), and correspond to the full range of the input texture
+ * dimensions. <b>Note that any coordinate values outside this range will be
+ * clamped.</b>
+ *
+ * @param[in] size_x    Width (fastest varying dimension) of lookup table.
+ * @param[in] size_y    Height (slowest varying dimension) of lookup table.
+ * @param[in] pitch     Memory pitch of input, as returned by cudaMallocPitch().
+ * @param[in] d_input   Lookup table pointer, as returned by cudaMallocPitch().
+ * @param[in] n         Number of output (interpolated) points.
+ * @param[in] d_pos_x   The x-positions of the output points.
+ * @param[in] d_pos_y   The y-positions of the output points.
+ * @param[out] d_output Interpolated output data.
+ */
+DllExport
+int oskar_cuda_interp_bilinear_z(int size_x, int size_y, int pitch,
+        const float2* d_input, int n, const double* d_pos_x,
+        const double* d_pos_y, double2* d_output);
 
 #ifdef __cplusplus
 }
