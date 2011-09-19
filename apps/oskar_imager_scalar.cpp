@@ -236,6 +236,9 @@ int imager_f(const oskar_Settings& settings)
     int num_dumps_per_snapshot = settings.image().make_snapshots() ?
             settings.image().dumps_per_snapshot() : settings.obs().num_vis_dumps();
     int num_snapshots = (int)settings.obs().num_vis_dumps() / num_dumps_per_snapshot;
+
+    printf("creating %i image snapshots\n", num_snapshots);
+
     if ((int)settings.obs().num_vis_dumps() % num_dumps_per_snapshot != 0)
         fprintf(stderr, "ERROR: eek!\n");
 
