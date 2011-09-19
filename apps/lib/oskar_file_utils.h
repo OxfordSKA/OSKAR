@@ -29,14 +29,14 @@
 #ifndef OSKAR_FILE_UTILS_H_
 #define OSKAR_FILE_UTILS_H_
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include <QtCore/QString>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-DllExport
+OSKAR_EXPORT
 bool oskar_remove_dir(const char* dir_name);
 
 

@@ -33,7 +33,7 @@
  * @file oskar_cudak_jones_mul_c2.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
 
 /**

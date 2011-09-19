@@ -29,7 +29,7 @@
 #ifndef OSKAR_STATION_MODEL_H_
 #define OSKAR_STATION_MODEL_H_
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 
 #ifdef __cplusplus
@@ -55,19 +55,19 @@ struct oskar_StationModel_f
 typedef struct oskar_StationModel_f oskar_StationModel_f;
 
 //----- Utility functions -----------------------------------------------------
-DllExport
+OSKAR_EXPORT
 void oskar_copy_stations_to_device_d(const oskar_StationModel_d* h_stations,
         const unsigned num_stations, oskar_StationModel_d* hd_stations);
 
-DllExport
+OSKAR_EXPORT
 void oskar_copy_stations_to_device_f(const oskar_StationModel_f* h_stations,
         const unsigned num_stations, oskar_StationModel_f* hd_stations);
 
-DllExport
+OSKAR_EXPORT
 void oskar_scale_station_coords_d(const unsigned num_stations,
         oskar_StationModel_d* hd_stations, const double value);
 
-DllExport
+OSKAR_EXPORT
 void oskar_scale_station_coords_f(const unsigned num_stations,
         oskar_StationModel_f* hd_stations, const float value);
 //------------------------------------------------------------------------------

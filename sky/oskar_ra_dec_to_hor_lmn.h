@@ -33,7 +33,7 @@
  * @file oskar_ra_dec_to_hor_lmn.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +58,7 @@ extern "C" {
  * @param[out] hor_m The source m-direction-cosines in the horizontal system.
  * @param[out] hor_n The source n-direction-cosines in the horizontal system.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_ra_dec_to_hor_lmn_f(int n, const float* ra, const float* dec,
 		float lst, float lat, float* hor_l, float* hor_m, float* hor_n);
 
@@ -81,7 +81,7 @@ int oskar_ra_dec_to_hor_lmn_f(int n, const float* ra, const float* dec,
  * @param[out] hor_m The source m-direction-cosines in the horizontal system.
  * @param[out] hor_n The source n-direction-cosines in the horizontal system.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_ra_dec_to_hor_lmn_d(int n, const double* ra, const double* dec,
 		double lst, double lat, double* hor_l, double* hor_m, double* hor_n);
 

@@ -34,7 +34,7 @@
  * @file oskar_write_ms.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "apps/lib/oskar_Settings.h"
 #include "interferometry/oskar_VisData.h"
 
@@ -42,11 +42,11 @@
 extern "C" {
 #endif
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
         const oskar_VisData_d* vis, const bool overwrite = true);
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
         const oskar_VisData_f* vis, const bool overwrite = true);
 

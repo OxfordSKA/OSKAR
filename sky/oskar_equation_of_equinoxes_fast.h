@@ -33,7 +33,7 @@
  * @file oskar_equation_of_equinoxes_fast.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +54,7 @@ extern "C" {
  *
  * @return The equation of the equinoxes in radians.
  */
-DllExport
+OSKAR_EXPORT
 double oskar_equation_of_equinoxes_fast_d(double mjd);
 
 #ifdef __cplusplus

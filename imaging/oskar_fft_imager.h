@@ -34,13 +34,13 @@
  */
 
 #include "interferometry/oskar_VisData.h"
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-DllExport
+OSKAR_EXPORT
 void oskar_fft_imager(const oskar_VisData_d* vis, const double image_size,
         const double cell_size, double* image);
 

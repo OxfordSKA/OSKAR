@@ -33,7 +33,7 @@
  * @file oskar_sky_cuda_ra_dec_to_relative_lmn.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +58,7 @@ extern "C" {
  * @param[out] d_m   The m-direction-cosines relative to the reference point.
  * @param[out] d_n   The n-direction-cosines relative to the reference point.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* d_ra,
         const float* d_dec, float ra0, float dec0, float* d_l, float* d_m,
         float* d_n);
@@ -82,7 +82,7 @@ int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* d_ra,
  * @param[out] d_m   The m-direction-cosines relative to the reference point.
  * @param[out] d_n   The n-direction-cosines relative to the reference point.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* d_ra,
         const double* d_dec, double ra0, double dec0, double* d_l, double* d_m,
         double* d_n);

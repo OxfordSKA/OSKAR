@@ -33,7 +33,7 @@
  * @file oskar_cuda_as2hi.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,7 +64,7 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] signals The computed antenna signals (see note, above).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_as2hi_f(int na, const float* ax, const float* ay,
         int ns, const float* samp, const float* slon, const float* slat,
         float k, float* signals);

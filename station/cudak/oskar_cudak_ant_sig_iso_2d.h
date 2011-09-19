@@ -33,7 +33,7 @@
  * @file oskar_bf_cudak_ant_sig_iso_2d.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

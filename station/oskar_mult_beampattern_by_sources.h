@@ -33,7 +33,7 @@
  * @file oskar_mult_beampattern_by_sources.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 #include "utility/oskar_vector_types.h"
 
@@ -41,11 +41,11 @@
 extern "C" {
 #endif
 
-DllExport
+OSKAR_EXPORT
 void oskar_mult_beampattern_by_source_field_amp_d(const unsigned num_stations,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_e_jones);
 
-DllExport
+OSKAR_EXPORT
 void oskar_mult_beampattern_by_source_field_amp_f(const unsigned num_stations,
         const oskar_SkyModelLocal_f* hd_sky, float2* d_e_jones);
 

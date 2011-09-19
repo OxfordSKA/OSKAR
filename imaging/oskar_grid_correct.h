@@ -33,14 +33,14 @@
  * @file oskar_grid_correct.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "imaging/oskar_GridKernel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-DllExport
+OSKAR_EXPORT
 void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
         const unsigned grid_size, double** correction);
 

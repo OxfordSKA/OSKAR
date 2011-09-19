@@ -33,7 +33,7 @@
  * @file oskar_cudaf_mul_c_c.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

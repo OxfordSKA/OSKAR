@@ -33,7 +33,7 @@
  * @file oskar_compute_baselines.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +58,7 @@ extern "C" {
  * @param[out] bv The baseline v-positions (length na * (na - 1) / 2).
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_compute_baselines_f(int na, const float* au,
         const float* av, const float* aw, float* bu, float* bv, float* bw);
 
@@ -81,7 +81,7 @@ void oskar_compute_baselines_f(int na, const float* au,
  * @param[out] bv The baseline v-positions (length na * (na - 1) / 2).
  * @param[out] bw The baseline w-positions (length na * (na - 1) / 2).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_compute_baselines_d(int na, const double* au,
         const double* av, const double* aw, double* bu, double* bv, double* bw);
 

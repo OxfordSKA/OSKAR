@@ -33,7 +33,7 @@
  * @file oskar_SkyModel.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 
 #ifdef __cplusplus
@@ -98,32 +98,32 @@ typedef struct oskar_SkyModelLocal_d oskar_SkyModelLocal_d;
 
 
 // ---------- Utility functions ------------------------------------------------
-DllExport
+OSKAR_EXPORT
 void oskar_copy_gobal_sky_to_device_d(const oskar_SkyModelGlobal_d* h_sky,
         oskar_SkyModelGlobal_d* hd_sky);
 
-DllExport
+OSKAR_EXPORT
 void oskar_copy_gobal_sky_to_device_f(const oskar_SkyModelGlobal_f* h_sky,
         oskar_SkyModelGlobal_f* hd_sky);
 
-DllExport
+OSKAR_EXPORT
 void oskar_allocate_device_local_sky_d(const int num_sources,
         oskar_SkyModelLocal_d* hd_sky);
 
-DllExport
+OSKAR_EXPORT
 void oskar_allocate_device_local_sky_f(const int num_sources,
         oskar_SkyModelLocal_f* hd_sky);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_device_global_sky_d(oskar_SkyModelGlobal_d* hd_sky);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_device_global_sky_f(oskar_SkyModelGlobal_f* hd_sky);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_device_local_sky_d(oskar_SkyModelLocal_d* hd_sky);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_device_local_sky_f(oskar_SkyModelLocal_f* hd_sky);
 // -----------------------------------------------------------------------------
 

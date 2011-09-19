@@ -30,7 +30,7 @@
 #define OSKAR_VIS_GRID_H_
 
 #include "utility/oskar_vector_types.h"
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,10 +44,10 @@ struct oskar_VisGrid_d
 };
 typedef struct oskar_VisGrid_d oskar_VisGrid_d;
 
-DllExport
+OSKAR_EXPORT
 void oskar_allocate_vis_grid_d(const unsigned grid_size, oskar_VisGrid_d* grid);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_vis_grid_d(oskar_VisGrid_d* grid);
 
 #ifdef __cplusplus

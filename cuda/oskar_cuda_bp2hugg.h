@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 /**
  * @brief
@@ -70,7 +70,7 @@ extern "C" {
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cudaf_bp2hugg(int na, const float* ax, const float* ay,
         const float* aw, const float* ag, int ns, const float* slon,
         const float* slat, float ba, float be, float k, float* image);
@@ -106,7 +106,7 @@ void oskar_cudaf_bp2hugg(int na, const float* ax, const float* ay,
  * @param[in] k The wavenumber (rad / m).
  * @param[out] image The computed beam pattern (see note, above).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cudad_bp2hugg(int na, const double* ax, const double* ay,
         const double* aw, const double* ag, int ns, const double* slon,
         const double* slat, double ba, double be, double k, double* image);

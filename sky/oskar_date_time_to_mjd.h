@@ -33,7 +33,7 @@
  * @file oskar_date_time_to_mjd.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +54,7 @@ extern "C" {
  *
  * @return The Modified Julian Date.
  */
-DllExport
+OSKAR_EXPORT
 double oskar_date_time_to_mjd_d(int year, int month, int day,
         double day_fraction);
 

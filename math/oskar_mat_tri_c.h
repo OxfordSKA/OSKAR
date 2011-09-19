@@ -33,7 +33,7 @@
  * @file oskar_mat_tri_c.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +51,7 @@ extern "C" {
  * @param[in] a The matrix (length 2 * n * n).
  * @param[out] b The triangular half (length 2 * (n * (n - 1) / 2)).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_mat_tri_c_f(int n, const float* a, float* b);
 
 /**
@@ -66,7 +66,7 @@ void oskar_mat_tri_c_f(int n, const float* a, float* b);
  * @param[in] a The matrix (length 2 * n * n).
  * @param[out] b The triangular half (length 2 * (n * (n - 1) / 2)).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_mat_tri_c_d(int n, const double* a, double* b);
 
 #ifdef __cplusplus

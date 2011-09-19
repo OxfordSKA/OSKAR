@@ -36,7 +36,7 @@
 #include "station/oskar_StationModel.h"
 #include "sky/oskar_SkyModel.h"
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 #include "math/cudak/oskar_cudak_dftw_2d_seq_in.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"

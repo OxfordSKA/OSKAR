@@ -33,7 +33,7 @@
  * @file oskar_cuda_dft_o2c_2d.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,7 +75,7 @@ extern "C" {
  * This function returns a code to indicate if there were errors in execution.
  * A return code of 0 indicates no error.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cudaf_dft_o2c_2d(int n_in, const float* x_in, const float* y_in,
         int n_out, const float* x_out, const float* y_out, float x_centre,
         float y_centre, float* work, float* output);
@@ -116,7 +116,7 @@ int oskar_cudaf_dft_o2c_2d(int n_in, const float* x_in, const float* y_in,
  * This function returns a code to indicate if there were errors in execution.
  * A return code of 0 indicates no error.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cudad_dft_o2c_2d(int n_in, const double* x_in, const double* y_in,
         int n_out, const double* x_out, const double* y_out, double x_centre,
         double y_centre, double* work, double* output);

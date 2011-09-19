@@ -33,7 +33,7 @@
  * @file oskar_math_cudak_sph_to_lm.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

@@ -33,7 +33,7 @@
  * @file oskar_cuda_device_info.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,11 +45,11 @@ extern "C" {
  * @param[out] major    The major CUDA architecture revision.
  * @param[out] minor    The minor CUDA architecture revision.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_get_cuda_arch(const int deviceId, int* major, int* minor);
 
 
-DllExport
+OSKAR_EXPORT
 bool oskar_cuda_device_supports_double(const int deviceId);
 
 #ifdef __cplusplus

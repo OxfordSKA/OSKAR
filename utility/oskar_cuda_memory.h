@@ -33,7 +33,7 @@
  * @file oskar_util_cuda_memory.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +50,7 @@ extern "C" {
  * @param[in,out] ptr Pointer to memory block.
  * @param[in] size Size (in bytes) of block to allocate.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_malloc(void** ptr, unsigned size);
 
 /**
@@ -64,7 +64,7 @@ void oskar_cuda_malloc(void** ptr, unsigned size);
  * @param[in,out] ptr Pointer to memory block.
  * @param[in] n Number of items to allocate.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_malloc_double(double** ptr, unsigned n);
 
 /**
@@ -78,7 +78,7 @@ void oskar_cuda_malloc_double(double** ptr, unsigned n);
  * @param[in,out] ptr Pointer to memory block.
  * @param[in] n Number of items to allocate.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_malloc_float(float** ptr, unsigned n);
 
 /**
@@ -92,7 +92,7 @@ void oskar_cuda_malloc_float(float** ptr, unsigned n);
  * @param[in,out] ptr Pointer to memory block.
  * @param[in] n Number of items to allocate.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_malloc_int(int** ptr, unsigned n);
 
 /**
@@ -106,7 +106,7 @@ void oskar_cuda_malloc_int(int** ptr, unsigned n);
  * @param[in] src Pointer to source memory block.
  * @param[in] size Size (in bytes) of memory to copy.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_h2d(void* dest, const void* src, unsigned size);
 
 /**
@@ -120,7 +120,7 @@ void oskar_cuda_memcpy_h2d(void* dest, const void* src, unsigned size);
  * @param[in] src Pointer to source memory block.
  * @param[in] n Number of items in the array.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_h2d_double(double* dest, const double* src, unsigned n);
 
 /**
@@ -134,7 +134,7 @@ void oskar_cuda_memcpy_h2d_double(double* dest, const double* src, unsigned n);
  * @param[in] src Pointer to source memory block.
  * @param[in] n Number of items in the array.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_h2d_float(float* dest, const float* src, unsigned n);
 
 /**
@@ -148,7 +148,7 @@ void oskar_cuda_memcpy_h2d_float(float* dest, const float* src, unsigned n);
  * @param[in] src Pointer to source memory block.
  * @param[in] n Number of items in the array.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_h2d_int(int* dest, const int* src, unsigned n);
 
 /**
@@ -162,7 +162,7 @@ void oskar_cuda_memcpy_h2d_int(int* dest, const int* src, unsigned n);
  * @param[in] src Pointer to source memory block.
  * @param[in] size Size (in bytes) of memory to copy.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_d2h(void* dest, const void* src, unsigned size);
 
 /**
@@ -176,7 +176,7 @@ void oskar_cuda_memcpy_d2h(void* dest, const void* src, unsigned size);
  * @param[in] src Pointer to source memory block.
  * @param[in] n Number of items in the array.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_d2h_double(double* dest, const double* src, unsigned n);
 
 /**
@@ -190,7 +190,7 @@ void oskar_cuda_memcpy_d2h_double(double* dest, const double* src, unsigned n);
  * @param[in] src Pointer to source memory block.
  * @param[in] n Number of items in the array.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_d2h_float(float* dest, const float* src, unsigned n);
 
 /**
@@ -204,7 +204,7 @@ void oskar_cuda_memcpy_d2h_float(float* dest, const float* src, unsigned n);
  * @param[in] src Pointer to source memory block.
  * @param[in] n Number of items in the array.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_memcpy_d2h_int(int* dest, const int* src, unsigned n);
 
 /**
@@ -216,7 +216,7 @@ void oskar_cuda_memcpy_d2h_int(int* dest, const int* src, unsigned n);
  *
  * @param[in] n Number of elements.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cuda_free(void* ptr);
 
 #ifdef __cplusplus

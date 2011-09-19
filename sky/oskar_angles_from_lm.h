@@ -33,7 +33,7 @@
  * @file oskar_angles_from_lm.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,7 +55,7 @@ extern "C" {
  * @param[out] lon           Array of longitude values, in radians.
  * @param[out] lat           Array of latitude values, in radians.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
         const double* l, const double* m, double* lon, double* lat);
 

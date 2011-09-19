@@ -33,7 +33,7 @@
  * @file oskar_bf_cudak_antenna.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

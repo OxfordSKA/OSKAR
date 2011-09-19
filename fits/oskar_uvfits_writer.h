@@ -33,7 +33,7 @@
  * @file oskar_uvfits_writer.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "interferometry/oskar_VisData.h"
 #include <fitsio.h>
 
@@ -68,37 +68,37 @@ struct oskar_uvfits_header
 
 
 
-DllExport
+OSKAR_EXPORT
 void oskar_uvfits_open(const char* filename, oskar_uvfits* fits);
 
-DllExport
+OSKAR_EXPORT
 void oskar_check_fits_status(const int status, const char* message);
 
-DllExport
+OSKAR_EXPORT
 void oskar_close_uvfits_file(fitsfile* fits_file);
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_groups_header(fitsfile* fits_file, const long long num_vis);
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_header(fitsfile* fits_file, const char* filename, double ra0,
         double dec0, double frequency0, double date0);
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_axis_header(fitsfile* fits_file, const int id,
         const char* ctype, const char* comment, const double crval,
         const double cdelt, const double crpix, const double crota);
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_param_header(fitsfile* fits_file, const int id,
         const char* type, const char* comment, const double scale,
         const double zero);
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
         const double* weight, const double* date, const double* baseline);
 
-DllExport
+OSKAR_EXPORT
 int oskar_uvfits_baseline_id(int ant1, int ant2);
 
 

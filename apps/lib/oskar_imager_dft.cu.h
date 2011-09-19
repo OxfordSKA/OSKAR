@@ -33,7 +33,7 @@
  * @file oskar_imager_dft.cu.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
@@ -57,13 +57,13 @@ extern "C" {
  *
  * @return CUDA error code.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
         double* v, const double frequency, const unsigned image_size,
         const double* l, double* image);
 
 
-DllExport
+OSKAR_EXPORT
 int oskar_imager_dft_f(const unsigned num_vis, const float2* vis, float* u,
         float* v, const float frequency, const unsigned image_size,
         const float* l, float* image);

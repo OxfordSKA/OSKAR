@@ -29,7 +29,7 @@
 #ifndef OSKAR_TELESCOPEMODEL_H_
 #define OSKAR_TELESCOPEMODEL_H_
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,26 +63,26 @@ typedef struct oskar_TelescopeModel_f oskar_TelescopeModel_f;
 
 
 //--- Utility functions --------------------------------------------------------
-DllExport
+OSKAR_EXPORT
 void oskar_copy_telescope_to_device_d(const oskar_TelescopeModel_d* h_telescope,
         oskar_TelescopeModel_d* hd_telescope);
 
-DllExport
+OSKAR_EXPORT
 void oskar_copy_telescope_to_device_f(const oskar_TelescopeModel_f* h_telescope,
         oskar_TelescopeModel_f* hd_telescope);
 
-DllExport
+OSKAR_EXPORT
 void oskar_scale_device_telescope_coords_d(oskar_TelescopeModel_d* hd_telescope,
         const double value);
 
-DllExport
+OSKAR_EXPORT
 void oskar_scale_device_telescope_coords_f(oskar_TelescopeModel_f* hd_telescope,
         const float value);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_device_telescope_d(oskar_TelescopeModel_d* hd_telescope);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_device_telescope_f(oskar_TelescopeModel_f* hd_telescope);
 //------------------------------------------------------------------------------
 

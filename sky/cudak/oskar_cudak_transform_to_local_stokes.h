@@ -33,7 +33,7 @@
  * @file oskar_cudak_transform_to_local_stokes.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

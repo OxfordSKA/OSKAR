@@ -33,7 +33,7 @@
  * @file oskar_cudak_correlator.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
 
 /**

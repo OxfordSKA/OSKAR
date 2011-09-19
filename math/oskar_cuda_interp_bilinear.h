@@ -33,7 +33,7 @@
  * @file oskar_cuda_interp_bilinear.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
@@ -65,7 +65,7 @@ extern "C" {
  * @param[in] d_pos_y   The y-positions of the output points.
  * @param[out] d_output Interpolated output data.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_interp_bilinear_f(int size_x, int size_y, int pitch,
         const float* d_input, int n, const float* d_pos_x,
         const float* d_pos_y, float* d_output);
@@ -95,7 +95,7 @@ int oskar_cuda_interp_bilinear_f(int size_x, int size_y, int pitch,
  * @param[in] d_pos_y   The y-positions of the output points.
  * @param[out] d_output Interpolated output data.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_interp_bilinear_c(int size_x, int size_y, int pitch,
         const float2* d_input, int n, const float* d_pos_x,
         const float* d_pos_y, float2* d_output);
@@ -127,7 +127,7 @@ int oskar_cuda_interp_bilinear_c(int size_x, int size_y, int pitch,
  * @param[in] d_pos_y   The y-positions of the output points.
  * @param[out] d_output Interpolated output data.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_interp_bilinear_d(int size_x, int size_y, int pitch,
         const float* d_input, int n, const double* d_pos_x,
         const double* d_pos_y, double* d_output);
@@ -159,7 +159,7 @@ int oskar_cuda_interp_bilinear_d(int size_x, int size_y, int pitch,
  * @param[in] d_pos_y   The y-positions of the output points.
  * @param[out] d_output Interpolated output data.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_interp_bilinear_z(int size_x, int size_y, int pitch,
         const float2* d_input, int n, const double* d_pos_x,
         const double* d_pos_y, double2* d_output);

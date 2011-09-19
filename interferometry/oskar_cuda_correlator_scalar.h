@@ -33,7 +33,7 @@
  * @file oskar_interferometry_cuda_correlator.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,7 +71,7 @@ extern "C" {
  * @param[in] work_uvw Work array for uvw coordinates (3*na)
  * @param[in,out] vis   The complex visibilities (see note, above).
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_correlator_scalar_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* n, const float2* eb, float ra0,
@@ -110,7 +110,7 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
  * @param[in] work_uvw Work array for uvw coordinates (3*na)
  * @param[out] vis The complex visibilities (see note, above).
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_correlator_scalar_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* n, const double2* eb, double ra0,

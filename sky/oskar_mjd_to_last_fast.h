@@ -33,7 +33,7 @@
  * @file oskar_mjd_to_last_fast.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,10 +51,10 @@ extern "C" {
  *
  * @return The Local Apparent Sidereal Time, in radians.
  */
-DllExport
+OSKAR_EXPORT
 double oskar_mjd_to_last_fast_d(double mjd, double lon);
 
-DllExport
+OSKAR_EXPORT
 float oskar_mjd_to_last_fast_f(float mjd, float lon);
 
 #ifdef __cplusplus

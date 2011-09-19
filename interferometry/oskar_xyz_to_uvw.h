@@ -33,7 +33,7 @@
  * @file oskar_xyz2uvw.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +58,7 @@ extern "C" {
  * @param[out] v    The station v-positions (length na).
  * @param[out] w    The station w-positions (length na).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_xyz_to_uvw_f(int na, const float* x,
         const float* y, const float* z, double ha0, double dec0, float* u,
         float* v, float* w);
@@ -82,7 +82,7 @@ void oskar_xyz_to_uvw_f(int na, const float* x,
  * @param[out] v    The station v-positions (length na).
  * @param[out] w    The station w-positions (length na).
  */
-DllExport
+OSKAR_EXPORT
 void oskar_xyz_to_uvw_d(int na, const double* x,
         const double* y, const double* z, double ha0, double dec0, double* u,
         double* v, double* w);

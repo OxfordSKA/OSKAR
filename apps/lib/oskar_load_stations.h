@@ -34,7 +34,7 @@
  * @file oskar_load_stations.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
@@ -51,11 +51,11 @@ extern "C" {
  * @param[in]  dir_path  Path to a directory of station files.
  * @param[out] stations  Pointer to an array to station model structures.
  */
-DllExport
+OSKAR_EXPORT
 unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stations,
         bool* idential_stations);
 
-DllExport
+OSKAR_EXPORT
 unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stations,
         bool* idential_stations);
 

@@ -33,7 +33,7 @@
  * @file oskar_cuda_bp2hc.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -93,7 +93,7 @@ extern "C" {
  * This function returns a code to indicate if there were errors in execution.
  * A return code of 0 indicates no error.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cudaf_bp2hc(int na, const float* ax, const float* ay,
         int ns, const float* sa, const float* se, float ba, float be, float k,
         int apfn, int atype, float gain, float fwhm, float* image);
@@ -152,7 +152,7 @@ int oskar_cudaf_bp2hc(int na, const float* ax, const float* ay,
  * This function returns a code to indicate if there were errors in execution.
  * A return code of 0 indicates no error.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cudad_bp2hc(int na, const double* ax, const double* ay,
         int ns, const double* sa, const double* se, double ba, double be,
         double k, int apfn, int atype, double gain, double fwhm, double* image);

@@ -33,7 +33,7 @@
  * @file oskar_cuda_compute_local_sky.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
@@ -52,7 +52,7 @@ extern "C" {
  * @param[in]  lat       The geographic latitude of the observer.
  * @param[out] hd_local  The output local sky model.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_compute_local_sky_f(const oskar_SkyModelGlobal_f* hd_global,
 		float lst, float lat, oskar_SkyModelLocal_f* hd_local);
 
@@ -68,7 +68,7 @@ int oskar_cuda_compute_local_sky_f(const oskar_SkyModelGlobal_f* hd_global,
  * @param[in]  lat       The geographic latitude of the observer.
  * @param[out] hd_local  The output local sky model.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_compute_local_sky_d(const oskar_SkyModelGlobal_d* hd_global,
 		double lst, double lat, oskar_SkyModelLocal_d* hd_local);
 

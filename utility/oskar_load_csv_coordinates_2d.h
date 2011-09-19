@@ -33,7 +33,7 @@
  * @file oskar_load_csv_coordinates_2d.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,7 +76,7 @@ extern "C" {
  *
  * @return The number of coordinates loaded.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
         float** x, float** y);
 
@@ -117,7 +117,7 @@ int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
  *
  * @return The number of coordinates loaded.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
         double** x, double** y);
 

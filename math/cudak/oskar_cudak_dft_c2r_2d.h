@@ -33,7 +33,7 @@
  * @file oskar_math_cudak_dft_c2r_2d.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

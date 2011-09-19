@@ -27,7 +27,7 @@
  */
 
 #include "math/oskar_cuda_interp_bilinear.h"
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 // Texture references must be static global variables,
 // hence kernel and all device code is in this file.

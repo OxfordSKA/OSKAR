@@ -33,7 +33,7 @@
  * @file oskar_gridding.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "interferometry/oskar_VisData.h"
 #include "imaging/oskar_GridKernel.h"
 #include "imaging/oskar_VisGrid.h"
@@ -51,7 +51,7 @@ extern "C" {
  * @return grid sum        The total amplitude contribution of the convolution
  *                         kernel to the grid.
  */
-DllExport
+OSKAR_EXPORT
 double oskar_grid_standard(const oskar_VisData_d* vis,
         const oskar_GridKernel_d* kernel, oskar_VisGrid_d* grid);
 

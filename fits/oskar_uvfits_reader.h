@@ -33,7 +33,7 @@
  * @file oskar_uvfits_reader.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include <fitsio.h>
 
 #ifdef __cplusplus

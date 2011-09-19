@@ -33,7 +33,7 @@
  * @file oskar_cuda_transform_to_local_stokes.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +56,7 @@ extern "C" {
  * @param[in,out] d_Q  The original and transformed Stokes Q parameters.
  * @param[in,out] d_U  The original and transformed Stokes U parameters.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_transform_to_local_stokes_f(int ns, const float* d_ra,
         const float* d_dec, float lst, float lat, float* d_Q, float* d_U);
 
@@ -77,7 +77,7 @@ int oskar_cuda_transform_to_local_stokes_f(int ns, const float* d_ra,
  * @param[in,out] d_Q  The original and transformed Stokes Q parameters.
  * @param[in,out] d_U  The original and transformed Stokes U parameters.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_cuda_transform_to_local_stokes_d(int ns, const double* d_ra,
         const double* d_dec, double lst, double lat, double* d_Q, double* d_U);
 

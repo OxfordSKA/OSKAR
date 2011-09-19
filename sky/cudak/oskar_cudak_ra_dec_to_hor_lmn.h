@@ -33,7 +33,7 @@
  * @file oskar_cudak_ra_dec_to_hor_lmn.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

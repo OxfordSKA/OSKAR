@@ -33,7 +33,7 @@
  * @file oskar_evaluate_station_beam.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 #include "station/oskar_StationModel.h"
 
@@ -73,7 +73,7 @@ extern "C" {
  *
  * @return CUDA error code.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
         const double h_beam_l, const double h_beam_m,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_weights_work,
@@ -83,7 +83,7 @@ int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
  * @brief
  * Single precision version of function above.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
         const float h_beam_l, const float h_beam_m,
         const oskar_SkyModelLocal_f* hd_sky, float2* d_weights_work,
@@ -108,7 +108,7 @@ int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
  *                                   identical layouts.
  * @param[out] d_e_jones             Array of beam pattern values.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_evaluate_station_beams_d(const unsigned num_stations,
         const oskar_StationModel_d* hd_stations,
         const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
@@ -119,7 +119,7 @@ void oskar_evaluate_station_beams_d(const unsigned num_stations,
  * @brief
  * Single precision version of function above.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_evaluate_station_beams_f(const unsigned num_stations,
         const oskar_StationModel_f* hd_stations,
         const oskar_SkyModelLocal_f* hd_sky, const float h_beam_l,

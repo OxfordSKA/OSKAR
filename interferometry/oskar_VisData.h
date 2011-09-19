@@ -29,7 +29,7 @@
 #ifndef OSKAR_VIS_DATA_H_
 #define OSKAR_VIS_DATA_H_
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
@@ -67,10 +67,10 @@ typedef struct oskar_VisData_f oskar_VisData_f;
  *                          usually num_baselines * num_snapshots
  * @param[in] vis           Pointer to a oskar_VisData_d structure.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_allocate_vis_data_d(const unsigned num_samples, oskar_VisData_d* vis);
 
-DllExport
+OSKAR_EXPORT
 void oskar_allocate_vis_data_f(const unsigned num_samples, oskar_VisData_f* vis);
 
 
@@ -79,10 +79,10 @@ void oskar_allocate_vis_data_f(const unsigned num_samples, oskar_VisData_f* vis)
  *
  * @param[in] vis          Pointer to a oskar_VisData_d structure.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_free_vis_data_d(oskar_VisData_d* vis);
 
-DllExport
+OSKAR_EXPORT
 void oskar_free_vis_data_f(oskar_VisData_f* vis);
 
 /**
@@ -91,10 +91,10 @@ void oskar_free_vis_data_f(oskar_VisData_f* vis);
  * @param[in] filename    Filename to write to.
  * @param[in] vis         Pointer to oskar_VisData_d structure to be written.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis);
 
-DllExport
+OSKAR_EXPORT
 void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis);
 
 
@@ -108,10 +108,10 @@ void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis);
  * @param[in]  filename  Filename holding the oskar_VisData_d data to load.
  * @param[out] vis       Structure holding the loaded data.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_load_vis_data_d(const char* filename, oskar_VisData_d* vis);
 
-DllExport
+OSKAR_EXPORT
 void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis);
 
 #ifdef __cplusplus

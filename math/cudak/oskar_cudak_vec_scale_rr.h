@@ -33,7 +33,7 @@
  * @file oskar_cudak_vec_scale_rr.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 
 /**
  * @brief

@@ -33,7 +33,7 @@
  * @file oskar_horizon_plane_to_itrs.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
 
 #ifdef __cplusplus
@@ -61,13 +61,13 @@ extern "C" {
  * @param[out] y             Vector of ITRS x-positions, in metres.
  * @param[out] z             Vector of ITRS x-positions, in metres.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_horizon_plane_to_itrs_d(const unsigned num_antennas,
         const double* x_horizon, const double* y_horizon,
         const double latitude, double* x, double* y, double* z);
 
 
-DllExport
+OSKAR_EXPORT
 void oskar_horizon_plane_to_itrs_f(const unsigned num_antennas,
         const float* x_horizon, const float* y_horizon,
         const float latitude, float* x, float* y, float* z);

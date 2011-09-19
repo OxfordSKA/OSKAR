@@ -33,7 +33,7 @@
  * @file oskar_cudaf_mul_mat2c_mat2c_conj_trans.h
  */
 
-#include "utility/oskar_cuda_eclipse.h"
+#include "oskar_global.h"
 #include "math/cudak/oskar_cudaf_mul_c_c_conj.h"
 
 /**

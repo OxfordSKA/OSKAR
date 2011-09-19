@@ -33,7 +33,7 @@
  * @file oskar_load_antenna_pattern.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "station/oskar_AntennaData.h"
 
 #ifdef __cplusplus
@@ -66,6 +66,7 @@ extern "C" {
  * @param[in]  filename Data file name.
  * @param[out] data     Pointer to data structure to fill.
  */
+OSKAR_EXPORT
 int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data);
 
 #ifdef __cplusplus

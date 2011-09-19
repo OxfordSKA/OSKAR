@@ -33,7 +33,7 @@
  * @file oskar_mjd_to_gmst.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +50,7 @@ extern "C" {
  *
  * @return The Greenwich Mean Sidereal Time in radians.
  */
-DllExport
+OSKAR_EXPORT
 double oskar_mjd_to_gmst_d(double mjd);
 
 #ifdef __cplusplus

@@ -33,7 +33,7 @@
  * @file oskar_cuda_vecadd.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +52,7 @@ extern "C" {
  * @param[in] b Second input vector.
  * @param[out] c Output vector.
  */
-DllExport
+OSKAR_EXPORT
 void oskar_cudaf_vecadd(int n, const float* a, const float* b, float* c);
 
 #ifdef __cplusplus

@@ -33,7 +33,7 @@
  * @file oskar_cuda_interferometer1_scalar.h
  */
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 
 #include "sky/oskar_SkyModel.h"
 #include "station/oskar_StationModel.h"
@@ -92,7 +92,7 @@ extern "C" {
  *
  * @return CUDA error code.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_interferometer1_scalar_d(
         const oskar_TelescopeModel_d telescope,
         const oskar_StationModel_d * stations,
@@ -117,7 +117,7 @@ int oskar_interferometer1_scalar_d(
  * @brief
  * Single precision implementation of above function.
  */
-DllExport
+OSKAR_EXPORT
 int oskar_interferometer1_scalar_f(
         const oskar_TelescopeModel_f telescope,
         const oskar_StationModel_f * stations,

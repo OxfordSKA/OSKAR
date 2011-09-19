@@ -29,7 +29,7 @@
 #ifndef OSKAR_FFT_UTILITY_H_
 #define OSKAR_FFT_UTILITY_H_
 
-#include "oskar_windows.h"
+#include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
 #include <fftw3.h>
 
@@ -41,16 +41,16 @@
 extern "C" {
 #endif
 
-DllExport
+OSKAR_EXPORT
 void oskar_fft_shift_z(const unsigned nx, const unsigned ny, double2* data);
 
-DllExport
+OSKAR_EXPORT
 void oskar_fft_shift_d(const unsigned nx, const unsigned ny, double* data);
 
-DllExport
+OSKAR_EXPORT
 void oskar_fft_shift_fftz(const unsigned nx, const unsigned ny, fftw_complex* data);
 
-DllExport
+OSKAR_EXPORT
 void oskar_fft_z2r_2d(const unsigned size, const double2* in, double* out);
 
 #ifdef __cplusplus
