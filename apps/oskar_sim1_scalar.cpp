@@ -28,6 +28,7 @@
 
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_load_sources.h"
+#include "sky/oskar_date_time_to_mjd.h"
 
 #include "station/oskar_StationModel.h"
 
@@ -116,6 +117,18 @@ int sim1_d(const oskar_Settings& settings)
     int error_code = 0;
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
+        unsigned year   = settings.obs().start_time_utc_year();
+        unsigned month  = settings.obs().start_time_utc_month();
+        unsigned day    = settings.obs().start_time_utc_day();
+        unsigned hour   = settings.obs().start_time_utc_hour();
+        unsigned minute = settings.obs().start_time_utc_minute();
+        double second   = settings.obs().start_time_utc_second();
+        double day_fraction = (hour + minute/60 + second/3600) / 24.0;
+        double start_time_mjd_utc = oskar_date_time_to_mjd_d(
+                year, month, day, day_fraction);
+        printf("- %i/%i/%i %i:%i:%f -> mjd %f\n", day, month, year, hour, minute,
+                second, start_time_mjd_utc);
+
         double frequency = settings.obs().frequency(i);
         printf("- Frequency: %e\n", frequency);
 
