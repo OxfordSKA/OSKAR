@@ -238,6 +238,18 @@ int sim1_f(const oskar_Settings& settings)
     int error_code = 0;
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
+        unsigned year   = settings.obs().start_time_utc_year();
+        unsigned month  = settings.obs().start_time_utc_month();
+        unsigned day    = settings.obs().start_time_utc_day();
+        unsigned hour   = settings.obs().start_time_utc_hour();
+        unsigned minute = settings.obs().start_time_utc_minute();
+        float second   = settings.obs().start_time_utc_second();
+        float day_fraction = (hour + minute/60 + second/3600) / 24.0;
+        float start_time_mjd_utc = oskar_date_time_to_mjd_d(
+                year, month, day, day_fraction);
+        printf("- %i/%i/%i %i:%i:%f -> mjd %f\n", day, month, year, hour, minute,
+                second, start_time_mjd_utc);
+
         float frequency = settings.obs().frequency(i);
         printf("- Frequency: %e\n", frequency);
 
@@ -266,7 +278,7 @@ int sim1_f(const oskar_Settings& settings)
 
         error_code = oskar_interferometer1_scalar_f(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
-                settings.obs().start_time_utc_mjd(), settings.obs().obs_length_days(),
+                start_time_mjd_utc, settings.obs().obs_length_days(),
                 settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
                 settings.obs().num_fringe_ave(), frequency, settings.obs().channel_bandwidth(),
                 settings.disable_station_beam(), &vis);
