@@ -173,6 +173,12 @@ void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis)
 
 void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis)
 {
+    vis->num_samples = 0;
+    vis->u   = NULL;
+    vis->v   = NULL;
+    vis->w   = NULL;
+    vis->amp = NULL;
+
     FILE* file;
     file = fopen(filename, "rb");
     if (file == NULL)
@@ -180,11 +186,6 @@ void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis)
         fprintf(stderr, "ERROR: Failed to open input visibility data file.\n");
         return;
     }
-    vis->num_samples = 0;
-    vis->u   = NULL;
-    vis->v   = NULL;
-    vis->w   = NULL;
-    vis->amp = NULL;
 
     size_t record_size = 5 * sizeof(float);
     float* buffer = (float*) malloc(record_size);

@@ -256,6 +256,12 @@ int imager_f(const oskar_Settings& settings)
                 + "_channel_" + QString::number(i) + ".dat";
         oskar_VisData_f vis;
         oskar_load_vis_data_f(vis_file.toLatin1().data(), &vis);
+        if (vis.num_samples < 1)
+        {
+            fprintf(stderr, "ERROR: no visibility data points found in data file: %s.\n",
+                    vis_file.toLatin1().data());
+            continue;
+        }
         printf("== num vis = %i\n", vis.num_samples);
 
         for (int t = 0; t < num_snapshots; ++t)
