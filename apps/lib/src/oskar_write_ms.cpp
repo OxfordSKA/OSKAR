@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_d* vis, const bool overwrite)
+        const oskar_VisData_d* vis, const unsigned channel, const bool overwrite)
 {
     const double days_to_sec = 86400.0;
 
@@ -76,7 +76,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
     double mjd_start = settings->obs().start_time_utc_mjd();
     double ra0_rad   = settings->obs().ra0_rad();
     double dec0_rad  = settings->obs().dec0_rad();
-    double frequency = settings->obs().start_frequency();
+    double frequency = settings->obs().start_frequency() + settings->obs().frequency_inc() * channel;
 
     // Load telescope model to get station/antenna positions.
     oskar_TelescopeModel_d telescope;
@@ -128,7 +128,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
 
 
 void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_f* vis, const bool overwrite)
+        const oskar_VisData_f* vis, const unsigned channel, const bool overwrite)
 {
     oskar_VisData_d temp_vis;
     oskar_allocate_vis_data_d(vis->num_samples, &temp_vis);
@@ -141,7 +141,7 @@ void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
         temp_vis.amp[i].y = (double)vis->amp[i].y;
     }
 
-    oskar_write_ms_d(ms_path, settings, &temp_vis, overwrite);
+    oskar_write_ms_d(ms_path, settings, &temp_vis, channel, overwrite);
 
     oskar_free_vis_data_d(&temp_vis);
 }

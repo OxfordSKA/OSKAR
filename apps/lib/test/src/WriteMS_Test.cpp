@@ -93,7 +93,7 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Write the MS.
     const char* ms_path = "temp_test.ms";
-    oskar_write_ms_d(ms_path, &settings, &vis);
+    oskar_write_ms_d(ms_path, &settings, &vis, 0);
 
     // Free memory.
     oskar_free_vis_data_d(&vis);

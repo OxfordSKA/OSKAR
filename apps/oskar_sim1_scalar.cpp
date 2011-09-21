@@ -180,7 +180,7 @@ int sim1_d(const oskar_Settings& settings)
         {
             QString ms_file = settings.obs().ms_filename() + "_channel_" + QString::number(i) + ".ms";
             printf("= Writing Measurement Set: %s\n", ms_file.toLatin1().data());
-            oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis, true);
+            oskar_write_ms_d(ms_file.toLatin1().data(), &settings, &vis, i, true);
         }
 #endif
 
@@ -301,7 +301,7 @@ int sim1_f(const oskar_Settings& settings)
         {
             QString ms_file = settings.obs().ms_filename() + "_channel_" + QString::number(i) + ".ms";
             printf("= Writing Measurement Set: %s\n", ms_file.toLatin1().data());
-            oskar_write_ms_f(ms_file.toLatin1().data(), &settings, &vis, true);
+            oskar_write_ms_f(ms_file.toLatin1().data(), &settings, &vis, i, true);
         }
 #endif
 
