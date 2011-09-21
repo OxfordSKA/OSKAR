@@ -155,7 +155,7 @@ int sim1_d(const oskar_Settings& settings)
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_d(num_baselines * settings.obs().num_vis_dumps(), &vis);
 
-        error_code = oskar_interferometer1_scalar_d(telescope, stations, sky,
+        error_code = oskar_interferometer1_scalar_d(telescope, stations, sky_temp,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
                 settings.obs().start_time_utc_mjd(), settings.obs().obs_length_days(),
                 settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
@@ -268,7 +268,8 @@ int sim1_f(const oskar_Settings& settings)
         for (int s = 0; s < sky.num_sources; ++s)
         {
 //            sky_temp.I[s] = 1.0e6 * pow(frequency, -0.7);
-            sky_temp.I[s] *= pow(frequency / settings.obs().start_frequency(), -0.7);
+            sky_temp.I[s] = pow(frequency / settings.obs().start_frequency(), -0.7f);
+//            printf("freq = %f, I = %f\n", frequency, sky_temp.I[s]);
         }
 
         // Allocate visibility data.
@@ -276,7 +277,7 @@ int sim1_f(const oskar_Settings& settings)
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_f(num_baselines * settings.obs().num_vis_dumps(), &vis);
 
-        error_code = oskar_interferometer1_scalar_f(telescope, stations, sky,
+        error_code = oskar_interferometer1_scalar_f(telescope, stations, sky_temp,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
                 start_time_mjd_utc, settings.obs().obs_length_days(),
                 settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),

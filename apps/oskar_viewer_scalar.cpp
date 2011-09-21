@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     plot1.plotImage(image, image_size, image_size, -extent, extent,
             -extent, extent);
     plot1.setYLabel("Relative Declination (deg)");
-    plot1.setXLabel("Relative Right Ascension x cos(Dec) (deg)");
+    plot1.setXLabel("Relative Right Ascension x cos(Dec) x -1 (deg)");
     plot1.setTitle("Dirty image (channel = " + QString::number(channel) + ", "
             " t = " + QString::number(t) + ")");
     plot1.setScaleLabel("Brightness");

@@ -175,7 +175,7 @@ int imager_d(const oskar_Settings& settings)
             // FIXME: ******** Pixel of peak *************
             int idx = (192) * image_size + (128-1);
             peak_amp[i * num_snapshots + t] = image[idx];
-            image[idx] = 0.0;
+            //image[idx] = 0.0;
             // FIXME: ******** Pixel of peak *************
 
             // Write out image file.
@@ -254,6 +254,7 @@ int imager_f(const oskar_Settings& settings)
         // Load data file for the frequency.
         QString vis_file = settings.obs().oskar_vis_filename()
                 + "_channel_" + QString::number(i) + ".dat";
+//        printf("loading vis data file: %s.\n", vis_file.toLatin1().data());
         oskar_VisData_f vis;
         oskar_load_vis_data_f(vis_file.toLatin1().data(), &vis);
         if (vis.num_samples < 1)
@@ -263,11 +264,13 @@ int imager_f(const oskar_Settings& settings)
             continue;
         }
         printf("== num vis = %i\n", vis.num_samples);
+//        printf("== vis[0] (re, im) %f %f\n", vis.amp[0].x, vis.amp[0].y);
 
         for (int t = 0; t < num_snapshots; ++t)
         {
             unsigned num_samples = num_baselines * num_dumps_per_snapshot;
             float2* amp = &vis.amp[t * num_samples];
+            //printf("%i\n", t*num_samples);
             float* u    = &vis.u[t * num_samples];
             float* v    = &vis.v[t * num_samples];
 
@@ -282,8 +285,13 @@ int imager_f(const oskar_Settings& settings)
             }
 
             // FIXME: ******** Pixel of peak *************
-            int idx = (192) * image_size + (128-1);
-            peak_amp[i * num_snapshots + t] = image[idx];
+            //int idx = (128 * image_size) + (128); // centre test ?
+            //int idx = (192 * image_size) + (128); // src1
+            //int idx = (52 * image_size) + (193); // src2
+            int idx = (135 * image_size) + (64); // src3
+            int peak_idx = i * num_snapshots + t;
+            peak_amp[peak_idx] = image[idx];
+            //printf("t = %i, peak amp[%i] = %f\n", t, peak_idx, peak_amp[i * num_snapshots + t]);
             image[idx] = 0.0;
             // FIXME: ******** Pixel of peak *************
 
