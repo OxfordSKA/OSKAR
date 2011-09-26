@@ -48,7 +48,6 @@ extern "C" {
  * The visibilities and (u,v,w) coordinates are appended to the main table.
  *
  * @param[in] name The name of the Measurement Set directory.
- * @param[in] mjd The Modified Julian Date of the start time.
  * @param[in] exposure The visibility exposure length in seconds.
  * @param[in] interval The visibility interval length in seconds.
  * @param[in] nv The number of visibilities to add.
@@ -60,11 +59,10 @@ extern "C" {
  * @param[in] ant2 The index of antenna 2 for the baselines (length nv).
  * @param[in] times The times at which each visibility is taken.
  */
-void oskar_ms_append_vis1(const char* name, double mjd, double exposure,
-        double interval, int nv, const double* u, const double* v,
-        const double* w, const double* vis, const int* ant1, const int* ant2,
+void oskar_ms_append_vis1(const char* name, double exposure, double interval,
+        int nv, const double* u, const double* v, const double* w,
+        const double* vis, const int* ant1, const int* ant2,
         const double* times);
-
 
 #ifdef __cplusplus
 }

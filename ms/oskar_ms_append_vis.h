@@ -26,29 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ms/MsCreate.h"
-
-namespace oskar {
+#ifndef OSKAR_MS_APPEND_VIS1_H_
+#define OSKAR_MS_APPEND_VIS1_H_
 
 /**
- * @details
- * Constructs an empty measurement set with the given filename.
+ * @file oskar_ms_append_vis1.h
+ */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Adds the supplied visibilities and (u,v,w) coordinates to a Measurement Set.
  *
- * @param[in] filename The Measurement Set filename to use.
- */
-MsCreate::MsCreate(const char* filename, double mjdStart, double exposure,
-        double interval)
-: MsManip(mjdStart, exposure, interval)
-{
-    create(filename);
-}
-
-/**
  * @details
- * Destroys the MsCreate class.
+ * This function appends to a Measurement Set using the supplied visibilities
+ * and (u,v,w) coordinates for a single polarisation.
+ *
+ * The visibilities and (u,v,w) coordinates are appended to the main table.
+ *
+ * @param[in] name The name of the Measurement Set directory.
+ * @param[in] exposure The visibility exposure length in seconds.
+ * @param[in] interval The visibility interval length in seconds.
+ * @param[in] nv The number of visibilities to add.
+ * @param[in] u The visibility u coordinates in metres (length nv).
+ * @param[in] v The visibility v coordinates in metres (length nv).
+ * @param[in] w The visibility w coordinates in metres (length nv).
+ * @param[in] vis The complex visibility values (length 2*nv).
+ * @param[in] ant1 The index of antenna 1 for the baselines (length nv).
+ * @param[in] ant2 The index of antenna 2 for the baselines (length nv).
+ * @param[in] times The times at which each visibility is taken.
  */
-MsCreate::~MsCreate()
-{
-}
+void oskar_ms_append_vis1(const char* name, double exposure, double interval,
+        int nv, const double* u, const double* v, const double* w,
+        const double* vis, const int* ant1, const int* ant2,
+        const double* times);
 
-} // namespace oskar
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_MS_APPEND_VIS1_H_

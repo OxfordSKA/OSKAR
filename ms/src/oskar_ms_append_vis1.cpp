@@ -27,16 +27,18 @@
  */
 
 #include "ms/oskar_ms_append_vis1.h"
-#include "ms/MsAppend.h"
+#include "ms/oskar_MeasurementSet.h"
 
-void oskar_ms_append_vis1(const char* name, double mjd, double exposure,
-        double interval, int nv, const double* u, const double* v,
-        const double* w, const double* vis, const int* ant1, const int* ant2,
+extern "C"
+void oskar_ms_append_vis1(const char* name, double exposure, double interval,
+        int nv, const double* u, const double* v, const double* w,
+        const double* vis, const int* ant1, const int* ant2,
         const double* times)
 {
-    // Create the MsAppend object, passing it the filename.
-    oskar::MsAppend ms(name, mjd, exposure, interval);
+    // Open the Measurement Set.
+    oskar_MeasurementSet ms(exposure, interval);
+    ms.open(name);
 
     // Add visibilities.
-    ms.addVisibilities(1, nv, u, v, w, vis, ant1, ant2, times);
+    ms.addVisibilities(1, 1, nv, u, v, w, vis, ant1, ant2, times);
 }

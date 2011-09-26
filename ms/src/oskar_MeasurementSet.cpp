@@ -26,28 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ms/MsManip.h"
+#include "ms/oskar_MeasurementSet.h"
 
 #include <ms/MeasurementSets.h>
 #include <tables/Tables.h>
 
 using namespace casa;
 
-namespace oskar {
-
 /*=============================================================================
  * Constructor & Destructor
  *---------------------------------------------------------------------------*/
 
-/**
- * @details
- * Constructs the MsManip object.
- */
-MsManip::MsManip(double mjdStart, double exposure, double interval)
+oskar_MeasurementSet::oskar_MeasurementSet(double exposure, double interval)
 {
     // Initialise members.
-    _nBlocksAdded = 0;
-    _mjdTimeStart = mjdStart;
     _exposure = exposure;
     _interval = interval;
     _ms = NULL;
@@ -55,11 +47,7 @@ MsManip::MsManip(double mjdStart, double exposure, double interval)
     _msmc = NULL;
 }
 
-/**
- * @details
- * Destroys the MsManip class.
- */
-MsManip::~MsManip()
+oskar_MeasurementSet::~oskar_MeasurementSet()
 {
     // Select all bands and channels for imager (not sure if this is required?).
     Matrix<Int> selection(2, _ms->spectralWindow().nrow());
@@ -67,10 +55,6 @@ MsManip::~MsManip()
     selection.row(1) = _msc->spectralWindow().numChan().getColumn();
     ArrayColumn<Complex> mcd(*_ms, MS::columnName(MS::MODEL_DATA));
     mcd.rwKeywordSet().define("CHANNEL_SELECTION", selection);
-
-    // Update the time range to reflect the number of visibilities added.
-    updateTimeRange();
-
     close();
 }
 
@@ -78,12 +62,8 @@ MsManip::~MsManip()
  * Public Members
  *---------------------------------------------------------------------------*/
 
-/**
- * @details
- * Adds the supplied list of antenna positions to the ANTENNA table.
- */
-void MsManip::addAntennas(int na, const double* ax, const double* ay,
-        const double* az)
+void oskar_MeasurementSet::addAntennas(int na, const double* ax,
+        const double* ay, const double* az)
 {
     // Add rows to the ANTENNA subtable.
     int startRow = _ms->antenna().nrow();
@@ -119,27 +99,19 @@ void MsManip::addAntennas(int na, const double* ax, const double* ay,
     }
 }
 
-/**
- * @details
- * Assumes the reference frequency is the centre of the whole band.
- * From that it calculates the centre frequency of each channel.
- */
-void MsManip::addBand(int polid, int nc, double refFreq, double chanWidth)
+void oskar_MeasurementSet::addBand(int polid, int nc, double refFreq,
+        double chanWidth)
 {
     Vector<double> chanWidths(nc, chanWidth);
     Vector<double> chanFreqs(nc);
-    double start = refFreq - (nc - 1) * chanWidth / 2.0;
+    //double start = refFreq - (nc - 1) * chanWidth / 2.0;
     for (int c = 0; c < nc; ++c) {
-        chanFreqs(c) = start + c * chanWidth;
+        chanFreqs(c) = refFreq + c * chanWidth;
     }
     addBand(polid, nc, refFreq, chanFreqs, chanWidths);
 }
 
-/**
- * @details
- * Adds the given field to the FIELD table.
- */
-void MsManip::addField(double ra, double dec, const char* /*name = 0*/)
+void oskar_MeasurementSet::addField(double ra, double dec, const char* name)
 {
     // Set up the field info.
     MVDirection radec(Quantity(ra, "rad"), Quantity(dec, "rad"));
@@ -152,18 +124,12 @@ void MsManip::addField(double ra, double dec, const char* /*name = 0*/)
     _msc->field().delayDirMeasCol().put(row, direction);
     _msc->field().phaseDirMeasCol().put(row, direction);
     _msc->field().referenceDirMeasCol().put(row, direction);
+    if (name) {
+        _msc->field().name().put(row, String(name));
+    }
 }
 
-/**
- * @details
- * Adds the given number of polarisations to the Measurement Set
- * by adding a row to the POLARIZATION sub-table.
- *
- * The number of polarisations should be 1, 2 or 4.
- *
- * @param[in] np Number of polarisations.
- */
-void MsManip::addPolarisation(int np)
+void oskar_MeasurementSet::addPolarisation(int np)
 {
     // Set up the correlation type, based on number of polarisations.
     Vector<Int> corrType(np);
@@ -191,46 +157,52 @@ void MsManip::addPolarisation(int np)
     _msc->polarization().numCorr().put(row, np);
 }
 
-/**
- * @details
- * Adds the given list of visibilities.
- */
-void MsManip::addVisibilities(int np, int nv, const double* vu, const double* vv,
-        const double* vw, const double* vis, const int* ant1, const int* ant2)
+void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
+        const double* u, const double* v, const double* w, const double* vis,
+        const int* ant1, const int* ant2, const double* times)
 {
     // Allocate storage for a (u,v,w) coordinate,
-    // a visibility, a visibility weight, and a flag.
+    // a visibility matrix, a visibility weight, and a flag matrix.
     Vector<Double> uvw(3);
-    Matrix<Complex> vism(np, 1);
-    Matrix<Bool> flag(np, 1, false);
-    Vector<Float> weight(np, 1.0);
-    Vector<Float> sigma(np, 1.0);
+    Matrix<Complex> vism(n_pol, n_chan);
+    Matrix<Bool> flag(n_pol, n_chan, false);
+    Vector<Float> weight(n_pol, 1.0);
+    Vector<Float> sigma(n_pol, 1.0);
 
     // Add enough rows to the main table.
-    int startRow = _ms->nrow();
-    _ms->addRow(nv);
+    int start_row = _ms->nrow();
+    _ms->addRow(n_row);
 
     // Loop over rows / visibilities.
-    for (int v = 0; v < nv; ++v) {
-        int row = v + startRow;
+    for (int r = 0; r < n_row; ++r)
+    {
+        int row = r + start_row;
 
         // Add the u,v,w coordinates.
-        uvw(0) = vu[v]; uvw(1) = vv[v]; uvw(2) = vw[v];
+        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
         _msmc->uvw().put(row, uvw);
 
-        // Loop over polarisations.
-        for (int p = 0; p < np; ++p) {
-            int b = 2 * (np * v + p);
-            vism(p, 0) = Complex(vis[b], vis[b + 1]);
+        // Get a pointer to the start of the visibility matrix for this row.
+        const double* vis_row = vis + (2 * n_pol * n_chan) * r;
+
+        // Fill the visibility matrix (polarisation and channel data).
+        for (int c = 0; c < n_chan; ++c)
+        {
+            for (int p = 0; p < n_pol; ++p)
+            {
+                int b = 2 * (p + c * n_pol);
+                vism(p, c) = Complex(vis_row[b], vis_row[b + 1]);
+            }
         }
+
         // Add the visibilities.
         _msmc->data().put(row, vism);
         _msmc->modelData().put(row, vism);
         _msmc->correctedData().put(row, vism);
 
         // Add the antenna pairs.
-        _msmc->antenna1().put(row, ant1[v]);
-        _msmc->antenna2().put(row, ant2[v]);
+        _msmc->antenna1().put(row, ant1[r]);
+        _msmc->antenna2().put(row, ant2[r]);
 
         // Add remaining meta-data.
         _msmc->flag().put(row, flag);
@@ -238,75 +210,30 @@ void MsManip::addVisibilities(int np, int nv, const double* vu, const double* vv
         _msmc->sigma().put(row, sigma);
         _msmc->exposure().put(row, _exposure);
         _msmc->interval().put(row, _interval);
-        _msmc->time().put(row, _mjdTimeStart * 86400
-                + (_nBlocksAdded * _interval));
-        _msmc->timeCentroid().put(row, _mjdTimeStart * 86400
-                + (_nBlocksAdded * _interval));
+        _msmc->time().put(row, times[r]);
+        _msmc->timeCentroid().put(row, times[r]);
     }
-    _nBlocksAdded++;
+
+    // Get the old time range.
+    Vector<Double> oldTimeRange(2);
+    _msc->observation().timeRange().get(0, oldTimeRange);
+
+    // Compute the new time range.
+    Vector<Double> timeRange(2);
+    timeRange[0] = (oldTimeRange[0] <= 0.0) ? times[0] : oldTimeRange[0];
+    timeRange[1] = (times[n_row - 1] > oldTimeRange[1]) ? times[n_row - 1] :
+            oldTimeRange[1];
+    double releaseDate = timeRange[1] + 365.25 * 86400.0;
+
+    // Fill observation columns.
+    _msc->observation().timeRange().put(0, timeRange);
+    _msc->observation().releaseDate().put(0, releaseDate);
 }
-
-
-/// Adds visibilities to the main table.
-void MsManip::addVisibilities(int np, int nv, const double* vu, const double* vv,
-        const double* vw, const double* vis, const int* ant1,
-        const int* ant2, const double* times)
-{
-    // Allocate storage for a (u,v,w) coordinate,
-    // a visibility, a visibility weight, and a flag.
-    Vector<Double> uvw(3);
-    Matrix<Complex> vism(np, 1);
-    Matrix<Bool> flag(np, 1, false);
-    Vector<Float> weight(np, 1.0);
-    Vector<Float> sigma(np, 1.0);
-
-    // Add enough rows to the main table.
-    int startRow = _ms->nrow();
-    _ms->addRow(nv);
-
-    // Loop over rows / visibilities.
-    for (int v = 0; v < nv; ++v) {
-        int row = v + startRow;
-
-        // Add the u,v,w coordinates.
-        uvw(0) = vu[v]; uvw(1) = vv[v]; uvw(2) = vw[v];
-        _msmc->uvw().put(row, uvw);
-
-        // Loop over polarisations.
-        for (int p = 0; p < np; ++p) {
-            int b = 2 * (np * v + p);
-            vism(p, 0) = Complex(vis[b], vis[b + 1]);
-        }
-        // Add the visibilities.
-        _msmc->data().put(row, vism);
-        _msmc->modelData().put(row, vism);
-        _msmc->correctedData().put(row, vism);
-
-        // Add the antenna pairs.
-        _msmc->antenna1().put(row, ant1[v]);
-        _msmc->antenna2().put(row, ant2[v]);
-
-        // Add remaining meta-data.
-        _msmc->flag().put(row, flag);
-        _msmc->weight().put(row, weight);
-        _msmc->sigma().put(row, sigma);
-        _msmc->exposure().put(row, _exposure);
-        _msmc->interval().put(row, _interval);
-        _msmc->time().put(row, times[v]);
-        _msmc->timeCentroid().put(row, times[v]);
-    }
-    _nBlocksAdded++;
-}
-
 
 /*=============================================================================
  * Protected Members
  *---------------------------------------------------------------------------*/
-/**
- * @details
- * Cleanup routine to delete objects.
- */
-void MsManip::close()
+void oskar_MeasurementSet::close()
 {
     // Delete object references.
     delete _msmc;
@@ -314,11 +241,7 @@ void MsManip::close()
     delete _ms;
 }
 
-/**
- * @details
- * Creates a new Measurement Set.
- */
-void MsManip::create(const char* filename)
+void oskar_MeasurementSet::create(const char* filename)
 {
     // Create the table descriptor and use it to set up a new main table.
     TableDesc desc = MS::requiredTableDesc();
@@ -350,8 +273,8 @@ void MsManip::create(const char* filename)
     _ms->observation().addRow();
     Vector<String> corrSchedule(1);
     Vector<Double> timeRange(2);
-    timeRange(0) = _mjdTimeStart * 86400;
-    timeRange(1) = _mjdTimeStart * 86400 + 1;
+    timeRange(0) = 0;
+    timeRange(1) = 1;
     double releaseDate = timeRange(1) + 365.25 * 86400;
     _msc->observation().telescopeName().put (0, "OSKAR");
     _msc->observation().timeRange().put (0, timeRange);
@@ -360,11 +283,7 @@ void MsManip::create(const char* filename)
     _msc->observation().releaseDate().put (0, releaseDate);
 }
 
-/**
- * @details
- * Opens an existing Measurement Set.
- */
-void MsManip::open(const char* filename)
+void oskar_MeasurementSet::open(const char* filename)
 {
     // Create the MeasurementSet.
     _ms = new MeasurementSet(filename, Table::Update);
@@ -375,12 +294,7 @@ void MsManip::open(const char* filename)
     _msmc = new MSMainColumns(*_ms);
 }
 
-/**
- * @details
- * Adds the given band.
- * The number of channels should be > 0.
- */
-void MsManip::addBand(int polid, int nc, double refFrequency,
+void oskar_MeasurementSet::addBand(int polid, int nc, double refFrequency,
         const Vector<double>& chanFreqs, const Vector<double>& chanWidths)
 {
     // Add a row to the DATA_DESCRIPTION subtable.
@@ -414,24 +328,3 @@ void MsManip::addBand(int polid, int nc, double refFrequency,
     _msc->spectralWindow().totalBandwidth().put(row, totalBandwidth);
     _ms->spectralWindow().flush();
 }
-
-/**
- * @details
- * Fills the meta-data for the OBSERVATION sub-table.
- */
-void MsManip::updateTimeRange()
-{
-    Vector<Double> oldTimeRange(2);
-    // TODO get the old time range.
-
-    Vector<Double> timeRange(2);
-    timeRange(0) = oldTimeRange(0);
-    timeRange(1) = _mjdTimeStart * 86400 + (_nBlocksAdded * _interval);
-    double releaseDate = timeRange(1) + 365.25 * 86400;
-
-    // Fill observation columns.
-    _msc->observation().timeRange().put (0, timeRange);
-    _msc->observation().releaseDate().put (0, releaseDate);
-}
-
-} // namespace oskar

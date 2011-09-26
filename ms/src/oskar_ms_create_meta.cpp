@@ -26,47 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MS_APPEND_TEST_H_
-#define MS_APPEND_TEST_H_
+#include "ms/oskar_ms_create_meta.h"
+#include "ms/oskar_MeasurementSet.h"
 
-/**
- * @file MsAppendTest.h
- */
-
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class MsAppendTest : public CppUnit::TestFixture
+extern "C"
+void oskar_ms_create_meta(const char* name, double ra, double dec, int na,
+        const double* ax, const double* ay, const double* az, double freq)
 {
-    public:
-        CPPUNIT_TEST_SUITE(MsAppendTest);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST(test_c);
-        CPPUNIT_TEST(test_large);
-        CPPUNIT_TEST_SUITE_END();
+    // Create the Measurement Set.
+    oskar_MeasurementSet ms(0, 0);
+    ms.create(name);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+    // Add antenna positions.
+    ms.addAntennas(na, ax, ay, az);
 
-        /// Clean up after the test run.
-        void tearDown();
+    // Add the Right Ascension & Declination of field centre.
+    ms.addField(ra, dec);
 
-    public:
-        /// Test method.
-        void test();
+    // Add polarisation.
+    ms.addPolarisation(1);
 
-        /// Test method.
-        void test_c();
-
-        /// Test method.
-        void test_large();
-};
-
-#endif // MS_APPEND_TEST_H_
+    // Add frequency band.
+    ms.addBand(0, 1, freq, 1.0);
+}

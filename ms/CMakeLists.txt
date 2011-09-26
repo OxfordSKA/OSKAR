@@ -3,13 +3,11 @@
 #
 
 set(ms_SRC
-    src/MsAppend.cpp
-    src/MsCreate.cpp
-    src/MsManip.cpp
+    src/oskar_MeasurementSet.cpp
+    src/oskar_ms_append_vis.cpp
     src/oskar_ms_append_vis1.cpp
-    src/oskar_ms_create_empty.cpp
+    src/oskar_ms_create_meta.cpp
     src/oskar_ms_create_meta1.cpp
-    src/oskar_ms_create_vis1.cpp
 )
 set(ms_SRC "${ms_SRC}" PARENT_SCOPE)
 

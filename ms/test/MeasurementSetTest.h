@@ -26,56 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MS_APPEND_MS_H_
-#define OSKAR_MS_APPEND_MS_H_
+#ifndef MEASUREMENT_SET_TEST_H_
+#define MEASUREMENT_SET_TEST_H_
 
 /**
- * @file MsAppend.h
+ * @file MeasurementSetTest.h
  */
 
-#include "ms/MsManip.h"
-
-namespace oskar {
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Utility class for appending to an existing Measurement Set.
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- * This class is used to easily append to a Measurement Set.
- * It should be used as follows:
- * <code>
-       // Create the MsAppend object, passing it the filename.
-       MsAppend ms("simple.ms", start, exposure, interval);
-
-       // Add the antenna positions.
-       ms.addAntennas(na, ax, ay, az);
-
-       // Add the Right Ascension & Declination of field centre.
-       ms.addField(0, 0);
-
-       // Add a polarisation.
-       ms.addPolarisation(np);
-
-       // Add frequency band.
-       ms.addBand(polid, 1, 400e6, 1.0);
-
-       // Add the visibilities.
-       // Note that u,v,w coordinates are in metres.
-       ms.addVisibilities(np, nv, u, v, w, vis, ant1, ant2);
- * </endcode>
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-class MsAppend : public MsManip
+class MeasurementSetTest : public CppUnit::TestFixture
 {
-public:
-    /// Constructs an empty measurement set with the given filename.
-    MsAppend(const char* filename, double mjdStart, double exposure,
-            double interval);
+    public:
+        CPPUNIT_TEST_SUITE(MeasurementSetTest);
+        CPPUNIT_TEST(test_create_simple);
+        CPPUNIT_TEST(test_append_c);
+        CPPUNIT_TEST(test_append_large);
+        CPPUNIT_TEST(test_multi_channel);
+        CPPUNIT_TEST_SUITE_END();
 
-    /// Destroys the MsAppend class.
-    ~MsAppend();
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test_create_simple();
+
+        /// Test method.
+        void test_append_c();
+
+        /// Test method.
+        void test_append_large();
+
+        /// Test method.
+        void test_multi_channel();
 };
 
-} // namespace oskar
-
-#endif // OSKAR_MS_APPEND_MS_H_
+#endif // MEASUREMENT_SET_TEST_H_

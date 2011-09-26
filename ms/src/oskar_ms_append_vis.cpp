@@ -26,56 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MS_CREATE_MS_H_
-#define OSKAR_MS_CREATE_MS_H_
+#include "ms/oskar_ms_append_vis.h"
+#include "ms/oskar_MeasurementSet.h"
 
-/**
- * @file MsCreate.h
- */
-
-#include "ms/MsManip.h"
-
-namespace oskar {
-
-/**
- * @brief
- * Utility class for creating a Measurement Set.
- *
- * @details
- * This class is used to easily create a Measurement Set.
- * It should be used as follows:
- * <code>
-       // Create the MsCreate object, passing it the filename.
-       MsCreate ms("simple.ms", start, exposure, interval);
-
-       // Add the antenna positions.
-       ms.addAntennas(na, ax, ay, az);
-
-       // Add the Right Ascension & Declination of field centre.
-       ms.addField(0, 0);
-
-       // Add a polarisation.
-       ms.addPolarisation(np);
-
-       // Add frequency band.
-       ms.addBand(polid, 1, 400e6, 1.0);
-
-       // Add the visibilities.
-       // Note that u,v,w coordinates are in metres.
-       ms.addVisibilities(np, nv, u, v, w, vis, ant1, ant2);
- * </endcode>
- */
-class MsCreate : public MsManip
+extern "C"
+void oskar_ms_append_vis(const char* name, double exposure, double interval,
+        int nv, const double* u, const double* v, const double* w,
+        const double* vis, const int* ant1, const int* ant2,
+        const double* times)
 {
-public:
-    /// Constructs an empty measurement set with the given filename.
-    MsCreate(const char* filename, double mjdStart, double exposure,
-            double interval);
+    // Open the Measurement Set.
+    oskar_MeasurementSet ms(exposure, interval);
+    ms.open(name);
 
-    /// Destroys the MsCreate class.
-    ~MsCreate();
-};
-
-} // namespace oskar
-
-#endif // OSKAR_MS_CREATE_MS_H_
+    // Add visibilities.
+    ms.addVisibilities(1, 1, nv, u, v, w, vis, ant1, ant2, times);
+}

@@ -40,10 +40,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+extern "C"
 void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
         const oskar_VisData_d* vis, const unsigned channel, const bool overwrite)
 {
@@ -84,7 +81,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
             settings->longitude_rad(), settings->latitude_rad(), &telescope);
 
     // Create the measurement set.
-    oskar_ms_create_meta1(ms_path, mjd_start, ra0_rad, dec0_rad,
+    oskar_ms_create_meta1(ms_path, ra0_rad, dec0_rad,
             telescope.num_antennas, telescope.antenna_x, telescope.antenna_y,
             telescope.antenna_z, frequency);
 
@@ -116,7 +113,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
         for (int i = 0; i < num_baselines; ++i)
             times[j * num_baselines + i] = t;
     }
-    oskar_ms_append_vis1(ms_path, mjd_start, exposure, interval, vis->num_samples,
+    oskar_ms_append_vis1(ms_path, exposure, interval, vis->num_samples,
             vis->u, vis->v, vis->w, (double*)vis->amp, baseline_ant_1,
             baseline_ant_2, times);
 
@@ -127,6 +124,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
 }
 
 
+extern "C"
 void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
         const oskar_VisData_f* vis, const unsigned channel, const bool overwrite)
 {
@@ -145,9 +143,3 @@ void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
 
     oskar_free_vis_data_d(&temp_vis);
 }
-
-
-
-#ifdef __cplusplus
-}
-#endif

@@ -34,8 +34,6 @@
  */
 
 #include "oskar_ms_append_vis1.h"
-#include "oskar_ms_create_empty.h"
 #include "oskar_ms_create_meta1.h"
-#include "oskar_ms_create_vis1.h"
 
 #endif // OSKAR_MS_H_

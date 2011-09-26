@@ -47,7 +47,6 @@ extern "C" {
  * sub-tables, but the main table will be blank.
  *
  * @param[in] name The name of the output Measurement Set directory.
- * @param[in] mjd The Modified Julian Date of the start time.
  * @param[in] ra The Right Ascension of the field centre in radians.
  * @param[in] dec The Declination of the field centre in radians.
  * @param[in] na The number of antennas or stations in the interferometer.
@@ -56,7 +55,7 @@ extern "C" {
  * @param[in] az The antenna z positions in metres, in ITRS frame (length na).
  * @param[in] freq The observing frequency, in Hertz.
  */
-void oskar_ms_create_meta1(const char* name, double mjd, double ra, double dec,
+void oskar_ms_create_meta1(const char* name, double ra, double dec,
         int na, const double* ax, const double* ay, const double* az, double freq);
 
 #ifdef __cplusplus
