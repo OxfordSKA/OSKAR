@@ -165,6 +165,7 @@ void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
     // a visibility matrix, a visibility weight, and a flag matrix.
     Vector<Double> uvw(3);
     Matrix<Complex> vism(n_pol, n_chan);
+    Matrix<Complex> vis_zero(n_pol, n_chan, Complex(0.0, 0.0));
     Matrix<Bool> flag(n_pol, n_chan, false);
     Vector<Float> weight(n_pol, 1.0);
     Vector<Float> sigma(n_pol, 1.0);
@@ -197,8 +198,8 @@ void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
 
         // Add the visibilities.
         _msmc->data().put(row, vism);
-        _msmc->modelData().put(row, vism);
-        _msmc->correctedData().put(row, vism);
+        _msmc->modelData().put(row, vis_zero);
+        _msmc->correctedData().put(row, vis_zero);
 
         // Add the antenna pairs.
         _msmc->antenna1().put(row, ant1[r]);

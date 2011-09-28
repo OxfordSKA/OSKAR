@@ -49,7 +49,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
-#include <math.h>
 
 #include <QtCore/QTime>
 
@@ -268,7 +267,7 @@ int sim1_f(const oskar_Settings& settings)
         for (int s = 0; s < sky.num_sources; ++s)
         {
 //            sky_temp.I[s] = 1.0e6 * pow(frequency, -0.7);
-            sky_temp.I[s] = pow(frequency / settings.obs().start_frequency(), -0.7f);
+            sky_temp.I[s] *= pow(frequency / (float)settings.obs().start_frequency(), -0.7f);
 //            printf("freq = %f, I = %f\n", frequency, sky_temp.I[s]);
         }
 

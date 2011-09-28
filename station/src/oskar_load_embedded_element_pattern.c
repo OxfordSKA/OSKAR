@@ -1,4 +1,4 @@
-#include "station/oskar_load_antenna_pattern.h"
+#include "station/oskar_load_embedded_element_pattern.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +13,7 @@ extern "C" {
 #define DEG2RAD 0.0174532925199432957692
 #define round(x) ((x)>=0.0?(int)((x)+0.5):(int)((x)-0.5))
 
-int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data)
+int oskar_load_embedded_element_pattern(const char* filename, oskar_AntennaData* data)
 {
     // Open the file.
     FILE* file = fopen(filename, "r");

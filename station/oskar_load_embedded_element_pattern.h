@@ -26,55 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_H_
-#define OSKAR_STATION_MODEL_H_
+#ifndef OSKAR_LOAD_EMBEDDED_ELEMENT_PATTERN_H_
+#define OSKAR_LOAD_EMBEDDED_ELEMENT_PATTERN_H_
+
+/**
+ * @file oskar_load_embedded_element_pattern.h
+ */
 
 #include "oskar_global.h"
-
+#include "station/oskar_AntennaData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_StationModel_d
-{
-    unsigned num_antennas;
-    double*  antenna_x;
-    double*  antenna_y;
-    //double * antenna_z;
-};
-typedef struct oskar_StationModel_d oskar_StationModel_d;
-
-struct oskar_StationModel_f
-{
-    unsigned num_antennas;
-    float*   antenna_x;
-    float*   antenna_y;
-    //double * antenna_z;
-};
-typedef struct oskar_StationModel_f oskar_StationModel_f;
-
-
-//----- Utility functions -----------------------------------------------------
+/**
+ * @brief
+ * Loads an antenna pattern from a text file.
+ *
+ * @details
+ * This function loads antenna pattern data from a text file and fills the
+ * provided data structure.
+ *
+ * The data file must contain eight columns, in the following order:
+ * - <theta, deg>
+ * - <phi, deg>
+ * - <abs dir>
+ * - <abs theta>
+ * - <phase theta, deg>
+ * - <abs phi>
+ * - <phase phi, deg>
+ * - <ax. ratio>
+ *
+ * Amplitude values in dBi are detected, and converted to linear format after
+ * loading.
+ *
+ * The theta dimension is assumed to be the fastest varying.
+ *
+ * @param[in]  filename Data file name.
+ * @param[out] data     Pointer to data structure to fill.
+ */
 OSKAR_EXPORT
-void oskar_station_model_copy_to_device_d(const oskar_StationModel_d* h_stations,
-        const unsigned num_stations, oskar_StationModel_d* hd_stations);
-
-OSKAR_EXPORT
-void oskar_station_model_copy_to_device_f(const oskar_StationModel_f* h_stations,
-        const unsigned num_stations, oskar_StationModel_f* hd_stations);
-
-OSKAR_EXPORT
-void oskar_station_model_scale_coords_d(const unsigned num_stations,
-        oskar_StationModel_d* hd_stations, const double value);
-
-OSKAR_EXPORT
-void oskar_station_model_scale_coords_f(const unsigned num_stations,
-        oskar_StationModel_f* hd_stations, const float value);
-//------------------------------------------------------------------------------
+int oskar_load_embedded_element_pattern(const char* filename,
+        oskar_AntennaData* data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_H_
+#endif // OSKAR_LOAD_EMBEDDED_ELEMENT_PATTERN_H_

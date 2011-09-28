@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void oskar_copy_stations_to_device_d(const oskar_StationModel_d* h_stations,
+void oskar_station_model_copy_to_device_d(const oskar_StationModel_d* h_stations,
         const unsigned num_stations, oskar_StationModel_d* hd_stations)
 {
     // Allocate and copy memory for each station.
@@ -53,7 +53,7 @@ void oskar_copy_stations_to_device_d(const oskar_StationModel_d* h_stations,
 }
 
 
-void oskar_copy_stations_to_device_f(const oskar_StationModel_f* h_stations,
+void oskar_station_model_copy_to_device_f(const oskar_StationModel_f* h_stations,
         const unsigned num_stations, oskar_StationModel_f* hd_stations)
 {
     // Allocate and copy memory for each station.
@@ -70,7 +70,7 @@ void oskar_copy_stations_to_device_f(const oskar_StationModel_f* h_stations,
     }
 }
 
-void oskar_scale_station_coords_d(const unsigned num_stations,
+void oskar_station_model_scale_coords_d(const unsigned num_stations,
         oskar_StationModel_d* hd_stations, const double value)
 {
     int num_threads = 256;
@@ -86,7 +86,7 @@ void oskar_scale_station_coords_d(const unsigned num_stations,
 }
 
 
-void oskar_scale_station_coords_f(const unsigned num_stations,
+void oskar_station_model_scale_coords_f(const unsigned num_stations,
         oskar_StationModel_f* hd_stations, const float value)
 {
     int num_threads = 256;

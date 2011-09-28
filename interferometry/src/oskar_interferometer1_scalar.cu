@@ -101,10 +101,10 @@ int oskar_interferometer1_scalar_d(
     // === Allocate device memory for antennas and transfer to the device.
     size_t mem_size = num_stations * sizeof(oskar_StationModel_d);
     oskar_StationModel_d* hd_stations = (oskar_StationModel_d*)malloc(mem_size);
-    oskar_copy_stations_to_device_d(stations, num_stations, hd_stations);
+    oskar_station_model_copy_to_device_d(stations, num_stations, hd_stations);
 
     // === Scale station coordinates to wavenumber units.
-    oskar_scale_station_coords_d(num_stations, hd_stations, wavenumber);
+    oskar_station_model_scale_coords_d(num_stations, hd_stations, wavenumber);
 
     // === Allocate device memory for source model and transfer to device.
     oskar_SkyModelGlobal_d hd_sky_global;
@@ -303,10 +303,10 @@ int oskar_interferometer1_scalar_f(
     // === Allocate device memory for antennas and transfer to the device.
     size_t mem_size = num_stations * sizeof(oskar_StationModel_f);
     oskar_StationModel_f* hd_stations = (oskar_StationModel_f*)malloc(mem_size);
-    oskar_copy_stations_to_device_f(stations, num_stations, hd_stations);
+    oskar_station_model_copy_to_device_f(stations, num_stations, hd_stations);
 
     // === Scale station coordinates to wavenumber units.
-    oskar_scale_station_coords_f(num_stations, hd_stations, (float)wavenumber);
+    oskar_station_model_scale_coords_f(num_stations, hd_stations, (float)wavenumber);
 
     // === Allocate device memory for source model and transfer to device.
     oskar_SkyModelGlobal_f hd_sky_global;

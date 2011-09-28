@@ -27,7 +27,7 @@
  */
 
 #include "station/test/LoadAntennaPatternTest.h"
-#include "station/oskar_load_antenna_pattern.h"
+#include "station/oskar_load_embedded_element_pattern.h"
 #include "station/oskar_AntennaData.h"
 
 #include <cmath>
@@ -127,7 +127,7 @@ void LoadAntennaPatternTest::test_method()
 
     // Load the file.
     oskar_AntennaData pattern;
-    oskar_load_antenna_pattern(filename, &pattern);
+    oskar_load_embedded_element_pattern(filename, &pattern);
 
     // Check the contents of the data.
     CPPUNIT_ASSERT_EQUAL(30, pattern.n_points);

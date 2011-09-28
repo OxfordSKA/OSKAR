@@ -26,51 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_ANTENNA_PATTERN_H_
-#define OSKAR_LOAD_ANTENNA_PATTERN_H_
 
-/**
- * @file oskar_load_antenna_pattern.h
- */
+#include <cstdio>
+#include <cstdlib>
 
-#include "oskar_global.h"
-#include "station/oskar_AntennaData.h"
+int main(int argc, char** argv)
+{
+    //=========================================
+    // Load setup
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    // Init memory (GPU)
 
-/**
- * @brief
- * Loads an antenna pattern from a text file.
- *
- * @details
- * This function loads antenna pattern data from a text file and fills the
- * provided data structure.
- *
- * The data file must contain eight columns, in the following order:
- * - <theta, deg>
- * - <phi, deg>
- * - <abs dir>
- * - <abs theta>
- * - <phase theta, deg>
- * - <abs phi>
- * - <phase phi, deg>
- * - <ax. ratio>
- *
- * Amplitude values in dBi are detected, and converted to linear format after
- * loading.
- *
- * The theta dimension is assumed to be the fastest varying.
- *
- * @param[in]  filename Data file name.
- * @param[out] data     Pointer to data structure to fill.
- */
-OSKAR_EXPORT
-int oskar_load_antenna_pattern(const char* filename, oskar_AntennaData* data);
 
-#ifdef __cplusplus
+    // for time ranges, source ranges
+    //{
+        // interferometer GPU()
+    //}
+    //==========================================
+
+    // Load Sky CPU -- FIXME: spectral index column (BM)
+
+    // Load Geometry CPU
+
+    // Load embedded element patterns -- TODO (BM)
+
+    // Copy embedded element patterns to GPU texture (FD)
+
+
+    return EXIT_SUCCESS;
 }
-#endif
 
-#endif // OSKAR_LOAD_ANTENNA_PATTERN_H_
