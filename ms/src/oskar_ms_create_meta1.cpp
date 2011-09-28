@@ -34,7 +34,7 @@ void oskar_ms_create_meta1(const char* name, double ra, double dec, int na,
         const double* ax, const double* ay, const double* az, double freq)
 {
     // Create the Measurement Set.
-    oskar_MeasurementSet ms(0, 0);
+    oskar_MeasurementSet ms;
     ms.create(name);
 
     // Add antenna positions.

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MS_CREATE_VIS_META1_H_
-#define OSKAR_MS_CREATE_VIS_META1_H_
+#ifndef OSKAR_MS_CREATE_META_H_
+#define OSKAR_MS_CREATE_META_H_
 
 /**
- * @file oskar_ms_create_meta1.h
+ * @file oskar_ms_create_meta.h
  */
 
 #ifdef __cplusplus
@@ -46,20 +46,26 @@ extern "C" {
  * supplied meta-data. The meta-data values are written into the relevant
  * sub-tables, but the main table will be blank.
  *
- * @param[in] name The name of the output Measurement Set directory.
- * @param[in] ra The Right Ascension of the field centre in radians.
- * @param[in] dec The Declination of the field centre in radians.
- * @param[in] na The number of antennas or stations in the interferometer.
- * @param[in] ax The antenna x positions in metres, in ITRS frame (length na).
- * @param[in] ay The antenna y positions in metres, in ITRS frame (length na).
- * @param[in] az The antenna z positions in metres, in ITRS frame (length na).
- * @param[in] freq The observing frequency, in Hertz.
+ * @param[in] ms_name The name of the output Measurement Set directory.
+ * @param[in] field_name The name of the observed field.
+ * @param[in] ra The Right Ascension of the field centre, in radians.
+ * @param[in] dec The Declination of the field centre, in radians.
+ * @param[in] n_pol The number of polarisations.
+ * @param[in] n_chan The number of frequency channels.
+ * @param[in] ref_freq The frequency of channel 0, in Hz.
+ * @param[in] chan_width The width of each channel, in Hz.
+ * @param[in] n_ant The number of antennas or stations in the interferometer.
+ * @param[in] ant_x The antenna x positions in metres, in ITRS frame (length na).
+ * @param[in] ant_y The antenna y positions in metres, in ITRS frame (length na).
+ * @param[in] ant_z The antenna z positions in metres, in ITRS frame (length na).
  */
-void oskar_ms_create_meta1(const char* name, double ra, double dec,
-        int na, const double* ax, const double* ay, const double* az, double freq);
+void oskar_ms_create_meta(const char* ms_name, const char* field_name,
+        double ra, double dec, int n_pol, int n_chan, double ref_freq,
+        double chan_width, int n_ant, const double* ant_x, const double* ant_y,
+        const double* ant_z);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_MS_CREATE_VIS_META1_H_
+#endif // OSKAR_MS_CREATE_META_H_

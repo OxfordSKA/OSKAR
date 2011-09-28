@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/LoadAntennaPatternTest.h"
-#include "station/oskar_load_embedded_element_pattern.h"
-#include "station/oskar_AntennaData.h"
+#include "station/test/EmbeddedElementPatternTest.h"
+#include "station/oskar_embedded_element_pattern_load.h"
+#include "station/oskar_EmbeddedElementPattern.h"
 
 #include <cmath>
 
@@ -39,7 +39,7 @@
  * @details
  * Sets up the context before running each test method.
  */
-void LoadAntennaPatternTest::setUp()
+void EmbeddedElementPatternTest::setUp()
 {
 }
 
@@ -47,7 +47,7 @@ void LoadAntennaPatternTest::setUp()
  * @details
  * Clean up routine called after each test is run.
  */
-void LoadAntennaPatternTest::tearDown()
+void EmbeddedElementPatternTest::tearDown()
 {
 }
 
@@ -55,7 +55,7 @@ void LoadAntennaPatternTest::tearDown()
  * @details
  * Tests loading of antenna pattern data.
  */
-void LoadAntennaPatternTest::test_method()
+void EmbeddedElementPatternTest::test_method()
 {
     // Create a dummy antenna pattern.
     char data[] = ""
@@ -126,8 +126,8 @@ void LoadAntennaPatternTest::test_method()
     fclose(file);
 
     // Load the file.
-    oskar_AntennaData pattern;
-    oskar_load_embedded_element_pattern(filename, &pattern);
+    oskar_EmbeddedElementPattern pattern;
+    oskar_embedded_element_pattern_load(filename, &pattern);
 
     // Check the contents of the data.
     CPPUNIT_ASSERT_EQUAL(30, pattern.n_points);

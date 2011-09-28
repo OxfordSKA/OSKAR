@@ -30,22 +30,24 @@
 #include "ms/oskar_MeasurementSet.h"
 
 extern "C"
-void oskar_ms_create_meta(const char* name, double ra, double dec, int na,
-        const double* ax, const double* ay, const double* az, double freq)
+void oskar_ms_create_meta(const char* ms_name, const char* field_name,
+        double ra, double dec, int n_pol, int n_chan, double ref_freq,
+        double chan_width, int n_ant, const double* ant_x, const double* ant_y,
+        const double* ant_z)
 {
     // Create the Measurement Set.
-    oskar_MeasurementSet ms(0, 0);
-    ms.create(name);
+    oskar_MeasurementSet ms;
+    ms.create(ms_name);
 
     // Add antenna positions.
-    ms.addAntennas(na, ax, ay, az);
+    ms.addAntennas(n_ant, ant_x, ant_y, ant_z);
 
-    // Add the Right Ascension & Declination of field centre.
-    ms.addField(ra, dec);
+    // Add the field data.
+    ms.addField(ra, dec, field_name);
 
     // Add polarisation.
-    ms.addPolarisation(1);
+    ms.addPolarisation(n_pol);
 
-    // Add frequency band.
-    ms.addBand(0, 1, freq, 1.0);
+    // Add frequency data.
+    ms.addBand(0, n_chan, ref_freq, chan_width);
 }

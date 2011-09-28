@@ -52,7 +52,7 @@ class MSMainColumns;
  * It can be used as follows:
  * <code>
        // Create the oskar_MeasurementSet object.
-       oskar_MeasurementSet ms(exposure, interval);
+       oskar_MeasurementSet ms;
 
        // Create or open an existing measurement set.
        ms.create("filename.ms"); // or ms.open("filename.ms");
@@ -72,7 +72,7 @@ class MSMainColumns;
        // Add the visibilities.
        // Note that u,v,w coordinates are in metres.
        ms.addVisibilities(n_pol, n_chan, n_row, u, v, w, vis,
-               ant1, ant2, times);
+               ant1, ant2, exposure, interval, times);
  * </endcode>
  *
  */
@@ -83,13 +83,9 @@ public:
      * @brief Constructs the class.
      *
      * @details
-     * The constructor is used to set common parameters, such as the EXPOSURE
-     * and INTERVAL values.
-     *
-     * @param[in] exposure The exposure length per visibility, in seconds.
-     * @param[in] interval The interval length per visibility, in seconds.
+     * Constructs the class.
      */
-    oskar_MeasurementSet(double exposure, double interval);
+    oskar_MeasurementSet();
 
     /**
      * @brief Destroys the class.
@@ -194,20 +190,31 @@ public:
      *   pol0,ch0  pol1,ch0  pol2,ch0  pol3,ch0
      *   pol0,ch1  pol1,ch1  pol2,ch1  pol3,ch1
      *
-     * @param[in] n_pol  Number of polarisations.
-     * @param[in] n_chan Number of channels.
-     * @param[in] n_row  Number of rows to add to the main table (see note).
-     * @param[in] u      Baseline u-coordinates, in metres (size n_row).
-     * @param[in] v      Baseline v-coordinate, in metres (size n_row).
-     * @param[in] w      Baseline w-coordinate, in metres (size n_row).
-     * @param[in] vis    Matrix of complex visibilities per row (see note).
-     * @param[in] ant1   Indices of antenna 1 for each baseline (size n_row).
-     * @param[in] ant2   Indices of antenna 2 for each baseline (size n_row).
-     * @param[in] times  Timestamp of each visibility block (size n_row).
+     * @param[in] n_pol    Number of polarisations.
+     * @param[in] n_chan   Number of channels.
+     * @param[in] n_row    Number of rows to add to the main table (see note).
+     * @param[in] u        Baseline u-coordinates, in metres (size n_row).
+     * @param[in] v        Baseline v-coordinate, in metres (size n_row).
+     * @param[in] w        Baseline w-coordinate, in metres (size n_row).
+     * @param[in] vis      Matrix of complex visibilities per row (see note).
+     * @param[in] ant1     Indices of antenna 1 for each baseline (size n_row).
+     * @param[in] ant2     Indices of antenna 2 for each baseline (size n_row).
+     * @param[in] exposure The exposure length per visibility, in seconds.
+     * @param[in] interval The interval length per visibility, in seconds.
+     * @param[in] times    Timestamp of each visibility block (size n_row).
      */
     void addVisibilities(int n_pol, int n_chan, int n_row, const double* u,
             const double* v, const double* w, const double* vis,
-            const int* ant1, const int* ant2, const double* times);
+            const int* ant1, const int* ant2, double exposure, double interval,
+            const double* times);
+
+    /**
+     * @brief Cleanup routine.
+     *
+     * @details
+     * Cleanup routine to delete objects.
+     */
+    void close();
 
     /**
      * @brief Creates a new Measurement Set.
@@ -229,14 +236,6 @@ public:
 
 protected:
     /**
-     * @brief Cleanup routine.
-     *
-     * @details
-     * Cleanup routine to delete objects.
-     */
-    void close();
-
-    /**
      * @brief Adds a band to the Measurement Set.
      *
      * @details
@@ -253,8 +252,6 @@ protected:
     casa::MeasurementSet* _ms;   ///< Pointer to the Measurement Set.
     casa::MSColumns* _msc;       ///< Pointer to the sub-tables.
     casa::MSMainColumns* _msmc;  ///< Pointer to the main columns.
-    double _exposure;            ///< For visibility data.
-    double _interval;            ///< For visibility data.
 };
 
 #endif // OSKAR_MEASUREMENT_SET_H_

@@ -30,15 +30,16 @@
 #include "ms/oskar_MeasurementSet.h"
 
 extern "C"
-void oskar_ms_append_vis(const char* name, double exposure, double interval,
-        int nv, const double* u, const double* v, const double* w,
-        const double* vis, const int* ant1, const int* ant2,
-        const double* times)
+void oskar_ms_append_vis(const char* ms_name, int n_pol, int n_chan,
+        int n_row, const double* u, const double* v, const double* w,
+        const double* vis, const int* ant1, const int* ant2, double exposure,
+        double interval, const double* times)
 {
     // Open the Measurement Set.
-    oskar_MeasurementSet ms(exposure, interval);
-    ms.open(name);
+    oskar_MeasurementSet ms;
+    ms.open(ms_name);
 
     // Add visibilities.
-    ms.addVisibilities(1, 1, nv, u, v, w, vis, ant1, ant2, times);
+    ms.addVisibilities(n_pol, n_chan, n_row, u, v, w, vis, ant1, ant2,
+            exposure, interval, times);
 }

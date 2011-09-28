@@ -37,11 +37,9 @@ using namespace casa;
  * Constructor & Destructor
  *---------------------------------------------------------------------------*/
 
-oskar_MeasurementSet::oskar_MeasurementSet(double exposure, double interval)
+oskar_MeasurementSet::oskar_MeasurementSet()
 {
     // Initialise members.
-    _exposure = exposure;
-    _interval = interval;
     _ms = NULL;
     _msc = NULL;
     _msmc = NULL;
@@ -159,7 +157,8 @@ void oskar_MeasurementSet::addPolarisation(int np)
 
 void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
         const double* u, const double* v, const double* w, const double* vis,
-        const int* ant1, const int* ant2, const double* times)
+        const int* ant1, const int* ant2, double exposure, double interval,
+        const double* times)
 {
     // Allocate storage for a (u,v,w) coordinate,
     // a visibility matrix, a visibility weight, and a flag matrix.
@@ -209,8 +208,8 @@ void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
         _msmc->flag().put(row, flag);
         _msmc->weight().put(row, weight);
         _msmc->sigma().put(row, sigma);
-        _msmc->exposure().put(row, _exposure);
-        _msmc->interval().put(row, _interval);
+        _msmc->exposure().put(row, exposure);
+        _msmc->interval().put(row, interval);
         _msmc->time().put(row, times[r]);
         _msmc->timeCentroid().put(row, times[r]);
     }
@@ -231,9 +230,6 @@ void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
     _msc->observation().releaseDate().put(0, releaseDate);
 }
 
-/*=============================================================================
- * Protected Members
- *---------------------------------------------------------------------------*/
 void oskar_MeasurementSet::close()
 {
     // Delete object references.
@@ -294,6 +290,11 @@ void oskar_MeasurementSet::open(const char* filename)
     _msc = new MSColumns(*_ms);
     _msmc = new MSMainColumns(*_ms);
 }
+
+
+/*=============================================================================
+ * Protected Members
+ *---------------------------------------------------------------------------*/
 
 void oskar_MeasurementSet::addBand(int polid, int nc, double refFrequency,
         const Vector<double>& chanFreqs, const Vector<double>& chanWidths)

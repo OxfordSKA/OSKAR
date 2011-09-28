@@ -48,8 +48,6 @@ extern "C" {
  * The visibilities and (u,v,w) coordinates are appended to the main table.
  *
  * @param[in] name The name of the Measurement Set directory.
- * @param[in] exposure The visibility exposure length in seconds.
- * @param[in] interval The visibility interval length in seconds.
  * @param[in] nv The number of visibilities to add.
  * @param[in] u The visibility u coordinates in metres (length nv).
  * @param[in] v The visibility v coordinates in metres (length nv).
@@ -57,11 +55,13 @@ extern "C" {
  * @param[in] vis The complex visibility values (length 2*nv).
  * @param[in] ant1 The index of antenna 1 for the baselines (length nv).
  * @param[in] ant2 The index of antenna 2 for the baselines (length nv).
+ * @param[in] exposure The visibility exposure length in seconds.
+ * @param[in] interval The visibility interval length in seconds.
  * @param[in] times The times at which each visibility is taken.
  */
-void oskar_ms_append_vis1(const char* name, double exposure, double interval,
-        int nv, const double* u, const double* v, const double* w,
-        const double* vis, const int* ant1, const int* ant2,
+void oskar_ms_append_vis1(const char* name, int nv, const double* u,
+        const double* v, const double* w, const double* vis, const int* ant1,
+        const int* ant2, double exposure, double interval,
         const double* times);
 
 #ifdef __cplusplus

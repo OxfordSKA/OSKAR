@@ -26,8 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ANTENNA_DATA_H_
-#define OSKAR_ANTENNA_DATA_H_
+#ifndef OSKAR_EMBEDDED_ELEMENT_PATTERN_H_
+#define OSKAR_EMBEDDED_ELEMENT_PATTERN_H_
+
+/**
+ * @file oskar_EmbeddedElementPattern.h
+ */
 
 #include "utility/oskar_vector_types.h"
 
@@ -36,7 +40,7 @@ extern "C" {
 #endif
 
 /**
- * @brief Structure to hold antenna field pattern data.
+ * @brief Structure to hold antenna (embedded element) pattern data.
  *
  * @details
  * This structure holds the complex gain of an antenna as a function of theta
@@ -45,7 +49,7 @@ extern "C" {
  *
  * The theta coordinate is assumed to be the fastest-varying dimension.
  */
-struct oskar_AntennaData
+struct oskar_EmbeddedElementPattern
 {
     int n_points;     ///< Total number of points in all arrays.
     int n_phi;        ///< Number of points in the phi direction.
@@ -59,10 +63,10 @@ struct oskar_AntennaData
     float2* g_phi;    ///< Response in phi direction at coordinates (re,im).
     float2* g_theta;  ///< Response in theta direction at coordinates (re,im).
 };
-typedef struct oskar_AntennaData oskar_AntennaData;
+typedef struct oskar_EmbeddedElementPattern oskar_EmbeddedElementPattern;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_ANTENNA_DATA_H_
+#endif // OSKAR_EMBEDDED_ELEMENT_PATTERN_H_

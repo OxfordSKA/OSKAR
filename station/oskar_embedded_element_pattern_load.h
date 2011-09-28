@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_EMBEDDED_ELEMENT_PATTERN_H_
-#define OSKAR_LOAD_EMBEDDED_ELEMENT_PATTERN_H_
+#ifndef OSKAR_EMBEDDED_ELEMENT_PATTERN_LOAD_H_
+#define OSKAR_EMBEDDED_ELEMENT_PATTERN_LOAD_H_
 
 /**
- * @file oskar_load_embedded_element_pattern.h
+ * @file oskar_embedded_element_pattern_load.h
  */
 
 #include "oskar_global.h"
-#include "station/oskar_AntennaData.h"
+#include "station/oskar_EmbeddedElementPattern.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,11 +67,11 @@ extern "C" {
  * @param[out] data     Pointer to data structure to fill.
  */
 OSKAR_EXPORT
-int oskar_load_embedded_element_pattern(const char* filename,
-        oskar_AntennaData* data);
+int oskar_embedded_element_pattern_load(const char* filename,
+        oskar_EmbeddedElementPattern* data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_LOAD_EMBEDDED_ELEMENT_PATTERN_H_
+#endif // OSKAR_EMBEDDED_ELEMENT_PATTERN_LOAD_H_

@@ -61,7 +61,7 @@ void MeasurementSetTest::tearDown()
 void MeasurementSetTest::test_create_simple()
 {
     // Create the Measurement Set.
-    oskar_MeasurementSet ms(90, 90);
+    oskar_MeasurementSet ms;
     ms.create("simple.ms");
 
     // Add some dummy antenna positions.
@@ -86,7 +86,7 @@ void MeasurementSetTest::test_create_simple()
     int ant1[] = {0, 0, 1};
     int ant2[] = {1, 2, 2};
     int nv = sizeof(u) / sizeof(double);
-    ms.addVisibilities(1, 1, nv, u, v, w, vis, ant1, ant2, times);
+    ms.addVisibilities(1, 1, nv, u, v, w, vis, ant1, ant2, 90, 90, times);
 }
 
 /**
@@ -123,8 +123,8 @@ void MeasurementSetTest::test_append_c()
         times[i] = i * 0.01;
 
     oskar_ms_create_meta1(filename, ra, dec, na, ax, ay, az, freq);
-    oskar_ms_append_vis1(filename, exposure, interval,
-            nv, u, v, w, vis, ant1, ant2, &times[0]);
+    oskar_ms_append_vis1(filename, nv, u, v, w, vis, ant1, ant2,
+            exposure, interval, &times[0]);
 }
 
 /**
@@ -163,8 +163,8 @@ void MeasurementSetTest::test_append_large()
     TIMER_START
     int blocks = 100;
     for (int b = 0; b < blocks; ++b) {
-        oskar_ms_append_vis1(filename, exposure, interval,
-                nv, &u[0], &v[0], &w[0], &vis[0], &ant1[0], &ant2[0], &times[0]);
+        oskar_ms_append_vis1(filename, nv, &u[0], &v[0], &w[0], &vis[0],
+                &ant1[0], &ant2[0], exposure, interval, &times[0]);
     }
     TIMER_STOP("Finished creating measurement set (%d visibilities)",
             nv * blocks)
@@ -177,16 +177,26 @@ void MeasurementSetTest::test_append_large()
 void MeasurementSetTest::test_multi_channel()
 {
     // Define the data dimensions.
-    int n_ant = 3;   // Number of antennas.
-    int n_pol = 4;   // Number of polarisations.
-    int n_chan = 10; // Number of channels.
+    int n_ant = 3;           // Number of antennas.
+    int n_pol = 4;           // Number of polarisations.
+    int n_chan = 10;         // Number of channels.
+    int n_dumps = 2;         // Number of total correlator dumps.
+
+    // Define other meta-data.
+    const char* filename = "multi_channel.ms";
+    double ra = 0.0;          // RA of field centre in radians.
+    double dec = 1.570796;    // Dec of field centre in radians.
+    double exposure = 90.0;   // Visibility exposure time in seconds.
+    double interval = 90.0;   // Visibility dump interval in seconds.
+    double freq = 400e6;      // Frequency of channel 0 in Hz.
+    double chan_width = 25e3; // Channel width in Hz.
 
     // Create the Measurement Set.
-    oskar_MeasurementSet ms(90, 90);
-    ms.create("multi_channel.ms");
+    oskar_MeasurementSet ms;
+    ms.create(filename);
 
     // Add some dummy antenna positions.
-    std::vector<double> ax(n_ant, 0.0), ay(n_ant, 0.0), az(n_ant, 0.0);
+    std::vector<double> ax(n_ant), ay(n_ant), az(n_ant);
     for (int i = 0; i < n_ant; ++i)
     {
         ax[i] = i / 10.0;
@@ -196,16 +206,15 @@ void MeasurementSetTest::test_multi_channel()
     ms.addAntennas(n_ant, &ax[0], &ay[0], &az[0]);
 
     // Add the Right Ascension & Declination of field centre.
-    ms.addField(0, 1.570796, "Test field");
+    ms.addField(ra, dec, "Test field");
 
     // Add polarisations.
     ms.addPolarisation(n_pol);
 
     // Add frequency band.
-    ms.addBand(0, n_chan, 400e6, 25e3);
+    ms.addBand(0, n_chan, freq, chan_width);
 
     // Create test data (without complex conjugate).
-    int n_dumps = 2;
     int n_baselines = n_ant * (n_ant - 1) / 2;
     int n_rows = n_baselines * n_dumps;
     std::vector<double> u(n_rows), v(n_rows), w(n_rows), times(n_rows);
@@ -251,7 +260,8 @@ void MeasurementSetTest::test_multi_channel()
 
     TIMER_START
     ms.addVisibilities(n_pol, n_chan, n_rows, &u[0], &v[0], &w[0],
-            (double*)(&vis_data[0]), &ant1[0], &ant2[0], &times[0]);
+            (double*)(&vis_data[0]), &ant1[0], &ant2[0], exposure, interval,
+            &times[0]);
     TIMER_STOP("Finished creating measurement set (%d rows, %d visibilities)",
             n_rows, n_pol * n_chan * n_rows)
 }

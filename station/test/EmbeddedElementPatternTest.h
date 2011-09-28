@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LOAD_ANTENNA_PATTERN_TEST_H
-#define LOAD_ANTENNA_PATTERN_TEST_H
+#ifndef EMBEDDED_ELEMENT_PATTERN_TEST_H
+#define EMBEDDED_ELEMENT_PATTERN_TEST_H
 
 /**
- * @file LoadAntennaPatternTest.h
+ * @file EmbeddedElementPatternTest.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,10 +42,10 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class LoadAntennaPatternTest : public CppUnit::TestFixture
+class EmbeddedElementPatternTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(LoadAntennaPatternTest);
+        CPPUNIT_TEST_SUITE(EmbeddedElementPatternTest);
         CPPUNIT_TEST(test_method);
         CPPUNIT_TEST_SUITE_END();
 
@@ -62,6 +62,6 @@ class LoadAntennaPatternTest : public CppUnit::TestFixture
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(LoadAntennaPatternTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(EmbeddedElementPatternTest);
 
-#endif // LOAD_ANTENNA_PATTERN_TEST_H
+#endif // EMBEDDED_ELEMENT_PATTERN_TEST_H
