@@ -63,8 +63,8 @@ void CudaInterpBilinearTest::test_method()
     };
 
     // Set up positions.
-    int nx = 70;
-    int ny = 90;
+    int nx = 7;
+    int ny = 9;
     int n = nx * ny;
     float* h_pos_x = (float*)malloc(n * sizeof(float));
     float* h_pos_y = (float*)malloc(n * sizeof(float));

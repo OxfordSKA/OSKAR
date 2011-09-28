@@ -62,15 +62,14 @@ __global__ void oskar_cudak_interp_bilinear(const CoordType size_x,
     if (i < n)
     {
         // Get normalised coordinates from global memory.
-        CoordType p_x = pos_x[i];
-        CoordType p_y = pos_y[i];
+    	float2 p = make_float2((float)pos_x[i], (float)pos_y[i]);
 
         // Re-scale coordinates to allow for 0.5-pixel offsets.
-        p_x = ((CoordType)0.5 + (size_x - 1) * p_x) / (CoordType)size_x;
-        p_y = ((CoordType)0.5 + (size_y - 1) * p_y) / (CoordType)size_y;
+        p.x = 0.5f + (size_x - 1) * p.x;
+        p.y = 0.5f + (size_y - 1) * p.y;
 
         // Perform interpolated texture lookup.
-        out[i] = tex2D(texture_ref<InputType>(), p_x, p_y);
+        out[i] = tex2D(texture_ref<InputType>(), p.x, p.y);
     }
 }
 
@@ -84,15 +83,14 @@ __global__ void oskar_cudak_interp_bilinear<float2, double, double2>(
     if (i < n)
     {
         // Get normalised coordinates from global memory.
-        float p_x = (float)pos_x[i];
-        float p_y = (float)pos_y[i];
+    	float2 p = make_float2((float)pos_x[i], (float)pos_y[i]);
 
         // Re-scale coordinates to allow for 0.5-pixel offsets.
-        p_x = (0.5f + (size_x - 1) * p_x) / (float)size_x;
-        p_y = (0.5f + (size_y - 1) * p_y) / (float)size_y;
+        p.x = 0.5f + (size_x - 1) * p.x;
+        p.y = 0.5f + (size_y - 1) * p.y;
 
         // Perform interpolated texture lookup.
-        float2 t1 = tex2D(texture_ref<float2>(), p_x, p_y);
+        float2 t1 = tex2D(texture_ref<float2>(), p.x, p.y);
 
         // Promote result to double.
         double2 t2 = make_double2(t1.x, t1.y);
@@ -110,10 +108,7 @@ int oskar_cuda_interp_bilinear(int size_x, int size_y, int pitch,
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<InputType>();
     texture<InputType, 2>& ref = texture_ref<InputType>();
     ref.filterMode = cudaFilterModeLinear;
-    ref.normalized = true;
-    ref.addressMode[0] = cudaAddressModeClamp;
-    ref.addressMode[1] = cudaAddressModeClamp;
-    ref.addressMode[2] = cudaAddressModeClamp;
+    ref.normalized = false;
     cudaError_t errCuda = cudaBindTexture2D(0, &ref, d_input, &channelDesc,
             size_x, size_y, pitch);
     if (errCuda != cudaSuccess) return errCuda;
@@ -121,8 +116,9 @@ int oskar_cuda_interp_bilinear(int size_x, int size_y, int pitch,
     // Launch the kernel.
     const int thd = 512; // Using more than this won't work with CUDA 1.3.
     const int blk = (n + thd - 1) / thd;
-    oskar_cudak_interp_bilinear<InputType, CoordType, OutputType> <<<blk, thd>>>
-            (size_x, size_y, n, d_pos_x, d_pos_y, d_output);
+    oskar_cudak_interp_bilinear<InputType, CoordType, OutputType>
+    		OSKAR_CUDAK_CONF(blk, thd)
+    		(size_x, size_y, n, d_pos_x, d_pos_y, d_output);
     cudaDeviceSynchronize();
 
     // Unbind texture.

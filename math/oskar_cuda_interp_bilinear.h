@@ -102,7 +102,7 @@ int oskar_cuda_interp_bilinear_c(int size_x, int size_y, int pitch,
 
 /**
  * @brief
- * Performs bilinear interpolation (double precision).
+ * Performs bilinear interpolation (double precision real).
  *
  * @details
  * This function performs bilinear interpolation using the native

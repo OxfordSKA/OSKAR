@@ -11,14 +11,12 @@ add_subdirectory(cudak)
 set(math_SRC
     src/oskar_mat_tri_c.c
     src/oskar_cuda_dft_c2r_2d.cu
+    src/oskar_cuda_interp_bilinear.cu
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})
 endforeach ()
 
-set(math_SRC ${math_SRC}
-    src/oskar_cuda_interp_bilinear.cu
-)
 set(math_SRC "${math_SRC}" PARENT_SCOPE)
 
 add_subdirectory(test)
