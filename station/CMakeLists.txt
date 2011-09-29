@@ -6,6 +6,9 @@ set(station_SRC
     src/oskar_beamPattern.cpp
     #src/oskar_bf_cuda_ant_sig_iso_2d.cu
     src/oskar_evaluate_station_beam.cu
+    src/oskar_embedded_element_pattern_copy_to_gpu.cu
+    src/oskar_embedded_element_pattern_free_gpu.cu
+    src/oskar_embedded_element_pattern_free.c
     src/oskar_embedded_element_pattern_load.c
     src/oskar_mult_beampattern_by_sources.cu
     src/oskar_StationModel.cu
