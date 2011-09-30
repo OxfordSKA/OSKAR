@@ -26,46 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/test/LoadSourcesTest.h"
-#include "sky/oskar_load_sources.h"
-#include "sky/oskar_SkyModel.h"
+#include "sky/cudak/oskar_cudak_scale_brightness_by_spectral_index.h"
 
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
-
-#include <cstdio>
-#include <cstdlib>
-
-void LoadSourcesTest::test_load()
+__global__
+void oskar_cudak_scale_brightness_by_spectral_index_f(const int num_sources,
+        const float frequency, const float* ref_frequency,
+        const float* spectral_index, float* I, float* Q, float* U, float* V)
 {
-    const char* filename = "temp_sources.dat";
-    FILE* file = fopen(filename, "w");
-    if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
-    int num_sources = 1000;
-    for (int i = 0; i < num_sources; ++i)
-    {
-        if (i % 10 == 0) fprintf(file, "# some comment!\n");
-        fprintf(file, "%lf %lf %lf %lf %lf %lf\n", i/10.0, i/20.0, 0.0, 1.0,
-                2.0, 3.0);
-    }
-    fclose(file);
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
 
-    oskar_SkyModelGlobal_d sky;
-    TIMER_START
-    oskar_load_sources_d(filename, &sky);
-    TIMER_STOP("Loaded %i sources", sky.num_sources)
+    if (i >= num_sources) return;
 
-    // Cleanup.
-    remove(filename);
-
-    const double deg2rad = 0.0174532925199432957692;
-
-    // Check the data loaded correctly.
-    CPPUNIT_ASSERT_EQUAL(num_sources, (int)sky.num_sources);
-    for (int i = 0; i < num_sources; ++i)
-    {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0 * deg2rad, sky.RA[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0 * deg2rad, sky.Dec[i], 1.0e-6);
-    }
-
+    float scale = powf(frequency / ref_frequency[i], spectral_index[i]);
+    I[i] *= scale;
+    Q[i] *= scale;
+    U[i] *= scale;
+    V[i] *= scale;
 }
+
+
+
+__global__
+void oskar_cudak_scale_brightness_by_spectral_index_d(const int num_sources,
+        const double frequency, const double* ref_frequency,
+        const double* spectral_index, double* I, double* Q, double* U, double* V)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i >= num_sources) return;
+
+    double scale = pow(frequency / ref_frequency[i], spectral_index[i]);
+    I[i] *= scale;
+    Q[i] *= scale;
+    U[i] *= scale;
+    V[i] *= scale;
+}
+

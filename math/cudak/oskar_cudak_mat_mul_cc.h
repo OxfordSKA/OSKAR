@@ -46,11 +46,11 @@
  *
  * All matrices must be of the same size.
  *
- * @param[in] n1 Size of the fastest varying dimension.
- * @param[in] n2 Size of the slowest varying dimension.
- * @param[in] a First input matrix.
- * @param[in] b Second input matrix.
- * @param[out] c Output matrix.
+ * @param[in]  n1 Size of the fastest varying dimension.
+ * @param[in]  n2 Size of the slowest varying dimension.
+ * @param[in]  a  First input matrix.
+ * @param[in]  b  Second input matrix.
+ * @param[out] c  Output matrix.
  */
 __global__
 void oskar_cudak_mat_mul_cc_f(int n1, int n2, const float2* a,
@@ -67,11 +67,11 @@ void oskar_cudak_mat_mul_cc_f(int n1, int n2, const float2* a,
  *
  * All matrices must be of the same size.
  *
- * @param[in] n1 Size of the fastest varying dimension.
- * @param[in] n2 Size of the slowest varying dimension.
- * @param[in] a First input matrix.
- * @param[in] b Second input matrix.
- * @param[out] c Output matrix.
+ * @param[in]  n1 Size of the fastest varying dimension.
+ * @param[in]  n2 Size of the slowest varying dimension.
+ * @param[in]  a  First input matrix.
+ * @param[in]  b  Second input matrix.
+ * @param[out] c  Output matrix.
  */
 __global__
 void oskar_cudak_mat_mul_cc_d(int n1, int n2, const double2* a,

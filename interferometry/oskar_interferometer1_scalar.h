@@ -96,7 +96,7 @@ OSKAR_EXPORT
 int oskar_interferometer1_scalar_d(
         const oskar_TelescopeModel_d telescope,
         const oskar_StationModel_d * stations,
-        const oskar_SkyModelGlobal_d sky,
+        oskar_SkyModelGlobal_d sky,
         const double ra0_rad,
         const double dec0_rad,
         const double obs_start_mjd_utc,
@@ -121,7 +121,7 @@ OSKAR_EXPORT
 int oskar_interferometer1_scalar_f(
         const oskar_TelescopeModel_f telescope,
         const oskar_StationModel_f * stations,
-        const oskar_SkyModelGlobal_f sky,
+        oskar_SkyModelGlobal_f sky,
         const float ra0_rad,
         const float dec0_rad,
         const float obs_start_mjd_utc,

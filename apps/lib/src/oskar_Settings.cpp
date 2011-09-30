@@ -109,6 +109,7 @@ void oskar_Settings::print() const
 {
     printf("\n");
     printf("= Settings (%s)\n", _filename.toLatin1().data());
+    printf("  - Double precision       = %s\n", _prec_double ? "true" : "false");
     printf("  - Sky file               = %s\n", _sky_file.toLatin1().data());
     printf("  - Stations directory     = %s\n", _station_dir.toLatin1().data());
     printf("  - Station beam disabled  = %s\n", _disable_station_beam ? "true" : "false");
@@ -128,7 +129,6 @@ void oskar_Settings::print() const
     printf("  - Num. fringe ave.       = %i\n", _obs.num_fringe_ave());
     printf("  - Oskar visibility file  = %s\n", _obs.oskar_vis_filename().toLatin1().data());
     printf("  - MS file                = %s\n", _obs.ms_filename().toLatin1().data());
-    printf("  - Double precision       = %i\n", _prec_double);
     printf("\n");
 }
 

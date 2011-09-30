@@ -26,35 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LOAD_SOURCES_TEST_H_
-#define LOAD_SOURCES_TEST_H_
+#ifndef OSKAR_CUDAK_SCALE_BRIGHTNESS_BY_SPECTRAL_INDEX_H_
+#define OSKAR_CUDAK_SCALE_BRIGHTNESS_BY_SPECTRAL_INDEX_H_
 
 /**
- * @file LoadSourcesTest.h
+ * @file oskar_cudak_scale_brightness_by_spectral_index.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class LoadSourcesTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(LoadSourcesTest);
-        CPPUNIT_TEST(test_load);
-        CPPUNIT_TEST_SUITE_END();
+__global__
+void oskar_cudak_scale_brightness_by_spectral_index_f(const int num_sources,
+        const float frequency, const float* ref_frequency,
+        const float* spectral_index, float* I, float* Q, float* U, float* V);
 
-    public:
-        /// Test method.
-        void test_load();
-};
+__global__
+void oskar_cudak_scale_brightness_by_spectral_index_d(const int num_sources,
+        const double frequency, const double* ref_frequency,
+        const double* spectral_index, double* I, double* Q, double* U, double* V);
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(LoadSourcesTest);
-
-#endif // LOAD_SOURCES_TEST_H_
+#endif // OSKAR_CUDAK_SCALE_BRIGHTNESS_BY_SPECTRAL_INDEX_H_

@@ -27,6 +27,7 @@
  */
 
 #include "apps/lib/oskar_SettingsObservation.h"
+#include "sky/oskar_date_time_to_mjd.h"
 
 #include <QtCore/QFileInfo>
 #include <QtCore/QSettings>
@@ -51,7 +52,12 @@ void oskar_SettingsObservation::load(const QSettings& settings)
     _start_time_utc_minute = settings.value("observation/start_time_utc_minute").toUInt();
     _start_time_utc_second = settings.value("observation/start_time_utc_second").toDouble();
 
-    _start_time_utc_mjd = settings.value("observation/start_time_utc_mjd").toDouble();
+    double day_fraction = (_start_time_utc_hour + _start_time_utc_minute/60
+            + _start_time_utc_second/3600) / 24.0;
+    _start_time_utc_mjd = oskar_date_time_to_mjd_d(_start_time_utc_year,
+            _start_time_utc_month, _start_time_utc_day,
+            day_fraction);
+
     _obs_length_sec    = settings.value("observation/length_seconds").toDouble();
     _oskar_vis_filename= settings.value("observation/oskar_vis_filename", "").toString();
     _ms_filename       = settings.value("observation/ms_filename", "").toString();

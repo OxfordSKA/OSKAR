@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void oskar_copy_gobal_sky_to_device_d(const oskar_SkyModelGlobal_d* h_sky,
+void oskar_sky_model_global_copy_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
         oskar_SkyModelGlobal_d* hd_sky)
 {
     // Allocate memory for arrays in structure.
@@ -46,6 +46,12 @@ void oskar_copy_gobal_sky_to_device_d(const oskar_SkyModelGlobal_d* h_sky,
     cudaMalloc((void**)&hd_sky->Q,   bytes);
     cudaMalloc((void**)&hd_sky->U,   bytes);
     cudaMalloc((void**)&hd_sky->V,   bytes);
+    cudaMalloc((void**)&hd_sky->reference_freq, bytes);
+    cudaMalloc((void**)&hd_sky->spectral_index, bytes);
+    cudaMalloc((void**)&hd_sky->rel_l, bytes);
+    cudaMalloc((void**)&hd_sky->rel_m, bytes);
+    cudaMalloc((void**)&hd_sky->rel_n, bytes);
+
 
     // Copy arrays to device.
     cudaMemcpy(hd_sky->RA,  h_sky->RA,  bytes, cudaMemcpyHostToDevice);
@@ -54,9 +60,11 @@ void oskar_copy_gobal_sky_to_device_d(const oskar_SkyModelGlobal_d* h_sky,
     cudaMemcpy(hd_sky->Q,   h_sky->Q,   bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(hd_sky->U,   h_sky->U,   bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(hd_sky->V,   h_sky->V,   bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->reference_freq, h_sky->reference_freq, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->spectral_index, h_sky->spectral_index, bytes, cudaMemcpyHostToDevice);
 }
 
-void oskar_copy_gobal_sky_to_device_f(const oskar_SkyModelGlobal_f* h_sky,
+void oskar_sky_model_global_copy_to_gpu_f(const oskar_SkyModelGlobal_f* h_sky,
         oskar_SkyModelGlobal_f* hd_sky)
 {
     // Allocate memory for arrays in structure.
@@ -69,6 +77,11 @@ void oskar_copy_gobal_sky_to_device_f(const oskar_SkyModelGlobal_f* h_sky,
     cudaMalloc((void**)&hd_sky->Q,   bytes);
     cudaMalloc((void**)&hd_sky->U,   bytes);
     cudaMalloc((void**)&hd_sky->V,   bytes);
+    cudaMalloc((void**)&hd_sky->reference_freq, bytes);
+    cudaMalloc((void**)&hd_sky->spectral_index, bytes);
+    cudaMalloc((void**)&hd_sky->rel_l, bytes);
+    cudaMalloc((void**)&hd_sky->rel_m, bytes);
+    cudaMalloc((void**)&hd_sky->rel_n, bytes);
 
     // Copy arrays to device.
     cudaMemcpy(hd_sky->RA,  h_sky->RA,  bytes, cudaMemcpyHostToDevice);
@@ -77,9 +90,11 @@ void oskar_copy_gobal_sky_to_device_f(const oskar_SkyModelGlobal_f* h_sky,
     cudaMemcpy(hd_sky->Q,   h_sky->Q,   bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(hd_sky->U,   h_sky->U,   bytes, cudaMemcpyHostToDevice);
     cudaMemcpy(hd_sky->V,   h_sky->V,   bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->reference_freq, h_sky->reference_freq, bytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(hd_sky->spectral_index, h_sky->spectral_index, bytes, cudaMemcpyHostToDevice);
 }
 
-void oskar_allocate_device_local_sky_d(const int num_sources,
+void oskar_local_sky_model_allocate_gpu_d(const int num_sources,
         oskar_SkyModelLocal_d* hd_sky)
 {
     size_t bytes = num_sources * sizeof(double);
@@ -92,9 +107,12 @@ void oskar_allocate_device_local_sky_d(const int num_sources,
     cudaMalloc((void**)&hd_sky->hor_l, bytes);
     cudaMalloc((void**)&hd_sky->hor_m, bytes);
     cudaMalloc((void**)&hd_sky->hor_n, bytes);
+    cudaMalloc((void**)&hd_sky->rel_l, bytes);
+    cudaMalloc((void**)&hd_sky->rel_m, bytes);
+    cudaMalloc((void**)&hd_sky->rel_n, bytes);
 }
 
-void oskar_allocate_device_local_sky_f(const int num_sources,
+void oskar_local_sky_model_allocate_gpu_f(const int num_sources,
         oskar_SkyModelLocal_f* hd_sky)
 {
     size_t bytes = num_sources * sizeof(float);
@@ -107,10 +125,13 @@ void oskar_allocate_device_local_sky_f(const int num_sources,
     cudaMalloc((void**)&hd_sky->hor_l, bytes);
     cudaMalloc((void**)&hd_sky->hor_m, bytes);
     cudaMalloc((void**)&hd_sky->hor_n, bytes);
+    cudaMalloc((void**)&hd_sky->rel_l, bytes);
+    cudaMalloc((void**)&hd_sky->rel_m, bytes);
+    cudaMalloc((void**)&hd_sky->rel_n, bytes);
 }
 
 
-void oskar_free_device_global_sky_d(oskar_SkyModelGlobal_d* hd_sky)
+void oskar_global_sky_model_free_gpu_d(oskar_SkyModelGlobal_d* hd_sky)
 {
     cudaFree(hd_sky->RA);
     cudaFree(hd_sky->Dec);
@@ -118,10 +139,15 @@ void oskar_free_device_global_sky_d(oskar_SkyModelGlobal_d* hd_sky)
     cudaFree(hd_sky->Q);
     cudaFree(hd_sky->U);
     cudaFree(hd_sky->V);
+    cudaFree(hd_sky->reference_freq);
+    cudaFree(hd_sky->spectral_index);
+    cudaFree(hd_sky->rel_l);
+    cudaFree(hd_sky->rel_m);
+    cudaFree(hd_sky->rel_n);
 }
 
 
-void oskar_free_device_global_sky_f(oskar_SkyModelGlobal_f* hd_sky)
+void oskar_global_sky_model_free_gpu_f(oskar_SkyModelGlobal_f* hd_sky)
 {
     cudaFree(hd_sky->RA);
     cudaFree(hd_sky->Dec);
@@ -129,9 +155,14 @@ void oskar_free_device_global_sky_f(oskar_SkyModelGlobal_f* hd_sky)
     cudaFree(hd_sky->Q);
     cudaFree(hd_sky->U);
     cudaFree(hd_sky->V);
+    cudaFree(hd_sky->reference_freq);
+    cudaFree(hd_sky->spectral_index);
+    cudaFree(hd_sky->rel_l);
+    cudaFree(hd_sky->rel_m);
+    cudaFree(hd_sky->rel_n);
 }
 
-void oskar_free_device_local_sky_d(oskar_SkyModelLocal_d* hd_sky)
+void oskar_local_sky_model_free_gpu_d(oskar_SkyModelLocal_d* hd_sky)
 {
     cudaFree(hd_sky->RA);
     cudaFree(hd_sky->Dec);
@@ -142,9 +173,12 @@ void oskar_free_device_local_sky_d(oskar_SkyModelLocal_d* hd_sky)
     cudaFree(hd_sky->hor_l);
     cudaFree(hd_sky->hor_m);
     cudaFree(hd_sky->hor_n);
+    cudaFree(hd_sky->rel_l);
+    cudaFree(hd_sky->rel_m);
+    cudaFree(hd_sky->rel_n);
 }
 
-void oskar_free_device_local_sky_f(oskar_SkyModelLocal_f* hd_sky)
+void oskar_local_sky_model_free_gpu_f(oskar_SkyModelLocal_f* hd_sky)
 {
     cudaFree(hd_sky->RA);
     cudaFree(hd_sky->Dec);
@@ -155,6 +189,9 @@ void oskar_free_device_local_sky_f(oskar_SkyModelLocal_f* hd_sky)
     cudaFree(hd_sky->hor_l);
     cudaFree(hd_sky->hor_m);
     cudaFree(hd_sky->hor_n);
+    cudaFree(hd_sky->rel_l);
+    cudaFree(hd_sky->rel_m);
+    cudaFree(hd_sky->rel_n);
 }
 
 #ifdef __cplusplus

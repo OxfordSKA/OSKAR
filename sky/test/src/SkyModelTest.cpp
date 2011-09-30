@@ -26,50 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sky/test/SkyModelTest.h"
+#include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_load.h"
 
-#include "apps/lib/oskar_Settings.h"
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
 
 #include <cstdio>
 #include <cstdlib>
 
-int main(int argc, char** argv)
+void SkyModelTest::test_load()
 {
-    //=========================================
-    // Load setup
-
-    // Init memory (GPU)
-
-
-    // for time ranges, source ranges
-    //{
-        // interferometer GPU()
-    //}
-    //==========================================
-
-
-
-    // Load Setup
-    if (argc != 2)
+    const char* filename = "temp_sources.osm";
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
+    int num_sources = 1000;
+    for (int i = 0; i < num_sources; ++i)
     {
-        fprintf(stderr, "ERROR: Missing command line arguments.\n");
-        fprintf(stderr, "Usage:  $ oskar_sim1 [settings file]\n");
-        return EXIT_FAILURE;
+        if (i % 10 == 0) fprintf(file, "# some comment!\n");
+        fprintf(file, "%lf %lf %lf %lf %lf %lf %lf %lf\n",
+                i/10.0, i/20.0, 0.0, 1.0, 2.0, 3.0, 200.0e6, -0.7);
     }
-    oskar_Settings settings;
-    if (!settings.load(QString(argv[1])))
-        return EXIT_FAILURE;
-    settings.print();
+    fclose(file);
 
+    oskar_SkyModelGlobal_d sky;
+    TIMER_START
+    oskar_sky_model_load_d(filename, &sky);
+    TIMER_STOP("Loaded %i sources", sky.num_sources)
 
-    // Load Sky CPU -- FIXME: spectral index column (BM)
+    // Cleanup.
+    remove(filename);
 
-    // Load Geometry CPU
+    const double deg2rad = 0.0174532925199432957692;
 
-    // Load embedded element patterns -- TODO (BM)
-
-    // Copy embedded element patterns to GPU texture (FD)
-
-
-    return EXIT_SUCCESS;
+    // Check the data loaded correctly.
+    CPPUNIT_ASSERT_EQUAL(num_sources, (int)sky.num_sources);
+    for (int i = 0; i < num_sources; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0 * deg2rad, sky.RA[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0 * deg2rad, sky.Dec[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, sky.I[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, sky.Q[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, sky.U[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, sky.V[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(200.0e6, sky.reference_freq[i], 1.0e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.7, sky.spectral_index[i], 1.0e-6);
+    }
 }
-

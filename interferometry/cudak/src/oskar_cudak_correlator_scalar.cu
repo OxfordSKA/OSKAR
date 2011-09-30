@@ -44,7 +44,8 @@ extern __shared__ double2 smem_d[];
 // Single precision.
 __global__
 void oskar_cudak_correlator_scalar_f(const int ns, const int na,
-        const float2* jones, const float* u, const float* v, const float* l,
+        const float2* jones, const float* b, const float* u,
+        const float* v, const float* l,
         const float* m, const float lambda_bandwidth, float2* vis)
 {
     // Return immediately if we're in the lower triangular half of the
@@ -79,6 +80,10 @@ void oskar_cudak_correlator_scalar_f(const int ns, const int na,
             // Complex-conjugate multiply.
             oskar_cudaf_mul_c_c_conj_f(c_a, c_b, temp);
 
+            // Multiply by the source brightness.
+            temp.x *= b[t];
+            temp.y *= b[t];
+
             // Multiply result by bandwidth-smearing term.
             sum.x += temp.x * rb;
             sum.y += temp.y * rb;
@@ -110,7 +115,8 @@ void oskar_cudak_correlator_scalar_f(const int ns, const int na,
 // Double precision.
 __global__
 void oskar_cudak_correlator_scalar_d(const int ns, const int na,
-        const double2* jones, const double* u, const double* v, const double* l,
+        const double2* jones, const double* b, const double* u,
+        const double* v, const double* l,
         const double* m, const double lambda_bandwidth, double2* vis)
 {
     // Return immediately if we're in the lower triangular half of the
@@ -144,6 +150,10 @@ void oskar_cudak_correlator_scalar_d(const int ns, const int na,
 
             // Complex-conjugate multiply.
             oskar_cudaf_mul_c_c_conj_d(c_a, c_b, temp);
+
+            // Multiply by the source brightness.
+            temp.x *= b[t];
+            temp.y *= b[t];
 
             // Multiply result by bandwidth-smearing term.
             sum.x += temp.x * rb;

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_SOURCES_H_
-#define OSKAR_LOAD_SOURCES_H_
+#ifndef OSKAR_SKY_MODEL_LOAD_H_
+#define OSKAR_SKY_MODEL_LOAD_H_
 
 /**
- * @file oskar_load_sources.h
+ * @file oskar_sky_model_load.h
  */
 
 #include "oskar_global.h"
@@ -42,23 +42,38 @@ extern "C" {
 
 
 /**
- * @brief Loads sources from a plain text source file. (double precision).
+ * @brief Loads sources from a plain text source file into an oskar global sky
+ * model structure (double precision).
+ *
+ * @details
+ * Source files are plain ascii files consisting of the following 8 columns:
+ *  RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), reference frequency (Hz), spectral index
+ *
+ *  Lines beginning with a # symbol are treated as comments and therefore ignored.
  *
  * @param[in]  file_path  Path to the a source list file.
  * @param[out] sky        Pointer to global sky model structure.
  */
 OSKAR_EXPORT
-void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky);
+void oskar_sky_model_load_d(const char* file_path, oskar_SkyModelGlobal_d* sky);
+
 
 
 /**
- * @brief Loads sources from a plain text source file. (single/float precision).
+ * @brief Loads sources from a plain text source file into an oskar global sky
+ * model structure (single precision).
+ *
+ * @details
+ * Source files are plain ascii files consisting of the following 8 columns:
+ *  RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), reference frequency (Hz), spectral index
+ *
+ *  Lines beginning with a # symbol are treated as comments and therefore ignored.
  *
  * @param[in]  file_path  Path to the a source list file.
  * @param[out] sky        Pointer to global sky model structure.
  */
 OSKAR_EXPORT
-void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky);
+void oskar_sky_model_load_f(const char* file_path, oskar_SkyModelGlobal_f* sky);
 
 
 
@@ -66,4 +81,4 @@ void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky);
 }
 #endif
 
-#endif // OSKAR_LOAD_SOURCES_H_
+#endif // OSKAR_SKY_MODEL_LOAD_H_

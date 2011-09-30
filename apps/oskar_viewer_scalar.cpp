@@ -44,6 +44,7 @@
 #include <cmath>
 
 using namespace oskar; // FIXME: take plot widget out of oskar namespace.
+using namespace std;
 
 int main(int argc, char** argv)
 {
@@ -77,18 +78,37 @@ int main(int argc, char** argv)
         fprintf(stderr, "ERROR: Failed to open oskar image data file.\n");
         return EXIT_FAILURE;
     }
-
-    // single precision
     unsigned num_pixels = image_size * image_size;
-    float* image = (float*) malloc(num_pixels * sizeof(float));
-    size_t read = fread(image, sizeof(float), num_pixels, file);
-    if ((unsigned)read != num_pixels)
+    vector<float> image(num_pixels, 0.0);
+
+    if (settings.double_precision())
     {
-        fprintf(stderr, "ERROR read the wrong number of bytes from image file. %i != %i\n",
-                (int)read, num_pixels);
-        return EXIT_FAILURE;
+        vector<double> image_temp(num_pixels, 0.0);
+        size_t read = fread(&image_temp[0], sizeof(double), num_pixels, file);
+        if ((unsigned)read != num_pixels)
+        {
+            fprintf(stderr, "ERROR read the wrong number of bytes from image file. %i != %i\n",
+                    (int)read, num_pixels);
+            return EXIT_FAILURE;
+        }
+
+        for (int i =0; i < num_pixels; ++i)
+        {
+            image[i] = (float)image_temp[i];
+        }
     }
 
+    // single precision
+    else
+    {
+        size_t read = fread(&image[0], sizeof(float), num_pixels, file);
+        if ((unsigned)read != num_pixels)
+        {
+            fprintf(stderr, "ERROR read the wrong number of bytes from image file. %i != %i\n",
+                    (int)read, num_pixels);
+            return EXIT_FAILURE;
+        }
+    }
     fclose(file);
 
 
@@ -108,7 +128,7 @@ int main(int argc, char** argv)
     plot1.setBackgroundRole(QPalette::Window);
     plot1.setPalette(p);
     double extent = fov_deg / 2.0;
-    plot1.plotImage(image, image_size, image_size, -extent, extent,
+    plot1.plotImage(&image[0], image_size, image_size, -extent, extent,
             -extent, extent);
     plot1.setYLabel("Relative Declination (deg)");
     plot1.setXLabel("Relative Right Ascension x cos(Dec) x -1 (deg)");
@@ -120,9 +140,6 @@ int main(int argc, char** argv)
     int status = 0;
     status = app.exec();
     // ========================================================================
-
-    // Free memory
-    free(image);
 
     return status;
 }

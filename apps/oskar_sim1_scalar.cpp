@@ -27,7 +27,7 @@
  */
 
 #include "sky/oskar_SkyModel.h"
-#include "sky/oskar_load_sources.h"
+#include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_date_time_to_mjd.h"
 
 #include "station/oskar_StationModel.h"
@@ -98,14 +98,17 @@ int sim1_d(const oskar_Settings& settings)
 {
     // ============== Load input data =========================================
     oskar_SkyModelGlobal_d sky;
-    oskar_load_sources_d(settings.sky_file().toLatin1().data(), &sky);
+    oskar_sky_model_load_d(settings.sky_file().toLatin1().data(), &sky);
+
     oskar_TelescopeModel_d telescope;
     oskar_load_telescope_d(settings.telescope_file().toLatin1().data(),
             settings.longitude_rad(), settings.latitude_rad(), &telescope);
+
     oskar_StationModel_d* stations;
     const char* station_dir = settings.station_dir().toLatin1().data();
     unsigned num_stations = oskar_load_stations_d(station_dir, &stations,
             &telescope.identical_stations);
+
     if (num_stations != telescope.num_antennas)
     {
         fprintf(stderr, "ERROR: Error loading telescope geometry.\n");
@@ -116,47 +119,19 @@ int sim1_d(const oskar_Settings& settings)
     int error_code = 0;
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
-        unsigned year   = settings.obs().start_time_utc_year();
-        unsigned month  = settings.obs().start_time_utc_month();
-        unsigned day    = settings.obs().start_time_utc_day();
-        unsigned hour   = settings.obs().start_time_utc_hour();
-        unsigned minute = settings.obs().start_time_utc_minute();
-        double second   = settings.obs().start_time_utc_second();
-        double day_fraction = (hour + minute/60 + second/3600) / 24.0;
-        double start_time_mjd_utc = oskar_date_time_to_mjd_d(
-                year, month, day, day_fraction);
-        printf("- %i/%i/%i %i:%i:%f -> mjd %f\n", day, month, year, hour, minute,
-                second, start_time_mjd_utc);
-
         double frequency = settings.obs().frequency(i);
-        printf("- Frequency: %e\n", frequency);
 
-        // Allocate memory for frequency scaled sky model.
-        oskar_SkyModelGlobal_d sky_temp;
-        sky_temp.num_sources = sky.num_sources;
-        sky_temp.Dec = (double*) malloc(sky.num_sources * sizeof(double));
-        sky_temp.RA  = (double*) malloc(sky.num_sources * sizeof(double));
-        sky_temp.I   = (double*) malloc(sky.num_sources * sizeof(double));
-        sky_temp.Q   = (double*) malloc(sky.num_sources * sizeof(double));
-        sky_temp.U   = (double*) malloc(sky.num_sources * sizeof(double));
-        sky_temp.V   = (double*) malloc(sky.num_sources * sizeof(double));
-        memcpy(sky_temp.Dec, sky.Dec,  sky.num_sources * sizeof(double));
-        memcpy(sky_temp.RA,  sky.RA,   sky.num_sources * sizeof(double));
-        memcpy(sky_temp.I,   sky.I,    sky.num_sources * sizeof(double));
-        for (int s = 0; s < sky.num_sources; ++s)
-        {
-//            sky_temp.I[s] = 1.0e6 * pow(frequency, -0.7);
-            sky_temp.I[s] *= pow(frequency / settings.obs().start_frequency(), -0.7);
-        }
+        printf("- Frequency: %e Hz.\n", frequency);
 
         // Allocate visibility data.
         oskar_VisData_d vis;
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_d(num_baselines * settings.obs().num_vis_dumps(), &vis);
 
-        error_code = oskar_interferometer1_scalar_d(telescope, stations, sky_temp,
+        error_code = oskar_interferometer1_scalar_d(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
-                settings.obs().start_time_utc_mjd(), settings.obs().obs_length_days(),
+                settings.obs().start_time_utc_mjd(),
+                settings.obs().obs_length_days(),
                 settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
                 settings.obs().num_fringe_ave(), frequency,
                 settings.obs().channel_bandwidth(),
@@ -183,12 +158,6 @@ int sim1_d(const oskar_Settings& settings)
         }
 #endif
 
-        free(sky_temp.RA);
-        free(sky_temp.Dec);
-        free(sky_temp.I);
-        free(sky_temp.Q);
-        free(sky_temp.U);
-        free(sky_temp.V);
         oskar_free_vis_data_d(&vis);
     }
 
@@ -219,14 +188,17 @@ int sim1_f(const oskar_Settings& settings)
 {
     // ============== Load input data =========================================
     oskar_SkyModelGlobal_f sky;
-    oskar_load_sources_f(settings.sky_file().toLatin1().data(), &sky);
+    oskar_sky_model_load_f(settings.sky_file().toLatin1().data(), &sky);
+
     oskar_TelescopeModel_f telescope;
     oskar_load_telescope_f(settings.telescope_file().toLatin1().data(),
             settings.longitude_rad(), settings.latitude_rad(), &telescope);
+
     oskar_StationModel_f* stations;
     const char* station_dir = settings.station_dir().toLatin1().data();
     unsigned num_stations = oskar_load_stations_f(station_dir, &stations,
             &telescope.identical_stations);
+
     if (num_stations != telescope.num_antennas)
     {
         fprintf(stderr, "ERROR: Error loading telescope geometry.\n");
@@ -237,50 +209,22 @@ int sim1_f(const oskar_Settings& settings)
     int error_code = 0;
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
-        unsigned year   = settings.obs().start_time_utc_year();
-        unsigned month  = settings.obs().start_time_utc_month();
-        unsigned day    = settings.obs().start_time_utc_day();
-        unsigned hour   = settings.obs().start_time_utc_hour();
-        unsigned minute = settings.obs().start_time_utc_minute();
-        float second   = settings.obs().start_time_utc_second();
-        float day_fraction = (hour + minute/60 + second/3600) / 24.0;
-        float start_time_mjd_utc = oskar_date_time_to_mjd_d(
-                year, month, day, day_fraction);
-        printf("- %i/%i/%i %i:%i:%f -> mjd %f\n", day, month, year, hour, minute,
-                second, start_time_mjd_utc);
-
         float frequency = settings.obs().frequency(i);
-        printf("- Frequency: %e\n", frequency);
 
-        // Allocate memory for frequency scaled sky model.
-        oskar_SkyModelGlobal_f sky_temp;
-        sky_temp.num_sources = sky.num_sources;
-        sky_temp.Dec = (float*) malloc(sky.num_sources * sizeof(float));
-        sky_temp.RA  = (float*) malloc(sky.num_sources * sizeof(float));
-        sky_temp.I   = (float*) malloc(sky.num_sources * sizeof(float));
-        sky_temp.Q   = (float*) malloc(sky.num_sources * sizeof(float));
-        sky_temp.U   = (float*) malloc(sky.num_sources * sizeof(float));
-        sky_temp.V   = (float*) malloc(sky.num_sources * sizeof(float));
-        memcpy(sky_temp.Dec, sky.Dec,  sky.num_sources * sizeof(float));
-        memcpy(sky_temp.RA,  sky.RA,   sky.num_sources * sizeof(float));
-        memcpy(sky_temp.I,   sky.I,    sky.num_sources * sizeof(float));
-        for (int s = 0; s < sky.num_sources; ++s)
-        {
-//            sky_temp.I[s] = 1.0e6 * pow(frequency, -0.7);
-            sky_temp.I[s] *= pow(frequency / (float)settings.obs().start_frequency(), -0.7f);
-//            printf("freq = %f, I = %f\n", frequency, sky_temp.I[s]);
-        }
+        printf("- Frequency: %e Hz.\n", frequency);
 
         // Allocate visibility data.
         oskar_VisData_f vis;
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_f(num_baselines * settings.obs().num_vis_dumps(), &vis);
 
-        error_code = oskar_interferometer1_scalar_f(telescope, stations, sky_temp,
+        error_code = oskar_interferometer1_scalar_f(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
-                start_time_mjd_utc, settings.obs().obs_length_days(),
+                settings.obs().start_time_utc_mjd(),
+                settings.obs().obs_length_days(),
                 settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
-                settings.obs().num_fringe_ave(), frequency, settings.obs().channel_bandwidth(),
+                settings.obs().num_fringe_ave(), frequency,
+                settings.obs().channel_bandwidth(),
                 settings.disable_station_beam(), &vis);
 
         printf("= Number of visibility points generated: %i\n", vis.num_samples);
@@ -288,7 +232,8 @@ int sim1_f(const oskar_Settings& settings)
         // Write visibility binary file.
         if (!settings.obs().oskar_vis_filename().isEmpty())
         {
-            QString vis_file = settings.obs().oskar_vis_filename() + "_channel_" + QString::number(i) + ".dat";
+            QString vis_file = settings.obs().oskar_vis_filename() +
+                    "_channel_" + QString::number(i) + ".dat";
             printf("= Writing OSKAR visibility data file: %s\n",
                     vis_file.toLatin1().data());
             oskar_write_vis_data_f(vis_file.toLatin1().data(), &vis);
@@ -304,12 +249,6 @@ int sim1_f(const oskar_Settings& settings)
         }
 #endif
 
-        free(sky_temp.RA);
-        free(sky_temp.Dec);
-        free(sky_temp.I);
-        free(sky_temp.Q);
-        free(sky_temp.U);
-        free(sky_temp.V);
         oskar_free_vis_data_f(&vis);
     }
 
@@ -320,6 +259,8 @@ int sim1_f(const oskar_Settings& settings)
     free(sky.Q);
     free(sky.U);
     free(sky.V);
+    free(sky.reference_freq);
+    free(sky.spectral_index);
     free(telescope.antenna_x);
     free(telescope.antenna_y);
     free(telescope.antenna_z);

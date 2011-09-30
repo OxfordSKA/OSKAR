@@ -98,6 +98,9 @@ void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis)
     }
     for (int i = 0; i < vis->num_samples; ++i)
     {
+//        printf("u[%i] = %f\n",i, vis->u[i]);
+//        printf("%f\n", vis->amp[i].x);
+//        printf("%f\n", vis->amp[i].y);
         fwrite(&(vis->u[i]),     sizeof(double), 1, file);
         fwrite(&(vis->v[i]),     sizeof(double), 1, file);
         fwrite(&(vis->w[i]),     sizeof(double), 1, file);
@@ -161,6 +164,9 @@ void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis)
     }
     for (int i = 0; i < vis->num_samples; ++i)
     {
+//        printf("u[%i] = %f\n",i, vis->u[i]);
+//        printf("%f\n", vis->amp[i].x);
+//        printf("%f\n", vis->amp[i].y);
         fwrite(&(vis->u[i]),     sizeof(float), 1, file);
         fwrite(&(vis->v[i]),     sizeof(float), 1, file);
         fwrite(&(vis->w[i]),     sizeof(float), 1, file);

@@ -40,39 +40,41 @@
  *
  * @details
  *
- * @param[in] ns               Number of sources.
- * @param[in] na               Number of stations.
- * @param[in] jones            Complex input matrix (ns rows, na columns).
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
- * @param[in] l                Distance from phase centre for each source.
- * @param[in] m                Distance from phase centre for each source.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis          Modified output complex visibilities.
+ * @param[in]  ns               Number of sources.
+ * @param[in]  na               Number of stations.
+ * @param[in]  jones            Complex input matrix (ns rows, na columns).
+ * @param[in]  b                Array of source brightness values  (length ns).
+ * @param[in]  u                Station u-coordinates, in wavenumbers.
+ * @param[in]  v                Station v-coordinates, in wavenumbers.
+ * @param[in]  l                Distance from phase centre for each source.
+ * @param[in]  m                Distance from phase centre for each source.
+ * @param[in]  lambda_bandwidth Wavelength (m) times bandwidth (Hz).
+ * @param[out] vis              Modified output complex visibilities.
  */
 __global__
 void oskar_cudak_correlator_scalar_f(const int ns, const int na,
-        const float2* jones, const float* u, const float* v, const float* l,
-        const float* m, const float lambda_bandwidth, float2* vis);
+        const float2* jones, const float* b, const float* u, const float* v,
+        const float* l, const float* m, const float lambda_bandwidth, float2* vis);
 
 /**
  * @brief
  *
  * @details
  *
- * @param[in] ns               Number of sources.
- * @param[in] na               Number of stations.
- * @param[in] jones            Complex input matrix (ns rows, na columns).
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
- * @param[in] l                Distance from phase centre for each source.
- * @param[in] m                Distance from phase centre for each source.
- * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
- * @param[in,out] vis          Modified output complex visibilities.
+ * @param[in]  ns               Number of sources.
+ * @param[in]  na               Number of stations.
+ * @param[in]  jones            Complex input matrix (ns rows, na columns).
+ * @param[in]  b                Array of source brightness values (length ns).
+ * @param[in]  u                Station u-coordinates, in wavenumbers.
+ * @param[in]  v                Station v-coordinates, in wavenumbers.
+ * @param[in]  l                Distance from phase centre for each source.
+ * @param[in]  m                Distance from phase centre for each source.
+ * @param[in]  lambda_bandwidth Wavelength (m) times bandwidth (Hz).
+ * @param[out] vis              Modified output complex visibilities.
  */
 __global__
 void oskar_cudak_correlator_scalar_d(const int ns, const int na,
-        const double2* jones, const double* u, const double* v, const double* l,
-        const double* m, const double lambda_bandwidth, double2* vis);
+        const double2* jones, const double* b, const double* u, const double* v,
+        const double* l, const double* m, const double lambda_bandwidth, double2* vis);
 
 #endif // OSKAR_CUDAK_CORRELATOR_SCALAR_H_

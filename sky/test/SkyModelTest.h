@@ -26,22 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_vec_scale_rr.h"
+#ifndef SKY_MODEL_TEST_H_
+#define SKY_MODEL_TEST_H_
 
-// Single precision.
-__global__
-void oskar_cudak_vec_scale_rr_f(int n, float s, float* a)
-{
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i < n)
-        a[i] *= s;
-}
+/**
+ * @file SkyModelTest.h
+ */
 
-// Double precision.
-__global__
-void oskar_cudak_vec_scale_rr_d(int n, double s, double* a)
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class SkyModelTest : public CppUnit::TestFixture
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i < n)
-        a[i] *= s;
-}
+    public:
+        CPPUNIT_TEST_SUITE(SkyModelTest);
+        CPPUNIT_TEST(test_load);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        /// Test method.
+        void test_load();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(SkyModelTest);
+
+#endif // SKY_MODEL_TEST_H_

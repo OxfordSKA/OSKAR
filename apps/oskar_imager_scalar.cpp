@@ -83,31 +83,7 @@ int main(int argc, char** argv)
         imager_f(settings);
     }
 
-
-
-
-    // =========== PLOTTING ====================================================
-    // FIXME images not in memory in this version....
-//    std::vector<float> image_f(image_size * image_size);
-//    for (unsigned i = 0; i < image_size * image_size; ++i)
-//        image_f[i] = (float)image[i];
-//    // plotting.
-//    QApplication app(argc, argv);
-//    PlotWidget plot1;
-//    plot1.plotImage(&image_f[0], image_size, image_size, -fov_deg/2, fov_deg/2,
-//            -fov_deg/2, fov_deg/2);
-//    plot1.resize(700, 600);
-//    plot1.setTitle("Dirty image");
-//    plot1.setXLabel("Relative Right Ascension (deg)");
-//    plot1.setYLabel("Relative Declination (deg)");
-//    plot1.setScaleLabel("Jy/beam");
-//    PlotWidget plot2;
-//    plot2.plotCurve(vis.num_samples, vis.u, vis.v);
-//    int status = app.exec();
-    // =========== END PLOTTING ================================================
-
-    int status = 0;
-    return status;
+    return EXIT_SUCCESS;
 }
 
 
@@ -130,17 +106,13 @@ int imager_d(const oskar_Settings& settings)
     for (unsigned i = 0; i < image_size; ++i)
         l[i] = -lmax + i * inc;
 
-
     int num_channels  = settings.obs().num_channels();
     int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
     int num_dumps_per_snapshot = settings.image().make_snapshots() ?
             settings.image().dumps_per_snapshot() : settings.obs().num_vis_dumps();
     int num_snapshots = (int)settings.obs().num_vis_dumps() / num_dumps_per_snapshot;
     if ((int)settings.obs().num_vis_dumps() % num_dumps_per_snapshot != 0)
-        fprintf(stderr, "ERROR: eek!\n");
-
-    // Array of peak amplitudes.
-    vector<double> peak_amp(num_channels * num_snapshots);
+        fprintf(stderr, "ERROR: Number of vis dumps not evenly divisible by number of dumps per snapshot!\n");
 
     // Loop over freqs. and make images.
     for (int i = 0; i < num_channels; ++i)
@@ -153,6 +125,12 @@ int imager_d(const oskar_Settings& settings)
                 + "_channel_" + QString::number(i) + ".dat";
         oskar_VisData_d vis;
         oskar_load_vis_data_d(vis_file.toLatin1().data(), &vis);
+        if (vis.num_samples < 1)
+        {
+            fprintf(stderr, "ERROR: no visibility data points found in data file: %s.\n",
+                    vis_file.toLatin1().data());
+            continue;
+        }
         printf("== num vis = %i\n", vis.num_samples);
 
         for (int t = 0; t < num_snapshots; ++t)
@@ -172,12 +150,6 @@ int imager_d(const oskar_Settings& settings)
                 return EXIT_FAILURE;
             }
 
-            // FIXME: ******** Pixel of peak *************
-            int idx = (192) * image_size + (128-1);
-            peak_amp[i * num_snapshots + t] = image[idx];
-            //image[idx] = 0.0;
-            // FIXME: ******** Pixel of peak *************
-
             // Write out image file.
             QString image_file = settings.image().filename() +
                     "_channel_" + QString::number(i) +
@@ -196,18 +168,6 @@ int imager_d(const oskar_Settings& settings)
         oskar_free_vis_data_d(&vis);
 
     } // end loop over frequency.
-
-
-    FILE* file;
-    QString peaks_file = settings.image().filename() + "_peaks.dat";
-    file = fopen(peaks_file.toLatin1().data(), "w");
-    if (file == NULL)
-    {
-        fprintf(stderr, "ERROR: Failed to open amps file.\n");
-        return EXIT_FAILURE;
-    }
-    fwrite(&peak_amp[0], sizeof(double), num_channels * num_snapshots, file);
-    fclose(file);
 
     return EXIT_SUCCESS;
 }
@@ -240,10 +200,7 @@ int imager_f(const oskar_Settings& settings)
     printf("creating %i image snapshots\n", num_snapshots);
 
     if ((int)settings.obs().num_vis_dumps() % num_dumps_per_snapshot != 0)
-        fprintf(stderr, "ERROR: eek!\n");
-
-    // Array of peak amplitudes.
-    vector<float> peak_amp(num_channels * num_snapshots);
+        fprintf(stderr, "ERROR: Number of vis dumps not evenly divisible by number of dumps per snapshot!\n");
 
     // Loop over freqs. and make images.
     for (int i = 0; i < num_channels; ++i)
@@ -254,7 +211,6 @@ int imager_f(const oskar_Settings& settings)
         // Load data file for the frequency.
         QString vis_file = settings.obs().oskar_vis_filename()
                 + "_channel_" + QString::number(i) + ".dat";
-//        printf("loading vis data file: %s.\n", vis_file.toLatin1().data());
         oskar_VisData_f vis;
         oskar_load_vis_data_f(vis_file.toLatin1().data(), &vis);
         if (vis.num_samples < 1)
@@ -264,13 +220,11 @@ int imager_f(const oskar_Settings& settings)
             continue;
         }
         printf("== num vis = %i\n", vis.num_samples);
-//        printf("== vis[0] (re, im) %f %f\n", vis.amp[0].x, vis.amp[0].y);
 
         for (int t = 0; t < num_snapshots; ++t)
         {
             unsigned num_samples = num_baselines * num_dumps_per_snapshot;
             float2* amp = &vis.amp[t * num_samples];
-            //printf("%i\n", t*num_samples);
             float* u    = &vis.u[t * num_samples];
             float* v    = &vis.v[t * num_samples];
 
@@ -283,17 +237,6 @@ int imager_f(const oskar_Settings& settings)
                 fprintf(stderr, "ERROR: CUDA DFT imager failed, error = %i\n", error);
                 return EXIT_FAILURE;
             }
-
-            // FIXME: ******** Pixel of peak *************
-            //int idx = (128 * image_size) + (128); // centre test ?
-            //int idx = (192 * image_size) + (128); // src1
-            //int idx = (52 * image_size) + (193); // src2
-            int idx = (135 * image_size) + (64); // src3
-            int peak_idx = i * num_snapshots + t;
-            peak_amp[peak_idx] = image[idx];
-            //printf("t = %i, peak amp[%i] = %f\n", t, peak_idx, peak_amp[i * num_snapshots + t]);
-            image[idx] = 0.0;
-            // FIXME: ******** Pixel of peak *************
 
             // Write out image file.
             QString image_file = settings.image().filename() +
@@ -313,18 +256,6 @@ int imager_f(const oskar_Settings& settings)
         oskar_free_vis_data_f(&vis);
 
     } // end loop over frequency.
-
-
-    FILE* file;
-    QString peaks_file = settings.image().filename() + "_peaks.dat";
-    file = fopen(peaks_file.toLatin1().data(), "w");
-    if (file == NULL)
-    {
-        fprintf(stderr, "ERROR: Failed to open amps file.\n");
-        return EXIT_FAILURE;
-    }
-    fwrite(&peak_amp[0], sizeof(float), num_channels * num_snapshots, file);
-    fclose(file);
 
     return EXIT_SUCCESS;
 }

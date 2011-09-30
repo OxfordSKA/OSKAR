@@ -47,7 +47,7 @@ extern "C" {
 // Single precision.
 int oskar_cuda_correlator_scalar_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
-        const float* m, const float* n, const float2* eb, float ra0,
+        const float* m, const float* n, const float* b, const float2* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt,
         float lambda_bandwidth, float2* work_k, float* work_uvw, float2* vis)
 {
@@ -67,6 +67,7 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
     dim3 vThd(256, 1); // Antennas, antennas.
     dim3 vBlk(na, na);
     size_t vsMem = vThd.x * sizeof(float2);
+
     dim3 rThd(256, 1); // Antennas.
     dim3 rBlk((na + rThd.x - 1) / rThd.x, 1);
 
@@ -92,16 +93,16 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
-        // Perform complex matrix element multiply of K with E * B.
-        oskar_cudak_mat_mul_cc_f <<<mBlk, mThd>>>
-                (ns, na, work_k, eb, work_k);
+        // Perform complex matrix element multiply of K with E with the
+        // output stored in work_k.
+        oskar_cudak_mat_mul_cc_f <<<mBlk, mThd>>> (ns, na, work_k, e, work_k);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
         oskar_cudak_correlator_scalar_f <<<vBlk, vThd, vsMem>>>
-                (ns, na, work_k, u, v, l, m, lambda_bandwidth, vis);
+                (ns, na, work_k, b, u, v, l, m, lambda_bandwidth, vis);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
@@ -116,7 +117,7 @@ int oskar_cuda_correlator_scalar_f(int na, const float* ax,
 // Double precision.
 int oskar_cuda_correlator_scalar_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
-        const double* m, const double* n, const double2* eb, double ra0,
+        const double* m, const double* n, const double* b, const double2* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt,
         double lambda_bandwidth, double2* work_k, double* work_uvw, double2* vis)
 {
@@ -161,15 +162,16 @@ int oskar_cuda_correlator_scalar_d(int na, const double* ax,
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
-        // Perform complex matrix element multiply of K with E * B.
-        oskar_cudak_mat_mul_cc_d <<<mBlk, mThd>>> (ns, na, work_k, eb, work_k);
+        // Perform complex matrix element multiply of K with E with the
+        // output stored in work_k.
+        oskar_cudak_mat_mul_cc_d <<<mBlk, mThd>>> (ns, na, work_k, e, work_k);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;
 
         // Call the correlator kernel.
         oskar_cudak_correlator_scalar_d <<<vBlk, vThd, vsMem>>>
-                (ns, na, work_k, u, v, l, m, lambda_bandwidth, vis);
+                (ns, na, work_k, b, u, v, l, m, lambda_bandwidth, vis);
         cudaDeviceSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) return errCuda;

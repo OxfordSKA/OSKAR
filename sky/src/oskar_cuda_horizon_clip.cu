@@ -50,26 +50,33 @@ struct is_negative_f {
 extern "C"
 #endif
 int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
-		float lst, float lat, oskar_SkyModelLocal_f* hd_local)
+        float lst, float lat, oskar_SkyModelLocal_f* hd_local)
 {
     // Extract pointers out of the structures.
     int n_in = hd_global->num_sources;
-    const float* in_I = hd_global->I;
-    const float* in_Q = hd_global->Q;
-    const float* in_U = hd_global->U;
-    const float* in_V = hd_global->V;
-    const float* in_ra = hd_global->RA;
+    const float* in_I   = hd_global->I;
+    const float* in_Q   = hd_global->Q;
+    const float* in_U   = hd_global->U;
+    const float* in_V   = hd_global->V;
+    const float* in_ra  = hd_global->RA;
     const float* in_dec = hd_global->Dec;
-    int* n_out = &hd_local->num_sources;
-    float* out_I = hd_local->I;
-    float* out_Q = hd_local->Q;
-    float* out_U = hd_local->U;
-    float* out_V = hd_local->V;
-    float* out_ra = hd_local->RA;
+    const float* in_rel_l = hd_global->rel_l;
+    const float* in_rel_m = hd_global->rel_m;
+    const float* in_rel_n = hd_global->rel_n;
+
+    int* n_out     = &hd_local->num_sources;
+    float* out_I   = hd_local->I;
+    float* out_Q   = hd_local->Q;
+    float* out_U   = hd_local->U;
+    float* out_V   = hd_local->V;
+    float* out_ra  = hd_local->RA;
     float* out_dec = hd_local->Dec;
-    float* hor_l = hd_local->hor_l;
-    float* hor_m = hd_local->hor_m;
-    float* hor_n = hd_local->hor_n;
+    float* hor_l   = hd_local->hor_l;
+    float* hor_m   = hd_local->hor_m;
+    float* hor_n   = hd_local->hor_n;
+    float* out_rel_l = hd_local->rel_l;
+    float* out_rel_m = hd_local->rel_m;
+    float* out_rel_n = hd_local->rel_n;
 
     // Determine horizontal l,m,n positions.
     int rv = oskar_cuda_ra_dec_to_hor_lmn_f
@@ -117,6 +124,23 @@ int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
             thrust::device_pointer_cast(hor_m + n_in), // Input end.
             thrust::device_pointer_cast(hor_n),        // Stencil.
             is_negative_f());
+    thrust::copy_if(
+            thrust::device_pointer_cast(in_rel_l),        // Input start.
+            thrust::device_pointer_cast(in_rel_l + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),           // Stencil.
+            thrust::device_pointer_cast(out_rel_l), is_positive_f());
+    thrust::copy_if(
+            thrust::device_pointer_cast(in_rel_m),        // Input start.
+            thrust::device_pointer_cast(in_rel_m + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),           // Stencil.
+            thrust::device_pointer_cast(out_rel_m), is_positive_f());
+    thrust::copy_if(
+            thrust::device_pointer_cast(in_rel_n),        // Input start.
+            thrust::device_pointer_cast(in_rel_n + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),           // Stencil.
+            thrust::device_pointer_cast(out_rel_n), is_positive_f());
+
+
 
     // Compact the stencil last.
     thrust::remove_if(
@@ -146,7 +170,7 @@ struct is_negative_d {
 extern "C"
 #endif
 int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
-		double lst, double lat, oskar_SkyModelLocal_d* hd_local)
+        double lst, double lat, oskar_SkyModelLocal_d* hd_local)
 {
     // Extract pointers out of the structures.
     int n_in = hd_global->num_sources;
@@ -156,6 +180,10 @@ int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
     const double* in_V = hd_global->V;
     const double* in_ra = hd_global->RA;
     const double* in_dec = hd_global->Dec;
+    const double* in_rel_l = hd_global->rel_l;
+    const double* in_rel_m = hd_global->rel_m;
+    const double* in_rel_n = hd_global->rel_n;
+
     int* n_out = &hd_local->num_sources;
     double* out_I = hd_local->I;
     double* out_Q = hd_local->Q;
@@ -166,6 +194,10 @@ int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
     double* hor_l = hd_local->hor_l;
     double* hor_m = hd_local->hor_m;
     double* hor_n = hd_local->hor_n;
+    double* out_rel_l = hd_local->rel_l;
+    double* out_rel_m = hd_local->rel_m;
+    double* out_rel_n = hd_local->rel_n;
+
 
     // Determine horizontal l,m,n positions.
     int rv = oskar_cuda_ra_dec_to_hor_lmn_d
@@ -213,6 +245,21 @@ int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
             thrust::device_pointer_cast(hor_m + n_in), // Input end.
             thrust::device_pointer_cast(hor_n),        // Stencil.
             is_negative_d());
+    thrust::copy_if(
+            thrust::device_pointer_cast(in_rel_l),        // Input start.
+            thrust::device_pointer_cast(in_rel_l + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),           // Stencil.
+            thrust::device_pointer_cast(out_rel_l), is_positive_d());
+    thrust::copy_if(
+            thrust::device_pointer_cast(in_rel_m),        // Input start.
+            thrust::device_pointer_cast(in_rel_m + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),           // Stencil.
+            thrust::device_pointer_cast(out_rel_m), is_positive_d());
+    thrust::copy_if(
+            thrust::device_pointer_cast(in_rel_n),        // Input start.
+            thrust::device_pointer_cast(in_rel_n + n_in), // Input end.
+            thrust::device_pointer_cast(hor_n),           // Stencil.
+            thrust::device_pointer_cast(out_rel_n), is_positive_d());
 
     // Compact the stencil last.
     thrust::remove_if(

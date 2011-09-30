@@ -56,7 +56,7 @@ extern "C" {
 // Single precision.
 int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
-        const float* m, const float* bsqrt, const float* e, float ra0,
+        const float* m, const float* b, const float* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
         float* vis, float* u, float* v, float* w)
 {
@@ -93,17 +93,17 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
     }
 
     // Scale source brightnesses (in Bsqrt) by station beams (in E).
-    float2* eb = (float2*)malloc(ns * na * sizeof(float2));
-    for (a = 0; a < na; ++a)
-    {
-        for (i = 0; i < ns; ++i)
-        {
-            int idx = i + a * ns;
-            float bs = bsqrt[i];
-            eb[idx].x = e[2*idx + 0] * bs; // Real
-            eb[idx].y = e[2*idx + 1] * bs; // Imag
-        }
-    }
+//    float2* eb = (float2*)malloc(ns * na * sizeof(float2));
+//    for (a = 0; a < na; ++a)
+//    {
+//        for (i = 0; i < ns; ++i)
+//        {
+//            int idx = i + a * ns;
+//            float bs = bsqrt[i];
+//            eb[idx].x = e[2*idx + 0] * bs; // Real
+//            eb[idx].y = e[2*idx + 1] * bs; // Imag
+//        }
+//    }
 
     // Allocate host memory for station u,v,w coordinates and visibility matrix.
     int nb = na * (na - 1) / 2;
@@ -111,7 +111,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
 
     // Allocate memory for source coordinates and visibility matrix on the
     // device.
-    float *ld, *md, *nd, *uvwd;
+    float *ld, *md, *nd, *uvwd, *d_b;
     float2 *visd, *kmat, *emat;
     cudaMalloc((void**)&ld, ns * sizeof(float));
     cudaMalloc((void**)&md, ns * sizeof(float));
@@ -119,6 +119,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
     cudaMalloc((void**)&visd, nb * sizeof(float2));
     cudaMalloc((void**)&kmat, ns * na * sizeof(float2));
     cudaMalloc((void**)&emat, ns * na * sizeof(float2));
+    cudaMalloc((void**)&d_b, ns * sizeof(float));
     cudaMalloc((void**)&uvwd, 3 * na * sizeof(float));
     cudaThreadSynchronize();
     errCuda = cudaPeekAtLastError();
@@ -128,7 +129,8 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
     cudaMemcpy(ld, l, ns * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(md, m, ns * sizeof(float), cudaMemcpyHostToDevice);
     cudaMemcpy(nd, n, ns * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(emat, eb, ns * na * sizeof(float2), cudaMemcpyHostToDevice);
+    cudaMemcpy(emat, e, ns * na * sizeof(float2), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, b, ns * sizeof(float), cudaMemcpyHostToDevice);
 
     // Clear visibility matrix.
     cudaMemset(visd, 0, nb * sizeof(float2));
@@ -180,7 +182,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
 
         // Call the correlator kernel.
         oskar_cudak_correlator_scalar_f <<<vBlk, vThd, vsMem>>> (
-                ns, na, kmat, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
+                ns, na, kmat, d_b, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;
@@ -209,7 +211,6 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
 
     // Free host memory.
     free(uvw);
-    free(eb);
     free(n);
 
     // Free device memory.
@@ -220,6 +221,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
     cudaFree(md);
     cudaFree(nd);
     cudaFree(visd);
+    cudaFree(d_b);
 
     // Shutdown.
     cublasShutdown();
@@ -230,7 +232,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
 // Double precision.
 int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
-        const double* m, const double* bsqrt, const double* e, double ra0,
+        const double* m, const double* b, const double* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt, double k,
         double bandwidth, double* vis, double* u, double* v, double* w)
 {
@@ -266,18 +268,18 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         n[i] = (r < 1.0) ? sqrt(1.0 - r) - 1.0 : -1.0;
     }
 
-    // Scale source brightnesses (in Bsqrt) by station beams (in E).
-    double2* eb = (double2*)malloc(ns * na * sizeof(double2));
-    for (a = 0; a < na; ++a)
-    {
-        for (i = 0; i < ns; ++i)
-        {
-            int idx = i + a * ns;
-            double bs = bsqrt[i];
-            eb[idx].x = e[2*idx + 0] * bs; // Real
-            eb[idx].y = e[2*idx + 1] * bs; // Imag
-        }
-    }
+//    // Scale source brightnesses (in Bsqrt) by station beams (in E).
+//    double2* eb = (double2*)malloc(ns * na * sizeof(double2));
+//    for (a = 0; a < na; ++a)
+//    {
+//        for (i = 0; i < ns; ++i)
+//        {
+//            int idx = i + a * ns;
+//            double bs = b[i];
+//            eb[idx].x = e[2*idx + 0] * bs; // Real
+//            eb[idx].y = e[2*idx + 1] * bs; // Imag
+//        }
+//    }
 
     // Allocate host memory for station u,v,w coordinates and visibility matrix.
     int nb = na * (na - 1) / 2;
@@ -285,13 +287,14 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
 
     // Allocate memory for source coordinates and visibility matrix on the
     // device.
-    double *ld, *md, *nd, *uvwd;
+    double *ld, *md, *nd, *uvwd, *d_b;
     double2 *visd, *kmat, *emat;
     cudaMalloc((void**)&ld, ns * sizeof(double));
     cudaMalloc((void**)&md, ns * sizeof(double));
     cudaMalloc((void**)&nd, ns * sizeof(double));
     cudaMalloc((void**)&visd, nb * sizeof(double2));
     cudaMalloc((void**)&kmat, ns * na * sizeof(double2));
+    cudaMalloc((void**)&d_b, ns * sizeof(double));
     cudaMalloc((void**)&emat, ns * na * sizeof(double2));
     cudaMalloc((void**)&uvwd, 3 * na * sizeof(double));
     cudaThreadSynchronize();
@@ -302,7 +305,8 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
     cudaMemcpy(ld, l, ns * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(md, m, ns * sizeof(double), cudaMemcpyHostToDevice);
     cudaMemcpy(nd, n, ns * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(emat, eb, ns * na * sizeof(double2), cudaMemcpyHostToDevice);
+    cudaMemcpy(emat, e, ns * na * sizeof(double2), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, b, ns * sizeof(double), cudaMemcpyHostToDevice);
 
     // Clear visibility matrix.
     cudaMemset(visd, 0, nb * sizeof(double2));
@@ -355,7 +359,7 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
 
         // Call the correlator kernel.
         oskar_cudak_correlator_scalar_d <<<vBlk, vThd, vsMem>>> (
-                ns, na, kmat, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
+                ns, na, kmat, d_b, &uvwd[0], &uvwd[na], ld, md, lambda_bandwidth, visd);
         cudaThreadSynchronize();
         errCuda = cudaPeekAtLastError();
         if (errCuda != cudaSuccess) goto stop;
@@ -384,7 +388,6 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
 
     // Free host memory.
     free(uvw);
-    free(eb);
     free(n);
 
     // Free device memory.
@@ -395,6 +398,7 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
     cudaFree(md);
     cudaFree(nd);
     cudaFree(visd);
+    cudaFree(d_b);
 
     // Shutdown.
     cublasShutdown();

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_load_sources.h"
+#include "sky/oskar_sky_model_load.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
+void oskar_sky_model_load_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
 {
     // Open the file.
     FILE* file = fopen(file_path, "r");
@@ -49,20 +49,22 @@ void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
     sky->Q   = NULL;
     sky->U   = NULL;
     sky->V   = NULL;
+    sky->reference_freq = NULL;
+    sky->spectral_index = NULL;
 
-    double ra, dec, I, Q, U, V;
+    double ra, dec, I, Q, U, V, ref_freq, spectral_index;
 
     char line[1024];
     while (fgets(line, sizeof(line), file))
     {
         // Ignore comment lines (lines starting with '#')
-        if (line[0] == '#')
-            continue;
+        if (line[0] == '#') continue;
 
         // Load source co-ordinates.
-        int read = sscanf(line, "%lf %lf %lf %lf %lf %lf", &ra, &dec, &I, &Q, &U, &V);
-        if (read != 6)
-            continue;
+        int read = sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf",
+                &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
+
+        if (read != 8) continue;
 
         // Convert coordinates to radians.
         ra  *= deg2rad;
@@ -78,6 +80,8 @@ void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
             sky->Q   = (double*) realloc(sky->Q,   mem_size);
             sky->U   = (double*) realloc(sky->U,   mem_size);
             sky->V   = (double*) realloc(sky->V,   mem_size);
+            sky->reference_freq = (double*) realloc(sky->reference_freq, mem_size);
+            sky->spectral_index = (double*) realloc(sky->spectral_index, mem_size);
         }
 
         sky->RA[sky->num_sources]  = ra;
@@ -86,6 +90,8 @@ void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
         sky->Q[sky->num_sources]   = Q;
         sky->U[sky->num_sources]   = U;
         sky->V[sky->num_sources]   = V;
+        sky->reference_freq[sky->num_sources] = ref_freq;
+        sky->spectral_index[sky->num_sources] = spectral_index;
         sky->num_sources++;
     }
     fclose(file);
@@ -93,7 +99,7 @@ void oskar_load_sources_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
 
 
 
-void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
+void oskar_sky_model_load_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
 {
     // Open the file.
     FILE* file = fopen(file_path, "r");
@@ -107,20 +113,22 @@ void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
     sky->Q   = NULL;
     sky->U   = NULL;
     sky->V   = NULL;
+    sky->reference_freq = NULL;
+    sky->spectral_index = NULL;
 
-    float ra, dec, I, Q, U, V;
+    float ra, dec, I, Q, U, V, spectral_index, ref_freq;
 
     char line[1024];
     while (fgets(line, sizeof(line), file))
     {
         // Ignore comment lines (lines starting with '#')
-        if (line[0] == '#')
-            continue;
+        if (line[0] == '#') continue;
 
         // Load source co-ordinates.
-        int read = sscanf(line, "%f %f %f %f %f %f", &ra, &dec, &I, &Q, &U, &V);
-        if (read != 6)
-            continue;
+        int read = sscanf(line, "%f %f %f %f %f %f %f %f",
+                &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
+
+        if (read != 8) continue;
 
         // Convert coordinates to radians.
         ra  *= deg2rad;
@@ -136,6 +144,8 @@ void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
             sky->Q   = (float*) realloc(sky->Q,   mem_size);
             sky->U   = (float*) realloc(sky->U,   mem_size);
             sky->V   = (float*) realloc(sky->V,   mem_size);
+            sky->reference_freq = (float*) realloc(sky->reference_freq, mem_size);
+            sky->spectral_index = (float*) realloc(sky->spectral_index, mem_size);
         }
 
         sky->RA[sky->num_sources]  = ra;
@@ -144,6 +154,8 @@ void oskar_load_sources_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
         sky->Q[sky->num_sources]   = Q;
         sky->U[sky->num_sources]   = U;
         sky->V[sky->num_sources]   = V;
+        sky->reference_freq[sky->num_sources] = ref_freq;
+        sky->spectral_index[sky->num_sources] = spectral_index;
         sky->num_sources++;
     }
     fclose(file);

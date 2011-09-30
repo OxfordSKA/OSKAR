@@ -43,12 +43,21 @@ extern "C" {
 struct oskar_SkyModelGlobal_f
 {
     int num_sources;
-    float* RA;          ///< The source Right Ascensions in radians.
-    float* Dec;         ///< The source Declinations in radians.
-    float* I;           ///< The source equatorial Stokes I values.
-    float* Q;           ///< The source equatorial Stokes Q values.
-    float* U;           ///< The source equatorial Stokes U values.
-    float* V;           ///< The source equatorial Stokes V values.
+
+    float* RA;             ///< The source Right Ascensions, in radians.
+    float* Dec;            ///< The source Declinations, in radians.
+
+    float* I;              ///< The source equatorial Stokes I values, in Jy.
+    float* Q;              ///< The source equatorial Stokes Q values, in Jy.
+    float* U;              ///< The source equatorial Stokes U values, in Jy.
+    float* V;              ///< The source equatorial Stokes V values, in Jy.
+
+    float* reference_freq; ///< The reference frequency for the source brightness, in Hz.
+    float* spectral_index; ///< The source spectral index.
+
+    float* rel_l;          ///< Source l-direction-cosines relative to the phase centre.
+    float* rel_m;          ///< Source m-direction-cosines relative to the phase centre.
+    float* rel_n;          ///< Source n-direction-cosines relative to the phase centre.
 };
 typedef struct oskar_SkyModelGlobal_f oskar_SkyModelGlobal_f;
 
@@ -56,75 +65,99 @@ typedef struct oskar_SkyModelGlobal_f oskar_SkyModelGlobal_f;
 struct oskar_SkyModelGlobal_d
 {
     int num_sources;
-    double* RA;         ///< The source Right Ascensions in radians.
-    double* Dec;        ///< The source Declinations in radians.
-    double* I;          ///< The source equatorial Stokes I values.
-    double* Q;          ///< The source equatorial Stokes Q values.
-    double* U;          ///< The source equatorial Stokes U values.
-    double* V;          ///< The source equatorial Stokes V values.
+
+    double* RA;             ///< The source Right Ascensions, in radians.
+    double* Dec;            ///< The source Declinations, in radians.
+
+    double* I;              ///< The source equatorial Stokes I values, in Jy.
+    double* Q;              ///< The source equatorial Stokes Q values, in Jy.
+    double* U;              ///< The source equatorial Stokes U values, in Jy.
+    double* V;              ///< The source equatorial Stokes V values, in Jy.
+
+    double* reference_freq; ///< The reference frequency for the source brightness, in Hz.
+    double* spectral_index; ///< The source spectral index.
+
+    double* rel_l;          ///< Source l-direction-cosines relative to the phase centre.
+    double* rel_m;          ///< Source m-direction-cosines relative to the phase centre.
+    double* rel_n;          ///< Source n-direction-cosines relative to the phase centre.
 };
 typedef struct oskar_SkyModelGlobal_d oskar_SkyModelGlobal_d;
+
 
 struct oskar_SkyModelLocal_f
 {
     int num_sources;
-    float* RA;          ///< The source Right Ascensions in radians.
-    float* Dec;         ///< The source Declinations in radians.
-    float* I;           ///< The source horizontal Stokes I values.
-    float* Q;           ///< The source horizontal Stokes Q values.
-    float* U;           ///< The source horizontal Stokes U values.
-    float* V;           ///< The source horizontal Stokes V values.
-    float* hor_l;       ///< The source horizontal l-direction-cosines.
-    float* hor_m;       ///< The source horizontal m-direction-cosines.
-    float* hor_n;       ///< The source horizontal n-direction-cosines.
+
+    float* RA;          ///< Source Right Ascensions, in radians.
+    float* Dec;         ///< Source Declinations, in radians.
+
+    float* I;           ///< Source horizontal Stokes I values, in Jy.
+    float* Q;           ///< Source horizontal Stokes Q values, in Jy.
+    float* U;           ///< Source horizontal Stokes U values, in Jy.
+    float* V;           ///< Source horizontal Stokes V values, in Jy.
+
+    float* hor_l;       ///< Source horizontal l-direction-cosines.
+    float* hor_m;       ///< Source horizontal m-direction-cosines.
+    float* hor_n;       ///< Source horizontal n-direction-cosines.
+
+    float* rel_l;      ///< Source l-direction-cosines relative to the phase centre.
+    float* rel_m;      ///< Source m-direction-cosines relative to the phase centre.
+    float* rel_n;      ///< Source n-direction-cosines relative to the phase centre.
 };
 typedef struct oskar_SkyModelLocal_f oskar_SkyModelLocal_f;
+
 
 struct oskar_SkyModelLocal_d
 {
     int num_sources;
-    double* RA;         ///< The source Right Ascensions in radians.
-    double* Dec;        ///< The source Declinations in radians.
-    double* I;          ///< The source horizontal Stokes I values.
-    double* Q;          ///< The source horizontal Stokes Q values.
-    double* U;          ///< The source horizontal Stokes U values.
-    double* V;          ///< The source horizontal Stokes V values.
-    double* hor_l;      ///< The source horizontal l-direction-cosines.
-    double* hor_m;      ///< The source horizontal m-direction-cosines.
-    double* hor_n;      ///< The source horizontal n-direction-cosines.
+
+    double* RA;         ///< Source Right Ascensions in radians.
+    double* Dec;        ///< Source Declinations in radians.
+
+    double* I;          ///< Source horizontal Stokes I values, in Jy.
+    double* Q;          ///< Source horizontal Stokes Q values, in Jy.
+    double* U;          ///< Source horizontal Stokes U values, in Jy.
+    double* V;          ///< Source horizontal Stokes V values, in Jy.
+
+    double* hor_l;      ///< Source horizontal l-direction-cosines.
+    double* hor_m;      ///< Source horizontal m-direction-cosines.
+    double* hor_n;      ///< Source horizontal n-direction-cosines.
+
+    double* rel_l;      ///< Source l-direction-cosines relative to the phase centre.
+    double* rel_m;      ///< Source m-direction-cosines relative to the phase centre.
+    double* rel_n;      ///< Source n-direction-cosines relative to the phase centre.
 };
 typedef struct oskar_SkyModelLocal_d oskar_SkyModelLocal_d;
 
 
-
 // ---------- Utility functions ------------------------------------------------
 OSKAR_EXPORT
-void oskar_copy_gobal_sky_to_device_d(const oskar_SkyModelGlobal_d* h_sky,
+void oskar_sky_model_global_copy_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
         oskar_SkyModelGlobal_d* hd_sky);
 
 OSKAR_EXPORT
-void oskar_copy_gobal_sky_to_device_f(const oskar_SkyModelGlobal_f* h_sky,
+void oskar_sky_model_global_copy_to_gpu_f(const oskar_SkyModelGlobal_f* h_sky,
         oskar_SkyModelGlobal_f* hd_sky);
 
 OSKAR_EXPORT
-void oskar_allocate_device_local_sky_d(const int num_sources,
+void oskar_local_sky_model_allocate_gpu_d(const int num_sources,
         oskar_SkyModelLocal_d* hd_sky);
 
 OSKAR_EXPORT
-void oskar_allocate_device_local_sky_f(const int num_sources,
+void oskar_local_sky_model_allocate_gpu_f(const int num_sources,
         oskar_SkyModelLocal_f* hd_sky);
 
 OSKAR_EXPORT
-void oskar_free_device_global_sky_d(oskar_SkyModelGlobal_d* hd_sky);
+void oskar_global_sky_model_free_gpu_d(oskar_SkyModelGlobal_d* hd_sky);
 
 OSKAR_EXPORT
-void oskar_free_device_global_sky_f(oskar_SkyModelGlobal_f* hd_sky);
+void oskar_global_sky_model_free_gpu_f(oskar_SkyModelGlobal_f* hd_sky);
 
 OSKAR_EXPORT
-void oskar_free_device_local_sky_d(oskar_SkyModelLocal_d* hd_sky);
+void oskar_local_sky_model_free_gpu_d(oskar_SkyModelLocal_d* hd_sky);
 
 OSKAR_EXPORT
-void oskar_free_device_local_sky_f(oskar_SkyModelLocal_f* hd_sky);
+void oskar_local_sky_model_free_gpu_f(oskar_SkyModelLocal_f* hd_sky);
 // -----------------------------------------------------------------------------
 
 #ifdef __cplusplus
