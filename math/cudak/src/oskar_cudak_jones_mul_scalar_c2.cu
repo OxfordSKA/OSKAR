@@ -26,50 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_JONES_MUL_C2_H_
-#define OSKAR_CUDAK_JONES_MUL_C2_H_
+#include "math/cudak/oskar_cudak_jones_mul_scalar_c2.h"
+#include "math/cudak/oskar_cudaf_mul_c_c.h"
 
-/**
- * @file oskar_cudak_jones_mul_c2.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
-
-/**
- * @brief
- * CUDA kernel to multiply together two Jones scalars, storing the result in a
- * Jones matrix (single precision).
- *
- * @details
- * This kernel multiplies together two complex Jones scalars to give a new
- * Jones matrix.
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] s1 Array of first input Jones scalars.
- * @param[in] s2 Array of second input Jones scalars.
- * @param[out] m Array of output Jones matrices.
- */
+// Single precision.
 __global__
-void oskar_cudak_jones_mul_c2_f(int n, const float2* s1,
-        const float2* s2, float4c* m);
+void oskar_cudak_jones_mul_scalar_c2_f(int n, const float2* s1,
+        const float2* s2, float2* m)
+{
+    // Get the array index ID that this thread is working on.
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
-/**
- * @brief
- * CUDA kernel to multiply together two Jones scalars, storing the result in a
- * Jones matrix (double precision).
- *
- * @details
- * This kernel multiplies together two complex Jones scalars to give a new
- * Jones matrix.
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] s1 Array of first input Jones scalars.
- * @param[in] s2 Array of second input Jones scalars.
- * @param[out] m Array of output Jones matrices.
- */
+    // Get the data from global memory.
+    float2 c_s1 = s1[i];
+    float2 c_s2 = s2[i];
+
+    // Multiply the two complex numbers.
+    oskar_cudaf_mul_c_c_f(c_s1, c_s2);
+
+    // Copy result back to global memory.
+    m[i] = c_s1;
+}
+
+// Double precision.
 __global__
-void oskar_cudak_jones_mul_c2_d(int n, const double2* s1,
-        const double2* s2, double4c* m);
+void oskar_cudak_jones_mul_scalar_c2_d(int n, const double2* s1,
+        const double2* s2, double2* m)
+{
+    // Get the array index ID that this thread is working on.
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
-#endif // OSKAR_CUDAK_JONES_MUL_C2_H_
+    // Get the data from global memory.
+    double2 c_s1 = s1[i];
+    double2 c_s2 = s2[i];
+
+    // Multiply the two complex numbers.
+    oskar_cudaf_mul_c_c_d(c_s1, c_s2);
+
+    // Copy result back to global memory.
+    m[i] = c_s1;
+}

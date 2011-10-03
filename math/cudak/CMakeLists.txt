@@ -9,9 +9,11 @@ set(math_cuda_kernels_SRC
     src/oskar_cudak_dftw_3d_seq_out.cu
     src/oskar_cudak_dftw_o2c_2d.cu
     src/oskar_cudak_jones_mul_c2.cu
+    src/oskar_cudak_jones_mul_mat1_c1.cu
     src/oskar_cudak_jones_mul_mat1_c2.cu
     src/oskar_cudak_jones_mul_mat2_c2.cu
     src/oskar_cudak_jones_mul_mat2.cu
+    src/oskar_cudak_jones_mul_scalar_c2.cu
     src/oskar_cudak_mat_mul_cc.cu
     src/oskar_cudak_sph_to_lm.cu
     src/oskar_cudak_vec_add_rr.cu

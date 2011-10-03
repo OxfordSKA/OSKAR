@@ -12,6 +12,7 @@ set(math_SRC
     src/oskar_mat_tri_c.c
     src/oskar_cuda_dft_c2r_2d.cu
     src/oskar_cuda_interp_bilinear.cu
+    src/oskar_jones_join.cu
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})

@@ -43,6 +43,9 @@
  * If using C++, then the meta-data is made private, and read-only accessor
  * functions are also provided.
  */
+#ifdef __cplusplus
+extern "C"
+#endif
 struct oskar_Jones
 {
     // If C++, then make the meta-data private.

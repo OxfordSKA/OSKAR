@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_JONES_MUL_C2_H_
-#define OSKAR_CUDAK_JONES_MUL_C2_H_
+#ifndef OSKAR_CUDAK_JONES_MUL_SCALAR_C2_H_
+#define OSKAR_CUDAK_JONES_MUL_SCALAR_C2_H_
 
 /**
- * @file oskar_cudak_jones_mul_c2.h
+ * @file oskar_cudak_jones_mul_scalar_c2.h
  */
 
 #include "oskar_global.h"
@@ -39,37 +39,37 @@
 /**
  * @brief
  * CUDA kernel to multiply together two Jones scalars, storing the result in a
- * Jones matrix (single precision).
+ * Jones scalar (single precision).
  *
  * @details
  * This kernel multiplies together two complex Jones scalars to give a new
- * Jones matrix.
+ * Jones scalar.
  *
  * @param[in] n  The size of the input arrays.
  * @param[in] s1 Array of first input Jones scalars.
  * @param[in] s2 Array of second input Jones scalars.
- * @param[out] m Array of output Jones matrices.
+ * @param[out] m Array of output Jones scalars.
  */
 __global__
-void oskar_cudak_jones_mul_c2_f(int n, const float2* s1,
-        const float2* s2, float4c* m);
+void oskar_cudak_jones_mul_scalar_c2_f(int n, const float2* s1,
+        const float2* s2, float2* m);
 
 /**
  * @brief
  * CUDA kernel to multiply together two Jones scalars, storing the result in a
- * Jones matrix (double precision).
+ * Jones scalar (double precision).
  *
  * @details
  * This kernel multiplies together two complex Jones scalars to give a new
- * Jones matrix.
+ * Jones scalar.
  *
  * @param[in] n  The size of the input arrays.
  * @param[in] s1 Array of first input Jones scalars.
  * @param[in] s2 Array of second input Jones scalars.
- * @param[out] m Array of output Jones matrices.
+ * @param[out] m Array of output Jones scalars.
  */
 __global__
-void oskar_cudak_jones_mul_c2_d(int n, const double2* s1,
-        const double2* s2, double4c* m);
+void oskar_cudak_jones_mul_scalar_c2_d(int n, const double2* s1,
+        const double2* s2, double2* m);
 
-#endif // OSKAR_CUDAK_JONES_MUL_C2_H_
+#endif // OSKAR_CUDAK_JONES_MUL_SCALAR_C2_H_
