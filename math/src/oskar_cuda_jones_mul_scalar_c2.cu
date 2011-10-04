@@ -26,53 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef JONES_JOIN_TEST_H_
-#define JONES_JOIN_TEST_H_
+#include "math/oskar_cuda_jones_mul_scalar_c2.h"
+#include "math/cudak/oskar_cudak_jones_mul_scalar_c2.h"
 
-/**
- * @file JonesJoinTest.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cppunit/extensions/HelperMacros.h>
-#include "math/oskar_Jones.h"
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class JonesJoinTest : public CppUnit::TestFixture
+// Single precision.
+int oskar_cuda_jones_mul_scalar_c2_f(int n, const float2* d_s1,
+        const float2* d_s2, float2* d_m)
 {
-    public:
-        CPPUNIT_TEST_SUITE(JonesJoinTest);
-        CPPUNIT_TEST(test_mat2_f);
-        CPPUNIT_TEST(test_mat2_d);
-        CPPUNIT_TEST_SUITE_END();
+    // Set up the thread blocks.
+    int n_thd = 256;
+    int n_blk = (n + n_thd - 1) / n_thd;
 
-    protected:
-        oskar_Jones jonesHost(int type, int n_src, int n_stat);
-        oskar_Jones jonesDevice(int type, int n_src, int n_stat);
-        void checkResultMatrixMatrix(const oskar_Jones* data);
-        void checkResultMatrixScalar(const oskar_Jones* data);
-        void checkResultScalarScalar(const oskar_Jones* data);
+    // Call the kernel.
+    oskar_cudak_jones_mul_scalar_c2_f OSKAR_CUDAK_CONF(n_blk, n_thd) (n,
+            d_s1, d_s2, d_m);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+    // Check for errors.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
 
-        /// Clean up after the test run.
-        void tearDown();
+// Double precision.
+int oskar_cuda_jones_mul_scalar_c2_d(int n, const double2* d_s1,
+        const double2* d_s2, double2* d_m)
+{
+    // Set up the thread blocks.
+    int n_thd = 256;
+    int n_blk = (n + n_thd - 1) / n_thd;
 
-        /// Test method.
-        void test_mat2_f();
+    // Call the kernel.
+    oskar_cudak_jones_mul_scalar_c2_d OSKAR_CUDAK_CONF(n_blk, n_thd) (n,
+            d_s1, d_s2, d_m);
 
-        /// Test method.
-        void test_mat2_d();
-};
+    // Check for errors.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(JonesJoinTest);
-
-#endif // JONES_JOIN_TEST_H_
+#ifdef __cplusplus
+}
+#endif

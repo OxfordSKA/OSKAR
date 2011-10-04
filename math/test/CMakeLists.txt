@@ -8,11 +8,11 @@ if (CPPUNIT_FOUND)
     set(math_test_SRC
         src/CppUnitMain.cpp
         src/CudaInterpBilinearTest.cu
-        src/CudaJonesJoinTest.cu
         src/CudaJonesMultiplyTest.cu
-        src/RandomTest.cpp
+        src/JonesJoinTest.cu
         src/Matrix3Test.cpp
         src/Matrix4Test.cpp
+        src/RandomTest.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

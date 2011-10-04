@@ -1,0 +1,83 @@
+/*
+ * Copyright (c) 2011, The University of Oxford
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef JONES_JOIN_TEST_H_
+#define JONES_JOIN_TEST_H_
+
+/**
+ * @file JonesJoinTest.h
+ */
+
+#include <cppunit/extensions/HelperMacros.h>
+#include "math/oskar_Jones.h"
+#include "utility/oskar_vector_types.h"
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class JonesJoinTest : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(JonesJoinTest);
+        CPPUNIT_TEST(test_float4c);
+        CPPUNIT_TEST(test_double4c);
+        CPPUNIT_TEST_SUITE_END();
+
+    protected:
+        void construct_double2_input(int i, double2& m);
+        void construct_double4c_input(int i, double4c& m);
+        void construct_double4c_output_matrix_matrix(int i, double4c& m);
+        void construct_double4c_output_matrix_scalar(int i, double4c& m);
+        void construct_double4c_output_scalar_scalar(int i, double2& m);
+        void construct_float2_input(int i, float2& m);
+        void construct_float4c_input(int i, float4c& m);
+        void construct_float4c_output_matrix_matrix(int i, float4c& m);
+        void construct_float4c_output_matrix_scalar(int i, float4c& m);
+        void construct_float4c_output_scalar_scalar(int i, float2& m);
+        oskar_Jones construct_jones_host(int type, int n_src, int n_stat);
+        oskar_Jones construct_jones_device(int type, int n_src, int n_stat);
+        void check_matrix_matrix(const oskar_Jones* data);
+        void check_matrix_scalar(const oskar_Jones* data);
+        void check_scalar_scalar(const oskar_Jones* data);
+
+    public:
+        /// Test method.
+        void test_float4c();
+
+        /// Test method.
+        void test_double4c();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(JonesJoinTest);
+
+#endif // JONES_JOIN_TEST_H_
