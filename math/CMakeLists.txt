@@ -11,12 +11,18 @@ add_subdirectory(cudak)
 set(math_SRC
     src/oskar_mat_tri_c.c
     src/oskar_cuda_dft_c2r_2d.cu
+    #src/oskar_cuda_interp_bicubic.cu
     src/oskar_cuda_interp_bilinear.cu
     src/oskar_cuda_jones_mul_c2.cu
     src/oskar_cuda_jones_mul_mat1_c1.cu
     src/oskar_cuda_jones_mul_mat2.cu
     src/oskar_cuda_jones_mul_scalar_c2.cu
+    src/oskar_jones_alloc.cu
+    src/oskar_jones_copy.cu
+    src/oskar_jones_element_size.c
+    src/oskar_jones_free.cu
     src/oskar_jones_join.cu
+    src/oskar_Jones.cpp
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})

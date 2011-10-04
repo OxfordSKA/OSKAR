@@ -63,15 +63,19 @@ public:
 #endif
     void* data; ///< Pointer to the matrix data.
 
-    // If C++, then provide constructors for the structure.
+    // If C++, then provide a constructor and destructor for the structure.
 #ifdef __cplusplus
-    oskar_Jones()
-    : private_type(0), private_n_sources(0),
-      private_n_stations(0), private_location(0) {}
+    /// Constructs and allocates data for an oskar_Jones data structure.
+    oskar_Jones(int type, int n_sources, int n_stations, int location);
 
-    oskar_Jones(int type, int n_sources, int n_stations, int location)
-    : private_type(type), private_n_sources(n_sources),
-      private_n_stations(n_stations), private_location(location) {}
+    /// Destroys the structure and frees memory held by it.
+    ~oskar_Jones();
+#endif
+
+    // If C++, then provide methods on the structure.
+#ifdef __cplusplus
+    /// Copies the memory contents and meta-data of this structure to another.
+    int copy_to(oskar_Jones* other);
 #endif
 
     // If C++, then provide read-only accessor functions for the meta-data.

@@ -27,6 +27,7 @@
  */
 
 #include "math/oskar_jones_join.h"
+#include "math/oskar_jones_element_size.h"
 #include "math/oskar_cuda_jones_mul_c2.h"
 #include "math/oskar_cuda_jones_mul_mat1_c1.h"
 #include "math/oskar_cuda_jones_mul_mat2.h"
@@ -35,101 +36,11 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-size_t oskar_jones_element_size_from_type(int type)
-{
-    if (type == OSKAR_JONES_FLOAT_SCALAR)
-        return sizeof(float2);
-    else if (type == OSKAR_JONES_DOUBLE_SCALAR)
-        return sizeof(double2);
-    else if (type == OSKAR_JONES_FLOAT_MATRIX)
-        return sizeof(float4c);
-    else if (type == OSKAR_JONES_DOUBLE_MATRIX)
-        return sizeof(double4c);
-    return 0;
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int oskar_jones_alloc(oskar_Jones* jones)
-{
-    // Check that the structure exists.
-    if (jones == NULL) return -1;
-
-    // Get the meta-data.
-#ifdef __cplusplus
-    int n_sources = jones->n_sources();
-    int n_stations = jones->n_stations();
-    int location = jones->location();
-    int type = jones->type();
-#else
-    int n_sources = jones->private_n_sources;
-    int n_stations = jones->private_n_stations;
-    int location = jones->private_location;
-    int type = jones->private_type;
-#endif
-
-    // Get the memory size.
-    size_t element_size = oskar_jones_element_size_from_type(type);
-    size_t bytes = n_sources * n_stations * element_size;
-
-    // Check whether the memory should be on the host or the device.
-    int err = 0;
-    if (location == 0)
-    {
-        // Allocate host memory.
-        jones->data = malloc(bytes);
-        if (jones->data == NULL) err = -1;
-    }
-    else if (location == 1)
-    {
-        // Allocate GPU memory.
-        cudaMalloc(&jones->data, bytes);
-        err = cudaPeekAtLastError();
-    }
-    return err;
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int oskar_jones_free(oskar_Jones* jones)
-{
-    // Check that the structure exists.
-    if (jones == NULL) return -1;
-
-    // Get the meta-data.
-#ifdef __cplusplus
-    int location = jones->location();
-#else
-    int location = jones->private_location;
-#endif
-
-    // Check whether the memory is on the host or the device.
-    int err = 0;
-    if (location == 0)
-    {
-        // Free host memory.
-        free(jones->data);
-    }
-    else if (location == 1)
-    {
-        // Free GPU memory.
-        cudaFree(jones->data);
-        err = cudaPeekAtLastError();
-    }
-    jones->data = NULL;
-    return err;
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
 int oskar_jones_alloc_gpu(int type, int n_sources, int n_stations,
         void** d_data)
 {
     // Allocate GPU memory.
-    size_t element_size = oskar_jones_element_size_from_type(type);
+    size_t element_size = oskar_jones_element_size(type);
     cudaMalloc(d_data, element_size * n_sources * n_stations);
     return cudaPeekAtLastError();
 }
@@ -141,7 +52,7 @@ int oskar_jones_copy_memory_from_gpu(int type, int n_sources, int n_stations,
         const void* d_data, void* h_data)
 {
     // Copy the data across.
-    size_t element_size = oskar_jones_element_size_from_type(type);
+    size_t element_size = oskar_jones_element_size(type);
     cudaMemcpy(h_data, d_data, element_size * n_sources * n_stations,
             cudaMemcpyDeviceToHost);
     return cudaPeekAtLastError();
@@ -154,7 +65,7 @@ int oskar_jones_copy_memory_to_gpu(int type, int n_sources, int n_stations,
         const void* h_data, void* d_data)
 {
     // Copy the data across.
-    size_t element_size = oskar_jones_element_size_from_type(type);
+    size_t element_size = oskar_jones_element_size(type);
     cudaMemcpy(d_data, h_data, element_size * n_sources * n_stations,
             cudaMemcpyHostToDevice);
     return cudaPeekAtLastError();
@@ -218,9 +129,9 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
 #endif
 
     // Check that there is enough memory to hold the result.
-    size_t size1 = oskar_jones_element_size_from_type(type1);
-    size_t size2 = oskar_jones_element_size_from_type(type2);
-    size_t size3 = oskar_jones_element_size_from_type(type3);
+    size_t size1 = oskar_jones_element_size(type1);
+    size_t size2 = oskar_jones_element_size(type2);
+    size_t size3 = oskar_jones_element_size(type3);
     if (size3 < size2 || size3 < size1)
         return -20;
 
