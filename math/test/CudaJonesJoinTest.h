@@ -34,6 +34,7 @@
  */
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "math/oskar_Jones.h"
 
 /**
  * @brief Unit test class that uses CppUnit.
@@ -49,6 +50,13 @@ class JonesJoinTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_mat2_f);
         CPPUNIT_TEST(test_mat2_d);
         CPPUNIT_TEST_SUITE_END();
+
+    protected:
+        oskar_Jones jonesHost(int type, int n_src, int n_stat);
+        oskar_Jones jonesDevice(int type, int n_src, int n_stat);
+        void checkResultMatrixMatrix(const oskar_Jones* data);
+        void checkResultMatrixScalar(const oskar_Jones* data);
+        void checkResultScalarScalar(const oskar_Jones* data);
 
     public:
         /// Set up context before running a test.
