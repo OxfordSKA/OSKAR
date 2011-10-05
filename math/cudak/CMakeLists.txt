@@ -14,6 +14,8 @@ set(math_cuda_kernels_SRC
     src/oskar_cudak_jones_mul_mat2_c2.cu
     src/oskar_cudak_jones_mul_mat2.cu
     src/oskar_cudak_jones_mul_scalar_c2.cu
+    src/oskar_cudak_jones_set_real_scalar_1.cu
+    src/oskar_cudak_jones_set_real_scalar_4.cu
     src/oskar_cudak_mat_mul_cc.cu
     src/oskar_cudak_sph_to_lm.cu
     src/oskar_cudak_vec_add_rr.cu
