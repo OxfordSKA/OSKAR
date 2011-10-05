@@ -46,19 +46,28 @@ extern "C" {
  *
  * @details
  * This function copies a Jones matrix data structure to another Jones matrix
- * data structure. Both data structures must be of the same size.
+ * data structure. Both data structures must be of the same size and type.
  *
- * @param[in]  a Pointer to source data structure to copy from.
  * @param[out] b Pointer to destination data structure to copy into.
+ * @param[in]  a Pointer to source data structure to copy from.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
  * - A return code of 0 indicates no error.
- * - A return code of -1 indicates that the memory in J1 is unallocated.
- * - A return code of -2 indicates that the memory in J2 is unallocated.
+ * - A positive return code indicates a CUDA error.
+ * - A return code of -1 indicates that a is NULL, or the memory in a is
+ *   unallocated.
+ * - A return code of -2 indicates that b is NULL, or the memory in b is
+ *   unallocated.
+ * - A return code of -11 indicates that the matrix blocks have different
+ *   source dimensions.
+ * - A return code of -12 indicates that the matrix blocks have different
+ *   station dimensions.
+ * - A return code of -100 indicates a type mismatch.
+ * - A return code of -1000 indicates an unknown error.
  */
 OSKAR_EXPORT
-int oskar_jones_copy(const oskar_Jones* a, oskar_Jones* b);
+int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a);
 
 #ifdef __cplusplus
 }

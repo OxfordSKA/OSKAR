@@ -33,45 +33,59 @@
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
 
-#include <sstream>
-
 /**
  * @details
- * Converts the parameter to a C++ string.
+ * Tests multiplication of Jones matrices using CUDA (single precision).
  */
-template <class T>
-inline std::string oskar_to_std_string(const T& t)
+void JonesJoinTest::test_float4c_inline()
 {
-    std::stringstream ss;
-    ss << t;
-    return ss.str();
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+    oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+            n_src, n_stat, 0);
+    oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+            n_src, n_stat, 1);
+
+    // Call wrapper function.
+    fail_on_error ( j1->join_right(j2) );
+
+    // Check result.
+    check_matrix_matrix(j1);
+
+    // Free memory.
+    delete j1;
+    delete j2;
 }
 
 /**
  * @details
- * Returns the sum of two complex numbers.
+ * Tests multiplication of Jones matrices using CUDA (double precision).
  */
-template<typename T> T complex_add(T a, T b)
+void JonesJoinTest::test_double4c_inline()
 {
-    // Add complex numbers a and b.
-    T out;
-    out.x = a.x + b.x; // RE+RE
-    out.y = a.y + b.y; // IM+IM
-    return out;
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+    oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+            n_src, n_stat, 0);
+    oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+            n_src, n_stat, 1);
+
+    // Call wrapper function.
+    fail_on_error ( j1->join_right(j2) );
+
+    // Check result.
+    check_matrix_matrix(j1);
+
+    // Free memory.
+    delete j1;
+    delete j2;
 }
 
-/**
- * @details
- * Returns the product of two complex numbers.
- */
-template<typename T> T complex_mul(T a, T b)
-{
-    // Multiply complex numbers a and b.
-    T out;
-    out.x = a.x * b.x - a.y * b.y; // RE*RE - IM*IM
-    out.y = a.x * b.y + a.y * b.x; // RE*IM + IM*RE
-    return out;
-}
+/*=============================================================================
+ * Private members
+ *---------------------------------------------------------------------------*/
 
 /**
  * @details
@@ -99,7 +113,8 @@ void JonesJoinTest::construct_double4c_input(int i, double4c& m)
  * @details
  * Returns a single, populated 2x2 Jones matrix.
  */
-void JonesJoinTest::construct_double4c_output_matrix_matrix(int i, double4c& m)
+void JonesJoinTest::construct_double4c_output_matrix_matrix(int i, int j,
+        double4c& m)
 {
     // Get the input matrix.
     double4c p;
@@ -116,7 +131,8 @@ void JonesJoinTest::construct_double4c_output_matrix_matrix(int i, double4c& m)
  * @details
  * Returns a single, populated 2x2 Jones matrix.
  */
-void JonesJoinTest::construct_double4c_output_matrix_scalar(int i, double4c& m)
+void JonesJoinTest::construct_double4c_output_matrix_scalar(int i, int j,
+        double4c& m)
 {
     // Get the input matrix.
     double4c p;
@@ -137,7 +153,8 @@ void JonesJoinTest::construct_double4c_output_matrix_scalar(int i, double4c& m)
  * @details
  * Returns a single, populated 2x2 Jones scalar.
  */
-void JonesJoinTest::construct_double4c_output_scalar_scalar(int i, double2& m)
+void JonesJoinTest::construct_double4c_output_scalar_scalar(int i, int j,
+        double2& m)
 {
     // Get the input scalars.
     double2 s1, s2;
@@ -174,7 +191,8 @@ void JonesJoinTest::construct_float4c_input(int i, float4c& m)
  * @details
  * Returns a single, populated 2x2 Jones matrix.
  */
-void JonesJoinTest::construct_float4c_output_matrix_matrix(int i, float4c& m)
+void JonesJoinTest::construct_float4c_output_matrix_matrix(int i, int j,
+        float4c& m)
 {
     // Get the input matrix.
     float4c p;
@@ -191,7 +209,8 @@ void JonesJoinTest::construct_float4c_output_matrix_matrix(int i, float4c& m)
  * @details
  * Returns a single, populated 2x2 Jones matrix.
  */
-void JonesJoinTest::construct_float4c_output_matrix_scalar(int i, float4c& m)
+void JonesJoinTest::construct_float4c_output_matrix_scalar(int i, int j,
+        float4c& m)
 {
     // Get the input matrix.
     float4c p;
@@ -212,7 +231,8 @@ void JonesJoinTest::construct_float4c_output_matrix_scalar(int i, float4c& m)
  * @details
  * Returns a single, populated 2x2 Jones scalar.
  */
-void JonesJoinTest::construct_float4c_output_scalar_scalar(int i, float2& m)
+void JonesJoinTest::construct_float4c_output_scalar_scalar(int i, int j,
+        float2& m)
 {
     // Get the input scalars.
     float2 s1, s2;
@@ -227,41 +247,37 @@ void JonesJoinTest::construct_float4c_output_scalar_scalar(int i, float2& m)
  * @details
  * Returns a populated Jones matrix in host memory.
  */
-oskar_Jones JonesJoinTest::construct_jones_host(int type, int n_src,
-        int n_stat)
+oskar_Jones* JonesJoinTest::construct_jones_host(int type, int n_src,
+        int n_stat, int offset)
 {
-    oskar_Jones m(type, n_src, n_stat, 0);
+    oskar_Jones* m = new oskar_Jones(type, n_src, n_stat, 0);
     int n = n_src * n_stat;
     if (type == OSKAR_JONES_FLOAT_MATRIX)
     {
-        float4c* ptr = (float4c*)malloc(n * sizeof(float4c));
-        m.data = (void*)ptr;
+        float4c* ptr = (float4c*)m->data;
         for (int i = 0; i < n; ++i)
             construct_float4c_input(i, ptr[i]);
     }
     else if (type == OSKAR_JONES_DOUBLE_MATRIX)
     {
-        double4c* ptr = (double4c*)malloc(n * sizeof(double4c));
-        m.data = (void*)ptr;
+        double4c* ptr = (double4c*)m->data;
         for (int i = 0; i < n; ++i)
             construct_double4c_input(i, ptr[i]);
     }
     else if (type == OSKAR_JONES_FLOAT_SCALAR)
     {
-        float2* ptr = (float2*)malloc(n * sizeof(float2));
-        m.data = (void*)ptr;
+        float2* ptr = (float2*)m->data;
         for (int i = 0; i < n; ++i)
             construct_float2_input(i, ptr[i]);
     }
     else if (type == OSKAR_JONES_DOUBLE_SCALAR)
     {
-        double2* ptr = (double2*)malloc(n * sizeof(double2));
-        m.data = (void*)ptr;
+        double2* ptr = (double2*)m->data;
         for (int i = 0; i < n; ++i)
             construct_double2_input(i, ptr[i]);
     }
 
-    // Return the matrix structure.
+    // Return a pointer to the matrix structure.
     return m;
 }
 
@@ -269,63 +285,41 @@ oskar_Jones JonesJoinTest::construct_jones_host(int type, int n_src,
  * @details
  * Returns a populated Jones matrix in device memory.
  */
-oskar_Jones JonesJoinTest::construct_jones_device(int type, int n_src,
-        int n_stat)
+oskar_Jones* JonesJoinTest::construct_jones_device(int type, int n_src,
+        int n_stat, int offset)
 {
     // Get the matrix in host memory.
-    oskar_Jones h_m = construct_jones_host(type, n_src, n_stat);
+    oskar_Jones* t = construct_jones_host(type, n_src, n_stat);
 
-    // Copy host to device memory.
-    oskar_Jones d_m(type, n_src, n_stat, 1);
-    int bytes = n_src * n_stat;
-    if (type == OSKAR_JONES_FLOAT_MATRIX)
-        bytes *= sizeof(float4c);
-    else if (type == OSKAR_JONES_DOUBLE_MATRIX)
-        bytes *= sizeof(double4c);
-    else if (type == OSKAR_JONES_FLOAT_SCALAR)
-        bytes *= sizeof(float2);
-    else if (type == OSKAR_JONES_DOUBLE_SCALAR)
-        bytes *= sizeof(double2);
-    cudaMalloc(&d_m.data, bytes);
-    cudaMemcpy(d_m.data, h_m.data, bytes, cudaMemcpyHostToDevice);
+    // Copy the data to device memory.
+    oskar_Jones* m = new oskar_Jones(t, 1);
 
-    // Free host memory.
-    free(h_m.data);
-
-    // Return the matrix structure.
-    return d_m;
+    // Delete the temporary and return the matrix structure.
+    delete t;
+    return m;
 }
 
 /**
  * @details
  * Checks result after performing matrix-matrix multiply.
  */
-void JonesJoinTest::check_matrix_matrix(const oskar_Jones* jones)
+void JonesJoinTest::check_matrix_matrix(const oskar_Jones* jones,
+        int offset1, int offset2)
 {
-    void* h_data = NULL;
-    int n = jones->n_sources() * jones->n_stations();
-
     // Copy result to temporary host buffer.
-    if (jones->location() == 1)
-    {
-        int bytes = 0;
-        if (jones->type() == OSKAR_JONES_FLOAT_MATRIX)
-            bytes = n * sizeof(float4c);
-        else if (jones->type() == OSKAR_JONES_DOUBLE_MATRIX)
-            bytes = n * sizeof(double4c);
-        h_data = malloc(bytes);
-        cudaMemcpy(h_data, jones->data, bytes, cudaMemcpyDeviceToHost);
-    }
-    else h_data = jones->data;
+    const oskar_Jones* temp = (jones->location() == 1) ?
+            new oskar_Jones(jones, 0) : jones;
 
     // Check the contents of the host buffer.
+    int n = jones->n_sources() * jones->n_stations();
     if (jones->type() == OSKAR_JONES_FLOAT_MATRIX)
     {
-        float4c* ptr = (float4c*)h_data;
+        float4c* ptr = (float4c*)temp->data;
         float4c t;
         for (int i = 0; i < n; ++i)
         {
-            construct_float4c_output_matrix_matrix(i, t);
+            construct_float4c_output_matrix_matrix(i + offset1,
+                    i + offset2, t);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, abs(t.a.x * 4e-5));
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, abs(t.a.y * 4e-5));
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, abs(t.b.x * 4e-5));
@@ -338,11 +332,12 @@ void JonesJoinTest::check_matrix_matrix(const oskar_Jones* jones)
     }
     else if (jones->type() == OSKAR_JONES_DOUBLE_MATRIX)
     {
-        double4c* ptr = (double4c*)h_data;
+        double4c* ptr = (double4c*)temp->data;
         double4c t;
         for (int i = 0; i < n; ++i)
         {
-            construct_double4c_output_matrix_matrix(i, t);
+            construct_double4c_output_matrix_matrix(i + offset1,
+                    i + offset2, t);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, abs(t.a.x * 1e-10));
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, abs(t.a.y * 1e-10));
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, abs(t.b.x * 1e-10));
@@ -355,15 +350,15 @@ void JonesJoinTest::check_matrix_matrix(const oskar_Jones* jones)
     }
 
     // Free temporary host buffer.
-    if (jones->location() == 1)
-        free(h_data);
+    if (jones->location() == 1) delete temp;
 }
 
 /**
  * @details
  * Checks result after performing matrix-scalar multiply.
  */
-void JonesJoinTest::check_matrix_scalar(const oskar_Jones* data)
+void JonesJoinTest::check_matrix_scalar(const oskar_Jones* data,
+        int offset1, int offset2)
 {
 
 }
@@ -372,72 +367,21 @@ void JonesJoinTest::check_matrix_scalar(const oskar_Jones* data)
  * @details
  * Checks result after performing scalar-scalar multiply.
  */
-void JonesJoinTest::check_scalar_scalar(const oskar_Jones* data)
+void JonesJoinTest::check_scalar_scalar(const oskar_Jones* data,
+        int offset1, int offset2)
 {
 
 }
 
 /**
  * @details
- * Tests multiplication of Jones matrices using CUDA (single precision).
+ * Checks for errors and fails the test if one is found.
  */
-void JonesJoinTest::test_float4c()
+void JonesJoinTest::fail_on_error(int err)
 {
-    // Set-up some test parameters.
-    int n_src = 10, n_stat = 25;
-    oskar_Jones j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
-            n_src, n_stat);
-    oskar_Jones j2 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
-            n_src, n_stat);
-
-    // Call wrapper function.
-    int err = oskar_jones_join(NULL, &j1, &j2); // J1 = J1 * J2
     if (err > 0)
-        CPPUNIT_FAIL(std::string("CUDA error, code ") +
-                oskar_to_std_string(err) +
+        CPPUNIT_FAIL("CUDA error, code " + oskar_to_std_string(err) +
                 ": " + cudaGetErrorString((cudaError_t)err));
     else if (err < 0)
-        CPPUNIT_FAIL(std::string("OSKAR error, code ") +
-                oskar_to_std_string(err));
-
-    // Check result.
-    check_matrix_matrix(&j1);
-
-    // Free memory.
-    cudaFree(j1.data);
-    cudaFree(j2.data);
-}
-
-/**
- * @details
- * Tests multiplication of Jones matrices using CUDA (double precision).
- */
-void JonesJoinTest::test_double4c()
-{
-    if (!oskar_cuda_device_supports_double(0))
-        return;
-
-    // Set-up some test parameters.
-    int n_src = 10, n_stat = 25;
-    oskar_Jones j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
-            n_src, n_stat);
-    oskar_Jones j2 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
-            n_src, n_stat);
-
-    // Call wrapper function.
-    int err = oskar_jones_join(NULL, &j1, &j2); // J1 = J1 * J2
-    if (err > 0)
-        CPPUNIT_FAIL(std::string("CUDA error, code ") +
-                oskar_to_std_string(err) +
-                ": " + cudaGetErrorString((cudaError_t)err));
-    else if (err < 0)
-        CPPUNIT_FAIL(std::string("OSKAR error, code ") +
-                oskar_to_std_string(err));
-
-    // Check result.
-    check_matrix_matrix(&j1);
-
-    // Free memory.
-    cudaFree(j1.data);
-    cudaFree(j2.data);
+        CPPUNIT_FAIL("OSKAR error, code " + oskar_to_std_string(err));
 }

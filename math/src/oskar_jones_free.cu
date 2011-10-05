@@ -27,6 +27,7 @@
  */
 
 #include "math/oskar_jones_free.h"
+#include <cuda_runtime_api.h>
 
 #ifdef __cplusplus
 extern "C"

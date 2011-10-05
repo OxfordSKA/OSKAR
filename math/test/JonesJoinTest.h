@@ -48,34 +48,84 @@ class JonesJoinTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(JonesJoinTest);
-        CPPUNIT_TEST(test_float4c);
-        CPPUNIT_TEST(test_double4c);
+        CPPUNIT_TEST(test_float4c_inline);
+        CPPUNIT_TEST(test_double4c_inline);
         CPPUNIT_TEST_SUITE_END();
-
-    protected:
-        void construct_double2_input(int i, double2& m);
-        void construct_double4c_input(int i, double4c& m);
-        void construct_double4c_output_matrix_matrix(int i, double4c& m);
-        void construct_double4c_output_matrix_scalar(int i, double4c& m);
-        void construct_double4c_output_scalar_scalar(int i, double2& m);
-        void construct_float2_input(int i, float2& m);
-        void construct_float4c_input(int i, float4c& m);
-        void construct_float4c_output_matrix_matrix(int i, float4c& m);
-        void construct_float4c_output_matrix_scalar(int i, float4c& m);
-        void construct_float4c_output_scalar_scalar(int i, float2& m);
-        oskar_Jones construct_jones_host(int type, int n_src, int n_stat);
-        oskar_Jones construct_jones_device(int type, int n_src, int n_stat);
-        void check_matrix_matrix(const oskar_Jones* data);
-        void check_matrix_scalar(const oskar_Jones* data);
-        void check_scalar_scalar(const oskar_Jones* data);
 
     public:
         /// Test method.
-        void test_float4c();
+        void test_float4c_inline();
 
         /// Test method.
-        void test_double4c();
+        void test_double4c_inline();
+
+    private:
+        void construct_double2_input(int i, double2& m);
+        void construct_double4c_input(int i, double4c& m);
+        void construct_double4c_output_matrix_matrix(int i, int j, double4c& m);
+        void construct_double4c_output_matrix_scalar(int i, int j, double4c& m);
+        void construct_double4c_output_scalar_scalar(int i, int j, double2& m);
+        void construct_float2_input(int i, float2& m);
+        void construct_float4c_input(int i, float4c& m);
+        void construct_float4c_output_matrix_matrix(int i, int j, float4c& m);
+        void construct_float4c_output_matrix_scalar(int i, int j, float4c& m);
+        void construct_float4c_output_scalar_scalar(int i, int j, float2& m);
+        oskar_Jones* construct_jones_host(int type, int n_src, int n_stat,
+                int offset = 0);
+        oskar_Jones* construct_jones_device(int type, int n_src, int n_stat,
+                int offset = 0);
+        void check_matrix_matrix(const oskar_Jones* data,
+                int offset1 = 0, int offset2 = 0);
+        void check_matrix_scalar(const oskar_Jones* data,
+                int offset1 = 0, int offset2 = 0);
+        void check_scalar_scalar(const oskar_Jones* data,
+                int offset1 = 0, int offset2 = 0);
+        void fail_on_error(int err);
 };
+
+/*=============================================================================
+ * Helper functions
+ *---------------------------------------------------------------------------*/
+
+/**
+ * @details
+ * Converts the parameter to a C++ string.
+ */
+#include <sstream>
+
+template <class T>
+inline std::string oskar_to_std_string(const T& t)
+{
+    std::stringstream ss;
+    ss << t;
+    return ss.str();
+}
+
+/**
+ * @details
+ * Returns the sum of two complex numbers.
+ */
+template<typename T> T complex_add(T a, T b)
+{
+    // Add complex numbers a and b.
+    T out;
+    out.x = a.x + b.x; // RE+RE
+    out.y = a.y + b.y; // IM+IM
+    return out;
+}
+
+/**
+ * @details
+ * Returns the product of two complex numbers.
+ */
+template<typename T> T complex_mul(T a, T b)
+{
+    // Multiply complex numbers a and b.
+    T out;
+    out.x = a.x * b.x - a.y * b.y; // RE*RE - IM*IM
+    out.y = a.x * b.y + a.y * b.x; // RE*IM + IM*RE
+    return out;
+}
 
 // Register the test class.
 CPPUNIT_TEST_SUITE_REGISTRATION(JonesJoinTest);

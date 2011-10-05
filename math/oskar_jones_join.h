@@ -68,16 +68,18 @@ extern "C" {
  * @return
  * This function returns a code to indicate if there were errors in execution:
  * - A return code of 0 indicates no error.
- * - A return code of -1 indicates that the memory in J1 is unallocated.
- * - A return code of -2 indicates that the memory in J2 is unallocated.
+ * - A return code of -1 indicates that J1 is NULL, or the memory in J1 is
+ *   unallocated.
+ * - A return code of -2 indicates that J2 is NULL, or the memory in J2 is
+ *   unallocated.
  * - A return code of -3 indicates that the memory in J3 is unallocated.
- * - A return code of -11 indicates that the input matrix blocks have
- *   different source dimensions.
- * - A return code of -12 indicates that the input matrix blocks have
- *   different station dimensions.
+ * - A return code of -11 indicates that the matrix blocks have different
+ *   source dimensions.
+ * - A return code of -12 indicates that the matrix blocks have different
+ *   station dimensions.
  * - A return code of -20 indicates that the element size of J3 is smaller than
  *   the element size of J2 or J1.
- * - A return code of -100 indicates a type mismatch between J1 and J2.
+ * - A return code of -100 indicates a type mismatch.
  */
 OSKAR_EXPORT
 int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2);

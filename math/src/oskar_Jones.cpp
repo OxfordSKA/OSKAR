@@ -30,23 +30,40 @@
 #include "math/oskar_jones_alloc.h"
 #include "math/oskar_jones_copy.h"
 #include "math/oskar_jones_free.h"
+#include "math/oskar_jones_join.h"
+#include <cstdlib>
 
 oskar_Jones::oskar_Jones(int type, int n_sources, int n_stations, int location)
 : private_type(type), private_n_sources(n_sources),
   private_n_stations(n_stations), private_location(location)
 {
-	// FIXME make this safe in existing code.
-//	oskar_jones_alloc(this);
+    oskar_jones_alloc(this);
+}
+
+oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
+: private_type(other->type()), private_n_sources(other->n_sources()),
+  private_n_stations(other->n_stations()), private_location(location)
+{
+    oskar_jones_alloc(this);
+    oskar_jones_copy(this, other); // Copy other to this.
 }
 
 oskar_Jones::~oskar_Jones()
 {
-	// FIXME make this safe in existing code.
-//	oskar_jones_free(this);
+    oskar_jones_free(this);
 }
 
-int oskar_Jones::copy_to(oskar_Jones* /*other*/)
+int oskar_Jones::copy_to(oskar_Jones* other)
 {
-	// TODO implement oskar_Jones::copy_to.
-	return -1;
+    return oskar_jones_copy(other, this); // Copy this to other.
+}
+
+int oskar_Jones::join_right(const oskar_Jones* other)
+{
+    return oskar_jones_join(NULL, this, other);
+}
+
+int oskar_Jones::join_left(oskar_Jones* other) const
+{
+    return oskar_jones_join(NULL, other, this);
 }

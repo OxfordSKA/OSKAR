@@ -63,19 +63,77 @@ public:
 #endif
     void* data; ///< Pointer to the matrix data.
 
-    // If C++, then provide a constructor and destructor for the structure.
+    // If C++, then provide constructors, a destructor and methods.
 #ifdef __cplusplus
-    /// Constructs and allocates data for an oskar_Jones data structure.
+    /**
+     * @brief Constructs and allocates data for an oskar_Jones data structure.
+     *
+     * @details
+     * Constructs a new oskar_Jones data structure, allocating memory for it
+     * in the specified location.
+     *
+     * @param[in] type Enumerated data type of memory contents (magic number).
+     * @param[in] n_sources Number of elements in the source dimension.
+     * @param[in] n_stations Number of elements in the station dimension.
+     * @param[in] location Specify 0 for host memory, 1 for device memory.
+     */
     oskar_Jones(int type, int n_sources, int n_stations, int location);
 
-    /// Destroys the structure and frees memory held by it.
-    ~oskar_Jones();
-#endif
+    /**
+     * @brief Copies an oskar_Jones data structure.
+     *
+     * @details
+     * Constructs a copy of the given oskar_Jones data structure, allocating
+     * memory for it in the specified location.
+     *
+     * @param[in] other Pointer to the oskar_Jones structure to copy.
+     * @param[in] location Specify 0 for host memory, 1 for device memory.
+     */
+    oskar_Jones(const oskar_Jones* other, int location);
 
-    // If C++, then provide methods on the structure.
-#ifdef __cplusplus
-    /// Copies the memory contents and meta-data of this structure to another.
+    /**
+     * @brief Destroys the structure and frees memory held by it.
+     *
+     * @details
+     * Destroys the structure and frees memory held by it.
+     */
+    ~oskar_Jones();
+
+    /**
+     * @brief Copies the memory contents and meta-data of this structure to another.
+     *
+     * @details
+     * Copies the memory contents and meta-data of this structure to another.
+     *
+     * @param[in] other Pointer to the oskar_Jones structure to copy.
+     */
     int copy_to(oskar_Jones* other);
+
+    /**
+     * @brief Combines this data with the other Jones matrix.
+     *
+     * @details
+     * This multiplies every Jones matrix in the this structure with those in
+     * the other structure.
+     *
+     * Matrix multiplication is done in the order (this) = (this) * (other).
+     *
+     * @param[in] other Pointer to the oskar_Jones structure to merge.
+     */
+    int join_right(const oskar_Jones* other);
+
+    /**
+     * @brief Combines this data with the other Jones matrix.
+     *
+     * @details
+     * This multiplies every Jones matrix in the this structure with those in
+     * the other structure.
+     *
+     * Matrix multiplication is done in the order (other) = (other) * (this).
+     *
+     * @param[in] other Pointer to the oskar_Jones structure to merge.
+     */
+    int join_left(oskar_Jones* other) const;
 #endif
 
     // If C++, then provide read-only accessor functions for the meta-data.

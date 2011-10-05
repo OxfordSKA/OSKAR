@@ -28,6 +28,7 @@
 
 #include "math/oskar_jones_alloc.h"
 #include "math/oskar_jones_element_size.h"
+#include <cuda_runtime_api.h>
 
 #ifdef __cplusplus
 extern "C"

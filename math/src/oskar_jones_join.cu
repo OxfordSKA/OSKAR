@@ -32,48 +32,9 @@
 #include "math/oskar_cuda_jones_mul_mat1_c1.h"
 #include "math/oskar_cuda_jones_mul_mat2.h"
 #include "math/oskar_cuda_jones_mul_scalar_c2.h"
+#include <cuda_runtime_api.h>
 
-#ifdef __cplusplus
 extern "C"
-#endif
-int oskar_jones_alloc_gpu(int type, int n_sources, int n_stations,
-        void** d_data)
-{
-    // Allocate GPU memory.
-    size_t element_size = oskar_jones_element_size(type);
-    cudaMalloc(d_data, element_size * n_sources * n_stations);
-    return cudaPeekAtLastError();
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int oskar_jones_copy_memory_from_gpu(int type, int n_sources, int n_stations,
-        const void* d_data, void* h_data)
-{
-    // Copy the data across.
-    size_t element_size = oskar_jones_element_size(type);
-    cudaMemcpy(h_data, d_data, element_size * n_sources * n_stations,
-            cudaMemcpyDeviceToHost);
-    return cudaPeekAtLastError();
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int oskar_jones_copy_memory_to_gpu(int type, int n_sources, int n_stations,
-        const void* h_data, void* d_data)
-{
-    // Copy the data across.
-    size_t element_size = oskar_jones_element_size(type);
-    cudaMemcpy(d_data, h_data, element_size * n_sources * n_stations,
-            cudaMemcpyHostToDevice);
-    return cudaPeekAtLastError();
-}
-
-#ifdef __cplusplus
-extern "C"
-#endif
 int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
 {
     // Check to see if the output structure J3 exists: if not, set it to J1.
@@ -82,28 +43,17 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     // Check that all pointers are not NULL.
     if (j1 == NULL) return -1;
     if (j2 == NULL) return -2;
-
-    // Check that the memory in each structure is allocated.
     if (j1->data == NULL) return -1;
     if (j2->data == NULL) return -2;
     if (j3->data == NULL) return -3;
 
     // Get the dimensions of the input data.
-#ifdef __cplusplus
     int n_sources1 = j1->n_sources();
     int n_sources2 = j2->n_sources();
     int n_sources3 = j3->n_sources();
     int n_stations1 = j1->n_stations();
     int n_stations2 = j2->n_stations();
     int n_stations3 = j3->n_stations();
-#else
-    int n_sources1 = j1->private_n_sources;
-    int n_sources2 = j2->private_n_sources;
-    int n_sources3 = j3->private_n_sources;
-    int n_stations1 = j1->private_n_stations;
-    int n_stations2 = j2->private_n_stations;
-    int n_stations3 = j3->private_n_stations;
-#endif
 
     // Check the data dimensions.
     if (n_sources1 != n_sources2 || n_sources1 != n_sources3)
@@ -112,21 +62,12 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
         return -12;
 
     // Figure out what we've been given.
-#ifdef __cplusplus
     int type1 = j1->type();
     int type2 = j2->type();
     int type3 = j3->type();
     int location1 = j1->location();
     int location2 = j2->location();
     int location3 = j3->location();
-#else
-    int type1 = j1->private_type;
-    int type2 = j2->private_type;
-    int type3 = j3->private_type;
-    int location1 = j1->private_location;
-    int location2 = j2->private_location;
-    int location3 = j3->private_location;
-#endif
 
     // Check that there is enough memory to hold the result.
     size_t size1 = oskar_jones_element_size(type1);
@@ -138,35 +79,16 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     // Set up CUDA thread block sizes.
     int n_elements = n_sources1 * n_stations1;
 
-    // Can no longer guarantee a clean return from this point,
-    // so wait until end in case of errors.
-    void *d1 = 0, *d2 = 0, *d3 = 0;
-    int err = 0;
-
     // Set up GPU pointer to J1.
-    if (location1 == 0)
-    {
-        err = oskar_jones_alloc_gpu(type1, n_sources1, n_stations1, &d1);
-        err = oskar_jones_copy_memory_to_gpu(type1, n_sources1, n_stations1,
-                j1->data, d1);
-    }
-    else d1 = j1->data;
+    const oskar_Jones* hd1 = (location1 == 0) ? new oskar_Jones(j1, 1) : j1;
+    const oskar_Jones* hd2 = (location2 == 0) ? new oskar_Jones(j2, 1) : j2;
+    oskar_Jones* hd3 = (location3 == 0) ? new oskar_Jones(j3, 1) : j3;
+    const void* d1 = hd1->data;
+    const void* d2 = hd2->data;
+    void* d3 = hd3->data;
 
-    // Set up GPU pointer to J2.
-    if (location2 == 0)
-    {
-        err = oskar_jones_alloc_gpu(type2, n_sources2, n_stations2, &d2);
-        err = oskar_jones_copy_memory_to_gpu(type2, n_sources2, n_stations2,
-                j2->data, d2);
-    }
-    else d2 = j2->data;
-
-    // Set up GPU pointer to J3.
-    if (location3 == 0)
-        err = oskar_jones_alloc_gpu(type3, n_sources3, n_stations3, &d3);
-    else d3 = j3->data;
-
-    // Check if errors occurred.
+    // Check for errors.
+    int err = cudaPeekAtLastError();
     if (err != 0) goto stop;
 
     // Set error code to type mismatch by default.
@@ -254,18 +176,15 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
 
 stop:
     // Free GPU memory if input data was on the host.
-    if (location1 == 0) cudaFree(d1);
-    if (location2 == 0) cudaFree(d2);
+    if (location1 == 0) delete hd1;
+    if (location2 == 0) delete hd2;
 
     // Copy result back to host memory if required.
     if (location3 == 0)
     {
         if (err == 0)
-        {
-            err = oskar_jones_copy_memory_from_gpu(type3,
-                    n_sources3,	n_stations3, d3, j3->data);
-        }
-        cudaFree(d3);
+            err = hd3->copy_to(j3);
+        delete hd3;
     }
     return err;
 }
