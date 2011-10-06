@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UTIL_VECTOR_TYPES_H_
-#define OSKAR_UTIL_VECTOR_TYPES_H_
+#ifndef OSKAR_VECTOR_TYPES_H_
+#define OSKAR_VECTOR_TYPES_H_
 
 /**
  * @file oskar_vector_types.h
@@ -47,7 +47,7 @@ extern "C" {
 #endif
 #endif
 
-#if !defined(__VECTOR_TYPES_H__) && !defined(__CUDACC__)
+#if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
  * @brief
  * Two-element structure (single precision).
@@ -64,7 +64,7 @@ struct __align__(8) float2
 typedef struct float2 float2;
 #endif
 
-#if !defined(__VECTOR_TYPES_H__) && !defined(__CUDACC__)
+#if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
  * @brief
  * Three-element structure (single precision).
@@ -116,7 +116,7 @@ struct __align__(16) float4c
 };
 typedef struct float4c float4c;
 
-#if !defined(__VECTOR_TYPES_H__) && !defined(__CUDACC__)
+#if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
  * @brief
  * Two-element structure (double precision).
@@ -133,7 +133,7 @@ struct __align__(16) double2
 typedef struct double2 double2;
 #endif
 
-#if !defined(__VECTOR_TYPES_H__) && !defined(__CUDACC__)
+#if !(defined(__VECTOR_TYPES_H__) || defined(__CUDACC__))
 /**
  * @brief
  * Three-element structure (double precision).
@@ -189,4 +189,4 @@ typedef struct double4c double4c;
 }
 #endif
 
-#endif // OSKAR_UTIL_VECTOR_TYPES_H_
+#endif // OSKAR_VECTOR_TYPES_H_

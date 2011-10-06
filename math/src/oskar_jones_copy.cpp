@@ -26,14 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
+#include <cstring>
 #include "math/oskar_jones_copy.h"
 #include "math/oskar_jones_element_size.h"
-#include <cuda_runtime_api.h>
-#include <string.h>
 
-#ifdef __cplusplus
 extern "C"
-#endif
 int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a)
 {
     // Check that all pointers are not NULL.
@@ -43,7 +41,6 @@ int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a)
     if (b->data == NULL) return -2;
 
     // Get the meta-data.
-#ifdef __cplusplus
     int n_sources_a = a->n_sources();
     int n_sources_b = b->n_sources();
     int n_stations_a = a->n_stations();
@@ -52,16 +49,6 @@ int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a)
     int type_b = b->type();
     int location_a = a->location();
     int location_b = b->location();
-#else
-    int n_sources_a = a->private_n_sources;
-    int n_sources_b = b->private_n_sources;
-    int n_stations_a = a->private_n_stations;
-    int n_stations_b = b->private_n_stations;
-    int type_a = a->private_type;
-    int type_b = b->private_type;
-    int location_a = a->private_location;
-    int location_b = b->private_location;
-#endif
 
     // Check the data dimensions.
     if (n_sources_a != n_sources_b)

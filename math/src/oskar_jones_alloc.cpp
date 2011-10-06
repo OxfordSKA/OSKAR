@@ -26,30 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
+#include <cstdlib>
 #include "math/oskar_jones_alloc.h"
 #include "math/oskar_jones_element_size.h"
-#include <cuda_runtime_api.h>
 
-#ifdef __cplusplus
 extern "C"
-#endif
 int oskar_jones_alloc(oskar_Jones* jones)
 {
     // Check that the structure exists.
     if (jones == NULL) return -1;
 
     // Get the meta-data.
-#ifdef __cplusplus
     int n_sources = jones->n_sources();
     int n_stations = jones->n_stations();
     int location = jones->location();
     int type = jones->type();
-#else
-    int n_sources = jones->private_n_sources;
-    int n_stations = jones->private_n_stations;
-    int location = jones->private_location;
-    int type = jones->private_type;
-#endif
 
     // Get the memory size.
     size_t element_size = oskar_jones_element_size(type);

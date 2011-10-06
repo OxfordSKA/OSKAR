@@ -26,30 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_jones_set_real_scalar.h"
 #include <cuda_runtime_api.h>
+#include <cstdlib>
+#include "math/oskar_jones_free.h"
 
-#ifdef __cplusplus
 extern "C"
-#endif
-int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
+int oskar_jones_free(oskar_Jones* jones)
 {
     // Check that the structure exists.
     if (jones == NULL) return -1;
 
     // Get the meta-data.
-#ifdef __cplusplus
-    int n_sources = jones->n_sources();
-    int n_stations = jones->n_stations();
     int location = jones->location();
-    int type = jones->type();
-#else
-    int n_sources = jones->private_n_sources;
-    int n_stations = jones->private_n_stations;
-    int location = jones->private_location;
-    int type = jones->private_type;
-#endif
 
-    int err = -1;
+    // Check whether the memory is on the host or the device.
+    int err = 0;
+    if (location == 0)
+    {
+        // Free host memory.
+        free(jones->data);
+    }
+    else if (location == 1)
+    {
+        // Free GPU memory.
+        cudaFree(jones->data);
+        err = cudaPeekAtLastError();
+    }
+    jones->data = NULL;
     return err;
 }

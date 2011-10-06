@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
 #include "math/oskar_jones_join.h"
 #include "math/oskar_jones_element_size.h"
 #include "math/oskar_cuda_jones_mul_c2.h"
 #include "math/oskar_cuda_jones_mul_mat1_c1.h"
 #include "math/oskar_cuda_jones_mul_mat2.h"
 #include "math/oskar_cuda_jones_mul_scalar_c2.h"
-#include <cuda_runtime_api.h>
 
 extern "C"
 int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
@@ -76,10 +76,8 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     if (size3 < size2 || size3 < size1)
         return -20;
 
-    // Set up CUDA thread block sizes.
+    // Copy data to GPU if required.
     int n_elements = n_sources1 * n_stations1;
-
-    // Set up GPU pointer to J1.
     const oskar_Jones* hd1 = (location1 == 0) ? new oskar_Jones(j1, 1) : j1;
     const oskar_Jones* hd2 = (location2 == 0) ? new oskar_Jones(j2, 1) : j2;
     oskar_Jones* hd3 = (location3 == 0) ? new oskar_Jones(j3, 1) : j3;
