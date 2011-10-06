@@ -28,6 +28,8 @@
 
 #include <cuda_runtime_api.h>
 #include "math/oskar_jones_set_real_scalar.h"
+#include "math/oskar_cuda_jones_set_real_scalar_1.h"
+#include "math/oskar_cuda_jones_set_real_scalar_4.h"
 
 extern "C"
 int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
@@ -40,7 +42,78 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
     int n_stations = jones->n_stations();
     int location = jones->location();
     int type = jones->type();
+    int err = 0;
 
-    int err = -1;
+    // Check the location of the data.
+    int n_elements = n_sources * n_stations;
+    if (location == 0)
+    {
+        // Data is on the host.
+        if (type == OSKAR_JONES_FLOAT_SCALAR)
+        {
+            float2* ptr = (float2*)jones->data;
+            for (int i = 0; i < n_elements; ++i)
+            {
+                ptr[i].x = (float)scalar;
+                ptr[i].y = 0.0f;
+            }
+        }
+        else if (type == OSKAR_JONES_FLOAT_MATRIX)
+        {
+            float4c* ptr = (float4c*)jones->data;
+            for (int i = 0; i < n_elements; ++i)
+            {
+                ptr[i].a.x = (float)scalar;
+                ptr[i].a.y = 0.0f;
+                ptr[i].b.x = 0.0f;
+                ptr[i].b.y = 0.0f;
+                ptr[i].c.x = 0.0f;
+                ptr[i].c.y = 0.0f;
+                ptr[i].d.x = (float)scalar;
+                ptr[i].d.y = 0.0f;
+            }
+        }
+        else if (type == OSKAR_JONES_DOUBLE_SCALAR)
+        {
+            double2* ptr = (double2*)jones->data;
+            for (int i = 0; i < n_elements; ++i)
+            {
+                ptr[i].x = scalar;
+                ptr[i].y = 0.0;
+            }
+        }
+        else if (type == OSKAR_JONES_DOUBLE_MATRIX)
+        {
+            double4c* ptr = (double4c*)jones->data;
+            for (int i = 0; i < n_elements; ++i)
+            {
+                ptr[i].a.x = scalar;
+                ptr[i].a.y = 0.0;
+                ptr[i].b.x = 0.0;
+                ptr[i].b.y = 0.0;
+                ptr[i].c.x = 0.0;
+                ptr[i].c.y = 0.0;
+                ptr[i].d.x = scalar;
+                ptr[i].d.y = 0.0;
+            }
+        }
+    }
+    else if (location == 1)
+    {
+        // Data is on the device.
+        if (type == OSKAR_JONES_FLOAT_SCALAR)
+            err = oskar_cuda_jones_set_real_scalar_1_f(n_elements,
+                    (float2*)jones->data, scalar);
+        else if (type == OSKAR_JONES_FLOAT_MATRIX)
+            err = oskar_cuda_jones_set_real_scalar_4_f(n_elements,
+                    (float4c*)jones->data, scalar);
+        else if (type == OSKAR_JONES_DOUBLE_SCALAR)
+            err = oskar_cuda_jones_set_real_scalar_1_d(n_elements,
+                    (double2*)jones->data, scalar);
+        else if (type == OSKAR_JONES_DOUBLE_MATRIX)
+            err = oskar_cuda_jones_set_real_scalar_4_d(n_elements,
+                    (double4c*)jones->data, scalar);
+    }
+
     return err;
 }

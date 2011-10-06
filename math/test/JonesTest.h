@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef JONES_JOIN_TEST_H_
-#define JONES_JOIN_TEST_H_
+#ifndef JONES_TEST_H_
+#define JONES_TEST_H_
 
 /**
  * @file JonesJoinTest.h
@@ -44,20 +44,32 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class JonesJoinTest : public CppUnit::TestFixture
+class JonesTest : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(JonesJoinTest);
-        CPPUNIT_TEST(test_float4c_inline);
-        CPPUNIT_TEST(test_double4c_inline);
+        CPPUNIT_TEST_SUITE(JonesTest);
+        CPPUNIT_TEST(test_join_inline_mat_mat_device);
+        CPPUNIT_TEST(test_join_inline_mat_mat_device_host);
+        CPPUNIT_TEST(test_join_inline_mat_mat_host);
+        CPPUNIT_TEST(test_set_ones_device);
+        CPPUNIT_TEST(test_set_ones_host);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
-        void test_float4c_inline();
+        void test_join_inline_mat_mat_device();
 
         /// Test method.
-        void test_double4c_inline();
+        void test_join_inline_mat_mat_device_host();
+
+        /// Test method.
+        void test_join_inline_mat_mat_host();
+
+        /// Test method.
+        void test_set_ones_device();
+
+        /// Test method.
+        void test_set_ones_host();
 
     private:
         void construct_double2_input(int i, double2& m);
@@ -75,11 +87,11 @@ class JonesJoinTest : public CppUnit::TestFixture
         oskar_Jones* construct_jones_device(int type, int n_src, int n_stat,
                 int offset = 0);
         void check_matrix_matrix(const oskar_Jones* data,
-                int offset1 = 0, int offset2 = 0);
+                int offset1, int offset2);
         void check_matrix_scalar(const oskar_Jones* data,
-                int offset1 = 0, int offset2 = 0);
+                int offset1, int offset2);
         void check_scalar_scalar(const oskar_Jones* data,
-                int offset1 = 0, int offset2 = 0);
+                int offset1, int offset2);
         void fail_on_error(int err);
 };
 
@@ -128,6 +140,6 @@ template<typename T> T complex_mul(T a, T b)
 }
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(JonesJoinTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(JonesTest);
 
-#endif // JONES_JOIN_TEST_H_
+#endif // JONES_TEST_H_

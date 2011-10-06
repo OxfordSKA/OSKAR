@@ -26,42 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RANDOM_TEST_H_
-#define RANDOM_TEST_H_
+#ifndef OSKAR_CUDA_JONES_SET_REAL_SCALAR_4_H_
+#define OSKAR_CUDA_JONES_SET_REAL_SCALAR_4_H_
 
 /**
- * @file RandomTest.h
+ * @file oskar_cuda_jones_set_real_scalar_4.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "utility/oskar_vector_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Function to set all data to a real scalar (single precision).
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function sets all the data in the array to a real scalar value.
+ *
+ * @param[in] n            The size of the input array.
+ * @param[in,out] d_jones  Array of Jones matrices.
+ * @param[in] scalar       Set all values in array to this.
  */
-class RandomTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(RandomTest);
-        CPPUNIT_TEST(test_uniform);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_cuda_jones_set_real_scalar_4_f(int n, float4c* d_jones,
+        float scalar);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+/**
+ * @brief
+ * Function to set all data to a real scalar (double precision).
+ *
+ * @details
+ * This function sets all the data in the array to a real scalar value.
+ *
+ * @param[in] n            The size of the input array.
+ * @param[in,out] d_jones  Array of Jones matrices.
+ * @param[in] scalar       Set all values in array to this.
+ */
+OSKAR_EXPORT
+int oskar_cuda_jones_set_real_scalar_4_d(int n, double4c* d_jones,
+        double scalar);
 
-        /// Clean up after the test run.
-        void tearDown();
+#ifdef __cplusplus
+}
+#endif
 
-    public:
-        /// Test method.
-        void test_uniform();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(RandomTest);
-
-#endif // RANDOM_TEST_H_
+#endif // OSKAR_CUDA_JONES_SET_REAL_SCALAR_4_H_

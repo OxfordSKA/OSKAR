@@ -26,37 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/test/RandomTest.h"
-#include "math/oskar_Random.h"
+#include "math/oskar_cuda_jones_set_real_scalar_4.h"
+#include "math/cudak/oskar_cudak_jones_set_real_scalar_4.h"
 
-#include <cmath>
-#include <vector>
-#include <cstdio>
-
-/**
- * @details
- * Sets up the context before running each test method.
- */
-void RandomTest::setUp()
+// Single precision.
+int oskar_cuda_jones_set_real_scalar_4_f(int n, float4c* d_jones,
+        float scalar)
 {
+    // Set up the thread blocks.
+    int n_thd = 256;
+    int n_blk = (n + n_thd - 1) / n_thd;
+
+    // Call the kernel.
+    oskar_cudak_jones_set_real_scalar_4_f OSKAR_CUDAK_CONF(n_blk, n_thd) (n,
+            d_jones, scalar);
+
+    // Check for errors.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
 }
 
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void RandomTest::tearDown()
+// Double precision.
+int oskar_cuda_jones_set_real_scalar_4_d(int n, double4c* d_jones,
+        double scalar)
 {
-}
+    // Set up the thread blocks.
+    int n_thd = 256;
+    int n_blk = (n + n_thd - 1) / n_thd;
 
-/**
- * @details
- * Tests beam pattern creation using CUDA.
- */
-void RandomTest::test_uniform()
-{
-    printf("%f\n", oskar_Random::uniform<float>(1));
-    printf("%f\n", oskar_Random::uniform<float>());
-    printf("%f\n", oskar_Random::uniform<float>());
-}
+    // Call the kernel.
+    oskar_cudak_jones_set_real_scalar_4_d OSKAR_CUDAK_CONF(n_blk, n_thd) (n,
+            d_jones, scalar);
 
+    // Check for errors.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}

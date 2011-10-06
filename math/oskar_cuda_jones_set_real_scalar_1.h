@@ -26,54 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_Jones.h"
-#include "math/oskar_jones_alloc.h"
-#include "math/oskar_jones_copy.h"
-#include "math/oskar_jones_free.h"
-#include "math/oskar_jones_join.h"
-#include "math/oskar_jones_set_real_scalar.h"
-#include <cstdlib>
+#ifndef OSKAR_CUDA_JONES_SET_REAL_SCALAR_1_H_
+#define OSKAR_CUDA_JONES_SET_REAL_SCALAR_1_H_
 
-oskar_Jones::oskar_Jones(int type, int n_sources, int n_stations, int location)
-: private_type(type), private_n_sources(n_sources),
-  private_n_stations(n_stations), private_location(location)
-{
-    if (oskar_jones_alloc(this) != 0)
-        throw "Error in oskar_jones_alloc";
-}
+/**
+ * @file oskar_cuda_jones_set_real_scalar_1.h
+ */
 
-oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
-: private_type(other->type()), private_n_sources(other->n_sources()),
-  private_n_stations(other->n_stations()), private_location(location)
-{
-    if (oskar_jones_alloc(this) != 0)
-        throw "Error in oskar_jones_alloc";
-    if (oskar_jones_copy(this, other) != 0) // Copy other to this.
-        throw "Error in oskar_jones_copy";
-}
+#include "oskar_global.h"
+#include "utility/oskar_vector_types.h"
 
-oskar_Jones::~oskar_Jones()
-{
-    if (oskar_jones_free(this) != 0)
-        throw "Error in oskar_jones_free";
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int oskar_Jones::copy_to(oskar_Jones* other)
-{
-    return oskar_jones_copy(other, this); // Copy this to other.
-}
+/**
+ * @brief
+ * Function to set all data to a real scalar (single precision).
+ *
+ * @details
+ * This function sets all the data in the array to a real scalar value.
+ *
+ * @param[in] n            The size of the input array.
+ * @param[in,out] d_jones  Array of Jones scalars.
+ * @param[in] scalar       Set all values in array to this.
+ */
+OSKAR_EXPORT
+int oskar_cuda_jones_set_real_scalar_1_f(int n, float2* d_jones,
+        float scalar);
 
-int oskar_Jones::join_from_right(const oskar_Jones* other)
-{
-    return oskar_jones_join(NULL, this, other);
-}
+/**
+ * @brief
+ * Function to set all data to a real scalar (double precision).
+ *
+ * @details
+ * This function sets all the data in the array to a real scalar value.
+ *
+ * @param[in] n            The size of the input array.
+ * @param[in,out] d_jones  Array of Jones scalars.
+ * @param[in] scalar       Set all values in array to this.
+ */
+OSKAR_EXPORT
+int oskar_cuda_jones_set_real_scalar_1_d(int n, double2* d_jones,
+        double scalar);
 
-int oskar_Jones::join_to_left(oskar_Jones* other) const
-{
-    return oskar_jones_join(NULL, other, this);
+#ifdef __cplusplus
 }
+#endif
 
-int oskar_Jones::set_real_scalar(double scalar)
-{
-    return oskar_jones_set_real_scalar(this, scalar);
-}
+#endif // OSKAR_CUDA_JONES_SET_REAL_SCALAR_1_H_

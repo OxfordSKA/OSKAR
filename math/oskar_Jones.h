@@ -113,27 +113,38 @@ public:
      * @brief Combines this data with the other Jones matrix.
      *
      * @details
-     * This multiplies every Jones matrix in the this structure with those in
+     * This multiplies every Jones matrix in this structure with those in
      * the other structure.
      *
      * Matrix multiplication is done in the order (this) = (this) * (other).
      *
      * @param[in] other Pointer to the oskar_Jones structure to merge.
      */
-    int join_right(const oskar_Jones* other);
+    int join_from_right(const oskar_Jones* other);
 
     /**
      * @brief Combines this data with the other Jones matrix.
      *
      * @details
-     * This multiplies every Jones matrix in the this structure with those in
+     * This multiplies every Jones matrix in this structure with those in
      * the other structure.
      *
      * Matrix multiplication is done in the order (other) = (other) * (this).
      *
      * @param[in] other Pointer to the oskar_Jones structure to merge.
      */
-    int join_left(oskar_Jones* other) const;
+    int join_to_left(oskar_Jones* other) const;
+
+    /**
+     * @brief Sets all the data elements to a real scalar.
+     *
+     * @details
+     * This sets all the Jones matrices in the structure to a real scalar
+     * number.
+     *
+     * @param[in] other Pointer to the oskar_Jones structure to merge.
+     */
+    int set_real_scalar(double scalar);
 #endif
 
     // If C++, then provide read-only accessor functions for the meta-data.

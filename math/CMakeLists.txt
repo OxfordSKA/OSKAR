@@ -17,6 +17,8 @@ set(math_SRC
     src/oskar_cuda_jones_mul_mat1_c1.cu
     src/oskar_cuda_jones_mul_mat2.cu
     src/oskar_cuda_jones_mul_scalar_c2.cu
+    src/oskar_cuda_jones_set_real_scalar_1.cu
+    src/oskar_cuda_jones_set_real_scalar_4.cu
     src/oskar_jones_alloc.cpp
     src/oskar_jones_copy.cpp
     src/oskar_jones_element_size.c

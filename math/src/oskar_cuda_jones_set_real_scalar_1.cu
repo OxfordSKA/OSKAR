@@ -26,47 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CUDA_JONES_MULTIPLY_TEST_H_
-#define CUDA_JONES_MULTIPLY_TEST_H_
+#include "math/oskar_cuda_jones_set_real_scalar_1.h"
+#include "math/cudak/oskar_cudak_jones_set_real_scalar_1.h"
 
-/**
- * @file CudaJonesMultiplyTest.h
- */
-
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class CudaJonesMultiplyTest : public CppUnit::TestFixture
+// Single precision.
+int oskar_cuda_jones_set_real_scalar_1_f(int n, float2* d_jones,
+        float scalar)
 {
-    public:
-        CPPUNIT_TEST_SUITE(CudaJonesMultiplyTest);
-        CPPUNIT_TEST(test_mat1_c2);
-        CPPUNIT_TEST(test_mat2_c2);
-        CPPUNIT_TEST(test_mat2_f);
-        CPPUNIT_TEST(test_mat2_d);
-        CPPUNIT_TEST_SUITE_END();
+    // Set up the thread blocks.
+    int n_thd = 256;
+    int n_blk = (n + n_thd - 1) / n_thd;
 
-    public:
-        /// Test method.
-        void test_mat1_c2();
+    // Call the kernel.
+    oskar_cudak_jones_set_real_scalar_1_f OSKAR_CUDAK_CONF(n_blk, n_thd) (n,
+            d_jones, scalar);
 
-        /// Test method.
-        void test_mat2_c2();
+    // Check for errors.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
 
-        /// Test method.
-        void test_mat2_f();
+// Double precision.
+int oskar_cuda_jones_set_real_scalar_1_d(int n, double2* d_jones,
+        double scalar)
+{
+    // Set up the thread blocks.
+    int n_thd = 256;
+    int n_blk = (n + n_thd - 1) / n_thd;
 
-        /// Test method.
-        void test_mat2_d();
-};
+    // Call the kernel.
+    oskar_cudak_jones_set_real_scalar_1_d OSKAR_CUDAK_CONF(n_blk, n_thd) (n,
+            d_jones, scalar);
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(CudaJonesMultiplyTest);
-
-#endif // CUDA_JONES_MULTIPLY_TEST_H_
+    // Check for errors.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
