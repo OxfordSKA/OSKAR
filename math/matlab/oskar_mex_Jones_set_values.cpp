@@ -28,20 +28,132 @@
 
 
 #include <mex.h>
+#include <string.h>
+#include "math/oskar_Jones.h"
+#include "math/matlab/oskar_mex_pointer.h"
 
 // Interface function
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_out != 0 || num_in != 1)
+    if (num_out != 0 || num_in != 2)
     {
-        mexErrMsgTxt("Usage: J = oskar_Jones_set_values(values)");
+        mexErrMsgTxt("Usage: oskar_Jones_set_values(jones_pointer, values)");
     }
 
-    mwSize num_dims        = mxGetNumberOfDimensions(in[0]);
-    const mwSize* dims     = mxGetDimensions(in[0]);
-    mxClassID class_id     = mxGetClassID(in[0]);
-    const char* class_name = mxGetClassName(in[0]);
+    oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
+    mwSize num_dims = mxGetNumberOfDimensions(in[1]);
+    const mwSize* dims = mxGetDimensions(in[1]);
+    const char* class_name = mxGetClassName(in[1]);
 
-    mexPrintf("num dims   = %i\n", num_dims);
-    mexPrintf("class name = %s\n", class_name);
+    // Check the type.
+    enum { CPU, GPU };
+    enum { DOUBLE, SINGLE, SCALAR, MATRIX };
+    int type = -1;
+    if (strcmp(class_name, "double") == 0)
+    {
+        type = DOUBLE;
+    }
+    else if (strcmp(class_name, "single") == 0)
+    {
+        type = SINGLE;
+    }
+    else
+    {
+        mexErrMsgTxt("The values array must be either 'double' or 'single'");
+    }
+
+    // Parse the dimensions to find if the format is scalar or matrix form
+    // and get the number of stations and sources.
+    mexPrintf("num_dims = %i\n", num_dims);
+    int num_sources  = 0;
+    int num_stations = 0;
+    int format       = -1;
+    int type_id      = 0;
+
+    if (num_dims == 2)
+    {
+        format = SCALAR;
+        num_sources  = dims[0];
+        num_stations = dims[1];
+        type_id = (type == DOUBLE) ?
+                OSKAR_JONES_DOUBLE_SCALAR : OSKAR_JONES_FLOAT_SCALAR;
+    }
+    else if (num_dims == 4)
+    {
+        if (dims[0] != 2 || dims[1] != 2)
+        {
+            mexErrMsgTxt("Jones matrices are 2 by 2 elements!.");
+        }
+        num_sources  = dims[2];
+        num_stations = dims[3];
+        format = MATRIX;
+        type_id = (type == DOUBLE) ?
+                OSKAR_JONES_DOUBLE_MATRIX : OSKAR_JONES_FLOAT_MATRIX;
+    }
+    else
+    {
+        mexErrMsgTxt("The values array must be either 2 or 4 dimensions.");
+    }
+
+    mexPrintf("num_stations = %i\n", num_stations);
+    mexPrintf("num_sources  = %i\n", num_sources);
+
+    // number of data entries.
+    int length = 0;
+    for (int i = 0; i < num_dims; ++i)
+    {
+        length *= dims[i];
+    }
+
+    size_t mem_size_new = (type == DOUBLE) ? length * sizeof(double2) :
+            length * sizeof(float2);
+
+    //size_t mem_size_old =
+
+    // Check if the currently allocated Jones structure can be used.
+    if (J->n_sources() != num_sources || J->n_stations() != num_stations ||
+            J->type() != type_id)
+    {
+        // Answer = NO ===> Have to resize or reallocate memory.
+        // TODO
+        void* data_ptr = J->data;
+        if (J->location() == CPU)
+        {
+            realloc(data_ptr, mem_size);
+        }
+        else
+        {
+        }
+    }
+
+    // number of data entries.
+    int length = 0;
+    for (int i = 0; i < num_dims; ++i)
+    {
+        length *= dims[i];
+    }
+
+    // Copy values from the mxArray into the Jones matrix.
+    if (type == DOUBLE)
+    {
+        double* values_re = mxGetPr(in[1]);
+        double* values_im = mxGetPr(in[1]);
+        double2* data     = (double2*)J->data;
+        for (int i = 0; i < length; ++i)
+        {
+            data[i].x = values_re[i];
+            data[i].y = values_im[i];
+        }
+    }
+    else
+    {
+        float* values_re = (float*)mxGetPr(in[1]);
+        float* values_im = (float*)mxGetPr(in[1]);
+        float2* data     = (float2*)J->data;
+        for (int i = 0; i < length; ++i)
+        {
+            data[i].x = values_re[i];
+            data[i].y = values_im[i];
+        }
+    }
 }
