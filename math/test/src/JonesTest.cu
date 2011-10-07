@@ -41,13 +41,12 @@
  */
 void JonesTest::test_join_inline_mat_mat_device()
 {
-//    return;
     // Set-up some test parameters.
     int n_src = 10, n_stat = 25;
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
                 n_src, n_stat, 0);
         oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
                 n_src, n_stat, 1);
@@ -68,7 +67,7 @@ void JonesTest::test_join_inline_mat_mat_device()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
                 n_src, n_stat, 0);
         oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
                 n_src, n_stat, 1);
@@ -535,7 +534,7 @@ oskar_Jones* JonesTest::construct_jones_device(int type, int n_src,
         int n_stat, int offset)
 {
     // Get the matrix in host memory.
-    oskar_Jones* t = construct_jones_host(type, n_src, n_stat);
+    oskar_Jones* t = construct_jones_host(type, n_src, n_stat, offset);
 
     // Copy the data to device memory.
     oskar_Jones* m = new oskar_Jones(t, 1);
@@ -566,14 +565,14 @@ void JonesTest::check_matrix_matrix(const oskar_Jones* jones,
         {
             construct_float4c_output_matrix_matrix(i + offset1,
                     i + offset2, t);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("a.x" + oskar_to_std_string(i), t.a.x, ptr[i].a.x, abs(t.a.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("a.y" + oskar_to_std_string(i), t.a.y, ptr[i].a.y, abs(t.a.y * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("b.x" + oskar_to_std_string(i), t.b.x, ptr[i].b.x, abs(t.b.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("b.y" + oskar_to_std_string(i), t.b.y, ptr[i].b.y, abs(t.b.y * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("c.x" + oskar_to_std_string(i), t.c.x, ptr[i].c.x, abs(t.c.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("c.y" + oskar_to_std_string(i), t.c.y, ptr[i].c.y, abs(t.c.y * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("d.x" + oskar_to_std_string(i), t.d.x, ptr[i].d.x, abs(t.d.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("d.y" + oskar_to_std_string(i), t.d.y, ptr[i].d.y, abs(t.d.y * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, abs(t.a.x * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, abs(t.a.y * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, abs(t.b.x * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.y, ptr[i].b.y, abs(t.b.y * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.x, ptr[i].c.x, abs(t.c.x * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.y, ptr[i].c.y, abs(t.c.y * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.x, ptr[i].d.x, abs(t.d.x * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, abs(t.d.y * 5e-5));
         }
     }
     else if (jones->type() == OSKAR_JONES_DOUBLE_MATRIX)

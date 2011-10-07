@@ -83,9 +83,9 @@ class JonesTest : public CppUnit::TestFixture
         void construct_float4c_output_matrix_scalar(int i, int j, float4c& m);
         void construct_float4c_output_scalar_scalar(int i, int j, float2& m);
         oskar_Jones* construct_jones_host(int type, int n_src, int n_stat,
-                int offset = 0);
+                int offset);
         oskar_Jones* construct_jones_device(int type, int n_src, int n_stat,
-                int offset = 0);
+                int offset);
         void check_matrix_matrix(const oskar_Jones* data,
                 int offset1, int offset2);
         void check_matrix_scalar(const oskar_Jones* data,
