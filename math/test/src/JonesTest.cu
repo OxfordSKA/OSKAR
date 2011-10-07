@@ -186,6 +186,306 @@ void JonesTest::test_join_inline_mat_mat_host()
 
 /**
  * @details
+ * Tests inline multiplication of Jones matrices using CUDA.
+ * Both matrices are on the device.
+ */
+void JonesTest::test_join_inline_mat_sca_device()
+{
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_matrix_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+
+    // Return if no double precision support.
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Double precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_matrix_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+}
+
+/**
+ * @details
+ * Tests inline multiplication of Jones matrices using CUDA.
+ * One set of matrices is on the device, and the other on the host.
+ */
+void JonesTest::test_join_inline_mat_sca_device_host()
+{
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_matrix_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+
+    // Return if no double precision support.
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Double precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_matrix_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+}
+
+/**
+ * @details
+ * Tests inline multiplication of Jones matrices using CUDA.
+ * Both matrices are on the host.
+ */
+void JonesTest::test_join_inline_mat_sca_host()
+{
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_FLOAT_MATRIX,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_matrix_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+
+    // Return if no double precision support.
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Double precision test.
+    {
+        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_DOUBLE_MATRIX,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_matrix_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+}
+
+/**
+ * @details
+ * Tests inline multiplication of Jones matrices using CUDA.
+ * Both matrices are on the device.
+ */
+void JonesTest::test_join_inline_sca_sca_device()
+{
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_scalar_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+
+    // Return if no double precision support.
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Double precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_scalar_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+}
+
+/**
+ * @details
+ * Tests inline multiplication of Jones matrices using CUDA.
+ * One set of matrices is on the device, and the other on the host.
+ */
+void JonesTest::test_join_inline_sca_sca_device_host()
+{
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_scalar_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+
+    // Return if no double precision support.
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Double precision test.
+    {
+        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_scalar_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+}
+
+/**
+ * @details
+ * Tests inline multiplication of Jones matrices using CUDA.
+ * Both matrices are on the host.
+ */
+void JonesTest::test_join_inline_sca_sca_host()
+{
+    // Set-up some test parameters.
+    int n_src = 10, n_stat = 25;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_scalar_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+
+    // Return if no double precision support.
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Double precision test.
+    {
+        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 0);
+        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+                n_src, n_stat, 1);
+
+        // Call wrapper function.
+        fail_on_error ( j1->join_from_right(j2) );
+
+        // Check result.
+        check_scalar_scalar(j1, 0, 1);
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+}
+
+/**
+ * @details
  * Tests setting the contents of the Jones matrices.
  * The data are on the device.
  */
@@ -341,6 +641,22 @@ void JonesTest::construct_double2_input(int i, double2& m)
 
 /**
  * @details
+ * Returns a single, populated Jones scalar.
+ */
+void JonesTest::construct_double2_output_scalar_scalar(int i, int j,
+        double2& m)
+{
+    // Get the input scalars.
+    double2 s1, s2;
+    construct_double2_input(i, s1);
+    construct_double2_input(j, s2);
+
+    // Compute s1*s2.
+    m = complex_mul(s1, s2);
+}
+
+/**
+ * @details
  * Returns a single, populated 2x2 Jones matrix.
  */
 void JonesTest::construct_double4c_input(int i, double4c& m)
@@ -384,7 +700,7 @@ void JonesTest::construct_double4c_output_matrix_scalar(int i, int j,
 
     // Get the input scalar.
     double2 s;
-    construct_double2_input(i, s);
+    construct_double2_input(j, s);
 
     // Compute p*s.
     m.a = complex_mul(p.a, s);
@@ -395,27 +711,27 @@ void JonesTest::construct_double4c_output_matrix_scalar(int i, int j,
 
 /**
  * @details
- * Returns a single, populated 2x2 Jones scalar.
+ * Returns a single, populated Jones scalar.
  */
-void JonesTest::construct_double4c_output_scalar_scalar(int i, int j,
-        double2& m)
+void JonesTest::construct_float2_input(int i, float2& m)
 {
-    // Get the input scalars.
-    double2 s1, s2;
-    construct_double2_input(i, s1);
-    construct_double2_input(i, s2);
-
-    // Compute s1*s2.
-    m = complex_mul(s1, s2);
+    m = make_float2(i, i);
 }
 
 /**
  * @details
  * Returns a single, populated Jones scalar.
  */
-void JonesTest::construct_float2_input(int i, float2& m)
+void JonesTest::construct_float2_output_scalar_scalar(int i, int j,
+        float2& m)
 {
-    m = make_float2(i, i);
+    // Get the input scalars.
+    float2 s1, s2;
+    construct_float2_input(i, s1);
+    construct_float2_input(j, s2);
+
+    // Compute s1*s2.
+    m = complex_mul(s1, s2);
 }
 
 /**
@@ -463,29 +779,13 @@ void JonesTest::construct_float4c_output_matrix_scalar(int i, int j,
 
     // Get the input scalar.
     float2 s;
-    construct_float2_input(i, s);
+    construct_float2_input(j, s);
 
     // Compute p*s.
     m.a = complex_mul(p.a, s);
     m.b = complex_mul(p.b, s);
     m.c = complex_mul(p.c, s);
     m.d = complex_mul(p.d, s);
-}
-
-/**
- * @details
- * Returns a single, populated 2x2 Jones scalar.
- */
-void JonesTest::construct_float4c_output_scalar_scalar(int i, int j,
-        float2& m)
-{
-    // Get the input scalars.
-    float2 s1, s2;
-    construct_float2_input(i, s1);
-    construct_float2_input(i, s2);
-
-    // Compute s1*s2.
-    m = complex_mul(s1, s2);
 }
 
 /**
@@ -602,20 +902,96 @@ void JonesTest::check_matrix_matrix(const oskar_Jones* jones,
  * @details
  * Checks result after performing matrix-scalar multiply.
  */
-void JonesTest::check_matrix_scalar(const oskar_Jones* data,
+void JonesTest::check_matrix_scalar(const oskar_Jones* jones,
         int offset1, int offset2)
 {
+    // Copy result to temporary host buffer.
+    const oskar_Jones* temp = (jones->location() == 1) ?
+            new oskar_Jones(jones, 0) : jones;
 
+    // Check the contents of the host buffer.
+    int n = jones->n_sources() * jones->n_stations();
+    if (jones->type() == OSKAR_JONES_FLOAT_MATRIX)
+    {
+        float4c* ptr = (float4c*)temp->data;
+        float4c t;
+        for (int i = 0; i < n; ++i)
+        {
+            construct_float4c_output_matrix_scalar(i + offset1,
+                    i + offset2, t);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, abs(t.a.x * 2e-4));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, abs(t.a.y * 2e-4));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, abs(t.b.x * 2e-4));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.y, ptr[i].b.y, abs(t.b.y * 2e-4));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.x, ptr[i].c.x, abs(t.c.x * 2e-4));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.y, ptr[i].c.y, abs(t.c.y * 2e-4));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.x, ptr[i].d.x, abs(t.d.x * 2e-4));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, abs(t.d.y * 2e-4));
+        }
+    }
+    else if (jones->type() == OSKAR_JONES_DOUBLE_MATRIX)
+    {
+        double4c* ptr = (double4c*)temp->data;
+        double4c t;
+        for (int i = 0; i < n; ++i)
+        {
+            construct_double4c_output_matrix_scalar(i + offset1,
+                    i + offset2, t);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, abs(t.a.x * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, abs(t.a.y * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, abs(t.b.x * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.y, ptr[i].b.y, abs(t.b.y * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.x, ptr[i].c.x, abs(t.c.x * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.y, ptr[i].c.y, abs(t.c.y * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.x, ptr[i].d.x, abs(t.d.x * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, abs(t.d.y * 1e-10));
+        }
+    }
+
+    // Free temporary host buffer.
+    if (jones->location() == 1) delete temp;
 }
 
 /**
  * @details
  * Checks result after performing scalar-scalar multiply.
  */
-void JonesTest::check_scalar_scalar(const oskar_Jones* data,
+void JonesTest::check_scalar_scalar(const oskar_Jones* jones,
         int offset1, int offset2)
 {
+    // Copy result to temporary host buffer.
+    const oskar_Jones* temp = (jones->location() == 1) ?
+            new oskar_Jones(jones, 0) : jones;
 
+    // Check the contents of the host buffer.
+    int n = jones->n_sources() * jones->n_stations();
+    if (jones->type() == OSKAR_JONES_FLOAT_SCALAR)
+    {
+        float2* ptr = (float2*)temp->data;
+        float2 t;
+        for (int i = 0; i < n; ++i)
+        {
+            construct_float2_output_scalar_scalar(i + offset1,
+                    i + offset2, t);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.x, ptr[i].x, abs(t.x * 5e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.y, ptr[i].y, abs(t.y * 5e-5));
+        }
+    }
+    else if (jones->type() == OSKAR_JONES_DOUBLE_SCALAR)
+    {
+        double2* ptr = (double2*)temp->data;
+        double2 t;
+        for (int i = 0; i < n; ++i)
+        {
+            construct_double2_output_scalar_scalar(i + offset1,
+                    i + offset2, t);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.x, ptr[i].x, abs(t.x * 1e-10));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.y, ptr[i].y, abs(t.y * 1e-10));
+        }
+    }
+
+    // Free temporary host buffer.
+    if (jones->location() == 1) delete temp;
 }
 
 /**

@@ -51,37 +51,41 @@ class JonesTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_join_inline_mat_mat_device);
         CPPUNIT_TEST(test_join_inline_mat_mat_device_host);
         CPPUNIT_TEST(test_join_inline_mat_mat_host);
+        CPPUNIT_TEST(test_join_inline_mat_sca_device);
+        CPPUNIT_TEST(test_join_inline_mat_sca_device_host);
+        CPPUNIT_TEST(test_join_inline_mat_sca_host);
+        CPPUNIT_TEST(test_join_inline_sca_sca_device);
+        CPPUNIT_TEST(test_join_inline_sca_sca_device_host);
+        CPPUNIT_TEST(test_join_inline_sca_sca_host);
         CPPUNIT_TEST(test_set_ones_device);
         CPPUNIT_TEST(test_set_ones_host);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        /// Test method.
+        /// Test methods.
         void test_join_inline_mat_mat_device();
-
-        /// Test method.
         void test_join_inline_mat_mat_device_host();
-
-        /// Test method.
         void test_join_inline_mat_mat_host();
-
-        /// Test method.
+        void test_join_inline_mat_sca_device();
+        void test_join_inline_mat_sca_device_host();
+        void test_join_inline_mat_sca_host();
+        void test_join_inline_sca_sca_device();
+        void test_join_inline_sca_sca_device_host();
+        void test_join_inline_sca_sca_host();
         void test_set_ones_device();
-
-        /// Test method.
         void test_set_ones_host();
 
     private:
         void construct_double2_input(int i, double2& m);
+        void construct_double2_output_scalar_scalar(int i, int j, double2& m);
         void construct_double4c_input(int i, double4c& m);
         void construct_double4c_output_matrix_matrix(int i, int j, double4c& m);
         void construct_double4c_output_matrix_scalar(int i, int j, double4c& m);
-        void construct_double4c_output_scalar_scalar(int i, int j, double2& m);
         void construct_float2_input(int i, float2& m);
+        void construct_float2_output_scalar_scalar(int i, int j, float2& m);
         void construct_float4c_input(int i, float4c& m);
         void construct_float4c_output_matrix_matrix(int i, int j, float4c& m);
         void construct_float4c_output_matrix_scalar(int i, int j, float4c& m);
-        void construct_float4c_output_scalar_scalar(int i, int j, float2& m);
         oskar_Jones* construct_jones_host(int type, int n_src, int n_stat,
                 int offset);
         oskar_Jones* construct_jones_device(int type, int n_src, int n_stat,
