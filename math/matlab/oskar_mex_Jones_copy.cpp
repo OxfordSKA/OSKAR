@@ -39,38 +39,41 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Check arguments.
     if (num_out != 1 || num_in != 1)
     {
-        mexErrMsgTxt("Usage: J_copy = oskar_Jones_copy(jones_pointer)");
+        mexErrMsgTxt("Usage: oskar_Jones = oskar_Jones_copy(jones_pointer)");
     }
 
     // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Jones* J_orig = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
+    oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
 
     // Construct a new oskar_Jones object to copy into as a mxArray.
-    // TODO: ----
-    mxArray *J_mex;
-    // 5 param = num_stations, num_sources, format, type, location
+    // Set up the memory to match the original object.
+    mxArray* J_class;
+    int num_sources  = J->n_sources();
+    int num_stations = J->n_stations();
+    const char* format_string = (J->type() == OSKAR_JONES_DOUBLE_MATRIX ||
+            J->type() == OSKAR_JONES_FLOAT_MATRIX) ? "matrix" : "scalar";
+    const char* type_string = (J->type() == OSKAR_JONES_DOUBLE_MATRIX ||
+            J->type() == OSKAR_JONES_DOUBLE_SCALAR) ? "double" : "single";
+    const char* location_string = (J->location() == 0) ? "cpu" : "gpu";
+    // num_sources, num_stations, [format], [type], [location]
     mxArray* param[5];
-    const char* format_string   = "scalar";
-    const char* type_string     = "double";
-    const char* location_string = (J_orig->location() == 0) ? "cpu" : "gpu";
     param[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[0])) = J_orig->type();
+    *((int*)mxGetPr(param[0])) = num_sources;
     param[1] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[1])) = J_orig->n_sources();
+    *((int*)mxGetPr(param[1])) = num_stations;
     param[2] = mxCreateString(format_string);
     param[3] = mxCreateString(type_string);
     param[4] = mxCreateString(location_string);
-    mexCallMATLAB(1, &J_mex, 5, param, "oskar_Jones");
+    mexCallMATLAB(1, &J_class, 5, param, "oskar_Jones");
 
+    // Get the pointer out of the mex object.
+    mxArray* J_pointer = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar_Jones.get_pointer");
+//    mexPrintf("pointer = %i\n", (uint64_t)mxGetScalar(J_pointer));
+    oskar_Jones* J_copy = covert_mxArray_to_pointer<oskar_Jones>(J_pointer);
 
-    //mexCallMATLAB(1, &J_mex, 5, param, "oskar_Jones.oskar_Jones_ptr");
+    // Copy values into it from the original Jones.
+    J->copy_to(J_copy);
 
-    // Extract the C pointer from the oskar_Jones mxArray object.
-    oskar_Jones* J_copy = covert_mxArray_to_pointer<oskar_Jones>(J_mex);
-
-    // Copy
-    J_orig->copy_to(J_copy);
-
-    // Return the pointer to the copy of the oskar_Jones structure.
-    out[0] = convert_ptr_to_mxArray(J_copy);
+    out[0] = J_class;
 }
