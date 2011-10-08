@@ -14,6 +14,6 @@ if (MATLAB_FOUND)
     oskar_mex(oskar_Jones_get_values oskar_mex_Jones_get_values.cpp)
     oskar_mex(oskar_Jones_set_real_scalar oskar_mex_Jones_set_real_scalar.cpp)
     oskar_mex(oskar_Jones_get_parameter oskar_mex_Jones_get_parameter.cpp)
-    oskar_mex(oskar_Jones_set_values oskar_mex_Jones_set_values.cpp)
+    oskar_mex(oskar_Jones_set_values oskar_mex_Jones_set_values.cu)
 endif ()
 
