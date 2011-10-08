@@ -22,14 +22,14 @@ if (BUILD_OSKAR_WIDGETS)
     target_link_libraries(oskar_imager_scalar oskar oskar_apps oskar_widgets
         ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
     set_target_properties(oskar_imager_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-    install(TARGETS oskar_imager_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+    #install(TARGETS oskar_imager_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
     # BINARY: oskar_viewer_sclar
     add_executable(oskar_viewer_scalar oskar_viewer_scalar.cpp)
     target_link_libraries(oskar_viewer_scalar oskar oskar_apps oskar_widgets
         ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
     set_target_properties(oskar_viewer_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-    install(TARGETS oskar_viewer_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+    #install(TARGETS oskar_viewer_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
 
 endif ()
