@@ -58,6 +58,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int location = get_location_id(location_string);
 
     // Create a new oskar_Jones structure.
+    // FIXME: Warnings/errors for double type on archiecture that dont support
+    // double.
+    // FIXME: Errors warnings about running out of GPU memory.
     oskar_Jones* J = new oskar_Jones(type, num_sources, num_stations, location);
 
     // Return a pointer to the oskar_Jones structure as a mxArray object.

@@ -34,6 +34,10 @@
 extern "C"
 int oskar_jones_alloc(oskar_Jones* jones)
 {
+    //
+    // FIXME allocation of double types on architecture that
+    // doesn't support double
+
     // Check that the structure exists.
     if (jones == NULL) return -1;
 
