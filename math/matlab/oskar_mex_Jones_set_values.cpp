@@ -31,6 +31,7 @@
 #include <string.h>
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
+#include "utility/oskar_vector_types.h"
 
 // Interface function
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -119,18 +120,11 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         void* data_ptr = J->data;
         if (J->location() == CPU)
         {
-            realloc(data_ptr, mem_size);
+//            realloc(data_ptr, mem_size);
         }
         else
         {
         }
-    }
-
-    // number of data entries.
-    int length = 0;
-    for (int i = 0; i < num_dims; ++i)
-    {
-        length *= dims[i];
     }
 
     // Copy values from the mxArray into the Jones matrix.
