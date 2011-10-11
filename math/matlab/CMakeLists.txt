@@ -14,6 +14,10 @@ if (MATLAB_FOUND)
     oskar_mex(oskar_Jones_get_values oskar_mex_Jones_get_values.cpp)
     oskar_mex(oskar_Jones_set_real_scalar oskar_mex_Jones_set_real_scalar.cpp)
     oskar_mex(oskar_Jones_get_parameter oskar_mex_Jones_get_parameter.cpp)
-    oskar_mex(oskar_Jones_set_values oskar_mex_Jones_set_values.cu)
+    oskar_mex(oskar_Jones_set_values oskar_mex_Jones_set_values.cpp)
+    oskar_mex(oskar_Jones_join oskar_mex_Jones_join.cpp)
+    oskar_mex(oskar_Jones_join_from_right oskar_mex_Jones_join_from_right.cpp)
+    oskar_mex(oskar_Jones_join_to_left oskar_mex_Jones_join_to_left.cpp)
+
 endif ()
 
