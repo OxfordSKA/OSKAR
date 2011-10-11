@@ -32,6 +32,7 @@
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
 #include "math/oskar_jones_join.h"
+#include "math/matlab/oskar_mex_Jones_utility.h"
 
 // Interface function
 void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
@@ -64,7 +65,6 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
 
     // Construct a new oskar_Jones object to copy into as a mxArray.
     // Set up the memory to match the original object.
-    mxArray* J_class;
     int num_sources  = J1->n_sources();
     int num_stations = J1->n_stations();
     const char* format_string = (J1->type() == OSKAR_JONES_DOUBLE_MATRIX ||
@@ -72,22 +72,11 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     const char* type_string = (J1->type() == OSKAR_JONES_DOUBLE_MATRIX ||
             J1->type() == OSKAR_JONES_DOUBLE_SCALAR) ? "double" : "single";
     const char* location_string = (J1->location() == 0) ? "cpu" : "gpu";
-    // num_sources, num_stations, [format], [type], [location]
-    mxArray* param[5];
-    param[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[0])) = num_sources;
-    param[1] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[1])) = num_stations;
-    param[2] = mxCreateString(format_string);
-    param[3] = mxCreateString(type_string);
-    param[4] = mxCreateString(location_string);
-    mexCallMATLAB(1, &J_class, 5, param, "oskar_Jones");
+    mxArray* J_class = create_matlab_Jones_class(num_sources, num_stations,
+            format_string, type_string, location_string);
 
     // Get the pointer out of the mex object.
-    mxArray* J_pointer = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-    mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar_Jones.get_pointer");
-
-    oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(J_pointer);
+    oskar_Jones* J = get_jones_pointer_from_matlab_jones_class(J_class);
 
     int err = oskar_jones_join(J, J1, J2);
 

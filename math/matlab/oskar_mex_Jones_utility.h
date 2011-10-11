@@ -105,4 +105,28 @@ int get_location_id(const char* location)
     return UNDEF;
 }
 
+mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations,
+        const char* format, const char* type, const char* location)
+{
+    mxArray* J;
+    mxArray* param[5];
+    param[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetPr(param[0])) = num_sources;
+    param[1] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetPr(param[1])) = num_stations;
+    param[2] = mxCreateString(format);
+    param[3] = mxCreateString(type);
+    param[4] = mxCreateString(location);
+    mexCallMATLAB(1, &J, 5, param, "oskar_Jones");
+    return J;
+}
+
+oskar_Jones* get_jones_pointer_from_matlab_jones_class(mxArray* J_class)
+{
+    mxArray* J_pointer = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
+    mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar_Jones.get_pointer");
+    return covert_mxArray_to_pointer<oskar_Jones>(J_pointer);
+}
+
+
 #endif // OSKAR_MEX_JONES_UTILITY_H_
