@@ -33,6 +33,7 @@
 #include "math/matlab/oskar_mex_pointer.h"
 #include "math/oskar_jones_join.h"
 #include "math/matlab/oskar_mex_Jones_utility.h"
+#include "utility/oskar_vector_types.h"
 
 // Interface function
 void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
@@ -78,6 +79,7 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     // Get the pointer out of the mex object.
     oskar_Jones* J = get_jones_pointer_from_matlab_jones_class(J_class);
 
+    // J = J1 * J2
     int err = oskar_jones_join(J, J1, J2);
 
     if (err != 0)

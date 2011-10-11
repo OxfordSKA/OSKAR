@@ -91,11 +91,17 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         values = mxCreateNumericArray(num_dims, dims, mxSINGLE_CLASS, mxCOMPLEX);
         float* values_re = (float*)mxGetPr(values);
         float* values_im = (float*)mxGetPi(values);
-        float2* data = (float2*)J_local->data;
-        for (int i = 0; i < num_stations * num_sources * 4; ++i)
+        float4c* data = (float4c*)J_local->data;
+        for (int i = 0; i < num_stations * num_sources; ++i)
         {
-            values_re[i] = data[i].x;
-            values_im[i] = data[i].y;
+            values_re[i + 0] = data[i].a.x;
+            values_re[i + 1] = data[i].c.x;
+            values_re[i + 2] = data[i].b.x;
+            values_re[i + 3] = data[i].d.x;
+            values_im[i + 0] = data[i].a.y;
+            values_im[i + 1] = data[i].c.y;
+            values_im[i + 2] = data[i].b.y;
+            values_im[i + 3] = data[i].d.y;
         }
     }
 
@@ -106,11 +112,17 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         values = mxCreateNumericArray(num_dims, dims, mxDOUBLE_CLASS, mxCOMPLEX);
         double* values_re = mxGetPr(values);
         double* values_im = mxGetPi(values);
-        double2* data = (double2*)J_local->data;
-        for (int i = 0; i < num_stations * num_sources * 4; ++i)
+        double4c* data = (double4c*)J_local->data;
+        for (int i = 0; i < num_stations * num_sources; ++i)
         {
-            values_re[i] = data[i].x;
-            values_im[i] = data[i].y;
+            values_re[i + 0] = data[i].a.x;
+            values_re[i + 1] = data[i].c.x;
+            values_re[i + 2] = data[i].b.x;
+            values_re[i + 3] = data[i].d.x;
+            values_im[i + 0] = data[i].a.y;
+            values_im[i + 1] = data[i].c.y;
+            values_im[i + 2] = data[i].b.y;
+            values_im[i + 3] = data[i].d.y;
         }
     }
 

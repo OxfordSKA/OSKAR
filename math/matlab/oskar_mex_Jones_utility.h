@@ -35,57 +35,55 @@
 #include "math/oskar_Jones.h"
 #include "string.h"
 
-// Return the oskar_Jones type for the associated data type and format.
-int get_type_id(const char* type, const char* format)
+enum { CPU = 0, GPU = 1 };
+enum { UNDEF = -1, DOUBLE, SINGLE, SCALAR, MATRIX };
+
+
+int get_type(const char* type)
 {
-    enum { SINGLE, DOUBLE, SCALAR, MATRIX };
-    int itype = 0;
     if ( strcmp(type, "single") == 0 )
     {
-        itype = SINGLE;
+        return SINGLE;
     }
     else if ( strcmp(type, "double") == 0 )
     {
-        itype = DOUBLE;
+        return DOUBLE;
     }
     else
     {
         mexErrMsgTxt("Unrecognised data type. "
                 "(accepted values: 'single' or 'double')");
     }
+    return UNDEF;
+}
 
-    int iformat = 0;
+
+int get_format(const char* format)
+{
     if ( strcmp(format, "scalar") == 0 )
     {
-        iformat = SCALAR;
+        return SCALAR;
     }
     else if ( strcmp(format, "matrix") == 0 )
     {
-        iformat = MATRIX;
+        return MATRIX;
     }
     else
     {
         mexErrMsgTxt("Unrecognised data format. "
                 "(accepted values: 'scalar' or 'matrix')");
     }
-
-    if (itype == SINGLE)
-    {
-        if (iformat == SCALAR)
-            return OSKAR_JONES_FLOAT_SCALAR;
-        else
-            return OSKAR_JONES_FLOAT_MATRIX;
-    }
-    else
-    {
-        if (iformat == SCALAR)
-            return OSKAR_JONES_DOUBLE_SCALAR;
-        else
-            return OSKAR_JONES_DOUBLE_MATRIX;
-    }
+    return UNDEF;
 }
 
-// Return the oskar_Jones type location id for the memory location.
+/**
+ * @brief Returns the oskar_Jones location id for the memory location string.
+ *
+ * @param[in] location String containing the memory location ("cpu" or "gpu")
+ *
+ * @return The memory location id as defined by the oskar_Jones structure.
+ *         (0 = CPU, 1 = GPU)
+ */
 int get_location_id(const char* location)
 {
     enum { HOST = 0, DEVICE = 1, UNDEF = -1 };
@@ -105,6 +103,49 @@ int get_location_id(const char* location)
     return UNDEF;
 }
 
+
+/**
+ * @brief Return the oskar_Jones structure type id for a given type and format
+ * string.
+ *
+ * @param[in] type    String containing the data type ("double" or "single")
+ * @param[in] format  String containing the data format ("scalar" or "matrix")
+ *
+ * @return The oskar_Jones structure type id.
+ */
+int get_type_id(const char* type, const char* format)
+{
+    int itype   = get_type(type);
+    int iformat = get_format(format);
+
+    if (itype == SINGLE)
+    {
+        if (iformat == SCALAR)
+            return OSKAR_JONES_FLOAT_SCALAR;
+        else
+            return OSKAR_JONES_FLOAT_MATRIX;
+    }
+    else
+    {
+        if (iformat == SCALAR)
+            return OSKAR_JONES_DOUBLE_SCALAR;
+        else
+            return OSKAR_JONES_DOUBLE_MATRIX;
+    }
+}
+
+
+/**
+ * @brief Create a MATLAB oskar_Jones object and return it as an mxArray pointer.
+ *
+ * @param[in] num_sources   Number of sources.
+ * @param[in] num_stations  Number of stations.
+ * @param[in] format        Format of the Jones matrix data ("scalar" or "matrix")
+ * @param[in] type          Type of the Jones matrix data ("double" or "single")
+ * @param[in] location      Memory location of the Jones matrix data ("cpu" or "gpu)
+ *
+ * @return mxArray containing an oskar_Jones object.
+ */
 mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations,
         const char* format, const char* type, const char* location)
 {
@@ -121,6 +162,15 @@ mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations
     return J;
 }
 
+
+/**
+ * @brief Return the oskar_Jones structure pointer associated with a MATLAB
+ * oskar_Jones object.
+ *
+ * @param[in] J_class mxArray pointer containing a MATLAB oskar_Jones object.
+ *
+ * @return oskar_Jones structure pointer.
+ */
 oskar_Jones* get_jones_pointer_from_matlab_jones_class(mxArray* J_class)
 {
     mxArray* J_pointer = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);

@@ -43,9 +43,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 "jones_pointer, values, format, location)");
     }
 
-    enum { CPU = 0, GPU = 1 };
-    enum { DOUBLE, SINGLE, SCALAR, MATRIX };
-
+    // Parse input parameters.
     oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
     mwSize num_dims             = mxGetNumberOfDimensions(in[1]);
     const mwSize* dims          = mxGetDimensions(in[1]);
@@ -53,57 +51,21 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* format_string   = mxArrayToString(in[2]);
     const char* location_string = mxArrayToString(in[3]);
 
-
-    // Check the type.
-    int type = -1;
-    if (strcmp(class_name, "double") == 0)
-    {
-        type = DOUBLE;
-    }
-    else if (strcmp(class_name, "single") == 0)
-    {
-        type = SINGLE;
-    }
-    else
-    {
-        mexErrMsgTxt("The values array must be either 'double' or 'single'");
-    }
-
-
-    int format = -1;
-    if ( strcmp(format_string, "scalar") == 0 )
-    {
-        format = SCALAR;
-    }
-    else if ( strcmp(format_string, "matrix") == 0 )
-    {
-        format = MATRIX;
-    }
-    else
-    {
-        mexErrMsgTxt("Unrecognised data format. "
-                "(accepted values: 'scalar' or 'matrix')");
-    }
-
-    int location = get_location_id(location_string);
-
-    // Parse the dimensions to find if the format is scalar or matrix form
-    // and get the number of stations and sources.
-//    mexPrintf("num_dims = %i\n", num_dims);
+    int type         = get_type(class_name);
+    int format       = get_format(format_string);
+    int location     = get_location_id(location_string);
+    int type_id      = get_type_id(class_name, format_string);
     int num_sources  = 0;
     int num_stations = 0;
-    int type_id      = 0;
 
+    // Work out data dimensions and check for errors.
     if (format == SCALAR)
     {
         if (num_dims != 2)
-        {
-            mexErrMsgTxt("Number of dimensions incompatible with a scalar format!\n");
-        }
+            mexErrMsgTxt("Scalar format must be 2-dimensional!\n");
+
         num_sources  = dims[0];
         num_stations = dims[1];
-        type_id = (type == DOUBLE) ?
-                OSKAR_JONES_DOUBLE_SCALAR : OSKAR_JONES_FLOAT_SCALAR;
     }
 
     else // format == MATRIX
@@ -114,8 +76,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         if (dims[0] != 2 || dims[1] != 2)
         {
-            mexErrMsgTxt("Jones matrices are 2 by 2 elements!.");
+            mexErrMsgTxt("Matrix format elements must be 2 by 2 matrices!.");
         }
+        // num_dims 2 and 3 deals with the problem of MATLAB collapsing dimensions
+        // of multi-dimensional arrays.
+        //   e.g. ndims(ones(2,2,1,1)) = 2
+        //        ndims(ones(2,2,2,1)) = 3
         if (num_dims == 2)
         {
             num_sources  = 1;
@@ -131,20 +97,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             num_sources  = dims[2];
             num_stations = dims[3];
         }
-        type_id = (type == DOUBLE) ?
-                OSKAR_JONES_DOUBLE_MATRIX : OSKAR_JONES_FLOAT_MATRIX;
     }
 
-    // ------------------------------------------------------------------------
-
-//    mexPrintf("num_stations = %i\n", num_stations);
-//    mexPrintf("num_sources  = %i\n", num_sources);
-
-    // number of data entries.
-    int length = 1;
+    // Number of values
+    int num_values = 1;
     for (int i = 0; i < (int)num_dims; ++i)
     {
-        length *= dims[i];
+        num_values *= dims[i];
     }
 
     size_t mem_size_old = J->n_sources() * J->n_stations();
@@ -166,24 +125,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
 
-    size_t mem_size_new = (type == DOUBLE) ? length * sizeof(double2) :
-            length * sizeof(float2);
-
-//    mexPrintf("mem size old = %i\n", mem_size_old);
-//    mexPrintf("mem size new = %i\n", mem_size_new);
-//
-//    mexPrintf("type old = %i\n", J->type());
-//    mexPrintf("type new = %i\n", type_id);
-//
-//    mexPrintf("location old = %i\n", J->location());
-//    mexPrintf("location new = %i\n", location);
-
+    size_t mem_size_new = (type == DOUBLE) ? num_values * sizeof(double2) :
+            num_values * sizeof(float2);
 
     // Check if the currently allocated Jones structure can be used.
     if (mem_size_new != mem_size_old || J->type() != type_id
             || J->location() != location)
     {
-//        mexPrintf("Updating memory\n");
         delete J;
         J = new oskar_Jones(type_id, num_sources, num_stations, location);
     }
@@ -191,31 +139,86 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Construct a local CPU Jones structure on the CPU as well if needed.
     oskar_Jones* J_local = (J->location() == GPU) ? new oskar_Jones(J, CPU) : J;
 
-//    mexPrintf("complex = %s\n", mxIsComplex(in[1]) == true ? "true" : "false");
-
-    // Populate the Jones structure.
+    // Populate the oskar_Jones structure from the MATLAB array.
     if (type == DOUBLE)
     {
         double* values_re = mxGetPr(in[1]);
         double* values_im = mxGetPi(in[1]);
-        double2* data     = (double2*)J_local->data;
-        for (int i = 0; i < length; ++i)
+        if (format == SCALAR)
         {
-            data[i].x = values_re[i];
-            data[i].y = (values_im == NULL) ? 0.0 : values_im[i];
+            double2* data = (double2*)J_local->data;
+            for (int i = 0; i < num_values; ++i)
+            {
+                data[i].x = values_re[i];
+                data[i].y = (values_im == NULL) ? 0.0 : values_im[i];
+            }
+        }
+        else
+        {
+            double4c* data = (double4c*)J_local->data;
+            for (int i = 0; i < num_stations * num_sources; ++i)
+            {
+                data[i].a.x = values_re[i + 0];
+                data[i].c.x = values_re[i + 1];
+                data[i].b.x = values_re[i + 2];
+                data[i].d.x = values_re[i + 3];
+                if (values_im == NULL)
+                {
+                    data[i].a.y = 0.0;
+                    data[i].c.y = 0.0;
+                    data[i].b.y = 0.0;
+                    data[i].d.y = 0.0;
+                }
+                else
+                {
+                    data[i].a.y = values_im[i + 0];
+                    data[i].c.y = values_im[i + 1];
+                    data[i].b.y = values_im[i + 2];
+                    data[i].d.y = values_im[i + 3];
+                }
+            }
         }
     }
     else
     {
         float* values_re = (float*)mxGetPr(in[1]);
         float* values_im = (float*)mxGetPi(in[1]);
-        float2* data     = (float2*)J_local->data;
-        for (int i = 0; i < length; ++i)
+        if (format == SCALAR)
         {
-            data[i].x = values_re[i];
-            data[i].y = (values_im == NULL) ? 0.0f : values_im[i];
+            float2* data = (float2*)J_local->data;
+            for (int i = 0; i < num_values; ++i)
+            {
+                data[i].x = values_re[i];
+                data[i].y = (values_im == NULL) ? 0.0f : values_im[i];
+            }
+        }
+        else
+        {
+            float4c* data = (float4c*)J_local->data;
+            for (int i = 0; i < num_stations * num_sources; ++i)
+            {
+                data[i].a.x = values_re[i + 0];
+                data[i].c.x = values_re[i + 1];
+                data[i].b.x = values_re[i + 2];
+                data[i].d.x = values_re[i + 3];
+                if (values_im == NULL)
+                {
+                    data[i].a.y = 0.0;
+                    data[i].c.y = 0.0;
+                    data[i].b.y = 0.0;
+                    data[i].d.y = 0.0;
+                }
+                else
+                {
+                    data[i].a.y = values_im[i + 0];
+                    data[i].c.y = values_im[i + 1];
+                    data[i].b.y = values_im[i + 2];
+                    data[i].d.y = values_im[i + 3];
+                }
+            }
         }
     }
+
 
     if (J->location() == GPU)
     {
