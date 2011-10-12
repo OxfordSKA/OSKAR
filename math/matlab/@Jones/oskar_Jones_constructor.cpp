@@ -34,7 +34,7 @@
 // Other headers.
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
-#include "math/matlab/@Jones/mex_utility.h"
+#include "math/matlab/@Jones/oskar_Jones_utility.h"
 #include <string.h>
 
 // Interface function.

@@ -6,7 +6,7 @@ function [ values ] = values(obj)
 % Jones data and the number of stations and sources for which Jones
 % matrices are stored.
 
-values = oskar_Jones_get_values(obj.pointer);
+values = oskar.Jones_get_values(obj.pointer);
 
 end
 

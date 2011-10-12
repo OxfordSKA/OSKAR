@@ -1,3 +1,3 @@
 function obj_copy = copy(obj)
-    obj_copy = oskar.jones_copy(obj.pointer);
+    obj_copy = oskar.Jones_copy(obj.pointer);
 end
