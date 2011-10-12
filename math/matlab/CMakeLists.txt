@@ -8,21 +8,7 @@ if (MATLAB_FOUND)
     oskar_mex(oskar_random_broken_power_law oskar_mex_random_broken_power_law.cpp)
     oskar_mex(oskar_spherical_positions oskar_mex_spherical_positions.cpp)
 
-    oskar_mex(oskar_Jones_constructor oskar_mex_Jones_constructor.cpp)
-    oskar_mex(oskar_Jones_destructor oskar_mex_Jones_destructor.cpp)
-    oskar_mex(oskar_Jones_copy oskar_mex_Jones_copy.cpp)
-    oskar_mex(oskar_Jones_get_values oskar_mex_Jones_get_values.cpp)
-    oskar_mex(oskar_Jones_set_real_scalar oskar_mex_Jones_set_real_scalar.cpp)
-    oskar_mex(oskar_Jones_get_parameter oskar_mex_Jones_get_parameter.cpp)
-    oskar_mex(oskar_Jones_set_values oskar_mex_Jones_set_values.cpp)
-    oskar_mex(oskar_Jones_join oskar_mex_Jones_join.cpp)
-    oskar_mex(oskar_Jones_join_from_right oskar_mex_Jones_join_from_right.cpp)
-    oskar_mex(oskar_Jones_join_to_left oskar_mex_Jones_join_to_left.cpp)
-
-    # Install oskar package
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/+oskar"
-        DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/.."
-        PATTERN ".svn" EXCLUDE)
+    add_subdirectory("@Jones")
 
 endif ()
 

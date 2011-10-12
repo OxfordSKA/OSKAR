@@ -15,6 +15,15 @@ macro(oskar_mex name source)
     # TODO: Add critical fail on matlab not found.
     # TODO: Add critical fail on not having set other required variables.
 
+    if (NOT DEFINED OSKAR_MEX_INSTALL_DIR)
+        #message("-- NOTE: OSKAR_MEX_INSTALL_DIR not defined in "
+        #        "source directory ${CMAKE_CURRENT_SOURCE_DIR}. "
+        #        "Using default: ${OSKAR_MATLAB_INSTALL_DIR}")
+        set(OSKAR_MEX_INSTALL_DIR ${OSKAR_MATLAB_INSTALL_DIR})
+    else()
+        #message("-- NOTE: OSKAR_MEX_INSTALL_DIR defined as ${OSKAR_MEX_INSTALL_DIR}")
+    endif ()
+
     # Find out if this is a CUDA or C/C++ source file based on the extension
     # and use the appropriate add_library target.
     get_filename_component(ext ${source} EXT)
@@ -33,11 +42,7 @@ macro(oskar_mex name source)
         INSTALL_RPATH_USE_LINK_PATH TRUE
         COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
         LINK_FLAGS ${MATLAB_CXX_FLAGS})
-    install(TARGETS ${name} DESTINATION ${OSKAR_MATLAB_INSTALL_DIR})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/.."
-        FILES_MATCHING PATTERN "*.m"
-        PATTERN ".svn" EXCLUDE)
-
+    # Install target for mex function.
+    install(TARGETS ${name} DESTINATION ${OSKAR_MEX_INSTALL_DIR})
 endmacro(oskar_mex)
 

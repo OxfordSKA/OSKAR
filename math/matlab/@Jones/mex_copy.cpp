@@ -26,55 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// MATLAB mex headers.
-#include <mex.h>
-#include <matrix.h>
-#include <mat.h>
 
-// Other headers.
+#include <mex.h>
+
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
-#include "math/matlab/oskar_mex_Jones_utility.h"
-#include <string.h>
+#include "math/matlab/@Jones/mex_utility.h"
 
-// Interface function.
+// Interface function
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     // Check arguments.
-    if (num_out != 1 || num_in != 5)
+    if (num_out != 1 || num_in != 1)
     {
-        mexErrMsgTxt("Usage: J = oskar_Jones_constructor("
-                "num_stations, num_sources, format, type, location)");
+        mexErrMsgTxt("Usage: oskar_Jones = oskar_Jones_copy(jones_pointer)");
     }
 
-    // Extract arguments from MATLAB mxArray objects.
-    const int   num_stations    = (int)mxGetScalar(in[0]);
-    const int   num_sources     = (int)mxGetScalar(in[1]);
-    const char* format_string   = mxArrayToString(in[2]);
-    const char* type_string     = mxArrayToString(in[3]);
-    const char* location_string = mxArrayToString(in[4]);
+    // Extract the oskar_Jones pointer from the mxArray object.
+    oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
 
-    // Construct type and location values.
-    int type     = get_type_id(type_string, format_string);
-    int location = get_location_id(location_string);
+    // Construct a new oskar_Jones object to copy into as a mxArray.
+    // Set up the memory to match the original object.
+    int num_sources  = J->n_sources();
+    int num_stations = J->n_stations();
+    const char* format_string = (J->type() == OSKAR_JONES_DOUBLE_MATRIX ||
+            J->type() == OSKAR_JONES_FLOAT_MATRIX) ? "matrix" : "scalar";
+    const char* type_string = (J->type() == OSKAR_JONES_DOUBLE_MATRIX ||
+            J->type() == OSKAR_JONES_DOUBLE_SCALAR) ? "double" : "single";
+    const char* location_string = (J->location() == 0) ? "cpu" : "gpu";
+    mxArray* J_class = create_matlab_Jones_class(num_sources, num_stations,
+            format_string, type_string, location_string);
 
-//    MATFile *pmat;
-//    pmat = matOpen("mattest.mat", "w");
-//    mxArray* testArray;
-//    testArray = mxCreateDoubleMatrix(3,3, mxREAL);
-//    double* testvalues = mxGetPr(testArray);
-//    testvalues[0] = 1.0;
-//    matPutVariable(pmat, "LocalTestArray", testArray);
-//    matPutVariableAsGlobal(pmat, "GlobalTestArray", testArray);
-//    mxDestroyArray(testArray);
-//    matClose(pmat);
+    oskar_Jones* J_copy = get_jones_pointer_from_matlab_jones_class(J_class);
 
-    // Create a new oskar_Jones structure.
-    // FIXME: Warnings/errors for double type on architectures that don't support
-    // double.
-    // FIXME: Errors warnings about running out of GPU memory.
-    oskar_Jones* J = new oskar_Jones(type, num_sources, num_stations, location);
+    // Copy values into it from the original Jones.
+    J->copy_to(J_copy);
 
-    // Return a pointer to the oskar_Jones structure as a mxArray object.
-    out[0] = convert_ptr_to_mxArray(J);
+    out[0] = J_class;
 }

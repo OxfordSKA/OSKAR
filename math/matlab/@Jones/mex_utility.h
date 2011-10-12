@@ -163,7 +163,7 @@ mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations
     // Call the MATLAB constructor to instantiate an oskar_Jones object
     // returning the result and an mxArray pointer.
     mxArray* J;
-    mexCallMATLAB(1, &J, 5, args, "oskar_Jones");
+    mexCallMATLAB(1, &J, 5, args, "oskar.Jones");
 
     return J;
 }
@@ -180,7 +180,7 @@ mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations
 oskar_Jones* get_jones_pointer_from_matlab_jones_class(mxArray* J_class)
 {
     mxArray* J_pointer = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-    mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar_Jones.get_pointer");
+    mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar.Jones.get_pointer");
     return covert_mxArray_to_pointer<oskar_Jones>(J_pointer);
 }
 

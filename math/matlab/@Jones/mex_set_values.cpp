@@ -31,7 +31,7 @@
 #include <string.h>
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
-#include "math/matlab/oskar_mex_Jones_utility.h"
+#include "math/matlab/@Jones/mex_utility.h"
 #include "utility/oskar_vector_types.h"
 
 // Interface function

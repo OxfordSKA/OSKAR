@@ -31,49 +31,62 @@
 
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
-#include "math/matlab/oskar_mex_Jones_utility.h"
+#include "math/oskar_jones_join.h"
+#include "math/matlab/@Jones/mex_utility.h"
+#include "utility/oskar_vector_types.h"
 
 // Interface function
-void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
 {
     // Check arguments.
-    if (num_out != 1 || num_in != 1)
+    if (num_out != 1 || num_in != 2)
     {
-        mexErrMsgTxt("Usage: oskar_Jones = oskar_Jones_copy(jones_pointer)");
+        // J3 = join(J1, J2)
+        mexErrMsgTxt("Usage: J.pointer = oskar_Jones_join(J1.pointer, J2.pointer)");
     }
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
+    // Extract the oskar_Jones pointers from the mxArray object.
+    oskar_Jones* J1 = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
+    oskar_Jones* J2 = covert_mxArray_to_pointer<oskar_Jones>(in[1]);
+
+    if (J1->n_sources() != J2->n_sources())
+    {
+        mexErrMsgTxt("Unable to join two matrices with different source dimensions!");
+    }
+
+    if (J1->n_stations() != J2->n_stations())
+    {
+        mexErrMsgTxt("Unable to join two matrices with different station dimensions!");
+    }
+
+    if (J1->type() != J2->type())
+    {
+        mexErrMsgTxt("Unable to join two matrices of different type");
+    }
 
     // Construct a new oskar_Jones object to copy into as a mxArray.
     // Set up the memory to match the original object.
-    mxArray* J_class;
-    int num_sources  = J->n_sources();
-    int num_stations = J->n_stations();
-    const char* format_string = (J->type() == OSKAR_JONES_DOUBLE_MATRIX ||
-            J->type() == OSKAR_JONES_FLOAT_MATRIX) ? "matrix" : "scalar";
-    const char* type_string = (J->type() == OSKAR_JONES_DOUBLE_MATRIX ||
-            J->type() == OSKAR_JONES_DOUBLE_SCALAR) ? "double" : "single";
-    const char* location_string = (J->location() == 0) ? "cpu" : "gpu";
-    // num_sources, num_stations, [format], [type], [location]
-    mxArray* param[5];
-    param[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[0])) = num_sources;
-    param[1] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[1])) = num_stations;
-    param[2] = mxCreateString(format_string);
-    param[3] = mxCreateString(type_string);
-    param[4] = mxCreateString(location_string);
-    mexCallMATLAB(1, &J_class, 5, param, "oskar_Jones");
+    int num_sources  = J1->n_sources();
+    int num_stations = J1->n_stations();
+    const char* format_string = (J1->type() == OSKAR_JONES_DOUBLE_MATRIX ||
+            J1->type() == OSKAR_JONES_FLOAT_MATRIX) ? "matrix" : "scalar";
+    const char* type_string = (J1->type() == OSKAR_JONES_DOUBLE_MATRIX ||
+            J1->type() == OSKAR_JONES_DOUBLE_SCALAR) ? "double" : "single";
+    const char* location_string = (J1->location() == 0) ? "cpu" : "gpu";
+    mxArray* J_class = create_matlab_Jones_class(num_sources, num_stations,
+            format_string, type_string, location_string);
 
     // Get the pointer out of the mex object.
-    mxArray* J_pointer = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
-    mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar_Jones.get_pointer");
-//    mexPrintf("pointer = %i\n", (uint64_t)mxGetScalar(J_pointer));
-    oskar_Jones* J_copy = covert_mxArray_to_pointer<oskar_Jones>(J_pointer);
+    oskar_Jones* J = get_jones_pointer_from_matlab_jones_class(J_class);
 
-    // Copy values into it from the original Jones.
-    J->copy_to(J_copy);
+    // J = J1 * J2
+    int err = oskar_jones_join(J, J1, J2);
+
+    if (err != 0)
+    {
+        mexPrintf("oskar_jones_join returned error code %i\n", err);
+        mexErrMsgTxt("Failed to complete join");
+    }
 
     out[0] = J_class;
 }

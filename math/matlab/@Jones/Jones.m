@@ -1,6 +1,11 @@
 classdef Jones <  handle
-    %JONES Summary of this class goes here
-    %   Detailed explanation goes here
+    %JONES Class holding a matrix of Jones matrices corresponding to a
+    %number of sources and stations.
+    %
+    % This is a matlab handle class used as an interface to the oskar_Jones
+    % structure defined in oskar/src/math/oskar_Jones.h
+    %
+    
        
     % Private attributes
     properties(SetAccess = private, GetAccess = public, Hidden = true)
@@ -18,18 +23,18 @@ classdef Jones <  handle
         %      e.g. ones(num_sources, num_stations)
         %
         % Usage:
-        %   J = oskar_Jones(values, format, [location]);
-        %   J = oskar_Jones(num_sources, num_stations, [format], [type], [location])
+        %   J = Jones(values, format, [location]);
+        %   J = Jones(num_sources, num_stations, [format], [type], [location])
         %
         % Examples:
-        %   J = oskar_Jones(zeros(2,2), 'scalar');
-        %   J = oskar_Jones(single(zeros(2,2)), 'scalar');
-        %   J = oskar_Jones(zeros(2,2,200,25), 'matrix', 'gpu');
-        %   J = oskar_Jones(complex(ones(2,2,200,25), 0.5), 'matrix', 'cpu');
+        %   J = Jones(zeros(2,2), 'scalar');
+        %   J = Jones(single(zeros(2,2)), 'scalar');
+        %   J = Jones(zeros(2,2,200,25), 'matrix', 'gpu');
+        %   J = Jones(complex(ones(2,2,200,25), 0.5), 'matrix', 'cpu');
         %
-        %   J = oskar_Jones(10, 2);
-        %   J = oskar_Jones(10, 2, 'scalar', 'double', 'cpu');
-        %   J = oskar_Jones(10, 2, 'matrix', 'single', 'gpu');
+        %   J = Jones(10, 2);
+        %   J = Jones(10, 2, 'scalar', 'double', 'cpu');
+        %   J = Jones(10, 2, 'matrix', 'single', 'gpu');
         %
         function obj = Jones(varargin)            
             
