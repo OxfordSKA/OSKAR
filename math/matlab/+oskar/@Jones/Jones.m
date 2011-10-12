@@ -1,5 +1,5 @@
-classdef oskar_Jones <  handle
-    %OSKAR_JONES Summary of this class goes here
+classdef Jones <  handle
+    %JONES Summary of this class goes here
     %   Detailed explanation goes here
        
     % Private attributes
@@ -31,7 +31,7 @@ classdef oskar_Jones <  handle
         %   J = oskar_Jones(10, 2, 'scalar', 'double', 'cpu');
         %   J = oskar_Jones(10, 2, 'matrix', 'single', 'gpu');
         %
-        function obj = oskar_Jones(varargin)            
+        function obj = Jones(varargin)            
             
             default_format   = 'matrix';
             default_type     = 'double';
@@ -104,8 +104,8 @@ classdef oskar_Jones <  handle
                 
             else
                 error('Usage:\n %s\n %s\n', ...
-                       'J = oskar_Jones(num_sources, num_stations, [format], [type], [location])', ...
-                       'J = oskar_Jones(values, format, [location])');
+                       'J = Jones(num_sources, num_stations, [format], [type], [location])', ...
+                       'J = Jones(values, format, [location])');
             end           
             
         end % constructor.

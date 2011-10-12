@@ -19,8 +19,8 @@ if (MATLAB_FOUND)
     oskar_mex(oskar_Jones_join_from_right oskar_mex_Jones_join_from_right.cpp)
     oskar_mex(oskar_Jones_join_to_left oskar_mex_Jones_join_to_left.cpp)
 
-    # Install oskar_Jones class definition to oskar MATLAB directory.
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/@oskar_Jones"
+    # Install oskar package
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/+oskar"
         DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/.."
         PATTERN ".svn" EXCLUDE)
 

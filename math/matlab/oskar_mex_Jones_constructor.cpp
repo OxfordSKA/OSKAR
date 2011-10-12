@@ -29,6 +29,7 @@
 // MATLAB mex headers.
 #include <mex.h>
 #include <matrix.h>
+#include <mat.h>
 
 // Other headers.
 #include "math/oskar_Jones.h"
@@ -57,8 +58,19 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int type     = get_type_id(type_string, format_string);
     int location = get_location_id(location_string);
 
+//    MATFile *pmat;
+//    pmat = matOpen("mattest.mat", "w");
+//    mxArray* testArray;
+//    testArray = mxCreateDoubleMatrix(3,3, mxREAL);
+//    double* testvalues = mxGetPr(testArray);
+//    testvalues[0] = 1.0;
+//    matPutVariable(pmat, "LocalTestArray", testArray);
+//    matPutVariableAsGlobal(pmat, "GlobalTestArray", testArray);
+//    mxDestroyArray(testArray);
+//    matClose(pmat);
+
     // Create a new oskar_Jones structure.
-    // FIXME: Warnings/errors for double type on archiecture that dont support
+    // FIXME: Warnings/errors for double type on architectures that don't support
     // double.
     // FIXME: Errors warnings about running out of GPU memory.
     oskar_Jones* J = new oskar_Jones(type, num_sources, num_stations, location);
