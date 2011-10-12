@@ -20,19 +20,28 @@ set(BUILD_SHARED_LIBS ON)
 # === GNU C++ compiler.
 if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-#    add_definitions(-Wall -Wextra -pedantic -std=c++0x)
-    list(APPEND CMAKE_C_FLAGS "-std=c99 -fPIC")
     list(APPEND CMAKE_CXX_FLAGS "-fPIC")
-    add_definitions(-Wall -Wextra)
+    set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    list(APPEND CMAKE_C_FLAGS   "-std=c99 -fPIC")
+
+    # Warnings.
+    add_definitions(-Wall)
+    add_definitions(-Wextra)
+    add_definitions(-pedantic)
     add_definitions(-Wcast-align)
     add_definitions(-Wcast-qual)
     add_definitions(-Wdisabled-optimization)
     add_definitions(-Wstrict-aliasing)
     add_definitions(-Wunknown-pragmas)
+    add_definitions(-Wformat)
     #add_definitions(-Wconversion)
-    #add_definitions(-Wno-deprecated -Wno-unknown-pragmas)
     #add_definitions(-Wfloat-equal)
+
+    # Disable specified warnings.
+    add_definitions(-Wno-long-long)
+    add_definitions(-Wno-variadic-macros)
+    #add_definitions(-Wno-deprecated)
+    #add_definitions(-Wno-unknown-pragmas)
 
 # === Intel compiler.
 elseif (NOT WIN32)

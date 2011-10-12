@@ -44,7 +44,7 @@ void LoadCoordinatesTest::test_load_2d()
     int num_coords = 100000;
     for (int i = 0; i < num_coords; ++i)
     {
-        fprintf(file, "%lf,%lf\n", i/10.0, i/20.0);
+        fprintf(file, "%f,%f\n", i/10.0, i/20.0);
     }
     fclose(file);
 
@@ -75,7 +75,7 @@ void LoadCoordinatesTest::test_load_3d()
     int num_coords = 100000;
     for (int i = 0; i < num_coords; ++i)
     {
-        fprintf(file, "%lf,%lf,%lf\n", i/10.0, i/20.0, i/30.0);
+        fprintf(file, "%f,%f,%f\n", i/10.0, i/20.0, i/30.0);
     }
     fclose(file);
 

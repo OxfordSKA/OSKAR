@@ -161,7 +161,7 @@ enum {
     OSKAR_JONES_FLOAT_SCALAR  = 0x01CF, // scalar, complex float
     OSKAR_JONES_DOUBLE_SCALAR = 0x01CD, // scalar, complex double
     OSKAR_JONES_FLOAT_MATRIX  = 0x04CF, // matrix, complex float
-    OSKAR_JONES_DOUBLE_MATRIX = 0x04CD, // matrix, complex double
+    OSKAR_JONES_DOUBLE_MATRIX = 0x04CD  // matrix, complex double
 };
 
 typedef struct oskar_Jones oskar_Jones;

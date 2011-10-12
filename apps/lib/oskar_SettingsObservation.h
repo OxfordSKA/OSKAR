@@ -32,14 +32,14 @@
 #include <QtCore/QString>
 #include <QtCore/QSettings>
 
+#define DEG2RAD 0.0174532925199432957692
+
 class oskar_SettingsObservation
 {
     public:
         void load(const QSettings& settings);
 
     public:
-        static const double deg2rad = 0.0174532925199432957692;
-
         double frequency(const unsigned channel) const
         { return _start_frequency + channel * _frequency_inc; }
 
@@ -57,11 +57,11 @@ class oskar_SettingsObservation
 
         double ra0_deg() const { return _ra0_deg; }
         void set_ra0_deg(const double value) { _ra0_deg = value; }
-        double ra0_rad() const { return _ra0_deg * deg2rad; }
+        double ra0_rad() const { return _ra0_deg * DEG2RAD; }
 
         double dec0_deg() const { return _dec0_deg; }
         void set_dec0_deg(const double value) { _dec0_deg = value; }
-        double dec0_rad() const { return _dec0_deg * deg2rad; }
+        double dec0_rad() const { return _dec0_deg * DEG2RAD; }
 
         unsigned start_time_utc_year() const { return _start_time_utc_year; }
         void set_start_time_utc_year(const unsigned value) { _start_time_utc_year = value; }

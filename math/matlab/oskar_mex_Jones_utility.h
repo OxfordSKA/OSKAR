@@ -149,16 +149,22 @@ int get_type_id(const char* type, const char* format)
 mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations,
         const char* format, const char* type, const char* location)
 {
+    // Construct the input argument list
+    // (num_sources, num_stations, format, type, location)
+    mxArray* args[5];
+    args[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetPr(args[0])) = num_sources;
+    args[1] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
+    *((int*)mxGetPr(args[1])) = num_stations;
+    args[2] = mxCreateString(format);
+    args[3] = mxCreateString(type);
+    args[4] = mxCreateString(location);
+
+    // Call the MATLAB constructor to instantiate an oskar_Jones object
+    // returning the result and an mxArray pointer.
     mxArray* J;
-    mxArray* param[5];
-    param[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[0])) = num_sources;
-    param[1] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    *((int*)mxGetPr(param[1])) = num_stations;
-    param[2] = mxCreateString(format);
-    param[3] = mxCreateString(type);
-    param[4] = mxCreateString(location);
-    mexCallMATLAB(1, &J, 5, param, "oskar_Jones");
+    mexCallMATLAB(1, &J, 5, args, "oskar_Jones");
+
     return J;
 }
 

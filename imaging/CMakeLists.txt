@@ -7,7 +7,7 @@
 # ==== Create list of source files for the oskar-lib imaging module.
 set(imaging_SRC
     src/oskar_evaluate_gridding_kernels.c
-    src/oskar_fft_imager.c
+    #src/oskar_fft_imager.c
     src/oskar_fft_utility.c
     src/oskar_gridding.c
     src/oskar_grid_correct.c

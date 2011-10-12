@@ -34,7 +34,7 @@
 #include "math/oskar_jones_join.h"
 
 // Interface function
-void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
+void mexFunction(int num_out,  mxArray** /*out*/, int num_in, const mxArray** in)
 {
     // Check arguments.
     if (num_out != 0 || num_in != 2)

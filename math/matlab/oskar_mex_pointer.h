@@ -43,7 +43,14 @@
 
 #include <mex.h>
 
-// Converts a pointer of type T to an mxArray object.
+/**
+ * @brief Converts a pointer of a specified type to an mxArray containing the
+ * pointer.
+ *
+ * @param[in] ptr Pointer to the object to convert to an mxArray.
+ *
+ * @return mxArray pointer holding the type pointer.
+ */
 template <class T> inline mxArray* convert_ptr_to_mxArray(T* ptr)
 {
     mxArray* out = mxCreateNumericMatrix(1,1, mxUINT64_CLASS, mxREAL);
@@ -51,10 +58,21 @@ template <class T> inline mxArray* convert_ptr_to_mxArray(T* ptr)
     return out;
 }
 
+/**
+ * @brief Converts a pointer stored as an mxArray to a pointer of the
+ * specified type.
+ *
+ * @param[in] in mxArray pointer holding the value of the pointer to the object.
+ *
+ * @return Pointer to the specified type.
+ */
 template<class T> inline T* covert_mxArray_to_pointer(const mxArray* in)
 {
-    if (mxGetNumberOfElements(in) != 1 || mxGetClassID(in) != mxUINT64_CLASS || mxIsComplex(in))
+    if (mxGetNumberOfElements(in) != 1 || mxGetClassID(in) != mxUINT64_CLASS
+            || mxIsComplex(in))
+    {
         mexErrMsgTxt("ERROR: Input must be a real uint64 scalar.");
+    }
 
     T* ptr = reinterpret_cast<T*>(*((uint64_t *)mxGetData(in)));
 

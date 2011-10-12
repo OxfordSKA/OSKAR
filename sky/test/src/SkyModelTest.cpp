@@ -45,7 +45,7 @@ void SkyModelTest::test_load()
     for (int i = 0; i < num_sources; ++i)
     {
         if (i % 10 == 0) fprintf(file, "# some comment!\n");
-        fprintf(file, "%lf %lf %lf %lf %lf %lf %lf %lf\n",
+        fprintf(file, "%f %f %f %f %f %f %f %f\n",
                 i/10.0, i/20.0, 0.0, 1.0, 2.0, 3.0, 200.0e6, -0.7);
     }
     fclose(file);

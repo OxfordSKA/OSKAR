@@ -35,6 +35,8 @@
 #include <QtCore/QString>
 #include <QtCore/QSettings>
 
+#define DEG2RAD 0.0174532925199432957692
+
 class oskar_Settings
 {
     public:
@@ -49,8 +51,6 @@ class oskar_Settings
         void print() const;
 
     public:
-        static const double deg2rad = 0.0174532925199432957692;
-
         QString sky_file() const { return _sky_file; }
         void set_sky_file(const QString& value) { _sky_file = value; }
 
@@ -61,8 +61,8 @@ class oskar_Settings
         void set_longitude_deg(const double value) { _longitude_deg = value; }
         double latitude_deg() const { return _latitude_deg; }
         void set_latitude_deg(const double value) { _latitude_deg = value; }
-        double longitude_rad() const { return _longitude_deg * deg2rad; }
-        double latitude_rad() const { return _latitude_deg * deg2rad; }
+        double longitude_rad() const { return _longitude_deg * DEG2RAD; }
+        double latitude_rad() const { return _latitude_deg * DEG2RAD; }
 
         QString station_dir() const { return _station_dir; }
         void set_station_dir(const QString& value) { _station_dir = value; }

@@ -92,7 +92,7 @@ int main(int argc, char** argv)
             return EXIT_FAILURE;
         }
 
-        for (int i =0; i < num_pixels; ++i)
+        for (unsigned i =0; i < num_pixels; ++i)
         {
             image[i] = (float)image_temp[i];
         }
