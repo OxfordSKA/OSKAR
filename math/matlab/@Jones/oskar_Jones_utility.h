@@ -31,14 +31,13 @@
 
 #include <mex.h>
 
-// Other headers.
 #include "math/oskar_Jones.h"
 #include "string.h"
 
 enum { CPU = 0, GPU = 1 };
 enum { UNDEF = -1, DOUBLE, SINGLE, SCALAR, MATRIX };
 
-int get_type(const char* type)
+inline int get_type(const char* type)
 {
     if ( strcmp(type, "single") == 0 )
     {
@@ -57,7 +56,7 @@ int get_type(const char* type)
 }
 
 
-int get_format(const char* format)
+inline int get_format(const char* format)
 {
     if ( strcmp(format, "scalar") == 0 )
     {
@@ -83,7 +82,7 @@ int get_format(const char* format)
  * @return The memory location id as defined by the oskar_Jones structure.
  *         (0 = CPU, 1 = GPU)
  */
-int get_location_id(const char* location)
+inline int get_location_id(const char* location)
 {
     enum { HOST = 0, DEVICE = 1, UNDEF = -1 };
     if (strcmp(location, "gpu") == 0)
@@ -112,7 +111,7 @@ int get_location_id(const char* location)
  *
  * @return The oskar_Jones structure type id.
  */
-int get_type_id(const char* type, const char* format)
+inline int get_type_id(const char* type, const char* format)
 {
     int itype   = get_type(type);
     int iformat = get_format(format);
@@ -145,7 +144,7 @@ int get_type_id(const char* type, const char* format)
  *
  * @return mxArray containing an oskar_Jones object.
  */
-mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations,
+inline mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations,
         const char* format, const char* type, const char* location)
 {
     // Construct the input argument list
@@ -176,7 +175,7 @@ mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations
  *
  * @return oskar_Jones structure pointer.
  */
-oskar_Jones* get_jones_pointer_from_matlab_jones_class(mxArray* J_class)
+inline oskar_Jones* get_jones_pointer_from_matlab_jones_class(mxArray* J_class)
 {
     mxArray* J_pointer = mxCreateNumericMatrix(1, 1, mxUINT64_CLASS, mxREAL);
     mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar.Jones.get_pointer");
