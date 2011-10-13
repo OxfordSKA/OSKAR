@@ -119,16 +119,16 @@ inline int get_type_id(const char* type, const char* format)
     if (itype == SINGLE)
     {
         if (iformat == SCALAR)
-            return OSKAR_JONES_FLOAT_SCALAR;
+            return OSKAR_SINGLE_COMPLEX;
         else
-            return OSKAR_JONES_FLOAT_MATRIX;
+            return OSKAR_SINGLE_COMPLEX_MATRIX;
     }
     else
     {
         if (iformat == SCALAR)
-            return OSKAR_JONES_DOUBLE_SCALAR;
+            return OSKAR_DOUBLE_COMPLEX;
         else
-            return OSKAR_JONES_DOUBLE_MATRIX;
+            return OSKAR_DOUBLE_COMPLEX_MATRIX;
     }
 }
 

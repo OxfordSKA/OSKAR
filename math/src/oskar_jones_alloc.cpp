@@ -56,13 +56,13 @@ int oskar_jones_alloc(oskar_Jones* jones)
     if (location == 0)
     {
         // Allocate host memory.
-        jones->data = malloc(bytes);
-        if (jones->data == NULL) err = -2;
+        jones->ptr.data = malloc(bytes);
+        if (jones->ptr.data == NULL) err = -2;
     }
     else if (location == 1)
     {
         // Allocate GPU memory.
-        cudaMalloc(&jones->data, bytes);
+        cudaMalloc(&jones->ptr.data, bytes);
         err = cudaPeekAtLastError();
     }
     return err;

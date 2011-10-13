@@ -44,14 +44,14 @@ int oskar_jones_free(oskar_Jones* jones)
     if (location == 0)
     {
         // Free host memory.
-        free(jones->data);
+        free(jones->ptr.data);
     }
     else if (location == 1)
     {
         // Free GPU memory.
-        cudaFree(jones->data);
+        cudaFree(jones->ptr.data);
         err = cudaPeekAtLastError();
     }
-    jones->data = NULL;
+    jones->ptr.data = NULL;
     return err;
 }

@@ -56,14 +56,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else if (strcmp(parameter_string, "format") == 0)
     {
-        const char* value = (J->type() == OSKAR_JONES_FLOAT_SCALAR ||
-                J->type() == OSKAR_JONES_DOUBLE_SCALAR) ? "scalar" : "matrix";
+        const char* value = (J->type() == OSKAR_SINGLE_COMPLEX ||
+                J->type() == OSKAR_DOUBLE_COMPLEX) ? "scalar" : "matrix";
         out[0] = mxCreateString(value);
     }
     else if (strcmp(parameter_string, "type") == 0)
     {
-        const char* value = (J->type() == OSKAR_JONES_DOUBLE_SCALAR ||
-                J->type() == OSKAR_JONES_DOUBLE_MATRIX) ? "double" : "single";
+        const char* value = (J->type() == OSKAR_DOUBLE_COMPLEX ||
+                J->type() == OSKAR_DOUBLE_COMPLEX_MATRIX) ? "double" : "single";
         out[0] = mxCreateString(value);
     }
     else if (strcmp(parameter_string, "location") == 0)

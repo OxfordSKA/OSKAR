@@ -33,6 +33,8 @@
  * @file oskar_Jones.h
  */
 
+#include "utility/oskar_Ptr.h"
+
 /**
  * @brief Structure to hold Jones matrix meta-data.
  *
@@ -52,16 +54,14 @@ struct oskar_Jones
 #ifdef __cplusplus
 private:
 #endif
-    int private_type; // Magic number.
     int private_n_sources;  ///< Fastest varying dimension.
     int private_n_stations; ///< Slowest varying dimension.
-    int private_location; // 0 for host, 1 for device.
 
     // If C++, then make the remaining members public.
 #ifdef __cplusplus
 public:
 #endif
-    void* data; ///< Pointer to the matrix data.
+    oskar_Ptr ptr; ///< Pointer to the matrix data.
 
     // If C++, then provide constructors, a destructor and methods.
 #ifdef __cplusplus
@@ -149,19 +149,11 @@ public:
 
     // If C++, then provide read-only accessor functions for the meta-data.
 #ifdef __cplusplus
-    int type() const {return private_type;}
+    int type() const {return ptr.type();}
     int n_sources() const {return private_n_sources;}
     int n_stations() const {return private_n_stations;}
-    int location() const {return private_location;}
+    int location() const {return ptr.location();}
 #endif
-};
-
-// Define an enumerator for the type.
-enum {
-    OSKAR_JONES_FLOAT_SCALAR  = 0x01CF, // scalar, complex float
-    OSKAR_JONES_DOUBLE_SCALAR = 0x01CD, // scalar, complex double
-    OSKAR_JONES_FLOAT_MATRIX  = 0x04CF, // matrix, complex float
-    OSKAR_JONES_DOUBLE_MATRIX = 0x04CD  // matrix, complex double
 };
 
 typedef struct oskar_Jones oskar_Jones;

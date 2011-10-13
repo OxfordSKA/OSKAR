@@ -84,20 +84,6 @@ typedef struct float3 float3;
 
 /**
  * @brief
- * Two-element complex structure (single precision).
- *
- * @details
- * Structure used to hold data for a length-2 single precision complex vector.
- */
-struct __align__(16) float2c
-{
-    float2 a;
-    float2 b;
-};
-typedef struct float2c float2c;
-
-/**
- * @brief
  * Four-element complex structure (single precision).
  *
  * @details
@@ -150,20 +136,6 @@ struct double3
 };
 typedef struct double3 double3;
 #endif
-
-/**
- * @brief
- * Two-element complex structure (double precision).
- *
- * @details
- * Structure used to hold data for a length-2 double precision complex vector.
- */
-struct __align__(16) double2c
-{
-    double2 a;
-    double2 b;
-};
-typedef struct double2c double2c;
 
 /**
  * @brief

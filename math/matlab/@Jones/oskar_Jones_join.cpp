@@ -68,10 +68,10 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     // Set up the memory to match the original object.
     int num_sources  = J1->n_sources();
     int num_stations = J1->n_stations();
-    const char* format_string = (J1->type() == OSKAR_JONES_DOUBLE_MATRIX ||
-            J1->type() == OSKAR_JONES_FLOAT_MATRIX) ? "matrix" : "scalar";
-    const char* type_string = (J1->type() == OSKAR_JONES_DOUBLE_MATRIX ||
-            J1->type() == OSKAR_JONES_DOUBLE_SCALAR) ? "double" : "single";
+    const char* format_string = (J1->type() == OSKAR_DOUBLE_COMPLEX_MATRIX ||
+            J1->type() == OSKAR_SINGLE_COMPLEX_MATRIX) ? "matrix" : "scalar";
+    const char* type_string = (J1->type() == OSKAR_DOUBLE_COMPLEX_MATRIX ||
+            J1->type() == OSKAR_DOUBLE_COMPLEX) ? "double" : "single";
     const char* location_string = (J1->location() == 0) ? "cpu" : "gpu";
     mxArray* J_class = create_matlab_Jones_class(num_sources, num_stations,
             format_string, type_string, location_string);

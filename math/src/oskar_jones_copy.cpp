@@ -37,8 +37,8 @@ int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a)
     // Check that all pointers are not NULL.
     if (a == NULL) return -1;
     if (b == NULL) return -2;
-    if (a->data == NULL) return -1;
-    if (b->data == NULL) return -2;
+    if (a->ptr.data == NULL) return -1;
+    if (b->ptr.data == NULL) return -2;
 
     // Get the meta-data.
     int n_sources_a = a->n_sources();
@@ -66,28 +66,28 @@ int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a)
     // Host to host.
     if (location_a == 0 && location_b == 0)
     {
-        memcpy(b->data, a->data, bytes);
+        memcpy(b->ptr.data, a->ptr.data, bytes);
         return 0;
     }
 
     // Host to device.
     else if (location_a == 0 && location_b == 1)
     {
-        cudaMemcpy(b->data, a->data, bytes, cudaMemcpyHostToDevice);
+        cudaMemcpy(b->ptr.data, a->ptr.data, bytes, cudaMemcpyHostToDevice);
         return cudaPeekAtLastError();
     }
 
     // Device to host.
     else if (location_a == 1 && location_b == 0)
     {
-        cudaMemcpy(b->data, a->data, bytes, cudaMemcpyDeviceToHost);
+        cudaMemcpy(b->ptr.data, a->ptr.data, bytes, cudaMemcpyDeviceToHost);
         return cudaPeekAtLastError();
     }
 
     // Device to device.
     else if (location_a == 1 && location_b == 1)
     {
-        cudaMemcpy(b->data, a->data, bytes, cudaMemcpyDeviceToDevice);
+        cudaMemcpy(b->ptr.data, a->ptr.data, bytes, cudaMemcpyDeviceToDevice);
         return cudaPeekAtLastError();
     }
 

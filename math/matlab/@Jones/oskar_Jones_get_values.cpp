@@ -54,14 +54,14 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     // Copy back to CPU if needed.
     oskar_Jones* J_local = (J->location() == GPU) ? new oskar_Jones(J, CPU) : J;
 
-    if (type == OSKAR_JONES_FLOAT_SCALAR)
+    if (type == OSKAR_SINGLE_COMPLEX)
     {
         mwSize num_dims = 2;
         mwSize dims[2] = {num_sources, num_stations};
         values = mxCreateNumericArray(num_dims, dims, mxSINGLE_CLASS, mxCOMPLEX);
         float* values_re = (float*)mxGetPr(values);
         float* values_im = (float*)mxGetPi(values);
-        float2* data = (float2*)J_local->data;
+        float2* data = (float2*)J_local->ptr.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[i] = data[i].x;
@@ -69,14 +69,14 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         }
     }
 
-    else if (type == OSKAR_JONES_DOUBLE_SCALAR)
+    else if (type == OSKAR_DOUBLE_COMPLEX)
     {
         mwSize num_dims = 2;
         mwSize dims[2] = {num_sources, num_stations};
         values = mxCreateNumericArray(num_dims, dims, mxDOUBLE_CLASS, mxCOMPLEX);
         double* values_re = mxGetPr(values);
         double* values_im = mxGetPi(values);
-        double2* data = (double2*)J_local->data;
+        double2* data = (double2*)J_local->ptr.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[i] = data[i].x;
@@ -84,14 +84,14 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         }
     }
 
-    else if (type == OSKAR_JONES_FLOAT_MATRIX)
+    else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
         mwSize num_dims = 4;
         mwSize dims[4] = {2, 2, num_sources, num_stations};
         values = mxCreateNumericArray(num_dims, dims, mxSINGLE_CLASS, mxCOMPLEX);
         float* values_re = (float*)mxGetPr(values);
         float* values_im = (float*)mxGetPi(values);
-        float4c* data = (float4c*)J_local->data;
+        float4c* data = (float4c*)J_local->ptr.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[4*i + 0] = data[i].a.x;
@@ -105,14 +105,14 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         }
     }
 
-    else if (type == OSKAR_JONES_DOUBLE_MATRIX)
+    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
         mwSize num_dims = 4;
         mwSize dims[4] = {2, 2, num_sources, num_stations};
         values = mxCreateNumericArray(num_dims, dims, mxDOUBLE_CLASS, mxCOMPLEX);
         double* values_re = mxGetPr(values);
         double* values_im = mxGetPi(values);
-        double4c* data = (double4c*)J_local->data;
+        double4c* data = (double4c*)J_local->ptr.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[4*i + 0] = data[i].a.x;

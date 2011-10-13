@@ -35,13 +35,13 @@ extern "C"
 #endif
 size_t oskar_jones_element_size(int type)
 {
-    if (type == OSKAR_JONES_FLOAT_SCALAR)
+    if (type == OSKAR_SINGLE_COMPLEX)
         return sizeof(float2);
-    else if (type == OSKAR_JONES_DOUBLE_SCALAR)
+    else if (type == OSKAR_DOUBLE_COMPLEX)
         return sizeof(double2);
-    else if (type == OSKAR_JONES_FLOAT_MATRIX)
+    else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
         return sizeof(float4c);
-    else if (type == OSKAR_JONES_DOUBLE_MATRIX)
+    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
         return sizeof(double4c);
     return 0;
 }

@@ -49,18 +49,18 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
     if (location == 0)
     {
         // Data is on the host.
-        if (type == OSKAR_JONES_FLOAT_SCALAR)
+        if (type == OSKAR_SINGLE_COMPLEX)
         {
-            float2* ptr = (float2*)jones->data;
+            float2* ptr = (float2*)jones->ptr.data;
             for (int i = 0; i < n_elements; ++i)
             {
                 ptr[i].x = (float)scalar;
                 ptr[i].y = 0.0f;
             }
         }
-        else if (type == OSKAR_JONES_FLOAT_MATRIX)
+        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
         {
-            float4c* ptr = (float4c*)jones->data;
+            float4c* ptr = (float4c*)jones->ptr.data;
             for (int i = 0; i < n_elements; ++i)
             {
                 ptr[i].a.x = (float)scalar;
@@ -73,18 +73,18 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
                 ptr[i].d.y = 0.0f;
             }
         }
-        else if (type == OSKAR_JONES_DOUBLE_SCALAR)
+        else if (type == OSKAR_DOUBLE_COMPLEX)
         {
-            double2* ptr = (double2*)jones->data;
+            double2* ptr = (double2*)jones->ptr.data;
             for (int i = 0; i < n_elements; ++i)
             {
                 ptr[i].x = scalar;
                 ptr[i].y = 0.0;
             }
         }
-        else if (type == OSKAR_JONES_DOUBLE_MATRIX)
+        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
-            double4c* ptr = (double4c*)jones->data;
+            double4c* ptr = (double4c*)jones->ptr.data;
             for (int i = 0; i < n_elements; ++i)
             {
                 ptr[i].a.x = scalar;
@@ -101,18 +101,18 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
     else if (location == 1)
     {
         // Data is on the device.
-        if (type == OSKAR_JONES_FLOAT_SCALAR)
+        if (type == OSKAR_SINGLE_COMPLEX)
             err = oskar_cuda_jones_set_real_scalar_1_f(n_elements,
-                    (float2*)jones->data, scalar);
-        else if (type == OSKAR_JONES_FLOAT_MATRIX)
+                    (float2*)jones->ptr.data, scalar);
+        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
             err = oskar_cuda_jones_set_real_scalar_4_f(n_elements,
-                    (float4c*)jones->data, scalar);
-        else if (type == OSKAR_JONES_DOUBLE_SCALAR)
+                    (float4c*)jones->ptr.data, scalar);
+        else if (type == OSKAR_DOUBLE_COMPLEX)
             err = oskar_cuda_jones_set_real_scalar_1_d(n_elements,
-                    (double2*)jones->data, scalar);
-        else if (type == OSKAR_JONES_DOUBLE_MATRIX)
+                    (double2*)jones->ptr.data, scalar);
+        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
             err = oskar_cuda_jones_set_real_scalar_4_d(n_elements,
-                    (double4c*)jones->data, scalar);
+                    (double4c*)jones->ptr.data, scalar);
     }
 
     return err;

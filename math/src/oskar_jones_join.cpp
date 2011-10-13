@@ -43,9 +43,9 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     // Check that all pointers are not NULL.
     if (j1 == NULL) return -1;
     if (j2 == NULL) return -2;
-    if (j1->data == NULL) return -1;
-    if (j2->data == NULL) return -2;
-    if (j3->data == NULL) return -3;
+    if (j1->ptr.data == NULL) return -1;
+    if (j2->ptr.data == NULL) return -2;
+    if (j3->ptr.data == NULL) return -3;
 
     // Get the dimensions of the input data.
     int n_sources1 = j1->n_sources();
@@ -81,9 +81,9 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     const oskar_Jones* hd1 = (location1 == 0) ? new oskar_Jones(j1, 1) : j1;
     const oskar_Jones* hd2 = (location2 == 0) ? new oskar_Jones(j2, 1) : j2;
     oskar_Jones* hd3 = (location3 == 0) ? new oskar_Jones(j3, 1) : j3;
-    const void* d1 = hd1->data;
-    const void* d2 = hd2->data;
-    void* d3 = hd3->data;
+    const void* d1 = hd1->ptr.data;
+    const void* d2 = hd2->ptr.data;
+    void* d3 = hd3->ptr.data;
 
     // Check for errors.
     int err = cudaPeekAtLastError();
@@ -93,78 +93,78 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     err = -100;
 
     // Multiply the matrices.
-    if (type1 == OSKAR_JONES_FLOAT_SCALAR)
+    if (type1 == OSKAR_SINGLE_COMPLEX)
     {
-        if (type2 == OSKAR_JONES_FLOAT_SCALAR)
+        if (type2 == OSKAR_SINGLE_COMPLEX)
         {
-            if (type3 == OSKAR_JONES_FLOAT_SCALAR)
+            if (type3 == OSKAR_SINGLE_COMPLEX)
             {
                 // Scalar-scalar to scalar, float: OK.
                 err = oskar_cuda_jones_mul_scalar_c2_f(n_elements,
                         (const float2*)d1, (const float2*)d2, (float2*)d3);
             }
-            else if (type3 == OSKAR_JONES_FLOAT_MATRIX)
+            else if (type3 == OSKAR_SINGLE_COMPLEX_MATRIX)
             {
                 // Scalar-scalar to matrix, float: OK.
                 err = oskar_cuda_jones_mul_c2_f(n_elements,
                         (const float2*)d1, (const float2*)d2, (float4c*)d3);
             }
         }
-        else if (type2 == OSKAR_JONES_FLOAT_MATRIX)
+        else if (type2 == OSKAR_SINGLE_COMPLEX_MATRIX)
         {
             // Scalar-matrix, float: OK.
             err = oskar_cuda_jones_mul_mat1_c1_f(n_elements,
                     (const float4c*)d2, (const float2*)d1, (float4c*)d3);
         }
     }
-    else if (type1 == OSKAR_JONES_FLOAT_MATRIX)
+    else if (type1 == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        if (type2 == OSKAR_JONES_FLOAT_SCALAR)
+        if (type2 == OSKAR_SINGLE_COMPLEX)
         {
             // Matrix-scalar, float: OK.
             err = oskar_cuda_jones_mul_mat1_c1_f(n_elements,
                     (const float4c*)d1, (const float2*)d2, (float4c*)d3);
         }
-        else if (type2 == OSKAR_JONES_FLOAT_MATRIX)
+        else if (type2 == OSKAR_SINGLE_COMPLEX_MATRIX)
         {
             // Matrix-matrix, float: OK.
             err = oskar_cuda_jones_mul_mat2_f(n_elements,
                     (const float4c*)d1, (const float4c*)d2, (float4c*)d3);
         }
     }
-    else if (type1 == OSKAR_JONES_DOUBLE_SCALAR)
+    else if (type1 == OSKAR_DOUBLE_COMPLEX)
     {
-        if (type2 == OSKAR_JONES_DOUBLE_SCALAR)
+        if (type2 == OSKAR_DOUBLE_COMPLEX)
         {
-            if (type3 == OSKAR_JONES_DOUBLE_SCALAR)
+            if (type3 == OSKAR_DOUBLE_COMPLEX)
             {
                 // Scalar-scalar to scalar, double: OK.
                 err = oskar_cuda_jones_mul_scalar_c2_d(n_elements,
                         (const double2*)d1, (const double2*)d2, (double2*)d3);
             }
-            else if (type3 == OSKAR_JONES_DOUBLE_MATRIX)
+            else if (type3 == OSKAR_DOUBLE_COMPLEX_MATRIX)
             {
                 // Scalar-scalar to matrix, double: OK.
                 err = oskar_cuda_jones_mul_c2_d(n_elements,
                         (const double2*)d1, (const double2*)d2, (double4c*)d3);
             }
         }
-        else if (type2 == OSKAR_JONES_DOUBLE_MATRIX)
+        else if (type2 == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
             // Scalar-matrix, double: OK.
             err = oskar_cuda_jones_mul_mat1_c1_d(n_elements,
                     (const double4c*)d2, (const double2*)d1, (double4c*)d3);
         }
     }
-    else if (type1 == OSKAR_JONES_DOUBLE_MATRIX)
+    else if (type1 == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        if (type2 == OSKAR_JONES_DOUBLE_SCALAR)
+        if (type2 == OSKAR_DOUBLE_COMPLEX)
         {
             // Matrix-scalar, double: OK.
             err = oskar_cuda_jones_mul_mat1_c1_d(n_elements,
                     (const double4c*)d1, (const double2*)d2, (double4c*)d3);
         }
-        else if (type2 == OSKAR_JONES_DOUBLE_MATRIX)
+        else if (type2 == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
             // Matrix-matrix, double: OK.
             err = oskar_cuda_jones_mul_mat2_d (n_elements,

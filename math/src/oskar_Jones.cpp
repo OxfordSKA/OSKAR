@@ -35,16 +35,18 @@
 #include <cstdlib>
 
 oskar_Jones::oskar_Jones(int type, int n_sources, int n_stations, int location)
-: private_type(type), private_n_sources(n_sources),
-  private_n_stations(n_stations), private_location(location)
+: private_n_sources(n_sources),
+  private_n_stations(n_stations),
+  ptr(type, location)
 {
     if (oskar_jones_alloc(this) != 0)
         throw "Error in oskar_jones_alloc";
 }
 
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
-: private_type(other->type()), private_n_sources(other->n_sources()),
-  private_n_stations(other->n_stations()), private_location(location)
+: private_n_sources(other->n_sources()),
+  private_n_stations(other->n_stations()),
+  ptr(other->type(), location)
 {
     if (oskar_jones_alloc(this) != 0)
         throw "Error in oskar_jones_alloc";

@@ -46,9 +46,9 @@ void JonesTest::test_join_inline_mat_mat_device()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j2 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -67,9 +67,9 @@ void JonesTest::test_join_inline_mat_mat_device()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j2 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -96,9 +96,9 @@ void JonesTest::test_join_inline_mat_mat_device_host()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -117,9 +117,9 @@ void JonesTest::test_join_inline_mat_mat_device_host()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -146,9 +146,9 @@ void JonesTest::test_join_inline_mat_mat_host()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -167,9 +167,9 @@ void JonesTest::test_join_inline_mat_mat_host()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -196,9 +196,9 @@ void JonesTest::test_join_inline_mat_sca_device()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j2 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -217,9 +217,9 @@ void JonesTest::test_join_inline_mat_sca_device()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j2 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -246,9 +246,9 @@ void JonesTest::test_join_inline_mat_sca_device_host()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -267,9 +267,9 @@ void JonesTest::test_join_inline_mat_sca_device_host()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -296,9 +296,9 @@ void JonesTest::test_join_inline_mat_sca_host()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -317,9 +317,9 @@ void JonesTest::test_join_inline_mat_sca_host()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -346,9 +346,9 @@ void JonesTest::test_join_inline_sca_sca_device()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j2 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -367,9 +367,9 @@ void JonesTest::test_join_inline_sca_sca_device()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j2 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -396,9 +396,9 @@ void JonesTest::test_join_inline_sca_sca_device_host()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -417,9 +417,9 @@ void JonesTest::test_join_inline_sca_sca_device_host()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -446,9 +446,9 @@ void JonesTest::test_join_inline_sca_sca_host()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_FLOAT_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_SINGLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -467,9 +467,9 @@ void JonesTest::test_join_inline_sca_sca_host()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 0);
-        oskar_Jones* j2 = construct_jones_host(OSKAR_JONES_DOUBLE_SCALAR,
+        oskar_Jones* j2 = construct_jones_host(OSKAR_DOUBLE_COMPLEX,
                 n_src, n_stat, 1);
 
         // Call wrapper function.
@@ -497,7 +497,7 @@ void JonesTest::test_set_ones_device()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
 
         // Call wrapper function.
@@ -507,7 +507,7 @@ void JonesTest::test_set_ones_device()
         oskar_Jones* t = new oskar_Jones(j1, 0);
 
         // Check result.
-        float4c* ptr = (float4c*)t->data;
+        float4c* ptr = (float4c*)t->ptr.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].a.x, 1e-5);
@@ -530,7 +530,7 @@ void JonesTest::test_set_ones_device()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_device(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_device(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
 
         // Call wrapper function.
@@ -540,7 +540,7 @@ void JonesTest::test_set_ones_device()
         oskar_Jones* t = new oskar_Jones(j1, 0);
 
         // Check result.
-        double4c* ptr = (double4c*)t->data;
+        double4c* ptr = (double4c*)t->ptr.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].a.x, 1e-12);
@@ -572,14 +572,14 @@ void JonesTest::test_set_ones_host()
 
     // Single precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_FLOAT_MATRIX,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_SINGLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
 
         // Call wrapper function.
         fail_on_error ( j1->set_real_scalar(1.0) );
 
         // Check result.
-        float4c* ptr = (float4c*)j1->data;
+        float4c* ptr = (float4c*)j1->ptr.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].a.x, 1e-5);
@@ -601,14 +601,14 @@ void JonesTest::test_set_ones_host()
 
     // Double precision test.
     {
-        oskar_Jones* j1 = construct_jones_host(OSKAR_JONES_DOUBLE_MATRIX,
+        oskar_Jones* j1 = construct_jones_host(OSKAR_DOUBLE_COMPLEX_MATRIX,
                 n_src, n_stat, 0);
 
         // Call wrapper function.
         fail_on_error ( j1->set_real_scalar(1.0) );
 
         // Check result.
-        double4c* ptr = (double4c*)j1->data;
+        double4c* ptr = (double4c*)j1->ptr.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].a.x, 1e-12);
@@ -797,27 +797,27 @@ oskar_Jones* JonesTest::construct_jones_host(int type, int n_src,
 {
     oskar_Jones* m = new oskar_Jones(type, n_src, n_stat, 0);
     int n = n_src * n_stat;
-    if (type == OSKAR_JONES_FLOAT_MATRIX)
+    if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        float4c* ptr = (float4c*)m->data;
+        float4c* ptr = (float4c*)m->ptr.data;
         for (int i = 0; i < n; ++i)
             construct_float4c_input(i + offset, ptr[i]);
     }
-    else if (type == OSKAR_JONES_DOUBLE_MATRIX)
+    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        double4c* ptr = (double4c*)m->data;
+        double4c* ptr = (double4c*)m->ptr.data;
         for (int i = 0; i < n; ++i)
             construct_double4c_input(i + offset, ptr[i]);
     }
-    else if (type == OSKAR_JONES_FLOAT_SCALAR)
+    else if (type == OSKAR_SINGLE_COMPLEX)
     {
-        float2* ptr = (float2*)m->data;
+        float2* ptr = (float2*)m->ptr.data;
         for (int i = 0; i < n; ++i)
             construct_float2_input(i + offset, ptr[i]);
     }
-    else if (type == OSKAR_JONES_DOUBLE_SCALAR)
+    else if (type == OSKAR_DOUBLE_COMPLEX)
     {
-        double2* ptr = (double2*)m->data;
+        double2* ptr = (double2*)m->ptr.data;
         for (int i = 0; i < n; ++i)
             construct_double2_input(i + offset, ptr[i]);
     }
@@ -857,9 +857,9 @@ void JonesTest::check_matrix_matrix(const oskar_Jones* jones,
 
     // Check the contents of the host buffer.
     int n = jones->n_sources() * jones->n_stations();
-    if (jones->type() == OSKAR_JONES_FLOAT_MATRIX)
+    if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        float4c* ptr = (float4c*)temp->data;
+        float4c* ptr = (float4c*)temp->ptr.data;
         float4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -875,9 +875,9 @@ void JonesTest::check_matrix_matrix(const oskar_Jones* jones,
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, abs(t.d.y * 5e-5));
         }
     }
-    else if (jones->type() == OSKAR_JONES_DOUBLE_MATRIX)
+    else if (jones->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        double4c* ptr = (double4c*)temp->data;
+        double4c* ptr = (double4c*)temp->ptr.data;
         double4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -911,9 +911,9 @@ void JonesTest::check_matrix_scalar(const oskar_Jones* jones,
 
     // Check the contents of the host buffer.
     int n = jones->n_sources() * jones->n_stations();
-    if (jones->type() == OSKAR_JONES_FLOAT_MATRIX)
+    if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        float4c* ptr = (float4c*)temp->data;
+        float4c* ptr = (float4c*)temp->ptr.data;
         float4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -929,9 +929,9 @@ void JonesTest::check_matrix_scalar(const oskar_Jones* jones,
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, abs(t.d.y * 2e-4));
         }
     }
-    else if (jones->type() == OSKAR_JONES_DOUBLE_MATRIX)
+    else if (jones->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        double4c* ptr = (double4c*)temp->data;
+        double4c* ptr = (double4c*)temp->ptr.data;
         double4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -965,9 +965,9 @@ void JonesTest::check_scalar_scalar(const oskar_Jones* jones,
 
     // Check the contents of the host buffer.
     int n = jones->n_sources() * jones->n_stations();
-    if (jones->type() == OSKAR_JONES_FLOAT_SCALAR)
+    if (jones->type() == OSKAR_SINGLE_COMPLEX)
     {
-        float2* ptr = (float2*)temp->data;
+        float2* ptr = (float2*)temp->ptr.data;
         float2 t;
         for (int i = 0; i < n; ++i)
         {
@@ -977,9 +977,9 @@ void JonesTest::check_scalar_scalar(const oskar_Jones* jones,
             CPPUNIT_ASSERT_DOUBLES_EQUAL(t.y, ptr[i].y, abs(t.y * 5e-5));
         }
     }
-    else if (jones->type() == OSKAR_JONES_DOUBLE_SCALAR)
+    else if (jones->type() == OSKAR_DOUBLE_COMPLEX)
     {
-        double2* ptr = (double2*)temp->data;
+        double2* ptr = (double2*)temp->ptr.data;
         double2 t;
         for (int i = 0; i < n; ++i)
         {
