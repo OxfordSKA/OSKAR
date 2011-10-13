@@ -1,5 +1,5 @@
 #
-# src/math/matlab/CMakeLists.txt
+# src/math/matlab/@Jones/CMakeLists.txt
 #
 
 # ==== Matlab mex funtions
@@ -17,11 +17,14 @@ if (MATLAB_FOUND)
     oskar_mex(Jones_set_real_scalar oskar_Jones_set_real_scalar.cpp)
     oskar_mex(Jones_set_values      oskar_Jones_set_values.cpp)
 
-    # Copy *.m files
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/+oskar"
+    # Copy *.m files from current directory to destination.
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+        DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/@Jones"
         FILES_MATCHING PATTERN "*.m"
         PATTERN ".svn" EXCLUDE)
+
+    
+    add_subdirectory(test)
 
 endif ()
 

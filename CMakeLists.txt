@@ -27,7 +27,7 @@ if (NOT OSKAR_BIN_INSTALL_DIR)
     set(OSKAR_BIN_INSTALL_DIR "bin")
 endif()
 if (NOT OSKAR_MATLAB_INSTALL_DIR)
-    set(OSKAR_MATLAB_INSTALL_DIR "share/oskar/matlab")
+    set(OSKAR_MATLAB_INSTALL_DIR "share/matlab/toolbox/oskar")
 endif()
 
 # ==== Defaults as to which libraries are build.
