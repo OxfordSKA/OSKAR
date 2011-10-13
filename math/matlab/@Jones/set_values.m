@@ -5,6 +5,6 @@ function set_values( obj, values, format, location)
     if ~exist('location', 'var')
         location = obj.location;
     end
-    obj.pointer = oskar.Jones_set_values(obj.pointer, values, format, location);
+    obj.pointer = Jones_set_values(obj.pointer, values, format, location);
 end
 

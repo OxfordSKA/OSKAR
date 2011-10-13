@@ -53,16 +53,16 @@ classdef Jones <  handle
                     else
                         [num_sources, num_stations] = size(values);
                     end
-                    obj.pointer = oskar.Jones_constructor(num_stations, ...
+                    obj.pointer = Jones_constructor(num_stations, ...
                         num_sources, format, default_type, default_location);
                     obj.set_values(values, format, default_location);
                 else
                     num_sources  = varargin{1};
                     num_stations = varargin{2};
-                    obj.pointer = oskar.Jones_constructor(num_stations, ...
+                    obj.pointer = Jones_constructor(num_stations, ...
                         num_sources, default_format, default_type, ...
                         default_location);
-                    oskar.Jones_set_real_scalar(obj.pointer, 0.0);
+                    Jones_set_real_scalar(obj.pointer, 0.0);
                 end                   
             
             elseif (nargin == 3)
@@ -75,17 +75,17 @@ classdef Jones <  handle
                     else
                         [num_sources, num_stations] = size(values);
                     end
-                    obj.pointer = oskar.Jones_constructor(num_stations, ...
+                    obj.pointer = Jones_constructor(num_stations, ...
                         num_sources, format, default_type, location);
                     obj.set_values(values, format, location);
                 else
                     num_sources  = varargin{1};
                     num_stations = varargin{2};
                     format       = varargin{3};
-                    obj.pointer = oskar.Jones_constructor(num_stations, ...
+                    obj.pointer = Jones_constructor(num_stations, ...
                         num_sources, format, default_type, ...
                         default_location);
-                    oskar.Jones_set_real_scalar(obj.pointer, 0.0);
+                    Jones_set_real_scalar(obj.pointer, 0.0);
                 end
                 
             elseif (nargin == 4)
@@ -93,9 +93,9 @@ classdef Jones <  handle
                 num_stations = varargin{2};
                 format       = varargin{3};
                 type         = varargin{4};
-                obj.pointer = oskar.Jones_constructor(num_stations, ...
+                obj.pointer = Jones_constructor(num_stations, ...
                         num_sources, format, type, default_location);
-                oskar.Jones_set_real_scalar(obj.pointer, 0.0);
+                Jones_set_real_scalar(obj.pointer, 0.0);
             
             elseif (nargin == 5)
                 num_sources  = varargin{1};
@@ -103,9 +103,9 @@ classdef Jones <  handle
                 format       = varargin{3};
                 type         = varargin{4};
                 location     = varargin{5};
-                obj.pointer = oskar.Jones_constructor(num_stations, ...
+                obj.pointer = Jones_constructor(num_stations, ...
                     num_sources, format, type, location);
-                oskar.Jones_set_real_scalar(obj.pointer, 0.0);
+                Jones_set_real_scalar(obj.pointer, 0.0);
                 
             else
                 error('Usage:\n %s\n %s\n', ...
@@ -120,7 +120,7 @@ classdef Jones <  handle
             if (obj.pointer == 0)
                 return;
             end
-            oskar.Jones_destructor(obj.pointer);
+            Jones_destructor(obj.pointer);
             obj.pointer = 0;
         end
                 
@@ -158,7 +158,7 @@ classdef Jones <  handle
         % Set the value of the Jones matrix a real scalar.
         % For the case of matrix format the diagonal is set.
         function set_real_scalar(obj, value)
-            oskar.Jones_set_real_scalar(obj.pointer, value);
+            Jones_set_real_scalar(obj.pointer, value);
         end
         
         % this = this * other 
@@ -166,7 +166,7 @@ classdef Jones <  handle
         %      J1 = J1 * J2
         % TODO: change name to multiply?!
         function join_from_right(obj, other_Jones)
-            oskar.Jones_join_from_right(obj.pointer, other_Jones.pointer);
+            Jones_join_from_right(obj.pointer, other_Jones.pointer);
         end
 
         % join from left: other = other * this
@@ -177,19 +177,19 @@ classdef Jones <  handle
                 
         % Accessor methods.
         function value = num_sources(obj)
-            value = oskar.Jones_get_parameter(obj.pointer, 'num_sources');
+            value = Jones_get_parameter(obj.pointer, 'num_sources');
         end
         function value = num_stations(obj)
-            value = oskar.Jones_get_parameter(obj.pointer, 'num_stations');
+            value = Jones_get_parameter(obj.pointer, 'num_stations');
         end
         function value = type(obj)
-            value = oskar.Jones_get_parameter(obj.pointer, 'type');
+            value = Jones_get_parameter(obj.pointer, 'type');
         end
         function value = format(obj)
-            value = oskar.Jones_get_parameter(obj.pointer, 'format');
+            value = Jones_get_parameter(obj.pointer, 'format');
         end
         function value = location(obj)
-            value = oskar.Jones_get_parameter(obj.pointer, 'location');
+            value = Jones_get_parameter(obj.pointer, 'location');
         end
     end
     
@@ -199,7 +199,7 @@ classdef Jones <  handle
         % TODO: change name to multiply?!
         function J = join(J1, J2)
             % TODO: inplace version?
-            J = oskar.Jones_join(J1.pointer, J2.pointer);
+            J = Jones_join(J1.pointer, J2.pointer);
         end
     end
     

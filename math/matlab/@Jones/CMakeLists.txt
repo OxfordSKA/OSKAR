@@ -5,7 +5,7 @@
 # ==== Matlab mex funtions
 if (MATLAB_FOUND)
     include(oskar_build_macros)
-    set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar")
+    set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/@Jones/private")
     oskar_mex(Jones_constructor     oskar_Jones_constructor.cpp)
     oskar_mex(Jones_copy            oskar_Jones_copy.cpp)
     oskar_mex(Jones_destructor      oskar_Jones_destructor.cpp)

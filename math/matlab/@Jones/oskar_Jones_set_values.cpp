@@ -33,6 +33,8 @@
 #include "math/matlab/oskar_mex_pointer.h"
 #include "math/matlab/@Jones/oskar_Jones_utility.h"
 #include "utility/oskar_vector_types.h"
+#include "math/oskar_jones_element_size.h"
+
 
 // Interface function
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -42,6 +44,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgTxt("Usage: jones_pointer = oskar_Jones_set_values("
                 "jones_pointer, values, format, location)");
     }
+
+    enum { CPU = 0, GPU = 1 };
+    enum { UNDEF = -1, DOUBLE, SINGLE, SCALAR, MATRIX };
 
     // Parse input parameters.
     oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
@@ -107,23 +112,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     size_t mem_size_old = J->n_sources() * J->n_stations();
-    if (J->type() == OSKAR_JONES_DOUBLE_MATRIX)
-    {
-        mem_size_old *= sizeof(double4c);
-    }
-    else if (J->type() == OSKAR_JONES_FLOAT_MATRIX)
-    {
-        mem_size_old *= sizeof(float4c);
-    }
-    else if (J->type() == OSKAR_JONES_FLOAT_SCALAR)
-    {
-        mem_size_old *= sizeof(float2);
-    }
-    else
-    {
-        mem_size_old *= sizeof(double2);
-    }
-
+    mem_size_old *= oskar_jones_element_size(J->type());
 
     size_t mem_size_new = (type == DOUBLE) ? num_values * sizeof(double2) :
             num_values * sizeof(float2);
@@ -147,7 +136,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         if (format == SCALAR)
         {
             double2* data = (double2*)J_local->data;
-            for (int i = 0; i < num_values; ++i)
+            for (int i = 0; i < num_sources * num_stations; ++i)
             {
                 data[i].x = values_re[i];
                 data[i].y = (values_im == NULL) ? 0.0 : values_im[i];
@@ -158,10 +147,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             double4c* data = (double4c*)J_local->data;
             for (int i = 0; i < num_stations * num_sources; ++i)
             {
-                data[i].a.x = values_re[i + 0];
-                data[i].c.x = values_re[i + 1];
-                data[i].b.x = values_re[i + 2];
-                data[i].d.x = values_re[i + 3];
+                data[i].a.x = values_re[4 * i + 0];
+                data[i].c.x = values_re[4 * i + 1];
+                data[i].b.x = values_re[4 * i + 2];
+                data[i].d.x = values_re[4 * i + 3];
                 if (values_im == NULL)
                 {
                     data[i].a.y = 0.0;
@@ -171,10 +160,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 }
                 else
                 {
-                    data[i].a.y = values_im[i + 0];
-                    data[i].c.y = values_im[i + 1];
-                    data[i].b.y = values_im[i + 2];
-                    data[i].d.y = values_im[i + 3];
+                    data[i].a.y = values_im[4 * i + 0];
+                    data[i].c.y = values_im[4 * i + 1];
+                    data[i].b.y = values_im[4 * i + 2];
+                    data[i].d.y = values_im[4 * i + 3];
                 }
             }
         }
@@ -197,10 +186,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             float4c* data = (float4c*)J_local->data;
             for (int i = 0; i < num_stations * num_sources; ++i)
             {
-                data[i].a.x = values_re[i + 0];
-                data[i].c.x = values_re[i + 1];
-                data[i].b.x = values_re[i + 2];
-                data[i].d.x = values_re[i + 3];
+                data[i].a.x = values_re[4*i + 0];
+                data[i].c.x = values_re[4*i + 1];
+                data[i].b.x = values_re[4*i + 2];
+                data[i].d.x = values_re[4*i + 3];
                 if (values_im == NULL)
                 {
                     data[i].a.y = 0.0;
@@ -210,10 +199,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 }
                 else
                 {
-                    data[i].a.y = values_im[i + 0];
-                    data[i].c.y = values_im[i + 1];
-                    data[i].b.y = values_im[i + 2];
-                    data[i].d.y = values_im[i + 3];
+                    data[i].a.y = values_im[4*i + 0];
+                    data[i].c.y = values_im[4*i + 1];
+                    data[i].b.y = values_im[4*i + 2];
+                    data[i].d.y = values_im[4*i + 3];
                 }
             }
         }

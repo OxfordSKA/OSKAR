@@ -38,7 +38,6 @@
 enum { CPU = 0, GPU = 1 };
 enum { UNDEF = -1, DOUBLE, SINGLE, SCALAR, MATRIX };
 
-
 int get_type(const char* type)
 {
     if ( strcmp(type, "single") == 0 )
