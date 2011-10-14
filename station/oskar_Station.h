@@ -26,50 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_STATION_H_
+#define OSKAR_STATION_H_
 
-#include "apps/lib/oskar_Settings.h"
-#include <cstdio>
-#include <cstdlib>
-#include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_correlate.h"
-#include "station/oskar_evaluate_jones_E.h"
-#include "math/oskar_jones_join.h"
+/**
+ * @file oskar_Station.h
+ */
 
-int main(int argc, char** argv)
+
+#include "oskar_global.h"
+#include "oskar_Ptr.h"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+struct oskar_Station
 {
-    oskar_Jones* E;
-    oskar_Jones* K;
-    oskar_Jones* J;
-    oskar_Sky* sky;
-    oskar_Telescope* telescope;
-    oskar_Visibilties* vis;
+    int num_antennas;
+    oskar_Ptr antenna_x;
+    oskar_Ptr antenna_y;
+    oskar_Ptr antenna_z;
+    oskar_Ptr antenna_weight;
 
-    oskar_load_stations_layouts(telescope, "station_directory");
-    oskar_load_station_positions(telescope, "telescope_layout_file");
-    oskar_load_global_sky_model(sky, "sky_model_file");
+    // amp and phase error.
 
-    // initialise E, J, K etc.
-    //...
+    // Tile positions - is this the best way to do this?
+    int num_tiles;
+    oskar_Ptr tile_x;
+    oskar_Ptr tile_y;
+    oskar_Ptr tile_z;
 
-    for (int j = 0; j < num_vis_dumps; ++j)
-    {
-        for (int i = 0; i < num_vis_ave; ++i)
-        {
-            double last = 0.0;
-            oskar_evaluate_jones_E(E, sky, telescope, last);
+    // Embedded element pattern.
+    int num_element_patterns;
+    oskar_EmbeddedElementPattern* element_pattern;
 
-            for (int k = 0; k < num_fringe_ave; ++k)
-            {
-                last = 0.0 + 0.1;
-                oskar_evaluate_jones_K(K, sky, telescope, last);
-                oskar_jones_join(J, K, E);
-                oskar_correlate(vis, J, telescope, sky, last);
-            }
-        }
-        // Dump vis to MS?
-    }
+    // Station position.
+    double longitude;
+    double latitude;
 
-    return EXIT_SUCCESS;
-}
+    // Beam phase centre.
+    double ra0;
+    double dec0;
+
+    int bit_depth;
+};
+
+typedef struct oskar_Station oskar_Station;
 
 
+#endif // OSKAR_STATION_H_

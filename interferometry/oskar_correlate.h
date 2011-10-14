@@ -26,50 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_CORRELATE_H_
+#define OSKAR_CORRELATE_H_
 
-#include "apps/lib/oskar_Settings.h"
-#include <cstdio>
-#include <cstdlib>
-#include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_correlate.h"
-#include "station/oskar_evaluate_jones_E.h"
-#include "math/oskar_jones_join.h"
-
-int main(int argc, char** argv)
-{
-    oskar_Jones* E;
-    oskar_Jones* K;
-    oskar_Jones* J;
-    oskar_Sky* sky;
-    oskar_Telescope* telescope;
-    oskar_Visibilties* vis;
-
-    oskar_load_stations_layouts(telescope, "station_directory");
-    oskar_load_station_positions(telescope, "telescope_layout_file");
-    oskar_load_global_sky_model(sky, "sky_model_file");
-
-    // initialise E, J, K etc.
-    //...
-
-    for (int j = 0; j < num_vis_dumps; ++j)
-    {
-        for (int i = 0; i < num_vis_ave; ++i)
-        {
-            double last = 0.0;
-            oskar_evaluate_jones_E(E, sky, telescope, last);
-
-            for (int k = 0; k < num_fringe_ave; ++k)
-            {
-                last = 0.0 + 0.1;
-                oskar_evaluate_jones_K(K, sky, telescope, last);
-                oskar_jones_join(J, K, E);
-                oskar_correlate(vis, J, telescope, sky, last);
-            }
-        }
-        // Dump vis to MS?
-    }
-
-    return EXIT_SUCCESS;
-}
+/**
+ * @file oskar_correlate.h
+ */
 
 
+#include "oskar_global.h"
+#include "math/oskar_Jones.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_Telescope.h"
+#include "sky/oskar_Sky.h"
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int oskar_correlate(oskar_Visibilties* vis, oskar_Jones* J,
+        oskar_Telescope* telescope, oskar_Sky* sky,
+        double local_apparent_sideral_time);
+
+#endif // OSKAR_CORRELATE_H_

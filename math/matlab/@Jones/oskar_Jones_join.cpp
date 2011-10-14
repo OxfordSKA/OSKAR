@@ -42,7 +42,7 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     if (num_out != 1 || num_in != 2)
     {
         // J3 = join(J1, J2)
-        mexErrMsgTxt("Usage: J.pointer = oskar_Jones_join(J1.pointer, J2.pointer)");
+        mexErrMsgTxt("Usage: J.pointer = Jones_join(J1.pointer, J2.pointer)");
     }
 
     // Extract the oskar_Jones pointers from the mxArray object.

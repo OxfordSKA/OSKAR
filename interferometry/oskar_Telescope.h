@@ -26,50 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_TELESCOPE_H_
+#define OSKAR_TELESCOPE_H_
 
-#include "apps/lib/oskar_Settings.h"
-#include <cstdio>
-#include <cstdlib>
-#include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_correlate.h"
-#include "station/oskar_evaluate_jones_E.h"
-#include "math/oskar_jones_join.h"
+/**
+ * @file oskar_Telescope.h
+ */
 
-int main(int argc, char** argv)
+
+#include "oskar_global.h"
+#include "station/oskar_Station.h"
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+struct oskar_Telescope
 {
-    oskar_Jones* E;
-    oskar_Jones* K;
-    oskar_Jones* J;
-    oskar_Sky* sky;
-    oskar_Telescope* telescope;
-    oskar_Visibilties* vis;
+        int num_stations;
+        oskar_Station* station; ///< Array of oskar_Station structures.
 
-    oskar_load_stations_layouts(telescope, "station_directory");
-    oskar_load_station_positions(telescope, "telescope_layout_file");
-    oskar_load_global_sky_model(sky, "sky_model_file");
+        // Work buffers.
+        // NOTE: need better name to indicate they should be treated as work buffers.
+        double update_timestamp; ///< Time for which u,v,w are valid.
+        oskar_Ptr station_u;
+        oskar_Ptr station_v;
+        oskar_Ptr station_w;
+};
 
-    // initialise E, J, K etc.
-    //...
-
-    for (int j = 0; j < num_vis_dumps; ++j)
-    {
-        for (int i = 0; i < num_vis_ave; ++i)
-        {
-            double last = 0.0;
-            oskar_evaluate_jones_E(E, sky, telescope, last);
-
-            for (int k = 0; k < num_fringe_ave; ++k)
-            {
-                last = 0.0 + 0.1;
-                oskar_evaluate_jones_K(K, sky, telescope, last);
-                oskar_jones_join(J, K, E);
-                oskar_correlate(vis, J, telescope, sky, last);
-            }
-        }
-        // Dump vis to MS?
-    }
-
-    return EXIT_SUCCESS;
-}
+typedef struct oskar_Telescope oskar_Telescope;
 
 
+#endif // OSKAR_TELESCOPE_H_

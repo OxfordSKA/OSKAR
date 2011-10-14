@@ -26,50 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_EVALUATE_JONES_K_H_
+#define OSKAR_EVALUATE_JONES_K_H_
 
-#include "apps/lib/oskar_Settings.h"
-#include <cstdio>
-#include <cstdlib>
-#include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_correlate.h"
-#include "station/oskar_evaluate_jones_E.h"
-#include "math/oskar_jones_join.h"
+/**
+ * @file oskar_evaluate_jones_E.h
+ */
 
-int main(int argc, char** argv)
-{
-    oskar_Jones* E;
-    oskar_Jones* K;
-    oskar_Jones* J;
-    oskar_Sky* sky;
-    oskar_Telescope* telescope;
-    oskar_Visibilties* vis;
+#include "oskar_global.h"
+#include "sky/oskar_Sky.h"
+#include "interferometry/oskar_Telescope.h"
+#include "math/oskar_Jones.h"
 
-    oskar_load_stations_layouts(telescope, "station_directory");
-    oskar_load_station_positions(telescope, "telescope_layout_file");
-    oskar_load_global_sky_model(sky, "sky_model_file");
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT
+int oskar_evaluate_jones_K(oskar_Jones* K, oskar_Sky* sky,
+        oskar_Telescope* telescope, double local_apparent_sideral_time);
 
-    // initialise E, J, K etc.
-    //...
-
-    for (int j = 0; j < num_vis_dumps; ++j)
-    {
-        for (int i = 0; i < num_vis_ave; ++i)
-        {
-            double last = 0.0;
-            oskar_evaluate_jones_E(E, sky, telescope, last);
-
-            for (int k = 0; k < num_fringe_ave; ++k)
-            {
-                last = 0.0 + 0.1;
-                oskar_evaluate_jones_K(K, sky, telescope, last);
-                oskar_jones_join(J, K, E);
-                oskar_correlate(vis, J, telescope, sky, last);
-            }
-        }
-        // Dump vis to MS?
-    }
-
-    return EXIT_SUCCESS;
-}
-
-
+#endif // OSKAR_EVALUATE_JONES_K_H_

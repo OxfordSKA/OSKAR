@@ -26,50 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_SKY_STRUCT_H_
+#define OSKAR_SKY_STRUCT_H_
 
-#include "apps/lib/oskar_Settings.h"
-#include <cstdio>
-#include <cstdlib>
-#include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_correlate.h"
-#include "station/oskar_evaluate_jones_E.h"
-#include "math/oskar_jones_join.h"
-
-int main(int argc, char** argv)
+#ifdef __cplusplus
+extern "C"
+#endif
+struct oskar_Sky
 {
-    oskar_Jones* E;
-    oskar_Jones* K;
-    oskar_Jones* J;
-    oskar_Sky* sky;
-    oskar_Telescope* telescope;
-    oskar_Visibilties* vis;
+    int num_sources;
+    oskar_Ptr RA;
+    oskar_Ptr Dec;
+    oskar_Ptr I;
+    oskar_Ptr Q;
+    oskar_Ptr U;
+    oskar_Ptr V;
+    oskar_Ptr reference_freq;
+    oskar_Ptr spectral_index;
 
-    oskar_load_stations_layouts(telescope, "station_directory");
-    oskar_load_station_positions(telescope, "telescope_layout_file");
-    oskar_load_global_sky_model(sky, "sky_model_file");
+    // Work buffers.
+    // NOTE: need better name to indicate they should be treated as work buffers.
+    double update_timestamp; ///< Time for which work buffer is valid.
+    oskar_Ptr rel_l;  ///< Phase centre relative direction-cosines.
+    oskar_Ptr rel_m;  ///< Phase centre relative direction-cosines.
+    oskar_Ptr rel_n;  ///< Phase centre relative direction-cosines.
+    oskar_Ptr hor_l;  ///< Horizontal coordinate system direction-cosines.
+    oskar_Ptr hor_m;  ///< Horizontal coordinate system direction-cosines.
+    oskar_Ptr hor_n;  ///< Horizontal coordinate system direction-cosines.
+};
+typedef struct oskar_Sky oskar_Sky;
 
-    // initialise E, J, K etc.
-    //...
-
-    for (int j = 0; j < num_vis_dumps; ++j)
-    {
-        for (int i = 0; i < num_vis_ave; ++i)
-        {
-            double last = 0.0;
-            oskar_evaluate_jones_E(E, sky, telescope, last);
-
-            for (int k = 0; k < num_fringe_ave; ++k)
-            {
-                last = 0.0 + 0.1;
-                oskar_evaluate_jones_K(K, sky, telescope, last);
-                oskar_jones_join(J, K, E);
-                oskar_correlate(vis, J, telescope, sky, last);
-            }
-        }
-        // Dump vis to MS?
-    }
-
-    return EXIT_SUCCESS;
-}
-
-
+#endif // OSKAR_SKY_STRUCT_H_
