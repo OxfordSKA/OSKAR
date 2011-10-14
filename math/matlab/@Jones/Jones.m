@@ -6,7 +6,7 @@ classdef Jones <  handle
     % structure defined in oskar/src/math/oskar_Jones.h
     %
     
-       
+    
     % Private attributes
     properties(SetAccess = private, GetAccess = public, Hidden = true)
         pointer = 0; % pointer to oskar_Jones structure.
@@ -36,7 +36,7 @@ classdef Jones <  handle
         %   J = Jones(10, 2, 'scalar', 'double', 'cpu');
         %   J = Jones(10, 2, 'matrix', 'single', 'gpu');
         %
-        function obj = Jones(varargin)            
+        function obj = Jones(varargin)
             
             default_format   = 'matrix';
             default_type     = 'double';
@@ -63,8 +63,8 @@ classdef Jones <  handle
                         num_sources, default_format, default_type, ...
                         default_location);
                     Jones_set_real_scalar(obj.pointer, 0.0);
-                end                   
-            
+                end
+                
             elseif (nargin == 3)
                 if (ischar(varargin{2}))
                     values   = varargin{1};
@@ -94,9 +94,9 @@ classdef Jones <  handle
                 format       = varargin{3};
                 type         = varargin{4};
                 obj.pointer = Jones_constructor(num_stations, ...
-                        num_sources, format, type, default_location);
+                    num_sources, format, type, default_location);
                 Jones_set_real_scalar(obj.pointer, 0.0);
-            
+                
             elseif (nargin == 5)
                 num_sources  = varargin{1};
                 num_stations = varargin{2};
@@ -109,12 +109,12 @@ classdef Jones <  handle
                 
             else
                 error('Usage:\n %s\n %s\n', ...
-                       'J = Jones(num_sources, num_stations, [format], [type], [location])', ...
-                       'J = Jones(values, format, [location])');
-            end           
+                    'J = Jones(num_sources, num_stations, [format], [type], [location])', ...
+                    'J = Jones(values, format, [location])');
+            end
             
         end % constructor.
-         
+        
         % Destructor
         function delete(obj)
             if (obj.pointer == 0)
@@ -123,19 +123,28 @@ classdef Jones <  handle
             Jones_destructor(obj.pointer);
             obj.pointer = 0;
         end
-                
+        
+               
         % Copy method (defined in function file)
-        obj_copy = copy(obj, location)
-           
+        obj = copy(obj, location)
+        
         % Return the Jones object data as a matlab array.
         data = values(obj)
         
         % returns the dimensions of the Jones array.
-        function dims = size(obj)
+        function d = size(obj, dim)
             if strcmp(obj.format, 'scalar')
-                dims = [obj.num_sources, obj.num_stations];
+                dimensions = [obj.num_sources, obj.num_stations];
             else
-                dims = [2, 2, obj.num_sources, obj.num_stations];
+                dimensions = [2, 2, obj.num_sources, obj.num_stations];
+            end
+            
+            if ~exist('dim', 'var')
+                d = dimensions;
+            elseif (dim > ndims(dimensions))
+                d = 1;
+            else
+                d = dimensions(dim);
             end
         end
         
@@ -161,20 +170,14 @@ classdef Jones <  handle
             Jones_set_real_scalar(obj.pointer, value);
         end
         
-        % this = this * other 
+        % this = this * other
         % e.g. J1.join_from_right(J2)
         %      J1 = J1 * J2
         % TODO: change name to multiply?!
         function join_from_right(obj, other_Jones)
             Jones_join_from_right(obj.pointer, other_Jones.pointer);
         end
-
-        % join from left: other = other * this
-        % e.g. J1.join_from_left(J2)
-        %      J2 = J2 * J1
-        % ...??? same as J2.join_from_right(J1) ??
-        % J2 = J1 * J1
-                
+              
         % Accessor methods.
         function value = num_sources(obj)
             value = Jones_get_parameter(obj.pointer, 'num_sources');
@@ -191,9 +194,37 @@ classdef Jones <  handle
         function value = location(obj)
             value = Jones_get_parameter(obj.pointer, 'location');
         end
+
+        % overloaded matrix multiply operator
+        % eg.
+        % J = K * E
+        % J = K * E * P
+        function j3 = mtimes(j1, j2)
+            j3 = Jones_join(j1.pointer, j2.pointer);
+        end
+        
+        % Disable undefined operators
+        function eq(~, ~)
+            error('Equality operator (=) undefined for oskar.Jones objects');
+        end
+        function ne(~, ~)
+            error('Not equal to (~=) operator undefined for oskar.Jones objects');
+        end
+        function le(~, ~)
+            error('Less than or equal to (<=) operator undefined for oskar.Jones objects');
+        end
+        function lt(~, ~)
+            error('Less than (<) operator undefined for oskar.Jones objects');
+        end
+        function ge(~, ~)
+            error('Greater than or equal to (>=) operator undefined for oskar.Jones objects');
+        end
+        function gt(~, ~)
+            error('Greater than operator (>) undefined for oskar.Jones objects');
+        end
     end
     
-    
+       
     % Static methods.
     methods (Static = true)
         % TODO: change name to multiply?!
@@ -211,5 +242,5 @@ classdef Jones <  handle
             value = obj.pointer;
         end
     end
-
+    
 end
