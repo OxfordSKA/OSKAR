@@ -3,6 +3,18 @@ import oskar.Jones
 a1 = [[1 3]; [2 4]];
 a2 = [[5 7]; [6 8]];
 
+% Test of matrix multiply operator overload.
+J1 = Jones(single(a1), 'matrix');
+J2 = Jones(single(a2), 'matrix');
+J3 = J1 * J2 * J2 * J1;
+values  = J3.values;
+expected = a1 * a2 * a2 * a1;
+for i=1:length(expected(:))
+    assert(expected(i) == values(i), 'matrix multiply operator failed!');
+end
+clear J1 J2 J3 expected values i;
+
+
 % Test scalar jones join with memory on the CPU.
 J1 = Jones(a1, 'scalar');
 J2 = Jones(a2, 'scalar');
