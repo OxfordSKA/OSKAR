@@ -26,38 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_JONES_ELEMENT_SIZE_H_
-#define OSKAR_JONES_ELEMENT_SIZE_H_
+#include <cuda_runtime_api.h>
+#include <cstdlib>
+#include "utility/oskar_mem_free.h"
 
-/**
- * @file oskar_jones_element_size.h
- */
+extern "C"
+int oskar_mem_free(oskar_Mem* mem)
+{
+    // Check that the structure exists.
+    if (mem == NULL) return -1;
 
-#include "oskar_global.h"
-#include <stdlib.h>
+    // Get the meta-data.
+    int location = mem->location();
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Returns the element size of an OSKAR Jones data structure, in bytes.
- *
- * @details
- * This function uses the supplied type to return the element size of an
- * OSKAR Jones data structure.
- *
- * @param[in] type Magic number enumerating the OSKAR Jones data type.
- *
- * @return
- * This function returns the element size in bytes corresponding to the type.
- */
-OSKAR_EXPORT
-size_t oskar_jones_element_size(int type);
-
-#ifdef __cplusplus
+    // Check whether the memory is on the host or the device.
+    int err = 0;
+    if (location == 0)
+    {
+        // Free host memory.
+        free(mem->data);
+    }
+    else if (location == 1)
+    {
+        // Free GPU memory.
+        cudaFree(mem->data);
+        err = cudaPeekAtLastError();
+    }
+    mem->data = NULL;
+    return err;
 }
-#endif
-
-#endif // OSKAR_JONES_ELEMENT_SIZE_H_

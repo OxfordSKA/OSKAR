@@ -26,46 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_Jones.h"
-#include "math/oskar_jones_join.h"
-#include "math/oskar_jones_set_real_scalar.h"
-#include "utility/oskar_mem_copy.h"
+#include <cuda_runtime_api.h>
 #include <cstdlib>
+#include "utility/oskar_mem_alloc.h"
+#include "utility/oskar_mem_element_size.h"
 
-oskar_Jones::oskar_Jones(int type, int n_sources, int n_stations, int location)
-: private_n_sources(n_sources),
-  private_n_stations(n_stations),
-  ptr(type, location, n_sources * n_stations)
+extern "C"
+int oskar_mem_alloc(oskar_Mem* mem)
 {
-}
+    // Check that the structure exists.
+    if (mem == NULL) return -1;
 
-oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
-: private_n_sources(other->n_sources()),
-  private_n_stations(other->n_stations()),
-  ptr(&other->ptr, location)
-{
-}
+    // Get the meta-data.
+    int n_elements = mem->n_elements();
+    int location = mem->location();
+    int type = mem->type();
 
-oskar_Jones::~oskar_Jones()
-{
-}
+    // Get the memory size.
+    size_t element_size = oskar_mem_element_size(type);
+    size_t bytes = n_elements * element_size;
 
-int oskar_Jones::copy_to(oskar_Jones* other)
-{
-    return oskar_mem_copy(&other->ptr, &ptr); // Copy this to other.
-}
-
-int oskar_Jones::join_from_right(const oskar_Jones* other)
-{
-    return oskar_jones_join(NULL, this, other);
-}
-
-int oskar_Jones::join_to_left(oskar_Jones* other) const
-{
-    return oskar_jones_join(NULL, other, this);
-}
-
-int oskar_Jones::set_real_scalar(double scalar)
-{
-    return oskar_jones_set_real_scalar(this, scalar);
+    // Check whether the memory should be on the host or the device.
+    int err = 0;
+    if (location == 0)
+    {
+        // Allocate host memory.
+        mem->data = malloc(bytes);
+        if (mem->data == NULL) err = -2;
+    }
+    else if (location == 1)
+    {
+        // Allocate GPU memory.
+        cudaMalloc(&mem->data, bytes);
+        err = cudaPeekAtLastError();
+    }
+    return err;
 }

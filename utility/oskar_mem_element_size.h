@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_JONES_FREE_H_
-#define OSKAR_JONES_FREE_H_
+#ifndef OSKAR_MEM_ELEMENT_SIZE_H_
+#define OSKAR_MEM_ELEMENT_SIZE_H_
 
 /**
- * @file oskar_jones_free.h
+ * @file oskar_mem_element_size.h
  */
 
 #include "oskar_global.h"
-#include "math/oskar_Jones.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,24 +42,22 @@ extern "C" {
 
 /**
  * @brief
- * Frees the memory held by an OSKAR Jones data structure.
+ * Returns the element size of a block of memory, in bytes.
  *
  * @details
- * This function frees memory held by an OSKAR Jones data structure.
+ * This function uses the supplied type to return the element size of an
+ * block of memory, in bytes.
  *
- * @param[in] jones Pointer to data structure whose memory to free.
+ * @param[in] type Magic number enumerating the OSKAR data type.
  *
  * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A return code of -1 indicates that the data structure is NULL.
+ * This function returns the element size in bytes corresponding to the type.
  */
 OSKAR_EXPORT
-int oskar_jones_free(oskar_Jones* jones);
+size_t oskar_mem_element_size(int type);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_JONES_FREE_H_
+#endif // OSKAR_MEM_ELEMENT_SIZE_H_

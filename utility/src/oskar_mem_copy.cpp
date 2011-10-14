@@ -28,66 +28,62 @@
 
 #include <cuda_runtime_api.h>
 #include <cstring>
-#include "math/oskar_jones_copy.h"
-#include "math/oskar_jones_element_size.h"
+#include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_element_size.h"
 
 extern "C"
-int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a)
+int oskar_mem_copy(oskar_Mem* b, const oskar_Mem* a)
 {
     // Check that all pointers are not NULL.
     if (a == NULL) return -1;
     if (b == NULL) return -2;
-    if (a->ptr.data == NULL) return -1;
-    if (b->ptr.data == NULL) return -2;
+    if (a->data == NULL) return -1;
+    if (b->data == NULL) return -2;
 
     // Get the meta-data.
-    int n_sources_a = a->n_sources();
-    int n_sources_b = b->n_sources();
-    int n_stations_a = a->n_stations();
-    int n_stations_b = b->n_stations();
+    int n_elements_a = a->n_elements();
+    int n_elements_b = b->n_elements();
     int type_a = a->type();
     int type_b = b->type();
     int location_a = a->location();
     int location_b = b->location();
 
     // Check the data dimensions.
-    if (n_sources_a != n_sources_b)
-        return -11;
-    if (n_stations_a != n_stations_b)
-        return -12;
+    if (n_elements_a != n_elements_b)
+        return -10;
 
     // Check the data types.
     if (type_a != type_b)
         return -100;
 
     // Get the number of bytes to copy.
-    int bytes = oskar_jones_element_size(type_a) * n_sources_a * n_stations_a;
+    int bytes = oskar_mem_element_size(type_a) * n_elements_a;
 
     // Host to host.
     if (location_a == 0 && location_b == 0)
     {
-        memcpy(b->ptr.data, a->ptr.data, bytes);
+        memcpy(b->data, a->data, bytes);
         return 0;
     }
 
     // Host to device.
     else if (location_a == 0 && location_b == 1)
     {
-        cudaMemcpy(b->ptr.data, a->ptr.data, bytes, cudaMemcpyHostToDevice);
+        cudaMemcpy(b->data, a->data, bytes, cudaMemcpyHostToDevice);
         return cudaPeekAtLastError();
     }
 
     // Device to host.
     else if (location_a == 1 && location_b == 0)
     {
-        cudaMemcpy(b->ptr.data, a->ptr.data, bytes, cudaMemcpyDeviceToHost);
+        cudaMemcpy(b->data, a->data, bytes, cudaMemcpyDeviceToHost);
         return cudaPeekAtLastError();
     }
 
     // Device to device.
     else if (location_a == 1 && location_b == 1)
     {
-        cudaMemcpy(b->ptr.data, a->ptr.data, bytes, cudaMemcpyDeviceToDevice);
+        cudaMemcpy(b->data, a->data, bytes, cudaMemcpyDeviceToDevice);
         return cudaPeekAtLastError();
     }
 

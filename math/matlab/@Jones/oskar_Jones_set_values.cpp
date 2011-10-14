@@ -33,7 +33,7 @@
 #include "math/matlab/oskar_mex_pointer.h"
 #include "math/matlab/@Jones/oskar_Jones_utility.h"
 #include "utility/oskar_vector_types.h"
-#include "math/oskar_jones_element_size.h"
+#include "utility/oskar_mem_element_size.h"
 
 
 // Interface function
@@ -112,7 +112,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     size_t mem_size_old = J->n_sources() * J->n_stations();
-    mem_size_old *= oskar_jones_element_size(J->type());
+    mem_size_old *= oskar_mem_element_size(J->type());
 
     size_t mem_size_new = (type == DOUBLE) ? num_values * sizeof(double2) :
             num_values * sizeof(float2);

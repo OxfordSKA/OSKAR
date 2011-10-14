@@ -26,42 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_JONES_ALLOC_H_
-#define OSKAR_JONES_ALLOC_H_
-
-/**
- * @file oskar_jones_alloc.h
- */
-
-#include "oskar_global.h"
-#include "math/oskar_Jones.h"
+#include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
 #endif
-
-/**
- * @brief
- * Allocates an OSKAR Jones matrix structure.
- *
- * @details
- * This function allocates memory in an OSKAR Jones data structure using the
- * supplied meta-data.
- *
- * @param[in,out] jones Pointer to data structure.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A return code of -1 indicates that the data structure is NULL.
- * - A return code of -2 indicates that host memory allocation failed.
- */
-OSKAR_EXPORT
-int oskar_jones_alloc(oskar_Jones* jones);
-
-#ifdef __cplusplus
+size_t oskar_mem_element_size(int type)
+{
+    if (type == OSKAR_SINGLE)
+        return sizeof(float);
+    else if (type == OSKAR_DOUBLE)
+        return sizeof(double);
+    else if (type == OSKAR_SINGLE_COMPLEX)
+        return sizeof(float2);
+    else if (type == OSKAR_DOUBLE_COMPLEX)
+        return sizeof(double2);
+    else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+        return sizeof(float4c);
+    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+        return sizeof(double4c);
+    return 0;
 }
-#endif
-
-#endif // OSKAR_JONES_ALLOC_H_

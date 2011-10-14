@@ -26,32 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include <cstdlib>
-#include "math/oskar_jones_free.h"
+#ifndef OSKAR_MEM_FREE_H_
+#define OSKAR_MEM_FREE_H_
 
-extern "C"
-int oskar_jones_free(oskar_Jones* jones)
-{
-    // Check that the structure exists.
-    if (jones == NULL) return -1;
+/**
+ * @file oskar_jones_free.h
+ */
 
-    // Get the meta-data.
-    int location = jones->location();
+#include "oskar_global.h"
+#include "math/oskar_Jones.h"
 
-    // Check whether the memory is on the host or the device.
-    int err = 0;
-    if (location == 0)
-    {
-        // Free host memory.
-        free(jones->ptr.data);
-    }
-    else if (location == 1)
-    {
-        // Free GPU memory.
-        cudaFree(jones->ptr.data);
-        err = cudaPeekAtLastError();
-    }
-    jones->ptr.data = NULL;
-    return err;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Frees the supplied block of memory.
+ *
+ * @details
+ * This function frees memory held in an array, either on the CPU or GPU.
+ *
+ * @param[in] mem Pointer to data structure whose memory to free.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A return code of -1 indicates that the data structure is NULL.
+ */
+OSKAR_EXPORT
+int oskar_mem_free(oskar_Mem* mem);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_MEM_FREE_H_

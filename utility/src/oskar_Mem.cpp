@@ -26,44 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_alloc.h"
+#include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_free.h"
 #include <cstdlib>
-#include "math/oskar_jones_alloc.h"
-#include "math/oskar_jones_element_size.h"
 
-extern "C"
-int oskar_jones_alloc(oskar_Jones* jones)
+oskar_Mem::oskar_Mem(int type, int location, int n_elements)
+: private_type(type),
+  private_location(location),
+  private_n_elements(n_elements),
+  data(NULL)
 {
-    //
-    // FIXME allocation of double types on architecture that
-    // doesn't support double
+    if (n_elements > 0)
+        if (oskar_mem_alloc(this) != 0)
+            throw "Error in oskar_mem_alloc";
+}
 
-    // Check that the structure exists.
-    if (jones == NULL) return -1;
+oskar_Mem::oskar_Mem(const oskar_Mem* other, int location)
+: private_type(other->type()),
+  private_location(location),
+  private_n_elements(other->n_elements()),
+  data(NULL)
+{
+    if (oskar_mem_alloc(this) != 0)
+        throw "Error in oskar_mem_alloc";
+    if (oskar_mem_copy(this, other) != 0) // Copy other to this.
+        throw "Error in oskar_mem_copy";
+}
 
-    // Get the meta-data.
-    int n_sources = jones->n_sources();
-    int n_stations = jones->n_stations();
-    int location = jones->location();
-    int type = jones->type();
+oskar_Mem::~oskar_Mem()
+{
+    if (oskar_mem_free(this) != 0)
+        throw "Error in oskar_mem_free";
+}
 
-    // Get the memory size.
-    size_t element_size = oskar_jones_element_size(type);
-    size_t bytes = n_sources * n_stations * element_size;
-
-    // Check whether the memory should be on the host or the device.
-    int err = 0;
-    if (location == 0)
-    {
-        // Allocate host memory.
-        jones->ptr.data = malloc(bytes);
-        if (jones->ptr.data == NULL) err = -2;
-    }
-    else if (location == 1)
-    {
-        // Allocate GPU memory.
-        cudaMalloc(&jones->ptr.data, bytes);
-        err = cudaPeekAtLastError();
-    }
-    return err;
+int oskar_Mem::copy_to(oskar_Mem* other)
+{
+    return oskar_mem_copy(other, this); // Copy this to other.
 }

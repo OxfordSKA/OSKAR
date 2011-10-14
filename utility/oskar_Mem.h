@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_PTR_H_
-#define OSKAR_PTR_H_
+#ifndef OSKAR_MEM_H_
+#define OSKAR_MEM_H_
 
 /**
- * @file oskar_Ptr.h
+ * @file oskar_Mem.h
  */
 
 /**
- * @brief Structure to wrap a pointer.
+ * @brief Structure to wrap a pointer to memory.
  *
  * @details
  * This is a valid C-structure that holds a pointer to memory either on the CPU
@@ -46,7 +46,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-struct oskar_Ptr
+struct oskar_Mem
 {
     // If C++, then make the meta-data private.
 #ifdef __cplusplus
@@ -54,6 +54,7 @@ private:
 #endif
     int private_type; // Magic number.
     int private_location; // 0 for host, 1 for device.
+    int private_n_elements; // Number of elements allocated.
 
     // If C++, then make the remaining members public.
 #ifdef __cplusplus
@@ -61,34 +62,58 @@ public:
 #endif
     void* data; ///< Data pointer.
 
-    // If C++, then provide a constructor, a destructor.
+    // If C++, then provide constructors and a destructor.
 #ifdef __cplusplus
     /**
-     * @brief Constructs and allocates data for an oskar_Ptr data structure.
+     * @brief Constructs and allocates data for an oskar_Mem data structure.
      *
      * @details
-     * Constructs a new oskar_Ptr data structure, allocating memory for it
-     * in the specified location.
+     * Constructs a new oskar_Mem data structure, allocating memory for it in
+     * the specified location.
      *
      * @param[in] type Enumerated data type of memory contents (magic number).
      * @param[in] location Specify 0 for host memory, 1 for device memory.
+     * @param[in] n_elements Number of elements of type \p type in the array.
      */
-    oskar_Ptr(int type, int location)
-    : private_type(type), private_location(location) {}
+    oskar_Mem(int type, int location, int n_elements = 0);
 
     /**
-     * @brief Destroys the structure.
+     * @brief Constructs and allocates data for an oskar_Mem data structure.
+     *
+     * @details
+     * Constructs a new oskar_Mem data structure, allocating memory for it in
+     * the specified location.
+     *
+     * @param[in] other Enumerated data type of memory contents (magic number).
+     * @param[in] location Specify 0 for host memory, 1 for device memory.
+     */
+    oskar_Mem(const oskar_Mem* other, int location);
+
+    /**
+     * @brief Destroys the structure, freeing any memory held by it.
      *
      * @details
      * Destroys the structure.
+     * If the pointer is not NULL, then the memory is also freed.
      */
-    ~oskar_Ptr() {}
+    ~oskar_Mem();
+
+    /**
+     * @brief Copies the memory contents of this structure to another.
+     *
+     * @details
+     * Copies the memory contents and meta-data of this structure to another.
+     *
+     * @param[in] other Pointer to the oskar_Mem structure to copy.
+     */
+    int copy_to(oskar_Mem* other);
 #endif
 
     // If C++, then provide read-only accessor functions for the meta-data.
 #ifdef __cplusplus
     int type() const {return private_type;}
     int location() const {return private_location;}
+    int n_elements() const {return private_n_elements;}
 #endif
 };
 
@@ -104,6 +129,6 @@ enum {
     OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  // (double4c) matrix, complex double
 };
 
-typedef struct oskar_Ptr oskar_Ptr;
+typedef struct oskar_Mem oskar_Mem;
 
-#endif // OSKAR_PTR_H_
+#endif // OSKAR_MEM_H_

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_JONES_COPY_H_
-#define OSKAR_JONES_COPY_H_
+#ifndef OSKAR_MEM_ALLOC_H_
+#define OSKAR_MEM_ALLOC_H_
 
 /**
- * @file oskar_jones_copy.h
+ * @file oskar_mem_alloc.h
  */
 
 #include "oskar_global.h"
@@ -42,35 +42,25 @@ extern "C" {
 
 /**
  * @brief
- * Copies a Jones matrix data structure to another Jones matrix data structure.
+ * Allocates an OSKAR memory block.
  *
  * @details
- * This function copies a Jones matrix data structure to another Jones matrix
- * data structure. Both data structures must be of the same size and type.
+ * This function allocates memory, either on the CPU or GPU.
  *
- * @param[out] b Pointer to destination data structure to copy into.
- * @param[in]  a Pointer to source data structure to copy from.
+ * @param[in,out] mem Pointer to data structure.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
  * - A return code of 0 indicates no error.
  * - A positive return code indicates a CUDA error.
- * - A return code of -1 indicates that a is NULL, or the memory in a is
- *   unallocated.
- * - A return code of -2 indicates that b is NULL, or the memory in b is
- *   unallocated.
- * - A return code of -11 indicates that the matrix blocks have different
- *   source dimensions.
- * - A return code of -12 indicates that the matrix blocks have different
- *   station dimensions.
- * - A return code of -100 indicates a type mismatch.
- * - A return code of -1000 indicates an unknown error.
+ * - A return code of -1 indicates that the data structure is NULL.
+ * - A return code of -2 indicates that host memory allocation failed.
  */
 OSKAR_EXPORT
-int oskar_jones_copy(oskar_Jones* b, const oskar_Jones* a);
+int oskar_mem_alloc(oskar_Mem* mem);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_JONES_COPY_H_
+#endif // OSKAR_MEM_ALLOC_H_

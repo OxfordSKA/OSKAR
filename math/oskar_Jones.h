@@ -33,7 +33,7 @@
  * @file oskar_Jones.h
  */
 
-#include "utility/oskar_Ptr.h"
+#include "utility/oskar_Mem.h"
 
 /**
  * @brief Structure to hold Jones matrix meta-data.
@@ -61,7 +61,7 @@ private:
 #ifdef __cplusplus
 public:
 #endif
-    oskar_Ptr ptr; ///< Pointer to the matrix data.
+    oskar_Mem ptr; ///< Pointer to the matrix data.
 
     // If C++, then provide constructors, a destructor and methods.
 #ifdef __cplusplus
@@ -100,7 +100,7 @@ public:
     ~oskar_Jones();
 
     /**
-     * @brief Copies the memory contents and meta-data of this structure to another.
+     * @brief Copies the memory contents of this structure to another.
      *
      * @details
      * Copies the memory contents and meta-data of this structure to another.
@@ -142,7 +142,7 @@ public:
      * This sets all the Jones matrices in the structure to a real scalar
      * number.
      *
-     * @param[in] other Pointer to the oskar_Jones structure to merge.
+     * @param[in] other Pointer to the oskar_Jones structure to set.
      */
     int set_real_scalar(double scalar);
 #endif

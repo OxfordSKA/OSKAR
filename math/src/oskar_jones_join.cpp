@@ -28,11 +28,11 @@
 
 #include <cuda_runtime_api.h>
 #include "math/oskar_jones_join.h"
-#include "math/oskar_jones_element_size.h"
 #include "math/oskar_cuda_jones_mul_c2.h"
 #include "math/oskar_cuda_jones_mul_mat1_c1.h"
 #include "math/oskar_cuda_jones_mul_mat2.h"
 #include "math/oskar_cuda_jones_mul_scalar_c2.h"
+#include "utility/oskar_mem_element_size.h"
 
 extern "C"
 int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
@@ -70,9 +70,9 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     int location3 = j3->location();
 
     // Check that there is enough memory to hold the result.
-    size_t size1 = oskar_jones_element_size(type1);
-    size_t size2 = oskar_jones_element_size(type2);
-    size_t size3 = oskar_jones_element_size(type3);
+    size_t size1 = oskar_mem_element_size(type1);
+    size_t size2 = oskar_mem_element_size(type2);
+    size_t size3 = oskar_mem_element_size(type3);
     if (size3 < size2 || size3 < size1)
         return -20;
 

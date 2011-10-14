@@ -26,22 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_jones_element_size.h"
-#include "math/oskar_Jones.h"
-#include "utility/oskar_vector_types.h"
+#ifndef OSKAR_MEM_COPY_H_
+#define OSKAR_MEM_COPY_H_
+
+/**
+ * @file oskar_mem_copy.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-size_t oskar_jones_element_size(int type)
-{
-    if (type == OSKAR_SINGLE_COMPLEX)
-        return sizeof(float2);
-    else if (type == OSKAR_DOUBLE_COMPLEX)
-        return sizeof(double2);
-    else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        return sizeof(float4c);
-    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        return sizeof(double4c);
-    return 0;
+
+/**
+ * @brief
+ * Copies a block of memory to another block of memory.
+ *
+ * @details
+ * This function copies data held in one structure to another structure.
+ * Both data structures must be of the same size and type.
+ *
+ * @param[out] b Pointer to destination data structure to copy into.
+ * @param[in]  a Pointer to source data structure to copy from.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A return code of -1 indicates that a is NULL, or the memory in a is
+ *   unallocated.
+ * - A return code of -2 indicates that b is NULL, or the memory in b is
+ *   unallocated.
+ * - A return code of -10 indicates that the arrays have different dimensions.
+ * - A return code of -100 indicates a type mismatch.
+ * - A return code of -1000 indicates an unknown error.
+ */
+OSKAR_EXPORT
+int oskar_mem_copy(oskar_Mem* b, const oskar_Mem* a);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_MEM_COPY_H_
