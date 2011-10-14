@@ -54,7 +54,7 @@ classdef Jones <  handle
                         [num_sources, num_stations] = size(values);
                     end
                     obj.pointer = Jones_constructor(num_stations, ...
-                        num_sources, format, default_type, default_location);
+                        num_sources, format, class(values), default_location);
                     obj.set_values(values, format, default_location);
                 else
                     num_sources  = varargin{1};
@@ -76,7 +76,7 @@ classdef Jones <  handle
                         [num_sources, num_stations] = size(values);
                     end
                     obj.pointer = Jones_constructor(num_stations, ...
-                        num_sources, format, default_type, location);
+                        num_sources, format, class(values), location);
                     obj.set_values(values, format, location);
                 else
                     num_sources  = varargin{1};

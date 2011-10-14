@@ -32,6 +32,7 @@
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
 #include "math/oskar_jones_join.h"
+#include "utility/oskar_cuda_device_info.h"
 
 // Interface function
 void mexFunction(int num_out,  mxArray** /*out*/, int num_in, const mxArray** in)
@@ -60,6 +61,15 @@ void mexFunction(int num_out,  mxArray** /*out*/, int num_in, const mxArray** in
     if (Jthis->type() != Jother->type())
     {
         mexErrMsgTxt("Unable to join two matrices of different type");
+    }
+
+    // Check if GPU supports double before trying to join on the GPU!
+    bool double_support = oskar_cuda_device_supports_double(0);
+    bool double_type = (Jthis->type() == OSKAR_DOUBLE_COMPLEX_MATRIX ||
+            Jthis->type() == OSKAR_DOUBLE_COMPLEX) ? true : false;
+    if (double_type == true && double_support == false)
+    {
+        mexErrMsgTxt("GPU architecture does not support double precision!");
     }
 
     int err = Jthis->join_from_right(Jother);

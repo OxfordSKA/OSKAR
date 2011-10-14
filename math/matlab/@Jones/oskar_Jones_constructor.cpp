@@ -26,15 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// MATLAB mex headers.
 #include <mex.h>
 #include <matrix.h>
 #include <mat.h>
 
-// Other headers.
 #include "math/oskar_Jones.h"
 #include "math/matlab/oskar_mex_pointer.h"
 #include "math/matlab/@Jones/oskar_Jones_utility.h"
+#include "utility/oskar_cuda_device_info.h"
+#include "utility/oskar_Mem.h"
+
 #include <string.h>
 
 // Interface function.
@@ -58,21 +59,19 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int type     = get_type_id(type_string, format_string);
     int location = get_location_id(location_string);
 
-//    MATFile *pmat;
-//    pmat = matOpen("mattest.mat", "w");
-//    mxArray* testArray;
-//    testArray = mxCreateDoubleMatrix(3,3, mxREAL);
-//    double* testvalues = mxGetPr(testArray);
-//    testvalues[0] = 1.0;
-//    matPutVariable(pmat, "LocalTestArray", testArray);
-//    matPutVariableAsGlobal(pmat, "GlobalTestArray", testArray);
-//    mxDestroyArray(testArray);
-//    matClose(pmat);
+    bool double_support = oskar_cuda_device_supports_double(0);
+    if (location == GPU)
+    {
+        bool double_type = (type == OSKAR_DOUBLE || type == OSKAR_DOUBLE_COMPLEX
+                || type == OSKAR_DOUBLE_MATRIX || type == OSKAR_DOUBLE_COMPLEX_MATRIX) ? true : false;
+
+        if (double_type == true && double_support == false)
+        {
+            mexErrMsgTxt("GPU architecture does not support double precision!");
+        }
+    }
 
     // Create a new oskar_Jones structure.
-    // FIXME: Warnings/errors for double type on architectures that don't support
-    // double.
-    // FIXME: Errors warnings about running out of GPU memory.
     oskar_Jones* J = new oskar_Jones(type, num_sources, num_stations, location);
 
     // Return a pointer to the oskar_Jones structure as a mxArray object.
