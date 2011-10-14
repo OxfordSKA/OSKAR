@@ -35,7 +35,7 @@
 
 
 #include "oskar_global.h"
-#include "oskar_Ptr.h"
+#include "oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -43,18 +43,18 @@ extern "C"
 struct oskar_Station
 {
     int num_antennas;
-    oskar_Ptr antenna_x;
-    oskar_Ptr antenna_y;
-    oskar_Ptr antenna_z;
-    oskar_Ptr antenna_weight;
+    oskar_Mem antenna_x;
+    oskar_Mem antenna_y;
+    oskar_Mem antenna_z;
+    oskar_Mem antenna_weight;
 
     // amp and phase error.
 
     // Tile positions - is this the best way to do this?
     int num_tiles;
-    oskar_Ptr tile_x;
-    oskar_Ptr tile_y;
-    oskar_Ptr tile_z;
+    oskar_Mem tile_x;
+    oskar_Mem tile_y;
+    oskar_Mem tile_z;
 
     // Embedded element pattern.
     int num_element_patterns;

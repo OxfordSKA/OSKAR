@@ -35,24 +35,24 @@
 
 
 #include "oskar_global.h"
-#include "utility/oskar_Ptr.h"
+#include "utility/oskar_Mem.h"
 
 
 #ifdef __cplusplus
 extern "C"
 #endif
-struct oskar_Visibilties
+struct oskar_Visibilities
 {
     int num_samples;
 //    int num_baselines;
 //    int num_times;
-    oskar_Ptr baseline_u;
-    oskar_Ptr baseline_v;
-    oskar_Ptr baseline_w;
-    oskar_Ptr amplitude;
+    oskar_Mem baseline_u;
+    oskar_Mem baseline_v;
+    oskar_Mem baseline_w;
+    oskar_Mem amplitude;
 };
 
-typedef struct oskar_Visibilties oskar_Visibilties;
+typedef struct oskar_Visibilities oskar_Visibilities;
 
 
 #endif // OSKAR_VISIBILITIES_H_

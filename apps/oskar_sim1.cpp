@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     oskar_Jones* J;
     oskar_Sky* sky;
     oskar_Telescope* telescope;
-    oskar_Visibilties* vis;
+    oskar_Visibilities* vis;
 
     oskar_load_stations_layouts(telescope, "station_directory");
     oskar_load_station_positions(telescope, "telescope_layout_file");

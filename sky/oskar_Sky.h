@@ -35,24 +35,24 @@ extern "C"
 struct oskar_Sky
 {
     int num_sources;
-    oskar_Ptr RA;
-    oskar_Ptr Dec;
-    oskar_Ptr I;
-    oskar_Ptr Q;
-    oskar_Ptr U;
-    oskar_Ptr V;
-    oskar_Ptr reference_freq;
-    oskar_Ptr spectral_index;
+    oskar_Mem RA;
+    oskar_Mem Dec;
+    oskar_Mem I;
+    oskar_Mem Q;
+    oskar_Mem U;
+    oskar_Mem V;
+    oskar_Mem reference_freq;
+    oskar_Mem spectral_index;
 
     // Work buffers.
     // NOTE: need better name to indicate they should be treated as work buffers.
     double update_timestamp; ///< Time for which work buffer is valid.
-    oskar_Ptr rel_l;  ///< Phase centre relative direction-cosines.
-    oskar_Ptr rel_m;  ///< Phase centre relative direction-cosines.
-    oskar_Ptr rel_n;  ///< Phase centre relative direction-cosines.
-    oskar_Ptr hor_l;  ///< Horizontal coordinate system direction-cosines.
-    oskar_Ptr hor_m;  ///< Horizontal coordinate system direction-cosines.
-    oskar_Ptr hor_n;  ///< Horizontal coordinate system direction-cosines.
+    oskar_Mem rel_l;  ///< Phase centre relative direction-cosines.
+    oskar_Mem rel_m;  ///< Phase centre relative direction-cosines.
+    oskar_Mem rel_n;  ///< Phase centre relative direction-cosines.
+    oskar_Mem hor_l;  ///< Horizontal coordinate system direction-cosines.
+    oskar_Mem hor_m;  ///< Horizontal coordinate system direction-cosines.
+    oskar_Mem hor_n;  ///< Horizontal coordinate system direction-cosines.
 };
 typedef struct oskar_Sky oskar_Sky;
 

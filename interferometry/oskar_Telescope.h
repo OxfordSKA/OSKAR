@@ -49,9 +49,9 @@ struct oskar_Telescope
         // Work buffers.
         // NOTE: need better name to indicate they should be treated as work buffers.
         double update_timestamp; ///< Time for which u,v,w are valid.
-        oskar_Ptr station_u;
-        oskar_Ptr station_v;
-        oskar_Ptr station_w;
+        oskar_Mem station_u;
+        oskar_Mem station_v;
+        oskar_Mem station_w;
 };
 
 typedef struct oskar_Telescope oskar_Telescope;

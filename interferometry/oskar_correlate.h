@@ -44,7 +44,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_correlate(oskar_Visibilties* vis, oskar_Jones* J,
+int oskar_correlate(oskar_Visibilities* vis, oskar_Jones* J,
         oskar_Telescope* telescope, oskar_Sky* sky,
         double local_apparent_sideral_time);
 
