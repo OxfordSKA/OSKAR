@@ -17,7 +17,6 @@ if(BUILD_OSKAR_MS)
         src/oskar_write_ms.cpp
     )
 endif()
-
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
 
 # ==== Macros to build the oskar-lib apps module.

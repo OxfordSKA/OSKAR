@@ -6,6 +6,7 @@
 add_subdirectory(lib)
 
 # BINARY: oskar_sim1_scalar
+include_directories(${QT_INCLUDE_DIR})
 add_executable(oskar_sim1_scalar oskar_sim1_scalar.cpp)
 target_link_libraries(oskar_sim1_scalar oskar oskar_apps ${QT_QTCORE_LIBRARY})
 set_target_properties(oskar_sim1_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
