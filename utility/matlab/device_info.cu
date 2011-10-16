@@ -33,17 +33,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         cudaSetDevice(i);
         cudaDeviceSynchronize();
 
-        // error_code
+        // Get the current CUDA error status.
         cudaError_t error = cudaPeekAtLastError();
         mxArray* error_code = mxCreateNumericMatrix(1,1, mxINT32_CLASS, mxREAL);
         *(int*)mxGetData(error_code) = (int)error;
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "error_code"), error_code);
-
-        // error_string
         mxArray* error_message = mxCreateString(cudaGetErrorString(error));
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "error_message"), error_message);
 
-        // double support
+        // Find if double is supported.
         cudaDeviceProp device_prop;
         cudaGetDeviceProperties(&device_prop, i);
         mxArray* double_support = mxCreateNumericMatrix(1,1, mxLOGICAL_CLASS, mxREAL);
@@ -53,8 +51,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             *mxGetLogicals(double_support) = false;
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "double_support"), double_support);
 
-        // Get memory info.
-        mxArray* mem_free = mxCreateNumericMatrix(1,1, mxINT64_CLASS, mxREAL);
+        // Get memory into and populate mem_free and mem_total fields.
+        mxArray* mem_free  = mxCreateNumericMatrix(1,1, mxINT64_CLASS, mxREAL);
         mxArray* mem_total = mxCreateNumericMatrix(1,1, mxINT64_CLASS, mxREAL);
         size_t* free  = (size_t*)mxGetData(mem_free);
         size_t* total = (size_t*)mxGetData(mem_total);
@@ -62,4 +60,5 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_free"), mem_free);
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_total"), mem_total);
     }
+    cudaSetDevice(0);
 }
