@@ -34,8 +34,64 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+struct oskar_SkyModel
+{
+#ifdef __cplusplus
+    private:
+#endif
+        int private_num_sources;
+
+#ifdef __cplusplus
+    public:
+#endif
+        oskar_Mem RA;
+        oskar_Mem Dec;
+        oskar_Mem I;
+        oskar_Mem Q;
+        oskar_Mem U;
+        oskar_Mem V;
+        oskar_Mem reference_freq;
+        oskar_Mem spectral_index;
+
+        // Work buffers.
+        // NOTE: need better name to indicate they should be treated as work buffers.
+        double update_timestamp; ///< Time for which work buffer is valid.
+        oskar_Mem rel_l;  ///< Phase centre relative direction-cosines.
+        oskar_Mem rel_m;  ///< Phase centre relative direction-cosines.
+        oskar_Mem rel_n;  ///< Phase centre relative direction-cosines.
+        oskar_Mem hor_l;  ///< Horizontal coordinate system direction-cosines.
+        oskar_Mem hor_m;  ///< Horizontal coordinate system direction-cosines.
+        oskar_Mem hor_n;  ///< Horizontal coordinate system direction-cosines.
+
+#ifdef __cplusplus
+    public:
+        oskar_SkyModel(const int num_sources, const int type, const int location);
+        oskar_SkyModel(const oskar_SkyModel* sky, const int location);
+        oskar_SkyModel(const char* filename, const int type, const int location);
+        ~oskar_SkyModel();
+
+        int load(const char* filename, const int type, const int location);
+
+        int num_sources() const { return private_num_sources; }
+        int type() const { return RA.type(); }
+        int location() const { return RA.location(); }
+#endif
+};
+typedef struct oskar_SkyModel oskar_SkyModel;
 
 
+
+
+
+
+
+
+// ==================== DEPRECATED ============================================
 #ifdef __cplusplus
 extern "C" {
 #endif

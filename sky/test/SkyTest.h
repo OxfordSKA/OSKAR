@@ -55,13 +55,6 @@ class SkyTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        /// Set up context before running a test.
-        void setUp();
-
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
         /// Test methods.
         void test_rand();
         void test_generate_random();

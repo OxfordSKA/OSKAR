@@ -44,23 +44,6 @@ using namespace std;
 
 /**
  * @details
- * Sets up the context before running each test method.
- */
-void SkyTest::setUp()
-{
-}
-
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void SkyTest::tearDown()
-{
-}
-
-
-/**
- * @details
  * Test of generating a random number in the range 0.0 to 1.0
  */
 void SkyTest::test_rand()
@@ -215,12 +198,12 @@ void SkyTest::test_angles_from_lm()
 
     oskar_angles_from_lm_d(num_positions, ra0, dec0, &l[0], &m[0], &ra[0], &dec[0]);
 
-    cout << endl;
-    for (unsigned i = 0; i < num_positions; ++i)
-    {
-        cout << setprecision(8);
-        cout << "(ra, dec) = " << ra[i] * (180.0 / M_PI);
-        cout << ", " << dec[i] * (180.0 / M_PI) << endl;
-    }
+//    cout << endl;
+//    for (unsigned i = 0; i < num_positions; ++i)
+//    {
+//        cout << setprecision(8);
+//        cout << "(ra, dec) = " << ra[i] * (180.0 / M_PI);
+//        cout << ", " << dec[i] * (180.0 / M_PI) << endl;
+//    }
 }
 

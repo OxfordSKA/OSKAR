@@ -42,7 +42,7 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-int oskar_evaluate_jones_K(oskar_Jones* K, oskar_Sky* sky,
+int oskar_evaluate_jones_K(oskar_Jones* K, oskar_SkyModel* sky,
         oskar_Telescope* telescope, double local_apparent_sideral_time);
 
 #endif // OSKAR_EVALUATE_JONES_K_H_

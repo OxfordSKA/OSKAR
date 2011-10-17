@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     oskar_Jones* E;
     oskar_Jones* K;
     oskar_Jones* J;
-    oskar_Sky* sky;
+    oskar_SkyModel* sky;
     oskar_Telescope* telescope;
     oskar_Visibilities* vis;
 

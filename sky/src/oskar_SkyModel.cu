@@ -28,11 +28,92 @@
 
 #include "sky/oskar_SkyModel.h"
 #include <cuda_runtime_api.h>
+#include <cstdio>
 
+
+oskar_SkyModel::oskar_SkyModel(const int num_sources, const int type, const int location)
+: private_num_sources(num_sources),
+  RA(type, location, num_sources),
+  Dec(type, location, num_sources),
+  I(type, location, num_sources),
+  Q(type, location, num_sources),
+  U(type, location, num_sources),
+  V(type, location, num_sources),
+  reference_freq(type, location, num_sources),
+  spectral_index(type, location, num_sources),
+  update_timestamp(0.0),
+  rel_l(type, location, num_sources),
+  rel_m(type, location, num_sources),
+  rel_n(type, location, num_sources),
+  hor_l(type, location, num_sources),
+  hor_m(type, location, num_sources),
+  hor_n(type, location, num_sources)
+{
+}
+
+
+oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* sky, const int location)
+: private_num_sources(sky->num_sources()),
+  RA(&sky->RA, location),
+  Dec(&sky->Dec, location),
+  I(&sky->I, location),
+  Q(&sky->Q, location),
+  U(&sky->U, location),
+  V(&sky->V, location),
+  reference_freq(&sky->reference_freq, location),
+  spectral_index(&sky->spectral_index, location),
+  update_timestamp(sky->update_timestamp),
+  rel_l(&sky->rel_l, location),
+  rel_m(&sky->rel_m, location),
+  rel_n(&sky->rel_n, location),
+  hor_l(&sky->rel_l, location),
+  hor_m(&sky->rel_m, location),
+  hor_n(&sky->rel_n, location)
+{
+}
+
+oskar_SkyModel::oskar_SkyModel(const char* filename, const int type, const int location)
+: private_num_sources(0),
+  RA(type, location, 0),
+  Dec(type, location, 0),
+  I(type, location, 0),
+  Q(type, location, 0),
+  U(type, location, 0),
+  V(type, location, 0),
+  reference_freq(type, location, 0),
+  spectral_index(type, location, 0),
+  update_timestamp(0.0),
+  rel_l(type, location, 0),
+  rel_m(type, location, 0),
+  rel_n(type, location, 0),
+  hor_l(type, location, 0),
+  hor_m(type, location, 0),
+  hor_n(type, location, 0)
+{
+}
+
+oskar_SkyModel::~oskar_SkyModel()
+{
+
+}
+
+
+int oskar_SkyModel::load(const char* filename, const int type, const int location)
+{
+
+    return 0;
+}
+
+
+
+
+
+
+
+// ========== DEPRECATED ======================================================
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 void oskar_sky_model_global_copy_to_gpu_d(const oskar_SkyModelGlobal_d* h_sky,
         oskar_SkyModelGlobal_d* hd_sky)
 {

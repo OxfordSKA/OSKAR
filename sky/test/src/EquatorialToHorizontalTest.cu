@@ -37,22 +37,6 @@
 
 /**
  * @details
- * Sets up the context before running each test method.
- */
-void EquatorialToHorizontalTest::setUp()
-{
-}
-
-/**
- * @details
- * Clean up routine called after each test is run.
- */
-void EquatorialToHorizontalTest::tearDown()
-{
-}
-
-/**
- * @details
  * Test conversion of J2000 to horizontal coordinates.
  */
 void EquatorialToHorizontalTest::test()
@@ -134,7 +118,7 @@ void EquatorialToHorizontalTest::test_last()
     cudaFree(d_el);
 
     // Print the result.
-    printf("Az: %.5f, El: %.5f\n", a * 180.0 / M_PI, e * 180.0 / M_PI);
+//    printf("Az: %.5f, El: %.5f\n", a * 180.0 / M_PI, e * 180.0 / M_PI);
 //    CPPUNIT_ASSERT_DOUBLES_EQUAL(104.53, a * 180.0 / M_PI, 0.01);
 //    CPPUNIT_ASSERT_DOUBLES_EQUAL(67.69,  e * 180.0 / M_PI, 0.01);
 }
@@ -143,7 +127,6 @@ void EquatorialToHorizontalTest::test_last()
 
 void EquatorialToHorizontalTest::test_wrapper()
 {
-    printf("--- EquatorialToHorizontalTest::test_wrapper() ---\n");
     double ra = 0, dec = 0, lst = 0, lat = 0, az = 0, el = 0;
     int error = 0;
     for (int j = 0; j < 100000; ++j)
@@ -158,5 +141,4 @@ void EquatorialToHorizontalTest::test_wrapper()
             break;
         }
     }
-    printf("--- done ---\n");
 }

@@ -116,6 +116,7 @@ public:
     int n_elements() const {return private_n_elements;}
 #endif
 };
+typedef struct oskar_Mem oskar_Mem;
 
 // Define an enumerator for the type.
 enum {
@@ -129,6 +130,9 @@ enum {
     OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  // (double4c) matrix, complex double
 };
 
-typedef struct oskar_Mem oskar_Mem;
+enum {
+    OSKAR_LOCATION_CPU = 0,
+    OSKAR_LOCATION_GPU = 1
+};
 
 #endif // OSKAR_MEM_H_

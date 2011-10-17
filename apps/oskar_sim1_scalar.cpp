@@ -116,7 +116,6 @@ int sim1_d(const oskar_Settings& settings)
     }
 
     // ============== Simulation loop =========================================
-    int error_code = 0;
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
         double frequency = settings.obs().frequency(i);
@@ -128,7 +127,7 @@ int sim1_d(const oskar_Settings& settings)
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_d(num_baselines * settings.obs().num_vis_dumps(), &vis);
 
-        error_code = oskar_interferometer1_scalar_d(telescope, stations, sky,
+        oskar_interferometer1_scalar_d(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
                 settings.obs().start_time_utc_mjd(),
                 settings.obs().obs_length_days(),
@@ -206,7 +205,6 @@ int sim1_f(const oskar_Settings& settings)
     }
 
     // ============== Simulation loop =========================================
-    int error_code = 0;
     for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
     {
         float frequency = settings.obs().frequency(i);
@@ -218,7 +216,7 @@ int sim1_f(const oskar_Settings& settings)
         int num_baselines = num_stations * (num_stations-1) / 2;
         oskar_allocate_vis_data_f(num_baselines * settings.obs().num_vis_dumps(), &vis);
 
-        error_code = oskar_interferometer1_scalar_f(telescope, stations, sky,
+        oskar_interferometer1_scalar_f(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
                 settings.obs().start_time_utc_mjd(),
                 settings.obs().obs_length_days(),

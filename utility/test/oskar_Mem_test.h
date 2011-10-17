@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EQUATORIAL_TO_HORIZONTAL_TEST_H_
-#define EQUATORIAL_TO_HORIZONTAL_TEST_H_
+#ifndef OSKAR_MEM_TEST_H_
+#define OSKAR_MEM_TEST_H_
 
 /**
- * @file EquatorialToHorizontalTest.h
+ * @file oskar_Mem_test
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,28 +42,19 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class EquatorialToHorizontalTest : public CppUnit::TestFixture
+class oskar_Mem_test : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(EquatorialToHorizontalTest);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST(test_last);
-//        CPPUNIT_TEST(test_wrapper);
+        CPPUNIT_TEST_SUITE(oskar_Mem_test);
+        CPPUNIT_TEST(test_realloc);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-    public:
-        /// Test methods.
-        void test();
-
-        // Test using LAST.
-        void test_last();
-
-        // Test the C wrapper.
-        void test_wrapper();
+        /// Test method.
+        void test_realloc();
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(EquatorialToHorizontalTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Mem_test);
 
-#endif // EQUATORIAL_TO_HORIZONTAL_TEST_H_
+#endif // OSKAR_MEM_TEST_H_

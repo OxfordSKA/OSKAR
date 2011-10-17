@@ -8,6 +8,7 @@ if (CPPUNIT_FOUND)
     set(utility_test_SRC
         src/CppUnitMain.cpp
         src/LoadCoordinatesTest.cpp
+        src/oskar_Mem_test.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

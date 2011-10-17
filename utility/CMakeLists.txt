@@ -12,6 +12,7 @@ set(utility_SRC
     src/oskar_mem_copy.cpp
     src/oskar_mem_element_size.c
     src/oskar_mem_free.cpp
+    src/oskar_mem_realloc.c
     src/oskar_Mem.cpp
 )
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)

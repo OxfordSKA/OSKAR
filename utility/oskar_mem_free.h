@@ -34,7 +34,7 @@
  */
 
 #include "oskar_global.h"
-#include "math/oskar_Jones.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {

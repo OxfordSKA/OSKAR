@@ -36,10 +36,22 @@
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT int oskar_SkyModel_load(const char* filename, oskar_SkyModel* sky);
+
+
+
+
+
+
+// ========== DEPRECATED ======================================================
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /**
  * @brief Loads sources from a plain text source file into an oskar global sky

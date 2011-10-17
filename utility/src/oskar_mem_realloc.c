@@ -26,34 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_STRUCT_H_
-#define OSKAR_SKY_STRUCT_H_
+#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_element_size.h"
 
-#ifdef __cplusplus
-extern "C"
-#endif
-struct oskar_Sky
+#include <cuda_runtime_api.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 {
-    int num_sources;
-    oskar_Mem RA;
-    oskar_Mem Dec;
-    oskar_Mem I;
-    oskar_Mem Q;
-    oskar_Mem U;
-    oskar_Mem V;
-    oskar_Mem reference_freq;
-    oskar_Mem spectral_index;
+    if (mem == NULL)
+    {
+        return -1;
+    }
 
-    // Work buffers.
-    // NOTE: need better name to indicate they should be treated as work buffers.
-    double update_timestamp; ///< Time for which work buffer is valid.
-    oskar_Mem rel_l;  ///< Phase centre relative direction-cosines.
-    oskar_Mem rel_m;  ///< Phase centre relative direction-cosines.
-    oskar_Mem rel_n;  ///< Phase centre relative direction-cosines.
-    oskar_Mem hor_l;  ///< Horizontal coordinate system direction-cosines.
-    oskar_Mem hor_m;  ///< Horizontal coordinate system direction-cosines.
-    oskar_Mem hor_n;  ///< Horizontal coordinate system direction-cosines.
-};
-typedef struct oskar_Sky oskar_Sky;
-
-#endif // OSKAR_SKY_STRUCT_H_
+    size_t element_type = oskar_mem_element_size(mem->private_type);
+    size_t new_size = num_elements * element_type;
+    if (mem->private_location == OSKAR_LOCATION_CPU)
+    {
+        mem->data = realloc(mem->data, new_size);
+        mem->private_n_elements = num_elements;
+    }
+    else if (mem->private_location == OSKAR_LOCATION_GPU)
+    {
+        size_t old_size = mem->private_n_elements * element_type;
+        void* d_mem_new = NULL;
+        cudaMalloc(&d_mem_new, new_size);
+        cudaMemcpy(d_mem_new, mem->data, old_size, cudaMemcpyDeviceToDevice);
+        cudaFree(mem->data);
+        mem->data = d_mem_new;
+    }
+    else
+    {
+        return -1;
+    }
+    return 0;
+}

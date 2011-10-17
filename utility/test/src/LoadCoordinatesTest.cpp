@@ -30,7 +30,7 @@
 #include "utility/oskar_load_csv_coordinates_2d.h"
 #include "utility/oskar_load_csv_coordinates_3d.h"
 
-#define TIMER_ENABLE 1
+//#define TIMER_ENABLE 1
 #include "utility/timer.h"
 
 #include <cstdio>
