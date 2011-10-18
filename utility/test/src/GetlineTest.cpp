@@ -26,81 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/test/LoadCoordinatesTest.h"
-#include "utility/oskar_load_csv_coordinates_2d.h"
-#include "utility/oskar_load_csv_coordinates_3d.h"
-
-//#define TIMER_ENABLE 1
-#include "utility/timer.h"
+#include "utility/test/GetlineTest.h"
+#include "utility/oskar_getline.h"
 
 #include <cstdio>
 #include <cstdlib>
 
-void LoadCoordinatesTest::test_load_2d()
+void GetlineTest::test_method()
 {
-    const char* filename = "temp_coordinates.dat";
+	// Write some dummy data.
+    const char* filename = "temp_lines.dat";
     FILE* file = fopen(filename, "w");
-    if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
+    if (file == NULL)
+    	CPPUNIT_FAIL("Unable to create test file");
     int num_coords = 1000;
     for (int i = 0; i < num_coords; ++i)
-    {
-        fprintf(file, "%f,%f\n", i/10.0, i/20.0);
-    }
+        fprintf(file, "%.12f,%.12f\n",
+        		(double)i/num_coords, (double)i/(10*num_coords));
     fclose(file);
 
-    double* x = NULL;
-    double* y = NULL;
-    unsigned n;
-    TIMER_START
-    oskar_load_csv_coordinates_2d_d(filename, &n, &x, &y);
-    TIMER_STOP("Loaded %d 2D coordinate pairs", n)
-
-    // Check the data loaded correctly.
-    CPPUNIT_ASSERT_EQUAL(num_coords, (int)n);
+    // Read it in again.
+    char* line = NULL;
+    size_t n = 0;
+    file = fopen(filename, "r");
+    char temp[1024];
     for (int i = 0; i < num_coords; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0, x[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0, y[i], 1.0e-6);
-    }
+    	// Read each line.
+    	int num_chars = oskar_getline(&line, &n, file);
 
-    // Cleanup.
-    free(x);
-    free(y);
-    remove(filename);
-}
+    	// Assert that number of characters per line is correct.
+    	CPPUNIT_ASSERT_EQUAL(30, num_chars);
+        sprintf(temp, "%.12f,%.12f\n",
+        		(double)i/num_coords, (double)i/(10*num_coords));
 
-void LoadCoordinatesTest::test_load_3d()
-{
-    const char* filename = "temp_coordinates.dat";
-    FILE* file = fopen(filename, "w");
-    if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
-    int num_coords = 1000;
-    for (int i = 0; i < num_coords; ++i)
-    {
-        fprintf(file, "%f,%f,%f\n", i/10.0, i/20.0, i/30.0);
+        // Assert that the strings are the same.
+    	int flag = strcmp(temp, line);
+    	CPPUNIT_ASSERT_EQUAL(0, flag);
     }
+    free(line);
     fclose(file);
 
-    double* x = NULL;
-    double* y = NULL;
-    double* z = NULL;
-    unsigned n;
-    TIMER_START
-    oskar_load_csv_coordinates_3d_d(filename, &n, &x, &y, &z);
-    TIMER_STOP("Loaded %d 3D coordinate pairs", n)
-
-    // Check the data loaded correctly.
-    CPPUNIT_ASSERT_EQUAL(num_coords, (int)n);
-    for (int i = 0; i < num_coords; ++i)
-    {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0, x[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0, y[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/30.0, z[i], 1.0e-6);
-    }
-
     // Cleanup.
-    free(x);
-    free(y);
-    free(z);
     remove(filename);
 }
