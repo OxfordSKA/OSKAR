@@ -56,7 +56,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxArray* mem_total = mxCreateNumericMatrix(1,1, mxINT64_CLASS, mxREAL);
         size_t* free  = (size_t*)mxGetData(mem_free);
         size_t* total = (size_t*)mxGetData(mem_total);
-        cudaMemGetInfo(&free[i], &total[i]);
+        cudaMemGetInfo(free, total);
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_free"), mem_free);
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_total"), mem_total);
     }
