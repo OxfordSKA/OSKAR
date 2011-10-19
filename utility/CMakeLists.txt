@@ -10,6 +10,7 @@ set(utility_SRC
     src/oskar_load_csv_coordinates_2d.c
     src/oskar_load_csv_coordinates_3d.c
     src/oskar_mem_alloc.cpp
+    src/oskar_mem_append.c
     src/oskar_mem_copy.cpp
     src/oskar_mem_element_size.c
     src/oskar_mem_free.cpp

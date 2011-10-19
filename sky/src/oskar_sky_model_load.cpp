@@ -36,32 +36,15 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_SkyModel_load(const char* filename, oskar_SkyModel* sky)
+int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
 {
     FILE* file = fopen(filename, "r");
-    if (file == NULL)
-        return 1;
+    if (file == NULL) return -1;
 
     const double deg2rad = 0.0174532925199432957692;
-    int num_sources = sky->num_sources();
-    if (num_sources != 0)
-    {
-        fclose(file);
-        return 2;
-    }
-
-    int temp_num_sources = 0;
-    void* temp_RA  = NULL;
-    void* temp_Dec = NULL;
-    void* temp_I   = NULL;
-    void* temp_Q   = NULL;
-    void* temp_U   = NULL;
-    void* temp_V   = NULL;
-    void* temp_reference_freq = NULL;
-    void* temp_spectral_index = NULL;
-    char  temp_line[1024];
-
     int type = sky->type();
+    char temp_line[1024];
+    oskar_SkyModel temp_sky(0, type, OSKAR_LOCATION_CPU);
 
     if (type == OSKAR_DOUBLE)
     {
@@ -75,27 +58,13 @@ int oskar_SkyModel_load(const char* filename, oskar_SkyModel* sky)
                     &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
             if (read != 8) continue;
             // Ensure enough space in arrays.
-            if (temp_num_sources % 100 == 0)
+            if (temp_sky.num_sources % 100 == 0)
             {
-                size_t mem_size = ((temp_num_sources) + 100) * sizeof(double);
-                temp_RA   = realloc(temp_RA,  mem_size);
-                temp_Dec  = realloc(temp_Dec, mem_size);
-                temp_I    = realloc(temp_I,   mem_size);
-                temp_Q    = realloc(temp_Q,   mem_size);
-                temp_U    = realloc(temp_U,   mem_size);
-                temp_V    = realloc(temp_V,   mem_size);
-                temp_reference_freq = realloc(temp_reference_freq, mem_size);
-                temp_spectral_index = realloc(temp_spectral_index, mem_size);
+                temp_sky.resize(temp_sky.num_sources + 100);
             }
-            static_cast<double*>(temp_RA)[temp_num_sources]  = ra * deg2rad;
-            static_cast<double*>(temp_Dec)[temp_num_sources] = dec * deg2rad;
-            static_cast<double*>(temp_I)[temp_num_sources] = I;
-            static_cast<double*>(temp_Q)[temp_num_sources] = Q;
-            static_cast<double*>(temp_U)[temp_num_sources] = U;
-            static_cast<double*>(temp_V)[temp_num_sources] = V;
-            static_cast<double*>(temp_reference_freq)[temp_num_sources] = ref_freq;
-            static_cast<double*>(temp_spectral_index)[temp_num_sources] = spectral_index;
-            ++temp_num_sources;
+            temp_sky.set_source(temp_sky.num_sources, ra * deg2rad, dec * deg2rad,
+                    I, Q, U, V, ref_freq, spectral_index);
+            ++(temp_sky.num_sources);
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -110,27 +79,13 @@ int oskar_SkyModel_load(const char* filename, oskar_SkyModel* sky)
                     &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
             if (read != 8) continue;
             // Ensure enough space in arrays.
-            if (temp_num_sources % 100 == 0)
+            if (temp_sky.num_sources % 100 == 0)
             {
-                size_t mem_size = ((temp_num_sources) + 100) * sizeof(float);
-                temp_RA   = realloc(temp_RA,  mem_size);
-                temp_Dec  = realloc(temp_Dec, mem_size);
-                temp_I    = realloc(temp_I,   mem_size);
-                temp_Q    = realloc(temp_Q,   mem_size);
-                temp_U    = realloc(temp_U,   mem_size);
-                temp_V    = realloc(temp_V,   mem_size);
-                temp_reference_freq = realloc(temp_reference_freq, mem_size);
-                temp_spectral_index = realloc(temp_spectral_index, mem_size);
+                temp_sky.resize(temp_sky.num_sources + 100);
             }
-            static_cast<float*>(temp_RA)[temp_num_sources]  = ra * deg2rad;
-            static_cast<float*>(temp_Dec)[temp_num_sources] = dec * deg2rad;
-            static_cast<float*>(temp_I)[temp_num_sources] = I;
-            ((float*)temp_Q)[temp_num_sources] = Q;
-            static_cast<float*>(temp_U)[temp_num_sources] = U;
-            static_cast<float*>(temp_V)[temp_num_sources] = V;
-            static_cast<float*>(temp_reference_freq)[temp_num_sources] = ref_freq;
-            static_cast<float*>(temp_spectral_index)[temp_num_sources] = spectral_index;
-            ++temp_num_sources;
+            temp_sky.set_source(temp_sky.num_sources, ra * deg2rad, dec * deg2rad,
+                    I, Q, U, V, ref_freq, spectral_index);
+            ++(temp_sky.num_sources);
         }
     }
     else
@@ -139,8 +94,9 @@ int oskar_SkyModel_load(const char* filename, oskar_SkyModel* sky)
         return 4;
     }
 
-    fclose(file);
+    sky->append(&temp_sky);
 
+    fclose(file);
     return 0;
 }
 

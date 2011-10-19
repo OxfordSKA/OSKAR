@@ -42,13 +42,9 @@ extern "C"
 struct oskar_SkyModel
 {
 #ifdef __cplusplus
-    private:
-#endif
-        int private_num_sources;
-
-#ifdef __cplusplus
     public:
 #endif
+        int num_sources;
         oskar_Mem RA;
         oskar_Mem Dec;
         oskar_Mem I;
@@ -73,11 +69,18 @@ struct oskar_SkyModel
         oskar_SkyModel(const int num_sources, const int type, const int location);
         oskar_SkyModel(const oskar_SkyModel* sky, const int location);
         oskar_SkyModel(const char* filename, const int type, const int location);
+
         ~oskar_SkyModel();
 
-        int load(const char* filename, const int type, const int location);
+        int load(const char* filename);
 
-        int num_sources() const { return private_num_sources; }
+        int resize(int num_sources);
+
+        int set_source(int index, double ra, double dec, double I, double Q,
+                double U, double V, double spectral_index, double ref_frequency);
+
+        int append(const oskar_SkyModel* sky);
+
         int type() const { return RA.type(); }
         int location() const { return RA.location(); }
 #endif

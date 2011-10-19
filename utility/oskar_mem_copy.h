@@ -48,23 +48,23 @@ extern "C" {
  * This function copies data held in one structure to another structure.
  * Both data structures must be of the same size and type.
  *
- * @param[out] b Pointer to destination data structure to copy into.
- * @param[in]  a Pointer to source data structure to copy from.
+ * @param[out] dst Pointer to destination data structure to copy into.
+ * @param[in]  src Pointer to source data structure to copy from.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
  * - A return code of 0 indicates no error.
  * - A positive return code indicates a CUDA error.
- * - A return code of -1 indicates that a is NULL, or the memory in a is
+ * - A return code of -1 indicates that a is NULL, or the memory in src is
  *   unallocated.
- * - A return code of -2 indicates that b is NULL, or the memory in b is
+ * - A return code of -2 indicates that b is NULL, or the memory in dst is
  *   unallocated.
  * - A return code of -10 indicates that the arrays have different dimensions.
  * - A return code of -100 indicates a type mismatch.
  * - A return code of -1000 indicates an unknown error.
  */
 OSKAR_EXPORT
-int oskar_mem_copy(oskar_Mem* b, const oskar_Mem* a);
+int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);
 
 #ifdef __cplusplus
 }

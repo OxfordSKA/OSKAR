@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ *    and/or src materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,39 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_element_size.h"
+#include "oskar_global.h"
+#include "sky/oskar_sky_model_resize.h"
+#include "utility/oskar_Mem.h"
 
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
+#ifdef __cplusplus
+extern "C"
+#endif
+int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources)
 {
-    if (mem == NULL) return -1;
-
-    size_t element_type = oskar_mem_element_size(mem->private_type);
-    size_t new_size = num_elements * element_type;
     int error = 0;
-    if (mem->private_location == OSKAR_LOCATION_CPU)
-    {
-        mem->data = realloc(mem->data, new_size);
-        mem->private_n_elements = num_elements;
-    }
-    else if (mem->private_location == OSKAR_LOCATION_GPU)
-    {
-        size_t old_size = mem->private_n_elements * element_type;
-        void* d_mem_new = NULL;
-        cudaMalloc(&d_mem_new, new_size);
-        cudaMemcpy(d_mem_new, mem->data, old_size, cudaMemcpyDeviceToDevice);
-        cudaFree(mem->data);
-        mem->data = d_mem_new;
-        error = cudaPeekAtLastError();
-        mem->private_n_elements = num_elements;
-    }
-    else
-    {
-        return -2;
-    }
+
+    sky->num_sources = num_sources;
+
+    // Resize the model data.
+    error = sky->RA.resize(num_sources);
+    if (error) return error;
+    error = sky->Dec.resize(num_sources);
+    if (error) return error;
+    error = sky->I.resize(num_sources);
+    if (error) return error;
+    error = sky->Q.resize(num_sources);
+    if (error) return error;
+    error = sky->U.resize(num_sources);
+    if (error) return error;
+    error = sky->V.resize(num_sources);
+    if (error) return error;
+    error = sky->spectral_index.resize(num_sources);
+    if (error) return error;
+    error = sky->reference_freq.resize(num_sources);
+    if (error) return error;
+
+    // Resize the work buffers.
+    error = sky->rel_l.resize(num_sources);
+    if (error) return error;
+    error = sky->rel_m.resize(num_sources);
+    if (error) return error;
+    error = sky->rel_n.resize(num_sources);
+    if (error) return error;
+    error = sky->hor_l.resize(num_sources);
+    if (error) return error;
+    error = sky->hor_m.resize(num_sources);
+    if (error) return error;
+    error = sky->hor_n.resize(num_sources);
+    if (error) return error;
+
     return error;
 }
+

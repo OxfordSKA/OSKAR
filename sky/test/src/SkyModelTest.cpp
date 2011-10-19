@@ -91,14 +91,15 @@ void SkyModelTest::test_load_new()
     fclose(file);
 
 
-    enum { CPU = 0, GPU = 1 };
-    num_sources = 0;
-    oskar_SkyModel* sky = new oskar_SkyModel(num_sources, OSKAR_SINGLE, CPU);
-
-    int err = oskar_SkyModel_load(filename, sky);
+    oskar_SkyModel* sky = new oskar_SkyModel(0, OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+    int err = oskar_sky_model_load(filename, sky);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("oskar_SkyModel_load failed", 0, err);
 
+    printf("%i\n", sky->RA.n_elements());
 
+    CPPUNIT_ASSERT_EQUAL(num_sources, sky->num_sources);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky->type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, sky->location());
 
 
 //    oskar_SkyModelGlobal_d sky;

@@ -11,6 +11,11 @@
 #include <cuda_runtime_api.h>
 #include <vector>
 
+void cleanup(void)
+{
+    cudaDeviceReset();
+}
+
 // Interface function
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
@@ -20,9 +25,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgTxt("Usage: info = device_info()");
     }
 
+    int device_id = 0;
+    cudaGetDevice(&device_id);
+
+    mexAtExit(cleanup);
+
     int device_count = 0;
     cudaGetDeviceCount(&device_count);
-
     const char* fields[5] = { "error_code", "error_message", "double_support",
             "mem_free", "mem_total" };
     out[0] = mxCreateStructMatrix(device_count, 1, 5, fields);
@@ -60,5 +69,5 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_free"), mem_free);
         mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_total"), mem_total);
     }
-    cudaSetDevice(0);
+    cudaSetDevice(device_id);
 }

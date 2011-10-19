@@ -26,39 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_mem_append.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_Mem.h"
 
 #include <cuda_runtime_api.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
+int oskar_mem_append(oskar_Mem* to, const void* from, int location, int num_elements)
 {
-    if (mem == NULL) return -1;
+    if (to == NULL)   return -1;
+    if (from == NULL) return -2;
 
-    size_t element_type = oskar_mem_element_size(mem->private_type);
-    size_t new_size = num_elements * element_type;
+    // Memory size being appended and offset into memory to append to.
+    size_t element_size = oskar_mem_element_size(to->private_type);
+    size_t mem_size = num_elements * element_size;
+    size_t offset_bytes = to->private_n_elements * element_size;
+
+    // Reallocate the memory pointer so it is big enough to append to.
     int error = 0;
-    if (mem->private_location == OSKAR_LOCATION_CPU)
+    error = oskar_mem_realloc(to, num_elements + to->private_n_elements);
+
+    // Append to the memory.
+    if (location == OSKAR_LOCATION_CPU)
     {
-        mem->data = realloc(mem->data, new_size);
-        mem->private_n_elements = num_elements;
+        if (to->private_location == OSKAR_LOCATION_CPU)
+            memcpy((char*)(to->data) + offset_bytes, from, mem_size);
+        else
+            cudaMemcpy((char*)(to->data) + offset_bytes, from, mem_size, cudaMemcpyHostToDevice);
     }
-    else if (mem->private_location == OSKAR_LOCATION_GPU)
+    else if (location == OSKAR_LOCATION_GPU)
     {
-        size_t old_size = mem->private_n_elements * element_type;
-        void* d_mem_new = NULL;
-        cudaMalloc(&d_mem_new, new_size);
-        cudaMemcpy(d_mem_new, mem->data, old_size, cudaMemcpyDeviceToDevice);
-        cudaFree(mem->data);
-        mem->data = d_mem_new;
-        error = cudaPeekAtLastError();
-        mem->private_n_elements = num_elements;
+        if (to->private_location == OSKAR_LOCATION_CPU)
+            cudaMemcpy((char*)(to->data) + offset_bytes, from, mem_size, cudaMemcpyDeviceToHost);
+        else
+            cudaMemcpy((char*)(to->data) + offset_bytes, from, mem_size, cudaMemcpyDeviceToDevice);
     }
     else
     {
-        return -2;
+        return -3;
     }
     return error;
 }

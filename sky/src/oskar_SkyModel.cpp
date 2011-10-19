@@ -27,12 +27,15 @@
  */
 
 #include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_append.h"
+#include "sky/oskar_sky_model_resize.h"
+#include "sky/oskar_sky_model_load.h"
 #include <cuda_runtime_api.h>
 #include <cstdio>
 
 
 oskar_SkyModel::oskar_SkyModel(const int num_sources, const int type, const int location)
-: private_num_sources(num_sources),
+: num_sources(num_sources),
   RA(type, location, num_sources),
   Dec(type, location, num_sources),
   I(type, location, num_sources),
@@ -53,7 +56,7 @@ oskar_SkyModel::oskar_SkyModel(const int num_sources, const int type, const int 
 
 
 oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* sky, const int location)
-: private_num_sources(sky->num_sources()),
+: num_sources(sky->num_sources),
   RA(&sky->RA, location),
   Dec(&sky->Dec, location),
   I(&sky->I, location),
@@ -72,8 +75,8 @@ oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* sky, const int location)
 {
 }
 
-oskar_SkyModel::oskar_SkyModel(const char* filename, const int type, const int location)
-: private_num_sources(0),
+oskar_SkyModel::oskar_SkyModel(const char* /*filename*/, const int type, const int location)
+: num_sources(0),
   RA(type, location, 0),
   Dec(type, location, 0),
   I(type, location, 0),
@@ -94,23 +97,88 @@ oskar_SkyModel::oskar_SkyModel(const char* filename, const int type, const int l
 
 oskar_SkyModel::~oskar_SkyModel()
 {
-
 }
 
 
-int oskar_SkyModel::load(const char* filename, const int type, const int location)
+int oskar_SkyModel::load(const char* /*filename*/)
 {
-
     return 0;
 }
 
 
+int oskar_SkyModel::resize(int num_sources)
+{
+    return oskar_sky_model_resize(this, num_sources);
+}
+
+
+int oskar_SkyModel::set_source(int index, double ra, double dec, double I,
+        double Q, double U, double V, double spectral_index,
+        double ref_frequency)
+{
+    if (index >= this->num_sources)
+    {
+        return -1;
+    }
+
+    if (this->type() == OSKAR_DOUBLE)
+    {
+        ((double*)this->RA.data)[index] = ra;
+        ((double*)this->Dec.data)[index] = dec;
+        ((double*)this->I.data)[index] = I;
+        ((double*)this->Q.data)[index] = Q;
+        ((double*)this->U.data)[index] = U;
+        ((double*)this->V.data)[index] = V;
+        ((double*)this->spectral_index.data)[index] = spectral_index;
+        ((double*)this->reference_freq.data)[index] = ref_frequency;
+    }
+    else if (this->type() == OSKAR_SINGLE)
+    {
+        ((float*)this->RA.data)[index] = (float)ra;
+        ((float*)this->Dec.data)[index] = (float)dec;
+        ((float*)this->I.data)[index] = (float)I;
+        ((float*)this->Q.data)[index] = (float)Q;
+        ((float*)this->U.data)[index] = (float)U;
+        ((float*)this->V.data)[index] = (float)V;
+        ((float*)this->spectral_index.data)[index] = (float)spectral_index;
+        ((float*)this->reference_freq.data)[index] = (float)ref_frequency;
+    }
+    else
+    {
+        return -2;
+    }
+    return 0;
+}
+
+
+int oskar_SkyModel::append(const oskar_SkyModel* other)
+{
+    return oskar_sky_model_append(this, other);
+}
 
 
 
 
 
-// ========== DEPRECATED ======================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ========== DEPRECATED
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -26,72 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_LOAD_H_
-#define OSKAR_SKY_MODEL_LOAD_H_
+#ifndef OSKAR_MEM_APPEND_H_
+#define OSKAR_MEM_APPEND_H_
 
 /**
- * @file oskar_sky_model_load.h
+ * @file oskar_mem_append.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
+#include "utility/oskar_Mem.h"
 
-
-
-#ifdef __cplusplus
-extern "C"
-#endif
-OSKAR_EXPORT
-int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky);
-
-
-
-
-
-
-// ========== DEPRECATED ======================================================
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Loads sources from a plain text source file into an oskar global sky
- * model structure (double precision).
+ * @brief
  *
  * @details
- * Source files are plain ascii files consisting of the following 8 columns:
- *  RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), reference frequency (Hz), spectral index
  *
- *  Lines beginning with a # symbol are treated as comments and therefore ignored.
- *
- * @param[in]  file_path  Path to the a source list file.
- * @param[out] sky        Pointer to global sky model structure.
+ * @return
  */
 OSKAR_EXPORT
-void oskar_sky_model_load_d(const char* file_path, oskar_SkyModelGlobal_d* sky);
-
-
-
-/**
- * @brief Loads sources from a plain text source file into an oskar global sky
- * model structure (single precision).
- *
- * @details
- * Source files are plain ascii files consisting of the following 8 columns:
- *  RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy), reference frequency (Hz), spectral index
- *
- *  Lines beginning with a # symbol are treated as comments and therefore ignored.
- *
- * @param[in]  file_path  Path to the a source list file.
- * @param[out] sky        Pointer to global sky model structure.
- */
-OSKAR_EXPORT
-void oskar_sky_model_load_f(const char* file_path, oskar_SkyModelGlobal_f* sky);
-
-
+int oskar_mem_append(oskar_Mem* to, const void* from, int location, int num_elements);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_SKY_MODEL_LOAD_H_
+#endif // OSKAR_MEM_APPEND_H_

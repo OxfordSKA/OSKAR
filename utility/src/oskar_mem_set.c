@@ -26,39 +26,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_set.h"
 #include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_alloc.h"
+#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_Mem.h"
 
 #include <cuda_runtime_api.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
+int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
+        int src_location)
 {
-    if (mem == NULL) return -1;
+    if (dst == NULL) return -1;
+    if (src == NULL) return -2;
 
-    size_t element_type = oskar_mem_element_size(mem->private_type);
-    size_t new_size = num_elements * element_type;
     int error = 0;
-    if (mem->private_location == OSKAR_LOCATION_CPU)
+    size_t dst_size = dst->private_n_elements * oskar_mem_element_size(dst->private_type);
+    size_t src_size = src_num_elements * oskar_mem_element_size(src_type);
+
+    // If the memory size or location changes free and reallocate the memory.
+    if (dst_size != src_size)
     {
-        mem->data = realloc(mem->data, new_size);
-        mem->private_n_elements = num_elements;
+        int location = dst->private_location;
+        error = oskar_mem_free(dst);
+        dst->private_location   = location;
+        dst->private_n_elements = src_num_elements;
+        dst->private_type       = src_type;
+        error = oskar_mem_alloc(dst);
+        if (error != 0) return error;
     }
-    else if (mem->private_location == OSKAR_LOCATION_GPU)
+
+    if (src_location == OSKAR_LOCATION_CPU)
     {
-        size_t old_size = mem->private_n_elements * element_type;
-        void* d_mem_new = NULL;
-        cudaMalloc(&d_mem_new, new_size);
-        cudaMemcpy(d_mem_new, mem->data, old_size, cudaMemcpyDeviceToDevice);
-        cudaFree(mem->data);
-        mem->data = d_mem_new;
-        error = cudaPeekAtLastError();
-        mem->private_n_elements = num_elements;
+        if (dst->private_location == OSKAR_LOCATION_CPU)
+            memcpy(dst->data, src, src_size);
+        else
+            cudaMemcpy(dst->data, src, src_size, cudaMemcpyHostToDevice);
+    }
+    else if (src_location == OSKAR_LOCATION_GPU)
+    {
+        if (dst->private_location == OSKAR_LOCATION_CPU)
+            cudaMemcpy(dst->data, src, cudaMemcpyDeviceToHost);
+        else // (dst->private_location == OSKAR_LOCATION_GPU
+            cudaMemcpy(dst->data, src, cudaMemcpyDeviceToDevice);
     }
     else
     {
-        return -2;
+        return -3;
     }
+
     return error;
 }

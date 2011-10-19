@@ -32,7 +32,7 @@ if (BUILD_OSKAR_WIDGETS)
     set_target_properties(oskar_viewer_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     #install(TARGETS oskar_viewer_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
-
 endif ()
 
+cuda_add_executable(oskar_device_info device_info.cpp)
 

@@ -30,6 +30,8 @@
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_append.h"
 #include <cstdlib>
 
 oskar_Mem::oskar_Mem(int type, int location, int n_elements)
@@ -67,4 +69,15 @@ oskar_Mem::~oskar_Mem()
 int oskar_Mem::copy_to(oskar_Mem* other)
 {
     return oskar_mem_copy(other, this); // Copy this to other.
+}
+
+int oskar_Mem::resize(int num_elements)
+{
+    return oskar_mem_realloc(this, num_elements);
+}
+
+
+int oskar_Mem::append(const void* from, int from_location, int num_elements)
+{
+    return oskar_mem_append(this, from, from_location, num_elements);
 }

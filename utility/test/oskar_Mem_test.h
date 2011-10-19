@@ -46,12 +46,16 @@ class oskar_Mem_test : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(oskar_Mem_test);
+        CPPUNIT_TEST(test_alloc);
         CPPUNIT_TEST(test_realloc);
+        CPPUNIT_TEST(test_append);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
+        void test_alloc();
         void test_realloc();
+        void test_append();
 };
 
 // Register the test class.
