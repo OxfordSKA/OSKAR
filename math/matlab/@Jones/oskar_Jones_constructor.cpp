@@ -63,7 +63,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (location == GPU)
     {
         bool double_type = (type == OSKAR_DOUBLE || type == OSKAR_DOUBLE_COMPLEX
-                || type == OSKAR_DOUBLE_MATRIX || type == OSKAR_DOUBLE_COMPLEX_MATRIX) ? true : false;
+                || type == OSKAR_DOUBLE_COMPLEX_MATRIX) ? true : false;
 
         if (double_type == true && double_support == false)
         {

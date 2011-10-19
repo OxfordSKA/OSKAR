@@ -26,41 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_H_
-#define OSKAR_VISIBILITIES_H_
+#ifndef OSKAR_ERRORS_H_
+#define OSKAR_ERRORS_H_
 
 /**
- * @file oskar_Visibilties.h
+ * @file oskar_errors.h
  */
 
+/**
+ * @brief
+ * Enumerator to define OSKAR common error conditions.
+ *
+ * @details
+ * This enumerator defines common error conditions returned by functions
+ * in the OSKAR library.
+ *
+ * All OSKAR error codes are negative.
+ * Positive error codes indicate CUDA run-time execution errors.
+ */
+enum {
+    // Could indicate that an invalid NULL pointer is passed to a function.
+    OSKAR_ERR_INVALID_ARGUMENT     = -1,
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+    // Indicates that host memory allocation failed.
+    OSKAR_ERR_MEMORY_ALLOC_FAILURE = -2,
 
+    // Indicates that an array has not been allocated (NULL pointer dereference).
+    OSKAR_ERR_MEMORY_NOT_ALLOCATED = -3,
 
-#ifdef __cplusplus
-extern "C"
-#endif
-struct oskar_Visibilities
-{
-    int num_baselines;
-    int num_times;
-    int num_channels;
-    oskar_Mem baseline_u; // Length num_baselines * num_times * num_channels
-    oskar_Mem baseline_v; // Length num_baselines * num_times * num_channels
-    oskar_Mem baseline_w; // Length num_baselines * num_times * num_channels
-    oskar_Mem amplitude; // Length num_baselines * num_times * num_channels. Could be complex matrix
+    // Indicates that the data types used for an operation are incompatible.
+    OSKAR_ERR_TYPE_MISMATCH        = -4,
 
-    // Provide methods if C++.
-#ifdef __cplusplus
-//    oskar_Visibilities();
-//
-//    int append(const oskar_Visibilities* other);
-//    int copy_to(oskar_Visibilities* other);
-#endif
+    // Indicates that the data dimensions do not match.
+    OSKAR_ERR_DIMENSION_MISMATCH   = -5,
+
+    // Indicates that an unknown error occurred.
+    OSKAR_ERR_UNKNOWN              = -1000
 };
 
-typedef struct oskar_Visibilities oskar_Visibilities;
-
-
-#endif // OSKAR_VISIBILITIES_H_
+#endif // OSKAR_ERRORS_H_

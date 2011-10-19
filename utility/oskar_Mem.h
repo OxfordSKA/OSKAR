@@ -146,8 +146,6 @@ enum {
     OSKAR_DOUBLE                 = 0x010D, // (double)   scalar, double
     OSKAR_SINGLE_COMPLEX         = 0x01CF, // (float2)   scalar, complex float
     OSKAR_DOUBLE_COMPLEX         = 0x01CD, // (double2)  scalar, complex double
-    OSKAR_SINGLE_MATRIX          = 0x040F, // (float4)   matrix, float
-    OSKAR_DOUBLE_MATRIX          = 0x040D, // (double4)  matrix, double
     OSKAR_SINGLE_COMPLEX_MATRIX  = 0x04CF, // (float4c)  matrix, complex float
     OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  // (double4c) matrix, complex double
 };
