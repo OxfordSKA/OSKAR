@@ -26,50 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EMBEDDED_ELEMENT_PATTERN_H_
-#define OSKAR_EMBEDDED_ELEMENT_PATTERN_H_
+#ifndef OSKAR_ELEMENT_MODEL_LOAD_H_
+#define OSKAR_ELEMENT_MODEL_LOAD_H_
 
 /**
- * @file oskar_EmbeddedElementPattern.h
+ * @file oskar_element_model_load.h
  */
 
-#include "utility/oskar_vector_types.h"
-#include <stdlib.h> // For size_t.
+#include "oskar_global.h"
+#include "station/oskar_ElementModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Structure to hold antenna (embedded element) pattern data.
+ * @brief
+ * Loads an antenna pattern from a text file.
  *
  * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
+ * This function loads antenna pattern data from a text file and fills the
+ * provided data structure.
  *
- * The theta coordinate is assumed to be the fastest-varying dimension.
+ * The data file must contain eight columns, in the following order:
+ * - <theta, deg>
+ * - <phi, deg>
+ * - <abs dir>
+ * - <abs theta>
+ * - <phase theta, deg>
+ * - <abs phi>
+ * - <phase phi, deg>
+ * - <ax. ratio>
+ *
+ * Amplitude values in dBi are detected, and converted to linear format after
+ * loading.
+ *
+ * The theta dimension is assumed to be the fastest varying.
+ *
+ * @param[in]  filename Data file name.
+ * @param[out] data     Pointer to data structure to fill.
  */
-struct oskar_EmbeddedElementPattern
-{
-    int n_points;       ///< Total number of points in all arrays.
-    int n_phi;          ///< Number of points in the phi direction.
-    int n_theta;        ///< Number of points in the theta direction.
-    float inc_phi;      ///< Increment in the phi direction, in radians.
-    float inc_theta;    ///< Increment in the theta direction, in radians.
-    float max_phi;      ///< Maximum value of phi, in radians.
-    float max_theta;    ///< Maximum value of theta, in radians.
-    float min_phi;      ///< Minimum value of phi, in radians.
-    float min_theta;    ///< Minimum value of theta, in radians.
-    float2* g_phi;      ///< Response in phi direction at coordinates (re,im).
-    float2* g_theta;    ///< Response in theta direction at coordinates (re,im).
-    size_t pitch_phi;   ///< Memory pitch, as returned by cudaMallocPitch().
-    size_t pitch_theta; ///< Memory pitch, as returned by cudaMallocPitch().
-};
-typedef struct oskar_EmbeddedElementPattern oskar_EmbeddedElementPattern;
+OSKAR_EXPORT
+int oskar_element_model_load(const char* filename, oskar_ElementModel* data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_EMBEDDED_ELEMENT_PATTERN_H_
+#endif // OSKAR_ELEMENT_MODEL_LOAD_H_

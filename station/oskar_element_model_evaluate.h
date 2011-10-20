@@ -26,41 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_embedded_element_pattern_copy_to_gpu.h"
+#ifndef OSKAR_ELEMENT_MODEL_EVALUATE_H_
+#define OSKAR_ELEMENT_MODEL_EVALUATE_H_
+
+/**
+ * @file oskar_element_model_evaluate.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_ElementModel.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-int oskar_embedded_element_pattern_copy_to_gpu(
-        const oskar_EmbeddedElementPattern* h_data,
-        oskar_EmbeddedElementPattern* hd_data)
-{
-    // Copy the meta-data into the new structure.
-    hd_data->n_points = h_data->n_points;
-    hd_data->n_phi = h_data->n_phi;
-    hd_data->n_theta = h_data->n_theta;
-    hd_data->inc_phi = h_data->inc_phi;
-    hd_data->inc_theta = h_data->inc_theta;
-    hd_data->max_phi = h_data->max_phi;
-    hd_data->max_theta = h_data->max_theta;
-    hd_data->min_phi = h_data->min_phi;
-    hd_data->min_theta = h_data->min_theta;
 
-    // Allocate GPU texture memory to hold the look-up tables.
-    cudaMallocPitch((void**)&hd_data->g_phi, &hd_data->pitch_phi,
-            h_data->n_theta, h_data->n_phi);
-    cudaMallocPitch((void**)&hd_data->g_theta, &hd_data->pitch_theta,
-            h_data->n_theta, h_data->n_phi);
+/**
+ * @brief
+ * Evaluates the element pattern data at the source positions.
+ *
+ * @details
+ * This function evaluates the embedded element pattern data at the source
+ * positions.
+ *
+ * (UNFINISHED)
+ */
+OSKAR_EXPORT
+int oskar_element_model_evaluate_f(const oskar_ElementModel* hd_data,
+        const oskar_SkyModelLocal_f* hd_sky, float* work, float4c* jones);
 
-    // Copy the data across.
-    cudaMemcpy2D(hd_data->g_phi, hd_data->pitch_phi, h_data->g_phi,
-            h_data->n_theta * sizeof(float2), h_data->n_theta * sizeof(float2),
-            h_data->n_phi * sizeof(float2), cudaMemcpyHostToDevice);
-    cudaMemcpy2D(hd_data->g_theta, hd_data->pitch_theta, h_data->g_theta,
-            h_data->n_theta * sizeof(float2), h_data->n_theta * sizeof(float2),
-            h_data->n_phi * sizeof(float2), cudaMemcpyHostToDevice);
-
-    // Check for errors.
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_ELEMENT_MODEL_EVALUATE_H_

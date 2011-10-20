@@ -26,52 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_H_
-#define OSKAR_STATION_H_
+#ifndef OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_
+#define OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_
 
 /**
- * @file oskar_Station.h
+ * @file oskar_element_model_copy_to_gpu.h
  */
 
-
 #include "oskar_global.h"
-#include "oskar_Mem.h"
+#include "station/oskar_ElementModel.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-struct oskar_Station
-{
-    int num_antennas;
-    oskar_Mem antenna_x;
-    oskar_Mem antenna_y;
-    oskar_Mem antenna_z;
-    oskar_Mem antenna_weight;
 
-    // amp and phase error.
+/**
+ * @brief
+ * Copies embedded element pattern data to the GPU.
+ *
+ * @details
+ * This function copies the embedded element pattern data from host memory to
+ * a GPU texture. It allocates texture memory on the GPU to do this.
+ *
+ * @param[in]  h_data   Data structure stored on the host.
+ * @param[out] hd_data  Data structure stored on the GPU.
+ */
+OSKAR_EXPORT
+int oskar_element_model_copy_to_gpu(const oskar_ElementModel* h_data,
+        oskar_ElementModel* hd_data);
 
-    // Tile positions - is this the best way to do this?
-    int num_tiles;
-    oskar_Mem tile_x;
-    oskar_Mem tile_y;
-    oskar_Mem tile_z;
+#ifdef __cplusplus
+}
+#endif
 
-    // Embedded element pattern.
-    int num_element_patterns;
-    oskar_EmbeddedElementPattern* element_pattern;
-
-    // Station position.
-    double longitude;
-    double latitude;
-
-    // Beam phase centre.
-    double ra0;
-    double dec0;
-
-    int bit_depth;
-};
-
-typedef struct oskar_Station oskar_Station;
-
-
-#endif // OSKAR_STATION_H_
+#endif // OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_

@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EMBEDDED_ELEMENT_PATTERN_COPY_TO_GPU_H_
-#define OSKAR_EMBEDDED_ELEMENT_PATTERN_COPY_TO_GPU_H_
+#ifndef OSKAR_ELEMENT_MODEL_FREE_H_
+#define OSKAR_ELEMENT_MODEL_FREE_H_
 
 /**
- * @file oskar_embedded_element_pattern_copy_to_gpu.h
+ * @file oskar_element_model_free.h
  */
 
 #include "oskar_global.h"
-#include "station/oskar_EmbeddedElementPattern.h"
+#include "station/oskar_ElementModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,22 +42,19 @@ extern "C" {
 
 /**
  * @brief
- * Copies embedded element pattern data to the GPU.
+ * Frees memory used for the embedded element pattern data.
  *
  * @details
- * This function copies the embedded element pattern data from host memory to
- * a GPU texture. It allocates texture memory on the GPU to do this.
+ * This function frees system memory that is used to hold the embedded element
+ * pattern data.
  *
- * @param[in]  h_data   Data structure stored on the host.
- * @param[out] hd_data  Data structure stored on the GPU.
+ * @param[in] h_data  Data structure.
  */
 OSKAR_EXPORT
-int oskar_embedded_element_pattern_copy_to_gpu(
-        const oskar_EmbeddedElementPattern* h_data,
-        oskar_EmbeddedElementPattern* hd_data);
+int oskar_element_model_free(oskar_ElementModel* h_data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_EMBEDDED_ELEMENT_PATTERN_COPY_TO_GPU_H_
+#endif // OSKAR_ELEMENT_MODEL_FREE_H_

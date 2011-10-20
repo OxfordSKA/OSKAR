@@ -26,36 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EMBEDDED_ELEMENT_PATTERN_FREE_GPU_H_
-#define OSKAR_EMBEDDED_ELEMENT_PATTERN_FREE_GPU_H_
+#ifndef OSKAR_ELEMENT_MODEL_H_
+#define OSKAR_ELEMENT_MODEL_H_
 
 /**
- * @file oskar_embedded_element_pattern_free_gpu.h
+ * @file oskar_ElementModel.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_EmbeddedElementPattern.h"
+#include "utility/oskar_vector_types.h"
+#include <stdlib.h> // For size_t.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Frees memory on the GPU used for the embedded element pattern data.
+ * @brief Structure to hold antenna (embedded element) pattern data.
  *
  * @details
- * This function frees memory on the GPU that is used to hold the embedded
- * element pattern data.
+ * This structure holds the complex gain of an antenna as a function of theta
+ * and phi. The 2D data can be interpolated easily using the additional
+ * meta-data.
  *
- * @param[in] hd_data  Data structure stored on the GPU.
+ * The theta coordinate is assumed to be the fastest-varying dimension.
  */
-OSKAR_EXPORT
-int oskar_embedded_element_pattern_free_gpu(
-        oskar_EmbeddedElementPattern* hd_data);
+struct oskar_ElementModel
+{
+    int coordsys;       ///< Specifies whether horizontal or wrt phase centre.
+    int n_points;       ///< Total number of points in all arrays.
+    int n_phi;          ///< Number of points in the phi direction.
+    int n_theta;        ///< Number of points in the theta direction.
+    float inc_phi;      ///< Increment in the phi direction, in radians.
+    float inc_theta;    ///< Increment in the theta direction, in radians.
+    float max_phi;      ///< Maximum value of phi, in radians.
+    float max_theta;    ///< Maximum value of theta, in radians.
+    float min_phi;      ///< Minimum value of phi, in radians.
+    float min_theta;    ///< Minimum value of theta, in radians.
+    float2* g_phi;      ///< Response in phi direction at coordinates (re,im).
+    float2* g_theta;    ///< Response in theta direction at coordinates (re,im).
+    size_t pitch_phi;   ///< Memory pitch, as returned by cudaMallocPitch().
+    size_t pitch_theta; ///< Memory pitch, as returned by cudaMallocPitch().
+};
+typedef struct oskar_ElementModel oskar_ElementModel;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_EMBEDDED_ELEMENT_PATTERN_FREE_GPU_H_
+#endif // OSKAR_ELEMENT_MODEL_H_

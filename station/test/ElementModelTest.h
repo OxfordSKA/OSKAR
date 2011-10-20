@@ -26,19 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_embedded_element_pattern_free_gpu.h"
+#ifndef ELEMENT_MODEL_TEST_H
+#define ELEMENT_MODEL_TEST_H
 
-#ifdef __cplusplus
-extern "C"
-#endif
-int oskar_embedded_element_pattern_free_gpu(
-        oskar_EmbeddedElementPattern* hd_data)
+/**
+ * @file ElementModelTest.h
+ */
+
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class ElementModelTest : public CppUnit::TestFixture
 {
-    // Free the memory.
-    cudaFree(hd_data->g_phi);
-    cudaFree(hd_data->g_theta);
+    public:
+        CPPUNIT_TEST_SUITE(ElementModelTest);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-    // Check for errors.
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
-}
+    public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test_method();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(ElementModelTest);
+
+#endif // ELEMENT_MODEL_TEST_H

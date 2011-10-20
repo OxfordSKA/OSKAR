@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_embedded_element_pattern_load.h"
+#include "station/oskar_element_model_load.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,8 +41,7 @@ extern "C" {
 #define DEG2RAD 0.0174532925199432957692
 #define round(x) ((x)>=0.0?(int)((x)+0.5):(int)((x)-0.5))
 
-int oskar_embedded_element_pattern_load(const char* filename,
-        oskar_EmbeddedElementPattern* data)
+int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
 {
     // Open the file.
     FILE* file = fopen(filename, "r");

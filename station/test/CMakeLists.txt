@@ -11,7 +11,7 @@ if (CPPUNIT_FOUND)
     set(station_test_SRC
         src/CppUnitMain.cpp
         #src/BeamPatternTest.cpp
-        src/EmbeddedElementPatternTest.cpp
+        src/ElementModelTest.cpp
     )
 
     add_executable(stationTest ${station_test_SRC})

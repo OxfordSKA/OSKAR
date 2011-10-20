@@ -26,35 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EMBEDDED_ELEMENT_PATTERN_FREE_H_
-#define OSKAR_EMBEDDED_ELEMENT_PATTERN_FREE_H_
-
-/**
- * @file oskar_embedded_element_pattern_free.h
- */
-
-#include "oskar_global.h"
-#include "station/oskar_EmbeddedElementPattern.h"
+#include "station/oskar_element_model_free_gpu.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
 #endif
+int oskar_element_model_free_gpu(oskar_ElementModel* hd_data)
+{
+    // Free the memory.
+    cudaFree(hd_data->g_phi);
+    cudaFree(hd_data->g_theta);
 
-/**
- * @brief
- * Frees memory used for the embedded element pattern data.
- *
- * @details
- * This function frees system memory that is used to hold the embedded element
- * pattern data.
- *
- * @param[in] h_data  Data structure.
- */
-OSKAR_EXPORT
-int oskar_embedded_element_pattern_free(oskar_EmbeddedElementPattern* h_data);
-
-#ifdef __cplusplus
+    // Check for errors.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
 }
-#endif
-
-#endif // OSKAR_EMBEDDED_ELEMENT_PATTERN_FREE_H_

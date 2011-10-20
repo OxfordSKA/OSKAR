@@ -26,42 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef EMBEDDED_ELEMENT_PATTERN_TEST_H
-#define EMBEDDED_ELEMENT_PATTERN_TEST_H
+#ifndef OSKAR_ELEMENT_MODEL_FREE_GPU_H_
+#define OSKAR_ELEMENT_MODEL_FREE_GPU_H_
 
 /**
- * @file EmbeddedElementPatternTest.h
+ * @file oskar_element_model_free_gpu.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "station/oskar_ElementModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Frees memory on the GPU used for the embedded element pattern data.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function frees memory on the GPU that is used to hold the embedded
+ * element pattern data.
+ *
+ * @param[in] hd_data  Data structure stored on the GPU.
  */
-class EmbeddedElementPatternTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(EmbeddedElementPatternTest);
-        CPPUNIT_TEST(test_method);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_element_model_free_gpu(oskar_ElementModel* hd_data);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+#ifdef __cplusplus
+}
+#endif
 
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
-        void test_method();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(EmbeddedElementPatternTest);
-
-#endif // EMBEDDED_ELEMENT_PATTERN_TEST_H
+#endif // OSKAR_ELEMENT_MODEL_FREE_GPU_H_

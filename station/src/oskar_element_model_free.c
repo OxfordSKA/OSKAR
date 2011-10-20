@@ -26,22 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_embedded_element_pattern_evaluate.h"
+#include "station/oskar_element_model_free.h"
 
-// Single precision.
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_embedded_element_pattern_evaluate_f(
-        const oskar_EmbeddedElementPattern* hd_data,
-        const oskar_SkyModelLocal_f* hd_sky,
-        float* work,
-        float4c* jones)
+int oskar_element_model_free(oskar_ElementModel* h_data)
 {
-    // Get pointers to the horizontal direction cosines.
-    const float* hor_l = hd_sky->hor_l;
-    const float* hor_m = hd_sky->hor_m;
-    const float* hor_n = hd_sky->hor_n;
+    // Free the memory.
+    free(h_data->g_phi);
+    free(h_data->g_theta);
 
-    // Convert direction cosines to fractional
+    return 0;
 }
