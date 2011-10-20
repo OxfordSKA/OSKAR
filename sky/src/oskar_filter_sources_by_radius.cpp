@@ -10,6 +10,8 @@
 
 using namespace std;
 
+// FIXME This function is broken! (Memory errors everywhere!)
+
 unsigned filter_sources_by_radius(unsigned * num_sources,
         const double inner_radius, const double outer_radius,
         const double ra0, const double dec0, double * ra,

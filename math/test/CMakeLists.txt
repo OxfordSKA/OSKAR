@@ -6,7 +6,7 @@
 if (CPPUNIT_FOUND)
 
     set(math_test_SRC
-        src/CppUnitMain.cpp
+        src/CppUnitMain.cu
         src/CudaInterpBilinearTest.cu
         src/JonesTest.cu
         src/Matrix3Test.cpp

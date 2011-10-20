@@ -72,7 +72,7 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int location,
     }
     else
     {
-        return OSKAR_ERR_UNKNOWN;
+        return OSKAR_ERR_BAD_LOCATION;
     }
     return error;
 }

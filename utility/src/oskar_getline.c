@@ -39,7 +39,7 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
 {
 	// Check for sane inputs.
 	if (lineptr == NULL || n == NULL || stream == NULL)
-		return -1;
+		return OSKAR_ERR_INVALID_ARGUMENT;
 
 	// Check if buffer is empty.
 	if (*n == 0 || *lineptr == NULL)
@@ -47,7 +47,7 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
 		*n = 80;
 		*lineptr = (char*)malloc(*n);
 		if (*lineptr == NULL)
-			return -1;
+			return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
 	}
 
 	// Initialise the byte counter.
@@ -59,16 +59,17 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
 		// Get the character.
 		int i = getc(stream);
 		if (i == EOF)
-			return -1;
+			return OSKAR_ERR_EOF;
 
 		// Allocate space for size+1 bytes (including NULL terminator).
 		if (size + 1 >= *n)
 		{
 			// Double the length of the buffer.
 			*n = 2 * *n + 1;
-			*lineptr = (char*)realloc(*lineptr, *n);
-			if (*lineptr == NULL)
-				return -1;
+			void* t = realloc(*lineptr, *n);
+			if (t == NULL)
+				return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+			*lineptr = (char*)t;
 		}
 
 		// Store the character.

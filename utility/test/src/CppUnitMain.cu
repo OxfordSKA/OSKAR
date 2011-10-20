@@ -4,6 +4,9 @@
 
 int main(int /*argc*/, char** /*argv*/)
 {
+	// Force any CUDA memory initialisation errors to appear here.
+	cudaDeviceSynchronize();
+
     // Get the top level suite from the registry
     CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 

@@ -91,5 +91,5 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return cudaPeekAtLastError();
     }
 
-    return OSKAR_ERR_UNKNOWN;
+    return OSKAR_ERR_BAD_LOCATION;
 }

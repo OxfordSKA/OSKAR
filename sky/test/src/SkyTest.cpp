@@ -80,7 +80,7 @@ void SkyTest::test_generate_random()
 }
 
 
-
+// FIXME This test has lots of memory errors.
 /**
  * @details
  */
@@ -95,15 +95,15 @@ void SkyTest::test_distance_filter()
     const double brightness_min = 1.0e-2;
     const double brightness_max = 1.0e4;
     const double distribution_power = -2.0;
-    vector<double> ra(num_sources);
-    vector<double> dec(num_sources);
-    vector<double> brightness(num_sources);
+    double* ra = (double*)malloc(num_sources * sizeof(double));
+    double* dec = (double*)malloc(num_sources * sizeof(double));
+    double* brightness = (double*)malloc(num_sources * sizeof(double));
 
     generate_random_sources(num_sources, brightness_min, brightness_max,
-            distribution_power, &ra[0], &dec[0], &brightness[0], 0);
+            distribution_power, ra, dec, brightness, 0);
 
     std::vector<double> dist(num_sources);
-    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
+    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
 
 //    cout <<  endl;
 //    cout << "= Before: " << endl;
@@ -114,14 +114,18 @@ void SkyTest::test_distance_filter()
 //    cout <<  endl;
 
     filter_sources_by_radius(&num_sources, inner_radius, outer_radius, ra0, dec0,
-            &ra[0], &dec[0], &brightness[0]);
+            ra, dec, brightness);
 
-    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
+    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
 //    cout << "= After: " << endl;
 //    for (unsigned i = 0; i < num_sources; ++i)
 //    {
 //        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
 //    }
+
+    free(ra);
+    free(dec);
+    free(brightness);
 }
 
 void SkyTest::test_rotate()

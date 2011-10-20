@@ -9,12 +9,12 @@ if (CPPUNIT_FOUND)
 
 
     set(station_test_SRC
-        src/CppUnitMain.cpp
+        src/CppUnitMain.cu
         #src/BeamPatternTest.cpp
         src/ElementModelTest.cpp
     )
 
-    add_executable(stationTest ${station_test_SRC})
+    cuda_add_executable(stationTest ${station_test_SRC})
 
     set_target_properties(stationTest PROPERTIES
        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"

@@ -53,6 +53,7 @@ int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
     {
         int location = dst->private_location;
         error = oskar_mem_free(dst);
+        if (error != 0) return error;
         dst->private_location   = location;
         dst->private_n_elements = src_num_elements;
         dst->private_type       = src_type;
@@ -67,7 +68,7 @@ int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
         else if (dst->private_location == OSKAR_LOCATION_GPU)
             cudaMemcpy(dst->data, src, src_size, cudaMemcpyHostToDevice);
         else
-            return OSKAR_ERR_UNKNOWN;
+            return OSKAR_ERR_BAD_LOCATION;
     }
     else if (src_location == OSKAR_LOCATION_GPU)
     {
@@ -76,11 +77,11 @@ int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
         else if (dst->private_location == OSKAR_LOCATION_GPU)
             cudaMemcpy(dst->data, src, cudaMemcpyDeviceToDevice);
         else
-            return OSKAR_ERR_UNKNOWN;
+            return OSKAR_ERR_BAD_LOCATION;
     }
     else
     {
-        return OSKAR_ERR_UNKNOWN;
+        return OSKAR_ERR_BAD_LOCATION;
     }
 
     return error;

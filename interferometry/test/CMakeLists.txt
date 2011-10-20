@@ -5,7 +5,7 @@
 if (CPPUNIT_FOUND)
 
     set(interferometry_cuda_test_SRC
-        src/CppUnitMain.cpp
+        src/CppUnitMain.cu
         src/CudaCorrelatorTest.cu
     )
 

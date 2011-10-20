@@ -6,7 +6,7 @@
 if (CPPUNIT_FOUND)
 
     set(sky_test_SRC
-        src/CppUnitMain.cpp
+        src/CppUnitMain.cu
         src/SkyTest.cpp
         src/EquatorialToHorizontalTest.cu
         src/SkyModelTest.cpp

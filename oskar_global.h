@@ -65,29 +65,33 @@
  * Positive error codes indicate CUDA run-time execution errors.
  */
 enum {
+    // Indicates that an end-of-file condition was encountered.
+	// This is compatible with the standard C EOF macro (-1).
+    OSKAR_ERR_EOF                  = -1,
+
     // Could indicate that an invalid NULL pointer is passed to a function.
-    OSKAR_ERR_INVALID_ARGUMENT     = -1,
+    OSKAR_ERR_INVALID_ARGUMENT     = -2,
 
     // Indicates that host memory allocation failed.
-    OSKAR_ERR_MEMORY_ALLOC_FAILURE = -2,
+    OSKAR_ERR_MEMORY_ALLOC_FAILURE = -3,
 
     // Indicates that an array has not been allocated (NULL pointer dereference).
-    OSKAR_ERR_MEMORY_NOT_ALLOCATED = -3,
+    OSKAR_ERR_MEMORY_NOT_ALLOCATED = -4,
 
     // Indicates that the data types used for an operation are incompatible.
-    OSKAR_ERR_TYPE_MISMATCH        = -4,
+    OSKAR_ERR_TYPE_MISMATCH        = -5,
 
     // Indicates that the data dimensions do not match.
-    OSKAR_ERR_DIMENSION_MISMATCH   = -5,
+    OSKAR_ERR_DIMENSION_MISMATCH   = -6,
 
     // Indicates that the memory pointer location is not supported.
-    OSKAR_ERR_BAD_LOCATION         = -6,
+    OSKAR_ERR_BAD_LOCATION         = -7,
 
     // Indicates that the data type is not supported.
-    OSKAR_ERR_BAD_DATA_TYPE        = -7,
+    OSKAR_ERR_BAD_DATA_TYPE        = -8,
 
     // Indicates that the data type of a Jones matrix is not supported.
-    OSKAR_ERR_BAD_JONES_TYPE       = -8,
+    OSKAR_ERR_BAD_JONES_TYPE       = -9,
 
     // Indicates that an unknown error occurred.
     OSKAR_ERR_UNKNOWN              = -1000

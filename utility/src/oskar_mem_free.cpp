@@ -54,7 +54,7 @@ int oskar_mem_free(oskar_Mem* mem)
     }
     else
     {
-        return OSKAR_ERR_UNKNOWN;
+        return OSKAR_ERR_BAD_LOCATION;
     }
     mem->data = NULL;
     return err;

@@ -63,7 +63,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
     }
     else
     {
-        return OSKAR_ERR_UNKNOWN;
+        return OSKAR_ERR_BAD_LOCATION;
     }
     return error;
 }
