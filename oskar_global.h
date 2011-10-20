@@ -54,6 +54,37 @@
 #define OSKAR_VERSION_STR "1.50.0_pre-alpha"
 
 /**
+ * @brief
+ * Enumerator to define OSKAR common error conditions.
+ *
+ * @details
+ * This enumerator defines common error conditions returned by functions
+ * in the OSKAR library.
+ *
+ * All OSKAR error codes are negative.
+ * Positive error codes indicate CUDA run-time execution errors.
+ */
+enum {
+    // Could indicate that an invalid NULL pointer is passed to a function.
+    OSKAR_ERR_INVALID_ARGUMENT     = -1,
+
+    // Indicates that host memory allocation failed.
+    OSKAR_ERR_MEMORY_ALLOC_FAILURE = -2,
+
+    // Indicates that an array has not been allocated (NULL pointer dereference).
+    OSKAR_ERR_MEMORY_NOT_ALLOCATED = -3,
+
+    // Indicates that the data types used for an operation are incompatible.
+    OSKAR_ERR_TYPE_MISMATCH        = -4,
+
+    // Indicates that the data dimensions do not match.
+    OSKAR_ERR_DIMENSION_MISMATCH   = -5,
+
+    // Indicates that an unknown error occurred.
+    OSKAR_ERR_UNKNOWN              = -1000
+};
+
+/**
  * @macro OSKAR_EXPORT
  *
  * @brief
