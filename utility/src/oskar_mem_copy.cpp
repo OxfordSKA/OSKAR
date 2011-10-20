@@ -35,10 +35,10 @@ extern "C"
 int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
 {
     // Check that all pointers are not NULL.
-    if (src == NULL) return -1;
-    if (dst == NULL) return -2;
-    if (src->data == NULL) return -1;
-    if (dst->data == NULL) return -2;
+    if (src == NULL || dst == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (src->data == NULL || dst->data == NULL)
+        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Get the meta-data.
     int n_elements_src = src->n_elements();
@@ -50,42 +50,46 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
 
     // Check the data dimensions.
     if (n_elements_src != n_elements_dst)
-        return -10;
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check the data types.
     if (type_src != type_dst)
-        return -100;
+        return OSKAR_ERR_TYPE_MISMATCH;
 
     // Get the number of bytes to copy.
     int bytes = oskar_mem_element_size(type_src) * n_elements_src;
 
     // Host to host.
-    if (location_src == 0 && location_dst == 0)
+    if (location_src == OSKAR_LOCATION_CPU
+            && location_dst == OSKAR_LOCATION_CPU)
     {
         memcpy(dst->data, src->data, bytes);
         return 0;
     }
 
     // Host to device.
-    else if (location_src == 0 && location_dst == 1)
+    else if (location_src == OSKAR_LOCATION_CPU
+            && location_dst == OSKAR_LOCATION_GPU)
     {
         cudaMemcpy(dst->data, src->data, bytes, cudaMemcpyHostToDevice);
         return cudaPeekAtLastError();
     }
 
     // Device to host.
-    else if (location_src == 1 && location_dst == 0)
+    else if (location_src == OSKAR_LOCATION_GPU
+            && location_dst == OSKAR_LOCATION_CPU)
     {
         cudaMemcpy(dst->data, src->data, bytes, cudaMemcpyDeviceToHost);
         return cudaPeekAtLastError();
     }
 
     // Device to device.
-    else if (location_src == 1 && location_dst == 1)
+    else if (location_src == OSKAR_LOCATION_GPU
+            && location_dst == OSKAR_LOCATION_GPU)
     {
         cudaMemcpy(dst->data, src->data, bytes, cudaMemcpyDeviceToDevice);
         return cudaPeekAtLastError();
     }
 
-    return -1000;
+    return OSKAR_ERR_UNKNOWN;
 }

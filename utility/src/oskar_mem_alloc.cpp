@@ -35,7 +35,7 @@ extern "C"
 int oskar_mem_alloc(oskar_Mem* mem)
 {
     // Check that the structure exists.
-    if (mem == NULL) return -1;
+    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Get the meta-data.
     int n_elements = mem->n_elements();
@@ -48,13 +48,13 @@ int oskar_mem_alloc(oskar_Mem* mem)
 
     // Check whether the memory should be on the host or the device.
     int err = 0;
-    if (location == 0)
+    if (location == OSKAR_LOCATION_CPU)
     {
         // Allocate host memory.
         mem->data = malloc(bytes);
-        if (mem->data == NULL) err = -2;
+        if (mem->data == NULL) err = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     }
-    else if (location == 1)
+    else if (location == OSKAR_LOCATION_GPU)
     {
         // Allocate GPU memory.
         cudaMalloc(&mem->data, bytes);

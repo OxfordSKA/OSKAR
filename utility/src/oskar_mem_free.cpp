@@ -34,23 +34,27 @@ extern "C"
 int oskar_mem_free(oskar_Mem* mem)
 {
     // Check that the structure exists.
-    if (mem == NULL) return -1;
+    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Get the meta-data.
     int location = mem->location();
 
     // Check whether the memory is on the host or the device.
     int err = 0;
-    if (location == 0)
+    if (location == OSKAR_LOCATION_CPU)
     {
         // Free host memory.
         free(mem->data);
     }
-    else if (location == 1)
+    else if (location == OSKAR_LOCATION_GPU)
     {
         // Free GPU memory.
         cudaFree(mem->data);
         err = cudaPeekAtLastError();
+    }
+    else
+    {
+        return OSKAR_ERR_UNKNOWN;
     }
     mem->data = NULL;
     return err;

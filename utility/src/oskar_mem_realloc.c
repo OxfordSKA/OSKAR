@@ -35,19 +35,22 @@
 
 int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 {
-    if (mem == NULL) return -1;
+    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    size_t element_type = oskar_mem_element_size(mem->private_type);
-    size_t new_size = num_elements * element_type;
+    size_t element_size = oskar_mem_element_size(mem->private_type);
+    size_t new_size = num_elements * element_size;
     int error = 0;
     if (mem->private_location == OSKAR_LOCATION_CPU)
     {
-        mem->data = realloc(mem->data, new_size);
+        void* mem_new = realloc(mem->data, new_size);
+        if (mem_new == NULL)
+            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        mem->data = mem_new;
         mem->private_n_elements = num_elements;
     }
     else if (mem->private_location == OSKAR_LOCATION_GPU)
     {
-        size_t old_size = mem->private_n_elements * element_type;
+        size_t old_size = mem->private_n_elements * element_size;
         void* d_mem_new = NULL;
         cudaMalloc(&d_mem_new, new_size);
         cudaMemcpy(d_mem_new, mem->data, old_size, cudaMemcpyDeviceToDevice);
@@ -58,7 +61,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
     }
     else
     {
-        return -2;
+        return OSKAR_ERR_UNKNOWN;
     }
     return error;
 }

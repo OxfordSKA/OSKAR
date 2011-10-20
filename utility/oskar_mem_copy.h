@@ -55,13 +55,7 @@ extern "C" {
  * This function returns a code to indicate if there were errors in execution:
  * - A return code of 0 indicates no error.
  * - A positive return code indicates a CUDA error.
- * - A return code of -1 indicates that a is NULL, or the memory in src is
- *   unallocated.
- * - A return code of -2 indicates that b is NULL, or the memory in dst is
- *   unallocated.
- * - A return code of -10 indicates that the arrays have different dimensions.
- * - A return code of -100 indicates a type mismatch.
- * - A return code of -1000 indicates an unknown error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
 int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);

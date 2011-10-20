@@ -40,14 +40,15 @@
 int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
         int src_location)
 {
-    if (dst == NULL) return -1;
-    if (src == NULL) return -2;
+    if (dst == NULL || src == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     int error = 0;
-    size_t dst_size = dst->private_n_elements * oskar_mem_element_size(dst->private_type);
+    size_t dst_size = dst->private_n_elements *
+            oskar_mem_element_size(dst->private_type);
     size_t src_size = src_num_elements * oskar_mem_element_size(src_type);
 
-    // If the memory size or location changes free and reallocate the memory.
+    // If the memory size changes, free and reallocate the memory.
     if (dst_size != src_size)
     {
         int location = dst->private_location;
@@ -63,19 +64,23 @@ int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
     {
         if (dst->private_location == OSKAR_LOCATION_CPU)
             memcpy(dst->data, src, src_size);
-        else
+        else if (dst->private_location == OSKAR_LOCATION_GPU)
             cudaMemcpy(dst->data, src, src_size, cudaMemcpyHostToDevice);
+        else
+            return OSKAR_ERR_UNKNOWN;
     }
     else if (src_location == OSKAR_LOCATION_GPU)
     {
         if (dst->private_location == OSKAR_LOCATION_CPU)
             cudaMemcpy(dst->data, src, cudaMemcpyDeviceToHost);
-        else // (dst->private_location == OSKAR_LOCATION_GPU
+        else if (dst->private_location == OSKAR_LOCATION_GPU)
             cudaMemcpy(dst->data, src, cudaMemcpyDeviceToDevice);
+        else
+            return OSKAR_ERR_UNKNOWN;
     }
     else
     {
-        return -3;
+        return OSKAR_ERR_UNKNOWN;
     }
 
     return error;

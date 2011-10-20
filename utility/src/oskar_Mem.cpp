@@ -60,10 +60,8 @@ oskar_Mem::oskar_Mem(const oskar_Mem* other, int location)
 oskar_Mem::~oskar_Mem()
 {
     if (this->data != NULL)
-    {
         if (oskar_mem_free(this) != 0)
             throw "Error in oskar_mem_free";
-    }
 }
 
 int oskar_Mem::copy_to(oskar_Mem* other)
@@ -75,7 +73,6 @@ int oskar_Mem::resize(int num_elements)
 {
     return oskar_mem_realloc(this, num_elements);
 }
-
 
 int oskar_Mem::append(const void* from, int from_location, int num_elements)
 {

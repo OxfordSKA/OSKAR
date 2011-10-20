@@ -36,10 +36,11 @@
 #include <stdio.h>
 #include <string.h>
 
-int oskar_mem_append(oskar_Mem* to, const void* from, int location, int num_elements)
+int oskar_mem_append(oskar_Mem* to, const void* from, int location,
+        int num_elements)
 {
-    if (to == NULL)   return -1;
-    if (from == NULL) return -2;
+    if (to == NULL || from == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Memory size being appended and offset into memory to append to.
     size_t element_size = oskar_mem_element_size(to->private_type);
@@ -49,6 +50,7 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int location, int num_elem
     // Reallocate the memory pointer so it is big enough to append to.
     int error = 0;
     error = oskar_mem_realloc(to, num_elements + to->private_n_elements);
+    if (error != 0) return error;
 
     // Append to the memory.
     if (location == OSKAR_LOCATION_CPU)
@@ -56,18 +58,21 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int location, int num_elem
         if (to->private_location == OSKAR_LOCATION_CPU)
             memcpy((char*)(to->data) + offset_bytes, from, mem_size);
         else
-            cudaMemcpy((char*)(to->data) + offset_bytes, from, mem_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(to->data) + offset_bytes, from,
+                    mem_size, cudaMemcpyHostToDevice);
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
         if (to->private_location == OSKAR_LOCATION_CPU)
-            cudaMemcpy((char*)(to->data) + offset_bytes, from, mem_size, cudaMemcpyDeviceToHost);
+            cudaMemcpy((char*)(to->data) + offset_bytes, from,
+                    mem_size, cudaMemcpyDeviceToHost);
         else
-            cudaMemcpy((char*)(to->data) + offset_bytes, from, mem_size, cudaMemcpyDeviceToDevice);
+            cudaMemcpy((char*)(to->data) + offset_bytes, from,
+                    mem_size, cudaMemcpyDeviceToDevice);
     }
     else
     {
-        return -3;
+        return OSKAR_ERR_UNKNOWN;
     }
     return error;
 }

@@ -53,7 +53,7 @@ extern "C" {
  * This function returns a code to indicate if there were errors in execution:
  * - A return code of 0 indicates no error.
  * - A positive return code indicates a CUDA error.
- * - A return code of -1 indicates that the data structure is NULL.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
 int oskar_mem_free(oskar_Mem* mem);

@@ -105,16 +105,22 @@ public:
      * Copies the memory contents and meta-data of this structure to another.
      *
      * @param[in] other Pointer to the oskar_Mem structure to copy.
+     *
+     * @return A CUDA or OSKAR error code.
      */
     int copy_to(oskar_Mem* other);
 
     /**
-     * @brief Resizes the memory to the specified number of elements. The
+     * @brief
+     * Resizes the memory block.
+     *
+     * @details
+     * Resizes the memory to the specified number of elements. The
      * memory type and location are preserved.
      *
-     * @param[in] num_elements number of elements to resize to.
+     * @param[in] num_elements The required number of elements.
      *
-     * @return error code
+     * @return A CUDA or OSKAR error code.
      */
     int resize(int num_elements);
 
@@ -122,11 +128,11 @@ public:
      * @brief Appends to the memory by copying num_elements of memory from the
      * specified array with the specified memory location.
      *
-     * @param[in] from          location from which to append to the current memory.
-     * @param[in] from_location location to append from.
-     * @param[in] num_elements  Number of elements to append
+     * @param[in] from          Location from which to append to the current memory.
+     * @param[in] from_location Location to append from.
+     * @param[in] num_elements  Number of elements to append.
      *
-     * @return error code
+     * @return A CUDA or OSKAR error code.
      */
     int append(const void* from, int from_location, int num_elements);
 #endif
