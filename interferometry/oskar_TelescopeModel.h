@@ -30,6 +30,29 @@
 #define OSKAR_TELESCOPEMODEL_H_
 
 #include "oskar_global.h"
+#include "station/oskar_StationModel.h"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+struct oskar_TelescopeModel
+{
+    int n_stations;
+    oskar_StationModel* station; ///< Array of station structures.
+
+    // Work buffers.
+    // NOTE: need better name to indicate they should be treated as work buffers.
+    double update_timestamp; ///< Time for which u,v,w are valid. FIXME required?
+    oskar_Mem station_u;
+    oskar_Mem station_v;
+    oskar_Mem station_w;
+    bool identical_stations; // True if all stations are identical.
+};
+
+typedef struct oskar_TelescopeModel oskar_TelescopeModel;
+
+
+// DEPRECATED:
 
 #ifdef __cplusplus
 extern "C" {
