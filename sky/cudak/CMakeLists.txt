@@ -3,6 +3,7 @@
 #
 
 set(sky_cuda_kernels_SRC
+    src/oskar_cudak_evaluate_jones_R.cu
     src/oskar_cudak_ha_dec_to_az_el.cu
     src/oskar_cudak_ha_dec_to_hor_lmn.cu
     src/oskar_cudak_hor_lmn_to_az_el.cu

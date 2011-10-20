@@ -80,6 +80,15 @@ enum {
     // Indicates that the data dimensions do not match.
     OSKAR_ERR_DIMENSION_MISMATCH   = -5,
 
+    // Indicates that the memory pointer location is not supported.
+    OSKAR_ERR_BAD_LOCATION         = -6,
+
+    // Indicates that the data type is not supported.
+    OSKAR_ERR_BAD_DATA_TYPE        = -7,
+
+    // Indicates that the data type of a Jones matrix is not supported.
+    OSKAR_ERR_BAD_JONES_TYPE       = -8,
+
     // Indicates that an unknown error occurred.
     OSKAR_ERR_UNKNOWN              = -1000
 };

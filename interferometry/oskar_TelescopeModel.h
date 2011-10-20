@@ -46,7 +46,8 @@ struct oskar_TelescopeModel
     oskar_Mem station_u;
     oskar_Mem station_v;
     oskar_Mem station_w;
-    bool identical_stations; // True if all stations are identical.
+    int identical_stations; // True if all stations are identical.
+    int use_common_sky; // True if all stations should use common source positions.
 };
 
 typedef struct oskar_TelescopeModel oskar_TelescopeModel;

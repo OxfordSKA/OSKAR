@@ -20,12 +20,13 @@ set(sky_SRC
     src/oskar_cuda_transform_to_local_stokes.cu
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
+    src/oskar_evaluate_jones_R.cu
     src/oskar_ha_dec_to_hor_lmn.c
     src/oskar_mjd_to_gmst.c
     src/oskar_mjd_to_last_fast.c
     src/oskar_mjd_to_lmst.c
     src/oskar_ra_dec_to_hor_lmn.c
-    
+
     src/oskar_sky_model_append.cpp
     src/oskar_sky_model_load.cpp
     src/oskar_sky_model_resize.cpp
