@@ -26,44 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_element_size.h"
+#ifndef OSKAR_SKY_MODEL_SET_SOURCE_H_
+#define OSKAR_SKY_MODEL_SET_SOURCE_H_
 
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
-#include <stdio.h>
+/**
+ * @file oskar_sky_model_set_source.h
+ */
 
-int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
-{
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+#include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
 
-    size_t element_size = oskar_mem_element_size(mem->private_type);
-    size_t new_size = num_elements * element_size;
-    int old_num_elements = mem->private_n_elements;
-    int error = 0;
-    if (mem->private_location == OSKAR_LOCATION_CPU)
-    {
-        void* mem_new = realloc(mem->data, new_size);
-        if (mem_new == NULL)
-            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-        mem->data = mem_new;
-        mem->private_n_elements = num_elements;
-    }
-    else if (mem->private_location == OSKAR_LOCATION_GPU)
-    {
-        size_t copy_size = (old_num_elements > num_elements) ?
-                num_elements * element_size : old_num_elements * element_size;
-        void* d_mem_new = NULL;
-        cudaMalloc(&d_mem_new, new_size);
-        cudaMemcpy(d_mem_new, mem->data, copy_size, cudaMemcpyDeviceToDevice);
-        cudaFree(mem->data);
-        mem->data = d_mem_new;
-        error = cudaPeekAtLastError();
-        mem->private_n_elements = num_elements;
-    }
-    else
-    {
-        return OSKAR_ERR_UNKNOWN;
-    }
-    return error;
-}
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT
+int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
+        double dec, double I, double Q, double U, double V, double reference_freq,
+        double spectral_index);
+
+#endif // OSKAR_SKY_MODEL_SET_SOURCE_H_

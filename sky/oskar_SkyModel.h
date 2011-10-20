@@ -77,7 +77,7 @@ struct oskar_SkyModel
         int resize(int num_sources);
 
         int set_source(int index, double ra, double dec, double I, double Q,
-                double U, double V, double spectral_index, double ref_frequency);
+                double U, double V, double ref_frequency, double spectral_index);
 
         int append(const oskar_SkyModel* sky);
 

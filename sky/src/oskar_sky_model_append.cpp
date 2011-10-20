@@ -64,9 +64,9 @@ int oskar_sky_model_append(oskar_SkyModel* to, const oskar_SkyModel* from)
     if (error) return error;
     error = to->V.append(from->V.data, location, num_sources);
     if (error) return error;
-    error = to->spectral_index.append(from->spectral_index.data, location, num_sources);
-    if (error) return error;
     error = to->reference_freq.append(from->reference_freq.data, location, num_sources);
+    if (error) return error;
+    error = to->spectral_index.append(from->spectral_index.data, location, num_sources);
     if (error) return error;
 
     // Update the number of sources

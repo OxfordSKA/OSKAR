@@ -29,6 +29,7 @@ set(sky_SRC
     src/oskar_sky_model_append.cpp
     src/oskar_sky_model_load.cpp
     src/oskar_sky_model_resize.cpp
+    src/oskar_sky_model_set_source.cpp
     src/oskar_SkyModel.cpp
 )
 

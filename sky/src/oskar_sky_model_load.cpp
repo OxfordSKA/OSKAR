@@ -39,13 +39,13 @@ extern "C"
 int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
 {
     FILE* file = fopen(filename, "r");
-    if (file == NULL) return -1;
+    if (file == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
     const double deg2rad = 0.0174532925199432957692;
     int type = sky->type();
     char temp_line[1024];
     oskar_SkyModel temp_sky(0, type, OSKAR_LOCATION_CPU);
-
+    int num_sources_loaded = 0;
     if (type == OSKAR_DOUBLE)
     {
         double ra, dec, I, Q, U, V, ref_freq, spectral_index;
@@ -58,13 +58,13 @@ int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
                     &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
             if (read != 8) continue;
             // Ensure enough space in arrays.
-            if (temp_sky.num_sources % 100 == 0)
+            if (num_sources_loaded % 100 == 0)
             {
-                temp_sky.resize(temp_sky.num_sources + 100);
+                temp_sky.resize(num_sources_loaded + 100);
             }
-            temp_sky.set_source(temp_sky.num_sources, ra * deg2rad, dec * deg2rad,
+            temp_sky.set_source(num_sources_loaded, ra * deg2rad, dec * deg2rad,
                     I, Q, U, V, ref_freq, spectral_index);
-            ++(temp_sky.num_sources);
+            ++(num_sources_loaded);
         }
     }
     else if (type == OSKAR_SINGLE)
@@ -79,21 +79,22 @@ int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
                     &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
             if (read != 8) continue;
             // Ensure enough space in arrays.
-            if (temp_sky.num_sources % 100 == 0)
+            if (num_sources_loaded % 100 == 0)
             {
-                temp_sky.resize(temp_sky.num_sources + 100);
+                temp_sky.resize(num_sources_loaded + 100);
             }
-            temp_sky.set_source(temp_sky.num_sources, ra * deg2rad, dec * deg2rad,
+            temp_sky.set_source(num_sources_loaded, ra * deg2rad, dec * deg2rad,
                     I, Q, U, V, ref_freq, spectral_index);
-            ++(temp_sky.num_sources);
+            ++(num_sources_loaded);
         }
     }
     else
     {
         fclose(file);
-        return 4;
+        return OSKAR_ERR_UNKNOWN;
     }
 
+    temp_sky.num_sources = num_sources_loaded;
     sky->append(&temp_sky);
 
     fclose(file);

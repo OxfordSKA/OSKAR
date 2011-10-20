@@ -46,14 +46,18 @@ class SkyModelTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(SkyModelTest);
-//        CPPUNIT_TEST(test_load);
-        CPPUNIT_TEST(test_load_new);
+        CPPUNIT_TEST(test_resize);
+        CPPUNIT_TEST(test_set_source);
+        CPPUNIT_TEST(test_append);
+        CPPUNIT_TEST(test_load);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
+        void test_resize();
+        void test_set_source();
+        void test_append();
         void test_load();
-        void test_load_new();
 };
 
 // Register the test class.
