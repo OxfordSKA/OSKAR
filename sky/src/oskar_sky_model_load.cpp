@@ -38,8 +38,13 @@ extern "C"
 #endif
 int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
 {
+    // Check for sane inputs.
+    if (filename == NULL || sky == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    // Open the file.
     FILE* file = fopen(filename, "r");
-    if (file == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (file == NULL) return OSKAR_ERR_FILE_IO;
 
     const double deg2rad = 0.0174532925199432957692;
     int type = sky->type();

@@ -36,16 +36,40 @@
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 
-
-
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
+/**
+ * @brief
+ * Loads sources from a plain text source file into an OSKAR sky model
+ * structure.
+ *
+ * @details
+ * Source files are plain ASCII files consisting of the following 8 columns:
+ * - RA (deg),
+ * - Dec (deg),
+ * - Stokes I (Jy),
+ * - Stokes Q (Jy),
+ * - Stokes U (Jy),
+ * - Stokes V (Jy),
+ * - Reference frequency (Hz),
+ * - Spectral index
+ *
+ * The columns must be space-separated.
+ *
+ * Lines beginning with a # symbol are treated as comments and therefore
+ * ignored.
+ *
+ * @param[in]  filename  Path to the a source list file.
+ * @param[out] sky       Pointer to sky model structure to fill.
+ */
 OSKAR_EXPORT
 int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky);
 
-
-
+#ifdef __cplusplus
+}
+#endif
 
 
 

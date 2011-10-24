@@ -161,4 +161,8 @@ void ElementModelTest::test_method()
     // Remove the file.
     printf("Antenna data loaded successfully.\n");
     remove(filename);
+
+    // Free the memory.
+    free(pattern.g_phi);
+    free(pattern.g_theta);
 }

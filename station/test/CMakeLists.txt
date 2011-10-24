@@ -12,6 +12,7 @@ if (CPPUNIT_FOUND)
         src/CppUnitMain.cu
         #src/BeamPatternTest.cpp
         src/ElementModelTest.cpp
+        src/StationModelTest.cpp
     )
 
     cuda_add_executable(stationTest ${station_test_SRC})

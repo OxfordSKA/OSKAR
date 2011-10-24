@@ -46,6 +46,9 @@ struct oskar_TelescopeModel
     oskar_Mem station_u;
     oskar_Mem station_v;
     oskar_Mem station_w;
+    oskar_Mem station_x; ///< Fixed x component of station coordinate in ITRS.
+    oskar_Mem station_y; ///< Fixed y component of station coordinate in ITRS.
+    oskar_Mem station_z; ///< Fixed z component of station coordinate in ITRS.
     int identical_stations; // True if all stations are identical.
     int use_common_sky; // True if all stations should use common source positions.
 };
@@ -64,7 +67,7 @@ struct oskar_TelescopeModel_d
     unsigned num_antennas;
     double*  antenna_x;
     double*  antenna_y;
-    double*  antenna_z; // NOTE: used after conversion to ITRS coordinates.
+    double*  antenna_z;
     double   longitude;
     double   latitude;
     bool     identical_stations; // true if all stations are identical
@@ -78,7 +81,7 @@ struct oskar_TelescopeModel_f
     unsigned num_antennas;
     float*   antenna_x;
     float*   antenna_y;
-    float*   antenna_z; // NOTE: used after conversion to ITRS coordinates.
+    float*   antenna_z;
     float    longitude;
     float    latitude;
     bool     identical_stations; // true if all stations are identical

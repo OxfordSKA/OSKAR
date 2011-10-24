@@ -47,7 +47,7 @@ extern "C" {
  * This function computes the azimuth and elevation of the specified points
  * in the horizontal coordinate system.
  *
- * NOTE: all pointers are device pointers!
+ * Note: all pointers are device pointers!
  *
  * @param[in]  n       The number of points.
  * @param[in]  d_ra    The input Right Ascensions, in radians.
@@ -75,7 +75,7 @@ int oskar_ra_dec_to_az_el_f(float ra, float dec, float lst,
  * @brief
  * Equatorial to horizontal coordinates (double precision).
  *
- * NOTE: all pointers are device pointers!
+ * Note: all pointers are device pointers!
  *
  * @details
  * This function computes the azimuth and elevation of the specified points

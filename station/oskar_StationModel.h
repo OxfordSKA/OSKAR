@@ -37,6 +37,10 @@
 #include "utility/oskar_Mem.h"
 #include "station/oskar_ElementModel.h"
 
+ // Forward declaration.
+struct oskar_StationModel;
+typedef struct oskar_StationModel oskar_StationModel;
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -53,24 +57,69 @@ struct oskar_StationModel
 
     // Station element position data.
     int n_elements;
-    oskar_Mem x; // x-position wrt local horizon, toward the East.
-    oskar_Mem y; // y-position wrt local horizon, toward the North.
-    oskar_Mem z; // z-position wrt local horizon, toward the zenith.
-    oskar_Mem weight;
+    oskar_Mem x; ///< x-position wrt local horizon, toward the East.
+    oskar_Mem y; ///< y-position wrt local horizon, toward the North.
+    oskar_Mem z; ///< z-position wrt local horizon, toward the zenith.
+    oskar_Mem weight; ///< Element complex weight (set to 1 unless apodisation).
     oskar_Mem amp_gain;
     oskar_Mem amp_error;
     oskar_Mem phase_offset;
     oskar_Mem phase_error;
-    oskar_StationModel* station; // NULL when there are no child stations.
+    oskar_StationModel* child; // NULL when there are no child stations.
+    oskar_StationModel* parent; ///< Pointer to station's parent (NULL if none).
 
     // Embedded element pattern.
-    int n_element_patterns; // Only for when there are no child stations.
+    int single_element_model; // True if using a single common element pattern.
     oskar_ElementModel* element_pattern; // NULL if there are child stations.
 
     int bit_depth; // Not implemented!
+
+    // If C++, provide constructors and methods.
+#ifdef __cplusplus
+    /**
+     * @brief Constructs an empty station model structure.
+     *
+     * @details
+     * Constructs an empty station model structure.
+     */
+    oskar_StationModel(int type, int location, int n_elements = 0);
+
+    /**
+     * @brief Constructs a copy of another station model structure.
+     *
+     * @details
+     * Copies an existing station model structure to the specified location.
+     */
+    oskar_StationModel(const oskar_StationModel* other, int location);
+
+    /**
+     * @brief Destroys the station model structure.
+     *
+     * @details
+     * Destroys the station model structure, freeing any memory it uses.
+     */
+    ~oskar_StationModel();
+
+    /**
+     * @brief Copies this station model structure to another.
+     *
+     * @details
+     * Copies the memory in this station model to that in another.
+     */
+    int copy_to(oskar_StationModel* other);
+
+    /**
+     * @brief Resizes the station structure.
+     *
+     * @details
+     * Resizes the memory arrays held by the station structure.
+     *
+     * @param[in] n_elements The new number of elements the arrays can hold.
+     */
+    int resize(int n_elements);
+#endif
 };
 
-typedef struct oskar_StationModel oskar_StationModel;
 
 
 
