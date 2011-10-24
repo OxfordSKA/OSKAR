@@ -34,6 +34,14 @@
 #include "utility/oskar_mem_append.h"
 #include <cstdlib>
 
+oskar_Mem::oskar_Mem()
+: private_type(0),
+  private_location(0),
+  private_n_elements(0),
+  data(0)
+{
+}
+
 oskar_Mem::oskar_Mem(int type, int location, int n_elements)
 : private_type(type),
   private_location(location),

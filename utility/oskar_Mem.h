@@ -65,6 +65,15 @@ public:
     // If C++, then provide constructors and a destructor.
 #ifdef __cplusplus
     /**
+     * @brief Constructs an oskar_Mem data structure.
+     *
+     * @details
+     * Constructs a new oskar_Mem data structure.
+     * The pointer and data types are all set to 0.
+     */
+    oskar_Mem();
+
+    /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
      *
      * @details

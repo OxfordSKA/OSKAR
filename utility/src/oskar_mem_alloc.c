@@ -26,40 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_FREE_H_
-#define OSKAR_MEM_FREE_H_
+#include <cuda_runtime_api.h>
+#include <stdlib.h>
+#include "utility/oskar_mem_alloc.h"
+#include "utility/oskar_mem_element_size.h"
 
-/**
- * @file oskar_mem_free.h
- */
+int oskar_mem_alloc(oskar_Mem* mem)
+{
+    // Check that the structure exists.
+    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+    // Get the meta-data.
+    int n_elements = mem->private_n_elements;
+    int location = mem->private_location;
+    int type = mem->private_type;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    // Get the memory size.
+    size_t element_size = oskar_mem_element_size(type);
+    if (element_size == 0)
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    size_t bytes = n_elements * element_size;
 
-/**
- * @brief
- * Frees the supplied block of memory.
- *
- * @details
- * This function frees memory held in an array, either on the CPU or GPU.
- *
- * @param[in] mem Pointer to data structure whose memory to free.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
- */
-OSKAR_EXPORT
-int oskar_mem_free(oskar_Mem* mem);
-
-#ifdef __cplusplus
+    // Check whether the memory should be on the host or the device.
+    int err = 0;
+    if (location == OSKAR_LOCATION_CPU)
+    {
+        // Allocate host memory.
+        mem->data = malloc(bytes);
+        if (mem->data == NULL)
+            err = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    }
+    else if (location == OSKAR_LOCATION_GPU)
+    {
+        // Allocate GPU memory.
+        cudaMalloc(&mem->data, bytes);
+        err = cudaPeekAtLastError();
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_LOCATION;
+    }
+    return err;
 }
-#endif
-
-#endif // OSKAR_MEM_FREE_H_

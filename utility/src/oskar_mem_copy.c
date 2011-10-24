@@ -27,11 +27,10 @@
  */
 
 #include <cuda_runtime_api.h>
-#include <cstring>
+#include <string.h>
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_size.h"
 
-extern "C"
 int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
 {
     // Check that all pointers are not NULL.
@@ -41,12 +40,12 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Get the meta-data.
-    int n_elements_src = src->n_elements();
-    int n_elements_dst = dst->n_elements();
-    int type_src = src->type();
-    int type_dst = dst->type();
-    int location_src = src->location();
-    int location_dst = dst->location();
+    int n_elements_src = src->private_n_elements;
+    int n_elements_dst = dst->private_n_elements;
+    int type_src = src->private_type;
+    int type_dst = dst->private_type;
+    int location_src = src->private_location;
+    int location_dst = dst->private_location;
 
     // Check the data dimensions.
     if (n_elements_src != n_elements_dst)

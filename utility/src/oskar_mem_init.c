@@ -26,36 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include <cstdlib>
-#include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_alloc.h"
 
-extern "C"
-int oskar_mem_free(oskar_Mem* mem)
+int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements)
 {
     // Check that the structure exists.
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Get the meta-data.
-    int location = mem->location();
+    // Check if this structure is already allocated.
+    if (mem->private_type != 0 && mem->data != NULL)
+    {
+        int err = oskar_mem_free(mem);
+        if (err) return err;
+    }
 
-    // Check whether the memory is on the host or the device.
-    int err = 0;
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        // Free host memory.
-        free(mem->data);
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        // Free GPU memory.
-        cudaFree(mem->data);
-        err = cudaPeekAtLastError();
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-    mem->data = NULL;
-    return err;
+    // Set the meta-data.
+    mem->private_type = type;
+    mem->private_location = location;
+    mem->private_n_elements = n_elements;
+
+    // Allocate memory.
+    return oskar_mem_alloc(mem);
 }

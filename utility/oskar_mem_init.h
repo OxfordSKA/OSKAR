@@ -26,44 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include <cstdlib>
-#include "utility/oskar_mem_alloc.h"
-#include "utility/oskar_mem_element_size.h"
+#ifndef OSKAR_MEM_INIT_H_
+#define OSKAR_MEM_INIT_H_
 
-extern "C"
-int oskar_mem_alloc(oskar_Mem* mem)
-{
-    // Check that the structure exists.
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+/**
+ * @file oskar_mem_init.h
+ */
 
-    // Get the meta-data.
-    int n_elements = mem->n_elements();
-    int location = mem->location();
-    int type = mem->type();
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
-    // Get the memory size.
-    size_t element_size = oskar_mem_element_size(type);
-    size_t bytes = n_elements * element_size;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Check whether the memory should be on the host or the device.
-    int err = 0;
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        // Allocate host memory.
-        mem->data = malloc(bytes);
-        if (mem->data == NULL)
-        	err = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        // Allocate GPU memory.
-        cudaMalloc(&mem->data, bytes);
-        err = cudaPeekAtLastError();
-    }
-    else
-    {
-    	return OSKAR_ERR_BAD_LOCATION;
-    }
-    return err;
+/**
+ * @brief
+ * Initialises and allocates an OSKAR memory block.
+ *
+ * @details
+ * This function initialises an OSKAR memory block, setting the type and
+ * location, allocating memory for it as required.
+ *
+ * If the structure already holds a pointer that is non-NULL with a nonzero
+ * type, then the memory is freed first.
+ *
+ * @param[in,out] mem Pointer to data structure.
+ * @param[in] type Enumerated data type of memory contents (magic number).
+ * @param[in] location Specify 0 for host memory, 1 for device memory.
+ * @param[in] n_elements Number of elements of type \p type in the array.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // OSKAR_MEM_INIT_H_
