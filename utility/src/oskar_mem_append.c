@@ -40,11 +40,13 @@
 int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
         int num_elements)
 {
+    // Check for sane inputs.
     if (to == NULL || from == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    // Check that the data types match.
     if (to->private_type != type)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+        return OSKAR_ERR_TYPE_MISMATCH;
 
     // Memory size being appended and offset into memory to append to.
     size_t element_size = oskar_mem_element_size(to->private_type);
