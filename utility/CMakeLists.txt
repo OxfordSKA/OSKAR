@@ -14,6 +14,7 @@ set(utility_SRC
     src/oskar_mem_copy.c
     src/oskar_mem_element_size.c
     src/oskar_mem_free.c
+    src/oskar_mem_init.c
     src/oskar_mem_realloc.c
     src/oskar_Mem.cpp
 )

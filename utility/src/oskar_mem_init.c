@@ -28,6 +28,8 @@
 
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_alloc.h"
+#include "utility/oskar_mem_free.h"
+#include <stdlib.h>
 
 int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements)
 {
