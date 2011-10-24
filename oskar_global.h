@@ -66,32 +66,35 @@
  */
 enum {
     // Indicates that an end-of-file condition was encountered.
-	// This is compatible with the standard C EOF macro (-1).
+    // This is compatible with the standard C EOF macro (-1).
     OSKAR_ERR_EOF                  = -1,
 
+    // Indicates a file I/O error.
+    OSKAR_ERR_FILE_IO              = -2,
+
     // Could indicate that an invalid NULL pointer is passed to a function.
-    OSKAR_ERR_INVALID_ARGUMENT     = -2,
+    OSKAR_ERR_INVALID_ARGUMENT     = -3,
 
     // Indicates that host memory allocation failed.
-    OSKAR_ERR_MEMORY_ALLOC_FAILURE = -3,
+    OSKAR_ERR_MEMORY_ALLOC_FAILURE = -4,
 
     // Indicates that an array has not been allocated (NULL pointer dereference).
-    OSKAR_ERR_MEMORY_NOT_ALLOCATED = -4,
+    OSKAR_ERR_MEMORY_NOT_ALLOCATED = -5,
 
     // Indicates that the data types used for an operation are incompatible.
-    OSKAR_ERR_TYPE_MISMATCH        = -5,
+    OSKAR_ERR_TYPE_MISMATCH        = -6,
 
     // Indicates that the data dimensions do not match.
-    OSKAR_ERR_DIMENSION_MISMATCH   = -6,
+    OSKAR_ERR_DIMENSION_MISMATCH   = -7,
 
     // Indicates that the memory pointer location is not supported.
-    OSKAR_ERR_BAD_LOCATION         = -7,
+    OSKAR_ERR_BAD_LOCATION         = -8,
 
     // Indicates that the data type is not supported.
-    OSKAR_ERR_BAD_DATA_TYPE        = -8,
+    OSKAR_ERR_BAD_DATA_TYPE        = -9,
 
     // Indicates that the data type of a Jones matrix is not supported.
-    OSKAR_ERR_BAD_JONES_TYPE       = -9,
+    OSKAR_ERR_BAD_JONES_TYPE       = -10,
 
     // Indicates that an unknown error occurred.
     OSKAR_ERR_UNKNOWN              = -1000
