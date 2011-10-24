@@ -17,7 +17,7 @@ void cleanup(void)
 }
 
 // Interface function
-void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** /*in*/)
 {
     // Check for proper number of arguments.
     if (num_in != 0 || num_out > 1)

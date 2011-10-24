@@ -66,12 +66,56 @@ struct oskar_SkyModel
 
 #ifdef __cplusplus
     public:
+
+        /**
+         * @brief Constructs and allocates data for an oskar_SkyModel.
+         *
+         * @param num_sources  Number of sources in the sky model.
+         * @param type         Data type for the sky model (either OSKAR_SINGLE,
+         *                     or OSKAR_DOUBLE)
+         * @param location     Memory location of the sky model (either
+         *                     OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+         */
         oskar_SkyModel(const int num_sources, const int type, const int location);
-        oskar_SkyModel(const oskar_SkyModel* sky, const int location);
+
+        /**
+         * @brief Constructs an oskar_SkyModel as a copy of the supplied sky
+         * model at the specified location.
+         *
+         * @param sky          oskar_SkyModel to copy.
+         * @param location     Memory location of the constructed sky model
+         *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+         */
+        oskar_SkyModel(const oskar_SkyModel* other, const int location);
+
+        /**
+         * @brief Constructs an oskar_SkyModel loading it from the specified
+         * file.
+         *
+         * @details
+         * Loads the sky model from a oskar source text file.
+         *
+         * @param filename     Path to a file containing an oskar sky model.
+         * @param type         Data type for the sky model (either OSKAR_SINGLE,
+         *                     or OSKAR_DOUBLE)
+         * @param location     Memory location of the constructed sky model
+         *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+         */
         oskar_SkyModel(const char* filename, const int type, const int location);
 
+        /**
+         * @brief Destroys the sky model.
+         */
         ~oskar_SkyModel();
 
+        /**
+         * @brief Loads an oskar source text file into the current sky structure.
+         * Sources from the file are appended to the end of the current structure.
+         *
+         * @param filename  Path to a file containing an oskar sky model.
+         *
+         * @return error code.
+         */
         int load(const char* filename);
 
         int resize(int num_sources);
@@ -79,9 +123,10 @@ struct oskar_SkyModel
         int set_source(int index, double ra, double dec, double I, double Q,
                 double U, double V, double ref_frequency, double spectral_index);
 
-        int append(const oskar_SkyModel* sky);
+        int append(const oskar_SkyModel* other);
 
         int type() const { return RA.type(); }
+
         int location() const { return RA.location(); }
 #endif
 };

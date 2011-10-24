@@ -17,7 +17,9 @@ set(interferometry_SRC
     src/oskar_interferometer1_scalar.cu
     src/oskar_horizon_plane_to_itrs.cpp
     src/oskar_TelescopeModel.cu
-    src/oskar_VisData.c
+    src/oskar_VisData.c  # deprecated
+    src/oskar_visibilities_append.cpp
+    src/oskar_Visibilities.cpp
     src/oskar_xyz_to_uvw.c
 )
 set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)

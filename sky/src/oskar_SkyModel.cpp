@@ -36,7 +36,8 @@
 #include <cuda_runtime_api.h>
 #include <cstdio>
 
-oskar_SkyModel::oskar_SkyModel(const int num_sources, const int type, const int location)
+oskar_SkyModel::oskar_SkyModel(const int num_sources, const int type,
+        const int location)
 : num_sources(num_sources),
   RA(type, location, num_sources),
   Dec(type, location, num_sources),
@@ -57,27 +58,28 @@ oskar_SkyModel::oskar_SkyModel(const int num_sources, const int type, const int 
 }
 
 
-oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* sky, const int location)
-: num_sources(sky->num_sources),
-  RA(&sky->RA, location),
-  Dec(&sky->Dec, location),
-  I(&sky->I, location),
-  Q(&sky->Q, location),
-  U(&sky->U, location),
-  V(&sky->V, location),
-  reference_freq(&sky->reference_freq, location),
-  spectral_index(&sky->spectral_index, location),
-  update_timestamp(sky->update_timestamp),
-  rel_l(&sky->rel_l, location),
-  rel_m(&sky->rel_m, location),
-  rel_n(&sky->rel_n, location),
-  hor_l(&sky->rel_l, location),
-  hor_m(&sky->rel_m, location),
-  hor_n(&sky->rel_n, location)
+oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, const int location)
+: num_sources(other->num_sources),
+  RA(&other->RA, location),
+  Dec(&other->Dec, location),
+  I(&other->I, location),
+  Q(&other->Q, location),
+  U(&other->U, location),
+  V(&other->V, location),
+  reference_freq(&other->reference_freq, location),
+  spectral_index(&other->spectral_index, location),
+  update_timestamp(other->update_timestamp),
+  rel_l(&other->rel_l, location),
+  rel_m(&other->rel_m, location),
+  rel_n(&other->rel_n, location),
+  hor_l(&other->rel_l, location),
+  hor_m(&other->rel_m, location),
+  hor_n(&other->rel_n, location)
 {
 }
 
-oskar_SkyModel::oskar_SkyModel(const char* filename, const int type, const int location)
+oskar_SkyModel::oskar_SkyModel(const char* filename, const int type,
+        const int location)
 : num_sources(0),
   RA(type, location, 0),
   Dec(type, location, 0),

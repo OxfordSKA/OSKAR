@@ -28,33 +28,25 @@ if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     add_definitions(-Wall)
     add_definitions(-Wextra)
     add_definitions(-pedantic)
+    
     add_definitions(-Wcast-align)
     add_definitions(-Wcast-qual)
-    add_definitions(-Wdisabled-optimization)
-    add_definitions(-Wstrict-aliasing)
-    add_definitions(-Wunknown-pragmas)
-    add_definitions(-Wformat)
     #add_definitions(-Wconversion)
     #add_definitions(-Wfloat-equal)
 
     # Disable specified warnings.
     add_definitions(-Wno-long-long)
     add_definitions(-Wno-variadic-macros)
-    #add_definitions(-Wno-deprecated)
-    #add_definitions(-Wno-unknown-pragmas)
 
 # === Intel compiler.
 elseif (NOT WIN32)
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    add_definitions(-Wall -Wcheck)
-    add_definitions(-wd1418) # External function with no prior declaration.
-    add_definitions(-wd1419) # External declaration in primary source file.
-    add_definitions(-wd383)  # Value copied to temporary, reference to temporary used.
-    add_definitions(-wd444)  # Destructor for base class not virtual.
-    add_definitions(-wd981)  # Operands are evaluated in unspecified order.
-    add_definitions(-wd177)  # Variable declared by never referenced.
-    add_definitions(-ww111)  # Promote remark 111 to warning.
-    add_definitions(-ww1572) # Promote remark 1572 to warning.
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    list(APPEND CMAKE_C_FLAGS "-fPIC -std=c99")
+    list(APPEND CMAKE_CXX_FLAGS "-fPIC")
+    add_definitions(-Wall)
+    add_definitions(-Wcheck)
+    add_definitions(-wd2259)
+    add_definitions(-wd1125) 
 
 # === Microsoft visual studio compiler.
 elseif (MSVC) # visual studio compiler.
@@ -79,6 +71,11 @@ if (CUDA_FOUND)
     # Default flags.
     if (NOT WIN32)
         set(CUDA_NVCC_FLAGS --compiler-options;-Wall;)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wextra;)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-unused-parameter;)
+        #list(APPEND CUDA_NVCC_FLAGS --compiler-options;-pedantic;)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-variadic-macros;)
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-long-long;)
     endif ()
 
     # Build mode specific flags.
@@ -91,7 +88,6 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS -O2;)
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-fPIC;)
         #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
-
         #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-dlcm=cg)
     else ()
         if (NOT MSVC)

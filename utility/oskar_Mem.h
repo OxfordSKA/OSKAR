@@ -143,7 +143,7 @@ public:
      *
      * @return A CUDA or OSKAR error code.
      */
-    int append(const void* from, int from_location, int num_elements);
+    int append(const void* from, int type, int from_location, int num_elements);
 #endif
 
     // If C++, then provide read-only accessor functions for the meta-data.
@@ -157,10 +157,10 @@ typedef struct oskar_Mem oskar_Mem;
 
 // Define an enumerator for the type.
 enum {
-    OSKAR_SINGLE                 = 0x010F, // (float)    scalar, float
-    OSKAR_DOUBLE                 = 0x010D, // (double)   scalar, double
-    OSKAR_SINGLE_COMPLEX         = 0x01CF, // (float2)   scalar, complex float
-    OSKAR_DOUBLE_COMPLEX         = 0x01CD, // (double2)  scalar, complex double
+    OSKAR_SINGLE                 = 0x000F, // (float)    scalar, float
+    OSKAR_DOUBLE                 = 0x000D, // (double)   scalar, double
+    OSKAR_SINGLE_COMPLEX         = 0x00CF, // (float2)   scalar, complex float
+    OSKAR_DOUBLE_COMPLEX         = 0x00CD, // (double2)  scalar, complex double
     OSKAR_SINGLE_COMPLEX_MATRIX  = 0x04CF, // (float4c)  matrix, complex float
     OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  // (double4c) matrix, complex double
 };

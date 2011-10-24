@@ -36,10 +36,14 @@
 #include <stdio.h>
 #include <string.h>
 
-int oskar_mem_append(oskar_Mem* to, const void* from, int location,
+
+int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
         int num_elements)
 {
     if (to == NULL || from == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (to->private_type != type)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Memory size being appended and offset into memory to append to.

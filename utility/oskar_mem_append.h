@@ -48,7 +48,8 @@ extern "C" {
  * @return
  */
 OSKAR_EXPORT
-int oskar_mem_append(oskar_Mem* to, const void* from, int location, int num_elements);
+int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
+        int num_elements);
 
 #ifdef __cplusplus
 }

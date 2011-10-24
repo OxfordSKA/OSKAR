@@ -26,57 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_H_
-#define OSKAR_VISIBILITIES_H_
-
-/**
- * @file oskar_Visibilties.h
- */
-
-
 #include "oskar_global.h"
+#include "interferometry/oskar_visibilities_append.h"
 #include "utility/oskar_Mem.h"
 
-
-#ifdef __cplusplus
-extern "C"
-#endif
-struct oskar_Visibilities
+int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* src)
 {
-#ifdef __cplusplus
-    public:
-#endif
-        int num_baselines;
-        int num_times;
-        int num_channels;
-        oskar_Mem baseline_u; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_v; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_w; // Length num_baselines * num_times * num_channels
-        oskar_Mem amplitude;  // Length num_baselines * num_times * num_channels.
+    int error = 0;
 
-    // Provide methods if C++.
-#ifdef __cplusplus
-    public:
+    int num_samples = src->num_baselines * src->num_times * src->num_channels;
+    if (num_samples > src->baseline_u.n_elements() ||
+            num_samples > src->baseline_v.n_elements() ||
+            num_samples > src->baseline_w.n_elements() ||
+            num_samples > src->amplitude.n_elements())
+    {
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    }
 
-        oskar_Visibilities(const int num_baselines, const int num_times,
-                const int num_channels, const int type, const int location);
+    if (dst->num_baselines != src->num_baselines)
+    {
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    }
 
-        oskar_Visibilities(const oskar_Visibilities* other, const int location);
+    // NOTE: Appending visibilities for different numbers of channels in each
+    // structure is currently not allowed as it would require extra information
+    // on the channel id's being appended and some memory reorder.
+    if (dst->num_channels != src->num_channels)
+    {
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    }
 
-        ~oskar_Visibilities();
+    int location = src->location();
+    error = dst->baseline_u.append(src->baseline_u.data, src->baseline_u.type(),
+            location, num_samples);
+    if (error) return error;
+    error = dst->baseline_v.append(src->baseline_v.data, src->baseline_v.type(),
+            location, num_samples);
+    if (error) return error;
+    error = dst->baseline_w.append(src->baseline_w.data, src->baseline_w.type(),
+            location, num_samples);
+    if (error) return error;
+    error = dst->amplitude.append(src->amplitude.data, src->amplitude.type(),
+            location, num_samples);
+    if (error) return error;
 
-        int append(const oskar_Visibilities* other);
+    dst->num_times += src->num_times;
 
-        int location() const { return amplitude.type(); }
-
-        int num_samples() const { return num_baselines * num_times * num_channels; }
-
-        int num_polarisations() const
-        { return ((amplitude.type() & 0x0400) == 0x0400) ? 4 : 1; }
-#endif
-};
-
-typedef struct oskar_Visibilities oskar_Visibilities;
+    return error;
+}
 
 
-#endif // OSKAR_VISIBILITIES_H_
+

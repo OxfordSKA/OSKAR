@@ -26,57 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_H_
-#define OSKAR_VISIBILITIES_H_
+#ifndef OSKAR_VISIBILITIES_APPEND_H_
+#define OSKAR_VISIBILITIES_APPEND_H_
 
 /**
- * @file oskar_Visibilties.h
+ * @file oskar_Visibilties_append.h
  */
 
 
 #include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-
+#include "interferometry/oskar_Visibilities.h"
 
 #ifdef __cplusplus
 extern "C"
 #endif
-struct oskar_Visibilities
-{
-#ifdef __cplusplus
-    public:
-#endif
-        int num_baselines;
-        int num_times;
-        int num_channels;
-        oskar_Mem baseline_u; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_v; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_w; // Length num_baselines * num_times * num_channels
-        oskar_Mem amplitude;  // Length num_baselines * num_times * num_channels.
-
-    // Provide methods if C++.
-#ifdef __cplusplus
-    public:
-
-        oskar_Visibilities(const int num_baselines, const int num_times,
-                const int num_channels, const int type, const int location);
-
-        oskar_Visibilities(const oskar_Visibilities* other, const int location);
-
-        ~oskar_Visibilities();
-
-        int append(const oskar_Visibilities* other);
-
-        int location() const { return amplitude.type(); }
-
-        int num_samples() const { return num_baselines * num_times * num_channels; }
-
-        int num_polarisations() const
-        { return ((amplitude.type() & 0x0400) == 0x0400) ? 4 : 1; }
-#endif
-};
-
-typedef struct oskar_Visibilities oskar_Visibilities;
+OSKAR_EXPORT
+int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* src);
 
 
-#endif // OSKAR_VISIBILITIES_H_
+#endif // OSKAR_VISIBILITIES_APPEND_H_

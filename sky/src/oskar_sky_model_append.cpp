@@ -33,57 +33,59 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_sky_model_append(oskar_SkyModel* to, const oskar_SkyModel* from)
+int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
 {
     int error = 0;
 
-    if (from->num_sources > from->RA.n_elements()  ||
-        from->num_sources > from->Dec.n_elements() ||
-        from->num_sources > from->I.n_elements() ||
-        from->num_sources > from->Q.n_elements() ||
-        from->num_sources > from->U.n_elements() ||
-        from->num_sources > from->V.n_elements() ||
-        from->num_sources > from->reference_freq.n_elements() ||
-        from->num_sources > from->spectral_index.n_elements())
+    int num_sources = src->num_sources;
+
+    if (num_sources > src->RA.n_elements()  ||
+        num_sources > src->Dec.n_elements() ||
+        num_sources > src->I.n_elements() ||
+        num_sources > src->Q.n_elements() ||
+        num_sources > src->U.n_elements() ||
+        num_sources > src->V.n_elements() ||
+        num_sources > src->reference_freq.n_elements() ||
+        num_sources > src->spectral_index.n_elements())
     {
-        return -1;
+        return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
     // Append to the sky model.
-    int location = from->location();
-    int num_sources = from->num_sources;
-    error = to->RA.append(from->RA.data, location, num_sources);
+    int location = src->location();
+    int type = src->type();
+    error = dst->RA.append(src->RA.data, type, location, num_sources);
     if (error) return error;
-    error = to->Dec.append(from->Dec.data, location, num_sources);
+    error = dst->Dec.append(src->Dec.data, type, location, num_sources);
     if (error) return error;
-    error = to->I.append(from->I.data, location, num_sources);
+    error = dst->I.append(src->I.data, type, location, num_sources);
     if (error) return error;
-    error = to->Q.append(from->Q.data, location, num_sources);
+    error = dst->Q.append(src->Q.data, type, location, num_sources);
     if (error) return error;
-    error = to->U.append(from->U.data, location, num_sources);
+    error = dst->U.append(src->U.data, type, location, num_sources);
     if (error) return error;
-    error = to->V.append(from->V.data, location, num_sources);
+    error = dst->V.append(src->V.data, type, location, num_sources);
     if (error) return error;
-    error = to->reference_freq.append(from->reference_freq.data, location, num_sources);
+    error = dst->reference_freq.append(src->reference_freq.data, type, location, num_sources);
     if (error) return error;
-    error = to->spectral_index.append(from->spectral_index.data, location, num_sources);
+    error = dst->spectral_index.append(src->spectral_index.data, type, location, num_sources);
     if (error) return error;
 
     // Update the number of sources
-    to->num_sources += from->num_sources;
+    dst->num_sources += src->num_sources;
 
     // Resize work arrays
-    error = to->rel_l.resize(num_sources);
+    error = dst->rel_l.resize(num_sources);
     if (error) return error;
-    error = to->rel_m.resize(num_sources);
+    error = dst->rel_m.resize(num_sources);
     if (error) return error;
-    error = to->rel_n.resize(num_sources);
+    error = dst->rel_n.resize(num_sources);
     if (error) return error;
-    error = to->hor_l.resize(num_sources);
+    error = dst->hor_l.resize(num_sources);
     if (error) return error;
-    error = to->hor_m.resize(num_sources);
+    error = dst->hor_m.resize(num_sources);
     if (error) return error;
-    error = to->hor_n.resize(num_sources);
+    error = dst->hor_n.resize(num_sources);
     if (error) return error;
 
     return error;

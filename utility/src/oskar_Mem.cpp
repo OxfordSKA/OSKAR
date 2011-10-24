@@ -82,7 +82,8 @@ int oskar_Mem::resize(int num_elements)
     return oskar_mem_realloc(this, num_elements);
 }
 
-int oskar_Mem::append(const void* from, int from_location, int num_elements)
+int oskar_Mem::append(const void* from, int from_type, int from_location,
+        int num_elements)
 {
-    return oskar_mem_append(this, from, from_location, num_elements);
+    return oskar_mem_append(this, from, from_type, from_location, num_elements);
 }

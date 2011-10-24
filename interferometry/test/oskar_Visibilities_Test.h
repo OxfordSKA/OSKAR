@@ -26,57 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_H_
-#define OSKAR_VISIBILITIES_H_
+#ifndef OSKAR_VISIBILTIES_TEST_
+#define OSKAR_VISIBILTIES_TEST_
 
 /**
- * @file oskar_Visibilties.h
+ * @file oskar_VisibiltiesTest.h
  */
 
+#include <cppunit/extensions/HelperMacros.h>
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-
-
-#ifdef __cplusplus
-extern "C"
-#endif
-struct oskar_Visibilities
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class oskar_Visibilties_Test : public CppUnit::TestFixture
 {
-#ifdef __cplusplus
     public:
-#endif
-        int num_baselines;
-        int num_times;
-        int num_channels;
-        oskar_Mem baseline_u; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_v; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_w; // Length num_baselines * num_times * num_channels
-        oskar_Mem amplitude;  // Length num_baselines * num_times * num_channels.
+        CPPUNIT_TEST_SUITE(CudaCorrelatorTest);
+        CPPUNIT_TEST(test_kernel_float);
+        CPPUNIT_TEST(test_kernel_double);
+        CPPUNIT_TEST_SUITE_END();
 
-    // Provide methods if C++.
-#ifdef __cplusplus
     public:
+        // Test Methods
+        void test_kernel_float();
 
-        oskar_Visibilities(const int num_baselines, const int num_times,
-                const int num_channels, const int type, const int location);
-
-        oskar_Visibilities(const oskar_Visibilities* other, const int location);
-
-        ~oskar_Visibilities();
-
-        int append(const oskar_Visibilities* other);
-
-        int location() const { return amplitude.type(); }
-
-        int num_samples() const { return num_baselines * num_times * num_channels; }
-
-        int num_polarisations() const
-        { return ((amplitude.type() & 0x0400) == 0x0400) ? 4 : 1; }
-#endif
+        // Test Methods
+        void test_kernel_double();
 };
 
-typedef struct oskar_Visibilities oskar_Visibilities;
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(CudaCorrelatorTest);
 
-
-#endif // OSKAR_VISIBILITIES_H_
+#endif // CUDA_CORRELATOR_TEST_H
