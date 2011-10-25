@@ -26,32 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
-#define OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+#ifndef OSKAR_VISIBILITIES_WRITE_H_
+#define OSKAR_VISIBILITIES_WRITE_H_
 
 /**
- * @file oskar_telescope_model_load_station_coords.h
+ * @file oskar_Visibilties_write.h
  */
 
-#include "interferometry/oskar_TelescopeModel.h"
 
-/**
- * @brief Loads a telescope station coordinates file, consisting specifying a
- * telescope in 2-dimensional horizontal coordinates, into the specified
- * telescope model structure.
- *
- * @details
- * An telescope station coordinate file is an ASCII file consisting of two or
- * columns of comma separated values representing the station x,y co-ordinates
- * in a horizontal coordinate system (the z coordinate is assumed to be zero).
- * Each line corresponds to the position of one station.
- *
- * @param telescope  Telescope model structure to be populated.
- * @param filename   File name path to a telescope coordinate file.
- * @param longitude  Telescope centre longitude, in radians.
- * @param latitude   Telescope centre latitude, in radians.
- */
-int oskar_load_telescope_horizontal(oskar_TelescopeModel* telescope,
-        const char* filename, const double longitude, const double latitude);
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
 
-#endif // OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT
+int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis);
+
+#endif // OSKAR_VISIBILITIES_WRITE_H_

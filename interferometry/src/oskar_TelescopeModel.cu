@@ -28,16 +28,25 @@
 
 
 #include "interferometry/oskar_TelescopeModel.h"
-
 #include "math/cudak/oskar_cudak_vec_scale_rr.h"
-
 #include <cuda_runtime_api.h>
+
+
+
+
+
+
+
+
+
+
+
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
+// DEPRECATED
 void oskar_copy_telescope_to_device_d(const oskar_TelescopeModel_d* h_telescope,
         oskar_TelescopeModel_d* hd_telescope)
 {
@@ -57,7 +66,7 @@ void oskar_copy_telescope_to_device_d(const oskar_TelescopeModel_d* h_telescope,
             cudaMemcpyHostToDevice);
 }
 
-
+// DEPRECATED
 void oskar_copy_telescope_to_device_f(const oskar_TelescopeModel_f* h_telescope,
         oskar_TelescopeModel_f* hd_telescope)
 {
@@ -77,7 +86,7 @@ void oskar_copy_telescope_to_device_f(const oskar_TelescopeModel_f* h_telescope,
             cudaMemcpyHostToDevice);
 }
 
-
+// DEPRECATED
 void oskar_scale_device_telescope_coords_d(oskar_TelescopeModel_d* hd_telescope,
         const double value)
 {
@@ -92,7 +101,7 @@ void oskar_scale_device_telescope_coords_d(oskar_TelescopeModel_d* hd_telescope,
             (num_stations, value, hd_telescope->antenna_z);
 }
 
-
+// DEPRECATED
 void oskar_scale_device_telescope_coords_f(oskar_TelescopeModel_f* hd_telescope,
         const float value)
 {

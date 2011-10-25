@@ -32,36 +32,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
-void oskar_load_telescope_horizontal(oskar_TelescopeModel* telescope,
-        const char* filename, const double longitude, const double latitude)
-{
-
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 void oskar_load_telescope_d(const char* file_path, const double longitude_rad,
         const double latitude_rad, oskar_TelescopeModel_d* telescope)
 {

@@ -16,10 +16,13 @@ set(interferometry_SRC
     src/oskar_cuda_correlator_scalar.cu
     src/oskar_interferometer1_scalar.cu
     src/oskar_horizon_plane_to_itrs.cpp
+    src/oskar_telescope_model_load_station_coords.cpp
     src/oskar_TelescopeModel.cu
     src/oskar_VisData.c  # deprecated
     src/oskar_visibilities_append.cpp
     src/oskar_visibilities_insert.cpp
+    src/oskar_visibilities_read.cpp
+    src/oskar_visibilities_write.cpp
     src/oskar_Visibilities.cpp
     src/oskar_xyz_to_uvw.c
 )

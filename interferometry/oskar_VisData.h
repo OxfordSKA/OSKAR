@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-// FIXME: This is very much a scalar oskar representation: ref UVFITS or polarised version...!?
+// DEPRECATED
 struct oskar_VisData_d
 {
     int      num_samples;
@@ -47,7 +47,7 @@ struct oskar_VisData_d
 };
 typedef struct oskar_VisData_d oskar_VisData_d;
 
-
+// DEPRECATED
 struct oskar_VisData_f
 {
     int      num_samples;

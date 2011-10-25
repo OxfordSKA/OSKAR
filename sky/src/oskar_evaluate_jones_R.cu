@@ -44,7 +44,7 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
 
     // Check that the data dimensions are OK.
     if (R->n_sources() != sky->num_sources ||
-            R->n_stations() != telescope->n_stations)
+            R->n_stations() != telescope->num_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.

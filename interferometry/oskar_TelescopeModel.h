@@ -32,28 +32,47 @@
 #include "oskar_global.h"
 #include "station/oskar_StationModel.h"
 
+/**
+ * @struct oskar_TelescopeModel
+ *
+ * @brief
+ *
+ * @details
+ */
+
 #ifdef __cplusplus
 extern "C"
 #endif
 struct oskar_TelescopeModel
 {
-    int n_stations;
+    int num_stations;            ///< Number of stations in the model.
+    oskar_Mem station_x;         ///< Fixed x component of station coordinate in ITRS.
+    oskar_Mem station_y;         ///< Fixed y component of station coordinate in ITRS.
+    oskar_Mem station_z;         ///< Fixed z component of station coordinate in ITRS.
     oskar_StationModel* station; ///< Array of station structures.
+    int identical_stations;      ///< True if all stations are identical.
+    int use_common_sky;          ///< True if all stations should use common source positions.
+
 
     // Work buffers.
     // NOTE: need better name to indicate they should be treated as work buffers.
-    double update_timestamp; ///< Time for which u,v,w are valid. FIXME is this required?
-    oskar_Mem station_u;
-    oskar_Mem station_v;
-    oskar_Mem station_w;
-    oskar_Mem station_x;     ///< Fixed x component of station coordinate in ITRS.
-    oskar_Mem station_y;     ///< Fixed y component of station coordinate in ITRS.
-    oskar_Mem station_z;     ///< Fixed z component of station coordinate in ITRS.
-    int identical_stations;  // True if all stations are identical.
-    int use_common_sky;      // True if all stations should use common source positions.
+    double update_timestamp;     ///< Time-stamp for which u,v,w are valid.
+    oskar_Mem station_u;         ///< Work buffer holding station u coordinates.
+    oskar_Mem station_v;         ///< Work buffer holding station v coordinates.
+    oskar_Mem station_w;         ///< Work buffer holding station w coordinates.
 };
 
 typedef struct oskar_TelescopeModel oskar_TelescopeModel;
+
+
+
+
+
+
+
+
+
+
 
 
 

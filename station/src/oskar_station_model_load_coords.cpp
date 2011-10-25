@@ -40,6 +40,7 @@ int oskar_station_model_load_coords(const char* filename,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the data is in the right location.
+    // NOTE is there some way of effectively locking the location for the entire structure?
     if (station->x.location() != OSKAR_LOCATION_CPU ||
             station->y.location() != OSKAR_LOCATION_CPU ||
             station->z.location() != OSKAR_LOCATION_CPU)
