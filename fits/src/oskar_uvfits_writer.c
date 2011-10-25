@@ -152,7 +152,7 @@ void oskar_write_header(fitsfile* fits_file, const char* filename, double ra0,
     fits_write_key_dbl(fits_file, "OBSRA", ra0, decimals, "Antenna pointing RA", &status);
     fits_write_key_dbl(fits_file, "OBSDEC", dec0, decimals, "Antenna pointing DEC", &status);
 
-    // Axis description headers (NOTE: axis 1 = empty).
+    // Axis description headers (Note: axis 1 = empty).
     oskar_write_axis_header(fits_file, 2, "COMPLEX", "1=real, 2=imag, 3=weight",
             1.0, 1.0, 1.0, 1.0);
     oskar_write_axis_header(fits_file, 3, "STOKES", "==scalar (I/Q/U/V)",
@@ -243,7 +243,7 @@ void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
 {
     int status = 0;
 
-    // !FIXME!: work out how to read this from the already written header.
+    // fixme: work out how to read this from the already written header.
     int num_axes = 6;
     long axis_dim[6];
     axis_dim[0] = 0;  // No standard image just group

@@ -152,7 +152,7 @@ void CudaCorrelatorTest::test_kernel_float()
     cudaFree(d_vis);
 
     // Check contents of memory.
-    // TODO?
+    // TODO tests missing?
 }
 
 /**
@@ -224,7 +224,7 @@ void CudaCorrelatorTest::test_kernel_double()
             cudaMemcpyHostToDevice);
 
     // Call the correlator kernel.
-    dim3 vThd(192, 1); // Antennas, antennas. (NOTE: changed from 256 to 192 for 1.3 arch)
+    dim3 vThd(192, 1); // Antennas, antennas. (Note: changed from 256 to 192 for 1.3 arch)
     dim3 vBlk(na, na);
     size_t vsMem = vThd.x * sizeof(double4c);
     TIMER_START

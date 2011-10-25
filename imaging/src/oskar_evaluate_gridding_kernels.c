@@ -132,7 +132,7 @@ void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
     oskar_initialise_kernel_d(param1, kernel);
     memset(kernel->amp, 0, kernel->size * sizeof(double));
 
-    // TODO: check these!
+    // todo: check these defaults!
     int iAlpha = 1;
     // alpha[iAlpha] = {0, 1/2, 1, 3/2, 2}
     //int iAlpha = MAX(0, MIN(4, 2.0 * param2 + 1.1));

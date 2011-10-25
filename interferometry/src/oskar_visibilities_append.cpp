@@ -43,6 +43,15 @@ int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* 
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
+    // For the case of appending to a completely empty visibility structure
+    // initialise its dimensions to the size of the data being appended.
+    if (dst->num_baselines == 0 && dst->num_channels == 0 && dst->num_times == 0)
+    {
+        dst->num_baselines = src->num_baselines;
+        dst->num_channels = src->num_channels;
+    }
+
+
     if (dst->num_baselines != src->num_baselines)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;

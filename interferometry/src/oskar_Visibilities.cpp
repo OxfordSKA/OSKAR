@@ -29,42 +29,50 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_append.h"
+#include "interferometry/oskar_visibilities_insert.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
-
+#include <cstdio>
 
 // Constructor.
-oskar_Visibilities::oskar_Visibilities(const int num_baselines,
-        const int num_times, const int num_channels, const int type,
+oskar_Visibilities::oskar_Visibilities(const int num_times,
+        const int num_baselines, const int num_channels, const int type,
         const int location)
-: num_baselines(num_baselines),
-  num_times(num_times),
+: num_times(num_times),
+  num_baselines(num_baselines),
   num_channels(num_channels)
 {
-    int num_vis = num_baselines * num_times * num_channels;
-    if ((type & 0x00C0) == 0x00C0) // check if complex
+    int num_vis = num_times * num_baselines * num_channels;
+
+    // check if complex
+    if ((type & 0x00C0) != 0x00C0)
         throw "visibilities must be complex";
+
     int coord_type = ((type & OSKAR_SINGLE) == OSKAR_SINGLE) ?
             OSKAR_SINGLE : OSKAR_DOUBLE;
-    oskar_mem_init(&baseline_u, coord_type, location, num_vis);
-    oskar_mem_init(&baseline_v, coord_type, location, num_vis);
-    oskar_mem_init(&baseline_w, coord_type, location, num_vis);
-    oskar_mem_init(&amplitude, type, location, num_vis);
+
+    if (oskar_mem_init(&baseline_u, coord_type, location, num_vis))
+        throw "error in oskar_mem_init";
+    if (oskar_mem_init(&baseline_v, coord_type, location, num_vis))
+        throw "error in oskar_mem_init";
+    if (oskar_mem_init(&baseline_w, coord_type, location, num_vis))
+        throw "error in oskar_mem_init";
+    if (oskar_mem_init(&amplitude,  type, location, num_vis))
+        throw "error in oskar_mem_init";
 }
 
-//// Copy constructor.
-//oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
-//        const int location)
-//: num_baselines(other->num_baselines),
-//  num_times(num_times),
-//  num_channels(num_channels),
-//  baseline_u(other->baseline_u, location),
-//  baseline_v(other->baseline_v, location),
-//  baseline_w(other->baseline_w, location),
-//  amplitude(other->amplitude, location)
-//{
-//}
-
+// Copy constructor.
+oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
+        const int location)
+: num_times(other->num_times),
+  num_baselines(other->num_baselines),
+  num_channels(other->num_channels),
+  baseline_u(&other->baseline_u, location),
+  baseline_v(&other->baseline_v, location),
+  baseline_w(&other->baseline_w, location),
+  amplitude(&other->amplitude, location)
+{
+}
 
 oskar_Visibilities::~oskar_Visibilities()
 {
@@ -73,5 +81,11 @@ oskar_Visibilities::~oskar_Visibilities()
 int oskar_Visibilities::append(const oskar_Visibilities* other)
 {
     return oskar_visibilties_append(this, other);
+}
+
+int oskar_Visibilities::insert(const oskar_Visibilities* other,
+        const unsigned time_index)
+{
+    return oskar_visibilties_insert(this, other, time_index);
 }
 

@@ -139,7 +139,7 @@ typedef struct oskar_SkyModel oskar_SkyModel;
 
 
 
-// ==================== DEPRECATED ============================================
+// ==================== DEPRECATED
 #ifdef __cplusplus
 extern "C" {
 #endif

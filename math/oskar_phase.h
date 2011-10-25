@@ -31,7 +31,7 @@
 
 /**
  * @file oskar_math_phase.h
- * FIXME! this isn't exactly general math!
+ * FIXME this isn't exactly general math!
  */
 
 /**

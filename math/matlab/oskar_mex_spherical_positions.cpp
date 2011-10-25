@@ -7,6 +7,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+// DEPRECATED
 // Interface function - can call anything from here...
 //
 // nlhs = The number of left-hand arguments, or the size of the plhs array.
@@ -74,6 +75,6 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     double * longitudes = mxGetPr(output[0]);
     double * latitudes  = mxGetPr(output[1]);
 
-    // Generate points. (TODO? allocate memory inside this function?)
+    // Generate points. todo allocate memory inside this function?
     positions.generate(&longitudes[0], &latitudes[0]);
 }

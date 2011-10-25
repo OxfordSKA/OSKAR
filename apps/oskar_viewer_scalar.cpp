@@ -43,7 +43,7 @@
 #include <vector>
 #include <cmath>
 
-using namespace oskar; // FIXME: take plot widget out of oskar namespace.
+using namespace oskar; // FIXME: Remove oskar namespace?
 using namespace std;
 
 int main(int argc, char** argv)

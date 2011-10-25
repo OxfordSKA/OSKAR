@@ -131,7 +131,7 @@ void oskar_WProjectionGridKernel::wFuncLMPadded(const unsigned innerSize, const 
             const float r2 = (l * l) + (m * m);
             assert(r2 < 1.0f);
 
-            // TODO: mmm not sure if this is a good idea...
+            // todo: mmm not sure if this is a good idea...
             if (r2 < max_r2)
             {
                 const float phase = -twoPiW * (sqrt(1.0f - r2) - 1.0f);
@@ -168,7 +168,7 @@ void oskar_WProjectionGridKernel::applyExpTaper(const unsigned innerSize, const 
 }
 
 
-// TODO(optimisation): Don't recreate the fftw plane each time this is called.
+// todo(optimisation): Don't recreate the fftw plane each time this is called.
 void oskar_WProjectionGridKernel::cfft2d(const unsigned size, Complex * convFunc) const
 {
     FFTUtility::fftPhase(size, size, convFunc);
@@ -184,7 +184,7 @@ void oskar_WProjectionGridKernel::cfft2d(const unsigned size, Complex * convFunc
 
 float oskar_WProjectionGridKernel::findMax(const unsigned size, Complex * convFunc) const
 {
-    // TODO(optimisation): Can just use the mid point?
+    // todo(optimisation): Can just use the mid point?
     float convmax = -numeric_limits<float>::max();
     for (unsigned i = 0; i < size * size; ++i)
         convmax = max(convmax, abs(convFunc[i]));

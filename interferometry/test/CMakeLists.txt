@@ -4,18 +4,19 @@
 
 if (CPPUNIT_FOUND)
 
-    set(interferometry_cuda_test_SRC
+    set(interferometry_test_SRC
         src/CppUnitMain.cu
         src/CudaCorrelatorTest.cu
+        src/oskar_Visibilities_Test.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
-    cuda_add_executable(interferometryCudaTest ${interferometry_cuda_test_SRC})
-    target_link_libraries(interferometryCudaTest
+    cuda_add_executable(interferometryTest ${interferometry_test_SRC})
+    target_link_libraries(interferometryTest
         oskar
         ${CPPUNIT_LIBRARIES}
     )
 
-    add_test(interferometryTest interferometryCudaTest)
+    add_test(interferometryTest interferometryTest)
 
 endif()

@@ -30,7 +30,7 @@
 #define OSKAR_VISIBILTIES_TEST_
 
 /**
- * @file oskar_VisibiltiesTest.h
+ * @file oskar_Visibilties_Test.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -45,20 +45,22 @@
 class oskar_Visibilties_Test : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(CudaCorrelatorTest);
-        CPPUNIT_TEST(test_kernel_float);
-        CPPUNIT_TEST(test_kernel_double);
+        CPPUNIT_TEST_SUITE(oskar_Visibilties_Test);
+        CPPUNIT_TEST(test_create);
+        CPPUNIT_TEST(test_copy);
+        CPPUNIT_TEST(test_append);
+        CPPUNIT_TEST(test_insert);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         // Test Methods
-        void test_kernel_float();
-
-        // Test Methods
-        void test_kernel_double();
+        void test_create();
+        void test_copy();
+        void test_append();
+        void test_insert();
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(CudaCorrelatorTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Visibilties_Test);
 
-#endif // CUDA_CORRELATOR_TEST_H
+#endif // OSKAR_VISIBILTIES_TEST_

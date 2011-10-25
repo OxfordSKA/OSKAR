@@ -73,7 +73,7 @@ int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky);
 
 
 
-// ========== DEPRECATED ======================================================
+// ========== DEPRECATED
 #ifdef __cplusplus
 extern "C" {
 #endif

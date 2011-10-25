@@ -42,7 +42,7 @@ struct oskar_TelescopeModel
 
     // Work buffers.
     // NOTE: need better name to indicate they should be treated as work buffers.
-    double update_timestamp; ///< Time for which u,v,w are valid. FIXME required?
+    double update_timestamp; ///< Time for which u,v,w are valid. FIXME is this required?
     oskar_Mem station_u;
     oskar_Mem station_v;
     oskar_Mem station_w;

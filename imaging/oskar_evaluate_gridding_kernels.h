@@ -45,7 +45,7 @@ void oskar_initialise_kernel_d(const double radius, oskar_GridKernel_d* kernel);
  * Generates a pill-box gridding convolution kernel (double precision)
  *
  * @details
- * NOTE: This function allocates memory for the kernel internally.
+ * Note: This function allocates memory for the kernel internally.
  *
  * @param[out] kernel       Pointer to a structure holding the gridding kernel.
  */
@@ -58,7 +58,7 @@ void oskar_evaluate_pillbox_d(oskar_GridKernel_d* kernel);
  * (double precision)
  *
  * @details
- * NOTE: This function allocates memory for the kernel internally.
+ * Note: This function allocates memory for the kernel internally.
  *
  * @param[out] kernel       Pointer to a structure holding the gridding kernel.
  */
@@ -71,7 +71,7 @@ void oskar_evaluate_exp_sinc_d(oskar_GridKernel_d* kernel);
  * Generates a Spherodial wave function convolution kernel (double precision)
  *
  * @details
- * NOTE: This function allocates memory for the kernel internally.
+ * Note: This function allocates memory for the kernel internally.
  *
  * @param[out] kernel       Pointer to a structure holding the gridding kernel.
  */

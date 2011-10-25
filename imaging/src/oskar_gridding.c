@@ -48,7 +48,7 @@ double oskar_grid_standard(const oskar_VisData_d* vis,
     double grid_sum = 0.0;
 
     int support  = (kernel->num_cells - 1) / 2;
-    int g_centre = grid->size / 2.0; // FIXME odd / even? floor() ?
+    int g_centre = grid->size / 2.0; // fixme: Will only work for even grids, should use floor() ?
     int ix_grid, iy_grid, ix_kernel, iy_kernel;
 
     for (int i = 0; i < vis->num_samples; ++i)

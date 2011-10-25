@@ -45,7 +45,8 @@ extern "C" {
  * Allocates an OSKAR memory block.
  *
  * @details
- * This function allocates memory, either on the CPU or GPU.
+ * This function allocates memory, either on the CPU or GPU. The memory is
+ * cleared to zero.
  *
  * @param[in,out] mem Pointer to data structure.
  *

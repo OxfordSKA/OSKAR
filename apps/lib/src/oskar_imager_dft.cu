@@ -50,7 +50,7 @@ int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
     const double wavelength = c_0 / frequency;
     const double wavenumber = 2.0 * M_PI / wavelength;
 
-    // Convert baselines to wavenumber units. -- TODO do this on the GPU.
+    // Convert baselines to wavenumber units. -- NOTE do this on the GPU?
     for (unsigned i = 0; i < num_vis; ++i)
     {
         u[i] *= wavenumber;
@@ -132,7 +132,7 @@ int oskar_imager_dft_f(const unsigned num_vis, const float2* vis, float* u,
     const float wavelength = c_0 / frequency;
     const float wavenumber = 2.0f * M_PI / wavelength;
 
-    // Convert baselines to wavenumber units. -- TODO do this on the GPU.
+    // Convert baselines to wavenumber units. -- NOTE do this on the GPU?
     for (unsigned i = 0; i < num_vis; ++i)
     {
         u[i] *= wavenumber;

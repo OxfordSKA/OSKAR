@@ -59,7 +59,7 @@ void oskar_fft_shift_d(const unsigned nx, const unsigned ny, double* data)
     {
         for (unsigned i = 0; i < nx; ++i)
         {
-            // FIXME both equivalent... which is faster
+            // Note: both equivalent... which is faster
             data[j * nx + i] *= (int) pow(-1, i + j);
 //            if ((i + j) % 2)
 //            {
@@ -76,7 +76,7 @@ void oskar_fft_shift_fftz(const unsigned nx, const unsigned ny, fftw_complex* da
     {
         for (unsigned i = 0; i < nx; ++i)
         {
-            // FIXME both equivalent... which is faster
+            // Note: both equivalent... which is faster
             int factor = (int) pow(-1, i + j);
             data[j * nx + i][0] *= factor;
             data[j * nx + i][1] *= factor;

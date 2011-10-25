@@ -55,8 +55,7 @@ extern "C" {
  *
  * - The beam phase centre coordinates are specified in horizontal lm
  *   and these can be converted from ra, dec using the function:
- *      - evaluate_beam_horizontal_lm() (FIXME: this currently only exists
- *        as a private function in oskar_interferometer1_scalar)
+ *      - evaluate_beam_horizontal_lm() (FIXME: this currently only exists as a private function in oskar_interferometer1_scalar)
  *
  *
  * @param[in]  hd_station       Pointer to host structure containing device

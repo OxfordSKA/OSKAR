@@ -96,6 +96,9 @@ enum {
     // Indicates that the data type of a Jones matrix is not supported.
     OSKAR_ERR_BAD_JONES_TYPE       = -10,
 
+    // Indicates that the memory location is out of range.
+    OSKAR_ERR_OUT_OF_RANGE         = -11,
+
     // Indicates that an unknown error occurred.
     OSKAR_ERR_UNKNOWN              = -1000
 };

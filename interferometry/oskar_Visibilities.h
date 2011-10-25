@@ -38,6 +38,12 @@
 #include "utility/oskar_Mem.h"
 
 
+/**
+ * @brief Structure to hold visibility data.
+ *
+ * @details
+ *
+ */
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -46,19 +52,19 @@ struct oskar_Visibilities
 #ifdef __cplusplus
     public:
 #endif
-        int num_baselines;
-        int num_times;
-        int num_channels;
-        oskar_Mem baseline_u; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_v; // Length num_baselines * num_times * num_channels
-        oskar_Mem baseline_w; // Length num_baselines * num_times * num_channels
-        oskar_Mem amplitude;  // Length num_baselines * num_times * num_channels.
+        int num_times;        ///< Number of time samples or visibility dumps.
+        int num_baselines;    ///< Number of baselines.
+        int num_channels;     ///< Number of frequency channels.
+        oskar_Mem baseline_u; ///< Baseline coordinates, in wavenumbers.
+        oskar_Mem baseline_v; ///< Baseline coordinates, in wavenumbers.
+        oskar_Mem baseline_w; ///< Baseline coordinates, in wavenumbers.
+        oskar_Mem amplitude;  ///< Complex visibility amplitude. Polarisation
+                              ///< dimensions are specified by the type format.
 
     // Provide methods if C++.
 #ifdef __cplusplus
     public:
-
-        oskar_Visibilities(const int num_baselines, const int num_times,
+        oskar_Visibilities(const int num_times, const int num_baselines,
                 const int num_channels, const int type, const int location);
 
         oskar_Visibilities(const oskar_Visibilities* other, const int location);
@@ -67,9 +73,11 @@ struct oskar_Visibilities
 
         int append(const oskar_Visibilities* other);
 
-        int location() const { return amplitude.type(); }
+        int insert(const oskar_Visibilities* other, const unsigned time_index);
 
-        int num_samples() const { return num_baselines * num_times * num_channels; }
+        int location() const { return amplitude.location(); }
+
+        int num_samples() const { return num_times * num_baselines * num_channels; }
 
         int num_polarisations() const
         { return ((amplitude.type() & 0x0400) == 0x0400) ? 4 : 1; }

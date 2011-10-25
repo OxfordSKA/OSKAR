@@ -26,64 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_alloc.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_append.h"
-#include <cstdlib>
+#ifndef OSKAR_VISIBILITIES_INSERT_H_
+#define OSKAR_VISIBILITIES_INSERT_H_
 
-oskar_Mem::oskar_Mem()
-: private_type(0),
-  private_location(0),
-  private_n_elements(0),
-  data(NULL)
-{
-}
+/**
+ * @file oskar_Visibilties_insert.h
+ */
 
-oskar_Mem::oskar_Mem(int type, int location, int n_elements)
-: private_type(type),
-  private_location(location),
-  private_n_elements(n_elements),
-  data(NULL)
-{
-    if (n_elements > 0)
-        if (oskar_mem_alloc(this) != 0)
-            throw "Error in oskar_mem_alloc";
-}
 
-oskar_Mem::oskar_Mem(const oskar_Mem* other, int location)
-: private_type(other->type()),
-  private_location(location),
-  private_n_elements(other->n_elements()),
-  data(NULL)
-{
-    if (oskar_mem_alloc(this) != 0)
-        throw "Error in oskar_mem_alloc";
-    if (oskar_mem_copy(this, other) != 0) // Copy other to this.
-        throw "Error in oskar_mem_copy";
-}
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
 
-oskar_Mem::~oskar_Mem()
-{
-    if (this->data != NULL)
-        if (oskar_mem_free(this) != 0)
-            throw "Error in oskar_mem_free";
-}
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT
+int oskar_visibilties_insert(oskar_Visibilities* dst,
+        const oskar_Visibilities* src, const unsigned time_index);
 
-int oskar_Mem::copy_to(oskar_Mem* other)
-{
-    return oskar_mem_copy(other, this); // Copy this to other.
-}
-
-int oskar_Mem::resize(int num_elements)
-{
-    return oskar_mem_realloc(this, num_elements);
-}
-
-int oskar_Mem::append(const void* from, int from_type, int from_location,
-        int num_elements)
-{
-    return oskar_mem_append(this, from, from_type, from_location, num_elements);
-}
+#endif // OSKAR_VISIBILITIES_INSERT_H_

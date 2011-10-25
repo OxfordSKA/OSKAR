@@ -52,7 +52,7 @@ int oskar_mem_alloc(oskar_Mem* mem)
     if (location == OSKAR_LOCATION_CPU)
     {
         // Allocate host memory.
-        mem->data = malloc(bytes);
+        mem->data = calloc(bytes, 1);
         if (mem->data == NULL)
             err = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     }
@@ -60,6 +60,7 @@ int oskar_mem_alloc(oskar_Mem* mem)
     {
         // Allocate GPU memory.
         cudaMalloc(&mem->data, bytes);
+        cudaMemset(mem->data, 0, bytes);
         err = cudaPeekAtLastError();
     }
     else

@@ -136,7 +136,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
     cudaMemset(visd, 0, nb * sizeof(float2));
 
     // Copy u,v,w baseline coordinates of mid-point to output arrays.
-    // FIXME: probably don't need to return UVW from this function?
+    // NOTE: probably don't need to return UVW from this function?
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;
@@ -312,7 +312,7 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
     cudaMemset(visd, 0, nb * sizeof(double2));
 
     // Copy u,v,w baseline coordinates of mid-point to output arrays.
-    // FIXME: probably don't need to return UVW from this function?
+    // NOTE: probably don't need to return UVW from this function?
     tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
     lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
     ha0 = lst - ra0;

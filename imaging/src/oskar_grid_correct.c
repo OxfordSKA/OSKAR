@@ -94,7 +94,7 @@ void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
     }
 
     // === Find the maximum of the correction function.
-    // TODO: same as normalising to the centre?
+    // Note: same as normalising to the centre?
     double correction_max = -DBL_MAX;
     for (int i = 0; i < (int)grid_size; ++i)
         correction_max = MAX(correction_max, correction1d[i]);
