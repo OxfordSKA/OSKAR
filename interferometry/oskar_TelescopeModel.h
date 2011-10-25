@@ -46,22 +46,37 @@ struct oskar_TelescopeModel
     oskar_Mem station_u;
     oskar_Mem station_v;
     oskar_Mem station_w;
-    oskar_Mem station_x; ///< Fixed x component of station coordinate in ITRS.
-    oskar_Mem station_y; ///< Fixed y component of station coordinate in ITRS.
-    oskar_Mem station_z; ///< Fixed z component of station coordinate in ITRS.
-    int identical_stations; // True if all stations are identical.
-    int use_common_sky; // True if all stations should use common source positions.
+    oskar_Mem station_x;     ///< Fixed x component of station coordinate in ITRS.
+    oskar_Mem station_y;     ///< Fixed y component of station coordinate in ITRS.
+    oskar_Mem station_z;     ///< Fixed z component of station coordinate in ITRS.
+    int identical_stations;  // True if all stations are identical.
+    int use_common_sky;      // True if all stations should use common source positions.
 };
 
 typedef struct oskar_TelescopeModel oskar_TelescopeModel;
 
 
-// DEPRECATED:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+// DEPRECATED
 struct oskar_TelescopeModel_d
 {
     unsigned num_antennas;
@@ -75,7 +90,7 @@ struct oskar_TelescopeModel_d
 typedef struct oskar_TelescopeModel_d oskar_TelescopeModel_d;
 
 
-
+// DEPRECATED
 struct oskar_TelescopeModel_f
 {
     unsigned num_antennas;

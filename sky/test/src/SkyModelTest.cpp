@@ -133,44 +133,97 @@ void SkyModelTest::test_append()
 
 void SkyModelTest::test_load()
 {
-    const char* filename = "temp_sources.osm";
-    FILE* file = fopen(filename, "w");
-    if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
-    int num_sources = 1013;
-    for (int i = 0; i < num_sources; ++i)
-    {
-        if (i % 10 == 0) fprintf(file, "# some comment!\n");
-        fprintf(file, "%f %f %f %f %f %f %f %f\n",
-                i/10.0, i/20.0, 0.0, 1.0, 2.0, 3.0, 200.0e6, -0.7);
-    }
-    fclose(file);
-
-
-    oskar_SkyModel* sky = new oskar_SkyModel(0, OSKAR_SINGLE, OSKAR_LOCATION_CPU);
-    int err = oskar_sky_model_load(filename, sky);
-
-    // Cleanup.
-    remove(filename);
-
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("oskar_SkyModel_load failed", 0, err);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky->type());
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, sky->location());
-    CPPUNIT_ASSERT_EQUAL(num_sources, num_sources);
-    CPPUNIT_ASSERT_EQUAL(num_sources, sky->RA.n_elements());
-    CPPUNIT_ASSERT_EQUAL(num_sources, sky->rel_l.n_elements());
-
     const double deg2rad = 0.0174532925199432957692;
+    const char* filename = "temp_sources.osm";
 
-    // Check the data loaded correctly.
-    for (int i = 0; i < num_sources; ++i)
+    // Load sky file with all columns specified.
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0 * deg2rad, ((float*)sky->RA.data)[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0 * deg2rad, ((float*)sky->Dec.data)[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((float*)sky->I.data)[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ((float*)sky->Q.data)[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, ((float*)sky->U.data)[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, ((float*)sky->V.data)[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(200.0e6, ((float*)sky->reference_freq.data)[i], 1.0e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.7, ((float*)sky->spectral_index.data)[i], 1.0e-6);
+        FILE* file = fopen(filename, "w");
+        if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
+        int num_sources = 1013;
+        for (int i = 0; i < num_sources; ++i)
+        {
+            if (i % 10 == 0) fprintf(file, "# some comment!\n");
+            fprintf(file, "%f %f %f %f %f %f %f %f\n",
+                    i/10.0, i/20.0, 0.0, 1.0, 2.0, 3.0, 200.0e6, -0.7);
+        }
+        fclose(file);
+
+
+        oskar_SkyModel* sky = new oskar_SkyModel(0, OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+        int err = oskar_sky_model_load(filename, sky);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        // Cleanup.
+        remove(filename);
+
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("oskar_SkyModel_load failed", 0, err);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky->type());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, sky->location());
+        CPPUNIT_ASSERT_EQUAL(num_sources, num_sources);
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky->RA.n_elements());
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky->rel_l.n_elements());
+
+        // Check the data loaded correctly.
+        for (int i = 0; i < num_sources; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0 * deg2rad, ((float*)sky->RA.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0 * deg2rad, ((float*)sky->Dec.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((float*)sky->I.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ((float*)sky->Q.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, ((float*)sky->U.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, ((float*)sky->V.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(200.0e6, ((float*)sky->reference_freq.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.7, ((float*)sky->spectral_index.data)[i], 1.0e-6);
+        }
+
+        free(sky);
+    }
+
+
+    // Load sky file with with just RA, Dec and I specified.
+    {
+        FILE* file = fopen(filename, "w");
+        if (file == NULL) CPPUNIT_FAIL("Unable to create test file");
+        int num_sources = 1013;
+        for (int i = 0; i < num_sources; ++i)
+        {
+            if (i % 10 == 0) fprintf(file, "# some comment!\n");
+            fprintf(file, "%f, %f, %f\n", i/10.0, i/20.0, (float)i);
+        }
+        fclose(file);
+
+        // Load the sky model onto the GPU.
+        oskar_SkyModel* sky_gpu = new oskar_SkyModel(0, OSKAR_SINGLE,
+                OSKAR_LOCATION_GPU);
+        int err = oskar_sky_model_load(filename, sky_gpu);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        // Cleanup.
+        remove(filename);
+
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("oskar_SkyModel_load failed", 0, err);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky_gpu->type());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky_gpu->location());
+        CPPUNIT_ASSERT_EQUAL(num_sources, num_sources);
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky_gpu->RA.n_elements());
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky_gpu->rel_l.n_elements());
+
+        // Copy the sky model back to the CPU and free the GPU version.
+        oskar_SkyModel sky_cpu(sky_gpu, OSKAR_LOCATION_CPU);
+        free(sky_gpu);
+
+        // Check the data is correct.
+        for (int i = 0; i < num_sources; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0 * deg2rad, ((float*)sky_cpu.RA.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0 * deg2rad, ((float*)sky_cpu.Dec.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i, ((float*)sky_cpu.I.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((float*)sky_cpu.Q.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((float*)sky_cpu.U.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((float*)sky_cpu.V.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((float*)sky_cpu.reference_freq.data)[i], 1.0e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((float*)sky_cpu.spectral_index.data)[i], 1.0e-6);
+        }
     }
 }

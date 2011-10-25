@@ -36,9 +36,6 @@
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * @brief
@@ -56,29 +53,34 @@ extern "C" {
  * - Reference frequency (Hz),
  * - Spectral index
  *
- * The columns must be space-separated.
+ * Columns 4 to 8 (Q, U, V, Reference frequency and Spectral index) are optional
+ * and defaulted to zero if omitted.
  *
- * Lines beginning with a # symbol are treated as comments and therefore
+ * The columns must be space or comma separated.
+ *
+ * Lines beginning with a hash symbol (#) are treated as comments and therefore
  * ignored.
  *
  * @param[in]  filename  Path to the a source list file.
  * @param[out] sky       Pointer to sky model structure to fill.
  */
+#ifdef __cplusplus
+extern "C"
+#endif
 OSKAR_EXPORT
 int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky);
 
-#ifdef __cplusplus
-}
-#endif
 
 
 
-// ========== DEPRECATED
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
+ * DEPRECATED
  * @brief Loads sources from a plain text source file into an oskar global sky
  * model structure (double precision).
  *
@@ -97,6 +99,7 @@ void oskar_sky_model_load_d(const char* file_path, oskar_SkyModelGlobal_d* sky);
 
 
 /**
+ * DEPRECATED
  * @brief Loads sources from a plain text source file into an oskar global sky
  * model structure (single precision).
  *

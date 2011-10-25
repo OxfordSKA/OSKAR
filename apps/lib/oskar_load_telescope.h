@@ -35,7 +35,49 @@
 
 #include "interferometry/oskar_TelescopeModel.h"
 
+
 /**
+ * @brief Loads a telescope station coordinates file, consisting specifying a
+ * telescope in 2-dimensional horizontal coordinates, into the specified
+ * telescope model structure.
+ *
+ * @details
+ * An telescope station coordinate file is an ASCII file consisting of two or
+ * columns of comma separated values representing the station x,y co-ordinates
+ * in a horizontal coordinate system (the z coordinate is assumed to be zero).
+ * Each line corresponds to the position of one station.
+ *
+ * @param telescope  Telescope model structure to be populated.
+ * @param filename   File name path to a telescope coordinate file.
+ * @param longitude  Telescope centre longitude, in radians.
+ * @param latitude   Telescope centre latitude, in radians.
+ */
+void oskar_load_telescope_horizontal(oskar_TelescopeModel* telescope,
+        const char* filename, const double longitude, const double latitude);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * DEPRECATED
+ *
  * @brief Loads a telescope station coordinates file into a telescope model
  * structure. (double precision)
  *
@@ -44,14 +86,17 @@
  * @param[in]  latitude   Telescope latitude, in radians.
  * @param[out] telescope  Pointer to telescope model structure.
  */
+#ifdef __cplusplus
+extern "C"
+#endif
 void oskar_load_telescope_d(const char* file_path, const double longitude_rad,
         const double latitude_rad, oskar_TelescopeModel_d* telescope);
 
-
 /**
+ * DEPRECATED
+ *
  * @brief Loads a telescope station coordinates file into a telescope model
  * structure. (single/float precision)
-
  *
  * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
  * @param[in]  longitude  Telescope longitude, in radians.

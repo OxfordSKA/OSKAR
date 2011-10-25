@@ -36,6 +36,19 @@
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 
+
+
+/**
+ * @struct oskar_SkyModel
+ *
+ * @brief Structure to hold a sky model used by the OSKAR simulator.
+ *
+ * @details
+ * The structure holds source parameters for the global sky model used by the
+ * OSKAR simulator along with a number of work buffers used by various processing
+ * modules.
+ */
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -44,25 +57,24 @@ struct oskar_SkyModel
 #ifdef __cplusplus
     public:
 #endif
-        int num_sources;
-        oskar_Mem RA;
-        oskar_Mem Dec;
-        oskar_Mem I;
-        oskar_Mem Q;
-        oskar_Mem U;
-        oskar_Mem V;
-        oskar_Mem reference_freq;
-        oskar_Mem spectral_index;
+        int num_sources;          ///< Number of soruces in the sky model.
+        oskar_Mem RA;             ///< Right ascension, in radians.
+        oskar_Mem Dec;            ///< Declination, in radians.
+        oskar_Mem I;              ///< Stokes-I, in Jy.
+        oskar_Mem Q;              ///< Stokes-Q, in Jy.
+        oskar_Mem U;              ///< Stokes-U, in Jy.
+        oskar_Mem V;              ///< Stokes-V, in Jy.
+        oskar_Mem reference_freq; ///< Reference frequency for the spectral index, in Hz.
+        oskar_Mem spectral_index; ///< Spectral index.
 
         // Work buffers.
-        // NOTE: need better name to indicate they should be treated as work buffers.
-        double update_timestamp; ///< Time for which work buffer is valid.
-        oskar_Mem rel_l;  ///< Phase centre relative direction-cosines.
-        oskar_Mem rel_m;  ///< Phase centre relative direction-cosines.
-        oskar_Mem rel_n;  ///< Phase centre relative direction-cosines.
-        oskar_Mem hor_l;  ///< Horizontal coordinate system direction-cosines.
-        oskar_Mem hor_m;  ///< Horizontal coordinate system direction-cosines.
-        oskar_Mem hor_n;  ///< Horizontal coordinate system direction-cosines.
+        double update_timestamp;  ///< Timestamp for which work buffer is valid.
+        oskar_Mem rel_l;          ///< Phase centre relative direction-cosines.
+        oskar_Mem rel_m;          ///< Phase centre relative direction-cosines.
+        oskar_Mem rel_n;          ///< Phase centre relative direction-cosines.
+        oskar_Mem hor_l;          ///< Horizontal coordinate system direction-cosines.
+        oskar_Mem hor_m;          ///< Horizontal coordinate system direction-cosines.
+        oskar_Mem hor_n;          ///< Horizontal coordinate system direction-cosines.
 
 #ifdef __cplusplus
     public:
@@ -118,15 +130,54 @@ struct oskar_SkyModel
          */
         int load(const char* filename);
 
+        /**
+         * @brief Resizes the sky model the specified number of sources.
+         *
+         * @param num_sources Number of sources to resize to.
+         *
+         * @return error code.
+         */
         int resize(int num_sources);
 
+        /**
+         * @brief Sets the source parameters for the source at the specified
+         * index in the sky model.
+         *
+         * @param index             Source index.
+         * @param ra                Right ascension, in radians.
+         * @param dec               Delination, in radians.
+         * @param I                 Stokes-I, in Jy.
+         * @param Q                 Stokes-Q, in Jy.
+         * @param U                 Stokes-U, in Jy.
+         * @param V                 Stokes-V, in Jy.
+         * @param ref_frequency     Reference frequency, in Hz.
+         * @param spectral_index    Spectral index.
+         *
+         * @return error code.
+         */
         int set_source(int index, double ra, double dec, double I, double Q,
                 double U, double V, double ref_frequency, double spectral_index);
 
+        /**
+         * @brief Appends the specified sky model the the current sky model.
+         *
+         * @param other Sky model to append.
+         *
+         * @return error code.
+         */
         int append(const oskar_SkyModel* other);
 
+        /**
+         * @brief Returns the memory type for memory in the sky structure.
+         * @return OSKAR memory type enum value.
+         */
         int type() const { return RA.type(); }
 
+        /**
+         * @brief Returns the memory location (host or device) for memory
+         * in the sky structure.
+         * @return OSKAR memory location enum value (0 = host, 1 = device)
+         */
         int location() const { return RA.location(); }
 #endif
 };
@@ -139,11 +190,12 @@ typedef struct oskar_SkyModel oskar_SkyModel;
 
 
 
-// ==================== DEPRECATED
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// DEPRECATED
 struct oskar_SkyModelGlobal_f
 {
     int num_sources;
@@ -165,7 +217,7 @@ struct oskar_SkyModelGlobal_f
 };
 typedef struct oskar_SkyModelGlobal_f oskar_SkyModelGlobal_f;
 
-
+// DEPRECATED
 struct oskar_SkyModelGlobal_d
 {
     int num_sources;
@@ -187,7 +239,7 @@ struct oskar_SkyModelGlobal_d
 };
 typedef struct oskar_SkyModelGlobal_d oskar_SkyModelGlobal_d;
 
-
+// DEPRECATED
 struct oskar_SkyModelLocal_f
 {
     int num_sources;
@@ -210,7 +262,7 @@ struct oskar_SkyModelLocal_f
 };
 typedef struct oskar_SkyModelLocal_f oskar_SkyModelLocal_f;
 
-
+// DEPRECATED
 struct oskar_SkyModelLocal_d
 {
     int num_sources;

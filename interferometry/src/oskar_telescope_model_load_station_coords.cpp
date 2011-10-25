@@ -26,46 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_TEST_H_
-#define SKY_TEST_H_
+#include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_load_station_coords.h"
 
-/**
- * @file SkyTest.h
- */
-
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * DEPRECATED
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class SkyTest : public CppUnit::TestFixture
+void oskar_load_telescope_horizontal(oskar_TelescopeModel* telescope,
+        const char* filename, const double longitude, const double latitude)
 {
-    public:
-        CPPUNIT_TEST_SUITE(SkyTest);
-        CPPUNIT_TEST(test_rand);
-        CPPUNIT_TEST(test_generate_random);
-        CPPUNIT_TEST(test_distance_filter);
-        CPPUNIT_TEST(test_rotate);
-        CPPUNIT_TEST(test_rotate_sources);
-        CPPUNIT_TEST(test_angles_from_lm);
-        CPPUNIT_TEST_SUITE_END();
 
-    public:
-        /// Test methods.
-        void test_rand();
-        void test_generate_random();
-        void test_distance_filter();
-        void test_rotate();
-        void test_rotate_sources();
-        void test_angles_from_lm();
-};
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(SkyTest);
 
-#endif // SKY_TEST_H_
+
+}
+

@@ -26,46 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_TEST_H_
-#define SKY_TEST_H_
+#ifndef OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+#define OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
 
 /**
- * @file SkyTest.h
+ * @file oskar_telescope_model_load_station_coords.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "interferometry/oskar_TelescopeModel.h"
 
 /**
- * DEPRECATED
- * @brief Unit test class that uses CppUnit.
+ * @brief Loads a telescope station coordinates file, consisting specifying a
+ * telescope in 2-dimensional horizontal coordinates, into the specified
+ * telescope model structure.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * An telescope station coordinate file is an ASCII file consisting of two or
+ * columns of comma separated values representing the station x,y co-ordinates
+ * in a horizontal coordinate system (the z coordinate is assumed to be zero).
+ * Each line corresponds to the position of one station.
+ *
+ * @param telescope  Telescope model structure to be populated.
+ * @param filename   File name path to a telescope coordinate file.
+ * @param longitude  Telescope centre longitude, in radians.
+ * @param latitude   Telescope centre latitude, in radians.
  */
-class SkyTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(SkyTest);
-        CPPUNIT_TEST(test_rand);
-        CPPUNIT_TEST(test_generate_random);
-        CPPUNIT_TEST(test_distance_filter);
-        CPPUNIT_TEST(test_rotate);
-        CPPUNIT_TEST(test_rotate_sources);
-        CPPUNIT_TEST(test_angles_from_lm);
-        CPPUNIT_TEST_SUITE_END();
+void oskar_load_telescope_horizontal(oskar_TelescopeModel* telescope,
+        const char* filename, const double longitude, const double latitude);
 
-    public:
-        /// Test methods.
-        void test_rand();
-        void test_generate_random();
-        void test_distance_filter();
-        void test_rotate();
-        void test_rotate_sources();
-        void test_angles_from_lm();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(SkyTest);
-
-#endif // SKY_TEST_H_
+#endif // OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
