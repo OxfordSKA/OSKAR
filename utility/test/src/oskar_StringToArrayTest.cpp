@@ -36,14 +36,13 @@ void oskar_StringToArrayTest::test_method()
 {
     double list[6];
     int filled = 0, n = sizeof(list) / sizeof(double);
-//    char* context; // Required for safe strtok_r() function.
 
     // Test comma and space separated values with additional non-numeric fields.
     char test1[] = "hello 1.0,2.0 3.0, there,4.0     5.0 6.0";
     filled = oskar_string_to_array_d(test1, n, list);
     CPPUNIT_ASSERT_EQUAL(6, filled);
     for (int i = 0; i < filled; ++i)
-    	CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i+1), list[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i+1), list[i], 1e-10);
 
     // Test empty string.
     char test2[] = "";
@@ -60,7 +59,7 @@ void oskar_StringToArrayTest::test_method()
     filled = oskar_string_to_array_d(test4, n, list);
     CPPUNIT_ASSERT_EQUAL(5, filled);
     for (int i = 0; i < filled; ++i)
-    	CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i-4), list[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i-4), list[i], 1e-10);
 
     // Test non-matching string.
     char test5[] = "nobody home";
@@ -72,5 +71,5 @@ void oskar_StringToArrayTest::test_method()
     filled = oskar_string_to_array_d(test6, n, list);
     CPPUNIT_ASSERT_EQUAL(n, filled);
     for (int i = 0; i < filled; ++i)
-    	CPPUNIT_ASSERT_DOUBLES_EQUAL((i+1)/10.0, list[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((i+1)/10.0, list[i], 1e-10);
 }

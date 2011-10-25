@@ -52,66 +52,80 @@ int oskar_station_model_load_coords(const char* filename,
 
     // Declare the line buffer.
     char* line = NULL;
-    size_t n = 0;
+    size_t bufsize = 0;
 
     // Loop over each line in the file.
-    int num_elements_loaded = 0;
+    int n = 0;
     if (station->x.type() == OSKAR_DOUBLE)
     {
-        while (oskar_getline(&line, &n, file) != OSKAR_ERR_EOF)
+        while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
         {
             // Ignore comment lines (lines starting with '#').
             if (line[0] == '#') continue;
 
             // Load element coordinates.
-            double p[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
-            int read = oskar_string_to_array_d(line, 9, p);
-            if (read < 3) continue;
+            double par[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+            int read = oskar_string_to_array_d(line, 9, par);
+            if (read < 2) continue;
 
             // Ensure enough space in arrays.
-            if (num_elements_loaded % 100 == 0)
-                station->resize(num_elements_loaded + 100);
+            if (n % 100 == 0)
+            {
+                int err = station->resize(n + 100);
+                if (err)
+                {
+                    fclose(file);
+                    return err;
+                }
+            }
 
             // Store the data.
-            ((double*)station->x.data)[num_elements_loaded] = p[0];
-            ((double*)station->y.data)[num_elements_loaded] = p[1];
-            ((double*)station->z.data)[num_elements_loaded] = p[2];
-            ((double2*)station->weight.data)[num_elements_loaded].x = p[3];
-            ((double2*)station->weight.data)[num_elements_loaded].y = p[4];
-            ((double*)station->amp_gain.data)[num_elements_loaded] = p[5];
-            ((double*)station->amp_error.data)[num_elements_loaded] = p[6];
-            ((double*)station->phase_offset.data)[num_elements_loaded] = p[7];
-            ((double*)station->phase_error.data)[num_elements_loaded] = p[8];
-            ++num_elements_loaded;
+            ((double*)station->x.data)[n] = par[0];
+            ((double*)station->y.data)[n] = par[1];
+            ((double*)station->z.data)[n] = par[2];
+            ((double2*)station->weight.data)[n].x = par[3];
+            ((double2*)station->weight.data)[n].y = par[4];
+            ((double*)station->amp_gain.data)[n] = par[5];
+            ((double*)station->amp_error.data)[n] = par[6];
+            ((double*)station->phase_offset.data)[n] = par[7];
+            ((double*)station->phase_error.data)[n] = par[8];
+            ++n;
         }
     }
     else if (station->x.type() == OSKAR_SINGLE)
     {
-        while (oskar_getline(&line, &n, file) != OSKAR_ERR_EOF)
+        while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
         {
             // Ignore comment lines (lines starting with '#').
             if (line[0] == '#') continue;
 
             // Load element coordinates.
-            float p[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
-            int read = oskar_string_to_array_f(line, 9, p);
-            if (read < 3) continue;
+            float par[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+            int read = oskar_string_to_array_f(line, 9, par);
+            if (read < 2) continue;
 
             // Ensure enough space in arrays.
-            if (num_elements_loaded % 100 == 0)
-                station->resize(num_elements_loaded + 100);
+            if (n % 100 == 0)
+            {
+                int err = station->resize(n + 100);
+                if (err)
+                {
+                    fclose(file);
+                    return err;
+                }
+            }
 
             // Store the data.
-            ((float*)station->x.data)[num_elements_loaded] = p[0];
-            ((float*)station->y.data)[num_elements_loaded] = p[1];
-            ((float*)station->z.data)[num_elements_loaded] = p[2];
-            ((float2*)station->weight.data)[num_elements_loaded].x = p[3];
-            ((float2*)station->weight.data)[num_elements_loaded].y = p[4];
-            ((float*)station->amp_gain.data)[num_elements_loaded] = p[5];
-            ((float*)station->amp_error.data)[num_elements_loaded] = p[6];
-            ((float*)station->phase_offset.data)[num_elements_loaded] = p[7];
-            ((float*)station->phase_error.data)[num_elements_loaded] = p[8];
-            ++num_elements_loaded;
+            ((float*)station->x.data)[n] = par[0];
+            ((float*)station->y.data)[n] = par[1];
+            ((float*)station->z.data)[n] = par[2];
+            ((float2*)station->weight.data)[n].x = par[3];
+            ((float2*)station->weight.data)[n].y = par[4];
+            ((float*)station->amp_gain.data)[n] = par[5];
+            ((float*)station->amp_error.data)[n] = par[6];
+            ((float*)station->phase_offset.data)[n] = par[7];
+            ((float*)station->phase_error.data)[n] = par[8];
+            ++n;
         }
     }
     else
@@ -120,7 +134,8 @@ int oskar_station_model_load_coords(const char* filename,
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    station->n_elements = num_elements_loaded;
+    // Record the number of elements loaded.
+    station->n_elements = n;
 
     // Free the line buffer and close the file.
     if (line) free(line);
