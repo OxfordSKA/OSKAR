@@ -10,6 +10,7 @@ if (CPPUNIT_FOUND)
         src/GetlineTest.cpp
         src/LoadCoordinatesTest.cpp
         src/oskar_Mem_test.cpp
+        src/oskar_StringToArrayTest.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
