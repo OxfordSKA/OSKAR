@@ -29,42 +29,35 @@
 #include "utility/oskar_string_to_array.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #ifdef _WIN32
 #define strtok_r(s,d,p) strtok_s(s,d,p)
-#endif
-
-#ifdef __cplusplus
-extern "C" {
+#else
+extern char* strtok_r(char*, const char*, char**);
 #endif
 
 // Single precision.
 int oskar_string_to_array_f(char* str, int n, float* data)
 {
-	char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
-	int i = 0;
-	while (token && i < n)
-	{
-		if (sscanf(token, "%f", &data[i]) > 0) i++;
-		token = strtok_r(NULL, " ,", &save_ptr);
-	}
-	return i;
+    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
+    int i = 0;
+    while (token && i < n)
+    {
+        if (sscanf(token, "%f", &data[i]) > 0) i++;
+        token = strtok_r(NULL, " ,", &save_ptr);
+    }
+    return i;
 }
 
 // Double precision.
 int oskar_string_to_array_d(char* str, int n, double* data)
 {
-	char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
-	int i = 0;
-	while (token && i < n)
-	{
-		if (sscanf(token, "%lf", &data[i]) > 0) i++;
-		token = strtok_r(NULL, " ,", &save_ptr);
-	}
-	return i;
+    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
+    int i = 0;
+    while (token && i < n)
+    {
+        if (sscanf(token, "%lf", &data[i]) > 0) i++;
+        token = strtok_r(NULL, " ,", &save_ptr);
+    }
+    return i;
 }
-
-#ifdef __cplusplus
-}
-#endif

@@ -28,6 +28,7 @@
 
 #include "station/oskar_station_model_load_coords.h"
 #include "utility/oskar_getline.h"
+#include "utility/oskar_string_to_array.h"
 #include <cstdio>
 
 extern "C"
@@ -57,15 +58,14 @@ int oskar_station_model_load_coords(const char* filename,
     int num_elements_loaded = 0;
     if (station->x.type() == OSKAR_DOUBLE)
     {
-        double x, y, z, w_re, w_im, amp, amp_err, ph, ph_err;
         while (oskar_getline(&line, &n, file) != OSKAR_ERR_EOF)
         {
             // Ignore comment lines (lines starting with '#').
             if (line[0] == '#') continue;
 
             // Load element coordinates.
-            int read = sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf %lf",
-                    &x, &y, &z, &w_re, &w_im, &amp, &amp_err, &ph, &ph_err);
+            double p[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+            int read = oskar_string_to_array_d(line, 9, p);
             if (read < 3) continue;
 
             // Ensure enough space in arrays.
@@ -73,23 +73,28 @@ int oskar_station_model_load_coords(const char* filename,
                 station->resize(num_elements_loaded + 100);
 
             // Store the data.
-            ((double*)station->x.data)[num_elements_loaded] = x;
-            ((double*)station->y.data)[num_elements_loaded] = y;
-            ((double*)station->z.data)[num_elements_loaded] = z;
+            ((double*)station->x.data)[num_elements_loaded] = p[0];
+            ((double*)station->y.data)[num_elements_loaded] = p[1];
+            ((double*)station->z.data)[num_elements_loaded] = p[2];
+            ((double2*)station->weight.data)[num_elements_loaded].x = p[3];
+            ((double2*)station->weight.data)[num_elements_loaded].y = p[4];
+            ((double*)station->amp_gain.data)[num_elements_loaded] = p[5];
+            ((double*)station->amp_error.data)[num_elements_loaded] = p[6];
+            ((double*)station->phase_offset.data)[num_elements_loaded] = p[7];
+            ((double*)station->phase_error.data)[num_elements_loaded] = p[8];
             ++num_elements_loaded;
         }
     }
     else if (station->x.type() == OSKAR_SINGLE)
     {
-        float x, y, z, w_re, w_im, amp, amp_err, ph, ph_err;
         while (oskar_getline(&line, &n, file) != OSKAR_ERR_EOF)
         {
             // Ignore comment lines (lines starting with '#').
             if (line[0] == '#') continue;
 
             // Load element coordinates.
-            int read = sscanf(line, "%f %f %f %f %f %f %f %f %f",
-                    &x, &y, &z, &w_re, &w_im, &amp, &amp_err, &ph, &ph_err);
+            float p[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+            int read = oskar_string_to_array_f(line, 9, p);
             if (read < 3) continue;
 
             // Ensure enough space in arrays.
@@ -97,9 +102,15 @@ int oskar_station_model_load_coords(const char* filename,
                 station->resize(num_elements_loaded + 100);
 
             // Store the data.
-            ((float*)station->x.data)[num_elements_loaded] = x;
-            ((float*)station->y.data)[num_elements_loaded] = y;
-            ((float*)station->z.data)[num_elements_loaded] = z;
+            ((float*)station->x.data)[num_elements_loaded] = p[0];
+            ((float*)station->y.data)[num_elements_loaded] = p[1];
+            ((float*)station->z.data)[num_elements_loaded] = p[2];
+            ((float2*)station->weight.data)[num_elements_loaded].x = p[3];
+            ((float2*)station->weight.data)[num_elements_loaded].y = p[4];
+            ((float*)station->amp_gain.data)[num_elements_loaded] = p[5];
+            ((float*)station->amp_error.data)[num_elements_loaded] = p[6];
+            ((float*)station->phase_offset.data)[num_elements_loaded] = p[7];
+            ((float*)station->phase_error.data)[num_elements_loaded] = p[8];
             ++num_elements_loaded;
         }
     }

@@ -34,6 +34,42 @@
 extern "C" {
 #endif
 
+#if 0
+void oskar_horizon_plane_to_itrs_d(int num_antennas,
+        const double* x_horizon, const double* y_horizon,
+        const double* z_horizon, double longitude, double latitude,
+        double altitude, double* x, double* y, double* z)
+{
+    const double sinLat = sin(latitude);
+    const double cosLat = cos(latitude);
+
+    for (int i = 0; i < num_antennas; ++i)
+    {
+        x[i] = -y_horizon[i] * sinLat + z_horizon[i] * cosLat;
+        y[i] =  x_horizon[i];
+        z[i] =  y_horizon[i] * cosLat + z_horizon[i] * sinLat;
+    }
+}
+
+
+void oskar_horizon_plane_to_itrs_f(int num_antennas,
+        const float* x_horizon, const float* y_horizon,
+        const float* z_horizon, float longitude, float latitude,
+        float altitude, float* x, float* y, float* z)
+{
+    const float sinLat = sinf(latitude);
+    const float cosLat = cosf(latitude);
+
+    for (int i = 0; i < num_antennas; ++i)
+    {
+        x[i] = -y_horizon[i] * sinLat + z_horizon[i] * cosLat;
+        y[i] =  x_horizon[i];
+        z[i] =  y_horizon[i] * cosLat + z_horizon[i] * sinLat;
+    }
+}
+#endif
+
+// Deprecated, old versions.
 void oskar_horizon_plane_to_itrs_d(const unsigned num_antennas,
         const double * x_horizon, const double * y_horizon,
         const double latitude, double * x, double * y, double * z)
@@ -64,6 +100,7 @@ void oskar_horizon_plane_to_itrs_f(const unsigned num_antennas,
         z[i] =  y_horizon[i] * cosLat;
     }
 }
+
 
 #ifdef __cplusplus
 }

@@ -46,7 +46,8 @@ class StationModelTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(StationModelTest);
-        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_load_single);
+        CPPUNIT_TEST(test_load_double);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -58,7 +59,10 @@ class StationModelTest : public CppUnit::TestFixture
 
     public:
         /// Test method.
-        void test_method();
+        void test_load_single();
+
+        // Test method.
+        void test_load_double();
 };
 
 // Register the test class.

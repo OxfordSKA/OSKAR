@@ -56,7 +56,7 @@ void StationModelTest::tearDown()
  * @details
  * Tests loading of station data.
  */
-void StationModelTest::test_method()
+void StationModelTest::test_load_single()
 {
     // Create the test file.
     const char* filename = "test.dat";
@@ -74,12 +74,76 @@ void StationModelTest::test_method()
     oskar_station_model_load_coords(filename, &station_model);
 
     // Check the coordinates.
-    printf("n_elements = %d\n",station_model.n_elements);
-    for (int i = 0; i < station_model.n_elements; ++i)
+    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.n_elements);
+    for (int i = 0; i < n_elements; ++i)
     {
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,
-                ((float*)station_model.x.data)[i], 1e-4);
-        printf("%d\n",i);
+                ((float*)station_model.x.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0,
+                ((float*)station_model.y.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/30.0,
+                ((float*)station_model.z.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
+                ((float2*)station_model.weight.data)[i].x, 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((float2*)station_model.weight.data)[i].y, 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
+                ((float*)station_model.amp_gain.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((float*)station_model.amp_error.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((float*)station_model.phase_offset.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((float*)station_model.phase_error.data)[i], 1e-3);
+    }
+
+    // Remove the test file.
+    remove(filename);
+}
+
+/**
+ * @details
+ * Tests loading of station data.
+ */
+void StationModelTest::test_load_double()
+{
+    // Create the test file.
+    const char* filename = "test.dat";
+    FILE* file = fopen(filename, "w");
+    int n_elements = 100;
+    for (int i = 0; i < n_elements/2; ++i)
+        fprintf(file, "%.6f %.6f %.6f\n", i/10.0, i/20.0, i/30.0);
+    fprintf(file, "\n"); // Add a blank line halfway.
+    for (int i = n_elements/2; i < n_elements; ++i)
+        fprintf(file, "%.6f,%.6f,%.6f\n", i/10.0, i/20.0, i/30.0);
+    fclose(file);
+
+    // Load the data.
+    oskar_StationModel station_model(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+    oskar_station_model_load_coords(filename, &station_model);
+
+    // Check the coordinates.
+    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.n_elements);
+    for (int i = 0; i < n_elements; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,
+                ((double*)station_model.x.data)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0,
+                ((double*)station_model.y.data)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i/30.0,
+                ((double*)station_model.z.data)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
+                ((double2*)station_model.weight.data)[i].x, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((double2*)station_model.weight.data)[i].y, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
+                ((double*)station_model.amp_gain.data)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((double*)station_model.amp_error.data)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((double*)station_model.phase_offset.data)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
+                ((double*)station_model.phase_error.data)[i], 1e-6);
     }
 
     // Remove the test file.

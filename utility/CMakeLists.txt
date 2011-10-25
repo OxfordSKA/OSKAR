@@ -17,7 +17,7 @@ set(utility_SRC
     src/oskar_mem_init.c
     src/oskar_mem_realloc.c
     src/oskar_Mem.cpp
-    src/oskar_string_to_array.cpp
+    src/oskar_string_to_array.c
 )
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 

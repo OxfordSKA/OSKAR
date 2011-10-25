@@ -53,14 +53,33 @@ extern "C" {
  *
  * see Thompson, Swenson & Moran (ch4, p86)
  *
- * @param[in]  num_antennas  Number of antennas/ stations.
+ * @param[in]  num_antennas  Number of antennas / stations.
  * @param[in]  x_horizon     Vector of horizontal station x-positions, in metres.
  * @param[in]  y_horizon     Vector of horizontal station y-positions, in metres.
+ * @param[in]  z_horizon     Vector of horizontal station z-positions, in metres.
+ * @param[in]  longitude     Telescope longitude, in radians.
  * @param[in]  latitude      Telescope latitude, in radians.
+ * @param[in]  altitude      Telescope altitude, in metres.
  * @param[out] x             Vector of ITRS x-positions, in metres.
- * @param[out] y             Vector of ITRS x-positions, in metres.
- * @param[out] z             Vector of ITRS x-positions, in metres.
+ * @param[out] y             Vector of ITRS y-positions, in metres.
+ * @param[out] z             Vector of ITRS z-positions, in metres.
  */
+#if 0
+OSKAR_EXPORT
+void oskar_horizon_plane_to_itrs_d(int num_antennas,
+        const double* x_horizon, const double* y_horizon,
+        const double* z_horizon, double longitude, double latitude,
+        double altitude, double* x, double* y, double* z);
+
+
+OSKAR_EXPORT
+void oskar_horizon_plane_to_itrs_f(int num_antennas,
+        const float* x_horizon, const float* y_horizon,
+        const float* z_horizon, float longitude, float latitude,
+        float altitude, float* x, float* y, float* z);
+#endif
+
+// Deprecated, old versions.
 OSKAR_EXPORT
 void oskar_horizon_plane_to_itrs_d(const unsigned num_antennas,
         const double* x_horizon, const double* y_horizon,
@@ -71,6 +90,7 @@ OSKAR_EXPORT
 void oskar_horizon_plane_to_itrs_f(const unsigned num_antennas,
         const float* x_horizon, const float* y_horizon,
         const float latitude, float* x, float* y, float* z);
+
 
 
 #ifdef __cplusplus
