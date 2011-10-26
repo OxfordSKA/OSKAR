@@ -27,8 +27,8 @@
  */
 
 #include "cuda/oskar_cuda_bp2hc.h"
-#include "cuda/kernels/oskar_cudak_antenna.h"
-#include "cuda/kernels/oskar_cudak_apodisation.h"
+#include "station/cudak/oskar_cudak_antenna.h"
+#include "station/cudak/oskar_cudak_apodisation.h"
 #include "cuda/kernels/oskar_cudak_bp2hiw.h"
 #include "cuda/kernels/oskar_cudak_wt2hg.h"
 #include <stdio.h>
@@ -107,7 +107,7 @@ int oskar_cudaf_bp2hc(int na, const float* ax, const float* ay,
         switch (apfn)
         {
         case apfn_hann:
-            oskar_cudakf_apodisation_hann <<< aBlk, aThd >>> (
+            oskar_cudak_apodisation_hann_f <<< aBlk, aThd >>> (
                     na, axd, ayd, nb, rmax, wts);
             break;
         default:
@@ -145,15 +145,15 @@ int oskar_cudaf_bp2hc(int na, const float* ax, const float* ay,
             switch (atype)
             {
             case atype_sin_elevation:
-                oskar_cudakf_antenna_sine <<< bBlk, bThd >>> (
+                oskar_cudak_antenna_sine_f <<< bBlk, bThd >>> (
                         csize, sed, imaged);
                 break;
             case atype_sin2_elevation:
-                oskar_cudakf_antenna_sine_squared <<< bBlk, bThd >>> (
+                oskar_cudak_antenna_sine_squared_f <<< bBlk, bThd >>> (
                         csize, sed, imaged);
                 break;
             case atype_gaussian:
-                oskar_cudakf_antenna_gaussian <<< bBlk, bThd >>> (
+                oskar_cudak_antenna_gaussian_f <<< bBlk, bThd >>> (
                         csize, sed, gain, fwhm, imaged);
                 break;
             default:
@@ -257,7 +257,7 @@ int oskar_cudad_bp2hc(int na, const double* ax, const double* ay,
         switch (apfn)
         {
         case apfn_hann:
-            oskar_cudakd_apodisation_hann <<< aBlk, aThd >>> (
+            oskar_cudak_apodisation_hann_d <<< aBlk, aThd >>> (
                     na, axd, ayd, nb, rmax, wts);
             break;
         default:
@@ -295,15 +295,15 @@ int oskar_cudad_bp2hc(int na, const double* ax, const double* ay,
             switch (atype)
             {
             case atype_sin_elevation:
-                oskar_cudakd_antenna_sine <<< bBlk, bThd >>> (
+                oskar_cudak_antenna_sine_d <<< bBlk, bThd >>> (
                         csize, sed, imaged);
                 break;
             case atype_sin2_elevation:
-                oskar_cudakd_antenna_sine_squared <<< bBlk, bThd >>> (
+                oskar_cudak_antenna_sine_squared_d <<< bBlk, bThd >>> (
                         csize, sed, imaged);
                 break;
             case atype_gaussian:
-                oskar_cudakd_antenna_gaussian <<< bBlk, bThd >>> (
+                oskar_cudak_antenna_gaussian_d <<< bBlk, bThd >>> (
                         csize, sed, gain, fwhm, imaged);
                 break;
             default:

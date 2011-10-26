@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BF_CUDAK_APODISATION_H_
-#define OSKAR_BF_CUDAK_APODISATION_H_
+#ifndef OSKAR_CUDAK_APODISATION_H_
+#define OSKAR_CUDAK_APODISATION_H_
 
 /**
- * @file oskar_bf_cudak_apodisation.h
+ * @file oskar_cudak_apodisation.h
  */
 
 #include "oskar_global.h"
@@ -77,4 +77,4 @@ __global__
 void oskar_cudak_apodisation_hann_d(const int na, const double* ax,
         const double* ay, const int nb, const double fwhm, double2* weights);
 
-#endif // OSKAR_BF_CUDAK_APODISATION_H_
+#endif // OSKAR_CUDAK_APODISATION_H_

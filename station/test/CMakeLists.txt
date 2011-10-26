@@ -5,7 +5,6 @@
 if (CPPUNIT_FOUND)
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
-    #include_directories(${QT_INCLUDE_DIR})
 
 
     set(station_test_SRC
@@ -23,7 +22,6 @@ if (CPPUNIT_FOUND)
 
     target_link_libraries(stationTest oskar
         ${CPPUNIT_LIBRARIES}
-        #${QT_QTCORE_LIBRARIES} #FIXME dependency
     )
 
     add_test(stationTest stationTest)

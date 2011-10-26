@@ -31,7 +31,6 @@
 #include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
 #include "math/cudak/oskar_cudak_mat_mul_cc.h"
 #include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
-#include "math/oskar_mat_tri_c.h"
 #include "interferometry/oskar_compute_baselines.h"
 #include "interferometry/oskar_xyz_to_uvw.h"
 
@@ -40,8 +39,6 @@
 #include <stdio.h>
 #include <cublas.h>
 #include <math.h>
-
-#include "cuda/CudaEclipse.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +55,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* b, const float* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
-        float* vis, float* u, float* v, float* w)
+        float* vis)
 {
     // Initialise.
     cudaError_t errCuda = cudaSuccess;
@@ -66,7 +63,7 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
     double lst, ha0; // Must be double.
     float2 one = make_float2(1.0f, 0.0f);
     int i, a, retVal = 0;
-    double tIncCentre, tInc;
+    double tInc;
     double tOffset = (double)sdt / 2.0;
     cublasInit();
 
@@ -91,19 +88,6 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
         r = l[i]*l[i] + m[i]*m[i];
         n[i] = (r < 1.0) ? sqrtf(1.0f - r) - 1.0f : -1.0f;
     }
-
-    // Scale source brightnesses (in Bsqrt) by station beams (in E).
-//    float2* eb = (float2*)malloc(ns * na * sizeof(float2));
-//    for (a = 0; a < na; ++a)
-//    {
-//        for (i = 0; i < ns; ++i)
-//        {
-//            int idx = i + a * ns;
-//            float bs = bsqrt[i];
-//            eb[idx].x = e[2*idx + 0] * bs; // Real
-//            eb[idx].y = e[2*idx + 1] * bs; // Imag
-//        }
-//    }
 
     // Allocate host memory for station u,v,w coordinates and visibility matrix.
     int nb = na * (na - 1) / 2;
@@ -134,15 +118,6 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
 
     // Clear visibility matrix.
     cudaMemset(visd, 0, nb * sizeof(float2));
-
-    // Copy u,v,w baseline coordinates of mid-point to output arrays.
-    // NOTE: probably don't need to return UVW from this function?
-    tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
-    lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
-    ha0 = lst - ra0;
-    oskar_xyz_to_uvw_f(na, ax, ay, az, ha0, dec0, &uvw[0], &uvw[na],
-            &uvw[2*na]);
-    oskar_compute_baselines_f(na, &uvw[0], &uvw[na], &uvw[2*na], u, v, w);
 
     // Loop over integrations.
     for (i = 0; i < nsdt; ++i)
@@ -234,7 +209,7 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* b, const double* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt, double k,
-        double bandwidth, double* vis, double* u, double* v, double* w)
+        double bandwidth, double* vis)
 {
     // Initialise.
     cudaError_t errCuda = cudaSuccess;
@@ -242,7 +217,7 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
     double lst, ha0;
     double2 one = make_double2(1.0, 0.0);
     int i, a, retVal = 0;
-    double tIncCentre, tInc;
+    double tInc;
     double tOffset = (double)sdt / 2.0;
     cublasInit();
 
@@ -267,19 +242,6 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         r = l[i]*l[i] + m[i]*m[i];
         n[i] = (r < 1.0) ? sqrt(1.0 - r) - 1.0 : -1.0;
     }
-
-//    // Scale source brightnesses (in Bsqrt) by station beams (in E).
-//    double2* eb = (double2*)malloc(ns * na * sizeof(double2));
-//    for (a = 0; a < na; ++a)
-//    {
-//        for (i = 0; i < ns; ++i)
-//        {
-//            int idx = i + a * ns;
-//            double bs = b[i];
-//            eb[idx].x = e[2*idx + 0] * bs; // Real
-//            eb[idx].y = e[2*idx + 1] * bs; // Imag
-//        }
-//    }
 
     // Allocate host memory for station u,v,w coordinates and visibility matrix.
     int nb = na * (na - 1) / 2;
@@ -310,16 +272,6 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
 
     // Clear visibility matrix.
     cudaMemset(visd, 0, nb * sizeof(double2));
-
-    // Copy u,v,w baseline coordinates of mid-point to output arrays.
-    // NOTE: probably don't need to return UVW from this function?
-    tIncCentre = ((nsdt - 1) / 2) * sdt + tOffset;
-    lst = lst0 + 2 * M_PI * tIncCentre * sdt / 86400.0f;
-    ha0 = lst - ra0;
-    oskar_xyz_to_uvw_d(na, ax, ay, az, ha0, dec0,
-            &uvw[0], &uvw[na], &uvw[2*na]);
-    oskar_compute_baselines_d(na, &uvw[0], &uvw[na], &uvw[2*na],
-            u, v, w);
 
     // Loop over integrations.
     for (i = 0; i < nsdt; ++i)

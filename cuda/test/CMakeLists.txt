@@ -6,8 +6,6 @@ if (CPPUNIT_FOUND)
 
     set(cuda_test_SRC
         src/CppUnitMain.cpp
-        src/CudaVectorAddTest.cpp
-        src/CudaThrustTest.cu
         src/CudaBeamPatternTest.cpp
         #src/CudaHierarchicalBeamPatternTest.cpp
         #src/CudaBeamPatternGaussianTest.cpp

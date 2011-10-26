@@ -28,8 +28,6 @@
 
 #include "station/oskar_evaluate_station_beam.h"
 
-#include "cuda/kernels/oskar_cudak_antenna.h"
-#include "cuda/kernels/oskar_cudak_apodisation.h"
 #include "cuda/kernels/oskar_cudak_bp2hiw.h"
 #include "cuda/kernels/oskar_cudak_wt2hg.h"
 

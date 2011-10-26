@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BF_CUDAK_ANTENNA_H_
-#define OSKAR_BF_CUDAK_ANTENNA_H_
+#ifndef OSKAR_CUDAK_ANTENNA_H_
+#define OSKAR_CUDAK_ANTENNA_H_
 
 /**
- * @file oskar_bf_cudak_antenna.h
+ * @file oskar_cudak_antenna.h
  */
 
 #include "oskar_global.h"
@@ -140,4 +140,4 @@ __global__
 void oskar_cudak_antenna_sine_squared_d(const int ns, const double* se,
         double2* image);
 
-#endif // OSKAR_BF_CUDAK_ANTENNA_H_
+#endif // OSKAR_CUDAK_ANTENNA_H_

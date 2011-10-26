@@ -65,16 +65,13 @@ extern "C" {
  * @param[in] sdt The time interval between averages in seconds.
  * @param[in] k Wavenumber in radians / metre.
  * @param[out] vis The complex visibilities (see note, above).
- * @param[out] u Array of baseline u-positions in metres (see note, above).
- * @param[out] v Array of baseline v-positions in metres (see note, above).
- * @param[out] w Array of baseline w-positions in metres (see note, above).
  */
 OSKAR_EXPORT
 int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
         const float* ay, const float* az, int ns, const float* l,
         const float* m, const float* bsqrt, const float* e, float ra0,
         float dec0, float lst0, int nsdt, float sdt, float k, float bandwidth,
-        float* vis, float* u, float* v, float* w);
+        float* vis);
 
 
 /**
@@ -102,16 +99,13 @@ int oskar_cuda_correlator_lm_bw_f(int na, const float* ax,
  * @param[in] sdt The time interval between averages in seconds.
  * @param[in] k Wavenumber in radians / metre.
  * @param[out] vis The complex visibilities (see note, above).
- * @param[out] u Array of baseline u-positions in metres.
- * @param[out] v Array of baseline v-positions in metres.
- * @param[out] w Array of baseline w-positions in metres.
  */
 OSKAR_EXPORT
 int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
         const double* ay, const double* az, int ns, const double* l,
         const double* m, const double* bsqrt, const double* e, double ra0,
         double dec0, double lst0, int nsdt, double sdt, double k,
-        double bandwidth, double* vis, double* u, double* v, double* w);
+        double bandwidth, double* vis);
 
 #ifdef __cplusplus
 }

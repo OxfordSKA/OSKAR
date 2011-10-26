@@ -27,15 +27,11 @@
  */
 
 #include "cuda/oskar_cuda_bp2phc.h"
-#include "cuda/kernels/oskar_cudak_antenna.h"
-#include "cuda/kernels/oskar_cudak_apodisation.h"
 #include "cuda/kernels/oskar_cudak_bp2phiw.h"
 #include "cuda/kernels/oskar_cudak_wt2phg.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#include "cuda/CudaEclipse.h"
 
 #ifdef __cplusplus
 extern "C" {

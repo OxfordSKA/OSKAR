@@ -21,9 +21,6 @@ set(cuda_SRC
     src/oskar_cuda_hbp2hig.cu
     src/oskar_cuda_im2dftlm.cu
     src/oskar_cuda_le2hg.cu
-
-    src/oskar_cuda_rpw3leg.cu
-    src/oskar_cuda_vecadd.cu
 )
 foreach (file ${cuda_kernels_SRC})
     list(APPEND cuda_SRC kernels/${file})

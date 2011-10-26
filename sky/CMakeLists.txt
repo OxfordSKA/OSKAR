@@ -12,12 +12,10 @@ set(sky_SRC
     src/oskar_filter_sources_by_flux.cpp
     src/oskar_filter_sources_by_radius.cpp
     src/oskar_generate_random_sources.cpp
-    src/oskar_cuda_compute_local_sky.c
     src/oskar_cuda_horizon_clip.cu
     src/oskar_cuda_ra_dec_to_az_el.cu
     src/oskar_cuda_ra_dec_to_hor_lmn.cu
     src/oskar_cuda_ra_dec_to_relative_lmn.cu
-    src/oskar_cuda_transform_to_local_stokes.cu
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
     src/oskar_evaluate_jones_R.cu

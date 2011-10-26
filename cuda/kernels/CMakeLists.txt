@@ -4,8 +4,6 @@
 #==============================================================================
 
 set(cuda_kernels_SRC
-    src/oskar_cudak_antenna.cu
-    src/oskar_cudak_apodisation.cu
     src/oskar_cudak_as2hi.cu
     src/oskar_cudak_bp2hiw.cu
     src/oskar_cudak_bp2phiw.cu
@@ -15,8 +13,6 @@ set(cuda_kernels_SRC
     src/oskar_cudak_im2dft.cu
     src/oskar_cudak_le2hg.cu
     src/oskar_cudak_pc2ht.cu
-    src/oskar_cudak_rpw3leg.cu
-    src/oskar_cudak_rpw3leglm.cu
     src/oskar_cudak_wt2hg.cu
     src/oskar_cudak_wt2phg.cu
 )

@@ -37,7 +37,6 @@
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
 #include "sky/cudak/oskar_cudak_scale_brightness_by_spectral_index.h"
 
-#include "station/oskar_mult_beampattern_by_sources.h"
 #include "station/oskar_evaluate_station_beam.h"
 
 #include "sky/oskar_mjd_to_last_fast.h"
