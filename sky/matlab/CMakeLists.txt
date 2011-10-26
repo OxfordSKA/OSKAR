@@ -9,5 +9,8 @@ if (MATLAB_FOUND)
     oskar_mex(oskar_mjd_to_last_fast  oskar_mex_mjd_to_last_fast.cpp)
     oskar_mex(oskar_date_time_to_mjd  oskar_mex_date_time_to_mjd.cpp)
     oskar_mex(oskar_mjd_to_gmst       oskar_mex_mjd_to_gmst.cpp)
+    
+    add_subdirectory("@SkyModel")
+    
 endif (MATLAB_FOUND)
 

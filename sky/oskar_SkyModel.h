@@ -37,7 +37,6 @@
 #include "utility/oskar_Mem.h"
 
 
-
 /**
  * @struct oskar_SkyModel
  *
@@ -91,6 +90,21 @@ struct oskar_SkyModel
         oskar_SkyModel(const int num_sources, const int type, const int location);
 
         /**
+         * @brief Constructs an oskar_SkyModel loading it from the specified
+         * file.
+         *
+         * @details
+         * Loads the sky model from a OSKAR source text file.
+         *
+         * @param filename     Path to a file containing an OSKAR sky model.
+         * @param type         Data type for the sky model (either OSKAR_SINGLE,
+         *                     or OSKAR_DOUBLE)
+         * @param location     Memory location of the constructed sky model
+         *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+         */
+        oskar_SkyModel(const char* filename, const int type, const int location);
+
+        /**
          * @brief Constructs an oskar_SkyModel as a copy of the supplied sky
          * model at the specified location.
          *
@@ -101,27 +115,12 @@ struct oskar_SkyModel
         oskar_SkyModel(const oskar_SkyModel* other, const int location);
 
         /**
-         * @brief Constructs an oskar_SkyModel loading it from the specified
-         * file.
-         *
-         * @details
-         * Loads the sky model from a oskar source text file.
-         *
-         * @param filename     Path to a file containing an oskar sky model.
-         * @param type         Data type for the sky model (either OSKAR_SINGLE,
-         *                     or OSKAR_DOUBLE)
-         * @param location     Memory location of the constructed sky model
-         *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
-         */
-        oskar_SkyModel(const char* filename, const int type, const int location);
-
-        /**
          * @brief Destroys the sky model.
          */
         ~oskar_SkyModel();
 
         /**
-         * @brief Loads an oskar source text file into the current sky structure.
+         * @brief Loads an OSKAR source text file into the current sky structure.
          * Sources from the file are appended to the end of the current structure.
          *
          * @param filename  Path to a file containing an oskar sky model.

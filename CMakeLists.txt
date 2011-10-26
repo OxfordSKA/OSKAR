@@ -55,12 +55,6 @@ if (NOT DEFINED BUILD_OSKAR_FITS)
     set(BUILD_OSKAR_FITS ON)
 endif ()
 
-
-# ==== Default CUDA architecture target.
-if (NOT CUDA_ARCH)
-    set(CUDA_ARCH 2.1)
-endif ()
-
 # ==== Set dependencies and compiler options.
 include(oskar_dependencies)
 include(oskar_compiler_options)

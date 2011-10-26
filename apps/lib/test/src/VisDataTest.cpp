@@ -34,8 +34,6 @@
 
 void VisDataTest::test_load()
 {
-    printf("(%f)\n", CUDA_ARCH);
-
     const unsigned num_stations  = 25;
     const unsigned num_vis_dumps = 100;
     oskar_VisData_d data_in;

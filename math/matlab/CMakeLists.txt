@@ -2,7 +2,6 @@
 # src/math/matlab/CMakeLists.txt
 #
 
-# ==== Matlab mex funtions
 if (MATLAB_FOUND)
     include(oskar_build_macros)
     oskar_mex(oskar_random_broken_power_law oskar_mex_random_broken_power_law.cpp)
@@ -10,5 +9,5 @@ if (MATLAB_FOUND)
 
     add_subdirectory("@Jones")
 
-endif ()
+endif (MATLAB_FOUND)
 
