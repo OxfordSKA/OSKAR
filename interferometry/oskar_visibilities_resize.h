@@ -37,6 +37,17 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+/**
+ * @brief Resize the memory in the visibility structure to the specified
+ * dimensions.
+ *
+ * @param vis            The visibility structure to resize.
+ * @param num_times      Number of visibility time snapshots.
+ * @param num_baselines  Number of baselines.
+ * @param num_channels   Number of frequency channels.
+ *
+ * @return An error code.
+ */
 #ifdef __cplusplus
 extern "C"
 #endif

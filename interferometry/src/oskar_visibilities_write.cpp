@@ -59,9 +59,15 @@ int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis)
     size_t amp_element_size = oskar_mem_element_size(amp_type);
     size_t num_samples = vis->num_samples();
     int oskar_vis_file_magic_number = OSKAR_VIS_FILE_ID;
+    int oskar_version = OSKAR_VERSION;
 
     // Write header.
     if (fwrite(&oskar_vis_file_magic_number, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(&oskar_version, sizeof(int), 1, file) != 1)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;

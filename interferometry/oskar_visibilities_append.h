@@ -37,6 +37,20 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+/**
+ * @brief Appends the specified visibility structure.
+ *
+ * @details
+ * The structure being appended must contain the same baseline
+ * and channel dimensions are the structure being appended to. This
+ * ensures memory order is preserved as the append simply allows
+ * expansion of the outer time time dimension.
+ *
+ * @param src Visibility structure to append from.
+ * @param dst Visibility structure to append to.
+ *
+ * @return An error code.
+ */
 #ifdef __cplusplus
 extern "C"
 #endif

@@ -99,6 +99,9 @@ enum {
     // Indicates that the memory location is out of range.
     OSKAR_ERR_OUT_OF_RANGE         = -11,
 
+    // Indicates that the OSKAR version is not compatible.
+    OSKAR_ERR_VERSION_MISMATCH     = -12,
+
     // Indicates that an unknown error occurred.
     OSKAR_ERR_UNKNOWN              = -1000
 };

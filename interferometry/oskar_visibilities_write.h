@@ -37,6 +37,21 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+
+/**
+ * @brief Writes the contents of visibility structure to an OSKAR
+ * visibility dump file of the specified file name. This is a simple
+ * custom binary format.
+ *
+ * @details
+ * Note: This function currently requires the visibility structure memory
+ * to reside on the CPU.
+ *
+ * @param filename The filename to write to.
+ * @param vis      The visibility structure to write.
+ *
+ * @return An error code.
+ */
 #ifdef __cplusplus
 extern "C"
 #endif

@@ -113,7 +113,6 @@ struct oskar_Visibilities
         oskar_Visibilities(const int num_times, const int num_baselines,
                 const int num_channels, const int amp_type, const int location);
 
-
         /**
          * @brief Constructs a visibility structure by loading it from the
          * specified filename.

@@ -37,6 +37,24 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+
+/**
+ * @brief Inserts the specified visibility structure at the specified
+ * time index.
+ *
+ * @details
+ * The structure being inserted must contain the same baseline
+ * and channel dimensions are the structure being appended to.
+ * To use this function the visibility structure being inserted must
+ * be preallocated to sufficiently large dimensions that the time index
+ * plus the number of times in the structure being inserted dosnt exceed
+ * the number of times in the destination.
+ *
+ * @param
+ * @param other Visibility structure to append.
+ *
+ * @return An error code.
+ */
 #ifdef __cplusplus
 extern "C"
 #endif

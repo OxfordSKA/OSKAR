@@ -61,6 +61,7 @@ typedef struct oskar_VisData_f oskar_VisData_f;
 
 
 /**
+ * DEPRECATED
  * @brief Allocate memory for the specified oskar_VisData_d structure.
  *
  * @param[in] num_samples   Number of visibility samples to allocate. This is
@@ -75,6 +76,7 @@ void oskar_allocate_vis_data_f(const unsigned num_samples, oskar_VisData_f* vis)
 
 
 /**
+ * DEPRECATED
  * @brief Free memory held in the specified oskar_VisData_d structure.
  *
  * @param[in] vis          Pointer to a oskar_VisData_d structure.

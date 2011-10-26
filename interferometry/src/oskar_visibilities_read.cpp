@@ -54,16 +54,29 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     int coord_type    = 0;
     int amp_type      = 0;
     int oskar_vis_file_magic_number = 0;
+    int version = 0;
 
     if (fread(&oskar_vis_file_magic_number, sizeof(int), 1, file) != 1)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
+    // Check the file data type magic number is correct.
     if (oskar_vis_file_magic_number != OSKAR_VIS_FILE_ID)
     {
         fclose(file);
         return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    if (fread(&version, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    // Check the OSKAR is compatible.
+    if (version > OSKAR_VERSION)
+    {
+        fclose(file);
+        return OSKAR_ERR_VERSION_MISMATCH;
     }
     if (fread(&num_times, sizeof(int), 1, file) != 1)
     {
