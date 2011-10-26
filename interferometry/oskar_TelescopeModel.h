@@ -53,9 +53,7 @@ struct oskar_TelescopeModel
     int identical_stations;      ///< True if all stations are identical.
     int use_common_sky;          ///< True if all stations should use common source positions.
 
-
     // Work buffers.
-    // NOTE: need better name to indicate they should be treated as work buffers.
     double update_timestamp;     ///< Time-stamp for which u,v,w are valid.
     oskar_Mem station_u;         ///< Work buffer holding station u coordinates.
     oskar_Mem station_v;         ///< Work buffer holding station v coordinates.

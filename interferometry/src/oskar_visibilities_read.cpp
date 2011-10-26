@@ -41,11 +41,6 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     if (filename == NULL || vis == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // If the vis structure already has data in it return an error.
-    // (This is not an append)
-    if (vis->num_samples() != 0)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
     // Open the file to write to.
     FILE* file;
     file = fopen(filename, "rb");
@@ -58,6 +53,18 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     int num_channels  = 0;
     int coord_type    = 0;
     int amp_type      = 0;
+    int oskar_vis_file_magic_number = 0;
+
+    if (fread(&oskar_vis_file_magic_number, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (oskar_vis_file_magic_number != OSKAR_VIS_FILE_ID)
+    {
+        fclose(file);
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
     if (fread(&num_times, sizeof(int), 1, file) != 1)
     {
         fclose(file);
@@ -85,6 +92,7 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     }
 
     // Initialise the visibility structure.
+    // Note: this will wipe any existing data in the structure.
     vis->init(num_times, num_baselines, num_channels, amp_type, OSKAR_LOCATION_CPU);
 
     // Read data.

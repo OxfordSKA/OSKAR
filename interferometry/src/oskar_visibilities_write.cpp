@@ -44,6 +44,8 @@ int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis)
     if (vis->location() != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
+    // FIXME Check overwrite behaviour?
+
     // Open the file to write to.
     FILE* file;
     file = fopen(filename, "wb");
@@ -56,8 +58,14 @@ int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis)
     size_t coord_element_size = oskar_mem_element_size(coord_type);
     size_t amp_element_size = oskar_mem_element_size(amp_type);
     size_t num_samples = vis->num_samples();
+    int oskar_vis_file_magic_number = OSKAR_VIS_FILE_ID;
 
     // Write header.
+    if (fwrite(&oskar_vis_file_magic_number, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
     if (fwrite(&(vis->num_times), sizeof(int), 1, file) != 1)
     {
         fclose(file);
