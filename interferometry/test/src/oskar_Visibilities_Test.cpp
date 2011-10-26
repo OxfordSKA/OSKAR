@@ -52,6 +52,7 @@ void oskar_Visibilties_Test::test_create()
 
     // Don't expect to throw for complex types.
     {
+        CPPUNIT_ASSERT_NO_THROW(oskar_Visibilities vis);
         CPPUNIT_ASSERT_NO_THROW(oskar_Visibilities vis(num_times, num_baselines,
                 num_channels, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU));
         CPPUNIT_ASSERT_NO_THROW(oskar_Visibilities vis(num_times, num_baselines,
@@ -84,6 +85,16 @@ void oskar_Visibilties_Test::test_create()
         CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_u.n_elements());
         CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_v.n_elements());
         CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_w.n_elements());
+
+        oskar_Visibilities vis2;
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2.location());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, vis2.amp_type());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.coord_type());
+        CPPUNIT_ASSERT_EQUAL(4, vis2.num_polarisations());
+        CPPUNIT_ASSERT_EQUAL(0, vis2.num_samples());
+        CPPUNIT_ASSERT(vis2.baseline_u.data == NULL);
+        CPPUNIT_ASSERT(vis2.amplitude.data == NULL);
+        CPPUNIT_ASSERT_EQUAL(0, vis2.baseline_u.n_elements());
     }
     {
         // Construct visibility data on the GPU and check accessor methods.
@@ -306,68 +317,129 @@ void oskar_Visibilties_Test::test_insert()
 }
 
 
+void oskar_Visibilties_Test::test_resize()
+{
+    {
+        oskar_Visibilities vis_cpu;
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis_cpu.location());
+        CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_times);
+        CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_baselines);
+        CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_channels);
+        int error = vis_cpu.resize(10, 2, 5);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        CPPUNIT_ASSERT_EQUAL(10, vis_cpu.num_times);
+        CPPUNIT_ASSERT_EQUAL(2, vis_cpu.num_baselines);
+        CPPUNIT_ASSERT_EQUAL(5, vis_cpu.num_channels);
+        CPPUNIT_ASSERT_EQUAL(10 * 2 * 5, vis_cpu.num_samples());
+    }
+
+    {
+        oskar_Visibilities vis_gpu(0, 0, 0, OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU);
+        CPPUNIT_ASSERT_EQUAL(0, vis_gpu.num_times);
+        CPPUNIT_ASSERT_EQUAL(0, vis_gpu.num_baselines);
+        CPPUNIT_ASSERT_EQUAL(0, vis_gpu.num_channels);
+        int error = vis_gpu.resize(10, 2, 5);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        CPPUNIT_ASSERT_EQUAL(10, vis_gpu.num_times);
+        CPPUNIT_ASSERT_EQUAL(2, vis_gpu.num_baselines);
+        CPPUNIT_ASSERT_EQUAL(5, vis_gpu.num_channels);
+        CPPUNIT_ASSERT_EQUAL(10 * 2 * 5, vis_gpu.num_samples());
+    }
+}
+
+
+void oskar_Visibilties_Test::test_init()
+{
+    // Create a visibility structure.
+    oskar_Visibilities vis(10, 5, 20, OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU);
+    CPPUNIT_ASSERT_EQUAL(10, vis.num_times);
+    CPPUNIT_ASSERT_EQUAL(5, vis.num_baselines);
+    CPPUNIT_ASSERT_EQUAL(20, vis.num_channels);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, vis.amp_type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis.coord_type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, vis.location());
+    CPPUNIT_ASSERT_EQUAL(4, vis.num_polarisations());
+
+    // Initialise the structure to completely different dimensions, type and
+    // location and check this works.
+    int error = vis.init(2, 1, 5, OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU);
+    CPPUNIT_ASSERT_EQUAL(0, error);
+    CPPUNIT_ASSERT_EQUAL(2, vis.num_times);
+    CPPUNIT_ASSERT_EQUAL(1, vis.num_baselines);
+    CPPUNIT_ASSERT_EQUAL(5, vis.num_channels);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE_COMPLEX, vis.amp_type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis.coord_type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis.location());
+    CPPUNIT_ASSERT_EQUAL(1, vis.num_polarisations());
+}
+
+
 void oskar_Visibilties_Test::test_read_write()
 {
-    int num_times     = 10;
-    int num_baselines = 20;
-    int num_channels  = 4;
-    int amp_type      = OSKAR_SINGLE_COMPLEX;
+    int num_times        = 10;
+    int num_baselines    = 20;
+    int num_channels     = 4;
+    int amp_type         = OSKAR_SINGLE_COMPLEX;
+    const char* filename = "vis_temp.dat";
 
-    // Create visibilities on the CPU and fill in some data.
-    oskar_Visibilities vis1(num_times, num_baselines, num_channels,
-            amp_type, OSKAR_LOCATION_CPU);
-    for (int i = 0, t = 0; t < vis1.num_times; ++t)
+    // Create visibilities on the CPU and fill in some data and write to file.
     {
-        for (int b = 0; b < vis1.num_baselines; ++b)
+        oskar_Visibilities vis1(num_times, num_baselines, num_channels,
+                amp_type, OSKAR_LOCATION_CPU);
+        for (int i = 0, t = 0; t < vis1.num_times; ++t)
         {
-            for (int c = 0; c < vis1.num_channels; ++c, ++i)
+            for (int b = 0; b < vis1.num_baselines; ++b)
             {
-                ((float*)vis1.baseline_u.data)[i]    = (float)t + 0.10f;
-                ((float*)vis1.baseline_v.data)[i]    = (float)b + 0.20f;
-                ((float*)vis1.baseline_w.data)[i]    = (float)c + 0.30f;
-                ((float2*)vis1.amplitude.data)[i].x  = (float)i + 1.123f;
-                ((float2*)vis1.amplitude.data)[i].y  = (float)i - 0.456f;
+                for (int c = 0; c < vis1.num_channels; ++c, ++i)
+                {
+                    ((float*)vis1.baseline_u.data)[i]    = (float)t + 0.10f;
+                    ((float*)vis1.baseline_v.data)[i]    = (float)b + 0.20f;
+                    ((float*)vis1.baseline_w.data)[i]    = (float)c + 0.30f;
+                    ((float2*)vis1.amplitude.data)[i].x  = (float)i + 1.123f;
+                    ((float2*)vis1.amplitude.data)[i].y  = (float)i - 0.456f;
+                }
             }
         }
+        int error = vis1.write(filename);
+        CPPUNIT_ASSERT_EQUAL(0, error);
     }
-
-    // Save the visiblity structure to file.
-    const char* filename = "vis_temp.dat";
-    int error = vis1.write(filename);
-    CPPUNIT_ASSERT_EQUAL(0, error);
 
     // Load the visibility structure from file.
-    oskar_Visibilities* vis2 = NULL;
-    CPPUNIT_ASSERT_NO_THROW(vis2 = new oskar_Visibilities(filename));
-    CPPUNIT_ASSERT_EQUAL(amp_type, vis2->amp_type());
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2->coord_type());
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2->location());
-    CPPUNIT_ASSERT_EQUAL(num_times, vis2->num_times);
-    CPPUNIT_ASSERT_EQUAL(num_baselines, vis2->num_baselines);
-    CPPUNIT_ASSERT_EQUAL(num_channels, vis2->num_channels);
-
-    for (int i = 0, t = 0; t < vis2->num_times; ++t)
     {
-        for (int b = 0; b < vis2->num_baselines; ++b)
+        oskar_Visibilities* vis2 = NULL;
+        CPPUNIT_ASSERT_NO_THROW(vis2 = new oskar_Visibilities(filename));
+        CPPUNIT_ASSERT_EQUAL(amp_type, vis2->amp_type());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2->coord_type());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2->location());
+        CPPUNIT_ASSERT_EQUAL(num_times, vis2->num_times);
+        CPPUNIT_ASSERT_EQUAL(num_baselines, vis2->num_baselines);
+        CPPUNIT_ASSERT_EQUAL(num_channels, vis2->num_channels);
+
+        // Check the data loaded correctly.
+        for (int i = 0, t = 0; t < vis2->num_times; ++t)
         {
-            for (int c = 0; c < vis2->num_channels; ++c, ++i)
+            for (int b = 0; b < vis2->num_baselines; ++b)
             {
-                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)t + 0.10f,
-                        ((float*)vis2->baseline_u.data)[i], 1.0e-6);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)b + 0.20f,
-                        ((float*)vis2->baseline_v.data)[i], 1.0e-6);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)c + 0.30f,
-                        ((float*)vis2->baseline_w.data)[i], 1.0e-6);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + 1.123f,
-                        ((float2*)vis2->amplitude.data)[i].x, 1.0e-6);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - 0.456f,
-                        ((float2*)vis2->amplitude.data)[i].y, 1.0e-6);
+                for (int c = 0; c < vis2->num_channels; ++c, ++i)
+                {
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL((float)t + 0.10f,
+                            ((float*)vis2->baseline_u.data)[i], 1.0e-6);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL((float)b + 0.20f,
+                            ((float*)vis2->baseline_v.data)[i], 1.0e-6);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL((float)c + 0.30f,
+                            ((float*)vis2->baseline_w.data)[i], 1.0e-6);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + 1.123f,
+                            ((float2*)vis2->amplitude.data)[i].x, 1.0e-6);
+                    CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - 0.456f,
+                            ((float2*)vis2->amplitude.data)[i].y, 1.0e-6);
+                }
             }
         }
+        // Free memory.
+        delete vis2;
     }
 
-    // Free memory and delete tempory file.
-    delete vis2;
+    // Delete temporary file.
     remove(filename);
 }
 

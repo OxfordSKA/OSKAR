@@ -38,13 +38,13 @@ extern "C"
 #endif
 int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
 {
-    if (filename == NULL)
+    if (filename == NULL || vis == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // if the vis has any data in it error out (this is not an append)
-
-    // TODO some checks on the validity of the visibility data.
-    // TODO require vis to be loaded to CPU?
+    // If the vis structure already has data in it return an error.
+    // (This is not an append)
+    if (vis->num_samples() != 0)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Open the file to write to.
     FILE* file;
@@ -52,13 +52,12 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     if (!file)
         return OSKAR_ERR_FILE_IO;
 
+    // Read header.
     int num_times     = 0;
     int num_baselines = 0;
     int num_channels  = 0;
     int coord_type    = 0;
     int amp_type      = 0;
-
-    // Read header.
     if (fread(&num_times, sizeof(int), 1, file) != 1)
     {
         fclose(file);
@@ -89,9 +88,9 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     vis->init(num_times, num_baselines, num_channels, amp_type, OSKAR_LOCATION_CPU);
 
     // Read data.
-    size_t num_samples = vis->num_samples();
+    size_t num_samples        = vis->num_samples();
     size_t coord_element_size = oskar_mem_element_size(coord_type);
-    size_t amp_element_size = oskar_mem_element_size(amp_type);
+    size_t amp_element_size   = oskar_mem_element_size(amp_type);
     if (fread(vis->baseline_u.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);

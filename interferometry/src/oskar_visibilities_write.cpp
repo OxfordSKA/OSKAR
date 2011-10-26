@@ -44,8 +44,6 @@ int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis)
     if (vis->location() != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    // TODO some checks on the validity of the visibility data.
-
     // Open the file to write to.
     FILE* file;
     file = fopen(filename, "wb");
@@ -53,27 +51,61 @@ int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis)
         return OSKAR_ERR_FILE_IO;
 
     // Local variables.
-    int num_samples = vis->num_samples();
     int coord_type = vis->baseline_u.type();
     int amp_type = vis->amplitude.type();
     size_t coord_element_size = oskar_mem_element_size(coord_type);
     size_t amp_element_size = oskar_mem_element_size(amp_type);
-
+    size_t num_samples = vis->num_samples();
 
     // Write header.
-    // TODO check return values from fwrite() ...
-    fwrite(&(vis->num_times), sizeof(int), 1, file);
-    fwrite(&(vis->num_baselines), sizeof(int), 1, file);
-    fwrite(&(vis->num_channels), sizeof(int), 1, file);
-    fwrite(&coord_type, sizeof(int), 1, file);
-    fwrite(&amp_type, sizeof(int), 1, file);
+    if (fwrite(&(vis->num_times), sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(&(vis->num_baselines), sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+
+    if (fwrite(&(vis->num_channels), sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(&coord_type, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(&amp_type, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
 
     // Write data.
-    // TODO check return values from fwrite() ...
-    fwrite(vis->baseline_u.data, coord_element_size, num_samples, file);
-    fwrite(vis->baseline_v.data, coord_element_size, num_samples, file);
-    fwrite(vis->baseline_w.data, coord_element_size, num_samples, file);
-    fwrite(vis->amplitude.data,  amp_element_size,   num_samples, file);
+    if (fwrite(vis->baseline_u.data, coord_element_size, num_samples, file) != num_samples)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(vis->baseline_v.data, coord_element_size, num_samples, file) != num_samples)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(vis->baseline_w.data, coord_element_size, num_samples, file) != num_samples)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(vis->amplitude.data,  amp_element_size,   num_samples, file) != num_samples)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
 
     fclose(file);
     return 0;
