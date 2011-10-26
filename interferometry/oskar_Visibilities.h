@@ -64,8 +64,12 @@ struct oskar_Visibilities
     // Provide methods if C++.
 #ifdef __cplusplus
     public:
+        oskar_Visibilities();
+
         oskar_Visibilities(const int num_times, const int num_baselines,
-                const int num_channels, const int type, const int location);
+                const int num_channels, const int amp_type, const int location);
+
+        oskar_Visibilities(const char* filename);
 
         oskar_Visibilities(const oskar_Visibilities* other, const int location);
 
@@ -75,12 +79,27 @@ struct oskar_Visibilities
 
         int insert(const oskar_Visibilities* other, const unsigned time_index);
 
+        int write(const char* filename);
+
+        int read(const char* filename);
+
+        int resize(int num_times, int num_baselines, int num_channels);
+
+        int init(int num_times, int num_baselines, int num_channels,
+                int amp_type, int location);
+
         int location() const { return amplitude.location(); }
 
         int num_samples() const { return num_times * num_baselines * num_channels; }
 
         int num_polarisations() const
         { return ((amplitude.type() & 0x0400) == 0x0400) ? 4 : 1; }
+
+        int coord_type() const
+        { return baseline_u.type(); }
+
+        int amp_type() const
+        { return amplitude.type(); }
 #endif
 };
 

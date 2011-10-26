@@ -20,8 +20,10 @@ set(interferometry_SRC
     src/oskar_TelescopeModel.cu
     src/oskar_VisData.c  # deprecated
     src/oskar_visibilities_append.cpp
+    src/oskar_visibilities_init.cpp
     src/oskar_visibilities_insert.cpp
     src/oskar_visibilities_read.cpp
+    src/oskar_visibilities_resize.cpp
     src/oskar_visibilities_write.cpp
     src/oskar_Visibilities.cpp
     src/oskar_xyz_to_uvw.c

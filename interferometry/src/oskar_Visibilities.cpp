@@ -29,36 +29,50 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_append.h"
+#include "interferometry/oskar_visibilities_init.h"
 #include "interferometry/oskar_visibilities_insert.h"
+#include "interferometry/oskar_visibilities_read.h"
+#include "interferometry/oskar_visibilities_resize.h"
+#include "interferometry/oskar_visibilities_write.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
 #include <cstdio>
 
-// Constructor.
+
+oskar_Visibilities::oskar_Visibilities()
+: num_times(0),
+  num_baselines(0),
+  num_channels(0),
+  baseline_u(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
+  baseline_v(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
+  baseline_w(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
+  amplitude(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0)
+{
+}
+
 oskar_Visibilities::oskar_Visibilities(const int num_times,
-        const int num_baselines, const int num_channels, const int type,
+        const int num_baselines, const int num_channels, const int amp_type,
         const int location)
 : num_times(num_times),
   num_baselines(num_baselines),
   num_channels(num_channels)
 {
-    int num_vis = num_times * num_baselines * num_channels;
+    if (oskar_visibilities_init(this, num_times, num_baselines, num_channels,
+            amp_type, location))
+        throw "error allocation visibility structure";
+}
 
-    // check if complex
-    if ((type & 0x00C0) != 0x00C0)
-        throw "visibilities must be complex";
-
-    int coord_type = ((type & OSKAR_SINGLE) == OSKAR_SINGLE) ?
-            OSKAR_SINGLE : OSKAR_DOUBLE;
-
-    if (oskar_mem_init(&baseline_u, coord_type, location, num_vis))
-        throw "error in oskar_mem_init";
-    if (oskar_mem_init(&baseline_v, coord_type, location, num_vis))
-        throw "error in oskar_mem_init";
-    if (oskar_mem_init(&baseline_w, coord_type, location, num_vis))
-        throw "error in oskar_mem_init";
-    if (oskar_mem_init(&amplitude,  type, location, num_vis))
-        throw "error in oskar_mem_init";
+oskar_Visibilities::oskar_Visibilities(const char* filename)
+: num_times(0),
+  num_baselines(0),
+  num_channels(0),
+  baseline_u(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
+  baseline_v(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
+  baseline_w(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
+  amplitude(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0)
+{
+    if (oskar_visibilties_read(this, filename) != 0)
+        throw "unable to read visibility file";
 }
 
 // Copy constructor.
@@ -74,6 +88,7 @@ oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
 {
 }
 
+
 oskar_Visibilities::~oskar_Visibilities()
 {
 }
@@ -87,5 +102,28 @@ int oskar_Visibilities::insert(const oskar_Visibilities* other,
         const unsigned time_index)
 {
     return oskar_visibilties_insert(this, other, time_index);
+}
+
+
+int oskar_Visibilities::write(const char* filename)
+{
+    return oskar_visibilties_write(filename, this);
+}
+
+int oskar_Visibilities::read(const char* filename)
+{
+    return oskar_visibilties_read(this, filename);
+}
+
+int oskar_Visibilities::resize(int num_times, int num_baselines, int num_channels)
+{
+    return oskar_visibilties_resize(this, num_times, num_baselines, num_channels);
+}
+
+int oskar_Visibilities::init(int num_times, int num_baselines, int num_channels,
+        int amp_type, int location)
+{
+    return oskar_visibilities_init(this, num_times, num_baselines, num_channels,
+            amp_type, location);
 }
 

@@ -26,43 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILTIES_TEST_
-#define OSKAR_VISIBILTIES_TEST_
+#include "oskar_global.h"
+#include "interferometry/oskar_visibilities_init.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_mem_init.h"
 
-/**
- * @file oskar_Visibilties_Test.h
- */
-
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class oskar_Visibilties_Test : public CppUnit::TestFixture
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT
+int oskar_visibilities_init(oskar_Visibilities* vis, int num_times,
+        int num_baselines, int num_channels, int amp_type, int location)
 {
-    public:
-        CPPUNIT_TEST_SUITE(oskar_Visibilties_Test);
-        CPPUNIT_TEST(test_create);
-        CPPUNIT_TEST(test_copy);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_insert);
-        CPPUNIT_TEST(test_read_write);
-        CPPUNIT_TEST_SUITE_END();
+    // Check if complex.
+    if ((amp_type & 0x00C0) != 0x00C0)
+        return OSKAR_ERR_BAD_DATA_TYPE;
 
-    public:
-        // Test Methods
-        void test_create();
-        void test_copy();
-        void test_append();
-        void test_insert();
-        void test_read_write();
-};
+    // Evaluate the coordinate type.
+    int coord_type = ((amp_type & OSKAR_SINGLE) == OSKAR_SINGLE) ?
+            OSKAR_SINGLE : OSKAR_DOUBLE;
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Visibilties_Test);
+    // Set dimensions.
+    vis->num_times     = num_times;
+    vis->num_baselines = num_baselines;
+    vis->num_channels  = num_channels;
+    int num_samples    = num_times * num_baselines * num_channels;
 
-#endif // OSKAR_VISIBILTIES_TEST_
+    // Initialise memory.
+    if (oskar_mem_init(&vis->baseline_u, coord_type, location, num_samples))
+        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    if (oskar_mem_init(&vis->baseline_v, coord_type, location, num_samples))
+        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    if (oskar_mem_init(&vis->baseline_w, coord_type, location, num_samples))
+        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    if (oskar_mem_init(&vis->amplitude, amp_type, location, num_samples))
+        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+
+    return 0;
+}

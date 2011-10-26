@@ -26,43 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILTIES_TEST_
-#define OSKAR_VISIBILTIES_TEST_
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_resize.h"
 
-/**
- * @file oskar_Visibilties_Test.h
- */
-
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class oskar_Visibilties_Test : public CppUnit::TestFixture
+#ifdef __cplusplus
+extern "C"
+#endif
+int oskar_visibilties_resize(oskar_Visibilities* vis, int num_times,
+        int num_baselines, int num_channels)
 {
-    public:
-        CPPUNIT_TEST_SUITE(oskar_Visibilties_Test);
-        CPPUNIT_TEST(test_create);
-        CPPUNIT_TEST(test_copy);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_insert);
-        CPPUNIT_TEST(test_read_write);
-        CPPUNIT_TEST_SUITE_END();
+    vis->num_times     = num_times;
+    vis->num_baselines = num_baselines;
+    vis->num_channels  = num_channels;
+    int num_samples    = num_times * num_baselines * num_channels;
 
-    public:
-        // Test Methods
-        void test_create();
-        void test_copy();
-        void test_append();
-        void test_insert();
-        void test_read_write();
-};
+    int error = 0;
+    error = vis->baseline_u.resize(num_samples);
+    if (error) return error;
+    error = vis->baseline_v.resize(num_samples);
+    if (error) return error;
+    error = vis->baseline_w.resize(num_samples);
+    if (error) return error;
+    error = vis->amplitude.resize(num_samples);
+    if (error) return error;
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Visibilties_Test);
-
-#endif // OSKAR_VISIBILTIES_TEST_
+    return error;
+}

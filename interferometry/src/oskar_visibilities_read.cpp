@@ -41,6 +41,8 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     if (filename == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    // if the vis has any data in it error out (this is not an append)
+
     // TODO some checks on the validity of the visibility data.
     // TODO require vis to be loaded to CPU?
 
@@ -50,14 +52,13 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     if (!file)
         return OSKAR_ERR_FILE_IO;
 
-    int num_times = 0;
+    int num_times     = 0;
     int num_baselines = 0;
-    int num_channels = 0;
-    int coord_type = 0;
-    int amp_type = 0;
+    int num_channels  = 0;
+    int coord_type    = 0;
+    int amp_type      = 0;
 
     // Read header.
-    // TODO check return values of fread().
     if (fread(&num_times, sizeof(int), 1, file) != 1)
     {
         fclose(file);
@@ -84,14 +85,10 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
         return OSKAR_ERR_FILE_IO;
     }
 
-    // Resize the visibility data to match the header (reallocate if needed)
-    // TODO this needs a resize method?
-    if (vis != NULL) delete vis;
-    vis = new oskar_Visibilities(num_times, num_baselines, num_channels,
-            amp_type, OSKAR_LOCATION_CPU);
+    // Initialise the visibility structure.
+    vis->init(num_times, num_baselines, num_channels, amp_type, OSKAR_LOCATION_CPU);
 
     // Read data.
-    // TODO check return values of fread().
     size_t num_samples = vis->num_samples();
     size_t coord_element_size = oskar_mem_element_size(coord_type);
     size_t amp_element_size = oskar_mem_element_size(amp_type);

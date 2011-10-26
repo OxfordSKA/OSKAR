@@ -30,6 +30,8 @@
 #include "interferometry/test/oskar_Visibilities_Test.h"
 #include "interferometry/oskar_Visibilities.h"
 
+
+
 /**
  * @details
  * Tests correlator kernel.
@@ -301,7 +303,72 @@ void oskar_Visibilties_Test::test_insert()
             }
         }
     }
-
-
 }
+
+
+void oskar_Visibilties_Test::test_read_write()
+{
+    int num_times     = 10;
+    int num_baselines = 20;
+    int num_channels  = 4;
+    int amp_type      = OSKAR_SINGLE_COMPLEX;
+
+    // Create visibilities on the CPU and fill in some data.
+    oskar_Visibilities vis1(num_times, num_baselines, num_channels,
+            amp_type, OSKAR_LOCATION_CPU);
+    for (int i = 0, t = 0; t < vis1.num_times; ++t)
+    {
+        for (int b = 0; b < vis1.num_baselines; ++b)
+        {
+            for (int c = 0; c < vis1.num_channels; ++c, ++i)
+            {
+                ((float*)vis1.baseline_u.data)[i]    = (float)t + 0.10f;
+                ((float*)vis1.baseline_v.data)[i]    = (float)b + 0.20f;
+                ((float*)vis1.baseline_w.data)[i]    = (float)c + 0.30f;
+                ((float2*)vis1.amplitude.data)[i].x  = (float)i + 1.123f;
+                ((float2*)vis1.amplitude.data)[i].y  = (float)i - 0.456f;
+            }
+        }
+    }
+
+    // Save the visiblity structure to file.
+    const char* filename = "vis_temp.dat";
+    int error = vis1.write(filename);
+    CPPUNIT_ASSERT_EQUAL(0, error);
+
+    // Load the visibility structure from file.
+    oskar_Visibilities* vis2 = NULL;
+    CPPUNIT_ASSERT_NO_THROW(vis2 = new oskar_Visibilities(filename));
+    CPPUNIT_ASSERT_EQUAL(amp_type, vis2->amp_type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2->coord_type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2->location());
+    CPPUNIT_ASSERT_EQUAL(num_times, vis2->num_times);
+    CPPUNIT_ASSERT_EQUAL(num_baselines, vis2->num_baselines);
+    CPPUNIT_ASSERT_EQUAL(num_channels, vis2->num_channels);
+
+    for (int i = 0, t = 0; t < vis2->num_times; ++t)
+    {
+        for (int b = 0; b < vis2->num_baselines; ++b)
+        {
+            for (int c = 0; c < vis2->num_channels; ++c, ++i)
+            {
+                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)t + 0.10f,
+                        ((float*)vis2->baseline_u.data)[i], 1.0e-6);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)b + 0.20f,
+                        ((float*)vis2->baseline_v.data)[i], 1.0e-6);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)c + 0.30f,
+                        ((float*)vis2->baseline_w.data)[i], 1.0e-6);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + 1.123f,
+                        ((float2*)vis2->amplitude.data)[i].x, 1.0e-6);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - 0.456f,
+                        ((float2*)vis2->amplitude.data)[i].y, 1.0e-6);
+            }
+        }
+    }
+
+    // Free memory and delete tempory file.
+    delete vis2;
+    remove(filename);
+}
+
 

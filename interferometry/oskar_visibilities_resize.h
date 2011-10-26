@@ -26,43 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILTIES_TEST_
-#define OSKAR_VISIBILTIES_TEST_
+#ifndef OSKAR_VISIBILITIES_RESIZE_H_
+#define OSKAR_VISIBILITIES_RESIZE_H_
 
 /**
- * @file oskar_Visibilties_Test.h
+ * @file oskar_Visibilties_resize.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class oskar_Visibilties_Test : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(oskar_Visibilties_Test);
-        CPPUNIT_TEST(test_create);
-        CPPUNIT_TEST(test_copy);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_insert);
-        CPPUNIT_TEST(test_read_write);
-        CPPUNIT_TEST_SUITE_END();
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
 
-    public:
-        // Test Methods
-        void test_create();
-        void test_copy();
-        void test_append();
-        void test_insert();
-        void test_read_write();
-};
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT
+int oskar_visibilties_resize(oskar_Visibilities* vis, int num_times,
+        int num_baselines, int num_channels);
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Visibilties_Test);
-
-#endif // OSKAR_VISIBILTIES_TEST_
+#endif // OSKAR_VISIBILITIES_RESIZE_H_

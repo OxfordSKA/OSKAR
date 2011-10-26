@@ -26,43 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILTIES_TEST_
-#define OSKAR_VISIBILTIES_TEST_
+#ifndef OSKAR_VISIBILITIES_INIT_H_
+#define OSKAR_VISIBILITIES_INIT_H_
 
 /**
- * @file oskar_Visibilties_Test.h
+ * @file oskar_Visibilties_init.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief Initialise the specified oskar_Visibility data structure.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function will overwrite any memory currently in the visibility structure.
+ *
+ * @param vis               Pointer to the visibility data structure to initialise.
+ * @param num_times         Number of time samples.
+ * @param num_baselines     Number of baselines.
+ * @param num_channels      Number of frequency channels.
+ * @param amp_type          OSKAR memory type for the visibility amplitudes.
+ * @param location          Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
  */
-class oskar_Visibilties_Test : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(oskar_Visibilties_Test);
-        CPPUNIT_TEST(test_create);
-        CPPUNIT_TEST(test_copy);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_insert);
-        CPPUNIT_TEST(test_read_write);
-        CPPUNIT_TEST_SUITE_END();
+#ifdef __cplusplus
+extern "C"
+#endif
+OSKAR_EXPORT
+int oskar_visibilities_init(oskar_Visibilities* vis, int num_times,
+        int num_baselines, int num_channels, int amp_type, int location);
 
-    public:
-        // Test Methods
-        void test_create();
-        void test_copy();
-        void test_append();
-        void test_insert();
-        void test_read_write();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Visibilties_Test);
-
-#endif // OSKAR_VISIBILTIES_TEST_
+#endif // OSKAR_VISIBILITIES_INIT_H_
