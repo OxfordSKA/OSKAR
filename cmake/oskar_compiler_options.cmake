@@ -28,7 +28,7 @@ if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     add_definitions(-Wall)
     add_definitions(-Wextra)
     add_definitions(-pedantic)
-    
+
     add_definitions(-Wcast-align)
     add_definitions(-Wcast-qual)
     #add_definitions(-Wconversion)
@@ -46,7 +46,7 @@ elseif (NOT WIN32)
     add_definitions(-Wall)
     add_definitions(-Wcheck)
     add_definitions(-wd2259)
-    add_definitions(-wd1125) 
+    add_definitions(-wd1125)
 
 # === Microsoft visual studio compiler.
 elseif (MSVC) # visual studio compiler.
@@ -102,7 +102,7 @@ if (CUDA_FOUND)
 
     message("================================================================================")
     if (NOT DEFINED CUDA_ARCH)
-        message("-- INFO: Building CUDA device code for native architecture.")
+        message("-- INFO: Building CUDA device code for architecture 1.0.")
         message("-- INFO: The target CUDA architecture can be changed by using the option:")
         message("-- INFO:   -DCUDA_ARCH=<arch>")
         message("-- INFO: where <arch> is one of:")
