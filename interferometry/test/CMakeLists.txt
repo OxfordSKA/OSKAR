@@ -7,6 +7,7 @@ if (CPPUNIT_FOUND)
     set(interferometry_test_SRC
         src/CppUnitMain.cu
         src/CudaCorrelatorTest.cu
+        src/oskar_StationCoordTransformTest.cpp
         src/oskar_Visibilities_Test.cpp
     )
 
