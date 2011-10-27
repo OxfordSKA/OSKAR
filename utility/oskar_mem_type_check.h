@@ -26,41 +26,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_TEST_H_
-#define OSKAR_MEM_TEST_H_
+#ifndef OSKAR_MEM_TYPE_CHECK_H_
+#define OSKAR_MEM_TYPE_CHECK_H_
 
 /**
- * @file oskar_Mem_test
+ * @file oskar_mem_type_check.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Checks if the OSKAR memory pointer data element is double precision.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * Returns 1 (true) if the memory element is double precision else 0 (false).
+ *
+ * @param[in] mem_type Type of oskar_Mem structure
+ *
+ * @return 1 if double, 0 if single.
  */
-class oskar_Mem_test : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(oskar_Mem_test);
-        CPPUNIT_TEST(test_alloc);
-        CPPUNIT_TEST(test_realloc);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_type_check);
-        CPPUNIT_TEST_SUITE_END();
+inline int oskar_mem_is_double(const int mem_type)
+{ return ((mem_type & 2) == 0); }
 
-    public:
-        /// Test method.
-        void test_alloc();
-        void test_realloc();
-        void test_append();
-        void test_type_check();
-};
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Mem_test);
+/**
+ * @brief
+ * Checks if the OSKAR memory pointer data element is complex.
+ *
+ * @details
+ * Returns 1 (true) if the memory element is complex else 0 (false).
+ *
+ * @param[in] mem_type Type of oskar_Mem structure
+ *
+ * @return 1 if complex, 0 if real.
+ */
+inline int oskar_mem_is_complex(const int mem_type)
+{ return ((mem_type & 0x00C0) == 0x00C0); }
 
-#endif // OSKAR_MEM_TEST_H_
+/**
+ * @brief
+ * Checks if the OSKAR memory pointer data element is scalar.
+ *
+ * @details
+ * Returns 1 (true) if the memory element is scalar else 0 (false).
+ *
+ * @param[in] mem_type Type of oskar_Mem structure
+ *
+ * @return 1 if scalar, 0 if matrix.
+ */
+inline int oskar_mem_is_scalar(const int mem_type)
+{ return ((mem_type & 0x0400) == 0); }
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_MEM_TYPE_CHECK_H_

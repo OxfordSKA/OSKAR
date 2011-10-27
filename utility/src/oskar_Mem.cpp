@@ -32,6 +32,7 @@
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_append.h"
+#include "utility/oskar_mem_type_check.h"
 #include <cstdlib>
 
 oskar_Mem::oskar_Mem()
@@ -86,4 +87,34 @@ int oskar_Mem::append(const void* from, int from_type, int from_location,
         int num_elements)
 {
     return oskar_mem_append(this, from, from_type, from_location, num_elements);
+}
+
+bool oskar_Mem::is_double() const
+{
+    return oskar_mem_is_double(this->type());
+}
+
+bool oskar_Mem::is_complex() const
+{
+    return oskar_mem_is_complex(this->type());
+}
+
+bool oskar_Mem::is_scalar() const
+{
+    return oskar_mem_is_scalar(this->type());
+}
+
+bool oskar_Mem::is_double(const int type)
+{
+    return oskar_mem_is_double(type);
+}
+
+bool oskar_Mem::is_complex(const int type)
+{
+    return oskar_mem_is_complex(type);
+}
+
+bool oskar_Mem::is_scalar(const int type)
+{
+    return oskar_mem_is_scalar(type);
 }
