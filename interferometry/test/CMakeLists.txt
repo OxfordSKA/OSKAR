@@ -8,7 +8,7 @@ if (CPPUNIT_FOUND)
         src/CppUnitMain.cu
         src/CudaCorrelatorTest.cu
         src/oskar_StationCoordTransformTest.cpp
-        src/oskar_Visibilities_Test.cpp
+        src/oskar_Visibilities_test.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

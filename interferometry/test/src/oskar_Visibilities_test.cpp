@@ -27,7 +27,7 @@
  */
 
 #include "utility/oskar_vector_types.h"
-#include "interferometry/test/oskar_Visibilities_Test.h"
+#include "interferometry/test/oskar_Visibilities_test.h"
 #include "interferometry/oskar_Visibilities.h"
 
 
@@ -36,7 +36,7 @@
  * @details
  * Tests correlator kernel.
  */
-void oskar_Visibilties_Test::test_create()
+void oskar_Visibilties_test::test_create()
 {
     int num_times     = 2;
     int num_baselines = 300;
@@ -119,7 +119,7 @@ void oskar_Visibilties_Test::test_create()
 }
 
 
-void oskar_Visibilties_Test::test_copy()
+void oskar_Visibilties_test::test_copy()
 {
     int num_times     = 3;
     int num_baselines = 2;
@@ -175,7 +175,7 @@ void oskar_Visibilties_Test::test_copy()
 }
 
 
-void oskar_Visibilties_Test::test_append()
+void oskar_Visibilties_test::test_append()
 {
     int num_baselines = 2;
     int num_times     = 3;
@@ -243,7 +243,7 @@ void oskar_Visibilties_Test::test_append()
 }
 
 
-void oskar_Visibilties_Test::test_insert()
+void oskar_Visibilties_test::test_insert()
 {
     int num_baselines = 2;
     int num_times     = 3;
@@ -317,7 +317,7 @@ void oskar_Visibilties_Test::test_insert()
 }
 
 
-void oskar_Visibilties_Test::test_resize()
+void oskar_Visibilties_test::test_resize()
 {
     {
         oskar_Visibilities vis_cpu;
@@ -348,7 +348,7 @@ void oskar_Visibilties_Test::test_resize()
 }
 
 
-void oskar_Visibilties_Test::test_init()
+void oskar_Visibilties_test::test_init()
 {
     // Create a visibility structure.
     oskar_Visibilities vis(10, 5, 20, OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU);
@@ -374,7 +374,7 @@ void oskar_Visibilties_Test::test_init()
 }
 
 
-void oskar_Visibilties_Test::test_read_write()
+void oskar_Visibilties_test::test_read_write()
 {
     int num_times        = 10;
     int num_baselines    = 20;

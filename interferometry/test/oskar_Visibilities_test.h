@@ -30,7 +30,7 @@
 #define OSKAR_VISIBILTIES_TEST_
 
 /**
- * @file oskar_Visibilties_Test.h
+ * @file oskar_Visibilties_test.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,10 +42,10 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class oskar_Visibilties_Test : public CppUnit::TestFixture
+class oskar_Visibilties_test : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(oskar_Visibilties_Test);
+        CPPUNIT_TEST_SUITE(oskar_Visibilties_test);
         CPPUNIT_TEST(test_create);
         CPPUNIT_TEST(test_copy);
         CPPUNIT_TEST(test_append);
@@ -67,6 +67,6 @@ class oskar_Visibilties_Test : public CppUnit::TestFixture
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Visibilties_Test);
+CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Visibilties_test);
 
 #endif // OSKAR_VISIBILTIES_TEST_
