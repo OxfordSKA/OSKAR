@@ -39,12 +39,11 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int num_times,
         int num_baselines, int num_channels, int amp_type, int location)
 {
     // Check if complex.
-    if ((amp_type & 0x00C0) != 0x00C0)
+    if (!oskar_Mem::is_complex(amp_type))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     // Evaluate the coordinate type.
-    int coord_type = ((amp_type & OSKAR_SINGLE) == OSKAR_SINGLE) ?
-            OSKAR_SINGLE : OSKAR_DOUBLE;
+    int coord_type = oskar_Mem::is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Set dimensions.
     vis->num_times     = num_times;

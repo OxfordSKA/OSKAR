@@ -258,7 +258,7 @@ struct oskar_Visibilities
          * @brief Returns the number of polarisations for each visibility sample.
          */
         int num_polarisations() const
-        { return ((amplitude.type() & 0x0400) == 0x0400) ? 4 : 1; }
+        { return amplitude.is_scalar() ? 1 : 4; }
 
         /**
          * @brief Returns the OSKAR memory type ID for the baseline coordinates.
