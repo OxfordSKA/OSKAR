@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "oskar_global.h"
+
 #include "station/oskar_evaluate_station_beam.h"
 
 #include "cuda/kernels/oskar_cudak_bp2hiw.h"
@@ -33,8 +35,6 @@
 
 #include "station/oskar_StationModel.h"
 #include "sky/oskar_SkyModel.h"
-
-#include "oskar_global.h"
 
 #include "math/cudak/oskar_cudak_dftw_2d_seq_in.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
@@ -47,6 +47,47 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+int oskar_evaluate_station_beam(oskar_Jones* E, int station_index,
+        oskar_SkyModel* sky, oskar_StationModel* station)
+{
+    // Consistency and validation checks on input arguments.
+    // -------------------------------------------------------------------------
+    if (E == NULL || sky == NULL || station == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (station->n_elements < 1)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (sky->num_sources < 1)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    // .... more checks.
+
+
+    // Element pattern assumed to be isotropic.
+    if (station->element_pattern == NULL)
+    {
+//        if (E->type() &
+
+
+    }
+
+    // Make use of element pattern data.
+    else
+    {
+
+    }
+
+
+
+
+
+
+
+    return 0;
+}
+
 
 // Double precision.
 int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,

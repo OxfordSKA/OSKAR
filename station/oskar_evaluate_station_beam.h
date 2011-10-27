@@ -36,11 +36,16 @@
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 #include "station/oskar_StationModel.h"
-
+#include "math/oskar_Jones.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+int oskar_evaluate_station_beam(oskar_Jones* E, int station_index,
+        oskar_SkyModel* sky, oskar_StationModel* station);
+
 
 /**
  * @brief

@@ -34,15 +34,26 @@
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_Sky.h"
-#include "interferometry/oskar_Telescope.h"
+#include "sky/oskar_SkyModel.h"
+#include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
 
+/**
+ * @brief Evaluates a set of E Jones matrices.
+ *
+ * @details
+ *
+ *
+ * @param[out] E         Output set of Jones matrices.
+ * @param[in] sky        Input sky model.
+ * @param[in] telescope  Input telescope model.
+ * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
+ */
 #ifdef __cplusplus
 extern "C"
 #endif
 OSKAR_EXPORT
 int oskar_evaluate_jones_E(oskar_Jones* E, oskar_SkyModel* sky,
-        oskar_Telescope* telescope, double local_apparent_sideral_time);
+        oskar_TelescopeModel* telescope, double gast);
 
 #endif // OSKAR_EVALUATE_JONES_E_H_
