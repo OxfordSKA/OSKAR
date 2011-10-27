@@ -46,10 +46,10 @@ extern "C"
 #endif
 struct oskar_StationModel
 {
-    // Station position (assumes a spherical Earth).
+    // Station position.
     double longitude;
     double latitude;
-    double altitude; // Altitude above mean Earth radius of 6371.0 km.
+    double altitude;
 
     // Beam phase centre.
     double ra0;

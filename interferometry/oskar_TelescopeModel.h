@@ -46,9 +46,12 @@ extern "C"
 struct oskar_TelescopeModel
 {
     int num_stations;            ///< Number of stations in the model.
-    oskar_Mem station_x;         ///< Fixed x component of station coordinate in ITRS.
-    oskar_Mem station_y;         ///< Fixed y component of station coordinate in ITRS.
-    oskar_Mem station_z;         ///< Fixed z component of station coordinate in ITRS.
+    oskar_Mem station_ecef_x;    ///< Fixed x component of station coordinate in ECEF frame.
+    oskar_Mem station_ecef_y;    ///< Fixed y component of station coordinate in ECEF frame.
+    oskar_Mem station_ecef_z;    ///< Fixed z component of station coordinate in ECEF frame.
+    oskar_Mem station_x;         ///< Fixed x component of station coordinate.
+    oskar_Mem station_y;         ///< Fixed y component of station coordinate.
+    oskar_Mem station_z;         ///< Fixed z component of station coordinate.
     oskar_StationModel* station; ///< Array of station structures.
     int identical_stations;      ///< True if all stations are identical.
     int use_common_sky;          ///< True if all stations should use common source positions.
