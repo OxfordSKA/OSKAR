@@ -27,6 +27,7 @@
  */
 
 #include "station/oskar_element_model_load.h"
+#include "utility/oskar_getline.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,10 +44,6 @@ extern "C" {
 
 int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
 {
-    // Open the file.
-    FILE* file = fopen(filename, "r");
-    if (file == NULL) return 1;
-
     // Initialise the flags and local data.
     int n = 0;
     float inc_theta = 0.0f, inc_phi = 0.0f;
@@ -55,9 +52,18 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     float min_theta = FLT_MAX, max_theta = -FLT_MAX;
     float min_phi = FLT_MAX, max_phi = -FLT_MAX;
 
+    // Open the file.
+    FILE* file = fopen(filename, "r");
+    if (!file)
+        return OSKAR_ERR_FILE_IO;
+
+    // Declare the line buffer.
+    char* line = NULL;
+    size_t bufsize = 0;
+
     // Read the first line and check if data is in logarithmic format.
-    char line[1024];
-    if (!fgets(line, sizeof(line), file)) return 1;
+    int err = oskar_getline(&line, &bufsize, file);
+    if (err < 0) return err;
     const char* dbi = strstr(line, "dBi"); // Check for presence of "dBi".
 
     // Initialise pointers to NULL.
@@ -65,7 +71,7 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     data->g_theta = NULL;
 
     // Loop over and read each line in the file.
-    while (fgets(line, sizeof(line), file))
+    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         // Parse the line.
         int a = sscanf(line, "%f %f %*f %f %f %f %f %*f", &theta, &phi,
@@ -119,6 +125,9 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
         // Increment array pointer.
         n++;
     }
+
+    // Free the line buffer and close the file.
+    if (line) free(line);
     fclose(file);
 
     // Get number of points in each dimension.

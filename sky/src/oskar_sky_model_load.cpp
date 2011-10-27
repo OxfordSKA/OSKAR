@@ -28,7 +28,6 @@
 
 #include "sky/oskar_sky_model_load.h"
 
-#include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
@@ -78,7 +77,6 @@ int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
                     fclose(file);
                     return err;
                 }
-
             }
             temp_sky.set_source(n, par[0] * deg2rad, par[1] * deg2rad,
                     par[2], par[3], par[4], par[5], par[6], par[7]);
@@ -120,7 +118,7 @@ int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    // Record thee number of elements loaded.
+    // Record the number of elements loaded.
     temp_sky.num_sources = n;
     sky->append(&temp_sky);
 
