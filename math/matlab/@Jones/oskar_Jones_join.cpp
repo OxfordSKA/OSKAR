@@ -30,7 +30,7 @@
 #include <mex.h>
 
 #include "math/oskar_Jones.h"
-#include "math/matlab/oskar_mex_pointer.h"
+#include "utility/matlab/oskar_mex_pointer.h"
 #include "math/oskar_jones_join.h"
 #include "math/matlab/@Jones/oskar_Jones_utility.h"
 #include "utility/oskar_vector_types.h"

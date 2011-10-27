@@ -32,106 +32,8 @@
 #include <mex.h>
 
 #include "math/oskar_Jones.h"
+#include "utility/matlab/oskar_mex_pointer.h"
 #include "string.h"
-
-enum { CPU = 0, GPU = 1 };
-enum { UNDEF = -1, DOUBLE, SINGLE, SCALAR, MATRIX };
-
-inline int get_type(const char* type)
-{
-    if ( strcmp(type, "single") == 0 )
-    {
-        return SINGLE;
-    }
-    else if ( strcmp(type, "double") == 0 )
-    {
-        return DOUBLE;
-    }
-    else
-    {
-        mexErrMsgTxt("Unrecognised data type. "
-                "(accepted values: 'single' or 'double')");
-    }
-    return UNDEF;
-}
-
-
-inline int get_format(const char* format)
-{
-    if ( strcmp(format, "scalar") == 0 )
-    {
-        return SCALAR;
-    }
-    else if ( strcmp(format, "matrix") == 0 )
-    {
-        return MATRIX;
-    }
-    else
-    {
-        mexErrMsgTxt("Unrecognised data format. "
-                "(accepted values: 'scalar' or 'matrix')");
-    }
-    return UNDEF;
-}
-
-/**
- * @brief Returns the oskar_Jones location id for the memory location string.
- *
- * @param[in] location String containing the memory location ("cpu" or "gpu")
- *
- * @return The memory location id as defined by the oskar_Jones structure.
- *         (0 = CPU, 1 = GPU)
- */
-inline int get_location_id(const char* location)
-{
-    enum { HOST = 0, DEVICE = 1, UNDEF = -1 };
-    if (strcmp(location, "gpu") == 0)
-    {
-        return DEVICE;
-    }
-    else if (strcmp(location, "cpu") == 0)
-    {
-        return HOST;
-    }
-    else
-    {
-        mexErrMsgTxt("Unrecognised memory location "
-                "(accepted values: 'cpu' or 'gpu')");
-    }
-    return UNDEF;
-}
-
-
-/**
- * @brief Return the oskar_Jones structure type id for a given type and format
- * string.
- *
- * @param[in] type    String containing the data type ("double" or "single")
- * @param[in] format  String containing the data format ("scalar" or "matrix")
- *
- * @return The oskar_Jones structure type id.
- */
-inline int get_type_id(const char* type, const char* format)
-{
-    int itype   = get_type(type);
-    int iformat = get_format(format);
-
-    if (itype == SINGLE)
-    {
-        if (iformat == SCALAR)
-            return OSKAR_SINGLE_COMPLEX;
-        else
-            return OSKAR_SINGLE_COMPLEX_MATRIX;
-    }
-    else
-    {
-        if (iformat == SCALAR)
-            return OSKAR_DOUBLE_COMPLEX;
-        else
-            return OSKAR_DOUBLE_COMPLEX_MATRIX;
-    }
-}
-
 
 /**
  * @brief Create a MATLAB oskar_Jones object and return it as an mxArray pointer.
@@ -166,7 +68,6 @@ inline mxArray* create_matlab_Jones_class(const int num_sources, const int num_s
     return J;
 }
 
-
 /**
  * @brief Return the oskar_Jones structure pointer associated with a MATLAB
  * oskar_Jones object.
@@ -181,6 +82,5 @@ inline oskar_Jones* get_jones_pointer_from_matlab_jones_class(mxArray* J_class)
     mexCallMATLAB(1, &J_pointer, 1, &J_class, "oskar.Jones.get_pointer");
     return covert_mxArray_to_pointer<oskar_Jones>(J_pointer);
 }
-
 
 #endif // OSKAR_MEX_JONES_UTILITY_H_

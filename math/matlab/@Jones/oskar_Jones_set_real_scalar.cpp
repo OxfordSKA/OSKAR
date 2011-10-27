@@ -29,7 +29,7 @@
 
 #include <mex.h>
 #include "math/oskar_Jones.h"
-#include "math/matlab/oskar_mex_pointer.h"
+#include "utility/matlab/oskar_mex_pointer.h"
 
 // Interface function
 void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)

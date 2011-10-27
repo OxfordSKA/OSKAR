@@ -30,7 +30,7 @@
 #include <mex.h>
 
 #include "utility/oskar_vector_types.h"
-#include "math/matlab/oskar_mex_pointer.h"
+#include "utility/matlab/oskar_mex_pointer.h"
 #include "math/oskar_Jones.h"
 
 // Interface function
@@ -45,14 +45,14 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
 
     oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
 
-    enum { CPU = 0, GPU = 1};
     int type         = J->type();
     int num_stations = J->n_stations();
     int num_sources  = J->n_sources();
     mxArray* values  = NULL;
 
     // Copy back to CPU if needed.
-    oskar_Jones* J_local = (J->location() == GPU) ? new oskar_Jones(J, CPU) : J;
+    oskar_Jones* J_local = (J->location() == OSKAR_LOCATION_GPU) ?
+            new oskar_Jones(J, OSKAR_LOCATION_CPU) : J;
 
     if (type == OSKAR_SINGLE_COMPLEX)
     {
@@ -127,7 +127,7 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     }
 
     // Free up memory if copied back to host.
-    if (J->location() == GPU) delete J_local;
+    if (J->location() == OSKAR_LOCATION_GPU) delete J_local;
 
     out[0] = values;
 }

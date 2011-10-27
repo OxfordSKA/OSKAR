@@ -26,55 +26,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <mex.h>
-#include "math/oskar_Jones.h"
-#include "utility/matlab/oskar_mex_pointer.h"
-#include "string.h"
+#include <matrix.h>
+#include <mat.h>
 
-// Interface function
+#include "sky/oskar_SkyModel.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_cuda_device_info.h"
+#include "utility/matlab/oskar_mex_pointer.h"
+#include "utility/matlab/oskar_Mem_utility.h"
+
+#include <string.h>
+
+// FIXME register a cleanup function to do a cudaDeviceReset() ?
+// -- This would apply to all mex functions with CUDA library components?
+
+// Interface function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_out > 1 || num_in != 2)
+    // Check arguments.
+    if (num_out != 1 || num_in != 3)
     {
-        mexErrMsgTxt("Usage: value = oskar_Jones_get_parameter("
-                "jones_pointer, parameter)");
+        mexErrMsgTxt("Usage: sky = sky_model_constructor("
+                "num_sources, type, location)");
     }
 
-    oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
-    const char* parameter_string = mxArrayToString(in[1]);
+    // Extract arguments from MATLAB mxArray objects.
+    const int   num_sources    = (int)mxGetScalar(in[0]);
+    const char* type_string     = mxArrayToString(in[1]);
+    const char* location_string = mxArrayToString(in[2]);
 
-    if (strcmp(parameter_string, "num_stations") == 0)
+    // Construct type and location values.
+    // NOTE might be better to sort out types match between matlab and C/C++
+    // see note in utility/matlab/oskar_Mem_utility.h
+    int type     = get_type(type_string);
+    int location = get_location_id(location_string);
+
+    bool double_support = oskar_cuda_device_supports_double(0);
+    if (location == OSKAR_LOCATION_GPU)
     {
-        out[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetPr(out[0])) = J->n_stations();
+        bool double_type = (type == OSKAR_DOUBLE || type == OSKAR_DOUBLE_COMPLEX
+                || type == OSKAR_DOUBLE_COMPLEX_MATRIX) ? true : false;
+
+        if (double_type == true && double_support == false)
+        {
+            mexErrMsgTxt("GPU architecture does not support double precision!");
+        }
     }
-    else if (strcmp(parameter_string, "num_sources") == 0)
-    {
-        out[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetPr(out[0])) = J->n_sources();
-    }
-    else if (strcmp(parameter_string, "format") == 0)
-    {
-        const char* value = (J->type() == OSKAR_SINGLE_COMPLEX ||
-                J->type() == OSKAR_DOUBLE_COMPLEX) ? "scalar" : "matrix";
-        out[0] = mxCreateString(value);
-    }
-    else if (strcmp(parameter_string, "type") == 0)
-    {
-        const char* value = (J->type() == OSKAR_DOUBLE_COMPLEX ||
-                J->type() == OSKAR_DOUBLE_COMPLEX_MATRIX) ? "double" : "single";
-        out[0] = mxCreateString(value);
-    }
-    else if (strcmp(parameter_string, "location") == 0)
-    {
-        const char* value = (J->location() == 0) ? "cpu" : "gpu";
-        out[0] = mxCreateString(value);
-    }
-    else
-    {
-        mexErrMsgTxt("Unrecognised parameter type.\n"
-                "(accepted values: 'num_stations', 'num_sources', 'format', "
-                "'type', 'location')");
-    }
+
+    // Create a new oskar_SkyModel structure.
+    oskar_SkyModel* sky = new oskar_SkyModel(num_sources, type, location);
+
+    // Return a pointer to the oskar_SkyModel structure as a mxArray object.
+    out[0] = convert_pointer_to_mxArray(sky);
 }

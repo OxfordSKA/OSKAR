@@ -31,10 +31,11 @@
 #include <mat.h>
 
 #include "math/oskar_Jones.h"
-#include "math/matlab/oskar_mex_pointer.h"
+#include "utility/matlab/oskar_mex_pointer.h"
 #include "math/matlab/@Jones/oskar_Jones_utility.h"
 #include "utility/oskar_cuda_device_info.h"
 #include "utility/oskar_Mem.h"
+#include "utility/matlab/oskar_Mem_utility.h"
 
 #include <string.h>
 
@@ -60,7 +61,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int location = get_location_id(location_string);
 
     bool double_support = oskar_cuda_device_supports_double(0);
-    if (location == GPU)
+    if (location == OSKAR_LOCATION_GPU)
     {
         bool double_type = (type == OSKAR_DOUBLE || type == OSKAR_DOUBLE_COMPLEX
                 || type == OSKAR_DOUBLE_COMPLEX_MATRIX) ? true : false;
@@ -75,5 +76,5 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_Jones* J = new oskar_Jones(type, num_sources, num_stations, location);
 
     // Return a pointer to the oskar_Jones structure as a mxArray object.
-    out[0] = convert_ptr_to_mxArray(J);
+    out[0] = convert_pointer_to_mxArray(J);
 }

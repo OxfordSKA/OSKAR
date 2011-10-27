@@ -30,7 +30,7 @@
 #include <mex.h>
 
 #include "math/oskar_Jones.h"
-#include "math/matlab/oskar_mex_pointer.h"
+#include "utility/matlab/oskar_mex_pointer.h"
 #include "math/oskar_jones_join.h"
 #include "utility/oskar_cuda_device_info.h"
 

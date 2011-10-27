@@ -43,7 +43,7 @@ classdef SkyModel < handle
         
         
         % Disable undefined operators
-        function mtimes(~, ~))
+        function mtimes(~, ~)
             error('Multiply operator (*) undefined for oskar.SkyModel objects');
         end
         function eq(~, ~)

@@ -11,12 +11,13 @@
 #include <cuda_runtime_api.h>
 #include <vector>
 
+// Cleanup function called when the mex function is unloaded. (i.e. 'clear mex')
 void cleanup(void)
 {
     cudaDeviceReset();
 }
 
-// Interface function
+// Interface function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** /*in*/)
 {
     // Check for proper number of arguments.

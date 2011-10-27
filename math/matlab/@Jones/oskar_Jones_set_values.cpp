@@ -28,13 +28,17 @@
 
 
 #include <mex.h>
-#include <string.h>
-#include "math/oskar_Jones.h"
-#include "math/matlab/oskar_mex_pointer.h"
-#include "math/matlab/@Jones/oskar_Jones_utility.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_mem_element_size.h"
 
+#include "math/oskar_Jones.h"
+#include "math/matlab/@Jones/oskar_Jones_utility.h"
+
+#include "utility/oskar_vector_types.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_element_size.h"
+#include "utility/matlab/oskar_Mem_utility.h"
+#include "utility/matlab/oskar_mex_pointer.h"
+
+#include <string.h>
 
 // Interface function
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -44,9 +48,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgTxt("Usage: jones_pointer = oskar_Jones_set_values("
                 "jones_pointer, values, format, location)");
     }
-
-    enum { CPU = 0, GPU = 1 };
-    enum { UNDEF = -1, DOUBLE, SINGLE, SCALAR, MATRIX };
 
     // Parse input parameters.
     oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
@@ -64,7 +65,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int num_stations = 0;
 
     // Work out data dimensions and check for errors.
-    if (format == SCALAR)
+    if (format == OSKAR_SCALAR)
     {
         if (num_dims != 2)
             mexErrMsgTxt("Scalar format must be 2-dimensional!\n");
@@ -114,7 +115,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     size_t mem_size_old = J->n_sources() * J->n_stations();
     mem_size_old *= oskar_mem_element_size(J->type());
 
-    size_t mem_size_new = (type == DOUBLE) ? num_values * sizeof(double2) :
+    size_t mem_size_new = (type == OSKAR_DOUBLE) ? num_values * sizeof(double2) :
             num_values * sizeof(float2);
 
     // Check if the currently allocated Jones structure can be used.
@@ -126,14 +127,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     // Construct a local CPU Jones structure on the CPU as well if needed.
-    oskar_Jones* J_local = (J->location() == GPU) ? new oskar_Jones(J, CPU) : J;
+    oskar_Jones* J_local = (J->location() == OSKAR_LOCATION_GPU) ?
+            new oskar_Jones(J, OSKAR_LOCATION_CPU) : J;
 
     // Populate the oskar_Jones structure from the MATLAB array.
-    if (type == DOUBLE)
+    if (type == OSKAR_DOUBLE)
     {
         double* values_re = mxGetPr(in[1]);
         double* values_im = mxGetPi(in[1]);
-        if (format == SCALAR)
+        if (format == OSKAR_SCALAR)
         {
             double2* data = (double2*)J_local->ptr.data;
             for (int i = 0; i < num_sources * num_stations; ++i)
@@ -172,7 +174,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         float* values_re = (float*)mxGetPr(in[1]);
         float* values_im = (float*)mxGetPi(in[1]);
-        if (format == SCALAR)
+        if (format == OSKAR_SCALAR)
         {
             float2* data = (float2*)J_local->ptr.data;
             for (int i = 0; i < num_values; ++i)
@@ -209,11 +211,11 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
 
-    if (J->location() == GPU)
+    if (J->location() == OSKAR_LOCATION_GPU)
     {
         J_local->copy_to(J);
         delete J_local;
     }
 
-    out[0] = convert_ptr_to_mxArray(J);
+    out[0] = convert_pointer_to_mxArray(J);
 }

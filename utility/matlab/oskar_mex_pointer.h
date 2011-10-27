@@ -43,6 +43,10 @@
 
 #include <mex.h>
 
+// NOTE using a slightly more sophisticated handle class here with a
+// magic number signature might be a good idea here.
+// To see how to do this see the mex function class testing code
+
 /**
  * @brief Converts a pointer of a specified type to an mxArray containing the
  * pointer.
@@ -51,7 +55,7 @@
  *
  * @return mxArray pointer holding the type pointer.
  */
-template <class T> inline mxArray* convert_ptr_to_mxArray(T* ptr)
+template <class T> inline mxArray* convert_pointer_to_mxArray(T* ptr)
 {
     mxArray* out = mxCreateNumericMatrix(1,1, mxUINT64_CLASS, mxREAL);
     *((uint64_t *)mxGetData(out)) = reinterpret_cast<uint64_t>(ptr);
@@ -73,10 +77,7 @@ template<class T> inline T* covert_mxArray_to_pointer(const mxArray* in)
     {
         mexErrMsgTxt("ERROR: Input must be a real uint64 scalar.");
     }
-
-    T* ptr = reinterpret_cast<T*>(*((uint64_t *)mxGetData(in)));
-
-    return ptr;
+    return reinterpret_cast<T*>(*((uint64_t *)mxGetData(in)));
 }
 
 #endif // OSKAR_MEX_POINTER_H_
