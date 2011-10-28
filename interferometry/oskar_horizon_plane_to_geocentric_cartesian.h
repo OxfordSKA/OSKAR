@@ -42,7 +42,6 @@ extern "C" {
 /**
  * @brief
  * Convert coordinates from horizon plane to geocentric cartesian system.
- * (double precision).
  *
  * @details
  * This function converts station positions from the local horizon plane
@@ -59,59 +58,26 @@ extern "C" {
  * Earth, and have the x-axis pointing towards the meridian of zero longitude,
  * the y-axis to +90 degrees East, and the z-axis to the North Celestial Pole.
  *
- * @param[in]  num_antennas  Number of antennas / stations.
- * @param[in]  x_horizon     Vector of horizontal station x-positions, in metres.
- * @param[in]  y_horizon     Vector of horizontal station y-positions, in metres.
- * @param[in]  z_horizon     Vector of horizontal station z-positions, in metres.
- * @param[in]  longitude     Telescope longitude, in radians.
- * @param[in]  latitude      Telescope latitude, in radians.
- * @param[in]  altitude      Telescope altitude above ellipsoid, in metres.
+ * A single precision version of this function is not provided, because it
+ * would be unable to represent points accurately on the Earth's surface
+ * (more than 7 decimal digits are required for sub-metre precision).
+ *
+ * @param[in]  n             Number of points.
+ * @param[in]  x_horizon     Vector of horizontal x-positions, in metres.
+ * @param[in]  y_horizon     Vector of horizontal y-positions, in metres.
+ * @param[in]  z_horizon     Vector of horizontal z-positions, in metres.
+ * @param[in]  longitude     Longitude of tangent point, in radians.
+ * @param[in]  latitude      Latitude of tangent point, in radians.
+ * @param[in]  altitude      Altitude above ellipsoid, in metres.
  * @param[out] x             Vector of ECEF x-positions, in metres.
  * @param[out] y             Vector of ECEF y-positions, in metres.
  * @param[out] z             Vector of ECEF z-positions, in metres.
  */
 OSKAR_EXPORT
-void oskar_horizon_plane_to_geocentric_cartesian_d(int num_antennas,
+void oskar_horizon_plane_to_geocentric_cartesian(int n,
         const double* x_horizon, const double* y_horizon,
         const double* z_horizon, double longitude, double latitude,
         double altitude, double* x, double* y, double* z);
-
-/**
- * @brief
- * Convert coordinates from horizon plane to geocentric cartesian system
- * (single precision).
- *
- * @details
- * This function converts station positions from the local horizon plane
- * (East-North-Up, or ENU) to the geocentric cartesian (Earth-Centred-
- * Earth-Fixed, or ECEF) system.
- *
- * The reference latitude is, strictly speaking, geodetic.
- *
- * The input coordinates are with respect to the origin at the tangent point,
- * and have the x-axis pointing to the local East, the y-axis to the local
- * North, and the z-axis to the zenith.
- *
- * The output coordinates are with respect to the origin at the centre of the
- * Earth, and have the x-axis pointing towards the meridian of zero longitude,
- * the y-axis to +90 degrees East, and the z-axis to the North Celestial Pole.
- *
- * @param[in]  num_antennas  Number of antennas / stations.
- * @param[in]  x_horizon     Vector of horizontal station x-positions, in metres.
- * @param[in]  y_horizon     Vector of horizontal station y-positions, in metres.
- * @param[in]  z_horizon     Vector of horizontal station z-positions, in metres.
- * @param[in]  longitude     Telescope longitude, in radians.
- * @param[in]  latitude      Telescope latitude, in radians.
- * @param[in]  altitude      Telescope altitude above ellipsoid, in metres.
- * @param[out] x             Vector of ECEF x-positions, in metres.
- * @param[out] y             Vector of ECEF y-positions, in metres.
- * @param[out] z             Vector of ECEF z-positions, in metres.
- */
-OSKAR_EXPORT
-void oskar_horizon_plane_to_geocentric_cartesian_f(int num_antennas,
-        const float* x_horizon, const float* y_horizon,
-        const float* z_horizon, float longitude, float latitude,
-        float altitude, float* x, float* y, float* z);
 
 #ifdef __cplusplus
 }

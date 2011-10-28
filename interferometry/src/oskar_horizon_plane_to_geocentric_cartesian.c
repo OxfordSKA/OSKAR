@@ -27,6 +27,8 @@
  */
 
 #include "interferometry/oskar_horizon_plane_to_geocentric_cartesian.h"
+#include "interferometry/oskar_geodetic_spherical_to_geocentric_cartesian.h"
+#include "interferometry/oskar_horizon_plane_to_offset_geocentric_cartesian.h"
 
 #include <math.h>
 
@@ -34,20 +36,28 @@
 extern "C" {
 #endif
 
-// Double precision.
-void oskar_horizon_plane_to_geocentric_cartesian_d(int num_antennas,
+void oskar_horizon_plane_to_geocentric_cartesian(int n,
         const double* x_horizon, const double* y_horizon,
         const double* z_horizon, double longitude, double latitude,
         double altitude, double* x, double* y, double* z)
 {
-}
+	// Compute ECEF coordinates of reference point.
+	double x_r = 0.0, y_r = 0.0, z_r = 0.0;
+	oskar_geodetic_spherical_to_geocentric_cartesian(1, &longitude, &latitude,
+			&altitude, &x_r, &y_r, &z_r);
 
-// Single precision.
-void oskar_horizon_plane_to_geocentric_cartesian_f(int num_antennas,
-        const float* x_horizon, const float* y_horizon,
-        const float* z_horizon, float longitude, float latitude,
-        float altitude, float* x, float* y, float* z)
-{
+	// Compute offset geocentric cartesian coordinates.
+	oskar_horizon_plane_to_offset_geocentric_cartesian_d(n, x_horizon,
+			y_horizon, z_horizon, longitude, latitude, x, y, z);
+
+	// Add on the coordinates of the reference point.
+	int i = 0;
+	for (i = 0; i < n; ++i)
+	{
+		x[i] += x_r;
+		y[i] += y_r;
+		z[i] += z_r;
+	}
 }
 
 #ifdef __cplusplus

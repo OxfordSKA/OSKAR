@@ -38,18 +38,58 @@ extern "C" {
 void oskar_horizon_plane_to_offset_geocentric_cartesian_d(int n,
         const double* x_horizon, const double* y_horizon,
         const double* z_horizon, double longitude, double latitude,
-        double altitude, double* x, double* y, double* z)
+        double* x, double* y, double* z)
 {
-    // Loop over points.
+	// Precompute some trig.
+	double sin_l = sin(longitude);
+	double cos_l = cos(longitude);
+	double sin_p = sin(latitude);
+	double cos_p = cos(latitude);
 
+	// Loop over points.
+	int i = 0;
+	double X, Y, Z, xi, yi, zi;
+	for (i = 0; i < n; ++i)
+	{
+		xi = x_horizon[i];
+		yi = y_horizon[i];
+		zi = z_horizon[i];
+		X = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
+		Y =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
+		Z =  yi * cos_p + zi * sin_p;
+		x[i] = X;
+		y[i] = Y;
+		z[i] = Z;
+	}
 }
 
 // Single precision.
 void oskar_horizon_plane_to_offset_geocentric_cartesian_f(int n,
         const float* x_horizon, const float* y_horizon,
         const float* z_horizon, float longitude, float latitude,
-        float altitude, float* x, float* y, float* z)
+        float* x, float* y, float* z)
 {
+	// Precompute some trig.
+	float sin_l = sinf(longitude);
+	float cos_l = cosf(longitude);
+	float sin_p = sinf(latitude);
+	float cos_p = cosf(latitude);
+
+	// Loop over points.
+	int i = 0;
+	float X, Y, Z, xi, yi, zi;
+	for (i = 0; i < n; ++i)
+	{
+		xi = x_horizon[i];
+		yi = y_horizon[i];
+		zi = z_horizon[i];
+		X = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
+		Y =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
+		Z =  yi * cos_p + zi * sin_p;
+		x[i] = X;
+		y[i] = Y;
+		z[i] = Z;
+	}
 }
 
 #ifdef __cplusplus

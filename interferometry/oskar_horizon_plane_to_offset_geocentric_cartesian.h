@@ -66,7 +66,6 @@ extern "C" {
  * @param[in]  z_horizon     Vector of horizontal z-positions, in metres.
  * @param[in]  longitude     Longitude of tangent point, in radians.
  * @param[in]  latitude      Latitude of tangent point, in radians.
- * @param[in]  altitude      Altitude above ellipsoid, in metres.
  * @param[out] x             Vector of output x-positions, in metres.
  * @param[out] y             Vector of output y-positions, in metres.
  * @param[out] z             Vector of output z-positions, in metres.
@@ -75,7 +74,7 @@ OSKAR_EXPORT
 void oskar_horizon_plane_to_offset_geocentric_cartesian_d(int n,
         const double* x_horizon, const double* y_horizon,
         const double* z_horizon, double longitude, double latitude,
-        double altitude, double* x, double* y, double* z);
+        double* x, double* y, double* z);
 
 /**
  * @brief
@@ -104,7 +103,6 @@ void oskar_horizon_plane_to_offset_geocentric_cartesian_d(int n,
  * @param[in]  z_horizon     Vector of horizontal z-positions, in metres.
  * @param[in]  longitude     Longitude of tangent point, in radians.
  * @param[in]  latitude      Latitude of tangent point, in radians.
- * @param[in]  altitude      Altitude above ellipsoid, in metres.
  * @param[out] x             Vector of output x-positions, in metres.
  * @param[out] y             Vector of output y-positions, in metres.
  * @param[out] z             Vector of output z-positions, in metres.
@@ -113,7 +111,7 @@ OSKAR_EXPORT
 void oskar_horizon_plane_to_offset_geocentric_cartesian_f(int n,
         const float* x_horizon, const float* y_horizon,
         const float* z_horizon, float longitude, float latitude,
-        float altitude, float* x, float* y, float* z);
+        float* x, float* y, float* z);
 
 #ifdef __cplusplus
 }
