@@ -89,6 +89,7 @@ void oskar_free_vis_data_f(oskar_VisData_f* vis)
 
 void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis)
 {
+    int i;
     FILE* file;
     file = fopen(filename, "wb");
     if (file == NULL)
@@ -96,7 +97,7 @@ void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis)
         fprintf(stderr, "ERROR: Failed to open output file.\n");
         return;
     }
-    for (int i = 0; i < vis->num_samples; ++i)
+    for (i = 0; i < vis->num_samples; ++i)
     {
 //        printf("u[%i] = %f\n",i, vis->u[i]);
 //        printf("%f\n", vis->amp[i].x);
@@ -114,6 +115,11 @@ void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis)
 void oskar_load_vis_data_d(const char* filename, oskar_VisData_d* vis)
 {
     FILE* file;
+    size_t record_size;
+    double* buffer;
+    record_size = 5 * sizeof(double);
+    buffer = (double*) malloc(record_size);
+
     file = fopen(filename, "rb");
     if (file == NULL)
     {
@@ -126,14 +132,13 @@ void oskar_load_vis_data_d(const char* filename, oskar_VisData_d* vis)
     vis->w = NULL;
     vis->amp = NULL;
 
-    size_t record_size = 5 * sizeof(double);
-    double* buffer = (double*) malloc(record_size);
     while (fread(buffer, record_size, 1, file) == 1)
     {
         // Ensure enough space in arrays.
         if (vis->num_samples % 100 == 0)
         {
-            size_t mem_size = (vis->num_samples + 100) * sizeof(double);
+            size_t mem_size;
+            mem_size = (vis->num_samples + 100) * sizeof(double);
             vis->u = (double*) realloc(vis->u, mem_size);
             vis->v = (double*) realloc(vis->v, mem_size);
             vis->w = (double*) realloc(vis->w, mem_size);
@@ -147,14 +152,15 @@ void oskar_load_vis_data_d(const char* filename, oskar_VisData_d* vis)
         vis->amp[vis->num_samples].y = buffer[4];
         vis->num_samples++;
     }
-
     fclose(file);
+    free(buffer);
 }
 
 
 
 void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis)
 {
+    int i;
     FILE* file;
     file = fopen(filename, "wb");
     if (file == NULL)
@@ -162,7 +168,7 @@ void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis)
         fprintf(stderr, "ERROR: Failed to open output file.\n");
         return;
     }
-    for (int i = 0; i < vis->num_samples; ++i)
+    for (i = 0; i < vis->num_samples; ++i)
     {
 //        printf("u[%i] = %f\n",i, vis->u[i]);
 //        printf("%f\n", vis->amp[i].x);
@@ -179,28 +185,31 @@ void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis)
 
 void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis)
 {
-    vis->num_samples = 0;
-    vis->u   = NULL;
-    vis->v   = NULL;
-    vis->w   = NULL;
-    vis->amp = NULL;
-
     FILE* file;
+    size_t record_size;
+    float* buffer;
+    record_size = 5 * sizeof(float);
+    buffer = (float*) malloc(record_size);
+
     file = fopen(filename, "rb");
     if (file == NULL)
     {
         fprintf(stderr, "ERROR: Failed to open input visibility data file.\n");
         return;
     }
+    vis->num_samples = 0;
+    vis->u   = NULL;
+    vis->v   = NULL;
+    vis->w   = NULL;
+    vis->amp = NULL;
 
-    size_t record_size = 5 * sizeof(float);
-    float* buffer = (float*) malloc(record_size);
     while (fread(buffer, record_size, 1, file) == 1)
     {
         // Ensure enough space in arrays.
         if (vis->num_samples % 100 == 0)
         {
-            size_t mem_size = (vis->num_samples + 100) * sizeof(float);
+            size_t mem_size;
+            mem_size = (vis->num_samples + 100) * sizeof(float);
             vis->u = (float*) realloc(vis->u, mem_size);
             vis->v = (float*) realloc(vis->v, mem_size);
             vis->w = (float*) realloc(vis->w, mem_size);
@@ -215,6 +224,7 @@ void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis)
         vis->num_samples++;
     }
     fclose(file);
+    free(buffer);
 }
 
 

@@ -38,17 +38,20 @@ extern "C" {
 void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
         const double* l, const double* m, double* lon, double* lat)
 {
-    const double sinLat0 = sin(lat0);
-    const double cosLat0 = cos(lat0);
+    int i;
+    double sinLat0, cosLat0;
+    sinLat0 = sin(lat0);
+    cosLat0 = cos(lat0);
 
     // Loop over l, m positions and evaluate the longitude and latitude values.
-    int i;
     for (i = 0; i < num_positions; ++i)
     {
-        double ll = l[i], mm = m[i];
-        double w = sqrt(1.0 - ll*ll - mm*mm);
-        lat[i] = asin(w * sinLat0 + mm * cosLat0);
-        lon[i] = lon0 + atan2(ll, cosLat0 * w - mm * sinLat0);
+        double li, mi, w;
+        li = l[i];
+        mi = m[i];
+        w = sqrt(1.0 - li*li - mi*mi);
+        lat[i] = asin(w * sinLat0 + mi * cosLat0);
+        lon[i] = lon0 + atan2(li, cosLat0 * w - mi * sinLat0);
     }
 }
 

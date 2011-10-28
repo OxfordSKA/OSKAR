@@ -44,14 +44,16 @@ extern "C" {
 
 double oskar_mjd_to_gmst_d(double mjd)
 {
+    double d, t, gmst;
+
     // Days from J2000.0.
-    double d = mjd - 51544.5;
+    d = mjd - 51544.5;
 
     // Centuries from J2000.0.
-    double t = d / 36525.0;
+    t = d / 36525.0;
 
     // GMST at this time.
-    double gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
+    gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
                     (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
 
     // Range check (0 to 2pi).

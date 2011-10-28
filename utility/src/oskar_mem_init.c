@@ -31,6 +31,10 @@
 #include "utility/oskar_mem_free.h"
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements)
 {
     // Check that the structure exists.
@@ -39,7 +43,8 @@ int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements)
     // Check if this structure is already allocated.
     if (mem->private_type != 0 && mem->data != NULL)
     {
-        int err = oskar_mem_free(mem);
+        int err = 0;
+        err = oskar_mem_free(mem);
         if (err) return err;
     }
 
@@ -51,3 +56,7 @@ int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements)
     // Allocate memory.
     return oskar_mem_alloc(mem);
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -40,27 +40,34 @@ void oskar_horizon_plane_to_offset_geocentric_cartesian_d(int n,
         const double* z_horizon, double longitude, double latitude,
         double* x, double* y, double* z)
 {
-	// Precompute some trig.
-	double sin_l = sin(longitude);
-	double cos_l = cos(longitude);
-	double sin_p = sin(latitude);
-	double cos_p = cos(latitude);
+    // Precompute some trig.
+    double sin_l, cos_l, sin_p, cos_p;
+    int i;
+    sin_l = sin(longitude);
+    cos_l = cos(longitude);
+    sin_p = sin(latitude);
+    cos_p = cos(latitude);
 
-	// Loop over points.
-	int i = 0;
-	double X, Y, Z, xi, yi, zi;
-	for (i = 0; i < n; ++i)
-	{
-		xi = x_horizon[i];
-		yi = y_horizon[i];
-		zi = z_horizon[i];
-		X = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
-		Y =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
-		Z =  yi * cos_p + zi * sin_p;
-		x[i] = X;
-		y[i] = Y;
-		z[i] = Z;
-	}
+    // Loop over points.
+    for (i = 0; i < n; ++i)
+    {
+        double xi, yi, zi, xt, yt, zt;
+
+        // Get the input coordinates.
+        xi = x_horizon[i];
+        yi = y_horizon[i];
+        zi = z_horizon[i];
+
+        // Apply rotation matrix.
+        xt = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
+        yt =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
+        zt =  yi * cos_p + zi * sin_p;
+
+        // Save the rotated values.
+        x[i] = xt;
+        y[i] = yt;
+        z[i] = zt;
+    }
 }
 
 // Single precision.
@@ -69,27 +76,34 @@ void oskar_horizon_plane_to_offset_geocentric_cartesian_f(int n,
         const float* z_horizon, float longitude, float latitude,
         float* x, float* y, float* z)
 {
-	// Precompute some trig.
-	float sin_l = sinf(longitude);
-	float cos_l = cosf(longitude);
-	float sin_p = sinf(latitude);
-	float cos_p = cosf(latitude);
+    // Precompute some trig.
+    double sin_l, cos_l, sin_p, cos_p;
+    int i;
+    sin_l = sin(longitude);
+    cos_l = cos(longitude);
+    sin_p = sin(latitude);
+    cos_p = cos(latitude);
 
-	// Loop over points.
-	int i = 0;
-	float X, Y, Z, xi, yi, zi;
-	for (i = 0; i < n; ++i)
-	{
-		xi = x_horizon[i];
-		yi = y_horizon[i];
-		zi = z_horizon[i];
-		X = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
-		Y =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
-		Z =  yi * cos_p + zi * sin_p;
-		x[i] = X;
-		y[i] = Y;
-		z[i] = Z;
-	}
+    // Loop over points.
+    for (i = 0; i < n; ++i)
+    {
+        double xi, yi, zi, xt, yt, zt;
+
+        // Get the input coordinates.
+        xi = (double) (x_horizon[i]);
+        yi = (double) (y_horizon[i]);
+        zi = (double) (z_horizon[i]);
+
+        // Apply rotation matrix.
+        xt = -xi * sin_l - yi * sin_p * cos_l + zi * cos_p * cos_l;
+        yt =  xi * cos_l - yi * sin_p * sin_l + zi * cos_p * sin_l;
+        zt =  yi * cos_p + zi * sin_p;
+
+        // Save the rotated values.
+        x[i] = (float)xt;
+        y[i] = (float)yt;
+        z[i] = (float)zt;
+    }
 }
 
 #ifdef __cplusplus

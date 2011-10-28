@@ -30,16 +30,21 @@
 #include <stdlib.h>
 #include "utility/oskar_mem_free.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_mem_free(oskar_Mem* mem)
 {
+    int location, err = 0;
+
     // Check that the structure exists.
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Get the meta-data.
-    int location = mem->private_location;
+    location = mem->private_location;
 
     // Check whether the memory is on the host or the device.
-    int err = 0;
     if (location == OSKAR_LOCATION_CPU)
     {
         // Free host memory.
@@ -61,3 +66,7 @@ int oskar_mem_free(oskar_Mem* mem)
     mem->private_type = 0;
     return err;
 }
+
+#ifdef __cplusplus
+}
+#endif

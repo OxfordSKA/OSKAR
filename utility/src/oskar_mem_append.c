@@ -36,10 +36,16 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
         int num_elements)
 {
+    int error = 0;
+    size_t element_size, mem_size, offset_bytes;
+
     // Check for sane inputs.
     if (to == NULL || from == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -49,12 +55,11 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
         return OSKAR_ERR_TYPE_MISMATCH;
 
     // Memory size being appended and offset into memory to append to.
-    size_t element_size = oskar_mem_element_size(to->private_type);
-    size_t mem_size = num_elements * element_size;
-    size_t offset_bytes = to->private_n_elements * element_size;
+    element_size = oskar_mem_element_size(to->private_type);
+    mem_size = num_elements * element_size;
+    offset_bytes = to->private_n_elements * element_size;
 
     // Reallocate the memory pointer so it is big enough to append to.
-    int error = 0;
     error = oskar_mem_realloc(to, num_elements + to->private_n_elements);
     if (error != 0) return error;
 
@@ -82,3 +87,7 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
     }
     return error;
 }
+
+#ifdef __cplusplus
+}
+#endif

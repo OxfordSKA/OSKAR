@@ -37,52 +37,55 @@ extern "C"
 #endif
 int oskar_getline(char** lineptr, size_t* n, FILE* stream)
 {
-	// Check for sane inputs.
-	if (lineptr == NULL || n == NULL || stream == NULL)
-		return OSKAR_ERR_INVALID_ARGUMENT;
+    // Check for sane inputs.
+    if (lineptr == NULL || n == NULL || stream == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-	// Check if buffer is empty.
-	if (*n == 0 || *lineptr == NULL)
-	{
-		*n = 80;
-		*lineptr = (char*)malloc(*n);
-		if (*lineptr == NULL)
-			return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-	}
+    // Check if buffer is empty.
+    if (*n == 0 || *lineptr == NULL)
+    {
+        *n = 80;
+        *lineptr = (char*)malloc(*n);
+        if (*lineptr == NULL)
+            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    }
 
-	// Initialise the byte counter.
-	size_t size = 0;
+    // Initialise the byte counter.
+    size_t size = 0;
 
-	// Read in the line.
-	for (;;)
-	{
-		// Get the character.
-		int i = getc(stream);
-		if (i == EOF)
-			return OSKAR_ERR_EOF;
+    // Read in the line.
+    for (;;)
+    {
+        // Get the character.
+        int i;
+        i = getc(stream);
+        if (i == EOF)
+            return OSKAR_ERR_EOF;
 
-		// Allocate space for size+1 bytes (including NULL terminator).
-		if (size + 1 >= *n)
-		{
-			// Double the length of the buffer.
-			*n = 2 * *n + 1;
-			void* t = realloc(*lineptr, *n);
-			if (t == NULL)
-				return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-			*lineptr = (char*)t;
-		}
+        // Allocate space for size+1 bytes (including NULL terminator).
+        if (size + 1 >= *n)
+        {
+            void *t;
 
-		// Store the character.
-		(*lineptr)[size++] = i;
+            // Double the length of the buffer.
+            *n = 2 * *n + 1;
+            t = realloc(*lineptr, *n);
+            if (t == NULL)
+                return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            *lineptr = (char*)t;
+        }
 
-		// Check if end-of-line reached.
-		if (i == '\n')
-			break;
-	}
+        // Store the character.
+        (*lineptr)[size++] = i;
 
-	// Add a NULL terminator.
-	(*lineptr)[size] = '\0';
+        // Check if end-of-line reached.
+        if (i == '\n')
+            break;
+    }
 
-	// Return the number of characters read.
-	return size;
+    // Add a NULL terminator.
+    (*lineptr)[size] = '\0';
+
+    // Return the number of characters read.
+    return size;
 }

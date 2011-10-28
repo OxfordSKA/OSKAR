@@ -33,12 +33,11 @@ extern "C" {
 #endif
 
 // Single precision.
-
 void oskar_compute_baselines_f(int na, const float* au,
         const float* av, const float* aw, float* bu, float* bv, float* bw)
 {
-    int a1, a2, b = 0; // Station and baseline indices.
-    for (a1 = 0; a1 < na; ++a1)
+    int a1, a2, b; // Station and baseline indices.
+    for (a1 = 0, b = 0; a1 < na; ++a1)
     {
         for (a2 = a1 + 1; a2 < na; ++a2, ++b)
         {
@@ -50,12 +49,11 @@ void oskar_compute_baselines_f(int na, const float* au,
 }
 
 // Double precision.
-
 void oskar_compute_baselines_d(int na, const double* au,
         const double* av, const double* aw, double* bu, double* bv, double* bw)
 {
-    int a1, a2, b = 0; // Station and baseline indices.
-    for (a1 = 0; a1 < na; ++a1)
+    int a1, a2, b; // Station and baseline indices.
+    for (a1 = 0, b = 0; a1 < na; ++a1)
     {
         for (a2 = a1 + 1; a2 < na; ++a2, ++b)
         {

@@ -36,11 +36,13 @@ extern "C" {
 double oskar_date_time_to_mjd_d(int year, int month, int day,
         double day_fraction)
 {
+    int a, y, m, jdn;
+
     // Compute Julian Day Number (Note: all integer division).
-    int a = (14 - month) / 12;
-    int y = year + 4800 - a;
-    int m = month + 12 * a - 3;
-    int jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
+    a = (14 - month) / 12;
+    y = year + 4800 - a;
+    m = month + 12 * a - 3;
+    jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
             + (y / 400) - 32045;
 
     // Compute day fraction (floating-point division).

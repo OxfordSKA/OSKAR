@@ -39,8 +39,8 @@ extern char* strtok_r(char*, const char*, char**);
 // Single precision.
 int oskar_string_to_array_f(char* str, int n, float* data)
 {
-    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
     int i = 0;
+    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
     while (token && i < n)
     {
         if (sscanf(token, "%f", &data[i]) > 0) i++;
@@ -52,8 +52,8 @@ int oskar_string_to_array_f(char* str, int n, float* data)
 // Double precision.
 int oskar_string_to_array_d(char* str, int n, double* data)
 {
-    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
     int i = 0;
+    char *save_ptr, *token = strtok_r(str, " ,", &save_ptr);
     while (token && i < n)
     {
         if (sscanf(token, "%lf", &data[i]) > 0) i++;

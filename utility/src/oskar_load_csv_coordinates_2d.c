@@ -39,14 +39,16 @@ extern "C" {
 int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
         float** x, float** y)
 {
+    float ax, ay;
+
     // Open the file.
-    FILE* file = fopen(filename, "r");
+    FILE* file;
+    file = fopen(filename, "r");
     if (file == NULL) return 0;
     *n = 0;
     *x = NULL;
     *y = NULL;
 
-    float ax, ay;
     while (fscanf(file, "%f,%f", &ax, &ay) == 2)
     {
         // Ensure enough space in arrays.
@@ -71,14 +73,16 @@ int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
 int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
         double** x, double** y)
 {
+    double ax, ay;
+
     // Open the file.
-    FILE* file = fopen(filename, "r");
+    FILE* file;
+    file = fopen(filename, "r");
     if (file == NULL) return 0;
     *n = 0;
     *x = NULL;
     *y = NULL;
 
-    double ax, ay;
     while (fscanf(file, "%lf,%lf", &ax, &ay) == 2)
     {
         // Ensure enough space in arrays.

@@ -34,40 +34,74 @@ extern "C" {
 #endif
 
 // Single precision.
-
-void oskar_xyz_to_uvw_f(int na, const float* x, const float* y,
+void oskar_xyz_to_uvw_f(int n, const float* x, const float* y,
         const float* z, double ha0, double dec0, float* u, float* v,
         float* w)
 {
-    double sinHa0  = sin(ha0);
-    double cosHa0  = cos(ha0);
-    double sinDec0 = sin(dec0);
-    double cosDec0 = cos(dec0);
+    int i;
+    double sinHa0, cosHa0, sinDec0, cosDec0;
 
-    int a = 0;
-    for (a = 0; a < na; ++a) {
-        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
-        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
-        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
+    // Precompute trig.
+    sinHa0  = sin(ha0);
+    cosHa0  = cos(ha0);
+    sinDec0 = sin(dec0);
+    cosDec0 = cos(dec0);
+
+    // Loop over points.
+    for (i = 0; i < n; ++i)
+    {
+        double xi, yi, zi, ut, vt, wt;
+
+        // Get the input coordinates.
+        xi = (double) (x[i]);
+        yi = (double) (y[i]);
+        zi = (double) (z[i]);
+
+        // Apply rotation matrix.
+        ut =  xi * sinHa0 + yi * cosHa0;
+        vt = sinDec0 * (-xi * cosHa0 + yi * sinHa0) + zi * cosDec0;
+        wt = cosDec0 * (xi * cosHa0 - yi * sinHa0) + zi * sinDec0;
+
+        // Save the rotated values.
+        u[i] = (float)ut;
+        v[i] = (float)vt;
+        w[i] = (float)wt;
     }
 }
 
 // Double precision.
-
-void oskar_xyz_to_uvw_d(int na, const double* x, const double* y,
+void oskar_xyz_to_uvw_d(int n, const double* x, const double* y,
         const double* z, double ha0, double dec0, double* u, double* v,
         double* w)
 {
-    double sinHa0  = sin(ha0);
-    double cosHa0  = cos(ha0);
-    double sinDec0 = sin(dec0);
-    double cosDec0 = cos(dec0);
+    int i;
+    double sinHa0, cosHa0, sinDec0, cosDec0;
 
-    int a = 0;
-    for (a = 0; a < na; ++a) {
-        u[a] =  x[a] * sinHa0 + y[a] * cosHa0;
-        v[a] = sinDec0 * (-x[a] * cosHa0 + y[a] * sinHa0) + z[a] * cosDec0;
-        w[a] = cosDec0 * (x[a] * cosHa0 - y[a] * sinHa0) + z[a] * sinDec0;
+    // Precompute trig.
+    sinHa0  = sin(ha0);
+    cosHa0  = cos(ha0);
+    sinDec0 = sin(dec0);
+    cosDec0 = cos(dec0);
+
+    // Loop over points.
+    for (i = 0; i < n; ++i)
+    {
+        double xi, yi, zi, ut, vt, wt;
+
+        // Get the input coordinates.
+        xi = x[i];
+        yi = y[i];
+        zi = z[i];
+
+        // Apply rotation matrix.
+        ut =  xi * sinHa0 + yi * cosHa0;
+        vt = sinDec0 * (-xi * cosHa0 + yi * sinHa0) + zi * cosDec0;
+        wt = cosDec0 * (xi * cosHa0 - yi * sinHa0) + zi * sinDec0;
+
+        // Save the rotated values.
+        u[i] = ut;
+        v[i] = vt;
+        w[i] = wt;
     }
 }
 

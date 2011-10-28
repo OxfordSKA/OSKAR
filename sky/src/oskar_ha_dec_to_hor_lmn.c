@@ -35,70 +35,78 @@ extern "C" {
 
 // Single precision.
 int oskar_ha_dec_to_hor_lmn_f(int n, const float* ha, const float* dec,
-		float lat, float* hor_l, float* hor_m, float* hor_n)
+        float lat, float* hor_l, float* hor_m, float* hor_n)
 {
-	// Compute latitude trig.
-	float sinLat = sinf(lat);
-	float cosLat = cosf(lat);
+    float sinLat, cosLat;
+    int i;
 
-	// Loop over positions.
-	int i;
-	for (i = 0; i < n; ++i)
-	{
-		// Load local equatorial coordinates.
-		float sh = ha[i];
-		float sd = dec[i];
+    // Compute latitude trig.
+    sinLat = sinf(lat);
+    cosLat = cosf(lat);
 
-		// Find direction cosines.
-		float sinHA = sinf(sh);
-		float sinDec = sinf(sd);
-		float cosHA = cosf(sh);
-		float cosDec = cosf(sd);
-		float t = cosDec * cosHA;
-		float X1 = cosLat * sinDec - sinLat * t;
-		float Y2 = sinLat * sinDec + cosLat * t;
-		t = -cosDec * sinHA;
+    // Loop over positions.
+    for (i = 0; i < n; ++i)
+    {
+        float sh, sd, sinHA, sinDec, cosHA, cosDec, t, X1, Y2;
 
-		// Store source direction cosines.
-		hor_l[i] = t;  // Horizontal x-component.
-		hor_m[i] = X1; // Horizontal y-component.
-		hor_n[i] = Y2; // Horizontal z-component.
-	}
+        // Load local equatorial coordinates.
+        sh = ha[i];
+        sd = dec[i];
+
+        // Find direction cosines.
+        sinHA = sinf(sh);
+        sinDec = sinf(sd);
+        cosHA = cosf(sh);
+        cosDec = cosf(sd);
+        t = cosDec * cosHA;
+        X1 = cosLat * sinDec - sinLat * t;
+        Y2 = sinLat * sinDec + cosLat * t;
+        t = -cosDec * sinHA;
+
+        // Store source direction cosines.
+        hor_l[i] = t;  // Horizontal x-component.
+        hor_m[i] = X1; // Horizontal y-component.
+        hor_n[i] = Y2; // Horizontal z-component.
+    }
 
     return 0;
 }
 
 // Double precision.
 int oskar_ha_dec_to_hor_lmn_d(int n, const double* ha, const double* dec,
-		double lat, double* hor_l, double* hor_m, double* hor_n)
+        double lat, double* hor_l, double* hor_m, double* hor_n)
 {
-	// Compute latitude trig.
-	double sinLat = sin(lat);
-	double cosLat = cos(lat);
+    double sinLat, cosLat;
+    int i;
 
-	// Loop over positions.
-	int i;
-	for (i = 0; i < n; ++i)
-	{
-		// Load local equatorial coordinates.
-		double sh = ha[i];
-		double sd = dec[i];
+    // Compute latitude trig.
+    sinLat = sin(lat);
+    cosLat = cos(lat);
 
-		// Find direction cosines.
-		double sinHA = sin(sh);
-		double sinDec = sin(sd);
-		double cosHA = cos(sh);
-		double cosDec = cos(sd);
-		double t = cosDec * cosHA;
-		double X1 = cosLat * sinDec - sinLat * t;
-		double Y2 = sinLat * sinDec + cosLat * t;
-		t = -cosDec * sinHA;
+    // Loop over positions.
+    for (i = 0; i < n; ++i)
+    {
+        double sh, sd, sinHA, sinDec, cosHA, cosDec, t, X1, Y2;
 
-		// Store source direction cosines.
-		hor_l[i] = t;  // Horizontal x-component.
-		hor_m[i] = X1; // Horizontal y-component.
-		hor_n[i] = Y2; // Horizontal z-component.
-	}
+        // Load local equatorial coordinates.
+        sh = ha[i];
+        sd = dec[i];
+
+        // Find direction cosines.
+        sinHA = sin(sh);
+        sinDec = sin(sd);
+        cosHA = cos(sh);
+        cosDec = cos(sd);
+        t = cosDec * cosHA;
+        X1 = cosLat * sinDec - sinLat * t;
+        Y2 = sinLat * sinDec + cosLat * t;
+        t = -cosDec * sinHA;
+
+        // Store source direction cosines.
+        hor_l[i] = t;  // Horizontal x-component.
+        hor_m[i] = X1; // Horizontal y-component.
+        hor_n[i] = Y2; // Horizontal z-component.
+    }
 
     return 0;
 }

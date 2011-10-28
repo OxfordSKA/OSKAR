@@ -40,21 +40,23 @@ extern "C" {
 
 double oskar_equation_of_equinoxes_fast_d(double mjd)
 {
+    double d, omega, L, delta_psi, epsilon, eqeq;
+
     // Days from J2000.0.
-    double d = mjd - 51544.5;
+    d = mjd - 51544.5;
 
     // Longitude of ascending node of the Moon.
-    double omega = (125.04 - 0.052954 * d) * DEG2RAD;
+    omega = (125.04 - 0.052954 * d) * DEG2RAD;
 
     // Mean Longitude of the Sun.
-    double L = (280.47 + 0.98565 * d) * DEG2RAD;
+    L = (280.47 + 0.98565 * d) * DEG2RAD;
 
     // eqeq = delta_psi * cos(epsilon).
-    double delta_psi = -0.000319 * sin(omega) - 0.000024 * sin(2.0 * L);
-    double epsilon = (23.4393 - 0.0000004 * d) * DEG2RAD;
+    delta_psi = -0.000319 * sin(omega) - 0.000024 * sin(2.0 * L);
+    epsilon = (23.4393 - 0.0000004 * d) * DEG2RAD;
 
     // Return equation of equinoxes in radians.
-    double eqeq = delta_psi * cos(epsilon) * HOUR2RAD;
+    eqeq = delta_psi * cos(epsilon) * HOUR2RAD;
     return eqeq;
 }
 

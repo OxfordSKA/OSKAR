@@ -78,9 +78,10 @@ void oskar_initialise_kernel_d(const double radius, oskar_GridKernel_d* kernel)
  */
 void oskar_evaluate_pillbox_d(oskar_GridKernel_d* kernel)
 {
+    int i;
     oskar_initialise_kernel_d(0.5, kernel);
 
-    for (int i = 0; i < (int)kernel->size; ++i)
+    for (i = 0; i < (int)kernel->size; ++i)
     {
         const double x    = (i - (int)kernel->centre) * kernel->xinc;
         const double absx = fabs(x);
@@ -96,13 +97,14 @@ void oskar_evaluate_pillbox_d(oskar_GridKernel_d* kernel)
 
 void oskar_evaluate_exp_sinc_d(oskar_GridKernel_d* kernel)
 {
-    oskar_initialise_kernel_d(3.0, kernel);
-
     const double p1 = M_PI / 1.55;
     const double p2 = 1.0 / 2.52;
     const double p3 = 2.0;
+    int i;
 
-    for (int i = 0; i < (int)kernel->size; ++i)
+    oskar_initialise_kernel_d(3.0, kernel);
+
+    for (i = 0; i < (int)kernel->size; ++i)
     {
         const double x    = (i - (int)kernel->size /2) * kernel->xinc;
         const double absx = fabs(x);
@@ -121,6 +123,7 @@ void oskar_evaluate_exp_sinc_d(oskar_GridKernel_d* kernel)
 
 void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
 {
+    int i;
     // AIPS: HELP UV5TYPE
     // param1 => Support size. 0.0 -> 3.0 cells.
     // param2 => ALPHA. 0.0 -> 1.0.
@@ -145,7 +148,7 @@ void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
 //    printf("nmax = %i\n", nmax);
 
     // Evaluate function.
-    for (int i = 0; i < nmax; ++i)
+    for (i = 0; i < nmax; ++i)
     {
         const double eta = i / (double)(nmax - 1);
         double value = 0.0;
@@ -155,7 +158,7 @@ void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
     }
 
     // Fill in the other half.
-    for (int i = 0; i < (int)kernel->centre-1; ++i)
+    for (i = 0; i < (int)kernel->centre-1; ++i)
         kernel->amp[kernel->centre - i] = kernel->amp[kernel->centre + i];
 }
 

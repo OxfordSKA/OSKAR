@@ -31,8 +31,15 @@
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_size.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
 {
+    int n_elements_src, n_elements_dst, type_src, type_dst;
+    int location_src, location_dst, bytes;
+
     // Check that all pointers are not NULL.
     if (src == NULL || dst == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -40,12 +47,12 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Get the meta-data.
-    int n_elements_src = src->private_n_elements;
-    int n_elements_dst = dst->private_n_elements;
-    int type_src = src->private_type;
-    int type_dst = dst->private_type;
-    int location_src = src->private_location;
-    int location_dst = dst->private_location;
+    n_elements_src = src->private_n_elements;
+    n_elements_dst = dst->private_n_elements;
+    type_src = src->private_type;
+    type_dst = dst->private_type;
+    location_src = src->private_location;
+    location_dst = dst->private_location;
 
     // Check the data dimensions.
     if (n_elements_src != n_elements_dst)
@@ -56,7 +63,7 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return OSKAR_ERR_TYPE_MISMATCH;
 
     // Get the number of bytes to copy.
-    int bytes = oskar_mem_element_size(type_src) * n_elements_src;
+    bytes = oskar_mem_element_size(type_src) * n_elements_src;
 
     // Host to host.
     if (location_src == OSKAR_LOCATION_CPU
@@ -92,3 +99,7 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
 
     return OSKAR_ERR_BAD_LOCATION;
 }
+
+#ifdef __cplusplus
+}
+#endif

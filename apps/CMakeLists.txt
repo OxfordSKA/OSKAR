@@ -12,6 +12,11 @@ target_link_libraries(oskar_sim1_scalar oskar oskar_apps ${QT_QTCORE_LIBRARY})
 set_target_properties(oskar_sim1_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 #install(TARGETS oskar_sim1_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
+# BINARY: oskar_sim1_scalar
+add_executable(oskar_icrs_to_az_el oskar_icrs_to_az_el.cpp)
+target_link_libraries(oskar_icrs_to_az_el oskar)
+set_target_properties(oskar_icrs_to_az_el PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 if (BUILD_OSKAR_WIDGETS)
     include_directories(${Qwt5_INCLUDE_DIR})
     include_directories(${QT_QTGUI_INCLUDE_DIR})

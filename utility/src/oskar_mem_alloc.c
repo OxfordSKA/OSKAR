@@ -31,24 +31,30 @@
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_element_size.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_mem_alloc(oskar_Mem* mem)
 {
+    int n_elements, location, type, err = 0;
+    size_t element_size, bytes;
+
     // Check that the structure exists.
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Get the meta-data.
-    int n_elements = mem->private_n_elements;
-    int location = mem->private_location;
-    int type = mem->private_type;
+    n_elements = mem->private_n_elements;
+    location = mem->private_location;
+    type = mem->private_type;
 
     // Get the memory size.
-    size_t element_size = oskar_mem_element_size(type);
+    element_size = oskar_mem_element_size(type);
     if (element_size == 0)
         return OSKAR_ERR_BAD_DATA_TYPE;
-    size_t bytes = n_elements * element_size;
+    bytes = n_elements * element_size;
 
     // Check whether the memory should be on the host or the device.
-    int err = 0;
     if (location == OSKAR_LOCATION_CPU)
     {
         // Allocate host memory.
@@ -69,3 +75,7 @@ int oskar_mem_alloc(oskar_Mem* mem)
     }
     return err;
 }
+
+#ifdef __cplusplus
+}
+#endif

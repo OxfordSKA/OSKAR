@@ -32,6 +32,8 @@
 int oskar_station_model_init(oskar_StationModel* model, int type, int location,
         int n_elements)
 {
+    int complex_type, error;
+
     // Check for sane inputs.
     if (model == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -41,7 +43,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     // Determine the complex type.
-    int complex_type = (type == OSKAR_SINGLE) ?
+    complex_type = (type == OSKAR_SINGLE) ?
             OSKAR_SINGLE_COMPLEX : OSKAR_DOUBLE_COMPLEX;
 
     // Initialise variables.
@@ -53,7 +55,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->n_elements = n_elements;
 
     // Initialise the memory.
-    int error = 0;
+    error = 0;
     error = oskar_mem_init(&model->x, type, location, n_elements);
     if (error) return error;
     error = oskar_mem_init(&model->y, type, location, n_elements);

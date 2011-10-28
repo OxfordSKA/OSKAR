@@ -45,26 +45,25 @@ extern "C" {
 int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
 {
     // Initialise the flags and local data.
-    int n = 0;
-    float inc_theta = 0.0f, inc_phi = 0.0f;
-    float theta = 0.0f, phi = 0.0f, p_theta = 0.0f, p_phi = 0.0f;
-    float abs_theta, phase_theta, abs_phi, phase_phi;
+    int n = 0, err = 0;
+    float inc_theta = 0.0f, inc_phi = 0.0f, n_theta = 0.0f, n_phi = 0.0f;
     float min_theta = FLT_MAX, max_theta = -FLT_MAX;
     float min_phi = FLT_MAX, max_phi = -FLT_MAX;
 
+    // Declare the line buffer.
+    char *line = NULL, *dbi = NULL;
+    size_t bufsize = 0;
+
     // Open the file.
-    FILE* file = fopen(filename, "r");
+    FILE* file;
+    file = fopen(filename, "r");
     if (!file)
         return OSKAR_ERR_FILE_IO;
 
-    // Declare the line buffer.
-    char* line = NULL;
-    size_t bufsize = 0;
-
     // Read the first line and check if data is in logarithmic format.
-    int err = oskar_getline(&line, &bufsize, file);
+    err = oskar_getline(&line, &bufsize, file);
     if (err < 0) return err;
-    const char* dbi = strstr(line, "dBi"); // Check for presence of "dBi".
+    dbi = strstr(line, "dBi"); // Check for presence of "dBi".
 
     // Initialise pointers to NULL.
     data->g_phi = NULL;
@@ -73,15 +72,19 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     // Loop over and read each line in the file.
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
+        int a;
+        float theta = 0.0f, phi = 0.0f, p_theta = 0.0f, p_phi = 0.0f;
+        float abs_theta, phase_theta, abs_phi, phase_phi;
+
         // Parse the line.
-        int a = sscanf(line, "%f %f %*f %f %f %f %f %*f", &theta, &phi,
+        a = sscanf(line, "%f %f %*f %f %f %f %f %*f", &theta, &phi,
                     &abs_theta, &phase_theta, &abs_phi, &phase_phi);
 
         // Check that data was read correctly.
         if (a != 6) continue;
 
         // Ignore any data below horizon.
-        if (theta > 90.0) continue;
+        if (theta > 90.0f) continue;
 
         // Convert coordinates to radians.
         theta *= DEG2RAD;
@@ -100,7 +103,8 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
         // Ensure enough space in arrays.
         if (n % 100 == 0)
         {
-            int size = (n + 100) * sizeof(float);
+            int size;
+            size = (n + 100) * sizeof(float);
             data->g_theta = (float2*) realloc(data->g_theta, 2*size);
             data->g_phi   = (float2*) realloc(data->g_phi, 2*size);
         }
@@ -131,8 +135,8 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     fclose(file);
 
     // Get number of points in each dimension.
-    float n_theta = (max_theta - min_theta) / inc_theta;
-    float n_phi = (max_phi - min_phi) / inc_phi;
+    n_theta = (max_theta - min_theta) / inc_theta;
+    n_phi = (max_phi - min_phi) / inc_phi;
 
     // Store number of points in arrays.
     data->n_points = n;

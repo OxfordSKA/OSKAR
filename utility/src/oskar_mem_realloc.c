@@ -33,14 +33,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 {
+    size_t element_size, new_size;
+    int old_num_elements, error = 0;
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    size_t element_size = oskar_mem_element_size(mem->private_type);
-    size_t new_size = num_elements * element_size;
-    int old_num_elements = mem->private_n_elements;
-    int error = 0;
+    element_size = oskar_mem_element_size(mem->private_type);
+    new_size = num_elements * element_size;
+    old_num_elements = mem->private_n_elements;
     if (mem->private_location == OSKAR_LOCATION_CPU)
     {
         void* mem_new = realloc(mem->data, new_size);
@@ -51,9 +56,9 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
     }
     else if (mem->private_location == OSKAR_LOCATION_GPU)
     {
+        void* d_mem_new = NULL;
         size_t copy_size = (old_num_elements > num_elements) ?
                 num_elements * element_size : old_num_elements * element_size;
-        void* d_mem_new = NULL;
         cudaMalloc(&d_mem_new, new_size);
         cudaMemcpy(d_mem_new, mem->data, copy_size, cudaMemcpyDeviceToDevice);
         cudaFree(mem->data);
@@ -67,3 +72,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
     }
     return error;
 }
+
+#ifdef __cplusplus
+}
+#endif
