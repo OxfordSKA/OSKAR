@@ -22,12 +22,12 @@ if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     list(APPEND CMAKE_CXX_FLAGS "-fPIC")
     set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    list(APPEND CMAKE_C_FLAGS   "-std=c99 -fPIC")
+    list(APPEND CMAKE_C_FLAGS   "-fPIC") # -std=c99
 
     # Warnings.
     add_definitions(-Wall)
     add_definitions(-Wextra)
-    add_definitions(-pedantic)
+    #add_definitions(-pedantic)
 
     add_definitions(-Wcast-align)
     add_definitions(-Wcast-qual)

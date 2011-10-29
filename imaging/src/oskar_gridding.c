@@ -45,13 +45,14 @@ double oskar_round_towards_zero(const double x);
 double oskar_grid_standard(const oskar_VisData_d* vis,
         const oskar_GridKernel_d* kernel, oskar_VisGrid_d* grid)
 {
+	int i, iy, ix;
     double grid_sum = 0.0;
 
     int support  = (kernel->num_cells - 1) / 2;
     int g_centre = grid->size / 2.0; // fixme: Will only work for even grids, should use floor() ?
     int ix_grid, iy_grid, ix_kernel, iy_kernel;
 
-    for (int i = 0; i < vis->num_samples; ++i)
+    for (i = 0; i < vis->num_samples; ++i)
     {
         oskar_evaluate_offset(vis->u[i], grid->pixel_separation,
                 (unsigned)kernel->oversample, &ix_grid, &ix_kernel);
@@ -66,12 +67,12 @@ double oskar_grid_standard(const oskar_VisData_d* vis,
         ix_kernel += kernel->centre;
         iy_kernel += kernel->centre;
 
-        for (int iy = -support; iy <= support; ++iy)
+        for (iy = -support; iy <= support; ++iy)
         {
             const int gy = iy + iy_grid;
             if (gy >= grid->size) continue;
 
-            for (int ix = -support; ix <= support; ++ix)
+            for (ix = -support; ix <= support; ++ix)
             {
                 const int gx = ix + ix_grid;
                 if (gx >= grid->size) continue;

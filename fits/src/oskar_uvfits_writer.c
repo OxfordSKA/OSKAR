@@ -241,6 +241,7 @@ void oskar_write_param_header(fitsfile* fits_file, const int id,
 void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
         const double* weight, const double* date, const double* baseline)
 {
+	int i, j;
     int status = 0;
 
     // fixme: work out how to read this from the already written header.
@@ -255,7 +256,7 @@ void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
 
     // Setup compressed axis dimensions vector.
     long naxes[5]; // length = num_axis-1
-    for (int i = 0; i < num_axes - 1; ++i)
+    for (i = 0; i < num_axes - 1; ++i)
         naxes[i] = axis_dim[i+1];
 
     // length = num_axes
@@ -263,7 +264,7 @@ void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
     long lpixel[5] = {3, 1, 1, 1, 1}; // == naxes
 
     int num_values_per_group = 1;
-    for (int i = 1; i < num_axes; ++i)
+    for (i = 1; i < num_axes; ++i)
         num_values_per_group *= axis_dim[i];
     printf("num values per group = %i\n", num_values_per_group);
 
@@ -274,7 +275,7 @@ void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
     float p_temp[5]; // length = num_param
     float *g_temp = (float*) malloc(num_values_per_group * sizeof(float));
 
-    for (int i = 0; i < vis->num_samples; ++i)
+    for (i = 0; i < vis->num_samples; ++i)
     {
         long group = (long)i + 1;
 
@@ -286,7 +287,7 @@ void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
         p_temp[4] = baseline[i];
 
         printf("- writing group %li\n", group);
-        for (int j = 0; j < nelements; ++j)
+        for (j = 0; j < nelements; ++j)
             printf("   param %i = %f\n", j+1, p_temp[j]);
 
         fits_write_grppar_flt(fits_file, group, firstelem, nelements,
@@ -298,7 +299,7 @@ void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
         g_temp[1] = vis->amp[i].y; // im
         g_temp[2] = weight[i];
 
-        for (int j = 0; j < num_values_per_group; ++j)
+        for (j = 0; j < num_values_per_group; ++j)
             printf("   data %i = %f\n", j+1, g_temp[j]);
 
         fits_write_subset_flt(fits_file, group, 5, naxes, fpixel, lpixel, g_temp, &status);

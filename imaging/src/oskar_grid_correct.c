@@ -52,9 +52,10 @@ extern "C" {
 void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
         const unsigned grid_size, double** correction)
 {
+	int i, j;
     // === Kernel x grid coordinates.
     double* kernel_x = (double*) malloc(kernel->size * sizeof(double));
-    for (int i = 0; i < kernel->size; ++i)
+    for (i = 0; i < kernel->size; ++i)
         kernel_x[i] = (i - kernel->centre) * kernel->xinc;
 
     // === Sinc term sinc(pi * f * x) / (pi * f * x)
@@ -62,7 +63,7 @@ void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
     double grid_inc = 1.0 / grid_size;
     double* f_sinc = (double*) malloc(grid_size * sizeof(double));
     double f = kernel->xinc;
-    for (int i = 0; i < (int)grid_size; ++i)
+    for (i = 0; i < (int)grid_size; ++i)
     {
         double x    = (i - grid_centre) * grid_inc;
         double absx = fabs(x);
@@ -75,10 +76,10 @@ void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
     // === DFT of convolution function
     double* c_sinc = (double*) malloc(grid_size * sizeof(double));
     memset(c_sinc, 0, grid_size * sizeof(double));
-    for (int j = 0; j < (int)grid_size; ++j)
+    for (j = 0; j < (int)grid_size; ++j)
     {
         double x = (j - grid_centre) * grid_inc;
-        for (int i = 0; i < kernel->size; ++i)
+        for (i = 0; i < kernel->size; ++i)
         {
             c_sinc[j] += kernel->amp[i] * cos(-2 * M_PI * x * kernel_x[i]);
         }
@@ -86,7 +87,7 @@ void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
 
     // === Combine terms to form 1d correction function.
     double* correction1d = (double*) malloc(grid_size * sizeof(double));
-    for (int i = 0; i < (int)grid_size; ++i)
+    for (i = 0; i < (int)grid_size; ++i)
     {
         correction1d[i] = f_sinc[i] * c_sinc[i];
         //correction1d[i] = f_sinc[i];
@@ -96,18 +97,18 @@ void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
     // === Find the maximum of the correction function.
     // Note: same as normalising to the centre?
     double correction_max = -DBL_MAX;
-    for (int i = 0; i < (int)grid_size; ++i)
+    for (i = 0; i < (int)grid_size; ++i)
         correction_max = MAX(correction_max, correction1d[i]);
 
     // === Normalise to the maximum.
-    for (int i = 0; i < (int)grid_size; ++i)
+    for (i = 0; i < (int)grid_size; ++i)
         correction1d[i] /= correction_max;
 
     // === Convert to a 2D correction screen.
     *correction = (double*) malloc(grid_size * grid_size * sizeof(double));
-    for (int j = 0; j < (int)grid_size; ++j)
+    for (j = 0; j < (int)grid_size; ++j)
     {
-        for (int i = 0; i < (int)grid_size; ++i)
+        for (i = 0; i < (int)grid_size; ++i)
         {
             (*correction)[j * grid_size + i] = correction1d[i] * correction1d[j];
         }
