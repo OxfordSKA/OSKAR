@@ -29,10 +29,10 @@
 
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_append.h"
-#include "sky/oskar_sky_model_resize.h"
+#include "sky/oskar_sky_model_compute_relative_lmn.h"
 #include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_set_source.h"
-#include "utility/oskar_mem_element_size.h"
 #include <cuda_runtime_api.h>
 #include <cstdio>
 
@@ -56,7 +56,6 @@ oskar_SkyModel::oskar_SkyModel(const int num_sources, const int type,
   hor_n(type, location, num_sources)
 {
 }
-
 
 oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, const int location)
 : num_sources(other->num_sources),
@@ -105,30 +104,34 @@ oskar_SkyModel::~oskar_SkyModel()
 {
 }
 
+int oskar_SkyModel::append(const oskar_SkyModel* other)
+{
+    return oskar_sky_model_append(this, other);
+}
+
+int oskar_SkyModel::compute_relative_lmn(double ra0, double dec0)
+{
+	return oskar_sky_model_compute_relative_lmn(this, ra0, dec0);
+}
 
 int oskar_SkyModel::load(const char* filename)
 {
     return oskar_sky_model_load(filename, this);
 }
 
-
 int oskar_SkyModel::resize(int num_sources)
 {
     return oskar_sky_model_resize(this, num_sources);
 }
 
-
 int oskar_SkyModel::set_source(int index, double ra, double dec, double I,
-        double Q, double U, double V, double ref_frequency, double spectral_index)
+        double Q, double U, double V, double ref_frequency,
+        double spectral_index)
 {
-    return oskar_sky_model_set_source(this, index, ra, dec, I, Q, U, V, ref_frequency, spectral_index);
+    return oskar_sky_model_set_source(this, index, ra, dec, I, Q, U, V,
+    		ref_frequency, spectral_index);
 }
 
-
-int oskar_SkyModel::append(const oskar_SkyModel* other)
-{
-    return oskar_sky_model_append(this, other);
-}
 
 
 

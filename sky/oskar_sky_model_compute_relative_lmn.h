@@ -26,43 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_MODEL_TEST_H_
-#define SKY_MODEL_TEST_H_
+#ifndef OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
+#define OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
 
 /**
- * @file SkyModelTest.h
+ * @file oskar_sky_model_compute_relative_lmn.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Computes 3D direction cosines of sources relative to phase centre.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function populates the 3D direction cosines (l,m,n coordinates)
+ * of all sources relative to the phase centre.
+ *
+ * It assumes that the source RA and Dec positions have already been filled,
+ * and that the arrays have been preallocated to the correct length.
+ *
+ * All arrays must be on the GPU prior to calling this function.
+ *
+ * @param[in,out] sky Pointer to sky model structure.
+ * @param[in] ra0 Right Ascension of phase centre, in radians.
+ * @param[in] dec0 Declination of phase centre, in radians.
  */
-class SkyModelTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(SkyModelTest);
-        CPPUNIT_TEST(test_resize);
-        CPPUNIT_TEST(test_set_source);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_load);
-        CPPUNIT_TEST(test_compute_relative_lmn);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
+		double dec0);
 
-    public:
-        /// Test method.
-        void test_resize();
-        void test_set_source();
-        void test_append();
-        void test_load();
-        void test_compute_relative_lmn();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(SkyModelTest);
-
-#endif // SKY_MODEL_TEST_H_
+#endif // OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_

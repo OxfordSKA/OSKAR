@@ -30,7 +30,7 @@
 #define OSKAR_CUDA_RA_DEC_TO_RELATIVE_LMN_H_
 
 /**
- * @file oskar_sky_cuda_ra_dec_to_relative_lmn.h
+ * @file oskar_cuda_ra_dec_to_relative_lmn.h
  */
 
 #include "oskar_global.h"

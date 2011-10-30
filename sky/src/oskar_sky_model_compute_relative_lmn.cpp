@@ -26,44 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sky/oskar_sky_model_compute_relative_lmn.h"
 #include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
-#include "math/cudak/oskar_cudak_sph_to_lm.h"
-#include "sky/cudak/oskar_cudak_lm_to_n.h"
+#include <cstdlib>
 
-// Single precision.
-int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* d_ra,
-        const float* d_dec, float ra0, float dec0, float* d_l, float* d_m,
-        float* d_n)
+#ifdef __cplusplus
+extern "C"
+#endif
+int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
+		double dec0)
 {
-    // Compute l,m-direction-cosines of RA, Dec relative to reference point.
-    const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
-    const float cosDec0 = cosf(dec0);
-    const float sinDec0 = sinf(dec0);
-    oskar_cudak_sph_to_lm_f OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+    // Check for sane inputs.
+    if (sky == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_f OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_l, d_m, d_n);
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
-}
+    // Check that data is on the GPU.
+    if (sky->RA.location() != OSKAR_LOCATION_GPU ||
+    		sky->Dec.location() != OSKAR_LOCATION_GPU ||
+    		sky->rel_l.location() != OSKAR_LOCATION_GPU ||
+    		sky->rel_m.location() != OSKAR_LOCATION_GPU ||
+    		sky->rel_n.location() != OSKAR_LOCATION_GPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
-// Double precision.
-int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* d_ra,
-        const double* d_dec, double ra0, double dec0, double* d_l, double* d_m,
-        double* d_n)
-{
-    // Compute l,m-direction-cosines of RA, Dec relative to reference point.
-    const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
-    const double cosDec0 = cos(dec0);
-    const double sinDec0 = sin(dec0);
-    oskar_cudak_sph_to_lm_d OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+    // Check the types are OK.
+    int error = 0;
+    if (sky->RA.type() == OSKAR_SINGLE &&
+    		sky->Dec.type() == OSKAR_SINGLE &&
+    		sky->rel_l.type() == OSKAR_SINGLE &&
+    		sky->rel_m.type() == OSKAR_SINGLE &&
+    		sky->rel_n.type() == OSKAR_SINGLE)
+    {
+		// Convert the coordinates (single precision).
+    	error = oskar_cuda_ra_dec_to_relative_lmn_f(sky->num_sources, sky->RA,
+				sky->Dec, (float)ra0, (float)dec0, sky->rel_l, sky->rel_m,
+				sky->rel_n);
+    }
+    else if (sky->RA.type() == OSKAR_DOUBLE &&
+    		sky->Dec.type() == OSKAR_DOUBLE &&
+    		sky->rel_l.type() == OSKAR_DOUBLE &&
+    		sky->rel_m.type() == OSKAR_DOUBLE &&
+    		sky->rel_n.type() == OSKAR_DOUBLE)
+    {
+		// Convert the coordinates (double precision).
+    	error = oskar_cuda_ra_dec_to_relative_lmn_d(sky->num_sources, sky->RA,
+				sky->Dec, ra0, dec0, sky->rel_l, sky->rel_m, sky->rel_n);
+    }
+    else
+    {
+    	return OSKAR_ERR_TYPE_MISMATCH;
+    }
 
-    // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_d OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_l, d_m, d_n);
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    return error;
 }

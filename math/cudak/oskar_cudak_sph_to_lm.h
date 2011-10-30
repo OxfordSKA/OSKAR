@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_CUDAK_SPH_TO_LM_H_
-#define OSKAR_MATH_CUDAK_SPH_TO_LM_H_
+#ifndef OSKAR_CUDAK_SPH_TO_LM_H_
+#define OSKAR_CUDAK_SPH_TO_LM_H_
 
 /**
- * @file oskar_math_cudak_sph_to_lm.h
+ * @file oskar_cudak_sph_to_lm.h
  */
 
 #include "oskar_global.h"
@@ -46,11 +46,11 @@
  * @param[in] np      Number of positions.
  * @param[in] lamda   Longitude positions in radians.
  * @param[in] phi     Latitude positions in radians.
- * @param[in] lambd0  Centre longitude position in radians.
+ * @param[in] lambd0  Centre longitude in radians.
  * @param[in] cosPhi0 Cosine of central latitude.
  * @param[in] sinPhi0 Sine of central latitude.
- * @param[out] l      Projected l-position.
- * @param[out] m      Projected m-position.
+ * @param[out] l      Projected l-positions.
+ * @param[out] m      Projected m-positions.
  */
 __global__
 void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
@@ -68,15 +68,15 @@ void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
  * @param[in] np      Number of positions.
  * @param[in] lamda   Longitude positions in radians.
  * @param[in] phi     Latitude positions in radians.
- * @param[in] lambd0  Centre longitude position in radians.
+ * @param[in] lambd0  Centre longitude in radians.
  * @param[in] cosPhi0 Cosine of central latitude.
  * @param[in] sinPhi0 Sine of central latitude.
- * @param[out] l      Projected l-position.
- * @param[out] m      Projected m-position.
+ * @param[out] l      Projected l-positions.
+ * @param[out] m      Projected m-positions.
  */
 __global__
 void oskar_cudak_sph_to_lm_d(const int np, const double* lambda,
         const double* phi, const double lambda0, const double cosPhi0,
         const double sinPhi0, double* l, double* m);
 
-#endif // OSKAR_MATH_CUDAK_SPH_TO_LM_H_
+#endif // OSKAR_CUDAK_SPH_TO_LM_H_

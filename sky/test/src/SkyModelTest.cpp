@@ -31,7 +31,7 @@
 #include "sky/oskar_sky_model_load.h"
 #include <cstdio>
 #include <cstdlib>
-
+#include <cmath>
 
 void SkyModelTest::test_resize()
 {
@@ -232,3 +232,56 @@ void SkyModelTest::test_load()
         }
     }
 }
+
+void SkyModelTest::test_compute_relative_lmn()
+{
+    const double deg2rad = 0.0174532925199432957692;
+
+    // Create some sources.
+    float ra[] = {30.0, 45.0};
+    float dec[] = {50.0, 60.0};
+    int n = sizeof(ra) / sizeof(float);
+    for (int i = 0; i < n; ++i)
+    {
+    	ra[i] *= deg2rad;
+    	dec[i] *= deg2rad;
+    }
+
+    // Define phase centre.
+    float ra0 = 30.0 * deg2rad;
+    float dec0 = 55.0 * deg2rad;
+
+    // Construct a sky model on the GPU.
+    oskar_SkyModel* sky = new oskar_SkyModel(n, OSKAR_SINGLE,
+    		OSKAR_LOCATION_GPU);
+    CPPUNIT_ASSERT_EQUAL(n, sky->num_sources);
+
+    // Set values of these sources.
+    int error = 0;
+    for (int i = 0; i < n; ++i)
+    {
+        error = sky->set_source(i, ra[i], dec[i], 1.0, 2.0, 3.0, 4.0,
+        		200.0e6, -0.7);
+    }
+    CPPUNIT_ASSERT_EQUAL(0, error);
+
+    // Compute l,m direction cosines.
+    sky->compute_relative_lmn(ra0, dec0);
+
+    // Copy data back to CPU.
+    oskar_SkyModel sky_temp(sky, OSKAR_LOCATION_CPU);
+    delete sky;
+
+    // Check the data.
+    for (int i = 0; i < n; ++i)
+    {
+    	float l = sin(ra[i] - ra0) * cos(dec[i]);
+    	float m = cos(dec0) * sin(dec[i]) -
+    			sin(dec0) * cos(dec[i]) * cos(ra[i] - ra0);
+    	float p = sqrt(1.0 - l*l - m*m) - 1.0;
+    	CPPUNIT_ASSERT_DOUBLES_EQUAL(l, ((float*)sky_temp.rel_l.data)[i], 1e-3);
+    	CPPUNIT_ASSERT_DOUBLES_EQUAL(m, ((float*)sky_temp.rel_m.data)[i], 1e-3);
+    	CPPUNIT_ASSERT_DOUBLES_EQUAL(p, ((float*)sky_temp.rel_n.data)[i], 1e-3);
+    }
+}
+

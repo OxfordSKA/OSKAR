@@ -29,7 +29,6 @@
 #include "math/cudak/oskar_cudak_sph_to_lm.h"
 
 // Single precision.
-
 __global__
 void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
         const float* phi, const float lambda0, const float cosPhi0,
@@ -45,7 +44,6 @@ void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
         relLambda = lambda[s];
         pphi = phi[s];
     }
-    __syncthreads(); // Coalesce memory accesses.
 
     // Convert from spherical to tangent-plane.
     relLambda -= lambda0;
@@ -56,7 +54,6 @@ void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
     mm -= sinPhi0 * cosPhi * cosLambda;
 
     // Output data.
-    __syncthreads(); // Coalesce memory accesses.
     if (s < np)
     {
         l[s] = ll;
@@ -65,7 +62,6 @@ void oskar_cudak_sph_to_lm_f(const int np, const float* lambda,
 }
 
 // Double precision.
-
 __global__
 void oskar_cudak_sph_to_lm_d(const int np, const double* lambda,
         const double* phi, const double lambda0, const double cosPhi0,
@@ -81,7 +77,6 @@ void oskar_cudak_sph_to_lm_d(const int np, const double* lambda,
         relLambda = lambda[s];
         pphi = phi[s];
     }
-    __syncthreads(); // Coalesce memory accesses.
 
     // Convert from spherical to tangent-plane.
     relLambda -= lambda0;
@@ -92,7 +87,6 @@ void oskar_cudak_sph_to_lm_d(const int np, const double* lambda,
     mm -= sinPhi0 * cosPhi * cosLambda;
 
     // Output data.
-    __syncthreads(); // Coalesce memory accesses.
     if (s < np)
     {
         l[s] = ll;

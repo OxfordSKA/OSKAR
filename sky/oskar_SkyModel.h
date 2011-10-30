@@ -56,7 +56,7 @@ struct oskar_SkyModel
 #ifdef __cplusplus
     public:
 #endif
-        int num_sources;          ///< Number of soruces in the sky model.
+        int num_sources;          ///< Number of sources in the sky model.
         oskar_Mem RA;             ///< Right ascension, in radians.
         oskar_Mem Dec;            ///< Declination, in radians.
         oskar_Mem I;              ///< Stokes-I, in Jy.
@@ -120,6 +120,30 @@ struct oskar_SkyModel
         ~oskar_SkyModel();
 
         /**
+         * @brief Appends the specified sky model the the current sky model.
+         *
+         * @param other Sky model to append.
+         *
+         * @return error code.
+         */
+        int append(const oskar_SkyModel* other);
+
+        /**
+         * @brief Computes the source l,m,n direction cosines relative to phase
+         * centre.
+         *
+         * @details
+         * Assumes that the RA and Dec arrays have already been populated, and
+         * that the data is on the GPU.
+         *
+		 * @param[in] ra0 Right Ascension of phase centre, in radians.
+		 * @param[in] dec0 Declination of phase centre, in radians.
+         *
+         * @return error code.
+         */
+        int compute_relative_lmn(double ra0, double dec0);
+
+        /**
          * @brief Loads an OSKAR source text file into the current sky structure.
          * Sources from the file are appended to the end of the current structure.
          *
@@ -128,6 +152,14 @@ struct oskar_SkyModel
          * @return error code.
          */
         int load(const char* filename);
+
+        /**
+         * @brief Returns the memory location (host or device) for memory
+         * in the sky structure.
+         *
+         * @return OSKAR memory location enum value (0 = host, 1 = device)
+         */
+        int location() const { return RA.location(); }
 
         /**
          * @brief Resizes the sky model the specified number of sources.
@@ -158,26 +190,12 @@ struct oskar_SkyModel
                 double U, double V, double ref_frequency, double spectral_index);
 
         /**
-         * @brief Appends the specified sky model the the current sky model.
-         *
-         * @param other Sky model to append.
-         *
-         * @return error code.
-         */
-        int append(const oskar_SkyModel* other);
-
-        /**
          * @brief Returns the memory type for memory in the sky structure.
+         *
          * @return OSKAR memory type enum value.
          */
         int type() const { return RA.type(); }
 
-        /**
-         * @brief Returns the memory location (host or device) for memory
-         * in the sky structure.
-         * @return OSKAR memory location enum value (0 = host, 1 = device)
-         */
-        int location() const { return RA.location(); }
 #endif
 };
 typedef struct oskar_SkyModel oskar_SkyModel;
