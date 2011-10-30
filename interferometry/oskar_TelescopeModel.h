@@ -55,9 +55,10 @@ struct oskar_TelescopeModel
     oskar_StationModel* station; ///< Array of station structures.
     int identical_stations;      ///< True if all stations are identical.
     int use_common_sky;          ///< True if all stations should use common source positions.
+    double ra0;                  ///< Right Ascension of phase centre in radians.
+    double dec0;                 ///< Declination of phase centre in radians.
 
     // Work buffers.
-    double update_timestamp;     ///< Time-stamp for which u,v,w are valid.
     oskar_Mem station_u;         ///< Work buffer holding station u coordinates.
     oskar_Mem station_v;         ///< Work buffer holding station v coordinates.
     oskar_Mem station_w;         ///< Work buffer holding station w coordinates.

@@ -26,45 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_K_H_
-#define OSKAR_EVALUATE_JONES_K_H_
-
-/**
- * @file oskar_evaluate_jones_K.h
- */
-
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
+#include "interferometry/oskar_cuda_xyz_to_uvw.h"
+#include "interferometry/cudak/oskar_cudak_xyz_to_uvw.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Evaluates the interferometer phase (K) Jones term.
- *
- * @details
- * This function constructs a set of Jones matrices that correspond to the
- * interferometer phase offset for each source and station, relative to the
- * array centre.
- *
- * The output set of Jones matrices (K) are scalar complex values.
- * This function will return an error if an incorrect type is used.
- *
- * @param[out] R         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
- */
-OSKAR_EXPORT
-int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        oskar_TelescopeModel* telescope, double gast);
+// Single precision.
+int oskar_cuda_xyz_to_uvw_f(int n, const float* d_x, const float* d_y,
+		const float* d_z, float ha0, float dec0, float* d_u, float* d_v,
+		float* d_w)
+{
+    // Define block and grid sizes.
+    const int n_thd = 256;
+    const int n_blk = (n + n_thd - 1) / n_thd;
+
+	// Call the CUDA kernel.
+    oskar_cudak_xyz_to_uvw_f OSKAR_CUDAK_CONF(n_blk, n_thd)
+    (n, d_x, d_y, d_z, ha0, dec0, d_u, d_v, d_w);
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
+
+// Double precision.
+int oskar_cuda_xyz_to_uvw_d(int n, const double* d_x, const double* d_y,
+        const double* d_z, double ha0, double dec0, double* d_u, double* d_v,
+        double* d_w)
+{
+    // Define block and grid sizes.
+    const int n_thd = 256;
+    const int n_blk = (n + n_thd - 1) / n_thd;
+
+	// Call the CUDA kernel.
+    oskar_cudak_xyz_to_uvw_d OSKAR_CUDAK_CONF(n_blk, n_thd)
+    (n, d_x, d_y, d_z, ha0, dec0, d_u, d_v, d_w);
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // OSKAR_EVALUATE_JONES_K_H_

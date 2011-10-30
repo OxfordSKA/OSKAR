@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETRY_CUDAK_XYZ2UVW_H_
-#define OSKAR_INTERFEROMETRY_CUDAK_XYZ2UVW_H_
+#ifndef OSKAR_CUDAK_XYZ_TO_UVW_H_
+#define OSKAR_CUDAK_XYZ_TO_UVW_H_
 
 /**
- * @file oskar_cudak_xyz2uvw.h
+ * @file oskar_cudak_xyz_to_uvw.h
  */
 
 #include "oskar_global.h"
@@ -46,9 +46,9 @@
  *
  * @param[in] n    Number of stations.
  * @param[in] x    Station x positions.
- * @param[in] x    Station y positions.
+ * @param[in] y    Station y positions.
  * @param[in] z    Station z positions.
- * @param[in] ha0  Hour angle of phase centre (radians).
+ * @param[in] ha0  Hour angle of phase centre relative to x-axis (radians).
  * @param[in] dec0 Declination of phase centre (radians).
  * @param[out] u   Station u positions.
  * @param[out] v   Station v positions.
@@ -69,9 +69,9 @@ void oskar_cudak_xyz_to_uvw_f(int n, const float* x, const float* y,
  *
  * @param[in] n    Number of stations.
  * @param[in] x    Station x positions.
- * @param[in] x    Station y positions.
+ * @param[in] y    Station y positions.
  * @param[in] z    Station z positions.
- * @param[in] ha0  Hour angle of phase centre (radians).
+ * @param[in] ha0  Hour angle of phase centre relative to x-axis (radians).
  * @param[in] dec0 Declination of phase centre (radians).
  * @param[out] u   Station u positions.
  * @param[out] v   Station v positions.
@@ -82,4 +82,4 @@ void oskar_cudak_xyz_to_uvw_d(int n, const double* x, const double* y,
         const double* z, double ha0, double dec0, double* u, double* v,
         double* w);
 
-#endif // OSKAR_INTERFEROMETRY_CUDAK_XYZ2UVW_H_
+#endif // OSKAR_CUDAK_XYZ_TO_UVW_H_
