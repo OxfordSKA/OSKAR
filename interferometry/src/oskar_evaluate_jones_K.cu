@@ -67,9 +67,14 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
             telescope->station_z.location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    // Check that the data is of the right type.
+    // Get data sizes.
+    const int n_sources  = K->n_sources();
+    const int n_stations = K->n_stations();
+
+    // Evaluate Jones matrix.
     if (K->type() == OSKAR_SINGLE_COMPLEX)
     {
+        // Check that the data is of the right type.
         if (sky->rel_l.type() != OSKAR_SINGLE ||
         		sky->rel_m.type() != OSKAR_SINGLE ||
         		sky->rel_n.type() != OSKAR_SINGLE ||
@@ -80,32 +85,7 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         		telescope->station_y.type() != OSKAR_SINGLE ||
         		telescope->station_z.type() != OSKAR_SINGLE)
             return OSKAR_ERR_TYPE_MISMATCH;
-    }
-    else if (K->type() == OSKAR_DOUBLE_COMPLEX)
-    {
-        if (sky->rel_l.type() != OSKAR_DOUBLE ||
-        		sky->rel_m.type() != OSKAR_DOUBLE ||
-        		sky->rel_n.type() != OSKAR_DOUBLE ||
-        		telescope->station_u.type() != OSKAR_DOUBLE ||
-        		telescope->station_v.type() != OSKAR_DOUBLE ||
-        		telescope->station_w.type() != OSKAR_DOUBLE ||
-        		telescope->station_x.type() != OSKAR_DOUBLE ||
-        		telescope->station_y.type() != OSKAR_DOUBLE ||
-        		telescope->station_z.type() != OSKAR_DOUBLE)
-            return OSKAR_ERR_TYPE_MISMATCH;
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_JONES_TYPE;
-    }
 
-    // Get data sizes.
-    int n_sources  = K->n_sources();
-    int n_stations = K->n_stations();
-
-    // Evaluate Jones matrix.
-    if (K->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
-    {
     	// Evaluate Greenwich Hour Angle of phase centre.
     	const float ha0 = (float)(gast - telescope->ra0);
     	const float dec0 = (float)telescope->dec0;
@@ -135,8 +115,20 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         		(const float*)sky->rel_n.data,
         		(float2*)K->ptr.data);
     }
-    else if (K->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
+    else if (K->type() == OSKAR_DOUBLE_COMPLEX)
     {
+        // Check that the data is of the right type.
+        if (sky->rel_l.type() != OSKAR_DOUBLE ||
+        		sky->rel_m.type() != OSKAR_DOUBLE ||
+        		sky->rel_n.type() != OSKAR_DOUBLE ||
+        		telescope->station_u.type() != OSKAR_DOUBLE ||
+        		telescope->station_v.type() != OSKAR_DOUBLE ||
+        		telescope->station_w.type() != OSKAR_DOUBLE ||
+        		telescope->station_x.type() != OSKAR_DOUBLE ||
+        		telescope->station_y.type() != OSKAR_DOUBLE ||
+        		telescope->station_z.type() != OSKAR_DOUBLE)
+            return OSKAR_ERR_TYPE_MISMATCH;
+
     	// Evaluate Greenwich Hour Angle of phase centre.
     	const double ha0 = gast - telescope->ra0;
     	const double dec0 = telescope->dec0;
@@ -165,6 +157,10 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         		(const double*)sky->rel_m.data,
         		(const double*)sky->rel_n.data,
         		(double2*)K->ptr.data);
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_JONES_TYPE;
     }
 
     cudaDeviceSynchronize();
