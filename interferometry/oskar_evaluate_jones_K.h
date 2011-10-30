@@ -54,7 +54,7 @@ extern "C" {
  * The output set of Jones matrices (K) are scalar complex values.
  * This function will return an error if an incorrect type is used.
  *
- * @param[out] R         Output set of Jones matrices.
+ * @param[out] K         Output set of Jones matrices.
  * @param[in] sky        Input sky model.
  * @param[in] telescope  Input telescope model.
  * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.

@@ -67,14 +67,9 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
             telescope->station_z.location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    // Get data sizes.
-    const int n_sources  = K->n_sources();
-    const int n_stations = K->n_stations();
-
-    // Evaluate Jones matrix.
+    // Check that the data is of the right type.
     if (K->type() == OSKAR_SINGLE_COMPLEX)
     {
-        // Check that the data is of the right type.
         if (sky->rel_l.type() != OSKAR_SINGLE ||
         		sky->rel_m.type() != OSKAR_SINGLE ||
         		sky->rel_n.type() != OSKAR_SINGLE ||
@@ -85,19 +80,41 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         		telescope->station_y.type() != OSKAR_SINGLE ||
         		telescope->station_z.type() != OSKAR_SINGLE)
             return OSKAR_ERR_TYPE_MISMATCH;
+    }
+    else if (K->type() == OSKAR_DOUBLE_COMPLEX)
+    {
+    	if (sky->rel_l.type() != OSKAR_DOUBLE ||
+    			sky->rel_m.type() != OSKAR_DOUBLE ||
+    			sky->rel_n.type() != OSKAR_DOUBLE ||
+    			telescope->station_u.type() != OSKAR_DOUBLE ||
+    			telescope->station_v.type() != OSKAR_DOUBLE ||
+    			telescope->station_w.type() != OSKAR_DOUBLE ||
+    			telescope->station_x.type() != OSKAR_DOUBLE ||
+    			telescope->station_y.type() != OSKAR_DOUBLE ||
+    			telescope->station_z.type() != OSKAR_DOUBLE)
+    		return OSKAR_ERR_TYPE_MISMATCH;
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_JONES_TYPE;
+    }
 
+    // Get data sizes.
+    const int n_sources  = K->n_sources();
+    const int n_stations = K->n_stations();
+
+    // Evaluate Jones matrix.
+    if (K->type() == OSKAR_SINGLE_COMPLEX)
+    {
     	// Evaluate Greenwich Hour Angle of phase centre.
     	const float ha0 = (float)(gast - telescope->ra0);
     	const float dec0 = (float)telescope->dec0;
 
     	// Evaluate station u,v,w coordinates.
-    	oskar_cuda_xyz_to_uvw_f(n_stations,
-    			(const float*)telescope->station_x.data,
-    			(const float*)telescope->station_y.data,
-    			(const float*)telescope->station_z.data, ha0, dec0,
-    			(float*)telescope->station_u.data,
-    			(float*)telescope->station_v.data,
-    			(float*)telescope->station_w.data);
+    	oskar_cuda_xyz_to_uvw_f(n_stations, telescope->station_x,
+    			telescope->station_y, telescope->station_z, ha0, dec0,
+    			telescope->station_u, telescope->station_v,
+    			telescope->station_w);
 
         // Define block and grid sizes.
     	const dim3 n_thd(64, 4); // Sources, antennas.
@@ -107,40 +124,21 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
 
     	// Compute DFT phase weights for K.
         oskar_cudak_dftw_3d_seq_out_f OSKAR_CUDAK_CONF(n_blk, n_thd, s_mem)
-        (n_stations, (const float*)telescope->station_u.data,
-        		(const float*)telescope->station_v.data,
-        		(const float*)telescope->station_w.data, n_sources,
-        		(const float*)sky->rel_l.data,
-        		(const float*)sky->rel_m.data,
-        		(const float*)sky->rel_n.data,
-        		(float2*)K->ptr.data);
+        (n_stations, telescope->station_u, telescope->station_v,
+        		telescope->station_w, n_sources, sky->rel_l,
+        		sky->rel_m, sky->rel_n, K->ptr);
     }
     else if (K->type() == OSKAR_DOUBLE_COMPLEX)
     {
-        // Check that the data is of the right type.
-        if (sky->rel_l.type() != OSKAR_DOUBLE ||
-        		sky->rel_m.type() != OSKAR_DOUBLE ||
-        		sky->rel_n.type() != OSKAR_DOUBLE ||
-        		telescope->station_u.type() != OSKAR_DOUBLE ||
-        		telescope->station_v.type() != OSKAR_DOUBLE ||
-        		telescope->station_w.type() != OSKAR_DOUBLE ||
-        		telescope->station_x.type() != OSKAR_DOUBLE ||
-        		telescope->station_y.type() != OSKAR_DOUBLE ||
-        		telescope->station_z.type() != OSKAR_DOUBLE)
-            return OSKAR_ERR_TYPE_MISMATCH;
-
     	// Evaluate Greenwich Hour Angle of phase centre.
     	const double ha0 = gast - telescope->ra0;
     	const double dec0 = telescope->dec0;
 
     	// Evaluate station u,v,w coordinates.
-    	oskar_cuda_xyz_to_uvw_d(n_stations,
-    			(const double*)telescope->station_x.data,
-    			(const double*)telescope->station_y.data,
-    			(const double*)telescope->station_z.data, ha0, dec0,
-    			(double*)telescope->station_u.data,
-    			(double*)telescope->station_v.data,
-    			(double*)telescope->station_w.data);
+    	oskar_cuda_xyz_to_uvw_d(n_stations, telescope->station_x,
+    			telescope->station_y, telescope->station_z, ha0, dec0,
+    			telescope->station_u, telescope->station_v,
+    			telescope->station_w);
 
         // Define block and grid sizes.
         const dim3 n_thd(64, 4); // Sources, antennas.
@@ -150,13 +148,9 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
 
     	// Compute DFT phase weights for K.
         oskar_cudak_dftw_3d_seq_out_d OSKAR_CUDAK_CONF(n_blk, n_thd, s_mem)
-        (n_stations, (const double*)telescope->station_u.data,
-        		(const double*)telescope->station_v.data,
-        		(const double*)telescope->station_w.data, n_sources,
-        		(const double*)sky->rel_l.data,
-        		(const double*)sky->rel_m.data,
-        		(const double*)sky->rel_n.data,
-        		(double2*)K->ptr.data);
+        (n_stations, telescope->station_u, telescope->station_v,
+        		telescope->station_w, n_sources, sky->rel_l, sky->rel_m,
+        		sky->rel_n, K->ptr);
     }
     else
     {

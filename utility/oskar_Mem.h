@@ -35,6 +35,14 @@
 
 #include "oskar_global.h"
 
+#ifdef __cplusplus
+// Forward declarations.
+struct float2;
+struct float4c;
+struct double2;
+struct double4c;
+#endif
+
 /**
  * @brief Structure to wrap a pointer to memory.
  *
@@ -50,16 +58,16 @@ extern "C"
 #endif
 struct oskar_Mem
 {
-    // If C++, then make the meta-data private.
 #ifdef __cplusplus
+// If C++, then make the meta-data private.
 private:
 #endif
     int private_type; // Magic number.
     int private_location; // 0 for host, 1 for device.
     int private_n_elements; // Number of elements allocated.
 
-    // If C++, then make the remaining members public.
 #ifdef __cplusplus
+// If C++, then make the remaining members public.
 public:
 #endif
     void* data; ///< Data pointer.
@@ -148,8 +156,8 @@ public:
     int append(const void* from, int type, int from_location, int num_elements);
 #endif
 
-    // If C++, then provide read-only accessor functions for the meta-data.
 #ifdef __cplusplus
+    // If C++, then provide read-only accessor functions for the meta-data.
     int type() const {return private_type;}
     int location() const {return private_location;}
     int n_elements() const {return private_n_elements;}
@@ -159,6 +167,20 @@ public:
     static bool is_double(const int mem_type);
     static bool is_complex(const int mem_type);
     static bool is_scalar(const int mem_type);
+
+    // Convenience pointer casts.
+    operator float*() {return (float*)data;}
+    operator double*() {return (double*)data;}
+    operator float2*() {return (float2*)data;}
+    operator double2*() {return (double2*)data;}
+    operator float4c*() {return (float4c*)data;}
+    operator double4c*() {return (double4c*)data;}
+    operator const float*() const {return (const float*)data;}
+    operator const double*() const {return (const double*)data;}
+    operator const float2*() const {return (const float2*)data;}
+    operator const double2*() const {return (const double2*)data;}
+    operator const float4c*() const {return (const float4c*)data;}
+    operator const double4c*() const {return (const double4c*)data;}
 #endif
 };
 typedef struct oskar_Mem oskar_Mem;
