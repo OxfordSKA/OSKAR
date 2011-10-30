@@ -45,6 +45,7 @@ void SkyModelTest::test_resize()
         CPPUNIT_ASSERT_EQUAL(1, sky->num_sources);
         sky->resize(20);
         CPPUNIT_ASSERT_EQUAL(20, sky->num_sources);
+        delete sky;
     }
     // Resizing on the CPU in double precision
     {
@@ -56,6 +57,7 @@ void SkyModelTest::test_resize()
         CPPUNIT_ASSERT_EQUAL(1, sky->num_sources);
         sky->resize(20);
         CPPUNIT_ASSERT_EQUAL(20, sky->num_sources);
+        delete sky;
     }
 }
 
@@ -91,6 +93,7 @@ void SkyModelTest::test_set_source()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(200.0e6, ((float*)sky_temp.reference_freq.data)[0], 1.0e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(4.5, ((float*)sky_temp.Q.data)[1], 1.0e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.8, ((float*)sky_temp.spectral_index.data)[1], 1.0e-6);
+    delete sky;
 }
 
 
@@ -128,6 +131,8 @@ void SkyModelTest::test_append()
             CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i - sky1_num_sources) + 0.5, ((float*)sky_temp.RA.data)[i], 1.0e-6);
         }
     }
+    delete sky2;
+    delete sky1;
 }
 
 
@@ -177,7 +182,7 @@ void SkyModelTest::test_load()
             CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.7, ((float*)sky->spectral_index.data)[i], 1.0e-6);
         }
 
-        free(sky);
+        delete sky;
     }
 
 
@@ -211,7 +216,7 @@ void SkyModelTest::test_load()
 
         // Copy the sky model back to the CPU and free the GPU version.
         oskar_SkyModel sky_cpu(sky_gpu, OSKAR_LOCATION_CPU);
-        free(sky_gpu);
+        delete sky_gpu;
 
         // Check the data is correct.
         for (int i = 0; i < num_sources; ++i)
