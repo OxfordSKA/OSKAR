@@ -39,7 +39,7 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the memory is not NULL.
-    if (R->ptr.data == NULL || sky->RA.data == NULL || sky->Dec.data == NULL)
+    if (R->ptr.is_null() || sky->RA.is_null() || sky->Dec.is_null())
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
@@ -86,16 +86,13 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
     if (R->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
         oskar_cudak_evaluate_jones_R_f OSKAR_CUDAK_CONF(n_blk_f, n_thd_f) (
-                n_sources, (const float*)(sky->RA.data),
-                (const float*)(sky->Dec.data), (float)cos_lat, (float)sin_lat,
-                lst, (float4c*)(R->ptr.data));
+                n_sources, sky->RA, sky->Dec, (float)cos_lat, (float)sin_lat,
+                lst, R->ptr);
     }
     else if (R->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
         oskar_cudak_evaluate_jones_R_d OSKAR_CUDAK_CONF(n_blk_d, n_thd_d) (
-                n_sources, (const double*)(sky->RA.data),
-                (const double*)(sky->Dec.data), cos_lat, sin_lat,
-                lst, (double4c*)(R->ptr.data));
+                n_sources, sky->RA, sky->Dec, cos_lat, sin_lat, lst, R->ptr);
     }
 
     // Evaluate Jones matrix for each source for remaining stations.
@@ -133,19 +130,16 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
             if (R->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
             {
                 oskar_cudak_evaluate_jones_R_f
-                OSKAR_CUDAK_CONF(n_blk_f, n_thd_f) (
-                        n_sources, (const float*)(sky->RA.data),
-                        (const float*)(sky->Dec.data), (float)cos_lat,
-                        (float)sin_lat, lst,
+                OSKAR_CUDAK_CONF(n_blk_f, n_thd_f) (n_sources, sky->RA,
+                        sky->Dec, (float)cos_lat, (float)sin_lat, lst,
                         (float4c*)(R->ptr.data) + i * n_sources);
             }
             else if (R->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
             {
                 oskar_cudak_evaluate_jones_R_d
-                OSKAR_CUDAK_CONF(n_blk_d, n_thd_d) (
-                        n_sources, (const double*)(sky->RA.data),
-                        (const double*)(sky->Dec.data), cos_lat, sin_lat,
-                        lst, (double4c*)(R->ptr.data) + i * n_sources);
+                OSKAR_CUDAK_CONF(n_blk_d, n_thd_d) (n_sources, sky->RA,
+                        sky->Dec, cos_lat, sin_lat, lst,
+                        (double4c*)(R->ptr.data) + i * n_sources);
             }
         }
     }

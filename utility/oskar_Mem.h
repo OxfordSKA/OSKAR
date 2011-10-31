@@ -163,6 +163,7 @@ public:
     int n_elements() const {return private_n_elements;}
     bool is_double() const;
     bool is_complex() const;
+    bool is_null() const {return (data == 0);}
     bool is_scalar() const;
     static bool is_double(const int mem_type);
     static bool is_complex(const int mem_type);
