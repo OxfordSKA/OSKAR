@@ -26,32 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
-#define OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
-
-/**
- * @file oskar_telescope_model_load_station_coords.h
- */
-
+#include "interferometry/oskar_telescope_model_alloc.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "station/oskar_StationModel.h"
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 
-/**
- * @brief
- * Loads a telescope coordinate file that specifies the station locations
- * with respect to the local tangent plane.
- *
- * @details
- * A telescope station coordinate file is an ASCII file consisting of two or
- * three columns of comma separated values representing the station
- * x,y,z co-ordinates in a horizontal coordinate system (the z coordinate is assumed to be zero).
- * Each line corresponds to the position of one station.
- *
- * @param telescope  Telescope model structure to be populated.
- * @param filename   File name path to a telescope coordinate file.
- * @param longitude  Telescope centre longitude, in radians.
- * @param latitude   Telescope centre latitude, in radians.
- */
-int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
-        const char* filename, const double longitude, const double latitude);
+#ifdef __cplusplus
+extern "C" {
+#endif
+int oskar_telecope_model_alloc(oskar_TelescopeModel* telescope, int n_stations)
+{
+    // Check that all pointers are not NULL.
+    if (telescope == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-#endif // OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+    return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif

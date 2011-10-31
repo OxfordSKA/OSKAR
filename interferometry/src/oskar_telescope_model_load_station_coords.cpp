@@ -35,7 +35,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-int oskar_load_telescope_horizontal(oskar_TelescopeModel* telescope,
+int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         const char* filename, const double longitude, const double latitude)
 {
     // Check that all pointers are not NULL.

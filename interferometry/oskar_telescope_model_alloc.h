@@ -26,32 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
-#define OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+#ifndef OSKAR_TELESCOPE_MODEL_ALLOC_H_
+#define OSKAR_TELESCOPE_MODEL_ALLOC_H_
 
 /**
- * @file oskar_telescope_model_load_station_coords.h
+ * @file oskar_telescope_model_alloc.h
  */
 
 #include "interferometry/oskar_TelescopeModel.h"
 
 /**
  * @brief
- * Loads a telescope coordinate file that specifies the station locations
- * with respect to the local tangent plane.
+ * Allocates memory for a telescope model structure.
  *
  * @details
- * A telescope station coordinate file is an ASCII file consisting of two or
- * three columns of comma separated values representing the station
- * x,y,z co-ordinates in a horizontal coordinate system (the z coordinate is assumed to be zero).
- * Each line corresponds to the position of one station.
+ * Allocates memory for a telescope model structure.
  *
- * @param telescope  Telescope model structure to be populated.
- * @param filename   File name path to a telescope coordinate file.
- * @param longitude  Telescope centre longitude, in radians.
- * @param latitude   Telescope centre latitude, in radians.
+ * @param telescope  Telescope model structure to allocate.
+ * @param n_stations Number of stations.
  */
-int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
-        const char* filename, const double longitude, const double latitude);
+int oskar_telescope_model_alloc(oskar_TelescopeModel* telescope, int n_stations);
 
-#endif // OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+#endif // OSKAR_TELESCOPE_MODEL_ALLOC_H_
