@@ -7,7 +7,6 @@ set(interferometry_SRC
     src/oskar_compute_baselines.c
     src/oskar_cuda_correlator_lm_bw.cu
     src/oskar_cuda_correlator_scalar.cu
-    src/oskar_cuda_xyz_to_uvw.cu
     src/oskar_evaluate_jones_K.cu
     src/oskar_geocentric_cartesian_to_geodetic_spherical.c
     src/oskar_geodetic_spherical_to_geocentric_cartesian.c
@@ -28,6 +27,7 @@ set(interferometry_SRC
     src/oskar_visibilities_resize.cpp
     src/oskar_visibilities_write.cpp
     src/oskar_Visibilities.cpp
+    src/oskar_xyz_to_uvw_cuda.cu
     src/oskar_xyz_to_uvw.c
 )
 

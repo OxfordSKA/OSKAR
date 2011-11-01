@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_XYZ_TO_UVW_H_
-#define OSKAR_CUDA_XYZ_TO_UVW_H_
+#ifndef OSKAR_XYZ_TO_UVW_CUDA_H_
+#define OSKAR_XYZ_TO_UVW_CUDA_H_
 
 /**
- * @file oskar_cuda_xyz_to_uvw.h
+ * @file oskar_xyz_to_uvw_cuda.h
  */
 
 #include "oskar_global.h"
@@ -59,9 +59,9 @@ extern "C" {
  * @param[out] d_w  The station w-positions (length n).
  */
 OSKAR_EXPORT
-int oskar_cuda_xyz_to_uvw_f(int n, const float* d_x, const float* d_y,
-		const float* d_z, float ha0, float dec0, float* d_u, float* d_v,
-		float* d_w);
+int oskar_xyz_to_uvw_cuda_f(int n, const float* d_x, const float* d_y,
+        const float* d_z, float ha0, float dec0, float* d_u, float* d_v,
+        float* d_w);
 
 /**
  * @brief
@@ -83,7 +83,7 @@ int oskar_cuda_xyz_to_uvw_f(int n, const float* d_x, const float* d_y,
  * @param[out] d_w  The station w-positions (length n).
  */
 OSKAR_EXPORT
-int oskar_cuda_xyz_to_uvw_d(int n, const double* d_x, const double* d_y,
+int oskar_xyz_to_uvw_cuda_d(int n, const double* d_x, const double* d_y,
         const double* d_z, double ha0, double dec0, double* d_u, double* d_v,
         double* d_w);
 
@@ -91,4 +91,4 @@ int oskar_cuda_xyz_to_uvw_d(int n, const double* d_x, const double* d_y,
 }
 #endif
 
-#endif // OSKAR_CUDA_XYZ_TO_UVW_H_
+#endif // OSKAR_XYZ_TO_UVW_CUDA_H_

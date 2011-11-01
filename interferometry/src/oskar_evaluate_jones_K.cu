@@ -27,7 +27,7 @@
  */
 
 #include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_cuda_xyz_to_uvw.h"
+#include "interferometry/oskar_xyz_to_uvw_cuda.h"
 #include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
 
 extern "C"
@@ -111,7 +111,7 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         const float dec0 = (float)telescope->dec0;
 
         // Evaluate station u,v,w coordinates.
-        oskar_cuda_xyz_to_uvw_f(n_stations, telescope->station_x,
+        oskar_xyz_to_uvw_cuda_f(n_stations, telescope->station_x,
                 telescope->station_y, telescope->station_z, ha0, dec0,
                 telescope->station_u, telescope->station_v,
                 telescope->station_w);
@@ -135,7 +135,7 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         const double dec0 = telescope->dec0;
 
         // Evaluate station u,v,w coordinates.
-        oskar_cuda_xyz_to_uvw_d(n_stations, telescope->station_x,
+        oskar_xyz_to_uvw_cuda_d(n_stations, telescope->station_x,
                 telescope->station_y, telescope->station_z, ha0, dec0,
                 telescope->station_u, telescope->station_v,
                 telescope->station_w);
