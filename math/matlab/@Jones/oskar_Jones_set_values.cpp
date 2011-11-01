@@ -123,7 +123,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             || J->location() != location)
     {
         delete J;
-        J = new oskar_Jones(type_id, num_sources, num_stations, location);
+        J = new oskar_Jones(type_id, location, num_stations, num_sources);
     }
 
     // Construct a local CPU Jones structure on the CPU as well if needed.

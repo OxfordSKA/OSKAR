@@ -44,27 +44,30 @@
  *
  * If using C++, then the meta-data is made private, and read-only accessor
  * functions are also provided.
+ *
+ * The fastest-varying dimension is the source dimension; the slowest varying
+ * is the station dimension.
  */
 #ifdef __cplusplus
 extern "C"
 #endif
 struct oskar_Jones
 {
-    // If C++, then make the meta-data private.
 #ifdef __cplusplus
+// If C++, then make the meta-data private.
 private:
 #endif
-    int private_n_sources;  ///< Fastest varying dimension.
     int private_n_stations; ///< Slowest varying dimension.
+    int private_n_sources;  ///< Fastest varying dimension.
 
-    // If C++, then make the remaining members public.
 #ifdef __cplusplus
+// If C++, then make the remaining members public.
 public:
 #endif
     oskar_Mem ptr; ///< Pointer to the matrix data.
 
-    // If C++, then provide constructors, a destructor and methods.
 #ifdef __cplusplus
+    // If C++, then provide constructors, a destructor and methods.
     /**
      * @brief Constructs and allocates data for an oskar_Jones data structure.
      *
@@ -73,11 +76,11 @@ public:
      * in the specified location.
      *
      * @param[in] type Enumerated data type of memory contents (magic number).
-     * @param[in] n_sources Number of elements in the source dimension.
+     * @param[in] location Enumerated memory location (magic number).
      * @param[in] n_stations Number of elements in the station dimension.
-     * @param[in] location Specify 0 for host memory, 1 for device memory.
+     * @param[in] n_sources Number of elements in the source dimension.
      */
-    oskar_Jones(int type, int n_sources, int n_stations, int location);
+    oskar_Jones(int type, int location, int n_stations, int n_sources);
 
     /**
      * @brief Copies an oskar_Jones data structure.
@@ -147,8 +150,8 @@ public:
     int set_real_scalar(double scalar);
 #endif
 
-    // If C++, then provide read-only accessor functions for the meta-data.
 #ifdef __cplusplus
+    // If C++, then provide read-only accessor functions for the meta-data.
     int type() const {return ptr.type();}
     int n_sources() const {return private_n_sources;}
     int n_stations() const {return private_n_stations;}

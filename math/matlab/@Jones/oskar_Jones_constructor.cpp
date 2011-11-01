@@ -73,7 +73,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     // Create a new oskar_Jones structure.
-    oskar_Jones* J = new oskar_Jones(type, num_sources, num_stations, location);
+    oskar_Jones* J = new oskar_Jones(type, location, num_stations, num_sources);
 
     // Return a pointer to the oskar_Jones structure as a mxArray object.
     out[0] = convert_pointer_to_mxArray(J);
