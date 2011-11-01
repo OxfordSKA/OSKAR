@@ -37,7 +37,7 @@ void SkyModelTest::test_resize()
 {
     // Resizing on the GPU in single precision
     {
-        oskar_SkyModel* sky = new oskar_SkyModel(10, OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+        oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_GPU, 10);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky->type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky->location());
         CPPUNIT_ASSERT_EQUAL(10, sky->num_sources);
@@ -49,7 +49,7 @@ void SkyModelTest::test_resize()
     }
     // Resizing on the CPU in double precision
     {
-        oskar_SkyModel* sky = new oskar_SkyModel(10, OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+        oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 10);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, sky->type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, sky->location());
         CPPUNIT_ASSERT_EQUAL(10, sky->num_sources);
@@ -64,7 +64,7 @@ void SkyModelTest::test_resize()
 void SkyModelTest::test_set_source()
 {
     // Construct a sky model on the GPU of zero size.
-    oskar_SkyModel* sky = new oskar_SkyModel(0, OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+    oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_GPU, 0);
     CPPUNIT_ASSERT_EQUAL(0, sky->num_sources);
 
     // Try to set a source into the model - this should fail as the model is
@@ -100,16 +100,16 @@ void SkyModelTest::test_set_source()
 void SkyModelTest::test_append()
 {
     int sky1_num_sources = 2;
-    oskar_SkyModel* sky1 = new oskar_SkyModel(sky1_num_sources,
-            OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+    oskar_SkyModel* sky1 = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_GPU,
+            sky1_num_sources);
     for (int i = 0; i < sky1_num_sources; ++i)
     {
         double value = (double)i;
         sky1->set_source(i, value, value, value, value, value, value, value, value);
     }
     int sky2_num_sorces = 3;
-    oskar_SkyModel* sky2 = new oskar_SkyModel(sky2_num_sorces,
-            OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+    oskar_SkyModel* sky2 = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+            sky2_num_sorces);
     for (int i = 0; i < sky2_num_sorces; ++i)
     {
         double value = (double)i + 0.5;
@@ -155,7 +155,7 @@ void SkyModelTest::test_load()
         fclose(file);
 
 
-        oskar_SkyModel* sky = new oskar_SkyModel(0, OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+        oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
         int err = oskar_sky_model_load(filename, sky);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
@@ -199,8 +199,8 @@ void SkyModelTest::test_load()
         fclose(file);
 
         // Load the sky model onto the GPU.
-        oskar_SkyModel* sky_gpu = new oskar_SkyModel(0, OSKAR_SINGLE,
-                OSKAR_LOCATION_GPU);
+        oskar_SkyModel* sky_gpu = new oskar_SkyModel(OSKAR_SINGLE,
+                OSKAR_LOCATION_GPU, 0);
         int err = oskar_sky_model_load(filename, sky_gpu);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
@@ -243,8 +243,8 @@ void SkyModelTest::test_compute_relative_lmn()
     int n = sizeof(ra) / sizeof(float);
     for (int i = 0; i < n; ++i)
     {
-    	ra[i] *= deg2rad;
-    	dec[i] *= deg2rad;
+        ra[i] *= deg2rad;
+        dec[i] *= deg2rad;
     }
 
     // Define phase centre.
@@ -252,8 +252,8 @@ void SkyModelTest::test_compute_relative_lmn()
     float dec0 = 55.0 * deg2rad;
 
     // Construct a sky model on the GPU.
-    oskar_SkyModel* sky = new oskar_SkyModel(n, OSKAR_SINGLE,
-    		OSKAR_LOCATION_GPU);
+    oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_SINGLE,
+            OSKAR_LOCATION_GPU, n);
     CPPUNIT_ASSERT_EQUAL(n, sky->num_sources);
 
     // Set values of these sources.
@@ -261,7 +261,7 @@ void SkyModelTest::test_compute_relative_lmn()
     for (int i = 0; i < n; ++i)
     {
         error = sky->set_source(i, ra[i], dec[i], 1.0, 2.0, 3.0, 4.0,
-        		200.0e6, -0.7);
+                200.0e6, -0.7);
     }
     CPPUNIT_ASSERT_EQUAL(0, error);
 
@@ -275,13 +275,13 @@ void SkyModelTest::test_compute_relative_lmn()
     // Check the data.
     for (int i = 0; i < n; ++i)
     {
-    	float l = sin(ra[i] - ra0) * cos(dec[i]);
-    	float m = cos(dec0) * sin(dec[i]) -
-    			sin(dec0) * cos(dec[i]) * cos(ra[i] - ra0);
-    	float p = sqrt(1.0 - l*l - m*m) - 1.0;
-    	CPPUNIT_ASSERT_DOUBLES_EQUAL(l, ((float*)sky_temp.rel_l.data)[i], 1e-3);
-    	CPPUNIT_ASSERT_DOUBLES_EQUAL(m, ((float*)sky_temp.rel_m.data)[i], 1e-3);
-    	CPPUNIT_ASSERT_DOUBLES_EQUAL(p, ((float*)sky_temp.rel_n.data)[i], 1e-3);
+        float l = sin(ra[i] - ra0) * cos(dec[i]);
+        float m = cos(dec0) * sin(dec[i]) -
+                sin(dec0) * cos(dec[i]) * cos(ra[i] - ra0);
+        float p = sqrt(1.0 - l*l - m*m) - 1.0;
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(l, ((float*)sky_temp.rel_l.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(m, ((float*)sky_temp.rel_m.data)[i], 1e-3);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(p, ((float*)sky_temp.rel_n.data)[i], 1e-3);
     }
 }
 

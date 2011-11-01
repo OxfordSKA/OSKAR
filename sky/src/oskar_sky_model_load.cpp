@@ -49,7 +49,7 @@ int oskar_sky_model_load(const char* filename, oskar_SkyModel* sky)
 
     const double deg2rad = 0.0174532925199432957692;
     int type = sky->type();
-    oskar_SkyModel temp_sky(0, type, OSKAR_LOCATION_CPU);
+    oskar_SkyModel temp_sky(type, OSKAR_LOCATION_CPU, 0);
     char* line = NULL;
     size_t bufsize = 0;
 

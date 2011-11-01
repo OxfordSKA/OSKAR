@@ -75,7 +75,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     // Create a new oskar_SkyModel structure.
-    oskar_SkyModel* sky = new oskar_SkyModel(num_sources, type, location);
+    oskar_SkyModel* sky = new oskar_SkyModel(type, location, num_sources);
 
     // Return a pointer to the oskar_SkyModel structure as a mxArray object.
     out[0] = convert_pointer_to_mxArray(sky);
