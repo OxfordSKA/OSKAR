@@ -40,25 +40,35 @@ extern "C" {
 int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
         int location, int n_stations)
 {
-    int i = 0;
+    int i = 0, error = 0;
 
     // Check that all pointers are not NULL.
     if (telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Initialise the arrays.
-    oskar_mem_init(&telescope->station_u, type, location, n_stations);
-    oskar_mem_init(&telescope->station_v, type, location, n_stations);
-    oskar_mem_init(&telescope->station_w, type, location, n_stations);
-    oskar_mem_init(&telescope->station_x, type, location, n_stations);
-    oskar_mem_init(&telescope->station_y, type, location, n_stations);
-    oskar_mem_init(&telescope->station_z, type, location, n_stations);
+    error = oskar_mem_init(&telescope->station_u, type, location, n_stations);
+    if (error) return error;
+    error = oskar_mem_init(&telescope->station_v, type, location, n_stations);
+    if (error) return error;
+    error = oskar_mem_init(&telescope->station_w, type, location, n_stations);
+    if (error) return error;
+    error = oskar_mem_init(&telescope->station_x, type, location, n_stations);
+    if (error) return error;
+    error = oskar_mem_init(&telescope->station_y, type, location, n_stations);
+    if (error) return error;
+    error = oskar_mem_init(&telescope->station_z, type, location, n_stations);
+    if (error) return error;
 
     // Initialise the station structures.
     telescope->station = realloc(telescope->station,
             n_stations * sizeof(oskar_StationModel));
     for (i = 0; i < n_stations; ++i)
-        oskar_station_model_init(&telescope->station[i], type, location, 0);
+    {
+        error = oskar_station_model_init(&telescope->station[i],
+                type, location, 0);
+        if (error) return error;
+    }
 
     return 0;
 }

@@ -48,12 +48,12 @@ int oskar_mem_free(oskar_Mem* mem)
     if (location == OSKAR_LOCATION_CPU)
     {
         // Free host memory.
-        free(mem->data);
+        if (mem->data != NULL) free(mem->data);
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
         // Free GPU memory.
-        cudaFree(mem->data);
+        if (mem->data != NULL) cudaFree(mem->data);
         err = cudaPeekAtLastError();
     }
     else
