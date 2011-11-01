@@ -34,7 +34,6 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-OSKAR_EXPORT
 int oskar_visibilities_init(oskar_Visibilities* vis, int num_times,
         int num_baselines, int num_channels, int amp_type, int location)
 {
@@ -52,14 +51,15 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int num_times,
     int num_samples    = num_times * num_baselines * num_channels;
 
     // Initialise memory.
-    if (oskar_mem_init(&vis->baseline_u, coord_type, location, num_samples))
-        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    if (oskar_mem_init(&vis->baseline_v, coord_type, location, num_samples))
-        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    if (oskar_mem_init(&vis->baseline_w, coord_type, location, num_samples))
-        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    if (oskar_mem_init(&vis->amplitude, amp_type, location, num_samples))
-        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    int err = 0;
+    err = oskar_mem_init(&vis->baseline_u, coord_type, location, num_samples);
+    if (err) return err;
+    err = oskar_mem_init(&vis->baseline_v, coord_type, location, num_samples);
+    if (err) return err;
+    err = oskar_mem_init(&vis->baseline_w, coord_type, location, num_samples);
+    if (err) return err;
+    err = oskar_mem_init(&vis->amplitude, amp_type, location, num_samples);
+    if (err) return err;
 
     return 0;
 }

@@ -46,13 +46,10 @@ extern "C"
 struct oskar_TelescopeModel
 {
     int num_stations;            ///< Number of stations in the model.
-    oskar_Mem station_ecef_x;    ///< Fixed x component of station coordinate in ECEF frame.
-    oskar_Mem station_ecef_y;    ///< Fixed y component of station coordinate in ECEF frame.
-    oskar_Mem station_ecef_z;    ///< Fixed z component of station coordinate in ECEF frame.
+    oskar_StationModel* station; ///< Array of station structures.
     oskar_Mem station_x;         ///< Fixed x component of station coordinate.
     oskar_Mem station_y;         ///< Fixed y component of station coordinate.
     oskar_Mem station_z;         ///< Fixed z component of station coordinate.
-    oskar_StationModel* station; ///< Array of station structures.
     int identical_stations;      ///< True if all stations are identical.
     int use_common_sky;          ///< True if all stations should use common source positions.
     double ra0;                  ///< Right Ascension of phase centre in radians.
@@ -62,6 +59,31 @@ struct oskar_TelescopeModel
     oskar_Mem station_u;         ///< Work buffer holding station u coordinates.
     oskar_Mem station_v;         ///< Work buffer holding station v coordinates.
     oskar_Mem station_w;         ///< Work buffer holding station w coordinates.
+
+#ifdef __cplusplus
+    // If C++, then provide constructors and methods.
+    /**
+     * @brief Constructs a telescope model structure.
+     *
+     * @details
+     * Constructs, initialises and allocates memory for a telescope model
+     * data structure.
+     *
+     * @param[in] type Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
+     * @param[in] location Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+     * @param[in] n_stations Number of stations.
+     */
+    oskar_TelescopeModel(int type, int location, int n_stations = 0);
+
+    /**
+     * @brief
+     * Destroys the telescope structure, freeing any memory it occupies.
+     *
+     * @details
+     * Destroys the telescope structure, freeing any memory it occupies.
+     */
+    ~oskar_TelescopeModel();
+#endif
 };
 
 typedef struct oskar_TelescopeModel oskar_TelescopeModel;
@@ -106,7 +128,7 @@ struct oskar_TelescopeModel_d
     double*  antenna_z;
     double   longitude;
     double   latitude;
-    bool     identical_stations; // true if all stations are identical
+    int      identical_stations; // true if all stations are identical
 };
 typedef struct oskar_TelescopeModel_d oskar_TelescopeModel_d;
 
@@ -120,7 +142,7 @@ struct oskar_TelescopeModel_f
     float*   antenna_z;
     float    longitude;
     float    latitude;
-    bool     identical_stations; // true if all stations are identical
+    int      identical_stations; // true if all stations are identical
 };
 typedef struct oskar_TelescopeModel_f oskar_TelescopeModel_f;
 

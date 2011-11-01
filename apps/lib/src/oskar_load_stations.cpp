@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stations,
-        bool* idential_stations)
+        int* idential_stations)
 {
     int num_stations = 0;
     QDir dir;
@@ -107,7 +107,7 @@ unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stat
 
 
 unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stations,
-        bool* idential_stations)
+        int* idential_stations)
 {
     int num_stations = 0;
     QDir dir;

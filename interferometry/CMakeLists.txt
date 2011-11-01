@@ -15,7 +15,10 @@ set(interferometry_SRC
     src/oskar_horizon_plane_to_geocentric_cartesian.c
     src/oskar_horizon_plane_to_itrs.cpp
     src/oskar_horizon_plane_to_offset_geocentric_cartesian.c
+    src/oskar_telescope_model_free.c
+    src/oskar_telescope_model_init.c
     src/oskar_telescope_model_load_station_coords.cpp
+    src/oskar_telescope_model_resize.c
     src/oskar_TelescopeModel.cu
     src/oskar_VisData.c  # deprecated
     src/oskar_visibilities_append.cpp

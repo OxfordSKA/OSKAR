@@ -26,25 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_ALLOC_H_
-#define OSKAR_TELESCOPE_MODEL_ALLOC_H_
+#ifndef OSKAR_TELESCOPE_MODEL_RESIZE_H_
+#define OSKAR_TELESCOPE_MODEL_RESIZE_H_
 
 /**
- * @file oskar_telescope_model_alloc.h
+ * @file oskar_telescope_model_resize.h
  */
 
+#include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * Allocates memory for a telescope model structure.
+ * Resizes a telescope model structure.
  *
  * @details
- * Allocates memory for a telescope model structure.
+ * Resizes a telescope model structure.
  *
- * @param telescope  Telescope model structure to allocate.
- * @param n_stations Number of stations.
+ * @param telescope  Telescope model structure to resize.
+ * @param n_stations New number of stations.
  */
-int oskar_telescope_model_alloc(oskar_TelescopeModel* telescope, int n_stations);
+OSKAR_EXPORT
+int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int n_stations);
 
-#endif // OSKAR_TELESCOPE_MODEL_ALLOC_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif // OSKAR_TELESCOPE_MODEL_RESIZE_H_

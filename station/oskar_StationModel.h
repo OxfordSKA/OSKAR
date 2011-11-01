@@ -46,17 +46,12 @@ extern "C"
 #endif
 struct oskar_StationModel
 {
-    // Station position.
-    double longitude;
-    double latitude;
-    double altitude;
-
-    // Beam phase centre.
-    double ra0;
-    double dec0;
-
-    // Station element position data.
     int n_elements;
+    oskar_StationModel* child; ///< NULL when there are no child stations.
+    oskar_StationModel* parent; ///< Pointer to station's parent (NULL if none).
+    oskar_ElementModel* element_pattern; ///< NULL if there are child stations.
+
+    // Station element data.
     oskar_Mem x; ///< x-position wrt local horizon, toward the East.
     oskar_Mem y; ///< y-position wrt local horizon, toward the North.
     oskar_Mem z; ///< z-position wrt local horizon, toward the zenith.
@@ -65,17 +60,18 @@ struct oskar_StationModel
     oskar_Mem amp_error;
     oskar_Mem phase_offset;
     oskar_Mem phase_error;
-    oskar_StationModel* child; // NULL when there are no child stations.
-    oskar_StationModel* parent; ///< Pointer to station's parent (NULL if none).
 
-    // Embedded element pattern.
-    int single_element_model; // True if using a single common element pattern.
-    oskar_ElementModel* element_pattern; // NULL if there are child stations.
+    // Other station data.
+    double longitude; ///< Geodetic longitude of station, in radians.
+    double latitude;  ///< Geodetic latitude of station, in radians.
+    double altitude;  ///< Altitude of station above ellipsoid, in metres.
+    double ra0;       ///< Right ascension of beam phase centre, in radians.
+    double dec0;      ///< Declination of beam phase centre, in radians.
+    int single_element_model; ///< True if using a single common element pattern.
+    int bit_depth;    ///< Not implemented!
 
-    int bit_depth; // Not implemented!
-
-    // If C++, provide constructors and methods.
 #ifdef __cplusplus
+    // If C++, provide constructors and methods.
     /**
      * @brief Constructs an empty station model structure.
      *

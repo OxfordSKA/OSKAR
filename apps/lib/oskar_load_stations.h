@@ -53,11 +53,11 @@ extern "C" {
  */
 OSKAR_EXPORT
 unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stations,
-        bool* idential_stations);
+        int* idential_stations);
 
 OSKAR_EXPORT
 unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stations,
-        bool* idential_stations);
+        int* idential_stations);
 
 #ifdef __cplusplus
 }

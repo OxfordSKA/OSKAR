@@ -48,6 +48,10 @@ int oskar_mem_alloc(oskar_Mem* mem)
     location = mem->private_location;
     type = mem->private_type;
 
+    // Check if allocation should happen or not.
+    if (n_elements == 0)
+        return 0;
+
     // Get the memory size.
     element_size = oskar_mem_element_size(type);
     if (element_size == 0)

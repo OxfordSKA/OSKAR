@@ -26,21 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_alloc.h"
+#include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "utility/oskar_mem_init.h"
 #include "station/oskar_StationModel.h"
-#include <cstring>
-#include <cstdio>
-#include <cstdlib>
+#include "station/oskar_station_model_init.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-int oskar_telecope_model_alloc(oskar_TelescopeModel* telescope, int n_stations)
+
+int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
+        int location, int n_stations)
 {
+    int i = 0;
+
     // Check that all pointers are not NULL.
     if (telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
+
+    // Initialise the arrays.
+    oskar_mem_init(&telescope->station_u, type, location, n_stations);
+    oskar_mem_init(&telescope->station_v, type, location, n_stations);
+    oskar_mem_init(&telescope->station_w, type, location, n_stations);
+    oskar_mem_init(&telescope->station_x, type, location, n_stations);
+    oskar_mem_init(&telescope->station_y, type, location, n_stations);
+    oskar_mem_init(&telescope->station_z, type, location, n_stations);
+
+    // Initialise the station structures.
+    telescope->station = realloc(telescope->station,
+            n_stations * sizeof(oskar_StationModel));
+    for (i = 0; i < n_stations; ++i)
+        oskar_station_model_init(&telescope->station[i], type, location, 0);
 
     return 0;
 }
