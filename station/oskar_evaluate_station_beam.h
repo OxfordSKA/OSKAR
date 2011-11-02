@@ -42,9 +42,29 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Evaluates the E-Jones matrices for the specified station
+ * for all source directions.
+ *
+ * @param E       oskar_Mem pointer to the the E-Jones matrices for a given
+ *                station.
+ * @param sky     Sky model structure.
+ * @param station Station structure.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_evaluate_station_beam(oskar_Mem* E, oskar_SkyModel* sky,
+        oskar_StationModel* station);
 
-int oskar_evaluate_station_beam(oskar_Jones* E, int station_index,
-        oskar_SkyModel* sky, oskar_StationModel* station);
+
+OSKAR_EXPORT
+int oskar_evalate_station_beam_scalar(oskar_Mem* E, oskar_SkyModel* sky,
+        oskar_StationModel* station);
+
+
+
+
 
 
 /**

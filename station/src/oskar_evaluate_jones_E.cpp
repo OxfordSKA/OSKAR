@@ -36,6 +36,7 @@
 
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
+#include "math/oskar_jones_get_station_pointer.h"
 #include "station/oskar_evaluate_station_beam.h"
 
 
@@ -43,7 +44,7 @@
 extern "C"
 #endif
 int oskar_evaluate_jones_E(oskar_Jones* E, oskar_SkyModel* sky,
-        oskar_TelescopeModel* telescope, double gast)
+        oskar_TelescopeModel* telescope, double /*gast*/)
 {
     // Consistency and validation checks on input arguments.
     // -------------------------------------------------------------------------
@@ -64,45 +65,27 @@ int oskar_evaluate_jones_E(oskar_Jones* E, oskar_SkyModel* sky,
     //   next level wrapper functions.
 
 
-
-
-
-
     // Evaluate the station beam for each station for each source position.
     // ------------------------------------------------------------------------
-
-    // TODO
-    // - function to evaluate the station beam values for one station.
-    //
-
     if (telescope->identical_stations && telescope->use_common_sky)
     {
-            // Evaluate horizontal l,m,n once and the station beam for
-            // station 0 and copy the result into the data for other stations
-            // in E.
+        // Evaluate horizontal l,m,n once and the station beam for
+        // station 0 and copy the result into the data for other stations
+        // in E.
+        oskar_StationModel* station0 = &telescope->station[0];
 
-            const oskar_StationModel* station0 = &telescope->station[0];
+        // Evaluate the horizontal l,m,m coordinates for beam phase centre
+        // and sources.
+        // oskar_cuda_ra_dec_to_hor_lmn_d(m, ra, dec, lst, lat, hor_l, hor_m, hor_n);
+        // TODO --> oskar_evalute_beam_hor_lmn(station0, gast);
+        // TODO --> oskar_evalute_source_hor_lmn(sky, station0, gast);
 
-            // Evaluate the horizontal l,m,m coordinates for beam phase centre
-            // and sources.
-//            double beam_hor_l, beam_hor_m, beam_hor_n;
-//            oskar_ra_dec_to_hor_lmn_d(1, &station0->ra0, &station0->dec0,
-//                    gast, station0->latitude, &beam_hor_l, &beam_hor_m,
-//                    &beam_hor_n);
-//
-            // sources above horizon?
-            //oskar_cuda_ra_dec_to_hor_lmn_d(m, ra, dec, lst, lat, hor_l, hor_m, hor_n);
-            // TODO --> oskar_evalute_beam_hor_lmn(station0, gast);
-            // TODO --> oskar_evalute_source_hor_lmn(sky, station0, gast);
+        // Evaluate the station beam.
+        oskar_Mem E0; // Pointer to the row of E for station 0.
+        oskar_jones_get_station_pointer(&E0, E, 0);
+        oskar_evaluate_station_beam(&E0, sky, station0);
 
-            // Evaluate station beam.
-            // NOTE E and station index could be replaced by a
-            // oskar_Jones_row structure which holds a pointer to the row
-            // for the station in the oskar_Jones along with its type location
-            // and dimensions. e.g.
-            // oskar_Jones_row station0_E = E.get_row(station_index)
-            // oskar_evalute_station_beam(station0_E, sky, station0)
-//            oskar_evalute_station_beam(E, 0, sky, station0);
+        //  (zero sources below horizon)
     }
     else
     {
@@ -113,8 +96,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, oskar_SkyModel* sky,
             // loop over stations to evaluate E.
             for (int i = 0; i < telescope->num_stations; ++i)
             {
-                const oskar_StationModel* station = &telescope->station[i];
-
+                //oskar_StationModel* station = &telescope->station[i];
             }
         }
         else
@@ -123,7 +105,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, oskar_SkyModel* sky,
             // loop over stations to evaluate E.
             for (int i = 0; i < telescope->num_stations; ++i)
             {
-                const oskar_StationModel* station = &telescope->station[i];
+                //oskar_StationModel* station = &telescope->station[i];
 
             }
         }
