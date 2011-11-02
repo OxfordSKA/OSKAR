@@ -46,7 +46,10 @@ extern "C" {
  *
  * @details
  * This function copies data held in one structure to another structure.
- * Both data structures must be of the same size and type.
+ * Both data structures must be of the same data type.
+ *
+ * If there is not enough memory in the destination structure, then it is
+ * automatically resized to hold the required number of elements.
  *
  * @param[out] dst Pointer to destination data structure to copy into.
  * @param[in]  src Pointer to source data structure to copy from.

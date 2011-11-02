@@ -35,16 +35,16 @@
 extern "C" {
 #endif
 
-int oskar_telecope_model_free(oskar_TelescopeModel* telescope)
+int oskar_telescope_model_free(oskar_TelescopeModel* telescope)
 {
-	int error = 0, i = 0;
+    int error = 0, i = 0;
 
-	/* Free each station. */
-	for (i = 0; i < telescope->num_stations; ++i)
-	{
-		error = oskar_station_model_free(&telescope->station[i]);
-		if (error) return error;
-	}
+    /* Free each station. */
+    for (i = 0; i < telescope->num_stations; ++i)
+    {
+        error = oskar_station_model_free(&telescope->station[i]);
+        if (error) return error;
+    }
 
     /* Free the station array. */
     free(telescope->station);

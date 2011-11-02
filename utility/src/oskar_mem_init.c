@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
+
 #include <stdlib.h>
 
 #ifdef __cplusplus

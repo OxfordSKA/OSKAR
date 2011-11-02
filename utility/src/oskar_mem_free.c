@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_mem_free.h"
+
 #include <cuda_runtime_api.h>
 #include <stdlib.h>
-#include "utility/oskar_mem_free.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -28,23 +28,26 @@
 
 
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_free.h"
 #include "interferometry/oskar_telescope_model_init.h"
 #include "math/cudak/oskar_cudak_vec_scale_rr.h"
 #include <cuda_runtime_api.h>
 
 
-oskar_TelescopeModel::oskar_TelescopeModel(int type, int location, int n_stations)
+oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
+        int n_stations)
 : num_stations(n_stations),
   station(NULL)
 {
-    oskar_telescope_model_init(this, type, location, n_stations);
+    if (oskar_telescope_model_init(this, type, location, n_stations))
+        throw "Error in oskar_telescope_model_init.";
 }
 
 oskar_TelescopeModel::~oskar_TelescopeModel()
 {
+    if (oskar_telescope_model_free(this))
+        throw "Error in oskar_telescope_model_free.";
 }
-
-
 
 
 

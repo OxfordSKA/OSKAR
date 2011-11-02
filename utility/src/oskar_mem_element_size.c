@@ -31,8 +31,9 @@
 #include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 size_t oskar_mem_element_size(int type)
 {
     if (type == OSKAR_SINGLE)
@@ -49,3 +50,7 @@ size_t oskar_mem_element_size(int type)
         return sizeof(double4c);
     return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

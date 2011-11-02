@@ -26,10 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include <string.h>
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_realloc.h"
+
+#include <cuda_runtime_api.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,13 +39,13 @@ extern "C" {
 
 int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
 {
-    int n_elements_src, n_elements_dst, type_src, type_dst;
+    int error = 0, n_elements_src, n_elements_dst, type_src, type_dst;
     int location_src, location_dst, bytes;
 
     /* Check that all pointers are not NULL. */
     if (src == NULL || dst == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
-    if (src->data == NULL || dst->data == NULL)
+    if (src->data == NULL)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Get the meta-data. */
@@ -54,13 +56,16 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     location_src = src->private_location;
     location_dst = dst->private_location;
 
-    /* Check the data dimensions. */
-    if (n_elements_src != n_elements_dst)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-
     /* Check the data types. */
     if (type_src != type_dst)
         return OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Check the data dimensions and resize if required. */
+    if (n_elements_src > n_elements_dst)
+    {
+        error = oskar_mem_realloc(dst, n_elements_src);
+        if (error) return error;
+    }
 
     /* Get the number of bytes to copy. */
     bytes = oskar_mem_element_size(type_src) * n_elements_src;

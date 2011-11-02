@@ -27,8 +27,8 @@
  */
 
 #include "utility/oskar_mem_append.h"
-#include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_Mem.h"
 
 #include <cuda_runtime_api.h>

@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_element_size.h"
+#include <cuda_runtime_api.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

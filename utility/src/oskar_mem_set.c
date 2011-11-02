@@ -26,19 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_set.h"
+#include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_set.h"
 #include "utility/oskar_Mem.h"
 
 #include <cuda_runtime_api.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
-        int src_location)
+int oskar_mem_set(oskar_Mem* dst, const void* src, int src_type,
+        int src_num_elements, int src_location)
 {
     int error = 0;
     size_t dst_size, src_size;

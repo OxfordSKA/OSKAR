@@ -28,10 +28,11 @@
 
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_alloc.h"
+#include "utility/oskar_mem_append.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_append.h"
 #include "utility/oskar_mem_type_check.h"
 #include <cstdlib>
 
@@ -44,33 +45,31 @@ oskar_Mem::oskar_Mem()
 }
 
 oskar_Mem::oskar_Mem(int type, int location, int n_elements)
-: private_type(type),
-  private_location(location),
-  private_n_elements(n_elements),
+: private_type(0),
+  private_location(0),
+  private_n_elements(0),
   data(NULL)
 {
-    if (n_elements > 0)
-        if (oskar_mem_alloc(this) != 0)
-            throw "Error in oskar_mem_alloc";
+    if (oskar_mem_init(this, type, location, n_elements))
+        throw "Error in oskar_mem_init.";
 }
 
 oskar_Mem::oskar_Mem(const oskar_Mem* other, int location)
-: private_type(other->type()),
-  private_location(location),
-  private_n_elements(other->n_elements()),
+: private_type(0),
+  private_location(0),
+  private_n_elements(0),
   data(NULL)
 {
-    if (oskar_mem_alloc(this) != 0)
-        throw "Error in oskar_mem_alloc";
-    if (oskar_mem_copy(this, other) != 0) // Copy other to this.
-        throw "Error in oskar_mem_copy";
+    if (oskar_mem_init(this, other->type(), location, other->n_elements()))
+        throw "Error in oskar_mem_init.";
+    if (oskar_mem_copy(this, other)) // Copy other to this.
+        throw "Error in oskar_mem_copy.";
 }
 
 oskar_Mem::~oskar_Mem()
 {
-    if (this->data != NULL)
-        if (oskar_mem_free(this) != 0)
-            throw "Error in oskar_mem_free";
+    if (oskar_mem_free(this))
+        throw "Error in oskar_mem_free.";
 }
 
 int oskar_Mem::copy_to(oskar_Mem* other)

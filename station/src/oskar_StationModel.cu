@@ -29,6 +29,7 @@
 
 #include "station/oskar_StationModel.h"
 #include "math/cudak/oskar_cudak_vec_scale_rr.h"
+#include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_resize.h"
 #include <cuda_runtime_api.h>
@@ -58,7 +59,7 @@ oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
 
 oskar_StationModel::~oskar_StationModel()
 {
-
+    oskar_station_model_free(this);
 }
 
 int oskar_StationModel::copy_to(oskar_StationModel* other)

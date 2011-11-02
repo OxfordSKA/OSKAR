@@ -42,10 +42,23 @@ extern "C" {
 
 /**
  * @brief
+ * Resizes a block of memory.
  *
  * @details
+ * This function resizes a block of memory, either on the CPU or the GPU,
+ * to hold the specified new number of elements. Existing data in the memory
+ * block is preserved.
+ *
+ * An error is returned if the data type of the memory block is unsupported.
+ *
+ * @param[in] mem Pointer to memory block to resize.
+ * @param[in] num_elements The new number of elements the block should hold.
  *
  * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
 int oskar_mem_realloc(oskar_Mem* mem, int num_elements);
