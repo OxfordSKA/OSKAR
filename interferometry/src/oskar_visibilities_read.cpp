@@ -106,7 +106,7 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
 
     // Initialise the visibility structure.
     // Note: this will wipe any existing data in the structure.
-    vis->init(num_times, num_baselines, num_channels, amp_type, OSKAR_LOCATION_CPU);
+    vis->init(amp_type, OSKAR_LOCATION_CPU, num_times, num_baselines, num_channels);
 
     // Read data.
     size_t num_samples        = vis->num_samples();

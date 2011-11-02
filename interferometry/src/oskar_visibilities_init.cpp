@@ -34,12 +34,14 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_visibilities_init(oskar_Visibilities* vis, int num_times,
-        int num_baselines, int num_channels, int amp_type, int location)
+int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
+        int num_times, int num_baselines, int num_channels)
 {
-    // Check if complex.
     if (!oskar_Mem::is_complex(amp_type))
         return OSKAR_ERR_BAD_DATA_TYPE;
+
+    if (location != OSKAR_LOCATION_GPU && location != OSKAR_LOCATION_CPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
     // Evaluate the coordinate type.
     int coord_type = oskar_Mem::is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;

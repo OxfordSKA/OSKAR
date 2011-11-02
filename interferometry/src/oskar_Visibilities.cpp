@@ -38,27 +38,15 @@
 #include "utility/oskar_Mem.h"
 #include <cstdio>
 
-
-oskar_Visibilities::oskar_Visibilities()
-: num_times(0),
-  num_baselines(0),
-  num_channels(0),
-  baseline_u(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
-  baseline_v(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
-  baseline_w(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
-  amplitude(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0)
-{
-}
-
-oskar_Visibilities::oskar_Visibilities(const int num_times,
-        const int num_baselines, const int num_channels, const int amp_type,
-        const int location)
+oskar_Visibilities::oskar_Visibilities(const int amp_type, const int location,
+        const int num_times, const int num_baselines,
+        const int num_channels)
 : num_times(num_times),
   num_baselines(num_baselines),
   num_channels(num_channels)
 {
-    if (oskar_visibilities_init(this, num_times, num_baselines, num_channels,
-            amp_type, location))
+    if (oskar_visibilities_init(this, amp_type, location, num_times,
+            num_baselines, num_channels))
         throw "error allocation visibility structure";
 }
 
@@ -120,10 +108,10 @@ int oskar_Visibilities::resize(int num_times, int num_baselines, int num_channel
     return oskar_visibilties_resize(this, num_times, num_baselines, num_channels);
 }
 
-int oskar_Visibilities::init(int num_times, int num_baselines, int num_channels,
-        int amp_type, int location)
+int oskar_Visibilities::init(int amp_type, int location, int num_times,
+        int num_baselines, int num_channels)
 {
-    return oskar_visibilities_init(this, num_times, num_baselines, num_channels,
-            amp_type, location);
+    return oskar_visibilities_init(this, amp_type, location, num_times,
+            num_baselines, num_channels);
 }
 
