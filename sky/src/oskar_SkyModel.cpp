@@ -47,13 +47,9 @@ oskar_SkyModel::oskar_SkyModel(int type, int location, int num_sources)
   V(type, location, num_sources),
   reference_freq(type, location, num_sources),
   spectral_index(type, location, num_sources),
-  update_timestamp(0.0),
   rel_l(type, location, num_sources),
   rel_m(type, location, num_sources),
-  rel_n(type, location, num_sources),
-  hor_l(type, location, num_sources),
-  hor_m(type, location, num_sources),
-  hor_n(type, location, num_sources)
+  rel_n(type, location, num_sources)
 {
 }
 
@@ -67,13 +63,9 @@ oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, int location)
   V(&other->V, location),
   reference_freq(&other->reference_freq, location),
   spectral_index(&other->spectral_index, location),
-  update_timestamp(other->update_timestamp),
   rel_l(&other->rel_l, location),
   rel_m(&other->rel_m, location),
-  rel_n(&other->rel_n, location),
-  hor_l(&other->rel_l, location),
-  hor_m(&other->rel_m, location),
-  hor_n(&other->rel_n, location)
+  rel_n(&other->rel_n, location)
 {
 }
 
@@ -87,13 +79,9 @@ oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
   V(type, location, 0),
   reference_freq(type, location, 0),
   spectral_index(type, location, 0),
-  update_timestamp(0.0),
   rel_l(type, location, 0),
   rel_m(type, location, 0),
-  rel_n(type, location, 0),
-  hor_l(type, location, 0),
-  hor_m(type, location, 0),
-  hor_n(type, location, 0)
+  rel_n(type, location, 0)
 {
     if (oskar_sky_model_load(filename, this) != 0)
         throw "Error in oskar_sky_model_load";

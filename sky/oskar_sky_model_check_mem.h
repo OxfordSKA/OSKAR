@@ -69,10 +69,7 @@ inline int oskar_sky_model_is_type(const oskar_SkyModel* sky, const int type)
             sky->spectral_index.type() == type &&
             sky->rel_l.type() == type &&
             sky->rel_m.type() == type &&
-            sky->rel_n.type() == type &&
-            sky->hor_l.type() == type &&
-            sky->hor_m.type() == type &&
-            sky->hor_n.type() == type);
+            sky->rel_n.type() == type);
 }
 
 /**
@@ -122,10 +119,7 @@ inline int oskar_sky_model_is_location(const oskar_SkyModel* sky, const int loca
             sky->spectral_index.location() == location &&
             sky->rel_l.location() == location &&
             sky->rel_m.location() == location &&
-            sky->rel_n.location() == location &&
-            sky->hor_l.location() == location &&
-            sky->hor_m.location() == location &&
-            sky->hor_n.location() == location);
+            sky->rel_n.location() == location);
 }
 
 /**

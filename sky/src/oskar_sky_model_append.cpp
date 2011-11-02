@@ -74,18 +74,11 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
     // Update the number of sources
     dst->num_sources += src->num_sources;
 
-    // Resize work arrays
     error = dst->rel_l.resize(num_sources);
     if (error) return error;
     error = dst->rel_m.resize(num_sources);
     if (error) return error;
     error = dst->rel_n.resize(num_sources);
-    if (error) return error;
-    error = dst->hor_l.resize(num_sources);
-    if (error) return error;
-    error = dst->hor_m.resize(num_sources);
-    if (error) return error;
-    error = dst->hor_n.resize(num_sources);
     if (error) return error;
 
     return error;

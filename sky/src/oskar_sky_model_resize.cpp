@@ -56,19 +56,11 @@ int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources)
     if (error) return error;
     error = sky->spectral_index.resize(num_sources);
     if (error) return error;
-
-    // Resize the work buffers.
     error = sky->rel_l.resize(num_sources);
     if (error) return error;
     error = sky->rel_m.resize(num_sources);
     if (error) return error;
     error = sky->rel_n.resize(num_sources);
-    if (error) return error;
-    error = sky->hor_l.resize(num_sources);
-    if (error) return error;
-    error = sky->hor_m.resize(num_sources);
-    if (error) return error;
-    error = sky->hor_n.resize(num_sources);
     if (error) return error;
 
     return error;

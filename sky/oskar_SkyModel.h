@@ -52,149 +52,141 @@ extern "C"
 #endif
 struct oskar_SkyModel
 {
-#ifdef __cplusplus
-    public:
-#endif
-        int num_sources;          /**< Number of sources in the sky model. */
-        oskar_Mem RA;             /**< Right ascension, in radians. */
-        oskar_Mem Dec;            /**< Declination, in radians. */
-        oskar_Mem I;              /**< Stokes-I, in Jy. */
-        oskar_Mem Q;              /**< Stokes-Q, in Jy. */
-        oskar_Mem U;              /**< Stokes-U, in Jy. */
-        oskar_Mem V;              /**< Stokes-V, in Jy. */
-        oskar_Mem reference_freq; /**< Reference frequency for the spectral index, in Hz. */
-        oskar_Mem spectral_index; /**< Spectral index. */
+    int num_sources;          /**< Number of sources in the sky model. */
+    oskar_Mem RA;             /**< Right ascension, in radians. */
+    oskar_Mem Dec;            /**< Declination, in radians. */
+    oskar_Mem I;              /**< Stokes-I, in Jy. */
+    oskar_Mem Q;              /**< Stokes-Q, in Jy. */
+    oskar_Mem U;              /**< Stokes-U, in Jy. */
+    oskar_Mem V;              /**< Stokes-V, in Jy. */
+    oskar_Mem reference_freq; /**< Reference frequency for the spectral index, in Hz. */
+    oskar_Mem spectral_index; /**< Spectral index. */
 
-        /* Work buffers. */
-        double update_timestamp;  /**< Timestamp for which work buffer is valid. */
-        oskar_Mem rel_l;          /**< Phase centre relative direction-cosines. */
-        oskar_Mem rel_m;          /**< Phase centre relative direction-cosines. */
-        oskar_Mem rel_n;          /**< Phase centre relative direction-cosines. */
-        oskar_Mem hor_l;          /**< Horizontal coordinate system direction-cosines. */
-        oskar_Mem hor_m;          /**< Horizontal coordinate system direction-cosines. */
-        oskar_Mem hor_n;          /**< Horizontal coordinate system direction-cosines. */
+    /* Work buffers. */
+    oskar_Mem rel_l;          /**< Phase centre relative direction-cosines. */
+    oskar_Mem rel_m;          /**< Phase centre relative direction-cosines. */
+    oskar_Mem rel_n;          /**< Phase centre relative direction-cosines. */
 
 #ifdef __cplusplus
-    public:
-        /**
-         * @brief Constructs and allocates memory for a sky model.
-         *
-         * @param type         Data type for the sky model (either OSKAR_SINGLE,
-         *                     or OSKAR_DOUBLE)
-         * @param location     Memory location of the sky model (either
-         *                     OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
-         * @param num_sources  Number of sources in the sky model.
-         */
-        oskar_SkyModel(int type, int location, int num_sources);
+    /**
+     * @brief Constructs and allocates memory for a sky model.
+     *
+     * @param type         Data type for the sky model (either OSKAR_SINGLE,
+     *                     or OSKAR_DOUBLE)
+     * @param location     Memory location of the sky model (either
+     *                     OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+     * @param num_sources  Number of sources in the sky model.
+     */
+    oskar_SkyModel(int type, int location, int num_sources);
 
-        /**
-         * @brief Constructs a sky model, loading it from the specified file.
-         *
-         * @details
-         * Loads the sky model from a OSKAR source text file.
-         *
-         * @param filename     Path to a file containing an OSKAR sky model.
-         * @param type         Data type for the sky model (either OSKAR_SINGLE,
-         *                     or OSKAR_DOUBLE)
-         * @param location     Memory location of the constructed sky model
-         *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
-         */
-        oskar_SkyModel(const char* filename, int type, int location);
+    /**
+     * @brief Constructs a sky model, loading it from the specified file.
+     *
+     * @details
+     * Loads the sky model from a OSKAR source text file.
+     *
+     * @param filename     Path to a file containing an OSKAR sky model.
+     * @param type         Data type for the sky model (either OSKAR_SINGLE,
+     *                     or OSKAR_DOUBLE)
+     * @param location     Memory location of the constructed sky model
+     *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+     */
+    oskar_SkyModel(const char* filename, int type, int location);
 
-        /**
-         * @brief Constructs a sky model by copying the supplied sky
-         * model to the specified location.
-         *
-         * @param sky          oskar_SkyModel to copy.
-         * @param location     Memory location of the constructed sky model
-         *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
-         */
-        oskar_SkyModel(const oskar_SkyModel* other, int location);
+    /**
+     * @brief Constructs a sky model by copying the supplied sky
+     * model to the specified location.
+     *
+     * @param sky          oskar_SkyModel to copy.
+     * @param location     Memory location of the constructed sky model
+     *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
+     */
+    oskar_SkyModel(const oskar_SkyModel* other, int location);
 
-        /**
-         * @brief Destroys the sky model.
-         */
-        ~oskar_SkyModel();
+    /**
+     * @brief Destroys the sky model.
+     */
+    ~oskar_SkyModel();
 
-        /**
-         * @brief Appends the specified sky model the the current sky model.
-         *
-         * @param other Sky model to append.
-         *
-         * @return error code.
-         */
-        int append(const oskar_SkyModel* other);
+    /**
+     * @brief Appends the specified sky model the the current sky model.
+     *
+     * @param other Sky model to append.
+     *
+     * @return error code.
+     */
+    int append(const oskar_SkyModel* other);
 
-        /**
-         * @brief Computes the source l,m,n direction cosines relative to phase
-         * centre.
-         *
-         * @details
-         * Assumes that the RA and Dec arrays have already been populated, and
-         * that the data is on the GPU.
-         *
-         * @param[in] ra0 Right Ascension of phase centre, in radians.
-         * @param[in] dec0 Declination of phase centre, in radians.
-         *
-         * @return error code.
-         */
-        int compute_relative_lmn(double ra0, double dec0);
+    /**
+     * @brief Computes the source l,m,n direction cosines relative to phase
+     * centre.
+     *
+     * @details
+     * Assumes that the RA and Dec arrays have already been populated, and
+     * that the data is on the GPU.
+     *
+     * @param[in] ra0 Right Ascension of phase centre, in radians.
+     * @param[in] dec0 Declination of phase centre, in radians.
+     *
+     * @return error code.
+     */
+    int compute_relative_lmn(double ra0, double dec0);
 
-        /**
-         * @brief Loads an OSKAR source text file into the current sky structure.
-         * Sources from the file are appended to the end of the current structure.
-         *
-         * @param filename  Path to a file containing an oskar sky model.
-         *
-         * @return error code.
-         */
-        int load(const char* filename);
+    /**
+     * @brief Loads an OSKAR source text file into the current sky structure.
+     * Sources from the file are appended to the end of the current structure.
+     *
+     * @param filename  Path to a file containing an oskar sky model.
+     *
+     * @return error code.
+     */
+    int load(const char* filename);
 
-        /**
-         * @brief Resizes the sky model the specified number of sources.
-         *
-         * @param num_sources Number of sources to resize to.
-         *
-         * @return error code.
-         */
-        int resize(int num_sources);
+    /**
+     * @brief Resizes the sky model the specified number of sources.
+     *
+     * @param num_sources Number of sources to resize to.
+     *
+     * @return error code.
+     */
+    int resize(int num_sources);
 
-        /**
-         * @brief Sets the source parameters for the source at the specified
-         * index in the sky model.
-         *
-         * @param index             Source index.
-         * @param ra                Right ascension, in radians.
-         * @param dec               Delination, in radians.
-         * @param I                 Stokes-I, in Jy.
-         * @param Q                 Stokes-Q, in Jy.
-         * @param U                 Stokes-U, in Jy.
-         * @param V                 Stokes-V, in Jy.
-         * @param ref_frequency     Reference frequency, in Hz.
-         * @param spectral_index    Spectral index.
-         *
-         * @return error code.
-         */
-        int set_source(int index, double ra, double dec, double I, double Q,
-                double U, double V, double ref_frequency, double spectral_index);
+    /**
+     * @brief Sets the source parameters for the source at the specified
+     * index in the sky model.
+     *
+     * @param index             Source index.
+     * @param ra                Right ascension, in radians.
+     * @param dec               Delination, in radians.
+     * @param I                 Stokes-I, in Jy.
+     * @param Q                 Stokes-Q, in Jy.
+     * @param U                 Stokes-U, in Jy.
+     * @param V                 Stokes-V, in Jy.
+     * @param ref_frequency     Reference frequency, in Hz.
+     * @param spectral_index    Spectral index.
+     *
+     * @return error code.
+     */
+    int set_source(int index, double ra, double dec, double I, double Q,
+            double U, double V, double ref_frequency, double spectral_index);
 
-        /**
-         * @brief Returns the memory type for memory in the sky structure
-         * or error code if the types are inconsistent.
-         */
-        int type() const;
+    /**
+     * @brief Returns the memory type for memory in the sky structure
+     * or error code if the types are inconsistent.
+     */
+    int type() const;
 
-        /**
-         * @brief Returns the memory location for memory in the sky structure
-         * or error code if the types are inconsistent.
-         */
-        int location() const;
+    /**
+     * @brief Returns the memory location for memory in the sky structure
+     * or error code if the types are inconsistent.
+     */
+    int location() const;
 
-        /**
-         * @brief Returns true if the memory in the sky structure is
-         * double precision.
-         */
-        bool is_double() const;
+    /**
+     * @brief Returns true if the memory in the sky structure is
+     * double precision.
+     */
+    bool is_double() const;
 #endif
 };
 typedef struct oskar_SkyModel oskar_SkyModel;
