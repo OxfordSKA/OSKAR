@@ -47,14 +47,14 @@ extern "C"
 struct oskar_StationModel
 {
     int n_elements;
-    oskar_StationModel* child; /**< NULL when there are no child stations. */
+    oskar_StationModel* child;  /**< NULL when there are no child stations. */
     oskar_StationModel* parent; /**< Pointer to station's parent (NULL if none). */
     oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */
 
     /* Station element data. */
-    oskar_Mem x; /**< x-position wrt local horizon, toward the East. */
-    oskar_Mem y; /**< y-position wrt local horizon, toward the North. */
-    oskar_Mem z; /**< z-position wrt local horizon, toward the zenith. */
+    oskar_Mem x;      /**< x-position wrt local horizon, toward the East. */
+    oskar_Mem y;      /**< y-position wrt local horizon, toward the North. */
+    oskar_Mem z;      /**< z-position wrt local horizon, toward the zenith. */
     oskar_Mem weight; /**< Element complex weight (set to 1 unless apodisation). */
     oskar_Mem amp_gain;
     oskar_Mem amp_error;
@@ -113,6 +113,18 @@ struct oskar_StationModel
      * @param[in] n_elements The new number of elements the arrays can hold.
      */
     int resize(int n_elements);
+
+    /**
+     * @brief Returns the oskar_Mem type ID of station coordinates or
+     * an error code if the coordinate type is invalid.
+     */
+    int coord_type() const;
+
+    /**
+     * @brief Returns the oskar_Mem locaiton ID of the station coordinates or
+     * an error code if the coordinate type is invalid.
+     */
+    int coord_location() const;
 #endif
 };
 

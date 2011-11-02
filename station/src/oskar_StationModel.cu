@@ -32,6 +32,7 @@
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_resize.h"
+#include "station/oskar_station_model_check_mem.h"
 #include <cuda_runtime_api.h>
 
 
@@ -71,6 +72,34 @@ int oskar_StationModel::resize(int n_elements)
 {
     return oskar_station_model_resize(this, n_elements);
 }
+
+int oskar_StationModel::coord_type() const
+{
+    return oskar_station_model_coord_type(this);
+}
+
+int oskar_StationModel::coord_location() const
+{
+    return oskar_station_model_coord_location(this);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // DEPRECATED
