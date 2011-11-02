@@ -48,13 +48,11 @@ extern "C" {
  * This function initialises an OSKAR memory block, setting the type and
  * location, allocating memory for it as required.
  *
- * If the structure already holds a pointer that is non-NULL with a nonzero
- * type, then the memory is freed first.
- *
  * @param[in,out] mem Pointer to data structure.
  * @param[in] type Enumerated data type of memory contents (magic number).
  * @param[in] location Specify 0 for host memory, 1 for device memory.
  * @param[in] n_elements Number of elements of type \p type in the array.
+ * @param[in] owner Flag to specify whether the structure should own the memory.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -63,7 +61,8 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements);
+int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements,
+        int owner);
 
 #ifdef __cplusplus
 }

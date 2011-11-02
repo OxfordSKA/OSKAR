@@ -36,7 +36,7 @@ extern "C" {
 int oskar_station_model_init(oskar_StationModel* model, int type, int location,
         int n_elements)
 {
-    int complex_type, error;
+    int complex_type, err = 0;
 
     /* Check for sane inputs. */
     if (model == NULL)
@@ -59,29 +59,28 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->n_elements = n_elements;
 
     /* Initialise the memory. */
-    error = 0;
-    error = oskar_mem_init(&model->x, type, location, n_elements);
-    if (error) return error;
-    error = oskar_mem_init(&model->y, type, location, n_elements);
-    if (error) return error;
-    error = oskar_mem_init(&model->z, type, location, n_elements);
-    if (error) return error;
-    error = oskar_mem_init(&model->weight, complex_type, location, n_elements);
-    if (error) return error;
-    error = oskar_mem_init(&model->amp_gain, type, location, n_elements);
-    if (error) return error;
-    error = oskar_mem_init(&model->amp_error, type, location, n_elements);
-    if (error) return error;
-    error = oskar_mem_init(&model->phase_offset, type, location, n_elements);
-    if (error) return error;
-    error = oskar_mem_init(&model->phase_error, type, location, n_elements);
-    if (error) return error;
+    err = oskar_mem_init(&model->x, type, location, n_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->y, type, location, n_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->z, type, location, n_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->weight, complex_type, location, n_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->amp_gain, type, location, n_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->amp_error, type, location, n_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->phase_offset, type, location, n_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->phase_error, type, location, n_elements, 1);
+    if (err) return err;
     model->child = NULL;
     model->parent = NULL;
     model->single_element_model = 0;
     model->element_pattern = NULL;
     model->bit_depth = 0;
-    return error;
+    return err;
 }
 
 #ifdef __cplusplus

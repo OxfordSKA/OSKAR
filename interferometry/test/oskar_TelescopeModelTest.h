@@ -26,51 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_free.h"
+#ifndef OSKAR_TELESCOPE_MODEL_TEST_
+#define OSKAR_TELESCOPE_MODEL_TEST_
 
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
+/**
+ * @file oskar_TelescopeModelTest.h
+ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
-int oskar_mem_free(oskar_Mem* mem)
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class oskar_TelescopeModelTest : public CppUnit::TestFixture
 {
-    int location, err = 0;
+    public:
+        CPPUNIT_TEST_SUITE(oskar_TelescopeModelTest);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-    /* Check that the structure exists. */
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    public:
+        // Test Methods
+        void test_method();
+};
 
-    /* Check if the structure owns the memory it points to. */
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(oskar_TelescopeModelTest);
 
-    /* Get the meta-data. */
-    location = mem->private_location;
-
-    /* Check whether the memory is on the host or the device. */
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        /* Free host memory. */
-        if (mem->data != NULL) free(mem->data);
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        /* Free GPU memory. */
-        if (mem->data != NULL) cudaFree(mem->data);
-        err = cudaPeekAtLastError();
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-    mem->data = NULL;
-    mem->private_location = 0;
-    mem->private_n_elements = 0;
-    mem->private_type = 0;
-    return err;
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif // OSKAR_TELESCOPE_MODEL_TEST_

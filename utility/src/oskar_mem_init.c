@@ -36,26 +36,23 @@
 extern "C" {
 #endif
 
-int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements)
+int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements,
+        int owner)
 {
     /* Check that the structure exists. */
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Check if this structure is already allocated. */
-    if (mem->private_type != 0 && mem->data != NULL)
-    {
-        int err = 0;
-        err = oskar_mem_free(mem);
-        if (err) return err;
-    }
 
     /* Set the meta-data. */
     mem->private_type = type;
     mem->private_location = location;
     mem->private_n_elements = n_elements;
+    mem->private_owner = owner;
 
     /* Allocate memory. */
-    return oskar_mem_alloc(mem);
+    if (owner)
+        return oskar_mem_alloc(mem);
+    else
+        return 0;
 }
 
 #ifdef __cplusplus

@@ -4,10 +4,10 @@
 
 int main(int /*argc*/, char** /*argv*/)
 {
-	// Force any CUDA memory initialisation errors to appear here.
-	cudaDeviceSynchronize();
+    // Force any CUDA memory initialisation errors to appear here.
+    cudaDeviceSynchronize();
 
-	// Get the top level suite from the registry
+    // Get the top level suite from the registry
     CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
 
     // Adds the test to the list of test to run
@@ -20,6 +20,10 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Run the tests.
     bool wasSucessful = runner.run();
+
+    // Force any CUDA memory initialisation errors to appear here.
+    cudaDeviceSynchronize();
+    cudaDeviceReset();
 
     // Return error code 1 if the one of test failed.
     return wasSucessful ? 0 : 1;

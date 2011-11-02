@@ -42,11 +42,12 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
     size_t element_size, new_size, old_size;
     int error = 0;
 
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
     /* Check for sane inputs. */
     if (mem == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check if the structure owns the memory it points to. */
+    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Get size of new and old memory blocks. */
     element_size = oskar_mem_element_size(mem->private_type);

@@ -42,11 +42,9 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     int error = 0, n_elements_src, n_elements_dst, type_src, type_dst;
     int location_src, location_dst, bytes;
 
-    /* Check that all pointers are not NULL. */
+    /* Sanity check on inputs. */
     if (src == NULL || dst == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
-    if (src->data == NULL)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Get the meta-data. */
     n_elements_src = src->private_n_elements;
@@ -55,6 +53,10 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     type_dst = dst->private_type;
     location_src = src->private_location;
     location_dst = dst->private_location;
+
+    /* Return immediately if there is nothing to copy. */
+    if (src->data == NULL || n_elements_src == 0)
+        return 0;
 
     /* Check the data types. */
     if (type_src != type_dst)

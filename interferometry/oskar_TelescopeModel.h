@@ -76,6 +76,18 @@ struct oskar_TelescopeModel
     oskar_TelescopeModel(int type, int location, int n_stations = 0);
 
     /**
+     * @brief Constructs a telescope model structure from an existing one.
+     *
+     * @details
+     * Constructs a telescope model data structure by copying an existing one
+     * to the specified location.
+     *
+     * @param[in] other Pointer to another structure to copy.
+     * @param[in] location Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+     */
+    oskar_TelescopeModel(const oskar_TelescopeModel* other, int location);
+
+    /**
      * @brief
      * Destroys the telescope structure, freeing any memory it occupies.
      *

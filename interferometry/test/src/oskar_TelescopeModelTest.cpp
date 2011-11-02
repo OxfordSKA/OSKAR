@@ -26,51 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_free.h"
+#include "interferometry/test/oskar_TelescopeModelTest.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int oskar_mem_free(oskar_Mem* mem)
+/**
+ * @details
+ * Tests filling a telescope model, and copying it to the GPU and back.
+ */
+void oskar_TelescopeModelTest::test_method()
 {
-    int location, err = 0;
-
-    /* Check that the structure exists. */
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Check if the structure owns the memory it points to. */
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    /* Get the meta-data. */
-    location = mem->private_location;
-
-    /* Check whether the memory is on the host or the device. */
-    if (location == OSKAR_LOCATION_CPU)
+    try
     {
-        /* Free host memory. */
-        if (mem->data != NULL) free(mem->data);
+        int n_stations = 10;
+        oskar_TelescopeModel* tel_cpu = new oskar_TelescopeModel(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, n_stations);
+
+        // Fill the telescope structure.
+
+        // Copy telescope structure to GPU.
+        oskar_TelescopeModel* tel_gpu = new oskar_TelescopeModel(tel_cpu,
+                OSKAR_LOCATION_GPU);
+
+        // Delete the old CPU structure.
+        delete tel_cpu;
+
+        // Copy the telescope structure back to the CPU.
+        tel_cpu = new oskar_TelescopeModel(tel_gpu, OSKAR_LOCATION_CPU);
+
+        // Delete the old GPU structure.
+        delete tel_gpu;
+
+        // Check the contents of the CPU structure.
+
+        // Delete the CPU structure.
+        delete tel_cpu;
     }
-    else if (location == OSKAR_LOCATION_GPU)
+    catch (const char* msg)
     {
-        /* Free GPU memory. */
-        if (mem->data != NULL) cudaFree(mem->data);
-        err = cudaPeekAtLastError();
+        CPPUNIT_FAIL(msg);
     }
-    else
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-    mem->data = NULL;
-    mem->private_location = 0;
-    mem->private_n_elements = 0;
-    mem->private_type = 0;
-    return err;
 }
-
-#ifdef __cplusplus
-}
-#endif

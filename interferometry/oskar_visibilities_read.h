@@ -30,32 +30,26 @@
 #define OSKAR_VISIBILITIES_READ_H_
 
 /**
- * @file oskar_Visibilties_read.h
+ * @file oskar_visibilties_read.h
  */
-
 
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
 /**
- * @brief Populates the contents of the visibility structure by loading
- * it from an OSKAR visibility dump file of the specified file name.
+ * @brief Returns a new visibility structure by reading the specified file.
  *
  * @details
- * Warning: Any existing contents of the visibility structure
- * being read into will be replaced by this function along with the type
- * and memory location.
  * Note: The loaded visibility structure will reside on the CPU.
  *
- * @param vis      The visibility structure to read into.
  * @param filename The filename to read from to.
  *
- * @return An error code.
+ * @return A pointer to the new visibility structure.
  */
 #ifdef __cplusplus
 extern "C"
 #endif
 OSKAR_EXPORT
-int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename);
+oskar_Visibilities* oskar_visibilties_read(const char* filename);
 
 #endif /* OSKAR_VISIBILITIES_READ_H_ */

@@ -406,8 +406,8 @@ void oskar_Visibilties_test::test_read_write()
 
     // Load the visibility structure from file.
     {
-        oskar_Visibilities* vis2 = NULL;
-        CPPUNIT_ASSERT_NO_THROW(vis2 = new oskar_Visibilities(filename));
+        oskar_Visibilities* vis2 = oskar_Visibilities::read(filename);
+        CPPUNIT_ASSERT(vis2 != NULL);
         CPPUNIT_ASSERT_EQUAL(amp_type, vis2->amp_type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2->coord_type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2->location());

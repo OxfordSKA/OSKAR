@@ -36,16 +36,16 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
+oskar_Visibilities* oskar_visibilties_read(const char* filename)
 {
-    if (filename == NULL || vis == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (filename == NULL)
+        return NULL;
 
     // Open the file to write to.
     FILE* file;
     file = fopen(filename, "rb");
     if (!file)
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
 
     // Read header.
     int num_times     = 0;
@@ -59,54 +59,55 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     if (fread(&oskar_vis_file_magic_number, sizeof(int), 1, file) != 1)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
     }
     // Check the file data type magic number is correct.
     if (oskar_vis_file_magic_number != OSKAR_VIS_FILE_ID)
     {
         fclose(file);
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        return NULL;
     }
     if (fread(&version, sizeof(int), 1, file) != 1)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
     }
     // Check the OSKAR is compatible.
     if (version > OSKAR_VERSION)
     {
         fclose(file);
-        return OSKAR_ERR_VERSION_MISMATCH;
+        return NULL;
     }
     if (fread(&num_times, sizeof(int), 1, file) != 1)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
     }
     if (fread(&num_baselines, sizeof(int), 1, file) != 1)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
     }
     if (fread(&num_channels, sizeof(int), 1, file) != 1)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
     }
     if (fread(&coord_type, sizeof(int), 1, file) != 1)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
     }
     if (fread(&amp_type, sizeof(int), 1, file) != 1)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        return NULL;
     }
 
     // Initialise the visibility structure.
     // Note: this will wipe any existing data in the structure.
-    vis->init(amp_type, OSKAR_LOCATION_CPU, num_times, num_baselines, num_channels);
+    oskar_Visibilities* vis = new oskar_Visibilities(amp_type,
+            OSKAR_LOCATION_CPU, num_times, num_baselines, num_channels);
 
     // Read data.
     size_t num_samples        = vis->num_samples();
@@ -115,28 +116,32 @@ int oskar_visibilties_read(oskar_Visibilities* vis, const char* filename)
     if (fread(vis->baseline_u.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        delete vis;
+        return NULL;
     }
     if (fread(vis->baseline_v.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        delete vis;
+        return NULL;
     }
 
     if (fread(vis->baseline_w.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        delete vis;
+        return NULL;
     }
 
     if (fread(vis->amplitude.data,  amp_element_size,   num_samples, file) != num_samples)
     {
         fclose(file);
-        return OSKAR_ERR_FILE_IO;
+        delete vis;
+        return NULL;
     }
 
     fclose(file);
 
-    return 0;
+    return vis;
 }
 

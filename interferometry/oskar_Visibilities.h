@@ -106,14 +106,6 @@ struct oskar_Visibilities
             const int num_channels = 0);
 
     /**
-     * @brief Constructs a visibility structure by loading it from the
-     * specified filename.
-     *
-     * @param filename  Filename path to an OSKAR visibility data file.
-     */
-    oskar_Visibilities(const char* filename);
-
-    /**
      * @brief Constructs a visibility structure at the specified location
      * by copying it from the specified visibility structure.
      *
@@ -182,22 +174,16 @@ struct oskar_Visibilities
     int write(const char* filename);
 
     /**
-     * @brief Populates the contents of the visibility structure by loading
-     * it from an OSKAR visibility dump file of the specified file name.
+     * @brief Returns a new visibility structure by reading the specified file.
      *
      * @details
-     * Warning: Any existing contents of the visibility structure
-     * being read into will be replaced by this function along with the type
-     * and memory location.
      * Note: The loaded visibility structure will reside on the CPU.
      *
-     * @note UNDER REVIEW
+     * @param filename The filename to read from.
      *
-     * @param filename The filename to read from to.
-     *
-     * @return An error code.
+     * @return A pointer to the new visibility structure.
      */
-    int read(const char* filename);
+    static oskar_Visibilities* read(const char* filename);
 
     /**
      * @brief Resize the memory in the visibility structure to the specified
@@ -269,6 +255,5 @@ struct oskar_Visibilities
 };
 
 typedef struct oskar_Visibilities oskar_Visibilities;
-
 
 #endif /* OSKAR_VISIBILITIES_H_ */

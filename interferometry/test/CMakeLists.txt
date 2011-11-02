@@ -8,6 +8,7 @@ if (CPPUNIT_FOUND)
         src/CppUnitMain.cu
         src/CudaCorrelatorTest.cu
         src/oskar_StationCoordTransformTest.cpp
+        src/oskar_TelescopeModelTest.cpp
         src/oskar_Visibilities_test.cpp
     )
 

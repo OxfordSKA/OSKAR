@@ -54,13 +54,13 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
 
     // Initialise memory.
     int err = 0;
-    err = oskar_mem_init(&vis->baseline_u, coord_type, location, num_samples);
+    err = oskar_mem_init(&vis->baseline_u, coord_type, location, num_samples, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->baseline_v, coord_type, location, num_samples);
+    err = oskar_mem_init(&vis->baseline_v, coord_type, location, num_samples, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->baseline_w, coord_type, location, num_samples);
+    err = oskar_mem_init(&vis->baseline_w, coord_type, location, num_samples, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->amplitude, amp_type, location, num_samples);
+    err = oskar_mem_init(&vis->amplitude, amp_type, location, num_samples, 1);
     if (err) return err;
 
     return 0;

@@ -52,7 +52,7 @@ struct double4c;
  *
  * If using C++, then the meta-data is made private, and accessor methods
  * are also provided. The C++ interface also provides facility for the structure
- * to take ownership of the memory. If the value of the private_ower member
+ * to take ownership of the memory. If the value of the private_owner member
  * variable flag is set to true the memory will automatically be released
  * when the structure is deleted.
  */
@@ -89,7 +89,7 @@ public:
      * @param[in] owner Bool flag specifying if the structure should take
      *                  ownership of the memory (default = true).
      */
-    oskar_Mem(int ower = 1);
+    oskar_Mem(int owner = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
@@ -104,7 +104,7 @@ public:
      * @param[in] owner      Bool flag specifying if the structure should take
      *                       ownership of the memory (default = true).
      */
-    oskar_Mem(int type, int location, int n_elements = 0, int ower = 1);
+    oskar_Mem(int type, int location, int n_elements = 0, int owner = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
@@ -118,7 +118,7 @@ public:
      * @param[in] owner    Bool flag specifying if the structure should take
      *                     ownership of the memory (default = true).
      */
-    oskar_Mem(const oskar_Mem* other, int location, int ower = 1);
+    oskar_Mem(const oskar_Mem* other, int location, int owner = 1);
 
     /**
      * @brief Destroys the structure.
@@ -166,6 +166,15 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int append(const void* from, int type, int from_location, int num_elements);
+
+    /**
+     * @brief Sets or releases ownership of the memory.
+     *
+     * @details
+     * Warning: this method can be dangerous if more than one oskar_Mem
+     * structure owns the memory.
+     */
+    void set_owner(bool value) { private_owner = (int)value; }
 #endif
 
 #ifdef __cplusplus
@@ -174,9 +183,6 @@ public:
     int location() const {return private_location;}
     int n_elements() const {return private_n_elements;}
     bool owner() const { return private_owner; }
-    // Warning: using this method can be dangerous if used to allow more than one
-    // oskar_Mem structure to own the memory.
-    void set_owner(bool value) { private_owner = (int)value; }
     bool is_double() const;
     bool is_complex() const;
     bool is_null() const {return (data == 0);}

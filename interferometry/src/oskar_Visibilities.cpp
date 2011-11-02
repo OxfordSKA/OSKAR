@@ -50,19 +50,6 @@ oskar_Visibilities::oskar_Visibilities(const int amp_type, const int location,
         throw "error allocation visibility structure";
 }
 
-oskar_Visibilities::oskar_Visibilities(const char* filename)
-: num_times(0),
-  num_baselines(0),
-  num_channels(0),
-  baseline_u(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
-  baseline_v(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
-  baseline_w(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0),
-  amplitude(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0)
-{
-    if (oskar_visibilties_read(this, filename) != 0)
-        throw "unable to read visibility file";
-}
-
 // Copy constructor.
 oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
         const int location)
@@ -98,9 +85,9 @@ int oskar_Visibilities::write(const char* filename)
     return oskar_visibilties_write(filename, this);
 }
 
-int oskar_Visibilities::read(const char* filename)
+oskar_Visibilities* oskar_Visibilities::read(const char* filename)
 {
-    return oskar_visibilties_read(this, filename);
+    return oskar_visibilties_read(filename);
 }
 
 int oskar_Visibilities::resize(int num_times, int num_baselines, int num_channels)
