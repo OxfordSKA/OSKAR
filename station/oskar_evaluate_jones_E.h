@@ -37,6 +37,7 @@
 #include "sky/oskar_SkyModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
+#include "station/oskar_WorkE.h"
 
 /**
  * @brief Evaluates a set of E Jones matrices.
@@ -53,7 +54,8 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, oskar_SkyModel* sky,
-        oskar_TelescopeModel* telescope, double gast);
+int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
+        const oskar_TelescopeModel* telescope, const double gast,
+        oskar_WorkE* work);
 
 #endif /* OSKAR_EVALUATE_JONES_E_H_ */

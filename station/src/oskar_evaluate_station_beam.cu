@@ -42,6 +42,7 @@
 #include "math/cudak/oskar_cudak_dftw_2d_seq_in.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
 #include "math/cudak/oskar_cudak_vec_set_c.h"
+#include "station/oskar_WorkE.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,8 +52,8 @@
 extern "C" {
 #endif
 
-int oskar_evaluate_station_beam(oskar_Mem* E, oskar_SkyModel* sky,
-        oskar_StationModel* station)
+int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_SkyModel* sky,
+        const oskar_StationModel* station, oskar_WorkE* work)
 {
     if (E == NULL || sky == NULL || station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -77,7 +78,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, oskar_SkyModel* sky,
     // Element pattern assumed to be isotropic.
     if (station->element_pattern == NULL && E->is_scalar())
     {
-        oskar_evalate_station_beam_scalar(E, sky, station);
+        oskar_evalate_station_beam_scalar(E, sky, station, work);
     }
 
     // Make use of element pattern data.
@@ -95,8 +96,8 @@ int oskar_evaluate_station_beam(oskar_Mem* E, oskar_SkyModel* sky,
 }
 
 OSKAR_EXPORT
-int oskar_evalate_station_beam_scalar(oskar_Mem* E, oskar_SkyModel* sky,
-        oskar_StationModel* station)
+int oskar_evalate_station_beam_scalar(oskar_Mem* E, const oskar_SkyModel* sky,
+        const oskar_StationModel* station, oskar_WorkE* work)
 {
     // Checks
     // TODO

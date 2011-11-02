@@ -36,6 +36,7 @@
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 #include "station/oskar_StationModel.h"
+#include "station/oskar_WorkE.h"
 #include "math/oskar_Jones.h"
 
 #ifdef __cplusplus
@@ -54,13 +55,13 @@ extern "C" {
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_station_beam(oskar_Mem* E, oskar_SkyModel* sky,
-        oskar_StationModel* station);
+int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_SkyModel* sky,
+        const oskar_StationModel* station, oskar_WorkE* work);
 
 
 OSKAR_EXPORT
-int oskar_evalate_station_beam_scalar(oskar_Mem* E, oskar_SkyModel* sky,
-        oskar_StationModel* station);
+int oskar_evalate_station_beam_scalar(oskar_Mem* E, const oskar_SkyModel* sky,
+        const oskar_StationModel* station, oskar_WorkE* work);
 
 
 
