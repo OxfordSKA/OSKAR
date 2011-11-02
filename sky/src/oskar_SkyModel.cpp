@@ -33,6 +33,7 @@
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_set_source.h"
+#include "sky/oskar_sky_model_check_mem.h"
 #include <cuda_runtime_api.h>
 #include <cstdio>
 
@@ -130,18 +131,21 @@ int oskar_SkyModel::set_source(int index, double ra, double dec, double I,
             ref_frequency, spectral_index);
 }
 
+int oskar_SkyModel::type() const
+{
+    return oskar_sky_model_type(this);
+}
+
+int oskar_SkyModel::location() const
+{
+    return oskar_sky_model_location(this);
+}
 
 
-
-
-
-
-
-
-
-
-
-
+bool oskar_SkyModel::is_double() const
+{
+    return (oskar_sky_model_type(this) == OSKAR_DOUBLE);
+}
 
 
 
