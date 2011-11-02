@@ -26,56 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_copy.h"
-#include "utility/oskar_mem_copy.h"
+#ifndef OSKAR_TELESCOPE_MODEL_COPY_H_
+#define OSKAR_TELESCOPE_MODEL_COPY_H_
+
+/**
+ * @file oskar_telescope_model_copy.h
+ */
+
+#include "oskar_global.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_station_model_copy(oskar_StationModel* dst,
-        const oskar_StationModel* src)
-{
-    int error = 0;
-
-    /* Check that all pointers are not NULL. */
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Copy the memory blocks. */
-    error = oskar_mem_copy(&dst->x, &src->x);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->y, &src->y);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->z, &src->z);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->weight, &src->weight);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->amp_gain, &src->amp_gain);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->amp_error, &src->amp_error);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->phase_offset, &src->phase_offset);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->phase_error, &src->phase_error);
-    if (error) return error;
-
-    /* Copy the meta data. */
-    dst->n_elements = src->n_elements;
-    dst->longitude = src->longitude;
-    dst->latitude = src->latitude;
-    dst->altitude = src->altitude;
-    dst->ra0 = src->ra0;
-    dst->dec0 = src->dec0;
-    dst->single_element_model = src->single_element_model;
-    dst->bit_depth = src->bit_depth;
-
-    /* TODO Work out how to deal with child stations. */
-    /* TODO Work out how to deal with element pattern data. */
-
-    return 0;
-}
+/**
+ * @brief
+ * Copies a telescope model from one structure to another.
+ *
+ * @details
+ * Copies telescope model data from one structure to another.
+ *
+ * @param dst Telescope model structure to copy into.
+ * @param src Telescope model structure to copy from.
+ */
+OSKAR_EXPORT
+int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
+        const oskar_TelescopeModel* src);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_TELESCOPE_MODEL_COPY_H_ */

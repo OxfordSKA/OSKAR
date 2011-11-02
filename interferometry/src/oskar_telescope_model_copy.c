@@ -26,52 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "interferometry/oskar_telescope_model_copy.h"
+#include "interferometry/oskar_TelescopeModel.h"
 #include "station/oskar_station_model_copy.h"
 #include "utility/oskar_mem_copy.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_station_model_copy(oskar_StationModel* dst,
-        const oskar_StationModel* src)
+int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
+        const oskar_TelescopeModel* src)
 {
-    int error = 0;
+    int error = 0, i = 0;
 
-    /* Check that all pointers are not NULL. */
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Ensure there is enough room in the station array. */
+    dst->station = realloc(dst->station,
+            src->num_stations * sizeof(oskar_StationModel));
 
-    /* Copy the memory blocks. */
-    error = oskar_mem_copy(&dst->x, &src->x);
+    /* Copy each station. */
+    for (i = 0; i < src->num_stations; ++i)
+    {
+        error = oskar_station_model_copy(&dst->station[i], &src->station[i]);
+        if (error) return error;
+    }
+
+    /* Copy the coordinates. */
+    error = oskar_mem_copy(&dst->station_u, &src->station_u);
     if (error) return error;
-    error = oskar_mem_copy(&dst->y, &src->y);
+    error = oskar_mem_copy(&dst->station_v, &src->station_v);
     if (error) return error;
-    error = oskar_mem_copy(&dst->z, &src->z);
+    error = oskar_mem_copy(&dst->station_w, &src->station_w);
     if (error) return error;
-    error = oskar_mem_copy(&dst->weight, &src->weight);
+    error = oskar_mem_copy(&dst->station_x, &src->station_x);
     if (error) return error;
-    error = oskar_mem_copy(&dst->amp_gain, &src->amp_gain);
+    error = oskar_mem_copy(&dst->station_y, &src->station_y);
     if (error) return error;
-    error = oskar_mem_copy(&dst->amp_error, &src->amp_error);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->phase_offset, &src->phase_offset);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->phase_error, &src->phase_error);
+    error = oskar_mem_copy(&dst->station_z, &src->station_z);
     if (error) return error;
 
-    /* Copy the meta data. */
-    dst->n_elements = src->n_elements;
-    dst->longitude = src->longitude;
-    dst->latitude = src->latitude;
-    dst->altitude = src->altitude;
+    /* Copy remaining meta-data. */
+    dst->num_stations = src->num_stations;
+    dst->identical_stations = src->identical_stations;
+    dst->use_common_sky = src->use_common_sky;
     dst->ra0 = src->ra0;
     dst->dec0 = src->dec0;
-    dst->single_element_model = src->single_element_model;
-    dst->bit_depth = src->bit_depth;
-
-    /* TODO Work out how to deal with child stations. */
-    /* TODO Work out how to deal with element pattern data. */
 
     return 0;
 }
