@@ -50,7 +50,6 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         oskar_WorkE* work)
 {
     // Consistency and validation checks on input arguments.
-    // -------------------------------------------------------------------------
     if (E == NULL || sky == NULL || telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
@@ -60,16 +59,9 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
     if (telescope->station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // TODO input argument validation
-    // - Check the sky, telescope and Jones for type consistency.
-    //    - double / single precision consistency
-    //    - format of E (scalar, matrix) with presence of element pattern data.
-    // - Work out what checking has to be done here and what can be delayed to
-    //   next level wrapper functions.
-
+    // TODO more checks..?
 
     // Evaluate the station beam for each station for each source position.
-    // ------------------------------------------------------------------------
     if (telescope->identical_stations && telescope->use_common_sky)
     {
         // Evaluate horizontal l,m,n once and the station beam for
@@ -87,7 +79,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         oskar_jones_get_station_pointer(&E0, E, 0);
         oskar_evaluate_station_beam(&E0, sky, station0, work);
 
-        //  (zero sources below horizon)
+        //  TODO zero sources below horizon.
     }
     else
     {
@@ -95,24 +87,34 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         {
             // Evaluate horizontal l,m,n once and use it for evaluating
             // the station beam for each station.
-            // TODO --> oskar_evalute_source_hor_lmn(sky, station0, gast, work);
-            // TODO --> oskar_evalute_beam_hor_lmn(station0, gast, work);
+            oskar_StationModel* station0 = &telescope->station[0];
+            oskar_evaluate_beam_hoizontal_lmn(work, station0, gast);
+            oskar_evaluate_source_horizontal_lmn(work, sky, station0, gast);
 
             // loop over stations to evaluate E.
+            oskar_Mem E_station;
             for (int i = 0; i < telescope->num_stations; ++i)
             {
-                //oskar_StationModel* station = &telescope->station[i];
-                //oskar_evaluate_station_beam(&E0, sky, station, EWork);
+                oskar_StationModel* station = &telescope->station[i];
+                oskar_jones_get_station_pointer(&E_station, E, i);
+                oskar_evaluate_station_beam(&E_station, sky, station, work);
             }
+
+            //  TODO zero sources below horizon.
         }
         else
         {
             // Evaluate horizontal l,m,n and the station beam for each station.
             // loop over stations to evaluate E.
+            oskar_Mem E_station;
             for (int i = 0; i < telescope->num_stations; ++i)
             {
-                //oskar_StationModel* station = &telescope->station[i];
-
+                oskar_StationModel* station = &telescope->station[i];
+                oskar_evaluate_beam_hoizontal_lmn(work, station, gast);
+                oskar_evaluate_source_horizontal_lmn(work, sky, station, gast);
+                oskar_jones_get_station_pointer(&E_station, E, i);
+                oskar_evaluate_station_beam(&E_station, sky, station, work);
+                //  TODO zero sources below horizon.
             }
         }
     }

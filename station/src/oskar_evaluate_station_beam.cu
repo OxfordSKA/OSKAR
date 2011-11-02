@@ -113,14 +113,9 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* E, const oskar_SkyModel* sky,
     size_t shared_mem_size = (block_dim.x + block_dim.y) * element_size;
 
     // Double precision version.
-    if (E->is_double() && sky->type() == OSKAR_DOUBLE && station->coord_type() == OSKAR_DOUBLE)
+    if (E->is_double() && sky->type() == OSKAR_DOUBLE
+            && station->coord_type() == OSKAR_DOUBLE)
     {
-//        double *d_beam_l, *d_beam_m; // beam position direction cosines.
-//        cudaMalloc(&d_beam_l, sizeof(double));
-//        cudaMalloc(&d_beam_m, sizeof(double));
-//        cudaMemcpy(d_beam_l, &h_beam_l, sizeof(double), cudaMemcpyHostToDevice);
-//        cudaMemcpy(d_beam_m, &h_beam_m, sizeof(double), cudaMemcpyHostToDevice);
-
         // TODO
         // station l,m,n   (temp) <-- station struct
         // station weights (temp) <-- station struct
