@@ -26,74 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_realloc.h"
 
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_get_pointer.h"
+#include "utility/oskar_mem_element_size.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
+int oskar_mem_get_pointer(oskar_Mem* ref, const oskar_Mem* mem,
+        const int offset, const int num_elements)
 {
-    size_t element_size, new_size, old_size;
-    int error = 0;
+    size_t element_size, offset_bytes;
 
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    /* Check for sane inputs. */
-    if (mem == NULL)
+    if (ref == NULL || mem == 0)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Get size of new and old memory blocks. */
+    if (offset + num_elements > mem->private_n_elements)
+        return OSKAR_ERR_OUT_OF_RANGE;
+
     element_size = oskar_mem_element_size(mem->private_type);
-    if (element_size == 0)
-        return OSKAR_ERR_BAD_DATA_TYPE;
-    new_size = num_elements * element_size;
-    old_size = mem->private_n_elements * element_size;
+    offset_bytes = offset * element_size;
+    ref->private_type = mem->private_type;
+    ref->private_n_elements = num_elements;
+    ref->data = (void*)((char*)mem->data + offset_bytes);
+    ref->private_location = mem->private_location;
+    ref->private_owner = 0;
 
-    /* Check memory location. */
-    if (mem->private_location == OSKAR_LOCATION_CPU)
-    {
-        /* Reallocate the memory. */
-        void* mem_new = NULL;
-        mem_new = realloc(mem->data, new_size);
-        if (mem_new == NULL)
-            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-
-        /* Set the new meta-data. */
-        mem->data = mem_new;
-        mem->private_n_elements = num_elements;
-    }
-    else if (mem->private_location == OSKAR_LOCATION_GPU)
-    {
-        /* Allocate a new block of memory. */
-        size_t copy_size;
-        void* mem_new = NULL;
-        cudaMalloc(&mem_new, new_size);
-
-        /* Copy contents of old block to new block. */
-        copy_size = (old_size > new_size) ? new_size : old_size;
-        cudaMemcpy(mem_new, mem->data, copy_size, cudaMemcpyDeviceToDevice);
-
-        /* Free the old block. */
-        cudaFree(mem->data);
-        error = cudaPeekAtLastError();
-
-        /* Set the new meta-data. */
-        mem->data = mem_new;
-        mem->private_n_elements = num_elements;
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-    return error;
+    return 0;
 }
 
 #ifdef __cplusplus
 }
 #endif
+

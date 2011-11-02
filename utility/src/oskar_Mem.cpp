@@ -36,28 +36,31 @@
 #include "utility/oskar_mem_type_check.h"
 #include <cstdlib>
 
-oskar_Mem::oskar_Mem()
+oskar_Mem::oskar_Mem(int owner)
 : private_type(0),
   private_location(0),
   private_n_elements(0),
+  private_owner(owner),
   data(NULL)
 {
 }
 
-oskar_Mem::oskar_Mem(int type, int location, int n_elements)
+oskar_Mem::oskar_Mem(int type, int location, int n_elements, int owner)
 : private_type(0),
   private_location(0),
   private_n_elements(0),
+  private_owner(owner),
   data(NULL)
 {
     if (oskar_mem_init(this, type, location, n_elements))
         throw "Error in oskar_mem_init.";
 }
 
-oskar_Mem::oskar_Mem(const oskar_Mem* other, int location)
+oskar_Mem::oskar_Mem(const oskar_Mem* other, int location, int owner)
 : private_type(0),
   private_location(0),
   private_n_elements(0),
+  private_owner(owner),
   data(NULL)
 {
     if (oskar_mem_init(this, other->type(), location, other->n_elements()))
@@ -68,8 +71,9 @@ oskar_Mem::oskar_Mem(const oskar_Mem* other, int location)
 
 oskar_Mem::~oskar_Mem()
 {
-    if (oskar_mem_free(this))
-        throw "Error in oskar_mem_free.";
+    if (this->owner())
+        if (oskar_mem_free(this))
+            throw "Error in oskar_mem_free.";
 }
 
 int oskar_Mem::copy_to(oskar_Mem* other)

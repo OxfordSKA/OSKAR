@@ -44,14 +44,17 @@ struct double4c;
 #endif
 
 /**
- * @brief Structure to wrap a pointer to memory.
+ * @brief Structure to wrap a memory pointer either on the CPU or GPU.
  *
  * @details
- * This is a valid C-structure that holds a pointer to memory either on the CPU
+ * This is a valid C-structure that holds a memory pointer either on the CPU
  * or GPU, and defines the type of the data that it points to.
  *
- * If using C++, then the meta-data is made private, and read-only accessor
- * functions are also provided.
+ * If using C++, then the meta-data is made private, and accessor methods
+ * are also provided. The C++ interface also provides facility for the structure
+ * to take ownership of the memory. If the value of the private_ower member
+ * variable flag is set to true the memory will automatically be released
+ * when the structure is deleted.
  */
 #ifdef __cplusplus
 extern "C"
@@ -65,6 +68,8 @@ private:
     int private_type;
     int private_location;
     int private_n_elements;
+    int private_owner;      // Bool flag specifying if the C++ interface should
+                            // take ownership of the memory.
 
 #ifdef __cplusplus
 /* If C++, then make the remaining members public. */
@@ -80,8 +85,11 @@ public:
      * @details
      * Constructs a new oskar_Mem data structure.
      * The pointer and data types are all set to 0.
+     *
+     * @param[in] owner Bool flag specifying if the structure should take
+     *                  ownership of the memory (default = true).
      */
-    oskar_Mem();
+    oskar_Mem(int ower = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
@@ -90,11 +98,13 @@ public:
      * Constructs a new oskar_Mem data structure, allocating memory for it in
      * the specified location.
      *
-     * @param[in] type Enumerated data type of memory contents (magic number).
-     * @param[in] location Specify 0 for host memory, 1 for device memory.
+     * @param[in] type       Enumerated data type of memory contents (magic number).
+     * @param[in] location   Specify 0 for host memory, 1 for device memory.
      * @param[in] n_elements Number of elements of type \p type in the array.
+     * @param[in] owner      Bool flag specifying if the structure should take
+     *                       ownership of the memory (default = true).
      */
-    oskar_Mem(int type, int location, int n_elements = 0);
+    oskar_Mem(int type, int location, int n_elements = 0, int ower = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
@@ -103,17 +113,19 @@ public:
      * Constructs a new oskar_Mem data structure, allocating memory for it in
      * the specified location.
      *
-     * @param[in] other Enumerated data type of memory contents (magic number).
+     * @param[in] other    Enumerated data type of memory contents (magic number).
      * @param[in] location Specify 0 for host memory, 1 for device memory.
+     * @param[in] owner    Bool flag specifying if the structure should take
+     *                     ownership of the memory (default = true).
      */
-    oskar_Mem(const oskar_Mem* other, int location);
+    oskar_Mem(const oskar_Mem* other, int location, int ower = 1);
 
     /**
-     * @brief Destroys the structure, freeing any memory held by it.
+     * @brief Destroys the structure.
      *
      * @details
-     * Destroys the structure.
-     * If the pointer is not NULL, then the memory is also freed.
+     * If the pointer is not NULL and the ownership flag is set to true,
+     * then the memory is also freed.
      */
     ~oskar_Mem();
 
@@ -161,6 +173,10 @@ public:
     int type() const {return private_type;}
     int location() const {return private_location;}
     int n_elements() const {return private_n_elements;}
+    bool owner() const { return private_owner; }
+    // Warning: using this method can be dangerous if used to allow more than one
+    // oskar_Mem structure to own the memory.
+    void set_owner(bool value) { private_owner = (int)value; }
     bool is_double() const;
     bool is_complex() const;
     bool is_null() const {return (data == 0);}

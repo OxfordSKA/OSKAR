@@ -26,50 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_free.h"
+#ifndef OSKAR_MEM_GET_POINTER_H_
+#define OSKAR_MEM_GET_POINTER_H_
 
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
+/**
+ * @file oskar_mem_get_pointer.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_free(oskar_Mem* mem)
-{
-    int location, err = 0;
-
-    /* Check that the structure exists. */
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
-
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    /* Get the meta-data. */
-    location = mem->private_location;
-
-    /* Check whether the memory is on the host or the device. */
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        /* Free host memory. */
-        if (mem->data != NULL) free(mem->data);
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        /* Free GPU memory. */
-        if (mem->data != NULL) cudaFree(mem->data);
-        err = cudaPeekAtLastError();
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-    mem->data = NULL;
-    mem->private_location = 0;
-    mem->private_n_elements = 0;
-    mem->private_type = 0;
-    return err;
-}
+/**
+ * @brief Returns oskar_Mem structure which holds a pointer to memory held
+ * within another oskar_Mem structure.
+ *
+ * @details
+ * Note: The returned memory structure is set to not hold ownership of
+ * memory which it points to.
+ *
+ * @param[out] ref         oskar_Mem structure holding a pointer to a location
+ *                         in memory and its associated meta-data.
+ * @param[in] mem          oskar_Mem structure from which the pointer reference
+ *                         is made.
+ * @param[in] offset       Offset into the \p mem to point to.
+ * @param[in] num_elements Number of elements of \p mem referred to in the
+ *                         by \p ref.
+ *
+ * @return error code.
+ */
+OSKAR_EXPORT
+int oskar_mem_get_pointer(oskar_Mem* ref, const oskar_Mem* mem,
+        const int offset, const int num_elements);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif // OSKAR_MEM_GET_POINTER_H_

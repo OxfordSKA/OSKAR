@@ -43,6 +43,8 @@ int oskar_mem_alloc(oskar_Mem* mem)
     /* Check that the structure exists. */
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
+    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+
     /* Get the meta-data. */
     n_elements = mem->private_n_elements;
     location = mem->private_location;
