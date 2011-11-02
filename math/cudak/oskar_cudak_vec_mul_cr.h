@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_CUDAK_VEC_MUL_CR_H_
-#define OSKAR_MATH_CUDAK_VEC_MUL_CR_H_
+#ifndef OSKAR_CUDAK_VEC_MUL_CR_H_
+#define OSKAR_CUDAK_VEC_MUL_CR_H_
 
 /**
- * @file oskar_math_cudak_vec_mul_cr.h
+ * @file oskar_cudak_vec_mul_cr.h
  */
 
 #include "oskar_global.h"
@@ -71,4 +71,4 @@ __global__
 void oskar_cudak_vec_mul_cr_d(int n, const double2* a, const double* b,
         double2* c);
 
-#endif // OSKAR_MATH_CUDAK_VEC_MUL_CR_H_
+#endif // OSKAR_CUDAK_VEC_MUL_CR_H_

@@ -26,29 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_CUDAK_VEC_ADD_RR_H_
-#define OSKAR_MATH_CUDAK_VEC_ADD_RR_H_
+#include "math/cudak/oskar_cudak_dftw_2d_seq_in.h"
 
-/**
- * @file oskar_math_cudak_vec_add_rr.h
- */
-
-#include "oskar_global.h"
-
-/**
- * @brief
- * CUDA kernel to add two real vectors together (single precision).
- *
- * @details
- * This CUDA kernel adds two real vectors together using the graphics card.
- *
- * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
- * @param[out] c Output vector.
- */
+// Single precision.
 __global__
-void oskar_cudak_vec_add_rr_f(int n, const float* a, const float* b,
-        float* c);
+void oskar_cudak_dftw_2d_f(const int n_in, const float* x_in,
+        const float* y_in, const float x_out, const float y_out,
+        float2* weights)
+{
+    // Get input index.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n_in) return;
 
-#endif // OSKAR_MATH_CUDAK_VEC_ADD_RR_H_
+    // Cache input data from global memory.
+    float cxi = x_in[i];
+    float cyi = y_in[i];
+
+    // Compute the geometric phase of the output direction.
+    float phase;
+    phase =  cxi * x_out;
+    phase += cyi * y_out;
+    float2 weight;
+    sincosf(phase, &weight.y, &weight.x);
+
+    // Write result to global memory.
+    weights[i] = weight;
+}
+
+// Double precision.
+__global__
+void oskar_cudak_dftw_2d_d(const int n_in, const double* x_in,
+        const double* y_in, const double x_out, const double y_out,
+        double2* weights)
+{
+    // Get input index.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n_in) return;
+
+    // Cache input data from global memory.
+    double cxi = x_in[i];
+    double cyi = y_in[i];
+
+    // Compute the geometric phase of the output direction.
+    double phase;
+    phase =  cxi * x_out;
+    phase += cyi * y_out;
+    double2 weight;
+    sincos(phase, &weight.y, &weight.x);
+
+    // Write result to global memory.
+    weights[i] = weight;
+}

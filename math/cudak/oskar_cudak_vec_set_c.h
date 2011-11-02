@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_CUDAK_VEC_SET_C_H_
-#define OSKAR_MATH_CUDAK_VEC_SET_C_H_
+#ifndef OSKAR_CUDAK_VEC_SET_C_H_
+#define OSKAR_CUDAK_VEC_SET_C_H_
 
 /**
- * @file oskar_math_cudak_vec_set_c.h
+ * @file oskar_cudak_vec_set_c.h
  */
 
 #include "oskar_global.h"
@@ -63,4 +63,4 @@ void oskar_cudak_vec_set_c_f(int n, const float2 alpha, float2* c);
 __global__
 void oskar_cudak_vec_set_c_d(int n, const double2 alpha, double2* c);
 
-#endif // OSKAR_MATH_CUDAK_VEC_SET_C_H_
+#endif // OSKAR_CUDAK_VEC_SET_C_H_

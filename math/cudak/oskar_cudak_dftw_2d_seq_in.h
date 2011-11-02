@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_CUDAK_DFTW_2D_SEQ_IN_H_
-#define OSKAR_MATH_CUDAK_DFTW_2D_SEQ_IN_H_
+#ifndef OSKAR_CUDAK_DFTW_2D_SEQ_IN_H_
+#define OSKAR_CUDAK_DFTW_2D_SEQ_IN_H_
 
 /**
- * @file oskar_math_cudak_dftw_2d_seq_in.h
+ * @file oskar_cudak_dftw_2d_seq_in.h
  */
 
 #include "oskar_global.h"
@@ -95,4 +95,4 @@ void oskar_cudak_dftw_2d_seq_in_d(const int n_in, const double* x_in,
         const double* y_in, const int n_out, const double* x_out,
         const double* y_out, double2* weights);
 
-#endif // OSKAR_MATH_CUDAK_DFTW_2D_SEQ_IN_H_
+#endif // OSKAR_CUDAK_DFTW_2D_SEQ_IN_H_

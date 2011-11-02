@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MATH_CUDAK_DFTSW_C2C_2D_H_
-#define OSKAR_MATH_CUDAK_DFTSW_C2C_2D_H_
+#ifndef OSKAR_CUDAK_DFTSW_C2C_2D_H_
+#define OSKAR_CUDAK_DFTSW_C2C_2D_H_
 
 /**
- * @file oskar_math_cudak_dftsw_c2c_2d.h
+ * @file oskar_cudak_dftsw_c2c_2d.h
  */
 
 #include "oskar_global.h"
@@ -79,4 +79,4 @@ void oskar_cudak_dftsw_c2c_2d_d(const int n_in, const double* x_in,
         const double* x_out, const double* y_out, const int max_in_chunk,
         const double2* data, double2* output);
 
-#endif // OSKAR_MATH_CUDAK_DFTSW_C2C_2D_H_
+#endif // OSKAR_CUDAK_DFTSW_C2C_2D_H_
