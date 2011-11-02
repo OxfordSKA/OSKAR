@@ -39,13 +39,14 @@
 #include "math/oskar_jones_get_station_pointer.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_WorkE.h"
-
+#include "station/oskar_evaluate_beam_horizontal_lmn.h"
+#include "station/oskar_evaluate_source_horizontal_lmn.h"
 
 #ifdef __cplusplus
 extern "C"
 #endif
 int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double /*gast*/,
+        const oskar_TelescopeModel* telescope, const double gast,
         oskar_WorkE* work)
 {
     // Consistency and validation checks on input arguments.
@@ -76,18 +77,10 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         // in E.
         oskar_StationModel* station0 = &telescope->station[0];
 
-        // Evaluate the horizontal l,m,m coordinates for beam phase centre
+        // Evaluate the horizontal l,m,m coordinates of the beam phase centre
         // and sources.
-        // TODO --> oskar_evalute_beam_hor_lmn(station0, gast, work);
-        // oskar_cuda_ra_dec_to_hor_lmn_d(m, ra, dec, lst, lat, hor_l, hor_m, hor_n);
-        // TODO --> oskar_evalute_source_hor_lmn(sky, station0, gast, work);
-
-        // work:
-        //  weights
-        //  signal
-        //  hor_l;
-        //  hor_m;
-        //  hor_n;
+        oskar_evaluate_beam_hoizontal_lmn(work, station0, gast);
+        oskar_evaluate_source_horizontal_lmn(work, sky, station0, gast);
 
         // Evaluate the station beam.
         oskar_Mem E0; // Pointer to the row of E for station 0.
