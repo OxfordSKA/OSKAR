@@ -86,4 +86,4 @@ inline int oskar_mem_is_scalar(const int mem_type)
 }
 #endif
 
-#endif // OSKAR_MEM_TYPE_CHECK_H_
+#endif /* OSKAR_MEM_TYPE_CHECK_H_ */

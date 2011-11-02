@@ -125,4 +125,4 @@ typedef struct double4c double4c;
 }
 #endif
 
-#endif // OSKAR_VECTOR_TYPES_H_
+#endif /* OSKAR_VECTOR_TYPES_H_ */

@@ -69,4 +69,4 @@ int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements);
 }
 #endif
 
-#endif // OSKAR_MEM_INIT_H_
+#endif /* OSKAR_MEM_INIT_H_ */

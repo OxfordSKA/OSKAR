@@ -33,27 +33,27 @@
 extern "C" {
 #endif
 
-// Single precision.
+/* Single precision. */
 int oskar_ha_dec_to_hor_lmn_f(int n, const float* ha, const float* dec,
         float lat, float* hor_l, float* hor_m, float* hor_n)
 {
     float sinLat, cosLat;
     int i;
 
-    // Compute latitude trig.
+    /* Compute latitude trig. */
     sinLat = sinf(lat);
     cosLat = cosf(lat);
 
-    // Loop over positions.
+    /* Loop over positions. */
     for (i = 0; i < n; ++i)
     {
         float sh, sd, sinHA, sinDec, cosHA, cosDec, t, X1, Y2;
 
-        // Load local equatorial coordinates.
+        /* Load local equatorial coordinates. */
         sh = ha[i];
         sd = dec[i];
 
-        // Find direction cosines.
+        /* Find direction cosines. */
         sinHA = sinf(sh);
         sinDec = sinf(sd);
         cosHA = cosf(sh);
@@ -63,36 +63,36 @@ int oskar_ha_dec_to_hor_lmn_f(int n, const float* ha, const float* dec,
         Y2 = sinLat * sinDec + cosLat * t;
         t = -cosDec * sinHA;
 
-        // Store source direction cosines.
-        hor_l[i] = t;  // Horizontal x-component.
-        hor_m[i] = X1; // Horizontal y-component.
-        hor_n[i] = Y2; // Horizontal z-component.
+        /* Store source direction cosines. */
+        hor_l[i] = t;  /* Horizontal x-component. */
+        hor_m[i] = X1; /* Horizontal y-component. */
+        hor_n[i] = Y2; /* Horizontal z-component. */
     }
 
     return 0;
 }
 
-// Double precision.
+/* Double precision. */
 int oskar_ha_dec_to_hor_lmn_d(int n, const double* ha, const double* dec,
         double lat, double* hor_l, double* hor_m, double* hor_n)
 {
     double sinLat, cosLat;
     int i;
 
-    // Compute latitude trig.
+    /* Compute latitude trig. */
     sinLat = sin(lat);
     cosLat = cos(lat);
 
-    // Loop over positions.
+    /* Loop over positions. */
     for (i = 0; i < n; ++i)
     {
         double sh, sd, sinHA, sinDec, cosHA, cosDec, t, X1, Y2;
 
-        // Load local equatorial coordinates.
+        /* Load local equatorial coordinates. */
         sh = ha[i];
         sd = dec[i];
 
-        // Find direction cosines.
+        /* Find direction cosines. */
         sinHA = sin(sh);
         sinDec = sin(sd);
         cosHA = cos(sh);
@@ -102,10 +102,10 @@ int oskar_ha_dec_to_hor_lmn_d(int n, const double* ha, const double* dec,
         Y2 = sinLat * sinDec + cosLat * t;
         t = -cosDec * sinHA;
 
-        // Store source direction cosines.
-        hor_l[i] = t;  // Horizontal x-component.
-        hor_m[i] = X1; // Horizontal y-component.
-        hor_n[i] = Y2; // Horizontal z-component.
+        /* Store source direction cosines. */
+        hor_l[i] = t;  /* Horizontal x-component. */
+        hor_m[i] = X1; /* Horizontal y-component. */
+        hor_n[i] = Y2; /* Horizontal z-component. */
     }
 
     return 0;

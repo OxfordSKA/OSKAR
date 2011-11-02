@@ -91,4 +91,4 @@ int oskar_xyz_to_uvw_cuda_d(int n, const double* d_x, const double* d_y,
 }
 #endif
 
-#endif // OSKAR_XYZ_TO_UVW_CUDA_H_
+#endif /* OSKAR_XYZ_TO_UVW_CUDA_H_ */

@@ -131,4 +131,4 @@ int oskar_cuda_correlator_scalar_d(int na, const double* ax,
 }
 #endif
 
-#endif // OSKAR_CUDA_CORRELATOR_SCALAR_H_
+#endif /* OSKAR_CUDA_CORRELATOR_SCALAR_H_ */

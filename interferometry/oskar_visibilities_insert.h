@@ -60,6 +60,6 @@ extern "C"
 #endif
 OSKAR_EXPORT
 int oskar_visibilties_insert(oskar_Visibilities* dst,
-        const oskar_Visibilities* src, const unsigned time_index);
+        const oskar_Visibilities* src, int time_index);
 
-#endif // OSKAR_VISIBILITIES_INSERT_H_
+#endif /* OSKAR_VISIBILITIES_INSERT_H_ */

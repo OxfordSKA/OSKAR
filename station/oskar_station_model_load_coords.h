@@ -64,4 +64,4 @@ int oskar_station_model_load_coords(const char* filename,
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_LOAD_COORDS_H_
+#endif /* OSKAR_STATION_MODEL_LOAD_COORDS_H_ */

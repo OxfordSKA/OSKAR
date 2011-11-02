@@ -28,7 +28,8 @@
 
 #include "interferometry/oskar_telescope_model_resize.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
+#include "station/oskar_station_model_init.h"
+#include "utility/oskar_mem_realloc.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,11 +40,46 @@ extern "C" {
 
 int oskar_telecope_model_resize(oskar_TelescopeModel* telescope, int n_stations)
 {
-    // Check that all pointers are not NULL.
+	int error = 0, old_size = 0;
+
+    /* Sanity check on inputs. */
     if (telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    return -1;
+    /* Get the old size. */
+    old_size = telescope->num_stations;
+
+    /* Resize the station array. */
+    telescope->station = realloc(telescope->station,
+    		n_stations * sizeof(oskar_StationModel));
+    if (n_stations > old_size)
+    {
+    	/* Initialise new stations. */
+    	int i = 0;
+    	for (i = old_size; i < n_stations; ++i)
+    	{
+    		error = oskar_station_model_init(&(telescope->station[i]),
+    				telescope->station_x.private_type,
+    				telescope->station_x.private_location, 0);
+    		if (error) return error;
+    	}
+    }
+
+    /* Resize the remaining arrays. */
+    error = oskar_mem_realloc(&(telescope->station_u), n_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_v), n_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_w), n_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_x), n_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_y), n_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_z), n_stations);
+    if (error) return error;
+
+    return error;
 }
 
 #ifdef __cplusplus

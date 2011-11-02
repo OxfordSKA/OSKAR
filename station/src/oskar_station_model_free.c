@@ -26,49 +26,79 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_mem_init.h"
-#include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_init.h"
-#include <stdlib.h>
+#include "station/oskar_station_model_free.h"
+#include "station/oskar_element_model_free.h"
+#include "station/oskar_element_model_free_gpu.h"
+#include "utility/oskar_mem_free.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
+int oskar_station_model_free(oskar_StationModel* model)
 {
-    int i = 0, error = 0;
+    int error = 0;
 
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
+    /* Check for sane inputs. */
+    if (model == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Initialise the arrays. */
-    error = oskar_mem_init(&telescope->station_u, type, location, n_stations);
+    /* Free the element data. */
+    error = oskar_mem_free(&model->x);
     if (error) return error;
-    error = oskar_mem_init(&telescope->station_v, type, location, n_stations);
+    error = oskar_mem_free(&model->y);
     if (error) return error;
-    error = oskar_mem_init(&telescope->station_w, type, location, n_stations);
+    error = oskar_mem_free(&model->z);
     if (error) return error;
-    error = oskar_mem_init(&telescope->station_x, type, location, n_stations);
+    error = oskar_mem_free(&model->weight);
     if (error) return error;
-    error = oskar_mem_init(&telescope->station_y, type, location, n_stations);
+    error = oskar_mem_free(&model->amp_gain);
     if (error) return error;
-    error = oskar_mem_init(&telescope->station_z, type, location, n_stations);
+    error = oskar_mem_free(&model->amp_error);
+    if (error) return error;
+    error = oskar_mem_free(&model->phase_offset);
+    if (error) return error;
+    error = oskar_mem_free(&model->phase_error);
     if (error) return error;
 
-    /* Initialise the station structures. */
-    telescope->station = realloc(telescope->station,
-            n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
+    /* Free the element pattern data if it exists. */
+    if (model->element_pattern)
     {
-        error = oskar_station_model_init(&telescope->station[i],
-                type, location, 0);
-        if (error) return error;
+    	if (model->element_pattern->location == OSKAR_LOCATION_CPU)
+    		oskar_element_model_free(model->element_pattern);
+    	else if (model->element_pattern->location == OSKAR_LOCATION_GPU)
+    	{
+    		error = oskar_element_model_free_gpu(model->element_pattern);
+    		if (error) return error;
+    	}
+    	model->element_pattern = NULL;
     }
+
+    /* Recursively free the child stations. */
+    if (model->child)
+    {
+    	int i = 0;
+    	for (i = 0; i < model->n_elements; ++i)
+    	{
+    		error = oskar_station_model_free(&(model->child[i]));
+    		if (error) return error;
+    	}
+
+    	/* Free the array. */
+    	free(model->child);
+    	model->child = NULL;
+    }
+
+    /* Clear remaining parameters. */
+    model->n_elements = 0;
+    model->parent = NULL;
+    model->longitude = 0.0;
+    model->latitude = 0.0;
+    model->altitude = 0.0;
+    model->ra0 = 0.0;
+    model->dec0 = 0.0;
+    model->single_element_model = 0;
+    model->bit_depth = 0;
 
     return 0;
 }

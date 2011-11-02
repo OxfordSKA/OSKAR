@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-// Double precision.
+/* Double precision. */
 void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
         const double* l, const double* m, double* lon, double* lat)
 {
@@ -43,7 +43,7 @@ void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
     sinLat0 = sin(lat0);
     cosLat0 = cos(lat0);
 
-    // Loop over l, m positions and evaluate the longitude and latitude values.
+    /* Loop over l, m positions and evaluate the longitude and latitude values. */
     for (i = 0; i < num_positions; ++i)
     {
         double li, mi, w;

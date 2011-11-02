@@ -35,4 +35,4 @@ void oskar_rotate_sources_to_phase_centre(const unsigned num_sources,
 void oskar_mult_matrix_vector(const double * M, double * v);
 
 
-#endif // OSKAR_SKY_ROTATE_SOURCES_H_
+#endif /* OSKAR_SKY_ROTATE_SOURCES_H_ */

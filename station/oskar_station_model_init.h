@@ -66,4 +66,4 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_INIT_H_
+#endif /* OSKAR_STATION_MODEL_INIT_H_ */

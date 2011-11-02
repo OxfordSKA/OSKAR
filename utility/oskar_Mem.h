@@ -36,7 +36,7 @@
 #include "oskar_global.h"
 
 #ifdef __cplusplus
-// Forward declarations.
+/* Forward declarations. */
 struct float2;
 struct float4c;
 struct double2;
@@ -59,21 +59,21 @@ extern "C"
 struct oskar_Mem
 {
 #ifdef __cplusplus
-// If C++, then make the meta-data private.
+/* If C++, then make the meta-data private. */
 private:
 #endif
-    int private_type; // Magic number.
-    int private_location; // 0 for host, 1 for device.
-    int private_n_elements; // Number of elements allocated.
+    int private_type;
+    int private_location;
+    int private_n_elements;
 
 #ifdef __cplusplus
-// If C++, then make the remaining members public.
+/* If C++, then make the remaining members public. */
 public:
 #endif
-    void* data; ///< Data pointer.
+    void* data; /**< Data pointer.  */
 
-    // If C++, then provide constructors and a destructor.
 #ifdef __cplusplus
+    /* If C++, then provide constructors and a destructor. */
     /**
      * @brief Constructs an oskar_Mem data structure.
      *
@@ -157,7 +157,7 @@ public:
 #endif
 
 #ifdef __cplusplus
-    // If C++, then provide read-only accessor functions for the meta-data.
+    /* If C++, then provide read-only accessor functions for the meta-data. */
     int type() const {return private_type;}
     int location() const {return private_location;}
     int n_elements() const {return private_n_elements;}
@@ -169,7 +169,7 @@ public:
     static bool is_complex(const int mem_type);
     static bool is_scalar(const int mem_type);
 
-    // Convenience pointer casts.
+    /* Convenience pointer casts. */
     operator float*() {return (float*)data;}
     operator double*() {return (double*)data;}
     operator float2*() {return (float2*)data;}
@@ -186,14 +186,14 @@ public:
 };
 typedef struct oskar_Mem oskar_Mem;
 
-// Define an enumerator for the type.
+/* Define an enumerator for the type. */
 enum {
-    OSKAR_SINGLE                 = 0x010F, // (float)    scalar, float
-    OSKAR_DOUBLE                 = 0x010D, // (double)   scalar, double
-    OSKAR_SINGLE_COMPLEX         = 0x01CF, // (float2)   scalar, complex float
-    OSKAR_DOUBLE_COMPLEX         = 0x01CD, // (double2)  scalar, complex double
-    OSKAR_SINGLE_COMPLEX_MATRIX  = 0x04CF, // (float4c)  matrix, complex float
-    OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  // (double4c) matrix, complex double
+    OSKAR_SINGLE                 = 0x010F, /* (float)    scalar, float */
+    OSKAR_DOUBLE                 = 0x010D, /* (double)   scalar, double */
+    OSKAR_SINGLE_COMPLEX         = 0x01CF, /* (float2)   scalar, complex float */
+    OSKAR_DOUBLE_COMPLEX         = 0x01CD, /* (double2)  scalar, complex double */
+    OSKAR_SINGLE_COMPLEX_MATRIX  = 0x04CF, /* (float4c)  matrix, complex float */
+    OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  /* (double4c) matrix, complex double */
 };
 
 enum {
@@ -201,4 +201,4 @@ enum {
     OSKAR_LOCATION_GPU = 1
 };
 
-#endif // OSKAR_MEM_H_
+#endif /* OSKAR_MEM_H_ */

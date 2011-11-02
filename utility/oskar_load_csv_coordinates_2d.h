@@ -125,4 +125,4 @@ int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
 }
 #endif
 
-#endif // OSKAR_LOAD_CSV_COORDINATES_2D_H_
+#endif /* OSKAR_LOAD_CSV_COORDINATES_2D_H_ */

@@ -30,13 +30,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _WIN32
 #define strtok_r(s,d,p) strtok_s(s,d,p)
 #else
 extern char* strtok_r(char*, const char*, char**);
 #endif
 
-// Single precision.
+/* Single precision. */
 int oskar_string_to_array_f(char* str, int n, float* data)
 {
     int i = 0;
@@ -49,7 +53,7 @@ int oskar_string_to_array_f(char* str, int n, float* data)
     return i;
 }
 
-// Double precision.
+/* Double precision. */
 int oskar_string_to_array_d(char* str, int n, double* data)
 {
     int i = 0;
@@ -61,3 +65,8 @@ int oskar_string_to_array_d(char* str, int n, double* data)
     }
     return i;
 }
+
+#ifdef __cplusplus
+}
+#endif
+

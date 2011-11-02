@@ -74,4 +74,4 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream);
 }
 #endif
 
-#endif // OSKAR_GETLINE_H_
+#endif /* OSKAR_GETLINE_H_ */

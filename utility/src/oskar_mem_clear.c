@@ -26,42 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_COPY_H_
-#define OSKAR_MEM_COPY_H_
-
-/**
- * @file oskar_mem_copy.h
- */
-
-#include "oskar_global.h"
+#include "utility/oskar_mem_clear.h"
+#include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_Mem.h"
+
+#include <cuda_runtime_api.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Copies a block of memory to another block of memory.
- *
- * @details
- * This function copies data held in one structure to another structure.
- * Both data structures must be of the same size and type.
- *
- * @param[out] dst Pointer to destination data structure to copy into.
- * @param[in]  src Pointer to source data structure to copy from.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
- */
-OSKAR_EXPORT
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);
+int oskar_mem_clear(oskar_Mem* mem)
+{
+    int error = 0;
+    size_t size;
+
+    /* Check for sane inputs. */
+    if (mem == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Compute the size. */
+    size = mem->private_n_elements * oskar_mem_element_size(mem->private_type);
+
+    /* Clear the memory. */
+    if (mem->private_location == OSKAR_LOCATION_CPU)
+    {
+    	memset(mem->data, 0, size);
+    }
+    else if (mem->private_location == OSKAR_LOCATION_GPU)
+    {
+    	cudaMemset(mem->data, 0, size);
+    	error = cudaPeekAtLastError();
+    }
+    else
+    {
+    	return OSKAR_ERR_BAD_LOCATION;
+    }
+
+    return error;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_MEM_COPY_H_ */

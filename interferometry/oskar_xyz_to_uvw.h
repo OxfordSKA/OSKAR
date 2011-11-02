@@ -90,4 +90,4 @@ void oskar_xyz_to_uvw_d(int n, const double* x, const double* y,
 }
 #endif
 
-#endif // OSKAR_XYZ_TO_UVW_H_
+#endif /* OSKAR_XYZ_TO_UVW_H_ */

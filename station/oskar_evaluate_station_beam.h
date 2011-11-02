@@ -135,4 +135,4 @@ void oskar_evaluate_station_beams_f(const unsigned num_stations,
 }
 #endif
 
-#endif // OSKAR_EVALUATE_STATION_BEAM_H_
+#endif /* OSKAR_EVALUATE_STATION_BEAM_H_ */

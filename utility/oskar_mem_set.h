@@ -55,4 +55,4 @@ int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
 }
 #endif
 
-#endif // OSKAR_MEM_SET_H_
+#endif /* OSKAR_MEM_SET_H_ */

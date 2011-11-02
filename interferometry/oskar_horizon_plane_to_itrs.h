@@ -98,4 +98,4 @@ void oskar_horizon_plane_to_itrs_f(const unsigned num_antennas,
 #endif
 
 
-#endif // OSKAR_HORIZON_PLANE_TO_ITRS_H_
+#endif /* OSKAR_HORIZON_PLANE_TO_ITRS_H_ */

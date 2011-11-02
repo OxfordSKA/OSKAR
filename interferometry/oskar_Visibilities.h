@@ -77,7 +77,7 @@ struct oskar_Visibilities
         oskar_Mem baseline_w; ///< Baseline coordinates, in wave-numbers.
         oskar_Mem amplitude;  ///< Complex visibility amplitude.
 
-    // Provide methods if C++.
+    /* Provide methods if C++. */
 #ifdef __cplusplus
     public:
 
@@ -277,4 +277,4 @@ struct oskar_Visibilities
 typedef struct oskar_Visibilities oskar_Visibilities;
 
 
-#endif // OSKAR_VISIBILITIES_H_
+#endif /* OSKAR_VISIBILITIES_H_ */

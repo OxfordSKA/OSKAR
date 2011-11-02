@@ -54,4 +54,4 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements);
 }
 #endif
 
-#endif // OSKAR_MEM_REALLOC_H_
+#endif /* OSKAR_MEM_REALLOC_H_ */

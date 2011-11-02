@@ -12,6 +12,7 @@ set(station_SRC
     src/oskar_element_model_load.c
     src/oskar_evaluate_jones_E.cpp
     src/oskar_station_model_copy.c
+    src/oskar_station_model_free.c
     src/oskar_station_model_init.c
     src/oskar_station_model_load_coords.cpp
     src/oskar_station_model_resize.cpp

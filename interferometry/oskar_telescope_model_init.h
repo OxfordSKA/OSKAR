@@ -59,4 +59,4 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
 }
 #endif
 
-#endif // OSKAR_TELESCOPE_MODEL_INIT_H_
+#endif /* OSKAR_TELESCOPE_MODEL_INIT_H_ */

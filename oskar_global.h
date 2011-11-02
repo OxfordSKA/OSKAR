@@ -65,44 +65,45 @@
  * Positive error codes indicate CUDA run-time execution errors.
  */
 enum {
-    // Indicates that an end-of-file condition was encountered.
-    // This is compatible with the standard C EOF macro (-1).
+    /* Indicates that an end-of-file condition was encountered.
+     * This is compatible with the standard C EOF macro (-1). */
     OSKAR_ERR_EOF                  = -1,
 
-    // Indicates a file I/O error.
+    /* Indicates a file I/O error. */
     OSKAR_ERR_FILE_IO              = -2,
 
-    // Could indicate that an invalid NULL pointer is passed to a function.
+    /* Could indicate that an invalid NULL pointer is passed to a function. */
     OSKAR_ERR_INVALID_ARGUMENT     = -3,
 
-    // Indicates that host memory allocation failed.
+    /* Indicates that host memory allocation failed. */
     OSKAR_ERR_MEMORY_ALLOC_FAILURE = -4,
 
-    // Indicates that an array has not been allocated (NULL pointer dereference).
+    /* Indicates that an array has not been allocated
+     * (NULL pointer dereference). */
     OSKAR_ERR_MEMORY_NOT_ALLOCATED = -5,
 
-    // Indicates that the data types used for an operation are incompatible.
+    /* Indicates that the data types used for an operation are incompatible. */
     OSKAR_ERR_TYPE_MISMATCH        = -6,
 
-    // Indicates that the data dimensions do not match.
+    /* Indicates that the data dimensions do not match. */
     OSKAR_ERR_DIMENSION_MISMATCH   = -7,
 
-    // Indicates that the memory pointer location is not supported.
+    /* Indicates that the memory pointer location is not supported. */
     OSKAR_ERR_BAD_LOCATION         = -8,
 
-    // Indicates that the data type is not supported.
+    /* Indicates that the data type is not supported. */
     OSKAR_ERR_BAD_DATA_TYPE        = -9,
 
-    // Indicates that the data type of a Jones matrix is not supported.
+    /* Indicates that the data type of a Jones matrix is not supported. */
     OSKAR_ERR_BAD_JONES_TYPE       = -10,
 
-    // Indicates that the memory location is out of range.
+    /* Indicates that the memory location is out of range. */
     OSKAR_ERR_OUT_OF_RANGE         = -11,
 
-    // Indicates that the OSKAR version is not compatible.
+    /* Indicates that the OSKAR version is not compatible. */
     OSKAR_ERR_VERSION_MISMATCH     = -12,
 
-    // Indicates that an unknown error occurred.
+    /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN              = -1000
 };
 
@@ -142,7 +143,7 @@ enum {
     #endif
 #endif
 
-// Macros used to prevent Eclipse from complaining about unknown CUDA syntax.
+/* Macros used to prevent Eclipse from complaining about unknown CUDA syntax. */
 #ifdef __CDT_PARSER__
     #define __global__
     #define __device__
@@ -155,4 +156,4 @@ enum {
     #define OSKAR_CUDAK_CONF(...) <<< __VA_ARGS__ >>>
 #endif
 
-#endif // OSKAR_GLOBAL_H_
+#endif /* OSKAR_GLOBAL_H_ */

@@ -40,13 +40,13 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     int n_elements_src, n_elements_dst, type_src, type_dst;
     int location_src, location_dst, bytes;
 
-    // Check that all pointers are not NULL.
+    /* Check that all pointers are not NULL. */
     if (src == NULL || dst == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
     if (src->data == NULL || dst->data == NULL)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    // Get the meta-data.
+    /* Get the meta-data. */
     n_elements_src = src->private_n_elements;
     n_elements_dst = dst->private_n_elements;
     type_src = src->private_type;
@@ -54,18 +54,18 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     location_src = src->private_location;
     location_dst = dst->private_location;
 
-    // Check the data dimensions.
+    /* Check the data dimensions. */
     if (n_elements_src != n_elements_dst)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
-    // Check the data types.
+    /* Check the data types. */
     if (type_src != type_dst)
         return OSKAR_ERR_TYPE_MISMATCH;
 
-    // Get the number of bytes to copy.
+    /* Get the number of bytes to copy. */
     bytes = oskar_mem_element_size(type_src) * n_elements_src;
 
-    // Host to host.
+    /* Host to host. */
     if (location_src == OSKAR_LOCATION_CPU
             && location_dst == OSKAR_LOCATION_CPU)
     {
@@ -73,7 +73,7 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return 0;
     }
 
-    // Host to device.
+    /* Host to device. */
     else if (location_src == OSKAR_LOCATION_CPU
             && location_dst == OSKAR_LOCATION_GPU)
     {
@@ -81,7 +81,7 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return cudaPeekAtLastError();
     }
 
-    // Device to host.
+    /* Device to host. */
     else if (location_src == OSKAR_LOCATION_GPU
             && location_dst == OSKAR_LOCATION_CPU)
     {
@@ -89,7 +89,7 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return cudaPeekAtLastError();
     }
 
-    // Device to device.
+    /* Device to device. */
     else if (location_src == OSKAR_LOCATION_GPU
             && location_dst == OSKAR_LOCATION_GPU)
     {

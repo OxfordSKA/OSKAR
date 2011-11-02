@@ -58,4 +58,4 @@ int oskar_element_model_evaluate_f(const oskar_ElementModel* hd_data,
 }
 #endif
 
-#endif // OSKAR_ELEMENT_MODEL_EVALUATE_H_
+#endif /* OSKAR_ELEMENT_MODEL_EVALUATE_H_ */

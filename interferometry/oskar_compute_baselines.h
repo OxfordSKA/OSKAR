@@ -89,4 +89,4 @@ void oskar_compute_baselines_d(int na, const double* au,
 }
 #endif
 
-#endif // OSKAR_COMPUTE_BASELINES_H_
+#endif /* OSKAR_COMPUTE_BASELINES_H_ */

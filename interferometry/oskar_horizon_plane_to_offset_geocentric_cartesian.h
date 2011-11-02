@@ -117,4 +117,4 @@ void oskar_horizon_plane_to_offset_geocentric_cartesian_f(int n,
 }
 #endif
 
-#endif // OSKAR_HORIZON_PLANE_TO_OFFSET_GEOCENTRIC_CARTESIAN_H_
+#endif /* OSKAR_HORIZON_PLANE_TO_OFFSET_GEOCENTRIC_CARTESIAN_H_ */

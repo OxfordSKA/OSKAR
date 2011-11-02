@@ -44,4 +44,4 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         double dec, double I, double Q, double U, double V, double reference_freq,
         double spectral_index);
 
-#endif // OSKAR_SKY_MODEL_SET_SOURCE_H_
+#endif /* OSKAR_SKY_MODEL_SET_SOURCE_H_ */

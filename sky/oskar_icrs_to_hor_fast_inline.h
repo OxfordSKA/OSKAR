@@ -115,4 +115,4 @@ inline void oskar_icrs_to_hor_fast_inline_d(const CelestialData* c,
 }
 #endif
 
-#endif // OSKAR_ICRS_TO_HOR_FAST_INLINE_H_
+#endif /* OSKAR_ICRS_TO_HOR_FAST_INLINE_H_ */

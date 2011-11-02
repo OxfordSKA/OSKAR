@@ -44,63 +44,63 @@ extern "C" {
 
 int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
 {
-    // Initialise the flags and local data.
+    /* Initialise the flags and local data. */
     int n = 0, err = 0;
     float inc_theta = 0.0f, inc_phi = 0.0f, n_theta = 0.0f, n_phi = 0.0f;
     float min_theta = FLT_MAX, max_theta = -FLT_MAX;
     float min_phi = FLT_MAX, max_phi = -FLT_MAX;
 
-    // Declare the line buffer.
+    /* Declare the line buffer. */
     char *line = NULL, *dbi = NULL;
     size_t bufsize = 0;
 
-    // Open the file.
+    /* Open the file. */
     FILE* file;
     file = fopen(filename, "r");
     if (!file)
         return OSKAR_ERR_FILE_IO;
 
-    // Read the first line and check if data is in logarithmic format.
+    /* Read the first line and check if data is in logarithmic format. */
     err = oskar_getline(&line, &bufsize, file);
     if (err < 0) return err;
-    dbi = strstr(line, "dBi"); // Check for presence of "dBi".
+    dbi = strstr(line, "dBi"); /* Check for presence of "dBi". */
 
-    // Initialise pointers to NULL.
+    /* Initialise pointers to NULL. */
     data->g_phi = NULL;
     data->g_theta = NULL;
 
-    // Loop over and read each line in the file.
+    /* Loop over and read each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         int a;
         float theta = 0.0f, phi = 0.0f, p_theta = 0.0f, p_phi = 0.0f;
         float abs_theta, phase_theta, abs_phi, phase_phi;
 
-        // Parse the line.
+        /* Parse the line. */
         a = sscanf(line, "%f %f %*f %f %f %f %f %*f", &theta, &phi,
                     &abs_theta, &phase_theta, &abs_phi, &phase_phi);
 
-        // Check that data was read correctly.
+        /* Check that data was read correctly. */
         if (a != 6) continue;
 
-        // Ignore any data below horizon.
+        /* Ignore any data below horizon. */
         if (theta > 90.0f) continue;
 
-        // Convert coordinates to radians.
+        /* Convert coordinates to radians. */
         theta *= DEG2RAD;
         phi *= DEG2RAD;
 
-        // Set coordinate increments.
+        /* Set coordinate increments. */
         if (inc_theta <= FLT_EPSILON) inc_theta = theta - p_theta;
         if (inc_phi <= FLT_EPSILON) inc_phi = phi - p_phi;
 
-        // Set ranges.
+        /* Set ranges. */
         if (theta < min_theta) min_theta = theta;
         if (theta > max_theta) max_theta = theta;
         if (phi < min_phi) min_phi = phi;
         if (phi > max_phi) max_phi = phi;
 
-        // Ensure enough space in arrays.
+        /* Ensure enough space in arrays. */
         if (n % 100 == 0)
         {
             int size;
@@ -109,39 +109,39 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
             data->g_phi   = (float2*) realloc(data->g_phi, 2*size);
         }
 
-        // Store the coordinates in radians.
+        /* Store the coordinates in radians. */
         p_theta = theta;
         p_phi = phi;
 
-        // Convert decibel to linear scale if necessary.
+        /* Convert decibel to linear scale if necessary. */
         if (dbi)
         {
             abs_theta = pow(10.0, abs_theta / 10.0);
             abs_phi   = pow(10.0, abs_phi / 10.0);
         }
 
-        // Amp,phase to real,imag conversion.
+        /* Amp,phase to real,imag conversion. */
         data->g_theta[n].x = abs_theta * cos(phase_theta * DEG2RAD);
         data->g_theta[n].y = abs_theta * sin(phase_theta * DEG2RAD);
         data->g_phi[n].x = abs_phi * cos(phase_phi * DEG2RAD);
         data->g_phi[n].y = abs_phi * sin(phase_phi * DEG2RAD);
 
-        // Increment array pointer.
+        /* Increment array pointer. */
         n++;
     }
 
-    // Free the line buffer and close the file.
+    /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);
 
-    // Get number of points in each dimension.
+    /* Get number of points in each dimension. */
     n_theta = (max_theta - min_theta) / inc_theta;
     n_phi = (max_phi - min_phi) / inc_phi;
 
-    // Store number of points in arrays.
+    /* Store number of points in arrays. */
     data->n_points = n;
-    data->n_theta = 1 + round(n_theta); // Must round to nearest integer.
-    data->n_phi = 1 + round(n_phi); // Must round to nearest integer.
+    data->n_theta = 1 + round(n_theta); /* Must round to nearest integer. */
+    data->n_phi = 1 + round(n_phi); /* Must round to nearest integer. */
     data->min_theta = min_theta;
     data->min_phi = min_phi;
     data->max_theta = max_theta;

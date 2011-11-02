@@ -37,8 +37,8 @@
 #include "oskar_global.h"
 #include "math/oskar_Jones.h"
 #include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_Telescope.h"
-#include "sky/oskar_Sky.h"
+#include "interferometry/oskar_TelescopeModel.h"
+#include "sky/oskar_SkyModel.h"
 
 
 #ifdef __cplusplus
@@ -48,4 +48,4 @@ int oskar_correlate(oskar_Visibilities* vis, oskar_Jones* J,
         oskar_Telescope* telescope, oskar_SkyModel* sky,
         double local_apparent_sideral_time);
 
-#endif // OSKAR_CORRELATE_H_
+#endif /* OSKAR_CORRELATE_H_ */

@@ -58,4 +58,4 @@ double oskar_mjd_to_lmst_d(double mjd, double lon);
 }
 #endif
 
-#endif // OSKAR_MJD_TO_LMST_H_
+#endif /* OSKAR_MJD_TO_LMST_H_ */

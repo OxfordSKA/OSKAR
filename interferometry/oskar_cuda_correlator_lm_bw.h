@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETRY_CUDA_CORRELATOR_LM_BW_H_
-#define OSKAR_INTERFEROMETRY_CUDA_CORRELATOR_LM_BW_H_
+#ifndef OSKAR_CUDA_CORRELATOR_LM_BW_H_
+#define OSKAR_CUDA_CORRELATOR_LM_BW_H_
 
 /**
  * @file oskar_cuda_correlator_lm_bw.h
@@ -111,4 +111,4 @@ int oskar_cuda_correlator_lm_bw_d(int na, const double* ax,
 }
 #endif
 
-#endif // OSKAR_INTERFEROMETRY_CUDA_CORRELATOR_LM_BW_H_
+#endif /* OSKAR_CUDA_CORRELATOR_LM_BW_H_ */

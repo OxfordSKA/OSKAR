@@ -39,4 +39,4 @@
 #include "sky/oskar_sky.h"
 #include "utility/oskar_util.h"
 
-#endif // OSKAR_H_
+#endif /* OSKAR_H_ */

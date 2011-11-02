@@ -83,4 +83,4 @@ void oskar_horizon_plane_to_geocentric_cartesian(int n,
 }
 #endif
 
-#endif // OSKAR_HORIZON_PLANE_TO_GEOCENTRIC_CARTESIAN_H_
+#endif /* OSKAR_HORIZON_PLANE_TO_GEOCENTRIC_CARTESIAN_H_ */

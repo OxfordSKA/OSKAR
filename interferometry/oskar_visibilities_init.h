@@ -57,4 +57,4 @@ OSKAR_EXPORT
 int oskar_visibilities_init(oskar_Visibilities* vis, int num_times,
         int num_baselines, int num_channels, int amp_type, int location);
 
-#endif // OSKAR_VISIBILITIES_INIT_H_
+#endif /* OSKAR_VISIBILITIES_INIT_H_ */

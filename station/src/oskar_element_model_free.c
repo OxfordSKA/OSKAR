@@ -33,7 +33,6 @@ extern "C"
 #endif
 int oskar_element_model_free(oskar_ElementModel* h_data)
 {
-    // Free the memory.
     free(h_data->g_phi);
     free(h_data->g_theta);
 

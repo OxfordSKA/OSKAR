@@ -72,4 +72,4 @@ void oskar_geodetic_spherical_to_geocentric_cartesian(int n,
 }
 #endif
 
-#endif // OSKAR_GEODETIC_SPHERICAL_TO_GEOCENTRIC_CARTESIAN_H_
+#endif /* OSKAR_GEODETIC_SPHERICAL_TO_GEOCENTRIC_CARTESIAN_H_ */

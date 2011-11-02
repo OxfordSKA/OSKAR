@@ -55,4 +55,4 @@ OSKAR_EXPORT
 int oskar_visibilties_resize(oskar_Visibilities* vis, int num_times,
         int num_baselines, int num_channels);
 
-#endif // OSKAR_VISIBILITIES_RESIZE_H_
+#endif /* OSKAR_VISIBILITIES_RESIZE_H_ */

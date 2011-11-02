@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-// Double precision.
+/* Double precision. */
 
 double oskar_mjd_to_lmst_d(double mjd, double lon)
 {

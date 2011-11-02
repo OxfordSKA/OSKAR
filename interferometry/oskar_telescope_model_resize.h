@@ -57,4 +57,4 @@ int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int n_stations
 }
 #endif
 
-#endif // OSKAR_TELESCOPE_MODEL_RESIZE_H_
+#endif /* OSKAR_TELESCOPE_MODEL_RESIZE_H_ */

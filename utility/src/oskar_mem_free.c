@@ -38,21 +38,21 @@ int oskar_mem_free(oskar_Mem* mem)
 {
     int location, err = 0;
 
-    // Check that the structure exists.
+    /* Check that the structure exists. */
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Get the meta-data.
+    /* Get the meta-data. */
     location = mem->private_location;
 
-    // Check whether the memory is on the host or the device.
+    /* Check whether the memory is on the host or the device. */
     if (location == OSKAR_LOCATION_CPU)
     {
-        // Free host memory.
+        /* Free host memory. */
         if (mem->data != NULL) free(mem->data);
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
-        // Free GPU memory.
+        /* Free GPU memory. */
         if (mem->data != NULL) cudaFree(mem->data);
         err = cudaPeekAtLastError();
     }

@@ -73,4 +73,4 @@ void oskar_mat_tri_c_d(int n, const double* a, double* b);
 }
 #endif
 
-#endif // OSKAR_MATH_MAT_TRI_C_H_
+#endif /* OSKAR_MATH_MAT_TRI_C_H_ */

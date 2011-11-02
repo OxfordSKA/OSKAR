@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_COPY_H_
-#define OSKAR_MEM_COPY_H_
+#ifndef OSKAR_MEM_CLEAR_H_
+#define OSKAR_MEM_CLEAR_H_
 
 /**
- * @file oskar_mem_copy.h
+ * @file oskar_mem_clear.h
  */
 
 #include "oskar_global.h"
@@ -42,14 +42,11 @@ extern "C" {
 
 /**
  * @brief
- * Copies a block of memory to another block of memory.
+ * Clears contents of the memory held by the structure.
  *
  * @details
- * This function copies data held in one structure to another structure.
- * Both data structures must be of the same size and type.
- *
- * @param[out] dst Pointer to destination data structure to copy into.
- * @param[in]  src Pointer to source data structure to copy from.
+ * This functions clears (i.e. sets to all bits zero) the contents of the
+ * memory block held by the structure.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -58,10 +55,10 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);
+int oskar_mem_clear(oskar_Mem* dst);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_COPY_H_ */
+#endif /* OSKAR_MEM_CLEAR_H_ */

@@ -59,4 +59,4 @@ int oskar_station_model_resize(oskar_StationModel* station, int n_elements);
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_RESIZE_H_
+#endif /* OSKAR_STATION_MODEL_RESIZE_H_ */

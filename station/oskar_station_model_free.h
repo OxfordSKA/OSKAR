@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_COPY_H_
-#define OSKAR_MEM_COPY_H_
+#ifndef OSKAR_STATION_MODEL_FREE_H_
+#define OSKAR_STATION_MODEL_FREE_H_
 
 /**
- * @file oskar_mem_copy.h
+ * @file oskar_station_model_free.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,14 +42,12 @@ extern "C" {
 
 /**
  * @brief
- * Copies a block of memory to another block of memory.
+ * Frees memory held by the data structure.
  *
  * @details
- * This function copies data held in one structure to another structure.
- * Both data structures must be of the same size and type.
+ * This function frees memory held by the data structure.
  *
- * @param[out] dst Pointer to destination data structure to copy into.
- * @param[in]  src Pointer to source data structure to copy from.
+ * @param[out] model Pointer to data structure to free.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -58,10 +56,10 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);
+int oskar_station_model_free(oskar_StationModel* model);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_COPY_H_ */
+#endif /* OSKAR_STATION_MODEL_FREE_H_ */

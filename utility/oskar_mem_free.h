@@ -62,4 +62,4 @@ int oskar_mem_free(oskar_Mem* mem);
 }
 #endif
 
-#endif // OSKAR_MEM_FREE_H_
+#endif /* OSKAR_MEM_FREE_H_ */

@@ -33,39 +33,37 @@
 extern "C" {
 #endif
 
-// Single precision.
-
+/* Single precision. */
 int oskar_ra_dec_to_hor_lmn_f(int n, const float* ra, const float* dec,
 		float lst, float lat, float* hor_l, float* hor_m, float* hor_n)
 {
-    // Determine source Hour Angles (HA = LST - RA).
-    float* ha = hor_n; // Temporary.
+    /* Determine source Hour Angles (HA = LST - RA). */
+    float* ha = hor_n; /* Temporary. */
     int i;
 	for (i = 0; i < n; ++i)
 	{
 		ha[i] = lst - ra[i];
 	}
 
-    // Determine horizontal l,m,n positions (destroys contents of ha).
+    /* Determine horizontal l,m,n positions (destroys contents of ha). */
     oskar_ha_dec_to_hor_lmn_f(n, ha, dec, lat, hor_l, hor_m, hor_n);
 
     return 0;
 }
 
-// Double precision.
-
+/* Double precision. */
 int oskar_ra_dec_to_hor_lmn_d(int n, const double* ra, const double* dec,
 		double lst, double lat, double* hor_l, double* hor_m, double* hor_n)
 {
-    // Determine source Hour Angles (HA = LST - RA).
-    double* ha = hor_n; // Temporary.
+    /* Determine source Hour Angles (HA = LST - RA). */
+    double* ha = hor_n; /* Temporary. */
     int i;
 	for (i = 0; i < n; ++i)
 	{
 		ha[i] = lst - ra[i];
 	}
 
-    // Determine horizontal l,m,n positions (destroys contents of ha).
+    /* Determine horizontal l,m,n positions (destroys contents of ha). */
     oskar_ha_dec_to_hor_lmn_d(n, ha, dec, lat, hor_l, hor_m, hor_n);
 
     return 0;

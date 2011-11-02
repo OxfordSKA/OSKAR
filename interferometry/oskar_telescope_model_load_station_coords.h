@@ -64,4 +64,4 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
 }
 #endif
 
-#endif // OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+#endif /* OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_ */

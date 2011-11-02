@@ -37,7 +37,7 @@
 #include "utility/oskar_Mem.h"
 #include "station/oskar_ElementModel.h"
 
- // Forward declaration.
+/* Forward declaration. */
 struct oskar_StationModel;
 typedef struct oskar_StationModel oskar_StationModel;
 
@@ -47,31 +47,31 @@ extern "C"
 struct oskar_StationModel
 {
     int n_elements;
-    oskar_StationModel* child; ///< NULL when there are no child stations.
-    oskar_StationModel* parent; ///< Pointer to station's parent (NULL if none).
-    oskar_ElementModel* element_pattern; ///< NULL if there are child stations.
+    oskar_StationModel* child; /**< NULL when there are no child stations. */
+    oskar_StationModel* parent; /**< Pointer to station's parent (NULL if none). */
+    oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */
 
-    // Station element data.
-    oskar_Mem x; ///< x-position wrt local horizon, toward the East.
-    oskar_Mem y; ///< y-position wrt local horizon, toward the North.
-    oskar_Mem z; ///< z-position wrt local horizon, toward the zenith.
-    oskar_Mem weight; ///< Element complex weight (set to 1 unless apodisation).
+    /* Station element data. */
+    oskar_Mem x; /**< x-position wrt local horizon, toward the East. */
+    oskar_Mem y; /**< y-position wrt local horizon, toward the North. */
+    oskar_Mem z; /**< z-position wrt local horizon, toward the zenith. */
+    oskar_Mem weight; /**< Element complex weight (set to 1 unless apodisation). */
     oskar_Mem amp_gain;
     oskar_Mem amp_error;
     oskar_Mem phase_offset;
     oskar_Mem phase_error;
 
-    // Other station data.
-    double longitude; ///< Geodetic longitude of station, in radians.
-    double latitude;  ///< Geodetic latitude of station, in radians.
-    double altitude;  ///< Altitude of station above ellipsoid, in metres.
-    double ra0;       ///< Right ascension of beam phase centre, in radians.
-    double dec0;      ///< Declination of beam phase centre, in radians.
-    int single_element_model; ///< True if using a single common element pattern.
-    int bit_depth;    ///< Not implemented!
+    /* Other station data. */
+    double longitude; /**< Geodetic longitude of station, in radians. */
+    double latitude;  /**< Geodetic latitude of station, in radians. */
+    double altitude;  /**< Altitude of station above ellipsoid, in metres. */
+    double ra0;       /**< Right ascension of beam phase centre, in radians. */
+    double dec0;      /**< Declination of beam phase centre, in radians. */
+    int single_element_model; /**< True if using a single common element pattern. */
+    int bit_depth;    /**< Not implemented! */
 
 #ifdef __cplusplus
-    // If C++, provide constructors and methods.
+    /* If C++, provide constructors and methods. */
     /**
      * @brief Constructs an empty station model structure.
      *
@@ -119,7 +119,7 @@ struct oskar_StationModel
 
 
 
-// DEPRECATED
+/* DEPRECATED */
 
 #ifdef __cplusplus
 extern "C" {
@@ -130,7 +130,6 @@ struct oskar_StationModel_d
     unsigned num_antennas;
     double*  antenna_x;
     double*  antenna_y;
-    //double * antenna_z;
 };
 typedef struct oskar_StationModel_d oskar_StationModel_d;
 
@@ -139,12 +138,10 @@ struct oskar_StationModel_f
     unsigned num_antennas;
     float*   antenna_x;
     float*   antenna_y;
-    //double * antenna_z;
 };
 typedef struct oskar_StationModel_f oskar_StationModel_f;
 
 
-//----- Utility functions -----------------------------------------------------
 OSKAR_EXPORT
 void oskar_station_model_copy_to_device_d(const oskar_StationModel_d* h_stations,
         const unsigned num_stations, oskar_StationModel_d* hd_stations);
@@ -160,10 +157,9 @@ void oskar_station_model_scale_coords_d(const unsigned num_stations,
 OSKAR_EXPORT
 void oskar_station_model_scale_coords_f(const unsigned num_stations,
         oskar_StationModel_f* hd_stations, const float value);
-//------------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_H_
+#endif /* OSKAR_STATION_MODEL_H_ */

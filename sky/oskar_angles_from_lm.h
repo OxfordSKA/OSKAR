@@ -63,4 +63,4 @@ void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
 }
 #endif
 
-#endif // OSKAR_ANGLES_FROM_LM_H_
+#endif /* OSKAR_ANGLES_FROM_LM_H_ */

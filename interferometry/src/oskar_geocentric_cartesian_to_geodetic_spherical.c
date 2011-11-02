@@ -31,7 +31,7 @@
 #include <math.h>
 
 #ifndef M_PI_2
-#define M_PI_2 1.57079632679489661923 // pi/2
+#define M_PI_2 1.57079632679489661923 /* pi/2 */
 #endif
 
 #ifdef __cplusplus
@@ -43,8 +43,8 @@ void oskar_geocentric_cartesian_to_geodetic_spherical(int n,
         double* latitude, double* altitude)
 {
     int i;
-    const double a = 6378137.000; // Equatorial radius (semi-major axis).
-    const double b_unsigned = 6356752.314; // Polar radius (semi-minor axis).
+    const double a = 6378137.000; /* Equatorial radius (semi-major axis). */
+    const double b_unsigned = 6356752.314; /* Polar radius (semi-minor axis). */
     for (i = 0; i < n; ++i)
     {
         double X, Y, Z, r, b, E, F, P, Q, D, Ds, v, G, t, phi, h;
@@ -75,7 +75,7 @@ void oskar_geocentric_cartesian_to_geodetic_spherical(int n,
             G = (sqrt(E*E + v) + E) / 2.0;
             t = sqrt(G*G + (F - v * G) / (2.0 * G - E)) - G;
 
-            // Evaluate geodetic latitude and altitude.
+            /* Evaluate geodetic latitude and altitude. */
             phi = atan(a * (1 - t*t) / (2.0 * b * t));
             h = (r - a * t) * cos(phi) + (Z - b) * sin(phi);
         }
@@ -90,7 +90,7 @@ void oskar_geocentric_cartesian_to_geodetic_spherical(int n,
             h = fabs(Z) - b_unsigned;
         }
 
-        // Store results.
+        /* Store results. */
         longitude[i] = atan2(Y, X);
         latitude[i] = phi;
         altitude[i] = h;

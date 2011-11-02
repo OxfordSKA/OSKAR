@@ -139,4 +139,4 @@ int oskar_interferometer1_scalar_f(
 }
 #endif
 
-#endif // OSKAR_CUDA_INTERFEROMETER1_SCALAR_H_
+#endif /* OSKAR_CUDA_INTERFEROMETER1_SCALAR_H_ */

@@ -46,24 +46,24 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
     int error = 0;
     size_t element_size, mem_size, offset_bytes;
 
-    // Check for sane inputs.
+    /* Check for sane inputs. */
     if (to == NULL || from == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Check that the data types match.
+    /* Check that the data types match. */
     if (to->private_type != type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
-    // Memory size being appended and offset into memory to append to.
+    /* Memory size being appended and offset into memory to append to. */
     element_size = oskar_mem_element_size(to->private_type);
     mem_size = num_elements * element_size;
     offset_bytes = to->private_n_elements * element_size;
 
-    // Reallocate the memory pointer so it is big enough to append to.
+    /* Reallocate the memory pointer so it is big enough to append to. */
     error = oskar_mem_realloc(to, num_elements + to->private_n_elements);
     if (error != 0) return error;
 
-    // Append to the memory.
+    /* Append to the memory. */
     if (location == OSKAR_LOCATION_CPU)
     {
         if (to->private_location == OSKAR_LOCATION_CPU)

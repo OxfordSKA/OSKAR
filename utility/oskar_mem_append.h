@@ -55,4 +55,4 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
 }
 #endif
 
-#endif // OSKAR_MEM_APPEND_H_
+#endif /* OSKAR_MEM_APPEND_H_ */

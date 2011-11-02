@@ -34,7 +34,7 @@
  */
 
 #include "utility/oskar_vector_types.h"
-#include <stdlib.h> // For size_t.
+#include <stdlib.h> /* For size_t. */
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,20 +52,21 @@ extern "C" {
  */
 struct oskar_ElementModel
 {
-    int coordsys;       ///< Specifies whether horizontal or wrt phase centre.
-    int n_points;       ///< Total number of points in all arrays.
-    int n_phi;          ///< Number of points in the phi direction.
-    int n_theta;        ///< Number of points in the theta direction.
-    float inc_phi;      ///< Increment in the phi direction, in radians.
-    float inc_theta;    ///< Increment in the theta direction, in radians.
-    float max_phi;      ///< Maximum value of phi, in radians.
-    float max_theta;    ///< Maximum value of theta, in radians.
-    float min_phi;      ///< Minimum value of phi, in radians.
-    float min_theta;    ///< Minimum value of theta, in radians.
-    float2* g_phi;      ///< Response in phi direction at coordinates (re,im).
-    float2* g_theta;    ///< Response in theta direction at coordinates (re,im).
-    size_t pitch_phi;   ///< Memory pitch, as returned by cudaMallocPitch().
-    size_t pitch_theta; ///< Memory pitch, as returned by cudaMallocPitch().
+	int location;       /**< Specifies the array data location (CPU or GPU). */
+    int coordsys;       /**< Specifies whether horizontal or wrt phase centre. */
+    int n_points;       /**< Total number of points in all arrays. */
+    int n_phi;          /**< Number of points in the phi direction. */
+    int n_theta;        /**< Number of points in the theta direction. */
+    float inc_phi;      /**< Increment in the phi direction, in radians. */
+    float inc_theta;    /**< Increment in the theta direction, in radians. */
+    float max_phi;      /**< Maximum value of phi, in radians. */
+    float max_theta;    /**< Maximum value of theta, in radians. */
+    float min_phi;      /**< Minimum value of phi, in radians. */
+    float min_theta;    /**< Minimum value of theta, in radians. */
+    float2* g_phi;      /**< Response in phi direction at coordinates (re,im). */
+    float2* g_theta;    /**< Response in theta direction at coordinates (re,im). */
+    size_t pitch_phi;   /**< Memory pitch, as returned by cudaMallocPitch(). */
+    size_t pitch_theta; /**< Memory pitch, as returned by cudaMallocPitch(). */
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
 
@@ -73,4 +74,4 @@ typedef struct oskar_ElementModel oskar_ElementModel;
 }
 #endif
 
-#endif // OSKAR_ELEMENT_MODEL_H_
+#endif /* OSKAR_ELEMENT_MODEL_H_ */

@@ -42,4 +42,4 @@ extern "C"
 OSKAR_EXPORT
 int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src);
 
-#endif // OSKAR_SKY_MODEL_APPEND_H_
+#endif /* OSKAR_SKY_MODEL_APPEND_H_ */

@@ -121,4 +121,4 @@ void oskar_sky_model_load_f(const char* file_path, oskar_SkyModelGlobal_f* sky);
 }
 #endif
 
-#endif // OSKAR_SKY_MODEL_LOAD_H_
+#endif /* OSKAR_SKY_MODEL_LOAD_H_ */

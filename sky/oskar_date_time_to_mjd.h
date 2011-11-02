@@ -62,4 +62,4 @@ double oskar_date_time_to_mjd_d(int year, int month, int day,
 }
 #endif
 
-#endif // OSKAR_DATE_TIME_TO_MJD_H_
+#endif /* OSKAR_DATE_TIME_TO_MJD_H_ */

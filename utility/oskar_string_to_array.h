@@ -81,4 +81,4 @@ int oskar_string_to_array_d(char* str, int n, double* data);
 }
 #endif
 
-#endif // OSKAR_STRING_TO_ARRAY_H_
+#endif /* OSKAR_STRING_TO_ARRAY_H_ */

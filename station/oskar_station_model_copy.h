@@ -65,4 +65,4 @@ int oskar_station_model_copy(oskar_StationModel* dst,
 }
 #endif
 
-#endif // OSKAR_STATION_MODEL_COPY_H_
+#endif /* OSKAR_STATION_MODEL_COPY_H_ */

@@ -52,4 +52,4 @@
 #define TIMER_STOP(...) ;
 #endif
 
-#endif // TIMER_H_
+#endif /* TIMER_H_ */

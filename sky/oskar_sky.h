@@ -43,4 +43,4 @@
 #include "sky/oskar_mjd_to_last_fast.h"
 #include "sky/oskar_mjd_to_lmst.h"
 
-#endif // OSKAR_SKY_H_
+#endif /* OSKAR_SKY_H_ */

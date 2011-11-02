@@ -42,4 +42,4 @@ extern "C"
 OSKAR_EXPORT
 int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources);
 
-#endif // OSKAR_SKY_MODEL_RESIZE_H_
+#endif /* OSKAR_SKY_MODEL_RESIZE_H_ */

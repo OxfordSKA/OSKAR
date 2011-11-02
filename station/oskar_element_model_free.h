@@ -57,4 +57,4 @@ int oskar_element_model_free(oskar_ElementModel* h_data);
 }
 #endif
 
-#endif // OSKAR_ELEMENT_MODEL_FREE_H_
+#endif /* OSKAR_ELEMENT_MODEL_FREE_H_ */

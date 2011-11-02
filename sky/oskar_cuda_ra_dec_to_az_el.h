@@ -107,4 +107,4 @@ int oskar_ra_dec_to_az_el_d(double ra, double dec, double lst,
 }
 #endif
 
-#endif // OSKAR_CUDA_RA_DEC_TO_AZ_EL_H_
+#endif /* OSKAR_CUDA_RA_DEC_TO_AZ_EL_H_ */

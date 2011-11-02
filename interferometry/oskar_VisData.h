@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-// DEPRECATED
+/* DEPRECATED */
 struct oskar_VisData_d
 {
     int      num_samples;
@@ -47,7 +47,7 @@ struct oskar_VisData_d
 };
 typedef struct oskar_VisData_d oskar_VisData_d;
 
-// DEPRECATED
+/* DEPRECATED */
 struct oskar_VisData_f
 {
     int      num_samples;
@@ -120,4 +120,4 @@ void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis);
 }
 #endif
 
-#endif // OSKAR_VIS_DATA_H_
+#endif /* OSKAR_VIS_DATA_H_ */

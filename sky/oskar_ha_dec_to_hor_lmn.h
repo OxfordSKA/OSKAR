@@ -87,4 +87,4 @@ int oskar_ha_dec_to_hor_lmn_d(int n, const double* ha, const double* dec,
 }
 #endif
 
-#endif // OSKAR_HA_DEC_TO_HOR_LMN_H_
+#endif /* OSKAR_HA_DEC_TO_HOR_LMN_H_ */

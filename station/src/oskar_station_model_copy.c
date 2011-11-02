@@ -31,10 +31,10 @@
 int oskar_station_model_copy(oskar_StationModel* dst,
         const oskar_StationModel* src)
 {
-    // Check that all pointers are not NULL.
+    /* Check that all pointers are not NULL. */
     if (src == NULL || dst == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Check the data types.
+    /* Check the data types. */
     return OSKAR_ERR_TYPE_MISMATCH;
 }

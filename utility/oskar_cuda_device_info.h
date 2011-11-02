@@ -56,4 +56,4 @@ bool oskar_cuda_device_supports_double(const int deviceId);
 }
 #endif
 
-#endif // OSKAR_CUDA_DEVICE_INFO_H_
+#endif /* OSKAR_CUDA_DEVICE_INFO_H_ */

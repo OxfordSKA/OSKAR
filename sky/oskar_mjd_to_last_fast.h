@@ -61,4 +61,4 @@ float oskar_mjd_to_last_fast_f(float mjd, float lon);
 }
 #endif
 
-#endif // OSKAR_MJD_TO_LAST_FAST_H_
+#endif /* OSKAR_MJD_TO_LAST_FAST_H_ */

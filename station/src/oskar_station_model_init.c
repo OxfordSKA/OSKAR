@@ -29,24 +29,28 @@
 #include "station/oskar_station_model_init.h"
 #include "utility/oskar_mem_init.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_station_model_init(oskar_StationModel* model, int type, int location,
         int n_elements)
 {
     int complex_type, error;
 
-    // Check for sane inputs.
+    /* Check for sane inputs. */
     if (model == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Check the type.
+    /* Check the type. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    // Determine the complex type.
+    /* Determine the complex type. */
     complex_type = (type == OSKAR_SINGLE) ?
             OSKAR_SINGLE_COMPLEX : OSKAR_DOUBLE_COMPLEX;
 
-    // Initialise variables.
+    /* Initialise variables. */
     model->longitude = 0.0;
     model->latitude = 0.0;
     model->altitude = 0.0;
@@ -54,7 +58,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->dec0 = 0.0;
     model->n_elements = n_elements;
 
-    // Initialise the memory.
+    /* Initialise the memory. */
     error = 0;
     error = oskar_mem_init(&model->x, type, location, n_elements);
     if (error) return error;
@@ -79,3 +83,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->bit_depth = 0;
     return error;
 }
+
+#ifdef __cplusplus
+}
+#endif

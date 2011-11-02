@@ -61,4 +61,4 @@ double oskar_equation_of_equinoxes_fast_d(double mjd);
 }
 #endif
 
-#endif // OSKAR_EQUATION_OF_EQUINOXES_FAST_H_
+#endif /* OSKAR_EQUATION_OF_EQUINOXES_FAST_H_ */

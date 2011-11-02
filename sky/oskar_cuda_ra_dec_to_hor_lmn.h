@@ -91,4 +91,4 @@ int oskar_cuda_ra_dec_to_hor_lmn_d(int n, const double* ra,
 }
 #endif
 
-#endif // OSKAR_CUDA_RA_DEC_TO_HOR_LMN_H_
+#endif /* OSKAR_CUDA_RA_DEC_TO_HOR_LMN_H_ */

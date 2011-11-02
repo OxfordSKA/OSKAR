@@ -59,4 +59,4 @@ int oskar_element_model_copy_to_gpu(const oskar_ElementModel* h_data,
 }
 #endif
 
-#endif // OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_
+#endif /* OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_ */

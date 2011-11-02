@@ -73,4 +73,4 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data);
 }
 #endif
 
-#endif // OSKAR_ELEMENT_MODEL_LOAD_H_
+#endif /* OSKAR_ELEMENT_MODEL_LOAD_H_ */

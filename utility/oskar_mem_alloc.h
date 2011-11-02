@@ -63,4 +63,4 @@ int oskar_mem_alloc(oskar_Mem* mem);
 }
 #endif
 
-#endif // OSKAR_MEM_ALLOC_H_
+#endif /* OSKAR_MEM_ALLOC_H_ */

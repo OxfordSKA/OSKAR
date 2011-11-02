@@ -223,4 +223,4 @@ void oskar_cuda_free(void* ptr);
 }
 #endif
 
-#endif // OSKAR_UTIL_CUDA_MEMORY_H_
+#endif /* OSKAR_UTIL_CUDA_MEMORY_H_ */

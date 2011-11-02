@@ -45,23 +45,23 @@ extern "C"
 #endif
 struct oskar_TelescopeModel
 {
-    int num_stations;            ///< Number of stations in the model.
-    oskar_StationModel* station; ///< Array of station structures.
-    oskar_Mem station_x;         ///< Fixed x component of station coordinate.
-    oskar_Mem station_y;         ///< Fixed y component of station coordinate.
-    oskar_Mem station_z;         ///< Fixed z component of station coordinate.
-    int identical_stations;      ///< True if all stations are identical.
-    int use_common_sky;          ///< True if all stations should use common source positions.
-    double ra0;                  ///< Right Ascension of phase centre in radians.
-    double dec0;                 ///< Declination of phase centre in radians.
+    int num_stations;            /**< Number of stations in the model. */
+    oskar_StationModel* station; /**< Array of station structures. */
+    oskar_Mem station_x;         /**< Fixed x component of station coordinate. */
+    oskar_Mem station_y;         /**< Fixed y component of station coordinate. */
+    oskar_Mem station_z;         /**< Fixed z component of station coordinate. */
+    int identical_stations;      /**< True if all stations are identical. */
+    int use_common_sky;          /**< True if all stations should use common source positions. */
+    double ra0;                  /**< Right Ascension of phase centre in radians. */
+    double dec0;                 /**< Declination of phase centre in radians. */
 
-    // Work buffers.
-    oskar_Mem station_u;         ///< Work buffer holding station u coordinates.
-    oskar_Mem station_v;         ///< Work buffer holding station v coordinates.
-    oskar_Mem station_w;         ///< Work buffer holding station w coordinates.
+    /* Work buffers. */
+    oskar_Mem station_u;         /**< Work buffer holding station u coordinates. */
+    oskar_Mem station_v;         /**< Work buffer holding station v coordinates. */
+    oskar_Mem station_w;         /**< Work buffer holding station w coordinates. */
 
 #ifdef __cplusplus
-    // If C++, then provide constructors and methods.
+    /* If C++, then provide constructors and methods. */
     /**
      * @brief Constructs a telescope model structure.
      *
@@ -119,7 +119,7 @@ typedef struct oskar_TelescopeModel oskar_TelescopeModel;
 #ifdef __cplusplus
 extern "C" {
 #endif
-// DEPRECATED
+/* DEPRECATED */
 struct oskar_TelescopeModel_d
 {
     unsigned num_antennas;
@@ -128,12 +128,12 @@ struct oskar_TelescopeModel_d
     double*  antenna_z;
     double   longitude;
     double   latitude;
-    int      identical_stations; // true if all stations are identical
+    int      identical_stations; /* true if all stations are identical */
 };
 typedef struct oskar_TelescopeModel_d oskar_TelescopeModel_d;
 
 
-// DEPRECATED
+/* DEPRECATED */
 struct oskar_TelescopeModel_f
 {
     unsigned num_antennas;
@@ -142,12 +142,11 @@ struct oskar_TelescopeModel_f
     float*   antenna_z;
     float    longitude;
     float    latitude;
-    int      identical_stations; // true if all stations are identical
+    int      identical_stations; /* true if all stations are identical */
 };
 typedef struct oskar_TelescopeModel_f oskar_TelescopeModel_f;
 
 
-//--- Utility functions --------------------------------------------------------
 OSKAR_EXPORT
 void oskar_copy_telescope_to_device_d(const oskar_TelescopeModel_d* h_telescope,
         oskar_TelescopeModel_d* hd_telescope);
@@ -169,10 +168,9 @@ void oskar_free_device_telescope_d(oskar_TelescopeModel_d* hd_telescope);
 
 OSKAR_EXPORT
 void oskar_free_device_telescope_f(oskar_TelescopeModel_f* hd_telescope);
-//------------------------------------------------------------------------------
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_TELESCOPEMODEL_H_
+#endif /* OSKAR_TELESCOPEMODEL_H_ */

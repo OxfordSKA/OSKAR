@@ -32,8 +32,7 @@
 extern "C" {
 #endif
 
-// Single precision.
-
+/* Single precision. */
 void oskar_mat_tri_c_f(int n, const float* a, float* b)
 {
     int a1, a2, p, q = 0;
@@ -48,8 +47,7 @@ void oskar_mat_tri_c_f(int n, const float* a, float* b)
     }
 }
 
-// Double precision.
-
+/* Double precision. */
 void oskar_mat_tri_c_d(int n, const double* a, double* b)
 {
     int a1, a2, p, q = 0;

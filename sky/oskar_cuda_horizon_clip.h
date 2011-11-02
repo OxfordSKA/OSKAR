@@ -80,4 +80,4 @@ int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
 }
 #endif
 
-#endif // OSKAR_CUDA_HORIZON_CLIP_H_
+#endif /* OSKAR_CUDA_HORIZON_CLIP_H_ */

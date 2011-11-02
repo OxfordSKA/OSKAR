@@ -91,4 +91,4 @@ int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* d_ra,
 }
 #endif
 
-#endif // OSKAR_CUDA_RA_DEC_TO_RELATIVE_LMN_H_
+#endif /* OSKAR_CUDA_RA_DEC_TO_RELATIVE_LMN_H_ */

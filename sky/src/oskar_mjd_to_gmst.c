@@ -33,9 +33,9 @@
 extern "C" {
 #endif
 
-// Double precision.
+/* Double precision. */
 
-// Seconds to radians.
+/* Seconds to radians. */
 #define SEC2RAD 7.2722052166430399038487e-5
 
 #ifndef M_2PI
@@ -46,17 +46,17 @@ double oskar_mjd_to_gmst_d(double mjd)
 {
     double d, t, gmst;
 
-    // Days from J2000.0.
+    /* Days from J2000.0. */
     d = mjd - 51544.5;
 
-    // Centuries from J2000.0.
+    /* Centuries from J2000.0. */
     t = d / 36525.0;
 
-    // GMST at this time.
+    /* GMST at this time. */
     gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
                     (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
 
-    // Range check (0 to 2pi).
+    /* Range check (0 to 2pi). */
     t = fmod(gmst, M_2PI);
     return (t >= 0.0) ? t : t + M_2PI;
 }

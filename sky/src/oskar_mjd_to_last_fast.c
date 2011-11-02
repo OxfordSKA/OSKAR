@@ -34,7 +34,7 @@
 extern "C" {
 #endif
 
-// Double precision.
+/* Double precision. */
 double oskar_mjd_to_last_fast_d(double mjd, double lon)
 {
     return oskar_mjd_to_lmst_d(mjd, lon) +
@@ -42,7 +42,7 @@ double oskar_mjd_to_last_fast_d(double mjd, double lon)
 }
 
 
-// Single precision.
+/* Single precision. */
 float oskar_mjd_to_last_fast_f(float mjd, float lon)
 {
     return (float)oskar_mjd_to_lmst_d((double)mjd, (double)lon) +

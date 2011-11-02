@@ -67,4 +67,4 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
 }
 #endif
 
-#endif // OSKAR_EVALUATE_JONES_K_H_
+#endif /* OSKAR_EVALUATE_JONES_K_H_ */

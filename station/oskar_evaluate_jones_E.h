@@ -56,4 +56,4 @@ OSKAR_EXPORT
 int oskar_evaluate_jones_E(oskar_Jones* E, oskar_SkyModel* sky,
         oskar_TelescopeModel* telescope, double gast);
 
-#endif // OSKAR_EVALUATE_JONES_E_H_
+#endif /* OSKAR_EVALUATE_JONES_E_H_ */

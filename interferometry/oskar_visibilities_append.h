@@ -58,4 +58,4 @@ OSKAR_EXPORT
 int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* src);
 
 
-#endif // OSKAR_VISIBILITIES_APPEND_H_
+#endif /* OSKAR_VISIBILITIES_APPEND_H_ */

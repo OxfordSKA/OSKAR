@@ -65,4 +65,4 @@ int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
 }
 #endif
 
-#endif // OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
+#endif /* OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_ */

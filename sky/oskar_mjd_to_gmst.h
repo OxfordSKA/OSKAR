@@ -57,4 +57,4 @@ double oskar_mjd_to_gmst_d(double mjd);
 }
 #endif
 
-#endif // OSKAR_MJD_TO_GMST_H_
+#endif /* OSKAR_MJD_TO_GMST_H_ */

@@ -60,4 +60,4 @@ size_t oskar_mem_element_size(int type);
 }
 #endif
 
-#endif // OSKAR_MEM_ELEMENT_SIZE_H_
+#endif /* OSKAR_MEM_ELEMENT_SIZE_H_ */

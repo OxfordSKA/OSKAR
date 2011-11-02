@@ -58,4 +58,4 @@ extern "C"
 OSKAR_EXPORT
 int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis);
 
-#endif // OSKAR_VISIBILITIES_WRITE_H_
+#endif /* OSKAR_VISIBILITIES_WRITE_H_ */

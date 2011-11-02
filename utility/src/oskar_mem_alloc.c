@@ -40,35 +40,35 @@ int oskar_mem_alloc(oskar_Mem* mem)
     int n_elements, location, type, err = 0;
     size_t element_size, bytes;
 
-    // Check that the structure exists.
+    /* Check that the structure exists. */
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Get the meta-data.
+    /* Get the meta-data. */
     n_elements = mem->private_n_elements;
     location = mem->private_location;
     type = mem->private_type;
 
-    // Check if allocation should happen or not.
+    /* Check if allocation should happen or not. */
     if (n_elements == 0)
         return 0;
 
-    // Get the memory size.
+    /* Get the memory size. */
     element_size = oskar_mem_element_size(type);
     if (element_size == 0)
         return OSKAR_ERR_BAD_DATA_TYPE;
     bytes = n_elements * element_size;
 
-    // Check whether the memory should be on the host or the device.
+    /* Check whether the memory should be on the host or the device. */
     if (location == OSKAR_LOCATION_CPU)
     {
-        // Allocate host memory.
+        /* Allocate host memory. */
         mem->data = calloc(bytes, 1);
         if (mem->data == NULL)
             err = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
-        // Allocate GPU memory.
+        /* Allocate GPU memory. */
         cudaMalloc(&mem->data, bytes);
         cudaMemset(mem->data, 0, bytes);
         err = cudaPeekAtLastError();

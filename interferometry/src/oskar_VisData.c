@@ -99,9 +99,6 @@ void oskar_write_vis_data_d(const char* filename, const oskar_VisData_d* vis)
     }
     for (i = 0; i < vis->num_samples; ++i)
     {
-//        printf("u[%i] = %f\n",i, vis->u[i]);
-//        printf("%f\n", vis->amp[i].x);
-//        printf("%f\n", vis->amp[i].y);
         fwrite(&(vis->u[i]),     sizeof(double), 1, file);
         fwrite(&(vis->v[i]),     sizeof(double), 1, file);
         fwrite(&(vis->w[i]),     sizeof(double), 1, file);
@@ -134,7 +131,7 @@ void oskar_load_vis_data_d(const char* filename, oskar_VisData_d* vis)
 
     while (fread(buffer, record_size, 1, file) == 1)
     {
-        // Ensure enough space in arrays.
+        /* Ensure enough space in arrays. */
         if (vis->num_samples % 100 == 0)
         {
             size_t mem_size;
@@ -170,9 +167,6 @@ void oskar_write_vis_data_f(const char* filename, const oskar_VisData_f* vis)
     }
     for (i = 0; i < vis->num_samples; ++i)
     {
-//        printf("u[%i] = %f\n",i, vis->u[i]);
-//        printf("%f\n", vis->amp[i].x);
-//        printf("%f\n", vis->amp[i].y);
         fwrite(&(vis->u[i]),     sizeof(float), 1, file);
         fwrite(&(vis->v[i]),     sizeof(float), 1, file);
         fwrite(&(vis->w[i]),     sizeof(float), 1, file);
@@ -205,7 +199,7 @@ void oskar_load_vis_data_f(const char* filename, oskar_VisData_f* vis)
 
     while (fread(buffer, record_size, 1, file) == 1)
     {
-        // Ensure enough space in arrays.
+        /* Ensure enough space in arrays. */
         if (vis->num_samples % 100 == 0)
         {
             size_t mem_size;

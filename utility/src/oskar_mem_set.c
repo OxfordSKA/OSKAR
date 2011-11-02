@@ -43,16 +43,16 @@ int oskar_mem_set(oskar_Mem* dst, void* src, int src_type, int src_num_elements,
     int error = 0;
     size_t dst_size, src_size;
 
-    // Check for sane inputs.
+    /* Check for sane inputs. */
     if (dst == NULL || src == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Compute the sizes.
+    /* Compute the sizes. */
     dst_size = dst->private_n_elements *
             oskar_mem_element_size(dst->private_type);
     src_size = src_num_elements * oskar_mem_element_size(src_type);
 
-    // If the memory size changes, free and reallocate the memory.
+    /* If the memory size changes, free and reallocate the memory. */
     if (dst_size != src_size)
     {
         int location = dst->private_location;

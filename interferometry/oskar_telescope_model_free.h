@@ -56,4 +56,4 @@ int oskar_telescope_model_free(oskar_TelescopeModel* telescope);
 }
 #endif
 
-#endif // OSKAR_TELESCOPE_MODEL_FREE_H_
+#endif /* OSKAR_TELESCOPE_MODEL_FREE_H_ */

@@ -35,13 +35,13 @@
 extern "C" {
 #endif
 
-// Single precision.
+/* Single precision. */
 int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
         float** x, float** y)
 {
     float ax, ay;
 
-    // Open the file.
+    /* Open the file. */
     FILE* file;
     file = fopen(filename, "r");
     if (file == NULL) return 0;
@@ -51,7 +51,7 @@ int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
 
     while (fscanf(file, "%f,%f", &ax, &ay) == 2)
     {
-        // Ensure enough space in arrays.
+        /* Ensure enough space in arrays. */
         if (*n % 100 == 0)
         {
             size_t mem_size = ((*n) + 100) * sizeof(float);
@@ -59,7 +59,7 @@ int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
             *y = (float*) realloc(*y, mem_size);
         }
 
-        // Store the data.
+        /* Store the data. */
         (*x)[*n] = ax;
         (*y)[*n] = ay;
         (*n)++;
@@ -69,13 +69,13 @@ int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
     return *n;
 }
 
-// Double precision.
+/* Double precision. */
 int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
         double** x, double** y)
 {
     double ax, ay;
 
-    // Open the file.
+    /* Open the file. */
     FILE* file;
     file = fopen(filename, "r");
     if (file == NULL) return 0;
@@ -85,7 +85,7 @@ int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
 
     while (fscanf(file, "%lf,%lf", &ax, &ay) == 2)
     {
-        // Ensure enough space in arrays.
+        /* Ensure enough space in arrays. */
         if (*n % 100 == 0)
         {
             size_t mem_size = ((*n) + 100) * sizeof(double);
@@ -93,7 +93,7 @@ int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
             *y = (double*) realloc(*y, mem_size);
         }
 
-        // Store the data.
+        /* Store the data. */
         (*x)[*n] = ax;
         (*y)[*n] = ay;
         (*n)++;
