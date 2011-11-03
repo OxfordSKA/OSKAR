@@ -10,14 +10,15 @@ set(interferometry_SRC
     src/oskar_evaluate_jones_K.cu
     src/oskar_geocentric_cartesian_to_geodetic_spherical.c
     src/oskar_geodetic_spherical_to_geocentric_cartesian.c
-    src/oskar_interferometer1_scalar.cu
     src/oskar_horizon_plane_to_geocentric_cartesian.c
-    src/oskar_horizon_plane_to_itrs.cpp
+    src/oskar_horizon_plane_to_itrs.cpp # Deprecated.
     src/oskar_horizon_plane_to_offset_geocentric_cartesian.c
+    src/oskar_interferometer1_scalar.cu
+    src/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.c
     src/oskar_telescope_model_copy.c
     src/oskar_telescope_model_free.c
     src/oskar_telescope_model_init.c
-    src/oskar_telescope_model_load_station_coords.cpp
+    src/oskar_telescope_model_load_station_coords.c
     src/oskar_telescope_model_location.c
     src/oskar_telescope_model_resize.c
     src/oskar_telescope_model_set_station_pos.c

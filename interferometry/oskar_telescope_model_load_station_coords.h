@@ -63,10 +63,12 @@ extern "C" {
  * @param filename   File name path to a telescope coordinate file.
  * @param longitude  Telescope centre longitude, in radians.
  * @param latitude   Telescope centre latitude, in radians.
+ * @param altitude   Telescope centre altitude, in metres.
  */
 OSKAR_EXPORT
 int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
-        const char* filename, const double longitude, const double latitude);
+        const char* filename, double longitude, double latitude,
+        double altitude);
 
 #ifdef __cplusplus
 }

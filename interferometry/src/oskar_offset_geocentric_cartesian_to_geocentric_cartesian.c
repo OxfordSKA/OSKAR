@@ -26,34 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_alloc.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_init.h"
+#include "interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h"
+#include "interferometry/oskar_geodetic_spherical_to_geocentric_cartesian.h"
 
-#include <stdlib.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements,
-        int owner)
+void oskar_offset_geocentric_cartesian_to_geocentric_cartesian(int n,
+        const double* x_offset, const double* y_offset,
+        const double* z_offset, double longitude, double latitude,
+        double altitude, double* x, double* y, double* z)
 {
-    /* Check that the structure exists. */
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Compute ECEF coordinates of reference point. */
+    double x_r = 0.0, y_r = 0.0, z_r = 0.0;
+    int i;
+    oskar_geodetic_spherical_to_geocentric_cartesian(1, &longitude, &latitude,
+            &altitude, &x_r, &y_r, &z_r);
 
-    /* Set the meta-data. */
-    mem->private_type = type;
-    mem->private_location = location;
-    mem->private_n_elements = n_elements;
-    mem->private_owner = owner;
-    mem->data = NULL;
-
-    /* Allocate memory. */
-    if (owner)
-        return oskar_mem_alloc(mem);
-    else
-        return 0;
+    /* Add on the coordinates of the reference point. */
+    for (i = 0; i < n; ++i)
+    {
+        x[i] = x_offset[i] + x_r;
+        y[i] = y_offset[i] + y_r;
+        z[i] = z_offset[i] + z_r;
+    }
 }
 
 #ifdef __cplusplus

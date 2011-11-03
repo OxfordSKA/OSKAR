@@ -40,65 +40,70 @@ extern "C" {
 #endif
 
 int oskar_telescope_model_set_station_pos(oskar_TelescopeModel* dst,
-		int index, double x, double y, double z)
+        int index, double x, double y, double z)
 {
+    int type, location;
+
+    /* Check range. */
     if (index >= dst->num_stations)
         return OSKAR_ERR_OUT_OF_RANGE;
 
-    if (oskar_telescope_model_is_location(dst, OSKAR_LOCATION_CPU))
+    /* Get the data type. */
+    type = oskar_telescope_model_type(dst);
+
+    /* Get the data location. */
+    location = oskar_telescope_model_location(dst);
+
+    if (location == OSKAR_LOCATION_CPU)
     {
-    	if (oskar_telescope_model_is_type(dst, OSKAR_DOUBLE))
-    	{
+        if (type == OSKAR_DOUBLE)
+        {
             ((double*)dst->station_x.data)[index] = x;
             ((double*)dst->station_y.data)[index] = y;
             ((double*)dst->station_z.data)[index] = z;
             return 0;
-    	}
-    	else if (oskar_telescope_model_is_type(dst, OSKAR_SINGLE))
-    	{
+        }
+        else if (type == OSKAR_SINGLE)
+        {
             ((float*)dst->station_x.data)[index] = (float)x;
             ((float*)dst->station_y.data)[index] = (float)y;
             ((float*)dst->station_z.data)[index] = (float)z;
             return 0;
-    	}
-    	else
-    		return OSKAR_ERR_BAD_DATA_TYPE;
+        }
+        else
+            return OSKAR_ERR_BAD_DATA_TYPE;
     }
-    else if (oskar_telescope_model_is_location(dst, OSKAR_LOCATION_GPU))
+    else if (location == OSKAR_LOCATION_GPU)
     {
-    	int type;
-    	size_t element_size, offset_bytes;
-
-    	/* Get the data type. */
-    	type = oskar_telescope_model_type(dst);
+        size_t element_size, offset_bytes;
         element_size = oskar_mem_element_size(type);
         offset_bytes = index * element_size;
         if (type == OSKAR_DOUBLE)
         {
             cudaMemcpy((char*)(dst->station_x.data) + offset_bytes, &x,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_y.data) + offset_bytes, &y,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_z.data) + offset_bytes, &z,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
-        	float tx, ty, tz;
-        	tx = (float) x;
-        	ty = (float) y;
-        	tz = (float) z;
+            float tx, ty, tz;
+            tx = (float) x;
+            ty = (float) y;
+            tz = (float) z;
             cudaMemcpy((char*)(dst->station_x.data) + offset_bytes, &tx,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_y.data) + offset_bytes, &ty,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_z.data) + offset_bytes, &tz,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             return 0;
         }
         else
-    		return OSKAR_ERR_BAD_DATA_TYPE;
+            return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     return OSKAR_ERR_BAD_LOCATION;

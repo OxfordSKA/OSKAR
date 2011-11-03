@@ -38,77 +38,76 @@ extern "C" {
 #endif
 
 int oskar_station_model_set_element_pos(oskar_StationModel* dst,
-		int index, double x, double y, double z)
+        int index, double x, double y, double z)
 {
-	int type, location;
+    int type, location;
 
-	/* Check range. */
+    /* Check range. */
     if (index >= dst->n_elements)
         return OSKAR_ERR_OUT_OF_RANGE;
 
-	/* Get the data type. */
+    /* Get the data type. */
     if (dst->x.private_type != dst->y.private_type ||
-    		dst->x.private_type != dst->z.private_type)
-    	return OSKAR_ERR_TYPE_MISMATCH;
-	type = dst->x.private_type;
+            dst->x.private_type != dst->z.private_type)
+        return OSKAR_ERR_TYPE_MISMATCH;
+    type = dst->x.private_type;
 
-	/* Get the data location. */
+    /* Get the data location. */
     if (dst->x.private_location != dst->y.private_location ||
-    		dst->x.private_location != dst->z.private_location)
-    	return OSKAR_ERR_BAD_LOCATION;
-	location = dst->x.private_location;
+            dst->x.private_location != dst->z.private_location)
+        return OSKAR_ERR_BAD_LOCATION;
+    location = dst->x.private_location;
 
     if (location == OSKAR_LOCATION_CPU)
     {
-    	if (type == OSKAR_DOUBLE)
-    	{
+        if (type == OSKAR_DOUBLE)
+        {
             ((double*)dst->x.data)[index] = x;
             ((double*)dst->y.data)[index] = y;
             ((double*)dst->z.data)[index] = z;
             return 0;
-    	}
-    	else if (type == OSKAR_SINGLE)
-    	{
+        }
+        else if (type == OSKAR_SINGLE)
+        {
             ((float*)dst->x.data)[index] = (float)x;
             ((float*)dst->y.data)[index] = (float)y;
             ((float*)dst->z.data)[index] = (float)z;
             return 0;
-    	}
-    	else
-    		return OSKAR_ERR_BAD_DATA_TYPE;
+        }
+        else
+            return OSKAR_ERR_BAD_DATA_TYPE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
-    	/* Get the data type. */
-    	size_t element_size, offset_bytes;
+        size_t element_size, offset_bytes;
         element_size = oskar_mem_element_size(type);
         offset_bytes = index * element_size;
         if (type == OSKAR_DOUBLE)
         {
             cudaMemcpy((char*)(dst->x.data) + offset_bytes, &x,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->y.data) + offset_bytes, &y,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->z.data) + offset_bytes, &z,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
-        	float tx, ty, tz;
-        	tx = (float) x;
-        	ty = (float) y;
-        	tz = (float) z;
+            float tx, ty, tz;
+            tx = (float) x;
+            ty = (float) y;
+            tz = (float) z;
             cudaMemcpy((char*)(dst->x.data) + offset_bytes, &tx,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->y.data) + offset_bytes, &ty,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->z.data) + offset_bytes, &tz,
-            		element_size, cudaMemcpyHostToDevice);
+                    element_size, cudaMemcpyHostToDevice);
             return 0;
         }
         else
-    		return OSKAR_ERR_BAD_DATA_TYPE;
+            return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     return OSKAR_ERR_BAD_LOCATION;

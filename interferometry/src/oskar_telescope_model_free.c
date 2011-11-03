@@ -29,6 +29,7 @@
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "station/oskar_station_model_free.h"
+#include "utility/oskar_mem_free.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -38,6 +39,20 @@ extern "C" {
 int oskar_telescope_model_free(oskar_TelescopeModel* telescope)
 {
     int error = 0, i = 0;
+
+    /* Free the arrays. */
+    error = oskar_mem_free(&telescope->station_u);
+    if (error) return error;
+    error = oskar_mem_free(&telescope->station_v);
+    if (error) return error;
+    error = oskar_mem_free(&telescope->station_w);
+    if (error) return error;
+    error = oskar_mem_free(&telescope->station_x);
+    if (error) return error;
+    error = oskar_mem_free(&telescope->station_y);
+    if (error) return error;
+    error = oskar_mem_free(&telescope->station_z);
+    if (error) return error;
 
     /* Free each station. */
     for (i = 0; i < telescope->num_stations; ++i)

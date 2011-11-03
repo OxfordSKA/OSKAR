@@ -95,6 +95,33 @@ struct oskar_TelescopeModel
      * Destroys the telescope structure, freeing any memory it occupies.
      */
     ~oskar_TelescopeModel();
+
+    /**
+     * @brief
+     * Loads a telescope coordinate file that specifies the station locations
+     * with respect to the local tangent plane.
+     *
+     * @details
+     * A telescope station coordinate file is an ASCII text file containing two
+     * or three columns of comma- or space-separated values that represent the
+     * station (x,y,z) coordinates in the local tangent plane. Each line
+     * corresponds to the position of one station, and the z coordinate is
+     * assumed to be zero if omitted.
+     *
+     * The coordinate system (ENU, or East-North-Up) is aligned so that the
+     * x-axis points to the local geographic East, the y-axis to local
+     * geographic North, and the z-axis to the local zenith. The origin is the
+     * tangent point with the Earth's ellipsoid.
+     *
+     * The geodetic longitude and latitude of the origin must also be supplied.
+     *
+     * @param filename   File name path to a telescope coordinate file.
+     * @param longitude  Telescope centre longitude, in radians.
+     * @param latitude   Telescope centre latitude, in radians.
+     * @param altitude   Telescope centre altitude, in metres.
+     */
+    int load_station_coords(const char* filename, double longitude,
+            double latitude, double altitude);
 #endif
 };
 

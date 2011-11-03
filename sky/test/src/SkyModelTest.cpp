@@ -70,7 +70,7 @@ void SkyModelTest::test_set_source()
     // Try to set a source into the model - this should fail as the model is
     // still zero size.
     int error = sky->set_source(0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 200.0e6, -0.7);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_INVALID_ARGUMENT, error);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_OUT_OF_RANGE, error);
 
     // Resize the model to 2 sources.
     sky->resize(2);

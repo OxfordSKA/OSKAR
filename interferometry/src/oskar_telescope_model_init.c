@@ -46,6 +46,9 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
     if (telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    /* Initialise the meta-data. */
+    telescope->num_stations = n_stations;
+
     /* Initialise the arrays. */
     err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
     if (err) return err;
@@ -61,11 +64,13 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
     if (err) return err;
 
     /* Initialise the station structures. */
-    telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
+    telescope->station = NULL;
+    if (n_stations > 0)
+        telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
     for (i = 0; i < n_stations; ++i)
     {
-        err = oskar_station_model_init(&telescope->station[i], type,
-        		location, 0);
+        err = oskar_station_model_init(&(telescope->station[i]), type,
+                location, 0);
         if (err) return err;
     }
 

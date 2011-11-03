@@ -48,7 +48,8 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     /* Copy each station. */
     for (i = 0; i < src->num_stations; ++i)
     {
-        error = oskar_station_model_copy(&dst->station[i], &src->station[i]);
+        error = oskar_station_model_copy(&(dst->station[i]),
+                &(src->station[i]));
         if (error) return error;
     }
 

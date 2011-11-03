@@ -28,7 +28,7 @@
 
 #include "interferometry/test/oskar_TelescopeModelTest.h"
 #include "interferometry/oskar_TelescopeModel.h"
-
+#include "interferometry/oskar_horizon_plane_to_offset_geocentric_cartesian.h"
 #include <cmath>
 #include <cstdio>
 
@@ -38,31 +38,80 @@
  */
 void oskar_TelescopeModelTest::test_method()
 {
+    // Create a telescope coordinate file.
+    const char* telescope_file = "test_telescope.dat";
+    FILE* file = fopen(telescope_file, "w");
+    int n_stations = 100;
+    for (int i = 0; i < n_stations; ++i)
+    {
+        fprintf(file, "%.8f,%.8f,%.8f\n", i / 10.0, i / 20.0, i / 30.0);
+    }
+    fclose(file);
+
+    // Set the location.
+    double longitude = 30.0 * M_PI / 180.0;
+    double latitude = 50.0 * M_PI / 180.0;
+    double altitude = 0.0;
+
     try
     {
-        int n_stations = 10;
-        oskar_TelescopeModel* tel_cpu = new oskar_TelescopeModel(OSKAR_DOUBLE,
-                OSKAR_LOCATION_CPU, n_stations);
+        oskar_TelescopeModel* tel_cpu1 = new oskar_TelescopeModel(OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU);
 
         // Fill the telescope structure.
+        CPPUNIT_ASSERT_EQUAL(0, tel_cpu1->load_station_coords(telescope_file,
+                longitude, latitude, altitude));
+
+        // Check the contents of the CPU structure.
+        for (int i = 0; i < n_stations; ++i)
+        {
+            // Define horizon coordinates.
+            double x_hor = i / 10.0;
+            double y_hor = i / 20.0;
+            double z_hor = i / 30.0;
+
+            // Compute offset geocentric coordinates.
+            double x = 0.0, y = 0.0, z = 0.0;
+            oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
+                    &x_hor, &y_hor, &z_hor, longitude, latitude, &x, &y, &z);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu1->station_x))[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu1->station_y))[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu1->station_z))[i], 1e-5);
+        }
 
         // Copy telescope structure to GPU.
-        oskar_TelescopeModel* tel_gpu = new oskar_TelescopeModel(tel_cpu,
+        oskar_TelescopeModel* tel_gpu = new oskar_TelescopeModel(tel_cpu1,
                 OSKAR_LOCATION_GPU);
 
         // Delete the old CPU structure.
-        delete tel_cpu;
+        delete tel_cpu1;
 
         // Copy the telescope structure back to the CPU.
-        tel_cpu = new oskar_TelescopeModel(tel_gpu, OSKAR_LOCATION_CPU);
+        oskar_TelescopeModel* tel_cpu2 = new oskar_TelescopeModel(tel_gpu,
+                OSKAR_LOCATION_CPU);
 
         // Delete the old GPU structure.
         delete tel_gpu;
 
         // Check the contents of the CPU structure.
+        for (int i = 0; i < n_stations; ++i)
+        {
+            // Define horizon coordinates.
+            double x_hor = i / 10.0;
+            double y_hor = i / 20.0;
+            double z_hor = i / 30.0;
+
+            // Compute offset geocentric coordinates.
+            double x = 0.0, y = 0.0, z = 0.0;
+            oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
+                    &x_hor, &y_hor, &z_hor, longitude, latitude, &x, &y, &z);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu2->station_x))[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu2->station_y))[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu2->station_z))[i], 1e-5);
+        }
 
         // Delete the CPU structure.
-        delete tel_cpu;
+        delete tel_cpu2;
     }
     catch (const char* msg)
     {

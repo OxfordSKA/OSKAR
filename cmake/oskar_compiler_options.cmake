@@ -97,7 +97,7 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS -g;)
         list(APPEND CUDA_NVCC_FLAGS -O0;)
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-fPIC;)
-        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v')
+        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
     endif ()
 
     message("================================================================================")
