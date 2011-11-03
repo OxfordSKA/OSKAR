@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
-#define OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_
+#ifndef OSKAR_TELESCOPE_MODEL_LOAD_STATION_POS_H_
+#define OSKAR_TELESCOPE_MODEL_LOAD_STATION_POS_H_
 
 /**
- * @file oskar_telescope_model_load_station_coords.h
+ * @file oskar_telescope_model_load_station_pos.h
  */
 
 #include "oskar_global.h"
@@ -66,7 +66,7 @@ extern "C" {
  * @param altitude   Telescope centre altitude, in metres.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
+int oskar_telescope_model_load_station_pos(oskar_TelescopeModel* telescope,
         const char* filename, double longitude, double latitude,
         double altitude);
 
@@ -74,4 +74,4 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
 }
 #endif
 
-#endif /* OSKAR_TELESCOPE_MODEL_LOAD_STATION_COORDS_H_ */
+#endif /* OSKAR_TELESCOPE_MODEL_LOAD_STATION_POS_H_ */

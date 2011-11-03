@@ -26,27 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
-#include "interferometry/oskar_horizon_plane_to_offset_geocentric_cartesian.h"
-#include "interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h"
-#include "interferometry/oskar_telescope_model_load_station_coords.h"
-#include "interferometry/oskar_telescope_model_resize.h"
-#include "interferometry/oskar_telescope_model_set_station_pos.h"
-#include "interferometry/oskar_telescope_model_type.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
+#include "station/oskar_station_model_load.h"
+#include "station/oskar_station_model_resize.h"
+#include "station/oskar_station_model_set_element_errors.h"
+#include "station/oskar_station_model_set_element_pos.h"
+#include "station/oskar_station_model_set_element_weight.h"
+#include "station/oskar_station_model_type.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
 #include <stdio.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
-        const char* filename, double longitude, double latitude,
-        double altitude)
+int oskar_station_model_load(oskar_StationModel* station, const char* filename)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
@@ -55,11 +49,11 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
     FILE* file;
 
     /* Check that all pointers are not NULL. */
-    if (telescope == NULL || filename == NULL)
+    if (station == NULL || filename == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check type. */
-    type = oskar_telescope_model_type(telescope);
+    type = oskar_station_model_type(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
@@ -72,21 +66,20 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         /* Declare parameter array. */
-        double par[] = {0.0, 0.0, 0.0}; /* Horizon plane x, y, z */
-        double x = 0.0, y = 0.0, z = 0.0; /* (Offset) geocentric x, y, z */
+        double par[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
         int read = 0;
 
         /* Ignore comment lines (lines starting with '#'). */
         if (line[0] == '#') continue;
 
-        /* Load coordinates. */
-        read = oskar_string_to_array_d(line, 3, par);
+        /* Load element coordinates. */
+        read = oskar_string_to_array_d(line, 9, par);
         if (read < 2) continue;
 
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
         {
-            err = oskar_telescope_model_resize(telescope, n + 100);
+            err = oskar_station_model_resize(station, n + 100);
             if (err)
             {
                 fclose(file);
@@ -94,32 +87,34 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
             }
         }
 
-        /* Convert horizon plane to offset geocentric cartesian coordinates. */
-        oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
-                &par[0], &par[1], &par[2], longitude, latitude, &x, &y, &z);
-
-        /* Store the offset geocentric coordinates. */
-        err = oskar_telescope_model_set_station_pos(telescope, n, x, y, z);
+        /* Store the data. */
+        err = oskar_station_model_set_element_pos(station, n,
+                par[0], par[1], par[2]);
+        if (err)
+        {
+            fclose(file);
+            return err;
+        }
+        err = oskar_station_model_set_element_weight(station, n,
+                par[3], par[4]);
+        if (err)
+        {
+            fclose(file);
+            return err;
+        }
+        err = oskar_station_model_set_element_errors(station, n,
+                par[5], par[6], par[7], par[8]);
         if (err)
         {
             fclose(file);
             return err;
         }
 
-        /* Convert to ECEF, then to station longitude, latitude, altitude. */
-        oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-                &x, &y, &z, longitude, latitude, altitude, &x, &y, &z);
-        oskar_geocentric_cartesian_to_geodetic_spherical(1, &x, &y, &z,
-                &(telescope->station[n].longitude),
-                &(telescope->station[n].latitude),
-                &(telescope->station[n].altitude));
-
-        /* Increment counter. */
         ++n;
     }
 
-    /* Record the number of station positions loaded. */
-    telescope->num_stations = n;
+    /* Record the number of elements loaded. */
+    station->n_elements = n;
 
     /* Free the line buffer and close the file. */
     if (line) free(line);

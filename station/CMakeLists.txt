@@ -16,7 +16,7 @@ set(station_SRC
     src/oskar_station_model_copy.c
     src/oskar_station_model_free.c
     src/oskar_station_model_init.c
-    src/oskar_station_model_load_coords.c
+    src/oskar_station_model_load.c
     src/oskar_station_model_location.c
     src/oskar_station_model_resize.c
     src/oskar_station_model_set_element_errors.c

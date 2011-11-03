@@ -27,7 +27,7 @@
  */
 
 #include "station/test/StationModelTest.h"
-#include "station/oskar_station_model_load_coords.h"
+#include "station/oskar_station_model_load.h"
 #include "station/oskar_StationModel.h"
 
 #include <cmath>
@@ -71,7 +71,7 @@ void StationModelTest::test_load_single()
 
     // Load the data.
     oskar_StationModel station_model(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load_coords(filename, &station_model);
+    oskar_station_model_load(&station_model, filename);
 
     // Check the coordinates.
     CPPUNIT_ASSERT_EQUAL(n_elements, station_model.n_elements);
@@ -120,7 +120,7 @@ void StationModelTest::test_load_double()
 
     // Load the data.
     oskar_StationModel station_model(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load_coords(filename, &station_model);
+    oskar_station_model_load(&station_model, filename);
 
     // Check the coordinates.
     CPPUNIT_ASSERT_EQUAL(n_elements, station_model.n_elements);

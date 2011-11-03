@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_LOAD_COORDS_H_
-#define OSKAR_STATION_MODEL_LOAD_COORDS_H_
+#ifndef OSKAR_STATION_MODEL_LOAD_H_
+#define OSKAR_STATION_MODEL_LOAD_H_
 
 /**
- * @file oskar_station_model_load_coords.h
+ * @file oskar_station_model_load.h
  */
 
 #include "oskar_global.h"
@@ -45,10 +45,10 @@ extern "C" {
  * Loads the station element coordinates.
  *
  * @details
- * This function loads station element (antenna) coordinates from a CSV file.
+ * This function loads station element (antenna) data from a CSV file.
  *
+ * @param[out] dst Pointer to destination data structure to fill.
  * @param[in] filename Name of the data file to load.
- * @param[out] dst Pointer to destination data structure to copy into.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -57,11 +57,10 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_station_model_load_coords(const char* filename,
-        oskar_StationModel* dst);
+int oskar_station_model_load(oskar_StationModel* dst, const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_MODEL_LOAD_COORDS_H_ */
+#endif /* OSKAR_STATION_MODEL_LOAD_H_ */
