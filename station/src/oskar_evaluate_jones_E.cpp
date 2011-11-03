@@ -77,8 +77,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         // Evaluate the station beam.
         oskar_Mem E0; // Pointer to the row of E for station 0.
         oskar_jones_get_station_pointer(&E0, E, 0);
-        oskar_evaluate_station_beam(&E0, sky, station0, work);
-
+        oskar_evaluate_station_beam(&E0, station0, work);
         //  TODO zero sources below horizon.
     }
     else
@@ -97,10 +96,9 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             {
                 oskar_StationModel* station = &telescope->station[i];
                 oskar_jones_get_station_pointer(&E_station, E, i);
-                oskar_evaluate_station_beam(&E_station, sky, station, work);
+                oskar_evaluate_station_beam(&E_station, station, work);
             }
-
-            //  TODO zero sources below horizon.
+            // TODO zero sources below horizon.
         }
         else
         {
@@ -113,8 +111,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 oskar_evaluate_beam_hoizontal_lmn(work, station, gast);
                 oskar_evaluate_source_horizontal_lmn(work, sky, station, gast);
                 oskar_jones_get_station_pointer(&E_station, E, i);
-                oskar_evaluate_station_beam(&E_station, sky, station, work);
-                //  TODO zero sources below horizon.
+                oskar_evaluate_station_beam(&E_station, station, work);
+                // TODO zero sources below horizon.
             }
         }
     }

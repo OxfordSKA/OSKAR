@@ -26,35 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_E_H_
-#define OSKAR_EVALUATE_JONES_E_H_
+
+#ifndef OSKAR_GET_ERROR_STRING_H_
+#define OSKAR_GET_ERROR_STRING_H_
 
 /**
- * @file oskar_evaluate_jones_E.h
+ * @file oskar_get_error_string.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "station/oskar_WorkE.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+OSKAR_EXPORT
 /**
- * @brief Evaluates a set of E Jones matrices.
+ * @brief Returns an string describing the specified error code.
  *
  * @details
+ * As all OSKAR defined error codes are negative, if the error code is positive
+ * it is assumed to be a CUDA error and an error message from
+ * cudaGetErrorString() is returned.
  *
- * @param[out] E         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in] error An OSKAR error code.
+ *
+ * @return String describing the error.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
-OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double gast,
-        oskar_WorkE* work);
+const char* oskar_get_error_string(const int error);
 
-#endif /* OSKAR_EVALUATE_JONES_E_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_GET_ERROR_STRING_H_ */

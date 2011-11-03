@@ -34,14 +34,15 @@
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
 #include "station/oskar_StationModel.h"
 #include "station/oskar_WorkE.h"
 #include "math/oskar_Jones.h"
+#include "sky/oskar_SkyModel.h" // no longer needed when old functions are removed.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 /**
  * @brief Evaluates the E-Jones matrices for the specified station
@@ -49,19 +50,21 @@ extern "C" {
  *
  * @param E       oskar_Mem pointer to the the E-Jones matrices for a given
  *                station.
- * @param sky     Sky model structure.
  * @param station Station structure.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_SkyModel* sky,
-        const oskar_StationModel* station, oskar_WorkE* work);
+int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
+        oskar_WorkE* work);
 
 
-OSKAR_EXPORT
-int oskar_evalate_station_beam_scalar(oskar_Mem* E, const oskar_SkyModel* sky,
-        const oskar_StationModel* station, oskar_WorkE* work);
+
+
+
+
+
+
 
 
 
@@ -69,6 +72,7 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* E, const oskar_SkyModel* sky,
 
 
 /**
+ * DEPRECATED
  * @brief
  * Function to evaluate the scalar E-Jones (beam pattern) for each source
  * in a local sky model for a specified station array geometry.
@@ -105,6 +109,7 @@ int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
         double2* d_e_jones);
 
 /**
+ * DEPRECATED
  * @brief
  * Single precision version of function above.
  */
@@ -115,6 +120,7 @@ int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
         float2* d_e_jones);
 
 /**
+ * DEPRECATED
  * @brief
  * Evaluates the station beam response for a local sky model for a number of
  * stations.
@@ -141,6 +147,7 @@ void oskar_evaluate_station_beams_d(const unsigned num_stations,
         bool disable, bool identical_stations, double2* d_e_jones);
 
 /**
+ * DEPRECATED
  * @brief
  * Single precision version of function above.
  */

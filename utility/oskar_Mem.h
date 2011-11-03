@@ -184,9 +184,12 @@ public:
     int n_elements() const {return private_n_elements;}
     bool owner() const { return private_owner; }
     bool is_double() const;
+    bool is_single() const;
     bool is_complex() const;
-    bool is_null() const {return (data == 0);}
+    bool is_real() const;
     bool is_scalar() const;
+    bool is_matrix() const;
+    bool is_null() const {return (data == 0);}
     static bool is_double(const int mem_type);
     static bool is_complex(const int mem_type);
     static bool is_scalar(const int mem_type);

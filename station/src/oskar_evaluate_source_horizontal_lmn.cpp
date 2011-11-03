@@ -52,20 +52,25 @@ int oskar_evaluate_source_horizontal_lmn(oskar_WorkE* work,
 
     // Check that the sky structure contains some sources.
     int num_sources = sky->num_sources;
-    if (num_sources == 0 || sky->RA.is_null() || sky->Dec.is_null())
+    if (num_sources == 0 || sky->RA.is_null() || sky->Dec.is_null() ||
+            work->hor_l.is_null() || work->hor_m.is_null() ||
+            work->hor_n.is_null())
+    {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    }
 
     // Make sure the work arrays are long enough.
-    if (work->hor_l.n_elements() != num_sources)
-        work->hor_l.resize(num_sources);
-    if (work->hor_m.n_elements() != num_sources)
-        work->hor_m.resize(num_sources);
-    if (work->hor_n.n_elements() != num_sources)
-        work->hor_n.resize(num_sources);
+    if (work->hor_l.n_elements() != num_sources ||
+            work->hor_m.n_elements() != num_sources ||
+            work->hor_n.n_elements() != num_sources)
+    {
+        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    }
 
     // Local apparent Sidereal Time, in radians.
     double last = gast + station->longitude;
 
+    // Double precision.
     if (sky->type() == OSKAR_DOUBLE &&
             work->hor_l.type() == OSKAR_DOUBLE &&
             work->hor_m.type() == OSKAR_DOUBLE &&
@@ -74,6 +79,8 @@ int oskar_evaluate_source_horizontal_lmn(oskar_WorkE* work,
         return oskar_cuda_ra_dec_to_hor_lmn_d(num_sources, sky->RA, sky->Dec,
                 last, station->latitude, work->hor_l, work->hor_m, work->hor_n);
     }
+
+    // Single precision.
     else if (sky->type() == OSKAR_SINGLE &&
             work->hor_l.type() == OSKAR_SINGLE &&
             work->hor_m.type() == OSKAR_SINGLE &&
@@ -84,7 +91,9 @@ int oskar_evaluate_source_horizontal_lmn(oskar_WorkE* work,
                 work->hor_n);
     }
     else
+    {
         return OSKAR_ERR_TYPE_MISMATCH;
+    }
 }
 
 #ifdef __cplusplus

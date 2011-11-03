@@ -26,35 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_E_H_
-#define OSKAR_EVALUATE_JONES_E_H_
+#ifndef OSKAR_EVALUATE_STATION_BEAM_SCALAR_H_
+#define OSKAR_EVALUATE_STATION_BEAM_SCALAR_H_
 
 /**
- * @file oskar_evaluate_jones_E.h
+ * @file oskar_evaluate_station_beam_scalar.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
+#include "utility/oskar_Mem.h"
+#include "station/oskar_StationModel.h"
 #include "station/oskar_WorkE.h"
 
-/**
- * @brief Evaluates a set of E Jones matrices.
- *
- * @details
- *
- * @param[out] E         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
- */
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double gast,
-        oskar_WorkE* work);
 
-#endif /* OSKAR_EVALUATE_JONES_E_H_ */
+/**
+ *
+ * @param E
+ * @param station
+ * @param work
+ * @return
+ */
+OSKAR_EXPORT
+int oskar_evalate_station_beam_scalar(oskar_Mem* E,
+        const oskar_StationModel* station, oskar_WorkE* work);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_EVALUATE_STATION_BEAM_SCALAR_H_ */

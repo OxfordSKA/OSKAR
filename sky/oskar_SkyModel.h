@@ -77,7 +77,7 @@ struct oskar_SkyModel
      *                     OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
      * @param num_sources  Number of sources in the sky model.
      */
-    oskar_SkyModel(int type, int location, int num_sources);
+    oskar_SkyModel(int type, int location, int num_sources = 0);
 
     /**
      * @brief Constructs a sky model, loading it from the specified file.

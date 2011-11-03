@@ -103,9 +103,33 @@ enum {
     /* Indicates that the OSKAR version is not compatible. */
     OSKAR_ERR_VERSION_MISMATCH     = -12,
 
+    /* Indicates that there is an error in units of some quantity. */
+    OSKAR_ERR_BAD_UNITS            = -13,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN              = -1000
 };
+
+
+/**
+ * @brief
+ * Enumerator to define coordinate units used by OSKAR.
+ */
+enum {
+    OSKAR_METRES,
+    OSKAR_WAVENUMBERS
+};
+
+
+/**
+ * @brief
+ * Enumerator for use with bool flags.
+ */
+enum {
+    OSKAR_FALSE = 0,
+    OSKAR_TRUE  = 1
+};
+
 
 /**
  * @macro OSKAR_EXPORT

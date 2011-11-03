@@ -98,9 +98,19 @@ bool oskar_Mem::is_double() const
     return oskar_mem_is_double(this->type());
 }
 
+bool oskar_Mem::is_single() const
+{
+    return !oskar_mem_is_double(this->type());
+}
+
 bool oskar_Mem::is_complex() const
 {
     return oskar_mem_is_complex(this->type());
+}
+
+bool oskar_Mem::is_real() const
+{
+    return !oskar_mem_is_complex(this->type());
 }
 
 bool oskar_Mem::is_scalar() const
@@ -108,16 +118,24 @@ bool oskar_Mem::is_scalar() const
     return oskar_mem_is_scalar(this->type());
 }
 
+bool oskar_Mem::is_matrix() const
+{
+    return !oskar_mem_is_scalar(this->type());
+}
+
+// static method
 bool oskar_Mem::is_double(const int type)
 {
     return oskar_mem_is_double(type);
 }
 
+// static method
 bool oskar_Mem::is_complex(const int type)
 {
     return oskar_mem_is_complex(type);
 }
 
+// static method
 bool oskar_Mem::is_scalar(const int type)
 {
     return oskar_mem_is_scalar(type);

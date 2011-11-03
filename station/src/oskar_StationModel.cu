@@ -29,11 +29,18 @@
 
 #include "station/oskar_StationModel.h"
 #include "math/cudak/oskar_cudak_vec_scale_rr.h"
+#include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_resize.h"
 #include "station/oskar_station_model_check_mem.h"
+#include "station/oskar_station_model_scale_coords.h"
 #include <cuda_runtime_api.h>
+#include <cmath>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
@@ -53,9 +60,11 @@ oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
   parent(NULL),
   element_pattern(NULL)
 {
-    oskar_station_model_init(this, other->x.type(), location,
-            other->n_elements);
-    throw "Not yet implemented.";
+    if (oskar_station_model_init(this, other->x.type(), location,
+            other->n_elements))
+        throw "error in oskar_station_model_init";
+    if (oskar_station_model_copy(this, other))
+        throw "error in oskar_station_model_copy";
 }
 
 oskar_StationModel::~oskar_StationModel()
@@ -71,6 +80,16 @@ int oskar_StationModel::copy_to(oskar_StationModel* other)
 int oskar_StationModel::resize(int n_elements)
 {
     return oskar_station_model_resize(this, n_elements);
+}
+
+
+int oskar_StationModel::scale_coords_to_wavenumbers(const double frequency_hz)
+{
+    if (coord_units != OSKAR_METRES)
+        return OSKAR_ERR_BAD_UNITS;
+    coord_units = OSKAR_WAVENUMBERS;
+    const double metres_to_wavenumbers = 2.0 * M_PI * frequency_hz / 299792458.0;
+    return oskar_station_model_scale_coords(this, metres_to_wavenumbers);
 }
 
 int oskar_StationModel::coord_type() const

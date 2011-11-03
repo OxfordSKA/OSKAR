@@ -55,6 +55,7 @@ struct oskar_StationModel
     oskar_Mem x;      /**< x-position wrt local horizon, toward the East. */
     oskar_Mem y;      /**< y-position wrt local horizon, toward the North. */
     oskar_Mem z;      /**< z-position wrt local horizon, toward the zenith. */
+    int coord_units;  /**< Units of the x,y,z coordinates.*/
     oskar_Mem weight; /**< Element complex weight (set to 1 unless apodisation). */
     oskar_Mem amp_gain;
     oskar_Mem amp_error;
@@ -115,6 +116,13 @@ struct oskar_StationModel
     int resize(int n_elements);
 
     /**
+     * @brief Scales station coordinates from metres to wavenumber units.
+     *
+     * @param[in] frequency_hz Frequency, in Hz.
+     */
+    int scale_coords_to_wavenumbers(const double frequency_hz);
+
+    /**
      * @brief Returns the oskar_Mem type ID of station coordinates or
      * an error code if the coordinate type is invalid.
      */
@@ -127,8 +135,6 @@ struct oskar_StationModel
     int coord_location() const;
 #endif
 };
-
-
 
 
 /* DEPRECATED */

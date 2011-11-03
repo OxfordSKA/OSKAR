@@ -26,35 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_E_H_
-#define OSKAR_EVALUATE_JONES_E_H_
+#include "station/oskar_station_model_scale_coords.h"
+#include "math/cudak/oskar_cudak_vec_scale_rr.h"
 
-/**
- * @file oskar_evaluate_jones_E.h
- */
-
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "station/oskar_WorkE.h"
-
-/**
- * @brief Evaluates a set of E Jones matrices.
- *
- * @details
- *
- * @param[out] E         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
- */
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double gast,
-        oskar_WorkE* work);
 
-#endif /* OSKAR_EVALUATE_JONES_E_H_ */
+int oskar_station_model_scale_coords(oskar_StationModel* station,
+        const double value)
+{
+    if (station == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (station->coord_location() != OSKAR_LOCATION_GPU)
+        return OSKAR_ERR_BAD_LOCATION;
+
+    int num_antennas = station->n_elements;
+    int num_threads = 256;
+    int num_blocks  = (num_antennas + num_threads - 1) / num_threads;
+
+    if (station->coord_type() == OSKAR_DOUBLE)
+    {
+        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, value, station->x);
+        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, value, station->y);
+    }
+    else if (station->coord_type() == OSKAR_SINGLE)
+    {
+        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, (float)value, station->x);
+        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, (float)value, station->y);
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+
+    return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif
+

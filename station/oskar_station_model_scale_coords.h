@@ -26,35 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_E_H_
-#define OSKAR_EVALUATE_JONES_E_H_
+
+#ifndef OSKAR_STATION_MODEL_SCALE_COORDINATES_H_
+#define OSKAR_STATION_MODEL_SCALE_COORDINATES_H_
 
 /**
- * @file oskar_evaluate_jones_E.h
+ * @file oskar_station_model_scale_coords.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "station/oskar_WorkE.h"
+#include "station/oskar_StationModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Evaluates a set of E Jones matrices.
+ * @brief Scale the coordinates (x,y,z) of a station structure by the specfied
+ * value.
  *
- * @details
+ * @param station Station model structure containing coordinates to scale.
+ * @param value   Scaling factor.
  *
- * @param[out] E         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
+ * @return An error code.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double gast,
-        oskar_WorkE* work);
+int oskar_station_model_scale_coords(oskar_StationModel* station,
+        const double value);
 
-#endif /* OSKAR_EVALUATE_JONES_E_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif /* OSKAR_STATION_MODEL_SCALE_COORDINATES_H_ */

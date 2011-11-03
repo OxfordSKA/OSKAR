@@ -12,13 +12,15 @@ set(station_SRC
     src/oskar_evaluate_beam_horizontal_lmn.cpp
     src/oskar_evaluate_jones_E.cpp
     src/oskar_evaluate_source_horizontal_lmn.cpp
-    src/oskar_evaluate_station_beam.cu
+    src/oskar_evaluate_station_beam_scalar.cu
+    src/oskar_evaluate_station_beam.cu # probably dosnt need to be cu soon.
     src/oskar_station_model_copy.c
     src/oskar_station_model_free.c
     src/oskar_station_model_init.c
     src/oskar_station_model_load.c
     src/oskar_station_model_location.c
     src/oskar_station_model_resize.c
+    src/oskar_station_model_scale_coords.cu
     src/oskar_station_model_set_element_errors.c
     src/oskar_station_model_set_element_pos.c
     src/oskar_station_model_set_element_weight.c

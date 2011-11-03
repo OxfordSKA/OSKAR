@@ -148,10 +148,7 @@ public:
      * @param[in] other Pointer to the oskar_Jones structure to set.
      */
     int set_real_scalar(double scalar);
-#endif
 
-#ifdef __cplusplus
-    // If C++, then provide read-only accessor functions for the meta-data.
     int type() const {return ptr.type();}
     int n_sources() const {return private_n_sources;}
     int n_stations() const {return private_n_stations;}

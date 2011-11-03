@@ -30,61 +30,75 @@
 
 #include "station/oskar_evaluate_station_beam.h"
 
-#include "cuda/kernels/oskar_cudak_bp2hiw.h"
-#include "cuda/kernels/oskar_cudak_wt2hg.h"
-
 #include "station/oskar_StationModel.h"
-#include "sky/oskar_SkyModel.h"
-
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_element_size.h"
+#include "station/oskar_WorkE.h"
+#include "station/oskar_evaluate_station_beam_scalar.h"
 
+#include <cuda_runtime_api.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+
+// These headers should be safe to remove when removing deprecated functions.
+// --------------------------------------------------------------------------
 #include "math/cudak/oskar_cudak_dftw_2d_seq_in.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
 #include "math/cudak/oskar_cudak_vec_set_c.h"
-#include "station/oskar_WorkE.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include "cuda/kernels/oskar_cudak_bp2hiw.h"
+#include "cuda/kernels/oskar_cudak_wt2hg.h"
+// --------------------------------------------------------------------------
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_SkyModel* sky,
-        const oskar_StationModel* station, oskar_WorkE* work)
+int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
+        oskar_WorkE* work)
 {
-    if (E == NULL || sky == NULL || station == NULL)
+    if (E == NULL || station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (E->location() != OSKAR_LOCATION_GPU ||
-            sky->location() != OSKAR_LOCATION_GPU ||
-            station->coord_location() != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    // NOTE extra fields will have to be added to these check
+    // for element pattern data.
 
-    if (E->data == NULL)
+    if (E->is_null() || station->x.is_null() || station->y.is_null() ||
+            work->hor_l.is_null() || work->hor_m.is_null() ||
+            work->weights.is_null())
+    {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    }
 
-    if (!E->is_complex())
+    // Check that the relevant memory is on the GPU.
+    if (E->location() != OSKAR_LOCATION_GPU ||
+            station->coord_location() != OSKAR_LOCATION_GPU ||
+            work->hor_l.location() != OSKAR_LOCATION_GPU ||
+            work->hor_m.location() != OSKAR_LOCATION_GPU ||
+            work->weights.location() != OSKAR_LOCATION_GPU)
+    {
+        return OSKAR_ERR_BAD_LOCATION;
+    }
+
+    if (work->weights.n_elements() != station->n_elements ||
+            work->hor_l.n_elements() != E->n_elements() ||
+            work->hor_m.n_elements() != E->n_elements())
+    {
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    }
+
+    if (E->is_real() || work->weights.is_real())
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    if (sky->num_sources != E->n_elements())
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-
-    // .... more checks here or can delay until later?!
-
-
-    // Element pattern assumed to be isotropic.
+    // No element pattern data. Assume isotropic antenna elements.
     if (station->element_pattern == NULL && E->is_scalar())
     {
-        oskar_evalate_station_beam_scalar(E, sky, station, work);
+        oskar_evalate_station_beam_scalar(E, station, work);
     }
 
     // Make use of element pattern data.
     else if (station->element_pattern != NULL && !E->is_scalar())
     {
-        // NOTE not yet implemented.
+        // NOTE Element pattern data ---> not yet implemented.
         return OSKAR_ERR_UNKNOWN;
     }
     else
@@ -94,76 +108,6 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_SkyModel* sky,
 
     return 0;
 }
-
-OSKAR_EXPORT
-int oskar_evalate_station_beam_scalar(oskar_Mem* E, const oskar_SkyModel* sky,
-        const oskar_StationModel* station, oskar_WorkE* work)
-{
-    // Checks
-    // TODO
-
-    int num_beams     = 1; // == 1 as this is a beam pattern!
-    int num_antennas  = station->n_elements;
-
-    // Invoke kernel to compute unnormalised, geometric antenna weights.
-    int num_antennas_per_block = 256;
-    dim3 block_dim(num_antennas_per_block, num_beams);  // (antennas, beams).
-    dim3 grid_dim((num_antennas + block_dim.x - 1) / block_dim.x, 1);
-    size_t element_size = oskar_mem_element_size(E->type());
-    size_t shared_mem_size = (block_dim.x + block_dim.y) * element_size;
-
-    // Double precision version.
-    if (E->is_double() && sky->type() == OSKAR_DOUBLE
-            && station->coord_type() == OSKAR_DOUBLE)
-    {
-        // TODO
-        // station l,m,n   (temp) <-- station struct
-        // station weights (temp) <-- station struct
-
-        // Generate dft weights. TODO new version
-//        oskar_cudak_dftw_2d_seq_in_d<<<grid_dim, block_dim, shared_mem_size >>>
-//                (num_antennas, d_antenna_x, d_antenna_y, num_beams, d_beam_l,
-//                        d_beam_m, d_weights_work);
-//
-//        // Evaluate beam pattern for each source.
-//        const int naMax = 432;    // Should be multiple of 16. // NOTE should be different for float / double
-//        const int bThd = 256;     // Beam pattern generator (source positions).
-//        int bBlk = 0;             // Number of thread blocks for beam pattern computed later.
-//        bBlk = (hd_sky->num_sources + bThd - 1) / bThd;
-//        shared_mem_size = 2 * naMax * sizeof(double2);
-//        oskar_cudak_dftw_o2c_2d_d <<< bBlk, bThd, shared_mem_size >>>
-//                (num_antennas, d_antenna_x, d_antenna_y,
-//                d_weights_work, hd_sky->num_sources, hd_sky->hor_l, hd_sky->hor_m,
-//                naMax, d_e_jones);
-//
-//        // Free device memory.
-//        cudaFree(d_beam_l);
-//        cudaFree(d_beam_m);
-    }
-
-
-    // Single precision version.
-    else if (!E->is_double() && sky->type() == OSKAR_SINGLE  && station->coord_type() == OSKAR_SINGLE)
-    {
-
-
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_DATA_TYPE;
-    }
-
-    // Return any CUDA error.
-    return cudaPeekAtLastError();
-}
-
-
-
-
-
-
-
-
 
 
 
@@ -199,6 +143,7 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* E, const oskar_SkyModel* sky,
 
 
 // Double precision.
+// DEPRECATED
 int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
         const double h_beam_l, const double h_beam_m,
         const oskar_SkyModelLocal_d* hd_sky, double2* d_weights_work,
@@ -250,6 +195,7 @@ int oskar_evaluate_station_beam_d(const oskar_StationModel_d* hd_station,
     return cudaPeekAtLastError();
 }
 
+// DEPRECATED
 int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
         const float h_beam_l, const float h_beam_m,
         const oskar_SkyModelLocal_f* hd_sky, float2* d_weights_work,
@@ -302,6 +248,7 @@ int oskar_evaluate_station_beam_f(const oskar_StationModel_f* hd_station,
 }
 
 
+// DEPRECATED
 void oskar_evaluate_station_beams_d(const unsigned num_stations,
         const oskar_StationModel_d* hd_stations,
         const oskar_SkyModelLocal_d* hd_sky, const double h_beam_l,
@@ -344,7 +291,7 @@ void oskar_evaluate_station_beams_d(const unsigned num_stations,
     }
 }
 
-
+// DEPRECATED
 void oskar_evaluate_station_beams_f(const unsigned num_stations,
         const oskar_StationModel_f* hd_stations,
         const oskar_SkyModelLocal_f* hd_sky, const float h_beam_l,

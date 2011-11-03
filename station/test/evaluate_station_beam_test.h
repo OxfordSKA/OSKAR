@@ -26,35 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_E_H_
-#define OSKAR_EVALUATE_JONES_E_H_
+
+#ifndef EVALUATE_STATION_BEAM_TEST_H_
+#define EVALUATE_STATION_BEAM_TEST_H_
 
 /**
- * @file oskar_evaluate_jones_E.h
+ * @file evalute_station_beam_test.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-#include "station/oskar_WorkE.h"
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief Evaluates a set of E Jones matrices.
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- *
- * @param[out] E         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
-OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double gast,
-        oskar_WorkE* work);
+class Evaluate_Station_Beam_Test : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Evaluate_Station_Beam_Test);
+        CPPUNIT_TEST(test_fail_conditions);
+        CPPUNIT_TEST(evalute_test_pattern);
+        CPPUNIT_TEST(performance_test);
+        CPPUNIT_TEST_SUITE_END();
 
-#endif /* OSKAR_EVALUATE_JONES_E_H_ */
+    public:
+        void test_fail_conditions();
+        void evalute_test_pattern();
+        void performance_test();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Evaluate_Station_Beam_Test);
+
+#endif // EVALUATE_STATION_BEAM_TEST_H_

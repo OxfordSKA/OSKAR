@@ -26,35 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_E_H_
-#define OSKAR_EVALUATE_JONES_E_H_
+#include "station/test/evaluate_jones_E_test.h"
 
-/**
- * @file oskar_evaluate_jones_E.h
- */
-
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
-#include "station/oskar_WorkE.h"
+#include "station/oskar_evaluate_jones_E.h"
+#include "utility/oskar_get_error_string.h"
 
-/**
- * @brief Evaluates a set of E Jones matrices.
- *
- * @details
- *
- * @param[out] E         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
- */
-#ifdef __cplusplus
-extern "C"
-#endif
-OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double gast,
-        oskar_WorkE* work);
+#include <cmath>
+#include <cstdio>
 
-#endif /* OSKAR_EVALUATE_JONES_E_H_ */
+void Evaluate_Jones_E_Test::test_fail_conditions()
+{
+
+    // Create some input data.
+    int num_stations = 2;
+    int num_sources  = 3;
+    oskar_TelescopeModel telescope(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+    oskar_SkyModel sky(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+    oskar_Jones E(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, num_stations,
+            num_sources);
+    double gast = 0.0;
+    oskar_WorkE work;
+
+    int error = oskar_evaluate_jones_E(&E, &sky, &telescope, gast, &work);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+}
+
+
+void Evaluate_Jones_E_Test::evalute_test_pattern()
+{
+}
+
+
+void Evaluate_Jones_E_Test::performance_test()
+{
+}
+
+
+
+
+
+
