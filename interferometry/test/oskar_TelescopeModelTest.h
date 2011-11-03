@@ -46,12 +46,12 @@ class oskar_TelescopeModelTest : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(oskar_TelescopeModelTest);
-        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_load_telescope_cpu);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         // Test Methods
-        void test_method();
+        void test_load_telescope_cpu();
 };
 
 // Register the test class.

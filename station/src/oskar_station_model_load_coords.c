@@ -46,7 +46,7 @@ int oskar_station_model_load_coords(const char* filename,
     /* Declare the line buffer and counter. */
     char* line = NULL;
     size_t bufsize = 0;
-    int n = 0, type = 0;
+    int n = 0, type = 0, err = 0;
     FILE* file;
 
     /* Check that all pointers are not NULL. */
@@ -80,7 +80,6 @@ int oskar_station_model_load_coords(const char* filename,
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
         {
-            int err;
             err = oskar_station_model_resize(station, n + 100);
             if (err)
             {
@@ -90,10 +89,28 @@ int oskar_station_model_load_coords(const char* filename,
         }
 
         /* Store the data. */
-        oskar_station_model_set_element_pos(station, n, par[0], par[1], par[2]);
-        oskar_station_model_set_element_weight(station, n, par[3], par[4]);
-        oskar_station_model_set_element_errors(station, n, par[5], par[6],
-                par[7], par[8]);
+        err = oskar_station_model_set_element_pos(station, n,
+                par[0], par[1], par[2]);
+        if (err)
+        {
+            fclose(file);
+            return err;
+        }
+        err = oskar_station_model_set_element_weight(station, n,
+                par[3], par[4]);
+        if (err)
+        {
+            fclose(file);
+            return err;
+        }
+        err = oskar_station_model_set_element_errors(station, n,
+                par[5], par[6], par[7], par[8]);
+        if (err)
+        {
+            fclose(file);
+            return err;
+        }
+
         ++n;
     }
 

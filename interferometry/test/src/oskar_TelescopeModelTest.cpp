@@ -36,7 +36,7 @@
  * @details
  * Tests filling a telescope model, and copying it to the GPU and back.
  */
-void oskar_TelescopeModelTest::test_method()
+void oskar_TelescopeModelTest::test_load_telescope_cpu()
 {
     // Create a telescope coordinate file.
     const char* telescope_file = "test_telescope.dat";
@@ -55,40 +55,23 @@ void oskar_TelescopeModelTest::test_method()
 
     try
     {
-        oskar_TelescopeModel* tel_cpu1 = new oskar_TelescopeModel(OSKAR_DOUBLE,
+        oskar_TelescopeModel* tel_cpu = new oskar_TelescopeModel(OSKAR_DOUBLE,
                 OSKAR_LOCATION_CPU);
 
         // Fill the telescope structure.
-        CPPUNIT_ASSERT_EQUAL(0, tel_cpu1->load_station_coords(telescope_file,
+        CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_coords(telescope_file,
                 longitude, latitude, altitude));
 
-        // Check the contents of the CPU structure.
-        for (int i = 0; i < n_stations; ++i)
-        {
-            // Define horizon coordinates.
-            double x_hor = i / 10.0;
-            double y_hor = i / 20.0;
-            double z_hor = i / 30.0;
-
-            // Compute offset geocentric coordinates.
-            double x = 0.0, y = 0.0, z = 0.0;
-            oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
-                    &x_hor, &y_hor, &z_hor, longitude, latitude, &x, &y, &z);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu1->station_x))[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu1->station_y))[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu1->station_z))[i], 1e-5);
-        }
-
         // Copy telescope structure to GPU.
-        oskar_TelescopeModel* tel_gpu = new oskar_TelescopeModel(tel_cpu1,
+        oskar_TelescopeModel* tel_gpu = new oskar_TelescopeModel(tel_cpu,
                 OSKAR_LOCATION_GPU);
 
         // Delete the old CPU structure.
-        delete tel_cpu1;
+        delete tel_cpu;
+        tel_cpu = NULL;
 
         // Copy the telescope structure back to the CPU.
-        oskar_TelescopeModel* tel_cpu2 = new oskar_TelescopeModel(tel_gpu,
-                OSKAR_LOCATION_CPU);
+        tel_cpu = new oskar_TelescopeModel(tel_gpu, OSKAR_LOCATION_CPU);
 
         // Delete the old GPU structure.
         delete tel_gpu;
@@ -105,13 +88,13 @@ void oskar_TelescopeModelTest::test_method()
             double x = 0.0, y = 0.0, z = 0.0;
             oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
                     &x_hor, &y_hor, &z_hor, longitude, latitude, &x, &y, &z);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu2->station_x))[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu2->station_y))[i], 1e-5);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu2->station_z))[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu->station_x))[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu->station_y))[i], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu->station_z))[i], 1e-5);
         }
 
         // Delete the CPU structure.
-        delete tel_cpu2;
+        delete tel_cpu;
     }
     catch (const char* msg)
     {
