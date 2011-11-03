@@ -46,10 +46,18 @@ extern "C" {
  * with respect to the local tangent plane.
  *
  * @details
- * A telescope station coordinate file is an ASCII file consisting of two or
- * three columns of comma separated values representing the station
- * x,y,z co-ordinates in a horizontal coordinate system (the z coordinate is assumed to be zero).
- * Each line corresponds to the position of one station.
+ * A telescope station coordinate file is an ASCII text file containing two or
+ * three columns of comma- or space-separated values that represent the station
+ * (x,y,z) coordinates in the local tangent plane. Each line corresponds to the
+ * position of one station, and the z coordinate is assumed to be zero if
+ * omitted.
+ *
+ * The coordinate system (ENU, or East-North-Up) is aligned so that the x-axis
+ * points to the local geographic East, the y-axis to local geographic North,
+ * and the z-axis to the local zenith. The origin is the tangent point with the
+ * Earth's ellipsoid.
+ *
+ * The geodetic longitude and latitude of the origin must also be supplied.
  *
  * @param telescope  Telescope model structure to be populated.
  * @param filename   File name path to a telescope coordinate file.

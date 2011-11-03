@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ *    and/or src materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,50 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_mem_init.h"
-#include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_init.h"
-#include <stdlib.h>
+#include "station/oskar_station_model_resize.h"
+#include "utility/oskar_mem_realloc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
+int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
 {
-    int i = 0, err = 0;
+    int error = 0;
 
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Set the new number of elements. */
+    station->n_elements = n_elements;
 
-    /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_v, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_w, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, n_stations, 1);
-    if (err) return err;
+    /* Resize the model data. */
+    error = oskar_mem_realloc(&station->x, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->y, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->z, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->weight, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->amp_gain, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->amp_error, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->phase_offset, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->phase_error, n_elements);
+    if (error) return error;
 
-    /* Initialise the station structures. */
-    telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
-    {
-        err = oskar_station_model_init(&telescope->station[i], type,
-        		location, 0);
-        if (err) return err;
-    }
-
-    return 0;
+    return error;
 }
 
 #ifdef __cplusplus

@@ -26,52 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_mem_init.h"
+#ifndef OSKAR_STATION_MODEL_SET_ELEMENT_WEIGHT_H_
+#define OSKAR_STATION_MODEL_SET_ELEMENT_WEIGHT_H_
+
+/**
+ * @file oskar_station_model_set_element_weight.h
+ */
+
+#include "oskar_global.h"
 #include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_init.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
-{
-    int i = 0, err = 0;
-
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_v, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_w, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, n_stations, 1);
-    if (err) return err;
-
-    /* Initialise the station structures. */
-    telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
-    {
-        err = oskar_station_model_init(&telescope->station[i], type,
-        		location, 0);
-        if (err) return err;
-    }
-
-    return 0;
-}
+/**
+ * @brief
+ * Sets the complex weight of a element in the station model.
+ *
+ * @details
+ * This function sets the complex weight of the specified element in the
+ * station model, transferring data to the GPU if necessary.
+ *
+ * @param[in] dst   Station model structure to copy into.
+ * @param[in] index Element array index to set.
+ * @param[in] re    Element weight (real).
+ * @param[in] im    Element weight (imag).
+ */
+OSKAR_EXPORT
+int oskar_station_model_set_element_weight(oskar_StationModel* dst,
+		int index, double re, double im);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_STATION_MODEL_SET_ELEMENT_WEIGHT_H_ */

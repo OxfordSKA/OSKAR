@@ -26,52 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
+#ifndef OSKAR_TELESCOPE_MODEL_SET_STATION_POS_H_
+#define OSKAR_TELESCOPE_MODEL_SET_STATION_POS_H_
+
+/**
+ * @file oskar_telescope_model_set_station_pos.h
+ */
+
+#include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_mem_init.h"
-#include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_init.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
-{
-    int i = 0, err = 0;
-
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_v, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_w, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, n_stations, 1);
-    if (err) return err;
-
-    /* Initialise the station structures. */
-    telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
-    {
-        err = oskar_station_model_init(&telescope->station[i], type,
-        		location, 0);
-        if (err) return err;
-    }
-
-    return 0;
-}
+/**
+ * @brief
+ * Sets the coordinates of a station in the telescope model.
+ *
+ * @details
+ * This function sets the coordinates of the specified station in the telescope
+ * model, transferring data to the GPU if necessary.
+ *
+ * @param[in] dst   Telescope model structure to copy into.
+ * @param[in] index Station array index to set.
+ * @param[in] x     Station x position.
+ * @param[in] y     Station y position.
+ * @param[in] z     Station z position.
+ */
+OSKAR_EXPORT
+int oskar_telescope_model_set_station_pos(oskar_TelescopeModel* dst,
+		int index, double x, double y, double z);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_TELESCOPE_MODEL_SET_STATION_POS_H_ */

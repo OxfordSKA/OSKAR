@@ -26,52 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
+#ifndef OSKAR_TELESCOPE_MODEL_TYPE_H_
+#define OSKAR_TELESCOPE_MODEL_TYPE_H_
+
+/**
+ * @file oskar_telescope_model_type.h
+ */
+
+#include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_mem_init.h"
-#include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_init.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
-{
-    int i = 0, err = 0;
+/**
+ * @brief Checks if the OSKAR telescope model is of the specified type.
+ *
+ * @details
+ * \p type should be an oskar_Mem data type.
+ *
+ * If the types are found to be inconsistent between all of the oskar_Mem
+ * structures held in the telescope model the type check is considered false.
+ *
+ * @param telescope   Pointer to telescope model structure.
+ * @param type  oskar_Mem data type to check against.
 
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+ * @return 1 (true) if the telescope model is of the specified type, 0 otherwise.
+ */
+int oskar_telescope_model_is_type(const oskar_TelescopeModel* telescope,
+		int type);
 
-    /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_v, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_w, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, n_stations, 1);
-    if (err) return err;
-
-    /* Initialise the station structures. */
-    telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
-    {
-        err = oskar_station_model_init(&telescope->station[i], type,
-        		location, 0);
-        if (err) return err;
-    }
-
-    return 0;
-}
+/**
+ * @brief Returns the oskar_Mem type ID for the telescope structure or an error
+ * code if an invalid type is found.
+ *
+ * @param telescope Pointer to an OSKAR telescope model structure.
+ *
+ * @return oskar_Mem data type or error code.
+ */
+int oskar_telescope_model_type(const oskar_TelescopeModel* telescope);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_TELESCOPE_MODEL_TYPE_H_ */

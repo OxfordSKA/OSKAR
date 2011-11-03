@@ -26,50 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_mem_init.h"
+#include "station/oskar_station_model_location.h"
 #include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_init.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
+int oskar_station_model_is_type(const oskar_StationModel* station, int type)
 {
-    int i = 0, err = 0;
+    return (station->x.private_type == type &&
+    		station->y.private_type == type &&
+    		station->z.private_type == type);
+}
 
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
+int oskar_station_model_type(const oskar_StationModel* station)
+{
+    if (station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_v, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_w, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, n_stations, 1);
-    if (err) return err;
-
-    /* Initialise the station structures. */
-    telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
-    {
-        err = oskar_station_model_init(&telescope->station[i], type,
-        		location, 0);
-        if (err) return err;
-    }
-
-    return 0;
+    if (oskar_station_model_is_type(station, OSKAR_DOUBLE))
+        return OSKAR_DOUBLE;
+    else if (oskar_station_model_is_type(station, OSKAR_SINGLE))
+        return OSKAR_SINGLE;
+    else
+        return OSKAR_ERR_BAD_DATA_TYPE;
 }
 
 #ifdef __cplusplus

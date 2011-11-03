@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or src materials provided with the distribution.
+ *    and/or other materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,37 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_STATION_MODEL_LOCATION_H_
+#define OSKAR_STATION_MODEL_LOCATION_H_
+
+/**
+ * @file oskar_station_model_location.h
+ */
+
 #include "oskar_global.h"
-#include "station/oskar_station_model_resize.h"
-#include "utility/oskar_Mem.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
-{
-    int error = 0;
 
-    station->n_elements = n_elements;
+/**
+ * @brief Checks if the OSKAR station model memory is at the specified location.
+ *
+ * @details
+ * \p location should be an oskar_Mem data location ID.
+ *
+ * If the location is found to be inconsistent between all of the oskar_Mem
+ * structures held in the station model the location check is considered false.
+ *
+ * @param station       Pointer to station model structure.
+ * @param location  oskar_Mem location type to check against.
 
-    // Resize the model data.
-    error = station->x.resize(n_elements);
-    if (error) return error;
-    error = station->y.resize(n_elements);
-    if (error) return error;
-    error = station->z.resize(n_elements);
-    if (error) return error;
-    error = station->weight.resize(n_elements);
-    if (error) return error;
-    error = station->amp_gain.resize(n_elements);
-    if (error) return error;
-    error = station->amp_error.resize(n_elements);
-    if (error) return error;
-    error = station->phase_offset.resize(n_elements);
-    if (error) return error;
-    error = station->phase_error.resize(n_elements);
-    if (error) return error;
+ * @return 1 (true) if the station model is of the specified location, 0 otherwise.
+ */
+int oskar_station_model_is_location(const oskar_StationModel* station,
+		int location);
 
-    return error;
+/**
+ * @brief Returns the oskar_Mem location ID for the station structure or an
+ * error code if an invalid location is found.
+ *
+ * @param station Pointer to an OSKAR station model structure.
+ *
+ * @return oskar_Mem data location or error code.
+ */
+int oskar_station_model_location(const oskar_StationModel* station);
+
+#ifdef __cplusplus
 }
+#endif
 
+#endif /* OSKAR_STATION_MODEL_LOCATION_H_ */

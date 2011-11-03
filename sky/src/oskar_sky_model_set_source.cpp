@@ -41,7 +41,7 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
 {
     if (index >= sky->num_sources)
     {
-        return OSKAR_ERR_INVALID_ARGUMENT;
+        return OSKAR_ERR_OUT_OF_RANGE;
     }
 
     if (sky->location() == OSKAR_LOCATION_GPU)
@@ -121,7 +121,7 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         }
         else
         {
-            return OSKAR_ERR_UNKNOWN;
+            return OSKAR_ERR_BAD_DATA_TYPE;
         }
     }
     return 0;

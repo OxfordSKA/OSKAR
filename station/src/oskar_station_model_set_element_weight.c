@@ -26,48 +26,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_mem_init.h"
-#include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_init.h"
+#include <cuda_runtime_api.h> // Must include this first to avoid type conflict.
 #include <stdlib.h>
+
+#include "station/oskar_station_model_set_element_weight.h"
+#include "station/oskar_StationModel.h"
+#include "utility/oskar_mem_element_size.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
+int oskar_station_model_set_element_weight(oskar_StationModel* dst,
+		int index, double re, double im)
 {
-    int i = 0, err = 0;
+	int type, location;
+	size_t element_size, offset_bytes;
 
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+	/* Check range. */
+    if (index >= dst->n_elements)
+        return OSKAR_ERR_OUT_OF_RANGE;
 
-    /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_v, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_w, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, n_stations, 1);
-    if (err) return err;
+	/* Get the data type. */
+	type = dst->weight.private_type;
+	location = dst->weight.private_location;
+    element_size = oskar_mem_element_size(type);
+    offset_bytes = index * element_size;
 
-    /* Initialise the station structures. */
-    telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
+    /* Check the type. */
+    if (type == OSKAR_DOUBLE_COMPLEX)
     {
-        err = oskar_station_model_init(&telescope->station[i], type,
-        		location, 0);
-        if (err) return err;
+    	double2 w;
+    	w.x = re; w.y = im;
+
+    	if (location == OSKAR_LOCATION_CPU)
+    		((double2*)dst->weight.data)[index] = w;
+    	else if (location == OSKAR_LOCATION_GPU)
+            cudaMemcpy((char*)(dst->weight.data) + offset_bytes, &w,
+            		element_size, cudaMemcpyHostToDevice);
+    	else
+    		return OSKAR_ERR_BAD_LOCATION;
     }
+    else if (type == OSKAR_SINGLE_COMPLEX)
+    {
+    	float2 w;
+    	w.x = (float)re; w.y = (float)im;
+
+    	if (location == OSKAR_LOCATION_CPU)
+    		((float2*)dst->weight.data)[index] = w;
+    	else if (location == OSKAR_LOCATION_GPU)
+            cudaMemcpy((char*)(dst->weight.data) + offset_bytes, &w,
+            		element_size, cudaMemcpyHostToDevice);
+    	else
+    		return OSKAR_ERR_BAD_LOCATION;
+    }
+    else
+    	return OSKAR_ERR_BAD_DATA_TYPE;
 
     return 0;
 }
