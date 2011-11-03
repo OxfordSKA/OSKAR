@@ -32,6 +32,7 @@
 #include "interferometry/oskar_telescope_model_free.h"
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_load_station_pos.h"
+#include "station/oskar_station_model_load.h"
 #include "math/cudak/oskar_cudak_vec_scale_rr.h"
 #include <cuda_runtime_api.h>
 #include <cstdio>
@@ -63,11 +64,18 @@ oskar_TelescopeModel::~oskar_TelescopeModel()
         throw "Error in oskar_telescope_model_free.";
 }
 
-int oskar_TelescopeModel::load_station_coords(const char* filename,
+int oskar_TelescopeModel::load_station_pos(const char* filename,
         double longitude, double latitude, double altitude)
 {
     return oskar_telescope_model_load_station_pos(this, filename,
             longitude, latitude, altitude);
+}
+
+int oskar_TelescopeModel::load_station(int index, const char* filename)
+{
+    if (index >= this->num_stations)
+        return OSKAR_ERR_OUT_OF_RANGE;
+    return oskar_station_model_load(&(this->station[index]), filename);
 }
 
 

@@ -50,6 +50,13 @@ class oskar_TelescopeModelTest : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE_END();
 
     public:
+        /// Set up context before running a test.
+        void setUp();
+
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
         // Test Methods
         void test_load_telescope_cpu();
 };

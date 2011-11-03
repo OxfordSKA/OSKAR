@@ -32,21 +32,65 @@
 #include <cmath>
 #include <cstdio>
 
+static const char* telescope_file_name = "test_telescope.dat";
+static const char* station_base = "test_station";
+static const int n_stations = 25;
+static const int n_elements = 200;
+
+/**
+ * @details
+ * Sets up the context before running each test method.
+ */
+void oskar_TelescopeModelTest::setUp()
+{
+    // Create a telescope coordinate file.
+    FILE* file;
+    char station_name[80];
+    file = fopen(telescope_file_name, "w");
+    for (int i = 0; i < n_stations; ++i)
+        fprintf(file, "%.8f,%.8f,%.8f\n", i / 10.0, i / 20.0, i / 30.0);
+    fclose(file);
+
+    // Create some station coordinate files.
+    for (int i = 0; i < n_stations; ++i)
+    {
+        sprintf(station_name, "%s_%d.dat", station_base, i);
+        file = fopen(station_name, "w");
+        for (int j = 0; j < n_elements; ++j)
+        {
+            int t = j + i;
+            fprintf(file, "%.8f,%.8f,%.8f\n", t / 5.0, t / 6.0, t / 7.0);
+        }
+        fclose(file);
+    }
+}
+
+/**
+ * @details
+ * Clean up routine called after each test is run.
+ */
+void oskar_TelescopeModelTest::tearDown()
+{
+    char station_name[80];
+
+    // Remove telescope coordinate file.
+    remove(telescope_file_name);
+
+    // Remove station coordinate files.
+    for (int i = 0; i < n_stations; ++i)
+    {
+        sprintf(station_name, "%s_%d.dat", station_base, i);
+        remove(station_name);
+    }
+}
+
 /**
  * @details
  * Tests filling a telescope model, and copying it to the GPU and back.
  */
 void oskar_TelescopeModelTest::test_load_telescope_cpu()
 {
-    // Create a telescope coordinate file.
-    const char* telescope_file = "test_telescope.dat";
-    FILE* file = fopen(telescope_file, "w");
-    int n_stations = 100;
-    for (int i = 0; i < n_stations; ++i)
-    {
-        fprintf(file, "%.8f,%.8f,%.8f\n", i / 10.0, i / 20.0, i / 30.0);
-    }
-    fclose(file);
+    char station_name[80];
 
     // Set the location.
     double longitude = 30.0 * M_PI / 180.0;
@@ -59,8 +103,14 @@ void oskar_TelescopeModelTest::test_load_telescope_cpu()
                 OSKAR_LOCATION_CPU);
 
         // Fill the telescope structure.
-        CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_coords(telescope_file,
+        CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_pos(telescope_file_name,
                 longitude, latitude, altitude));
+        for (int i = 0; i < n_stations; ++i)
+        {
+            sprintf(station_name, "%s_%d.dat", station_base, i);
+            CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station(i, station_name));
+            CPPUNIT_ASSERT_EQUAL(n_elements, tel_cpu->station[i].n_elements);
+        }
 
         // Copy telescope structure to GPU.
         oskar_TelescopeModel* tel_gpu = new oskar_TelescopeModel(tel_cpu,
@@ -91,6 +141,17 @@ void oskar_TelescopeModelTest::test_load_telescope_cpu()
             CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu->station_x))[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu->station_y))[i], 1e-5);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu->station_z))[i], 1e-5);
+
+            for (int j = 0; j < n_elements; ++j)
+            {
+                int t = j + i;
+                double x = t / 5.0;
+                double y = t / 6.0;
+                double z = t / 7.0;
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu->station[i].x))[j], 1e-5);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu->station[i].y))[j], 1e-5);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu->station[i].z))[j], 1e-5);
+            }
         }
 
         // Delete the CPU structure.

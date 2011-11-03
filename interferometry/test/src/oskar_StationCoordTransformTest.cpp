@@ -32,45 +32,37 @@
 
 #include <cmath>
 
-//double radius(double phi)
-//{
-//	const double a = 6378137.000; // Equatorial radius (semi-major axis).
-//	const double b = 6356752.314; // Polar radius (semi-minor axis).
-//	return sqrt((pow(a*a*cos(phi), 2.0) + pow(b*b*sin(phi), 2.0))
-//			/ (pow(a*cos(phi), 2.0) + pow(b*sin(phi), 2.0)));
-//}
-
 /**
  * @details
  * Tests conversion from geocentric cartesian to geodetic spherical coordinates.
  */
 void oskar_StationCoordTransformTest::test_geocentric_cartesian_to_geodetic_spherical()
 {
-	double lon[] = {0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0,
-			120.0, 135.0, 150.0, 165.0, 180.0, -15.0, -30.0, -45.0,
-			-60.0, -75.0, -90.0};
-	double lat[] = {-90.0, -80.0, -70.0, -60.0, -50.0, -40.0, -30.0, -20.0,
-			-10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0};
-	double alt[] = {0.0, 5.0, 10.0, 50.0, 100.0, 200.0, 400.0, 500.0, 340.0,
-			84.5, 63.8, 34.8, 73.6, 67.4, 98.3, 12.4, 64.7, 88.6, 224.5};
+    double lon[] = {0.0, 15.0, 30.0, 45.0, 60.0, 75.0, 90.0, 105.0,
+            120.0, 135.0, 150.0, 165.0, 180.0, -15.0, -30.0, -45.0,
+            -60.0, -75.0, -90.0};
+    double lat[] = {-90.0, -80.0, -70.0, -60.0, -50.0, -40.0, -30.0, -20.0,
+            -10.0, 0.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0};
+    double alt[] = {0.0, 5.0, 10.0, 50.0, 100.0, 200.0, 400.0, 500.0, 340.0,
+            84.5, 63.8, 34.8, 73.6, 67.4, 98.3, 12.4, 64.7, 88.6, 224.5};
 
-	const int n = sizeof(lon) / sizeof(double);
-	for (int i = 0; i < n; ++i)
-	{
-		lon[i] *= M_PI / 180;
-		lat[i] *= M_PI / 180;
-	}
+    const int n = sizeof(lon) / sizeof(double);
+    for (int i = 0; i < n; ++i)
+    {
+        lon[i] *= M_PI / 180;
+        lat[i] *= M_PI / 180;
+    }
 
-	double x[n], y[n], z[n], lambda[n], phi[n], h[n];
-	oskar_geodetic_spherical_to_geocentric_cartesian(n, lon, lat, alt,
-			x, y, z);
-	oskar_geocentric_cartesian_to_geodetic_spherical(n, x, y, z,
-			lambda, phi, h);
+    double x[n], y[n], z[n], lambda[n], phi[n], h[n];
+    oskar_geodetic_spherical_to_geocentric_cartesian(n, lon, lat, alt,
+            x, y, z);
+    oskar_geocentric_cartesian_to_geodetic_spherical(n, x, y, z,
+            lambda, phi, h);
 
-	for (int i = 0; i < n; ++i)
-	{
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(lon[i], lambda[i], 1e-8);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(lat[i], phi[i], 1e-8);
-		CPPUNIT_ASSERT_DOUBLES_EQUAL(alt[i], h[i], 1e-8);
-	}
+    for (int i = 0; i < n; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(lon[i], lambda[i], 1e-8);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(lat[i], phi[i], 1e-8);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(alt[i], h[i], 1e-8);
+    }
 }

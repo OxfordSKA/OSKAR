@@ -119,9 +119,52 @@ struct oskar_TelescopeModel
      * @param longitude  Telescope centre longitude, in radians.
      * @param latitude   Telescope centre latitude, in radians.
      * @param altitude   Telescope centre altitude, in metres.
+     *
+     * @return
+     * This function returns a code to indicate if there were errors in execution:
+     * - A return code of 0 indicates no error.
+     * - A positive return code indicates a CUDA error.
+     * - A negative return code indicates an OSKAR error.
      */
-    int load_station_coords(const char* filename, double longitude,
+    int load_station_pos(const char* filename, double longitude,
             double latitude, double altitude);
+
+    /**
+     * @brief
+     * Loads the station element data from a text file.
+     *
+     * @details
+     * This function loads station element (antenna) data from a comma- or
+     * space-separated text file. Each line contains data for one element of the
+     * station.
+     *
+     * The file may have the following columns, in the following order:
+     * - Element x-position, in metres.
+     * - Element y-position, in metres.
+     * - Element z-position, in metres (default 0).
+     * - Element multiplicative weight (real part, default 1).
+     * - Element multiplicative weight (imaginary part, default 0).
+     * - Element amplitude gain factor (default 1).
+     * - Element amplitude gain error (default 0).
+     * - Element phase offset in degrees (default 0).
+     * - Element phase error in degrees (default 0).
+     *
+     * Only the first two columns are required to be present.
+     *
+     * The coordinate system (ENU, or East-North-Up) is aligned so that the
+     * x-axis points to the local geographic East, the y-axis to local
+     * geographic North, and the z-axis to the local zenith.
+     *
+     * @param[in] index    Index into station array to load.
+     * @param[in] filename Name of the data file to load.
+     *
+     * @return
+     * This function returns a code to indicate if there were errors in execution:
+     * - A return code of 0 indicates no error.
+     * - A positive return code indicates a CUDA error.
+     * - A negative return code indicates an OSKAR error.
+     */
+    int load_station(int index, const char* filename);
 #endif
 };
 

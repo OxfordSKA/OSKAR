@@ -42,12 +42,31 @@ extern "C" {
 
 /**
  * @brief
- * Loads the station element coordinates.
+ * Loads the station element data from a text file.
  *
  * @details
- * This function loads station element (antenna) data from a CSV file.
+ * This function loads station element (antenna) data from a comma- or
+ * space-separated text file. Each line contains data for one element of the
+ * station.
  *
- * @param[out] dst Pointer to destination data structure to fill.
+ * The file may have the following columns, in the following order:
+ * - Element x-position, in metres.
+ * - Element y-position, in metres.
+ * - Element z-position, in metres (default 0).
+ * - Element multiplicative weight (real part, default 1).
+ * - Element multiplicative weight (imaginary part, default 0).
+ * - Element amplitude gain factor (default 1).
+ * - Element amplitude gain error (default 0).
+ * - Element phase offset in degrees (default 0).
+ * - Element phase error in degrees (default 0).
+ *
+ * Only the first two columns are required to be present.
+ *
+ * The coordinate system (ENU, or East-North-Up) is aligned so that the
+ * x-axis points to the local geographic East, the y-axis to local
+ * geographic North, and the z-axis to the local zenith.
+ *
+ * @param[out] station Pointer to destination data structure to fill.
  * @param[in] filename Name of the data file to load.
  *
  * @return
@@ -57,7 +76,7 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_station_model_load(oskar_StationModel* dst, const char* filename);
+int oskar_station_model_load(oskar_StationModel* station, const char* filename);
 
 #ifdef __cplusplus
 }
