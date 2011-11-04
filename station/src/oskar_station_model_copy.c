@@ -69,6 +69,7 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     dst->dec0 = src->dec0;
     dst->single_element_model = src->single_element_model;
     dst->bit_depth = src->bit_depth;
+    dst->coord_units = src->coord_units;
 
     /* TODO Work out how to deal with child stations. */
     /* TODO Work out how to deal with element pattern data. */

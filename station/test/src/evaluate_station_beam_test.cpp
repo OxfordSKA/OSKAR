@@ -83,6 +83,7 @@ void Evaluate_Station_Beam_Test::evalute_test_pattern()
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
     oskar_meshgrid_f(station_cpu.x, station_cpu.y, x_pos, station_dim,
             x_pos, station_dim);
+    free(x_pos);
 
     // Set the station beam direction.
     station_cpu.ra0  = 0.0;
@@ -90,6 +91,7 @@ void Evaluate_Station_Beam_Test::evalute_test_pattern()
 
     // Copy the station structure to the gpu and scale the coordinates to wavenumbers.
     oskar_StationModel station_gpu(&station_cpu, OSKAR_LOCATION_GPU);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_METRES, station_gpu.coord_units);
     station_gpu.scale_coords_to_wavenumbers(frequency);
 
     // Evaluate horizontal l,m,n for beam phase centre.

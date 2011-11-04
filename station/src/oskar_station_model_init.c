@@ -80,6 +80,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->single_element_model = 0;
     model->element_pattern = NULL;
     model->bit_depth = 0;
+    model->coord_units = OSKAR_METRES;
     return err;
 }
 
