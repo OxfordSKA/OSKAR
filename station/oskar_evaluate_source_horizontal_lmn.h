@@ -37,7 +37,7 @@
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
 #include "station/oskar_StationModel.h"
-#include "station/oskar_WorkE.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,9 +62,9 @@ extern "C" {
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_source_horizontal_lmn(oskar_WorkE* work,
-        const oskar_SkyModel* sky, const oskar_StationModel* station,
-        const double gast);
+int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, const oskar_SkyModel* sky,
+        const oskar_StationModel* station, const double gast);
 
 #ifdef __cplusplus
 }

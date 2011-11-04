@@ -31,7 +31,6 @@
 #include "station/oskar_evaluate_station_beam_scalar.h"
 #include "utility/oskar_Mem.h"
 #include "station/oskar_StationModel.h"
-#include "station/oskar_WorkE.h"
 #include "utility/oskar_mem_element_size.h"
 #include "math/cudak/oskar_cudak_dftw_2d.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
@@ -46,28 +45,31 @@ extern "C" {
 #endif
 
 int oskar_evalate_station_beam_scalar(oskar_Mem* E,
-        const oskar_StationModel* station, oskar_WorkE* work)
+        const oskar_StationModel* station, const double l_beam,
+        const double m_beam, const oskar_Mem* l_source,
+        const oskar_Mem* m_source, oskar_Mem* weights)
 {
-    if (E == NULL || station == NULL || work == NULL)
+    if (E == NULL || station == NULL || m_source == NULL || l_source == NULL ||
+            weights == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     int num_antennas = station->n_elements;
     size_t element_size = oskar_mem_element_size(E->type());
-    int num_sources = work->hor_l.n_elements();
+    int num_sources = l_source->n_elements();
 
     // Double precision.
-    if (E->is_double() &&
+    if (E->type() == OSKAR_DOUBLE_COMPLEX &&
             station->coord_type() == OSKAR_DOUBLE &&
-            work->weights.is_double() &&
-            work->hor_l.is_double() &&
-            work->hor_m.is_double())
+            weights->type() == OSKAR_DOUBLE_COMPLEX &&
+            l_source->type() == OSKAR_DOUBLE &&
+            m_source->type() == OSKAR_DOUBLE)
     {
         // DFT weights.
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
         oskar_cudak_dftw_2d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (num_antennas, station->x, station->y, work->beam_hor_l,
-                        work->beam_hor_m, work->weights);
+                (num_antennas, station->x, station->y, l_beam,
+                        m_beam, *weights);
 
         // Evaluate beam pattern for each source.
         int antennas_per_chunk = 432;  // Should be multiple of 16.
@@ -76,24 +78,23 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* E,
         oskar_cudak_dftw_o2c_2d_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
                 (num_antennas, station->x, station->y,
-                work->weights, num_sources, work->hor_l, work->hor_m,
-                antennas_per_chunk, (double2*)E->data);
+                *weights, num_sources, *l_source, *m_source, antennas_per_chunk, *E);
     }
 
 
     // Single precision.
-    else if (E->is_single() &&
+    else if (E->type() == OSKAR_SINGLE_COMPLEX &&
             station->coord_type() == OSKAR_SINGLE &&
-            work->weights.is_single() &&
-            work->hor_l.is_single() &&
-            work->hor_m.is_single())
+            weights->type() == OSKAR_SINGLE_COMPLEX &&
+            l_source->type() == OSKAR_SINGLE &&
+            m_source->type() == OSKAR_SINGLE)
     {
         // DFT weights.
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
         oskar_cudak_dftw_2d_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (num_antennas, station->x, station->y, work->beam_hor_l,
-                        work->beam_hor_m, work->weights);
+                (num_antennas, station->x, station->y, l_beam,
+                        m_beam, *weights);
 
         // Evaluate beam pattern for each source.
         int antennas_per_chunk = 864;  // Should be multiple of 16.
@@ -101,9 +102,8 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* E,
         size_t shared_mem_size = 2 * antennas_per_chunk * element_size;
         oskar_cudak_dftw_o2c_2d_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
-            (num_antennas, station->x, station->y, work->weights,
-                    num_sources, work->hor_l, work->hor_m,
-                    antennas_per_chunk, (float2*)E->data);
+            (num_antennas, station->x, station->y, *weights,
+                    num_sources, *l_source, *m_source, antennas_per_chunk, *E);
     }
     else
     {

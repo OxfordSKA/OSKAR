@@ -27,32 +27,24 @@
  */
 
 
-#ifndef OSKAR_WORKE_H_
-#define OSKAR_WORKE_H_
+#ifndef OSKAR_WORK_H_
+#define OSKAR_WORK_H_
 
 /**
- * @file oskar_WorkE.h
+ * @file oskar_Work.h
  */
 
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
-/**
- * @struct oskar_WorkE
- *
- * @brief Structure holding work buffers used in the evaluating E-Jones
- * matrices.
- */
-
-struct oskar_WorkE
+// These are all either double or single.
+struct oskar_Work
 {
-    oskar_Mem hor_l;   /**< Source horizontal l */
-    oskar_Mem hor_m;   /**< Source horizontal m */
-    oskar_Mem hor_n;   /**< Source horizontal n */
-    oskar_Mem weights; /**< Beamforming weights */
-    oskar_Mem signal;  /**< Element signals (if required for multi-level processing) */
-    double beam_hor_l; /**< Beam phase centre horizontal l */
-    double beam_hor_m; /**< Beam phase centre horizontal m */
-    double beam_hor_n; /**< Beam phase centre horizontal n */
+    oskar_Mem real;
+    oskar_Mem complex;
+    oskar_Mem matrix;
 };
-typedef struct oskar_WorkE oskar_WorkE;
+typedef struct oskar_Work oskar_Work;
 
-#endif /* OSKAR_WORKE_H_ */
+
+#endif /* OSKAR_WORK_H_ */

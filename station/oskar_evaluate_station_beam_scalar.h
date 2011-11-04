@@ -36,7 +36,6 @@
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 #include "station/oskar_StationModel.h"
-#include "station/oskar_WorkE.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +50,9 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_evalate_station_beam_scalar(oskar_Mem* E,
-        const oskar_StationModel* station, oskar_WorkE* work);
+        const oskar_StationModel* station, const double hor_l_beam,
+        const double hor_m_beam, const oskar_Mem* hor_l_source,
+        const oskar_Mem* hor_m_source, oskar_Mem* weights);
 
 #ifdef __cplusplus
 }

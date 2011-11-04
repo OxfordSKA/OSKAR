@@ -33,17 +33,17 @@
 extern "C" {
 #endif
 
-int oskar_evaluate_source_horizontal_lmn(oskar_WorkE* work,
-        const oskar_SkyModel* sky, const oskar_StationModel* station,
-        const double gast)
+int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
+        oskar_Mem* n, const oskar_SkyModel* sky,
+        const oskar_StationModel* station, const double gast)
 {
-    if (work == NULL || sky == NULL || station == NULL)
+    if (sky == NULL || station == NULL || l == NULL || m == NULL || n == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Make sure the coordinates in the work and sky arrays are on the GPU.
-    if (work->hor_l.location() != OSKAR_LOCATION_GPU ||
-            work->hor_m.location() != OSKAR_LOCATION_GPU ||
-            work->hor_n.location() != OSKAR_LOCATION_GPU ||
+    if (l->location() != OSKAR_LOCATION_GPU ||
+            m->location() != OSKAR_LOCATION_GPU ||
+            n->location() != OSKAR_LOCATION_GPU ||
             sky->RA.location() != OSKAR_LOCATION_GPU ||
             sky->Dec.location() != OSKAR_LOCATION_GPU)
     {
@@ -53,16 +53,15 @@ int oskar_evaluate_source_horizontal_lmn(oskar_WorkE* work,
     // Check that the sky structure contains some sources.
     int num_sources = sky->num_sources;
     if (num_sources == 0 || sky->RA.is_null() || sky->Dec.is_null() ||
-            work->hor_l.is_null() || work->hor_m.is_null() ||
-            work->hor_n.is_null())
+            l->is_null() || m->is_null() || n->is_null())
     {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
     }
 
     // Make sure the work arrays are long enough.
-    if (work->hor_l.n_elements() != num_sources ||
-            work->hor_m.n_elements() != num_sources ||
-            work->hor_n.n_elements() != num_sources)
+    if (l->n_elements() != num_sources ||
+            m->n_elements() != num_sources ||
+            n->n_elements() != num_sources)
     {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
     }
@@ -71,24 +70,19 @@ int oskar_evaluate_source_horizontal_lmn(oskar_WorkE* work,
     double last = gast + station->longitude;
 
     // Double precision.
-    if (sky->type() == OSKAR_DOUBLE &&
-            work->hor_l.type() == OSKAR_DOUBLE &&
-            work->hor_m.type() == OSKAR_DOUBLE &&
-            work->hor_n.type() == OSKAR_DOUBLE)
+    if (sky->type() == OSKAR_DOUBLE && l->type() == OSKAR_DOUBLE &&
+            m->type() == OSKAR_DOUBLE && n->type() == OSKAR_DOUBLE)
     {
         return oskar_cuda_ra_dec_to_hor_lmn_d(num_sources, sky->RA, sky->Dec,
-                last, station->latitude, work->hor_l, work->hor_m, work->hor_n);
+                last, station->latitude, *l, *m, *n);
     }
 
     // Single precision.
-    else if (sky->type() == OSKAR_SINGLE &&
-            work->hor_l.type() == OSKAR_SINGLE &&
-            work->hor_m.type() == OSKAR_SINGLE &&
-            work->hor_n.type() == OSKAR_SINGLE)
+    else if (sky->type() == OSKAR_SINGLE && l->type() == OSKAR_SINGLE &&
+            m->type() == OSKAR_SINGLE && n->type() == OSKAR_SINGLE)
     {
         return oskar_cuda_ra_dec_to_hor_lmn_f(num_sources, sky->RA, sky->Dec,
-                (float)last, (float)station->latitude, work->hor_l, work->hor_m,
-                work->hor_n);
+                (float)last, (float)station->latitude, *l, *m, *n);
     }
     else
     {

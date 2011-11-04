@@ -35,7 +35,6 @@
 
 #include "oskar_global.h"
 #include "station/oskar_StationModel.h"
-#include "station/oskar_WorkE.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,7 +59,7 @@ extern "C" {
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_beam_hoizontal_lmn(oskar_WorkE* work,
+int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
         const oskar_StationModel* station, const double gast);
 
 #ifdef __cplusplus

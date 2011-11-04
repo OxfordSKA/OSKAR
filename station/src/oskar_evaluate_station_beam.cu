@@ -32,7 +32,6 @@
 
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_Mem.h"
-#include "station/oskar_WorkE.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
 
 #include <cuda_runtime_api.h>
@@ -54,17 +53,18 @@ extern "C" {
 #endif
 
 int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
-        oskar_WorkE* work)
+        const double l_beam, const double m_beam, const oskar_Mem* l_source,
+        const oskar_Mem* m_source, oskar_Mem* weights)
 {
-    if (E == NULL || station == NULL)
+    if (E == NULL || station == NULL || l_source == NULL || m_source == NULL ||
+            weights == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // NOTE extra fields will have to be added to these check
     // for element pattern data.
 
     if (E->is_null() || station->x.is_null() || station->y.is_null() ||
-            work->hor_l.is_null() || work->hor_m.is_null() ||
-            work->weights.is_null())
+            l_source->is_null() || m_source->is_null())
     {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
     }
@@ -72,27 +72,35 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     // Check that the relevant memory is on the GPU.
     if (E->location() != OSKAR_LOCATION_GPU ||
             station->coord_location() != OSKAR_LOCATION_GPU ||
-            work->hor_l.location() != OSKAR_LOCATION_GPU ||
-            work->hor_m.location() != OSKAR_LOCATION_GPU ||
-            work->weights.location() != OSKAR_LOCATION_GPU)
+            weights->location() != OSKAR_LOCATION_GPU ||
+            l_source->location() != OSKAR_LOCATION_GPU ||
+            m_source->location() != OSKAR_LOCATION_GPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-    if (work->weights.n_elements() != station->n_elements ||
-            work->hor_l.n_elements() != E->n_elements() ||
-            work->hor_m.n_elements() != E->n_elements())
+    if (l_source->n_elements() != E->n_elements() ||
+            m_source->n_elements() != E->n_elements())
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    if (E->is_real() || work->weights.is_real())
+    if (E->is_real() || weights->is_real() || l_source->is_complex()
+            || m_source->is_complex())
         return OSKAR_ERR_BAD_DATA_TYPE;
+
+    // Resize the weights work array if needed.
+    if (weights->n_elements() != station->n_elements)
+    {
+        int error = weights->resize(station->n_elements);
+        if (error) return error;
+    }
 
     // No element pattern data. Assume isotropic antenna elements.
     if (station->element_pattern == NULL && E->is_scalar())
     {
-        oskar_evalate_station_beam_scalar(E, station, work);
+        oskar_evalate_station_beam_scalar(E, station, l_beam, m_beam,
+                l_source, m_source, weights);
     }
 
     // Make use of element pattern data.

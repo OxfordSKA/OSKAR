@@ -36,24 +36,24 @@
 extern "C" {
 #endif
 
-int oskar_mem_get_pointer(oskar_Mem* ref, const oskar_Mem* mem,
+int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
         const int offset, const int num_elements)
 {
     size_t element_size, offset_bytes;
 
-    if (ref == NULL || mem == 0)
+    if (ptr == NULL || src == 0)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (offset + num_elements > mem->private_n_elements)
+    if (offset + num_elements > src->private_n_elements)
         return OSKAR_ERR_OUT_OF_RANGE;
 
-    element_size = oskar_mem_element_size(mem->private_type);
+    element_size = oskar_mem_element_size(src->private_type);
     offset_bytes = offset * element_size;
-    ref->private_type = mem->private_type;
-    ref->private_n_elements = num_elements;
-    ref->data = (void*)((char*)mem->data + offset_bytes);
-    ref->private_location = mem->private_location;
-    ref->private_owner = 0;
+    ptr->private_type = src->private_type;
+    ptr->private_n_elements = num_elements;
+    ptr->data = (void*)((char*)src->data + offset_bytes);
+    ptr->private_location = src->private_location;
+    ptr->private_owner = OSKAR_FALSE;
 
     return 0;
 }

@@ -48,10 +48,10 @@ extern "C" {
  * Note: The returned memory structure is set to not hold ownership of
  * memory which it points to.
  *
- * @param[out] ref         oskar_Mem structure holding a pointer to a location
+ * @param[out] ptr         oskar_Mem structure holding a pointer to a location
  *                         in memory and its associated meta-data.
- * @param[in] mem          oskar_Mem structure from which the pointer reference
- *                         is made.
+ * @param[in] src          oskar_Mem source structure from which the pointer
+ *                         is derived.
  * @param[in] offset       Offset into the \p mem to point to.
  * @param[in] num_elements Number of elements of \p mem referred to in the
  *                         by \p ref.
@@ -59,7 +59,7 @@ extern "C" {
  * @return error code.
  */
 OSKAR_EXPORT
-int oskar_mem_get_pointer(oskar_Mem* ref, const oskar_Mem* mem,
+int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
         const int offset, const int num_elements);
 
 #ifdef __cplusplus

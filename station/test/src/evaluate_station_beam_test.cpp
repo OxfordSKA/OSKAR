@@ -101,29 +101,31 @@ void Evaluate_Station_Beam_Test::evalute_test_pattern()
     station_cpu.ra0  = 0.0;
     station_cpu.dec0 = M_PI_2;
 
-    // Declare an E Jones work buffer (FIXME name in context of not using with
-    // evaluate E).
-    oskar_WorkE work_cpu;
-
     // Evaluate horizontal l,m,n for beam phase centre.
-    error = oskar_evaluate_beam_hoizontal_lmn(&work_cpu, &station_gpu, gast);
+    double beam_l, beam_m, beam_n;
+    error = oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n,
+            &station_cpu, gast);
+    printf("beam: l = %f, m = %f, n = %f\n", beam_l, beam_m, beam_n);
+    //beam_m = 0.0;
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Evalute horizontal l,m positions at which to generate the beam pattern.
     int image_size = 100;
-    double fov_deg = 30.0;
+    double fov_deg = 45.0;
     int num_pixels = image_size * image_size;
 
-    error = oskar_mem_init(&work_cpu.hor_l, OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+    oskar_Mem l_cpu, m_cpu;
+    error = oskar_mem_init(&l_cpu, OSKAR_SINGLE, OSKAR_LOCATION_CPU,
             num_pixels, OSKAR_TRUE);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    error = oskar_mem_init(&work_cpu.hor_m, OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+    error = oskar_mem_init(&m_cpu, OSKAR_SINGLE, OSKAR_LOCATION_CPU,
             num_pixels, OSKAR_TRUE);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     float* lm = (float*)malloc(image_size * sizeof(float));
     // linspace.
     double lm_max = sin(fov_deg * M_PI / 180.0);
+    printf("lm_max = %f\n", lm_max);
     double lm_inc = (2.0 * lm_max) / (image_size - 1);
     for (int i = 0; i < image_size; ++i)
     {
@@ -134,50 +136,47 @@ void Evaluate_Station_Beam_Test::evalute_test_pattern()
     {
         for (int i = 0; i < image_size; ++i)
         {
-            ((float*)work_cpu.hor_l.data)[j * image_size + i] = lm[i];
-            ((float*)work_cpu.hor_m.data)[i * image_size + j] = lm[image_size - 1 - i];
+            ((float*)l_cpu.data)[j * image_size + i] = lm[i];
+            ((float*)m_cpu.data)[i * image_size + j] = lm[image_size - 1 - i];
         }
     }
     free(lm);
 
     // Copy horizontal l,m work array buffers to GPU.
-    oskar_WorkE work_gpu;
-    error = oskar_mem_init(&work_gpu.hor_l, OSKAR_SINGLE, OSKAR_LOCATION_GPU,
-            num_pixels, OSKAR_TRUE);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    error = oskar_mem_init(&work_gpu.hor_m, OSKAR_SINGLE, OSKAR_LOCATION_GPU,
-            num_pixels, OSKAR_TRUE);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    error = work_cpu.hor_l.copy_to(&work_gpu.hor_l);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    error = work_cpu.hor_m.copy_to(&work_gpu.hor_m);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    oskar_Mem l_gpu(&l_cpu, OSKAR_LOCATION_GPU);
+    oskar_Mem m_gpu(&m_cpu, OSKAR_LOCATION_GPU);
 
     // Allocate weights work array.
-    error = oskar_mem_init(&work_gpu.weights, OSKAR_SINGLE_COMPLEX,
-            OSKAR_LOCATION_GPU, num_antennas, OSKAR_TRUE);
+    oskar_Mem weights_gpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU);
 
     // Declare memory for the beam pattern.
     oskar_Mem beam_pattern(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
 
-    error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, &work_gpu);
+    error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
+            beam_m, &l_gpu, &m_gpu, &weights_gpu);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy beam pattern back to CPU.
     oskar_Mem beam_pattern_cpu(&beam_pattern, OSKAR_LOCATION_CPU);
 
-    // todo: save beam to file for plotting.
+    // Save beam to file for plotting.
     const char* filename = "temp_test_beam_pattern.txt";
     FILE* file = fopen(filename, "w");
     for (int i = 0; i < num_pixels; ++i)
     {
         fprintf(file, "%10.3f,%10.3f,%10.3f,%10.3f\n",
-                ((float*)work_cpu.hor_l)[i],
-                ((float*)work_cpu.hor_m)[i],
+                ((float*)l_cpu.data)[i],
+                ((float*)m_cpu.data)[i],
                 ((float2*)(beam_pattern_cpu.data))[i].x,
                 ((float2*)(beam_pattern_cpu.data))[i].y);
     }
     fclose(file);
+
+    /*--------------------------------------------------------------------------
+        data = dlmread('temp_test_beam_pattern.txt')
+        imagesc(reshape(data(:,3), 100, 100).^2)
+
+    --------------------------------------------------------------------------*/
 }
 
 
