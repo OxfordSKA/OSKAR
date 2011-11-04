@@ -26,46 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_K_H_
-#define OSKAR_EVALUATE_JONES_K_H_
+#include "interferometry/oskar_correlate.h"
 
-/**
- * @file oskar_evaluate_jones_K.h
- */
-
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Evaluates the interferometer phase (K) Jones term.
- *
- * @details
- * This function constructs a set of Jones matrices that correspond to the
- * interferometer phase offset for each source and station, relative to the
- * array centre.
- *
- * The output set of Jones matrices (K) are scalar complex values.
- * This function will return an error if an incorrect type is used.
- *
- * @param[out] K         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] u          Station u coordinates.
- * @param[in] v          Station v coordinates.
- * @param[in] w          Station w coordinates.
- */
-OSKAR_EXPORT
-int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w);
-
-#ifdef __cplusplus
+extern "C"
+int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
+        const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
+        const oskar_Mem* u, const oskar_Mem* v)
+{
+    return -1;
 }
-#endif
-
-#endif /* OSKAR_EVALUATE_JONES_K_H_ */

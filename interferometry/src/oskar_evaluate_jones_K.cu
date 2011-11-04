@@ -32,26 +32,23 @@
 
 extern "C"
 int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        oskar_TelescopeModel* telescope, double gast)
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w)
 {
     // Assert that the parameters are not NULL.
-    if (K == NULL || sky == NULL || telescope == NULL)
+    if (K == NULL || sky == NULL || u == NULL || v == NULL || w == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the memory is not NULL.
     if (K->ptr.is_null() || sky->rel_l.is_null() ||
             sky->rel_m.is_null() || sky->rel_n.is_null() ||
-            telescope->station_u.is_null() ||
-            telescope->station_v.is_null() ||
-            telescope->station_w.is_null() ||
-            telescope->station_x.is_null() ||
-            telescope->station_y.is_null() ||
-            telescope->station_z.is_null())
+            u->is_null() || v->is_null() || w->is_null())
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
     if (K->n_sources() != sky->num_sources ||
-            K->n_stations() != telescope->num_stations)
+            K->n_stations() != u->n_elements() ||
+            K->n_stations() != v->n_elements() ||
+            K->n_stations() != w->n_elements())
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.
@@ -59,12 +56,9 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
             sky->rel_l.location() != OSKAR_LOCATION_GPU ||
             sky->rel_m.location() != OSKAR_LOCATION_GPU ||
             sky->rel_n.location() != OSKAR_LOCATION_GPU ||
-            telescope->station_u.location() != OSKAR_LOCATION_GPU ||
-            telescope->station_v.location() != OSKAR_LOCATION_GPU ||
-            telescope->station_w.location() != OSKAR_LOCATION_GPU ||
-            telescope->station_x.location() != OSKAR_LOCATION_GPU ||
-            telescope->station_y.location() != OSKAR_LOCATION_GPU ||
-            telescope->station_z.location() != OSKAR_LOCATION_GPU)
+            u->location() != OSKAR_LOCATION_GPU ||
+            v->location() != OSKAR_LOCATION_GPU ||
+            w->location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check that the data is of the right type.
@@ -73,12 +67,9 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         if (sky->rel_l.type() != OSKAR_SINGLE ||
                 sky->rel_m.type() != OSKAR_SINGLE ||
                 sky->rel_n.type() != OSKAR_SINGLE ||
-                telescope->station_u.type() != OSKAR_SINGLE ||
-                telescope->station_v.type() != OSKAR_SINGLE ||
-                telescope->station_w.type() != OSKAR_SINGLE ||
-                telescope->station_x.type() != OSKAR_SINGLE ||
-                telescope->station_y.type() != OSKAR_SINGLE ||
-                telescope->station_z.type() != OSKAR_SINGLE)
+                u->type() != OSKAR_SINGLE ||
+                v->type() != OSKAR_SINGLE ||
+                w->type() != OSKAR_SINGLE)
             return OSKAR_ERR_TYPE_MISMATCH;
     }
     else if (K->type() == OSKAR_DOUBLE_COMPLEX)
@@ -86,12 +77,9 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         if (sky->rel_l.type() != OSKAR_DOUBLE ||
                 sky->rel_m.type() != OSKAR_DOUBLE ||
                 sky->rel_n.type() != OSKAR_DOUBLE ||
-                telescope->station_u.type() != OSKAR_DOUBLE ||
-                telescope->station_v.type() != OSKAR_DOUBLE ||
-                telescope->station_w.type() != OSKAR_DOUBLE ||
-                telescope->station_x.type() != OSKAR_DOUBLE ||
-                telescope->station_y.type() != OSKAR_DOUBLE ||
-                telescope->station_z.type() != OSKAR_DOUBLE)
+                u->type() != OSKAR_DOUBLE ||
+                v->type() != OSKAR_DOUBLE ||
+                w->type() != OSKAR_DOUBLE)
             return OSKAR_ERR_TYPE_MISMATCH;
     }
     else
@@ -106,16 +94,6 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
     // Evaluate Jones matrix.
     if (K->type() == OSKAR_SINGLE_COMPLEX)
     {
-        // Evaluate Greenwich Hour Angle of phase centre.
-        const float ha0 = (float)(gast - telescope->ra0);
-        const float dec0 = (float)telescope->dec0;
-
-        // Evaluate station u,v,w coordinates.
-        oskar_xyz_to_uvw_cuda_f(n_stations, telescope->station_x,
-                telescope->station_y, telescope->station_z, ha0, dec0,
-                telescope->station_u, telescope->station_v,
-                telescope->station_w);
-
         // Define block and grid sizes.
         const dim3 n_thd(64, 4); // Sources, antennas.
         const dim3 n_blk((n_sources + n_thd.x - 1) / n_thd.x,
@@ -124,22 +102,11 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
 
         // Compute DFT phase weights for K.
         oskar_cudak_dftw_3d_seq_out_f OSKAR_CUDAK_CONF(n_blk, n_thd, s_mem)
-        (n_stations, telescope->station_u, telescope->station_v,
-                telescope->station_w, n_sources, sky->rel_l,
-                sky->rel_m, sky->rel_n, K->ptr);
+        (n_stations, *u, *v, *w, n_sources, sky->rel_l, sky->rel_m, sky->rel_n,
+                K->ptr);
     }
     else if (K->type() == OSKAR_DOUBLE_COMPLEX)
     {
-        // Evaluate Greenwich Hour Angle of phase centre.
-        const double ha0 = gast - telescope->ra0;
-        const double dec0 = telescope->dec0;
-
-        // Evaluate station u,v,w coordinates.
-        oskar_xyz_to_uvw_cuda_d(n_stations, telescope->station_x,
-                telescope->station_y, telescope->station_z, ha0, dec0,
-                telescope->station_u, telescope->station_v,
-                telescope->station_w);
-
         // Define block and grid sizes.
         const dim3 n_thd(64, 4); // Sources, antennas.
         const dim3 n_blk((n_sources + n_thd.x - 1) / n_thd.x,
@@ -148,9 +115,8 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
 
         // Compute DFT phase weights for K.
         oskar_cudak_dftw_3d_seq_out_d OSKAR_CUDAK_CONF(n_blk, n_thd, s_mem)
-        (n_stations, telescope->station_u, telescope->station_v,
-                telescope->station_w, n_sources, sky->rel_l, sky->rel_m,
-                sky->rel_n, K->ptr);
+        (n_stations, *u, *v, *w, n_sources, sky->rel_l, sky->rel_m, sky->rel_n,
+                K->ptr);
     }
     else
     {

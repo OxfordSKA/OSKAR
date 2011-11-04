@@ -26,17 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_K_H_
-#define OSKAR_EVALUATE_JONES_K_H_
+#ifndef OSKAR_EVALUATE_STATION_UVW_H_
+#define OSKAR_EVALUATE_STATION_UVW_H_
 
 /**
- * @file oskar_evaluate_jones_K.h
+ * @file oskar_evaluate_station_uvw.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,28 +43,25 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the interferometer phase (K) Jones term.
+ * Evaluates the station (u,v,w) coordinates.
  *
  * @details
- * This function constructs a set of Jones matrices that correspond to the
- * interferometer phase offset for each source and station, relative to the
- * array centre.
+ * This function evaluates the station (u,v,w) coordinates from the beam phase
+ * centre and station (x,y,z) coordinates in the telescope data structure,
+ * and the supplied Greenwich Apparent Sidereal Time.
  *
- * The output set of Jones matrices (K) are scalar complex values.
- * This function will return an error if an incorrect type is used.
- *
- * @param[out] K         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] u          Station u coordinates.
- * @param[in] v          Station v coordinates.
- * @param[in] w          Station w coordinates.
+ * @param[out] u         Station u coordinates.
+ * @param[out] v         Station v coordinates.
+ * @param[out] w         Station w coordinates.
+ * @param[in] telescope  Input telescope model.
+ * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
  */
 OSKAR_EXPORT
-int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w);
+int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
+        const oskar_TelescopeModel* telescope, double gast);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_JONES_K_H_ */
+#endif /* OSKAR_EVALUATE_STATION_UVW_H_ */
