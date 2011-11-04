@@ -30,18 +30,25 @@
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 int oskar_evaluate_beam_hoizontal_lmn(oskar_WorkE* work,
         const oskar_StationModel* station, const double gast)
 {
+    double last;
+
     if (work == NULL || station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Local apparent Sidereal Time, in radians.
-    double last = gast + station->longitude;
+    /* Local apparent Sidereal Time, in radians. */
+    last = gast + station->longitude;
 
     return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0, &station->dec0, last,
             station->latitude, &work->beam_hor_l, &work->beam_hor_m,
             &work->beam_hor_n);
 }
+
+#ifdef __cplusplus
+}
+#endif

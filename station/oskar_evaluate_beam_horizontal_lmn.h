@@ -37,6 +37,10 @@
 #include "station/oskar_StationModel.h"
 #include "station/oskar_WorkE.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Wrapper function to evaluate the beam phase centre coordinates as
  * horizontal direction cosines for the specified Greenwich apparent sidereal time.
@@ -55,11 +59,12 @@
  *
  * @return An error code.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
 int oskar_evaluate_beam_hoizontal_lmn(oskar_WorkE* work,
         const oskar_StationModel* station, const double gast);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_EVALUATE_BEAM_HORIZONTAL_LMN_H_ */

@@ -9,7 +9,7 @@ set(station_SRC
     src/oskar_element_model_free_gpu.cu
     src/oskar_element_model_free.c
     src/oskar_element_model_load.c
-    src/oskar_evaluate_beam_horizontal_lmn.cpp
+    src/oskar_evaluate_beam_horizontal_lmn.c
     src/oskar_evaluate_jones_E.cpp
     src/oskar_evaluate_source_horizontal_lmn.cpp
     src/oskar_evaluate_station_beam_scalar.cu
