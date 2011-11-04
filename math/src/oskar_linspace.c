@@ -26,28 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
+#include "math/oskar_linspace.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast)
+
+void oskar_linspace_d(double* values, const double a, const double b, const unsigned n)
 {
-    double last;
+    double inc = (b - a) / (n - 1);
+    unsigned i;
+    for (i = 0; i < n; ++i)
+    {
+        values[i] = a + (i * inc);
+    }
+}
 
-    if (station == NULL || l == NULL || m == NULL || n == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Local apparent Sidereal Time, in radians. */
-    last = gast + station->longitude;
-
-    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0, &station->dec0, last,
-            station->latitude, l, m, n);
+void oskar_linspace_f(float* values, const float a, const float b, const unsigned n)
+{
+    float inc = (b - a) / (n - 1);
+    unsigned i;
+    for (i = 0; i < n; ++i)
+    {
+        values[i] = a + (i * inc);
+    }
 }
 
 #ifdef __cplusplus
 }
 #endif
+
+
+

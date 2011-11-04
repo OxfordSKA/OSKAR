@@ -11,6 +11,8 @@ if (CPPUNIT_FOUND)
         src/JonesTest.cu
         src/Matrix3Test.cpp
         src/Matrix4Test.cpp
+        src/oskar_linspace_test.cpp
+        src/oskar_meshgrid_test.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

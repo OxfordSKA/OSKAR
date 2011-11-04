@@ -34,6 +34,8 @@
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
+#include "math/oskar_linspace.h"
+#include "math/oskar_meshgrid.h"
 
 #include <cmath>
 #include <cstdio>
@@ -66,83 +68,51 @@ void Evaluate_Station_Beam_Test::evalute_test_pattern()
     double gast = 0.0;
 
     // Construct a station model.
-    double frequency = c_0;
-    int num_antennas_1d = 10;
-    double station_size_m = 100.0;
-    double separation_m = station_size_m / num_antennas_1d;
-    double station_centre_offset_m = station_size_m / 2.0 - separation_m / 2.0;
-    int num_antennas = num_antennas_1d * num_antennas_1d;
+    double frequency = 30e6;
+    int station_dim = 100;
+    double station_size_m = 180.0;
+    int num_antennas = station_dim * station_dim;
     oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
 
-    // Station coordinates.
+    // Set the station coordinates.
     station_cpu.longitude = 0.0;
     station_cpu.latitude  = M_PI_2;
     station_cpu.altitude  = 0.0;
-
     station_cpu.coord_units = OSKAR_METRES;
-    for (int j = 0; j < num_antennas_1d; ++j)
-    {
-        for (int i = 0; i < num_antennas_1d; ++i)
-        {
-            int idx = j * num_antennas_1d + i;
-            double x = i * separation_m - station_centre_offset_m;
-            double y = j * separation_m - station_centre_offset_m;
-            ((float*)(station_cpu.x.data))[idx] = x;
-            ((float*)(station_cpu.y.data))[idx] = y;
-            ((float*)(station_cpu.z.data))[idx] = 0.0;
-        }
-    }
+    float* x_pos = (float*) malloc(station_dim * sizeof(float));
+    oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
+    oskar_meshgrid_f(station_cpu.x, station_cpu.y, x_pos, station_dim,
+            x_pos, station_dim);
+
+    // Set the station beam direction.
+    station_cpu.ra0  = 0.0;
+    station_cpu.dec0 = M_PI_2;
 
     // Copy the station structure to the gpu and scale the coordinates to wavenumbers.
     oskar_StationModel station_gpu(&station_cpu, OSKAR_LOCATION_GPU);
     station_gpu.scale_coords_to_wavenumbers(frequency);
 
-    // Station beam direction.
-    station_cpu.ra0  = 0.0;
-    station_cpu.dec0 = M_PI_2;
-
     // Evaluate horizontal l,m,n for beam phase centre.
     double beam_l, beam_m, beam_n;
     error = oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n,
-            &station_cpu, gast);
-    printf("beam: l = %f, m = %f, n = %f\n", beam_l, beam_m, beam_n);
-    //beam_m = 0.0;
+            &station_gpu, gast);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Evalute horizontal l,m positions at which to generate the beam pattern.
-    int image_size = 100;
-    double fov_deg = 45.0;
+    int image_size = 401;
+    double fov_deg = 30.0;
     int num_pixels = image_size * image_size;
 
-    oskar_Mem l_cpu, m_cpu;
-    error = oskar_mem_init(&l_cpu, OSKAR_SINGLE, OSKAR_LOCATION_CPU,
-            num_pixels, OSKAR_TRUE);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    error = oskar_mem_init(&m_cpu, OSKAR_SINGLE, OSKAR_LOCATION_CPU,
-            num_pixels, OSKAR_TRUE);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-
+    // Generate horizontal lm coordinates for the beam pattern.
+    oskar_Mem l_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels);
+    oskar_Mem m_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels);
     float* lm = (float*)malloc(image_size * sizeof(float));
-    // linspace.
     double lm_max = sin(fov_deg * M_PI / 180.0);
-    printf("lm_max = %f\n", lm_max);
-    double lm_inc = (2.0 * lm_max) / (image_size - 1);
-    for (int i = 0; i < image_size; ++i)
-    {
-        lm[i] = -lm_max + i * lm_inc;
-    }
-    // meshgrid.
-    for (int j = 0; j < image_size; ++j)
-    {
-        for (int i = 0; i < image_size; ++i)
-        {
-            ((float*)l_cpu.data)[j * image_size + i] = lm[i];
-            ((float*)m_cpu.data)[i * image_size + j] = lm[image_size - 1 - i];
-        }
-    }
+    oskar_linspace_f(lm, -lm_max, lm_max, image_size);
+    oskar_meshgrid_f(l_cpu, m_cpu, lm, image_size, lm, image_size);
     free(lm);
 
-    // Copy horizontal l,m work array buffers to GPU.
+    // Copy horizontal lm coordinates to GPU.
     oskar_Mem l_gpu(&l_cpu, OSKAR_LOCATION_GPU);
     oskar_Mem m_gpu(&m_cpu, OSKAR_LOCATION_GPU);
 

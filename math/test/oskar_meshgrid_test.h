@@ -26,28 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
+#ifndef MESHGRID_TEST_H_
+#define MESHGRID_TEST_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file oskar_meshgrid_test.h
+ */
 
-int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast)
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Meshgrid_Test : public CppUnit::TestFixture
 {
-    double last;
+    public:
+        CPPUNIT_TEST_SUITE(Meshgrid_Test);
+        CPPUNIT_TEST(test_meshgrid);
+        CPPUNIT_TEST_SUITE_END();
 
-    if (station == NULL || l == NULL || m == NULL || n == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    public:
+        /// Test creation.
+        void test_meshgrid();
+};
 
-    /* Local apparent Sidereal Time, in radians. */
-    last = gast + station->longitude;
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Meshgrid_Test);
 
-    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0, &station->dec0, last,
-            station->latitude, l, m, n);
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif // MESHGRID_TEST_H_

@@ -26,28 +26,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
+
+#ifndef OSKAR_MESHGRID_H_
+#define OSKAR_MESHGRID_H_
+
+/**
+ * @file oskar_meshgrid.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast)
-{
-    double last;
+OSKAR_EXPORT
 
-    if (station == NULL || l == NULL || m == NULL || n == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+/**
+ * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
+ * (Single precision).
+ *
+ * @details
+ * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
+ *
+ * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
+ *
+ * @param[out] X    2-D grid coordinate array in the x direction.
+ * @param[out] Y    2-D grid coordinate array in the y direction.
+ * @param[in]  x    1-D vector of x coordinates.
+ * @param[in]  nx   Length of the x coordinate array.
+ * @param[in]  y    1-D vector of y coordinates.
+ * @param[in]  ny   Length of the x coordinate array.
+ */
+void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
+        const double* y, const unsigned ny);
 
-    /* Local apparent Sidereal Time, in radians. */
-    last = gast + station->longitude;
+OSKAR_EXPORT
 
-    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0, &station->dec0, last,
-            station->latitude, l, m, n);
-}
+/**
+ * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
+ * (Double precision).
+ *
+ * @details
+ * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
+ *
+ * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
+ *
+ * @param[out] X    2-D grid coordinate array in the x direction.
+ * @param[out] Y    2-D grid coordinate array in the y direction.
+ * @param[in]  x    1-D vector of x coordinates.
+ * @param[in]  nx   Length of the x coordinate array.
+ * @param[in]  y    1-D vector of y coordinates.
+ * @param[in]  ny   Length of the x coordinate array.
+ */
+void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
+        const float* y, const unsigned ny);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MESHGRID_H_ */

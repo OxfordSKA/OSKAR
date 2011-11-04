@@ -26,27 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
+
+#include "math/oskar_meshgrid.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast)
+void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
+        const double* y, const unsigned ny)
 {
-    double last;
-
-    if (station == NULL || l == NULL || m == NULL || n == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Local apparent Sidereal Time, in radians. */
-    last = gast + station->longitude;
-
-    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0, &station->dec0, last,
-            station->latitude, l, m, n);
+    unsigned j, i;
+    for (j = 0; j < ny; ++j)
+    {
+        for (i = 0; i < nx; ++i)
+        {
+            X[j * nx + i] = x[i];
+            Y[j * nx + i] = y[ny - 1 - j];
+        }
+    }
 }
+
+void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
+        const float* y, const unsigned ny)
+{
+    unsigned j, i;
+    for (j = 0; j < ny; ++j)
+    {
+        for (i = 0; i < nx; ++i)
+        {
+            X[j * nx + i] = x[i];
+            Y[j * nx + i] = y[ny - 1 - j];
+        }
+    }
+}
+
+
 
 #ifdef __cplusplus
 }

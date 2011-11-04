@@ -26,28 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
+#include "math/test/oskar_meshgrid_test.h"
+#include "math/oskar_meshgrid.h"
+#include "math/oskar_linspace.h"
+#include <cstdlib>
+#include <cstdio>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast)
+void Meshgrid_Test::test_meshgrid()
 {
-    double last;
+    int nx = 4;
+    int ny = 2;
+    double* x = (double*)malloc(nx * sizeof(double));
+    double* y = (double*)malloc(ny * sizeof(double));
+    double* X = (double*)malloc(nx * ny * sizeof(double));
+    double* Y = (double*)malloc(nx * ny * sizeof(double));
+    oskar_linspace_d(x, 0, 3, nx);
+    oskar_linspace_d(y, 1, 2, ny);
+    oskar_meshgrid_d(X, Y, x, nx, y, ny);
 
-    if (station == NULL || l == NULL || m == NULL || n == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+//    printf("\n\n");
+//    for (int j = 0; j < ny; ++j)
+//    {
+//        for (int i = 0; i < nx; ++i)
+//        {
+//            printf("%f ", X[j * nx + i]);
+//        }
+//        printf("\n");
+//    }
+//
+//    printf("\n\n");
+//    for (int j = 0; j < ny; ++j)
+//    {
+//        for (int i = 0; i < nx; ++i)
+//        {
+//            printf("%f ", Y[j * nx + i]);
+//        }
+//        printf("\n");
+//    }
 
-    /* Local apparent Sidereal Time, in radians. */
-    last = gast + station->longitude;
 
-    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0, &station->dec0, last,
-            station->latitude, l, m, n);
+    free(x);
+    free(y);
+    free(X);
+    free(Y);
 }
 
-#ifdef __cplusplus
-}
-#endif
+
