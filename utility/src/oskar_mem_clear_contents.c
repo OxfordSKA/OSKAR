@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_clear.h"
+#include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_Mem.h"
 
@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-int oskar_mem_clear(oskar_Mem* mem)
+int oskar_mem_clear_contents(oskar_Mem* mem)
 {
     int error = 0;
     size_t size;
@@ -53,16 +53,16 @@ int oskar_mem_clear(oskar_Mem* mem)
     /* Clear the memory. */
     if (mem->private_location == OSKAR_LOCATION_CPU)
     {
-    	memset(mem->data, 0, size);
+        memset(mem->data, 0, size);
     }
     else if (mem->private_location == OSKAR_LOCATION_GPU)
     {
-    	cudaMemset(mem->data, 0, size);
-    	error = cudaPeekAtLastError();
+        cudaMemset(mem->data, 0, size);
+        error = cudaPeekAtLastError();
     }
     else
     {
-    	return OSKAR_ERR_BAD_LOCATION;
+        return OSKAR_ERR_BAD_LOCATION;
     }
 
     return error;

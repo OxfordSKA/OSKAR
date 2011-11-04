@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_CLEAR_H_
-#define OSKAR_MEM_CLEAR_H_
+#ifndef OSKAR_MEM_CLEAR_CONTENTS_H_
+#define OSKAR_MEM_CLEAR_CONTENTS_H_
 
 /**
- * @file oskar_mem_clear.h
+ * @file oskar_mem_clear_contents.h
  */
 
 #include "oskar_global.h"
@@ -55,10 +55,10 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_mem_clear(oskar_Mem* dst);
+int oskar_mem_clear_contents(oskar_Mem* dst);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_CLEAR_H_ */
+#endif /* OSKAR_MEM_CLEAR_CONTENTS_H_ */
