@@ -41,12 +41,6 @@ int oskar_telescope_model_free(oskar_TelescopeModel* telescope)
     int error = 0, i = 0;
 
     /* Free the arrays. */
-    error = oskar_mem_free(&telescope->station_u);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_v);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_w);
-    if (error) return error;
     error = oskar_mem_free(&telescope->station_x);
     if (error) return error;
     error = oskar_mem_free(&telescope->station_y);

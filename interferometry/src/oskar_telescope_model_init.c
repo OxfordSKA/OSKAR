@@ -50,12 +50,6 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
     telescope->num_stations = n_stations;
 
     /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_u, type, location, n_stations ,1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_v, type, location, n_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_w, type, location, n_stations, 1);
-    if (err) return err;
     err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
     if (err) return err;
     err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);

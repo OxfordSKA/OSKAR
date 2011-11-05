@@ -66,12 +66,6 @@ int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int n_stations
     }
 
     /* Resize the remaining arrays. */
-    error = oskar_mem_realloc(&(telescope->station_u), n_stations);
-    if (error) return error;
-    error = oskar_mem_realloc(&(telescope->station_v), n_stations);
-    if (error) return error;
-    error = oskar_mem_realloc(&(telescope->station_w), n_stations);
-    if (error) return error;
     error = oskar_mem_realloc(&(telescope->station_x), n_stations);
     if (error) return error;
     error = oskar_mem_realloc(&(telescope->station_y), n_stations);

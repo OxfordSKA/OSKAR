@@ -55,11 +55,6 @@ struct oskar_TelescopeModel
     double ra0;                  /**< Right Ascension of phase centre in radians. */
     double dec0;                 /**< Declination of phase centre in radians. */
 
-    /* Work buffers. */
-    oskar_Mem station_u;         /**< Work buffer holding station u coordinates. */
-    oskar_Mem station_v;         /**< Work buffer holding station v coordinates. */
-    oskar_Mem station_w;         /**< Work buffer holding station w coordinates. */
-
 #ifdef __cplusplus
     /* If C++, then provide constructors and methods. */
     /**
