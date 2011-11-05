@@ -4,8 +4,8 @@
 // number of sources is modified by this function.
 unsigned filter_sources_by_radius(unsigned * num_sources,
         const double inner_radius, const double outer_radius,
-        const double ra0, const double dec0, double * ra, double *dec,
-        double * brightness);
+        const double ra0, const double dec0, double** ra, double** dec,
+        double** brightness);
 
 // ============================================================================
 // private functions...

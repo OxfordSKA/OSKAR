@@ -7,29 +7,27 @@
 #include <algorithm>
 #include <vector>
 #include <cstring>
+#include <cstdio>
 
 using namespace std;
 
-// FIXME This function is broken! (Memory errors everywhere!)
-
 unsigned filter_sources_by_radius(unsigned * num_sources,
         const double inner_radius, const double outer_radius,
-        const double ra0, const double dec0, double * ra,
-        double * dec, double * brightness)
+        const double ra0, const double dec0, double** ra,
+        double** dec, double** brightness)
 {
     // Convert to radians.
     double inner = inner_radius * (M_PI / 180.0);
     double outer = outer_radius * (M_PI / 180.0);
 
     // Evaluate the radial distance of sources from the phase centre.
-    std::vector<double> dist(*num_sources);
-    source_distance_from_phase_centre(*num_sources, ra, dec, ra0, dec0, &dist[0]);
+    double* dist = (double*)malloc(*num_sources * sizeof(double));
+    source_distance_from_phase_centre(*num_sources, *ra, *dec, ra0, dec0, dist);
 
     // Sort the radial distances into increasing order, holding onto
     // the positions of the original indices.
-    std::vector<unsigned> indices(*num_sources);
-    unsigned * idx = &indices[0];
-    oskar_LinkedSort::sortIndices(*num_sources, &dist[0], idx);
+    unsigned* idx = (unsigned*)malloc(*num_sources * sizeof(unsigned));
+    oskar_LinkedSort::sortIndices(*num_sources, dist, idx);
 
     // Find the indices of the sorted radial distance distance array
     // corresponding to the inner and outer radius.
@@ -55,16 +53,20 @@ unsigned filter_sources_by_radius(unsigned * num_sources,
 
     // Re-order the RA, Dec. and Brightness arrays for the remaining sources
     // according to distance.
-    reorder_sources(num_remaining_sources, &idx[iStart], ra, dec, brightness);
+    reorder_sources(num_remaining_sources, &idx[iStart], *ra, *dec, *brightness);
 
     // Resize the RA, Dec. and brightness arrays to the number of
     // sources retained by the filter.
-    dec = (double*) realloc(dec, num_remaining_sources * sizeof(double));
-    ra = (double*) realloc(ra, num_remaining_sources * sizeof(double));
-    brightness = (double*) realloc(brightness, num_remaining_sources * sizeof(double));
+    size_t mem_size = num_remaining_sources * sizeof(double);
+    *dec = (double*)realloc(*dec, mem_size);
+    *ra  = (double*)realloc(*ra, mem_size);
+    *brightness = (double*)realloc(*brightness, mem_size);
 
     // Update the number of sources.
     *num_sources = num_remaining_sources;
+
+    free(dist);
+    free(idx);
 
     return num_remaining_sources;
 }
@@ -84,24 +86,25 @@ void source_distance_from_phase_centre(const unsigned num_sources,
 }
 
 
-void reorder_sources(const unsigned num_sources, const unsigned * indices,
-        double * ra, double * dec, double * brightness)
+void reorder_sources(const unsigned num_sources, const unsigned* indices,
+        double* ra, double* dec, double* brightness)
 {
-    std::vector<double> temp(num_sources);
-    double * tempPtr = &temp[0];
+    double* temp = (double*)malloc(num_sources * sizeof(double));
 
     // RA
     for (unsigned i = 0; i < num_sources; ++i)
-        tempPtr[i] = ra[indices[i]];
-    memcpy(ra, tempPtr, num_sources * sizeof(double));
+        temp[i] = ra[indices[i]];
+    memcpy(ra, temp, num_sources * sizeof(double));
 
     // Dec.
     for (unsigned i = 0; i < num_sources; ++i)
-        tempPtr[i] = dec[indices[i]];
-    memcpy(dec, tempPtr, num_sources * sizeof(double));
+        temp[i] = dec[indices[i]];
+    memcpy(dec, temp, num_sources * sizeof(double));
 
     // Brightness
     for (unsigned i = 0; i < num_sources; ++i)
-        tempPtr[i] = brightness[indices[i]];
-    memcpy(brightness, tempPtr, num_sources * sizeof(double));
+        temp[i] = brightness[indices[i]];
+    memcpy(brightness, temp, num_sources * sizeof(double));
+
+    free(temp);
 }

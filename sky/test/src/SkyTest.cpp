@@ -37,10 +37,8 @@
 #include <vector>
 #include <cstdlib>
 #include <cmath>
-#include <iostream>
-#include <iomanip>
+#include <cstdio>
 using namespace std;
-
 
 /**
  * @details
@@ -80,52 +78,51 @@ void SkyTest::test_generate_random()
 }
 
 
-// FIXME This test has lots of memory errors.
 /**
  * @details
  */
 void SkyTest::test_distance_filter()
 {
     unsigned num_sources = 5;
-    const double inner_radius = 1.0;
-    const double outer_radius = 180.0;
-    const double ra0 = 0.0;
-    const double dec0 = M_PI / 2.0;
+    double inner_radius = 1.0;
+    double outer_radius = 180.0;
+    double ra0 = 0.0;
+    double dec0 = M_PI / 2.0;
+    double brightness_min = 1.0e-2;
+    double brightness_max = 1.0e4;
+    double distribution_power = -2.0;
 
-    const double brightness_min = 1.0e-2;
-    const double brightness_max = 1.0e4;
-    const double distribution_power = -2.0;
-    double* ra = (double*)malloc(num_sources * sizeof(double));
-    double* dec = (double*)malloc(num_sources * sizeof(double));
-    double* brightness = (double*)malloc(num_sources * sizeof(double));
+    double* ra   = (double*)malloc(num_sources * sizeof(double));
+    double* dec  = (double*)malloc(num_sources * sizeof(double));
+    double* B    = (double*)malloc(num_sources * sizeof(double));
+    double* dist = (double*)malloc(num_sources * sizeof(double));
 
     generate_random_sources(num_sources, brightness_min, brightness_max,
-            distribution_power, ra, dec, brightness, 0);
+            distribution_power, ra, dec, B, 0);
 
-    std::vector<double> dist(num_sources);
-    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
-
-//    cout <<  endl;
-//    cout << "= Before: " << endl;
+//    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
+//    printf("\n= Before:\n");
 //    for (unsigned i = 0; i < num_sources; ++i)
 //    {
-//        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+//        printf("[%u] % -6.2f, % -6.2f, % -6.2f, % -6.2f\n", i, dist[i], ra[i],
+//                dec[i], B[i]);
 //    }
-//    cout <<  endl;
 
     filter_sources_by_radius(&num_sources, inner_radius, outer_radius, ra0, dec0,
-            ra, dec, brightness);
+            &ra, &dec, &B);
 
-    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
-//    cout << "= After: " << endl;
+//    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
+//    printf("\n= After:\n");
 //    for (unsigned i = 0; i < num_sources; ++i)
 //    {
-//        cout << " [" << i << "] " << dist[i] << " " << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
+//        printf("[%u] % -6.2f, % -6.2f, % -6.2f, % -6.2f\n", i, dist[i], ra[i],
+//                dec[i], B[i]);
 //    }
 
+    free(dist);
     free(ra);
     free(dec);
-    free(brightness);
+    free(B);
 }
 
 void SkyTest::test_rotate()
