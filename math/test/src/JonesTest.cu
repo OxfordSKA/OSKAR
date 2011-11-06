@@ -33,6 +33,7 @@
 #include "utility/timer.h"
 
 #include <cstdio>
+#include <cstdlib>
 
 /**
  * @details
@@ -55,6 +56,7 @@ void JonesTest::test_join_inline_mat_mat_device()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
+        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_matrix(j1, 0, 1);
 
         // Free memory.
@@ -105,6 +107,7 @@ void JonesTest::test_join_inline_mat_mat_device_host()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
+        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_matrix(j1, 0, 1);
 
         // Free memory.
@@ -155,6 +158,7 @@ void JonesTest::test_join_inline_mat_mat_host()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
+        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_matrix(j1, 0, 1);
 
         // Free memory.
@@ -202,6 +206,7 @@ void JonesTest::test_join_inline_mat_sca_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
+        // NOTE: this test fails on CUDA arch < 1.3
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
@@ -255,6 +260,7 @@ void JonesTest::test_join_inline_mat_sca_device_host()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
+        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_scalar(j1, 0, 1);
 
         // Free memory.
@@ -302,6 +308,7 @@ void JonesTest::test_join_inline_mat_sca_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
+        // NOTE: this test fails on CUDA arch < 1.3
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
@@ -851,6 +858,8 @@ oskar_Jones* JonesTest::construct_jones_device(int type,
 void JonesTest::check_matrix_matrix(const oskar_Jones* jones,
         int offset1, int offset2)
 {
+    char msg[100]; // Message buffer.
+
     // Copy result to temporary host buffer.
     const oskar_Jones* temp = (jones->location() == 1) ?
             new oskar_Jones(jones, 0) : jones;
@@ -865,14 +874,17 @@ void JonesTest::check_matrix_matrix(const oskar_Jones* jones,
         {
             construct_float4c_output_matrix_matrix(i + offset1,
                     i + offset2, t);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.x, ptr[i].a.x, abs(t.a.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.a.y, ptr[i].a.y, abs(t.a.y * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.x, ptr[i].b.x, abs(t.b.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.b.y, ptr[i].b.y, abs(t.b.y * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.x, ptr[i].c.x, abs(t.c.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.c.y, ptr[i].c.y, abs(t.c.y * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.x, ptr[i].d.x, abs(t.d.x * 5e-5));
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(t.d.y, ptr[i].d.y, abs(t.d.y * 5e-5));
+//            construct_double4c_output_matrix_matrix(i + offset1,
+//                    i + offset2, t);
+            sprintf(msg, "failed at index %i\n", i);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.a.x, ptr[i].a.x, abs(t.a.x * 5.0e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.a.y, ptr[i].a.y, abs(t.a.y * 5.0e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.b.x, ptr[i].b.x, abs(t.b.x * 5.0e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.b.y, ptr[i].b.y, abs(t.b.y * 5.0e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.c.x, ptr[i].c.x, abs(t.c.x * 5.0e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.c.y, ptr[i].c.y, abs(t.c.y * 5.0e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.d.x, ptr[i].d.x, abs(t.d.x * 5.0e-5));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(msg, t.d.y, ptr[i].d.y, abs(t.d.y * 5.0e-5));
         }
     }
     else if (jones->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
