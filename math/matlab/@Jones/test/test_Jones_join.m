@@ -14,7 +14,6 @@ for i=1:length(expected(:))
 end
 clear J1 J2 J3 expected values i;
 
-
 % Test scalar jones join with memory on the CPU.
 J1 = Jones(a1, 'scalar');
 J2 = Jones(a2, 'scalar');
@@ -62,21 +61,9 @@ for i=1:length(expected(:))
 end
 clear J1 J2 expected values i;
 
-% Test Matrix jones join to left
-this  = Jones(a1, 'matrix', 'cpu');
-other = Jones(a2, 'matrix', 'gpu');
-% other = other * this
-oskar.Jones_join_to_left(this.pointer, other.pointer); % Note not a class function yet...
-expected = a2 * a1;
-values = other.values;
-for i=1:length(expected(:))
-    assert(expected(i) == values(i), 'Matrix jones join to left');
-end
-clear this other expected values i;
-
 clear a1 a2
 
 disp('SUCCESS!! All oskar.Jones tests passed! ');
 
-disp('"what oskar" returns:');
-what oskar
+%disp('"what oskar" returns:');
+%what oskar

@@ -16,12 +16,6 @@ classdef Jones <  handle
     methods
         % Constructor.
         %
-        % FIXME: double memory type on GPU on unsupported architecture.
-        %
-        % NOTE! Argument order of sources and stations has to be this way
-        % round to match other matlab functions
-        %      e.g. ones(num_sources, num_stations)
-        %
         % Usage:
         %   J = Jones(values, format, [location]);
         %   J = Jones(num_sources, num_stations, [format], [type], [location])
@@ -44,75 +38,74 @@ classdef Jones <  handle
             
             % Switch on the number of arguments to determine which
             % version of the constructor to run.
-            if (nargin == 2)
-                if (ischar(varargin{2}))
-                    values = varargin{1};
-                    format = varargin{2};
-                    if (strcmp(format, 'matrix'))
-                        [~, ~, num_sources, num_stations] = size(values);
+            switch nargin
+                case 2
+                    if (ischar(varargin{2}))
+                        values = varargin{1};
+                        format = varargin{2};
+                        if (strcmp(format, 'matrix'))
+                            [~, ~, num_sources, num_stations] = size(values);
+                        else
+                            [num_sources, num_stations] = size(values);
+                        end
+                        obj.pointer = Jones_constructor(num_stations, ...
+                            num_sources, format, class(values), default_location);
+                        obj.set_values(values, format, default_location);
                     else
-                        [num_sources, num_stations] = size(values);
+                        num_sources  = varargin{1};
+                        num_stations = varargin{2};
+                        obj.pointer = Jones_constructor(num_stations, ...
+                            num_sources, default_format, default_type, ...
+                            default_location);
+                        Jones_set_real_scalar(obj.pointer, 0.0);
                     end
-                    obj.pointer = Jones_constructor(num_stations, ...
-                        num_sources, format, class(values), default_location);
-                    obj.set_values(values, format, default_location);
-                else
-                    num_sources  = varargin{1};
-                    num_stations = varargin{2};
-                    obj.pointer = Jones_constructor(num_stations, ...
-                        num_sources, default_format, default_type, ...
-                        default_location);
-                    Jones_set_real_scalar(obj.pointer, 0.0);
-                end
-                
-            elseif (nargin == 3)
-                if (ischar(varargin{2}))
-                    values   = varargin{1};
-                    format   = varargin{2};
-                    location = varargin{3};
-                    if (strcmp(format, 'matrix'))
-                        [~, ~, num_sources, num_stations] = size(values);
+                case 3
+                    if (ischar(varargin{2}))
+                        values   = varargin{1};
+                        format   = varargin{2};
+                        location = varargin{3};
+                        if (strcmp(format, 'matrix'))
+                            [~, ~, num_sources, num_stations] = size(values);
+                        else
+                            [num_sources, num_stations] = size(values);
+                        end
+                        obj.pointer = Jones_constructor(num_stations, ...
+                            num_sources, format, class(values), location);
+                        obj.set_values(values, format, location);
                     else
-                        [num_sources, num_stations] = size(values);
+                        num_sources  = varargin{1};
+                        num_stations = varargin{2};
+                        format       = varargin{3};
+                        obj.pointer = Jones_constructor(num_stations, ...
+                            num_sources, format, default_type, ...
+                            default_location);
+                        Jones_set_real_scalar(obj.pointer, 0.0);
                     end
-                    obj.pointer = Jones_constructor(num_stations, ...
-                        num_sources, format, class(values), location);
-                    obj.set_values(values, format, location);
-                else
+                    
+                    
+                case 4
                     num_sources  = varargin{1};
                     num_stations = varargin{2};
                     format       = varargin{3};
+                    type         = varargin{4};
                     obj.pointer = Jones_constructor(num_stations, ...
-                        num_sources, format, default_type, ...
-                        default_location);
+                        num_sources, format, type, default_location);
                     Jones_set_real_scalar(obj.pointer, 0.0);
-                end
-                
-            elseif (nargin == 4)
-                num_sources  = varargin{1};
-                num_stations = varargin{2};
-                format       = varargin{3};
-                type         = varargin{4};
-                obj.pointer = Jones_constructor(num_stations, ...
-                    num_sources, format, type, default_location);
-                Jones_set_real_scalar(obj.pointer, 0.0);
-                
-            elseif (nargin == 5)
-                num_sources  = varargin{1};
-                num_stations = varargin{2};
-                format       = varargin{3};
-                type         = varargin{4};
-                location     = varargin{5};
-                obj.pointer = Jones_constructor(num_stations, ...
-                    num_sources, format, type, location);
-                Jones_set_real_scalar(obj.pointer, 0.0);
-                
-            else
-                error('Usage:\n %s\n %s\n', ...
-                    'J = Jones(num_sources, num_stations, [format], [type], [location])', ...
-                    'J = Jones(values, format, [location])');
+                case 5
+                    num_sources  = varargin{1};
+                    num_stations = varargin{2};
+                    format       = varargin{3};
+                    type         = varargin{4};
+                    location     = varargin{5};
+                    obj.pointer = Jones_constructor(num_stations, ...
+                        num_sources, format, type, location);
+                    Jones_set_real_scalar(obj.pointer, 0.0);
+                    
+                otherwise
+                    error('Usage:\n %s\n %s\n', ...
+                        'J = Jones(num_sources, num_stations, [format], [type], [location])', ...
+                        'J = Jones(values, format, [location])');
             end
-            
         end % constructor.
         
         % Destructor
@@ -124,7 +117,7 @@ classdef Jones <  handle
             obj.pointer = 0;
         end
         
-               
+        
         % Copy method (defined in function file)
         obj = copy(obj, location)
         
@@ -177,7 +170,7 @@ classdef Jones <  handle
         function join_from_right(obj, other_Jones)
             Jones_join_from_right(obj.pointer, other_Jones.pointer);
         end
-              
+        
         % Accessor methods.
         function value = num_sources(obj)
             value = Jones_get_parameter(obj.pointer, 'num_sources');
@@ -194,7 +187,7 @@ classdef Jones <  handle
         function value = location(obj)
             value = Jones_get_parameter(obj.pointer, 'location');
         end
-
+        
         % overloaded matrix multiply operator
         % eg.
         % J = K * E
@@ -224,7 +217,7 @@ classdef Jones <  handle
         end
     end
     
-       
+    
     % Static methods.
     methods (Static = true)
         % TODO: change name to multiply?!
