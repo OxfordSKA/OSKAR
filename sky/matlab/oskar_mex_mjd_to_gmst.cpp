@@ -17,5 +17,5 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
     output[0] = mxCreateNumericArray(n_dims, dims, mxDOUBLE_CLASS, mxREAL);
     double* gmst_rad = (double*) mxGetPr(output[0]);
 
-    *gmst_rad = oskar_mjd_to_gmst_d(mjd_ut1);
+    *gmst_rad = oskar_mjd_to_gmst(mjd_ut1);
 }

@@ -26,37 +26,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_gmst.h"
-#include <math.h>
+#include "utility/oskar_exit.h"
+#include "utility/oskar_get_error_string.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Seconds to radians. */
-#define SEC2RAD 7.2722052166430399038487e-5
-
-#ifndef M_2PI
-#define M_2PI 6.28318530717958647693
-#endif
-
-double oskar_mjd_to_gmst(double mjd)
+void oskar_exit(int error)
 {
-    double d, t, gmst;
-
-    /* Days from J2000.0. */
-    d = mjd - 51544.5;
-
-    /* Centuries from J2000.0. */
-    t = d / 36525.0;
-
-    /* GMST at this time. */
-    gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
-                    (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
-
-    /* Range check (0 to 2pi). */
-    t = fmod(gmst, M_2PI);
-    return (t >= 0.0) ? t : t + M_2PI;
+    fprintf(stderr, ">>> Exiting with error (%d): %s\n", error,
+            oskar_get_error_string(error));
+    exit(error);
 }
 
 #ifdef __cplusplus

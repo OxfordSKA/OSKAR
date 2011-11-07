@@ -65,18 +65,17 @@ int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* 
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    int location = src->location();
     error = dst->baseline_u.append(src->baseline_u.data, src->baseline_u.type(),
-            location, num_samples);
+            src->baseline_u.location(), num_samples);
     if (error) return error;
     error = dst->baseline_v.append(src->baseline_v.data, src->baseline_v.type(),
-            location, num_samples);
+            src->baseline_v.location(), num_samples);
     if (error) return error;
     error = dst->baseline_w.append(src->baseline_w.data, src->baseline_w.type(),
-            location, num_samples);
+            src->baseline_w.location(), num_samples);
     if (error) return error;
     error = dst->amplitude.append(src->amplitude.data, src->amplitude.type(),
-            location, num_samples);
+            src->amplitude.location(), num_samples);
     if (error) return error;
 
     dst->num_times += src->num_times;

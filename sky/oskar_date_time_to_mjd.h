@@ -55,7 +55,7 @@ extern "C" {
  * @return The Modified Julian Date.
  */
 OSKAR_EXPORT
-double oskar_date_time_to_mjd_d(int year, int month, int day,
+double oskar_date_time_to_mjd(int year, int month, int day,
         double day_fraction);
 
 #ifdef __cplusplus

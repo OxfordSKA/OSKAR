@@ -20,5 +20,5 @@ void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
     output[0] = mxCreateNumericArray(n_dims, dims, mxDOUBLE_CLASS, mxREAL);
     double* mjd = (double*) mxGetPr(output[0]);
 
-    *mjd = oskar_date_time_to_mjd_d(year, month, day, day_fraction);
+    *mjd = oskar_date_time_to_mjd(year, month, day, day_fraction);
 }

@@ -63,6 +63,8 @@ class oskar_Settings
         void set_latitude_deg(const double value) { _latitude_deg = value; }
         double longitude_rad() const { return _longitude_deg * DEG2RAD; }
         double latitude_rad() const { return _latitude_deg * DEG2RAD; }
+        double altitude_m() const { return _altitude_m; }
+        void set_altitude_m(const double value) { _altitude_m = value; }
 
         QString station_dir() const { return _station_dir; }
         void set_station_dir(const QString& value) { _station_dir = value; }
@@ -70,7 +72,7 @@ class oskar_Settings
         void set_disable_station_beam(const bool value)
         { _disable_station_beam = value; }
 
-        bool double_precision() { return _prec_double; }
+        bool double_precision() const { return _prec_double; }
 
         const oskar_SettingsObservation& obs() const { return _obs; }
         oskar_SettingsObservation& obs() { return _obs; }
@@ -88,6 +90,7 @@ class oskar_Settings
         QString _telescope_file;
         double _longitude_deg;
         double _latitude_deg;
+        double _altitude_m;
 
         QString _station_dir;
         bool _disable_station_beam;

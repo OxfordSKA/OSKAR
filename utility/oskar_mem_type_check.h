@@ -52,7 +52,7 @@ extern "C" {
  */
 inline int oskar_mem_is_double(const int mem_type)
 {
-	return ((mem_type & 2) == 0);
+    return ((mem_type & 0x0002) == 0x0002);
 }
 
 /**
@@ -68,7 +68,7 @@ inline int oskar_mem_is_double(const int mem_type)
  */
 inline int oskar_mem_is_single(const int mem_type)
 {
-	return ((mem_type & 2) == 2);
+    return ((mem_type & 0x0001) == 0x0001);
 }
 
 /**
@@ -84,7 +84,7 @@ inline int oskar_mem_is_single(const int mem_type)
  */
 inline int oskar_mem_is_complex(const int mem_type)
 {
-	return ((mem_type & 0x00C0) == 0x00C0);
+    return ((mem_type & 0x00C0) == 0x00C0);
 }
 
 /**
@@ -100,7 +100,7 @@ inline int oskar_mem_is_complex(const int mem_type)
  */
 inline int oskar_mem_is_real(const int mem_type)
 {
-	return ((mem_type & 0x00C0) == 0);
+    return ((mem_type & 0x00C0) == 0);
 }
 
 /**
@@ -116,7 +116,7 @@ inline int oskar_mem_is_real(const int mem_type)
  */
 inline int oskar_mem_is_matrix(const int mem_type)
 {
-	return ((mem_type & 0x0400) == 0x0400);
+    return ((mem_type & 0x0400) == 0x0400);
 }
 
 /**
@@ -132,7 +132,7 @@ inline int oskar_mem_is_matrix(const int mem_type)
  */
 inline int oskar_mem_is_scalar(const int mem_type)
 {
-	return ((mem_type & 0x0400) == 0);
+    return ((mem_type & 0x0400) == 0);
 }
 
 #ifdef __cplusplus

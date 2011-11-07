@@ -55,7 +55,7 @@ extern "C" {
  * @return The equation of the equinoxes in radians.
  */
 OSKAR_EXPORT
-double oskar_equation_of_equinoxes_fast_d(double mjd);
+double oskar_equation_of_equinoxes_fast(double mjd);
 
 #ifdef __cplusplus
 }

@@ -32,9 +32,12 @@
 #include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
+#include "station/oskar_station_model_load.h"
+#include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_resize.h"
 #include "station/oskar_station_model_check_mem.h"
 #include "station/oskar_station_model_scale_coords.h"
+#include "station/oskar_station_model_type.h"
 #include <cuda_runtime_api.h>
 #include <cmath>
 
@@ -74,14 +77,23 @@ oskar_StationModel::~oskar_StationModel()
 
 int oskar_StationModel::copy_to(oskar_StationModel* other)
 {
-    return -1;
+    return oskar_station_model_copy(other, this); // Copy this to other.
+}
+
+int oskar_StationModel::load(const char* filename)
+{
+    return oskar_station_model_load(this, filename);
+}
+
+int oskar_StationModel::location() const
+{
+    return oskar_station_model_location(this);
 }
 
 int oskar_StationModel::resize(int n_elements)
 {
     return oskar_station_model_resize(this, n_elements);
 }
-
 
 int oskar_StationModel::scale_coords_to_wavenumbers(const double frequency_hz)
 {
@@ -90,6 +102,11 @@ int oskar_StationModel::scale_coords_to_wavenumbers(const double frequency_hz)
     coord_units = OSKAR_WAVENUMBERS;
     const double metres_to_wavenumbers = 2.0 * M_PI * frequency_hz / 299792458.0;
     return oskar_station_model_scale_coords(this, metres_to_wavenumbers);
+}
+
+int oskar_StationModel::type() const
+{
+    return oskar_station_model_type(this);
 }
 
 int oskar_StationModel::coord_type() const

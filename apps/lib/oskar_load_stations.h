@@ -35,6 +35,7 @@
  */
 
 #include "oskar_global.h"
+#include "interferometry/oskar_TelescopeModel.h"
 #include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
@@ -42,6 +43,26 @@ extern "C" {
 #endif
 
 /**
+ * @brief
+ * Loads a directory of station (coordinate) files into an array of station
+ * model structures.
+ *
+ * TODO: confirm if the dir_path needs to be relative or absolute...
+ *
+ * @param[out] stations           Array of station model structures.
+ * @param[out] identical_stations True if station element coords are identical.
+ * @param[in]  num_stations       Number of station model structures in array.
+ * @param[in]  dir_path           Path to a directory of station files.
+ *
+ * @return An OSKAR error code.
+ */
+OSKAR_EXPORT
+int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
+        const int num_stations, const char* dir_path);
+
+/**
+ * @deprecated
+ *
  * @brief
  * Loads a directory of station (coordinate) files into an array of station
  * model structures.

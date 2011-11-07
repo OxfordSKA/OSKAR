@@ -68,6 +68,7 @@ int oskar_Settings::load(const QString& filename)
     _telescope_file    = settings.value("telescope/layout_file").toString();
     _latitude_deg      = settings.value("telescope/latitude_deg").toDouble();
     _longitude_deg     = settings.value("telescope/longitude_deg").toDouble();
+    _altitude_m        = settings.value("telescope/altitude_m").toDouble();
 
     _station_dir       = settings.value("station/station_directory").toString();
     _disable_station_beam = settings.value("station/disable_station_beam").toBool();

@@ -33,12 +33,10 @@
 extern "C" {
 #endif
 
-/* Double precision. */
-
 #define DEG2RAD 0.0174532925199432957692
 #define HOUR2RAD 0.261799387799149436539
 
-double oskar_equation_of_equinoxes_fast_d(double mjd)
+double oskar_equation_of_equinoxes_fast(double mjd)
 {
     double d, omega, L, delta_psi, epsilon, eqeq;
 

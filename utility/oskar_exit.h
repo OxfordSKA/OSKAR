@@ -26,39 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_gmst.h"
-#include <math.h>
+#ifndef OSKAR_EXIT_H_
+#define OSKAR_EXIT_H_
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Seconds to radians. */
-#define SEC2RAD 7.2722052166430399038487e-5
-
-#ifndef M_2PI
-#define M_2PI 6.28318530717958647693
-#endif
-
-double oskar_mjd_to_gmst(double mjd)
-{
-    double d, t, gmst;
-
-    /* Days from J2000.0. */
-    d = mjd - 51544.5;
-
-    /* Centuries from J2000.0. */
-    t = d / 36525.0;
-
-    /* GMST at this time. */
-    gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
-                    (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
-
-    /* Range check (0 to 2pi). */
-    t = fmod(gmst, M_2PI);
-    return (t >= 0.0) ? t : t + M_2PI;
-}
+/**
+ * @brief
+ * Exits application and displays an OSKAR error message.
+ *
+ * @details
+ * Call this function to immediately exit an application if an error is
+ * encountered. The error code and corresponding error message are displayed.
+ *
+ * This function should only ever be called from applications, and should never
+ * be called from any functions in the main library.
+ *
+ * @param[in] error The error code.
+ */
+OSKAR_EXPORT
+void oskar_exit(int error);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_EXIT_H_ */

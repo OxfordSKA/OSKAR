@@ -28,6 +28,7 @@
 
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_StationModel.h"
+#include "utility/oskar_mem_type_check.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,9 +36,20 @@ extern "C" {
 
 int oskar_station_model_is_type(const oskar_StationModel* station, int type)
 {
+    // Check the type of the weights array.
+    if ((type == OSKAR_SINGLE &&
+            !oskar_mem_is_single(station->weight.private_type)) ||
+            (type == OSKAR_DOUBLE &&
+                    !oskar_mem_is_double(station->weight.private_type)))
+        return 0;
+
     return (station->x.private_type == type &&
-    		station->y.private_type == type &&
-    		station->z.private_type == type);
+            station->y.private_type == type &&
+            station->z.private_type == type &&
+            station->amp_gain.private_type == type &&
+            station->amp_error.private_type == type &&
+            station->phase_offset.private_type == type &&
+            station->phase_error.private_type == type);
 }
 
 int oskar_station_model_type(const oskar_StationModel* station)

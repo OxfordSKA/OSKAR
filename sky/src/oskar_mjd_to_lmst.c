@@ -37,7 +37,7 @@ extern "C" {
 
 double oskar_mjd_to_lmst_d(double mjd, double lon)
 {
-    return oskar_mjd_to_gmst_d(mjd) + lon;
+    return oskar_mjd_to_gmst(mjd) + lon;
 }
 
 #ifdef __cplusplus

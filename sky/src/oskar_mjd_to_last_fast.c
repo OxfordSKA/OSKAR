@@ -38,7 +38,7 @@ extern "C" {
 double oskar_mjd_to_last_fast_d(double mjd, double lon)
 {
     return oskar_mjd_to_lmst_d(mjd, lon) +
-            oskar_equation_of_equinoxes_fast_d(mjd);
+            oskar_equation_of_equinoxes_fast(mjd);
 }
 
 
@@ -46,7 +46,7 @@ double oskar_mjd_to_last_fast_d(double mjd, double lon)
 float oskar_mjd_to_last_fast_f(float mjd, float lon)
 {
     return (float)oskar_mjd_to_lmst_d((double)mjd, (double)lon) +
-            oskar_equation_of_equinoxes_fast_d((double)mjd);
+            oskar_equation_of_equinoxes_fast((double)mjd);
 }
 
 #ifdef __cplusplus

@@ -26,39 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_mjd_to_gmst.h"
-#include <math.h>
+#ifndef OSKAR_MJD_TO_GAST_FAST_H_
+#define OSKAR_MJD_TO_GAST_FAST_H_
+
+/**
+ * @file oskar_mjd_to_gast_fast.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Seconds to radians. */
-#define SEC2RAD 7.2722052166430399038487e-5
-
-#ifndef M_2PI
-#define M_2PI 6.28318530717958647693
-#endif
-
-double oskar_mjd_to_gmst(double mjd)
-{
-    double d, t, gmst;
-
-    /* Days from J2000.0. */
-    d = mjd - 51544.5;
-
-    /* Centuries from J2000.0. */
-    t = d / 36525.0;
-
-    /* GMST at this time. */
-    gmst = fmod(mjd, 1.0) * M_2PI + (24110.54841 + (8640184.812866 +
-                    (0.093104 - 6.2e-6 * t) * t) * t) * SEC2RAD;
-
-    /* Range check (0 to 2pi). */
-    t = fmod(gmst, M_2PI);
-    return (t >= 0.0) ? t : t + M_2PI;
-}
+/**
+ * @brief
+ * Convert MJD(UT1) to Greenwich Apparent Sidereal Time.
+ *
+ * @details
+ * This function converts MJD(UT1) to the Greenwich Apparent Sidereal Time.
+ *
+ * @param[in] mjd  The MJD(UT1).
+ *
+ * @return The Greenwich Apparent Sidereal Time, in radians.
+ */
+OSKAR_EXPORT
+double oskar_mjd_to_gast_fast(double mjd);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MJD_TO_GAST_FAST_H_ */

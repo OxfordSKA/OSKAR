@@ -58,14 +58,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* location_string = mxArrayToString(in[3]);
 
     int type         = get_type(class_name);
-    int format       = get_format(format_string);
+    int scalar       = is_scalar(format_string);
     int location     = get_location_id(location_string);
     int type_id      = get_type_id(class_name, format_string);
     int num_sources  = 0;
     int num_stations = 0;
 
     // Work out data dimensions and check for errors.
-    if (format == OSKAR_SCALAR)
+    if (scalar)
     {
         if (num_dims != 2)
             mexErrMsgTxt("Scalar format must be 2-dimensional!\n");
@@ -135,7 +135,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         double* values_re = mxGetPr(in[1]);
         double* values_im = mxGetPi(in[1]);
-        if (format == OSKAR_SCALAR)
+        if (scalar)
         {
             double2* data = (double2*)J_local->ptr.data;
             for (int i = 0; i < num_sources * num_stations; ++i)
@@ -174,7 +174,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         float* values_re = (float*)mxGetPr(in[1]);
         float* values_im = (float*)mxGetPi(in[1]);
-        if (format == OSKAR_SCALAR)
+        if (scalar)
         {
             float2* data = (float2*)J_local->ptr.data;
             for (int i = 0; i < num_values; ++i)

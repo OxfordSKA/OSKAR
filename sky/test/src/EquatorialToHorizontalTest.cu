@@ -48,7 +48,7 @@ void EquatorialToHorizontalTest::test()
 
     // Set time-dependent celestial parameter data.
     CelestialData cel;
-    double mjdUt1 = oskar_date_time_to_mjd_d(2018, 9, 12, 1.5/24);
+    double mjdUt1 = oskar_date_time_to_mjd(2018, 9, 12, 1.5/24);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(58373.0625, mjdUt1, 1e-4);
     oskar_skyd_set_celestial_parameters_inline(&cel, longitude, mjdUt1);
 
@@ -73,7 +73,7 @@ void EquatorialToHorizontalTest::test_last()
     double longitude = 21.0 * M_PI / 180.0;
 
     // Get MJD(UT1).
-    double mjdUt1 = oskar_date_time_to_mjd_d(2018, 9, 12, 1.5/24);
+    double mjdUt1 = oskar_date_time_to_mjd(2018, 9, 12, 1.5/24);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(58373.0625, mjdUt1, 1e-4);
 
     // Get Local Apparent Sidereal Time.

@@ -28,25 +28,87 @@
 
 
 #include "apps/lib/oskar_load_stations.h"
-
-#include "utility/oskar_load_csv_coordinates_2d.h"
+#include "utility/oskar_load_csv_coordinates_2d.h" // Deprecated.
+#include "utility/oskar_mem_element_size.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
 #include <QtCore/QFileInfoList>
-
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
+        const int num_stations, const char* dir_path)
+{
+    // Get the list of station files to load.
+    QDir dir;
+    dir.setPath(QString(dir_path));
+    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
+
+    // Check that the number of stations is the same as that supplied.
+    if (num_stations != files.size())
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    // Check that the data is in the right location.
+    for (int i = 0; i < num_stations; ++i)
+    {
+        if (station[i].location() != OSKAR_LOCATION_CPU)
+            return OSKAR_ERR_BAD_LOCATION;
+    }
+
+    // Load the station data.
+    for (int i = 0; i < num_stations; ++i)
+    {
+        const char* filename = files.at(i).absoluteFilePath().toLatin1().data();
+        station[i].load(filename);
+    }
+
+    // Check if stations are all the same.
+    *identical_stations = true;
+
+    // 1. Check if they have the same number of antennas.
+    int num_antennas_station0 = station[0].n_elements;
+    for (int i = 0; i < num_stations; ++i)
+    {
+        if (station[i].n_elements != num_antennas_station0)
+        {
+            *identical_stations = false;
+            break;
+        }
+    }
+
+    // 2. Check if the positions are the same (compare every byte).
+    bool done = false;
+    oskar_StationModel* station0 = &station[0];
+    if (*identical_stations)
+    {
+        for (int j = 0; j < num_stations; ++j)
+        {
+            oskar_StationModel* s = &station[j];
+            int bytes = s->n_elements * oskar_mem_element_size(s->type());
+            for (int i = 0; i < bytes; ++i)
+            {
+                if (((char*)(station0->x))[i] != ((char*)(s->x))[i] ||
+                        ((char*)(station0->y))[i] != ((char*)(s->y))[i] ||
+                        ((char*)(station0->z))[i] != ((char*)(s->z))[i])
+                {
+                    *identical_stations = false;
+                    done = true;
+                    break;
+                }
+            }
+            if (done) break;
+        }
+    }
+    return 0;
+}
+
+
+// DEPRECATED
 unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stations,
-        int* idential_stations)
+        int* identical_stations)
 {
     int num_stations = 0;
     QDir dir;
@@ -64,7 +126,7 @@ unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stat
     }
 
     // Check if stations are all the same.
-    *idential_stations = true;
+    *identical_stations = true;
     // 1. Check if they have the same number of antennas.
     int num_antennas_station0 = (*stations)[0].num_antennas;
     for (int j = 0; j < num_stations; ++j)
@@ -72,7 +134,7 @@ unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stat
         oskar_StationModel_d * s = &(*stations)[j];
         if ((int)s->num_antennas != num_antennas_station0)
         {
-            *idential_stations = false;
+            *identical_stations = false;
             break;
         }
     }
@@ -80,7 +142,7 @@ unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stat
     // 2. Check if the positions are are the same.
     bool done = false;
     oskar_StationModel_d* station0 = &(*stations)[0];
-    if (*idential_stations)
+    if (*identical_stations)
     {
         for (int j = 0; j < num_stations; ++j)
         {
@@ -90,7 +152,7 @@ unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stat
                 if (station0->antenna_x[i] != s->antenna_x[i] ||
                         station0->antenna_y[i] != s->antenna_y[i])
                 {
-                    *idential_stations = false;
+                    *identical_stations = false;
                     done = true;
                     break;
                 }
@@ -105,9 +167,9 @@ unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stat
 
 
 
-
+// DEPRECATED
 unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stations,
-        int* idential_stations)
+        int* identical_stations)
 {
     int num_stations = 0;
     QDir dir;
@@ -125,7 +187,7 @@ unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stat
     }
 
     // Check if stations are all the same.
-    *idential_stations = true;
+    *identical_stations = true;
     // 1. Check if they have the same number of antennas.
     int num_antennas_station0 = (*stations)[0].num_antennas;
     for (int j = 0; j < num_stations; ++j)
@@ -133,7 +195,7 @@ unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stat
         oskar_StationModel_f * s = &(*stations)[j];
         if ((int)s->num_antennas != num_antennas_station0)
         {
-            *idential_stations = false;
+            *identical_stations = false;
             break;
         }
     }
@@ -141,7 +203,7 @@ unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stat
     // 2. Check if the positions are are the same.
     bool done = false;
     oskar_StationModel_f* station0 = &(*stations)[0];
-    if (*idential_stations)
+    if (*identical_stations)
     {
         for (int j = 0; j < num_stations; ++j)
         {
@@ -151,7 +213,7 @@ unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stat
                 if (station0->antenna_x[i] != s->antenna_x[i] ||
                         station0->antenna_y[i] != s->antenna_y[i])
                 {
-                    *idential_stations = false;
+                    *identical_stations = false;
                     done = true;
                     break;
                 }

@@ -41,7 +41,7 @@ extern "C" {
 
 /**
  * @brief
- * Convert MJD(UT1) to Greenwich Mean Sidereal Time (double precision).
+ * Convert MJD(UT1) to Greenwich Mean Sidereal Time.
  *
  * @details
  * This function converts MJD(UT1) to the Greenwich Mean Sidereal Time.
@@ -51,7 +51,7 @@ extern "C" {
  * @return The Greenwich Mean Sidereal Time in radians.
  */
 OSKAR_EXPORT
-double oskar_mjd_to_gmst_d(double mjd);
+double oskar_mjd_to_gmst(double mjd);
 
 #ifdef __cplusplus
 }

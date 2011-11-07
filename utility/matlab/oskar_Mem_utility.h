@@ -49,7 +49,7 @@
 //   double_complex
 //   single_complex_matrix
 //   double_complex_matrix
-enum { OSKAR_SCALAR = 0x0010, OSKAR_MATRIX = 0x0040};
+//enum { OSKAR_SCALAR = 0x0010, OSKAR_MATRIX = 0x0040};
 
 inline int get_type(const char* type)
 {
@@ -69,15 +69,15 @@ inline int get_type(const char* type)
 }
 
 
-inline int get_format(const char* format)
+inline int is_scalar(const char* format)
 {
     if (strcmp(format, "scalar") == 0)
     {
-        return OSKAR_SCALAR;
+        return OSKAR_TRUE;
     }
     else if (strcmp(format, "matrix") == 0)
     {
-        return OSKAR_MATRIX;
+        return OSKAR_FALSE;
     }
     else
     {
@@ -122,18 +122,18 @@ inline int get_location_id(const char* location)
 inline int get_type_id(const char* type, const char* format)
 {
     int itype   = get_type(type);
-    int iformat = get_format(format);
+    int scalar = is_scalar(format);
 
     if (itype == OSKAR_SINGLE)
     {
-        if (iformat == OSKAR_SCALAR)
+        if (scalar)
             return OSKAR_SINGLE_COMPLEX;
         else
             return OSKAR_SINGLE_COMPLEX_MATRIX;
     }
     else
     {
-        if (iformat == OSKAR_SCALAR)
+        if (scalar)
             return OSKAR_DOUBLE_COMPLEX;
         else
             return OSKAR_DOUBLE_COMPLEX_MATRIX;

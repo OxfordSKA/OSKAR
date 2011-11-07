@@ -195,12 +195,14 @@ public:
     static bool is_scalar(const int mem_type);
 
     /* Convenience pointer casts. */
+    operator char*() {return (char*)data;}
     operator float*() {return (float*)data;}
     operator double*() {return (double*)data;}
     operator float2*() {return (float2*)data;}
     operator double2*() {return (double2*)data;}
     operator float4c*() {return (float4c*)data;}
     operator double4c*() {return (double4c*)data;}
+    operator const char*() const {return (const char*)data;}
     operator const float*() const {return (const float*)data;}
     operator const double*() const {return (const double*)data;}
     operator const float2*() const {return (const float2*)data;}
@@ -213,12 +215,35 @@ typedef struct oskar_Mem oskar_Mem;
 
 /* Define an enumerator for the type. */
 enum {
-    OSKAR_SINGLE                 = 0x010F, /* (float)    scalar, float */
-    OSKAR_DOUBLE                 = 0x010D, /* (double)   scalar, double */
-    OSKAR_SINGLE_COMPLEX         = 0x01CF, /* (float2)   scalar, complex float */
-    OSKAR_DOUBLE_COMPLEX         = 0x01CD, /* (double2)  scalar, complex double */
-    OSKAR_SINGLE_COMPLEX_MATRIX  = 0x04CF, /* (float4c)  matrix, complex float */
-    OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  /* (double4c) matrix, complex double */
+    /* Scalar single (float): bit 0 set. */
+    OSKAR_SINGLE                 = 0x0001,
+//    OSKAR_SINGLE                 = 0x010F, /* (float)    scalar, float */
+
+    /* Scalar double (double): bit 1 set. */
+    OSKAR_DOUBLE                 = 0x0002,
+//    OSKAR_DOUBLE                 = 0x010D, /* (double)   scalar, double */
+
+    /* Complex flag: bits 6 and 7 set. */
+    OSKAR_COMPLEX                = 0x00C0,
+
+    /* Matrix flag: bit 10 set. */
+    OSKAR_MATRIX                 = 0x0400,
+
+    /* Scalar complex single (float2). */
+    OSKAR_SINGLE_COMPLEX         = OSKAR_SINGLE | OSKAR_COMPLEX,
+//    OSKAR_SINGLE_COMPLEX         = 0x01CF, /* (float2)   scalar, complex float */
+
+    /* Scalar complex double (double2). */
+    OSKAR_DOUBLE_COMPLEX         = OSKAR_DOUBLE | OSKAR_COMPLEX,
+//    OSKAR_DOUBLE_COMPLEX         = 0x01CD, /* (double2)  scalar, complex double */
+
+    /* Matrix complex float (float4c). */
+    OSKAR_SINGLE_COMPLEX_MATRIX  = OSKAR_SINGLE | OSKAR_COMPLEX | OSKAR_MATRIX,
+//    OSKAR_SINGLE_COMPLEX_MATRIX  = 0x04CF, /* (float4c)  matrix, complex float */
+
+    /* Matrix complex double (double4c). */
+    OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX,
+//    OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  /* (double4c) matrix, complex double */
 };
 
 enum {

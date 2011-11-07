@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     printf("  Date & Time: %04d-%02d-%02d, %02d:%02d:%02d\n",
             year, month, day, hour, min, sec);
     double day_frac = (hour / 24.0) + (min / 1440.0) + (sec / 86400.0);
-    double ut1 = oskar_date_time_to_mjd_d(year, month, day, day_frac);
+    double ut1 = oskar_date_time_to_mjd(year, month, day, day_frac);
     printf("  MJD: %.8f\n", ut1);
     printf("\n");
     printf("  Reading from file: %s\n", in_name);

@@ -217,6 +217,9 @@ struct oskar_Visibilities
             int num_channels);
 
     /**
+     * @deprecated
+     * DEPRECATED
+     *
      * @brief Returns the location of the memory in the visibility structure
      * as an OSKAR memory location ID.
      *

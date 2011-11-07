@@ -20,9 +20,10 @@ set(sky_SRC
     src/oskar_equation_of_equinoxes_fast.c
     src/oskar_evaluate_jones_R.cu
     src/oskar_ha_dec_to_hor_lmn.c
+    src/oskar_mjd_to_gast_fast.c
     src/oskar_mjd_to_gmst.c
-    src/oskar_mjd_to_last_fast.c
-    src/oskar_mjd_to_lmst.c
+    src/oskar_mjd_to_last_fast.c # Deprecated.
+    src/oskar_mjd_to_lmst.c # Deprecated.
     src/oskar_ra_dec_to_hor_lmn.c
 
     src/oskar_sky_model_append.cpp

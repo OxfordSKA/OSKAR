@@ -32,8 +32,7 @@
 extern "C" {
 #endif
 
-/* Double precision. */
-double oskar_date_time_to_mjd_d(int year, int month, int day,
+double oskar_date_time_to_mjd(int year, int month, int day,
         double day_fraction)
 {
     int a, y, m, jdn;
@@ -45,7 +44,7 @@ double oskar_date_time_to_mjd_d(int year, int month, int day,
     jdn = day + (153 * m + 2) / 5 + (365 * y) + (y / 4) - (y / 100)
             + (y / 400) - 32045;
 
-    /* Compute day fraction (floating-point division). */
+    /* Compute day fraction. */
     day_fraction -= 0.5;
     return jdn + day_fraction - 2400000.5;
 }

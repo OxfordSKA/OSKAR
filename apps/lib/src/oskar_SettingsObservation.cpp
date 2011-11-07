@@ -52,9 +52,10 @@ void oskar_SettingsObservation::load(const QSettings& settings)
     _start_time_utc_minute = settings.value("observation/start_time_utc_minute").toUInt();
     _start_time_utc_second = settings.value("observation/start_time_utc_second").toDouble();
 
-    double day_fraction = (_start_time_utc_hour + _start_time_utc_minute/60
-            + _start_time_utc_second/3600) / 24.0;
-    _start_time_utc_mjd = oskar_date_time_to_mjd_d(_start_time_utc_year,
+    double day_fraction = (_start_time_utc_hour +
+            (_start_time_utc_minute / 60.0) +
+            (_start_time_utc_second / 3600.0)) / 24.0;
+    _start_time_utc_mjd = oskar_date_time_to_mjd(_start_time_utc_year,
             _start_time_utc_month, _start_time_utc_day,
             day_fraction);
 
