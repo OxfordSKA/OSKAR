@@ -44,43 +44,96 @@ extern "C" {
  * Checks if the OSKAR memory pointer data element is double precision.
  *
  * @details
- * Returns 1 (true) if the memory element is double precision else 0 (false).
+ * Returns 1 (true) if the memory element is double precision, else 0 (false).
  *
- * @param[in] mem_type Type of oskar_Mem structure
+ * @param[in] mem_type Type of oskar_Mem structure.
  *
  * @return 1 if double, 0 if single.
  */
 inline int oskar_mem_is_double(const int mem_type)
-{ return ((mem_type & 2) == 0); }
+{
+	return ((mem_type & 2) == 0);
+}
 
+/**
+ * @brief
+ * Checks if the OSKAR memory pointer data element is single precision.
+ *
+ * @details
+ * Returns 1 (true) if the memory element is single precision, else 0 (false).
+ *
+ * @param[in] mem_type Type of oskar_Mem structure.
+ *
+ * @return 1 if single, 0 if double.
+ */
+inline int oskar_mem_is_single(const int mem_type)
+{
+	return ((mem_type & 2) == 2);
+}
 
 /**
  * @brief
  * Checks if the OSKAR memory pointer data element is complex.
  *
  * @details
- * Returns 1 (true) if the memory element is complex else 0 (false).
+ * Returns 1 (true) if the memory element is complex, else 0 (false).
  *
- * @param[in] mem_type Type of oskar_Mem structure
+ * @param[in] mem_type Type of oskar_Mem structure.
  *
  * @return 1 if complex, 0 if real.
  */
 inline int oskar_mem_is_complex(const int mem_type)
-{ return ((mem_type & 0x00C0) == 0x00C0); }
+{
+	return ((mem_type & 0x00C0) == 0x00C0);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR memory pointer data element is real.
+ *
+ * @details
+ * Returns 1 (true) if the memory element is real, else 0 (false).
+ *
+ * @param[in] mem_type Type of oskar_Mem structure.
+ *
+ * @return 1 if real, 0 if complex.
+ */
+inline int oskar_mem_is_real(const int mem_type)
+{
+	return ((mem_type & 0x00C0) == 0);
+}
+
+/**
+ * @brief
+ * Checks if the OSKAR memory pointer data element is matrix.
+ *
+ * @details
+ * Returns 1 (true) if the memory element is matrix, else 0 (false).
+ *
+ * @param[in] mem_type Type of oskar_Mem structure.
+ *
+ * @return 1 if matrix, 0 if scalar.
+ */
+inline int oskar_mem_is_matrix(const int mem_type)
+{
+	return ((mem_type & 0x0400) == 0x0400);
+}
 
 /**
  * @brief
  * Checks if the OSKAR memory pointer data element is scalar.
  *
  * @details
- * Returns 1 (true) if the memory element is scalar else 0 (false).
+ * Returns 1 (true) if the memory element is scalar, else 0 (false).
  *
- * @param[in] mem_type Type of oskar_Mem structure
+ * @param[in] mem_type Type of oskar_Mem structure.
  *
  * @return 1 if scalar, 0 if matrix.
  */
 inline int oskar_mem_is_scalar(const int mem_type)
-{ return ((mem_type & 0x0400) == 0); }
+{
+	return ((mem_type & 0x0400) == 0);
+}
 
 #ifdef __cplusplus
 }

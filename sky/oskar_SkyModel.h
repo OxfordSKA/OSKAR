@@ -44,8 +44,7 @@
  *
  * @details
  * The structure holds source parameters for the global sky model used by the
- * OSKAR simulator along with a number of work buffers used by various processing
- * modules.
+ * OSKAR simulator.
  */
 #ifdef __cplusplus
 extern "C"
@@ -59,10 +58,8 @@ struct oskar_SkyModel
     oskar_Mem Q;              /**< Stokes-Q, in Jy. */
     oskar_Mem U;              /**< Stokes-U, in Jy. */
     oskar_Mem V;              /**< Stokes-V, in Jy. */
-    oskar_Mem reference_freq; /**< Reference frequency for the spectral index, in Hz. */
+    oskar_Mem reference_freq; /**< Reference frequency for the source flux, in Hz. */
     oskar_Mem spectral_index; /**< Spectral index. */
-
-    /* Work buffers. */
     oskar_Mem rel_l;          /**< Phase centre relative direction-cosines. */
     oskar_Mem rel_m;          /**< Phase centre relative direction-cosines. */
     oskar_Mem rel_n;          /**< Phase centre relative direction-cosines. */
@@ -152,12 +149,12 @@ struct oskar_SkyModel
     int resize(int num_sources);
 
     /**
-     * @brief Sets the source parameters for the source at the specified
+     * @brief Sets the parameters for the source at the specified
      * index in the sky model.
      *
      * @param index             Source index.
      * @param ra                Right ascension, in radians.
-     * @param dec               Delination, in radians.
+     * @param dec               Declination, in radians.
      * @param I                 Stokes-I, in Jy.
      * @param Q                 Stokes-Q, in Jy.
      * @param U                 Stokes-U, in Jy.

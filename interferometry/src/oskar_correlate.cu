@@ -27,11 +27,113 @@
  */
 
 #include "interferometry/oskar_correlate.h"
+#include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
+#include "interferometry/cudak/oskar_cudak_correlator.h"
 
 extern "C"
 int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
         const oskar_Mem* u, const oskar_Mem* v)
 {
-    return -1;
+	// Type flags.
+	bool single_precision = false, double_precision = false;
+
+	// Check data location.
+	if (vis->amplitude.location() != OSKAR_LOCATION_GPU ||
+			J->location() != OSKAR_LOCATION_GPU ||
+			sky->location() != OSKAR_LOCATION_GPU ||
+			u->location() != OSKAR_LOCATION_GPU ||
+			v->location() != OSKAR_LOCATION_GPU)
+		return OSKAR_ERR_BAD_LOCATION;
+
+	// Check if single precision.
+	single_precision = (vis->amplitude.is_single() && J->ptr.is_single() &&
+			sky->I.is_single() && sky->Q.is_single() && sky->U.is_single() &&
+			sky->V.is_single() && sky->rel_l.is_single() &&
+			sky->rel_m.is_single() && u->is_single() && v->is_single());
+
+	// If not single precision, check if double precision.
+	if (!single_precision)
+		double_precision = (vis->amplitude.is_double() && J->ptr.is_double() &&
+				sky->I.is_double() && sky->Q.is_double() &&
+				sky->U.is_double() && sky->V.is_double() &&
+				sky->rel_l.is_double() && sky->rel_m.is_double() &&
+				u->is_double() && v->is_double());
+
+	// If neither single or double precision, return error.
+	if (!single_precision && !double_precision)
+		return OSKAR_ERR_BAD_DATA_TYPE;
+
+	// Check the input dimensions.
+	int n_stations = telescope->num_stations;
+	int n_sources = sky->num_sources;
+	if (J->n_sources() != n_sources || u->n_elements() != n_stations ||
+			v->n_elements() != n_stations)
+		return OSKAR_ERR_DIMENSION_MISMATCH;
+
+	// Check there is enough space for the result.
+	if (vis->amplitude.n_elements() < n_stations * (n_stations - 1) / 2)
+		return OSKAR_ERR_DIMENSION_MISMATCH;
+
+	// Get bandwidth-smearing term.
+	double lambda_bandwidth = 0.0; // FIXME compute from telescope structure.
+
+	// Check type of Jones matrix.
+	if (J->ptr.is_matrix())
+	{
+		// Call the kernel for full polarisation.
+		if (double_precision)
+		{
+			dim3 num_threads(192, 1); // Antennas, antennas.
+			dim3 num_blocks(n_stations, n_stations);
+			size_t shared_mem = num_threads.x * sizeof(double4c);
+
+			oskar_cudak_correlator_d
+			OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+			(n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U, sky->V,
+					*u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth,
+					vis->amplitude);
+		}
+		else
+		{
+			dim3 num_threads(256, 1); // Antennas, antennas.
+			dim3 num_blocks(n_stations, n_stations);
+			size_t shared_mem = num_threads.x * sizeof(float4c);
+
+			oskar_cudak_correlator_f
+			OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+			(n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U, sky->V,
+					*u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth,
+					vis->amplitude);
+		}
+	}
+	else
+	{
+		// Call the kernel for scalar simulation.
+		if (double_precision)
+		{
+			dim3 num_threads(256, 1); // Antennas, antennas.
+			dim3 num_blocks(n_stations, n_stations);
+			size_t shared_mem = num_threads.x * sizeof(double2);
+
+			oskar_cudak_correlator_scalar_d
+			OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+			(n_sources, n_stations, J->ptr, sky->I, *u, *v, sky->rel_l,
+					sky->rel_m, lambda_bandwidth, vis->amplitude);
+		}
+		else
+		{
+			dim3 num_threads(256, 1); // Antennas, antennas.
+			dim3 num_blocks(n_stations, n_stations);
+			size_t shared_mem = num_threads.x * sizeof(float2);
+
+			oskar_cudak_correlator_scalar_f
+			OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
+			(n_sources, n_stations, J->ptr, sky->I, *u, *v, sky->rel_l,
+					sky->rel_m, lambda_bandwidth, vis->amplitude);
+		}
+	}
+
+	cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
 }

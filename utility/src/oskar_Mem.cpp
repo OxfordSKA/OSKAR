@@ -100,7 +100,7 @@ bool oskar_Mem::is_double() const
 
 bool oskar_Mem::is_single() const
 {
-    return !oskar_mem_is_double(this->type());
+    return oskar_mem_is_single(this->type());
 }
 
 bool oskar_Mem::is_complex() const
@@ -110,7 +110,7 @@ bool oskar_Mem::is_complex() const
 
 bool oskar_Mem::is_real() const
 {
-    return !oskar_mem_is_complex(this->type());
+    return oskar_mem_is_real(this->type());
 }
 
 bool oskar_Mem::is_scalar() const
@@ -120,7 +120,7 @@ bool oskar_Mem::is_scalar() const
 
 bool oskar_Mem::is_matrix() const
 {
-    return !oskar_mem_is_scalar(this->type());
+    return oskar_mem_is_matrix(this->type());
 }
 
 // static method
