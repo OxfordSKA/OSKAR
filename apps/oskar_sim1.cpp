@@ -75,16 +75,18 @@ int main(int argc, char** argv)
     // Initialise blocks of Jones matrices and visibilities.
     int n_stat = telescope_gpu->num_stations;
     int n_src = sky_gpu->num_sources;
-    oskar_Jones R(type | OSKAR_COMPLEX | OSKAR_MATRIX,
-            OSKAR_LOCATION_GPU, n_stat, n_src);
-    oskar_Jones E(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU, n_stat, n_src);
-    oskar_Jones K(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU, n_stat, n_src);
+    int complex_scalar = type | OSKAR_COMPLEX;
+    int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
+    oskar_Jones J(complex_matrix, OSKAR_LOCATION_GPU, n_stat, n_src);
+    oskar_Jones R(complex_matrix, OSKAR_LOCATION_GPU, n_stat, n_src);
+    oskar_Jones E(complex_scalar, OSKAR_LOCATION_GPU, n_stat, n_src);
+    oskar_Jones K(complex_scalar, OSKAR_LOCATION_GPU, n_stat, n_src);
     oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stat, true);
     oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stat, true);
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stat, true);
     oskar_Work work;
-    oskar_Visibilities vis(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
-    oskar_Visibilities vis_global(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
+    oskar_Visibilities vis(complex_scalar, OSKAR_LOCATION_GPU);
+    oskar_Visibilities vis_global(complex_scalar, OSKAR_LOCATION_CPU);
 
     // Calculate time increments.
     int num_vis_dumps        = settings.obs().num_vis_dumps();
@@ -144,12 +146,12 @@ int main(int argc, char** argv)
                 err = oskar_evaluate_jones_K(&K, sky_gpu, &u, &v, &w);
                 if (err) oskar_exit(err);
 
-                // Join Jones matrices (K = K * R).
-                err = oskar_jones_join(&K, &K, &R);
+                // Join Jones matrices (J = K * R).
+                err = oskar_jones_join(&J, &K, &R);
                 if (err) oskar_exit(err);
 
                 // Produce visibilities.
-                err = oskar_correlate(&vis, &K, telescope_gpu, sky_gpu, &u, &v);
+                err = oskar_correlate(&vis, &J, telescope_gpu, sky_gpu, &u, &v);
                 if (err) oskar_exit(err);
             }
         }

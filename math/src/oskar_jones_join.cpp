@@ -41,11 +41,11 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     if (j3 == NULL) j3 = j1;
 
     // Check that all pointers are not NULL.
-    if (j1 == NULL) return -1;
-    if (j2 == NULL) return -2;
-    if (j1->ptr.data == NULL) return -1;
-    if (j2->ptr.data == NULL) return -2;
-    if (j3->ptr.data == NULL) return -3;
+    if (j1 == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (j2 == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (j1->ptr.data == NULL) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (j2->ptr.data == NULL) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (j3->ptr.data == NULL) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Get the dimensions of the input data.
     int n_sources1 = j1->n_sources();
@@ -57,9 +57,9 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
 
     // Check the data dimensions.
     if (n_sources1 != n_sources2 || n_sources1 != n_sources3)
-        return -11;
+        return OSKAR_ERR_DIMENSION_MISMATCH;
     if (n_stations1 != n_stations2 || n_stations1 != n_stations3)
-        return -12;
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Figure out what we've been given.
     int type1 = j1->type();
@@ -74,23 +74,26 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     size_t size2 = oskar_mem_element_size(type2);
     size_t size3 = oskar_mem_element_size(type3);
     if (size3 < size2 || size3 < size1)
-        return -20;
+        return OSKAR_ERR_TYPE_MISMATCH;
 
     // Copy data to GPU if required.
     int n_elements = n_sources1 * n_stations1;
-    const oskar_Jones* hd1 = (location1 == 0) ? new oskar_Jones(j1, 1) : j1;
-    const oskar_Jones* hd2 = (location2 == 0) ? new oskar_Jones(j2, 1) : j2;
-    oskar_Jones* hd3 = (location3 == 0) ? new oskar_Jones(j3, 1) : j3;
+    const oskar_Jones* hd1 = (location1 == OSKAR_LOCATION_CPU) ?
+    		new oskar_Jones(j1, OSKAR_LOCATION_GPU) : j1;
+    const oskar_Jones* hd2 = (location2 == OSKAR_LOCATION_CPU) ?
+    		new oskar_Jones(j2, OSKAR_LOCATION_GPU) : j2;
+    oskar_Jones* hd3 = (location3 == OSKAR_LOCATION_CPU) ?
+    		new oskar_Jones(j3, OSKAR_LOCATION_GPU) : j3;
     const void* d1 = hd1->ptr.data;
     const void* d2 = hd2->ptr.data;
     void* d3 = hd3->ptr.data;
 
     // Check for errors.
     int err = cudaPeekAtLastError();
-    if (err != 0) goto stop;
+    if (err) goto stop;
 
     // Set error code to type mismatch by default.
-    err = -100;
+    err = OSKAR_ERR_TYPE_MISMATCH;
 
     // Multiply the matrices.
     if (type1 == OSKAR_SINGLE_COMPLEX)
@@ -174,11 +177,11 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
 
 stop:
     // Free GPU memory if input data was on the host.
-    if (location1 == 0) delete hd1;
-    if (location2 == 0) delete hd2;
+    if (location1 == OSKAR_LOCATION_CPU) delete hd1;
+    if (location2 == OSKAR_LOCATION_CPU) delete hd2;
 
     // Copy result back to host memory if required.
-    if (location3 == 0)
+    if (location3 == OSKAR_LOCATION_CPU)
     {
         if (err == 0)
             err = hd3->copy_to(j3);
