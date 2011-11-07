@@ -45,20 +45,44 @@ extern "C" {
 
 
 /**
- * @brief Evaluates the E-Jones matrices for the specified station
- * for all source directions.
+ * @brief Evaluates the value of a station beam at a number of discrete
+ * positions for the given station and beam direction. This is equivalent
+ * to the Jones-E matrices for a given station.
  *
- * @param E       oskar_Mem pointer to the the E-Jones matrices for a given
- *                station.
- * @param station Station structure.
+ * @details
+ * The station beam values are evaluated using a DFT on the GPU and as such
+ * all memory, passed to and return from this function, must be allocated
+ * in device memory prior to calling this function.
+ *
+ * The detailed description of processing performed by this function will
+ * depend on the presence of element pattern and hierarchical layout information
+ * within the station structure.
+ *
+ * Note:
+ * - Station x,y,z coorinates used by this function are assumed to be in
+ * wavenumber units.
+ * - The \p work_weights buffer must be allocated on the GPU of complex type
+ * matching the same floating point precision as the rest of the memory
+ * passed to the function.
+ *
+ *
+ * @param[out] beam         Array of station complex beam amplitudes returned.
+ * @param[in]  station      Station model structure.
+ * @param[in]  hor_l_beam   Beam phase centre horizontal l, in radians.
+ * @param[in]  hor_m_beam   Beam phase centre horizontal m, in radians.
+ * @param[in]  hor_l        Array of horizontal l directions for which the beam
+ *                          should be evaluated, in radians.
+ * @param[in]  hor_m        Array of horizontal m directions for which the beam
+ *                          should be evaluated, in radians.
+ * @param[in]  work_weights Work buffer used to hold DFT weights.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
-        const double hor_l_beam, const double hor_m_beam,
-        const oskar_Mem* hor_l_source, const oskar_Mem* hor_m_source,
-        oskar_Mem* weights_work);
+int oskar_evaluate_station_beam(oskar_Mem* beam,
+        const oskar_StationModel* station, const double hor_l_beam,
+        const double hor_m_beam, const oskar_Mem* hor_l,
+        const oskar_Mem* hor_m, oskar_Mem* weights_work);
 
 
 

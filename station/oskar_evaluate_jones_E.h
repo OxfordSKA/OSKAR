@@ -40,15 +40,19 @@
 #include "utility/oskar_Work.h"
 
 /**
- * @brief Evaluates a set of E Jones matrices.
+ * @brief Evaluates a set of E-Jones matrices for a number of stations
+ * and source directions.
  *
  * @details
+ * Note: Processing in this function is performed on the GPU and therefore
+ * the memory passed to and from this function must be allocated on the
+ * GPU.
  *
  * @param[out] E         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
- * @param[in] work       oskar_Mem structure to holding work arrays.
+ * @param[in]  sky        Input sky model.
+ * @param[in]  telescope  Input telescope model.
+ * @param[in]  gast       The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  work       oskar_Mem structure to holding work arrays.
  */
 #ifdef __cplusplus
 extern "C"

@@ -44,25 +44,35 @@
 extern "C" {
 #endif
 
-int oskar_evalate_station_beam_scalar(oskar_Mem* E,
+int oskar_evalate_station_beam_scalar(oskar_Mem* beam,
         const oskar_StationModel* station, const double l_beam,
-        const double m_beam, const oskar_Mem* l_source,
-        const oskar_Mem* m_source, oskar_Mem* weights)
+        const double m_beam, const oskar_Mem* l, const oskar_Mem* m,
+        oskar_Mem* weights)
 {
-    if (E == NULL || station == NULL || m_source == NULL || l_source == NULL ||
-            weights == NULL)
+    if (beam == NULL || station == NULL || m == NULL ||
+            l == NULL || weights == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    if (station->coord_units != OSKAR_WAVENUMBERS)
+        return OSKAR_ERR_BAD_UNITS;
+
+    // Resize the weights work array if needed.
+    if (weights->n_elements() != station->n_elements)
+    {
+        int error = weights->resize(station->n_elements);
+        if (error) return error;
+    }
+
     int num_antennas = station->n_elements;
-    size_t element_size = oskar_mem_element_size(E->type());
-    int num_sources = l_source->n_elements();
+    size_t element_size = oskar_mem_element_size(beam->type());
+    int num_sources = l->n_elements();
 
     // Double precision.
-    if (E->type() == OSKAR_DOUBLE_COMPLEX &&
+    if (beam->type() == OSKAR_DOUBLE_COMPLEX &&
             station->coord_type() == OSKAR_DOUBLE &&
             weights->type() == OSKAR_DOUBLE_COMPLEX &&
-            l_source->type() == OSKAR_DOUBLE &&
-            m_source->type() == OSKAR_DOUBLE)
+            l->type() == OSKAR_DOUBLE &&
+            m->type() == OSKAR_DOUBLE)
     {
         // DFT weights.
         int num_threads = 256;
@@ -78,16 +88,16 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* E,
         oskar_cudak_dftw_o2c_2d_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
                 (num_antennas, station->x, station->y,
-                *weights, num_sources, *l_source, *m_source, antennas_per_chunk, *E);
+                *weights, num_sources, *l, *m, antennas_per_chunk, *beam);
     }
 
 
     // Single precision.
-    else if (E->type() == OSKAR_SINGLE_COMPLEX &&
+    else if (beam->type() == OSKAR_SINGLE_COMPLEX &&
             station->coord_type() == OSKAR_SINGLE &&
             weights->type() == OSKAR_SINGLE_COMPLEX &&
-            l_source->type() == OSKAR_SINGLE &&
-            m_source->type() == OSKAR_SINGLE)
+            l->type() == OSKAR_SINGLE &&
+            m->type() == OSKAR_SINGLE)
     {
         // DFT weights.
         int num_threads = 256;
@@ -103,7 +113,7 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* E,
         oskar_cudak_dftw_o2c_2d_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
             (num_antennas, station->x, station->y, *weights,
-                    num_sources, *l_source, *m_source, antennas_per_chunk, *E);
+                    num_sources, *l, *m, antennas_per_chunk, *beam);
     }
     else
     {

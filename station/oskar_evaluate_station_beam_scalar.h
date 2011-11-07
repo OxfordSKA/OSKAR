@@ -42,17 +42,39 @@ extern "C" {
 #endif
 
 /**
+ * @brief Evaluates the value of a station beam at a number of discrete
+ * positions for the given station and beam direction. This is equivalent
+ * to the Array Factor or scalar Jones-E.
  *
- * @param E
- * @param station
- * @param work
- * @return
+ * @details
+ * The station beam amplitudes are evaluated using a DFT on the GPU and as such
+ * all memory, passed to and return from this function, must be allocated
+ * in device memory prior to calling this function.
+ *
+ * Note:
+ * - Station x,y,z coorinates used by this function are assumed to be in
+ * wavenumber units.
+ * - The \p work_weights buffer must be allocated on the GPU of complex type
+ * matching the same floating point precision as the rest of the memory
+ * passed to the function.
+ *
+ * @param[out] beam         Array of station complex beam amplitudes returned.
+ * @param[in]  station      Station model structure.
+ * @param[in]  hor_l_beam   Beam phase centre horizontal l, in radians.
+ * @param[in]  hor_m_beam   Beam phase centre horizontal m, in radians.
+ * @param[in]  hor_l        Array of horizontal l directions for which the beam
+ *                          should be evaluated, in radians.
+ * @param[in]  hor_m        Array of horizontal m directions for which the beam
+ *                          should be evaluated, in radians.
+ * @param[in]  work_weights Work buffer used to hold DFT weights.
+ *
+ * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evalate_station_beam_scalar(oskar_Mem* E,
+int oskar_evalate_station_beam_scalar(oskar_Mem* beam,
         const oskar_StationModel* station, const double hor_l_beam,
-        const double hor_m_beam, const oskar_Mem* hor_l_source,
-        const oskar_Mem* hor_m_source, oskar_Mem* weights);
+        const double hor_m_beam, const oskar_Mem* hor_l, const oskar_Mem* hor_m,
+        oskar_Mem* work_weights);
 
 #ifdef __cplusplus
 }
