@@ -26,44 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/evaluate_jones_E_test.h"
 
-#include "math/oskar_Jones.h"
-#include "station/oskar_evaluate_jones_E.h"
-#include "utility/oskar_get_error_string.h"
+#ifndef OSKAR_WORK_INIT_H_
+#define OSKAR_WORK_INIT_H_
 
-#include <cmath>
-#include <cstdio>
+/**
+ * @file oskar_work_init.h
+ */
 
-void Evaluate_Jones_E_Test::test_fail_conditions()
-{
+#include "oskar_global.h"
+#include "utility/oskar_Work.h"
 
-    // Create some input data.
-    int num_stations = 2;
-    int num_sources  = 3;
-    oskar_TelescopeModel telescope(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
-    oskar_SkyModel sky(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
-    oskar_Jones E(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, num_stations,
-            num_sources);
-    double gast = 0.0;
-    oskar_WorkE work;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    int error = oskar_evaluate_jones_E(&E, &sky, &telescope, gast, &work);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+/**
+ * @brief Initialises an oskar_Work structure.
+ *
+ * @param[in/out] work      oskar_Work structure pointer to be initialised.
+ * @param[in]     type      OSKAR memory type ID.
+ * @param[in]     location  OSKAR memory location ID.
+ * @return An error code.
+ */
+int oskar_work_init(oskar_Work* work, const int type, const int location);
+
+#ifdef __cplusplus
 }
+#endif
 
-
-void Evaluate_Jones_E_Test::evalute_test_pattern()
-{
-}
-
-
-void Evaluate_Jones_E_Test::performance_test()
-{
-}
-
-
-
-
-
-
+#endif /* OSKAR_WORK_INIT_H_ */

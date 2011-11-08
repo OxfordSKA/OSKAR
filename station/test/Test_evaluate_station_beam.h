@@ -27,11 +27,11 @@
  */
 
 
-#ifndef EVALUATE_STATION_BEAM_TEST_H_
-#define EVALUATE_STATION_BEAM_TEST_H_
+#ifndef TEST_EVALUATE_STATION_BEAM_H_
+#define TEST_EVALUATE_STATION_BEAM_H_
 
 /**
- * @file evalute_station_beam_test.h
+ * @file Test_evalute_station_beam.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -43,10 +43,10 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class Evaluate_Station_Beam_Test : public CppUnit::TestFixture
+class Test_evaluate_station_beam : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(Evaluate_Station_Beam_Test);
+        CPPUNIT_TEST_SUITE(Test_evaluate_station_beam);
         CPPUNIT_TEST(test_fail_conditions);
         CPPUNIT_TEST(evalute_test_pattern);
         CPPUNIT_TEST(performance_test);
@@ -59,6 +59,6 @@ class Evaluate_Station_Beam_Test : public CppUnit::TestFixture
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Evaluate_Station_Beam_Test);
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_evaluate_station_beam);
 
-#endif // EVALUATE_STATION_BEAM_TEST_H_
+#endif // TEST_EVALUATE_STATION_BEAM_H_

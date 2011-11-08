@@ -27,6 +27,7 @@
  */
 
 #include "oskar_global.h"
+#include <cuda_runtime_api.h>
 
 #include "station/oskar_evaluate_jones_E.h"
 
@@ -43,6 +44,7 @@
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_Work.h"
+#include <cstdio>
 
 #ifdef __cplusplus
 extern "C"
@@ -51,6 +53,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, const double gast,
         oskar_Work* work)
 {
+    int error = 0;
+
     // Consistency and validation checks on input arguments.
     if (E == NULL || sky == NULL || telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -61,19 +65,31 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
     if (telescope->station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (work->real.type() != OSKAR_DOUBLE || work->real.type() != OSKAR_SINGLE)
+    if (work->real.type() != OSKAR_DOUBLE && work->real.type() != OSKAR_SINGLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
+
+    if (E->location() != OSKAR_LOCATION_GPU)
+        return OSKAR_ERR_BAD_LOCATION;
+
+    // Resize the work buffer if needed.
+    if (work->real.n_elements() < 3 * sky->num_sources)
+    {
+        error = work->real.resize(3 * sky->num_sources);
+        if (error) return error;
+    }
 
     // Get pointers to work arrays.
     oskar_Mem* weights = &work->complex;
     double beam_l, beam_m, beam_n;
     oskar_Mem hor_l, hor_m, hor_n;
-    oskar_mem_get_pointer(&hor_l, &work->real, 0, sky->num_sources);
-    oskar_mem_get_pointer(&hor_m, &work->real, sky->num_sources, sky->num_sources);
-    oskar_mem_get_pointer(&hor_n, &work->real, 2 * sky->num_sources, sky->num_sources);
-
-    if (work->real.n_elements() > 3 * sky->num_sources)
-        work->real.resize(3 * sky->num_sources);
+    error = oskar_mem_get_pointer(&hor_l, &work->real, 0, sky->num_sources);
+    if (error) return error;
+    error = oskar_mem_get_pointer(&hor_m, &work->real, sky->num_sources,
+            sky->num_sources);
+    if (error) return error;
+    error = oskar_mem_get_pointer(&hor_n, &work->real, 2 * sky->num_sources,
+            sky->num_sources);
+    if (error) return error;
 
     // Evaluate the station beam for each station for each source position.
     if (telescope->identical_stations && telescope->use_common_sky)
@@ -85,19 +101,30 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
 
         // Evaluate the horizontal l,m,m coordinates of the beam phase centre
         // and sources.
-        oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n, station0,
+        error = oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n, station0,
                 gast);
-        oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n, sky,
+        if (error) return error;
+        error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n, sky,
                 station0, gast);
+        if (error) return error;
 
         // Evaluate the station beam.
         oskar_Mem E0; // Pointer to the row of E for station 0.
-        oskar_jones_get_station_pointer(&E0, E, 0);
-        oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, &hor_l,
+        error = oskar_jones_get_station_pointer(&E0, E, 0);
+        if (error) return error;
+        error = oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, &hor_l,
                 &hor_m, weights);
+        if (error) return error;
 
-        // TODO copy E0 into other stations E Jones.
-
+        // Copy E for station 0 into memory for other stations.
+        oskar_Mem E_station;
+        size_t mem_size = E->n_sources() * oskar_mem_element_size(E->type());
+        for (int i = 1; i < telescope->num_stations; ++i)
+        {
+            error = oskar_jones_get_station_pointer(&E_station, E, i);
+            if (error) return error;
+            cudaMemcpy(E_station.data, E0.data, mem_size, cudaMemcpyDeviceToDevice);
+        }
         // TODO zero sources below horizon.
     }
     else
@@ -107,19 +134,23 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             // Evaluate horizontal l,m,n once and use it for evaluating
             // the station beam for each station.
             oskar_StationModel* station0 = &telescope->station[0];
-            oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n,
+            error = oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n,
                     station0, gast);
-            oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n, sky,
+            if (error) return error;
+            error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n, sky,
                     station0, gast);
+            if (error) return error;
 
             // loop over stations to evaluate E.
             oskar_Mem E_station;
             for (int i = 0; i < telescope->num_stations; ++i)
             {
                 oskar_StationModel* station = &telescope->station[i];
-                oskar_jones_get_station_pointer(&E_station, E, i);
-                oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
-                        &hor_l, &hor_m, weights);
+                error = oskar_jones_get_station_pointer(&E_station, E, i);
+                if (error) return error;
+                error = oskar_evaluate_station_beam(&E_station, station, beam_l,
+                        beam_m, &hor_l, &hor_m, weights);
+                if (error) return error;
             }
             // TODO zero sources below horizon.
         }
@@ -131,13 +162,17 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             for (int i = 0; i < telescope->num_stations; ++i)
             {
                 oskar_StationModel* station = &telescope->station[i];
-                oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n,
+                error = oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n,
                         station, gast);
-                oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n,
+                if (error) return error;
+                error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n,
                         sky, station, gast);
-                oskar_jones_get_station_pointer(&E_station, E, i);
-                oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
+                if (error) return error;
+                error = oskar_jones_get_station_pointer(&E_station, E, i);
+                if (error) return error;
+                error = oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
                         &hor_l, &hor_m, weights);
+                if (error) return error;
                 // TODO zero sources below horizon.
             }
         }

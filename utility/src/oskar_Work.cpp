@@ -27,38 +27,30 @@
  */
 
 
-#ifndef EVALUATE_JONES_E_TEST_H_
-#define EVALUATE_JONES_E_TEST_H_
+#include "utility/oskar_Work.h"
+#include "utility/oskar_work_init.h"
 
-/**
- * @file evalute_jones_E_test.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Evaluate_Jones_E_Test : public CppUnit::TestFixture
+oskar_Work::oskar_Work(int type, int location)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Evaluate_Jones_E_Test);
-        CPPUNIT_TEST(test_fail_conditions);
-        CPPUNIT_TEST(evalute_test_pattern);
-        CPPUNIT_TEST(performance_test);
-        CPPUNIT_TEST_SUITE_END();
+    int error = oskar_work_init(this, type, location);
+    if (error) throw "Error in oskar_work_init";
+}
 
-    public:
-        void test_fail_conditions();
-        void evalute_test_pattern();
-        void performance_test();
-};
+oskar_Work::oskar_Work(const oskar_Work* other, int location, int owner)
+: real(&other->real, location, owner),
+  complex(&other->complex, location, owner),
+  matrix(&other->matrix, location, owner)
+{
+}
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Evaluate_Jones_E_Test);
+oskar_Work::~oskar_Work()
+{
+}
 
-#endif // EVALUATE_JONES_E_TEST_H_
+#ifdef __cplusplus
+}
+#endif

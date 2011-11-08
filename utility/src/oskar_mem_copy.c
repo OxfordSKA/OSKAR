@@ -29,6 +29,7 @@
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_get_pointer.h"
 
 #include <cuda_runtime_api.h>
 #include <string.h>
@@ -46,6 +47,11 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     if (src == NULL || dst == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    /* Disallow a pointer copy at a different location */
+    if (dst->private_location != src->private_location &&
+            dst->private_owner == OSKAR_FALSE)
+        return OSKAR_ERR_BAD_LOCATION;
+
     /* Get the meta-data. */
     n_elements_src = src->private_n_elements;
     n_elements_dst = dst->private_n_elements;
@@ -61,6 +67,14 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     /* Check the data types. */
     if (type_src != type_dst)
         return OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Make a copy of the pointer. */
+    if (dst->private_owner == OSKAR_FALSE)
+    {
+        error = oskar_mem_get_pointer(dst, src, 0, src->private_n_elements);
+        if (error) return error;
+        return 0;
+    }
 
     /* Check the data dimensions and resize if required. */
     if (n_elements_src > n_elements_dst)

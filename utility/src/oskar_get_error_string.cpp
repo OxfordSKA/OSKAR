@@ -76,10 +76,12 @@ const char* oskar_get_error_string(const int error)
         case OSKAR_ERR_VERSION_MISMATCH:
             return "incompatible OSKAR version";
             break;
+        case OSKAR_ERR_BAD_UNITS:
+            return "invalid units";
         default:
             break;
     };
-    return "unknown";
+    return "unknown error.";
 }
 
 

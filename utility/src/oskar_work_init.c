@@ -27,61 +27,39 @@
  */
 
 
-#ifndef OSKAR_WORK_H_
-#define OSKAR_WORK_H_
-
-/**
- * @file oskar_Work.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include "utility/oskar_work_init.h"
+#include "utility/oskar_mem_init.h"
+#include "stdlib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct oskar_Work;
-typedef struct oskar_Work oskar_Work;
-
-// These are all either double or single.
-struct oskar_Work
+int oskar_work_init(oskar_Work* work, const int type, const int location)
 {
-    oskar_Mem real;
-    oskar_Mem complex;
-    oskar_Mem matrix;
+    int error = 0;
 
-#ifdef __cplusplus
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] type     OSKAR memory type ID (Accepted values: OSKAR_SINGLE,
-     *                     OSKAR_DOUBLE).
-     * @param[in] location OSKAR memory location ID.
-     */
-    oskar_Work(int type, int location);
+    if (work == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /**
-     * @brief Constructs an oskar_Work structure as a copy of another oskar_Work
-     * structure.
-     *
-     * @param other     oskar_Work structure to copy.
-     * @param location  Memory location to copy to.
-     * @param owner     Bool flag specifying if the structure should
-     *                  take ownership of the memory.
-     */
-    oskar_Work(const oskar_Work* other, int location, int owner = 1);
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        return OSKAR_ERR_BAD_DATA_TYPE;
 
-    /**
-     * @brief Destructor.
-     */
-    ~oskar_Work();
-#endif
-};
+    if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
+        return OSKAR_ERR_BAD_LOCATION;
+
+    error = oskar_mem_init(&work->real, type, location, 0, 1);
+    if (error) return error;
+    error = oskar_mem_init(&work->complex, (type | OSKAR_COMPLEX), location, 0, 1);
+    if (error) return error;
+    error = oskar_mem_init(&work->matrix, (type | OSKAR_COMPLEX | OSKAR_MATRIX),
+            location, 0, 1);
+    if (error) return error;
+
+    return error;
+}
 
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_WORK_H_ */

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/evaluate_station_beam_test.h"
+#include "station/test/Test_evaluate_station_beam.h"
 
 #include "oskar_global.h"
 #include "station/oskar_evaluate_station_beam.h"
@@ -54,14 +54,11 @@ using namespace std;
 #define c_0 299792458.0
 #endif
 
-void Evaluate_Station_Beam_Test::test_fail_conditions()
+void Test_evaluate_station_beam::test_fail_conditions()
 {
-
-
 }
 
-
-void Evaluate_Station_Beam_Test::evalute_test_pattern()
+void Test_evaluate_station_beam::evalute_test_pattern()
 {
     int error = 0;
 
@@ -145,14 +142,13 @@ void Evaluate_Station_Beam_Test::evalute_test_pattern()
     fclose(file);
 
     /*--------------------------------------------------------------------------
-        data = dlmread('temp_test_beam_pattern.txt')
-        imagesc(reshape(data(:,3), 100, 100).^2)
-
+        data = dlmread('temp_test_beam_pattern.txt');
+        imagesc(log10(reshape(data(:,3), 401, 401).^2));
     --------------------------------------------------------------------------*/
 }
 
 
-void Evaluate_Station_Beam_Test::performance_test()
+void Test_evaluate_station_beam::performance_test()
 {
 }
 

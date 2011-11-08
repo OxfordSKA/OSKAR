@@ -10,8 +10,8 @@ if (CPPUNIT_FOUND)
         src/CppUnitMain.cu
         #src/BeamPatternTest.cpp
         src/ElementModelTest.cpp
-        #src/evaluate_jones_E_test.cpp
-        src/evaluate_station_beam_test.cpp
+        src/Test_evaluate_jones_E.cpp
+        src/Test_evaluate_station_beam.cpp
         src/StationModelTest.cpp
     )
 

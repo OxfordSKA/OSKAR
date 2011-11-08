@@ -116,8 +116,8 @@ enum {
  * Enumerator to define coordinate units used by OSKAR.
  */
 enum {
-    OSKAR_METRES,
-    OSKAR_WAVENUMBERS
+    OSKAR_METRES      = 0x6666,
+    OSKAR_WAVENUMBERS = 0x7777
 };
 
 

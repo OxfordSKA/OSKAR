@@ -21,6 +21,8 @@ set(utility_SRC
     src/oskar_mem_realloc.c
     src/oskar_Mem.cpp
     src/oskar_string_to_array.c
+    src/oskar_work_init.c
+    src/oskar_Work.cpp
 )
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 

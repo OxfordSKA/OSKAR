@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stat, true);
     oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stat, true);
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stat, true);
-    oskar_Work work;
+    oskar_Work work(type, OSKAR_LOCATION_GPU);
     oskar_Visibilities vis(complex_scalar, OSKAR_LOCATION_GPU);
     oskar_Visibilities vis_global(complex_scalar, OSKAR_LOCATION_CPU);
 

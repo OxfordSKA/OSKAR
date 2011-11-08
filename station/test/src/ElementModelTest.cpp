@@ -159,7 +159,7 @@ void ElementModelTest::test_method()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.593518683e-5, pattern.g_phi[29].y, 1e-6);
 
     // Remove the file.
-    printf("Antenna data loaded successfully.\n");
+//    printf("Antenna data loaded successfully.\n");
     remove(filename);
 
     // Free the memory.

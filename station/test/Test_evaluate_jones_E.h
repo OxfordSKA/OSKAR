@@ -27,61 +27,38 @@
  */
 
 
-#ifndef OSKAR_WORK_H_
-#define OSKAR_WORK_H_
+#ifndef TEST_EVALUATE_JONES_E_H_
+#define TEST_EVALUATE_JONES_E_H_
 
 /**
- * @file oskar_Work.h
+ * @file Test_evalute_jones_E.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct oskar_Work;
-typedef struct oskar_Work oskar_Work;
-
-// These are all either double or single.
-struct oskar_Work
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_evaluate_jones_E : public CppUnit::TestFixture
 {
-    oskar_Mem real;
-    oskar_Mem complex;
-    oskar_Mem matrix;
+    public:
+        CPPUNIT_TEST_SUITE(Test_evaluate_jones_E);
+        CPPUNIT_TEST(test_fail_conditions);
+        CPPUNIT_TEST(evaluate_e);
+        CPPUNIT_TEST(performance_test);
+        CPPUNIT_TEST_SUITE_END();
 
-#ifdef __cplusplus
-    /**
-     * @brief Constructor.
-     *
-     * @param[in] type     OSKAR memory type ID (Accepted values: OSKAR_SINGLE,
-     *                     OSKAR_DOUBLE).
-     * @param[in] location OSKAR memory location ID.
-     */
-    oskar_Work(int type, int location);
-
-    /**
-     * @brief Constructs an oskar_Work structure as a copy of another oskar_Work
-     * structure.
-     *
-     * @param other     oskar_Work structure to copy.
-     * @param location  Memory location to copy to.
-     * @param owner     Bool flag specifying if the structure should
-     *                  take ownership of the memory.
-     */
-    oskar_Work(const oskar_Work* other, int location, int owner = 1);
-
-    /**
-     * @brief Destructor.
-     */
-    ~oskar_Work();
-#endif
+    public:
+        void test_fail_conditions();
+        void evaluate_e();
+        void performance_test();
 };
 
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_evaluate_jones_E);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_WORK_H_ */
+#endif // TEST_EVALUATE_JONES_E_H_
