@@ -30,7 +30,7 @@
 #define OSKAR_VISIBILITIES_WRITE_H_
 
 /**
- * @file oskar_Visibilties_write.h
+ * @file oskar_visibilities_write.h
  */
 
 
@@ -56,6 +56,6 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis);
+int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis);
 
 #endif /* OSKAR_VISIBILITIES_WRITE_H_ */

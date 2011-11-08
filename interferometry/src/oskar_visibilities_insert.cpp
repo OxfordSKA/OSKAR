@@ -34,7 +34,7 @@
 #include <cstring>
 #include <cuda_runtime_api.h>
 
-int oskar_visibilties_insert(oskar_Visibilities* dst,
+int oskar_visibilities_insert(oskar_Visibilities* dst,
         const oskar_Visibilities* src, int time_index)
 {
     int error = 0;

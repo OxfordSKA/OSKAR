@@ -36,7 +36,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-oskar_Visibilities* oskar_visibilties_read(const char* filename)
+oskar_Visibilities* oskar_visibilities_read(const char* filename)
 {
     if (filename == NULL)
         return NULL;

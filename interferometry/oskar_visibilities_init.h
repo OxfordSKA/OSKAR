@@ -30,7 +30,7 @@
 #define OSKAR_VISIBILITIES_INIT_H_
 
 /**
- * @file oskar_visibilties_init.h
+ * @file oskar_visibilities_init.h
  */
 
 

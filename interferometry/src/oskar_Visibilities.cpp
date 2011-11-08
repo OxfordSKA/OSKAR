@@ -29,6 +29,7 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_append.h"
+#include "interferometry/oskar_visibilities_clear_contents.h"
 #include "interferometry/oskar_visibilities_init.h"
 #include "interferometry/oskar_visibilities_insert.h"
 #include "interferometry/oskar_visibilities_read.h"
@@ -73,26 +74,31 @@ int oskar_Visibilities::append(const oskar_Visibilities* other)
     return oskar_visibilties_append(this, other);
 }
 
+int oskar_Visibilities::clear_contents()
+{
+    return oskar_visibilities_clear_contents(this);
+}
+
 int oskar_Visibilities::insert(const oskar_Visibilities* other,
         const unsigned time_index)
 {
-    return oskar_visibilties_insert(this, other, time_index);
+    return oskar_visibilities_insert(this, other, time_index);
 }
 
 
 int oskar_Visibilities::write(const char* filename)
 {
-    return oskar_visibilties_write(filename, this);
+    return oskar_visibilities_write(filename, this);
 }
 
 oskar_Visibilities* oskar_Visibilities::read(const char* filename)
 {
-    return oskar_visibilties_read(filename);
+    return oskar_visibilities_read(filename);
 }
 
 int oskar_Visibilities::resize(int num_times, int num_baselines, int num_channels)
 {
-    return oskar_visibilties_resize(this, num_times, num_baselines, num_channels);
+    return oskar_visibilities_resize(this, num_times, num_baselines, num_channels);
 }
 
 int oskar_Visibilities::init(int amp_type, int location, int num_times,

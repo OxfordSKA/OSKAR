@@ -30,7 +30,7 @@
 #define OSKAR_VISIBILITIES_H_
 
 /**
- * @file oskar_Visibilties.h
+ * @file oskar_Visibilities.h
  */
 
 
@@ -139,6 +139,16 @@ struct oskar_Visibilities
      * @return An error code.
      */
     int append(const oskar_Visibilities* other);
+
+    /**
+     * @brief Clears contents of the visibility structure.
+     *
+     * @details
+     * Clears the memory contents of the visibility data.
+     *
+     * @return An error code.
+     */
+    int clear_contents();
 
     /**
      * @brief Inserts the specified visibility structure at the specified

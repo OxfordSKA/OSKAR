@@ -26,40 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_INSERT_H_
-#define OSKAR_VISIBILITIES_INSERT_H_
-
-/**
- * @file oskar_visibilities_insert.h
- */
-
-
 #include "oskar_global.h"
+#include "interferometry/oskar_visibilities_clear_contents.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_mem_clear_contents.h"
 
-
-/**
- * @brief Inserts the specified visibility structure at the specified
- * time index.
- *
- * @details
- * The structure being inserted must contain the same baseline
- * and channel dimensions are the structure being appended to.
- * To use this function the visibility structure being inserted must
- * be preallocated to sufficiently large dimensions that the time index
- * plus the number of times in the structure being inserted dosnt exceed
- * the number of times in the destination.
- *
- * @param
- * @param other Visibility structure to append.
- *
- * @return An error code.
- */
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-OSKAR_EXPORT
-int oskar_visibilities_insert(oskar_Visibilities* dst,
-        const oskar_Visibilities* src, int time_index);
 
-#endif /* OSKAR_VISIBILITIES_INSERT_H_ */
+int oskar_visibilities_clear_contents(oskar_Visibilities* vis)
+{
+    int err = 0;
+    err = oskar_mem_clear_contents(&vis->amplitude);
+    if (err) return err;
+    err = oskar_mem_clear_contents(&vis->baseline_u);
+    if (err) return err;
+    err = oskar_mem_clear_contents(&vis->baseline_v);
+    if (err) return err;
+    err = oskar_mem_clear_contents(&vis->baseline_w);
+    if (err) return err;
+    return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif

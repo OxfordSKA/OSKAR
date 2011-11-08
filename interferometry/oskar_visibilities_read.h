@@ -30,7 +30,7 @@
 #define OSKAR_VISIBILITIES_READ_H_
 
 /**
- * @file oskar_visibilties_read.h
+ * @file oskar_visibilities_read.h
  */
 
 #include "oskar_global.h"
@@ -50,6 +50,6 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-oskar_Visibilities* oskar_visibilties_read(const char* filename);
+oskar_Visibilities* oskar_visibilities_read(const char* filename);
 
 #endif /* OSKAR_VISIBILITIES_READ_H_ */

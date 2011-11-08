@@ -36,7 +36,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_visibilties_write(const char* filename, const oskar_Visibilities* vis)
+int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis)
 {
     if (filename == NULL || vis == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;

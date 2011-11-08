@@ -26,40 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_INSERT_H_
-#define OSKAR_VISIBILITIES_INSERT_H_
+#ifndef OSKAR_VISIBILITIES_CLEAR_CONTENTS_H_
+#define OSKAR_VISIBILITIES_CLEAR_CONTENTS_H_
 
 /**
- * @file oskar_visibilities_insert.h
+ * @file oskar_visibilities_clear_contents.h
  */
 
 
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Inserts the specified visibility structure at the specified
- * time index.
+ * @brief Clears the contents of memory in the structure.
  *
  * @details
- * The structure being inserted must contain the same baseline
- * and channel dimensions are the structure being appended to.
- * To use this function the visibility structure being inserted must
- * be preallocated to sufficiently large dimensions that the time index
- * plus the number of times in the structure being inserted dosnt exceed
- * the number of times in the destination.
+ * This function clears the contents of the memory in the structure.
  *
- * @param
- * @param other Visibility structure to append.
- *
- * @return An error code.
+ * @param vis  Pointer to the visibility data structure to clear.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
-int oskar_visibilities_insert(oskar_Visibilities* dst,
-        const oskar_Visibilities* src, int time_index);
+int oskar_visibilities_clear_contents(oskar_Visibilities* vis);
 
-#endif /* OSKAR_VISIBILITIES_INSERT_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_VISIBILITIES_CLEAR_CONTENTS_H_ */

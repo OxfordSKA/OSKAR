@@ -30,7 +30,7 @@
 #define OSKAR_VISIBILITIES_RESIZE_H_
 
 /**
- * @file oskar_Visibilties_resize.h
+ * @file oskar_visibilities_resize.h
  */
 
 
@@ -52,7 +52,7 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-int oskar_visibilties_resize(oskar_Visibilities* vis, int num_times,
+int oskar_visibilities_resize(oskar_Visibilities* vis, int num_times,
         int num_baselines, int num_channels);
 
 #endif /* OSKAR_VISIBILITIES_RESIZE_H_ */

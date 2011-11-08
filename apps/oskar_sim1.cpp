@@ -111,7 +111,7 @@ int main(int argc, char** argv)
         double t_vis_dump_start = obs_start_mjd_utc + (j * dt_vis);
 
         // Initialise visibilities for the dump to zero.
-//        vis.clear_contents();
+        vis.clear_contents();
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)

@@ -33,7 +33,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_visibilties_resize(oskar_Visibilities* vis, int num_times,
+int oskar_visibilities_resize(oskar_Visibilities* vis, int num_times,
         int num_baselines, int num_channels)
 {
     vis->num_times     = num_times;
