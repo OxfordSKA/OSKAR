@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MESHGRID_H_
-#define OSKAR_MESHGRID_H_
+#ifndef OSKAR_LM_TO_N_H_
+#define OSKAR_LM_TO_N_H_
 
 /**
- * @file oskar_meshgrid.h
+ * @file oskar_lm_to_n.h
  */
 
 #include "oskar_global.h"
@@ -40,47 +40,39 @@ extern "C" {
 #endif
 
 /**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (single precision).
+ * @brief
+ * Compute n-direction cosines from l and m (single precision).
  *
  * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
+ * This function computes the n-direction cosines from the l,m-positions,
+ * using the relation n = sqrt(1 - l*l - m*m) - 1.
  *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
+ * @param[in] n     The number of points.
+ * @param[out] p_l  The l-direction-cosines.
+ * @param[out] p_m  The m-direction-cosines.
+ * @param[out] p_n  The n-direction-cosines.
  */
 OSKAR_EXPORT
-void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
-        const double* y, const unsigned ny);
+void oskar_lm_to_n_f(int n, const float* p_l, const float* p_m, float* p_n);
 
 /**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (double precision).
+ * @brief
+ * Compute n-direction cosines from l and m (double precision).
  *
  * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
+ * This function computes the n-direction cosines from the l,m-positions,
+ * using the relation n = sqrt(1 - l*l - m*m) - 1.
  *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
+ * @param[in] n     The number of points.
+ * @param[out] p_l  The l-direction-cosines.
+ * @param[out] p_m  The m-direction-cosines.
+ * @param[out] p_n  The n-direction-cosines.
  */
 OSKAR_EXPORT
-void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
-        const float* y, const unsigned ny);
+void oskar_lm_to_n_d(int n, const double* p_l, const double* p_m, double* p_n);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MESHGRID_H_ */
+#endif /* OSKAR_LM_TO_N_H_ */

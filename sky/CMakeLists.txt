@@ -6,25 +6,28 @@ include_directories(${oskar-lib_SOURCE_DIR}/math)
 
 # Add the source files in this directory.
 set(sky_SRC
-    src/oskar_angles_from_lm.c
-    src/oskar_rotate_sources.cpp
+    src/oskar_angles_from_lm.c # Deprecated.
+    src/oskar_rotate_sources.cpp # Deprecated.
 
     src/oskar_filter_sources_by_flux.cpp
     src/oskar_filter_sources_by_radius.cpp
     src/oskar_generate_random_sources.cpp
-    src/oskar_cuda_horizon_clip.cu
-    src/oskar_cuda_ra_dec_to_az_el.cu
-    src/oskar_cuda_ra_dec_to_hor_lmn.cu
-    src/oskar_cuda_ra_dec_to_relative_lmn.cu
+    src/oskar_cuda_horizon_clip.cu # Deprecated.
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
     src/oskar_evaluate_jones_R.cu
+    src/oskar_ha_dec_to_az_el.c
     src/oskar_ha_dec_to_hor_lmn.c
+    src/oskar_lm_to_n.c
     src/oskar_mjd_to_gast_fast.c
     src/oskar_mjd_to_gmst.c
     src/oskar_mjd_to_last_fast.c # Deprecated.
     src/oskar_mjd_to_lmst.c # Deprecated.
+    src/oskar_ra_dec_to_az_el_cuda.cu
+    src/oskar_ra_dec_to_hor_lmn_cuda.cu
     src/oskar_ra_dec_to_hor_lmn.c
+    src/oskar_ra_dec_to_rel_lmn_cuda.cu
+    src/oskar_ra_dec_to_rel_lmn.c
 
     src/oskar_sky_model_append.cpp
     src/oskar_sky_model_compute_relative_lmn.cpp

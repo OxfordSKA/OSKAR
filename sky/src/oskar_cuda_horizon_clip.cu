@@ -27,8 +27,7 @@
  */
 
 #include "sky/oskar_cuda_horizon_clip.h"
-#include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
-#include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
+#include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
 
 #include <thrust/device_vector.h> // Must be included before thrust/copy.h
 #include <thrust/copy.h>
@@ -79,7 +78,7 @@ int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
     float* out_rel_n = hd_local->rel_n;
 
     // Determine horizontal l,m,n positions.
-    int rv = oskar_cuda_ra_dec_to_hor_lmn_f
+    int rv = oskar_ra_dec_to_hor_lmn_cuda_f
             (n_in, in_ra, in_dec, lst, lat, hor_l, hor_m, hor_n);
     if (rv) return rv;
 
@@ -200,7 +199,7 @@ int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
 
 
     // Determine horizontal l,m,n positions.
-    int rv = oskar_cuda_ra_dec_to_hor_lmn_d
+    int rv = oskar_ra_dec_to_hor_lmn_cuda_d
             (n_in, in_ra, in_dec, lst, lat, hor_l, hor_m, hor_n);
     if (rv) return rv;
 

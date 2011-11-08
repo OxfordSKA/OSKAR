@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MESHGRID_H_
-#define OSKAR_MESHGRID_H_
+#ifndef OSKAR_SPH_TO_LM_H_
+#define OSKAR_SPH_TO_LM_H_
 
 /**
- * @file oskar_meshgrid.h
+ * @file oskar_sph_to_lm.h
  */
 
 #include "oskar_global.h"
@@ -40,47 +40,51 @@ extern "C" {
 #endif
 
 /**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (single precision).
+ * @brief
+ * Project spherical coordinates (single precision).
  *
  * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
+ * Projects spherical coordinates at the specified tangent point using the
+ * orthographic tangent-plane projection.
  *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
+ * @param[in] np      Number of positions.
+ * @param[in] lamda   Longitude positions in radians.
+ * @param[in] phi     Latitude positions in radians.
+ * @param[in] lambd0  Centre longitude in radians.
+ * @param[in] cosPhi0 Cosine of central latitude.
+ * @param[in] sinPhi0 Sine of central latitude.
+ * @param[out] l      Projected l-positions.
+ * @param[out] m      Projected m-positions.
  */
 OSKAR_EXPORT
-void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
-        const double* y, const unsigned ny);
+void oskar_sph_to_lm_f(const int np, const float* lambda,
+        const float* phi, const float lambda0, const float cosPhi0,
+        const float sinPhi0, float* l, float* m);
 
 /**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (double precision).
+ * @brief
+ * Project spherical coordinates (double precision).
  *
  * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
+ * Projects spherical coordinates at the specified tangent point using the
+ * orthographic tangent-plane projection.
  *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
+ * @param[in] np      Number of positions.
+ * @param[in] lamda   Longitude positions in radians.
+ * @param[in] phi     Latitude positions in radians.
+ * @param[in] lambd0  Centre longitude in radians.
+ * @param[in] cosPhi0 Cosine of central latitude.
+ * @param[in] sinPhi0 Sine of central latitude.
+ * @param[out] l      Projected l-positions.
+ * @param[out] m      Projected m-positions.
  */
 OSKAR_EXPORT
-void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
-        const float* y, const unsigned ny);
+void oskar_sph_to_lm_d(const int np, const double* lambda,
+        const double* phi, const double lambda0, const double cosPhi0,
+        const double sinPhi0, double* l, double* m);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MESHGRID_H_ */
+#endif /* OSKAR_SPH_TO_LM_H_ */

@@ -70,7 +70,11 @@ int main(int argc, char** argv)
 
     // Get the sky model and telescope model.
     oskar_SkyModel* sky_gpu = oskar_set_up_sky(settings);
-    oskar_TelescopeModel* telescope_gpu = oskar_set_up_telescope(settings);
+    oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(settings);
+
+    // Copy telescope model to GPU.
+    oskar_TelescopeModel* telescope_gpu = new oskar_TelescopeModel(
+            telescope_cpu, OSKAR_LOCATION_GPU);
 
     // Initialise blocks of Jones matrices and visibilities.
     int n_stat = telescope_gpu->num_stations;
@@ -161,15 +165,18 @@ int main(int argc, char** argv)
 //        if (err) oskar_exit(err);
 
         // Add to global data.
-        vis_global.append(&vis);
+        err = vis_global.append(&vis);
+        if (err) oskar_exit(err);
     }
 
     // Write global visibilities to disk.
-    vis_global.write(settings.obs().oskar_vis_filename().toLatin1().data());
+    err = vis_global.write(settings.obs().oskar_vis_filename().toLatin1().data());
+    if (err) oskar_exit(err);
 
-    // Delete data structures on GPU.
+    // Delete data structures.
     delete sky_gpu;
     delete telescope_gpu;
+    delete telescope_cpu;
 
     return EXIT_SUCCESS;
 }
@@ -199,25 +206,21 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
 {
     // Load telescope model into CPU structure.
-    oskar_TelescopeModel *telescope_cpu, *telescope_gpu;
+    oskar_TelescopeModel *telescope;
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    telescope_cpu = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
-    int err = telescope_cpu->load_station_pos(
+    telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
+    int err = telescope->load_station_pos(
             settings.telescope_file().toLatin1().data(),
             settings.longitude_rad(), settings.latitude_rad(),
             settings.altitude_m());
     if (err) oskar_exit(err);
 
     // Load stations from directory.
-    err = oskar_load_stations(telescope_cpu->station,
-            &(telescope_cpu->identical_stations), telescope_cpu->num_stations,
+    err = oskar_load_stations(telescope->station,
+            &(telescope->identical_stations), telescope->num_stations,
             settings.station_dir().toLatin1().data());
     if (err) oskar_exit(err);
 
-    // Copy telescope model to GPU.
-    telescope_gpu = new oskar_TelescopeModel(telescope_cpu, OSKAR_LOCATION_GPU);
-    delete telescope_cpu; telescope_cpu = NULL;
-
     // Return the structure.
-    return telescope_gpu;
+    return telescope;
 }

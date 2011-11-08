@@ -41,6 +41,9 @@ extern "C" {
 #endif
 
 /**
+ * @deprecated
+ * DEPRECATED
+ *
  * @brief
  * Clips sources below the horizon (single precision).
  *
@@ -56,9 +59,12 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
-		float lst, float lat, oskar_SkyModelLocal_f* hd_local);
+        float lst, float lat, oskar_SkyModelLocal_f* hd_local);
 
 /**
+ * @deprecated
+ * DEPRECATED
+ *
  * @brief
  * Clips sources below the horizon (double precision).
  *
@@ -74,7 +80,7 @@ int oskar_cuda_horizon_clip_f(const oskar_SkyModelGlobal_f* hd_global,
  */
 OSKAR_EXPORT
 int oskar_cuda_horizon_clip_d(const oskar_SkyModelGlobal_d* hd_global,
-		double lst, double lat, oskar_SkyModelLocal_d* hd_local);
+        double lst, double lat, oskar_SkyModelLocal_d* hd_local);
 
 #ifdef __cplusplus
 }

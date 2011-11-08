@@ -33,7 +33,6 @@
 
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
-#include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
 
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"

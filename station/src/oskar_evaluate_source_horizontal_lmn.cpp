@@ -27,7 +27,7 @@
  */
 
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
+#include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,7 +73,7 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
     if (sky->type() == OSKAR_DOUBLE && l->type() == OSKAR_DOUBLE &&
             m->type() == OSKAR_DOUBLE && n->type() == OSKAR_DOUBLE)
     {
-        return oskar_cuda_ra_dec_to_hor_lmn_d(num_sources, sky->RA, sky->Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, sky->RA, sky->Dec,
                 last, station->latitude, *l, *m, *n);
     }
 
@@ -81,7 +81,7 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
     else if (sky->type() == OSKAR_SINGLE && l->type() == OSKAR_SINGLE &&
             m->type() == OSKAR_SINGLE && n->type() == OSKAR_SINGLE)
     {
-        return oskar_cuda_ra_dec_to_hor_lmn_f(num_sources, sky->RA, sky->Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, sky->RA, sky->Dec,
                 (float)last, (float)station->latitude, *l, *m, *n);
     }
     else

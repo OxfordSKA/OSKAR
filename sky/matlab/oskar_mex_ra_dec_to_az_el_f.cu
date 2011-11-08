@@ -1,6 +1,6 @@
 #include <mex.h>
 
-#include "sky/oskar_cuda_ra_dec_to_az_el.h"
+#include "sky/oskar_ra_dec_to_az_el_cuda.h"
 
 void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
         const mxArray ** input)

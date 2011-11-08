@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_RA_DEC_TO_HOR_LMN_H_
-#define OSKAR_CUDA_RA_DEC_TO_HOR_LMN_H_
+#ifndef OSKAR_HA_DEC_TO_AZ_EL_H_
+#define OSKAR_HA_DEC_TO_AZ_EL_H_
 
 /**
- * @file oskar_cuda_ra_dec_to_hor_lmn.h
+ * @file oskar_ha_dec_to_az_el.h
  */
 
 #include "oskar_global.h"
@@ -50,18 +50,16 @@ extern "C" {
  * Points where hor_n is negative are below the local horizon.
  *
  * @param[in] n      The number of sources in the sky model.
- * @param[in] ra     The input source Right Ascensions in radians.
+ * @param[in] ha     The input source Hour Angles in radians.
  * @param[in] dec    The input source Declinations in radians.
- * @param[in] lst    The current local sidereal time in radians.
  * @param[in] lat    The geographic latitude of the observer.
- * @param[out] hor_l The source l-direction-cosines in the horizontal system.
- * @param[out] hor_m The source m-direction-cosines in the horizontal system.
- * @param[out] hor_n The source n-direction-cosines in the horizontal system.
+ * @param[in]  work  Work array of length n.
+ * @param[out] az    The azimuths, in radians.
+ * @param[out] el    The elevations, in radians.
  */
 OSKAR_EXPORT
-int oskar_cuda_ra_dec_to_hor_lmn_f(int n, const float* ra,
-        const float* dec, float lst, float lat, float* hor_l, float* hor_m,
-        float* hor_n);
+int oskar_ha_dec_to_az_el_f(int n, const float* ha, const float* dec,
+        float lat, float* work, float* az, float* el);
 
 /**
  * @brief
@@ -74,21 +72,19 @@ int oskar_cuda_ra_dec_to_hor_lmn_f(int n, const float* ra,
  * Points where hor_n is negative are below the local horizon.
  *
  * @param[in] n      The number of sources in the sky model.
- * @param[in] ra     The input source Right Ascensions in radians.
+ * @param[in] ha     The input source Hour Angles in radians.
  * @param[in] dec    The input source Declinations in radians.
- * @param[in] lst    The current local sidereal time in radians.
  * @param[in] lat    The geographic latitude of the observer.
- * @param[out] hor_l The source l-direction-cosines in the horizontal system.
- * @param[out] hor_m The source m-direction-cosines in the horizontal system.
- * @param[out] hor_n The source n-direction-cosines in the horizontal system.
+ * @param[in]  work  Work array of length n.
+ * @param[out] az    The azimuths, in radians.
+ * @param[out] el    The elevations, in radians.
  */
 OSKAR_EXPORT
-int oskar_cuda_ra_dec_to_hor_lmn_d(int n, const double* ra,
-        const double* dec, double lst, double lat, double* hor_l, double* hor_m,
-        double* hor_n);
+int oskar_ha_dec_to_az_el_d(int n, const double* ha, const double* dec,
+        double lat, double* work, double* az, double* el);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CUDA_RA_DEC_TO_HOR_LMN_H_ */
+#endif /* OSKAR_HA_DEC_TO_AZ_EL_H_ */

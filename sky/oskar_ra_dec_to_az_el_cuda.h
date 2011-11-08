@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_RA_DEC_TO_AZ_EL_H_
-#define OSKAR_CUDA_RA_DEC_TO_AZ_EL_H_
+#ifndef OSKAR_RA_DEC_TO_AZ_EL_CUDA_H_
+#define OSKAR_RA_DEC_TO_AZ_EL_CUDA_H_
 
 /**
  * @file oskar_cuda_ra_dec_to_az_el.h
@@ -59,7 +59,7 @@ extern "C" {
  * @param[out] d_el    The elevations, in radians.
  */
 OSKAR_EXPORT
-int oskar_cuda_ra_dec_to_az_el_f(int n, const float* d_ra,
+int oskar_ra_dec_to_az_el_cuda_f(int n, const float* d_ra,
         const float* d_dec, float lst, float lat, float* d_work,
         float* d_az, float* d_el);
 
@@ -91,7 +91,7 @@ int oskar_ra_dec_to_az_el_f(float ra, float dec, float lst,
  * @param[out] d_el    The elevations, in radians.
  */
 OSKAR_EXPORT
-int oskar_cuda_ra_dec_to_az_el_d(int n, const double* d_ra,
+int oskar_ra_dec_to_az_el_cuda_d(int n, const double* d_ra,
         const double* d_dec, double lst, double lat, double* d_work,
         double* d_az, double* d_el);
 
@@ -107,4 +107,4 @@ int oskar_ra_dec_to_az_el_d(double ra, double dec, double lst,
 }
 #endif
 
-#endif /* OSKAR_CUDA_RA_DEC_TO_AZ_EL_H_ */
+#endif /* OSKAR_RA_DEC_TO_AZ_EL_CUDA_H_ */

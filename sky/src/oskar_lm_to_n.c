@@ -26,61 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MESHGRID_H_
-#define OSKAR_MESHGRID_H_
-
-/**
- * @file oskar_meshgrid.h
- */
-
-#include "oskar_global.h"
+#include "sky/oskar_lm_to_n.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (single precision).
- *
- * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
- *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
- */
-OSKAR_EXPORT
-void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
-        const double* y, const unsigned ny);
+/* Single precision. */
+void oskar_lm_to_n_f(int n, const float* p_l, const float* p_m, float* p_n)
+{
+    int i;
+    for (i = 0; i < n; ++i)
+    {
+        float ll, mm;
+        ll = p_l[i];
+        mm = p_m[i];
+        p_n[i] = sqrtf(1.0f - ll*ll - mm*mm) - 1.0f;
+    }
+}
 
-/**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (double precision).
- *
- * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
- *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
- */
-OSKAR_EXPORT
-void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
-        const float* y, const unsigned ny);
+/* Double precision. */
+void oskar_lm_to_n_d(int n, const double* p_l, const double* p_m, double* p_n)
+{
+    int i;
+    for (i = 0; i < n; ++i)
+    {
+        double ll, mm;
+        ll = p_l[i];
+        mm = p_m[i];
+        p_n[i] = sqrt(1.0 - ll*ll - mm*mm) - 1.0;
+    }
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_MESHGRID_H_ */

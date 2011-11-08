@@ -26,61 +26,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MESHGRID_H_
-#define OSKAR_MESHGRID_H_
-
-/**
- * @file oskar_meshgrid.h
- */
-
-#include "oskar_global.h"
+#include "sky/oskar_ha_dec_to_az_el.h"
+#include "sky/oskar_ha_dec_to_hor_lmn.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (single precision).
- *
- * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
- *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
- */
-OSKAR_EXPORT
-void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
-        const double* y, const unsigned ny);
+/* Single precision. */
+int oskar_ha_dec_to_az_el_f(int n, const float* ha, const float* dec,
+        float lat, float* work, float* az, float* el)
+{
+    int i;
+    oskar_ha_dec_to_hor_lmn_f(n, ha, dec, lat, work, az, el);
+    for (i = 0; i < n; ++i)
+    {
+        float x, y, z, a;
+        x = work[i];
+        y = az[i];
+        z = el[i];
+        a = atan2f(x, y); /* Azimuth. */
+        x = sqrtf(x*x + y*y);
+        y = atan2f(z, x); /* Elevation. */
+        az[i] = a;
+        el[i] = y;
+    }
+    return 0;
+}
 
-/**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
- * (double precision).
- *
- * @details
- * This function is equivalent to the 2-D version of the MATLAB meshgrid function.
- *
- * Warning: Arrays \p X and \p Y must be preallocated to length (nx x ny).
- *
- * @param[out] X    2-D grid coordinate array in the x direction.
- * @param[out] Y    2-D grid coordinate array in the y direction.
- * @param[in]  x    1-D vector of x coordinates.
- * @param[in]  nx   Length of the x coordinate array.
- * @param[in]  y    1-D vector of y coordinates.
- * @param[in]  ny   Length of the x coordinate array.
- */
-OSKAR_EXPORT
-void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
-        const float* y, const unsigned ny);
+/* Double precision. */
+int oskar_ha_dec_to_az_el_d(int n, const double* ha, const double* dec,
+        double lat, double* work, double* az, double* el)
+{
+    int i;
+    oskar_ha_dec_to_hor_lmn_d(n, ha, dec, lat, work, az, el);
+    for (i = 0; i < n; ++i)
+    {
+        double x, y, z, a;
+        x = work[i];
+        y = az[i];
+        z = el[i];
+        a = atan2(x, y); /* Azimuth. */
+        x = sqrt(x*x + y*y);
+        y = atan2(z, x); /* Elevation. */
+        az[i] = a;
+        el[i] = y;
+    }
+    return 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_MESHGRID_H_ */

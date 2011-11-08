@@ -32,8 +32,7 @@
 #include "interferometry/oskar_xyz_to_uvw.h"
 
 #include "sky/oskar_cuda_horizon_clip.h"
-#include "sky/oskar_cuda_ra_dec_to_hor_lmn.h"
-#include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
+#include "sky/oskar_ra_dec_to_rel_lmn_cuda.h"
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
 #include "sky/cudak/oskar_cudak_scale_brightness_by_spectral_index.h"
 
@@ -97,7 +96,7 @@ int oskar_interferometer1_scalar_d(
     scale_sources_by_spectral_index_d(frequency, &hd_sky_global);
 
     // Convert source positions in ra, dec to lmn relative to the phase centre.
-    oskar_cuda_ra_dec_to_relative_lmn_d(hd_sky_global.num_sources,
+    oskar_ra_dec_to_rel_lmn_cuda_d(hd_sky_global.num_sources,
             hd_sky_global.RA, hd_sky_global.Dec, ra0_rad, dec0_rad,
             hd_sky_global.rel_l, hd_sky_global.rel_m, hd_sky_global.rel_n);
 
@@ -290,7 +289,7 @@ int oskar_interferometer1_scalar_f(
     scale_sources_by_spectral_index_f(frequency, &hd_sky_global);
 
     // Convert source positions in ra, dec to lmn relative to the phase centre.
-    oskar_cuda_ra_dec_to_relative_lmn_f(hd_sky_global.num_sources,
+    oskar_ra_dec_to_rel_lmn_cuda_f(hd_sky_global.num_sources,
             hd_sky_global.RA, hd_sky_global.Dec, ra0_rad, dec0_rad,
             hd_sky_global.rel_l, hd_sky_global.rel_m, hd_sky_global.rel_n);
 

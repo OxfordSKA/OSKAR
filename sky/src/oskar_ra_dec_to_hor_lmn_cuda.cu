@@ -26,44 +26,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_cuda_ra_dec_to_relative_lmn.h"
-#include "math/cudak/oskar_cudak_sph_to_lm.h"
-#include "sky/cudak/oskar_cudak_lm_to_n.h"
+#include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
+#include "sky/cudak/oskar_cudak_ha_dec_to_hor_lmn.h"
+#include "math/cudak/oskar_cudak_vec_sub_sr.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Single precision.
-int oskar_cuda_ra_dec_to_relative_lmn_f(int n, const float* d_ra,
-        const float* d_dec, float ra0, float dec0, float* d_l, float* d_m,
-        float* d_n)
+int oskar_ra_dec_to_hor_lmn_cuda_f(int n, const float* ra,
+        const float* dec, float lst, float lat, float* hor_l, float* hor_m,
+        float* hor_n)
 {
-    // Compute l,m-direction-cosines of RA, Dec relative to reference point.
+    // Determine source Hour Angles (HA = LST - RA).
+    float* ha = hor_n; // Temporary.
     const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
-    const float cosDec0 = cosf(dec0);
-    const float sinDec0 = sinf(dec0);
-    oskar_cudak_sph_to_lm_f OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+    const int n_blk_in = (n + n_thd - 1) / n_thd;
+    oskar_cudak_vec_sub_sr_f <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
 
-    // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_f OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_l, d_m, d_n);
+    // Determine horizontal l,m,n positions (destroys contents of ha).
+    float cosLat = cosf(lat);
+    float sinLat = sinf(lat);
+    oskar_cudak_ha_dec_to_hor_lmn_f <<< n_blk_in, n_thd >>> (n, ha, dec,
+            cosLat, sinLat, hor_l, hor_m, hor_n);
     cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    cudaError_t errCuda = cudaPeekAtLastError();
+    if (errCuda != cudaSuccess) return errCuda;
+
+    return 0;
 }
 
 // Double precision.
-int oskar_cuda_ra_dec_to_relative_lmn_d(int n, const double* d_ra,
-        const double* d_dec, double ra0, double dec0, double* d_l, double* d_m,
-        double* d_n)
+int oskar_ra_dec_to_hor_lmn_cuda_d(int n, const double* ra,
+        const double* dec, double lst, double lat, double* hor_l, double* hor_m,
+        double* hor_n)
 {
-    // Compute l,m-direction-cosines of RA, Dec relative to reference point.
+    // Determine source Hour Angles (HA = LST - RA).
+    double* ha = hor_n; // Temporary.
     const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
-    const double cosDec0 = cos(dec0);
-    const double sinDec0 = sin(dec0);
-    oskar_cudak_sph_to_lm_d OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+    const int n_blk_in = (n + n_thd - 1) / n_thd;
+    oskar_cudak_vec_sub_sr_d <<< n_blk_in, n_thd >>> (n, lst, ra, ha);
 
-    // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_d OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_l, d_m, d_n);
+    // Determine horizontal l,m,n positions (destroys contents of ha).
+    double cosLat = cos(lat);
+    double sinLat = sin(lat);
+    oskar_cudak_ha_dec_to_hor_lmn_d <<< n_blk_in, n_thd >>> (n, ha, dec,
+            cosLat, sinLat, hor_l, hor_m, hor_n);
     cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    cudaError_t errCuda = cudaPeekAtLastError();
+    if (errCuda != cudaSuccess) return errCuda;
+
+    return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
