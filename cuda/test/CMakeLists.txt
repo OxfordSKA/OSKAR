@@ -13,7 +13,6 @@ if (CPPUNIT_FOUND)
         #src/CudaAntennaSignalTest.cpp
         #src/CudaBeamformerMatrixVectorTest.cu
         #src/CudaImagerDftTest.cpp
-        #src/CudaEquatorialToHorizontalTest.cpp
     )
 
     # === Macros to build the oskar-lib cuda test module.
