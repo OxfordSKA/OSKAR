@@ -31,7 +31,7 @@
 #include "interferometry/cudak/oskar_cudak_correlator.h"
 
 extern "C"
-int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
+int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
         const oskar_Mem* u, const oskar_Mem* v)
 {
@@ -39,7 +39,7 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
     bool single_precision = false, double_precision = false;
 
     // Check data location.
-    if (vis->amplitude.location() != OSKAR_LOCATION_GPU ||
+    if (vis->location() != OSKAR_LOCATION_GPU ||
             J->location() != OSKAR_LOCATION_GPU ||
             sky->location() != OSKAR_LOCATION_GPU ||
             u->location() != OSKAR_LOCATION_GPU ||
@@ -47,14 +47,14 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check if single precision.
-    single_precision = (vis->amplitude.is_single() && J->ptr.is_single() &&
+    single_precision = (vis->is_single() && J->ptr.is_single() &&
             sky->I.is_single() && sky->Q.is_single() && sky->U.is_single() &&
             sky->V.is_single() && sky->rel_l.is_single() &&
             sky->rel_m.is_single() && u->is_single() && v->is_single());
 
     // If not single precision, check if double precision.
     if (!single_precision)
-        double_precision = (vis->amplitude.is_double() && J->ptr.is_double() &&
+        double_precision = (vis->is_double() && J->ptr.is_double() &&
                 sky->I.is_double() && sky->Q.is_double() &&
                 sky->U.is_double() && sky->V.is_double() &&
                 sky->rel_l.is_double() && sky->rel_m.is_double() &&
@@ -72,14 +72,14 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check there is enough space for the result.
-    if (vis->amplitude.num_elements() < n_stations * (n_stations - 1) / 2)
+    if (vis->num_elements() < n_stations * (n_stations - 1) / 2)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Get bandwidth-smearing term.
     double lambda_bandwidth = 0.0; // FIXME compute from telescope structure.
 
     // Check type of Jones matrix.
-    if (J->ptr.is_matrix())
+    if (J->ptr.is_matrix() && vis->is_matrix())
     {
         // Call the kernel for full polarisation.
         if (double_precision)
@@ -91,8 +91,7 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
             oskar_cudak_correlator_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
             (n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U, sky->V,
-                    *u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth,
-                    vis->amplitude);
+                    *u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth, *vis);
         }
         else
         {
@@ -103,8 +102,7 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
             oskar_cudak_correlator_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
             (n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U, sky->V,
-                    *u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth,
-                    vis->amplitude);
+                    *u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth, *vis);
         }
     }
     else
@@ -119,7 +117,7 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
             oskar_cudak_correlator_scalar_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
             (n_sources, n_stations, J->ptr, sky->I, *u, *v, sky->rel_l,
-                    sky->rel_m, lambda_bandwidth, vis->amplitude);
+                    sky->rel_m, lambda_bandwidth, *vis);
         }
         else
         {
@@ -130,7 +128,7 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
             oskar_cudak_correlator_scalar_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
             (n_sources, n_stations, J->ptr, sky->I, *u, *v, sky->rel_l,
-                    sky->rel_m, lambda_bandwidth, vis->amplitude);
+                    sky->rel_m, lambda_bandwidth, *vis);
         }
     }
 

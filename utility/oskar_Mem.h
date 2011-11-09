@@ -129,6 +129,30 @@ public:
     ~oskar_Mem();
 
     /**
+     * @brief Appends to the memory by copying num_elements of memory from the
+     * specified array with the specified memory location.
+     *
+     * @param[in] from          Location from which to append to the current memory.
+     * @param[in] from_location Location to append from.
+     * @param[in] num_elements  Number of elements to append.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int append(const void* from, int type, int from_location, int num_elements);
+
+    /**
+     * @brief
+     * Clears contents of the memory held by the structure.
+     *
+     * @details
+     * This functions clears (i.e. sets to all bits zero) the contents of the
+     * memory block held by the structure.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int clear_contents();
+
+    /**
      * @brief Copies the memory contents of this structure to another.
      *
      * @details
@@ -139,6 +163,41 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int copy_to(oskar_Mem* other);
+
+    /**
+     * @brief Returns oskar_Mem structure which holds a pointer to memory held
+     * within another oskar_Mem structure.
+     *
+     * @details
+     * Note: The returned structure will not hold ownership of the memory to
+     * which it points.
+     *
+     * @param[in] offset       Element offset into memory.
+     * @param[in] num_elements Number of elements of this referred to by output.
+     *
+     * @return A structure containing the required pointer.
+     */
+    oskar_Mem get_pointer(int offset, int num_elements);
+
+    /**
+     * @brief
+     * Inserts (copies) a block of memory into another block of memory.
+     *
+     * @details
+     * This function copies data held in one structure to another structure at
+     * a specified element offset.
+     *
+     * Both data structures must be of the same data type, and there must be
+     * enough memory in the destination structure to hold the result:
+     * otherwise, an error is returned.
+     *
+     * @param[out] dst    Pointer to destination data structure to copy into.
+     * @param[in]  src    Pointer to source data structure to copy from.
+     * @param[in]  offset Offset into destination memory block.
+     *
+     * @return A structure containing the required pointer.
+     */
+    int insert(const oskar_Mem* src, int offset);
 
     /**
      * @brief
@@ -153,27 +212,6 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int resize(int num_elements);
-
-    /**
-     * @brief Appends to the memory by copying num_elements of memory from the
-     * specified array with the specified memory location.
-     *
-     * @param[in] from          Location from which to append to the current memory.
-     * @param[in] from_location Location to append from.
-     * @param[in] num_elements  Number of elements to append.
-     *
-     * @return A CUDA or OSKAR error code.
-     */
-    int append(const void* from, int type, int from_location, int num_elements);
-
-    /**
-     * @brief Sets or releases ownership of the memory.
-     *
-     * @details
-     * Warning: this method can be dangerous if more than one oskar_Mem
-     * structure owns the memory.
-     */
-    void set_owner(bool value) { private_owner = (int)value; }
 #endif
 
 #ifdef __cplusplus
@@ -181,7 +219,7 @@ public:
     int type() const {return private_type;}
     int location() const {return private_location;}
     int num_elements() const {return private_num_elements;}
-    bool owner() const { return private_owner; }
+    bool owner() const {return private_owner;}
     bool is_double() const;
     bool is_single() const;
     bool is_complex() const;
@@ -236,7 +274,7 @@ enum {
     OSKAR_SINGLE_COMPLEX_MATRIX  = OSKAR_SINGLE | OSKAR_COMPLEX | OSKAR_MATRIX,
 
     /* Matrix complex double (double4c). */
-    OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX,
+    OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
 };
 
 enum {

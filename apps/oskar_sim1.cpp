@@ -78,20 +78,24 @@ int main(int argc, char** argv)
             telescope_cpu, OSKAR_LOCATION_GPU);
 
     // Initialise blocks of Jones matrices and visibilities.
-    int n_stat = telescope_gpu->num_stations;
-    int n_src = sky_gpu->num_sources;
+    int n_stations = telescope_gpu->num_stations;
+    int n_baselines = n_stations * (n_stations - 1) / 2;
+    int n_sources = sky_gpu->num_sources;
     int complex_scalar = type | OSKAR_COMPLEX;
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    oskar_Jones J(complex_matrix, OSKAR_LOCATION_GPU, n_stat, n_src);
-    oskar_Jones R(complex_matrix, OSKAR_LOCATION_GPU, n_stat, n_src);
-    oskar_Jones E(complex_scalar, OSKAR_LOCATION_GPU, n_stat, n_src);
-    oskar_Jones K(complex_scalar, OSKAR_LOCATION_GPU, n_stat, n_src);
-    oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stat, true);
-    oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stat, true);
-    oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stat, true);
+    oskar_Jones J(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
+    oskar_Jones R(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
+    oskar_Jones E(complex_scalar, OSKAR_LOCATION_GPU, n_stations, n_sources);
+    oskar_Jones K(complex_scalar, OSKAR_LOCATION_GPU, n_stations, n_sources);
+    oskar_Mem vis(complex_matrix, OSKAR_LOCATION_GPU, n_baselines);
+    oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stations, true);
+    oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stations, true);
+    oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
+    oskar_Mem u_cpu(type, OSKAR_LOCATION_CPU, n_stations, true);
+    oskar_Mem v_cpu(type, OSKAR_LOCATION_CPU, n_stations, true);
+    oskar_Mem w_cpu(type, OSKAR_LOCATION_CPU, n_stations, true);
     oskar_Work work(type, OSKAR_LOCATION_GPU);
-    oskar_Visibilities vis(complex_scalar, OSKAR_LOCATION_GPU);
-    oskar_Visibilities vis_global(complex_scalar, OSKAR_LOCATION_CPU);
+    oskar_Mem bu, bv, bw;
 
     // Calculate time increments.
     int num_vis_dumps        = settings.obs().num_vis_dumps();
@@ -105,6 +109,10 @@ int main(int argc, char** argv)
     double dt_vis_offset     = dt_vis / 2.0;
     double dt_vis_ave        = dt_vis / num_vis_ave; // Vis average interval.
     double dt_vis_ave_offset = dt_vis_ave / 2.0;
+
+    // Create the global visibility structure on the CPU.
+    oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
+            num_vis_dumps, n_baselines, 1);
 
     // Start simulation.
     int err = 0;
@@ -161,12 +169,19 @@ int main(int argc, char** argv)
             }
         }
 
-        // TODO Compute u,v,w coordinates of mid point.
-//        err = oskar_evaluate_station_uvw(&u, &v, &w, telescope_gpu, gast);
-//        if (err) oskar_exit(err);
+        // Extract pointers to baseline u,v,w coordinates.
+        bu = vis_global.baseline_u.get_pointer(j * n_baselines, n_baselines);
+        bv = vis_global.baseline_v.get_pointer(j * n_baselines, n_baselines);
+        bw = vis_global.baseline_w.get_pointer(j * n_baselines, n_baselines);
+
+        // Compute u,v,w coordinates of mid point.
+//        err = oskar_evaluate_station_uvw(&u_cpu, &v_cpu, &w_cpu, telescope_cpu, gast);
+        if (err) oskar_exit(err);
+//        err = oskar_evaluate_baseline(&bu, &bv, &bw, &u_cpu, &v_cpu, &w_cpu);
+        if (err) oskar_exit(err);
 
         // Add to global data.
-        err = vis_global.append(&vis);
+        err = vis_global.amplitude.insert(&vis, j * n_baselines);
         if (err) oskar_exit(err);
     }
 

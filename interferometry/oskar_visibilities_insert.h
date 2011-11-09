@@ -47,7 +47,7 @@
  * and channel dimensions are the structure being appended to.
  * To use this function the visibility structure being inserted must
  * be preallocated to sufficiently large dimensions that the time index
- * plus the number of times in the structure being inserted dosnt exceed
+ * plus the number of times in the structure being inserted doesn't exceed
  * the number of times in the destination.
  *
  * @param

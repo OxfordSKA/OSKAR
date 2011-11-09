@@ -26,55 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_insert.h"
-#include "utility/oskar_mem_realloc.h"
-#include <stdlib.h>
+#ifndef OSKAR_MEM_INSERT_H_
+#define OSKAR_MEM_INSERT_H_
+
+/**
+ * @file oskar_mem_insert.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
-{
-    int error = 0;
-
-    /* Sanity check on inputs. */
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Check the data types. */
-    if (src->private_type != dst->private_type)
-        return OSKAR_ERR_TYPE_MISMATCH;
-
-    /* Only copy the pointer if destination does not own its memory. */
-    if (dst->private_owner == OSKAR_FALSE)
-    {
-        /* Disallow a pointer copy at a different location. */
-        if (dst->private_location != src->private_location)
-            return OSKAR_ERR_BAD_LOCATION;
-
-        error = oskar_mem_get_pointer(dst, src, 0, src->private_num_elements);
-        if (error) return error;
-    }
-    else
-    {
-        /* Check the data dimensions and resize if required. */
-        if (src->private_num_elements > dst->private_num_elements)
-        {
-            error = oskar_mem_realloc(dst, src->private_num_elements);
-            if (error) return error;
-        }
-
-        /* Copy the memory. */
-        error = oskar_mem_insert(dst, src, 0);
-        if (error) return error;
-    }
-
-    return error;
-}
+/**
+ * @brief
+ * Inserts (copies) a block of memory into another block of memory.
+ *
+ * @details
+ * This function copies data held in one structure to another structure at a
+ * specified element offset.
+ *
+ * Both data structures must be of the same data type, and there must be enough
+ * memory in the destination structure to hold the result: otherwise, an error
+ * is returned.
+ *
+ * @param[out] dst    Pointer to destination data structure to copy into.
+ * @param[in]  src    Pointer to source data structure to copy from.
+ * @param[in]  offset Offset into destination memory block.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MEM_INSERT_H_ */

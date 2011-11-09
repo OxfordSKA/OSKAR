@@ -29,26 +29,31 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_get_pointer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        const int offset, const int num_elements)
+        int offset, int num_elements)
 {
     size_t element_size, offset_bytes;
 
-    if (ptr == NULL || src == 0)
+    /* Sanity check on inputs. */
+    if (ptr == NULL || src == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    /* Check that the new pointer will be valid. */
     if (offset + num_elements > src->private_num_elements)
         return OSKAR_ERR_OUT_OF_RANGE;
 
+    /* Compute the offset for the new pointer. */
     element_size = oskar_mem_element_size(src->private_type);
     offset_bytes = offset * element_size;
+
+    /* Initialise the new meta-data. */
     ptr->private_type = src->private_type;
     ptr->private_num_elements = num_elements;
     ptr->data = (void*)((char*)src->data + offset_bytes);

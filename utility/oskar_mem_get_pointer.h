@@ -45,22 +45,24 @@ extern "C" {
  * within another oskar_Mem structure.
  *
  * @details
- * Note: The returned memory structure is set to not hold ownership of
- * memory which it points to.
+ * Note: The returned structure will not hold ownership of the memory to
+ * which it points.
  *
- * @param[out] ptr         oskar_Mem structure holding a pointer to a location
+ * @param[out] ptr         Output structure holding a pointer to a location
  *                         in memory and its associated meta-data.
- * @param[in] src          oskar_Mem source structure from which the pointer
- *                         is derived.
- * @param[in] offset       Offset into the \p mem to point to.
- * @param[in] num_elements Number of elements of \p mem referred to in the
- *                         by \p ref.
+ * @param[in] src          Input structure from which the pointer is derived.
+ * @param[in] offset       Offset into \p src.
+ * @param[in] num_elements Number of elements of \p src referred to by \p ptr.
  *
- * @return error code.
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
 int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        const int offset, const int num_elements);
+        int offset, int num_elements);
 
 #ifdef __cplusplus
 }

@@ -29,9 +29,12 @@
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_append.h"
+#include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_type_check.h"
 #include <cstdlib>
@@ -76,20 +79,44 @@ oskar_Mem::~oskar_Mem()
         throw "Error in oskar_mem_free.";
 }
 
+int oskar_Mem::append(const void* from, int from_type, int from_location,
+        int num_elements)
+{
+    return oskar_mem_append(this, from, from_type, from_location, num_elements);
+}
+
+int oskar_Mem::clear_contents()
+{
+    return oskar_mem_clear_contents(this);
+}
+
 int oskar_Mem::copy_to(oskar_Mem* other)
 {
     return oskar_mem_copy(other, this); // Copy this to other.
 }
 
+oskar_Mem oskar_Mem::get_pointer(int offset, int num_elements)
+{
+    oskar_Mem ptr;
+    if (oskar_mem_get_pointer(&ptr, this, offset, num_elements) != 0)
+    {
+        ptr.data = NULL;
+        ptr.private_location = 0;
+        ptr.private_num_elements = 0;
+        ptr.private_owner = 0;
+        ptr.private_type = 0;
+    }
+    return ptr;
+}
+
+int oskar_Mem::insert(const oskar_Mem* src, int offset)
+{
+    return oskar_mem_insert(this, src, offset);
+}
+
 int oskar_Mem::resize(int num_elements)
 {
     return oskar_mem_realloc(this, num_elements);
-}
-
-int oskar_Mem::append(const void* from, int from_type, int from_location,
-        int num_elements)
-{
-    return oskar_mem_append(this, from, from_type, from_location, num_elements);
 }
 
 bool oskar_Mem::is_double() const

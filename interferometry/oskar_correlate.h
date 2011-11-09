@@ -44,7 +44,7 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
+int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
         const oskar_Mem* u, const oskar_Mem* v);
 
