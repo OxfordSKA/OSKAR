@@ -31,6 +31,7 @@
 #include "oskar_global.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
+#include "station/oskar_station_model_write_coords.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
@@ -81,10 +82,14 @@ void Test_evaluate_station_beam::evalute_test_pattern()
     oskar_meshgrid_f(station_cpu.x, station_cpu.y, x_pos, station_dim,
             x_pos, station_dim);
     free(x_pos);
+    station_cpu.num_elements = num_antennas;
 
     // Set the station beam direction.
     station_cpu.ra0  = 0.0;
     station_cpu.dec0 = M_PI_2;
+
+//    error = oskar_station_model_write_coords("temp_test_station.txt", &station_cpu);
+//    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy the station structure to the gpu and scale the coordinates to wavenumbers.
     oskar_StationModel station_gpu(&station_cpu, OSKAR_LOCATION_GPU);

@@ -36,6 +36,7 @@ set(sky_SRC
     src/oskar_sky_model_resize.cpp
     src/oskar_sky_model_set_source.cpp
     src/oskar_sky_model_type.c
+    src/oskar_sky_model_write.c
     src/oskar_SkyModel.cpp
 )
 

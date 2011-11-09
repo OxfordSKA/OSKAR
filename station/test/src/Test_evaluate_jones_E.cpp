@@ -28,6 +28,7 @@
 
 #include "station/test/Test_evaluate_jones_E.h"
 
+#include "sky/oskar_sky_model_write.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_get_station_pointer.h"
 #include "math/oskar_linspace.h"
@@ -61,7 +62,7 @@ void Test_evaluate_jones_E::test_fail_conditions()
 
 void Test_evaluate_jones_E::evaluate_e()
 {
-    float deg2rad = 180.0 / M_PI;
+    float deg2rad = M_PI / 180.0;
 
     int error = 0;
 
@@ -122,6 +123,9 @@ void Test_evaluate_jones_E::evaluate_e()
     num_sources = positions.generate(0, 0);
     sky_cpu.resize(num_sources);
     positions.generate(sky_cpu.RA, sky_cpu.Dec);
+
+//    error = oskar_sky_model_write("temp_test_sky.txt", &sky_cpu);
+//    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy sky to the GPU
     oskar_SkyModel sky_gpu(&sky_cpu, OSKAR_LOCATION_GPU);

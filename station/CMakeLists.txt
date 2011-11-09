@@ -25,6 +25,7 @@ set(station_SRC
     src/oskar_station_model_set_element_pos.c
     src/oskar_station_model_set_element_weight.c
     src/oskar_station_model_type.c
+    src/oskar_station_model_write_coords.c
     src/oskar_StationModel.cu
 )
 
