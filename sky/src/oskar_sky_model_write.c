@@ -28,7 +28,8 @@
 
 
 #include "sky/oskar_sky_model_write.h"
-#include "sky/oskar_sky_model_check_mem.h"
+#include "sky/oskar_sky_model_type.h"
+#include "sky/oskar_sky_model_location.h"
 #include "stdlib.h"
 #include "stdio.h"
 
