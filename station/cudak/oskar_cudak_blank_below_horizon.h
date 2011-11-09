@@ -48,6 +48,10 @@
  * For sources where the mask value is negative, the corresponding element
  * of the Jones array is set to zero.
  *
+ * Note:
+ * - One thread is assigned per source.
+ * - Threads are assigned based on linear 'x' block and grid dimensions.
+ *
  * @param[in] n         Number of source positions.
  * @param[in] mask      Array of source mask values.
  * @param[in,out] jones Array of Jones scalars.
@@ -67,6 +71,10 @@ void oskar_cudak_blank_below_horizon_scalar_f(const int n, const float* mask,
  *
  * For sources where the mask value is negative, the corresponding element
  * of the Jones array is set to zero.
+ *
+ * Note:
+ * - One thread is assigned per source.
+ * - Threads are assigned based on linear 'x' block and grid dimensions.
  *
  * @param[in] n         Number of source positions.
  * @param[in] mask      Array of source mask values.

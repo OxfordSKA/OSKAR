@@ -110,6 +110,7 @@ void Test_evaluate_station_beam::evalute_test_pattern()
     // Generate horizontal lm coordinates for the beam pattern.
     oskar_Mem l_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem m_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels);
+    oskar_Mem n_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_pixels);
     float* lm = (float*)malloc(image_size * sizeof(float));
     double lm_max = sin(fov_deg * M_PI / 180.0);
     oskar_linspace_f(lm, -lm_max, lm_max, image_size);
@@ -119,6 +120,7 @@ void Test_evaluate_station_beam::evalute_test_pattern()
     // Copy horizontal lm coordinates to GPU.
     oskar_Mem l_gpu(&l_cpu, OSKAR_LOCATION_GPU);
     oskar_Mem m_gpu(&m_cpu, OSKAR_LOCATION_GPU);
+    oskar_Mem n_gpu(&n_cpu, OSKAR_LOCATION_GPU);
 
     // Allocate weights work array.
     oskar_Mem weights_gpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU);
@@ -127,7 +129,7 @@ void Test_evaluate_station_beam::evalute_test_pattern()
     oskar_Mem beam_pattern(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
 
     error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, &l_gpu, &m_gpu, &weights_gpu);
+            beam_m, &l_gpu, &m_gpu, &n_gpu, &weights_gpu);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy beam pattern back to CPU.

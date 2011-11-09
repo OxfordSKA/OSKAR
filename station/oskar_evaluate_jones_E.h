@@ -49,10 +49,10 @@
  * GPU.
  *
  * @param[out] E         Output set of Jones matrices.
- * @param[in]  sky        Input sky model.
- * @param[in]  telescope  Input telescope model.
- * @param[in]  gast       The Greenwich Apparent Sidereal Time, in radians.
- * @param[in]  work       oskar_Mem structure to holding work arrays.
+ * @param[in]  sky       Input sky model.
+ * @param[in]  telescope Input telescope model.
+ * @param[in]  gast      The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  work      oskar_Mem structure to holding work arrays.
  */
 #ifdef __cplusplus
 extern "C"

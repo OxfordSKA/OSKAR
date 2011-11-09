@@ -33,7 +33,6 @@
 
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
-
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_get_station_pointer.h"
@@ -112,7 +111,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         error = oskar_jones_get_station_pointer(&E0, E, 0);
         if (error) return error;
         error = oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, &hor_l,
-                &hor_m, weights);
+                &hor_m, &hor_n, weights);
         if (error) return error;
 
         // Copy E for station 0 into memory for other stations.
@@ -124,7 +123,6 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             if (error) return error;
             cudaMemcpy(E_station.data, E0.data, mem_size, cudaMemcpyDeviceToDevice);
         }
-        // TODO zero sources below horizon.
     }
     else
     {
@@ -148,10 +146,9 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station, beam_l,
-                        beam_m, &hor_l, &hor_m, weights);
+                        beam_m, &hor_l, &hor_m, &hor_n, weights);
                 if (error) return error;
             }
-            // TODO zero sources below horizon.
         }
         else
         {
@@ -170,9 +167,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
-                        &hor_l, &hor_m, weights);
+                        &hor_l, &hor_m,  &hor_n, weights);
                 if (error) return error;
-                // TODO zero sources below horizon.
             }
         }
     }

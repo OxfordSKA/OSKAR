@@ -171,6 +171,23 @@ void Test_evaluate_jones_E::evaluate_e()
         }
     }
     fclose(file);
+
+    /*
+        data = dlmread('temp_test_E_jones.txt');
+        l  = reshape(data(:,1), length(data(:,1))/2, 2);
+        m  = reshape(data(:,2), length(data(:,2))/2, 2);
+        n  = reshape(data(:,3), length(data(:,3))/2, 2);
+        re = reshape(data(:,4), length(data(:,4))/2, 2);
+        im = reshape(data(:,5), length(data(:,5))/2, 2);
+        amp = sqrt(re.^2 + im.^2);
+        %idx = find(n > 0.0);
+        %l = l(idx);
+        %m = m(idx);
+        %n = n(idx);
+        %amp = amp(idx);
+        station = 1;
+        scatter3(l(:,station),m(:,station),n(:,station),2,amp(:,station));
+     */
 }
 
 

@@ -54,9 +54,9 @@ extern "C" {
 
 int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
         const double l_beam, const double m_beam, const oskar_Mem* l,
-        const oskar_Mem* m, oskar_Mem* weights)
+        const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* weights)
 {
-    if (E == NULL || station == NULL || l == NULL || m == NULL ||
+    if (E == NULL || station == NULL || l == NULL || m == NULL || n == NULL ||
             weights == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
@@ -67,7 +67,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
         return OSKAR_ERR_BAD_UNITS;
 
     if (E->is_null() || station->x.is_null() || station->y.is_null() ||
-            l->is_null() || m->is_null())
+            l->is_null() || m->is_null() || n->is_null())
     {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
     }
@@ -77,19 +77,21 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
             station->coord_location() != OSKAR_LOCATION_GPU ||
             weights->location() != OSKAR_LOCATION_GPU ||
             l->location() != OSKAR_LOCATION_GPU ||
-            m->location() != OSKAR_LOCATION_GPU)
+            m->location() != OSKAR_LOCATION_GPU ||
+            n->location() != OSKAR_LOCATION_GPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
 
     if (l->num_elements() != E->num_elements() ||
-            m->num_elements() != E->num_elements())
+            m->num_elements() != E->num_elements() ||
+            n->num_elements() != E->num_elements())
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
     if (E->is_real() || weights->is_real() || l->is_complex()
-            || m->is_complex())
+            || m->is_complex() || n->is_complex())
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     // Resize the weights work array if needed.
@@ -103,7 +105,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     if (station->element_pattern == NULL && E->is_scalar())
     {
         oskar_evalate_station_beam_scalar(E, station, l_beam, m_beam,
-                l, m, weights);
+                l, m, n, weights);
     }
 
     // Make use of element pattern data.
