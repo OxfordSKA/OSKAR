@@ -50,6 +50,7 @@ struct oskar_TelescopeModel
     oskar_Mem station_x;         /**< Fixed x component of station coordinate. */
     oskar_Mem station_y;         /**< Fixed y component of station coordinate. */
     oskar_Mem station_z;         /**< Fixed z component of station coordinate. */
+    int coord_units;             /**< Units of the x,y,z coordinates.*/
     int identical_stations;      /**< True if all stations are identical. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
     double ra0;                  /**< Right Ascension of phase centre in radians. */
@@ -160,6 +161,25 @@ struct oskar_TelescopeModel
      * - A negative return code indicates an OSKAR error.
      */
     int load_station(int index, const char* filename);
+
+    /**
+     * @brief Returns the location of all arrays in the structure, or an error
+     * code if the locations are inconsistent.
+     */
+    int location() const;
+
+    /**
+     * @brief Multiplies all coordinates by the wavenumber.
+     *
+     * @param[in] frequency_hz Frequency, in Hz.
+     */
+    int multiply_by_wavenumber(double frequency_hz);
+
+    /**
+     * @brief Returns the base type of all arrays in the structure, or an error
+     * code if the types are inconsistent.
+     */
+    int type() const;
 #endif
 };
 

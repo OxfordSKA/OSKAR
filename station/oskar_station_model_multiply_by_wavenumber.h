@@ -26,52 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_copy.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_station_model_copy.h"
-#include "utility/oskar_mem_copy.h"
-#include <stdlib.h>
+#ifndef OSKAR_STATION_MODEL_MULTIPLY_BY_WAVENUMBER_H_
+#define OSKAR_STATION_MODEL_MULTIPLY_BY_WAVENUMBER_H_
+
+/**
+ * @file oskar_station_model_multiply_by_wavenumber.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
-        const oskar_TelescopeModel* src)
-{
-    int error = 0, i = 0;
-
-    /* Ensure there is enough room in the station array. */
-    dst->station = realloc(dst->station,
-            src->num_stations * sizeof(oskar_StationModel));
-
-    /* Copy each station. */
-    for (i = 0; i < src->num_stations; ++i)
-    {
-        error = oskar_station_model_copy(&(dst->station[i]),
-                &(src->station[i]));
-        if (error) return error;
-    }
-
-    /* Copy the coordinates. */
-    error = oskar_mem_copy(&dst->station_x, &src->station_x);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_y, &src->station_y);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_z, &src->station_z);
-    if (error) return error;
-
-    /* Copy remaining meta-data. */
-    dst->num_stations = src->num_stations;
-    dst->coord_units = src->coord_units;
-    dst->identical_stations = src->identical_stations;
-    dst->use_common_sky = src->use_common_sky;
-    dst->ra0 = src->ra0;
-    dst->dec0 = src->dec0;
-
-    return 0;
-}
+/**
+ * @brief Convert the (x,y,z) coordinates of a station structure from metres
+ * to wavenumbers.
+ *
+ * @param station      Station model structure containing coordinates to scale.
+ * @param frequency_hz The frequency, in Hz.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
+        double frequency_hz);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_STATION_MODEL_MULTIPLY_BY_WAVENUMBER_H_ */

@@ -26,52 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_copy.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_station_model_copy.h"
-#include "utility/oskar_mem_copy.h"
-#include <stdlib.h>
+#ifndef OSKAR_EVALUATE_BASELINES_H_
+#define OSKAR_EVALUATE_BASELINES_H_
+
+/**
+ * @file oskar_evaluate_baselines.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
-        const oskar_TelescopeModel* src)
-{
-    int error = 0, i = 0;
-
-    /* Ensure there is enough room in the station array. */
-    dst->station = realloc(dst->station,
-            src->num_stations * sizeof(oskar_StationModel));
-
-    /* Copy each station. */
-    for (i = 0; i < src->num_stations; ++i)
-    {
-        error = oskar_station_model_copy(&(dst->station[i]),
-                &(src->station[i]));
-        if (error) return error;
-    }
-
-    /* Copy the coordinates. */
-    error = oskar_mem_copy(&dst->station_x, &src->station_x);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_y, &src->station_y);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_z, &src->station_z);
-    if (error) return error;
-
-    /* Copy remaining meta-data. */
-    dst->num_stations = src->num_stations;
-    dst->coord_units = src->coord_units;
-    dst->identical_stations = src->identical_stations;
-    dst->use_common_sky = src->use_common_sky;
-    dst->ra0 = src->ra0;
-    dst->dec0 = src->dec0;
-
-    return 0;
-}
+/**
+ * @brief
+ * Evaluates the baseline (u,v,w) coordinates.
+ *
+ * @details
+ * Given the (u,v,w) coordinates for each station, this function computes
+ * the baseline coordinates for all station pairs.
+ *
+ * @param[out] baseline_u   Baseline u coordinates.
+ * @param[out] baseline_v   Baseline v coordinates.
+ * @param[out] baseline_w   Baseline w coordinates.
+ * @param[in] station_u     Station u coordinates.
+ * @param[in] station_v     Station v coordinates.
+ * @param[in] station_w     Station w coordinates.
+ */
+OSKAR_EXPORT
+int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
+        oskar_Mem* baseline_w, const oskar_Mem* station_u,
+        const oskar_Mem* station_v, const oskar_Mem* station_w);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_EVALUATE_BASELINES_H_ */

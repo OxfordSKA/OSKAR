@@ -94,7 +94,7 @@ void Test_evaluate_jones_E::evaluate_e()
     {
         error = oskar_station_model_copy(&telescope_gpu.station[i], &station_cpu);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-        error = telescope_gpu.station[i].scale_coords_to_wavenumbers(frequency);
+        error = telescope_gpu.station[i].multiply_by_wavenumber(frequency);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     }
     telescope_gpu.identical_stations = OSKAR_TRUE;

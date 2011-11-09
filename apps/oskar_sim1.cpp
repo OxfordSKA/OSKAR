@@ -31,6 +31,7 @@
 //#include "apps/lib/oskar_set_up_sky.h"
 //#include "apps/lib/oskar_set_up_telescope.h"
 #include "interferometry/oskar_correlate.h"
+#include "interferometry/oskar_evaluate_baselines.h"
 #include "interferometry/oskar_evaluate_jones_K.h"
 #include "interferometry/oskar_evaluate_station_uvw.h"
 #include "interferometry/oskar_TelescopeModel.h"
@@ -53,6 +54,7 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings);
 int main(int argc, char** argv)
 {
     // Parse command line.
+    int err = 0;
     if (argc != 2)
     {
         fprintf(stderr, "ERROR: Missing command line arguments.\n");
@@ -69,16 +71,21 @@ int main(int argc, char** argv)
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Get the sky model and telescope model.
-    oskar_SkyModel* sky_cpu = oskar_set_up_sky(settings);
-    oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(settings);
+    oskar_SkyModel *sky_cpu, *sky_gpu;
+    oskar_TelescopeModel *tel_cpu, *tel_gpu;
+    sky_cpu = oskar_set_up_sky(settings);
+    tel_cpu = oskar_set_up_telescope(settings);
 
     // Copy sky and telescope models to GPU.
-    oskar_SkyModel* sky_gpu = new oskar_SkyModel(sky_cpu, OSKAR_LOCATION_GPU);
-    oskar_TelescopeModel* telescope_gpu = new oskar_TelescopeModel(
-            telescope_cpu, OSKAR_LOCATION_GPU);
+    sky_gpu = new oskar_SkyModel(sky_cpu, OSKAR_LOCATION_GPU);
+    tel_gpu = new oskar_TelescopeModel(tel_cpu, OSKAR_LOCATION_GPU);
+
+    // Scale GPU telescope coordinates by wavenumber (get freq of channel 0).
+    err = tel_gpu->multiply_by_wavenumber(settings.obs().frequency(0));
+    if (err) oskar_exit(err);
 
     // Initialise blocks of Jones matrices and visibilities.
-    int n_stations = telescope_gpu->num_stations;
+    int n_stations = tel_gpu->num_stations;
     int n_baselines = n_stations * (n_stations - 1) / 2;
     int n_sources = sky_gpu->num_sources;
     int complex_scalar = type | OSKAR_COMPLEX;
@@ -95,51 +102,46 @@ int main(int argc, char** argv)
     oskar_Mem v_cpu(type, OSKAR_LOCATION_CPU, n_stations, true);
     oskar_Mem w_cpu(type, OSKAR_LOCATION_CPU, n_stations, true);
     oskar_Work work(type, OSKAR_LOCATION_GPU);
-    oskar_Mem bu, bv, bw;
+    oskar_Mem bu, bv, bw; // Pointers.
 
     // Calculate time increments.
     int num_vis_dumps        = settings.obs().num_vis_dumps();
     int num_vis_ave          = settings.obs().num_vis_ave();
     int num_fringe_ave       = settings.obs().num_fringe_ave();
-    int total_samples        = num_vis_dumps * num_fringe_ave * num_vis_ave;
     double obs_start_mjd_utc = settings.obs().start_time_utc_mjd();
     double obs_length        = settings.obs().obs_length_days();
-    double dt                = obs_length / total_samples; // Fringe interval.
-    double dt_vis            = obs_length / num_vis_dumps; // Dump interval.
-    double dt_vis_offset     = dt_vis / 2.0;
-    double dt_vis_ave        = dt_vis / num_vis_ave; // Vis average interval.
-    double dt_vis_ave_offset = dt_vis_ave / 2.0;
+    double dt_dump           = obs_length / num_vis_dumps; // Dump interval.
+    double dt_ave            = dt_dump / num_vis_ave; // Average interval.
+    double dt_fringe         = dt_ave / num_fringe_ave; // Fringe interval.
 
     // Create the global visibility structure on the CPU.
     oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
             num_vis_dumps, n_baselines, 1);
 
     // Start simulation.
-    int err = 0;
     for (int j = 0; j < num_vis_dumps; ++j)
     {
-        printf("--> Simulating snapshot (%i / %i).\n", j+1, num_vis_dumps);
-
         // Start time for the visibility dump, in MJD(UTC).
-        double t_vis_dump_start = obs_start_mjd_utc + (j * dt_vis);
+        printf("--> Simulating snapshot (%i / %i).\n", j+1, num_vis_dumps);
+        double t_dump = obs_start_mjd_utc + j * dt_dump;
 
         // Initialise visibilities for the dump to zero.
-        vis.clear_contents();
+        err = vis.clear_contents();
+        if (err) oskar_exit(err);
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
         {
-            // Evaluate Greenwich Apparent Sidereal Time at mid-point.
-            double t_ave_start = t_vis_dump_start + i * dt_vis_ave;
-            double t_ave_mid   = t_ave_start + dt_vis_ave_offset;
-            double gast = oskar_mjd_to_gast_fast(t_ave_mid);
+            // Evaluate Greenwich Apparent Sidereal Time.
+            double t_ave = t_dump + i * dt_ave;
+            double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate parallactic angle rotation (Jones R).
-            err = oskar_evaluate_jones_R(&R, sky_gpu, telescope_gpu, gast);
+            err = oskar_evaluate_jones_R(&R, sky_gpu, tel_gpu, gast);
             if (err) oskar_exit(err);
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, sky_gpu, telescope_gpu, gast, &work);
+            err = oskar_evaluate_jones_E(&E, sky_gpu, tel_gpu, gast, &work);
             if (err) oskar_exit(err);
 
             // Join Jones matrices (R = E * R).
@@ -149,10 +151,11 @@ int main(int argc, char** argv)
             for (int k = 0; k < num_fringe_ave; ++k)
             {
                 // Evaluate Greenwich Apparent Sidereal Time.
-                double gast = oskar_mjd_to_gast_fast(t_ave_start + k * dt);
+                double t_fringe = t_ave + k * dt_fringe;
+                double gast = oskar_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 // Evaluate station u,v,w coordinates.
-                err = oskar_evaluate_station_uvw(&u, &v, &w, telescope_gpu, gast);
+                err = oskar_evaluate_station_uvw(&u, &v, &w, tel_gpu, gast);
                 if (err) oskar_exit(err);
 
                 // Evaluate interferometer phase (Jones K).
@@ -164,20 +167,25 @@ int main(int argc, char** argv)
                 if (err) oskar_exit(err);
 
                 // Produce visibilities.
-                err = oskar_correlate(&vis, &J, telescope_gpu, sky_gpu, &u, &v);
+                err = oskar_correlate(&vis, &J, tel_gpu, sky_gpu, &u, &v);
                 if (err) oskar_exit(err);
             }
         }
 
-        // Extract pointers to baseline u,v,w coordinates.
+        // Compute u,v,w coordinates of mid point.
+        double gast = t_dump + j * dt_dump + dt_dump / 2.0;
+        err = oskar_evaluate_station_uvw(&u_cpu, &v_cpu, &w_cpu, tel_cpu, gast);
+        if (err) oskar_exit(err);
+
+        // Extract pointers to baseline u,v,w coordinates for this dump.
         bu = vis_global.baseline_u.get_pointer(j * n_baselines, n_baselines);
         bv = vis_global.baseline_v.get_pointer(j * n_baselines, n_baselines);
         bw = vis_global.baseline_w.get_pointer(j * n_baselines, n_baselines);
+        if (bu.data == NULL || bv.data == NULL || bw.data == NULL)
+            oskar_exit(OSKAR_ERR_UNKNOWN);
 
-        // Compute u,v,w coordinates of mid point.
-//        err = oskar_evaluate_station_uvw(&u_cpu, &v_cpu, &w_cpu, telescope_cpu, gast);
-        if (err) oskar_exit(err);
-//        err = oskar_evaluate_baseline(&bu, &bv, &bw, &u_cpu, &v_cpu, &w_cpu);
+        // Compute baselines from station positions.
+        err = oskar_evaluate_baselines(&bu, &bv, &bw, &u_cpu, &v_cpu, &w_cpu);
         if (err) oskar_exit(err);
 
         // Add to global data.
@@ -186,14 +194,19 @@ int main(int argc, char** argv)
     }
 
     // Write global visibilities to disk.
-    err = vis_global.write(settings.obs().oskar_vis_filename().toLatin1().data());
-    if (err) oskar_exit(err);
+    if (!settings.obs().oskar_vis_filename().isEmpty())
+    {
+        const char* outname = settings.obs().oskar_vis_filename().toAscii().constData();
+        printf("--> Writing visibility file: '%s'\n", outname);
+        err = vis_global.write(outname);
+        if (err) oskar_exit(err);
+    }
 
     // Delete data structures.
     delete sky_cpu;
     delete sky_gpu;
-    delete telescope_gpu;
-    delete telescope_cpu;
+    delete tel_gpu;
+    delete tel_cpu;
 
     return EXIT_SUCCESS;
 }
@@ -204,13 +217,19 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     oskar_SkyModel *sky;
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
-    int err = sky->load(settings.sky_file().toLatin1().data());
+    int err = sky->load(settings.sky_file().toAscii().constData());
     if (err) oskar_exit(err);
 
     // Compute source direction cosines relative to phase centre.
     err = sky->compute_relative_lmn(settings.obs().ra0_rad(),
             settings.obs().dec0_rad());
     if (err) oskar_exit(err);
+
+    // Print summary data.
+    printf("\n");
+    printf("= Sky (%s)\n", settings.sky_file().toLatin1().data());
+    printf("  - Num. sources           = %u\n", sky->num_sources);
+    printf("\n");
 
     // Return the structure.
     return sky;
@@ -223,7 +242,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
     int err = telescope->load_station_pos(
-            settings.telescope_file().toLatin1().data(),
+            settings.telescope_file().toAscii().constData(),
             settings.longitude_rad(), settings.latitude_rad(),
             settings.altitude_m());
     if (err) oskar_exit(err);
@@ -231,8 +250,31 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     // Load stations from directory.
     err = oskar_load_stations(telescope->station,
             &(telescope->identical_stations), telescope->num_stations,
-            settings.station_dir().toLatin1().data());
+            settings.station_dir().toAscii().constData());
     if (err) oskar_exit(err);
+
+    // Set phase centre.
+    telescope->ra0 = settings.obs().ra0_rad();
+    telescope->dec0 = settings.obs().dec0_rad();
+
+    // Set other telescope parameters.
+    telescope->use_common_sky = true; // FIXME set this via the settings file.
+
+    // Set other station parameters.
+    for (int i = 0; i < telescope->num_stations; ++i)
+    {
+        telescope->station[i].ra0 = telescope->ra0;
+        telescope->station[i].dec0 = telescope->dec0;
+        telescope->station[i].single_element_model = true; // FIXME set this via the settings file.
+    }
+
+    // Print summary data.
+    printf("\n");
+    printf("= Telescope (%s)\n", settings.telescope_file().toLatin1().data());
+    printf("  - Num. stations          = %u\n", telescope->num_stations);
+    printf("  - Identical stations     = %s\n",
+            telescope->identical_stations ? "true" : "false");
+    printf("\n");
 
     // Return the structure.
     return telescope;

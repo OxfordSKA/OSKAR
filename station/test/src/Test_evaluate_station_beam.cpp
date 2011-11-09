@@ -94,7 +94,7 @@ void Test_evaluate_station_beam::evalute_test_pattern()
     // Copy the station structure to the gpu and scale the coordinates to wavenumbers.
     oskar_StationModel station_gpu(&station_cpu, OSKAR_LOCATION_GPU);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_METRES, station_gpu.coord_units);
-    station_gpu.scale_coords_to_wavenumbers(frequency);
+    station_gpu.multiply_by_wavenumber(frequency);
 
     // Evaluate horizontal l,m,n for beam phase centre.
     double beam_l, beam_m, beam_n;

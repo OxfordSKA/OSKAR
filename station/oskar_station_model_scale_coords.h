@@ -51,12 +51,10 @@ extern "C" {
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_station_model_scale_coords(oskar_StationModel* station,
-        const double value);
+int oskar_station_model_scale_coords(oskar_StationModel* station, double value);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* OSKAR_STATION_MODEL_SCALE_COORDINATES_H_ */

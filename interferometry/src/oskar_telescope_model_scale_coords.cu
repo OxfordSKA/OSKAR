@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "interferometry/oskar_telescope_model_scale_coords.h"
 #include "station/oskar_station_model_scale_coords.h"
 #include "math/cudak/oskar_cudak_vec_scale_rr.h"
 #include <cuda_runtime_api.h>
@@ -34,32 +35,37 @@
 extern "C" {
 #endif
 
-int oskar_station_model_scale_coords(oskar_StationModel* station, double value)
+int oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
+        double value)
 {
-    if (station == NULL)
+    if (telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (station->coord_location() != OSKAR_LOCATION_GPU)
+    if (telescope->location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    int num_antennas = station->num_elements;
+    int num_antennas = telescope->num_stations;
     int num_threads = 256;
     int num_blocks  = (num_antennas + num_threads - 1) / num_threads;
 
-    // Scale the station coordinates.
-    if (station->coord_type() == OSKAR_DOUBLE)
+    // Scale the telescope coordinates.
+    if (telescope->type() == OSKAR_DOUBLE)
     {
         oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, value, station->x);
+            (num_antennas, value, telescope->station_x);
         oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, value, station->y);
+            (num_antennas, value, telescope->station_y);
+        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, value, telescope->station_z);
     }
-    else if (station->coord_type() == OSKAR_SINGLE)
+    else if (telescope->type() == OSKAR_SINGLE)
     {
         oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, (float)value, station->x);
+            (num_antennas, (float)value, telescope->station_x);
         oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, (float)value, station->y);
+            (num_antennas, (float)value, telescope->station_y);
+        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, (float)value, telescope->station_z);
     }
     else
     {
@@ -73,4 +79,3 @@ int oskar_station_model_scale_coords(oskar_StationModel* station, double value)
 #ifdef __cplusplus
 }
 #endif
-

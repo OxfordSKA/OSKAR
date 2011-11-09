@@ -26,50 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_copy.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_station_model_copy.h"
-#include "utility/oskar_mem_copy.h"
-#include <stdlib.h>
+#include "station/oskar_station_model_scale_coords.h"
+#include "station/oskar_station_model_multiply_by_wavenumber.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
-        const oskar_TelescopeModel* src)
+int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
+        double frequency_hz)
 {
-    int error = 0, i = 0;
+    /* Check and update current units. */
+    if (station->coord_units != OSKAR_METRES)
+        return OSKAR_ERR_BAD_UNITS;
+    station->coord_units = OSKAR_WAVENUMBERS;
 
-    /* Ensure there is enough room in the station array. */
-    dst->station = realloc(dst->station,
-            src->num_stations * sizeof(oskar_StationModel));
-
-    /* Copy each station. */
-    for (i = 0; i < src->num_stations; ++i)
-    {
-        error = oskar_station_model_copy(&(dst->station[i]),
-                &(src->station[i]));
-        if (error) return error;
-    }
-
-    /* Copy the coordinates. */
-    error = oskar_mem_copy(&dst->station_x, &src->station_x);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_y, &src->station_y);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_z, &src->station_z);
-    if (error) return error;
-
-    /* Copy remaining meta-data. */
-    dst->num_stations = src->num_stations;
-    dst->coord_units = src->coord_units;
-    dst->identical_stations = src->identical_stations;
-    dst->use_common_sky = src->use_common_sky;
-    dst->ra0 = src->ra0;
-    dst->dec0 = src->dec0;
-
-    return 0;
+    /* Scale to wavenumbers. */
+    double metres_to_wavenumbers = 2.0 * M_PI * frequency_hz / 299792458.0;
+    return oskar_station_model_scale_coords(station, metres_to_wavenumbers);
 }
 
 #ifdef __cplusplus

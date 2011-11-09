@@ -116,6 +116,9 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
     /* Record the number of elements loaded. */
     station->num_elements = n;
 
+    /* Set the coordinate units to metres. */
+    station->coord_units = OSKAR_METRES;
+
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);

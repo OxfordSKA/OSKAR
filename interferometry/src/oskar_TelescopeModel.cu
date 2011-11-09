@@ -32,10 +32,14 @@
 #include "interferometry/oskar_telescope_model_free.h"
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_load_station_pos.h"
+#include "interferometry/oskar_telescope_model_location.h"
+#include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
+#include "interferometry/oskar_telescope_model_type.h"
 #include "station/oskar_station_model_load.h"
-#include "math/cudak/oskar_cudak_vec_scale_rr.h"
+#include "math/cudak/oskar_cudak_vec_scale_rr.h" // DEPRECATED
 #include <cuda_runtime_api.h>
 #include <cstdio>
+#include <cmath>
 
 oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
         int n_stations)
@@ -71,11 +75,26 @@ int oskar_TelescopeModel::load_station_pos(const char* filename,
             longitude, latitude, altitude);
 }
 
+int oskar_TelescopeModel::location() const
+{
+    return oskar_telescope_model_location(this);
+}
+
 int oskar_TelescopeModel::load_station(int index, const char* filename)
 {
     if (index >= this->num_stations)
         return OSKAR_ERR_OUT_OF_RANGE;
     return oskar_station_model_load(&(this->station[index]), filename);
+}
+
+int oskar_TelescopeModel::multiply_by_wavenumber(double frequency_hz)
+{
+    return oskar_telescope_model_multiply_by_wavenumber(this, frequency_hz);
+}
+
+int oskar_TelescopeModel::type() const
+{
+    return oskar_telescope_model_type(this);
 }
 
 

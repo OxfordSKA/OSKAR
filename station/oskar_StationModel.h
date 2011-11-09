@@ -163,10 +163,10 @@ struct oskar_StationModel
      *
      * @param[in] frequency_hz Frequency, in Hz.
      */
-    int scale_coords_to_wavenumbers(const double frequency_hz);
+    int multiply_by_wavenumber(double frequency_hz);
 
     /**
-     * @brief Returns the type of all arrays in the structure, or an error
+     * @brief Returns the base type of all arrays in the structure, or an error
      * code if the types are inconsistent.
      */
     int type() const;

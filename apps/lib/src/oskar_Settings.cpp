@@ -128,7 +128,7 @@ void oskar_Settings::print() const
     printf("  - Num. visibility dumps  = %i\n", _obs.num_vis_dumps());
     printf("  - Num. visibility ave.   = %i\n", _obs.num_vis_ave());
     printf("  - Num. fringe ave.       = %i\n", _obs.num_fringe_ave());
-    printf("  - Oskar visibility file  = %s\n", _obs.oskar_vis_filename().toLatin1().data());
+    printf("  - OSKAR visibility file  = %s\n", _obs.oskar_vis_filename().toLatin1().data());
     printf("  - MS file                = %s\n", _obs.ms_filename().toLatin1().data());
     printf("\n");
 }

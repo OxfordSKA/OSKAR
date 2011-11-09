@@ -8,6 +8,7 @@ set(interferometry_SRC
     src/oskar_correlate.cu
     src/oskar_cuda_correlator_lm_bw.cu # Deprecated.
     src/oskar_cuda_correlator_scalar.cu
+    src/oskar_evaluate_baselines.cpp
     src/oskar_evaluate_jones_K.cu
     src/oskar_evaluate_station_uvw.cpp
     src/oskar_geocentric_cartesian_to_geodetic_spherical.c
@@ -22,7 +23,9 @@ set(interferometry_SRC
     src/oskar_telescope_model_init.c
     src/oskar_telescope_model_load_station_pos.c
     src/oskar_telescope_model_location.c
+    src/oskar_telescope_model_multiply_by_wavenumber.c
     src/oskar_telescope_model_resize.c
+    src/oskar_telescope_model_scale_coords.cu
     src/oskar_telescope_model_set_station_pos.c
     src/oskar_telescope_model_type.c
     src/oskar_TelescopeModel.cu
