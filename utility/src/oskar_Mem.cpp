@@ -72,9 +72,8 @@ oskar_Mem::oskar_Mem(const oskar_Mem* other, int location, int owner)
 
 oskar_Mem::~oskar_Mem()
 {
-    if (this->owner())
-        if (oskar_mem_free(this))
-            throw "Error in oskar_mem_free.";
+    if (oskar_mem_free(this))
+        throw "Error in oskar_mem_free.";
 }
 
 int oskar_Mem::copy_to(oskar_Mem* other)

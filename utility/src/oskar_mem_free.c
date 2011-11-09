@@ -37,32 +37,33 @@ extern "C" {
 
 int oskar_mem_free(oskar_Mem* mem)
 {
-    int location, err = 0;
+    int err = 0;
 
     /* Check that the structure exists. */
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (mem == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Check if the structure owns the memory it points to. */
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-
-    /* Get the meta-data. */
-    location = mem->private_location;
-
-    /* Check whether the memory is on the host or the device. */
-    if (location == OSKAR_LOCATION_CPU)
+    /* Only free the memory if the structure actually owns it. */
+    if (mem->private_owner && mem->data != NULL)
     {
-        /* Free host memory. */
-        if (mem->data != NULL) free(mem->data);
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        /* Free GPU memory. */
-        if (mem->data != NULL) cudaFree(mem->data);
-        err = cudaPeekAtLastError();
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_LOCATION;
+        /* Check whether the memory is on the host or the device. */
+        int location;
+        location = mem->private_location;
+        if (location == OSKAR_LOCATION_CPU)
+        {
+            /* Free host memory. */
+            free(mem->data);
+        }
+        else if (location == OSKAR_LOCATION_GPU)
+        {
+            /* Free GPU memory. */
+            cudaFree(mem->data);
+            err = cudaPeekAtLastError();
+        }
+        else
+        {
+            return OSKAR_ERR_BAD_LOCATION;
+        }
     }
     mem->data = NULL;
     mem->private_location = 0;
