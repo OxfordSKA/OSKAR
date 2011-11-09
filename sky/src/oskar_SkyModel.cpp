@@ -31,9 +31,10 @@
 #include "sky/oskar_sky_model_append.h"
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
 #include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_set_source.h"
-#include "sky/oskar_sky_model_check_mem.h"
+#include "sky/oskar_sky_model_type.h"
 #include <cuda_runtime_api.h>
 #include <cstdio>
 

@@ -28,17 +28,18 @@
 
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int oskar_telescope_model_is_type(const oskar_TelescopeModel* telescope,
-		int type)
+        int type)
 {
     return (telescope->station_x.private_type == type &&
-    		telescope->station_y.private_type == type &&
-    		telescope->station_z.private_type == type);
+            telescope->station_y.private_type == type &&
+            telescope->station_z.private_type == type);
 }
 
 int oskar_telescope_model_type(const oskar_TelescopeModel* telescope)

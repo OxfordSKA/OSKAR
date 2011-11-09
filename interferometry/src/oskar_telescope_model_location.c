@@ -28,17 +28,18 @@
 
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int oskar_telescope_model_is_location(const oskar_TelescopeModel* telescope,
-		int location)
+        int location)
 {
     return (telescope->station_x.private_location == location &&
-    		telescope->station_y.private_location == location &&
-    		telescope->station_z.private_location == location);
+            telescope->station_y.private_location == location &&
+            telescope->station_z.private_location == location);
 }
 
 int oskar_telescope_model_location(const oskar_TelescopeModel* telescope)

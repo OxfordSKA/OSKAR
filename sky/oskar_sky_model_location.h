@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
-#define OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
+#ifndef OSKAR_SKY_MODEL_LOCATION_H_
+#define OSKAR_SKY_MODEL_LOCATION_H_
 
 /**
- * @file oskar_sky_model_compute_relative_lmn.h
+ * @file oskar_sky_model_location.h
  */
 
 #include "oskar_global.h"
@@ -41,26 +41,33 @@ extern "C" {
 #endif
 
 /**
- * @brief
- * Computes 3D direction cosines of sources relative to phase centre.
+ * @brief Checks if the OSKAR sky model memory is at the specified location.
  *
  * @details
- * This function populates the 3D direction cosines (l,m,n coordinates)
- * of all sources relative to the phase centre.
+ * \p location should be an oskar_Mem data location ID.
  *
- * It assumes that the source RA and Dec positions have already been filled,
- * and that the arrays have been preallocated to the correct length.
+ * If the location is found to be inconsistent between all of the oskar_Mem
+ * structures held in the sky model the location check is considered false.
  *
- * @param[in,out] sky Pointer to sky model structure.
- * @param[in] ra0 Right Ascension of phase centre, in radians.
- * @param[in] dec0 Declination of phase centre, in radians.
+ * @param sky       Pointer to sky model structure.
+ * @param location  oskar_Mem location type to check against.
+
+ * @return 1 (true) if the sky model is of the specified location, 0 otherwise.
  */
-OSKAR_EXPORT
-int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
-        double dec0);
+int oskar_sky_model_is_location(const oskar_SkyModel* sky, int location);
+
+/**
+ * @brief Returns the oskar_Mem location ID for the sky structure or an
+ * error code if an invalid location is found.
+ *
+ * @param sky Pointer to an OSKAR sky model structure.
+ *
+ * @return oskar_Mem data location or error code.
+ */
+int oskar_sky_model_location(const oskar_SkyModel* sky);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_ */
+#endif /* OSKAR_SKY_MODEL_LOCATION_H_ */

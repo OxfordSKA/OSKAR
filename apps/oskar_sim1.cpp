@@ -69,10 +69,11 @@ int main(int argc, char** argv)
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Get the sky model and telescope model.
-    oskar_SkyModel* sky_gpu = oskar_set_up_sky(settings);
+    oskar_SkyModel* sky_cpu = oskar_set_up_sky(settings);
     oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(settings);
 
-    // Copy telescope model to GPU.
+    // Copy sky and telescope models to GPU.
+    oskar_SkyModel* sky_gpu = new oskar_SkyModel(sky_cpu, OSKAR_LOCATION_GPU);
     oskar_TelescopeModel* telescope_gpu = new oskar_TelescopeModel(
             telescope_cpu, OSKAR_LOCATION_GPU);
 
@@ -174,6 +175,7 @@ int main(int argc, char** argv)
     if (err) oskar_exit(err);
 
     // Delete data structures.
+    delete sky_cpu;
     delete sky_gpu;
     delete telescope_gpu;
     delete telescope_cpu;
@@ -184,23 +186,19 @@ int main(int argc, char** argv)
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 {
     // Load sky model into CPU structure.
-    oskar_SkyModel *sky_cpu, *sky_gpu;
+    oskar_SkyModel *sky;
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    sky_cpu = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
-    int err = sky_cpu->load(settings.sky_file().toLatin1().data());
+    sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
+    int err = sky->load(settings.sky_file().toLatin1().data());
     if (err) oskar_exit(err);
 
-    // Copy sky model to GPU.
-    sky_gpu = new oskar_SkyModel(sky_cpu, OSKAR_LOCATION_GPU);
-    delete sky_cpu; sky_cpu = NULL;
-
     // Compute source direction cosines relative to phase centre.
-    err = sky_gpu->compute_relative_lmn(settings.obs().ra0_rad(),
+    err = sky->compute_relative_lmn(settings.obs().ra0_rad(),
             settings.obs().dec0_rad());
     if (err) oskar_exit(err);
 
     // Return the structure.
-    return sky_gpu;
+    return sky;
 }
 
 oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)

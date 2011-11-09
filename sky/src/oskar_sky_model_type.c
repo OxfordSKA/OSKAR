@@ -26,41 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
-#define OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
-
-/**
- * @file oskar_sky_model_compute_relative_lmn.h
- */
-
-#include "oskar_global.h"
+#include "sky/oskar_sky_model_type.h"
 #include "sky/oskar_SkyModel.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Computes 3D direction cosines of sources relative to phase centre.
- *
- * @details
- * This function populates the 3D direction cosines (l,m,n coordinates)
- * of all sources relative to the phase centre.
- *
- * It assumes that the source RA and Dec positions have already been filled,
- * and that the arrays have been preallocated to the correct length.
- *
- * @param[in,out] sky Pointer to sky model structure.
- * @param[in] ra0 Right Ascension of phase centre, in radians.
- * @param[in] dec0 Declination of phase centre, in radians.
- */
-OSKAR_EXPORT
-int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
-        double dec0);
+int oskar_sky_model_is_type(const oskar_SkyModel* sky, int type)
+{
+    return (sky->RA.private_type == type &&
+            sky->Dec.private_type == type &&
+            sky->I.private_type == type &&
+            sky->Q.private_type == type &&
+            sky->U.private_type == type &&
+            sky->V.private_type == type &&
+            sky->reference_freq.private_type == type &&
+            sky->spectral_index.private_type == type &&
+            sky->rel_l.private_type == type &&
+            sky->rel_m.private_type == type &&
+            sky->rel_n.private_type == type);
+}
+
+int oskar_sky_model_type(const oskar_SkyModel* sky)
+{
+    if (sky == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (oskar_sky_model_is_type(sky, OSKAR_DOUBLE))
+        return OSKAR_DOUBLE;
+    else if (oskar_sky_model_is_type(sky, OSKAR_SINGLE))
+        return OSKAR_SINGLE;
+    else
+        return OSKAR_ERR_BAD_DATA_TYPE;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_ */

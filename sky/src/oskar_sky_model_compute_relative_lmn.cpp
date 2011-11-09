@@ -27,54 +27,71 @@
  */
 
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
+#include "sky/oskar_sky_model_location.h"
+#include "sky/oskar_sky_model_type.h"
 #include "sky/oskar_ra_dec_to_rel_lmn_cuda.h"
+#include "sky/oskar_ra_dec_to_rel_lmn.h"
 #include <cstdlib>
 
-#ifdef __cplusplus
 extern "C"
-#endif
 int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
         double dec0)
 {
+    int type, location, err = 0;
+
     // Check for sane inputs.
     if (sky == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Check that data is on the GPU.
-    if (sky->RA.location() != OSKAR_LOCATION_GPU ||
-            sky->Dec.location() != OSKAR_LOCATION_GPU ||
-            sky->rel_l.location() != OSKAR_LOCATION_GPU ||
-            sky->rel_m.location() != OSKAR_LOCATION_GPU ||
-            sky->rel_n.location() != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    // Get the data location and type.
+    location = oskar_sky_model_location(sky);
+    type = oskar_sky_model_type(sky);
 
-    // Check the types are OK.
-    int error = 0;
-    if (sky->RA.type() == OSKAR_SINGLE &&
-            sky->Dec.type() == OSKAR_SINGLE &&
-            sky->rel_l.type() == OSKAR_SINGLE &&
-            sky->rel_m.type() == OSKAR_SINGLE &&
-            sky->rel_n.type() == OSKAR_SINGLE)
+    // Convert coordinates.
+    if (location == OSKAR_LOCATION_GPU)
     {
-        // Convert the coordinates (single precision).
-        error = oskar_ra_dec_to_rel_lmn_cuda_f(sky->num_sources, sky->RA,
-                sky->Dec, (float)ra0, (float)dec0, sky->rel_l, sky->rel_m,
-                sky->rel_n);
+        if (type == OSKAR_SINGLE)
+        {
+            // Convert the coordinates (single precision).
+            err = oskar_ra_dec_to_rel_lmn_cuda_f(sky->num_sources, sky->RA,
+                    sky->Dec, (float)ra0, (float)dec0, sky->rel_l, sky->rel_m,
+                    sky->rel_n);
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            // Convert the coordinates (double precision).
+            err = oskar_ra_dec_to_rel_lmn_cuda_d(sky->num_sources, sky->RA,
+                    sky->Dec, ra0, dec0, sky->rel_l, sky->rel_m, sky->rel_n);
+        }
+        else
+        {
+            return OSKAR_ERR_TYPE_MISMATCH;
+        }
     }
-    else if (sky->RA.type() == OSKAR_DOUBLE &&
-            sky->Dec.type() == OSKAR_DOUBLE &&
-            sky->rel_l.type() == OSKAR_DOUBLE &&
-            sky->rel_m.type() == OSKAR_DOUBLE &&
-            sky->rel_n.type() == OSKAR_DOUBLE)
+    else if (location == OSKAR_LOCATION_CPU)
     {
-        // Convert the coordinates (double precision).
-        error = oskar_ra_dec_to_rel_lmn_cuda_d(sky->num_sources, sky->RA,
-                sky->Dec, ra0, dec0, sky->rel_l, sky->rel_m, sky->rel_n);
+        if (type == OSKAR_SINGLE)
+        {
+            // Convert the coordinates (single precision).
+            err = oskar_ra_dec_to_rel_lmn_f(sky->num_sources, sky->RA,
+                    sky->Dec, (float)ra0, (float)dec0, sky->rel_l, sky->rel_m,
+                    sky->rel_n);
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            // Convert the coordinates (double precision).
+            err = oskar_ra_dec_to_rel_lmn_d(sky->num_sources, sky->RA,
+                    sky->Dec, ra0, dec0, sky->rel_l, sky->rel_m, sky->rel_n);
+        }
+        else
+        {
+            return OSKAR_ERR_TYPE_MISMATCH;
+        }
     }
     else
     {
-        return OSKAR_ERR_TYPE_MISMATCH;
+        return OSKAR_ERR_BAD_LOCATION;
     }
 
-    return error;
+    return err;
 }

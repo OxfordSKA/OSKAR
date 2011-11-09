@@ -26,41 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
-#define OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_
-
-/**
- * @file oskar_sky_model_compute_relative_lmn.h
- */
-
-#include "oskar_global.h"
+#include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_SkyModel.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Computes 3D direction cosines of sources relative to phase centre.
- *
- * @details
- * This function populates the 3D direction cosines (l,m,n coordinates)
- * of all sources relative to the phase centre.
- *
- * It assumes that the source RA and Dec positions have already been filled,
- * and that the arrays have been preallocated to the correct length.
- *
- * @param[in,out] sky Pointer to sky model structure.
- * @param[in] ra0 Right Ascension of phase centre, in radians.
- * @param[in] dec0 Declination of phase centre, in radians.
- */
-OSKAR_EXPORT
-int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
-        double dec0);
+int oskar_sky_model_is_location(const oskar_SkyModel* sky, int location)
+{
+    return (sky->RA.private_location == location &&
+            sky->Dec.private_location == location &&
+            sky->I.private_location == location &&
+            sky->Q.private_location == location &&
+            sky->U.private_location == location &&
+            sky->V.private_location == location &&
+            sky->reference_freq.private_location == location &&
+            sky->spectral_index.private_location == location &&
+            sky->rel_l.private_location == location &&
+            sky->rel_m.private_location == location &&
+            sky->rel_n.private_location == location);
+}
+
+int oskar_sky_model_location(const oskar_SkyModel* sky)
+{
+    if (sky == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (oskar_sky_model_is_location(sky, OSKAR_LOCATION_CPU))
+        return OSKAR_LOCATION_CPU;
+    else if (oskar_sky_model_is_location(sky, OSKAR_LOCATION_GPU))
+        return OSKAR_LOCATION_GPU;
+    else
+        return OSKAR_ERR_BAD_LOCATION;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SKY_MODEL_COMPUTE_RELATIVE_LMN_H_ */
