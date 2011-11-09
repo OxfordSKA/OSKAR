@@ -45,10 +45,10 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
-    if (K->n_sources() != sky->num_sources ||
-            K->n_stations() != u->n_elements() ||
-            K->n_stations() != v->n_elements() ||
-            K->n_stations() != w->n_elements())
+    if (K->num_sources() != sky->num_sources ||
+            K->num_stations() != u->num_elements() ||
+            K->num_stations() != v->num_elements() ||
+            K->num_stations() != w->num_elements())
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.
@@ -88,8 +88,8 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
     }
 
     // Get data sizes.
-    const int n_sources  = K->n_sources();
-    const int n_stations = K->n_stations();
+    const int n_sources  = K->num_sources();
+    const int n_stations = K->num_stations();
 
     // Evaluate Jones matrix.
     if (K->type() == OSKAR_SINGLE_COMPLEX)

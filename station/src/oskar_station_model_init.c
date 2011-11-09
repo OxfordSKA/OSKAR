@@ -56,7 +56,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->altitude = 0.0;
     model->ra0 = 0.0;
     model->dec0 = 0.0;
-    model->n_elements = n_elements;
+    model->num_elements = n_elements;
 
     /* Initialise the memory. */
     err = oskar_mem_init(&model->x, type, location, n_elements, 1);

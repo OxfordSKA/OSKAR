@@ -66,7 +66,7 @@ int oskar_mem_free(oskar_Mem* mem)
     }
     mem->data = NULL;
     mem->private_location = 0;
-    mem->private_n_elements = 0;
+    mem->private_num_elements = 0;
     mem->private_type = 0;
     mem->private_owner = 0;
     return err;

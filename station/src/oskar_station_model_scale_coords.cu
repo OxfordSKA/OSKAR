@@ -42,7 +42,7 @@ int oskar_station_model_scale_coords(oskar_StationModel* station,
     if (station->coord_location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    int num_antennas = station->n_elements;
+    int num_antennas = station->num_elements;
     int num_threads = 256;
     int num_blocks  = (num_antennas + num_threads - 1) / num_threads;
 

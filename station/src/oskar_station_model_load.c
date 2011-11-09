@@ -114,7 +114,7 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
     }
 
     /* Record the number of elements loaded. */
-    station->n_elements = n;
+    station->num_elements = n;
 
     /* Free the line buffer and close the file. */
     if (line) free(line);

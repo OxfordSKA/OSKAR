@@ -51,9 +51,9 @@ struct double4c;
  * or GPU, and defines the type of the data that it points to.
  *
  * If using C++, then the meta-data is made private, and accessor methods
- * are also provided. The C++ interface also provides facility for the structure
- * to take ownership of the memory. If the value of the private_owner member
- * variable flag is set to true the memory will automatically be released
+ * are provided. The C++ interface also provides a facility for the structure
+ * to take ownership of the memory: If the value of the private_owner member
+ * variable is set to true, the memory will be released automatically
  * when the structure is deleted.
  */
 #ifdef __cplusplus
@@ -65,17 +65,16 @@ struct oskar_Mem
 /* If C++, then make the meta-data private. */
 private:
 #endif
-    int private_type;
-    int private_location;
-    int private_n_elements;
-    int private_owner;      // Bool flag specifying if the C++ interface should
-                            // take ownership of the memory.
+    int private_type; /**< Enumerated element type of memory block. */
+    int private_location; /**< Address space of data pointer. */
+    int private_num_elements; /**< Number of elements in memory block. */
+    int private_owner; /**< Flag set if the structure owns the memory. */
 
 #ifdef __cplusplus
 /* If C++, then make the remaining members public. */
 public:
 #endif
-    void* data; /**< Data pointer.  */
+    void* data; /**< Data pointer. */
 
 #ifdef __cplusplus
     /* If C++, then provide constructors and a destructor. */
@@ -181,7 +180,7 @@ public:
     /* If C++, then provide read-only accessor functions for the meta-data. */
     int type() const {return private_type;}
     int location() const {return private_location;}
-    int n_elements() const {return private_n_elements;}
+    int num_elements() const {return private_num_elements;}
     bool owner() const { return private_owner; }
     bool is_double() const;
     bool is_single() const;
@@ -217,11 +216,9 @@ typedef struct oskar_Mem oskar_Mem;
 enum {
     /* Scalar single (float): bit 0 set. */
     OSKAR_SINGLE                 = 0x0001,
-//    OSKAR_SINGLE                 = 0x010F, /* (float)    scalar, float */
 
     /* Scalar double (double): bit 1 set. */
     OSKAR_DOUBLE                 = 0x0002,
-//    OSKAR_DOUBLE                 = 0x010D, /* (double)   scalar, double */
 
     /* Complex flag: bits 6 and 7 set. */
     OSKAR_COMPLEX                = 0x00C0,
@@ -231,19 +228,15 @@ enum {
 
     /* Scalar complex single (float2). */
     OSKAR_SINGLE_COMPLEX         = OSKAR_SINGLE | OSKAR_COMPLEX,
-//    OSKAR_SINGLE_COMPLEX         = 0x01CF, /* (float2)   scalar, complex float */
 
     /* Scalar complex double (double2). */
     OSKAR_DOUBLE_COMPLEX         = OSKAR_DOUBLE | OSKAR_COMPLEX,
-//    OSKAR_DOUBLE_COMPLEX         = 0x01CD, /* (double2)  scalar, complex double */
 
     /* Matrix complex float (float4c). */
     OSKAR_SINGLE_COMPLEX_MATRIX  = OSKAR_SINGLE | OSKAR_COMPLEX | OSKAR_MATRIX,
-//    OSKAR_SINGLE_COMPLEX_MATRIX  = 0x04CF, /* (float4c)  matrix, complex float */
 
     /* Matrix complex double (double4c). */
     OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX,
-//    OSKAR_DOUBLE_COMPLEX_MATRIX  = 0x04CD  /* (double4c) matrix, complex double */
 };
 
 enum {

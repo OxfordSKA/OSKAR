@@ -48,12 +48,12 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
     if (j3->ptr.data == NULL) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Get the dimensions of the input data.
-    int n_sources1 = j1->n_sources();
-    int n_sources2 = j2->n_sources();
-    int n_sources3 = j3->n_sources();
-    int n_stations1 = j1->n_stations();
-    int n_stations2 = j2->n_stations();
-    int n_stations3 = j3->n_stations();
+    int n_sources1 = j1->num_sources();
+    int n_sources2 = j2->num_sources();
+    int n_sources3 = j3->num_sources();
+    int n_stations1 = j1->num_stations();
+    int n_stations2 = j2->num_stations();
+    int n_stations3 = j3->num_stations();
 
     // Check the data dimensions.
     if (n_sources1 != n_sources2 || n_sources1 != n_sources3)

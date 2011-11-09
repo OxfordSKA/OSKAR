@@ -61,7 +61,7 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     if (error) return error;
 
     /* Copy the meta data. */
-    dst->n_elements = src->n_elements;
+    dst->num_elements = src->num_elements;
     dst->longitude = src->longitude;
     dst->latitude = src->latitude;
     dst->altitude = src->altitude;

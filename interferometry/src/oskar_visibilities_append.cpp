@@ -35,10 +35,10 @@ int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* 
     int error = 0;
 
     int num_samples = src->num_baselines * src->num_times * src->num_channels;
-    if (num_samples > src->baseline_u.n_elements() ||
-            num_samples > src->baseline_v.n_elements() ||
-            num_samples > src->baseline_w.n_elements() ||
-            num_samples > src->amplitude.n_elements())
+    if (num_samples > src->baseline_u.num_elements() ||
+            num_samples > src->baseline_v.num_elements() ||
+            num_samples > src->baseline_w.num_elements() ||
+            num_samples > src->amplitude.num_elements())
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }

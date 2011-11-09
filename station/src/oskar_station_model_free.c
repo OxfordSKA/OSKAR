@@ -78,7 +78,7 @@ int oskar_station_model_free(oskar_StationModel* model)
     if (model->child)
     {
     	int i = 0;
-    	for (i = 0; i < model->n_elements; ++i)
+    	for (i = 0; i < model->num_elements; ++i)
     	{
     		error = oskar_station_model_free(&(model->child[i]));
     		if (error) return error;
@@ -90,7 +90,7 @@ int oskar_station_model_free(oskar_StationModel* model)
     }
 
     /* Clear remaining parameters. */
-    model->n_elements = 0;
+    model->num_elements = 0;
     model->parent = NULL;
     model->longitude = 0.0;
     model->latitude = 0.0;

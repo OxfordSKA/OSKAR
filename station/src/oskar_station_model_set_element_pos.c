@@ -43,7 +43,7 @@ int oskar_station_model_set_element_pos(oskar_StationModel* dst,
     int type, location;
 
     /* Check range. */
-    if (index >= dst->n_elements)
+    if (index >= dst->num_elements)
         return OSKAR_ERR_OUT_OF_RANGE;
 
     /* Get the data type. */

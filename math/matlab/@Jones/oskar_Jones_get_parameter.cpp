@@ -47,12 +47,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (strcmp(parameter_string, "num_stations") == 0)
     {
         out[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetPr(out[0])) = J->n_stations();
+        *((int*)mxGetPr(out[0])) = J->num_stations();
     }
     else if (strcmp(parameter_string, "num_sources") == 0)
     {
         out[0] = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-        *((int*)mxGetPr(out[0])) = J->n_sources();
+        *((int*)mxGetPr(out[0])) = J->num_sources();
     }
     else if (strcmp(parameter_string, "format") == 0)
     {

@@ -71,7 +71,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         return OSKAR_ERR_BAD_LOCATION;
 
     // Resize the work buffer if needed.
-    if (work->real.n_elements() < 3 * sky->num_sources)
+    if (work->real.num_elements() < 3 * sky->num_sources)
     {
         error = work->real.resize(3 * sky->num_sources);
         if (error) return error;
@@ -117,7 +117,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
 
         // Copy E for station 0 into memory for other stations.
         oskar_Mem E_station;
-        size_t mem_size = E->n_sources() * oskar_mem_element_size(E->type());
+        size_t mem_size = E->num_sources() * oskar_mem_element_size(E->type());
         for (int i = 1; i < telescope->num_stations; ++i)
         {
             error = oskar_jones_get_station_pointer(&E_station, E, i);

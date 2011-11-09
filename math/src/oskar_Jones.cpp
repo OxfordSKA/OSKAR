@@ -32,16 +32,17 @@
 #include "utility/oskar_mem_copy.h"
 #include <cstdlib>
 
-oskar_Jones::oskar_Jones(int type, int location, int n_stations, int n_sources)
-: private_n_stations(n_stations),
-  private_n_sources(n_sources),
-  ptr(type, location, n_sources * n_stations)
+oskar_Jones::oskar_Jones(int type, int location, int num_stations,
+		int num_sources)
+: private_num_stations(num_stations),
+  private_num_sources(num_sources),
+  ptr(type, location, num_sources * num_stations)
 {
 }
 
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
-: private_n_stations(other->n_stations()),
-  private_n_sources(other->n_sources()),
+: private_num_stations(other->num_stations()),
+  private_num_sources(other->num_sources()),
   ptr(&other->ptr, location)
 {
 }

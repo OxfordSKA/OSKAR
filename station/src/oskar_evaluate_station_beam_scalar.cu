@@ -57,15 +57,15 @@ int oskar_evalate_station_beam_scalar(oskar_Mem* beam,
         return OSKAR_ERR_BAD_UNITS;
 
     // Resize the weights work array if needed.
-    if (weights->n_elements() != station->n_elements)
+    if (weights->num_elements() != station->num_elements)
     {
-        int error = weights->resize(station->n_elements);
+        int error = weights->resize(station->num_elements);
         if (error) return error;
     }
 
-    int num_antennas = station->n_elements;
+    int num_antennas = station->num_elements;
     size_t element_size = oskar_mem_element_size(beam->type());
-    int num_sources = l->n_elements();
+    int num_sources = l->num_elements();
 
     // Double precision.
     if (beam->type() == OSKAR_DOUBLE_COMPLEX &&

@@ -54,7 +54,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
     if (element_size == 0)
         return OSKAR_ERR_BAD_DATA_TYPE;
     new_size = num_elements * element_size;
-    old_size = mem->private_n_elements * element_size;
+    old_size = mem->private_num_elements * element_size;
 
     /* Check memory location. */
     if (mem->private_location == OSKAR_LOCATION_CPU)
@@ -67,7 +67,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 
         /* Set the new meta-data. */
         mem->data = mem_new;
-        mem->private_n_elements = num_elements;
+        mem->private_num_elements = num_elements;
     }
     else if (mem->private_location == OSKAR_LOCATION_GPU)
     {
@@ -86,7 +86,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 
         /* Set the new meta-data. */
         mem->data = mem_new;
-        mem->private_n_elements = num_elements;
+        mem->private_num_elements = num_elements;
     }
     else
     {

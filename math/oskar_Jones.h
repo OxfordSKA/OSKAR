@@ -54,20 +54,20 @@ extern "C"
 struct oskar_Jones
 {
 #ifdef __cplusplus
-// If C++, then make the meta-data private.
+/* If C++, then make the meta-data private. */
 private:
 #endif
-    int private_n_stations; ///< Slowest varying dimension.
-    int private_n_sources;  ///< Fastest varying dimension.
+    int private_num_stations; /**< Slowest varying dimension. */
+    int private_num_sources;  /**< Fastest varying dimension. */
 
 #ifdef __cplusplus
-// If C++, then make the remaining members public.
+/* If C++, then make the remaining members public. */
 public:
 #endif
-    oskar_Mem ptr; ///< Pointer to the matrix data.
+    oskar_Mem ptr; /**< Pointer to the matrix data. */
 
 #ifdef __cplusplus
-    // If C++, then provide constructors, a destructor and methods.
+    /* If C++, then provide constructors, a destructor and methods. */
     /**
      * @brief Constructs and allocates data for an oskar_Jones data structure.
      *
@@ -77,10 +77,10 @@ public:
      *
      * @param[in] type Enumerated data type of memory contents (magic number).
      * @param[in] location Enumerated memory location (magic number).
-     * @param[in] n_stations Number of elements in the station dimension.
-     * @param[in] n_sources Number of elements in the source dimension.
+     * @param[in] num_stations Number of elements in the station dimension.
+     * @param[in] num_sources Number of elements in the source dimension.
      */
-    oskar_Jones(int type, int location, int n_stations, int n_sources);
+    oskar_Jones(int type, int location, int num_stations, int num_sources);
 
     /**
      * @brief Copies an oskar_Jones data structure.
@@ -150,12 +150,12 @@ public:
     int set_real_scalar(double scalar);
 
     int type() const {return ptr.type();}
-    int n_sources() const {return private_n_sources;}
-    int n_stations() const {return private_n_stations;}
+    int num_sources() const {return private_num_sources;}
+    int num_stations() const {return private_num_stations;}
     int location() const {return ptr.location();}
 #endif
 };
 
 typedef struct oskar_Jones oskar_Jones;
 
-#endif // OSKAR_JONES_H_
+#endif /* OSKAR_JONES_H_ */

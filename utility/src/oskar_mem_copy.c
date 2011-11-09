@@ -53,8 +53,8 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Get the meta-data. */
-    n_elements_src = src->private_n_elements;
-    n_elements_dst = dst->private_n_elements;
+    n_elements_src = src->private_num_elements;
+    n_elements_dst = dst->private_num_elements;
     type_src = src->private_type;
     type_dst = dst->private_type;
     location_src = src->private_location;
@@ -71,7 +71,7 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     /* Make a copy of the pointer. */
     if (dst->private_owner == OSKAR_FALSE)
     {
-        error = oskar_mem_get_pointer(dst, src, 0, src->private_n_elements);
+        error = oskar_mem_get_pointer(dst, src, 0, src->private_num_elements);
         if (error) return error;
         return 0;
     }

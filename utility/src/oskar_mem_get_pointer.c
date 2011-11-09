@@ -44,13 +44,13 @@ int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
     if (ptr == NULL || src == 0)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (offset + num_elements > src->private_n_elements)
+    if (offset + num_elements > src->private_num_elements)
         return OSKAR_ERR_OUT_OF_RANGE;
 
     element_size = oskar_mem_element_size(src->private_type);
     offset_bytes = offset * element_size;
     ptr->private_type = src->private_type;
-    ptr->private_n_elements = num_elements;
+    ptr->private_num_elements = num_elements;
     ptr->data = (void*)((char*)src->data + offset_bytes);
     ptr->private_location = src->private_location;
     ptr->private_owner = OSKAR_FALSE;

@@ -81,10 +81,10 @@ void oskar_Visibilties_test::test_create()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis.baseline_w.type());
         CPPUNIT_ASSERT_EQUAL(4, vis.num_polarisations());
         CPPUNIT_ASSERT_EQUAL(num_times * num_baselines * num_channels, vis.num_samples());
-        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.amplitude.n_elements());
-        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_u.n_elements());
-        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_v.n_elements());
-        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_w.n_elements());
+        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.amplitude.num_elements());
+        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_u.num_elements());
+        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_v.num_elements());
+        CPPUNIT_ASSERT_EQUAL(vis.num_samples(), vis.baseline_w.num_elements());
 
         oskar_Visibilities vis2;
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2.location());
@@ -94,7 +94,7 @@ void oskar_Visibilties_test::test_create()
         CPPUNIT_ASSERT_EQUAL(0, vis2.num_samples());
         CPPUNIT_ASSERT(vis2.baseline_u.data == NULL);
         CPPUNIT_ASSERT(vis2.amplitude.data == NULL);
-        CPPUNIT_ASSERT_EQUAL(0, vis2.baseline_u.n_elements());
+        CPPUNIT_ASSERT_EQUAL(0, vis2.baseline_u.num_elements());
     }
     {
         // Construct visibility data on the GPU and check accessor methods.

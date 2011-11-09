@@ -112,7 +112,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         num_values *= dims[i];
     }
 
-    size_t mem_size_old = J->n_sources() * J->n_stations();
+    size_t mem_size_old = J->num_sources() * J->num_stations();
     mem_size_old *= oskar_mem_element_size(J->type());
 
     size_t mem_size_new = (type == OSKAR_DOUBLE) ? num_values * sizeof(double2) :

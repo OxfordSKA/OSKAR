@@ -865,7 +865,7 @@ void JonesTest::check_matrix_matrix(const oskar_Jones* jones,
             new oskar_Jones(jones, 0) : jones;
 
     // Check the contents of the host buffer.
-    int n = jones->n_sources() * jones->n_stations();
+    int n = jones->num_sources() * jones->num_stations();
     if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
         float4c* ptr = (float4c*)temp->ptr.data;
@@ -922,7 +922,7 @@ void JonesTest::check_matrix_scalar(const oskar_Jones* jones,
             new oskar_Jones(jones, 0) : jones;
 
     // Check the contents of the host buffer.
-    int n = jones->n_sources() * jones->n_stations();
+    int n = jones->num_sources() * jones->num_stations();
     if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
         float4c* ptr = (float4c*)temp->ptr.data;
@@ -976,7 +976,7 @@ void JonesTest::check_scalar_scalar(const oskar_Jones* jones,
             new oskar_Jones(jones, 0) : jones;
 
     // Check the contents of the host buffer.
-    int n = jones->n_sources() * jones->n_stations();
+    int n = jones->num_sources() * jones->num_stations();
     if (jones->type() == OSKAR_SINGLE_COMPLEX)
     {
         float2* ptr = (float2*)temp->ptr.data;

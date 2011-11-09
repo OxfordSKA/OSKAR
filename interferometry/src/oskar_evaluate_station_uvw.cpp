@@ -48,12 +48,12 @@ int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
-    if (u->n_elements() != n_stations ||
-            v->n_elements() != n_stations ||
-            w->n_elements() != n_stations ||
-            telescope->station_x.n_elements() != n_stations ||
-            telescope->station_y.n_elements() != n_stations ||
-            telescope->station_z.n_elements() != n_stations)
+    if (u->num_elements() != n_stations ||
+            v->num_elements() != n_stations ||
+            w->num_elements() != n_stations ||
+            telescope->station_x.num_elements() != n_stations ||
+            telescope->station_y.num_elements() != n_stations ||
+            telescope->station_z.num_elements() != n_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.

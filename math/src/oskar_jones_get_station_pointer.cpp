@@ -36,7 +36,7 @@ extern "C" {
 int oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
         const int station_index)
 {
-    int num_sources = J->n_sources();
+    int num_sources = J->num_sources();
     int offset = station_index * num_sources;
     return oskar_mem_get_pointer(J_station, &J->ptr, offset, num_sources);
 }

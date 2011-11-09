@@ -48,7 +48,7 @@ int oskar_mem_clear_contents(oskar_Mem* mem)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Compute the size. */
-    size = mem->private_n_elements * oskar_mem_element_size(mem->private_type);
+    size = mem->private_num_elements * oskar_mem_element_size(mem->private_type);
 
     /* Clear the memory. */
     if (mem->private_location == OSKAR_LOCATION_CPU)

@@ -109,7 +109,7 @@ void oskar_TelescopeModelTest::test_load_telescope_cpu()
         {
             sprintf(station_name, "%s_%d.dat", station_base, i);
             CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station(i, station_name));
-            CPPUNIT_ASSERT_EQUAL(n_elements, tel_cpu->station[i].n_elements);
+            CPPUNIT_ASSERT_EQUAL(n_elements, tel_cpu->station[i].num_elements);
         }
 
         // Copy telescope structure to GPU.

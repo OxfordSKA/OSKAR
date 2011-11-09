@@ -46,7 +46,7 @@ extern "C"
 #endif
 struct oskar_StationModel
 {
-    int n_elements;
+    int num_elements;
     oskar_StationModel* child;  /**< NULL when there are no child stations. */
     oskar_StationModel* parent; /**< Pointer to station's parent (NULL if none). */
     oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */

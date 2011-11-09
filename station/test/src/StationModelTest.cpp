@@ -74,7 +74,7 @@ void StationModelTest::test_load_single()
     oskar_station_model_load(&station_model, filename);
 
     // Check the coordinates.
-    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.n_elements);
+    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);
     for (int i = 0; i < n_elements; ++i)
     {
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,
@@ -123,7 +123,7 @@ void StationModelTest::test_load_double()
     oskar_station_model_load(&station_model, filename);
 
     // Check the coordinates.
-    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.n_elements);
+    CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);
     for (int i = 0; i < n_elements; ++i)
     {
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,

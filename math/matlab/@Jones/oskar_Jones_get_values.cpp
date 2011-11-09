@@ -46,8 +46,8 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
 
     int type         = J->type();
-    int num_stations = J->n_stations();
-    int num_sources  = J->n_sources();
+    int num_stations = J->num_stations();
+    int num_sources  = J->num_sources();
     mxArray* values  = NULL;
 
     // Copy back to CPU if needed.

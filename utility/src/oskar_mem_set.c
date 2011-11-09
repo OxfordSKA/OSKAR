@@ -48,7 +48,7 @@ int oskar_mem_set(oskar_Mem* dst, const void* src, int src_type,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Compute the sizes. */
-    dst_size = dst->private_n_elements *
+    dst_size = dst->private_num_elements *
             oskar_mem_element_size(dst->private_type);
     src_size = src_num_elements * oskar_mem_element_size(src_type);
 
@@ -59,7 +59,7 @@ int oskar_mem_set(oskar_Mem* dst, const void* src, int src_type,
         error = oskar_mem_free(dst);
         if (error != 0) return error;
         dst->private_location   = location;
-        dst->private_n_elements = src_num_elements;
+        dst->private_num_elements = src_num_elements;
         dst->private_type       = src_type;
         error = oskar_mem_alloc(dst);
         if (error != 0) return error;

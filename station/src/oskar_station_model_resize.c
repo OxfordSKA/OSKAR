@@ -38,7 +38,7 @@ int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
     int error = 0;
 
     /* Set the new number of elements. */
-    station->n_elements = n_elements;
+    station->num_elements = n_elements;
 
     /* Resize the model data. */
     error = oskar_mem_realloc(&station->x, n_elements);

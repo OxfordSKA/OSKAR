@@ -166,8 +166,8 @@ void SkyModelTest::test_load()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky->type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, sky->location());
         CPPUNIT_ASSERT_EQUAL(num_sources, num_sources);
-        CPPUNIT_ASSERT_EQUAL(num_sources, sky->RA.n_elements());
-        CPPUNIT_ASSERT_EQUAL(num_sources, sky->rel_l.n_elements());
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky->RA.num_elements());
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky->rel_l.num_elements());
 
         // Check the data loaded correctly.
         for (int i = 0; i < num_sources; ++i)
@@ -211,8 +211,8 @@ void SkyModelTest::test_load()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky_gpu->type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky_gpu->location());
         CPPUNIT_ASSERT_EQUAL(num_sources, num_sources);
-        CPPUNIT_ASSERT_EQUAL(num_sources, sky_gpu->RA.n_elements());
-        CPPUNIT_ASSERT_EQUAL(num_sources, sky_gpu->rel_l.n_elements());
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky_gpu->RA.num_elements());
+        CPPUNIT_ASSERT_EQUAL(num_sources, sky_gpu->rel_l.num_elements());
 
         // Copy the sky model back to the CPU and free the GPU version.
         oskar_SkyModel sky_cpu(sky_gpu, OSKAR_LOCATION_CPU);

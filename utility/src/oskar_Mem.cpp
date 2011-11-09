@@ -39,7 +39,7 @@
 oskar_Mem::oskar_Mem(int owner)
 : private_type(0),
   private_location(0),
-  private_n_elements(0),
+  private_num_elements(0),
   private_owner(owner),
   data(NULL)
 {
@@ -48,7 +48,7 @@ oskar_Mem::oskar_Mem(int owner)
 oskar_Mem::oskar_Mem(int type, int location, int n_elements, int owner)
 : private_type(0),
   private_location(0),
-  private_n_elements(0),
+  private_num_elements(0),
   private_owner(0),
   data(NULL)
 {
@@ -59,11 +59,11 @@ oskar_Mem::oskar_Mem(int type, int location, int n_elements, int owner)
 oskar_Mem::oskar_Mem(const oskar_Mem* other, int location, int owner)
 : private_type(0),
   private_location(0),
-  private_n_elements(0),
+  private_num_elements(0),
   private_owner(0),
   data(NULL)
 {
-    if (oskar_mem_init(this, other->type(), location, other->n_elements(),
+    if (oskar_mem_init(this, other->type(), location, other->num_elements(),
             owner))
         throw "Error in oskar_mem_init.";
     if (oskar_mem_copy(this, other)) // Copy other to this.

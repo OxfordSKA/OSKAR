@@ -47,7 +47,7 @@ int oskar_mem_alloc(oskar_Mem* mem)
     if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Get the meta-data. */
-    n_elements = mem->private_n_elements;
+    n_elements = mem->private_num_elements;
     location = mem->private_location;
     type = mem->private_type;
 

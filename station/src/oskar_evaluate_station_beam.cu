@@ -82,8 +82,8 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-    if (l->n_elements() != E->n_elements() ||
-            m->n_elements() != E->n_elements())
+    if (l->num_elements() != E->num_elements() ||
+            m->num_elements() != E->num_elements())
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
@@ -93,9 +93,9 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     // Resize the weights work array if needed.
-    if (weights->n_elements() != station->n_elements)
+    if (weights->num_elements() != station->num_elements)
     {
-        int error = weights->resize(station->n_elements);
+        int error = weights->resize(station->num_elements);
         if (error) return error;
     }
 

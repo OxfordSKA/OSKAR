@@ -38,8 +38,8 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
     if (jones == NULL) return -1;
 
     // Get the meta-data.
-    int n_sources = jones->n_sources();
-    int n_stations = jones->n_stations();
+    int n_sources = jones->num_sources();
+    int n_stations = jones->num_stations();
     int location = jones->location();
     int type = jones->type();
     int err = 0;

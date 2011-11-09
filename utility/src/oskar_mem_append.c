@@ -57,10 +57,10 @@ int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
     /* Memory size being appended and offset into memory to append to. */
     element_size = oskar_mem_element_size(to->private_type);
     mem_size = num_elements * element_size;
-    offset_bytes = to->private_n_elements * element_size;
+    offset_bytes = to->private_num_elements * element_size;
 
     /* Reallocate the memory pointer so it is big enough to append to. */
-    error = oskar_mem_realloc(to, num_elements + to->private_n_elements);
+    error = oskar_mem_realloc(to, num_elements + to->private_num_elements);
     if (error != 0) return error;
 
     /* Append to the memory. */

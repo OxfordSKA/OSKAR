@@ -59,9 +59,9 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
     }
 
     // Make sure the work arrays are long enough.
-    if (l->n_elements() != num_sources ||
-            m->n_elements() != num_sources ||
-            n->n_elements() != num_sources)
+    if (l->num_elements() != num_sources ||
+            m->num_elements() != num_sources ||
+            n->num_elements() != num_sources)
     {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
     }

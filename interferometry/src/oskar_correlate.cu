@@ -67,12 +67,12 @@ int oskar_correlate(oskar_Visibilities* vis, const oskar_Jones* J,
     // Check the input dimensions.
     int n_stations = telescope->num_stations;
     int n_sources = sky->num_sources;
-    if (J->n_sources() != n_sources || u->n_elements() != n_stations ||
-            v->n_elements() != n_stations)
+    if (J->num_sources() != n_sources || u->num_elements() != n_stations ||
+            v->num_elements() != n_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check there is enough space for the result.
-    if (vis->amplitude.n_elements() < n_stations * (n_stations - 1) / 2)
+    if (vis->amplitude.num_elements() < n_stations * (n_stations - 1) / 2)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Get bandwidth-smearing term.

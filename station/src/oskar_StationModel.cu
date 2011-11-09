@@ -47,7 +47,7 @@
 
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
-: n_elements(n_elements),
+: num_elements(n_elements),
   child(NULL),
   parent(NULL),
   element_pattern(NULL)
@@ -58,13 +58,13 @@ oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
 
 oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
         int location)
-: n_elements(other->n_elements),
+: num_elements(other->num_elements),
   child(NULL),
   parent(NULL),
   element_pattern(NULL)
 {
     if (oskar_station_model_init(this, other->x.type(), location,
-            other->n_elements))
+            other->num_elements))
         throw "error in oskar_station_model_init";
     if (oskar_station_model_copy(this, other))
         throw "error in oskar_station_model_copy";

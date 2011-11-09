@@ -43,8 +43,8 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
-    if (R->n_sources() != sky->num_sources ||
-            R->n_stations() != telescope->num_stations)
+    if (R->num_sources() != sky->num_sources ||
+            R->num_stations() != telescope->num_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.
@@ -70,8 +70,8 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
     }
 
     // Get data sizes.
-    int n_sources  = R->n_sources();
-    int n_stations = R->n_stations();
+    int n_sources  = R->num_sources();
+    int n_stations = R->num_stations();
 
     // Define block and grid sizes.
     const int n_thd_f = 256;

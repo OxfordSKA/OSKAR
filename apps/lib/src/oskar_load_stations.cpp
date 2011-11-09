@@ -69,10 +69,10 @@ int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
     *identical_stations = true;
 
     // 1. Check if they have the same number of antennas.
-    int num_antennas_station0 = station[0].n_elements;
+    int num_antennas_station0 = station[0].num_elements;
     for (int i = 0; i < num_stations; ++i)
     {
-        if (station[i].n_elements != num_antennas_station0)
+        if (station[i].num_elements != num_antennas_station0)
         {
             *identical_stations = false;
             break;
@@ -87,7 +87,7 @@ int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
         for (int j = 0; j < num_stations; ++j)
         {
             oskar_StationModel* s = &station[j];
-            int bytes = s->n_elements * oskar_mem_element_size(s->type());
+            int bytes = s->num_elements * oskar_mem_element_size(s->type());
             for (int i = 0; i < bytes; ++i)
             {
                 if (((char*)(station0->x))[i] != ((char*)(s->x))[i] ||

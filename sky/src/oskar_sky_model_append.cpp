@@ -39,14 +39,14 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
 
     int num_sources = src->num_sources;
 
-    if (num_sources > src->RA.n_elements()  ||
-        num_sources > src->Dec.n_elements() ||
-        num_sources > src->I.n_elements() ||
-        num_sources > src->Q.n_elements() ||
-        num_sources > src->U.n_elements() ||
-        num_sources > src->V.n_elements() ||
-        num_sources > src->reference_freq.n_elements() ||
-        num_sources > src->spectral_index.n_elements())
+    if (num_sources > src->RA.num_elements()  ||
+        num_sources > src->Dec.num_elements() ||
+        num_sources > src->I.num_elements() ||
+        num_sources > src->Q.num_elements() ||
+        num_sources > src->U.num_elements() ||
+        num_sources > src->V.num_elements() ||
+        num_sources > src->reference_freq.num_elements() ||
+        num_sources > src->spectral_index.num_elements())
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }

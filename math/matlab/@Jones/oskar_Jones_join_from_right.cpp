@@ -48,12 +48,12 @@ void mexFunction(int num_out,  mxArray** /*out*/, int num_in, const mxArray** in
     oskar_Jones* Jthis  = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
     oskar_Jones* Jother = covert_mxArray_to_pointer<oskar_Jones>(in[1]);
 
-    if (Jthis->n_sources() != Jother->n_sources())
+    if (Jthis->num_sources() != Jother->num_sources())
     {
         mexErrMsgTxt("Unable to join two matrices with different source dimensions!");
     }
 
-    if (Jthis->n_stations() != Jother->n_stations())
+    if (Jthis->num_stations() != Jother->num_stations())
     {
         mexErrMsgTxt("Unable to join two matrices with different station dimensions!");
     }
