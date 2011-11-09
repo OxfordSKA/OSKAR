@@ -1,13 +1,14 @@
 #include <mex.h>
 #include "math/oskar_SphericalPositions.h"
-#include <vector>
 #include <cmath>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-// DEPRECATED
+//
+// DEPRECATED yes, BUT don't yet delete as some version of this is still useful.
+//
 // Interface function - can call anything from here...
 //
 // nlhs = The number of left-hand arguments, or the size of the plhs array.

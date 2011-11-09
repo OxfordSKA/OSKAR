@@ -378,7 +378,7 @@ void oskar_Visibilties_test::test_read_write()
 {
     int num_times        = 10;
     int num_baselines    = 20;
-    int num_channels     = 4;
+    int num_channels     = 1;
     int amp_type         = OSKAR_SINGLE_COMPLEX;
     const char* filename = "vis_temp.dat";
 
@@ -440,7 +440,7 @@ void oskar_Visibilties_test::test_read_write()
     }
 
     // Delete temporary file.
-    remove(filename);
+//    remove(filename);
 }
 
 

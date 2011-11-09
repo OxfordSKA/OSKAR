@@ -60,6 +60,9 @@
  * array determines the number of polarisations stored in the data. Scalar elements
  * represent a single polarisation axis whereas matrix elements store 4 polarisations
  * per data sample.
+ *
+ * FIXME Channel dimension is probably wrong - to ensure future compatibility
+ * only use with 1 channel until this is resolved!
  */
 #ifdef __cplusplus
 extern "C"
