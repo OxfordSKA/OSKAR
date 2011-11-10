@@ -47,6 +47,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <QtCore/QByteArray>
 
 oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings);
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings);
@@ -196,8 +197,8 @@ int main(int argc, char** argv)
     // Write global visibilities to disk.
     if (!settings.obs().oskar_vis_filename().isEmpty())
     {
-        const char* outname = settings.obs().oskar_vis_filename().toAscii().constData();
-        printf("--> Writing visibility file: '%s'\n", outname);
+        QByteArray outname = settings.obs().oskar_vis_filename().toAscii();
+        printf("--> Writing visibility file: '%s'\n", outname.constData());
         err = vis_global.write(outname);
         if (err) oskar_exit(err);
     }
@@ -214,10 +215,10 @@ int main(int argc, char** argv)
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 {
     // Load sky model into CPU structure.
-    oskar_SkyModel *sky;
+    QByteArray sky_file = settings.sky_file().toAscii();
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
-    int err = sky->load(settings.sky_file().toAscii().constData());
+    oskar_SkyModel *sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
+    int err = sky->load(sky_file.constData());
     if (err) oskar_exit(err);
 
     // Compute source direction cosines relative to phase centre.
@@ -227,7 +228,7 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 
     // Print summary data.
     printf("\n");
-    printf("= Sky (%s)\n", settings.sky_file().toLatin1().data());
+    printf("= Sky (%s)\n", sky_file.constData());
     printf("  - Num. sources           = %u\n", sky->num_sources);
     printf("\n");
 
@@ -239,10 +240,11 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
 {
     // Load telescope model into CPU structure.
     oskar_TelescopeModel *telescope;
+    QByteArray telescope_file = settings.telescope_file().toAscii();
+    QByteArray station_dir = settings.station_dir().toAscii();
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
-    int err = telescope->load_station_pos(
-            settings.telescope_file().toAscii().constData(),
+    int err = telescope->load_station_pos(telescope_file.constData(),
             settings.longitude_rad(), settings.latitude_rad(),
             settings.altitude_m());
     if (err) oskar_exit(err);
@@ -250,7 +252,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     // Load stations from directory.
     err = oskar_load_stations(telescope->station,
             &(telescope->identical_stations), telescope->num_stations,
-            settings.station_dir().toAscii().constData());
+            station_dir.constData());
     if (err) oskar_exit(err);
 
     // Set phase centre.
@@ -270,7 +272,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
 
     // Print summary data.
     printf("\n");
-    printf("= Telescope (%s)\n", settings.telescope_file().toLatin1().data());
+    printf("= Telescope (%s)\n", telescope_file.constData());
     printf("  - Num. stations          = %u\n", telescope->num_stations);
     printf("  - Identical stations     = %s\n",
             telescope->identical_stations ? "true" : "false");

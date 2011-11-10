@@ -61,8 +61,8 @@ int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
     // Load the station data.
     for (int i = 0; i < num_stations; ++i)
     {
-        const char* filename = files.at(i).absoluteFilePath().toLatin1().data();
-        station[i].load(filename);
+    	QByteArray filename = files.at(i).absoluteFilePath().toAscii();
+        station[i].load(filename.constData());
     }
 
     // Check if stations are all the same.
