@@ -174,7 +174,7 @@ int main(int argc, char** argv)
         }
 
         // Compute u,v,w coordinates of mid point.
-        double gast = t_dump + j * dt_dump + dt_dump / 2.0;
+        double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
         err = oskar_evaluate_station_uvw(&u_cpu, &v_cpu, &w_cpu, tel_cpu, gast);
         if (err) oskar_exit(err);
 
