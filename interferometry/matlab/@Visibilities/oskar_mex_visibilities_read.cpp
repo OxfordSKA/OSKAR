@@ -40,10 +40,8 @@ extern "C" {
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-//    if (num_in != 1 || num_out != 1)
-//        mexErrMsgTxt("Usage: vis = oskar_visibilities_read(filename)");
-    if (num_in != 1 || num_out < 4)
-        mexErrMsgTxt("Usage: [uu vv ww xx xy yx yy] = oskar_visibilities_read(filename)");
+    if (num_in != 1 || num_out != 1)
+        mexErrMsgTxt("Usage: vis = oskar_visibilities_read(filename)");
 
     // Extract arguments from MATLAB mxArray objects.
     const char* filename = mxArrayToString(in[0]);
@@ -168,36 +166,27 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
     }
 
-
-    out[0] = uu;
-    out[1] = vv;
-    out[2] = ww;
-    out[3] = xx;
-
-//    // Create and populate output visibility structure.
-//    if (num_pols == 4)
-//    {
-//        const char* fields[7] = {"uu", "vv", "ww", "xx", "xy", "yx", "yy"};
-//        out[0] = mxCreateStructMatrix(1, 1, 7, fields);
-//        mxSetField(out[0], 1, "uu", uu);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "uu"), uu);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "vv"), vv);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "ww"), ww);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "xx"), xx);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "xy"), xy);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "yx"), yx);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "yy"), yy);
-//    }
-//    else
-//    {
-//        const char* fields[4] = {"uu", "vv", "ww", "xx"};
-//        out[0] = mxCreateStructMatrix(1, 1, 4, fields);
-//        mxSetField(out[0], 1, "uu", uu);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "uu"), uu);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "vv"), vv);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "ww"), ww);
-////        mxSetFieldByNumber(out[0], 1, mxGetFieldNumber(out[0], "xx"), xx);
-//    }
+    // Create and populate output visibility structure.
+    if (num_pols == 4)
+    {
+        const char* fields[7] = {"uu", "vv", "ww", "xx", "xy", "yx", "yy"};
+        out[0] = mxCreateStructMatrix(1, 1, 7, fields);
+    }
+    else
+    {
+        const char* fields[4] = {"uu", "vv", "ww", "xx"};
+        out[0] = mxCreateStructMatrix(1, 1, 4, fields);
+    }
+    mxSetField(out[0], 0, "uu", uu);
+    mxSetField(out[0], 0, "vv", vv);
+    mxSetField(out[0], 0, "ww", ww);
+    mxSetField(out[0], 0, "xx", xx);
+    if (num_pols == 4)
+    {
+        mxSetField(out[0], 0, "xy", xy);
+        mxSetField(out[0], 0, "yx", yx);
+        mxSetField(out[0], 0, "yy", yy);
+    }
 
     // Clean up local memory.
     delete vis;

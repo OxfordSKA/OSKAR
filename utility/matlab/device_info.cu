@@ -47,19 +47,19 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** /*in*/)
         cudaError_t error = cudaPeekAtLastError();
         mxArray* error_code = mxCreateNumericMatrix(1,1, mxINT32_CLASS, mxREAL);
         *(int*)mxGetData(error_code) = (int)error;
-        mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "error_code"), error_code);
+        mxSetField(out[0], i, "error_code", error_code);
         mxArray* error_message = mxCreateString(cudaGetErrorString(error));
-        mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "error_message"), error_message);
+        mxSetField(out[0], i, "error_message", error_message);
 
         // Find if double is supported.
         cudaDeviceProp device_prop;
         cudaGetDeviceProperties(&device_prop, i);
-        mxArray* double_support = mxCreateNumericMatrix(1,1, mxLOGICAL_CLASS, mxREAL);
+        mxArray* double_support = mxCreateNumericMatrix(1, 1, mxLOGICAL_CLASS, mxREAL);
         if (device_prop.major >= 2 || device_prop.minor >= 3)
             *mxGetLogicals(double_support) = true;
         else
             *mxGetLogicals(double_support) = false;
-        mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "double_support"), double_support);
+        mxSetField(out[0], i, "double_support", double_support);
 
         // Get memory into and populate mem_free and mem_total fields.
         mxArray* mem_free  = mxCreateNumericMatrix(1,1, mxINT64_CLASS, mxREAL);
@@ -67,8 +67,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** /*in*/)
         size_t* free  = (size_t*)mxGetData(mem_free);
         size_t* total = (size_t*)mxGetData(mem_total);
         cudaMemGetInfo(free, total);
-        mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_free"), mem_free);
-        mxSetFieldByNumber(out[0], i, mxGetFieldNumber(out[0], "mem_total"), mem_total);
+        mxSetField(out[0], i, "mem_free", mem_free);
+        mxSetField(out[0], i, "mem_total", mem_total);
     }
     cudaSetDevice(device_id);
 }
