@@ -4,7 +4,7 @@
 
 set(apps_SRC
     src/oskar_load_stations.cpp
-    src/oskar_load_telescope.cpp
+    src/oskar_load_telescope.cpp # Deprecated.
     src/oskar_Settings.cpp
     src/oskar_SettingsImage.cpp
     src/oskar_SettingsObservation.cpp
