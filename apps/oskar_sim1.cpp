@@ -171,7 +171,11 @@ int main(int argc, char** argv)
                 err = oskar_correlate(&vis, &J, tel_gpu, sky_gpu, &u, &v);
                 if (err) oskar_exit(err);
             }
+
+            // TODO Divide visibilities by number of fringe averages.
         }
+
+        // TODO Divide visibilities by number of time averages.
 
         // Compute u,v,w coordinates of mid point.
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
