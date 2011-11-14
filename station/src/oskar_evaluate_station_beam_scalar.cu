@@ -45,7 +45,7 @@
 extern "C" {
 #endif
 
-int oskar_evalate_station_beam_scalar(oskar_Mem* beam,
+int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         const oskar_StationModel* station, const double l_beam,
         const double m_beam, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* weights)

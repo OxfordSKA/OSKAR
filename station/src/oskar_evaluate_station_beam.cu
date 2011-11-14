@@ -104,7 +104,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     // No element pattern data. Assume isotropic antenna elements.
     if (station->element_pattern == NULL && E->is_scalar())
     {
-        oskar_evalate_station_beam_scalar(E, station, l_beam, m_beam,
+        oskar_evaluate_station_beam_scalar(E, station, l_beam, m_beam,
                 l, m, n, weights);
     }
 
