@@ -99,6 +99,7 @@ int sim1_d(const oskar_Settings& settings)
     // ============== Load input data =========================================
     oskar_SkyModelGlobal_d sky;
     oskar_sky_model_load_d(settings.sky_file().toLatin1().data(), &sky);
+    printf("Sky model contains %d sources.\n", sky.num_sources);
 
     oskar_TelescopeModel_d telescope;
     oskar_load_telescope_d(settings.telescope_file().toLatin1().data(),
@@ -188,6 +189,7 @@ int sim1_f(const oskar_Settings& settings)
     // ============== Load input data =========================================
     oskar_SkyModelGlobal_f sky;
     oskar_sky_model_load_f(settings.sky_file().toLatin1().data(), &sky);
+    printf("Sky model contains %d sources.\n", sky.num_sources);
 
     oskar_TelescopeModel_f telescope;
     oskar_load_telescope_f(settings.telescope_file().toLatin1().data(),

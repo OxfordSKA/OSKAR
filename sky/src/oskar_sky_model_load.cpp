@@ -165,8 +165,6 @@ void oskar_sky_model_load_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
     sky->reference_freq = NULL;
     sky->spectral_index = NULL;
 
-    double ra, dec, I, Q, U, V, ref_freq, spectral_index;
-
     char line[1024];
     while (fgets(line, sizeof(line), file))
     {
@@ -174,14 +172,13 @@ void oskar_sky_model_load_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
         if (line[0] == '#') continue;
 
         // Load source co-ordinates.
-        int read = sscanf(line, "%lf %lf %lf %lf %lf %lf %lf %lf",
-                &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
-
-        if (read != 8) continue;
+        double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        int read = oskar_string_to_array_d(line, 8, par);
+        if (read < 3) continue;
 
         // Convert coordinates to radians.
-        ra  *= deg2rad;
-        dec *= deg2rad;
+        par[0] *= deg2rad;
+        par[1] *= deg2rad;
 
         // Ensure enough space in arrays.
         if (sky->num_sources % 100 == 0)
@@ -197,14 +194,14 @@ void oskar_sky_model_load_d(const char* file_path, oskar_SkyModelGlobal_d* sky)
             sky->spectral_index = (double*) realloc(sky->spectral_index, mem_size);
         }
 
-        sky->RA[sky->num_sources]  = ra;
-        sky->Dec[sky->num_sources] = dec;
-        sky->I[sky->num_sources]   = I;
-        sky->Q[sky->num_sources]   = Q;
-        sky->U[sky->num_sources]   = U;
-        sky->V[sky->num_sources]   = V;
-        sky->reference_freq[sky->num_sources] = ref_freq;
-        sky->spectral_index[sky->num_sources] = spectral_index;
+        sky->RA[sky->num_sources]  = par[0];
+        sky->Dec[sky->num_sources] = par[1];
+        sky->I[sky->num_sources]   = par[2];
+        sky->Q[sky->num_sources]   = par[3];
+        sky->U[sky->num_sources]   = par[4];
+        sky->V[sky->num_sources]   = par[5];
+        sky->reference_freq[sky->num_sources] = par[6];
+        sky->spectral_index[sky->num_sources] = par[7];
         sky->num_sources++;
     }
     fclose(file);
@@ -229,8 +226,6 @@ void oskar_sky_model_load_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
     sky->reference_freq = NULL;
     sky->spectral_index = NULL;
 
-    float ra, dec, I, Q, U, V, spectral_index, ref_freq;
-
     char line[1024];
     while (fgets(line, sizeof(line), file))
     {
@@ -238,14 +233,13 @@ void oskar_sky_model_load_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
         if (line[0] == '#') continue;
 
         // Load source co-ordinates.
-        int read = sscanf(line, "%f %f %f %f %f %f %f %f",
-                &ra, &dec, &I, &Q, &U, &V, &ref_freq, &spectral_index);
-
-        if (read != 8) continue;
+        double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+        int read = oskar_string_to_array_d(line, 8, par);
+        if (read < 3) continue;
 
         // Convert coordinates to radians.
-        ra  *= deg2rad;
-        dec *= deg2rad;
+        par[0] *= deg2rad;
+        par[1] *= deg2rad;
 
         // Ensure enough space in arrays.
         if (sky->num_sources % 100 == 0)
@@ -261,14 +255,14 @@ void oskar_sky_model_load_f(const char* file_path, oskar_SkyModelGlobal_f* sky)
             sky->spectral_index = (float*) realloc(sky->spectral_index, mem_size);
         }
 
-        sky->RA[sky->num_sources]  = ra;
-        sky->Dec[sky->num_sources] = dec;
-        sky->I[sky->num_sources]   = I;
-        sky->Q[sky->num_sources]   = Q;
-        sky->U[sky->num_sources]   = U;
-        sky->V[sky->num_sources]   = V;
-        sky->reference_freq[sky->num_sources] = ref_freq;
-        sky->spectral_index[sky->num_sources] = spectral_index;
+        sky->RA[sky->num_sources]  = float(par[0]);
+        sky->Dec[sky->num_sources] = float(par[1]);
+        sky->I[sky->num_sources]   = float(par[2]);
+        sky->Q[sky->num_sources]   = float(par[3]);
+        sky->U[sky->num_sources]   = float(par[4]);
+        sky->V[sky->num_sources]   = float(par[5]);
+        sky->reference_freq[sky->num_sources] = float(par[6]);
+        sky->spectral_index[sky->num_sources] = float(par[7]);
         sky->num_sources++;
     }
     fclose(file);

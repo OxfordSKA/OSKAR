@@ -48,6 +48,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <QtCore/QByteArray>
+#include <QtCore/QTime>
 
 oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings);
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings);
@@ -70,6 +71,9 @@ int main(int argc, char** argv)
 
     // Set the precision.
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
+
+    QTime timer;
+    timer.start();
 
     // Get the sky model and telescope model.
     oskar_SkyModel *sky_cpu, *sky_gpu;
@@ -212,6 +216,8 @@ int main(int argc, char** argv)
     delete sky_gpu;
     delete tel_gpu;
     delete tel_cpu;
+
+    printf("=== Completed simulation after %f seconds.\n", timer.elapsed() / 1.0e3);
 
     return EXIT_SUCCESS;
 }
