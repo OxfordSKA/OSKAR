@@ -86,14 +86,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Evaluate the and check consistency of data precision.
     int type = 0;
     if (mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
-            mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
-            mxGetClassID(in[0]) == mxDOUBLE_CLASS)
+            mxGetClassID(in[1]) == mxDOUBLE_CLASS &&
+            mxGetClassID(in[2]) == mxDOUBLE_CLASS)
     {
         type = OSKAR_DOUBLE;
     }
     else if (mxGetClassID(in[0]) == mxSINGLE_CLASS &&
-            mxGetClassID(in[0]) == mxSINGLE_CLASS &&
-            mxGetClassID(in[0]) == mxSINGLE_CLASS)
+            mxGetClassID(in[1]) == mxSINGLE_CLASS &&
+            mxGetClassID(in[2]) == mxSINGLE_CLASS)
     {
         type = OSKAR_SINGLE;
     }
@@ -105,11 +105,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Evaluate the number of visibility samples are in the data.
     int num_baselines = mxGetM(in[0]);
     int num_times     = mxGetN(in[0]);
-
     if (num_baselines != (int)mxGetM(in[1]) ||
             num_baselines != (int)mxGetM(in[2]) ||
             num_times != (int)mxGetN(in[1]) ||
-            num_times != (int)mxGetN(in[1]))
+            num_times != (int)mxGetN(in[2]))
     {
         mexErrMsgTxt("Dimension mismatch in input data.");
     }
