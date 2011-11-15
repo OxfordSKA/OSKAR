@@ -28,9 +28,12 @@
 
 
 #include <mex.h>
+#include <cuda_runtime_api.h>
+#include <vector_functions.h>
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
+#include "math/oskar_cuda_dft_c2r_2d.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 
@@ -54,51 +57,74 @@ using namespace std;
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in != 7 || num_out > 1)
+    // NOTE work out how to handle channels?
+    // NOTE pass vis structure instead and make images for all pols?
+    // NOTE treatment of time and frequency info in structure?
+    // NOTE allow optional arguments of uu, vv, amp or structure?
+
+    if (num_in != 6 || num_out > 1)
     {
-        // TODO pass vis structure instead and make images for all pols?
-        // TODO treatment of time and frequency info in structure?
-        // TODO allow optional arguments of uu,vv,amp or structure?
-        mexErrMsgTxt("Usage: image = oskar_make_dirty_image(uu, vv, ww,"
+        mexErrMsgTxt("Usage: image = oskar_make_dirty_image(uu, vv,"
                 " amp, frequency_hz, num_pixels, field_of_view_deg)");
     }
 
+    // Make sure visibility data array is complex.
+    if (!mxIsComplex(in[2]))
+        mexErrMsgTxt("Input visibility amplitude array must be complex");
+
     // Retrieve scalar arguments.
-    double freq_hz = mxGetScalar(in[5]);
-    int image_size = (int)mxGetScalar(in[6]);
-    double fov_deg = mxGetScalar(in[7]);
+    double freq_hz = mxGetScalar(in[3]);
+    int image_size = (int)mxGetScalar(in[4]);
+    double fov_deg = mxGetScalar(in[5]);
+    double m_to_wavenumbers = 2.0 * M_PI * freq_hz / c_0;
 
     // Image parameters.
     double lm_max = sin(fov_deg * M_PI / 180.0);
     int num_pixels = image_size * image_size;
 
-    // Evaluate the data precision.
-    int type = (mxGetClassID(in[0]) == mxDOUBLE_CLASS) ?
-            OSKAR_DOUBLE : OSKAR_SINGLE;
-    // TODO type consistency of vv, ww, and amp arrays ?
+    // Evaluate the and check consistency of data precision.
+    int type;
+    if (mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
+            mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
+            mxGetClassID(in[0]) == mxDOUBLE_CLASS)
+    {
+        type = OSKAR_DOUBLE;
+    }
+    else if (mxGetClassID(in[0]) == mxSINGLE_CLASS &&
+            mxGetClassID(in[0]) == mxSINGLE_CLASS &&
+            mxGetClassID(in[0]) == mxSINGLE_CLASS)
+    {
+        type = OSKAR_SINGLE;
+    }
+    else
+    {
+        mexErrMsgTxt("uu, vv and amplitudes must be of the same type");
+    }
 
     // Evaluate the number of visibility samples are in the data.
-    // TODO how to handle channels?
-    // TODO dimension consistency of vv, ww, and amp arrays ?
-    int m = mxGetM(in[0]); // times?
-    int n = mxGetN(in[0]); // baselines ?
-    mexPrintf("m = %i n = %i\n", m, n);
-    int num_samples = m * n;
+    int num_baselines = mxGetM(in[0]);
+    int num_times     = mxGetN(in[0]);
+
+    if (num_baselines != mxGetM(in[1]) || num_baselines != mxGetM(in[2]) ||
+            num_times != mxGetN(in[1]) || num_times != mxGetN(in[1]))
+    {
+        mexErrMsgTxt("Dimension mismatch in input data.");
+    }
+
+    int num_samples   = num_baselines * num_times;
 
     if (type == OSKAR_DOUBLE)
     {
         double* uu = (double*)mxGetData(in[0]);
         double* vv = (double*)mxGetData(in[1]);
-        double* ww = (double*)mxGetData(in[2]);
-
-        // TODO scale uu,vv,ww to wave-number units
-
-        double* re = (double*)mxGetPr(in[3]);
-        double* im = (double*)mxGetPi(in[4]);
-        double2* amp = (double2)malloc(num_samples * sizeof(double2));
+        double* re = (double*)mxGetPr(in[2]);
+        double* im = (double*)mxGetPi(in[2]);
+        double2* amp = (double2*)malloc(num_samples * sizeof(double2));
         for (int i = 0; i < num_samples; ++i)
         {
             amp[i] = make_double2(re[i], im[i]);
+            uu[i] *= m_to_wavenumbers;
+            vv[i] *= m_to_wavenumbers;
         }
 
         // Allocate memory for image and image coordinates.
@@ -113,20 +139,20 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Copy memory to the GPU.
         double *d_l, *d_m, *d_uu, *d_vv, *d_amp;
-        cudaMalloc(&d_l, num_pixels * sizeof(double));
-        cudaMalloc(&d_m, num_pixels * sizeof(double));
+        cudaMalloc((void**)&d_l, num_pixels * sizeof(double));
+        cudaMalloc((void**)&d_m, num_pixels * sizeof(double));
         cudaMemcpy(d_l, l, num_pixels * sizeof(double), cudaMemcpyHostToDevice);
         cudaMemcpy(d_m, m, num_pixels * sizeof(double), cudaMemcpyHostToDevice);
-        cudaMalloc(&d_uu, num_samples * sizeof(double));
-        cudaMalloc(&d_vv, num_samples * sizeof(double));
-        cudaMalloc(&d_amp, num_samples * sizeof(double2));
+        cudaMalloc((void**)&d_uu, num_samples * sizeof(double));
+        cudaMalloc((void**)&d_vv, num_samples * sizeof(double));
+        cudaMalloc((void**)&d_amp, num_samples * sizeof(double2));
         cudaMemcpy(d_uu, uu, num_samples * sizeof(double), cudaMemcpyHostToDevice);
         cudaMemcpy(d_vv, vv, num_samples * sizeof(double), cudaMemcpyHostToDevice);
         cudaMemcpy(d_amp, amp, num_samples * sizeof(double2), cudaMemcpyHostToDevice);
 
         // Allocate device memory for the image.
         double* d_image;
-        cudaMalloc(&d_image, num_pixels * sizeof(double));
+        cudaMalloc((void**)&d_image, num_pixels * sizeof(double));
 
         // DFT.
         oskar_cuda_dft_c2r_2d_d(num_samples, d_uu, d_vv, d_amp, num_pixels,
@@ -135,7 +161,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         // Copy back image
         cudaMemcpy(image, d_image, num_pixels * sizeof(double), cudaMemcpyDeviceToHost);
 
-        // TODO Scale image by number of vis? - can do this on the GPU!?
+        // TODO Scale image by number of vis?
 
         // Clean up memory
         free(lm);
@@ -152,16 +178,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         float* uu = (float*)mxGetData(in[0]);
         float* vv = (float*)mxGetData(in[1]);
-        float* ww = (float*)mxGetData(in[2]);
-
-        // TODO scale uu,vv,ww to wave-number units
-
-        float* re = (float*)mxGetPr(in[3]);
-        float* im = (float*)mxGetPi(in[4]);
-        float2* amp = (float2)malloc(num_samples * sizeof(float2));
+        float* re = (float*)mxGetPr(in[2]);
+        float* im = (float*)mxGetPi(in[2]);
+        float2* amp = (float2*)malloc(num_samples * sizeof(float2));
         for (int i = 0; i < num_samples; ++i)
         {
             amp[i] = make_float2(re[i], im[i]);
+            uu[i] *= (float)m_to_wavenumbers;
+            vv[i] *= (float)m_to_wavenumbers;
         }
 
         // Allocate memory for image and coordinate grid.
@@ -176,26 +200,26 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Copy memory to the GPU.
         float *d_l, *d_m, *d_uu, *d_vv, *d_amp;
-        cudaMalloc(&d_l, num_pixels * sizeof(float));
-        cudaMalloc(&d_m, num_pixels * sizeof(float));
+        cudaMalloc((void**)&d_l, num_pixels * sizeof(float));
+        cudaMalloc((void**)&d_m, num_pixels * sizeof(float));
         cudaMemcpy(d_l, l, num_pixels * sizeof(float), cudaMemcpyHostToDevice);
         cudaMemcpy(d_m, m, num_pixels * sizeof(float), cudaMemcpyHostToDevice);
-        cudaMalloc(&d_uu, num_samples * sizeof(float));
-        cudaMalloc(&d_vv, num_samples * sizeof(float));
-        cudaMalloc(&d_amp, num_samples * sizeof(float2));
+        cudaMalloc((void**)&d_uu, num_samples * sizeof(float));
+        cudaMalloc((void**)&d_vv, num_samples * sizeof(float));
+        cudaMalloc((void**)&d_amp, num_samples * sizeof(float2));
         cudaMemcpy(d_uu, uu, num_samples * sizeof(float), cudaMemcpyHostToDevice);
         cudaMemcpy(d_vv, vv, num_samples * sizeof(float), cudaMemcpyHostToDevice);
         cudaMemcpy(d_amp, amp, num_samples * sizeof(float2), cudaMemcpyHostToDevice);
 
         // Allocate device memory for the image.
         float* d_image;
-        cudaMalloc(&d_image, num_pixels * sizeof(float));
+        cudaMalloc((void**)&d_image, num_pixels * sizeof(float));
 
         // DFT
         oskar_cuda_dft_c2r_2d_f(num_samples, d_uu, d_vv, d_amp, num_pixels,
                 d_l, d_m, d_image);
 
-        // TODO Scale image by number of vis? - can do this on the GPU!?
+        // TODO Scale image by number of vis?
 
         // Copy back image
         cudaMemcpy(image, d_image, num_pixels * sizeof(float), cudaMemcpyDeviceToHost);
@@ -212,5 +236,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         cudaFree(d_image);
     }
 
-    // TODO plotting. ?!
+    // TODO put image in a structure with meta-data for field of view and frequency?
+
+    mexCallMATLAB(0, 0, 0, 0, "figure");
+    mexCallMATLAB(0, 0, 1, &out[0], "imagesc");
 }
