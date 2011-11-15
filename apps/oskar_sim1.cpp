@@ -121,7 +121,7 @@ int main(int argc, char** argv)
 
     // Create the global visibility structure on the CPU.
     oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
-            num_vis_dumps, n_baselines, 1);
+            1, num_vis_dumps, n_baselines);
 
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)
