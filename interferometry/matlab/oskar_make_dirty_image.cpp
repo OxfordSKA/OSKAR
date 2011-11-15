@@ -84,7 +84,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int num_pixels = image_size * image_size;
 
     // Evaluate the and check consistency of data precision.
-    int type;
+    int type = 0;
     if (mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
             mxGetClassID(in[0]) == mxDOUBLE_CLASS &&
             mxGetClassID(in[0]) == mxDOUBLE_CLASS)
@@ -106,13 +106,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int num_baselines = mxGetM(in[0]);
     int num_times     = mxGetN(in[0]);
 
-    if (num_baselines != mxGetM(in[1]) || num_baselines != mxGetM(in[2]) ||
-            num_times != mxGetN(in[1]) || num_times != mxGetN(in[1]))
+    if (num_baselines != (int)mxGetM(in[1]) ||
+            num_baselines != (int)mxGetM(in[2]) ||
+            num_times != (int)mxGetN(in[1]) ||
+            num_times != (int)mxGetN(in[1]))
     {
         mexErrMsgTxt("Dimension mismatch in input data.");
     }
 
-    int num_samples   = num_baselines * num_times;
+    int num_samples = num_baselines * num_times;
 
     if (type == OSKAR_DOUBLE)
     {
@@ -162,12 +164,17 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         // Copy back image
         cudaMemcpy(image, d_image, num_pixels * sizeof(double), cudaMemcpyDeviceToHost);
 
-        // TODO Scale image by number of vis?
+        // Scale by number of data samples.
+        for (int i = 0; i < num_pixels; ++i)
+        {
+            image[i] /= (double)num_samples;
+        }
 
         // Clean up memory
         free(lm);
         free(l);
         free(m);
+        free(amp);
         cudaFree(d_l);
         cudaFree(d_m);
         cudaFree(d_uu);
@@ -175,7 +182,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         cudaFree(d_amp);
         cudaFree(d_image);
     }
-    else
+    else if (type == OSKAR_SINGLE)
     {
         float* uu = (float*)mxGetData(in[0]);
         float* vv = (float*)mxGetData(in[1]);
@@ -220,21 +227,30 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_cuda_dft_c2r_2d_f(num_samples, d_uu, d_vv, d_amp, num_pixels,
                 d_l, d_m, d_image);
 
-        // TODO Scale image by number of vis?
-
         // Copy back image
         cudaMemcpy(image, d_image, num_pixels * sizeof(float), cudaMemcpyDeviceToHost);
+
+        // Scale by number of data samples.
+        for (int i = 0; i < num_pixels; ++i)
+        {
+            image[i] /= (float)num_samples;
+        }
 
         // Clean up memory
         free(lm);
         free(l);
         free(m);
+        free(amp);
         cudaFree(d_l);
         cudaFree(d_m);
         cudaFree(d_uu);
         cudaFree(d_vv);
         cudaFree(d_amp);
         cudaFree(d_image);
+    }
+    else
+    {
+        mexErrMsgTxt("Failed to run oskar_dirty_image.");
     }
 
 //    mexCallMATLAB(0, 0, 0, 0, "figure");
