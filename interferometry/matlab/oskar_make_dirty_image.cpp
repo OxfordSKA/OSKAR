@@ -57,10 +57,11 @@ using namespace std;
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    // NOTE work out how to handle channels?
-    // NOTE pass vis structure instead and make images for all pols?
-    // NOTE treatment of time and frequency info in structure?
-    // NOTE allow optional arguments of uu, vv, amp or structure?
+    // TODO work out how to handle channels?
+    // TODO pass vis structure instead and make images for all pols?
+    // TODO treatment of time and frequency info in structure?
+    // TODO allow optional arguments of uu, vv, amp or structure?
+    // TODO put image in a structure with meta-data for field of view and frequency?
 
     if (num_in != 6 || num_out > 1)
     {
@@ -236,8 +237,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         cudaFree(d_image);
     }
 
-    // TODO put image in a structure with meta-data for field of view and frequency?
-
-    mexCallMATLAB(0, 0, 0, 0, "figure");
-    mexCallMATLAB(0, 0, 1, &out[0], "imagesc");
+//    mexCallMATLAB(0, 0, 0, 0, "figure");
+//    mexCallMATLAB(0, 0, 1, &out[0], "imagesc");
 }
