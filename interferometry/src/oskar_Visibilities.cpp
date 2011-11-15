@@ -39,31 +39,32 @@
 #include "utility/oskar_Mem.h"
 #include <cstdio>
 
-oskar_Visibilities::oskar_Visibilities(const int amp_type, const int location,
-        const int num_times, const int num_baselines,
-        const int num_channels)
-: num_times(num_times),
-  num_baselines(num_baselines),
-  num_channels(num_channels)
+oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
+        int num_channels, int num_times, int num_baselines)
+: num_channels(num_channels),
+  num_times(num_times),
+  num_baselines(num_baselines)
+
 {
-    if (oskar_visibilities_init(this, amp_type, location, num_times,
-            num_baselines, num_channels))
+    if (oskar_visibilities_init(this, amp_type, location, num_channels,
+            num_times, num_baselines))
+    {
         throw "error allocation visibility structure";
+    }
 }
 
 // Copy constructor.
 oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
-        const int location)
-: num_times(other->num_times),
+        int location)
+: num_channels(other->num_channels),
+  num_times(other->num_times),
   num_baselines(other->num_baselines),
-  num_channels(other->num_channels),
-  baseline_u(&other->baseline_u, location),
-  baseline_v(&other->baseline_v, location),
-  baseline_w(&other->baseline_w, location),
+  uu_metres(&other->uu_metres, location),
+  vv_metres(&other->vv_metres, location),
+  ww_metres(&other->ww_metres, location),
   amplitude(&other->amplitude, location)
 {
 }
-
 
 oskar_Visibilities::~oskar_Visibilities()
 {
@@ -80,31 +81,30 @@ int oskar_Visibilities::clear_contents()
 }
 
 int oskar_Visibilities::insert(const oskar_Visibilities* other,
-        const unsigned time_index)
+        int channel_index, int time_index)
 {
-    return oskar_visibilities_insert(this, other, time_index);
+    return oskar_visibilities_insert(this, other, channel_index, time_index);
 }
-
 
 int oskar_Visibilities::write(const char* filename)
 {
     return oskar_visibilities_write(filename, this);
 }
 
-oskar_Visibilities* oskar_Visibilities::read(const char* filename)
+oskar_Visibilities* oskar_Visibilities::read(const char* filename, int* status)
 {
-    return oskar_visibilities_read(filename);
+    return oskar_visibilities_read(filename, status);
 }
 
-int oskar_Visibilities::resize(int num_times, int num_baselines, int num_channels)
+int oskar_Visibilities::resize(int num_channels, int num_times, int num_baselines)
 {
-    return oskar_visibilities_resize(this, num_times, num_baselines, num_channels);
+    return oskar_visibilities_resize(this, num_channels, num_times, num_baselines);
 }
 
-int oskar_Visibilities::init(int amp_type, int location, int num_times,
-        int num_baselines, int num_channels)
+int oskar_Visibilities::init(int amp_type, int location, int num_channels,
+        int num_times, int num_baselines)
 {
-    return oskar_visibilities_init(this, amp_type, location, num_times,
-            num_baselines, num_channels);
+    return oskar_visibilities_init(this, amp_type, location, num_channels,
+            num_times, num_baselines);
 }
 

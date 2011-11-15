@@ -36,10 +36,12 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-oskar_Visibilities* oskar_visibilities_read(const char* filename)
+oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
 {
     if (filename == NULL)
         return NULL;
+
+    if (status) *status = OSKAR_SUCCESS;
 
     // Open the file to write to.
     FILE* file;
@@ -48,9 +50,9 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename)
         return NULL;
 
     // Read header.
+    int num_channels  = 0;
     int num_times     = 0;
     int num_baselines = 0;
-    int num_channels  = 0;
     int coord_type    = 0;
     int amp_type      = 0;
     int oskar_vis_file_magic_number = 0;
@@ -59,77 +61,89 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename)
     if (fread(&oskar_vis_file_magic_number, sizeof(int), 1, file) != 1)
     {
         fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
     // Check the file data type magic number is correct.
     if (oskar_vis_file_magic_number != OSKAR_VIS_FILE_ID)
     {
         fclose(file);
+        if (status) *status = OSKAR_ERR_VERSION_MISMATCH;
         return NULL;
     }
     if (fread(&version, sizeof(int), 1, file) != 1)
     {
         fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
     // Check the OSKAR is compatible.
     if (version > OSKAR_VERSION)
     {
         fclose(file);
-        return NULL;
-    }
-    if (fread(&num_times, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        return NULL;
-    }
-    if (fread(&num_baselines, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
+        if (status) *status = OSKAR_ERR_VERSION_MISMATCH;
         return NULL;
     }
     if (fread(&num_channels, sizeof(int), 1, file) != 1)
     {
         fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
+        return NULL;
+    }
+    if (fread(&num_times, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
+        return NULL;
+    }
+    if (fread(&num_baselines, sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
     if (fread(&coord_type, sizeof(int), 1, file) != 1)
     {
         fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
     if (fread(&amp_type, sizeof(int), 1, file) != 1)
     {
         fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
 
     // Initialise the visibility structure.
     // Note: this will wipe any existing data in the structure.
     oskar_Visibilities* vis = new oskar_Visibilities(amp_type,
-            OSKAR_LOCATION_CPU, num_times, num_baselines, num_channels);
+            OSKAR_LOCATION_CPU, num_channels, num_times, num_baselines);
 
     // Read data.
     size_t num_samples        = vis->num_samples();
     size_t coord_element_size = oskar_mem_element_size(coord_type);
     size_t amp_element_size   = oskar_mem_element_size(amp_type);
-    if (fread(vis->baseline_u.data, coord_element_size, num_samples, file) != num_samples)
+    if (fread(vis->uu_metres.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
         delete vis;
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
-    if (fread(vis->baseline_v.data, coord_element_size, num_samples, file) != num_samples)
+    if (fread(vis->vv_metres.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
         delete vis;
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
 
-    if (fread(vis->baseline_w.data, coord_element_size, num_samples, file) != num_samples)
+    if (fread(vis->ww_metres.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
         delete vis;
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
 
@@ -137,6 +151,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename)
     {
         fclose(file);
         delete vis;
+        if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
 

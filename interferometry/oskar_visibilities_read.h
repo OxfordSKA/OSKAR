@@ -42,7 +42,8 @@
  * @details
  * Note: The loaded visibility structure will reside on the CPU.
  *
- * @param filename The filename to read from to.
+ * @param[in]  filename The filename to read from to.
+ * @param[out] status   Error code.
  *
  * @return A pointer to the new visibility structure.
  */
@@ -50,6 +51,7 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-oskar_Visibilities* oskar_visibilities_read(const char* filename);
+oskar_Visibilities* oskar_visibilities_read(const char* filename,
+        int* status = NULL);
 
 #endif /* OSKAR_VISIBILITIES_READ_H_ */

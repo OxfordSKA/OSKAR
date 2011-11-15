@@ -37,6 +37,9 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief Inserts the specified visibility structure at the specified
@@ -50,16 +53,22 @@
  * plus the number of times in the structure being inserted doesn't exceed
  * the number of times in the destination.
  *
- * @param
- * @param other Visibility structure to append.
+ * FIXME is this used for anything anymore? - if not deprecate it.
+ * NOTE This function is potentially dangerous as it allows for inserting
+ * data out of time and frequency order.
+ *
+ * @param[out] dst             Visibility structure to insert into.
+ * @param[in]  src             Visibility structure to insert.
+ * @param[in]  channel_index   Channel index which to insert at.
+ * @param[in]  time_index      Time index which to insert at.
  *
  * @return An error code.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
 int oskar_visibilities_insert(oskar_Visibilities* dst,
-        const oskar_Visibilities* src, int time_index);
+        const oskar_Visibilities* src, int channel_index, int time_index);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* OSKAR_VISIBILITIES_INSERT_H_ */

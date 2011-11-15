@@ -187,9 +187,9 @@ int main(int argc, char** argv)
         if (err) oskar_exit(err);
 
         // Extract pointers to baseline u,v,w coordinates for this dump.
-        bu = vis_global.baseline_u.get_pointer(j * n_baselines, n_baselines);
-        bv = vis_global.baseline_v.get_pointer(j * n_baselines, n_baselines);
-        bw = vis_global.baseline_w.get_pointer(j * n_baselines, n_baselines);
+        bu = vis_global.uu_metres.get_pointer(j * n_baselines, n_baselines);
+        bv = vis_global.vv_metres.get_pointer(j * n_baselines, n_baselines);
+        bw = vis_global.ww_metres.get_pointer(j * n_baselines, n_baselines);
         if (bu.data == NULL || bv.data == NULL || bw.data == NULL)
             oskar_exit(OSKAR_ERR_UNKNOWN);
 

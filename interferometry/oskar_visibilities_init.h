@@ -46,15 +46,15 @@
  * @param vis               Pointer to the visibility data structure to initialise.
  * @param amp_type          OSKAR memory type for the visibility amplitudes.
  * @param location          Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
+ * @param num_channels      Number of frequency channels.
  * @param num_times         Number of time samples.
  * @param num_baselines     Number of baselines.
- * @param num_channels      Number of frequency channels.
  */
 #ifdef __cplusplus
 extern "C"
 #endif
 OSKAR_EXPORT
 int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_times, int num_baselines, int num_channels);
+        int num_channels, int num_times, int num_baselines);
 
 #endif /* OSKAR_VISIBILITIES_INIT_H_ */

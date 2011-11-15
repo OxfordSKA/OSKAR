@@ -31,6 +31,7 @@
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_get_error_string.h"
 #include <cstdio>
 #include <cstdlib>
 
@@ -43,9 +44,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* filename = mxArrayToString(in[0]);
 
     // Load the OSKAR visibilities structure from the specified file.
-    oskar_Visibilities* vis = oskar_Visibilities::read(filename);
+    int status = OSKAR_SUCCESS;
+    oskar_Visibilities* vis = oskar_Visibilities::read(filename, &status);
     if (vis == NULL)
-        mexErrMsgTxt("Error reading specified OSKAR visibilities data file.");
+    {
+        mexErrMsgIdAndTxt("OSKAR:error",
+                "Error reading OSKAR visibilities data file: '%s'.\nERROR: %s.",
+                filename, oskar_get_error_string(status));
+    }
 
     if (vis->num_channels != 1)
         mexErrMsgTxt("Only one channel is currently supported");
@@ -64,11 +70,16 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxArray* ww = mxCreateNumericArray(num_dims, dims, class_id, mxREAL);
     mxArray* xx = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
     mxArray *yy = NULL, *xy = NULL, *yx = NULL;
+    mxArray *I = NULL, *Q = NULL, *U = NULL, *V = NULL;
     if (num_pols == 4)
     {
         xy = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
         yx = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
         yy = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
+        I  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
+        Q  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
+        U  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
+        V  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
     }
 
     mexPrintf("= Loading %i visibility samples\n",
@@ -85,6 +96,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         double *xy_re_ptr = NULL, *xy_im_ptr = NULL;
         double *yx_re_ptr = NULL, *yx_im_ptr = NULL;
         double *yy_re_ptr = NULL, *yy_im_ptr = NULL;
+        double *I_re_ptr  = NULL, *I_im_ptr = NULL;
+        double *Q_re_ptr  = NULL, *Q_im_ptr = NULL;
+        double *U_re_ptr  = NULL, *U_im_ptr = NULL;
+        double *V_re_ptr  = NULL, *V_im_ptr = NULL;
         if (num_pols == 4)
         {
             xy_re_ptr = (double*)mxGetPr(xy);
@@ -93,12 +108,20 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             yx_im_ptr = (double*)mxGetPi(yx);
             yy_re_ptr = (double*)mxGetPr(yy);
             yy_im_ptr = (double*)mxGetPi(yy);
+            I_re_ptr  = (double*)mxGetPr(I);
+            I_im_ptr  = (double*)mxGetPi(I);
+            Q_re_ptr  = (double*)mxGetPr(Q);
+            Q_im_ptr  = (double*)mxGetPi(Q);
+            U_re_ptr  = (double*)mxGetPr(U);
+            U_im_ptr  = (double*)mxGetPi(U);
+            V_re_ptr  = (double*)mxGetPr(V);
+            V_im_ptr  = (double*)mxGetPi(V);
         }
         for (int i = 0; i < vis->num_times * vis->num_baselines; ++i)
         {
-            uu_ptr[i] = ((double*)(vis->baseline_u.data))[i];
-            vv_ptr[i] = ((double*)(vis->baseline_v.data))[i];
-            ww_ptr[i] = ((double*)(vis->baseline_w.data))[i];
+            uu_ptr[i] = ((double*)(vis->uu_metres.data))[i];
+            vv_ptr[i] = ((double*)(vis->vv_metres.data))[i];
+            ww_ptr[i] = ((double*)(vis->ww_metres.data))[i];
 
             if (num_pols == 1)
             {
@@ -115,6 +138,22 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 yx_im_ptr[i] = ((double4c*)(vis->amplitude.data))[i].c.y;
                 yy_re_ptr[i] = ((double4c*)(vis->amplitude.data))[i].d.x;
                 yy_im_ptr[i] = ((double4c*)(vis->amplitude.data))[i].d.y;
+
+                // I = 0.5 (XX + YY)
+                I_re_ptr[i]  = 0.5 * (xx_re_ptr[i] + yy_re_ptr[i]);
+                I_im_ptr[i]  = 0.5 * (xx_im_ptr[i] + yy_im_ptr[i]);
+
+                // Q = 0.5 (XX - YY)
+                Q_re_ptr[i]  = 0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
+                Q_im_ptr[i]  = 0.5 * (xx_im_ptr[i] - yy_im_ptr[i]);
+
+                // U = 0.5 (XY + YX)
+                U_re_ptr[i]  = 0.5 * (xy_re_ptr[i] + yx_re_ptr[i]);
+                U_im_ptr[i]  = 0.5 * (xy_im_ptr[i] + yx_im_ptr[i]);
+
+                // U = -0.5i (XY - YX)
+                V_re_ptr[i]  = -0.5 * (xx_im_ptr[i] - yy_im_ptr[i]);
+                V_im_ptr[i]  =  0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
             }
         }
     }
@@ -128,6 +167,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         float *xy_re_ptr = NULL, *xy_im_ptr = NULL;
         float *yx_re_ptr = NULL, *yx_im_ptr = NULL;
         float *yy_re_ptr = NULL, *yy_im_ptr = NULL;
+        float *I_re_ptr  = NULL, *I_im_ptr = NULL;
+        float *Q_re_ptr  = NULL, *Q_im_ptr = NULL;
+        float *U_re_ptr  = NULL, *U_im_ptr = NULL;
+        float *V_re_ptr  = NULL, *V_im_ptr = NULL;
         if (num_pols == 4)
         {
             xy_re_ptr = (float*)mxGetPr(xy);
@@ -136,12 +179,21 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             yx_im_ptr = (float*)mxGetPi(yx);
             yy_re_ptr = (float*)mxGetPr(yy);
             yy_im_ptr = (float*)mxGetPi(yy);
+            I_re_ptr  = (float*)mxGetPr(I);
+            I_im_ptr  = (float*)mxGetPi(I);
+            Q_re_ptr  = (float*)mxGetPr(Q);
+            Q_im_ptr  = (float*)mxGetPi(Q);
+            U_re_ptr  = (float*)mxGetPr(U);
+            U_im_ptr  = (float*)mxGetPi(U);
+            V_re_ptr  = (float*)mxGetPr(V);
+            V_im_ptr  = (float*)mxGetPi(V);
+
         }
         for (int i = 0; i < vis->num_times * vis->num_baselines; ++i)
         {
-            uu_ptr[i] = ((float*)(vis->baseline_u.data))[i];
-            vv_ptr[i] = ((float*)(vis->baseline_v.data))[i];
-            ww_ptr[i] = ((float*)(vis->baseline_w.data))[i];
+            uu_ptr[i] = ((float*)(vis->uu_metres.data))[i];
+            vv_ptr[i] = ((float*)(vis->vv_metres.data))[i];
+            ww_ptr[i] = ((float*)(vis->ww_metres.data))[i];
 
             if (num_pols == 1)
             {
@@ -158,6 +210,22 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 yx_im_ptr[i] = ((float4c*)(vis->amplitude.data))[i].c.y;
                 yy_re_ptr[i] = ((float4c*)(vis->amplitude.data))[i].d.x;
                 yy_im_ptr[i] = ((float4c*)(vis->amplitude.data))[i].d.y;
+
+                // I = 0.5 (XX + YY)
+                I_re_ptr[i]  = 0.5 * (xx_re_ptr[i] + yy_re_ptr[i]);
+                I_im_ptr[i]  = 0.5 * (xx_im_ptr[i] + yy_im_ptr[i]);
+
+                // Q = 0.5 (XX - YY)
+                Q_re_ptr[i]  = 0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
+                Q_im_ptr[i]  = 0.5 * (xx_im_ptr[i] - yy_im_ptr[i]);
+
+                // U = 0.5 (XY + YX)
+                U_re_ptr[i]  = 0.5 * (xy_re_ptr[i] + yx_re_ptr[i]);
+                U_im_ptr[i]  = 0.5 * (xy_im_ptr[i] + yx_im_ptr[i]);
+
+                // U = -0.5i (XY - YX)
+                V_re_ptr[i]  = -0.5 * (xx_im_ptr[i] - yy_im_ptr[i]);
+                V_im_ptr[i]  =  0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
             }
         }
     }
@@ -165,8 +233,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Create and populate output visibility structure.
     if (num_pols == 4)
     {
-        const char* fields[7] = {"uu", "vv", "ww", "xx", "xy", "yx", "yy"};
-        out[0] = mxCreateStructMatrix(1, 1, 7, fields);
+        const char* fields[11] = {"uu", "vv", "ww", "xx", "xy", "yx", "yy",
+                "I", "Q", "U", "V"};
+        out[0] = mxCreateStructMatrix(1, 1, 11, fields);
     }
     else
     {
@@ -182,6 +251,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetField(out[0], 0, "xy", xy);
         mxSetField(out[0], 0, "yx", yx);
         mxSetField(out[0], 0, "yy", yy);
+        mxSetField(out[0], 0, "I", I);
+        mxSetField(out[0], 0, "Q", Q);
+        mxSetField(out[0], 0, "U", U);
+        mxSetField(out[0], 0, "V", V);
     }
 
     // Clean up local memory.

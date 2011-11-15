@@ -34,10 +34,10 @@ int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* 
 {
     int error = 0;
 
-    int num_samples = src->num_baselines * src->num_times * src->num_channels;
-    if (num_samples > src->baseline_u.num_elements() ||
-            num_samples > src->baseline_v.num_elements() ||
-            num_samples > src->baseline_w.num_elements() ||
+    int num_samples = src->num_channels * src->num_times * src->num_baselines;
+    if (num_samples > src->uu_metres.num_elements() ||
+            num_samples > src->vv_metres.num_elements() ||
+            num_samples > src->ww_metres.num_elements() ||
             num_samples > src->amplitude.num_elements())
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
@@ -45,10 +45,10 @@ int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* 
 
     // For the case of appending to a completely empty visibility structure
     // initialise its dimensions to the size of the data being appended.
-    if (dst->num_baselines == 0 && dst->num_channels == 0 && dst->num_times == 0)
+    if (dst->num_channels == 0 && dst->num_times == 0 && dst->num_baselines == 0)
     {
+        dst->num_channels  = src->num_channels;
         dst->num_baselines = src->num_baselines;
-        dst->num_channels = src->num_channels;
     }
 
 
@@ -57,22 +57,14 @@ int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* 
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    // NOTE: Appending visibilities for different numbers of channels in each
-    // structure is currently not allowed as it would require extra information
-    // on the channel id's being appended and some memory reorder.
-    if (dst->num_channels != src->num_channels)
-    {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-    }
-
-    error = dst->baseline_u.append(src->baseline_u.data, src->baseline_u.type(),
-            src->baseline_u.location(), num_samples);
+    error = dst->uu_metres.append(src->uu_metres.data, src->uu_metres.type(),
+            src->uu_metres.location(), num_samples);
     if (error) return error;
-    error = dst->baseline_v.append(src->baseline_v.data, src->baseline_v.type(),
-            src->baseline_v.location(), num_samples);
+    error = dst->vv_metres.append(src->vv_metres.data, src->vv_metres.type(),
+            src->vv_metres.location(), num_samples);
     if (error) return error;
-    error = dst->baseline_w.append(src->baseline_w.data, src->baseline_w.type(),
-            src->baseline_w.location(), num_samples);
+    error = dst->ww_metres.append(src->ww_metres.data, src->ww_metres.type(),
+            src->ww_metres.location(), num_samples);
     if (error) return error;
     error = dst->amplitude.append(src->amplitude.data, src->amplitude.type(),
             src->amplitude.location(), num_samples);

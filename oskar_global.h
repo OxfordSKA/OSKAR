@@ -65,6 +65,9 @@
  * Positive error codes indicate CUDA run-time execution errors.
  */
 enum {
+    /* Indicates that no error has occurred. */
+    OSKAR_SUCCESS                  = 0,
+
     /* Indicates that an end-of-file condition was encountered.
      * This is compatible with the standard C EOF macro (-1). */
     OSKAR_ERR_EOF                  = -1,

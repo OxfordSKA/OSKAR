@@ -41,10 +41,12 @@
  * @brief Appends the specified visibility structure.
  *
  * @details
- * The structure being appended must contain the same baseline
- * and channel dimensions are the structure being appended to. This
- * ensures memory order is preserved as the append simply allows
- * expansion of the outer time time dimension.
+ * Warning:
+ * - The additional visibilities are appended to the end of the
+ *   destination visibility structure at whatever channel this
+ *   corresponds to.
+ *
+ * NOTE This function is dangerous if using with more than one channel.
  *
  * @param src Visibility structure to append from.
  * @param dst Visibility structure to append to.
@@ -55,7 +57,8 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-int oskar_visibilties_append(oskar_Visibilities* dst, const oskar_Visibilities* src);
+int oskar_visibilties_append(oskar_Visibilities* dst,
+        const oskar_Visibilities* src);
 
 
 #endif /* OSKAR_VISIBILITIES_APPEND_H_ */

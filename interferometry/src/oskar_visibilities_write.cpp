@@ -53,7 +53,7 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
         return OSKAR_ERR_FILE_IO;
 
     // Local variables.
-    int coord_type = vis->baseline_u.type();
+    int coord_type = vis->uu_metres.type();
     int amp_type = vis->amplitude.type();
     size_t coord_element_size = oskar_mem_element_size(coord_type);
     size_t amp_element_size = oskar_mem_element_size(amp_type);
@@ -72,18 +72,17 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
+    if (fwrite(&(vis->num_channels), sizeof(int), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
     if (fwrite(&(vis->num_times), sizeof(int), 1, file) != 1)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
     if (fwrite(&(vis->num_baselines), sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        return OSKAR_ERR_FILE_IO;
-    }
-
-    if (fwrite(&(vis->num_channels), sizeof(int), 1, file) != 1)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
@@ -100,22 +99,22 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     }
 
     // Write data.
-    if (fwrite(vis->baseline_u.data, coord_element_size, num_samples, file) != num_samples)
+    if (fwrite(vis->uu_metres.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->baseline_v.data, coord_element_size, num_samples, file) != num_samples)
+    if (fwrite(vis->vv_metres.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->baseline_w.data, coord_element_size, num_samples, file) != num_samples)
+    if (fwrite(vis->ww_metres.data, coord_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->amplitude.data,  amp_element_size,   num_samples, file) != num_samples)
+    if (fwrite(vis->amplitude.data,  amp_element_size, num_samples, file) != num_samples)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;

@@ -35,12 +35,16 @@
 #include <cuda_runtime_api.h>
 
 int oskar_visibilities_insert(oskar_Visibilities* dst,
-        const oskar_Visibilities* src, int time_index)
+        const oskar_Visibilities* src, int channel_index, int time_index)
 {
     int error = 0;
 
     if (dst == NULL || src == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
+
+    // FIXME this function probably no longer works with new vis data ordering.
+    if (src->num_channels != 1)
+        return OSKAR_ERR_OUT_OF_RANGE;
 
     // Restrict the time index that can be inserted into to make sure
     // that the can be completely filled with zero overlap.
@@ -51,7 +55,7 @@ int oskar_visibilities_insert(oskar_Visibilities* dst,
     if (dst->amplitude.type() != src->amplitude.type())
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    if (dst->baseline_u.type() != src->baseline_u.type())
+    if (dst->uu_metres.type() != src->uu_metres.type())
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     if (dst->num_baselines != src-> num_baselines)
@@ -67,7 +71,7 @@ int oskar_visibilities_insert(oskar_Visibilities* dst,
     int num_channels     = dst->num_channels;
     int samples_per_time = num_baselines * num_channels;
     int index            = time_index * samples_per_time;
-    size_t element_size_uvw = oskar_mem_element_size(dst->baseline_u.type());
+    size_t element_size_uvw = oskar_mem_element_size(dst->uu_metres.type());
     size_t element_size_amp = oskar_mem_element_size(dst->amplitude.type());
 
     cudaMemcpyKind mem_copy_kind;
@@ -88,12 +92,12 @@ int oskar_visibilities_insert(oskar_Visibilities* dst,
 
     size_t offset = index * element_size_uvw;
     size_t mem_size = src->num_samples() * element_size_uvw;
-    cudaMemcpy((char*)(dst->baseline_u.data) + offset,
-            src->baseline_u.data, mem_size, mem_copy_kind);
-    cudaMemcpy((char*)(dst->baseline_v.data) + offset,
-            src->baseline_v.data, mem_size, mem_copy_kind);
-    cudaMemcpy((char*)(dst->baseline_w.data) + offset,
-            src->baseline_w.data, mem_size, mem_copy_kind);
+    cudaMemcpy((char*)(dst->uu_metres.data) + offset,
+            src->uu_metres.data, mem_size, mem_copy_kind);
+    cudaMemcpy((char*)(dst->vv_metres.data) + offset,
+            src->vv_metres.data, mem_size, mem_copy_kind);
+    cudaMemcpy((char*)(dst->ww_metres.data) + offset,
+            src->ww_metres.data, mem_size, mem_copy_kind);
     offset   = index * element_size_amp;
     mem_size = src->num_samples() * element_size_amp;
     cudaMemcpy((char*)(dst->amplitude.data) + offset,

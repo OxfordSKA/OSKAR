@@ -36,8 +36,9 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
+#include <stdlib.h>
 
-#define OSKAR_VIS_FILE_ID 0x1F2F
+#define OSKAR_VIS_FILE_ID 0x1F3F
 
 /**
  * @brief Structure to hold visibility data.
@@ -50,8 +51,10 @@
  * Baseline coordinates are stored as three separate arrays of length corresponding
  * to the number of visibility samples in the data set. Coordinates are real
  * valued and can be either double or single precision. Coordinates are ordered
- * by time, baseline and channel ID where time is the slowest varying dimension
- * and channel the fastest varying.
+ * by channel ID, time and baseline where channel is the slowest varying dimension
+ * and baseline is the fastest varying. This is coordinate ordering is chosen
+ * to for optimal memory write performance in OSKAR where channels are simulated
+ * on the outer processing loop.
  *
  * Visibility amplitudes are sorted as an array of complex scalar or 2-by-2 matrix
  * elements which can be either double or single precision according to the
@@ -61,21 +64,29 @@
  * represent a single polarisation axis whereas matrix elements store 4 polarisations
  * per data sample.
  *
- * FIXME Channel dimension is probably wrong - to ensure future compatibility
- * only use with 1 channel until this is resolved!
+ * NOTE Consider meta-data fields for frequency and time under review w.r.t.
+ * names and interface for setting.
+ * NOTE Consider storing a coord_type_id for the baseline coordinates similar
+ * to the station model.
  */
 #ifdef __cplusplus
 extern "C"
 #endif
 struct oskar_Visibilities
 {
+    int num_channels;     /**< Number of frequency channels. */
     int num_times;        /**< Number of time samples or visibility dumps. */
     int num_baselines;    /**< Number of baselines. */
-    int num_channels;     /**< Number of frequency channels. */
-    oskar_Mem baseline_u; /**< Baseline coordinates, in wave-numbers. */
-    oskar_Mem baseline_v; /**< Baseline coordinates, in wave-numbers. */
-    oskar_Mem baseline_w; /**< Baseline coordinates, in wave-numbers. */
+    oskar_Mem uu_metres;  /**< Baseline coordinates, in metres. */
+    oskar_Mem vv_metres;  /**< Baseline coordinates, in metres. */
+    oskar_Mem ww_metres;  /**< Baseline coordinates, in metres. */
     oskar_Mem amplitude;  /**< Complex visibility amplitude. */
+
+    /* NOTE the following fields are under review. */
+    double freq_start_hz; /**< Start Frequency, in Hz. */
+    double freq_inc_hz;   /**< Frequency increment, in Hz. */
+    double time_start_jd; /**< Start time, in JD. */
+    double time_inc_s;    /**< Time increment, in seconds. */
 
 #ifdef __cplusplus
     /**
@@ -97,16 +108,19 @@ struct oskar_Visibilities
      * scalar amplitude types. Matrix amplitude types represent 4 polarisation
      * dimensions whereas scalar types represent a single polarisation.
      *
+     * Note
+     *  - Channels is the slowest varying dimension.
+     *  - Baselines is the fastest varying dimension.
+     *
      * @param amp_type       OSKAR type ID for visibility amplitudes.
      * @param location       OSKAR memory location ID for data in the structure.
+     * @param num_channels   Number of frequency channels.
      * @param num_times      Number of visibility time snapshots.
      * @param num_baselines  Number of baselines.
-     * @param num_channels   Number of frequency channels.
      */
-    oskar_Visibilities(const int amp_type = OSKAR_SINGLE_COMPLEX_MATRIX,
-            const int location = OSKAR_LOCATION_CPU,
-            const int num_times = 0, const int num_baselines = 0,
-            const int num_channels = 0);
+    oskar_Visibilities(int amp_type = OSKAR_SINGLE_COMPLEX_MATRIX,
+            int location = OSKAR_LOCATION_CPU, int num_channels = 0,
+            int num_times = 0, int num_baselines = 0);
 
     /**
      * @brief Constructs a visibility structure at the specified location
@@ -121,7 +135,7 @@ struct oskar_Visibilities
      * @param other     Visibility structure to copy.
      * @param location  Location to construct the new visibility structure.
      */
-    oskar_Visibilities(const oskar_Visibilities* other, const int location);
+    oskar_Visibilities(const oskar_Visibilities* other, int location);
 
     /**
      * @brief Destructor.
@@ -169,7 +183,8 @@ struct oskar_Visibilities
      *
      * @return An error code.
      */
-    int insert(const oskar_Visibilities* other, const unsigned time_index);
+    int insert(const oskar_Visibilities* other, int channel_index,
+            int time_index);
 
     /**
      * @brief Writes the contents of visibility structure to an OSKAR
@@ -192,23 +207,24 @@ struct oskar_Visibilities
      * @details
      * Note: The loaded visibility structure will reside on the CPU.
      *
-     * @param filename The filename to read from.
+     * @param[in]  filename The filename to read from.
+     * @param[out] status   Error code.
      *
      * @return A pointer to the new visibility structure.
      */
-    static oskar_Visibilities* read(const char* filename);
+    static oskar_Visibilities* read(const char* filename, int *status = NULL);
 
     /**
      * @brief Resize the memory in the visibility structure to the specified
      * dimensions.
      *
+     * @param num_channels   Number of frequency channels.
      * @param num_times      Number of visibility time snapshots.
      * @param num_baselines  Number of baselines.
-     * @param num_channels   Number of frequency channels.
      *
      * @return An error code.
      */
-    int resize(int num_times, int num_baselines, int num_channels);
+    int resize(int num_channels, int num_times, int num_baselines);
 
     /**
      * @brief Initialises the memory in the visibility structure
@@ -220,18 +236,18 @@ struct oskar_Visibilities
      *
      * @param amp_type       OSKAR type ID for visibility amplitudes.
      * @param location       OSKAR memory location ID for data in the structure.
+     * @param num_channels   Number of frequency channels.
      * @param num_times      Number of visibility time snapshots.
      * @param num_baselines  Number of baselines.
-     * @param num_channels   Number of frequency channels.
      *
      * @return An error code.
      */
-    int init(int amp_type, int location, int num_times, int num_baselines,
-            int num_channels);
+    int init(int amp_type, int location, int num_channels, int num_times,
+            int num_baselines);
 
     /**
-     * @deprecated
-     * DEPRECATED
+     * DEPRECATED?
+     * FIXME this isn't ALWAYS safe.
      *
      * @brief Returns the location of the memory in the visibility structure
      * as an OSKAR memory location ID.
@@ -257,10 +273,11 @@ struct oskar_Visibilities
     { return amplitude.is_scalar() ? 1 : 4; }
 
     /**
+     * FIXME this isn't ALWAYS safe.
      * @brief Returns the OSKAR memory type ID for the baseline coordinates.
      */
     int coord_type() const
-    { return baseline_u.type(); }
+    { return uu_metres.type(); }
 
     /**
      * @brief Returns the OSKAR memory type ID for the visibility amplitudes.

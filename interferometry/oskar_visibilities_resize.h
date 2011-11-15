@@ -42,9 +42,9 @@
  * dimensions.
  *
  * @param vis            The visibility structure to resize.
+ * @param num_channels   Number of frequency channels.
  * @param num_times      Number of visibility time snapshots.
  * @param num_baselines  Number of baselines.
- * @param num_channels   Number of frequency channels.
  *
  * @return An error code.
  */
@@ -52,7 +52,7 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-int oskar_visibilities_resize(oskar_Visibilities* vis, int num_times,
-        int num_baselines, int num_channels);
+int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
+        int num_times, int num_baselines);
 
 #endif /* OSKAR_VISIBILITIES_RESIZE_H_ */

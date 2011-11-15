@@ -55,6 +55,12 @@ using namespace std;
 #define c_0 299792458.0
 #endif
 
+// Cleanup function called when the mex function is unloaded. (i.e. 'clear mex')
+void cleanup(void)
+{
+    cudaDeviceReset();
+}
+
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     // TODO work out how to handle channels?
@@ -68,6 +74,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgTxt("Usage: image = oskar_make_dirty_image(uu, vv,"
                 " amp, frequency_hz, num_pixels, field_of_view_deg)");
     }
+
+    // Register cleanup function.
+    mexAtExit(cleanup);
 
     // Make sure visibility data array is complex.
     if (!mxIsComplex(in[2]))

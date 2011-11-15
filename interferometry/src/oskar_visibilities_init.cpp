@@ -35,7 +35,7 @@
 extern "C"
 #endif
 int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_times, int num_baselines, int num_channels)
+        int num_channels, int num_times, int num_baselines)
 {
     if (!oskar_Mem::is_complex(amp_type))
         return OSKAR_ERR_BAD_DATA_TYPE;
@@ -47,18 +47,18 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
     int coord_type = oskar_Mem::is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Set dimensions.
+    vis->num_channels  = num_channels;
     vis->num_times     = num_times;
     vis->num_baselines = num_baselines;
-    vis->num_channels  = num_channels;
-    int num_samples    = num_times * num_baselines * num_channels;
+    int num_samples    = num_channels * num_times * num_baselines;
 
     // Initialise memory.
     int err = 0;
-    err = oskar_mem_init(&vis->baseline_u, coord_type, location, num_samples, 1);
+    err = oskar_mem_init(&vis->uu_metres, coord_type, location, num_samples, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->baseline_v, coord_type, location, num_samples, 1);
+    err = oskar_mem_init(&vis->vv_metres, coord_type, location, num_samples, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->baseline_w, coord_type, location, num_samples, 1);
+    err = oskar_mem_init(&vis->ww_metres, coord_type, location, num_samples, 1);
     if (err) return err;
     err = oskar_mem_init(&vis->amplitude, amp_type, location, num_samples, 1);
     if (err) return err;

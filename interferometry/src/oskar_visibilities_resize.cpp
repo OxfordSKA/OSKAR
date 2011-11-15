@@ -33,20 +33,20 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_visibilities_resize(oskar_Visibilities* vis, int num_times,
-        int num_baselines, int num_channels)
+int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
+        int num_times, int num_baselines)
 {
+    vis->num_channels  = num_channels;
     vis->num_times     = num_times;
     vis->num_baselines = num_baselines;
-    vis->num_channels  = num_channels;
-    int num_samples    = num_times * num_baselines * num_channels;
+    int num_samples    = num_channels * num_times * num_baselines;
 
     int error = 0;
-    error = vis->baseline_u.resize(num_samples);
+    error = vis->uu_metres.resize(num_samples);
     if (error) return error;
-    error = vis->baseline_v.resize(num_samples);
+    error = vis->vv_metres.resize(num_samples);
     if (error) return error;
-    error = vis->baseline_w.resize(num_samples);
+    error = vis->ww_metres.resize(num_samples);
     if (error) return error;
     error = vis->amplitude.resize(num_samples);
     if (error) return error;
