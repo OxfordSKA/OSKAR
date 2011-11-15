@@ -134,6 +134,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
     }
 
     // Return any CUDA error.
+    cudaDeviceSynchronize();
     return cudaPeekAtLastError();
 }
 

@@ -28,6 +28,7 @@
 
 #include "math/test/JonesTest.h"
 #include "utility/oskar_cuda_device_info.h"
+#include "math/oskar_jones_join.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -630,6 +631,110 @@ void JonesTest::test_set_ones_host()
 
         // Free memory.
         delete j1;
+    }
+}
+
+/**
+ * @details
+ * Tests setting the contents of the Jones matrices.
+ * The data are on the host.
+ */
+void JonesTest::test_performance()
+{
+    // Set-up some test parameters.
+    int n_stat = 25, n_src = 50000;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = new oskar_Jones(OSKAR_SINGLE_COMPLEX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+        oskar_Jones* j2 = new oskar_Jones(OSKAR_SINGLE_COMPLEX_MATRIX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+        oskar_Jones* j3 = new oskar_Jones(OSKAR_SINGLE_COMPLEX_MATRIX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+
+        // Call wrapper function.
+        fail_on_error ( j1->set_real_scalar(1.0) );
+        fail_on_error ( j2->set_real_scalar(2.0) );
+
+        // Join J3 = J1 * J2.
+        TIMER_START
+        fail_on_error( oskar_jones_join(j3, j1, j2) );
+        TIMER_STOP("Finished out-of-place join")
+
+        // Free memory.
+        delete j1;
+        delete j2;
+        delete j3;
+    }
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = new oskar_Jones(OSKAR_SINGLE_COMPLEX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+        oskar_Jones* j2 = new oskar_Jones(OSKAR_SINGLE_COMPLEX_MATRIX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+
+        // Call wrapper function.
+        fail_on_error ( j1->set_real_scalar(1.0) );
+        fail_on_error ( j2->set_real_scalar(2.0) );
+
+        // Join J2 = J1 * J2.
+        TIMER_START
+        fail_on_error( oskar_jones_join(j2, j1, j2) );
+        TIMER_STOP("Finished in-place join")
+
+        // Free memory.
+        delete j1;
+        delete j2;
+    }
+
+    // Return if no double precision support.
+    if (!oskar_cuda_device_supports_double(0)) return;
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+        oskar_Jones* j2 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX_MATRIX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+        oskar_Jones* j3 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX_MATRIX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+
+        // Call wrapper function.
+        fail_on_error ( j1->set_real_scalar(1.0) );
+        fail_on_error ( j2->set_real_scalar(2.0) );
+
+        // Join J3 = J1 * J2.
+        TIMER_START
+        fail_on_error( oskar_jones_join(j3, j1, j2) );
+        TIMER_STOP("Finished out-of-place join")
+
+        // Free memory.
+        delete j1;
+        delete j2;
+        delete j3;
+    }
+
+    // Single precision test.
+    {
+        oskar_Jones* j1 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+        oskar_Jones* j2 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX_MATRIX,
+                OSKAR_LOCATION_GPU, n_stat, n_src);
+
+        // Call wrapper function.
+        fail_on_error ( j1->set_real_scalar(1.0) );
+        fail_on_error ( j2->set_real_scalar(2.0) );
+
+        // Join J2 = J1 * J2.
+        TIMER_START
+        fail_on_error( oskar_jones_join(j2, j1, j2) );
+        TIMER_STOP("Finished in-place join")
+
+        // Free memory.
+        delete j1;
+        delete j2;
     }
 }
 
