@@ -34,10 +34,6 @@
 #include <cstdio>
 #include <cstdlib>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 1 || num_out != 1)
@@ -191,8 +187,3 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Clean up local memory.
     delete vis;
 }
-
-
-#ifdef __cplusplus
-}
-#endif

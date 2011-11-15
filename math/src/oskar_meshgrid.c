@@ -33,10 +33,10 @@
 extern "C" {
 #endif
 
-void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
-        const double* y, const unsigned ny)
+void oskar_meshgrid_d(double* X, double* Y, const double* x, int nx,
+        const double* y, int ny)
 {
-    unsigned j, i;
+    int j, i;
     for (j = 0; j < ny; ++j)
     {
         for (i = 0; i < nx; ++i)
@@ -47,10 +47,10 @@ void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
     }
 }
 
-void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
-        const float* y, const unsigned ny)
+void oskar_meshgrid_f(float* X, float* Y, const float* x, int nx,
+        const float* y, int ny)
 {
-    unsigned j, i;
+    int j, i;
     for (j = 0; j < ny; ++j)
     {
         for (i = 0; i < nx; ++i)

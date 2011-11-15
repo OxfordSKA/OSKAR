@@ -55,7 +55,7 @@ extern "C" {
  * @param[in]  n      Number of values.
  */
 OSKAR_EXPORT
-void oskar_linspace_d(double* values, const double a, const double b, const unsigned n);
+void oskar_linspace_d(double* values, double a, double b, int n);
 
 /**
  * @brief Populates an array with linearly spaced values (Single precision).
@@ -71,7 +71,7 @@ void oskar_linspace_d(double* values, const double a, const double b, const unsi
  * @param[in]  n      Number of values.
  */
 OSKAR_EXPORT
-void oskar_linspace_f(float* values, const float a, const float b, const unsigned n);
+void oskar_linspace_f(float* values, float a, float b, int n);
 
 #ifdef __cplusplus
 }

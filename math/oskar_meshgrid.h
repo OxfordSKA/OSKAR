@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 /**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
+ * @brief Generates coordinates for a 2-D grid from a pair of 1-D vectors
  * (single precision).
  *
  * @details
@@ -56,11 +56,11 @@ extern "C" {
  * @param[in]  ny   Length of the x coordinate array.
  */
 OSKAR_EXPORT
-void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
-        const double* y, const unsigned ny);
+void oskar_meshgrid_d(double* X, double* Y, const double* x, int nx,
+        const double* y, int ny);
 
 /**
- * @brief Generates coordintes for a 2-D grid from a pair of 1-D vectors
+ * @brief Generates coordinates for a 2-D grid from a pair of 1-D vectors
  * (double precision).
  *
  * @details
@@ -76,8 +76,8 @@ void oskar_meshgrid_d(double* X, double* Y, const double* x, const unsigned nx,
  * @param[in]  ny   Length of the x coordinate array.
  */
 OSKAR_EXPORT
-void oskar_meshgrid_f(float* X, float* Y, const float* x, const unsigned nx,
-        const float* y, const unsigned ny);
+void oskar_meshgrid_f(float* X, float* Y, const float* x, int nx,
+        const float* y, int ny);
 
 #ifdef __cplusplus
 }

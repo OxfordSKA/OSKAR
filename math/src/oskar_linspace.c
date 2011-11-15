@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 
-void oskar_linspace_d(double* values, const double a, const double b, const unsigned n)
+void oskar_linspace_d(double* values, double a, double b, int n)
 {
     double inc = (b - a) / (n - 1);
     unsigned i;
@@ -44,7 +44,7 @@ void oskar_linspace_d(double* values, const double a, const double b, const unsi
     }
 }
 
-void oskar_linspace_f(float* values, const float a, const float b, const unsigned n)
+void oskar_linspace_f(float* values, float a, float b, int n)
 {
     float inc = (b - a) / (n - 1);
     unsigned i;
