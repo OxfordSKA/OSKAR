@@ -32,6 +32,7 @@
 
 #include "station/oskar_StationModel.h"
 
+#include "interferometry/oskar_SimTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_interferometer1_scalar.h"
 #include "interferometry/oskar_VisData.h"
@@ -117,23 +118,23 @@ int sim1_d(const oskar_Settings& settings)
     }
 
     // ============== Simulation loop =========================================
-    for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
+    for (int i = 0; i < settings.obs().num_channels(); ++i)
     {
         double frequency = settings.obs().frequency(i);
 
         printf("- Frequency: %e Hz.\n", frequency);
 
         // Allocate visibility data.
+        const oskar_SimTime* time = settings.obs().sim_time();
         oskar_VisData_d vis;
         int num_baselines = num_stations * (num_stations-1) / 2;
-        oskar_allocate_vis_data_d(num_baselines * settings.obs().num_vis_dumps(), &vis);
+        oskar_allocate_vis_data_d(num_baselines * time->num_vis_dumps, &vis);
 
         oskar_interferometer1_scalar_d(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
-                settings.obs().start_time_utc_mjd(),
-                settings.obs().obs_length_days(),
-                settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
-                settings.obs().num_fringe_ave(), frequency,
+                time->obs_start_mjd_utc, time->obs_length_days,
+                time->num_vis_dumps, time->num_vis_ave,
+                time->num_fringe_ave, frequency,
                 settings.obs().channel_bandwidth(),
                 settings.disable_station_beam(), &vis);
 
@@ -207,23 +208,23 @@ int sim1_f(const oskar_Settings& settings)
     }
 
     // ============== Simulation loop =========================================
-    for (unsigned i = 0; i < settings.obs().num_channels(); ++i)
+    for (int i = 0; i < settings.obs().num_channels(); ++i)
     {
         float frequency = settings.obs().frequency(i);
 
         printf("- Frequency: %e Hz.\n", frequency);
 
         // Allocate visibility data.
+        const oskar_SimTime* time = settings.obs().sim_time();
         oskar_VisData_f vis;
         int num_baselines = num_stations * (num_stations-1) / 2;
-        oskar_allocate_vis_data_f(num_baselines * settings.obs().num_vis_dumps(), &vis);
+        oskar_allocate_vis_data_f(num_baselines * time->num_vis_dumps, &vis);
 
         oskar_interferometer1_scalar_f(telescope, stations, sky,
                 settings.obs().ra0_rad(), settings.obs().dec0_rad(),
-                settings.obs().start_time_utc_mjd(),
-                settings.obs().obs_length_days(),
-                settings.obs().num_vis_dumps(), settings.obs().num_vis_ave(),
-                settings.obs().num_fringe_ave(), frequency,
+                time->obs_start_mjd_utc, time->obs_length_days,
+                time->num_vis_dumps, time->num_vis_ave,
+                time->num_fringe_ave, frequency,
                 settings.obs().channel_bandwidth(),
                 settings.disable_station_beam(), &vis);
 

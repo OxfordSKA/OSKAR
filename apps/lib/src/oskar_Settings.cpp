@@ -123,11 +123,11 @@ void oskar_Settings::print() const
     printf("  - Phase centre Dec (deg) = %f\n", _obs.dec0_deg());
     printf("  - Latitude (deg)         = %f\n", _latitude_deg);
     printf("  - Longitude (deg)        = %f\n", _longitude_deg);
-    printf("  - Obs. length (sec)      = %f\n", _obs.obs_length_sec());
-    printf("  - Obs. start (MJD)       = %f\n", _obs.start_time_utc_mjd());
-    printf("  - Num. visibility dumps  = %i\n", _obs.num_vis_dumps());
-    printf("  - Num. visibility ave.   = %i\n", _obs.num_vis_ave());
-    printf("  - Num. fringe ave.       = %i\n", _obs.num_fringe_ave());
+    printf("  - Obs. length (sec)      = %f\n", _obs.sim_time()->obs_length_seconds);
+    printf("  - Obs. start (MJD)       = %f\n", _obs.sim_time()->obs_start_mjd_utc);
+    printf("  - Num. visibility dumps  = %i\n", _obs.sim_time()->num_vis_dumps);
+    printf("  - Num. visibility ave.   = %i\n", _obs.sim_time()->num_vis_ave);
+    printf("  - Num. fringe ave.       = %i\n", _obs.sim_time()->num_fringe_ave);
     printf("  - OSKAR visibility file  = %s\n", _obs.oskar_vis_filename().toLatin1().data());
     printf("  - MS file                = %s\n", _obs.ms_filename().toLatin1().data());
     printf("\n");

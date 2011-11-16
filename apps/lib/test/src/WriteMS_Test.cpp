@@ -79,14 +79,28 @@ int main(int /*argc*/, char** /*argv*/)
 
     // Construct the required settings.
     oskar_Settings settings;
+    oskar_SimTime times;
+    times.num_vis_dumps = num_dumps;
+    times.num_vis_ave = 0;
+    times.num_fringe_ave = 0;
+    times.obs_start_utc_year = 0;
+    times.obs_start_utc_month = 0;
+    times.obs_start_utc_day = 0;
+    times.obs_start_utc_hour = 0;
+    times.obs_start_utc_minute = 0;
+    times.obs_start_utc_second = 0;
+    times.obs_start_mjd_utc = 0.0;
+    times.obs_length_seconds = 60.0 * 2.0;
+    times.obs_length_days = times.obs_length_seconds / 86400.0;
+    times.dt_dump_days = 0.0;
+    times.dt_ave_days = 0.0;
+    times.dt_fringe_days = 0.0;
+    settings.obs().set_sim_time(times);
     settings.obs().set_ra0_deg(0.0);
     settings.obs().set_dec0_deg(90.0);
     settings.obs().set_start_frequency(250e6);
     settings.obs().set_num_channels(1);
     settings.obs().set_frequency_inc(0.0);
-    settings.obs().set_start_time_utc_mjd(0.0);
-    settings.obs().set_obs_length_sec(60.0 * 2.0);
-    settings.obs().set_num_vis_dumps(num_dumps);
     settings.set_telescope_file(telescope_file);
     settings.set_longitude_deg(0.0);
     settings.set_latitude_deg(90.0);

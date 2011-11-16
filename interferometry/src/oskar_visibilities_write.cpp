@@ -106,22 +106,22 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     }
 
     // Write data.
-    if (fwrite(vis->uu_metres.data, coord_element_size, num_coords, file) != num_coords)
+    if (fwrite(vis->uu_metres.data, coord_element_size, num_coords, file) != (size_t)num_coords)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->vv_metres.data, coord_element_size, num_coords, file) != num_coords)
+    if (fwrite(vis->vv_metres.data, coord_element_size, num_coords, file) != (size_t)num_coords)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->ww_metres.data, coord_element_size,num_coords, file) != num_coords)
+    if (fwrite(vis->ww_metres.data, coord_element_size,num_coords, file) != (size_t)num_coords)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->amplitude.data, amp_element_size, num_amps, file) != num_amps)
+    if (fwrite(vis->amplitude.data, amp_element_size, num_amps, file) != (size_t)num_amps)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;

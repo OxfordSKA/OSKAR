@@ -38,31 +38,45 @@
 
 void oskar_SettingsObservation::load(const QSettings& settings)
 {
-    _start_frequency   = settings.value("observation/start_frequency").toDouble();
-    _num_channels      = settings.value("observation/num_channels").toUInt();
-    _frequency_inc     = settings.value("observation/frequency_inc").toDouble();
-    _channel_bandwidth = settings.value("observation/channel_bandwidth").toDouble();
-    _ra0_deg           = settings.value("observation/phase_centre_ra_deg").toDouble();
-    _dec0_deg          = settings.value("observation/phase_centre_dec_deg").toDouble();
+    // Get frequency / channel data.
+    start_frequency_   = settings.value("observation/start_frequency").toDouble();
+    num_channels_      = settings.value("observation/num_channels").toInt();
+    frequency_inc_     = settings.value("observation/frequency_inc").toDouble();
+    channel_bandwidth_ = settings.value("observation/channel_bandwidth").toDouble();
 
-    _start_time_utc_year   = settings.value("observation/start_time_utc_year").toUInt();
-    _start_time_utc_month  = settings.value("observation/start_time_utc_month").toUInt();
-    _start_time_utc_day    = settings.value("observation/start_time_utc_day").toUInt();
-    _start_time_utc_hour   = settings.value("observation/start_time_utc_hour").toUInt();
-    _start_time_utc_minute = settings.value("observation/start_time_utc_minute").toUInt();
-    _start_time_utc_second = settings.value("observation/start_time_utc_second").toDouble();
+    // Get pointing direction.
+    ra0_deg_           = settings.value("observation/phase_centre_ra_deg").toDouble();
+    dec0_deg_          = settings.value("observation/phase_centre_dec_deg").toDouble();
 
-    double day_fraction = (_start_time_utc_hour +
-            (_start_time_utc_minute / 60.0) +
-            (_start_time_utc_second / 3600.0)) / 24.0;
-    _start_time_utc_mjd = oskar_date_time_to_mjd(_start_time_utc_year,
-            _start_time_utc_month, _start_time_utc_day,
-            day_fraction);
+    // Get time data.
+    time_.num_vis_dumps        = settings.value("observation/num_vis_dumps").toInt();
+    time_.num_vis_ave          = settings.value("observation/num_vis_ave").toInt();
+    time_.num_fringe_ave       = settings.value("observation/num_fringe_ave").toInt();
+    time_.obs_start_utc_year   = settings.value("observation/start_time_utc_year").toInt();
+    time_.obs_start_utc_month  = settings.value("observation/start_time_utc_month").toInt();
+    time_.obs_start_utc_day    = settings.value("observation/start_time_utc_day").toInt();
+    time_.obs_start_utc_hour   = settings.value("observation/start_time_utc_hour").toInt();
+    time_.obs_start_utc_minute = settings.value("observation/start_time_utc_minute").toInt();
+    time_.obs_start_utc_second = settings.value("observation/start_time_utc_second").toDouble();
 
-    _obs_length_sec    = settings.value("observation/length_seconds").toDouble();
-    _oskar_vis_filename= settings.value("observation/oskar_vis_filename", "").toString();
-    _ms_filename       = settings.value("observation/ms_filename", "").toString();
-    _num_vis_dumps     = settings.value("observation/num_vis_dumps").toUInt();
-    _num_vis_ave       = settings.value("observation/num_vis_ave").toUInt();
-    _num_fringe_ave    = settings.value("observation/num_fringe_ave").toUInt();
+    // Compute day fraction from start time.
+    double day_fraction = (time_.obs_start_utc_hour +
+            (time_.obs_start_utc_minute / 60.0) +
+            (time_.obs_start_utc_second / 3600.0)) / 24.0;
+
+    // Compute start time as MJD(UTC).
+    time_.obs_start_mjd_utc = oskar_date_time_to_mjd(time_.obs_start_utc_year,
+            time_.obs_start_utc_month, time_.obs_start_utc_day, day_fraction);
+
+    // Get observation length.
+    time_.obs_length_seconds   = settings.value("observation/length_seconds").toDouble();
+    time_.obs_length_days      = time_.obs_length_seconds / 86400.0;
+
+    // Compute intervals.
+    time_.dt_dump_days         = time_.obs_length_days / time_.num_vis_dumps;
+    time_.dt_ave_days          = time_.dt_dump_days / time_.num_vis_ave;
+    time_.dt_fringe_days       = time_.dt_ave_days / time_.num_fringe_ave;
+
+    oskar_vis_filename_        = settings.value("observation/oskar_vis_filename", "").toString();
+    ms_filename_               = settings.value("observation/ms_filename", "").toString();
 }

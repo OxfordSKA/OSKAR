@@ -184,7 +184,8 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
     }
 
     // Make local copies of settings.
-    double mjd_start = settings->obs().start_time_utc_mjd();
+    const oskar_SimTime* time = settings->obs().sim_time();
+    double mjd_start = time->obs_start_mjd_utc;
     double ra0_rad   = settings->obs().ra0_rad();
     double dec0_rad  = settings->obs().dec0_rad();
     double frequency = settings->obs().start_frequency() + settings->obs().frequency_inc() * channel;
@@ -202,7 +203,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
     // Evaluate baseline index arrays.
     int* baseline_ant_1 = (int*) malloc(vis->num_samples * sizeof(int));
     int* baseline_ant_2 = (int*) malloc(vis->num_samples * sizeof(int));
-    for (int idx = 0, t = 0; t < (int)settings->obs().num_vis_dumps(); ++t)
+    for (int idx = 0, t = 0; t < time->num_vis_dumps; ++t)
     {
         for (int a1 = 0; a1 < (int)telescope.num_antennas; ++a1)
         {
@@ -217,11 +218,11 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
 
     // Write visibility data to the measurement set.
     int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
-    double interval = settings->obs().obs_length_sec() / settings->obs().num_vis_dumps();
+    double interval = time->obs_length_seconds / time->num_vis_dumps;
     double exposure = interval;
     double* times = (double*) malloc(vis->num_samples * sizeof(double));
     double t_start_sec = mjd_start * days_to_sec + interval / 2;
-    for (int j = 0; j < (int)settings->obs().num_vis_dumps(); ++j)
+    for (int j = 0; j < time->num_vis_dumps; ++j)
     {
         double t = t_start_sec + interval * j;
         for (int i = 0; i < num_baselines; ++i)

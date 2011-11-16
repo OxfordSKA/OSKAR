@@ -3,13 +3,15 @@
 #
 
 set(apps_SRC
+    src/oskar_file_utils.cpp
+    src/oskar_imager_dft.cu
     src/oskar_load_stations.cpp
     src/oskar_load_telescope.cpp # Deprecated.
+    src/oskar_set_up_sky.cpp
+    src/oskar_set_up_telescope.cpp
     src/oskar_Settings.cpp
     src/oskar_SettingsImage.cpp
     src/oskar_SettingsObservation.cpp
-    src/oskar_imager_dft.cu
-    src/oskar_file_utils.cpp
 )
 
 if(BUILD_OSKAR_MS)

@@ -106,12 +106,14 @@ int imager_d(const oskar_Settings& settings)
     for (unsigned i = 0; i < image_size; ++i)
         l[i] = -lmax + i * inc;
 
+    const oskar_SimTime* time = settings.obs().sim_time();
+    int num_vis_dumps = time->num_vis_dumps;
     int num_channels  = settings.obs().num_channels();
     int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
     int num_dumps_per_snapshot = settings.image().make_snapshots() ?
-            settings.image().dumps_per_snapshot() : settings.obs().num_vis_dumps();
-    int num_snapshots = (int)settings.obs().num_vis_dumps() / num_dumps_per_snapshot;
-    if ((int)settings.obs().num_vis_dumps() % num_dumps_per_snapshot != 0)
+            settings.image().dumps_per_snapshot() : num_vis_dumps;
+    int num_snapshots = num_vis_dumps / num_dumps_per_snapshot;
+    if (num_vis_dumps % num_dumps_per_snapshot != 0)
         fprintf(stderr, "ERROR: Number of vis dumps not evenly divisible by number of dumps per snapshot!\n");
 
     // Loop over freqs. and make images.
@@ -191,15 +193,14 @@ int imager_f(const oskar_Settings& settings)
     for (unsigned i = 0; i < image_size; ++i)
         l[i] = -lmax + i * inc;
 
+    const oskar_SimTime* time = settings.obs().sim_time();
+    int num_vis_dumps = time->num_vis_dumps;
     int num_channels  = settings.obs().num_channels();
     int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
     int num_dumps_per_snapshot = settings.image().make_snapshots() ?
-            settings.image().dumps_per_snapshot() : settings.obs().num_vis_dumps();
-    int num_snapshots = (int)settings.obs().num_vis_dumps() / num_dumps_per_snapshot;
-
-    printf("creating %i image snapshots\n", num_snapshots);
-
-    if ((int)settings.obs().num_vis_dumps() % num_dumps_per_snapshot != 0)
+            settings.image().dumps_per_snapshot() : num_vis_dumps;
+    int num_snapshots = num_vis_dumps / num_dumps_per_snapshot;
+    if (num_vis_dumps % num_dumps_per_snapshot != 0)
         fprintf(stderr, "ERROR: Number of vis dumps not evenly divisible by number of dumps per snapshot!\n");
 
     // Loop over freqs. and make images.
