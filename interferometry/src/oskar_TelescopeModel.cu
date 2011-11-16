@@ -34,6 +34,7 @@
 #include "interferometry/oskar_telescope_model_load_station_pos.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
+#include "interferometry/oskar_telescope_model_resize.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "station/oskar_station_model_load.h"
 #include "math/cudak/oskar_cudak_vec_scale_rr.h" // DEPRECATED
@@ -90,6 +91,11 @@ int oskar_TelescopeModel::load_station(int index, const char* filename)
 int oskar_TelescopeModel::multiply_by_wavenumber(double frequency_hz)
 {
     return oskar_telescope_model_multiply_by_wavenumber(this, frequency_hz);
+}
+
+int oskar_TelescopeModel::resize(int n_stations)
+{
+    return oskar_telescope_model_resize(this, n_stations);
 }
 
 int oskar_TelescopeModel::type() const

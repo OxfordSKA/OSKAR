@@ -233,6 +233,7 @@ public:
 
     /* Convenience pointer casts. */
     operator char*() {return (char*)data;}
+    operator int*() {return (int*)data;}
     operator float*() {return (float*)data;}
     operator double*() {return (double*)data;}
     operator float2*() {return (float2*)data;}
@@ -240,6 +241,7 @@ public:
     operator float4c*() {return (float4c*)data;}
     operator double4c*() {return (double4c*)data;}
     operator const char*() const {return (const char*)data;}
+    operator const int*() const {return (const int*)data;}
     operator const float*() const {return (const float*)data;}
     operator const double*() const {return (const double*)data;}
     operator const float2*() const {return (const float2*)data;}
@@ -257,6 +259,9 @@ enum {
 
     /* Scalar double (double): bit 1 set. */
     OSKAR_DOUBLE                 = 0x0002,
+
+    /* Integer (int): bit 2 set. */
+    OSKAR_INT                    = 0x0004,
 
     /* Complex flag: bits 6 and 7 set. */
     OSKAR_COMPLEX                = 0x00C0,

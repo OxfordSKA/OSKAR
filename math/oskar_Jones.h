@@ -59,6 +59,8 @@ private:
 #endif
     int private_num_stations; /**< Slowest varying dimension. */
     int private_num_sources;  /**< Fastest varying dimension. */
+    int private_cap_stations; /**< Slowest varying dimension. */
+    int private_cap_sources;  /**< Fastest varying dimension. */
 
 #ifdef __cplusplus
 /* If C++, then make the remaining members public. */
@@ -148,6 +150,20 @@ public:
      * @param[in] other Pointer to the oskar_Jones structure to set.
      */
     int set_real_scalar(double scalar);
+
+    /**
+     * @brief Sets the actual size of the collection of Jones matrices.
+     *
+     * @details
+     * This sets the size of the data dimensions without actually performing
+     * a resize.
+     *
+     * The new size must be less than or equal to the existing capacity.
+     *
+     * @param[in] num_stations Number of elements in the station dimension.
+     * @param[in] num_sources Number of elements in the source dimension.
+     */
+    int set_size(int num_stations, int num_sources);
 
     int type() const {return ptr.type();}
     int num_sources() const {return private_num_sources;}

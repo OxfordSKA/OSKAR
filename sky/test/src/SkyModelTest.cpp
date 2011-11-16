@@ -26,9 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "interferometry/oskar_TelescopeModel.h"
 #include "sky/test/SkyModelTest.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_compact.h"
+#include "utility/oskar_Work.h"
+
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
@@ -282,6 +288,82 @@ void SkyModelTest::test_compute_relative_lmn()
         CPPUNIT_ASSERT_DOUBLES_EQUAL(l, ((float*)sky_temp.rel_l.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(m, ((float*)sky_temp.rel_m.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(p, ((float*)sky_temp.rel_n.data)[i], 1e-3);
+    }
+}
+
+void SkyModelTest::test_compact()
+{
+    // Create a sky model.
+    int err = 0;
+    oskar_SkyModel sky_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
+    oskar_SkyModel sky_out(OSKAR_SINGLE, OSKAR_LOCATION_GPU, 0);
+
+    // Constants.
+    const double deg2rad = M_PI / 180.0;
+
+    // Sky grid parameters.
+    int n_lat = 256; // 8
+    int n_lon = 256; // 12
+    int n_sources = n_lat * n_lon;
+    double lat_start = -90.0;
+    double lon_start = 0.0;
+    double lat_end = 90.0;
+    double lon_end = 330.0;
+    sky_cpu.resize(n_sources);
+
+    // Generate grid.
+    for (int i = 0, k = 0; i < n_lat; ++i)
+    {
+        for (int j = 0; j < n_lon; ++j, ++k)
+        {
+            double ra = lon_start + j * (lon_end - lon_start) / (n_lon - 1);
+            double dec = lat_start + i * (lat_end - lat_start) / (n_lat - 1);
+            sky_cpu.set_source(k, ra * deg2rad, dec * deg2rad,
+                    double(k), double(2*k), double(3*k), double(4*k),
+                    double(5*k), double(6*k));
+        }
+    }
+
+    // Create a telescope model.
+    int n_stations = 25;
+    oskar_TelescopeModel telescope(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+    err = telescope.resize(n_stations);
+    CPPUNIT_ASSERT_EQUAL(0, err);
+
+    // Create a work buffer.
+    oskar_Work work(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+
+    // Try calling compact: should fail.
+    err = oskar_sky_model_compact(&sky_out, &sky_cpu, &telescope, 0.0, &work);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BAD_LOCATION, err);
+
+    {
+        // Copy sky data to GPU.
+        oskar_SkyModel* sky_gpu = new oskar_SkyModel(&sky_cpu, OSKAR_LOCATION_GPU);
+
+        // Compact sky data at pole.
+        for (int i = 0; i < n_stations; ++i)
+        {
+            telescope.station[i].latitude = (90.0 - i * 0.01) * deg2rad;
+            telescope.station[i].longitude = 0.0;
+        }
+
+        TIMER_START
+        err = oskar_sky_model_compact(&sky_out, sky_gpu, &telescope, 0.0, &work);
+        TIMER_STOP("Done sky model compaction (%d sources)", n_sources)
+        CPPUNIT_ASSERT_EQUAL(0, err);
+        CPPUNIT_ASSERT_EQUAL(n_sources / 2, sky_out.num_sources);
+
+        // Check sky data.
+        oskar_SkyModel* sky_temp = new oskar_SkyModel(&sky_out, OSKAR_LOCATION_CPU);
+        CPPUNIT_ASSERT_EQUAL(n_sources / 2, sky_temp->num_sources);
+        for (int i = 0, n = sky_temp->num_sources; i < n; ++i)
+        {
+            CPPUNIT_ASSERT(((float*)(sky_temp->Dec))[i] > 0.0f);
+        }
+
+        delete sky_temp;
+        delete sky_gpu;
     }
 }
 

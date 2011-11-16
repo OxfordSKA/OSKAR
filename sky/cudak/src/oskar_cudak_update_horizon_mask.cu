@@ -26,60 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_Jones.h"
-#include "math/oskar_jones_join.h"
-#include "math/oskar_jones_set_real_scalar.h"
-#include "utility/oskar_mem_copy.h"
-#include <cstdlib>
+#include "sky/cudak/oskar_cudak_update_horizon_mask.h"
 
-oskar_Jones::oskar_Jones(int type, int location, int num_stations,
-        int num_sources)
-: private_num_stations(num_stations),
-  private_num_sources(num_sources),
-  private_cap_stations(num_stations),
-  private_cap_sources(num_sources),
-  ptr(type, location, num_sources * num_stations)
+// Single precision.
+__global__
+void oskar_cudak_update_horizon_mask_f(int ns, const float* condition,
+        int* mask)
 {
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= ns) return;
+
+    mask[i] = mask[i] | (condition[i] > 0.0f);
 }
 
-oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
-: private_num_stations(other->num_stations()),
-  private_num_sources(other->num_sources()),
-  private_cap_stations(other->num_stations()),
-  private_cap_sources(other->num_sources()),
-  ptr(&other->ptr, location)
+// Double precision.
+__global__
+void oskar_cudak_update_horizon_mask_d(int ns, const double* condition,
+        int* mask)
 {
-}
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= ns) return;
 
-oskar_Jones::~oskar_Jones()
-{
-}
-
-int oskar_Jones::copy_to(oskar_Jones* other)
-{
-    return oskar_mem_copy(&other->ptr, &ptr); // Copy this to other.
-}
-
-int oskar_Jones::join_from_right(const oskar_Jones* other)
-{
-    return oskar_jones_join(NULL, this, other);
-}
-
-int oskar_Jones::join_to_left(oskar_Jones* other) const
-{
-    return oskar_jones_join(NULL, other, this);
-}
-
-int oskar_Jones::set_real_scalar(double scalar)
-{
-    return oskar_jones_set_real_scalar(this, scalar);
-}
-
-int oskar_Jones::set_size(int num_stations, int num_sources)
-{
-    if (num_stations * num_sources > private_cap_stations * private_cap_sources)
-        return OSKAR_ERR_OUT_OF_RANGE;
-    private_num_stations = num_stations;
-    private_num_sources = num_sources;
-    return 0;
+    mask[i] = mask[i] | (condition[i] > 0.0);
 }

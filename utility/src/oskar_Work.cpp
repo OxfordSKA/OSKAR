@@ -41,7 +41,8 @@ oskar_Work::oskar_Work(int type, int location)
 }
 
 oskar_Work::oskar_Work(const oskar_Work* other, int location, int owner)
-: real(&other->real, location, owner),
+: integer(&other->integer, location, owner),
+  real(&other->real, location, owner),
   complex(&other->complex, location, owner),
   matrix(&other->matrix, location, owner)
 {

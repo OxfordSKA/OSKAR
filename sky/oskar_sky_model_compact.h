@@ -26,60 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_Jones.h"
-#include "math/oskar_jones_join.h"
-#include "math/oskar_jones_set_real_scalar.h"
-#include "utility/oskar_mem_copy.h"
-#include <cstdlib>
+#ifndef OSKAR_SKY_MODEL_COMPACT_H_
+#define OSKAR_SKY_MODEL_COMPACT_H_
 
-oskar_Jones::oskar_Jones(int type, int location, int num_stations,
-        int num_sources)
-: private_num_stations(num_stations),
-  private_num_sources(num_sources),
-  private_cap_stations(num_stations),
-  private_cap_sources(num_sources),
-  ptr(type, location, num_sources * num_stations)
-{
-}
+/**
+ * @file oskar_sky_model_compact.h
+ */
 
-oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
-: private_num_stations(other->num_stations()),
-  private_num_sources(other->num_sources()),
-  private_cap_stations(other->num_stations()),
-  private_cap_sources(other->num_sources()),
-  ptr(&other->ptr, location)
-{
-}
+#include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
+#include "interferometry/oskar_TelescopeModel.h"
+#include "utility/oskar_Work.h"
 
-oskar_Jones::~oskar_Jones()
-{
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int oskar_Jones::copy_to(oskar_Jones* other)
-{
-    return oskar_mem_copy(&other->ptr, &ptr); // Copy this to other.
-}
+/**
+ * @brief
+ * Compacts a sky model into another one by removing sources below the
+ * horizon of all stations.
+ *
+ * @details
+ * Copies sources into another sky model that are above the horizon of
+ * stations.
+ *
+ * @param[out] output    The output sky model.
+ * @param[in]  input     The input sky model.
+ * @param[in]  telescope The telescope model.
+ * @param[in]  work      Work arrays.
+ */
+OSKAR_EXPORT
+int oskar_sky_model_compact(oskar_SkyModel* output, const oskar_SkyModel* input,
+        const oskar_TelescopeModel* telescope, double gast, oskar_Work* work);
 
-int oskar_Jones::join_from_right(const oskar_Jones* other)
-{
-    return oskar_jones_join(NULL, this, other);
+#ifdef __cplusplus
 }
+#endif
 
-int oskar_Jones::join_to_left(oskar_Jones* other) const
-{
-    return oskar_jones_join(NULL, other, this);
-}
-
-int oskar_Jones::set_real_scalar(double scalar)
-{
-    return oskar_jones_set_real_scalar(this, scalar);
-}
-
-int oskar_Jones::set_size(int num_stations, int num_sources)
-{
-    if (num_stations * num_sources > private_cap_stations * private_cap_sources)
-        return OSKAR_ERR_OUT_OF_RANGE;
-    private_num_stations = num_stations;
-    private_num_sources = num_sources;
-    return 0;
-}
+#endif /* OSKAR_SKY_MODEL_COMPACT_H_ */

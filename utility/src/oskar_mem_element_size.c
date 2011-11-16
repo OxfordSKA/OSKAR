@@ -36,7 +36,9 @@ extern "C" {
 
 size_t oskar_mem_element_size(int type)
 {
-    if (type == OSKAR_SINGLE)
+    if (type == OSKAR_INT)
+        return sizeof(int);
+    else if (type == OSKAR_SINGLE)
         return sizeof(float);
     else if (type == OSKAR_DOUBLE)
         return sizeof(double);

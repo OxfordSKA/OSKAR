@@ -47,6 +47,7 @@ typedef struct oskar_Work oskar_Work;
 // These are all either double or single.
 struct oskar_Work
 {
+    oskar_Mem integer;
     oskar_Mem real;
     oskar_Mem complex;
     oskar_Mem matrix;

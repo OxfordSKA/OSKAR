@@ -48,6 +48,8 @@ int oskar_work_init(oskar_Work* work, const int type, const int location)
     if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
+    error = oskar_mem_init(&work->integer, OSKAR_INT, location, 0, 1);
+    if (error) return error;
     error = oskar_mem_init(&work->real, type, location, 0, 1);
     if (error) return error;
     error = oskar_mem_init(&work->complex, (type | OSKAR_COMPLEX), location, 0, 1);

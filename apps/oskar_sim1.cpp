@@ -41,6 +41,7 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_evaluate_jones_R.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
+#include "sky/oskar_sky_model_compact.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "utility/oskar_exit.h"
 #include "utility/oskar_Mem.h"
@@ -71,9 +72,6 @@ int main(int argc, char** argv)
 
     // Set the precision.
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-
-    QTime timer;
-    timer.start();
 
     // Get the sky model and telescope model.
     oskar_SkyModel *sky_cpu, *sky_gpu;
@@ -123,16 +121,31 @@ int main(int argc, char** argv)
     oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
             1, num_vis_dumps, n_baselines);
 
+    QTime timer;
+    timer.start();
+
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)
     {
         // Start time for the visibility dump, in MJD(UTC).
         printf("--> Simulating snapshot (%i / %i).\n", j+1, num_vis_dumps);
         double t_dump = obs_start_mjd_utc + j * dt_dump;
+        double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         // Initialise visibilities for the dump to zero.
         err = vis.clear_contents();
         if (err) oskar_exit(err);
+
+        // Compact sky model to temporary.
+        oskar_SkyModel* sky = new oskar_SkyModel(type, OSKAR_LOCATION_GPU);
+        err = oskar_sky_model_compact(sky, sky_gpu, tel_gpu, gast, &work);
+        if (err) oskar_exit(err);
+
+        // Set dimensions of Jones matrices (this is not a resize!).
+        J.set_size(n_stations, sky->num_sources);
+        R.set_size(n_stations, sky->num_sources);
+        E.set_size(n_stations, sky->num_sources);
+        K.set_size(n_stations, sky->num_sources);
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
@@ -142,11 +155,11 @@ int main(int argc, char** argv)
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate parallactic angle rotation (Jones R).
-            err = oskar_evaluate_jones_R(&R, sky_gpu, tel_gpu, gast);
+            err = oskar_evaluate_jones_R(&R, sky, tel_gpu, gast);
             if (err) oskar_exit(err);
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, sky_gpu, tel_gpu, gast, &work);
+            err = oskar_evaluate_jones_E(&E, sky, tel_gpu, gast, &work);
             if (err) oskar_exit(err);
 
             // Join Jones matrices (R = E * R).
@@ -164,7 +177,7 @@ int main(int argc, char** argv)
                 if (err) oskar_exit(err);
 
                 // Evaluate interferometer phase (Jones K).
-                err = oskar_evaluate_jones_K(&K, sky_gpu, &u, &v, &w);
+                err = oskar_evaluate_jones_K(&K, sky, &u, &v, &w);
                 if (err) oskar_exit(err);
 
                 // Join Jones matrices (J = K * R).
@@ -172,17 +185,17 @@ int main(int argc, char** argv)
                 if (err) oskar_exit(err);
 
                 // Produce visibilities.
-                err = oskar_correlate(&vis, &J, tel_gpu, sky_gpu, &u, &v);
+                err = oskar_correlate(&vis, &J, tel_gpu, sky, &u, &v);
                 if (err) oskar_exit(err);
             }
 
             // TODO Divide visibilities by number of fringe averages.
+
         }
 
         // TODO Divide visibilities by number of time averages.
 
         // Compute u,v,w coordinates of mid point.
-        double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
         err = oskar_evaluate_station_uvw(&u_cpu, &v_cpu, &w_cpu, tel_cpu, gast);
         if (err) oskar_exit(err);
 
@@ -200,7 +213,11 @@ int main(int argc, char** argv)
         // Add to global data.
         err = vis_global.amplitude.insert(&vis, j * n_baselines);
         if (err) oskar_exit(err);
+
+        // Delete temporary sky.
+        delete sky;
     }
+    printf("=== Completed simulation after %f seconds.\n", timer.elapsed() / 1.0e3);
 
     // Write global visibilities to disk.
     if (!settings.obs().oskar_vis_filename().isEmpty())
@@ -216,8 +233,6 @@ int main(int argc, char** argv)
     delete sky_gpu;
     delete tel_gpu;
     delete tel_cpu;
-
-    printf("=== Completed simulation after %f seconds.\n", timer.elapsed() / 1.0e3);
 
     return EXIT_SUCCESS;
 }

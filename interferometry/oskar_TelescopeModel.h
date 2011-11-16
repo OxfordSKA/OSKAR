@@ -176,6 +176,17 @@ struct oskar_TelescopeModel
     int multiply_by_wavenumber(double frequency_hz);
 
     /**
+     * @brief
+     * Resizes the telescope model structure.
+     *
+     * @details
+     * Resizes the telescope model structure.
+     *
+     * @param n_stations New number of stations.
+     */
+    int resize(int n_stations);
+
+    /**
      * @brief Returns the base type of all arrays in the structure, or an error
      * code if the types are inconsistent.
      */
