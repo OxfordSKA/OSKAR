@@ -31,6 +31,7 @@
 #include "interferometry/oskar_visibilities_clear_contents.h"
 #include "interferometry/oskar_visibilities_get_channel_amps.h"
 #include "interferometry/oskar_visibilities_init.h"
+#include "interferometry/oskar_visibilities_location.h"
 #include "interferometry/oskar_visibilities_read.h"
 #include "interferometry/oskar_visibilities_resize.h"
 #include "interferometry/oskar_visibilities_write.h"
@@ -97,4 +98,9 @@ int oskar_Visibilities::init(int amp_type, int location, int num_channels,
 int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)
 {
     return oskar_visibilties_get_channel_amps(vis_amps, this, channel);
+}
+
+int oskar_Visibilities::location() const
+{
+    return oskar_visibilities_location(this);
 }

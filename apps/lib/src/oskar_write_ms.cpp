@@ -32,6 +32,8 @@
 #include "ms/oskar_ms.h"
 #include "interferometry/oskar_TelescopeModel.h"
 
+#include "interferometry/oskar_Visibilities.h"
+
 #include <QtCore/QDir>
 #include <QtCore/QFileInfoList>
 #include <QtCore/QFile>
@@ -40,7 +42,119 @@
 #include <cstdlib>
 #include <cstring>
 
-extern "C"
+#ifndef DAYS_2_SEC
+#define DAYS_2_SEC 86400.0
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
+        const oskar_Settings* settings, int overwrite)
+{
+//    // Check if the ms path already exists and overwrite if specified.
+//    QDir dir;
+//    dir.setPath(QString(ms_path));
+//    if (dir.exists(dir.absolutePath()))
+//    {
+//        // Try to overwrite.
+//        if (overwrite && !oskar_remove_dir(ms_path))
+//            return OSKAR_ERR_UNKNOWN;
+//        // No overwrite specified and directory already exists.
+//        else
+//            return OSKAR_ERR_UNKNOWN;
+//    }
+//
+//    // Load telescope model station / antenna positions.
+//    oskar_TelescopeModel telescope(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+//    QByteArray telescope_file = settings->telescope_file().toAscii();
+//    int error = telescope.load_station_pos(telescope_file.constData(),
+//            settings->longitude_rad(), settings->latitude_rad(),
+//            settings->altitude_m());
+//    if (error) return error;
+
+
+
+
+//    // Make local copies of settings.
+//    double mjd_start = settings->obs().start_time_utc_mjd();
+//    double frequency = settings->obs().start_frequency() +
+//            settings->obs().frequency_inc() * channel;
+
+//    // Create the measurement set.
+//    oskar_ms_create_meta1(ms_path, settings->obs().ra0_rad(),
+//            settings->obs().dec0_rad(),
+//            telescope.num_stations, telescope.station_x,
+//            telescope.station_y, telescope.station_z, frequency);
+//
+//    // Evaluate baseline index arrays.
+//
+//    int* baseline_ant_1 = (int*) malloc(vis->num_samples() * sizeof(int));
+//    int* baseline_ant_2 = (int*) malloc(vis->num_samples * sizeof(int));
+//    for (int idx = 0, t = 0; t < (int)settings->obs().num_vis_dumps(); ++t)
+//    {
+//        for (int a1 = 0; a1 < (int)telescope.num_antennas; ++a1)
+//        {
+//            for (int a2 = (a1 + 1); a2 < (int)telescope.num_antennas; ++a2)
+//            {
+//                baseline_ant_1[idx] = a1;
+//                baseline_ant_2[idx] = a2;
+//                ++idx;
+//            }
+//        }
+//    }
+//
+//    // Write visibility data to the measurement set.
+//    int num_baselines = telescope.num_antennas * (telescope.num_antennas - 1) / 2;
+//    double interval = settings->obs().obs_length_sec() / settings->obs().num_vis_dumps();
+//    double exposure = interval;
+//    double* times = (double*) malloc(vis->num_samples * sizeof(double));
+//    double t_start_sec = mjd_start * days_to_sec + interval / 2;
+//    for (int j = 0; j < (int)settings->obs().num_vis_dumps(); ++j)
+//    {
+//        double t = t_start_sec + interval * j;
+//        for (int i = 0; i < num_baselines; ++i)
+//            times[j * num_baselines + i] = t;
+//    }
+//    oskar_ms_append_vis1(ms_path, vis->num_samples, vis->u, vis->v, vis->w,
+//            (double*)vis->amp, baseline_ant_1, baseline_ant_2,
+//            exposure, interval, times);
+//
+//    // Cleanup.
+//    free(baseline_ant_1);
+//    free(baseline_ant_2);
+//    free(times);
+//
+//
+//
+//
+    return OSKAR_SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// DEPRECATED
 void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
         const oskar_VisData_d* vis, const unsigned channel, const bool overwrite)
 {
@@ -123,8 +237,7 @@ void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
    free(times);
 }
 
-
-extern "C"
+// DEPRECATED
 void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
         const oskar_VisData_f* vis, const unsigned channel, const bool overwrite)
 {
@@ -143,3 +256,8 @@ void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
 
     oskar_free_vis_data_d(&temp_vis);
 }
+
+#ifdef __cplusplus
+}
+#endif
+

@@ -29,9 +29,9 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_mem_element_size.h"
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -44,7 +44,15 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     if (vis->location() != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    // FIXME Check overwrite behaviour?
+    int num_amps = vis->num_channels * vis->num_times * vis->num_baselines;
+    int num_coords = vis->num_times * vis->num_baselines;
+    if (num_amps != vis->amplitude.num_elements() ||
+            num_coords != vis->uu_metres.num_elements() ||
+            num_coords != vis->vv_metres.num_elements() ||
+            num_coords != vis->ww_metres.num_elements())
+    {
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    }
 
     // Open the file to write to.
     FILE* file;
@@ -57,7 +65,6 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     int amp_type = vis->amplitude.type();
     size_t coord_element_size = oskar_mem_element_size(coord_type);
     size_t amp_element_size = oskar_mem_element_size(amp_type);
-    size_t num_samples = vis->num_samples();
     int oskar_vis_file_magic_number = OSKAR_VIS_FILE_ID;
     int oskar_version = OSKAR_VERSION;
 
@@ -99,22 +106,22 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     }
 
     // Write data.
-    if (fwrite(vis->uu_metres.data, coord_element_size, num_samples, file) != num_samples)
+    if (fwrite(vis->uu_metres.data, coord_element_size, num_coords, file) != num_coords)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->vv_metres.data, coord_element_size, num_samples, file) != num_samples)
+    if (fwrite(vis->vv_metres.data, coord_element_size, num_coords, file) != num_coords)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->ww_metres.data, coord_element_size, num_samples, file) != num_samples)
+    if (fwrite(vis->ww_metres.data, coord_element_size,num_coords, file) != num_coords)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
-    if (fwrite(vis->amplitude.data,  amp_element_size, num_samples, file) != num_samples)
+    if (fwrite(vis->amplitude.data, amp_element_size, num_amps, file) != num_amps)
     {
         fclose(file);
         return OSKAR_ERR_FILE_IO;

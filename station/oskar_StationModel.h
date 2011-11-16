@@ -178,7 +178,7 @@ struct oskar_StationModel
     int coord_type() const;
 
     /**
-     * @brief Returns the oskar_Mem locaiton ID of the station coordinates or
+     * @brief Returns the oskar_Mem location ID of the station coordinates or
      * an error code if the coordinate type is invalid.
      */
     int coord_location() const;

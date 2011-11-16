@@ -29,9 +29,10 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_mem_element_size.h"
-#include <cstdio>
-#include <cstring>
-#include <cstdlib>
+
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -121,25 +122,18 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
             OSKAR_LOCATION_CPU, num_channels, num_times, num_baselines);
 
     // Read data.
-    size_t num_samples        = vis->num_samples();
+    size_t num_amps = num_channels * num_times * num_baselines;
+    size_t num_coords = num_times * num_baselines;
     size_t coord_element_size = oskar_mem_element_size(coord_type);
     size_t amp_element_size   = oskar_mem_element_size(amp_type);
-    if (fread(vis->uu_metres.data, coord_element_size, num_samples, file) != num_samples)
+    if (fread(vis->uu_metres.data, coord_element_size, num_coords, file) != num_coords)
     {
         fclose(file);
         delete vis;
         if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
-    if (fread(vis->vv_metres.data, coord_element_size, num_samples, file) != num_samples)
-    {
-        fclose(file);
-        delete vis;
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-
-    if (fread(vis->ww_metres.data, coord_element_size, num_samples, file) != num_samples)
+    if (fread(vis->vv_metres.data, coord_element_size, num_coords, file) != num_coords)
     {
         fclose(file);
         delete vis;
@@ -147,7 +141,15 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
         return NULL;
     }
 
-    if (fread(vis->amplitude.data,  amp_element_size,   num_samples, file) != num_samples)
+    if (fread(vis->ww_metres.data, coord_element_size, num_coords, file) != num_coords)
+    {
+        fclose(file);
+        delete vis;
+        if (status) *status = OSKAR_ERR_FILE_IO;
+        return NULL;
+    }
+
+    if (fread(vis->amplitude.data,  amp_element_size, num_amps, file) != num_amps)
     {
         fclose(file);
         delete vis;

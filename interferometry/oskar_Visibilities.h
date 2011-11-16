@@ -38,7 +38,7 @@
 #include "utility/oskar_Mem.h"
 #include <stdlib.h>
 
-#define OSKAR_VIS_FILE_ID 0x1F3F
+#define OSKAR_VIS_FILE_ID 0x1F4F
 
 /**
  * @brief Structure to hold visibility data.
@@ -224,44 +224,27 @@ struct oskar_Visibilities
     int get_channel_amps(oskar_Mem* vis_amps, int channel);
 
     /**
-     * DEPRECATED?
-     * FIXME this isn't ALWAYS safe.
-     *
-     * @brief Returns the location of the memory in the visibility structure
-     * as an OSKAR memory location ID.
-     *
-     * @details
-     * A value of 0 or OSKAR_LOCATION_CPU indicates memory is on the host
-     * (CPU) and a value of 1 or OSKAR_LOCATION_GPU indicates memory is
-     * stored on the device (GPU).
-     *
-     * @return Memory location ID.
+     * @brief Returns the number of baseline u,v,w coordinates.
      */
-    int location() const { return amplitude.location(); }
+    int num_coords() const
+    { return num_times * num_baselines; }
 
     /**
-     * @brief Returns the number of visibility samples held in the structure.
+     * @brief Returns the number of visibility amplitudes.
      */
-    int num_samples() const { return num_times * num_baselines * num_channels; }
+    int num_amps() const
+    { return num_channels * num_times * num_baselines; }
+
+    /**
+     * @brief Returns the OSKAR location ID of the visibilities structure.
+     */
+    int location() const;
 
     /**
      * @brief Returns the number of polarisations for each visibility sample.
      */
     int num_polarisations() const
     { return amplitude.is_scalar() ? 1 : 4; }
-
-    /**
-     * FIXME this isn't ALWAYS safe.
-     * @brief Returns the OSKAR memory type ID for the baseline coordinates.
-     */
-    int coord_type() const
-    { return uu_metres.type(); }
-
-    /**
-     * @brief Returns the OSKAR memory type ID for the visibility amplitudes.
-     */
-    int amp_type() const
-    { return amplitude.type(); }
 #endif
 };
 

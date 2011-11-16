@@ -26,46 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WRITE_MS_H_
-#define OSKAR_WRITE_MS_H_
 
-
-/**
- * @file oskar_write_ms.h
- */
-
-#include "oskar_global.h"
-#include "apps/lib/oskar_Settings.h"
-#include "interferometry/oskar_Visibilities.h"
-
-#include "interferometry/oskar_VisData.h" // DEPRECATED
+#include "interferometry/oskar_visibilities_location.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
-        const oskar_Settings* settings, int overwrite);
+int oskar_visibilities_is_location(const oskar_Visibilities* vis, int location)
+{
+    return (vis->uu_metres.private_location == location &&
+            vis->vv_metres.private_location == location &&
+            vis->ww_metres.private_location == location &&
+            vis->amplitude.private_location == location);
+}
 
+int oskar_visibilities_location(const oskar_Visibilities* vis)
+{
+    if (vis == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-
-// DEPRECATED
-OSKAR_EXPORT
-void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_d* vis, const unsigned channel,
-        const bool overwrite = true);
-
-
-// DEPRECATED
-OSKAR_EXPORT
-void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_f* vis, const unsigned channel,
-        const bool overwrite = true);
-
+    if (oskar_visibilities_is_location(vis, OSKAR_LOCATION_CPU))
+        return OSKAR_LOCATION_CPU;
+    else if (oskar_visibilities_is_location(vis, OSKAR_LOCATION_GPU))
+        return OSKAR_LOCATION_GPU;
+    else
+        return OSKAR_ERR_BAD_LOCATION;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // OSKAR_WRITE_MS_H_

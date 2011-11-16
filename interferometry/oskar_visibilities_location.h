@@ -26,46 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WRITE_MS_H_
-#define OSKAR_WRITE_MS_H_
 
+#ifndef OSKAR_VISIBILITIES_LOCATION_H_
+#define OSKAR_VISIBILITIES_LOCATION_H_
 
 /**
- * @file oskar_write_ms.h
+ * @file oskar_visibilities_location.h
  */
 
 #include "oskar_global.h"
-#include "apps/lib/oskar_Settings.h"
 #include "interferometry/oskar_Visibilities.h"
-
-#include "interferometry/oskar_VisData.h" // DEPRECATED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
-        const oskar_Settings* settings, int overwrite);
+/**
+ * @brief Checks if the OSKAR visibilities structure is at the specified
+ * location.
+ *
+ * @details
+ * \p location should be an oskar_Mem data location ID.
+ *
+ * If the location is found to be inconsistent between all of the oskar_Mem
+ * structures held in the visibility structure the location check is considered
+ * false.
+ *
+ * @param vis       Pointer to visibilities structure.
+ * @param location  oskar_Mem location type to check against.
 
+ * @return 1 (true) if the visibilities is of the specified location,
+ * 0 (false) otherwise.
+ */
+int oskar_visibilities_is_location(const oskar_Visibilities* vis, int location);
 
-
-// DEPRECATED
-OSKAR_EXPORT
-void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_d* vis, const unsigned channel,
-        const bool overwrite = true);
-
-
-// DEPRECATED
-OSKAR_EXPORT
-void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_f* vis, const unsigned channel,
-        const bool overwrite = true);
-
+/**
+ * @brief Returns the oskar_Mem location ID for the visibilities structure or
+ * an error code if an invalid location is found.
+ *
+ * @param vis Pointer to an OSKAR visibilities structure.
+ *
+ * @return oskar_Mem data location or error code.
+ */
+int oskar_visibilities_location(const oskar_Visibilities* vis);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_WRITE_MS_H_
+#endif /* OSKAR_VISIBILITIES_LOCATION_H_ */

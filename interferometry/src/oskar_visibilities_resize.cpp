@@ -39,16 +39,17 @@ int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
     vis->num_channels  = num_channels;
     vis->num_times     = num_times;
     vis->num_baselines = num_baselines;
-    int num_samples    = num_channels * num_times * num_baselines;
+    int num_amps   = num_channels * num_times * num_baselines;
+    int num_coords = num_times * num_baselines;
 
     int error = 0;
-    error = vis->uu_metres.resize(num_samples);
+    error = vis->uu_metres.resize(num_coords);
     if (error) return error;
-    error = vis->vv_metres.resize(num_samples);
+    error = vis->vv_metres.resize(num_coords);
     if (error) return error;
-    error = vis->ww_metres.resize(num_samples);
+    error = vis->ww_metres.resize(num_coords);
     if (error) return error;
-    error = vis->amplitude.resize(num_samples);
+    error = vis->amplitude.resize(num_amps);
     if (error) return error;
 
     return error;
