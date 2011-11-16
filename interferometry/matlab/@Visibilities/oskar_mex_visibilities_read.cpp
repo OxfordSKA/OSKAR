@@ -53,33 +53,31 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 filename, oskar_get_error_string(status));
     }
 
-    if (vis->num_channels != 1)
-        mexErrMsgTxt("Only one channel is currently supported");
-
+    int num_channels  = vis->num_channels;
     int num_times     = vis->num_times;
     int num_baselines = vis->num_baselines;
     int num_pols      = vis->num_polarisations();
 
-    // Allocate memory returned to the MATLAB workspace.
-    mwSize num_dims = 2;
-    mwSize dims[2] = { num_baselines, num_times};
+    // Allocate memory returned to the MATLAB work-space.
+    mwSize coord_dims[2] = { num_baselines, num_times};
+    mwSize amp_dims[3]   = {num_baselines, num_times, num_channels};
     mxClassID class_id = (vis->uu_metres.type() == OSKAR_DOUBLE) ?
             mxDOUBLE_CLASS : mxSINGLE_CLASS;
-    mxArray* uu = mxCreateNumericArray(num_dims, dims, class_id, mxREAL);
-    mxArray* vv = mxCreateNumericArray(num_dims, dims, class_id, mxREAL);
-    mxArray* ww = mxCreateNumericArray(num_dims, dims, class_id, mxREAL);
-    mxArray* xx = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
+    mxArray* uu = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
+    mxArray* vv = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
+    mxArray* ww = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
+    mxArray* xx = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
     mxArray *yy = NULL, *xy = NULL, *yx = NULL;
     mxArray *I = NULL, *Q = NULL, *U = NULL, *V = NULL;
     if (num_pols == 4)
     {
-        xy = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
-        yx = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
-        yy = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
-        I  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
-        Q  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
-        U  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
-        V  = mxCreateNumericArray(num_dims, dims, class_id, mxCOMPLEX);
+        xy = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+        yx = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+        yy = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+        I  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+        Q  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+        U  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
+        V  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
     }
 
     mexPrintf("= Loading %i visibility samples\n",
@@ -117,11 +115,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             V_re_ptr  = (double*)mxGetPr(V);
             V_im_ptr  = (double*)mxGetPi(V);
         }
-        for (int i = 0; i < vis->num_times * vis->num_baselines; ++i)
+        for (int i = 0; i < num_times * num_baselines; ++i)
         {
             uu_ptr[i] = ((double*)(vis->uu_metres.data))[i];
             vv_ptr[i] = ((double*)(vis->vv_metres.data))[i];
             ww_ptr[i] = ((double*)(vis->ww_metres.data))[i];
+        }
+
+        for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
+        {
 
             if (num_pols == 1)
             {
@@ -189,11 +191,16 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             V_im_ptr  = (float*)mxGetPi(V);
 
         }
-        for (int i = 0; i < vis->num_times * vis->num_baselines; ++i)
+
+        for (int i = 0; i < num_times * num_baselines; ++i)
         {
             uu_ptr[i] = ((float*)(vis->uu_metres.data))[i];
             vv_ptr[i] = ((float*)(vis->vv_metres.data))[i];
             ww_ptr[i] = ((float*)(vis->ww_metres.data))[i];
+        }
+
+        for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
+        {
 
             if (num_pols == 1)
             {
@@ -233,18 +240,19 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Create and populate output visibility structure.
     if (num_pols == 4)
     {
-        const char* fields[11] = {"uu", "vv", "ww", "xx", "xy", "yx", "yy",
-                "I", "Q", "U", "V"};
+        const char* fields[11] = {"uu_metres", "vv_metres", "ww_metres",
+                "xx", "xy", "yx", "yy", "I", "Q", "U", "V"};
         out[0] = mxCreateStructMatrix(1, 1, 11, fields);
     }
     else
     {
-        const char* fields[4] = {"uu", "vv", "ww", "xx"};
+        const char* fields[4] = {"uu_metres", "vv_metres", "ww_metres",
+                "xx"};
         out[0] = mxCreateStructMatrix(1, 1, 4, fields);
     }
-    mxSetField(out[0], 0, "uu", uu);
-    mxSetField(out[0], 0, "vv", vv);
-    mxSetField(out[0], 0, "ww", ww);
+    mxSetField(out[0], 0, "uu_metres", uu);
+    mxSetField(out[0], 0, "vv_metres", vv);
+    mxSetField(out[0], 0, "ww_metres", ww);
     mxSetField(out[0], 0, "xx", xx);
     if (num_pols == 4)
     {
