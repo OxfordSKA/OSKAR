@@ -143,21 +143,6 @@ struct oskar_Visibilities
     ~oskar_Visibilities();
 
     /**
-     * @brief Appends the specified visibility structure.
-     *
-     * @details
-     * The structure being appended must contain the same baseline
-     * and channel dimensions are the structure being appended to. This
-     * ensures memory order is preserved as the append simply allows
-     * expansion of the outer time time dimension.
-     *
-     * @param other Visibility structure to append.
-     *
-     * @return An error code.
-     */
-    int append(const oskar_Visibilities* other);
-
-    /**
      * @brief Clears contents of the visibility structure.
      *
      * @details
@@ -166,25 +151,6 @@ struct oskar_Visibilities
      * @return An error code.
      */
     int clear_contents();
-
-    /**
-     * @brief Inserts the specified visibility structure at the specified
-     * time index.
-     *
-     * @details
-     * The structure being inserted must contain the same baseline
-     * and channel dimensions are the structure being appended to.
-     * To use this function the visibility structure being inserted must
-     * be preallocated to sufficiently large dimensions that the time index
-     * plus the number of times in the structure being inserted dosnt exceed
-     * the number of times in the destination.
-     *
-     * @param other Visibility structure to append.
-     *
-     * @return An error code.
-     */
-    int insert(const oskar_Visibilities* other, int channel_index,
-            int time_index);
 
     /**
      * @brief Writes the contents of visibility structure to an OSKAR
@@ -244,6 +210,18 @@ struct oskar_Visibilities
      */
     int init(int amp_type, int location, int num_channels, int num_times,
             int num_baselines);
+
+    /**
+     * @brief Returns an oskar_Mem pointer (non ownership) for the channel
+     * amplitudes of the specified channel.
+     *
+     * @param vis_amps oskar_Mem pointer to the amplitudes for the specified
+     *                 channel.
+     * @param channel  Channel index for requested amplitudes
+     *
+     * @return An error code.
+     */
+    int get_channel_amps(oskar_Mem* vis_amps, int channel);
 
     /**
      * DEPRECATED?

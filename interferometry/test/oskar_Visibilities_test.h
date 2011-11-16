@@ -48,10 +48,9 @@ class oskar_Visibilties_test : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(oskar_Visibilties_test);
         CPPUNIT_TEST(test_create);
         CPPUNIT_TEST(test_copy);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_insert);
         CPPUNIT_TEST(test_resize);
         CPPUNIT_TEST(test_init);
+        CPPUNIT_TEST(test_get_amps);
         CPPUNIT_TEST(test_read_write);
         CPPUNIT_TEST_SUITE_END();
 
@@ -59,10 +58,9 @@ class oskar_Visibilties_test : public CppUnit::TestFixture
         // Test Methods
         void test_create();
         void test_copy();
-        void test_append();
-        void test_insert();
         void test_resize();
         void test_init();
+        void test_get_amps();
         void test_read_write();
 };
 

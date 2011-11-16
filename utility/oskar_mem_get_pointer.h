@@ -47,11 +47,13 @@ extern "C" {
  * @details
  * Note: The returned structure will not hold ownership of the memory to
  * which it points.
+ * Warning: If the pointer \p ptr returned already owns memory, this will be
+ * lost and cause a leak!
  *
  * @param[out] ptr         Output structure holding a pointer to a location
  *                         in memory and its associated meta-data.
  * @param[in] src          Input structure from which the pointer is derived.
- * @param[in] offset       Offset into \p src.
+ * @param[in] offset       Offset into \p src in elements.
  * @param[in] num_elements Number of elements of \p src referred to by \p ptr.
  *
  * @return

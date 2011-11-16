@@ -26,49 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_INSERT_H_
-#define OSKAR_VISIBILITIES_INSERT_H_
+
+#ifndef OSKAR_VISIBILITIES_GET_CHANNEL_AMPS_H_
+#define OSKAR_VISIBILITIES_GET_CHANNEL_AMPS_H_
 
 /**
- * @file oskar_visibilities_insert.h
+ * @file oskar_visibilities_get_channel_amps.h
  */
 
-
 #include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 #include "interferometry/oskar_Visibilities.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+
 /**
- * @brief Inserts the specified visibility structure at the specified
- * time index.
+ * @brief Returns a non-owned pointer to the visibility amplitudes for the
+ * specified channel.
  *
- * @details
- * The structure being inserted must contain the same baseline
- * and channel dimensions are the structure being appended to.
- * To use this function the visibility structure being inserted must
- * be preallocated to sufficiently large dimensions that the time index
- * plus the number of times in the structure being inserted doesn't exceed
- * the number of times in the destination.
- *
- * FIXME is this used for anything anymore? - if not deprecate it.
- * NOTE This function is potentially dangerous as it allows for inserting
- * data out of time and frequency order.
- *
- * @param[out] dst             Visibility structure to insert into.
- * @param[in]  src             Visibility structure to insert.
- * @param[in]  channel_index   Channel index which to insert at.
- * @param[in]  time_index      Time index which to insert at.
+ * @param[out] vis_amp  oskar_Mem pointer to the visibility amplitudes for the
+ *                      specified channel.
+ * @param[in]  vis      Visibility structure to extract the amplitudes from.
+ * @param[in]  channel  Channel index.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_insert(oskar_Visibilities* dst,
-        const oskar_Visibilities* src, int channel_index, int time_index);
+int oskar_visibilties_get_channel_amps(oskar_Mem* vis_amp,
+        const oskar_Visibilities* vis, int channel);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* OSKAR_VISIBILITIES_INSERT_H_ */
+
+#endif /* OSKAR_VISIBILITIES_GET_CHANNEL_AMPS_H_ */

@@ -56,11 +56,11 @@ int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
     /* Initialise the new meta-data. */
     ptr->private_type = src->private_type;
     ptr->private_num_elements = num_elements;
-    ptr->data = (void*)((char*)src->data + offset_bytes);
+    ptr->data = (void*)((char*)(src->data) + offset_bytes);
     ptr->private_location = src->private_location;
     ptr->private_owner = OSKAR_FALSE;
 
-    return 0;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

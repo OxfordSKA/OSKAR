@@ -51,7 +51,6 @@
 extern "C"
 #endif
 OSKAR_EXPORT
-oskar_Visibilities* oskar_visibilities_read(const char* filename,
-        int* status = NULL);
+oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status);
 
 #endif /* OSKAR_VISIBILITIES_READ_H_ */

@@ -26,39 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_APPEND_H_
-#define OSKAR_VISIBILITIES_APPEND_H_
 
-/**
- * @file oskar_Visibilties_append.h
- */
+#include "interferometry/oskar_visibilities_get_channel_amps.h"
+#include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_get_pointer.h"
+#include "stdio.h"
 
-
-#include "oskar_global.h"
-#include "interferometry/oskar_Visibilities.h"
-
-/**
- * @brief Appends the specified visibility structure.
- *
- * @details
- * Warning:
- * - The additional visibilities are appended to the end of the
- *   destination visibility structure at whatever channel this
- *   corresponds to.
- *
- * NOTE This function is dangerous if using with more than one channel.
- *
- * @param src Visibility structure to append from.
- * @param dst Visibility structure to append to.
- *
- * @return An error code.
- */
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-OSKAR_EXPORT
-int oskar_visibilties_append(oskar_Visibilities* dst,
-        const oskar_Visibilities* src);
+
+int oskar_visibilties_get_channel_amps(oskar_Mem* vis_amp,
+        const oskar_Visibilities* vis, int channel)
+{
+    if (vis_amp == NULL || vis == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    int num_elements = vis->num_times * vis->num_baselines;
+    int offset = channel * num_elements;
+
+    return oskar_mem_get_pointer(vis_amp, &vis->amplitude,
+            offset, num_elements);
+}
 
 
-#endif /* OSKAR_VISIBILITIES_APPEND_H_ */
+#ifdef __cplusplus
+}
+#endif
