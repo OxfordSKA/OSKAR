@@ -74,22 +74,28 @@ int main(int argc, char** argv)
 
     // Create the global visibility structure on the CPU.
     int n_stations = tel_gpu->num_stations;
+    int n_channels = settings.obs().num_channels();
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    // FIXME Set the channel dimension correctly.
     oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
-            1, times->num_vis_dumps, n_stations * (n_stations - 1) / 2);
+            n_channels, times->num_vis_dumps, n_stations * (n_stations - 1) /2);
 
     // Run the simulation.
     QTime timer;
     timer.start();
-    // TODO Loop over channels here.
+    for (int c = 0; c < n_channels; ++c)
     {
-        err = oskar_interferometer(&vis_global.amplitude, sky_gpu, tel_gpu,
-                times, settings.obs().frequency(0));
+        // Get a pointer to the visibility channel data.
+        oskar_Mem vis_amp;
+        printf("--> Simulating channel (%d / %d).\n", c + 1, n_channels);
+        vis_global.get_channel_amps(&vis_amp, c);
+
+        // Simulate data for this channel.
+        err = oskar_interferometer(&vis_amp, sky_gpu, tel_gpu, times,
+                settings.obs().frequency(0));
         if (err) oskar_exit(err);
     }
-    printf("=== Completed simulation after %f seconds.\n", timer.elapsed() / 1.0e3);
+    printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
 
     // Compute baseline u,v,w coordinates for simulation.
     err = oskar_evaluate_baseline_uvw(&vis_global, tel_cpu, times);

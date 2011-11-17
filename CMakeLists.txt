@@ -30,7 +30,7 @@ if (NOT OSKAR_MATLAB_INSTALL_DIR)
     set(OSKAR_MATLAB_INSTALL_DIR "share/matlab/toolbox/oskar")
 endif()
 
-# ==== Defaults as to which libraries are build.
+# ==== Set the libraries that are built by default.
 if (NOT DEFINED BUILD_OSKAR)
     set(BUILD_OSKAR ON)
 endif ()
@@ -61,20 +61,20 @@ include(oskar_compiler_options)
 
 enable_testing()
 
-# ==== Build single oskar library.
+# ==== Build main oskar library.
 if (BUILD_OSKAR)
-    add_subdirectory(station)
-    add_subdirectory(cuda)
+    #add_subdirectory(cuda) # Deprecated.
     add_subdirectory(interferometry)
     add_subdirectory(math)
     add_subdirectory(sky)
+    add_subdirectory(station)
     add_subdirectory(utility)
     foreach (file ${station_SRC})
         list(APPEND oskar_SRC station/${file})
     endforeach ()
-    foreach (file ${cuda_SRC})
-        list(APPEND oskar_SRC cuda/${file})
-    endforeach ()
+    #foreach (file ${cuda_SRC}) # Deprecated.
+    #    list(APPEND oskar_SRC cuda/${file})
+    #endforeach ()
     foreach (file ${interferometry_SRC})
         list(APPEND oskar_SRC interferometry/${file})
     endforeach ()
