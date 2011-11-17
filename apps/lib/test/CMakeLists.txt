@@ -10,21 +10,22 @@ if (CPPUNIT_FOUND)
     set(apps_test_SRC
         src/CppUnitMain.cpp
         src/LoadStationsTest.cpp
+        src/Test_write_ms.cpp
     )
 
-    add_executable(appsTest ${apps_test_SRC})
+    add_executable(apps_lib_test ${apps_test_SRC})
 
-    set_target_properties(appsTest PROPERTIES
+    set_target_properties(apps_lib_test PROPERTIES
        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
-    target_link_libraries(appsTest
+    target_link_libraries(apps_lib_test
         oskar_apps
         ${CPPUNIT_LIBRARIES}
         ${QT_QTCORE_LIBRARIES}
     )
 
-    add_test(appsTest appsTest)
+    add_test(apps_lib_test apps_lib_test)
 
 endif()
 

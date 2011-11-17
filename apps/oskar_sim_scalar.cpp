@@ -30,6 +30,7 @@
 #include "apps/lib/oskar_Settings.h"
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
+#include "apps/lib/oskar_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer_scalar.h"
 #include "interferometry/oskar_SimTime.h"
@@ -79,6 +80,10 @@ int main(int argc, char** argv)
     int complex_scalar = type | OSKAR_COMPLEX;
     oskar_Visibilities vis_global(complex_scalar, OSKAR_LOCATION_CPU,
             n_channels, times->num_vis_dumps, n_stations * (n_stations - 1) /2);
+    vis_global.freq_start_hz = settings.obs().start_frequency();
+    vis_global.freq_inc_hz = settings.obs().frequency_inc();
+    vis_global.time_start_mjd_utc = times->obs_start_mjd_utc;
+    vis_global.time_inc_seconds = times->dt_dump_days * 86400.0;
 
     // Run the simulation.
     QTime timer;
@@ -92,7 +97,7 @@ int main(int argc, char** argv)
 
         // Simulate data for this channel.
         err = oskar_interferometer_scalar(&vis_amp, sky_gpu, tel_gpu, times,
-                settings.obs().frequency(0));
+                settings.obs().frequency(c));
         if (err) oskar_exit(err);
     }
     printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
@@ -116,7 +121,8 @@ int main(int argc, char** argv)
     {
         QByteArray outname = settings.obs().ms_filename().toAscii();
         printf("--> Writing Measurement Set: '%s'\n", outname.constData());
-        // TODO Write the Measurement Set.
+        err = oskar_write_ms(outname.constData(), &vis_global, tel_cpu, (int)OSKAR_TRUE);
+        if (err) oskar_exit(err);
     }
 #endif
 

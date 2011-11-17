@@ -97,6 +97,43 @@ void oskar_MeasurementSet::addAntennas(int na, const double* ax,
     }
 }
 
+void oskar_MeasurementSet::addAntennas(int na, const float* ax,
+        const float* ay, const float* az)
+{
+    // Add rows to the ANTENNA subtable.
+    int startRow = _ms->antenna().nrow();
+    _ms->antenna().addRow(na);
+    Vector<Double> pos(3, 0.0);
+    for (int a = 0; a < na; ++a) {
+        int row = a + startRow;
+        pos(0) = ax[a]; pos(1) = ay[a]; pos(2) = az[a];
+        _msc->antenna().position().put(row, pos);
+        _msc->antenna().mount().put(row, "ALT-AZ");
+        _msc->antenna().dishDiameter().put(row, 1);
+        _msc->antenna().flagRow().put(row, false);
+    }
+
+    // Determine constants for the FEED subtable.
+    int nRec = 2;
+    Matrix<Double> feedOffset(2, nRec, 0.0);
+    Matrix<Complex> feedResponse(nRec, nRec, Complex(0.0, 0.0));
+    Vector<String> feedType(nRec);
+    feedType(0) = "X";
+    if (nRec > 1) feedType(1) = "Y";
+    Vector<Double> feedAngle(nRec, 0.0);
+
+    // Fill the FEED subtable (required).
+    _ms->feed().addRow(na);
+    for (int a = 0; a < na; ++a) {
+        _msc->feed().antennaId().put(a, a);
+        _msc->feed().beamOffset().put(a, feedOffset);
+        _msc->feed().polarizationType().put(a, feedType);
+        _msc->feed().polResponse().put(a, feedResponse);
+        _msc->feed().receptorAngle().put(a, feedAngle);
+        _msc->feed().numReceptors().put(a, 1);
+    }
+}
+
 void oskar_MeasurementSet::addBand(int polid, int nc, double refFreq,
         double chanWidth)
 {
@@ -228,6 +265,81 @@ void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
     _msc->observation().timeRange().put(0, timeRange);
     _msc->observation().releaseDate().put(0, releaseDate);
 }
+
+void oskar_MeasurementSet::addVisibilities(int n_pol, int n_chan, int n_row,
+        const float* u, const float* v, const float* w, const float* vis,
+        const int* ant1, const int* ant2, double exposure, double interval,
+        const float* times)
+{
+    // Allocate storage for a (u,v,w) coordinate,
+    // a visibility matrix, a visibility weight, and a flag matrix.
+    Vector<Double> uvw(3);
+    Matrix<Complex> vis_data(n_pol, n_chan);
+    Matrix<Bool> flag(n_pol, n_chan, false);
+    Vector<Float> weight(n_pol, 1.0);
+    Vector<Float> sigma(n_pol, 1.0);
+
+    // Add enough rows to the main table.
+    int start_row = _ms->nrow();
+    _ms->addRow(n_row);
+
+    // Loop over rows / visibilities.
+    for (int r = 0; r < n_row; ++r)
+    {
+        int row = r + start_row;
+
+        // Add the u,v,w coordinates.
+        uvw(0) = u[r]; uvw(1) = v[r]; uvw(2) = w[r];
+        _msmc->uvw().put(row, uvw);
+
+        // Get a pointer to the start of the visibility matrix for this row.
+        const float* vis_row = vis + (2 * n_pol * n_chan) * r;
+
+        // Fill the visibility matrix (polarisation and channel data).
+        for (int c = 0; c < n_chan; ++c)
+        {
+            for (int p = 0; p < n_pol; ++p)
+            {
+                int b = 2 * (p + c * n_pol);
+                vis_data(p, c) = Complex(vis_row[b], vis_row[b + 1]);
+            }
+        }
+
+        // Add the visibilities.
+        _msmc->data().put(row, vis_data);
+        _msmc->modelData().put(row, vis_data);
+        _msmc->correctedData().put(row, vis_data);
+
+        // Add the antenna pairs.
+        _msmc->antenna1().put(row, ant1[r]);
+        _msmc->antenna2().put(row, ant2[r]);
+
+        // Add remaining meta-data.
+        _msmc->flag().put(row, flag);
+        _msmc->weight().put(row, weight);
+        _msmc->sigma().put(row, sigma);
+        _msmc->exposure().put(row, exposure);
+        _msmc->interval().put(row, interval);
+        _msmc->time().put(row, times[r]);
+        _msmc->timeCentroid().put(row, times[r]);
+    }
+
+    // Get the old time range.
+    Vector<Double> oldTimeRange(2);
+    _msc->observation().timeRange().get(0, oldTimeRange);
+
+    // Compute the new time range.
+    Vector<Double> timeRange(2);
+    timeRange[0] = (oldTimeRange[0] <= 0.0) ? times[0] : oldTimeRange[0];
+    timeRange[1] = (times[n_row - 1] > oldTimeRange[1]) ? times[n_row - 1] :
+            oldTimeRange[1];
+    double releaseDate = timeRange[1] + 365.25 * 86400.0;
+
+    // Fill observation columns.
+    _msc->observation().timeRange().put(0, timeRange);
+    _msc->observation().releaseDate().put(0, releaseDate);
+}
+
 
 void oskar_MeasurementSet::close()
 {

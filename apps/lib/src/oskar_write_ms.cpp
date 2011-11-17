@@ -27,17 +27,13 @@
  */
 
 #include "apps/lib/oskar_write_ms.h"
-#include "apps/lib/oskar_file_utils.h"
-#include "ms/oskar_ms.h"
-#include "interferometry/oskar_TelescopeModel.h"
 
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_SimTime.h"
 #include "ms/oskar_MeasurementSet.h"
+#include "apps/lib/oskar_file_utils.h"
+#include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_Visibilities.h"
 
 #include <QtCore/QDir>
-#include <QtCore/QFileInfoList>
-#include <QtCore/QFile>
 
 #include <cstdio>
 #include <cstdlib>
@@ -52,14 +48,10 @@ extern "C" {
 #endif
 
 int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
-        const oskar_Settings* settings, int overwrite)
+        const oskar_TelescopeModel* telescope, int overwrite)
 {
-    // TODO
-    // - Remove settings structure from the interface?
-    //   - all of the relevant meta data should probably be in the vis structure.
-    //   - This would also allow for other functions that operate on visibility
-    //     data (e.g. imagers) to be not rely on the user remembering which
-    //     settings file was used to generate the data.
+    // NOTE Currently the telescope model is needed for pointing and antenna
+    // positions.
 
     // Check if the ms path already exists and overwrite if specified.
     QDir dir;
@@ -67,44 +59,63 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
     if (dir.exists(dir.absolutePath()))
     {
         // Try to overwrite.
-        if (overwrite && !oskar_remove_dir(ms_path))
-            return OSKAR_ERR_UNKNOWN;
+        if (overwrite)
+        {
+            if (!oskar_remove_dir(ms_path))
+                return OSKAR_ERR_UNKNOWN;
+        }
         // No overwrite specified and directory already exists.
         else
+        {
             return OSKAR_ERR_UNKNOWN;
+        }
     }
 
-    // Load telescope model station / antenna positions.
-    oskar_TelescopeModel telescope(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    QByteArray telescope_file = settings->telescope_file().toAscii();
-    int error = telescope.load_station_pos(telescope_file.constData(),
-            settings->longitude_rad(), settings->latitude_rad(),
-            settings->altitude_m());
-    if (error) return error;
+    if (telescope->num_stations * (telescope->num_stations - 1) / 2 != vis->num_baselines)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    int num_antennas   = telescope->num_stations;
+    int num_baselines  = vis->num_baselines;
+    int num_pols       = vis->num_polarisations();
+    int num_channels   = vis->num_channels;
+    int num_times      = vis->num_times;
+    double dt_vis_dump = vis->time_inc_seconds;
+    double t_start_sec = vis->time_start_mjd_utc * DAYS_2_SEC + (dt_vis_dump / 2);
+    double ref_freq    = vis->freq_start_hz;
+    double chan_width  = vis->freq_inc_hz;
 
     // Create an empty measurement set of the correct dimensions and meta-data.
     oskar_MeasurementSet ms;
     ms.create(ms_path);
-    ms.addAntennas(telescope.num_stations, telescope.station_x,
-            telescope.station_y, telescope.station_z);
-    ms.addField(settings->obs().ra0_rad(), settings->obs().dec0_rad());
-    ms.addPolarisation(vis->num_polarisations());
-    double ref_freq   = settings->obs().start_frequency();
-    double chan_width = settings->obs().frequency_inc();
-    for (int i = 0; i < vis->num_polarisations(); ++i)
+    if (telescope->type() == OSKAR_DOUBLE)
     {
-        ms.addBand(i, vis->num_channels, ref_freq, chan_width);
+        ms.addAntennas(num_antennas, (const double*)telescope->station_x,
+                (const double*)telescope->station_y, (const double*)telescope->station_z);
+    }
+    else if (telescope->type() == OSKAR_SINGLE)
+    {
+        ms.addAntennas(num_antennas, (const float*)telescope->station_x,
+                (const float*)telescope->station_y, (const float*)telescope->station_z);
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    ms.addField(telescope->ra0, telescope->dec0);
+    ms.addPolarisation(num_pols);
+    for (int i = 0; i < num_pols; ++i)
+    {
+        ms.addBand(i, num_channels, ref_freq, chan_width);
     }
 
     // Evaluate baseline index arrays.
     int* baseline_ant_1 = (int*)malloc(vis->num_coords() * sizeof(int));
     int* baseline_ant_2 = (int*)malloc(vis->num_coords() * sizeof(int));
-    const oskar_SimTime* time = settings->obs().sim_time();
-    for (int idx = 0, t = 0; t < time->num_vis_dumps; ++t)
+    for (int idx = 0, t = 0; t < num_times; ++t)
     {
-        for (int a1 = 0; a1 < (int)telescope.num_stations; ++a1)
+        for (int a1 = 0; a1 < num_antennas; ++a1)
         {
-            for (int a2 = (a1 + 1); a2 < (int)telescope.num_stations; ++a2)
+            for (int a2 = (a1 + 1); a2 < num_antennas; ++a2)
             {
                 baseline_ant_1[idx] = a1;
                 baseline_ant_2[idx] = a2;
@@ -113,35 +124,122 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
         }
     }
 
-    // Evaluate the time array.
-    int num_baselines = telescope.num_stations * (telescope.num_stations - 1) / 2;
-    if (num_baselines != vis->num_baselines)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-
-    double interval = time->obs_length_seconds / time->num_vis_dumps;
-    double* times = (double*)malloc(vis->num_coords() * sizeof(double));
-    double t_start_sec = time->obs_start_mjd_utc * DAYS_2_SEC + interval / 2;
-    for (int j = 0; j < time->num_vis_dumps; ++j)
+    if (vis->amplitude.is_double())
     {
-        double t = t_start_sec + interval * j;
-        for (int i = 0; i < num_baselines; ++i)
+        double2* amp_tb = (double2*)malloc(num_channels * num_pols * sizeof(double2));
+        for (int t = 0; t < num_times; ++t)
         {
-            times[j * num_baselines + i] = t;
+            // TODO check this is the correct midpoint time of the simulation
+            // vis dump.
+            double vis_time = t_start_sec + (t * dt_vis_dump);
+
+            for (int b = 0; b < num_baselines; ++b)
+            {
+                int row = t * num_baselines + b;
+                double u = ((double*)vis->uu_metres.data)[row];
+                double v = ((double*)vis->vv_metres.data)[row];
+                double w = ((double*)vis->ww_metres.data)[row];
+
+                int ant1 = baseline_ant_1[row];
+                int ant2 = baseline_ant_2[row];
+
+                // Construct the amplitude data for the given time, baseline.
+                for (int c = 0; c < num_channels; ++c)
+                {
+                    if (num_pols == 1)
+                    {
+                        int idx = num_baselines * (c * num_times + t) + b;
+                        double2* vis_amp = &((double2*)vis->amplitude.data)[idx];
+                        // xx
+                        amp_tb[c * num_pols + 0].x = vis_amp->x;
+                        amp_tb[c * num_pols + 0].y = vis_amp->y;
+                    }
+                    else
+                    {
+                        int idx = num_baselines * (c * num_times + t) + b;
+                        double4c* vis_amp = &((double4c*)vis->amplitude.data)[idx];
+                        // xx
+                        amp_tb[c * num_pols + 0].x = vis_amp->a.x;
+                        amp_tb[c * num_pols + 0].y = vis_amp->a.y;
+                        // xy
+                        amp_tb[c * num_pols + 1].x = vis_amp->b.x;
+                        amp_tb[c * num_pols + 1].y = vis_amp->b.y;
+                        // yx
+                        amp_tb[c * num_pols + 2].x = vis_amp->c.x;
+                        amp_tb[c * num_pols + 2].y = vis_amp->c.y;
+                        // yy
+                        amp_tb[c * num_pols + 3].x = vis_amp->d.x;
+                        amp_tb[c * num_pols + 3].y = vis_amp->d.y;
+                    }
+                }
+                ms.addVisibilities(num_pols, num_channels, 1, &u, &v, &w,
+                        (double*)amp_tb, &ant1, &ant2, dt_vis_dump, dt_vis_dump,
+                        &vis_time);
+            }
         }
+        free(amp_tb);
     }
+    else if (vis->amplitude.is_single())
+    {
+        float2* amp_tb = (float2*)malloc(num_channels * num_pols * sizeof(float2));
+        for (int t = 0; t < num_times; ++t)
+        {
+            // TODO check this is the correct midpoint time of the simulation
+            // vis dump.
+            float vis_time = t_start_sec + (t * dt_vis_dump);
 
-    //ms.addVisibilities()
+            for (int b = 0; b < num_baselines; ++b)
+            {
+                int row = t * num_baselines + b;
+                float u = ((float*)vis->uu_metres.data)[row];
+                float v = ((float*)vis->vv_metres.data)[row];
+                float w = ((float*)vis->ww_metres.data)[row];
+                int ant1 = baseline_ant_1[row];
+                int ant2 = baseline_ant_2[row];
 
-
-
-//    oskar_ms_append_vis1(ms_path, vis->num_samples, vis->u, vis->v, vis->w,
-//            (double*)vis->amp, baseline_ant_1, baseline_ant_2,
-//            exposure, interval, times);
+                // Construct the amplitude data for the given time, baseline.
+                for (int c = 0; c < num_channels; ++c)
+                {
+                    if (num_pols == 1)
+                    {
+                        int idx = num_baselines * (c * num_times + t) + b;
+                        float2* vis_amp = &((float2*)vis->amplitude.data)[idx];
+                        // xx
+                        amp_tb[c * num_pols + 0].x = vis_amp->x;
+                        amp_tb[c * num_pols + 0].y = vis_amp->y;
+                    }
+                    else
+                    {
+                        int idx = num_baselines * (c * num_times + t) + b;
+                        float4c* vis_amp = &((float4c*)vis->amplitude.data)[idx];
+                        // xx
+                        amp_tb[c * num_pols + 0].x = vis_amp->a.x;
+                        amp_tb[c * num_pols + 0].y = vis_amp->a.y;
+                        // xy
+                        amp_tb[c * num_pols + 1].x = vis_amp->b.x;
+                        amp_tb[c * num_pols + 1].y = vis_amp->b.y;
+                        // yx
+                        amp_tb[c * num_pols + 2].x = vis_amp->c.x;
+                        amp_tb[c * num_pols + 2].y = vis_amp->c.y;
+                        // yy
+                        amp_tb[c * num_pols + 3].x = vis_amp->d.x;
+                        amp_tb[c * num_pols + 3].y = vis_amp->d.y;
+                    }
+                }
+                ms.addVisibilities(num_pols, num_channels, 1, &u, &v, &w,
+                        (float*)amp_tb, &ant1, &ant2, dt_vis_dump, dt_vis_dump, &vis_time);
+            }
+        }
+        free(amp_tb);
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
 
     // Cleanup.
     free(baseline_ant_1);
     free(baseline_ant_2);
-    free(times);
 
     return OSKAR_SUCCESS;
 }

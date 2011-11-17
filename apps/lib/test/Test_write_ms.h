@@ -26,29 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WRITE_MS_H_
-#define OSKAR_WRITE_MS_H_
 
+#ifndef TEST_WRITE_MS_H_
+#define TEST_WRITE_MS_H_
 
 /**
- * @file oskar_write_ms.h
+ * @file Test_write_ms.h
  */
 
-#include "oskar_global.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_TelescopeModel.h"
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_write_ms : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_write_ms);
+        CPPUNIT_TEST(test_write);
+        CPPUNIT_TEST_SUITE_END();
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    public:
+        void test_write();
+};
 
-OSKAR_EXPORT
-int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, int overwrite);
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_write_ms);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // OSKAR_WRITE_MS_H_
+#endif /* TEST_WRITE_MS_H_ */

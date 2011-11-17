@@ -82,11 +82,10 @@ struct oskar_Visibilities
     oskar_Mem ww_metres;  /**< Baseline coordinates, in metres. */
     oskar_Mem amplitude;  /**< Complex visibility amplitude. */
 
-    /* NOTE the following fields are under review. */
-    double freq_start_hz; /**< Start Frequency, in Hz. */
-    double freq_inc_hz;   /**< Frequency increment, in Hz. */
-    double time_start_jd; /**< Start time, in JD. */
-    double time_inc_s;    /**< Time increment, in seconds. */
+    double freq_start_hz;      /**< Start Frequency, in Hz. */
+    double freq_inc_hz;        /**< Frequency increment, in Hz. */
+    double time_start_mjd_utc; /**< Start time in MJD, UTC */
+    double time_inc_seconds;   /**< Time increment, in seconds. */
 
 #ifdef __cplusplus
     /**

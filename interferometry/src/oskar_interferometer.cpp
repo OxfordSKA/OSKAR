@@ -39,7 +39,7 @@
 #include <cstdio>
 
 extern "C"
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky_gpu,
+int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
         double frequency)
 {
@@ -47,15 +47,20 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky_gpu,
 
     // Copy telescope model and sky model for frequency scaling.
     oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
+    oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
 
     // Scale GPU telescope coordinates by wavenumber.
     err = tel_gpu.multiply_by_wavenumber(frequency); if (err) return err;
 
+    // Scale by spectral index.
+    err = sky_gpu.scale_by_spectral_index(frequency);
+    if (err) return err;
+
     // Initialise blocks of Jones matrices and visibilities.
-    int type = sky_gpu->type();
+    int type = sky_gpu.type();
     int n_stations = tel_gpu.num_stations;
     int n_baselines = n_stations * (n_stations - 1) / 2;
-    int n_sources = sky_gpu->num_sources;
+    int n_sources = sky_gpu.num_sources;
     int complex_scalar = type | OSKAR_COMPLEX;
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
     oskar_Jones J(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
@@ -90,7 +95,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky_gpu,
 
         // Compact sky model to temporary.
         oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
-        err = oskar_sky_model_compact(&sky, sky_gpu, &tel_gpu, gast, &work);
+        err = oskar_sky_model_compact(&sky, &sky_gpu, &tel_gpu, gast, &work);
         if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
         {
             // Skip iteration.
