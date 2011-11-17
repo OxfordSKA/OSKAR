@@ -17,8 +17,9 @@ set(interferometry_SRC
     src/oskar_horizon_plane_to_geocentric_cartesian.c
     src/oskar_horizon_plane_to_itrs.cpp # Deprecated.
     src/oskar_horizon_plane_to_offset_geocentric_cartesian.c
-    src/oskar_interferometer1_scalar.cu # Deprecated.
+    src/oskar_interferometer_scalar.cpp
     src/oskar_interferometer.cpp
+    src/oskar_interferometer1_scalar.cu # Deprecated.
     src/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.c
     src/oskar_telescope_model_copy.c
     src/oskar_telescope_model_free.c

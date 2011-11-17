@@ -5,21 +5,28 @@
 # Recurse into lib subdirectory.
 add_subdirectory(lib)
 
-# BINARY: oskar_sim1_scalar
+# BINARY: oskar_sim1_scalar (DEPRECATED)
 include_directories(${QT_INCLUDE_DIR})
 add_executable(oskar_sim1_scalar oskar_sim1_scalar.cpp)
 target_link_libraries(oskar_sim1_scalar oskar oskar_apps ${QT_QTCORE_LIBRARY})
 set_target_properties(oskar_sim1_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 #install(TARGETS oskar_sim1_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
-# BINARY: oskar_sim1
+# BINARY: oskar_sim
 include_directories(${QT_INCLUDE_DIR})
-add_executable(oskar_sim1 oskar_sim1.cpp)
-target_link_libraries(oskar_sim1 oskar oskar_apps ${QT_QTCORE_LIBRARY})
-set_target_properties(oskar_sim1 PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-install(TARGETS oskar_sim1 DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+add_executable(oskar_sim oskar_sim.cpp)
+target_link_libraries(oskar_sim oskar oskar_apps ${QT_QTCORE_LIBRARY})
+set_target_properties(oskar_sim PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+install(TARGETS oskar_sim DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
-# BINARY: oskar_sim1_scalar
+# BINARY: oskar_sim_scalar
+include_directories(${QT_INCLUDE_DIR})
+add_executable(oskar_sim_scalar oskar_sim_scalar.cpp)
+target_link_libraries(oskar_sim_scalar oskar oskar_apps ${QT_QTCORE_LIBRARY})
+set_target_properties(oskar_sim_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+install(TARGETS oskar_sim_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+
+# BINARY: oskar_icrs_to_az_el
 add_executable(oskar_icrs_to_az_el oskar_icrs_to_az_el.cpp)
 target_link_libraries(oskar_icrs_to_az_el oskar)
 set_target_properties(oskar_icrs_to_az_el PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
