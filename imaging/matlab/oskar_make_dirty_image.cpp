@@ -86,10 +86,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     double freq_hz = mxGetScalar(in[3]);
     int image_size = (int)mxGetScalar(in[4]);
     double fov_deg = mxGetScalar(in[5]);
-    double m_to_wavenumbers = 2.0 * M_PI * freq_hz / c_0;
+    double m_to_wavenumbers = 2.0 * M_PI * (freq_hz / c_0);
 
     // Image parameters.
-    double lm_max = sin(fov_deg * M_PI / 180.0);
+    double lm_max = sin(fov_deg * (M_PI / 180.0));
     int num_pixels = image_size * image_size;
 
     // Evaluate the and check consistency of data precision.
@@ -178,6 +178,17 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             image[i] /= (double)num_samples;
         }
 
+        // Transpose the image to FORTRAN / MATLAB order.
+        for (int j = 0; j < image_size; ++j)
+        {
+            for (int i = j; i < image_size; ++i)
+            {
+                double temp = image[j * image_size + i];
+                image[j * image_size + i] = image[i * image_size + j];
+                image[i * image_size + j] = temp;
+            }
+        }
+
         // Clean up memory
         free(lm);
         free(l);
@@ -242,6 +253,17 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         for (int i = 0; i < num_pixels; ++i)
         {
             image[i] /= (float)num_samples;
+        }
+
+        // Transpose the image to FORTRAN / MATLAB order.
+        for (int j = 0; j < image_size; ++j)
+        {
+            for (int i = j; i < image_size; ++i)
+            {
+                float temp = image[j * image_size + i];
+                image[j * image_size + i] = image[i * image_size + j];
+                image[i * image_size + j] = temp;
+            }
         }
 
         // Clean up memory

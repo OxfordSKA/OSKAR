@@ -104,9 +104,7 @@ endif (BUILD_OSKAR)
 
 
 # ==== Build other oskar libraries.
-if (BUILD_OSKAR_IMAGING)
-    add_subdirectory(imaging)
-endif ()
+add_subdirectory(imaging)
 if (BUILD_OSKAR_MS)
     add_subdirectory(ms)
 endif ()
