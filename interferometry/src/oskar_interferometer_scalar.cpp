@@ -39,21 +39,20 @@
 
 extern "C"
 int oskar_interferometer_scalar(oskar_Mem* vis_amp,
-		const oskar_SkyModel* sky_gpu, const oskar_TelescopeModel* telescope,
-		const oskar_SimTime* times, double frequency)
+        const oskar_SkyModel* sky_gpu, const oskar_TelescopeModel* telescope,
+        const oskar_SimTime* times, double frequency)
 {
     int err = 0;
 
     // Copy telescope model and sky model for frequency scaling.
-    oskar_TelescopeModel* tel_gpu = new oskar_TelescopeModel(telescope,
-            OSKAR_LOCATION_GPU);
+    oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
 
     // Scale GPU telescope coordinates by wavenumber.
-    err = tel_gpu->multiply_by_wavenumber(frequency); if (err) return err;
+    err = tel_gpu.multiply_by_wavenumber(frequency); if (err) return err;
 
     // Initialise blocks of Jones matrices and visibilities.
     int type = sky_gpu->type();
-    int n_stations = tel_gpu->num_stations;
+    int n_stations = tel_gpu.num_stations;
     int n_baselines = n_stations * (n_stations - 1) / 2;
     int n_sources = sky_gpu->num_sources;
     int complex_scalar = type | OSKAR_COMPLEX;
@@ -86,13 +85,19 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
         err = vis.clear_contents(); if (err) return err;
 
         // Compact sky model to temporary.
-        oskar_SkyModel* sky = new oskar_SkyModel(type, OSKAR_LOCATION_GPU);
-        err = oskar_sky_model_compact(sky, sky_gpu, tel_gpu, gast, &work);
-        if (err) return err;
+        oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
+        err = oskar_sky_model_compact(&sky, sky_gpu, &tel_gpu, gast, &work);
+        if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
+        {
+            // Skip iteration.
+            printf("--> WARNING: No sources above horizon. Skipping.\n");
+            continue;
+        }
+        else if (err != 0) return err;
 
         // Set dimensions of Jones matrices (this is not a resize!).
-        err = E.set_size(n_stations, sky->num_sources); if (err) return err;
-        err = K.set_size(n_stations, sky->num_sources); if (err) return err;
+        err = E.set_size(n_stations, sky.num_sources); if (err) return err;
+        err = K.set_size(n_stations, sky.num_sources); if (err) return err;
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
@@ -102,7 +107,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, sky, tel_gpu, gast, &work);
+            err = oskar_evaluate_jones_E(&E, &sky, &tel_gpu, gast, &work);
             if (err) return err;
 
             for (int k = 0; k < num_fringe_ave; ++k)
@@ -112,18 +117,18 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
                 double gast = oskar_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 // Evaluate station u,v,w coordinates.
-                err = oskar_evaluate_station_uvw(&u, &v, &w, tel_gpu, gast);
+                err = oskar_evaluate_station_uvw(&u, &v, &w, &tel_gpu, gast);
                 if (err) return err;
 
                 // Evaluate interferometer phase (Jones K).
-                err = oskar_evaluate_jones_K(&K, sky, &u, &v, &w);
+                err = oskar_evaluate_jones_K(&K, &sky, &u, &v, &w);
                 if (err) return err;
 
                 // Join Jones matrices (K = K * E).
                 err = oskar_jones_join(&K, &K, &E); if (err) return err;
 
                 // Produce visibilities.
-                err = oskar_correlate(&vis, &K, tel_gpu, sky, &u, &v);
+                err = oskar_correlate(&vis, &K, &tel_gpu, &sky, &u, &v);
                 if (err) return err;
             }
 
@@ -134,13 +139,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
 
         // Add visibilities to global data.
         err = vis_amp->insert(&vis, j * n_baselines); if (err) return err;
-
-        // Delete temporary sky.
-        delete sky;
     }
-
-    // Delete local telescope model.
-    delete tel_gpu;
 
     return 0;
 }

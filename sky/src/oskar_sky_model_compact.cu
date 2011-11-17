@@ -215,6 +215,10 @@ int oskar_sky_model_compact(oskar_SkyModel* output, const oskar_SkyModel* input,
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
+    // Check if there are no sources in the new model.
+    if (output->num_sources == 0)
+        return OSKAR_ERR_NO_VISIBLE_SOURCES;
+
     cudaDeviceSynchronize();
     return cudaPeekAtLastError();
 }

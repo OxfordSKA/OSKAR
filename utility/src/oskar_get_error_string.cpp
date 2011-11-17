@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utility/oskar_get_error_string.h"
 #include <cuda_runtime_api.h>
 
@@ -38,50 +37,38 @@ const char* oskar_get_error_string(const int error)
         return cudaGetErrorString((cudaError_t)error);
 
     // Return a string describing the OSKAR error code.
-    switch(error)
+    switch (error)
     {
         case OSKAR_ERR_EOF:
             return "end of file";
-            break;
         case OSKAR_ERR_FILE_IO:
             return "file I/O error";
-            break;
         case OSKAR_ERR_INVALID_ARGUMENT:
             return "invalid argument";
-            break;
         case OSKAR_ERR_MEMORY_ALLOC_FAILURE:
             return "memory allocation failure";
-            break;
         case OSKAR_ERR_MEMORY_NOT_ALLOCATED:
             return "memory not allocated";
-            break;
         case OSKAR_ERR_TYPE_MISMATCH:
             return "data type mismatch";
-            break;
         case OSKAR_ERR_DIMENSION_MISMATCH:
             return "data dimension mismatch";
-            break;
         case OSKAR_ERR_BAD_LOCATION:
             return "unsupported pointer location";
-            break;
         case OSKAR_ERR_BAD_DATA_TYPE:
             return "unsupported data type";
-            break;
         case OSKAR_ERR_BAD_JONES_TYPE:
             return "unsupported data type for Jones matrix";
-            break;
         case OSKAR_ERR_OUT_OF_RANGE:
             return "memory location out of range";
-            break;
         case OSKAR_ERR_VERSION_MISMATCH:
             return "incompatible OSKAR version";
-            break;
         case OSKAR_ERR_BAD_UNITS:
             return "invalid units";
+        case OSKAR_ERR_NO_VISIBLE_SOURCES:
+            return "no visible sources in sky model";
         default:
             break;
     };
     return "unknown error.";
 }
-
-
