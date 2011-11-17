@@ -42,6 +42,8 @@
 extern "C" {
 #endif
 
+// FIXME This needs fixing to use the new visibility structure.
+
 /**
  *
  * @param[in]     vis      Structure containing visibility data.

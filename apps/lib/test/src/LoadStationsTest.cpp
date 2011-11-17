@@ -29,6 +29,8 @@
 #include "apps/lib/test/LoadStationsTest.h"
 #include "apps/lib/oskar_load_stations.h"
 #include "station/oskar_StationModel.h"
+#include "station/oskar_station_model_free.h"
+#include "station/oskar_station_model_init.h"
 
 #include <QtCore/QFile>
 #include <QtCore/QDir>
@@ -64,21 +66,22 @@ void LoadStationsTest::test_load()
     }
 
     // Load the stations.
-    oskar_StationModel_d * stations;
+    oskar_StationModel* stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
+    for (int i = 0; i < num_stations; ++i)
+        oskar_station_model_init(&stations[i], OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
     int identical_stations;
-    int num_stations_loaded = oskar_load_stations_d(path, &stations,
-            &identical_stations);
+    int error = oskar_load_stations(stations, &identical_stations, num_stations, path);
+    CPPUNIT_ASSERT_EQUAL(0, error);
 
     // Check the data loaded correctly.
-    CPPUNIT_ASSERT_EQUAL(num_stations, num_stations_loaded);
     double err = 1.0e-6;
     for (int j = 0; j < num_stations; ++j)
     {
-        CPPUNIT_ASSERT_EQUAL(num_antennas, (int)stations[j].num_antennas);
+        CPPUNIT_ASSERT_EQUAL(num_antennas, (int)stations[j].num_elements);
         for (int i = 0; i < num_antennas; ++i)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i/10.0, stations[j].antenna_x[i], err);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i/10.0, stations[j].antenna_y[i], err);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i/10.0, ((float*)(stations[j].x))[i], err);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i/10.0, ((float*)(stations[j].y))[i], err);
         }
     }
     CPPUNIT_ASSERT_EQUAL(1, identical_stations);
@@ -89,4 +92,9 @@ void LoadStationsTest::test_load()
     for (int i = 0; i < files.size(); ++i)
         QFile::remove(files.at(i).absoluteFilePath());
     dir.rmdir(dir.absolutePath());
+
+    // Free the stations.
+    for (int i = 0; i < num_stations; ++i)
+        oskar_station_model_free(&stations[i]);
+    free(stations);
 }

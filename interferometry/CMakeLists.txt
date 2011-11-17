@@ -15,11 +15,9 @@ set(interferometry_SRC
     src/oskar_geocentric_cartesian_to_geodetic_spherical.c
     src/oskar_geodetic_spherical_to_geocentric_cartesian.c
     src/oskar_horizon_plane_to_geocentric_cartesian.c
-    src/oskar_horizon_plane_to_itrs.cpp # Deprecated.
     src/oskar_horizon_plane_to_offset_geocentric_cartesian.c
     src/oskar_interferometer_scalar.cpp
     src/oskar_interferometer.cpp
-    src/oskar_interferometer1_scalar.cu # Deprecated.
     src/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.c
     src/oskar_telescope_model_copy.c
     src/oskar_telescope_model_free.c
@@ -32,7 +30,6 @@ set(interferometry_SRC
     src/oskar_telescope_model_set_station_pos.c
     src/oskar_telescope_model_type.c
     src/oskar_TelescopeModel.cu
-    src/oskar_VisData.c  # deprecated
     src/oskar_visibilities_clear_contents.c
     src/oskar_visibilities_get_channel_amps.c
     src/oskar_visibilities_init.cpp

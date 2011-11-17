@@ -238,76 +238,78 @@ void oskar_write_param_header(fitsfile* fits_file, const int id,
 
 
 
-void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline)
-{
-	int i, j;
-    int status = 0;
+// FIXME This needs fixing to use the new visibility structure.
 
-    // fixme: work out how to read this from the already written header.
-    int num_axes = 6;
-    long axis_dim[6];
-    axis_dim[0] = 0;  // No standard image just group
-    axis_dim[1] = 3;  // (required) real, imaginary, weight.
-    axis_dim[2] = 1;  // (required) Stokes parameters.
-    axis_dim[3] = 1;  // (required) Frequency (spectral channel).
-    axis_dim[4] = 1;  // (required) Right ascension of phase centre.
-    axis_dim[5] = 1;  // (required) Declination of phase centre.
-
-    // Setup compressed axis dimensions vector.
-    long naxes[5]; // length = num_axis-1
-    for (i = 0; i < num_axes - 1; ++i)
-        naxes[i] = axis_dim[i+1];
-
-    // length = num_axes
-    long fpixel[5] = {1, 1, 1, 1, 1};
-    long lpixel[5] = {3, 1, 1, 1, 1}; // == naxes
-
-    int num_values_per_group = 1;
-    for (i = 1; i < num_axes; ++i)
-        num_values_per_group *= axis_dim[i];
-    printf("num values per group = %i\n", num_values_per_group);
-
-    int num_param = 5;
-    long firstelem = 1;
-    long nelements = num_param;
-
-    float p_temp[5]; // length = num_param
-    float *g_temp = (float*) malloc(num_values_per_group * sizeof(float));
-
-    for (i = 0; i < vis->num_samples; ++i)
-    {
-        long group = (long)i + 1;
-
-        // Write the parameters.
-        p_temp[0] = vis->u[i];
-        p_temp[1] = vis->v[i];
-        p_temp[2] = vis->w[i];
-        p_temp[3] = date[i];
-        p_temp[4] = baseline[i];
-
-        printf("- writing group %li\n", group);
-        for (j = 0; j < nelements; ++j)
-            printf("   param %i = %f\n", j+1, p_temp[j]);
-
-        fits_write_grppar_flt(fits_file, group, firstelem, nelements,
-                p_temp, &status);
-        oskar_check_fits_status(status, NULL);
-
-        // Write the data.
-        g_temp[0] = vis->amp[i].x; // re
-        g_temp[1] = vis->amp[i].y; // im
-        g_temp[2] = weight[i];
-
-        for (j = 0; j < num_values_per_group; ++j)
-            printf("   data %i = %f\n", j+1, g_temp[j]);
-
-        fits_write_subset_flt(fits_file, group, 5, naxes, fpixel, lpixel, g_temp, &status);
-
-        oskar_check_fits_status(status, NULL);
-    }
-    free(g_temp);
-}
+//void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
+//        const double* weight, const double* date, const double* baseline)
+//{
+//	int i, j;
+//    int status = 0;
+//
+//    // fixme: work out how to read this from the already written header.
+//    int num_axes = 6;
+//    long axis_dim[6];
+//    axis_dim[0] = 0;  // No standard image just group
+//    axis_dim[1] = 3;  // (required) real, imaginary, weight.
+//    axis_dim[2] = 1;  // (required) Stokes parameters.
+//    axis_dim[3] = 1;  // (required) Frequency (spectral channel).
+//    axis_dim[4] = 1;  // (required) Right ascension of phase centre.
+//    axis_dim[5] = 1;  // (required) Declination of phase centre.
+//
+//    // Setup compressed axis dimensions vector.
+//    long naxes[5]; // length = num_axis-1
+//    for (i = 0; i < num_axes - 1; ++i)
+//        naxes[i] = axis_dim[i+1];
+//
+//    // length = num_axes
+//    long fpixel[5] = {1, 1, 1, 1, 1};
+//    long lpixel[5] = {3, 1, 1, 1, 1}; // == naxes
+//
+//    int num_values_per_group = 1;
+//    for (i = 1; i < num_axes; ++i)
+//        num_values_per_group *= axis_dim[i];
+//    printf("num values per group = %i\n", num_values_per_group);
+//
+//    int num_param = 5;
+//    long firstelem = 1;
+//    long nelements = num_param;
+//
+//    float p_temp[5]; // length = num_param
+//    float *g_temp = (float*) malloc(num_values_per_group * sizeof(float));
+//
+//    for (i = 0; i < vis->num_samples; ++i)
+//    {
+//        long group = (long)i + 1;
+//
+//        // Write the parameters.
+//        p_temp[0] = vis->u[i];
+//        p_temp[1] = vis->v[i];
+//        p_temp[2] = vis->w[i];
+//        p_temp[3] = date[i];
+//        p_temp[4] = baseline[i];
+//
+//        printf("- writing group %li\n", group);
+//        for (j = 0; j < nelements; ++j)
+//            printf("   param %i = %f\n", j+1, p_temp[j]);
+//
+//        fits_write_grppar_flt(fits_file, group, firstelem, nelements,
+//                p_temp, &status);
+//        oskar_check_fits_status(status, NULL);
+//
+//        // Write the data.
+//        g_temp[0] = vis->amp[i].x; // re
+//        g_temp[1] = vis->amp[i].y; // im
+//        g_temp[2] = weight[i];
+//
+//        for (j = 0; j < num_values_per_group; ++j)
+//            printf("   data %i = %f\n", j+1, g_temp[j]);
+//
+//        fits_write_subset_flt(fits_file, group, 5, naxes, fpixel, lpixel, g_temp, &status);
+//
+//        oskar_check_fits_status(status, NULL);
+//    }
+//    free(g_temp);
+//}
 
 int oskar_uvfits_baseline_id(int ant1, int ant2)
 {

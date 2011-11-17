@@ -28,7 +28,6 @@
 
 
 #include "station/oskar_StationModel.h"
-#include "math/cudak/oskar_cudak_vec_scale_rr.h"
 #include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
@@ -38,7 +37,6 @@
 #include "station/oskar_station_model_resize.h"
 #include "station/oskar_station_model_check_mem.h"
 #include "station/oskar_station_model_type.h"
-#include <cuda_runtime_api.h>
 #include <cmath>
 
 #ifndef M_PI
@@ -114,99 +112,3 @@ int oskar_StationModel::coord_location() const
 {
     return oskar_station_model_coord_location(this);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// DEPRECATED
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void oskar_station_model_copy_to_device_d(const oskar_StationModel_d* h_stations,
-        const unsigned num_stations, oskar_StationModel_d* hd_stations)
-{
-    // Allocate and copy memory for each station.
-    for (unsigned i = 0; i < num_stations; ++i)
-    {
-        hd_stations[i].num_antennas = h_stations[i].num_antennas;
-        size_t mem_size = hd_stations[i].num_antennas * sizeof(double);
-        cudaMalloc((void**)&(hd_stations[i].antenna_x), mem_size);
-        cudaMalloc((void**)&(hd_stations[i].antenna_y), mem_size);
-        cudaMemcpy(hd_stations[i].antenna_x, h_stations[i].antenna_x, mem_size,
-                cudaMemcpyHostToDevice);
-        cudaMemcpy(hd_stations[i].antenna_y, h_stations[i].antenna_y, mem_size,
-                cudaMemcpyHostToDevice);
-    }
-}
-
-
-void oskar_station_model_copy_to_device_f(const oskar_StationModel_f* h_stations,
-        const unsigned num_stations, oskar_StationModel_f* hd_stations)
-{
-    // Allocate and copy memory for each station.
-    for (unsigned i = 0; i < num_stations; ++i)
-    {
-        hd_stations[i].num_antennas = h_stations[i].num_antennas;
-        size_t mem_size = hd_stations[i].num_antennas * sizeof(float);
-        cudaMalloc((void**)&(hd_stations[i].antenna_x), mem_size);
-        cudaMalloc((void**)&(hd_stations[i].antenna_y), mem_size);
-        cudaMemcpy(hd_stations[i].antenna_x, h_stations[i].antenna_x, mem_size,
-                cudaMemcpyHostToDevice);
-        cudaMemcpy(hd_stations[i].antenna_y, h_stations[i].antenna_y, mem_size,
-                cudaMemcpyHostToDevice);
-    }
-}
-
-void oskar_station_model_scale_coords_d(const unsigned num_stations,
-        oskar_StationModel_d* hd_stations, const double value)
-{
-    int num_threads = 256;
-    for (unsigned i = 0; i < num_stations; ++i)
-    {
-        int num_antennas = hd_stations[i].num_antennas;
-        int num_blocks  = (int)ceil((double) num_antennas / num_threads);
-        oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
-                (num_antennas, value, hd_stations[i].antenna_x);
-        oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
-                (num_antennas, value, hd_stations[i].antenna_y);
-    }
-}
-
-
-void oskar_station_model_scale_coords_f(const unsigned num_stations,
-        oskar_StationModel_f* hd_stations, const float value)
-{
-    int num_threads = 256;
-    for (unsigned i = 0; i < num_stations; ++i)
-    {
-        int num_antennas = hd_stations[i].num_antennas;
-        int num_blocks  = (int)ceil((float) num_antennas / num_threads);
-        oskar_cudak_vec_scale_rr_f <<< num_blocks, num_threads >>>
-                (num_antennas, value, hd_stations[i].antenna_x);
-        oskar_cudak_vec_scale_rr_f <<< num_blocks, num_threads >>>
-                (num_antennas, value, hd_stations[i].antenna_y);
-    }
-}
-
-
-#ifdef __cplusplus
-}
-#endif

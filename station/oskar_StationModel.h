@@ -185,48 +185,4 @@ struct oskar_StationModel
 #endif
 };
 
-
-/* DEPRECATED */
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct oskar_StationModel_d
-{
-    unsigned num_antennas;
-    double*  antenna_x;
-    double*  antenna_y;
-};
-typedef struct oskar_StationModel_d oskar_StationModel_d;
-
-struct oskar_StationModel_f
-{
-    unsigned num_antennas;
-    float*   antenna_x;
-    float*   antenna_y;
-};
-typedef struct oskar_StationModel_f oskar_StationModel_f;
-
-
-OSKAR_EXPORT
-void oskar_station_model_copy_to_device_d(const oskar_StationModel_d* h_stations,
-        const unsigned num_stations, oskar_StationModel_d* hd_stations);
-
-OSKAR_EXPORT
-void oskar_station_model_copy_to_device_f(const oskar_StationModel_f* h_stations,
-        const unsigned num_stations, oskar_StationModel_f* hd_stations);
-
-OSKAR_EXPORT
-void oskar_station_model_scale_coords_d(const unsigned num_stations,
-        oskar_StationModel_d* hd_stations, const double value);
-
-OSKAR_EXPORT
-void oskar_station_model_scale_coords_f(const unsigned num_stations,
-        oskar_StationModel_f* hd_stations, const float value);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* OSKAR_STATION_MODEL_H_ */

@@ -12,7 +12,6 @@ set(sky_SRC
     src/oskar_filter_sources_by_flux.cpp
     src/oskar_filter_sources_by_radius.cpp
     src/oskar_generate_random_sources.cpp
-    src/oskar_cuda_horizon_clip.cu # Deprecated.
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
     src/oskar_evaluate_jones_R.cu
@@ -35,6 +34,7 @@ set(sky_SRC
     src/oskar_sky_model_load.cpp
     src/oskar_sky_model_location.c
     src/oskar_sky_model_resize.cpp
+    src/oskar_sky_model_scale_by_spectral_index.cu
     src/oskar_sky_model_set_source.cpp
     src/oskar_sky_model_type.c
     src/oskar_sky_model_write.c

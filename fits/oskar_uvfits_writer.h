@@ -34,7 +34,6 @@
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_VisData.h"
 #include <fitsio.h>
 
 #ifdef __cplusplus
@@ -94,9 +93,11 @@ void oskar_write_param_header(fitsfile* fits_file, const int id,
         const char* type, const char* comment, const double scale,
         const double zero);
 
-OSKAR_EXPORT
-void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline);
+// FIXME This needs fixing to use the new visibility structure.
+
+//OSKAR_EXPORT
+//void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
+//        const double* weight, const double* date, const double* baseline);
 
 OSKAR_EXPORT
 int oskar_uvfits_baseline_id(int ant1, int ant2);

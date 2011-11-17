@@ -26,45 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_TELESCOPE_H_
-#define OSKAR_LOAD_TELESCOPE_H_
+#ifndef OSKAR_SKY_MODEL_SCALE_BY_SPECTRAL_INDEX_H_
+#define OSKAR_SKY_MODEL_SCALE_BY_SPECTRAL_INDEX_H_
 
 /**
- * @file oskar_load_telescope.h
+ * @file oskar_sky_model_scale_by_spectral_index.h
  */
 
-#include "interferometry/oskar_TelescopeModel.h"
+#include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
 
-/**
- * DEPRECATED
- *
- * @brief Loads a telescope station coordinates file into a telescope model
- * structure. (double precision)
- *
- * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
- * @param[in]  longitude  Telescope longitude, in radians.
- * @param[in]  latitude   Telescope latitude, in radians.
- * @param[out] telescope  Pointer to telescope model structure.
- */
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-void oskar_load_telescope_d(const char* file_path, const double longitude_rad,
-        const double latitude_rad, oskar_TelescopeModel_d* telescope);
 
 /**
- * DEPRECATED
+ * @brief
+ * Scales all current source brightnesses according to the spectral index for
+ * the given frequency.
  *
- * @brief Loads a telescope station coordinates file into a telescope model
- * structure. (single/float precision)
+ * @details
+ * This function scales all the existing source brightnesses using the spectral
+ * index and the given frequency.
  *
- * @param[in]  file_path  Path to the a telescope layout (coordinates) file.
- * @param[in]  longitude  Telescope longitude, in radians.
- * @param[in]  latitude   Telescope latitude, in radians.
- * @param[out] telescope  Pointer to telescope model structure.
+ * Note that the scaling is done relative to the current brightness, and should
+ * therefore be performed only on a temporary copy of the original sky model.
+ *
+ * @param[in,out] model The sky model to re-scale.
+ * @param[in] frequency The frequency, in Hz.
+ *
+ * @return An OSKAR or CUDA error code.
  */
-void oskar_load_telescope_f(const char* file_path, const float longitude_rad,
-        const float latitude_rad, oskar_TelescopeModel_f* telescope);
+OSKAR_EXPORT
+int oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
+        double frequency);
 
+#ifdef __cplusplus
+}
+#endif
 
-#endif // OSKAR_LOAD_TELESCOPE_H_
+#endif /* OSKAR_SKY_MODEL_SCALE_BY_SPECTRAL_INDEX_H_ */

@@ -110,6 +110,16 @@ int main(int argc, char** argv)
         if (err) oskar_exit(err);
     }
 
+#ifndef OSKAR_NO_MS
+    // Write Measurement Set.
+    if (!settings.obs().ms_filename().isEmpty())
+    {
+        QByteArray outname = settings.obs().ms_filename().toAscii();
+        printf("--> Writing Measurement Set: '%s'\n", outname.constData());
+        // TODO Write the Measurement Set.
+    }
+#endif
+
     // Delete data structures.
     delete sky_cpu;
     delete sky_gpu;

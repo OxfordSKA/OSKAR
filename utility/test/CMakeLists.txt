@@ -8,7 +8,6 @@ if (CPPUNIT_FOUND)
     set(utility_test_SRC
         src/CppUnitMain.cu
         src/GetlineTest.cpp
-        src/LoadCoordinatesTest.cpp
         src/oskar_Mem_test.cpp
         src/oskar_StringToArrayTest.cpp
     )

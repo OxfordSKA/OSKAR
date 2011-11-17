@@ -26,83 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_load_csv_coordinates_2d.h"
+#include "sky/oskar_sky_model_scale_by_spectral_index.h"
+#include "sky/cudak/oskar_cudak_scale_brightness_by_spectral_index.h"
+#include <cstdio>
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Single precision. */
-int oskar_load_csv_coordinates_2d_f(const char* filename, unsigned* n,
-        float** x, float** y)
+extern "C"
+int oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
+        double frequency)
 {
-    float ax, ay;
+    // Check for sane inputs.
+    if (model == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Open the file. */
-    FILE* file;
-    file = fopen(filename, "r");
-    if (file == NULL) return 0;
-    *n = 0;
-    *x = NULL;
-    *y = NULL;
+    // Check for the correct location.
+    if (model->location() != OSKAR_LOCATION_GPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
-    while (fscanf(file, "%f,%f", &ax, &ay) == 2)
+    // Get the type and dimensions.
+    int type = model->type();
+    int num_sources = model->num_sources;
+
+    // Scale the brightnesses.
+    if (type == OSKAR_SINGLE)
     {
-        /* Ensure enough space in arrays. */
-        if (*n % 100 == 0)
-        {
-            size_t mem_size = ((*n) + 100) * sizeof(float);
-            *x = (float*) realloc(*x, mem_size);
-            *y = (float*) realloc(*y, mem_size);
-        }
-
-        /* Store the data. */
-        (*x)[*n] = ax;
-        (*y)[*n] = ay;
-        (*n)++;
+        int num_threads = 256;
+        int num_blocks = (num_sources + num_threads - 1) / num_threads;
+        oskar_cudak_scale_brightness_by_spectral_index_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
+                        frequency, model->reference_freq,
+                        model->spectral_index, model->I, model->Q,
+                        model->U, model->V);
     }
-    fclose(file);
-
-    return *n;
-}
-
-/* Double precision. */
-int oskar_load_csv_coordinates_2d_d(const char* filename, unsigned* n,
-        double** x, double** y)
-{
-    double ax, ay;
-
-    /* Open the file. */
-    FILE* file;
-    file = fopen(filename, "r");
-    if (file == NULL) return 0;
-    *n = 0;
-    *x = NULL;
-    *y = NULL;
-
-    while (fscanf(file, "%lf,%lf", &ax, &ay) == 2)
+    else if (type == OSKAR_DOUBLE)
     {
-        /* Ensure enough space in arrays. */
-        if (*n % 100 == 0)
-        {
-            size_t mem_size = ((*n) + 100) * sizeof(double);
-            *x = (double*) realloc(*x, mem_size);
-            *y = (double*) realloc(*y, mem_size);
-        }
-
-        /* Store the data. */
-        (*x)[*n] = ax;
-        (*y)[*n] = ay;
-        (*n)++;
+        int num_threads = 256;
+        int num_blocks = (num_sources + num_threads - 1) / num_threads;
+        oskar_cudak_scale_brightness_by_spectral_index_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
+                        frequency, model->reference_freq,
+                        model->spectral_index, model->I, model->Q,
+                        model->U, model->V);
     }
-    fclose(file);
+    else
+    {
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
 
-    return *n;
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
 }
-
-#ifdef __cplusplus
-}
-#endif

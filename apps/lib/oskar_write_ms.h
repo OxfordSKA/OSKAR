@@ -38,8 +38,6 @@
 #include "apps/lib/oskar_Settings.h"
 #include "interferometry/oskar_Visibilities.h"
 
-#include "interferometry/oskar_VisData.h" // DEPRECATED
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,22 +45,6 @@ extern "C" {
 OSKAR_EXPORT
 int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
         const oskar_Settings* settings, int overwrite);
-
-
-
-// DEPRECATED
-OSKAR_EXPORT
-void oskar_write_ms_d(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_d* vis, const unsigned channel,
-        const bool overwrite = true);
-
-
-// DEPRECATED
-OSKAR_EXPORT
-void oskar_write_ms_f(const char* ms_path, const oskar_Settings* settings,
-        const oskar_VisData_f* vis, const unsigned channel,
-        const bool overwrite = true);
-
 
 #ifdef __cplusplus
 }

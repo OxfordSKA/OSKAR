@@ -60,27 +60,8 @@ OSKAR_EXPORT
 int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
         const int num_stations, const char* dir_path);
 
-/**
- * @deprecated
- *
- * @brief
- * Loads a directory of station (coordinate) files into an array of station
- * model structures.
- *
- * TODO: confirm if the dir_path needs to be relative or absolute...
- *
- * @param[in]  dir_path  Path to a directory of station files.
- * @param[out] stations  Pointer to an array to station model structures.
- */
-OSKAR_EXPORT
-unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stations,
-        int* idential_stations);
-
-OSKAR_EXPORT
-unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stations,
-        int* idential_stations);
-
 #ifdef __cplusplus
 }
 #endif
+
 #endif // OSKAR_LOAD_STATIONS_H_

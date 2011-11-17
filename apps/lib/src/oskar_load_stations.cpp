@@ -28,7 +28,6 @@
 
 
 #include "apps/lib/oskar_load_stations.h"
-#include "utility/oskar_load_csv_coordinates_2d.h" // Deprecated.
 #include "utility/oskar_mem_element_size.h"
 
 #include <QtCore/QDir>
@@ -61,7 +60,7 @@ int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
     // Load the station data.
     for (int i = 0; i < num_stations; ++i)
     {
-    	QByteArray filename = files.at(i).absoluteFilePath().toAscii();
+        QByteArray filename = files.at(i).absoluteFilePath().toAscii();
         station[i].load(filename.constData());
     }
 
@@ -103,126 +102,6 @@ int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
         }
     }
     return 0;
-}
-
-
-// DEPRECATED
-unsigned oskar_load_stations_d(const char* dir_path, oskar_StationModel_d** stations,
-        int* identical_stations)
-{
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel_d*) malloc(num_stations * sizeof(oskar_StationModel_d));
-
-    for (int i = 0; i < num_stations; ++i)
-    {
-        oskar_StationModel_d * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates_2d_d(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
-    }
-
-    // Check if stations are all the same.
-    *identical_stations = true;
-    // 1. Check if they have the same number of antennas.
-    int num_antennas_station0 = (*stations)[0].num_antennas;
-    for (int j = 0; j < num_stations; ++j)
-    {
-        oskar_StationModel_d * s = &(*stations)[j];
-        if ((int)s->num_antennas != num_antennas_station0)
-        {
-            *identical_stations = false;
-            break;
-        }
-    }
-
-    // 2. Check if the positions are are the same.
-    bool done = false;
-    oskar_StationModel_d* station0 = &(*stations)[0];
-    if (*identical_stations)
-    {
-        for (int j = 0; j < num_stations; ++j)
-        {
-            oskar_StationModel_d * s = &(*stations)[j];
-            for (int i = 0; i < (int)s->num_antennas; ++i)
-            {
-                if (station0->antenna_x[i] != s->antenna_x[i] ||
-                        station0->antenna_y[i] != s->antenna_y[i])
-                {
-                    *identical_stations = false;
-                    done = true;
-                    break;
-                }
-            }
-            if (done) break;
-        }
-    }
-
-    return num_stations;
-}
-
-
-
-
-// DEPRECATED
-unsigned oskar_load_stations_f(const char* dir_path, oskar_StationModel_f** stations,
-        int* identical_stations)
-{
-    int num_stations = 0;
-    QDir dir;
-    dir.setPath(QString(dir_path));
-    QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
-    num_stations = files.size();
-    *stations = (oskar_StationModel_f*) malloc(num_stations * sizeof(oskar_StationModel_f));
-
-    for (int i = 0; i < num_stations; ++i)
-    {
-        oskar_StationModel_f * s = &(*stations)[i];
-        const char * filename = files.at(i).absoluteFilePath().toLatin1().data();
-        oskar_load_csv_coordinates_2d_f(filename, &s->num_antennas,
-                &s->antenna_x, &s->antenna_y);
-    }
-
-    // Check if stations are all the same.
-    *identical_stations = true;
-    // 1. Check if they have the same number of antennas.
-    int num_antennas_station0 = (*stations)[0].num_antennas;
-    for (int j = 0; j < num_stations; ++j)
-    {
-        oskar_StationModel_f * s = &(*stations)[j];
-        if ((int)s->num_antennas != num_antennas_station0)
-        {
-            *identical_stations = false;
-            break;
-        }
-    }
-
-    // 2. Check if the positions are are the same.
-    bool done = false;
-    oskar_StationModel_f* station0 = &(*stations)[0];
-    if (*identical_stations)
-    {
-        for (int j = 0; j < num_stations; ++j)
-        {
-            oskar_StationModel_f * s = &(*stations)[j];
-            for (int i = 0; i < (int)s->num_antennas; ++i)
-            {
-                if (station0->antenna_x[i] != s->antenna_x[i] ||
-                        station0->antenna_y[i] != s->antenna_y[i])
-                {
-                    *identical_stations = false;
-                    done = true;
-                    break;
-                }
-            }
-            if (done) break;
-        }
-    }
-
-    return num_stations;
 }
 
 #ifdef __cplusplus

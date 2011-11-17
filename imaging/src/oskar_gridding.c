@@ -37,6 +37,8 @@
 extern "C" {
 #endif
 
+// FIXME This needs fixing to use the new visibility structure.
+
 void oskar_evaluate_offset(const double x, const double pixel_size,
         const unsigned kernel_oversample, int* grid_idx, int* kernel_idx);
 double oskar_round_away_from_zero(const double x);
@@ -45,7 +47,7 @@ double oskar_round_towards_zero(const double x);
 double oskar_grid_standard(const oskar_VisData_d* vis,
         const oskar_GridKernel_d* kernel, oskar_VisGrid_d* grid)
 {
-	int i, iy, ix;
+    int i, iy, ix;
     double grid_sum = 0.0;
 
     int support  = (kernel->num_cells - 1) / 2;
