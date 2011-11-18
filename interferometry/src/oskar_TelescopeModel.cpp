@@ -37,10 +37,6 @@
 #include "interferometry/oskar_telescope_model_resize.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "station/oskar_station_model_load.h"
-#include "math/cudak/oskar_cudak_vec_scale_rr.h" // DEPRECATED
-#include <cuda_runtime_api.h>
-#include <cstdio>
-#include <cmath>
 
 oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
         int n_stations)
@@ -102,98 +98,3 @@ int oskar_TelescopeModel::type() const
 {
     return oskar_telescope_model_type(this);
 }
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-// DEPRECATED
-void oskar_copy_telescope_to_device_d(const oskar_TelescopeModel_d* h_telescope,
-        oskar_TelescopeModel_d* hd_telescope)
-{
-    size_t mem_size = h_telescope->num_antennas * sizeof(double);
-
-    hd_telescope->num_antennas = h_telescope->num_antennas;
-
-    cudaMalloc((void**)&(hd_telescope->antenna_x), mem_size);
-    cudaMalloc((void**)&(hd_telescope->antenna_y), mem_size);
-    cudaMalloc((void**)&(hd_telescope->antenna_z), mem_size);
-
-    cudaMemcpy(hd_telescope->antenna_x, h_telescope->antenna_x, mem_size,
-            cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_telescope->antenna_y, h_telescope->antenna_y, mem_size,
-            cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_telescope->antenna_z, h_telescope->antenna_z, mem_size,
-            cudaMemcpyHostToDevice);
-}
-
-// DEPRECATED
-void oskar_copy_telescope_to_device_f(const oskar_TelescopeModel_f* h_telescope,
-        oskar_TelescopeModel_f* hd_telescope)
-{
-    size_t mem_size = h_telescope->num_antennas * sizeof(float);
-
-    hd_telescope->num_antennas = h_telescope->num_antennas;
-
-    cudaMalloc((void**)&(hd_telescope->antenna_x), mem_size);
-    cudaMalloc((void**)&(hd_telescope->antenna_y), mem_size);
-    cudaMalloc((void**)&(hd_telescope->antenna_z), mem_size);
-
-    cudaMemcpy(hd_telescope->antenna_x, h_telescope->antenna_x, mem_size,
-            cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_telescope->antenna_y, h_telescope->antenna_y, mem_size,
-            cudaMemcpyHostToDevice);
-    cudaMemcpy(hd_telescope->antenna_z, h_telescope->antenna_z, mem_size,
-            cudaMemcpyHostToDevice);
-}
-
-// DEPRECATED
-void oskar_scale_device_telescope_coords_d(oskar_TelescopeModel_d* hd_telescope,
-        const double value)
-{
-    int num_stations = hd_telescope->num_antennas;
-    int num_threads  = 256;
-    int num_blocks   = (int)ceil((double) num_stations / num_threads);
-    oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
-            (num_stations, value, hd_telescope->antenna_x);
-    oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
-            (num_stations, value, hd_telescope->antenna_y);
-    oskar_cudak_vec_scale_rr_d <<< num_blocks, num_threads >>>
-            (num_stations, value, hd_telescope->antenna_z);
-}
-
-// DEPRECATED
-void oskar_scale_device_telescope_coords_f(oskar_TelescopeModel_f* hd_telescope,
-        const float value)
-{
-    int num_stations = hd_telescope->num_antennas;
-    int num_threads  = 256;
-    int num_blocks   = (int)ceilf((float) num_stations / num_threads);
-    oskar_cudak_vec_scale_rr_f <<< num_blocks, num_threads >>>
-            (num_stations, value, hd_telescope->antenna_x);
-    oskar_cudak_vec_scale_rr_f <<< num_blocks, num_threads >>>
-            (num_stations, value, hd_telescope->antenna_y);
-    oskar_cudak_vec_scale_rr_f <<< num_blocks, num_threads >>>
-            (num_stations, value, hd_telescope->antenna_z);
-}
-
-
-void oskar_free_device_telescope_d(oskar_TelescopeModel_d* hd_telescope)
-{
-    cudaFree(hd_telescope->antenna_x);
-    cudaFree(hd_telescope->antenna_y);
-    cudaFree(hd_telescope->antenna_z);
-}
-
-void oskar_free_device_telescope_f(oskar_TelescopeModel_f* hd_telescope)
-{
-    cudaFree(hd_telescope->antenna_x);
-    cudaFree(hd_telescope->antenna_y);
-    cudaFree(hd_telescope->antenna_z);
-}
-
-
-
-#ifdef __cplusplus
-}
-#endif

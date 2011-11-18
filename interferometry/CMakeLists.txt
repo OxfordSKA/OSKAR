@@ -7,7 +7,6 @@ set(interferometry_SRC
     src/oskar_compute_baselines.c
     src/oskar_correlate.cu
     src/oskar_cuda_correlator_lm_bw.cu # Deprecated.
-    src/oskar_cuda_correlator_scalar.cu
     src/oskar_evaluate_baseline_uvw.cpp
     src/oskar_evaluate_baselines.cpp
     src/oskar_evaluate_jones_K.cu
@@ -29,7 +28,7 @@ set(interferometry_SRC
     src/oskar_telescope_model_scale_coords.cu
     src/oskar_telescope_model_set_station_pos.c
     src/oskar_telescope_model_type.c
-    src/oskar_TelescopeModel.cu
+    src/oskar_TelescopeModel.cpp
     src/oskar_visibilities_clear_contents.c
     src/oskar_visibilities_get_channel_amps.c
     src/oskar_visibilities_init.cpp

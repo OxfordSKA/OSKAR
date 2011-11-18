@@ -37,12 +37,6 @@
 #include "station/oskar_station_model_resize.h"
 #include "station/oskar_station_model_check_mem.h"
 #include "station/oskar_station_model_type.h"
-#include <cmath>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
 : num_elements(n_elements),
