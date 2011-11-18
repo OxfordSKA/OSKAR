@@ -15,9 +15,7 @@ set(apps_SRC
 
 if(BUILD_OSKAR_MS)
     include_directories(${CASACORE_INCLUDE_DIR}/casacore)
-    list(APPEND apps_SRC
-        src/oskar_write_ms.cpp
-    )
+    list(APPEND apps_SRC src/oskar_write_ms.cpp)
 endif()
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
 

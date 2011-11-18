@@ -104,6 +104,26 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
         fclose(file);
         return OSKAR_ERR_FILE_IO;
     }
+    if (fwrite(&vis->freq_start_hz, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(&vis->freq_inc_hz, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(&vis->time_start_mjd_utc, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
+    if (fwrite(&vis->time_inc_seconds, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        return OSKAR_ERR_FILE_IO;
+    }
 
     // Write data.
     if (fwrite(vis->uu_metres.data, coord_element_size, num_coords, file) != (size_t)num_coords)

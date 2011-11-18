@@ -80,6 +80,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         V  = mxCreateNumericArray(3, amp_dims, class_id, mxCOMPLEX);
     }
 
+    // Create time and frequency arrays.
+    mwSize time_dims[1] = { num_times };
+    mxArray* time = mxCreateNumericArray(1, time_dims, class_id, mxREAL);
+    mwSize channel_dims[1] = { num_channels };
+    mxArray* frequency = mxCreateNumericArray(1, channel_dims, class_id, mxREAL);
+
+
     mexPrintf("= Loading %i visibility samples\n",
             vis->num_times * vis->num_baselines);
 
@@ -158,6 +165,19 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 V_im_ptr[i]  =  0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
             }
         }
+
+        double* t_vis = (double*)mxGetData(time);
+        double interval = vis->time_inc_seconds;
+        double start_time = vis->time_start_mjd_utc * 86400.0  + interval / 2.0;
+        for (int i = 0; i < num_times; ++i)
+        {
+            t_vis[i] = start_time + interval * i;
+        }
+        double* freq = (double*)mxGetData(frequency);
+        for (int i = 0; i < num_channels; ++i)
+        {
+            freq[i] = vis->freq_start_hz + i * vis->freq_inc_hz;
+        }
     }
     else
     {
@@ -235,19 +255,32 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 V_im_ptr[i]  =  0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
             }
         }
+        float* t_vis = (float*)mxGetData(time);
+        float interval = vis->time_inc_seconds;
+        float start_time = vis->time_start_mjd_utc * 86400.0  + interval / 2.0;
+        for (int i = 0; i < num_times; ++i)
+        {
+            t_vis[i] = start_time + interval * i;
+        }
+        float* freq = (float*)mxGetData(frequency);
+        for (int i = 0; i < num_channels; ++i)
+        {
+            freq[i] = vis->freq_start_hz + i * vis->freq_inc_hz;
+        }
     }
 
     // Create and populate output visibility structure.
     if (num_pols == 4)
     {
-        const char* fields[11] = {"uu_metres", "vv_metres", "ww_metres",
-                "xx", "xy", "yx", "yy", "I", "Q", "U", "V"};
-        out[0] = mxCreateStructMatrix(1, 1, 11, fields);
+        const char* fields[13] = {"uu_metres", "vv_metres", "ww_metres",
+                "xx", "xy", "yx", "yy", "I", "Q", "U", "V", "frequency",
+                "time"};
+        out[0] = mxCreateStructMatrix(1, 1, 13, fields);
     }
     else
     {
-        const char* fields[4] = {"uu_metres", "vv_metres", "ww_metres",
-                "xx"};
+        const char* fields[6] = {"uu_metres", "vv_metres", "ww_metres",
+                "xx", "frequency", "time"};
         out[0] = mxCreateStructMatrix(1, 1, 4, fields);
     }
     mxSetField(out[0], 0, "uu_metres", uu);
@@ -264,6 +297,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetField(out[0], 0, "U", U);
         mxSetField(out[0], 0, "V", V);
     }
+    mxSetField(out[0], 0, "frequency", frequency);
+    mxSetField(out[0], 0, "time", time);
 
     // Clean up local memory.
     delete vis;

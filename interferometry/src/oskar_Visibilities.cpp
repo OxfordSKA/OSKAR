@@ -41,8 +41,11 @@ oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
         int num_channels, int num_times, int num_baselines)
 : num_channels(num_channels),
   num_times(num_times),
-  num_baselines(num_baselines)
-
+  num_baselines(num_baselines),
+  freq_start_hz(0.0),
+  freq_inc_hz(0.0),
+  time_start_mjd_utc(0.0),
+  time_inc_seconds(0.0)
 {
     if (oskar_visibilities_init(this, amp_type, location, num_channels,
             num_times, num_baselines))
@@ -57,6 +60,10 @@ oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
 : num_channels(other->num_channels),
   num_times(other->num_times),
   num_baselines(other->num_baselines),
+  freq_start_hz(0.0),
+  freq_inc_hz(0.0),
+  time_start_mjd_utc(0.0),
+  time_inc_seconds(0.0),
   uu_metres(&other->uu_metres, location),
   vv_metres(&other->vv_metres, location),
   ww_metres(&other->ww_metres, location),

@@ -56,6 +56,10 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     int num_baselines = 0;
     int coord_type    = 0;
     int amp_type      = 0;
+    double freq_start_hz      = 0.0;
+    double freq_inc_hz        = 0.0;
+    double time_start_mjd_utc = 0.0;
+    double time_inc_seconds   = 0.0;
     int oskar_vis_file_magic_number = 0;
     int version = 0;
 
@@ -115,11 +119,40 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
         if (status) *status = OSKAR_ERR_FILE_IO;
         return NULL;
     }
+    if (fread(&freq_start_hz, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
+        return NULL;
+    }
+    if (fread(&freq_inc_hz, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
+        return NULL;
+    }
+    if (fread(&time_start_mjd_utc, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
+        return NULL;
+    }
+    if (fread(&time_inc_seconds, sizeof(double), 1, file) != 1)
+    {
+        fclose(file);
+        if (status) *status = OSKAR_ERR_FILE_IO;
+        return NULL;
+    }
 
     // Initialise the visibility structure.
     // Note: this will wipe any existing data in the structure.
     oskar_Visibilities* vis = new oskar_Visibilities(amp_type,
             OSKAR_LOCATION_CPU, num_channels, num_times, num_baselines);
+
+    vis->freq_start_hz      = freq_start_hz;
+    vis->freq_inc_hz        = freq_inc_hz;
+    vis->time_start_mjd_utc = time_start_mjd_utc;
+    vis->time_inc_seconds   = time_inc_seconds;
 
     // Read data.
     size_t num_amps = num_channels * num_times * num_baselines;

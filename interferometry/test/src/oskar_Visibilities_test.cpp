@@ -307,6 +307,10 @@ void oskar_Visibilties_test::test_read_write()
     int num_channels     = 10;
     int num_times        = 10;
     int num_baselines    = 20;
+    double start_freq    = 200.0e6;
+    double freq_inc      = 10.0e6;
+    double time_start_mjd_utc = 10.0;
+    double time_inc_seconds   = 1.5;
     int amp_type         = OSKAR_SINGLE_COMPLEX;
     const char* filename = "vis_temp.dat";
 
@@ -314,6 +318,11 @@ void oskar_Visibilties_test::test_read_write()
     {
         oskar_Visibilities vis1(amp_type, OSKAR_LOCATION_CPU, num_channels,
                 num_times, num_baselines);
+        vis1.freq_start_hz      = 200e6;
+        vis1.freq_inc_hz        = 10e6;
+        vis1.time_start_mjd_utc = 10.0;
+        vis1.time_inc_seconds   = 1.5;
+
         for (int i = 0, c = 0; c < vis1.num_channels; ++c)
         {
             for (int t = 0; t < vis1.num_times; ++t)
@@ -350,6 +359,11 @@ void oskar_Visibilties_test::test_read_write()
         CPPUNIT_ASSERT_EQUAL(num_channels, vis2->num_channels);
         CPPUNIT_ASSERT_EQUAL(num_baselines, vis2->num_baselines);
         CPPUNIT_ASSERT_EQUAL(num_times, vis2->num_times);
+
+        CPPUNIT_ASSERT_EQUAL(start_freq, vis2->freq_start_hz);
+        CPPUNIT_ASSERT_EQUAL(freq_inc, vis2->freq_inc_hz);
+        CPPUNIT_ASSERT_EQUAL(time_start_mjd_utc, vis2->time_start_mjd_utc);
+        CPPUNIT_ASSERT_EQUAL(time_inc_seconds, vis2->time_inc_seconds);
 
         // Check the data loaded correctly.
         for (int i = 0, c = 0; c < vis2->num_channels; ++c)

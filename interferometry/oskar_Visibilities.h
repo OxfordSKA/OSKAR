@@ -74,18 +74,17 @@ extern "C"
 #endif
 struct oskar_Visibilities
 {
-    int num_channels;     /**< Number of frequency channels. */
-    int num_times;        /**< Number of time samples or visibility dumps. */
-    int num_baselines;    /**< Number of baselines. */
-    oskar_Mem uu_metres;  /**< Baseline coordinates, in metres. */
-    oskar_Mem vv_metres;  /**< Baseline coordinates, in metres. */
-    oskar_Mem ww_metres;  /**< Baseline coordinates, in metres. */
-    oskar_Mem amplitude;  /**< Complex visibility amplitude. */
-
+    int num_channels;          /**< Number of frequency channels. */
+    int num_times;             /**< Number of time samples. */
+    int num_baselines;         /**< Number of baselines. */
     double freq_start_hz;      /**< Start Frequency, in Hz. */
     double freq_inc_hz;        /**< Frequency increment, in Hz. */
     double time_start_mjd_utc; /**< Start time in MJD, UTC */
     double time_inc_seconds;   /**< Time increment, in seconds. */
+    oskar_Mem uu_metres;       /**< Baseline coordinates, in metres. */
+    oskar_Mem vv_metres;       /**< Baseline coordinates, in metres. */
+    oskar_Mem ww_metres;       /**< Baseline coordinates, in metres. */
+    oskar_Mem amplitude;       /**< Complex visibility amplitude. */
 
 #ifdef __cplusplus
     /**
