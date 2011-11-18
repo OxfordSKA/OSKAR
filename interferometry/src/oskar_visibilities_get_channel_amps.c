@@ -26,11 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "interferometry/oskar_visibilities_get_channel_amps.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_get_pointer.h"
-#include "stdio.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,16 +38,17 @@ extern "C" {
 int oskar_visibilties_get_channel_amps(oskar_Mem* vis_amp,
         const oskar_Visibilities* vis, int channel)
 {
+    int num_elements, offset;
+
     if (vis_amp == NULL || vis == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    int num_elements = vis->num_times * vis->num_baselines;
-    int offset = channel * num_elements;
+    num_elements = vis->num_times * vis->num_baselines;
+    offset = channel * num_elements;
 
     return oskar_mem_get_pointer(vis_amp, &vis->amplitude,
             offset, num_elements);
 }
-
 
 #ifdef __cplusplus
 }
