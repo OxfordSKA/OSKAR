@@ -26,50 +26,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_jones_mul_mat1_c2.h"
-#include "math/cudak/oskar_cudaf_mul_c_c.h"
-#include "math/cudak/oskar_cudaf_mul_c_mat2c.h"
+#include "math/oskar_sph_from_lm.h"
 
-// Single precision.
-__global__
-void oskar_cudak_jones_mul_mat1_c2_f(int n, const float4c* j1,
-        const float2* s1, const float2* s2, float4c* m)
+#include <math.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Single precision. */
+void oskar_sph_from_lm_f(int num_positions, float lon0, float lat0,
+        const float* l, const float* m, float* lon, float* lat)
 {
-    // Get the array index ID that this thread is working on.
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    int i;
+    float sinLat0, cosLat0;
+    sinLat0 = sin(lat0);
+    cosLat0 = cos(lat0);
 
-    // Get the data from global memory.
-    float4c c_j1 = j1[i];
-    float2 c_s1 = s1[i];
-    float2 c_s2 = s2[i];
-
-    // Multiply Jones matrix by complex scalars.
-    oskar_cudaf_mul_c_c_f(c_s1, c_s2);
-    oskar_cudaf_mul_c_mat2c_f(c_s1, c_j1);
-
-    // Copy result back to global memory.
-    m[i] = c_j1;
+    /* Loop over l, m positions and evaluate the longitude and latitude values. */
+    for (i = 0; i < num_positions; ++i)
+    {
+        float li, mi, w;
+        li = l[i];
+        mi = m[i];
+        w = sqrtf(1.0 - li*li - mi*mi);
+        lat[i] = asinf(w * sinLat0 + mi * cosLat0);
+        lon[i] = lon0 + atan2f(li, cosLat0 * w - mi * sinLat0);
+    }
 }
 
-// Double precision.
-__global__
-void oskar_cudak_jones_mul_mat1_c2_d(int n, const double4c* j1,
-        const double2* s1, const double2* s2, double4c* m)
+/* Double precision. */
+void oskar_sph_from_lm_d(int num_positions, double lon0, double lat0,
+        const double* l, const double* m, double* lon, double* lat)
 {
-    // Get the array index ID that this thread is working on.
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    int i;
+    double sinLat0, cosLat0;
+    sinLat0 = sin(lat0);
+    cosLat0 = cos(lat0);
 
-    // Get the data from global memory.
-    double4c c_j1 = j1[i];
-    double2 c_s1 = s1[i];
-    double2 c_s2 = s2[i];
-
-    // Multiply Jones matrix by complex scalars.
-    oskar_cudaf_mul_c_c_d(c_s1, c_s2);
-    oskar_cudaf_mul_c_mat2c_d(c_s1, c_j1);
-
-    // Copy result back to global memory.
-    m[i] = c_j1;
+    /* Loop over l, m positions and evaluate the longitude and latitude values. */
+    for (i = 0; i < num_positions; ++i)
+    {
+        double li, mi, w;
+        li = l[i];
+        mi = m[i];
+        w = sqrt(1.0 - li*li - mi*mi);
+        lat[i] = asin(w * sinLat0 + mi * cosLat0);
+        lon[i] = lon0 + atan2(li, cosLat0 * w - mi * sinLat0);
+    }
 }
+
+#ifdef __cplusplus
+}
+#endif

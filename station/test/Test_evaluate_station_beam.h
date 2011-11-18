@@ -48,13 +48,13 @@ class Test_evaluate_station_beam : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(Test_evaluate_station_beam);
         CPPUNIT_TEST(test_fail_conditions);
-        CPPUNIT_TEST(evalute_test_pattern);
+        CPPUNIT_TEST(evaluate_test_pattern);
         CPPUNIT_TEST(performance_test);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         void test_fail_conditions();
-        void evalute_test_pattern();
+        void evaluate_test_pattern();
         void performance_test();
 };
 

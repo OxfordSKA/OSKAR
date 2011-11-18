@@ -28,7 +28,6 @@
 
 #include "sky/test/SkyTest.h"
 
-#include "sky/oskar_angles_from_lm.h"
 #include "sky/oskar_rotate_sources.h"
 
 #include "sky/oskar_filter_sources_by_radius.h"
@@ -174,37 +173,3 @@ void SkyTest::test_rotate_sources()
 //        cout << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
 //    }
 }
-
-void SkyTest::test_angles_from_lm()
-{
-    const unsigned num_positions = 4;
-    std::vector<double> l(num_positions);
-    std::vector<double> m(num_positions);
-    std::vector<double> ra(num_positions);
-    std::vector<double> dec(num_positions);
-    const double ra0 = 0.0;
-    const double dec0 = 90.0 * (M_PI / 180.0);
-
-    l[0] = 0.0;
-    m[0] = 0.0;
-
-    l[1] = 0.0;
-    m[1] = sin(45.0 * M_PI / 180.0);
-
-    l[2] = sin(5.0 * M_PI / 180.0);
-    m[2] = sin(5.0 * M_PI / 180.0);
-
-    l[3] = sin(-1.5 * M_PI / 180.0);
-    m[3] = 0.0;//sin(5.0 * M_PI / 180.0);
-
-    oskar_angles_from_lm_d(num_positions, ra0, dec0, &l[0], &m[0], &ra[0], &dec[0]);
-
-//    cout << endl;
-//    for (unsigned i = 0; i < num_positions; ++i)
-//    {
-//        cout << setprecision(8);
-//        cout << "(ra, dec) = " << ra[i] * (180.0 / M_PI);
-//        cout << ", " << dec[i] * (180.0 / M_PI) << endl;
-//    }
-}
-

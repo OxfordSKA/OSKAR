@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_EVALUATE_SOURCE_HORIZONTAL_LMN_H_
 #define OSKAR_EVALUATE_SOURCE_HORIZONTAL_LMN_H_
 
@@ -55,7 +54,8 @@ extern "C" {
  *
  * @param[out] work    OSKAR E Jones work buffer structure containing arrays
  *                     to hold the hoizontal lmn coordinates of each source.
- * @param[in]  sky     Sky Model.
+ * @param[in]  RA      Source Right Ascension values.
+ * @param[in]  Dec     Source Declination values.
  * @param[in]  station Station Model.
  * @param[in]  gast    The Greenwich apparent sidereal time, in radians.
  *
@@ -63,7 +63,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
-        oskar_Mem* n, const oskar_SkyModel* sky,
+        oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
         const oskar_StationModel* station, const double gast);
 
 #ifdef __cplusplus

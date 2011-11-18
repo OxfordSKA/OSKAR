@@ -24,6 +24,7 @@ set(math_SRC
     src/oskar_linspace.c
     src/oskar_mat_tri_c.c
     src/oskar_meshgrid.c
+    src/oskar_sph_from_lm.c
     src/oskar_sph_to_lm.c
 )
 foreach (file ${math_cuda_kernels_SRC})

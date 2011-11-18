@@ -19,6 +19,13 @@ target_link_libraries(oskar_sim_scalar oskar oskar_apps ${QT_QTCORE_LIBRARY})
 set_target_properties(oskar_sim_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS oskar_sim_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
+# BINARY: oskar_beam_pattern
+include_directories(${QT_INCLUDE_DIR})
+add_executable(oskar_beam_pattern oskar_beam_pattern.cpp)
+target_link_libraries(oskar_beam_pattern oskar oskar_apps ${QT_QTCORE_LIBRARY})
+set_target_properties(oskar_beam_pattern PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+install(TARGETS oskar_beam_pattern DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+
 # BINARY: oskar_icrs_to_az_el
 add_executable(oskar_icrs_to_az_el oskar_icrs_to_az_el.cpp)
 target_link_libraries(oskar_icrs_to_az_el oskar)

@@ -34,54 +34,57 @@ extern "C" {
 #endif
 
 int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
-        oskar_Mem* n, const oskar_SkyModel* sky,
+        oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
         const oskar_StationModel* station, const double gast)
 {
-    if (sky == NULL || station == NULL || l == NULL || m == NULL || n == NULL)
+    if (RA == NULL || Dec == NULL || station == NULL ||
+            l == NULL || m == NULL || n == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Make sure the coordinates in the work and sky arrays are on the GPU.
+    // Make sure the arrays are on the GPU.
     if (l->location() != OSKAR_LOCATION_GPU ||
             m->location() != OSKAR_LOCATION_GPU ||
             n->location() != OSKAR_LOCATION_GPU ||
-            sky->RA.location() != OSKAR_LOCATION_GPU ||
-            sky->Dec.location() != OSKAR_LOCATION_GPU)
-    {
+            RA->location() != OSKAR_LOCATION_GPU ||
+            Dec->location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
-    }
 
-    // Check that the sky structure contains some sources.
-    int num_sources = sky->num_sources;
-    if (num_sources == 0 || sky->RA.is_null() || sky->Dec.is_null() ||
+    // Get the number of sources.
+    int num_sources = RA->num_elements();
+
+    // Check that the dimensions are correct.
+    if (num_sources != Dec->num_elements())
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    // Check that the structures contains some sources.
+    if (num_sources == 0 || RA->is_null() || Dec->is_null() ||
             l->is_null() || m->is_null() || n->is_null())
-    {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-    }
 
     // Make sure the work arrays are long enough.
-    if (l->num_elements() != num_sources ||
-            m->num_elements() != num_sources ||
-            n->num_elements() != num_sources)
-    {
+    if (l->num_elements() < num_sources ||
+            m->num_elements() < num_sources ||
+            n->num_elements() < num_sources)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-    }
 
     // Local apparent Sidereal Time, in radians.
     double last = gast + station->longitude;
 
     // Double precision.
-    if (sky->type() == OSKAR_DOUBLE && l->type() == OSKAR_DOUBLE &&
-            m->type() == OSKAR_DOUBLE && n->type() == OSKAR_DOUBLE)
+    if (RA->type() == OSKAR_DOUBLE && Dec->type() == OSKAR_DOUBLE &&
+            l->type() == OSKAR_DOUBLE && m->type() == OSKAR_DOUBLE &&
+            n->type() == OSKAR_DOUBLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, sky->RA, sky->Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, *RA, *Dec,
                 last, station->latitude, *l, *m, *n);
     }
 
     // Single precision.
-    else if (sky->type() == OSKAR_SINGLE && l->type() == OSKAR_SINGLE &&
-            m->type() == OSKAR_SINGLE && n->type() == OSKAR_SINGLE)
+    else if (RA->type() == OSKAR_SINGLE && Dec->type() == OSKAR_SINGLE &&
+            l->type() == OSKAR_SINGLE && m->type() == OSKAR_SINGLE &&
+            n->type() == OSKAR_SINGLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, sky->RA, sky->Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, *RA, *Dec,
                 (float)last, (float)station->latitude, *l, *m, *n);
     }
     else

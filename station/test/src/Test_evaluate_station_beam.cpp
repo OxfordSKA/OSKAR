@@ -59,7 +59,7 @@ void Test_evaluate_station_beam::test_fail_conditions()
 {
 }
 
-void Test_evaluate_station_beam::evalute_test_pattern()
+void Test_evaluate_station_beam::evaluate_test_pattern()
 {
     int error = 0;
 
@@ -98,7 +98,7 @@ void Test_evaluate_station_beam::evalute_test_pattern()
 
     // Evaluate horizontal l,m,n for beam phase centre.
     double beam_l, beam_m, beam_n;
-    error = oskar_evaluate_beam_hoizontal_lmn(&beam_l, &beam_m, &beam_n,
+    error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
             &station_gpu, gast);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 

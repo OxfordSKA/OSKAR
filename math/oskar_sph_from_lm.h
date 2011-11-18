@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ANGLES_FROM_LM_H_
-#define OSKAR_ANGLES_FROM_LM_H_
+#ifndef OSKAR_SPH_FROM_LM_H_
+#define OSKAR_SPH_FROM_LM_H_
 
 /**
- * @file oskar_angles_from_lm.h
+ * @file oskar_sph_from_lm.h
  */
 
 #include "oskar_global.h"
@@ -38,6 +38,26 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief
+ * Convert direction cosines to angles (single precision).
+ *
+ * @details
+ * Returns the longitude and latitude of the supplied array of
+ * direction cosines (l and m).
+ *
+ * @param[in]  num_positions Number of positions to evaluate.
+ * @param[in]  lon0          Longitude of the field centre, in radians.
+ * @param[in]  lat0          Latitude of the field centre, in radians.
+ * @param[in]  l             Array of positions in cosine space.
+ * @param[in]  m             Array of positions in cosine space.
+ * @param[out] lon           Array of longitude values, in radians.
+ * @param[out] lat           Array of latitude values, in radians.
+ */
+OSKAR_EXPORT
+void oskar_sph_from_lm_f(int num_positions, float lon0, float lat0,
+        const float* l, const float* m, float* lon, float* lat);
 
 /**
  * @brief
@@ -56,11 +76,11 @@ extern "C" {
  * @param[out] lat           Array of latitude values, in radians.
  */
 OSKAR_EXPORT
-void oskar_angles_from_lm_d(int num_positions, double lon0, double lat0,
+void oskar_sph_from_lm_d(int num_positions, double lon0, double lat0,
         const double* l, const double* m, double* lon, double* lat);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ANGLES_FROM_LM_H_ */
+#endif /* OSKAR_SPH_FROM_LM_H_ */

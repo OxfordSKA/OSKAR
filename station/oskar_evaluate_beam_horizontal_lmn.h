@@ -59,7 +59,7 @@ extern "C" {
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
+int oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
         const oskar_StationModel* station, const double gast);
 
 #ifdef __cplusplus

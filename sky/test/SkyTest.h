@@ -52,7 +52,6 @@ class SkyTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_distance_filter);
         CPPUNIT_TEST(test_rotate);
         CPPUNIT_TEST(test_rotate_sources);
-        CPPUNIT_TEST(test_angles_from_lm);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -62,7 +61,6 @@ class SkyTest : public CppUnit::TestFixture
         void test_distance_filter();
         void test_rotate();
         void test_rotate_sources();
-        void test_angles_from_lm();
 };
 
 // Register the test class.

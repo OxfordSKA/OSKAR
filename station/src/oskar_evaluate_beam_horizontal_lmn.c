@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-int oskar_evaluate_beam_hoizontal_lmn(double* l, double* m, double* n,
+int oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
         const oskar_StationModel* station, const double gast)
 {
     double last;

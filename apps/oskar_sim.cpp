@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     if (argc != 2)
     {
         fprintf(stderr, "ERROR: Missing command line arguments.\n");
-        fprintf(stderr, "Usage:  $ oskar_sim1 [settings file]\n");
+        fprintf(stderr, "Usage:  $ oskar_sim [settings file]\n");
         return EXIT_FAILURE;
     }
 
