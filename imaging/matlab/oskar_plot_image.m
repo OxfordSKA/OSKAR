@@ -12,7 +12,7 @@ function [ handle ] = oskar_plot_image(Image, fov_deg, fig_title, fig_id)
 
 % Set the figure ID, if not already set.
 if ~exist('fig_id', 'var')
-    fig_id = 991;
+    fig_id = 999;
 end
 
 % Set the image title, if not already set.
@@ -47,7 +47,7 @@ axis equal;
 
 % Plot the image.
 rel_coords  = linspace(-fov_deg / 2, fov_deg / 2, size(Image, 2));
-imagesc(rel_coords, -rel_coords, fliplr(Image));
+imagesc(rel_coords, -rel_coords, Image);
 
 % Set axis options.
 set(gca, 'YDir', 'normal');

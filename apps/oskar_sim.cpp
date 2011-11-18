@@ -80,10 +80,12 @@ int main(int argc, char** argv)
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
     oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
             n_channels, times->num_vis_dumps, n_stations * (n_stations - 1) /2);
-    vis_global.freq_start_hz = settings.obs().start_frequency();
-    vis_global.freq_inc_hz = settings.obs().frequency_inc();
+
+    // Add visibility meta-data.
+    vis_global.freq_start_hz      = settings.obs().start_frequency();
+    vis_global.freq_inc_hz        = settings.obs().frequency_inc();
     vis_global.time_start_mjd_utc = times->obs_start_mjd_utc;
-    vis_global.time_inc_seconds = times->dt_dump_days * 86400.0;
+    vis_global.time_inc_seconds   = times->dt_dump_days * 86400.0;
 
     // Run the simulation.
     QTime timer;
@@ -92,7 +94,7 @@ int main(int argc, char** argv)
     {
         // Get a pointer to the visibility channel data.
         oskar_Mem vis_amp;
-        printf("--> Simulating channel (%d / %d).\n", c + 1, n_channels);
+        printf("\n--> Simulating channel (%d / %d).\n", c + 1, n_channels);
         vis_global.get_channel_amps(&vis_amp, c);
 
         // Simulate data for this channel.

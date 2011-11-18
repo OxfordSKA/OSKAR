@@ -89,7 +89,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     double m_to_wavenumbers = 2.0 * M_PI * (freq_hz / c_0);
 
     // Image parameters.
-    double lm_max = sin(fov_deg * (M_PI / 180.0));
+    double lm_max = sin((fov_deg/2.0) * (M_PI / 180.0));
     int num_pixels = image_size * image_size;
 
     // Evaluate the and check consistency of data precision.
@@ -178,16 +178,16 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             image[i] /= (double)num_samples;
         }
 
-        // Transpose the image to FORTRAN / MATLAB order.
-        for (int j = 0; j < image_size; ++j)
-        {
-            for (int i = j; i < image_size; ++i)
-            {
-                double temp = image[j * image_size + i];
-                image[j * image_size + i] = image[i * image_size + j];
-                image[i * image_size + j] = temp;
-            }
-        }
+//        // Transpose the image to FORTRAN / MATLAB order.
+//        for (int j = 0; j < image_size; ++j)
+//        {
+//            for (int i = j; i < image_size; ++i)
+//            {
+//                double temp = image[j * image_size + i];
+//                image[j * image_size + i] = image[i * image_size + j];
+//                image[i * image_size + j] = temp;
+//            }
+//        }
 
         // Clean up memory
         free(lm);
@@ -255,16 +255,16 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             image[i] /= (float)num_samples;
         }
 
-        // Transpose the image to FORTRAN / MATLAB order.
-        for (int j = 0; j < image_size; ++j)
-        {
-            for (int i = j; i < image_size; ++i)
-            {
-                float temp = image[j * image_size + i];
-                image[j * image_size + i] = image[i * image_size + j];
-                image[i * image_size + j] = temp;
-            }
-        }
+//        // Transpose the image to FORTRAN / MATLAB order.
+//        for (int j = 0; j < image_size; ++j)
+//        {
+//            for (int i = j; i < image_size; ++i)
+//            {
+//                float temp = image[j * image_size + i];
+//                image[j * image_size + i] = image[i * image_size + j];
+//                image[i * image_size + j] = temp;
+//            }
+//        }
 
         // Clean up memory
         free(lm);
