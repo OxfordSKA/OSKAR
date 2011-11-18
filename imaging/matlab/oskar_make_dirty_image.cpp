@@ -123,6 +123,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     int num_samples = num_baselines * num_times;
+    mxArray* mxImage = NULL;
 
     if (type == OSKAR_DOUBLE)
     {
@@ -140,8 +141,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Allocate memory for image and image coordinates.
         mwSize dims[2] = {image_size, image_size};
-        out[0] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-        double* image = (double*)mxGetData(out[0]);
+        mxImage = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+        double* image = (double*)mxGetData(mxImage);
         double* lm = (double*)malloc(image_size * sizeof(double));
         double* l = (double*)malloc(num_pixels * sizeof(double));
         double* m = (double*)malloc(num_pixels * sizeof(double));
@@ -178,16 +179,16 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             image[i] /= (double)num_samples;
         }
 
-//        // Transpose the image to FORTRAN / MATLAB order.
-//        for (int j = 0; j < image_size; ++j)
-//        {
-//            for (int i = j; i < image_size; ++i)
-//            {
-//                double temp = image[j * image_size + i];
-//                image[j * image_size + i] = image[i * image_size + j];
-//                image[i * image_size + j] = temp;
-//            }
-//        }
+        // Transpose the image to FORTRAN / MATLAB order.
+        for (int j = 0; j < image_size; ++j)
+        {
+            for (int i = j; i < image_size; ++i)
+            {
+                double temp = image[j * image_size + i];
+                image[j * image_size + i] = image[i * image_size + j];
+                image[i * image_size + j] = temp;
+            }
+        }
 
         // Clean up memory
         free(lm);
@@ -217,8 +218,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Allocate memory for image and coordinate grid.
         mwSize dims[2] = {image_size, image_size};
-        out[0] = mxCreateNumericArray(2, dims, mxSINGLE_CLASS, mxREAL);
-        float* image = (float*)mxGetData(out[0]);
+        mxImage = mxCreateNumericArray(2, dims, mxSINGLE_CLASS, mxREAL);
+        float* image = (float*)mxGetData(mxImage);
         float* lm = (float*)malloc(image_size * sizeof(float));
         float* l = (float*)malloc(num_pixels * sizeof(float));
         float* m = (float*)malloc(num_pixels * sizeof(float));
@@ -255,16 +256,16 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             image[i] /= (float)num_samples;
         }
 
-//        // Transpose the image to FORTRAN / MATLAB order.
-//        for (int j = 0; j < image_size; ++j)
-//        {
-//            for (int i = j; i < image_size; ++i)
-//            {
-//                float temp = image[j * image_size + i];
-//                image[j * image_size + i] = image[i * image_size + j];
-//                image[i * image_size + j] = temp;
-//            }
-//        }
+        // Transpose the image to FORTRAN / MATLAB order.
+        for (int j = 0; j < image_size; ++j)
+        {
+            for (int i = j; i < image_size; ++i)
+            {
+                float temp = image[j * image_size + i];
+                image[j * image_size + i] = image[i * image_size + j];
+                image[i * image_size + j] = temp;
+            }
+        }
 
         // Clean up memory
         free(lm);
@@ -283,6 +284,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgTxt("Failed to run oskar_dirty_image.");
     }
 
-//    mexCallMATLAB(0, 0, 0, 0, "figure");
-//    mexCallMATLAB(0, 0, 1, &out[0], "imagesc");
+    // Create meta-data values.
+    mxArray* mxFreq = mxCreateNumericMatrix(1,1,mxDOUBLE_CLASS, mxREAL);
+    *(double*)mxGetData(mxFreq) = freq_hz;
+    mxArray* mxFOV = mxCreateNumericMatrix(1,1,mxDOUBLE_CLASS, mxREAL);
+    *(double*)mxGetData(mxFOV) = fov_deg;
+
+    const char* fields[3] = {"data", "frequency_hz", "fov_deg"};
+    out[0] = mxCreateStructMatrix(1, 1, 3, fields);
+    mxSetField(out[0], 0, "data", mxImage);
+    mxSetField(out[0], 0, "frequency_hz", mxFreq);
+    mxSetField(out[0], 0, "fov_deg", mxFOV);
 }

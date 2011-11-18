@@ -160,9 +160,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 U_re_ptr[i]  = 0.5 * (xy_re_ptr[i] + yx_re_ptr[i]);
                 U_im_ptr[i]  = 0.5 * (xy_im_ptr[i] + yx_im_ptr[i]);
 
-                // U = -0.5i (XY - YX)
-                V_re_ptr[i]  = -0.5 * (xx_im_ptr[i] - yy_im_ptr[i]);
-                V_im_ptr[i]  =  0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
+                // V = -0.5i (XY - YX)
+                V_re_ptr[i] =  0.5 * (xy_im_ptr[i] - yx_im_ptr[i]);
+                V_im_ptr[i] = -0.5 * (xy_re_ptr[i] - yx_re_ptr[i]);
             }
         }
 
@@ -250,9 +250,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 U_re_ptr[i]  = 0.5 * (xy_re_ptr[i] + yx_re_ptr[i]);
                 U_im_ptr[i]  = 0.5 * (xy_im_ptr[i] + yx_im_ptr[i]);
 
-                // U = -0.5i (XY - YX)
-                V_re_ptr[i]  = -0.5 * (xx_im_ptr[i] - yy_im_ptr[i]);
-                V_im_ptr[i]  =  0.5 * (xx_re_ptr[i] - yy_re_ptr[i]);
+                // V = -0.5i (XY - YX)
+                V_re_ptr[i]  =  0.5 * (xy_im_ptr[i] - yx_im_ptr[i]);
+                V_im_ptr[i]  = -0.5 * (xy_re_ptr[i] - yx_re_ptr[i]);
             }
         }
         float* t_vis = (float*)mxGetData(time);
