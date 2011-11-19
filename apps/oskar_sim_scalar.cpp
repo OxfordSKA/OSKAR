@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     {
         // Get a pointer to the visibility channel data.
         oskar_Mem vis_amp;
-        printf("--> Simulating channel (%d / %d).\n", c + 1, n_channels);
+        printf("\n--> Simulating channel (%d / %d).\n", c + 1, n_channels);
         vis_global.get_channel_amps(&vis_amp, c);
 
         // Simulate data for this channel.

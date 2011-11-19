@@ -74,8 +74,9 @@ int main(int argc, char** argv)
     const oskar_SimTime* times = settings.obs().sim_time();
 
     // Get the sky model and telescope model and copy both to GPU (slow step).
-    oskar_TelescopeModel* tel_cpu = oskar_set_up_telescope(settings);
-    oskar_TelescopeModel tel_gpu(tel_cpu, OSKAR_LOCATION_GPU);
+    oskar_TelescopeModel* tel_cpu, *tel_gpu;
+    tel_cpu = oskar_set_up_telescope(settings);
+    tel_gpu = new oskar_TelescopeModel(tel_cpu, OSKAR_LOCATION_GPU);
 
     // Get the type.
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
@@ -108,17 +109,6 @@ int main(int argc, char** argv)
         oskar_sph_from_lm_d(num_pixels, ra0, dec0, l_cpu, m_cpu, RA_cpu, Dec_cpu);
     }
 
-    // Copy RA and Dec to GPU and allocate arrays for pixel direction cosines.
-    oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
-    oskar_Mem Dec(&Dec_cpu, OSKAR_LOCATION_GPU);
-    oskar_Mem l(type, OSKAR_LOCATION_GPU, num_pixels);
-    oskar_Mem m(type, OSKAR_LOCATION_GPU, num_pixels);
-    oskar_Mem n(type, OSKAR_LOCATION_GPU, num_pixels);
-
-    // Allocate weights work array and memory for the beam pattern.
-    oskar_Mem weights(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
-    oskar_Mem beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
-
     // Get time data.
     int num_vis_dumps        = times->num_vis_dumps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
@@ -134,11 +124,22 @@ int main(int argc, char** argv)
     for (int c = 0; c < n_channels; ++c)
     {
         // Get the channel frequency.
-        printf("--> Simulating channel (%d / %d).\n", c + 1, n_channels);
+        printf("\n--> Simulating channel (%d / %d).\n", c + 1, n_channels);
         double frequency = settings.obs().frequency(c);
 
+        // Copy RA and Dec to GPU and allocate arrays for pixel direction cosines.
+    	oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
+    	oskar_Mem Dec(&Dec_cpu, OSKAR_LOCATION_GPU);
+    	oskar_Mem l(type, OSKAR_LOCATION_GPU, num_pixels);
+    	oskar_Mem m(type, OSKAR_LOCATION_GPU, num_pixels);
+    	oskar_Mem n(type, OSKAR_LOCATION_GPU, num_pixels);
+
+    	// Allocate weights work array and memory for the beam pattern.
+    	oskar_Mem weights(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
+    	oskar_Mem beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
+
         // Copy the telescope model and scale coordinates to wavenumbers.
-        oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
+        oskar_TelescopeModel telescope(tel_gpu, OSKAR_LOCATION_GPU);
         err = telescope.multiply_by_wavenumber(frequency);
         if (err) oskar_exit(err);
 
@@ -205,18 +206,11 @@ int main(int argc, char** argv)
     }
     printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
     fclose(file);
-    printf("Done.\n");
 
     // Delete data structures.
-    try
-    {
-        delete tel_cpu;
-        cudaDeviceReset();
-    }
-    catch (const char* msg)
-    {
-        fprintf(stderr, "%s\n", msg);
-    }
+    delete tel_gpu;
+    delete tel_cpu;
+    cudaDeviceReset();
 
     return EXIT_SUCCESS;
 }
