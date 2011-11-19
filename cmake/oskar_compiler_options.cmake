@@ -27,7 +27,7 @@ if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
     # Warnings.
     add_definitions(-Wall)
     add_definitions(-Wextra)
-    #add_definitions(-pedantic)
+    add_definitions(-pedantic)
 
     add_definitions(-Wcast-align)
     add_definitions(-Wcast-qual)

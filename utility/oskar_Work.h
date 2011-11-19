@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_WORK_H_
 #define OSKAR_WORK_H_
 
@@ -38,16 +37,12 @@
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
 #endif
-
-struct oskar_Work;
-typedef struct oskar_Work oskar_Work;
-
-// These are all either double or single.
 struct oskar_Work
 {
     oskar_Mem integer;
+	/* These are all either double or single. */
     oskar_Mem real;
     oskar_Mem complex;
     oskar_Mem matrix;
@@ -80,9 +75,6 @@ struct oskar_Work
 #endif
 };
 
-
-#ifdef __cplusplus
-}
-#endif
+typedef struct oskar_Work oskar_Work;
 
 #endif /* OSKAR_WORK_H_ */

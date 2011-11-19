@@ -8,14 +8,14 @@ int main(int /*argc*/, char** /*argv*/)
     // Open the file.
     const char* filename = "test.fits";
     oskar_uvfits uvfits;
-    oskar_uvfits_open(filename, &uvfits);
+    oskar_uvfits_create(filename, &uvfits);
 
     // Groups header.
     long long num_vis = 2;
-    oskar_write_groups_header(uvfits.fptr, num_vis);
+    oskar_uvfits_write_groups_header(uvfits.fptr, num_vis);
 
     // Close file.
-    oskar_close_uvfits_file(uvfits.fptr);
+    oskar_uvfits_close(uvfits.fptr);
 
     return 0;
 }

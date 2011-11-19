@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h> // Must include this first to avoid type conflict.
+/* Must include this first to avoid type conflict. */
+#include <cuda_runtime_api.h>
+
 #include <stdlib.h>
 
 #include "interferometry/oskar_telescope_model_location.h"

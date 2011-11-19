@@ -60,44 +60,45 @@ struct oskar_uvfits_header
     long  num_axes;
     long* axis_dim;
 
-    long long num_param; // == pcount
-    long long gcount;    // == num_vis
+    long long num_param; /* == pcount */
+    long long gcount;    /* == num_vis */
 };
 
 
 
 
 OSKAR_EXPORT
-void oskar_uvfits_open(const char* filename, oskar_uvfits* fits);
+void oskar_uvfits_create(const char* filename, oskar_uvfits* fits);
 
 OSKAR_EXPORT
-void oskar_check_fits_status(const int status, const char* message);
+void oskar_uvfits_check_status(const int status, const char* message);
 
 OSKAR_EXPORT
-void oskar_close_uvfits_file(fitsfile* fits_file);
+void oskar_uvfits_close(fitsfile* fits_file);
 
 OSKAR_EXPORT
-void oskar_write_groups_header(fitsfile* fits_file, const long long num_vis);
+void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis);
 
 OSKAR_EXPORT
-void oskar_write_header(fitsfile* fits_file, const char* filename, double ra0,
+void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename, double ra0,
         double dec0, double frequency0, double date0);
 
 OSKAR_EXPORT
-void oskar_write_axis_header(fitsfile* fits_file, const int id,
-        const char* ctype, const char* comment, const double crval,
-        const double cdelt, const double crpix, const double crota);
+void oskar_uvfits_write_axis_header(fitsfile* fits_file, int id,
+        const char* ctype, const char* comment, double crval,
+        double cdelt, double crpix, double crota);
 
 OSKAR_EXPORT
-void oskar_write_param_header(fitsfile* fits_file, const int id,
-        const char* type, const char* comment, const double scale,
-        const double zero);
+void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
+        const char* type, const char* comment, double scale,
+        double zero);
 
-// FIXME This needs fixing to use the new visibility structure.
+/* FIXME This needs fixing to use the new visibility structure.
 
-//OSKAR_EXPORT
-//void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-//        const double* weight, const double* date, const double* baseline);
+OSKAR_EXPORT
+void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
+        const double* weight, const double* date, const double* baseline);
+*/
 
 OSKAR_EXPORT
 int oskar_uvfits_baseline_id(int ant1, int ant2);
@@ -107,4 +108,4 @@ int oskar_uvfits_baseline_id(int ant1, int ant2);
 }
 #endif
 
-#endif // OSKAR_UVFITS_WRITER_H_
+#endif /* OSKAR_UVFITS_WRITER_H_ */

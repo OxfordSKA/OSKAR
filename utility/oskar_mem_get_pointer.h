@@ -70,4 +70,4 @@ int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
 }
 #endif
 
-#endif // OSKAR_MEM_GET_POINTER_H_
+#endif /* OSKAR_MEM_GET_POINTER_H_ */

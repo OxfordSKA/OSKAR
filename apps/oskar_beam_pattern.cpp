@@ -28,14 +28,9 @@
 
 #include <cuda_runtime_api.h>
 #include "apps/lib/oskar_Settings.h"
-#include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_write_ms.h"
-#include "interferometry/oskar_evaluate_baseline_uvw.h"
-#include "interferometry/oskar_interferometer.h"
 #include "interferometry/oskar_SimTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_Visibilities.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 #include "math/oskar_sph_from_lm.h"
@@ -46,9 +41,6 @@
 #include "station/oskar_evaluate_station_beam.h"
 #include "utility/oskar_exit.h"
 #include "utility/oskar_Mem.h"
-
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
 
 #include <cstdio>
 #include <cstdlib>

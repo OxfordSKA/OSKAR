@@ -28,7 +28,6 @@
 
 #include "fits/oskar_uvfits_writer.h"
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -38,10 +37,9 @@
 extern "C" {
 #endif
 
-
-void oskar_uvfits_open(const char* filename, oskar_uvfits* fits)
+void oskar_uvfits_create(const char* filename, oskar_uvfits* fits)
 {
-    // If the file exists remove it.
+    /* If the file exists, remove it. */
     FILE* file;
     if ((file = fopen(filename, "r")) != NULL)
     {
@@ -49,99 +47,93 @@ void oskar_uvfits_open(const char* filename, oskar_uvfits* fits)
         remove(filename);
     }
 
-    // Init Defaults.
+    /* Defaults. */
     fits->status    = 0;
     fits->decimals  = 10;
-    fits->num_axes  = 6; // 6 => 0(==GROUPS),AMP(RE,IM,WGT),STOKES, FREQ, RA, DEC
-    fits->num_param = 5; // 5 => UU, VV, WW, DATE, BASELINE
+    fits->num_axes  = 6; /* 6 => 0(==GROUPS),AMP(RE,IM,WGT),STOKES, FREQ, RA, DEC */
+    fits->num_param = 5; /* 5 => UU, VV, WW, DATE, BASELINE */
 
-    // Create and open a new empty output FITS file.
-    // fits_create_file
+    /* Create a new empty output FITS file. */
+    /* fits_create_file */
     ffinit(&(fits->fptr), filename, &(fits->status));
-    oskar_check_fits_status(fits->status, "Opening file");
+    oskar_uvfits_check_status(fits->status, "Opening file");
 }
 
-
-void oskar_check_fits_status(const int status, const char* message)
+void oskar_uvfits_check_status(const int status, const char* message)
 {
-    // No status error, return.
+    char line[80];
+
+    /* No status error, return. */
     if (!status) return;
 
-    char line[80];
     memset(line, '*', 79);
     fprintf(stderr, "%s\n", line);
 
-    // Print user supplied message.
+    /* Print user supplied message. */
     if (message == NULL || strlen(message) > 0)
-        fprintf(stderr, "UVFITS !ERROR!: %s.", message);
+        fprintf(stderr, "UVFITS ERROR: %s.", message);
 
-    // Print the CFITSIO error message.
+    /* Print the CFITSIO error message. */
     fits_report_error(stderr, status);
     fprintf(stderr, "%s\n", line);
 }
 
-void oskar_close_uvfits_file(fitsfile* fits_file)
+void oskar_uvfits_close(fitsfile* fits_file)
 {
-    if (fits_file == NULL) return;
     int status = 0;
-    //fits_close_file
+    if (fits_file == NULL) return;
+    /* fits_close_file */
     ffclos(fits_file, &status);
-    oskar_check_fits_status(status, "Closing file");
+    oskar_uvfits_check_status(status, "Closing file");
 }
 
-
-void oskar_write_groups_header(fitsfile* fits_file, const long long num_vis)
+void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis)
 {
-    // Number of axes (6 are required, a 7th (BAND axis) is optional).
-    long num_stokes = 1; // Scalar only (I, Q, U, or V e.t.c.)
-    long num_freqs  = 1; // Only write one frequency.
-    long num_ra     = 1; // One pointing
-    long num_dec    = 1; // One pointing
-
+    /* Number of axes (6 are required, a 7th (BAND axis) is optional). */
     int num_axes = 6;
     long axis_dim[6];
-    axis_dim[0] = 0;           // No standard image just group
-    axis_dim[1] = 3;           // (required) real, imaginary, weight.
-    axis_dim[2] = num_stokes;  // (required) Stokes parameters.
-    axis_dim[3] = num_freqs;   // (required) Frequency (spectral channel).
-    axis_dim[4] = num_ra;      // (required) Right ascension of phase centre.
-    axis_dim[5] = num_dec;     // (required) Declination of phase centre.
-
-    // Number of parameters.
-    // 1. UU        (u baseline coordinate)
-    // 2. VV        (v baseline coordinate)
-    // 3. WW        (w baseline coordinate)
-    // 4. DATE      (Julian date)
-    // 5. BASELINE  (Baseline number = ant1 * 256 + ant2)
-    int num_param = 5;
-    long long pcount = num_param;  // Number of parameters per group.
-    long long gcount = num_vis;    // number of groups (i.e. visibilities)
-
-    int simple = TRUE;          // This file does conform to FITS standard.
-    int bitpix = FLOAT_IMG;     // FLOAT_IMG=-32: AIPS dosn't use double!
-    int extend = TRUE;          // Allow use of extensions.
+    int simple = TRUE;          /* This file does conform to FITS standard. */
+    int bitpix = FLOAT_IMG;     /* FLOAT_IMG=-32: AIPS doesn't use double! */
+    int extend = TRUE;          /* Allow use of extensions. */
     int status = 0;
+    /* Number of parameters.
+     * 1. UU        (u baseline coordinate)
+     * 2. VV        (v baseline coordinate)
+     * 3. WW        (w baseline coordinate)
+     * 4. DATE      (Julian date)
+     * 5. BASELINE  (Baseline number = ant1 * 256 + ant2) */
+    int num_param = 5;
+    long long pcount = num_param;  /* Number of parameters per group. */
+    long long gcount = num_vis;    /* Number of groups (i.e. visibilities) */
+    long num_stokes = 1; /* Scalar only (I, Q, U, or V e.t.c.) */
+    long num_freqs  = 1; /* Only write one frequency. */
+    long num_ra     = 1; /* One pointing */
+    long num_dec    = 1; /* One pointing */
 
-    // Write random groups description header.
+    axis_dim[0] = 0;           /* No standard image just group */
+    axis_dim[1] = 3;           /* (required) real, imaginary, weight. */
+    axis_dim[2] = num_stokes;  /* (required) Stokes parameters. */
+    axis_dim[3] = num_freqs;   /* (required) Frequency (spectral channel). */
+    axis_dim[4] = num_ra;      /* (required) Right ascension of phase centre. */
+    axis_dim[5] = num_dec;     /* (required) Declination of phase centre. */
+
+    /* Write random groups description header. */
     fits_write_grphdr(fits_file, simple, bitpix, num_axes, axis_dim,
             pcount, gcount, extend, &status);
 
-    // Check the CFITSIO error status.
-    oskar_check_fits_status(status, "write groups header");
+    /* Check the CFITSIO error status. */
+    oskar_uvfits_check_status(status, "Write groups header");
 }
 
-
-
-void oskar_write_header(fitsfile* fits_file, const char* filename, double ra0,
-        double dec0, double frequency0, double date0)
+void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename,
+		double ra0, double dec0, double frequency0, double date0)
 {
+    char key[FLEN_KEYWORD], value[FLEN_VALUE], name[FLEN_COMMENT];
     int decimals = 10;
-
     int status = 0;
+    double invFreq;
     fits_write_date(fits_file, &status);
 
-    char key[FLEN_KEYWORD];
-    char value[FLEN_VALUE];
     strcpy(key, "TELESCOP");
     strcpy(value, "OSKAR SIM (0.0.0)");
     fits_write_key_str(fits_file,  key, value, NULL, &status);
@@ -152,46 +144,42 @@ void oskar_write_header(fitsfile* fits_file, const char* filename, double ra0,
     fits_write_key_dbl(fits_file, "OBSRA", ra0, decimals, "Antenna pointing RA", &status);
     fits_write_key_dbl(fits_file, "OBSDEC", dec0, decimals, "Antenna pointing DEC", &status);
 
-    // Axis description headers (Note: axis 1 = empty).
-    oskar_write_axis_header(fits_file, 2, "COMPLEX", "1=real, 2=imag, 3=weight",
+    /* Axis description headers (Note: axis 1 = empty). */
+    oskar_uvfits_write_axis_header(fits_file, 2, "COMPLEX", "1=real, 2=imag, 3=weight",
             1.0, 1.0, 1.0, 1.0);
-    oskar_write_axis_header(fits_file, 3, "STOKES", "==scalar (I/Q/U/V)",
+    oskar_uvfits_write_axis_header(fits_file, 3, "STOKES", "==scalar (I/Q/U/V)",
             1.0, 1.0, 1.0, 1.0);
-    oskar_write_axis_header(fits_file, 4, "FREQ", "Frequency in Hz.",
+    oskar_uvfits_write_axis_header(fits_file, 4, "FREQ", "Frequency in Hz.",
             frequency0, 0.0, 1.0, 0.0);
-    oskar_write_axis_header(fits_file, 5, "RA", "Right Ascension in deg.",
+    oskar_uvfits_write_axis_header(fits_file, 5, "RA", "Right Ascension in deg.",
             ra0, 0.0, 1.0, 1.0);
-    oskar_write_axis_header(fits_file, 6, "DEC", "Declination in deg.",
+    oskar_uvfits_write_axis_header(fits_file, 6, "DEC", "Declination in deg.",
             dec0, 0.0, 1.0, 1.0);
-    oskar_check_fits_status(status, NULL);
+    oskar_uvfits_check_status(status, "");
 
-    // Parameter headers.
-    double invFreq = 1.0 / frequency0;
-    oskar_write_param_header(fits_file, 1, "UU--",     "", invFreq, 0.0);
-    oskar_write_param_header(fits_file, 2, "VV--",     "", invFreq, 0.0);
-    oskar_write_param_header(fits_file, 3, "WW--",     "", invFreq, 0.0);
-    oskar_write_param_header(fits_file, 4, "DATE",     "", 1.0,     date0);
-    oskar_write_param_header(fits_file, 5, "BASELINE", "", 1.0,     0.0);
-    oskar_check_fits_status(status, NULL);
+    /* Parameter headers. */
+    invFreq = 1.0 / frequency0;
+    oskar_uvfits_write_param_header(fits_file, 1, "UU--",     "", invFreq, 0.0);
+    oskar_uvfits_write_param_header(fits_file, 2, "VV--",     "", invFreq, 0.0);
+    oskar_uvfits_write_param_header(fits_file, 3, "WW--",     "", invFreq, 0.0);
+    oskar_uvfits_write_param_header(fits_file, 4, "DATE",     "", 1.0,     date0);
+    oskar_uvfits_write_param_header(fits_file, 5, "BASELINE", "", 1.0,     0.0);
+    oskar_uvfits_check_status(status, "");
 
-    // Write a name that is picked up by AIPS.
-    char name[FLEN_COMMENT];
+    /* Write a name that is picked up by AIPS. */
     strcat(name, "AIPS   IMNAME='");
     strcat(name, filename);
     strcat(name, "'");
     fits_write_history(fits_file, name, &status);
 }
 
-
-void oskar_write_axis_header(fitsfile* fits_file, const int id,
-        const char* ctype, const char* comment, const double crval,
-        const double cdelt, const double crpix, const double crota)
+void oskar_uvfits_write_axis_header(fitsfile* fits_file, int id,
+        const char* ctype, const char* comment, double crval,
+        double cdelt, double crpix, double crota)
 {
+    char s_key[FLEN_KEYWORD], s_value[FLEN_VALUE], s_comment[FLEN_COMMENT];
     int status = 0;
     int decimals = 10;
-    char s_key[FLEN_KEYWORD];
-    char s_value[FLEN_VALUE];
-    char s_comment[FLEN_COMMENT];
 
     strcpy(s_comment, comment);
     strcpy(s_value, ctype);
@@ -212,17 +200,13 @@ void oskar_write_axis_header(fitsfile* fits_file, const int id,
     fits_write_key_dbl(fits_file, s_key, crota, decimals, NULL, &status);
 }
 
-
-void oskar_write_param_header(fitsfile* fits_file, const int id,
-        const char* type, const char* comment, const double scale,
-        const double zero)
+void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
+        const char* type, const char* comment, double scale,
+        double zero)
 {
+    char s_key[FLEN_KEYWORD], s_value[FLEN_VALUE], s_comment[FLEN_COMMENT];
     int status = 0;
     int decimals = 10;
-
-    char s_key[FLEN_KEYWORD];
-    char s_value[FLEN_VALUE];
-    char s_comment[FLEN_COMMENT];
 
     fits_make_keyn("PTYPE", id, s_key, &status);
     strcpy(s_value, type);
@@ -236,90 +220,85 @@ void oskar_write_param_header(fitsfile* fits_file, const int id,
     fits_write_key_dbl(fits_file, s_key, zero, decimals, NULL, &status);
 }
 
+/* FIXME This needs fixing to use the new visibility structure. */
+#if 0
+void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
+        const double* weight, const double* date, const double* baseline)
+{
+	int i, j;
+    int status = 0;
 
+    /* fixme: work out how to read this from the already written header. */
+    int num_axes = 6;
+    long axis_dim[6];
+    axis_dim[0] = 0;  /* No standard image just group */
+    axis_dim[1] = 3;  /* (required) real, imaginary, weight. */
+    axis_dim[2] = 1;  /* (required) Stokes parameters. */
+    axis_dim[3] = 1;  /* (required) Frequency (spectral channel). */
+    axis_dim[4] = 1;  /* (required) Right ascension of phase centre. */
+    axis_dim[5] = 1;  /* (required) Declination of phase centre. */
 
-// FIXME This needs fixing to use the new visibility structure.
+    /* Setup compressed axis dimensions vector. */
+    long naxes[5]; /* length = num_axis-1 */
+    for (i = 0; i < num_axes - 1; ++i)
+        naxes[i] = axis_dim[i+1];
 
-//void oskar_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-//        const double* weight, const double* date, const double* baseline)
-//{
-//	int i, j;
-//    int status = 0;
-//
-//    // fixme: work out how to read this from the already written header.
-//    int num_axes = 6;
-//    long axis_dim[6];
-//    axis_dim[0] = 0;  // No standard image just group
-//    axis_dim[1] = 3;  // (required) real, imaginary, weight.
-//    axis_dim[2] = 1;  // (required) Stokes parameters.
-//    axis_dim[3] = 1;  // (required) Frequency (spectral channel).
-//    axis_dim[4] = 1;  // (required) Right ascension of phase centre.
-//    axis_dim[5] = 1;  // (required) Declination of phase centre.
-//
-//    // Setup compressed axis dimensions vector.
-//    long naxes[5]; // length = num_axis-1
-//    for (i = 0; i < num_axes - 1; ++i)
-//        naxes[i] = axis_dim[i+1];
-//
-//    // length = num_axes
-//    long fpixel[5] = {1, 1, 1, 1, 1};
-//    long lpixel[5] = {3, 1, 1, 1, 1}; // == naxes
-//
-//    int num_values_per_group = 1;
-//    for (i = 1; i < num_axes; ++i)
-//        num_values_per_group *= axis_dim[i];
-//    printf("num values per group = %i\n", num_values_per_group);
-//
-//    int num_param = 5;
-//    long firstelem = 1;
-//    long nelements = num_param;
-//
-//    float p_temp[5]; // length = num_param
-//    float *g_temp = (float*) malloc(num_values_per_group * sizeof(float));
-//
-//    for (i = 0; i < vis->num_samples; ++i)
-//    {
-//        long group = (long)i + 1;
-//
-//        // Write the parameters.
-//        p_temp[0] = vis->u[i];
-//        p_temp[1] = vis->v[i];
-//        p_temp[2] = vis->w[i];
-//        p_temp[3] = date[i];
-//        p_temp[4] = baseline[i];
-//
-//        printf("- writing group %li\n", group);
-//        for (j = 0; j < nelements; ++j)
-//            printf("   param %i = %f\n", j+1, p_temp[j]);
-//
-//        fits_write_grppar_flt(fits_file, group, firstelem, nelements,
-//                p_temp, &status);
-//        oskar_check_fits_status(status, NULL);
-//
-//        // Write the data.
-//        g_temp[0] = vis->amp[i].x; // re
-//        g_temp[1] = vis->amp[i].y; // im
-//        g_temp[2] = weight[i];
-//
-//        for (j = 0; j < num_values_per_group; ++j)
-//            printf("   data %i = %f\n", j+1, g_temp[j]);
-//
-//        fits_write_subset_flt(fits_file, group, 5, naxes, fpixel, lpixel, g_temp, &status);
-//
-//        oskar_check_fits_status(status, NULL);
-//    }
-//    free(g_temp);
-//}
+    /* length = num_axes */
+    long fpixel[5] = {1, 1, 1, 1, 1};
+    long lpixel[5] = {3, 1, 1, 1, 1}; /* == naxes */
+
+    int num_values_per_group = 1;
+    for (i = 1; i < num_axes; ++i)
+        num_values_per_group *= axis_dim[i];
+    printf("num values per group = %i\n", num_values_per_group);
+
+    int num_param = 5;
+    long firstelem = 1;
+    long nelements = num_param;
+
+    float p_temp[5]; /* length = num_param */
+    float *g_temp = (float*) malloc(num_values_per_group * sizeof(float));
+
+    for (i = 0; i < vis->num_samples; ++i)
+    {
+        long group = (long)i + 1;
+
+        /* Write the parameters. */
+        p_temp[0] = vis->u[i];
+        p_temp[1] = vis->v[i];
+        p_temp[2] = vis->w[i];
+        p_temp[3] = date[i];
+        p_temp[4] = baseline[i];
+
+        printf("- writing group %li\n", group);
+        for (j = 0; j < nelements; ++j)
+            printf("   param %i = %f\n", j+1, p_temp[j]);
+
+        fits_write_grppar_flt(fits_file, group, firstelem, nelements,
+                p_temp, &status);
+        oskar_uvfits_check_status(status, "");
+
+        /* Write the data. */
+        g_temp[0] = vis->amp[i].x; /* re */
+        g_temp[1] = vis->amp[i].y; /* im */
+        g_temp[2] = weight[i];
+
+        for (j = 0; j < num_values_per_group; ++j)
+            printf("   data %i = %f\n", j+1, g_temp[j]);
+
+        fits_write_subset_flt(fits_file, group, 5, naxes, fpixel, lpixel, g_temp, &status);
+
+        oskar_uvfits_check_status(status, "");
+    }
+    free(g_temp);
+}
+#endif
 
 int oskar_uvfits_baseline_id(int ant1, int ant2)
 {
     return ant1 * 256 + ant2;
 }
 
-
-
 #ifdef __cplusplus
 }
 #endif
-
-

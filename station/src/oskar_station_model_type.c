@@ -36,7 +36,7 @@ extern "C" {
 
 int oskar_station_model_is_type(const oskar_StationModel* station, int type)
 {
-    // Check the type of the weights array.
+    /* Check the type of the weights array. */
     if ((type == OSKAR_SINGLE &&
             !oskar_mem_is_single(station->weight.private_type)) ||
             (type == OSKAR_DOUBLE &&
