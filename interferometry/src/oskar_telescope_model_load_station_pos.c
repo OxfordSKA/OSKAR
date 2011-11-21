@@ -110,9 +110,9 @@ int oskar_telescope_model_load_station_pos(oskar_TelescopeModel* telescope,
         oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
                 &x, &y, &z, longitude, latitude, altitude, &x, &y, &z);
         oskar_geocentric_cartesian_to_geodetic_spherical(1, &x, &y, &z,
-                &(telescope->station[n].longitude),
-                &(telescope->station[n].latitude),
-                &(telescope->station[n].altitude));
+                &(telescope->station[n].longitude_rad),
+                &(telescope->station[n].latitude_rad),
+                &(telescope->station[n].altitude_metres));
 
         /* Increment counter. */
         ++n;

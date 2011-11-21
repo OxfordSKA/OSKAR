@@ -73,8 +73,8 @@ int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         return OSKAR_ERR_TYPE_MISMATCH;
 
     // Evaluate Greenwich Hour Angle of phase centre.
-    const double ha0 = gast - telescope->ra0;
-    const double dec0 = telescope->dec0;
+    const double ha0 = gast - telescope->ra0_rad;
+    const double dec0 = telescope->dec0_rad;
 
     // Evaluate station u,v,w coordinates.
     if (location == OSKAR_LOCATION_GPU)

@@ -26,35 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GETLINE_TEST_H_
-#define GETLINE_TEST_H_
+#include "station/oskar_station_model_scale_coords.h"
+#include "utility/oskar_mem_scale_real.h"
 
-/**
- * @file GetlineTest.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class GetlineTest : public CppUnit::TestFixture
+int oskar_station_model_scale_coords(oskar_StationModel* station, double value)
 {
-    public:
-        CPPUNIT_TEST_SUITE(GetlineTest);
-        CPPUNIT_TEST(test_method);
-        CPPUNIT_TEST_SUITE_END();
+	int error = 0;
 
-    public:
-        /// Test method.
-        void test_method();
-};
+	/* Sanity check on inputs. */
+    if (station == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(GetlineTest);
+    /* Scale the coordinates. */
+    error = oskar_mem_scale_real(&station->x, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&station->y, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&station->z, value);
+    if (error) return error;
 
-#endif // GETLINE_TEST_H_
+    return error;
+}
+
+#ifdef __cplusplus
+}
+#endif

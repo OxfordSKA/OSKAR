@@ -62,11 +62,11 @@ int oskar_station_model_copy(oskar_StationModel* dst,
 
     /* Copy the meta data. */
     dst->num_elements = src->num_elements;
-    dst->longitude = src->longitude;
-    dst->latitude = src->latitude;
-    dst->altitude = src->altitude;
-    dst->ra0 = src->ra0;
-    dst->dec0 = src->dec0;
+    dst->longitude_rad = src->longitude_rad;
+    dst->latitude_rad = src->latitude_rad;
+    dst->altitude_metres = src->altitude_metres;
+    dst->ra0_rad = src->ra0_rad;
+    dst->dec0_rad = src->dec0_rad;
     dst->single_element_model = src->single_element_model;
     dst->bit_depth = src->bit_depth;
     dst->coord_units = src->coord_units;

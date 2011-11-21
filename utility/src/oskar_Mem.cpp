@@ -36,6 +36,7 @@
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_scale_real.h"
 #include "utility/oskar_mem_type_check.h"
 #include <cstdlib>
 
@@ -117,6 +118,11 @@ int oskar_Mem::insert(const oskar_Mem* src, int offset)
 int oskar_Mem::resize(int num_elements)
 {
     return oskar_mem_realloc(this, num_elements);
+}
+
+int oskar_Mem::scale_real(double value)
+{
+    return oskar_mem_scale_real(this, value);
 }
 
 bool oskar_Mem::is_double() const

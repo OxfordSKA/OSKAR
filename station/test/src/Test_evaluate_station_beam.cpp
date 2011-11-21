@@ -73,9 +73,9 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
 
     // Set the station coordinates.
-    station_cpu.longitude = 0.0;
-    station_cpu.latitude  = M_PI_2;
-    station_cpu.altitude  = 0.0;
+    station_cpu.longitude_rad = 0.0;
+    station_cpu.latitude_rad  = M_PI_2;
+    station_cpu.altitude_metres  = 0.0;
     station_cpu.coord_units = OSKAR_METRES;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
@@ -85,8 +85,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_cpu.num_elements = num_antennas;
 
     // Set the station beam direction.
-    station_cpu.ra0  = 0.0;
-    station_cpu.dec0 = M_PI_2;
+    station_cpu.ra0_rad  = 0.0;
+    station_cpu.dec0_rad = M_PI_2;
 
 //    error = oskar_station_model_write_coords("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);

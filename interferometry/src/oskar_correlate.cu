@@ -76,7 +76,8 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Get bandwidth-smearing term.
-    double lambda_bandwidth = 0.0; // FIXME compute from telescope structure.
+    double lambda_bandwidth = telescope->wavelength_metres *
+    		telescope->bandwidth_hz;
 
     // Check type of Jones matrix.
     if (J->ptr.is_matrix() && vis->is_matrix())

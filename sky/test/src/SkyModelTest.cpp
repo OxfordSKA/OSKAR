@@ -344,8 +344,8 @@ void SkyModelTest::test_compact()
         // Compact sky data at pole.
         for (int i = 0; i < n_stations; ++i)
         {
-            telescope.station[i].latitude = (90.0 - i * 0.01) * deg2rad;
-            telescope.station[i].longitude = 0.0;
+            telescope.station[i].latitude_rad = (90.0 - i * 0.01) * deg2rad;
+            telescope.station[i].longitude_rad = 0.0;
         }
 
         TIMER_START

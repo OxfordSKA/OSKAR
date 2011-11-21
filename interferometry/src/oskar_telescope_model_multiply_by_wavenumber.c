@@ -39,7 +39,7 @@ int oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope
         double frequency_hz)
 {
     int i, err = 0;
-    double metres_to_wavenumbers;
+    double wavenumber;
 
     /* Check and update current units of station positions. */
     if (telescope->coord_units != OSKAR_METRES)
@@ -47,8 +47,9 @@ int oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope
     telescope->coord_units = OSKAR_WAVENUMBERS;
 
     /* Multiply station positions by wavenumber. */
-    metres_to_wavenumbers = 2.0 * M_PI * frequency_hz / 299792458.0;
-    err = oskar_telescope_model_scale_coords(telescope, metres_to_wavenumbers);
+    telescope->wavelength_metres = 299792458.0 / frequency_hz;
+    wavenumber = 2.0 * M_PI / telescope->wavelength_metres;
+    err = oskar_telescope_model_scale_coords(telescope, wavenumber);
     if (err) return err;
 
     /* Multiply station element positions by wavenumber. */

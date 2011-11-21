@@ -51,11 +51,11 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
             OSKAR_SINGLE_COMPLEX : OSKAR_DOUBLE_COMPLEX;
 
     /* Initialise variables. */
-    model->longitude = 0.0;
-    model->latitude = 0.0;
-    model->altitude = 0.0;
-    model->ra0 = 0.0;
-    model->dec0 = 0.0;
+    model->longitude_rad = 0.0;
+    model->latitude_rad = 0.0;
+    model->altitude_metres = 0.0;
+    model->ra0_rad = 0.0;
+    model->dec0_rad = 0.0;
     model->num_elements = n_elements;
 
     /* Initialise the memory. */

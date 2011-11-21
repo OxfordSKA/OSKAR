@@ -92,11 +92,11 @@ int oskar_station_model_free(oskar_StationModel* model)
     /* Clear remaining parameters. */
     model->num_elements = 0;
     model->parent = NULL;
-    model->longitude = 0.0;
-    model->latitude = 0.0;
-    model->altitude = 0.0;
-    model->ra0 = 0.0;
-    model->dec0 = 0.0;
+    model->longitude_rad = 0.0;
+    model->latitude_rad = 0.0;
+    model->altitude_metres = 0.0;
+    model->ra0_rad = 0.0;
+    model->dec0_rad = 0.0;
     model->single_element_model = 0;
     model->bit_depth = 0;
 

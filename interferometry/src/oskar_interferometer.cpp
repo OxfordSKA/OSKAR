@@ -149,11 +149,10 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
                 err = oskar_correlate(&vis, &J, &tel_gpu, &sky, &u, &v);
                 if (err) return err;
             }
-
-            // TODO Divide visibilities by number of fringe averages.
         }
 
-        // TODO Divide visibilities by number of time averages.
+        // Divide visibilities by number of averages (can this be done in stages?).
+        vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
 
         // Add visibilities to global data.
         err = vis_amp->insert(&vis, j * n_baselines); if (err) return err;

@@ -26,51 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_scale_coords.h"
-#include "math/cudak/oskar_cudak_vec_scale_rr.h"
-#include <cuda_runtime_api.h>
+#ifndef TEST_GETLINE_H_
+#define TEST_GETLINE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file Test_getline.h
+ */
 
-int oskar_station_model_scale_coords(oskar_StationModel* station, double value)
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_getline : public CppUnit::TestFixture
 {
-    if (station == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    public:
+        CPPUNIT_TEST_SUITE(Test_getline);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-    if (station->coord_location() != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    public:
+        /// Test method.
+        void test_method();
+};
 
-    int num_antennas = station->num_elements;
-    int num_threads = 256;
-    int num_blocks  = (num_antennas + num_threads - 1) / num_threads;
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_getline);
 
-    // Scale the station coordinates.
-    if (station->coord_type() == OSKAR_DOUBLE)
-    {
-        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, value, station->x);
-        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, value, station->y);
-    }
-    else if (station->coord_type() == OSKAR_SINGLE)
-    {
-        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, (float)value, station->x);
-        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, (float)value, station->y);
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_DATA_TYPE;
-    }
-
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
-}
-
-#ifdef __cplusplus
-}
-#endif
-
+#endif // TEST_GETLINE_H_

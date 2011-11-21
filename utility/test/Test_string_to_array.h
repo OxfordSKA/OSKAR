@@ -26,29 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_scale_coords.h"
-#include "station/oskar_station_model_multiply_by_wavenumber.h"
-#include <math.h>
+#ifndef TEST_STRING_TO_ARRAY_H_
+#define TEST_STRING_TO_ARRAY_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file Test_string_to_array.h
+ */
 
-int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
-        double frequency_hz)
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_string_to_array : public CppUnit::TestFixture
 {
-	double wavenumber;
+    public:
+        CPPUNIT_TEST_SUITE(Test_string_to_array);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-    /* Check and update current units. */
-    if (station->coord_units != OSKAR_METRES)
-        return OSKAR_ERR_BAD_UNITS;
-    station->coord_units = OSKAR_WAVENUMBERS;
+    public:
+        /// Test method.
+        void test_method();
+};
 
-    /* Scale to wavenumbers. */
-    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    return oskar_station_model_scale_coords(station, wavenumber);
-}
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_string_to_array);
 
-#ifdef __cplusplus
-}
-#endif
+#endif // TEST_STRING_TO_ARRAY_H_

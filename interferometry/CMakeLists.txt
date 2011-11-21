@@ -25,7 +25,7 @@ set(interferometry_SRC
     src/oskar_telescope_model_location.c
     src/oskar_telescope_model_multiply_by_wavenumber.c
     src/oskar_telescope_model_resize.c
-    src/oskar_telescope_model_scale_coords.cu
+    src/oskar_telescope_model_scale_coords.c
     src/oskar_telescope_model_set_station_pos.c
     src/oskar_telescope_model_type.c
     src/oskar_TelescopeModel.cpp

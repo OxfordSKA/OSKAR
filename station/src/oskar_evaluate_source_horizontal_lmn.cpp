@@ -68,7 +68,7 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Local apparent Sidereal Time, in radians.
-    double last = gast + station->longitude;
+    double last = gast + station->longitude_rad;
 
     // Double precision.
     if (RA->type() == OSKAR_DOUBLE && Dec->type() == OSKAR_DOUBLE &&
@@ -76,7 +76,7 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
             n->type() == OSKAR_DOUBLE)
     {
         return oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, *RA, *Dec,
-                last, station->latitude, *l, *m, *n);
+                last, station->latitude_rad, *l, *m, *n);
     }
 
     // Single precision.
@@ -85,7 +85,7 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
             n->type() == OSKAR_SINGLE)
     {
         return oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, *RA, *Dec,
-                (float)last, (float)station->latitude, *l, *m, *n);
+                (float)last, (float)station->latitude_rad, *l, *m, *n);
     }
     else
     {

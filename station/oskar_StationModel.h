@@ -63,11 +63,11 @@ struct oskar_StationModel
     oskar_Mem phase_error;
 
     /* Other station data. */
-    double longitude; /**< Geodetic longitude of station, in radians. */
-    double latitude;  /**< Geodetic latitude of station, in radians. */
-    double altitude;  /**< Altitude of station above ellipsoid, in metres. */
-    double ra0;       /**< Right ascension of beam phase centre, in radians. */
-    double dec0;      /**< Declination of beam phase centre, in radians. */
+    double longitude_rad;   /**< Geodetic longitude of station, in radians. */
+    double latitude_rad;    /**< Geodetic latitude of station, in radians. */
+    double altitude_metres; /**< Altitude of station above ellipsoid, in metres. */
+    double ra0_rad;         /**< Right ascension of beam phase centre, in radians. */
+    double dec0_rad;        /**< Declination of beam phase centre, in radians. */
     int single_element_model; /**< True if using a single common element pattern. */
     int bit_depth;    /**< Not implemented! */
 

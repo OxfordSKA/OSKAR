@@ -53,8 +53,10 @@ struct oskar_TelescopeModel
     int coord_units;             /**< Units of the x,y,z coordinates.*/
     int identical_stations;      /**< True if all stations are identical. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
-    double ra0;                  /**< Right Ascension of phase centre in radians. */
-    double dec0;                 /**< Declination of phase centre in radians. */
+    double ra0_rad;              /**< Right Ascension of phase centre, in radians. */
+    double dec0_rad;             /**< Declination of phase centre, in radians. */
+    double wavelength_metres;    /**< Current wavelength of observation, in metres. */
+    double bandwidth_hz;         /**< Channel bandwidth, in Hz. */
 
 #ifdef __cplusplus
     /* If C++, then provide constructors and methods. */

@@ -165,8 +165,8 @@ int oskar_sky_model_compact(oskar_SkyModel* output, const oskar_SkyModel* input,
         {
             // Get the station position.
             double longitude, latitude, lst;
-            longitude = telescope->station[i].longitude;
-            latitude  = telescope->station[i].latitude;
+            longitude = telescope->station[i].longitude_rad;
+            latitude  = telescope->station[i].latitude_rad;
             lst = gast + longitude;
 
             // Evaluate source horizontal l,m,n direction cosines.
@@ -193,8 +193,8 @@ int oskar_sky_model_compact(oskar_SkyModel* output, const oskar_SkyModel* input,
         {
             // Get the station position.
             double longitude, latitude, lst;
-            longitude = telescope->station[i].longitude;
-            latitude  = telescope->station[i].latitude;
+            longitude = telescope->station[i].longitude_rad;
+            latitude  = telescope->station[i].latitude_rad;
             lst = gast + longitude;
 
             // Evaluate source horizontal l,m,n direction cosines.

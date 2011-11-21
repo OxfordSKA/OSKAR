@@ -63,8 +63,8 @@ void Test_write_ms::test_write()
         ((double*)telescope.station_y)[i] = (double)i + 0.2;
         ((double*)telescope.station_z)[i] = (double)i + 0.3;
     }
-    telescope.ra0  = 160.0 * (M_PI / 180.0);
-    telescope.dec0 = 89.0 * (M_PI / 180.0);
+    telescope.ra0_rad  = 160.0 * (M_PI / 180.0);
+    telescope.dec0_rad = 89.0 * (M_PI / 180.0);
 
     // Create a visibility structure and fill in some data.
     oskar_Visibilities vis(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,

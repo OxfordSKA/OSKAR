@@ -59,9 +59,9 @@ int oskar_station_model_write_coords(const char* filename,
         return OSKAR_ERR_FILE_IO;
 
     fprintf(file, "# num_antennas = %i\n", station->num_elements);
-    fprintf(file, "# longitude (radians) = %f\n", station->longitude);
-    fprintf(file, "# latitude (radians)  = %f\n", station->latitude);
-    fprintf(file, "# altitude (metres)   = %f\n", station->altitude);
+    fprintf(file, "# longitude (radians) = %f\n", station->longitude_rad);
+    fprintf(file, "# latitude (radians)  = %f\n", station->latitude_rad);
+    fprintf(file, "# altitude (metres)   = %f\n", station->altitude_metres);
     fprintf(file, "# local horizontal x(east), y(north), z(zenith) [metres]\n");
     if (station->x.private_type == OSKAR_DOUBLE &&
             station->y.private_type == OSKAR_DOUBLE &&

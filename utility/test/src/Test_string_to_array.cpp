@@ -26,47 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/test/GetlineTest.h"
-#include "utility/oskar_getline.h"
+#include "utility/test/Test_string_to_array.h"
+#include "utility/oskar_string_to_array.h"
 
 #include <cstdio>
 #include <cstdlib>
 
-void GetlineTest::test_method()
+void Test_string_to_array::test_method()
 {
-	// Write some dummy data.
-    const char* filename = "temp_lines.dat";
-    FILE* file = fopen(filename, "w");
-    if (file == NULL)
-    	CPPUNIT_FAIL("Unable to create test file");
-    int num_coords = 1000;
-    for (int i = 0; i < num_coords; ++i)
-        fprintf(file, "%.12f,%.12f\n",
-        		(double)i/num_coords, (double)i/(10*num_coords));
-    fclose(file);
+    double list[6];
+    int filled = 0, n = sizeof(list) / sizeof(double);
 
-    // Read it in again.
-    char* line = NULL;
-    size_t n = 0;
-    file = fopen(filename, "r");
-    char temp[1024];
-    for (int i = 0; i < num_coords; ++i)
-    {
-    	// Read each line.
-    	int num_chars = oskar_getline(&line, &n, file);
+    // Test comma and space separated values with additional non-numeric fields.
+    char test1[] = "hello 1.0,2.0 3.0, there,4.0     5.0 6.0";
+    filled = oskar_string_to_array_d(test1, n, list);
+    CPPUNIT_ASSERT_EQUAL(6, filled);
+    for (int i = 0; i < filled; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i+1), list[i], 1e-10);
 
-    	// Assert that number of characters per line is correct.
-    	CPPUNIT_ASSERT_EQUAL(30, num_chars);
-        sprintf(temp, "%.12f,%.12f\n",
-        		(double)i/num_coords, (double)i/(10*num_coords));
+    // Test empty string.
+    char test2[] = "";
+    filled = oskar_string_to_array_d(test2, n, list);
+    CPPUNIT_ASSERT_EQUAL(0, filled);
 
-        // Assert that the strings are the same.
-    	int flag = strcmp(temp, line);
-    	CPPUNIT_ASSERT_EQUAL(0, flag);
-    }
-    free(line);
-    fclose(file);
+    // Test empty string.
+    char test3[] = " ";
+    filled = oskar_string_to_array_d(test3, n, list);
+    CPPUNIT_ASSERT_EQUAL(0, filled);
 
-    // Cleanup.
-    remove(filename);
+    // Test negative integers.
+    char test4[] = "-4,-3,-2 -1 0";
+    filled = oskar_string_to_array_d(test4, n, list);
+    CPPUNIT_ASSERT_EQUAL(5, filled);
+    for (int i = 0; i < filled; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((double)(i-4), list[i], 1e-10);
+
+    // Test non-matching string.
+    char test5[] = "nobody home";
+    filled = oskar_string_to_array_d(test5, n, list);
+    CPPUNIT_ASSERT_EQUAL(0, filled);
+
+    // Test too many items.
+    char test6[] = "0.1 0.2 0.3   ,  0.4 0.5 0.6 0.7 0.8 0.9 1.0";
+    filled = oskar_string_to_array_d(test6, n, list);
+    CPPUNIT_ASSERT_EQUAL(n, filled);
+    for (int i = 0; i < filled; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((i+1)/10.0, list[i], 1e-10);
 }

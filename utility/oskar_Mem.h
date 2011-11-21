@@ -191,11 +191,10 @@ public:
      * enough memory in the destination structure to hold the result:
      * otherwise, an error is returned.
      *
-     * @param[out] dst    Pointer to destination data structure to copy into.
      * @param[in]  src    Pointer to source data structure to copy from.
      * @param[in]  offset Offset into destination memory block.
      *
-     * @return A structure containing the required pointer.
+     * @return A CUDA or OSKAR error code.
      */
     int insert(const oskar_Mem* src, int offset);
 
@@ -212,6 +211,20 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int resize(int num_elements);
+
+    /**
+     * @brief
+     * Scales the contents of the memory by a real number.
+     *
+     * @details
+     * This function multiplies all the elements in a block of memory by a real
+     * number.
+     *
+     * @param[in] value Value by which to scale.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int scale_real(double value);
 #endif
 
 #ifdef __cplusplus

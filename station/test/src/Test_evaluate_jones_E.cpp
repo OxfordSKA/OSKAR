@@ -76,17 +76,17 @@ void Test_evaluate_jones_E::evaluate_e()
     double station_size_m = 180.0;
     int num_antennas = station_dim * station_dim;
     oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
-    station_cpu.longitude = 0.0;
-    station_cpu.latitude  = M_PI_2;
-    station_cpu.altitude  = 0.0;
+    station_cpu.longitude_rad = 0.0;
+    station_cpu.latitude_rad  = M_PI_2;
+    station_cpu.altitude_metres  = 0.0;
     station_cpu.coord_units = OSKAR_METRES;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
     oskar_meshgrid_f(station_cpu.x, station_cpu.y, x_pos, station_dim,
             x_pos, station_dim);
     free(x_pos);
-    station_cpu.ra0  = 0.0;
-    station_cpu.dec0 = M_PI_2;
+    station_cpu.ra0_rad  = 0.0;
+    station_cpu.dec0_rad = M_PI_2;
 
     int num_stations = 2;
     oskar_TelescopeModel telescope_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU, num_stations);

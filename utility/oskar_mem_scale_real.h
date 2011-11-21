@@ -26,41 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_TEST_H_
-#define OSKAR_MEM_TEST_H_
+#ifndef OSKAR_MEM_SCALE_REAL_H_
+#define OSKAR_MEM_SCALE_REAL_H_
 
 /**
- * @file oskar_Mem_test
+ * @file oskar_mem_scale_real.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Scales the contents of the memory by a real number.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function multiplies all the elements in a block of memory by a real
+ * number.
+ *
+ * @param[in] mem Pointer to the block of memory to scale.
+ * @param[in] value Value by which to scale.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
-class oskar_Mem_test : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(oskar_Mem_test);
-        CPPUNIT_TEST(test_alloc);
-        CPPUNIT_TEST(test_realloc);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_type_check);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_mem_scale_real(oskar_Mem* mem, double value);
 
-    public:
-        /// Test method.
-        void test_alloc();
-        void test_realloc();
-        void test_append();
-        void test_type_check();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_Mem_test);
-
-#endif // OSKAR_MEM_TEST_H_
+#endif /* OSKAR_MEM_SCALE_REAL_H_ */

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STRING_TO_ARRAY_TEST_H_
-#define OSKAR_STRING_TO_ARRAY_TEST_H_
+#ifndef OSKAR_MEM_TEST_H_
+#define OSKAR_MEM_TEST_H_
 
 /**
- * @file oskar_StringToArrayTest.h
+ * @file Test_Mem.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,19 +42,27 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class oskar_StringToArrayTest : public CppUnit::TestFixture
+class Test_Mem : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(oskar_StringToArrayTest);
-        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE(Test_Mem);
+        CPPUNIT_TEST(test_alloc);
+        CPPUNIT_TEST(test_realloc);
+        CPPUNIT_TEST(test_append);
+        CPPUNIT_TEST(test_type_check);
+        CPPUNIT_TEST(test_scale_real);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
-        void test_method();
+        void test_alloc();
+        void test_realloc();
+        void test_append();
+        void test_type_check();
+        void test_scale_real();
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(oskar_StringToArrayTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_Mem);
 
-#endif // OSKAR_STRING_TO_ARRAY_TEST_H_
+#endif // OSKAR_MEM_TEST_H_

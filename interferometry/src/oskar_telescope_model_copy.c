@@ -66,8 +66,8 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->coord_units = src->coord_units;
     dst->identical_stations = src->identical_stations;
     dst->use_common_sky = src->use_common_sky;
-    dst->ra0 = src->ra0;
-    dst->dec0 = src->dec0;
+    dst->ra0_rad = src->ra0_rad;
+    dst->dec0_rad = src->dec0_rad;
 
     return 0;
 }

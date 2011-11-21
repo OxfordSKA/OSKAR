@@ -80,9 +80,9 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
     const int n_blk_d = (n_sources + n_thd_d - 1) / n_thd_d;
 
     // Evaluate Jones matrix for each source for station 0.
-    double cos_lat = cos(telescope->station[0].latitude);
-    double sin_lat = sin(telescope->station[0].latitude);
-    double lst = gast + telescope->station[0].longitude;
+    double cos_lat = cos(telescope->station[0].latitude_rad);
+    double sin_lat = sin(telescope->station[0].latitude_rad);
+    double lst = gast + telescope->station[0].longitude_rad;
     if (R->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
         oskar_cudak_evaluate_jones_R_f OSKAR_CUDAK_CONF(n_blk_f, n_thd_f) (
@@ -123,9 +123,9 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
         for (int i = 1; i < n_stations; ++i)
         {
             // Get station location.
-            double cos_lat = cos(telescope->station[i].latitude);
-            double sin_lat = sin(telescope->station[i].latitude);
-            double lst = gast + telescope->station[i].longitude;
+            double cos_lat = cos(telescope->station[i].latitude_rad);
+            double sin_lat = sin(telescope->station[i].latitude_rad);
+            double lst = gast + telescope->station[i].longitude_rad;
 
             if (R->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
             {

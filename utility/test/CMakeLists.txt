@@ -7,9 +7,9 @@ if (CPPUNIT_FOUND)
 
     set(utility_test_SRC
         src/CppUnitMain.cu
-        src/GetlineTest.cpp
-        src/oskar_Mem_test.cpp
-        src/oskar_StringToArrayTest.cpp
+        src/Test_getline.cpp
+        src/Test_Mem.cpp
+        src/Test_string_to_array.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

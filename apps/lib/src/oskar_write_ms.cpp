@@ -101,7 +101,7 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
     {
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
-    ms.addField(telescope->ra0, telescope->dec0);
+    ms.addField(telescope->ra0_rad, telescope->dec0_rad);
     ms.addPolarisation(num_pols);
     for (int i = 0; i < num_pols; ++i)
     {

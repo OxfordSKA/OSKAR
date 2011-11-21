@@ -27,9 +27,7 @@
  */
 
 #include "interferometry/oskar_telescope_model_scale_coords.h"
-#include "station/oskar_station_model_scale_coords.h"
-#include "math/cudak/oskar_cudak_vec_scale_rr.h"
-#include <cuda_runtime_api.h>
+#include "utility/oskar_mem_scale_real.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,42 +36,21 @@ extern "C" {
 int oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
         double value)
 {
+	int error = 0;
+
+	/* Sanity check on inputs. */
     if (telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (telescope->location() != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    /* Scale the coordinates. */
+    error = oskar_mem_scale_real(&telescope->station_x, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&telescope->station_y, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&telescope->station_z, value);
+    if (error) return error;
 
-    int num_antennas = telescope->num_stations;
-    int num_threads = 256;
-    int num_blocks  = (num_antennas + num_threads - 1) / num_threads;
-
-    // Scale the telescope coordinates.
-    if (telescope->type() == OSKAR_DOUBLE)
-    {
-        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, value, telescope->station_x);
-        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, value, telescope->station_y);
-        oskar_cudak_vec_scale_rr_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, value, telescope->station_z);
-    }
-    else if (telescope->type() == OSKAR_SINGLE)
-    {
-        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, (float)value, telescope->station_x);
-        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, (float)value, telescope->station_y);
-        oskar_cudak_vec_scale_rr_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, (float)value, telescope->station_z);
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_DATA_TYPE;
-    }
-
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    return error;
 }
 
 #ifdef __cplusplus

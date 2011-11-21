@@ -54,17 +54,19 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     if (err) return NULL;
 
     // Set phase centre.
-    telescope->ra0 = settings.obs().ra0_rad();
-    telescope->dec0 = settings.obs().dec0_rad();
+    telescope->ra0_rad = settings.obs().ra0_rad();
+    telescope->dec0_rad = settings.obs().dec0_rad();
 
     // Set other telescope parameters.
     telescope->use_common_sky = true; // FIXME set this via the settings file.
+    telescope->bandwidth_hz = settings.obs().channel_bandwidth();
+    telescope->wavelength_metres = 0.0; // This is set on a per-channel basis.
 
     // Set other station parameters.
     for (int i = 0; i < telescope->num_stations; ++i)
     {
-        telescope->station[i].ra0 = telescope->ra0;
-        telescope->station[i].dec0 = telescope->dec0;
+        telescope->station[i].ra0_rad = telescope->ra0_rad;
+        telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].single_element_model = true; // FIXME set this via the settings file.
     }
 
