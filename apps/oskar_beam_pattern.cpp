@@ -109,6 +109,7 @@ int main(int argc, char** argv)
     // Open the data file.
     QByteArray filename = settings.image().filename().toAscii();
     FILE* file = fopen(filename, "w");
+    if (file == NULL) oskar_exit(OSKAR_ERR_FILE_IO);
 
     // Loop over channels.
     QTime timer;
@@ -120,15 +121,15 @@ int main(int argc, char** argv)
         double frequency = settings.obs().frequency(c);
 
         // Copy RA and Dec to GPU and allocate arrays for pixel direction cosines.
-    	oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
-    	oskar_Mem Dec(&Dec_cpu, OSKAR_LOCATION_GPU);
-    	oskar_Mem l(type, OSKAR_LOCATION_GPU, num_pixels);
-    	oskar_Mem m(type, OSKAR_LOCATION_GPU, num_pixels);
-    	oskar_Mem n(type, OSKAR_LOCATION_GPU, num_pixels);
+        oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
+        oskar_Mem Dec(&Dec_cpu, OSKAR_LOCATION_GPU);
+        oskar_Mem l(type, OSKAR_LOCATION_GPU, num_pixels);
+        oskar_Mem m(type, OSKAR_LOCATION_GPU, num_pixels);
+        oskar_Mem n(type, OSKAR_LOCATION_GPU, num_pixels);
 
-    	// Allocate weights work array and memory for the beam pattern.
-    	oskar_Mem weights(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
-    	oskar_Mem beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
+        // Allocate weights work array and memory for the beam pattern.
+        oskar_Mem weights(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
+        oskar_Mem beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
 
         // Copy the telescope model and scale coordinates to wavenumbers.
         oskar_TelescopeModel telescope(tel_gpu, OSKAR_LOCATION_GPU);
