@@ -26,15 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
 #include "station/oskar_element_model_copy_to_gpu.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 int oskar_element_model_copy_to_gpu(const oskar_ElementModel* h_data,
         oskar_ElementModel* hd_data)
 {
-    // Copy the meta-data into the new structure.
+    /* Copy the meta-data into the new structure. */
     hd_data->n_points = h_data->n_points;
     hd_data->n_phi = h_data->n_phi;
     hd_data->n_theta = h_data->n_theta;
@@ -45,13 +47,13 @@ int oskar_element_model_copy_to_gpu(const oskar_ElementModel* h_data,
     hd_data->min_phi = h_data->min_phi;
     hd_data->min_theta = h_data->min_theta;
 
-    // Allocate GPU texture memory to hold the look-up tables.
+    /* Allocate GPU texture memory to hold the look-up tables. */
     cudaMallocPitch((void**)&hd_data->g_phi, &hd_data->pitch_phi,
             h_data->n_theta, h_data->n_phi);
     cudaMallocPitch((void**)&hd_data->g_theta, &hd_data->pitch_theta,
             h_data->n_theta, h_data->n_phi);
 
-    // Copy the data across.
+    /* Copy the data across. */
     cudaMemcpy2D(hd_data->g_phi, hd_data->pitch_phi, h_data->g_phi,
             h_data->n_theta * sizeof(float2), h_data->n_theta * sizeof(float2),
             h_data->n_phi * sizeof(float2), cudaMemcpyHostToDevice);
@@ -59,7 +61,11 @@ int oskar_element_model_copy_to_gpu(const oskar_ElementModel* h_data,
             h_data->n_theta * sizeof(float2), h_data->n_theta * sizeof(float2),
             h_data->n_phi * sizeof(float2), cudaMemcpyHostToDevice);
 
-    // Check for errors.
+    /* Check for errors. */
     cudaDeviceSynchronize();
     return cudaPeekAtLastError();
 }
+
+#ifdef __cplusplus
+}
+#endif

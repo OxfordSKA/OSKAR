@@ -26,18 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
 #include "station/oskar_element_model_free_gpu.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 int oskar_element_model_free_gpu(oskar_ElementModel* hd_data)
 {
-    // Free the memory.
+    /* Free the memory. */
     cudaFree(hd_data->g_phi);
     cudaFree(hd_data->g_theta);
 
-    // Check for errors.
+    /* Check for errors. */
     cudaDeviceSynchronize();
     return cudaPeekAtLastError();
 }
+
+#ifdef __cplusplus
+}
+#endif

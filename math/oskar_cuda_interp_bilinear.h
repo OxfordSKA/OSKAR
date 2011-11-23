@@ -168,4 +168,4 @@ int oskar_cuda_interp_bilinear_z(int size_x, int size_y, int pitch,
 }
 #endif
 
-#endif // OSKAR_CUDA_INTERP_BILINEAR_H_
+#endif /* OSKAR_CUDA_INTERP_BILINEAR_H_ */

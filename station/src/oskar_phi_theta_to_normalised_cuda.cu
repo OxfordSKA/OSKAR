@@ -26,39 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_EVALUATE_H_
-#define OSKAR_ELEMENT_MODEL_EVALUATE_H_
-
-/**
- * @file oskar_element_model_evaluate.h
- */
-
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_Work.h"
+#include "station/oskar_phi_theta_to_normalised_cuda.h"
+#include "station/cudak/oskar_cudak_phi_theta_to_normalised.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Evaluates the element pattern data at the source positions.
- *
- * @details
- * This function evaluates the embedded element pattern data at the source
- * positions.
- *
- * (UNFINISHED)
- */
-OSKAR_EXPORT
-int oskar_element_model_evaluate(oskar_Mem* output,
-        const oskar_ElementModel* pattern, const oskar_Mem* phi,
-        const oskar_Mem* theta, oskar_Work* work);
+// Single precision.
+int oskar_phi_theta_to_normalised_cuda_f(int n, const float* d_phi,
+        const float* d_theta, float min_phi, float min_theta, float range_phi,
+        float range_theta, float* d_norm_phi, float* d_norm_theta)
+{
+    // Set up block sizes.
+    int num_threads = 256;
+    int num_blocks = (n + num_threads - 1) / num_threads;
+
+    // Call the kernel.
+    oskar_cudak_phi_theta_to_normalised_f
+            OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (n, d_phi, d_theta, min_phi, min_theta, range_phi, range_theta,
+                    d_norm_phi, d_norm_theta);
+
+    // Return error code.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
+
+// Double precision.
+int oskar_phi_theta_to_normalised_cuda_d(int n, const double* d_phi,
+        const double* d_theta, double min_phi, double min_theta,
+        double range_phi, double range_theta, double* d_norm_phi,
+        double* d_norm_theta)
+{
+    // Set up block sizes.
+    int num_threads = 256;
+    int num_blocks = (n + num_threads - 1) / num_threads;
+
+    // Call the kernel.
+    oskar_cudak_phi_theta_to_normalised_d
+            OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (n, d_phi, d_theta, min_phi, min_theta, range_phi, range_theta,
+                    d_norm_phi, d_norm_theta);
+
+    // Return error code.
+    cudaDeviceSynchronize();
+    return cudaPeekAtLastError();
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_ELEMENT_MODEL_EVALUATE_H_ */

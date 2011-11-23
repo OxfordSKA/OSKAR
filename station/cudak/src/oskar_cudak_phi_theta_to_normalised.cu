@@ -26,14 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_evaluate.h"
+#include "station/cudak/oskar_cudak_phi_theta_to_normalised.h"
+#include "utility/oskar_vector_types.h"
 
 // Single precision.
-#ifdef __cplusplus
-extern "C"
-#endif
-int oskar_element_model_evaluate(oskar_Mem* output,
-        const oskar_ElementModel* pattern, const oskar_Mem* phi,
-        const oskar_Mem* theta)
+__global__
+void oskar_cudak_phi_theta_to_normalised_f(const int n, const float* phi,
+        const float* theta, const float min_phi, const float min_theta,
+        const float range_phi, const float range_theta, float* norm_phi,
+        float* norm_theta)
 {
+    // Array element ID.
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= n) return;
+
+    // Get input coordinates.
+    float c_phi = phi[i];
+    float c_theta = theta[i];
+
+    // Re-scale input coordinates.
+    c_phi = (c_phi - min_phi) / range_phi;
+    c_theta = (c_theta - min_theta) / range_theta;
+
+    // Copy to output arrays.
+    norm_phi[i] = c_phi;
+    norm_theta[i] = c_theta;
+}
+
+// Double precision.
+__global__
+void oskar_cudak_phi_theta_to_normalised_d(const int n, const double* phi,
+        const double* theta, const double min_phi, const double min_theta,
+        const double range_phi, const double range_theta, double* norm_phi,
+        double* norm_theta)
+{
+    // Array element ID.
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= n) return;
+
+    // Get input coordinates.
+    double c_phi = phi[i];
+    double c_theta = theta[i];
+
+    // Re-scale input coordinates.
+    c_phi = (c_phi - min_phi) / range_phi;
+    c_theta = (c_theta - min_theta) / range_theta;
+
+    // Copy to output arrays.
+    norm_phi[i] = c_phi;
+    norm_theta[i] = c_theta;
 }
