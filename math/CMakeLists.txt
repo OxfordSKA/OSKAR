@@ -17,9 +17,13 @@ set(math_SRC
     src/oskar_cuda_jones_mul_scalar_c2.cu
     src/oskar_cuda_jones_set_real_scalar_1.cu
     src/oskar_cuda_jones_set_real_scalar_4.cu
-    src/oskar_jones_get_station_pointer.cpp
+    src/oskar_jones_copy.c
+    src/oskar_jones_free.c
+    src/oskar_jones_get_station_pointer.c
+    src/oskar_jones_init.c
     src/oskar_jones_join.cpp
-    src/oskar_jones_set_real_scalar.cpp
+    src/oskar_jones_set_size.c
+    src/oskar_jones_set_real_scalar.c
     src/oskar_Jones.cpp
     src/oskar_linspace.c
     src/oskar_mat_tri_c.c

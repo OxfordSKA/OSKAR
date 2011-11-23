@@ -82,4 +82,4 @@ int oskar_cuda_jones_mul_mat2_d(int n, const double4c* d_j1,
 }
 #endif
 
-#endif // OSKAR_CUDA_JONES_MUL_MAT2_H_
+#endif /* OSKAR_CUDA_JONES_MUL_MAT2_H_ */

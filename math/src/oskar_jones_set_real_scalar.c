@@ -26,33 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
 #include "math/oskar_jones_set_real_scalar.h"
 #include "math/oskar_cuda_jones_set_real_scalar_1.h"
 #include "math/oskar_cuda_jones_set_real_scalar_4.h"
+#include <stdlib.h>
 
-extern "C"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
 {
-    // Check that the structure exists.
+    int n_elements, location, type, i, err = 0;
+
+    /* Check that the structure exists. */
     if (jones == NULL) return -1;
 
-    // Get the meta-data.
-    int n_sources = jones->num_sources();
-    int n_stations = jones->num_stations();
-    int location = jones->location();
-    int type = jones->type();
-    int err = 0;
+    /* Get the meta-data. */
+    location = jones->ptr.private_location;
+    type = jones->ptr.private_type;
+    err = 0;
 
-    // Check the location of the data.
-    int n_elements = n_sources * n_stations;
-    if (location == 0)
+    /* Check the location of the data. */
+    n_elements = jones->private_num_sources * jones->private_num_stations;
+    if (location == OSKAR_LOCATION_CPU)
     {
-        // Data is on the host.
         if (type == OSKAR_SINGLE_COMPLEX)
         {
             float2* ptr = (float2*)jones->ptr.data;
-            for (int i = 0; i < n_elements; ++i)
+            for (i = 0; i < n_elements; ++i)
             {
                 ptr[i].x = (float)scalar;
                 ptr[i].y = 0.0f;
@@ -61,7 +63,7 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
         else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
         {
             float4c* ptr = (float4c*)jones->ptr.data;
-            for (int i = 0; i < n_elements; ++i)
+            for (i = 0; i < n_elements; ++i)
             {
                 ptr[i].a.x = (float)scalar;
                 ptr[i].a.y = 0.0f;
@@ -76,7 +78,7 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
         else if (type == OSKAR_DOUBLE_COMPLEX)
         {
             double2* ptr = (double2*)jones->ptr.data;
-            for (int i = 0; i < n_elements; ++i)
+            for (i = 0; i < n_elements; ++i)
             {
                 ptr[i].x = scalar;
                 ptr[i].y = 0.0;
@@ -85,7 +87,7 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
         else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
         {
             double4c* ptr = (double4c*)jones->ptr.data;
-            for (int i = 0; i < n_elements; ++i)
+            for (i = 0; i < n_elements; ++i)
             {
                 ptr[i].a.x = scalar;
                 ptr[i].a.y = 0.0;
@@ -97,10 +99,13 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
                 ptr[i].d.y = 0.0;
             }
         }
+        else
+        {
+            return OSKAR_ERR_BAD_JONES_TYPE;
+        }
     }
-    else if (location == 1)
+    else if (location == OSKAR_LOCATION_GPU)
     {
-        // Data is on the device.
         if (type == OSKAR_SINGLE_COMPLEX)
             err = oskar_cuda_jones_set_real_scalar_1_f(n_elements,
                     (float2*)jones->ptr.data, scalar);
@@ -113,7 +118,13 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
         else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
             err = oskar_cuda_jones_set_real_scalar_4_d(n_elements,
                     (double4c*)jones->ptr.data, scalar);
+        else
+            return OSKAR_ERR_BAD_JONES_TYPE;
     }
 
     return err;
 }
+
+#ifdef __cplusplus
+}
+#endif

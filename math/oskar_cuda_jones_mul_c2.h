@@ -80,4 +80,4 @@ int oskar_cuda_jones_mul_c2_d(int n, const double2* d_s1,
 }
 #endif
 
-#endif // OSKAR_CUDA_JONES_MUL_C2_H_
+#endif /* OSKAR_CUDA_JONES_MUL_C2_H_ */

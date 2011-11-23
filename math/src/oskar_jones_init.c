@@ -26,22 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_jones_get_station_pointer.h"
-#include "utility/oskar_mem_get_pointer.h"
+#include "math/oskar_jones_init.h"
+#include "utility/oskar_mem_init.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
-        const int station_index)
+int oskar_jones_init(oskar_Jones* jones, int type, int location,
+        int num_stations, int num_sources)
 {
-    int num_sources = J->num_sources();
-    int offset = station_index * num_sources;
-    return oskar_mem_get_pointer(J_station, &J->ptr, offset, num_sources);
+    int n_elements, err = 0;
+    n_elements = num_stations * num_sources;
+    jones->private_num_stations = num_stations;
+    jones->private_num_sources = num_sources;
+    jones->private_cap_stations = num_stations;
+    jones->private_cap_sources = num_sources;
+    err = oskar_mem_init(&jones->ptr, type, location, n_elements, OSKAR_TRUE);
+    return err;
 }
 
 #ifdef __cplusplus
 }
 #endif
-

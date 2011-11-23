@@ -27,37 +27,40 @@
  */
 
 #include "math/oskar_Jones.h"
+#include "math/oskar_jones_copy.h"
+#include "math/oskar_jones_free.h"
+#include "math/oskar_jones_init.h"
 #include "math/oskar_jones_join.h"
 #include "math/oskar_jones_set_real_scalar.h"
+#include "math/oskar_jones_set_size.h"
 #include "utility/oskar_mem_copy.h"
 #include <cstdlib>
 
 oskar_Jones::oskar_Jones(int type, int location, int num_stations,
         int num_sources)
-: private_num_stations(num_stations),
-  private_num_sources(num_sources),
-  private_cap_stations(num_stations),
-  private_cap_sources(num_sources),
-  ptr(type, location, num_sources * num_stations)
 {
+    if (oskar_jones_init(this, type, location, num_stations, num_sources))
+        throw "Error in oskar_jones_init.";
 }
 
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
-: private_num_stations(other->num_stations()),
-  private_num_sources(other->num_sources()),
-  private_cap_stations(other->num_stations()),
-  private_cap_sources(other->num_sources()),
-  ptr(&other->ptr, location)
 {
+    if (oskar_jones_init(this, other->type(), location,
+            other->num_stations(), other->num_sources()))
+        throw "Error in oskar_jones_init.";
+    if (oskar_jones_copy(this, other))
+        throw "Error in oskar_jones_copy.";
 }
 
 oskar_Jones::~oskar_Jones()
 {
+    if (oskar_jones_free(this))
+        throw "Error in oskar_jones_free.";
 }
 
 int oskar_Jones::copy_to(oskar_Jones* other)
 {
-    return oskar_mem_copy(&other->ptr, &ptr); // Copy this to other.
+    return oskar_jones_copy(other, this); // Copy this to other.
 }
 
 int oskar_Jones::join_from_right(const oskar_Jones* other)
@@ -77,9 +80,5 @@ int oskar_Jones::set_real_scalar(double scalar)
 
 int oskar_Jones::set_size(int num_stations, int num_sources)
 {
-    if (num_stations * num_sources > private_cap_stations * private_cap_sources)
-        return OSKAR_ERR_OUT_OF_RANGE;
-    private_num_stations = num_stations;
-    private_num_sources = num_sources;
-    return 0;
+    return oskar_jones_set_size(this, num_stations, num_sources);
 }

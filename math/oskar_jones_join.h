@@ -49,8 +49,8 @@ extern "C" {
  *
  * Matrix multiplication is done in the order J3 = J1 * J2.
  *
- * If the parameter \p j3 is NULL on input, then J3 = J1 instead, and the
- * multiplication is performed in-place.
+ * If the parameter \p j3 is NULL on input, then J3 is overwritten by J1, and
+ * the multiplication is performed in-place, i.e. J1 = J1 * J2.
  *
  * The input dimensions (number of sources, number of stations) must be the
  * same for J3, J1 and J2, and the data type (single precision or double

@@ -41,7 +41,6 @@
 extern "C" {
 #endif
 
-
 /**
  * @brief Returns a pointer (contained in an oskar_Mem) to the set of Jones
  * matrices for a specified station index.
@@ -56,10 +55,10 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
-        const int station_index);
+        int station_index);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_JONES_GET_STATION_POINTER_H_
+#endif /* OSKAR_JONES_GET_STATION_POINTER_H_ */

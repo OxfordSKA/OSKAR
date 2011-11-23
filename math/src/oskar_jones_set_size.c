@@ -26,58 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
-#define OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
-
-/**
- * @file oskar_cuda_jones_mul_mat1_c1.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include "math/oskar_jones_set_size.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (single precision).
- *
- * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
- */
-OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_f(int n, const float4c* d_j1,
-        const float2* d_s1, float4c* d_m);
+int oskar_jones_set_size(oskar_Jones* jones, int num_stations, int num_sources)
+{
+    int capacity;
 
-/**
- * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (double precision).
- *
- * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
- */
-OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_d(int n, const double4c* d_j1,
-        const double2* d_s1, double4c* d_m);
+    /* Check size is within existing capacity. */
+    capacity = jones->private_cap_stations * jones->private_cap_sources;
+    if (num_stations * num_sources > capacity)
+        return OSKAR_ERR_OUT_OF_RANGE;
+
+    /* Set the new dimension sizes, but don't actually resize the memory. */
+    jones->private_num_stations = num_stations;
+    jones->private_num_sources = num_sources;
+    return 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_CUDA_JONES_MUL_MAT1_C1_H_ */

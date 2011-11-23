@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
-#define OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
+#ifndef OSKAR_JONES_COPY_H_
+#define OSKAR_JONES_COPY_H_
 
 /**
- * @file oskar_cuda_jones_mul_mat1_c1.h
+ * @file oskar_jones_copy.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include "math/oskar_Jones.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,42 +42,26 @@ extern "C" {
 
 /**
  * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (single precision).
+ * Copies memory from one Jones matrix structure to another.
  *
  * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
+ * This function copies memory held by a Jones matrix data structure to another
+ * structure.
  *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
+ * @param[out] dst Pointer to destination data structure to copy into.
+ * @param[in]  src Pointer to source data structure to copy from.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_f(int n, const float4c* d_j1,
-        const float2* d_s1, float4c* d_m);
-
-/**
- * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (double precision).
- *
- * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
- */
-OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_d(int n, const double4c* d_j1,
-        const double2* d_s1, double4c* d_m);
+int oskar_jones_copy(oskar_Jones* dst, const oskar_Jones* src);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CUDA_JONES_MUL_MAT1_C1_H_ */
+#endif /* OSKAR_JONES_COPY_H_ */

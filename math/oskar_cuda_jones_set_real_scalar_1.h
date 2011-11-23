@@ -74,4 +74,4 @@ int oskar_cuda_jones_set_real_scalar_1_d(int n, double2* d_jones,
 }
 #endif
 
-#endif // OSKAR_CUDA_JONES_SET_REAL_SCALAR_1_H_
+#endif /* OSKAR_CUDA_JONES_SET_REAL_SCALAR_1_H_ */

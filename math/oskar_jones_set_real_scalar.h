@@ -54,7 +54,7 @@ extern "C" {
  * This function returns a code to indicate if there were errors in execution:
  * - A return code of 0 indicates no error.
  * - A positive return code indicates a CUDA error.
- * - A return code of -1 indicates that the data structure is NULL.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
 int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar);
@@ -63,4 +63,4 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar);
 }
 #endif
 
-#endif // OSKAR_JONES_SET_REAL_SCALAR_H_
+#endif /* OSKAR_JONES_SET_REAL_SCALAR_H_ */

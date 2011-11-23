@@ -26,58 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
-#define OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
+#ifndef OSKAR_JONES_SET_SIZE_H_
+#define OSKAR_JONES_SET_SIZE_H_
 
 /**
- * @file oskar_cuda_jones_mul_mat1_c1.h
+ * @file oskar_jones_set_size.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include "math/oskar_Jones.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (single precision).
+ * @brief Sets the actual size of the collection of Jones matrices.
  *
  * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
+ * This sets the size of the data dimensions without actually performing
+ * a resize.
  *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
+ * The new size must be less than or equal to the existing capacity.
+ *
+ * @param[in] jones Pointer to the structure.
+ * @param[in] num_stations Number of elements in the station dimension.
+ * @param[in] num_sources Number of elements in the source dimension.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_f(int n, const float4c* d_j1,
-        const float2* d_s1, float4c* d_m);
-
-/**
- * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (double precision).
- *
- * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
- */
-OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_d(int n, const double4c* d_j1,
-        const double2* d_s1, double4c* d_m);
+int oskar_jones_set_size(oskar_Jones* jones, int num_stations, int num_sources);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CUDA_JONES_MUL_MAT1_C1_H_ */
+#endif /* OSKAR_JONES_SET_SIZE_H_ */
