@@ -51,8 +51,9 @@ extern "C" {
  * (UNFINISHED)
  */
 OSKAR_EXPORT
-int oskar_element_model_evaluate_f(const oskar_ElementModel* hd_data,
-        const oskar_SkyModelLocal_f* hd_sky, float* work, float4c* jones);
+int oskar_element_model_evaluate(oskar_Mem* output,
+        const oskar_ElementModel* pattern, const oskar_Mem* phi,
+        const oskar_Mem* theta);
 
 #ifdef __cplusplus
 }

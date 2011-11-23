@@ -32,13 +32,8 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_element_model_evaluate_f(const oskar_ElementModel* hd_data,
-        const oskar_SkyModelLocal_f* hd_sky, float* work, float4c* jones)
+int oskar_element_model_evaluate(oskar_Mem* output,
+        const oskar_ElementModel* pattern, const oskar_Mem* phi,
+        const oskar_Mem* theta)
 {
-    // Get pointers to the horizontal direction cosines.
-    const float* hor_l = hd_sky->hor_l;
-    const float* hor_m = hd_sky->hor_m;
-    const float* hor_n = hd_sky->hor_n;
-
-    // Convert direction cosines to fractional
 }
