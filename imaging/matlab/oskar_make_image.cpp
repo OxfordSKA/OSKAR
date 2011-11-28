@@ -130,16 +130,18 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     if (type == OSKAR_DOUBLE)
     {
-        double* uu = (double*)mxGetData(in[0]);
-        double* vv = (double*)mxGetData(in[1]);
+        double* uu_metres = (double*)mxGetData(in[0]);
+        double* vv_metres = (double*)mxGetData(in[1]);
+        double* uu = (double*)malloc(num_samples * sizeof(double));
+        double* vv = (double*)malloc(num_samples * sizeof(double));
         double* re = (double*)mxGetPr(in[2]);
         double* im = (double*)mxGetPi(in[2]);
         double2* amp = (double2*)malloc(num_samples * sizeof(double2));
         for (int i = 0; i < num_samples; ++i)
         {
             amp[i] = make_double2(re[i], im[i]);
-            uu[i] *= m_to_wavenumbers;
-            vv[i] *= m_to_wavenumbers;
+            uu[i] = uu_metres[i] * m_to_wavenumbers;
+            vv[i] = vv_metres[i] * m_to_wavenumbers;
         }
 
         // Allocate memory for image and image coordinates.
@@ -197,6 +199,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         free(lm);
         free(l);
         free(m);
+        free(uu);
+        free(vv);
         free(amp);
         cudaFree(d_l);
         cudaFree(d_m);
@@ -207,16 +211,18 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else if (type == OSKAR_SINGLE)
     {
-        float* uu = (float*)mxGetData(in[0]);
-        float* vv = (float*)mxGetData(in[1]);
+        float* uu_metres = (float*)mxGetData(in[0]);
+        float* vv_metres = (float*)mxGetData(in[1]);
+        float* uu = (float*)malloc(num_samples * sizeof(float));
+        float* vv = (float*)malloc(num_samples * sizeof(float));
         float* re = (float*)mxGetPr(in[2]);
         float* im = (float*)mxGetPi(in[2]);
         float2* amp = (float2*)malloc(num_samples * sizeof(float2));
         for (int i = 0; i < num_samples; ++i)
         {
             amp[i] = make_float2(re[i], im[i]);
-            uu[i] *= (float)m_to_wavenumbers;
-            vv[i] *= (float)m_to_wavenumbers;
+            uu[i] = uu_metres[i] * (float)m_to_wavenumbers;
+            vv[i] = vv_metres[i] * (float)m_to_wavenumbers;
         }
 
         // Allocate memory for image and coordinate grid.
@@ -274,6 +280,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         free(lm);
         free(l);
         free(m);
+        free(uu);
+        free(vv);
         free(amp);
         cudaFree(d_l);
         cudaFree(d_m);
