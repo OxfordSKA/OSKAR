@@ -131,7 +131,7 @@ void EquatorialToHorizontalTest::test_wrapper()
     int error = 0;
     for (int j = 0; j < 100000; ++j)
     {
-        error = oskar_ra_dec_to_az_el_d(ra, dec, lst, lat, &az, &el);
+        error = oskar_ra_dec_to_az_el_d(1, &ra, &dec, lst, lat, &az, &el);
         if (j % 1000 == 0)
             printf("run[%i] error = %i\n", j, error);
         if (error != cudaSuccess)

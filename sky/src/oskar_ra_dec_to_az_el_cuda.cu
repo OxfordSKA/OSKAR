@@ -57,19 +57,19 @@ int oskar_ra_dec_to_az_el_cuda_f(int n, const float* d_ra,
 }
 
 
-int oskar_ra_dec_to_az_el_f(float ra, float dec, float lst,
+int oskar_ra_dec_to_az_el_f(int n, const float* ra, const float* dec, float lst,
         float lat, float* az, float* el)
 {
-    const size_t mem_size = sizeof(float);
+    size_t mem_size = n * sizeof(float);
     float *d_ra, *d_dec, *d_az, *d_el, *d_work;
     cudaMalloc((void**)&d_ra,   mem_size);
     cudaMalloc((void**)&d_dec,  mem_size);
     cudaMalloc((void**)&d_work, mem_size);
     cudaMalloc((void**)&d_az,   mem_size);
     cudaMalloc((void**)&d_el,   mem_size);
-    cudaMemcpy(d_ra,  &ra,  mem_size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_dec, &dec, mem_size, cudaMemcpyHostToDevice);
-    oskar_ra_dec_to_az_el_cuda_f(1, d_ra, d_dec, lst, lat, d_work, d_az, d_el);
+    cudaMemcpy(d_ra,  ra,  mem_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_dec, dec, mem_size, cudaMemcpyHostToDevice);
+    oskar_ra_dec_to_az_el_cuda_f(n, d_ra, d_dec, lst, lat, d_work, d_az, d_el);
     cudaMemcpy(az, d_az, mem_size, cudaMemcpyDeviceToHost);
     cudaMemcpy(el, d_el, mem_size, cudaMemcpyDeviceToHost);
     cudaFree(d_ra);
@@ -77,7 +77,7 @@ int oskar_ra_dec_to_az_el_f(float ra, float dec, float lst,
     cudaFree(d_work);
     cudaFree(d_az);
     cudaFree(d_el);
-    return (int)cudaPeekAtLastError();
+    return (int)cudaDeviceSynchronize();
 }
 
 
@@ -101,19 +101,19 @@ int oskar_ra_dec_to_az_el_cuda_d(int n, const double* d_ra,
 }
 
 
-int oskar_ra_dec_to_az_el_d(double ra, double dec, double lst,
-        double lat, double* az, double* el)
+int oskar_ra_dec_to_az_el_d(int n, const double* ra, const double* dec,
+        double lst, double lat, double* az, double* el)
 {
-    const size_t mem_size = sizeof(double);
+    size_t mem_size = n * sizeof(double);
     double *d_ra, *d_dec, *d_az, *d_el, *d_work;
     cudaMalloc((void**)&d_ra,   mem_size);
     cudaMalloc((void**)&d_dec,  mem_size);
     cudaMalloc((void**)&d_work, mem_size);
     cudaMalloc((void**)&d_az,   mem_size);
     cudaMalloc((void**)&d_el,   mem_size);
-    cudaMemcpy(d_ra,  &ra,  mem_size, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_dec, &dec, mem_size, cudaMemcpyHostToDevice);
-    oskar_ra_dec_to_az_el_cuda_d(1, d_ra, d_dec, lst, lat, d_work, d_az, d_el);
+    cudaMemcpy(d_ra,  ra,  mem_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_dec, dec, mem_size, cudaMemcpyHostToDevice);
+    oskar_ra_dec_to_az_el_cuda_d(n, d_ra, d_dec, lst, lat, d_work, d_az, d_el);
     cudaMemcpy(az, d_az, mem_size, cudaMemcpyDeviceToHost);
     cudaMemcpy(el, d_el, mem_size, cudaMemcpyDeviceToHost);
     cudaFree(d_ra);
@@ -121,7 +121,7 @@ int oskar_ra_dec_to_az_el_d(double ra, double dec, double lst,
     cudaFree(d_work);
     cudaFree(d_az);
     cudaFree(d_el);
-    return (int)cudaPeekAtLastError();
+    return cudaDeviceSynchronize();
 }
 
 

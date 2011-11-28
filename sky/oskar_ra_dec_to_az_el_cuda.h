@@ -63,12 +63,12 @@ int oskar_ra_dec_to_az_el_cuda_f(int n, const float* d_ra,
         const float* d_dec, float lst, float lat, float* d_work,
         float* d_az, float* d_el);
 
-
 /**
+ * @brief
  * Wrapper function to oskar_cuda_ra_dec_to_az_el_f()
  */
 OSKAR_EXPORT
-int oskar_ra_dec_to_az_el_f(float ra, float dec, float lst,
+int oskar_ra_dec_to_az_el_f(int n, const float* ra, const float* dec, float lst,
         float lat, float* az, float* el);
 
 /**
@@ -96,11 +96,12 @@ int oskar_ra_dec_to_az_el_cuda_d(int n, const double* d_ra,
         double* d_az, double* d_el);
 
 /**
+ * @brief
  * Wrapper function to oskar_cuda_ra_dec_to_az_el_d()
  */
 OSKAR_EXPORT
-int oskar_ra_dec_to_az_el_d(double ra, double dec, double lst,
-        double lat, double* az, double* el);
+int oskar_ra_dec_to_az_el_d(int n, const double* ra, const double* dec,
+        double lst, double lat, double* az, double* el);
 
 
 #ifdef __cplusplus

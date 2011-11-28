@@ -26,24 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_H_
-#define OSKAR_SKY_H_
 
-/**
- * @file oskar_sky.h
- */
+#include <mex.h>
+#include "sky/oskar_mjd_to_gast_fast.h"
 
-#include "sky/oskar_ha_dec_to_az_el.h"
-#include "sky/oskar_ha_dec_to_hor_lmn.h"
-#include "sky/oskar_ra_dec_to_az_el_cuda.h"
-#include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
-#include "sky/oskar_ra_dec_to_rel_lmn_cuda.h"
-#include "sky/oskar_ra_dec_to_rel_lmn.h"
-#include "sky/oskar_date_time_to_mjd.h"
-#include "sky/oskar_equation_of_equinoxes_fast.h"
-#include "sky/oskar_mjd_to_gmst.h"
-#include "sky/oskar_mjd_to_last_fast.h"
-#include "sky/oskar_mjd_to_lmst.h"
+//
+// gast = oskar_mjd_to_gast(mjd)
+//
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+{
+    if (num_in != 1 || num_out < 1)
+    {
+        mexErrMsgTxt("Usage: gast = oskar_mjd_to_gast(mjd)");
+    }
 
-#endif /* OSKAR_SKY_H_ */
+    double mjd = mxGetScalar(in[0]);
+    out[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+    double* gast = (double*)mxGetData(out[0]);
+    *gast = oskar_mjd_to_gast_fast(mjd);
+}
