@@ -37,7 +37,7 @@
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in != 1 || num_out != 1)
+    if (num_in != 1 || num_out > 1)
         mexErrMsgTxt("Usage: vis = oskar_visibilities_read(filename)");
 
     // Extract arguments from MATLAB mxArray objects.
@@ -269,6 +269,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
     }
 
+
+
     // Create and populate output visibility structure.
     if (num_pols == 4)
     {
@@ -299,6 +301,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     mxSetField(out[0], 0, "frequency", frequency);
     mxSetField(out[0], 0, "time", time);
+
 
     // Clean up local memory.
     delete vis;
