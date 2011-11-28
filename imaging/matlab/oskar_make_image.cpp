@@ -63,16 +63,19 @@ void cleanup(void)
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    // TODO work out how to handle channels?
-    // TODO pass vis structure instead and make images for all pols?
-    // TODO treatment of time and frequency info in structure?
-    // TODO allow optional arguments of uu, vv, amp or structure?
-    // TODO put image in a structure with meta-data for field of view and frequency?
+    // Design considerations:
+
+    // -- Channel selection       - single channel, cube, frequency synthesis
+    // -- Time selection          - snapshots or combine?
+    // -- Polarisation selection. - All, Stokes, XX/YY..., single or cube?
+
+    // image = oskar_make_image(vis, [1 1], [1 1], 'I', 256, 2)
+    // image = oskar_make_image(vis, [1 48], [1 3], 'I', 256, 2)
 
     if (num_in != 6 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: image = oskar_make_dirty_image(uu, vv,"
-                " amp, frequency_hz, num_pixels, field_of_view_deg)");
+        mexErrMsgTxt("Usage: image = oskar_make_image(uu, vv, amp, "
+                "frequency_hz, num_pixels, field_of_view_deg)");
     }
 
     // Register cleanup function.
