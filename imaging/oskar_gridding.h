@@ -34,7 +34,7 @@
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_VisData.h"
+#include "interferometry/oskar_Visibilities.h"
 #include "imaging/oskar_GridKernel.h"
 #include "imaging/oskar_VisGrid.h"
 

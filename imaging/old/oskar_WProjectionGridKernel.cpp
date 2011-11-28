@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_WProjectionGridKernel.h"
-#include "imaging/oskar_FFTUtility.h"
+#include "imaging/old/oskar_WProjectionGridKernel.h"
+#include "imaging/oskar_fft_utility.h"
 
 #include "fftw3.h"
 
