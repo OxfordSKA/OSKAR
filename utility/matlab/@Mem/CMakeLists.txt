@@ -7,6 +7,8 @@ if (MATLAB_FOUND)
     set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/@Mem/private")                          
     oskar_mex(oskar_mem_constructor oskar_mex_mem_constructor.cpp)
     oskar_mex(oskar_mem_destructor oskar_mex_mem_destructor.cpp)
+    oskar_mex(oskar_mem_get_values oskar_mex_mem_get_values.cpp)
+    oskar_mex(oskar_mem_set_values oskar_mex_mem_set_values.cpp)
     
     # Copy *.m files from current directy to destination
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"

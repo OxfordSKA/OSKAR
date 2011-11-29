@@ -38,6 +38,24 @@ classdef Mem < handle
             oskar_mem_destructor(obj.pointer);
             obj.pointer = 0;
         end
+        
+        function set_values(obj, type, location, values)            
+            % Check type and location arguments are valid.
+            if (strcmp(class(type), 'oskar.Type') == 0)
+                error('type argument must be an object of class oskar.Type')
+            end
+            if (strcmp(class(location), 'oskar.Location') == 0)
+                error('location argument must be an object of class oskar.Location')
+            end                 
+            obj.pointer = oskar_mem_set_values(obj.pointer, type, location, values);
+        end
+        
+        
+        function values = values(obj)            
+            values = oskar_mem_get_values(obj.pointer);
+        end
+    
+        
     end
     
 end
