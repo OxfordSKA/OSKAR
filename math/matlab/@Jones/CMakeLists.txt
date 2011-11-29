@@ -21,8 +21,7 @@ if (MATLAB_FOUND)
         DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/@Jones"
         FILES_MATCHING PATTERN "*.m"
         PATTERN ".svn" EXCLUDE)
-
-    
+  
     add_subdirectory(test)
 
 endif ()

@@ -46,8 +46,9 @@
  *
  * @return mxArray containing an oskar_Jones object.
  */
-inline mxArray* create_matlab_Jones_class(const int num_sources, const int num_stations,
-        const char* format, const char* type, const char* location)
+inline mxArray* create_matlab_Jones_class(const int num_sources,
+        const int num_stations, const char* format, const char* type,
+        const char* location)
 {
     // Construct the input argument list
     // (num_sources, num_stations, format, type, location)

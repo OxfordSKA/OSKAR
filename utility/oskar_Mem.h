@@ -97,13 +97,13 @@ public:
      * Constructs a new oskar_Mem data structure, allocating memory for it in
      * the specified location.
      *
-     * @param[in] type       Enumerated data type of memory contents (magic number).
-     * @param[in] location   Specify 0 for host memory, 1 for device memory.
-     * @param[in] n_elements Number of elements of type \p type in the array.
-     * @param[in] owner      Bool flag specifying if the structure should take
-     *                       ownership of the memory (default = true).
+     * @param[in] type         Enumerated data type of memory contents (magic number).
+     * @param[in] location     Specify 0 for host memory, 1 for device memory.
+     * @param[in] num_elements Number of elements of type \p type in the array.
+     * @param[in] owner        Bool flag specifying if the structure should take
+     *                         ownership of the memory (default = true).
      */
-    oskar_Mem(int type, int location, int n_elements = 0, int owner = 1);
+    oskar_Mem(int type, int location, int num_elements = 0, int owner = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
