@@ -27,12 +27,39 @@
  */
 
 
+#include "utility/oskar_Mem.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-char* oskar_get_type_string
-
+const char* oskar_get_type_string(int type)
+{
+    switch (type)
+    {
+        case OSKAR_SINGLE:
+            return "OSKAR_SINGLE";
+        case OSKAR_DOUBLE:
+            return "OSKAR_DOUBLE";
+        case OSKAR_INT:
+            return "OSKAR_INT";
+        case OSKAR_COMPLEX:
+            return "OSKAR_COMPLEX";
+        case OSKAR_MATRIX:
+            return "OSKAR_COMPLEX";
+        case OSKAR_SINGLE_COMPLEX:
+            return "OSKAR_SINGLE_COMPLEX";
+        case OSKAR_DOUBLE_COMPLEX:
+            return "OSKAR_DOUBLE_COMPLEX";
+        case OSKAR_SINGLE_COMPLEX_MATRIX:
+            return "OSKAR_SINGLE_COMPLEX_MATRIX";
+        case OSKAR_DOUBLE_COMPLEX_MATRIX:
+            return "OSKAR_DOUBLE_COMPLEX_MATRIX";
+        default:
+            break;
+    };
+    return "unknown type";
+}
 
 #ifdef __cplusplus
 }

@@ -33,6 +33,7 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/matlab/oskar_mex_pointer.h"
 #include "utility/oskar_Mem.h"
+#include "utility/matlab/oskar_get_type_string.h"
 
 // MATLAB entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
@@ -82,10 +83,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             break;
     };
 
+    mexPrintf("values type = %i %s\n", values_type, oskar_get_type_string(values_type));
+
     if (complex && values_type != OSKAR_INT)
     {
         values_type |= OSKAR_COMPLEX;
     }
+    mexPrintf("values type = %i %s\n", values_type, oskar_get_type_string(values_type));
 
     // Work out if this is matrix data.
     // Matrix data is (2,2,n) where for the case of n = 1 the dimension will
@@ -102,9 +106,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
 
-    mexPrintf("values type = %i\n", values_type);
-
-
+    mexPrintf("values type = %i %s\n", values_type, oskar_get_type_string(values_type));
 
 
 
