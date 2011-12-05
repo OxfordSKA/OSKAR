@@ -99,13 +99,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         if (dims[0] == 2 && dims[1] == 2)
             matrix = true;
+        else
+            mexErrMsgTxt("Values array has invalid dimensions");
     }
     if (matrix)
     {
         values_type |= OSKAR_MATRIX;
     }
-
-
     mexPrintf("values type = %i %s\n", values_type, oskar_get_type_string(values_type));
 
 
