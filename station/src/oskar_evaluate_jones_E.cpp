@@ -99,8 +99,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
 
         // Evaluate the horizontal l,m,m coordinates of the beam phase centre
         // and sources.
-        error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n, station0,
-                gast);
+        error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
+                station0, gast);
         if (error) return error;
         error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n,
                 &sky->RA, &sky->Dec, station0, gast);
@@ -110,8 +110,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         oskar_Mem E0; // Pointer to the row of E for station 0.
         error = oskar_jones_get_station_pointer(&E0, E, 0);
         if (error) return error;
-        error = oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, &hor_l,
-                &hor_m, &hor_n, weights);
+        error = oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m,
+                &hor_l, &hor_m, &hor_n, weights);
         if (error) return error;
 
         // Copy E for station 0 into memory for other stations.
@@ -131,8 +131,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             // Evaluate horizontal l,m,n once and use it for evaluating
             // the station beam for each station.
             oskar_StationModel* station0 = &telescope->station[0];
-            error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
-                    station0, gast);
+            error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
+                    &beam_n, station0, gast);
             if (error) return error;
             error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n,
                     &sky->RA, &sky->Dec, station0, gast);
@@ -158,20 +158,19 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             for (int i = 0; i < telescope->num_stations; ++i)
             {
                 oskar_StationModel* station = &telescope->station[i];
-                error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
-                        station, gast);
+                error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
+                        &beam_n, station, gast);
                 if (error) return error;
-                error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n,
-                        &sky->RA, &sky->Dec, station, gast);
+                error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m,
+                        &hor_n, &sky->RA, &sky->Dec, station, gast);
                 if (error) return error;
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;
-                error = oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
-                        &hor_l, &hor_m,  &hor_n, weights);
+                error = oskar_evaluate_station_beam(&E_station, station,
+                        beam_l, beam_m, &hor_l, &hor_m,  &hor_n, weights);
                 if (error) return error;
             }
         }
     }
     return 0;
 }
-

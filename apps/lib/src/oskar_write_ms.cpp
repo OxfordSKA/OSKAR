@@ -32,6 +32,7 @@
 #include "apps/lib/oskar_file_utils.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_vector_types.h"
 
 #include <QtCore/QDir>
 

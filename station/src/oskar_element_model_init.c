@@ -26,46 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include "station/oskar_element_model_copy_to_gpu.h"
+#include "station/oskar_element_model_init.h"
+#include "utility/oskar_mem_init.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
 #endif
-
-int oskar_element_model_copy_to_gpu(const oskar_ElementModel* h_data,
-        oskar_ElementModel* hd_data)
+int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
 {
-    /* Copy the meta-data into the new structure. */
-    hd_data->n_points = h_data->n_points;
-    hd_data->n_phi = h_data->n_phi;
-    hd_data->n_theta = h_data->n_theta;
-    hd_data->inc_phi = h_data->inc_phi;
-    hd_data->inc_theta = h_data->inc_theta;
-    hd_data->max_phi = h_data->max_phi;
-    hd_data->max_theta = h_data->max_theta;
-    hd_data->min_phi = h_data->min_phi;
-    hd_data->min_theta = h_data->min_theta;
+    int err, complex_type;
 
-    /* Allocate GPU texture memory to hold the look-up tables. */
-    cudaMallocPitch((void**)&hd_data->g_phi, &hd_data->pitch_phi,
-            h_data->n_theta, h_data->n_phi);
-    cudaMallocPitch((void**)&hd_data->g_theta, &hd_data->pitch_theta,
-            h_data->n_theta, h_data->n_phi);
+    /* Check type. */
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    complex_type = type | OSKAR_COMPLEX;
 
-    /* Copy the data across. */
-    cudaMemcpy2D(hd_data->g_phi, hd_data->pitch_phi, h_data->g_phi,
-            h_data->n_theta * sizeof(float2), h_data->n_theta * sizeof(float2),
-            h_data->n_phi * sizeof(float2), cudaMemcpyHostToDevice);
-    cudaMemcpy2D(hd_data->g_theta, hd_data->pitch_theta, h_data->g_theta,
-            h_data->n_theta * sizeof(float2), h_data->n_theta * sizeof(float2),
-            h_data->n_phi * sizeof(float2), cudaMemcpyHostToDevice);
+    err = oskar_mem_init(&data->g_phi, complex_type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->g_theta, complex_type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->spline_coeff, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
 
-    /* Check for errors. */
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    return 0;
 }
-
-#ifdef __cplusplus
-}
-#endif

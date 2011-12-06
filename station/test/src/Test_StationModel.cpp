@@ -26,9 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/StationModelTest.h"
+#include "station/test/Test_StationModel.h"
 #include "station/oskar_station_model_load.h"
 #include "station/oskar_StationModel.h"
+#include "utility/oskar_vector_types.h"
 
 #include <cmath>
 #include <cstdio>
@@ -40,7 +41,7 @@
  * @details
  * Sets up the context before running each test method.
  */
-void StationModelTest::setUp()
+void Test_StationModel::setUp()
 {
 }
 
@@ -48,7 +49,7 @@ void StationModelTest::setUp()
  * @details
  * Clean up routine called after each test is run.
  */
-void StationModelTest::tearDown()
+void Test_StationModel::tearDown()
 {
 }
 
@@ -56,7 +57,7 @@ void StationModelTest::tearDown()
  * @details
  * Tests loading of station data.
  */
-void StationModelTest::test_load_single()
+void Test_StationModel::test_load_single()
 {
     // Create the test file.
     const char* filename = "test.dat";
@@ -105,7 +106,7 @@ void StationModelTest::test_load_single()
  * @details
  * Tests loading of station data.
  */
-void StationModelTest::test_load_double()
+void Test_StationModel::test_load_double()
 {
     // Create the test file.
     const char* filename = "test.dat";

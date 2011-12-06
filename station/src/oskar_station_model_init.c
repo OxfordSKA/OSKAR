@@ -28,6 +28,7 @@
 
 #include "station/oskar_station_model_init.h"
 #include "utility/oskar_mem_init.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

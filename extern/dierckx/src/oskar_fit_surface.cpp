@@ -13,8 +13,6 @@
     fprintf(stdout, __VA_ARGS__); \
     fprintf(stdout, ": %.6f sec.\n", _end - _start);};
 
-#define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
-
 extern "C" {
 void bispev_(float tx[], int* nx, float ty[], int* ny, float c[],
         int* kx, int* ky, float x[], int* mx, float y[], int* my,
@@ -38,10 +36,10 @@ int main(int argc, char** argv)
         return 1;
     }
     const char* filename = argv[1];
-    
+
     // Open input file.
     FILE* file = fopen(filename, "r");
-    
+
     // Read header.
     vector<int> header(8);
     size_t t = fread(&header[0], sizeof(int), header.size(), file);
@@ -50,7 +48,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Error reading file header.\n");
         return 1;
     }
-    
+
     // Get data dimensions.
     int size_x = header[0];
     int size_y = header[1];
@@ -59,7 +57,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Bad data type, or corrupted header.\n");
         return 1;
     }
-    
+
     // Read the data.
     vector<float> data(size_x * size_y);
     t = fread(&data[0], sizeof(float), data.size(), file);
@@ -68,29 +66,29 @@ int main(int argc, char** argv)
         fprintf(stderr, "Error reading file data.\n");
         return 1;
     }
-    
+
     // Close input file.
     fclose(file);
-    
+
     // Create the data axes.
     vector<float> x(size_x), y(size_y);
     for (int i = 0; i < size_x; ++i)
         x[i] = (float) i;
     for (int i = 0; i < size_y; ++i)
         y[i] = (float) i;
-    
+
     // Set up the surface fitting parameters.
     int iopt = 0; // -1 = Specify least-squares spline.
     int kxy = 3; // Degree of spline (cubic).
     float noise = 5e-4; // Numerical noise on input data.
-    
+
     // Checks.
     if (size_x <= kxy || size_y <= kxy)
     {
         fprintf(stderr, "ERROR: Input grid dimensions too small. Aborting.\n");
         return 1;
     }
-    
+
     // Set up the spline knots.
     int nx = 0; // Number of knots in x.
     int ny = 0; // Number of knots in y.
@@ -100,17 +98,17 @@ int main(int argc, char** argv)
     vector<float> ty(nyest, 0.0); // Spline knots in y.
     vector<float> c((nxest-kxy-1)*(nyest-kxy-1)); // Output spline coefficients.
     float fp = 0.0; // Output sum of squared residuals of spline approximation.
-    
+
     // Set up workspace.
     int u = size_y > nxest ? size_y : nxest;
-    int lwrk = 4 + nxest * (size_y + 2 * kxy + 5) + 
-            nyest * (2 * kxy + 5) + size_x * (kxy + 1) + 
+    int lwrk = 4 + nxest * (size_y + 2 * kxy + 5) +
+            nyest * (2 * kxy + 5) + size_x * (kxy + 1) +
             size_y * (kxy + 1) + u;
     vector<float> wrk(lwrk);
     int kwrk = 3 + size_x + size_y + nxest + nyest;
     vector<int> iwrk(kwrk);
     int ier = 0; // Output return code.
-    
+
     TIMER_START
     int k = 0;
     // Set initial smoothing factor (ignored for iopt < 0).
@@ -129,7 +127,7 @@ int main(int argc, char** argv)
                 ty[k + kxy + 1] = y[i]; // Knot y positions.
             ny = k + 2 * kxy + 1;
         }
-        
+
         // Set iopt to 1 if this is at least the second of multiple passes.
         if (k > 0) iopt = 1;
         regrid_(&iopt, &size_x, &x[0], &size_y, &y[0], &data[0],
@@ -165,7 +163,7 @@ int main(int argc, char** argv)
             return ier;
         }
         fail = false;
-        
+
         // Print knot positions.
         printf(" ## Pass %d has knots (nx,ny)=(%d,%d), s=%.4f, fp=%.4f\n",
                 k+1, nx, ny, s, fp);
@@ -173,16 +171,16 @@ int main(int argc, char** argv)
         for (int j = 0; j < nx; ++j) printf(" %.3f", tx[j]); printf("\n");
         printf("    y:\n");
         for (int j = 0; j < ny; ++j) printf(" %.3f", ty[j]); printf("\n\n");
-        
+
         // Reduce smoothness parameter.
         s = s / 1.2;
-        
+
         // Increment counter.
         ++k;
-    } while (fp / ((nx-2*(kxy+1)) * (ny-2*(kxy+1))) > pow(2.0 * noise, 2) && 
+    } while (fp / ((nx-2*(kxy+1)) * (ny-2*(kxy+1))) > pow(2.0 * noise, 2) &&
             k < 1000 && (iopt >= 0 || fail));
     TIMER_STOP("Finished precalculation");
-    
+
     // Interpolate.
     int out_x = 701;
     int out_y = 501;
@@ -208,7 +206,7 @@ int main(int argc, char** argv)
         }
     }
     TIMER_STOP("Finished interpolation (%d points)", out_x * out_y);
-    
+
     // Write out the interpolated data.
     file = fopen("test.dat", "w");
     for (int j = 0, k = 0; j < out_y; ++j)
@@ -220,6 +218,6 @@ int main(int argc, char** argv)
         fprintf(file, "\n");
     }
     fclose(file);
-    
+
     return 0;
 }

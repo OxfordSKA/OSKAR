@@ -31,6 +31,7 @@
 #include "interferometry/oskar_telescope_model_type.h"
 #include "interferometry/oskar_xyz_to_uvw_cuda.h"
 #include "interferometry/oskar_xyz_to_uvw.h"
+#include <stdlib.h>
 
 extern "C"
 int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,

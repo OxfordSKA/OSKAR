@@ -3,7 +3,7 @@
 #
 
 # ==== Set the project name and specify the required CMAKE version.
-project(oskar-lib CXX C)
+project(oskar-lib CXX C Fortran)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # ==== Project version.
@@ -61,6 +61,9 @@ include(oskar_compiler_options)
 
 enable_testing()
 
+# Build external libraries.
+add_subdirectory(extern)
+
 # ==== Build main oskar library.
 if (BUILD_OSKAR)
     #add_subdirectory(cuda) # Deprecated.
@@ -93,7 +96,7 @@ if (BUILD_OSKAR)
     cuda_add_library(oskar ${oskar_SRC})
     set_target_properties(oskar PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-    target_link_libraries(oskar ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
+    target_link_libraries(oskar dierckx ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
     set_target_properties(oskar PROPERTIES
         INSTALL_RPATH_USE_LINK_PATH TRUE
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)

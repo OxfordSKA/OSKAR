@@ -5,10 +5,9 @@
 set(station_SRC
     src/oskar_beamPattern.cpp
     #src/oskar_bf_cuda_ant_sig_iso_2d.cu
-    src/oskar_element_model_copy_to_gpu.c
     src/oskar_element_model_evaluate.c
-    src/oskar_element_model_free_gpu.c
     src/oskar_element_model_free.c
+    src/oskar_element_model_init.c
     src/oskar_element_model_load.c
     src/oskar_evaluate_beam_horizontal_lmn.c
     src/oskar_evaluate_jones_E.cpp

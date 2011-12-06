@@ -17,26 +17,31 @@ message("=======================================================================
 
 set(BUILD_SHARED_LIBS ON)
 
-# === GNU C++ compiler.
-if (CMAKE_COMPILER_IS_GNUCC) # || CMAKE_COMPILER_IS_GNUCXX ?!
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    list(APPEND CMAKE_CXX_FLAGS "-fPIC")
-    set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    list(APPEND CMAKE_C_FLAGS   "-fPIC") # -std=c99
-
-    # Warnings.
-    add_definitions(-Wall)
-    add_definitions(-Wextra)
-    add_definitions(-pedantic)
-
-    add_definitions(-Wcast-align)
-    add_definitions(-Wcast-qual)
-    #add_definitions(-Wconversion)
-    #add_definitions(-Wfloat-equal)
+# === GNU compiler.
+if (CMAKE_COMPILER_IS_GNUCC)
+    # Enable warnings.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wcast-align")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-qual")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wcast-qual")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion")
+    #set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wconversion")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfloat-equal")
+    #set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wfloat-equal")
 
     # Disable specified warnings.
-    add_definitions(-Wno-long-long)
-    add_definitions(-Wno-variadic-macros)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-long-long")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-variadic-macros")
+
+    # Add release and debug flags.
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG")
+    set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0")
 
 # === Intel compiler.
 elseif (NOT WIN32)

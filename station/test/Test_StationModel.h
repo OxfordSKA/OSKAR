@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef STATION_MODEL_TEST_H
-#define STATION_MODEL_TEST_H
+#ifndef TEST_STATION_MODEL_H
+#define TEST_STATION_MODEL_H
 
 /**
- * @file StationModelTest.h
+ * @file Test_StationModel.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,10 +42,10 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class StationModelTest : public CppUnit::TestFixture
+class Test_StationModel : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(StationModelTest);
+        CPPUNIT_TEST_SUITE(Test_StationModel);
         CPPUNIT_TEST(test_load_single);
         CPPUNIT_TEST(test_load_double);
         CPPUNIT_TEST_SUITE_END();
@@ -66,6 +66,6 @@ class StationModelTest : public CppUnit::TestFixture
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(StationModelTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_StationModel);
 
-#endif // STATION_MODEL_TEST_H
+#endif // TEST_STATION_MODEL_H

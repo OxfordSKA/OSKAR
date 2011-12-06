@@ -40,6 +40,7 @@
 #include <QtCore/QFileInfoList>
 
 #include <cstdio>
+#include <cstdlib>
 
 void LoadStationsTest::test_load()
 {

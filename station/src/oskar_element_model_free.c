@@ -27,14 +27,19 @@
  */
 
 #include "station/oskar_element_model_free.h"
+#include "utility/oskar_mem_free.h"
 
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_element_model_free(oskar_ElementModel* h_data)
+int oskar_element_model_free(oskar_ElementModel* data)
 {
-    free(h_data->g_phi);
-    free(h_data->g_theta);
+    int err;
+
+    err = oskar_mem_free(&data->g_phi);
+    if (err) return err;
+    err = oskar_mem_free(&data->g_theta);
+    if (err) return err;
 
     return 0;
 }

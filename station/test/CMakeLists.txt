@@ -9,10 +9,10 @@ if (CPPUNIT_FOUND)
     set(station_test_SRC
         src/CppUnitMain.cu
         #src/BeamPatternTest.cpp
-        src/ElementModelTest.cpp
+        src/Test_ElementModel.cpp
         src/Test_evaluate_jones_E.cpp
         src/Test_evaluate_station_beam.cpp
-        src/StationModelTest.cpp
+        src/Test_StationModel.cpp
     )
 
     cuda_add_executable(stationTest ${station_test_SRC})

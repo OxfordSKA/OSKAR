@@ -28,6 +28,7 @@
 
 #include "interferometry/oskar_telescope_model_scale_coords.h"
 #include "utility/oskar_mem_scale_real.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,9 +37,9 @@ extern "C" {
 int oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
         double value)
 {
-	int error = 0;
+    int error = 0;
 
-	/* Sanity check on inputs. */
+    /* Sanity check on inputs. */
     if (telescope == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 

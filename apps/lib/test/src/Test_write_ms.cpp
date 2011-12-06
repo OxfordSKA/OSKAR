@@ -37,6 +37,7 @@
 #include "sky/oskar_date_time_to_mjd.h"
 
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_vector_types.h"
 
 #include <cstdio>
 #include <cmath>

@@ -28,6 +28,7 @@
 
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

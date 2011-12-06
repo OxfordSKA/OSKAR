@@ -26,37 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_
-#define OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_
+#ifndef TEST_ELEMENT_MODEL_H
+#define TEST_ELEMENT_MODEL_H
 
 /**
- * @file oskar_element_model_copy_to_gpu.h
+ * @file Test_ElementModel.h
  */
 
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Copies embedded element pattern data to the GPU.
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- * This function copies the embedded element pattern data from host memory to
- * a GPU texture. It allocates texture memory on the GPU to do this.
- *
- * @param[in]  h_data   Data structure stored on the host.
- * @param[out] hd_data  Data structure stored on the GPU.
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-OSKAR_EXPORT
-int oskar_element_model_copy_to_gpu(const oskar_ElementModel* h_data,
-        oskar_ElementModel* hd_data);
+class Test_ElementModel : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_ElementModel);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-#ifdef __cplusplus
-}
-#endif
+    public:
+        /// Set up context before running a test.
+        void setUp();
 
-#endif /* OSKAR_ELEMENT_MODEL_COPY_TO_GPU_H_ */
+        /// Clean up after the test run.
+        void tearDown();
+
+    public:
+        /// Test method.
+        void test_method();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_ElementModel);
+
+#endif // TEST_ELEMENT_MODEL_H

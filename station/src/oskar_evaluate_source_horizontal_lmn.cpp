@@ -28,6 +28,7 @@
 
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
+#include <cstdlib>
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,24 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include "station/oskar_element_model_free_gpu.h"
+#ifndef OSKAR_ELEMENT_MODEL_INIT_H_
+#define OSKAR_ELEMENT_MODEL_INIT_H_
+
+/**
+ * @file oskar_element_model_init.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_ElementModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_element_model_free_gpu(oskar_ElementModel* hd_data)
-{
-    /* Free the memory. */
-    cudaFree(hd_data->g_phi);
-    cudaFree(hd_data->g_theta);
-
-    /* Check for errors. */
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
-}
+/**
+ * @brief
+ * Initialises the embedded element pattern data structure.
+ *
+ * @details
+ * This function initialises the embedded element pattern data structure.
+ * All memory arrays will be empty (i.e. zero-sized).
+ *
+ * @param[in] data     Pointer to data structure.
+ * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
+ * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ */
+OSKAR_EXPORT
+int oskar_element_model_init(oskar_ElementModel* data, int type, int location);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_ELEMENT_MODEL_INIT_H_ */

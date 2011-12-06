@@ -45,7 +45,7 @@ extern "C" {
  * Frees memory used for the embedded element pattern data.
  *
  * @details
- * This function frees system memory that is used to hold the embedded element
+ * This function frees memory that is used to hold the embedded element
  * pattern data.
  *
  * @param[in] h_data  Data structure.

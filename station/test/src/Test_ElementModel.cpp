@@ -26,9 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/ElementModelTest.h"
+#include "station/test/Test_ElementModel.h"
+#include "station/oskar_element_model_free.h"
+#include "station/oskar_element_model_init.h"
 #include "station/oskar_element_model_load.h"
 #include "station/oskar_ElementModel.h"
+#include "utility/oskar_vector_types.h"
 
 #include <cmath>
 
@@ -39,7 +42,7 @@
  * @details
  * Sets up the context before running each test method.
  */
-void ElementModelTest::setUp()
+void Test_ElementModel::setUp()
 {
 }
 
@@ -47,7 +50,7 @@ void ElementModelTest::setUp()
  * @details
  * Clean up routine called after each test is run.
  */
-void ElementModelTest::tearDown()
+void Test_ElementModel::tearDown()
 {
 }
 
@@ -55,7 +58,7 @@ void ElementModelTest::tearDown()
  * @details
  * Tests loading of antenna pattern data.
  */
-void ElementModelTest::test_method()
+void Test_ElementModel::test_method()
 {
     // Create a dummy antenna pattern.
     char data[] = ""
@@ -126,10 +129,17 @@ void ElementModelTest::test_method()
     fclose(file);
 
     // Load the file.
+    int err;
     oskar_ElementModel pattern;
-    oskar_element_model_load(filename, &pattern);
+    err = oskar_element_model_init(&pattern,
+            OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+    if (err) CPPUNIT_FAIL("Error in oskar_element_pattern_init.");
+    err = oskar_element_model_load(filename, &pattern);
+    if (err) CPPUNIT_FAIL("Error in oskar_element_pattern_load.");
 
     // Check the contents of the data.
+    const float2* g_theta = (const float2*)pattern.g_theta;
+    const float2* g_phi   = (const float2*)pattern.g_phi;
     CPPUNIT_ASSERT_EQUAL(30, pattern.n_points);
     CPPUNIT_ASSERT_EQUAL(10, pattern.n_theta);
     CPPUNIT_ASSERT_EQUAL(3, pattern.n_phi);
@@ -141,28 +151,28 @@ void ElementModelTest::test_method()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0 * M_PI / 180.0, pattern.inc_phi, 1e-6);
 
     // Check the contents of the first row.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(3.770844212e-1, pattern.g_theta[0].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-3.556198490e-1, pattern.g_theta[0].y, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(6.446807267, pattern.g_phi[0].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.374663044, pattern.g_phi[0].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(3.770844212e-1, g_theta[0].x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-3.556198490e-1, g_theta[0].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(6.446807267, g_phi[0].x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.374663044, g_phi[0].y, 1e-6);
 
     // Check the contents of row 15.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0192064, pattern.g_theta[14].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.90594407, pattern.g_theta[14].y, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.013445964, pattern.g_phi[14].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.151916707, pattern.g_phi[14].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0192064, g_theta[14].x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.90594407, g_theta[14].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.013445964, g_phi[14].x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.151916707, g_phi[14].y, 1e-6);
 
     // Check the contents of the last row.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.05954787, pattern.g_theta[29].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.018560778, pattern.g_theta[29].y, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(4.208770322e-6, pattern.g_phi[29].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.593518683e-5, pattern.g_phi[29].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.05954787, g_theta[29].x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.018560778, g_theta[29].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(4.208770322e-6, g_phi[29].x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.593518683e-5, g_phi[29].y, 1e-6);
 
     // Remove the file.
 //    printf("Antenna data loaded successfully.\n");
     remove(filename);
 
     // Free the memory.
-    free(pattern.g_phi);
-    free(pattern.g_theta);
+    err = oskar_element_model_free(&pattern);
+    if (err) CPPUNIT_FAIL("Error in oskar_element_pattern_free.");
 }

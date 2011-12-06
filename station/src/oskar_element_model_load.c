@@ -28,6 +28,8 @@
 
 #include "station/oskar_element_model_load.h"
 #include "utility/oskar_getline.h"
+#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_vector_types.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,17 +47,29 @@ extern "C" {
 int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
 {
     /* Initialise the flags and local data. */
-    int n = 0, err = 0;
-    float inc_theta = 0.0f, inc_phi = 0.0f, n_theta = 0.0f, n_phi = 0.0f;
-    float min_theta = FLT_MAX, max_theta = -FLT_MAX;
-    float min_phi = FLT_MAX, max_phi = -FLT_MAX;
+    int n = 0, err = 0, type = 0;
+    double inc_theta = 0.0, inc_phi = 0.0, n_theta = 0.0, n_phi = 0.0;
+    double min_theta = DBL_MAX, max_theta = -DBL_MAX;
+    double min_phi = DBL_MAX, max_phi = -DBL_MAX;
 
     /* Declare the line buffer. */
     char *line = NULL, *dbi = NULL;
     size_t bufsize = 0;
+    FILE* file;
+
+    /* Check the data types. */
+    type = data->g_phi.private_type;
+    if (type != OSKAR_SINGLE_COMPLEX && type != OSKAR_DOUBLE_COMPLEX)
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    if (type != data->g_theta.private_type)
+        return OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Check the locations. */
+    if (data->g_phi.private_location != OSKAR_LOCATION_CPU ||
+            data->g_theta.private_location != OSKAR_LOCATION_CPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
     /* Open the file. */
-    FILE* file;
     file = fopen(filename, "r");
     if (!file)
         return OSKAR_ERR_FILE_IO;
@@ -63,36 +77,40 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     /* Read the first line and check if data is in logarithmic format. */
     err = oskar_getline(&line, &bufsize, file);
     if (err < 0) return err;
+    err = 0;
     dbi = strstr(line, "dBi"); /* Check for presence of "dBi". */
 
     /* Initialise pointers to NULL. */
-    data->g_phi = NULL;
-    data->g_theta = NULL;
+    data->g_phi.data = NULL;
+    data->g_theta.data = NULL;
 
     /* Loop over and read each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         int a;
-        float theta = 0.0f, phi = 0.0f, p_theta = 0.0f, p_phi = 0.0f;
-        float abs_theta, phase_theta, abs_phi, phase_phi;
+        double theta = 0.0, phi = 0.0, p_theta = 0.0, p_phi = 0.0;
+        double abs_theta, phase_theta, abs_phi, phase_phi;
+        double phi_re, phi_im, theta_re, theta_im;
 
         /* Parse the line. */
-        a = sscanf(line, "%f %f %*f %f %f %f %f %*f", &theta, &phi,
+        a = sscanf(line, "%lf %lf %*f %lf %lf %lf %lf %*f", &theta, &phi,
                     &abs_theta, &phase_theta, &abs_phi, &phase_phi);
 
         /* Check that data was read correctly. */
         if (a != 6) continue;
 
         /* Ignore any data below horizon. */
-        if (theta > 90.0f) continue;
+        if (theta > 90.0) continue;
 
-        /* Convert coordinates to radians. */
+        /* Convert data to radians. */
         theta *= DEG2RAD;
         phi *= DEG2RAD;
+        phase_theta *= DEG2RAD;
+        phase_phi *= DEG2RAD;
 
         /* Set coordinate increments. */
-        if (inc_theta <= FLT_EPSILON) inc_theta = theta - p_theta;
-        if (inc_phi <= FLT_EPSILON) inc_phi = phi - p_phi;
+        if (inc_theta <= DBL_EPSILON) inc_theta = theta - p_theta;
+        if (inc_phi <= DBL_EPSILON) inc_phi = phi - p_phi;
 
         /* Set ranges. */
         if (theta < min_theta) min_theta = theta;
@@ -104,9 +122,11 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
         if (n % 100 == 0)
         {
             int size;
-            size = (n + 100) * sizeof(float);
-            data->g_theta = (float2*) realloc(data->g_theta, 2*size);
-            data->g_phi   = (float2*) realloc(data->g_phi, 2*size);
+            size = n + 100;
+            err = oskar_mem_realloc(&data->g_theta, size);
+            if (err) return err;
+            err = oskar_mem_realloc(&data->g_phi, size);
+            if (err) return err;
         }
 
         /* Store the coordinates in radians. */
@@ -121,10 +141,30 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
         }
 
         /* Amp,phase to real,imag conversion. */
-        data->g_theta[n].x = abs_theta * cos(phase_theta * DEG2RAD);
-        data->g_theta[n].y = abs_theta * sin(phase_theta * DEG2RAD);
-        data->g_phi[n].x = abs_phi * cos(phase_phi * DEG2RAD);
-        data->g_phi[n].y = abs_phi * sin(phase_phi * DEG2RAD);
+        theta_re = abs_theta * cos(phase_theta);
+        theta_im = abs_theta * sin(phase_theta);
+        phi_re = abs_phi * cos(phase_phi);
+        phi_im = abs_phi * sin(phase_phi);
+        if (data->g_theta.private_type == OSKAR_SINGLE_COMPLEX)
+        {
+            ((float2*)(data->g_theta.data))[n].x = theta_re;
+            ((float2*)(data->g_theta.data))[n].y = theta_im;
+        }
+        else if (data->g_phi.private_type == OSKAR_DOUBLE_COMPLEX)
+        {
+            ((double2*)(data->g_theta.data))[n].x = theta_re;
+            ((double2*)(data->g_theta.data))[n].y = theta_im;
+        }
+        if (data->g_theta.private_type == OSKAR_SINGLE_COMPLEX)
+        {
+            ((float2*)(data->g_phi.data))[n].x = phi_re;
+            ((float2*)(data->g_phi.data))[n].y = phi_im;
+        }
+        else if (data->g_theta.private_type == OSKAR_DOUBLE_COMPLEX)
+        {
+            ((double2*)(data->g_phi.data))[n].x = phi_re;
+            ((double2*)(data->g_phi.data))[n].y = phi_im;
+        }
 
         /* Increment array pointer. */
         n++;

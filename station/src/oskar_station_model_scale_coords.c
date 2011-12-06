@@ -28,6 +28,7 @@
 
 #include "station/oskar_station_model_scale_coords.h"
 #include "utility/oskar_mem_scale_real.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,9 +36,9 @@ extern "C" {
 
 int oskar_station_model_scale_coords(oskar_StationModel* station, double value)
 {
-	int error = 0;
+    int error = 0;
 
-	/* Sanity check on inputs. */
+    /* Sanity check on inputs. */
     if (station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 

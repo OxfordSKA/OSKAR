@@ -28,6 +28,7 @@
 
 #include "station/oskar_station_model_copy.h"
 #include "utility/oskar_mem_copy.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

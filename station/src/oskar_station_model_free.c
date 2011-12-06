@@ -28,8 +28,8 @@
 
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_element_model_free.h"
-#include "station/oskar_element_model_free_gpu.h"
 #include "utility/oskar_mem_free.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,29 +64,24 @@ int oskar_station_model_free(oskar_StationModel* model)
     /* Free the element pattern data if it exists. */
     if (model->element_pattern)
     {
-    	if (model->element_pattern->location == OSKAR_LOCATION_CPU)
-    		oskar_element_model_free(model->element_pattern);
-    	else if (model->element_pattern->location == OSKAR_LOCATION_GPU)
-    	{
-    		error = oskar_element_model_free_gpu(model->element_pattern);
-    		if (error) return error;
-    	}
-    	model->element_pattern = NULL;
+        error = oskar_element_model_free(model->element_pattern);
+        if (error) return error;
+        model->element_pattern = NULL;
     }
 
     /* Recursively free the child stations. */
     if (model->child)
     {
-    	int i = 0;
-    	for (i = 0; i < model->num_elements; ++i)
-    	{
-    		error = oskar_station_model_free(&(model->child[i]));
-    		if (error) return error;
-    	}
+        int i = 0;
+        for (i = 0; i < model->num_elements; ++i)
+        {
+            error = oskar_station_model_free(&(model->child[i]));
+            if (error) return error;
+        }
 
-    	/* Free the array. */
-    	free(model->child);
-    	model->child = NULL;
+        /* Free the array. */
+        free(model->child);
+        model->child = NULL;
     }
 
     /* Clear remaining parameters. */

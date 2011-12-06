@@ -38,9 +38,11 @@
 #include "station/oskar_station_model_copy.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_get_pointer.h"
+#include "utility/oskar_vector_types.h"
 
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 
 using namespace std;
 

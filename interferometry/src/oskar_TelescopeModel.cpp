@@ -37,6 +37,7 @@
 #include "interferometry/oskar_telescope_model_resize.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "station/oskar_station_model_load.h"
+#include <cstdlib>
 
 oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
         int n_stations)

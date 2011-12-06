@@ -28,6 +28,7 @@
 
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_StationModel.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ELEMENT_MODEL_TEST_H
-#define ELEMENT_MODEL_TEST_H
+#ifndef TEST_DIERCKX_H_
+#define TEST_DIERCKX_H_
 
 /**
- * @file ElementModelTest.h
+ * @file Test_dierckx.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,26 +42,18 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class ElementModelTest : public CppUnit::TestFixture
+class Test_dierckx : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(ElementModelTest);
+        CPPUNIT_TEST_SUITE(Test_dierckx);
         CPPUNIT_TEST(test_method);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        /// Set up context before running a test.
-        void setUp();
-
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
         void test_method();
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(ElementModelTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_dierckx);
 
-#endif // ELEMENT_MODEL_TEST_H
+#endif // TEST_DIERCKX_H_
