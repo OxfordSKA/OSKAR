@@ -131,15 +131,16 @@ void Test_ElementModel::test_method()
     // Load the file.
     int err;
     oskar_ElementModel pattern;
-    err = oskar_element_model_init(&pattern,
-            OSKAR_SINGLE, OSKAR_LOCATION_CPU);
+    err = oskar_element_model_init(&pattern, OSKAR_SINGLE, OSKAR_LOCATION_CPU);
     if (err) CPPUNIT_FAIL("Error in oskar_element_pattern_init.");
     err = oskar_element_model_load(filename, &pattern);
     if (err) CPPUNIT_FAIL("Error in oskar_element_pattern_load.");
 
     // Check the contents of the data.
-    const float2* g_theta = (const float2*)pattern.g_theta;
-    const float2* g_phi   = (const float2*)pattern.g_phi;
+    const float* theta_re = (const float*)pattern.theta_re;
+    const float* theta_im = (const float*)pattern.theta_im;
+    const float* phi_re = (const float*)pattern.phi_re;
+    const float* phi_im = (const float*)pattern.phi_im;
     CPPUNIT_ASSERT_EQUAL(30, pattern.n_points);
     CPPUNIT_ASSERT_EQUAL(10, pattern.n_theta);
     CPPUNIT_ASSERT_EQUAL(3, pattern.n_phi);
@@ -151,25 +152,24 @@ void Test_ElementModel::test_method()
     CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0 * M_PI / 180.0, pattern.inc_phi, 1e-6);
 
     // Check the contents of the first row.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(3.770844212e-1, g_theta[0].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-3.556198490e-1, g_theta[0].y, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(6.446807267, g_phi[0].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.374663044, g_phi[0].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(3.770844212e-1, theta_re[0], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-3.556198490e-1, theta_im[0], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(6.446807267, phi_re[0], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.374663044, phi_im[0], 1e-6);
 
     // Check the contents of row 15.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0192064, g_theta[14].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.90594407, g_theta[14].y, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.013445964, g_phi[14].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.151916707, g_phi[14].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0192064, theta_re[14], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.90594407, theta_im[14], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.013445964, phi_re[14], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.151916707, phi_im[14], 1e-6);
 
     // Check the contents of the last row.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.05954787, g_theta[29].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.018560778, g_theta[29].y, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(4.208770322e-6, g_phi[29].x, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.593518683e-5, g_phi[29].y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.05954787, theta_re[29], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.018560778, theta_im[29], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(4.208770322e-6, phi_re[29], 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.593518683e-5, phi_im[29], 1e-6);
 
     // Remove the file.
-//    printf("Antenna data loaded successfully.\n");
     remove(filename);
 
     // Free the memory.

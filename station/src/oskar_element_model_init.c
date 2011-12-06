@@ -34,16 +34,19 @@ extern "C"
 #endif
 int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
 {
-    int err, complex_type;
+    int err;
 
     /* Check type. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
-    complex_type = type | OSKAR_COMPLEX;
 
-    err = oskar_mem_init(&data->g_phi, complex_type, location, 0, OSKAR_TRUE);
+    err = oskar_mem_init(&data->phi_re, type, location, 0, OSKAR_TRUE);
     if (err) return err;
-    err = oskar_mem_init(&data->g_theta, complex_type, location, 0, OSKAR_TRUE);
+    err = oskar_mem_init(&data->phi_im, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->theta_re, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->theta_im, type, location, 0, OSKAR_TRUE);
     if (err) return err;
     err = oskar_mem_init(&data->spline_coeff, type, location, 0, OSKAR_TRUE);
     if (err) return err;

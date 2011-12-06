@@ -61,8 +61,10 @@ struct oskar_ElementModel
     double max_theta;   /**< Maximum value of theta, in radians. */
     double min_phi;     /**< Minimum value of phi, in radians. */
     double min_theta;   /**< Minimum value of theta, in radians. */
-    oskar_Mem g_phi;    /**< Response in phi direction at coordinates (re,im). */
-    oskar_Mem g_theta;  /**< Response in theta direction at coordinates (re,im). */
+    oskar_Mem phi_re;   /**< Real part of response in phi direction. */
+    oskar_Mem phi_im;   /**< Imaginary part of response in phi direction. */
+    oskar_Mem theta_re; /**< Real part of response in theta direction. */
+    oskar_Mem theta_im; /**< Imaginary part of response in theta direction. */
     oskar_Mem spline_coeff; /**< Pre-computed spline coefficients. */
 };
 typedef struct oskar_ElementModel oskar_ElementModel;

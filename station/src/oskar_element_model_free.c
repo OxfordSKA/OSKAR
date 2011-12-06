@@ -36,9 +36,13 @@ int oskar_element_model_free(oskar_ElementModel* data)
 {
     int err;
 
-    err = oskar_mem_free(&data->g_phi);
+    err = oskar_mem_free(&data->phi_re);
     if (err) return err;
-    err = oskar_mem_free(&data->g_theta);
+    err = oskar_mem_free(&data->phi_im);
+    if (err) return err;
+    err = oskar_mem_free(&data->theta_re);
+    if (err) return err;
+    err = oskar_mem_free(&data->theta_im);
     if (err) return err;
 
     return 0;

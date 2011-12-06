@@ -35,6 +35,7 @@
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
