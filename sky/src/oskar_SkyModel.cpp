@@ -30,6 +30,7 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_append.h"
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
+#include "sky/oskar_sky_model_copy.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_resize.h"
@@ -89,6 +90,11 @@ oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
 
 oskar_SkyModel::~oskar_SkyModel()
 {
+}
+
+int oskar_SkyModel::copy_to(oskar_SkyModel* other)
+{
+    return oskar_sky_model_copy(other, this);
 }
 
 int oskar_SkyModel::append(const oskar_SkyModel* other)

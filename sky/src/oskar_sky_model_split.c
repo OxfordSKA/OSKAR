@@ -26,44 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
 
-/**
- * @file oskar_interferometer.h
- */
+#include "sky/oskar_sky_model_split.h"
+#include "math/oskar_round_robin.h"
+#include "sky/oskar_sky_model_get_ptr.h"
 
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Mem.h"
+#include "math.h"
+#include "stdlib.h"
+#include "stdio.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Main interferometer simulation function (full polarisation).
- *
- * @details
- * This function produces simulated visibilities from an interferometer.
- *
- * @param[out] vis_amp    Output visibilities.
- * @param[in]  sky        Sky model structure.
- * @param[in]  telescope  Telescope model structure.
- * @param[in]  times      Simulation time data.
- * @param[in]  frequency  Observation frequency in Hz.
- */
-OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
-        double frequency);
+int oskar_sky_model_split(oskar_SkyModel** out, int* num_out, int max_sources_out,
+        const oskar_SkyModel* in)
+{
+    int offset, size, i, error;
+
+    if (in == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    *num_out = (int)ceil((double)in->num_sources/max_sources_out);
+    *out = (oskar_SkyModel*)malloc(*num_out * sizeof(oskar_SkyModel));
+
+    for (i = 0; i < *num_out; ++i)
+    {
+        oskar_round_robin(in->num_sources, *num_out, i, &size, &offset);
+        error = oskar_sky_model_get_ptr(&(*out)[i], in, offset, size);
+        if (error) return error;
+    }
+
+    return OSKAR_SUCCESS;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_INTERFEROMETER_H_ */

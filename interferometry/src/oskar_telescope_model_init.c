@@ -38,7 +38,7 @@ extern "C" {
 #endif
 
 int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations)
+        int location, int num_stations)
 {
     int i = 0, err = 0;
 
@@ -47,21 +47,21 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Initialise the meta-data. */
-    telescope->num_stations = n_stations;
+    telescope->num_stations = num_stations;
 
     /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_x, type, location, n_stations, 1);
+    err = oskar_mem_init(&telescope->station_x, type, location, num_stations, 1);
     if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, n_stations, 1);
+    err = oskar_mem_init(&telescope->station_y, type, location, num_stations, 1);
     if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, n_stations, 1);
+    err = oskar_mem_init(&telescope->station_z, type, location, num_stations, 1);
     if (err) return err;
 
     /* Initialise the station structures. */
     telescope->station = NULL;
-    if (n_stations > 0)
-        telescope->station = malloc(n_stations * sizeof(oskar_StationModel));
-    for (i = 0; i < n_stations; ++i)
+    if (num_stations > 0)
+        telescope->station = malloc(num_stations * sizeof(oskar_StationModel));
+    for (i = 0; i < num_stations; ++i)
     {
         err = oskar_station_model_init(&(telescope->station[i]), type,
                 location, 0);

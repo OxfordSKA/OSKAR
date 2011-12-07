@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int n_stations)
+int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int num_stations)
 {
     int error = 0, old_size = 0;
 
@@ -51,12 +51,12 @@ int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int n_stations
 
     /* Resize the station array. */
     telescope->station = realloc(telescope->station,
-            n_stations * sizeof(oskar_StationModel));
-    if (n_stations > old_size)
+            num_stations * sizeof(oskar_StationModel));
+    if (num_stations > old_size)
     {
         /* Initialise new stations. */
         int i = 0;
-        for (i = old_size; i < n_stations; ++i)
+        for (i = old_size; i < num_stations; ++i)
         {
             error = oskar_station_model_init(&(telescope->station[i]),
                     telescope->station_x.private_type,
@@ -66,15 +66,15 @@ int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int n_stations
     }
 
     /* Resize the remaining arrays. */
-    error = oskar_mem_realloc(&(telescope->station_x), n_stations);
+    error = oskar_mem_realloc(&(telescope->station_x), num_stations);
     if (error) return error;
-    error = oskar_mem_realloc(&(telescope->station_y), n_stations);
+    error = oskar_mem_realloc(&(telescope->station_y), num_stations);
     if (error) return error;
-    error = oskar_mem_realloc(&(telescope->station_z), n_stations);
+    error = oskar_mem_realloc(&(telescope->station_z), num_stations);
     if (error) return error;
 
     /* Store the new size. */
-    telescope->num_stations = n_stations;
+    telescope->num_stations = num_stations;
 
     return error;
 }

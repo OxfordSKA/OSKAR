@@ -73,6 +73,7 @@ ELSE( WIN32 )
       $ENV{MATLAB_ROOT}/bin/glnxa64/
       /usr/local/MATLAB/R2011a/bin/glnxa64/
       /usr/local/MATLAB/R2011b/bin/glnxa64/
+      /data/MATLAB/R2011b/bin/glnxa64/
       /usr/local/matlab/bin/glnxa64/
       /usr/local/matlab-7sp1/bin/glnxa64/
       /opt/matlab-7sp1/bin/glnxa64/
@@ -111,6 +112,7 @@ ELSE( WIN32 )
     /usr/local/MATLAB/R2011b/extern/include
     /usr/local/matlab/extern/include/
     /usr/local/matlab-7sp1/extern/include/
+    /data/MATLAB/R2011b/extern/include/
     /opt/matlab-7sp1/extern/include/
     $ENV{HOME}/matlab-7sp1/extern/include/
     $ENV{HOME}/redhat-matlab/extern/include/

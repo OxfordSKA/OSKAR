@@ -26,44 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
+
+#ifndef OSKAR_SKY_MODEL_COPY_H_
+#define OSKAR_SKY_MODEL_COPY_H_
 
 /**
- * @file oskar_interferometer.h
+ * @file oskar_sky_model_copy.h
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
-#include "interferometry/oskar_Visibilities.h"
 #include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Main interferometer simulation function (full polarisation).
+ * @brief Copies the contents of one data structure to another.
  *
- * @details
- * This function produces simulated visibilities from an interferometer.
+ * @param[out] dst Pointer to destination structure to copy into.
+ * @param[in]  src Pointer to source structure to copy from.
  *
- * @param[out] vis_amp    Output visibilities.
- * @param[in]  sky        Sky model structure.
- * @param[in]  telescope  Telescope model structure.
- * @param[in]  times      Simulation time data.
- * @param[in]  frequency  Observation frequency in Hz.
+ * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
-        double frequency);
+int oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_INTERFEROMETER_H_ */
+#endif /* OSKAR_SKY_MODEL_COPY_H_ */

@@ -29,11 +29,15 @@ set(sky_SRC
     src/oskar_sky_model_append.cpp
     src/oskar_sky_model_compact.cu
     src/oskar_sky_model_compute_relative_lmn.cpp
+    src/oskar_sky_model_copy.c
+    src/oskar_sky_model_get_ptr.c
+    src/oskar_sky_model_init.c
     src/oskar_sky_model_load.cpp
     src/oskar_sky_model_location.c
     src/oskar_sky_model_resize.cpp
     src/oskar_sky_model_scale_by_spectral_index.cu
     src/oskar_sky_model_set_source.cpp
+    src/oskar_sky_model_split.c
     src/oskar_sky_model_type.c
     src/oskar_sky_model_write.c
     src/oskar_SkyModel.cpp

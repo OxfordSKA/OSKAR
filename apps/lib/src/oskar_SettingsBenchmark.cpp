@@ -26,44 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
+#include "apps/lib/oskar_SettingsBenchmark.h"
+#include <QtCore/QSettings>
+#include <cstdio>
 
-/**
- * @file oskar_interferometer.h
- */
-
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Mem.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Main interferometer simulation function (full polarisation).
- *
- * @details
- * This function produces simulated visibilities from an interferometer.
- *
- * @param[out] vis_amp    Output visibilities.
- * @param[in]  sky        Sky model structure.
- * @param[in]  telescope  Telescope model structure.
- * @param[in]  times      Simulation time data.
- * @param[in]  frequency  Observation frequency in Hz.
- */
-OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
-        double frequency);
-
-#ifdef __cplusplus
+void oskar_SettingsBenchmark::load(const QSettings& settings)
+{
+    // note: need to cast to double to accept values of the form 1e6
+    num_sources_  = (int)settings.value("benchmark/num_sources").toDouble();
+    num_stations_ = (int)settings.value("benchmark/num_stations").toDouble();
+    num_antennas_ = (int)settings.value("benchmark/num_antennas").toDouble();
 }
-#endif
-
-#endif /* OSKAR_INTERFEROMETER_H_ */

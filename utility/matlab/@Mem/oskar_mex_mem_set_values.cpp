@@ -108,7 +108,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     mexPrintf("values type = %i %s\n", values_type, oskar_get_type_string(values_type));
 
+    if (type != values_type)
+    {
 
+    }
 
 
 

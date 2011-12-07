@@ -9,6 +9,7 @@ set(apps_SRC
     src/oskar_set_up_sky.cpp
     src/oskar_set_up_telescope.cpp
     src/oskar_Settings.cpp
+    src/oskar_SettingsBenchmark.cpp
     src/oskar_SettingsImage.cpp
     src/oskar_SettingsObservation.cpp
 )

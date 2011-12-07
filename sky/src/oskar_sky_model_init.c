@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_init.h"
+#include "sky/oskar_sky_model_init.h"
 #include "utility/oskar_mem_init.h"
 #include <stdlib.h>
 
@@ -34,55 +34,49 @@
 extern "C" {
 #endif
 
-int oskar_station_model_init(oskar_StationModel* model, int type, int location,
+int oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
         int num_elements)
 {
-    int complex_type, err = 0;
+    int error = OSKAR_SUCCESS;
+    int owner = OSKAR_TRUE;
 
-    /* Check for sane inputs. */
     if (model == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Check the type. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    /* Determine the complex type. */
-    complex_type = (type == OSKAR_SINGLE) ?
-            OSKAR_SINGLE_COMPLEX : OSKAR_DOUBLE_COMPLEX;
+    if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
-    /* Initialise variables. */
-    model->longitude_rad = 0.0;
-    model->latitude_rad = 0.0;
-    model->altitude_metres = 0.0;
-    model->ra0_rad = 0.0;
-    model->dec0_rad = 0.0;
-    model->num_elements = num_elements;
+    /* Set meta-data */
+    model->num_sources = num_elements;
 
     /* Initialise the memory. */
-    err = oskar_mem_init(&model->x, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->y, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->z, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->weight, complex_type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->amp_gain, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->amp_error, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->phase_offset, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->phase_error, type, location, num_elements, 1);
-    if (err) return err;
-    model->child = NULL;
-    model->parent = NULL;
-    model->single_element_model = 0;
-    model->element_pattern = NULL;
-    model->bit_depth = 0;
-    model->coord_units = OSKAR_METRES;
-    return err;
+    error = oskar_mem_init(&model->RA, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->Dec, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->I, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->Q, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->U, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->V, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->reference_freq, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->spectral_index, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->rel_l, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->rel_m, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->rel_n, type, location, num_elements, owner);
+    if (error) return error;
+
+    return error;
 }
 
 #ifdef __cplusplus

@@ -106,6 +106,14 @@ struct oskar_SkyModel
     ~oskar_SkyModel();
 
     /**
+     * @brief Copies this sky model to another
+     *
+     * @return An error code.
+     */
+    int copy_to(oskar_SkyModel* other);
+
+
+    /**
      * @brief Appends the specified sky model the the current sky model.
      *
      * @param other Sky model to append.

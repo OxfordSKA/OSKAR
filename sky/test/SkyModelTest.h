@@ -52,6 +52,7 @@ class SkyModelTest : public CppUnit::TestFixture
         CPPUNIT_TEST(test_load);
         CPPUNIT_TEST(test_compute_relative_lmn);
         CPPUNIT_TEST(test_compact);
+        CPPUNIT_TEST(test_split);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -62,6 +63,7 @@ class SkyModelTest : public CppUnit::TestFixture
         void test_load();
         void test_compute_relative_lmn();
         void test_compact();
+        void test_split();
 };
 
 // Register the test class.

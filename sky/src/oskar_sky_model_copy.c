@@ -26,44 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
 
-/**
- * @file oskar_interferometer.h
- */
-
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Mem.h"
+#include "sky/oskar_sky_model_copy.h"
+#include "utility/oskar_mem_copy.h"
+#include "stdlib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Main interferometer simulation function (full polarisation).
- *
- * @details
- * This function produces simulated visibilities from an interferometer.
- *
- * @param[out] vis_amp    Output visibilities.
- * @param[in]  sky        Sky model structure.
- * @param[in]  telescope  Telescope model structure.
- * @param[in]  times      Simulation time data.
- * @param[in]  frequency  Observation frequency in Hz.
- */
-OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
-        double frequency);
+int oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src)
+{
+    int error = OSKAR_SUCCESS;
+
+    if (src == NULL || dst == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Copy the memory blocks */
+    error = oskar_mem_copy(&dst->RA, &src->RA);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->Dec, &src->Dec);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->I, &src->I);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->Q, &src->Q);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->U, &src->U);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->V, &src->V);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->reference_freq, &src->reference_freq);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->spectral_index, &src->spectral_index);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->rel_l, &src->rel_l);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->rel_m, &src->rel_m);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->rel_n, &src->rel_n);
+    if (error) return error;
+
+    /* Copy meta data */
+    dst->num_sources = src->num_sources;
+
+    return error;
+}
+
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_INTERFEROMETER_H_ */

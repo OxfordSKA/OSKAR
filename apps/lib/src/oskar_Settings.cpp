@@ -37,7 +37,7 @@
 
 oskar_Settings::oskar_Settings(const QString& filename)
 {
-    _disable_station_beam = false;
+    disable_station_beam_ = false;
 
     // Load the settings file, if one is provided.
     if (!filename.isEmpty())
@@ -50,7 +50,7 @@ oskar_Settings::~oskar_Settings()
 
 int oskar_Settings::load(const QString& filename)
 {
-    _filename = filename;
+    filename_ = filename;
 
     // Check the settings file exists.
     if (!QFileInfo(filename).isFile())
@@ -63,40 +63,53 @@ int oskar_Settings::load(const QString& filename)
     QSettings settings(filename, QSettings::IniFormat);
 
     // Read settings.
-    _sky_file          = settings.value("sky/source_file").toString();
+    sky_file_          = settings.value("sky/source_file").toString();
 
-    _telescope_file    = settings.value("telescope/layout_file").toString();
-    _latitude_deg      = settings.value("telescope/latitude_deg").toDouble();
-    _longitude_deg     = settings.value("telescope/longitude_deg").toDouble();
-    _altitude_m        = settings.value("telescope/altitude_m").toDouble();
+    telescope_file_    = settings.value("telescope/layout_file").toString();
+    latitude_deg_      = settings.value("telescope/latitude_deg").toDouble();
+    longitude_deg_     = settings.value("telescope/longitude_deg").toDouble();
+    altitude_m_        = settings.value("telescope/altitude_m").toDouble();
 
-    _station_dir       = settings.value("station/station_directory").toString();
-    _disable_station_beam = settings.value("station/disable_station_beam").toBool();
+    station_dir_       = settings.value("station/station_directory").toString();
+    disable_station_beam_ = settings.value("station/disable_station_beam").toBool();
 
-    _obs.load(settings);
+    obs_.load(settings);
 
-    _image.load(settings);
+    image_.load(settings);
 
-    _prec_double       = settings.value("global/double_precision").toBool();
+    // Load settings from benchmark group.
+    benchmark_.load(settings);
+
+    prec_double_ = settings.value("global/double_precision").toBool();
+    max_sources_per_gpu_ = settings.value("global/max_sources_per_gpu").toUInt();
+    max_host_threads_ = settings.value("global/max_host_threads").toUInt();
+    int size = settings.beginReadArray("global/use_devices");
+    use_devices_.resize(size);
+    for (int i = 0; i < size; ++i)
+    {
+        settings.setArrayIndex(i);
+        use_devices_[i] = settings.value("id").toInt();
+    }
+    settings.endArray();
 
     return check();
 }
 
 int oskar_Settings::check() const
 {
-    if (!QFileInfo(_sky_file).isFile())
+    if (benchmark().num_sources() == 0 && !QFileInfo(sky_file_).isFile())
     {
         fprintf(stderr, "ERROR: Sky file doesn't exist!\n");
         return FALSE;
     }
 
-    if (!QFileInfo(_telescope_file).isFile())
+    if (benchmark().num_stations() == 0 && !QFileInfo(telescope_file_).isFile())
     {
         fprintf(stderr, "ERROR: Telescope layout file doesn't exist!\n");
         return FALSE;
     }
 
-    if (!QFileInfo(_station_dir).isDir())
+    if (benchmark().num_antennas() == 0 && !QFileInfo(station_dir_).isDir())
     {
         fprintf(stderr, "ERROR: Station directory doesn't exist!\n");
         return FALSE;
@@ -109,27 +122,27 @@ int oskar_Settings::check() const
 void oskar_Settings::print() const
 {
     printf("\n");
-    printf("= Settings (%s)\n", _filename.toLatin1().data());
-    printf("  - Double precision       = %s\n", _prec_double ? "true" : "false");
-    printf("  - Sky file               = %s\n", _sky_file.toLatin1().data());
-    printf("  - Stations directory     = %s\n", _station_dir.toLatin1().data());
-    printf("  - Station beam disabled  = %s\n", _disable_station_beam ? "true" : "false");
-    printf("  - Telescope file         = %s\n", _telescope_file.toLatin1().data());
-    printf("  - Frequency (Hz)         = %e\n", _obs.start_frequency());
-    printf("  - Frequency inc (Hz)     = %e\n", _obs.frequency_inc());
-    printf("  - Num. channels          = %u\n", _obs.num_channels());
-    printf("  - Channel bandwidth (Hz) = %f\n", _obs.channel_bandwidth());
-    printf("  - Phase centre RA (deg)  = %f\n", _obs.ra0_deg());
-    printf("  - Phase centre Dec (deg) = %f\n", _obs.dec0_deg());
-    printf("  - Latitude (deg)         = %f\n", _latitude_deg);
-    printf("  - Longitude (deg)        = %f\n", _longitude_deg);
-    printf("  - Obs. length (sec)      = %f\n", _obs.sim_time()->obs_length_seconds);
-    printf("  - Obs. start (MJD)       = %f\n", _obs.sim_time()->obs_start_mjd_utc);
-    printf("  - Num. visibility dumps  = %i\n", _obs.sim_time()->num_vis_dumps);
-    printf("  - Num. visibility ave.   = %i\n", _obs.sim_time()->num_vis_ave);
-    printf("  - Num. fringe ave.       = %i\n", _obs.sim_time()->num_fringe_ave);
-    printf("  - OSKAR visibility file  = %s\n", _obs.oskar_vis_filename().toLatin1().data());
-    printf("  - MS file                = %s\n", _obs.ms_filename().toLatin1().data());
+    printf("= Settings (%s)\n", filename_.toLatin1().data());
+    printf("  - Double precision       = %s\n", prec_double_ ? "true" : "false");
+    printf("  - Sky file               = %s\n", sky_file_.toLatin1().data());
+    printf("  - Stations directory     = %s\n", station_dir_.toLatin1().data());
+    printf("  - Station beam disabled  = %s\n", disable_station_beam_ ? "true" : "false");
+    printf("  - Telescope file         = %s\n", telescope_file_.toLatin1().data());
+    printf("  - Frequency (Hz)         = %e\n", obs_.start_frequency());
+    printf("  - Frequency inc (Hz)     = %e\n", obs_.frequency_inc());
+    printf("  - Num. channels          = %u\n", obs_.num_channels());
+    printf("  - Channel bandwidth (Hz) = %f\n", obs_.channel_bandwidth());
+    printf("  - Phase centre RA (deg)  = %f\n", obs_.ra0_deg());
+    printf("  - Phase centre Dec (deg) = %f\n", obs_.dec0_deg());
+    printf("  - Latitude (deg)         = %f\n", latitude_deg_);
+    printf("  - Longitude (deg)        = %f\n", longitude_deg_);
+    printf("  - Obs. length (sec)      = %f\n", obs_.sim_time()->obs_length_seconds);
+    printf("  - Obs. start (MJD)       = %f\n", obs_.sim_time()->obs_start_mjd_utc);
+    printf("  - Num. visibility dumps  = %i\n", obs_.sim_time()->num_vis_dumps);
+    printf("  - Num. visibility ave.   = %i\n", obs_.sim_time()->num_vis_ave);
+    printf("  - Num. fringe ave.       = %i\n", obs_.sim_time()->num_fringe_ave);
+    printf("  - OSKAR visibility file  = %s\n", obs_.oskar_vis_filename().toLatin1().data());
+    printf("  - MS file                = %s\n", obs_.ms_filename().toLatin1().data());
     printf("\n");
 }
 

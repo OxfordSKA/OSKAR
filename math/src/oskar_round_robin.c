@@ -26,44 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
 
-/**
- * @file oskar_interferometer.h
- */
-
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Mem.h"
+#include "math/oskar_round_robin.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Main interferometer simulation function (full polarisation).
- *
- * @details
- * This function produces simulated visibilities from an interferometer.
- *
- * @param[out] vis_amp    Output visibilities.
- * @param[in]  sky        Sky model structure.
- * @param[in]  telescope  Telescope model structure.
- * @param[in]  times      Simulation time data.
- * @param[in]  frequency  Observation frequency in Hz.
- */
-OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
-        double frequency);
+void oskar_round_robin(int items, int resources, int rank, int* number,
+        int* start)
+{
+    int remainder;
+    *number = items / resources;
+    remainder = items % resources;
+    if (rank < remainder) (*number)++;
+    *start = *number * rank;
+    if (rank >= remainder) *start += remainder;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_INTERFEROMETER_H_ */

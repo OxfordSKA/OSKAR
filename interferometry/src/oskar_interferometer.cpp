@@ -126,7 +126,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             if (err) return err;
 
             // Join Jones matrices (R = E * R).
-            err = oskar_jones_join(&R, &E, &R); if (err) return err;
+            err = oskar_jones_join(&R, &E, &R);
+            if (err) return err;
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {
@@ -155,8 +156,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
 
         // Add visibilities to global data.
-        err = vis_amp->insert(&vis, j * n_baselines); if (err) return err;
+        err = vis_amp->insert(&vis, j * n_baselines);
+        if (err) return err;
     }
 
-    return 0;
+    return OSKAR_SUCCESS;
 }

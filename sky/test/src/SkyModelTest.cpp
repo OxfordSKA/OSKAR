@@ -31,9 +31,12 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_compact.h"
+#include "sky/oskar_sky_model_split.h"
+#include "sky/oskar_sky_model_init.h"
 #include "utility/oskar_Work.h"
+#include "utility/oskar_get_error_string.h"
 
-#define TIMER_ENABLE 1
+//#define TIMER_ENABLE
 #include "utility/timer.h"
 #include <cstdio>
 #include <cstdlib>
@@ -367,3 +370,80 @@ void SkyModelTest::test_compact()
     }
 }
 
+void SkyModelTest::test_split()
+{
+    int num_sources = 2139;
+    int max_sources_per_subset = 510;
+
+    oskar_SkyModel sky_full(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_sources);
+    oskar_SkyModel* sky_subset = NULL;
+
+    // Split the sky model into a number of subsets.
+    int num_subsets = 0;
+    int error = oskar_sky_model_split(&sky_subset, &num_subsets,
+            max_sources_per_subset, &sky_full);
+
+    // Check if the split worked as expected.
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    CPPUNIT_ASSERT_EQUAL((int)ceil((double)num_sources/max_sources_per_subset),
+            num_subsets);
+
+    for (int i = 0; i < num_subsets; ++i)
+    {
+        CPPUNIT_ASSERT(sky_subset[i].num_sources <= max_sources_per_subset);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky_subset[i].type());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, sky_subset[i].location());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].RA.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].Dec.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].I.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].Q.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].U.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].V.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].reference_freq.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].spectral_index.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].rel_l.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].rel_m.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset[i].num_sources, sky_subset[i].rel_n.num_elements());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].RA.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].Dec.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].I.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].Q.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].U.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].V.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].reference_freq.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].spectral_index.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].rel_l.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].rel_m.owner());
+        CPPUNIT_ASSERT_EQUAL(false, sky_subset[i].rel_n.owner());
+    }
+
+    // Copy subsets to the GPU.
+    // NOTE: this interface is not exactly ideal as it requires the user to use
+    // the low level function oskar_sky_model_init().
+    oskar_SkyModel* sky_subset_gpu = NULL;
+    sky_subset_gpu = (oskar_SkyModel*)malloc(num_subsets * sizeof(oskar_SkyModel));
+    for (int i = 0; i < num_subsets; ++i)
+    {
+        error = oskar_sky_model_init(&sky_subset_gpu[i], sky_subset[i].type(),
+                OSKAR_LOCATION_GPU, 0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+        error = sky_subset[i].copy_to(&sky_subset_gpu[i]);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    }
+
+    for (int i = 0; i < num_subsets; ++i)
+    {
+        CPPUNIT_ASSERT(sky_subset_gpu[i].num_sources <= max_sources_per_subset);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky_subset_gpu[i].type());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky_subset_gpu[i].location());
+        CPPUNIT_ASSERT_EQUAL(sky_subset_gpu[i].num_sources, sky_subset_gpu[i].RA.num_elements());
+        CPPUNIT_ASSERT_EQUAL(sky_subset_gpu[i].num_sources, sky_subset_gpu[i].rel_m.num_elements());
+        CPPUNIT_ASSERT_EQUAL(true, sky_subset_gpu[i].RA.owner());
+        CPPUNIT_ASSERT_EQUAL(true, sky_subset_gpu[i].Q.owner());
+        CPPUNIT_ASSERT_EQUAL(true, sky_subset_gpu[i].rel_m.owner());
+    }
+
+    // Cleanup.
+    free(sky_subset_gpu);
+    free(sky_subset);
+}

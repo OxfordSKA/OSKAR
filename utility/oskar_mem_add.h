@@ -26,18 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
+
+#ifndef OSKAR_MEM_ADD_H_
+#define OSKAR_MEM_ADD_H_
 
 /**
- * @file oskar_interferometer.h
+ * @file oskar_mem_add.h
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
@@ -45,25 +42,25 @@ extern "C" {
 #endif
 
 /**
- * @brief
- * Main interferometer simulation function (full polarisation).
+ * @brief Element-wise add of the contents of the oskar_Mem arrays \p b and \p c
+ * storing the result in \p a.
  *
  * @details
- * This function produces simulated visibilities from an interferometer.
+ * Note: Current this function is restricted to adding mem pointers
+ * of the same type on the CPU.
  *
- * @param[out] vis_amp    Output visibilities.
- * @param[in]  sky        Sky model structure.
- * @param[in]  telescope  Telescope model structure.
- * @param[in]  times      Simulation time data.
- * @param[in]  frequency  Observation frequency in Hz.
+ * @param[out] a oskar_Mem pointer with the result of adding b and c.
+ * @param[in]  b oskar_Mem pointer
+ * @param[in]  c oskar_Mem pointer
+ *
+ * @return An OSKAR error code.
  */
 OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
-        double frequency);
+int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_INTERFEROMETER_H_ */
+#endif /* OSKAR_MEM_ADD_H_ */

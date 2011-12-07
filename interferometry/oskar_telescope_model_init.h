@@ -47,13 +47,13 @@ extern "C" {
  * @details
  * Initialises and allocates memory for a telescope model structure.
  *
- * @param[in] type Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
- * @param[in] location Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
- * @param[in] n_stations Number of stations.
+ * @param[in] type         Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
+ * @param[in] location     Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @param[in] num_stations Number of stations.
  */
 OSKAR_EXPORT
 int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int n_stations);
+        int location, int num_stations);
 
 #ifdef __cplusplus
 }

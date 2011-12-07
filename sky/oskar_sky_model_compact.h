@@ -47,6 +47,8 @@ extern "C" {
  * Compacts a sky model into another one by removing sources below the
  * horizon of all stations.
  *
+ * TODO oskar_sky_model_horizon_clip() better name?
+ *
  * @details
  * Copies sources into another sky model that are above the horizon of
  * stations.

@@ -31,6 +31,7 @@
 
 #include "apps/lib/oskar_SettingsImage.h"
 #include "apps/lib/oskar_SettingsObservation.h"
+#include "apps/lib/oskar_SettingsBenchmark.h"
 
 #include <QtCore/QString>
 #include <QtCore/QSettings>
@@ -51,53 +52,57 @@ class oskar_Settings
         void print() const;
 
     public:
-        QString sky_file() const { return _sky_file; }
-        void set_sky_file(const QString& value) { _sky_file = value; }
+        QString sky_file() const { return sky_file_; }
+        void set_sky_file(const QString& value) { sky_file_ = value; }
 
-        QString telescope_file() const { return _telescope_file; }
-        void set_telescope_file(const QString& value) { _telescope_file = value; }
+        QString telescope_file() const { return telescope_file_; }
+        void set_telescope_file(const QString& value) { telescope_file_ = value; }
 
-        double longitude_deg() const { return _longitude_deg; }
-        void set_longitude_deg(const double value) { _longitude_deg = value; }
-        double latitude_deg() const { return _latitude_deg; }
-        void set_latitude_deg(const double value) { _latitude_deg = value; }
-        double longitude_rad() const { return _longitude_deg * DEG2RAD; }
-        double latitude_rad() const { return _latitude_deg * DEG2RAD; }
-        double altitude_m() const { return _altitude_m; }
-        void set_altitude_m(const double value) { _altitude_m = value; }
+        double longitude_deg() const { return longitude_deg_; }
+        void set_longitude_deg(const double value) { longitude_deg_ = value; }
+        double latitude_deg() const { return latitude_deg_; }
+        void set_latitude_deg(const double value) { latitude_deg_ = value; }
+        double longitude_rad() const { return longitude_deg_ * DEG2RAD; }
+        double latitude_rad() const { return latitude_deg_ * DEG2RAD; }
+        double altitude_m() const { return altitude_m_; }
+        void set_altitude_m(const double value) { altitude_m_ = value; }
 
-        QString station_dir() const { return _station_dir; }
-        void set_station_dir(const QString& value) { _station_dir = value; }
-        bool disable_station_beam() const { return _disable_station_beam; }
+        QString station_dir() const { return station_dir_; }
+        void set_station_dir(const QString& value) { station_dir_ = value; }
+        bool disable_station_beam() const { return disable_station_beam_; }
         void set_disable_station_beam(const bool value)
-        { _disable_station_beam = value; }
+        { disable_station_beam_ = value; }
 
-        bool double_precision() const { return _prec_double; }
+        bool double_precision() const { return prec_double_; }
+        unsigned max_sources_per_gpu() const { return max_sources_per_gpu_; }
+        unsigned max_host_threads() const { return max_host_threads_; }
+        unsigned num_devices() const { return use_devices_.size(); }
+        const int* use_devices() const { return use_devices_.constData(); }
 
-        const oskar_SettingsObservation& obs() const { return _obs; }
-        oskar_SettingsObservation& obs() { return _obs; }
+        const oskar_SettingsObservation& obs() const { return obs_; }
+        oskar_SettingsObservation& obs() { return obs_; }
 
-        const oskar_SettingsImage& image() const { return _image; }
-        oskar_SettingsImage& image() { return _image; }
+        const oskar_SettingsImage& image() const { return image_; }
+        oskar_SettingsImage& image() { return image_; }
+
+        const oskar_SettingsBenchmark& benchmark() const { return benchmark_; }
 
     private:
-        bool _prec_double;
-
-        QString _filename;
-
-        QString _sky_file;
-
-        QString _telescope_file;
-        double _longitude_deg;
-        double _latitude_deg;
-        double _altitude_m;
-
-        QString _station_dir;
-        bool _disable_station_beam;
-
-        oskar_SettingsObservation _obs;
-
-        oskar_SettingsImage _image;
+        bool prec_double_;
+        unsigned max_sources_per_gpu_;
+        unsigned max_host_threads_;
+        QVector<int> use_devices_;
+        QString filename_;
+        QString sky_file_;
+        QString telescope_file_;
+        double longitude_deg_;
+        double latitude_deg_;
+        double altitude_m_;
+        QString station_dir_;
+        bool disable_station_beam_;
+        oskar_SettingsObservation obs_;
+        oskar_SettingsImage image_;
+        oskar_SettingsBenchmark benchmark_;
 };
 
 #endif // OSKAR_SETTINGS_H_

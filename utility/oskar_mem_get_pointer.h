@@ -47,6 +47,7 @@ extern "C" {
  * @details
  * Note: The returned structure will not hold ownership of the memory to
  * which it points.
+ *
  * Warning: If the pointer \p ptr returned already owns memory, this will be
  * lost and cause a leak!
  *

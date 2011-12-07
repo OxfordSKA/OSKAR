@@ -19,6 +19,15 @@ target_link_libraries(oskar_sim_scalar oskar oskar_apps ${QT_QTCORE_LIBRARY})
 set_target_properties(oskar_sim_scalar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS oskar_sim_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
+# BINARY: oskar_sim_benchmark
+include_directories(${QT_INCLUDE_DIR})
+add_executable(oskar_sim_benchmark oskar_sim_benchmark.cpp)
+target_link_libraries(oskar_sim_benchmark oskar oskar_apps ${QT_QTCORE_LIBRARY})
+set_target_properties(oskar_sim_benchmark PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+set_target_properties(oskar_sim_benchmark PROPERTIES 
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}" LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+install(TARGETS oskar_sim_benchmark DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+
 # BINARY: oskar_beam_pattern
 include_directories(${QT_INCLUDE_DIR})
 add_executable(oskar_beam_pattern oskar_beam_pattern.cpp)

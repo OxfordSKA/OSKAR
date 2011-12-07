@@ -67,11 +67,11 @@ struct oskar_TelescopeModel
      * Constructs, initialises and allocates memory for a telescope model
      * data structure.
      *
-     * @param[in] type Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
-     * @param[in] location Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
-     * @param[in] n_stations Number of stations.
+     * @param[in] type         Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
+     * @param[in] location     Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+     * @param[in] num_stations Number of stations.
      */
-    oskar_TelescopeModel(int type, int location, int n_stations = 0);
+    oskar_TelescopeModel(int type, int location, int num_stations = 0);
 
     /**
      * @brief Constructs a telescope model structure from an existing one.
@@ -193,6 +193,13 @@ struct oskar_TelescopeModel
      * code if the types are inconsistent.
      */
     int type() const;
+
+    /**
+     * @brief Returns the number of baselines.
+     */
+    int num_baselines() const
+    { return ((num_stations * (num_stations - 1)) / 2); }
+
 #endif
 };
 

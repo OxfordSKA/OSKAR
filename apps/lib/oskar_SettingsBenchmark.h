@@ -26,44 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_INTERFEROMETER_H_
-#define OSKAR_INTERFEROMETER_H_
+#ifndef OSKAR_SETTINGS_BENCHMARK_H_
+#define OSKAR_SETTINGS_BENCHMARK_H_
 
-/**
- * @file oskar_interferometer.h
- */
+#include <QtCore/QString>
+#include <QtCore/QSettings>
+#include <QtCore/QVector>
 
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Mem.h"
+/// Container class for benchmark settings group.
+class oskar_SettingsBenchmark
+{
+    public:
+        void load(const QSettings& settings);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    public:
+        unsigned num_sources()  const { return num_sources_; }
+        unsigned num_stations() const { return num_stations_; }
+        unsigned num_antennas() const { return num_antennas_; }
 
-/**
- * @brief
- * Main interferometer simulation function (full polarisation).
- *
- * @details
- * This function produces simulated visibilities from an interferometer.
- *
- * @param[out] vis_amp    Output visibilities.
- * @param[in]  sky        Sky model structure.
- * @param[in]  telescope  Telescope model structure.
- * @param[in]  times      Simulation time data.
- * @param[in]  frequency  Observation frequency in Hz.
- */
-OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
-        double frequency);
+    private:
+        unsigned num_sources_;
+        unsigned num_stations_;
+        unsigned num_antennas_;
+};
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_INTERFEROMETER_H_ */
+#endif // OSKAR_SETTINGS_BENCHMARK_H_

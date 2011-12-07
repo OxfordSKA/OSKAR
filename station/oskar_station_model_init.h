@@ -47,10 +47,10 @@ extern "C" {
  * @details
  * This function initialises the station model data structure.
  *
- * @param[out] model Pointer to data structure to initialise.
- * @param[in] type Enumerated data type of memory contents (magic number).
- * @param[in] location Specify 0 for host memory, 1 for device memory.
- * @param[in] n_elements Number of elements of type \p type in the array.
+ * @param[out] model        Pointer to data structure to initialise.
+ * @param[in]  type         Enumerated data type of memory contents (magic number).
+ * @param[in]  location     Specify 0 for host memory, 1 for device memory.
+ * @param[in]  num_elements Number of elements of type \p type in the array.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -60,7 +60,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_station_model_init(oskar_StationModel* model, int type, int location,
-        int n_elements);
+        int num_elements);
 
 #ifdef __cplusplus
 }

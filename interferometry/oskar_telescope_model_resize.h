@@ -47,11 +47,11 @@ extern "C" {
  * @details
  * Resizes a telescope model structure.
  *
- * @param telescope  Telescope model structure to resize.
- * @param n_stations New number of stations.
+ * @param telescope    Telescope model structure to resize.
+ * @param num_stations New number of stations.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int n_stations);
+int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int num_stations);
 
 #ifdef __cplusplus
 }

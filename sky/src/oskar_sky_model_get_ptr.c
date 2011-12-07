@@ -26,63 +26,56 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_init.h"
-#include "utility/oskar_mem_init.h"
-#include <stdlib.h>
+
+#include "sky/oskar_sky_model_get_ptr.h"
+#include "utility/oskar_mem_get_pointer.h"
+#include "stdlib.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_station_model_init(oskar_StationModel* model, int type, int location,
-        int num_elements)
+int oskar_sky_model_get_ptr(oskar_SkyModel* sky_ptr, const oskar_SkyModel* sky,
+        int offset, int num_sources)
 {
-    int complex_type, err = 0;
+    int err = OSKAR_SUCCESS;
 
-    /* Check for sane inputs. */
-    if (model == NULL)
+    if (sky == NULL || sky_ptr == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Check the type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+    if (offset < 0 || num_sources < 0 ||
+            sky->num_sources < offset + num_sources)
+    {
+        return OSKAR_ERR_OUT_OF_RANGE;
+    }
 
-    /* Determine the complex type. */
-    complex_type = (type == OSKAR_SINGLE) ?
-            OSKAR_SINGLE_COMPLEX : OSKAR_DOUBLE_COMPLEX;
+    sky_ptr->num_sources = num_sources;
+    err = oskar_mem_get_pointer(&sky_ptr->RA,  &sky->RA, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->Dec, &sky->Dec, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->I, &sky->I, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->Q, &sky->Q, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->U, &sky->U, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->V, &sky->V, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->reference_freq, &sky->reference_freq,
+            offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->spectral_index, &sky->spectral_index,
+            offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->rel_l, &sky->rel_l, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->rel_m, &sky->rel_m, offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->rel_n, &sky->rel_n, offset, num_sources);
+    if (err) return err;
 
-    /* Initialise variables. */
-    model->longitude_rad = 0.0;
-    model->latitude_rad = 0.0;
-    model->altitude_metres = 0.0;
-    model->ra0_rad = 0.0;
-    model->dec0_rad = 0.0;
-    model->num_elements = num_elements;
-
-    /* Initialise the memory. */
-    err = oskar_mem_init(&model->x, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->y, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->z, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->weight, complex_type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->amp_gain, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->amp_error, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->phase_offset, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->phase_error, type, location, num_elements, 1);
-    if (err) return err;
-    model->child = NULL;
-    model->parent = NULL;
-    model->single_element_model = 0;
-    model->element_pattern = NULL;
-    model->bit_depth = 0;
-    model->coord_units = OSKAR_METRES;
-    return err;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus
