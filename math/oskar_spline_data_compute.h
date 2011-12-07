@@ -26,21 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_add.h"
-#include <stdlib.h>
+#ifndef OSKAR_SPLINE_DATA_COMPUTE_H_
+#define OSKAR_SPLINE_DATA_COMPUTE_H_
+
+/**
+ * @file oskar_spline_data_compute.h
+ */
+
+#include "oskar_global.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
-{
-    if (a == NULL || b == NULL || c == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    return OSKAR_SUCCESS;
-}
+/**
+ * @brief
+ * Computes spline data from a table.
+ *
+ * @details
+ * This function computes all required spline data from an input data table.
+ *
+ * Note that the fastest varying dimension is along y.
+ *
+ * @param[in,out] spline Pointer to data structure.
+ * @param[in] num_x The number of input grid points in the x dimension.
+ * @param[in] num_y The number of input grid points in the y dimension.
+ * @param[in] start_x The value of x on the first grid line.
+ * @param[in] start_y The value of y on the first grid line.
+ * @param[in] end_x The value of x on the last grid line.
+ * @param[in] end_y The value of y on the last grid line.
+ * @param[in] data Pointer to look-up table data.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_spline_data_compute(oskar_SplineData* spline, int num_x, int num_y,
+        double start_x, double start_y, double end_x, double end_y,
+        const oskar_Mem* data);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SPLINE_DATA_COMPUTE_H_ */

@@ -31,6 +31,10 @@ set(math_SRC
     src/oskar_round_robin.c
     src/oskar_sph_from_lm.c
     src/oskar_sph_to_lm.c
+    src/oskar_spline_data_compute.c
+    src/oskar_spline_data_free.c
+    src/oskar_spline_data_init.c
+    src/oskar_spline_set_up.c
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})

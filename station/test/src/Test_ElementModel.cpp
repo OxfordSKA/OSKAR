@@ -141,9 +141,9 @@ void Test_ElementModel::test_method()
     const float* theta_im = (const float*)pattern.theta_im;
     const float* phi_re = (const float*)pattern.phi_re;
     const float* phi_im = (const float*)pattern.phi_im;
-    CPPUNIT_ASSERT_EQUAL(30, pattern.n_points);
-    CPPUNIT_ASSERT_EQUAL(10, pattern.n_theta);
-    CPPUNIT_ASSERT_EQUAL(3, pattern.n_phi);
+    CPPUNIT_ASSERT_EQUAL(30, pattern.num_points);
+    CPPUNIT_ASSERT_EQUAL(10, pattern.num_points_theta);
+    CPPUNIT_ASSERT_EQUAL(3, pattern.num_points_phi);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0 * M_PI / 180.0, pattern.min_theta, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0 * M_PI / 180.0, pattern.min_phi, 1e-6);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(90.0 * M_PI / 180.0, pattern.max_theta, 1e-6);

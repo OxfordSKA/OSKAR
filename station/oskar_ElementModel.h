@@ -33,6 +33,7 @@
  * @file oskar_ElementModel.h
  */
 
+#include "math/oskar_SplineData.h"
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
@@ -51,21 +52,27 @@ extern "C" {
  */
 struct oskar_ElementModel
 {
-    int coordsys;       /**< Specifies whether horizontal or wrt phase centre. */
-    int n_points;       /**< Total number of points in all arrays. */
-    int n_phi;          /**< Number of points in the phi direction. */
-    int n_theta;        /**< Number of points in the theta direction. */
-    double inc_phi;     /**< Increment in the phi direction, in radians. */
-    double inc_theta;   /**< Increment in the theta direction, in radians. */
-    double max_phi;     /**< Maximum value of phi, in radians. */
-    double max_theta;   /**< Maximum value of theta, in radians. */
-    double min_phi;     /**< Minimum value of phi, in radians. */
-    double min_theta;   /**< Minimum value of theta, in radians. */
-    oskar_Mem phi_re;   /**< Real part of response in phi direction. */
-    oskar_Mem phi_im;   /**< Imaginary part of response in phi direction. */
-    oskar_Mem theta_re; /**< Real part of response in theta direction. */
-    oskar_Mem theta_im; /**< Imaginary part of response in theta direction. */
-    oskar_Mem spline_coeff; /**< Pre-computed spline coefficients. */
+    int coordsys;         /**< Specifies whether horizontal or wrt phase centre. */
+    int function_type;    /**< Specifies an analytic function, if required. */
+    int num_points;       /**< Total number of points in all arrays. */
+    int num_points_phi;   /**< Number of points in the phi direction. */
+    int num_points_theta; /**< Number of points in the theta direction. */
+    double inc_phi;       /**< Increment in the phi direction, in radians. */
+    double inc_theta;     /**< Increment in the theta direction, in radians. */
+    double max_phi;       /**< Maximum value of phi, in radians. */
+    double max_theta;     /**< Maximum value of theta, in radians. */
+    double min_phi;       /**< Minimum value of phi, in radians. */
+    double min_theta;     /**< Minimum value of theta, in radians. */
+    oskar_Mem phi_re;     /**< Real part of response in phi direction. */
+    oskar_Mem phi_im;     /**< Imaginary part of response in phi direction. */
+    oskar_Mem theta_re;   /**< Real part of response in theta direction. */
+    oskar_Mem theta_im;   /**< Imaginary part of response in theta direction. */
+
+    /* The spline data are initialised at the pre-computation stage. */
+    oskar_SplineData spline_phi_re;
+    oskar_SplineData spline_phi_im;
+    oskar_SplineData spline_theta_re;
+    oskar_SplineData spline_theta_im;
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
 

@@ -177,9 +177,9 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     n_phi = (max_phi - min_phi) / inc_phi;
 
     /* Store number of points in arrays. */
-    data->n_points = n;
-    data->n_theta = 1 + round(n_theta); /* Must round to nearest integer. */
-    data->n_phi = 1 + round(n_phi); /* Must round to nearest integer. */
+    data->num_points = n;
+    data->num_points_theta = 1 + round(n_theta); /* Must round to nearest integer. */
+    data->num_points_phi = 1 + round(n_phi); /* Must round to nearest integer. */
     data->min_theta = min_theta;
     data->min_phi = min_phi;
     data->max_theta = max_theta;

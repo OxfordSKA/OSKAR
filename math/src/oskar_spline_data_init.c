@@ -26,19 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_add.h"
-#include <stdlib.h>
+#include "math/oskar_spline_data_init.h"
+#include "utility/oskar_mem_init.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
+int oskar_spline_data_init(oskar_SplineData* data, int type, int location)
 {
-    if (a == NULL || b == NULL || c == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    int err = 0;
+    data->degree_x = 0;
+    data->degree_y = 0;
+    data->num_knots_x = 0;
+    data->num_knots_y = 0;
+    err = oskar_mem_init(&data->knots_x, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_y, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->coeff, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
 
-    return OSKAR_SUCCESS;
+    return 0;
 }
 
 #ifdef __cplusplus

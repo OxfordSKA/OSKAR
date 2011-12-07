@@ -26,19 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_add.h"
-#include <stdlib.h>
+#include "station/oskar_element_model_compute_splines.h"
+#include "math/oskar_spline_data_compute.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
+int oskar_element_model_compute_splines(oskar_ElementModel* e)
 {
-    if (a == NULL || b == NULL || c == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    int err;
+    err = oskar_spline_data_compute(&e->spline_phi_im, e->num_points_phi,
+            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
+            e->max_theta, &e->phi_im);
+    if (err) return err;
+    err = oskar_spline_data_compute(&e->spline_phi_re, e->num_points_phi,
+            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
+            e->max_theta, &e->phi_re);
+    if (err) return err;
+    err = oskar_spline_data_compute(&e->spline_theta_im, e->num_points_phi,
+            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
+            e->max_theta, &e->theta_im);
+    if (err) return err;
+    err = oskar_spline_data_compute(&e->spline_theta_re, e->num_points_phi,
+            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
+            e->max_theta, &e->theta_re);
+    if (err) return err;
 
-    return OSKAR_SUCCESS;
+    return OSKAR_ERR_UNKNOWN;
 }
 
 #ifdef __cplusplus

@@ -26,21 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_add.h"
-#include <stdlib.h>
+#ifndef OSKAR_ELEMENT_MODEL_COMPUTE_SPLINES_H_
+#define OSKAR_ELEMENT_MODEL_COMPUTE_SPLINES_H_
+
+/**
+ * @file oskar_element_model_compute_splines.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_ElementModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
-{
-    if (a == NULL || b == NULL || c == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    return OSKAR_SUCCESS;
-}
+/**
+ * @brief
+ * Computes the spline coefficients for the element pattern data.
+ *
+ * @details
+ * This function computes the spline coefficients for the element pattern data,
+ * for later evaluation of the surface at the source positions.
+ */
+OSKAR_EXPORT
+int oskar_element_model_compute_splines(oskar_ElementModel* data);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_ELEMENT_MODEL_COMPUTE_SPLINES_H_ */

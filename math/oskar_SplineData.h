@@ -26,21 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_add.h"
-#include <stdlib.h>
+#ifndef OSKAR_SPLINE_DATA_H_
+#define OSKAR_SPLINE_DATA_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file oskar_SplineData.h
+ */
 
-int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
+#include "utility/oskar_Mem.h"
+
+/**
+ * @brief Structure to hold spline data.
+ *
+ * @details
+ * This structure holds the data required to construct a 2D surface from
+ * splines.
+ *
+ * The arrays knots_x and knots_y should always be at least
+ * size_x + degree_x + 1 and size_y + degree_y + 1 in length respectively,
+ * where size is the size of the input data (lookup table) dimension.
+ */
+struct oskar_SplineData
 {
-    if (a == NULL || b == NULL || c == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    int degree_x;      /**< Degree of spline in x direction (use 3). */
+    int degree_y;      /**< Degree of spline in y direction (use 3). */
+    int num_knots_x;   /**< Output actual number of knots in x direction. */
+    int num_knots_y;   /**< Output actual number of knots in y direction. */
+    oskar_Mem knots_x; /**< Knot positions in x. */
+    oskar_Mem knots_y; /**< Knot positions in y. */
+    oskar_Mem coeff;   /**< Spline coefficient array. */
+};
 
-    return OSKAR_SUCCESS;
-}
+typedef struct oskar_SplineData oskar_SplineData;
 
-#ifdef __cplusplus
-}
-#endif
+#endif /* OSKAR_SPLINE_DATA_H_ */
