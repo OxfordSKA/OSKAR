@@ -83,12 +83,12 @@ int main(int argc, char** argv)
     // Construct sky and telescope structures on the CPU.
     // NOTE replace these to load real data...
     oskar_SkyModel* sky_cpu;
-//    sky_cpu = oskar_set_up_benchmark_sky(settings);
-    sky_cpu = oskar_set_up_sky(settings);
+    sky_cpu = oskar_set_up_benchmark_sky(settings);
+    //    sky_cpu = oskar_set_up_sky(settings);
     if (sky_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
     oskar_TelescopeModel* telescope_cpu;
-//    telescope_cpu = oskar_set_up_benchmark_telescope(settings);
-    telescope_cpu = oskar_set_up_telescope(settings);
+    telescope_cpu = oskar_set_up_benchmark_telescope(settings);
+    //    telescope_cpu = oskar_set_up_telescope(settings);
     if (telescope_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
 
     // Split the sky model into chunks.
@@ -114,9 +114,13 @@ int main(int argc, char** argv)
     vis_global.time_inc_seconds   = times->dt_dump_days * 86400.0;
 
 
+    
+
+
     // Find out how many GPU's we have.
     int device_count = 0;
     error = (int)cudaGetDeviceCount(&device_count);
+
     printf("== Found %i CUDA devices!\n", device_count);
     if (device_count < (int)settings.num_devices())
     {
@@ -124,6 +128,10 @@ int main(int argc, char** argv)
                 device_count, settings.num_devices());
         oskar_exit(OSKAR_ERR_UNKNOWN);
     }
+
+
+
+
 
     // Set the number of host threads to use.
     int num_omp_threads = min(device_count, (int)settings.max_host_threads());
@@ -135,25 +143,20 @@ int main(int argc, char** argv)
     oskar_Mem* vis_temp = NULL;
     vis_acc  = (oskar_Mem*)malloc(settings.num_devices() * sizeof(oskar_Mem));
     vis_temp = (oskar_Mem*)malloc(settings.num_devices() * sizeof(oskar_Mem));
-    int num_elements = telescope_cpu->num_baselines() * times->num_vis_dumps;
-    printf("num_elements = %i\n", num_elements);
     for (int i = 0; i < (int)settings.num_devices(); ++i)
     {
         error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
                 telescope_cpu->num_baselines() * times->num_vis_dumps, OSKAR_TRUE);
         if (error) oskar_exit(error);
-        error = oskar_mem_clear_contents(&vis_acc[i]);
-        if (error) oskar_exit(error);
-
         error = oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
                 telescope_cpu->num_baselines() * times->num_vis_dumps, OSKAR_TRUE);
-        if (error) oskar_exit(error);
-        error = oskar_mem_clear_contents(&vis_temp[i]);
         if (error) oskar_exit(error);
     }
 
     // ################## SIMULATION ###########################################
     printf("\nStarting simulation ...\n");
+    QTime timer;
+    timer.start();
     for (int c = 0; c < num_channels; ++c)
     {
         printf(" --> channel %i (of %i)\n", c + 1, num_channels);
@@ -166,11 +169,14 @@ int main(int argc, char** argv)
             int num_chunks = 0, start_chunk = 0;
             oskar_round_robin(num_sky_chunks, num_threads, thread_id,
                     &num_chunks, &start_chunk);
+
             int device_id = settings.use_devices()[thread_id];
+	    cudaDeviceProp device_prop;
+	    cudaGetDeviceProperties(&device_prop, device_id);
 
             printf("\t== omp thread id = %i (of %i) (using device id %i) to process sky "
-                    "chunks %i to %i\n", thread_id, num_threads, device_id,
-                    start_chunk, start_chunk + num_chunks -1);
+                    "chunks %i to %i [%s]\n", thread_id, num_threads, device_id,
+		   start_chunk, start_chunk + num_chunks -1, device_prop.name);
 
             error = cudaSetDevice(device_id);
             if (error) oskar_exit(error);
@@ -188,10 +194,10 @@ int main(int argc, char** argv)
                 if (error) oskar_exit(error);
             }
         } // end of omp parallel region.
-
+	#pragma omp barrier
+	
         oskar_Mem vis_amp;
         vis_global.get_channel_amps(&vis_amp, c);
-        double4c* v = (double4c*)(vis_amp.data);
 
         // Accumulate into global vis structure.
         for (int t = 0; t < num_omp_threads; ++t)
@@ -201,6 +207,7 @@ int main(int argc, char** argv)
         }
 
     } // end loop over channels
+    printf("time taken = %f sec.\n", timer.elapsed() / 1000.0);
 
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(&vis_global, telescope_cpu, times);
@@ -245,6 +252,31 @@ oskar_SkyModel* oskar_set_up_benchmark_sky(const oskar_Settings& settings)
 
     // Declare a sky model structure.
     sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU, num_sources);
+    if (type == OSKAR_DOUBLE)
+      {
+    for (int i = 0; i < num_sources; ++i)
+    {
+      ((double*)sky->Dec)[i] = M_PI / 2.0;
+      ((double*)sky->RA)[i] = 0.0;
+      ((double*)sky->I)[i] = 1.0;
+      ((double*)sky->Q)[i] = 0.0;
+      ((double*)sky->U)[i] = 0.0;
+      ((double*)sky->V)[i] = 0.0;
+    }
+      }
+else
+  {
+    for (int i = 0; i < num_sources; ++i)
+    {
+      ((float*)sky->Dec)[i] = M_PI / 2.0;
+      ((float*)sky->RA)[i] = 0.0;
+      ((float*)sky->I)[i] = 1.0;
+      ((float*)sky->Q)[i] = 0.0;
+      ((float*)sky->U)[i] = 0.0;
+      ((float*)sky->V)[i] = 0.0;
+    }
+  }
+
 
     return sky;
 }
@@ -268,11 +300,22 @@ oskar_TelescopeModel* oskar_set_up_benchmark_telescope(const oskar_Settings& set
         if (error) oskar_exit(error);
     }
 
+
+    telescope->ra0_rad = 0.0;
+    telescope->dec0_rad = 0.0;
+
+    for (int i = 0; i < telescope->num_stations; ++i)
+      {
+        telescope->station[i].ra0_rad = telescope->ra0_rad;
+        telescope->station[i].dec0_rad = telescope->dec0_rad;
+	telescope->station[i].longitude_rad = settings.longitude_rad();
+	telescope->station[i].latitude_rad = settings.latitude_rad();
+	telescope->station[i].altitude_metres = 0.0;
+      }
+
     telescope->identical_stations = OSKAR_FALSE;
     telescope->coord_units = OSKAR_METRES;
     telescope->use_common_sky = OSKAR_TRUE;
-    telescope->ra0_rad = 0.0;
-    telescope->dec0_rad = 0.0;
     telescope->wavelength_metres = 0.0;
     telescope->bandwidth_hz = 0.0;
 
