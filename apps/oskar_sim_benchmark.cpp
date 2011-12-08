@@ -46,6 +46,7 @@
 #include "math/oskar_round_robin.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_add.h"
 
 #include <QtCore/QByteArray>
 #include <QtCore/QTime>
@@ -112,7 +113,8 @@ int main(int argc, char** argv)
     }
 
     // Set the number of host threads to use.
-    omp_set_num_threads(min(device_count, (int)settings.max_host_threads()));
+    int num_omp_threads = min(device_count, (int)settings.max_host_threads());
+    omp_set_num_threads(num_omp_threads);
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
     // (one per thread/GPU).
@@ -134,7 +136,7 @@ int main(int argc, char** argv)
     printf("\nStarting simulation ...\n");
     for (int c = 0; c < num_channels; ++c)
     {
-        printf(" --> channel %i (of %i)\n", c, num_channels);
+        printf(" --> channel %i (of %i)\n", c + 1, num_channels);
         double freq = 0.0;
 
         #pragma omp parallel
@@ -161,25 +163,35 @@ int main(int argc, char** argv)
                 if (error) oskar_exit(error);
 
                 printf("--> Accumulating visibilities\n");
-                // oskar_mem_add(...)
-                // TODO accumulate visibilities for the chunks by the current thread/GPU.
-                // vis_acc += vis_temp;
+                error = oskar_mem_add(&vis_acc[thread_id], &vis_acc[thread_id], &vis_temp[thread_id]);
+                if (error) oskar_exit(error);
             }
         } // end of omp parallel region.
 
-//        foreach (thread)
-            // oskar_mem_add(...)
-//            vis_global[channel, time] += vis_acc[thread]
+        oskar_Mem vis_amp;
+        vis_global.get_channel_amps(&vis_amp, c);
 
-        // TODO: accumulate visibilities for the chunks for each thread/GPU.
-        // == copy back to to host and accumulate.
+        // Accumulate into global vis structure.
+        for (int t = 0; t < num_omp_threads; ++t)
+        {
+            error = oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[t]);
+            if (error) oskar_exit(error);
+        }
 
     } // end loop over channels
-
 
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(&vis_global, telescope_cpu, times);
     if (error) oskar_exit(error);
+
+    // Write global visibilities to disk.
+    if (!settings.obs().oskar_vis_filename().isEmpty())
+    {
+        QByteArray outname = settings.obs().oskar_vis_filename().toAscii();
+        printf("--> Writing visibility file: '%s'\n", outname.constData());
+        error = vis_global.write(outname);
+        if (error) oskar_exit(error);
+    }
 
     // Delete data structures.
     delete sky_cpu;

@@ -27,15 +27,22 @@
  */
 
 #include <cuda_runtime_api.h>
+#include <vector_functions.h>
+
 #include "utility/test/Test_Mem.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_append.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_mem_add.h"
+#include "utility/oskar_get_error_string.h"
+
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 #include <string>
+
+
 using namespace std;
 
 void Test_Mem::test_alloc()
@@ -488,4 +495,116 @@ void Test_Mem::test_scale_real()
 					((double4c*)(mem_cpu2.data))[i].d.y, 1e-12);
 		}
 	}
+}
+
+void Test_Mem::test_add()
+{
+    // Use case: Two CPU oskar_Mem matrix pointers are added together.
+    {
+        int num_elements = 10;
+        oskar_Mem mem_A(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        oskar_Mem mem_B(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        float4c* A = (float4c*)mem_A.data;
+        float4c* B = (float4c*)mem_B.data;
+
+        for (int i = 0; i < num_elements; ++i)
+        {
+            A[i].a = make_float2((float)i + 0.1, (float)i + 0.2);
+            A[i].b = make_float2((float)i + 0.3, (float)i + 0.4);
+            A[i].c = make_float2((float)i + 0.5, (float)i + 0.6);
+            A[i].d = make_float2((float)i + 0.7, (float)i + 0.8);
+            B[i].a = make_float2(1.15, 0.15);
+            B[i].b = make_float2(2.16, 0.16);
+            B[i].c = make_float2(3.17, 0.17);
+            B[i].d = make_float2(4.18, 0.18);
+        }
+
+        oskar_Mem mem_C(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        int error = oskar_mem_add(&mem_C, &mem_A, &mem_B);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+        float4c* C = (float4c*)mem_C.data;
+        double delta = 1.0e-5;
+        for (int i = 0; i < num_elements; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].a.x + B[i].a.x , C[i].a.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].a.y + B[i].a.y , C[i].a.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].b.x + B[i].b.x , C[i].b.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].b.y + B[i].b.y , C[i].b.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].c.x + B[i].c.x , C[i].c.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].c.y + B[i].c.y , C[i].c.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].d.x + B[i].d.x , C[i].d.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].d.y + B[i].d.y , C[i].d.y, delta);
+        }
+    }
+
+    // Use case: In place add.
+    {
+        double delta = 1.0e-5;
+
+        int num_elements = 10;
+        oskar_Mem mem_A(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        oskar_Mem mem_B(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        float4c* A = (float4c*)mem_A.data;
+        float4c* B = (float4c*)mem_B.data;
+
+        for (int i = 0; i < num_elements; ++i)
+        {
+            A[i].a = make_float2((float)i + 0.1, (float)i + 0.2);
+            A[i].b = make_float2((float)i + 0.3, (float)i + 0.4);
+            A[i].c = make_float2((float)i + 0.5, (float)i + 0.6);
+            A[i].d = make_float2((float)i + 0.7, (float)i + 0.8);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].a.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].a.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].b.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].b.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].c.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].c.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].d.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].d.y, delta);
+        }
+
+        int error = oskar_mem_add(&mem_B, &mem_A, &mem_B);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+        for (int i = 0; i < num_elements; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].a.x, B[i].a.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].a.y, B[i].a.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].b.x, B[i].b.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].b.y, B[i].b.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].c.x, B[i].c.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].c.y, B[i].c.y, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].d.x, B[i].d.x, delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(A[i].d.y, B[i].d.y, delta);
+        }
+    }
+
+
+
+    // Use Case: memory on the GPU.
+    {
+        int num_elements = 10;
+        oskar_Mem mem_A(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, num_elements);
+        oskar_Mem mem_B(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, num_elements);
+        oskar_Mem mem_C(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, num_elements);
+        int error = oskar_mem_add(&mem_C, &mem_A, &mem_B);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BAD_LOCATION, error);
+    }
+
+    // Use Case: Dimension mismatch in mem pointers being added.
+    {
+        int num_elements = 10;
+        oskar_Mem mem_A(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        oskar_Mem mem_B(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        oskar_Mem mem_C(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, 5);
+        int error = oskar_mem_add(&mem_C, &mem_A, &mem_B);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_DIMENSION_MISMATCH, error);
+    }
+
+    // Note: this is far from extensive testing on this method which has been
+    // added as a quick hack for the multi-gpu performance tests for
+    // the ASTRON meeting Dec-2011.
+
+    // TODO add more testing.
 }

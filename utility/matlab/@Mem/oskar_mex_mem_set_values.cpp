@@ -36,7 +36,7 @@
 #include "utility/matlab/oskar_get_type_string.h"
 
 // MATLAB entry function.
-void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
 {
     // Check number of input arguments.
     if (num_out != 1 || num_in != 4)
@@ -48,8 +48,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Parse input arguments.
     oskar_Mem* mem     = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
     int type           = (int)mxGetScalar(in[1]);
-    int location       = (int)mxGetScalar(in[2]);
-    int num_elements   = mem->num_elements();
+//    int location       = (int)mxGetScalar(in[2]);
+//    int num_elements   = mem->num_elements();
 
     // Properties of the values array.
     mwSize num_dims    = mxGetNumberOfDimensions(in[3]);
@@ -63,7 +63,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         mexErrMsgTxt("Specified values array has unsupported dimensions");
     }
-
 
     // Work out the OSKAR type of the values array.
     int values_type = 0;
