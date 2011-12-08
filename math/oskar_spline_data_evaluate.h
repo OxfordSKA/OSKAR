@@ -26,46 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_ELEMENT_MODEL_H
-#define TEST_ELEMENT_MODEL_H
+#ifndef OSKAR_SPLINE_DATA_EVALUATE_H_
+#define OSKAR_SPLINE_DATA_EVALUATE_H_
 
 /**
- * @file Test_ElementModel.h
+ * @file oskar_spline_data_evaluate.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "math/oskar_SplineData.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Evaluates a surface fitted by splines at the given positions.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function evaluates a surface fitted by splines at the given positions.
+ *
+ * @param[out] output Output values.
+ * @param[in] spline Pointer to data structure.
+ * @param[in] x List of x coordinates.
+ * @param[in] y List of y coordinates.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
-class Test_ElementModel : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_ElementModel);
-        CPPUNIT_TEST(test_method);
-        CPPUNIT_TEST(test_plot);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_spline_data_evaluate(oskar_Mem* output,
+		const oskar_SplineData* spline, const oskar_Mem* x,
+		const oskar_Mem* y);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+#ifdef __cplusplus
+}
+#endif
 
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
-        void test_method();
-
-        /// Test method.
-        void test_plot();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_ElementModel);
-
-#endif // TEST_ELEMENT_MODEL_H
+#endif /* OSKAR_SPLINE_DATA_EVALUATE_H_ */

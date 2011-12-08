@@ -26,46 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_ELEMENT_MODEL_H
-#define TEST_ELEMENT_MODEL_H
+#include "math/oskar_spline_surface_evaluate.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
-/**
- * @file Test_ElementModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <cppunit/extensions/HelperMacros.h>
+/* Fortran function prototype. */
+void bispev_(const float tx[], const int* nx, const float ty[], const int* ny,
+		const float c[], const int* kx, const int* ky, const float x[],
+		const int* mx, const float y[], const int* my, float z[],
+		float wrk[], const int* lwrk, int iwrk[], const int* kwrk, int* ier);
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_ElementModel : public CppUnit::TestFixture
+int oskar_spline_surface_evaluate_f(const float* tx, int nx, const float* ty,
+		int ny, const float* c, int kx, int ky, int num_points, const float* x,
+		const float* y, float* output)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_ElementModel);
-        CPPUNIT_TEST(test_method);
-        CPPUNIT_TEST(test_plot);
-        CPPUNIT_TEST_SUITE_END();
+	int i, ier = 0, one = 1;
+	int lwrk = 12, iwrk[2], kwrk = 2;
+	float wrk[12];
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+	/* Loop over input points. */
+	float val = 0.0;
+	for (i = 0; i < num_points; ++i)
+	{
+		bispev_(tx, &nx, ty, &ny, c, &kx, &ky, &x[i], &one, &y[i], &one,
+				&val, wrk, &lwrk, iwrk, &kwrk, &ier);
+		if (ier != 0)
+			return 1000 - ier;
+		output[i] = val;
+	}
 
-        /// Clean up after the test run.
-        void tearDown();
+    return 0;
+}
 
-    public:
-        /// Test method.
-        void test_method();
-
-        /// Test method.
-        void test_plot();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_ElementModel);
-
-#endif // TEST_ELEMENT_MODEL_H
+#ifdef __cplusplus
+}
+#endif

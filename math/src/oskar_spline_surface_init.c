@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spline_set_up.h"
+#include "math/oskar_spline_surface_init.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -42,7 +42,7 @@ void regrid_(int* iopt, int* mx, const float x[], int* my, const float y[],
         const int* nyest, int* nx, float tx[], int* ny, float ty[], float c[],
         float* fp, float wrk[], int* lwrk, int iwrk[], int* kwrk, int* ier);
 
-int oskar_spline_set_up_f(int num_x, const float* x, int num_y,
+int oskar_spline_surface_init_f(int num_x, const float* x, int num_y,
         const float* y, const float* data, int kx, float* tx,
         int ky, float* ty, int* nx, int* ny, float* c)
 {
@@ -55,7 +55,7 @@ int oskar_spline_set_up_f(int num_x, const float* x, int num_y,
 
     /* Set options and limits. */
     iopt = 0;
-    noise = 5e-4;
+    noise = 10e-4;
     threshold = pow(2.0 * noise, 2.0);
     fix_x = 2 * (kx + 1);
     fix_y = 2 * (ky + 1);
@@ -107,6 +107,7 @@ int oskar_spline_set_up_f(int num_x, const float* x, int num_y,
         {
             fprintf(stderr, "ERROR: Impossible result! (s too small?)\n");
             fprintf(stderr, "### Reverting to single-shot fit.\n");
+            ier = 0;
             fail = 1;
             k = 0;
             iopt = -1;
@@ -116,6 +117,7 @@ int oskar_spline_set_up_f(int num_x, const float* x, int num_y,
         {
             fprintf(stderr, "ERROR: Iteration limit. (s too small?)\n");
             fprintf(stderr, "### Reverting to single-shot fit.\n");
+            ier = 0;
             fail = 1;
             k = 0;
             iopt = -1;

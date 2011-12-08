@@ -54,7 +54,7 @@ int oskar_element_model_compute_splines(oskar_ElementModel* e)
             e->max_theta, &e->theta_re);
     if (err) return err;
 
-    return OSKAR_ERR_UNKNOWN;
+    return 0;
 }
 
 #ifdef __cplusplus

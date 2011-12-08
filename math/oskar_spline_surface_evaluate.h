@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPLINE_SET_UP_H_
-#define OSKAR_SPLINE_SET_UP_H_
+#ifndef OSKAR_SPLINE_SURFACE_EVALUATE_H_
+#define OSKAR_SPLINE_SURFACE_EVALUATE_H_
 
 /**
- * @file oskar_spline_set_up.h
+ * @file oskar_spline_surface_evaluate.h
  */
 
 #include "oskar_global.h"
@@ -42,12 +42,12 @@ extern "C" {
 
 /**
  * @brief
- * Sets up spline knot positions and coefficients.
+ * Evaluates a surface fitted by splines, at the given positions.
  *
  * @details
- * This function sets up knot positions and coefficients for a spline surface.
+ * This function evaluates a surface fitted by splines.
  *
- * It calls the FORTRAN function regrid from the DIERCKX library to perform the
+ * It calls the FORTRAN function bispev from the DIERCKX library to perform the
  * maths.
  *
  * References:
@@ -60,27 +60,17 @@ extern "C" {
  *  Dierckx P. : Curve and surface fitting with splines, monographs on
  *               numerical analysis, Oxford University Press, 1993.
  *
- * Note that the fastest varying dimension is along y.
- *
- * The arrays \p tx and \p ty must be large enough to hold all the knot
- * positions, so set them to be (size_x + kx + 1) and (size_y + ky + 1),
- * respectively.
- *
- * The array \p c must be large enough to hold all the spline coefficients
- * at the knot positions, so set to it be (num_x * num_y).
- *
- * @param[in] num_x The number of input grid points in the x dimension.
- * @param[in] x     The input grid positions in x.
- * @param[in] num_y The number of input grid points in the y dimension.
- * @param[in] y     The input grid positions in y.
- * @param[in] data  The data table (dimensions num_x * num_y).
- * @param[in] kx    The order of the spline in x (use 3).
- * @param[out] tx   Array of knot positions in x (see note on size).
- * @param[in] ky    The order of the spline in y (use 3).
- * @param[out] ty   Array of knot positions in y (see note on size).
- * @param[out] nx   The number of knot positions generated in x.
- * @param[out] ny   The number of knot positions generated in y.
- * @param[out] c    The spline coefficients (see note on size).
+ * @param[in] tx   Array of knot positions in x.
+ * @param[in] nx   The number of knot positions generated in x.
+ * @param[in] ty   Array of knot positions in y (see note on size).
+ * @param[in] ny   The number of knot positions generated in y.
+ * @param[in] c    The spline coefficients.
+ * @param[in] kx   The order of the spline in x (use 3).
+ * @param[in] ky   The order of the spline in y (use 3).
+ * @param[in] num_points The number of points at which to evaluate the surface.
+ * @param[in] x    Array of x positions.
+ * @param[in] y    Array of x positions.
+ * @param[out] output Array of evaluated surface values.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -89,12 +79,12 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_spline_set_up_f(int num_x, const float* x, int num_y,
-        const float* y, const float* data, int kx, float* tx,
-        int ky, float* ty, int* nx, int* ny, float* c);
+int oskar_spline_surface_evaluate_f(const float* tx, int nx, const float* ty,
+		int ny, const float* c, int kx, int ky, int num_points, const float* x,
+		const float* y, float* output);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SPLINE_SET_UP_H_ */
+#endif /* OSKAR_SPLINE_SURFACE_EVALUATE_H_ */

@@ -28,11 +28,12 @@
 
 #include "math/oskar_spline_data_compute.h"
 #include "math/oskar_spline_data_init.h"
-#include "math/oskar_spline_set_up.h"
+#include "math/oskar_spline_surface_init.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_realloc.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,12 +43,12 @@ int oskar_spline_data_compute(oskar_SplineData* spline, int num_x, int num_y,
         double start_x, double start_y, double end_x, double end_y,
         const oskar_Mem* data)
 {
-    int type, err, i;
+    int type, err = 0, i;
     oskar_Mem x_axis, y_axis;
 
     /* Get the data type. */
     type = data->private_type;
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+    if (!((type == OSKAR_SINGLE) || (type == OSKAR_DOUBLE)))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
@@ -93,7 +94,7 @@ int oskar_spline_data_compute(oskar_SplineData* spline, int num_x, int num_y,
             y[i] = i * (float)((end_y - start_y) / (num_y - 1));
 
         /* Set up the spline data. */
-        err = oskar_spline_set_up_f(num_x, x, num_y, y, z, spline->degree_x,
+        err = oskar_spline_surface_init_f(num_x, x, num_y, y, z, spline->degree_x,
                 tx, spline->degree_y, ty, &spline->num_knots_x,
                 &spline->num_knots_y, c);
     }
