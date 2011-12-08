@@ -47,6 +47,8 @@
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_add.h"
+#include "utility/oskar_mem_clear_contents.h"
+#include "utility/oskar_vector_types.h"
 
 #include <QtCore/QByteArray>
 #include <QtCore/QTime>
@@ -75,14 +77,19 @@ int main(int argc, char** argv)
     // Load the settings file.
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
+    settings.print();
     const oskar_SimTime* times = settings.obs().sim_time();
 
     // Construct sky and telescope structures on the CPU.
     // NOTE replace these to load real data...
     oskar_SkyModel* sky_cpu;
-    sky_cpu = oskar_set_up_benchmark_sky(settings);
+//    sky_cpu = oskar_set_up_benchmark_sky(settings);
+    sky_cpu = oskar_set_up_sky(settings);
+    if (sky_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
     oskar_TelescopeModel* telescope_cpu;
-    telescope_cpu = oskar_set_up_benchmark_telescope(settings);
+//    telescope_cpu = oskar_set_up_benchmark_telescope(settings);
+    telescope_cpu = oskar_set_up_telescope(settings);
+    if (telescope_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
 
     // Split the sky model into chunks.
     oskar_SkyModel* sky_chunk_cpu = NULL;
@@ -100,6 +107,12 @@ int main(int argc, char** argv)
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
     oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
             num_channels, times->num_vis_dumps, telescope_cpu->num_baselines());
+    // Add visibility meta-data.
+    vis_global.freq_start_hz      = settings.obs().start_frequency();
+    vis_global.freq_inc_hz        = settings.obs().frequency_inc();
+    vis_global.time_start_mjd_utc = times->obs_start_mjd_utc;
+    vis_global.time_inc_seconds   = times->dt_dump_days * 86400.0;
+
 
     // Find out how many GPU's we have.
     int device_count = 0;
@@ -120,15 +133,22 @@ int main(int argc, char** argv)
     // (one per thread/GPU).
     oskar_Mem* vis_acc = NULL;
     oskar_Mem* vis_temp = NULL;
-    vis_acc = (oskar_Mem*)malloc(settings.num_devices() * sizeof(oskar_Mem));
+    vis_acc  = (oskar_Mem*)malloc(settings.num_devices() * sizeof(oskar_Mem));
     vis_temp = (oskar_Mem*)malloc(settings.num_devices() * sizeof(oskar_Mem));
+    int num_elements = telescope_cpu->num_baselines() * times->num_vis_dumps;
+    printf("num_elements = %i\n", num_elements);
     for (int i = 0; i < (int)settings.num_devices(); ++i)
     {
         error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
                 telescope_cpu->num_baselines() * times->num_vis_dumps, OSKAR_TRUE);
         if (error) oskar_exit(error);
+        error = oskar_mem_clear_contents(&vis_acc[i]);
+        if (error) oskar_exit(error);
+
         error = oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
                 telescope_cpu->num_baselines() * times->num_vis_dumps, OSKAR_TRUE);
+        if (error) oskar_exit(error);
+        error = oskar_mem_clear_contents(&vis_temp[i]);
         if (error) oskar_exit(error);
     }
 
@@ -137,9 +157,9 @@ int main(int argc, char** argv)
     for (int c = 0; c < num_channels; ++c)
     {
         printf(" --> channel %i (of %i)\n", c + 1, num_channels);
-        double freq = 0.0;
+        double freq = settings.obs().frequency(c);
 
-        #pragma omp parallel
+        #pragma omp parallel shared(vis_acc, vis_temp)
         {
             int num_threads = omp_get_num_threads();
             int thread_id  = omp_get_thread_num();
@@ -158,18 +178,20 @@ int main(int argc, char** argv)
             for (int i = start_chunk; i <  start_chunk + num_chunks; ++i)
             {
                 printf("<<==== Sky chunk %i ====>>\n", i);
-                error = oskar_interferometer(&vis_temp[thread_id],
-                        &sky_chunk_cpu[i], telescope_cpu, times, freq);
+                 error = oskar_interferometer(&(vis_temp[thread_id]),
+                        &(sky_chunk_cpu[i]), telescope_cpu, times, freq);
                 if (error) oskar_exit(error);
 
-                printf("--> Accumulating visibilities\n");
-                error = oskar_mem_add(&vis_acc[thread_id], &vis_acc[thread_id], &vis_temp[thread_id]);
+                 printf("--> Accumulating visibilities\n");
+                error = oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
+                        &(vis_temp[thread_id]));
                 if (error) oskar_exit(error);
             }
         } // end of omp parallel region.
 
         oskar_Mem vis_amp;
         vis_global.get_channel_amps(&vis_amp, c);
+        double4c* v = (double4c*)(vis_amp.data);
 
         // Accumulate into global vis structure.
         for (int t = 0; t < num_omp_threads; ++t)
@@ -183,6 +205,8 @@ int main(int argc, char** argv)
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(&vis_global, telescope_cpu, times);
     if (error) oskar_exit(error);
+
+
 
     // Write global visibilities to disk.
     if (!settings.obs().oskar_vis_filename().isEmpty())

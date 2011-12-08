@@ -72,6 +72,9 @@ int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
     if (a->private_location == OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
+    if (a->data == NULL || b->data == NULL || c->data == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
     num_elements = a->private_num_elements;
 
     if (oskar_mem_is_matrix(a->private_type))
