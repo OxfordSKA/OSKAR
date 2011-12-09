@@ -163,14 +163,8 @@ int main(int argc, char** argv)
         cudaDeviceSynchronize();
     }
 
-    cudaEvent_t start, stop;
-    float time;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
-
     QTime timer;
     timer.start();
-    cudaEventRecord(start, 0);
     int num_channels = settings.obs().num_channels();
     for (int c = 0; c < num_channels; ++c)
     {
@@ -218,13 +212,8 @@ int main(int argc, char** argv)
         }
 
     } // end loop over channels
-    cudaEventRecord( stop, 0 );
-    cudaEventSynchronize( stop );
-    cudaEventElapsedTime( &time, start, stop );
-    cudaEventDestroy( start );
-    cudaEventDestroy( stop );
-    printf("\n== Simulation complete after %f seconds (%f).\n",
-            time / 1000.0, timer.elapsed() / 1000.0);
+    printf("\n== Simulation complete after %f seconds.\n",
+            timer.elapsed() / 1000.0);
 
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(vis_global, telescope_cpu, times);
