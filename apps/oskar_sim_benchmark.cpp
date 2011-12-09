@@ -137,6 +137,12 @@ int main(int argc, char** argv)
         if (error) oskar_exit(error);
     }
 
+    printf("\n");
+    printf(">> total sources            = %i\n", sky_cpu->num_sources);
+    printf(">> no. stations             = %i\n", telescope_cpu->num_stations);
+    printf(">> no. antennas per station = %i\n", telescope_cpu->station[0].num_elements);
+    printf("\n");
+
     // ################## SIMULATION ###########################################
     printf("\n== Starting simulation ...\n");
     QTime timer;
