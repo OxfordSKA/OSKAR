@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     // Split the sky model into chunks.
     oskar_SkyModel* sky_chunk_cpu = NULL;
     int max_sources_per_chunk = min((int)settings.max_sources_per_chunk(),
-            (int)ceil((double)sky_cpu->num_sources / device_count));
+            (int)ceil((double)sky_cpu->num_sources / (double)settings.num_devices()));
 
     int num_sky_chunks = 0;
     error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
