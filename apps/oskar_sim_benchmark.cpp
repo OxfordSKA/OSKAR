@@ -59,6 +59,7 @@
 #include <cmath>
 
 using std::min;
+using std::pow;
 
 oskar_SkyModel* oskar_set_up_benchmark_sky(const oskar_Settings& settings);
 oskar_TelescopeModel* oskar_set_up_benchmark_telescope(const oskar_Settings& settings);
@@ -138,9 +139,14 @@ int main(int argc, char** argv)
     }
 
     printf("\n");
+    printf(">> no. GPUs                 = %i\n", omp_get_num_threads());
     printf(">> total sources            = %i\n", sky_cpu->num_sources);
     printf(">> no. stations             = %i\n", telescope_cpu->num_stations);
     printf(">> no. antennas per station = %i\n", telescope_cpu->station[0].num_elements);
+    printf(">> no. vis dumps            = %i\n", times->num_vis_dumps);
+    printf(">> no. vis averages         = %i\n", times->num_vis_ave);
+    printf(">> no. fringe averages      = %i\n", times->num_fringe_ave);
+    printf(">> no. channels             = %i\n", settings.obs().num_channels());
     printf("\n");
 
     // ################## SIMULATION ###########################################
@@ -208,6 +214,25 @@ int main(int argc, char** argv)
         printf("\n--> Writing visibility file: '%s'\n", outname.constData());
         error = vis_global->write(outname);
         if (error) oskar_exit(error);
+    }
+
+    if (type == OSKAR_DOUBLE)
+    {
+        printf("\n --> vis amp = %.4e %.4e (%.4e)\n",
+                ((double4c*)vis_global->amplitude.data)[0].a.x,
+                ((double4c*)vis_global->amplitude.data)[0].a.y,
+                sky_cpu->num_sources * pow((double)telescope_cpu->station[0].num_elements,2));
+    }
+    else if (type == OSKAR_SINGLE)
+    {
+        printf("\n --> vis amp = %.4e %.4e (%.4e)\n",
+                ((float4c*)vis_global->amplitude.data)[0].a.x,
+                ((float4c*)vis_global->amplitude.data)[0].a.y,
+                sky_cpu->num_sources * pow((float)telescope_cpu->station[0].num_elements,2));
+    }
+    else
+    {
+        oskar_exit(OSKAR_ERR_UNKNOWN);
     }
 
     // Delete data structures.
