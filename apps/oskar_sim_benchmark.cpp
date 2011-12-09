@@ -81,6 +81,17 @@ int main(int argc, char** argv)
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     const oskar_SimTime* times = settings.obs().sim_time();
 
+    // Find out how many GPU's we have.
+    int device_count = 0;
+    error = (int)cudaGetDeviceCount(&device_count);
+    printf("== Found %i CUDA devices!\n", device_count);
+    if (device_count < (int)settings.num_devices())
+    {
+        fprintf(stderr, "ERROR: Only found %i devices, %i specified!\n",
+                device_count, settings.num_devices());
+        oskar_exit(OSKAR_ERR_UNKNOWN);
+    }
+
     // Construct sky and telescope.
     oskar_SkyModel* sky_cpu = oskar_set_up_benchmark_sky(settings);
     oskar_TelescopeModel* telescope_cpu = oskar_set_up_benchmark_telescope(settings);
@@ -89,7 +100,9 @@ int main(int argc, char** argv)
 
     // Split the sky model into chunks.
     oskar_SkyModel* sky_chunk_cpu = NULL;
-    int max_sources_per_gpu = settings.max_sources_per_chunk();
+    int max_sources_per_gpu = min((int)settings.max_sources_per_chunk(),
+            (int)ceil((double)sky_cpu->num_sources / device_count));
+
     int num_sky_chunks = 0;
     error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
             max_sources_per_gpu, sky_cpu);
@@ -101,17 +114,6 @@ int main(int argc, char** argv)
     oskar_Visibilities* vis_global = oskar_set_up_visibilities(settings,
             telescope_cpu, type | OSKAR_COMPLEX | OSKAR_MATRIX);
 
-    // Find out how many GPU's we have.
-    int device_count = 0;
-    error = (int)cudaGetDeviceCount(&device_count);
-
-    printf("== Found %i CUDA devices!\n", device_count);
-    if (device_count < (int)settings.num_devices())
-    {
-        fprintf(stderr, "ERROR: Only found %i devices, %i specified!\n",
-                device_count, settings.num_devices());
-        oskar_exit(OSKAR_ERR_UNKNOWN);
-    }
 
     // Set the number of host threads to use.
     int num_omp_threads = min(device_count, (int)settings.max_host_threads());
