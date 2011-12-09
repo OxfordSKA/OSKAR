@@ -46,7 +46,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         double frequency)
 {
     int err = 0;
+    int device_id = 0;
     size_t mem_free, mem_total;
+    cudaDeviceProp device_prop;
 
     // Copy telescope model and sky model for frequency scaling.
     oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
@@ -85,13 +87,17 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     double dt_ave            = times->dt_ave_days;
     double dt_fringe         = times->dt_fringe_days;
 
+    cudaMemGetInfo(&mem_free, &mem_total);
+    cudaGetDevice(&device_id);
+    cudaGetDeviceProperties(&device_prop, device_id);
+    printf("==> Device memory [%i, %s]: free %.1fMB, total %.1fMB.\n",
+            device_id, device_prop.name, mem_free/(1024.*1024.), mem_total/(1024.*1024.));
+
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)
     {
         // Start time for the visibility dump, in MJD(UTC).
-        cudaMemGetInfo(&mem_free, &mem_total);
-        printf("--> Simulating snapshot (%i / %i) [device memory: free %.1fMB, total %.1fMB]\n",
-                j+1, num_vis_dumps, mem_free/(1024.*1024.), mem_total/(1024.*1024.));
+        printf("--> Simulating snapshot (%i / %i)\n", j+1, num_vis_dumps);
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 

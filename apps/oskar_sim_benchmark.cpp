@@ -152,11 +152,6 @@ int main(int argc, char** argv)
     // ################## SIMULATION ###########################################
     printf("\n== Starting simulation ...\n");
 
-
-
-
-
-
     for (int i = 0; i < settings.num_devices(); ++i)
     {
         cudaSetDevice(settings.use_devices()[i]);
