@@ -151,6 +151,7 @@ int main(int argc, char** argv)
 
     // ################## SIMULATION ###########################################
     printf("\n== Starting simulation ...\n");
+    cudaDeviceSynchronize();
     QTime timer;
     timer.start();
     int num_channels = settings.obs().num_channels();
