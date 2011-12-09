@@ -139,7 +139,7 @@ int main(int argc, char** argv)
     }
 
     printf("\n");
-    printf(">> no. GPUs                 = %i\n", omp_get_num_threads());
+    printf(">> no. GPUs                 = %i\n", settings.num_devices());
     printf(">> total sources            = %i\n", sky_cpu->num_sources);
     printf(">> no. stations             = %i\n", telescope_cpu->num_stations);
     printf(">> no. antennas per station = %i\n", telescope_cpu->station[0].num_elements);
@@ -157,13 +157,17 @@ int main(int argc, char** argv)
 
 
 
+    for (int i = 0; i < settings.num_devices(); ++i)
+    {
+        cudaSetDevice(settings.use_devices()[i]);
+        cudaDeviceSynchronize();
+    }
 
     cudaEvent_t start, stop;
     float time;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
 
-    cudaDeviceSynchronize();
     QTime timer;
     timer.start();
     cudaEventRecord(start, 0);
