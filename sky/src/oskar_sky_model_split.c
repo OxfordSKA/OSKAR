@@ -48,7 +48,6 @@ int oskar_sky_model_split(oskar_SkyModel** out, int* num_out, int max_sources_ou
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     *num_out = (int)ceil((double)in->num_sources/max_sources_out);
-    printf("num_out = (%i %i) %i\n", in->num_sources, max_sources_out, *num_out);
     *out = (oskar_SkyModel*)malloc(*num_out * sizeof(oskar_SkyModel));
 
     for (i = 0; i < *num_out; ++i)

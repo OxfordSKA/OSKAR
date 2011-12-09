@@ -90,7 +90,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     {
         // Start time for the visibility dump, in MJD(UTC).
         cudaMemGetInfo(&mem_free, &mem_total);
-        printf("--> Simulating snapshot (%i / %i) [device memory %.1f / %.1f MB]\n",
+        printf("--> Simulating snapshot (%i / %i) [device memory: free %.1fMB, total %.1fMB]\n",
                 j+1, num_vis_dumps, mem_free/(1024.*1024.), mem_total/(1024.*1024.));
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);

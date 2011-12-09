@@ -84,7 +84,6 @@ int main(int argc, char** argv)
     // Find out how many GPU's we have.
     int device_count = 0;
     error = (int)cudaGetDeviceCount(&device_count);
-    printf("== Found %i CUDA devices!\n", device_count);
     if (device_count < (int)settings.num_devices())
     {
         fprintf(stderr, "ERROR: Only found %i devices, %i specified!\n",
@@ -100,20 +99,20 @@ int main(int argc, char** argv)
 
     // Split the sky model into chunks.
     oskar_SkyModel* sky_chunk_cpu = NULL;
-    int max_sources_per_gpu = min((int)settings.max_sources_per_chunk(),
+    int max_sources_per_chunk = min((int)settings.max_sources_per_chunk(),
             (int)ceil((double)sky_cpu->num_sources / device_count));
 
     int num_sky_chunks = 0;
     error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
-            max_sources_per_gpu, sky_cpu);
+            max_sources_per_chunk, sky_cpu);
     if (error) oskar_exit(error);
-    printf("* Input sky model of %i sources will be split into %i chunks.\n\n",
-            sky_cpu->num_sources, num_sky_chunks);
+    printf("* Input sky model of %i sources will be split into %i chunks. "
+            "(max chunk size = %i)\n",
+            sky_cpu->num_sources, num_sky_chunks, max_sources_per_chunk);
 
     // Create the global visibility structure on the CPU.
     oskar_Visibilities* vis_global = oskar_set_up_visibilities(settings,
             telescope_cpu, type | OSKAR_COMPLEX | OSKAR_MATRIX);
-
 
     // Set the number of host threads to use.
     int num_omp_threads = min(device_count, (int)settings.max_host_threads());
@@ -139,27 +138,26 @@ int main(int argc, char** argv)
     }
 
     // ################## SIMULATION ###########################################
-    printf("\nStarting simulation ...\n");
+    printf("\n== Starting simulation ...\n");
     QTime timer;
     timer.start();
     int num_channels = settings.obs().num_channels();
     for (int c = 0; c < num_channels; ++c)
     {
-        printf(" --> channel %i (of %i)\n", c + 1, num_channels);
+        printf("\n<< channel %i of %i >>\n", c + 1, num_channels);
         double freq = settings.obs().frequency(c);
 
-#pragma omp parallel shared(vis_acc, vis_temp)
+        #pragma omp parallel shared(vis_acc, vis_temp)
         {
             int num_threads = omp_get_num_threads();
             int thread_id   = omp_get_thread_num();
             int device_id   = settings.use_devices()[thread_id];
             int num_chunks  = 0, start_chunk = 0;
-            size_t mem_free, mem_total;
             oskar_round_robin(num_sky_chunks, num_threads, thread_id, &num_chunks,
                     &start_chunk);
             cudaDeviceProp device_prop;
             cudaGetDeviceProperties(&device_prop, device_id);
-            printf("== OMP thread %i (of %i) using device %i [%s] to process sky "
+            printf("*** Thread %i (of %i) using device %i [%s] to process sky "
                     "chunks from %i to %i.\n", thread_id + 1, num_threads,
                     device_id, device_prop.name, start_chunk,
                     start_chunk + num_chunks - 1);
@@ -167,20 +165,17 @@ int main(int argc, char** argv)
             if (error) oskar_exit(error);
             for (int i = start_chunk; i <  start_chunk + num_chunks; ++i)
             {
+                printf("*** Sky chunk %i (num sources = %i), device[%i] (%s).\n",
+                        i, sky_chunk_cpu[i].num_sources, device_id, device_prop.name);
                 error = oskar_interferometer(&(vis_temp[thread_id]),
                         &(sky_chunk_cpu[i]), telescope_cpu, times, freq);
                 if (error) oskar_exit(error);
                 error = oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
                         &(vis_temp[thread_id]));
                 if (error) oskar_exit(error);
-                printf("\n*** Sky chunk %i (num sources = %i), device[%i] (%s) ***\n",
-                        i, sky_chunk_cpu[i].num_sources, device_id, device_prop.name);
-                cudaMemGetInfo(&mem_free, &mem_total);
-                printf("   (device memory: free = %f MB, total = %f MB)\n",
-                        mem_free/(1024.0*1024.0), mem_total/(1024.0*1024.0));
             }
         }
-#pragma omp barrier
+        #pragma omp barrier
 
         oskar_Mem vis_amp;
         vis_global->get_channel_amps(&vis_amp, c);
