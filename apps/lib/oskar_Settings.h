@@ -32,6 +32,7 @@
 #include "apps/lib/oskar_SettingsImage.h"
 #include "apps/lib/oskar_SettingsObservation.h"
 #include "apps/lib/oskar_SettingsBenchmark.h"
+#include "apps/lib/oskar_SettingsAllSky.h"
 
 #include <QtCore/QString>
 #include <QtCore/QSettings>
@@ -74,9 +75,9 @@ class oskar_Settings
         { disable_station_beam_ = value; }
 
         bool double_precision() const { return prec_double_; }
-        unsigned max_sources_per_chunk() const { return max_sources_per_chunk_; }
-        unsigned max_host_threads() const { return max_host_threads_; }
-        unsigned num_devices() const { return use_devices_.size(); }
+        int max_sources_per_chunk() const { return max_sources_per_chunk_; }
+        int max_host_threads() const { return max_host_threads_; }
+        int num_devices() const { return use_devices_.size(); }
         const int* use_devices() const { return use_devices_.constData(); }
 
         const oskar_SettingsObservation& obs() const { return obs_; }
@@ -86,11 +87,12 @@ class oskar_Settings
         oskar_SettingsImage& image() { return image_; }
 
         const oskar_SettingsBenchmark& benchmark() const { return benchmark_; }
+        const oskar_SettingsAllSky& all_sky() const { return all_sky_; }
 
     private:
         bool prec_double_;
-        unsigned max_sources_per_chunk_;
-        unsigned max_host_threads_;
+        int max_sources_per_chunk_;
+        int max_host_threads_;
         QVector<int> use_devices_;
         QString filename_;
         QString sky_file_;
@@ -103,6 +105,7 @@ class oskar_Settings
         oskar_SettingsObservation obs_;
         oskar_SettingsImage image_;
         oskar_SettingsBenchmark benchmark_;
+        oskar_SettingsAllSky all_sky_;
 };
 
 #endif // OSKAR_SETTINGS_H_

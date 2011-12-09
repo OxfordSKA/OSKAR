@@ -30,6 +30,7 @@
 #include "apps/lib/oskar_Settings.h"
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
+#include "apps/lib/oskar_set_up_visibilities.h"
 #include "apps/lib/oskar_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
@@ -63,6 +64,7 @@ int main(int argc, char** argv)
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
     settings.print();
+    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     const oskar_SimTime* times = settings.obs().sim_time();
 
     // Get the sky model and telescope model and copy both to GPU (slow step).
@@ -74,28 +76,19 @@ int main(int argc, char** argv)
     tel_gpu = new oskar_TelescopeModel(tel_cpu, OSKAR_LOCATION_GPU);
 
     // Create the global visibility structure on the CPU.
-    int n_stations = tel_gpu->num_stations;
-    int n_channels = settings.obs().num_channels();
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
-            n_channels, times->num_vis_dumps, n_stations * (n_stations - 1) /2);
-
-    // Add visibility meta-data.
-    vis_global.freq_start_hz      = settings.obs().start_frequency();
-    vis_global.freq_inc_hz        = settings.obs().frequency_inc();
-    vis_global.time_start_mjd_utc = times->obs_start_mjd_utc;
-    vis_global.time_inc_seconds   = times->dt_dump_days * 86400.0;
+    oskar_Visibilities* vis_global = oskar_set_up_visibilities(settings,
+            tel_cpu, type | OSKAR_COMPLEX | OSKAR_MATRIX);
 
     // Run the simulation.
     QTime timer;
     timer.start();
+    int n_channels = settings.obs().num_channels();
     for (int c = 0; c < n_channels; ++c)
     {
         // Get a pointer to the visibility channel data.
         oskar_Mem vis_amp;
         printf("\n--> Simulating channel (%d / %d).\n", c + 1, n_channels);
-        vis_global.get_channel_amps(&vis_amp, c);
+        vis_global->get_channel_amps(&vis_amp, c);
 
         // Simulate data for this channel.
         err = oskar_interferometer(&vis_amp, sky_gpu, tel_gpu, times,
@@ -105,7 +98,7 @@ int main(int argc, char** argv)
     printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
 
     // Compute baseline u,v,w coordinates for simulation.
-    err = oskar_evaluate_baseline_uvw(&vis_global, tel_cpu, times);
+    err = oskar_evaluate_baseline_uvw(vis_global, tel_cpu, times);
     if (err) oskar_exit(err);
 
     // Write global visibilities to disk.
@@ -113,7 +106,7 @@ int main(int argc, char** argv)
     {
         QByteArray outname = settings.obs().oskar_vis_filename().toAscii();
         printf("--> Writing visibility file: '%s'\n", outname.constData());
-        err = vis_global.write(outname);
+        err = vis_global->write(outname);
         if (err) oskar_exit(err);
     }
 
@@ -123,12 +116,13 @@ int main(int argc, char** argv)
     {
         QByteArray outname = settings.obs().ms_filename().toAscii();
         printf("--> Writing Measurement Set: '%s'\n", outname.constData());
-        err = oskar_write_ms(outname.constData(), &vis_global, tel_cpu, (int)OSKAR_TRUE);
+        err = oskar_write_ms(outname, vis_global, tel_cpu, (int)OSKAR_TRUE);
         if (err) oskar_exit(err);
     }
 #endif
 
     // Delete data structures.
+    delete vis_global;
     delete sky_cpu;
     delete sky_gpu;
     delete tel_gpu;

@@ -80,9 +80,12 @@ int oskar_Settings::load(const QString& filename)
     // Load settings from benchmark group.
     benchmark_.load(settings);
 
+    // Load settings from all-sky group.
+    all_sky_.load(settings);
+
     prec_double_ = settings.value("global/double_precision").toBool();
-    max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk").toUInt();
-    max_host_threads_ = settings.value("global/max_host_threads").toUInt();
+    max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk").toInt();
+    max_host_threads_ = settings.value("global/max_host_threads").toInt();
     int size = settings.beginReadArray("global/use_devices");
     use_devices_.resize(size);
     for (int i = 0; i < size; ++i)
@@ -97,7 +100,8 @@ int oskar_Settings::load(const QString& filename)
 
 int oskar_Settings::check() const
 {
-    if (benchmark().num_sources() == 0 && !QFileInfo(sky_file_).isFile())
+    if (benchmark().num_sources() == 0 && all_sky().separation() == 0.0
+            && !QFileInfo(sky_file_).isFile())
     {
         fprintf(stderr, "ERROR: Sky file doesn't exist!\n");
         return FALSE;

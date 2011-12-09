@@ -32,6 +32,7 @@
 #include "apps/lib/oskar_Settings.h"
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
+#include "apps/lib/oskar_set_up_visibilities.h"
 #include "apps/lib/oskar_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
@@ -77,16 +78,13 @@ int main(int argc, char** argv)
     // Load the settings file.
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
+    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     const oskar_SimTime* times = settings.obs().sim_time();
 
-    // Construct sky
-    oskar_SkyModel* sky_cpu;
-    sky_cpu = oskar_set_up_benchmark_sky(settings);
+    // Construct sky and telescope.
+    oskar_SkyModel* sky_cpu = oskar_set_up_benchmark_sky(settings);
+    oskar_TelescopeModel* telescope_cpu = oskar_set_up_benchmark_telescope(settings);
     if (sky_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
-
-    // Construct telescope.
-    oskar_TelescopeModel* telescope_cpu;
-    telescope_cpu = oskar_set_up_benchmark_telescope(settings);
     if (telescope_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
 
     // Split the sky model into chunks.
@@ -99,17 +97,9 @@ int main(int argc, char** argv)
     printf("* Input sky model of %i sources will be split into %i chunks.\n\n",
             sky_cpu->num_sources, num_sky_chunks);
 
-    // Create the global visibility structure on the CPU
-    int num_channels = settings.obs().num_channels();
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    oskar_Visibilities vis_global(complex_matrix, OSKAR_LOCATION_CPU,
-            num_channels, times->num_vis_dumps, telescope_cpu->num_baselines());
-    // Add visibility meta-data.
-    vis_global.freq_start_hz      = settings.obs().start_frequency();
-    vis_global.freq_inc_hz        = settings.obs().frequency_inc();
-    vis_global.time_start_mjd_utc = times->obs_start_mjd_utc;
-    vis_global.time_inc_seconds   = times->dt_dump_days * 86400.0;
+    // Create the global visibility structure on the CPU.
+    oskar_Visibilities* vis_global = oskar_set_up_visibilities(settings,
+            telescope_cpu, type | OSKAR_COMPLEX | OSKAR_MATRIX);
 
     // Find out how many GPU's we have.
     int device_count = 0;
@@ -137,6 +127,7 @@ int main(int argc, char** argv)
     oskar_Mem* vis_temp = (oskar_Mem*)malloc(num_bytes);
     for (int i = 0; i < (int)settings.num_devices(); ++i)
     {
+        int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
         error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
                 telescope_cpu->num_baselines() * times->num_vis_dumps, OSKAR_TRUE);
         if (error) oskar_exit(error);
@@ -149,6 +140,7 @@ int main(int argc, char** argv)
     printf("\nStarting simulation ...\n");
     QTime timer;
     timer.start();
+    int num_channels = settings.obs().num_channels();
     for (int c = 0; c < num_channels; ++c)
     {
         printf(" --> channel %i (of %i)\n", c + 1, num_channels);
@@ -189,7 +181,7 @@ int main(int argc, char** argv)
 #pragma omp barrier
 
         oskar_Mem vis_amp;
-        vis_global.get_channel_amps(&vis_amp, c);
+        vis_global->get_channel_amps(&vis_amp, c);
 
         // Accumulate into global vis structure.
         for (int t = 0; t < num_omp_threads; ++t)
@@ -203,7 +195,7 @@ int main(int argc, char** argv)
             timer.elapsed() / 1000.0);
 
     // Compute baseline u,v,w coordinates for simulation.
-    error = oskar_evaluate_baseline_uvw(&vis_global, telescope_cpu, times);
+    error = oskar_evaluate_baseline_uvw(vis_global, telescope_cpu, times);
     if (error) oskar_exit(error);
 
     // Write global visibilities to disk.
@@ -211,11 +203,12 @@ int main(int argc, char** argv)
     {
         QByteArray outname = settings.obs().oskar_vis_filename().toAscii();
         printf("\n--> Writing visibility file: '%s'\n", outname.constData());
-        error = vis_global.write(outname);
+        error = vis_global->write(outname);
         if (error) oskar_exit(error);
     }
 
     // Delete data structures.
+    delete vis_global;
     delete sky_cpu;
     delete telescope_cpu;
     for (int i = 0; i < (int)settings.num_devices(); ++i)
