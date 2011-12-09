@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
+
 #include "interferometry/oskar_interferometer.h"
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/oskar_evaluate_jones_K.h"
@@ -44,6 +46,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         double frequency)
 {
     int err = 0;
+    size_t mem_free, mem_total;
 
     // Copy telescope model and sky model for frequency scaling.
     oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
@@ -86,7 +89,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     for (int j = 0; j < num_vis_dumps; ++j)
     {
         // Start time for the visibility dump, in MJD(UTC).
-        printf("--> Simulating snapshot (%i / %i).\n", j+1, num_vis_dumps);
+        cudaMemGetInfo(&mem_free, &mem_total);
+        printf("--> Simulating snapshot (%i / %i) [device memory %.1f / %.1f MB]\n",
+                j+1, num_vis_dumps, mem_free/(1024.*1024.), mem_total/(1024.*1024.));
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 

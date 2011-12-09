@@ -74,7 +74,7 @@ class oskar_Settings
         { disable_station_beam_ = value; }
 
         bool double_precision() const { return prec_double_; }
-        unsigned max_sources_per_gpu() const { return max_sources_per_gpu_; }
+        unsigned max_sources_per_chunk() const { return max_sources_per_chunk_; }
         unsigned max_host_threads() const { return max_host_threads_; }
         unsigned num_devices() const { return use_devices_.size(); }
         const int* use_devices() const { return use_devices_.constData(); }
@@ -89,7 +89,7 @@ class oskar_Settings
 
     private:
         bool prec_double_;
-        unsigned max_sources_per_gpu_;
+        unsigned max_sources_per_chunk_;
         unsigned max_host_threads_;
         QVector<int> use_devices_;
         QString filename_;

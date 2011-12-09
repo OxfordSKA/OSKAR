@@ -81,7 +81,7 @@ int oskar_Settings::load(const QString& filename)
     benchmark_.load(settings);
 
     prec_double_ = settings.value("global/double_precision").toBool();
-    max_sources_per_gpu_ = settings.value("global/max_sources_per_gpu").toUInt();
+    max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk").toUInt();
     max_host_threads_ = settings.value("global/max_host_threads").toUInt();
     int size = settings.beginReadArray("global/use_devices");
     use_devices_.resize(size);
