@@ -69,9 +69,6 @@
  * NOTE Consider storing a coord_type_id for the baseline coordinates similar
  * to the station model.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 struct oskar_Visibilities
 {
     int num_channels;          /**< Number of frequency channels. */

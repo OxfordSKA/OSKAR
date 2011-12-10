@@ -39,10 +39,6 @@
  *
  * @details
  */
-
-#ifdef __cplusplus
-extern "C"
-#endif
 struct oskar_TelescopeModel
 {
     int num_stations;            /**< Number of stations in the model. */

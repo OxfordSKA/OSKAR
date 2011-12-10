@@ -27,8 +27,6 @@
  */
 
 #include "station/oskar_element_model_evaluate.h"
-#include "station/oskar_phi_theta_to_normalised_cuda.h"
-#include "math/oskar_cuda_interp_bilinear.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_type_check.h"
@@ -42,7 +40,6 @@ int oskar_element_model_evaluate(oskar_Mem* output,
         const oskar_Mem* theta, oskar_Work* work)
 {
     int location, type, precision, n_points, err = 0;
-    oskar_Mem norm_phi, norm_theta;
 
     /* Get the meta-data. */
     location = output->private_location;
@@ -76,41 +73,6 @@ int oskar_element_model_evaluate(oskar_Mem* output,
                     oskar_mem_is_double(theta->private_type) &&
                     oskar_mem_is_double(work->real.private_type))))
         return OSKAR_ERR_TYPE_MISMATCH;
-
-    /* Ensure enough space in work buffer for normalised coordinates. */
-    if (work->real.private_num_elements < 2 * n_points)
-    {
-        err = oskar_mem_realloc(&work->real, 2 * n_points);
-        if (err) return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
-    }
-
-    /* Get pointers to memory for normalised coordinates. */
-    err = oskar_mem_get_pointer(&norm_phi, &work->real, 0, n_points);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&norm_theta, &work->real, n_points, n_points);
-    if (err) return err;
-
-    /* Convert spherical coordinates to normalised texture coordinates. */
-    if (precision == OSKAR_SINGLE)
-    {
-        float range_phi, range_theta;
-        range_phi = pattern->max_phi - pattern->min_phi;
-        range_theta = pattern->max_theta - pattern->min_theta;
-        err = oskar_phi_theta_to_normalised_cuda_f(n_points,
-                (const float*)(phi->data), (const float*)(theta->data),
-                pattern->min_phi, pattern->min_theta, range_phi, range_theta,
-                (float*)(norm_phi.data), (float*)(norm_theta.data));
-    }
-    else
-    {
-        double range_phi, range_theta;
-        range_phi = pattern->max_phi - pattern->min_phi;
-        range_theta = pattern->max_theta - pattern->min_theta;
-        err = oskar_phi_theta_to_normalised_cuda_d(n_points,
-                (const double*)(phi->data), (const double*)(theta->data),
-                pattern->min_phi, pattern->min_theta, range_phi, range_theta,
-                (double*)(norm_phi.data), (double*)(norm_theta.data));
-    }
 
     /* Interpolate element pattern data. */
     return OSKAR_ERR_UNKNOWN;

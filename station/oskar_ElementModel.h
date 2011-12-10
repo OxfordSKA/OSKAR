@@ -36,10 +36,6 @@
 #include "math/oskar_SplineData.h"
 #include "utility/oskar_Mem.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @brief Structure to hold antenna (embedded element) pattern data.
  *
@@ -75,9 +71,5 @@ struct oskar_ElementModel
     oskar_SplineData spline_theta_im;
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* OSKAR_ELEMENT_MODEL_H_ */

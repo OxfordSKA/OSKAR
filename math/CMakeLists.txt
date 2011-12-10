@@ -10,7 +10,6 @@ add_subdirectory(cudak)
 # Add the source files in this directory.
 set(math_SRC
     src/oskar_cuda_dft_c2r_2d.cu
-    src/oskar_cuda_interp_bilinear.cu
     src/oskar_cuda_jones_mul_c2.cu
     src/oskar_cuda_jones_mul_mat1_c1.cu
     src/oskar_cuda_jones_mul_mat2.cu

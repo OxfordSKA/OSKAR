@@ -46,9 +46,6 @@
  * The structure holds source parameters for the global sky model used by the
  * OSKAR simulator.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 struct oskar_SkyModel
 {
     int num_sources;          /**< Number of sources in the sky model. */

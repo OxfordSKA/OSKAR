@@ -56,9 +56,6 @@ struct double4c;
  * variable is set to true, the memory will be released automatically
  * when the structure is deleted.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 struct oskar_Mem
 {
 #ifdef __cplusplus

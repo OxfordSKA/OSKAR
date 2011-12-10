@@ -31,10 +31,6 @@
 
 #include "oskar_global.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 OSKAR_EXPORT
 struct oskar_SimTime
 {
@@ -55,9 +51,5 @@ struct oskar_SimTime
     double dt_fringe_days;
 };
 typedef struct oskar_SimTime oskar_SimTime;
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* OSKAR_SIM_TIME_H_ */

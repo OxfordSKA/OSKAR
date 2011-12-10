@@ -41,9 +41,6 @@
 struct oskar_StationModel;
 typedef struct oskar_StationModel oskar_StationModel;
 
-#ifdef __cplusplus
-extern "C"
-#endif
 struct oskar_StationModel
 {
     int num_elements;

@@ -7,7 +7,6 @@ if (CPPUNIT_FOUND)
 
     set(math_test_SRC
         src/CppUnitMain.cu
-        src/CudaInterpBilinearTest.cu
         src/JonesTest.cu
         src/Matrix3Test.cpp
         src/Matrix4Test.cpp
