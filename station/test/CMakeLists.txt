@@ -4,10 +4,8 @@
 
 if (CPPUNIT_FOUND)
 
-    include_directories(${CPPUNIT_INCLUDE_DIR})
-
     set(station_test_SRC
-        src/CppUnitMain.cu
+        src/CppUnitMain.cpp
         #src/BeamPatternTest.cpp
         src/Test_ElementModel.cpp
         src/Test_evaluate_jones_E.cpp
@@ -15,15 +13,13 @@ if (CPPUNIT_FOUND)
         src/Test_StationModel.cpp
     )
 
-    cuda_add_executable(stationTest ${station_test_SRC})
-
-    set_target_properties(stationTest PROPERTIES
+    include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
+    add_executable(station_test ${station_test_SRC})
+    set_target_properties(station_test PROPERTIES
        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+    target_link_libraries(station_test oskar ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
 
-    target_link_libraries(stationTest oskar ${CPPUNIT_LIBRARIES})
-
-    add_test(stationTest stationTest)
+    add_test(station_test station_test)
 
 endif()
-

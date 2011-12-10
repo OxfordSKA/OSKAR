@@ -36,7 +36,7 @@
 #include "math/oskar_jones_join.h"
 #include "sky/oskar_evaluate_jones_R.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
-#include "sky/oskar_sky_model_compact.h"
+#include "sky/oskar_sky_model_horizon_clip.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include <cstdio>
 
@@ -78,7 +78,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Work work(type, OSKAR_LOCATION_GPU);
 
-    // Calculate time increments.
+    // Get time increments.
     int num_vis_dumps        = times->num_vis_dumps;
     int num_vis_ave          = times->num_vis_ave;
     int num_fringe_ave       = times->num_fringe_ave;
@@ -90,8 +90,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     cudaMemGetInfo(&mem_free, &mem_total);
     cudaGetDevice(&device_id);
     cudaGetDeviceProperties(&device_prop, device_id);
-    printf("==> Device memory [%i, %s]: free %.1fMB, total %.1fMB.\n",
-            device_id, device_prop.name, mem_free/(1024.*1024.), mem_total/(1024.*1024.));
+    printf("==> Device memory [%i, %s]: free %.1f MB, total %.1f MB.\n",
+            device_id, device_prop.name, mem_free/(1024.*1024.),
+            mem_total/(1024.*1024.));
 
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)
@@ -106,7 +107,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
 
         // Compact sky model to temporary.
         oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
-        err = oskar_sky_model_compact(&sky, &sky_gpu, &tel_gpu, gast, &work);
+        err = oskar_sky_model_horizon_clip(&sky, &sky_gpu, &tel_gpu,
+        		gast, &work);
         if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
         {
             // Skip iteration.
@@ -163,8 +165,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             }
         }
 
-        // Divide visibilities by number of averages (can this be done in stages?).
-        vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
+        // Divide visibilities by number of averages.
+        err = vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
+        if (err) return err;
 
         // Add visibilities to global data.
         err = vis_amp->insert(&vis, j * n_baselines);

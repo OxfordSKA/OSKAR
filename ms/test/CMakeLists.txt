@@ -7,7 +7,7 @@ if (CPPUNIT_FOUND)
 
     set(ms_test_SRC
         src/CppUnitMain.cpp
-        src/MeasurementSetTest.cpp
+        src/Test_MeasurementSet.cpp
     )
 
     add_executable(msTest ${ms_test_SRC})

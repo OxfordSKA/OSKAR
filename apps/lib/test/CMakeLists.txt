@@ -9,9 +9,9 @@ if (CPPUNIT_FOUND)
 
     set(apps_test_SRC
         src/CppUnitMain.cpp
-        src/LoadStationsTest.cpp
+        src/Test_load_stations.cpp
     )
-    
+
     if(BUILD_OSKAR_MS)
         list(APPEND apps_test_SRC src/Test_write_ms.cpp)
     endif ()

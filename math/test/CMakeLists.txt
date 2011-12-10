@@ -6,30 +6,24 @@
 if (CPPUNIT_FOUND)
 
     set(math_test_SRC
-        src/CppUnitMain.cu
-        src/JonesTest.cu
-        src/Matrix3Test.cpp
-        src/Matrix4Test.cpp
-        src/oskar_linspace_test.cpp
-        src/oskar_meshgrid_test.cpp
+        src/CppUnitMain.cpp
+        src/Test_Jones.cpp
+        src/Test_Matrix3.cpp
+        src/Test_Matrix4.cpp
+        src/Test_linspace.cpp
+        src/Test_meshgrid.cpp
+        src/Test_SphericalPositions.cpp
     )
 
-    include_directories(${CPPUNIT_INCLUDE_DIR})
-    cuda_add_executable(mathTest ${math_test_SRC})
-    set_target_properties(mathTest PROPERTIES
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+    include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
+    add_executable(math_test ${math_test_SRC})
+    target_link_libraries(math_test oskar ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
 
-    target_link_libraries(mathTest
-        oskar
-        ${CPPUNIT_LIBRARIES}
-    )
-
-    add_test(mathTest mathTest)
+    add_test(math_test math_test)
 endif()
 
 
-
+# FIXME Move to CppUnit test.
 # ==== QtTest
 if (QT_QTTEST_FOUND AND BUILD_OSKAR_WIDGETS)
 
@@ -49,5 +43,3 @@ if (QT_QTTEST_FOUND AND BUILD_OSKAR_WIDGETS)
         ${QT_QTGUI_LIBRARY}
     )
 endif()
-
-

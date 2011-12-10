@@ -33,7 +33,7 @@
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_join.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
-#include "sky/oskar_sky_model_compact.h"
+#include "sky/oskar_sky_model_horizon_clip.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include <cstdio>
 
@@ -91,7 +91,8 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
 
         // Compact sky model to temporary.
         oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
-        err = oskar_sky_model_compact(&sky, &sky_gpu, &tel_gpu, gast, &work);
+        err = oskar_sky_model_horizon_clip(&sky, &sky_gpu, &tel_gpu,
+        		gast, &work);
         if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
         {
             // Skip iteration.
@@ -138,8 +139,9 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
             }
         }
 
-        // Divide visibilities by number of averages (can this be done in stages?).
-        vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
+        // Divide visibilities by number of averages.
+        err = vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
+        if (err) return err;
 
         // Add visibilities to global data.
         err = vis_amp->insert(&vis, j * n_baselines); if (err) return err;

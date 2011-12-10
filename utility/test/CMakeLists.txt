@@ -2,22 +2,19 @@
 # src/utility/test/CMakeLists.txt
 #
 
-
 if (CPPUNIT_FOUND)
 
     set(utility_test_SRC
-        src/CppUnitMain.cu
+        src/CppUnitMain.cpp
         src/Test_getline.cpp
         src/Test_Mem.cpp
         src/Test_string_to_array.cpp
     )
 
-    include_directories(${CPPUNIT_INCLUDE_DIR})
-    cuda_add_executable(utilityTest ${utility_test_SRC})
-    target_link_libraries(utilityTest
-        oskar
-        ${CPPUNIT_LIBRARIES})
+    include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
+    add_executable(utility_test ${utility_test_SRC})
+    target_link_libraries(utility_test oskar ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
 
-    add_test(utilityTest utilityTest)
+    add_test(utility_test utility_test)
 
 endif ()
