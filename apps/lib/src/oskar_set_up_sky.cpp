@@ -27,6 +27,7 @@
  */
 
 #include "apps/lib/oskar_set_up_sky.h"
+#include "apps/lib/oskar_SettingsSky.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -35,23 +36,48 @@
 extern "C"
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 {
-    // Load sky model into CPU structure.
-    QByteArray sky_file = settings.sky_file().toAscii();
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
+	int type, err;
+
+	// Create empty sky model.
+    type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_SkyModel *sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
-    int err = sky->load(sky_file.constData());
-    if (err) return NULL;
+
+    // Load sky file if it exists.
+    QByteArray sky_file = settings.sky().sky_file().toAscii();
+    if (!sky_file.isEmpty())
+    {
+    	err = sky->load(sky_file);
+    	if (err)
+    	{
+    		delete sky;
+    		return NULL;
+    	}
+    }
+
 
     // Compute source direction cosines relative to phase centre.
     err = sky->compute_relative_lmn(settings.obs().ra0_rad(),
             settings.obs().dec0_rad());
-    if (err) return NULL;
+    if (err)
+    {
+    	delete sky;
+    	return NULL;
+    }
 
     // Print summary data.
     printf("\n");
-    printf("= Sky (%s)\n", sky_file.constData());
+    printf("= Sky model\n");
+    printf("  - Sky file               = %s\n", sky_file.constData());
     printf("  - Num. sources           = %u\n", sky->num_sources);
     printf("\n");
+
+    // Check if sky model contains no sources.
+    if (sky->num_sources == 0)
+    {
+    	fprintf(stderr, "ERROR: Sky model contains no sources.\n");
+    	delete sky;
+    	return NULL;
+    }
 
     // Return the structure.
     return sky;

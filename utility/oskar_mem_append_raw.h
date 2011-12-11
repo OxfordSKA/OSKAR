@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_APPEND_H_
-#define OSKAR_SKY_MODEL_APPEND_H_
+#ifndef OSKAR_MEM_APPEND_RAW_H_
+#define OSKAR_MEM_APPEND_RAW_H_
 
 /**
- * @file oskar_sky_model_append.h
+ * @file oskar_mem_append_raw.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,20 +42,30 @@ extern "C" {
 
 /**
  * @brief
- * Appends (copies) sources from one sky model to another.
+ * Appends to a memory block by copying data from another memory location.
  *
  * @details
- * This function appends source data in one sky model to those in another
- * by resizing the existing arrays and copying the data across.
+ * This function copies memory from a raw pointer and appends
+ * it to memory held in an oskar_Mem structure.
  *
- * @param[out] dst Pointer to destination sky model.
- * @param[in]  src Pointer to source sky model.
+ * @param[out] to           Pointer to structure to which to append.
+ * @param[in] from          Location from which to append the memory.
+ * @param[in] from_type     Enumerated type of memory to be appended.
+ * @param[in] from_location Location to append from.
+ * @param[in] num_elements  Number of elements to append.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src);
+int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
+		int from_location, int num_elements);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_MODEL_APPEND_H_ */
+#endif /* OSKAR_MEM_APPEND_RAW_H_ */

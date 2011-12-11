@@ -37,6 +37,10 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Initialise the specified oskar_Visibility data structure.
  *
@@ -50,11 +54,12 @@
  * @param num_times         Number of time samples.
  * @param num_baselines     Number of baselines.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
 int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
         int num_channels, int num_times, int num_baselines);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_VISIBILITIES_INIT_H_ */

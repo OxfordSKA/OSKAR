@@ -26,43 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "interferometry/oskar_visibilities_init.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "utility/oskar_mem_init.h"
+#include "math/oskar_healpix_nside_to_npix.h"
+#include <math.h>
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_baselines)
+
+long oskar_healpix_nside_to_npix(long nside)
 {
-    if (!oskar_Mem::is_complex(amp_type))
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    if (location != OSKAR_LOCATION_GPU && location != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
-
-    // Evaluate the coordinate type.
-    int coord_type = oskar_Mem::is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
-
-    // Set dimensions.
-    vis->num_channels  = num_channels;
-    vis->num_times     = num_times;
-    vis->num_baselines = num_baselines;
-    int num_amps   = num_channels * num_times * num_baselines;
-    int num_coords = num_times * num_baselines;
-
-    // Initialise memory.
-    int err = 0;
-    err = oskar_mem_init(&vis->uu_metres, coord_type, location, num_coords, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->vv_metres, coord_type, location, num_coords, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->ww_metres, coord_type, location, num_coords, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->amplitude, amp_type, location, num_amps, 1);
-    if (err) return err;
-
-    return 0;
+	return 12 * nside * nside;
 }
+
+#ifdef __cplusplus
+}
+#endif

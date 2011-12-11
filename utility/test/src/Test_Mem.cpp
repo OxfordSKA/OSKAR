@@ -76,7 +76,7 @@ void Test_Mem::test_append()
         int num_values1 = 10;
         double value1 = 1.0;
         vector<double> data1(num_values1, value1);
-        mem_cpu.append((const void*)&data1[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values1);
+        mem_cpu.append_raw((const void*)&data1[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values1);
         CPPUNIT_ASSERT_EQUAL(num_values1, mem_cpu.num_elements());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type());
@@ -87,7 +87,7 @@ void Test_Mem::test_append()
         int num_values2 = 5;
         double value2 = 2.0;
         vector<double> data2(num_values2, value2);
-        mem_cpu.append((const void*)&data2[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values2);
+        mem_cpu.append_raw((const void*)&data2[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values2);
         CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_cpu.num_elements());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type());
@@ -106,7 +106,7 @@ void Test_Mem::test_append()
         float value1 = 1.0;
         vector<float> data1(num_values1, value1);
         int error = 0;
-        error = mem_gpu.append((const void*)&data1[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1);
+        error = mem_gpu.append_raw((const void*)&data1[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
                 cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
         CPPUNIT_ASSERT_EQUAL(num_values1, mem_gpu.num_elements());
@@ -121,7 +121,7 @@ void Test_Mem::test_append()
         int num_values2 = 5;
         float value2 = 2.0;
         vector<float> data2(num_values2, value2);
-        error = mem_gpu.append((const void*)&data2[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2);
+        error = mem_gpu.append_raw((const void*)&data2[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2);
         CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
                 cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
         CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_gpu.num_elements());

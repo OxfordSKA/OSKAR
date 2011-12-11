@@ -26,11 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_SettingsAllSky.h"
-#include <QtCore/QSettings>
-#include <cstdio>
+#ifndef OSKAR_HEALPIX_PIX_TO_ANGLES_RING_H_
+#define OSKAR_HEALPIX_PIX_TO_ANGLES_RING_H_
 
-void oskar_SettingsAllSky::load(const QSettings& settings)
-{
-    separation_  = settings.value("all_sky/separation", 0.0).toDouble();
+/**
+ * @file oskar_healpix_pix_to_angles_ring.h
+ */
+
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Converts Healpix pixel ID to angles for the Healpix RING scheme.
+ *
+ * @details
+ * Gives \p theta and \p phi corresponding to pixel \p ipix
+ * for a parameter \p nside in the RING scheme.
+ *
+ * Note that \p theta is the polar angle (the colatitude) and \p phi is the
+ * east longitude.
+ *
+ * \p nside must be in the range 1 to 8192, and \p ipix in the range 0 to
+ * (12 * nside^2 - 1).
+ */
+OSKAR_EXPORT
+int oskar_healpix_pix_to_angles_ring(long nside, long ipix, double* theta,
+		double* phi);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_HEALPIX_PIX_TO_ANGLES_RING_H_ */

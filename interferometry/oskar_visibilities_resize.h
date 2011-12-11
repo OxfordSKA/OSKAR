@@ -37,6 +37,10 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Resize the memory in the visibility structure to the specified
  * dimensions.
@@ -48,11 +52,12 @@
  *
  * @return An error code.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
 int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
         int num_times, int num_baselines);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_VISIBILITIES_RESIZE_H_ */

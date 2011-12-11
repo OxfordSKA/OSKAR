@@ -26,36 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_APPEND_H_
-#define OSKAR_SKY_MODEL_APPEND_H_
+#include "apps/lib/oskar_SettingsSky.h"
+#include <QtCore/QSettings>
+#include <cstdio>
 
-/**
- * @file oskar_sky_model_append.h
- */
-
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Appends (copies) sources from one sky model to another.
- *
- * @details
- * This function appends source data in one sky model to those in another
- * by resizing the existing arrays and copying the data across.
- *
- * @param[out] dst Pointer to destination sky model.
- * @param[in]  src Pointer to source sky model.
- */
-OSKAR_EXPORT
-int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src);
-
-#ifdef __cplusplus
+void oskar_SettingsSky::load(const QSettings& settings)
+{
+    sky_file_    = settings.value("sky/source_file").toString();
+    separation_  = settings.value("sky/separation", 0.0).toDouble();
 }
-#endif
-
-#endif /* OSKAR_SKY_MODEL_APPEND_H_ */

@@ -42,14 +42,23 @@ extern "C" {
 
 /**
  * @brief
+ * Appends to a memory block by copying data from another oskar_Mem structure.
  *
  * @details
+ * This function copies memory from an oskar_Mem structure and appends
+ * it to another, preserving all existing memory.
+ *
+ * @param[out] to    Pointer to structure to which to append.
+ * @param[in] from   Pointer to structure to which to append from.
  *
  * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
-        int num_elements);
+int oskar_mem_append(oskar_Mem* to, const oskar_Mem* from);
 
 #ifdef __cplusplus
 }

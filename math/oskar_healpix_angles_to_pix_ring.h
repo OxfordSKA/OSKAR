@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_APPEND_H_
-#define OSKAR_SKY_MODEL_APPEND_H_
+#ifndef OSKAR_HEALPIX_ANGLES_TO_PIX_RING_H_
+#define OSKAR_HEALPIX_ANGLES_TO_PIX_RING_H_
 
 /**
- * @file oskar_sky_model_append.h
+ * @file oskar_healpix_angles_to_pix_ring.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,20 +41,15 @@ extern "C" {
 
 /**
  * @brief
- * Appends (copies) sources from one sky model to another.
+ * Converts spherical angles to a Healpix pixel ID in the RING scheme.
  *
  * @details
- * This function appends source data in one sky model to those in another
- * by resizing the existing arrays and copying the data across.
- *
- * @param[out] dst Pointer to destination sky model.
- * @param[in]  src Pointer to source sky model.
  */
 OSKAR_EXPORT
-int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src);
+int oskar_healpix_angles_to_pix_ring();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_MODEL_APPEND_H_ */
+#endif /* OSKAR_HEALPIX_ANGLES_TO_PIX_RING_H_ */

@@ -26,67 +26,68 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_alloc.h"
+#include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_set.h"
 #include "utility/oskar_Mem.h"
 
 #include <cuda_runtime_api.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-int oskar_mem_set(oskar_Mem* dst, const void* src, int src_type,
-        int src_num_elements, int src_location)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
+		int from_location, int num_elements)
 {
     int error = 0;
-    size_t dst_size, src_size;
+    size_t element_size, mem_size, offset_bytes;
 
     /* Check for sane inputs. */
-    if (dst == NULL || src == NULL)
+    if (to == NULL || from == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Compute the sizes. */
-    dst_size = dst->private_num_elements *
-            oskar_mem_element_size(dst->private_type);
-    src_size = src_num_elements * oskar_mem_element_size(src_type);
+    /* Check that the data types match. */
+    if (to->private_type != from_type)
+        return OSKAR_ERR_TYPE_MISMATCH;
 
-    /* If the memory size changes, free and reallocate the memory. */
-    if (dst_size != src_size)
-    {
-        int location = dst->private_location;
-        error = oskar_mem_free(dst);
-        if (error != 0) return error;
-        dst->private_location   = location;
-        dst->private_num_elements = src_num_elements;
-        dst->private_type       = src_type;
-        error = oskar_mem_alloc(dst);
-        if (error != 0) return error;
-    }
+    /* Memory size being appended and offset into memory to append to. */
+    element_size = oskar_mem_element_size(to->private_type);
+    mem_size = num_elements * element_size;
+    offset_bytes = to->private_num_elements * element_size;
 
-    if (src_location == OSKAR_LOCATION_CPU)
+    /* Reallocate the memory block so it is big enough to hold the new data. */
+    error = oskar_mem_realloc(to, num_elements + to->private_num_elements);
+    if (error != 0) return error;
+
+    /* Append to the memory. */
+    if (from_location == OSKAR_LOCATION_CPU)
     {
-        if (dst->private_location == OSKAR_LOCATION_CPU)
-            memcpy(dst->data, src, src_size);
-        else if (dst->private_location == OSKAR_LOCATION_GPU)
-            cudaMemcpy(dst->data, src, src_size, cudaMemcpyHostToDevice);
+        if (to->private_location == OSKAR_LOCATION_CPU)
+            memcpy((char*)(to->data) + offset_bytes, from, mem_size);
         else
-            return OSKAR_ERR_BAD_LOCATION;
+            cudaMemcpy((char*)(to->data) + offset_bytes, from,
+                    mem_size, cudaMemcpyHostToDevice);
     }
-    else if (src_location == OSKAR_LOCATION_GPU)
+    else if (from_location == OSKAR_LOCATION_GPU)
     {
-        if (dst->private_location == OSKAR_LOCATION_CPU)
-            cudaMemcpy(dst->data, src, cudaMemcpyDeviceToHost);
-        else if (dst->private_location == OSKAR_LOCATION_GPU)
-            cudaMemcpy(dst->data, src, cudaMemcpyDeviceToDevice);
+        if (to->private_location == OSKAR_LOCATION_CPU)
+            cudaMemcpy((char*)(to->data) + offset_bytes, from,
+                    mem_size, cudaMemcpyDeviceToHost);
         else
-            return OSKAR_ERR_BAD_LOCATION;
+            cudaMemcpy((char*)(to->data) + offset_bytes, from,
+                    mem_size, cudaMemcpyDeviceToDevice);
     }
     else
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
-
     return error;
 }
+
+#ifdef __cplusplus
+}
+#endif

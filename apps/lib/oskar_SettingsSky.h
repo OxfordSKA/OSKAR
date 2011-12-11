@@ -26,31 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_resize.h"
+#ifndef OSKAR_SETTINGS_SKY_H_
+#define OSKAR_SETTINGS_SKY_H_
 
-#ifdef __cplusplus
-extern "C"
-#endif
-int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
-        int num_times, int num_baselines)
+#include <QtCore/QSettings>
+
+/// Container class for sky settings group.
+class oskar_SettingsSky
 {
-    vis->num_channels  = num_channels;
-    vis->num_times     = num_times;
-    vis->num_baselines = num_baselines;
-    int num_amps   = num_channels * num_times * num_baselines;
-    int num_coords = num_times * num_baselines;
+    public:
+        void load(const QSettings& settings);
 
-    int error = 0;
-    error = vis->uu_metres.resize(num_coords);
-    if (error) return error;
-    error = vis->vv_metres.resize(num_coords);
-    if (error) return error;
-    error = vis->ww_metres.resize(num_coords);
-    if (error) return error;
-    error = vis->amplitude.resize(num_amps);
-    if (error) return error;
+		QString sky_file() const { return sky_file_; }
+		void set_sky_file(const QString& value) { sky_file_ = value; }
+        double separation() const {return separation_;}
 
-    return error;
-}
+    private:
+        QString sky_file_;
+        double separation_;
+};
+
+#endif // OSKAR_SETTINGS_SKY_H_

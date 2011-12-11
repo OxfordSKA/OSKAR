@@ -26,33 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_SET_H_
-#define OSKAR_MEM_SET_H_
-
-/**
- * @file oskar_mem_set.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_resize.h"
+#include "utility/oskar_mem_realloc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- *
- * @details
- *
- * @return
- */
-OSKAR_EXPORT
-int oskar_mem_set(oskar_Mem* dst, const void* src, int src_type,
-        int src_num_elements, int src_location);
+int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
+        int num_times, int num_baselines)
+{
+    int num_amps, num_coords, error = 0;
+
+    vis->num_channels  = num_channels;
+    vis->num_times     = num_times;
+    vis->num_baselines = num_baselines;
+    num_amps   = num_channels * num_times * num_baselines;
+    num_coords = num_times * num_baselines;
+
+    error = oskar_mem_realloc(&vis->uu_metres, num_coords);
+    if (error) return error;
+    error = oskar_mem_realloc(&vis->vv_metres, num_coords);
+    if (error) return error;
+    error = oskar_mem_realloc(&vis->ww_metres, num_coords);
+    if (error) return error;
+    error = oskar_mem_realloc(&vis->amplitude, num_amps);
+    if (error) return error;
+
+    return error;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_MEM_SET_H_ */

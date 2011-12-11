@@ -29,6 +29,7 @@
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_append.h"
+#include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
@@ -80,10 +81,16 @@ oskar_Mem::~oskar_Mem()
         throw "Error in oskar_mem_free.";
 }
 
-int oskar_Mem::append(const void* from, int from_type, int from_location,
+int oskar_Mem::append(const oskar_Mem* from)
+{
+    return oskar_mem_append(this, from);
+}
+
+int oskar_Mem::append_raw(const void* from, int from_type, int from_location,
         int num_elements)
 {
-    return oskar_mem_append(this, from, from_type, from_location, num_elements);
+    return oskar_mem_append_raw(this, from, from_type, from_location,
+    		num_elements);
 }
 
 int oskar_Mem::clear_contents()

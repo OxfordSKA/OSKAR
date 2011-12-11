@@ -31,10 +31,10 @@ set(interferometry_SRC
     src/oskar_TelescopeModel.cpp
     src/oskar_visibilities_clear_contents.c
     src/oskar_visibilities_get_channel_amps.c
-    src/oskar_visibilities_init.cpp
+    src/oskar_visibilities_init.c
     src/oskar_visibilities_location.c
     src/oskar_visibilities_read.cpp
-    src/oskar_visibilities_resize.cpp
+    src/oskar_visibilities_resize.c
     src/oskar_visibilities_write.cpp
     src/oskar_Visibilities.cpp
     src/oskar_xyz_to_uvw_cuda.cu

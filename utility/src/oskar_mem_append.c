@@ -27,65 +27,17 @@
  */
 
 #include "utility/oskar_mem_append.h"
-#include "utility/oskar_mem_element_size.h"
-#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_Mem.h"
-
-#include <cuda_runtime_api.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_append(oskar_Mem* to, const void* from, int type, int location,
-        int num_elements)
+int oskar_mem_append(oskar_Mem* to, const oskar_Mem* from)
 {
-    int error = 0;
-    size_t element_size, mem_size, offset_bytes;
-
-    /* Check for sane inputs. */
-    if (to == NULL || from == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Check that the data types match. */
-    if (to->private_type != type)
-        return OSKAR_ERR_TYPE_MISMATCH;
-
-    /* Memory size being appended and offset into memory to append to. */
-    element_size = oskar_mem_element_size(to->private_type);
-    mem_size = num_elements * element_size;
-    offset_bytes = to->private_num_elements * element_size;
-
-    /* Reallocate the memory pointer so it is big enough to append to. */
-    error = oskar_mem_realloc(to, num_elements + to->private_num_elements);
-    if (error != 0) return error;
-
-    /* Append to the memory. */
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        if (to->private_location == OSKAR_LOCATION_CPU)
-            memcpy((char*)(to->data) + offset_bytes, from, mem_size);
-        else
-            cudaMemcpy((char*)(to->data) + offset_bytes, from,
-                    mem_size, cudaMemcpyHostToDevice);
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        if (to->private_location == OSKAR_LOCATION_CPU)
-            cudaMemcpy((char*)(to->data) + offset_bytes, from,
-                    mem_size, cudaMemcpyDeviceToHost);
-        else
-            cudaMemcpy((char*)(to->data) + offset_bytes, from,
-                    mem_size, cudaMemcpyDeviceToDevice);
-    }
-    else
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
-    return error;
+	return oskar_mem_append_raw(to, from->data, from->private_type,
+			from->private_location, from->private_num_elements);
 }
 
 #ifdef __cplusplus

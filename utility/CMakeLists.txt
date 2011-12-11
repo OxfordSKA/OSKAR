@@ -11,6 +11,7 @@ set(utility_SRC
     src/oskar_getline.c
     src/oskar_mem_add.c
     src/oskar_mem_alloc.c
+    src/oskar_mem_append_raw.c
     src/oskar_mem_append.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_copy.c

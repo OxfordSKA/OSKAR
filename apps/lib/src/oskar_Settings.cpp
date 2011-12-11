@@ -63,8 +63,6 @@ int oskar_Settings::load(const QString& filename)
     QSettings settings(filename, QSettings::IniFormat);
 
     // Read settings.
-    sky_file_          = settings.value("sky/source_file").toString();
-
     telescope_file_    = settings.value("telescope/layout_file").toString();
     latitude_deg_      = settings.value("telescope/latitude_deg").toDouble();
     longitude_deg_     = settings.value("telescope/longitude_deg").toDouble();
@@ -80,8 +78,8 @@ int oskar_Settings::load(const QString& filename)
     // Load settings from benchmark group.
     benchmark_.load(settings);
 
-    // Load settings from all-sky group.
-    all_sky_.load(settings);
+    // Load settings from sky group.
+    sky_.load(settings);
 
     prec_double_ = settings.value("global/double_precision").toBool();
     max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk").toInt();
@@ -100,13 +98,6 @@ int oskar_Settings::load(const QString& filename)
 
 int oskar_Settings::check() const
 {
-    if (benchmark().num_sources() == 0 && all_sky().separation() == 0.0
-            && !QFileInfo(sky_file_).isFile())
-    {
-        fprintf(stderr, "ERROR: Sky file doesn't exist!\n");
-        return FALSE;
-    }
-
     if (benchmark().num_stations() == 0 && !QFileInfo(telescope_file_).isFile())
     {
         fprintf(stderr, "ERROR: Telescope layout file doesn't exist!\n");
@@ -128,7 +119,6 @@ void oskar_Settings::print() const
     printf("\n");
     printf("= Settings (%s)\n", filename_.toLatin1().data());
     printf("  - Double precision       = %s\n", prec_double_ ? "true" : "false");
-    printf("  - Sky file               = %s\n", sky_file_.toLatin1().data());
     printf("  - Stations directory     = %s\n", station_dir_.toLatin1().data());
     printf("  - Station beam disabled  = %s\n", disable_station_beam_ ? "true" : "false");
     printf("  - Telescope file         = %s\n", telescope_file_.toLatin1().data());

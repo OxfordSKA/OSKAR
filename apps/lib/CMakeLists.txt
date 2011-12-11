@@ -10,10 +10,10 @@ set(apps_SRC
     src/oskar_set_up_telescope.cpp
     src/oskar_set_up_visibilities.cpp
     src/oskar_Settings.cpp
-    src/oskar_SettingsAllSky.cpp
     src/oskar_SettingsBenchmark.cpp
     src/oskar_SettingsImage.cpp
     src/oskar_SettingsObservation.cpp
+    src/oskar_SettingsSky.cpp
 )
 
 if(BUILD_OSKAR_MS)

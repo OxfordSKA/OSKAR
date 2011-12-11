@@ -32,7 +32,7 @@
 #include "apps/lib/oskar_SettingsImage.h"
 #include "apps/lib/oskar_SettingsObservation.h"
 #include "apps/lib/oskar_SettingsBenchmark.h"
-#include "apps/lib/oskar_SettingsAllSky.h"
+#include "apps/lib/oskar_SettingsSky.h"
 
 #include <QtCore/QString>
 #include <QtCore/QSettings>
@@ -53,9 +53,6 @@ class oskar_Settings
         void print() const;
 
     public:
-        QString sky_file() const { return sky_file_; }
-        void set_sky_file(const QString& value) { sky_file_ = value; }
-
         QString telescope_file() const { return telescope_file_; }
         void set_telescope_file(const QString& value) { telescope_file_ = value; }
 
@@ -87,7 +84,8 @@ class oskar_Settings
         oskar_SettingsImage& image() { return image_; }
 
         const oskar_SettingsBenchmark& benchmark() const { return benchmark_; }
-        const oskar_SettingsAllSky& all_sky() const { return all_sky_; }
+        const oskar_SettingsSky& sky() const { return sky_; }
+        oskar_SettingsSky& sky() { return sky_; }
 
     private:
         bool prec_double_;
@@ -95,7 +93,6 @@ class oskar_Settings
         int max_host_threads_;
         QVector<int> use_devices_;
         QString filename_;
-        QString sky_file_;
         QString telescope_file_;
         double longitude_deg_;
         double latitude_deg_;
@@ -105,8 +102,7 @@ class oskar_Settings
         oskar_SettingsObservation obs_;
         oskar_SettingsImage image_;
         oskar_SettingsBenchmark benchmark_;
-        oskar_SettingsAllSky all_sky_;
+        oskar_SettingsSky sky_;
 };
 
 #endif // OSKAR_SETTINGS_H_
-

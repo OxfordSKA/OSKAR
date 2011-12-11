@@ -16,6 +16,10 @@ set(math_SRC
     src/oskar_cuda_jones_mul_scalar_c2.cu
     src/oskar_cuda_jones_set_real_scalar_1.cu
     src/oskar_cuda_jones_set_real_scalar_4.cu
+    src/oskar_healpix_angles_to_pix_ring.c
+    src/oskar_healpix_npix_to_nside.c
+    src/oskar_healpix_nside_to_npix.c
+    src/oskar_healpix_pix_to_angles_ring.c
     src/oskar_jones_copy.c
     src/oskar_jones_free.c
     src/oskar_jones_get_station_pointer.c

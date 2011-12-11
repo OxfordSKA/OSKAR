@@ -26,7 +26,7 @@ set(sky_SRC
     src/oskar_ra_dec_to_hor_lmn.c
     src/oskar_ra_dec_to_rel_lmn_cuda.cu
     src/oskar_ra_dec_to_rel_lmn.c
-    src/oskar_sky_model_append.cpp
+    src/oskar_sky_model_append.c
     src/oskar_sky_model_compute_relative_lmn.cpp
     src/oskar_sky_model_copy.c
     src/oskar_sky_model_get_ptr.c

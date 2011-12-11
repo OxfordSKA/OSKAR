@@ -126,16 +126,27 @@ public:
     ~oskar_Mem();
 
     /**
+     * @brief Appends to the memory by copying from another oskar_Mem structure.
+     *
+     * @param[in] from   Pointer to structure to append to the current memory.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int append(const oskar_Mem* from);
+
+    /**
      * @brief Appends to the memory by copying num_elements of memory from the
      * specified array with the specified memory location.
      *
      * @param[in] from          Location from which to append to the current memory.
+     * @param[in] from_type     Enumerated type of memory to be appended.
      * @param[in] from_location Location to append from.
      * @param[in] num_elements  Number of elements to append.
      *
      * @return A CUDA or OSKAR error code.
      */
-    int append(const void* from, int type, int from_location, int num_elements);
+    int append_raw(const void* from, int type, int from_location,
+    		int num_elements);
 
     /**
      * @brief

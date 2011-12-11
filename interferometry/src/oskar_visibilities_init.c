@@ -26,36 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_APPEND_H_
-#define OSKAR_SKY_MODEL_APPEND_H_
-
-/**
- * @file oskar_sky_model_append.h
- */
-
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
+#include "interferometry/oskar_visibilities_init.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_type_check.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Appends (copies) sources from one sky model to another.
- *
- * @details
- * This function appends source data in one sky model to those in another
- * by resizing the existing arrays and copying the data across.
- *
- * @param[out] dst Pointer to destination sky model.
- * @param[in]  src Pointer to source sky model.
- */
-OSKAR_EXPORT
-int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src);
+int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
+        int num_channels, int num_times, int num_baselines)
+{
+    int coord_type, num_amps, num_coords, err = 0;
+
+    if (!oskar_mem_is_complex(amp_type))
+        return OSKAR_ERR_BAD_DATA_TYPE;
+
+    if (location != OSKAR_LOCATION_GPU && location != OSKAR_LOCATION_CPU)
+        return OSKAR_ERR_BAD_LOCATION;
+
+    /* Evaluate the coordinate type. */
+    coord_type = oskar_mem_is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+
+    /* Set dimensions. */
+    vis->num_channels  = num_channels;
+    vis->num_times     = num_times;
+    vis->num_baselines = num_baselines;
+    num_amps   = num_channels * num_times * num_baselines;
+    num_coords = num_times * num_baselines;
+
+    /* Initialise memory. */
+    err = oskar_mem_init(&vis->uu_metres, coord_type, location, num_coords, 1);
+    if (err) return err;
+    err = oskar_mem_init(&vis->vv_metres, coord_type, location, num_coords, 1);
+    if (err) return err;
+    err = oskar_mem_init(&vis->ww_metres, coord_type, location, num_coords, 1);
+    if (err) return err;
+    err = oskar_mem_init(&vis->amplitude, amp_type, location, num_amps, 1);
+    if (err) return err;
+
+    return 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SKY_MODEL_APPEND_H_ */

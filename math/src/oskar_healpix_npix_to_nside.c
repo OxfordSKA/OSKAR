@@ -26,36 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_APPEND_H_
-#define OSKAR_SKY_MODEL_APPEND_H_
-
-/**
- * @file oskar_sky_model_append.h
- */
-
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
+#include "math/oskar_healpix_npix_to_nside.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Appends (copies) sources from one sky model to another.
- *
- * @details
- * This function appends source data in one sky model to those in another
- * by resizing the existing arrays and copying the data across.
- *
- * @param[out] dst Pointer to destination sky model.
- * @param[in]  src Pointer to source sky model.
- */
-OSKAR_EXPORT
-int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src);
+long oskar_healpix_npix_to_nside(long npix)
+{
+	return (long)floor(sqrt(npix / 12.0) + 0.5);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SKY_MODEL_APPEND_H_ */

@@ -26,22 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ALL_SKY_H_
-#define OSKAR_SETTINGS_ALL_SKY_H_
+#ifndef OSKAR_HEALPIX_NSIDE_TO_NPIX_H_
+#define OSKAR_HEALPIX_NSIDE_TO_NPIX_H_
 
-#include <QtCore/QSettings>
+/**
+ * @file oskar_healpix_nside_to_npix.h
+ */
 
-/// Container class for all-sky settings group.
-class oskar_SettingsAllSky
-{
-    public:
-        void load(const QSettings& settings);
+#include "oskar_global.h"
 
-    public:
-        double separation() const {return separation_;}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    private:
-        double separation_;
-};
+/**
+ * @brief
+ * Compute total number of pixels from Healpix nside parameter.
+ *
+ * @details
+ * Given the nside parameter for a Healpix map, this function returns
+ * the total number of pixels in the map.
+ */
+OSKAR_EXPORT
+long oskar_healpix_nside_to_npix(long nside);
 
-#endif // OSKAR_SETTINGS_ALL_SKY_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_HEALPIX_NSIDE_TO_NPIX_H_ */
