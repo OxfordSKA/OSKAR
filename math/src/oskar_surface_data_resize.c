@@ -26,34 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#include "math/oskar_surface_data_resize.h"
+#include "utility/oskar_mem_realloc.h"
 
-/**
- * @file oskar_ElementModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
- */
-struct oskar_ElementModel
+int oskar_surface_data_resize(oskar_SurfaceData* data, int size)
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+    int err = 0;
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+    /* Resize memory. */
+    err = oskar_mem_realloc(&data->re, size);
+    if (err) return err;
+    err = oskar_mem_realloc(&data->im, size);
+    if (err) return err;
+
+    return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif

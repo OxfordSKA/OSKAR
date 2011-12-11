@@ -26,34 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#include "math/test/Test_healpix.h"
+#include "math/oskar_healpix_pix_to_angles_ring.h"
+#include "math/oskar_healpix_nside_to_npix.h"
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
 
-/**
- * @file oskar_ElementModel.h
- */
-
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
- */
-struct oskar_ElementModel
+void Test_healpix::test()
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+	int nside = 10;
+	int npix = oskar_healpix_nside_to_npix(nside);
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+	const char* filename = "healpix_test.dat";
+	FILE* file = fopen(filename, "w");
+	for (int i = 0; i < npix; ++i)
+	{
+		int err;
+		double lon, lat;
+		err = oskar_healpix_pix_to_angles_ring(nside, i, &lat, &lon);
+		if (err) CPPUNIT_FAIL("Error in oskar_healpix_pix_to_angles_ring.");
+		lat = M_PI / 2 - lat;
+		fprintf(file, "%.5f %.5f\n", lon, lat);
+	}
+	fclose(file);
+	remove(filename);
+}
+

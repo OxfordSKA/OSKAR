@@ -26,34 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#ifndef OSKAR_SURFACE_DATA_FREE_H_
+#define OSKAR_SURFACE_DATA_FREE_H_
 
 /**
- * @file oskar_ElementModel.h
+ * @file oskar_surface_data_free.h
  */
 
+#include "oskar_global.h"
 #include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Structure to hold antenna (embedded element) pattern data.
+ * @brief
+ * Frees memory held by a surface data structure.
  *
  * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
+ * This function frees memory held by a surface data structure.
  *
- * The theta coordinate is assumed to be the fastest-varying dimension.
+ * @param[in,out] data Pointer to data structure.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
-struct oskar_ElementModel
-{
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+OSKAR_EXPORT
+int oskar_surface_data_free(oskar_SurfaceData* data);
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_SURFACE_DATA_FREE_H_ */

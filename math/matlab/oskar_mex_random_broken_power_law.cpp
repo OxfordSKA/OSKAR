@@ -1,5 +1,6 @@
 #include <mex.h>
-#include "math/oskar_Random.h"
+#include "math/oskar_random_broken_power_law.h"
+#include <cstdlib>
 #include <vector>
 
 
@@ -52,11 +53,10 @@ void mexFunction(
     return_ptrs[0] = mxCreateNumericMatrix(rows, cols, mxDOUBLE_CLASS, mxREAL);
     double * rand = mxGetPr(return_ptrs[0]);
 
-    rand[0] = oskar_Random::broken_power_law<double>(min, max,
-            threshold, power1, power2, seed);
+    if (seed > 0) srand(seed);
     for (int i = 0; i < n; ++i)
     {
-        rand[i] = oskar_Random::broken_power_law<double>(min, max,
+        rand[i] = oskar_random_broken_power_law(min, max,
                 threshold, power1, power2);
     }
 }

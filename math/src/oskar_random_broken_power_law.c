@@ -26,34 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#include "math/oskar_random_broken_power_law.h"
+#include <math.h>
+#include <stdlib.h>
 
-/**
- * @file oskar_ElementModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
- */
-struct oskar_ElementModel
+double oskar_random_broken_power_law(double min, double max, double threshold,
+		double power1, double power2)
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+	double b0, pow1, pow2, powinv1, powinv2, b1, b2, r, b;
+	b0 = pow(threshold, (power1 - power2));
+	pow1 = power1 + 1.0;
+	pow2 = power2 + 1.0;
+	powinv1 = 1.0 / pow1;
+	powinv2 = 1.0 / pow2;
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+    if (power1 == -1.0)
+        b1 = log(threshold) - log(min);
+    else
+        b1 = powinv1 * (pow(threshold, pow1) - pow(min, pow2));
+
+    if (power2 == -1.0)
+        b2 = b0 * (log(max) - log(threshold));
+    else
+        b2 = b0 * powinv2 * (pow(max, pow2) - pow(threshold, pow2));
+
+    r = (double)rand() / ((double)RAND_MAX + 1.0);
+    b = -b1 + r * (b2 + b1);
+    if (b > 0.0)
+    {
+        if (power2 == -1.0)
+            return threshold * exp(b / b0);
+        else
+            return pow((b * (pow2 / b0) + pow(threshold, pow2)), powinv2);
+    }
+    else
+    {
+        if (power1 == -1.0)
+            return threshold * exp(-abs(b));
+        else
+            return pow( (pow(threshold, pow1) - abs(b) * pow1) , powinv1);
+    }
+}
+
+#ifdef __cplusplus
+}
+#endif

@@ -26,34 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#include "math/oskar_surface_data_set_data.h"
 
-/**
- * @file oskar_ElementModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
- */
-struct oskar_ElementModel
+int oskar_surface_data_set_data(oskar_SurfaceData* data,
+		int i, double real, double imag)
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+	/* Check index is in range. */
+	if (i >= data->re.private_num_elements ||
+			i >= data->im.private_num_elements)
+		return OSKAR_ERR_OUT_OF_RANGE;
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+	/* Store the data. */
+	if (data->re.private_type == OSKAR_SINGLE &&
+			data->im.private_type == OSKAR_SINGLE)
+	{
+		((float*)data->re.data)[i] = real;
+		((float*)data->im.data)[i] = imag;
+	}
+	else if (data->re.private_type == OSKAR_DOUBLE &&
+			data->im.private_type == OSKAR_DOUBLE)
+	{
+		((double*)data->re.data)[i] = real;
+		((double*)data->im.data)[i] = imag;
+	}
+	else
+		return OSKAR_ERR_BAD_DATA_TYPE;
+
+    return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif

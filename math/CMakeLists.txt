@@ -31,6 +31,10 @@ set(math_SRC
     src/oskar_linspace.c
     src/oskar_mat_tri_c.c
     src/oskar_meshgrid.c
+    src/oskar_random_broken_power_law.c
+    src/oskar_random_gaussian.c
+    src/oskar_random_power_law.c
+    src/oskar_random_uniform.c
     src/oskar_round_robin.c
     src/oskar_sph_from_lm.c
     src/oskar_sph_to_lm.c
@@ -40,6 +44,14 @@ set(math_SRC
     src/oskar_spline_data_init.c
     src/oskar_spline_surface_evaluate.c
     src/oskar_spline_surface_init.c
+    src/oskar_surface_data_compute_splines.c
+    src/oskar_surface_data_free.c
+    src/oskar_surface_data_init.c
+    src/oskar_surface_data_location.c
+    src/oskar_surface_data_resize.c
+    src/oskar_surface_data_set_data.c
+    src/oskar_surface_data_set_metadata.c
+    src/oskar_surface_data_type.c
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})

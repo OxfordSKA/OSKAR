@@ -26,34 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#include "math/oskar_surface_data_location.h"
 
-/**
- * @file oskar_ElementModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
- */
-struct oskar_ElementModel
+int oskar_surface_data_location(const oskar_SurfaceData* data)
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+	int location;
+	location = data->re.private_location;
+	if (location != data->im.private_location ||
+			location != data->spline_re.coeff.private_location ||
+			location != data->spline_re.knots_x.private_location ||
+			location != data->spline_re.knots_y.private_location ||
+			location != data->spline_im.coeff.private_location ||
+			location != data->spline_im.knots_x.private_location ||
+			location != data->spline_im.knots_y.private_location)
+		return OSKAR_ERR_BAD_LOCATION;
+	return location;
+}
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+#ifdef __cplusplus
+}
+#endif

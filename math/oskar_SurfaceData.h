@@ -26,34 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#ifndef OSKAR_SURFACE_DATA_H_
+#define OSKAR_SURFACE_DATA_H_
 
 /**
- * @file oskar_ElementModel.h
+ * @file oskar_SurfaceData.h
  */
 
-#include "math/oskar_SurfaceData.h"
+#include "math/oskar_SplineData.h"
 #include "utility/oskar_Mem.h"
 
 /**
- * @brief Structure to hold antenna (embedded element) pattern data.
+ * @brief Structure to hold surface data.
  *
  * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
+ * This structure holds the data required to describe a 2D complex surface.
  */
-struct oskar_ElementModel
+struct oskar_SurfaceData
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+    int num_points_x; /**< Number of points in the x direction. */
+    int num_points_y; /**< Number of points in the y direction. */
+    double inc_x;     /**< Increment in the x direction. */
+    double inc_y;     /**< Increment in the y direction. */
+    double max_x;     /**< Maximum value of x. */
+    double max_y;     /**< Maximum value of y. */
+    double min_x;     /**< Minimum value of x. */
+    double min_y;     /**< Minimum value of y. */
+    oskar_Mem re;     /**< Real part of surface (2D array). */
+    oskar_Mem im;     /**< Imaginary part of surface (2D array). */
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+    /* The spline data are initialised at the pre-computation stage. */
+    oskar_SplineData spline_re;
+    oskar_SplineData spline_im;
+};
+
+typedef struct oskar_SurfaceData oskar_SurfaceData;
+
+#endif /* OSKAR_SURFACE_DATA_H_ */

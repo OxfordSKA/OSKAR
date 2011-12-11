@@ -27,7 +27,7 @@
  */
 
 #include "station/oskar_element_model_compute_splines.h"
-#include "math/oskar_spline_data_compute.h"
+#include "math/oskar_surface_data_compute_splines.h"
 #include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
@@ -37,22 +37,16 @@ extern "C" {
 int oskar_element_model_compute_splines(oskar_ElementModel* e)
 {
     int err;
-    err = oskar_spline_data_compute(&e->spline_phi_im, e->num_points_phi,
-            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
-            e->max_theta, &e->phi_im);
+    err = oskar_surface_data_compute_splines(&e->port1_phi);
     if (err) return err;
-    err = oskar_spline_data_compute(&e->spline_phi_re, e->num_points_phi,
-            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
-            e->max_theta, &e->phi_re);
+    err = oskar_surface_data_compute_splines(&e->port1_theta);
     if (err) return err;
-    err = oskar_spline_data_compute(&e->spline_theta_im, e->num_points_phi,
-            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
-            e->max_theta, &e->theta_im);
+#if 0
+    err = oskar_surface_data_compute_splines(&e->port2_phi);
     if (err) return err;
-    err = oskar_spline_data_compute(&e->spline_theta_re, e->num_points_phi,
-            e->num_points_theta, e->min_phi, e->min_theta, e->max_phi,
-            e->max_theta, &e->theta_re);
+    err = oskar_surface_data_compute_splines(&e->port2_theta);
     if (err) return err;
+#endif
 
     return 0;
 }

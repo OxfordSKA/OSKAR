@@ -26,34 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#include "math/oskar_spline_data_free.h"
+#include "math/oskar_surface_data_free.h"
+#include "math/oskar_surface_data_set_metadata.h"
+#include "utility/oskar_mem_free.h"
 
-/**
- * @file oskar_ElementModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
- */
-struct oskar_ElementModel
+int oskar_surface_data_free(oskar_SurfaceData* data)
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+    int err = 0;
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+    /* Free memory. */
+    err = oskar_mem_free(&data->re);
+    if (err) return err;
+    err = oskar_mem_free(&data->im);
+    if (err) return err;
+    err = oskar_spline_data_free(&data->spline_re);
+    if (err) return err;
+    err = oskar_spline_data_free(&data->spline_im);
+    if (err) return err;
+
+    /* Clear metadata. */
+    oskar_surface_data_set_metadata(data, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+    return 0;
+}
+
+#ifdef __cplusplus
+}
+#endif

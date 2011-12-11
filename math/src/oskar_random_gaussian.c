@@ -26,34 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#include "math/oskar_random_gaussian.h"
+#include <math.h>
+#include <stdlib.h>
 
-/**
- * @file oskar_ElementModel.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
- *
- * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
- */
-struct oskar_ElementModel
+double oskar_random_gaussian(double* another)
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+    double x, y, r2, fac;
+    do
+    {
+        /* Choose x and y in a uniform square (-1, -1) to (+1, +1). */
+        x = 2.0 * rand() / (RAND_MAX + 1.0) - 1.0;
+        y = 2.0 * rand() / (RAND_MAX + 1.0) - 1.0;
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+        /* Check if this is in the unit circle. */
+        r2 = x*x + y*y;
+    } while (r2 >= 1.0 || r2 == 0.0);
+
+    /* Box-Muller transform. */
+    fac = sqrt(-2.0 * log(r2) / r2);
+    x *= fac;
+    if (another) *another = y * fac;
+
+    /* Return the first random number. */
+    return x;
+}
+
+#ifdef __cplusplus
+}
+#endif

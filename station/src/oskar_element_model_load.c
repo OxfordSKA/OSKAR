@@ -30,6 +30,12 @@
 #include "utility/oskar_getline.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_vector_types.h"
+#include "math/oskar_SurfaceData.h"
+#include "math/oskar_surface_data_type.h"
+#include "math/oskar_surface_data_location.h"
+#include "math/oskar_surface_data_resize.h"
+#include "math/oskar_surface_data_set_data.h"
+#include "math/oskar_surface_data_set_metadata.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,27 +57,26 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     double inc_theta = 0.0, inc_phi = 0.0, n_theta = 0.0, n_phi = 0.0;
     double min_theta = DBL_MAX, max_theta = -DBL_MAX;
     double min_phi = DBL_MAX, max_phi = -DBL_MAX;
+    oskar_SurfaceData *data_phi = NULL, *data_theta = NULL;
 
     /* Declare the line buffer. */
     char *line = NULL, *dbi = NULL;
     size_t bufsize = 0;
     FILE* file;
 
+    /* FIXME Get a pointer to the surface to fill. */
+    data_phi = &data->port1_phi;
+    data_theta = &data->port1_theta;
+
     /* Check the data types. */
-    type = data->phi_re.private_type;
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
-    if (type != data->phi_im.private_type ||
-            type != data->theta_re.private_type ||
-            type != data->theta_im.private_type)
-        return OSKAR_ERR_TYPE_MISMATCH;
+    type = oskar_surface_data_type(data_phi);
+    if (type != oskar_surface_data_type(data_theta))
+    	return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check the locations. */
-    if (data->phi_re.private_location != OSKAR_LOCATION_CPU ||
-            data->phi_im.private_location != OSKAR_LOCATION_CPU ||
-            data->theta_re.private_location != OSKAR_LOCATION_CPU ||
-            data->theta_im.private_location != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    if (oskar_surface_data_location(data_phi) != OSKAR_LOCATION_CPU ||
+    		oskar_surface_data_location(data_theta) != OSKAR_LOCATION_CPU)
+    	return OSKAR_ERR_BAD_LOCATION;
 
     /* Open the file. */
     file = fopen(filename, "r");
@@ -123,13 +128,9 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
         {
             int size;
             size = n + 100;
-            err = oskar_mem_realloc(&data->phi_re, size);
+            err = oskar_surface_data_resize(data_phi, size);
             if (err) return err;
-            err = oskar_mem_realloc(&data->phi_im, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&data->theta_re, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&data->theta_im, size);
+            err = oskar_surface_data_resize(data_theta, size);
             if (err) return err;
         }
 
@@ -149,20 +150,12 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
         theta_im = abs_theta * sin(phase_theta);
         phi_re = abs_phi * cos(phase_phi);
         phi_im = abs_phi * sin(phase_phi);
-        if (type == OSKAR_SINGLE)
-        {
-            ((float*)(data->theta_re.data))[n] = theta_re;
-            ((float*)(data->theta_im.data))[n] = theta_im;
-            ((float*)(data->phi_re.data))[n]   = phi_re;
-            ((float*)(data->phi_im.data))[n]   = phi_im;
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            ((double*)(data->theta_re.data))[n] = theta_re;
-            ((double*)(data->theta_im.data))[n] = theta_im;
-            ((double*)(data->phi_re.data))[n]   = phi_re;
-            ((double*)(data->phi_im.data))[n]   = phi_im;
-        }
+
+        /* Store the surface data. */
+        err = oskar_surface_data_set_data(data_phi, n, phi_re, phi_im);
+        if (err) return err;
+        err = oskar_surface_data_set_data(data_theta, n, theta_re, theta_im);
+        if (err) return err;
 
         /* Increment array pointer. */
         n++;
@@ -177,15 +170,14 @@ int oskar_element_model_load(const char* filename, oskar_ElementModel* data)
     n_phi = (max_phi - min_phi) / inc_phi;
 
     /* Store number of points in arrays. */
-    data->num_points = n;
-    data->num_points_theta = 1 + round(n_theta); /* Must round to nearest integer. */
-    data->num_points_phi = 1 + round(n_phi); /* Must round to nearest integer. */
-    data->min_theta = min_theta;
-    data->min_phi = min_phi;
-    data->max_theta = max_theta;
-    data->max_phi = max_phi;
-    data->inc_theta = inc_theta;
-    data->inc_phi = inc_phi;
+    oskar_surface_data_set_metadata(data_phi,
+    		1 + round(n_phi),   /* Must round to nearest integer. */
+    		1 + round(n_theta), /* Must round to nearest integer. */
+    		inc_phi, inc_theta, min_phi, min_theta, max_phi, max_theta);
+    oskar_surface_data_set_metadata(data_theta,
+    		1 + round(n_phi),   /* Must round to nearest integer. */
+    		1 + round(n_theta), /* Must round to nearest integer. */
+    		inc_phi, inc_theta, min_phi, min_theta, max_phi, max_theta);
 
     return 0;
 }

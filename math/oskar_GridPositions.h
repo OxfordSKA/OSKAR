@@ -36,7 +36,7 @@
  */
 
 #include <cmath>
-#include "math/oskar_Random.h"
+#include "math/oskar_random_gaussian.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -81,8 +81,8 @@ int oskar_GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
         T* gx = 0, T* gy = 0)
 {
     // Seed the random number generator.
-    T r1, r2;
-    oskar_Random::gaussian<T>(&r1, &r2, seed);
+    double r1, r2;
+    if (seed > 0) srand(seed);
 
     int nx = 2.0 * radius / xs;
     int ny = 2.0 * radius / ys;
@@ -94,9 +94,9 @@ int oskar_GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
             T y = iy * ys - (ny - 1) * ys / 2;
 
             // Modify grid position by random numbers.
-            oskar_Random::gaussian<T>(&r1, &r2);
-            x += xe * r1;
-            y += ye * r2;
+            r1 = oskar_random_gaussian(&r2);
+            x += xe * (T)r1;
+            y += ye * (T)r2;
 
             // Store if inside filter.
             if (x*x + y*y < radius*radius) {

@@ -26,34 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#ifndef OSKAR_RANDOM_GAUSSIAN_H_
+#define OSKAR_RANDOM_GAUSSIAN_H_
 
 /**
- * @file oskar_ElementModel.h
+ * @file oskar_random_gaussian.h
  */
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Structure to hold antenna (embedded element) pattern data.
+ * @brief
+ * Generates a random number from a Gaussian distribution with zero mean
+ * and unit variance.
  *
  * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
+ * This function returns a random number from a Gaussian distribution with
+ * zero mean and unit variance.
  *
- * The theta coordinate is assumed to be the fastest-varying dimension.
+ * The random number generator may be seeded by calling srand() prior to this
+ * function.
+ *
+ * @param[in] another If not NULL, then this is used to return a second random number.
  */
-struct oskar_ElementModel
-{
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+double oskar_random_gaussian(double* another);
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_RANDOM_GAUSSIAN_H_ */

@@ -34,4 +34,9 @@ void oskar_SettingsSky::load(const QSettings& settings)
 {
     sky_file_    = settings.value("sky/source_file").toString();
     separation_  = settings.value("sky/separation", 0.0).toDouble();
+//    settings.value("sky/generator", "").toString();
+//    settings.value("sky/generator/healpix/nside", 0).toInt();
+//    settings.value("sky/generator/random/num_sources", 0).toInt();
+//    settings.value("sky/generator/filter_radius/inner_deg", 0).toDouble();
+//    settings.value("sky/generator/filter_radius/outer_deg", 0).toDouble();
 }

@@ -26,34 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#ifndef OSKAR_SURFACE_DATA_COMPUTE_SPLINES_H_
+#define OSKAR_SURFACE_DATA_COMPUTE_SPLINES_H_
 
 /**
- * @file oskar_ElementModel.h
+ * @file oskar_surface_data_compute_splines.h
  */
 
+#include "oskar_global.h"
 #include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Structure to hold antenna (embedded element) pattern data.
+ * @brief
+ * Computes the spline coefficients for the surface data.
  *
  * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
+ * This function computes the spline coefficients for the surface data
+ * for later evaluation of the surface.
  */
-struct oskar_ElementModel
-{
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+OSKAR_EXPORT
+int oskar_surface_data_compute_splines(oskar_SurfaceData* data);
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_SURFACE_DATA_COMPUTE_SPLINES_H_ */

@@ -27,8 +27,7 @@
  */
 
 #include "station/oskar_element_model_init.h"
-#include "math/oskar_spline_data_init.h"
-#include "utility/oskar_mem_init.h"
+#include "math/oskar_surface_data_init.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -41,21 +40,13 @@ int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    err = oskar_mem_init(&data->phi_re, type, location, 0, OSKAR_TRUE);
+    err = oskar_surface_data_init(&data->port1_phi, type, location);
     if (err) return err;
-    err = oskar_mem_init(&data->phi_im, type, location, 0, OSKAR_TRUE);
+    err = oskar_surface_data_init(&data->port1_theta, type, location);
     if (err) return err;
-    err = oskar_mem_init(&data->theta_re, type, location, 0, OSKAR_TRUE);
+    err = oskar_surface_data_init(&data->port2_phi, type, location);
     if (err) return err;
-    err = oskar_mem_init(&data->theta_im, type, location, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->spline_phi_re, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->spline_phi_im, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->spline_theta_re, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->spline_theta_im, type, location);
+    err = oskar_surface_data_init(&data->port2_theta, type, location);
     if (err) return err;
 
     return 0;

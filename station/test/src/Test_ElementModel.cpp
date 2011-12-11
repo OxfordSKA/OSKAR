@@ -33,12 +33,14 @@
 #include "station/oskar_element_model_load.h"
 #include "station/oskar_ElementModel.h"
 #include "utility/oskar_vector_types.h"
-#include "math/oskar_spline_surface_evaluate.h"
+#include "math/oskar_spline_data_evaluate.h"
 
 #include <cmath>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
+
+#define DEG2RAD (M_PI / 180.0)
 
 /**
  * @details
@@ -139,19 +141,18 @@ void Test_ElementModel::test_method()
     if (err) CPPUNIT_FAIL("Error in oskar_element_pattern_load.");
 
     // Check the contents of the data.
-    const float* theta_re = (const float*)pattern.theta_re;
-    const float* theta_im = (const float*)pattern.theta_im;
-    const float* phi_re = (const float*)pattern.phi_re;
-    const float* phi_im = (const float*)pattern.phi_im;
-    CPPUNIT_ASSERT_EQUAL(30, pattern.num_points);
-    CPPUNIT_ASSERT_EQUAL(10, pattern.num_points_theta);
-    CPPUNIT_ASSERT_EQUAL(3, pattern.num_points_phi);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0 * M_PI / 180.0, pattern.min_theta, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0 * M_PI / 180.0, pattern.min_phi, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(90.0 * M_PI / 180.0, pattern.max_theta, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0 * M_PI / 180.0, pattern.max_phi, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0 * M_PI / 180.0, pattern.inc_theta, 1e-6);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0 * M_PI / 180.0, pattern.inc_phi, 1e-6);
+    const float* theta_re = (const float*)pattern.port1_theta.re;
+    const float* theta_im = (const float*)pattern.port1_theta.im;
+    const float* phi_re = (const float*)pattern.port1_phi.re;
+    const float* phi_im = (const float*)pattern.port1_phi.im;
+    CPPUNIT_ASSERT_EQUAL(10, pattern.port1_theta.num_points_y);
+    CPPUNIT_ASSERT_EQUAL(3, pattern.port1_theta.num_points_x);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0*DEG2RAD, pattern.port1_theta.min_y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0*DEG2RAD, pattern.port1_theta.min_x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(90.0*DEG2RAD, pattern.port1_theta.max_y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0*DEG2RAD, pattern.port1_theta.max_x, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0*DEG2RAD, pattern.port1_theta.inc_y, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0*DEG2RAD, pattern.port1_theta.inc_x, 1e-6);
 
     // Check the contents of the first row.
     CPPUNIT_ASSERT_DOUBLES_EQUAL(3.770844212e-1, theta_re[0], 1e-6);
@@ -2870,20 +2871,24 @@ void Test_ElementModel::test_plot()
     if (err) CPPUNIT_FAIL("Error in oskar_element_model_compute_splines.");
 
     // Generate points at which to evaluate the surface.
-    int n_theta = (pattern.num_points_theta) * 10;
-    int n_phi = (pattern.num_points_phi) * 10;
+    int n_theta = (pattern.port1_phi.num_points_y) * 10;
+    int n_phi = (pattern.port1_phi.num_points_x) * 10;
     int num_points = n_theta * n_phi;
     oskar_Mem pt_theta(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
     oskar_Mem pt_phi(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
     oskar_Mem output(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
 
     int i = 0;
+    float max_phi = pattern.port1_phi.max_x;
+    float min_phi = pattern.port1_phi.min_x;
+    float max_theta = pattern.port1_phi.max_y;
+    float min_theta = pattern.port1_phi.min_y;
     for (int p = 0; p < n_phi; ++p)
     {
-    	float phi = p * (pattern.max_phi - pattern.min_phi) / (n_phi-1);
+    	float phi = p * (max_phi - min_phi) / (n_phi-1);
     	for (int t = 0; t < n_theta; ++t)
     	{
-    		float theta = t * (pattern.max_theta - pattern.min_theta) / (n_theta-1);
+    		float theta = t * (max_theta - min_theta) / (n_theta-1);
     		((float*)pt_theta)[i] = theta;
     		((float*)pt_phi)[i] = phi;
     		++i;
@@ -2891,34 +2896,20 @@ void Test_ElementModel::test_plot()
     }
 
     // Evaluate the surface.
-    const float *tx, *ty, *c, *x, *y;
-    float* z;
-    int nx, ny, kx, ky;
-    tx = (const float*)pattern.spline_phi_im.knots_x;
-    ty = (const float*)pattern.spline_phi_im.knots_y;
-    nx = pattern.spline_phi_im.num_knots_x;
-    ny = pattern.spline_phi_im.num_knots_y;
-    c = (const float*)pattern.spline_phi_im.coeff;
-    kx = pattern.spline_phi_im.degree_x;
-    ky = pattern.spline_phi_im.degree_y;
-    x = (const float*)pt_phi;
-    y = (const float*)pt_theta;
-    z = (float*)output;
     TIMER_START
-    err = oskar_spline_surface_evaluate_f(tx, nx, ty, ny, c, kx, ky, num_points,
-    		x, y, z);
-    if (err) CPPUNIT_FAIL("Error in oskar_spline_surface_evaluate_f.");
-    TIMER_STOP("Finished interpolation (%d points)", num_points)
+    err = oskar_spline_data_evaluate(&output, &pattern.port1_phi.spline_re, &pt_phi, &pt_theta);
+    if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
+    TIMER_STOP("Finished surface evaluation (%d points)", num_points)
 
     // Write out the interpolated data.
     file = fopen("fitted_antenna_data.dat", "w");
     for (int j = 0, k = 0; j < n_phi; ++j)
     {
-        for (int i = 0; i < n_theta; ++i, ++k)
-        {
-            fprintf(file, "%10.6f ", z[k]);
-        }
-        fprintf(file, "\n");
+    	for (int i = 0; i < n_theta; ++i, ++k)
+    	{
+    		fprintf(file, "%10.6f ", ((const float*)output)[k]);
+    	}
+    	fprintf(file, "\n");
     }
     fclose(file);
 

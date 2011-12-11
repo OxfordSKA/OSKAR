@@ -26,34 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#ifndef TEST_HEALPIX_H_
+#define TEST_HEALPIX_H_
 
 /**
- * @file oskar_ElementModel.h
+ * @file Test_healpix.h
  */
 
-#include "math/oskar_SurfaceData.h"
-#include "utility/oskar_Mem.h"
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief Structure to hold antenna (embedded element) pattern data.
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-struct oskar_ElementModel
+class Test_healpix : public CppUnit::TestFixture
 {
-    int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
-};
-typedef struct oskar_ElementModel oskar_ElementModel;
+    public:
+        CPPUNIT_TEST_SUITE(Test_healpix);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST_SUITE_END();
 
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+    public:
+        /// Test creation.
+        void test();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_healpix);
+
+#endif // TEST_HEALPIX_H_
