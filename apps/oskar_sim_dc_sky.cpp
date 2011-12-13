@@ -61,9 +61,6 @@
 using std::min;
 using std::pow;
 
-oskar_SkyModel* oskar_set_up_benchmark_sky(const oskar_Settings& settings);
-oskar_TelescopeModel* oskar_set_up_benchmark_telescope(const oskar_Settings& settings);
-
 int main(int argc, char** argv)
 {
     int error = OSKAR_SUCCESS;
@@ -93,7 +90,7 @@ int main(int argc, char** argv)
     }
 
     // Construct sky and telescope.
-    oskar_SkyModel* sky_cpu = oskar_set_up_benchmark_sky(settings);
+    oskar_SkyModel* sky_cpu = oskar_set_up_sky(settings);
     oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(settings);
     if (sky_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
     if (telescope_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
@@ -261,81 +258,3 @@ int main(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-
-oskar_SkyModel* oskar_set_up_benchmark_sky(const oskar_Settings& settings)
-{
-    oskar_SkyModel* sky = NULL;
-
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    int num_sources = settings.benchmark().num_sources();
-
-    // Declare a sky model structure.
-    sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU, num_sources);
-    if (type == OSKAR_DOUBLE)
-    {
-        for (int i = 0; i < num_sources; ++i)
-        {
-            ((double*)sky->Dec)[i] = M_PI / 2.0;
-            ((double*)sky->RA)[i]  = 0.0;
-            ((double*)sky->I)[i]   = 1.0;
-            ((double*)sky->Q)[i]   = 0.0;
-            ((double*)sky->U)[i]   = 0.0;
-            ((double*)sky->V)[i]   = 0.0;
-        }
-    }
-    else
-    {
-        for (int i = 0; i < num_sources; ++i)
-        {
-            ((float*)sky->Dec)[i] = M_PI / 2.0;
-            ((float*)sky->RA)[i]  = 0.0;
-            ((float*)sky->I)[i]   = 1.0;
-            ((float*)sky->Q)[i]   = 0.0;
-            ((float*)sky->U)[i]   = 0.0;
-            ((float*)sky->V)[i]   = 0.0;
-        }
-    }
-
-
-    return sky;
-}
-
-
-oskar_TelescopeModel* oskar_set_up_benchmark_telescope(const oskar_Settings& settings)
-{
-    oskar_TelescopeModel *telescope = NULL;
-
-    int error = OSKAR_SUCCESS;
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    int num_stations = settings.benchmark().num_stations();
-    int num_antennas = settings.benchmark().num_antennas();
-
-    // Declare a telescope structure.
-    telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU, num_stations);
-
-    for (int i = 0; i < num_stations; ++i)
-    {
-        error = oskar_station_model_resize(&telescope->station[i], num_antennas);
-        if (error) oskar_exit(error);
-    }
-
-    telescope->ra0_rad  = 0.0;
-    telescope->dec0_rad = M_PI / 2;
-
-    for (int i = 0; i < telescope->num_stations; ++i)
-    {
-        telescope->station[i].ra0_rad         = telescope->ra0_rad;
-        telescope->station[i].dec0_rad        = telescope->dec0_rad;
-        telescope->station[i].longitude_rad   = 0.0;
-        telescope->station[i].latitude_rad    = M_PI / 2;
-        telescope->station[i].altitude_metres = 0.0;
-    }
-
-    telescope->identical_stations = OSKAR_FALSE;
-    telescope->coord_units        = OSKAR_METRES;
-    telescope->use_common_sky     = OSKAR_TRUE;
-    telescope->wavelength_metres  = 0.0;
-    telescope->bandwidth_hz       = 0.0;
-
-    return telescope;
-}

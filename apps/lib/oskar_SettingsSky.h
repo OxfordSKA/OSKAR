@@ -39,11 +39,15 @@ class oskar_SettingsSky
 
 		QString sky_file() const { return sky_file_; }
 		void set_sky_file(const QString& value) { sky_file_ = value; }
-        double separation() const {return separation_;}
+		QString generator() const { return generator_; }
+		void set_generator(const QString& value) { generator_ = value; }
+		int healpix_nside() const { return healpix_nside_; }
+		void set_healpix_nside(const int value) { healpix_nside_ = value; }
 
     private:
         QString sky_file_;
-        double separation_;
+        QString generator_;
+        int healpix_nside_;
 };
 
 #endif // OSKAR_SETTINGS_SKY_H_

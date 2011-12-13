@@ -39,6 +39,16 @@ set_target_properties(${bin_name} PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}" LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
+# BINARY: oskar_sim_dc_sky
+include_directories(${QT_INCLUDE_DIR})
+set(bin_name oskar_sim_dc_sky)
+add_executable(${bin_name} ${bin_name}.cpp)
+target_link_libraries(${bin_name} oskar oskar_apps ${QT_QTCORE_LIBRARY})
+set_target_properties(${bin_name} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+set_target_properties(${bin_name} PROPERTIES 
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}" LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+
 # BINARY: oskar_beam_pattern
 include_directories(${QT_INCLUDE_DIR})
 add_executable(oskar_beam_pattern oskar_beam_pattern.cpp)

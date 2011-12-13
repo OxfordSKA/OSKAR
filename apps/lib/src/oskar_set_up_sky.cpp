@@ -28,9 +28,12 @@
 
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_SettingsSky.h"
+#include "math/oskar_healpix_nside_to_npix.h"
+#include "math/oskar_healpix_pix_to_angles_ring.h"
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 #include <QtCore/QByteArray>
 
 extern "C"
@@ -54,6 +57,26 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     	}
     }
 
+    // Set up sky using generator parameters.
+    if (settings.sky().generator().toUpper() == "HEALPIX")
+    {
+        int nside = settings.sky().healpix_nside();
+        int npix = oskar_healpix_nside_to_npix(nside);
+
+        // Add enough positions to the sky model.
+        int old_size = sky->num_sources;
+        sky->resize(old_size + npix);
+
+        // Generate the new positions.
+        double ra = 0.0, dec = 0.0;
+        for (int i = 0; i < npix; ++i)
+        {
+            oskar_healpix_pix_to_angles_ring(npix, i, &dec, &ra);
+            dec = M_PI / 2.0 - dec;
+            sky->set_source(i + old_size, ra, dec,
+                    1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    	}
+    }
 
     // Compute source direction cosines relative to phase centre.
     err = sky->compute_relative_lmn(settings.obs().ra0_rad(),
