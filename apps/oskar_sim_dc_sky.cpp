@@ -220,25 +220,6 @@ int main(int argc, char** argv)
         if (error) oskar_exit(error);
     }
 
-    if (type == OSKAR_DOUBLE)
-    {
-        printf("\n --> vis amp = %.4e %.4e (%.4e)\n",
-                ((double4c*)vis_global->amplitude.data)[0].a.x,
-                ((double4c*)vis_global->amplitude.data)[0].a.y,
-                sky_cpu->num_sources * pow((double)telescope_cpu->station[0].num_elements,2));
-    }
-    else if (type == OSKAR_SINGLE)
-    {
-        printf("\n --> vis amp = %.4e %.4e (%.4e)\n",
-                ((float4c*)vis_global->amplitude.data)[0].a.x,
-                ((float4c*)vis_global->amplitude.data)[0].a.y,
-                sky_cpu->num_sources * pow((float)telescope_cpu->station[0].num_elements,2));
-    }
-    else
-    {
-        oskar_exit(OSKAR_ERR_UNKNOWN);
-    }
-
     // Delete data structures.
     delete vis_global;
     delete sky_cpu;

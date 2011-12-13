@@ -76,6 +76,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         if (error) return error;
     }
 
+
     // Get pointers to work arrays.
     oskar_Mem* weights = &work->complex;
     double beam_l, beam_m, beam_n;
@@ -88,6 +89,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
     error = oskar_mem_get_pointer(&hor_n, &work->real, 2 * sky->num_sources,
             sky->num_sources);
     if (error) return error;
+
 
     // Evaluate the station beam for each station for each source position.
     if (telescope->identical_stations && telescope->use_common_sky)

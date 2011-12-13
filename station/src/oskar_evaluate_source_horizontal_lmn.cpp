@@ -29,6 +29,7 @@
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
 #include <cstdlib>
+#include <cstdio>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,23 +51,24 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
             Dec->location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
+    // TODO check arguments properly!
     // Get the number of sources.
-    int num_sources = RA->num_elements();
+//    int num_sources = RA->num_elements();
 
-    // Check that the dimensions are correct.
-    if (num_sources != Dec->num_elements())
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+//    // Check that the dimensions are correct.
+//    if (num_sources != Dec->num_elements())
+//        return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the structures contains some sources.
-    if (num_sources == 0 || RA->is_null() || Dec->is_null() ||
+    if (RA->is_null() || Dec->is_null() ||
             l->is_null() || m->is_null() || n->is_null())
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    // Make sure the work arrays are long enough.
-    if (l->num_elements() < num_sources ||
-            m->num_elements() < num_sources ||
-            n->num_elements() < num_sources)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+//    // Make sure the work arrays are long enough.
+//    if (l->num_elements() < num_sources ||
+//            m->num_elements() < num_sources ||
+//            n->num_elements() < num_sources)
+//        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Local apparent Sidereal Time, in radians.
     double last = gast + station->longitude_rad;
@@ -76,7 +78,7 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
             l->type() == OSKAR_DOUBLE && m->type() == OSKAR_DOUBLE &&
             n->type() == OSKAR_DOUBLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, *RA, *Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_d(l->num_elements(), *RA, *Dec,
                 last, station->latitude_rad, *l, *m, *n);
     }
 
@@ -85,7 +87,7 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
             l->type() == OSKAR_SINGLE && m->type() == OSKAR_SINGLE &&
             n->type() == OSKAR_SINGLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, *RA, *Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_f(l->num_elements(), *RA, *Dec,
                 (float)last, (float)station->latitude_rad, *l, *m, *n);
     }
     else

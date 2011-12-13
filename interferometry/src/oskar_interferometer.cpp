@@ -103,7 +103,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         // Initialise visibilities for the dump to zero.
-        err = vis.clear_contents(); if (err) return err;
+        err = vis.clear_contents();
+        if (err) return err;
 
         // Compact sky model to temporary.
         oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
