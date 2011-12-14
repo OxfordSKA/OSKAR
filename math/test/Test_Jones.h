@@ -64,7 +64,7 @@ class Test_Jones : public CppUnit::TestFixture
         CPPUNIT_TEST(test_join_inline_sca_sca_host);
         CPPUNIT_TEST(test_set_ones_device);
         CPPUNIT_TEST(test_set_ones_host);
-        CPPUNIT_TEST(test_performance);
+//        CPPUNIT_TEST(test_performance);
         CPPUNIT_TEST_SUITE_END();
 
     public:

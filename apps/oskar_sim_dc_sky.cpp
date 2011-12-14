@@ -147,24 +147,24 @@ int main(int argc, char** argv)
     printf("\n");
 
 
-    printf(">>>> num_sources = %i\n", sky_cpu->num_sources);
-    typedef float real;
-    for (int source = 0; source < sky_cpu->num_sources; ++source)
-    {
-        printf(">>>> source[%3i] % .2f % .2f | %.2f %.2f %.2f %.2f | %.2f %.2f | % .2f % .2f % .2f\n",
-                source,
-                ((real*)sky_cpu->RA.data)[source],
-                ((real*)sky_cpu->Dec.data)[source],
-                ((real*)sky_cpu->I.data)[source],
-                ((real*)sky_cpu->Q.data)[source],
-                ((real*)sky_cpu->U.data)[source],
-                ((real*)sky_cpu->V.data)[source],
-                ((real*)sky_cpu->reference_freq.data)[source],
-                ((real*)sky_cpu->spectral_index.data)[source],
-                ((real*)sky_cpu->rel_l.data)[source],
-                ((real*)sky_cpu->rel_m.data)[source],
-                ((real*)sky_cpu->rel_n.data)[source]);
-    }
+//    printf(">>>> num_sources = %i\n", sky_cpu->num_sources);
+//    typedef float real;
+//    for (int source = 0; source < sky_cpu->num_sources; ++source)
+//    {
+//        printf(">>>> source[%3i] % .2f % .2f | %.2f %.2f %.2f %.2f | %.2f %.2f | % .2f % .2f % .2f\n",
+//                source,
+//                ((real*)sky_cpu->RA.data)[source],
+//                ((real*)sky_cpu->Dec.data)[source],
+//                ((real*)sky_cpu->I.data)[source],
+//                ((real*)sky_cpu->Q.data)[source],
+//                ((real*)sky_cpu->U.data)[source],
+//                ((real*)sky_cpu->V.data)[source],
+//                ((real*)sky_cpu->reference_freq.data)[source],
+//                ((real*)sky_cpu->spectral_index.data)[source],
+//                ((real*)sky_cpu->rel_l.data)[source],
+//                ((real*)sky_cpu->rel_m.data)[source],
+//                ((real*)sky_cpu->rel_n.data)[source]);
+//    }
 
     // ################## SIMULATION ###########################################
     printf("\n== Starting simulation ...\n");
