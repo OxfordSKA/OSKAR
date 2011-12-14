@@ -122,7 +122,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         oskar_SkyModel temp_sky(&local_sky, OSKAR_LOCATION_CPU);
         printf("#### num_sources = %i (%i %i)\n", temp_sky.num_sources,
                 local_sky.num_sources, sky->num_sources);
-        typedef float real;
+        typedef double real;
         for (int source = 0; source < temp_sky.num_sources; ++source)
         {
             printf("##### source[%3i] % .2f % .2f | %.2f %.2f %.2f %.2f | %.2f %.2f | % .2f % .2f % .2f\n",
