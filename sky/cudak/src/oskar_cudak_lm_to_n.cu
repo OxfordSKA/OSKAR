@@ -41,8 +41,15 @@ void oskar_cudak_lm_to_n_f(int n, const float* p_l, const float* p_m,
     float l = p_l[i];
     float m = p_m[i];
     float a = 1.0f - l*l - m*m;
-    float x = sqrtf(a) - 1.0f;
-    p_n[i] = x;
+    if (a < 0.0f)
+    {
+        p_n[i] = -1.0f;
+    }
+    else
+    {
+        float x = sqrtf(a) - 1.0f;
+        p_n[i] = x;
+    }
 }
 
 // Double precision.
@@ -58,6 +65,13 @@ void oskar_cudak_lm_to_n_d(int n, const double* p_l, const double* p_m,
     double l = p_l[i];
     double m = p_m[i];
     double a = 1.0 - l*l - m*m;
-    double x = sqrt(a) - 1.0;
-    p_n[i] = x;
+    if (a < 0.0)
+    {
+        p_n[i] = -1.0;
+    }
+    else
+    {
+        double x = sqrt(a) - 1.0;
+        p_n[i] = x;
+    }
 }

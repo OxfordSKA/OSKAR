@@ -39,10 +39,18 @@ void oskar_lm_to_n_f(int n, const float* p_l, const float* p_m, float* p_n)
     int i;
     for (i = 0; i < n; ++i)
     {
-        float ll, mm;
+        float a, ll, mm;
         ll = p_l[i];
         mm = p_m[i];
-        p_n[i] = sqrtf(1.0f - ll*ll - mm*mm) - 1.0f;
+        a = 1.0f - ll*ll - mm*mm;
+        if (a < 0.0f)
+        {
+            p_n[i] = -1.0f;
+        }
+        else
+        {
+            p_n[i] = sqrtf(a) - 1.0f;
+        }
     }
 }
 
@@ -52,10 +60,18 @@ void oskar_lm_to_n_d(int n, const double* p_l, const double* p_m, double* p_n)
     int i;
     for (i = 0; i < n; ++i)
     {
-        double ll, mm;
+        double a, ll, mm;
         ll = p_l[i];
         mm = p_m[i];
-        p_n[i] = sqrt(1.0 - ll*ll - mm*mm) - 1.0;
+        a = 1.0 - ll*ll - mm*mm;
+        if (a < 0.0)
+        {
+            p_n[i] = -1.0;
+        }
+        else
+        {
+            p_n[i] = sqrt(a) - 1.0;
+        }
     }
 }
 
