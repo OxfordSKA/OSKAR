@@ -39,9 +39,9 @@
 extern "C"
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 {
-	int type, err;
+    int type, err;
 
-	// Create empty sky model.
+    // Create empty sky model.
     type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_SkyModel *sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
 
@@ -49,12 +49,12 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     QByteArray sky_file = settings.sky().sky_file().toAscii();
     if (!sky_file.isEmpty())
     {
-    	err = sky->load(sky_file);
-    	if (err)
-    	{
-    		delete sky;
-    		return NULL;
-    	}
+        err = sky->load(sky_file);
+        if (err)
+        {
+            delete sky;
+            return NULL;
+        }
     }
 
     // Set up sky using generator parameters.
@@ -71,11 +71,11 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
         double ra = 0.0, dec = 0.0;
         for (int i = 0; i < npix; ++i)
         {
-            oskar_healpix_pix_to_angles_ring(npix, i, &dec, &ra);
+            oskar_healpix_pix_to_angles_ring(nside, i, &dec, &ra);
             dec = M_PI / 2.0 - dec;
             sky->set_source(i + old_size, ra, dec,
                     1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    	}
+        }
     }
 
     // Compute source direction cosines relative to phase centre.
@@ -83,8 +83,8 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
             settings.obs().dec0_rad());
     if (err)
     {
-    	delete sky;
-    	return NULL;
+        delete sky;
+        return NULL;
     }
 
     // Print summary data.
@@ -97,9 +97,9 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     // Check if sky model contains no sources.
     if (sky->num_sources == 0)
     {
-    	fprintf(stderr, "ERROR: Sky model contains no sources.\n");
-    	delete sky;
-    	return NULL;
+        fprintf(stderr, "ERROR: Sky model contains no sources.\n");
+        delete sky;
+        return NULL;
     }
 
     // Return the structure.

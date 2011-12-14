@@ -35,21 +35,21 @@
 
 void Test_healpix::test()
 {
-	int nside = 10;
-	int npix = oskar_healpix_nside_to_npix(nside);
+    int nside = 10;
+    int npix = oskar_healpix_nside_to_npix(nside);
 
-	const char* filename = "healpix_test.dat";
-	FILE* file = fopen(filename, "w");
-	for (int i = 0; i < npix; ++i)
-	{
-		int err;
-		double lon, lat;
-		err = oskar_healpix_pix_to_angles_ring(nside, i, &lat, &lon);
-		if (err) CPPUNIT_FAIL("Error in oskar_healpix_pix_to_angles_ring.");
-		lat = M_PI / 2 - lat;
-		fprintf(file, "%.5f %.5f\n", lon, lat);
-	}
-	fclose(file);
-	remove(filename);
+    const char* filename = "healpix_test.dat";
+    FILE* file = fopen(filename, "w");
+    for (int i = 0; i < npix; ++i)
+    {
+        int err;
+        double lon, lat;
+        err = oskar_healpix_pix_to_angles_ring(nside, i, &lat, &lon);
+        if (err) CPPUNIT_FAIL("Error in oskar_healpix_pix_to_angles_ring.");
+        lat = M_PI / 2 - lat;
+        fprintf(file, "%.5f %.5f\n", lon, lat);
+    }
+    fclose(file);
+    remove(filename);
 }
 
