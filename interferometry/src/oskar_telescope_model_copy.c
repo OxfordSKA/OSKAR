@@ -39,7 +39,7 @@ extern "C" {
 int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
         const oskar_TelescopeModel* src)
 {
-    int error = 0, i = 0;
+    int error = OSKAR_SUCCESS, i = 0;
 
     /* Ensure there is enough room in the station array. */
     dst->station = realloc(dst->station,
@@ -68,8 +68,9 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->use_common_sky = src->use_common_sky;
     dst->ra0_rad = src->ra0_rad;
     dst->dec0_rad = src->dec0_rad;
+    dst->disable_e_jones = src->disable_e_jones;
 
-    return 0;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

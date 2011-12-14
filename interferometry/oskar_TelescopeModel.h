@@ -48,6 +48,7 @@ struct oskar_TelescopeModel
     oskar_Mem station_z;         /**< Fixed z component of station coordinate. */
     int coord_units;             /**< Units of the x,y,z coordinates.*/
     int identical_stations;      /**< True if all stations are identical. */
+    int disable_e_jones;         /**< If True, E-Jones is disabled. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
     double ra0_rad;              /**< Right Ascension of phase centre, in radians. */
     double dec0_rad;             /**< Declination of phase centre, in radians. */

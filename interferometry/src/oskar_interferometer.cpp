@@ -119,26 +119,26 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         }
         else if (err != 0) return err;
 
-        oskar_SkyModel temp_sky(&local_sky, OSKAR_LOCATION_CPU);
-        printf("#### num_sources = %i (%i %i)\n", temp_sky.num_sources,
-                local_sky.num_sources, sky->num_sources);
-        typedef double real;
-        for (int source = 0; source < temp_sky.num_sources; ++source)
-        {
-            printf("##### source[%3i] % .2f % .2f | %.2f %.2f %.2f %.2f | %.2f %.2f | % .2f % .2f % .2f\n",
-                    source,
-                    ((real*)temp_sky.RA.data)[source],
-                    ((real*)temp_sky.Dec.data)[source],
-                    ((real*)temp_sky.I.data)[source],
-                    ((real*)temp_sky.Q.data)[source],
-                    ((real*)temp_sky.U.data)[source],
-                    ((real*)temp_sky.V.data)[source],
-                    ((real*)temp_sky.reference_freq.data)[source],
-                    ((real*)temp_sky.spectral_index.data)[source],
-                    ((real*)temp_sky.rel_l.data)[source],
-                    ((real*)temp_sky.rel_m.data)[source],
-                    ((real*)temp_sky.rel_n.data)[source]);
-        }
+//        oskar_SkyModel temp_sky(&local_sky, OSKAR_LOCATION_CPU);
+//        printf("#### num_sources = %i (%i %i)\n", temp_sky.num_sources,
+//                local_sky.num_sources, sky->num_sources);
+//        typedef double real;
+//        for (int source = 0; source < temp_sky.num_sources; ++source)
+//        {
+//            printf("##### source[%3i] % .2f % .2f | %.2f %.2f %.2f %.2f | %.2f %.2f | % .2f % .2f % .2f\n",
+//                    source,
+//                    ((real*)temp_sky.RA.data)[source],
+//                    ((real*)temp_sky.Dec.data)[source],
+//                    ((real*)temp_sky.I.data)[source],
+//                    ((real*)temp_sky.Q.data)[source],
+//                    ((real*)temp_sky.U.data)[source],
+//                    ((real*)temp_sky.V.data)[source],
+//                    ((real*)temp_sky.reference_freq.data)[source],
+//                    ((real*)temp_sky.spectral_index.data)[source],
+//                    ((real*)temp_sky.rel_l.data)[source],
+//                    ((real*)temp_sky.rel_m.data)[source],
+//                    ((real*)temp_sky.rel_n.data)[source]);
+//        }
 
         // Set dimensions of Jones matrices (this is not a resize!).
         err = J.set_size(n_stations, local_sky.num_sources); if (err) return err;
@@ -158,12 +158,15 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             if (err) return err;
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work);
-            if (err) return err;
+            if (!tel_gpu.disable_e_jones)
+            {
+                err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work);
+                if (err) return err;
 
-            // Join Jones matrices (R = E * R).
-            err = oskar_jones_join(&R, &E, &R);
-            if (err) return err;
+                // Join Jones matrices (R = E * R).
+                err = oskar_jones_join(&R, &E, &R);
+                if (err) return err;
+            }
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {

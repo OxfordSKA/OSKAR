@@ -61,6 +61,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     telescope->use_common_sky = true; // FIXME set this via the settings file.
     telescope->bandwidth_hz = settings.obs().channel_bandwidth();
     telescope->wavelength_metres = 0.0; // This is set on a per-channel basis.
+    telescope->disable_e_jones = settings.disable_station_beam();
 
     // Set other station parameters.
     for (int i = 0; i < telescope->num_stations; ++i)
