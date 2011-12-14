@@ -201,8 +201,9 @@ int main(int argc, char** argv)
             if (error) oskar_exit(error);
             for (int i = start_chunk; i <  start_chunk + num_chunks; ++i)
             {
-                printf("*** Sky chunk %i (num sources = %i), device[%i] (%s).\n",
-                        i, sky_chunk_cpu[i].num_sources, device_id, device_prop.name);
+                printf("*** Sky chunk %i (of %i) (num sources = %i), device[%i] (%s).\n",
+                        i, num_sky_chunks, sky_chunk_cpu[i].num_sources,
+                        device_id, device_prop.name);
                 error = oskar_interferometer(&(vis_temp[thread_id]),
                         &(sky_chunk_cpu[i]), telescope_cpu, times, freq);
                 if (error) oskar_exit(error);
