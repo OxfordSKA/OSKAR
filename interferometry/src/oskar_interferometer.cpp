@@ -87,6 +87,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     double dt_ave            = times->dt_ave_days;
     double dt_fringe         = times->dt_fringe_days;
 
+    printf("==> Disable station beam = %s\n", telescope->disable_e_jones ?
+            "true" : "false");
+
     cudaMemGetInfo(&mem_free, &mem_total);
     cudaGetDevice(&device_id);
     cudaGetDeviceProperties(&device_prop, device_id);
