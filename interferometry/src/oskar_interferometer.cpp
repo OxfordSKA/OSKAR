@@ -98,7 +98,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     for (int j = 0; j < num_vis_dumps; ++j)
     {
         // Start time for the visibility dump, in MJD(UTC).
-        printf("--> Simulating snapshot (%i / %i)\n", j+1, num_vis_dumps);
+        printf("--> Simulating snapshot (%i / %i) ", j+1, num_vis_dumps);
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
@@ -107,9 +107,10 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         if (err) return err;
 
         // Compact sky model to temporary.
-        oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
-        err = oskar_sky_model_horizon_clip(&sky, &sky_gpu, &tel_gpu,
-        		gast, &work);
+        oskar_SkyModel local_sky(type, OSKAR_LOCATION_GPU);
+        err = oskar_sky_model_horizon_clip(&local_sky, &sky_gpu, &tel_gpu,
+                gast, &work);
+        printf("[num sources = %i]\n", local_sky.num_sources);
         if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
         {
             // Skip iteration.
@@ -118,11 +119,28 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         }
         else if (err != 0) return err;
 
+//        oskar_SkyModel temp_sky(&local_sky, OSKAR_LOCATION_CPU);
+//        printf("#### num_sources = %i (%i %i)\n", temp_sky.num_sources,
+//                local_sky.num_sources, sky->num_sources);
+//        typedef float real;
+//        for (int source = 0; source < temp_sky.num_sources; ++source)
+//        {
+//            printf("##### source[%i] %f %f %f %f %f %f\n", source,
+//                    ((real*)temp_sky.RA.data)[source],
+//                    ((real*)temp_sky.Dec.data)[source],
+//                    ((real*)temp_sky.I.data)[source],
+//                    ((real*)temp_sky.Q.data)[source],
+//                    ((real*)temp_sky.U.data)[source],
+//                    ((real*)temp_sky.V.data)[source],
+//                    ((real*)temp_sky.reference_freq.data)[source],
+//                    ((real*)temp_sky.spectral_index.data)[source]);
+//        }
+
         // Set dimensions of Jones matrices (this is not a resize!).
-        err = J.set_size(n_stations, sky.num_sources); if (err) return err;
-        err = R.set_size(n_stations, sky.num_sources); if (err) return err;
-        err = E.set_size(n_stations, sky.num_sources); if (err) return err;
-        err = K.set_size(n_stations, sky.num_sources); if (err) return err;
+        err = J.set_size(n_stations, local_sky.num_sources); if (err) return err;
+        err = R.set_size(n_stations, local_sky.num_sources); if (err) return err;
+        err = E.set_size(n_stations, local_sky.num_sources); if (err) return err;
+        err = K.set_size(n_stations, local_sky.num_sources); if (err) return err;
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
@@ -132,11 +150,11 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate parallactic angle rotation (Jones R).
-            err = oskar_evaluate_jones_R(&R, &sky, &tel_gpu, gast);
+            err = oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast);
             if (err) return err;
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, &sky, &tel_gpu, gast, &work);
+            err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work);
             if (err) return err;
 
             // Join Jones matrices (R = E * R).
@@ -154,14 +172,14 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
                 if (err) return err;
 
                 // Evaluate interferometer phase (Jones K).
-                err = oskar_evaluate_jones_K(&K, &sky, &u, &v, &w);
+                err = oskar_evaluate_jones_K(&K, &local_sky, &u, &v, &w);
                 if (err) return err;
 
                 // Join Jones matrices (J = K * R).
                 err = oskar_jones_join(&J, &K, &R); if (err) return err;
 
                 // Produce visibilities.
-                err = oskar_correlate(&vis, &J, &tel_gpu, &sky, &u, &v);
+                err = oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v);
                 if (err) return err;
             }
         }
