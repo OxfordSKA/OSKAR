@@ -125,7 +125,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
         typedef double real;
         for (int source = 0; source < temp_sky.num_sources; ++source)
         {
-            printf("##### source[%3i] %f %f %f %f %f %f %f\n", source,
+            printf("##### source[%3i] %f %f | %f %f %f %f | %f %f\n", source,
                     ((real*)temp_sky.RA.data)[source],
                     ((real*)temp_sky.Dec.data)[source],
                     ((real*)temp_sky.I.data)[source],
