@@ -37,6 +37,13 @@
 
 oskar_Settings::oskar_Settings(const QString& filename)
 {
+    // Initialise members.
+    prec_double_ = false;
+    max_sources_per_chunk_ = 10000;
+    max_host_threads_ = 1;
+    longitude_deg_ = 0.0;
+    latitude_deg_ = 0.0;
+    altitude_m_ = 0.0;
     disable_station_beam_ = false;
 
     // Load the settings file, if one is provided.
@@ -63,13 +70,13 @@ int oskar_Settings::load(const QString& filename)
     QSettings settings(filename, QSettings::IniFormat);
 
     // Read settings.
-    telescope_file_    = settings.value("telescope/layout_file").toString();
-    latitude_deg_      = settings.value("telescope/latitude_deg").toDouble();
-    longitude_deg_     = settings.value("telescope/longitude_deg").toDouble();
-    altitude_m_        = settings.value("telescope/altitude_m").toDouble();
+    telescope_file_    = settings.value("telescope/layout_file", "").toString();
+    latitude_deg_      = settings.value("telescope/latitude_deg", 0.0).toDouble();
+    longitude_deg_     = settings.value("telescope/longitude_deg", 0.0).toDouble();
+    altitude_m_        = settings.value("telescope/altitude_m", 0.0).toDouble();
 
-    station_dir_       = settings.value("station/station_directory").toString();
-    disable_station_beam_ = settings.value("station/disable_station_beam").toBool();
+    station_dir_       = settings.value("station/station_directory", "").toString();
+    disable_station_beam_ = settings.value("station/disable_station_beam", false).toBool();
 
     obs_.load(settings);
 
@@ -81,9 +88,9 @@ int oskar_Settings::load(const QString& filename)
     // Load settings from sky group.
     sky_.load(settings);
 
-    prec_double_ = settings.value("global/double_precision").toBool();
-    max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk").toInt();
-    max_host_threads_ = settings.value("global/max_host_threads").toInt();
+    prec_double_ = settings.value("global/double_precision", true).toBool();
+    max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk", 10000).toInt();
+    max_host_threads_ = settings.value("global/max_host_threads", 1).toInt();
     int size = settings.beginReadArray("global/use_devices");
     use_devices_.resize(size);
     for (int i = 0; i < size; ++i)

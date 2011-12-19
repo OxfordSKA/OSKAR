@@ -39,6 +39,7 @@ void oskar_sph_to_lm_f(const int np, const float* lambda,
         const float sinPhi0, float* l, float* m)
 {
     int i;
+    #pragma omp parallel for
     for (i = 0; i < np; ++i)
     {
         float cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi, ll, mm;
@@ -62,6 +63,7 @@ void oskar_sph_to_lm_d(const int np, const double* lambda,
         const double sinPhi0, double* l, double* m)
 {
     int i;
+    #pragma omp parallel for
     for (i = 0; i < np; ++i)
     {
         double cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi, ll, mm;

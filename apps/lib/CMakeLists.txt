@@ -34,6 +34,8 @@ else()
     target_link_libraries(oskar_apps oskar
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 endif()
+set_target_properties(oskar_apps PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 set_target_properties(oskar_apps PROPERTIES LINKER_LANGUAGE CXX)
 set_target_properties(oskar_apps PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})

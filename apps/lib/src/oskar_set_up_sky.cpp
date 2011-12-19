@@ -49,7 +49,10 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     QByteArray sky_file = settings.sky().sky_file().toAscii();
     if (!sky_file.isEmpty())
     {
+        printf("--> Loading sky model data... ");
+        fflush(stdout);
         err = sky->load(sky_file);
+        printf("done.\n");
         if (err)
         {
             delete sky;
@@ -68,19 +71,26 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
         sky->resize(old_size + npix);
 
         // Generate the new positions.
-        double ra = 0.0, dec = 0.0;
+        printf("--> Generating HEALPIX source positions... ");
+        fflush(stdout);
+        #pragma omp parallel for
         for (int i = 0; i < npix; ++i)
         {
+            double ra, dec;
             oskar_healpix_pix_to_angles_ring(nside, i, &dec, &ra);
             dec = M_PI / 2.0 - dec;
             sky->set_source(i + old_size, ra, dec,
                     1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         }
+        printf("done.\n");
     }
 
     // Compute source direction cosines relative to phase centre.
+    printf("--> Computing source direction cosines... ");
+    fflush(stdout);
     err = sky->compute_relative_lmn(settings.obs().ra0_rad(),
             settings.obs().dec0_rad());
+    printf("done.\n");
     if (err)
     {
         delete sky;
