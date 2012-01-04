@@ -45,8 +45,8 @@ void mexFunction(int /* num_outputs */, mxArray ** output,
     bool set_centre_after   = false;
     bool force_centre_point = true;
     bool force_to_edges     = true;
-    //int projection_type     = SphericalPositions<double>::PROJECTION_SIN;
-    int projection_type     = oskar_SphericalPositions<double>::PROJECTION_NONE;
+    int projection_type     = oskar_SphericalPositions<double>::PROJECTION_SIN;
+    //int projection_type     = oskar_SphericalPositions<double>::PROJECTION_NONE;
 
     mexPrintf("Inputs: %d\n", num_inputs);
     mexPrintf("     centre_long = %f (rads)\n", centre_long);

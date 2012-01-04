@@ -87,8 +87,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     double dt_ave            = times->dt_ave_days;
     double dt_fringe         = times->dt_fringe_days;
 
-    printf("==> Disable station beam = %s\n", telescope->disable_e_jones ?
-            "true" : "false");
+    if (telescope->disable_e_jones)
+        printf("==> Station beam (E-Jones) disabled.\n");
 
     cudaMemGetInfo(&mem_free, &mem_total);
     cudaGetDevice(&device_id);
@@ -101,7 +101,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     for (int j = 0; j < num_vis_dumps; ++j)
     {
         // Start time for the visibility dump, in MJD(UTC).
-        printf("--> Simulating snapshot (%i / %i) ", j+1, num_vis_dumps);
+        printf("--> Simulating snapshot (%-3i / %-3i) ", j+1, num_vis_dumps);
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
