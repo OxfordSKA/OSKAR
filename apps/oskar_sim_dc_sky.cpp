@@ -44,7 +44,6 @@
 #include "sky/oskar_sky_model_split.h"
 #include "utility/oskar_exit.h"
 #include "utility/oskar_Mem.h"
-#include "math/oskar_round_robin.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_add.h"
@@ -69,38 +68,41 @@ int main(int argc, char** argv)
     if (argc != 2)
     {
         fprintf(stderr, "ERROR: Missing command line arguments.\n");
-        fprintf(stderr, "Usage:  $ oskar_sim_benchmark [settings file]\n");
+        fprintf(stderr, "Usage:  $ oskar_sim_dc_sky [settings file]\n");
         return EXIT_FAILURE;
     }
 
     // Load the settings file.
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
+    settings.print();
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     const oskar_SimTime* times = settings.obs().sim_time();
 
-    // Find out how many GPU's we have.
+    // Find out how many GPUs we have.
     int device_count = 0;
     error = (int)cudaGetDeviceCount(&device_count);
-    if (device_count < (int)settings.num_devices())
+    if (device_count < settings.num_devices())
     {
-        fprintf(stderr, "ERROR: Only found %i devices, %i specified!\n",
+        fprintf(stderr, "ERROR: Only found %i CUDA devices, %i specified!\n",
                 device_count, settings.num_devices());
-        oskar_exit(OSKAR_ERR_UNKNOWN);
+        return EXIT_FAILURE;
     }
 
     // Construct sky and telescope.
     oskar_SkyModel* sky_cpu = oskar_set_up_sky(settings);
     oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(settings);
-    if (sky_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
-    if (telescope_cpu == NULL) oskar_exit(OSKAR_ERR_UNKNOWN);
+    if (sky_cpu == NULL || telescope_cpu == NULL)
+    {
+        fprintf(stderr, "ERROR: Could not set up sky or telescope data.\n");
+        return EXIT_FAILURE;
+    }
 
     // Split the sky model into chunks.
     oskar_SkyModel* sky_chunk_cpu = NULL;
-    int max_sources_per_chunk = min((int)settings.max_sources_per_chunk(),
-            (int)ceil((double)sky_cpu->num_sources / (double)settings.num_devices()));
-
     int num_sky_chunks = 0;
+    int max_sources_per_chunk = min(settings.max_sources_per_chunk(),
+            (int)ceil((double)sky_cpu->num_sources / (double)settings.num_devices()));
     error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
             max_sources_per_chunk, sky_cpu);
     if (error) oskar_exit(error);
@@ -112,19 +114,15 @@ int main(int argc, char** argv)
     oskar_Visibilities* vis_global = oskar_set_up_visibilities(settings,
             telescope_cpu, type | OSKAR_COMPLEX | OSKAR_MATRIX);
 
-    // Set the number of host threads to use.
-    int num_omp_threads = min(device_count, (int)settings.max_host_threads());
-    omp_set_num_threads(num_omp_threads);
-
-    if (num_omp_threads > (int)settings.num_devices())
-        oskar_exit(OSKAR_ERR_DIMENSION_MISMATCH);
+    // Set the number of host threads to use (one per GPU).
+    omp_set_num_threads(settings.num_devices());
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
     // (one per thread/GPU).
     size_t num_bytes = settings.num_devices() * sizeof(oskar_Mem);
     oskar_Mem* vis_acc  = (oskar_Mem*)malloc(num_bytes);
     oskar_Mem* vis_temp = (oskar_Mem*)malloc(num_bytes);
-    for (int i = 0; i < (int)settings.num_devices(); ++i)
+    for (int i = 0; i < settings.num_devices(); ++i)
     {
         int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
         error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
@@ -133,64 +131,46 @@ int main(int argc, char** argv)
         error = oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
                 telescope_cpu->num_baselines() * times->num_vis_dumps, OSKAR_TRUE);
         if (error) oskar_exit(error);
-    }
-
-    printf("\n");
-    printf(">> no. GPUs                 = %i\n", settings.num_devices());
-    printf(">> total sources            = %i\n", sky_cpu->num_sources);
-    printf(">> no. stations             = %i\n", telescope_cpu->num_stations);
-    printf(">> no. antennas per station = %i\n", telescope_cpu->station[0].num_elements);
-    printf(">> no. vis dumps            = %i\n", times->num_vis_dumps);
-    printf(">> no. vis averages         = %i\n", times->num_vis_ave);
-    printf(">> no. fringe averages      = %i\n", times->num_fringe_ave);
-    printf(">> no. channels             = %i\n", settings.obs().num_channels());
-    printf("\n");
-
-    // ################## SIMULATION ###########################################
-    printf("\n== Starting simulation ...\n");
-
-    for (int i = 0; i < settings.num_devices(); ++i)
-    {
         cudaSetDevice(settings.use_devices()[i]);
         cudaDeviceSynchronize();
     }
 
+    // ################## SIMULATION ###########################################
+    printf("\n== Starting simulation ...\n");
     QTime timer;
     timer.start();
     int num_channels = settings.obs().num_channels();
     for (int c = 0; c < num_channels; ++c)
     {
-        printf("\n<< channel %i of %i >>\n", c + 1, num_channels);
+        printf("\n<< Channel (%i / %i).\n", c + 1, num_channels);
         double freq = settings.obs().frequency(c);
 
-        #pragma omp parallel shared(vis_acc, vis_temp)
+        // Use OpenMP dynamic scheduling for loop over chunks.
+        #pragma omp parallel for schedule(runtime)
+        for (int i = 0; i < num_sky_chunks; ++i)
         {
-            int num_threads = omp_get_num_threads();
-            int thread_id   = omp_get_thread_num();
-            int device_id   = settings.use_devices()[thread_id];
-            int num_chunks  = 0, start_chunk = 0;
-            oskar_round_robin(num_sky_chunks, num_threads, thread_id, &num_chunks,
-                    &start_chunk);
+            // Get thread ID for this chunk.
+            int thread_id = omp_get_thread_num();
+
+            // Get device ID and device properties for this chunk.
+            int device_id = settings.use_devices()[thread_id];
             cudaDeviceProp device_prop;
             cudaGetDeviceProperties(&device_prop, device_id);
-            printf("*** Thread %i (of %i) using device %i [%s] to process sky "
-                    "chunks from %i to %i.\n", thread_id + 1, num_threads,
-                    device_id, device_prop.name, start_chunk,
-                    start_chunk + num_chunks - 1);
+
+            // Set the device to use for the chunk.
             error = cudaSetDevice(device_id);
             if (error) oskar_exit(error);
-            for (int i = start_chunk; i <  start_chunk + num_chunks; ++i)
-            {
-                printf("\n*** Sky chunk %i (of %i) (num sources = %i), device[%i] (%s).\n",
-                        i, num_sky_chunks, sky_chunk_cpu[i].num_sources,
-                        device_id, device_prop.name);
-                error = oskar_interferometer(&(vis_temp[thread_id]),
-                        &(sky_chunk_cpu[i]), telescope_cpu, times, freq);
-                if (error) oskar_exit(error);
-                error = oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
-                        &(vis_temp[thread_id]));
-                if (error) oskar_exit(error);
-            }
+            printf("\n*** Sky chunk (%i / %i : %i sources), device[%i] (%s).\n",
+                    i + 1, num_sky_chunks, sky_chunk_cpu[i].num_sources,
+                    device_id, device_prop.name);
+
+            // Run simulation for this chunk.
+            error = oskar_interferometer(&(vis_temp[thread_id]),
+                    &(sky_chunk_cpu[i]), telescope_cpu, times, freq);
+            if (error) oskar_exit(error);
+            error = oskar_mem_add(&(vis_acc[thread_id]),
+                    &(vis_acc[thread_id]), &(vis_temp[thread_id]));
+            if (error) oskar_exit(error);
         }
         #pragma omp barrier
 
@@ -198,13 +178,12 @@ int main(int argc, char** argv)
         vis_global->get_channel_amps(&vis_amp, c);
 
         // Accumulate into global vis structure.
-        for (int t = 0; t < num_omp_threads; ++t)
+        for (int i = 0; i < settings.num_devices(); ++i)
         {
-            error = oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[t]);
+            error = oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i]);
             if (error) oskar_exit(error);
         }
-
-    } // end loop over channels
+    }
     printf("\n== Simulation complete after %f seconds.\n",
             timer.elapsed() / 1000.0);
 
@@ -225,17 +204,16 @@ int main(int argc, char** argv)
     delete vis_global;
     delete sky_cpu;
     delete telescope_cpu;
-    for (int i = 0; i < (int)settings.num_devices(); ++i)
+    for (int i = 0; i < settings.num_devices(); ++i)
     {
-        error = oskar_mem_free(&vis_acc[i]);
-        if (error) oskar_exit(error);
-        error = oskar_mem_free(&vis_temp[i]);
-        if (error) oskar_exit(error);
+        error = oskar_mem_free(&vis_acc[i]);  if (error) oskar_exit(error);
+        error = oskar_mem_free(&vis_temp[i]); if (error) oskar_exit(error);
+        cudaSetDevice(settings.use_devices()[i]);
+        cudaDeviceReset();
     }
     free(vis_acc);
     free(vis_temp);
     free(sky_chunk_cpu);
-    cudaDeviceReset();
 
     return EXIT_SUCCESS;
 }

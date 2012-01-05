@@ -125,13 +125,14 @@ void oskar_Settings::print() const
 {
     printf("\n");
     printf("= Settings (%s)\n", filename_.toLatin1().data());
+    printf("  - Num. GPUs              = %i\n", num_devices());
     printf("  - Double precision       = %s\n", prec_double_ ? "true" : "false");
     printf("  - Stations directory     = %s\n", station_dir_.toLatin1().data());
     printf("  - Station beam disabled  = %s\n", disable_station_beam_ ? "true" : "false");
     printf("  - Telescope file         = %s\n", telescope_file_.toLatin1().data());
-    printf("  - Frequency (Hz)         = %e\n", obs_.start_frequency());
-    printf("  - Frequency inc (Hz)     = %e\n", obs_.frequency_inc());
     printf("  - Num. channels          = %u\n", obs_.num_channels());
+    printf("  - Start frequency (Hz)   = %e\n", obs_.start_frequency());
+    printf("  - Frequency inc (Hz)     = %e\n", obs_.frequency_inc());
     printf("  - Channel bandwidth (Hz) = %f\n", obs_.channel_bandwidth());
     printf("  - Phase centre RA (deg)  = %f\n", obs_.ra0_deg());
     printf("  - Phase centre Dec (deg) = %f\n", obs_.dec0_deg());
