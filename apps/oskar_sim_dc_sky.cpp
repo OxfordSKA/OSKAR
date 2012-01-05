@@ -146,7 +146,7 @@ int main(int argc, char** argv)
         double freq = settings.obs().frequency(c);
 
         // Use OpenMP dynamic scheduling for loop over chunks.
-        #pragma omp parallel for schedule(runtime)
+        #pragma omp parallel for schedule(dynamic, 1)
         for (int i = 0; i < num_sky_chunks; ++i)
         {
             // Get thread ID for this chunk.
