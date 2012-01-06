@@ -39,7 +39,6 @@
 #include "interferometry/oskar_SimTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
-#include "station/oskar_station_model_resize.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_split.h"
 #include "utility/oskar_exit.h"
@@ -58,7 +57,6 @@
 #include <cmath>
 
 using std::min;
-using std::pow;
 
 int main(int argc, char** argv)
 {
@@ -135,7 +133,7 @@ int main(int argc, char** argv)
         cudaDeviceSynchronize();
     }
 
-    // ################## SIMULATION ###########################################
+    // Run the simulation.
     printf("\n== Starting simulation ...\n");
     QTime timer;
     timer.start();
@@ -184,8 +182,7 @@ int main(int argc, char** argv)
             if (error) oskar_exit(error);
         }
     }
-    printf("\n== Simulation complete after %f seconds.\n",
-            timer.elapsed() / 1000.0);
+    printf("\n== Simulation completed in %f seconds.\n", timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(vis_global, telescope_cpu, times);
@@ -199,6 +196,17 @@ int main(int argc, char** argv)
         error = vis_global->write(outname);
         if (error) oskar_exit(error);
     }
+
+#ifndef OSKAR_NO_MS
+    // Write Measurement Set.
+    if (!settings.obs().ms_filename().isEmpty())
+    {
+        QByteArray outname = settings.obs().ms_filename().toAscii();
+        printf("--> Writing Measurement Set: '%s'\n", outname.constData());
+        error = oskar_write_ms(outname, vis_global, telescope_cpu, (int)OSKAR_TRUE);
+        if (error) oskar_exit(error);
+    }
+#endif
 
     // Delete data structures.
     delete vis_global;

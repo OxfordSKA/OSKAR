@@ -15,18 +15,21 @@ set(dierckx_SRC
     src/fpgivs.f
     src/fpgrre.f
     src/fpknot.f
+    src/fporde.f
+    src/fprank.f
     src/fprati.f
     src/fpregr.f
     src/fprota.f
+    src/fprpsp.f
+    src/fpsphe.c
+    src/fpsphe.f
     src/regrid.f
+    src/sphere.c
+    src/sphere.f
 )
 
 add_library(dierckx SHARED ${dierckx_SRC})
 install(TARGETS dierckx DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-
-add_executable(oskar_fit_surface src/oskar_fit_surface.cpp)
-target_link_libraries(oskar_fit_surface dierckx)
-install(TARGETS oskar_fit_surface DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
 add_subdirectory(test)
 
