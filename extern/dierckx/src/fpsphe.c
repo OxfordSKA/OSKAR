@@ -1,10 +1,21 @@
+#include "extern/dierckx/fpsphe.h"
+#include "extern/dierckx/fpback.h"
+#include "extern/dierckx/fpdisc.h"
+#include "extern/dierckx/fporde.h"
+#include "extern/dierckx/fprank.h"
+#include "extern/dierckx/fpbspl.h"
+#include "extern/dierckx/fprota.h"
+#include "extern/dierckx/fpgivs.h"
+#include "extern/dierckx/fprpsp.h"
+#include "extern/dierckx/fprati.h"
 #include <math.h>
 
-/* Table of constant values */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-static int c__3 = 3;
-static int c__5 = 5;
-
+#if 0
+/* Fortran function prototypes. */
 extern int fpback_(float *, float *, int *, int *, float *, int *);
 extern int fpdisc_(float *, int *, int *, float *, int *);
 extern int fporde_(const float *, const float *, int *, int *, int *,
@@ -16,6 +27,11 @@ extern int fprota_(float *, float *, float *, float *);
 extern int fpgivs_(float *, float *, float *, float *);
 extern int fprpsp_(int *, int *, float *, float *, float *, float *, int *);
 extern double fprati_(float *, float *, float *, float *, float *, float *);
+
+/* Constant values */
+static int c3 = 3;
+static int c5 = 5;
+#endif
 
 void fpsphe(int iopt, int m, const float* theta, const float* phi,
         const float* r, const float* w, float s, int ntest, int npest,
@@ -33,9 +49,9 @@ void fpsphe(int iopt, int m, const float* theta, const float* phi,
 
     /* Local variables */
     int i, j, l, i1, i2, i3, j1, j2, l1, l2, l3, l4, la, ii, ij, il, in;
-    int lf, lh, ll, lp, lt, nr1, np4 = 0, nt4 = 0, nt6, jlt, npp, num, nrr, ntt = 0;
-    int ich1, ich3, num1, ncof, nreg, rank, iter, irot, jrot, iband, ncoff;
-    int nrint, iband1 = 0, lwest, iband3, iband4;
+    int lf, lh, ll, lp, lt, nr1, np4 = 0, nt4 = 0, nt6, jlt, npp = 0, num, nrr;
+    int ntt = 0, ich1, ich3, num1, ncof = 0, nreg = 0, rank, iter, irot, jrot;
+    int iband = 0, ncoff = 0, nrint, iband1 = 0, lwest, iband3, iband4;
     float p, c1, d1, d2, f1, f2, f3, p1, p2, p3, aa, cn, co, fn, ri, si;
     float wi, rn, sq, acc, arg, hti, htj, eps, piv, fac1, fac2;
     float facc, facs, dmax, fpms = 0.0, pinv, sigma, fpmax, store;
@@ -116,14 +132,19 @@ void fpsphe(int iopt, int m, const float* theta, const float* phi,
         fn *= wi;
         if (fn != 0.0)
         {
-            fpgivs_(&fn, &d1, &co, &si);
-            fprota_(&co, &si, &f1, &aa);
-            fprota_(&co, &si, &ri, &cn);
+            /* fpgivs_(&fn, &d1, &co, &si); */
+            /* fprota_(&co, &si, &f1, &aa); */
+            /* fprota_(&co, &si, &ri, &cn); */
+            fpgivs(fn, &d1, &co, &si);
+            fprota(co, si, &f1, &aa);
+            fprota(co, si, &ri, &cn);
         }
         if (f1 != 0.0)
         {
-            fpgivs_(&f1, &d2, &co, &si);
-            fprota_(&co, &si, &ri, &c1);
+            /* fpgivs_(&f1, &d2, &co, &si); */
+            /* fprota_(&co, &si, &ri, &c1); */
+            fpgivs(f1, &d2, &co, &si);
+            fprota(co, si, &ri, &c1);
         }
         *sup += ri * ri;
     }
@@ -166,7 +187,7 @@ L60:
     tp[7] = tp[5] + M_PI;
     *nt = 9;
     tt[5] = tp[5];
-
+L70:
     /*
      *  part 1 : computation of least-squares spherical splines.
      *  ********************************************************
@@ -182,7 +203,6 @@ L60:
 
     /*  main loop for the different sets of knots. m is a safe upper bound
      *  for the number of trials. */
-L70:
     for (iter = 1; iter <= m; ++iter)
     {
         /*  find the position of the additional knots which are needed for
@@ -219,8 +239,10 @@ L70:
         nrint = ntt + npp;
         nreg = ntt * npp;
         /*  arrange the data points according to the panel they belong to. */
-        fporde_(&theta[1], &phi[1], &m, &c__3, &c__3, &tt[1], nt, &tp[1], np,
-                &nummer[1], &index[1], &nreg);
+        /* fporde_(&theta[1], &phi[1], &m, &c3, &c3, &tt[1], nt, &tp[1], np,
+                &nummer[1], &index[1], &nreg); */
+        fporde(&theta[1], &phi[1], m, 3, 3, &tt[1], *nt, &tp[1], *np,
+                &nummer[1], &index[1], nreg);
         /*  find the b-spline coefficients coco and cosi of the cubic spline
          *  approximations sc(phi) and ss(phi) for cos(phi) and sin(phi). */
         for (i = 1; i <= npp; ++i)
@@ -238,7 +260,8 @@ L70:
         {
             l2 = i + 3;
             arg = tp[l2];
-            fpbspl_(&tp[1], np, &c__3, &arg, &l2, hp);
+            /* fpbspl_(&tp[1], np, &c3, &arg, &l2, hp); */
+            fpbspl(&tp[1], 3, arg, l2, hp);
             for (j = 1; j <= npp; ++j)
             {
                 row[j] = 0.0;
@@ -256,21 +279,27 @@ L70:
             {
                 piv = row[j];
                 if (piv == 0.0) continue;
-                fpgivs_(&piv, &a[j + a_dim1], &co, &si);
-                fprota_(&co, &si, &facc, &coco[j]);
-                fprota_(&co, &si, &facs, &cosi[j]);
+                /* fpgivs_(&piv, &a[j + a_dim1], &co, &si); */
+                /* fprota_(&co, &si, &facc, &coco[j]); */
+                /* fprota_(&co, &si, &facs, &cosi[j]); */
+                fpgivs(piv, &a[j + a_dim1], &co, &si);
+                fprota(co, si, &facc, &coco[j]);
+                fprota(co, si, &facs, &cosi[j]);
                 if (j == npp) break;
                 j1 = j + 1;
                 i2 = 1;
                 for (l = j1; l <= npp; ++l)
                 {
                     ++i2;
-                    fprota_(&co, &si, &row[l], &a[j + i2 * a_dim1]);
+                    /* fprota_(&co, &si, &row[l], &a[j + i2 * a_dim1]); */
+                    fprota(co, si, &row[l], &a[j + i2 * a_dim1]);
                 }
             }
         }
-        fpback_(&a[a_offset], &coco[1], &npp, &npp, &coco[1], &ncc);
-        fpback_(&a[a_offset], &cosi[1], &npp, &npp, &cosi[1], &ncc);
+        /* fpback_(&a[a_offset], &coco[1], &npp, &npp, &coco[1], &ncc); */
+        /* fpback_(&a[a_offset], &cosi[1], &npp, &npp, &cosi[1], &ncc); */
+        fpback(&a[a_offset], &coco[1], npp, npp, &coco[1], ncc);
+        fpback(&a[a_offset], &cosi[1], npp, npp, &cosi[1], ncc);
         /*  find ncof, the dimension of the spherical spline and ncoff, the
          *  number of coefficients in the standard b-spline representation. */
         nt4 = *nt - 4;
@@ -317,10 +346,12 @@ L70:
                 ri = r[in] * wi;
                 /*  evaluate for the theta-direction, the 4 non-zero b-splines
                  *  at theta(in) */
-                fpbspl_(&tt[1], nt, &c__3, &theta[in], &l1, ht);
+                /* fpbspl_(&tt[1], nt, &c3, &theta[in], &l1, ht); */
+                fpbspl(&tt[1], 3, theta[in], l1, ht);
                 /*  evaluate for the phi-direction, the 4 non-zero b-splines
                  *  at phi(in) */
-                fpbspl_(&tp[1], np, &c__3, &phi[in], &l2, hp);
+                /* fpbspl_(&tp[1], np, &c3, &phi[in], &l2, hp); */
+                fpbspl(&tp[1], 3, phi[in], l2, hp);
                 /*  store the value of these b-splines in spt and spp resp. */
                 for (i = 1; i <= 4; ++i)
                 {
@@ -407,9 +438,11 @@ L70:
                     piv = h[i];
                     if (piv == 0.0) continue;
                     /*  calculate the parameters of the givens transformation. */
-                    fpgivs_(&piv, &a[irot + a_dim1], &co, &si);
+                    /* fpgivs_(&piv, &a[irot + a_dim1], &co, &si); */
+                    fpgivs(piv, &a[irot + a_dim1], &co, &si);
                     /*  apply that transformation to the right hand side. */
-                    fprota_(&co, &si, &ri, &f[irot]);
+                    /* fprota_(&co, &si, &ri, &f[irot]); */
+                    fprota(co, si, &ri, &f[irot]);
                     if (i == iband) break;
                     /*  apply that transformation to the left hand side. */
                     i2 = 1;
@@ -417,7 +450,8 @@ L70:
                     for (j = i3; j <= iband; ++j)
                     {
                         ++i2;
-                        fprota_(&co, &si, &h[j], &a[irot + i2 * a_dim1]);
+                        /* fprota_(&co, &si, &h[j], &a[irot + i2 * a_dim1]); */
+                        fprota(co, si, &h[j], &a[irot + i2 * a_dim1]);
                     }
                 }
                 /*  add the contribution of the row to the sum of squares of
@@ -439,50 +473,59 @@ L70:
         sigma = eps * dmax;
         for (i = 1; i <= ncof; ++i)
         {
-            if (a[i + a_dim1] <= sigma) {
-                goto L370;
-            }
-        }
-        /*  backward substitution in case of full rank. */
-        fpback_(&a[a_offset], &f[1], &ncof, &iband, &c[1], &ncc);
-        rank = ncof;
-        for (i = 1; i <= ncof; ++i)
-        {
-            q[i + q_dim1] = a[i + a_dim1] / dmax;
-        }
-        goto L390;
-        /*  in case of rank deficiency, find the minimum norm solution. */
-L370:
-        lwest = ncof * iband + ncof + iband;
-        if (lwrk < lwest)
-        {
-            *ier = lwest;
-            return;
-        }
-        lf = 1;
-        lh = lf + ncof;
-        la = lh + iband;
-        for (i = 1; i <= ncof; ++i)
-        {
-            ff[i] = f[i];
-            for (j = 1; j <= iband; ++j)
+            if (a[i + a_dim1] <= sigma)
             {
-                q[i + j * q_dim1] = a[i + j * a_dim1];
+                i = -1;
+                break;
             }
         }
-        fprank_(&q[q_offset], &ff[1], &ncof, &iband, &ncc, &sigma, &c[1], &
-                sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
-        for (i = 1; i <= ncof; ++i)
+        if (i != -1)
         {
-            q[i + q_dim1] /= dmax;
+            /*  backward substitution in case of full rank. */
+            /* fpback_(&a[a_offset], &f[1], &ncof, &iband, &c[1], &ncc); */
+            fpback(&a[a_offset], &f[1], ncof, iband, &c[1], ncc);
+            rank = ncof;
+            for (i = 1; i <= ncof; ++i)
+            {
+                q[i + q_dim1] = a[i + a_dim1] / dmax;
+            }
         }
-        /*  add to the sum of squared residuals, the contribution of reducing */
-        /*  the rank. */
-        *fp += sq;
-        /*  find the coefficients in the standard b-spline representation of */
-        /*  the spherical spline. */
-L390:
-        fprpsp_(nt, np, &coco[1], &cosi[1], &c[1], &ff[1], &ncoff);
+        else
+        {
+            /*  in case of rank deficiency, find the minimum norm solution. */
+            lwest = ncof * iband + ncof + iband;
+            if (lwrk < lwest)
+            {
+                *ier = lwest;
+                return;
+            }
+            lf = 1;
+            lh = lf + ncof;
+            la = lh + iband;
+            for (i = 1; i <= ncof; ++i)
+            {
+                ff[i] = f[i];
+                for (j = 1; j <= iband; ++j)
+                {
+                    q[i + j * q_dim1] = a[i + j * a_dim1];
+                }
+            }
+            /* fprank_(&q[q_offset], &ff[1], &ncof, &iband, &ncc, &sigma, &c[1],
+                    &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]); */
+            fprank(&q[q_offset], &ff[1], ncof, iband, ncc, sigma, &c[1],
+                    &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
+            for (i = 1; i <= ncof; ++i)
+            {
+                q[i + q_dim1] /= dmax;
+            }
+            /*  add to the sum of squared residuals, the contribution of
+             *  reducing the rank. */
+            *fp += sq;
+        }
+        /*  find the coefficients in the standard b-spline representation of
+         *  the spherical spline. */
+        /* fprpsp_(nt, np, &coco[1], &cosi[1], &c[1], &ff[1], &ncoff); */
+        fprpsp(*nt, *np, &coco[1], &cosi[1], &c[1], &ff[1], ncoff);
         /*  test whether the least-squares spline is an acceptable solution. */
         if (iopt < 0) {
             if (*fp <= 0.0) {
@@ -500,9 +543,7 @@ L390:
             }
         }
         /*  if f(p=inf) < s, accept the choice of knots. */
-        if (fpms < 0.0) {
-            goto L580;
-        }
+        if (fpms < 0.0) break; /* Go to part 2. */
         /*  test whether we cannot further increase the number of knots. */
         if (ncof > m)
         {
@@ -543,7 +584,6 @@ L390:
                     }
                     i1 += np4;
                 }
-                /* Computing 2nd power */
                 r1 = w[in] * (r[in] - store);
                 store = r1 * r1;
                 fpint[l1] += store;
@@ -557,88 +597,83 @@ L390:
          *  there still can be added a knot. */
         l1 = 1;
         l2 = nrint;
-        if (ntest < *nt + 1) {
-            l1 = ntt + 1;
-        }
-        if (npest < *np + 2) {
-            l2 = ntt;
-        }
+        if (ntest < *nt + 1) l1 = ntt + 1;
+        if (npest < *np + 2) l2 = ntt;
         /*  test whether we cannot further increase the number of knots. */
         if (l1 > l2)
         {
             *ier = 1;
             return;
         }
-L500:
-        fpmax = 0.0;
-        l = 0;
-        for (i = l1; i <= l2; ++i)
+        for (;;)
         {
-            if (fpmax >= fpint[i]) continue;
-            l = i;
-            fpmax = fpint[i];
-        }
-        if (l == 0)
-        {
-            *ier = 5;
-            return;
-        }
-        /*  calculate the position of the new knot. */
-        arg = coord[l] / fpint[l];
-        /*  test in what direction the new knot is going to be added. */
-        if (l > ntt) {
-            goto L530;
-        }
-        /*  addition in the theta-direction */
-        l4 = l + 4;
-        fpint[l] = 0.0;
-        fac1 = tt[l4] - arg;
-        fac2 = arg - tt[l4 - 1];
-        if (fac1 > 10.0 * fac2 || fac2 > 10.0 * fac1) {
-            goto L500;
-        }
-        j = *nt;
-        for (i = l4; i <= *nt; ++i)
-        {
-            tt[j + 1] = tt[j];
-            --j;
-        }
-        tt[l4] = arg;
-        ++(*nt);
-        goto L570;
-        /*  addition in the phi-direction */
-L530:
-        l4 = l + 4 - ntt;
-        if (!(arg < M_PI))
-        {
-            arg -= M_PI;
-            l4 -= nrr;
-        }
-        fpint[l] = 0.0;
-        fac1 = tp[l4] - arg;
-        fac2 = arg - tp[l4 - 1];
-        if (fac1 > 10.0 * fac2 || fac2 > 10.0 * fac1) {
-            goto L500;
-        }
-        ll = nrr + 4;
-        j = ll;
-        for (i = l4; i <= ll; ++i)
-        {
-            tp[j + 1] = tp[j];
-            --j;
-        }
-        tp[l4] = arg;
-        *np += 2;
-        ++nrr;
-        for (i = 5; i <= ll; ++i)
-        {
-            j = i + nrr;
-            tp[j] = tp[i] + M_PI;
+            fpmax = 0.0;
+            l = 0;
+            for (i = l1; i <= l2; ++i)
+            {
+                if (fpmax >= fpint[i]) continue;
+                l = i;
+                fpmax = fpint[i];
+            }
+            if (l == 0)
+            {
+                *ier = 5;
+                return;
+            }
+            /*  calculate the position of the new knot. */
+            arg = coord[l] / fpint[l];
+            /*  test in what direction the new knot is going to be added. */
+            if (l > ntt)
+            {
+                /*  addition in the phi-direction */
+                l4 = l + 4 - ntt;
+                if (!(arg < M_PI))
+                {
+                    arg -= M_PI;
+                    l4 -= nrr;
+                }
+                fpint[l] = 0.0;
+                fac1 = tp[l4] - arg;
+                fac2 = arg - tp[l4 - 1];
+                if (fac1 > 10.0 * fac2 || fac2 > 10.0 * fac1) continue;
+                ll = nrr + 4;
+                j = ll;
+                for (i = l4; i <= ll; ++i)
+                {
+                    tp[j + 1] = tp[j];
+                    --j;
+                }
+                tp[l4] = arg;
+                *np += 2;
+                ++nrr;
+                for (i = 5; i <= ll; ++i)
+                {
+                    j = i + nrr;
+                    tp[j] = tp[i] + M_PI;
+                }
+            }
+            else
+            {
+                /*  addition in the theta-direction */
+                l4 = l + 4;
+                fpint[l] = 0.0;
+                fac1 = tt[l4] - arg;
+                fac2 = arg - tt[l4 - 1];
+                if (fac1 > 10.0 * fac2 || fac2 > 10.0 * fac1) continue;
+                j = *nt;
+                for (i = l4; i <= *nt; ++i)
+                {
+                    tt[j + 1] = tt[j];
+                    --j;
+                }
+                tt[l4] = arg;
+                ++(*nt);
+            }
+            break;
         }
         /*  restart the computations with the new set of knots. */
-L570:
-        ;
     }
+
     /*
      * part 2: determination of the smoothing spherical spline.
      * ********************************************************
@@ -653,20 +688,21 @@ L570:
      * we already know that the least-squares polynomial corresponds to p=0,
      * and that the least-squares spherical spline corresponds to p=infin.
      * the iteration process makes use of rational interpolation. since f(p)
-     * is a convex and strictly decreasing function of p, it can be approx-
-     * imated by a rational function of the form r(p) = (u*p+v)/(p+w).
+     * is a convex and strictly decreasing function of p, it can be
+     * approximated by a rational function of the form r(p) = (u*p+v)/(p+w).
      * three values of p (p1,p2,p3) with corresponding values of f(p) (f1=
      * f(p1)-s,f2=f(p2)-s,f3=f(p3)-s) are used to calculate the new value
      * of p such that r(p)=s. convergence is guaranteed by taking f1>0,f3<0.
      */
 
-    /*  evaluate the discontinuity jumps of the 3-th order derivative of
+    /*  evaluate the discontinuity jumps of the 3rd order derivative of
      *  the b-splines at the knots tt(l),l=5,...,nt-4. */
-L580:
-    fpdisc_(&tt[1], nt, &c__5, &bt[bt_offset], &ntest);
-    /*  evaluate the discontinuity jumps of the 3-th order derivative of
+    /* fpdisc_(&tt[1], nt, &c5, &bt[bt_offset], &ntest); */
+    fpdisc(&tt[1], *nt, 5, &bt[bt_offset], ntest);
+    /*  evaluate the discontinuity jumps of the 3rd order derivative of
      *  the b-splines at the knots tp(l),l=5,...,np-4. */
-    fpdisc_(&tp[1], np, &c__5, &bp[bp_offset], &npest);
+    /* fpdisc_(&tp[1], np, &c5, &bp[bp_offset], &npest); */
+    fpdisc(&tp[1], *np, 5, &bp[bp_offset], npest);
     /*  initial value for p. */
     p1 = 0.0;
     f1 = *sup - s;
@@ -758,25 +794,28 @@ L580:
                 {
                     piv = h[1];
                     i2 = (iband1 < ncof - irot) ? iband1 : ncof - irot;
-                    if (piv == 0.0) {
-                        if (i2 <= 0) {
-                            break;
-                        } else {
-                            goto L690;
+                    if (piv == 0.0)
+                    {
+                        if (i2 <= 0) break;
+                    }
+                    else
+                    {
+                        /*  calculate the parameters of the givens
+                         *  transformation. */
+                        /* fpgivs_(&piv, &q[irot + q_dim1], &co, &si); */
+                        fpgivs(piv, &q[irot + q_dim1], &co, &si);
+                        /*  apply givens transformation to right hand side. */
+                        /* fprota_(&co, &si, &ri, &ff[irot]); */
+                        fprota(co, si, &ri, &ff[irot]);
+                        if (i2 == 0) break;
+                        /*  apply givens transformation to left hand side. */
+                        for (l = 1; l <= i2; ++l)
+                        {
+                            l1 = l + 1;
+                            /* fprota_(&co, &si, &h[l1], &q[irot + l1 * q_dim1]); */
+                            fprota(co, si, &h[l1], &q[irot + l1 * q_dim1]);
                         }
                     }
-                    /*  calculate the parameters of the givens transformation. */
-                    fpgivs_(&piv, &q[irot + q_dim1], &co, &si);
-                    /*  apply that givens transformation to the right hand side. */
-                    fprota_(&co, &si, &ri, &ff[irot]);
-                    if (i2 == 0) break;
-                    /*  apply that givens transformation to the left hand side. */
-                    for (l = 1; l <= i2; ++l)
-                    {
-                        l1 = l + 1;
-                        fprota_(&co, &si, &h[l1], &q[irot + l1 * q_dim1]);
-                    }
-L690:
                     for (l = 1; l <= i2; ++l)
                     {
                         h[l] = h[l + 1];
@@ -833,25 +872,28 @@ L690:
                 {
                     piv = h[1];
                     i2 = (iband3 < ncof - irot) ? iband3 : ncof - irot;
-                    if (piv == 0.0) {
-                        if (i2 <= 0) {
-                            break;
-                        } else {
-                            goto L780;
+                    if (piv == 0.0)
+                    {
+                        if (i2 <= 0) break;
+                    }
+                    else
+                    {
+                        /*  calculate the parameters of the givens
+                         *  transformation. */
+                        /* fpgivs_(&piv, &q[irot + q_dim1], &co, &si); */
+                        fpgivs(piv, &q[irot + q_dim1], &co, &si);
+                        /*  apply givens transformation to right hand side. */
+                        /* fprota_(&co, &si, &ri, &ff[irot]); */
+                        fprota(co, si, &ri, &ff[irot]);
+                        if (i2 == 0) break;
+                        /*  apply givens transformation to left hand side. */
+                        for (l = 1; l <= i2; ++l)
+                        {
+                            l1 = l + 1;
+                            /* fprota_(&co, &si, &h[l1], &q[irot + l1 * q_dim1]); */
+                            fprota(co, si, &h[l1], &q[irot + l1 * q_dim1]);
                         }
                     }
-                    /*  calculate the parameters of the givens transformation. */
-                    fpgivs_(&piv, &q[irot + q_dim1], &co, &si);
-                    /*  apply that givens transformation to the right hand side. */
-                    fprota_(&co, &si, &ri, &ff[irot]);
-                    if (i2 == 0) break;
-                    /*  apply that givens transformation to the left hand side. */
-                    for (l = 1; l <= i2; ++l)
-                    {
-                        l1 = l + 1;
-                        fprota_(&co, &si, &h[l1], &q[irot + l1 * q_dim1]);
-                    }
-L780:
                     for (l = 1; l <= i2; ++l)
                     {
                         h[l] = h[l + 1];
@@ -872,35 +914,44 @@ L780:
         sigma = eps * dmax;
         for (i = 1; i <= ncof; ++i)
         {
-            if (q[i + q_dim1] <= sigma) {
-                goto L840;
+            if (q[i + q_dim1] <= sigma)
+            {
+                i = -1;
+                break;
             }
         }
-        /*  backward substitution in case of full rank. */
-        fpback_(&q[q_offset], &ff[1], &ncof, &iband4, &c[1], &ncc);
-        rank = ncof;
-        goto L845;
-        /*  in case of rank deficiency, find the minimum norm solution. */
-L840:
-        lwest = ncof * iband4 + ncof + iband4;
-        if (lwrk < lwest)
+        if (i != -1)
         {
-            *ier = lwest;
-            return;
+            /*  backward substitution in case of full rank. */
+            /* fpback_(&q[q_offset], &ff[1], &ncof, &iband4, &c[1], &ncc); */
+            fpback(&q[q_offset], &ff[1], ncof, iband4, &c[1], ncc);
+            rank = ncof;
         }
-        lf = 1;
-        lh = lf + ncof;
-        la = lh + iband4;
-        fprank_(&q[q_offset], &ff[1], &ncof, &iband4, &ncc, &sigma, &c[1], &sq,
-                &rank, &wrk[la], &wrk[lf], &wrk[lh]);
-L845:
+        else
+        {
+            /*  in case of rank deficiency, find the minimum norm solution. */
+            lwest = ncof * iband4 + ncof + iband4;
+            if (lwrk < lwest)
+            {
+                *ier = lwest;
+                return;
+            }
+            lf = 1;
+            lh = lf + ncof;
+            la = lh + iband4;
+            /* fprank_(&q[q_offset], &ff[1], &ncof, &iband4, &ncc, &sigma, &c[1],
+                    &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]); */
+            fprank(&q[q_offset], &ff[1], ncof, iband4, ncc, sigma, &c[1],
+                    &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
+        }
         for (i = 1; i <= ncof; ++i)
         {
             q[i + q_dim1] /= dmax;
         }
         /*  find the coefficients in the standard b-spline representation of
          *  the spherical spline. */
-        fprpsp_(nt, np, &coco[1], &cosi[1], &c[1], &ff[1], &ncoff);
+        /* fprpsp_(nt, np, &coco[1], &cosi[1], &c[1], &ff[1], &ncoff); */
+        fprpsp(*nt, *np, &coco[1], &cosi[1], &c[1], &ff[1], ncoff);
         /*  compute f(p). */
         *fp = 0.0;
         for (num = 1; num <= nreg; ++num)
@@ -925,7 +976,6 @@ L845:
                     }
                     i1 += np4;
                 }
-                /* Computing 2nd power */
                 r1 = w[in] * (r[in] - store);
                 *fp += r1 * r1;
                 in = nummer[in];
@@ -955,9 +1005,7 @@ L845:
                 p3 = p2;
                 f3 = f2;
                 p *= 0.04;
-                if (p <= p1) {
-                    p = p1 * 0.9 + p2 * 0.1;
-                }
+                if (p <= p1) p = p1 * 0.9 + p2 * 0.1;
                 continue;
             }
             if (f2 < 0.0) ich3 = 1;
@@ -985,7 +1033,8 @@ L845:
             return;
         }
         /*  find the new value of p. */
-        p = fprati_(&p1, &f1, &p2, &f2, &p3, &f3);
+        /* p = fprati_(&p1, &f1, &p2, &f2, &p3, &f3); */
+        p = fprati(&p1, &f1, p2, f2, &p3, &f3);
     }
 L970:
     *ier = -1;
@@ -993,3 +1042,7 @@ L970:
 L980:
     if (ncof != rank) *ier = -rank;
 }
+
+#ifdef __cplusplus
+}
+#endif

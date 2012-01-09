@@ -1,9 +1,8 @@
-/**
- * @details
- * Subroutine fpbspl evaluates the (k+1) non-zero b-splines of
- * degree k at t(l) <= x < t(l+1) using the stable recurrence
- * relation of de boor and cox.
- */
+#include "extern/dierckx/fpbspl.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void fpbspl(const float *t, int k, float x, int l, float *h)
 {
@@ -16,12 +15,14 @@ void fpbspl(const float *t, int k, float x, int l, float *h)
     --h;
 
     /* Function Body */
-    h[1] = 1.f;
+    h[1] = 1.0;
     for (j = 1; j <= k; ++j)
     {
         for (i = 1; i <= j; ++i)
+        {
             hh[i - 1] = h[i];
-        h[1] = 0.f;
+        }
+        h[1] = 0.0;
         for (i = 1; i <= j; ++i)
         {
             li = l + i;
@@ -33,3 +34,6 @@ void fpbspl(const float *t, int k, float x, int l, float *h)
     }
 }
 
+#ifdef __cplusplus
+}
+#endif

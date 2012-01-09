@@ -1,7 +1,8 @@
-/**
- * @details
- * Subroutine fprota applies a givens rotation to a and b.
- */
+#include "extern/dierckx/fprota.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void fprota(float cos_, float sin_, float *a, float *b)
 {
@@ -13,3 +14,6 @@ void fprota(float cos_, float sin_, float *a, float *b)
     *a = cos_ * stor1 - sin_ * stor2;
 }
 
+#ifdef __cplusplus
+}
+#endif
