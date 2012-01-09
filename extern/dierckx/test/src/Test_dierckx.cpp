@@ -27,6 +27,10 @@
  */
 
 #include "extern/dierckx/test/Test_dierckx.h"
+#include "extern/dierckx/sphere.h"
+#include "extern/dierckx/bispev.h"
+
+#define TIMER_ENABLE 1
 #include "utility/timer.h"
 
 #include <cmath>
@@ -34,7 +38,22 @@
 #include <cstdlib>
 #include <vector>
 
-extern "C" {
+/**
+ * @details
+ * Converts the parameter to a C++ string.
+ */
+#include <sstream>
+
+template <class T>
+inline std::string oskar_to_std_string(const T& t)
+{
+    std::stringstream ss;
+    ss << t;
+    return ss.str();
+}
+
+extern "C"
+{
 void bispev_(float tx[], int* nx, float ty[], int* ny, float c[],
         int* kx, int* ky, float x[], int* mx, float y[], int* my,
         float z[], float wrk[], int* lwrk, int iwrk[], int* kwrk, int* ier);
@@ -44,11 +63,17 @@ void regrid_(int* iopt, int* mx, float x[], int* my, float y[], float z[],
         float* s, int* nxest, int* nyest, int* nx, float tx[], int* ny,
         float ty[], float c[], float* fp, float wrk[], int* lwrk, int iwrk[],
         int* kwrk, int* ier);
+
+void sphere_(int* iopt, int* m, float* theta, float* phi,
+        float* r, float* w, float* s, int* ntest, int* npest,
+        float* eps, int* nt, float* tt, int* np, float* tp, float* c,
+        float* fp, float* wrk1, int* lwrk1, float* wrk2, int* lwrk2,
+        int* iwrk, int* kwrk, int* ier);
 }
 
 using std::vector;
 
-void Test_dierckx::test_method()
+void Test_dierckx::test_regrid()
 {
     // Set data dimensions.
     int size_x = 10;
@@ -166,9 +191,9 @@ void Test_dierckx::test_method()
         ++k;
     } while (fp / ((nx-2*(kxy+1)) * (ny-2*(kxy+1))) > pow(2.0 * noise, 2) &&
             k < 1000 && (iopt >= 0 || fail));
-    TIMER_STOP("Finished precalculation");
+    TIMER_STOP("Finished regular grid precalculation");
 
-    // Interpolate.
+    // Evaluate surface.
     int out_x = 701;
     int out_y = 501;
     vector<float> output(out_x * out_y);
@@ -192,10 +217,10 @@ void Test_dierckx::test_method()
             output[k] = val;
         }
     }
-    TIMER_STOP("Finished interpolation (%d points)", out_x * out_y);
+    TIMER_STOP("Finished evaluation (%d points)", out_x * out_y);
 
-    // Write out the interpolated data.
-    FILE* file = fopen("test.dat", "w");
+    // Write out the data.
+    FILE* file = fopen("test_regrid.dat", "w");
     for (int j = 0, k = 0; j < out_y; ++j)
     {
         for (int i = 0; i < out_x; ++i, ++k)
@@ -203,6 +228,198 @@ void Test_dierckx::test_method()
             fprintf(file, "%10.6f ", output[k]);
         }
         fprintf(file, "\n");
+    }
+    fclose(file);
+}
+
+void Test_dierckx::test_sphere()
+{
+    // Set data dimensions.
+    int size_theta_in = 20;
+    int size_phi_in = 10;
+    int m_in = size_theta_in * size_phi_in;
+
+    // Set up the input data.
+    vector<float> theta_in(m_in), phi_in(m_in), r_in(m_in), w(m_in);
+    for (int p = 0, i = 0; p < size_phi_in; ++p)
+    {
+        float phi1 = p * (2.0 * M_PI) / (size_phi_in - 1); // Phi.
+        for (int t = 0; t < size_theta_in; ++t, ++i)
+        {
+            float theta1 = t * (M_PI / 2.0) / (size_theta_in - 1); // Theta.
+
+            // Store the data points.
+            theta_in[i] = theta1;
+            phi_in[i]   = phi1;
+            r_in[i]     = cos(theta1); // Value of the function at theta,phi.
+            w[i]        = 1.0; // Weight.
+        }
+    }
+
+    // Set up the surface fitting parameters.
+    float noise = 5e-4; // Numerical noise on input data.
+    float eps = 1e-6; // Magnitude of float epsilon.
+
+    // Set up workspace.
+    int ntest = 8 + (int)sqrt(m_in);
+    int npest = ntest;
+    int u = ntest - 7;
+    int v = npest - 7;
+    int lwrk1 = 185 + 52*v + 10*u + 14*u*v + 8*(u-1)*v*v + 8*m_in;
+    int lwrk2 = 48 + 21*v + 7*u*v + 4*(u-1)*v*v;
+    vector<float> wrk1(lwrk1), wrk2(lwrk2);
+    int kwrk = m_in + (ntest - 7) * (npest - 7);
+    vector<int> iwrk(kwrk);
+    int k = 0, ier = 0;
+    float s;
+
+    // Set up the spline knots (Fortran).
+    int nt_f = 0, np_f = 0; // Number of knots in theta and phi.
+    vector<float> tt_f(ntest, 0.0), tp_f(npest, 0.0); // Knots in theta and phi.
+    vector<float> c_f((ntest-4) * (npest-4), 0.0); // Spline coefficients.
+    float fp_f = 0.0; // Sum of squared residuals.
+    {
+        // Set initial smoothing factor.
+        s = m_in + sqrt(2.0 * m_in);
+        int iopt = 0;
+        TIMER_START
+        for (k = 0; k < 1000; ++k)
+        {
+            if (k > 0) iopt = 1; // Set iopt to 1 if not the first pass.
+            sphere_(&iopt, &m_in, &theta_in[0], &phi_in[0], &r_in[0], &w[0], &s,
+                    &ntest, &npest, &eps, &nt_f, &tt_f[0], &np_f, &tp_f[0],
+                    &c_f[0], &fp_f, &wrk1[0], &lwrk1, &wrk2[0], &lwrk2,
+                    &iwrk[0], &kwrk, &ier);
+
+            // Check return code.
+            if (ier > 0 || ier < -2)
+                CPPUNIT_FAIL("Spline coefficient computation failed with code "
+                        + oskar_to_std_string(ier));
+            else if (ier == -2) s = fp_f * 0.9;
+            else s /= 1.2;
+
+            // Check if the fit is good enough.
+            if ((fp_f / m_in) < pow(2.0 * noise, 2)) break;
+        }
+        TIMER_STOP("Finished sphere precalculation [Fortran]");
+    }
+
+    // Set up the spline knots (C).
+    int nt_c = 0, np_c = 0; // Number of knots in theta and phi.
+    vector<float> tt_c(ntest, 0.0), tp_c(npest, 0.0); // Knots in theta and phi.
+    vector<float> c_c((ntest-4) * (npest-4), 0.0); // Spline coefficients.
+    float fp_c = 0.0; // Sum of squared residuals.
+    {
+        // Set initial smoothing factor.
+        s = m_in + sqrt(2.0 * m_in);
+        int iopt = 0;
+        TIMER_START
+        for (k = 0; k < 1000; ++k)
+        {
+            if (k > 0) iopt = 1; // Set iopt to 1 if not the first pass.
+            sphere(iopt, m_in, &theta_in[0], &phi_in[0], &r_in[0], &w[0], s,
+                    ntest, npest, eps, &nt_c, &tt_c[0], &np_c, &tp_c[0],
+                    &c_c[0], &fp_c, &wrk1[0], lwrk1, &wrk2[0], lwrk2,
+                    &iwrk[0], kwrk, &ier);
+
+            // Check return code.
+            if (ier > 0 || ier < -2)
+                CPPUNIT_FAIL("Spline coefficient computation failed with code "
+                        + oskar_to_std_string(ier));
+            else if (ier == -2) s = fp_c * 0.9;
+            else s /= 1.2;
+
+            // Check if the fit is good enough.
+            if ((fp_c / m_in) < pow(2.0 * noise, 2)) break;
+        }
+        TIMER_STOP("Finished sphere precalculation [C]");
+    }
+
+    // Check results are consistent.
+    CPPUNIT_ASSERT_EQUAL(nt_f, nt_c);
+    CPPUNIT_ASSERT_EQUAL(np_f, np_c);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(fp_f, fp_c, 1e-6);
+    for (int i = 0; i < nt_c; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(tt_f[i], tt_c[i], 1e-6);
+    for (int i = 0; i < np_c; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(tp_f[i], tp_c[i], 1e-6);
+    for (int i = 0; i < (ntest-4) * (npest-4); ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(c_f[i], c_c[i], 1e-6);
+
+    // Print knot positions.
+    printf(" ## Pass %d has knots (nt,np)=(%d,%d), s=%.6f, fp=%.6f\n",
+            k + 1, nt_c, np_c, s, fp_c);
+    printf("    theta:\n");
+    for (int i = 0; i < nt_c; ++i) printf(" %.3f", tt_c[i]); printf("\n");
+    printf("    phi:\n");
+    for (int i = 0; i < np_c; ++i) printf(" %.3f", tp_c[i]); printf("\n\n");
+
+    // Output buffers.
+    int size_theta_out = 100;
+    int size_phi_out = 200;
+    int m_out = size_theta_out * size_phi_out;
+    vector<float> theta_out(m_out), phi_out(m_out);
+    vector<float> r_out_f(m_out), r_out_c(m_out);
+    int iwrk1[2];
+    float wrk[16];
+    int kwrk1 = sizeof(iwrk1) / sizeof(int);
+    int lwrk = sizeof(wrk) / sizeof(float);
+
+    // Evaluate surface (Fortran).
+    {
+        int kxy = 3; // Degree of spline (cubic).
+        int one = 1;
+        TIMER_START
+        for (int p = 0, i = 0; p < size_phi_out; ++p)
+        {
+            float phi1 = p * (2.0 * M_PI) / (size_phi_out - 1);
+            for (int t = 0; t < size_theta_out; ++t, ++i)
+            {
+                float theta1 = t * (M_PI / 2.0) / (size_theta_out - 1);
+                float val;
+                bispev_(&tt_f[0], &nt_f, &tp_f[0], &np_f, &c_f[0], &kxy, &kxy,
+                        &theta1, &one, &phi1, &one, &val, wrk, &lwrk, iwrk1,
+                        &kwrk1, &ier);
+                if (ier != 0)
+                    CPPUNIT_FAIL("ERROR: Spherical spline evaluation failed\n");
+                r_out_f[i] = val;
+            }
+        }
+        TIMER_STOP("Finished sphere evaluation [Fortran] (%d points)", m_out);
+    }
+
+    // Evaluate surface (C).
+    {
+        TIMER_START
+        for (int p = 0, i = 0; p < size_phi_out; ++p)
+        {
+            float phi1 = p * (2.0 * M_PI) / (size_phi_out - 1);
+            for (int t = 0; t < size_theta_out; ++t, ++i)
+            {
+                float theta1 = t * (M_PI / 2.0) / (size_theta_out - 1);
+                float val;
+                bispev(&tt_c[0], nt_c, &tp_c[0], np_c, &c_c[0], 3, 3, &theta1,
+                        1, &phi1, 1, &val, wrk, lwrk, iwrk1, kwrk1, &ier);
+                if (ier != 0)
+                    CPPUNIT_FAIL("ERROR: Spherical spline evaluation failed\n");
+                r_out_c[i]   = val;
+                theta_out[i] = theta1;
+                phi_out[i]   = phi1;
+            }
+        }
+        TIMER_STOP("Finished sphere evaluation [C] (%d points)", m_out);
+    }
+
+    // Check results are consistent.
+    for (int i = 0; i < m_out; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(r_out_f[i], r_out_c[i], 1e-6);
+
+    // Write out the data.
+    FILE* file = fopen("test_sphere.dat", "w");
+    for (int i = 0; i < m_out; ++i)
+    {
+        fprintf(file, "%10.6f %10.6f %10.6f\n ",
+                theta_out[i], phi_out[i], r_out_c[i]);
     }
     fclose(file);
 }

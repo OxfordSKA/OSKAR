@@ -12,7 +12,7 @@ void sphere(int iopt, int m, const float* theta, const float* phi,
     int i, j, la, lf, ki, lh, kn, lq, ib1, ib3;
     int np4, nt4, lcc, ncc, lff, lco, lbp, lbt, lcs, lfp, lro, npp;
     int lsp, lst, ntt, ncof, nreg, ncest, maxit, nrint, kwest, lwest;
-    float tol;
+    float tol, pi, pi2;
 
     /* Parameter adjustments */
     --tt;
@@ -49,14 +49,16 @@ void sphere(int iopt, int m, const float* theta, const float* phi,
             (npp * npp));
     kwest = m + nreg;
     if (lwrk1 < lwest || kwrk < kwest) return;
+    pi = 4.0 * atan(1.0);
+    pi2 = pi + pi;
     if (iopt >= 0 && s < 0.0) return;
     if (iopt <= 0)
     {
         for (i = 0; i < m; ++i)
         {
             if (w[i] <= 0.0) return;
-            if (theta[i] < 0.0 || theta[i] > M_PI) return;
-            if (phi[i] < 0.0 || phi[i] > 2 * M_PI) return;
+            if (theta[i] < 0.0 || theta[i] > pi) return;
+            if (phi[i] < 0.0 || phi[i] > pi2) return;
         }
         if (iopt < 0)
         {
@@ -68,7 +70,7 @@ void sphere(int iopt, int m, const float* theta, const float* phi,
                 for (i = 1; i <= ntt; ++i)
                 {
                     j = i + 4;
-                    if (tt[j] <= tt[j - 1] || tt[j] >= M_PI) return;
+                    if (tt[j] <= tt[j - 1] || tt[j] >= pi) return;
                 }
             }
             npp = *np - 8;
@@ -77,7 +79,7 @@ void sphere(int iopt, int m, const float* theta, const float* phi,
             for (i = 1; i <= npp; ++i)
             {
                 j = i + 4;
-                if (tp[j] <= tp[j - 1] || tp[j] >= 2 * M_PI) return;
+                if (tp[j] <= tp[j - 1] || tp[j] >= pi2) return;
             }
         }
     }

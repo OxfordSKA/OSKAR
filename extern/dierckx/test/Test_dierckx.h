@@ -46,11 +46,13 @@ class Test_dierckx : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_dierckx);
-        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_regrid);
+        CPPUNIT_TEST(test_sphere);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        void test_method();
+        void test_regrid();
+        void test_sphere();
 };
 
 // Register the test class.

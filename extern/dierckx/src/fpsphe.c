@@ -54,7 +54,7 @@ void fpsphe(int iopt, int m, const float* theta, const float* phi,
     int iband = 0, ncoff = 0, nrint, iband1 = 0, lwest, iband3, iband4;
     float p, c1, d1, d2, f1, f2, f3, p1, p2, p3, aa, cn, co, fn, ri, si;
     float wi, rn, sq, acc, arg, hti, htj, eps, piv, fac1, fac2;
-    float facc, facs, dmax, fpms = 0.0, pinv, sigma, fpmax, store;
+    float facc, facs, dmax, fpms = 0.0, pinv, sigma, fpmax, store, pi, pi2;
     float ht[4], hp[4];
 
     /* Parameter adjustments */
@@ -92,7 +92,9 @@ void fpsphe(int iopt, int m, const float* theta, const float* phi,
     --wrk;
 
     /* Function Body */
-    eps = sqrt(eta);
+    pi = 4.0 * atanf(1.0);
+    pi2 = pi + pi;
+    eps = sqrtf(eta);
     /*  calculation of acc, the absolute tolerance for the root of f(p)=s. */
     acc = tol * s;
     if (iopt < 0) {
@@ -119,8 +121,8 @@ void fpsphe(int iopt, int m, const float* theta, const float* phi,
     d2 = 0.0;
     c1 = 0.0;
     cn = 0.0;
-    fac1 = 1.5 * M_PI;
-    fac2 = 2.0 / (M_PI * (M_PI * M_PI));
+    fac1 = pi * (1.0 + 0.5);
+    fac2 = (1.0 + 1.0) / (pi * (pi * pi));
     aa = 0.0;
     for (i = 1; i <= m; ++i)
     {
@@ -160,9 +162,9 @@ void fpsphe(int iopt, int m, const float* theta, const float* phi,
         c[i + 8] = cn;
         c[i + 12] = cn;
         tt[i] = 0.0;
-        tt[i + 4] = M_PI;
+        tt[i + 4] = pi;
         tp[i] = 0.0;
-        tp[i + 4] = 2 * M_PI;
+        tp[i + 4] = pi2;
     }
     *fp = *sup;
     /*  test whether the least-squares polynomial is an acceptable solution */
@@ -182,9 +184,9 @@ L60:
     /*  find the initial set of interior knots of the spherical spline in
      *  case iopt = 0. */
     *np = 11;
-    tp[5] = M_PI / 2;
-    tp[6] = M_PI;
-    tp[7] = tp[5] + M_PI;
+    tp[5] = pi * 0.5;
+    tp[6] = pi;
+    tp[7] = tp[5] + pi;
     *nt = 9;
     tt[5] = tp[5];
 L70:
@@ -212,21 +214,21 @@ L70:
         l3 = *np - 3;
         l4 = l3;
         tp[l2] = 0.0;
-        tp[l3] = 2 * M_PI;
+        tp[l3] = pi2;
         for (i = 1; i <= 3; ++i)
         {
             ++l1;
             --l2;
             ++l3;
             --l4;
-            tp[l2] = tp[l4] - 2 * M_PI;
-            tp[l3] = tp[l1] + 2 * M_PI;
+            tp[l2] = tp[l4] - pi2;
+            tp[l3] = tp[l1] + pi2;
         }
         l = *nt;
         for (i = 1; i <= 4; ++i)
         {
             tt[i] = 0.0;
-            tt[l] = M_PI;
+            tt[l] = pi;
             --l;
         }
         /*  find nrint, the total number of knot intervals and nreg, the number
@@ -273,8 +275,8 @@ L70:
                 row[ll] += hp[j - 1];
                 ++ll;
             }
-            facc = cos(arg);
-            facs = sin(arg);
+            facc = cosf(arg);
+            facs = sinf(arg);
             for (j = 1; j <= npp; ++j)
             {
                 piv = row[j];
@@ -535,7 +537,7 @@ L70:
             }
         }
         fpms = *fp - s;
-        if (fabs(fpms) <= acc) {
+        if (fabsf(fpms) <= acc) {
             if (*fp <= 0.0) {
                 goto L970;
             } else {
@@ -627,9 +629,9 @@ L70:
             {
                 /*  addition in the phi-direction */
                 l4 = l + 4 - ntt;
-                if (!(arg < M_PI))
+                if (!(arg < pi))
                 {
-                    arg -= M_PI;
+                    arg -= pi;
                     l4 -= nrr;
                 }
                 fpint[l] = 0.0;
@@ -649,7 +651,7 @@ L70:
                 for (i = 5; i <= ll; ++i)
                 {
                     j = i + nrr;
-                    tp[j] = tp[i] + M_PI;
+                    tp[j] = tp[i] + pi;
                 }
             }
             else
@@ -984,7 +986,7 @@ L70:
         /*  test whether the approximation sp(theta,phi) is an acceptable
          *  solution */
         fpms = *fp - s;
-        if (fabs(fpms) <= acc) {
+        if (fabsf(fpms) <= acc) {
             goto L980;
         }
         /*  test whether the maximum allowable number of iterations has been

@@ -49,7 +49,7 @@ extern "C" {
  *
  * output parameters:
  *  z     : float array of dimension (mx*my).
- *          on succesful exit z(my*(i-1)+j) contains the value of s(x,y)
+ *          on successful exit z(my*(i-1)+j) contains the value of s(x,y)
  *          at the point (x(i),y(j)),i=1,...,mx;j=1,...,my.
  *  ier   : int error flag
  *   ier=0 : normal return
