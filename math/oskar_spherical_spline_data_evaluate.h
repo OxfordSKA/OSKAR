@@ -48,7 +48,7 @@ extern "C" {
  * This function evaluates a surface fitted by spherical splines at the given
  * positions.
  *
- * @param[out] output Output values.
+ * @param[out] output Complex output values.
  * @param[in] spline  Pointer to data structure.
  * @param[in] theta   List of theta coordinates.
  * @param[in] phi     List of phi coordinates.
@@ -60,7 +60,7 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_spherical_spline_data_evaluate(oskar_Mem* output,
+int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
         const oskar_SphericalSplineData* spline, const oskar_Mem* theta,
         const oskar_Mem* phi);
 

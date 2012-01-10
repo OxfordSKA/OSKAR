@@ -51,7 +51,8 @@ extern "C" {
  * @param[in]     num_points Number of data points in all arrays.
  * @param[in]     theta      Array of theta positions.
  * @param[in]     phi        Array of phi positions.
- * @param[in]     data       Array of data points.
+ * @param[in]     data_re    Array of data points (real).
+ * @param[in]     data_im    Array of data points (imaginary).
  * @param[in]     weight     Array of data point weights.
  *
  * @return
@@ -63,7 +64,8 @@ extern "C" {
 OSKAR_EXPORT
 int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
-        const oskar_Mem* data, const oskar_Mem* weight);
+        const oskar_Mem* data_re, const oskar_Mem* data_im,
+        const oskar_Mem* weight);
 
 #ifdef __cplusplus
 }

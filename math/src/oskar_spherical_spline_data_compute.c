@@ -44,33 +44,40 @@ extern "C" {
 
 int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
-        const oskar_Mem* data, const oskar_Mem* weight)
+        const oskar_Mem* data_re, const oskar_Mem* data_im,
+        const oskar_Mem* weight)
 {
-    int element_size, err, est, iopt = 0, k = 0;
+    int element_size, err, est, i, iopt, k = 0;
     int kwrk, lwrk1, lwrk2, maxiter, type, u;
     int *iwrk;
     void *wrk1, *wrk2;
     double noise, s;
 
     /* Get the data type. */
-    type = data->private_type;
+    type = data_re->private_type;
     element_size = oskar_mem_element_size(type);
     if ((type != OSKAR_SINGLE) && (type != OSKAR_DOUBLE))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
-    if (data->private_location != OSKAR_LOCATION_CPU)
+    if (data_re->private_location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise and allocate spline data. */
     est = 8 + (int)sqrt(num_points); /* Could use num_points/2 if needed. */
     err = oskar_spherical_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_theta, est);
+    err = oskar_mem_realloc(&spline->knots_theta_re, est);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_phi, est);
+    err = oskar_mem_realloc(&spline->knots_phi_re, est);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->coeff, (est-4)*(est-4));
+    err = oskar_mem_realloc(&spline->coeff_re, (est-4)*(est-4));
+    if (err) return err;
+    err = oskar_mem_realloc(&spline->knots_theta_im, est);
+    if (err) return err;
+    err = oskar_mem_realloc(&spline->knots_phi_im, est);
+    if (err) return err;
+    err = oskar_mem_realloc(&spline->coeff_im, (est-4)*(est-4));
     if (err) return err;
 
     /* Set up workspace. */
@@ -82,7 +89,6 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
     wrk2 = malloc(lwrk2 * element_size);
     iwrk = (int*)malloc(kwrk * sizeof(int));
     noise = 5e-4; /* Numerical noise on input data. */
-    s = num_points + sqrt(2.0 * num_points); /* Initial smoothing factor. */
     maxiter = 1000;
 
     if (type == OSKAR_SINGLE)
@@ -90,29 +96,57 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         /* Set up the surface fitting parameters. */
         float fp = 0.0;
         float eps = 1e-6; /* Magnitude of float epsilon. */
-        for (k = 0; k < maxiter; ++k)
+
+        for (i = 0; i < 2; ++i)
         {
-            if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
-            sphere_f(iopt, num_points, (const float*)theta->data,
-                    (const float*)phi->data, (const float*)data->data,
-                    (const float*)weight->data, (float)s, est, est, eps,
-                    &spline->num_knots_theta, (float*)spline->knots_theta.data,
-                    &spline->num_knots_phi, (float*)spline->knots_phi.data,
-                    (float*)spline->coeff.data, &fp, (float*)wrk1, lwrk1,
-                    (float*)wrk2, lwrk2, iwrk, kwrk, &err);
-
-            /* Check return code. */
-            if (err > 0 || err < -2)
+            float *knots_theta, *knots_phi, *coeff;
+            const float *data;
+            int *num_knots_theta, *num_knots_phi;
+            if (i == 0) /* Real part. */
             {
-                printf("Error computing spline coefficients: code %d.\n", err);
-                err = OSKAR_ERR_SPLINE_COEFF_FAIL;
-                break;
+                knots_theta     = (float*)spline->knots_theta_re.data;
+                knots_phi       = (float*)spline->knots_phi_re.data;
+                coeff           = (float*)spline->coeff_re.data;
+                data            = (const float*)data_re->data;
+                num_knots_theta = &spline->num_knots_theta_re;
+                num_knots_phi   = &spline->num_knots_phi_re;
             }
-            else if (err == -2) s = fp * 0.9;
-            else s /= 1.2;
+            else /* Imaginary part. */
+            {
+                knots_theta     = (float*)spline->knots_theta_im.data;
+                knots_phi       = (float*)spline->knots_phi_im.data;
+                coeff           = (float*)spline->coeff_im.data;
+                data            = (const float*)data_im->data;
+                num_knots_theta = &spline->num_knots_theta_im;
+                num_knots_phi   = &spline->num_knots_phi_im;
+            }
+            s = num_points + sqrt(2.0 * num_points); /* Smoothing factor. */
+            for (k = 0, iopt = 0; k < maxiter; ++k)
+            {
+                if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
+                sphere_f(iopt, num_points, (const float*)theta->data,
+                        (const float*)phi->data, data,
+                        (const float*)weight->data, (float)s, est, est, eps,
+                        num_knots_theta, knots_theta, num_knots_phi, knots_phi,
+                        coeff, &fp, (float*)wrk1, lwrk1, (float*)wrk2, lwrk2,
+                        iwrk, kwrk, &err);
 
-            /* Check if the fit is good enough. */
-            if ((fp / num_points) < pow(2.0 * noise, 2.0)) break;
+                /* Check return code. */
+                if (err > 0 || err < -2)
+                {
+                    printf("Error computing spline coefficients: code %d.\n", err);
+                    err = OSKAR_ERR_SPLINE_COEFF_FAIL;
+                    break;
+                }
+                else if (err == -2) s = fp * 0.9;
+                else s /= 1.2;
+
+                /* Check if the fit is good enough. */
+                if ((fp / num_points) < pow(2.0 * noise, 2.0)) break;
+            }
+
+            /* Check if iteration limit was reached. */
+            if (k >= maxiter-1) err = OSKAR_ERR_SPLINE_COEFF_FAIL;
         }
     }
     else if (type == OSKAR_DOUBLE)
@@ -120,29 +154,57 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         /* Set up the surface fitting parameters. */
         double fp = 0.0;
         double eps = 1e-16; /* Magnitude of double epsilon. */
-        for (k = 0; k < maxiter; ++k)
+
+        for (i = 0; i < 2; ++i)
         {
-            if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
-            sphere_d(iopt, num_points, (const double*)theta->data,
-                    (const double*)phi->data, (const double*)data->data,
-                    (const double*)weight->data, (double)s, est, est, eps,
-                    &spline->num_knots_theta, (double*)spline->knots_theta.data,
-                    &spline->num_knots_phi, (double*)spline->knots_phi.data,
-                    (double*)spline->coeff.data, &fp, (double*)wrk1, lwrk1,
-                    (double*)wrk2, lwrk2, iwrk, kwrk, &err);
-
-            /* Check return code. */
-            if (err > 0 || err < -2)
+            double *knots_theta, *knots_phi, *coeff;
+            const double *data;
+            int *num_knots_theta, *num_knots_phi;
+            if (i == 0) /* Real part. */
             {
-                printf("Error computing spline coefficients: code %d.\n", err);
-                err = OSKAR_ERR_SPLINE_COEFF_FAIL;
-                break;
+                knots_theta     = (double*)spline->knots_theta_re.data;
+                knots_phi       = (double*)spline->knots_phi_re.data;
+                coeff           = (double*)spline->coeff_re.data;
+                data            = (const double*)data_re->data;
+                num_knots_theta = &spline->num_knots_theta_re;
+                num_knots_phi   = &spline->num_knots_phi_re;
             }
-            else if (err == -2) s = fp * 0.9;
-            else s /= 1.2;
+            else /* Imaginary part. */
+            {
+                knots_theta     = (double*)spline->knots_theta_im.data;
+                knots_phi       = (double*)spline->knots_phi_im.data;
+                coeff           = (double*)spline->coeff_im.data;
+                data            = (const double*)data_im->data;
+                num_knots_theta = &spline->num_knots_theta_im;
+                num_knots_phi   = &spline->num_knots_phi_im;
+            }
+            s = num_points + sqrt(2.0 * num_points); /* Smoothing factor. */
+            for (k = 0, iopt = 0; k < maxiter; ++k)
+            {
+                if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
+                sphere_d(iopt, num_points, (const double*)theta->data,
+                        (const double*)phi->data, data,
+                        (const double*)weight->data, (double)s, est, est, eps,
+                        num_knots_theta, knots_theta, num_knots_phi, knots_phi,
+                        coeff, &fp, (double*)wrk1, lwrk1, (double*)wrk2, lwrk2,
+                        iwrk, kwrk, &err);
 
-            /* Check if the fit is good enough. */
-            if ((fp / num_points) < pow(2.0 * noise, 2.0)) break;
+                /* Check return code. */
+                if (err > 0 || err < -2)
+                {
+                    printf("Error computing spline coefficients: code %d.\n", err);
+                    err = OSKAR_ERR_SPLINE_COEFF_FAIL;
+                    break;
+                }
+                else if (err == -2) s = fp * 0.9;
+                else s /= 1.2;
+
+                /* Check if the fit is good enough. */
+                if ((fp / num_points) < pow(2.0 * noise, 2.0)) break;
+            }
+
+            /* Check if iteration limit was reached. */
+            if (k >= maxiter-1) err = OSKAR_ERR_SPLINE_COEFF_FAIL;
         }
     }
 
@@ -151,8 +213,6 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
     free(wrk2);
     free(wrk1);
 
-    /* Check if iteration limit was reached. */
-    if (k >= maxiter-1) err = OSKAR_ERR_SPLINE_COEFF_FAIL;
     return err;
 }
 

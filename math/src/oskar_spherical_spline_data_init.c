@@ -37,13 +37,21 @@ int oskar_spherical_spline_data_init(oskar_SphericalSplineData* data,
         int type, int location)
 {
     int err = 0;
-    data->num_knots_theta = 0;
-    data->num_knots_phi = 0;
-    err = oskar_mem_init(&data->knots_theta, type, location, 0, OSKAR_TRUE);
+    data->num_knots_theta_re = 0;
+    data->num_knots_phi_re = 0;
+    data->num_knots_theta_im = 0;
+    data->num_knots_phi_im = 0;
+    err = oskar_mem_init(&data->knots_theta_re, type, location, 0, OSKAR_TRUE);
     if (err) return err;
-    err = oskar_mem_init(&data->knots_phi, type, location, 0, OSKAR_TRUE);
+    err = oskar_mem_init(&data->knots_phi_re, type, location, 0, OSKAR_TRUE);
     if (err) return err;
-    err = oskar_mem_init(&data->coeff, type, location, 0, OSKAR_TRUE);
+    err = oskar_mem_init(&data->coeff_re, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_theta_im, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_phi_im, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->coeff_im, type, location, 0, OSKAR_TRUE);
     if (err) return err;
 
     return 0;

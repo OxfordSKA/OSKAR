@@ -36,25 +36,30 @@
 #include "utility/oskar_Mem.h"
 
 /**
- * @brief Structure to hold spherical spline data.
+ * @brief Structure to hold complex, spherical spline data.
  *
  * @details
- * This structure holds the data required to construct a spherical surface
- * from splines.
+ * This structure holds the data required to construct a complex spherical
+ * surface from splines.
  *
  * The knot position arrays should be of size e = 8 + sqrt(n), where n is the
  * number of scatter points used to define the surface. If storage space is
  * tight, then e = 8 + sqrt(n/2) may be sufficient.
  *
- * The coefficient array should be of size (e-4) * (e-4), where e is as above.
+ * The coefficient arrays should be of size (e-4) * (e-4), where e is as above.
  */
 struct oskar_SphericalSplineData
 {
-    int num_knots_theta;   /**< Actual number of knots in theta direction. */
-    int num_knots_phi;     /**< Actual number of knots in phi direction. */
-    oskar_Mem knots_theta; /**< Knot positions in theta. */
-    oskar_Mem knots_phi;   /**< Knot positions in phi. */
-    oskar_Mem coeff;       /**< Spline coefficient array. */
+    int num_knots_theta_re;   /**< Number of knots in theta(real) direction. */
+    int num_knots_theta_im;   /**< Number of knots in theta(imag) direction. */
+    int num_knots_phi_re;     /**< Number of knots in phi(real) direction. */
+    int num_knots_phi_im;     /**< Number of knots in phi(real) direction. */
+    oskar_Mem knots_theta_re; /**< Knot positions in theta(real). */
+    oskar_Mem knots_theta_im; /**< Knot positions in theta(imag). */
+    oskar_Mem knots_phi_re;   /**< Knot positions in phi(real). */
+    oskar_Mem knots_phi_im;   /**< Knot positions in phi(imag). */
+    oskar_Mem coeff_re;       /**< Spline coefficient array (real). */
+    oskar_Mem coeff_im;       /**< Spline coefficient array (imag). */
 };
 
 typedef struct oskar_SphericalSplineData oskar_SphericalSplineData;

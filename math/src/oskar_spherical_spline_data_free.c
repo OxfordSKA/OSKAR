@@ -36,13 +36,21 @@ extern "C" {
 int oskar_spherical_spline_data_free(oskar_SphericalSplineData* data)
 {
     int err = 0;
-    data->num_knots_theta = 0;
-    data->num_knots_phi = 0;
-    err = oskar_mem_free(&data->knots_theta);
+    data->num_knots_theta_re = 0;
+    data->num_knots_phi_re = 0;
+    data->num_knots_theta_im = 0;
+    data->num_knots_phi_im = 0;
+    err = oskar_mem_free(&data->knots_theta_re);
     if (err) return err;
-    err = oskar_mem_free(&data->knots_phi);
+    err = oskar_mem_free(&data->knots_phi_re);
     if (err) return err;
-    err = oskar_mem_free(&data->coeff);
+    err = oskar_mem_free(&data->coeff_re);
+    if (err) return err;
+    err = oskar_mem_free(&data->knots_theta_im);
+    if (err) return err;
+    err = oskar_mem_free(&data->knots_phi_im);
+    if (err) return err;
+    err = oskar_mem_free(&data->coeff_im);
     if (err) return err;
 
     return 0;
