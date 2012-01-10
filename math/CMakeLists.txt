@@ -29,7 +29,6 @@ set(math_SRC
     src/oskar_jones_set_real_scalar.c
     src/oskar_Jones.cpp
     src/oskar_linspace.c
-    src/oskar_mat_tri_c.c
     src/oskar_meshgrid.c
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
