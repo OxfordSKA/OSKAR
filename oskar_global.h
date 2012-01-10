@@ -112,6 +112,12 @@ enum {
     /* Indicates that there are no visible sources in the sky model. */
     OSKAR_ERR_NO_VISIBLE_SOURCES   = -14,
 
+    /* Indicates that spline coefficient computation failed. */
+    OSKAR_ERR_SPLINE_COEFF_FAIL    = -15,
+
+    /* Indicates that spline evaluation failed. */
+    OSKAR_ERR_SPLINE_EVAL_FAIL     = -16,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN              = -1000
 };

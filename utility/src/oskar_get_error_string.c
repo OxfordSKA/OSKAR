@@ -29,14 +29,18 @@
 #include "utility/oskar_get_error_string.h"
 #include <cuda_runtime_api.h>
 
-const char* oskar_get_error_string(const int error)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+const char* oskar_get_error_string(int error)
 {
-    // If the error code is positive, get the CUDA error string as OSKAR
-    // error codes are negative.
+    /* If the error code is positive, get the CUDA error string
+     * (OSKAR error codes are negative). */
     if (error > 0)
         return cudaGetErrorString((cudaError_t)error);
 
-    // Return a string describing the OSKAR error code.
+    /* Return a string describing the OSKAR error code. */
     switch (error)
     {
         case OSKAR_ERR_EOF:
@@ -67,8 +71,16 @@ const char* oskar_get_error_string(const int error)
             return "invalid units";
         case OSKAR_ERR_NO_VISIBLE_SOURCES:
             return "no visible sources in sky model";
+        case OSKAR_ERR_SPLINE_COEFF_FAIL:
+            return "spline coefficient computation failed";
+        case OSKAR_ERR_SPLINE_EVAL_FAIL:
+            return "spline evaluation failed";
         default:
             break;
     };
     return "unknown error.";
 }
+
+#ifdef __cplusplus
+}
+#endif

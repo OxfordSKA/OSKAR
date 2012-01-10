@@ -7,7 +7,7 @@ set(utility_SRC
     src/oskar_exit.c
     src/oskar_cuda_device_info.cu
     src/oskar_cuda_memory.cu
-    src/oskar_get_error_string.cpp
+    src/oskar_get_error_string.c
     src/oskar_getline.c
     src/oskar_mem_add.c
     src/oskar_mem_alloc.c

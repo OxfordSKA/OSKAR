@@ -26,36 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GET_ERROR_STRING_H_
-#define OSKAR_GET_ERROR_STRING_H_
+#ifndef OSKAR_SPHERICAL_SURFACE_DATA_H_
+#define OSKAR_SPHERICAL_SURFACE_DATA_H_
 
 /**
- * @file oskar_get_error_string.h
+ * @file oskar_SphericalSurfaceData.h
  */
 
-#include "oskar_global.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "math/oskar_SphericalSplineData.h"
+#include "utility/oskar_Mem.h"
 
 /**
- * @brief Returns an string describing the specified error code.
+ * @brief Structure to hold spherical surface data.
  *
  * @details
- * As all OSKAR defined error codes are negative, if the error code is positive
- * it is assumed to be a CUDA error and an error message from
- * cudaGetErrorString() is returned.
+ * This structure holds the data required to describe a complex spherical
+ * surface in theta,phi coordinates.
  *
- * @param[in] error An OSKAR error code.
- *
- * @return String describing the error.
+ * Theta is the polar angle (in range 0 to pi) and phi is the azimuthal angle
+ * (in range 0 to 2pi).
  */
-OSKAR_EXPORT
-const char* oskar_get_error_string(int error);
+struct oskar_SphericalSurfaceData
+{
+    int num_points;   /**< Number of points in data arrays. */
+    oskar_Mem theta;  /**< Positions in theta. */
+    oskar_Mem phi;    /**< Positions in phi. */
+    oskar_Mem re;     /**< Real part of surface. */
+    oskar_Mem im;     /**< Imaginary part of surface. */
 
-#ifdef __cplusplus
-}
-#endif
+    /* The spline data are initialised at the pre-computation stage. */
+    oskar_SphericalSplineData spline_re;
+    oskar_SphericalSplineData spline_im;
+};
 
-#endif /* OSKAR_GET_ERROR_STRING_H_ */
+typedef struct oskar_SphericalSurfaceData oskar_SphericalSurfaceData;
+
+#endif /* OSKAR_SPHERICAL_SURFACE_DATA_H_ */

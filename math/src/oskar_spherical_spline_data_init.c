@@ -26,36 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GET_ERROR_STRING_H_
-#define OSKAR_GET_ERROR_STRING_H_
-
-/**
- * @file oskar_get_error_string.h
- */
-
-#include "oskar_global.h"
+#include "math/oskar_spherical_spline_data_init.h"
+#include "utility/oskar_mem_init.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Returns an string describing the specified error code.
- *
- * @details
- * As all OSKAR defined error codes are negative, if the error code is positive
- * it is assumed to be a CUDA error and an error message from
- * cudaGetErrorString() is returned.
- *
- * @param[in] error An OSKAR error code.
- *
- * @return String describing the error.
- */
-OSKAR_EXPORT
-const char* oskar_get_error_string(int error);
+int oskar_spherical_spline_data_init(oskar_SphericalSplineData* data,
+        int type, int location)
+{
+    int err = 0;
+    data->num_knots_theta = 0;
+    data->num_knots_phi = 0;
+    err = oskar_mem_init(&data->knots_theta, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_phi, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->coeff, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+
+    return 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_GET_ERROR_STRING_H_ */

@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void fpgivs(float piv, float *ww, float *cos_, float *sin_)
+void fpgivs_f(float piv, float *ww, float *cos_, float *sin_)
 {
     float dd, store, t;
     store = fabsf(piv);
@@ -18,6 +18,25 @@ void fpgivs(float piv, float *ww, float *cos_, float *sin_)
     {
         t = *ww / piv;
         dd = store * sqrtf(1.0 + t * t);
+    }
+    *cos_ = *ww / dd;
+    *sin_ = piv / dd;
+    *ww = dd;
+}
+
+void fpgivs_d(double piv, double *ww, double *cos_, double *sin_)
+{
+    double dd, store, t;
+    store = fabs(piv);
+    if (store < *ww)
+    {
+        t = piv / *ww;
+        dd = *ww * sqrt(1.0 + t * t);
+    }
+    else
+    {
+        t = *ww / piv;
+        dd = store * sqrt(1.0 + t * t);
     }
     *cos_ = *ww / dd;
     *sin_ = piv / dd;

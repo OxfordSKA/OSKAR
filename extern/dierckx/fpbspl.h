@@ -15,7 +15,15 @@ extern "C" {
  * degree k at t(l) <= x < t(l+1) using the stable recurrence
  * relation of de Boor and Cox.
  */
-void fpbspl(const float *t, int k, float x, int l, float *h);
+void fpbspl_f(const float *t, int k, float x, int l, float *h);
+
+/**
+ * @details
+ * Subroutine fpbspl evaluates the (k+1) non-zero b-splines of
+ * degree k at t(l) <= x < t(l+1) using the stable recurrence
+ * relation of de Boor and Cox.
+ */
+void fpbspl_d(const double *t, int k, double x, int l, double *h);
 
 #ifdef __cplusplus
 }

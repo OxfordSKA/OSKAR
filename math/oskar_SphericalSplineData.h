@@ -26,36 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GET_ERROR_STRING_H_
-#define OSKAR_GET_ERROR_STRING_H_
+#ifndef OSKAR_SPHERICAL_SPLINE_DATA_H_
+#define OSKAR_SPHERICAL_SPLINE_DATA_H_
 
 /**
- * @file oskar_get_error_string.h
+ * @file oskar_SphericalSplineData.h
  */
 
-#include "oskar_global.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "utility/oskar_Mem.h"
 
 /**
- * @brief Returns an string describing the specified error code.
+ * @brief Structure to hold spherical spline data.
  *
  * @details
- * As all OSKAR defined error codes are negative, if the error code is positive
- * it is assumed to be a CUDA error and an error message from
- * cudaGetErrorString() is returned.
+ * This structure holds the data required to construct a spherical surface
+ * from splines.
  *
- * @param[in] error An OSKAR error code.
+ * The knot position arrays should be of size e = 8 + sqrt(n), where n is the
+ * number of scatter points used to define the surface. If storage space is
+ * tight, then e = 8 + sqrt(n/2) may be sufficient.
  *
- * @return String describing the error.
+ * The coefficient array should be of size (e-4) * (e-4), where e is as above.
  */
-OSKAR_EXPORT
-const char* oskar_get_error_string(int error);
+struct oskar_SphericalSplineData
+{
+    int num_knots_theta;   /**< Actual number of knots in theta direction. */
+    int num_knots_phi;     /**< Actual number of knots in phi direction. */
+    oskar_Mem knots_theta; /**< Knot positions in theta. */
+    oskar_Mem knots_phi;   /**< Knot positions in phi. */
+    oskar_Mem coeff;       /**< Spline coefficient array. */
+};
 
-#ifdef __cplusplus
-}
-#endif
+typedef struct oskar_SphericalSplineData oskar_SphericalSplineData;
 
-#endif /* OSKAR_GET_ERROR_STRING_H_ */
+#endif /* OSKAR_SPHERICAL_SPLINE_DATA_H_ */

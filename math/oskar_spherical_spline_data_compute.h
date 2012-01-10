@@ -26,36 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GET_ERROR_STRING_H_
-#define OSKAR_GET_ERROR_STRING_H_
+#ifndef OSKAR_SPHERICAL_SPLINE_DATA_COMPUTE_H_
+#define OSKAR_SPHERICAL_SPLINE_DATA_COMPUTE_H_
 
 /**
- * @file oskar_get_error_string.h
+ * @file oskar_spherical_spline_data_compute.h
  */
 
 #include "oskar_global.h"
+#include "math/oskar_SphericalSplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Returns an string describing the specified error code.
+ * @brief
+ * Computes spherical spline data from a list of data points.
  *
  * @details
- * As all OSKAR defined error codes are negative, if the error code is positive
- * it is assumed to be a CUDA error and an error message from
- * cudaGetErrorString() is returned.
+ * This function constructs spherical splines from a list of data points.
  *
- * @param[in] error An OSKAR error code.
+ * @param[in,out] spline     Pointer to data structure.
+ * @param[in]     num_points Number of data points in all arrays.
+ * @param[in]     theta      Array of theta positions.
+ * @param[in]     phi        Array of phi positions.
+ * @param[in]     data       Array of data points.
+ * @param[in]     weight     Array of data point weights.
  *
- * @return String describing the error.
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-const char* oskar_get_error_string(int error);
+int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
+        int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
+        const oskar_Mem* data, const oskar_Mem* weight);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_GET_ERROR_STRING_H_ */
+#endif /* OSKAR_SPHERICAL_SPLINE_DATA_COMPUTE_H_ */

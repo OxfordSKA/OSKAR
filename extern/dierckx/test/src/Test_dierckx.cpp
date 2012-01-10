@@ -317,7 +317,7 @@ void Test_dierckx::test_sphere()
         for (k = 0; k < 1000; ++k)
         {
             if (k > 0) iopt = 1; // Set iopt to 1 if not the first pass.
-            sphere(iopt, m_in, &theta_in[0], &phi_in[0], &r_in[0], &w[0], s,
+            sphere_f(iopt, m_in, &theta_in[0], &phi_in[0], &r_in[0], &w[0], s,
                     ntest, npest, eps, &nt_c, &tt_c[0], &np_c, &tp_c[0],
                     &c_c[0], &fp_c, &wrk1[0], lwrk1, &wrk2[0], lwrk2,
                     &iwrk[0], kwrk, &ier);
@@ -398,7 +398,7 @@ void Test_dierckx::test_sphere()
             {
                 float theta1 = t * (M_PI / 2.0) / (size_theta_out - 1);
                 float val;
-                bispev(&tt_c[0], nt_c, &tp_c[0], np_c, &c_c[0], 3, 3, &theta1,
+                bispev_f(&tt_c[0], nt_c, &tp_c[0], np_c, &c_c[0], 3, 3, &theta1,
                         1, &phi1, 1, &val, wrk, lwrk, iwrk1, kwrk1, &ier);
                 if (ier != 0)
                     CPPUNIT_FAIL("ERROR: Spherical spline evaluation failed\n");
