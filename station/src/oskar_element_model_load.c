@@ -50,7 +50,8 @@ extern "C" {
 #define DEG2RAD 0.0174532925199432957692
 
 int oskar_element_model_load(oskar_ElementModel* data, int i,
-        const char* filename)
+        const char* filename, int search, double avg_fractional_err,
+        double s_real, double s_imag)
 {
     /* Initialise the flags and local data. */
     int n = 0, err = 0, type = 0;
@@ -130,8 +131,8 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
         /* Check that data was read correctly. */
         if (a != 6) continue;
 
-        /* Ignore any data at pole or below horizon. */
-        if (theta < 20.0 || theta > 80.0) continue;
+        /* Ignore any data at poles. */
+        if (theta < 1e-6 || theta > (180.0 - 1e-6)) continue;
 
         /* Convert data to radians. */
         theta *= DEG2RAD;
@@ -222,10 +223,12 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
 
     /* Fit bicubic spherical splines to the surface data. */
     err = oskar_spherical_spline_data_compute(data_theta, n,
-            &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight);
+            &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, search,
+            avg_fractional_err, s_real, s_imag);
     if (err) return err;
     err = oskar_spherical_spline_data_compute(data_phi, n,
-            &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight);
+            &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, search,
+            avg_fractional_err, s_real, s_imag);
     if (err) return err;
 
     /* Free temporary storage. */

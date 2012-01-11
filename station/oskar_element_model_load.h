@@ -69,7 +69,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_element_model_load(oskar_ElementModel* data, int i,
-        const char* filename);
+        const char* filename, int search, double avg_fractional_err,
+        double s_real, double s_imag);
 
 #ifdef __cplusplus
 }

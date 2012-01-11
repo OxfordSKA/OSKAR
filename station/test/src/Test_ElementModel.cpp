@@ -32,7 +32,10 @@
 #include "station/oskar_element_model_load.h"
 #include "station/oskar_ElementModel.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_mem_realloc.h"
+#include "math/oskar_spherical_spline_data_init.h"
 #include "math/oskar_spherical_spline_data_evaluate.h"
+#include "math/oskar_spherical_spline_data_compute.h"
 
 #include <cmath>
 
@@ -2739,17 +2742,21 @@ void Test_ElementModel::test_plot()
     err = oskar_element_model_init(&pattern, OSKAR_SINGLE, OSKAR_LOCATION_CPU);
     if (err) CPPUNIT_FAIL("Error in oskar_element_model_init.");
     TIMER_START
-    err = oskar_element_model_load(&pattern, 1, filename);
-    if (err) CPPUNIT_FAIL("Error in oskar_element_model_load.");
+    err = oskar_element_model_load(&pattern, 1, filename, true, 0.02, 1.0, 2.0);
+    if (err) {
+        printf("Error code: %d\n", err);
+        CPPUNIT_FAIL("Error in oskar_element_model_load.");
+    }
     TIMER_STOP("Loaded antenna pattern")
 
     // Generate points at which to evaluate the surface.
-    int n_theta = 180;
-    int n_phi = 720;
+    int n_theta = 90;
+    int n_phi = 360;
     int num_points = n_theta * n_phi;
     oskar_Mem pt_theta(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
     oskar_Mem pt_phi(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
-    oskar_Mem output(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
+    oskar_Mem output_theta(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, num_points);
+    oskar_Mem output_phi(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, num_points);
 
     for (int p = 0, i = 0; p < n_phi; ++p)
     {
@@ -2764,19 +2771,22 @@ void Test_ElementModel::test_plot()
 
     // Evaluate the surface.
     TIMER_START
-    err = oskar_spherical_spline_data_evaluate(&output, 1, &pattern.port1_phi, &pt_theta, &pt_phi);
+    err = oskar_spherical_spline_data_evaluate(&output_theta, 1,
+            &pattern.port1_theta, &pt_theta, &pt_phi);
     if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
-    TIMER_STOP("Finished surface evaluation (%d points)", num_points)
+    err = oskar_spherical_spline_data_evaluate(&output_phi, 1,
+            &pattern.port1_phi, &pt_theta, &pt_phi);
+    if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
+    TIMER_STOP("Finished surface evaluation (%d points)", 2 * num_points)
 
     // Write out the interpolated data.
     file = fopen("fitted_antenna_data.dat", "w");
-    for (int j = 0, k = 0; j < n_phi; ++j)
+    for (int j = 0; j < num_points; ++j)
     {
-        for (int i = 0; i < n_theta; ++i, ++k)
-        {
-            fprintf(file, "%10.6f ", ((const float*)output)[k]);
-        }
-        fprintf(file, "\n");
+        fprintf(file, "%10.6f %10.6f %10.6f %10.6f %10.6f %10.6f\n",
+                ((float*)pt_theta)[j], ((float*)pt_phi)[j],
+                ((float2*)output_theta)[j].x, ((float2*)output_theta)[j].y,
+                ((float2*)output_phi)[j].x, ((float2*)output_phi)[j].y);
     }
     fclose(file);
 
@@ -2786,4 +2796,73 @@ void Test_ElementModel::test_plot()
 
     // Remove the input file.
     remove(filename);
+}
+
+void Test_ElementModel::test_sphere()
+{
+    // Set data dimensions.
+    int size_theta_in = 20;
+    int size_phi_in = 10;
+    int m_in = size_theta_in * size_phi_in;
+
+    // Set up the input data.
+    oskar_Mem theta_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, m_in);
+    oskar_Mem phi_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, m_in);
+    oskar_Mem r_re(OSKAR_SINGLE, OSKAR_LOCATION_CPU, m_in);
+    oskar_Mem r_im(OSKAR_SINGLE, OSKAR_LOCATION_CPU, m_in);
+    oskar_Mem w(OSKAR_SINGLE, OSKAR_LOCATION_CPU, m_in);
+    for (int p = 0, i = 0; p < size_phi_in; ++p)
+    {
+        float phi1 = p * (2.0 * M_PI) / (size_phi_in - 1); // Phi.
+        for (int t = 0; t < size_theta_in; ++t, ++i)
+        {
+            float theta1 = t * (M_PI / 2.0) / (size_theta_in - 1); // Theta.
+
+            // Store the data points.
+            ((float*)theta_in.data)[i] = theta1;
+            ((float*)phi_in.data)[i]   = phi1;
+            ((float*)r_re.data)[i]     = cos(theta1); // Value of the function at theta,phi.
+            ((float*)r_im.data)[i]     = sin(theta1); // Value of the function at theta,phi.
+            ((float*)w.data)[i]        = 1.0; // Weight.
+        }
+    }
+
+    // Generate points at which to evaluate the surface.
+    int n_theta = 90;
+    int n_phi = 360;
+    int num_points = n_theta * n_phi;
+    oskar_Mem pt_theta(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
+    oskar_Mem pt_phi(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points);
+    oskar_Mem output(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, num_points);
+    for (int p = 0, i = 0; p < n_phi; ++p)
+    {
+        float phi = p * (2.0 * M_PI) / (n_phi-1);
+        for (int t = 0; t < n_theta; ++t, ++i)
+        {
+            float theta = t * (0.5 * M_PI) / (n_theta-1);
+            ((float*)pt_theta)[i] = theta;
+            ((float*)pt_phi)[i] = phi;
+        }
+    }
+
+    oskar_SphericalSplineData data;
+    int err;
+    err = oskar_spherical_spline_data_compute(&data, m_in,
+            &theta_in, &phi_in, &r_re, &r_im, &w, true, 0.02, 0.0, 0.0);
+    if (err) CPPUNIT_FAIL("Error in oskar_spherical_spline_data_compute.");
+
+    err = oskar_spherical_spline_data_evaluate(&output, 1, &data,
+            &pt_theta, &pt_phi);
+    if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
+
+    // Write out the interpolated data.
+    FILE* file = fopen("fitted_test_data.dat", "w");
+    for (int j = 0; j < num_points; ++j)
+    {
+        fprintf(file, "%10.6f %10.6f %10.6f %10.6f\n",
+                ((float*)pt_theta)[j], ((float*)pt_phi)[j],
+                ((float2*)output)[j].x, ((float2*)output)[j].y);
+    }
+    fclose(file);
+
 }

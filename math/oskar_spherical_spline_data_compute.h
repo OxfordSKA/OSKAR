@@ -65,7 +65,8 @@ OSKAR_EXPORT
 int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
         const oskar_Mem* data_re, const oskar_Mem* data_im,
-        const oskar_Mem* weight);
+        const oskar_Mem* weight, int search, double avg_fractional_err,
+        double s_real, double s_imag);
 
 #ifdef __cplusplus
 }
