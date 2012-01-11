@@ -33,26 +33,23 @@
  * @file oskar_ElementModel.h
  */
 
-#include "math/oskar_SurfaceData.h"
+#include "math/oskar_SphericalSplineData.h"
 #include "utility/oskar_Mem.h"
 
 /**
  * @brief Structure to hold antenna (embedded element) pattern data.
  *
  * @details
- * This structure holds the complex gain of an antenna as a function of theta
- * and phi. The 2D data can be interpolated easily using the additional
- * meta-data.
- *
- * The theta coordinate is assumed to be the fastest-varying dimension.
+ * This structure holds the bicubic spherical spline coefficients and knot
+ * positions for both polarisations of the antenna element.
  */
 struct oskar_ElementModel
 {
     int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SurfaceData port1_phi;
-    oskar_SurfaceData port1_theta;
-    oskar_SurfaceData port2_phi;
-    oskar_SurfaceData port2_theta;
+    oskar_SphericalSplineData port1_phi;
+    oskar_SphericalSplineData port1_theta;
+    oskar_SphericalSplineData port2_phi;
+    oskar_SphericalSplineData port2_theta;
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
 

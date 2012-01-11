@@ -27,11 +27,12 @@
  */
 
 #include "station/oskar_element_model_init.h"
-#include "math/oskar_surface_data_init.h"
+#include "math/oskar_spherical_spline_data_init.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
 {
     int err;
@@ -40,14 +41,18 @@ int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    err = oskar_surface_data_init(&data->port1_phi, type, location);
+    err = oskar_spherical_spline_data_init(&data->port1_phi, type, location);
     if (err) return err;
-    err = oskar_surface_data_init(&data->port1_theta, type, location);
+    err = oskar_spherical_spline_data_init(&data->port1_theta, type, location);
     if (err) return err;
-    err = oskar_surface_data_init(&data->port2_phi, type, location);
+    err = oskar_spherical_spline_data_init(&data->port2_phi, type, location);
     if (err) return err;
-    err = oskar_surface_data_init(&data->port2_theta, type, location);
+    err = oskar_spherical_spline_data_init(&data->port2_theta, type, location);
     if (err) return err;
 
     return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

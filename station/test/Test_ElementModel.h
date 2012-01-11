@@ -46,7 +46,6 @@ class Test_ElementModel : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_ElementModel);
-        CPPUNIT_TEST(test_method);
         CPPUNIT_TEST(test_plot);
         CPPUNIT_TEST_SUITE_END();
 
@@ -58,9 +57,6 @@ class Test_ElementModel : public CppUnit::TestFixture
         void tearDown();
 
     public:
-        /// Test method.
-        void test_method();
-
         /// Test method.
         void test_plot();
 };

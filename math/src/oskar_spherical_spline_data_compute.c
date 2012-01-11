@@ -42,6 +42,12 @@
 extern "C" {
 #endif
 
+void sphere_(int* iopt, int* m, const float* theta, const float* phi,
+        const float* r, const float* w, float* s, int* ntest, int* npest,
+        float* eps, int* nt, float* tt, int* np, float* tp, float* c,
+        float* fp, float* wrk1, int* lwrk1, float* wrk2, int* lwrk2,
+        int* iwrk, int* kwrk, int* ier);
+
 int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
         const oskar_Mem* data_re, const oskar_Mem* data_im,
@@ -95,7 +101,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
     {
         /* Set up the surface fitting parameters. */
         float fp = 0.0;
-        float eps = 1e-6; /* Magnitude of float epsilon. */
+        float eps = 1e-5; /* Magnitude of float epsilon. */
 
         for (i = 0; i < 2; ++i)
         {
@@ -120,16 +126,26 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 num_knots_theta = &spline->num_knots_theta_im;
                 num_knots_phi   = &spline->num_knots_phi_im;
             }
-            s = num_points + sqrt(2.0 * num_points); /* Smoothing factor. */
+            s = (num_points + sqrt(2.0 * num_points)); /* Smoothing factor. */
             for (k = 0, iopt = 0; k < maxiter; ++k)
             {
+                float s2;
+                s2 = (float)s;
                 if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
+                /*
                 sphere_f(iopt, num_points, (const float*)theta->data,
                         (const float*)phi->data, data,
                         (const float*)weight->data, (float)s, est, est, eps,
                         num_knots_theta, knots_theta, num_knots_phi, knots_phi,
                         coeff, &fp, (float*)wrk1, lwrk1, (float*)wrk2, lwrk2,
                         iwrk, kwrk, &err);
+                 */
+                sphere_(&iopt, &num_points, (const float*)theta->data,
+                        (const float*)phi->data, data,
+                        (const float*)weight->data, &s2, &est, &est, &eps,
+                        num_knots_theta, knots_theta, num_knots_phi, knots_phi,
+                        coeff, &fp, (float*)wrk1, &lwrk1, (float*)wrk2, &lwrk2,
+                        iwrk, &kwrk, &err);
 
                 /* Check return code. */
                 if (err > 0 || err < -2)
@@ -146,7 +162,10 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
             }
 
             /* Check if iteration limit was reached. */
+            printf("Surface fit complete ");
+            printf("(i = %d, s = %.5e, fp = %.5e, k = %d).\n", i, s, fp, k);
             if (k >= maxiter-1) err = OSKAR_ERR_SPLINE_COEFF_FAIL;
+            if (err > 0 || err < -2) break;
         }
     }
     else if (type == OSKAR_DOUBLE)
@@ -204,7 +223,10 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
             }
 
             /* Check if iteration limit was reached. */
+            printf("Surface fit complete ");
+            printf("(i = %d, s = %.5e, fp = %.5e, k = %d).\n", i, s, fp, k);
             if (k >= maxiter-1) err = OSKAR_ERR_SPLINE_COEFF_FAIL;
+            if (err > 0 || err < -2) break;
         }
     }
 

@@ -41,6 +41,8 @@ set(math_SRC
     src/oskar_spherical_spline_data_compute.c
     src/oskar_spherical_spline_data_free.c
     src/oskar_spherical_spline_data_init.c
+    src/oskar_spherical_spline_data_location.c
+    src/oskar_spherical_spline_data_type.c
     src/oskar_spline_data_compute.c
     src/oskar_spline_data_evaluate.c
     src/oskar_spline_data_free.c

@@ -56,7 +56,7 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_sphercial_spline_data_free(oskar_SphericalSplineData* data);
+int oskar_spherical_spline_data_free(oskar_SphericalSplineData* data);
 
 #ifdef __cplusplus
 }

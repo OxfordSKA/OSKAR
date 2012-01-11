@@ -27,23 +27,28 @@
  */
 
 #include "station/oskar_element_model_free.h"
-#include "math/oskar_surface_data_free.h"
+#include "math/oskar_spherical_spline_data_free.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 int oskar_element_model_free(oskar_ElementModel* data)
 {
     int err;
 
-    err = oskar_surface_data_free(&data->port1_phi);
+    err = oskar_spherical_spline_data_free(&data->port1_phi);
     if (err) return err;
-    err = oskar_surface_data_free(&data->port1_theta);
+    err = oskar_spherical_spline_data_free(&data->port1_theta);
     if (err) return err;
-    err = oskar_surface_data_free(&data->port2_phi);
+    err = oskar_spherical_spline_data_free(&data->port2_phi);
     if (err) return err;
-    err = oskar_surface_data_free(&data->port2_theta);
+    err = oskar_spherical_spline_data_free(&data->port2_theta);
     if (err) return err;
 
     return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -28,6 +28,7 @@
 
 #include "extern/dierckx/bispev.h"
 #include "math/oskar_spherical_spline_data_evaluate.h"
+#include "utility/oskar_mem_type_check.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +47,8 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
     type = theta->private_type;
     if (type != phi->private_type)
         return OSKAR_ERR_TYPE_MISMATCH;
+    if (!oskar_mem_is_complex(output->private_type))
+        return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check location. */
     location = output->private_location;
@@ -70,6 +73,7 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
             for (j = 0; j < 2; ++j)
             {
                 const float *knots_theta, *knots_phi, *coeff;
+                float *out;
                 if (j == 0) /* Real part. */
                 {
                     nt          = spline->num_knots_theta_re;
@@ -77,6 +81,7 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
                     knots_theta = (const float*)spline->knots_theta_re.data;
                     knots_phi   = (const float*)spline->knots_phi_re.data;
                     coeff       = (const float*)spline->coeff_re.data;
+                    out         = (float*)output->data;
                 }
                 else  /* Imaginary part. */
                 {
@@ -85,18 +90,18 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
                     knots_theta = (const float*)spline->knots_theta_im.data;
                     knots_phi   = (const float*)spline->knots_phi_im.data;
                     coeff       = (const float*)spline->coeff_im.data;
+                    out         = (float*)output->data + 1;
                 }
 
                 for (i = 0; i < num_points; ++i)
                 {
-                    float val, theta1, phi1;
+                    float theta1, phi1;
                     theta1 = ((const float*)theta->data)[i];
                     phi1 = ((const float*)phi->data)[i];
                     bispev_f(knots_theta, nt, knots_phi, np, coeff, 3, 3,
-                            &theta1, 1, &phi1, 1, &val,
+                            &theta1, 1, &phi1, 1, &out[i * 2 * stride],
                             wrk, lwrk, iwrk1, kwrk1, &err);
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
-
                 }
             }
         }
@@ -107,6 +112,7 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
             for (j = 0; j < 2; ++j)
             {
                 const double *knots_theta, *knots_phi, *coeff;
+                double* out;
                 if (j == 0) /* Real part. */
                 {
                     nt          = spline->num_knots_theta_re;
@@ -114,6 +120,7 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
                     knots_theta = (const double*)spline->knots_theta_re.data;
                     knots_phi   = (const double*)spline->knots_phi_re.data;
                     coeff       = (const double*)spline->coeff_re.data;
+                    out         = (double*)output->data;
                 }
                 else  /* Imaginary part. */
                 {
@@ -122,18 +129,18 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
                     knots_theta = (const double*)spline->knots_theta_im.data;
                     knots_phi   = (const double*)spline->knots_phi_im.data;
                     coeff       = (const double*)spline->coeff_im.data;
+                    out         = (double*)output->data + 1;
                 }
 
                 for (i = 0; i < num_points; ++i)
                 {
-                    double val, theta1, phi1;
+                    double theta1, phi1;
                     theta1 = ((const double*)theta->data)[i];
                     phi1 = ((const double*)phi->data)[i];
                     bispev_d(knots_theta, nt, knots_phi, np, coeff, 3, 3,
-                            &theta1, 1, &phi1, 1, &val,
+                            &theta1, 1, &phi1, 1, &out[i * 2 * stride],
                             wrk, lwrk, iwrk1, kwrk1, &err);
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
-
                 }
             }
         }

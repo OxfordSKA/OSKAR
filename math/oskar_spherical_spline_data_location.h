@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_LOAD_H_
-#define OSKAR_ELEMENT_MODEL_LOAD_H_
+#ifndef OSKAR_SPHERICAL_SPLINE_DATA_LOCATION_H_
+#define OSKAR_SPHERICAL_SPLINE_DATA_LOCATION_H_
 
 /**
- * @file oskar_element_model_load.h
+ * @file oskar_spherical_spline_data_location.h
  */
 
 #include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
+#include "math/oskar_SphericalSplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,37 +42,22 @@ extern "C" {
 
 /**
  * @brief
- * Loads an antenna pattern from a text file.
+ * Returns the location of a spherical spline data structure.
  *
  * @details
- * This function loads antenna pattern data from a text file and fills the
- * provided data structure.
+ * This function returns the location of memory held in a spherical spline data
+ * structure.
  *
- * The data file must contain eight columns, in the following order:
- * - <theta, deg>
- * - <phi, deg>
- * - <abs dir>
- * - <abs theta>
- * - <phase theta, deg>
- * - <abs phi>
- * - <phase phi, deg>
- * - <ax. ratio>
+ * @param[in] data Pointer to data structure.
  *
- * Amplitude values in dBi are detected, and converted to linear format after
- * loading.
- *
- * The theta dimension is assumed to be the fastest varying.
- *
- * @param[out] data     Pointer to data structure to fill.
- * @param[in]  filename Data file name.
- * @param[in]  i        Index 1 or 2 (port number to load).
+ * @return
+ * Enumerated location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU) of memory.
  */
 OSKAR_EXPORT
-int oskar_element_model_load(oskar_ElementModel* data, int i,
-        const char* filename);
+int oskar_spherical_spline_data_location(const oskar_SphericalSplineData* data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ELEMENT_MODEL_LOAD_H_ */
+#endif /* OSKAR_SPHERICAL_SPLINE_DATA_LOCATION_H_ */
