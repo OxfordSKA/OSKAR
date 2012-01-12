@@ -223,12 +223,12 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
 
     /* Fit bicubic spherical splines to the surface data. */
     err = oskar_spherical_spline_data_compute(data_theta, n,
-            &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, search,
-            avg_fractional_err, s_real, s_imag);
+            &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, &weight,
+            search, avg_fractional_err, s_real, s_imag);
     if (err) return err;
     err = oskar_spherical_spline_data_compute(data_phi, n,
-            &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, search,
-            avg_fractional_err, s_real, s_imag);
+            &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, &weight,
+            search, avg_fractional_err, s_real, s_imag);
     if (err) return err;
 
     /* Free temporary storage. */

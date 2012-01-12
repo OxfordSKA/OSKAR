@@ -48,6 +48,7 @@ class Test_ElementModel : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(Test_ElementModel);
         CPPUNIT_TEST(test_plot);
 //        CPPUNIT_TEST(test_sphere);
+        CPPUNIT_TEST(test_sphere_large);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -63,6 +64,9 @@ class Test_ElementModel : public CppUnit::TestFixture
 
         /// Test method.
         void test_sphere();
+
+        /// Test method.
+        void test_sphere_large();
 };
 
 // Register the test class.

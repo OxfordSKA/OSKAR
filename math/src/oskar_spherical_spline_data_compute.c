@@ -80,8 +80,8 @@ void sphere_(int* iopt, int* m, const float* theta, const float* phi,
 int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
         const oskar_Mem* data_re, const oskar_Mem* data_im,
-        const oskar_Mem* weight, int search, double avg_fractional_err,
-        double s_real, double s_imag)
+        const oskar_Mem* weight_re, const oskar_Mem* weight_im, int search,
+        double avg_fractional_err, double s_real, double s_imag)
 {
     int element_size, err, est, i, iopt, k = 0;
     int kwrk, lwrk1, lwrk2, maxiter = 1000, type, u;
@@ -133,7 +133,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         for (i = 0; i < 2; ++i)
         {
             float *knots_theta, *knots_phi, *coeff, peak_abs, avg_frac_err_loc;
-            const float *data;
+            const float *data, *weight;
             int *num_knots_theta, *num_knots_phi, done = 0;
             avg_frac_err_loc = (float)avg_fractional_err;
             if (i == 0) /* Real part. */
@@ -142,6 +142,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 knots_phi       = (float*)spline->knots_phi_re.data;
                 coeff           = (float*)spline->coeff_re.data;
                 data            = (const float*)data_re->data;
+                weight          = (const float*)weight_re->data;
                 num_knots_theta = &spline->num_knots_theta_re;
                 num_knots_phi   = &spline->num_knots_phi_re;
                 peak_abs        = max_f(data_re, num_points);
@@ -153,6 +154,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 knots_phi       = (float*)spline->knots_phi_im.data;
                 coeff           = (float*)spline->coeff_im.data;
                 data            = (const float*)data_im->data;
+                weight          = (const float*)weight_im->data;
                 num_knots_theta = &spline->num_knots_theta_im;
                 num_knots_phi   = &spline->num_knots_phi_im;
                 peak_abs        = max_f(data_im, num_points);
@@ -169,14 +171,14 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                     if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
                     sphere_f(iopt, num_points, (const float*)theta->data,
                             (const float*)phi->data, data,
-                            (const float*)weight->data, s, est, est, eps,
+                            weight, s, est, est, eps,
                             num_knots_theta, knots_theta, num_knots_phi,
                             knots_phi, coeff, &fp, (float*)wrk1, lwrk1,
                             (float*)wrk2, lwrk2, iwrk, kwrk, &err);
                     /*
                     sphere_(&iopt, &num_points, (const float*)theta->data,
                             (const float*)phi->data, data,
-                            (const float*)weight->data, &s, &est, &est, &eps,
+                            weight, &s, &est, &est, &eps,
                             num_knots_theta, knots_theta, num_knots_phi,
                             knots_phi, coeff, &fp, (float*)wrk1, &lwrk1,
                             (float*)wrk2, &lwrk2, iwrk, &kwrk, &err);
@@ -217,6 +219,8 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                     else
                         printf("%s surface fit (s=%.2e, fp=%.2e).\n",
                                 (i == 0 ? "Real" : "Imag"), s, fp);
+                    printf("Number of knots (theta: %d, phi: %d)\n",
+                            *num_knots_theta, *num_knots_phi);
                 }
             } while (search && !done);
         }
@@ -230,7 +234,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         for (i = 0; i < 2; ++i)
         {
             double *knots_theta, *knots_phi, *coeff, peak_abs, avg_frac_err_loc;
-            const double *data;
+            const double *data, *weight;
             int *num_knots_theta, *num_knots_phi, done = 0;
             avg_frac_err_loc = avg_fractional_err;
             if (i == 0) /* Real part. */
@@ -239,6 +243,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 knots_phi       = (double*)spline->knots_phi_re.data;
                 coeff           = (double*)spline->coeff_re.data;
                 data            = (const double*)data_re->data;
+                weight          = (const double*)weight_re->data;
                 num_knots_theta = &spline->num_knots_theta_re;
                 num_knots_phi   = &spline->num_knots_phi_re;
                 peak_abs        = max_d(data_re, num_points);
@@ -250,6 +255,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 knots_phi       = (double*)spline->knots_phi_im.data;
                 coeff           = (double*)spline->coeff_im.data;
                 data            = (const double*)data_im->data;
+                weight          = (const double*)weight_im->data;
                 num_knots_theta = &spline->num_knots_theta_im;
                 num_knots_phi   = &spline->num_knots_phi_im;
                 peak_abs        = max_d(data_im, num_points);
@@ -266,7 +272,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                     if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
                     sphere_d(iopt, num_points, (const double*)theta->data,
                             (const double*)phi->data, data,
-                            (const double*)weight->data, s, est, est, eps,
+                            weight, s, est, est, eps,
                             num_knots_theta, knots_theta, num_knots_phi,
                             knots_phi, coeff, &fp, (double*)wrk1, lwrk1,
                             (double*)wrk2, lwrk2, iwrk, kwrk, &err);
@@ -307,6 +313,8 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                     else
                         printf("%s surface fit (s=%.2e, fp=%.2e).\n",
                                 (i == 0 ? "Real" : "Imag"), s, fp);
+                    printf("Number of knots (theta: %d, phi: %d)\n",
+                            *num_knots_theta, *num_knots_phi);
                 }
             } while (search && !done);
         }
