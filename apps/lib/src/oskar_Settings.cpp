@@ -33,6 +33,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 
 oskar_Settings::oskar_Settings(const QString& filename)
@@ -45,6 +46,8 @@ oskar_Settings::oskar_Settings(const QString& filename)
     latitude_deg_ = 0.0;
     altitude_m_ = 0.0;
     disable_station_beam_ = false;
+    element_pattern_files_meerkat_pol1_ = NULL;
+    element_pattern_files_meerkat_pol2_ = NULL;
 
     // Load the settings file, if one is provided.
     if (!filename.isEmpty())
@@ -53,6 +56,12 @@ oskar_Settings::oskar_Settings(const QString& filename)
 
 oskar_Settings::~oskar_Settings()
 {
+    for (int i = 0; i < element_pattern_meerkat_pol1_.size(); ++i)
+        free(element_pattern_files_meerkat_pol1_[i]);
+    free(element_pattern_files_meerkat_pol1_);
+    for (int i = 0; i < element_pattern_meerkat_pol2_.size(); ++i)
+        free(element_pattern_files_meerkat_pol2_[i]);
+    free(element_pattern_files_meerkat_pol2_);
 }
 
 int oskar_Settings::load(const QString& filename)
@@ -69,29 +78,11 @@ int oskar_Settings::load(const QString& filename)
     // Create a settings object from the settings file.
     QSettings settings(filename, QSettings::IniFormat);
 
-    // Read settings.
-    telescope_file_    = settings.value("telescope/layout_file", "").toString();
-    latitude_deg_      = settings.value("telescope/latitude_deg", 0.0).toDouble();
-    longitude_deg_     = settings.value("telescope/longitude_deg", 0.0).toDouble();
-    altitude_m_        = settings.value("telescope/altitude_m", 0.0).toDouble();
-
-    station_dir_       = settings.value("station/station_directory", "").toString();
-    disable_station_beam_ = settings.value("station/disable_station_beam", false).toBool();
-
-    obs_.load(settings);
-
-    image_.load(settings);
-
-    // Load settings from benchmark group.
-    benchmark_.load(settings);
-
-    // Load settings from sky group.
-    sky_.load(settings);
-
-    prec_double_ = settings.value("global/double_precision", true).toBool();
+    // Load global settings.
+    prec_double_           = settings.value("global/double_precision", true).toBool();
     max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk", 10000).toInt();
-    max_host_threads_ = settings.value("global/max_host_threads", 1).toInt();
-    int size = settings.beginReadArray("global/use_devices");
+    max_host_threads_      = settings.value("global/max_host_threads", 1).toInt();
+    int size               = settings.beginReadArray("global/use_devices");
     use_devices_.resize(size);
     for (int i = 0; i < size; ++i)
     {
@@ -99,6 +90,46 @@ int oskar_Settings::load(const QString& filename)
         use_devices_[i] = settings.value("id").toInt();
     }
     settings.endArray();
+
+    // Load sky settings.
+    sky_.load(settings);
+
+    // Load telescope settings.
+    telescope_file_    = settings.value("telescope/layout_file", "").toString();
+    latitude_deg_      = settings.value("telescope/latitude_deg", 0.0).toDouble();
+    longitude_deg_     = settings.value("telescope/longitude_deg", 0.0).toDouble();
+    altitude_m_        = settings.value("telescope/altitude_m", 0.0).toDouble();
+
+    // Load station settings.
+    station_dir_       = settings.value("station/station_directory", "").toString();
+    disable_station_beam_ = settings.value("station/disable_station_beam", false).toBool();
+    element_pattern_meerkat_pol1_ = settings.value("station/element_pattern_meerkat_pol1").toStringList();
+    element_pattern_meerkat_pol2_ = settings.value("station/element_pattern_meerkat_pol2").toStringList();
+    element_pattern_files_meerkat_pol1_ = (char**)malloc(element_pattern_meerkat_pol1_.size() * sizeof(char*));
+    element_pattern_files_meerkat_pol2_ = (char**)malloc(element_pattern_meerkat_pol2_.size() * sizeof(char*));
+    for (int i = 0; i < element_pattern_meerkat_pol1_.size(); ++i)
+    {
+        int len = 1 + element_pattern_meerkat_pol1_[i].length();
+        element_pattern_files_meerkat_pol1_[i] = (char*)malloc(len * sizeof(char));
+        QByteArray src = element_pattern_meerkat_pol1_[i].toAscii();
+        strcpy(element_pattern_files_meerkat_pol1_[i], src);
+    }
+    for (int i = 0; i < element_pattern_meerkat_pol2_.size(); ++i)
+    {
+        int len = 1 + element_pattern_meerkat_pol2_[i].length();
+        element_pattern_files_meerkat_pol2_[i] = (char*)malloc(len * sizeof(char));
+        QByteArray src = element_pattern_meerkat_pol2_[i].toAscii();
+        strcpy(element_pattern_files_meerkat_pol2_[i], src);
+    }
+
+    // Load observation settings.
+    obs_.load(settings);
+
+    // Load image settings.
+    image_.load(settings);
+
+    // Load benchmark settings (deprecated).
+    benchmark_.load(settings);
 
     return check();
 }

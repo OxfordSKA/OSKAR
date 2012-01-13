@@ -23,3 +23,7 @@ if (CPPUNIT_FOUND)
     add_test(station_test station_test)
 
 endif()
+
+# Add standalone test for Meerkat beam.
+add_executable(meerkat_beam_test src/meerkat_beam_test.cpp)
+target_link_libraries(meerkat_beam_test oskar ${CUDA_LIBRARIES})

@@ -4,9 +4,10 @@
 
 # ==== Utility library source
 set(utility_SRC
-    src/oskar_exit.c
+    src/oskar_blank_parentheses.c
     src/oskar_cuda_device_info.cu
     src/oskar_cuda_memory.cu
+    src/oskar_exit.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
     src/oskar_mem_add.c

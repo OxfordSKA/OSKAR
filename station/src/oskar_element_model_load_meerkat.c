@@ -26,11 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_load.h"
+#include "station/oskar_element_model_load_meerkat.h"
+#include "utility/oskar_blank_parentheses.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_string_to_array.h"
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_SphericalSplineData.h"
 #include "math/oskar_spherical_spline_data_compute.h"
@@ -49,16 +51,16 @@ extern "C" {
 
 #define DEG2RAD 0.0174532925199432957692
 
-int oskar_element_model_load(oskar_ElementModel* data, int i,
-        const char* filename, int search, double avg_fractional_err,
-        double s_real, double s_imag)
+int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
+        int num_files, const char* const* filenames, int search,
+        double avg_fractional_err, double s_real, double s_imag)
 {
     /* Initialise the flags and local data. */
-    int n = 0, err = 0, type = 0;
+    int n = 0, err = 0, type = 0, f;
     oskar_SphericalSplineData *data_phi = NULL, *data_theta = NULL;
 
     /* Declare the line buffer. */
-    char *line = NULL, *dbi = NULL;
+    char *line = NULL;
     size_t bufsize = 0;
     FILE* file;
 
@@ -105,111 +107,105 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     err = oskar_mem_init(&weight, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
     if (err) return err;
 
-    /* Open the file. */
-    file = fopen(filename, "r");
-    if (!file)
-        return OSKAR_ERR_FILE_IO;
-
-    /* Read the first line and check if data is in logarithmic format. */
-    err = oskar_getline(&line, &bufsize, file);
-    if (err < 0) return err;
-    err = 0;
-    dbi = strstr(line, "dBi"); /* Check for presence of "dBi". */
-
-    /* Loop over and read each line in the file. */
-    while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+    for (f = 0; f < num_files; ++f)
     {
-        int a;
-        double theta = 0.0, phi = 0.0;
-        double abs_theta, phase_theta, abs_phi, phase_phi;
-        double phi_re, phi_im, theta_re, theta_im;
+        /* Open the file. */
+        printf("Opening file %s\n", filenames[f]);
+        file = fopen(filenames[f], "r");
+        if (!file)
+            return OSKAR_ERR_FILE_IO;
 
-        /* Parse the line. */
-        a = sscanf(line, "%lf %lf %*f %lf %lf %lf %lf %*f", &theta, &phi,
-                    &abs_theta, &phase_theta, &abs_phi, &phase_phi);
-
-        /* Check that data was read correctly. */
-        if (a != 6) continue;
-
-        /* Ignore any data at poles. */
-        if (theta < 1e-6 || theta > (180.0 - 1e-6)) continue;
-
-        /* Convert data to radians. */
-        theta *= DEG2RAD;
-        phi *= DEG2RAD;
-        phase_theta *= DEG2RAD;
-        phase_phi *= DEG2RAD;
-
-        /* Ensure enough space in arrays. */
-        if (n % 100 == 0)
+        /* Read the first four lines. */
+        for (i = 0; i < 4; i++)
         {
-            int size;
-            size = n + 100;
-            err = oskar_mem_realloc(&m_theta, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&m_phi, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&m_theta_re, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&m_theta_im, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&m_phi_re, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&m_phi_im, size);
-            if (err) return err;
-            err = oskar_mem_realloc(&weight, size);
-            if (err) return err;
+            err = oskar_getline(&line, &bufsize, file);
+            if (err < 0) return err;
+        }
+        err = 0;
+
+        /* Loop over and read each line in the file. */
+        while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
+        {
+            double data[6];
+
+            /* Parse the line. */
+            int a;
+            oskar_blank_parentheses(line);
+            a = oskar_string_to_array_d(line, 6, data);
+            if (a != 6) {
+                printf("EEEK %s ::: a = %d, n = %d\n", filenames[f], a, n);
+                for (i = 0; i < 6; ++i) printf("%.4f ", data[i]);
+                printf("\n");
+                return -1000;
+            }
+
+            /* Ignore any data at poles. */
+            if (data[0] < 1e-6 || data[0] > (180.0 - 1e-6)) continue;
+
+            /* Convert data to radians. */
+            data[0] *= DEG2RAD;
+            data[1] *= DEG2RAD;
+
+            /* Ensure enough space in arrays. */
+            if (n % 100 == 0)
+            {
+                int size;
+                size = n + 100;
+                err = oskar_mem_realloc(&m_theta, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&weight, size);
+                if (err) return err;
+            }
+
+            /* Store the surface data. */
+            if (type == OSKAR_SINGLE)
+            {
+                ((float*)m_theta.data)[n]    = (float)data[0];
+                ((float*)m_phi.data)[n]      = (float)data[1];
+                ((float*)m_theta_re.data)[n] = (float)data[2];
+                ((float*)m_theta_im.data)[n] = (float)data[3];
+                ((float*)m_phi_re.data)[n]   = (float)data[4];
+                ((float*)m_phi_im.data)[n]   = (float)data[5];
+                ((float*)weight.data)[n]     = 1.0;
+            }
+            else if (type == OSKAR_DOUBLE)
+            {
+                ((double*)m_theta.data)[n]    = data[0];
+                ((double*)m_phi.data)[n]      = data[1];
+                ((double*)m_theta_re.data)[n] = data[2];
+                ((double*)m_theta_im.data)[n] = data[3];
+                ((double*)m_phi_re.data)[n]   = data[4];
+                ((double*)m_phi_im.data)[n]   = data[5];
+                ((double*)weight.data)[n]     = 1.0;
+            }
+
+            /* Increment array pointer. */
+            n++;
         }
 
-        /* Convert decibel to linear scale if necessary. */
-        if (dbi)
-        {
-            abs_theta = pow(10.0, abs_theta / 10.0);
-            abs_phi   = pow(10.0, abs_phi / 10.0);
-        }
-
-        /* Amp,phase to real,imag conversion. */
-        theta_re = abs_theta * cos(phase_theta);
-        theta_im = abs_theta * sin(phase_theta);
-        phi_re = abs_phi * cos(phase_phi);
-        phi_im = abs_phi * sin(phase_phi);
-
-        /* Store the surface data. */
-        if (type == OSKAR_SINGLE)
-        {
-            ((float*)m_theta.data)[n]    = theta;
-            ((float*)m_phi.data)[n]      = phi;
-            ((float*)m_theta_re.data)[n] = theta_re;
-            ((float*)m_theta_im.data)[n] = theta_im;
-            ((float*)m_phi_re.data)[n]   = phi_re;
-            ((float*)m_phi_im.data)[n]   = phi_im;
-            ((float*)weight.data)[n]     = 1.0;
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            ((double*)m_theta.data)[n]    = theta;
-            ((double*)m_phi.data)[n]      = phi;
-            ((double*)m_theta_re.data)[n] = theta_re;
-            ((double*)m_theta_im.data)[n] = theta_im;
-            ((double*)m_phi_re.data)[n]   = phi_re;
-            ((double*)m_phi_im.data)[n]   = phi_im;
-            ((double*)weight.data)[n]     = 1.0;
-        }
-
-        /* Increment array pointer. */
-        n++;
+        /* Close the file. */
+        fclose(file);
     }
 
-    /* Free the line buffer and close the file. */
+    /* Free the line buffer. */
     if (line) free(line);
-    fclose(file);
 
     if (type == OSKAR_SINGLE)
     {
-        file = fopen("dump.txt", "w");
+        file = fopen("dump_meerkat.txt", "w");
         for (i = 0; i < n; ++i)
         {
-            fprintf(file, "%9.4f, %9.4f, %9.4f, %9.4f, %9.4f, %9.4f, %9.4f\n",
+            fprintf(file, "%9.4e, %9.4e, %9.4e, %9.4e, %9.4e, %9.4e, %9.4e\n",
                     ((float*)m_theta.data)[i],
                     ((float*)m_phi.data)[i],
                     ((float*)m_theta_re.data)[i],

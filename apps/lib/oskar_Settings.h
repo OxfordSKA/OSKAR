@@ -35,6 +35,7 @@
 #include "apps/lib/oskar_SettingsSky.h"
 
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QSettings>
 
 #define DEG2RAD 0.0174532925199432957692
@@ -76,6 +77,10 @@ class oskar_Settings
         int max_host_threads() const { return max_host_threads_; }
         int num_devices() const { return use_devices_.size(); }
         const int* use_devices() const { return use_devices_.constData(); }
+        const char* const* element_pattern_files_meerkat_pol1() const {return element_pattern_files_meerkat_pol1_;}
+        const char* const* element_pattern_files_meerkat_pol2() const {return element_pattern_files_meerkat_pol2_;}
+        int num_element_pattern_files_meerkat_pol1() const {return element_pattern_meerkat_pol1_.size();}
+        int num_element_pattern_files_meerkat_pol2() const {return element_pattern_meerkat_pol2_.size();}
 
         const oskar_SettingsObservation& obs() const { return obs_; }
         oskar_SettingsObservation& obs() { return obs_; }
@@ -99,10 +104,14 @@ class oskar_Settings
         double altitude_m_;
         QString station_dir_;
         bool disable_station_beam_;
+        QStringList element_pattern_meerkat_pol1_;
+        QStringList element_pattern_meerkat_pol2_;
         oskar_SettingsObservation obs_;
         oskar_SettingsImage image_;
         oskar_SettingsBenchmark benchmark_;
         oskar_SettingsSky sky_;
+        char** element_pattern_files_meerkat_pol1_;
+        char** element_pattern_files_meerkat_pol2_;
 };
 
 #endif // OSKAR_SETTINGS_H_

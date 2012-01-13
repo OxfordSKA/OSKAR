@@ -99,7 +99,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise and allocate spline data. */
-    est = 8 + (int)sqrt(num_points);
+    est = 1.3 * (8 + (int)sqrt(num_points));
     err = oskar_spherical_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
     if (err) return err;
     err = oskar_mem_realloc(&spline->knots_theta_re, est);
@@ -169,20 +169,22 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 for (k = 0, iopt = 0; k < maxiter; ++k)
                 {
                     if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
+                    /*
                     sphere_f(iopt, num_points, (const float*)theta->data,
                             (const float*)phi->data, data,
                             weight, s, est, est, eps,
                             num_knots_theta, knots_theta, num_knots_phi,
                             knots_phi, coeff, &fp, (float*)wrk1, lwrk1,
                             (float*)wrk2, lwrk2, iwrk, kwrk, &err);
-                    /*
+                     */
                     sphere_(&iopt, &num_points, (const float*)theta->data,
                             (const float*)phi->data, data,
                             weight, &s, &est, &est, &eps,
                             num_knots_theta, knots_theta, num_knots_phi,
                             knots_phi, coeff, &fp, (float*)wrk1, &lwrk1,
                             (float*)wrk2, &lwrk2, iwrk, &kwrk, &err);
-                     */
+                    printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
+
                     /* Check for errors. */
                     if (err > 0 || err < -2) break;
                     else if (err == -2) s = fp;
@@ -195,7 +197,24 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 }
 
                 /* Check for errors. */
-                if (err > 0 || err < -2)
+                if (err == 5)
+                {
+                    done = 1;
+                    err = 0;
+                    printf("Cannot add any more knots.\n");
+                    avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
+                    if (search)
+                        printf("%s surface fit to %.3f avg. frac. error "
+                                "(s=%.2e, fp=%.2e, k=%d).\n",
+                                (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
+                                s, fp, k);
+                    else
+                        printf("%s surface fit (s=%.2e, fp=%.2e).\n",
+                                (i == 0 ? "Real" : "Imag"), s, fp);
+                    printf("Number of knots (theta: %d, phi: %d)\n",
+                            *num_knots_theta, *num_knots_phi);
+                }
+                else if (err > 0 || err < -2)
                 {
                     printf("Error finding spline coefficients (code %d).\n", err);
                     if (!search)
@@ -276,6 +295,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                             num_knots_theta, knots_theta, num_knots_phi,
                             knots_phi, coeff, &fp, (double*)wrk1, lwrk1,
                             (double*)wrk2, lwrk2, iwrk, kwrk, &err);
+                    printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
 
                     /* Check for errors. */
                     if (err > 0 || err < -2) break;
@@ -289,7 +309,24 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 }
 
                 /* Check for errors. */
-                if (err > 0 || err < -2)
+                if (err == 5)
+                {
+                    done = 1;
+                    err = 0;
+                    printf("Cannot add any more knots.\n");
+                    avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
+                    if (search)
+                        printf("%s surface fit to %.3f avg. frac. error "
+                                "(s=%.2e, fp=%.2e, k=%d).\n",
+                                (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
+                                s, fp, k);
+                    else
+                        printf("%s surface fit (s=%.2e, fp=%.2e).\n",
+                                (i == 0 ? "Real" : "Imag"), s, fp);
+                    printf("Number of knots (theta: %d, phi: %d)\n",
+                            *num_knots_theta, *num_knots_phi);
+                }
+                else if (err > 0 || err < -2)
                 {
                     printf("Error finding spline coefficients (code %d).\n", err);
                     if (!search)
