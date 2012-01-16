@@ -48,13 +48,11 @@
  */
 struct oskar_SplineData
 {
-    int degree_x;      /**< Degree of spline in x direction (use 3). */
-    int degree_y;      /**< Degree of spline in y direction (use 3). */
-    int num_knots_x;   /**< Output actual number of knots in x direction. */
-    int num_knots_y;   /**< Output actual number of knots in y direction. */
-    oskar_Mem knots_x; /**< Knot positions in x. */
-    oskar_Mem knots_y; /**< Knot positions in y. */
-    oskar_Mem coeff;   /**< Spline coefficient array. */
+    int num_knots_x_re;   /**< Number of knots in x(real) direction. */
+    int num_knots_y_re;   /**< Number of knots in y(real) direction. */
+    oskar_Mem knots_x_re; /**< Knot positions in x(real). */
+    oskar_Mem knots_y_re; /**< Knot positions in y(real). */
+    oskar_Mem coeff_re;   /**< Spline coefficient array (real). */
 };
 
 typedef struct oskar_SplineData oskar_SplineData;

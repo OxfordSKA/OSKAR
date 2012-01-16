@@ -58,6 +58,9 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
     /* Initialise the flags and local data. */
     int n = 0, err = 0, type = 0, f;
     oskar_SphericalSplineData *data_phi = NULL, *data_theta = NULL;
+    int k_theta = 0, k_phi = 0;
+    double prev_theta = -1.0, prev_phi = -1.0;
+    int decimate_theta = 3, decimate_phi = 3; /* Decimation factors. */
 
     /* Declare the line buffer. */
     char *line = NULL;
@@ -129,22 +132,32 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
             double data[6];
 
             /* Parse the line. */
-            int a;
             oskar_blank_parentheses(line);
-            a = oskar_string_to_array_d(line, 6, data);
-            if (a != 6) {
-                printf("EEEK %s ::: a = %d, n = %d\n", filenames[f], a, n);
-                for (i = 0; i < 6; ++i) printf("%.4f ", data[i]);
-                printf("\n");
-                return -1000;
-            }
+            if (oskar_string_to_array_d(line, 6, data) != 6) continue;
 
             /* Ignore any data at poles. */
             if (data[0] < 1e-6 || data[0] > (180.0 - 1e-6)) continue;
 
+            /* Keep a record of how many times the coordinates change. */
+            if (data[0] != prev_theta)
+            {
+                prev_theta = data[0];
+                k_theta++;
+            }
+            if (data[1] != prev_phi)
+            {
+                prev_phi = data[1];
+                k_phi++;
+            }
+
             /* Convert data to radians. */
             data[0] *= DEG2RAD;
             data[1] *= DEG2RAD;
+
+            /* Decimate input data. */
+            decimate_phi = 1 + (int)(0.02 / sin(data[0]));
+            if (k_theta % decimate_theta) continue;
+            if (k_phi % decimate_phi) continue;
 
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
@@ -205,7 +218,7 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
         file = fopen("dump_meerkat.txt", "w");
         for (i = 0; i < n; ++i)
         {
-            fprintf(file, "%9.4e, %9.4e, %9.4e, %9.4e, %9.4e, %9.4e, %9.4e\n",
+            fprintf(file, "%12.6e, %12.6e, %12.6e, %12.6e, %12.6e, %12.6e, %12.6e\n",
                     ((float*)m_theta.data)[i],
                     ((float*)m_phi.data)[i],
                     ((float*)m_theta_re.data)[i],

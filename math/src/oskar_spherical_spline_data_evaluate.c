@@ -34,11 +34,17 @@
 extern "C" {
 #endif
 
+/* Fortran function prototype. */
+void bispev_(const float tx[], const int* nx, const float ty[], const int* ny,
+        const float c[], const int* kx, const int* ky, const float x[],
+        const int* mx, const float y[], const int* my, float z[],
+        float wrk[], const int* lwrk, int iwrk[], const int* kwrk, int* ier);
+
 int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
         const oskar_SphericalSplineData* spline, const oskar_Mem* theta,
         const oskar_Mem* phi)
 {
-    int err = 0, i, j, kwrk1, lwrk, num_points, type, location;
+    int err = 0, num_points, type, location;
 
     /* Check arrays are consistent. */
     num_points = theta->private_num_elements;
@@ -63,13 +69,11 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
     if (location == OSKAR_LOCATION_CPU)
     {
         /* Set up workspace. */
-        int iwrk1[2], nt, np;
-        kwrk1 = sizeof(iwrk1) / sizeof(int);
+        int i, iwrk1[2], j, kwrk1 = 2, lwrk = 16, nt, np;
 
         if (type == OSKAR_SINGLE)
         {
             float wrk[16];
-            lwrk = sizeof(wrk) / sizeof(float);
             for (j = 0; j < 2; ++j)
             {
                 const float *knots_theta, *knots_phi, *coeff;
@@ -108,7 +112,6 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
         else if (type == OSKAR_DOUBLE)
         {
             double wrk[16];
-            lwrk = sizeof(wrk) / sizeof(double);
             for (j = 0; j < 2; ++j)
             {
                 const double *knots_theta, *knots_phi, *coeff;

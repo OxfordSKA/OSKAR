@@ -188,7 +188,7 @@ extern "C" {
  *            the parameter fp gives the corresponding weighted sum of
  *            squared residuals (fp>s).
  *   ier=2  : error. a theoretically impossible result was found during
- *            the iteration proces for finding a smoothing spline with
+ *            the iteration process for finding a smoothing spline with
  *            fp = s. probably causes : s too small or badly chosen eps.
  *            there is an approximation returned but the corresponding
  *            weighted sum of squared residuals does not satisfy the
@@ -500,7 +500,7 @@ void sphere_f(int iopt, int m, const float* theta, const float* phi,
  *            the parameter fp gives the corresponding weighted sum of
  *            squared residuals (fp>s).
  *   ier=2  : error. a theoretically impossible result was found during
- *            the iteration proces for finding a smoothing spline with
+ *            the iteration process for finding a smoothing spline with
  *            fp = s. probably causes : s too small or badly chosen eps.
  *            there is an approximation returned but the corresponding
  *            weighted sum of squared residuals does not satisfy the

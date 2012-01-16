@@ -43,20 +43,7 @@ set(math_SRC
     src/oskar_spherical_spline_data_init.c
     src/oskar_spherical_spline_data_location.c
     src/oskar_spherical_spline_data_type.c
-    src/oskar_spline_data_compute.c
-    src/oskar_spline_data_evaluate.c
-    src/oskar_spline_data_free.c
-    src/oskar_spline_data_init.c
-    src/oskar_spline_surface_evaluate.c
-    src/oskar_spline_surface_init.c
-    src/oskar_surface_data_compute_splines.c
-    src/oskar_surface_data_free.c
-    src/oskar_surface_data_init.c
-    src/oskar_surface_data_location.c
-    src/oskar_surface_data_resize.c
-    src/oskar_surface_data_set_data.c
-    src/oskar_surface_data_set_metadata.c
-    src/oskar_surface_data_type.c
+    src/oskar_spline_data_compute_regrid.c
 )
 foreach (file ${math_cuda_kernels_SRC})
     list(APPEND math_SRC cudak/${file})

@@ -26,29 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_surface_data_type.h"
+#ifndef OSKAR_SPLINE_DATA_COMPUTE_REGRID_H_
+#define OSKAR_SPLINE_DATA_COMPUTE_REGRID_H_
+
+/**
+ * @file oskar_spline_data_compute_regrid.h
+ */
+
+#include "oskar_global.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_surface_data_type(const oskar_SurfaceData* data)
-{
-	int type;
-	type = data->re.private_type;
-	if (type != data->im.private_type ||
-			type != data->spline_re.coeff.private_type ||
-			type != data->spline_re.knots_x.private_type ||
-			type != data->spline_re.knots_y.private_type ||
-			type != data->spline_im.coeff.private_type ||
-			type != data->spline_im.knots_x.private_type ||
-			type != data->spline_im.knots_y.private_type)
-		return OSKAR_ERR_TYPE_MISMATCH;
-	if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-		return OSKAR_ERR_BAD_DATA_TYPE;
-	return type;
-}
+/**
+ * @brief
+ * Computes spline data from a table.
+ *
+ * @details
+ * This function computes all required spline data from an input data table.
+ *
+ * Note that the fastest varying dimension is along y.
+ *
+ * @param[in,out] spline Pointer to data structure.
+ * @param[in] num_x The number of input grid points in the x dimension.
+ * @param[in] num_y The number of input grid points in the y dimension.
+ * @param[in] start_x The value of x on the first grid line.
+ * @param[in] start_y The value of y on the first grid line.
+ * @param[in] end_x The value of x on the last grid line.
+ * @param[in] end_y The value of y on the last grid line.
+ * @param[in] data Pointer to look-up table data.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_spline_data_compute_regrid(oskar_SplineData* spline, int num_x, int num_y,
+        double start_x, double start_y, double end_x, double end_y,
+        const oskar_Mem* data);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SPLINE_DATA_COMPUTE_REGRID_H_ */

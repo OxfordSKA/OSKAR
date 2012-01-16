@@ -33,8 +33,10 @@ set(dierckx_SRC
     src/fprota.f
     src/fprpsp.f
     src/fpsphe.f
+    src/fpsurf.f
     src/regrid.f # Deprecated
     src/sphere.f
+    src/surfit.f
 )
 
 add_library(dierckx SHARED ${dierckx_SRC})
