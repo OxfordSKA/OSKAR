@@ -71,6 +71,13 @@ static double max_d(const oskar_Mem* data, int n)
 extern "C" {
 #endif
 
+void surfit_(int* iopt, int* m, const float* x, const float* y,
+        const float* z, const float* w, float* xb, float* xe, float* yb,
+        float* ye, int* kx, int* ky, float* s, int* nxest, int* nyest,
+        int* nmax, float* eps, int* nx, float* tx, int* ny, float* ty,
+        float* c, float* fp, float* wrk1, int* lwrk1, float* wrk2, int* lwrk2,
+        int* iwrk, int* kwrk, int* ier);
+
 int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
         const oskar_Mem* data_re, const oskar_Mem* data_im,
