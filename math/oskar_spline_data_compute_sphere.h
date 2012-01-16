@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPHERICAL_SPLINE_DATA_LOCATION_H_
-#define OSKAR_SPHERICAL_SPLINE_DATA_LOCATION_H_
+#ifndef OSKAR_SPLINE_DATA_COMPUTE_H_
+#define OSKAR_SPLINE_DATA_COMPUTE_H_
 
 /**
- * @file oskar_spherical_spline_data_location.h
+ * @file oskar_spline_data_compute_sphere.h
  */
 
 #include "oskar_global.h"
-#include "math/oskar_SphericalSplineData.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,22 +42,34 @@ extern "C" {
 
 /**
  * @brief
- * Returns the location of a spherical spline data structure.
+ * Computes spherical spline data from a list of data points.
  *
  * @details
- * This function returns the location of memory held in a spherical spline data
- * structure.
+ * This function constructs spherical splines from a list of data points.
  *
- * @param[in] data Pointer to data structure.
+ * @param[in,out] spline     Pointer to data structure.
+ * @param[in]     num_points Number of data points in all arrays.
+ * @param[in]     theta      Array of theta positions.
+ * @param[in]     phi        Array of phi positions.
+ * @param[in]     data_re    Array of data points (real).
+ * @param[in]     data_im    Array of data points (imaginary).
+ * @param[in]     weight     Array of data point weights.
  *
  * @return
- * Enumerated location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU) of memory.
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_spherical_spline_data_location(const oskar_SphericalSplineData* data);
+int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
+        int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
+        const oskar_Mem* data_re, const oskar_Mem* data_im,
+        const oskar_Mem* weight_re, const oskar_Mem* weight_im, int search,
+        double avg_fractional_err, double s_real, double s_imag);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SPHERICAL_SPLINE_DATA_LOCATION_H_ */
+#endif /* OSKAR_SPLINE_DATA_COMPUTE_H_ */

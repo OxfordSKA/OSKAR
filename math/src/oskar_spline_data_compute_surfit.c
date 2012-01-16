@@ -27,8 +27,8 @@
  */
 
 #include "extern/dierckx/sphere.h"
-#include "math/oskar_spherical_spline_data_compute.h"
-#include "math/oskar_spherical_spline_data_init.h"
+#include "math/oskar_spline_data_compute_surfit.h"
+#include "math/oskar_spline_data_init.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_free.h"
@@ -71,13 +71,7 @@ static double max_d(const oskar_Mem* data, int n)
 extern "C" {
 #endif
 
-void sphere_(int* iopt, int* m, const float* theta, const float* phi,
-        const float* r, const float* w, float* s, int* ntest, int* npest,
-        float* eps, int* nt, float* tt, int* np, float* tp, float* c,
-        float* fp, float* wrk1, int* lwrk1, float* wrk2, int* lwrk2,
-        int* iwrk, int* kwrk, int* ier);
-
-int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
+int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
         const oskar_Mem* data_re, const oskar_Mem* data_im,
         const oskar_Mem* weight_re, const oskar_Mem* weight_im, int search,
@@ -100,17 +94,17 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
 
     /* Initialise and allocate spline data. */
     est = 1.3 * (8 + (int)sqrt(num_points));
-    err = oskar_spherical_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
+    err = oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_theta_re, est);
+    err = oskar_mem_realloc(&spline->knots_x_re, est);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_phi_re, est);
+    err = oskar_mem_realloc(&spline->knots_y_re, est);
     if (err) return err;
     err = oskar_mem_realloc(&spline->coeff_re, (est-4)*(est-4));
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_theta_im, est);
+    err = oskar_mem_realloc(&spline->knots_x_im, est);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_phi_im, est);
+    err = oskar_mem_realloc(&spline->knots_y_im, est);
     if (err) return err;
     err = oskar_mem_realloc(&spline->coeff_im, (est-4)*(est-4));
     if (err) return err;
@@ -138,25 +132,25 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
             avg_frac_err_loc = (float)avg_fractional_err;
             if (i == 0) /* Real part. */
             {
-                knots_theta     = (float*)spline->knots_theta_re.data;
-                knots_phi       = (float*)spline->knots_phi_re.data;
+                knots_theta     = (float*)spline->knots_x_re.data;
+                knots_phi       = (float*)spline->knots_y_re.data;
                 coeff           = (float*)spline->coeff_re.data;
                 data            = (const float*)data_re->data;
                 weight          = (const float*)weight_re->data;
-                num_knots_theta = &spline->num_knots_theta_re;
-                num_knots_phi   = &spline->num_knots_phi_re;
+                num_knots_theta = &spline->num_knots_x_re;
+                num_knots_phi   = &spline->num_knots_y_re;
                 peak_abs        = max_f(data_re, num_points);
                 user_s          = (float)s_real;
             }
             else /* Imaginary part. */
             {
-                knots_theta     = (float*)spline->knots_theta_im.data;
-                knots_phi       = (float*)spline->knots_phi_im.data;
+                knots_theta     = (float*)spline->knots_x_im.data;
+                knots_phi       = (float*)spline->knots_y_im.data;
                 coeff           = (float*)spline->coeff_im.data;
                 data            = (const float*)data_im->data;
                 weight          = (const float*)weight_im->data;
-                num_knots_theta = &spline->num_knots_theta_im;
-                num_knots_phi   = &spline->num_knots_phi_im;
+                num_knots_theta = &spline->num_knots_x_im;
+                num_knots_phi   = &spline->num_knots_y_im;
                 peak_abs        = max_f(data_im, num_points);
                 user_s          = (float)s_imag;
             }
@@ -169,20 +163,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
                 for (k = 0, iopt = 0; k < maxiter; ++k)
                 {
                     if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
-                    /*
-                    sphere_f(iopt, num_points, (const float*)theta->data,
-                            (const float*)phi->data, data,
-                            weight, s, est, est, eps,
-                            num_knots_theta, knots_theta, num_knots_phi,
-                            knots_phi, coeff, &fp, (float*)wrk1, lwrk1,
-                            (float*)wrk2, lwrk2, iwrk, kwrk, &err);
-                     */
-                    sphere_(&iopt, &num_points, (const float*)theta->data,
-                            (const float*)phi->data, data,
-                            weight, &s, &est, &est, &eps,
-                            num_knots_theta, knots_theta, num_knots_phi,
-                            knots_phi, coeff, &fp, (float*)wrk1, &lwrk1,
-                            (float*)wrk2, &lwrk2, iwrk, &kwrk, &err);
+                    /* surfit_(); */
                     printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
 
                     /* Check for errors. */
@@ -246,115 +227,7 @@ int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
     }
     else if (type == OSKAR_DOUBLE)
     {
-        /* Set up the surface fitting parameters. */
-        double s, user_s, fp = 0.0;
-        double eps = 1e-16; /* Magnitude of double epsilon. */
-
-        for (i = 0; i < 2; ++i)
-        {
-            double *knots_theta, *knots_phi, *coeff, peak_abs, avg_frac_err_loc;
-            const double *data, *weight;
-            int *num_knots_theta, *num_knots_phi, done = 0;
-            avg_frac_err_loc = avg_fractional_err;
-            if (i == 0) /* Real part. */
-            {
-                knots_theta     = (double*)spline->knots_theta_re.data;
-                knots_phi       = (double*)spline->knots_phi_re.data;
-                coeff           = (double*)spline->coeff_re.data;
-                data            = (const double*)data_re->data;
-                weight          = (const double*)weight_re->data;
-                num_knots_theta = &spline->num_knots_theta_re;
-                num_knots_phi   = &spline->num_knots_phi_re;
-                peak_abs        = max_d(data_re, num_points);
-                user_s          = s_real;
-            }
-            else /* Imaginary part. */
-            {
-                knots_theta     = (double*)spline->knots_theta_im.data;
-                knots_phi       = (double*)spline->knots_phi_im.data;
-                coeff           = (double*)spline->coeff_im.data;
-                data            = (const double*)data_im->data;
-                weight          = (const double*)weight_im->data;
-                num_knots_theta = &spline->num_knots_theta_im;
-                num_knots_phi   = &spline->num_knots_phi_im;
-                peak_abs        = max_d(data_im, num_points);
-                user_s          = s_imag;
-            }
-            do
-            {
-                double avg_err, term;
-                avg_err = avg_frac_err_loc * peak_abs;
-                term = num_points * avg_err * avg_err; /* Termination. */
-                s = search ? 2.0 * term : user_s; /* Smoothing factor. */
-                for (k = 0, iopt = 0; k < maxiter; ++k)
-                {
-                    if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
-                    sphere_d(iopt, num_points, (const double*)theta->data,
-                            (const double*)phi->data, data,
-                            weight, s, est, est, eps,
-                            num_knots_theta, knots_theta, num_knots_phi,
-                            knots_phi, coeff, &fp, (double*)wrk1, lwrk1,
-                            (double*)wrk2, lwrk2, iwrk, kwrk, &err);
-                    printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
-
-                    /* Check for errors. */
-                    if (err > 0 || err < -2) break;
-                    else if (err == -2) s = fp;
-
-                    /* Check if the fit is good enough. */
-                    if (!search || fp < term || s < term) break;
-
-                    /* Decrease smoothing factor. */
-                    s *= 0.9;
-                }
-
-                /* Check for errors. */
-                if (err == 5)
-                {
-                    done = 1;
-                    err = 0;
-                    printf("Cannot add any more knots.\n");
-                    avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
-                    if (search)
-                        printf("%s surface fit to %.3f avg. frac. error "
-                                "(s=%.2e, fp=%.2e, k=%d).\n",
-                                (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
-                                s, fp, k);
-                    else
-                        printf("%s surface fit (s=%.2e, fp=%.2e).\n",
-                                (i == 0 ? "Real" : "Imag"), s, fp);
-                    printf("Number of knots (theta: %d, phi: %d)\n",
-                            *num_knots_theta, *num_knots_phi);
-                }
-                else if (err > 0 || err < -2)
-                {
-                    printf("Error finding spline coefficients (code %d).\n", err);
-                    if (!search)
-                    {
-                        err = OSKAR_ERR_SPLINE_COEFF_FAIL;
-                        goto stop;
-                    }
-                    avg_frac_err_loc *= 2.0;
-                    printf("Increasing allowed average fractional "
-                            "error to %.3f.\n", avg_frac_err_loc);
-                }
-                else
-                {
-                    done = 1;
-                    err = 0;
-                    if (search)
-                        printf("%s surface fit to %.3f avg. frac. error "
-                                "(s=%.2e, fp=%.2e, k=%d).\n",
-                                (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
-                                s, fp, k);
-                    else
-                        printf("%s surface fit (s=%.2e, fp=%.2e).\n",
-                                (i == 0 ? "Real" : "Imag"), s, fp);
-                    printf("Number of knots (theta: %d, phi: %d)\n",
-                            *num_knots_theta, *num_knots_phi);
-                }
-            } while (search && !done);
-        }
+        return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     /* Free work arrays. */

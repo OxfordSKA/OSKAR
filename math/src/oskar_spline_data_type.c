@@ -26,33 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_COMPUTE_SPLINES_H_
-#define OSKAR_ELEMENT_MODEL_COMPUTE_SPLINES_H_
-
-/**
- * @file oskar_element_model_compute_splines.h
- */
-
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
+#include "math/oskar_spline_data_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Computes the spline coefficients for the element pattern data.
- *
- * @details
- * This function computes the spline coefficients for the element pattern data,
- * for later evaluation of the surface at the source positions.
- */
-OSKAR_EXPORT
-int oskar_element_model_compute_splines(oskar_ElementModel* data);
+int oskar_spline_data_type(const oskar_SplineData* data)
+{
+    int type;
+    type = data->knots_x_re.private_type;
+    if (type != data->knots_x_im.private_type ||
+            type != data->knots_y_re.private_type ||
+            type != data->knots_y_im.private_type ||
+            type != data->coeff_re.private_type ||
+            type != data->coeff_im.private_type)
+        return OSKAR_ERR_TYPE_MISMATCH;
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    return type;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_ELEMENT_MODEL_COMPUTE_SPLINES_H_ */

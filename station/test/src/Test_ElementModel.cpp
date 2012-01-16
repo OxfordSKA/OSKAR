@@ -33,9 +33,9 @@
 #include "station/oskar_ElementModel.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_mem_realloc.h"
-#include "math/oskar_spherical_spline_data_init.h"
-#include "math/oskar_spherical_spline_data_evaluate.h"
-#include "math/oskar_spherical_spline_data_compute.h"
+#include "math/oskar_spline_data_compute_sphere.h"
+#include "math/oskar_spline_data_init.h"
+#include "math/oskar_spline_data_evaluate.h"
 
 #include <cmath>
 
@@ -2771,10 +2771,10 @@ void Test_ElementModel::test_plot()
 
     // Evaluate the surface.
     TIMER_START
-    err = oskar_spherical_spline_data_evaluate(&output_theta, 1,
+    err = oskar_spline_data_evaluate(&output_theta, 1,
             &pattern.port1_theta, &pt_theta, &pt_phi);
     if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
-    err = oskar_spherical_spline_data_evaluate(&output_phi, 1,
+    err = oskar_spline_data_evaluate(&output_phi, 1,
             &pattern.port1_phi, &pt_theta, &pt_phi);
     if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
     TIMER_STOP("Finished surface evaluation (%d points)", 2 * num_points)
@@ -2845,13 +2845,13 @@ void Test_ElementModel::test_sphere()
         }
     }
 
-    oskar_SphericalSplineData data;
+    oskar_SplineData data;
     int err;
-    err = oskar_spherical_spline_data_compute(&data, m_in,
+    err = oskar_spline_data_compute_sphere(&data, m_in,
             &theta_in, &phi_in, &r_re, &r_im, &w, &w, true, 0.02, 0.0, 0.0);
     if (err) CPPUNIT_FAIL("Error in oskar_spherical_spline_data_compute.");
 
-    err = oskar_spherical_spline_data_evaluate(&output, 1, &data,
+    err = oskar_spline_data_evaluate(&output, 1, &data,
             &pt_theta, &pt_phi);
     if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
 
@@ -2914,13 +2914,13 @@ void Test_ElementModel::test_sphere_large()
         }
     }
 
-    oskar_SphericalSplineData data;
+    oskar_SplineData data;
     int err;
-    err = oskar_spherical_spline_data_compute(&data, m_in,
+    err = oskar_spline_data_compute_sphere(&data, m_in,
             &theta_in, &phi_in, &r_re, &r_im, &w, &w, true, 0.01, 0.0, 0.0);
     if (err) CPPUNIT_FAIL("Error in oskar_spherical_spline_data_compute.");
 
-    err = oskar_spherical_spline_data_evaluate(&output, 1, &data,
+    err = oskar_spline_data_evaluate(&output, 1, &data,
             &pt_theta, &pt_phi);
     if (err) CPPUNIT_FAIL("Error in oskar_spline_data_evaluate.");
 

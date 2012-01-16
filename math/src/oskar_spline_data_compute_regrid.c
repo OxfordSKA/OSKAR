@@ -27,7 +27,7 @@
  */
 
 #include "math/oskar_spline_data_compute_regrid.h"
-/* #include "math/oskar_spline_data_init.h" */
+#include "math/oskar_spline_data_init.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
@@ -39,21 +39,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-static int oskar_spline_data_init(oskar_SplineData* data, int type, int location)
-{
-    int err = 0;
-    data->num_knots_x_re = 0;
-    data->num_knots_y_re = 0;
-    err = oskar_mem_init(&data->knots_x_re, type, location, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&data->knots_y_re, type, location, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&data->coeff_re, type, location, 0, OSKAR_TRUE);
-    if (err) return err;
-
-    return 0;
-}
 
 /* Fortran function prototype. */
 void regrid_(int* iopt, int* mx, const float x[], int* my, const float y[],

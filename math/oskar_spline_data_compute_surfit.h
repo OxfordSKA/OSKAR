@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPHERICAL_SPLINE_DATA_EVALUATE_H_
-#define OSKAR_SPHERICAL_SPLINE_DATA_EVALUATE_H_
+#ifndef OSKAR_SPLINE_DATA_COMPUTE_SURFIT_H_
+#define OSKAR_SPLINE_DATA_COMPUTE_SURFIT_H_
 
 /**
- * @file oskar_spherical_spline_data_evaluate.h
+ * @file oskar_spline_data_compute_surfit.h
  */
 
 #include "oskar_global.h"
-#include "math/oskar_SphericalSplineData.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,16 +42,18 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates a surface fitted by spherical splines at the given positions.
+ * Computes spherical spline data from a list of data points.
  *
  * @details
- * This function evaluates a surface fitted by spherical splines at the given
- * positions.
+ * This function constructs spherical splines from a list of data points.
  *
- * @param[out] output Complex output values.
- * @param[in] spline  Pointer to data structure.
- * @param[in] theta   List of theta coordinates.
- * @param[in] phi     List of phi coordinates.
+ * @param[in,out] spline     Pointer to data structure.
+ * @param[in]     num_points Number of data points in all arrays.
+ * @param[in]     theta      Array of theta positions.
+ * @param[in]     phi        Array of phi positions.
+ * @param[in]     data_re    Array of data points (real).
+ * @param[in]     data_im    Array of data points (imaginary).
+ * @param[in]     weight     Array of data point weights.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -60,12 +62,14 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
-        const oskar_SphericalSplineData* spline, const oskar_Mem* theta,
-        const oskar_Mem* phi);
+int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
+        int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
+        const oskar_Mem* data_re, const oskar_Mem* data_im,
+        const oskar_Mem* weight_re, const oskar_Mem* weight_im, int search,
+        double avg_fractional_err, double s_real, double s_imag);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SPHERICAL_SPLINE_DATA_EVALUATE_H_ */
+#endif /* OSKAR_SPLINE_DATA_COMPUTE_SURFIT_H_ */

@@ -26,25 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spherical_spline_data_location.h"
+#ifndef OSKAR_SPLINE_DATA_EVALUATE_H_
+#define OSKAR_SPLINE_DATA_EVALUATE_H_
+
+/**
+ * @file oskar_spline_data_evaluate.h
+ */
+
+#include "oskar_global.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_spherical_spline_data_location(const oskar_SphericalSplineData* data)
-{
-    int location;
-    location = data->knots_theta_re.private_location;
-    if (location != data->knots_theta_im.private_location ||
-            location != data->knots_phi_re.private_location ||
-            location != data->knots_phi_im.private_location ||
-            location != data->coeff_re.private_location ||
-            location != data->coeff_im.private_location)
-        return OSKAR_ERR_BAD_LOCATION;
-    return location;
-}
+/**
+ * @brief
+ * Evaluates a surface fitted by spherical splines at the given positions.
+ *
+ * @details
+ * This function evaluates a surface fitted by spherical splines at the given
+ * positions.
+ *
+ * @param[out] output Complex output values.
+ * @param[in] spline  Pointer to data structure.
+ * @param[in] theta   List of theta coordinates.
+ * @param[in] phi     List of phi coordinates.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
+        const oskar_SplineData* spline, const oskar_Mem* theta,
+        const oskar_Mem* phi);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SPLINE_DATA_EVALUATE_H_ */

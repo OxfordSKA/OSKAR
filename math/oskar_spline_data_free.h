@@ -26,36 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spherical_spline_data_free.h"
-#include "utility/oskar_mem_free.h"
+#ifndef OSKAR_SPLINE_DATA_FREE_H_
+#define OSKAR_SPLINE_DATA_FREE_H_
+
+/**
+ * @file oskar_spline_data_free.h
+ */
+
+#include "oskar_global.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_spherical_spline_data_free(oskar_SphericalSplineData* data)
-{
-    int err = 0;
-    data->num_knots_theta_re = 0;
-    data->num_knots_phi_re = 0;
-    data->num_knots_theta_im = 0;
-    data->num_knots_phi_im = 0;
-    err = oskar_mem_free(&data->knots_theta_re);
-    if (err) return err;
-    err = oskar_mem_free(&data->knots_phi_re);
-    if (err) return err;
-    err = oskar_mem_free(&data->coeff_re);
-    if (err) return err;
-    err = oskar_mem_free(&data->knots_theta_im);
-    if (err) return err;
-    err = oskar_mem_free(&data->knots_phi_im);
-    if (err) return err;
-    err = oskar_mem_free(&data->coeff_im);
-    if (err) return err;
-
-    return 0;
-}
+/**
+ * @brief
+ * Frees memory held by a spherical spline data structure.
+ *
+ * @details
+ * This function releases memory held by a spherical spline data structure.
+ *
+ * @param[in,out] data Pointer to data structure.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_spline_data_free(oskar_SplineData* data);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SPLINE_DATA_FREE_H_ */

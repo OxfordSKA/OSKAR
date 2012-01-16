@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPHERICAL_SPLINE_DATA_TYPE_H_
-#define OSKAR_SPHERICAL_SPLINE_DATA_TYPE_H_
+#ifndef OSKAR_SPLINE_DATA_TYPE_H_
+#define OSKAR_SPLINE_DATA_TYPE_H_
 
 /**
- * @file oskar_spherical_spline_data_type.h
+ * @file oskar_spline_data_type.h
  */
 
 #include "oskar_global.h"
-#include "math/oskar_SphericalSplineData.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,10 +54,10 @@ extern "C" {
  * Enumerated type (OSKAR_SINGLE or OSKAR_DOUBLE) of memory.
  */
 OSKAR_EXPORT
-int oskar_spherical_spline_data_type(const oskar_SphericalSplineData* data);
+int oskar_spline_data_type(const oskar_SplineData* data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SPHERICAL_SPLINE_DATA_TYPE_H_ */
+#endif /* OSKAR_SPLINE_DATA_TYPE_H_ */

@@ -27,7 +27,7 @@
  */
 
 #include "extern/dierckx/bispev.h"
-#include "math/oskar_spherical_spline_data_evaluate.h"
+#include "math/oskar_spline_data_evaluate.h"
 #include "utility/oskar_mem_type_check.h"
 
 #ifdef __cplusplus
@@ -40,8 +40,8 @@ void bispev_(const float tx[], const int* nx, const float ty[], const int* ny,
         const int* mx, const float y[], const int* my, float z[],
         float wrk[], const int* lwrk, int iwrk[], const int* kwrk, int* ier);
 
-int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
-        const oskar_SphericalSplineData* spline, const oskar_Mem* theta,
+int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
+        const oskar_SplineData* spline, const oskar_Mem* theta,
         const oskar_Mem* phi)
 {
     int err = 0, num_points, type, location;
@@ -59,8 +59,8 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
     /* Check location. */
     location = output->private_location;
     if (location != spline->coeff_re.private_location ||
-            location != spline->knots_theta_re.private_location ||
-            location != spline->knots_phi_re.private_location ||
+            location != spline->knots_x_re.private_location ||
+            location != spline->knots_y_re.private_location ||
             location != theta->private_location ||
             location != phi->private_location)
         return OSKAR_ERR_BAD_LOCATION;
@@ -80,19 +80,19 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
                 float *out;
                 if (j == 0) /* Real part. */
                 {
-                    nt          = spline->num_knots_theta_re;
-                    np          = spline->num_knots_phi_re;
-                    knots_theta = (const float*)spline->knots_theta_re.data;
-                    knots_phi   = (const float*)spline->knots_phi_re.data;
+                    nt          = spline->num_knots_x_re;
+                    np          = spline->num_knots_y_re;
+                    knots_theta = (const float*)spline->knots_x_re.data;
+                    knots_phi   = (const float*)spline->knots_y_re.data;
                     coeff       = (const float*)spline->coeff_re.data;
                     out         = (float*)output->data;
                 }
                 else  /* Imaginary part. */
                 {
-                    nt          = spline->num_knots_theta_im;
-                    np          = spline->num_knots_phi_im;
-                    knots_theta = (const float*)spline->knots_theta_im.data;
-                    knots_phi   = (const float*)spline->knots_phi_im.data;
+                    nt          = spline->num_knots_x_im;
+                    np          = spline->num_knots_y_im;
+                    knots_theta = (const float*)spline->knots_x_im.data;
+                    knots_phi   = (const float*)spline->knots_y_im.data;
                     coeff       = (const float*)spline->coeff_im.data;
                     out         = (float*)output->data + 1;
                 }
@@ -118,19 +118,19 @@ int oskar_spherical_spline_data_evaluate(oskar_Mem* output, int stride,
                 double* out;
                 if (j == 0) /* Real part. */
                 {
-                    nt          = spline->num_knots_theta_re;
-                    np          = spline->num_knots_phi_re;
-                    knots_theta = (const double*)spline->knots_theta_re.data;
-                    knots_phi   = (const double*)spline->knots_phi_re.data;
+                    nt          = spline->num_knots_x_re;
+                    np          = spline->num_knots_y_re;
+                    knots_theta = (const double*)spline->knots_x_re.data;
+                    knots_phi   = (const double*)spline->knots_y_re.data;
                     coeff       = (const double*)spline->coeff_re.data;
                     out         = (double*)output->data;
                 }
                 else  /* Imaginary part. */
                 {
-                    nt          = spline->num_knots_theta_im;
-                    np          = spline->num_knots_phi_im;
-                    knots_theta = (const double*)spline->knots_theta_im.data;
-                    knots_phi   = (const double*)spline->knots_phi_im.data;
+                    nt          = spline->num_knots_x_im;
+                    np          = spline->num_knots_y_im;
+                    knots_theta = (const double*)spline->knots_x_im.data;
+                    knots_phi   = (const double*)spline->knots_y_im.data;
                     coeff       = (const double*)spline->coeff_im.data;
                     out         = (double*)output->data + 1;
                 }

@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPHERICAL_SPLINE_DATA_COMPUTE_H_
-#define OSKAR_SPHERICAL_SPLINE_DATA_COMPUTE_H_
+#ifndef OSKAR_SPLINE_DATA_INIT_H_
+#define OSKAR_SPLINE_DATA_INIT_H_
 
 /**
- * @file oskar_spherical_spline_data_compute.h
+ * @file oskar_spline_data_init.h
  */
 
 #include "oskar_global.h"
-#include "math/oskar_SphericalSplineData.h"
+#include "math/oskar_SplineData.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,18 +42,14 @@ extern "C" {
 
 /**
  * @brief
- * Computes spherical spline data from a list of data points.
+ * Initialises a spherical spline data structure.
  *
  * @details
- * This function constructs spherical splines from a list of data points.
+ * This function initialises a spherical spline data structure.
  *
- * @param[in,out] spline     Pointer to data structure.
- * @param[in]     num_points Number of data points in all arrays.
- * @param[in]     theta      Array of theta positions.
- * @param[in]     phi        Array of phi positions.
- * @param[in]     data_re    Array of data points (real).
- * @param[in]     data_im    Array of data points (imaginary).
- * @param[in]     weight     Array of data point weights.
+ * @param[in,out] data Pointer to data structure.
+ * @param[in] type Enumerated type of data structure.
+ * @param[in] location Enumerated location of memory held in data structure.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -62,14 +58,10 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_spherical_spline_data_compute(oskar_SphericalSplineData* spline,
-        int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
-        const oskar_Mem* data_re, const oskar_Mem* data_im,
-        const oskar_Mem* weight_re, const oskar_Mem* weight_im, int search,
-        double avg_fractional_err, double s_real, double s_imag);
+int oskar_spline_data_init(oskar_SplineData* data, int type, int location);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SPHERICAL_SPLINE_DATA_COMPUTE_H_ */
+#endif /* OSKAR_SPLINE_DATA_INIT_H_ */

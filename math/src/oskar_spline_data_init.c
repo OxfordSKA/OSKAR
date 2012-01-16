@@ -26,25 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spherical_spline_data_type.h"
+#include "math/oskar_spline_data_init.h"
+#include "utility/oskar_mem_init.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_spherical_spline_data_type(const oskar_SphericalSplineData* data)
+int oskar_spline_data_init(oskar_SplineData* data, int type, int location)
 {
-    int type;
-    type = data->knots_theta_re.private_type;
-    if (type != data->knots_theta_im.private_type ||
-            type != data->knots_phi_re.private_type ||
-            type != data->knots_phi_im.private_type ||
-            type != data->coeff_re.private_type ||
-            type != data->coeff_im.private_type)
-        return OSKAR_ERR_TYPE_MISMATCH;
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
-    return type;
+    int err = 0;
+    data->num_knots_x_re = 0;
+    data->num_knots_y_re = 0;
+    data->num_knots_x_im = 0;
+    data->num_knots_y_im = 0;
+    err = oskar_mem_init(&data->knots_x_re, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_y_re, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->coeff_re, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_x_im, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_y_im, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->coeff_im, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+
+    return 0;
 }
 
 #ifdef __cplusplus

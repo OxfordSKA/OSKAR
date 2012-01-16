@@ -33,7 +33,7 @@
  * @file oskar_ElementModel.h
  */
 
-#include "math/oskar_SphericalSplineData.h"
+#include "math/oskar_SplineData.h"
 #include "utility/oskar_Mem.h"
 
 /**
@@ -46,10 +46,10 @@
 struct oskar_ElementModel
 {
     int coordsys; /**< Specifies whether horizontal or wrt phase centre. */
-    oskar_SphericalSplineData port1_phi;
-    oskar_SphericalSplineData port1_theta;
-    oskar_SphericalSplineData port2_phi;
-    oskar_SphericalSplineData port2_theta;
+    oskar_SplineData port1_phi;
+    oskar_SplineData port1_theta;
+    oskar_SplineData port2_phi;
+    oskar_SplineData port2_theta;
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
 

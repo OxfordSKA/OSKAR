@@ -26,43 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPHERICAL_SPLINE_DATA_INIT_H_
-#define OSKAR_SPHERICAL_SPLINE_DATA_INIT_H_
-
-/**
- * @file oskar_spherical_spline_data_init.h
- */
-
-#include "oskar_global.h"
-#include "math/oskar_SphericalSplineData.h"
+#include "math/oskar_spline_data_location.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Initialises a spherical spline data structure.
- *
- * @details
- * This function initialises a spherical spline data structure.
- *
- * @param[in,out] data Pointer to data structure.
- * @param[in] type Enumerated type of data structure.
- * @param[in] location Enumerated location of memory held in data structure.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
- */
-OSKAR_EXPORT
-int oskar_spherical_spline_data_init(oskar_SphericalSplineData* data,
-        int type, int location);
+int oskar_spline_data_location(const oskar_SplineData* data)
+{
+    int location;
+    location = data->knots_x_re.private_location;
+    if (location != data->knots_x_im.private_location ||
+            location != data->knots_y_re.private_location ||
+            location != data->knots_y_im.private_location ||
+            location != data->coeff_re.private_location ||
+            location != data->coeff_im.private_location)
+        return OSKAR_ERR_BAD_LOCATION;
+    return location;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SPHERICAL_SPLINE_DATA_INIT_H_ */

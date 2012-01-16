@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_spherical_spline_data_evaluate.h"
+#include "math/oskar_spline_data_evaluate.h"
 #include "station/oskar_element_model_free.h"
 #include "station/oskar_element_model_init.h"
 #include "station/oskar_element_model_load_meerkat.h"
@@ -85,14 +85,14 @@ int main(int argc, char** argv)
     }
 
     // Evaluate the surface.
-    err = oskar_spherical_spline_data_evaluate(&output_theta, 1,
+    err = oskar_spline_data_evaluate(&output_theta, 1,
             &pattern.port1_theta, &pt_theta, &pt_phi);
     if (err)
     {
         fprintf(stderr, "Error in oskar_spherical_spline_data_evaluate.");
         oskar_exit(err);
     }
-    err = oskar_spherical_spline_data_evaluate(&output_phi, 1,
+    err = oskar_spline_data_evaluate(&output_phi, 1,
             &pattern.port1_phi, &pt_theta, &pt_phi);
     if (err)
     {

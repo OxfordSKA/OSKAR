@@ -26,42 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SPHERICAL_SPLINE_DATA_H_
-#define OSKAR_SPHERICAL_SPLINE_DATA_H_
+#ifndef OSKAR_SPLINE_DATA_LOCATION_H_
+#define OSKAR_SPLINE_DATA_LOCATION_H_
 
 /**
- * @file oskar_SphericalSplineData.h
+ * @file oskar_spline_data_location.h
  */
 
-#include "utility/oskar_Mem.h"
+#include "oskar_global.h"
+#include "math/oskar_SplineData.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Structure to hold complex, spherical spline data.
+ * @brief
+ * Returns the location of a spherical spline data structure.
  *
  * @details
- * This structure holds the data required to construct a complex spherical
- * surface from splines.
+ * This function returns the location of memory held in a spherical spline data
+ * structure.
  *
- * The knot position arrays should be of size e = 8 + sqrt(n), where n is the
- * number of scatter points used to define the surface. If storage space is
- * tight, then e = 8 + sqrt(n/2) may be sufficient.
+ * @param[in] data Pointer to data structure.
  *
- * The coefficient arrays should be of size (e-4) * (e-4), where e is as above.
+ * @return
+ * Enumerated location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU) of memory.
  */
-struct oskar_SphericalSplineData
-{
-    int num_knots_theta_re;   /**< Number of knots in theta(real) direction. */
-    int num_knots_theta_im;   /**< Number of knots in theta(imag) direction. */
-    int num_knots_phi_re;     /**< Number of knots in phi(real) direction. */
-    int num_knots_phi_im;     /**< Number of knots in phi(real) direction. */
-    oskar_Mem knots_theta_re; /**< Knot positions in theta(real). */
-    oskar_Mem knots_theta_im; /**< Knot positions in theta(imag). */
-    oskar_Mem knots_phi_re;   /**< Knot positions in phi(real). */
-    oskar_Mem knots_phi_im;   /**< Knot positions in phi(imag). */
-    oskar_Mem coeff_re;       /**< Spline coefficient array (real). */
-    oskar_Mem coeff_im;       /**< Spline coefficient array (imag). */
-};
+OSKAR_EXPORT
+int oskar_spline_data_location(const oskar_SplineData* data);
 
-typedef struct oskar_SphericalSplineData oskar_SphericalSplineData;
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* OSKAR_SPHERICAL_SPLINE_DATA_H_ */
+#endif /* OSKAR_SPLINE_DATA_LOCATION_H_ */

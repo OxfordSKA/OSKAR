@@ -34,10 +34,10 @@
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_string_to_array.h"
 #include "utility/oskar_vector_types.h"
-#include "math/oskar_SphericalSplineData.h"
-#include "math/oskar_spherical_spline_data_compute.h"
-#include "math/oskar_spherical_spline_data_type.h"
-#include "math/oskar_spherical_spline_data_location.h"
+#include "math/oskar_SplineData.h"
+#include "math/oskar_spline_data_compute_sphere.h"
+#include "math/oskar_spline_data_type.h"
+#include "math/oskar_spline_data_location.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,7 +57,7 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
 {
     /* Initialise the flags and local data. */
     int n = 0, err = 0, type = 0, f;
-    oskar_SphericalSplineData *data_phi = NULL, *data_theta = NULL;
+    oskar_SplineData *data_phi = NULL, *data_theta = NULL;
     int k_theta = 0, k_phi = 0;
     double prev_theta = -1.0, prev_phi = -1.0;
     int decimate_theta = 3, decimate_phi = 3; /* Decimation factors. */
@@ -85,13 +85,13 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
     else return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check the data types. */
-    type = oskar_spherical_spline_data_type(data_phi);
-    if (type != oskar_spherical_spline_data_type(data_theta))
+    type = oskar_spline_data_type(data_phi);
+    if (type != oskar_spline_data_type(data_theta))
         return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check the locations. */
-    if (oskar_spherical_spline_data_location(data_phi) != OSKAR_LOCATION_CPU ||
-            oskar_spherical_spline_data_location(data_theta) != OSKAR_LOCATION_CPU)
+    if (oskar_spline_data_location(data_phi) != OSKAR_LOCATION_CPU ||
+            oskar_spline_data_location(data_theta) != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise temporary storage. */
@@ -231,11 +231,11 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
     }
 
     /* Fit bicubic spherical splines to the surface data. */
-    err = oskar_spherical_spline_data_compute(data_theta, n,
+    err = oskar_spline_data_compute_sphere(data_theta, n,
             &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, &weight,
             search, avg_fractional_err, s_real, s_imag);
     if (err) return err;
-    err = oskar_spherical_spline_data_compute(data_phi, n,
+    err = oskar_spline_data_compute_sphere(data_phi, n,
             &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, &weight,
             search, avg_fractional_err, s_real, s_imag);
     if (err) return err;
