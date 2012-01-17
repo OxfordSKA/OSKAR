@@ -39,8 +39,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Returns the largest absolute (real) value in the array. */
-static float max_f(const oskar_Mem* data, int n)
+static float max_abs_f(const oskar_Mem* data, int n)
 {
     int i;
     float r = -FLT_MAX;
@@ -54,7 +58,7 @@ static float max_f(const oskar_Mem* data, int n)
 }
 
 /* Returns the largest absolute (real) value in the array. */
-static double max_d(const oskar_Mem* data, int n)
+static double max_abs_d(const oskar_Mem* data, int n)
 {
     int i;
     double r = -DBL_MAX;
@@ -67,9 +71,61 @@ static double max_d(const oskar_Mem* data, int n)
     return r;
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* Returns the largest value in the array. */
+static float max_f(const oskar_Mem* data, int n)
+{
+    int i;
+    float r = -FLT_MAX;
+    const float *p;
+    p = (const float*)data->data;
+    for (i = 0; i < n; ++i)
+    {
+        if (p[i] > r) r = p[i];
+    }
+    return r;
+}
+
+/* Returns the largest value in the array. */
+static double max_d(const oskar_Mem* data, int n)
+{
+    int i;
+    double r = -DBL_MAX;
+    const double *p;
+    p = (const double*)data->data;
+    for (i = 0; i < n; ++i)
+    {
+        if (p[i] > r) r = p[i];
+    }
+    return r;
+}
+
+/* Returns the smallest value in the array. */
+static float min_f(const oskar_Mem* data, int n)
+{
+    int i;
+    float r = FLT_MAX;
+    const float *p;
+    p = (const float*)data->data;
+    for (i = 0; i < n; ++i)
+    {
+        if (p[i] < r) r = p[i];
+    }
+    return r;
+}
+
+/* Returns the smallest value in the array. */
+static double min_d(const oskar_Mem* data, int n)
+{
+    int i;
+    double r = DBL_MAX;
+    const double *p;
+    p = (const double*)data->data;
+    for (i = 0; i < n; ++i)
+    {
+        if (p[i] < r) r = p[i];
+    }
+    return r;
+}
 
 void surfit_(int* iopt, int* m, const float* x, const float* y,
         const float* z, const float* w, float* xb, float* xe, float* yb,
@@ -77,6 +133,9 @@ void surfit_(int* iopt, int* m, const float* x, const float* y,
         int* nmax, float* eps, int* nx, float* tx, int* ny, float* ty,
         float* c, float* fp, float* wrk1, int* lwrk1, float* wrk2, int* lwrk2,
         int* iwrk, int* kwrk, int* ier);
+
+static int kx = 3;
+static int ky = 3;
 
 int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
@@ -130,6 +189,11 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
         /* Set up the surface fitting parameters. */
         float s, user_s, fp = 0.0;
         float eps = 1e-6; /* Magnitude of float epsilon. */
+        float theta_beg, theta_end, phi_beg, phi_end;
+        theta_beg = min_f(theta, num_points);
+        theta_end = max_f(theta, num_points);
+        phi_beg   = min_f(phi, num_points);
+        phi_end   = max_f(phi, num_points);
 
         for (i = 0; i < 2; ++i)
         {
@@ -146,7 +210,7 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 weight          = (const float*)weight_re->data;
                 num_knots_theta = &spline->num_knots_x_re;
                 num_knots_phi   = &spline->num_knots_y_re;
-                peak_abs        = max_f(data_re, num_points);
+                peak_abs        = max_abs_f(data_re, num_points);
                 user_s          = (float)s_real;
             }
             else /* Imaginary part. */
@@ -158,7 +222,7 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 weight          = (const float*)weight_im->data;
                 num_knots_theta = &spline->num_knots_x_im;
                 num_knots_phi   = &spline->num_knots_y_im;
-                peak_abs        = max_f(data_im, num_points);
+                peak_abs        = max_abs_f(data_im, num_points);
                 user_s          = (float)s_imag;
             }
             do
@@ -170,7 +234,13 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 for (k = 0, iopt = 0; k < maxiter; ++k)
                 {
                     if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
-                    /* surfit_(); */
+                    surfit_(&iopt, &num_points, (const float*)theta->data,
+                            (const float*)phi->data, data, weight, &theta_beg,
+                            &theta_end, &phi_beg, &phi_end, &kx, &ky, &s,
+                            &est, &est, &est, &eps, num_knots_theta,
+                            knots_theta, num_knots_phi, knots_phi, coeff, &fp,
+                            (float*)wrk1, &lwrk1, (float*)wrk2, &lwrk2, iwrk,
+                            &kwrk, &err);
                     printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
 
                     /* Check for errors. */

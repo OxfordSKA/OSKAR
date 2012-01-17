@@ -36,6 +36,7 @@
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_SplineData.h"
 #include "math/oskar_spline_data_compute_sphere.h"
+#include "math/oskar_spline_data_compute_surfit.h"
 #include "math/oskar_spline_data_type.h"
 #include "math/oskar_spline_data_location.h"
 
@@ -230,7 +231,8 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
         fclose(file);
     }
 
-    /* Fit bicubic spherical splines to the surface data. */
+    /* Fit bicubic splines to the surface data. */
+#if 0
     err = oskar_spline_data_compute_sphere(data_theta, n,
             &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, &weight,
             search, avg_fractional_err, s_real, s_imag);
@@ -239,6 +241,17 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
             &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, &weight,
             search, avg_fractional_err, s_real, s_imag);
     if (err) return err;
+#endif
+#if 1
+    err = oskar_spline_data_compute_surfit(data_theta, n,
+            &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, &weight,
+            search, avg_fractional_err, s_real, s_imag);
+    if (err) return err;
+    err = oskar_spline_data_compute_surfit(data_phi, n,
+            &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, &weight,
+            search, avg_fractional_err, s_real, s_imag);
+    if (err) return err;
+#endif
 
     /* Free temporary storage. */
     err = oskar_mem_free(&m_theta);

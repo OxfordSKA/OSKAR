@@ -57,7 +57,7 @@ int main(int argc, char** argv)
         oskar_exit(err);
     }
     err = oskar_element_model_load_meerkat(&pattern, 1, argc-1, &argv[1],
-            true, 0.10, 1.0, 2.0);
+            true, 0.02, 0.0, 0.0);
     if (err)
     {
         fprintf(stderr, "Error in oskar_element_model_load_meerkat.");

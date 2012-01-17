@@ -40,6 +40,9 @@ void bispev_(const float tx[], const int* nx, const float ty[], const int* ny,
         const int* mx, const float y[], const int* my, float z[],
         float wrk[], const int* lwrk, int iwrk[], const int* kwrk, int* ier);
 
+static int c1 = 1;
+static int c3 = 3;
+
 int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
         const oskar_SplineData* spline, const oskar_Mem* theta,
         const oskar_Mem* phi)
@@ -102,9 +105,14 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
                     float theta1, phi1;
                     theta1 = ((const float*)theta->data)[i];
                     phi1 = ((const float*)phi->data)[i];
+                    bispev_(knots_theta, &nt, knots_phi, &np, coeff, &c3, &c3,
+                            &theta1, &c1, &phi1, &c1, &out[i * 2 * stride],
+                            wrk, &lwrk, iwrk1, &kwrk1, &err);
+#if 0
                     bispev_f(knots_theta, nt, knots_phi, np, coeff, 3, 3,
                             &theta1, 1, &phi1, 1, &out[i * 2 * stride],
                             wrk, lwrk, iwrk1, kwrk1, &err);
+#endif
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
                 }
             }
