@@ -32,6 +32,7 @@
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
 #include "sky/oskar_sky_model_copy.h"
 #include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_write.h"
 #include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_scale_by_spectral_index.h"
@@ -110,6 +111,11 @@ int oskar_SkyModel::compute_relative_lmn(double ra0, double dec0)
 int oskar_SkyModel::load(const char* filename)
 {
     return oskar_sky_model_load(filename, this);
+}
+
+int oskar_SkyModel::write(const char* filename)
+{
+    return oskar_sky_model_write(filename, this);
 }
 
 int oskar_SkyModel::resize(int num_sources)

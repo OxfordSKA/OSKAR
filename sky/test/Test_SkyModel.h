@@ -53,6 +53,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         CPPUNIT_TEST(test_compute_relative_lmn);
         CPPUNIT_TEST(test_horizon_clip);
         CPPUNIT_TEST(test_split);
+        CPPUNIT_TEST(test_evaluate_sky_temperature);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -64,6 +65,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         void test_compute_relative_lmn();
         void test_horizon_clip();
         void test_split();
+        void test_evaluate_sky_temperature();
 };
 
 // Register the test class.

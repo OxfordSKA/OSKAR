@@ -90,7 +90,7 @@ class QTest_Random : public QObject
             srand(1);
             for (int i = 0; i < rand.size(); i += 2)
             {
-            	double r2;
+                double r2;
                 rand[i    ] = oskar_random_gaussian(&r2);
                 rand[i + 1] = r2;
                 x[i] = static_cast<double>(i);

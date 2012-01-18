@@ -26,24 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef OSKAR_GENERATE_RANDOM_COORDINATE_H_
+#define OSKAR_GENERATE_RANDOM_COORDINATE_H_
 
-#include <mex.h>
+/**
+ * @file oskar_generate_random_coordinate.h
+ */
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+#include "oskar_global.h"
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+/**
+ * @brief Generates a pair of random source coordinates.
+ *
+ * @details
+ * Note: In order to modify the positions of coordinates returned change the
+ * random number generator seed with the function srand().
+ *
+ * @param[out] ra   Right Ascension coordinate returned.
+ * @param[out] dec  Declination coordinate returned.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_generate_random_coordinate(double* ra, double* dec);
 
-    // Destroy the object to free the memory.
-    delete m;
+#ifdef __cplusplus
 }
+#endif
+
+
+#endif /* OSKAR_GENERATE_RANDOM_COORDINATE_H_ */

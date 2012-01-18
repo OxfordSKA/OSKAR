@@ -27,23 +27,26 @@
  */
 
 
-#include <mex.h>
+#include "sky/oskar_generate_random_coordinate.h"
+#include <stdlib.h>
+#include <math.h>
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
+int oskar_generate_random_coordinate(double* ra, double* dec)
 {
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+    double r1, r2;
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+    if (ra == NULL || dec == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Destroy the object to free the memory.
-    delete m;
+    r1 = (double)rand() / ((double)RAND_MAX + 1.0);
+    r2 = (double)rand() / ((double)RAND_MAX + 1.0);
+    *dec = M_PI / 2.0 - acos(2.0 * r1 - 1);
+    *ra  = 2.0 * M_PI * r2;
+
+    return OSKAR_SUCCESS;
 }
+

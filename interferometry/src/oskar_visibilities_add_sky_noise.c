@@ -27,23 +27,52 @@
  */
 
 
-#include <mex.h>
+#include "interferometry/oskar_visibilities_add_sky_noise.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_get_channel_amps.h"
 
 #include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+#include "utility/oskar_mem_add_gaussian_noise.h"
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
+#include "sky/oskar_evaluate_sky_temperature.h"
+
+#include "station/oskar_evaluate_flux_density.h"
+#include "station/oskar_evaluate_effective_area.h"
+
+#include "interferometry/oskar_evaluate_baseline_noise_stddev.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int oskar_visibilities_add_sky_noise(oskar_Visibilities* vis,
+        const double* stddev, unsigned seed)
 {
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
+    int c, error;
+    oskar_Mem vis_amp;
+
+    if (vis == NULL || stddev == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    srand(seed);
+
+    for (c = 0; c < vis->num_channels; ++c)
     {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
+        error = oskar_visibilties_get_channel_amps(&vis_amp, vis, c);
+        if (error) return error;
+        error = oskar_mem_add_gaussian_noise(&vis_amp, stddev[c], 0.0);
+        if (error) return error;
     }
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
-
-    // Destroy the object to free the memory.
-    delete m;
+    return OSKAR_SUCCESS;
 }
+
+
+#ifdef __cplusplus
+}
+#endif

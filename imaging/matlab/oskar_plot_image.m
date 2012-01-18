@@ -15,8 +15,8 @@ if ~exist('fig_title', 'var')
 end
 
 % Set up the figure.
-width  = 1600;
-height = 550;
+width  = 700;
+height = 700;
 screen_size = get(0, 'ScreenSize');
 left   = (screen_size(3) - (width  + 50));
 bottom = (screen_size(4) - (height + 75));
@@ -42,10 +42,10 @@ set(gca, 'XDir', 'reverse');
 set(gca, 'XColor', 'white');
 set(gca, 'YColor', 'white');
 set(gca, 'ZColor', 'white');
-%xlabel('Relative RA * cos(Dec) [deg]', 'FontSize', 11, 'FontName', 'Arial');
-%ylabel('Relative Dec [deg]', 'FontSize', 11, 'FontName', 'Arial');
-xlabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
-ylabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
+xlabel('Relative RA * cos(Dec) [deg]', 'FontSize', 11, 'FontName', 'Arial');
+ylabel('Relative Dec [deg]', 'FontSize', 11, 'FontName', 'Arial');
+%xlabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
+%ylabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
 title(fig_title, 'FontSize', 11, 'Color', 'white', 'FontName', 'Arial');
 colormap(jet(1024));
 c = colorbar;

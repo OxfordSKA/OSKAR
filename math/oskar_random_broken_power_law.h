@@ -33,6 +33,8 @@
  * @file oskar_random_broken_power_law.h
  */
 
+#include "oskar_global.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,14 +49,17 @@ extern "C" {
  * The random number generator may be seeded by calling srand() prior to this
  * function.
  *
- * @param[in] min The minimum number to return.
- * @param[in] max The maximum number to return.
+ * @param[in] min       The minimum number to return.
+ * @param[in] max       The maximum number to return.
  * @param[in] threshold The point at which the power-law index changes.
- * @param[in] power1 The slope (power-law index) of the first part of the distribution.
- * @param[in] power2 The slope (power-law index) of the second part of the distribution.
+ * @param[in] power1    The slope (power-law index) of the first part of the
+ *                      distribution.
+ * @param[in] power2    The slope (power-law index) of the second part of the
+ *                       distribution.
  */
+OSKAR_EXPORT
 double oskar_random_broken_power_law(double min, double max, double threshold,
-		double power1, double power2);
+        double power1, double power2);
 
 #ifdef __cplusplus
 }

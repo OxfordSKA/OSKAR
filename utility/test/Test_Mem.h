@@ -52,6 +52,7 @@ class Test_Mem : public CppUnit::TestFixture
         CPPUNIT_TEST(test_type_check);
         CPPUNIT_TEST(test_scale_real);
         CPPUNIT_TEST(test_add);
+        CPPUNIT_TEST(test_add_noise);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -62,6 +63,7 @@ class Test_Mem : public CppUnit::TestFixture
         void test_type_check();
         void test_scale_real();
         void test_add();
+        void test_add_noise();
 };
 
 // Register the test class.

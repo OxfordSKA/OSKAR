@@ -35,6 +35,8 @@
 #include "interferometry/oskar_visibilities_read.h"
 #include "interferometry/oskar_visibilities_resize.h"
 #include "interferometry/oskar_visibilities_write.h"
+#include "interferometry/oskar_visibilities_evaluate_sky_noise_stddev.h"
+#include "interferometry/oskar_visibilities_add_sky_noise.h"
 #include "utility/oskar_mem_init.h"
 
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
@@ -45,7 +47,8 @@ oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
   freq_start_hz(0.0),
   freq_inc_hz(0.0),
   time_start_mjd_utc(0.0),
-  time_inc_seconds(0.0)
+  time_inc_seconds(0.0),
+  channel_bandwidth_hz(0.0)
 {
     if (oskar_visibilities_init(this, amp_type, location, num_channels,
             num_times, num_baselines))
@@ -64,6 +67,7 @@ oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
   freq_inc_hz(0.0),
   time_start_mjd_utc(0.0),
   time_inc_seconds(0.0),
+  channel_bandwidth_hz(0.0),
   uu_metres(&other->uu_metres, location),
   vv_metres(&other->vv_metres, location),
   ww_metres(&other->ww_metres, location),
@@ -106,6 +110,19 @@ int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)
 {
     return oskar_visibilties_get_channel_amps(vis_amps, this, channel);
 }
+
+int oskar_Visibilities::evaluate_sky_noise_stddev(const oskar_TelescopeModel* telescope,
+        double spectral_index)
+{
+    return oskar_visibilities_evaluate_sky_noise_stddev(this, telescope,
+            spectral_index);
+}
+
+int oskar_Visibilities::add_sky_noise(const double* stddev, unsigned seed)
+{
+    return oskar_visibilities_add_sky_noise(this, stddev, seed);
+}
+
 
 int oskar_Visibilities::location() const
 {

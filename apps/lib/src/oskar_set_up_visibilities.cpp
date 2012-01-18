@@ -52,6 +52,7 @@ oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings& settings,
     vis->freq_inc_hz = settings.obs().frequency_inc();
     vis->time_start_mjd_utc = times->obs_start_mjd_utc;
     vis->time_inc_seconds = times->dt_dump_days * 86400.0;
+    vis->channel_bandwidth_hz = settings.obs().start_frequency();
 
     // Return the structure.
     return vis;

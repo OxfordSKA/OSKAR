@@ -27,23 +27,24 @@
  */
 
 
-#include <mex.h>
+#ifndef OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_
+#define OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_
 
+/**
+ * @file oskar_mem_add_gaussian_noise.h
+ */
+
+#include "oskar_global.h"
 #include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+int oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean);
 
-    // Destroy the object to free the memory.
-    delete m;
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_ */

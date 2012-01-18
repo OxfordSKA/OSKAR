@@ -27,23 +27,25 @@
  */
 
 
-#include <mex.h>
+#ifndef OSKAR_EVALUATE_BASELINE_NOISE_STDDEV_H_
+#define OSKAR_EVALUATE_BASELINE_NOISE_STDDEV_H_
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+/**
+ * @file oskar_evaluate_baseline_noise_stddev.h
+ */
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#include "oskar_global.h"
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Destroy the object to free the memory.
-    delete m;
+int oskar_evaluate_baseline_noise_stddev(double* stddev, int num_channels,
+        double* flux_density, double bandwidth, double integration_time);
+
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_EVALUATE_BASELINE_NOISE_STDDEV_H_ */

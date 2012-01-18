@@ -27,23 +27,49 @@
  */
 
 
-#include <mex.h>
+#ifndef OSKAR_VISIBILITIES_EVALUATE_SKY_NOISE_STDDEV_H_
+#define OSKAR_VISIBILITIES_EVALUATE_SKY_NOISE_STDDEV_H_
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+/**
+ * @file oskar_visibilities_evaluate_sky_noise_stddev.h
+ */
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Destroy the object to free the memory.
-    delete m;
+/**
+ * @brief Evaluate the standard deviation of a random gaussian visibility
+ * corresponding to sky noise in Janskys.
+ *
+ * @details
+ *
+ * === WARNING ===
+ * This function may add un-physical noise levels. Use with care!
+ * === WARNING ===
+ *
+ * Current noise model is taken from the VLA science memo number 146.
+ * This is expected to work for frequencies less than 408MHz although
+ * this noise model should be considered in testing.
+ *
+ * @param[in/out] vis            visibility structure to which to add noise.
+ * @param[in]     telescope      telescope model (used for evaluation of
+ *                               effective area)
+ * @param[in]     spectral_index Spectral index use for frequency variation
+ *                               (use +0.75).
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_visibilities_evaluate_sky_noise_stddev(oskar_Visibilities* vis,
+        const oskar_TelescopeModel* telescope, double spectral_index);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_VISIBILITIES_EVALUATE_SKY_NOISE_PARAMETERS_H_ */

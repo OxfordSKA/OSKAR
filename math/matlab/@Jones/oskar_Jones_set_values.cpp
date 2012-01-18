@@ -35,7 +35,7 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_element_size.h"
-#include "utility/matlab/oskar_Mem_utility.h"
+#include "utility/matlab/oskar_mex_mem_utility.h"
 #include "utility/matlab/oskar_mex_pointer.h"
 
 #include <string.h>

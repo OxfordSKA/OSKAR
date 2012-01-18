@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "oskar_global.h"
+
 #include <cuda_runtime_api.h>
 #include "apps/lib/oskar_Settings.h"
 #include "apps/lib/oskar_set_up_sky.h"
@@ -72,6 +74,7 @@ int main(int argc, char** argv)
     oskar_TelescopeModel *tel_cpu, *tel_gpu;
     sky_cpu = oskar_set_up_sky(settings);
     tel_cpu = oskar_set_up_telescope(settings);
+    if (tel_cpu == NULL) oskar_exit(OSKAR_ERR_FILE_IO);
     sky_gpu = new oskar_SkyModel(sky_cpu, OSKAR_LOCATION_GPU);
     tel_gpu = new oskar_TelescopeModel(tel_cpu, OSKAR_LOCATION_GPU);
 
@@ -95,7 +98,19 @@ int main(int argc, char** argv)
                 settings.obs().frequency(c));
         if (err) oskar_exit(err);
     }
-    printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
+
+    if (settings.sky().noise_model().toUpper() == "VLA_MEMO_146")
+    {
+        printf("== Adding Gaussian visibility noise.\n");
+        err = vis_global->evaluate_sky_noise_stddev(tel_cpu,
+                settings.sky().noise_spectral_index());
+        if (err) oskar_exit(err);
+        err = vis_global->add_sky_noise(vis_global->sky_noise_stddev,
+            settings.sky().noise_seed());
+        if (err) oskar_exit(err);
+    }
+
+    printf("\n=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
 
     // Compute baseline u,v,w coordinates for simulation.
     err = oskar_evaluate_baseline_uvw(vis_global, tel_cpu, times);

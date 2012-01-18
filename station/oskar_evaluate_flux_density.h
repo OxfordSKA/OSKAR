@@ -27,23 +27,40 @@
  */
 
 
-#include <mex.h>
+#ifndef OSKAR_EVALUATE_FLUX_DENSITY_H_
+#define OSKAR_EVALUATE_FLUX_DENSITY_H_
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+/**
+ * @file oskar_evaluate_flux_density.h
+ */
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#include "oskar_global.h"
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Destroy the object to free the memory.
-    delete m;
+/**
+ * @brief Evaluates the antenna flux density for a given sky temperature
+ * (in Kelvin) and effective area (in metres^2) as a function of frequency. The
+ * result is given in Janskys.
+ *
+ * @details
+ *
+ *
+ * @param flux_density      Flux density as a function of frequcny, in Janskys
+ * @param num_channels      Number of frequency channels.
+ * @param effective_area    Antenna effective area as a function of frequency, in metres^2.
+ * @param temperature       Sky temperature as a function of frequency, in Kelvin.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_evaluate_flux_density(double* flux_density, int num_channels,
+        double* effective_area, double* temperature);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_EVALUATE_FLUX_DENSITY_H_ */

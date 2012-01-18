@@ -2,21 +2,22 @@
 
 #include "sky/oskar_mjd_to_last_fast.h"
 
-void mexFunction(int /*num_outputs*/, mxArray ** output, int num_inputs,
-        const mxArray ** input)
+void mexFunction(int /*num_out*/, mxArray** out, int num_in, const mxArray** in)
 {
     // Parse Inputs.
-    if (num_inputs != 2)
-        mexErrMsgTxt("Two inputs required ==> (mjd (UT1), longitude (radians))");
+    if (num_in != 2)
+    {
+        mexErrMsgIdAndTxt("OSKAR:error",
+                "Two inputs required ==> (mjd (UT1), longitude (radians)) "
+                "[%i inputs found]", num_in);
+    }
 
     // Get matlab inputs.
-    double mjd_utc  = mxGetScalar(input[0]);
-    double lon_rad  = mxGetScalar(input[1]);
+    double mjd_utc  = mxGetScalar(in[0]);
+    double lon_rad  = mxGetScalar(in[1]);
 
-    mwSize n_dims  = 1;
-    mwSize dims[1] = {1};
-    output[0] = mxCreateNumericArray(n_dims, dims, mxDOUBLE_CLASS, mxREAL);
-    double* last_rad = (double*) mxGetPr(output[0]);
+    out[0] = mxCreateNumericMatrix(1, 1, mxDOUBLE_CLASS, mxREAL);
+    double* last_rad = (double*)mxGetPr(out[0]);
 
     *last_rad = oskar_mjd_to_last_fast_d(mjd_utc, lon_rad);
 }

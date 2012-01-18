@@ -28,6 +28,7 @@
 
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_load_stations.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -45,13 +46,23 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     int err = telescope->load_station_pos(telescope_file.constData(),
             settings.longitude_rad(), settings.latitude_rad(),
             settings.altitude_m());
-    if (err) return NULL;
+    if (err)
+    {
+        fprintf(stderr, "== ERROR: Failed to load telescope geometry (%s).\n",
+                oskar_get_error_string(err));
+        return NULL;
+    }
 
     // Load stations from directory.
     err = oskar_load_stations(telescope->station,
             &(telescope->identical_stations), telescope->num_stations,
             station_dir.constData());
-    if (err) return NULL;
+    if (err)
+    {
+        fprintf(stderr, "== ERROR: Failed to load station geometry (%s).\n",
+                oskar_get_error_string(err));
+        return NULL;
+    }
 
     // Set phase centre.
     telescope->ra0_rad = settings.obs().ra0_rad();

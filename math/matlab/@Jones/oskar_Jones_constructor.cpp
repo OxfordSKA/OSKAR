@@ -35,7 +35,7 @@
 #include "math/matlab/@Jones/oskar_Jones_utility.h"
 #include "utility/oskar_cuda_device_info.h"
 #include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_Mem_utility.h"
+#include "utility/matlab/oskar_mex_mem_utility.h"
 
 #include <string.h>
 

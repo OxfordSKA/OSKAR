@@ -27,23 +27,37 @@
  */
 
 
-#include <mex.h>
+#ifndef OSKAR_VISIBILITIES_ADD_SKY_NOISE_H_
+#define OSKAR_VISIBILITIES_ADD_SKY_NOISE_H_
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+/**
+ * @file oskar_visibilities_add_noise.h
+ */
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#include "oskar_global.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Destroy the object to free the memory.
-    delete m;
+/**
+ * @brief Add a random gaussian noise component to the visibilities.
+ *
+ * @param[in/out] vis    Visibility structure to which to add noise.
+ * @param[in]     stddev Array (length num_channels) of the standard deviation
+ *                       of the noise to add, in Janskys.
+ * @param[in[     seed   Seed for the random number generator.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_visibilities_add_sky_noise(oskar_Visibilities* vis,
+        const double* stddev, unsigned seed);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_VISIBILITIES_ADD_SKY_NOISE_H_ */

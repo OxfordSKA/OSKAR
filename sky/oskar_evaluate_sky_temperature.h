@@ -27,23 +27,44 @@
  */
 
 
-#include <mex.h>
+#ifndef OSKAR_EVALUATE_SKY_TEMPERATURE_H_
+#define OSKAR_EVALUATE_SKY_TEMPERATURE_H_
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+/**
+ * @file oskar_evaluate_sky_temperature.h
+ */
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#include "oskar_global.h"
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Destroy the object to free the memory.
-    delete m;
+/**
+ * @brief
+ * Evaluates the sky temperature (in Kelvin) according to VLA memo 146 at a
+ * number of frequencies.
+ *
+ * @details
+ * Note: The output \p temperature array must be preallocated to length
+ * \p num_channels.
+ *
+ * Usually the value of \p spectral_index should be set to +0.75.
+ *
+ * @param[out] temperature      Array of sky temperatures as a function of frequency, in Kelvin.
+ * @param[in]  num_channels     Number of frequency channels.
+ * @param[in]  start_freq_hz    Start frequency, in Hz.
+ * @param[in]  freq_inc_hz      Frequency increment, in Hz.
+ * @param[in]  spectral_index   Spectral index of the frequency.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_evaluate_sky_temperature(double* temperature, int num_channels,
+        double start_freq_hz, double freq_inc_hz, double spectral_index);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_EVALUATE_SKY_TEMPERATURE_H_ */

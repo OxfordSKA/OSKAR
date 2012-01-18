@@ -50,6 +50,12 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     size_t mem_free, mem_total;
     cudaDeviceProp device_prop;
 
+    if (sky->num_sources == 0)
+    {
+        printf("--> WARNING: No sources in sky model. Skipping ME evaluation.\n");
+        return OSKAR_SUCCESS;
+    }
+
     // Copy telescope model and sky model for frequency scaling.
     oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
     oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
@@ -102,13 +108,13 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     {
         // Start time for the visibility dump, in MJD(UTC).
         printf("--> Simulating snapshot (%-3i / %-3i) ", j+1, num_vis_dumps);
+
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         // Initialise visibilities for the dump to zero.
         err = vis.clear_contents();
         if (err) return err;
-
         // Compact sky model to temporary.
         oskar_SkyModel local_sky(type, OSKAR_LOCATION_GPU);
         err = oskar_sky_model_horizon_clip(&local_sky, &sky_gpu, &tel_gpu,
@@ -121,27 +127,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             continue;
         }
         else if (err != 0) return err;
-
-        // oskar_SkyModel temp_sky(&local_sky, OSKAR_LOCATION_CPU);
-        // printf("#### num_sources = %i (%i %i)\n", temp_sky.num_sources,
-        //         local_sky.num_sources, sky->num_sources);
-        // typedef double real;
-        // for (int source = 0; source < temp_sky.num_sources; ++source)
-        // {
-        //     printf("##### source[%3i] % .10e % .10e | %.2f %.2f %.2f %.2f | %.2f %.2f | % .2f % .2f % .2f\n",
-        //             source,
-        //             ((real*)temp_sky.RA.data)[source],
-        //             ((real*)temp_sky.Dec.data)[source],
-        //             ((real*)temp_sky.I.data)[source],
-        //             ((real*)temp_sky.Q.data)[source],
-        //             ((real*)temp_sky.U.data)[source],
-        //             ((real*)temp_sky.V.data)[source],
-        //             ((real*)temp_sky.reference_freq.data)[source],
-        //             ((real*)temp_sky.spectral_index.data)[source],
-        //             ((real*)temp_sky.rel_l.data)[source],
-        //             ((real*)temp_sky.rel_m.data)[source],
-        //             ((real*)temp_sky.rel_n.data)[source]);
-        // }
 
         // Set dimensions of Jones matrices (this is not a resize!).
         err = J.set_size(n_stations, local_sky.num_sources); if (err) return err;

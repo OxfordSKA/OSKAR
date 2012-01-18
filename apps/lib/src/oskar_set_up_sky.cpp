@@ -30,6 +30,9 @@
 #include "apps/lib/oskar_SettingsSky.h"
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
+#include "sky/oskar_generate_random_coordinate.h"
+#include "math/oskar_random_power_law.h"
+#include "math/oskar_random_broken_power_law.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -60,6 +63,8 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
         }
     }
 
+    // TODO: enable 2 generates at the same time somehow?
+
     // Set up sky using generator parameters.
     if (settings.sky().generator().toUpper() == "HEALPIX")
     {
@@ -81,6 +86,53 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
             dec = M_PI / 2.0 - dec;
             sky->set_source(i + old_size, ra, dec,
                     1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        }
+        printf("done.\n");
+    }
+    else if (settings.sky().generator().toUpper() == "RANDOM_POWER_LAW")
+    {
+        printf("--> Generating random power law source distribution... ");
+
+        int old_size = sky->num_sources;
+        int num_sources = settings.sky().random_num_sources();
+        sky->resize(old_size + num_sources);
+
+        double min = settings.sky().random_flux_density_min();
+        double max = settings.sky().random_flux_density_max();
+        double power = settings.sky().random_power();
+
+        srand(settings.sky().random_seed());
+
+        for (int i = 0; i < num_sources; ++i)
+        {
+            double ra, dec, b;
+            oskar_generate_random_coordinate(&ra, &dec);
+            b = oskar_random_power_law(min, max, power);
+            sky->set_source(i + old_size, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
+        }
+        printf("done.\n");
+    }
+    else if (settings.sky().generator().toUpper() == "RANDOM_BROKEN_POWER_LAW")
+    {
+        printf("--> Generating random power broken law source distribution...");
+        int old_size = sky->num_sources;
+        int num_sources = settings.sky().random_num_sources();
+        sky->resize(old_size + num_sources);
+
+        double min = settings.sky().random_flux_density_min();
+        double max = settings.sky().random_flux_density_max();
+        double power1 = settings.sky().random_power1();
+        double power2 = settings.sky().random_power2();
+        double threshold = settings.sky().random_threshold();
+
+        srand(settings.sky().random_seed());
+
+        for (int i = 0; i < num_sources; ++i)
+        {
+            double ra, dec, b;
+            oskar_generate_random_coordinate(&ra, &dec);
+            b = oskar_random_broken_power_law(min, max, threshold, power1, power2);
+            sky->set_source(i + old_size, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
         }
         printf("done.\n");
     }
@@ -107,9 +159,14 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     // Check if sky model contains no sources.
     if (sky->num_sources == 0)
     {
-        fprintf(stderr, "ERROR: Sky model contains no sources.\n");
-        delete sky;
-        return NULL;
+        fprintf(stderr, "--> WARNING: Sky model contains no sources.\n");
+    }
+
+    if (!settings.sky().output_sky_file().isEmpty())
+    {
+        printf("--> Writing sky file to disk as: %s\n",
+                settings.sky().output_sky_file().toAscii().constData());
+        sky->write(settings.sky().output_sky_file().toAscii().constData());
     }
 
     // Return the structure.

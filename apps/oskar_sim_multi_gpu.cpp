@@ -112,11 +112,7 @@ int main(int argc, char** argv)
     }
 
     // Set the number of host threads to use.
-    int num_omp_threads = min(device_count, (int)settings.max_host_threads());
-    omp_set_num_threads(num_omp_threads);
-
-    if (num_omp_threads > settings.num_devices())
-        oskar_exit(OSKAR_ERR_DIMENSION_MISMATCH);
+    omp_set_num_threads(settings.num_devices());
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
     // (one per thread/GPU).
@@ -182,7 +178,7 @@ int main(int argc, char** argv)
         vis_global->get_channel_amps(&vis_amp, c);
 
         // Accumulate into global vis structure.
-        for (int t = 0; t < num_omp_threads; ++t)
+        for (int t = 0; t < settings.num_devices(); ++t)
         {
             error = oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[t]);
             if (error) oskar_exit(error);

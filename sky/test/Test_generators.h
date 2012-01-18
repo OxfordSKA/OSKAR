@@ -26,24 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef TEST_GENERATORS_H_
+#define TEST_GENERATORS_H_
 
-#include <mex.h>
+/**
+ * @file Test_coord_transforms.h
+ */
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_generators : public CppUnit::TestFixture
 {
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+    public:
+        CPPUNIT_TEST_SUITE(Test_generators);
+        CPPUNIT_TEST(test_random_coordinates);
+        CPPUNIT_TEST_SUITE_END();
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+    public:
+        void test_random_coordinates();
+};
 
-    // Destroy the object to free the memory.
-    delete m;
-}
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_generators);
+
+#endif // TEST_GENERATORS_H_

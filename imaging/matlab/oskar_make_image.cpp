@@ -40,6 +40,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
+#include <limits>
 
 using namespace std;
 
@@ -94,6 +96,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Image parameters.
     double lm_max = sin((fov_deg/2.0) * (M_PI / 180.0));
     int num_pixels = image_size * image_size;
+    double sum = 0.0, im_min = DBL_MAX, im_max = -DBL_MAX, rms = 0.0,
+            var = 0.0, mean = 0.0, sum_squared = 0.0;
 
     // Evaluate the and check consistency of data precision.
     int type = 0;
@@ -195,6 +199,22 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             }
         }
 
+
+        for (int i = 0; i < num_pixels; ++i)
+        {
+            sum += image[i];
+            sum_squared += image[i] * image[i];
+            im_min = min(im_min, image[i]);
+            im_max = max(im_max, image[i]);
+        }
+        mean = sum / num_pixels;
+        rms = sqrt(sum_squared / num_pixels);
+        for (int i = 0; i < num_pixels; ++i)
+        {
+            var = (image[i] - mean);
+            var *= var;
+        }
+
         // Clean up memory
         free(lm);
         free(l);
@@ -276,6 +296,22 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             }
         }
 
+        for (int i = 0; i < num_pixels; ++i)
+        {
+            sum += image[i];
+            sum_squared += image[i] * image[i];
+            im_min = min((float)im_min, image[i]);
+            im_max = max((float)im_max, image[i]);
+        }
+
+        mean = sum / num_pixels;
+        rms = sqrt(sum_squared / num_pixels);
+        for (int i = 0; i < num_pixels; ++i)
+        {
+            var = (image[i] - mean);
+            var *= var;
+        }
+
         // Clean up memory
         free(lm);
         free(l);
@@ -301,9 +337,15 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxArray* mxFOV = mxCreateNumericMatrix(1,1,mxDOUBLE_CLASS, mxREAL);
     *(double*)mxGetData(mxFOV) = fov_deg;
 
-    const char* fields[3] = {"data", "frequency_hz", "fov_deg"};
-    out[0] = mxCreateStructMatrix(1, 1, 3, fields);
+    const char* fields[8] = {"data", "frequency_hz", "fov_deg", "min",
+            "max", "mean", "rms", "variance"};
+    out[0] = mxCreateStructMatrix(1, 1, 8, fields);
     mxSetField(out[0], 0, "data", mxImage);
     mxSetField(out[0], 0, "frequency_hz", mxFreq);
     mxSetField(out[0], 0, "fov_deg", mxFOV);
+    mxSetField(out[0], 0, "min", mxCreateDoubleScalar(im_min));
+    mxSetField(out[0], 0, "max", mxCreateDoubleScalar(im_max));
+    mxSetField(out[0], 0, "mean", mxCreateDoubleScalar(mean));
+    mxSetField(out[0], 0, "rms", mxCreateDoubleScalar(rms));
+    mxSetField(out[0], 0, "variance", mxCreateDoubleScalar(var));
 }

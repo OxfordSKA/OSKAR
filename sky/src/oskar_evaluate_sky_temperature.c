@@ -27,23 +27,33 @@
  */
 
 
-#include <mex.h>
+#include "sky/oskar_evaluate_sky_temperature.h"
+#include <stdlib.h>
+#include <math.h>
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
+int oskar_evaluate_sky_temperature(double* temperature, int num_channels,
+        double start_freq, double freq_inc, double spectral_index)
 {
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
+    int c;
+    double freq;
+
+    if (temperature == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    for (c = 0; c < num_channels; ++c)
     {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
+        freq = start_freq + freq_inc * c;
+        temperature[c] = 20.0 * pow((408e6 / freq), 2.0 + spectral_index);
     }
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
-
-    // Destroy the object to free the memory.
-    delete m;
+    return OSKAR_SUCCESS;
 }
+
+
+#ifdef __cplusplus
+}
+#endif

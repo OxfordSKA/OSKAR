@@ -269,25 +269,27 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
     }
 
-
-
     // Create and populate output visibility structure.
     if (num_pols == 4)
     {
-        const char* fields[13] = {"uu_metres", "vv_metres", "ww_metres",
-                "xx", "xy", "yx", "yy", "I", "Q", "U", "V", "frequency",
-                "time"};
-        out[0] = mxCreateStructMatrix(1, 1, 13, fields);
+        const char* fields[18] = {"uu", "vv", "ww", "coord_units",
+                "xx", "xy", "yx", "yy",
+                "I", "Q", "U", "V", "frequency",
+                "time", "axis_order", "num_baselines", "num_times",
+                "num_channels"};
+        out[0] = mxCreateStructMatrix(1, 1, 18, fields);
     }
     else
     {
-        const char* fields[6] = {"uu_metres", "vv_metres", "ww_metres",
-                "xx", "frequency", "time"};
-        out[0] = mxCreateStructMatrix(1, 1, 4, fields);
+        const char* fields[11] = {"uu", "vv", "ww", "coord_units",
+                "xx", "frequency", "time", "axis_order","num_baselines", "num_times",
+                "num_channels"};
+        out[0] = mxCreateStructMatrix(1, 1, 11, fields);
     }
-    mxSetField(out[0], 0, "uu_metres", uu);
-    mxSetField(out[0], 0, "vv_metres", vv);
-    mxSetField(out[0], 0, "ww_metres", ww);
+    mxSetField(out[0], 0, "uu", uu);
+    mxSetField(out[0], 0, "vv", vv);
+    mxSetField(out[0], 0, "ww", ww);
+    mxSetField(out[0], 0, "coord_units", mxCreateString("metres"));
     mxSetField(out[0], 0, "xx", xx);
     if (num_pols == 4)
     {
@@ -301,7 +303,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     mxSetField(out[0], 0, "frequency", frequency);
     mxSetField(out[0], 0, "time", time);
-
+    mxSetField(out[0], 0, "axis_order", mxCreateString("baseline x time x channel"));
+    mxSetField(out[0], 0, "num_baselines", mxCreateDoubleScalar((double)num_baselines));
+    mxSetField(out[0], 0, "num_times", mxCreateDoubleScalar((double)num_times));
+    mxSetField(out[0], 0, "num_channels", mxCreateDoubleScalar((double)num_channels));
 
     // Clean up local memory.
     delete vis;

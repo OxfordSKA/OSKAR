@@ -36,6 +36,8 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_mem_add.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_add_real_gaussian_noise.h"
+#include "utility/oskar_mem_add_gaussian_noise.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -204,297 +206,297 @@ void Test_Mem::test_type_check()
 
 void Test_Mem::test_scale_real()
 {
-	int n = 100;
+    int n = 100;
 
-	// Single precision real.
-	{
-		oskar_Mem mem_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, n);
+    // Single precision real.
+    {
+        oskar_Mem mem_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, n);
 
-		// Fill memory.
-		for (int i = 0; i < n; ++i)
-		{
-			((float*)(mem_cpu.data))[i] = (float)i;
-		}
+        // Fill memory.
+        for (int i = 0; i < n; ++i)
+        {
+            ((float*)(mem_cpu.data))[i] = (float)i;
+        }
 
-		// Scale.
-		mem_cpu.scale_real(2.0);
+        // Scale.
+        mem_cpu.scale_real(2.0);
 
-		// Check contents.
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * i,
-					((float*)(mem_cpu.data))[i], 1e-6);
-		}
+        // Check contents.
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * i,
+                    ((float*)(mem_cpu.data))[i], 1e-6);
+        }
 
-		// Copy to GPU.
-		oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
+        // Copy to GPU.
+        oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
-		// Scale again.
-		mem_gpu.scale_real(2.0);
+        // Scale again.
+        mem_gpu.scale_real(2.0);
 
-		// Copy back and check contents.
-		oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * i,
-					((float*)(mem_cpu2.data))[i], 1e-6);
-		}
-	}
+        // Copy back and check contents.
+        oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * i,
+                    ((float*)(mem_cpu2.data))[i], 1e-6);
+        }
+    }
 
-	// Single precision complex.
-	{
-		oskar_Mem mem_cpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, n);
+    // Single precision complex.
+    {
+        oskar_Mem mem_cpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, n);
 
-		// Fill memory.
-		for (int i = 0; i < n; ++i)
-		{
-			((float2*)(mem_cpu.data))[i].x = (float)i;
-			((float2*)(mem_cpu.data))[i].y = (float)i + 0.2f;
-		}
+        // Fill memory.
+        for (int i = 0; i < n; ++i)
+        {
+            ((float2*)(mem_cpu.data))[i].x = (float)i;
+            ((float2*)(mem_cpu.data))[i].y = (float)i + 0.2f;
+        }
 
-		// Scale.
-		mem_cpu.scale_real(2.0);
+        // Scale.
+        mem_cpu.scale_real(2.0);
 
-		// Check contents.
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i),
-					((float2*)(mem_cpu.data))[i].x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.2f),
-					((float2*)(mem_cpu.data))[i].y, 1e-6);
-		}
+        // Check contents.
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i),
+                    ((float2*)(mem_cpu.data))[i].x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.2f),
+                    ((float2*)(mem_cpu.data))[i].y, 1e-6);
+        }
 
-		// Copy to GPU.
-		oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
+        // Copy to GPU.
+        oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
-		// Scale again.
-		mem_gpu.scale_real(2.0);
+        // Scale again.
+        mem_gpu.scale_real(2.0);
 
-		// Copy back and check contents.
-		oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i),
-					((float2*)(mem_cpu2.data))[i].x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.2f),
-					((float2*)(mem_cpu2.data))[i].y, 1e-6);
-		}
-	}
+        // Copy back and check contents.
+        oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i),
+                    ((float2*)(mem_cpu2.data))[i].x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.2f),
+                    ((float2*)(mem_cpu2.data))[i].y, 1e-6);
+        }
+    }
 
-	// Single precision complex matrix.
-	{
-		oskar_Mem mem_cpu(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, n);
+    // Single precision complex matrix.
+    {
+        oskar_Mem mem_cpu(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, n);
 
-		// Fill memory.
-		for (int i = 0; i < n; ++i)
-		{
-			((float4c*)(mem_cpu.data))[i].a.x = (float)i;
-			((float4c*)(mem_cpu.data))[i].a.y = (float)i + 0.2f;
-			((float4c*)(mem_cpu.data))[i].b.x = (float)i + 0.4f;
-			((float4c*)(mem_cpu.data))[i].b.y = (float)i + 0.6f;
-			((float4c*)(mem_cpu.data))[i].c.x = (float)i + 0.8f;
-			((float4c*)(mem_cpu.data))[i].c.y = (float)i + 1.0f;
-			((float4c*)(mem_cpu.data))[i].d.x = (float)i + 1.2f;
-			((float4c*)(mem_cpu.data))[i].d.y = (float)i + 1.4f;
-		}
+        // Fill memory.
+        for (int i = 0; i < n; ++i)
+        {
+            ((float4c*)(mem_cpu.data))[i].a.x = (float)i;
+            ((float4c*)(mem_cpu.data))[i].a.y = (float)i + 0.2f;
+            ((float4c*)(mem_cpu.data))[i].b.x = (float)i + 0.4f;
+            ((float4c*)(mem_cpu.data))[i].b.y = (float)i + 0.6f;
+            ((float4c*)(mem_cpu.data))[i].c.x = (float)i + 0.8f;
+            ((float4c*)(mem_cpu.data))[i].c.y = (float)i + 1.0f;
+            ((float4c*)(mem_cpu.data))[i].d.x = (float)i + 1.2f;
+            ((float4c*)(mem_cpu.data))[i].d.y = (float)i + 1.4f;
+        }
 
-		// Scale.
-		mem_cpu.scale_real(2.0);
+        // Scale.
+        mem_cpu.scale_real(2.0);
 
-		// Check contents.
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i),
-					((float4c*)(mem_cpu.data))[i].a.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.2f),
-					((float4c*)(mem_cpu.data))[i].a.y, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.4f),
-					((float4c*)(mem_cpu.data))[i].b.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.6f),
-					((float4c*)(mem_cpu.data))[i].b.y, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.8f),
-					((float4c*)(mem_cpu.data))[i].c.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 1.0f),
-					((float4c*)(mem_cpu.data))[i].c.y, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 1.2f),
-					((float4c*)(mem_cpu.data))[i].d.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 1.4f),
-					((float4c*)(mem_cpu.data))[i].d.y, 1e-6);
-		}
+        // Check contents.
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i),
+                    ((float4c*)(mem_cpu.data))[i].a.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.2f),
+                    ((float4c*)(mem_cpu.data))[i].a.y, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.4f),
+                    ((float4c*)(mem_cpu.data))[i].b.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.6f),
+                    ((float4c*)(mem_cpu.data))[i].b.y, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 0.8f),
+                    ((float4c*)(mem_cpu.data))[i].c.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 1.0f),
+                    ((float4c*)(mem_cpu.data))[i].c.y, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 1.2f),
+                    ((float4c*)(mem_cpu.data))[i].d.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0f * ((float)i + 1.4f),
+                    ((float4c*)(mem_cpu.data))[i].d.y, 1e-6);
+        }
 
-		// Copy to GPU.
-		oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
+        // Copy to GPU.
+        oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
-		// Scale again.
-		mem_gpu.scale_real(2.0);
+        // Scale again.
+        mem_gpu.scale_real(2.0);
 
-		// Copy back and check contents.
-		oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i),
-					((float4c*)(mem_cpu2.data))[i].a.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.2f),
-					((float4c*)(mem_cpu2.data))[i].a.y, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.4f),
-					((float4c*)(mem_cpu2.data))[i].b.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.6f),
-					((float4c*)(mem_cpu2.data))[i].b.y, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.8f),
-					((float4c*)(mem_cpu2.data))[i].c.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 1.0f),
-					((float4c*)(mem_cpu2.data))[i].c.y, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 1.2f),
-					((float4c*)(mem_cpu2.data))[i].d.x, 1e-6);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 1.4f),
-					((float4c*)(mem_cpu2.data))[i].d.y, 1e-6);
-		}
-	}
+        // Copy back and check contents.
+        oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i),
+                    ((float4c*)(mem_cpu2.data))[i].a.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.2f),
+                    ((float4c*)(mem_cpu2.data))[i].a.y, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.4f),
+                    ((float4c*)(mem_cpu2.data))[i].b.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.6f),
+                    ((float4c*)(mem_cpu2.data))[i].b.y, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 0.8f),
+                    ((float4c*)(mem_cpu2.data))[i].c.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 1.0f),
+                    ((float4c*)(mem_cpu2.data))[i].c.y, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 1.2f),
+                    ((float4c*)(mem_cpu2.data))[i].d.x, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0f * ((float)i + 1.4f),
+                    ((float4c*)(mem_cpu2.data))[i].d.y, 1e-6);
+        }
+    }
 
-	// Double precision real.
-	{
-		oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    // Double precision real.
+    {
+        oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
 
-		// Fill memory.
-		for (int i = 0; i < n; ++i)
-		{
-			((double*)(mem_cpu.data))[i] = (double)i;
-		}
+        // Fill memory.
+        for (int i = 0; i < n; ++i)
+        {
+            ((double*)(mem_cpu.data))[i] = (double)i;
+        }
 
-		// Scale.
-		mem_cpu.scale_real(2.0);
+        // Scale.
+        mem_cpu.scale_real(2.0);
 
-		// Check contents.
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i,
-					((double*)(mem_cpu.data))[i], 1e-12);
-		}
+        // Check contents.
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i,
+                    ((double*)(mem_cpu.data))[i], 1e-12);
+        }
 
-		// Copy to GPU.
-		oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
+        // Copy to GPU.
+        oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
-		// Scale again.
-		mem_gpu.scale_real(2.0);
+        // Scale again.
+        mem_gpu.scale_real(2.0);
 
-		// Copy back and check contents.
-		oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * i,
-					((double*)(mem_cpu2.data))[i], 1e-6);
-		}
-	}
+        // Copy back and check contents.
+        oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * i,
+                    ((double*)(mem_cpu2.data))[i], 1e-6);
+        }
+    }
 
-	// Double precision complex.
-	{
-		oskar_Mem mem_cpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, n);
+    // Double precision complex.
+    {
+        oskar_Mem mem_cpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, n);
 
-		// Fill memory.
-		for (int i = 0; i < n; ++i)
-		{
-			((double2*)(mem_cpu.data))[i].x = (double)i;
-			((double2*)(mem_cpu.data))[i].y = (double)i + 0.2;
-		}
+        // Fill memory.
+        for (int i = 0; i < n; ++i)
+        {
+            ((double2*)(mem_cpu.data))[i].x = (double)i;
+            ((double2*)(mem_cpu.data))[i].y = (double)i + 0.2;
+        }
 
-		// Scale.
-		mem_cpu.scale_real(2.0);
+        // Scale.
+        mem_cpu.scale_real(2.0);
 
-		// Check contents.
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i),
-					((double2*)(mem_cpu.data))[i].x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.2),
-					((double2*)(mem_cpu.data))[i].y, 1e-12);
-		}
+        // Check contents.
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i),
+                    ((double2*)(mem_cpu.data))[i].x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.2),
+                    ((double2*)(mem_cpu.data))[i].y, 1e-12);
+        }
 
-		// Copy to GPU.
-		oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
+        // Copy to GPU.
+        oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
-		// Scale again.
-		mem_gpu.scale_real(2.0);
+        // Scale again.
+        mem_gpu.scale_real(2.0);
 
-		// Copy back and check contents.
-		oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i),
-					((double2*)(mem_cpu2.data))[i].x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.2),
-					((double2*)(mem_cpu2.data))[i].y, 1e-12);
-		}
-	}
+        // Copy back and check contents.
+        oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i),
+                    ((double2*)(mem_cpu2.data))[i].x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.2),
+                    ((double2*)(mem_cpu2.data))[i].y, 1e-12);
+        }
+    }
 
-	// Double precision complex matrix.
-	{
-		oskar_Mem mem_cpu(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, n);
+    // Double precision complex matrix.
+    {
+        oskar_Mem mem_cpu(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, n);
 
-		// Fill memory.
-		for (int i = 0; i < n; ++i)
-		{
-			((double4c*)(mem_cpu.data))[i].a.x = (double)i;
-			((double4c*)(mem_cpu.data))[i].a.y = (double)i + 0.2;
-			((double4c*)(mem_cpu.data))[i].b.x = (double)i + 0.4;
-			((double4c*)(mem_cpu.data))[i].b.y = (double)i + 0.6;
-			((double4c*)(mem_cpu.data))[i].c.x = (double)i + 0.8;
-			((double4c*)(mem_cpu.data))[i].c.y = (double)i + 1.0;
-			((double4c*)(mem_cpu.data))[i].d.x = (double)i + 1.2;
-			((double4c*)(mem_cpu.data))[i].d.y = (double)i + 1.4;
-		}
+        // Fill memory.
+        for (int i = 0; i < n; ++i)
+        {
+            ((double4c*)(mem_cpu.data))[i].a.x = (double)i;
+            ((double4c*)(mem_cpu.data))[i].a.y = (double)i + 0.2;
+            ((double4c*)(mem_cpu.data))[i].b.x = (double)i + 0.4;
+            ((double4c*)(mem_cpu.data))[i].b.y = (double)i + 0.6;
+            ((double4c*)(mem_cpu.data))[i].c.x = (double)i + 0.8;
+            ((double4c*)(mem_cpu.data))[i].c.y = (double)i + 1.0;
+            ((double4c*)(mem_cpu.data))[i].d.x = (double)i + 1.2;
+            ((double4c*)(mem_cpu.data))[i].d.y = (double)i + 1.4;
+        }
 
-		// Scale.
-		mem_cpu.scale_real(2.0);
+        // Scale.
+        mem_cpu.scale_real(2.0);
 
-		// Check contents.
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i),
-					((double4c*)(mem_cpu.data))[i].a.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.2),
-					((double4c*)(mem_cpu.data))[i].a.y, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.4),
-					((double4c*)(mem_cpu.data))[i].b.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.6),
-					((double4c*)(mem_cpu.data))[i].b.y, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.8),
-					((double4c*)(mem_cpu.data))[i].c.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 1.0),
-					((double4c*)(mem_cpu.data))[i].c.y, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 1.2),
-					((double4c*)(mem_cpu.data))[i].d.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 1.4),
-					((double4c*)(mem_cpu.data))[i].d.y, 1e-12);
-		}
+        // Check contents.
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i),
+                    ((double4c*)(mem_cpu.data))[i].a.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.2),
+                    ((double4c*)(mem_cpu.data))[i].a.y, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.4),
+                    ((double4c*)(mem_cpu.data))[i].b.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.6),
+                    ((double4c*)(mem_cpu.data))[i].b.y, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 0.8),
+                    ((double4c*)(mem_cpu.data))[i].c.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 1.0),
+                    ((double4c*)(mem_cpu.data))[i].c.y, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 1.2),
+                    ((double4c*)(mem_cpu.data))[i].d.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * ((double)i + 1.4),
+                    ((double4c*)(mem_cpu.data))[i].d.y, 1e-12);
+        }
 
-		// Copy to GPU.
-		oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
+        // Copy to GPU.
+        oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
-		// Scale again.
-		mem_gpu.scale_real(2.0);
+        // Scale again.
+        mem_gpu.scale_real(2.0);
 
-		// Copy back and check contents.
-		oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
-		for (int i = 0; i < n; ++i)
-		{
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i),
-					((double4c*)(mem_cpu2.data))[i].a.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.2),
-					((double4c*)(mem_cpu2.data))[i].a.y, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.4),
-					((double4c*)(mem_cpu2.data))[i].b.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.6),
-					((double4c*)(mem_cpu2.data))[i].b.y, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.8),
-					((double4c*)(mem_cpu2.data))[i].c.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 1.0),
-					((double4c*)(mem_cpu2.data))[i].c.y, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 1.2),
-					((double4c*)(mem_cpu2.data))[i].d.x, 1e-12);
-			CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 1.4),
-					((double4c*)(mem_cpu2.data))[i].d.y, 1e-12);
-		}
-	}
+        // Copy back and check contents.
+        oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i),
+                    ((double4c*)(mem_cpu2.data))[i].a.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.2),
+                    ((double4c*)(mem_cpu2.data))[i].a.y, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.4),
+                    ((double4c*)(mem_cpu2.data))[i].b.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.6),
+                    ((double4c*)(mem_cpu2.data))[i].b.y, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 0.8),
+                    ((double4c*)(mem_cpu2.data))[i].c.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 1.0),
+                    ((double4c*)(mem_cpu2.data))[i].c.y, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 1.2),
+                    ((double4c*)(mem_cpu2.data))[i].d.x, 1e-12);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 1.4),
+                    ((double4c*)(mem_cpu2.data))[i].d.y, 1e-12);
+        }
+    }
 }
 
 void Test_Mem::test_add()
@@ -607,4 +609,32 @@ void Test_Mem::test_add()
     // the ASTRON meeting Dec-2011.
 
     // TODO add more testing.
+}
+
+void Test_Mem::test_add_noise()
+{
+    int num_elements = 1000;
+    double stddev = 0.1;
+    double mean = 5.0;
+
+    // Test case: add real Gaussian noise.
+    {
+        oskar_Mem values(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        oskar_mem_add_real_gaussian_noise(&values, stddev, mean);
+
+        //    FILE* file;
+        //    file = fopen("temp_mem_noise.dat", "wb");
+        //    fwrite(values.data, sizeof(double4c), num_elements, file);
+        //    fclose(file);
+    }
+
+    // Test case: add Gaussian noise.
+    {
+        oskar_Mem values(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
+        oskar_mem_add_gaussian_noise(&values, stddev, mean);
+        FILE* file;
+        file = fopen("temp_mem_noise.dat", "wb");
+        fwrite(values.data, sizeof(double4c), num_elements, file);
+        fclose(file);
+    }
 }

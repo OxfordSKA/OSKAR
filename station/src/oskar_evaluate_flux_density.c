@@ -27,23 +27,34 @@
  */
 
 
-#include <mex.h>
+#include "station/oskar_evaluate_flux_density.h"
+#include <stdlib.h>
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+#ifndef c_0
+#define kB 1.3806503e-23
+#endif
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int oskar_evaluate_flux_density(double* flux_density, int num_channels,
+        double* effective_area, double* temperature)
 {
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
+    int c;
+
+    if (flux_density == NULL || effective_area == NULL || temperature == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    for (c = 0; c < num_channels; ++c)
     {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
+        flux_density[c] = (2.0 * kB * temperature[c]) / effective_area[c];
+        flux_density[c] *= 1.0e26; /* convert to Jansky (10^-26 W m^-2 Hz^-1) */
     }
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
-
-    // Destroy the object to free the memory.
-    delete m;
+    return OSKAR_SUCCESS;
 }
+
+#ifdef __cplusplus
+}
+#endif

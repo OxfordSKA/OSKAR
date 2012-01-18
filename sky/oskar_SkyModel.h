@@ -35,7 +35,7 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
-
+#include <stdlib.h>
 
 /**
  * @struct oskar_SkyModel
@@ -138,11 +138,22 @@ struct oskar_SkyModel
      * @brief Loads an OSKAR source text file into the current sky structure.
      * Sources from the file are appended to the end of the current structure.
      *
-     * @param filename  Path to a file containing an oskar sky model.
+     * @param filename  Path to a file containing an OSKAR sky model.
      *
-     * @return error code.
+     * @return An error code.
      */
     int load(const char* filename);
+
+
+    /**
+     * @brief Writes the current contents of teh sky structure to an OSKAR
+     * source text file.
+     *
+     * @param filename Path to a file to write to.
+     *
+     * @return An error code.
+     */
+    int write(const char* filename);
 
     /**
      * @brief Resizes the sky model the specified number of sources.

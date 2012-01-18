@@ -41,7 +41,6 @@ oskar_Settings::oskar_Settings(const QString& filename)
     // Initialise members.
     prec_double_ = false;
     max_sources_per_chunk_ = 10000;
-    max_host_threads_ = 1;
     longitude_deg_ = 0.0;
     latitude_deg_ = 0.0;
     altitude_m_ = 0.0;
@@ -81,7 +80,6 @@ int oskar_Settings::load(const QString& filename)
     // Load global settings.
     prec_double_           = settings.value("global/double_precision", true).toBool();
     max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk", 10000).toInt();
-    max_host_threads_      = settings.value("global/max_host_threads", 1).toInt();
     int size               = settings.beginReadArray("global/use_devices");
     use_devices_.resize(size);
     for (int i = 0; i < size; ++i)

@@ -37,17 +37,54 @@ class oskar_SettingsSky
     public:
         void load(const QSettings& settings);
 
-		QString sky_file() const { return sky_file_; }
-		void set_sky_file(const QString& value) { sky_file_ = value; }
-		QString generator() const { return generator_; }
-		void set_generator(const QString& value) { generator_ = value; }
-		int healpix_nside() const { return healpix_nside_; }
-		void set_healpix_nside(const int value) { healpix_nside_ = value; }
+        void print_summary() const;
+
+        QString sky_file() const { return sky_file_; }
+        void set_sky_file(const QString& value) { sky_file_ = value; }
+
+        QString output_sky_file() const { return output_sky_file_; }
+
+        // Generator accessor methods
+        QString generator() const { return generator_; }
+        void set_generator(const QString& value) { generator_ = value; }
+        int healpix_nside() const { return healpix_nside_; }
+        void set_healpix_nside(const int value) { healpix_nside_ = value; }
+
+        int random_num_sources() const { return random_num_sources_; }
+        double random_flux_density_min() const { return random_flux_density_min_; }
+        double random_flux_density_max() const { return random_flux_density_max_; }
+        double random_threshold() const { return random_threshold_; }
+        double random_power() const { return random_power1_; }
+        double random_power1() const { return random_power1_; }
+        double random_power2() const { return random_power2_; }
+        unsigned random_seed() const { return random_seed_; }
+
+        QString noise_model() const { return noise_model_; }
+        double noise_spectral_index() const { return noise_spectral_index_; }
+        double noise_seed() const { return noise_seed_; }
 
     private:
+        // Sky model file name to load.
         QString sky_file_;
-        QString generator_;
-        int healpix_nside_;
+
+        // Sky model file to write to.
+        QString output_sky_file_;
+
+        // Generator settings.
+        QString  generator_;                 ///< Generator type.
+        int      healpix_nside_;
+        int      random_num_sources_;
+        double   random_flux_density_min_;
+        double   random_flux_density_max_;
+        double   random_threshold_;
+        double   random_power1_;
+        double   random_power2_;
+        unsigned random_seed_;
+
+        // Sky noise (Gaussian random component added to visibilities).
+        QString noise_model_;         ///< Noise model type.
+        double noise_spectral_index_; ///< Frequency spectral index
+        unsigned noise_seed_;
 };
 
 #endif // OSKAR_SETTINGS_SKY_H_

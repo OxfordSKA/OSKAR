@@ -26,50 +26,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/oskar_random_broken_power_law.h"
-#include <math.h>
+
+#include "utility/oskar_mem_add_real_gaussian_noise.h"
+#include "math/oskar_random_gaussian.h"
+#include "utility/oskar_vector_types.h"
+#include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-double oskar_random_broken_power_law(double min, double max, double threshold,
-        double power1, double power2)
+int oskar_mem_add_real_gaussian_noise(oskar_Mem* mem, double stddev, double mean)
 {
-    double b0, pow1, pow2, powinv1, powinv2, b1, b2, r, b;
-    b0 = pow(threshold, (power1 - power2));
-    pow1 = power1 + 1.0;
-    pow2 = power2 + 1.0;
-    powinv1 = 1.0 / pow1;
-    powinv2 = 1.0 / pow2;
+    int i;
+    double r1, r2;
 
-    if (power1 == -1.0)
-        b1 = log(threshold) - log(min);
-    else
-        b1 = powinv1 * (pow(threshold, pow1) - pow(min, pow2));
+    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (power2 == -1.0)
-        b2 = b0 * (log(max) - log(threshold));
-    else
-        b2 = b0 * powinv2 * (pow(max, pow2) - pow(threshold, pow2));
+    if (mem->private_location != OSKAR_LOCATION_CPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
-    r = (double)rand() / ((double)RAND_MAX + 1.0);
-    b = -b1 + r * (b2 + b1);
-    if (b > 0.0)
+    srand(1); /* TODO seed properly */
+
+    if (mem->private_type == OSKAR_DOUBLE)
     {
-        if (power2 == -1.0)
-            return threshold * exp(b / b0);
-        else
-            return pow((b * (pow2 / b0) + pow(threshold, pow2)), powinv2);
+        for (i = 0; i < mem->private_num_elements; ++i)
+        {
+            r1 = oskar_random_gaussian(NULL) * stddev + mean;
+            ((double*)mem->data)[i] += r1;
+        }
+    }
+    else if (mem->private_type == OSKAR_DOUBLE_COMPLEX)
+    {
+        for (i = 0; i < mem->private_num_elements; ++i)
+        {
+            r1 = oskar_random_gaussian(NULL) * stddev + mean;
+            ((double2*)mem->data)[i].x += r1;
+        }
+    }
+    else if (mem->private_type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+    {
+        for (i = 0; i < mem->private_num_elements; ++i)
+        {
+            r1 = oskar_random_gaussian(&r2);
+            ((double4c*)mem->data)[i].a.x += r1 * stddev + mean;
+            ((double4c*)mem->data)[i].b.x += r2 * stddev + mean;
+            r1 = oskar_random_gaussian(&r2);
+            ((double4c*)mem->data)[i].c.x += r1 * stddev + mean;
+            ((double4c*)mem->data)[i].d.x += r2 * stddev + mean;
+        }
     }
     else
-    {
-        if (power1 == -1.0)
-            return threshold * exp(-abs(b));
-        else
-            return pow((pow(threshold, pow1) - abs(b) * pow1) , powinv1);
-    }
+        return OSKAR_ERR_BAD_DATA_TYPE;
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

@@ -26,24 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sky/test/Test_generators.h"
+#include <cuda_runtime_api.h>
 
-#include <mex.h>
+#include "sky/oskar_generate_random_coordinate.h"
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
+void Test_generators::test_random_coordinates()
 {
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
+    int num_sources = 10000;
+    double* ra = (double*)malloc(num_sources * sizeof(double));
+    double* dec = (double*)malloc(num_sources * sizeof(double));
+
+    srand(time(NULL));
+
+    for (int i = 0; i < num_sources; ++i)
     {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
+        oskar_generate_random_coordinate(&ra[i], &dec[i]);
     }
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+//    FILE* file = fopen("temp_coords.dat", "wb");
+//    for (int i = 0; i < num_sources; ++i)
+//    {
+//        fwrite((const void*)&ra[i], sizeof(double), 1, file);
+//        fwrite((const void*)&dec[i], sizeof(double), 1, file);
+//    }
+//    fclose(file);
 
-    // Destroy the object to free the memory.
-    delete m;
+    // Matlab code to plot the results:
+    //      fid = fopen('temp_coords.dat');
+    //      coords = fread(fid, [2 10000], 'double');
+    //      [x y z] = sph2cart(coords(1, :), coords(2,:), 1);
+    //      scatter3(x,y,z,10);
+    //      fclose(fid);
+
+    free(ra);
+    free(dec);
+
 }

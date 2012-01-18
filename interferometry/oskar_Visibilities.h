@@ -36,6 +36,7 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
+#include "interferometry/oskar_TelescopeModel.h"
 #include <stdlib.h>
 
 #define OSKAR_VIS_FILE_ID 0x1F4F
@@ -56,6 +57,8 @@
  * to for optimal memory write performance in OSKAR where channels are simulated
  * on the outer processing loop.
  *
+ * Axis order: channel(slowest) -> time -> baseline (fastest)
+ *
  * Visibility amplitudes are sorted as an array of complex scalar or 2-by-2 matrix
  * elements which can be either double or single precision according to the
  * amplitude type ID. The dimension ordering is the same as that used for
@@ -71,17 +74,22 @@
  */
 struct oskar_Visibilities
 {
-    int num_channels;          /**< Number of frequency channels. */
-    int num_times;             /**< Number of time samples. */
-    int num_baselines;         /**< Number of baselines. */
-    double freq_start_hz;      /**< Start Frequency, in Hz. */
-    double freq_inc_hz;        /**< Frequency increment, in Hz. */
-    double time_start_mjd_utc; /**< Start time in MJD, UTC */
-    double time_inc_seconds;   /**< Time increment, in seconds. */
-    oskar_Mem uu_metres;       /**< Baseline coordinates, in metres. */
-    oskar_Mem vv_metres;       /**< Baseline coordinates, in metres. */
-    oskar_Mem ww_metres;       /**< Baseline coordinates, in metres. */
-    oskar_Mem amplitude;       /**< Complex visibility amplitude. */
+    int num_channels;            /**< Number of frequency channels. */
+    int num_times;               /**< Number of time samples. */
+    int num_baselines;           /**< Number of baselines. */
+    double freq_start_hz;        /**< Start Frequency, in Hz. */
+    double freq_inc_hz;          /**< Frequency increment, in Hz. */
+    double time_start_mjd_utc;   /**< Start time in MJD, UTC */
+    double time_inc_seconds;     /**< Time increment, in seconds. */
+    double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
+
+    oskar_Mem sky_noise_stddev;  /**< Standard deviation corresponding to all
+                                      sky noise, per channel. */
+
+    oskar_Mem uu_metres;         /**< Baseline coordinates, in metres. */
+    oskar_Mem vv_metres;         /**< Baseline coordinates, in metres. */
+    oskar_Mem ww_metres;         /**< Baseline coordinates, in metres. */
+    oskar_Mem amplitude;         /**< Complex visibility amplitude. */
 
 #ifdef __cplusplus
     /**
@@ -173,7 +181,7 @@ struct oskar_Visibilities
      *
      * @return A pointer to the new visibility structure.
      */
-    static oskar_Visibilities* read(const char* filename, int *status = NULL);
+    static oskar_Visibilities* read(const char* filename, int* status = NULL);
 
     /**
      * @brief Resize the memory in the visibility structure to the specified
@@ -217,6 +225,36 @@ struct oskar_Visibilities
      * @return An error code.
      */
     int get_channel_amps(oskar_Mem* vis_amps, int channel);
+
+    /**
+     * @brief Evaluates the sky noise standard deviation for the addition of
+     * a gaussian sky noise component to the visibility amplitudes.
+     *
+     * @details
+     * NOTE: the interface to this may change!
+     *
+     * @param telescope         OSKAR telescope model structure.
+     * @param spectral_index    Spectral index (used to evaluate the sky noise
+     *                          frequency response, usually +0.75)
+     *
+     * @return An error code.
+     */
+    int evaluate_sky_noise_stddev(const oskar_TelescopeModel* telescope,
+            double spectral_index);
+
+    /**
+     * @brief Adds a frequency dependent gaussian noise component to the
+     * visibilities, typically corresponding to sky noise.
+     *
+     * @details
+     * NOTE: the interface to this may change!
+     *
+     * @param[in] stddev  Array (length num_channels) of the standard deviation
+     *                    of the noise to add, in Janskys.
+     *
+     * @return An error code.
+     */
+    int add_sky_noise(const double* stddev, unsigned seed = 666);
 
     /**
      * @brief Returns the number of baseline u,v,w coordinates.

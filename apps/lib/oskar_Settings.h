@@ -74,7 +74,6 @@ class oskar_Settings
 
         bool double_precision() const { return prec_double_; }
         int max_sources_per_chunk() const { return max_sources_per_chunk_; }
-        int max_host_threads() const { return max_host_threads_; }
         int num_devices() const { return use_devices_.size(); }
         const int* use_devices() const { return use_devices_.constData(); }
         const char* const* element_pattern_files_meerkat_pol1() const {return element_pattern_files_meerkat_pol1_;}
@@ -95,7 +94,6 @@ class oskar_Settings
     private:
         bool prec_double_;
         int max_sources_per_chunk_;
-        int max_host_threads_;
         QVector<int> use_devices_;
         QString filename_;
         QString telescope_file_;

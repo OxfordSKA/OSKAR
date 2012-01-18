@@ -33,7 +33,7 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/matlab/oskar_mex_pointer.h"
 #include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_get_type_string.h"
+#include "utility/matlab/oskar_mex_get_type_string.h"
 
 // MATLAB entry function.
 void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
@@ -46,7 +46,7 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
     }
 
     // Parse input arguments.
-    oskar_Mem* mem     = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
+    //oskar_Mem* mem     = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
     int type           = (int)mxGetScalar(in[1]);
 //    int location       = (int)mxGetScalar(in[2]);
 //    int num_elements   = mem->num_elements();

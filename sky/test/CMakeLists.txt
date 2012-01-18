@@ -8,6 +8,7 @@ if (CPPUNIT_FOUND)
         src/CppUnitMain.cpp
         src/Test_coord_transforms.cpp
         src/Test_SkyModel.cpp
+        src/Test_generators.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})

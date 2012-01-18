@@ -27,23 +27,26 @@
  */
 
 
-#include <mex.h>
+#ifndef OSKAR_EVALUATE_EFFECTIVE_AREA_H_
+#define OSKAR_EVALUATE_EFFECTIVE_AREA_H_
 
-#include "utility/oskar_Mem.h"
-#include "utility/matlab/oskar_mex_pointer.h"
+/**
+ * @file oskar_evaluate_effective_area.h
+ */
 
-// MATLAB entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
-{
-    // Check arguments.
-    if (num_out != 0 || num_in != 1)
-    {
-        mexErrMsgTxt("Usage: oskar_mem_destructor(pointer)");
-    }
+#include "oskar_global.h"
 
-    // Extract the oskar_Jones pointer from the mxArray object.
-    oskar_Mem* m = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
 
-    // Destroy the object to free the memory.
-    delete m;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+OSKAR_EXPORT
+int oskar_evaluate_effective_area(double* effective_area, int num_channels,
+        double start_freq, double freq_inc, int num_antennas);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_EVALUATE_EFFECTIVE_AREA_H_ */
