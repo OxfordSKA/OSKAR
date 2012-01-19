@@ -37,9 +37,31 @@
 #include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
+/**
+ * @brief
+ * Resizes arrays in a sky model structure.
+ *
+ * @details
+ * This function reallocates memory used by arrays in a sky model structure,
+ * preserving the existing contents.
+ *
+ * @param sky           Pointer to sky model structure.
+ * @param num_sources   New number of sources.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
 OSKAR_EXPORT
 int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_SKY_MODEL_RESIZE_H_ */

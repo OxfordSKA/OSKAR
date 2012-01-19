@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or src materials provided with the distribution.
+ *    and/or other materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,43 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_sky_model_resize.h"
-#include "utility/oskar_Mem.h"
+#include "math/oskar_angular_distance.h"
+#include <math.h>
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources)
+
+double oskar_angular_distance(double l1, double l2, double b1, double b2)
 {
-    int error = 0;
-
-    sky->num_sources = num_sources;
-
-    // Resize the model data.
-    error = sky->RA.resize(num_sources);
-    if (error) return error;
-    error = sky->Dec.resize(num_sources);
-    if (error) return error;
-    error = sky->I.resize(num_sources);
-    if (error) return error;
-    error = sky->Q.resize(num_sources);
-    if (error) return error;
-    error = sky->U.resize(num_sources);
-    if (error) return error;
-    error = sky->V.resize(num_sources);
-    if (error) return error;
-    error = sky->reference_freq.resize(num_sources);
-    if (error) return error;
-    error = sky->spectral_index.resize(num_sources);
-    if (error) return error;
-    error = sky->rel_l.resize(num_sources);
-    if (error) return error;
-    error = sky->rel_m.resize(num_sources);
-    if (error) return error;
-    error = sky->rel_n.resize(num_sources);
-    if (error) return error;
-
-    return error;
+    double delta_l, delta_b, sinDb, sinDl;
+    delta_l = (l2 - l1) / 2.0;
+    delta_b = (b2 - b1) / 2.0;
+    sinDb = sin(delta_b);
+    sinDl = sin(delta_l);
+    return 2.0 * asin( sqrt(sinDb*sinDb + cos(b1)*cos(b2) * sinDl*sinDl) );
 }
 
+#ifdef __cplusplus
+}
+#endif

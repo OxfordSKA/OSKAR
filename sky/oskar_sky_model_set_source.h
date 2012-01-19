@@ -37,11 +37,37 @@
 #include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
+/**
+ * @brief
+ * Sets source data into a sky model.
+ *
+ * @details
+ * This function sets sky model data for a single source at the given index.
+ * The sky model must already be large enough to hold the source data.
+ *
+ * @param[out] sky           Pointer to sky model.
+ * @param[in] index          Source index in sky model to set.
+ * @param[in] ra             Source right ascension in radians.
+ * @param[in] dec            Source declination in radians.
+ * @param[in] I              Source Stokes I in Jy.
+ * @param[in] Q              Source Stokes Q in Jy.
+ * @param[in] U              Source Stokes U in Jy.
+ * @param[in] V              Source Stokes V in Jy.
+ * @param[in] reference_freq Source reference frequency in Hz.
+ * @param[in] spectral_index Source spectral index.
+ *
+ * @return An error code.
+ */
 OSKAR_EXPORT
 int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         double dec, double I, double Q, double U, double V, double reference_freq,
         double spectral_index);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_SKY_MODEL_SET_SOURCE_H_ */

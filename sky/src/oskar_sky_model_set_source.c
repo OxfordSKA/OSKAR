@@ -27,28 +27,35 @@
  */
 
 #include "sky/oskar_sky_model_set_source.h"
+#include "sky/oskar_sky_model_location.h"
+#include "sky/oskar_sky_model_type.h"
 #include "sky/oskar_SkyModel.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_Mem.h"
 #include <cuda_runtime_api.h>
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         double dec, double I, double Q, double U, double V, double ref_frequency,
         double spectral_index)
 {
+    int type, location;
     if (index >= sky->num_sources)
-    {
         return OSKAR_ERR_OUT_OF_RANGE;
-    }
 
-    if (sky->location() == OSKAR_LOCATION_GPU)
+    /* Get the data location and type. */
+    location = oskar_sky_model_location(sky);
+    type = oskar_sky_model_type(sky);
+
+    if (location == OSKAR_LOCATION_GPU)
     {
-        size_t element_size = oskar_mem_element_size(sky->type());
-        size_t offset_bytes = index * element_size;
-        if (sky->type() == OSKAR_DOUBLE)
+        size_t element_size, offset_bytes;
+        element_size = oskar_mem_element_size(type);
+        offset_bytes = index * element_size;
+        if (type == OSKAR_DOUBLE)
         {
             cudaMemcpy((char*)(sky->RA.data) + offset_bytes, &ra, element_size,
                     cudaMemcpyHostToDevice);
@@ -67,7 +74,7 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
             cudaMemcpy((char*)(sky->spectral_index.data) + offset_bytes,
                     &spectral_index, element_size, cudaMemcpyHostToDevice);
         }
-        else if (sky->type() == OSKAR_SINGLE)
+        else if (type == OSKAR_SINGLE)
         {
             float temp_ra = (float)ra;
             float temp_dec = (float)dec;
@@ -97,7 +104,7 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
     }
     else
     {
-        if (sky->type() == OSKAR_DOUBLE)
+        if (type == OSKAR_DOUBLE)
         {
             ((double*)sky->RA.data)[index] = ra;
             ((double*)sky->Dec.data)[index] = dec;
@@ -108,7 +115,7 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
             ((double*)sky->reference_freq.data)[index] = ref_frequency;
             ((double*)sky->spectral_index.data)[index] = spectral_index;
         }
-        else if (sky->type() == OSKAR_SINGLE)
+        else if (type == OSKAR_SINGLE)
         {
             ((float*)sky->RA.data)[index] = (float)ra;
             ((float*)sky->Dec.data)[index] = (float)dec;
@@ -127,3 +134,6 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
     return 0;
 }
 
+#ifdef __cplusplus
+}
+#endif

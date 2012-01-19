@@ -29,6 +29,8 @@
 #include "interferometry/oskar_TelescopeModel.h"
 #include "sky/test/Test_SkyModel.h"
 #include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_filter_by_flux.h"
+#include "sky/oskar_sky_model_filter_by_radius.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_load.h"
@@ -458,3 +460,54 @@ void Test_SkyModel::test_evaluate_sky_temperature()
 
     free(temp);
 }
+
+void Test_SkyModel::test_filter_by_radius()
+{
+    // Generate 91 sources from dec = 0 to dec = 90 degrees.
+    int err = 0;
+    int num_sources = 91;
+    oskar_SkyModel sky(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_sources);
+    for (int i = 0; i < num_sources; ++i)
+    {
+        err = sky.set_source(i, 0.0, i * ((M_PI / 2) / (num_sources - 1)),
+                i, 1.0, 2.0, 3.0, i * 100, i * 200);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+    }
+
+    // Check that the data was set correctly.
+    CPPUNIT_ASSERT_EQUAL(num_sources, sky.num_sources);
+    for (int i = 0; i < num_sources; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, ((const double*)sky.RA)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i * ((M_PI / 2) / (num_sources - 1)),
+                ((const double*)sky.Dec)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i,
+                ((const double*)sky.I)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ((const double*)sky.Q)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, ((const double*)sky.U)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0, ((const double*)sky.V)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 100,
+                ((const double*)sky.reference_freq)[i], 0.001);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 200,
+                ((const double*)sky.spectral_index)[i], 0.001);
+    }
+
+    // Filter the data.
+    double inner = 4.5 * M_PI / 180;
+    double outer = 10.5 * M_PI / 180;
+    double ra0 = 0.0;
+    double dec0 = M_PI / 2;
+    err = oskar_sky_model_filter_by_radius(&sky, inner, outer, ra0, dec0);
+    CPPUNIT_ASSERT_EQUAL(0, err);
+
+    // Check the resulting sky model.
+    CPPUNIT_ASSERT_EQUAL(6, sky.num_sources);
+    for (int i = 0; i < sky.num_sources; ++i)
+    {
+        CPPUNIT_ASSERT(((const double*)sky.Dec)[i] > 79.5 * M_PI / 180.0);
+        CPPUNIT_ASSERT(((const double*)sky.Dec)[i] < 85.5 * M_PI / 180.0);
+//        printf("RA = %f, Dec = %f\n", ((const double*)sky.RA)[i],
+//                ((const double*)sky.Dec)[i] * 180 / M_PI);
+    }
+}
+

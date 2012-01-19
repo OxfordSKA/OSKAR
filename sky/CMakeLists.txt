@@ -7,9 +7,9 @@ include_directories(${oskar-lib_SOURCE_DIR}/math)
 # Add the source files in this directory.
 set(sky_SRC
     src/oskar_rotate_sources.cpp # Deprecated.
-    
+
     src/oskar_evaluate_sky_temperature.c
-    
+
     src/oskar_filter_sources_by_flux.cpp  # probably broken
     src/oskar_filter_sources_by_radius.cpp # probably broken
     src/oskar_date_time_to_mjd.c
@@ -31,16 +31,18 @@ set(sky_SRC
     src/oskar_generate_random_coordinate.c
 
     src/oskar_sky_model_append.c
-    src/oskar_sky_model_compute_relative_lmn.cpp
+    src/oskar_sky_model_compute_relative_lmn.c
     src/oskar_sky_model_copy.c
+    src/oskar_sky_model_filter_by_flux.c
+    src/oskar_sky_model_filter_by_radius.c
     src/oskar_sky_model_get_ptr.c
     src/oskar_sky_model_horizon_clip.cu
     src/oskar_sky_model_init.c
     src/oskar_sky_model_load.cpp
     src/oskar_sky_model_location.c
-    src/oskar_sky_model_resize.cpp
+    src/oskar_sky_model_resize.c
     src/oskar_sky_model_scale_by_spectral_index.cu
-    src/oskar_sky_model_set_source.cpp
+    src/oskar_sky_model_set_source.c
     src/oskar_sky_model_split.c
     src/oskar_sky_model_type.c
     src/oskar_sky_model_write.c

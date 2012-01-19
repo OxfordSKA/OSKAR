@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
+ *    and/or src materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,37 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ROUND_ROBIN_H_
-#define OSKAR_ROUND_ROBIN_H_
-
-/**
- * @file oskar_round_robin.h
- */
+#include "sky/oskar_sky_model_resize.h"
+#include "utility/oskar_mem_realloc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- *
- * @details
- * Distributes a number of \p items among a number of \p resources
- * (e.g. threads, or processes), and returns the \p number of items
- * and \p start item index (zero-based) for the current resource \p rank
- * (also zero-based).
- *
- * @param[in]  items     Number of items to distribute.
- * @param[in]  resources Number of resources available.
- * @param[in]  rank      Index of this resource.
- * @param[out] number    Pointer to the number of items assigned to this resource.
- * @param[out] start     Pointer to the start index assigned to this resource.
- */
-void oskar_round_robin(int items, int resources, int rank, int* number,
-        int* start);
+int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources)
+{
+    int error = 0;
+
+    sky->num_sources = num_sources;
+
+    /* Resize the model data. */
+    error = oskar_mem_realloc(&sky->RA, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->Dec, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->I, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->Q, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->U, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->V, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->reference_freq, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->spectral_index, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->rel_l, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->rel_m, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->rel_n, num_sources);
+    if (error) return error;
+
+    return error;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_ROUND_ROBIN_H_ */

@@ -26,12 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ROUND_ROBIN_H_
-#define OSKAR_ROUND_ROBIN_H_
+#ifndef OSKAR_SKY_MODEL_FILTER_BY_RADIUS_H_
+#define OSKAR_SKY_MODEL_FILTER_BY_RADIUS_H_
 
 /**
- * @file oskar_round_robin.h
+ * @file oskar_sky_model_filter_by_radius.h
  */
+
+#include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,24 +42,24 @@ extern "C" {
 
 /**
  * @brief
+ * Removes sources outside given limits.
  *
  * @details
- * Distributes a number of \p items among a number of \p resources
- * (e.g. threads, or processes), and returns the \p number of items
- * and \p start item index (zero-based) for the current resource \p rank
- * (also zero-based).
+ * This function removes sources from a sky model that lie within
+ * \p inner_radius or beyond \p outer_radius.
  *
- * @param[in]  items     Number of items to distribute.
- * @param[in]  resources Number of resources available.
- * @param[in]  rank      Index of this resource.
- * @param[out] number    Pointer to the number of items assigned to this resource.
- * @param[out] start     Pointer to the start index assigned to this resource.
+ * @param[out] sky Pointer to sky model.
+ * @param[in] inner_radius Inner radius in radians.
+ * @param[in] outer_radius Outer radius in radians.
+ * @param[in] ra0 Right ascension of the phase centre in radians.
+ * @param[in] dec0 Declination of the phase centre in radians.
  */
-void oskar_round_robin(int items, int resources, int rank, int* number,
-        int* start);
+OSKAR_EXPORT
+int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
+        double outer_radius, double ra0, double dec0);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ROUND_ROBIN_H_ */
+#endif /* OSKAR_SKY_MODEL_FILTER_BY_RADIUS_H_ */

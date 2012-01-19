@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ROUND_ROBIN_H_
-#define OSKAR_ROUND_ROBIN_H_
+#ifndef OSKAR_ANGULAR_DISTANCE_H_
+#define OSKAR_ANGULAR_DISTANCE_H_
 
 /**
- * @file oskar_round_robin.h
+ * @file oskar_angular_distance.h
  */
 
 #ifdef __cplusplus
@@ -38,25 +38,26 @@ extern "C" {
 #endif
 
 /**
- * @brief
- *
  * @details
- * Distributes a number of \p items among a number of \p resources
- * (e.g. threads, or processes), and returns the \p number of items
- * and \p start item index (zero-based) for the current resource \p rank
- * (also zero-based).
+ * Return the angular distance between two points on a sphere.
+ * This is implemented using the Haversin formula:
  *
- * @param[in]  items     Number of items to distribute.
- * @param[in]  resources Number of resources available.
- * @param[in]  rank      Index of this resource.
- * @param[out] number    Pointer to the number of items assigned to this resource.
- * @param[out] start     Pointer to the start index assigned to this resource.
+ * \f{equation}{
+ *     2\arcsin\left(\sqrt{\sin^2\left(\frac{\Delta\phi}{2}\right)
+ *     +\cos{\phi_s}\cos{\phi_f}\sin^2\left(\frac{\Delta\lambda}{2}\right)}\right)
+ * \f}
+ *
+ * @param[in] l1 Longitude of the first point, in radians.
+ * @param[in] l2 Longitude of the second point, in radians.
+ * @param[in] b1 Latitude of the first point, in radians.
+ * @param[in] b2 Latitude of the second point, in radians.
+ *
+ * @return The angular distance in radians.
  */
-void oskar_round_robin(int items, int resources, int rank, int* number,
-        int* start);
+double oskar_angular_distance(double l1, double l2, double b1, double b2);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_ROUND_ROBIN_H_ */
+#endif /* OSKAR_ANGULAR_DISTANCE_H_ */
