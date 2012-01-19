@@ -137,6 +137,17 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
         printf("done.\n");
     }
 
+    // Filter sources.
+    sky->filter_by_radius(settings.sky().filter_inner_rad(),
+            settings.sky().filter_outer_rad(),
+            settings.obs().ra0_rad(), settings.obs().dec0_rad());
+    if (settings.sky().filter_flux_min() != 0.0 &&
+            settings.sky().filter_flux_max() != 0.0)
+    {
+        sky->filter_by_flux(settings.sky().filter_flux_min(),
+                settings.sky().filter_flux_max());
+    }
+
     // Compute source direction cosines relative to phase centre.
     printf("--> Computing source direction cosines... ");
     fflush(stdout);

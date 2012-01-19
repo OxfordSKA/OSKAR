@@ -62,6 +62,10 @@ class oskar_SettingsSky
         QString noise_model() const { return noise_model_; }
         double noise_spectral_index() const { return noise_spectral_index_; }
         double noise_seed() const { return noise_seed_; }
+        double filter_inner_rad() const { return filter_inner_rad_; }
+        double filter_outer_rad() const { return filter_outer_rad_; }
+        double filter_flux_min() const { return filter_flux_min_; }
+        double filter_flux_max() const { return filter_flux_max_; }
 
     private:
         // Sky model file name to load.
@@ -80,6 +84,12 @@ class oskar_SettingsSky
         double   random_power1_;
         double   random_power2_;
         unsigned random_seed_;
+
+        // Filter settings.
+        double filter_inner_rad_;
+        double filter_outer_rad_;
+        double filter_flux_min_;
+        double filter_flux_max_;
 
         // Sky noise (Gaussian random component added to visibilities).
         QString noise_model_;         ///< Noise model type.

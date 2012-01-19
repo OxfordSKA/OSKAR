@@ -30,6 +30,7 @@
 #include <QtCore/QSettings>
 #include <cstdio>
 #include <ctime>
+#include <cmath>
 
 void oskar_SettingsSky::load(const QSettings& settings)
 {
@@ -59,10 +60,11 @@ void oskar_SettingsSky::load(const QSettings& settings)
 
     output_sky_file_ = settings.value("sky/output_sky_file", "").toString();
 
-
-    // Filter settings. (TODO)
-//    settings.value("sky/generator/filter_radius/inner_deg", 0).toDouble();
-//    settings.value("sky/generator/filter_radius/outer_deg", 0).toDouble();
+    // Filter settings.
+    filter_inner_rad_ = settings.value("sky/filter/radius_inner_deg", -1.0).toDouble() * M_PI / 180;
+    filter_outer_rad_ = settings.value("sky/filter/radius_outer_deg", 1000.0).toDouble() * M_PI / 180;
+    filter_flux_min_  = settings.value("sky/filter/flux_min", 0.0).toDouble();
+    filter_flux_max_  = settings.value("sky/filter/flux_max", 0.0).toDouble();
 
     // Noise model settings.
     noise_model_ = settings.value("sky/noise_model", "").toString();

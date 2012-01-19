@@ -30,6 +30,8 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_append.h"
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
+#include "sky/oskar_sky_model_filter_by_flux.h"
+#include "sky/oskar_sky_model_filter_by_radius.h"
 #include "sky/oskar_sky_model_copy.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_write.h"
@@ -106,6 +108,18 @@ int oskar_SkyModel::append(const oskar_SkyModel* other)
 int oskar_SkyModel::compute_relative_lmn(double ra0, double dec0)
 {
     return oskar_sky_model_compute_relative_lmn(this, ra0, dec0);
+}
+
+int oskar_SkyModel::filter_by_flux(double min_I, double max_I)
+{
+    return oskar_sky_model_filter_by_flux(this, min_I, max_I);
+}
+
+int oskar_SkyModel::filter_by_radius(double inner_radius, double outer_radius,
+        double ra0, double dec0)
+{
+    return oskar_sky_model_filter_by_radius(this, inner_radius, outer_radius,
+            ra0, dec0);
 }
 
 int oskar_SkyModel::load(const char* filename)
