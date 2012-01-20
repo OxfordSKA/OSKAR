@@ -62,10 +62,9 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
             rel_l    = (float*)sky->rel_l.data;
             rel_m    = (float*)sky->rel_m.data;
             rel_n    = (float*)sky->rel_n.data;
-            for (in = 0, out = -1; in < sky->num_sources; ++in)
+            for (in = 0, out = 0; in < sky->num_sources; ++in)
             {
                 if (I[in] < (float)min_I || I[in] > (float)max_I) continue;
-                out++;
                 ra[out]       = ra[in];
                 dec[out]      = dec[in];
                 I[out]        = I[in];
@@ -77,6 +76,7 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
                 rel_l[out]    = rel_l[in];
                 rel_m[out]    = rel_m[in];
                 rel_n[out]    = rel_n[in];
+                out++;
             }
         }
         else if (type == OSKAR_DOUBLE)
@@ -94,10 +94,9 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
             rel_l    = (double*)sky->rel_l.data;
             rel_m    = (double*)sky->rel_m.data;
             rel_n    = (double*)sky->rel_n.data;
-            for (in = 0, out = -1; in < sky->num_sources; ++in)
+            for (in = 0, out = 0; in < sky->num_sources; ++in)
             {
                 if (I[in] < min_I || I[in] > max_I) continue;
-                out++;
                 ra[out]       = ra[in];
                 dec[out]      = dec[in];
                 I[out]        = I[in];
@@ -109,13 +108,14 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
                 rel_l[out]    = rel_l[in];
                 rel_m[out]    = rel_m[in];
                 rel_n[out]    = rel_n[in];
+                out++;
             }
         }
         else
             return OSKAR_ERR_BAD_DATA_TYPE;
 
         /* Store the new number of sources in the sky model. */
-        sky->num_sources = out + 1;
+        sky->num_sources = out;
     }
     else
         return OSKAR_ERR_BAD_LOCATION;

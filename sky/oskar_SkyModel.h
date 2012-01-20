@@ -103,14 +103,6 @@ struct oskar_SkyModel
     ~oskar_SkyModel();
 
     /**
-     * @brief Copies this sky model to another
-     *
-     * @return An error code.
-     */
-    int copy_to(oskar_SkyModel* other);
-
-
-    /**
      * @brief Appends the specified sky model the the current sky model.
      *
      * @param other Sky model to append.
@@ -133,6 +125,13 @@ struct oskar_SkyModel
      * @return error code.
      */
     int compute_relative_lmn(double ra0, double dec0);
+
+    /**
+     * @brief Copies this sky model to another
+     *
+     * @return An error code.
+     */
+    int copy_to(oskar_SkyModel* other);
 
     /**
      * @brief Filter sources by flux.
@@ -169,16 +168,11 @@ struct oskar_SkyModel
      */
     int load(const char* filename);
 
-
     /**
-     * @brief Writes the current contents of teh sky structure to an OSKAR
-     * source text file.
-     *
-     * @param filename Path to a file to write to.
-     *
-     * @return An error code.
+     * @brief Returns the memory location for memory in the sky structure
+     * or error code if the types are inconsistent.
      */
-    int write(const char* filename);
+    int location() const;
 
     /**
      * @brief Resizes the sky model the specified number of sources.
@@ -234,16 +228,14 @@ struct oskar_SkyModel
     int type() const;
 
     /**
-     * @brief Returns the memory location for memory in the sky structure
-     * or error code if the types are inconsistent.
+     * @brief Writes the current contents of teh sky structure to an OSKAR
+     * source text file.
+     *
+     * @param filename Path to a file to write to.
+     *
+     * @return An error code.
      */
-    int location() const;
-
-    /**
-     * @brief Returns true if the memory in the sky structure is
-     * double precision.
-     */
-    bool is_double() const;
+    int write(const char* filename);
 #endif
 };
 typedef struct oskar_SkyModel oskar_SkyModel;

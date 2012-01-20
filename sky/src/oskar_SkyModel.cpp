@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_append.h"
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
@@ -95,11 +94,6 @@ oskar_SkyModel::~oskar_SkyModel()
 {
 }
 
-int oskar_SkyModel::copy_to(oskar_SkyModel* other)
-{
-    return oskar_sky_model_copy(other, this);
-}
-
 int oskar_SkyModel::append(const oskar_SkyModel* other)
 {
     return oskar_sky_model_append(this, other);
@@ -108,6 +102,11 @@ int oskar_SkyModel::append(const oskar_SkyModel* other)
 int oskar_SkyModel::compute_relative_lmn(double ra0, double dec0)
 {
     return oskar_sky_model_compute_relative_lmn(this, ra0, dec0);
+}
+
+int oskar_SkyModel::copy_to(oskar_SkyModel* other)
+{
+    return oskar_sky_model_copy(other, this);
 }
 
 int oskar_SkyModel::filter_by_flux(double min_I, double max_I)
@@ -127,9 +126,9 @@ int oskar_SkyModel::load(const char* filename)
     return oskar_sky_model_load(filename, this);
 }
 
-int oskar_SkyModel::write(const char* filename)
+int oskar_SkyModel::location() const
 {
-    return oskar_sky_model_write(filename, this);
+    return oskar_sky_model_location(this);
 }
 
 int oskar_SkyModel::resize(int num_sources)
@@ -155,12 +154,7 @@ int oskar_SkyModel::type() const
     return oskar_sky_model_type(this);
 }
 
-int oskar_SkyModel::location() const
+int oskar_SkyModel::write(const char* filename)
 {
-    return oskar_sky_model_location(this);
-}
-
-bool oskar_SkyModel::is_double() const
-{
-    return (oskar_sky_model_type(this) == OSKAR_DOUBLE);
+    return oskar_sky_model_write(filename, this);
 }

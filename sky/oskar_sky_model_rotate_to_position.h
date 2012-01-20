@@ -26,13 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_ROTATE_SOURCES_H_
-#define OSKAR_SKY_ROTATE_SOURCES_H_
+#ifndef OSKAR_SKY_MODEL_ROTATE_TO_POSITION_H_
+#define OSKAR_SKY_MODEL_ROTATE_TO_POSITION_H_
 
-void oskar_rotate_sources_to_phase_centre(const unsigned num_sources,
-        double * ra, double * dec, const double ra0, const double dec0);
+/**
+ * @file oskar_sky_model_rotate_to_position.h
+ */
 
-void oskar_mult_matrix_vector(const double * M, double * v);
+#include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /* OSKAR_SKY_ROTATE_SOURCES_H_ */
+/**
+ * @brief
+ * Rotates sources in the sky model to a point in the sky.
+ *
+ * @details
+ * This function can be used to rotate the sky model to the observation phase
+ * centre.
+ *
+ * The rotation matrix is given by:
+ *
+ *   [ cos(a)sin(d)   -sin(a)   cos(a)cos(d) ]
+ *   [ sin(a)sin(d)    cos(a)   sin(a)cos(d) ]
+ *   [    -cos(d)        0          sin(d)   ]
+ *
+ * where a = ra0, d = dec0.
+ * This corresponds to a rotation of a around z,
+ * followed by a rotation of (90-d) around y.
+ *
+ * @param[out] sky  Pointer to sky model structure.
+ * @param[in] ra0   Right ascension of position.
+ * @param[in] dec0  Declination of position.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_sky_model_rotate_to_position(oskar_SkyModel* sky,
+        double ra0, double dec0);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_SKY_MODEL_ROTATE_TO_POSITION_H_ */

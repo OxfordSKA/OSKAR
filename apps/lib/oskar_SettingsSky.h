@@ -35,17 +35,17 @@
 class oskar_SettingsSky
 {
     public:
-        void load(const QSettings& settings);
+        void load(QSettings& settings);
 
         void print_summary() const;
 
-        QString sky_file() const { return sky_file_; }
-        void set_sky_file(const QString& value) { sky_file_ = value; }
+        QString input_sky_file() const { return input_sky_file_; }
+        void set_input_sky_file(const QString& value) { input_sky_file_ = value; }
 
         QString output_sky_file() const { return output_sky_file_; }
 
         // Generator accessor methods
-        QString generator() const { return generator_; }
+        QString generator() const { return generator_; } // FIXME Change to enumerator.
         void set_generator(const QString& value) { generator_ = value; }
         int healpix_nside() const { return healpix_nside_; }
         void set_healpix_nside(const int value) { healpix_nside_ = value; }
@@ -59,7 +59,7 @@ class oskar_SettingsSky
         double random_power2() const { return random_power2_; }
         unsigned random_seed() const { return random_seed_; }
 
-        QString noise_model() const { return noise_model_; }
+        QString noise_model() const { return noise_model_; } // FIXME Change to enumerator.
         double noise_spectral_index() const { return noise_spectral_index_; }
         double noise_seed() const { return noise_seed_; }
         double filter_inner_rad() const { return filter_inner_rad_; }
@@ -69,13 +69,13 @@ class oskar_SettingsSky
 
     private:
         // Sky model file name to load.
-        QString sky_file_;
+        QString input_sky_file_; // FIXME Change to char*.
 
         // Sky model file to write to.
-        QString output_sky_file_;
+        QString output_sky_file_; // FIXME Change to char*.
 
         // Generator settings.
-        QString  generator_;                 ///< Generator type.
+        QString  generator_;                 ///< Generator type. FIXME Change to enumerator.
         int      healpix_nside_;
         int      random_num_sources_;
         double   random_flux_density_min_;
@@ -92,7 +92,7 @@ class oskar_SettingsSky
         double filter_flux_max_;
 
         // Sky noise (Gaussian random component added to visibilities).
-        QString noise_model_;         ///< Noise model type.
+        QString noise_model_;         ///< Noise model type. FIXME Change to enumerator.
         double noise_spectral_index_; ///< Frequency spectral index
         unsigned noise_seed_;
 };

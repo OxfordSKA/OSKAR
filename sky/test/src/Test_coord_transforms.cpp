@@ -26,8 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// FIXME Many of these functions and tests are under review: some may be deprecated and/or rewritten.
-
 #include "sky/test/Test_coord_transforms.h"
 #include <cuda_runtime_api.h>
 
@@ -35,12 +33,9 @@
 #include "sky/oskar_date_time_to_mjd.h"
 #include "sky/oskar_mjd_to_last_fast.h"
 #include "sky/oskar_ra_dec_to_az_el_cuda.h"
-#include "sky/oskar_rotate_sources.h"
-#include "sky/oskar_filter_sources_by_radius.h"
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-
 
 /**
  * @details
@@ -130,8 +125,6 @@ void Test_coord_transforms::test_last()
 //    CPPUNIT_ASSERT_DOUBLES_EQUAL(67.69,  e * 180.0 / M_PI, 0.01);
 }
 
-
-
 void Test_coord_transforms::test_wrapper()
 {
     double ra = 0, dec = 0, lst = 0, lat = 0, az = 0, el = 0;
@@ -148,84 +141,4 @@ void Test_coord_transforms::test_wrapper()
             break;
         }
     }
-}
-
-/**
- * @details
- */
-void Test_coord_transforms::test_distance_filter()
-{
-//    unsigned num_sources = 5;
-//    double inner_radius = 1.0;
-//    double outer_radius = 180.0;
-//    double ra0 = 0.0;
-//    double dec0 = M_PI / 2.0;
-//    double brightness_min = 1.0e-2;
-//    double brightness_max = 1.0e4;
-//    double distribution_power = -2.0;
-//
-//    double* ra   = (double*)malloc(num_sources * sizeof(double));
-//    double* dec  = (double*)malloc(num_sources * sizeof(double));
-//    double* B    = (double*)malloc(num_sources * sizeof(double));
-//    double* dist = (double*)malloc(num_sources * sizeof(double));
-//
-//    generate_random_sources(num_sources, brightness_min, brightness_max,
-//            distribution_power, ra, dec, B, 0);
-//
-////    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
-////    printf("\n= Before:\n");
-////    for (unsigned i = 0; i < num_sources; ++i)
-////    {
-////        printf("[%u] % -6.2f, % -6.2f, % -6.2f, % -6.2f\n", i, dist[i], ra[i],
-////                dec[i], B[i]);
-////    }
-//
-//    filter_sources_by_radius(&num_sources, inner_radius, outer_radius, ra0, dec0,
-//            &ra, &dec, &B);
-//
-////    source_distance_from_phase_centre(num_sources, ra, dec, ra0, dec0, &dist[0]);
-////    printf("\n= After:\n");
-////    for (unsigned i = 0; i < num_sources; ++i)
-////    {
-////        printf("[%u] % -6.2f, % -6.2f, % -6.2f, % -6.2f\n", i, dist[i], ra[i],
-////                dec[i], B[i]);
-////    }
-//
-//    free(dist);
-//    free(ra);
-//    free(dec);
-//    free(B);
-}
-
-void Test_coord_transforms::test_rotate_sources()
-{
-//    const unsigned num_sources = 3;
-//    const double ra0 = 0;
-//    const double dec0 = 30 * M_PI / 180.0;
-//    std::vector<double> ra(num_sources);
-//    std::vector<double> dec(num_sources);
-//    std::vector<double> brightness(num_sources);
-//
-//    generate_random_sources(num_sources, 1.0, 1.0, -2.0, &ra[0], &dec[0],
-//            &brightness[0], 0);
-////    std::vector<double> dist(num_sources);
-////    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0],
-////            0, M_PI / 2.0, &dist[0]);
-////    cout << "= Before: " << endl;
-////    for (unsigned i = 0; i < num_sources; ++i)
-////    {
-////        cout << setw(2) << " [" << i << "] ";
-////        cout << setprecision(4) << fixed << setw(6) << dist[i] << " " ;
-////        cout << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
-////    }
-//
-//    oskar_rotate_sources_to_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0);
-//
-////    source_distance_from_phase_centre(num_sources, &ra[0], &dec[0], ra0, dec0, &dist[0]);
-////    cout << "= After: " << endl;
-////    for (unsigned i = 0; i < num_sources; ++i)
-////    {
-////        cout << " [" << i << "] " << dist[i] << " " ;
-////        cout << ra[i] << " " << dec[i] << " " << brightness[i] << endl;
-////    }
 }

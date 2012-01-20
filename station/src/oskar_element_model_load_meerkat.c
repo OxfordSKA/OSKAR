@@ -46,6 +46,8 @@
 #include <math.h>
 #include <float.h>
 
+#define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,7 +63,7 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
     oskar_SplineData *data_phi = NULL, *data_theta = NULL;
     int k_theta = 0, k_phi = 0;
     double prev_theta = -1.0, prev_phi = -1.0;
-    int decimate_theta = 3, decimate_phi = 3; /* Decimation factors. */
+    int decimate_theta = 1, decimate_phi = 1; /* Decimation factors. */
 
     /* Declare the line buffer. */
     char *line = NULL;
@@ -138,6 +140,7 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
 
             /* Ignore any data at poles. */
             if (data[0] < 1e-6 || data[0] > (180.0 - 1e-6)) continue;
+            if (data[0] > 8.0) continue;
 
             /* Keep a record of how many times the coordinates change. */
             if (data[0] != prev_theta)
@@ -156,9 +159,17 @@ int oskar_element_model_load_meerkat(oskar_ElementModel* data, int i,
             data[1] *= DEG2RAD;
 
             /* Decimate input data. */
+            /*
             decimate_phi = 1 + (int)(0.02 / sin(data[0]));
             if (k_theta % decimate_theta) continue;
             if (k_phi % decimate_phi) continue;
+            for (i = 2; i < 6; ++i)
+            {
+                data[i] *= 1024;
+                data[i] = (double)(round(data[i]));
+                data[i] /= 1024;
+            }
+            */
 
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)

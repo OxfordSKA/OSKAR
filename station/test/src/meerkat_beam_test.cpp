@@ -78,7 +78,8 @@ int main(int argc, char** argv)
         float phi = p * (2.0 * M_PI) / (n_phi-1);
         for (int t = 0; t < n_theta; ++t, ++i)
         {
-            float theta = t * (0.5 * M_PI) / (n_theta-1);
+//            float theta = t * (0.5 * M_PI) / (n_theta-1);
+            float theta = t * (8.0 * (M_PI / 180.0)) / (n_theta-1);
             ((float*)pt_theta)[i] = theta;
             ((float*)pt_phi)[i] = phi;
         }

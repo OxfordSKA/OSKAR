@@ -32,56 +32,66 @@
 #include <ctime>
 #include <cmath>
 
-void oskar_SettingsSky::load(const QSettings& settings)
+void oskar_SettingsSky::load(QSettings& settings)
 {
     // Sky model file.
-    sky_file_      = settings.value("sky/source_file", "").toString();
+    settings.beginGroup("sky");
+    input_sky_file_ = settings.value("source_file", "").toString();
 
     // Generator settings.
-    generator_     = settings.value("sky/generator", "").toString();
-    healpix_nside_ = settings.value("sky/generator/healpix/nside", 0).toInt();
-    random_num_sources_ = (int)settings.value("sky/generator/random/num_sources", 0).toDouble();
-    random_flux_density_min_ = settings.value("sky/generator/random/flux_density_min", 0.0).toDouble();
-    random_flux_density_max_ = settings.value("sky/generator/random/flux_density_max", 0.0).toDouble();
-    random_threshold_ = settings.value("sky/generator/random/threshold", 0.0).toDouble();
+    generator_ = settings.value("generator", "").toString();
+    settings.beginGroup("generator");
+    healpix_nside_ = settings.value("healpix/nside", 0).toInt();
+    settings.beginGroup("random");
+    random_num_sources_ = (int)settings.value("num_sources", 0).toDouble();
+    random_flux_density_min_ = settings.value("flux_density_min", 0.0).toDouble();
+    random_flux_density_max_ = settings.value("flux_density_max", 0.0).toDouble();
+    random_threshold_ = settings.value("threshold", 0.0).toDouble();
     if (generator_.toUpper() == "RANDOM_POWER_LAW")
     {
-        if (settings.contains("sky/generator/random/power") && settings.contains("sky/generator/random/power1"))
-            printf("== WARNING: both 'power' and 'power1' keywords detected, these can conflict!\n");
+        if (settings.contains("power") && settings.contains("power1"))
+            printf("== WARNING: Conflicting 'power' and 'power1' keywords.\n");
     }
-    random_power1_ = settings.value("sky/generator/random/power", 0.0).toDouble();
-    random_power1_ = settings.value("sky/generator/random/power1", 0.0).toDouble();
-    random_power2_ = settings.value("sky/generator/random/power2", 0.0).toDouble();
-    QString seed = settings.value("sky/generator/random/seed").toString();
+    random_power1_ = settings.value("power", 0.0).toDouble();
+    random_power1_ = settings.value("power1", 0.0).toDouble();
+    random_power2_ = settings.value("power2", 0.0).toDouble();
+    QString seed = settings.value("seed").toString();
     if (seed.toUpper() == "TIME")
         random_seed_ = (unsigned)time(NULL);
     else
         random_seed_ = (unsigned)seed.toDouble();
+    settings.endGroup(); // Group "random".
+    settings.endGroup(); // Group "generator".
 
-    output_sky_file_ = settings.value("sky/output_sky_file", "").toString();
+    output_sky_file_ = settings.value("output_sky_file", "").toString();
 
     // Filter settings.
-    filter_inner_rad_ = settings.value("sky/filter/radius_inner_deg", -1.0).toDouble() * M_PI / 180;
-    filter_outer_rad_ = settings.value("sky/filter/radius_outer_deg", 1000.0).toDouble() * M_PI / 180;
-    filter_flux_min_  = settings.value("sky/filter/flux_min", 0.0).toDouble();
-    filter_flux_max_  = settings.value("sky/filter/flux_max", 0.0).toDouble();
+    settings.beginGroup("filter");
+    filter_inner_rad_ = settings.value("radius_inner_deg", -1.0).toDouble() * M_PI / 180;
+    filter_outer_rad_ = settings.value("radius_outer_deg", 1000.0).toDouble() * M_PI / 180;
+    filter_flux_min_  = settings.value("flux_min", 0.0).toDouble();
+    filter_flux_max_  = settings.value("flux_max", 0.0).toDouble();
+    settings.endGroup(); // Group "filter".
 
     // Noise model settings.
-    noise_model_ = settings.value("sky/noise_model", "").toString();
-    noise_spectral_index_ = settings.value("sky/noise_model/spectral_index", 0.0).toDouble();
-    seed = settings.value("sky/noise_model/seed").toString();
+    noise_model_ = settings.value("noise_model", "").toString();
+    noise_spectral_index_ = settings.value("noise_model/spectral_index", 0.0).toDouble();
+    seed = settings.value("noise_model/seed").toString();
     if (seed.toUpper() == "TIME")
         noise_seed_ = (unsigned)time(NULL);
     else
         noise_seed_ = (unsigned)seed.toDouble();
+
+    // End sky group.
+    settings.endGroup();
 }
 
 void oskar_SettingsSky::print_summary() const
 {
     printf("\n\n-------------------------------------------\n");
     printf("[Sky]\n");
-    if (!sky_file_.isEmpty())
-        printf("- sky file  = %s\n",sky_file_.toAscii().data());
+    if (!input_sky_file_.isEmpty())
+        printf("- sky file  = %s\n",input_sky_file_.toAscii().data());
 
     if (!generator_.isEmpty())
     {

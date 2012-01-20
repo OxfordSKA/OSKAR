@@ -30,9 +30,9 @@
 #include "apps/lib/oskar_SettingsSky.h"
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
-#include "sky/oskar_generate_random_coordinate.h"
 #include "math/oskar_random_power_law.h"
 #include "math/oskar_random_broken_power_law.h"
+#include "sky/oskar_generate_random_coordinate.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -49,7 +49,7 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     oskar_SkyModel *sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
 
     // Load sky file if it exists.
-    QByteArray sky_file = settings.sky().sky_file().toAscii();
+    QByteArray sky_file = settings.sky().input_sky_file().toAscii();
     if (!sky_file.isEmpty())
     {
         printf("--> Loading sky model data... ");
@@ -68,11 +68,10 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     // Set up sky using generator parameters.
     if (settings.sky().generator().toUpper() == "HEALPIX")
     {
-        int nside = settings.sky().healpix_nside();
-        int npix = oskar_healpix_nside_to_npix(nside);
-
         // Add enough positions to the sky model.
         int old_size = sky->num_sources;
+        int nside = settings.sky().healpix_nside();
+        int npix = oskar_healpix_nside_to_npix(nside);
         sky->resize(old_size + npix);
 
         // Generate the new positions.
@@ -91,18 +90,20 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     }
     else if (settings.sky().generator().toUpper() == "RANDOM_POWER_LAW")
     {
-        printf("--> Generating random power law source distribution... ");
-
+        // Add enough positions to the sky model.
         int old_size = sky->num_sources;
         int num_sources = settings.sky().random_num_sources();
         sky->resize(old_size + num_sources);
 
+        // Generator parameters.
         double min = settings.sky().random_flux_density_min();
         double max = settings.sky().random_flux_density_max();
         double power = settings.sky().random_power();
 
+        // Generate the new positions.
         srand(settings.sky().random_seed());
-
+        printf("--> Generating random power law source distribution... ");
+        fflush(stdout);
         for (int i = 0; i < num_sources; ++i)
         {
             double ra, dec, b;
@@ -114,19 +115,22 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     }
     else if (settings.sky().generator().toUpper() == "RANDOM_BROKEN_POWER_LAW")
     {
-        printf("--> Generating random power broken law source distribution...");
+        // Add enough positions to the sky model.
         int old_size = sky->num_sources;
         int num_sources = settings.sky().random_num_sources();
         sky->resize(old_size + num_sources);
 
+        // Generator parameters.
         double min = settings.sky().random_flux_density_min();
         double max = settings.sky().random_flux_density_max();
         double power1 = settings.sky().random_power1();
         double power2 = settings.sky().random_power2();
         double threshold = settings.sky().random_threshold();
 
+        // Generate the new positions.
         srand(settings.sky().random_seed());
-
+        printf("--> Generating random power broken law source distribution... ");
+        fflush(stdout);
         for (int i = 0; i < num_sources; ++i)
         {
             double ra, dec, b;
@@ -175,9 +179,9 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 
     if (!settings.sky().output_sky_file().isEmpty())
     {
-        printf("--> Writing sky file to disk as: %s\n",
-                settings.sky().output_sky_file().toAscii().constData());
-        sky->write(settings.sky().output_sky_file().toAscii().constData());
+        QByteArray file = settings.sky().output_sky_file().toAscii();
+        printf("--> Writing sky file to disk as: %s\n", file.constData());
+        sky->write(file);
     }
 
     // Return the structure.

@@ -61,9 +61,6 @@ class Test_coord_transforms : public CppUnit::TestFixture
 
         // Test the C wrapper.
         void test_wrapper();
-
-        void test_distance_filter();
-        void test_rotate_sources();
 };
 
 // Register the test class.

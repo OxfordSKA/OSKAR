@@ -63,12 +63,11 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
             rel_l    = (float*)sky->rel_l.data;
             rel_m    = (float*)sky->rel_m.data;
             rel_n    = (float*)sky->rel_n.data;
-            for (in = 0, out = -1; in < sky->num_sources; ++in)
+            for (in = 0, out = 0; in < sky->num_sources; ++in)
             {
                 dist = (float)oskar_angular_distance(ra[in], ra0,
                         dec[in], dec0);
                 if (dist < inner_radius || dist > outer_radius) continue;
-                out++;
                 ra[out]       = ra[in];
                 dec[out]      = dec[in];
                 I[out]        = I[in];
@@ -80,6 +79,7 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
                 rel_l[out]    = rel_l[in];
                 rel_m[out]    = rel_m[in];
                 rel_n[out]    = rel_n[in];
+                out++;
             }
         }
         else if (type == OSKAR_DOUBLE)
@@ -97,11 +97,10 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
             rel_l    = (double*)sky->rel_l.data;
             rel_m    = (double*)sky->rel_m.data;
             rel_n    = (double*)sky->rel_n.data;
-            for (in = 0, out = -1; in < sky->num_sources; ++in)
+            for (in = 0, out = 0; in < sky->num_sources; ++in)
             {
                 dist = oskar_angular_distance(ra[in], ra0, dec[in], dec0);
                 if (dist < inner_radius || dist > outer_radius) continue;
-                out++;
                 ra[out]       = ra[in];
                 dec[out]      = dec[in];
                 I[out]        = I[in];
@@ -113,13 +112,14 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
                 rel_l[out]    = rel_l[in];
                 rel_m[out]    = rel_m[in];
                 rel_n[out]    = rel_n[in];
+                out++;
             }
         }
         else
             return OSKAR_ERR_BAD_DATA_TYPE;
 
         /* Store the new number of sources in the sky model. */
-        sky->num_sources = out + 1;
+        sky->num_sources = out;
     }
     else
         return OSKAR_ERR_BAD_LOCATION;
