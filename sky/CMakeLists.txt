@@ -10,6 +10,7 @@ set(sky_SRC
     src/oskar_equation_of_equinoxes_fast.c
     src/oskar_evaluate_jones_R.cu
     src/oskar_evaluate_sky_temperature.c
+    src/oskar_galactic_to_fk5.c
     src/oskar_generate_random_coordinate.c
     src/oskar_ha_dec_to_az_el.c
     src/oskar_ha_dec_to_hor_lmn.c
@@ -31,7 +32,8 @@ set(sky_SRC
     src/oskar_sky_model_get_ptr.c
     src/oskar_sky_model_horizon_clip.cu
     src/oskar_sky_model_init.c
-    src/oskar_sky_model_load.cpp
+    src/oskar_sky_model_load.c
+    src/oskar_sky_model_load_gsm.c
     src/oskar_sky_model_location.c
     src/oskar_sky_model_resize.c
     src/oskar_sky_model_rotate_to_position.c

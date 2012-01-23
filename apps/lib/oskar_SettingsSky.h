@@ -40,6 +40,8 @@ class oskar_SettingsSky
         void print_summary() const;
 
         QString input_sky_file() const { return input_sky_file_; }
+        QString gsm_file() const { return gsm_file_; }
+        int gsm_nside() const { return gsm_nside_; }
         void set_input_sky_file(const QString& value) { input_sky_file_ = value; }
 
         QString output_sky_file() const { return output_sky_file_; }
@@ -70,6 +72,10 @@ class oskar_SettingsSky
     private:
         // Sky model file name to load.
         QString input_sky_file_; // FIXME Change to char*.
+
+        // Global sky model file name to load.
+        QString gsm_file_; // FIXME Change to char*.
+        int gsm_nside_;
 
         // Sky model file to write to.
         QString output_sky_file_; // FIXME Change to char*.

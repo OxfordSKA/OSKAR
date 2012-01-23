@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_LOAD_H_
-#define OSKAR_SKY_MODEL_LOAD_H_
+#ifndef OSKAR_GALACTIC_TO_FK5_H_
+#define OSKAR_GALACTIC_TO_FK5_H_
 
 /**
- * @file oskar_sky_model_load.h
+ * @file oskar_galactic_to_fk5.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,36 +41,40 @@ extern "C" {
 
 /**
  * @brief
- * Loads sources from a plain text source file into an OSKAR sky model
- * structure.
+ * Convert Galactic to FK5 (J2000) equatorial coordinates (single precision).
  *
  * @details
- * Source files are plain ASCII files consisting of the following 8 columns:
- * - RA (deg),
- * - Dec (deg),
- * - Stokes I (Jy),
- * - Stokes Q (Jy),
- * - Stokes U (Jy),
- * - Stokes V (Jy),
- * - Reference frequency (Hz),
- * - Spectral index
+ * This function converts Galactic to FK5 (J2000) equatorial coordinates.
  *
- * Columns 4 to 8 (Q, U, V, Reference frequency and Spectral index) are optional
- * and defaulted to zero if omitted.
- *
- * The columns must be space or comma separated.
- *
- * Lines beginning with a hash symbol (#) are treated as comments and therefore
- * ignored.
- *
- * @param[out] sky       Pointer to sky model structure to fill.
- * @param[in]  filename  Path to the a source list file.
+ * @param[in] num_points The number of points to transform.
+ * @param[in] longitude  The Galactic longitudes in radians.
+ * @param[in] latitude   The Galactic latitudes in radians.
+ * @param[out] ra        The FK5 (J2000) equatorial Right Ascensions in radians.
+ * @param[out] dec       The FK5 (J2000) equatorial Declination in radians.
  */
 OSKAR_EXPORT
-int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename);
+void oskar_galactic_to_fk5_f(int num_points, const float* longitude,
+        const float* latitude, float* ra, float* dec);
+
+/**
+ * @brief
+ * Convert Galactic to FK5 (J2000) equatorial coordinates (double precision).
+ *
+ * @details
+ * This function converts Galactic to FK5 (J2000) equatorial coordinates.
+ *
+ * @param[in] num_points The number of points to transform.
+ * @param[in] longitude  The Galactic longitudes in radians.
+ * @param[in] latitude   The Galactic latitudes in radians.
+ * @param[out] ra        The FK5 (J2000) equatorial Right Ascensions in radians.
+ * @param[out] dec       The FK5 (J2000) equatorial Declination in radians.
+ */
+OSKAR_EXPORT
+void oskar_galactic_to_fk5_d(int num_points, const double* longitude,
+        const double* latitude, double* ra, double* dec);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_MODEL_LOAD_H_ */
+#endif /* OSKAR_GALACTIC_TO_FK5_H_ */

@@ -36,7 +36,11 @@ void oskar_SettingsSky::load(QSettings& settings)
 {
     // Sky model file.
     settings.beginGroup("sky");
-    input_sky_file_ = settings.value("source_file", "").toString();
+    input_sky_file_ = settings.value("oskar_source_file", "").toString();
+
+    // Global sky model settings.
+    gsm_file_ = settings.value("gsm/file", "").toString();
+    gsm_nside_ = settings.value("gsm/nside", "").toInt();
 
     // Generator settings.
     generator_ = settings.value("generator", "").toString();

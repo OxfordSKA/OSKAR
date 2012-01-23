@@ -63,6 +63,21 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
         }
     }
 
+    // Load GSM file if it exists.
+    QByteArray gsm_file = settings.sky().gsm_file().toAscii();
+    if (!gsm_file.isEmpty())
+    {
+        printf("--> Loading GSM data... ");
+        fflush(stdout);
+        err = sky->load_gsm(gsm_file, settings.sky().gsm_nside());
+        printf("done.\n");
+        if (err)
+        {
+            delete sky;
+            return NULL;
+        }
+    }
+
     // TODO: enable 2 generates at the same time somehow?
 
     // Set up sky using generator parameters.

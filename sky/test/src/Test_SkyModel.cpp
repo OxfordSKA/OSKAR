@@ -168,7 +168,7 @@ void Test_SkyModel::test_load()
 
 
         oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-        int err = oskar_sky_model_load(filename, sky);
+        int err = oskar_sky_model_load(sky, filename);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         // Cleanup.
@@ -211,7 +211,7 @@ void Test_SkyModel::test_load()
         // Load the sky model onto the GPU.
         oskar_SkyModel* sky_gpu = new oskar_SkyModel(OSKAR_SINGLE,
                 OSKAR_LOCATION_GPU, 0);
-        int err = oskar_sky_model_load(filename, sky_gpu);
+        int err = oskar_sky_model_load(sky_gpu, filename);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         // Cleanup.

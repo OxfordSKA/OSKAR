@@ -169,6 +169,16 @@ struct oskar_SkyModel
     int load(const char* filename);
 
     /**
+     * @brief Loads a GSM text file into the current sky structure.
+     * Pixels from the file are appended to the end of the current structure.
+     *
+     * @param filename  Path to a GSM file.
+     *
+     * @return An error code.
+     */
+    int load_gsm(const char* filename, int nside);
+
+    /**
      * @brief Returns the memory location for memory in the sky structure
      * or error code if the types are inconsistent.
      */

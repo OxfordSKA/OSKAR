@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_LOAD_H_
-#define OSKAR_SKY_MODEL_LOAD_H_
+#ifndef OSKAR_SKY_MODEL_LOAD_GSM_H_
+#define OSKAR_SKY_MODEL_LOAD_GSM_H_
 
 /**
- * @file oskar_sky_model_load.h
+ * @file oskar_sky_model_load_gsm.h
  */
 
 #include "oskar_global.h"
@@ -42,36 +42,26 @@ extern "C" {
 
 /**
  * @brief
- * Loads sources from a plain text source file into an OSKAR sky model
- * structure.
+ * Loads pixels from a GSM text file into an OSKAR sky model structure.
  *
  * @details
- * Source files are plain ASCII files consisting of the following 8 columns:
- * - RA (deg),
- * - Dec (deg),
- * - Stokes I (Jy),
- * - Stokes Q (Jy),
- * - Stokes U (Jy),
- * - Stokes V (Jy),
- * - Reference frequency (Hz),
- * - Spectral index
- *
- * Columns 4 to 8 (Q, U, V, Reference frequency and Spectral index) are optional
- * and defaulted to zero if omitted.
- *
- * The columns must be space or comma separated.
+ * This function loads data from a GSM text file.
+ * The data must be given in the HEALPix RING scheme, and the \p nside
+ * parameter must also be supplied.
  *
  * Lines beginning with a hash symbol (#) are treated as comments and therefore
  * ignored.
  *
  * @param[out] sky       Pointer to sky model structure to fill.
  * @param[in]  filename  Path to the a source list file.
+ * @param[in]  nside     HEALPix nside parameter.
  */
 OSKAR_EXPORT
-int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename);
+int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename,
+        int nside);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_MODEL_LOAD_H_ */
+#endif /* OSKAR_SKY_MODEL_LOAD_GSM_H_ */

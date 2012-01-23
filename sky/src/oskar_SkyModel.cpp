@@ -33,6 +33,7 @@
 #include "sky/oskar_sky_model_filter_by_radius.h"
 #include "sky/oskar_sky_model_copy.h"
 #include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_load_gsm.h"
 #include "sky/oskar_sky_model_write.h"
 #include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_resize.h"
@@ -86,7 +87,7 @@ oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
   rel_m(type, location, 0),
   rel_n(type, location, 0)
 {
-    if (oskar_sky_model_load(filename, this) != 0)
+    if (oskar_sky_model_load(this, filename) != 0)
         throw "Error in oskar_sky_model_load";
 }
 
@@ -123,7 +124,12 @@ int oskar_SkyModel::filter_by_radius(double inner_radius, double outer_radius,
 
 int oskar_SkyModel::load(const char* filename)
 {
-    return oskar_sky_model_load(filename, this);
+    return oskar_sky_model_load(this, filename);
+}
+
+int oskar_SkyModel::load_gsm(const char* filename, int nside)
+{
+    return oskar_sky_model_load_gsm(this, filename, nside);
 }
 
 int oskar_SkyModel::location() const
