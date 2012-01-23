@@ -74,8 +74,8 @@ class oskar_Settings
 
         bool double_precision() const { return prec_double_; }
         int max_sources_per_chunk() const { return max_sources_per_chunk_; }
-        int num_devices() const { return use_devices_.size(); }
-        const int* use_devices() const { return use_devices_.constData(); }
+        int num_cuda_devices() const { return cuda_device_ids_.size(); }
+        const int* cuda_device_ids() const { return cuda_device_ids_.constData(); }
         const char* const* element_pattern_files_meerkat_pol1() const {return element_pattern_files_meerkat_pol1_;}
         const char* const* element_pattern_files_meerkat_pol2() const {return element_pattern_files_meerkat_pol2_;}
         int num_element_pattern_files_meerkat_pol1() const {return element_pattern_meerkat_pol1_.size();}
@@ -94,7 +94,7 @@ class oskar_Settings
     private:
         bool prec_double_;
         int max_sources_per_chunk_;
-        QVector<int> use_devices_;
+        QVector<int> cuda_device_ids_;
         QString filename_;
         QString telescope_file_;
         double longitude_deg_;

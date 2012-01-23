@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 
     // Find out how many GPUs we have.
     int device_count = 0;
-    int num_devices = settings.num_devices();
+    int num_devices = settings.num_cuda_devices();
     error = (int)cudaGetDeviceCount(&device_count);
     if (device_count < num_devices)
     {
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
         error = oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
                 time_baseline, true);
         if (error) oskar_exit(error);
-        cudaSetDevice(settings.use_devices()[i]);
+        cudaSetDevice(settings.cuda_device_ids()[i]);
         cudaDeviceSynchronize();
     }
 
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
             int thread_id = omp_get_thread_num();
 
             // Get device ID and device properties for this chunk.
-            int device_id = settings.use_devices()[thread_id];
+            int device_id = settings.cuda_device_ids()[thread_id];
             cudaDeviceProp device_prop;
             cudaGetDeviceProperties(&device_prop, device_id);
 
@@ -227,7 +227,7 @@ int main(int argc, char** argv)
     {
         error = oskar_mem_free(&vis_acc[i]);  if (error) oskar_exit(error);
         error = oskar_mem_free(&vis_temp[i]); if (error) oskar_exit(error);
-        cudaSetDevice(settings.use_devices()[i]);
+        cudaSetDevice(settings.cuda_device_ids()[i]);
         cudaDeviceReset();
     }
     free(vis_acc);

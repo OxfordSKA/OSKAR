@@ -80,14 +80,12 @@ int oskar_Settings::load(const QString& filename)
     // Load global settings.
     prec_double_           = settings.value("global/double_precision", true).toBool();
     max_sources_per_chunk_ = settings.value("global/max_sources_per_chunk", 10000).toInt();
-    int size               = settings.beginReadArray("global/use_devices");
-    use_devices_.resize(size);
-    for (int i = 0; i < size; ++i)
+    QStringList devs       = settings.value("global/cuda_device_ids", "0").toStringList();
+    cuda_device_ids_.resize(devs.size());
+    for (int i = 0; i < devs.size(); ++i)
     {
-        settings.setArrayIndex(i);
-        use_devices_[i] = settings.value("id").toInt();
+        cuda_device_ids_[i] = devs[i].toInt();
     }
-    settings.endArray();
 
     // Load sky settings.
     sky_.load(settings);
@@ -154,7 +152,7 @@ void oskar_Settings::print() const
 {
     printf("\n");
     printf("= Settings (%s)\n", filename_.toLatin1().data());
-    printf("  - Num. GPUs              = %i\n", num_devices());
+    printf("  - Num. CUDA devices      = %i\n", num_cuda_devices());
     printf("  - Double precision       = %s\n", prec_double_ ? "true" : "false");
     printf("  - Stations directory     = %s\n", station_dir_.toLatin1().data());
     printf("  - Station beam disabled  = %s\n", disable_station_beam_ ? "true" : "false");
