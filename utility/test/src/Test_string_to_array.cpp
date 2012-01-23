@@ -72,4 +72,11 @@ void Test_string_to_array::test_method()
     CPPUNIT_ASSERT_EQUAL(n, filled);
     for (int i = 0; i < filled; ++i)
         CPPUNIT_ASSERT_DOUBLES_EQUAL((i+1)/10.0, list[i], 1e-10);
+
+    // Test single item.
+    char test7[] = "   0.1 ";
+    double par;
+    filled = oskar_string_to_array_d(test7, 1, &par);
+    CPPUNIT_ASSERT_EQUAL(1, filled);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.1, par, 1e-10);
 }
