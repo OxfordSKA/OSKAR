@@ -29,6 +29,7 @@ set(sky_SRC
     src/oskar_sky_model_copy.c
     src/oskar_sky_model_filter_by_flux.c
     src/oskar_sky_model_filter_by_radius.c
+    src/oskar_sky_model_free.c
     src/oskar_sky_model_get_ptr.c
     src/oskar_sky_model_horizon_clip.cu
     src/oskar_sky_model_init.c

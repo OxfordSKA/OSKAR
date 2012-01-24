@@ -27,12 +27,12 @@
  */
 
 #include "sky/oskar_sky_model_append.h"
+#include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_set_source.h"
 #include "sky/oskar_sky_model_type.h"
-
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
@@ -63,6 +63,8 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
 
     /* Get the data type. */
     type = oskar_sky_model_type(sky);
+
+    /* Initialise the temporary sky model. */
     oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, 0);
 
     if (type == OSKAR_DOUBLE)
@@ -85,6 +87,7 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
                 err = oskar_sky_model_resize(&temp_sky, n + 100);
                 if (err)
                 {
+                    oskar_sky_model_free(&temp_sky);
                     fclose(file);
                     return err;
                 }
@@ -115,6 +118,7 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
                 err = oskar_sky_model_resize(&temp_sky, n + 100);
                 if (err)
                 {
+                    oskar_sky_model_free(&temp_sky);
                     fclose(file);
                     return err;
                 }
@@ -127,6 +131,7 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
     }
     else
     {
+        oskar_sky_model_free(&temp_sky);
         fclose(file);
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
@@ -134,6 +139,9 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
     /* Record the number of elements loaded. */
     temp_sky.num_sources = n;
     oskar_sky_model_append(sky, &temp_sky);
+
+    /* Free the temporary sky model. */
+    oskar_sky_model_free(&temp_sky);
 
     /* Free the line buffer and close the file. */
     if (line) free(line);

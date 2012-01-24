@@ -29,6 +29,7 @@
 #include "math/oskar_healpix_pix_to_angles_ring.h"
 #include "sky/oskar_galactic_to_fk5.h"
 #include "sky/oskar_sky_model_append.h"
+#include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_resize.h"
@@ -64,6 +65,8 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename,
 
     /* Get the data type. */
     type = oskar_sky_model_type(sky);
+
+    /* Initialise the temporary sky model. */
     oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, 0);
 
     if (type == OSKAR_DOUBLE)
@@ -85,18 +88,19 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename,
                 err = oskar_sky_model_resize(&temp_sky, n + 100);
                 if (err)
                 {
+                    oskar_sky_model_free(&temp_sky);
                     fclose(file);
                     return err;
                 }
             }
-            
+
             /* Compute Galactic longitude and latitude from pixel index. */
             oskar_healpix_pix_to_angles_ring(nside, n, &b, &l);
             b = (M_PI / 2.0) - b; /* Colatitude to latitude. */
-            
+
             /* Compute RA and Dec. */
             oskar_galactic_to_fk5_d(1, &l, &b, &ra, &dec);
-            
+
             /* Store pixel data. */
             oskar_sky_model_set_source(&temp_sky, n,
                     ra, dec, par, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -123,19 +127,20 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename,
                 err = oskar_sky_model_resize(&temp_sky, n + 100);
                 if (err)
                 {
+                    oskar_sky_model_free(&temp_sky);
                     fclose(file);
                     return err;
                 }
             }
-            
+
             /* Compute Galactic longitude and latitude from pixel index. */
             oskar_healpix_pix_to_angles_ring(nside, n, &b, &l);
             b = (M_PI / 2.0) - b; /* Colatitude to latitude. */
-            
+
             /* Compute RA and Dec. */
             tl = l; tb = b;
             oskar_galactic_to_fk5_f(1, &tl, &tb, &ra, &dec);
-            
+
             /* Store pixel data. */
             oskar_sky_model_set_source(&temp_sky, n, (float)ra,
                     (float)dec, (float)par, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -144,6 +149,7 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename,
     }
     else
     {
+        oskar_sky_model_free(&temp_sky);
         fclose(file);
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
@@ -151,6 +157,9 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename,
     /* Record the number of elements loaded. */
     temp_sky.num_sources = n;
     oskar_sky_model_append(sky, &temp_sky);
+
+    /* Free the temporary sky model. */
+    oskar_sky_model_free(&temp_sky);
 
     /* Free the line buffer and close the file. */
     if (line) free(line);
