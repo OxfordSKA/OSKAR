@@ -46,6 +46,8 @@
 extern "C" {
 #endif
 
+static const double boltzmann = 1.3806488e-23; /* Boltzmann constant in J/K. */
+
 int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename)
 {
     int err, i, n = 0, nside, type;
@@ -84,6 +86,10 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename)
 
         /* Load pixel value. */
         if (oskar_string_to_array_d(line, 1, &temp[n]) < 1) continue;
+
+        /* Convert from temperature in K to flux in Jy.
+         * Flux[Jy] = 2 * k * T[K] / (1e-26) */
+        temp[n] = 2.0 * boltzmann * temp[n] * 1e26;
         ++n;
     }
 
