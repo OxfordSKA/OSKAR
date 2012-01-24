@@ -176,7 +176,7 @@ struct oskar_SkyModel
      *
      * @return An error code.
      */
-    int load_gsm(const char* filename, int nside);
+    int load_gsm(const char* filename);
 
     /**
      * @brief Returns the memory location for memory in the sky structure

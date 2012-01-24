@@ -127,9 +127,9 @@ int oskar_SkyModel::load(const char* filename)
     return oskar_sky_model_load(this, filename);
 }
 
-int oskar_SkyModel::load_gsm(const char* filename, int nside)
+int oskar_SkyModel::load_gsm(const char* filename)
 {
-    return oskar_sky_model_load_gsm(this, filename, nside);
+    return oskar_sky_model_load_gsm(this, filename);
 }
 
 int oskar_SkyModel::location() const

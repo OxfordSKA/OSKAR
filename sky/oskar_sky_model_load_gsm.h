@@ -46,19 +46,16 @@ extern "C" {
  *
  * @details
  * This function loads data from a GSM text file.
- * The data must be given in the HEALPix RING scheme, and the \p nside
- * parameter must also be supplied.
+ * The data must be given in the HEALPix RING scheme.
  *
  * Lines beginning with a hash symbol (#) are treated as comments and therefore
  * ignored.
  *
  * @param[out] sky       Pointer to sky model structure to fill.
  * @param[in]  filename  Path to the a source list file.
- * @param[in]  nside     HEALPix nside parameter.
  */
 OSKAR_EXPORT
-int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename,
-        int nside);
+int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename);
 
 #ifdef __cplusplus
 }

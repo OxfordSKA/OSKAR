@@ -33,7 +33,6 @@
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_set_source.h"
 #include "sky/oskar_sky_model_type.h"
-#include "utility/oskar_Mem.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
 #include <stdio.h>
@@ -57,12 +56,14 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
     if (sky == NULL || filename == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    /* Get the data type. */
+    type = oskar_sky_model_type(sky);
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        return OSKAR_ERR_BAD_DATA_TYPE;
+
     /* Open the file. */
     file = fopen(filename, "r");
     if (file == NULL) return OSKAR_ERR_FILE_IO;
-
-    /* Get the data type. */
-    type = oskar_sky_model_type(sky);
 
     /* Initialise the temporary sky model. */
     oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, 0);
@@ -128,12 +129,6 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
                     par[2], par[3], par[4], par[5], par[6], par[7]);
             ++n;
         }
-    }
-    else
-    {
-        oskar_sky_model_free(&temp_sky);
-        fclose(file);
-        return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     /* Record the number of elements loaded. */

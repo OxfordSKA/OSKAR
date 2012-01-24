@@ -55,12 +55,12 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
         printf("--> Loading sky model data... ");
         fflush(stdout);
         err = sky->load(sky_file);
-        printf("done.\n");
         if (err)
         {
             delete sky;
             return NULL;
         }
+        printf("done.\n");
     }
 
     // Load GSM file if it exists.
@@ -69,13 +69,13 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     {
         printf("--> Loading GSM data... ");
         fflush(stdout);
-        err = sky->load_gsm(gsm_file, settings.sky().gsm_nside());
-        printf("done.\n");
+        err = sky->load_gsm(gsm_file);
         if (err)
         {
             delete sky;
             return NULL;
         }
+        printf("done.\n");
     }
 
     // TODO: enable 2 generates at the same time somehow?
@@ -172,12 +172,12 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     fflush(stdout);
     err = sky->compute_relative_lmn(settings.obs().ra0_rad(),
             settings.obs().dec0_rad());
-    printf("done.\n");
     if (err)
     {
         delete sky;
         return NULL;
     }
+    printf("done.\n");
 
     // Print summary data.
     printf("\n");
