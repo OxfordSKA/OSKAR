@@ -41,5 +41,8 @@ set_target_properties(oskar_apps PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 set_target_properties(oskar_apps PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
 
+# Build MATLAB mex functions.
+add_subdirectory(matlab)
+
 # ==== Recurse into test subdirectory.
 add_subdirectory(test)
