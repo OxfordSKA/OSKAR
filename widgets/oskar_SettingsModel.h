@@ -37,7 +37,7 @@
 #include <QtCore/QModelIndex>
 #include <QtCore/QVariant>
 #include <QtCore/QStringList>
-#include <QtGui/QTreeView>
+#include <QtCore/QSettings>
 
 class oskar_SettingsItem;
 
@@ -50,7 +50,8 @@ public:
     virtual ~oskar_SettingsModel();
 
     void append(const QString& key, const QString& keyShort,
-            int type, const QVector<QVariant>& data,
+            int type, const QVariant& defaultValue,
+            const QVector<QVariant>& data,
             const QModelIndex& parent = QModelIndex());
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;
@@ -59,24 +60,24 @@ public:
             int role = Qt::DisplayRole) const;
     QModelIndex index(int row, int column,
             const QModelIndex& parent = QModelIndex()) const;
-//    bool insertColumns(int position, int columns,
-//            const QModelIndex& parent = QModelIndex());
+    void iterate_load(const QModelIndex& parent);
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& caption,
-            int type, const QStringList& options = QStringList());
+            int type, const QVariant& defaultValue = QVariant(),
+            const QStringList& options = QStringList());
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     void setCaption(const QString& key,
             const QString& caption);
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
-//    bool setHeaderData(int section, Qt::Orientation orientation,
-//            const QVariant& value, int role = Qt::EditRole);
+    void setFile(const QString& filename);
 
 private:
     oskar_SettingsItem* getItem(const QModelIndex& index) const;
     QModelIndex getChild(const QString& keyShort,
             const QModelIndex& parent = QModelIndex()) const;
 
+    QSettings* settings_;
     oskar_SettingsItem* rootItem_;
 };
 

@@ -3,12 +3,14 @@
 #include <QtCore/QStringList>
 #include <cstdio>
 
-oskar_SettingsItem::oskar_SettingsItem(const QString& key, const QString& keyShort,
-        int type, const QVector<QVariant>& data, oskar_SettingsItem* parent)
+oskar_SettingsItem::oskar_SettingsItem(const QString& key,
+        const QString& keyShort, int type, const QVariant& defaultValue,
+        const QVector<QVariant>& data, oskar_SettingsItem* parent)
 {
     key_ = key;
     keyShort_ = keyShort;
     type_ = type;
+    default_ = defaultValue;
     parentItem_ = parent;
     itemData_ = data;
 }
@@ -91,4 +93,9 @@ QString oskar_SettingsItem::keyShort() const
 int oskar_SettingsItem::type() const
 {
     return type_;
+}
+
+QVariant oskar_SettingsItem::defaultValue() const
+{
+    return default_;
 }

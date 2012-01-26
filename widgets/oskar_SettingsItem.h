@@ -42,23 +42,24 @@ class oskar_SettingsItem
 {
 public:
     enum {
-        OSKAR_SETTINGS_CAPTION_ONLY, /* e.g. "Sky model settings". */
-        OSKAR_SETTINGS_BOOL,         /* e.g. disable station beam. */
-        OSKAR_SETTINGS_INT,
-        OSKAR_SETTINGS_DOUBLE,
-        OSKAR_SETTINGS_STRING,       /* e.g. output file names. */
-        OSKAR_SETTINGS_DIR,          /* e.g. station directory. */
-        OSKAR_SETTINGS_FILE,         /* e.g. sky model file. */
-        OSKAR_SETTINGS_FILE_LIST,    /* e.g. MeerKAT antenna files. */
-        OSKAR_SETTINGS_INT_CSV_LIST, /* e.g. CUDA device IDs. */
-        OSKAR_SETTINGS_OPTIONS,      /* e.g. generator type, noise type. */
-        OSKAR_SETTINGS_RANDOM_SEED,
-        OSKAR_SETTINGS_DATETIME
+        CAPTION_ONLY, /* e.g. "Sky model settings". */
+        BOOL,         /* e.g. disable station beam. */
+        INT,
+        DOUBLE,
+        STRING,       /* e.g. output file names. */
+        DIR_NAME,     /* e.g. station directory. */
+        FILE_NAME,    /* e.g. sky model file. */
+        FILE_LIST,    /* e.g. MeerKAT antenna files. */
+        INT_CSV_LIST, /* e.g. CUDA device IDs. */
+        OPTIONS,      /* e.g. generator type, noise type. */
+        RANDOM_SEED,
+        DATE_TIME
     };
 
 public:
     oskar_SettingsItem(const QString& key, const QString& keyShort, int type,
-            const QVector<QVariant>& data, oskar_SettingsItem* parent = 0);
+            const QVariant& defaultValue, const QVector<QVariant>& data,
+            oskar_SettingsItem* parent = 0);
     ~oskar_SettingsItem();
 
     void appendChild(oskar_SettingsItem* child);
@@ -73,6 +74,7 @@ public:
     QString key() const;
     QString keyShort() const;
     int type() const;
+    QVariant defaultValue() const;
 
 private:
     oskar_SettingsItem* parentItem_;
@@ -81,6 +83,7 @@ private:
     int type_; // Enumerated type.
     QList<oskar_SettingsItem*> childItems_;
     QVector<QVariant> itemData_;
+    QVariant default_;
 };
 
 #endif /* OSKAR_SETTINGS_ITEM_H_ */

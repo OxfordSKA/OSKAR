@@ -6,26 +6,29 @@
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent)
 {
+    settings_ = NULL;
     QVector<QVariant> rootData;
     rootData.append("Setting");
     rootData.append("Value");
-    rootItem_ = new oskar_SettingsItem(QString(), QString(), 0, rootData);
+    rootItem_ = new oskar_SettingsItem(QString(), QString(), 0, QVariant(),
+            rootData);
 }
 
 oskar_SettingsModel::~oskar_SettingsModel()
 {
+    if (settings_) delete settings_;
     delete rootItem_;
 }
 
 void oskar_SettingsModel::append(const QString& key,
-        const QString& keyShort, int type, const QVector<QVariant>& data,
-        const QModelIndex& parent)
+        const QString& keyShort, int type, const QVariant& defaultValue,
+        const QVector<QVariant>& data, const QModelIndex& parent)
 {
     oskar_SettingsItem *parentItem = getItem(parent);
 
     beginInsertRows(parent, rowCount(), rowCount());
-    parentItem->appendChild(new oskar_SettingsItem(key, keyShort, type, data,
-            parentItem));
+    parentItem->appendChild(new oskar_SettingsItem(key, keyShort, type,
+            defaultValue, data, parentItem));
     endInsertRows();
 }
 
@@ -52,7 +55,7 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
 
     oskar_SettingsItem* item = getItem(index);
     if (index.column() == 0 ||
-            item->type() == oskar_SettingsItem::OSKAR_SETTINGS_CAPTION_ONLY)
+            item->type() == oskar_SettingsItem::CAPTION_ONLY)
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -81,19 +84,26 @@ QModelIndex oskar_SettingsModel::index(int row, int column,
         return QModelIndex();
 }
 
-/*
-bool oskar_SettingsModel::insertColumns(int position, int columns,
-        const QModelIndex& parent)
+void oskar_SettingsModel::iterate_load(const QModelIndex& parent)
 {
-    bool success;
-
-    beginInsertColumns(parent, position, position + columns - 1);
-    success = rootItem_->insertColumns(position, columns);
-    endInsertColumns();
-
-    return success;
+    int rows = rowCount(parent);
+    for (int i = 0; i < rows; ++i)
+    {
+        QModelIndex idx = index(i, 0, parent);
+        if (idx.isValid())
+        {
+            oskar_SettingsItem* item = getItem(idx);
+            if (item->type() != oskar_SettingsItem::CAPTION_ONLY)
+            {
+                QVariant value = settings_->value(item->key(),
+                        item->defaultValue());
+                if (item->setData(1, value))
+                    emit dataChanged(idx, idx);
+            }
+            iterate_load(idx);
+        }
+    }
 }
-*/
 
 QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
 {
@@ -110,7 +120,8 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
 }
 
 void oskar_SettingsModel::registerSetting(const QString& key,
-        const QString& caption, int type, const QStringList& options)
+        const QString& caption, int type, const QVariant& defaultValue,
+        const QStringList& /*options*/)
 {
     QStringList keys = key.split('/');
     QVector<QVariant> data(columnCount() <= 2 ? 2 : columnCount());
@@ -129,15 +140,15 @@ void oskar_SettingsModel::registerSetting(const QString& key,
             // Append the group and set it as the new parent.
             data[0] = keys[k];
             append(key, keys[k],
-                    oskar_SettingsItem::OSKAR_SETTINGS_CAPTION_ONLY,
-                    data, parent);
+                    oskar_SettingsItem::CAPTION_ONLY,
+                    QVariant(), data, parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
 
     // Append the actual setting.
     data[0] = caption;
-    append(key, keys.last(), type, data, parent);
+    append(key, keys.last(), type, defaultValue, data, parent);
 }
 
 int oskar_SettingsModel::rowCount(const QModelIndex& parent) const
@@ -165,8 +176,8 @@ void oskar_SettingsModel::setCaption(const QString& key,
             // Append the group and set it as the new parent.
             data[0] = keys[k];
             append(key, keys[k],
-                    oskar_SettingsItem::OSKAR_SETTINGS_CAPTION_ONLY,
-                    data, parent);
+                    oskar_SettingsItem::CAPTION_ONLY,
+                    QVariant(), data, parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
@@ -179,7 +190,8 @@ void oskar_SettingsModel::setCaption(const QString& key,
     {
         data[0] = caption;
         append(key, keys.last(),
-                oskar_SettingsItem::OSKAR_SETTINGS_CAPTION_ONLY, data, parent);
+                oskar_SettingsItem::CAPTION_ONLY, QVariant(),
+                data, parent);
     }
 }
 
@@ -193,26 +205,28 @@ bool oskar_SettingsModel::setData(const QModelIndex& index,
     bool result = item->setData(index.column(), value);
 
     if (result)
+    {
         emit dataChanged(index, index);
+        if (settings_)
+        {
+            settings_->setValue(item->key(), value);
+        }
+    }
 
     return result;
 }
 
-/*
-bool oskar_SettingsModel::setHeaderData(int section,
-        Qt::Orientation orientation, const QVariant& value, int role)
+void oskar_SettingsModel::setFile(const QString& filename)
 {
-    if (role != Qt::EditRole || orientation != Qt::Horizontal)
-        return false;
+    if (!filename.isEmpty())
+    {
+        settings_ = new QSettings(filename, QSettings::IniFormat);
 
-    bool result = rootItem_->setData(section, value);
-
-    if (result)
-        emit headerDataChanged(orientation, section, section);
-
-    return result;
+        // Display the contents of the file.
+        QModelIndex parent;
+        iterate_load(parent);
+    }
 }
-*/
 
 // Private methods.
 
