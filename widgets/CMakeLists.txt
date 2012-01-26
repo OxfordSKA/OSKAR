@@ -13,11 +13,13 @@ if (Qwt5_FOUND)
     add_subdirectory(plotting)
 
     set(widgets_MOC_SRC
-        oskar_SettingsModel.h        
+        oskar_SettingsModel.h
+        oskar_SettingsView.h
     )
     set(widgets_SRC
+        src/oskar_SettingsItem.cpp
         src/oskar_SettingsModel.cpp
-        src/oskar_TreeItem.cpp
+        src/oskar_SettingsView.cpp
     )
 
     # Concatenate source code for widget subfolders.
