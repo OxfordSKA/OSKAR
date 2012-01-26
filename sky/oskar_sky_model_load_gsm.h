@@ -48,6 +48,21 @@ extern "C" {
  * This function loads data from a GSM text file.
  * The data must be given in the HEALPix RING scheme.
  *
+ * N.B. This function assumes that the values of pixels in the input GSM
+ * data file are in units of Kelvin per steradian. These are converted to
+ * Jansky per pixel using the following method:
+ *
+ * First obtain Kelvin per pixel by dividing the values of the input points
+ * by the number of pixels per steradian.
+ *
+ * Then convert Kelvin per pixel to Jansky per pixel using the relation
+ * between antenna temperature T and flux S:
+ * S(Jy) = 2 * k_B * T(K) * 1e26.
+ *
+ * Note that this assumes that any wavelength dependence is already
+ * in the input temperature data, so there is NO division by the square of
+ * the wavelength.
+ *
  * Lines beginning with a hash symbol (#) are treated as comments and therefore
  * ignored.
  *

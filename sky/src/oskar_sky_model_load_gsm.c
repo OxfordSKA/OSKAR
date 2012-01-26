@@ -86,10 +86,6 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename)
 
         /* Load pixel value. */
         if (oskar_string_to_array_d(line, 1, &temp[n]) < 1) continue;
-
-        /* Convert from temperature in K to flux in Jy.
-         * Flux[Jy] = 2 * k * T[K] / (1e-26) */
-        temp[n] = 2.0 * boltzmann * temp[n] * 1e26;
         ++n;
     }
 
@@ -119,6 +115,17 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename)
     for (i = 0; i < n; ++i)
     {
         double l, b, ra, dec;
+
+        /* Assume that input map is in Kelvin per steradian. */
+        /* Convert temperature per steradian to temperature per pixel. */
+        /* Divide by number of pixels per steradian. */
+        temp[i] = temp[i] / (n / (4 * M_PI));
+
+        /* Convert temperature per pixel to Jansky per pixel. */
+        /* Multiply by 2.0 * k_B * 10^26. */
+        /* Assume that any wavelength dependence is already
+         * in the input data! */
+        temp[i] = temp[i] * 2.0 * boltzmann * 1e26;
 
         /* Compute Galactic longitude and latitude from pixel index. */
         oskar_healpix_pix_to_angles_ring(nside, i, &b, &l);
