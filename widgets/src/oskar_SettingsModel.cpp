@@ -42,10 +42,19 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole && role != Qt::EditRole)
-        return QVariant();
+    oskar_SettingsItem* item = getItem(index);
 
-    return getItem(index)->data(index.column());
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
+    {
+    	return item->data(index.column());
+    }
+    else if (role == Qt::CheckStateRole &&
+    		item->type() == oskar_SettingsItem::BOOL && index.column() == 1)
+    {
+    	return item->data(1).toBool() ? Qt::Checked : Qt::Unchecked;
+    }
+
+    return QVariant();
 }
 
 Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
@@ -54,9 +63,18 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
         return 0;
 
     oskar_SettingsItem* item = getItem(index);
+
     if (index.column() == 0 ||
-            item->type() == oskar_SettingsItem::CAPTION_ONLY)
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    		item->type() == oskar_SettingsItem::CAPTION_ONLY)
+    {
+    	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    }
+    else if (index.column() == 1 &&
+    		item->type() == oskar_SettingsItem::BOOL)
+    {
+    	return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
+    			Qt::ItemIsUserCheckable;
+    }
 
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
@@ -198,21 +216,24 @@ void oskar_SettingsModel::setCaption(const QString& key,
 bool oskar_SettingsModel::setData(const QModelIndex& index,
         const QVariant& value, int role)
 {
-    if (role != Qt::EditRole)
-        return false;
+	if (!index.isValid())
+		return false;
 
-    oskar_SettingsItem *item = getItem(index);
-    bool result = item->setData(index.column(), value);
+    oskar_SettingsItem* item = getItem(index);
 
+    QVariant data;
+    if (role == Qt::EditRole)
+    	data = value;
+    else if (role == Qt::CheckStateRole)
+    	data = value.toBool() ? QString("true") : QString("false");
+
+    bool result = item->setData(index.column(), data);
     if (result)
     {
-        emit dataChanged(index, index);
-        if (settings_)
-        {
-            settings_->setValue(item->key(), value);
-        }
+    	emit dataChanged(index, index);
+    	if (settings_)
+    		settings_->setValue(item->key(), data);
     }
-
     return result;
 }
 
