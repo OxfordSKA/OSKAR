@@ -1,6 +1,38 @@
+/*
+ * Copyright (c) 2011, The University of Oxford
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "widgets/oskar_SettingsModel.h"
 #include "widgets/oskar_SettingsItem.h"
+#include <QtGui/QApplication>
+#include <QtGui/QFontMetrics>
 #include <QtCore/QVector>
+#include <QtCore/QSize>
+#include <QtCore/QVariant>
 #include <cstdio>
 
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
@@ -10,8 +42,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     QVector<QVariant> rootData;
     rootData.append("Setting");
     rootData.append("Value");
-    rootItem_ = new oskar_SettingsItem(QString(), QString(), 0, QVariant(),
-            rootData);
+    rootItem_ = new oskar_SettingsItem(QString(), QString(),
+            oskar_SettingsItem::CAPTION_ONLY, QVariant(), rootData);
 }
 
 oskar_SettingsModel::~oskar_SettingsModel()
@@ -46,12 +78,17 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
 
     if (role == Qt::DisplayRole || role == Qt::EditRole)
     {
-    	return item->data(index.column());
+        if (index.column() == 0) return item->caption();
+        else if (index.column() == 1) return item->data();
     }
     else if (role == Qt::CheckStateRole &&
-    		item->type() == oskar_SettingsItem::BOOL && index.column() == 1)
+            item->type() == oskar_SettingsItem::BOOL && index.column() == 1)
     {
-    	return item->data(1).toBool() ? Qt::Checked : Qt::Unchecked;
+        return item->data().toBool() ? Qt::Checked : Qt::Unchecked;
+    }
+    else if (role == Qt::SizeHintRole)
+    {
+        return QSize(QApplication::fontMetrics().width(item->caption())+10, 24);
     }
 
     return QVariant();
@@ -65,18 +102,29 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
     oskar_SettingsItem* item = getItem(index);
 
     if (index.column() == 0 ||
-    		item->type() == oskar_SettingsItem::CAPTION_ONLY)
+            item->type() == oskar_SettingsItem::CAPTION_ONLY)
     {
-    	return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     }
     else if (index.column() == 1 &&
-    		item->type() == oskar_SettingsItem::BOOL)
+            item->type() == oskar_SettingsItem::BOOL)
     {
-    	return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
-    			Qt::ItemIsUserCheckable;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
+                Qt::ItemIsUserCheckable;
     }
 
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+}
+
+oskar_SettingsItem* oskar_SettingsModel::getItem(const QModelIndex& index) const
+{
+    if (index.isValid())
+    {
+        oskar_SettingsItem* item =
+                static_cast<oskar_SettingsItem*>(index.internalPointer());
+        if (item) return item;
+    }
+    return rootItem_;
 }
 
 QVariant oskar_SettingsModel::headerData(int section,
@@ -102,25 +150,9 @@ QModelIndex oskar_SettingsModel::index(int row, int column,
         return QModelIndex();
 }
 
-void oskar_SettingsModel::iterate_load(const QModelIndex& parent)
+int oskar_SettingsModel::itemType(const QModelIndex& index) const
 {
-    int rows = rowCount(parent);
-    for (int i = 0; i < rows; ++i)
-    {
-        QModelIndex idx = index(i, 0, parent);
-        if (idx.isValid())
-        {
-            oskar_SettingsItem* item = getItem(idx);
-            if (item->type() != oskar_SettingsItem::CAPTION_ONLY)
-            {
-                QVariant value = settings_->value(item->key(),
-                        item->defaultValue());
-                if (item->setData(1, value))
-                    emit dataChanged(idx, idx);
-            }
-            iterate_load(idx);
-        }
-    }
+    return getItem(index)->type();
 }
 
 QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
@@ -216,23 +248,23 @@ void oskar_SettingsModel::setCaption(const QString& key,
 bool oskar_SettingsModel::setData(const QModelIndex& index,
         const QVariant& value, int role)
 {
-	if (!index.isValid())
-		return false;
+    if (!index.isValid())
+        return false;
 
     oskar_SettingsItem* item = getItem(index);
 
     QVariant data;
     if (role == Qt::EditRole)
-    	data = value;
+        data = value;
     else if (role == Qt::CheckStateRole)
-    	data = value.toBool() ? QString("true") : QString("false");
+        data = value.toBool() ? QString("true") : QString("false");
 
     bool result = item->setData(index.column(), data);
     if (result)
     {
-    	emit dataChanged(index, index);
-    	if (settings_)
-    		settings_->setValue(item->key(), data);
+        emit dataChanged(index, index);
+        if (settings_)
+            settings_->setValue(item->key(), data);
     }
     return result;
 }
@@ -245,22 +277,11 @@ void oskar_SettingsModel::setFile(const QString& filename)
 
         // Display the contents of the file.
         QModelIndex parent;
-        iterate_load(parent);
+        loadFromParentIndex(parent);
     }
 }
 
 // Private methods.
-
-oskar_SettingsItem* oskar_SettingsModel::getItem(const QModelIndex& index) const
-{
-    if (index.isValid())
-    {
-        oskar_SettingsItem* item =
-                static_cast<oskar_SettingsItem*>(index.internalPointer());
-        if (item) return item;
-    }
-    return rootItem_;
-}
 
 QModelIndex oskar_SettingsModel::getChild(const QString& keyShort,
         const QModelIndex& parent) const
@@ -273,4 +294,25 @@ QModelIndex oskar_SettingsModel::getChild(const QString& keyShort,
             return index(i, 0, parent);
     }
     return QModelIndex();
+}
+
+void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
+{
+    int rows = rowCount(parent);
+    for (int i = 0; i < rows; ++i)
+    {
+        QModelIndex idx = index(i, 0, parent);
+        if (idx.isValid())
+        {
+            oskar_SettingsItem* item = getItem(idx);
+            if (item->type() != oskar_SettingsItem::CAPTION_ONLY)
+            {
+                QVariant value = settings_->value(item->key(),
+                        item->defaultValue());
+                if (item->setData(1, value))
+                    emit dataChanged(idx, idx);
+            }
+            loadFromParentIndex(idx);
+        }
+    }
 }

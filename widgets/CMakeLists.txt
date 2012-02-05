@@ -13,10 +13,12 @@ if (Qwt5_FOUND)
     add_subdirectory(plotting)
 
     set(widgets_MOC_SRC
+        oskar_SettingsDelegate.h
         oskar_SettingsModel.h
         oskar_SettingsView.h
     )
     set(widgets_SRC
+        src/oskar_SettingsDelegate.cpp
         src/oskar_SettingsItem.cpp
         src/oskar_SettingsModel.cpp
         src/oskar_SettingsView.cpp

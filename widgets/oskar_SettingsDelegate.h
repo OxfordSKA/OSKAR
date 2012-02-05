@@ -26,18 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "widgets/oskar_SettingsView.h"
+#ifndef OSKAR_SETTINGS_DELEGATE_H_
+#define OSKAR_SETTINGS_DELEGATE_H_
 
-oskar_SettingsView::oskar_SettingsView(QWidget* parent)
-: QTreeView(parent)
-{
-    connect(this, SIGNAL(expanded(const QModelIndex&)),
-            this, SLOT(resizeAfterExpand(const QModelIndex&)));
-    setAlternatingRowColors(true);
-    setUniformRowHeights(true);
-}
+/**
+ * @file oskar_SettingsDelegate.h
+ */
 
-void oskar_SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)
+#include <QtGui/QStyledItemDelegate>
+#include <QtGui/QWidget>
+#include <QtCore/QModelIndex>
+
+class oskar_SettingsItem;
+
+class oskar_SettingsDelegate : public QStyledItemDelegate
 {
-    resizeColumnToContents(0);
-}
+    Q_OBJECT
+
+public:
+    oskar_SettingsDelegate(QObject* parent = 0);
+
+    /**
+     * @details
+     * Returns the widget used to edit the item specified by index for editing.
+     */
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
+            const QModelIndex& index) const;
+
+    /**
+     * @details
+     * Used to display the file dialog.
+     */
+    bool editorEvent(QEvent* event, QAbstractItemModel* model,
+            const QStyleOptionViewItem& option, const QModelIndex& index);
+
+    /**
+     * @details
+     * Sets the data to be displayed and edited by the editor.
+     */
+    void setEditorData(QWidget* editor, const QModelIndex& index) const;
+
+    /**
+     * @details
+     * Gets data from the editor widget and stores it in the model.
+     */
+    void setModelData(QWidget* editor, QAbstractItemModel* model,
+            const QModelIndex& index) const;
+
+    /**
+     * @details
+     * Updates the editor for the item specified by index.
+     */
+    void updateEditorGeometry(QWidget* editor,
+            const QStyleOptionViewItem& option, const QModelIndex& index) const;
+};
+
+#endif /* OSKAR_SETTINGS_DELEGATE_H_ */

@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModel.h"
 #include "widgets/oskar_SettingsView.h"
@@ -17,15 +18,15 @@ int main(int argc, char** argv)
 
     QApplication app(argc, argv);
 
-    oskar_SettingsModel mod(0);
+    oskar_SettingsModel mod;
     mod.registerSetting("global/double_precision", "Use double precision", oskar_SettingsItem::BOOL);
     mod.registerSetting("global/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT);
     mod.registerSetting("global/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST);
     mod.setCaption("global", "Global settings");
     mod.setCaption("sky", "Sky model settings");
-    mod.registerSetting("sky/oskar_source_file", "Input OSKAR source file", oskar_SettingsItem::FILE_NAME);
-    mod.registerSetting("sky/gsm_file", "Input Global Sky Model file", oskar_SettingsItem::FILE_NAME);
-    mod.registerSetting("sky/output_sky_file", "Output OSKAR source file", oskar_SettingsItem::STRING);
+    mod.registerSetting("sky/oskar_source_file", "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_NAME);
+    mod.registerSetting("sky/gsm_file", "Input Global Sky Model file", oskar_SettingsItem::INPUT_FILE_NAME);
+    mod.registerSetting("sky/output_sky_file", "Output OSKAR source file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     mod.registerSetting("sky/generator", "Generator", oskar_SettingsItem::STRING);
     mod.setCaption("sky/generator/healpix", "HEALPix (all sky) grid");
     mod.registerSetting("sky/generator/healpix/nside", "Nside", oskar_SettingsItem::INT);
@@ -44,11 +45,11 @@ int main(int argc, char** argv)
     mod.registerSetting("sky/filter/flux_min", "Flux min (Jy)", oskar_SettingsItem::DOUBLE);
     mod.registerSetting("sky/filter/flux_max", "Flux max (Jy)", oskar_SettingsItem::DOUBLE);
     mod.setCaption("telescope", "Telescope model settings");
-    mod.registerSetting("telescope/layout_file", "Array layout file", oskar_SettingsItem::FILE_NAME);
+    mod.registerSetting("telescope/layout_file", "Array layout file", oskar_SettingsItem::INPUT_FILE_NAME);
     mod.registerSetting("telescope/latitude_deg", "Latitude (deg)", oskar_SettingsItem::DOUBLE);
     mod.registerSetting("telescope/longitude_deg", "Longitude (deg)", oskar_SettingsItem::DOUBLE);
     mod.registerSetting("telescope/altitude_m", "Altitude (m)", oskar_SettingsItem::DOUBLE);
-    mod.registerSetting("station/station_directory", "Station directory", oskar_SettingsItem::DIR_NAME);
+    mod.registerSetting("station/station_directory", "Station directory", oskar_SettingsItem::INPUT_DIR_NAME);
     mod.registerSetting("station/disable_station_beam", "Disable station beam", oskar_SettingsItem::BOOL);
     mod.setCaption("station", "Station model settings");
     mod.setCaption("observation", "Observation settings");
@@ -63,14 +64,16 @@ int main(int argc, char** argv)
     mod.registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT);
     mod.registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME);
     mod.registerSetting("observation/length_seconds", "Observation length (s)", oskar_SettingsItem::DOUBLE);
-    mod.registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::STRING);
-    mod.registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::STRING);
+    mod.registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    mod.registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
-    oskar_SettingsView tree_view;
-    tree_view.setModel(&mod);
-    tree_view.setWindowTitle("OSKAR Settings");
-    tree_view.show();
-    tree_view.resizeColumnToContents(0);
+    oskar_SettingsDelegate delegate;
+    oskar_SettingsView view;
+    view.setModel(&mod);
+    view.setItemDelegate(&delegate);
+    view.setWindowTitle("OSKAR Settings");
+    view.show();
+    view.resizeColumnToContents(0);
     mod.setFile(QString(argv[1]));
 
     int status = app.exec();

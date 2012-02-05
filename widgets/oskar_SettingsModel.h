@@ -46,7 +46,7 @@ class oskar_SettingsModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    oskar_SettingsModel(QObject* parent);
+    oskar_SettingsModel(QObject* parent = 0);
     virtual ~oskar_SettingsModel();
 
     void append(const QString& key, const QString& keyShort,
@@ -56,11 +56,12 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
+    oskar_SettingsItem* getItem(const QModelIndex& index) const;
     QVariant headerData(int section, Qt::Orientation orientation,
             int role = Qt::DisplayRole) const;
     QModelIndex index(int row, int column,
             const QModelIndex& parent = QModelIndex()) const;
-    void iterate_load(const QModelIndex& parent);
+    int itemType(const QModelIndex& index) const;
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& caption,
             int type, const QVariant& defaultValue = QVariant(),
@@ -73,9 +74,9 @@ public:
     void setFile(const QString& filename);
 
 private:
-    oskar_SettingsItem* getItem(const QModelIndex& index) const;
     QModelIndex getChild(const QString& keyShort,
             const QModelIndex& parent = QModelIndex()) const;
+    void loadFromParentIndex(const QModelIndex& parent);
 
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;

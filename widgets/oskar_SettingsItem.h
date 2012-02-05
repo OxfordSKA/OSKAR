@@ -42,16 +42,17 @@ class oskar_SettingsItem
 {
 public:
     enum {
-        CAPTION_ONLY, /* e.g. "Sky model settings". */
-        BOOL,         /* e.g. disable station beam. */
+        CAPTION_ONLY,       /* e.g. "Sky model settings". */
+        BOOL,               /* e.g. disable station beam. */
         INT,
         DOUBLE,
-        STRING,       /* e.g. output file names. */
-        DIR_NAME,     /* e.g. station directory. */
-        FILE_NAME,    /* e.g. sky model file. */
-        FILE_LIST,    /* e.g. MeerKAT antenna files. */
-        INT_CSV_LIST, /* e.g. CUDA device IDs. */
-        OPTIONS,      /* e.g. generator type, noise type. */
+        STRING,
+        OUTPUT_FILE_NAME,   /* e.g. visibility data. */
+        INPUT_DIR_NAME,     /* e.g. station directory. */
+        INPUT_FILE_NAME,    /* e.g. sky model file. */
+        INPUT_FILE_LIST,    /* e.g. MeerKAT antenna files. */
+        INT_CSV_LIST,       /* e.g. CUDA device IDs. */
+        OPTIONS,            /* e.g. generator type, noise type. */
         RANDOM_SEED,
         DATE_TIME
     };
@@ -64,9 +65,11 @@ public:
 
     void appendChild(oskar_SettingsItem* child);
     oskar_SettingsItem* child(int row);
+    QString caption() const;
     int childCount() const;
     int childNumber() const;
     int columnCount() const;
+    QVariant data() const;
     QVariant data(int column) const;
     bool insertColumns(int position, int columns);
     oskar_SettingsItem* parent();
