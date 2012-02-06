@@ -58,35 +58,40 @@ public:
     };
 
 public:
-    oskar_SettingsItem(const QString& key, const QString& keyShort, int type,
-            const QVariant& defaultValue, const QVector<QVariant>& data,
+    oskar_SettingsItem(const QString& key, const QString& subkey, int type,
+            const QString& caption, const QVariant& defaultValue,
             oskar_SettingsItem* parent = 0);
     ~oskar_SettingsItem();
 
     void appendChild(oskar_SettingsItem* child);
+    const QString& caption() const;
     oskar_SettingsItem* child(int row);
-    QString caption() const;
     int childCount() const;
     int childNumber() const;
-    int columnCount() const;
-    QVariant data() const;
-    QVariant data(int column) const;
-    bool insertColumns(int position, int columns);
+    const QVariant& defaultValue() const;
+    const QVariant& iterationInc() const;
+    int iterationNum() const;
+    const QString& key() const;
     oskar_SettingsItem* parent();
-    bool setData(int column, const QVariant &value);
-    QString key() const;
-    QString keyShort() const;
+    void setCaption(const QString& value);
+    void setIterationInc(const QVariant& value);
+    void setIterationNum(int value);
+    void setValue(const QVariant& value);
+    const QString& subkey() const;
     int type() const;
-    QVariant defaultValue() const;
+    const QVariant& value() const;
 
 private:
     oskar_SettingsItem* parentItem_;
-    QString key_; // Full settings key for the item.
-    QString keyShort_; // Short settings key.
-    int type_; // Enumerated type.
     QList<oskar_SettingsItem*> childItems_;
-    QVector<QVariant> itemData_;
+    QString key_; // Full settings key for the item.
+    QString subkey_; // Short settings key.
+    int type_; // Enumerated type.
+    QString caption_;
+    QVariant value_;
     QVariant default_;
+    int iterNum_;
+    QVariant iterInc_;
 };
 
 #endif /* OSKAR_SETTINGS_ITEM_H_ */

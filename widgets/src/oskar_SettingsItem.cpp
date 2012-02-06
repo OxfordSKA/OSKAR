@@ -32,15 +32,19 @@
 #include <cstdio>
 
 oskar_SettingsItem::oskar_SettingsItem(const QString& key,
-        const QString& keyShort, int type, const QVariant& defaultValue,
-        const QVector<QVariant>& data, oskar_SettingsItem* parent)
+        const QString& subkey, int type, const QString& caption,
+        const QVariant& defaultValue, oskar_SettingsItem* parent)
 {
+    // Initialise constructed values.
     key_ = key;
-    keyShort_ = keyShort;
+    subkey_ = subkey;
     type_ = type;
+    caption_ = caption;
     default_ = defaultValue;
     parentItem_ = parent;
-    itemData_ = data;
+
+    // Initialise user-defined, runtime values.
+    iterNum_ = 1;
 }
 
 oskar_SettingsItem::~oskar_SettingsItem()
@@ -53,9 +57,9 @@ void oskar_SettingsItem::appendChild(oskar_SettingsItem* item)
     childItems_.append(item);
 }
 
-QString oskar_SettingsItem::caption() const
+const QString& oskar_SettingsItem::caption() const
 {
-    return itemData_.value(0).toString();
+    return caption_;
 }
 
 oskar_SettingsItem* oskar_SettingsItem::child(int row)
@@ -75,33 +79,24 @@ int oskar_SettingsItem::childNumber() const
     return 0;
 }
 
-int oskar_SettingsItem::columnCount() const
+const QVariant& oskar_SettingsItem::defaultValue() const
 {
-    return itemData_.count();
+    return default_;
 }
 
-QVariant oskar_SettingsItem::data() const
+const QVariant& oskar_SettingsItem::iterationInc() const
 {
-    return itemData_.value(1);
+    return iterInc_;
 }
 
-QVariant oskar_SettingsItem::data(int column) const
+int oskar_SettingsItem::iterationNum() const
 {
-    return itemData_.value(column);
+    return iterNum_;
 }
 
-bool oskar_SettingsItem::insertColumns(int position, int columns)
+const QString& oskar_SettingsItem::key() const
 {
-    if (position < 0 || position > itemData_.size())
-        return false;
-
-    for (int column = 0; column < columns; ++column)
-        itemData_.insert(position, QVariant());
-
-    foreach (oskar_SettingsItem* child, childItems_)
-        child->insertColumns(position, columns);
-
-    return true;
+    return key_;
 }
 
 oskar_SettingsItem* oskar_SettingsItem::parent()
@@ -109,23 +104,29 @@ oskar_SettingsItem* oskar_SettingsItem::parent()
     return parentItem_;
 }
 
-bool oskar_SettingsItem::setData(int column, const QVariant &value)
+void oskar_SettingsItem::setCaption(const QString& value)
 {
-    if (column < 0 || column >= itemData_.size())
-        return false;
-
-    itemData_[column] = value;
-    return true;
+    caption_ = value;
 }
 
-QString oskar_SettingsItem::key() const
+void oskar_SettingsItem::setIterationInc(const QVariant& value)
 {
-    return key_;
+    iterInc_ = value;
 }
 
-QString oskar_SettingsItem::keyShort() const
+void oskar_SettingsItem::setIterationNum(int value)
 {
-    return keyShort_;
+    iterNum_ = value;
+}
+
+void oskar_SettingsItem::setValue(const QVariant& value)
+{
+    value_ = value;
+}
+
+const QString& oskar_SettingsItem::subkey() const
+{
+    return subkey_;
 }
 
 int oskar_SettingsItem::type() const
@@ -133,7 +134,7 @@ int oskar_SettingsItem::type() const
     return type_;
 }
 
-QVariant oskar_SettingsItem::defaultValue() const
+const QVariant& oskar_SettingsItem::value() const
 {
-    return default_;
+    return value_;
 }

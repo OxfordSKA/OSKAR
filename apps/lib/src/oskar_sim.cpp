@@ -33,6 +33,7 @@
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_visibilities.h"
+#include "apps/lib/oskar_sim.h"
 #include "apps/lib/oskar_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
@@ -56,20 +57,13 @@
 
 using std::min;
 
-int main(int argc, char** argv)
+int oskar_sim(const char* settings_file)
 {
     int error = OSKAR_SUCCESS;
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_sim [settings file]\n");
-        return EXIT_FAILURE;
-    }
-
     // Load the settings file.
     oskar_Settings settings;
-    if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
+    if (!settings.load(QString(settings_file))) return EXIT_FAILURE;
     settings.print();
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
     const oskar_SimTime* times = settings.obs().sim_time();

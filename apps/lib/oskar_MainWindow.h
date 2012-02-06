@@ -26,65 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_DELEGATE_H_
-#define OSKAR_SETTINGS_DELEGATE_H_
+#ifndef OSKAR_MAIN_WINDOW_H_
+#define OSKAR_MAIN_WINDOW_H_
 
-/**
- * @file oskar_SettingsDelegate.h
- */
+#include <QtGui/QMainWindow>
+#include <QtCore/QString>
 
-#include <QtGui/QStyledItemDelegate>
-#include <QtGui/QWidget>
-#include <QtCore/QModelIndex>
-
-class oskar_SettingsItem;
 class oskar_SettingsModel;
+class oskar_SettingsView;
+class QAction;
+class QDialogButtonBox;
+class QMenu;
+class QMenuBar;
+class QVBoxLayout;
+class QWidget;
 
-class oskar_SettingsDelegate : public QStyledItemDelegate
+class oskar_MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    oskar_SettingsDelegate(QWidget* view, QObject* parent = 0);
+    oskar_MainWindow(QWidget* parent = 0);
 
-    /**
-     * @details
-     * Returns the widget used to edit the item specified by index for editing.
-     */
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
-            const QModelIndex& index) const;
-
-    /**
-     * @details
-     * Used to display the file dialog.
-     */
-    bool editorEvent(QEvent* event, QAbstractItemModel* model,
-            const QStyleOptionViewItem& option, const QModelIndex& index);
-
-    /**
-     * @details
-     * Sets the data to be displayed and edited by the editor.
-     */
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
-
-    /**
-     * @details
-     * Gets data from the editor widget and stores it in the model.
-     */
-    void setModelData(QWidget* editor, QAbstractItemModel* model,
-            const QModelIndex& index) const;
-
-    /**
-     * @details
-     * Updates the editor for the item specified by index.
-     */
-    void updateEditorGeometry(QWidget* editor,
-            const QStyleOptionViewItem& option, const QModelIndex& index) const;
+private slots:
+    void runButton();
+    void openSettings();
 
 private:
-    void setIterations(oskar_SettingsModel* model, oskar_SettingsItem* item);
+    void runSim(int depth);
 
-    QWidget* view_;
+private:
+    QWidget* widget_;
+    QVBoxLayout* layout_;
+    QDialogButtonBox* buttons_;
+    oskar_SettingsModel* model_;
+    oskar_SettingsView* view_;
+    QMenuBar* menubar_;
+    QMenu* menuFile_;
+    QAction* actionOpen_;
+    QString settingsFile_;
 };
 
-#endif /* OSKAR_SETTINGS_DELEGATE_H_ */
+#endif // OSKAR_MAIN_WINDOW_H_

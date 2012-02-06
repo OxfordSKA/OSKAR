@@ -34,10 +34,12 @@
  */
 
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QHash>
+#include <QtCore/QList>
 #include <QtCore/QModelIndex>
-#include <QtCore/QVariant>
-#include <QtCore/QStringList>
 #include <QtCore/QSettings>
+#include <QtCore/QStringList>
+#include <QtCore/QVariant>
 
 class oskar_SettingsItem;
 
@@ -49,37 +51,43 @@ public:
     oskar_SettingsModel(QObject* parent = 0);
     virtual ~oskar_SettingsModel();
 
-    void append(const QString& key, const QString& keyShort,
-            int type, const QVariant& defaultValue,
-            const QVector<QVariant>& data,
+    void append(const QString& key,
+            const QString& subkey, int type, const QString& caption,
+            const QVariant& defaultValue,
             const QModelIndex& parent = QModelIndex());
+    void clearIteration(const QString& key);
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
     oskar_SettingsItem* getItem(const QModelIndex& index) const;
+    oskar_SettingsItem* getItem(const QString& key) const;
     QVariant headerData(int section, Qt::Orientation orientation,
             int role = Qt::DisplayRole) const;
     QModelIndex index(int row, int column,
             const QModelIndex& parent = QModelIndex()) const;
     int itemType(const QModelIndex& index) const;
+    const QList<QString>& iterationKeys() const;
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& caption,
             int type, const QVariant& defaultValue = QVariant(),
             const QStringList& options = QStringList());
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
-    void setCaption(const QString& key,
-            const QString& caption);
+    void setCaption(const QString& key, const QString& caption);
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
     void setFile(const QString& filename);
+    void setIteration(const QString& key);
 
 private:
     QModelIndex getChild(const QString& keyShort,
             const QModelIndex& parent = QModelIndex()) const;
+    QModelIndex getIndex(const QString& key);
     void loadFromParentIndex(const QModelIndex& parent);
 
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;
+    QHash<QString, oskar_SettingsItem*> hash_;
+    QList<QString> iterationKeys_;
 };
 
 #endif /* OSKAR_SETTINGS_MODEL_H_ */

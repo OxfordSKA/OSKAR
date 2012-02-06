@@ -67,8 +67,8 @@ int main(int argc, char** argv)
     mod.registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     mod.registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
-    oskar_SettingsDelegate delegate;
     oskar_SettingsView view;
+    oskar_SettingsDelegate delegate(&view);
     view.setModel(&mod);
     view.setItemDelegate(&delegate);
     view.setWindowTitle("OSKAR Settings");

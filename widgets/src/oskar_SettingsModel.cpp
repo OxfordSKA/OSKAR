@@ -39,34 +39,57 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent)
 {
     settings_ = NULL;
-    QVector<QVariant> rootData;
-    rootData.append("Setting");
-    rootData.append("Value");
     rootItem_ = new oskar_SettingsItem(QString(), QString(),
-            oskar_SettingsItem::CAPTION_ONLY, QVariant(), rootData);
+            oskar_SettingsItem::CAPTION_ONLY, "Setting", QVariant());
+    rootItem_->setValue("Value");
 }
 
 oskar_SettingsModel::~oskar_SettingsModel()
 {
-    if (settings_) delete settings_;
+    // Delete any existing settings object.
+    if (settings_)
+    {
+        settings_->sync();
+        delete settings_;
+    }
     delete rootItem_;
 }
 
 void oskar_SettingsModel::append(const QString& key,
-        const QString& keyShort, int type, const QVariant& defaultValue,
-        const QVector<QVariant>& data, const QModelIndex& parent)
+        const QString& subkey, int type, const QString& caption,
+        const QVariant& defaultValue, const QModelIndex& parent)
 {
     oskar_SettingsItem *parentItem = getItem(parent);
 
     beginInsertRows(parent, rowCount(), rowCount());
-    parentItem->appendChild(new oskar_SettingsItem(key, keyShort, type,
-            defaultValue, data, parentItem));
+    oskar_SettingsItem* item = new oskar_SettingsItem(key, subkey, type,
+            caption, defaultValue, parentItem);
+    parentItem->appendChild(item);
     endInsertRows();
+    hash_.insert(key, item);
 }
 
-int oskar_SettingsModel::columnCount(const QModelIndex& parent) const
+void oskar_SettingsModel::clearIteration(const QString& key)
 {
-    return getItem(parent)->columnCount();
+    int i = iterationKeys_.indexOf(key);
+    if (i >= 0)
+    {
+        iterationKeys_.removeAt(i);
+        foreach (QString k, iterationKeys_)
+        {
+            QModelIndex idx = getIndex(k);
+            emit dataChanged(index(idx.row(), 0, parent(idx)),
+                    index(idx.row(), columnCount(), parent(idx)));
+        }
+        QModelIndex idx = getIndex(key);
+        emit dataChanged(index(idx.row(), 0, parent(idx)),
+                index(idx.row(), columnCount(), parent(idx)));
+    }
+}
+
+int oskar_SettingsModel::columnCount(const QModelIndex& /*parent*/) const
+{
+    return 2;
 }
 
 QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
@@ -76,19 +99,44 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
 
     oskar_SettingsItem* item = getItem(index);
 
-    if (role == Qt::DisplayRole || role == Qt::EditRole)
+    if (role == Qt::FontRole)
     {
-        if (index.column() == 0) return item->caption();
-        else if (index.column() == 1) return item->data();
+        int iterIndex = iterationKeys_.indexOf(item->key());
+        if (iterIndex >= 0)
+        {
+            QFont font = QApplication::font();
+            font.setBold(true);
+            return font;
+        }
     }
-    else if (role == Qt::CheckStateRole &&
-            item->type() == oskar_SettingsItem::BOOL && index.column() == 1)
+
+    if (index.column() == 0)
     {
-        return item->data().toBool() ? Qt::Checked : Qt::Unchecked;
+        if (role == Qt::DisplayRole)
+        {
+            QString caption = item->caption();
+            int iterIndex = iterationKeys_.indexOf(item->key());
+            if (iterIndex >= 0)
+                caption.prepend(QString("[%1] ").arg(iterIndex + 1));
+            return caption;
+        }
     }
-    else if (role == Qt::SizeHintRole)
+    else if (index.column() == 1)
     {
-        return QSize(QApplication::fontMetrics().width(item->caption())+10, 24);
+        if (role == Qt::DisplayRole || role == Qt::EditRole)
+        {
+            return item->value();
+        }
+        else if (role == Qt::CheckStateRole &&
+                item->type() == oskar_SettingsItem::BOOL)
+        {
+            return item->value().toBool() ? Qt::Checked : Qt::Unchecked;
+        }
+        else if (role == Qt::SizeHintRole)
+        {
+            int width = QApplication::fontMetrics().width(item->caption()) + 10;
+            return QSize(width, 24);
+        }
     }
 
     return QVariant();
@@ -127,11 +175,21 @@ oskar_SettingsItem* oskar_SettingsModel::getItem(const QModelIndex& index) const
     return rootItem_;
 }
 
+oskar_SettingsItem* oskar_SettingsModel::getItem(const QString& key) const
+{
+    return hash_.value(key);
+}
+
 QVariant oskar_SettingsModel::headerData(int section,
         Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return rootItem_->data(section);
+    {
+        if (section == 0)
+            return rootItem_->caption();
+        else if (section == 1)
+            return rootItem_->value();
+    }
 
     return QVariant();
 }
@@ -155,6 +213,11 @@ int oskar_SettingsModel::itemType(const QModelIndex& index) const
     return getItem(index)->type();
 }
 
+const QList<QString>& oskar_SettingsModel::iterationKeys() const
+{
+    return iterationKeys_;
+}
+
 QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
@@ -174,31 +237,25 @@ void oskar_SettingsModel::registerSetting(const QString& key,
         const QStringList& /*options*/)
 {
     QStringList keys = key.split('/');
-    QVector<QVariant> data(columnCount() <= 2 ? 2 : columnCount());
 
     // Find the parent, creating groups as necessary.
     QModelIndex parent, child;
     for (int k = 0; k < keys.size() - 1; ++k)
     {
-        QString keyShort = keys[k];
         child = getChild(keys[k], parent);
-
         if (child.isValid())
             parent = child;
         else
         {
             // Append the group and set it as the new parent.
-            data[0] = keys[k];
-            append(key, keys[k],
-                    oskar_SettingsItem::CAPTION_ONLY,
-                    QVariant(), data, parent);
+            append(key, keys[k], oskar_SettingsItem::CAPTION_ONLY, keys[k],
+                    QVariant(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
 
     // Append the actual setting.
-    data[0] = caption;
-    append(key, keys.last(), type, defaultValue, data, parent);
+    append(key, keys.last(), type, caption, defaultValue, parent);
 }
 
 int oskar_SettingsModel::rowCount(const QModelIndex& parent) const
@@ -206,43 +263,10 @@ int oskar_SettingsModel::rowCount(const QModelIndex& parent) const
     return getItem(parent)->childCount();
 }
 
-void oskar_SettingsModel::setCaption(const QString& key,
-        const QString& caption)
+void oskar_SettingsModel::setCaption(const QString& key, const QString& caption)
 {
-    QStringList keys = key.split('/');
-    QVector<QVariant> data(columnCount() <= 2 ? 2 : columnCount());
-
-    // Find the parent, creating groups as necessary.
-    QModelIndex parent, child;
-    for (int k = 0; k < keys.size() - 1; ++k)
-    {
-        QString keyShort = keys[k];
-        child = getChild(keys[k], parent);
-
-        if (child.isValid())
-            parent = child;
-        else
-        {
-            // Append the group and set it as the new parent.
-            data[0] = keys[k];
-            append(key, keys[k],
-                    oskar_SettingsItem::CAPTION_ONLY,
-                    QVariant(), data, parent);
-            parent = index(rowCount(parent) - 1, 0, parent);
-        }
-    }
-
-    // Set the new caption.
-    child = getChild(keys.last(), parent);
-    if (child.isValid())
-        setData(index(child.row(), 0, parent), caption);
-    else
-    {
-        data[0] = caption;
-        append(key, keys.last(),
-                oskar_SettingsItem::CAPTION_ONLY, QVariant(),
-                data, parent);
-    }
+    QModelIndex idx = getIndex(key);
+    setData(idx, caption);
 }
 
 bool oskar_SettingsModel::setData(const QModelIndex& index,
@@ -259,41 +283,106 @@ bool oskar_SettingsModel::setData(const QModelIndex& index,
     else if (role == Qt::CheckStateRole)
         data = value.toBool() ? QString("true") : QString("false");
 
-    bool result = item->setData(index.column(), data);
-    if (result)
+    if (index.column() == 0)
     {
+        item->setCaption(data.toString());
+        emit dataChanged(index, index);
+        return true;
+    }
+    else if (index.column() == 1)
+    {
+        item->setValue(data);
         emit dataChanged(index, index);
         if (settings_)
-            settings_->setValue(item->key(), data);
+        {
+            if (value.toString().isEmpty())
+                settings_->remove(item->key());
+            else
+                settings_->setValue(item->key(), data);
+        }
+        return true;
     }
-    return result;
+
+    return false;
 }
 
 void oskar_SettingsModel::setFile(const QString& filename)
 {
     if (!filename.isEmpty())
     {
+        // Delete any existing settings object.
+        if (settings_)
+        {
+            settings_->sync();
+            delete settings_;
+        }
+
+        // Create new settings object from supplied filename.
         settings_ = new QSettings(filename, QSettings::IniFormat);
 
         // Display the contents of the file.
+        beginResetModel();
         QModelIndex parent;
         loadFromParentIndex(parent);
+        endResetModel();
+    }
+}
+
+void oskar_SettingsModel::setIteration(const QString& key)
+{
+    if (!iterationKeys_.contains(key))
+    {
+        iterationKeys_.append(key);
+        QModelIndex idx = getIndex(key);
+        emit dataChanged(index(idx.row(), 0, parent(idx)),
+                index(idx.row(), columnCount(), parent(idx)));
     }
 }
 
 // Private methods.
 
-QModelIndex oskar_SettingsModel::getChild(const QString& keyShort,
+QModelIndex oskar_SettingsModel::getChild(const QString& subkey,
         const QModelIndex& parent) const
 {
     // Search this parent's children.
     oskar_SettingsItem* item = getItem(parent);
     for (int i = 0; i < item->childCount(); ++i)
     {
-        if (item->child(i)->keyShort() == keyShort)
+        if (item->child(i)->subkey() == subkey)
             return index(i, 0, parent);
     }
     return QModelIndex();
+}
+
+QModelIndex oskar_SettingsModel::getIndex(const QString& key)
+{
+    QStringList keys = key.split('/');
+
+    // Find the parent, creating groups as necessary.
+    QModelIndex parent, child;
+    for (int k = 0; k < keys.size() - 1; ++k)
+    {
+        child = getChild(keys[k], parent);
+        if (child.isValid())
+            parent = child;
+        else
+        {
+            // Append the group and set it as the new parent.
+            append(key, keys[k], oskar_SettingsItem::CAPTION_ONLY, keys[k],
+                    QVariant(), parent);
+            parent = index(rowCount(parent) - 1, 0, parent);
+        }
+    }
+
+    // Return the model index.
+    child = getChild(keys.last(), parent);
+    if (!child.isValid())
+    {
+        append(key, keys.last(), oskar_SettingsItem::CAPTION_ONLY, keys.last(),
+                QVariant(), parent);
+        child = index(rowCount(parent) - 1, 0, parent);
+    }
+    return child;
 }
 
 void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
@@ -309,8 +398,8 @@ void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
             {
                 QVariant value = settings_->value(item->key(),
                         item->defaultValue());
-                if (item->setData(1, value))
-                    emit dataChanged(idx, idx);
+                item->setValue(value);
+                emit dataChanged(idx, idx);
             }
             loadFromParentIndex(idx);
         }

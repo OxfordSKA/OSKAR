@@ -26,65 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_DELEGATE_H_
-#define OSKAR_SETTINGS_DELEGATE_H_
+#ifndef OSKAR_SIM_H_
+#define OSKAR_SIM_H_
 
 /**
- * @file oskar_SettingsDelegate.h
+ * @file oskar_sim.h
  */
 
-#include <QtGui/QStyledItemDelegate>
-#include <QtGui/QWidget>
-#include <QtCore/QModelIndex>
+#include "oskar_global.h"
 
-class oskar_SettingsItem;
-class oskar_SettingsModel;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-class oskar_SettingsDelegate : public QStyledItemDelegate
-{
-    Q_OBJECT
+/**
+ * @brief
+ * Main OSKAR interferometer simulation function.
+ *
+ * @details
+ * This function acts as thought it were a stand-alone executable.
+ *
+ * @param[in] settings_file Path to a settings file.
+ */
+OSKAR_EXPORT
+int oskar_sim(const char* settings_file);
 
-public:
-    oskar_SettingsDelegate(QWidget* view, QObject* parent = 0);
+#ifdef __cplusplus
+}
+#endif
 
-    /**
-     * @details
-     * Returns the widget used to edit the item specified by index for editing.
-     */
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
-            const QModelIndex& index) const;
-
-    /**
-     * @details
-     * Used to display the file dialog.
-     */
-    bool editorEvent(QEvent* event, QAbstractItemModel* model,
-            const QStyleOptionViewItem& option, const QModelIndex& index);
-
-    /**
-     * @details
-     * Sets the data to be displayed and edited by the editor.
-     */
-    void setEditorData(QWidget* editor, const QModelIndex& index) const;
-
-    /**
-     * @details
-     * Gets data from the editor widget and stores it in the model.
-     */
-    void setModelData(QWidget* editor, QAbstractItemModel* model,
-            const QModelIndex& index) const;
-
-    /**
-     * @details
-     * Updates the editor for the item specified by index.
-     */
-    void updateEditorGeometry(QWidget* editor,
-            const QStyleOptionViewItem& option, const QModelIndex& index) const;
-
-private:
-    void setIterations(oskar_SettingsModel* model, oskar_SettingsItem* item);
-
-    QWidget* view_;
-};
-
-#endif /* OSKAR_SETTINGS_DELEGATE_H_ */
+#endif /* OSKAR_SIM_H_ */

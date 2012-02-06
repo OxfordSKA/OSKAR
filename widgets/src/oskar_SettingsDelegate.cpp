@@ -37,13 +37,18 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QDateTimeEdit>
 #include <QtGui/QDoubleSpinBox>
+
+#include <QtGui/QDialog>
+#include <QtGui/QDialogButtonBox>
+#include <QtGui/QFormLayout>
 #include <cstdio>
 #include <climits>
 #include <cfloat>
 
-oskar_SettingsDelegate::oskar_SettingsDelegate(QObject* parent)
+oskar_SettingsDelegate::oskar_SettingsDelegate(QWidget* view, QObject* parent)
 : QStyledItemDelegate(parent)
 {
+    view_ = view;
 }
 
 QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
@@ -98,22 +103,25 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
 }
 
 bool oskar_SettingsDelegate::editorEvent(QEvent* event,
-        QAbstractItemModel* model, const QStyleOptionViewItem& option,
+        QAbstractItemModel* mod, const QStyleOptionViewItem& option,
         const QModelIndex& index)
 {
+    // Check for events only in column 1.
+    if (index.column() != 1)
+        return false;
+
+    oskar_SettingsModel* model = (oskar_SettingsModel*)mod;
+
     // Check for mouse double-click events.
     if (event->type() == QEvent::MouseButtonDblClick)
     {
-        // Get the setting type.
-        int type = ((const oskar_SettingsModel*)index.model())->itemType(index);
-
         // Get a pointer to the item.
-        oskar_SettingsItem* item = ((oskar_SettingsModel*)model)->getItem(index);
-        QWidget* parent = 0;
+        oskar_SettingsItem* item = model->getItem(index);
+        QWidget* parent = view_;
 
-        if (type == oskar_SettingsItem::INPUT_FILE_NAME)
+        if (item->type() == oskar_SettingsItem::INPUT_FILE_NAME)
         {
-            QString dir = item->data().toString();
+            QString dir = item->value().toString();
             QString value = QFileDialog::getOpenFileName(parent,
                     "Input file name", dir);
             if (!value.isNull())
@@ -124,9 +132,9 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             event->accept();
             return true;
         }
-        else if (type == oskar_SettingsItem::INPUT_DIR_NAME)
+        else if (item->type() == oskar_SettingsItem::INPUT_DIR_NAME)
         {
-            QString dir = item->data().toString();
+            QString dir = item->value().toString();
             QString value = QFileDialog::getExistingDirectory(parent,
                     "Directory", dir);
             if (!value.isNull())
@@ -137,9 +145,9 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             event->accept();
             return true;
         }
-        else if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
+        else if (item->type() == oskar_SettingsItem::OUTPUT_FILE_NAME)
         {
-            QString dir = item->data().toString();
+            QString dir = item->value().toString();
             QString value = QFileDialog::getSaveFileName(parent,
                     "Output file name", dir);
             if (!value.isNull())
@@ -155,19 +163,54 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
     // Check for mouse right-click events.
     else if (event->type() == QEvent::MouseButtonRelease)
     {
+        // Get a pointer to the item.
+        oskar_SettingsItem* item = model->getItem(index);
+
         QMouseEvent* mouseEvent = (QMouseEvent*)event;
-        if (mouseEvent->button() == Qt::RightButton && index.column() == 1)
+        if (mouseEvent->button() == Qt::RightButton &&
+                item->type() != oskar_SettingsItem::CAPTION_ONLY)
         {
+            // Set up the context menu.
             QMenu menu;
-            menu.addAction("Clear");
-            if (menu.exec(mouseEvent->globalPos()))
-                model->setData(index, "", Qt::EditRole);
+            QString strClearValue = "Clear Value";
+            QString strClearIteration = "Clear Iteration";
+            QString strEditIteration = "Edit Iteration Parameters";
+            QString strIterate = QString("Iterate (Dimension %1)...").
+                    arg(model->iterationKeys().size() + 1);
+            menu.addAction(strClearValue);
+            if (item->type() == oskar_SettingsItem::INT ||
+                    item->type() == oskar_SettingsItem::DOUBLE)
+            {
+                menu.addSeparator();
+                if (model->iterationKeys().contains(item->key()))
+                {
+                    menu.addAction(strEditIteration);
+                    menu.addAction(strClearIteration);
+                }
+                else
+                    menu.addAction(strIterate);
+            }
+
+            // Display the context menu.
+            QAction* action = menu.exec(mouseEvent->globalPos());
+
+            // Check which action was selected.
+            if (action)
+            {
+                if (action->text() == strClearValue)
+                    model->setData(index, "", Qt::EditRole);
+                else if (action->text() == strIterate ||
+                        action->text() == strEditIteration)
+                    setIterations(model, item);
+                else if (action->text() == strClearIteration)
+                    model->clearIteration(item->key());
+            }
             event->accept();
             return true;
         }
     }
 
-    return QStyledItemDelegate::editorEvent(event, model, option, index);
+    return QStyledItemDelegate::editorEvent(event, mod, option, index);
 }
 
 void oskar_SettingsDelegate::setEditorData(QWidget* editor,
@@ -251,4 +294,63 @@ void oskar_SettingsDelegate::updateEditorGeometry(QWidget* editor,
         const QModelIndex& /*index*/) const
 {
     editor->setGeometry(option.rect);
+}
+
+// Private members.
+
+void oskar_SettingsDelegate::setIterations(oskar_SettingsModel* model,
+        oskar_SettingsItem* item)
+{
+    QDialog* dialog = new QDialog(view_);
+    dialog->setWindowTitle("Iteration Parameters");
+    QFormLayout* layout = new QFormLayout(dialog);
+    QSpinBox* iterNum = new QSpinBox(dialog);
+    iterNum->setMinimum(1);
+    iterNum->setMaximum(INT_MAX);
+    layout->addRow("Iterations", iterNum);
+    QSpinBox* iterIncInt = NULL;
+    QDoubleSpinBox* iterIncDbl = NULL;
+    if (item->type() == oskar_SettingsItem::INT)
+    {
+        iterIncInt = new QSpinBox(dialog);
+        iterIncInt->setMinimum(-INT_MAX);
+        iterIncInt->setMaximum(INT_MAX);
+        layout->addRow("Increment", iterIncInt);
+    }
+    else if (item->type() == oskar_SettingsItem::DOUBLE)
+    {
+        iterIncDbl = new QDoubleSpinBox(dialog);
+        iterIncDbl->setMinimum(-DBL_MAX);
+        iterIncDbl->setMaximum(DBL_MAX);
+        layout->addRow("Increment", iterIncDbl);
+    }
+
+    // Add the buttons and connect them.
+    QDialogButtonBox* buttons = new QDialogButtonBox(
+            (QDialogButtonBox::Ok | QDialogButtonBox::Cancel),
+            Qt::Horizontal, dialog);
+    layout->setWidget(2, QFormLayout::SpanningRole, buttons);
+    connect(buttons, SIGNAL(accepted()), dialog, SLOT(accept()));
+    connect(buttons, SIGNAL(rejected()), dialog, SLOT(reject()));
+
+    // Fill the widget data from the item.
+    iterNum->setValue(item->iterationNum());
+    if (item->type() == oskar_SettingsItem::INT)
+        iterIncInt->setValue(item->iterationInc().toInt());
+    else if (item->type() == oskar_SettingsItem::DOUBLE)
+        iterIncDbl->setValue(item->iterationInc().toDouble());
+
+    if (dialog->exec() == QDialog::Accepted)
+    {
+        // Set the iteration data.
+        item->setIterationNum(iterNum->value());
+        if (item->type() == oskar_SettingsItem::INT)
+            item->setIterationInc(iterIncInt->value());
+        else if (item->type() == oskar_SettingsItem::DOUBLE)
+            item->setIterationInc(iterIncDbl->value());
+
+        // Set the iteration flag.
+        model->setIteration(item->key());
+    }
+    delete dialog;
 }
