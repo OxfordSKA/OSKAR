@@ -118,6 +118,15 @@ enum {
     /* Indicates that spline evaluation failed. */
     OSKAR_ERR_SPLINE_EVAL_FAIL     = -16,
 
+    /* Indicates that the sky or telescope structure could not be created. */
+    OSKAR_ERR_SETUP_FAIL           = -17,
+
+    /* Indicates that the settings file could not be opened. */
+    OSKAR_ERR_SETTINGS             = -18,
+
+    /* Indicates that there are not enough CUDA devices available. */
+    OSKAR_ERR_CUDA_DEVICES         = -19,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN              = -1000
 };

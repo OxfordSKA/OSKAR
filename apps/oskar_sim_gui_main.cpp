@@ -33,8 +33,19 @@
 
 int main(int argc, char** argv)
 {
+    // Create the QApplication and initialise settings fields.
     QApplication app(argc, argv);
+    app.setApplicationName("OSKAR2");
+    app.setOrganizationName("OeRC");
+
+    // Create the main window.
     oskar_MainWindow mainWindow;
+
+    // Load settings file if one is provided on the command line.
+    if (argc > 1)
+        mainWindow.openSettings(QString(argv[1]));
+
+    // Show the main window and enter the event loop.
     mainWindow.show();
     return app.exec();
 }

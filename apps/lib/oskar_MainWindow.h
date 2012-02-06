@@ -48,9 +48,14 @@ class oskar_MainWindow : public QMainWindow
 public:
     oskar_MainWindow(QWidget* parent = 0);
 
+protected:
+    void closeEvent(QCloseEvent* event);
+
+public slots:
+    void openSettings(QString filename = QString());
+
 private slots:
     void runButton();
-    void openSettings();
 
 private:
     void runSim(int depth);

@@ -27,17 +27,29 @@
  */
 
 #include "apps/lib/oskar_sim.h"
+#include "utility/oskar_get_error_string.h"
 #include <cstdlib>
 #include <cstdio>
 
 int main(int argc, char** argv)
 {
+    int error;
+
     // Parse command line.
     if (argc != 2)
     {
         fprintf(stderr, "Usage: $ oskar_sim [settings file]\n");
-        return EXIT_FAILURE;
+        return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
-    return oskar_sim(argv[1]);
+    // Run simulation.
+    error = oskar_sim(argv[1]);
+
+    // Check for errors.
+    if (error)
+    {
+        fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+                oskar_get_error_string(error));
+    }
+    return error;
 }

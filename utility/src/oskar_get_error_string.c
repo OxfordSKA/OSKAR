@@ -75,6 +75,12 @@ const char* oskar_get_error_string(int error)
             return "spline coefficient computation failed";
         case OSKAR_ERR_SPLINE_EVAL_FAIL:
             return "spline evaluation failed";
+        case OSKAR_ERR_SETUP_FAIL:
+            return "could not initialise sky or telescope model";
+        case OSKAR_ERR_SETTINGS:
+            return "could not create settings structure";
+        case OSKAR_ERR_CUDA_DEVICES:
+            return "insufficient CUDA devices found";
         default:
             break;
     };

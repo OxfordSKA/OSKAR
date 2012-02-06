@@ -32,6 +32,7 @@
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModel.h"
 #include "widgets/oskar_SettingsView.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
@@ -126,6 +127,37 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     actionOpen_ = new QAction("Open...", this);
     menuFile_->addAction(actionOpen_);
     connect(actionOpen_, SIGNAL(triggered()), this, SLOT(openSettings()));
+
+    // Load the settings.
+    QSettings settings;
+    restoreGeometry(settings.value("main_window/geometry").toByteArray());
+    restoreState(settings.value("main_window/state").toByteArray());
+}
+
+void oskar_MainWindow::openSettings(QString filename)
+{
+    // Check if the supplied filename is empty, and prompt to open file if so.
+    if (filename.isEmpty())
+        filename = QFileDialog::getOpenFileName(this, "Open Settings",
+                settingsFile_);
+
+    // Set the file if one was selected.
+    if (!filename.isEmpty())
+    {
+        settingsFile_ = filename;
+        model_->setFile(filename);
+        setWindowTitle("OSKAR GUI [" + filename + "]");
+    }
+}
+
+// Protected methods.
+
+void oskar_MainWindow::closeEvent(QCloseEvent* event)
+{
+    QSettings settings;
+    settings.setValue("main_window/geometry", saveGeometry());
+    settings.setValue("main_window/state", saveState());
+    QMainWindow::closeEvent(event);
 }
 
 // Private slots.
@@ -141,17 +173,6 @@ void oskar_MainWindow::runButton()
     runSim(0);
 }
 
-void oskar_MainWindow::openSettings()
-{
-    QString filename = QFileDialog::getOpenFileName(this, "Open Settings");
-    if (!filename.isEmpty())
-    {
-        settingsFile_ = filename;
-        model_->setFile(filename);
-        setWindowTitle("OSKAR GUI [" + filename + "]");
-    }
-}
-
 // Private members.
 
 void oskar_MainWindow::runSim(int depth)
@@ -159,39 +180,51 @@ void oskar_MainWindow::runSim(int depth)
     QByteArray settings = settingsFile_.toAscii();
     if (model_->iterationKeys().size() == 0)
     {
-        oskar_sim(settings);
+        int error = oskar_sim(settings);
+        if (error)
+        {
+            fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+                    oskar_get_error_string(error));
+        }
     }
     else
     {
         QString key = model_->iterationKeys()[depth];
         oskar_SettingsItem* item = model_->getItem(key);
-        int iter = item->iterationNum();
-        int startInt = item->value().toInt();
-        double startDbl = item->value().toDouble();
-        for (int i = 0; i < iter; ++i)
+        QVariant start = item->value();
+        QVariant inc = item->iterationInc();
+        for (int i = 0; i < item->iterationNum(); ++i)
         {
-            // Set the settings file here.
-            printf("setting %s = ", key.toAscii().constData());
-            QVariant var;
+            // Set the settings file parameter.
             if (item->type() == oskar_SettingsItem::INT)
             {
-                var = startInt + i * item->iterationInc().toInt();
-                printf("%d\n", var.toInt());
+                int val = start.toInt() + i * inc.toInt();
+                model_->setValue(key, val);
             }
             else if (item->type() == oskar_SettingsItem::DOUBLE)
             {
-                var = startDbl + i * item->iterationInc().toDouble();
-                printf("%.3f\n", var.toDouble());
+                double val = start.toDouble() + i * inc.toDouble();
+                model_->setValue(key, val);
             }
 
-            // Run the simulation with these settings.
+            // Check if recursion depth has been reached.
             if (depth < model_->iterationKeys().size() - 1)
+            {
                 runSim(depth + 1);
+            }
             else
             {
-                printf("Starting run %d with depth %d\n", i, depth);
-//                oskar_sim(settings);
+                // Run the simulation with these settings.
+                int error = oskar_sim(settings);
+                if (error)
+                {
+                    fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+                            oskar_get_error_string(error));
+                }
             }
         }
+
+        // Restore initial value.
+        model_->setValue(key, start);
     }
 }

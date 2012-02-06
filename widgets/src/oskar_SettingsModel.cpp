@@ -292,7 +292,6 @@ bool oskar_SettingsModel::setData(const QModelIndex& index,
     else if (index.column() == 1)
     {
         item->setValue(data);
-        emit dataChanged(index, index);
         if (settings_)
         {
             if (value.toString().isEmpty())
@@ -300,6 +299,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& index,
             else
                 settings_->setValue(item->key(), data);
         }
+        emit dataChanged(index, index);
         return true;
     }
 
@@ -337,6 +337,17 @@ void oskar_SettingsModel::setIteration(const QString& key)
         emit dataChanged(index(idx.row(), 0, parent(idx)),
                 index(idx.row(), columnCount(), parent(idx)));
     }
+}
+
+void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
+{
+    // Get the model index.
+    QModelIndex idx = getIndex(key);
+    idx = idx.sibling(idx.row(), 1);
+
+    // Set the data.
+    setData(idx, value, Qt::EditRole);
+    if (settings_) settings_->sync();
 }
 
 // Private methods.

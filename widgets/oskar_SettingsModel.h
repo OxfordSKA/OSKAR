@@ -77,6 +77,7 @@ public:
             int role = Qt::EditRole);
     void setFile(const QString& filename);
     void setIteration(const QString& key);
+    void setValue(const QString& key, const QVariant& value);
 
 private:
     QModelIndex getChild(const QString& keyShort,
