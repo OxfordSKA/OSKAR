@@ -232,6 +232,11 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
     return createIndex(parentItem->childNumber(), 0, parentItem);
 }
 
+const QList<QString>& oskar_SettingsModel::outputKeys() const
+{
+    return outputKeys_;
+}
+
 void oskar_SettingsModel::registerSetting(const QString& key,
         const QString& caption, int type, const QVariant& defaultValue,
         const QStringList& /*options*/)
@@ -256,6 +261,10 @@ void oskar_SettingsModel::registerSetting(const QString& key,
 
     // Append the actual setting.
     append(key, keys.last(), type, caption, defaultValue, parent);
+
+    // Check if this is an output file.
+    if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
+        outputKeys_.append(key);
 }
 
 int oskar_SettingsModel::rowCount(const QModelIndex& parent) const

@@ -68,6 +68,7 @@ public:
     int itemType(const QModelIndex& index) const;
     const QList<QString>& iterationKeys() const;
     QModelIndex parent(const QModelIndex& index) const;
+    const QList<QString>& outputKeys() const;
     void registerSetting(const QString& key, const QString& caption,
             int type, const QVariant& defaultValue = QVariant(),
             const QStringList& options = QStringList());
@@ -89,6 +90,7 @@ private:
     oskar_SettingsItem* rootItem_;
     QHash<QString, oskar_SettingsItem*> hash_;
     QList<QString> iterationKeys_;
+    QList<QString> outputKeys_;
 };
 
 #endif /* OSKAR_SETTINGS_MODEL_H_ */

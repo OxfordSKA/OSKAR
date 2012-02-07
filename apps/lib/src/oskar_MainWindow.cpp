@@ -111,9 +111,9 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     layout_->addWidget(view_);
 
     // Create the button box.
-    buttons_ = new QDialogButtonBox(
-            (QDialogButtonBox::Ok | QDialogButtonBox::Cancel),
+    buttons_ = new QDialogButtonBox(QDialogButtonBox::Close,
             Qt::Horizontal, widget_);
+    buttons_->addButton("Run", QDialogButtonBox::AcceptRole);
     layout_->addWidget(buttons_);
     connect(buttons_, SIGNAL(accepted()), this, SLOT(runButton()));
     connect(buttons_, SIGNAL(rejected()), qApp, SLOT(quit()));
@@ -170,12 +170,30 @@ void oskar_MainWindow::runButton()
                 "Must specify an OSKAR settings file.");
         return;
     }
-    runSim(0);
+
+    // Get the (list of) output file names.
+    QStringList outputFiles;
+    const QList<QString>& keys =  model_->outputKeys();
+    for (int i = 0; i < keys.size(); ++i)
+    {
+        oskar_SettingsItem* it = model_->getItem(keys[i]);
+        QString file = it->value().toString();
+        outputFiles.append(file);
+    }
+
+    // Run simulation recursively.
+    runSim(0, outputFiles);
+
+    // Restore the output files.
+    for (int i = 0; i < keys.size(); ++i)
+    {
+        model_->setValue(keys[i], outputFiles[i]);
+    }
 }
 
 // Private members.
 
-void oskar_MainWindow::runSim(int depth)
+void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
 {
     QByteArray settings = settingsFile_.toAscii();
     if (model_->iterationKeys().size() == 0)
@@ -193,24 +211,43 @@ void oskar_MainWindow::runSim(int depth)
         oskar_SettingsItem* item = model_->getItem(key);
         QVariant start = item->value();
         QVariant inc = item->iterationInc();
+
+        // Modify all the output file names with the subkey name.
+        for (int i = 0; i < outputFiles.size(); ++i)
+        {
+            if (!outputFiles[i].isEmpty())
+            {
+                QString separator = (depth == 0) ? "__" : "_";
+                outputFiles[i].append(separator + item->subkey());
+            }
+        }
+        QStringList outputFilesStart = outputFiles;
+
         for (int i = 0; i < item->iterationNum(); ++i)
         {
             // Set the settings file parameter.
+            QVariant val;
             if (item->type() == oskar_SettingsItem::INT)
-            {
-                int val = start.toInt() + i * inc.toInt();
-                model_->setValue(key, val);
-            }
+                val = QVariant(start.toInt() + i * inc.toInt());
             else if (item->type() == oskar_SettingsItem::DOUBLE)
+                val = QVariant(start.toDouble() + i * inc.toDouble());
+            model_->setValue(key, val);
+
+            // Modify all the output file names with the parameter value.
+            for (int i = 0; i < outputFiles.size(); ++i)
             {
-                double val = start.toDouble() + i * inc.toDouble();
-                model_->setValue(key, val);
+                if (!outputFiles[i].isEmpty())
+                {
+                    outputFiles[i].append("_" + val.toString());
+                    model_->setValue(model_->outputKeys()[i], outputFiles[i]);
+                }
             }
 
             // Check if recursion depth has been reached.
             if (depth < model_->iterationKeys().size() - 1)
             {
-                runSim(depth + 1);
+                // If not, then call this function again.
+                runSim(depth + 1, outputFiles);
             }
             else
             {
@@ -222,9 +259,13 @@ void oskar_MainWindow::runSim(int depth)
                             oskar_get_error_string(error));
                 }
             }
+
+            // Restore the list of output file names.
+            outputFiles = outputFilesStart;
         }
 
         // Restore initial value.
         model_->setValue(key, start);
+
     }
 }

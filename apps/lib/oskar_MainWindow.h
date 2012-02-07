@@ -58,7 +58,7 @@ private slots:
     void runButton();
 
 private:
-    void runSim(int depth);
+    void runSim(int depth, QStringList outputfiles = QStringList());
 
 private:
     QWidget* widget_;
