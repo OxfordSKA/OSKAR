@@ -75,7 +75,6 @@ macro(oskar_qt_mex name source)
     else ()
         message(CRITICAL "OSKAR_MEX: UNRECOGNISED SOURCE FILE EXTENSION!")
     endif ()
-
     target_link_libraries(${name} oskar ${MATLAB_LIBRARIES}
         ${MATLAB_QT_QT_CORE_LIBRARY})
     set_target_properties(${name} PROPERTIES
