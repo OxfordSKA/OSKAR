@@ -157,18 +157,21 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     }
 
     // Filter sources.
-    if (settings.sky().filter_inner_rad() != 0.0 &&
-            settings.sky().filter_outer_rad() != 0.0)
+    if (!(settings.sky().filter_inner_rad() == 0.0 &&
+            settings.sky().filter_outer_rad() == 0.0))
     {
+        printf("--> Filtering by radius between %f and %f radians.\n",\
+                settings.sky().filter_inner_rad(),
+                settings.sky().filter_outer_rad());
         sky->filter_by_radius(settings.sky().filter_inner_rad(),
                 settings.sky().filter_outer_rad(),
                 settings.obs().ra0_rad(), settings.obs().dec0_rad());
     }
 
-    if (settings.sky().filter_flux_min() != 0.0 ||
-            settings.sky().filter_flux_max() != 0.0)
+    if (!(settings.sky().filter_flux_min() == 0.0 &&
+            settings.sky().filter_flux_max() == 0.0))
     {
-        printf("--> Filtering by flux between %f and %f Jy.\n",
+        printf("--> Filtering by flux between %f and %f Jy.\n",\
                 settings.sky().filter_flux_min(),
                 settings.sky().filter_flux_max());
         sky->filter_by_flux(settings.sky().filter_flux_min(),
