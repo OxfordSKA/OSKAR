@@ -58,6 +58,8 @@ struct oskar_StationModel
     oskar_Mem amp_error;
     oskar_Mem phase_offset;
     oskar_Mem phase_error;
+    oskar_Mem total_receiver_noise; /**< Total receiver noise stddev as a
+                                         function of frequency, in Jy */
 
     /* Other station data. */
     double longitude_rad;   /**< Geodetic longitude of station, in radians. */

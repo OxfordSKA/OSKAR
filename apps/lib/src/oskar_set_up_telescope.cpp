@@ -29,10 +29,14 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_load_stations.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_init.h"
+#include "station/oskar_evaluate_station_receiver_noise_stddev.h"
 
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 #include <QtCore/QByteArray>
+using namespace std;
 
 extern "C"
 oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
@@ -80,6 +84,34 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].single_element_model = true; // FIXME set this via the settings file.
+    }
+
+    // Evaluate station receiver noise (if any specified in the settings)
+    if (!settings.receiver_temperature_file().isEmpty() ||
+            settings.receiver_temperature() > 0.0)
+    {
+        int num_channels = settings.obs().num_channels();
+        double bandwidth = telescope->bandwidth_hz;
+        const oskar_SimTime* time =  settings.obs().sim_time();
+        double integration_time = time->obs_length_seconds / time->num_vis_dumps;
+        vector<double> receiver_temp(num_channels, settings.receiver_temperature());
+
+        // Load receiver temperatures from file.
+        if (!settings.receiver_temperature_file().isEmpty())
+        {
+            //oskar_load_receiver_temperatures(settings.receiver_temperature_file().toAscii().constData());
+            printf("== WARNING: Use of receiver temperature files not yet implemented.\n");
+        }
+
+        for (int i = 0; i < telescope->num_stations; ++i)
+        {
+            oskar_StationModel* s = &telescope->station[i];
+            oskar_mem_init(&(s->total_receiver_noise), OSKAR_DOUBLE,
+                    OSKAR_LOCATION_CPU, num_channels, OSKAR_TRUE);
+            oskar_evaluate_station_receiver_noise_stddev(s->total_receiver_noise,
+                    &receiver_temp[0], num_channels, bandwidth, integration_time,
+                    s->num_elements);
+        }
     }
 
     // Print summary data.

@@ -117,6 +117,15 @@ int oskar_Settings::load(const QString& filename)
         QByteArray src = element_pattern_meerkat_pol2_[i].toAscii();
         strcpy(element_pattern_files_meerkat_pol2_[i], src);
     }
+    receiver_temperature_file_ = settings.value("station/receiver_temperature_file", "").toString();
+    receiver_temperature_ = settings.value("station/receiver_temperature", -1.0).toDouble();
+    if (settings.contains("station/receiver_temperature_file") &&
+            settings.contains("station/receiver_temperature"))
+    {
+        printf("== WARNING: Receiver temperature specified in two different ways,"
+                " this may lead to unpredictable results!.\n");
+    }
+
 
     // Load observation settings.
     obs_.load(settings);

@@ -80,6 +80,8 @@ class oskar_Settings
         const char* const* element_pattern_files_meerkat_pol2() const {return element_pattern_files_meerkat_pol2_;}
         int num_element_pattern_files_meerkat_pol1() const {return element_pattern_meerkat_pol1_.size();}
         int num_element_pattern_files_meerkat_pol2() const {return element_pattern_meerkat_pol2_.size();}
+        QString receiver_temperature_file() const { return receiver_temperature_file_; }
+        double receiver_temperature() const { return receiver_temperature_; }
 
         const oskar_SettingsObservation& obs() const { return obs_; }
         oskar_SettingsObservation& obs() { return obs_; }
@@ -110,6 +112,9 @@ class oskar_Settings
         oskar_SettingsSky sky_;
         char** element_pattern_files_meerkat_pol1_;
         char** element_pattern_files_meerkat_pol2_;
+        QString receiver_temperature_file_;
+        double receiver_temperature_;
+        unsigned receiver_temperature_seed;
 };
 
 #endif // OSKAR_SETTINGS_H_

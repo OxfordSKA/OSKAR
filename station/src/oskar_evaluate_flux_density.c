@@ -30,7 +30,7 @@
 #include "station/oskar_evaluate_flux_density.h"
 #include <stdlib.h>
 
-#ifndef c_0
+#ifndef kB
 #define kB 1.3806503e-23
 #endif
 
@@ -48,6 +48,7 @@ int oskar_evaluate_flux_density(double* flux_density, int num_channels,
 
     for (c = 0; c < num_channels; ++c)
     {
+        // NOTE factor of 2.0 from where?
         flux_density[c] = (2.0 * kB * temperature[c]) / effective_area[c];
         flux_density[c] *= 1.0e26; /* convert to Jansky (10^-26 W m^-2 Hz^-1) */
     }
