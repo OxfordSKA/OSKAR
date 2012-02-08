@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "widgets/oskar_DoubleSpinBox.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModel.h"
@@ -73,7 +74,7 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
         case oskar_SettingsItem::DOUBLE:
         {
             // Double spin box editors.
-            QDoubleSpinBox* spinner = new QDoubleSpinBox(parent);
+            oskar_DoubleSpinBox* spinner = new oskar_DoubleSpinBox(parent);
             spinner->setFrame(false);
             spinner->setRange(-DBL_MAX, DBL_MAX);
             editor = spinner;
@@ -232,7 +233,7 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
         case oskar_SettingsItem::DOUBLE:
         {
             // Double spin box editors.
-            static_cast<QDoubleSpinBox*>(editor)->setValue(value.toDouble());
+            static_cast<oskar_DoubleSpinBox*>(editor)->setValue(value.toDouble());
             break;
         }
         case oskar_SettingsItem::DATE_TIME:
@@ -270,7 +271,7 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         case oskar_SettingsItem::DOUBLE:
         {
             // Double spin box editors.
-            value = static_cast<QDoubleSpinBox*>(editor)->value();
+            value = static_cast<oskar_DoubleSpinBox*>(editor)->value();
             break;
         }
         case oskar_SettingsItem::DATE_TIME:
@@ -309,7 +310,7 @@ void oskar_SettingsDelegate::setIterations(oskar_SettingsModel* model,
     iterNum->setMaximum(INT_MAX);
     layout->addRow("Iterations", iterNum);
     QSpinBox* iterIncInt = NULL;
-    QDoubleSpinBox* iterIncDbl = NULL;
+    oskar_DoubleSpinBox* iterIncDbl = NULL;
     if (item->type() == oskar_SettingsItem::INT)
     {
         iterIncInt = new QSpinBox(dialog);
@@ -319,9 +320,8 @@ void oskar_SettingsDelegate::setIterations(oskar_SettingsModel* model,
     }
     else if (item->type() == oskar_SettingsItem::DOUBLE)
     {
-        iterIncDbl = new QDoubleSpinBox(dialog);
-        iterIncDbl->setMinimum(-DBL_MAX);
-        iterIncDbl->setMaximum(DBL_MAX);
+        iterIncDbl = new oskar_DoubleSpinBox(dialog);
+        iterIncDbl->setRange(-DBL_MAX, DBL_MAX);
         layout->addRow("Increment", iterIncDbl);
     }
 
