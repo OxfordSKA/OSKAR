@@ -99,6 +99,7 @@ int oskar_Settings::load(const QString& filename)
     // Load station settings.
     station_dir_       = settings.value("station/station_directory", "").toString();
     disable_station_beam_ = settings.value("station/disable_station_beam", false).toBool();
+    normalise_beam_ = settings.value("station/normalise_beam", false).toBool();
     element_pattern_meerkat_pol1_ = settings.value("station/element_pattern_meerkat_pol1").toStringList();
     element_pattern_meerkat_pol2_ = settings.value("station/element_pattern_meerkat_pol2").toStringList();
     element_pattern_files_meerkat_pol1_ = (char**)malloc(element_pattern_meerkat_pol1_.size() * sizeof(char*));

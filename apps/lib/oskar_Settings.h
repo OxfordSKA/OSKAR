@@ -104,6 +104,7 @@ class oskar_Settings
         double altitude_m_;
         QString station_dir_;
         bool disable_station_beam_;
+        bool normalise_beam_;
         QStringList element_pattern_meerkat_pol1_;
         QStringList element_pattern_meerkat_pol2_;
         oskar_SettingsObservation obs_;

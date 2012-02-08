@@ -72,11 +72,11 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
     if (location == OSKAR_LOCATION_CPU)
     {
         /* Set up workspace. */
-        int i, iwrk1[2], j, kwrk1 = 2, lwrk = 16, nt, np;
+        int i, iwrk1[2], j, kwrk1 = 2, lwrk = 8, nt, np;
 
         if (type == OSKAR_SINGLE)
         {
-            float wrk[16];
+            float wrk[8];
             for (j = 0; j < 2; ++j)
             {
                 const float *knots_theta, *knots_phi, *coeff;
@@ -119,7 +119,7 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
         }
         else if (type == OSKAR_DOUBLE)
         {
-            double wrk[16];
+            double wrk[8];
             for (j = 0; j < 2; ++j)
             {
                 const double *knots_theta, *knots_phi, *coeff;

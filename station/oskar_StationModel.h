@@ -68,6 +68,7 @@ struct oskar_StationModel
     double ra0_rad;         /**< Right ascension of beam phase centre, in radians. */
     double dec0_rad;        /**< Declination of beam phase centre, in radians. */
     int single_element_model; /**< True if using a single common element pattern. */
+    int normalise_beam; /**< True if the station beam should be normalised by the number of antennas. */
     int bit_depth;    /**< Not implemented! */
 
 #ifdef __cplusplus
