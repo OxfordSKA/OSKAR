@@ -14,15 +14,14 @@ if (MATLAB_FOUND)
     oskar_mex(ra_dec_to_az_el   oskar_mex_ra_dec_to_az_el.cpp)
     oskar_mex(ra_dec_to_hor_lmn oskar_mex_ra_dec_to_hor_lmn.cpp)
     oskar_mex(load_source_file  oskar_mex_sky_model_load.cpp)
-    
-    
+
     # Copy *.m files from current directory to destination.
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/+sky"
-        DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}"
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+        DESTINATION "${OSKAR_MATLAB_INSTALL_DIR}/+sky"
         FILES_MATCHING PATTERN "*.m"
         PATTERN ".svn" EXCLUDE)
 
     add_subdirectory("@SkyModel")
-    
+
 endif (MATLAB_FOUND)
 
