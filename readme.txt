@@ -83,6 +83,26 @@ Matlab interface
 ================================================================================
     scripts/matlab      : Matlab wrapper scripts.
 
+Tab completion for mex functions:
+---------------------------------
+
+    Edit the TC.xml file in the MATLAB root toolbox/local directory.
+    
+    e.g. to add filename tab completion for the oskar load_source_file and
+    oskar_visibilties_read functions add the following to the end of the file
+    just before the <\TC> tag.
+        
+        <binding name="load_source_file">
+            <arg argn="1" ctype="FILE"/>
+        </binding>
+  
+        <binding name="oskar_visibilities_read">
+            <arg argn="1" ctype="FILE"/>
+        </binding>
+        
+
+
+
 
 Python interface
 ================================================================================
