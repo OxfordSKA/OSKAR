@@ -39,6 +39,10 @@
 #include <cmath>
 #include <QtCore/QByteArray>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 extern "C"
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
 {
@@ -160,9 +164,9 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     if (!(settings.sky().filter_inner_rad() == 0.0 &&
             settings.sky().filter_outer_rad() == 0.0))
     {
-        printf("--> Filtering by radius between %f and %f radians.\n",\
-                settings.sky().filter_inner_rad(),
-                settings.sky().filter_outer_rad());
+        printf("--> Filtering by radius between %f and %f degrees.\n",\
+                settings.sky().filter_inner_rad() * (180.0 / M_PI),
+                settings.sky().filter_outer_rad() * (180.0 / M_PI));
         sky->filter_by_radius(settings.sky().filter_inner_rad(),
                 settings.sky().filter_outer_rad(),
                 settings.obs().ra0_rad(), settings.obs().dec0_rad());
