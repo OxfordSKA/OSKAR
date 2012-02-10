@@ -26,53 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_H_
-#define OSKAR_ELEMENT_MODEL_H_
+#ifndef OSKAR_SETTINGS_SIMULATOR_H_
+#define OSKAR_SETTINGS_SIMULATOR_H_
 
 /**
- * @file oskar_ElementModel.h
- */
-
-#include "math/oskar_SplineData.h"
-#include "utility/oskar_Mem.h"
-
-/**
- * @brief Structure to hold antenna (embedded element) pattern data.
+ * @struct oskar_SettingsSimulator
+ *
+ * @brief Structure to hold simulator settings.
  *
  * @details
- * This structure holds the bicubic spherical spline coefficients and knot
- * positions for both polarisations of the antenna element.
+ * The structure holds parameters for the simulator.
  */
-struct oskar_ElementModel
+struct oskar_SettingsSimulator
 {
-
-    int element_type; /**< Specifies whether horizontal or wrt phase centre. */
-    int function_type;
-    oskar_SplineData port1_phi;
-    oskar_SplineData port1_theta;
-    oskar_SplineData port2_phi;
-    oskar_SplineData port2_theta;
+    int prec_double;
+    int max_sources_per_chunk;
+    int num_cuda_devices;
+    int* cuda_device_ids;
 };
-typedef struct oskar_ElementModel oskar_ElementModel;
+typedef struct oskar_SettingsSimulator oskar_SettingsSimulator;
 
-/* Element type enumerator. */
-enum
-{
-    OSKAR_ELEMENT_FIXED,
-    OSKAR_ELEMENT_DISH
-};
-
-/* Function enumerator. */
-enum
-{
-    OSKAR_ELEMENT_SPLINE,
-    OSKAR_ELEMENT_GAUSSIAN,
-    OSKAR_ELEMENT_COS,
-    OSKAR_ELEMENT_COS_SQUARED,
-    OSKAR_ELEMENT_DIPOLE,
-    OSKAR_ELEMENT_DIPOLE_COS,
-    OSKAR_ELEMENT_DIPOLE_COS_SQUARED,
-    OSKAR_ELEMENT_DIPOLE_GAUSSIAN
-};
-
-#endif /* OSKAR_ELEMENT_MODEL_H_ */
+#endif /* OSKAR_SETTINGS_SIMULATOR_H_ */
