@@ -81,6 +81,8 @@ if (CUDA_FOUND)
         #list(APPEND CUDA_NVCC_FLAGS --compiler-options;-pedantic;)
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-variadic-macros;)
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-long-long;)
+        # Disable warning about missing initializers (for CUDA Thrust).
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-missing-field-initializers;)
     endif ()
 
     # Build mode specific flags.
