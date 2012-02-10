@@ -88,7 +88,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     model_->registerSetting("station/disable_station_beam", "Disable station beam", oskar_SettingsItem::BOOL);
     model_->setCaption("station", "Station model settings");
     model_->setCaption("observation", "Observation settings");
-    model_->registerSetting("observation/start_frequency", "Start frequency", oskar_SettingsItem::DOUBLE);
+    model_->registerSetting("observation/start_frequency", "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
     model_->registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT);
     model_->registerSetting("observation/frequency_inc", "Frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
     model_->registerSetting("observation/channel_bandwidth", "Channel bandwidth (Hz)", oskar_SettingsItem::DOUBLE);
@@ -98,7 +98,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     model_->registerSetting("observation/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT);
     model_->registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT);
     model_->registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME);
-    model_->registerSetting("observation/length_seconds", "Observation length (s)", oskar_SettingsItem::DOUBLE);
+    model_->registerSetting("observation/length", "Observation length (h:m:s.z)", oskar_SettingsItem::TIME);
     model_->registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     model_->registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 

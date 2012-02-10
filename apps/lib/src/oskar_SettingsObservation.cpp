@@ -82,51 +82,39 @@ void oskar_SettingsObservation::load(const QSettings& settings)
     time_.num_vis_ave          = settings.value("observation/num_vis_ave").toInt();
     time_.num_fringe_ave       = settings.value("observation/num_fringe_ave").toInt();
 
-    if (settings.contains("observation/start_time_utc") &&
-            settings.value("observation/start_time_utc").type() == QVariant::String)
+    // Get observation start time.
+    QString str_st = settings.value("observation/start_time_utc").toString();
+    QDateTime st = QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
+    if (!st.isValid())
     {
-        QString s = settings.value("observation/start_time_utc").toString();
-        QDateTime dt = QDateTime::fromString(s, "d-M-yyyy h:m:s.z");
-        if (!dt.isValid())
-        {
-            fprintf(stderr, "ERROR invalid date string for 'start_time_utc': "
-                    "format must be: 'd-M-yyyy h:m:s.z'.\n");
-        }
-        QDate d = dt.date();
-        QTime t = dt.time();
-        time_.obs_start_utc_year   = d.year();
-        time_.obs_start_utc_month  = d.month();
-        time_.obs_start_utc_day    = d.day();
-        time_.obs_start_utc_hour   = t.hour();
-        time_.obs_start_utc_minute = t.minute();
-        time_.obs_start_utc_second = t.second() + t.msec()/1000.0;
-//        printf("%i/%i/%i %i:%i:%f\n", time_.obs_start_utc_day,
-//                time_.obs_start_utc_month, time_.obs_start_utc_year,
-//                time_.obs_start_utc_hour, time_.obs_start_utc_minute, time_.obs_start_utc_second);
-
+        fprintf(stderr, "ERROR: Invalid date string for 'start_time_utc' "
+                "(format must be: 'd-M-yyyy h:m:s.z').\n");
     }
-    else
-    {
-        time_.obs_start_utc_year   = settings.value("observation/start_time_utc_year").toInt();
-        time_.obs_start_utc_month  = settings.value("observation/start_time_utc_month").toInt();
-        time_.obs_start_utc_day    = settings.value("observation/start_time_utc_day").toInt();
-        time_.obs_start_utc_hour   = settings.value("observation/start_time_utc_hour").toInt();
-        time_.obs_start_utc_minute = settings.value("observation/start_time_utc_minute").toInt();
-        time_.obs_start_utc_second = settings.value("observation/start_time_utc_second").toDouble();
-    }
+    time_.obs_start_utc_year   = st.date().year();
+    time_.obs_start_utc_month  = st.date().month();
+    time_.obs_start_utc_day    = st.date().day();
+    time_.obs_start_utc_hour   = st.time().hour();
+    time_.obs_start_utc_minute = st.time().minute();
+    time_.obs_start_utc_second = st.time().second() + st.time().msec()/1000.0;
 
-    // Compute day fraction from start time.
+    // Compute start time as MJD(UTC).
     double day_fraction = (time_.obs_start_utc_hour +
             (time_.obs_start_utc_minute / 60.0) +
             (time_.obs_start_utc_second / 3600.0)) / 24.0;
-
-    // Compute start time as MJD(UTC).
     time_.obs_start_mjd_utc = oskar_date_time_to_mjd(time_.obs_start_utc_year,
             time_.obs_start_utc_month, time_.obs_start_utc_day, day_fraction);
 
     // Get observation length.
-    time_.obs_length_seconds   = settings.value("observation/length_seconds").toDouble();
-    time_.obs_length_days      = time_.obs_length_seconds / 86400.0;
+    QString str_len = settings.value("observation/length").toString();
+    QTime len = QTime::fromString(str_len, "h:m:s.z");
+    if (!len.isValid())
+    {
+        fprintf(stderr, "ERROR: Invalid time string for 'length' "
+                "(format must be: 'h:m:s.z').\n");
+    }
+    time_.obs_length_seconds = len.hour() * 3600.0 + len.minute() * 60.0 +
+            len.second() + len.msec() / 1000.0;
+    time_.obs_length_days    = time_.obs_length_seconds / 86400.0;
 
     // Compute intervals.
     time_.dt_dump_days         = time_.obs_length_days / time_.num_vis_dumps;

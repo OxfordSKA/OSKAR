@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     mod.registerSetting("station/disable_station_beam", "Disable station beam", oskar_SettingsItem::BOOL);
     mod.setCaption("station", "Station model settings");
     mod.setCaption("observation", "Observation settings");
-    mod.registerSetting("observation/start_frequency", "Start frequency", oskar_SettingsItem::DOUBLE);
+    mod.registerSetting("observation/start_frequency", "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
     mod.registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT);
     mod.registerSetting("observation/frequency_inc", "Frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
     mod.registerSetting("observation/channel_bandwidth", "Channel bandwidth (Hz)", oskar_SettingsItem::DOUBLE);
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     mod.registerSetting("observation/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT);
     mod.registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT);
     mod.registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME);
-    mod.registerSetting("observation/length_seconds", "Observation length (s)", oskar_SettingsItem::DOUBLE);
+    mod.registerSetting("observation/length", "Observation length (h:m:s.z)", oskar_SettingsItem::TIME);
     mod.registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     mod.registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 

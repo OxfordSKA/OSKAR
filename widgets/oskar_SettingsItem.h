@@ -54,7 +54,8 @@ public:
         INT_CSV_LIST,       /* e.g. CUDA device IDs. */
         OPTIONS,            /* e.g. generator type, noise type. */
         RANDOM_SEED,
-        DATE_TIME
+        DATE_TIME,          /* e.g. observation start time. */
+        TIME                /* e.g. observation duration. */
     };
 
 public:

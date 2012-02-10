@@ -37,6 +37,7 @@
 #include <QtGui/QLineEdit>
 #include <QtGui/QSpinBox>
 #include <QtGui/QDateTimeEdit>
+#include <QtGui/QTimeEdit>
 #include <QtGui/QDoubleSpinBox>
 
 #include <QtGui/QDialog>
@@ -87,6 +88,15 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             spinner->setFrame(false);
             spinner->setDisplayFormat("dd-MM-yyyy hh:mm:ss.zzz");
             spinner->setCalendarPopup(true);
+            editor = spinner;
+            break;
+        }
+        case oskar_SettingsItem::TIME:
+        {
+            // Double spin box editors.
+            QTimeEdit* spinner = new QTimeEdit(parent);
+            spinner->setFrame(false);
+            spinner->setDisplayFormat("hh:mm:ss.zzz");
             editor = spinner;
             break;
         }
@@ -244,6 +254,13 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
             static_cast<QDateTimeEdit*>(editor)->setDateTime(date);
             break;
         }
+        case oskar_SettingsItem::TIME:
+        {
+            // Date and time editors.
+            QTime time = QTime::fromString(value.toString(), "h:m:s.z");
+            static_cast<QTimeEdit*>(editor)->setTime(time);
+            break;
+        }
         default:
         {
             // Line editors.
@@ -279,6 +296,13 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
             // Date and time editors.
             QDateTime date = static_cast<QDateTimeEdit*>(editor)->dateTime();
             value = date.toString("dd-MM-yyyy hh:mm:ss.zzz");
+            break;
+        }
+        case oskar_SettingsItem::TIME:
+        {
+            // Date and time editors.
+            QTime date = static_cast<QTimeEdit*>(editor)->time();
+            value = date.toString("hh:mm:ss.zzz");
             break;
         }
         default:
