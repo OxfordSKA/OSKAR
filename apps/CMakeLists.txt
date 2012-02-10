@@ -55,9 +55,7 @@ if (BUILD_OSKAR_WIDGETS)
     add_executable(${bin_name} ${bin_name}_main.cpp)
     target_link_libraries(${bin_name} 
         oskar oskar_apps ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
-    set_target_properties(${bin_name} PROPERTIES
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+    set_target_properties(${bin_name} PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     set_target_properties(${bin_name} PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         LINK_FLAGS "${OpenMP_CXX_FLAGS}")

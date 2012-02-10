@@ -39,9 +39,7 @@ if (Qwt5_FOUND)
     target_link_libraries(oskar_widgets ${QT_QTCORE_LIBRARY}
         ${QT_QTGUI_LIBRARY} ${Qwt5_Qt4_LIBRARY})
     set_target_properties(oskar_widgets PROPERTIES LINKER_LANGUAGE CXX)
-    set_target_properties(oskar_widgets PROPERTIES
-        INSTALL_RPATH_USE_LINK_PATH TRUE)
-        #INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+    set_target_properties(oskar_widgets PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
     # Tests
     add_subdirectory(test)
