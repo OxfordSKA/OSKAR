@@ -70,9 +70,10 @@ set_target_properties(oskar_apps
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
 set_target_properties(oskar_apps PROPERTIES LINKER_LANGUAGE CXX)
-    set_target_properties(oskar_apps PROPERTIES
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
+#set_target_properties(oskar_apps PROPERTIES
+#    INSTALL_RPATH_USE_LINK_PATH TRUE
+#    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 # Install target for the apps library.
 set_target_properties(oskar_apps PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
