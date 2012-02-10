@@ -42,27 +42,44 @@ include_directories(${QT_INCLUDE_DIR})
 include_directories(${CUDA_INCLUDE_DIRS})
 set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.dir/src)
 cuda_add_library(oskar_apps ${apps_SRC})
+
+# Link in oskar_ms if its avaliable
+## FIXME: mmm not sure if its a good idea for the apps library to depend on
+# widgets and ms. ?! it makes the dependency tree harder to satisfy.
+message("HERE")
+message("HERE")
+message("HERE")
 if (BUILD_OSKAR_MS AND BUILD_OSKAR_WIDGETS)
-    target_link_libraries(oskar_apps oskar_widgets oskar oskar_ms
+    message("****** linking ms and widgets...")
+    target_link_libraries(oskar_apps oskar oskar_widgets oskar_ms
         ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
         ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 elseif(BUILD_OSKAR_MS)
+    message("****** linking ms...")
     target_link_libraries(oskar_apps oskar oskar_ms ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 else()
+    message("****** linking oskar only...")
     target_link_libraries(oskar_apps oskar
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 endif()
-set_target_properties(oskar_apps PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+
+set_target_properties(oskar_apps 
+    PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
 set_target_properties(oskar_apps PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(oskar_apps PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    set_target_properties(oskar_apps PROPERTIES
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
+# Install target for the apps library.
 set_target_properties(oskar_apps PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
+install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
 # Build MATLAB mex functions.
 add_subdirectory(matlab)
 
-# ==== Recurse into test subdirectory.
+# Tests
 add_subdirectory(test)
