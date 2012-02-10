@@ -44,23 +44,18 @@ set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.
 cuda_add_library(oskar_apps ${apps_SRC})
 
 # Link in oskar_ms if its avaliable
-## FIXME: mmm not sure if its a good idea for the apps library to depend on
-# widgets and ms. ?! it makes the dependency tree harder to satisfy.
-message("HERE")
-message("HERE")
-message("HERE")
+## FIXME: mmm we might want to rethink the dependencies of the apps library
+## to not link vs other oskar libaries.
+## ... if this is possible ...
 if (BUILD_OSKAR_MS AND BUILD_OSKAR_WIDGETS)
-    message("****** linking ms and widgets...")
     target_link_libraries(oskar_apps oskar oskar_widgets oskar_ms
         ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
         ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 elseif(BUILD_OSKAR_MS)
-    message("****** linking ms...")
     target_link_libraries(oskar_apps oskar oskar_ms ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 else()
-    message("****** linking oskar only...")
     target_link_libraries(oskar_apps oskar
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 endif()
@@ -71,9 +66,9 @@ set_target_properties(oskar_apps
 
 set_target_properties(oskar_apps PROPERTIES LINKER_LANGUAGE CXX)
 
-#set_target_properties(oskar_apps PROPERTIES
-#    INSTALL_RPATH_USE_LINK_PATH TRUE
-#    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+set_target_properties(oskar_apps PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 
 # Install target for the apps library.
 set_target_properties(oskar_apps PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
