@@ -37,7 +37,7 @@
 #include "apps/lib/oskar_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
-#include "interferometry/oskar_SimTime.h"
+#include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "sky/oskar_SkyModel.h"
@@ -65,7 +65,7 @@ int oskar_sim(const char* settings_file)
     if (!settings.load(QString(settings_file))) return OSKAR_ERR_SETTINGS;
     settings.print();
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    const oskar_SimTime* times = settings.obs().sim_time();
+    const oskar_SettingsTime* times = settings.obs().settings_time();
 
     // Find out how many GPUs we have.
     int device_count = 0;

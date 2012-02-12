@@ -26,18 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_OBSERVATION_H_
-#define OSKAR_SETTINGS_OBSERVATION_H_
+#ifndef OSKAR_SETTINGS_OBSERVATION_NEW_H_
+#define OSKAR_SETTINGS_OBSERVATION_NEW_H_
 
-#include "interferometry/oskar_SimTime.h"
+#include "interferometry/oskar_SettingsTime.h"
 
 /**
- * @struct oskar_SettingsSkyFilter
+ * @struct oskar_SettingsObservation
  *
- * @brief Structure to hold sky model filter settings.
+ * @brief Structure to hold observation settings.
  *
  * @details
- * The structure holds parameters for a source filter.
+ * The structure holds observation parameters.
  */
 struct oskar_SettingsObservationNew
 {
@@ -49,8 +49,8 @@ struct oskar_SettingsObservationNew
     double dec0_rad;
     char* oskar_vis_filename;
     char* ms_filename;
-    oskar_SimTime time;
+    oskar_SettingsTime time;
 };
 typedef struct oskar_SettingsObservationNew oskar_SettingsObservationNew;
 
-#endif /* OSKAR_SETTINGS_OBSERVATION_H_ */
+#endif /* OSKAR_SETTINGS_OBSERVATION_NEW_H_ */

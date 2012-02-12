@@ -9,6 +9,11 @@ set(apps_SRC
     src/oskar_set_up_sky.cpp
     src/oskar_set_up_telescope.cpp
     src/oskar_set_up_visibilities.cpp
+    src/oskar_settings_load_observation.cpp
+    src/oskar_settings_load_simulator.cpp
+    src/oskar_settings_load_sky.cpp
+    src/oskar_settings_load_telescope.cpp
+    src/oskar_settings_load.cpp
     src/oskar_Settings.cpp
     src/oskar_SettingsBenchmark.cpp
     src/oskar_SettingsImage.cpp
@@ -60,7 +65,7 @@ else()
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 endif()
 
-set_target_properties(oskar_apps 
+set_target_properties(oskar_apps
     PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 

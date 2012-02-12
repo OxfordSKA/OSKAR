@@ -26,64 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_SettingsObservation.h"
+#include "apps/lib/oskar_settings_load_observation.h"
 #include "sky/oskar_date_time_to_mjd.h"
 
-#include <QtCore/QFileInfo>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <QtCore/QSettings>
-#include <QtCore/QStringList>
+#include <QtCore/QByteArray>
 #include <QtCore/QDateTime>
 #include <QtCore/QVariant>
 #include <QtCore/QDate>
 #include <QtCore/QTime>
-#include <QtCore/QChar>
 #include <QtCore/QString>
 
-#include <cstdio>
-#include <cstdlib>
-
-
-void oskar_SettingsObservation::load(const QSettings& settings)
+extern "C"
+int oskar_settings_load_observation(oskar_SettingsObservationNew* obs,
+        const char* filename)
 {
+    QByteArray t;
+    QSettings s(QString(filename), QSettings::IniFormat);
+    s.beginGroup("observation");
+
     // Get frequency / channel data.
-    start_frequency_   = settings.value("observation/start_frequency").toDouble();
-    num_channels_      = settings.value("observation/num_channels").toInt();
-    frequency_inc_     = settings.value("observation/frequency_inc").toDouble();
-    channel_bandwidth_ = settings.value("observation/channel_bandwidth").toDouble();
+    obs->start_frequency_hz   = s.value("start_frequency").toDouble();
+    obs->num_channels         = s.value("num_channels").toInt();
+    obs->frequency_inc_hz     = s.value("frequency_inc").toDouble();
+    obs->channel_bandwidth_hz = s.value("channel_bandwidth").toDouble();
 
     // Get pointing direction.
-//    QVariant ra0 = settings.value("observation/phase_centre_ra_deg");
-//    printf("%s\n", ra0.typeName());
-//    if (ra0.type() == QVariant::Double)
-//    {
-        ra0_deg_ = settings.value("observation/phase_centre_ra_deg").toDouble();
-//    }
-//    else if (ra0.type() == QVariant::String)
-//    {
-//        QStringList s_ra0 = ra0.toString().split(":");
-//        if (s_ra0.length() != 3)
-//        {
-//            fprintf(stderr, "ERROR: invalid ra0 string. Required format = "
-//                    "'deg:arcmin:arcsec'\n");
-//            return;
-//        }
-//        ra0_deg_ = s_ra0.at(0).toInt() + s_ra0.at(1).toInt()/60.0 +
-//                s_ra0.at(2).toDouble()/3600.0;
-//    }
-//    else
-//    {
-//        fprintf(stderr, "ERROR: observation/phase_centre_ra_deg => bad type!");
-//    }
-
-    dec0_deg_ = settings.value("observation/phase_centre_dec_deg").toDouble();
+    obs->ra0_rad = s.value("phase_centre_ra_deg").toDouble() * M_PI / 180.0;
+    obs->dec0_rad = s.value("phase_centre_dec_deg").toDouble() * M_PI / 180.0;
 
     // Get time data.
-    time_.num_vis_dumps        = settings.value("observation/num_vis_dumps").toInt();
-    time_.num_vis_ave          = settings.value("observation/num_vis_ave").toInt();
-    time_.num_fringe_ave       = settings.value("observation/num_fringe_ave").toInt();
+    obs->time.num_vis_dumps  = s.value("num_vis_dumps").toInt();
+    obs->time.num_vis_ave    = s.value("num_vis_ave").toInt();
+    obs->time.num_fringe_ave = s.value("num_fringe_ave").toInt();
 
     // Get observation start time.
-    QString str_st = settings.value("observation/start_time_utc").toString();
+    QString str_st = s.value("start_time_utc").toString();
     QDateTime st = QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
     if (!st.isValid())
     {
@@ -95,30 +77,39 @@ void oskar_SettingsObservation::load(const QSettings& settings)
     int day    = st.date().day();
     int hour   = st.time().hour();
     int minute = st.time().minute();
-    double second = st.time().second() + st.time().msec()/1000.0;
+    double second = st.time().second() + st.time().msec() / 1000.0;
 
     // Compute start time as MJD(UTC).
     double day_fraction = (hour + (minute / 60.0) + (second / 3600.0)) / 24.0;
-    time_.obs_start_mjd_utc = oskar_date_time_to_mjd(year, month, day,
+    obs->time.obs_start_mjd_utc = oskar_date_time_to_mjd(year, month, day,
             day_fraction);
 
     // Get observation length.
-    QString str_len = settings.value("observation/length").toString();
+    QString str_len = s.value("length").toString();
     QTime len = QTime::fromString(str_len, "h:m:s.z");
     if (!len.isValid())
     {
         fprintf(stderr, "ERROR: Invalid time string for 'length' "
                 "(format must be: 'h:m:s.z').\n");
     }
-    time_.obs_length_seconds = len.hour() * 3600.0 + len.minute() * 60.0 +
-            len.second() + len.msec() / 1000.0;
-    time_.obs_length_days    = time_.obs_length_seconds / 86400.0;
+    obs->time.obs_length_seconds = len.hour() * 3600.0 +
+            len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
+    obs->time.obs_length_days = obs->time.obs_length_seconds / 86400.0;
 
     // Compute intervals.
-    time_.dt_dump_days         = time_.obs_length_days / time_.num_vis_dumps;
-    time_.dt_ave_days          = time_.dt_dump_days / time_.num_vis_ave;
-    time_.dt_fringe_days       = time_.dt_ave_days / time_.num_fringe_ave;
+    obs->time.dt_dump_days = obs->time.obs_length_days / obs->time.num_vis_dumps;
+    obs->time.dt_ave_days = obs->time.dt_dump_days / obs->time.num_vis_ave;
+    obs->time.dt_fringe_days = obs->time.dt_ave_days / obs->time.num_fringe_ave;
 
-    oskar_vis_filename_        = settings.value("observation/oskar_vis_filename", "").toString();
-    ms_filename_               = settings.value("observation/ms_filename", "").toString();
+    // Get output visibility file name.
+    t = s.value("oskar_vis_filename", "").toByteArray();
+    obs->oskar_vis_filename = (char*)malloc(t.size() + 1);
+    strcpy(obs->oskar_vis_filename, t.constData());
+
+    // Get output MS file name.
+    t = s.value("ms_filename", "").toByteArray();
+    obs->ms_filename = (char*)malloc(t.size() + 1);
+    strcpy(obs->ms_filename, t.constData());
+
+    return 0;
 }

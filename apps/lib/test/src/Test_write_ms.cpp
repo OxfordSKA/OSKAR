@@ -32,7 +32,7 @@
 
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SimTime.h"
+#include "interferometry/oskar_SettingsTime.h"
 
 #include "sky/oskar_date_time_to_mjd.h"
 

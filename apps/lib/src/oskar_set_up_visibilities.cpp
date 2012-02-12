@@ -41,7 +41,7 @@ oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings& settings,
         return NULL;
 
     // Create the global visibility structure on the CPU.
-    const oskar_SimTime* times = settings.obs().sim_time();
+    const oskar_SettingsTime* times = settings.obs().settings_time();
     int n_stations = tel_cpu->num_stations;
     int n_channels = settings.obs().num_channels();
     oskar_Visibilities* vis = new oskar_Visibilities(type, OSKAR_LOCATION_CPU,

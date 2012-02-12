@@ -42,7 +42,7 @@
 
 extern "C"
 int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times,
+        const oskar_TelescopeModel* telescope, const oskar_SettingsTime* times,
         double frequency)
 {
     int err = 0;

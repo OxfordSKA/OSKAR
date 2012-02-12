@@ -26,30 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SIM_TIME_H_
-#define OSKAR_SIM_TIME_H_
+#include "apps/lib/oskar_settings_load_telescope.h"
 
-#include "oskar_global.h"
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <QtCore/QSettings>
+#include <QtCore/QByteArray>
+#include <QtCore/QVariant>
+#include <QtCore/QString>
 
-OSKAR_EXPORT
-struct oskar_SimTime
+extern "C"
+int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
+        const char* filename)
 {
-    int    num_vis_dumps;
-    int    num_vis_ave;
-    int    num_fringe_ave;
-    int    obs_start_utc_year;
-    int    obs_start_utc_month;
-    int    obs_start_utc_day;
-    int    obs_start_utc_hour;
-    int    obs_start_utc_minute;
-    double obs_start_utc_second;
-    double obs_start_mjd_utc;
-    double obs_length_seconds;
-    double obs_length_days;
-    double dt_dump_days;
-    double dt_ave_days;
-    double dt_fringe_days;
-};
-typedef struct oskar_SimTime oskar_SimTime;
+    QByteArray t;
+    QSettings s(QString(filename), QSettings::IniFormat);
+    s.beginGroup("telescope");
 
-#endif /* OSKAR_SIM_TIME_H_ */
+    // Telescope layout file.
+    t = s.value("layout_file", "").toByteArray();
+    tel->layout_file = (char*)malloc(t.size() + 1);
+    strcpy(tel->layout_file, t.constData());
+
+    // Station directory.
+    t = s.value("station_directory", "").toByteArray();
+    tel->station_dir = (char*)malloc(t.size() + 1);
+    strcpy(tel->station_dir, t.constData());
+
+    // Telescope location.
+    tel->latitude_rad = s.value("latitude_deg", 0.0).toDouble() * M_PI / 180.0;
+    tel->longitude_rad = s.value("longitude_deg", 0.0).toDouble() * M_PI / 180.0;
+    tel->altitude_m = s.value("altitude_m", 0.0).toDouble();
+
+    return 0;
+}

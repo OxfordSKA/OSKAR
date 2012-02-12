@@ -26,31 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_NEW_H_
-#define OSKAR_SETTINGS_NEW_H_
+#include "apps/lib/oskar_settings_load_simulator.h"
 
-#include "interferometry/oskar_SettingsObservation.h"
-#include "sky/oskar_SettingsSky.h"
-#include "station/oskar_SettingsStation.h"
-#include "telescope/oskar_SettingsTelescope.h"
-#include "utility/oskar_SettingsSimulator.h"
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <QtCore/QSettings>
+#include <QtCore/QVariant>
+#include <QtCore/QStringList>
 
-/**
- * @struct oskar_Settings
- *
- * @brief Structure to hold all settings.
- *
- * @details
- * The structure holds all settings parameters.
- */
-struct oskar_SettingsNew
+extern "C"
+int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
+        const char* filename)
 {
-    oskar_SettingsSimulator sim;
-    oskar_SettingsObservation obs;
-    oskar_SettingsSky sky;
-    oskar_SettingsStation station;
-    oskar_SettingsTelescope telescope;
-};
-typedef struct oskar_SettingsNew oskar_SettingsNew;
+    QSettings s(QString(filename), QSettings::IniFormat);
+    s.beginGroup("simulator");
 
-#endif /* OSKAR_SETTINGS_NEW_H_ */
+    // Get the simulator settings.
+    sim->prec_double = s.value("double_precision", true).toBool();
+    sim->max_sources_per_chunk = s.value("max_sources_per_chunk", 10000).toInt();
+
+    // Get the device IDs to use.
+    QStringList devs = s.value("cuda_device_ids", "0").toStringList();
+    sim->num_cuda_devices = devs.size();
+    sim->cuda_device_ids = (int*)malloc(devs.size() * sizeof(int));
+    for (int i = 0; i < devs.size(); ++i)
+    {
+        sim->cuda_device_ids[i] = devs[i].toInt();
+    }
+
+    return 0;
+}

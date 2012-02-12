@@ -34,7 +34,7 @@
 
 extern "C"
 int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, const oskar_SimTime* times)
+        const oskar_TelescopeModel* telescope, const oskar_SettingsTime* times)
 {
     // Assert that the parameters are not NULL.
     if (vis == NULL || telescope == NULL || times == NULL)

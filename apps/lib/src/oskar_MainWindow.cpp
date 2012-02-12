@@ -116,7 +116,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     buttons_->addButton("Run", QDialogButtonBox::AcceptRole);
     layout_->addWidget(buttons_);
     connect(buttons_, SIGNAL(accepted()), this, SLOT(runButton()));
-    connect(buttons_, SIGNAL(rejected()), qApp, SLOT(quit()));
+    connect(buttons_, SIGNAL(rejected()), this, SLOT(close()));
 
     // Create the menus.
     menubar_ = new QMenuBar(this);

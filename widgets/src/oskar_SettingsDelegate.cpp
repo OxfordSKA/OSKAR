@@ -38,7 +38,6 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QDateTimeEdit>
 #include <QtGui/QTimeEdit>
-#include <QtGui/QDoubleSpinBox>
 
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
@@ -83,7 +82,7 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
         }
         case oskar_SettingsItem::DATE_TIME:
         {
-            // Double spin box editors.
+            // Date and time editors.
             QDateTimeEdit* spinner = new QDateTimeEdit(parent);
             spinner->setFrame(false);
             spinner->setDisplayFormat("dd-MM-yyyy hh:mm:ss.zzz");
@@ -93,7 +92,7 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
         }
         case oskar_SettingsItem::TIME:
         {
-            // Double spin box editors.
+            // Time editors.
             QTimeEdit* spinner = new QTimeEdit(parent);
             spinner->setFrame(false);
             spinner->setDisplayFormat("hh:mm:ss.zzz");
@@ -119,8 +118,9 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
 {
     // Check for events only in column 1.
     if (index.column() != 1)
-        return false;
+        QStyledItemDelegate::editorEvent(event, mod, option, index);
 
+    // Get pointer to model.
     oskar_SettingsModel* model = (oskar_SettingsModel*)mod;
 
     // Check for mouse double-click events.
@@ -256,7 +256,7 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
         }
         case oskar_SettingsItem::TIME:
         {
-            // Date and time editors.
+            // Time editors.
             QTime time = QTime::fromString(value.toString(), "h:m:s.z");
             static_cast<QTimeEdit*>(editor)->setTime(time);
             break;
@@ -300,7 +300,7 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         }
         case oskar_SettingsItem::TIME:
         {
-            // Date and time editors.
+            // Time editors.
             QTime date = static_cast<QTimeEdit*>(editor)->time();
             value = date.toString("hh:mm:ss.zzz");
             break;
@@ -338,8 +338,7 @@ void oskar_SettingsDelegate::setIterations(oskar_SettingsModel* model,
     if (item->type() == oskar_SettingsItem::INT)
     {
         iterIncInt = new QSpinBox(dialog);
-        iterIncInt->setMinimum(-INT_MAX);
-        iterIncInt->setMaximum(INT_MAX);
+        iterIncInt->setRange(-INT_MAX, INT_MAX);
         layout->addRow("Increment", iterIncInt);
     }
     else if (item->type() == oskar_SettingsItem::DOUBLE)

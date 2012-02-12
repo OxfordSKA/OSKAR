@@ -175,11 +175,11 @@ void oskar_Settings::print() const
     printf("  - Phase centre Dec (deg) = %f\n", obs_.dec0_deg());
     printf("  - Latitude (deg)         = %f\n", latitude_deg_);
     printf("  - Longitude (deg)        = %f\n", longitude_deg_);
-    printf("  - Obs. length (sec)      = %f\n", obs_.sim_time()->obs_length_seconds);
-    printf("  - Obs. start (MJD)       = %f\n", obs_.sim_time()->obs_start_mjd_utc);
-    printf("  - Num. visibility dumps  = %i\n", obs_.sim_time()->num_vis_dumps);
-    printf("  - Num. visibility ave.   = %i\n", obs_.sim_time()->num_vis_ave);
-    printf("  - Num. fringe ave.       = %i\n", obs_.sim_time()->num_fringe_ave);
+    printf("  - Obs. length (sec)      = %f\n", obs_.settings_time()->obs_length_seconds);
+    printf("  - Obs. start (MJD)       = %f\n", obs_.settings_time()->obs_start_mjd_utc);
+    printf("  - Num. visibility dumps  = %i\n", obs_.settings_time()->num_vis_dumps);
+    printf("  - Num. visibility ave.   = %i\n", obs_.settings_time()->num_vis_ave);
+    printf("  - Num. fringe ave.       = %i\n", obs_.settings_time()->num_fringe_ave);
     printf("  - OSKAR visibility file  = %s\n", obs_.oskar_vis_filename().toLatin1().data());
     printf("  - MS file                = %s\n", obs_.ms_filename().toLatin1().data());
     printf("\n");

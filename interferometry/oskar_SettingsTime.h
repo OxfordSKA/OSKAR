@@ -26,56 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_OBSERVATION_H_
-#define OSKAR_SETTINGS_OBSERVATION_H_
+#ifndef OSKAR_SETTINGS_TIME_H_
+#define OSKAR_SETTINGS_TIME_H_
 
-#include "interferometry/oskar_SettingsTime.h"
-#include <QtCore/QString>
-#include <QtCore/QSettings>
+#include "oskar_global.h"
 
-#define DEG2RAD 0.0174532925199432957692
-
-class oskar_SettingsObservation
+OSKAR_EXPORT
+struct oskar_SettingsTime
 {
-    public:
-        void load(const QSettings& settings);
-
-    public:
-        double frequency(int channel) const
-        { return start_frequency_ + channel * frequency_inc_; }
-
-        double start_frequency() const { return start_frequency_; }
-
-        int num_channels() const { return num_channels_; }
-
-        double frequency_inc() const { return frequency_inc_; }
-
-        double channel_bandwidth() const { return channel_bandwidth_; }
-
-        double ra0_deg() const { return ra0_deg_; }
-        double ra0_rad() const { return ra0_deg_ * DEG2RAD; }
-
-        double dec0_deg() const { return dec0_deg_; }
-        double dec0_rad() const { return dec0_deg_ * DEG2RAD; }
-
-        QString oskar_vis_filename() const { return oskar_vis_filename_; }
-
-        QString ms_filename() const { return ms_filename_; }
-
-        const oskar_SettingsTime* settings_time() const {return &time_;}
-
-    private:
-        double   start_frequency_;
-        int      num_channels_;
-        double   frequency_inc_;
-        double   channel_bandwidth_;
-        double   ra0_deg_;
-        double   dec0_deg_;
-
-        QString  oskar_vis_filename_;
-        QString  ms_filename_;
-
-        oskar_SettingsTime time_;
+    int    num_vis_dumps;
+    int    num_vis_ave;
+    int    num_fringe_ave;
+    double obs_start_mjd_utc;
+    double obs_length_seconds;
+    double obs_length_days;
+    double dt_dump_days;
+    double dt_ave_days;
+    double dt_fringe_days;
 };
+typedef struct oskar_SettingsTime oskar_SettingsTime;
 
-#endif // OSKAR_SETTINGS_OBSERVATION_H_
+#endif /* OSKAR_SETTINGS_TIME_H_ */

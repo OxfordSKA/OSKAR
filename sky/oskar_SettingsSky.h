@@ -119,6 +119,27 @@ struct oskar_SettingsSkyGenerator
 };
 typedef struct oskar_SettingsSkyGenerator oskar_SettingsSkyGenerator;
 
+enum
+{
+    OSKAR_NOISE_VLA_MEMO_146
+};
+
+/**
+ * @struct oskar_SettingsSkyNoise
+ *
+ * @brief Structure to hold sky noise model settings.
+ *
+ * @details
+ * The structure holds parameters for the sky noise model.
+ */
+struct oskar_SettingsSkyNoise
+{
+    int type; /**< Noise model type. */
+    double spectral_index; /**< Frequency spectral index. */
+    int seed;
+};
+typedef struct oskar_SettingsSkyNoise oskar_SettingsSkyNoise;
+
 /**
  * @struct oskar_SettingsSky
  *
@@ -133,15 +154,9 @@ struct oskar_SettingsSkyNew
     oskar_SettingsSkyFilter input_sky_filter;
     char* gsm_file;        /**< Name of global sky model file to load. */
     oskar_SettingsSkyFilter gsm_filter;
-
     char* output_sky_file; /**< Optional name of output sky model. */
-
     oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
-
-    /* Sky noise (Gaussian random component added to visibilities). */
-    int noise_model;         /**< Noise model type. */
-    double noise_spectral_index; /**< Frequency spectral index. */
-    unsigned noise_seed;
+    oskar_SettingsSkyNoise noise_model; /**< Noise model parameters. */
 };
 typedef struct oskar_SettingsSkyNew oskar_SettingsSkyNew;
 

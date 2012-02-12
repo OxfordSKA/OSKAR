@@ -33,8 +33,6 @@
 #include <cmath>
 #include <cstdio>
 
-#define round(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
-
 oskar_DoubleSpinBox::oskar_DoubleSpinBox(QWidget* parent)
 : QAbstractSpinBox(parent)
 {
@@ -83,23 +81,74 @@ void oskar_DoubleSpinBox::stepBy(int steps)
 {
     // Get cursor position and locate "e" character.
     int p = lineEdit()->cursorPosition();
-    int e = 1 + text().indexOf('e', 0, Qt::CaseInsensitive);
+    int e = text().indexOf('e', 0, Qt::CaseInsensitive);
+    double val = valueFromText(text());
 
     // Set appropriate value.
     if (e < 0)
-        setValue(value_ + steps * singleStep_);
-    else if (p < e)
     {
-        double a = log10(fabs(value_));
-        int power = (int)a;
-        if (a < 0.0) --power;
-        double f = pow(10.0, power);
-        //printf("a = %f, power = %d, f = %f\n", a, power, f);
-        if (fabs(f) > fabs(value_ + steps * singleStep_)) f /= 10.0;
-        setValue(value_ + steps * singleStep_ * f);
+        // Exponent not present: change normal decimal number.
+        setValue(val + steps * singleStep_);
+    }
+    else if (p < e + 1)
+    {
+        // Change mantissa.
+        int exponent = (int) floor(log10(fabs(val)));
+        double mantissa = val / pow(10.0, exponent);
+
+        if (mantissa < 0.0)
+        {
+            if (steps < 0)
+            {
+                if (mantissa > -9.0)
+                    mantissa--;
+                else
+                {
+                    exponent++;
+                    mantissa += 8.0;
+                }
+            }
+            else
+            {
+                if (mantissa > -2.0)
+                {
+                    exponent--;
+                    mantissa -= 8.0;
+                }
+                else
+                    mantissa++;
+            }
+        }
+        else
+        {
+            if (steps < 0)
+            {
+                if (mantissa < 2.0)
+                {
+                    exponent--;
+                    mantissa += 8.0;
+                }
+                else
+                    mantissa--;
+            }
+            else
+            {
+                if (mantissa < 9.0)
+                    mantissa++;
+                else
+                {
+                    exponent++;
+                    mantissa -= 8.0;
+                }
+            }
+        }
+        setValue(mantissa * pow(10.0, exponent));
     }
     else
-        setValue((steps < 0) ? value_ / 10.0 : value_ * 10.0);
+    {
+        // Change exponent only.
+        setValue((steps < 0) ? val / 10.0 : val * 10.0);
+    }
 
     // Restore the cursor position.
     lineEdit()->setCursorPosition(p);
@@ -111,8 +160,12 @@ QString oskar_DoubleSpinBox::textFromValue(double value) const
     {
         return QString::number(value, 'e', decimals());
     }
-    else if (value != 0.0 && (fabs(value) < pow(10.0, -decimals()) ||
-            fabs(value) > pow(10.0, decimals())))
+    else if (value == 0.0)
+    {
+        return QString::number(value, 'f', decimals());
+    }
+    else if (fabs(value) < pow(10.0, -decimals()) ||
+            fabs(value) > pow(10.0, decimals()))
     {
         return QString::number(value, 'e', decimals());
     }

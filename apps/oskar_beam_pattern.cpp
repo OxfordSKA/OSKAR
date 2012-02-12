@@ -29,7 +29,7 @@
 #include <cuda_runtime_api.h>
 #include "apps/lib/oskar_Settings.h"
 #include "apps/lib/oskar_set_up_telescope.h"
-#include "interferometry/oskar_SimTime.h"
+#include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     oskar_Settings settings;
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
     settings.print();
-    const oskar_SimTime* times = settings.obs().sim_time();
+    const oskar_SettingsTime* times = settings.obs().settings_time();
 
     // Get the sky model and telescope model and copy both to GPU (slow step).
     oskar_TelescopeModel* tel_cpu, *tel_gpu;

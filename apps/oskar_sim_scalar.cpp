@@ -34,7 +34,7 @@
 #include "apps/lib/oskar_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer_scalar.h"
-#include "interferometry/oskar_SimTime.h"
+#include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "sky/oskar_SkyModel.h"
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
     settings.print();
     int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    const oskar_SimTime* times = settings.obs().sim_time();
+    const oskar_SettingsTime* times = settings.obs().settings_time();
 
     // Get the sky model and telescope model and copy both to GPU (slow step).
     oskar_SkyModel *sky_cpu, *sky_gpu;
