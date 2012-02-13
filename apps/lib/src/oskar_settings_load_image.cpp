@@ -26,20 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_SettingsImage.h"
-
-#include <QtCore/QFileInfo>
-#include <QtCore/QSettings>
+#include "apps/lib/oskar_settings_load_image.h"
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <QtCore/QSettings>
+#include <QtCore/QByteArray>
+#include <QtCore/QVariant>
 
-void oskar_SettingsImage::load(const QSettings& settings)
+extern "C"
+int oskar_settings_load_image(oskar_SettingsImageNew* im,
+        const char* filename)
 {
-    _fov_deg            = settings.value("imaging/fov_deg").toDouble();
-    _size               = settings.value("imaging/image_size").toUInt();
-    _make_snapshots     = settings.value("imaging/make_snapshots").toBool();
-    _dumps_per_snapshot = settings.value("imaging/dumps_per_snapshot").toUInt();
-    _scan_frequencies   = settings.value("imaging/scan_frequencies").toBool();
-    _filename           = settings.value("imaging/image_filename").toString();
+    QByteArray t;
+    QSettings s(QString(filename), QSettings::IniFormat);
+    s.beginGroup("image");
+
+    // Get output image file name.
+    t = s.value("filename", "").toByteArray();
+    im->filename = (char*)malloc(t.size() + 1);
+    strcpy(im->filename, t.constData());
+
+    // Get image sizes.
+    im->fov_deg = s.value("fov_deg").toDouble();
+    im->size    = s.value("size").toUInt();
+
+    return 0;
 }

@@ -26,56 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_OBSERVATION_H_
-#define OSKAR_SETTINGS_OBSERVATION_H_
+#include "apps/lib/oskar_settings_print.h"
+#include "apps/lib/oskar_settings_load.h"
+#include "apps/lib/oskar_settings_load_observation.h"
+#include "apps/lib/oskar_settings_load_simulator.h"
+#include "apps/lib/oskar_settings_load_sky.h"
+#include "apps/lib/oskar_settings_load_telescope.h"
 
-#include "interferometry/oskar_SettingsTime.h"
-#include <QtCore/QString>
-#include <QtCore/QSettings>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define DEG2RAD 0.0174532925199432957692
-
-class oskar_SettingsObservation
+int oskar_settings_load(oskar_SettingsNew* settings, const char* filename)
 {
-    public:
-        void load(const QSettings& settings);
+    int error;
 
-    public:
-        double frequency(int channel) const
-        { return start_frequency_ + channel * frequency_inc_; }
+    /* Initialise all array pointers to NULL. */
+    settings->obs.ms_filename = 0;
+    settings->obs.oskar_vis_filename = 0;
+    settings->sim.cuda_device_ids = 0;
+    settings->sky.gsm_file = 0;
+    settings->sky.input_sky_file = 0;
+    settings->sky.output_sky_file = 0;
+    settings->telescope.layout_file = 0;
+    settings->telescope.receiver_temperature_file = 0;
+    settings->telescope.station_dir = 0;
 
-        double start_frequency() const { return start_frequency_; }
+    error = oskar_settings_load_observation(&settings->obs, filename);
+    if (error) return error;
+    error = oskar_settings_load_simulator(&settings->sim, filename);
+    if (error) return error;
+    error = oskar_settings_load_sky(&settings->sky, filename);
+    if (error) return error;
+    error = oskar_settings_load_telescope(&settings->telescope, filename);
+    if (error) return error;
 
-        int num_channels() const { return num_channels_; }
+    /* Print settings. */
+    oskar_settings_print(settings, filename);
 
-        double frequency_inc() const { return frequency_inc_; }
+    return 0;
+}
 
-        double channel_bandwidth() const { return channel_bandwidth_; }
-
-        double ra0_deg() const { return ra0_deg_; }
-        double ra0_rad() const { return ra0_deg_ * DEG2RAD; }
-
-        double dec0_deg() const { return dec0_deg_; }
-        double dec0_rad() const { return dec0_deg_ * DEG2RAD; }
-
-        QString oskar_vis_filename() const { return oskar_vis_filename_; }
-
-        QString ms_filename() const { return ms_filename_; }
-
-        const oskar_SettingsTime* settings_time() const {return &time_;}
-
-    private:
-        double   start_frequency_;
-        int      num_channels_;
-        double   frequency_inc_;
-        double   channel_bandwidth_;
-        double   ra0_deg_;
-        double   dec0_deg_;
-
-        QString  oskar_vis_filename_;
-        QString  ms_filename_;
-
-        oskar_SettingsTime time_;
-};
-
-#endif // OSKAR_SETTINGS_OBSERVATION_H_
+#ifdef __cplusplus
+}
+#endif

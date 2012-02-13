@@ -44,6 +44,7 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     parentItem_ = parent;
 
     // Initialise user-defined, runtime values.
+    if (key.isEmpty()) value_ = defaultValue;
     iterNum_ = 1;
 }
 

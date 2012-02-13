@@ -26,34 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_load.h"
-#include "apps/lib/oskar_settings_load_observation.h"
-#include "apps/lib/oskar_settings_load_simulator.h"
-#include "apps/lib/oskar_settings_load_sky.h"
-#include "apps/lib/oskar_settings_load_telescope.h"
+#ifndef OSKAR_SETTINGS_FREE_H_
+#define OSKAR_SETTINGS_FREE_H_
 
-extern "C"
-int oskar_settings_load(oskar_SettingsNew* settings, const char* filename)
-{
-    int error;
+/**
+ * @file oskar_settings_free.h
+ */
 
-    // Initialise all array pointers to NULL.
-    settings->obs.ms_filename = 0;
-    settings->obs.oskar_vis_filename = 0;
-    settings->sim.cuda_device_ids = 0;
-    settings->sky.gsm_file = 0;
-    settings->sky.input_sky_file = 0;
-    settings->sky.output_sky_file = 0;
-    settings->telescope.layout_file = 0;
-    settings->telescope.station_dir = 0;
+#include "oskar_global.h"
+#include "apps/lib/oskar_Settings.h"
 
-    error = oskar_settings_load_observation(&settings->obs, filename);
-    if (error) return error;
-    error = oskar_settings_load_simulator(&settings->sim, filename);
-    if (error) return error;
-    error = oskar_settings_load_sky(&settings->sky, filename);
-    if (error) return error;
-    error = oskar_settings_load_telescope(&settings->telescope, filename);
-    if (error) return error;
-    return 0;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Frees the memory held by a settings structure.
+ *
+ * @details
+ * This top-level function frees the memory held by a settings structure
+ *
+ * @param settings A pointer to the settings structure.
+ */
+OSKAR_EXPORT
+void oskar_settings_free(oskar_SettingsNew* settings);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_SETTINGS_FREE_H_ */

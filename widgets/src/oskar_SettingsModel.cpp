@@ -39,9 +39,96 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent)
 {
     settings_ = NULL;
+
+    // Set up the root item.
     rootItem_ = new oskar_SettingsItem(QString(), QString(),
-            oskar_SettingsItem::CAPTION_ONLY, "Setting", QVariant());
-    rootItem_->setValue("Value");
+            oskar_SettingsItem::CAPTION_ONLY, "Setting", "Value");
+
+    // Simulator settings.
+    setCaption("simulator", "Simulator settings");
+    registerSetting("simulator/double_precision", "Use double precision", oskar_SettingsItem::BOOL);
+    registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT);
+    registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST);
+
+    // Sky model file settings.
+    setCaption("sky", "Sky model settings");
+    registerSetting("sky/oskar_source_file", "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setCaption("sky/oskar_source_file/filter", "Filter settings");
+    registerSetting("sky/oskar_source_file/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/oskar_source_file/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/oskar_source_file/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/oskar_source_file/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/gsm_file", "Input Global Sky Model file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setCaption("sky/gsm_file/filter", "Filter settings");
+    registerSetting("sky/gsm_file/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/gsm_file/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/gsm_file/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/gsm_file/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/output_sky_file", "Output OSKAR source file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+
+    // Sky model generator settings.
+    setCaption("sky/generator", "Generators");
+    setCaption("sky/generator/random_power_law", "Random, power-law in flux");
+    registerSetting("sky/generator/random_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT);
+    registerSetting("sky/generator/random_power_law/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_power_law/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_power_law/power", "Power law index", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_power_law/seed", "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setCaption("sky/generator/random_power_law/filter", "Filter settings");
+    registerSetting("sky/generator/random_power_law/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_power_law/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_power_law/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_power_law/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    setCaption("sky/generator/random_broken_power_law", "Random, broken power-law in flux");
+    registerSetting("sky/generator/random_broken_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT);
+    registerSetting("sky/generator/random_broken_power_law/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/power1", "Power law index 1", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/power2", "Power law index 2", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/threshold", "Threshold (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/seed", "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setCaption("sky/generator/random_broken_power_law/filter", "Filter settings");
+    registerSetting("sky/generator/random_broken_power_law/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/random_broken_power_law/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    setCaption("sky/generator/healpix", "HEALPix (uniform, all sky) grid");
+    registerSetting("sky/generator/healpix/nside", "Nside", oskar_SettingsItem::INT);
+    setCaption("sky/generator/healpix/filter", "Filter settings");
+    registerSetting("sky/generator/healpix/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/healpix/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/healpix/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("sky/generator/healpix/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
+
+    // Telescope model settings.
+    setCaption("telescope", "Telescope model settings");
+    registerSetting("telescope/layout_file", "Array layout file", oskar_SettingsItem::INPUT_FILE_NAME);
+    registerSetting("telescope/station_directory", "Station directory", oskar_SettingsItem::INPUT_DIR_NAME);
+    registerSetting("telescope/longitude_deg", "Longitude (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/latitude_deg", "Latitude (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/altitude_m", "Altitude (m)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/enable_station_beam", "Enable station beam", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/normalise_station_beam", "Normalise station beam", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/element_amp_gain", "Element amplitude gain", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/element_amp_error", "Element amplitude error", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/element_phase_offset_deg", "Element phase offset (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/element_phase_error_deg", "Element phase error (deg)", oskar_SettingsItem::DOUBLE);
+
+    // Observation settings.
+    setCaption("observation", "Observation settings");
+    registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT);
+    registerSetting("observation/start_frequency_hz", "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/frequency_inc_hz", "Frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/channel_bandwidth_hz", "Channel bandwidth (Hz)", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/phase_centre_ra_deg", "Phase centre RA (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/phase_centre_dec_deg", "Phase centre Dec (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/num_vis_dumps", "Number of visibility dumps", oskar_SettingsItem::INT);
+    registerSetting("observation/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT);
+    registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT);
+    registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME);
+    registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME);
+    registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 }
 
 oskar_SettingsModel::~oskar_SettingsModel()

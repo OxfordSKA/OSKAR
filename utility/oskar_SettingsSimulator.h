@@ -39,7 +39,7 @@
  */
 struct oskar_SettingsSimulator
 {
-    int prec_double;
+    int double_precision;
     int max_sources_per_chunk;
     int num_cuda_devices;
     int* cuda_device_ids;

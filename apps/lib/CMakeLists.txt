@@ -9,16 +9,14 @@ set(apps_SRC
     src/oskar_set_up_sky.cpp
     src/oskar_set_up_telescope.cpp
     src/oskar_set_up_visibilities.cpp
+    src/oskar_settings_free.c
+    src/oskar_settings_load_image.cpp
     src/oskar_settings_load_observation.cpp
     src/oskar_settings_load_simulator.cpp
     src/oskar_settings_load_sky.cpp
     src/oskar_settings_load_telescope.cpp
-    src/oskar_settings_load.cpp
-    src/oskar_Settings.cpp
-    src/oskar_SettingsBenchmark.cpp
-    src/oskar_SettingsImage.cpp
-    src/oskar_SettingsObservation.cpp
-    src/oskar_SettingsSky.cpp
+    src/oskar_settings_load.c
+    src/oskar_settings_print.c
     src/oskar_sim.cpp
 )
 

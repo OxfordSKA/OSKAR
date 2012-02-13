@@ -34,22 +34,23 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
-#include <QtCore/QByteArray>
+
 using namespace std;
 
 extern "C"
-oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
+oskar_TelescopeModel* oskar_set_up_telescope(const oskar_SettingsNew* settings)
 {
     // Load telescope model into CPU structure.
     oskar_TelescopeModel *telescope;
-    QByteArray telescope_file = settings.telescope_file().toAscii();
-    QByteArray station_dir = settings.station_dir().toAscii();
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    const char* telescope_file = settings->telescope.layout_file;
+    const char* station_dir = settings->telescope.station_dir;
+    int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
-    int err = telescope->load_station_pos(telescope_file.constData(),
-            settings.longitude_rad(), settings.latitude_rad(),
-            settings.altitude_m());
+    int err = telescope->load_station_pos(telescope_file,
+            settings->telescope.longitude_rad, settings->telescope.latitude_rad,
+            settings->telescope.altitude_m);
     if (err)
     {
         fprintf(stderr, "== ERROR: Failed to load telescope geometry (%s).\n",
@@ -60,7 +61,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     // Load stations from directory.
     err = oskar_load_stations(telescope->station,
             &(telescope->identical_stations), telescope->num_stations,
-            station_dir.constData());
+            station_dir);
     if (err)
     {
         fprintf(stderr, "== ERROR: Failed to load station geometry (%s).\n",
@@ -69,14 +70,14 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     }
 
     // Set phase centre.
-    telescope->ra0_rad = settings.obs().ra0_rad();
-    telescope->dec0_rad = settings.obs().dec0_rad();
+    telescope->ra0_rad = settings->obs.ra0_rad;
+    telescope->dec0_rad = settings->obs.dec0_rad;
 
     // Set other telescope parameters.
     telescope->use_common_sky = true; // FIXME set this via the settings file.
-    telescope->bandwidth_hz = settings.obs().channel_bandwidth();
+    telescope->bandwidth_hz = settings->obs.channel_bandwidth_hz;
     telescope->wavelength_metres = 0.0; // This is set on a per-channel basis.
-    telescope->disable_e_jones = settings.disable_station_beam();
+    telescope->disable_e_jones = ! (settings->telescope.enable_station_beam);
 
     // Set other station parameters.
     for (int i = 0; i < telescope->num_stations; ++i)
@@ -87,20 +88,23 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
     }
 
     // Evaluate station receiver noise (if any specified in the settings)
-    if (!settings.receiver_temperature_file().isEmpty() ||
-            settings.receiver_temperature() > 0.0)
+    if (settings->telescope.receiver_temperature_file ||
+            settings->telescope.receiver_temperature > 0.0)
     {
-        int num_channels = settings.obs().num_channels();
+        int num_channels = settings->obs.num_channels;
         double bandwidth = telescope->bandwidth_hz;
-        const oskar_SettingsTime* time =  settings.obs().settings_time();
+        const oskar_SettingsTime* time = &settings->obs.time;
         double integration_time = time->obs_length_seconds / time->num_vis_dumps;
-        vector<double> receiver_temp(num_channels, settings.receiver_temperature());
+        vector<double> receiver_temp(num_channels, settings->telescope.receiver_temperature);
 
         // Load receiver temperatures from file.
-        if (!settings.receiver_temperature_file().isEmpty())
+        if (settings->telescope.receiver_temperature_file)
         {
-            //oskar_load_receiver_temperatures(settings.receiver_temperature_file().toAscii().constData());
-            printf("== WARNING: Use of receiver temperature files not yet implemented.\n");
+            if (strlen(settings->telescope.receiver_temperature_file) > 0)
+            {
+                //oskar_load_receiver_temperatures(settings->telescope.receiver_temperature_file);
+                printf("== WARNING: Receiver temperature files are not yet implemented.\n");
+            }
         }
 
         for (int i = 0; i < telescope->num_stations; ++i)
@@ -116,7 +120,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings& settings)
 
     // Print summary data.
     printf("\n");
-    printf("= Telescope (%s)\n", telescope_file.constData());
+    printf("= Telescope model\n");
     printf("  - Num. stations          = %u\n", telescope->num_stations);
     printf("  - Identical stations     = %s\n",
             telescope->identical_stations ? "true" : "false");

@@ -28,6 +28,8 @@
 
 
 #include "apps/lib/oskar_Settings.h"
+#include "apps/lib/oskar_settings_free.h"
+#include "apps/lib/oskar_settings_load.h"
 
 #include <QtGui/QApplication>
 #include <QtCore/QTime>
@@ -57,18 +59,18 @@ int main(int argc, char** argv)
     }
 
     // Load settings file.
-    oskar_Settings settings;
-    settings.load(QString(argv[1]));
+    oskar_SettingsNew settings;
+    oskar_settings_load(&settings, argv[1]);
 
     // Load image date from file... (animate in loop?)
     unsigned channel = (unsigned)atoi(argv[2]); // channel number
     unsigned t = (unsigned)atoi(argv[3]);  // snapshot number.
-    unsigned image_size = settings.image().size();
+    unsigned image_size = settings.image.size;
 
 
     QString image_dir  = "./";
     //QString image_dir  = "./output/";
-    QString image_file = image_dir + settings.image().filename() + "_channel_"
+    QString image_file = image_dir + settings.image.filename + "_channel_"
             + QString::number(channel) + "_t_" + QString::number(t) + ".dat";
 
     FILE* file;
@@ -81,7 +83,7 @@ int main(int argc, char** argv)
     unsigned num_pixels = image_size * image_size;
     vector<float> image(num_pixels, 0.0);
 
-    if (settings.double_precision())
+    if (settings.sim.double_precision)
     {
         vector<double> image_temp(num_pixels, 0.0);
         size_t read = fread(&image_temp[0], sizeof(double), num_pixels, file);
@@ -115,7 +117,7 @@ int main(int argc, char** argv)
     //====== Plotting. =======================================================
     QApplication app(argc, argv);
 
-    double fov_deg = settings.image().fov_deg();
+    double fov_deg = settings.image.fov_deg;
 
     PlotWidget plot1;
     plot1.setCanvasBackground(Qt::black);
@@ -141,5 +143,6 @@ int main(int argc, char** argv)
     status = app.exec();
     // ========================================================================
 
+    oskar_settings_free(&settings);
     return status;
 }

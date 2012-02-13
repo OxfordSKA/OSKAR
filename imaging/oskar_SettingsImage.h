@@ -26,29 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_NEW_H_
-#define OSKAR_SETTINGS_NEW_H_
-
-#include "interferometry/oskar_SettingsObservation.h"
-#include "sky/oskar_SettingsSky.h"
-#include "interferometry/oskar_SettingsTelescope.h"
-#include "utility/oskar_SettingsSimulator.h"
+#ifndef OSKAR_SETTINGS_IMAGE_NEW_H_
+#define OSKAR_SETTINGS_IMAGE_NEW_H_
 
 /**
- * @struct oskar_Settings
+ * @struct oskar_SettingsImage
  *
- * @brief Structure to hold all settings.
+ * @brief Structure to hold image settings.
  *
  * @details
- * The structure holds all settings parameters.
+ * The structure holds parameters for imaging.
  */
-struct oskar_SettingsNew
+struct oskar_SettingsImageNew
 {
-    oskar_SettingsSimulator sim;
-    oskar_SettingsObservationNew obs;
-    oskar_SettingsSkyNew sky;
-    oskar_SettingsTelescope telescope;
+    double fov_deg;
+    int size;
+    char* filename;
 };
-typedef struct oskar_SettingsNew oskar_SettingsNew;
+typedef struct oskar_SettingsImageNew oskar_SettingsImageNew;
 
-#endif /* OSKAR_SETTINGS_NEW_H_ */
+#endif /* OSKAR_SETTINGS_IMAGE_NEW_H_ */

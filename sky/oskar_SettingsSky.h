@@ -60,7 +60,6 @@ struct oskar_SettingsSkyGeneratorRandomPowerLaw
     int num_sources;
     double flux_min;
     double flux_max;
-    double threshold;
     double power;
     int seed;
 };

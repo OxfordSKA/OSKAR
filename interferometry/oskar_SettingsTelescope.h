@@ -40,11 +40,22 @@
 struct oskar_SettingsTelescope
 {
     char* layout_file;
-    double latitude_rad;
-    double longitude_rad;
-    double altitude_m;
     char* station_dir;
+    double longitude_rad;
+    double latitude_rad;
+    double altitude_m;
+
+    /* Station settings. */
     int enable_station_beam;
+    int normalise_station_beam;
+    double receiver_temperature;
+    char* receiver_temperature_file;
+
+    /* Station element settings (can override those in the station files). */
+    double element_amp_gain;
+    double element_amp_error;
+    double element_phase_offset_rad;
+    double element_phase_error_rad;
 };
 typedef struct oskar_SettingsTelescope oskar_SettingsTelescope;
 

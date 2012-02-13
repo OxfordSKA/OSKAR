@@ -52,7 +52,7 @@ public:
         INPUT_FILE_NAME,    /* e.g. sky model file. */
         INPUT_FILE_LIST,    /* e.g. MeerKAT antenna files. */
         INT_CSV_LIST,       /* e.g. CUDA device IDs. */
-        OPTIONS,            /* e.g. generator type, noise type. */
+        OPTIONS,            /* e.g. noise type. */
         RANDOM_SEED,
         DATE_TIME,          /* e.g. observation start time. */
         TIME                /* e.g. observation duration. */

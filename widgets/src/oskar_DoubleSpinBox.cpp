@@ -29,6 +29,8 @@
 #include "widgets/oskar_DoubleSpinBox.h"
 #include <QtGui/QDoubleValidator>
 #include <QtGui/QLineEdit>
+#include <QtGui/QFocusEvent>
+#include <QtGui/QKeyEvent>
 #include <cfloat>
 #include <cmath>
 #include <cstdio>
@@ -89,6 +91,9 @@ void oskar_DoubleSpinBox::stepBy(int steps)
     {
         // Exponent not present: change normal decimal number.
         setValue(val + steps * singleStep_);
+
+        // Set selected region.
+        lineEdit()->selectAll();
     }
     else if (p < e + 1)
     {
@@ -143,33 +148,28 @@ void oskar_DoubleSpinBox::stepBy(int steps)
             }
         }
         setValue(mantissa * pow(10.0, exponent));
+
+        // Set selected region.
+        int e = text().indexOf('e', 0, Qt::CaseInsensitive);
+        lineEdit()->setSelection(0, e);
     }
     else
     {
         // Change exponent only.
         setValue((steps < 0) ? val / 10.0 : val * 10.0);
-    }
 
-    // Restore the cursor position.
-    lineEdit()->setCursorPosition(p);
+        // Set selected region.
+        int e = text().indexOf('e', 0, Qt::CaseInsensitive);
+        lineEdit()->setSelection(e + 1, text().length() - (e + 1));
+    }
 }
 
 QString oskar_DoubleSpinBox::textFromValue(double value) const
 {
     if (text().contains('e', Qt::CaseInsensitive))
-    {
         return QString::number(value, 'e', decimals());
-    }
-    else if (value == 0.0)
-    {
-        return QString::number(value, 'f', decimals());
-    }
-    else if (fabs(value) < pow(10.0, -decimals()) ||
-            fabs(value) > pow(10.0, decimals()))
-    {
-        return QString::number(value, 'e', decimals());
-    }
-    return QString::number(value, 'f', decimals());
+    else
+        return QString::number(value);
 }
 
 QValidator::State oskar_DoubleSpinBox::validate(QString& text, int& pos) const
@@ -196,12 +196,29 @@ void oskar_DoubleSpinBox::setValue(double val)
     emit valueChanged(t);
 }
 
-QAbstractSpinBox::StepEnabled oskar_DoubleSpinBox::stepEnabled() const
-{
-    return QAbstractSpinBox::StepUpEnabled | QAbstractSpinBox::StepDownEnabled;
-}
-
 void oskar_DoubleSpinBox::setValue()
 {
     setValue(valueFromText(text()));
+}
+
+// Protected functions.
+
+void oskar_DoubleSpinBox::focusInEvent(QFocusEvent* event)
+{
+    lineEdit()->selectAll();
+    QAbstractSpinBox::focusInEvent(event);
+}
+
+void oskar_DoubleSpinBox::keyPressEvent(QKeyEvent* event)
+{
+    QAbstractSpinBox::keyPressEvent(event);
+    int pos = 0;
+    QString txt = text();
+    if (validate(txt, pos) == QValidator::Acceptable)
+        value_ = valueFromText(txt);
+}
+
+QAbstractSpinBox::StepEnabled oskar_DoubleSpinBox::stepEnabled() const
+{
+    return QAbstractSpinBox::StepUpEnabled | QAbstractSpinBox::StepDownEnabled;
 }

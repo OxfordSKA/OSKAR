@@ -40,6 +40,10 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
 {
     int err = 0, type, location;
 
+    /* Return immediately if no filtering should be done. */
+    if (min_I == 0.0 && max_I == 0.0)
+        return 0;
+
     /* Get the type and location. */
     type = oskar_sky_model_type(sky);
     location = oskar_sky_model_location(sky);

@@ -28,6 +28,8 @@
 
 #include <cuda_runtime_api.h>
 #include "apps/lib/oskar_Settings.h"
+#include "apps/lib/oskar_settings_free.h"
+#include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_visibilities.h"
@@ -41,12 +43,8 @@
 #include "utility/oskar_exit.h"
 #include "utility/oskar_Mem.h"
 
-#define TIMER_ENABLE 1
-#include "utility/timer.h"
-
 #include <cstdio>
 #include <cstdlib>
-#include <QtCore/QByteArray>
 #include <QtCore/QTime>
 
 int main(int argc, char** argv)
@@ -61,28 +59,28 @@ int main(int argc, char** argv)
     }
 
     // Load the settings file.
-    oskar_Settings settings;
-    if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
-    settings.print();
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    const oskar_SettingsTime* times = settings.obs().settings_time();
+    oskar_SettingsNew settings;
+    err = oskar_settings_load(&settings, argv[1]);
+    if (err) oskar_exit(err);
+    int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    const oskar_SettingsTime* times = &settings.obs.time;
 
     // Get the sky model and telescope model and copy both to GPU (slow step).
     oskar_SkyModel *sky_cpu, *sky_gpu;
     oskar_TelescopeModel *tel_cpu, *tel_gpu;
-    sky_cpu = oskar_set_up_sky(settings);
-    tel_cpu = oskar_set_up_telescope(settings);
+    sky_cpu = oskar_set_up_sky(&settings);
+    tel_cpu = oskar_set_up_telescope(&settings);
     sky_gpu = new oskar_SkyModel(sky_cpu, OSKAR_LOCATION_GPU);
     tel_gpu = new oskar_TelescopeModel(tel_cpu, OSKAR_LOCATION_GPU);
 
     // Create the global visibility structure on the CPU.
-    oskar_Visibilities* vis_global = oskar_set_up_visibilities(settings,
+    oskar_Visibilities* vis_global = oskar_set_up_visibilities(&settings,
             tel_cpu, type | OSKAR_COMPLEX);
 
     // Run the simulation.
     QTime timer;
     timer.start();
-    int n_channels = settings.obs().num_channels();
+    int n_channels = settings.obs.num_channels;
     for (int c = 0; c < n_channels; ++c)
     {
         // Get a pointer to the visibility channel data.
@@ -91,8 +89,10 @@ int main(int argc, char** argv)
         vis_global->get_channel_amps(&vis_amp, c);
 
         // Simulate data for this channel.
+        double freq = settings.obs.start_frequency_hz +
+                c * settings.obs.frequency_inc_hz;
         err = oskar_interferometer_scalar(&vis_amp, sky_gpu, tel_gpu, times,
-                settings.obs().frequency(c));
+                freq);
         if (err) oskar_exit(err);
     }
     printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
@@ -102,21 +102,20 @@ int main(int argc, char** argv)
     if (err) oskar_exit(err);
 
     // Write global visibilities to disk.
-    if (!settings.obs().oskar_vis_filename().isEmpty())
+    if (settings.obs.oskar_vis_filename)
     {
-        QByteArray outname = settings.obs().oskar_vis_filename().toAscii();
-        printf("--> Writing visibility file: '%s'\n", outname.constData());
-        err = vis_global->write(outname);
+        printf("--> Writing visibility file: '%s'\n",
+                settings.obs.oskar_vis_filename);
+        err = vis_global->write(settings.obs.oskar_vis_filename);
         if (err) oskar_exit(err);
     }
 
 #ifndef OSKAR_NO_MS
     // Write Measurement Set.
-    if (!settings.obs().ms_filename().isEmpty())
+    if (settings.obs.ms_filename)
     {
-        QByteArray outname = settings.obs().ms_filename().toAscii();
-        printf("--> Writing Measurement Set: '%s'\n", outname.constData());
-        err = oskar_write_ms(outname, vis_global, tel_cpu, (int)OSKAR_TRUE);
+        printf("--> Writing Measurement Set: '%s'\n", settings.obs.ms_filename);
+        err = oskar_write_ms(settings.obs.ms_filename, vis_global, tel_cpu, true);
         if (err) oskar_exit(err);
     }
 #endif
@@ -129,5 +128,6 @@ int main(int argc, char** argv)
     delete tel_cpu;
     cudaDeviceReset();
 
+    oskar_settings_free(&settings);
     return EXIT_SUCCESS;
 }

@@ -29,93 +29,28 @@
 #ifndef OSKAR_SETTINGS_H_
 #define OSKAR_SETTINGS_H_
 
-#include "apps/lib/oskar_SettingsImage.h"
-#include "apps/lib/oskar_SettingsObservation.h"
-#include "apps/lib/oskar_SettingsBenchmark.h"
-#include "apps/lib/oskar_SettingsSky.h"
+#include "imaging/oskar_SettingsImage.h"
+#include "interferometry/oskar_SettingsObservation.h"
+#include "sky/oskar_SettingsSky.h"
+#include "interferometry/oskar_SettingsTelescope.h"
+#include "utility/oskar_SettingsSimulator.h"
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QSettings>
-
-#define DEG2RAD 0.0174532925199432957692
-
-class oskar_Settings
+/**
+ * @struct oskar_Settings
+ *
+ * @brief Structure to hold all settings.
+ *
+ * @details
+ * The structure holds all settings parameters.
+ */
+struct oskar_SettingsNew
 {
-    public:
-        oskar_Settings(const QString& filename = QString());
-        ~oskar_Settings();
-
-    public:
-        int load(const QString& filename = QString());
-
-        int check() const;
-
-        void print() const;
-
-    public:
-        QString telescope_file() const { return telescope_file_; }
-        void set_telescope_file(const QString& value) { telescope_file_ = value; }
-
-        double longitude_deg() const { return longitude_deg_; }
-        void set_longitude_deg(const double value) { longitude_deg_ = value; }
-        double latitude_deg() const { return latitude_deg_; }
-        void set_latitude_deg(const double value) { latitude_deg_ = value; }
-        double longitude_rad() const { return longitude_deg_ * DEG2RAD; }
-        double latitude_rad() const { return latitude_deg_ * DEG2RAD; }
-        double altitude_m() const { return altitude_m_; }
-        void set_altitude_m(const double value) { altitude_m_ = value; }
-
-        QString station_dir() const { return station_dir_; }
-        void set_station_dir(const QString& value) { station_dir_ = value; }
-        bool disable_station_beam() const { return disable_station_beam_; }
-        void set_disable_station_beam(const bool value)
-        { disable_station_beam_ = value; }
-
-        bool double_precision() const { return prec_double_; }
-        int max_sources_per_chunk() const { return max_sources_per_chunk_; }
-        int num_cuda_devices() const { return cuda_device_ids_.size(); }
-        const int* cuda_device_ids() const { return cuda_device_ids_.constData(); }
-        const char* const* element_pattern_files_meerkat_pol1() const {return element_pattern_files_meerkat_pol1_;}
-        const char* const* element_pattern_files_meerkat_pol2() const {return element_pattern_files_meerkat_pol2_;}
-        int num_element_pattern_files_meerkat_pol1() const {return element_pattern_meerkat_pol1_.size();}
-        int num_element_pattern_files_meerkat_pol2() const {return element_pattern_meerkat_pol2_.size();}
-        QString receiver_temperature_file() const { return receiver_temperature_file_; }
-        double receiver_temperature() const { return receiver_temperature_; }
-
-        const oskar_SettingsObservation& obs() const { return obs_; }
-        oskar_SettingsObservation& obs() { return obs_; }
-
-        const oskar_SettingsImage& image() const { return image_; }
-        oskar_SettingsImage& image() { return image_; }
-
-        const oskar_SettingsBenchmark& benchmark() const { return benchmark_; }
-        const oskar_SettingsSky& sky() const { return sky_; }
-        oskar_SettingsSky& sky() { return sky_; }
-
-    private:
-        bool prec_double_;
-        int max_sources_per_chunk_;
-        QVector<int> cuda_device_ids_;
-        QString filename_;
-        QString telescope_file_;
-        double longitude_deg_;
-        double latitude_deg_;
-        double altitude_m_;
-        QString station_dir_;
-        bool disable_station_beam_;
-        bool normalise_beam_;
-        QStringList element_pattern_meerkat_pol1_;
-        QStringList element_pattern_meerkat_pol2_;
-        oskar_SettingsObservation obs_;
-        oskar_SettingsImage image_;
-        oskar_SettingsBenchmark benchmark_;
-        oskar_SettingsSky sky_;
-        char** element_pattern_files_meerkat_pol1_;
-        char** element_pattern_files_meerkat_pol2_;
-        QString receiver_temperature_file_;
-        double receiver_temperature_;
-        unsigned receiver_temperature_seed;
+    oskar_SettingsSimulator sim;
+    oskar_SettingsObservationNew obs;
+    oskar_SettingsImageNew image;
+    oskar_SettingsSkyNew sky;
+    oskar_SettingsTelescope telescope;
 };
+typedef struct oskar_SettingsNew oskar_SettingsNew;
 
-#endif // OSKAR_SETTINGS_H_
+#endif /* OSKAR_SETTINGS_H_ */

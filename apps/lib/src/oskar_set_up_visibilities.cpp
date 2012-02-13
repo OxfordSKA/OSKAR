@@ -33,7 +33,7 @@
 #include <cstdlib>
 
 extern "C"
-oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings& settings,
+oskar_Visibilities* oskar_set_up_visibilities(const oskar_SettingsNew* settings,
         const oskar_TelescopeModel* tel_cpu, int type)
 {
     // Check the type.
@@ -41,18 +41,18 @@ oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings& settings,
         return NULL;
 
     // Create the global visibility structure on the CPU.
-    const oskar_SettingsTime* times = settings.obs().settings_time();
+    const oskar_SettingsTime* times = &settings->obs.time;
     int n_stations = tel_cpu->num_stations;
-    int n_channels = settings.obs().num_channels();
+    int n_channels = settings->obs.num_channels;
     oskar_Visibilities* vis = new oskar_Visibilities(type, OSKAR_LOCATION_CPU,
             n_channels, times->num_vis_dumps, n_stations * (n_stations - 1) /2);
 
     // Add meta-data.
-    vis->freq_start_hz = settings.obs().start_frequency();
-    vis->freq_inc_hz = settings.obs().frequency_inc();
+    vis->freq_start_hz = settings->obs.start_frequency_hz;
+    vis->freq_inc_hz = settings->obs.frequency_inc_hz;
     vis->time_start_mjd_utc = times->obs_start_mjd_utc;
     vis->time_inc_seconds = times->dt_dump_days * 86400.0;
-    vis->channel_bandwidth_hz = settings.obs().start_frequency();
+    vis->channel_bandwidth_hz = settings->obs.start_frequency_hz;
 
     // Return the structure.
     return vis;

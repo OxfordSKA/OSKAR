@@ -26,14 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_SettingsBenchmark.h"
-#include <QtCore/QSettings>
-#include <cstdio>
+#ifndef OSKAR_SETTINGS_LOAD_IMAGE_H_
+#define OSKAR_SETTINGS_LOAD_IMAGE_H_
 
-void oskar_SettingsBenchmark::load(const QSettings& settings)
-{
-    // note: need to cast to double to accept values of the form 1e6
-    num_sources_  = (int)settings.value("benchmark/num_sources").toDouble();
-    num_stations_ = (int)settings.value("benchmark/num_stations").toDouble();
-    num_antennas_ = (int)settings.value("benchmark/num_antennas").toDouble();
+/**
+ * @file oskar_settings_load_image.h
+ */
+
+#include "oskar_global.h"
+#include "imaging/oskar_SettingsImage.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Populates image settings from the given settings file.
+ *
+ * @details
+ * This function populates an image settings structure from the given
+ * settings file.
+ *
+ * @param[out] settings A pointer to a settings structure to populate.
+ * @param[in] filename  String containing name of settings file to read.
+ */
+OSKAR_EXPORT
+int oskar_settings_load_image(oskar_SettingsImageNew* settings,
+        const char* filename);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_SETTINGS_LOAD_IMAGE_H_ */

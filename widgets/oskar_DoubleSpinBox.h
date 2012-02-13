@@ -63,6 +63,8 @@ Q_SIGNALS:
     void valueChanged(const QString& text);
 
 protected:
+    virtual void focusInEvent(QFocusEvent* event);
+    virtual void keyPressEvent(QKeyEvent* event);
     virtual StepEnabled stepEnabled() const;
 
 private Q_SLOTS:

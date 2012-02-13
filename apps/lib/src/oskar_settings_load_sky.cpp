@@ -35,6 +35,8 @@
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 
+#define D2R M_PI/180.0
+
 extern "C"
 int oskar_settings_load_sky(oskar_SettingsSkyNew* sky, const char* filename)
 {
@@ -45,13 +47,19 @@ int oskar_settings_load_sky(oskar_SettingsSkyNew* sky, const char* filename)
 
     // Output OSKAR sky model file.
     t = s.value("output_sky_file").toByteArray();
-    sky->output_sky_file = (char*)malloc(t.size() + 1);
-    strcpy(sky->output_sky_file, t.constData());
+    if (t.size() > 0)
+    {
+        sky->output_sky_file = (char*)malloc(t.size() + 1);
+        strcpy(sky->output_sky_file, t.constData());
+    }
 
     // Input OSKAR sky model file.
     t = s.value("oskar_source_file").toByteArray();
-    sky->input_sky_file = (char*)malloc(t.size() + 1);
-    strcpy(sky->input_sky_file, t.constData());
+    if (t.size() > 0)
+    {
+        sky->input_sky_file = (char*)malloc(t.size() + 1);
+        strcpy(sky->input_sky_file, t.constData());
+    }
 
     // Input OSKAR sky model filter.
     s.beginGroup("oskar_source_file");
@@ -59,16 +67,19 @@ int oskar_settings_load_sky(oskar_SettingsSkyNew* sky, const char* filename)
     sky->input_sky_filter.flux_min = s.value("flux_min").toDouble();
     sky->input_sky_filter.flux_max = s.value("flux_max").toDouble();
     sky->input_sky_filter.radius_inner =
-            s.value("radius_inner_deg", -1.0).toDouble() * M_PI / 180.0;
+            s.value("radius_inner_deg").toDouble() * D2R;
     sky->input_sky_filter.radius_outer =
-            s.value("radius_outer_deg", 1000.0).toDouble() * M_PI / 180.0;
+            s.value("radius_outer_deg").toDouble() * D2R;
     s.endGroup();
     s.endGroup();
 
     // GSM file.
     t = s.value("gsm_file").toByteArray();
-    sky->gsm_file = (char*)malloc(t.size() + 1);
-    strcpy(sky->gsm_file, t.constData());
+    if (t.size() > 0)
+    {
+        sky->gsm_file = (char*)malloc(t.size() + 1);
+        strcpy(sky->gsm_file, t.constData());
+    }
 
     // GSM filter.
     s.beginGroup("gsm_file");
@@ -76,81 +87,79 @@ int oskar_settings_load_sky(oskar_SettingsSkyNew* sky, const char* filename)
     sky->gsm_filter.flux_min = s.value("flux_min").toDouble();
     sky->gsm_filter.flux_max = s.value("flux_max").toDouble();
     sky->gsm_filter.radius_inner =
-            s.value("radius_inner_deg", -1.0).toDouble() * M_PI / 180.0;
+            s.value("radius_inner_deg").toDouble() * D2R;
     sky->gsm_filter.radius_outer =
-            s.value("radius_outer_deg", 1000.0).toDouble() * M_PI / 180.0;
+            s.value("radius_outer_deg").toDouble() * D2R;
     s.endGroup();
     s.endGroup();
 
     // Generator settings.
     s.beginGroup("generator");
 
-    // HEALPix generator settings.
-    s.beginGroup("healpix");
-    sky->generator.healpix.nside = s.value("nside", 0).toInt();
-    // HEALPix generator filter.
-    s.beginGroup("filter");
-    sky->generator.healpix.filter.flux_max = s.value("flux_min", 0).toDouble();
-    sky->generator.healpix.filter.flux_max = s.value("flux_max", 0).toDouble();
-    sky->generator.healpix.filter.radius_inner =
-            s.value("radius_inner_deg", -1.0).toDouble() * M_PI / 180.0;
-    sky->generator.healpix.filter.radius_outer =
-            s.value("radius_outer_deg", 1000.0).toDouble() * M_PI / 180.0;
-    s.endGroup();
-    s.endGroup();
-
     // Random power-law generator settings.
     s.beginGroup("random_power_law");
     sky->generator.random_power_law.num_sources =
-            s.value("num_sources", 0).toInt();
-    sky->generator.random_power_law.flux_min =
-            s.value("flux_density_min", 0.0).toDouble();
-    sky->generator.random_power_law.flux_max =
-            s.value("flux_density_max", 0.0).toDouble();
-    sky->generator.random_power_law.power = s.value("power", 0.0).toDouble();
+            s.value("num_sources").toInt();
+    sky->generator.random_power_law.flux_min = s.value("flux_min").toDouble();
+    sky->generator.random_power_law.flux_max = s.value("flux_max").toDouble();
+    sky->generator.random_power_law.power = s.value("power").toDouble();
     temp = s.value("seed").toString();
     sky->generator.random_power_law.seed = (temp.toUpper() == "TIME")
             ? (int)time(NULL) : (int)temp.toDouble();
     // Random power-law generator filter.
     s.beginGroup("filter");
+    sky->generator.random_power_law.filter.flux_min =
+            s.value("flux_min").toDouble();
     sky->generator.random_power_law.filter.flux_max =
-            s.value("flux_min", 0).toDouble();
-    sky->generator.random_power_law.filter.flux_max =
-            s.value("flux_max", 0).toDouble();
+            s.value("flux_max").toDouble();
     sky->generator.random_power_law.filter.radius_inner =
-            s.value("radius_inner_deg", -1.0).toDouble() * M_PI / 180.0;
+            s.value("radius_inner_deg").toDouble() * D2R;
     sky->generator.random_power_law.filter.radius_outer =
-            s.value("radius_outer_deg", 1000.0).toDouble() * M_PI / 180.0;
+            s.value("radius_outer_deg").toDouble() * D2R;
     s.endGroup();
     s.endGroup();
 
     // Random broken-power-law generator settings.
     s.beginGroup("random_broken_power_law");
     sky->generator.random_broken_power_law.num_sources =
-            s.value("num_sources", 0).toInt();
+            s.value("num_sources").toInt();
     sky->generator.random_broken_power_law.flux_min =
-            s.value("flux_density_min", 0.0).toDouble();
+            s.value("flux_min").toDouble();
     sky->generator.random_broken_power_law.flux_max =
-            s.value("flux_density_max", 0.0).toDouble();
+            s.value("flux_max").toDouble();
     sky->generator.random_broken_power_law.threshold =
-            s.value("threshold", 0.0).toDouble();
+            s.value("threshold").toDouble();
     sky->generator.random_broken_power_law.power1 =
-            s.value("power1", 0.0).toDouble();
+            s.value("power1").toDouble();
     sky->generator.random_broken_power_law.power2 =
-            s.value("power2", 0.0).toDouble();
+            s.value("power2").toDouble();
     temp = s.value("seed").toString();
     sky->generator.random_broken_power_law.seed = (temp.toUpper() == "TIME")
             ? (int)time(NULL) : (int)temp.toDouble();
     // Random broken-power-law generator filter.
     s.beginGroup("filter");
+    sky->generator.random_broken_power_law.filter.flux_min =
+            s.value("flux_min").toDouble();
     sky->generator.random_broken_power_law.filter.flux_max =
-            s.value("flux_min", 0).toDouble();
-    sky->generator.random_broken_power_law.filter.flux_max =
-            s.value("flux_max", 0).toDouble();
+            s.value("flux_max").toDouble();
     sky->generator.random_broken_power_law.filter.radius_inner =
-            s.value("radius_inner_deg", -1.0).toDouble() * M_PI / 180.0;
+            s.value("radius_inner_deg").toDouble() * D2R;
     sky->generator.random_broken_power_law.filter.radius_outer =
-            s.value("radius_outer_deg", 1000.0).toDouble() * M_PI / 180.0;
+            s.value("radius_outer_deg").toDouble() * D2R;
+    s.endGroup();
+    s.endGroup();
+
+    // HEALPix generator settings.
+    s.beginGroup("healpix");
+    sky->generator.healpix.nside = s.value("nside", 0).toInt();
+    // HEALPix generator filter.
+    s.beginGroup("filter");
+    sky->generator.healpix.filter.flux_min = s.value("flux_min").toDouble();
+    sky->generator.healpix.filter.flux_max = s.value("flux_max").toDouble();
+    sky->generator.healpix.filter.radius_inner =
+            s.value("radius_inner_deg").toDouble() * D2R;
+    sky->generator.healpix.filter.radius_outer =
+            s.value("radius_outer_deg").toDouble() * D2R;
     s.endGroup();
     s.endGroup();
 
@@ -163,7 +172,7 @@ int oskar_settings_load_sky(oskar_SettingsSkyNew* sky, const char* filename)
     if (temp.toUpper() == "VLA_MEMO_146")
         sky->noise_model.type = OSKAR_NOISE_VLA_MEMO_146;
     sky->noise_model.spectral_index =
-            s.value("noise_model/spectral_index", 0.0).toDouble();
+            s.value("noise_model/spectral_index").toDouble();
     temp = s.value("noise_model/seed").toString();
     sky->noise_model.seed = (temp.toUpper() == "TIME")
             ? (int)time(NULL) : (int)temp.toDouble();

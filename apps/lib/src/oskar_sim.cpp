@@ -30,6 +30,8 @@
 #include <omp.h>
 
 #include "apps/lib/oskar_Settings.h"
+#include "apps/lib/oskar_settings_load.h"
+#include "apps/lib/oskar_settings_free.h"
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_visibilities.h"
@@ -61,28 +63,28 @@ int oskar_sim(const char* settings_file)
     int error;
 
     // Load the settings file.
-    oskar_Settings settings;
-    if (!settings.load(QString(settings_file))) return OSKAR_ERR_SETTINGS;
-    settings.print();
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    const oskar_SettingsTime* times = settings.obs().settings_time();
+    oskar_SettingsNew settings;
+    error = oskar_settings_load(&settings, settings_file);
+    if (error) return error;
+    int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    const oskar_SettingsTime* times = &settings.obs.time;
 
     // Find out how many GPUs we have.
     int device_count = 0;
-    int num_devices = settings.num_cuda_devices();
+    int num_devices = settings.sim.num_cuda_devices;
     error = (int)cudaGetDeviceCount(&device_count);
     if (error) return error;
     if (device_count < num_devices) return OSKAR_ERR_CUDA_DEVICES;
 
     // Construct sky and telescope.
-    oskar_SkyModel* sky_cpu = oskar_set_up_sky(settings);
-    oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(settings);
+    oskar_SkyModel* sky_cpu = oskar_set_up_sky(&settings);
+    oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(&settings);
     if (sky_cpu == NULL || telescope_cpu == NULL) return OSKAR_ERR_SETUP_FAIL;
 
     // Split the sky model into chunks.
     oskar_SkyModel* sky_chunk_cpu = NULL;
     int num_sky_chunks = 0;
-    int max_sources_per_chunk = min(settings.max_sources_per_chunk(),
+    int max_sources_per_chunk = min(settings.sim.max_sources_per_chunk,
             (int)ceil((double)sky_cpu->num_sources / (double)num_devices));
     error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
             max_sources_per_chunk, sky_cpu);
@@ -93,7 +95,7 @@ int oskar_sim(const char* settings_file)
 
     // Create the global visibility structure on the CPU.
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    oskar_Visibilities* vis_global = oskar_set_up_visibilities(settings,
+    oskar_Visibilities* vis_global = oskar_set_up_visibilities(&settings,
             telescope_cpu, complex_matrix);
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
@@ -109,7 +111,7 @@ int oskar_sim(const char* settings_file)
         error = oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
                 time_baseline, true);
         if (error) return error;
-        error = cudaSetDevice(settings.cuda_device_ids()[i]);
+        error = cudaSetDevice(settings.sim.cuda_device_ids[i]);
         if (error) return error;
         cudaDeviceSynchronize();
     }
@@ -121,11 +123,12 @@ int oskar_sim(const char* settings_file)
     printf("\n=== Starting simulation...\n");
     QTime timer;
     timer.start();
-    int num_channels = settings.obs().num_channels();
+    int num_channels = settings.obs.num_channels;
     for (int c = 0; c < num_channels; ++c)
     {
         printf("\n<< Channel (%i / %i).\n", c + 1, num_channels);
-        double freq = settings.obs().frequency(c);
+        double freq = settings.obs.start_frequency_hz +
+                c * settings.obs.frequency_inc_hz;
 
         // Use OpenMP dynamic scheduling for loop over chunks.
         #pragma omp parallel for schedule(dynamic, 1)
@@ -136,7 +139,7 @@ int oskar_sim(const char* settings_file)
             int thread_id = omp_get_thread_num();
 
             // Get device ID and device properties for this chunk.
-            int device_id = settings.cuda_device_ids()[thread_id];
+            int device_id = settings.sim.cuda_device_ids[thread_id];
             cudaDeviceProp device_prop;
             cudaGetDeviceProperties(&device_prop, device_id);
 
@@ -171,14 +174,14 @@ int oskar_sim(const char* settings_file)
     }
 
     // Add visibility noise.
-    if (settings.sky().noise_model().toUpper() == "VLA_MEMO_146")
+    if (settings.sky.noise_model.type == OSKAR_NOISE_VLA_MEMO_146)
     {
         printf("== Adding Gaussian visibility noise.\n");
         error = vis_global->evaluate_sky_noise_stddev(telescope_cpu,
-                settings.sky().noise_spectral_index());
+                settings.sky.noise_model.spectral_index);
         if (error) return error;
         error = vis_global->add_sky_noise(vis_global->sky_noise_stddev,
-            settings.sky().noise_seed());
+            settings.sky.noise_model.seed);
         if (error) return error;
     }
 
@@ -189,21 +192,21 @@ int oskar_sim(const char* settings_file)
     if (error) return error;
 
     // Write global visibilities to disk.
-    if (!settings.obs().oskar_vis_filename().isEmpty())
+    if (settings.obs.oskar_vis_filename)
     {
-        QByteArray outname = settings.obs().oskar_vis_filename().toAscii();
-        printf("\n--> Writing visibility file: '%s'\n", outname.constData());
-        error = vis_global->write(outname);
+        printf("\n--> Writing visibility file: '%s'\n",
+                settings.obs.oskar_vis_filename);
+        error = vis_global->write(settings.obs.oskar_vis_filename);
         if (error) return error;
     }
 
 #ifndef OSKAR_NO_MS
     // Write Measurement Set.
-    if (!settings.obs().ms_filename().isEmpty())
+    if (settings.obs.ms_filename)
     {
-        QByteArray outname = settings.obs().ms_filename().toAscii();
-        printf("--> Writing Measurement Set: '%s'\n", outname.constData());
-        error = oskar_write_ms(outname, vis_global, telescope_cpu, true);
+        printf("--> Writing Measurement Set: '%s'\n", settings.obs.ms_filename);
+        error = oskar_write_ms(settings.obs.ms_filename, vis_global,
+                telescope_cpu, true);
         if (error) return error;
     }
 #endif
@@ -216,12 +219,13 @@ int oskar_sim(const char* settings_file)
     {
         error = oskar_mem_free(&vis_acc[i]);  if (error) return error;
         error = oskar_mem_free(&vis_temp[i]); if (error) return error;
-        cudaSetDevice(settings.cuda_device_ids()[i]);
+        cudaSetDevice(settings.sim.cuda_device_ids[i]);
         cudaDeviceReset();
     }
     free(vis_acc);
     free(vis_temp);
     free(sky_chunk_cpu);
+    oskar_settings_free(&settings);
 
     fprintf(stdout, "=== Run complete.\n");
     return OSKAR_SUCCESS;

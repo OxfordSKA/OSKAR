@@ -27,73 +27,118 @@
  */
 
 #include "apps/lib/oskar_set_up_sky.h"
-#include "apps/lib/oskar_SettingsSky.h"
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
 #include "math/oskar_random_power_law.h"
 #include "math/oskar_random_broken_power_law.h"
 #include "sky/oskar_generate_random_coordinate.h"
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
-#include <QtCore/QByteArray>
+#include <cstring>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
 extern "C"
-oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
+oskar_SkyModel* oskar_set_up_sky(const oskar_SettingsNew* settings)
 {
+    const char* filename = NULL;
     int type, err;
 
     // Create empty sky model.
-    type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_SkyModel *sky = new oskar_SkyModel(type, OSKAR_LOCATION_CPU);
 
     // Load sky file if it exists.
-    QByteArray sky_file = settings.sky().input_sky_file().toAscii();
-    if (!sky_file.isEmpty())
+    filename = settings->sky.input_sky_file;
+    if (filename)
     {
-        printf("--> Loading sky model data... ");
-        fflush(stdout);
-        err = sky->load(sky_file);
-        if (err)
+        if (strlen(filename) > 0)
         {
-            delete sky;
-            return NULL;
+            // Load the sky model data into a temporary sky model.
+            oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
+            printf("--> Loading OSKAR sky model data... ");
+            fflush(stdout);
+            err = temp.load(filename);
+            if (err)
+            {
+                delete sky;
+                return NULL;
+            }
+
+            // Get the filter parameters.
+            double inner = settings->sky.input_sky_filter.radius_inner;
+            double outer = settings->sky.input_sky_filter.radius_outer;
+            double flux_min = settings->sky.input_sky_filter.flux_min;
+            double flux_max = settings->sky.input_sky_filter.flux_max;
+
+            // Apply filters.
+            temp.filter_by_flux(flux_min, flux_max);
+            temp.filter_by_radius(inner, outer,	settings->obs.ra0_rad,
+                    settings->obs.dec0_rad);
+            printf("done.\n");
+
+            // Save the new model sky.
+            sky->append(&temp);
+            if (err)
+            {
+                delete sky;
+                return NULL;
+            }
         }
-        printf("done.\n");
     }
 
     // Load GSM file if it exists.
-    QByteArray gsm_file = settings.sky().gsm_file().toAscii();
-    if (!gsm_file.isEmpty())
+    filename = settings->sky.gsm_file;
+    if (filename)
     {
-        printf("--> Loading GSM data... ");
-        fflush(stdout);
-        err = sky->load_gsm(gsm_file);
-        if (err)
+        if (strlen(filename) > 0)
         {
-            delete sky;
-            return NULL;
+            // Load the sky model data into a temporary sky model.
+            oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
+            printf("--> Loading GSM data... ");
+            fflush(stdout);
+            err = temp.load_gsm(filename);
+            if (err)
+            {
+                delete sky;
+                return NULL;
+            }
+
+            // Get the filter parameters.
+            double inner = settings->sky.gsm_filter.radius_inner;
+            double outer = settings->sky.gsm_filter.radius_outer;
+            double flux_min = settings->sky.gsm_filter.flux_min;
+            double flux_max = settings->sky.gsm_filter.flux_max;
+
+            // Apply filters.
+            temp.filter_by_flux(flux_min, flux_max);
+            temp.filter_by_radius(inner, outer,	settings->obs.ra0_rad,
+                    settings->obs.dec0_rad);
+            printf("done.\n");
+
+            // Save the new model sky.
+            sky->append(&temp);
+            if (err)
+            {
+                delete sky;
+                return NULL;
+            }
         }
-        printf("done.\n");
     }
 
-    // TODO: enable 2 generates at the same time somehow?
-
-    // Set up sky using generator parameters.
-    if (settings.sky().generator().toUpper() == "HEALPIX")
+    // HEALPix generator.
+    if (settings->sky.generator.healpix.nside != 0)
     {
-        // Add enough positions to the sky model.
-        int old_size = sky->num_sources;
-        int nside = settings.sky().healpix_nside();
+        // Get the generator parameters.
+        int nside = settings->sky.generator.healpix.nside;
         int npix = oskar_healpix_nside_to_npix(nside);
-        sky->resize(old_size + npix);
 
-        // Generate the new positions.
+        // Generate the new positions into a temporary sky model.
+        oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, npix);
         printf("--> Generating HEALPIX source positions... ");
         fflush(stdout);
         #pragma omp parallel for
@@ -102,25 +147,37 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
             double ra, dec;
             oskar_healpix_pix_to_angles_ring(nside, i, &dec, &ra);
             dec = M_PI / 2.0 - dec;
-            sky->set_source(i + old_size, ra, dec,
-                    1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            temp.set_source(i, ra, dec, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         }
+
+        // Get the filter parameters.
+        double inner = settings->sky.generator.healpix.filter.radius_inner;
+        double outer = settings->sky.generator.healpix.filter.radius_outer;
+        double flux_min = settings->sky.generator.healpix.filter.flux_min;
+        double flux_max = settings->sky.generator.healpix.filter.flux_max;
+
+        // Apply filters.
+        temp.filter_by_flux(flux_min, flux_max);
+        temp.filter_by_radius(inner, outer,	settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         printf("done.\n");
+
+        // Save the new model sky.
+        sky->append(&temp);
     }
-    else if (settings.sky().generator().toUpper() == "RANDOM_POWER_LAW")
+
+    // Random power-law generator.
+    if (settings->sky.generator.random_power_law.num_sources != 0)
     {
-        // Add enough positions to the sky model.
-        int old_size = sky->num_sources;
-        int num_sources = settings.sky().random_num_sources();
-        sky->resize(old_size + num_sources);
+        // Get the generator parameters.
+        int num_sources = settings->sky.generator.random_power_law.num_sources;
+        double min = settings->sky.generator.random_power_law.flux_min;
+        double max = settings->sky.generator.random_power_law.flux_max;
+        double power = settings->sky.generator.random_power_law.power;
 
-        // Generator parameters.
-        double min = settings.sky().random_flux_density_min();
-        double max = settings.sky().random_flux_density_max();
-        double power = settings.sky().random_power();
-
-        // Generate the new positions.
-        srand(settings.sky().random_seed());
+        // Generate the new positions into a temporary sky model.
+        oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, num_sources);
+        srand(settings->sky.generator.random_power_law.seed);
         printf("--> Generating random power law source distribution... ");
         fflush(stdout);
         for (int i = 0; i < num_sources; ++i)
@@ -128,65 +185,70 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
             double ra, dec, b;
             oskar_generate_random_coordinate(&ra, &dec);
             b = oskar_random_power_law(min, max, power);
-            sky->set_source(i + old_size, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
+            temp.set_source(i, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
         }
+
+        // Get the filter parameters.
+        double inner = settings->sky.generator.random_power_law.filter.radius_inner;
+        double outer = settings->sky.generator.random_power_law.filter.radius_outer;
+        double flux_min = settings->sky.generator.random_power_law.filter.flux_min;
+        double flux_max = settings->sky.generator.random_power_law.filter.flux_max;
+
+        // Apply filters.
+        temp.filter_by_flux(flux_min, flux_max);
+        temp.filter_by_radius(inner, outer,	settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         printf("done.\n");
+
+        // Save the new model sky.
+        sky->append(&temp);
     }
-    else if (settings.sky().generator().toUpper() == "RANDOM_BROKEN_POWER_LAW")
+
+    // Random broken power-law generator.
+    if (settings->sky.generator.random_broken_power_law.num_sources != 0)
     {
-        // Add enough positions to the sky model.
-        int old_size = sky->num_sources;
-        int num_sources = settings.sky().random_num_sources();
-        sky->resize(old_size + num_sources);
+        // Get the generator parameters.
+        int num_sources = settings->sky.generator.random_broken_power_law.num_sources;
+        double min = settings->sky.generator.random_broken_power_law.flux_min;
+        double max = settings->sky.generator.random_broken_power_law.flux_max;
+        double threshold = settings->sky.generator.random_broken_power_law.threshold;
+        double power1 = settings->sky.generator.random_broken_power_law.power1;
+        double power2 = settings->sky.generator.random_broken_power_law.power2;
 
-        // Generator parameters.
-        double min = settings.sky().random_flux_density_min();
-        double max = settings.sky().random_flux_density_max();
-        double power1 = settings.sky().random_power1();
-        double power2 = settings.sky().random_power2();
-        double threshold = settings.sky().random_threshold();
-
-        // Generate the new positions.
-        srand(settings.sky().random_seed());
-        printf("--> Generating random power broken law source distribution... ");
+        // Generate the new positions into a temporary sky model.
+        oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, num_sources);
+        srand(settings->sky.generator.random_broken_power_law.seed);
+        printf("--> Generating random broken power law source distribution... ");
         fflush(stdout);
         for (int i = 0; i < num_sources; ++i)
         {
             double ra, dec, b;
             oskar_generate_random_coordinate(&ra, &dec);
             b = oskar_random_broken_power_law(min, max, threshold, power1, power2);
-            sky->set_source(i + old_size, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
+            temp.set_source(i, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
         }
+
+        // Get the filter parameters.
+        double inner = settings->sky.generator.random_broken_power_law.filter.radius_inner;
+        double outer = settings->sky.generator.random_broken_power_law.filter.radius_outer;
+        double flux_min = settings->sky.generator.random_broken_power_law.filter.flux_min;
+        double flux_max = settings->sky.generator.random_broken_power_law.filter.flux_max;
+
+        // Apply filters.
+        temp.filter_by_flux(flux_min, flux_max);
+        temp.filter_by_radius(inner, outer,	settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         printf("done.\n");
-    }
 
-    // Filter sources.
-    if (!(settings.sky().filter_inner_rad() == 0.0 &&
-            settings.sky().filter_outer_rad() == 0.0))
-    {
-        printf("--> Filtering by radius between %f and %f degrees.\n",\
-                settings.sky().filter_inner_rad() * (180.0 / M_PI),
-                settings.sky().filter_outer_rad() * (180.0 / M_PI));
-        sky->filter_by_radius(settings.sky().filter_inner_rad(),
-                settings.sky().filter_outer_rad(),
-                settings.obs().ra0_rad(), settings.obs().dec0_rad());
-    }
-
-    if (!(settings.sky().filter_flux_min() == 0.0 &&
-            settings.sky().filter_flux_max() == 0.0))
-    {
-        printf("--> Filtering by flux between %f and %f Jy.\n",\
-                settings.sky().filter_flux_min(),
-                settings.sky().filter_flux_max());
-        sky->filter_by_flux(settings.sky().filter_flux_min(),
-                settings.sky().filter_flux_max());
+        // Save the new model sky.
+        sky->append(&temp);
     }
 
     // Compute source direction cosines relative to phase centre.
     printf("--> Computing source direction cosines... ");
     fflush(stdout);
-    err = sky->compute_relative_lmn(settings.obs().ra0_rad(),
-            settings.obs().dec0_rad());
+    err = sky->compute_relative_lmn(settings->obs.ra0_rad,
+            settings->obs.dec0_rad);
     if (err)
     {
         delete sky;
@@ -194,24 +256,27 @@ oskar_SkyModel* oskar_set_up_sky(const oskar_Settings& settings)
     }
     printf("done.\n");
 
-    // Print summary data.
-    printf("\n");
-    printf("= Sky model\n");
-    printf("  - Sky file               = %s\n", sky_file.constData());
-    printf("  - Num. sources           = %u\n", sky->num_sources);
-    printf("\n");
+    // Write sky model out.
+    filename = settings->sky.output_sky_file;
+    if (filename)
+    {
+        if (strlen(filename))
+        {
+            printf("--> Writing sky file to disk as: %s\n", filename);
+            sky->write(filename);
+        }
+    }
 
     // Check if sky model contains no sources.
     if (sky->num_sources == 0)
-    {
         fprintf(stderr, "--> WARNING: Sky model contains no sources.\n");
-    }
-
-    if (!settings.sky().output_sky_file().isEmpty())
+    else
     {
-        QByteArray file = settings.sky().output_sky_file().toAscii();
-        printf("--> Writing sky file to disk as: %s\n", file.constData());
-        sky->write(file);
+        // Print summary data.
+        printf("\n");
+        printf("= Sky model\n");
+        printf("  - Num. sources           = %u\n", sky->num_sources);
+        printf("\n");
     }
 
     // Return the structure.

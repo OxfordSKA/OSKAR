@@ -50,10 +50,10 @@ int oskar_settings_load_observation(oskar_SettingsObservationNew* obs,
     s.beginGroup("observation");
 
     // Get frequency / channel data.
-    obs->start_frequency_hz   = s.value("start_frequency").toDouble();
     obs->num_channels         = s.value("num_channels").toInt();
-    obs->frequency_inc_hz     = s.value("frequency_inc").toDouble();
-    obs->channel_bandwidth_hz = s.value("channel_bandwidth").toDouble();
+    obs->start_frequency_hz   = s.value("start_frequency_hz").toDouble();
+    obs->frequency_inc_hz     = s.value("frequency_inc_hz").toDouble();
+    obs->channel_bandwidth_hz = s.value("channel_bandwidth_hz").toDouble();
 
     // Get pointing direction.
     obs->ra0_rad = s.value("phase_centre_ra_deg").toDouble() * M_PI / 180.0;
@@ -103,13 +103,19 @@ int oskar_settings_load_observation(oskar_SettingsObservationNew* obs,
 
     // Get output visibility file name.
     t = s.value("oskar_vis_filename", "").toByteArray();
-    obs->oskar_vis_filename = (char*)malloc(t.size() + 1);
-    strcpy(obs->oskar_vis_filename, t.constData());
+    if (t.size() > 0)
+    {
+        obs->oskar_vis_filename = (char*)malloc(t.size() + 1);
+        strcpy(obs->oskar_vis_filename, t.constData());
+    }
 
     // Get output MS file name.
     t = s.value("ms_filename", "").toByteArray();
-    obs->ms_filename = (char*)malloc(t.size() + 1);
-    strcpy(obs->ms_filename, t.constData());
+    if (t.size() > 0)
+    {
+        obs->ms_filename = (char*)malloc(t.size() + 1);
+        strcpy(obs->ms_filename, t.constData());
+    }
 
     return 0;
 }

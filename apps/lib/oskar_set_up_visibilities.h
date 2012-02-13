@@ -55,7 +55,7 @@ extern "C" {
  * @param[in] type The type of the visibility data (must be a complex type).
  */
 OSKAR_EXPORT
-oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings& settings,
+oskar_Visibilities* oskar_set_up_visibilities(const oskar_SettingsNew* settings,
         const oskar_TelescopeModel* tel_cpu, int type);
 
 #ifdef __cplusplus

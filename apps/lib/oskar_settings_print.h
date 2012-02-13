@@ -26,28 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_BENCHMARK_H_
-#define OSKAR_SETTINGS_BENCHMARK_H_
+#ifndef OSKAR_SETTINGS_PRINT_H_
+#define OSKAR_SETTINGS_PRINT_H_
 
-#include <QtCore/QString>
-#include <QtCore/QSettings>
-#include <QtCore/QVector>
+/**
+ * @file oskar_settings_print.h
+ */
 
-/// Container class for benchmark settings group.
-class oskar_SettingsBenchmark
-{
-    public:
-        void load(const QSettings& settings);
+#include "oskar_global.h"
+#include "apps/lib/oskar_Settings.h"
 
-    public:
-        unsigned num_sources()  const { return num_sources_; }
-        unsigned num_stations() const { return num_stations_; }
-        unsigned num_antennas() const { return num_antennas_; }
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    private:
-        unsigned num_sources_;
-        unsigned num_stations_;
-        unsigned num_antennas_;
-};
+/**
+ * @brief
+ * Prints the contents of the settings object to standard output.
+ *
+ * @details
+ * This top-level function prints the contents of a populated settings
+ * object to the standard output stream.
+ *
+ * @param[out] settings A pointer to a populated settings structure.
+ * @param[in] filename  String containing the name of the settings file.
+ */
+OSKAR_EXPORT
+void oskar_settings_print(const oskar_SettingsNew* settings,
+        const char* filename);
 
-#endif // OSKAR_SETTINGS_BENCHMARK_H_
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_SETTINGS_PRINT_H_ */

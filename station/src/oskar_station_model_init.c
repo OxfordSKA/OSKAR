@@ -76,6 +76,8 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     if (err) return err;
     err = oskar_mem_init(&model->phase_error, type, location, num_elements, 1);
     if (err) return err;
+    err = oskar_mem_init(&model->total_receiver_noise, type, location, 0, 1);
+    if (err) return err;
     model->child = NULL;
     model->parent = NULL;
     model->single_element_model = 0;

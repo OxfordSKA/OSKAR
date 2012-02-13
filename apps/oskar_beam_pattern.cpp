@@ -28,6 +28,8 @@
 
 #include <cuda_runtime_api.h>
 #include "apps/lib/oskar_Settings.h"
+#include "apps/lib/oskar_settings_free.h"
+#include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
@@ -60,27 +62,27 @@ int main(int argc, char** argv)
     }
 
     // Load the settings file.
-    oskar_Settings settings;
-    if (!settings.load(QString(argv[1]))) return EXIT_FAILURE;
-    settings.print();
-    const oskar_SettingsTime* times = settings.obs().settings_time();
+    oskar_SettingsNew settings;
+    err = oskar_settings_load(&settings, argv[1]);
+    if (err) return err;
+    const oskar_SettingsTime* times = &settings.obs.time;
 
     // Get the sky model and telescope model and copy both to GPU (slow step).
     oskar_TelescopeModel* tel_cpu, *tel_gpu;
-    tel_cpu = oskar_set_up_telescope(settings);
+    tel_cpu = oskar_set_up_telescope(&settings);
     tel_gpu = new oskar_TelescopeModel(tel_cpu, OSKAR_LOCATION_GPU);
 
     // Get the type.
-    int type = settings.double_precision() ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Get the image settings.
-    int image_size = (int)settings.image().size();
-    int n_channels = settings.obs().num_channels();
+    int image_size = (int)settings.image.size;
+    int n_channels = settings.obs.num_channels;
     int num_pixels = image_size * image_size;
-    double fov_deg = settings.image().fov_deg();
+    double fov_deg = settings.image.fov_deg;
     double lm_max = sin(fov_deg * M_PI / 180.0);
-    double ra0 = settings.obs().ra0_rad();
-    double dec0 = settings.obs().dec0_rad();
+    double ra0 = settings.obs.ra0_rad;
+    double dec0 = settings.obs.dec0_rad;
 
     // Generate l,m grid and equatorial coordinates for beam pattern pixels.
     oskar_Mem lm(type, OSKAR_LOCATION_CPU, image_size);
@@ -107,8 +109,12 @@ int main(int argc, char** argv)
     double dt_dump           = times->dt_dump_days;
 
     // Open the data file.
-    QByteArray filename = settings.image().filename().toAscii();
-    FILE* file = fopen(filename, "w");
+    if (!settings.image.filename)
+    {
+        fprintf(stderr, "ERROR: No image file specified.\n");
+        return EXIT_FAILURE;
+    }
+    FILE* file = fopen(settings.image.filename, "w");
     if (file == NULL) oskar_exit(OSKAR_ERR_FILE_IO);
 
     // Loop over channels.
@@ -118,7 +124,8 @@ int main(int argc, char** argv)
     {
         // Get the channel frequency.
         printf("\n--> Simulating channel (%d / %d).\n", c + 1, n_channels);
-        double frequency = settings.obs().frequency(c);
+        double frequency = settings.obs.start_frequency_hz +
+                c * settings.obs.frequency_inc_hz;
 
         // Copy RA and Dec to GPU and allocate arrays for pixel direction cosines.
         oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
@@ -205,5 +212,6 @@ int main(int argc, char** argv)
     delete tel_cpu;
     cudaDeviceReset();
 
+    oskar_settings_free(&settings);
     return EXIT_SUCCESS;
 }

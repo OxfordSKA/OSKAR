@@ -26,44 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_IMAGE_H_
-#define OSKAR_SETTINGS_IMAGE_H_
+#include "apps/lib/oskar_settings_free.h"
+#include <stdlib.h>
 
-#include <QtCore/QString>
-#include <QtCore/QSettings>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/// Container class for image settings group.
-class oskar_SettingsImage
+void oskar_settings_free(oskar_SettingsNew* settings)
 {
-    public:
-        void load(const QSettings& settings);
+    /* Free all settings arrays. */
+    free(settings->obs.ms_filename);
+    free(settings->obs.oskar_vis_filename);
+    free(settings->sim.cuda_device_ids);
+    free(settings->sky.gsm_file);
+    free(settings->sky.input_sky_file);
+    free(settings->sky.output_sky_file);
+    free(settings->telescope.layout_file);
+    free(settings->telescope.receiver_temperature_file);
+    free(settings->telescope.station_dir);
+}
 
-    public:
-        double fov_deg() const { return _fov_deg; }
-        void set_fov_deg(const double value) { _fov_deg = value; }
-
-        unsigned size() const { return _size; }
-        void set_size(const unsigned value) { _size = value; }
-
-        bool make_snapshots() const { return _make_snapshots; }
-        void set_make_snapshots(const bool value) { _make_snapshots = value; }
-
-        unsigned dumps_per_snapshot() const { return _dumps_per_snapshot; }
-        void set_dumps_per_snapshot(const unsigned value) { _dumps_per_snapshot = value; }
-
-        bool scan_frequencies() const { return _scan_frequencies; }
-        void set_scan_frequencies(const bool value) { _scan_frequencies = value; }
-
-        QString filename() const { return _filename; }
-        void set_filename(const QString& value)  { _filename = value; }
-
-    private:
-        double   _fov_deg;
-        unsigned _size;
-        bool     _make_snapshots;
-        unsigned _dumps_per_snapshot;
-        bool     _scan_frequencies;
-        QString  _filename;
-};
-
-#endif // OSKAR_SETTINGS_IMAGE_H_
+#ifdef __cplusplus
+}
+#endif
