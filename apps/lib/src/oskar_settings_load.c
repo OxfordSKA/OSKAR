@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-int oskar_settings_load(oskar_SettingsNew* settings, const char* filename)
+int oskar_settings_load(oskar_Settings* settings, const char* filename)
 {
     int error;
 

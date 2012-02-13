@@ -54,7 +54,7 @@ extern "C" {
  * @param[in] settings A reference to the settings object.
  */
 OSKAR_EXPORT
-oskar_SkyModel* oskar_set_up_sky(const oskar_SettingsNew* settings);
+oskar_SkyModel* oskar_set_up_sky(const oskar_Settings* settings);
 
 #ifdef __cplusplus
 }

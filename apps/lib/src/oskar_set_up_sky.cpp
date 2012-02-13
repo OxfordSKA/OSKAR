@@ -43,7 +43,7 @@
 #endif
 
 extern "C"
-oskar_SkyModel* oskar_set_up_sky(const oskar_SettingsNew* settings)
+oskar_SkyModel* oskar_set_up_sky(const oskar_Settings* settings)
 {
     const char* filename = NULL;
     int type, err;

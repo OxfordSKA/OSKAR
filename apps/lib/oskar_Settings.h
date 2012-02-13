@@ -43,14 +43,14 @@
  * @details
  * The structure holds all settings parameters.
  */
-struct oskar_SettingsNew
+struct oskar_Settings
 {
     oskar_SettingsSimulator sim;
-    oskar_SettingsObservationNew obs;
-    oskar_SettingsImageNew image;
-    oskar_SettingsSkyNew sky;
+    oskar_SettingsObservation obs;
+    oskar_SettingsImage image;
+    oskar_SettingsSky sky;
     oskar_SettingsTelescope telescope;
 };
-typedef struct oskar_SettingsNew oskar_SettingsNew;
+typedef struct oskar_Settings oskar_Settings;
 
 #endif /* OSKAR_SETTINGS_H_ */

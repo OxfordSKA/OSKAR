@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_IMAGE_NEW_H_
-#define OSKAR_SETTINGS_IMAGE_NEW_H_
+#ifndef OSKAR_SETTINGS_IMAGE_H_
+#define OSKAR_SETTINGS_IMAGE_H_
 
 /**
  * @struct oskar_SettingsImage
@@ -37,12 +37,12 @@
  * @details
  * The structure holds parameters for imaging.
  */
-struct oskar_SettingsImageNew
+struct oskar_SettingsImage
 {
     double fov_deg;
     int size;
     char* filename;
 };
-typedef struct oskar_SettingsImageNew oskar_SettingsImageNew;
+typedef struct oskar_SettingsImage oskar_SettingsImage;
 
-#endif /* OSKAR_SETTINGS_IMAGE_NEW_H_ */
+#endif /* OSKAR_SETTINGS_IMAGE_H_ */

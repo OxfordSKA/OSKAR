@@ -38,7 +38,7 @@
 #define D2R M_PI/180.0
 
 extern "C"
-int oskar_settings_load_sky(oskar_SettingsSkyNew* sky, const char* filename)
+int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
 {
     QByteArray t;
     QString temp;

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_SKY_NEW_H_
-#define OSKAR_SETTINGS_SKY_NEW_H_
+#ifndef OSKAR_SETTINGS_SKY_H_
+#define OSKAR_SETTINGS_SKY_H_
 
 /**
  * @struct oskar_SettingsSkyFilter
@@ -147,7 +147,7 @@ typedef struct oskar_SettingsSkyNoise oskar_SettingsSkyNoise;
  * @details
  * The structure holds parameters to construct a sky model.
  */
-struct oskar_SettingsSkyNew
+struct oskar_SettingsSky
 {
     char* input_sky_file;  /**< Name of sky model file to load. */
     oskar_SettingsSkyFilter input_sky_filter;
@@ -157,6 +157,6 @@ struct oskar_SettingsSkyNew
     oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
     oskar_SettingsSkyNoise noise_model; /**< Noise model parameters. */
 };
-typedef struct oskar_SettingsSkyNew oskar_SettingsSkyNew;
+typedef struct oskar_SettingsSky oskar_SettingsSky;
 
-#endif /* OSKAR_SETTINGS_SKY_NEW_H_ */
+#endif /* OSKAR_SETTINGS_SKY_H_ */

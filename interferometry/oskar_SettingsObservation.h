@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_OBSERVATION_NEW_H_
-#define OSKAR_SETTINGS_OBSERVATION_NEW_H_
+#ifndef OSKAR_SETTINGS_OBSERVATION_H_
+#define OSKAR_SETTINGS_OBSERVATION_H_
 
 #include "interferometry/oskar_SettingsTime.h"
 
@@ -39,7 +39,7 @@
  * @details
  * The structure holds observation parameters.
  */
-struct oskar_SettingsObservationNew
+struct oskar_SettingsObservation
 {
     double start_frequency_hz;
     int num_channels;
@@ -51,6 +51,6 @@ struct oskar_SettingsObservationNew
     char* ms_filename;
     oskar_SettingsTime time;
 };
-typedef struct oskar_SettingsObservationNew oskar_SettingsObservationNew;
+typedef struct oskar_SettingsObservation oskar_SettingsObservation;
 
-#endif /* OSKAR_SETTINGS_OBSERVATION_NEW_H_ */
+#endif /* OSKAR_SETTINGS_OBSERVATION_H_ */

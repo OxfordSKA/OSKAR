@@ -52,8 +52,7 @@ extern "C" {
  * @param[in] filename  String containing the name of the settings file.
  */
 OSKAR_EXPORT
-void oskar_settings_print(const oskar_SettingsNew* settings,
-        const char* filename);
+void oskar_settings_print(const oskar_Settings* settings, const char* filename);
 
 #ifdef __cplusplus
 }

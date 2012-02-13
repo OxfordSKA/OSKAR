@@ -33,7 +33,7 @@
 #include <cstdlib>
 
 extern "C"
-oskar_Visibilities* oskar_set_up_visibilities(const oskar_SettingsNew* settings,
+oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings* settings,
         const oskar_TelescopeModel* tel_cpu, int type)
 {
     // Check the type.

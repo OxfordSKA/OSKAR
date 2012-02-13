@@ -42,7 +42,7 @@
 #include <QtCore/QString>
 
 extern "C"
-int oskar_settings_load_observation(oskar_SettingsObservationNew* obs,
+int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         const char* filename)
 {
     QByteArray t;

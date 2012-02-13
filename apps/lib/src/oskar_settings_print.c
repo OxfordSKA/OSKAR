@@ -121,7 +121,7 @@ static void pr_b(int depth, int width, const char* setting, int val)
     printf(" = %s\n", val ? "true" : "false");
 }
 
-void oskar_settings_print(const oskar_SettingsNew* s, const char* filename)
+void oskar_settings_print(const oskar_Settings* s, const char* filename)
 {
     /* Define width of settings name column. */
     int w = 31;

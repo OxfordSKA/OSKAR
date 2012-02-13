@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_SettingsNew* settings)
+void oskar_settings_free(oskar_Settings* settings)
 {
     /* Free all settings arrays. */
     free(settings->obs.ms_filename);

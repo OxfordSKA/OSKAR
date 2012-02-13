@@ -52,7 +52,7 @@ extern "C" {
  * @param[in] filename  String containing name of settings file to read.
  */
 OSKAR_EXPORT
-int oskar_settings_load_image(oskar_SettingsImageNew* settings,
+int oskar_settings_load_image(oskar_SettingsImage* settings,
         const char* filename);
 
 #ifdef __cplusplus

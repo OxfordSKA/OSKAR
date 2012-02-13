@@ -59,7 +59,7 @@ int main(int argc, char** argv)
     }
 
     // Load settings file.
-    oskar_SettingsNew settings;
+    oskar_Settings settings;
     oskar_settings_load(&settings, argv[1]);
 
     // Load image date from file... (animate in loop?)

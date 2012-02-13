@@ -36,7 +36,7 @@
 #include <QtCore/QVariant>
 
 extern "C"
-int oskar_settings_load_image(oskar_SettingsImageNew* im,
+int oskar_settings_load_image(oskar_SettingsImage* im,
         const char* filename)
 {
     QByteArray t;

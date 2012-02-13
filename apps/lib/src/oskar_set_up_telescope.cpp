@@ -40,7 +40,7 @@
 using namespace std;
 
 extern "C"
-oskar_TelescopeModel* oskar_set_up_telescope(const oskar_SettingsNew* settings)
+oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
 {
     // Load telescope model into CPU structure.
     oskar_TelescopeModel *telescope;

@@ -63,7 +63,7 @@ int oskar_sim(const char* settings_file)
     int error;
 
     // Load the settings file.
-    oskar_SettingsNew settings;
+    oskar_Settings settings;
     error = oskar_settings_load(&settings, settings_file);
     if (error) return error;
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;

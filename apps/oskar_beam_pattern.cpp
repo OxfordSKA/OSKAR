@@ -62,7 +62,7 @@ int main(int argc, char** argv)
     }
 
     // Load the settings file.
-    oskar_SettingsNew settings;
+    oskar_Settings settings;
     err = oskar_settings_load(&settings, argv[1]);
     if (err) return err;
     const oskar_SettingsTime* times = &settings.obs.time;
