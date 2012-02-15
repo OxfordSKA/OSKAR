@@ -36,16 +36,31 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QHash>
 #include <QtCore/QList>
+#include <QtCore/QMap>
 #include <QtCore/QModelIndex>
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
+#include <QtGui/QSortFilterProxyModel>
 
 class oskar_SettingsItem;
 
 class oskar_SettingsModel : public QAbstractItemModel
 {
     Q_OBJECT
+
+public:
+    enum {
+        KeyRole = Qt::UserRole,
+        TypeRole,
+        VisibleRole,
+        IterationNumRole,
+        IterationIncRole,
+        IterationKeysRole,
+        SetIterationRole,
+        ClearIterationRole,
+        OutputKeyRole
+    };
 
 public:
     oskar_SettingsModel(QObject* parent = 0);
@@ -55,7 +70,6 @@ public:
             const QString& subkey, int type, const QString& caption,
             const QVariant& defaultValue,
             const QModelIndex& parent = QModelIndex());
-    void clearIteration(const QString& key);
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
@@ -65,10 +79,10 @@ public:
             int role = Qt::DisplayRole) const;
     QModelIndex index(int row, int column,
             const QModelIndex& parent = QModelIndex()) const;
-    int itemType(const QModelIndex& index) const;
-    const QList<QString>& iterationKeys() const;
+    QMap<int, QVariant> itemData (const QModelIndex& index) const;
+    const QStringList& iterationKeys() const;
     QModelIndex parent(const QModelIndex& index) const;
-    const QList<QString>& outputKeys() const;
+    const QStringList& outputKeys() const;
     void registerSetting(const QString& key, const QString& caption,
             int type, const QVariant& defaultValue = QVariant(),
             const QStringList& options = QStringList());
@@ -77,7 +91,7 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
     void setFile(const QString& filename);
-    void setIteration(const QString& key);
+    void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
 
 private:
@@ -89,8 +103,22 @@ private:
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;
     QHash<QString, oskar_SettingsItem*> hash_;
-    QList<QString> iterationKeys_;
-    QList<QString> outputKeys_;
+    QStringList iterationKeys_;
+    QStringList outputKeys_;
+};
+
+class oskar_SettingsFilterModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+
+public:
+    oskar_SettingsFilterModel(QObject* parent = 0);
+    virtual ~oskar_SettingsFilterModel();
+
+protected:
+    virtual bool filterAcceptsRow(int source_row,
+            const QModelIndex& source_parent) const;
+
 };
 
 #endif /* OSKAR_SETTINGS_MODEL_H_ */

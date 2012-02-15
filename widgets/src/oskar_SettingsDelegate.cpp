@@ -56,7 +56,7 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
     const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const
 {
     // Get the setting type.
-    int type = ((const oskar_SettingsModel*)index.model())->itemType(index);
+    int type = index.model()->data(index, oskar_SettingsModel::TypeRole).toInt();
 
     // Create the appropriate editor.
     QWidget* editor = 0;
@@ -128,53 +128,47 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
 {
     // Check for events only in column 1.
     if (index.column() != 1)
-        QStyledItemDelegate::editorEvent(event, mod, option, index);
+        return QStyledItemDelegate::editorEvent(event, mod, option, index);
 
-    // Get pointer to model.
-    oskar_SettingsModel* model = (oskar_SettingsModel*)mod;
+    // Get item type and value.
+    int type = index.model()->data(index, oskar_SettingsModel::TypeRole).toInt();
+    QVariant value = index.model()->data(index, Qt::EditRole);
 
     // Check for mouse double-click events.
     if (event->type() == QEvent::MouseButtonDblClick)
     {
-        // Get a pointer to the item.
-        oskar_SettingsItem* item = model->getItem(index);
-        QWidget* parent = view_;
-
-        if (item->type() == oskar_SettingsItem::INPUT_FILE_NAME)
+        if (type == oskar_SettingsItem::INPUT_FILE_NAME)
         {
-            QString dir = item->value().toString();
-            QString value = QFileDialog::getOpenFileName(parent,
-                    "Input file name", dir);
-            if (!value.isNull())
+            QString name = QFileDialog::getOpenFileName(view_,
+                    "Input file name", value.toString());
+            if (!name.isNull())
             {
-                value = QDir::current().relativeFilePath(value);
-                model->setData(index, value, Qt::EditRole);
+                name = QDir::current().relativeFilePath(name);
+                mod->setData(index, name, Qt::EditRole);
             }
             event->accept();
             return true;
         }
-        else if (item->type() == oskar_SettingsItem::INPUT_DIR_NAME)
+        else if (type == oskar_SettingsItem::INPUT_DIR_NAME)
         {
-            QString dir = item->value().toString();
-            QString value = QFileDialog::getExistingDirectory(parent,
-                    "Directory", dir);
-            if (!value.isNull())
+            QString name = QFileDialog::getExistingDirectory(view_,
+                    "Directory", value.toString());
+            if (!name.isNull())
             {
-                value = QDir::current().relativeFilePath(value);
-                model->setData(index, value, Qt::EditRole);
+                name = QDir::current().relativeFilePath(name);
+                mod->setData(index, name, Qt::EditRole);
             }
             event->accept();
             return true;
         }
-        else if (item->type() == oskar_SettingsItem::OUTPUT_FILE_NAME)
+        else if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
         {
-            QString dir = item->value().toString();
-            QString value = QFileDialog::getSaveFileName(parent,
-                    "Output file name", dir);
-            if (!value.isNull())
+            QString name = QFileDialog::getSaveFileName(view_,
+                    "Output file name", value.toString());
+            if (!name.isNull())
             {
-                value = QDir::current().relativeFilePath(value);
-                model->setData(index, value, Qt::EditRole);
+                name = QDir::current().relativeFilePath(name);
+                mod->setData(index, name, Qt::EditRole);
             }
             event->accept();
             return true;
@@ -184,26 +178,29 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
     // Check for mouse right-click events.
     else if (event->type() == QEvent::MouseButtonRelease)
     {
-        // Get a pointer to the item.
-        oskar_SettingsItem* item = model->getItem(index);
-
         QMouseEvent* mouseEvent = (QMouseEvent*)event;
         if (mouseEvent->button() == Qt::RightButton &&
-                item->type() != oskar_SettingsItem::CAPTION_ONLY)
+                type != oskar_SettingsItem::CAPTION_ONLY)
         {
+            // Get the iteration keys.
+            QStringList iterationKeys = mod->data(index,
+                    oskar_SettingsModel::IterationKeysRole).toStringList();
+
             // Set up the context menu.
             QMenu menu;
             QString strClearValue = "Clear Value";
             QString strClearIteration = "Clear Iteration";
             QString strEditIteration = "Edit Iteration Parameters";
             QString strIterate = QString("Iterate (Dimension %1)...").
-                    arg(model->iterationKeys().size() + 1);
+                    arg(iterationKeys.size() + 1);
             menu.addAction(strClearValue);
-            if (item->type() == oskar_SettingsItem::INT ||
-                    item->type() == oskar_SettingsItem::DOUBLE)
+            if (type == oskar_SettingsItem::INT ||
+                    type == oskar_SettingsItem::DOUBLE)
             {
+                QString key = mod->data(index,
+                        oskar_SettingsModel::KeyRole).toString();
                 menu.addSeparator();
-                if (model->iterationKeys().contains(item->key()))
+                if (iterationKeys.contains(key))
                 {
                     menu.addAction(strEditIteration);
                     menu.addAction(strClearIteration);
@@ -219,12 +216,12 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             if (action)
             {
                 if (action->text() == strClearValue)
-                    model->setData(index, "", Qt::EditRole);
+                    mod->setData(index, "", Qt::EditRole);
                 else if (action->text() == strIterate ||
                         action->text() == strEditIteration)
-                    setIterations(model, item);
+                    setIterations(mod, index);
                 else if (action->text() == strClearIteration)
-                    model->clearIteration(item->key());
+                    mod->setData(index, 0, oskar_SettingsModel::ClearIterationRole);
             }
             event->accept();
             return true;
@@ -238,7 +235,7 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
         const QModelIndex& index) const
 {
     // Get the setting type.
-    int type = ((const oskar_SettingsModel*)index.model())->itemType(index);
+    int type = index.model()->data(index, oskar_SettingsModel::TypeRole).toInt();
 
     // Set the editor data.
     QVariant value = index.model()->data(index, Qt::EditRole);
@@ -292,7 +289,7 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         QAbstractItemModel* model, const QModelIndex& index) const
 {
     // Get the setting type.
-    int type = ((const oskar_SettingsModel*)index.model())->itemType(index);
+    int type = index.model()->data(index, oskar_SettingsModel::TypeRole).toInt();
 
     // Get the editor data.
     QVariant value;
@@ -349,9 +346,13 @@ void oskar_SettingsDelegate::updateEditorGeometry(QWidget* editor,
 
 // Private members.
 
-void oskar_SettingsDelegate::setIterations(oskar_SettingsModel* model,
-        oskar_SettingsItem* item)
+void oskar_SettingsDelegate::setIterations(QAbstractItemModel* model,
+        const QModelIndex& index)
 {
+    // Get the item type.
+    int type = model->data(index, oskar_SettingsModel::TypeRole).toInt();
+
+    // Set up the dialog.
     QDialog* dialog = new QDialog(view_);
     dialog->setWindowTitle("Iteration Parameters");
     QFormLayout* layout = new QFormLayout(dialog);
@@ -361,13 +362,13 @@ void oskar_SettingsDelegate::setIterations(oskar_SettingsModel* model,
     layout->addRow("Iterations", iterNum);
     QSpinBox* iterIncInt = NULL;
     oskar_DoubleSpinBox* iterIncDbl = NULL;
-    if (item->type() == oskar_SettingsItem::INT)
+    if (type == oskar_SettingsItem::INT)
     {
         iterIncInt = new QSpinBox(dialog);
         iterIncInt->setRange(-INT_MAX, INT_MAX);
         layout->addRow("Increment", iterIncInt);
     }
-    else if (item->type() == oskar_SettingsItem::DOUBLE)
+    else if (type == oskar_SettingsItem::DOUBLE)
     {
         iterIncDbl = new oskar_DoubleSpinBox(dialog);
         iterIncDbl->setRange(-DBL_MAX, DBL_MAX);
@@ -383,23 +384,28 @@ void oskar_SettingsDelegate::setIterations(oskar_SettingsModel* model,
     connect(buttons, SIGNAL(rejected()), dialog, SLOT(reject()));
 
     // Fill the widget data from the item.
-    iterNum->setValue(item->iterationNum());
-    if (item->type() == oskar_SettingsItem::INT)
-        iterIncInt->setValue(item->iterationInc().toInt());
-    else if (item->type() == oskar_SettingsItem::DOUBLE)
-        iterIncDbl->setValue(item->iterationInc().toDouble());
+    int num = model->data(index, oskar_SettingsModel::IterationNumRole).toInt();
+    QVariant inc = model->data(index, oskar_SettingsModel::IterationIncRole);
+    iterNum->setValue(num);
+    if (type == oskar_SettingsItem::INT)
+        iterIncInt->setValue(inc.toInt());
+    else if (type == oskar_SettingsItem::DOUBLE)
+        iterIncDbl->setValue(inc.toDouble());
 
     if (dialog->exec() == QDialog::Accepted)
     {
         // Set the iteration data.
-        item->setIterationNum(iterNum->value());
-        if (item->type() == oskar_SettingsItem::INT)
-            item->setIterationInc(iterIncInt->value());
-        else if (item->type() == oskar_SettingsItem::DOUBLE)
-            item->setIterationInc(iterIncDbl->value());
+        model->setData(index, iterNum->value(),
+                oskar_SettingsModel::IterationNumRole);
+        if (type == oskar_SettingsItem::INT)
+            model->setData(index, iterIncInt->value(),
+                    oskar_SettingsModel::IterationIncRole);
+        else if (type == oskar_SettingsItem::DOUBLE)
+            model->setData(index, iterIncDbl->value(),
+                    oskar_SettingsModel::IterationIncRole);
 
         // Set the iteration flag.
-        model->setIteration(item->key());
+        model->setData(index, 0, oskar_SettingsModel::SetIterationRole);
     }
     delete dialog;
 }

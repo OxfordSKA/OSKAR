@@ -47,6 +47,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Simulator settings.
     setCaption("simulator", "Simulator settings");
     registerSetting("simulator/double_precision", "Use double precision", oskar_SettingsItem::BOOL);
+    setTooltip("simulator/double_precision", "Determines whether double precision arithmetic is used for the simulation");
     registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT);
     registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST);
 
@@ -156,24 +157,6 @@ void oskar_SettingsModel::append(const QString& key,
     hash_.insert(key, item);
 }
 
-void oskar_SettingsModel::clearIteration(const QString& key)
-{
-    int i = iterationKeys_.indexOf(key);
-    if (i >= 0)
-    {
-        iterationKeys_.removeAt(i);
-        foreach (QString k, iterationKeys_)
-        {
-            QModelIndex idx = getIndex(k);
-            emit dataChanged(index(idx.row(), 0, parent(idx)),
-                    index(idx.row(), columnCount(), parent(idx)));
-        }
-        QModelIndex idx = getIndex(key);
-        emit dataChanged(index(idx.row(), 0, parent(idx)),
-                index(idx.row(), columnCount(), parent(idx)));
-    }
-}
-
 int oskar_SettingsModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 2;
@@ -184,19 +167,37 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
+    // Get a pointer to the item.
     oskar_SettingsItem* item = getItem(index);
 
+    // Check for roles common to all columns.
     if (role == Qt::FontRole)
     {
-        int iterIndex = iterationKeys_.indexOf(item->key());
-        if (iterIndex >= 0)
+        if (iterationKeys_.contains(item->key()))
         {
             QFont font = QApplication::font();
             font.setBold(true);
             return font;
         }
     }
+    else if (role == Qt::ToolTipRole)
+        return item->tooltip();
+    else if (role == KeyRole)
+        return item->key();
+    else if (role == TypeRole)
+        return item->type();
+    else if (role == VisibleRole)
+        return item->visible();
+    else if (role == IterationNumRole)
+        return item->iterationNum();
+    else if (role == IterationIncRole)
+        return item->iterationInc();
+    else if (role == IterationKeysRole)
+        return iterationKeys_;
+    else if (role == OutputKeyRole)
+        return outputKeys_;
 
+    // Check for roles in specific columns.
     if (index.column() == 0)
     {
         if (role == Qt::DisplayRole)
@@ -295,12 +296,20 @@ QModelIndex oskar_SettingsModel::index(int row, int column,
         return QModelIndex();
 }
 
-int oskar_SettingsModel::itemType(const QModelIndex& index) const
+QMap<int, QVariant> oskar_SettingsModel::itemData(const QModelIndex& index) const
 {
-    return getItem(index)->type();
+    QMap<int, QVariant> d;
+    d.insert(KeyRole, data(index, KeyRole));
+    d.insert(TypeRole, data(index, TypeRole));
+    d.insert(VisibleRole, data(index, VisibleRole));
+    d.insert(IterationNumRole, data(index, IterationNumRole));
+    d.insert(IterationIncRole, data(index, IterationIncRole));
+    d.insert(IterationKeysRole, data(index, IterationKeysRole));
+    d.insert(OutputKeyRole, data(index, OutputKeyRole));
+    return d;
 }
 
-const QList<QString>& oskar_SettingsModel::iterationKeys() const
+const QStringList& oskar_SettingsModel::iterationKeys() const
 {
     return iterationKeys_;
 }
@@ -319,7 +328,7 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
     return createIndex(parentItem->childNumber(), 0, parentItem);
 }
 
-const QList<QString>& oskar_SettingsModel::outputKeys() const
+const QStringList& oskar_SettingsModel::outputKeys() const
 {
     return outputKeys_;
 }
@@ -365,13 +374,73 @@ void oskar_SettingsModel::setCaption(const QString& key, const QString& caption)
     setData(idx, caption);
 }
 
-bool oskar_SettingsModel::setData(const QModelIndex& index,
+void oskar_SettingsModel::setTooltip(const QString& key, const QString& tooltip)
+{
+    QModelIndex idx = getIndex(key);
+    setData(idx, tooltip, Qt::ToolTipRole);
+}
+
+bool oskar_SettingsModel::setData(const QModelIndex& idx,
         const QVariant& value, int role)
 {
-    if (!index.isValid())
+    if (!idx.isValid())
         return false;
 
-    oskar_SettingsItem* item = getItem(index);
+    // Get a pointer to the item.
+    oskar_SettingsItem* item = getItem(idx);
+
+    // Check for roles common to all columns.
+    if (role == Qt::ToolTipRole)
+    {
+        item->setTooltip(value.toString());
+        emit dataChanged(idx, idx);
+        return true;
+    }
+    else if (role == VisibleRole)
+    {
+        item->setVisible(value.toBool());
+        emit dataChanged(idx, idx);
+        return true;
+    }
+    else if (role == IterationNumRole)
+    {
+        item->setIterationNum(value.toInt());
+        emit dataChanged(idx, idx);
+        return true;
+    }
+    else if (role == IterationIncRole)
+    {
+        item->setIterationInc(value);
+        emit dataChanged(idx, idx);
+        return true;
+    }
+    else if (role == SetIterationRole)
+    {
+        if (!iterationKeys_.contains(item->key()))
+        {
+            iterationKeys_.append(item->key());
+            emit dataChanged(idx, idx);
+            return true;
+        }
+        return false;
+    }
+    else if (role == ClearIterationRole)
+    {
+        int i = iterationKeys_.indexOf(item->key());
+        if (i >= 0)
+        {
+            iterationKeys_.removeAt(i);
+            emit dataChanged(idx, idx);
+            foreach (QString k, iterationKeys_)
+            {
+                QModelIndex idx = getIndex(k);
+                emit dataChanged(index(idx.row(), 0, parent(idx)),
+                        index(idx.row(), columnCount(), parent(idx)));
+            }
+            return true;
+        }
+        return false;
+    }
 
     QVariant data;
     if (role == Qt::EditRole)
@@ -379,13 +448,13 @@ bool oskar_SettingsModel::setData(const QModelIndex& index,
     else if (role == Qt::CheckStateRole)
         data = value.toBool() ? QString("true") : QString("false");
 
-    if (index.column() == 0)
+    if (idx.column() == 0)
     {
         item->setCaption(data.toString());
-        emit dataChanged(index, index);
+        emit dataChanged(idx, idx);
         return true;
     }
-    else if (index.column() == 1)
+    else if (idx.column() == 1)
     {
         item->setValue(data);
         if (settings_)
@@ -395,7 +464,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& index,
             else
                 settings_->setValue(item->key(), data);
         }
-        emit dataChanged(index, index);
+        emit dataChanged(idx, idx);
         return true;
     }
 
@@ -421,17 +490,6 @@ void oskar_SettingsModel::setFile(const QString& filename)
         QModelIndex parent;
         loadFromParentIndex(parent);
         endResetModel();
-    }
-}
-
-void oskar_SettingsModel::setIteration(const QString& key)
-{
-    if (!iterationKeys_.contains(key))
-    {
-        iterationKeys_.append(key);
-        QModelIndex idx = getIndex(key);
-        emit dataChanged(index(idx.row(), 0, parent(idx)),
-                index(idx.row(), columnCount(), parent(idx)));
     }
 }
 
@@ -501,14 +559,39 @@ void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
         if (idx.isValid())
         {
             oskar_SettingsItem* item = getItem(idx);
+            item->setVisible(false);
             if (item->type() != oskar_SettingsItem::CAPTION_ONLY)
             {
-                QVariant value = settings_->value(item->key(),
-                        item->defaultValue());
-                item->setValue(value);
+                if (settings_->contains(item->key()))
+                {
+                    item->setValue(settings_->value(item->key()));
+                    item->setVisible(true);
+                }
+                else
+                {
+                    item->setValue(item->defaultValue());
+                }
                 emit dataChanged(idx, idx);
             }
             loadFromParentIndex(idx);
         }
     }
+}
+
+
+oskar_SettingsFilterModel::oskar_SettingsFilterModel(QObject* parent)
+: QSortFilterProxyModel(parent)
+{
+}
+
+oskar_SettingsFilterModel::~oskar_SettingsFilterModel()
+{
+}
+
+bool oskar_SettingsFilterModel::filterAcceptsRow(int sourceRow,
+            const QModelIndex& sourceParent) const
+{
+    return true;
+    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+    return sourceModel()->data(idx, oskar_SettingsModel::VisibleRole).toBool();
 }

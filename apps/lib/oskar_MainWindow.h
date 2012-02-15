@@ -33,6 +33,7 @@
 #include <QtCore/QString>
 
 class oskar_SettingsModel;
+class oskar_SettingsFilterModel;
 class oskar_SettingsView;
 class QAction;
 class QDialogButtonBox;
@@ -40,6 +41,7 @@ class QMenu;
 class QMenuBar;
 class QVBoxLayout;
 class QWidget;
+class QSortFilterProxyModel;
 
 class oskar_MainWindow : public QMainWindow
 {
@@ -65,6 +67,7 @@ private:
     QVBoxLayout* layout_;
     QDialogButtonBox* buttons_;
     oskar_SettingsModel* model_;
+    oskar_SettingsFilterModel* modelProxy_;
     oskar_SettingsView* view_;
     QMenuBar* menubar_;
     QMenu* menuFile_;

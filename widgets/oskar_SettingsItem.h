@@ -77,10 +77,14 @@ public:
     void setCaption(const QString& value);
     void setIterationInc(const QVariant& value);
     void setIterationNum(int value);
+    void setTooltip(const QString& value);
     void setValue(const QVariant& value);
+    void setVisible(bool value);
     const QString& subkey() const;
+    const QString& tooltip() const;
     int type() const;
     const QVariant& value() const;
+    bool visible() const;
 
 private:
     oskar_SettingsItem* parentItem_;
@@ -88,7 +92,9 @@ private:
     QString key_; // Full settings key for the item.
     QString subkey_; // Short settings key.
     int type_; // Enumerated type.
+    int visible_;
     QString caption_;
+    QString tooltip_;
     QVariant value_;
     QVariant default_;
     int iterNum_;

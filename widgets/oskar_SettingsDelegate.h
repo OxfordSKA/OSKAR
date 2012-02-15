@@ -82,7 +82,7 @@ public:
             const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
 private:
-    void setIterations(oskar_SettingsModel* model, oskar_SettingsItem* item);
+    void setIterations(QAbstractItemModel* model, const QModelIndex& index);
 
     QWidget* view_;
 };

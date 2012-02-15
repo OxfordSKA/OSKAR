@@ -46,6 +46,7 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     // Initialise user-defined, runtime values.
     if (key.isEmpty()) value_ = defaultValue;
     iterNum_ = 1;
+    visible_ = true;
 }
 
 oskar_SettingsItem::~oskar_SettingsItem()
@@ -120,14 +121,31 @@ void oskar_SettingsItem::setIterationNum(int value)
     iterNum_ = value;
 }
 
+void oskar_SettingsItem::setTooltip(const QString& value)
+{
+    tooltip_ = value;
+}
+
 void oskar_SettingsItem::setValue(const QVariant& value)
 {
     value_ = value;
 }
 
+void oskar_SettingsItem::setVisible(bool value)
+{
+    visible_ = value;
+    if (visible_ && parentItem_)
+        parentItem_->setVisible(true);
+}
+
 const QString& oskar_SettingsItem::subkey() const
 {
     return subkey_;
+}
+
+const QString& oskar_SettingsItem::tooltip() const
+{
+    return tooltip_;
 }
 
 int oskar_SettingsItem::type() const
@@ -138,4 +156,9 @@ int oskar_SettingsItem::type() const
 const QVariant& oskar_SettingsItem::value() const
 {
     return value_;
+}
+
+bool oskar_SettingsItem::visible() const
+{
+    return visible_;
 }

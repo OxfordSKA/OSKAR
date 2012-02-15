@@ -54,11 +54,13 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Create and set up the settings model.
     model_ = new oskar_SettingsModel(widget_);
+    modelProxy_ = new oskar_SettingsFilterModel(widget_);
+    modelProxy_->setSourceModel(model_);
 
     // Create and set up the settings view.
     view_ = new oskar_SettingsView(widget_);
     oskar_SettingsDelegate* delegate = new oskar_SettingsDelegate(view_, widget_);
-    view_->setModel(model_);
+    view_->setModel(modelProxy_);
     view_->setItemDelegate(delegate);
     view_->resizeColumnToContents(0);
     layout_->addWidget(view_);
