@@ -159,7 +159,7 @@ void Test_curand::test_multi_device()
 {
     int num_devices = 0;
     cudaGetDeviceCount(&num_devices);
-    omp_set_num_threads(min(num_devices, 4));
+    omp_set_num_threads(min(num_devices, 2));
     int use_device[4] = {0, 1, 2, 3};
 
     #pragma omp parallel
@@ -185,8 +185,8 @@ void Test_curand::test_multi_device()
         CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
         int num_iter = 1;
-        int num_blocks  = 2;
-        int num_threads = 20;
+        int num_blocks  = 1;
+        int num_threads = 40;
         int num_per_thread = 1;
         int num_values = num_blocks * num_threads * num_per_thread;
         oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);

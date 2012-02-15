@@ -47,7 +47,9 @@ int oskar_allocate_curand_states(curandState* d_states, int num_states,
 
     int device_id = 0;
     cudaGetDevice(&device_id);
-    int device_offset = device_id * num_states;
+    int device_offset = 0;//device_id * num_states;
+    // NOTE Device offset should be zero as different GPUs process different
+    // chunks but same time and stations so need the same set of random numbers.
 
     oskar_cudak_curand_init
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
