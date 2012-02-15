@@ -47,9 +47,8 @@ set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.
 cuda_add_library(oskar_apps ${apps_SRC})
 
 # Link in oskar_ms if its avaliable
-## FIXME: mmm we might want to rethink the dependencies of the apps library
-## to not link vs other oskar libaries.
-## ... if this is possible ...
+## FIXME:
+## ===>>> IDEALLY WE DONT WANT LIB_APPS EVER TO DEPEND ON OSKAR_WIDGETS!
 if (BUILD_OSKAR_MS AND BUILD_OSKAR_WIDGETS)
     target_link_libraries(oskar_apps oskar oskar_widgets oskar_ms
         ${CASACORE_LIBRARIES}
@@ -59,7 +58,13 @@ elseif(BUILD_OSKAR_MS)
     target_link_libraries(oskar_apps oskar oskar_ms ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
         ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
+elseif(BUILD_OSKAR_WIDGETS)
+    target_link_libraries(oskar_apps oskar oskar_widgets
+        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
+        ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 else()
+    #--- THIS CASE IS PROBABLY BROKEN AS IF NO WIDGETS LIBRARY IS BUILD
+    #--- APPS WILL STILL DEPEND ON WIDGETS.
     target_link_libraries(oskar_apps oskar
         ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
         ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
