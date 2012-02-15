@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or src materials provided with the distribution.
+ *    and/or other materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,41 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_resize.h"
-#include "utility/oskar_mem_realloc.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef OSKAR_CUDAK_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
+#define OSKAR_CUDAK_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
 
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
-{
-    int error = 0;
+/**
+ * @file oskar_cudak_evaluate_element_weights_errors.h
+ */
 
-    /* Set the new number of elements. */
-    station->num_elements = n_elements;
+#include <stdio.h>
+#include <stdlib.h>
+#include <cuda.h>
+#include <curand_kernel.h>
 
-    /* Resize the model data. */
-    error = oskar_mem_realloc(&station->x, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->y, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->z, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->weight, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain_error, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_offset, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_error, n_elements);
-    if (error) return error;
+__global__
+void oskar_cudak_evaluate_element_weights_errors_d(double2* errors, int n,
+        const double* amp_gain, const double* amp_error,
+        const double* phase_offset, const double* phase_error,
+        curandState* state);
 
-    return error;
-}
+__global__
+void oskar_cudak_evaluate_element_weights_errors_f(float2* errors, int n,
+        const float* amp_gain, const float* amp_error,
+        const float* phase_offset, const float* phase_error,
+        curandState* state);
 
-#ifdef __cplusplus
-}
-#endif
+#endif /* OSKAR_CUDAK_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_ */

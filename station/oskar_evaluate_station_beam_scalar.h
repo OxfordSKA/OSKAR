@@ -76,9 +76,10 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
-        const oskar_StationModel* station, const double hor_l_beam,
-        const double hor_m_beam, const oskar_Mem* hor_l, const oskar_Mem* hor_m,
-        const oskar_Mem* hor_n, oskar_Mem* work_weights);
+        const oskar_StationModel* station, const double l_beam,
+        const double m_beam, const oskar_Mem* l, const oskar_Mem* m,
+        const oskar_Mem* n, oskar_Mem* work_weights,
+        oskar_Mem* work_weights_error);
 
 #ifdef __cplusplus
 }

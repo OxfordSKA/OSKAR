@@ -33,6 +33,7 @@
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_Mem.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
+#include "utility/oskar_mem_get_pointer.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -81,18 +82,24 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
             || m->is_complex() || n->is_complex())
         return OSKAR_ERR_BAD_DATA_TYPE;
 
+    // Declare a non-owned Mem pointer to store the weights error work array.
+    oskar_Mem weights_error;
+
     // Resize the weights work array if needed.
-    if (weights->num_elements() != station->num_elements)
+    if (weights->num_elements() < 2 * station->num_elements)
     {
-        int error = weights->resize(station->num_elements);
+        int error = weights->resize(2 * station->num_elements);
         if (error) return error;
     }
+    int error = oskar_mem_get_pointer(&weights_error, weights,
+            station->num_elements, station->num_elements);
+    if (error) return error;
 
     // No element pattern data. Assume isotropic antenna elements.
     if (station->element_pattern == NULL && E->is_scalar())
     {
         oskar_evaluate_station_beam_scalar(E, station, l_beam, m_beam,
-                l, m, n, weights);
+                l, m, n, weights, &weights_error);
     }
 
     // Make use of element pattern data.

@@ -53,11 +53,16 @@ struct oskar_StationModel
     oskar_Mem y;      /**< y-position wrt local horizon, toward the North. */
     oskar_Mem z;      /**< z-position wrt local horizon, toward the zenith. */
     int coord_units;  /**< Units of the x,y,z coordinates.*/
+
+    int apply_weight; /**< Bool switch to toggle complex element weight vector (default false) */
     oskar_Mem weight; /**< Element complex weight (set to 1 unless apodisation). */
-    oskar_Mem amp_gain;
-    oskar_Mem amp_error;
-    oskar_Mem phase_offset;
-    oskar_Mem phase_error;
+
+    int apply_antenna_errors; /**< Bool switch to toggle element gain and phase errors (default false) */
+    oskar_Mem amp_gain;       /**< Per element amplitude gain factor (default 1.0) */
+    oskar_Mem amp_gain_error; /**< Standard deviation of per element random amplitude gain factor (default 0.0) */
+    oskar_Mem phase_offset;   /**< Per element systematic phase offset, in radians (default 0.0) */
+    oskar_Mem phase_error;    /**< Standard deviation of per element random phase offset, in radians (default 0.0) */
+
     oskar_Mem total_receiver_noise; /**< Total receiver noise stddev as a
                                          function of frequency, in Jy */
 

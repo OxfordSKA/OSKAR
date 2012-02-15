@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or src materials provided with the distribution.
+ *    and/or other materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,41 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_resize.h"
-#include "utility/oskar_mem_realloc.h"
+
+#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
+#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
+
+/**
+ * @file oskar_evaluate_element_weights_errors.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
-{
-    int error = 0;
-
-    /* Set the new number of elements. */
-    station->num_elements = n_elements;
-
-    /* Resize the model data. */
-    error = oskar_mem_realloc(&station->x, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->y, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->z, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->weight, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain_error, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_offset, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_error, n_elements);
-    if (error) return error;
-
-    return error;
-}
+OSKAR_EXPORT
+int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
+        const oskar_Mem* gain, const oskar_Mem* gain_error,
+        const oskar_Mem* phase, const oskar_Mem* phase_error);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_ */

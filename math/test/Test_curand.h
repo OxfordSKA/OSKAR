@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or src materials provided with the distribution.
+ *    and/or other materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,41 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_resize.h"
-#include "utility/oskar_mem_realloc.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef TEST_CURAND_H_
+#define TEST_CURAND_H_
 
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
+/**
+ * @file Test_curand.h
+ */
+
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_curand : public CppUnit::TestFixture
 {
-    int error = 0;
+    public:
+        CPPUNIT_TEST_SUITE(Test_curand);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST(test_state_allocation);
+        CPPUNIT_TEST(test_multi_device);
+        CPPUNIT_TEST_SUITE_END();
 
-    /* Set the new number of elements. */
-    station->num_elements = n_elements;
+    public:
+        void test();
+        void test_state_allocation();
+        void test_multi_device();
+};
 
-    /* Resize the model data. */
-    error = oskar_mem_realloc(&station->x, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->y, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->z, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->weight, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain_error, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_offset, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_error, n_elements);
-    if (error) return error;
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_curand);
 
-    return error;
-}
 
-#ifdef __cplusplus
-}
-#endif
+#endif /* TEST_CURAND_H_ */

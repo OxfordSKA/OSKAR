@@ -42,7 +42,7 @@ int oskar_station_model_is_location(const oskar_StationModel* station,
             station->z.private_location == location &&
             station->weight.private_location == location &&
             station->amp_gain.private_location == location &&
-            station->amp_error.private_location == location &&
+            station->amp_gain_error.private_location == location &&
             station->phase_offset.private_location == location &&
             station->phase_error.private_location == location);
 }

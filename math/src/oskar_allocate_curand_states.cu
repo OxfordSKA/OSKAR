@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or src materials provided with the distribution.
+ *    and/or other materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,37 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_resize.h"
-#include "utility/oskar_mem_realloc.h"
+
+#include "math/oskar_allocate_curand_states.h"
+#include "math/cudak/oskar_cudak_curand_init.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
+
+int oskar_allocate_curand_states(curandState* d_states, int num_states,
+        int seed, int offset)
 {
-    int error = 0;
+    if (d_states == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Set the new number of elements. */
-    station->num_elements = n_elements;
+    int error = OSKAR_SUCCESS;
+    int num_threads = 128;
+    int num_blocks = (num_states + num_threads - 1) / num_threads;
 
-    /* Resize the model data. */
-    error = oskar_mem_realloc(&station->x, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->y, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->z, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->weight, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain_error, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_offset, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_error, n_elements);
-    if (error) return error;
+    int device_id = 0;
+    cudaGetDevice(&device_id);
+    int device_offset = device_id * num_states;
+
+    oskar_cudak_curand_init
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (d_states, seed, offset, device_offset);
+    error = cudaPeekAtLastError();
 
     return error;
 }

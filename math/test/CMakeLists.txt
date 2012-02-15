@@ -2,11 +2,14 @@
 # src/math/test/CMakeLists.txt
 #
 
-# ==== CppUnit
+add_subdirectory(cudak)
+
+# CppUnit
 if (CPPUNIT_FOUND)
 
     set(math_test_SRC
         src/CppUnitMain.cpp
+        src/Test_curand.cu
         src/Test_healpix.cpp
         src/Test_Jones.cpp
         src/Test_Matrix3.cpp
@@ -16,16 +19,17 @@ if (CPPUNIT_FOUND)
         src/Test_SphericalPositions.cpp
     )
 
-    include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
-    add_executable(math_test ${math_test_SRC})
-    target_link_libraries(math_test oskar ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
-
+    include_directories(${CPPUNIT_INCLUDE_DIR})
+    include_directories(${CUDA_INCLUDE_DIRS})
+    list(APPEND CUDA_NVCC_FLAGS --compiler-options;${OpenMP_CXX_FLAGS};)
+    cuda_add_executable(math_test ${math_test_SRC})
+    target_link_libraries(math_test oskar oskar_math_test_cudak
+        ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
     add_test(math_test math_test)
 endif()
 
 
-# FIXME Move to CppUnit test.
-# ==== QtTest
+# QtTest
 if (QT_QTTEST_FOUND AND BUILD_OSKAR_WIDGETS)
 
     include_directories(

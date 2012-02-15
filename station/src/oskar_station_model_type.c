@@ -48,7 +48,7 @@ int oskar_station_model_is_type(const oskar_StationModel* station, int type)
             station->y.private_type == type &&
             station->z.private_type == type &&
             station->amp_gain.private_type == type &&
-            station->amp_error.private_type == type &&
+            station->amp_gain_error.private_type == type &&
             station->phase_offset.private_type == type &&
             station->phase_error.private_type == type);
 }

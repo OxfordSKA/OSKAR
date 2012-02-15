@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 int oskar_station_model_set_element_errors(oskar_StationModel* dst,
-		int index, double amp_gain, double amp_error, double phase_offset,
+		int index, double amp_gain, double amp_gain_error, double phase_offset,
 		double phase_error)
 {
 	int type, location;
@@ -50,14 +50,14 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
         return OSKAR_ERR_OUT_OF_RANGE;
 
 	/* Get the data type. */
-    if (dst->amp_gain.private_type != dst->amp_error.private_type ||
+    if (dst->amp_gain.private_type != dst->amp_gain_error.private_type ||
     		dst->amp_gain.private_type != dst->phase_offset.private_type ||
     		dst->amp_gain.private_type != dst->phase_error.private_type)
     	return OSKAR_ERR_TYPE_MISMATCH;
 	type = dst->amp_gain.private_type;
 
 	/* Get the data location. */
-    if (dst->amp_gain.private_location != dst->amp_error.private_location ||
+    if (dst->amp_gain.private_location != dst->amp_gain_error.private_location ||
     		dst->amp_gain.private_location != dst->phase_offset.private_location ||
     		dst->amp_gain.private_location != dst->phase_error.private_location)
     	return OSKAR_ERR_BAD_LOCATION;
@@ -68,7 +68,7 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
     	if (type == OSKAR_DOUBLE)
     	{
             ((double*)dst->amp_gain.data)[index] = amp_gain;
-            ((double*)dst->amp_error.data)[index] = amp_error;
+            ((double*)dst->amp_gain_error.data)[index] = amp_gain_error;
             ((double*)dst->phase_offset.data)[index] = phase_offset;
             ((double*)dst->phase_error.data)[index] = phase_error;
             return 0;
@@ -76,7 +76,7 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
     	else if (type == OSKAR_SINGLE)
     	{
             ((float*)dst->amp_gain.data)[index] = (float) amp_gain;
-            ((float*)dst->amp_error.data)[index] = (float) amp_error;
+            ((float*)dst->amp_gain_error.data)[index] = (float) amp_gain_error;
             ((float*)dst->phase_offset.data)[index] = (float) phase_offset;
             ((float*)dst->phase_error.data)[index] = (float) phase_error;
             return 0;
@@ -94,8 +94,8 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
         {
             cudaMemcpy((char*)(dst->amp_gain.data) + offset_bytes,
             		&amp_gain, element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->amp_error.data) + offset_bytes,
-            		&amp_error, element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(dst->amp_gain_error.data) + offset_bytes,
+            		&amp_gain_error, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_offset.data) + offset_bytes,
             		&phase_offset, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_error.data) + offset_bytes,
@@ -106,12 +106,12 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
         {
         	float t_amp_gain, t_amp_error, t_phase_offset, t_phase_error;
         	t_amp_gain = (float) amp_gain;
-        	t_amp_error = (float) amp_error;
+        	t_amp_error = (float) amp_gain_error;
         	t_phase_offset = (float) phase_offset;
         	t_phase_error = (float) phase_error;
             cudaMemcpy((char*)(dst->amp_gain.data) + offset_bytes,
             		&t_amp_gain, element_size, cudaMemcpyHostToDevice);
-            cudaMemcpy((char*)(dst->amp_error.data) + offset_bytes,
+            cudaMemcpy((char*)(dst->amp_gain_error.data) + offset_bytes,
             		&t_amp_error, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_offset.data) + offset_bytes,
             		&t_phase_offset, element_size, cudaMemcpyHostToDevice);
@@ -120,7 +120,7 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
             return 0;
         }
         else
-    		return OSKAR_ERR_BAD_DATA_TYPE;
+            return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     return OSKAR_ERR_BAD_LOCATION;

@@ -35,6 +35,7 @@
 #include "utility/oskar_mem_element_size.h"
 #include "math/cudak/oskar_cudak_dftw_2d.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
+#include "utility/oskar_Work.h"
 
 #include <cuda_runtime_api.h>
 #include <cstdio>
@@ -48,7 +49,7 @@ extern "C" {
 int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         const oskar_StationModel* station, const double l_beam,
         const double m_beam, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_Mem* weights)
+        const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error)
 {
     if (beam == NULL || station == NULL || m == NULL ||
             l == NULL || n == NULL || weights == NULL)
@@ -82,6 +83,21 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         oskar_cudak_dftw_2d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
                 (num_antennas, station->x, station->y, l_beam,
                         m_beam, *weights);
+
+//        if (station->apply_antenna_errors == OSKAR_TRUE)
+//        {
+//            // (NOTE HACK while errors are evaluated on the CPU)
+//            // Copy error vectors back to CPU (as they are unfortunately on
+//            // the GPU at this point).
+//            // Also copy back work buffer to CPU.
+//
+//            // Generate weights modification (gain and phase errors)
+//            // On the CPU for now
+//
+//            // Copy weights modification to GPU
+//
+//            // Modify the weights (complex multiply with error vector) on the GPU
+//        }
 
         // Evaluate beam pattern for each source.
         int antennas_per_chunk = 432;  // Should be multiple of 16.

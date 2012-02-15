@@ -8,7 +8,7 @@
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or src materials provided with the distribution.
+ *    and/or other materials provided with the distribution.
  * 3. Neither the name of the University of Oxford nor the names of its
  *    contributors may be used to endorse or promote products derived from this
  *    software without specific prior written permission.
@@ -26,41 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_resize.h"
-#include "utility/oskar_mem_realloc.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef TEST_CURAND_GENERATE_H_
+#define TEST_CURAND_GENERATE_H_
 
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
-{
-    int error = 0;
+/**
+ * @file test_curand_generate.h
+ */
 
-    /* Set the new number of elements. */
-    station->num_elements = n_elements;
+#include "oskar_global.h"
+#include <cuda.h>
+#include <curand_kernel.h>
 
-    /* Resize the model data. */
-    error = oskar_mem_realloc(&station->x, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->y, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->z, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->weight, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain_error, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_offset, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_error, n_elements);
-    if (error) return error;
 
-    return error;
-}
+__global__
+void test_curand_generate(double* values, int num_values,
+        int num_per_thread, curandState* state);
 
-#ifdef __cplusplus
-}
-#endif
+
+#endif /* TEST_CURAND_GENERATE_H_ */

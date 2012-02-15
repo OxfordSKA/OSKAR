@@ -54,7 +54,7 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     if (error) return error;
     error = oskar_mem_copy(&dst->amp_gain, &src->amp_gain);
     if (error) return error;
-    error = oskar_mem_copy(&dst->amp_error, &src->amp_error);
+    error = oskar_mem_copy(&dst->amp_gain_error, &src->amp_gain_error);
     if (error) return error;
     error = oskar_mem_copy(&dst->phase_offset, &src->phase_offset);
     if (error) return error;
