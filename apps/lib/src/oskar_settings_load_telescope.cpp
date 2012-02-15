@@ -46,44 +46,20 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("telescope");
 
-    // Telescope layout file.
-    t = s.value("layout_file", "").toByteArray();
+    // Station positions file.
+    t = s.value("station_positions_file", "").toByteArray();
     if (t.size() > 0)
     {
-        tel->layout_file = (char*)malloc(t.size() + 1);
-        strcpy(tel->layout_file, t.constData());
-
-        // Check that telescope layout file exists.
-        if (!QFileInfo(tel->layout_file).isFile())
-        {
-            fprintf(stderr, "ERROR: Telescope layout file doesn't exist!\n");
-            return OSKAR_ERR_SETTINGS;
-        }
-    }
-    else
-    {
-        fprintf(stderr, "ERROR: No telescope layout file specified!\n");
-        return OSKAR_ERR_SETTINGS;
+        tel->station_positions_file = (char*)malloc(t.size() + 1);
+        strcpy(tel->station_positions_file, t.constData());
     }
 
-    // Station directory.
-    t = s.value("station_directory", "").toByteArray();
+    // Station layout directory.
+    t = s.value("station_layout_directory", "").toByteArray();
     if (t.size() > 0)
     {
-        tel->station_dir = (char*)malloc(t.size() + 1);
-        strcpy(tel->station_dir, t.constData());
-
-        // Check that station directory exists.
-        if (!QFileInfo(tel->station_dir).isDir())
-        {
-            fprintf(stderr, "ERROR: Station directory doesn't exist!\n");
-            return OSKAR_ERR_SETTINGS;
-        }
-    }
-    else
-    {
-        fprintf(stderr, "ERROR: No station directory specified!\n");
-        return OSKAR_ERR_SETTINGS;
+        tel->station_layout_directory = (char*)malloc(t.size() + 1);
+        strcpy(tel->station_layout_directory, t.constData());
     }
 
     // Telescope location.
@@ -92,22 +68,23 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     tel->altitude_m    = s.value("altitude_m", 0.0).toDouble();
 
     // Station settings.
-    tel->enable_station_beam = s.value("enable_station_beam", true).toBool();
-    tel->normalise_station_beam = s.value("normalise_station_beam", false).toBool();
+    s.beginGroup("station");
+    tel->station.enable_beam = s.value("enable_beam", true).toBool();
+    tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
 
     // Station element settings (overrides).
-    tel->element_amp_gain = s.value("element_amp_gain", 1.0).toDouble();
-    tel->element_amp_error = s.value("element_amp_error", 0.0).toDouble();
-    tel->element_phase_offset_rad = s.value("element_phase_offset_deg", 0.0).toDouble() * M_PI / 180.0;
-    tel->element_phase_error_rad = s.value("element_phase_error_deg", 0.0).toDouble() * M_PI / 180.0;
+    tel->station.element_amp_gain = s.value("element_amp_gain", -1e99).toDouble();
+    tel->station.element_amp_error = s.value("element_amp_error", -1e99).toDouble();
+    tel->station.element_phase_offset_rad = s.value("element_phase_offset_deg", -1e99).toDouble() * M_PI / 180.0;
+    tel->station.element_phase_error_rad = s.value("element_phase_error_deg", -1e99).toDouble() * M_PI / 180.0;
 
     // Receiver temperature.
-    tel->receiver_temperature = s.value("receiver_temperature", -1.0).toDouble();
+    tel->station.receiver_temperature = s.value("receiver_temperature", -1.0).toDouble();
     t = s.value("receiver_temperature_file", "").toByteArray();
     if (t.size() > 0)
     {
-        tel->receiver_temperature_file = (char*)malloc(t.size() + 1);
-        strcpy(tel->receiver_temperature_file, t.constData());
+        tel->station.receiver_temperature_file = (char*)malloc(t.size() + 1);
+        strcpy(tel->station.receiver_temperature_file, t.constData());
     }
     if (s.contains("receiver_temperature_file") &&
             s.contains("receiver_temperature"))

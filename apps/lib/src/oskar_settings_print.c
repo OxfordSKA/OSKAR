@@ -249,10 +249,10 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
 
     /* Print telescope settings. */
     pr_k(1, w, "Telescope settings", 1);
-    pr_s(2, w, "Telescope file", s->telescope.layout_file);
-    pr_s(2, w, "Station directory", s->telescope.station_dir);
-    pr_b(2, w, "Enable station beam", s->telescope.enable_station_beam);
-    pr_b(2, w, "Normalise station beam", s->telescope.normalise_station_beam);
+    pr_s(2, w, "Telescope file", s->telescope.station_positions_file);
+    pr_s(2, w, "Station directory", s->telescope.station_layout_directory);
+    pr_b(2, w, "Enable station beam", s->telescope.station.enable_beam);
+    pr_b(2, w, "Normalise station beam", s->telescope.station.normalise_beam);
     pr_1f(2, w, "Longitude (deg)", s->telescope.longitude_rad * R2D);
     pr_1f(2, w, "Latitude (deg)", s->telescope.latitude_rad * R2D);
     pr_1f(2, w, "Altitude (m)", s->telescope.altitude_m);

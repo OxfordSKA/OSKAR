@@ -29,6 +29,8 @@
 #ifndef OSKAR_SETTINGS_TELESCOPE_H_
 #define OSKAR_SETTINGS_TELESCOPE_H_
 
+#include "station/oskar_SettingsStation.h"
+
 /**
  * @struct oskar_SettingsTelescope
  *
@@ -39,23 +41,12 @@
  */
 struct oskar_SettingsTelescope
 {
-    char* layout_file;
-    char* station_dir;
+    char* station_positions_file;
+    char* station_layout_directory;
     double longitude_rad;
     double latitude_rad;
     double altitude_m;
-
-    /* Station settings. */
-    int enable_station_beam;
-    int normalise_station_beam;
-    double receiver_temperature;
-    char* receiver_temperature_file;
-
-    /* Station element settings (can override those in the station files). */
-    double element_amp_gain;
-    double element_amp_error;
-    double element_phase_offset_rad;
-    double element_phase_error_rad;
+    oskar_SettingsStation station;
 };
 typedef struct oskar_SettingsTelescope oskar_SettingsTelescope;
 

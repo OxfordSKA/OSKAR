@@ -59,30 +59,24 @@ public:
         IterationKeysRole,
         SetIterationRole,
         ClearIterationRole,
-        OutputKeyRole
+        OutputKeysRole
     };
 
 public:
     oskar_SettingsModel(QObject* parent = 0);
     virtual ~oskar_SettingsModel();
 
-    void append(const QString& key,
-            const QString& subkey, int type, const QString& caption,
-            const QVariant& defaultValue,
-            const QModelIndex& parent = QModelIndex());
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
-    oskar_SettingsItem* getItem(const QModelIndex& index) const;
-    oskar_SettingsItem* getItem(const QString& key) const;
+    const oskar_SettingsItem* getItem(const QString& key) const;
     QVariant headerData(int section, Qt::Orientation orientation,
             int role = Qt::DisplayRole) const;
     QModelIndex index(int row, int column,
             const QModelIndex& parent = QModelIndex()) const;
+    QModelIndex index(const QString& key);
     QMap<int, QVariant> itemData (const QModelIndex& index) const;
-    const QStringList& iterationKeys() const;
     QModelIndex parent(const QModelIndex& index) const;
-    const QStringList& outputKeys() const;
     void registerSetting(const QString& key, const QString& caption,
             int type, const QVariant& defaultValue = QVariant(),
             const QStringList& options = QStringList());
@@ -90,14 +84,17 @@ public:
     void setCaption(const QString& key, const QString& caption);
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
-    void setFile(const QString& filename);
+    void setSettingsFile(const QString& filename);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
 
 private:
-    QModelIndex getChild(const QString& keyShort,
+    void append(const QString& key, const QString& subkey, int type,
+            const QString& caption, const QVariant& defaultValue,
+            const QModelIndex& parent = QModelIndex());
+    QModelIndex getChild(const QString& subkey,
             const QModelIndex& parent = QModelIndex()) const;
-    QModelIndex getIndex(const QString& key);
+    oskar_SettingsItem* getItem(const QModelIndex& index) const;
     void loadFromParentIndex(const QModelIndex& parent);
 
     QSettings* settings_;

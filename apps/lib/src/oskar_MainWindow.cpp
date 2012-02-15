@@ -99,7 +99,7 @@ void oskar_MainWindow::openSettings(QString filename)
     if (!filename.isEmpty())
     {
         settingsFile_ = filename;
-        model_->setFile(filename);
+        model_->setSettingsFile(filename);
         setWindowTitle("OSKAR GUI [" + filename + "]");
     }
 }
@@ -127,10 +127,11 @@ void oskar_MainWindow::runButton()
 
     // Get the (list of) output file names.
     QStringList outputFiles;
-    const QList<QString>& keys =  model_->outputKeys();
+    QStringList keys = model_->data(QModelIndex(),
+            oskar_SettingsModel::OutputKeysRole).toStringList();
     for (int i = 0; i < keys.size(); ++i)
     {
-        oskar_SettingsItem* it = model_->getItem(keys[i]);
+        const oskar_SettingsItem* it = model_->getItem(keys[i]);
         QString file = it->value().toString();
         outputFiles.append(file);
     }
@@ -150,7 +151,9 @@ void oskar_MainWindow::runButton()
 void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
 {
     QByteArray settings = settingsFile_.toAscii();
-    if (model_->iterationKeys().size() == 0)
+    QStringList iterationKeys = model_->data(QModelIndex(),
+            oskar_SettingsModel::IterationKeysRole).toStringList();
+    if (iterationKeys.size() == 0)
     {
         int error = oskar_sim(settings);
         if (error)
@@ -161,8 +164,10 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
     }
     else
     {
-        QString key = model_->iterationKeys()[depth];
-        oskar_SettingsItem* item = model_->getItem(key);
+        QStringList outputKeys = model_->data(QModelIndex(),
+                oskar_SettingsModel::OutputKeysRole).toStringList();
+        QString key = iterationKeys[depth];
+        const oskar_SettingsItem* item = model_->getItem(key);
         QVariant start = item->value();
         QVariant inc = item->iterationInc();
 
@@ -193,12 +198,12 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
                 if (!outputFiles[i].isEmpty())
                 {
                     outputFiles[i].append("_" + val.toString());
-                    model_->setValue(model_->outputKeys()[i], outputFiles[i]);
+                    model_->setValue(outputKeys[i], outputFiles[i]);
                 }
             }
 
             // Check if recursion depth has been reached.
-            if (depth < model_->iterationKeys().size() - 1)
+            if (depth < iterationKeys.size() - 1)
             {
                 // If not, then call this function again.
                 runSim(depth + 1, outputFiles);
@@ -220,6 +225,5 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
 
         // Restore initial value.
         model_->setValue(key, start);
-
     }
 }

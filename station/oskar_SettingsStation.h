@@ -26,27 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_SETTINGS_STATION_H_
+#define OSKAR_SETTINGS_STATION_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void oskar_settings_free(oskar_Settings* settings)
+/**
+ * @struct oskar_SettingsStation
+ *
+ * @brief Structure to hold station model settings.
+ *
+ * @details
+ * The structure holds station model parameters.
+ */
+struct oskar_SettingsStation
 {
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-}
+    int enable_beam;
+    int normalise_beam;
+    double receiver_temperature;
+    char* receiver_temperature_file;
 
-#ifdef __cplusplus
-}
-#endif
+    /* Station element settings (can override those in the station files). */
+    double element_amp_gain;
+    double element_amp_error;
+    double element_phase_offset_rad;
+    double element_phase_error_rad;
+};
+typedef struct oskar_SettingsStation oskar_SettingsStation;
+
+#endif /* OSKAR_SETTINGS_STATION_H_ */

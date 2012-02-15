@@ -44,8 +44,8 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
 {
     // Load telescope model into CPU structure.
     oskar_TelescopeModel *telescope;
-    const char* telescope_file = settings->telescope.layout_file;
-    const char* station_dir = settings->telescope.station_dir;
+    const char* telescope_file = settings->telescope.station_positions_file;
+    const char* station_dir = settings->telescope.station_layout_directory;
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
     int err = telescope->load_station_pos(telescope_file,
@@ -77,7 +77,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
     telescope->use_common_sky = true; // FIXME set this via the settings file.
     telescope->bandwidth_hz = settings->obs.channel_bandwidth_hz;
     telescope->wavelength_metres = 0.0; // This is set on a per-channel basis.
-    telescope->disable_e_jones = ! (settings->telescope.enable_station_beam);
+    telescope->disable_e_jones = ! (settings->telescope.station.enable_beam);
 
     // Set other station parameters.
     for (int i = 0; i < telescope->num_stations; ++i)
@@ -88,21 +88,21 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
     }
 
     // Evaluate station receiver noise (if any specified in the settings)
-    if (settings->telescope.receiver_temperature_file ||
-            settings->telescope.receiver_temperature > 0.0)
+    if (settings->telescope.station.receiver_temperature_file ||
+            settings->telescope.station.receiver_temperature > 0.0)
     {
         int num_channels = settings->obs.num_channels;
         double bandwidth = telescope->bandwidth_hz;
         const oskar_SettingsTime* time = &settings->obs.time;
         double integration_time = time->obs_length_seconds / time->num_vis_dumps;
-        vector<double> receiver_temp(num_channels, settings->telescope.receiver_temperature);
+        vector<double> receiver_temp(num_channels, settings->telescope.station.receiver_temperature);
 
         // Load receiver temperatures from file.
-        if (settings->telescope.receiver_temperature_file)
+        if (settings->telescope.station.receiver_temperature_file)
         {
-            if (strlen(settings->telescope.receiver_temperature_file) > 0)
+            if (strlen(settings->telescope.station.receiver_temperature_file) > 0)
             {
-                //oskar_load_receiver_temperatures(settings->telescope.receiver_temperature_file);
+                //oskar_load_receiver_temperatures(settings->telescope.station.receiver_temperature_file);
                 printf("== WARNING: Receiver temperature files are not yet implemented.\n");
             }
         }

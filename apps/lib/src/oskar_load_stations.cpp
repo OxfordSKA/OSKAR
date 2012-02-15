@@ -44,6 +44,8 @@ int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
     // Get the list of station files to load.
     QDir dir;
     dir.setPath(QString(dir_path));
+    if (!dir.exists())
+        return OSKAR_ERR_FILE_IO;
     QFileInfoList files = dir.entryInfoList(QStringList() << "*.dat");
 
     // Check that the number of stations is the same as that supplied.

@@ -48,9 +48,9 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
     settings->sky.gsm_file = 0;
     settings->sky.input_sky_file = 0;
     settings->sky.output_sky_file = 0;
-    settings->telescope.layout_file = 0;
-    settings->telescope.receiver_temperature_file = 0;
-    settings->telescope.station_dir = 0;
+    settings->telescope.station_positions_file = 0;
+    settings->telescope.station_layout_directory = 0;
+    settings->telescope.station.receiver_temperature_file = 0;
 
     error = oskar_settings_load_observation(&settings->obs, filename);
     if (error) return error;

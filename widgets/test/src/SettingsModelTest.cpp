@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     view.setWindowTitle("OSKAR Settings");
     view.show();
     view.resizeColumnToContents(0);
-    mod.setFile(QString(argv[1]));
+    mod.setSettingsFile(QString(argv[1]));
 
     int status = app.exec();
     return status;

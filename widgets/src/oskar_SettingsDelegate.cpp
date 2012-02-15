@@ -173,6 +173,7 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             event->accept();
             return true;
         }
+        return QStyledItemDelegate::editorEvent(event, mod, option, index);
     }
 
     // Check for mouse right-click events.

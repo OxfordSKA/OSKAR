@@ -103,17 +103,18 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 
     // Telescope model settings.
     setCaption("telescope", "Telescope model settings");
-    registerSetting("telescope/layout_file", "Array layout file", oskar_SettingsItem::INPUT_FILE_NAME);
-    registerSetting("telescope/station_directory", "Station directory", oskar_SettingsItem::INPUT_DIR_NAME);
+    registerSetting("telescope/station_positions_file", "Station positions file", oskar_SettingsItem::INPUT_FILE_NAME);
+    registerSetting("telescope/station_layout_directory", "Station layout directory", oskar_SettingsItem::INPUT_DIR_NAME);
     registerSetting("telescope/longitude_deg", "Longitude (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/latitude_deg", "Latitude (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/altitude_m", "Altitude (m)", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/enable_station_beam", "Enable station beam", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/normalise_station_beam", "Normalise station beam", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/element_amp_gain", "Element amplitude gain", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/element_amp_error", "Element amplitude error", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/element_phase_offset_deg", "Element phase offset (deg)", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/element_phase_error_deg", "Element phase error (deg)", oskar_SettingsItem::DOUBLE);
+    setCaption("telescope/station", "Station settings");
+    registerSetting("telescope/station/enable_beam", "Enable", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/normalise_beam", "Normalise", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/element_amp_gain", "Element amplitude gain", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element_amp_error", "Element amplitude standard deviation", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element_phase_offset_deg", "Element phase offset (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element_phase_error_deg", "Element phase standard deviation (deg)", oskar_SettingsItem::DOUBLE);
 
     // Observation settings.
     setCaption("observation", "Observation settings");
@@ -143,20 +144,6 @@ oskar_SettingsModel::~oskar_SettingsModel()
     delete rootItem_;
 }
 
-void oskar_SettingsModel::append(const QString& key,
-        const QString& subkey, int type, const QString& caption,
-        const QVariant& defaultValue, const QModelIndex& parent)
-{
-    oskar_SettingsItem *parentItem = getItem(parent);
-
-    beginInsertRows(parent, rowCount(), rowCount());
-    oskar_SettingsItem* item = new oskar_SettingsItem(key, subkey, type,
-            caption, defaultValue, parentItem);
-    parentItem->appendChild(item);
-    endInsertRows();
-    hash_.insert(key, item);
-}
-
 int oskar_SettingsModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 2;
@@ -164,10 +151,15 @@ int oskar_SettingsModel::columnCount(const QModelIndex& /*parent*/) const
 
 QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
-        return QVariant();
+    // Check for roles that do not depend on the index.
+    if (role == IterationKeysRole)
+        return iterationKeys_;
+    else if (role == OutputKeysRole)
+        return outputKeys_;
 
     // Get a pointer to the item.
+    if (!index.isValid())
+        return QVariant();
     oskar_SettingsItem* item = getItem(index);
 
     // Check for roles common to all columns.
@@ -192,10 +184,6 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         return item->iterationNum();
     else if (role == IterationIncRole)
         return item->iterationInc();
-    else if (role == IterationKeysRole)
-        return iterationKeys_;
-    else if (role == OutputKeyRole)
-        return outputKeys_;
 
     // Check for roles in specific columns.
     if (index.column() == 0)
@@ -252,18 +240,7 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-oskar_SettingsItem* oskar_SettingsModel::getItem(const QModelIndex& index) const
-{
-    if (index.isValid())
-    {
-        oskar_SettingsItem* item =
-                static_cast<oskar_SettingsItem*>(index.internalPointer());
-        if (item) return item;
-    }
-    return rootItem_;
-}
-
-oskar_SettingsItem* oskar_SettingsModel::getItem(const QString& key) const
+const oskar_SettingsItem* oskar_SettingsModel::getItem(const QString& key) const
 {
     return hash_.value(key);
 }
@@ -296,6 +273,37 @@ QModelIndex oskar_SettingsModel::index(int row, int column,
         return QModelIndex();
 }
 
+QModelIndex oskar_SettingsModel::index(const QString& key)
+{
+    QStringList keys = key.split('/');
+
+    // Find the parent, creating groups as necessary.
+    QModelIndex parent, child;
+    for (int k = 0; k < keys.size() - 1; ++k)
+    {
+        child = getChild(keys[k], parent);
+        if (child.isValid())
+            parent = child;
+        else
+        {
+            // Append the group and set it as the new parent.
+            append(key, keys[k], oskar_SettingsItem::CAPTION_ONLY, keys[k],
+                    QVariant(), parent);
+            parent = index(rowCount(parent) - 1, 0, parent);
+        }
+    }
+
+    // Return the model index.
+    child = getChild(keys.last(), parent);
+    if (!child.isValid())
+    {
+        append(key, keys.last(), oskar_SettingsItem::CAPTION_ONLY, keys.last(),
+                QVariant(), parent);
+        child = index(rowCount(parent) - 1, 0, parent);
+    }
+    return child;
+}
+
 QMap<int, QVariant> oskar_SettingsModel::itemData(const QModelIndex& index) const
 {
     QMap<int, QVariant> d;
@@ -305,13 +313,8 @@ QMap<int, QVariant> oskar_SettingsModel::itemData(const QModelIndex& index) cons
     d.insert(IterationNumRole, data(index, IterationNumRole));
     d.insert(IterationIncRole, data(index, IterationIncRole));
     d.insert(IterationKeysRole, data(index, IterationKeysRole));
-    d.insert(OutputKeyRole, data(index, OutputKeyRole));
+    d.insert(OutputKeysRole, data(index, OutputKeysRole));
     return d;
-}
-
-const QStringList& oskar_SettingsModel::iterationKeys() const
-{
-    return iterationKeys_;
 }
 
 QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
@@ -326,11 +329,6 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
         return QModelIndex();
 
     return createIndex(parentItem->childNumber(), 0, parentItem);
-}
-
-const QStringList& oskar_SettingsModel::outputKeys() const
-{
-    return outputKeys_;
 }
 
 void oskar_SettingsModel::registerSetting(const QString& key,
@@ -370,13 +368,13 @@ int oskar_SettingsModel::rowCount(const QModelIndex& parent) const
 
 void oskar_SettingsModel::setCaption(const QString& key, const QString& caption)
 {
-    QModelIndex idx = getIndex(key);
+    QModelIndex idx = index(key);
     setData(idx, caption);
 }
 
 void oskar_SettingsModel::setTooltip(const QString& key, const QString& tooltip)
 {
-    QModelIndex idx = getIndex(key);
+    QModelIndex idx = index(key);
     setData(idx, tooltip, Qt::ToolTipRole);
 }
 
@@ -433,7 +431,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
             emit dataChanged(idx, idx);
             foreach (QString k, iterationKeys_)
             {
-                QModelIndex idx = getIndex(k);
+                QModelIndex idx = index(k);
                 emit dataChanged(index(idx.row(), 0, parent(idx)),
                         index(idx.row(), columnCount(), parent(idx)));
             }
@@ -463,6 +461,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
                 settings_->remove(item->key());
             else
                 settings_->setValue(item->key(), data);
+            settings_->sync();
         }
         emit dataChanged(idx, idx);
         return true;
@@ -471,7 +470,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     return false;
 }
 
-void oskar_SettingsModel::setFile(const QString& filename)
+void oskar_SettingsModel::setSettingsFile(const QString& filename)
 {
     if (!filename.isEmpty())
     {
@@ -496,15 +495,28 @@ void oskar_SettingsModel::setFile(const QString& filename)
 void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
 {
     // Get the model index.
-    QModelIndex idx = getIndex(key);
+    QModelIndex idx = index(key);
     idx = idx.sibling(idx.row(), 1);
 
     // Set the data.
     setData(idx, value, Qt::EditRole);
-    if (settings_) settings_->sync();
 }
 
 // Private methods.
+
+void oskar_SettingsModel::append(const QString& key, const QString& subkey,
+        int type, const QString& caption, const QVariant& defaultValue,
+        const QModelIndex& parent)
+{
+    oskar_SettingsItem *parentItem = getItem(parent);
+
+    beginInsertRows(parent, rowCount(), rowCount());
+    oskar_SettingsItem* item = new oskar_SettingsItem(key, subkey, type,
+            caption, defaultValue, parentItem);
+    parentItem->appendChild(item);
+    endInsertRows();
+    hash_.insert(key, item);
+}
 
 QModelIndex oskar_SettingsModel::getChild(const QString& subkey,
         const QModelIndex& parent) const
@@ -519,35 +531,15 @@ QModelIndex oskar_SettingsModel::getChild(const QString& subkey,
     return QModelIndex();
 }
 
-QModelIndex oskar_SettingsModel::getIndex(const QString& key)
+oskar_SettingsItem* oskar_SettingsModel::getItem(const QModelIndex& index) const
 {
-    QStringList keys = key.split('/');
-
-    // Find the parent, creating groups as necessary.
-    QModelIndex parent, child;
-    for (int k = 0; k < keys.size() - 1; ++k)
+    if (index.isValid())
     {
-        child = getChild(keys[k], parent);
-        if (child.isValid())
-            parent = child;
-        else
-        {
-            // Append the group and set it as the new parent.
-            append(key, keys[k], oskar_SettingsItem::CAPTION_ONLY, keys[k],
-                    QVariant(), parent);
-            parent = index(rowCount(parent) - 1, 0, parent);
-        }
+        oskar_SettingsItem* item =
+                static_cast<oskar_SettingsItem*>(index.internalPointer());
+        if (item) return item;
     }
-
-    // Return the model index.
-    child = getChild(keys.last(), parent);
-    if (!child.isValid())
-    {
-        append(key, keys.last(), oskar_SettingsItem::CAPTION_ONLY, keys.last(),
-                QVariant(), parent);
-        child = index(rowCount(parent) - 1, 0, parent);
-    }
-    return child;
+    return rootItem_;
 }
 
 void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
