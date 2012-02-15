@@ -57,7 +57,8 @@ if (BUILD_OSKAR_MS AND BUILD_OSKAR_WIDGETS)
         ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 elseif(BUILD_OSKAR_MS)
     target_link_libraries(oskar_apps oskar oskar_ms ${CASACORE_LIBRARIES}
-        ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
+        ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} 
+        ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 else()
     target_link_libraries(oskar_apps oskar
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
