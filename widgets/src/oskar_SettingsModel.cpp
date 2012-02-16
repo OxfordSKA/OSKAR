@@ -317,6 +317,27 @@ QMap<int, QVariant> oskar_SettingsModel::itemData(const QModelIndex& index) cons
     return d;
 }
 
+void oskar_SettingsModel::loadSettingsFile(const QString& filename)
+{
+    if (!filename.isEmpty())
+    {
+        // Delete any existing settings object.
+        if (settings_)
+        {
+            settings_->sync();
+            delete settings_;
+        }
+
+        // Create new settings object from supplied filename.
+        settings_ = new QSettings(filename, QSettings::IniFormat);
+
+        // Display the contents of the file.
+        beginResetModel();
+        loadFromParentIndex(QModelIndex());
+        endResetModel();
+    }
+}
+
 QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
@@ -364,6 +385,27 @@ void oskar_SettingsModel::registerSetting(const QString& key,
 int oskar_SettingsModel::rowCount(const QModelIndex& parent) const
 {
     return getItem(parent)->childCount();
+}
+
+void oskar_SettingsModel::saveSettingsFile(const QString& filename)
+{
+    if (!filename.isEmpty())
+    {
+        // Delete any existing settings object.
+        if (settings_)
+        {
+            settings_->sync();
+            delete settings_;
+        }
+
+        // Create new settings object from supplied filename.
+        settings_ = new QSettings(filename, QSettings::IniFormat);
+
+        // Set the contents of the file.
+        beginResetModel();
+        saveFromParentIndex(QModelIndex());
+        endResetModel();
+    }
 }
 
 void oskar_SettingsModel::setCaption(const QString& key, const QString& caption)
@@ -470,28 +512,6 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     return false;
 }
 
-void oskar_SettingsModel::setSettingsFile(const QString& filename)
-{
-    if (!filename.isEmpty())
-    {
-        // Delete any existing settings object.
-        if (settings_)
-        {
-            settings_->sync();
-            delete settings_;
-        }
-
-        // Create new settings object from supplied filename.
-        settings_ = new QSettings(filename, QSettings::IniFormat);
-
-        // Display the contents of the file.
-        beginResetModel();
-        QModelIndex parent;
-        loadFromParentIndex(parent);
-        endResetModel();
-    }
-}
-
 void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
 {
     // Get the model index.
@@ -570,6 +590,21 @@ void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
     }
 }
 
+void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
+{
+    int rows = rowCount(parent);
+    for (int i = 0; i < rows; ++i)
+    {
+        QModelIndex idx = index(i, 0, parent);
+        if (idx.isValid())
+        {
+            oskar_SettingsItem* item = getItem(idx);
+            if (!item->value().toString().isEmpty())
+                settings_->setValue(item->key(), item->value());
+            saveFromParentIndex(idx);
+        }
+    }
+}
 
 oskar_SettingsFilterModel::oskar_SettingsFilterModel(QObject* parent)
 : QSortFilterProxyModel(parent)

@@ -26,49 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_TEST_H_
-#define OSKAR_MEM_TEST_H_
+#ifndef OSKAR_MEM_SET_VALUE_REAL_H_
+#define OSKAR_MEM_SET_VALUE_REAL_H_
 
 /**
- * @file Test_Mem.h
+ * @file oskar_mem_set_value_real.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Sets the value of all elements in a vector.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function sets all the values in a block of memory to the same, real,
+ * value.
+ *
+ * Only single or double precision floating-point types are supported.
+ * Other types will cause an error code to be returned.
+ *
+ * @param[in] mem Pointer to the block of memory to update.
+ * @param[in] val All memory elements will be set to this value.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
-class Test_Mem : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_Mem);
-        CPPUNIT_TEST(test_alloc);
-        CPPUNIT_TEST(test_realloc);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_type_check);
-        CPPUNIT_TEST(test_scale_real);
-        CPPUNIT_TEST(test_set_value_real);
-        CPPUNIT_TEST(test_add);
-        CPPUNIT_TEST(test_add_noise);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_mem_set_value_real(oskar_Mem* mem, double val);
 
-    public:
-        /// Test method.
-        void test_alloc();
-        void test_realloc();
-        void test_append();
-        void test_type_check();
-        void test_scale_real();
-        void test_set_value_real();
-        void test_add();
-        void test_add_noise();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_Mem);
-
-#endif // OSKAR_MEM_TEST_H_
+#endif /* OSKAR_MEM_SET_VALUE_REAL_H_ */

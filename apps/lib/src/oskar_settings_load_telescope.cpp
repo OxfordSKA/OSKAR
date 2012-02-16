@@ -38,6 +38,8 @@
 #include <QtCore/QVariant>
 #include <QtCore/QString>
 
+#define D2R (M_PI/180.0)
+
 extern "C"
 int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         const char* filename)
@@ -63,8 +65,8 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     }
 
     // Telescope location.
-    tel->longitude_rad = s.value("longitude_deg", 0.0).toDouble() * M_PI / 180.0;
-    tel->latitude_rad  = s.value("latitude_deg", 0.0).toDouble() * M_PI / 180.0;
+    tel->longitude_rad = s.value("longitude_deg", 0.0).toDouble() * D2R;
+    tel->latitude_rad  = s.value("latitude_deg", 0.0).toDouble() * D2R;
     tel->altitude_m    = s.value("altitude_m", 0.0).toDouble();
 
     // Station settings.
@@ -73,10 +75,14 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
 
     // Station element settings (overrides).
-    tel->station.element_amp_gain = s.value("element_amp_gain", -1e99).toDouble();
-    tel->station.element_amp_error = s.value("element_amp_error", -1e99).toDouble();
-    tel->station.element_phase_offset_rad = s.value("element_phase_offset_deg", -1e99).toDouble() * M_PI / 180.0;
-    tel->station.element_phase_error_rad = s.value("element_phase_error_deg", -1e99).toDouble() * M_PI / 180.0;
+    tel->station.element_amp_gain =
+            s.value("element_amp_gain", -1e99).toDouble();
+    tel->station.element_amp_error =
+            s.value("element_amp_error", -1e99).toDouble();
+    tel->station.element_phase_offset_rad =
+            s.value("element_phase_offset_deg", -1e99).toDouble() * D2R;
+    tel->station.element_phase_error_rad =
+            s.value("element_phase_error_deg", -1e99).toDouble() * D2R;
 
     // Receiver temperature.
     tel->station.receiver_temperature = s.value("receiver_temperature", -1.0).toDouble();

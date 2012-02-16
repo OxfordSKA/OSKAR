@@ -38,6 +38,7 @@
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_scale_real.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_mem_type_check.h"
 #include <cstdlib>
 
@@ -90,7 +91,7 @@ int oskar_Mem::append_raw(const void* from, int from_type, int from_location,
         int num_elements)
 {
     return oskar_mem_append_raw(this, from, from_type, from_location,
-    		num_elements);
+            num_elements);
 }
 
 int oskar_Mem::clear_contents()
@@ -130,6 +131,11 @@ int oskar_Mem::resize(int num_elements)
 int oskar_Mem::scale_real(double value)
 {
     return oskar_mem_scale_real(this, value);
+}
+
+int oskar_Mem::set_value_real(double value)
+{
+    return oskar_mem_set_value_real(this, value);
 }
 
 bool oskar_Mem::is_double() const

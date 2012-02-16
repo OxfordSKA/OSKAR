@@ -146,7 +146,7 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int append_raw(const void* from, int type, int from_location,
-    		int num_elements);
+            int num_elements);
 
     /**
      * @brief
@@ -233,6 +233,20 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int scale_real(double value);
+
+    /**
+     * @brief
+     * Sets the contents of the memory to a real number.
+     *
+     * @details
+     * This function sets all the elements in a block of memory to a real
+     * number.
+     *
+     * @param[in] value Value to set.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int set_value_real(double value);
 #endif
 
 #ifdef __cplusplus

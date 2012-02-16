@@ -26,51 +26,66 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_AS2HI_H_
-#define OSKAR_CUDA_AS2HI_H_
-
-/**
- * @file oskar_cuda_as2hi.h
- */
-
-#include "oskar_global.h"
+#include <cuda_runtime_api.h>
+#include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Computes antenna signals using CUDA.
- *
- * @details
- * Computes complex antenna signals using CUDA using a direct Fourier summation
- * over the sources.
- *
- * The function must be supplied with the antenna x- and y-positions, the
- * source amplitudes, longitude and latitude positions, and the wavenumber.
- *
- * The computed antenna signals are returned in the \p signals array, which
- * must be pre-sized to length 2*na. The values in the \p signals array
- * are alternate (real, imag) pairs for each antenna.
- *
- * @param[in] na The number of antennas.
- * @param[in] ax The antenna x-positions in metres.
- * @param[in] ay The antenna y-positions in metres.
- * @param[in] ns The number of source positions.
- * @param[in] samp The source amplitudes.
- * @param[in] slon The source longitude coordinates in radians.
- * @param[in] slat The source latitude coordinates in radians.
- * @param[in] k The wavenumber (rad / m).
- * @param[out] signals The computed antenna signals (see note, above).
- */
-OSKAR_EXPORT
-void oskar_cuda_as2hi_f(int na, const float* ax, const float* ay,
-        int ns, const float* samp, const float* slon, const float* slat,
-        float k, float* signals);
+int oskar_mem_set_value_real(oskar_Mem* mem, double val)
+{
+    int i, n, type, location;
+
+    /* Get the data type, location, and number of elements. */
+    type = mem->private_type;
+    location = mem->private_location;
+    n = mem->private_num_elements;
+
+    if (location == OSKAR_LOCATION_CPU)
+    {
+        if (type == OSKAR_DOUBLE)
+        {
+            double *v;
+            v = (double*)(mem->data);
+            for (i = 0; i < n; ++i) v[i] = val;
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            float *v;
+            v = (float*)(mem->data);
+            for (i = 0; i < n; ++i) v[i] = val;
+        }
+        else
+            return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    else if (location == OSKAR_LOCATION_GPU)
+    {
+        if (type == OSKAR_DOUBLE)
+        {
+            double *v;
+            v = (double*)(mem->data);
+            for (i = 0; i < n; ++i)
+                cudaMemcpy(v + i, &val, sizeof(double), cudaMemcpyHostToDevice);
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            float t, *v;
+            t = (float) val;
+            v = (float*)(mem->data);
+            for (i = 0; i < n; ++i)
+                cudaMemcpy(v + i, &t, sizeof(float), cudaMemcpyHostToDevice);
+        }
+        else
+            return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+    else
+        return OSKAR_ERR_BAD_LOCATION;
+
+    return OSKAR_SUCCESS;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // OSKAR_CUDA_AS2HI_H_

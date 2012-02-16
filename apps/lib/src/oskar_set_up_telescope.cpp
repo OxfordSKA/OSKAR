@@ -30,6 +30,7 @@
 #include "apps/lib/oskar_load_stations.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include "station/oskar_evaluate_station_receiver_noise_stddev.h"
 
 #include <cstdio>
@@ -95,6 +96,46 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].single_element_model = true; // FIXME set this via the settings file.
+    }
+
+    // Override station element amplitude gains if required.
+    if (settings->telescope.station.element_amp_gain > -1e10)
+    {
+        for (int i = 0; i < telescope->num_stations; ++i)
+        {
+            oskar_mem_set_value_real(&telescope->station[i].amp_gain,
+                    settings->telescope.station.element_amp_gain);
+        }
+    }
+
+    // Override station element amplitude errors if required.
+    if (settings->telescope.station.element_amp_error > -1e10)
+    {
+        for (int i = 0; i < telescope->num_stations; ++i)
+        {
+            oskar_mem_set_value_real(&telescope->station[i].amp_gain_error,
+                    settings->telescope.station.element_amp_error);
+        }
+    }
+
+    // Override station element phase offsets if required.
+    if (settings->telescope.station.element_phase_offset_rad > -1e10)
+    {
+        for (int i = 0; i < telescope->num_stations; ++i)
+        {
+            oskar_mem_set_value_real(&telescope->station[i].phase_offset,
+                    settings->telescope.station.element_phase_offset_rad);
+        }
+    }
+
+    // Override station element phase errors if required.
+    if (settings->telescope.station.element_phase_error_rad > -1e10)
+    {
+        for (int i = 0; i < telescope->num_stations; ++i)
+        {
+            oskar_mem_set_value_real(&telescope->station[i].phase_error,
+                    settings->telescope.station.element_phase_error_rad);
+        }
     }
 
     // Evaluate station receiver noise (if any specified in the settings)

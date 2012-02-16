@@ -105,7 +105,7 @@ void oskar_MainWindow::openSettings(QString filename)
     if (!filename.isEmpty())
     {
         settingsFile_ = filename;
-        model_->setSettingsFile(filename);
+        model_->loadSettingsFile(filename);
         setWindowTitle("OSKAR GUI [" + filename + "]");
 
         // Restore the expanded items.
@@ -130,11 +130,23 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
 
 void oskar_MainWindow::runButton()
 {
+    // Save settings if they are not already saved.
     if (settingsFile_.isEmpty())
     {
-        QMessageBox::critical(this, "Error",
-                "Must specify an OSKAR settings file.");
-        return;
+        // Get the name of the new settings file (return if empty).
+        settingsFile_ = QFileDialog::getSaveFileName(this, "Save Settings");
+        if (settingsFile_.isEmpty())
+            return;
+
+        // Remove any existing file with this name.
+        if (QFile::exists(settingsFile_))
+            QFile::remove(settingsFile_);
+
+        // Save the settings file.
+        view_->saveExpanded();
+        model_->saveSettingsFile(settingsFile_);
+        setWindowTitle("OSKAR GUI [" + settingsFile_ + "]");
+        view_->restoreExpanded();
     }
 
     // Get the (list of) output file names.

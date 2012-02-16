@@ -35,6 +35,7 @@
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_mem_add.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_add_real_gaussian_noise.h"
 #include "utility/oskar_mem_add_gaussian_noise.h"
@@ -496,6 +497,75 @@ void Test_Mem::test_scale_real()
             CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 * ((double)i + 1.4),
                     ((double4c*)(mem_cpu2.data))[i].d.y, 1e-12);
         }
+    }
+}
+
+void Test_Mem::test_set_value_real()
+{
+    int n = 100;
+
+    // Single precision real.
+    {
+        oskar_Mem mem(OSKAR_SINGLE, OSKAR_LOCATION_CPU, n);
+        int err = oskar_mem_set_value_real(&mem, 4.5);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)mem)[i], 4.5, 1e-6);
+        }
+    }
+
+    // Double precision real.
+    {
+        oskar_Mem mem(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+        int err = oskar_mem_set_value_real(&mem, 6.5);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)mem)[i], 6.5, 1e-10);
+        }
+    }
+
+    // Double precision complex.
+    {
+        oskar_Mem mem(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, n);
+        int err = oskar_mem_set_value_real(&mem, 6.5);
+        CPPUNIT_ASSERT(err != 0);
+    }
+
+    // Single precision real.
+    {
+        oskar_Mem mem(OSKAR_SINGLE, OSKAR_LOCATION_GPU, n);
+        int err = oskar_mem_set_value_real(&mem, 4.5);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)mem2)[i], 4.5, 1e-6);
+        }
+    }
+
+    // Double precision real.
+    {
+        oskar_Mem mem(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, n);
+        int err = oskar_mem_set_value_real(&mem, 6.5);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)mem2)[i], 6.5, 1e-10);
+        }
+    }
+
+    // Double precision complex.
+    {
+        oskar_Mem mem(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, n);
+        int err = oskar_mem_set_value_real(&mem, 6.5);
+        CPPUNIT_ASSERT(err != 0);
     }
 }
 

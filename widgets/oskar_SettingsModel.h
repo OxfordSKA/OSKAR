@@ -76,15 +76,16 @@ public:
             const QModelIndex& parent = QModelIndex()) const;
     QModelIndex index(const QString& key);
     QMap<int, QVariant> itemData (const QModelIndex& index) const;
+    void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& caption,
             int type, const QVariant& defaultValue = QVariant(),
             const QStringList& options = QStringList());
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    void saveSettingsFile(const QString& filename);
     void setCaption(const QString& key, const QString& caption);
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
-    void setSettingsFile(const QString& filename);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
 
@@ -96,6 +97,7 @@ private:
             const QModelIndex& parent = QModelIndex()) const;
     oskar_SettingsItem* getItem(const QModelIndex& index) const;
     void loadFromParentIndex(const QModelIndex& parent);
+    void saveFromParentIndex(const QModelIndex& parent);
 
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;

@@ -29,6 +29,7 @@ set(utility_SRC
     src/oskar_mem_insert.c
     src/oskar_mem_realloc.c
     src/oskar_mem_scale_real.cu
+    src/oskar_mem_set_value_real.c
     src/oskar_Mem.cpp
     src/oskar_string_to_array.c
     src/oskar_work_init.c
