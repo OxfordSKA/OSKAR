@@ -170,7 +170,7 @@ void Test_curand::test_multi_device()
     {
         int thread_id = omp_get_thread_num();
         int error = (int)cudaSetDevice(use_device[thread_id]);
-        CPPUNIT_ASSERT_MESSAGE(cudaGetErrorString((cudaError_t)error), error == 0);
+        CPPUNIT_ASSERT_MESSAGE(cudaGetErrorString((cudaError_t)error), error == OSKAR_SUCCESS);
 
         int device_id = 0;
         cudaGetDevice(&device_id);
@@ -186,10 +186,10 @@ void Test_curand::test_multi_device()
         error = d_states.init(seed);
         CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
-        int num_iter = 1;
+        int num_iter = 2;
         int num_blocks  = 1;
-        int num_threads = 40;
-        int num_per_thread = 1;
+        int num_threads = 2;
+        int num_per_thread = 2;
         int num_values = num_blocks * num_threads * num_per_thread;
         oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);
 

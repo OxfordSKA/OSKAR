@@ -31,6 +31,7 @@
 #include "utility/oskar_device_curand_state_init.h"
 #include <cstdlib>
 #include <cuda.h>
+#include <cstdio>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +39,9 @@ extern "C" {
 
 oskar_Device_curand_state::oskar_Device_curand_state(int num_states)
 {
-    if (cudaMalloc((void**)&state, num_states * sizeof(curandState)) != CUDA_SUCCESS)
+    int err = cudaMalloc((void**)&(this->state), num_states * sizeof(curandState));
+    this->num_states = num_states;
+    if (err != CUDA_SUCCESS)
         throw "Error allocating memory oskar_Device_state::curand_state.";
 }
 
@@ -49,8 +52,8 @@ oskar_Device_curand_state::~oskar_Device_curand_state()
 
 int oskar_Device_curand_state::init(int seed, int offset, int use_device_offset)
 {
-    return oskar_device_curand_state_init(state, num_states, seed, offset,
-            use_device_offset);
+    return oskar_device_curand_state_init(this->state, this->num_states, 
+        seed, offset, use_device_offset);
 }
 
 
