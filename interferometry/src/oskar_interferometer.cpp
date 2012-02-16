@@ -86,6 +86,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     oskar_Work work(type, OSKAR_LOCATION_GPU);
 
     // Initialise the random number generator.
+    // Note: This is reset to the same sequence per sky chunk and per channel.
+    // This is required so that when splitting the sky into chunks or channels
+    // antennas still have the same error value for the given time and seed.
     oskar_Device_curand_state curand_state(telescope->max_station_size);
     int seed = 0; // TODO get this from the settings file....
     curand_state.init(seed);
