@@ -27,6 +27,7 @@
  */
 
 #include "widgets/oskar_SettingsView.h"
+#include "widgets/oskar_SettingsModel.h"
 
 oskar_SettingsView::oskar_SettingsView(QWidget* parent)
 : QTreeView(parent)
@@ -37,7 +38,45 @@ oskar_SettingsView::oskar_SettingsView(QWidget* parent)
     setUniformRowHeights(true);
 }
 
+void oskar_SettingsView::restoreExpanded()
+{
+    QSettings settings;
+    QStringList expanded = settings.value("settings_view/expanded_items").
+            toStringList();
+    saveRestoreExpanded(QModelIndex(), expanded, 1);
+}
+
+void oskar_SettingsView::saveExpanded()
+{
+    QSettings settings;
+    QStringList expanded;
+    saveRestoreExpanded(QModelIndex(), expanded, 0);
+    settings.setValue("settings_view/expanded_items", expanded);
+}
+
 void oskar_SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)
 {
     resizeColumnToContents(0);
+}
+
+void oskar_SettingsView::saveRestoreExpanded(const QModelIndex& parent,
+        QStringList& list, int restore)
+{
+    for (int i = 0; i < model()->rowCount(parent); ++i)
+    {
+        QModelIndex idx = model()->index(i, 0, parent);
+        QString key = idx.data(oskar_SettingsModel::KeyRole).toString();
+        if (restore)
+        {
+            if (list.contains(key)) expand(idx);
+        }
+        else
+        {
+            if (isExpanded(idx)) list.append(key);
+        }
+
+        // Recursion.
+        if (model()->rowCount(idx) > 0)
+            saveRestoreExpanded(idx, list, restore);
+    }
 }

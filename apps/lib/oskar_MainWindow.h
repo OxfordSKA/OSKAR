@@ -41,6 +41,7 @@ class QMenu;
 class QMenuBar;
 class QVBoxLayout;
 class QWidget;
+class QModelIndex;
 class QSortFilterProxyModel;
 
 class oskar_MainWindow : public QMainWindow

@@ -109,8 +109,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/latitude_deg", "Latitude (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/altitude_m", "Altitude (m)", oskar_SettingsItem::DOUBLE);
     setCaption("telescope/station", "Station settings");
-    registerSetting("telescope/station/enable_beam", "Enable", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/station/normalise_beam", "Normalise", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/enable_beam", "Enable station beam", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/normalise_beam", "Normalise station beam", oskar_SettingsItem::BOOL);
     registerSetting("telescope/station/element_amp_gain", "Element amplitude gain", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_amp_error", "Element amplitude standard deviation", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_phase_offset_deg", "Element phase offset (deg)", oskar_SettingsItem::DOUBLE);

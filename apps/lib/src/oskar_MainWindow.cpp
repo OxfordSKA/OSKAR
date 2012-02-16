@@ -42,6 +42,7 @@
 #include <QtGui/QMenuBar>
 #include <QtGui/QMessageBox>
 #include <QtGui/QVBoxLayout>
+#include <QtCore/QModelIndex>
 
 oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 : QMainWindow(parent)
@@ -59,7 +60,8 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Create and set up the settings view.
     view_ = new oskar_SettingsView(widget_);
-    oskar_SettingsDelegate* delegate = new oskar_SettingsDelegate(view_, widget_);
+    oskar_SettingsDelegate* delegate = new oskar_SettingsDelegate(view_,
+            widget_);
     view_->setModel(modelProxy_);
     view_->setItemDelegate(delegate);
     view_->resizeColumnToContents(0);
@@ -84,8 +86,12 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Load the settings.
     QSettings settings;
+    QApplication::processEvents();
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
     restoreState(settings.value("main_window/state").toByteArray());
+
+    // Restore the expanded items.
+    view_->restoreExpanded();
 }
 
 void oskar_MainWindow::openSettings(QString filename)
@@ -101,6 +107,9 @@ void oskar_MainWindow::openSettings(QString filename)
         settingsFile_ = filename;
         model_->setSettingsFile(filename);
         setWindowTitle("OSKAR GUI [" + filename + "]");
+
+        // Restore the expanded items.
+        view_->restoreExpanded();
     }
 }
 
@@ -108,6 +117,9 @@ void oskar_MainWindow::openSettings(QString filename)
 
 void oskar_MainWindow::closeEvent(QCloseEvent* event)
 {
+    // Save the state of the tree view.
+    view_->saveExpanded();
+
     QSettings settings;
     settings.setValue("main_window/geometry", saveGeometry());
     settings.setValue("main_window/state", saveState());

@@ -41,9 +41,15 @@ class oskar_SettingsView : public QTreeView
 
 public:
     oskar_SettingsView(QWidget* parent = 0);
+    void restoreExpanded();
+    void saveExpanded();
 
 public slots:
     void resizeAfterExpand(const QModelIndex& index);
+
+private:
+    void saveRestoreExpanded(const QModelIndex& parent, QStringList& list,
+            int restore);
 };
 
 #endif /* OSKAR_SETTINGS_VIEW_H_ */
