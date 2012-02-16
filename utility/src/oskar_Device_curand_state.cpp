@@ -30,6 +30,7 @@
 #include "utility/oskar_Device_curand_state.h"
 #include "utility/oskar_device_curand_state_init.h"
 #include <cstdlib>
+#include <cuda.h>
 
 #ifdef __cplusplus
 extern "C" {
