@@ -35,6 +35,7 @@
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "station/oskar_evaluate_jones_E.h"
+#include "utility/oskar_Device_curand_state.h"
 #include <cstdio>
 
 extern "C"
@@ -42,7 +43,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         const oskar_SettingsTime* times, double frequency)
 {
-    int err = 0;
+    int err = OSKAR_SUCCESS;
 
     // Copy telescope model and sky model for frequency scaling.
     oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
@@ -68,6 +69,11 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
     oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Work work(type, OSKAR_LOCATION_GPU);
+
+    // Initialise the random number generator.
+    oskar_Device_curand_state curand_state(telescope->max_station_size);
+    int seed = 0; // TODO get this from the settings file....
+    curand_state.init(seed);
 
     // Calculate time increments.
     int num_vis_dumps        = times->num_vis_dumps;
@@ -113,7 +119,8 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, &sky, &tel_gpu, gast, &work);
+            err = oskar_evaluate_jones_E(&E, &sky, &tel_gpu, gast, &work,
+                    &curand_state);
             if (err) return err;
 
             for (int k = 0; k < num_fringe_ave; ++k)
@@ -147,5 +154,5 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
         err = vis_amp->insert(&vis, j * n_baselines); if (err) return err;
     }
 
-    return 0;
+    return OSKAR_SUCCESS;
 }

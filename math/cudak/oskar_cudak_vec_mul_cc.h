@@ -44,9 +44,9 @@
  * This CUDA kernel multiplies the elements of two complex vectors together
  * using the graphics card.
  *
- * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
+ * @param[in]  n Number of elements in all vectors.
+ * @param[in]  a First input vector.
+ * @param[in]  b Second input vector.
  * @param[out] c Output vector.
  */
 __global__
@@ -62,9 +62,9 @@ void oskar_cudak_vec_mul_cc_f(int n, const float2* a, const float2* b,
  * This CUDA kernel multiplies the elements of two complex vectors together
  * using the graphics card.
  *
- * @param[in] n Number of elements in all vectors.
- * @param[in] a First input vector.
- * @param[in] b Second input vector.
+ * @param[in]  n Number of elements in all vectors.
+ * @param[in]  a First input vector.
+ * @param[in]  b Second input vector.
  * @param[out] c Output vector.
  */
 __global__

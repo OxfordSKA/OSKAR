@@ -38,6 +38,7 @@
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
 #include "utility/oskar_Work.h"
+#include "utility/oskar_Device_curand_state.h"
 
 /**
  * @brief Evaluates a set of E-Jones matrices for a number of stations
@@ -48,11 +49,14 @@
  * the memory passed to and from this function must be allocated on the
  * GPU.
  *
- * @param[out] E         Output set of Jones matrices.
- * @param[in]  sky       Input sky model.
- * @param[in]  telescope Input telescope model.
- * @param[in]  gast      The Greenwich Apparent Sidereal Time, in radians.
- * @param[in]  work      oskar_Mem structure to holding work arrays.
+ * @param[out] E            Output set of Jones matrices.
+ * @param[in]  sky          Input sky model.
+ * @param[in]  telescope    Input telescope model.
+ * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in]  work         oskar_Mem structure to holding work arrays.
+ * @param[in]  curand_state Structure holding curand states.
+ *
+ * @return An error code.
  */
 #ifdef __cplusplus
 extern "C"
@@ -60,6 +64,6 @@ extern "C"
 OSKAR_EXPORT
 int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, const double gast,
-        oskar_Work* work);
+        oskar_Work* work, oskar_Device_curand_state* curand_state);
 
 #endif /* OSKAR_EVALUATE_JONES_E_H_ */

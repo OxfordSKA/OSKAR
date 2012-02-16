@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
-#define TEST_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
+#ifndef TEST_ELEMENT_WEIGHTS_ERRORS_H_
+#define TEST_ELEMENT_WEIGHTS_ERRORS_H_
 
 /**
- * @file Test_evaluate_element_weights_errors.h
+ * @file Test_element_weights_errors.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,19 +42,21 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class Test_evaluate_element_weights_errors : public CppUnit::TestFixture
+class Test_element_weights_errors : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(Test_evaluate_element_weights_errors);
-        CPPUNIT_TEST(test);
+        CPPUNIT_TEST_SUITE(Test_element_weights_errors);
+        CPPUNIT_TEST(test_evaluate);
+        CPPUNIT_TEST(test_apply);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
-        void test();
+        void test_evaluate();
+        void test_apply();
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_evaluate_element_weights_errors);
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_element_weights_errors);
 
-#endif // TEST_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
+#endif // TEST_ELEMENT_WEIGHTS_ERRORS_H_

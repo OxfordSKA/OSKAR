@@ -36,6 +36,7 @@
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 #include "station/oskar_StationModel.h"
+#include "utility/oskar_Device_curand_state.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,18 +65,19 @@ extern "C" {
  * - Horizontal n (\p hor_n) coordinates are used to remove sources below the
  * horizon (i.e. where n < 0).
  *
- * @param[out] beam         Array of station complex beam amplitudes returned.
- * @param[in]  station      Station model structure.
- * @param[in]  hor_l_beam   Beam phase centre horizontal l, in radians.
- * @param[in]  hor_m_beam   Beam phase centre horizontal m, in radians.
- * @param[in]  hor_l        Array of horizontal l directions for which the beam
- *                          should be evaluated, in radians.
- * @param[in]  hor_m        Array of horizontal m directions for which the beam
- *                          should be evaluated, in radians.
- * @param[in]  hor_n        Array of horizontal n directions for which the beam
- *                          should be evaluated, in radians.
+ * @param[out] beam          Array of station complex beam amplitudes returned.
+ * @param[in]  station       Station model structure.
+ * @param[in]  hor_l_beam    Beam phase centre horizontal l, in radians.
+ * @param[in]  hor_m_beam    Beam phase centre horizontal m, in radians.
+ * @param[in]  hor_l         Array of horizontal l directions for which the beam
+ *                           should be evaluated, in radians.
+ * @param[in]  hor_m         Array of horizontal m directions for which the beam
+ *                           should be evaluated, in radians.
+ * @param[in]  hor_n         Array of horizontal n directions for which the beam
+ *                           should be evaluated, in radians.
  *
- * @param[in]  work_weights Work buffer used to hold DFT weights.
+ * @param[in]  work_weights  Work buffer used to hold DFT weights.
+ * @param[in]  curand_states Structure holding a set of curand states.
  *
  * @return An error code.
  */
@@ -83,7 +85,8 @@ OSKAR_EXPORT
 int oskar_evaluate_station_beam(oskar_Mem* beam,
         const oskar_StationModel* station, const double hor_l_beam,
         const double hor_m_beam, const oskar_Mem* hor_l,
-        const oskar_Mem* hor_m, const oskar_Mem* hor_n, oskar_Mem* weights_work);
+        const oskar_Mem* hor_m, const oskar_Mem* hor_n, oskar_Mem* weights_work,
+        oskar_Device_curand_state* curand_states);
 
 #ifdef __cplusplus
 }

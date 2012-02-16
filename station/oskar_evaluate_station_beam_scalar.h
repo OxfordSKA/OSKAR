@@ -36,6 +36,7 @@
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 #include "station/oskar_StationModel.h"
+#include "utility/oskar_Device_curand_state.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,7 +80,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         const oskar_StationModel* station, const double l_beam,
         const double m_beam, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* work_weights,
-        oskar_Mem* work_weights_error);
+        oskar_Mem* work_weights_error, oskar_Device_curand_state* curand_state);
 
 #ifdef __cplusplus
 }

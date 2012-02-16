@@ -66,7 +66,9 @@ struct oskar_Device_curand_state
      */
     int init(int seed, int offset = 0, int use_device_offset = OSKAR_FALSE);
 
-    operator const curandState*() const { return (const curandState*)state; }
+    /* Convenience pointer casts. */
+    operator const curandState*() const { return state; }
+    operator curandState*() { return state; }
 #endif
 };
 typedef struct oskar_Device_curand_state oskar_Device_curand_state;

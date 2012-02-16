@@ -42,7 +42,8 @@
 extern "C"
 int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
         const double l_beam, const double m_beam, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* weights)
+        const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* weights,
+        oskar_Device_curand_state* curand_states)
 {
     if (E == NULL || station == NULL || l == NULL || m == NULL || n == NULL ||
             weights == NULL)
@@ -99,7 +100,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     if (station->element_pattern == NULL && E->is_scalar())
     {
         oskar_evaluate_station_beam_scalar(E, station, l_beam, m_beam,
-                l, m, n, weights, &weights_error);
+                l, m, n, weights, &weights_error, curand_states);
     }
 
     // Make use of element pattern data.

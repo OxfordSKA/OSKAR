@@ -98,10 +98,16 @@ void Test_evaluate_jones_E::evaluate_e()
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
         error = telescope_gpu.station[i].multiply_by_wavenumber(frequency);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+        telescope_gpu.station[i].apply_antenna_errors = OSKAR_FALSE;
     }
     telescope_gpu.identical_stations = OSKAR_TRUE;
     telescope_gpu.use_common_sky = OSKAR_TRUE;
     // Other fields of the telescope structure are not used for E?!
+
+    // Initialise the random number generator.
+    oskar_Device_curand_state curand_state(num_antennas);
+    int seed = 0; // TODO get this from the settings file....
+    curand_state.init(seed);
 
     // Construct a sky model.
     int num_sources = 0;
@@ -140,7 +146,8 @@ void Test_evaluate_jones_E::evaluate_e()
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX, work_gpu.complex.type());
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, work_gpu.matrix.type());
 
-     error = oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast, &work_gpu);
+    error = oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast,
+            &work_gpu, &curand_state);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy the Jones matrix back to the CPU.

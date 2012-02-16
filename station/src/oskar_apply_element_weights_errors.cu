@@ -27,29 +27,53 @@
  */
 
 
-#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
-#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
-
-/**
- * @file oskar_evaluate_element_weights_errors.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
-#include <curand_kernel.h>
+#include "station/oskar_apply_element_weights_errors.h"
+#include "math/cudak/oskar_cudak_vec_mul_cc.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
-        const oskar_Mem* gain, const oskar_Mem* gain_error,
-        const oskar_Mem* phase, const oskar_Mem* phase_error,
-        curandState* states);
+int oskar_apply_element_weights_errors(oskar_Mem* weights, int num_weights,
+        oskar_Mem* weights_error)
+{
+    if (weights == NULL || weights_error == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (weights->location() != OSKAR_LOCATION_GPU ||
+            weights_error->location() != OSKAR_LOCATION_GPU)
+    {
+        return OSKAR_ERR_BAD_LOCATION;
+    }
+
+    int num_threads = 128; /* FIXME work out what size this should be...? */
+    int num_blocks = (num_weights + num_threads - 1) / num_threads;
+
+
+    if (weights->type() == OSKAR_DOUBLE_COMPLEX &&
+            weights_error->type() == OSKAR_DOUBLE_COMPLEX)
+    {
+        oskar_cudak_vec_mul_cc_d
+            OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_weights, *weights, *weights_error, *weights);
+    }
+    else if (weights->type() == OSKAR_SINGLE_COMPLEX &&
+            weights_error->type() == OSKAR_SINGLE_COMPLEX)
+    {
+        oskar_cudak_vec_mul_cc_f
+            OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_weights, *weights, *weights_error, *weights);
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+
+    return OSKAR_SUCCESS;
+}
+
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_ */

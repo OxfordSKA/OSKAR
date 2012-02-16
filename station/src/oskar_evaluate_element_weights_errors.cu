@@ -29,7 +29,6 @@
 
 #include "station/oskar_evaluate_element_weights_errors.h"
 #include "station/cudak/oskar_cudak_evaluate_element_weights_errors.h"
-#include "math/cudak/oskar_cudak_curand_init.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,12 +39,13 @@ extern "C" {
 
 int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
-        const oskar_Mem* phase, const oskar_Mem* phase_error)
+        const oskar_Mem* phase, const oskar_Mem* phase_error,
+        curandState* states)
 {
     int error = OSKAR_SUCCESS;
 
     if (errors == NULL || gain == NULL || gain_error == NULL ||
-            phase == NULL || phase_error == NULL)
+            phase == NULL || phase_error == NULL || states == NULL)
     {
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
@@ -68,22 +68,8 @@ int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-
-    unsigned long long seed = 1234; /* FIXME seed properly */
-    unsigned long long offset = 0;
-
     int num_threads = 128; /* FIXME work out what size this should be...? */
     int num_blocks = (num_elements + num_threads - 1) / num_threads;
-
-    /* FIXME don't allocate this each time. */
-    curandState* d_states;
-    cudaMalloc((void**)&d_states, num_elements * sizeof(curandState));
-
-    int device_offset = 0;
-    /* Initialise the random number generator */
-    oskar_cudak_curand_init
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_states, seed, offset, device_offset);
 
     /* Generate weights errors */
     /* Double precision */
@@ -94,7 +80,7 @@ int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
             OSKAR_CUDAK_CONF(num_blocks, num_threads)
             ((double2*)errors->data, num_elements, (double*)gain->data,
                     (double*)gain_error->data, (double*)phase->data,
-                    (double*)phase_error->data, d_states);
+                    (double*)phase_error->data, states);
     }
     /* Single precision */
     else if (errors->is_double() && gain->is_double() && gain_error->is_double() &&
@@ -104,15 +90,12 @@ int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
             OSKAR_CUDAK_CONF(num_blocks, num_threads)
             ((float2*)errors->data, num_elements, (float*)gain->data,
                     (float*)gain_error->data, (float*)phase->data,
-                    (float*)phase_error->data, d_states);
+                    (float*)phase_error->data, states);
     }
     else
     {
         error = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    /* Cleanup */
-    cudaFree(d_states);
 
     return error;
 }

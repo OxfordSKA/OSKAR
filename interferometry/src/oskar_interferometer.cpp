@@ -87,7 +87,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
 
     // Initialise the random number generator.
     oskar_Device_curand_state curand_state(telescope->max_station_size);
-    int seed = 0;   // TODO get these from the settings file.
+    int seed = 0; // TODO get this from the settings file....
     curand_state.init(seed);
 
     // Get time increments.
@@ -155,7 +155,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             if (!tel_gpu.disable_e_jones)
             {
                 err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
-                        &work);
+                        &work, &curand_state);
                 if (err) return err;
 
                 // Join Jones matrices (R = E * R).

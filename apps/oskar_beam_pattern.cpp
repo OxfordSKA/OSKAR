@@ -103,6 +103,11 @@ int main(int argc, char** argv)
         oskar_sph_from_lm_d(num_pixels, ra0, dec0, l_cpu, m_cpu, RA_cpu, Dec_cpu);
     }
 
+    // Initialise the random number generator.
+    oskar_Device_curand_state curand_state(tel_cpu->max_station_size);
+    int seed = 0; // TODO get this from the settings file....
+    curand_state.init(seed);
+
     // Get time data.
     int num_vis_dumps        = times->num_vis_dumps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
@@ -168,7 +173,7 @@ int main(int argc, char** argv)
 
             // Evaluate the station beam.
             err = oskar_evaluate_station_beam(&beam_pattern, station, beam_l,
-                    beam_m, &l, &m, &n, &weights);
+                    beam_m, &l, &m, &n, &weights, &curand_state);
             if (err) oskar_exit(err);
 
             // Copy beam pattern back to CPU.

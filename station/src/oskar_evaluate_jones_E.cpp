@@ -49,7 +49,7 @@ extern "C"
 #endif
 int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, const double gast,
-        oskar_Work* work)
+        oskar_Work* work, oskar_Device_curand_state* curand_state)
 {
     int error = 0;
 
@@ -113,7 +113,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         error = oskar_jones_get_station_pointer(&E0, E, 0);
         if (error) return error;
         error = oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m,
-                &hor_l, &hor_m, &hor_n, weights);
+                &hor_l, &hor_m, &hor_n, weights, curand_state);
         if (error) return error;
 
         // Copy E for station 0 into memory for other stations.
@@ -148,7 +148,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station, beam_l,
-                        beam_m, &hor_l, &hor_m, &hor_n, weights);
+                        beam_m, &hor_l, &hor_m, &hor_n, weights, curand_state);
                 if (error) return error;
             }
         }
@@ -169,7 +169,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station,
-                        beam_l, beam_m, &hor_l, &hor_m,  &hor_n, weights);
+                        beam_l, beam_m, &hor_l, &hor_m,  &hor_n, weights,
+                        curand_state);
                 if (error) return error;
             }
         }
