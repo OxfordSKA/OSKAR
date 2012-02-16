@@ -9,7 +9,6 @@ add_subdirectory(cudak)
 
 # Add the source files in this directory.
 set(math_SRC
-    src/oskar_allocate_curand_states.cu
     src/oskar_angular_distance.c
     src/oskar_cuda_dft_c2r_2d.cu
     src/oskar_cuda_jones_mul_c2.cu

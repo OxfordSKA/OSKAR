@@ -38,6 +38,7 @@
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "station/oskar_evaluate_jones_E.h"
+#include "utility/oskar_Device_curand_state.h"
 #include <cstdio>
 
 extern "C"
@@ -83,6 +84,11 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Work work(type, OSKAR_LOCATION_GPU);
+
+    // Initialise the random number generator.
+    oskar_Device_curand_state curand_state(telescope->max_station_size);
+    int seed = 0;   // TODO get these from the settings file.
+    curand_state.init(seed);
 
     // Get time increments.
     int num_vis_dumps        = times->num_vis_dumps;
@@ -148,7 +154,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             // Evaluate station beam (Jones E).
             if (!tel_gpu.disable_e_jones)
             {
-                err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work);
+                err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
+                        &work);
                 if (err) return err;
 
                 // Join Jones matrices (R = E * R).
@@ -171,7 +178,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
                 if (err) return err;
 
                 // Join Jones matrices (J = K * R).
-                err = oskar_jones_join(&J, &K, &R); if (err) return err;
+                err = oskar_jones_join(&J, &K, &R);
+                if (err) return err;
 
                 // Produce visibilities.
                 err = oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v);

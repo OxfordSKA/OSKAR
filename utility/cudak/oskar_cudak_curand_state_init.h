@@ -27,26 +27,20 @@
  */
 
 
-#ifndef OSKAR_ALLOCATE_CURAND_STATES_H_
-#define OSKAR_ALLOCATE_CURAND_STATES_H_
+#ifndef OSKAR_CUDAK_CURAND_STATE_INIT_H_
+#define OSKAR_CUDAK_CURAND_STATE_INIT_H_
 
 /**
- * @file oskar_allocate_curand_states.h
+ * @file oskar_cudak_curand_state_init.h
  */
 
 #include "oskar_global.h"
+#include <cuda.h>
 #include <curand_kernel.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+__global__
+void oskar_cudak_curand_state_init(curandState* state, unsigned long long seed,
+        unsigned long long offset, unsigned long long device_offset);
 
-OSKAR_EXPORT
-int oskar_allocate_curand_states(curandState* d_states, int num_states,
-        int seed, int offset);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_ALLOCATE_CURAND_STATES_H_ */
+#endif /* OSKAR_CUDAK_CURAND_INIT_H_ */

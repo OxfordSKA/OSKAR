@@ -27,20 +27,32 @@
  */
 
 
-#ifndef OSKAR_CUDAK_CURAND_INIT_H_
-#define OSKAR_CUDAK_CURAND_INIT_H_
+#include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_device_curand_state_init.h"
+#include <cstdlib>
 
-/**
- * @file oskar_cudak_curand_init.h
- */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "oskar_global.h"
-#include <cuda.h>
-#include <curand_kernel.h>
+oskar_Device_curand_state::oskar_Device_curand_state(int num_states)
+{
+    if (cudaMalloc((void**)&state, num_states * sizeof(curandState)) != CUDA_SUCCESS)
+        throw "Error allocating memory oskar_Device_state::curand_state.";
+}
 
-__global__
-void oskar_cudak_curand_init(curandState* state, unsigned long long seed,
-        unsigned long long offset, unsigned long long device_offset);
+oskar_Device_curand_state::~oskar_Device_curand_state()
+{
+    if (state != NULL) cudaFree(state);
+}
+
+int oskar_Device_curand_state::init(int seed, int offset, int use_device_offset)
+{
+    return oskar_device_curand_state_init(state, num_states, seed, offset,
+            use_device_offset);
+}
 
 
-#endif /* OSKAR_CUDAK_CURAND_INIT_H_ */
+#ifdef __cplusplus
+}
+#endif

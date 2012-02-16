@@ -43,6 +43,7 @@
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "sky/oskar_SkyModel.h"
+#include "sky/oskar_SettingsSky.h"
 #include "sky/oskar_sky_model_split.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"

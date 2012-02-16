@@ -36,6 +36,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <vector>
+#include <climits>
+#include <algorithm>
 
 using namespace std;
 
@@ -67,6 +69,14 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         fprintf(stderr, "== ERROR: Failed to load station geometry (%s).\n",
                 oskar_get_error_string(err));
         return NULL;
+    }
+
+    // Find the maximum station size.
+    telescope->max_station_size = -INT_MAX;
+    for (int i = 0; i < telescope->num_stations; ++i)
+    {
+        telescope->max_station_size = max(telescope->station[i].num_elements,
+                telescope->max_station_size);
     }
 
     // Set phase centre.

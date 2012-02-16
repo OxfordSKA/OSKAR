@@ -27,38 +27,49 @@
  */
 
 
-#include "math/oskar_allocate_curand_states.h"
-#include "math/cudak/oskar_cudak_curand_init.h"
+#ifndef OSKAR_DEVICE_CURAND_STATE_H_
+#define OSKAR_DEVICE_CURAND_STATE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file oskar_Device_curand_state.h
+ */
 
+#include "oskar_global.h"
+#include <curand.h>
+#include <curand_kernel.h>
 
-int oskar_allocate_curand_states(curandState* d_states, int num_states,
-        int seed, int offset)
+struct oskar_Device_curand_state
 {
-    if (d_states == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    int error = OSKAR_SUCCESS;
-    int num_threads = 128;
-    int num_blocks = (num_states + num_threads - 1) / num_threads;
-
-    int device_id = 0;
-    cudaGetDevice(&device_id);
-    int device_offset = 0;//device_id * num_states;
-    // NOTE Device offset should be zero as different GPUs process different
-    // chunks but same time and stations so need the same set of random numbers.
-
-    oskar_cudak_curand_init
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_states, seed, offset, device_offset);
-    error = cudaPeekAtLastError();
-
-    return error;
-}
+    int num_states;     /**< Number of curand states */
+    curandState* state; /**< Array of curand states */
 
 #ifdef __cplusplus
-}
+    /**
+     * @brief Constructor
+     *
+     * @param[in] num_states Number of curand states to allocate.
+     */
+    oskar_Device_curand_state(int num_states);
+
+    /**
+     * @brief Destructor
+     */
+    ~oskar_Device_curand_state();
+
+    /**
+     * @brief Initialise curand states.
+     *
+     * @param[in] seed
+     * @param[in] offset
+     *
+     * @return An error code.
+     */
+    int init(int seed, int offset = 0, int use_device_offset = OSKAR_FALSE);
+
+    operator const curandState*() const { return (const curandState*)state; }
 #endif
+};
+typedef struct oskar_Device_curand_state oskar_Device_curand_state;
+
+
+#endif /* OSKAR_DEVICE_CURAND_STATE_H_ */

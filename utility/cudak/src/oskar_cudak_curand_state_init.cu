@@ -27,10 +27,10 @@
  */
 
 
-#include "math/cudak/oskar_cudak_curand_init.h"
+#include "utility/cudak/oskar_cudak_curand_state_init.h"
 
 __global__
-void oskar_cudak_curand_init(curandState* state, unsigned long long seed,
+void oskar_cudak_curand_state_init(curandState* state, unsigned long long seed,
         unsigned long long offset, unsigned long long device_offset)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;

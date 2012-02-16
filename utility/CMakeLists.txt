@@ -2,11 +2,15 @@
 # src/utility/CMakeLists.txt
 #
 
+add_subdirectory(cudak)
+
 # ==== Utility library source
 set(utility_SRC
     src/oskar_blank_parentheses.c
     src/oskar_cuda_device_info.cu
     src/oskar_cuda_memory.cu
+    src/oskar_device_curand_state_init.cu
+    src/oskar_Device_curand_state.cpp
     src/oskar_exit.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
@@ -30,6 +34,9 @@ set(utility_SRC
     src/oskar_work_init.c
     src/oskar_Work.cpp
 )
+foreach (file ${utility_cuda_kernels_SRC})
+    list(APPEND utility_SRC cudak/${file})
+endforeach ()
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 
 add_subdirectory(matlab)

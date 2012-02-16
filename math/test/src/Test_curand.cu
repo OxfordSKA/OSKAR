@@ -30,20 +30,24 @@
 #include "math/test/Test_curand.h"
 
 #include "oskar_global.h"
-#include "math/cudak/oskar_cudak_curand_init.h"
+#include "utility/cudak/oskar_cudak_curand_state_init.h"
 #include "math/test/cudak/test_curand_generate.h"
-#include "math/oskar_allocate_curand_states.h"
+#include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_device_curand_state_init.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_Mem.h"
 
 #include <cuda.h>
 #include <curand_kernel.h>
+#include <thrust/device_vector.h>
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
+#include <algorithm>
 #include <omp.h>
+
+using namespace std;
 
 void Test_curand::test()
 {
@@ -80,7 +84,7 @@ void Test_curand::test()
     }
 
     // Initialise the random number generator.
-    oskar_cudak_curand_init
+    oskar_cudak_curand_state_init
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
         (d_states, seed, offset, device_offset);
 
@@ -121,9 +125,9 @@ void Test_curand::test_state_allocation()
         int offset = 0;
         int seed = 0;
         int num_states = (int)2e5;
-        curandState* d_states;
-        cudaMalloc(&d_states, num_states * sizeof(curandState));
-        int error = oskar_allocate_curand_states(d_states, num_states, seed, offset);
+        thrust::device_vector<curandState> d_states(num_states);
+        int error = oskar_device_curand_state_init(thrust::raw_pointer_cast(&d_states[0]),
+                num_states, seed, offset, OSKAR_FALSE);
         CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
         int num_iter = 1;
@@ -136,8 +140,9 @@ void Test_curand::test_state_allocation()
         for (int i = 0; i < num_iter; ++i)
         {
             test_curand_generate
-            OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (d_values, num_values, num_per_thread, d_states);
+                OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                (d_values, num_values, num_per_thread,
+                        thrust::raw_pointer_cast(&d_states[0]));
 
             oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
 
@@ -150,7 +155,6 @@ void Test_curand::test_state_allocation()
             }
         }
         if (file) fclose(file);
-        cudaFree(d_states);
     }
 }
 
@@ -176,12 +180,10 @@ void Test_curand::test_multi_device()
         FILE* file = NULL;
 
         // Allocate a number of curand states.
-        int offset = 0;
         int seed = 0;
         int num_states = (int)2e5;
-        curandState* d_states;
-        cudaMalloc(&d_states, num_states * sizeof(curandState));
-        error = oskar_allocate_curand_states(d_states, num_states, seed, offset);
+        oskar_Device_curand_state d_states(num_states);
+        error = d_states.init(seed);
         CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
         int num_iter = 1;
@@ -196,8 +198,8 @@ void Test_curand::test_multi_device()
         for (int i = 0; i < num_iter; ++i)
         {
             test_curand_generate
-            OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (d_values, num_values, num_per_thread, d_states);
+                OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                (d_values, num_values, num_per_thread, d_states.state);
 
             oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
 
@@ -210,7 +212,6 @@ void Test_curand::test_multi_device()
             }
         }
         fclose(file);
-        cudaFree(d_states);
     }
 }
 
