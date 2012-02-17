@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAF_DIERCKX_FPBISP_H_
-#define OSKAR_CUDAF_DIERCKX_FPBISP_H_
+#ifndef OSKAR_CUDAF_DIERCKX_FPBISP1_H_
+#define OSKAR_CUDAF_DIERCKX_FPBISP1_H_
 
 /**
- * @file oskar_cudaf_dierckx_fpbisp.h
+ * @file oskar_cudaf_dierckx_fpbisp1.h
  */
 
 #include "oskar_global.h"
@@ -46,65 +46,48 @@
  */
 __device__ void oskar_cudaf_dierckx_fpbisp1_f(const float *tx, const int nx,
         const float *ty, const int ny, const float *c, const int kx,
-        const int ky, const float x, const float y, float *z)
+        const int ky, float x, float y, float *z)
 {
-    /* Local variables */
-    int i, l, i1, j1, l1, l2, kx1, ky1, nkx1, nky1, lx, ly;
-    float h[6], wx[6], wy[6];
-    float tb, te, sp, arg;
+    int j, l, l1, l2, k1, nk1, lx;
+    float wx[6], wy[6], t;
 
-    /* Parameter adjustments */
-    --c;
+    // Do x.
+    k1 = kx + 1;
+    nk1 = nx - k1;
+    t = tx[kx];
+    if (x < t) x = t;
+    t = tx[nk1];
+    if (x > t) x = t;
+    l = k1;
+    while (!(x < tx[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_f(tx, kx, x, l, wx);
+    lx = l - k1;
 
-    /* Function Body */
-    kx1 = kx + 1;
-    nkx1 = nx - kx1;
-    tb = tx[kx];
-    te = tx[nkx1];
-    l = kx1;
-    arg = x;
-    if (arg < tb) arg = tb;
-    if (arg > te) arg = te;
-    while (!(arg < tx[l] || l == nkx1)) l++;
-    oskar_cudaf_dierckx_fpbspl_f(tx, kx, arg, l, h);
-    lx = l - kx1;
-    for (i = 0; i < kx1; ++i)
-    {
-        wx[i] = h[i];
-    }
-    ky1 = ky + 1;
-    nky1 = ny - ky1;
-    tb = ty[ky];
-    te = ty[nky1];
-    l = ky1;
-    arg = y;
-    if (arg < tb) arg = tb;
-    if (arg > te) arg = te;
-    while (!(arg < ty[l] || l == nky1)) l++;
-    oskar_cudaf_dierckx_fpbspl_f(ty, ky, arg, l, h);
-    ly = l - ky1;
-    for (i = 0; i < ky1; ++i)
-    {
-        wy[i] = h[i];
-    }
-    l = lx * nky1;
-    for (i = 0; i < kx1; ++i)
-    {
-        h[i] = wx[i];
-    }
-    l1 = l + ly;
-    sp = 0.0f;
-    for (i = 0; i < kx1; ++i)
+    // Do y.
+    k1 = ky + 1;
+    nk1 = ny - k1;
+    t = ty[ky];
+    if (y < t) y = t;
+    t = ty[nk1];
+    if (y > t) y = t;
+    l = k1;
+    while (!(y < ty[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_f(ty, ky, y, l, wy);
+    l1 = lx * nk1 + (l - k1);
+
+    // Evaluate surface using coefficients.
+    t = 0.0f;
+    for (l = 0; l <= kx; ++l)
     {
         l2 = l1;
-        for (j1 = 0; j1 < ky1; ++j1)
+        for (j = 0; j <= ky; ++j)
         {
+            t += c[l2] * wx[l] * wy[j];
             ++l2;
-            sp += c[l2] * h[i] * wy[j1];
         }
-        l1 += nky1;
+        l1 += nk1;
     }
-    *z = sp;
+    *z = t;
 }
 
 /**
@@ -115,91 +98,50 @@ __device__ void oskar_cudaf_dierckx_fpbisp1_f(const float *tx, const int nx,
  * CUDA device function to replace the fpbisp function from the DIERCKX
  * fitting library.
  */
-__device__ void oskar_cudaf_dierckx_fpbisp_d(const double *tx, const int nx,
+__device__ void oskar_cudaf_dierckx_fpbisp1_d(const double *tx, const int nx,
         const double *ty, const int ny, const double *c, const int kx,
-        const int ky, const double *x, const int mx, const double *y,
-        const int my, double *z, double *wx, double *wy, int *lx, int *ly)
+        const int ky, double x, double y, double *z)
 {
-    /* Local variables */
-    int i, j, l, m, i1, j1, l1, l2, kx1, ky1, nkx1, nky1;
-    double h[6];
-    double tb, te, sp, arg;
+    int j, l, l1, l2, k1, nk1, lx;
+    double wx[6], wy[6], t;
 
-    /* Parameter adjustments */
-    --tx;
-    --ty;
-    --c;
-    --lx;
-    wx -= (1 + mx);
-    --x;
-    --ly;
-    wy -= (1 + my);
-    --z;
-    --y;
+    // Do x.
+    k1 = kx + 1;
+    nk1 = nx - k1;
+    t = tx[kx];
+    if (x < t) x = t;
+    t = tx[nk1];
+    if (x > t) x = t;
+    l = k1;
+    while (!(x < tx[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_d(tx, kx, x, l, wx);
+    lx = l - k1;
 
-    /* Function Body */
-    kx1 = kx + 1;
-    nkx1 = nx - kx1;
-    tb = tx[kx1];
-    te = tx[nkx1 + 1];
-    l = kx1;
-    for (i = 1; i <= mx; ++i)
+    // Do y.
+    k1 = ky + 1;
+    nk1 = ny - k1;
+    t = ty[ky];
+    if (y < t) y = t;
+    t = ty[nk1];
+    if (y > t) y = t;
+    l = k1;
+    while (!(y < ty[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_d(ty, ky, y, l, wy);
+    l1 = lx * nk1 + (l - k1);
+
+    // Evaluate surface using coefficients.
+    t = 0.0;
+    for (l = 0; l <= kx; ++l)
     {
-        arg = x[i];
-        if (arg < tb) arg = tb;
-        if (arg > te) arg = te;
-        while (!(arg < tx[l + 1] || l == nkx1)) l++;
-        oskar_cudaf_dierckx_fpbspl_d(&tx[1], kx, arg, l, h);
-        lx[i] = l - kx1;
-        for (j = 1; j <= kx1; ++j)
+        l2 = l1;
+        for (j = 0; j <= ky; ++j)
         {
-            wx[i + j * mx] = h[j - 1];
+            t += c[l2] * wx[l] * wy[j];
+            ++l2;
         }
+        l1 += nk1;
     }
-    ky1 = ky + 1;
-    nky1 = ny - ky1;
-    tb = ty[ky1];
-    te = ty[nky1 + 1];
-    l = ky1;
-    for (i = 1; i <= my; ++i)
-    {
-        arg = y[i];
-        if (arg < tb) arg = tb;
-        if (arg > te) arg = te;
-        while (!(arg < ty[l + 1] || l == nky1)) l++;
-        oskar_cudaf_dierckx_fpbspl_d(&ty[1], ky, arg, l, h);
-        ly[i] = l - ky1;
-        for (j = 1; j <= ky1; ++j)
-        {
-            wy[i + j * my] = h[j - 1];
-        }
-    }
-    m = 0;
-    for (i = 1; i <= mx; ++i)
-    {
-        l = lx[i] * nky1;
-        for (i1 = 1; i1 <= kx1; ++i1)
-        {
-            h[i1 - 1] = wx[i + i1 * mx];
-        }
-        for (j = 1; j <= my; ++j)
-        {
-            l1 = l + ly[j];
-            sp = 0.0;
-            for (i1 = 1; i1 <= kx1; ++i1)
-            {
-                l2 = l1;
-                for (j1 = 1; j1 <= ky1; ++j1)
-                {
-                    ++l2;
-                    sp += c[l2] * h[i1 - 1] * wy[j + j1 * my];
-                }
-                l1 += nky1;
-            }
-            ++m;
-            z[m] = sp;
-        }
-    }
+    *z = t;
 }
 
-#endif // OSKAR_CUDAF_DIERCKX_FPBISP_H_
+#endif // OSKAR_CUDAF_DIERCKX_FPBISP1_H_
