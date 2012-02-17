@@ -110,9 +110,10 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/altitude_m", "Altitude (m)", oskar_SettingsItem::DOUBLE);
     setCaption("telescope/station", "Station settings");
     registerSetting("telescope/station/enable_beam", "Enable station beam", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/station/normalise_beam", "Normalise station beam", oskar_SettingsItem::BOOL);
+//    registerSetting("telescope/station/normalise_beam", "Normalise station beam", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/apply_element_errors", "Apply element errors", oskar_SettingsItem::BOOL);
     registerSetting("telescope/station/element_amp_gain", "Element amplitude gain", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_amp_error", "Element amplitude standard deviation", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element_amp_error", "Element amplitude gain standard deviation", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_phase_offset_deg", "Element phase offset (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_phase_error_deg", "Element phase standard deviation (deg)", oskar_SettingsItem::DOUBLE);
 
@@ -131,6 +132,12 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME);
     registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+
+    // Image settings.
+    setCaption("image", "Image settings");
+    registerSetting("image/filename", "Output image file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("image/fov_deg", "Field-of-view (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("image/size", "Image dimension (pixels)", oskar_SettingsItem::INT);
 }
 
 oskar_SettingsModel::~oskar_SettingsModel()

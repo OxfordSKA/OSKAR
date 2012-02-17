@@ -26,31 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_STATION_H_
-#define OSKAR_SETTINGS_STATION_H_
+#include "apps/lib/oskar_sim_beam_pattern.h"
+#include "utility/oskar_get_error_string.h"
+#include <cstdlib>
+#include <cstdio>
 
-/**
- * @struct oskar_SettingsStation
- *
- * @brief Structure to hold station model settings.
- *
- * @details
- * The structure holds station model parameters.
- */
-struct oskar_SettingsStation
+int main(int argc, char** argv)
 {
-    int enable_beam;
-    int normalise_beam;
-    int apply_element_errors;
-    double receiver_temperature;
-    char* receiver_temperature_file;
+    int error;
 
-    /* Station element settings (can override those in the station files). */
-    double element_amp_gain;
-    double element_amp_error;
-    double element_phase_offset_rad;
-    double element_phase_error_rad;
-};
-typedef struct oskar_SettingsStation oskar_SettingsStation;
+    // Parse command line.
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage: $ oskar_sim_beam_pattern [settings file]\n");
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    }
 
-#endif /* OSKAR_SETTINGS_STATION_H_ */
+    // Run simulation.
+    error = oskar_sim_beam_pattern(argv[1]);
+
+    // Check for errors.
+    if (error)
+    {
+        fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+                oskar_get_error_string(error));
+    }
+    return error;
+}

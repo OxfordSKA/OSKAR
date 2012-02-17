@@ -35,7 +35,7 @@
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_visibilities.h"
-#include "apps/lib/oskar_sim.h"
+#include "apps/lib/oskar_sim_interferometer.h"
 #include "apps/lib/oskar_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
@@ -59,7 +59,7 @@
 
 using std::min;
 
-int oskar_sim(const char* settings_file)
+int oskar_sim_interferometer(const char* settings_file)
 {
     int error;
 
@@ -85,14 +85,17 @@ int oskar_sim(const char* settings_file)
     // Split the sky model into chunks.
     oskar_SkyModel* sky_chunk_cpu = NULL;
     int num_sky_chunks = 0;
-    int max_sources_per_chunk = min(settings.sim.max_sources_per_chunk,
-            (int)ceil((double)sky_cpu->num_sources / (double)num_devices));
-    error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
-            max_sources_per_chunk, sky_cpu);
-    if (error) return error;
-    printf("** Splitting sky model of %i sources into %i chunks "
-            "(max %i per chunk).\n", sky_cpu->num_sources, num_sky_chunks,
-            max_sources_per_chunk);
+    if (sky_cpu->num_sources > 0)
+    {
+        int max_sources_per_chunk = min(settings.sim.max_sources_per_chunk,
+                (int)ceil((double)sky_cpu->num_sources / (double)num_devices));
+        error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
+                max_sources_per_chunk, sky_cpu);
+        if (error) return error;
+        printf("** Splitting sky model of %i sources into %i chunks "
+                "(max %i per chunk).\n", sky_cpu->num_sources, num_sky_chunks,
+                max_sources_per_chunk);
+    }
 
     // Create the global visibility structure on the CPU.
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
@@ -186,7 +189,7 @@ int oskar_sim(const char* settings_file)
         if (error) return error;
     }
 
-    printf("\n== Simulation completed in %f seconds.\n", timer.elapsed() / 1e3);
+    printf("\n=== Simulation completed in %f sec.\n", timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(vis_global, telescope_cpu, times);

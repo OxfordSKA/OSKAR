@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_MainWindow.h"
+#include "apps/oskar_MainWindow.h"
 #include <QtGui/QApplication>
 #include <cstdlib>
 #include <cstdio>

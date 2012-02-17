@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SIM_H_
-#define OSKAR_SIM_H_
+#ifndef OSKAR_SIM_INTERFEROMETER_H_
+#define OSKAR_SIM_INTERFEROMETER_H_
 
 /**
  * @file oskar_sim.h
@@ -49,10 +49,10 @@ extern "C" {
  * @param[in] settings_file Path to a settings file.
  */
 OSKAR_EXPORT
-int oskar_sim(const char* settings_file);
+int oskar_sim_interferometer(const char* settings_file);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SIM_H_ */
+#endif /* OSKAR_SIM_INTERFEROMETER_H_ */

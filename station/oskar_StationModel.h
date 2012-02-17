@@ -57,7 +57,7 @@ struct oskar_StationModel
     int apply_weight; /**< Bool switch to toggle complex element weight vector (default false) */
     oskar_Mem weight; /**< Element complex weight (set to 1 unless apodisation). */
 
-    int apply_antenna_errors; /**< Bool switch to toggle element gain and phase errors (default false) */
+    int apply_element_errors; /**< Bool switch to toggle element gain and phase errors (default false) */
     oskar_Mem amp_gain;       /**< Per element amplitude gain factor (default 1.0) */
     oskar_Mem amp_gain_error; /**< Standard deviation of per element random amplitude gain factor (default 0.0) */
     oskar_Mem phase_offset;   /**< Per element systematic phase offset, in radians (default 0.0) */

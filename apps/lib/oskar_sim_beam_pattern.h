@@ -26,31 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_STATION_H_
-#define OSKAR_SETTINGS_STATION_H_
+#ifndef OSKAR_SIM_BEAM_PATTERN_H_
+#define OSKAR_SIM_BEAM_PATTERN_H_
 
 /**
- * @struct oskar_SettingsStation
- *
- * @brief Structure to hold station model settings.
+ * @file oskar_sim_beam_pattern.h
+ */
+
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Main OSKAR beam pattern simulation function.
  *
  * @details
- * The structure holds station model parameters.
+ * This function acts as thought it were a stand-alone executable.
+ *
+ * @param[in] settings_file Path to a settings file.
  */
-struct oskar_SettingsStation
-{
-    int enable_beam;
-    int normalise_beam;
-    int apply_element_errors;
-    double receiver_temperature;
-    char* receiver_temperature_file;
+OSKAR_EXPORT
+int oskar_sim_beam_pattern(const char* settings_file);
 
-    /* Station element settings (can override those in the station files). */
-    double element_amp_gain;
-    double element_amp_error;
-    double element_phase_offset_rad;
-    double element_phase_error_rad;
-};
-typedef struct oskar_SettingsStation oskar_SettingsStation;
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* OSKAR_SETTINGS_STATION_H_ */
+#endif /* OSKAR_SIM_BEAM_PATTERN_H_ */

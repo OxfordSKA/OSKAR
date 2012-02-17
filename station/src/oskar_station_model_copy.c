@@ -71,6 +71,9 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     dst->single_element_model = src->single_element_model;
     dst->bit_depth = src->bit_depth;
     dst->coord_units = src->coord_units;
+    dst->apply_element_errors = src->apply_element_errors;
+    dst->apply_weight = src->apply_weight;
+    dst->normalise_beam = src->normalise_beam;
 
     /* TODO Work out how to deal with child stations. */
     /* TODO Work out how to deal with element pattern data. */

@@ -257,6 +257,7 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_k(2, w, "Station settings", 1);
     pr_b(3, w, "Enable station beam", s->telescope.station.enable_beam);
     pr_b(3, w, "Normalise station beam", s->telescope.station.normalise_beam);
+    pr_b(3, w, "Apply element errors", s->telescope.station.apply_element_errors);
     if (s->telescope.station.element_amp_gain > -1e10)
         pr_3f(3, w, "Element amplitude gain",
                 s->telescope.station.element_amp_gain);
@@ -275,7 +276,7 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_i(2, w, "Num. channels", s->obs.num_channels);
     pr_3e(2, w, "Start frequency (Hz)", s->obs.start_frequency_hz);
     pr_3e(2, w, "Frequency inc (Hz)", s->obs.frequency_inc_hz);
-    pr_f(2, w, "Channel bandwidth (Hz)", s->obs.frequency_inc_hz);
+    pr_f(2, w, "Channel bandwidth (Hz)", s->obs.channel_bandwidth_hz);
     pr_3f(2, w, "Phase centre RA (deg)", s->obs.ra0_rad * R2D);
     pr_3f(2, w, "Phase centre Dec (deg)", s->obs.dec0_rad * R2D);
     pr_f(2, w, "Start time (MJD)", s->obs.time.obs_start_mjd_utc);
@@ -285,6 +286,16 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_i(2, w, "Num. fringe ave.", s->obs.time.num_fringe_ave);
     pr_s(2, w, "OSKAR visibility file", s->obs.oskar_vis_filename);
     pr_s(2, w, "Measurement Set name", s->obs.ms_filename);
+
+    /* Print image settings. */
+    if (s->image.size > 0)
+    {
+        pr_k(1, w, "Image settings", 1);
+        pr_s(2, w, "Output image file", s->image.filename);
+        pr_3f(2, w, "Field-of-view (deg)", s->image.fov_deg);
+        pr_i(2, w, "Dimension (pixels)", s->image.size);
+    }
+
     printf("\n");
 }
 

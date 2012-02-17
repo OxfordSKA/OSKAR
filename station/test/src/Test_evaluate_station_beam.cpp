@@ -129,7 +129,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     oskar_Device_curand_state curand_state(num_antennas);
     int seed = 0; // TODO get this from the settings file....
     curand_state.init(seed);
-    station_gpu.apply_antenna_errors = OSKAR_FALSE;
+    station_gpu.apply_element_errors = OSKAR_FALSE;
 
     // Allocate weights work array.
     oskar_Mem weights_gpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU);

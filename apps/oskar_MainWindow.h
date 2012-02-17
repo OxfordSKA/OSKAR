@@ -26,30 +26,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_sim.h"
-#include "utility/oskar_get_error_string.h"
-#include <cstdlib>
-#include <cstdio>
+#ifndef OSKAR_MAIN_WINDOW_H_
+#define OSKAR_MAIN_WINDOW_H_
 
-int main(int argc, char** argv)
+#include <QtGui/QMainWindow>
+#include <QtCore/QString>
+
+class oskar_SettingsModel;
+class oskar_SettingsFilterModel;
+class oskar_SettingsView;
+class QAbstractButton;
+class QAction;
+class QDialogButtonBox;
+class QMenu;
+class QMenuBar;
+class QModelIndex;
+class QPushButton;
+class QVBoxLayout;
+class QWidget;
+
+class oskar_MainWindow : public QMainWindow
 {
-    int error;
+    Q_OBJECT
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_sim [settings file]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+public:
+    oskar_MainWindow(QWidget* parent = 0);
 
-    // Run simulation.
-    error = oskar_sim(argv[1]);
+protected:
+    void closeEvent(QCloseEvent* event);
 
-    // Check for errors.
-    if (error)
-    {
-        fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
-                oskar_get_error_string(error));
-    }
-    return error;
-}
+public slots:
+    void openSettings(QString filename = QString());
+
+private slots:
+    void startSim(QAbstractButton* button);
+
+private:
+    void runButton();
+    void runSim(int depth, QStringList outputfiles = QStringList());
+
+private:
+    QWidget* widget_;
+    QVBoxLayout* layout_;
+    QDialogButtonBox* buttons_;
+    QPushButton* buttonRunInterferometer_;
+    QPushButton* buttonRunBeamPattern_;
+    oskar_SettingsModel* model_;
+    oskar_SettingsFilterModel* modelProxy_;
+    oskar_SettingsView* view_;
+    QMenuBar* menubar_;
+    QMenu* menuFile_;
+    QAction* actionOpen_;
+    QString settingsFile_;
+    int (*sim_function_)(const char*);
+};
+
+#endif // OSKAR_MAIN_WINDOW_H_

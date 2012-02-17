@@ -31,6 +31,7 @@
 #include "apps/lib/oskar_settings_free.h"
 #include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_set_up_telescope.h"
+#include "apps/lib/oskar_sim_beam_pattern.h"
 #include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_linspace.h"
@@ -41,7 +42,6 @@
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
-#include "utility/oskar_exit.h"
 #include "utility/oskar_Mem.h"
 
 #include <cstdio>
@@ -50,20 +50,13 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QTime>
 
-int main(int argc, char** argv)
+int oskar_sim_beam_pattern(const char* settings_file)
 {
-    // Parse command line.
-    int err = 0;
-    if (argc != 2)
-    {
-        fprintf(stderr, "ERROR: Missing command line arguments.\n");
-        fprintf(stderr, "Usage:  $ oskar_beam_pattern [settings file]\n");
-        return EXIT_FAILURE;
-    }
+    int err;
 
     // Load the settings file.
     oskar_Settings settings;
-    err = oskar_settings_load(&settings, argv[1]);
+    err = oskar_settings_load(&settings, settings_file);
     if (err) return err;
     const oskar_SettingsTime* times = &settings.obs.time;
 
@@ -115,7 +108,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
     FILE* file = fopen(settings.image.filename, "w");
-    if (file == NULL) oskar_exit(OSKAR_ERR_FILE_IO);
+    if (file == NULL) return OSKAR_ERR_FILE_IO;
 
     // Loop over channels.
     QTime timer;
@@ -146,7 +139,7 @@ int main(int argc, char** argv)
         // Copy the telescope model and scale coordinates to wavenumbers.
         oskar_TelescopeModel telescope(tel_gpu, OSKAR_LOCATION_GPU);
         err = telescope.multiply_by_wavenumber(frequency);
-        if (err) oskar_exit(err);
+        if (err) return err;
 
         // Get pointer to the station.
         // FIXME Currently station 0: Determine this from the settings file?
@@ -164,17 +157,17 @@ int main(int argc, char** argv)
             double beam_l, beam_m, beam_n;
             err = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
                     &beam_n, station, gast);
-            if (err) oskar_exit(err);
+            if (err) return err;
 
             // Evaluate horizontal l,m,n coordinates.
             err = oskar_evaluate_source_horizontal_lmn(&l, &m, &n, &RA, &Dec,
                     station, gast);
-            if (err) oskar_exit(err);
+            if (err) return err;
 
             // Evaluate the station beam.
             err = oskar_evaluate_station_beam(&beam_pattern, station, beam_l,
                     beam_m, &l, &m, &n, &weights, &curand_state);
-            if (err) oskar_exit(err);
+            if (err) return err;
 
             // Copy beam pattern back to CPU.
             oskar_Mem beam_pattern_cpu(&beam_pattern, OSKAR_LOCATION_CPU);
@@ -218,5 +211,5 @@ int main(int argc, char** argv)
     cudaDeviceReset();
 
     oskar_settings_free(&settings);
-    return EXIT_SUCCESS;
+    return OSKAR_SUCCESS;
 }

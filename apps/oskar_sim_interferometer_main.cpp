@@ -26,54 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MAIN_WINDOW_H_
-#define OSKAR_MAIN_WINDOW_H_
+#include "apps/lib/oskar_sim_interferometer.h"
+#include "utility/oskar_get_error_string.h"
+#include <cstdlib>
+#include <cstdio>
 
-#include <QtGui/QMainWindow>
-#include <QtCore/QString>
-
-class oskar_SettingsModel;
-class oskar_SettingsFilterModel;
-class oskar_SettingsView;
-class QAction;
-class QDialogButtonBox;
-class QMenu;
-class QMenuBar;
-class QVBoxLayout;
-class QWidget;
-class QModelIndex;
-class QSortFilterProxyModel;
-
-class oskar_MainWindow : public QMainWindow
+int main(int argc, char** argv)
 {
-    Q_OBJECT
+    int error;
 
-public:
-    oskar_MainWindow(QWidget* parent = 0);
+    // Parse command line.
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage: $ oskar_sim_interferometer [settings file]\n");
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    }
 
-protected:
-    void closeEvent(QCloseEvent* event);
+    // Run simulation.
+    error = oskar_sim_interferometer(argv[1]);
 
-public slots:
-    void openSettings(QString filename = QString());
-
-private slots:
-    void runButton();
-
-private:
-    void runSim(int depth, QStringList outputfiles = QStringList());
-
-private:
-    QWidget* widget_;
-    QVBoxLayout* layout_;
-    QDialogButtonBox* buttons_;
-    oskar_SettingsModel* model_;
-    oskar_SettingsFilterModel* modelProxy_;
-    oskar_SettingsView* view_;
-    QMenuBar* menubar_;
-    QMenu* menuFile_;
-    QAction* actionOpen_;
-    QString settingsFile_;
-};
-
-#endif // OSKAR_MAIN_WINDOW_H_
+    // Check for errors.
+    if (error)
+    {
+        fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+                oskar_get_error_string(error));
+    }
+    return error;
+}

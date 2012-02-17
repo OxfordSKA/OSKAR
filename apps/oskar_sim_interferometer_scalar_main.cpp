@@ -53,8 +53,7 @@ int main(int argc, char** argv)
     int err = 0;
     if (argc != 2)
     {
-        fprintf(stderr, "ERROR: Missing command line arguments.\n");
-        fprintf(stderr, "Usage:  $ oskar_sim_scalar [settings file]\n");
+        fprintf(stderr, "Usage: $ oskar_sim_interferometer_scalar [settings file]\n");
         return EXIT_FAILURE;
     }
 

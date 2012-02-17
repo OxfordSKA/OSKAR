@@ -26,8 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_MainWindow.h"
-#include "apps/lib/oskar_sim.h"
+#include "apps/oskar_MainWindow.h"
+#include "apps/lib/oskar_sim_beam_pattern.h"
+#include "apps/lib/oskar_sim_interferometer.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModel.h"
@@ -41,6 +42,7 @@
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QMessageBox>
+#include <QtGui/QPushButton>
 #include <QtGui/QVBoxLayout>
 #include <QtCore/QModelIndex>
 
@@ -67,12 +69,16 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     view_->resizeColumnToContents(0);
     layout_->addWidget(view_);
 
-    // Create the button box.
-    buttons_ = new QDialogButtonBox(QDialogButtonBox::Close,
-            Qt::Horizontal, widget_);
-    buttons_->addButton("Run", QDialogButtonBox::AcceptRole);
+    // Create the button box and buttons.
+    buttons_ = new QDialogButtonBox(Qt::Horizontal, widget_);
+    buttonRunBeamPattern_ = new QPushButton("Run Beam Pattern", this);
+    buttonRunInterferometer_ = new QPushButton("Run Interferometer", this);
+    buttons_->addButton(buttonRunInterferometer_, QDialogButtonBox::AcceptRole);
+    buttons_->addButton(buttonRunBeamPattern_, QDialogButtonBox::AcceptRole);
+    buttons_->addButton(QDialogButtonBox::Close);
     layout_->addWidget(buttons_);
-    connect(buttons_, SIGNAL(accepted()), this, SLOT(runButton()));
+    connect(buttons_, SIGNAL(clicked(QAbstractButton*)),
+            this, SLOT(startSim(QAbstractButton*)));
     connect(buttons_, SIGNAL(rejected()), this, SLOT(close()));
 
     // Create the menus.
@@ -128,6 +134,22 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
 
 // Private slots.
 
+void oskar_MainWindow::startSim(QAbstractButton* button)
+{
+    if (button == buttonRunBeamPattern_)
+    {
+        sim_function_ = &oskar_sim_beam_pattern;
+        runButton();
+    }
+    else if (button == buttonRunInterferometer_)
+    {
+        sim_function_ = &oskar_sim_interferometer;
+        runButton();
+    }
+}
+
+// Private members.
+
 void oskar_MainWindow::runButton()
 {
     // Save settings if they are not already saved.
@@ -170,8 +192,6 @@ void oskar_MainWindow::runButton()
     }
 }
 
-// Private members.
-
 void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
 {
     QByteArray settings = settingsFile_.toAscii();
@@ -179,7 +199,7 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
             oskar_SettingsModel::IterationKeysRole).toStringList();
     if (iterationKeys.size() == 0)
     {
-        int error = oskar_sim(settings);
+        int error = (*sim_function_)(settings);
         if (error)
         {
             fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
@@ -235,7 +255,7 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
             else
             {
                 // Run the simulation with these settings.
-                int error = oskar_sim(settings);
+                int error = (*sim_function_)(settings);
                 if (error)
                 {
                     fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,

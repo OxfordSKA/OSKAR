@@ -89,7 +89,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
                 (num_antennas, station->x, station->y, l_beam,
                         m_beam, *weights);
 
-        if (station->apply_antenna_errors == OSKAR_TRUE)
+        if (station->apply_element_errors)
         {
             // Evaluate weights errors.
             oskar_evaluate_element_weights_errors(weights_error,
