@@ -169,3 +169,63 @@ void Test_element_weights_errors::test_apply()
     }
     fclose(file);
 }
+
+
+void Test_element_weights_errors::test_reinit()
+{
+    int num_elements   = 5;
+
+    double gain        = 1.5;
+    double gain_error  = 0.2;
+    double phase       = 0.1 * M_PI;
+    double phase_error = (5 / 180.0) * M_PI;
+
+    oskar_Mem d_errors(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, num_elements);
+    oskar_Mem d_gain(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
+    oskar_Mem d_gain_error(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
+    oskar_Mem d_phase(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
+    oskar_Mem d_phase_error(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
+
+    d_gain.set_value_real(gain);
+    d_gain_error.set_value_real(gain_error);
+    d_phase.set_value_real(phase);
+    d_phase_error.set_value_real(phase_error);
+
+    int num_channels = 2;
+    int num_chunks = 3;
+    int num_stations = 5;
+    int num_times = 3;
+
+    FILE* file = fopen("temp_test_weights_error_reinit.dat", "w");
+    for (int chan = 0; chan < num_channels; ++chan)
+    {
+        fprintf(file, "channel: %i\n", chan);
+        for (int chunk = 0; chunk < num_chunks; ++chunk)
+        {
+            fprintf(file, "  chunk: %i\n", chunk);
+            oskar_Device_curand_state states(num_elements);
+            states.init(0);
+
+            for (int t = 0; t < num_times; ++t)
+            {
+                fprintf(file, "    time: %i\n", t);
+                for (int s = 0; s < num_stations; ++s)
+                {
+                    fprintf(file, "      station: %i  ==> ", s);
+                    int error = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
+                            &d_gain, &d_gain_error, &d_phase, &d_phase_error, states);
+                    CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
+                    oskar_Mem h_errors(&d_errors, OSKAR_LOCATION_CPU);
+                    for (int i = 0; i < num_elements; ++i)
+                    {
+                        fprintf(file, "(% -6.4f, % -6.4f), ",
+                                ((double2*)h_errors.data)[i].x,
+                                ((double2*)h_errors.data)[i].y);
+                    }
+                    fprintf(file, "\n");
+                }
+            }
+        }
+    }
+    fclose(file);
+}

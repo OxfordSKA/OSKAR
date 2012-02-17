@@ -52,8 +52,8 @@ extern "C" {
  * @param[in] index         Element array index to set.
  * @param[in] amp_gain      Element amplitude gain.
  * @param[in] amp_error     Element amplitude error.
- * @param[in] phase_offset  Element phase offset.
- * @param[in] phase_error   Element phase error.
+ * @param[in] phase_offset  Element phase offset, in degrees.
+ * @param[in] phase_error   Element phase error, in degrees.
  */
 OSKAR_EXPORT
 int oskar_station_model_set_element_errors(oskar_StationModel* dst,

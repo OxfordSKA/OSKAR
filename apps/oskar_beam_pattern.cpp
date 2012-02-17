@@ -103,11 +103,6 @@ int main(int argc, char** argv)
         oskar_sph_from_lm_d(num_pixels, ra0, dec0, l_cpu, m_cpu, RA_cpu, Dec_cpu);
     }
 
-    // Initialise the random number generator.
-    oskar_Device_curand_state curand_state(tel_cpu->max_station_size);
-    int seed = 0; // TODO get this from the settings file....
-    curand_state.init(seed);
-
     // Get time data.
     int num_vis_dumps        = times->num_vis_dumps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
@@ -127,6 +122,11 @@ int main(int argc, char** argv)
     timer.start();
     for (int c = 0; c < n_channels; ++c)
     {
+        // Initialise the random number generator.
+        oskar_Device_curand_state curand_state(tel_cpu->max_station_size);
+        int seed = 0; // TODO get this from the settings file....
+        curand_state.init(seed);
+
         // Get the channel frequency.
         printf("\n--> Simulating channel (%d / %d).\n", c + 1, n_channels);
         double frequency = settings.obs.start_frequency_hz +

@@ -52,13 +52,13 @@ extern "C" {
  * The file may have the following columns, in the following order:
  * - Element x-position, in metres.
  * - Element y-position, in metres.
- * - Element z-position, in metres (default 0).
- * - Element multiplicative weight (real part, default 1).
- * - Element multiplicative weight (imaginary part, default 0).
+ * - Element z-position, in metres [note: this currently has no effect!] (default 0).
  * - Element amplitude gain factor (default 1).
  * - Element amplitude gain error (default 0).
  * - Element phase offset in degrees (default 0).
  * - Element phase error in degrees (default 0).
+ * - Element multiplicative weight (real part, default 1).
+ * - Element multiplicative weight (imaginary part, default 0).
  *
  * Only the first two columns are required to be present.
  *

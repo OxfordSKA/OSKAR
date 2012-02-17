@@ -30,93 +30,102 @@
 #include <cuda_runtime_api.h>
 
 #include <stdlib.h>
+#include <math.h>
 
 #include "station/oskar_station_model_set_element_errors.h"
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_mem_element_size.h"
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int oskar_station_model_set_element_errors(oskar_StationModel* dst,
-		int index, double amp_gain, double amp_gain_error, double phase_offset,
-		double phase_error)
+        int index, double amp_gain, double amp_gain_error, double phase_offset,
+        double phase_error)
 {
-	int type, location;
+    int type, location;
 
-	/* Check range. */
+    /* Convert phases to radians */
+    phase_offset *= M_PI / 180.0;
+    phase_error *= M_PI / 180.0;
+
+    /* Check range. */
     if (index >= dst->num_elements)
         return OSKAR_ERR_OUT_OF_RANGE;
 
-	/* Get the data type. */
+    /* Get the data type. */
     if (dst->amp_gain.private_type != dst->amp_gain_error.private_type ||
-    		dst->amp_gain.private_type != dst->phase_offset.private_type ||
-    		dst->amp_gain.private_type != dst->phase_error.private_type)
-    	return OSKAR_ERR_TYPE_MISMATCH;
-	type = dst->amp_gain.private_type;
+            dst->amp_gain.private_type != dst->phase_offset.private_type ||
+            dst->amp_gain.private_type != dst->phase_error.private_type)
+        return OSKAR_ERR_TYPE_MISMATCH;
+    type = dst->amp_gain.private_type;
 
-	/* Get the data location. */
+    /* Get the data location. */
     if (dst->amp_gain.private_location != dst->amp_gain_error.private_location ||
-    		dst->amp_gain.private_location != dst->phase_offset.private_location ||
-    		dst->amp_gain.private_location != dst->phase_error.private_location)
-    	return OSKAR_ERR_BAD_LOCATION;
-	location = dst->amp_gain.private_location;
+            dst->amp_gain.private_location != dst->phase_offset.private_location ||
+            dst->amp_gain.private_location != dst->phase_error.private_location)
+        return OSKAR_ERR_BAD_LOCATION;
+    location = dst->amp_gain.private_location;
 
     if (location == OSKAR_LOCATION_CPU)
     {
-    	if (type == OSKAR_DOUBLE)
-    	{
+        if (type == OSKAR_DOUBLE)
+        {
             ((double*)dst->amp_gain.data)[index] = amp_gain;
             ((double*)dst->amp_gain_error.data)[index] = amp_gain_error;
             ((double*)dst->phase_offset.data)[index] = phase_offset;
             ((double*)dst->phase_error.data)[index] = phase_error;
             return 0;
-    	}
-    	else if (type == OSKAR_SINGLE)
-    	{
+        }
+        else if (type == OSKAR_SINGLE)
+        {
             ((float*)dst->amp_gain.data)[index] = (float) amp_gain;
             ((float*)dst->amp_gain_error.data)[index] = (float) amp_gain_error;
             ((float*)dst->phase_offset.data)[index] = (float) phase_offset;
             ((float*)dst->phase_error.data)[index] = (float) phase_error;
             return 0;
-    	}
-    	else
-    		return OSKAR_ERR_BAD_DATA_TYPE;
+        }
+        else
+            return OSKAR_ERR_BAD_DATA_TYPE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
-    	/* Get the data type. */
-    	size_t element_size, offset_bytes;
+        /* Get the data type. */
+        size_t element_size, offset_bytes;
         element_size = oskar_mem_element_size(type);
         offset_bytes = index * element_size;
         if (type == OSKAR_DOUBLE)
         {
             cudaMemcpy((char*)(dst->amp_gain.data) + offset_bytes,
-            		&amp_gain, element_size, cudaMemcpyHostToDevice);
+                    &amp_gain, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->amp_gain_error.data) + offset_bytes,
-            		&amp_gain_error, element_size, cudaMemcpyHostToDevice);
+                    &amp_gain_error, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_offset.data) + offset_bytes,
-            		&phase_offset, element_size, cudaMemcpyHostToDevice);
+                    &phase_offset, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_error.data) + offset_bytes,
-            		&phase_error, element_size, cudaMemcpyHostToDevice);
+                    &phase_error, element_size, cudaMemcpyHostToDevice);
             return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
-        	float t_amp_gain, t_amp_error, t_phase_offset, t_phase_error;
-        	t_amp_gain = (float) amp_gain;
-        	t_amp_error = (float) amp_gain_error;
-        	t_phase_offset = (float) phase_offset;
-        	t_phase_error = (float) phase_error;
+            float t_amp_gain, t_amp_error, t_phase_offset, t_phase_error;
+            t_amp_gain = (float) amp_gain;
+            t_amp_error = (float) amp_gain_error;
+            t_phase_offset = (float) phase_offset;
+            t_phase_error = (float) phase_error;
             cudaMemcpy((char*)(dst->amp_gain.data) + offset_bytes,
-            		&t_amp_gain, element_size, cudaMemcpyHostToDevice);
+                    &t_amp_gain, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->amp_gain_error.data) + offset_bytes,
-            		&t_amp_error, element_size, cudaMemcpyHostToDevice);
+                    &t_amp_error, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_offset.data) + offset_bytes,
-            		&t_phase_offset, element_size, cudaMemcpyHostToDevice);
+                    &t_phase_offset, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_error.data) + offset_bytes,
-            		&t_phase_error, element_size, cudaMemcpyHostToDevice);
+                    &t_phase_error, element_size, cudaMemcpyHostToDevice);
             return 0;
         }
         else

@@ -67,7 +67,7 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         /* Declare parameter array. */
-        double par[] = {0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+        double par[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0};
         int read = 0;
 
         /* Ignore comment lines (lines starting with '#'). */
@@ -96,15 +96,15 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
             fclose(file);
             return err;
         }
-        err = oskar_station_model_set_element_weight(station, n,
-                par[3], par[4]);
+        err = oskar_station_model_set_element_errors(station, n,
+                par[3], par[4], par[5], par[6]);
         if (err)
         {
             fclose(file);
             return err;
         }
-        err = oskar_station_model_set_element_errors(station, n,
-                par[5], par[6], par[7], par[8]);
+        err = oskar_station_model_set_element_weight(station, n,
+                par[7], par[8]);
         if (err)
         {
             fclose(file);

@@ -48,12 +48,14 @@ class Test_element_weights_errors : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE(Test_element_weights_errors);
         CPPUNIT_TEST(test_evaluate);
         CPPUNIT_TEST(test_apply);
+        CPPUNIT_TEST(test_reinit);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
         void test_evaluate();
         void test_apply();
+        void test_reinit();
 };
 
 // Register the test class.
