@@ -134,7 +134,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
     // Image settings.
-    setCaption("image", "Image settings");
+    setCaption("image", "Beam pattern settings");
     registerSetting("image/filename", "Output image file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
     registerSetting("image/fov_deg", "Field-of-view (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("image/size", "Image dimension (pixels)", oskar_SettingsItem::INT);
