@@ -11,11 +11,16 @@ set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
 include_directories(${CFITSIO_INCLUDE_DIR})
 include_directories(${QT_INCLUDE_DIR})
 add_library(oskar_fits ${fits_SRC})
-set_target_properties(oskar_fits PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-target_link_libraries(oskar_fits
-    ${CFITSIO_LIBRARIES}
-    ${QT_QTCORE_LIBRARY}
-)
+target_link_libraries(oskar_fits ${CFITSIO_LIBRARIES} ${QT_QTCORE_LIBRARY})
+
+set_target_properties(oskar_fits
+    PROPERTIES
+    #PREFIX "lib"
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    SOVERSION ${oskar-lib_SOVERSION})
+
+
 
 # ==== Install configuration for the oskar-lib ms module.
 install(TARGETS oskar_fits DESTINATION ${OSKAR_LIB_INSTALL_DIR})

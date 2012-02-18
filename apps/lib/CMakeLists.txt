@@ -43,14 +43,14 @@ else()
 endif()
 
 set_target_properties(oskar_apps
-    PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-
-set_target_properties(oskar_apps PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(oskar_apps PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+    PROPERTIES
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+    SOVERSION ${oskar-lib_SOVERSION})
 
 # Install target for the apps library.
-set_target_properties(oskar_apps PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
 install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
 # Build MATLAB mex functions.
