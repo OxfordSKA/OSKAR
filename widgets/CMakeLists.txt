@@ -12,6 +12,9 @@ if (Qwt5_FOUND)
     # Add plotting widgets.
     add_subdirectory(plotting)
 
+    qt4_add_resources(widgets_RCC_SRC
+        icons/icons.qrc
+    )
     set(widgets_MOC_SRC
         oskar_DoubleSpinBox.h
         oskar_SettingsDelegate.h
@@ -34,7 +37,7 @@ if (Qwt5_FOUND)
         list(APPEND widgets_MOC_SRC plotting/${file})
     endforeach ()
     qt4_wrap_cpp(widgets_SRC ${widgets_MOC_SRC})
-    add_library(oskar_widgets ${widgets_SRC})
+    add_library(oskar_widgets ${widgets_SRC} ${widgets_RCC_SRC})
     target_link_libraries(oskar_widgets
         ${QT_QTCORE_LIBRARY}
         ${QT_QTGUI_LIBRARY}

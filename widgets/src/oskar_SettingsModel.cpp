@@ -30,6 +30,7 @@
 #include "widgets/oskar_SettingsItem.h"
 #include <QtGui/QApplication>
 #include <QtGui/QFontMetrics>
+#include <QtGui/QIcon>
 #include <QtCore/QVector>
 #include <QtCore/QSize>
 #include <QtCore/QVariant>
@@ -188,6 +189,21 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         return item->iterationNum();
     else if (role == IterationIncRole)
         return item->iterationInc();
+    else if (role == Qt::DecorationRole)
+    {
+        if (index.column() == 0)
+        {
+            if (item->type() == oskar_SettingsItem::INPUT_FILE_NAME ||
+                    item->type() == oskar_SettingsItem::INPUT_DIR_NAME)
+            {
+                return QIcon(":/icons/open.png");
+            }
+            else if (item->type() == oskar_SettingsItem::OUTPUT_FILE_NAME)
+            {
+                return QIcon(":/icons/save.png");
+            }
+        }
+    }
 
     // Check for roles in specific columns.
     if (index.column() == 0)
