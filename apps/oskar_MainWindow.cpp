@@ -37,12 +37,10 @@
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
-#include <QtGui/QDialogButtonBox>
 #include <QtGui/QFileDialog>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
-#include <QtGui/QMessageBox>
-#include <QtGui/QPushButton>
+#include <QtGui/QToolBar>
 #include <QtGui/QVBoxLayout>
 #include <QtCore/QModelIndex>
 
@@ -69,44 +67,59 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     view_->resizeColumnToContents(0);
     layout_->addWidget(view_);
 
-    // Create the button box and buttons.
-    buttons_ = new QDialogButtonBox(Qt::Horizontal, widget_);
-    buttonRunBeamPattern_ = new QPushButton("Run Beam Pattern", this);
-    buttonRunInterferometer_ = new QPushButton("Run Interferometer", this);
-    buttons_->addButton(buttonRunInterferometer_, QDialogButtonBox::AcceptRole);
-    buttons_->addButton(buttonRunBeamPattern_, QDialogButtonBox::AcceptRole);
-    buttons_->addButton(QDialogButtonBox::Close);
-    layout_->addWidget(buttons_);
-    connect(buttons_, SIGNAL(clicked(QAbstractButton*)),
-            this, SLOT(startSim(QAbstractButton*)));
-    connect(buttons_, SIGNAL(rejected()), this, SLOT(close()));
-
-    // Create the menus.
-    menubar_ = new QMenuBar(this);
-    setMenuBar(menubar_);
-    menuFile_ = new QMenu("File", menubar_);
-    menuView_ = new QMenu("View", menubar_);
-    menubar_->addAction(menuFile_->menuAction());
-    menubar_->addAction(menuView_->menuAction());
-    actOpen_ = new QAction("Open...", this);
+    // Create and set up the actions.
+    QAction* actOpen = new QAction("Open...", this);
+    QAction* actExit = new QAction("Exit", this);
     actHideUnset_ = new QAction("Hide Unset Items", this);
     actHideUnset_->setCheckable(true);
-    actShowFirstLevel_ = new QAction("Show First Level", this);
-    actExpandAll_ = new QAction("Expand All", this);
-    actCollapseAll_ = new QAction("Collapse All", this);
-    menuFile_->addAction(actOpen_);
-    menuView_->addAction(actHideUnset_);
-    menuView_->addSeparator();
-    menuView_->addAction(actShowFirstLevel_);
-    menuView_->addAction(actExpandAll_);
-    menuView_->addAction(actCollapseAll_);
-    connect(actOpen_, SIGNAL(triggered()), this, SLOT(openSettings()));
+    QAction* actShowFirstLevel = new QAction("Show First Level", this);
+    QAction* actExpandAll = new QAction("Expand All", this);
+    QAction* actCollapseAll = new QAction("Collapse All", this);
+    QAction* actRunInterferometer = new QAction("Run Interferometer", this);
+    QAction* actRunBeamPattern = new QAction("Run Beam Pattern", this);
+    connect(actOpen, SIGNAL(triggered()), this, SLOT(openSettings()));
+    connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(actHideUnset_, SIGNAL(toggled(bool)),
             this, SLOT(setHideIfUnset(bool)));
-    connect(actShowFirstLevel_, SIGNAL(triggered()),
+    connect(actShowFirstLevel, SIGNAL(triggered()),
             view_, SLOT(showFirstLevel()));
-    connect(actExpandAll_, SIGNAL(triggered()), view_, SLOT(expandAll()));
-    connect(actCollapseAll_, SIGNAL(triggered()), view_, SLOT(collapseAll()));
+    connect(actExpandAll, SIGNAL(triggered()), view_, SLOT(expandAll()));
+    connect(actCollapseAll, SIGNAL(triggered()), view_, SLOT(collapseAll()));
+    connect(actRunInterferometer, SIGNAL(triggered()),
+            this, SLOT(runInterferometer()));
+    connect(actRunBeamPattern, SIGNAL(triggered()),
+            this, SLOT(runBeamPattern()));
+
+    // Set up keyboard shortcuts.
+    actOpen->setShortcut(QKeySequence::Open);
+    actExit->setShortcut(QKeySequence::Quit);
+
+    // Create the menus.
+    QMenuBar* menubar = new QMenuBar(this);
+    setMenuBar(menubar);
+    QMenu* menuFile = new QMenu("File", menubar);
+    QMenu* menuView = new QMenu("View", menubar);
+    QMenu* menuRun = new QMenu("Run", menubar);
+    menubar->addAction(menuFile->menuAction());
+    menubar->addAction(menuView->menuAction());
+    menubar->addAction(menuRun->menuAction());
+    menuFile->addAction(actOpen);
+    menuFile->addSeparator();
+    menuFile->addAction(actExit);
+    menuView->addAction(actHideUnset_);
+    menuView->addSeparator();
+    menuView->addAction(actShowFirstLevel);
+    menuView->addAction(actExpandAll);
+    menuView->addAction(actCollapseAll);
+    menuRun->addAction(actRunInterferometer);
+    menuRun->addAction(actRunBeamPattern);
+
+    // Create the toolbar.
+    QToolBar* toolbar = new QToolBar(this);
+    toolbar->setObjectName("Run");
+    toolbar->addAction(actRunInterferometer);
+    toolbar->addAction(actRunBeamPattern);
+    addToolBar(Qt::TopToolBarArea, toolbar);
 
     // Load the settings.
     QSettings settings;
@@ -158,25 +171,23 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
 
 // Private slots.
 
+void oskar_MainWindow::runBeamPattern()
+{
+    sim_function_ = &oskar_sim_beam_pattern;
+    runButton();
+}
+
+void oskar_MainWindow::runInterferometer()
+{
+    sim_function_ = &oskar_sim_interferometer;
+    runButton();
+}
+
 void oskar_MainWindow::setHideIfUnset(bool value)
 {
     view_->saveExpanded();
     modelProxy_->setHideIfUnset(value);
     view_->restoreExpanded();
-}
-
-void oskar_MainWindow::startSim(QAbstractButton* button)
-{
-    if (button == buttonRunBeamPattern_)
-    {
-        sim_function_ = &oskar_sim_beam_pattern;
-        runButton();
-    }
-    else if (button == buttonRunInterferometer_)
-    {
-        sim_function_ = &oskar_sim_interferometer;
-        runButton();
-    }
 }
 
 // Private members.

@@ -134,6 +134,8 @@ void oskar_SettingsItem::setValue(const QVariant& value)
     if (value_.isNull() != value.isNull())
         setVisible(!value.isNull());
     value_ = value;
+    if (type_ == DOUBLE)
+        value_.convert(QVariant::Double);
 }
 
 const QString& oskar_SettingsItem::subkey() const

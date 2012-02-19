@@ -35,13 +35,8 @@
 class oskar_SettingsModel;
 class oskar_SettingsModelFilter;
 class oskar_SettingsView;
-class QAbstractButton;
 class QAction;
-class QDialogButtonBox;
-class QMenu;
-class QMenuBar;
 class QModelIndex;
-class QPushButton;
 class QVBoxLayout;
 class QWidget;
 
@@ -59,8 +54,9 @@ public slots:
     void openSettings(QString filename = QString());
 
 private slots:
+    void runBeamPattern();
+    void runInterferometer();
     void setHideIfUnset(bool value);
-    void startSim(QAbstractButton* button);
 
 private:
     void runButton();
@@ -69,19 +65,9 @@ private:
 private:
     QWidget* widget_;
     QVBoxLayout* layout_;
-    QDialogButtonBox* buttons_;
-    QPushButton* buttonRunInterferometer_;
-    QPushButton* buttonRunBeamPattern_;
     oskar_SettingsModel* model_;
     oskar_SettingsModelFilter* modelProxy_;
     oskar_SettingsView* view_;
-    QMenuBar* menubar_;
-    QMenu* menuFile_;
-    QMenu* menuView_;
-    QAction* actOpen_;
-    QAction* actShowFirstLevel_;
-    QAction* actExpandAll_;
-    QAction* actCollapseAll_;
     QAction* actHideUnset_;
     QString settingsFile_;
     int (*sim_function_)(const char*);
