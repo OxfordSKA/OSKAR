@@ -57,7 +57,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Create and set up the settings model.
     model_ = new oskar_SettingsModel(widget_);
-    modelProxy_ = new oskar_SettingsFilterModel(widget_);
+    modelProxy_ = new oskar_SettingsModelFilter(widget_);
     modelProxy_->setSourceModel(model_);
 
     // Create and set up the settings view.
@@ -85,27 +85,50 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menubar_ = new QMenuBar(this);
     setMenuBar(menubar_);
     menuFile_ = new QMenu("File", menubar_);
+    menuView_ = new QMenu("View", menubar_);
     menubar_->addAction(menuFile_->menuAction());
-    actionOpen_ = new QAction("Open...", this);
-    menuFile_->addAction(actionOpen_);
-    connect(actionOpen_, SIGNAL(triggered()), this, SLOT(openSettings()));
+    menubar_->addAction(menuView_->menuAction());
+    actOpen_ = new QAction("Open...", this);
+    actHideUnset_ = new QAction("Hide Unset Items", this);
+    actHideUnset_->setCheckable(true);
+    actShowFirstLevel_ = new QAction("Show First Level", this);
+    actExpandAll_ = new QAction("Expand All", this);
+    actCollapseAll_ = new QAction("Collapse All", this);
+    menuFile_->addAction(actOpen_);
+    menuView_->addAction(actHideUnset_);
+    menuView_->addSeparator();
+    menuView_->addAction(actShowFirstLevel_);
+    menuView_->addAction(actExpandAll_);
+    menuView_->addAction(actCollapseAll_);
+    connect(actOpen_, SIGNAL(triggered()), this, SLOT(openSettings()));
+    connect(actHideUnset_, SIGNAL(toggled(bool)),
+            this, SLOT(setHideIfUnset(bool)));
+    connect(actShowFirstLevel_, SIGNAL(triggered()),
+            view_, SLOT(showFirstLevel()));
+    connect(actExpandAll_, SIGNAL(triggered()), view_, SLOT(expandAll()));
+    connect(actCollapseAll_, SIGNAL(triggered()), view_, SLOT(collapseAll()));
 
     // Load the settings.
     QSettings settings;
-    QApplication::processEvents();
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
     restoreState(settings.value("main_window/state").toByteArray());
 
-    // Restore the expanded items.
+    // First, restore the expanded items.
     view_->restoreExpanded();
+
+    // Optionally hide unset items.
+    actHideUnset_->setChecked(settings.value("main_window/hide_unset_items").toBool());
 }
 
 void oskar_MainWindow::openSettings(QString filename)
 {
     // Check if the supplied filename is empty, and prompt to open file if so.
     if (filename.isEmpty())
+    {
+        view_->saveExpanded();
         filename = QFileDialog::getOpenFileName(this, "Open Settings",
                 settingsFile_);
+    }
 
     // Set the file if one was selected.
     if (!filename.isEmpty())
@@ -129,10 +152,18 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
     QSettings settings;
     settings.setValue("main_window/geometry", saveGeometry());
     settings.setValue("main_window/state", saveState());
+    settings.setValue("main_window/hide_unset_items", actHideUnset_->isChecked());
     QMainWindow::closeEvent(event);
 }
 
 // Private slots.
+
+void oskar_MainWindow::setHideIfUnset(bool value)
+{
+    view_->saveExpanded();
+    modelProxy_->setHideIfUnset(value);
+    view_->restoreExpanded();
+}
 
 void oskar_MainWindow::startSim(QAbstractButton* button)
 {

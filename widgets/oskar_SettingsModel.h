@@ -59,7 +59,8 @@ public:
         IterationKeysRole,
         SetIterationRole,
         ClearIterationRole,
-        OutputKeysRole
+        OutputKeysRole,
+        LoadRole
     };
 
 public:
@@ -78,20 +79,20 @@ public:
     QMap<int, QVariant> itemData (const QModelIndex& index) const;
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
-    void registerSetting(const QString& key, const QString& caption,
+    void registerSetting(const QString& key, const QString& label,
             int type, const QVariant& defaultValue = QVariant(),
             const QStringList& options = QStringList());
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     void saveSettingsFile(const QString& filename);
-    void setCaption(const QString& key, const QString& caption);
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
+    void setLabel(const QString& key, const QString& label);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
 
 private:
     void append(const QString& key, const QString& subkey, int type,
-            const QString& caption, const QVariant& defaultValue,
+            const QString& label, const QVariant& defaultValue,
             const QModelIndex& parent = QModelIndex());
     QModelIndex getChild(const QString& subkey,
             const QModelIndex& parent = QModelIndex()) const;
@@ -106,18 +107,24 @@ private:
     QStringList outputKeys_;
 };
 
-class oskar_SettingsFilterModel : public QSortFilterProxyModel
+class oskar_SettingsModelFilter : public QSortFilterProxyModel
 {
     Q_OBJECT
 
 public:
-    oskar_SettingsFilterModel(QObject* parent = 0);
-    virtual ~oskar_SettingsFilterModel();
+    oskar_SettingsModelFilter(QObject* parent = 0);
+    virtual ~oskar_SettingsModelFilter();
+    bool hideIfUnset() const;
+
+public slots:
+    void setHideIfUnset(bool value);
 
 protected:
     virtual bool filterAcceptsRow(int source_row,
             const QModelIndex& source_parent) const;
 
+private:
+    bool hideIfUnset_;
 };
 
 #endif /* OSKAR_SETTINGS_MODEL_H_ */

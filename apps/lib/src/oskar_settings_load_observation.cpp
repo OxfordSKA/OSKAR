@@ -50,7 +50,7 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
     s.beginGroup("observation");
 
     // Get frequency / channel data.
-    obs->num_channels         = s.value("num_channels").toInt();
+    obs->num_channels         = s.value("num_channels", 1).toInt();
     obs->start_frequency_hz   = s.value("start_frequency_hz").toDouble();
     obs->frequency_inc_hz     = s.value("frequency_inc_hz").toDouble();
     obs->channel_bandwidth_hz = s.value("channel_bandwidth_hz").toDouble();
@@ -60,13 +60,14 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
     obs->dec0_rad = s.value("phase_centre_dec_deg").toDouble() * M_PI / 180.0;
 
     // Get time data.
-    obs->time.num_vis_dumps  = s.value("num_vis_dumps").toInt();
-    obs->time.num_vis_ave    = s.value("num_vis_ave").toInt();
-    obs->time.num_fringe_ave = s.value("num_fringe_ave").toInt();
+    obs->time.num_vis_dumps  = s.value("num_vis_dumps", 1).toInt();
+    obs->time.num_vis_ave    = s.value("num_vis_ave", 1).toInt();
+    obs->time.num_fringe_ave = s.value("num_fringe_ave", 1).toInt();
 
-    // Get observation start time.
+    // Get observation start time (if blank, then use current).
     QString str_st = s.value("start_time_utc").toString();
-    QDateTime st = QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
+    QDateTime st = (str_st.isEmpty()) ?  QDateTime::currentDateTime().toUTC()
+            : QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
     if (!st.isValid())
     {
         fprintf(stderr, "ERROR: Invalid date string for 'start_time_utc' "
@@ -87,6 +88,7 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
 
     // Get observation length.
     QString str_len = s.value("length").toString();
+    if (str_len.isEmpty()) str_st = "00:00:01.000";
     QTime len = QTime::fromString(str_len, "h:m:s.z");
     if (!len.isValid())
     {

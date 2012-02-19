@@ -33,7 +33,7 @@
 #include <QtCore/QString>
 
 class oskar_SettingsModel;
-class oskar_SettingsFilterModel;
+class oskar_SettingsModelFilter;
 class oskar_SettingsView;
 class QAbstractButton;
 class QAction;
@@ -59,6 +59,7 @@ public slots:
     void openSettings(QString filename = QString());
 
 private slots:
+    void setHideIfUnset(bool value);
     void startSim(QAbstractButton* button);
 
 private:
@@ -72,11 +73,16 @@ private:
     QPushButton* buttonRunInterferometer_;
     QPushButton* buttonRunBeamPattern_;
     oskar_SettingsModel* model_;
-    oskar_SettingsFilterModel* modelProxy_;
+    oskar_SettingsModelFilter* modelProxy_;
     oskar_SettingsView* view_;
     QMenuBar* menubar_;
     QMenu* menuFile_;
-    QAction* actionOpen_;
+    QMenu* menuView_;
+    QAction* actOpen_;
+    QAction* actShowFirstLevel_;
+    QAction* actExpandAll_;
+    QAction* actCollapseAll_;
+    QAction* actHideUnset_;
     QString settingsFile_;
     int (*sim_function_)(const char*);
 };

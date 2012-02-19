@@ -32,21 +32,22 @@
 #include <cstdio>
 
 oskar_SettingsItem::oskar_SettingsItem(const QString& key,
-        const QString& subkey, int type, const QString& caption,
+        const QString& subkey, int type, const QString& label,
         const QVariant& defaultValue, oskar_SettingsItem* parent)
 {
     // Initialise constructed values.
     key_ = key;
     subkey_ = subkey;
     type_ = type;
-    caption_ = caption;
+    label_ = label;
     default_ = defaultValue;
     parentItem_ = parent;
 
     // Initialise user-defined, runtime values.
-    if (key.isEmpty()) value_ = defaultValue;
     iterNum_ = 1;
-    visible_ = true;
+    visible_ = 0;
+    if (key.isEmpty())
+        value_ = defaultValue;
 }
 
 oskar_SettingsItem::~oskar_SettingsItem()
@@ -57,11 +58,6 @@ oskar_SettingsItem::~oskar_SettingsItem()
 void oskar_SettingsItem::appendChild(oskar_SettingsItem* item)
 {
     childItems_.append(item);
-}
-
-const QString& oskar_SettingsItem::caption() const
-{
-    return caption_;
 }
 
 oskar_SettingsItem* oskar_SettingsItem::child(int row)
@@ -101,14 +97,14 @@ const QString& oskar_SettingsItem::key() const
     return key_;
 }
 
+const QString& oskar_SettingsItem::label() const
+{
+    return label_;
+}
+
 oskar_SettingsItem* oskar_SettingsItem::parent()
 {
     return parentItem_;
-}
-
-void oskar_SettingsItem::setCaption(const QString& value)
-{
-    caption_ = value;
 }
 
 void oskar_SettingsItem::setIterationInc(const QVariant& value)
@@ -121,6 +117,11 @@ void oskar_SettingsItem::setIterationNum(int value)
     iterNum_ = value;
 }
 
+void oskar_SettingsItem::setLabel(const QString& value)
+{
+    label_ = value;
+}
+
 void oskar_SettingsItem::setTooltip(const QString& value)
 {
     tooltip_ = value;
@@ -128,14 +129,11 @@ void oskar_SettingsItem::setTooltip(const QString& value)
 
 void oskar_SettingsItem::setValue(const QVariant& value)
 {
+    if (type_ == LABEL)
+        return;
+    if (value_.isNull() != value.isNull())
+        setVisible(!value.isNull());
     value_ = value;
-}
-
-void oskar_SettingsItem::setVisible(bool value)
-{
-    visible_ = value;
-    if (visible_ && parentItem_)
-        parentItem_->setVisible(true);
 }
 
 const QString& oskar_SettingsItem::subkey() const
@@ -158,7 +156,19 @@ const QVariant& oskar_SettingsItem::value() const
     return value_;
 }
 
-bool oskar_SettingsItem::visible() const
+int oskar_SettingsItem::visible() const
 {
     return visible_;
+}
+
+// Private members.
+
+void oskar_SettingsItem::setVisible(bool value)
+{
+    if (value)
+        ++visible_;
+    else
+        --visible_;
+    if (parentItem_)
+        parentItem_->setVisible(value);
 }

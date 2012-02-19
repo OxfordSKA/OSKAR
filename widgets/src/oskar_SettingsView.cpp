@@ -54,6 +54,11 @@ void oskar_SettingsView::saveExpanded()
     settings.setValue("settings_view/expanded_items", expanded);
 }
 
+void oskar_SettingsView::showFirstLevel()
+{
+    expandToDepth(0);
+}
+
 void oskar_SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)
 {
     resizeColumnToContents(0);

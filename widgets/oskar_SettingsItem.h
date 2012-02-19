@@ -42,7 +42,7 @@ class oskar_SettingsItem
 {
 public:
     enum {
-        CAPTION_ONLY,       /* e.g. "Sky model settings". */
+        LABEL,              /* e.g. "Sky model settings". */
         BOOL,               /* e.g. disable station beam. */
         INT,
         DOUBLE,
@@ -60,12 +60,11 @@ public:
 
 public:
     oskar_SettingsItem(const QString& key, const QString& subkey, int type,
-            const QString& caption, const QVariant& defaultValue,
+            const QString& label, const QVariant& defaultValue,
             oskar_SettingsItem* parent = 0);
     ~oskar_SettingsItem();
 
     void appendChild(oskar_SettingsItem* child);
-    const QString& caption() const;
     oskar_SettingsItem* child(int row);
     int childCount() const;
     int childNumber() const;
@@ -73,18 +72,21 @@ public:
     const QVariant& iterationInc() const;
     int iterationNum() const;
     const QString& key() const;
+    const QString& label() const;
     oskar_SettingsItem* parent();
-    void setCaption(const QString& value);
     void setIterationInc(const QVariant& value);
     void setIterationNum(int value);
+    void setLabel(const QString& value);
     void setTooltip(const QString& value);
     void setValue(const QVariant& value);
-    void setVisible(bool value);
     const QString& subkey() const;
     const QString& tooltip() const;
     int type() const;
     const QVariant& value() const;
-    bool visible() const;
+    int visible() const;
+
+private:
+    void setVisible(bool value);
 
 private:
     oskar_SettingsItem* parentItem_;
@@ -93,7 +95,7 @@ private:
     QString subkey_; // Short settings key.
     int type_; // Enumerated type.
     int visible_;
-    QString caption_;
+    QString label_;
     QString tooltip_;
     QVariant value_;
     QVariant default_;

@@ -181,7 +181,7 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
     {
         QMouseEvent* mouseEvent = (QMouseEvent*)event;
         if (mouseEvent->button() == Qt::RightButton &&
-                type != oskar_SettingsItem::CAPTION_ONLY)
+                type != oskar_SettingsItem::LABEL)
         {
             // Get the iteration keys.
             QStringList iterationKeys = mod->data(index,
@@ -217,7 +217,7 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             if (action)
             {
                 if (action->text() == strClearValue)
-                    mod->setData(index, "", Qt::EditRole);
+                    mod->setData(index, QVariant(), Qt::EditRole);
                 else if (action->text() == strIterate ||
                         action->text() == strEditIteration)
                     setIterations(mod, index);

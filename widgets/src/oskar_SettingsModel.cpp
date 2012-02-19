@@ -36,31 +36,31 @@
 #include <cstdio>
 
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
-: QAbstractItemModel(parent)
+: QAbstractItemModel(parent),
+  settings_(NULL),
+  rootItem_(NULL)
 {
-    settings_ = NULL;
-
     // Set up the root item.
     rootItem_ = new oskar_SettingsItem(QString(), QString(),
-            oskar_SettingsItem::CAPTION_ONLY, "Setting", "Value");
+            oskar_SettingsItem::LABEL, "Setting", "Value");
 
     // Simulator settings.
-    setCaption("simulator", "Simulator settings");
+    setLabel("simulator", "Simulator settings");
     registerSetting("simulator/double_precision", "Use double precision", oskar_SettingsItem::BOOL);
     setTooltip("simulator/double_precision", "Determines whether double precision arithmetic is used for the simulation");
     registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT);
     registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST);
 
     // Sky model file settings.
-    setCaption("sky", "Sky model settings");
+    setLabel("sky", "Sky model settings");
     registerSetting("sky/oskar_source_file", "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_NAME);
-    setCaption("sky/oskar_source_file/filter", "Filter settings");
+    setLabel("sky/oskar_source_file/filter", "Filter settings");
     registerSetting("sky/oskar_source_file/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/oskar_source_file/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/oskar_source_file/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/oskar_source_file/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/gsm_file", "Input Global Sky Model file", oskar_SettingsItem::INPUT_FILE_NAME);
-    setCaption("sky/gsm_file/filter", "Filter settings");
+    setLabel("sky/gsm_file/filter", "Filter settings");
     registerSetting("sky/gsm_file/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/gsm_file/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/gsm_file/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
@@ -68,19 +68,19 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/output_sky_file", "Output OSKAR source file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
     // Sky model generator settings.
-    setCaption("sky/generator", "Generators");
-    setCaption("sky/generator/random_power_law", "Random, power-law in flux");
+    setLabel("sky/generator", "Generators");
+    setLabel("sky/generator/random_power_law", "Random, power-law in flux");
     registerSetting("sky/generator/random_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT);
     registerSetting("sky/generator/random_power_law/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/power", "Power law index", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/seed", "Random seed", oskar_SettingsItem::RANDOM_SEED);
-    setCaption("sky/generator/random_power_law/filter", "Filter settings");
+    setLabel("sky/generator/random_power_law/filter", "Filter settings");
     registerSetting("sky/generator/random_power_law/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
-    setCaption("sky/generator/random_broken_power_law", "Random, broken power-law in flux");
+    setLabel("sky/generator/random_broken_power_law", "Random, broken power-law in flux");
     registerSetting("sky/generator/random_broken_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT);
     registerSetting("sky/generator/random_broken_power_law/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
@@ -88,27 +88,27 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/generator/random_broken_power_law/power2", "Power law index 2", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/threshold", "Threshold (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/seed", "Random seed", oskar_SettingsItem::RANDOM_SEED);
-    setCaption("sky/generator/random_broken_power_law/filter", "Filter settings");
+    setLabel("sky/generator/random_broken_power_law/filter", "Filter settings");
     registerSetting("sky/generator/random_broken_power_law/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
-    setCaption("sky/generator/healpix", "HEALPix (uniform, all sky) grid");
+    setLabel("sky/generator/healpix", "HEALPix (uniform, all sky) grid");
     registerSetting("sky/generator/healpix/nside", "Nside", oskar_SettingsItem::INT);
-    setCaption("sky/generator/healpix/filter", "Filter settings");
+    setLabel("sky/generator/healpix/filter", "Filter settings");
     registerSetting("sky/generator/healpix/filter/flux_min", "Flux density min (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/filter/flux_max", "Flux density max (Jy)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/filter/radius_inner_deg", "Inner radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/filter/radius_outer_deg", "Outer radius from phase centre (deg)", oskar_SettingsItem::DOUBLE);
 
     // Telescope model settings.
-    setCaption("telescope", "Telescope model settings");
+    setLabel("telescope", "Telescope model settings");
     registerSetting("telescope/station_positions_file", "Station positions file", oskar_SettingsItem::INPUT_FILE_NAME);
     registerSetting("telescope/station_layout_directory", "Station layout directory", oskar_SettingsItem::INPUT_DIR_NAME);
     registerSetting("telescope/longitude_deg", "Longitude (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/latitude_deg", "Latitude (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/altitude_m", "Altitude (m)", oskar_SettingsItem::DOUBLE);
-    setCaption("telescope/station", "Station settings");
+    setLabel("telescope/station", "Station settings");
     registerSetting("telescope/station/enable_beam", "Enable station beam", oskar_SettingsItem::BOOL);
 //    registerSetting("telescope/station/normalise_beam", "Normalise station beam", oskar_SettingsItem::BOOL);
     registerSetting("telescope/station/apply_element_errors", "Apply element errors", oskar_SettingsItem::BOOL);
@@ -118,7 +118,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/station/element_phase_error_deg", "Element phase standard deviation (deg)", oskar_SettingsItem::DOUBLE);
 
     // Observation settings.
-    setCaption("observation", "Observation settings");
+    setLabel("observation", "Observation settings");
     registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT);
     registerSetting("observation/start_frequency_hz", "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
     registerSetting("observation/frequency_inc_hz", "Frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
@@ -134,7 +134,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
     // Image settings.
-    setCaption("image", "Beam pattern settings");
+    setLabel("image", "Beam pattern settings");
     registerSetting("image/filename", "Output image file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
     registerSetting("image/fov_deg", "Field-of-view (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("image/size", "Image dimension (pixels)", oskar_SettingsItem::INT);
@@ -144,10 +144,7 @@ oskar_SettingsModel::~oskar_SettingsModel()
 {
     // Delete any existing settings object.
     if (settings_)
-    {
-        settings_->sync();
         delete settings_;
-    }
     delete rootItem_;
 }
 
@@ -197,11 +194,11 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (role == Qt::DisplayRole)
         {
-            QString caption = item->caption();
+            QString label = item->label();
             int iterIndex = iterationKeys_.indexOf(item->key());
             if (iterIndex >= 0)
-                caption.prepend(QString("[%1] ").arg(iterIndex + 1));
-            return caption;
+                label.prepend(QString("[%1] ").arg(iterIndex + 1));
+            return label;
         }
     }
     else if (index.column() == 1)
@@ -217,7 +214,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         }
         else if (role == Qt::SizeHintRole)
         {
-            int width = QApplication::fontMetrics().width(item->caption()) + 10;
+            int width = QApplication::fontMetrics().width(item->label()) + 10;
             return QSize(width, 24);
         }
     }
@@ -233,7 +230,7 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
     oskar_SettingsItem* item = getItem(index);
 
     if (index.column() == 0 ||
-            item->type() == oskar_SettingsItem::CAPTION_ONLY)
+            item->type() == oskar_SettingsItem::LABEL)
     {
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     }
@@ -258,7 +255,7 @@ QVariant oskar_SettingsModel::headerData(int section,
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         if (section == 0)
-            return rootItem_->caption();
+            return rootItem_->label();
         else if (section == 1)
             return rootItem_->value();
     }
@@ -294,7 +291,7 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
         else
         {
             // Append the group and set it as the new parent.
-            append(key, keys[k], oskar_SettingsItem::CAPTION_ONLY, keys[k],
+            append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
                     QVariant(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
@@ -304,7 +301,7 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
     child = getChild(keys.last(), parent);
     if (!child.isValid())
     {
-        append(key, keys.last(), oskar_SettingsItem::CAPTION_ONLY, keys.last(),
+        append(key, keys.last(), oskar_SettingsItem::LABEL, keys.last(),
                 QVariant(), parent);
         child = index(rowCount(parent) - 1, 0, parent);
     }
@@ -330,10 +327,7 @@ void oskar_SettingsModel::loadSettingsFile(const QString& filename)
     {
         // Delete any existing settings object.
         if (settings_)
-        {
-            settings_->sync();
             delete settings_;
-        }
 
         // Create new settings object from supplied filename.
         settings_ = new QSettings(filename, QSettings::IniFormat);
@@ -360,7 +354,7 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
 }
 
 void oskar_SettingsModel::registerSetting(const QString& key,
-        const QString& caption, int type, const QVariant& defaultValue,
+        const QString& label, int type, const QVariant& defaultValue,
         const QStringList& /*options*/)
 {
     QStringList keys = key.split('/');
@@ -375,14 +369,14 @@ void oskar_SettingsModel::registerSetting(const QString& key,
         else
         {
             // Append the group and set it as the new parent.
-            append(key, keys[k], oskar_SettingsItem::CAPTION_ONLY, keys[k],
+            append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
                     QVariant(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
 
     // Append the actual setting.
-    append(key, keys.last(), type, caption, defaultValue, parent);
+    append(key, keys.last(), type, label, defaultValue, parent);
 
     // Check if this is an output file.
     if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
@@ -400,25 +394,20 @@ void oskar_SettingsModel::saveSettingsFile(const QString& filename)
     {
         // Delete any existing settings object.
         if (settings_)
-        {
-            settings_->sync();
             delete settings_;
-        }
 
         // Create new settings object from supplied filename.
         settings_ = new QSettings(filename, QSettings::IniFormat);
 
         // Set the contents of the file.
-        beginResetModel();
         saveFromParentIndex(QModelIndex());
-        endResetModel();
     }
 }
 
-void oskar_SettingsModel::setCaption(const QString& key, const QString& caption)
+void oskar_SettingsModel::setLabel(const QString& key, const QString& label)
 {
     QModelIndex idx = index(key);
-    setData(idx, caption);
+    setData(idx, label);
 }
 
 void oskar_SettingsModel::setTooltip(const QString& key, const QString& tooltip)
@@ -436,16 +425,10 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     // Get a pointer to the item.
     oskar_SettingsItem* item = getItem(idx);
 
-    // Check for roles common to all columns.
+    // Check for role type.
     if (role == Qt::ToolTipRole)
     {
         item->setTooltip(value.toString());
-        emit dataChanged(idx, idx);
-        return true;
-    }
-    else if (role == VisibleRole)
-    {
-        item->setVisible(value.toBool());
         emit dataChanged(idx, idx);
         return true;
     }
@@ -481,39 +464,47 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
             foreach (QString k, iterationKeys_)
             {
                 QModelIndex idx = index(k);
-                emit dataChanged(index(idx.row(), 0, parent(idx)),
-                        index(idx.row(), columnCount(), parent(idx)));
+                emit dataChanged(idx, idx.sibling(idx.row(), columnCount()-1));
             }
             return true;
         }
         return false;
     }
-
-    QVariant data;
-    if (role == Qt::EditRole)
-        data = value;
-    else if (role == Qt::CheckStateRole)
-        data = value.toBool() ? QString("true") : QString("false");
-
-    if (idx.column() == 0)
+    else if (role == Qt::EditRole || role == Qt::CheckStateRole ||
+            role == LoadRole)
     {
-        item->setCaption(data.toString());
-        emit dataChanged(idx, idx);
-        return true;
-    }
-    else if (idx.column() == 1)
-    {
-        item->setValue(data);
-        if (settings_)
+        QVariant data = value;
+        if (role == Qt::CheckStateRole)
+            data = value.toBool() ? QString("true") : QString("false");
+
+        if (idx.column() == 0)
         {
-            if (value.toString().isEmpty())
-                settings_->remove(item->key());
-            else
-                settings_->setValue(item->key(), data);
-            settings_->sync();
+            item->setLabel(data.toString());
+            emit dataChanged(idx, idx);
+            return true;
         }
-        emit dataChanged(idx, idx);
-        return true;
+        else if (idx.column() == 1)
+        {
+            // Set the data in the settings file.
+            if ((role != LoadRole) && settings_)
+            {
+                if (data.isNull())
+                    settings_->remove(item->key());
+                else
+                    settings_->setValue(item->key(), data);
+                settings_->sync();
+            }
+
+            // Set the item data.
+            item->setValue(data);
+            QModelIndex i(idx);
+            while (i.isValid())
+            {
+                emit dataChanged(i, i);
+                i = i.parent();
+            }
+            return true;
+        }
     }
 
     return false;
@@ -532,14 +523,14 @@ void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
 // Private methods.
 
 void oskar_SettingsModel::append(const QString& key, const QString& subkey,
-        int type, const QString& caption, const QVariant& defaultValue,
+        int type, const QString& label, const QVariant& defaultValue,
         const QModelIndex& parent)
 {
     oskar_SettingsItem *parentItem = getItem(parent);
 
     beginInsertRows(parent, rowCount(), rowCount());
     oskar_SettingsItem* item = new oskar_SettingsItem(key, subkey, type,
-            caption, defaultValue, parentItem);
+            label, defaultValue, parentItem);
     parentItem->appendChild(item);
     endInsertRows();
     hash_.insert(key, item);
@@ -577,21 +568,9 @@ void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
         QModelIndex idx = index(i, 0, parent);
         if (idx.isValid())
         {
-            oskar_SettingsItem* item = getItem(idx);
-            item->setVisible(false);
-            if (item->type() != oskar_SettingsItem::CAPTION_ONLY)
-            {
-                if (settings_->contains(item->key()))
-                {
-                    item->setValue(settings_->value(item->key()));
-                    item->setVisible(true);
-                }
-                else
-                {
-                    item->setValue(item->defaultValue());
-                }
-                emit dataChanged(idx, idx);
-            }
+            const oskar_SettingsItem* item = getItem(idx);
+            setData(idx.sibling(idx.row(), 1),
+                    settings_->value(item->key()), LoadRole);
             loadFromParentIndex(idx);
         }
     }
@@ -605,27 +584,48 @@ void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
         QModelIndex idx = index(i, 0, parent);
         if (idx.isValid())
         {
-            oskar_SettingsItem* item = getItem(idx);
-            if (!item->value().toString().isEmpty())
+            const oskar_SettingsItem* item = getItem(idx);
+            if (!item->value().isNull())
                 settings_->setValue(item->key(), item->value());
             saveFromParentIndex(idx);
         }
     }
 }
 
-oskar_SettingsFilterModel::oskar_SettingsFilterModel(QObject* parent)
-: QSortFilterProxyModel(parent)
+oskar_SettingsModelFilter::oskar_SettingsModelFilter(QObject* parent)
+: QSortFilterProxyModel(parent),
+  hideIfUnset_(false)
+{
+    setDynamicSortFilter(true);
+}
+
+oskar_SettingsModelFilter::~oskar_SettingsModelFilter()
 {
 }
 
-oskar_SettingsFilterModel::~oskar_SettingsFilterModel()
+bool oskar_SettingsModelFilter::hideIfUnset() const
 {
+    return hideIfUnset_;
 }
 
-bool oskar_SettingsFilterModel::filterAcceptsRow(int sourceRow,
+// Public slots.
+
+void oskar_SettingsModelFilter::setHideIfUnset(bool value)
+{
+    if (value != hideIfUnset_)
+    {
+        hideIfUnset_ = value;
+        beginResetModel();
+        endResetModel();
+    }
+}
+
+// Protected methods.
+
+bool oskar_SettingsModelFilter::filterAcceptsRow(int sourceRow,
             const QModelIndex& sourceParent) const
 {
-    return true;
+    if (!hideIfUnset_) return true;
     QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
     return sourceModel()->data(idx, oskar_SettingsModel::VisibleRole).toBool();
 }

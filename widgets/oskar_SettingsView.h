@@ -45,6 +45,9 @@ public:
     void saveExpanded();
 
 public slots:
+    void showFirstLevel();
+
+private slots:
     void resizeAfterExpand(const QModelIndex& index);
 
 private:
