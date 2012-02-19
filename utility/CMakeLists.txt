@@ -22,6 +22,7 @@ set(utility_SRC
     src/oskar_mem_append.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_copy.c
+    src/oskar_mem_different.c
     src/oskar_mem_element_size.c
     src/oskar_mem_free.c
     src/oskar_mem_get_pointer.c

@@ -49,6 +49,7 @@ class Test_Mem : public CppUnit::TestFixture
         CPPUNIT_TEST(test_alloc);
         CPPUNIT_TEST(test_realloc);
         CPPUNIT_TEST(test_append);
+        CPPUNIT_TEST(test_different);
         CPPUNIT_TEST(test_type_check);
         CPPUNIT_TEST(test_scale_real);
         CPPUNIT_TEST(test_set_value_real);
@@ -61,6 +62,7 @@ class Test_Mem : public CppUnit::TestFixture
         void test_alloc();
         void test_realloc();
         void test_append();
+        void test_different();
         void test_type_check();
         void test_scale_real();
         void test_set_value_real();

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPEMODEL_H_
-#define OSKAR_TELESCOPEMODEL_H_
+#ifndef OSKAR_TELESCOPE_MODEL_H_
+#define OSKAR_TELESCOPE_MODEL_H_
 
 #include "oskar_global.h"
 #include "station/oskar_StationModel.h"
@@ -91,6 +91,17 @@ struct oskar_TelescopeModel
      * Destroys the telescope structure, freeing any memory it occupies.
      */
     ~oskar_TelescopeModel();
+
+    /**
+     * @brief
+     * Analyses a telescope model to determine its properties.
+     *
+     * @details
+     * This function analyses a telescope model to determine whether all
+     * stations are identical and whether element errors and/or weights
+     * should be applied. The relevant flags within the structure are updated.
+     */
+    void analyse();
 
     /**
      * @brief
@@ -203,4 +214,4 @@ struct oskar_TelescopeModel
 
 typedef struct oskar_TelescopeModel oskar_TelescopeModel;
 
-#endif /* OSKAR_TELESCOPEMODEL_H_ */
+#endif /* OSKAR_TELESCOPE_MODEL_H_ */

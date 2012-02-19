@@ -19,6 +19,7 @@ set(interferometry_SRC
     src/oskar_interferometer_scalar.cpp
     src/oskar_interferometer.cpp
     src/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.c
+    src/oskar_telescope_model_analyse.c
     src/oskar_telescope_model_copy.c
     src/oskar_telescope_model_free.c
     src/oskar_telescope_model_init.c

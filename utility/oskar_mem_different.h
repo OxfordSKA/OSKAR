@@ -26,16 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_STATIONS_H_
-#define OSKAR_LOAD_STATIONS_H_
+#ifndef OSKAR_MEM_DIFFERENT_H_
+#define OSKAR_MEM_DIFFERENT_H_
 
 /**
- * @file oskar_load_stations.h
+ * @file oskar_mem_different.h
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,21 +42,33 @@ extern "C" {
 
 /**
  * @brief
- * Loads a directory of station (coordinate) files into an array of station
- * model structures.
+ * Checks if the contents of two blocks of memory are different.
  *
- * @param[out] stations           Array of station model structures.
- * @param[in]  num_stations       Number of station model structures in array.
- * @param[in]  dir_path           Path to a directory of station files.
+ * @details
+ * This function checks whether the contents of one block of memory are
+ * different to the contents of another. If \p num_elements is greater than
+ * zero, then only this number of elements are checked.
  *
- * @return An OSKAR error code.
+ * If the data types are different, then OSKAR_TRUE is returned immediately
+ * without checking each element.
+ *
+ * NOTE: Data checks are currently only supported in CPU memory.
+ *
+ * @param[in] one Pointer to the first data structure.
+ * @param[in] two Pointer to the second data structure.
+ * @param[in] num_elements Number of elements to check.
+ *
+ * @return
+ * This function returns OSKAR_TRUE (1) if the contents of the blocks of memory
+ * are different, or OSKAR_FALSE (0) if the contents are the same.
+ * OSKAR error codes (values < 0) may also be returned.
  */
 OSKAR_EXPORT
-int oskar_load_stations(oskar_StationModel* station, int num_stations,
-        const char* dir_path);
+int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
+        int num_elements);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_LOAD_STATIONS_H_ */
+#endif /* OSKAR_MEM_DIFFERENT_H_ */

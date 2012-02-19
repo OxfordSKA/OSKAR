@@ -62,22 +62,13 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
     }
 
     // Load stations from directory.
-    err = oskar_load_stations(telescope->station,
-            &(telescope->identical_stations), telescope->num_stations,
+    err = oskar_load_stations(telescope->station, telescope->num_stations,
             station_dir);
     if (err)
     {
         fprintf(stderr, "== ERROR: Failed to load station geometry (%s).\n",
                 oskar_get_error_string(err));
         return NULL;
-    }
-
-    // Find the maximum station size.
-    telescope->max_station_size = -INT_MAX;
-    for (int i = 0; i < telescope->num_stations; ++i)
-    {
-        telescope->max_station_size = max(telescope->station[i].num_elements,
-                telescope->max_station_size);
     }
 
     // Set phase centre.
@@ -96,8 +87,6 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].single_element_model = true; // FIXME set this via the settings file.
-        telescope->station[i].apply_element_errors =
-                settings->telescope.station.apply_element_errors;
     }
 
     // Override station element amplitude gains if required.
@@ -171,13 +160,9 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         }
     }
 
-    // Print summary data.
-    printf("\n");
-    printf("= Telescope model\n");
-    printf("  - Num. stations          = %u\n", telescope->num_stations);
-    printf("  - Identical stations     = %s\n",
-            telescope->identical_stations ? "true" : "false");
-    printf("\n");
+    // Analyse telescope model to determine whether stations are identical,
+    // whether to apply element errors and/or weights.
+    telescope->analyse();
 
     // Return the structure.
     return telescope;

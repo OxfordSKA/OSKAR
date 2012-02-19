@@ -51,7 +51,7 @@ extern "C" {
  *
  * The data in the structure that is returned resides in CPU memory.
  *
- * @param[in] settings A reference to the settings object.
+ * @param[in] settings A pointer to the settings structure.
  */
 OSKAR_EXPORT
 oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings);
@@ -60,4 +60,4 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings);
 }
 #endif
 
-#endif // OSKAR_SET_UP_TELESCOPE_H_
+#endif /* OSKAR_SET_UP_TELESCOPE_H_ */

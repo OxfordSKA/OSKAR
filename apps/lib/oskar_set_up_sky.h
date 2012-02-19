@@ -51,7 +51,7 @@ extern "C" {
  *
  * The data in the structure that is returned resides in CPU memory.
  *
- * @param[in] settings A reference to the settings object.
+ * @param[in] settings A pointer to the settings structure.
  */
 OSKAR_EXPORT
 oskar_SkyModel* oskar_set_up_sky(const oskar_Settings* settings);

@@ -26,38 +26,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_STATIONS_H_
-#define OSKAR_LOAD_STATIONS_H_
-
-/**
- * @file oskar_load_stations.h
- */
-
-#include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
+#include "utility/oskar_mem_different.h"
+#include "utility/oskar_mem_element_size.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Loads a directory of station (coordinate) files into an array of station
- * model structures.
- *
- * @param[out] stations           Array of station model structures.
- * @param[in]  num_stations       Number of station model structures in array.
- * @param[in]  dir_path           Path to a directory of station files.
- *
- * @return An OSKAR error code.
- */
-OSKAR_EXPORT
-int oskar_load_stations(oskar_StationModel* station, int num_stations,
-        const char* dir_path);
+int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
+        int num_elements)
+{
+    int type, bytes_to_check, i;
+
+    /* Sanity check on inputs. */
+    if (one == NULL || two == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check the data types. */
+    type = one->private_type;
+    if (type != two->private_type)
+        return OSKAR_TRUE;
+
+    /* Check the number of elements. */
+    if (num_elements <= 0 || num_elements > one->private_num_elements)
+        num_elements = one->private_num_elements;
+    if (num_elements > two->private_num_elements)
+        return OSKAR_TRUE;
+    bytes_to_check = num_elements * oskar_mem_element_size(type);
+
+    /* Check data location. */
+    if (one->private_location == OSKAR_LOCATION_CPU &&
+            two->private_location == OSKAR_LOCATION_CPU)
+    {
+        const char *p1, *p2;
+
+        /* Check contents of CPU memory (every byte). */
+        p1 = (const char*)(one->data);
+        p2 = (const char*)(two->data);
+        for (i = 0; i < bytes_to_check; ++i)
+        {
+            if (p1[i] != p2[i])
+                return OSKAR_TRUE;
+        }
+
+        /* Memory contents must be the same. */
+        return OSKAR_FALSE;
+    }
+
+    /* Data checks are currently only supported in CPU memory. */
+    return OSKAR_ERR_BAD_LOCATION;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_LOAD_STATIONS_H_ */

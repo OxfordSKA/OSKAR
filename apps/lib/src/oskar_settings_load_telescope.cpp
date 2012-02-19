@@ -73,7 +73,6 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     s.beginGroup("station");
     tel->station.enable_beam = s.value("enable_beam", true).toBool();
     tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
-    tel->station.apply_element_errors = s.value("apply_element_errors", false).toBool();
 
     // Station element settings (overrides).
     tel->station.element_amp_gain =

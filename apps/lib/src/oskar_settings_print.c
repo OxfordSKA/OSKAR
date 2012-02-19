@@ -257,7 +257,6 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_k(2, w, "Station settings", 1);
     pr_b(3, w, "Enable station beam", s->telescope.station.enable_beam);
     pr_b(3, w, "Normalise station beam", s->telescope.station.normalise_beam);
-    pr_b(3, w, "Apply element errors", s->telescope.station.apply_element_errors);
     if (s->telescope.station.element_amp_gain > -1e10)
         pr_3f(3, w, "Element amplitude gain",
                 s->telescope.station.element_amp_gain);

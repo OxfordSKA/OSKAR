@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_analyse.h"
 #include "interferometry/oskar_telescope_model_copy.h"
 #include "interferometry/oskar_telescope_model_free.h"
 #include "interferometry/oskar_telescope_model_init.h"
@@ -64,6 +64,11 @@ oskar_TelescopeModel::~oskar_TelescopeModel()
 {
     if (oskar_telescope_model_free(this))
         throw "Error in oskar_telescope_model_free.";
+}
+
+void oskar_TelescopeModel::analyse()
+{
+    oskar_telescope_model_analyse(this);
 }
 
 int oskar_TelescopeModel::load_station_pos(const char* filename,

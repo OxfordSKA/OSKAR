@@ -26,16 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_LOAD_STATIONS_H_
-#define OSKAR_LOAD_STATIONS_H_
+#ifndef OSKAR_TELESCOPE_MODEL_ANALYSE_H_
+#define OSKAR_TELESCOPE_MODEL_ANALYSE_H_
 
 /**
- * @file oskar_load_stations.h
+ * @file oskar_telescope_model_analyse.h
  */
 
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,21 +42,20 @@ extern "C" {
 
 /**
  * @brief
- * Loads a directory of station (coordinate) files into an array of station
- * model structures.
+ * Analyses a telescope model to determine its properties.
  *
- * @param[out] stations           Array of station model structures.
- * @param[in]  num_stations       Number of station model structures in array.
- * @param[in]  dir_path           Path to a directory of station files.
+ * @details
+ * This function analyses a telescope model to determine whether all
+ * stations are identical and whether element errors and/or weights
+ * should be applied. The relevant flags within the structure are updated.
  *
- * @return An OSKAR error code.
+ * @param model Telescope model structure to analyse.
  */
 OSKAR_EXPORT
-int oskar_load_stations(oskar_StationModel* station, int num_stations,
-        const char* dir_path);
+void oskar_telescope_model_analyse(oskar_TelescopeModel* model);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_LOAD_STATIONS_H_ */
+#endif /* OSKAR_TELESCOPE_MODEL_ANALYSE_H_ */

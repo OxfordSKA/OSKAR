@@ -32,6 +32,7 @@
 #include "utility/test/Test_Mem.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_append.h"
+#include "utility/oskar_mem_different.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_mem_add.h"
@@ -138,6 +139,70 @@ void Test_Mem::test_append()
             else
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(value2, ((float*)mem_temp2.data)[i], 1.0e-5);
         }
+    }
+}
+
+void Test_Mem::test_different()
+{
+    int error, value;
+
+    // Test two memory blocks that are the same.
+    {
+        oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+        oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+
+        error = oskar_mem_set_value_real(&one, 4.4);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        error = oskar_mem_set_value_real(&two, 4.4);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+
+        value = oskar_mem_different(&one, &two, 0);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, value);
+    }
+
+    // Test two memory blocks that are different.
+    {
+        oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+        oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+
+        error = oskar_mem_set_value_real(&one, 4.4);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        error = oskar_mem_set_value_real(&two, 4.2);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+
+        value = oskar_mem_different(&one, &two, 0);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, value);
+    }
+
+    // Test two memory blocks that are different by one element.
+    {
+        oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+        oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+
+        error = oskar_mem_set_value_real(&one, 1.0);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        error = oskar_mem_set_value_real(&two, 1.0);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        ((float*)(two.data))[4] = 1.1;
+
+        value = oskar_mem_different(&one, &two, 0);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, value);
+    }
+
+    // Test two memory blocks that are different by one element, but only up to
+    // the point where they are different.
+    {
+        oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+        oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
+
+        error = oskar_mem_set_value_real(&one, 1.0);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        error = oskar_mem_set_value_real(&two, 1.0);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+        ((float*)(two.data))[4] = 1.1;
+
+        value = oskar_mem_different(&one, &two, 4);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, value);
     }
 }
 

@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "apps/lib/oskar_load_stations.h"
 #include "utility/oskar_mem_element_size.h"
 
@@ -34,12 +33,9 @@
 #include <QtCore/QStringList>
 #include <QtCore/QFileInfoList>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
-        const int num_stations, const char* dir_path)
+extern "C"
+int oskar_load_stations(oskar_StationModel* station, int num_stations,
+        const char* dir_path)
 {
     // Get the list of station files to load.
     QDir dir;
@@ -63,49 +59,8 @@ int oskar_load_stations(oskar_StationModel* station, int* identical_stations,
     for (int i = 0; i < num_stations; ++i)
     {
         QByteArray filename = files.at(i).absoluteFilePath().toAscii();
-        station[i].load(filename.constData());
+        station[i].load(filename);
     }
 
-    // Check if stations are all the same.
-    *identical_stations = true;
-
-    // 1. Check if they have the same number of antennas.
-    int num_antennas_station0 = station[0].num_elements;
-    for (int i = 0; i < num_stations; ++i)
-    {
-        if (station[i].num_elements != num_antennas_station0)
-        {
-            *identical_stations = false;
-            break;
-        }
-    }
-
-    // 2. Check if the positions are the same (compare every byte).
-    bool done = false;
-    oskar_StationModel* station0 = &station[0];
-    if (*identical_stations)
-    {
-        for (int j = 0; j < num_stations; ++j)
-        {
-            oskar_StationModel* s = &station[j];
-            int bytes = s->num_elements * oskar_mem_element_size(s->type());
-            for (int i = 0; i < bytes; ++i)
-            {
-                if (((char*)(station0->x))[i] != ((char*)(s->x))[i] ||
-                        ((char*)(station0->y))[i] != ((char*)(s->y))[i] ||
-                        ((char*)(station0->z))[i] != ((char*)(s->z))[i])
-                {
-                    *identical_stations = false;
-                    done = true;
-                    break;
-                }
-            }
-            if (done) break;
-        }
-    }
     return 0;
 }
-
-#ifdef __cplusplus
-}
-#endif

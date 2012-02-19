@@ -28,6 +28,7 @@
 
 #include "apps/lib/test/Test_load_stations.h"
 #include "apps/lib/oskar_load_stations.h"
+#include "interferometry/oskar_TelescopeModel.h"
 #include "station/oskar_StationModel.h"
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
@@ -67,11 +68,10 @@ void Test_load_stations::test()
     }
 
     // Load the stations.
-    oskar_StationModel* stations = (oskar_StationModel*) malloc(num_stations * sizeof(oskar_StationModel));
-    for (int i = 0; i < num_stations; ++i)
-        oskar_station_model_init(&stations[i], OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-    int identical_stations;
-    int error = oskar_load_stations(stations, &identical_stations, num_stations, path);
+    oskar_TelescopeModel telescope(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_stations);
+    oskar_StationModel* stations = telescope.station;
+    int error = oskar_load_stations(stations, num_stations, path);
+    telescope.analyse();
     CPPUNIT_ASSERT_EQUAL(0, error);
 
     // Check the data loaded correctly.
@@ -85,7 +85,7 @@ void Test_load_stations::test()
             CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i/10.0, ((float*)(stations[j].y))[i], err);
         }
     }
-    CPPUNIT_ASSERT_EQUAL(1, identical_stations);
+    CPPUNIT_ASSERT_EQUAL(1, telescope.identical_stations);
 
     // Remove the test directory.
     dir.setPath(QString(path));
@@ -93,9 +93,4 @@ void Test_load_stations::test()
     for (int i = 0; i < files.size(); ++i)
         QFile::remove(files.at(i).absoluteFilePath());
     dir.rmdir(dir.absolutePath());
-
-    // Free the stations.
-    for (int i = 0; i < num_stations; ++i)
-        oskar_station_model_free(&stations[i]);
-    free(stations);
 }
