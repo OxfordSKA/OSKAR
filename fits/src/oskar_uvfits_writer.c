@@ -27,6 +27,8 @@
  */
 
 #include "fits/oskar_uvfits_writer.h"
+#include "fits/oskar_fits_write_axis_header.h"
+#include "fits/oskar_fits_check_status.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,26 +58,7 @@ void oskar_uvfits_create(const char* filename, oskar_uvfits* fits)
     /* Create a new empty output FITS file. */
     /* fits_create_file */
     ffinit(&(fits->fptr), filename, &(fits->status));
-    oskar_uvfits_check_status(fits->status, "Opening file");
-}
-
-void oskar_uvfits_check_status(const int status, const char* message)
-{
-    char line[80];
-
-    /* No status error, return. */
-    if (!status) return;
-
-    memset(line, '*', 79);
-    fprintf(stderr, "%s\n", line);
-
-    /* Print user supplied message. */
-    if (message == NULL || strlen(message) > 0)
-        fprintf(stderr, "UVFITS ERROR: %s.", message);
-
-    /* Print the CFITSIO error message. */
-    fits_report_error(stderr, status);
-    fprintf(stderr, "%s\n", line);
+    oskar_fits_check_status(fits->status, "Opening file");
 }
 
 void oskar_uvfits_close(fitsfile* fits_file)
@@ -84,7 +67,7 @@ void oskar_uvfits_close(fitsfile* fits_file)
     if (fits_file == NULL) return;
     /* fits_close_file */
     ffclos(fits_file, &status);
-    oskar_uvfits_check_status(status, "Closing file");
+    oskar_fits_check_status(status, "Closing file");
 }
 
 void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis)
@@ -122,11 +105,11 @@ void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis)
             pcount, gcount, extend, &status);
 
     /* Check the CFITSIO error status. */
-    oskar_uvfits_check_status(status, "Write groups header");
+    oskar_fits_check_status(status, "Write groups header");
 }
 
 void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename,
-		double ra0, double dec0, double frequency0, double date0)
+        double ra0, double dec0, double frequency0, double date0)
 {
     char key[FLEN_KEYWORD], value[FLEN_VALUE], name[FLEN_COMMENT];
     int decimals = 10;
@@ -145,17 +128,17 @@ void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename,
     fits_write_key_dbl(fits_file, "OBSDEC", dec0, decimals, "Antenna pointing DEC", &status);
 
     /* Axis description headers (Note: axis 1 = empty). */
-    oskar_uvfits_write_axis_header(fits_file, 2, "COMPLEX", "1=real, 2=imag, 3=weight",
+    oskar_fits_write_axis_header(fits_file, 2, "COMPLEX", "1=real, 2=imag, 3=weight",
             1.0, 1.0, 1.0, 1.0);
-    oskar_uvfits_write_axis_header(fits_file, 3, "STOKES", "==scalar (I/Q/U/V)",
+    oskar_fits_write_axis_header(fits_file, 3, "STOKES", "==scalar (I/Q/U/V)",
             1.0, 1.0, 1.0, 1.0);
-    oskar_uvfits_write_axis_header(fits_file, 4, "FREQ", "Frequency in Hz.",
+    oskar_fits_write_axis_header(fits_file, 4, "FREQ", "Frequency in Hz.",
             frequency0, 0.0, 1.0, 0.0);
-    oskar_uvfits_write_axis_header(fits_file, 5, "RA", "Right Ascension in deg.",
+    oskar_fits_write_axis_header(fits_file, 5, "RA", "Right Ascension in deg.",
             ra0, 0.0, 1.0, 1.0);
-    oskar_uvfits_write_axis_header(fits_file, 6, "DEC", "Declination in deg.",
+    oskar_fits_write_axis_header(fits_file, 6, "DEC", "Declination in deg.",
             dec0, 0.0, 1.0, 1.0);
-    oskar_uvfits_check_status(status, "");
+    oskar_fits_check_status(status, "");
 
     /* Parameter headers. */
     invFreq = 1.0 / frequency0;
@@ -164,40 +147,13 @@ void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename,
     oskar_uvfits_write_param_header(fits_file, 3, "WW--",     "", invFreq, 0.0);
     oskar_uvfits_write_param_header(fits_file, 4, "DATE",     "", 1.0,     date0);
     oskar_uvfits_write_param_header(fits_file, 5, "BASELINE", "", 1.0,     0.0);
-    oskar_uvfits_check_status(status, "");
+    oskar_fits_check_status(status, "");
 
     /* Write a name that is picked up by AIPS. */
     strcat(name, "AIPS   IMNAME='");
     strcat(name, filename);
     strcat(name, "'");
     fits_write_history(fits_file, name, &status);
-}
-
-void oskar_uvfits_write_axis_header(fitsfile* fits_file, int id,
-        const char* ctype, const char* comment, double crval,
-        double cdelt, double crpix, double crota)
-{
-    char s_key[FLEN_KEYWORD], s_value[FLEN_VALUE], s_comment[FLEN_COMMENT];
-    int status = 0;
-    int decimals = 10;
-
-    strcpy(s_comment, comment);
-    strcpy(s_value, ctype);
-
-    fits_make_keyn("CTYPE", id, s_key, &status);
-    fits_write_key_str(fits_file, s_key, s_value, s_comment, &status);
-
-    fits_make_keyn("CRVAL", id, s_key, &status);
-    fits_write_key_dbl(fits_file, s_key, crval, decimals, NULL, &status);
-
-    fits_make_keyn("CDELT", id, s_key, &status);
-    fits_write_key_dbl(fits_file, s_key, cdelt, decimals, NULL, &status);
-
-    fits_make_keyn("CRPIX", id, s_key, &status);
-    fits_write_key_dbl(fits_file, s_key, crpix, decimals, NULL, &status);
-
-    fits_make_keyn("CROTA", id, s_key, &status);
-    fits_write_key_dbl(fits_file, s_key, crota, decimals, NULL, &status);
 }
 
 void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
@@ -225,7 +181,7 @@ void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
 void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
         const double* weight, const double* date, const double* baseline)
 {
-	int i, j;
+    int i, j;
     int status = 0;
 
     /* fixme: work out how to read this from the already written header. */
@@ -276,7 +232,7 @@ void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
 
         fits_write_grppar_flt(fits_file, group, firstelem, nelements,
                 p_temp, &status);
-        oskar_uvfits_check_status(status, "");
+        oskar_fits_check_status(status, "");
 
         /* Write the data. */
         g_temp[0] = vis->amp[i].x; /* re */
@@ -288,7 +244,7 @@ void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
 
         fits_write_subset_flt(fits_file, group, 5, naxes, fpixel, lpixel, g_temp, &status);
 
-        oskar_uvfits_check_status(status, "");
+        oskar_fits_check_status(status, "");
     }
     free(g_temp);
 }

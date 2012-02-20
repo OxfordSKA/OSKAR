@@ -26,78 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UVFITS_WRITER_H_
-#define OSKAR_UVFITS_WRITER_H_
+#ifndef OSKAR_FITS_WRITE_IMAGE_H_
+#define OSKAR_FITS_WRITE_IMAGE_H_
 
 /**
- * @file oskar_uvfits_writer.h
+ * @file oskar_fits_write_image.h
  */
 
 #include "oskar_global.h"
-#include <fitsio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-struct oskar_uvfits
-{
-    fitsfile* fptr;
-    int       status;
-    int       decimals;
-    int       num_axes;
-    int       num_param;
-};
-typedef struct oskar_uvfits oskar_uvfits;
-
-
-enum oskar_uvfits_axis_type
-{ GROUPS_NONE = 0, AMP = 1, STOKES = 2, FREQ = 3, RA = 4, DEC = 5 };
-
-struct oskar_uvfits_header
-{
-    long  num_axes;
-    long* axis_dim;
-
-    long long num_param; /* == pcount */
-    long long gcount;    /* == num_vis */
-};
-
-
-
-
+/**
+ * @brief
+ * Writes a block of memory to a simple 2D FITS image.
+ *
+ * @details
+ * This function writes the contents of a block of memory to a FITS image.
+ * The supplied parameters are written into the FITS header.
+ *
+ * This function is intended to be used for simple 2D images of one frequency
+ * channel and one polarisation (Stokes I) only.
+ *
+ * Note that FITS data arrays should be given in FORTRAN (column major) order.
+ */
 OSKAR_EXPORT
-void oskar_uvfits_create(const char* filename, oskar_uvfits* fits);
-
-OSKAR_EXPORT
-void oskar_uvfits_close(fitsfile* fits_file);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename, double ra0,
-        double dec0, double frequency0, double date0);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
-        const char* type, const char* comment, double scale,
-        double zero);
-
-/* FIXME This needs fixing to use the new visibility structure.
-
-OSKAR_EXPORT
-void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline);
-*/
-
-OSKAR_EXPORT
-int oskar_uvfits_baseline_id(int ant1, int ant2);
-
+void oskar_fits_write_image(const char* filename, int type, int width,
+        int height, void* data, double ra, double dec, double d_ra,
+        double d_dec, double frequency, double bandwidth);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_UVFITS_WRITER_H_ */
+#endif /* OSKAR_FITS_WRITE_IMAGE_H_ */

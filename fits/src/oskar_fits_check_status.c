@@ -26,78 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UVFITS_WRITER_H_
-#define OSKAR_UVFITS_WRITER_H_
+#include "fits/oskar_fits_check_status.h"
 
-/**
- * @file oskar_uvfits_writer.h
- */
-
-#include "oskar_global.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <fitsio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
-struct oskar_uvfits
+void oskar_fits_check_status(const int status, const char* message)
 {
-    fitsfile* fptr;
-    int       status;
-    int       decimals;
-    int       num_axes;
-    int       num_param;
-};
-typedef struct oskar_uvfits oskar_uvfits;
+    /* No status error, return. */
+    if (!status) return;
 
+    /* Print user supplied message. */
+    fprintf(stderr, "\nFITS ERROR");
+    if (strlen(message) > 0)
+        fprintf(stderr, ": %s.", message);
+    fprintf(stderr, "\n");
 
-enum oskar_uvfits_axis_type
-{ GROUPS_NONE = 0, AMP = 1, STOKES = 2, FREQ = 3, RA = 4, DEC = 5 };
-
-struct oskar_uvfits_header
-{
-    long  num_axes;
-    long* axis_dim;
-
-    long long num_param; /* == pcount */
-    long long gcount;    /* == num_vis */
-};
-
-
-
-
-OSKAR_EXPORT
-void oskar_uvfits_create(const char* filename, oskar_uvfits* fits);
-
-OSKAR_EXPORT
-void oskar_uvfits_close(fitsfile* fits_file);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename, double ra0,
-        double dec0, double frequency0, double date0);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
-        const char* type, const char* comment, double scale,
-        double zero);
-
-/* FIXME This needs fixing to use the new visibility structure.
-
-OSKAR_EXPORT
-void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline);
-*/
-
-OSKAR_EXPORT
-int oskar_uvfits_baseline_id(int ant1, int ant2);
-
+    /* Print the CFITSIO error message. */
+    fits_report_error(stderr, status);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_UVFITS_WRITER_H_ */

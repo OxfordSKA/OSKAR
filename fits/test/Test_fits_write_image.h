@@ -26,78 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UVFITS_WRITER_H_
-#define OSKAR_UVFITS_WRITER_H_
+#ifndef TEST_FITS_WRITE_IMAGE_H_
+#define TEST_FITS_WRITE_IMAGE_H_
 
 /**
- * @file oskar_uvfits_writer.h
+ * @file Test_fits_write_image.h
  */
 
-#include "oskar_global.h"
-#include <fitsio.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-struct oskar_uvfits
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_fits_write_image : public CppUnit::TestFixture
 {
-    fitsfile* fptr;
-    int       status;
-    int       decimals;
-    int       num_axes;
-    int       num_param;
-};
-typedef struct oskar_uvfits oskar_uvfits;
+    public:
+        CPPUNIT_TEST_SUITE(Test_fits_write_image);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-
-enum oskar_uvfits_axis_type
-{ GROUPS_NONE = 0, AMP = 1, STOKES = 2, FREQ = 3, RA = 4, DEC = 5 };
-
-struct oskar_uvfits_header
-{
-    long  num_axes;
-    long* axis_dim;
-
-    long long num_param; /* == pcount */
-    long long gcount;    /* == num_vis */
+    public:
+        // Test methods.
+        void test_method();
 };
 
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_fits_write_image);
 
-
-
-OSKAR_EXPORT
-void oskar_uvfits_create(const char* filename, oskar_uvfits* fits);
-
-OSKAR_EXPORT
-void oskar_uvfits_close(fitsfile* fits_file);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename, double ra0,
-        double dec0, double frequency0, double date0);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
-        const char* type, const char* comment, double scale,
-        double zero);
-
-/* FIXME This needs fixing to use the new visibility structure.
-
-OSKAR_EXPORT
-void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline);
-*/
-
-OSKAR_EXPORT
-int oskar_uvfits_baseline_id(int ant1, int ant2);
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* OSKAR_UVFITS_WRITER_H_ */
+#endif // TEST_FITS_WRITE_IMAGE_H_

@@ -3,15 +3,18 @@
 #
 
 set(fits_SRC
+    src/oskar_fits_check_status.c
+    src/oskar_fits_write_axis_header.c
+    src/oskar_fits_write_image.c
+    #src/oskar_fits_write_cube.c
     src/oskar_uvfits_writer.c # Needs fixing for the new visibility structure.
 )
 set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
 
-# ==== Macros to build the oskar-lib ms module.
+# ==== Macros to build the FITS module.
 include_directories(${CFITSIO_INCLUDE_DIR})
-include_directories(${QT_INCLUDE_DIR})
 add_library(oskar_fits ${fits_SRC})
-target_link_libraries(oskar_fits ${CFITSIO_LIBRARIES} ${QT_QTCORE_LIBRARY})
+target_link_libraries(oskar_fits ${CFITSIO_LIBRARIES})
 
 set_target_properties(oskar_fits
     PROPERTIES
@@ -22,7 +25,7 @@ set_target_properties(oskar_fits
 
 
 
-# ==== Install configuration for the oskar-lib ms module.
+# ==== Install configuration for the FITS module.
 install(TARGETS oskar_fits DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 set_target_properties(oskar_fits PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
 

@@ -26,78 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_UVFITS_WRITER_H_
-#define OSKAR_UVFITS_WRITER_H_
+#include "fits/test/Test_fits_write_image.h"
+#include "fits/oskar_fits_write_image.h"
+#include "utility/oskar_Mem.h"
 
-/**
- * @file oskar_uvfits_writer.h
- */
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
-#include "oskar_global.h"
-#include <fitsio.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-struct oskar_uvfits
+void Test_fits_write_image::test_method()
 {
-    fitsfile* fptr;
-    int       status;
-    int       decimals;
-    int       num_axes;
-    int       num_param;
-};
-typedef struct oskar_uvfits oskar_uvfits;
+    int width = 100;
+    int height = 200;
+    double ra0 = 10.0;
+    double dec0 = 80.0;
+    double ra_d = -0.1;
+    double dec_d = 0.1;
+    double freq = 100e6;
+    double bw = 1e5;
+    oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, width * height);
+    const char filename[] = "cpp_unit_test_image.fits";
 
-
-enum oskar_uvfits_axis_type
-{ GROUPS_NONE = 0, AMP = 1, STOKES = 2, FREQ = 3, RA = 4, DEC = 5 };
-
-struct oskar_uvfits_header
-{
-    long  num_axes;
-    long* axis_dim;
-
-    long long num_param; /* == pcount */
-    long long gcount;    /* == num_vis */
-};
-
-
-
-
-OSKAR_EXPORT
-void oskar_uvfits_create(const char* filename, oskar_uvfits* fits);
-
-OSKAR_EXPORT
-void oskar_uvfits_close(fitsfile* fits_file);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename, double ra0,
-        double dec0, double frequency0, double date0);
-
-OSKAR_EXPORT
-void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
-        const char* type, const char* comment, double scale,
-        double zero);
-
-/* FIXME This needs fixing to use the new visibility structure.
-
-OSKAR_EXPORT
-void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
-        const double* weight, const double* date, const double* baseline);
-*/
-
-OSKAR_EXPORT
-int oskar_uvfits_baseline_id(int ant1, int ant2);
-
-
-#ifdef __cplusplus
+    oskar_fits_write_image(filename, data.type(), width, height, data.data,
+            ra0, dec0, ra_d, dec_d, freq, bw);
 }
-#endif
-
-#endif /* OSKAR_UVFITS_WRITER_H_ */
