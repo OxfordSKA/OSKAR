@@ -38,7 +38,6 @@
 #include "utility/oskar_mem_add.h"
 #include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_add_real_gaussian_noise.h"
 #include "utility/oskar_mem_add_gaussian_noise.h"
 
 #include <cstdio>
@@ -751,17 +750,6 @@ void Test_Mem::test_add_noise()
     int num_elements = 1000;
     double stddev = 0.1;
     double mean = 5.0;
-
-    // Test case: add real Gaussian noise.
-    {
-        oskar_Mem values(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
-        oskar_mem_add_real_gaussian_noise(&values, stddev, mean);
-
-        //    FILE* file;
-        //    file = fopen("temp_mem_noise.dat", "wb");
-        //    fwrite(values.data, sizeof(double4c), num_elements, file);
-        //    fclose(file);
-    }
 
     // Test case: add Gaussian noise.
     {

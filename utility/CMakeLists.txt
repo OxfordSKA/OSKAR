@@ -14,7 +14,6 @@ set(utility_SRC
     src/oskar_exit.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
-    src/oskar_mem_add_real_gaussian_noise.c
     src/oskar_mem_add_gaussian_noise.c
     src/oskar_mem_add.c
     src/oskar_mem_alloc.c
