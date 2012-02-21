@@ -53,7 +53,7 @@ extern "C" {
  */
 static inline int oskar_mem_is_double(const int mem_type)
 {
-    return ((mem_type & 0x000F) == OSKAR_DOUBLE);
+    return ((mem_type & 0x0F) == OSKAR_DOUBLE);
 }
 
 /**
@@ -69,7 +69,7 @@ static inline int oskar_mem_is_double(const int mem_type)
  */
 static inline int oskar_mem_is_single(const int mem_type)
 {
-    return ((mem_type & 0x000F) == OSKAR_SINGLE);
+    return ((mem_type & 0x0F) == OSKAR_SINGLE);
 }
 
 /**
@@ -85,7 +85,7 @@ static inline int oskar_mem_is_single(const int mem_type)
  */
 static inline int oskar_mem_is_complex(const int mem_type)
 {
-    return ((mem_type & 0x00F0) == OSKAR_COMPLEX);
+    return ((mem_type & OSKAR_COMPLEX) == OSKAR_COMPLEX);
 }
 
 /**
@@ -101,7 +101,7 @@ static inline int oskar_mem_is_complex(const int mem_type)
  */
 static inline int oskar_mem_is_real(const int mem_type)
 {
-    return ((mem_type & 0x00F0) == 0);
+    return ((mem_type & OSKAR_COMPLEX) == 0);
 }
 
 /**
@@ -117,7 +117,7 @@ static inline int oskar_mem_is_real(const int mem_type)
  */
 static inline int oskar_mem_is_matrix(const int mem_type)
 {
-    return ((mem_type & 0x0F00) == OSKAR_MATRIX);
+    return ((mem_type & OSKAR_MATRIX) == OSKAR_MATRIX);
 }
 
 /**
@@ -133,7 +133,7 @@ static inline int oskar_mem_is_matrix(const int mem_type)
  */
 static inline int oskar_mem_is_scalar(const int mem_type)
 {
-    return ((mem_type & 0x0F00) == 0);
+    return ((mem_type & OSKAR_MATRIX) == 0);
 }
 
 #ifdef __cplusplus
