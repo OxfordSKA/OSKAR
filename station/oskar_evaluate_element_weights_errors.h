@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
 #define OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
 
@@ -36,7 +35,10 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
-#include <curand_kernel.h>
+
+/* Forward declarations. */
+struct curandStateXORWOW;
+typedef struct curandStateXORWOW curandState;
 
 #ifdef __cplusplus
 extern "C" {

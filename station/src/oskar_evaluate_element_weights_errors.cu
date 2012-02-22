@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "station/oskar_evaluate_element_weights_errors.h"
 #include "station/cudak/oskar_cudak_evaluate_element_weights_errors.h"
 

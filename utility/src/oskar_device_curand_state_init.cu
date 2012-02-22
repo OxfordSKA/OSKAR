@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utility/oskar_device_curand_state_init.h"
 #include "utility/cudak/oskar_cudak_curand_state_init.h"
+#include <curand_kernel.h>
 
 #ifdef __cplusplus
 extern "C" {

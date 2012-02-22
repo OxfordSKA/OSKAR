@@ -28,6 +28,8 @@
 
 #include "station/cudak/oskar_cudak_evaluate_element_weights_errors.h"
 
+#include <curand_kernel.h>
+
 __global__
 void oskar_cudak_evaluate_element_weights_errors_d(double2* errors, int n,
         const double* amp_gain, const double* amp_error,

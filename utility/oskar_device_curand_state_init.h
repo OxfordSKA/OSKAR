@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_DEVICE_CURAND_STATE_INIT_H_
 #define OSKAR_DEVICE_CURAND_STATE_INIT_H_
 
@@ -35,7 +34,10 @@
  */
 
 #include "oskar_global.h"
-#include <curand_kernel.h>
+
+/* Forward declarations. */
+struct curandStateXORWOW;
+typedef struct curandStateXORWOW curandState;
 
 #ifdef __cplusplus
 extern "C" {

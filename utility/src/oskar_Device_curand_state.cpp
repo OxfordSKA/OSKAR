@@ -26,16 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utility/oskar_Device_curand_state.h"
 #include "utility/oskar_device_curand_state_init.h"
 #include <cstdlib>
-#include <cuda.h>
 #include <cstdio>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cuda_runtime_api.h>
+#include <curand_kernel.h>
 
 oskar_Device_curand_state::oskar_Device_curand_state(int num_states)
 {
@@ -52,11 +49,6 @@ oskar_Device_curand_state::~oskar_Device_curand_state()
 
 int oskar_Device_curand_state::init(int seed, int offset, int use_device_offset)
 {
-    return oskar_device_curand_state_init(this->state, this->num_states, 
+    return oskar_device_curand_state_init(this->state, this->num_states,
         seed, offset, use_device_offset);
 }
-
-
-#ifdef __cplusplus
-}
-#endif

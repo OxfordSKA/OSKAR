@@ -36,8 +36,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <cuda.h>
-#include <curand_kernel.h>
+#include "oskar_global.h"
+
+/* Forward declarations. */
+struct curandStateXORWOW;
+typedef struct curandStateXORWOW curandState;
 
 __global__
 void oskar_cudak_evaluate_element_weights_errors_d(double2* errors, int n,

@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utility/cudak/oskar_cudak_curand_state_init.h"
+#include <curand_kernel.h>
 
 __global__
 void oskar_cudak_curand_state_init(curandState* state, unsigned long long seed,

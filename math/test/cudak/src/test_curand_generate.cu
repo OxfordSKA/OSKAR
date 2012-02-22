@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "math/test/cudak/test_curand_generate.h"
+#include <curand_kernel.h>
 
 __global__
 void test_curand_generate(double* values, int num_values,

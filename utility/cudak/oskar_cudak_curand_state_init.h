@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_CUDAK_CURAND_STATE_INIT_H_
 #define OSKAR_CUDAK_CURAND_STATE_INIT_H_
 
@@ -35,8 +34,10 @@
  */
 
 #include "oskar_global.h"
-#include <cuda.h>
-#include <curand_kernel.h>
+
+/* Forward declarations. */
+struct curandStateXORWOW;
+typedef struct curandStateXORWOW curandState;
 
 __global__
 void oskar_cudak_curand_state_init(curandState* state, unsigned long long seed,

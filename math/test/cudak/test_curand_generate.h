@@ -35,9 +35,10 @@
  */
 
 #include "oskar_global.h"
-#include <cuda.h>
-#include <curand_kernel.h>
 
+/* Forward declarations. */
+struct curandStateXORWOW;
+typedef struct curandStateXORWOW curandState;
 
 __global__
 void test_curand_generate(double* values, int num_values,
