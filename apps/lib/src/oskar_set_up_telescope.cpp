@@ -87,6 +87,8 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].single_element_model = true; // FIXME set this via the settings file.
+        telescope->station[i].normalise_beam =
+                settings->telescope.station.normalise_beam;
     }
 
     // Override station element amplitude gains if required.
