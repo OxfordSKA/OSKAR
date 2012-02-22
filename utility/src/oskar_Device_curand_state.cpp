@@ -31,7 +31,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <cuda_runtime_api.h>
+#include <cuda.h>
 #include <curand_kernel.h>
 
 oskar_Device_curand_state::oskar_Device_curand_state(int num_states)
