@@ -48,33 +48,37 @@ extern "C" {
  *
  * Offset    Length    Description
  * ----------------------------------------------------------------------------
- *  0         8        The string "OSKARBIN" in ASCII format.
- *  8         1        A zero.
- *  9         1        Size of void* in bytes.
- * 10         1        Size of size_t in bytes.
- * 11         1        Size of int in bytes.
- * 12         1        Size of long int in bytes.
- * 13         1        Size of float in bytes.
- * 14         1        Size of double in bytes.
- * 15         1        If data blocks are written as little endian, 0; else 1.
+ *  0         9        The ASCII string "OSKARBIN", with trailing zero.
+ *  9         1        The OSKAR binary format version (enumerator).
+ * 10         1        If data blocks are written as little endian, 0; else 1.
+ * 11         1        Size of void* in bytes.
+ * 12         1        Size of int in bytes.
+ * 13         1        Size of long int in bytes.
+ * 14         1        Size of float in bytes.
+ * 15         1        Size of double in bytes.
  * 16         4        The OSKAR_VERSION as a little-endian, 4-byte integer.
  * 20        44        Padding to 64 byte length (reserved for future use).
  */
 struct oskar_BinaryHeader
 {
-    char magic[8];              /* Start + 0 */
-    char zero;                  /* Start + 8 */
-    char size_ptr;              /* Start + 9 */
-    char size_size_t;           /* Start + 10 */
-    char size_int;              /* Start + 11 */
-    char size_long;             /* Start + 12 */
-    char size_float;            /* Start + 13 */
-    char size_double;           /* Start + 14 */
-    char endian;                /* Start + 15 */
+    char magic[9];              /* Start + 0 */
+    char bin_version;           /* Start + 9 */
+    char endian;                /* Start + 10 */
+    char size_ptr;              /* Start + 11 */
+    char size_int;              /* Start + 12 */
+    char size_long;             /* Start + 13 */
+    char size_float;            /* Start + 14 */
+    char size_double;           /* Start + 15 */
     char version[4];            /* Start + 16 */
     char reserved[44];          /* Start + 20 */
 };
 typedef struct oskar_BinaryHeader oskar_BinaryHeader;
+
+/* This binary format is anticipated to remain stable. */
+enum
+{
+    OSKAR_BINARY_FORMAT_VERSION = 1
+};
 
 #ifdef __cplusplus
 }

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_HEADER_READ_FILE_H_
-#define OSKAR_BINARY_HEADER_READ_FILE_H_
+#ifndef OSKAR_BINARY_FILE_READ_HEADER_H_
+#define OSKAR_BINARY_FILE_READ_HEADER_H_
 
 /**
- * @file oskar_binary_header_read_file.h
+ * @file oskar_binary_file_read_header.h
  */
 
 #include "oskar_global.h"
@@ -62,4 +62,4 @@ int oskar_binary_file_read_header(FILE* file, oskar_BinaryHeader* header);
 }
 #endif
 
-#endif /* OSKAR_BINARY_HEADER_READ_FILE_H_ */
+#endif /* OSKAR_BINARY_FILE_READ_HEADER_H_ */

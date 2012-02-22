@@ -26,43 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_TAG_DOUBLE_H_
-#define OSKAR_BINARY_FILE_WRITE_TAG_DOUBLE_H_
-
-/**
- * @file oskar_binary_file_write_tag_double.h
- */
-
-#include "oskar_global.h"
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
+#include "utility/oskar_BinaryTag.h"
+#include "utility/oskar_binary_file_write.h"
+#include "utility/oskar_binary_file_write_int.h"
+#include "utility/oskar_endian.h"
+#include "utility/oskar_Mem.h"
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Writes a single double-precision value to an open binary file.
- *
- * @details
- * This function writes a single double-precision value to an open binary file.
- *
- * @param[in,out] file   An open file handle.
- * @param[in] id         Tag identifier (enumerator).
- * @param[in] id_user_1  User tag identifier byte 1.
- * @param[in] id_user_2  User tag identifier byte 2.
- * @param[in] value      Value to write.
- */
-OSKAR_EXPORT
-void oskar_binary_file_write_tag_double(FILE* file, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, double value);
+int oskar_binary_file_write_int(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, int value)
+{
+    return oskar_binary_file_write(file, id, id_user_1, id_user_2,
+            OSKAR_INT, sizeof(int), &value);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_BINARY_FILE_WRITE_TAG_DOUBLE_H_ */

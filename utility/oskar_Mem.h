@@ -289,6 +289,8 @@ typedef struct oskar_Mem oskar_Mem;
 
 /* Define an enumerator for the type. */
 /* NOTE: All these must be small enough to fit into one byte (8 bits) only. */
+/* NOTE: To maintain binary data compatibility, do not modify any numbers
+ * that appear in the list below! */
 enum {
     /* Byte (char): bit 0 set. */
     OSKAR_CHAR                   = 0x01,

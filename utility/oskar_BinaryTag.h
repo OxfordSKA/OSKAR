@@ -49,49 +49,69 @@ extern "C" {
  * Offset    Length    Description
  * ----------------------------------------------------------------------------
  *  0         4        The string "TAG" in ASCII format, with trailing zero.
- *  4         1        Tag identifier byte.
- *  5         1        Data type (as used by oskar_Mem) of the data block.
- *  6         1        User tag identifier byte 1.
- *  7         1        User tag identifier byte 1.
+ *  4         1        Tag identifier byte (enumerator).
+ *  5         1        User tag identifier byte 1.
+ *  6         1        User tag identifier byte 2.
+ *  7         1        Data type (as used by oskar_Mem) of the data block.
  *  8         8        Block size in bytes, as little-endian 8-byte integer.
  */
 struct oskar_BinaryTag
 {
     char magic[4];             /**< Magic number (ASCII "TAG"). */
     unsigned char id;          /**< Tag identifier (enumerator). */
-    unsigned char data_type;   /**< Type (as oskar_Mem) of data block. */
     unsigned char id_user_1;   /**< User tag identifier byte 1. */
     unsigned char id_user_2;   /**< User tag identifier byte 2. */
+    unsigned char data_type;   /**< Type (as oskar_Mem) of data block. */
     char size_bytes[8];        /**< Block size in bytes, as little-endian 8-byte integer. */
 };
 typedef struct oskar_BinaryTag oskar_BinaryTag;
 
-/* Do not modify any numbers that appear in the list below! */
+/**
+ * @brief Structure to hold tag index data from an OSKAR binary file.
+ *
+ * @details
+ * This structure holds an index of tags found in an OSKAR binary file,
+ * and the offset in bytes from the start of the file of each data block.
+ * It can be used to find an item of the required type.
+ */
+struct oskar_BinaryTagIndex
+{
+    int num_tags;             /**< Size of tag arrays. */
+    oskar_BinaryTag* tag;     /**< Array of tags in the file. */
+    long* block_offset_bytes; /**< Array of block offsets from the start. */
+};
+typedef struct oskar_BinaryTagIndex oskar_BinaryTagIndex;
+
+/* NOTE: To maintain binary data compatibility, do not modify any numbers
+ * that appear in the list below! */
 enum
 {
+    /* User tag identifier. */
+    OSKAR_TAG_USER = 0,
+
     /* File data. */
-    OSKAR_TAG_FILE_CREATION_DATE_STRING = 0,
-    OSKAR_TAG_FILE_DESCRIPTION_STRING = 1,
-    OSKAR_TAG_FILE_AUTHOR_STRING = 2,
-    OSKAR_TAG_SETTINGS_FILE = 3,
+    OSKAR_TAG_FILE_CREATION_DATE_STRING = 1,
+    OSKAR_TAG_FILE_DESCRIPTION_STRING = 2,
+    OSKAR_TAG_FILE_AUTHOR_STRING = 3,
+    OSKAR_TAG_SETTINGS_FILE = 4,
 
     /* Sky model data. */
     OSKAR_TAG_NUM_SOURCES = 10,
-    OSKAR_TAG_SOURCE_RA = 11,
-    OSKAR_TAG_SOURCE_DEC = 12,
+    OSKAR_TAG_SOURCE_RA_RAD = 11,
+    OSKAR_TAG_SOURCE_DEC_RAD = 12,
     OSKAR_TAG_SOURCE_I = 13,
     OSKAR_TAG_SOURCE_Q = 14,
     OSKAR_TAG_SOURCE_U = 15,
     OSKAR_TAG_SOURCE_V = 16,
     OSKAR_TAG_SOURCE_SPECTRAL_INDEX = 17,
     OSKAR_TAG_SOURCE_REF_FREQ_HZ = 18,
-    OSKAR_TAG_SOURCE_MAJOR_AXIS = 19,
-    OSKAR_TAG_SOURCE_MINOR_AXIS = 20,
-    OSKAR_TAG_SOURCE_POSITION_ANGLE = 21,
+    OSKAR_TAG_SOURCE_MAJOR_AXIS_RAD = 19,
+    OSKAR_TAG_SOURCE_MINOR_AXIS_RAD = 20,
+    OSKAR_TAG_SOURCE_POSITION_ANGLE_RAD = 21,
 
     /* Telescope data. */
-    OSKAR_TAG_TELESCOPE_LAT_DEG = 30,
-    OSKAR_TAG_TELESCOPE_LON_DEG = 31,
+    OSKAR_TAG_TELESCOPE_LAT_RAD = 30,
+    OSKAR_TAG_TELESCOPE_LON_RAD = 31,
     OSKAR_TAG_TELESCOPE_ALT_M = 32,
     OSKAR_TAG_NUM_STATIONS = 33,
     OSKAR_TAG_STATION_X_POSITONS = 34,
@@ -101,8 +121,8 @@ enum
     OSKAR_TAG_STATION_COORD_UNIT = 38,
 
     /* Observation data. */
-    OSKAR_TAG_OBS_PHASE_CENTRE_RA_DEG = 60,
-    OSKAR_TAG_OBS_PHASE_CENTRE_DEC_DEG = 61,
+    OSKAR_TAG_OBS_PHASE_CENTRE_RA_RAD = 60,
+    OSKAR_TAG_OBS_PHASE_CENTRE_DEC_RAD = 61,
     OSKAR_TAG_OBS_START_TIME_MJD_UTC = 62,
     OSKAR_TAG_OBS_LENGTH_S = 63,
 
@@ -128,8 +148,8 @@ enum
     OSKAR_TAG_IMAGE_DATA = 93,
     OSKAR_TAG_IMAGE_CUBE_DATA = 94,
 
-    /* User tag identifier. */
-    OSKAR_TAG_USER = 255
+    /* Largest possible standard tag identifier. */
+    OSKAR_TAG_LARGEST_STANDARD_TAG_ID = 255
 };
 
 #ifdef __cplusplus

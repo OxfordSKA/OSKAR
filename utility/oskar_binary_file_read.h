@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_HEADER_H_
-#define OSKAR_BINARY_FILE_WRITE_HEADER_H_
+#ifndef OSKAR_BINARY_FILE_READ_H_
+#define OSKAR_BINARY_FILE_READ_H_
 
 /**
- * @file oskar_binary_file_write_header.h
+ * @file oskar_binary_file_read.h
  */
 
 #include "oskar_global.h"
@@ -46,18 +46,27 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes a binary header to an open file.
+ * @brief Read a block of binary data for a single tag from an open file.
  *
  * @details
- * This function writes a header to an open binary file.
+ * This function reads a block of binary data for a single tag from an open
+ * binary file.
  *
- * @param[in,out] file An open file handle.
+ * @param[in,out] file   An open file handle.
+ * @param[in] index      Pointer to a tag index structure.
+ * @param[in] id         Tag identifier (enumerator).
+ * @param[in] id_user_1  User tag identifier byte 1.
+ * @param[in] id_user_2  User tag identifier byte 2.
+ * @param[in] block_size Size of memory available at \p data, in bytes.
+ * @param[out] data      Pointer to memory block to write into.
  */
 OSKAR_EXPORT
-void oskar_binary_file_write_header(FILE* file);
+int oskar_binary_file_read(FILE* file, const oskar_BinaryTagIndex* index,
+        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
+        size_t block_size, void* data);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_FILE_WRITE_HEADER_H_ */
+#endif /* OSKAR_BINARY_FILE_READ_H_ */

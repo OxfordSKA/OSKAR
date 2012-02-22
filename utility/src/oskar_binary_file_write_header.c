@@ -43,17 +43,16 @@ void oskar_binary_file_write_header(FILE* file)
     int version = OSKAR_VERSION;
     oskar_BinaryHeader header;
     char magic[] = "OSKARBIN";
-    memcpy(header.magic, magic, sizeof(magic));
-    header.zero        = 0;
-    header.size_ptr    = (unsigned char)sizeof(void*);
-    header.size_size_t = (unsigned char)sizeof(size_t);
-    header.size_int    = (unsigned char)sizeof(int);
-    header.size_long   = (unsigned char)sizeof(long);
-    header.size_float  = (unsigned char)sizeof(float);
-    header.size_double = (unsigned char)sizeof(double);
-    header.endian      = (unsigned char)oskar_endian();
+    strcpy(header.magic, magic);
+    header.bin_version = OSKAR_BINARY_FORMAT_VERSION;
+    header.endian      = (char)oskar_endian();
+    header.size_ptr    = (char)sizeof(void*);
+    header.size_int    = (char)sizeof(int);
+    header.size_long   = (char)sizeof(long);
+    header.size_float  = (char)sizeof(float);
+    header.size_double = (char)sizeof(double);
 
-    /* Write version data. */
+    /* Write OSKAR version data. */
     if (oskar_endian() == OSKAR_BIG_ENDIAN)
     {
         if (sizeof(int) == 4)

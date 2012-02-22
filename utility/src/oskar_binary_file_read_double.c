@@ -27,10 +27,8 @@
  */
 
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_write_tag.h"
-#include "utility/oskar_binary_file_write_tag_double.h"
-#include "utility/oskar_endian.h"
-#include "utility/oskar_Mem.h"
+#include "utility/oskar_binary_file_read_double.h"
+#include "utility/oskar_binary_file_read.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -39,11 +37,12 @@
 extern "C" {
 #endif
 
-void oskar_binary_file_write_tag_double(FILE* file, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, double value)
+int oskar_binary_file_read_double(FILE* file, const oskar_BinaryTagIndex* index,
+        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
+        double* value)
 {
-    oskar_binary_file_write_tag(file, id, OSKAR_DOUBLE, id_user_1, id_user_2,
-            sizeof(double), &value);
+    return oskar_binary_file_read(file, index, id, id_user_1, id_user_2,
+            sizeof(double), value);
 }
 
 #ifdef __cplusplus

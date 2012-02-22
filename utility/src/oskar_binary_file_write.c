@@ -26,38 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_HEADER_H_
-#define OSKAR_BINARY_FILE_WRITE_HEADER_H_
-
-/**
- * @file oskar_binary_file_write_header.h
- */
-
-#include "oskar_global.h"
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
+#include "utility/oskar_BinaryTag.h"
+#include "utility/oskar_binary_file_write.h"
+#include "utility/oskar_endian.h"
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Writes a binary header to an open file.
- *
- * @details
- * This function writes a header to an open binary file.
- *
- * @param[in,out] file An open file handle.
- */
-OSKAR_EXPORT
-void oskar_binary_file_write_header(FILE* file);
+int oskar_binary_file_write(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2,
+        unsigned char data_type, size_t bytes, const void* data)
+{
+    oskar_BinaryTag tag;
+    size_t size_bytes;
+
+    /* Initialise the tag. */
+    char magic[] = "TAG";
+    size_bytes = bytes;
+    strcpy(tag.magic, magic);
+    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
+
+    /* Set up the tag identifiers */
+    tag.id = id;
+    tag.data_type = data_type;
+    tag.id_user_1 = id_user_1;
+    tag.id_user_2 = id_user_2;
+
+    /* Write the block size in bytes as little endian. */
+    if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
+    {
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
+    }
+    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    {
+        if (sizeof(size_t) == 4)
+            oskar_endian_swap_4((char*)&size_bytes);
+        else if (sizeof(size_t) == 8)
+            oskar_endian_swap_8((char*)&size_bytes);
+    }
+    memcpy(tag.size_bytes, &size_bytes, sizeof(size_t));
+
+    /* Write the tag to the file. */
+    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, file) != 1)
+        return OSKAR_ERR_FILE_IO;
+
+    /* Write the data to the file. */
+    if (fwrite(data, 1, bytes, file) != bytes)
+        return OSKAR_ERR_FILE_IO;
+
+    return OSKAR_SUCCESS;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_BINARY_FILE_WRITE_HEADER_H_ */

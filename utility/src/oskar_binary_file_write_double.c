@@ -26,38 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_HEADER_H_
-#define OSKAR_BINARY_FILE_WRITE_HEADER_H_
-
-/**
- * @file oskar_binary_file_write_header.h
- */
-
-#include "oskar_global.h"
-
-#ifdef __cplusplus
-#include <cstdio>
-#else
+#include "utility/oskar_BinaryTag.h"
+#include "utility/oskar_binary_file_write.h"
+#include "utility/oskar_binary_file_write_double.h"
+#include "utility/oskar_endian.h"
+#include "utility/oskar_Mem.h"
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Writes a binary header to an open file.
- *
- * @details
- * This function writes a header to an open binary file.
- *
- * @param[in,out] file An open file handle.
- */
-OSKAR_EXPORT
-void oskar_binary_file_write_header(FILE* file);
+int oskar_binary_file_write_double(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, double value)
+{
+    return oskar_binary_file_write(file, id, id_user_1, id_user_2,
+            OSKAR_DOUBLE, sizeof(double), &value);
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_BINARY_FILE_WRITE_HEADER_H_ */

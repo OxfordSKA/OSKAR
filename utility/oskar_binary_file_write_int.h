@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_TAG_H_
-#define OSKAR_BINARY_FILE_WRITE_TAG_H_
+#ifndef OSKAR_BINARY_FILE_WRITE_INT_H_
+#define OSKAR_BINARY_FILE_WRITE_INT_H_
 
 /**
- * @file oskar_binary_file_write_tag.h
+ * @file oskar_binary_file_write_int.h
  */
 
 #include "oskar_global.h"
@@ -46,26 +46,23 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes a binary tag to an open binary file.
+ * @brief Writes a single integer value to an open binary file.
  *
  * @details
- * This function writes a binary tag to an open binary file.
+ * This function writes a single integer value to an open binary file.
  *
  * @param[in,out] file   An open file handle.
  * @param[in] id         Tag identifier (enumerator).
- * @param[in] data_type  Type (as oskar_Mem) of data block.
  * @param[in] id_user_1  User tag identifier byte 1.
  * @param[in] id_user_2  User tag identifier byte 2.
- * @param[in] bytes      Block size in bytes.
- * @param[in] data       Pointer to memory block to write.
+ * @param[in] value      Value to write.
  */
 OSKAR_EXPORT
-void oskar_binary_file_write_tag(FILE* file, unsigned char id,
-        unsigned char data_type, unsigned char id_user_1,
-        unsigned char id_user_2, size_t bytes, const void* data);
+int oskar_binary_file_write_int(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, int value);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_FILE_WRITE_TAG_H_ */
+#endif /* OSKAR_BINARY_FILE_WRITE_INT_H_ */

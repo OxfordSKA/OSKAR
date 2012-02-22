@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_HEADER_H_
-#define OSKAR_BINARY_FILE_WRITE_HEADER_H_
+#ifndef OSKAR_BINARY_TAG_INDEX_CREATE_H_
+#define OSKAR_BINARY_TAG_INDEX_CREATE_H_
 
 /**
- * @file oskar_binary_file_write_header.h
+ * @file oskar_binary_tag_index_create.h
  */
 
 #include "oskar_global.h"
@@ -46,18 +46,20 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes a binary header to an open file.
+ * @brief Generate an index of tags in an OSKAR binary file.
  *
  * @details
- * This function writes a header to an open binary file.
+ * This function generates a tag index from an OSKAR binary file.
  *
- * @param[in,out] file An open file handle.
+ * @param[in,out] index  Pointer to index structure to fill.
+ * @param[in] filename   Name of OSKAR binary file to index.
  */
 OSKAR_EXPORT
-void oskar_binary_file_write_header(FILE* file);
+int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
+        const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_FILE_WRITE_HEADER_H_ */
+#endif /* OSKAR_BINARY_TAG_INDEX_CREATE_H_ */

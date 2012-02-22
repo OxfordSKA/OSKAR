@@ -127,6 +127,12 @@ enum {
     /* Indicates that there are not enough CUDA devices available. */
     OSKAR_ERR_CUDA_DEVICES         = -19,
 
+    /* Indicates that the binary file format is incompatible. */
+    OSKAR_ERR_BAD_BINARY_FORMAT    = -20,
+
+    /* Indicates that required data was not found in the binary file. */
+    OSKAR_ERR_BINARY_TAG_NOT_FOUND = -21,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN              = -1000
 };

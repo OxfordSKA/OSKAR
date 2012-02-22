@@ -27,23 +27,25 @@
  */
 
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_write_tag.h"
-#include "utility/oskar_binary_file_write_tag_int.h"
-#include "utility/oskar_endian.h"
-#include "utility/oskar_Mem.h"
-#include <string.h>
+#include "utility/oskar_binary_tag_index_free.h"
 #include <stdlib.h>
-#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_binary_file_write_tag_int(FILE* file, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, int value)
+int oskar_binary_tag_index_free(oskar_BinaryTagIndex* index)
 {
-    oskar_binary_file_write_tag(file, id, OSKAR_INT, id_user_1, id_user_2,
-            sizeof(int), &value);
+    /* Free arrays. */
+    free(index->tag);
+    free(index->block_offset_bytes);
+
+    /* Reset values. */
+    index->num_tags = 0;
+    index->tag = 0;
+    index->block_offset_bytes = 0;
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

@@ -50,45 +50,51 @@ int oskar_binary_file_read_header(FILE* file, oskar_BinaryHeader* header)
     if (strcmp("OSKARBIN", header->magic) != 0)
     {
         fprintf(stderr, "Error: Invalid OSKAR binary file.\n");
-        return OSKAR_ERR_FILE_IO;
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
+    }
+
+    /* Check if the format is compatible. */
+    if (OSKAR_BINARY_FORMAT_VERSION != (int)(header->bin_version))
+    {
+        fprintf(stderr, "Error: Unknown OSKAR binary file format.\n");
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
     }
 
     /* Check if the architecture is compatible. */
-    if (sizeof(size_t) < (size_t)(header->size_size_t))
+    if (oskar_endian() != (int)(header->endian))
     {
         fprintf(stderr, "Error: Incompatible architecture "
-                "(sizeof(size_t) < file sizeof(size_t)).\n");
-        return OSKAR_ERR_FILE_IO;
+                "(wrong data byte ordering).\n");
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
     }
 
+    /* Check size of pointer type. */
+    if (sizeof(void*) < (size_t)(header->size_ptr))
+    {
+        fprintf(stderr, "Warning: (sizeof(void*) < file sizeof(void*)).\n");
+    }
+
+    /* Check size of data types. */
     if (sizeof(int) != (size_t)(header->size_int))
     {
         fprintf(stderr, "Error: Incompatible architecture "
                 "(sizeof(int) != file sizeof(int)).\n");
-        return OSKAR_ERR_FILE_IO;
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
     }
-
     if (sizeof(float) != (size_t)(header->size_float))
     {
         fprintf(stderr, "Error: Incompatible architecture "
                 "(sizeof(float) != file sizeof(float)).\n");
-        return OSKAR_ERR_FILE_IO;
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
     }
-
     if (sizeof(double) != (size_t)(header->size_double))
     {
         fprintf(stderr, "Error: Incompatible architecture "
                 "(sizeof(double) != file sizeof(double)).\n");
-        return OSKAR_ERR_FILE_IO;
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
     }
 
-    if (oskar_endian() != (int)(header->endian))
-    {
-        fprintf(stderr, "Error: Incompatible architecture "
-                "(wrong byte ordering).\n");
-        return OSKAR_ERR_FILE_IO;
-    }
-
+    /* Check OSKAR version. */
     if ((int)OSKAR_VERSION != oskar_binary_header_version(header))
     {
         fprintf(stderr, "Warning: OSKAR_VERSION mismatch.\n");
