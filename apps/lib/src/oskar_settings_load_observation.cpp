@@ -88,7 +88,7 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
 
     // Get observation length.
     QString str_len = s.value("length").toString();
-    if (str_len.isEmpty()) str_st = "00:00:01.000";
+    if (str_len.isEmpty()) str_len = "00:00:01.000";
     QTime len = QTime::fromString(str_len, "h:m:s.z");
     if (!len.isValid())
     {
