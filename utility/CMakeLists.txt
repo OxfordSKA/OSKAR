@@ -6,11 +6,18 @@ add_subdirectory(cudak)
 
 # ==== Utility library source
 set(utility_SRC
+    src/oskar_binary_file_read_header.c
+    src/oskar_binary_file_write_header.c
+    src/oskar_binary_file_write_tag_double.c
+    src/oskar_binary_file_write_tag_int.c
+    src/oskar_binary_file_write_tag.c
+    src/oskar_binary_header_version.c
     src/oskar_blank_parentheses.c
     src/oskar_cuda_device_info.cu
     src/oskar_cuda_memory.cu
     src/oskar_device_curand_state_init.cu
     src/oskar_Device_curand_state.cpp
+    src/oskar_endian.c
     src/oskar_exit.c
     src/oskar_get_error_string.c
     src/oskar_getline.c

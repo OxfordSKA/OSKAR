@@ -290,20 +290,23 @@ typedef struct oskar_Mem oskar_Mem;
 /* Define an enumerator for the type. */
 /* NOTE: All these must be small enough to fit into one byte (8 bits) only. */
 enum {
-    /* Scalar single (float): bit 0 set. */
-    OSKAR_SINGLE                 = 0x01,
+    /* Byte (char): bit 0 set. */
+    OSKAR_CHAR                   = 0x01,
 
-    /* Scalar double (double): bit 1 set. */
-    OSKAR_DOUBLE                 = 0x02,
+    /* Integer (int): bit 1 set. */
+    OSKAR_INT                    = 0x02,
 
-    /* Integer (int): bit 2 set. */
-    OSKAR_INT                    = 0x04,
+    /* Scalar single (float): bit 2 set. */
+    OSKAR_SINGLE                 = 0x04,
 
-    /* Complex flag: bit 4 set. */
-    OSKAR_COMPLEX                = 0x10,
+    /* Scalar double (double): bit 3 set. */
+    OSKAR_DOUBLE                 = 0x08,
 
-    /* Matrix flag: bit 5 set. */
-    OSKAR_MATRIX                 = 0x20,
+    /* Complex flag: bit 5 set. */
+    OSKAR_COMPLEX                = 0x20,
+
+    /* Matrix flag: bit 6 set. */
+    OSKAR_MATRIX                 = 0x40,
 
     /* Scalar complex single (float2). */
     OSKAR_SINGLE_COMPLEX         = OSKAR_SINGLE | OSKAR_COMPLEX,
