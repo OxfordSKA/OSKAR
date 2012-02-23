@@ -15,7 +15,7 @@ if ~exist('fig_title', 'var')
 end
 
 % Set up the figure.
-width  = 700;
+width  = 1000;
 height = 700;
 screen_size = get(0, 'ScreenSize');
 left   = (screen_size(3) - (width  + 50));
@@ -25,8 +25,8 @@ set(gcf, 'PaperSize', [width height]);
 set(gcf, 'Position', [left bottom width height]);
 set(gcf, 'PaperPositionMode','auto');
 set(gcf, 'PaperPosition', [left bottom width height]);
-set(gcf, 'Menubar',  'none');
-set(gcf, 'Toolbar',  'none');
+%set(gcf, 'Menubar',  'none');
+%set(gcf, 'Toolbar',  'none');
 set(gcf, 'Color',  'black');
 set(gcf, 'InvertHardcopy','off');
 
