@@ -36,7 +36,9 @@
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_insert.h"
+#include "utility/oskar_mem_load_binary.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_save_binary_append.h"
 #include "utility/oskar_mem_scale_real.h"
 #include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_mem_type_check.h"
@@ -99,12 +101,12 @@ int oskar_Mem::clear_contents()
     return oskar_mem_clear_contents(this);
 }
 
-int oskar_Mem::copy_to(oskar_Mem* other)
+int oskar_Mem::copy_to(oskar_Mem* other) const
 {
     return oskar_mem_copy(other, this); // Copy this to other.
 }
 
-oskar_Mem oskar_Mem::get_pointer(int offset, int num_elements)
+oskar_Mem oskar_Mem::get_pointer(int offset, int num_elements) const
 {
     oskar_Mem ptr;
     if (oskar_mem_get_pointer(&ptr, this, offset, num_elements) != 0)
@@ -123,9 +125,23 @@ int oskar_Mem::insert(const oskar_Mem* src, int offset)
     return oskar_mem_insert(this, src, offset);
 }
 
+int oskar_Mem::load_binary(const char* filename, oskar_BinaryTagIndex** index,
+        unsigned char id, unsigned char id_user_1, unsigned char id_user_2)
+{
+    return oskar_mem_load_binary(this, filename, index,
+            id, id_user_1, id_user_2);
+}
+
 int oskar_Mem::resize(int num_elements)
 {
     return oskar_mem_realloc(this, num_elements);
+}
+
+int oskar_Mem::save_binary_append(const char* filename, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, int num_to_write) const
+{
+    return oskar_mem_save_binary_append(this, filename, id,
+            id_user_1, id_user_2, num_to_write);
 }
 
 int oskar_Mem::scale_real(double value)

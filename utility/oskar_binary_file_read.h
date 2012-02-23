@@ -34,6 +34,7 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_BinaryTag.h"
 
 #ifdef __cplusplus
 #include <cstdlib>

@@ -30,15 +30,20 @@
 #include <vector_functions.h>
 
 #include "utility/test/Test_Mem.h"
-#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_binary_file_append.h"
+#include "utility/oskar_binary_file_read.h"
+#include "utility/oskar_binary_tag_index_free.h"
+#include "utility/oskar_BinaryTag.h"
+#include "utility/oskar_mem_add.h"
+#include "utility/oskar_mem_add_gaussian_noise.h"
 #include "utility/oskar_mem_append.h"
 #include "utility/oskar_mem_different.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_mem_add.h"
+#include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_set_value_real.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_file_exists.h"
 #include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_add_gaussian_noise.h"
+#include "utility/oskar_vector_types.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -760,4 +765,99 @@ void Test_Mem::test_add_noise()
         fwrite(values.data, sizeof(double4c), num_elements, file);
         fclose(file);
     }
+}
+
+void Test_Mem::test_binary()
+{
+    // Remove the file if it already exists.
+    const char filename[] = "cpp_unit_test_mem_binary.dat";
+    if (oskar_file_exists(filename))
+        remove(filename);
+    int num_cpu = 1000;
+    int num_gpu = 2048;
+    int error = 0;
+
+    // Save data from CPU.
+    {
+        oskar_Mem mem_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_cpu);
+        float* data = (float*)mem_cpu;
+
+        // Fill array with data.
+        for (int i = 0; i < num_cpu; ++i)
+        {
+            data[i] = i * 1024.0;
+        }
+
+        // Save CPU data.
+        error = mem_cpu.save_binary_append(filename, OSKAR_TAG_USER, 1, 2, 0);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+    }
+
+    // Save data from GPU.
+    {
+        oskar_Mem mem_cpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, num_gpu);
+        oskar_Mem mem_gpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, num_gpu);
+        double2* data = (double2*)mem_cpu;
+
+        // Fill array with data.
+        for (int i = 0; i < num_gpu; ++i)
+        {
+            data[i].x = i * 10.0;
+            data[i].y = i * 20.0 + 1.0;
+        }
+
+        // Copy data to GPU.
+        mem_cpu.copy_to(&mem_gpu);
+
+        // Save GPU data.
+        error = mem_gpu.save_binary_append(filename, OSKAR_TAG_USER, 4, 2, 0);
+        CPPUNIT_ASSERT_EQUAL(0, error);
+    }
+
+    // Save a single integer.
+    int val = 0xFFFFFF;
+    error = oskar_binary_file_append_int(filename, OSKAR_TAG_USER, 9, 8, val);
+    CPPUNIT_ASSERT_EQUAL(0, error);
+
+    // Declare index pointer.
+    oskar_BinaryTagIndex* index = NULL;
+
+    // Load GPU data.
+    {
+        oskar_Mem mem_gpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU);
+        error = mem_gpu.load_binary(filename, &index, OSKAR_TAG_USER, 4, 2);
+        CPPUNIT_ASSERT_EQUAL(num_gpu, mem_gpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(0, error);
+
+        // Copy back to CPU and examine contents.
+        oskar_Mem mem_cpu(&mem_gpu, OSKAR_LOCATION_CPU);
+        double2* data = (double2*)mem_cpu;
+        for (int i = 0; i < num_gpu; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 10.0,       data[i].x, 1e-8);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 20.0 + 1.0, data[i].y, 1e-8);
+        }
+    }
+
+    // Load integer.
+    int new_val = 0;
+    error = oskar_binary_file_read_int(filename, &index,
+            OSKAR_TAG_USER, 9, 8, &new_val);
+    CPPUNIT_ASSERT_EQUAL(0, error);
+    CPPUNIT_ASSERT_EQUAL(val, new_val);
+
+    // Load CPU data.
+    {
+        oskar_Mem mem_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_cpu);
+        error = mem_cpu.load_binary(filename, &index, OSKAR_TAG_USER, 1, 2);
+        CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements());
+        float* data = (float*)mem_cpu;
+        for (int i = 0; i < num_cpu; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 1024.0, data[i], 1e-8);
+        }
+    }
+
+    // Free the tag index.
+    oskar_binary_tag_index_free(&index);
 }

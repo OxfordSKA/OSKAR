@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_binary_file_read.h"
 #include "utility/oskar_binary_stream_read_header.h"
 #include "utility/oskar_binary_stream_read.h"

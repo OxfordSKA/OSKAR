@@ -41,6 +41,7 @@ struct float2;
 struct float4c;
 struct double2;
 struct double4c;
+struct oskar_BinaryTagIndex;
 #endif
 
 /**
@@ -170,7 +171,7 @@ public:
      *
      * @return A CUDA or OSKAR error code.
      */
-    int copy_to(oskar_Mem* other);
+    int copy_to(oskar_Mem* other) const;
 
     /**
      * @brief Returns oskar_Mem structure which holds a pointer to memory held
@@ -185,7 +186,7 @@ public:
      *
      * @return A structure containing the required pointer.
      */
-    oskar_Mem get_pointer(int offset, int num_elements);
+    oskar_Mem get_pointer(int offset, int num_elements) const;
 
     /**
      * @brief
@@ -208,6 +209,24 @@ public:
 
     /**
      * @brief
+     * Loads an OSKAR memory block from an OSKAR binary file.
+     *
+     * @details
+     * This function loads the contents of an OSKAR memory block from a binary file.
+     *
+     * @param[in] filename     Name of file from which to load.
+     * @param[in,out] index    Pointer to a tag index structure.
+     * @param[in] id           Tag identifier (enumerator).
+     * @param[in] id_user_1    User tag identifier byte 1 (set to 0 if unused).
+     * @param[in] id_user_2    User tag identifier byte 2 (set to 0 if unused).
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int load_binary(const char* filename, oskar_BinaryTagIndex** index,
+            unsigned char id, unsigned char id_user_1, unsigned char id_user_2);
+
+    /**
+     * @brief
      * Resizes the memory block.
      *
      * @details
@@ -219,6 +238,26 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int resize(int num_elements);
+
+    /**
+     * @brief
+     * Appends an OSKAR memory block to an OSKAR binary file.
+     *
+     * @details
+     * This function saves the contents of an OSKAR memory block to a binary
+     * file.
+     *
+     * @param[in] filename     Name of file to which to append.
+     * @param[in] id           Tag identifier (enumerator).
+     * @param[in] id_user_1    User tag identifier byte 1 (set to 0 if unused).
+     * @param[in] id_user_2    User tag identifier byte 2 (set to 0 if unused).
+     * @param[in] num_to_write If > 0, only the first \p num_elements are written.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int save_binary_append(const char* filename, unsigned char id,
+            unsigned char id_user_1, unsigned char id_user_2,
+            int num_to_write) const;
 
     /**
      * @brief

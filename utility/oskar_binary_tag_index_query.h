@@ -26,53 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_TEST_H_
-#define OSKAR_MEM_TEST_H_
+#ifndef OSKAR_BINARY_TAG_INDEX_QUERY_H_
+#define OSKAR_BINARY_TAG_INDEX_QUERY_H_
 
 /**
- * @file Test_Mem.h
+ * @file oskar_binary_tag_index_query.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+#include <cstdio>
+#else
+#include <stdio.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief Return the block size and offset associated with a given tag.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function returns the block size and offset associated with a given
+ * tag, based on its identifiers.
+ *
+ * @param[in] index         Index structure pointer.
+ * @param[in] id            Tag identifier (enumerator).
+ * @param[in] id_user_1     User tag identifier byte 1.
+ * @param[in] id_user_2     User tag identifier byte 2.
+ * @param[in] data_type     Type of the memory (as in oskar_Mem).
+ * @param[out] block_size   The size of the block, in bytes.
+ * @param[out] block_offset The block offset from the start of the file, in bytes.
  */
-class Test_Mem : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_Mem);
-        CPPUNIT_TEST(test_alloc);
-        CPPUNIT_TEST(test_realloc);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_different);
-        CPPUNIT_TEST(test_type_check);
-        CPPUNIT_TEST(test_scale_real);
-        CPPUNIT_TEST(test_set_value_real);
-        CPPUNIT_TEST(test_add);
-        CPPUNIT_TEST(test_add_noise);
-        CPPUNIT_TEST(test_binary);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
+        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
+        unsigned char data_type, size_t* block_size, long* block_offset);
 
-    public:
-        /// Test method.
-        void test_alloc();
-        void test_realloc();
-        void test_append();
-        void test_different();
-        void test_type_check();
-        void test_scale_real();
-        void test_set_value_real();
-        void test_add();
-        void test_add_noise();
-        void test_binary();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_Mem);
-
-#endif // OSKAR_MEM_TEST_H_
+#endif /* OSKAR_BINARY_TAG_INDEX_QUERY_H_ */

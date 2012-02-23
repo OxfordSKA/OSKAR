@@ -26,64 +26,76 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_binary_stream_read.h"
-#include "utility/oskar_binary_tag_index_query.h"
-#include "utility/oskar_endian.h"
-#include "utility/oskar_Mem.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_save_binary_append.h"
+#include "utility/oskar_binary_file_append.h"
 
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_binary_stream_read(FILE* stream, const oskar_BinaryTagIndex* index,
+int oskar_mem_save_binary_append(const oskar_Mem* mem, const char* filename,
         unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
-        unsigned char data_type, size_t data_size, void* data)
+        int num_to_write)
 {
-    int err;
-    size_t block_size = 0;
-    long block_offset = 0;
+    int err, type, location, num_elements;
+    oskar_Mem temp;
+    size_t size_bytes;
+    const oskar_Mem* data = NULL;
 
     /* Sanity check on inputs. */
-    if (stream == NULL || index == NULL || data == NULL)
+    if (mem == NULL || filename == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Query the tag index to get the block size and offset. */
-    err = oskar_binary_tag_index_query(index, id, id_user_1, id_user_2,
-            data_type, &block_size, &block_offset);
-    if (err) return err;
+    /* Get the meta-data. */
+#ifdef __cplusplus
+    type = mem->type();
+    location = mem->location();
+    num_elements = mem->num_elements();
+#else
+    type = mem->private_type;
+    location = mem->private_location;
+    num_elements = mem->private_num_elements;
+#endif
 
-    /* Check that there is enough memory in the block. */
-    if (data_size < block_size)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    /* Initialise temporary (to zero length). */
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
 
-    /* Copy the data out of the file. */
-    if (fseek(stream, block_offset, SEEK_SET) != 0)
-        return OSKAR_ERR_FILE_IO;
-    if (fread(data, 1, block_size, stream) != block_size)
-        return OSKAR_ERR_FILE_IO;
+    /* Get the total number of bytes to write. */
+    if (num_to_write <= 0)
+        num_to_write = num_elements;
+    size_bytes = num_to_write * oskar_mem_element_size(type);
 
-    return OSKAR_SUCCESS;
-}
+    /* Check if data is in CPU or GPU memory. */
+    if (location == OSKAR_LOCATION_CPU)
+    {
+        data = mem;
+    }
+    else if (location == OSKAR_LOCATION_GPU)
+    {
+        /* Copy to temporary. */
+        err = oskar_mem_copy(&temp, mem);
+        if (err)
+        {
+            oskar_mem_free(&temp);
+            return err;
+        }
+        data = &temp;
+    }
 
-int oskar_binary_stream_read_double(FILE* stream,
-        const oskar_BinaryTagIndex* index, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, double* value)
-{
-    return oskar_binary_stream_read(stream, index, id, id_user_1, id_user_2,
-            OSKAR_DOUBLE, sizeof(double), value);
-}
+    /* Save the memory to a binary file. */
+    err = oskar_binary_file_append(filename, id, id_user_1, id_user_2,
+            type, size_bytes, data->data);
 
-int oskar_binary_stream_read_int(FILE* stream,
-        const oskar_BinaryTagIndex* index, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, int* value)
-{
-    return oskar_binary_stream_read(stream, index, id, id_user_1, id_user_2,
-            OSKAR_INT, sizeof(int), value);
+    /* Free the temporary. */
+    oskar_mem_free(&temp);
+
+    return err;
 }
 
 #ifdef __cplusplus

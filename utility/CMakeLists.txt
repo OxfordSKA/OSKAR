@@ -15,6 +15,7 @@ set(utility_SRC
     src/oskar_binary_stream_write.c
     src/oskar_binary_tag_index_create.c
     src/oskar_binary_tag_index_free.c
+    src/oskar_binary_tag_index_query.c
     src/oskar_blank_parentheses.c
     src/oskar_cuda_device_info.cu
     src/oskar_cuda_memory.cu
@@ -38,7 +39,9 @@ set(utility_SRC
     src/oskar_mem_get_pointer.c
     src/oskar_mem_init.c
     src/oskar_mem_insert.c
+    src/oskar_mem_load_binary.c
     src/oskar_mem_realloc.c
+    src/oskar_mem_save_binary_append.c
     src/oskar_mem_scale_real.cu
     src/oskar_mem_set_value_real.c
     src/oskar_Mem.cpp
