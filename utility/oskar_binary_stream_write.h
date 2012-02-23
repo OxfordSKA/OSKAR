@@ -53,7 +53,7 @@ extern "C" {
  * The data are written at the current position of the stream, in native
  * byte order.
  *
- * @param[in,out] file   An output stream.
+ * @param[in,out] stream An output stream.
  * @param[in] id         Tag identifier (enumerator).
  * @param[in] id_user_1  User tag identifier byte 1.
  * @param[in] id_user_2  User tag identifier byte 2.
@@ -62,7 +62,7 @@ extern "C" {
  * @param[in] data       Pointer to memory block to write.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write(FILE* file, unsigned char id,
+int oskar_binary_stream_write(FILE* stream, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2,
         unsigned char data_type, size_t data_size, const void* data);
 
@@ -74,14 +74,14 @@ int oskar_binary_stream_write(FILE* file, unsigned char id,
  * The data are written at the current position of the stream, in native
  * byte order.
  *
- * @param[in,out] file   An output stream.
+ * @param[in,out] stream An output stream.
  * @param[in] id         Tag identifier (enumerator).
  * @param[in] id_user_1  User tag identifier byte 1.
  * @param[in] id_user_2  User tag identifier byte 2.
  * @param[in] value      Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_double(FILE* file, unsigned char id,
+int oskar_binary_stream_write_double(FILE* stream, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2, double value);
 
 /**
@@ -92,14 +92,14 @@ int oskar_binary_stream_write_double(FILE* file, unsigned char id,
  * The data are written at the current position of the stream, in native
  * byte order.
  *
- * @param[in,out] file   An output stream.
+ * @param[in,out] stream An output stream.
  * @param[in] id         Tag identifier (enumerator).
  * @param[in] id_user_1  User tag identifier byte 1.
  * @param[in] id_user_2  User tag identifier byte 2.
  * @param[in] value      Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_int(FILE* file, unsigned char id,
+int oskar_binary_stream_write_int(FILE* stream, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2, int value);
 
 #ifdef __cplusplus

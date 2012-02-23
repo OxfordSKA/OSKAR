@@ -26,29 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_free.h"
-#include <stdlib.h>
+#include "utility/oskar_file_exists.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index)
+int oskar_file_exists(const char* filename)
 {
-    /* Free arrays. */
-    free((*index)->tag);
-    free((*index)->block_offset_bytes);
-
-    /* Reset values. */
-    (*index)->num_tags = 0;
-    (*index)->tag = 0;
-    (*index)->block_offset_bytes = 0;
-
-    /* Free the structure itself. */
-    free(*index);
-
-    return OSKAR_SUCCESS;
+    FILE* stream;
+    stream = fopen(filename, "r");
+    if (stream)
+    {
+        fclose(stream);
+        return 1;
+    }
+    return 0;
 }
 
 #ifdef __cplusplus

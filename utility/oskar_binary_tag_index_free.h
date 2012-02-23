@@ -54,7 +54,7 @@ extern "C" {
  * @param[in,out] index  Pointer to index structure to free.
  */
 OSKAR_EXPORT
-int oskar_binary_tag_index_free(oskar_BinaryTagIndex* index);
+int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index);
 
 #ifdef __cplusplus
 }

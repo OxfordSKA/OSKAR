@@ -46,17 +46,31 @@ extern "C" {
 #endif
 
 /**
- * @brief Generate an index of tags in an OSKAR binary file.
+ * @brief Generate index of tags in an OSKAR binary file from an input stream.
  *
  * @details
- * This function generates a tag index from an OSKAR binary file.
+ * This function generates an index of tags in an OSKAR binary file from an
+ * input stream.
  *
- * @param[in,out] index  Pointer to index structure to fill.
- * @param[in] filename   Name of OSKAR binary file to index.
+ * The pointer to the index structure should be NULL on input.
+ * Typical use would be:
+ *
+ * @code
+ * oskar_BinaryTagIndex* index = NULL;
+ * oskar_binary_tag_index_create(&index, stream);
+ * @endcode
+ *
+ * The index structure should be freed using
+ *
+ * @code
+ * oskar_binary_tag_index_free(&index);
+ * @endcode
+ *
+ * @param[in,out] index   Index structure pointer (NULL on input).
+ * @param[in,out] stream  An input stream to index.
  */
 OSKAR_EXPORT
-int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
-        const char* filename);
+int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream);
 
 #ifdef __cplusplus
 }

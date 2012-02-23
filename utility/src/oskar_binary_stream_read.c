@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_read(FILE* file, const oskar_BinaryTagIndex* index,
+int oskar_binary_stream_read(FILE* stream, const oskar_BinaryTagIndex* index,
         unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
         unsigned char data_type, size_t data_size, void* data)
 {
@@ -48,7 +48,7 @@ int oskar_binary_stream_read(FILE* file, const oskar_BinaryTagIndex* index,
     size_t block_size = 0, memcpy_size = 0;
 
     /* Sanity check on inputs. */
-    if (file == NULL || index == NULL || data == NULL)
+    if (stream == NULL || index == NULL || data == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Find the tag ID in the index. */
@@ -86,27 +86,27 @@ int oskar_binary_stream_read(FILE* file, const oskar_BinaryTagIndex* index,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Copy the data out of the file. */
-    if (fseek(file, index->block_offset_bytes[i], SEEK_SET) != 0)
+    if (fseek(stream, index->block_offset_bytes[i], SEEK_SET) != 0)
         return OSKAR_ERR_FILE_IO;
-    if (fread(data, 1, block_size, file) != block_size)
+    if (fread(data, 1, block_size, stream) != block_size)
         return OSKAR_ERR_FILE_IO;
 
     return OSKAR_SUCCESS;
 }
 
-int oskar_binary_stream_read_double(FILE* file, const oskar_BinaryTagIndex* index,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
-        double* value)
+int oskar_binary_stream_read_double(FILE* stream,
+        const oskar_BinaryTagIndex* index, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, double* value)
 {
-    return oskar_binary_stream_read(file, index, id, id_user_1, id_user_2,
+    return oskar_binary_stream_read(stream, index, id, id_user_1, id_user_2,
             OSKAR_DOUBLE, sizeof(double), value);
 }
 
-int oskar_binary_stream_read_int(FILE* file, const oskar_BinaryTagIndex* index,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
-        int* value)
+int oskar_binary_stream_read_int(FILE* stream,
+        const oskar_BinaryTagIndex* index, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, int* value)
 {
-    return oskar_binary_stream_read(file, index, id, id_user_1, id_user_2,
+    return oskar_binary_stream_read(stream, index, id, id_user_1, id_user_2,
             OSKAR_INT, sizeof(int), value);
 }
 

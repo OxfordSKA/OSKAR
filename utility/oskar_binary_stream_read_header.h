@@ -52,11 +52,11 @@ extern "C" {
  * @details
  * This function reads a binary header from an input stream.
  *
- * @param[in,out] file   An input stream.
+ * @param[in,out] stream An input stream.
  * @param[in,out] header Pointer to a header structure to fill.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read_header(FILE* file, oskar_BinaryHeader* header);
+int oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header);
 
 #ifdef __cplusplus
 }

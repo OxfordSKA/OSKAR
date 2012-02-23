@@ -46,12 +46,14 @@ class Test_binary_file : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_binary_file);
-        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_stream);
+        CPPUNIT_TEST(test_file);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        /// Test method.
-        void test_method();
+        // Test methods.
+        void test_stream();
+        void test_file();
 };
 
 // Register the test class.

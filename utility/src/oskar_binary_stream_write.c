@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_write(FILE* file, unsigned char id,
+int oskar_binary_stream_write(FILE* stream, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2,
         unsigned char data_type, size_t data_size, const void* data)
 {
@@ -53,9 +53,9 @@ int oskar_binary_stream_write(FILE* file, unsigned char id,
 
     /* Set up the tag identifiers */
     tag.id = id;
-    tag.data_type = data_type;
     tag.id_user_1 = id_user_1;
     tag.id_user_2 = id_user_2;
+    tag.data_type = data_type;
 
     /* Get the number of bytes in the block in native byte order. */
     if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
@@ -74,27 +74,27 @@ int oskar_binary_stream_write(FILE* file, unsigned char id,
     memcpy(tag.size_bytes, &block_size, sizeof(size_t));
 
     /* Write the tag to the file. */
-    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, file) != 1)
+    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
         return OSKAR_ERR_FILE_IO;
 
     /* Write the data to the file. */
-    if (fwrite(data, 1, data_size, file) != data_size)
+    if (fwrite(data, 1, data_size, stream) != data_size)
         return OSKAR_ERR_FILE_IO;
 
     return OSKAR_SUCCESS;
 }
 
-int oskar_binary_stream_write_double(FILE* file, unsigned char id,
+int oskar_binary_stream_write_double(FILE* stream, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2, double value)
 {
-    return oskar_binary_stream_write(file, id, id_user_1, id_user_2,
+    return oskar_binary_stream_write(stream, id, id_user_1, id_user_2,
             OSKAR_DOUBLE, sizeof(double), &value);
 }
 
-int oskar_binary_stream_write_int(FILE* file, unsigned char id,
+int oskar_binary_stream_write_int(FILE* stream, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2, int value)
 {
-    return oskar_binary_stream_write(file, id, id_user_1, id_user_2,
+    return oskar_binary_stream_write(stream, id, id_user_1, id_user_2,
             OSKAR_INT, sizeof(int), &value);
 }
 

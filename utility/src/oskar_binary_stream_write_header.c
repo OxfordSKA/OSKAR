@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_write_header(FILE* file)
+int oskar_binary_stream_write_header(FILE* stream)
 {
     /* Construct binary header. */
     int version = OSKAR_VERSION;
@@ -65,11 +65,11 @@ int oskar_binary_stream_write_header(FILE* file)
     /* Pad rest of header with zeros. */
     memset(header.reserved, 0, sizeof(header.reserved));
 
-    /* Set file pointer to beginning. */
-    rewind(file);
+    /* Set stream pointer to beginning. */
+    rewind(stream);
 
-    /* Write header to file. */
-    if (fwrite(&header, sizeof(oskar_BinaryHeader), 1, file) != 1)
+    /* Write header to stream. */
+    if (fwrite(&header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
         return OSKAR_ERR_FILE_IO;
 
     return OSKAR_SUCCESS;

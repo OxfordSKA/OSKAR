@@ -51,10 +51,10 @@ extern "C" {
  * @details
  * This function writes a header to an output stream.
  *
- * @param[in,out] file An output stream.
+ * @param[in,out] stream An output stream.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_header(FILE* file);
+int oskar_binary_stream_write_header(FILE* stream);
 
 #ifdef __cplusplus
 }

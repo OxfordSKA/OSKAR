@@ -41,26 +41,26 @@ extern "C" {
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
-int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
-        const char* filename)
+int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
 {
-    FILE* file;
     oskar_BinaryHeader header;
+    oskar_BinaryTagIndex* idx;
     int error, i;
 
-    /* Open file for reading. */
-    file = fopen(filename, "rb");
+    /* Allocate index. */
+    idx = (oskar_BinaryTagIndex*) malloc(sizeof(oskar_BinaryTagIndex));
+    *index = idx;
 
     /* Read header. */
-    error = oskar_binary_stream_read_header(file, &header);
+    error = oskar_binary_stream_read_header(stream, &header);
     if (error) return error;
 
     /* Initialise tag index. */
-    index->tag = 0;
-    index->block_offset_bytes = 0;
-    index->num_tags = 0;
+    idx->tag = 0;
+    idx->block_offset_bytes = 0;
+    idx->num_tags = 0;
 
-    /* Read all tags in the file. */
+    /* Read all tags in the stream. */
     for (i = 0; OSKAR_TRUE; ++i)
     {
         size_t block_size = 0, memcpy_size = 0;
@@ -72,32 +72,31 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
 
             /* New size of arrays. */
             m = i + 10;
-            index->tag = realloc(index->tag, m * sizeof(oskar_BinaryTag));
-            index->block_offset_bytes = realloc(index->block_offset_bytes,
+            idx->tag = realloc(idx->tag, m * sizeof(oskar_BinaryTag));
+            idx->block_offset_bytes = realloc(idx->block_offset_bytes,
                     m * sizeof(long));
         }
 
         /* Initialise the data block offset to 0. */
-        index->block_offset_bytes[i] = 0;
+        idx->block_offset_bytes[i] = 0;
 
         /* Try to read a tag, and end the loop if unsuccessful. */
-        if (fread(&(index->tag[i]), sizeof(oskar_BinaryTag), 1, file) != 1)
+        if (fread(&(idx->tag[i]), sizeof(oskar_BinaryTag), 1, stream) != 1)
             break;
 
         /* If the bytes read are not a tag, then return an error. */
-        if (index->tag[i].magic[0] != 'T' || index->tag[i].magic[1] != 'A' ||
-                index->tag[i].magic[2] != 'G' || index->tag[i].magic[3] != 0)
-        {
-            fclose(file);
+        if (idx->tag[i].magic[0] != 'T' ||
+                idx->tag[i].magic[1] != 'A' ||
+                idx->tag[i].magic[2] != 'G' ||
+                idx->tag[i].magic[3] != 0)
             return OSKAR_ERR_BAD_BINARY_FORMAT;
-        }
 
-        /* Store the current file pointer as the data block offset. */
-        index->block_offset_bytes[i] = ftell(file);
+        /* Store the current stream pointer as the data block offset. */
+        idx->block_offset_bytes[i] = ftell(stream);
 
         /* Copy out the number of bytes in the block. */
-        memcpy_size = MIN(sizeof(size_t), sizeof(index->tag[i].size_bytes));
-        memcpy(&block_size, index->tag[i].size_bytes, memcpy_size);
+        memcpy_size = MIN(sizeof(size_t), sizeof(idx->tag[i].size_bytes));
+        memcpy(&block_size, idx->tag[i].size_bytes, memcpy_size);
 
         /* Get the number of bytes in the block in native byte order. */
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
@@ -108,15 +107,12 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
                 oskar_endian_swap_8((char*)&block_size);
         }
 
-        /* Increment file pointer by block size. */
-        fseek(file, block_size, SEEK_CUR);
+        /* Increment stream pointer by block size. */
+        fseek(stream, block_size, SEEK_CUR);
 
-        /* Save the number of tags read from the file. */
-        index->num_tags = i + 1;
+        /* Save the number of tags read from the stream. */
+        idx->num_tags = i + 1;
     }
-
-    /* Close file. */
-    fclose(file);
 
     return OSKAR_SUCCESS;
 }

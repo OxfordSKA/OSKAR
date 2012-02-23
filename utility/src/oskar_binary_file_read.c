@@ -27,28 +27,66 @@
  */
 
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_free.h"
+#include "utility/oskar_binary_file_read.h"
+#include "utility/oskar_binary_stream_read_header.h"
+#include "utility/oskar_binary_stream_read.h"
+#include "utility/oskar_binary_tag_index_create.h"
+#include "utility/oskar_endian.h"
+#include "utility/oskar_Mem.h"
+#include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index)
+int oskar_binary_file_read(const char* filename,
+        oskar_BinaryTagIndex** index, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2,
+        unsigned char data_type, size_t data_size, void* data)
 {
-    /* Free arrays. */
-    free((*index)->tag);
-    free((*index)->block_offset_bytes);
+    FILE* stream;
+    int err;
 
-    /* Reset values. */
-    (*index)->num_tags = 0;
-    (*index)->tag = 0;
-    (*index)->block_offset_bytes = 0;
+    /* Open the file for read. */
+    stream = fopen(filename, "rb");
 
-    /* Free the structure itself. */
-    free(*index);
+    /* Index the file if necessary. */
+    if (*index == NULL)
+    {
+        err = oskar_binary_tag_index_create(index, stream);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
+    }
 
-    return OSKAR_SUCCESS;
+    /* Read the data. */
+    err = oskar_binary_stream_read(stream, *index, id, id_user_1, id_user_2,
+            data_type, data_size, data);
+
+    /* Close the file. */
+    fclose(stream);
+
+    return err;
+}
+
+int oskar_binary_file_read_double(const char* filename,
+        oskar_BinaryTagIndex** index, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, double* value)
+{
+    return oskar_binary_file_read(filename, index, id, id_user_1, id_user_2,
+            OSKAR_DOUBLE, sizeof(double), value);
+}
+
+int oskar_binary_file_read_int(const char* filename,
+        oskar_BinaryTagIndex** index, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, int* value)
+{
+    return oskar_binary_file_read(filename, index, id, id_user_1, id_user_2,
+            OSKAR_INT, sizeof(int), value);
 }
 
 #ifdef __cplusplus

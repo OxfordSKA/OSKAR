@@ -65,13 +65,13 @@ extern "C" {
  * @param[in] id_user_1  User tag identifier byte 1.
  * @param[in] id_user_2  User tag identifier byte 2.
  * @param[in] data_type  Type (as oskar_Mem) of data block.
- * @param[in] bytes      Block size in bytes.
+ * @param[in] data_size  Block size in bytes.
  * @param[in] data       Pointer to memory block to write.
  */
 OSKAR_EXPORT
 int oskar_binary_file_append(const char* filename, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2,
-        unsigned char data_type, size_t bytes, const void* data);
+        unsigned char data_type, size_t data_size, const void* data);
 
 /**
  * @brief Appends a single double-precision value to a binary file.

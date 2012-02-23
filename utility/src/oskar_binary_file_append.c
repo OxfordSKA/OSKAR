@@ -43,41 +43,42 @@ extern "C" {
 
 int oskar_binary_file_append(const char* filename, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2,
-        unsigned char data_type, size_t bytes, const void* data)
+        unsigned char data_type, size_t data_size, const void* data)
 {
-    FILE* file;
+    FILE* stream;
     int err;
 
     /* Open the file for read and append. */
-    file = fopen(filename, "a+");
+    stream = fopen(filename, "a+b");
 
     /* Check if the file is empty. */
-    if (ftell(file) == 0)
+    fseek(stream, 0, SEEK_END);
+    if (ftell(stream) == 0)
     {
         /* If the file is empty, then write the header. */
-        oskar_binary_stream_write_header(file);
+        oskar_binary_stream_write_header(stream);
     }
     else
     {
         /* If the file is not empty, then check the header. */
         oskar_BinaryHeader header;
-        err = oskar_binary_stream_read_header(file, &header);
+        err = oskar_binary_stream_read_header(stream, &header);
         if (err)
         {
-            fclose(file);
+            fclose(stream);
             return err;
         }
 
         /* Seek to end of file. */
-        fseek(file, 0, SEEK_END);
+        fseek(stream, 0, SEEK_END);
     }
 
     /* Write the data. */
-    err = oskar_binary_stream_write(file, id, id_user_1, id_user_2,
-            data_type, bytes, data);
+    err = oskar_binary_stream_write(stream, id, id_user_1, id_user_2,
+            data_type, data_size, data);
 
     /* Close the file. */
-    fclose(file);
+    fclose(stream);
 
     return err;
 }

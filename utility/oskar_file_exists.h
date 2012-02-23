@@ -26,31 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_tag_index_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_FILE_EXISTS_H_
+#define OSKAR_FILE_EXISTS_H_
+
+/**
+ * @file oskar_file_exists.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index)
-{
-    /* Free arrays. */
-    free((*index)->tag);
-    free((*index)->block_offset_bytes);
+/**
+ * @brief Returns true (1) if a file exists; false (0) if not.
+ *
+ * @details
+ * This function checks whether the file specified by the given filename
+ * exists on the file system.
 
-    /* Reset values. */
-    (*index)->num_tags = 0;
-    (*index)->tag = 0;
-    (*index)->block_offset_bytes = 0;
-
-    /* Free the structure itself. */
-    free(*index);
-
-    return OSKAR_SUCCESS;
-}
+ * @param[in] filename   Name of file.
+ *
+ * @return
+ * If the file exists, this function returns 1; if not, it returns 0.
+ */
+OSKAR_EXPORT
+int oskar_file_exists(const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_FILE_EXISTS_H_ */

@@ -37,13 +37,13 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_read_header(FILE* file, oskar_BinaryHeader* header)
+int oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header)
 {
-    /* Set file pointer to beginning. */
-    rewind(file);
+    /* Set stream pointer to beginning. */
+    rewind(stream);
 
-    /* Read the header from the file. */
-    if (fread(header, sizeof(oskar_BinaryHeader), 1, file) != 1)
+    /* Read the header from the stream. */
+    if (fread(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
         return OSKAR_ERR_FILE_IO;
 
     /* Check if this is a valid header. */

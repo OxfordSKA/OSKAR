@@ -7,6 +7,7 @@ add_subdirectory(cudak)
 # ==== Utility library source
 set(utility_SRC
     src/oskar_binary_file_append.c
+    src/oskar_binary_file_read.c
     src/oskar_binary_header_version.c
     src/oskar_binary_stream_read_header.c
     src/oskar_binary_stream_read.c
@@ -21,6 +22,7 @@ set(utility_SRC
     src/oskar_Device_curand_state.cpp
     src/oskar_endian.c
     src/oskar_exit.c
+    src/oskar_file_exists.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
     src/oskar_mem_add_gaussian_noise.c
