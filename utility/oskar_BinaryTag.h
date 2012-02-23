@@ -57,12 +57,12 @@ extern "C" {
  */
 struct oskar_BinaryTag
 {
-    char magic[4];             /**< Magic number (ASCII "TAG"). */
-    unsigned char id;          /**< Tag identifier (enumerator). */
-    unsigned char id_user_1;   /**< User tag identifier byte 1. */
-    unsigned char id_user_2;   /**< User tag identifier byte 2. */
-    unsigned char data_type;   /**< Type (as oskar_Mem) of data block. */
-    char size_bytes[8];        /**< Block size in bytes, as little-endian 8-byte integer. */
+    char magic[4];           /**< Magic number (ASCII "TAG"). */
+    unsigned char id;        /**< Tag identifier (enumerator). */
+    unsigned char id_user_1; /**< User tag identifier byte 1. */
+    unsigned char id_user_2; /**< User tag identifier byte 2. */
+    unsigned char data_type; /**< Type (as oskar_Mem) of data block. */
+    char size_bytes[8];      /**< Block size in bytes, as little-endian 8-byte integer. */
 };
 typedef struct oskar_BinaryTag oskar_BinaryTag;
 
@@ -110,8 +110,8 @@ enum
     OSKAR_TAG_SOURCE_POSITION_ANGLE_RAD = 21,
 
     /* Telescope data. */
-    OSKAR_TAG_TELESCOPE_LAT_RAD = 30,
-    OSKAR_TAG_TELESCOPE_LON_RAD = 31,
+    OSKAR_TAG_TELESCOPE_LON_RAD = 30,
+    OSKAR_TAG_TELESCOPE_LAT_RAD = 31,
     OSKAR_TAG_TELESCOPE_ALT_M = 32,
     OSKAR_TAG_NUM_STATIONS = 33,
     OSKAR_TAG_STATION_X_POSITONS = 34,
@@ -130,23 +130,24 @@ enum
     OSKAR_TAG_NUM_TIMES = 70,
     OSKAR_TAG_NUM_CHANNELS = 71,
     OSKAR_TAG_NUM_BASELINES = 72,
-    OSKAR_TAG_VISIBILITY_DATA = 73,
-    OSKAR_TAG_BASELINE_UU = 74,
-    OSKAR_TAG_BASELINE_VV = 75,
-    OSKAR_TAG_BASELINE_WW = 76,
-    OSKAR_TAG_BASELINE_UNIT = 77,
-    OSKAR_TAG_FREQ_START_HZ = 78,
-    OSKAR_TAG_FREQ_INC_HZ = 79,
-    OSKAR_TAG_FREQ_CHANNEL_BANDWIDTH_HZ = 80,
-    OSKAR_TAG_TIME_INTERVAL_S = 81,
-    OSKAR_TAG_TIME_EXPOSURE_S = 82,
+    OSKAR_TAG_NUM_POLARISATIONS = 73,
+    OSKAR_TAG_VISIBILITY_DATA = 74,
+    OSKAR_TAG_VISIBILITY_AXIS_ORDER = 75,
+    OSKAR_TAG_VISIBILITY_POLARISATION_TYPE = 76,
+    OSKAR_TAG_BASELINE_UU = 77,
+    OSKAR_TAG_BASELINE_VV = 78,
+    OSKAR_TAG_BASELINE_WW = 79,
+    OSKAR_TAG_BASELINE_UNIT = 80,
+    OSKAR_TAG_FREQ_START_HZ = 81,
+    OSKAR_TAG_FREQ_INC_HZ = 82,
+    OSKAR_TAG_FREQ_CHANNEL_BANDWIDTH_HZ = 83,
+    OSKAR_TAG_TIME_INTERVAL_S = 84,
+    OSKAR_TAG_TIME_EXPOSURE_S = 85,
 
     /* Image data. */
-    OSKAR_TAG_NUM_PIXELS_WIDTH = 90,
-    OSKAR_TAG_NUM_PIXELS_HEIGHT = 91,
-    OSKAR_TAG_NUM_POLARISATIONS = 92,
-    OSKAR_TAG_IMAGE_DATA = 93,
-    OSKAR_TAG_IMAGE_CUBE_DATA = 94,
+    OSKAR_TAG_NUM_PIXELS_WIDTH = 100,
+    OSKAR_TAG_NUM_PIXELS_HEIGHT = 101,
+    OSKAR_TAG_FITS_IMAGE_DATA = 103,
 
     /* Largest possible standard tag identifier. */
     OSKAR_TAG_LARGEST_STANDARD_TAG_ID = 255

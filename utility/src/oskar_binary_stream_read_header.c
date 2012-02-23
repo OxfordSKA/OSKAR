@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_binary_file_read_header.h"
 #include "utility/oskar_binary_header_version.h"
+#include "utility/oskar_binary_stream_read_header.h"
 #include "utility/oskar_endian.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +37,7 @@
 extern "C" {
 #endif
 
-int oskar_binary_file_read_header(FILE* file, oskar_BinaryHeader* header)
+int oskar_binary_stream_read_header(FILE* file, oskar_BinaryHeader* header)
 {
     /* Set file pointer to beginning. */
     rewind(file);

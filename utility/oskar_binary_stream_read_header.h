@@ -26,14 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_HEADER_H_
-#define OSKAR_BINARY_FILE_WRITE_HEADER_H_
+#ifndef OSKAR_BINARY_STREAM_READ_HEADER_H_
+#define OSKAR_BINARY_STREAM_READ_HEADER_H_
 
 /**
- * @file oskar_binary_file_write_header.h
+ * @file oskar_binary_stream_read_header.h
  */
 
 #include "oskar_global.h"
+#include "oskar_BinaryHeader.h"
 
 #ifdef __cplusplus
 #include <cstdio>
@@ -46,18 +47,19 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes a binary header to an open file.
+ * @brief Reads a binary header from an input stream.
  *
  * @details
- * This function writes a header to an open binary file.
+ * This function reads a binary header from an input stream.
  *
- * @param[in,out] file An open file handle.
+ * @param[in,out] file   An input stream.
+ * @param[in,out] header Pointer to a header structure to fill.
  */
 OSKAR_EXPORT
-void oskar_binary_file_write_header(FILE* file);
+int oskar_binary_stream_read_header(FILE* file, oskar_BinaryHeader* header);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_FILE_WRITE_HEADER_H_ */
+#endif /* OSKAR_BINARY_STREAM_READ_HEADER_H_ */

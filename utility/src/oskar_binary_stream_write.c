@@ -27,8 +27,7 @@
  */
 
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_write.h"
-#include "utility/oskar_binary_file_write_int.h"
+#include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_endian.h"
 #include "utility/oskar_Mem.h"
 #include <string.h>
@@ -39,10 +38,63 @@
 extern "C" {
 #endif
 
-int oskar_binary_file_write_int(FILE* file, unsigned char id,
+int oskar_binary_stream_write(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2,
+        unsigned char data_type, size_t data_size, const void* data)
+{
+    oskar_BinaryTag tag;
+    size_t block_size;
+
+    /* Initialise the tag. */
+    char magic[] = "TAG";
+    block_size = data_size;
+    strcpy(tag.magic, magic);
+    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
+
+    /* Set up the tag identifiers */
+    tag.id = id;
+    tag.data_type = data_type;
+    tag.id_user_1 = id_user_1;
+    tag.id_user_2 = id_user_2;
+
+    /* Get the number of bytes in the block in native byte order. */
+    if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
+    {
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
+    }
+    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    {
+        if (sizeof(size_t) == 4)
+            oskar_endian_swap_4((char*)&block_size);
+        else if (sizeof(size_t) == 8)
+            oskar_endian_swap_8((char*)&block_size);
+    }
+
+    /* Copy the block size in bytes to the tag, as little endian. */
+    memcpy(tag.size_bytes, &block_size, sizeof(size_t));
+
+    /* Write the tag to the file. */
+    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, file) != 1)
+        return OSKAR_ERR_FILE_IO;
+
+    /* Write the data to the file. */
+    if (fwrite(data, 1, data_size, file) != data_size)
+        return OSKAR_ERR_FILE_IO;
+
+    return OSKAR_SUCCESS;
+}
+
+int oskar_binary_stream_write_double(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, double value)
+{
+    return oskar_binary_stream_write(file, id, id_user_1, id_user_2,
+            OSKAR_DOUBLE, sizeof(double), &value);
+}
+
+int oskar_binary_stream_write_int(FILE* file, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2, int value)
 {
-    return oskar_binary_file_write(file, id, id_user_1, id_user_2,
+    return oskar_binary_stream_write(file, id, id_user_1, id_user_2,
             OSKAR_INT, sizeof(int), &value);
 }
 

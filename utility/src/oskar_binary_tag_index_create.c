@@ -28,7 +28,7 @@
 
 #include "utility/oskar_BinaryHeader.h"
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_read_header.h"
+#include "utility/oskar_binary_stream_read_header.h"
 #include "utility/oskar_binary_tag_index_create.h"
 #include "utility/oskar_endian.h"
 #include <string.h>
@@ -39,18 +39,20 @@
 extern "C" {
 #endif
 
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
+
 int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
         const char* filename)
 {
     FILE* file;
     oskar_BinaryHeader header;
-    int error, n;
+    int error, i;
 
     /* Open file for reading. */
     file = fopen(filename, "rb");
 
     /* Read header. */
-    error = oskar_binary_file_read_header(file, &header);
+    error = oskar_binary_stream_read_header(file, &header);
     if (error) return error;
 
     /* Initialise tag index. */
@@ -59,43 +61,45 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
     index->num_tags = 0;
 
     /* Read all tags in the file. */
-    n = 0;
-    for (;;)
+    for (i = 0; OSKAR_TRUE; ++i)
     {
-        size_t t, block_size;
+        size_t block_size = 0, memcpy_size = 0;
 
         /* Check if we need to allocate more storage for the tag. */
-        if (n % 10 == 0)
+        if (i % 10 == 0)
         {
             int m;
 
             /* New size of arrays. */
-            m = n + 10;
+            m = i + 10;
             index->tag = realloc(index->tag, m * sizeof(oskar_BinaryTag));
             index->block_offset_bytes = realloc(index->block_offset_bytes,
                     m * sizeof(long));
         }
 
         /* Initialise the data block offset to 0. */
-        index->block_offset_bytes[n] = 0;
+        index->block_offset_bytes[i] = 0;
 
         /* Try to read a tag, and end the loop if unsuccessful. */
-        if (fread(&(index->tag[n]), sizeof(oskar_BinaryTag), 1, file) != 1)
+        if (fread(&(index->tag[i]), sizeof(oskar_BinaryTag), 1, file) != 1)
             break;
 
         /* If the bytes read are not a tag, then return an error. */
-        if (strcmp(index->tag[n].magic, "TAG") != 0)
+        if (index->tag[i].magic[0] != 'T' || index->tag[i].magic[1] != 'A' ||
+                index->tag[i].magic[2] != 'G' || index->tag[i].magic[3] != 0)
         {
             fclose(file);
             return OSKAR_ERR_BAD_BINARY_FORMAT;
         }
 
         /* Store the current file pointer as the data block offset. */
-        index->block_offset_bytes[n] = ftell(file);
+        index->block_offset_bytes[i] = ftell(file);
+
+        /* Copy out the number of bytes in the block. */
+        memcpy_size = MIN(sizeof(size_t), sizeof(index->tag[i].size_bytes));
+        memcpy(&block_size, index->tag[i].size_bytes, memcpy_size);
 
         /* Get the number of bytes in the block in native byte order. */
-        t = sizeof(size_t) < 8 ? sizeof(size_t) : 8;
-        memcpy(&block_size, index->tag[n].size_bytes, t);
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
         {
             if (sizeof(size_t) == 4)
@@ -107,12 +111,9 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex* index,
         /* Increment file pointer by block size. */
         fseek(file, block_size, SEEK_CUR);
 
-        /* Increment tag counter. */
-        n++;
+        /* Save the number of tags read from the file. */
+        index->num_tags = i + 1;
     }
-
-    /* Save the number of tags read from the file. */
-    index->num_tags = n;
 
     /* Close file. */
     fclose(file);

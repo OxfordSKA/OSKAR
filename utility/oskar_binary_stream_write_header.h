@@ -26,25 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_read_int.h"
-#include "utility/oskar_binary_file_read.h"
-#include <string.h>
-#include <stdlib.h>
+#ifndef OSKAR_BINARY_STREAM_WRITE_HEADER_H_
+#define OSKAR_BINARY_STREAM_WRITE_HEADER_H_
+
+/**
+ * @file oskar_binary_stream_write_header.h
+ */
+
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+#include <cstdio>
+#else
 #include <stdio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_binary_file_read_int(FILE* file, const oskar_BinaryTagIndex* index,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
-        int* value)
-{
-    return oskar_binary_file_read(file, index, id, id_user_1, id_user_2,
-            sizeof(int), value);
-}
+/**
+ * @brief Writes a binary header to an output stream.
+ *
+ * @details
+ * This function writes a header to an output stream.
+ *
+ * @param[in,out] file An output stream.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write_header(FILE* file);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_BINARY_STREAM_WRITE_HEADER_H_ */

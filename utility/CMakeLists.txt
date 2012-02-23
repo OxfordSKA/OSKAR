@@ -6,15 +6,12 @@ add_subdirectory(cudak)
 
 # ==== Utility library source
 set(utility_SRC
-    src/oskar_binary_file_read_double.c
-    src/oskar_binary_file_read_header.c
-    src/oskar_binary_file_read_int.c
-    src/oskar_binary_file_read.c
-    src/oskar_binary_file_write_double.c
-    src/oskar_binary_file_write_header.c
-    src/oskar_binary_file_write_int.c
-    src/oskar_binary_file_write.c
+    src/oskar_binary_file_append.c
     src/oskar_binary_header_version.c
+    src/oskar_binary_stream_read_header.c
+    src/oskar_binary_stream_read.c
+    src/oskar_binary_stream_write_header.c
+    src/oskar_binary_stream_write.c
     src/oskar_binary_tag_index_create.c
     src/oskar_binary_tag_index_free.c
     src/oskar_blank_parentheses.c

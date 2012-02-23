@@ -27,8 +27,12 @@
  */
 
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_write.h"
+#include "utility/oskar_binary_file_append.h"
+#include "utility/oskar_binary_stream_read_header.h"
+#include "utility/oskar_binary_stream_write_header.h"
+#include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_endian.h"
+#include "utility/oskar_Mem.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,48 +41,59 @@
 extern "C" {
 #endif
 
-int oskar_binary_file_write(FILE* file, unsigned char id,
+int oskar_binary_file_append(const char* filename, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2,
         unsigned char data_type, size_t bytes, const void* data)
 {
-    oskar_BinaryTag tag;
-    size_t size_bytes;
+    FILE* file;
+    int err;
 
-    /* Initialise the tag. */
-    char magic[] = "TAG";
-    size_bytes = bytes;
-    strcpy(tag.magic, magic);
-    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
+    /* Open the file for read and append. */
+    file = fopen(filename, "a+");
 
-    /* Set up the tag identifiers */
-    tag.id = id;
-    tag.data_type = data_type;
-    tag.id_user_1 = id_user_1;
-    tag.id_user_2 = id_user_2;
-
-    /* Write the block size in bytes as little endian. */
-    if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
+    /* Check if the file is empty. */
+    if (ftell(file) == 0)
     {
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
+        /* If the file is empty, then write the header. */
+        oskar_binary_stream_write_header(file);
     }
-    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    else
     {
-        if (sizeof(size_t) == 4)
-            oskar_endian_swap_4((char*)&size_bytes);
-        else if (sizeof(size_t) == 8)
-            oskar_endian_swap_8((char*)&size_bytes);
+        /* If the file is not empty, then check the header. */
+        oskar_BinaryHeader header;
+        err = oskar_binary_stream_read_header(file, &header);
+        if (err)
+        {
+            fclose(file);
+            return err;
+        }
+
+        /* Seek to end of file. */
+        fseek(file, 0, SEEK_END);
     }
-    memcpy(tag.size_bytes, &size_bytes, sizeof(size_t));
 
-    /* Write the tag to the file. */
-    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, file) != 1)
-        return OSKAR_ERR_FILE_IO;
+    /* Write the data. */
+    err = oskar_binary_stream_write(file, id, id_user_1, id_user_2,
+            data_type, bytes, data);
 
-    /* Write the data to the file. */
-    if (fwrite(data, 1, bytes, file) != bytes)
-        return OSKAR_ERR_FILE_IO;
+    /* Close the file. */
+    fclose(file);
 
-    return OSKAR_SUCCESS;
+    return err;
+}
+
+int oskar_binary_file_append_double(const char* filename, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, double value)
+{
+    return oskar_binary_file_append(filename, id, id_user_1, id_user_2,
+            OSKAR_DOUBLE, sizeof(double), &value);
+}
+
+int oskar_binary_file_append_int(const char* filename, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, int value)
+{
+    return oskar_binary_file_append(filename, id, id_user_1, id_user_2,
+            OSKAR_INT, sizeof(int), &value);
 }
 
 #ifdef __cplusplus

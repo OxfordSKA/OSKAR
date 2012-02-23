@@ -26,9 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_read_double.h"
-#include "utility/oskar_binary_file_read.h"
+#include "utility/oskar_BinaryHeader.h"
+#include "utility/oskar_binary_stream_write_header.h"
+#include "utility/oskar_endian.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,12 +37,42 @@
 extern "C" {
 #endif
 
-int oskar_binary_file_read_double(FILE* file, const oskar_BinaryTagIndex* index,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
-        double* value)
+int oskar_binary_stream_write_header(FILE* file)
 {
-    return oskar_binary_file_read(file, index, id, id_user_1, id_user_2,
-            sizeof(double), value);
+    /* Construct binary header. */
+    int version = OSKAR_VERSION;
+    oskar_BinaryHeader header;
+    char magic[] = "OSKARBIN";
+    strcpy(header.magic, magic);
+    header.bin_version = OSKAR_BINARY_FORMAT_VERSION;
+    header.endian      = (char)oskar_endian();
+    header.size_ptr    = (char)sizeof(void*);
+    header.size_int    = (char)sizeof(int);
+    header.size_long   = (char)sizeof(long);
+    header.size_float  = (char)sizeof(float);
+    header.size_double = (char)sizeof(double);
+
+    /* Write OSKAR version data in little-endian format. */
+    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    {
+        if (sizeof(int) == 4)
+            oskar_endian_swap_4((char*)&version);
+        else if (sizeof(int) == 8)
+            oskar_endian_swap_8((char*)&version);
+    }
+    memcpy(header.version, &version, sizeof(header.version));
+
+    /* Pad rest of header with zeros. */
+    memset(header.reserved, 0, sizeof(header.reserved));
+
+    /* Set file pointer to beginning. */
+    rewind(file);
+
+    /* Write header to file. */
+    if (fwrite(&header, sizeof(oskar_BinaryHeader), 1, file) != 1)
+        return OSKAR_ERR_FILE_IO;
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

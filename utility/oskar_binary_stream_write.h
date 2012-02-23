@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_WRITE_INT_H_
-#define OSKAR_BINARY_FILE_WRITE_INT_H_
+#ifndef OSKAR_BINARY_STREAM_WRITE_H_
+#define OSKAR_BINARY_STREAM_WRITE_H_
 
 /**
- * @file oskar_binary_file_write_int.h
+ * @file oskar_binary_stream_write.h
  */
 
 #include "oskar_global.h"
@@ -46,23 +46,64 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes a single integer value to an open binary file.
+ * @brief Writes a block of binary data to an output stream.
  *
  * @details
- * This function writes a single integer value to an open binary file.
+ * This function writes a block of binary data to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
  *
- * @param[in,out] file   An open file handle.
+ * @param[in,out] file   An output stream.
+ * @param[in] id         Tag identifier (enumerator).
+ * @param[in] id_user_1  User tag identifier byte 1.
+ * @param[in] id_user_2  User tag identifier byte 2.
+ * @param[in] data_type  Type (as oskar_Mem) of data block.
+ * @param[in] data_size  Size of data block, in bytes.
+ * @param[in] data       Pointer to memory block to write.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2,
+        unsigned char data_type, size_t data_size, const void* data);
+
+/**
+ * @brief Writes a single double-precision value to an output stream.
+ *
+ * @details
+ * This function writes a single double-precision value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
+ *
+ * @param[in,out] file   An output stream.
  * @param[in] id         Tag identifier (enumerator).
  * @param[in] id_user_1  User tag identifier byte 1.
  * @param[in] id_user_2  User tag identifier byte 2.
  * @param[in] value      Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_int(FILE* file, unsigned char id,
+int oskar_binary_stream_write_double(FILE* file, unsigned char id,
+        unsigned char id_user_1, unsigned char id_user_2, double value);
+
+/**
+ * @brief Writes a single integer value to an output stream.
+ *
+ * @details
+ * This function writes a single integer value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
+ *
+ * @param[in,out] file   An output stream.
+ * @param[in] id         Tag identifier (enumerator).
+ * @param[in] id_user_1  User tag identifier byte 1.
+ * @param[in] id_user_2  User tag identifier byte 2.
+ * @param[in] value      Value to write.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write_int(FILE* file, unsigned char id,
         unsigned char id_user_1, unsigned char id_user_2, int value);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_FILE_WRITE_INT_H_ */
+#endif /* OSKAR_BINARY_STREAM_WRITE_H_ */
