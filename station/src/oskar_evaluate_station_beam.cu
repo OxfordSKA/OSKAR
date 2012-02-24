@@ -101,6 +101,11 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     {
         oskar_evaluate_station_beam_scalar(E, station, l_beam, m_beam,
                 l, m, n, weights, &weights_error, curand_states);
+
+        if (station->normalise_beam)
+        {
+            E->scale_real(1.0/station->num_elements);
+        }
     }
 
     // Make use of element pattern data.
