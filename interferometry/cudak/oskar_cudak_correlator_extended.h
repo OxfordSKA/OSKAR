@@ -38,8 +38,12 @@
 
 /**
  * @brief
+ * Correlator kernel for extended gaussian sources.
+ *
  *
  * @details
+ * Gaussian parameters a,b, and c are assumed to be evaluated when the
+ * sky model is loaded.
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
@@ -65,8 +69,11 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
 
 /**
  * @brief
+ * Correlator kernel for extended gaussian sources.
  *
  * @details
+ * Gaussian parameters a,b, and c are assumed to be evaluated when the
+ * sky model is loaded.
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
