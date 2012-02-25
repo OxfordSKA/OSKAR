@@ -41,9 +41,9 @@
 extern "C" {
 #endif
 
-int oskar_binary_file_append(const char* filename, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2,
-        unsigned char data_type, size_t data_size, const void* data)
+int oskar_binary_file_append(const char* filename, unsigned char data_type,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t data_size, const void* data)
 {
     FILE* stream;
     int err;
@@ -74,8 +74,8 @@ int oskar_binary_file_append(const char* filename, unsigned char id,
     }
 
     /* Write the data. */
-    err = oskar_binary_stream_write(stream, id, id_user_1, id_user_2,
-            data_type, data_size, data);
+    err = oskar_binary_stream_write(stream, data_type,
+            name_group, name_tag, user_index, data_size, data);
 
     /* Close the file. */
     fclose(stream);
@@ -83,18 +83,78 @@ int oskar_binary_file_append(const char* filename, unsigned char id,
     return err;
 }
 
-int oskar_binary_file_append_double(const char* filename, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, double value)
+int oskar_binary_file_append_double(const char* filename,
+        const char* name_group, const char* name_tag, int user_index,
+        double value)
 {
-    return oskar_binary_file_append(filename, id, id_user_1, id_user_2,
-            OSKAR_DOUBLE, sizeof(double), &value);
+    return oskar_binary_file_append(filename, OSKAR_DOUBLE, name_group,
+            name_tag, user_index, sizeof(double), &value);
 }
 
-int oskar_binary_file_append_int(const char* filename, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, int value)
+int oskar_binary_file_append_int(const char* filename,
+        const char* name_group, const char* name_tag, int user_index,
+        int value)
 {
-    return oskar_binary_file_append(filename, id, id_user_1, id_user_2,
-            OSKAR_INT, sizeof(int), &value);
+    return oskar_binary_file_append(filename, OSKAR_INT, name_group,
+            name_tag, user_index, sizeof(int), &value);
+}
+
+int oskar_binary_file_append_std(const char* filename, unsigned char data_type,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        size_t data_size, const void* data)
+{
+    FILE* stream;
+    int err;
+
+    /* Open the file for read and append. */
+    stream = fopen(filename, "a+b");
+
+    /* Check if the file is empty. */
+    fseek(stream, 0, SEEK_END);
+    if (ftell(stream) == 0)
+    {
+        /* If the file is empty, then write the header. */
+        oskar_binary_stream_write_header(stream);
+    }
+    else
+    {
+        /* If the file is not empty, then check the header. */
+        oskar_BinaryHeader header;
+        err = oskar_binary_stream_read_header(stream, &header);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
+
+        /* Seek to end of file. */
+        fseek(stream, 0, SEEK_END);
+    }
+
+    /* Write the data. */
+    err = oskar_binary_stream_write_std(stream, data_type,
+            id_group, id_tag, user_index, data_size, data);
+
+    /* Close the file. */
+    fclose(stream);
+
+    return err;
+}
+
+int oskar_binary_file_append_std_double(const char* filename,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        double value)
+{
+    return oskar_binary_file_append_std(filename, OSKAR_DOUBLE, id_group,
+            id_tag, user_index, sizeof(double), &value);
+}
+
+int oskar_binary_file_append_std_int(const char* filename,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        int value)
+{
+    return oskar_binary_file_append_std(filename, OSKAR_INT, id_group,
+            id_tag, user_index, sizeof(int), &value);
 }
 
 #ifdef __cplusplus

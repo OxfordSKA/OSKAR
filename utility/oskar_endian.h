@@ -53,6 +53,16 @@ OSKAR_EXPORT
 int oskar_endian(void);
 
 /**
+ * @brief Swaps the byte ordering of the two bytes at the supplied address.
+ *
+ * @details
+ * This function swaps the byte ordering of the two bytes at the supplied
+ * address.
+ */
+OSKAR_EXPORT
+void oskar_endian_swap_2(char* data);
+
+/**
  * @brief Swaps the byte ordering of the four bytes at the supplied address.
  *
  * @details

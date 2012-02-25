@@ -32,7 +32,7 @@
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_load_binary.h"
 #include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_binary_file_read.h"
+#include "utility/oskar_binary_stream_read.h"
 #include "utility/oskar_binary_tag_index_create.h"
 #include "utility/oskar_binary_tag_index_query.h"
 
@@ -44,13 +44,14 @@ extern "C" {
 #endif
 
 int oskar_mem_load_binary(oskar_Mem* mem, const char* filename,
-        oskar_BinaryTagIndex** index, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2)
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index)
 {
     int err, type, location, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
+    FILE* stream;
 
     /* Sanity check on inputs. */
     if (mem == NULL || filename == NULL || index == NULL)
@@ -71,21 +72,31 @@ int oskar_mem_load_binary(oskar_Mem* mem, const char* filename,
     /* Check if data is in CPU or GPU memory. */
     data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;
 
+    /* Open the input file. */
+    stream = fopen(filename, "rb");
+    if (stream == NULL)
+        return OSKAR_ERR_FILE_IO;
+
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
     {
-        FILE* stream;
-        stream = fopen(filename, "rb");
         err = oskar_binary_tag_index_create(index, stream);
-        if (err) return err;
-        fclose(stream);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
     }
 
     /* Query the tag index to find out how big the block is. */
     element_size = oskar_mem_element_size(type);
-    err = oskar_binary_tag_index_query(*index, id, id_user_1, id_user_2,
-            (unsigned char)type, &size_bytes, NULL);
-    if (err) return err;
+    err = oskar_binary_tag_index_query(*index, (unsigned char)type, 0, 0,
+            name_group, name_tag, user_index, NULL, &size_bytes, NULL);
+    if (err)
+    {
+        fclose(stream);
+        return err;
+    }
 
     /* Resize memory block if necessary, so that it can hold the data. */
     num_elements = (int)ceil(size_bytes / element_size);
@@ -93,13 +104,17 @@ int oskar_mem_load_binary(oskar_Mem* mem, const char* filename,
     if (err)
     {
         oskar_mem_free(&temp);
+        fclose(stream);
         return err;
     }
     size_bytes = num_elements * element_size;
 
-    /* Load the memory from a binary file. */
-    err = oskar_binary_file_read(filename, index, id, id_user_1, id_user_2,
-            type, size_bytes, data->data);
+    /* Load the memory from a binary stream. */
+    err = oskar_binary_stream_read(stream, index, (unsigned char)type,
+            name_group, name_tag, user_index, size_bytes, data->data);
+
+    /* Close the input file and check for errors. */
+    fclose(stream);
     if (err)
     {
         oskar_mem_free(&temp);

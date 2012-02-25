@@ -37,25 +37,60 @@
 extern "C" {
 #endif
 
-#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-
 int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
-        unsigned char data_type, size_t* block_size, long* block_offset)
+        unsigned char data_type, unsigned char id_group, unsigned char id_tag,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t* block_size, size_t* data_size, long* data_offset)
 {
-    int i;
-    size_t memcpy_size = 0;
+    int i, extended = 0;
 
-    /* Find the tag ID in the index. */
+    /* Check if names are specified. */
+    if (name_group && name_tag)
+    {
+        size_t lgroup, ltag;
+        lgroup = strlen(name_group);
+        ltag = strlen(name_tag);
+        extended = 1;
+
+        /* It's an error to specify nonzero IDs as well. */
+        if (id_group || id_tag)
+            return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
+
+        /* Store the lengths as the new IDs. */
+        id_group = 1 + lgroup;
+        id_tag = 1 + ltag;
+    }
+
+    /* Find the tag in the index. */
     for (i = 0; i < index->num_tags; ++i)
     {
-        if (id == index->tag[i].id &&
-                id_user_1 == index->tag[i].id_user_1 &&
-                id_user_2 == index->tag[i].id_user_2 &&
-                data_type == index->tag[i].data_type)
+        oskar_BinaryTag* tag;
+        tag = index->tag + i;
+        if (data_type == tag->data_type && id_group == tag->group.id &&
+                id_tag == tag->tag.id && user_index == index->user_index[i])
         {
-            /* Match found, so break. */
-            break;
+            if (!extended)
+            {
+                /* If tag is extended, keep searching. */
+                if (tag->flags != 0) continue;
+
+                /* Match found, so break. */
+                break;
+            }
+            else
+            {
+                /* If tag is not extended, keep searching. */
+                if (tag->flags == 0) continue;
+
+                /* Possible match: check names. */
+                if (strcmp(name_group, index->name_group[i]))
+                    continue;
+                if (strcmp(name_tag, index->name_tag[i]))
+                    continue;
+
+                /* Match found, so break. */
+                break;
+            }
         }
     }
 
@@ -63,22 +98,13 @@ int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
     if (i == index->num_tags)
         return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
 
-    /* Copy out the number of bytes in the block. */
-    memcpy_size = MIN(sizeof(size_t), sizeof(index->tag[i].size_bytes));
-    memcpy(block_size, index->tag[i].size_bytes, memcpy_size);
-
-    /* Get the number of bytes in the block in native byte order. */
-    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-    {
-        if (sizeof(size_t) == 4)
-            oskar_endian_swap_4((char*)block_size);
-        else if (sizeof(size_t) == 8)
-            oskar_endian_swap_8((char*)block_size);
-    }
-
-    /* Get the block offset. */
-    if (block_offset)
-        *block_offset = index->block_offset_bytes[i];
+    /* Get the tag data. */
+    if (block_size)
+        *block_size = index->block_size_bytes[i];
+    if (data_size)
+        *data_size = index->data_size_bytes[i];
+    if (data_offset)
+        *data_offset = index->data_offset_bytes[i];
 
     return OSKAR_SUCCESS;
 }

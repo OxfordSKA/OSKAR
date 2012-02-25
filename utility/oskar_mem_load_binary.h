@@ -49,11 +49,12 @@ extern "C" {
  * This function loads the contents of an OSKAR memory block from a binary file.
  *
  * @param[in] mem          Pointer to data structure.
- * @param[in] filename     Name of file from which to load.
- * @param[in,out] index    Pointer to a tag index structure.
- * @param[in] id           Tag identifier (enumerator).
- * @param[in] id_user_1    User tag identifier byte 1 (set to 0 if unused).
- * @param[in] id_user_2    User tag identifier byte 2 (set to 0 if unused).
+ * @param[in] filename     Name of binary file.
+ * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -63,8 +64,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_mem_load_binary(oskar_Mem* mem, const char* filename,
-        oskar_BinaryTagIndex** index, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2);
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index);
 
 #ifdef __cplusplus
 }

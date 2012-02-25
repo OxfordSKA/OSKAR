@@ -126,10 +126,10 @@ int oskar_Mem::insert(const oskar_Mem* src, int offset)
 }
 
 int oskar_Mem::load_binary(const char* filename, oskar_BinaryTagIndex** index,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2)
+        const char* name_group, const char* name_tag, int user_index)
 {
-    return oskar_mem_load_binary(this, filename, index,
-            id, id_user_1, id_user_2);
+    return oskar_mem_load_binary(this, filename, index, name_group,
+            name_tag, user_index);
 }
 
 int oskar_Mem::resize(int num_elements)
@@ -137,11 +137,11 @@ int oskar_Mem::resize(int num_elements)
     return oskar_mem_realloc(this, num_elements);
 }
 
-int oskar_Mem::save_binary_append(const char* filename, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, int num_to_write) const
+int oskar_Mem::save_binary_append(const char* filename, const char* name_group,
+        const char* name_tag, int user_index, int num_to_write) const
 {
-    return oskar_mem_save_binary_append(this, filename, id,
-            id_user_1, id_user_2, num_to_write);
+    return oskar_mem_save_binary_append(this, filename, name_group, name_tag,
+            user_index, num_to_write);
 }
 
 int oskar_Mem::scale_real(double value)

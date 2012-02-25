@@ -46,24 +46,35 @@ extern "C" {
 #endif
 
 /**
- * @brief Return the block size and offset associated with a given tag.
+ * @brief Return the block size, data size and offset associated with a tag.
  *
  * @details
- * This function returns the block size and offset associated with a given
- * tag, based on its identifiers.
+ * This function returns the block size, data size and offset associated with
+ * a given tag.
  *
- * @param[in] index         Index structure pointer.
- * @param[in] id            Tag identifier (enumerator).
- * @param[in] id_user_1     User tag identifier byte 1.
- * @param[in] id_user_2     User tag identifier byte 2.
- * @param[in] data_type     Type of the memory (as in oskar_Mem).
- * @param[out] block_size   The size of the block, in bytes.
- * @param[out] block_offset The block offset from the start of the file, in bytes.
+ * Tags can be specified either as two bytes or as two strings, if the tag
+ * is an extended tag. If the tag is not extended, pass NULL for the name
+ * arguments.
+ *
+ * It is an error to specify both a group/tag ID and group/tag names:
+ * when using names, set the IDs to zero.
+ *
+ * @param[in] index        Index structure pointer.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] id_group     Tag group identifier.
+ * @param[in] id_tag       Tag identifier.
+ * @param[in] name_group   Tag group name (NULL if not an extended tag).
+ * @param[in] name_tag     Tag name (NULL if not an extended tag).
+ * @param[in] user_index   User-defined index.
+ * @param[out] block_size  The total size of the block, in bytes.
+ * @param[out] data_size   The size of the data, in bytes.
+ * @param[out] data_offset The data offset from the start of the file, in bytes.
  */
 OSKAR_EXPORT
 int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
-        unsigned char data_type, size_t* block_size, long* block_offset);
+        unsigned char data_type, unsigned char id_group, unsigned char id_tag,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t* block_size, size_t* data_size, long* data_offset);
 
 #ifdef __cplusplus
 }

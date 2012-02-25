@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 int oskar_mem_save_binary_append(const oskar_Mem* mem, const char* filename,
-        unsigned char id, unsigned char id_user_1, unsigned char id_user_2,
+        const char* name_group, const char* name_tag, int user_index,
         int num_to_write)
 {
     int err, type, location, num_elements;
@@ -49,7 +49,8 @@ int oskar_mem_save_binary_append(const oskar_Mem* mem, const char* filename,
     const oskar_Mem* data = NULL;
 
     /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL)
+    if (mem == NULL || filename == NULL ||
+            name_group == NULL || name_tag == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get the meta-data. */
@@ -89,8 +90,8 @@ int oskar_mem_save_binary_append(const oskar_Mem* mem, const char* filename,
     }
 
     /* Save the memory to a binary file. */
-    err = oskar_binary_file_append(filename, id, id_user_1, id_user_2,
-            type, size_bytes, data->data);
+    err = oskar_binary_file_append(filename, (unsigned char)type,
+            name_group, name_tag, user_index, size_bytes, data->data);
 
     /* Free the temporary. */
     oskar_mem_free(&temp);

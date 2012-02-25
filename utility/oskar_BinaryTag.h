@@ -36,6 +36,12 @@
 #include "oskar_global.h"
 
 #ifdef __cplusplus
+#include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -44,24 +50,44 @@ extern "C" {
  *
  * @details
  * This structure holds data for a single tag in an OSKAR binary file.
- * The tag is exactly 16 bytes long and contains the following data:
+ * The tag is exactly 20 bytes long and contains the following data:
  *
- * Offset    Length    Description
+ * @verbatim
+ * Offset  Length  Description
  * ----------------------------------------------------------------------------
- *  0         4        The string "TAG" in ASCII format, with trailing zero.
- *  4         1        Tag identifier byte (enumerator).
- *  5         1        User tag identifier byte 1.
- *  6         1        User tag identifier byte 2.
- *  7         1        Data type (as used by oskar_Mem) of the data block.
- *  8         8        Block size in bytes, as little-endian 8-byte integer.
+ *  0       4      The string "TAG" in ASCII format, with trailing zero.
+ *  4       1      Tag flags. If true, indicates an extended tag (see below).
+ *  5       1      Data type (as used by oskar_Mem) of the data block.
+ *  6       1      The group ID, if not an extended tag;
+ *                     else the group name size in bytes.
+ *  7       1      The tag ID, if not an extended tag;
+ *                     else the tag name size in bytes.
+ *  8       4      User-specified index, as little-endian 4-byte integer.
+ * 12       8      Block size in bytes, as little-endian 8-byte integer.
+ * @endverbatim
+ *
+ * If the tag is an extended tag, then the group name and tag name are
+ * specified as strings rather than 8-bit IDs: extended tags in an OSKAR
+ * binary file have the group name and tag name written as strings
+ * immediately after the main tag itself. Both strings have a trailing zero.
+ *
+ * Note that the block size is the total number of bytes until the next tag,
+ * including any extended tag names.
  */
 struct oskar_BinaryTag
 {
     char magic[4];           /**< Magic number (ASCII "TAG"). */
-    unsigned char id;        /**< Tag identifier (enumerator). */
-    unsigned char id_user_1; /**< User tag identifier byte 1. */
-    unsigned char id_user_2; /**< User tag identifier byte 2. */
+    unsigned char flags;     /**< If true, indicates an extended tag. */
     unsigned char data_type; /**< Type (as oskar_Mem) of data block. */
+    union {
+        unsigned char id;    /**< The group ID, if not an extended tag. */
+        unsigned char bytes; /**< The group name size in bytes, if extended tag. */
+    } group;
+    union {
+        unsigned char id;    /**< The tag ID, if not an extended tag. */
+        unsigned char bytes; /**< The tag name size in bytes, if extended tag. */
+    } tag;
+    char user_index[4];      /**< User index, as little-endian 4-byte integer. */
     char size_bytes[8];      /**< Block size in bytes, as little-endian 8-byte integer. */
 };
 typedef struct oskar_BinaryTag oskar_BinaryTag;
@@ -77,83 +103,85 @@ typedef struct oskar_BinaryTag oskar_BinaryTag;
 struct oskar_BinaryTagIndex
 {
     int num_tags;             /**< Size of tag arrays. */
+    int* user_index;          /**< Array of user indices. */
+    size_t* block_size_bytes; /**< Array of block sizes. */
+    size_t* data_size_bytes;  /**< Array of data sizes.*/
     oskar_BinaryTag* tag;     /**< Array of tags in the file. */
-    long* block_offset_bytes; /**< Array of block offsets from the start. */
+    long* data_offset_bytes;  /**< Array of data offsets from the start. */
+    char** name_group;        /**< Array of tag group names. */
+    char** name_tag;          /**< Array of tag names. */
 };
 typedef struct oskar_BinaryTagIndex oskar_BinaryTagIndex;
 
 /* NOTE: To maintain binary data compatibility, do not modify any numbers
- * that appear in the list below! */
-enum
-{
-    /* User tag identifier. */
-    OSKAR_TAG_USER = 0,
+ * that appear in the lists below! */
 
-    /* File data. */
-    OSKAR_TAG_FILE_CREATION_DATE_STRING = 1,
-    OSKAR_TAG_FILE_DESCRIPTION_STRING = 2,
-    OSKAR_TAG_FILE_AUTHOR_STRING = 3,
-    OSKAR_TAG_SETTINGS_FILE = 4,
+/* Tag groups/sub-groups. */
+enum {
+    OSKAR_GRP_NONE,
+    OSKAR_GRP_METADATA,
+    OSKAR_GRP_SOURCES,
+    OSKAR_GRP_TELESCOPE,
+    OSAKR_GRP_STATION,
+    OSKAR_GRP_ELEMENT,
+    OSKAR_GRP_OBSERVATION,
+    OSKAR_GRP_VISIBILITY,
+    OSKAR_GRP_BASELINE,
+    OSKAR_GRP_IMAGE,
+    OSKAR_GRP_TIME,
+    OSKAR_GRP_FREQUENCY,
+    OSKAR_GRP_POLARISATION
+};
 
-    /* Sky model data. */
-    OSKAR_TAG_NUM_SOURCES = 10,
-    OSKAR_TAG_SOURCE_RA_RAD = 11,
-    OSKAR_TAG_SOURCE_DEC_RAD = 12,
-    OSKAR_TAG_SOURCE_I = 13,
-    OSKAR_TAG_SOURCE_Q = 14,
-    OSKAR_TAG_SOURCE_U = 15,
-    OSKAR_TAG_SOURCE_V = 16,
-    OSKAR_TAG_SOURCE_SPECTRAL_INDEX = 17,
-    OSKAR_TAG_SOURCE_REF_FREQ_HZ = 18,
-    OSKAR_TAG_SOURCE_MAJOR_AXIS_RAD = 19,
-    OSKAR_TAG_SOURCE_MINOR_AXIS_RAD = 20,
-    OSKAR_TAG_SOURCE_POSITION_ANGLE_RAD = 21,
+/* Axes/dimensions. */
+enum {
+    OSKAR_DIM_WIDTH,
+    OSKAR_DIM_HEIGHT,
+    OSKAR_DIM_RA,
+    OSKAR_DIM_DEC,
+    OSKAR_DIM_TIME,
+    OSKAR_DIM_FREQUENCY,
+    OSKAR_DIM_POLARISATION,
+    OSKAR_DIM_BASELINE,
+    OSKAR_DIM_STATION,
+    OSKAR_DIM_SOURCE
+};
 
-    /* Telescope data. */
-    OSKAR_TAG_TELESCOPE_LON_RAD = 30,
-    OSKAR_TAG_TELESCOPE_LAT_RAD = 31,
-    OSKAR_TAG_TELESCOPE_ALT_M = 32,
-    OSKAR_TAG_NUM_STATIONS = 33,
-    OSKAR_TAG_STATION_X_POSITONS = 34,
-    OSKAR_TAG_STATION_Y_POSITONS = 35,
-    OSKAR_TAG_STATION_Z_POSITONS = 36,
-    OSKAR_TAG_STATION_COORD_SYS = 37,
-    OSKAR_TAG_STATION_COORD_UNIT = 38,
+/* Common tags. */
+enum {
+    OSKAR_TAG_SIZE,
+    OSKAR_TAG_TYPE,
+    OSKAR_TAG_DIMENSIONS,
+    OSKAR_TAG_DIMENSION_ORDER,
+    OSKAR_TAG_START,
+    OSKAR_TAG_INCREMENT,
+    OSKAR_TAG_LENGTH,
+    OSKAR_TAG_WIDTH,
+    OSKAR_TAG_UNITS,
+    OSKAR_TAG_COORD_SYSTEM,
+    OSKAR_TAG_DESCRIPTION,
+    OSKAR_TAG_AUTHOR,
+    OSKAR_TAG_RA,
+    OSKAR_TAG_DEC,
+    OSKAR_TAG_LONGITUDE,
+    OSKAR_TAG_LATITUDE,
+    OSKAR_TAG_U,
+    OSKAR_TAG_V,
+    OSKAR_TAG_W,
+    OSKAR_TAG_X,
+    OSKAR_TAG_Y,
+    OSKAR_TAG_Z,
 
-    /* Observation data. */
-    OSKAR_TAG_OBS_PHASE_CENTRE_RA_RAD = 60,
-    OSKAR_TAG_OBS_PHASE_CENTRE_DEC_RAD = 61,
-    OSKAR_TAG_OBS_START_TIME_MJD_UTC = 62,
-    OSKAR_TAG_OBS_LENGTH_S = 63,
+    OSKAR_TAG_SPECIAL = 128
+};
 
-    /* Visibility data. */
-    OSKAR_TAG_NUM_TIMES = 70,
-    OSKAR_TAG_NUM_CHANNELS = 71,
-    OSKAR_TAG_NUM_BASELINES = 72,
-    OSKAR_TAG_NUM_POLARISATIONS = 73,
-    OSKAR_TAG_VISIBILITY_DATA = 74,
-    OSKAR_TAG_VISIBILITY_DATA_TYPE = 75,
-    OSKAR_TAG_VISIBILITY_DIMENSIONS = 76,
-    OSKAR_TAG_VISIBILITY_AXIS_ORDER = 77,
-    OSKAR_TAG_VISIBILITY_POLARISATION_TYPE = 78,
-    OSKAR_TAG_BASELINE_UU = 79,
-    OSKAR_TAG_BASELINE_VV = 80,
-    OSKAR_TAG_BASELINE_WW = 81,
-    OSKAR_TAG_BASELINE_DATA_TYPE = 82,
-    OSKAR_TAG_BASELINE_UNIT = 83,
-    OSKAR_TAG_FREQ_START_HZ = 84,
-    OSKAR_TAG_FREQ_INC_HZ = 85,
-    OSKAR_TAG_FREQ_CHANNEL_BANDWIDTH_HZ = 86,
-    OSKAR_TAG_TIME_INTERVAL_S = 87,
-    OSKAR_TAG_TIME_EXPOSURE_S = 88,
-
-    /* Image data. */
-    OSKAR_TAG_NUM_PIXELS_WIDTH = 100,
-    OSKAR_TAG_NUM_PIXELS_HEIGHT = 101,
-    OSKAR_TAG_FITS_IMAGE_DATA = 103,
-
-    /* Largest possible standard tag identifier. */
-    OSKAR_TAG_LARGEST_STANDARD_TAG_ID = 255
+/* Source tags. */
+enum {
+    OSKAR_TAG_STOKES_I,
+    OSKAR_TAG_STOKES_Q,
+    OSKAR_TAG_STOKES_U,
+    OSKAR_TAG_STOKES_V,
+    OSKAR_TAG_SPECTRAL_INDEX
 };
 
 #ifdef __cplusplus

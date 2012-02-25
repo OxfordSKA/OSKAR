@@ -36,17 +36,27 @@ extern "C" {
 
 int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index)
 {
+    int i;
+
+    /* Free string data. */
+    for (i = 0; i < (*index)->num_tags; ++i)
+    {
+        free((*index)->name_group[i]);
+        free((*index)->name_tag[i]);
+    }
+
     /* Free arrays. */
     free((*index)->tag);
-    free((*index)->block_offset_bytes);
-
-    /* Reset values. */
-    (*index)->num_tags = 0;
-    (*index)->tag = 0;
-    (*index)->block_offset_bytes = 0;
+    free((*index)->user_index);
+    free((*index)->block_size_bytes);
+    free((*index)->data_size_bytes);
+    free((*index)->data_offset_bytes);
+    free((*index)->name_group);
+    free((*index)->name_tag);
 
     /* Free the structure itself. */
     free(*index);
+    *index = NULL;
 
     return OSKAR_SUCCESS;
 }

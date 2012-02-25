@@ -40,6 +40,14 @@ int oskar_endian(void)
     return OSKAR_BIG_ENDIAN;
 }
 
+void oskar_endian_swap_2(char* d)
+{
+    char t;
+    t    = d[0];
+    d[0] = d[1];
+    d[1] = t;
+}
+
 void oskar_endian_swap_4(char* d)
 {
     char t;

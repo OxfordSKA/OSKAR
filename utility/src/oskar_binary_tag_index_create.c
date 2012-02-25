@@ -56,14 +56,19 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
     if (error) return error;
 
     /* Initialise tag index. */
-    idx->tag = 0;
-    idx->block_offset_bytes = 0;
     idx->num_tags = 0;
+    idx->tag = 0;
+    idx->user_index = 0;
+    idx->block_size_bytes = 0;
+    idx->data_size_bytes = 0;
+    idx->data_offset_bytes = 0;
+    idx->name_group = 0;
+    idx->name_tag = 0;
 
     /* Read all tags in the stream. */
     for (i = 0; OSKAR_TRUE; ++i)
     {
-        size_t block_size = 0, memcpy_size = 0;
+        size_t memcpy_size = 0;
 
         /* Check if we need to allocate more storage for the tag. */
         if (i % 10 == 0)
@@ -72,13 +77,27 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
 
             /* New size of arrays. */
             m = i + 10;
-            idx->tag = realloc(idx->tag, m * sizeof(oskar_BinaryTag));
-            idx->block_offset_bytes = realloc(idx->block_offset_bytes,
+            idx->tag = (oskar_BinaryTag*) realloc(idx->tag,
+                    m * sizeof(oskar_BinaryTag));
+            idx->user_index = (int*) realloc(idx->user_index, m * sizeof(int));
+            idx->block_size_bytes = (size_t*) realloc(idx->block_size_bytes,
+                    m * sizeof(size_t));
+            idx->data_size_bytes = (size_t*) realloc(idx->data_size_bytes,
+                    m * sizeof(size_t));
+            idx->data_offset_bytes = (long*) realloc(idx->data_offset_bytes,
                     m * sizeof(long));
+            idx->name_group = (char**) realloc(idx->name_group,
+                    m * sizeof(char*));
+            idx->name_tag = (char**) realloc(idx->name_tag, m * sizeof(char*));
         }
 
-        /* Initialise the data block offset to 0. */
-        idx->block_offset_bytes[i] = 0;
+        /* Initialise the tag index data. */
+        idx->user_index[i] = 0;
+        idx->block_size_bytes[i] = 0;
+        idx->data_size_bytes[i] = 0;
+        idx->data_offset_bytes[i] = 0;
+        idx->name_group[i] = 0;
+        idx->name_tag[i] = 0;
 
         /* Try to read a tag, and end the loop if unsuccessful. */
         if (fread(&(idx->tag[i]), sizeof(oskar_BinaryTag), 1, stream) != 1)
@@ -91,24 +110,67 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
                 idx->tag[i].magic[3] != 0)
             return OSKAR_ERR_BAD_BINARY_FORMAT;
 
-        /* Store the current stream pointer as the data block offset. */
-        idx->block_offset_bytes[i] = ftell(stream);
+        /* Copy out the index. */
+        memcpy_size = MIN(sizeof(int), sizeof(idx->tag[i].user_index));
+        memcpy(&idx->user_index[i], idx->tag[i].user_index, memcpy_size);
+
+        /* Get the index in native byte order. */
+        if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+        {
+            if (sizeof(int) == 2)
+                oskar_endian_swap_2((char*)(&idx->user_index[i]));
+            else if (sizeof(int) == 4)
+                oskar_endian_swap_4((char*)(&idx->user_index[i]));
+            else if (sizeof(int) == 8)
+                oskar_endian_swap_8((char*)(&idx->user_index[i]));
+        }
 
         /* Copy out the number of bytes in the block. */
         memcpy_size = MIN(sizeof(size_t), sizeof(idx->tag[i].size_bytes));
-        memcpy(&block_size, idx->tag[i].size_bytes, memcpy_size);
+        memcpy(&idx->block_size_bytes[i], idx->tag[i].size_bytes, memcpy_size);
 
         /* Get the number of bytes in the block in native byte order. */
         if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
         {
-            if (sizeof(size_t) == 4)
-                oskar_endian_swap_4((char*)&block_size);
+            if (sizeof(size_t) == 2)
+                oskar_endian_swap_2((char*)(&idx->block_size_bytes[i]));
+            else if (sizeof(size_t) == 4)
+                oskar_endian_swap_4((char*)(&idx->block_size_bytes[i]));
             else if (sizeof(size_t) == 8)
-                oskar_endian_swap_8((char*)&block_size);
+                oskar_endian_swap_8((char*)(&idx->block_size_bytes[i]));
         }
 
-        /* Increment stream pointer by block size. */
-        fseek(stream, block_size, SEEK_CUR);
+        /* Store the data size. */
+        idx->data_size_bytes[i] = idx->block_size_bytes[i];
+
+        /* Check if the tag is extended. */
+        if (idx->tag[i].flags)
+        {
+            size_t lgroup, ltag;
+
+            /* Get the lengths of the strings. */
+            lgroup = idx->tag[i].group.bytes;
+            ltag = idx->tag[i].tag.bytes;
+
+            /* Modify data size. */
+            idx->data_size_bytes[i] -= (lgroup + ltag);
+
+            /* Allocate memory for the tag names. */
+            idx->name_group[i] = (char*) malloc(lgroup);
+            idx->name_tag[i]   = (char*) malloc(ltag);
+
+            /* Copy the tag names into the index. */
+            if (fread(idx->name_group[i], 1, lgroup, stream) != lgroup)
+                return OSKAR_ERR_BAD_BINARY_FORMAT;
+            if (fread(idx->name_tag[i], 1, ltag, stream) != ltag)
+                return OSKAR_ERR_BAD_BINARY_FORMAT;
+        }
+
+        /* Store the current stream pointer as the data offset. */
+        idx->data_offset_bytes[i] = ftell(stream);
+
+        /* Increment stream pointer by data size. */
+        fseek(stream, idx->data_size_bytes[i], SEEK_CUR);
 
         /* Save the number of tags read from the stream. */
         idx->num_tags = i + 1;

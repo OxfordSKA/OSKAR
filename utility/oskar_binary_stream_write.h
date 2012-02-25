@@ -53,18 +53,21 @@ extern "C" {
  * The data are written at the current position of the stream, in native
  * byte order.
  *
- * @param[in,out] stream An output stream.
- * @param[in] id         Tag identifier (enumerator).
- * @param[in] id_user_1  User tag identifier byte 1.
- * @param[in] id_user_2  User tag identifier byte 2.
- * @param[in] data_type  Type (as oskar_Mem) of data block.
- * @param[in] data_size  Size of data block, in bytes.
- * @param[in] data       Pointer to memory block to write.
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * @param[in,out] stream   An output stream.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in] data_size    Size of data block, in bytes.
+ * @param[out] data        Pointer to memory block to write.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write(FILE* stream, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2,
-        unsigned char data_type, size_t data_size, const void* data);
+int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t data_size, const void* data);
 
 /**
  * @brief Writes a single double-precision value to an output stream.
@@ -74,15 +77,18 @@ int oskar_binary_stream_write(FILE* stream, unsigned char id,
  * The data are written at the current position of the stream, in native
  * byte order.
  *
- * @param[in,out] stream An output stream.
- * @param[in] id         Tag identifier (enumerator).
- * @param[in] id_user_1  User tag identifier byte 1.
- * @param[in] id_user_2  User tag identifier byte 2.
- * @param[in] value      Value to write.
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * @param[in,out] stream   An output stream.
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_double(FILE* stream, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, double value);
+int oskar_binary_stream_write_double(FILE* stream, const char* name_group,
+        const char* name_tag, int user_index, double value);
 
 /**
  * @brief Writes a single integer value to an output stream.
@@ -92,15 +98,84 @@ int oskar_binary_stream_write_double(FILE* stream, unsigned char id,
  * The data are written at the current position of the stream, in native
  * byte order.
  *
- * @param[in,out] stream An output stream.
- * @param[in] id         Tag identifier (enumerator).
- * @param[in] id_user_1  User tag identifier byte 1.
- * @param[in] id_user_2  User tag identifier byte 2.
- * @param[in] value      Value to write.
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * @param[in,out] stream   An output stream.
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_int(FILE* stream, unsigned char id,
-        unsigned char id_user_1, unsigned char id_user_2, int value);
+int oskar_binary_stream_write_int(FILE* stream, const char* name_group,
+        const char* name_tag, int user_index, int value);
+
+/**
+ * @brief Writes a block of binary data to an output stream.
+ *
+ * @details
+ * This function writes a block of binary data to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
+ *
+ * The tag is specified as a standard tag, using a group ID and a tag ID
+ * that are both given as bytes.
+ *
+ * @param[in,out] stream   An output stream.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] id_group     Tag group identifier.
+ * @param[in] id_tag       Tag identifier.
+ * @param[in] user_index   User-defined index.
+ * @param[in] data_size    Size of data block, in bytes.
+ * @param[out] data        Pointer to memory block to write.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write_std(FILE* stream, unsigned char data_type,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        size_t data_size, const void* data);
+
+/**
+ * @brief Writes a single double-precision value to an output stream.
+ *
+ * @details
+ * This function writes a single double-precision value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
+ *
+ * The tag is specified as a standard tag, using a group ID and a tag ID
+ * that are both given as bytes.
+ *
+ * @param[in,out] stream   An output stream.
+ * @param[in] id_group     Tag group identifier.
+ * @param[in] id_tag       Tag identifier.
+ * @param[in] user_index   User-defined index.
+ * @param[in] value        Value to write.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write_std_double(FILE* stream, unsigned char id_group,
+        unsigned char id_tag, int user_index, double value);
+
+/**
+ * @brief Writes a single integer value to an output stream.
+ *
+ * @details
+ * This function writes a single integer value to an output stream.
+ * The data are written at the current position of the stream, in native
+ * byte order.
+ *
+ * The tag is specified as a standard tag, using a group ID and a tag ID
+ * that are both given as bytes.
+ *
+ * @param[in,out] stream   An output stream.
+ * @param[in] id_group     Tag group identifier.
+ * @param[in] id_tag       Tag identifier.
+ * @param[in] user_index   User-defined index.
+ * @param[in] value        Value to write.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write_std_int(FILE* stream, unsigned char id_group,
+        unsigned char id_tag, int user_index, int value);
 
 #ifdef __cplusplus
 }
