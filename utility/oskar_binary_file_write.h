@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_FILE_APPEND_H_
-#define OSKAR_BINARY_FILE_APPEND_H_
+#ifndef OSKAR_BINARY_FILE_WRITE_H_
+#define OSKAR_BINARY_FILE_WRITE_H_
 
 /**
- * @file oskar_binary_file_append.h
+ * @file oskar_binary_file_write.h
  */
 
 #include "oskar_global.h"
@@ -72,7 +72,7 @@ extern "C" {
  * @param[out] data        Pointer to memory block.
  */
 OSKAR_EXPORT
-int oskar_binary_file_append(const char* filename, unsigned char data_type,
+int oskar_binary_file_write(const char* filename, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
         size_t data_size, const void* data);
 
@@ -101,9 +101,8 @@ int oskar_binary_file_append(const char* filename, unsigned char data_type,
  * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_file_append_double(const char* filename,
-        const char* name_group, const char* name_tag, int user_index,
-        double value);
+int oskar_binary_file_write_double(const char* filename, const char* name_group,
+        const char* name_tag, int user_index, double value);
 
 /**
  * @brief Appends a single integer value to a binary file.
@@ -130,9 +129,8 @@ int oskar_binary_file_append_double(const char* filename,
  * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_file_append_int(const char* filename,
-        const char* name_group, const char* name_tag, int user_index,
-        int value);
+int oskar_binary_file_write_int(const char* filename, const char* name_group,
+        const char* name_tag, int user_index, int value);
 
 /**
  * @brief Appends a block of binary data to a binary file.
@@ -161,7 +159,7 @@ int oskar_binary_file_append_int(const char* filename,
  * @param[out] data        Pointer to memory block.
  */
 OSKAR_EXPORT
-int oskar_binary_file_append_std(const char* filename, unsigned char data_type,
+int oskar_binary_file_write_std(const char* filename, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
         size_t data_size, const void* data);
 
@@ -190,7 +188,7 @@ int oskar_binary_file_append_std(const char* filename, unsigned char data_type,
  * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_file_append_std_double(const char* filename,
+int oskar_binary_file_write_std_double(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
         double value);
 
@@ -219,7 +217,7 @@ int oskar_binary_file_append_std_double(const char* filename,
  * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_file_append_std_int(const char* filename,
+int oskar_binary_file_write_std_int(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
         int value);
 
@@ -227,4 +225,4 @@ int oskar_binary_file_append_std_int(const char* filename,
 }
 #endif
 
-#endif /* OSKAR_BINARY_FILE_APPEND_H_ */
+#endif /* OSKAR_BINARY_FILE_WRITE_H_ */

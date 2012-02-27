@@ -46,18 +46,20 @@ extern "C" {
  * This structure holds header data for an OSKAR binary file.
  * The header is exactly 64 bytes long and contains the following data:
  *
- * Offset  Length  Description
- * ----------------------------------------------------------------------------
- *  0       9      The ASCII string "OSKARBIN", with trailing zero.
- *  9       1      The OSKAR binary format version (enumerator).
- * 10       1      If data blocks are written as little endian, 0; else 1.
- * 11       1      Size of void* in bytes.
- * 12       1      Size of int in bytes.
- * 13       1      Size of long int in bytes.
- * 14       1      Size of float in bytes.
- * 15       1      Size of double in bytes.
- * 16       4      The OSKAR_VERSION as a little-endian, 4-byte integer.
- * 20      44      Padding to 64 byte length (reserved for future use).
+   @verbatim
+   Offset  Length  Description
+   ----------------------------------------------------------------------------
+    0       9      The ASCII string "OSKARBIN", with trailing zero.
+    9       1      The OSKAR binary format version (enumerator).
+   10       1      If data blocks are written as little endian, 0; else 1.
+   11       1      Size of void* in bytes.
+   12       1      Size of int in bytes.
+   13       1      Size of long int in bytes.
+   14       1      Size of float in bytes.
+   15       1      Size of double in bytes.
+   16       4      The OSKAR_VERSION as a little-endian, 4-byte integer.
+   20      44      Padding to 64 byte length (reserved for future use).
+   @endverbatim
  */
 struct oskar_BinaryHeader
 {

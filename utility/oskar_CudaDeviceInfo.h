@@ -26,32 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_CUDA_DEVICE_INFO_H_
+#define OSKAR_CUDA_DEVICE_INFO_H_
+
+/**
+ * @file oskar_cuda_device_info.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
+/**
+ * @brief Structure to hold CUDA device information.
+ *
+ * @details
+ * This structure holds information about a CUDA device.
+ */
+struct oskar_CudaDeviceInfo
 {
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+    char name[256];            /**< String holding device name. */
+    union {
+        struct {
+            int major;         /**< Compute capability, major version. */
+            int minor;         /**< Compute capability, minor version. */
+        } capability;
+        int version[2];
+    } compute;
+    int supports_double;       /**< True if device supports double precision. */
+    int global_memory_size;    /**< Total size in kiB. */
+    int num_multiprocessors;   /**< Number of multiprocessors. */
+    int num_cores;             /**< Number of CUDA cores. */
+    int gpu_clock;             /**< GPU clock speed in kHz. */
+    int memory_clock;          /**< Memory clock speed in kHz. */
+    int memory_bus_width;      /**< Memory bus width in bits. */
+    int level_2_cache_size;    /**< Cache size in bytes. */
+    int shared_memory_size;    /**< Shared memory per block in bytes. */
+    int num_registers;         /**< Number of registers per block. */
+    int warp_size;             /**< Warp size. */
+    int max_threads_per_block; /**< Maximum number of threads per block. */
+    int max_threads_dim[3];    /**< Maximum threads per dimension. */
+    int max_grid_size[3];      /**< Maximum grid size per dimension. */
+};
+typedef struct oskar_CudaDeviceInfo oskar_CudaDeviceInfo;
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CUDA_DEVICE_INFO_H_ */

@@ -26,32 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_CUDA_DEVICE_INFO_SCAN_H_
+#define OSKAR_CUDA_DEVICE_INFO_SCAN_H_
+
+/**
+ * @file oskar_cuda_device_info_scan.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_CudaDeviceInfo.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
-{
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+/**
+ * @brief Scans the specified device for information.
+ *
+ * @details
+ * This function scans the specified device to populate a structure
+ * containing device information, such as device name, the compute
+ * capability, whether the device supports double precision, and the
+ * amount of global memory (among others).
+ *
+ * @param[out] device Pointer to CUDA device info structure to fill.
+ * @param[in]  id     The CUDA device ID number.
+ */
+OSKAR_EXPORT
+void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CUDA_DEVICE_INFO_SCAN_H_ */

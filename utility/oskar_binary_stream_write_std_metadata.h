@@ -26,32 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_BINARY_STREAM_WRITE_STD_METADATA_H_
+#define OSKAR_BINARY_STREAM_WRITE_STD_METADATA_H_
+
+/**
+ * @file oskar_binary_stream_write_std_metadata.h
+ */
+
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+#include <cstdio>
+#else
+#include <stdio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
-{
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+/**
+ * @brief Writes standard metadata to an output stream.
+ *
+ * @details
+ * This function writes standard metadata to an output stream.
+ *
+ * @param[in,out] stream An output stream.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write_std_metadata(FILE* stream);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_BINARY_STREAM_WRITE_STD_METADATA_H_ */

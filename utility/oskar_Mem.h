@@ -151,6 +151,43 @@ public:
 
     /**
      * @brief
+     * Loads an OSKAR memory block from an OSKAR binary file.
+     *
+     * @details
+     * This function loads the contents of an OSKAR memory block from a binary file.
+     *
+     * @param[in] filename     Name of file from which to load.
+     * @param[in,out] index    Pointer to a tag index structure.
+     * @param[in] name_group   Tag group name.
+     * @param[in] name_tag     Tag name.
+     * @param[in] user_index   User-defined index.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int binary_file_read(const char* filename, oskar_BinaryTagIndex** index,
+            const char* name_group, const char* name_tag, int user_index);
+
+    /**
+     * @brief
+     * Appends an OSKAR memory block to an OSKAR binary file.
+     *
+     * @details
+     * This function saves the contents of an OSKAR memory block to a binary
+     * file.
+     *
+     * @param[in] filename     Name of file to which to append.
+     * @param[in] name_group   Tag group name.
+     * @param[in] name_tag     Tag name.
+     * @param[in] user_index   User-defined index.
+     * @param[in] num_to_write If > 0, only the first \p num_elements are written.
+     *
+     * @return A CUDA or OSKAR error code.
+     */
+    int binary_file_write(const char* filename, const char* name_group,
+            const char* name_tag, int user_index, int num_to_write) const;
+
+    /**
+     * @brief
      * Clears contents of the memory held by the structure.
      *
      * @details
@@ -209,24 +246,6 @@ public:
 
     /**
      * @brief
-     * Loads an OSKAR memory block from an OSKAR binary file.
-     *
-     * @details
-     * This function loads the contents of an OSKAR memory block from a binary file.
-     *
-     * @param[in] filename     Name of file from which to load.
-     * @param[in,out] index    Pointer to a tag index structure.
-     * @param[in] name_group   Tag group name.
-     * @param[in] name_tag     Tag name.
-     * @param[in] user_index   User-defined index.
-     *
-     * @return A CUDA or OSKAR error code.
-     */
-    int load_binary(const char* filename, oskar_BinaryTagIndex** index,
-            const char* name_group, const char* name_tag, int user_index);
-
-    /**
-     * @brief
      * Resizes the memory block.
      *
      * @details
@@ -238,25 +257,6 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int resize(int num_elements);
-
-    /**
-     * @brief
-     * Appends an OSKAR memory block to an OSKAR binary file.
-     *
-     * @details
-     * This function saves the contents of an OSKAR memory block to a binary
-     * file.
-     *
-     * @param[in] filename     Name of file to which to append.
-     * @param[in] name_group   Tag group name.
-     * @param[in] name_tag     Tag name.
-     * @param[in] user_index   User-defined index.
-     * @param[in] num_to_write If > 0, only the first \p num_elements are written.
-     *
-     * @return A CUDA or OSKAR error code.
-     */
-    int save_binary_append(const char* filename, const char* name_group,
-            const char* name_tag, int user_index, int num_to_write) const;
 
     /**
      * @brief

@@ -28,8 +28,8 @@
 
 #include "utility/test/Test_binary_file.h"
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_append.h"
 #include "utility/oskar_binary_file_read.h"
+#include "utility/oskar_binary_file_write.h"
 #include "utility/oskar_binary_stream_read_header.h"
 #include "utility/oskar_binary_stream_read.h"
 #include "utility/oskar_binary_stream_write_header.h"
@@ -226,37 +226,37 @@ void Test_binary_file::test_file()
         std::vector<int> data_int(num_elements_int);
 
         // Write data.
-        err = oskar_binary_file_append_std_int(filename, 0, 0, 12345, a1);
+        err = oskar_binary_file_write_std_int(filename, 0, 0, 12345, a1);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i + 1000.0;
-            err = oskar_binary_file_append_std(filename, OSKAR_DOUBLE,
+            err = oskar_binary_file_write_std(filename, OSKAR_DOUBLE,
                     1, 10, 987654321, size_double, &data_double[0]);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 10;
-            err = oskar_binary_file_append_std(filename, OSKAR_INT,
+            err = oskar_binary_file_write_std(filename, OSKAR_INT,
                     2, 20, 1, size_int, &data_int[0]);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
-        err = oskar_binary_file_append_std_int(filename, 0, 0, 2, c1);
+        err = oskar_binary_file_write_std_int(filename, 0, 0, 2, c1);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 75;
-            err = oskar_binary_file_append_std(filename, OSKAR_INT,
+            err = oskar_binary_file_write_std(filename, OSKAR_INT,
                     14, 5, 6, size_int, &data_int[0]);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
-        err = oskar_binary_file_append_std_int(filename, 12, 0, 0, b1);
+        err = oskar_binary_file_write_std_int(filename, 12, 0, 0, b1);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i * 1234.0;
-            err = oskar_binary_file_append_std(filename, OSKAR_DOUBLE,
+            err = oskar_binary_file_write_std(filename, OSKAR_DOUBLE,
                     4, 0, 3, size_double, &data_double[0]);
         }
     }

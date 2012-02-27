@@ -52,6 +52,10 @@ int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
         ltag = strlen(name_tag);
         extended = 1;
 
+        /* Check that string lengths are within range. */
+        if (lgroup > 254 || ltag > 254)
+            return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
+
         /* It's an error to specify nonzero IDs as well. */
         if (id_group || id_tag)
             return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
@@ -72,7 +76,7 @@ int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
             if (!extended)
             {
                 /* If tag is extended, keep searching. */
-                if (tag->flags != 0) continue;
+                if (tag->flags & (1 << 7)) continue;
 
                 /* Match found, so break. */
                 break;
@@ -80,7 +84,7 @@ int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
             else
             {
                 /* If tag is not extended, keep searching. */
-                if (tag->flags == 0) continue;
+                if (!(tag->flags & (1 << 7))) continue;
 
                 /* Possible match: check names. */
                 if (strcmp(name_group, index->name_group[i]))

@@ -41,6 +41,7 @@ struct float2;
 struct float4c;
 struct double2;
 struct double4c;
+struct oskar_CudaDeviceInfo;
 
 /**
  * @brief Unit test class that uses CppUnit.
@@ -66,6 +67,10 @@ class Test_Jones : public CppUnit::TestFixture
         CPPUNIT_TEST(test_set_ones_host);
 //        CPPUNIT_TEST(test_performance);
         CPPUNIT_TEST_SUITE_END();
+
+    public:
+        Test_Jones();
+        ~Test_Jones();
 
     public:
         // Test methods.
@@ -104,6 +109,9 @@ class Test_Jones : public CppUnit::TestFixture
         void check_scalar_scalar(const oskar_Jones* data,
                 int offset1, int offset2);
         void fail_on_error(int err);
+
+    private:
+        oskar_CudaDeviceInfo* device_;
 };
 
 /*=============================================================================

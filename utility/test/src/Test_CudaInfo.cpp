@@ -26,32 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#include "utility/test/Test_CudaInfo.h"
+#include "utility/oskar_CudaInfo.h"
+#include "utility/oskar_cuda_info_create.h"
+#include "utility/oskar_cuda_info_free.h"
+#include "utility/oskar_cuda_info_print.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cstdio>
+#include <cstdlib>
 
-void oskar_settings_free(oskar_Settings* settings)
+void Test_CudaInfo::test()
 {
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
+    oskar_CudaInfo* info = NULL;
+    oskar_cuda_info_create(&info);
+    oskar_cuda_info_print(info);
+    oskar_cuda_info_free(&info);
 }
-
-#ifdef __cplusplus
-}
-#endif

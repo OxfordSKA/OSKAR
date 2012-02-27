@@ -26,30 +26,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
+#include "utility/oskar_CudaInfo.h"
+#include "utility/oskar_cuda_device_info_scan.h"
 #include <stdlib.h>
+#include <stdio.h>
+
+#include <cuda_runtime_api.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
+int oskar_cuda_info_create(oskar_CudaInfo** info)
 {
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
+    oskar_CudaInfo* inf;
+    int error, i;
 
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
+    /* Allocate index. */
+    inf = (oskar_CudaInfo*) malloc(sizeof(oskar_CudaInfo));
+    *info = inf;
+
+    /* Get the runtime version and the driver version. */
+    cudaDriverGetVersion(&inf->driver_version);
+    cudaRuntimeGetVersion(&inf->runtime_version);
+
+    /* Query the number of devices in the system. */
+    error = cudaGetDeviceCount(&inf->num_devices);
+    if (error != cudaSuccess || inf->num_devices == 0)
+    {
+        fprintf(stderr, "Unable to determine number of CUDA devices: %s\n",
+                cudaGetErrorString(error));
+        return error;
+    }
+
+    /* Allocate array big enough. */
+    inf->device = (oskar_CudaDeviceInfo*) malloc(sizeof(oskar_CudaDeviceInfo));
+
+    /* Populate device array. */
+    for (i = 0; i < inf->num_devices; ++i)
+    {
+        oskar_cuda_device_info_scan(&(inf->device[i]), i);
+    }
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

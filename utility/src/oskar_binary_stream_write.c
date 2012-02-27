@@ -43,8 +43,7 @@ int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
         size_t data_size, const void* data)
 {
     oskar_BinaryTag tag;
-    size_t block_size;
-    int tag_index;
+    size_t block_size, lgroup, ltag;
 
     /* Initialise the tag. */
     char magic[] = "TAG";
@@ -52,11 +51,23 @@ int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
     memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
     memset(tag.user_index, 0, sizeof(tag.user_index));
 
+    /* Sanity check on inputs. */
+    if (stream == NULL || data == NULL ||
+            name_group == NULL || name_tag == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check that string lengths are within range. */
+    lgroup = strlen(name_group);
+    ltag = strlen(name_tag);
+    if (lgroup > 254 || ltag > 254)
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
+
     /* Set up the tag identifiers */
-    tag.flags = (unsigned char)1;
+    tag.flags = 0;
+    tag.flags |= (1 << 7); /* Set bit 7 to indicate that tag is extended. */
     tag.data_type = data_type;
-    tag.group.bytes = 1 + strlen(name_group);
-    tag.tag.bytes = 1 + strlen(name_tag);
+    tag.group.bytes = 1 + (unsigned char)lgroup;
+    tag.tag.bytes = 1 + (unsigned char)ltag;
 
     /* Get the number of bytes in the block in little-endian byte order. */
     block_size = data_size + tag.group.bytes + tag.tag.bytes;
@@ -76,19 +87,18 @@ int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
     memcpy(tag.size_bytes, &block_size, sizeof(size_t));
 
     /* Get the user index in little-endian byte order. */
-    tag_index = user_index;
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
     {
         if (sizeof(int) == 2)
-            oskar_endian_swap_2((char*)&tag_index);
+            oskar_endian_swap_2((char*)&user_index);
         else if (sizeof(int) == 4)
-            oskar_endian_swap_4((char*)&tag_index);
+            oskar_endian_swap_4((char*)&user_index);
         else if (sizeof(int) == 8)
-            oskar_endian_swap_8((char*)&tag_index);
+            oskar_endian_swap_8((char*)&user_index);
     }
 
     /* Copy the user index to the tag, as little endian. */
-    memcpy(tag.user_index, &tag_index, sizeof(int));
+    memcpy(tag.user_index, &user_index, sizeof(int));
 
     /* Write the tag to the file. */
     if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
@@ -127,13 +137,16 @@ int oskar_binary_stream_write_std(FILE* stream, unsigned char data_type,
 {
     oskar_BinaryTag tag;
     size_t block_size;
-    int tag_index;
 
     /* Initialise the tag. */
     char magic[] = "TAG";
     strcpy(tag.magic, magic);
     memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
     memset(tag.user_index, 0, sizeof(tag.user_index));
+
+    /* Sanity check on inputs. */
+    if (stream == NULL || data == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Set up the tag identifiers */
     tag.flags = 0;
@@ -159,19 +172,18 @@ int oskar_binary_stream_write_std(FILE* stream, unsigned char data_type,
     memcpy(tag.size_bytes, &block_size, sizeof(size_t));
 
     /* Get the user index in little-endian byte order. */
-    tag_index = user_index;
     if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
     {
         if (sizeof(int) == 2)
-            oskar_endian_swap_2((char*)&tag_index);
+            oskar_endian_swap_2((char*)&user_index);
         else if (sizeof(int) == 4)
-            oskar_endian_swap_4((char*)&tag_index);
+            oskar_endian_swap_4((char*)&user_index);
         else if (sizeof(int) == 8)
-            oskar_endian_swap_8((char*)&tag_index);
+            oskar_endian_swap_8((char*)&user_index);
     }
 
     /* Copy the user index to the tag, as little endian. */
-    memcpy(tag.user_index, &tag_index, sizeof(int));
+    memcpy(tag.user_index, &user_index, sizeof(int));
 
     /* Write the tag to the file. */
     if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)

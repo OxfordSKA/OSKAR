@@ -144,7 +144,7 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
         idx->data_size_bytes[i] = idx->block_size_bytes[i];
 
         /* Check if the tag is extended. */
-        if (idx->tag[i].flags)
+        if (idx->tag[i].flags & (1 << 7))
         {
             size_t lgroup, ltag;
 

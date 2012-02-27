@@ -26,30 +26,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
+#include "utility/oskar_binary_stream_write_std_metadata.h"
+#include "utility/oskar_binary_stream_write.h"
+#include "utility/oskar_BinaryTag.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_system_clock_time.h"
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
+int oskar_binary_stream_write_std_metadata(FILE* stream)
 {
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
+    int error;
+    const char* str;
+    size_t len;
 
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
+    /* Write the system date and time. */
+    str = oskar_system_clock_time(0, NULL);
+    len = 1 + strlen(str);
+    error = oskar_binary_stream_write_std(stream, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0,
+            len, str);
+    if (error) return error;
+
+    /* Write the current working directory. */
+    str = getenv("PWD");
+    if (!str) str = getenv("CD");
+    if (str)
+    {
+        len = 1 + strlen(str);
+        error = oskar_binary_stream_write_std(stream, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD, 0,
+                len, str);
+        if (error) return error;
+    }
+
+    /* Write the username. */
+    str = getenv("USERNAME");
+    if (str)
+    {
+        len = 1 + strlen(str);
+        error = oskar_binary_stream_write_std(stream, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME, 0,
+                len, str);
+        if (error) return error;
+    }
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

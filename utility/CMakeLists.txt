@@ -6,18 +6,23 @@ add_subdirectory(cudak)
 
 # ==== Utility library source
 set(utility_SRC
-    src/oskar_binary_file_append.c
     src/oskar_binary_file_read.c
+    src/oskar_binary_file_write.c
     src/oskar_binary_header_version.c
     src/oskar_binary_stream_read_header.c
     src/oskar_binary_stream_read.c
     src/oskar_binary_stream_write_header.c
+    src/oskar_binary_stream_write_std_cuda_info.c
+    src/oskar_binary_stream_write_std_metadata.c
     src/oskar_binary_stream_write.c
     src/oskar_binary_tag_index_create.c
     src/oskar_binary_tag_index_free.c
     src/oskar_binary_tag_index_query.c
     src/oskar_blank_parentheses.c
-    src/oskar_cuda_device_info.cu
+    src/oskar_cuda_device_info_scan.c
+    src/oskar_cuda_info_create.c
+    src/oskar_cuda_info_print.c
+    src/oskar_cuda_info_free.c
     src/oskar_cuda_memory.cu
     src/oskar_device_curand_state_init.cu
     src/oskar_Device_curand_state.cpp
@@ -31,6 +36,9 @@ set(utility_SRC
     src/oskar_mem_alloc.c
     src/oskar_mem_append_raw.c
     src/oskar_mem_append.c
+    src/oskar_mem_binary_file_read_raw.c
+    src/oskar_mem_binary_file_read.c
+    src/oskar_mem_binary_file_write.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_copy.c
     src/oskar_mem_different.c
@@ -39,13 +47,12 @@ set(utility_SRC
     src/oskar_mem_get_pointer.c
     src/oskar_mem_init.c
     src/oskar_mem_insert.c
-    src/oskar_mem_load_binary.c
     src/oskar_mem_realloc.c
-    src/oskar_mem_save_binary_append.c
     src/oskar_mem_scale_real.cu
     src/oskar_mem_set_value_real.c
     src/oskar_Mem.cpp
     src/oskar_string_to_array.c
+    src/oskar_system_clock_time.c
     src/oskar_work_init.c
     src/oskar_Work.cpp
 )

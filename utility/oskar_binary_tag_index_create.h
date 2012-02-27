@@ -52,7 +52,7 @@ extern "C" {
  * This function generates an index of tags in an OSKAR binary file from an
  * input stream.
  *
- * The pointer to the index structure should be NULL on input.
+ * The index structure pointer should be NULL on input.
  * Typical use would be:
  *
  * @code
@@ -66,7 +66,7 @@ extern "C" {
  * oskar_binary_tag_index_free(&index);
  * @endcode
  *
- * @param[in,out] index   Index structure pointer (NULL on input).
+ * @param[in,out] index   Pointer to index structure pointer.
  * @param[in,out] stream  An input stream to index.
  */
 OSKAR_EXPORT

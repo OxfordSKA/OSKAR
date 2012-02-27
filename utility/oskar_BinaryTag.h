@@ -52,23 +52,31 @@ extern "C" {
  * This structure holds data for a single tag in an OSKAR binary file.
  * The tag is exactly 20 bytes long and contains the following data:
  *
- * @verbatim
- * Offset  Length  Description
- * ----------------------------------------------------------------------------
- *  0       4      The string "TAG" in ASCII format, with trailing zero.
- *  4       1      Tag flags. If true, indicates an extended tag (see below).
- *  5       1      Data type (as used by oskar_Mem) of the data block.
- *  6       1      The group ID, if not an extended tag;
- *                     else the group name size in bytes.
- *  7       1      The tag ID, if not an extended tag;
- *                     else the tag name size in bytes.
- *  8       4      User-specified index, as little-endian 4-byte integer.
- * 12       8      Block size in bytes, as little-endian 8-byte integer.
- * @endverbatim
+   @verbatim
+   Offset  Length  Description
+   ----------------------------------------------------------------------------
+    0       4      The string "TAG" in ASCII format, with trailing zero.
+    4       1      Tag flags (see below).
+    5       1      Data type (as used by oskar_Mem) of the data block.
+    6       1      The group ID, if not an extended tag;
+                       else the group name size in bytes.
+    7       1      The tag ID, if not an extended tag;
+                       else the tag name size in bytes.
+    8       4      User-specified index, as little-endian 4-byte integer.
+   12       8      Block size in bytes, as little-endian 8-byte integer.
+   @endverbatim
+ *
+ * The flags field specifies the tag type. Supported flags are:
+ *
+   @verbatim
+   Bit  Description
+   ----------------------------------------------------------------------------
+   7    If true, this is an extended tag; if false, this is a standard tag.
+   @endverbatim
  *
  * If the tag is an extended tag, then the group name and tag name are
  * specified as strings rather than 8-bit IDs: extended tags in an OSKAR
- * binary file have the group name and tag name written as strings
+ * binary file have the group name and tag name written as ASCII 8-bit strings
  * immediately after the main tag itself. Both strings have a trailing zero.
  *
  * Note that the block size is the total number of bytes until the next tag,
@@ -77,7 +85,7 @@ extern "C" {
 struct oskar_BinaryTag
 {
     char magic[4];           /**< Magic number (ASCII "TAG"). */
-    unsigned char flags;     /**< If true, indicates an extended tag. */
+    unsigned char flags;     /**< Bit 7 set indicates an extended tag. */
     unsigned char data_type; /**< Type (as oskar_Mem) of data block. */
     union {
         unsigned char id;    /**< The group ID, if not an extended tag. */
@@ -116,72 +124,53 @@ typedef struct oskar_BinaryTagIndex oskar_BinaryTagIndex;
 /* NOTE: To maintain binary data compatibility, do not modify any numbers
  * that appear in the lists below! */
 
-/* Tag groups/sub-groups. */
+/* Standard tag groups. */
 enum {
-    OSKAR_GRP_NONE,
-    OSKAR_GRP_METADATA,
-    OSKAR_GRP_SOURCES,
-    OSKAR_GRP_TELESCOPE,
-    OSAKR_GRP_STATION,
-    OSKAR_GRP_ELEMENT,
-    OSKAR_GRP_OBSERVATION,
-    OSKAR_GRP_VISIBILITY,
-    OSKAR_GRP_BASELINE,
-    OSKAR_GRP_IMAGE,
-    OSKAR_GRP_TIME,
-    OSKAR_GRP_FREQUENCY,
-    OSKAR_GRP_POLARISATION
+    OSKAR_TAG_GROUP_METADATA = 1,
+    OSKAR_TAG_GROUP_CUDA_INFO = 2,
+    OSKAR_TAG_GROUP_SETTINGS = 3,
+    OSKAR_TAG_GROUP_RUN = 4
 };
 
-/* Axes/dimensions. */
+/* Standard metadata tags. */
 enum {
-    OSKAR_DIM_WIDTH,
-    OSKAR_DIM_HEIGHT,
-    OSKAR_DIM_RA,
-    OSKAR_DIM_DEC,
-    OSKAR_DIM_TIME,
-    OSKAR_DIM_FREQUENCY,
-    OSKAR_DIM_POLARISATION,
-    OSKAR_DIM_BASELINE,
-    OSKAR_DIM_STATION,
-    OSKAR_DIM_SOURCE
+    OSKAR_TAG_METADATA_DATE_TIME_STRING = 1,
+    OSKAR_TAG_METADATA_USERNAME = 2,
+    OSKAR_TAG_METADATA_CWD = 3
 };
 
-/* Common tags. */
+/* Standard settings tags. */
 enum {
-    OSKAR_TAG_SIZE,
-    OSKAR_TAG_TYPE,
-    OSKAR_TAG_DIMENSIONS,
-    OSKAR_TAG_DIMENSION_ORDER,
-    OSKAR_TAG_START,
-    OSKAR_TAG_INCREMENT,
-    OSKAR_TAG_LENGTH,
-    OSKAR_TAG_WIDTH,
-    OSKAR_TAG_UNITS,
-    OSKAR_TAG_COORD_SYSTEM,
-    OSKAR_TAG_DESCRIPTION,
-    OSKAR_TAG_AUTHOR,
-    OSKAR_TAG_RA,
-    OSKAR_TAG_DEC,
-    OSKAR_TAG_LONGITUDE,
-    OSKAR_TAG_LATITUDE,
-    OSKAR_TAG_U,
-    OSKAR_TAG_V,
-    OSKAR_TAG_W,
-    OSKAR_TAG_X,
-    OSKAR_TAG_Y,
-    OSKAR_TAG_Z,
-
-    OSKAR_TAG_SPECIAL = 128
+    OSKAR_TAG_SETTINGS_PATH = 1,
+    OSKAR_TAG_SETTINGS = 2
 };
 
-/* Source tags. */
+/* Standard CUDA info tags. */
+/* Values are as in oskar_CudaInfo and oskar_CudaDeviceInfo. */
 enum {
-    OSKAR_TAG_STOKES_I,
-    OSKAR_TAG_STOKES_Q,
-    OSKAR_TAG_STOKES_U,
-    OSKAR_TAG_STOKES_V,
-    OSKAR_TAG_SPECTRAL_INDEX
+    OSKAR_TAG_CUDA_INFO_NUM_DEVICES = 1,
+    OSKAR_TAG_CUDA_INFO_DRIVER_VERSION = 2,
+    OSKAR_TAG_CUDA_INFO_RUNTIME_VERSION = 3,
+    OSKAR_TAG_CUDA_INFO_DEVICE_NAME = 4,
+    OSKAR_TAG_CUDA_INFO_DEVICE_COMPUTE = 5,
+    OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_SIZE = 6,
+    OSKAR_TAG_CUDA_INFO_DEVICE_MULTIPROCESSORS = 7,
+    OSKAR_TAG_CUDA_INFO_DEVICE_GPU_CLOCK = 8,
+    OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_CLOCK = 9,
+    OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_BUS = 10,
+    OSKAR_TAG_CUDA_INFO_DEVICE_L2_CACHE = 11,
+    OSKAR_TAG_CUDA_INFO_DEVICE_SHARED_MEMORY_SIZE = 12,
+    OSKAR_TAG_CUDA_INFO_DEVICE_REGS_PER_BLOCK = 13,
+    OSKAR_TAG_CUDA_INFO_DEVICE_WARP_SIZE = 14,
+    OSKAR_TAG_CUDA_INFO_DEVICE_MAX_THREADS_PER_BLOCK = 15,
+    OSKAR_TAG_CUDA_INFO_DEVICE_MAX_THREADS_DIM = 16,
+    OSKAR_TAG_CUDA_INFO_DEVICE_MAX_GRID_SIZE = 17
+};
+
+/* Standard run info tags. */
+enum {
+    OSKAR_TAG_RUN_TIME = 1, /* (double; sec) */
+    OSKAR_TAG_RUN_LOG = 2
 };
 
 #ifdef __cplusplus

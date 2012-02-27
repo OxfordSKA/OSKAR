@@ -26,32 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_CUDA_INFO_H_
+#define OSKAR_CUDA_INFO_H_
+
+/**
+ * @file oskar_cuda_info.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_CudaDeviceInfo.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
+/**
+ * @brief Structure to hold CUDA system information.
+ *
+ * @details
+ * This structure holds information about the CUDA environment and
+ * devices in the system.
+ */
+struct oskar_CudaInfo
 {
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+    int num_devices;              /**< Number of installed CUDA devices. */
+    int driver_version;           /**< CUDA driver version. */
+    int runtime_version;          /**< CUDA runtime version. */
+    oskar_CudaDeviceInfo* device; /**< Array of device info structures. */
+};
+typedef struct oskar_CudaInfo oskar_CudaInfo;
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CUDA_INFO_H_ */

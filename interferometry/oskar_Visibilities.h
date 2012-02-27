@@ -74,6 +74,7 @@
  */
 struct oskar_Visibilities
 {
+    oskar_Mem settings_path;     /**< Path to settings file. */
     int num_channels;            /**< Number of frequency channels. */
     int num_times;               /**< Number of time samples. */
     int num_baselines;           /**< Number of baselines. */
@@ -93,7 +94,7 @@ struct oskar_Visibilities
 
 #ifdef __cplusplus
     /**
-     * @brief Constructs a visibility structure according to the specified,
+     * @brief Constructs a visibility structure according to the specified
      * dimensions, type and location.
      *
      * @details

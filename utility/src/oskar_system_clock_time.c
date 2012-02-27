@@ -26,32 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
+#include "utility/oskar_system_clock_time.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
+const char* oskar_system_clock_time(int utc, int* data)
 {
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
+    static char str[80];
+    time_t unix_time;
+    struct tm* timeinfo;
 
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
+    /* Get raw system time. */
+    unix_time = time(NULL);
+
+    /* Convert to local time or UTC. */
+    if (utc)
+        timeinfo = gmtime(&unix_time);
+    else
+        timeinfo = localtime(&unix_time);
+
+    /* Save data. */
+    if (data)
+    {
+        data[0] = timeinfo->tm_year;
+        data[1] = timeinfo->tm_mon;
+        data[2] = timeinfo->tm_mday;
+        data[3] = timeinfo->tm_hour;
+        data[4] = timeinfo->tm_min;
+        data[5] = timeinfo->tm_sec;
+        data[6] = timeinfo->tm_isdst;
+    }
+
+    /* Convert to string. */
+    strftime(str, sizeof(str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
+    return str;
 }
 
 #ifdef __cplusplus
 }
 #endif
+

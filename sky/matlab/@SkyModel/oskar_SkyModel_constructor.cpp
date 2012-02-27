@@ -31,12 +31,16 @@
 #include <mat.h>
 
 #include "sky/oskar_SkyModel.h"
+#include "utility/oskar_cuda_device_info_scan.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_cuda_device_info.h"
+#include "utility/oskar_mem_type_check.h"
 #include "utility/matlab/oskar_mex_pointer.h"
 #include "utility/matlab/oskar_mex_mem_utility.h"
 
 #include <string.h>
+
+static int initialised = 0;
+static oskar_CudaDeviceInfo device;
 
 // FIXME register a cleanup function to do a cudaDeviceReset() ?
 // -- This would apply to all mex functions with CUDA library components?
@@ -62,13 +66,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int type     = get_type(type_string);
     int location = get_location_id(location_string);
 
-    bool double_support = oskar_cuda_device_supports_double(0);
+    if (!initialised)
+    {
+        oskar_cuda_device_info_scan(&device, 0);
+        initialised = 1;
+    }
     if (location == OSKAR_LOCATION_GPU)
     {
-        bool double_type = (type == OSKAR_DOUBLE || type == OSKAR_DOUBLE_COMPLEX
-                || type == OSKAR_DOUBLE_COMPLEX_MATRIX) ? true : false;
-
-        if (double_type == true && double_support == false)
+        if (oskar_mem_is_double(type) && !device.supports_double)
         {
             mexErrMsgTxt("GPU architecture does not support double precision!");
         }

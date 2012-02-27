@@ -26,32 +26,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_SYSTEM_CLOCK_TIME_H_
+#define OSKAR_SYSTEM_CLOCK_TIME_H_
+
+/**
+ * @file oskar_system_clock_time.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
-{
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+/**
+ * @brief Returns information about the system clock time.
+ *
+ * @details
+ * This function returns a string containing the system date and time in
+ * the format "yyyy-mm-dd, hh:mm:ss (timezone)".
+ *
+ * The data are also optionally returned in a 7-element array containing:
+ * - data[0] = year
+ * - data[1] = month
+ * - data[2] = day of month
+ * - data[3] = hour
+ * - data[4] = minute
+ * - data[5] = second
+ * - data[6] = DST flag
+ *
+ * If not NULL on input, the \p data array must be able to hold at least 7
+ * elements.
+ *
+ * @param[in] utc    If set, return UTC time; else return local time.
+ * @param[out] data  If not NULL, this array must contain 7 elements in which
+ *                   the system time and date information is returned.
+ */
+OSKAR_EXPORT
+const char* oskar_system_clock_time(int utc, int* data);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_SYSTEM_CLOCK_TIME_H_ */

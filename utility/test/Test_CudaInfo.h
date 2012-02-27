@@ -26,73 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_cuda_device_info.h"
+#ifndef TEST_CUDA_INFO_H_
+#define TEST_CUDA_INFO_H_
 
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <driver_types.h>
+/**
+ * @file Test_CudaInfo.h
+ */
 
-#include <stdio.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void oskar_get_cuda_arch(const int deviceId, int* major, int* minor)
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_CudaInfo : public CppUnit::TestFixture
 {
-    int device_count = 0;
-    cudaError_t error = cudaGetDeviceCount(&device_count);
+    public:
+        CPPUNIT_TEST_SUITE(Test_CudaInfo);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST_SUITE_END();
 
-    if (error != cudaSuccess)
-    {
-        fprintf(stderr, "CUDA ERROR[%i]: cudaGetDeviceCount() return %s\n",
-                error, cudaGetErrorString(error));
-        return;
-    }
+    public:
+        // Test methods.
+        void test();
+};
 
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_CudaInfo);
 
-    if (deviceId > device_count - 1)
-    {
-        fprintf(stderr, "ERROR: Device ID out of range!\n");
-        return;
-    }
-
-    cudaDeviceProp device_prop;
-    cudaGetDeviceProperties(&device_prop, deviceId);
-    *major = device_prop.major;
-    *minor = device_prop.minor;
-}
-
-
-bool oskar_cuda_device_supports_double(const int deviceId)
-{
-    int device_count = 0;
-    cudaError_t error = cudaGetDeviceCount(&device_count);
-
-    if (error != cudaSuccess)
-    {
-        fprintf(stderr, "CUDA ERROR[%i]: cudaGetDeviceCount() return %s\n",
-                error, cudaGetErrorString(error));
-        return false;
-    }
-
-    cudaDeviceProp device_prop;
-    cudaGetDeviceProperties(&device_prop, deviceId);
-
-    int major = device_prop.major;
-    int minor = device_prop.minor;
-
-    if (major >= 2)
-        return true;
-    else if (minor >= 3)
-        return true;
-    else
-        return false;
-}
-
-
-#ifdef __cplusplus
-}
-#endif
-
-
+#endif // TEST_CUDA_INFO_H_

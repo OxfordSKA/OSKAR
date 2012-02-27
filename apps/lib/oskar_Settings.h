@@ -34,6 +34,7 @@
 #include "sky/oskar_SettingsSky.h"
 #include "interferometry/oskar_SettingsTelescope.h"
 #include "utility/oskar_SettingsSimulator.h"
+#include "utility/oskar_Mem.h"
 
 /**
  * @struct oskar_Settings
@@ -45,6 +46,7 @@
  */
 struct oskar_Settings
 {
+    oskar_Mem settings_path;
     oskar_SettingsSimulator sim;
     oskar_SettingsObservation obs;
     oskar_SettingsImage image;

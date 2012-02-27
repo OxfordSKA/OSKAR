@@ -28,6 +28,7 @@
 
 #include "apps/lib/oskar_set_up_visibilities.h"
 #include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_mem_copy.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -36,6 +37,8 @@ extern "C"
 oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings* settings,
         const oskar_TelescopeModel* tel_cpu, int type)
 {
+    int error;
+
     // Check the type.
     if (!oskar_mem_is_complex(type))
         return NULL;
@@ -53,6 +56,14 @@ oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings* settings,
     vis->time_start_mjd_utc = times->obs_start_mjd_utc;
     vis->time_inc_seconds = times->dt_dump_days * 86400.0;
     vis->channel_bandwidth_hz = settings->obs.start_frequency_hz;
+
+    // Add settings file path.
+    error = oskar_mem_copy(&vis->settings_path, &settings->settings_path);
+    if (error)
+    {
+        delete vis;
+        return NULL;
+    }
 
     // Return the structure.
     return vis;

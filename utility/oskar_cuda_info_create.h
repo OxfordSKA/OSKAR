@@ -26,32 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_CUDA_INFO_CREATE_H_
+#define OSKAR_CUDA_INFO_CREATE_H_
+
+/**
+ * @file oskar_cuda_info_create.h
+ */
+
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+#include <cstdio>
+#else
+#include <stdio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
-{
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+/**
+ * @brief Obtain information about the CUDA environment and devices.
+ *
+ * @details
+ * This function creates and populates a structure containing information
+ * about the CUDA environment and devices on the system.
+ *
+ * The info structure pointer should be NULL on input.
+ * Typical use would be:
+ *
+ * @code
+ * oskar_CudaInfo* info = NULL;
+ * oskar_cuda_info_create(&info);
+ * @endcode
+ *
+ * The structure should be freed using
+ *
+ * @code
+ * oskar_cuda_info_free(&info);
+ * @endcode
+ *
+ * @param[in,out] info    Pointer to info structure pointer.
+ */
+OSKAR_EXPORT
+int oskar_cuda_info_create(oskar_CudaInfo** info);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CUDA_INFO_CREATE_H_ */

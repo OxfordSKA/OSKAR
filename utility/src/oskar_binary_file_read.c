@@ -48,6 +48,10 @@ int oskar_binary_file_read(const char* filename,
     FILE* stream;
     int err;
 
+    /* Sanity check on inputs. */
+    if (filename == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
     /* Open the file for read. */
     stream = fopen(filename, "rb");
 
@@ -84,6 +88,10 @@ int oskar_binary_file_read_std(const char* filename,
 {
     FILE* stream;
     int err;
+
+    /* Sanity check on inputs. */
+    if (filename == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Open the file for read. */
     stream = fopen(filename, "rb");

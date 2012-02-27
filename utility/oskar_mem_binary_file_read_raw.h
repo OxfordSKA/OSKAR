@@ -26,32 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_MEM_BINARY_FILE_READ_RAW_H_
+#define OSKAR_MEM_BINARY_FILE_READ_RAW_H_
+
+/**
+ * @file oskar_mem_binary_read_raw.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_BinaryTag.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
-{
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.station_positions_file);
-    free(settings->telescope.station_layout_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.filename);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+/**
+ * @brief
+ * Loads an OSKAR memory block from a raw binary file.
+ *
+ * @details
+ * This function loads the contents of an OSKAR memory block from a raw
+ * binary file.
+ *
+ * @param[in] mem          Pointer to data structure.
+ * @param[in] filename     Name of binary file.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_MEM_BINARY_FILE_READ_RAW_H_ */

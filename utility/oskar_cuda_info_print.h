@@ -26,47 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_SAVE_BINARY_APPEND_H_
-#define OSKAR_MEM_SAVE_BINARY_APPEND_H_
+#ifndef OSKAR_CUDA_INFO_PRINT_H_
+#define OSKAR_CUDA_INFO_PRINT_H_
 
 /**
- * @file oskar_mem_save_binary_append.h
+ * @file oskar_cuda_info_print.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+#include <cstdio>
+#else
+#include <stdio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Appends an OSKAR memory block to an OSKAR binary file.
+ * @brief Print information about the CUDA environment and devices.
  *
  * @details
- * This function saves the contents of an OSKAR memory block to a binary file.
+ * This function prints to standard output the contents of the
+ * supplied data structure.
  *
- * @param[in] mem          Pointer to data structure.
- * @param[in] filename     Name of binary file to which to append.
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[in] num_to_write If > 0, only the first \p num_elements are written.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in] info    Pointer to info structure pointer.
  */
 OSKAR_EXPORT
-int oskar_mem_save_binary_append(const oskar_Mem* mem, const char* filename,
-        const char* name_group, const char* name_tag, int user_index,
-        int num_to_write);
+int oskar_cuda_info_print(const oskar_CudaInfo* info);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_SAVE_BINARY_APPEND_H_ */
+#endif /* OSKAR_CUDA_INFO_PRINT_H_ */

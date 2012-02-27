@@ -34,7 +34,7 @@
 #include "math/oskar_jones_join.h"
 #include "math/oskar_Jones.h"
 #include "utility/oskar_vector_types.h"
-#include "utility/oskar_cuda_device_info.h"
+#include "utility/oskar_cuda_device_info_scan.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -42,6 +42,25 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+
+/**
+ * @details
+ * Constructor.
+ */
+Test_Jones::Test_Jones()
+{
+    device_ = new oskar_CudaDeviceInfo;
+    oskar_cuda_device_info_scan(device_, 0);
+}
+
+/**
+ * @details
+ * Destructor.
+ */
+Test_Jones::~Test_Jones()
+{
+    delete device_;
+}
 
 /**
  * @details
@@ -73,7 +92,7 @@ void Test_Jones::test_join_inline_mat_mat_device()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -124,7 +143,7 @@ void Test_Jones::test_join_inline_mat_mat_device_host()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -175,7 +194,7 @@ void Test_Jones::test_join_inline_mat_mat_host()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -226,7 +245,7 @@ void Test_Jones::test_join_inline_mat_sca_device()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -277,7 +296,7 @@ void Test_Jones::test_join_inline_mat_sca_device_host()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -328,7 +347,7 @@ void Test_Jones::test_join_inline_mat_sca_host()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -378,7 +397,7 @@ void Test_Jones::test_join_inline_sca_sca_device()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -428,7 +447,7 @@ void Test_Jones::test_join_inline_sca_sca_device_host()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -478,7 +497,7 @@ void Test_Jones::test_join_inline_sca_sca_host()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -541,7 +560,7 @@ void Test_Jones::test_set_ones_device()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -612,7 +631,7 @@ void Test_Jones::test_set_ones_host()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Double precision test.
     {
@@ -697,7 +716,7 @@ void Test_Jones::test_performance()
     }
 
     // Return if no double precision support.
-    if (!oskar_cuda_device_supports_double(0)) return;
+    if (!device_->supports_double) return;
 
     // Single precision test.
     {

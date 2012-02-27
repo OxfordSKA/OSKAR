@@ -57,6 +57,8 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
     num_coords = num_times * num_baselines;
 
     /* Initialise memory. */
+    err = oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1);
+    if (err) return err;
     err = oskar_mem_init(&vis->uu_metres, coord_type, location, num_coords, 1);
     if (err) return err;
     err = oskar_mem_init(&vis->vv_metres, coord_type, location, num_coords, 1);

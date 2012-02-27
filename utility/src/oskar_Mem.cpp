@@ -30,15 +30,15 @@
 #include "utility/oskar_mem_alloc.h"
 #include "utility/oskar_mem_append.h"
 #include "utility/oskar_mem_append_raw.h"
+#include "utility/oskar_mem_binary_file_read.h"
+#include "utility/oskar_mem_binary_file_write.h"
 #include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_insert.h"
-#include "utility/oskar_mem_load_binary.h"
 #include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_save_binary_append.h"
 #include "utility/oskar_mem_scale_real.h"
 #include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_mem_type_check.h"
@@ -96,6 +96,21 @@ int oskar_Mem::append_raw(const void* from, int from_type, int from_location,
             num_elements);
 }
 
+int oskar_Mem::binary_file_write(const char* filename, const char* name_group,
+        const char* name_tag, int user_index, int num_to_write) const
+{
+    return oskar_mem_binary_file_write(this, filename, name_group,
+            name_tag, user_index, num_to_write);
+}
+
+int oskar_Mem::binary_file_read(const char* filename,
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index)
+{
+    return oskar_mem_binary_file_read(this, filename, index, name_group,
+            name_tag, user_index);
+}
+
 int oskar_Mem::clear_contents()
 {
     return oskar_mem_clear_contents(this);
@@ -125,23 +140,9 @@ int oskar_Mem::insert(const oskar_Mem* src, int offset)
     return oskar_mem_insert(this, src, offset);
 }
 
-int oskar_Mem::load_binary(const char* filename, oskar_BinaryTagIndex** index,
-        const char* name_group, const char* name_tag, int user_index)
-{
-    return oskar_mem_load_binary(this, filename, index, name_group,
-            name_tag, user_index);
-}
-
 int oskar_Mem::resize(int num_elements)
 {
     return oskar_mem_realloc(this, num_elements);
-}
-
-int oskar_Mem::save_binary_append(const char* filename, const char* name_group,
-        const char* name_tag, int user_index, int num_to_write) const
-{
-    return oskar_mem_save_binary_append(this, filename, name_group, name_tag,
-            user_index, num_to_write);
 }
 
 int oskar_Mem::scale_real(double value)

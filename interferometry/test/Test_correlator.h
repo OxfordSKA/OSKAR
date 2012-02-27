@@ -35,6 +35,8 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+struct oskar_CudaDeviceInfo;
+
 /**
  * @brief Unit test class that uses CppUnit.
  *
@@ -51,11 +53,18 @@ class Test_correlator : public CppUnit::TestFixture
         CPPUNIT_TEST_SUITE_END();
 
     public:
+        Test_correlator();
+        ~Test_correlator();
+
+    public:
         // Test Methods
         void test_kernel_float();
 
         // Test Methods
         void test_kernel_double();
+
+    private:
+        oskar_CudaDeviceInfo* device_;
 };
 
 // Register the test class.

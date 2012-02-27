@@ -27,10 +27,11 @@
  */
 
 #include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_binary_file_append.h"
+#include "utility/oskar_binary_file_write.h"
 #include "utility/oskar_binary_stream_read_header.h"
 #include "utility/oskar_binary_stream_write_header.h"
 #include "utility/oskar_binary_stream_write.h"
+#include "utility/oskar_binary_stream_write_std_metadata.h"
 #include "utility/oskar_endian.h"
 #include "utility/oskar_Mem.h"
 #include <string.h>
@@ -41,12 +42,16 @@
 extern "C" {
 #endif
 
-int oskar_binary_file_append(const char* filename, unsigned char data_type,
+int oskar_binary_file_write(const char* filename, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
         size_t data_size, const void* data)
 {
     FILE* stream;
     int err;
+
+    /* Sanity check on inputs. */
+    if (filename == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Open the file for read and append. */
     stream = fopen(filename, "a+b");
@@ -56,7 +61,20 @@ int oskar_binary_file_append(const char* filename, unsigned char data_type,
     if (ftell(stream) == 0)
     {
         /* If the file is empty, then write the header. */
-        oskar_binary_stream_write_header(stream);
+        err = oskar_binary_stream_write_header(stream);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
+
+        /* Write standard metadata. */
+        err = oskar_binary_stream_write_std_metadata(stream);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
     }
     else
     {
@@ -83,28 +101,32 @@ int oskar_binary_file_append(const char* filename, unsigned char data_type,
     return err;
 }
 
-int oskar_binary_file_append_double(const char* filename,
+int oskar_binary_file_write_double(const char* filename,
         const char* name_group, const char* name_tag, int user_index,
         double value)
 {
-    return oskar_binary_file_append(filename, OSKAR_DOUBLE, name_group,
+    return oskar_binary_file_write(filename, OSKAR_DOUBLE, name_group,
             name_tag, user_index, sizeof(double), &value);
 }
 
-int oskar_binary_file_append_int(const char* filename,
+int oskar_binary_file_write_int(const char* filename,
         const char* name_group, const char* name_tag, int user_index,
         int value)
 {
-    return oskar_binary_file_append(filename, OSKAR_INT, name_group,
+    return oskar_binary_file_write(filename, OSKAR_INT, name_group,
             name_tag, user_index, sizeof(int), &value);
 }
 
-int oskar_binary_file_append_std(const char* filename, unsigned char data_type,
+int oskar_binary_file_write_std(const char* filename, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
         size_t data_size, const void* data)
 {
     FILE* stream;
     int err;
+
+    /* Sanity check on inputs. */
+    if (filename == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Open the file for read and append. */
     stream = fopen(filename, "a+b");
@@ -114,7 +136,20 @@ int oskar_binary_file_append_std(const char* filename, unsigned char data_type,
     if (ftell(stream) == 0)
     {
         /* If the file is empty, then write the header. */
-        oskar_binary_stream_write_header(stream);
+        err = oskar_binary_stream_write_header(stream);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
+
+        /* Write standard metadata. */
+        err = oskar_binary_stream_write_std_metadata(stream);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
     }
     else
     {
@@ -141,19 +176,19 @@ int oskar_binary_file_append_std(const char* filename, unsigned char data_type,
     return err;
 }
 
-int oskar_binary_file_append_std_double(const char* filename,
+int oskar_binary_file_write_std_double(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
         double value)
 {
-    return oskar_binary_file_append_std(filename, OSKAR_DOUBLE, id_group,
+    return oskar_binary_file_write_std(filename, OSKAR_DOUBLE, id_group,
             id_tag, user_index, sizeof(double), &value);
 }
 
-int oskar_binary_file_append_std_int(const char* filename,
+int oskar_binary_file_write_std_int(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
         int value)
 {
-    return oskar_binary_file_append_std(filename, OSKAR_INT, id_group,
+    return oskar_binary_file_write_std(filename, OSKAR_INT, id_group,
             id_tag, user_index, sizeof(int), &value);
 }
 

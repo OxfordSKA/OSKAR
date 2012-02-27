@@ -26,72 +26,104 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_binary_stream_read.h"
+#include "utility/oskar_binary_tag_index_create.h"
+#include "utility/oskar_binary_tag_index_query.h"
+#include "utility/oskar_mem_binary_file_read.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_save_binary_append.h"
-#include "utility/oskar_binary_file_append.h"
+#include "utility/oskar_mem_realloc.h"
 
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_save_binary_append(const oskar_Mem* mem, const char* filename,
-        const char* name_group, const char* name_tag, int user_index,
-        int num_to_write)
+int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index)
 {
-    int err, type, location, num_elements;
+    int err, type, location, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
-    const oskar_Mem* data = NULL;
+    oskar_Mem* data = NULL;
+    FILE* stream;
 
     /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL ||
-            name_group == NULL || name_tag == NULL)
+    if (mem == NULL || filename == NULL || index == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get the meta-data. */
 #ifdef __cplusplus
     type = mem->type();
     location = mem->location();
-    num_elements = mem->num_elements();
 #else
     type = mem->private_type;
     location = mem->private_location;
-    num_elements = mem->private_num_elements;
 #endif
 
     /* Initialise temporary (to zero length). */
     oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
 
-    /* Get the total number of bytes to write. */
-    if (num_to_write <= 0)
-        num_to_write = num_elements;
-    size_bytes = num_to_write * oskar_mem_element_size(type);
-
     /* Check if data is in CPU or GPU memory. */
-    if (location == OSKAR_LOCATION_CPU)
+    data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;
+
+    /* Open the input file. */
+    stream = fopen(filename, "rb");
+    if (stream == NULL)
+        return OSKAR_ERR_FILE_IO;
+
+    /* Create the tag index if it doesn't already exist. */
+    if (*index == NULL)
     {
-        data = mem;
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        /* Copy to temporary. */
-        err = oskar_mem_copy(&temp, mem);
+        err = oskar_binary_tag_index_create(index, stream);
         if (err)
         {
-            oskar_mem_free(&temp);
+            fclose(stream);
             return err;
         }
-        data = &temp;
     }
 
-    /* Save the memory to a binary file. */
-    err = oskar_binary_file_append(filename, (unsigned char)type,
+    /* Query the tag index to find out how big the block is. */
+    element_size = oskar_mem_element_size(type);
+    err = oskar_binary_tag_index_query(*index, (unsigned char)type, 0, 0,
+            name_group, name_tag, user_index, NULL, &size_bytes, NULL);
+    if (err)
+    {
+        fclose(stream);
+        return err;
+    }
+
+    /* Resize memory block if necessary, so that it can hold the data. */
+    num_elements = (int)ceil(size_bytes / element_size);
+    err = oskar_mem_realloc(data, num_elements);
+    if (err)
+    {
+        oskar_mem_free(&temp);
+        fclose(stream);
+        return err;
+    }
+    size_bytes = num_elements * element_size;
+
+    /* Load the memory from a binary stream. */
+    err = oskar_binary_stream_read(stream, index, (unsigned char)type,
             name_group, name_tag, user_index, size_bytes, data->data);
+
+    /* Close the input file and check for errors. */
+    fclose(stream);
+    if (err)
+    {
+        oskar_mem_free(&temp);
+        return err;
+    }
+
+    /* Copy to GPU memory if required. */
+    if (location == OSKAR_LOCATION_GPU)
+        err = oskar_mem_copy(mem, &temp);
 
     /* Free the temporary. */
     oskar_mem_free(&temp);

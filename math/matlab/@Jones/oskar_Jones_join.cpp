@@ -34,8 +34,11 @@
 #include "math/oskar_jones_join.h"
 #include "math/matlab/@Jones/oskar_Jones_utility.h"
 #include "utility/oskar_vector_types.h"
-#include "utility/oskar_cuda_device_info.h"
+#include "utility/oskar_cuda_device_info_scan.h"
 #include <string.h>
+
+static int initialised = 0;
+static oskar_CudaDeviceInfo device;
 
 // Interface function
 void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
@@ -83,9 +86,13 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
 
 
     // Check if GPU supports double before trying to join on the GPU!
-    bool double_support = oskar_cuda_device_supports_double(0);
+    if (!initialised)
+    {
+        oskar_cuda_device_info_scan(&device, 0);
+        initialised = 1;
+    }
     bool double_type = (strcmp(type_string, "double") == 0) ? true : false;
-    if (double_type == true && double_support == false)
+    if (double_type && !device.supports_double)
     {
         mexErrMsgTxt("GPU architecture does not support double precision!");
     }

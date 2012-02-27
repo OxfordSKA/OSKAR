@@ -37,6 +37,10 @@ if (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-variadic-macros")
 
+    # Ignore warnings from CUDA headers by specifying them as system headers.
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
+
     # Add release and debug flags.
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG")

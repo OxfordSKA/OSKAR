@@ -29,7 +29,7 @@
 #include "interferometry/test/Test_correlator.h"
 #include "interferometry/cudak/oskar_cudak_correlator.h"
 #include "utility/oskar_vector_types.h"
-#include "utility/oskar_cuda_device_info.h"
+#include "utility/oskar_cuda_device_info_scan.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -38,6 +38,25 @@
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
+
+/**
+ * @details
+ * Constructor.
+ */
+Test_correlator::Test_correlator()
+{
+    device_ = new oskar_CudaDeviceInfo;
+    oskar_cuda_device_info_scan(device_, 0);
+}
+
+/**
+ * @details
+ * Destructor.
+ */
+Test_correlator::~Test_correlator()
+{
+    delete device_;
+}
 
 /**
  * @details
@@ -112,10 +131,9 @@ void Test_correlator::test_kernel_float()
     }
 
     // Call the correlator kernel.
-    int cu_arch_major, cu_arch_minor;
-    oskar_get_cuda_arch(0, &cu_arch_major, &cu_arch_minor);
     int num_threads = 0;
-    if (cu_arch_major < 2 && cu_arch_minor < 3)
+    if (device_->compute.capability.major < 2 &&
+            device_->compute.capability.minor < 3)
         num_threads = 128;
     else
         num_threads = 256;
@@ -161,7 +179,7 @@ void Test_correlator::test_kernel_float()
  */
 void Test_correlator::test_kernel_double()
 {
-    if (!oskar_cuda_device_supports_double(0))
+    if (!device_->supports_double)
         return;
 
     int ns = 50000;
