@@ -54,7 +54,8 @@ int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
     FILE* stream;
 
     /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL || index == NULL)
+    if (mem == NULL || filename == NULL || index == NULL ||
+            name_group == NULL || name_tag == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get the meta-data. */
@@ -112,6 +113,94 @@ int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
     /* Load the memory from a binary stream. */
     err = oskar_binary_stream_read(stream, index, (unsigned char)type,
             name_group, name_tag, user_index, size_bytes, data->data);
+
+    /* Close the input file and check for errors. */
+    fclose(stream);
+    if (err)
+    {
+        oskar_mem_free(&temp);
+        return err;
+    }
+
+    /* Copy to GPU memory if required. */
+    if (location == OSKAR_LOCATION_GPU)
+        err = oskar_mem_copy(mem, &temp);
+
+    /* Free the temporary. */
+    oskar_mem_free(&temp);
+
+    return err;
+}
+
+int oskar_mem_binary_file_read_std(oskar_Mem* mem, const char* filename,
+        oskar_BinaryTagIndex** index, unsigned char id_group,
+        unsigned char id_tag, int user_index)
+{
+    int err, type, location, num_elements, element_size;
+    oskar_Mem temp;
+    size_t size_bytes;
+    oskar_Mem* data = NULL;
+    FILE* stream;
+
+    /* Sanity check on inputs. */
+    if (mem == NULL || filename == NULL || index == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Get the meta-data. */
+#ifdef __cplusplus
+    type = mem->type();
+    location = mem->location();
+#else
+    type = mem->private_type;
+    location = mem->private_location;
+#endif
+
+    /* Initialise temporary (to zero length). */
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+
+    /* Check if data is in CPU or GPU memory. */
+    data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;
+
+    /* Open the input file. */
+    stream = fopen(filename, "rb");
+    if (stream == NULL)
+        return OSKAR_ERR_FILE_IO;
+
+    /* Create the tag index if it doesn't already exist. */
+    if (*index == NULL)
+    {
+        err = oskar_binary_tag_index_create(index, stream);
+        if (err)
+        {
+            fclose(stream);
+            return err;
+        }
+    }
+
+    /* Query the tag index to find out how big the block is. */
+    element_size = oskar_mem_element_size(type);
+    err = oskar_binary_tag_index_query(*index, (unsigned char)type, id_group,
+            id_tag, NULL, NULL, user_index, NULL, &size_bytes, NULL);
+    if (err)
+    {
+        fclose(stream);
+        return err;
+    }
+
+    /* Resize memory block if necessary, so that it can hold the data. */
+    num_elements = (int)ceil(size_bytes / element_size);
+    err = oskar_mem_realloc(data, num_elements);
+    if (err)
+    {
+        oskar_mem_free(&temp);
+        fclose(stream);
+        return err;
+    }
+    size_bytes = num_elements * element_size;
+
+    /* Load the memory from a binary stream. */
+    err = oskar_binary_stream_read_std(stream, index, (unsigned char)type,
+            id_group, id_tag, user_index, size_bytes, data->data);
 
     /* Close the input file and check for errors. */
     fclose(stream);

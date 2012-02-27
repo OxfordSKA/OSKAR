@@ -28,7 +28,10 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_binary_file_read.h"
+#include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_binary_file_read.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -39,159 +42,125 @@ extern "C"
 #endif
 oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
 {
+    // Visibility metadata.
+    int num_channels = 0, num_times = 0, num_baselines = 0, amp_type = 0;
+    int err = 0;
+    oskar_BinaryTagIndex* index = NULL;
+    oskar_Visibilities* vis     = NULL;
+    char grp[] = "VISIBILITY";
+
+    // Sanity check on inputs.
     if (filename == NULL)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
         return NULL;
+    }
+
+    // Read visibility dimensions.
+    err = oskar_binary_file_read_int(filename, &index, grp,
+            "NUM_CHANNELS", 0, &num_channels);
+    if (err)
+    {
+        if (status) *status = err;
+        return NULL;
+    }
+    err = oskar_binary_file_read_int(filename, &index, grp,
+            "NUM_TIMES", 0, &num_times);
+    if (err)
+    {
+        if (status) *status = err;
+        return NULL;
+    }
+    err = oskar_binary_file_read_int(filename, &index, grp,
+            "NUM_BASELINES", 0, &num_baselines);
+    if (err)
+    {
+        if (status) *status = err;
+        return NULL;
+    }
+    err = oskar_binary_file_read_int(filename, &index, grp,
+            "AMP_TYPE", 0, &amp_type);
+    if (err)
+    {
+        if (status) *status = err;
+        return NULL;
+    }
+
+    // Create the visibility structure.
+    vis = new oskar_Visibilities(amp_type, OSKAR_LOCATION_CPU,
+            num_channels, num_times, num_baselines);
+
+    // Read visibility metadata.
+    err = oskar_binary_file_read_double(filename, &index, grp,
+            "FREQ_START_HZ", 0, &vis->freq_start_hz);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
+    err = oskar_binary_file_read_double(filename, &index, grp,
+            "FREQ_INC_HZ", 0, &vis->freq_inc_hz);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
+    err = oskar_binary_file_read_double(filename, &index, grp,
+            "TIME_START_MJD_UTC", 0, &vis->time_start_mjd_utc);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
+    err = oskar_binary_file_read_double(filename, &index, grp,
+            "TIME_INC_SEC", 0, &vis->time_inc_seconds);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
+
+    // Read the baseline coordinate arrays.
+    err = oskar_mem_binary_file_read(&vis->uu_metres, filename, &index, grp,
+            "BASELINE_UU", 0);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
+    err = oskar_mem_binary_file_read(&vis->vv_metres, filename, &index, grp,
+            "BASELINE_VV", 0);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
+    err = oskar_mem_binary_file_read(&vis->ww_metres, filename, &index, grp,
+            "BASELINE_WW", 0);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
+
+    // Read the visibility data.
+    err = oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
+            "AMPLITUDE", 0);
+    if (err)
+    {
+        if (status) *status = err;
+        delete vis;
+        return NULL;
+    }
 
     if (status) *status = OSKAR_SUCCESS;
 
-    // Open the file to write to.
-    FILE* file;
-    file = fopen(filename, "rb");
-    if (!file)
-        return NULL;
-
-    // Read header.
-    int num_channels  = 0;
-    int num_times     = 0;
-    int num_baselines = 0;
-    int coord_type    = 0;
-    int amp_type      = 0;
-    double freq_start_hz      = 0.0;
-    double freq_inc_hz        = 0.0;
-    double time_start_mjd_utc = 0.0;
-    double time_inc_seconds   = 0.0;
-    int oskar_vis_file_magic_number = 0;
-    int version = 0;
-
-    if (fread(&oskar_vis_file_magic_number, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    // Check the file data type magic number is correct.
-    if (oskar_vis_file_magic_number != OSKAR_VIS_FILE_ID)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_VERSION_MISMATCH;
-        return NULL;
-    }
-    if (fread(&version, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    // Check the OSKAR is compatible.
-    if (version > OSKAR_VERSION)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_VERSION_MISMATCH;
-        return NULL;
-    }
-    if (fread(&num_channels, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&num_times, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&num_baselines, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&coord_type, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&amp_type, sizeof(int), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&freq_start_hz, sizeof(double), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&freq_inc_hz, sizeof(double), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&time_start_mjd_utc, sizeof(double), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(&time_inc_seconds, sizeof(double), 1, file) != 1)
-    {
-        fclose(file);
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-
-    // Initialise the visibility structure.
-    // Note: this will wipe any existing data in the structure.
-    oskar_Visibilities* vis = new oskar_Visibilities(amp_type,
-            OSKAR_LOCATION_CPU, num_channels, num_times, num_baselines);
-
-    vis->freq_start_hz      = freq_start_hz;
-    vis->freq_inc_hz        = freq_inc_hz;
-    vis->time_start_mjd_utc = time_start_mjd_utc;
-    vis->time_inc_seconds   = time_inc_seconds;
-
-    // Read data.
-    size_t num_amps = num_channels * num_times * num_baselines;
-    size_t num_coords = num_times * num_baselines;
-    size_t coord_element_size = oskar_mem_element_size(coord_type);
-    size_t amp_element_size   = oskar_mem_element_size(amp_type);
-    if (fread(vis->uu_metres.data, coord_element_size, num_coords, file) != num_coords)
-    {
-        fclose(file);
-        delete vis;
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-    if (fread(vis->vv_metres.data, coord_element_size, num_coords, file) != num_coords)
-    {
-        fclose(file);
-        delete vis;
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-
-    if (fread(vis->ww_metres.data, coord_element_size, num_coords, file) != num_coords)
-    {
-        fclose(file);
-        delete vis;
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-
-    if (fread(vis->amplitude.data,  amp_element_size, num_amps, file) != num_amps)
-    {
-        fclose(file);
-        delete vis;
-        if (status) *status = OSKAR_ERR_FILE_IO;
-        return NULL;
-    }
-
-    fclose(file);
-
     return vis;
 }
-

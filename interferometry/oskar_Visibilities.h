@@ -284,4 +284,21 @@ struct oskar_Visibilities
 
 typedef struct oskar_Visibilities oskar_Visibilities;
 
+/* Do not change the values below - these are merely dimension labels, not the
+ * actual dimension order. */
+enum {
+    OSKAR_VISIBILITY_DIM_CHANNEL = 0,
+    OSKAR_VISIBILITY_DIM_TIME = 1,
+    OSKAR_VISIBILITY_DIM_BASELINE = 2,
+    OSKAR_VISIBILITY_DIM_POLARISATION = 3
+};
+
+enum {
+    OSKAR_VISIBILITY_POLARISATION_TYPE_LINEAR = 0
+};
+
+enum {
+    OSKAR_VISIBILITY_BASELINE_COORD_UNIT_METRES = 0
+};
+
 #endif /* OSKAR_VISIBILITIES_H_ */

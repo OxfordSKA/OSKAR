@@ -39,7 +39,7 @@ set(interferometry_SRC
     src/oskar_visibilities_location.c
     src/oskar_visibilities_read.cpp
     src/oskar_visibilities_resize.c
-    src/oskar_visibilities_write.cpp
+    src/oskar_visibilities_write.c
     src/oskar_Visibilities.cpp
     src/oskar_xyz_to_uvw_cuda.cu
     src/oskar_xyz_to_uvw.c

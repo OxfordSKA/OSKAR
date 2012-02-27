@@ -65,6 +65,31 @@ int oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
         const char* name_group, const char* name_tag, int user_index,
         int num_to_write);
 
+/**
+ * @brief
+ * Appends an OSKAR memory block to an OSKAR binary file.
+ *
+ * @details
+ * This function saves the contents of an OSKAR memory block to a binary file.
+ *
+ * @param[in] mem          Pointer to data structure.
+ * @param[in] filename     Name of binary file to which to append.
+ * @param[in] id_group     Tag group identifier.
+ * @param[in] id_tag       Tag identifier.
+ * @param[in] user_index   User-defined index.
+ * @param[in] num_to_write If > 0, only the first \p num_elements are written.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_mem_binary_file_write_std(const oskar_Mem* mem, const char* filename,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        int num_to_write);
+
 #ifdef __cplusplus
 }
 #endif
