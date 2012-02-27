@@ -84,20 +84,24 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     if (oskar_file_exists(filename))
         remove(filename);
 
-    /* Write the settings path. */
-    err = oskar_mem_binary_file_write_std(&vis->settings_path, filename,
-            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_SETTINGS_PATH, 0, 0);
-    if (err) return err;
+    /* If settings path is set, write out the data. */
+    if (vis->settings_path.data)
+    {
+        /* Write the settings path. */
+        err = oskar_mem_binary_file_write_std(&vis->settings_path, filename,
+                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, 0);
+        if (err) return err;
 
-    /* Write the settings file. */
-    oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
-    err = oskar_mem_binary_file_read_raw(&temp,
-            (const char*) vis->settings_path.data);
-    if (err) return err;
-    err = oskar_mem_binary_file_write_std(&temp, filename,
-            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_SETTINGS, 0, 0);
-    oskar_mem_free(&temp);
-    if (err) return err;
+        /* Write the settings file. */
+        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
+        err = oskar_mem_binary_file_read_raw(&temp,
+                (const char*) vis->settings_path.data);
+        if (err) return err;
+        err = oskar_mem_binary_file_write_std(&temp, filename,
+                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0);
+        oskar_mem_free(&temp);
+        if (err) return err;
+    }
 
     /* Write dimensions. */
     oskar_binary_file_write_int(filename, grp,
