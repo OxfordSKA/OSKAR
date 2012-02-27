@@ -60,7 +60,8 @@ int oskar_cuda_info_create(oskar_CudaInfo** info)
     }
 
     /* Allocate array big enough. */
-    inf->device = (oskar_CudaDeviceInfo*) malloc(sizeof(oskar_CudaDeviceInfo));
+    inf->device = (oskar_CudaDeviceInfo*) malloc(inf->num_devices *
+            sizeof(oskar_CudaDeviceInfo));
 
     /* Populate device array. */
     for (i = 0; i < inf->num_devices; ++i)
