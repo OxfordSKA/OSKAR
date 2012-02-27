@@ -45,19 +45,19 @@ int oskar_binary_stream_write_std_cuda_info(FILE* stream,
     int i, error;
 
     /* Write the number of devices. */
-    error = oskar_binary_stream_write_std_int(stream,
+    error = oskar_binary_stream_write_int(stream,
             OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_NUM_DEVICES, 0,
             cuda_info->num_devices);
     if (error) return error;
 
     /* Write the driver version. */
-    error = oskar_binary_stream_write_std_int(stream,
+    error = oskar_binary_stream_write_int(stream,
             OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DRIVER_VERSION, 0,
             cuda_info->driver_version);
     if (error) return error;
 
     /* Write the runtime version. */
-    error = oskar_binary_stream_write_std_int(stream,
+    error = oskar_binary_stream_write_int(stream,
             OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_RUNTIME_VERSION, 0,
             cuda_info->runtime_version);
     if (error) return error;
@@ -69,84 +69,84 @@ int oskar_binary_stream_write_std_cuda_info(FILE* stream,
 
         /* Write device name. */
         len = 1 + strlen(cuda_info->device[i].name);
-        error = oskar_binary_stream_write_std(stream, OSKAR_CHAR,
+        error = oskar_binary_stream_write(stream, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_NAME,
                 i, len, cuda_info->device[i].name);
         if (error) return error;
 
         /* Write the compute capability. */
-        error = oskar_binary_stream_write_std(stream, OSKAR_INT,
+        error = oskar_binary_stream_write(stream, OSKAR_INT,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_COMPUTE,
                 i, 2 * sizeof(int), cuda_info->device[i].compute.version);
         if (error) return error;
 
         /* Write the global memory size. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_SIZE,
                 i, cuda_info->device[i].global_memory_size);
         if (error) return error;
 
         /* Write the number of multiprocessors. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_MULTIPROCESSORS,
                 i, cuda_info->device[i].num_multiprocessors);
         if (error) return error;
 
         /* Write the GPU clock frequency. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_GPU_CLOCK,
                 i, cuda_info->device[i].gpu_clock);
         if (error) return error;
 
         /* Write the memory clock frequency. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_CLOCK,
                 i, cuda_info->device[i].memory_clock);
         if (error) return error;
 
         /* Write the memory bus width. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_MEMORY_BUS,
                 i, cuda_info->device[i].memory_bus_width);
         if (error) return error;
 
         /* Write the level 2 cache size. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_L2_CACHE,
                 i, cuda_info->device[i].level_2_cache_size);
         if (error) return error;
 
         /* Write the shared memory size. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_SHARED_MEMORY_SIZE,
                 i, cuda_info->device[i].shared_memory_size);
         if (error) return error;
 
         /* Write the registers per block. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_REGS_PER_BLOCK,
                 i, cuda_info->device[i].num_registers);
         if (error) return error;
 
         /* Write the warp size. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_WARP_SIZE,
                 i, cuda_info->device[i].warp_size);
         if (error) return error;
 
         /* Write the maximum number of threads per block. */
-        error = oskar_binary_stream_write_std_int(stream,
+        error = oskar_binary_stream_write_int(stream,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_MAX_THREADS_PER_BLOCK,
                 i, cuda_info->device[i].max_threads_per_block);
         if (error) return error;
 
         /* Write the maximum thread block dimensions. */
-        error = oskar_binary_stream_write_std(stream, OSKAR_INT,
+        error = oskar_binary_stream_write(stream, OSKAR_INT,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_MAX_THREADS_DIM,
                 i, 3 * sizeof(int), cuda_info->device[i].max_threads_dim);
 
         /* Write the maximum grid dimensions. */
-        error = oskar_binary_stream_write_std(stream, OSKAR_INT,
+        error = oskar_binary_stream_write(stream, OSKAR_INT,
                 OSKAR_TAG_GROUP_CUDA_INFO, OSKAR_TAG_CUDA_INFO_DEVICE_MAX_GRID_SIZE,
                 i, 3 * sizeof(int), cuda_info->device[i].max_grid_size);
         if (error) return error;

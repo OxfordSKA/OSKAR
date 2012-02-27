@@ -110,18 +110,17 @@ typedef struct oskar_BinaryTag oskar_BinaryTag;
  */
 struct oskar_BinaryTagIndex
 {
-    int num_tags;             /**< Size of tag arrays. */
-    int* extended;            /**< */
-    int* type;
-    int* id_group;
-    int* id_tag;
+    int num_tags;             /**< Number of tags in the index. */
+    int* extended;            /**< Array of flags (if true, tag is extended). */
+    int* data_type;           /**< Array of tag data types. */
+    int* id_group;            /**< Array of tag group IDs. */
+    int* id_tag;              /**< Array of tag IDs. */
     char** name_group;        /**< Array of tag group names. */
     char** name_tag;          /**< Array of tag names. */
     int* user_index;          /**< Array of user indices. */
+    long* data_offset_bytes;  /**< Array of data offsets from the start. */
     size_t* data_size_bytes;  /**< Array of data sizes.*/
     size_t* block_size_bytes; /**< Array of block sizes. */
-    oskar_BinaryTag* tag;     /**< Array of tags in the file. */
-    long* data_offset_bytes;  /**< Array of data offsets from the start. */
 };
 typedef struct oskar_BinaryTagIndex oskar_BinaryTagIndex;
 

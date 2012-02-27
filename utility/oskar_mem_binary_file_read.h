@@ -52,8 +52,8 @@ extern "C" {
  * @param[in] filename     Name of binary file.
  * @param[in,out] index    Pointer to an index structure pointer.
  * @param[in] data_type    Type of the memory (as in oskar_Mem).
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
+ * @param[in] id_group     Tag group identifier.
+ * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  *
  * @return
@@ -64,8 +64,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index);
+        oskar_BinaryTagIndex** index, unsigned char id_group,
+        unsigned char id_tag, int user_index);
 
 /**
  * @brief
@@ -78,8 +78,8 @@ int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
  * @param[in] filename     Name of binary file.
  * @param[in,out] index    Pointer to an index structure pointer.
  * @param[in] data_type    Type of the memory (as in oskar_Mem).
- * @param[in] id_group     Tag group identifier.
- * @param[in] id_tag       Tag identifier.
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  *
  * @return
@@ -89,9 +89,9 @@ int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_mem_binary_file_read_std(oskar_Mem* mem, const char* filename,
-        oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index);
+int oskar_mem_binary_file_read_ext(oskar_Mem* mem, const char* filename,
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index);
 
 #ifdef __cplusplus
 }

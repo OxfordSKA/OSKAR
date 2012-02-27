@@ -29,6 +29,7 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_binary_file_read.h"
+#include "utility/oskar_binary_tag_index_free.h"
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_binary_file_read.h"
@@ -47,7 +48,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     int err = 0;
     oskar_BinaryTagIndex* index = NULL;
     oskar_Visibilities* vis     = NULL;
-    char grp[] = "VISIBILITY";
+    unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
 
     // Sanity check on inputs.
     if (filename == NULL)
@@ -58,28 +59,28 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
 
     // Read visibility dimensions.
     err = oskar_binary_file_read_int(filename, &index, grp,
-            "NUM_CHANNELS", 0, &num_channels);
+            OSKAR_VIS_TAG_NUM_CHANNELS, 0, &num_channels);
     if (err)
     {
         if (status) *status = err;
         return NULL;
     }
     err = oskar_binary_file_read_int(filename, &index, grp,
-            "NUM_TIMES", 0, &num_times);
+            OSKAR_VIS_TAG_NUM_TIMES, 0, &num_times);
     if (err)
     {
         if (status) *status = err;
         return NULL;
     }
     err = oskar_binary_file_read_int(filename, &index, grp,
-            "NUM_BASELINES", 0, &num_baselines);
+            OSKAR_VIS_TAG_NUM_BASELINES, 0, &num_baselines);
     if (err)
     {
         if (status) *status = err;
         return NULL;
     }
     err = oskar_binary_file_read_int(filename, &index, grp,
-            "AMP_TYPE", 0, &amp_type);
+            OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type);
     if (err)
     {
         if (status) *status = err;
@@ -92,7 +93,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
 
     // Read visibility metadata.
     err = oskar_binary_file_read_double(filename, &index, grp,
-            "FREQ_START_HZ", 0, &vis->freq_start_hz);
+            OSKAR_VIS_TAG_FREQ_START_HZ, 0, &vis->freq_start_hz);
     if (err)
     {
         if (status) *status = err;
@@ -100,7 +101,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
         return NULL;
     }
     err = oskar_binary_file_read_double(filename, &index, grp,
-            "FREQ_INC_HZ", 0, &vis->freq_inc_hz);
+            OSKAR_VIS_TAG_FREQ_INC_HZ, 0, &vis->freq_inc_hz);
     if (err)
     {
         if (status) *status = err;
@@ -108,7 +109,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
         return NULL;
     }
     err = oskar_binary_file_read_double(filename, &index, grp,
-            "TIME_START_MJD_UTC", 0, &vis->time_start_mjd_utc);
+            OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, &vis->time_start_mjd_utc);
     if (err)
     {
         if (status) *status = err;
@@ -116,7 +117,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
         return NULL;
     }
     err = oskar_binary_file_read_double(filename, &index, grp,
-            "TIME_INC_SEC", 0, &vis->time_inc_seconds);
+            OSKAR_VIS_TAG_TIME_INC_SEC, 0, &vis->time_inc_seconds);
     if (err)
     {
         if (status) *status = err;
@@ -126,7 +127,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
 
     // Read the baseline coordinate arrays.
     err = oskar_mem_binary_file_read(&vis->uu_metres, filename, &index, grp,
-            "BASELINE_UU", 0);
+            OSKAR_VIS_TAG_BASELINE_UU, 0);
     if (err)
     {
         if (status) *status = err;
@@ -134,7 +135,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
         return NULL;
     }
     err = oskar_mem_binary_file_read(&vis->vv_metres, filename, &index, grp,
-            "BASELINE_VV", 0);
+            OSKAR_VIS_TAG_BASELINE_VV, 0);
     if (err)
     {
         if (status) *status = err;
@@ -142,7 +143,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
         return NULL;
     }
     err = oskar_mem_binary_file_read(&vis->ww_metres, filename, &index, grp,
-            "BASELINE_WW", 0);
+            OSKAR_VIS_TAG_BASELINE_WW, 0);
     if (err)
     {
         if (status) *status = err;
@@ -152,7 +153,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
 
     // Read the visibility data.
     err = oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
-            "AMPLITUDE", 0);
+            OSKAR_VIS_TAG_AMPLITUDE, 0);
     if (err)
     {
         if (status) *status = err;
@@ -161,6 +162,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     }
 
     if (status) *status = OSKAR_SUCCESS;
+    oskar_binary_tag_index_free(&index);
 
     return vis;
 }

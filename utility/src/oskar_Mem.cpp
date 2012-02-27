@@ -96,19 +96,34 @@ int oskar_Mem::append_raw(const void* from, int from_type, int from_location,
             num_elements);
 }
 
-int oskar_Mem::binary_file_write(const char* filename, const char* name_group,
-        const char* name_tag, int user_index, int num_to_write) const
+int oskar_Mem::binary_file_read(const char* filename,
+        oskar_BinaryTagIndex** index, unsigned char id_group,
+        unsigned char id_tag, int user_index)
 {
-    return oskar_mem_binary_file_write(this, filename, name_group,
-            name_tag, user_index, num_to_write);
+    return oskar_mem_binary_file_read(this, filename, index, id_group,
+            id_tag, user_index);
 }
 
-int oskar_Mem::binary_file_read(const char* filename,
+int oskar_Mem::binary_file_read_ext(const char* filename,
         oskar_BinaryTagIndex** index, const char* name_group,
         const char* name_tag, int user_index)
 {
-    return oskar_mem_binary_file_read(this, filename, index, name_group,
+    return oskar_mem_binary_file_read_ext(this, filename, index, name_group,
             name_tag, user_index);
+}
+
+int oskar_Mem::binary_file_write(const char* filename, unsigned char id_group,
+        unsigned char id_tag, int user_index, int num_to_write) const
+{
+    return oskar_mem_binary_file_write(this, filename, id_group,
+            id_tag, user_index, num_to_write);
+}
+
+int oskar_Mem::binary_file_write_ext(const char* filename, const char* name_group,
+        const char* name_tag, int user_index, int num_to_write) const
+{
+    return oskar_mem_binary_file_write_ext(this, filename, name_group,
+            name_tag, user_index, num_to_write);
 }
 
 int oskar_Mem::clear_contents()

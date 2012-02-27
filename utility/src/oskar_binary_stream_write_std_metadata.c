@@ -48,7 +48,7 @@ int oskar_binary_stream_write_std_metadata(FILE* stream)
     /* Write the system date and time. */
     str = oskar_system_clock_time(0, NULL);
     len = 1 + strlen(str);
-    error = oskar_binary_stream_write_std(stream, OSKAR_CHAR,
+    error = oskar_binary_stream_write(stream, OSKAR_CHAR,
             OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0,
             len, str);
     if (error) return error;
@@ -59,7 +59,7 @@ int oskar_binary_stream_write_std_metadata(FILE* stream)
     if (str)
     {
         len = 1 + strlen(str);
-        error = oskar_binary_stream_write_std(stream, OSKAR_CHAR,
+        error = oskar_binary_stream_write(stream, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD, 0,
                 len, str);
         if (error) return error;
@@ -70,7 +70,7 @@ int oskar_binary_stream_write_std_metadata(FILE* stream)
     if (str)
     {
         len = 1 + strlen(str);
-        error = oskar_binary_stream_write_std(stream, OSKAR_CHAR,
+        error = oskar_binary_stream_write(stream, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME, 0,
                 len, str);
         if (error) return error;

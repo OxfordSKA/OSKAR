@@ -39,6 +39,85 @@ extern "C" {
 #endif
 
 int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
+        unsigned char id_group, unsigned char id_tag, int user_index,
+        size_t data_size, const void* data)
+{
+    oskar_BinaryTag tag;
+    size_t block_size;
+
+    /* Initialise the tag. */
+    char magic[] = "TAG";
+    strcpy(tag.magic, magic);
+    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
+    memset(tag.user_index, 0, sizeof(tag.user_index));
+
+    /* Sanity check on inputs. */
+    if (stream == NULL || data == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Set up the tag identifiers */
+    tag.flags = 0;
+    tag.data_type = data_type;
+    tag.group.id = id_group;
+    tag.tag.id = id_tag;
+
+    /* Get the number of bytes in the block in little-endian byte order. */
+    block_size = data_size;
+    if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
+    {
+        return OSKAR_ERR_BAD_BINARY_FORMAT;
+    }
+    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    {
+        if (sizeof(size_t) == 4)
+            oskar_endian_swap_4((char*)&block_size);
+        else if (sizeof(size_t) == 8)
+            oskar_endian_swap_8((char*)&block_size);
+    }
+
+    /* Copy the block size in bytes to the tag, as little endian. */
+    memcpy(tag.size_bytes, &block_size, sizeof(size_t));
+
+    /* Get the user index in little-endian byte order. */
+    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
+    {
+        if (sizeof(int) == 2)
+            oskar_endian_swap_2((char*)&user_index);
+        else if (sizeof(int) == 4)
+            oskar_endian_swap_4((char*)&user_index);
+        else if (sizeof(int) == 8)
+            oskar_endian_swap_8((char*)&user_index);
+    }
+
+    /* Copy the user index to the tag, as little endian. */
+    memcpy(tag.user_index, &user_index, sizeof(int));
+
+    /* Write the tag to the file. */
+    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
+        return OSKAR_ERR_FILE_IO;
+
+    /* Write the data to the file. */
+    if (fwrite(data, 1, data_size, stream) != data_size)
+        return OSKAR_ERR_FILE_IO;
+
+    return OSKAR_SUCCESS;
+}
+
+int oskar_binary_stream_write_double(FILE* stream, unsigned char id_group,
+        unsigned char id_tag, int user_index, double value)
+{
+    return oskar_binary_stream_write(stream, OSKAR_DOUBLE, id_group, id_tag,
+            user_index, sizeof(double), &value);
+}
+
+int oskar_binary_stream_write_int(FILE* stream, unsigned char id_group,
+        unsigned char id_tag, int user_index, int value)
+{
+    return oskar_binary_stream_write(stream, OSKAR_INT, id_group, id_tag,
+            user_index, sizeof(int), &value);
+}
+
+int oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
         size_t data_size, const void* data)
 {
@@ -117,97 +196,18 @@ int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
     return OSKAR_SUCCESS;
 }
 
-int oskar_binary_stream_write_double(FILE* stream, const char* name_group,
+int oskar_binary_stream_write_ext_double(FILE* stream, const char* name_group,
         const char* name_tag, int user_index, double value)
 {
-    return oskar_binary_stream_write(stream, OSKAR_DOUBLE, name_group,
+    return oskar_binary_stream_write_ext(stream, OSKAR_DOUBLE, name_group,
             name_tag, user_index, sizeof(double), &value);
 }
 
-int oskar_binary_stream_write_int(FILE* stream, const char* name_group,
+int oskar_binary_stream_write_ext_int(FILE* stream, const char* name_group,
         const char* name_tag, int user_index, int value)
 {
-    return oskar_binary_stream_write(stream, OSKAR_INT, name_group,
+    return oskar_binary_stream_write_ext(stream, OSKAR_INT, name_group,
             name_tag, user_index, sizeof(int), &value);
-}
-
-int oskar_binary_stream_write_std(FILE* stream, unsigned char data_type,
-        unsigned char id_group, unsigned char id_tag, int user_index,
-        size_t data_size, const void* data)
-{
-    oskar_BinaryTag tag;
-    size_t block_size;
-
-    /* Initialise the tag. */
-    char magic[] = "TAG";
-    strcpy(tag.magic, magic);
-    memset(tag.size_bytes, 0, sizeof(tag.size_bytes));
-    memset(tag.user_index, 0, sizeof(tag.user_index));
-
-    /* Sanity check on inputs. */
-    if (stream == NULL || data == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Set up the tag identifiers */
-    tag.flags = 0;
-    tag.data_type = data_type;
-    tag.group.id = id_group;
-    tag.tag.id = id_tag;
-
-    /* Get the number of bytes in the block in little-endian byte order. */
-    block_size = data_size;
-    if (sizeof(size_t) != 4 && sizeof(size_t) != 8)
-    {
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
-    }
-    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-    {
-        if (sizeof(size_t) == 4)
-            oskar_endian_swap_4((char*)&block_size);
-        else if (sizeof(size_t) == 8)
-            oskar_endian_swap_8((char*)&block_size);
-    }
-
-    /* Copy the block size in bytes to the tag, as little endian. */
-    memcpy(tag.size_bytes, &block_size, sizeof(size_t));
-
-    /* Get the user index in little-endian byte order. */
-    if (oskar_endian() != OSKAR_LITTLE_ENDIAN)
-    {
-        if (sizeof(int) == 2)
-            oskar_endian_swap_2((char*)&user_index);
-        else if (sizeof(int) == 4)
-            oskar_endian_swap_4((char*)&user_index);
-        else if (sizeof(int) == 8)
-            oskar_endian_swap_8((char*)&user_index);
-    }
-
-    /* Copy the user index to the tag, as little endian. */
-    memcpy(tag.user_index, &user_index, sizeof(int));
-
-    /* Write the tag to the file. */
-    if (fwrite(&tag, sizeof(oskar_BinaryTag), 1, stream) != 1)
-        return OSKAR_ERR_FILE_IO;
-
-    /* Write the data to the file. */
-    if (fwrite(data, 1, data_size, stream) != data_size)
-        return OSKAR_ERR_FILE_IO;
-
-    return OSKAR_SUCCESS;
-}
-
-int oskar_binary_stream_write_std_double(FILE* stream, unsigned char id_group,
-        unsigned char id_tag, int user_index, double value)
-{
-    return oskar_binary_stream_write_std(stream, OSKAR_DOUBLE, id_group, id_tag,
-            user_index, sizeof(double), &value);
-}
-
-int oskar_binary_stream_write_std_int(FILE* stream, unsigned char id_group,
-        unsigned char id_tag, int user_index, int value)
-{
-    return oskar_binary_stream_write_std(stream, OSKAR_INT, id_group, id_tag,
-            user_index, sizeof(int), &value);
 }
 
 #ifdef __cplusplus

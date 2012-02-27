@@ -39,62 +39,75 @@ extern "C" {
 
 int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
-        const char* name_group, const char* name_tag, int user_index,
-        size_t* block_size, size_t* data_size, long* data_offset)
+        int user_index, size_t* data_size, long* data_offset)
 {
-    int i, extended = 0;
+    int i;
 
-    /* Check if names are specified. */
-    if (name_group && name_tag)
-    {
-        size_t lgroup, ltag;
-        lgroup = strlen(name_group);
-        ltag = strlen(name_tag);
-        extended = 1;
-
-        /* Check that string lengths are within range. */
-        if (lgroup > 254 || ltag > 254)
-            return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
-
-        /* It's an error to specify nonzero IDs as well. */
-        if (id_group || id_tag)
-            return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
-
-        /* Store the lengths as the new IDs. */
-        id_group = 1 + lgroup;
-        id_tag = 1 + ltag;
-    }
+    /* Sanity check on inputs. */
+    if (index == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Find the tag in the index. */
     for (i = 0; i < index->num_tags; ++i)
     {
-        oskar_BinaryTag* tag;
-        tag = index->tag + i;
-        if (data_type == tag->data_type && id_group == tag->group.id &&
-                id_tag == tag->tag.id && user_index == index->user_index[i])
+        if (!(index->extended[i]) &&
+                index->data_type[i] == (int) data_type &&
+                index->id_group[i] == (int) id_group &&
+                index->id_tag[i] == (int) id_tag &&
+                index->user_index[i] == user_index)
         {
-            if (!extended)
-            {
-                /* If tag is extended, keep searching. */
-                if (tag->flags & (1 << 7)) continue;
+            /* Match found, so break. */
+            break;
+        }
+    }
 
-                /* Match found, so break. */
-                break;
-            }
-            else
-            {
-                /* If tag is not extended, keep searching. */
-                if (!(tag->flags & (1 << 7))) continue;
+    /* Check if tag is not present. */
+    if (i == index->num_tags)
+        return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
 
-                /* Possible match: check names. */
-                if (strcmp(name_group, index->name_group[i]))
-                    continue;
-                if (strcmp(name_tag, index->name_tag[i]))
-                    continue;
+    /* Get the tag data. */
+    if (data_size)
+        *data_size = index->data_size_bytes[i];
+    if (data_offset)
+        *data_offset = index->data_offset_bytes[i];
 
-                /* Match found, so break. */
-                break;
-            }
+    return OSKAR_SUCCESS;
+}
+
+int oskar_binary_tag_index_query_ext(const oskar_BinaryTagIndex* index,
+        unsigned char data_type, const char* name_group, const char* name_tag,
+        int user_index, size_t* block_size, size_t* data_size,
+        long* data_offset)
+{
+    int i, lgroup, ltag;
+
+    /* Sanity check on inputs. */
+    if (index == NULL || name_group == NULL || name_tag == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check that string lengths are within range. */
+    lgroup = 1 + strlen(name_group);
+    ltag = 1 + strlen(name_tag);
+    if (lgroup > 255 || ltag > 255)
+        return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
+
+    /* Find the tag in the index. */
+    for (i = 0; i < index->num_tags; ++i)
+    {
+        if (index->extended[i] &&
+                index->data_type[i] == (int) data_type &&
+                index->id_group[i] == (int) lgroup &&
+                index->id_tag[i] == (int) ltag &&
+                index->user_index[i] == user_index)
+        {
+            /* Possible match: check names. */
+            if (strcmp(name_group, index->name_group[i]))
+                continue;
+            if (strcmp(name_tag, index->name_tag[i]))
+                continue;
+
+            /* Match found, so break. */
+            break;
         }
     }
 

@@ -42,47 +42,6 @@ extern "C" {
 
 int oskar_binary_file_read(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char data_type,
-        const char* name_group, const char* name_tag, int user_index,
-        size_t data_size, void* data)
-{
-    FILE* stream;
-    int err;
-
-    /* Sanity check on inputs. */
-    if (filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Open the file for read. */
-    stream = fopen(filename, "rb");
-
-    /* Read the data. */
-    err = oskar_binary_stream_read(stream, index, data_type, name_group,
-            name_tag, user_index, data_size, data);
-
-    /* Close the file. */
-    fclose(stream);
-
-    return err;
-}
-
-int oskar_binary_file_read_double(const char* filename,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, double* value)
-{
-    return oskar_binary_file_read(filename, index, OSKAR_DOUBLE,
-            name_group, name_tag, user_index, sizeof(double), value);
-}
-
-int oskar_binary_file_read_int(const char* filename,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, int* value)
-{
-    return oskar_binary_file_read(filename, index, OSKAR_INT,
-            name_group, name_tag, user_index, sizeof(int), value);
-}
-
-int oskar_binary_file_read_std(const char* filename,
-        oskar_BinaryTagIndex** index, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
         size_t data_size, void* data)
 {
@@ -97,7 +56,7 @@ int oskar_binary_file_read_std(const char* filename,
     stream = fopen(filename, "rb");
 
     /* Read the data. */
-    err = oskar_binary_stream_read_std(stream, index, data_type, id_group,
+    err = oskar_binary_stream_read(stream, index, data_type, id_group,
             id_tag, user_index, data_size, data);
 
     /* Close the file. */
@@ -106,20 +65,61 @@ int oskar_binary_file_read_std(const char* filename,
     return err;
 }
 
-int oskar_binary_file_read_std_double(const char* filename,
+int oskar_binary_file_read_double(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
         unsigned char id_tag, int user_index, double* value)
 {
-    return oskar_binary_file_read_std(filename, index, OSKAR_DOUBLE, id_group,
+    return oskar_binary_file_read(filename, index, OSKAR_DOUBLE, id_group,
             id_tag, user_index, sizeof(double), value);
 }
 
-int oskar_binary_file_read_std_int(const char* filename,
+int oskar_binary_file_read_int(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
         unsigned char id_tag, int user_index, int* value)
 {
-    return oskar_binary_file_read_std(filename, index, OSKAR_INT, id_group,
+    return oskar_binary_file_read(filename, index, OSKAR_INT, id_group,
             id_tag, user_index, sizeof(int), value);
+}
+
+int oskar_binary_file_read_ext(const char* filename,
+        oskar_BinaryTagIndex** index, unsigned char data_type,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t data_size, void* data)
+{
+    FILE* stream;
+    int err;
+
+    /* Sanity check on inputs. */
+    if (filename == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Open the file for read. */
+    stream = fopen(filename, "rb");
+
+    /* Read the data. */
+    err = oskar_binary_stream_read_ext(stream, index, data_type, name_group,
+            name_tag, user_index, data_size, data);
+
+    /* Close the file. */
+    fclose(stream);
+
+    return err;
+}
+
+int oskar_binary_file_read_ext_double(const char* filename,
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index, double* value)
+{
+    return oskar_binary_file_read_ext(filename, index, OSKAR_DOUBLE,
+            name_group, name_tag, user_index, sizeof(double), value);
+}
+
+int oskar_binary_file_read_ext_int(const char* filename,
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index, int* value)
+{
+    return oskar_binary_file_read_ext(filename, index, OSKAR_INT,
+            name_group, name_tag, user_index, sizeof(int), value);
 }
 
 #ifdef __cplusplus

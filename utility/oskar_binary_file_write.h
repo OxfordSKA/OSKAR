@@ -52,93 +52,6 @@ extern "C" {
  * This function appends a block of binary data to a binary file specified
  * by the given filename.
  *
- * The tag is specified as an extended tag, using a group name and a tag name
- * that are both given as strings.
- *
- * If the file does not exist, it is created and a header is written to the
- * file before the data are appended.
- *
- * If the file does exist, the header is checked to ensure that it is an
- * OSKAR binary file before the data are appended.
- *
- * The data are written in native byte order.
- *
- * @param[in] filename     Name of binary file.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[in] data_size    Size of memory block, in bytes.
- * @param[out] data        Pointer to memory block.
- */
-OSKAR_EXPORT
-int oskar_binary_file_write(const char* filename, unsigned char data_type,
-        const char* name_group, const char* name_tag, int user_index,
-        size_t data_size, const void* data);
-
-/**
- * @brief Appends a single double-precision value to a binary file.
- *
- * @details
- * This function appends a single double-precision value to a binary file
- * specified by the given filename.
- *
- * The tag is specified as an extended tag, using a group name and a tag name
- * that are both given as strings.
- *
- * If the file does not exist, it is created and a header is written to the
- * file before the data are appended.
- *
- * If the file does exist, the header is checked to ensure that it is an
- * OSKAR binary file before the data are appended.
- *
- * The data are written in native byte order.
- *
- * @param[in] filename     Name of binary file.
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[in] value        Value to write.
- */
-OSKAR_EXPORT
-int oskar_binary_file_write_double(const char* filename, const char* name_group,
-        const char* name_tag, int user_index, double value);
-
-/**
- * @brief Appends a single integer value to a binary file.
- *
- * @details
- * This function appends a single integer value to a binary file
- * specified by the given filename.
- *
- * The tag is specified as an extended tag, using a group name and a tag name
- * that are both given as strings.
- *
- * If the file does not exist, it is created and a header is written to the
- * file before the data are appended.
- *
- * If the file does exist, the header is checked to ensure that it is an
- * OSKAR binary file before the data are appended.
- *
- * The data are written in native byte order.
- *
- * @param[in] filename     Name of binary file.
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[in] value        Value to write.
- */
-OSKAR_EXPORT
-int oskar_binary_file_write_int(const char* filename, const char* name_group,
-        const char* name_tag, int user_index, int value);
-
-/**
- * @brief Appends a block of binary data to a binary file.
- *
- * @details
- * This function appends a block of binary data to a binary file specified
- * by the given filename.
- *
  * The tag is specified as a standard tag, using a group ID and a tag ID
  * that are both given as bytes.
  *
@@ -159,7 +72,7 @@ int oskar_binary_file_write_int(const char* filename, const char* name_group,
  * @param[out] data        Pointer to memory block.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_std(const char* filename, unsigned char data_type,
+int oskar_binary_file_write(const char* filename, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
         size_t data_size, const void* data);
 
@@ -188,7 +101,7 @@ int oskar_binary_file_write_std(const char* filename, unsigned char data_type,
  * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_std_double(const char* filename,
+int oskar_binary_file_write_double(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
         double value);
 
@@ -217,8 +130,97 @@ int oskar_binary_file_write_std_double(const char* filename,
  * @param[in] value        Value to write.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_std_int(const char* filename,
+int oskar_binary_file_write_int(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
+        int value);
+
+/**
+ * @brief Appends a block of binary data to a binary file.
+ *
+ * @details
+ * This function appends a block of binary data to a binary file specified
+ * by the given filename.
+ *
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * If the file does not exist, it is created and a header is written to the
+ * file before the data are appended.
+ *
+ * If the file does exist, the header is checked to ensure that it is an
+ * OSKAR binary file before the data are appended.
+ *
+ * The data are written in native byte order.
+ *
+ * @param[in] filename     Name of binary file.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in] data_size    Size of memory block, in bytes.
+ * @param[out] data        Pointer to memory block.
+ */
+OSKAR_EXPORT
+int oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t data_size, const void* data);
+
+/**
+ * @brief Appends a single double-precision value to a binary file.
+ *
+ * @details
+ * This function appends a single double-precision value to a binary file
+ * specified by the given filename.
+ *
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * If the file does not exist, it is created and a header is written to the
+ * file before the data are appended.
+ *
+ * If the file does exist, the header is checked to ensure that it is an
+ * OSKAR binary file before the data are appended.
+ *
+ * The data are written in native byte order.
+ *
+ * @param[in] filename     Name of binary file.
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in] value        Value to write.
+ */
+OSKAR_EXPORT
+int oskar_binary_file_write_ext_double(const char* filename,
+        const char* name_group, const char* name_tag, int user_index,
+        double value);
+
+/**
+ * @brief Appends a single integer value to a binary file.
+ *
+ * @details
+ * This function appends a single integer value to a binary file
+ * specified by the given filename.
+ *
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * If the file does not exist, it is created and a header is written to the
+ * file before the data are appended.
+ *
+ * If the file does exist, the header is checked to ensure that it is an
+ * OSKAR binary file before the data are appended.
+ *
+ * The data are written in native byte order.
+ *
+ * @param[in] filename     Name of binary file.
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in] value        Value to write.
+ */
+OSKAR_EXPORT
+int oskar_binary_file_write_ext_int(const char* filename,
+        const char* name_group, const char* name_tag, int user_index,
         int value);
 
 #ifdef __cplusplus

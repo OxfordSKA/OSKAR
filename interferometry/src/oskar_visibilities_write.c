@@ -50,7 +50,7 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     int err = 0, num_amps, num_coords;
     int uu_elements, vv_elements, ww_elements, amp_elements;
     int coord_type, amp_type, *dim;
-    char grp[] = "VISIBILITY";
+    unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
 
     /* Get the metadata. */
 #ifdef __cplusplus
@@ -88,7 +88,7 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     if (vis->settings_path.data)
     {
         /* Write the settings path. */
-        err = oskar_mem_binary_file_write_std(&vis->settings_path, filename,
+        err = oskar_mem_binary_file_write(&vis->settings_path, filename,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, 0);
         if (err) return err;
 
@@ -97,7 +97,7 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
         err = oskar_mem_binary_file_read_raw(&temp,
                 (const char*) vis->settings_path.data);
         if (err) return err;
-        err = oskar_mem_binary_file_write_std(&temp, filename,
+        err = oskar_mem_binary_file_write(&temp, filename,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0);
         oskar_mem_free(&temp);
         if (err) return err;
@@ -105,49 +105,53 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
 
     /* Write dimensions. */
     oskar_binary_file_write_int(filename, grp,
-            "NUM_CHANNELS", 0, vis->num_channels);
+            OSKAR_VIS_TAG_NUM_CHANNELS, 0, vis->num_channels);
     oskar_binary_file_write_int(filename, grp,
-            "NUM_TIMES", 0, vis->num_times);
+            OSKAR_VIS_TAG_NUM_TIMES, 0, vis->num_times);
     oskar_binary_file_write_int(filename, grp,
-            "NUM_BASELINES", 0, vis->num_baselines);
+            OSKAR_VIS_TAG_NUM_BASELINES, 0, vis->num_baselines);
 
     /* Write the dimension order. */
     oskar_mem_init(&temp, OSKAR_INT, OSKAR_LOCATION_CPU, 4, 1);
     dim = (int*) temp.data;
-    dim[0] = OSKAR_VISIBILITY_DIM_CHANNEL;
-    dim[1] = OSKAR_VISIBILITY_DIM_TIME;
-    dim[2] = OSKAR_VISIBILITY_DIM_BASELINE;
-    dim[3] = OSKAR_VISIBILITY_DIM_POLARISATION;
-    oskar_mem_binary_file_write(&temp, filename, grp, "DIMENSION_ORDER", 0, 0);
+    dim[0] = OSKAR_VIS_DIM_CHANNEL;
+    dim[1] = OSKAR_VIS_DIM_TIME;
+    dim[2] = OSKAR_VIS_DIM_BASELINE;
+    dim[3] = OSKAR_VIS_DIM_POLARISATION;
+    oskar_mem_binary_file_write(&temp, filename, grp,
+            OSKAR_VIS_TAG_DIMENSION_ORDER, 0, 0);
     oskar_mem_free(&temp);
 
     /* Write other visibility metadata. */
-    oskar_binary_file_write_int(filename, grp, "COORD_TYPE", 0, coord_type);
-    oskar_binary_file_write_int(filename, grp, "AMP_TYPE", 0, amp_type);
-    oskar_binary_file_write_double(filename, grp,
-            "FREQ_START_HZ", 0, vis->freq_start_hz);
-    oskar_binary_file_write_double(filename, grp,
-            "FREQ_INC_HZ", 0, vis->freq_inc_hz);
-    oskar_binary_file_write_double(filename, grp,
-            "TIME_START_MJD_UTC", 0, vis->time_start_mjd_utc);
-    oskar_binary_file_write_double(filename, grp,
-            "TIME_INC_SEC", 0, vis->time_inc_seconds);
     oskar_binary_file_write_int(filename, grp,
-            "POL_TYPE", 0, OSKAR_VISIBILITY_POLARISATION_TYPE_LINEAR);
-    oskar_binary_file_write_int(filename, grp, "BASELINE_COORD_UNIT", 0,
-            OSKAR_VISIBILITY_BASELINE_COORD_UNIT_METRES);
+            OSKAR_VIS_TAG_COORD_TYPE, 0, coord_type);
+    oskar_binary_file_write_int(filename, grp,
+            OSKAR_VIS_TAG_AMP_TYPE, 0, amp_type);
+    oskar_binary_file_write_double(filename, grp,
+            OSKAR_VIS_TAG_FREQ_START_HZ, 0, vis->freq_start_hz);
+    oskar_binary_file_write_double(filename, grp,
+            OSKAR_VIS_TAG_FREQ_INC_HZ, 0, vis->freq_inc_hz);
+    oskar_binary_file_write_double(filename, grp,
+            OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, vis->time_start_mjd_utc);
+    oskar_binary_file_write_double(filename, grp,
+            OSKAR_VIS_TAG_TIME_INC_SEC, 0, vis->time_inc_seconds);
+    oskar_binary_file_write_int(filename, grp,
+            OSKAR_VIS_TAG_POL_TYPE, 0, OSKAR_VIS_POL_TYPE_LINEAR);
+    oskar_binary_file_write_int(filename, grp,
+            OSKAR_VIS_TAG_BASELINE_COORD_UNIT, 0,
+            OSKAR_VIS_BASELINE_COORD_UNIT_METRES);
 
     /* Write the baseline coordinate arrays. */
     oskar_mem_binary_file_write(&vis->uu_metres, filename,
-            grp, "BASELINE_UU", 0, 0);
+            grp, OSKAR_VIS_TAG_BASELINE_UU, 0, 0);
     oskar_mem_binary_file_write(&vis->vv_metres, filename,
-            grp, "BASELINE_VV", 0, 0);
+            grp, OSKAR_VIS_TAG_BASELINE_VV, 0, 0);
     oskar_mem_binary_file_write(&vis->ww_metres, filename,
-            grp, "BASELINE_WW", 0, 0);
+            grp, OSKAR_VIS_TAG_BASELINE_WW, 0, 0);
 
     /* Write the visibility data. */
     err = oskar_mem_binary_file_write(&vis->amplitude, filename,
-            grp, "AMPLITUDE", 0, 0);
+            grp, OSKAR_VIS_TAG_AMPLITUDE, 0, 0);
 
     return err;
 }

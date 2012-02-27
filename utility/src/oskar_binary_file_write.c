@@ -43,7 +43,7 @@ extern "C" {
 #endif
 
 int oskar_binary_file_write(const char* filename, unsigned char data_type,
-        const char* name_group, const char* name_tag, int user_index,
+        unsigned char id_group, unsigned char id_tag, int user_index,
         size_t data_size, const void* data)
 {
     FILE* stream;
@@ -93,7 +93,7 @@ int oskar_binary_file_write(const char* filename, unsigned char data_type,
 
     /* Write the data. */
     err = oskar_binary_stream_write(stream, data_type,
-            name_group, name_tag, user_index, data_size, data);
+            id_group, id_tag, user_index, data_size, data);
 
     /* Close the file. */
     fclose(stream);
@@ -102,23 +102,23 @@ int oskar_binary_file_write(const char* filename, unsigned char data_type,
 }
 
 int oskar_binary_file_write_double(const char* filename,
-        const char* name_group, const char* name_tag, int user_index,
+        unsigned char id_group, unsigned char id_tag, int user_index,
         double value)
 {
-    return oskar_binary_file_write(filename, OSKAR_DOUBLE, name_group,
-            name_tag, user_index, sizeof(double), &value);
+    return oskar_binary_file_write(filename, OSKAR_DOUBLE, id_group,
+            id_tag, user_index, sizeof(double), &value);
 }
 
 int oskar_binary_file_write_int(const char* filename,
-        const char* name_group, const char* name_tag, int user_index,
+        unsigned char id_group, unsigned char id_tag, int user_index,
         int value)
 {
-    return oskar_binary_file_write(filename, OSKAR_INT, name_group,
-            name_tag, user_index, sizeof(int), &value);
+    return oskar_binary_file_write(filename, OSKAR_INT, id_group,
+            id_tag, user_index, sizeof(int), &value);
 }
 
-int oskar_binary_file_write_std(const char* filename, unsigned char data_type,
-        unsigned char id_group, unsigned char id_tag, int user_index,
+int oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
+        const char* name_group, const char* name_tag, int user_index,
         size_t data_size, const void* data)
 {
     FILE* stream;
@@ -167,8 +167,8 @@ int oskar_binary_file_write_std(const char* filename, unsigned char data_type,
     }
 
     /* Write the data. */
-    err = oskar_binary_stream_write_std(stream, data_type,
-            id_group, id_tag, user_index, data_size, data);
+    err = oskar_binary_stream_write_ext(stream, data_type,
+            name_group, name_tag, user_index, data_size, data);
 
     /* Close the file. */
     fclose(stream);
@@ -176,20 +176,20 @@ int oskar_binary_file_write_std(const char* filename, unsigned char data_type,
     return err;
 }
 
-int oskar_binary_file_write_std_double(const char* filename,
-        unsigned char id_group, unsigned char id_tag, int user_index,
+int oskar_binary_file_write_ext_double(const char* filename,
+        const char* name_group, const char* name_tag, int user_index,
         double value)
 {
-    return oskar_binary_file_write_std(filename, OSKAR_DOUBLE, id_group,
-            id_tag, user_index, sizeof(double), &value);
+    return oskar_binary_file_write_ext(filename, OSKAR_DOUBLE, name_group,
+            name_tag, user_index, sizeof(double), &value);
 }
 
-int oskar_binary_file_write_std_int(const char* filename,
-        unsigned char id_group, unsigned char id_tag, int user_index,
+int oskar_binary_file_write_ext_int(const char* filename,
+        const char* name_group, const char* name_tag, int user_index,
         int value)
 {
-    return oskar_binary_file_write_std(filename, OSKAR_INT, id_group,
-            id_tag, user_index, sizeof(int), &value);
+    return oskar_binary_file_write_ext(filename, OSKAR_INT, name_group,
+            name_tag, user_index, sizeof(int), &value);
 }
 
 #ifdef __cplusplus

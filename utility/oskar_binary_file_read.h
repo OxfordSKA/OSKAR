@@ -53,137 +53,6 @@ extern "C" {
  * This function reads a block of binary data for a single tag, from a binary
  * file specified by the given filename.
  *
- * The tag is specified as an extended tag, using a group name and a tag name
- * that are both given as strings.
- *
- * The data are read in the byte order that they were written.
- *
- * The value pointed at by \p index should be NULL on first read, so the file
- * is indexed first. Any subsequent calls to oskar_binary_file_read* functions
- * can then make use of this index.
- *
- * A typical use might be:
- *
- * @code
- * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_file_read(filename, &index, tag_id1, 0, 0,
- *         data1_type, data1_size, data1);
- * oskar_binary_file_read(filename, &index, tag_id2, 0, 0,
- *         data2_type, data2_size, data2);
- * @endcode
- *
- * The index should be freed by the caller using:
- *
- * @code
- * oskar_binary_tag_index_free(&index);
- * @endcode
- *
- * @param[in] filename     Name of binary file.
- * @param[in,out] index    Pointer to an index structure pointer.
- * @param[in] data_type    Type of the memory (as in oskar_Mem).
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[in] data_size    Size of memory available at \p data, in bytes.
- * @param[out] data        Pointer to memory block to write into.
- */
-OSKAR_EXPORT
-int oskar_binary_file_read(const char* filename,
-        oskar_BinaryTagIndex** index, unsigned char data_type,
-        const char* name_group, const char* name_tag, int user_index,
-        size_t data_size, void* data);
-
-/**
- * @brief Reads a single double-precision value from a binary file.
- *
- * @details
- * This function reads a single double-precision value for a single tag,
- * from a binary file specified by the given filename.
- *
- * The tag is specified as an extended tag, using a group name and a tag name
- * that are both given as strings.
- *
- * The data are read in the byte order that they were written.
- *
- * The value pointed at by \p index should be NULL on first read, so the file
- * is indexed first. Any subsequent calls to oskar_binary_file_read* functions
- * can then make use of this index.
- *
- * A typical use might be:
- *
- * @code
- * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_file_read_double(filename, &index, tag_id1, 0, 0, &my_double1);
- * oskar_binary_file_read_double(filename, &index, tag_id2, 0, 0, &my_double2);
- * @endcode
- *
- * The index should be freed by the caller using:
- *
- * @code
- * oskar_binary_tag_index_free(&index);
- * @endcode
- *
- * @param[in] filename     Name of binary file.
- * @param[in,out] index    Pointer to an index structure pointer.
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[out] value       Pointer to output value.
- */
-OSKAR_EXPORT
-int oskar_binary_file_read_double(const char* filename,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, double* value);
-
-/**
- * @brief Reads a single integer value from a binary file.
- *
- * @details
- * This function reads a single integer value for a single tag,
- * from a binary file specified by the given filename.
- *
- * The tag is specified as an extended tag, using a group name and a tag name
- * that are both given as strings.
- *
- * The data are read in the byte order that they were written.
- *
- * The value pointed at by \p index should be NULL on first read, so the file
- * is indexed first. Any subsequent calls to oskar_binary_file_read* functions
- * can then make use of this index.
- *
- * A typical use might be:
- *
- * @code
- * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_file_read_int(filename, &index, tag_id1, 0, 0, &my_int1);
- * oskar_binary_file_read_int(filename, &index, tag_id2, 0, 0, &my_int2);
- * @endcode
- *
- * The index should be freed by the caller using:
- *
- * @code
- * oskar_binary_tag_index_free(&index);
- * @endcode
- *
- * @param[in] filename     Name of binary file.
- * @param[in,out] index    Pointer to an index structure pointer.
- * @param[in] name_group   Tag group name.
- * @param[in] name_tag     Tag name.
- * @param[in] user_index   User-defined index.
- * @param[out] value       Pointer to output value.
- */
-OSKAR_EXPORT
-int oskar_binary_file_read_int(const char* filename,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, int* value);
-
-/**
- * @brief Reads a block of binary data from a binary file.
- *
- * @details
- * This function reads a block of binary data for a single tag, from a binary
- * file specified by the given filename.
- *
  * The tag is specified as a standard tag, using a group ID and a tag ID
  * that are both given as bytes.
  *
@@ -197,10 +66,10 @@ int oskar_binary_file_read_int(const char* filename,
  *
  * @code
  * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_file_read(filename, &index, tag_id1, 0, 0,
- *         data1_type, data1_size, data1);
- * oskar_binary_file_read(filename, &index, tag_id2, 0, 0,
- *         data2_type, data2_size, data2);
+ * oskar_binary_file_read(filename, &index, data_type1, group_id1,
+ *         tag_id1, 0, data_size1, data1);
+ * oskar_binary_file_read(filename, &index, data_type2, group_id2,
+ *         tag_id2, 0, data_size2, data2);
  * @endcode
  *
  * The index should be freed by the caller using:
@@ -219,7 +88,7 @@ int oskar_binary_file_read_int(const char* filename,
  * @param[out] data        Pointer to memory block to write into.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_std(const char* filename,
+int oskar_binary_file_read(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
         size_t data_size, void* data);
@@ -244,8 +113,10 @@ int oskar_binary_file_read_std(const char* filename,
  *
  * @code
  * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_file_read_double(filename, &index, tag_id1, 0, 0, &my_double1);
- * oskar_binary_file_read_double(filename, &index, tag_id2, 0, 0, &my_double2);
+ * oskar_binary_file_read_double(filename, &index, group_id1,
+ *         tag_id1, 0, &my_double1);
+ * oskar_binary_file_read_double(filename, &index, group_id2,
+ *         tag_id2, 0, &my_double2);
  * @endcode
  *
  * The index should be freed by the caller using:
@@ -262,7 +133,7 @@ int oskar_binary_file_read_std(const char* filename,
  * @param[out] value       Pointer to output value.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_std_double(const char* filename,
+int oskar_binary_file_read_double(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
         unsigned char id_tag, int user_index, double* value);
 
@@ -286,8 +157,10 @@ int oskar_binary_file_read_std_double(const char* filename,
  *
  * @code
  * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_file_read_int(filename, &index, tag_id1, 0, 0, &my_int1);
- * oskar_binary_file_read_int(filename, &index, tag_id2, 0, 0, &my_int2);
+ * oskar_binary_file_read_int(filename, &index, group_id1,
+ *         tag_id1, 0, &my_int1);
+ * oskar_binary_file_read_int(filename, &index, group_id2,
+ *         tag_id2, 0, &my_int2);
  * @endcode
  *
  * The index should be freed by the caller using:
@@ -304,9 +177,144 @@ int oskar_binary_file_read_std_double(const char* filename,
  * @param[out] value       Pointer to output value.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_std_int(const char* filename,
+int oskar_binary_file_read_int(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
         unsigned char id_tag, int user_index, int* value);
+
+/**
+ * @brief Reads a block of binary data from a binary file.
+ *
+ * @details
+ * This function reads a block of binary data for a single tag, from a binary
+ * file specified by the given filename.
+ *
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * The data are read in the byte order that they were written.
+ *
+ * The value pointed at by \p index should be NULL on first read, so the file
+ * is indexed first. Any subsequent calls to oskar_binary_file_read* functions
+ * can then make use of this index.
+ *
+ * A typical use might be:
+ *
+ * @code
+ * oskar_BinaryTagIndex* index = NULL;
+ * oskar_binary_file_read_ext(filename, &index, data_type1, group_name1,
+ *         tag_name1, 0, data_size1, data1);
+ * oskar_binary_file_read_ext(filename, &index, data_type2, group_name2,
+ *         tag_name2, 0, data_size2, data2);
+ * @endcode
+ *
+ * The index should be freed by the caller using:
+ *
+ * @code
+ * oskar_binary_tag_index_free(&index);
+ * @endcode
+ *
+ * @param[in] filename     Name of binary file.
+ * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in] data_type    Type of the memory (as in oskar_Mem).
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[in] data_size    Size of memory available at \p data, in bytes.
+ * @param[out] data        Pointer to memory block to write into.
+ */
+OSKAR_EXPORT
+int oskar_binary_file_read_ext(const char* filename,
+        oskar_BinaryTagIndex** index, unsigned char data_type,
+        const char* name_group, const char* name_tag, int user_index,
+        size_t data_size, void* data);
+
+/**
+ * @brief Reads a single double-precision value from a binary file.
+ *
+ * @details
+ * This function reads a single double-precision value for a single tag,
+ * from a binary file specified by the given filename.
+ *
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * The data are read in the byte order that they were written.
+ *
+ * The value pointed at by \p index should be NULL on first read, so the file
+ * is indexed first. Any subsequent calls to oskar_binary_file_read* functions
+ * can then make use of this index.
+ *
+ * A typical use might be:
+ *
+ * @code
+ * oskar_BinaryTagIndex* index = NULL;
+ * oskar_binary_file_read_ext_double(filename, &index, group_name1,
+ *         tag_name1, 0, &my_double1);
+ * oskar_binary_file_read_ext_double(filename, &index, group_name2,
+ *         tag_name2, 0, &my_double2);
+ * @endcode
+ *
+ * The index should be freed by the caller using:
+ *
+ * @code
+ * oskar_binary_tag_index_free(&index);
+ * @endcode
+ *
+ * @param[in] filename     Name of binary file.
+ * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[out] value       Pointer to output value.
+ */
+OSKAR_EXPORT
+int oskar_binary_file_read_ext_double(const char* filename,
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index, double* value);
+
+/**
+ * @brief Reads a single integer value from a binary file.
+ *
+ * @details
+ * This function reads a single integer value for a single tag,
+ * from a binary file specified by the given filename.
+ *
+ * The tag is specified as an extended tag, using a group name and a tag name
+ * that are both given as strings.
+ *
+ * The data are read in the byte order that they were written.
+ *
+ * The value pointed at by \p index should be NULL on first read, so the file
+ * is indexed first. Any subsequent calls to oskar_binary_file_read* functions
+ * can then make use of this index.
+ *
+ * A typical use might be:
+ *
+ * @code
+ * oskar_BinaryTagIndex* index = NULL;
+ * oskar_binary_file_read_ext_int(filename, &index, group_name1,
+ *         tag_name1, 0, &my_int1);
+ * oskar_binary_file_read_ext_int(filename, &index, group_name2,
+ *         tag_name2, 0, &my_int2);
+ * @endcode
+ *
+ * The index should be freed by the caller using:
+ *
+ * @code
+ * oskar_binary_tag_index_free(&index);
+ * @endcode
+ *
+ * @param[in] filename     Name of binary file.
+ * @param[in,out] index    Pointer to an index structure pointer.
+ * @param[in] name_group   Tag group name.
+ * @param[in] name_tag     Tag name.
+ * @param[in] user_index   User-defined index.
+ * @param[out] value       Pointer to output value.
+ */
+OSKAR_EXPORT
+int oskar_binary_file_read_ext_int(const char* filename,
+        oskar_BinaryTagIndex** index, const char* name_group,
+        const char* name_tag, int user_index, int* value);
 
 #ifdef __cplusplus
 }
