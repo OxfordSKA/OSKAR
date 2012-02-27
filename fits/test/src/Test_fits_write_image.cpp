@@ -36,17 +36,27 @@
 
 void Test_fits_write_image::test_method()
 {
-    int width = 100;
-    int height = 200;
+    int columns = 10; // width
+    int rows = 20; // height
     double ra0 = 10.0;
     double dec0 = 80.0;
     double ra_d = -0.1;
     double dec_d = 0.1;
     double freq = 100e6;
     double bw = 1e5;
-    oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, width * height);
+    oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, columns * rows);
     const char filename[] = "cpp_unit_test_image.fits";
 
-    oskar_fits_write_image(filename, data.type(), width, height, data.data,
+    // Define test data.
+    double* d = (double*) data.data;
+    for (int r = 0, i = 0; r < rows; ++r)
+    {
+        for (int c = 0; c < columns; ++c, ++i)
+        {
+            d[i] = r + 2 * c;
+        }
+    }
+
+    oskar_fits_write_image(filename, data.type(), columns, rows, data.data,
             ra0, dec0, ra_d, dec_d, freq, bw);
 }

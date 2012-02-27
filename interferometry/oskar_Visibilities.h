@@ -284,6 +284,27 @@ struct oskar_Visibilities
 
 typedef struct oskar_Visibilities oskar_Visibilities;
 
+/* To maintain binary compatibility, do not change the values
+ * in the lists below. */
+enum {
+    OSKAR_TAG_VISIBILITY_NUM_CHANNELS = 1,
+    OSKAR_TAG_VISIBILITY_NUM_TIMES = 2,
+    OSKAR_TAG_VISIBILITY_NUM_BASELINES = 3,
+    OSKAR_TAG_VISIBILITY_DIMENSION_ORDER = 4,
+    OSKAR_TAG_VISIBILITY_COORD_TYPE = 5,
+    OSKAR_TAG_VISIBILITY_AMP_TYPE = 6,
+    OSKAR_TAG_VISIBILITY_FREQ_START_HZ = 7,
+    OSKAR_TAG_VISIBILITY_FREQ_INC_HZ = 8,
+    OSKAR_TAG_VISIBILITY_TIME_START_MJD_UTC = 9,
+    OSKAR_TAG_VISIBILITY_TIME_INC_SEC = 10,
+    OSKAR_TAG_VISIBILITY_POL_TYPE = 11,
+    OSKAR_TAG_VISIBILITY_BASELINE_COORD_UNIT = 12,
+    OSKAR_TAG_VISIBILITY_BASELINE_UU = 13,
+    OSKAR_TAG_VISIBILITY_BASELINE_VV = 14,
+    OSKAR_TAG_VISIBILITY_BASELINE_WW = 15,
+    OSKAR_TAG_VISIBILITY_AMPLITUDE = 16
+};
+
 /* Do not change the values below - these are merely dimension labels, not the
  * actual dimension order. */
 enum {

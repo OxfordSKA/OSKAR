@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/oskar_fits_write_image.h"
+#include "fits/oskar_fits_write.h"
 #include "fits/oskar_fits_write_axis_header.h"
 #include "fits/oskar_fits_check_status.h"
 #include "utility/oskar_Mem.h"
@@ -40,27 +40,16 @@
 extern "C" {
 #endif
 
-void oskar_fits_write_image(const char* filename, int type, int width,
-        int height, void* data, double ra, double dec, double d_ra,
-        double d_dec, double frequency, double bandwidth)
+void oskar_fits_write(const char* filename, int type, int naxis,
+        const long* naxes, const void* data, const char* const* ctype,
+        const char* const* ctype_desc, const double* crval,
+        const double* cdelt, const double* crpix, const double* crota,
+        const char* const* cunit)
 {
     char key[FLEN_KEYWORD], value[FLEN_VALUE];
-    int status = 0, decimals = 10;
+    int i, num_elements = 1, status = 0;
     int datatype = TFLOAT, imagetype = FLOAT_IMG;
-    long naxes[4];
     fitsfile* fptr;
-    char* ctype[] = {
-            "RA---SIN",
-            "DEC--SIN",
-            "FREQ",
-            "STOKES"
-    };
-    char* ctype_comment[] = {
-            "Right Ascension",
-            "Declination",
-            "Frequency",
-            "Polarisation"
-    };
 
     /* If the file exists, remove it. */
     FILE* file;
@@ -82,18 +71,12 @@ void oskar_fits_write_image(const char* filename, int type, int width,
         imagetype = DOUBLE_IMG;
     }
 
-    /* Set the dimensions. */
-    naxes[0] = width;
-    naxes[1] = height;
-    naxes[2] = 1;
-    naxes[3] = 1;
-
     /* Create a new empty output FITS file. */
     fits_create_file(&fptr, filename, &status);
     oskar_fits_check_status(status, "Creating file");
 
     /* Create the new image. */
-    fits_create_img(fptr, imagetype, 4, naxes, &status);
+    fits_create_img(fptr, imagetype, naxis, naxes, &status);
     oskar_fits_check_status(status, "Creating image");
 
     /* Write date stamp. */
@@ -106,35 +89,24 @@ void oskar_fits_write_image(const char* filename, int type, int width,
     fits_write_key_str(fptr,  key, value, NULL, &status);
     oskar_fits_check_status(status, "Writing key: TELESCOP");
 
-    /* Write brightness unit keyword. */
-    strcpy(key, "BUNIT");
-    strcpy(value, "JY/BEAM");
-    fits_write_key_str(fptr, key, value, "Units of flux", &status);
-    oskar_fits_check_status(status, "Writing key: BUNIT");
-
-    /* Write coordinate keywords. */
-    fits_write_key_dbl(fptr, "OBSRA", ra, decimals, "Pointing RA", &status);
-    oskar_fits_check_status(status, "Writing key: OBSRA");
-    fits_write_key_dbl(fptr, "OBSDEC", dec, decimals, "Pointing DEC", &status);
-    oskar_fits_check_status(status, "Writing key: OBSDEC");
-
     /* Axis description headers. */
-    oskar_fits_write_axis_header(fptr, 1, ctype[0], "Right Ascension",
-            ra, d_ra, (width + 1) / 2.0, 0.0, "deg");
-    oskar_fits_write_axis_header(fptr, 2, ctype[1], "Declination",
-            dec, d_dec, (height + 1) / 2.0, 0.0, "deg");
-    oskar_fits_write_axis_header(fptr, 3, ctype[2], "Frequency",
-            frequency, bandwidth, 1.0, 0.0, "Hz");
-    oskar_fits_write_axis_header(fptr, 4, ctype[3], "Stokes",
-            1.0, 1.0, 1.0, 0.0, "");
+    for (i = 0; i < naxis; ++i)
+    {
+        oskar_fits_write_axis_header(fptr, i + 1, ctype[i], ctype_desc[i],
+                crval[i], cdelt[i], crpix[i], crota[i], cunit[i]);
+    }
 
     /* Write a history line. */
     fits_write_history(fptr,
-            "This image was created using the OSKAR-2 simulator.", &status);
+            "This file was created using the OSKAR-2 simulator.", &status);
     oskar_fits_check_status(status, "Writing history");
 
     /* Write image data. */
-    fits_write_img(fptr, datatype, 1, width * height, data, &status);
+    for (i = 0; i < naxis; ++i)
+    {
+        num_elements *= naxes[i];
+    }
+    fits_write_img(fptr, datatype, 1, num_elements, data, &status);
     oskar_fits_check_status(status, "Writing image data");
 
     /* Close the FITS file. */

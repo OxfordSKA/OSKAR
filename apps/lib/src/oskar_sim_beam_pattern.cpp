@@ -70,7 +70,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
 
     // Get the image settings.
     int image_size = (int)settings.image.size;
-    int n_channels = settings.obs.num_channels;
+    int num_channels = settings.obs.num_channels;
     int num_pixels = image_size * image_size;
     double fov_deg = settings.image.fov_deg;
     double lm_max = sin(fov_deg * M_PI / 180.0);
@@ -101,6 +101,10 @@ int oskar_sim_beam_pattern(const char* settings_file)
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
     double dt_dump           = times->dt_dump_days;
 
+    // Allocate memory big enough for data hyper-cube.
+    int num_elements = num_pixels * num_vis_dumps * num_channels;
+    oskar_Mem data(type, OSKAR_LOCATION_CPU);
+
     // Open the data file.
     if (!settings.image.filename)
     {
@@ -113,7 +117,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     // Loop over channels.
     QTime timer;
     timer.start();
-    for (int c = 0; c < n_channels; ++c)
+    for (int c = 0; c < num_channels; ++c)
     {
         // Initialise the random number generator.
         oskar_Device_curand_state curand_state(tel_cpu->max_station_size);
@@ -121,7 +125,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
         curand_state.init(seed);
 
         // Get the channel frequency.
-        printf("\n--> Simulating channel (%d / %d).\n", c + 1, n_channels);
+        printf("\n--> Simulating channel (%d / %d).\n", c + 1, num_channels);
         double frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
 

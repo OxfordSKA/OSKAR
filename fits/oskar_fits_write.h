@@ -26,49 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/oskar_fits_write_axis_header.h"
+#ifndef OSKAR_FITS_WRITE_IMAGE_H_
+#define OSKAR_FITS_WRITE_IMAGE_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+/**
+ * @file oskar_fits_write_image.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_fits_write_axis_header(fitsfile* fptr, int axis_id,
-        const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota, const char* cunit)
-{
-    char key[FLEN_KEYWORD], value[FLEN_VALUE], comment[FLEN_COMMENT];
-    int status = 0;
-    int decimals = 10;
-
-    strncpy(comment, ctype_comment, FLEN_COMMENT-1);
-    strncpy(value, ctype, FLEN_VALUE-1);
-    fits_make_keyn("CTYPE", axis_id, key, &status);
-    fits_write_key_str(fptr, key, value, comment, &status);
-
-    fits_make_keyn("CRVAL", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, crval, decimals, NULL, &status);
-
-    fits_make_keyn("CDELT", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, cdelt, decimals, NULL, &status);
-
-    fits_make_keyn("CRPIX", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, crpix, decimals, NULL, &status);
-
-    fits_make_keyn("CROTA", axis_id, key, &status);
-    fits_write_key_dbl(fptr, key, crota, decimals, NULL, &status);
-
-    if (cunit)
-    {
-        strncpy(value, cunit, FLEN_VALUE-1);
-        fits_make_keyn("CUNIT", axis_id, key, &status);
-        fits_write_key_str(fptr, key, value, NULL, &status);
-    }
-}
+/**
+ * @brief
+ * Writes a block of memory to a simple 2D FITS image.
+ *
+ * @details
+ * This function writes the contents of a block of memory to a FITS image.
+ * The supplied parameters are written into the FITS header.
+ *
+ * This function is intended to be used for simple 2D images of one frequency
+ * channel and one polarisation (Stokes I) only.
+ *
+ * Note that FITS data arrays should be given in FORTRAN (column major) order.
+ */
+OSKAR_EXPORT
+void oskar_fits_write_image(const char* filename, int type, int width,
+        int height, void* data, double ra, double dec, double d_ra,
+        double d_dec, double frequency, double bandwidth);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_FITS_WRITE_IMAGE_H_ */

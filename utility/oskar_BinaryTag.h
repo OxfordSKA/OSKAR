@@ -111,13 +111,17 @@ typedef struct oskar_BinaryTag oskar_BinaryTag;
 struct oskar_BinaryTagIndex
 {
     int num_tags;             /**< Size of tag arrays. */
-    int* user_index;          /**< Array of user indices. */
-    size_t* block_size_bytes; /**< Array of block sizes. */
-    size_t* data_size_bytes;  /**< Array of data sizes.*/
-    oskar_BinaryTag* tag;     /**< Array of tags in the file. */
-    long* data_offset_bytes;  /**< Array of data offsets from the start. */
+    int* extended;            /**< */
+    int* type;
+    int* id_group;
+    int* id_tag;
     char** name_group;        /**< Array of tag group names. */
     char** name_tag;          /**< Array of tag names. */
+    int* user_index;          /**< Array of user indices. */
+    size_t* data_size_bytes;  /**< Array of data sizes.*/
+    size_t* block_size_bytes; /**< Array of block sizes. */
+    oskar_BinaryTag* tag;     /**< Array of tags in the file. */
+    long* data_offset_bytes;  /**< Array of data offsets from the start. */
 };
 typedef struct oskar_BinaryTagIndex oskar_BinaryTagIndex;
 
@@ -129,7 +133,9 @@ enum {
     OSKAR_TAG_GROUP_METADATA = 1,
     OSKAR_TAG_GROUP_CUDA_INFO = 2,
     OSKAR_TAG_GROUP_SETTINGS = 3,
-    OSKAR_TAG_GROUP_RUN = 4
+    OSKAR_TAG_GROUP_RUN = 4,
+    OSKAR_TAG_GROUP_VISIBILITY = 5,
+    OSKAR_TAG_GROUP_IMAGE = 6
 };
 
 /* Standard metadata tags. */

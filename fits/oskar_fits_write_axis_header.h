@@ -50,7 +50,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_fits_write_axis_header(fitsfile* fits_file, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota);
+        double cdelt, double crpix, double crota, const char* cunit);
 
 #ifdef __cplusplus
 }
