@@ -94,12 +94,15 @@ if (BUILD_OSKAR)
     include_directories(${CUDA_INCLUDE_DIRS})
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar.dir/src)
     cuda_add_library(oskar ${oskar_SRC})
-    set_target_properties(oskar PROPERTIES COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-    target_link_libraries(oskar dierckx ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES} ${CUDA_curand_LIBRARY})
-    #set_target_properties(oskar PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+    target_link_libraries(oskar dierckx ${CUDA_LIBRARIES} 
+        ${CUDA_CUBLAS_LIBRARIES} ${CUDA_curand_LIBRARY})
+    set_target_properties(oskar PROPERTIES 
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        SOVERSION ${oskar-lib_SOVERSION})
     install(TARGETS oskar DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-    set_target_properties(oskar PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
     cuda_build_clean_target()
 endif (BUILD_OSKAR)
 

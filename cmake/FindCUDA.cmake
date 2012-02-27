@@ -565,7 +565,7 @@ macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     # CUDA 3.2+ on Windows moved the library directoryies, so we need the new
     # and old paths.
-    set(_cuda_64bit_lib_dir "lib/x64" "lib64" )
+    set(_cuda_64bit_lib_dir "lib/x64" "lib64")
   endif()
   # CUDA 3.2+ on Windows moved the library directories, so we need to new
   # (lib/Win32) and the old path (lib).
@@ -579,7 +579,7 @@ macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
     NO_DEFAULT_PATH
     )
   # Search default search paths, after we search our own set of paths.
-  find_library(${_var} NAMES ${_names} DOC ${_doc})
+  find_library(${_var} NAMES ${_names} PATH_SUFFIXES "nvidia-current" DOC ${_doc})
 endmacro()
 
 # CUDA_LIBRARIES
