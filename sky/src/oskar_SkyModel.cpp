@@ -53,7 +53,13 @@ oskar_SkyModel::oskar_SkyModel(int type, int location, int num_sources)
   spectral_index(type, location, num_sources),
   rel_l(type, location, num_sources),
   rel_m(type, location, num_sources),
-  rel_n(type, location, num_sources)
+  rel_n(type, location, num_sources),
+  FWHM_major(type, location, num_sources),
+  FWHM_minor(type, location, num_sources),
+  position_angle(type, location, num_sources),
+  gaussian_a(type, location, num_sources),
+  gaussian_b(type, location, num_sources),
+  gaussian_c(type, location, num_sources)
 {
 }
 
@@ -69,7 +75,13 @@ oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, int location)
   spectral_index(&other->spectral_index, location),
   rel_l(&other->rel_l, location),
   rel_m(&other->rel_m, location),
-  rel_n(&other->rel_n, location)
+  rel_n(&other->rel_n, location),
+  FWHM_major(&other->FWHM_major, location),
+  FWHM_minor(&other->FWHM_minor, location),
+  position_angle(&other->position_angle, location),
+  gaussian_a(&other->gaussian_a, location),
+  gaussian_b(&other->gaussian_b, location),
+  gaussian_c(&other->gaussian_c, location)
 {
 }
 
@@ -85,7 +97,13 @@ oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
   spectral_index(type, location, 0),
   rel_l(type, location, 0),
   rel_m(type, location, 0),
-  rel_n(type, location, 0)
+  rel_n(type, location, 0),
+  FWHM_major(type, location, 0),
+  FWHM_minor(type, location, 0),
+  position_angle(type, location, 0),
+  gaussian_a(type, location, 0),
+  gaussian_b(type, location, 0),
+  gaussian_c(type, location, 0)
 {
     if (oskar_sky_model_load(this, filename) != 0)
         throw "Error in oskar_sky_model_load";
@@ -149,10 +167,12 @@ int oskar_SkyModel::scale_by_spectral_index(double frequency)
 
 int oskar_SkyModel::set_source(int index, double ra, double dec, double I,
         double Q, double U, double V, double ref_frequency,
-        double spectral_index)
+        double spectral_index, double FWHM_major, double FWHM_minor,
+        double position_angle)
 {
     return oskar_sky_model_set_source(this, index, ra, dec, I, Q, U, V,
-            ref_frequency, spectral_index);
+            ref_frequency, spectral_index, FWHM_major, FWHM_minor,
+            position_angle);
 }
 
 int oskar_SkyModel::type() const

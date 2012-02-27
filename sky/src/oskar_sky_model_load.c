@@ -42,7 +42,8 @@
 extern "C" {
 #endif
 
-static const double deg2rad = 0.0174532925199432957692;
+static const double deg2rad = 1.74532925199432957692369e-2;
+static const double arcsec2rad = 4.84813681109535993589914e-6;
 
 int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
 {
@@ -73,7 +74,8 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
         while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
         {
             /* Set defaults. */
-            double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            /*  (RA, Dec, I, Q, U, V, spix, freq0, FWHM maj, FWHM min, PA) */
+            double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
             /* Ignore comment lines (lines starting with '#') */
             if (line[0] == '#') continue;
@@ -95,7 +97,8 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
             }
             oskar_sky_model_set_source(&temp_sky, n,
                     par[0] * deg2rad, par[1] * deg2rad,
-                    par[2], par[3], par[4], par[5], par[6], par[7]);
+                    par[2], par[3], par[4], par[5], par[6], par[7],
+                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad);
             ++n;
         }
     }
@@ -104,7 +107,8 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
         while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
         {
             /* Set defaults. */
-            float par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            /*  (RA, Dec, I, Q, U, V, spix, freq0, FWHM maj, FWHM min, PA) */
+            float par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
             /* Ignore comment lines (lines starting with '#') */
             if (line[0] == '#') continue;
@@ -126,7 +130,8 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
             }
             oskar_sky_model_set_source(&temp_sky, n,
                     par[0] * deg2rad, par[1] * deg2rad,
-                    par[2], par[3], par[4], par[5], par[6], par[7]);
+                    par[2], par[3], par[4], par[5], par[6], par[7],
+                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad);
             ++n;
         }
     }

@@ -64,6 +64,18 @@ int oskar_sky_model_free(oskar_SkyModel* model)
     if (error) return error;
     error = oskar_mem_free(&model->rel_n);
     if (error) return error;
+    error = oskar_mem_free(&model->FWHM_major);
+    if (error) return error;
+    error = oskar_mem_free(&model->FWHM_minor);
+    if (error) return error;
+    error = oskar_mem_free(&model->position_angle);
+    if (error) return error;
+    error = oskar_mem_free(&model->gaussian_a);
+    if (error) return error;
+    error = oskar_mem_free(&model->gaussian_b);
+    if (error) return error;
+    error = oskar_mem_free(&model->gaussian_c);
+    if (error) return error;
 
     /* Set meta-data */
     model->num_sources = 0;

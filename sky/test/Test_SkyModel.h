@@ -55,6 +55,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         CPPUNIT_TEST(test_split);
         CPPUNIT_TEST(test_evaluate_sky_temperature);
         CPPUNIT_TEST(test_filter_by_radius);
+        CPPUNIT_TEST(test_evaluate_gaussian_source_parameters);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -68,6 +69,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         void test_split();
         void test_evaluate_sky_temperature();
         void test_filter_by_radius();
+        void test_evaluate_gaussian_source_parameters();
 };
 
 // Register the test class.

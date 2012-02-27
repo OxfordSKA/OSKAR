@@ -100,6 +100,37 @@ static void copy_source_data(oskar_SkyModel* output, const oskar_SkyModel* input
             thrust::device_pointer_cast((const int*)mask),
             thrust::device_pointer_cast((T*)output->rel_n), is_true());
 
+    thrust::copy_if(
+            thrust::device_pointer_cast((const T*)input->FWHM_major),
+            thrust::device_pointer_cast(((const T*)input->FWHM_major) + n),
+            thrust::device_pointer_cast((const int*)mask),
+            thrust::device_pointer_cast((T*)output->FWHM_major), is_true());
+    thrust::copy_if(
+            thrust::device_pointer_cast((const T*)input->FWHM_minor),
+            thrust::device_pointer_cast(((const T*)input->FWHM_minor) + n),
+            thrust::device_pointer_cast((const int*)mask),
+            thrust::device_pointer_cast((T*)output->FWHM_minor), is_true());
+    thrust::copy_if(
+            thrust::device_pointer_cast((const T*)input->position_angle),
+            thrust::device_pointer_cast(((const T*)input->position_angle) + n),
+            thrust::device_pointer_cast((const int*)mask),
+            thrust::device_pointer_cast((T*)output->position_angle), is_true());
+    thrust::copy_if(
+            thrust::device_pointer_cast((const T*)input->gaussian_a),
+            thrust::device_pointer_cast(((const T*)input->gaussian_a) + n),
+            thrust::device_pointer_cast((const int*)mask),
+            thrust::device_pointer_cast((T*)output->gaussian_a), is_true());
+    thrust::copy_if(
+            thrust::device_pointer_cast((const T*)input->gaussian_b),
+            thrust::device_pointer_cast(((const T*)input->gaussian_b) + n),
+            thrust::device_pointer_cast((const int*)mask),
+            thrust::device_pointer_cast((T*)output->gaussian_b), is_true());
+    thrust::copy_if(
+            thrust::device_pointer_cast((const T*)input->gaussian_c),
+            thrust::device_pointer_cast(((const T*)input->gaussian_c) + n),
+            thrust::device_pointer_cast((const int*)mask),
+            thrust::device_pointer_cast((T*)output->gaussian_c), is_true());
+
     // Get the number of sources above the horizon.
     output->num_sources = out - thrust::device_pointer_cast((T*)output->RA);
 }

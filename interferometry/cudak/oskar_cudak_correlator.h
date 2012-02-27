@@ -43,8 +43,8 @@
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
+ * @param[in] u                Station u-coordinates multipled by the wavenumber.
+ * @param[in] v                Station v-coordinates multipled by the wavenumber.
  * @param[in] l                Distance from phase centre for each source.
  * @param[in] m                Distance from phase centre for each source.
  * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).
@@ -64,8 +64,8 @@ void oskar_cudak_correlator_f(const int ns, const int na,
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
+ * @param[in] u                Station u-coordinates multipled by the wavenumber.
+ * @param[in] v                Station v-coordinates multipled by the wavenumber.
  * @param[in] l                Distance from phase centre for each source.
  * @param[in] m                Distance from phase centre for each source.
  * @param[in] lambda_bandwidth Wavelength (m) times bandwidth (Hz).

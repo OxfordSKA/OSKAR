@@ -62,6 +62,18 @@ int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources)
     if (error) return error;
     error = oskar_mem_realloc(&sky->rel_n, num_sources);
     if (error) return error;
+    error = oskar_mem_realloc(&sky->FWHM_major, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->FWHM_minor, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->position_angle, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->gaussian_a, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->gaussian_b, num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&sky->gaussian_c, num_sources);
+    if (error) return error;
 
     return error;
 }

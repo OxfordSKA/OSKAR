@@ -46,7 +46,13 @@ int oskar_sky_model_is_type(const oskar_SkyModel* sky, int type)
             sky->spectral_index.private_type == type &&
             sky->rel_l.private_type == type &&
             sky->rel_m.private_type == type &&
-            sky->rel_n.private_type == type);
+            sky->rel_n.private_type == type &&
+            sky->FWHM_major.private_type == type &&
+            sky->FWHM_minor.private_type == type &&
+            sky->position_angle.private_type == type &&
+            sky->gaussian_a.private_type == type &&
+            sky->gaussian_b.private_type == type &&
+            sky->gaussian_c.private_type == type);
 }
 
 int oskar_sky_model_type(const oskar_SkyModel* sky)

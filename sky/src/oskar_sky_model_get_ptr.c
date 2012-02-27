@@ -74,6 +74,24 @@ int oskar_sky_model_get_ptr(oskar_SkyModel* sky_ptr, const oskar_SkyModel* sky,
     if (err) return err;
     err = oskar_mem_get_pointer(&sky_ptr->rel_n, &sky->rel_n, offset, num_sources);
     if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->FWHM_major, &sky->FWHM_major,
+            offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->FWHM_minor, &sky->FWHM_minor,
+            offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->position_angle, &sky->position_angle,
+            offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->gaussian_a, &sky->gaussian_a,
+            offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->gaussian_b, &sky->gaussian_b,
+            offset, num_sources);
+    if (err) return err;
+    err = oskar_mem_get_pointer(&sky_ptr->gaussian_c, &sky->gaussian_c,
+            offset, num_sources);
+    if (err) return err;
 
     return OSKAR_SUCCESS;
 }

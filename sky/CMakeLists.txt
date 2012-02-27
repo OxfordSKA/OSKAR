@@ -8,6 +8,7 @@ include_directories(${oskar-lib_SOURCE_DIR}/math)
 set(sky_SRC
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
+    src/oskar_evaluate_gaussian_source_parameters.c
     src/oskar_evaluate_jones_R.cu
     src/oskar_evaluate_sky_temperature.c
     src/oskar_galactic_to_fk5.c

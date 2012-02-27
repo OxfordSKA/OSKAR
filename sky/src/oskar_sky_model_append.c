@@ -42,15 +42,18 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
     /* Check data dimensions. */
     num_sources = src->num_sources;
     if (num_sources > src->RA.private_num_elements  ||
-    		num_sources > src->Dec.private_num_elements ||
-    		num_sources > src->I.private_num_elements ||
-    		num_sources > src->Q.private_num_elements ||
-    		num_sources > src->U.private_num_elements ||
-    		num_sources > src->V.private_num_elements ||
-    		num_sources > src->reference_freq.private_num_elements ||
-    		num_sources > src->spectral_index.private_num_elements)
+            num_sources > src->Dec.private_num_elements ||
+            num_sources > src->I.private_num_elements ||
+            num_sources > src->Q.private_num_elements ||
+            num_sources > src->U.private_num_elements ||
+            num_sources > src->V.private_num_elements ||
+            num_sources > src->reference_freq.private_num_elements ||
+            num_sources > src->spectral_index.private_num_elements ||
+            num_sources > src->FWHM_major.private_num_elements ||
+            num_sources > src->FWHM_minor.private_num_elements ||
+            num_sources > src->position_angle.private_num_elements)
     {
-    	return OSKAR_ERR_DIMENSION_MISMATCH;
+        return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
     /* Append to the sky model. */
@@ -70,6 +73,12 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
     if (error) return error;
     error = oskar_mem_append(&dst->spectral_index, &src->spectral_index);
     if (error) return error;
+    error = oskar_mem_append(&dst->FWHM_major, &src->FWHM_major);
+    if (error) return error;
+    error = oskar_mem_append(&dst->FWHM_minor, &src->FWHM_minor);
+    if (error) return error;
+    error = oskar_mem_append(&dst->position_angle, &src->position_angle);
+    if (error) return error;
 
     /* Update the number of sources. */
     dst->num_sources += src->num_sources;
@@ -80,6 +89,14 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
     error = oskar_mem_realloc(&dst->rel_m, dst->num_sources);
     if (error) return error;
     error = oskar_mem_realloc(&dst->rel_n, dst->num_sources);
+    if (error) return error;
+
+    /* Resize arrays to hold gaussian source paramters */
+    error = oskar_mem_realloc(&dst->gaussian_a, dst->num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&dst->gaussian_b, dst->num_sources);
+    if (error) return error;
+    error = oskar_mem_realloc(&dst->gaussian_c, dst->num_sources);
     if (error) return error;
 
     return error;

@@ -75,6 +75,19 @@ int oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
     if (error) return error;
     error = oskar_mem_init(&model->rel_n, type, location, num_elements, owner);
     if (error) return error;
+    error = oskar_mem_init(&model->FWHM_major, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->FWHM_minor, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->position_angle, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->gaussian_a, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->gaussian_b, type, location, num_elements, owner);
+    if (error) return error;
+    error = oskar_mem_init(&model->gaussian_c, type, location, num_elements, owner);
+    if (error) return error;
+
 
     return error;
 }

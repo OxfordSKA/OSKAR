@@ -47,15 +47,15 @@
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
+ * @param[in] u                Station u-coordinates multipled by the wavenumber.
+ * @param[in] v                Station v-coordinates multipled by the wavenumber.
  * @param[in] l                Distance from phase centre for each source.
  * @param[in] m                Distance from phase centre for each source.
  * @param[in] freq             Frequency, in Hz.
  * @param[in] bandwidth        Channel bandwidth, in Hz.
- * @param[in] gaussian_a       Extended source gaussian parameter a.
- * @param[in] gaussian_b       Extended source gaussian parameter b.
- * @param[in] gaussian_c       Extended source gaussian parameter c.
+ * @param[in] gaussian_a       Extended source gaussian parameter a (per source)
+ * @param[in] gaussian_b       Extended source gaussian parameter b (per source)
+ * @param[in] gaussian_c       Extended source gaussian parameter c (per source)
  * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__
@@ -64,8 +64,8 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
         const float* source_U, const float* source_V, const float* u,
         const float* v, const float* l, const float* m,
         const float freq, const float bandwidth,
-        const float gaussian_a, const float gaussian_b,
-        const float gaussian_c, float4c* vis);
+        const float* gaussian_a, const float* gaussian_b,
+        const float* gaussian_c, float4c* vis);
 
 /**
  * @brief
@@ -77,15 +77,15 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
  *
  * @param[in] ns               Number of sources.
  * @param[in] na               Number of stations.
- * @param[in] u                Station u-coordinates in wavenumbers.
- * @param[in] v                Station v-coordinates in wavenumbers.
+ * @param[in] u                Station u-coordinates multipled by the wavenumber.
+ * @param[in] v                Station v-coordinates multipled by the wavenumber.
  * @param[in] l                Distance from phase centre for each source.
  * @param[in] m                Distance from phase centre for each source.
  * @param[in] freq             Frequency, in Hz.
  * @param[in] bandwidth        Channel bandwidth, in Hz.
- * @param[in] gaussian_a       Extended source gaussian parameter a.
- * @param[in] gaussian_b       Extended source gaussian parameter b.
- * @param[in] gaussian_c       Extended source gaussian parameter c.
+ * @param[in] gaussian_a       Extended source gaussian parameter a (per source)
+ * @param[in] gaussian_b       Extended source gaussian parameter b (per source)
+ * @param[in] gaussian_c       Extended source gaussian parameter c (per source)
  * @param[in,out] vis          Modified output complex visibilities.
  */
 __global__

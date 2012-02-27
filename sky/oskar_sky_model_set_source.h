@@ -58,13 +58,17 @@ extern "C" {
  * @param[in] V              Source Stokes V in Jy.
  * @param[in] reference_freq Source reference frequency in Hz.
  * @param[in] spectral_index Source spectral index.
+ * @param[in] FWHM_major     Gaussian source major axis FWHM, in radians.
+ * @param[in] FWHM_minor     Gaussian source minor axis FWHM, in radians.
+ * @param[in] position_angle Gaussian source position angle, in radians.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
 int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         double dec, double I, double Q, double U, double V, double reference_freq,
-        double spectral_index);
+        double spectral_index, double FWHM_major, double FWHM_minor,
+        double position_angle);
 
 #ifdef __cplusplus
 }

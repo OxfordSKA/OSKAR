@@ -60,6 +60,12 @@ struct oskar_SkyModel
     oskar_Mem rel_l;          /**< Phase centre relative direction-cosines. */
     oskar_Mem rel_m;          /**< Phase centre relative direction-cosines. */
     oskar_Mem rel_n;          /**< Phase centre relative direction-cosines. */
+    oskar_Mem FWHM_major;     /**< Major axis FWHM for gaussian sources */
+    oskar_Mem FWHM_minor;     /**< Minor axis FWHM for gaussian sources */
+    oskar_Mem position_angle; /**< Position angle for gaussian sources */
+    oskar_Mem gaussian_a;     /**< Gaussian source width parameter */
+    oskar_Mem gaussian_b;     /**< Gaussian source width parameter */
+    oskar_Mem gaussian_c;     /**< Gaussian source width parameter */
 
 #ifdef __cplusplus
     /**
@@ -225,11 +231,16 @@ struct oskar_SkyModel
      * @param V                 Stokes-V, in Jy.
      * @param ref_frequency     Reference frequency, in Hz.
      * @param spectral_index    Spectral index.
+     * @param FWHM_major        Major axis FWHM, radians.
+     * @param FWHM_minor        Minor axis FWHM, radians.
+     * @param position_angle    Position angle, radians.
      *
      * @return error code.
      */
     int set_source(int index, double ra, double dec, double I, double Q,
-            double U, double V, double ref_frequency, double spectral_index);
+            double U, double V, double ref_frequency, double spectral_index,
+            double FWHM_major = 0.0, double FWHM_minor = 0.0,
+            double position_angle = 0.0);
 
     /**
      * @brief Returns the memory type for memory in the sky structure

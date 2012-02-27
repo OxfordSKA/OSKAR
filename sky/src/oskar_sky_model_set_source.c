@@ -40,7 +40,8 @@ extern "C" {
 
 int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         double dec, double I, double Q, double U, double V, double ref_frequency,
-        double spectral_index)
+        double spectral_index, double FWHM_major, double FWHM_minor,
+        double position_angle)
 {
     int type, location;
     if (index >= sky->num_sources)
@@ -73,6 +74,13 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
                     &ref_frequency, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(sky->spectral_index.data) + offset_bytes,
                     &spectral_index, element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(sky->FWHM_major.data) + offset_bytes,
+                    &FWHM_major, element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(sky->FWHM_minor.data) + offset_bytes,
+                    &FWHM_minor, element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(sky->position_angle.data) + offset_bytes,
+                    &position_angle, element_size, cudaMemcpyHostToDevice);
+
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -84,6 +92,9 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
             float temp_V = (float)V;
             float temp_ref_freq = (float)ref_frequency;
             float temp_spectral_index = (float)spectral_index;
+            float temp_FWHM_major = (float)FWHM_major;
+            float temp_FWHM_minor = (float)FWHM_minor;
+            float temp_position_angle = (float)position_angle;
             cudaMemcpy((char*)(sky->RA.data) + offset_bytes, &temp_ra,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(sky->Dec.data) + offset_bytes, &temp_dec,
@@ -100,6 +111,12 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
                     &temp_ref_freq, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(sky->spectral_index.data) + offset_bytes,
                     &temp_spectral_index, element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(sky->FWHM_major.data) + offset_bytes,
+                    &temp_FWHM_major, element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(sky->FWHM_minor.data) + offset_bytes,
+                    &temp_FWHM_minor, element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(sky->position_angle.data) + offset_bytes,
+                    &temp_position_angle, element_size, cudaMemcpyHostToDevice);
         }
     }
     else
@@ -114,6 +131,10 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
             ((double*)sky->V.data)[index] = V;
             ((double*)sky->reference_freq.data)[index] = ref_frequency;
             ((double*)sky->spectral_index.data)[index] = spectral_index;
+            ((double*)sky->FWHM_major.data)[index] = FWHM_major;
+            ((double*)sky->FWHM_minor.data)[index] = FWHM_minor;
+            ((double*)sky->position_angle.data)[index] = position_angle;
+
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -125,6 +146,9 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
             ((float*)sky->V.data)[index] = (float)V;
             ((float*)sky->reference_freq.data)[index] = (float)ref_frequency;
             ((float*)sky->spectral_index.data)[index] = (float)spectral_index;
+            ((float*)sky->FWHM_major.data)[index] = (float)FWHM_major;
+            ((float*)sky->FWHM_minor.data)[index] = (float)FWHM_minor;
+            ((float*)sky->position_angle.data)[index] = (float)position_angle;
         }
         else
         {

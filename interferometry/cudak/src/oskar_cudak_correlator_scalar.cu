@@ -31,7 +31,7 @@
 #include "math/cudak/oskar_cudaf_sinc.h"
 
 
-#define ONE_OVER_2C 1.66782047599076024788E-9   // 1 / (2c)
+#define ONE_OVER_2C  1.66782047599076024788E-9  // 1 / (2c)
 #define ONE_OVER_2Cf 1.66782047599076024788E-9f // 1 / (2c)
 
 // Indices into the visibility/baseline matrix.

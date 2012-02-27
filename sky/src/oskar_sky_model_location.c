@@ -46,7 +46,13 @@ int oskar_sky_model_is_location(const oskar_SkyModel* sky, int location)
             sky->spectral_index.private_location == location &&
             sky->rel_l.private_location == location &&
             sky->rel_m.private_location == location &&
-            sky->rel_n.private_location == location);
+            sky->rel_n.private_location == location &&
+            sky->FWHM_major.private_location == location &&
+            sky->FWHM_major.private_location == location &&
+            sky->position_angle.private_location == location &&
+            sky->gaussian_a.private_location == location &&
+            sky->gaussian_b.private_location == location &&
+            sky->gaussian_c.private_location == location);
 }
 
 int oskar_sky_model_location(const oskar_SkyModel* sky)

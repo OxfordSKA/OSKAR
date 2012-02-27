@@ -36,6 +36,7 @@
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_split.h"
 #include "sky/oskar_evaluate_sky_temperature.h"
+#include "sky/oskar_evaluate_gaussian_source_parameters.h"
 #include "utility/oskar_Work.h"
 #include "utility/oskar_get_error_string.h"
 
@@ -511,3 +512,29 @@ void Test_SkyModel::test_filter_by_radius()
     }
 }
 
+
+void Test_SkyModel::test_evaluate_gaussian_source_parameters()
+{
+    const double asec2rad = M_PI / (180.0 * 3600.0);
+    const double deg2rad  = M_PI / 180.0;
+
+    int num_sources = 1;
+    oskar_SkyModel sky(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_sources);
+    sky.set_source(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            20 * 60 * asec2rad,
+            10 * 60 * asec2rad,
+            30 * deg2rad);
+    oskar_evaluate_gaussian_source_parameters(num_sources, &sky.gaussian_a,
+            &sky.gaussian_b, &sky.gaussian_c, &sky.FWHM_major, &sky.FWHM_minor,
+            &sky.position_angle);
+    //sky.write("temp_sky_gaussian.osm");
+
+//    printf("\n");
+//    for (int i = 0; i < num_sources; ++i)
+//    {
+//        printf("[%i] a = %e, b = %e, c = %e\n", i,
+//                ((double*)sky.gaussian_a.data)[i],
+//                ((double*)sky.gaussian_b.data)[i],
+//                ((double*)sky.gaussian_c.data)[i]);
+//    }
+}

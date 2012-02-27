@@ -46,7 +46,7 @@ extern "C" {
  * structure.
  *
  * @details
- * Source files are plain ASCII files consisting of the following 8 columns:
+ * Source files are plain ASCII files consisting of the following 11 columns:
  * - RA (deg),
  * - Dec (deg),
  * - Stokes I (Jy),
@@ -54,9 +54,13 @@ extern "C" {
  * - Stokes U (Jy),
  * - Stokes V (Jy),
  * - Reference frequency (Hz),
- * - Spectral index
+ * - Spectral index,
+ * - FWHM of major axis (arcseconds),
+ * - FWHM of minor axis (arcseconds),
+ * - Position angle of gaussian axis (deg)
  *
- * Columns 4 to 8 (Q, U, V, Reference frequency and Spectral index) are optional
+ *
+ * Columns 4 to 11 (Q, U, V, Reference frequency and Spectral index) are optional
  * and defaulted to zero if omitted.
  *
  * The columns must be space or comma separated.

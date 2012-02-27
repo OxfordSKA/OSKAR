@@ -26,46 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_JONES_K_H_
-#define OSKAR_EVALUATE_JONES_K_H_
+
+#ifndef OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
+#define OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
 
 /**
- * @file oskar_evaluate_jones_K.h
+ * @file oskar_evaluate_gaussian_source_parameters.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_Jones.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Evaluates the interferometer phase (K) Jones term.
- *
- * @details
- * This function constructs a set of Jones matrices that correspond to the
- * interferometer phase offset for each source and station, relative to the
- * array centre.
- *
- * The output set of Jones matrices (K) are scalar complex values.
- * This function will return an error if an incorrect type is used.
- *
- * @param[out] K         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] u          Station u coordinates, in ??? FIXME units!
- * @param[in] v          Station v coordinates, in ??? FIXME units!
- * @param[in] w          Station w coordinates, in ??? FIXME units!
- */
 OSKAR_EXPORT
-int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w);
+int oskar_evaluate_gaussian_source_parameters(int num_sources,
+        oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
+        oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_JONES_K_H_ */
+#endif /* OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_ */

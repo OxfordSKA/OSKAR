@@ -59,7 +59,8 @@ void oskar_cudak_correlator_f(const int ns, const int na,
     __device__ __shared__ float uu, vv;
     if (threadIdx.x == 0)
     {
-        // Determine UV-distance for baseline (common per thread block).
+        // Determine UV-distance for baseline modified by the bandwidth smearing
+        // parameters.
         uu = ONE_OVER_2Cf * lambda_bandwidth * (u[AI] - u[AJ]);
         vv = ONE_OVER_2Cf * lambda_bandwidth * (v[AI] - v[AJ]);
     }

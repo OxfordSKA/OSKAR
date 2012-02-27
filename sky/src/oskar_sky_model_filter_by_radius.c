@@ -56,6 +56,8 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
         {
             float *ra, *dec, *I, *Q, *U, *V, *ref_freq, *spix;
             float *rel_l, *rel_m, *rel_n, dist;
+            float *FWHM_major, *FWHM_minor, *position_angle;
+            float *gaussian_a, *gaussian_b, *gaussian_c;
             ra       = (float*)sky->RA.data;
             dec      = (float*)sky->Dec.data;
             I        = (float*)sky->I.data;
@@ -67,6 +69,13 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
             rel_l    = (float*)sky->rel_l.data;
             rel_m    = (float*)sky->rel_m.data;
             rel_n    = (float*)sky->rel_n.data;
+            FWHM_major = (float*)sky->FWHM_major.data;
+            FWHM_minor = (float*)sky->FWHM_minor.data;
+            position_angle = (float*)sky->position_angle.data;
+            gaussian_a = (float*)sky->gaussian_a.data;
+            gaussian_b = (float*)sky->gaussian_b.data;
+            gaussian_c = (float*)sky->gaussian_c.data;
+
             for (in = 0, out = 0; in < sky->num_sources; ++in)
             {
                 dist = (float)oskar_angular_distance(ra[in], ra0,
@@ -83,6 +92,12 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
                 rel_l[out]    = rel_l[in];
                 rel_m[out]    = rel_m[in];
                 rel_n[out]    = rel_n[in];
+                FWHM_major[out] = FWHM_major[in];
+                FWHM_minor[out] = FWHM_minor[in];
+                position_angle[out] = position_angle[in];
+                gaussian_a[out] = gaussian_a[in];
+                gaussian_b[out] = gaussian_b[in];
+                gaussian_c[out] = gaussian_c[in];
                 out++;
             }
         }
@@ -90,6 +105,8 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
         {
             double *ra, *dec, *I, *Q, *U, *V, *ref_freq, *spix;
             double *rel_l, *rel_m, *rel_n, dist;
+            double *FWHM_major, *FWHM_minor, *position_angle;
+            double *gaussian_a, *gaussian_b, *gaussian_c;
             ra       = (double*)sky->RA.data;
             dec      = (double*)sky->Dec.data;
             I        = (double*)sky->I.data;
@@ -101,6 +118,12 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
             rel_l    = (double*)sky->rel_l.data;
             rel_m    = (double*)sky->rel_m.data;
             rel_n    = (double*)sky->rel_n.data;
+            FWHM_major = (double*)sky->FWHM_major.data;
+            FWHM_minor = (double*)sky->FWHM_minor.data;
+            position_angle = (double*)sky->position_angle.data;
+            gaussian_a = (double*)sky->gaussian_a.data;
+            gaussian_b = (double*)sky->gaussian_b.data;
+            gaussian_c = (double*)sky->gaussian_c.data;
             for (in = 0, out = 0; in < sky->num_sources; ++in)
             {
                 dist = oskar_angular_distance(ra[in], ra0, dec[in], dec0);
@@ -116,6 +139,12 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
                 rel_l[out]    = rel_l[in];
                 rel_m[out]    = rel_m[in];
                 rel_n[out]    = rel_n[in];
+                FWHM_major[out] = FWHM_major[in];
+                FWHM_minor[out] = FWHM_minor[in];
+                position_angle[out] = position_angle[in];
+                gaussian_a[out] = gaussian_a[in];
+                gaussian_b[out] = gaussian_b[in];
+                gaussian_c[out] = gaussian_c[in];
                 out++;
             }
         }

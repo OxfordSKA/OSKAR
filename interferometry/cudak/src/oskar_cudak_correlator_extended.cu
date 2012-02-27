@@ -31,10 +31,16 @@
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans.h"
 #include "math/cudak/oskar_cudaf_sinc.h"
+#include <math.h>
 
+#define PI_OVER_C     1.0479225109758409060653E-8  // pi / c
+#define PI_OVER_Cf    1.0479225109758409060653E-8f // pi / c
+#define ONE_OVER_2PI  0.159154943091895335768884   // 1 / (2 * pi)
+#define ONE_OVER_2PIf 0.159154943091895335768884f  // 1 / (2 * pi)
 
-#define ONE_OVER_2C 1.66782047599076024788E-9   // 1 / (2c)
-#define ONE_OVER_2Cf 1.66782047599076024788E-9f // 1 / (2c)
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 // Indices into the visibility/baseline matrix.
 #define AI blockIdx.x // Column index.
@@ -50,26 +56,30 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
         const float* source_U, const float* source_V, const float* u,
         const float* v, const float* l, const float* m,
         const float freq, const float bandwidth,
-        const float gaussian_a, const float gaussian_b,
-        const float gaussian_c, float4c* vis)
+        const float* a, const float* b, const float* c, float4c* vis)
 {
-    // FIXME: add extended source still
-
-
-
-
 
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
     if (AJ >= AI) return;
 
     // Common things per thread block.
-    __device__ __shared__ float uu, vv;
+    __device__ __shared__ float uu, vv, uu2, vv2, uuvv;
     if (threadIdx.x == 0)
     {
-        // Determine UV-distance for baseline (common per thread block).
-        uu = ONE_OVER_2Cf * lambda_bandwidth * (u[AI] - u[AJ]);
-        vv = ONE_OVER_2Cf * lambda_bandwidth * (v[AI] - v[AJ]);
+        // Baseline UV-distance, in wavelengths.
+        uu   = (u[AI] - u[AJ]) * ONE_OVER_2PIf;
+        vv   = (v[AI] - v[AJ]) * ONE_OVER_2PIf;
+
+        // Quantities needed for evaluating source with gaussian term.
+        uu2  = uu * uu;
+        vv2  = vv * vv;
+        uuvv = uu * vv;
+
+        // Modify the baseline UV-distance to include the common components
+        // of the bandwidth smearing term.
+        uu *= PI_OVER_Cf * bandwidth / freq;
+        vv *= PI_OVER_Cf * bandwidth / freq;
     }
     __syncthreads();
 
@@ -88,6 +98,9 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
         {
             // Compute bandwidth-smearing term first (register optimisation).
             float rb = oskar_cudaf_sinc_f(uu * l[t] + vv * m[t]);
+
+            // Evaluate gaussian source width term.
+            float f = expf(-(a[t] * uu2 + 2 * b[t] * uuvv + c[t] * vv2));
 
             // Construct source brightness matrix.
             float4c c_b;
@@ -109,14 +122,14 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
             oskar_cudaf_mul_mat2c_mat2c_conj_trans_f(c_a, c_b);
 
             // Multiply result by bandwidth-smearing term.
-            sum.a.x += c_a.a.x * rb;
-            sum.a.y += c_a.a.y * rb;
-            sum.b.x += c_a.b.x * rb;
-            sum.b.y += c_a.b.y * rb;
-            sum.c.x += c_a.c.x * rb;
-            sum.c.y += c_a.c.y * rb;
-            sum.d.x += c_a.d.x * rb;
-            sum.d.y += c_a.d.y * rb;
+            sum.a.x += c_a.a.x * rb * f;
+            sum.a.y += c_a.a.y * rb * f;
+            sum.b.x += c_a.b.x * rb * f;
+            sum.b.y += c_a.b.y * rb * f;
+            sum.c.x += c_a.c.x * rb * f;
+            sum.c.y += c_a.c.y * rb * f;
+            sum.d.x += c_a.d.x * rb * f;
+            sum.d.y += c_a.d.y * rb * f;
         }
         smem_f[threadIdx.x] = sum;
     }
@@ -165,23 +178,30 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
         const double* source_U, const double* source_V, const double* u,
         const double* v, const double* l, const double* m,
         const double freq, const double bandwidth,
-        const double gaussian_a, const double gaussian_b,
-        const double gaussian_c, double4c* vis)
+        const double* a, const double* b, const double* c, double4c* vis)
 {
-    // FIXME: add extended source still
-
 
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
     if (AJ >= AI) return;
 
     // Common things per thread block.
-    __device__ __shared__ double uu, vv;
+    __device__ __shared__ double uu, vv, uu2, vv2, uuvv;
     if (threadIdx.x == 0)
     {
-        // Determine UV-distance for baseline (common per thread block).
-        uu = ONE_OVER_2C * lambda_bandwidth * (u[AI] - u[AJ]);
-        vv = ONE_OVER_2C * lambda_bandwidth * (v[AI] - v[AJ]);
+        // Baseline UV-distance, in wavelengths.
+        uu   = (u[AI] - u[AJ]) * ONE_OVER_2PI;
+        vv   = (v[AI] - v[AJ]) * ONE_OVER_2PI;
+
+        // Quantities needed for evaluating source with gaussian term.
+        uu2  = uu * uu;
+        vv2  = vv * vv;
+        uuvv = uu * vv;
+
+        // Modify the baseline UV-distance to include the common components
+        // of the bandwidth smearing term.
+        uu *= PI_OVER_C * bandwidth / freq;
+        vv *= PI_OVER_C * bandwidth / freq;
     }
     __syncthreads();
 
@@ -200,6 +220,9 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
         {
             // Compute bandwidth-smearing term first (register optimisation).
             double rb = oskar_cudaf_sinc_d(uu * l[t] + vv * m[t]);
+
+            // Evaluate gaussian source width term.
+            double f = exp(-(a[t] * uu2 + 2 * b[t] * uuvv + c[t] * vv2));
 
             // Construct source brightness matrix.
             double4c c_b;
@@ -221,14 +244,14 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
             oskar_cudaf_mul_mat2c_mat2c_conj_trans_d(c_a, c_b);
 
             // Multiply result by bandwidth-smearing term.
-            sum.a.x += c_a.a.x * rb;
-            sum.a.y += c_a.a.y * rb;
-            sum.b.x += c_a.b.x * rb;
-            sum.b.y += c_a.b.y * rb;
-            sum.c.x += c_a.c.x * rb;
-            sum.c.y += c_a.c.y * rb;
-            sum.d.x += c_a.d.x * rb;
-            sum.d.y += c_a.d.y * rb;
+            sum.a.x += c_a.a.x * rb * f;
+            sum.a.y += c_a.a.y * rb * f;
+            sum.b.x += c_a.b.x * rb * f;
+            sum.b.y += c_a.b.y * rb * f;
+            sum.c.x += c_a.c.x * rb * f;
+            sum.c.y += c_a.c.y * rb * f;
+            sum.d.x += c_a.d.x * rb * f;
+            sum.d.y += c_a.d.y * rb * f;
         }
         smem_d[threadIdx.x] = sum;
     }
