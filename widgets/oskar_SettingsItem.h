@@ -69,11 +69,13 @@ public:
     int childCount() const;
     int childNumber() const;
     const QVariant& defaultValue() const;
+    bool enabled() const;
     const QVariant& iterationInc() const;
     int iterationNum() const;
     const QString& key() const;
     const QString& label() const;
     oskar_SettingsItem* parent();
+    void setEnabled(bool value);
     void setIterationInc(const QVariant& value);
     void setIterationNum(int value);
     void setLabel(const QString& value);
@@ -95,6 +97,7 @@ private:
     QString subkey_; // Short settings key.
     int type_; // Enumerated type.
     int visible_;
+    bool enabled_;
     QString label_;
     QString tooltip_;
     QVariant value_;

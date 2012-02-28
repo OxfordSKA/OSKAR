@@ -46,6 +46,7 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     // Initialise user-defined, runtime values.
     iterNum_ = 1;
     visible_ = 0;
+    enabled_ = 1;
     if (key.isEmpty())
         value_ = defaultValue;
 }
@@ -82,6 +83,11 @@ const QVariant& oskar_SettingsItem::defaultValue() const
     return default_;
 }
 
+bool oskar_SettingsItem::enabled() const
+{
+    return enabled_;
+}
+
 const QVariant& oskar_SettingsItem::iterationInc() const
 {
     return iterInc_;
@@ -105,6 +111,11 @@ const QString& oskar_SettingsItem::label() const
 oskar_SettingsItem* oskar_SettingsItem::parent()
 {
     return parentItem_;
+}
+
+void oskar_SettingsItem::setEnabled(bool value)
+{
+    enabled_ = value;
 }
 
 void oskar_SettingsItem::setIterationInc(const QVariant& value)

@@ -54,6 +54,7 @@ public:
         KeyRole = Qt::UserRole,
         TypeRole,
         VisibleRole,
+        EnabledRole,
         IterationNumRole,
         IterationIncRole,
         IterationKeysRole,

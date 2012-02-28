@@ -29,6 +29,7 @@
 #include "widgets/oskar_SettingsModel.h"
 #include "widgets/oskar_SettingsItem.h"
 #include <QtGui/QApplication>
+#include <QtGui/QBrush>
 #include <QtGui/QFontMetrics>
 #include <QtGui/QIcon>
 #include <QtCore/QVector>
@@ -184,6 +185,8 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         return item->type();
     else if (role == VisibleRole)
         return item->visible();
+    else if (role == EnabledRole)
+        return item->enabled();
     else if (role == IterationNumRole)
         return item->iterationNum();
     else if (role == IterationIncRole)
@@ -243,6 +246,8 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
         return 0;
 
     oskar_SettingsItem* item = getItem(index);
+    if (!item->enabled())
+        return Qt::ItemIsSelectable;
 
     if (index.column() == 0 ||
             item->type() == oskar_SettingsItem::LABEL)
@@ -444,6 +449,17 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     if (role == Qt::ToolTipRole)
     {
         item->setTooltip(value.toString());
+        emit dataChanged(idx, idx);
+        return true;
+    }
+    else if (role == EnabledRole)
+    {
+        item->setEnabled(value.toBool());
+        if (value.toBool())
+            settings_->setValue(item->key(), item->value());
+        else
+            settings_->remove(item->key());
+        settings_->sync();
         emit dataChanged(idx, idx);
         return true;
     }

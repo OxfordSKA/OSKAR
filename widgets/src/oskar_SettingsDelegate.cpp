@@ -190,11 +190,17 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             // Set up the context menu.
             QMenu menu;
             QString strClearValue = "Clear Value";
+            QString strDisable = "Disable";
+            QString strEnable = "Enable";
             QString strClearIteration = "Clear Iteration";
             QString strEditIteration = "Edit Iteration Parameters";
             QString strIterate = QString("Iterate (Dimension %1)...").
                     arg(iterationKeys.size() + 1);
             menu.addAction(strClearValue);
+            if (mod->data(index, oskar_SettingsModel::EnabledRole).toBool())
+                menu.addAction(strDisable);
+            else
+                menu.addAction(strEnable);
             if (type == oskar_SettingsItem::INT ||
                     type == oskar_SettingsItem::DOUBLE)
             {
@@ -218,6 +224,10 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             {
                 if (action->text() == strClearValue)
                     mod->setData(index, QVariant(), Qt::EditRole);
+                else if (action->text() == strDisable)
+                    mod->setData(index, false, oskar_SettingsModel::EnabledRole);
+                else if (action->text() == strEnable)
+                    mod->setData(index, true, oskar_SettingsModel::EnabledRole);
                 else if (action->text() == strIterate ||
                         action->text() == strEditIteration)
                     setIterations(mod, index);
