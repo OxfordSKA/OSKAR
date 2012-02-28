@@ -34,48 +34,54 @@ extern "C" {
 #endif
 
 /* Single precision. */
-void oskar_sph_to_lm_f(const int np, const float* lambda,
-        const float* phi, const float lambda0, const float cosPhi0,
-        const float sinPhi0, float* l, float* m)
+void oskar_sph_to_lm_f(int num_positions, float lon0, float lat0,
+        const float* lon, const float* lat, float* l, float* m)
 {
     int i;
+    float sinLat0, cosLat0;
+    sinLat0 = sin(lat0);
+    cosLat0 = cos(lat0);
+
     #pragma omp parallel for
-    for (i = 0; i < np; ++i)
+    for (i = 0; i < num_positions; ++i)
     {
-        float cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi, ll, mm;
-        pphi = phi[i];
-        relLambda = lambda[i];
-        relLambda -= lambda0;
-        sinLambda = sinf(relLambda);
-        cosLambda = cosf(relLambda);
-        sinPhi = sinf(pphi);
-        cosPhi = cosf(pphi);
-        ll = cosPhi * sinLambda;
-        mm = cosPhi0 * sinPhi - sinPhi0 * cosPhi * cosLambda;
+        float cosLat, sinLat, sinLon, cosLon, relLon, pLat, ll, mm;
+        pLat = lat[i];
+        relLon = lon[i];
+        relLon -= lon0;
+        sinLon = sinf(relLon);
+        cosLon = cosf(relLon);
+        sinLat = sinf(pLat);
+        cosLat = cosf(pLat);
+        ll = cosLat * sinLon;
+        mm = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
         l[i] = ll;
         m[i] = mm;
     }
 }
 
 /* Double precision. */
-void oskar_sph_to_lm_d(const int np, const double* lambda,
-        const double* phi, const double lambda0, const double cosPhi0,
-        const double sinPhi0, double* l, double* m)
+void oskar_sph_to_lm_d(int num_positions, double lon0, double lat0,
+        const double* lon, const double* lat, double* l, double* m)
 {
     int i;
+    double sinLat0, cosLat0;
+    sinLat0 = sin(lat0);
+    cosLat0 = cos(lat0);
+
     #pragma omp parallel for
-    for (i = 0; i < np; ++i)
+    for (i = 0; i < num_positions; ++i)
     {
-        double cosPhi, sinPhi, sinLambda, cosLambda, relLambda, pphi, ll, mm;
-        pphi = phi[i];
-        relLambda = lambda[i];
-        relLambda -= lambda0;
-        sinLambda = sin(relLambda);
-        cosLambda = cos(relLambda);
-        sinPhi = sin(pphi);
-        cosPhi = cos(pphi);
-        ll = cosPhi * sinLambda;
-        mm = cosPhi0 * sinPhi - sinPhi0 * cosPhi * cosLambda;
+        double cosLat, sinLat, sinLon, cosLon, relLon, pLat, ll, mm;
+        pLat = lat[i];
+        relLon = lon[i];
+        relLon -= lon0;
+        sinLon = sin(relLon);
+        cosLon = cos(relLon);
+        sinLat = sin(pLat);
+        cosLat = cos(pLat);
+        ll = cosLat * sinLon;
+        mm = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
         l[i] = ll;
         m[i] = mm;
     }

@@ -40,8 +40,7 @@ void Test_fits_write_image::test_method()
     int rows = 20; // height
     double ra0 = 10.0;
     double dec0 = 80.0;
-    double ra_d = -0.1;
-    double dec_d = 0.1;
+    double pixel_scale = 0.1;
     double freq = 100e6;
     double bw = 1e5;
     oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, columns * rows);
@@ -58,5 +57,5 @@ void Test_fits_write_image::test_method()
     }
 
     oskar_fits_write_image(filename, data.type(), columns, rows, data.data,
-            ra0, dec0, ra_d, dec_d, freq, bw);
+            ra0, dec0, pixel_scale, freq, bw);
 }

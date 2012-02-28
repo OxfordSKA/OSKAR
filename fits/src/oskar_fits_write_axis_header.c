@@ -38,7 +38,7 @@ extern "C" {
 
 void oskar_fits_write_axis_header(fitsfile* fptr, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota, const char* cunit)
+        double cdelt, double crpix, double crota)
 {
     char key[FLEN_KEYWORD], value[FLEN_VALUE], comment[FLEN_COMMENT];
     int status = 0;
@@ -60,13 +60,6 @@ void oskar_fits_write_axis_header(fitsfile* fptr, int axis_id,
 
     fits_make_keyn("CROTA", axis_id, key, &status);
     fits_write_key_dbl(fptr, key, crota, decimals, NULL, &status);
-
-    if (cunit)
-    {
-        strncpy(value, cunit, FLEN_VALUE-1);
-        fits_make_keyn("CUNIT", axis_id, key, &status);
-        fits_write_key_str(fptr, key, value, NULL, &status);
-    }
 }
 
 #ifdef __cplusplus

@@ -50,12 +50,39 @@ extern "C" {
  * This function is intended to be used for simple 2D images of one frequency
  * channel and one polarisation (Stokes I) only.
  *
- * Note that FITS data arrays should be given in FORTRAN (column major) order.
+ * Note that astronomical FITS images have their first pixel at the
+ * BOTTOM LEFT of the image, and their last pixel at the TOP RIGHT
+ * of the image.
+ *
+ * Although the FITS documentation says that "the ordering of arrays in
+ * FITS files ... is more similar to the dimensionality of arrays in Fortran
+ * rather than C" (http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node75.html),
+ * confusingly, the fastest-varying dimension is across the columns - i.e.
+ * C-ordered!
+ *
+ * By convention, astronomical radio FITS images are written with the
+ * following axis parameter keywords:
+ *
+ * - CTYPE1 = 'RA---SIN'
+ * - CDELT1 = (negative value)
+ * - CTYPE2 = 'DEC--SIN'
+ * - CDELT2 = (positive value)
+ *
+ * The first pixel therefore corresponds to:
+ * - the LARGEST Right Ascension, and
+ * - the SMALLEST Declination.
+ *
+ * The last pixel corresponds to:
+ * - the SMALLEST Right Ascension, and
+ * - the LARGEST Declination.
+ *
+ * The fastest varying dimension is along the RA axis.
+ *
  */
 OSKAR_EXPORT
 void oskar_fits_write_image(const char* filename, int type, int width,
-        int height, void* data, double ra, double dec, double d_ra,
-        double d_dec, double frequency, double bandwidth);
+        int height, void* data, double ra, double dec, double pixel_scale,
+        double frequency, double bandwidth);
 
 #ifdef __cplusplus
 }

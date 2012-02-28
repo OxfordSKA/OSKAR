@@ -47,11 +47,15 @@ extern "C" {
  * Returns the longitude and latitude of the supplied array of
  * direction cosines (l and m).
  *
+ * For normal fields of view at normal latitudes (i.e. not at the poles),
+ * the minimum and maximum values of l and m correspond to
+ * the minimum and maximum values of the longitude and latitude, respectively.
+ *
  * @param[in]  num_positions Number of positions to evaluate.
  * @param[in]  lon0          Longitude of the field centre, in radians.
  * @param[in]  lat0          Latitude of the field centre, in radians.
- * @param[in]  l             Array of positions in cosine space.
- * @param[in]  m             Array of positions in cosine space.
+ * @param[in]  l             Array of l-positions in cosine space.
+ * @param[in]  m             Array of m-positions in cosine space.
  * @param[out] lon           Array of longitude values, in radians.
  * @param[out] lat           Array of latitude values, in radians.
  */
@@ -67,11 +71,15 @@ void oskar_sph_from_lm_f(int num_positions, float lon0, float lat0,
  * Returns the longitude and latitude of the supplied array of
  * direction cosines (l and m).
  *
+ * For normal fields of view at normal latitudes (i.e. not at the poles),
+ * the minimum and maximum values of l and m correspond to
+ * the minimum and maximum values of the longitude and latitude, respectively.
+ *
  * @param[in]  num_positions Number of positions to evaluate.
  * @param[in]  lon0          Longitude of the field centre, in radians.
  * @param[in]  lat0          Latitude of the field centre, in radians.
- * @param[in]  l             Array of positions in cosine space.
- * @param[in]  m             Array of positions in cosine space.
+ * @param[in]  l             Array of l-positions in cosine space.
+ * @param[in]  m             Array of m-positions in cosine space.
  * @param[out] lon           Array of longitude values, in radians.
  * @param[out] lat           Array of latitude values, in radians.
  */

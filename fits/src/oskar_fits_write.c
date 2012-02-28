@@ -41,15 +41,14 @@ extern "C" {
 #endif
 
 void oskar_fits_write(const char* filename, int type, int naxis,
-        const long* naxes, const void* data, const char* const* ctype,
-        const char* const* ctype_desc, const double* crval,
-        const double* cdelt, const double* crpix, const double* crota,
-        const char* const* cunit)
+        long* naxes, void* data, const char** ctype, const char** ctype_desc,
+        const double* crval, const double* cdelt, const double* crpix,
+        const double* crota)
 {
     char key[FLEN_KEYWORD], value[FLEN_VALUE];
     int i, num_elements = 1, status = 0;
     int datatype = TFLOAT, imagetype = FLOAT_IMG;
-    fitsfile* fptr;
+    fitsfile* fptr = NULL;
 
     /* If the file exists, remove it. */
     FILE* file;
@@ -93,7 +92,7 @@ void oskar_fits_write(const char* filename, int type, int naxis,
     for (i = 0; i < naxis; ++i)
     {
         oskar_fits_write_axis_header(fptr, i + 1, ctype[i], ctype_desc[i],
-                crval[i], cdelt[i], crpix[i], crota[i], cunit[i]);
+                crval[i], cdelt[i], crpix[i], crota[i]);
     }
 
     /* Write a history line. */

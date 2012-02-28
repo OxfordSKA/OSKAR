@@ -12,6 +12,7 @@ if (CPPUNIT_FOUND)
     set(fits_test_SRC
         src/CppUnitMain.cpp
         src/Test_fits_write_image.cpp
+        src/Test_fits_write.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

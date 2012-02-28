@@ -129,15 +129,15 @@ void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename,
 
     /* Axis description headers (Note: axis 1 = empty). */
     oskar_fits_write_axis_header(fits_file, 2, "COMPLEX", "1=real, 2=imag, 3=weight",
-            1.0, 1.0, 1.0, 1.0, NULL);
+            1.0, 1.0, 1.0, 1.0);
     oskar_fits_write_axis_header(fits_file, 3, "STOKES", "==scalar (I/Q/U/V)",
-            1.0, 1.0, 1.0, 1.0, NULL);
+            1.0, 1.0, 1.0, 1.0);
     oskar_fits_write_axis_header(fits_file, 4, "FREQ", "Frequency in Hz.",
-            frequency0, 0.0, 1.0, 0.0, "Hz");
+            frequency0, 0.0, 1.0, 0.0);
     oskar_fits_write_axis_header(fits_file, 5, "RA", "Right Ascension in deg.",
-            ra0, 0.0, 1.0, 1.0, "deg");
+            ra0, 0.0, 1.0, 1.0);
     oskar_fits_write_axis_header(fits_file, 6, "DEC", "Declination in deg.",
-            dec0, 0.0, 1.0, 1.0, "deg");
+            dec0, 0.0, 1.0, 1.0);
     oskar_fits_check_status(status, "");
 
     /* Parameter headers. */

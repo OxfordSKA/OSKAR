@@ -6,6 +6,7 @@ set(fits_SRC
     src/oskar_fits_check_status.c
     src/oskar_fits_write_axis_header.c
     src/oskar_fits_write_image.c
+    src/oskar_fits_write.c
     #src/oskar_fits_write_cube.c
     src/oskar_uvfits_writer.c # Needs fixing for the new visibility structure.
 )

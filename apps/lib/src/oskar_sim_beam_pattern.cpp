@@ -96,6 +96,14 @@ int oskar_sim_beam_pattern(const char* settings_file)
         oskar_sph_from_lm_d(num_pixels, ra0, dec0, l_cpu, m_cpu, RA_cpu, Dec_cpu);
     }
 
+    // Print contents of RA, DEC arrays.
+    for (int i = 0; i < num_pixels; ++i)
+    {
+        fprintf(stdout, "RA, DEC = (%10.3f, %10.3f)\n",
+                ((double*)RA_cpu)[i] * 180 / M_PI,
+                ((double*)Dec_cpu)[i] * 180 / M_PI);
+    }
+
     // Get time data.
     int num_vis_dumps        = times->num_vis_dumps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
@@ -103,7 +111,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
 
     // Allocate memory big enough for data hyper-cube.
     int num_elements = num_pixels * num_vis_dumps * num_channels;
-    oskar_Mem data(type, OSKAR_LOCATION_CPU);
+    oskar_Mem data(type, OSKAR_LOCATION_CPU, num_elements);
 
     // Open the data file.
     if (!settings.image.filename)

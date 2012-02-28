@@ -16,6 +16,7 @@ if (CPPUNIT_FOUND)
         src/Test_Matrix4.cpp
         src/Test_linspace.cpp
         src/Test_meshgrid.cpp
+        src/Test_sph_lm.cpp
         src/Test_SphericalPositions.cpp
     )
 

@@ -26,34 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_WRITE_AXIS_HEADER_H_
-#define OSKAR_FITS_WRITE_AXIS_HEADER_H_
+#ifndef TEST_FITS_WRITE_H_
+#define TEST_FITS_WRITE_H_
 
 /**
- * @file oskar_fits_write_axis_header.h
+ * @file Test_fits_write.h
  */
 
-#include "oskar_global.h"
-#include <fitsio.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Writes axis header keywords and data to a FITS file.
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- * This function writes axis header keywords and data to a FITS file.
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-OSKAR_EXPORT
-void oskar_fits_write_axis_header(fitsfile* fits_file, int axis_id,
-        const char* ctype, const char* ctype_comment, double crval,
-        double cdelt, double crpix, double crota);
+class Test_fits_write : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_fits_write);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-#ifdef __cplusplus
-}
-#endif
+    public:
+        // Test methods.
+        void test_method();
+};
 
-#endif /* OSKAR_FITS_WRITE_AXIS_HEADER_H_ */
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_fits_write);
+
+#endif // TEST_FITS_WRITE_H_

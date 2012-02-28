@@ -39,12 +39,8 @@ extern "C" {
 int oskar_ra_dec_to_rel_lmn_f(int n, const float* h_ra, const float* h_dec,
         float ra0, float dec0, float* h_l, float* h_m, float* h_n)
 {
-    float cosDec0, sinDec0;
-
     /* Compute l,m-direction-cosines of RA, Dec relative to reference point. */
-    cosDec0 = cosf(dec0);
-    sinDec0 = sinf(dec0);
-    oskar_sph_to_lm_f(n, h_ra, h_dec, ra0, cosDec0, sinDec0, h_l, h_m);
+    oskar_sph_to_lm_f(n, ra0, dec0, h_ra, h_dec, h_l, h_m);
 
     /* Compute n-direction-cosines of points from l and m. */
     oskar_lm_to_n_f(n, h_l, h_m, h_n);
@@ -55,12 +51,8 @@ int oskar_ra_dec_to_rel_lmn_f(int n, const float* h_ra, const float* h_dec,
 int oskar_ra_dec_to_rel_lmn_d(int n, const double* h_ra, const double* h_dec,
         double ra0, double dec0, double* h_l, double* h_m, double* h_n)
 {
-    double cosDec0, sinDec0;
-
     /* Compute l,m-direction-cosines of RA, Dec relative to reference point. */
-    cosDec0 = cos(dec0);
-    sinDec0 = sin(dec0);
-    oskar_sph_to_lm_d(n, h_ra, h_dec, ra0, cosDec0, sinDec0, h_l, h_m);
+    oskar_sph_to_lm_d(n, ra0, dec0, h_ra, h_dec, h_l, h_m);
 
     /* Compute n-direction-cosines of points from l and m. */
     oskar_lm_to_n_d(n, h_l, h_m, h_n);

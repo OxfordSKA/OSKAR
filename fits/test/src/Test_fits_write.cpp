@@ -26,30 +26,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/oskar_fits_write_image.h"
+#include "fits/test/Test_fits_write.h"
 #include "fits/oskar_fits_write.h"
-#include "fits/oskar_fits_write_axis_header.h"
-#include "fits/oskar_fits_check_status.h"
 #include "utility/oskar_Mem.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <fitsio.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void oskar_fits_write_image(const char* filename, int type, int width,
-        int height, void* data, double ra, double dec, double pixel_scale,
-        double frequency, double bandwidth)
+void Test_fits_write::test_method()
 {
-    char key[FLEN_KEYWORD], value[FLEN_VALUE];
-    int status = 0, decimals = 10;
+    int columns = 10; // width
+    int rows = 40; // height
+    int planes = 4;
+    int blocks = 4;
+    int num_elements = columns * rows * planes * blocks;
+    oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements);
+    const char filename[] = "cpp_unit_test_fits_write.fits";
+
+    // Define test data.
+    double* d = (double*) data.data;
+    int i = 0;
+    for (int b = 0; b < blocks; ++b)
+    {
+        for (int p = 0; p < planes; ++p)
+        {
+            if (p == 0)
+            {
+                for (int r = 0; r < rows; ++r)
+                {
+                    for (int c = 0; c < columns; ++c)
+                    {
+                        d[i] = r + 2 * c;
+                        ++i;
+                    }
+                }
+            }
+            else
+            {
+                for (int r = 0; r < rows; ++r)
+                {
+                    for (int c = 0; c < columns; ++c)
+                    {
+                        d[i] = (b+1) * sin((p+1) * M_PI * r / (double)(rows-1));
+                        ++i;
+                    }
+                }
+            }
+        }
+    }
+
     long naxes[4];
     double crval[4], crpix[4], cdelt[4], crota[4];
-    fitsfile* fptr = NULL;
 
     /* Axis types. */
     const char* ctype[] = {
@@ -68,26 +96,26 @@ void oskar_fits_write_image(const char* filename, int type, int width,
     };
 
     /* Axis dimensions. */
-    naxes[0] = width;
-    naxes[1] = height;
-    naxes[2] = 1;
-    naxes[3] = 1;
+    naxes[0] = columns; // width
+    naxes[1] = rows; // height
+    naxes[2] = planes;
+    naxes[3] = blocks;
 
     /* Reference values. */
-    crval[0] = ra;
-    crval[1] = dec;
-    crval[2] = frequency;
+    crval[0] = 10.0; // RA
+    crval[1] = 80.0; // DEC
+    crval[2] = 100e6;
     crval[3] = 1.0;
 
     /* Deltas. */
-    cdelt[0] = -pixel_scale;
-    cdelt[1] = pixel_scale;
-    cdelt[2] = bandwidth;
+    cdelt[0] = -0.1; // DELTA_RA
+    cdelt[1] = 0.1; // DELTA_DEC
+    cdelt[2] = 1e5; // BANDWIDTH
     cdelt[3] = 1.0;
 
     /* Reference pixels. */
-    crpix[0] = (width + 1) / 2.0;
-    crpix[1] = (height + 1) / 2.0;
+    crpix[0] = (columns + 1) / 2.0;
+    crpix[1] = (rows + 1) / 2.0;
     crpix[2] = 1.0;
     crpix[3] = 1.0;
 
@@ -98,29 +126,6 @@ void oskar_fits_write_image(const char* filename, int type, int width,
     crota[3] = 0.0;
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, type, 4, naxes, data, ctype, ctype_comment,
-            crval, cdelt, crpix, crota);
-
-    /* Open file for read/write access. */
-    fits_open_file(&fptr, filename, READWRITE, &status);
-
-    /* Write brightness unit keyword. */
-    strcpy(key, "BUNIT");
-    strcpy(value, "JY/BEAM");
-    fits_write_key_str(fptr, key, value, "Units of flux", &status);
-    oskar_fits_check_status(status, "Writing key: BUNIT");
-
-    /* Write pointing keywords. */
-    fits_write_key_dbl(fptr, "OBSRA", ra, decimals, "Pointing RA", &status);
-    oskar_fits_check_status(status, "Writing key: OBSRA");
-    fits_write_key_dbl(fptr, "OBSDEC", dec, decimals, "Pointing DEC", &status);
-    oskar_fits_check_status(status, "Writing key: OBSDEC");
-
-    /* Close the FITS file. */
-    fits_close_file(fptr, &status);
-    oskar_fits_check_status(status, "Closing file");
+    oskar_fits_write(filename, data.type(), 4, naxes, data.data, ctype,
+            ctype_comment, crval, cdelt, crpix, crota);
 }
-
-#ifdef __cplusplus
-}
-#endif
