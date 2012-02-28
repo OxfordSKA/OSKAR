@@ -60,32 +60,16 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     // Read visibility dimensions.
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_NUM_CHANNELS, 0, &num_channels);
-    if (err)
-    {
-        if (status) *status = err;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_NUM_TIMES, 0, &num_times);
-    if (err)
-    {
-        if (status) *status = err;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_NUM_BASELINES, 0, &num_baselines);
-    if (err)
-    {
-        if (status) *status = err;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type);
-    if (err)
-    {
-        if (status) *status = err;
-        return NULL;
-    }
+    if (err) goto cleanup;
 
     // Create the visibility structure.
     vis = new oskar_Visibilities(amp_type, OSKAR_LOCATION_CPU,
@@ -94,75 +78,42 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     // Read visibility metadata.
     err = oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_FREQ_START_HZ, 0, &vis->freq_start_hz);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_FREQ_INC_HZ, 0, &vis->freq_inc_hz);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, &vis->time_start_mjd_utc);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_TIME_INC_SEC, 0, &vis->time_inc_seconds);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
 
     // Read the baseline coordinate arrays.
     err = oskar_mem_binary_file_read(&vis->uu_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_UU, 0);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_mem_binary_file_read(&vis->vv_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_VV, 0);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
     err = oskar_mem_binary_file_read(&vis->ww_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_WW, 0);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
 
     // Read the visibility data.
     err = oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
             OSKAR_VIS_TAG_AMPLITUDE, 0);
-    if (err)
-    {
-        if (status) *status = err;
-        delete vis;
-        return NULL;
-    }
+    if (err) goto cleanup;
 
+    // Normal return.
     if (status) *status = OSKAR_SUCCESS;
     oskar_binary_tag_index_free(&index);
-
     return vis;
+
+    // Aborted return.
+    cleanup:
+    if (status) *status = err;
+    if (vis) delete vis;
+    oskar_binary_tag_index_free(&index);
+    return NULL;
 }

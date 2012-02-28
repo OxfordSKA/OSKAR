@@ -36,6 +36,14 @@ extern "C" {
 
 int oskar_cuda_info_free(oskar_CudaInfo** info)
 {
+    /* Sanity check on inputs. */
+    if (info == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check if structure needs to be freed. */
+    if (*info == NULL)
+        return OSKAR_SUCCESS;
+
     /* Free array. */
     free((*info)->device);
 

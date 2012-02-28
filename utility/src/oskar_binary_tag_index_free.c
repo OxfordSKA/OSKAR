@@ -38,6 +38,14 @@ int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index)
 {
     int i;
 
+    /* Sanity check on inputs. */
+    if (index == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check if index needs to be freed. */
+    if (*index == NULL)
+        return OSKAR_SUCCESS;
+
     /* Free string data. */
     for (i = 0; i < (*index)->num_tags; ++i)
     {
