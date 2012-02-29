@@ -26,14 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_BINARY_STREAM_WRITE_STD_METADATA_H_
-#define OSKAR_BINARY_STREAM_WRITE_STD_METADATA_H_
+#ifndef OSKAR_BINARY_STREAM_WRITE_CUDA_INFO_H_
+#define OSKAR_BINARY_STREAM_WRITE_CUDA_INFO_H_
 
 /**
- * @file oskar_binary_stream_write_std_metadata.h
+ * @file oskar_binary_stream_write_cuda_info.h
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_CudaInfo.h"
 
 #ifdef __cplusplus
 #include <cstdio>
@@ -46,18 +47,19 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes standard metadata to an output stream.
+ * @brief Writes standard CUDA device information to an output stream.
  *
  * @details
- * This function writes standard metadata to an output stream.
+ * This function writes standard CUDA device information to an output stream.
  *
  * @param[in,out] stream An output stream.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_std_metadata(FILE* stream);
+int oskar_binary_stream_write_cuda_info(FILE* stream,
+        const oskar_CudaInfo* cuda_info);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_BINARY_STREAM_WRITE_STD_METADATA_H_ */
+#endif /* OSKAR_BINARY_STREAM_WRITE_CUDA_INFO_H_ */

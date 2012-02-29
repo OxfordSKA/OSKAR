@@ -31,7 +31,7 @@
 #include "utility/oskar_binary_stream_read_header.h"
 #include "utility/oskar_binary_stream_write_header.h"
 #include "utility/oskar_binary_stream_write.h"
-#include "utility/oskar_binary_stream_write_std_metadata.h"
+#include "utility/oskar_binary_stream_write_metadata.h"
 #include "utility/oskar_endian.h"
 #include "utility/oskar_Mem.h"
 #include <string.h>
@@ -69,7 +69,7 @@ int oskar_binary_file_write(const char* filename, unsigned char data_type,
         }
 
         /* Write standard metadata. */
-        err = oskar_binary_stream_write_std_metadata(stream);
+        err = oskar_binary_stream_write_metadata(stream);
         if (err)
         {
             fclose(stream);
@@ -144,7 +144,7 @@ int oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
         }
 
         /* Write standard metadata. */
-        err = oskar_binary_stream_write_std_metadata(stream);
+        err = oskar_binary_stream_write_metadata(stream);
         if (err)
         {
             fclose(stream);

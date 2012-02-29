@@ -26,59 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_binary_stream_write_std_metadata.h"
-#include "utility/oskar_binary_stream_write.h"
-#include "utility/oskar_BinaryTag.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_system_clock_time.h"
+#ifndef OSKAR_BINARY_STREAM_WRITE_METADATA_H_
+#define OSKAR_BINARY_STREAM_WRITE_METADATA_H_
+
+/**
+ * @file oskar_binary_stream_write_metadata.h
+ */
+
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+#include <cstdio>
+#else
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_binary_stream_write_std_metadata(FILE* stream)
-{
-    int error;
-    const char* str;
-    size_t len;
-
-    /* Write the system date and time. */
-    str = oskar_system_clock_time(0, NULL);
-    len = 1 + strlen(str);
-    error = oskar_binary_stream_write(stream, OSKAR_CHAR,
-            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0,
-            len, str);
-    if (error) return error;
-
-    /* Write the current working directory. */
-    str = getenv("PWD");
-    if (!str) str = getenv("CD");
-    if (str)
-    {
-        len = 1 + strlen(str);
-        error = oskar_binary_stream_write(stream, OSKAR_CHAR,
-                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD, 0,
-                len, str);
-        if (error) return error;
-    }
-
-    /* Write the username. */
-    str = getenv("USERNAME");
-    if (str)
-    {
-        len = 1 + strlen(str);
-        error = oskar_binary_stream_write(stream, OSKAR_CHAR,
-                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME, 0,
-                len, str);
-        if (error) return error;
-    }
-
-    return OSKAR_SUCCESS;
-}
+/**
+ * @brief Writes standard metadata to an output stream.
+ *
+ * @details
+ * This function writes standard metadata to an output stream.
+ *
+ * @param[in,out] stream An output stream.
+ */
+OSKAR_EXPORT
+int oskar_binary_stream_write_metadata(FILE* stream);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_BINARY_STREAM_WRITE_METADATA_H_ */

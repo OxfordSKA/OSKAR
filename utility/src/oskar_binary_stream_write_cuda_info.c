@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_binary_stream_write_std_cuda_info.h"
+#include "utility/oskar_binary_stream_write_cuda_info.h"
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_CudaInfo.h"
@@ -39,7 +39,7 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_write_std_cuda_info(FILE* stream,
+int oskar_binary_stream_write_cuda_info(FILE* stream,
         const oskar_CudaInfo* cuda_info)
 {
     int i, error;

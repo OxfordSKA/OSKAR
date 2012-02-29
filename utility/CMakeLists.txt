@@ -12,8 +12,8 @@ set(utility_SRC
     src/oskar_binary_stream_read_header.c
     src/oskar_binary_stream_read.c
     src/oskar_binary_stream_write_header.c
-    src/oskar_binary_stream_write_std_cuda_info.c
-    src/oskar_binary_stream_write_std_metadata.c
+    src/oskar_binary_stream_write_cuda_info.c
+    src/oskar_binary_stream_write_metadata.c
     src/oskar_binary_stream_write.c
     src/oskar_binary_tag_index_create.c
     src/oskar_binary_tag_index_free.c
@@ -39,6 +39,8 @@ set(utility_SRC
     src/oskar_mem_binary_file_read_raw.c
     src/oskar_mem_binary_file_read.c
     src/oskar_mem_binary_file_write.c
+    src/oskar_mem_binary_stream_read.c
+    src/oskar_mem_binary_stream_write.c
     src/oskar_mem_clear_contents.c
     src/oskar_mem_copy.c
     src/oskar_mem_different.c
