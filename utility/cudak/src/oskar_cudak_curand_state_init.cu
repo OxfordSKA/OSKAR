@@ -29,6 +29,8 @@
 #include "utility/cudak/oskar_cudak_curand_state_init.h"
 #include <curand_kernel.h>
 
+// FIXME This needs to be checked to ensure there are no invalid memory accesses.
+
 __global__
 void oskar_cudak_curand_state_init(curandState* state, unsigned long long seed,
         unsigned long long offset, unsigned long long device_offset)
