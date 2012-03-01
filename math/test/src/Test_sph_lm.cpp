@@ -30,7 +30,7 @@
 #include "math/oskar_linspace.h"
 #include "math/oskar_sph_from_lm.h"
 #include "math/oskar_sph_to_lm.h"
-#include "math/oskar_evaluate_image_lm_grid.h"
+#include "imaging/oskar_evaluate_image_lm_grid.h"
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>

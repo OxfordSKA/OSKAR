@@ -67,16 +67,17 @@ add_subdirectory(extern)
 # ==== Build main oskar library.
 if (BUILD_OSKAR)
     add_subdirectory(cuda) # Deprecated.
+    add_subdirectory(imaging)
     add_subdirectory(interferometry)
     add_subdirectory(math)
     add_subdirectory(sky)
     add_subdirectory(station)
     add_subdirectory(utility)
-    foreach (file ${station_SRC})
-        list(APPEND oskar_SRC station/${file})
-    endforeach ()
     foreach (file ${cuda_SRC}) # Deprecated.
         list(APPEND oskar_SRC cuda/${file})
+    endforeach ()
+    foreach (file ${imaging_SRC})
+        list(APPEND oskar_SRC imaging/${file})
     endforeach ()
     foreach (file ${interferometry_SRC})
         list(APPEND oskar_SRC interferometry/${file})
@@ -87,6 +88,9 @@ if (BUILD_OSKAR)
     foreach (file ${sky_SRC})
         list(APPEND oskar_SRC sky/${file})
     endforeach ()
+    foreach (file ${station_SRC})
+        list(APPEND oskar_SRC station/${file})
+    endforeach ()
     foreach (file ${utility_SRC})
         list(APPEND oskar_SRC utility/${file})
     endforeach ()
@@ -94,9 +98,9 @@ if (BUILD_OSKAR)
     include_directories(${CUDA_INCLUDE_DIRS})
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar.dir/src)
     cuda_add_library(oskar ${oskar_SRC})
-    target_link_libraries(oskar dierckx ${CUDA_LIBRARIES} 
+    target_link_libraries(oskar dierckx ${CUDA_LIBRARIES}
         ${CUDA_CUBLAS_LIBRARIES} ${CUDA_curand_LIBRARY})
-    set_target_properties(oskar PROPERTIES 
+    set_target_properties(oskar PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         LINK_FLAGS "${OpenMP_CXX_FLAGS}"
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
@@ -108,7 +112,6 @@ endif (BUILD_OSKAR)
 
 
 # ==== Build other oskar libraries.
-add_subdirectory(imaging)
 if (BUILD_OSKAR_MS)
     add_subdirectory(ms)
 endif ()

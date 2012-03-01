@@ -35,7 +35,7 @@
 #include "fits/oskar_fits_write.h"
 #include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_evaluate_image_lm_grid.h"
+#include "imaging/oskar_evaluate_image_lm_grid.h"
 #include "math/oskar_sph_from_lm.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
