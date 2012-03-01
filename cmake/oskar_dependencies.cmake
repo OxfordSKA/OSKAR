@@ -118,6 +118,7 @@ if (NOT CFITSIO_FOUND)
            "Unable to build FITS library.")
     message("================================================================================")
     set(BUILD_OSKAR_FITS OFF)
+    add_definitions(-DOSKAR_NO_FITS)
 endif ()
 
 if (NOT BUILD_OSKAR)

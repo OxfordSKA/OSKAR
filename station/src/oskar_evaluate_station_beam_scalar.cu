@@ -64,9 +64,9 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         return OSKAR_ERR_BAD_UNITS;
 
     // Resize the weights work array if needed.
-    if (weights->num_elements() != station->num_elements)
+    if (weights->num_elements() < 2 * station->num_elements)
     {
-        int error = weights->resize(station->num_elements);
+        int error = weights->resize(2 * station->num_elements);
         if (error) return error;
     }
 

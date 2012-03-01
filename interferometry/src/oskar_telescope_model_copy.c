@@ -45,7 +45,7 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->station = realloc(dst->station,
             src->num_stations * sizeof(oskar_StationModel));
 
-    /* Copy each station. */
+    /* TODO CHECK. Copy each station. */
     for (i = 0; i < src->num_stations; ++i)
     {
         error = oskar_station_model_copy(&(dst->station[i]),

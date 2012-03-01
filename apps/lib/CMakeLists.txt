@@ -33,9 +33,16 @@ include_directories(${CUDA_INCLUDE_DIRS})
 set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.dir/src)
 cuda_add_library(oskar_apps ${apps_SRC})
 
-# Link in oskar_ms if its avaliable
-if(BUILD_OSKAR_MS)
+# Link in oskar_ms and oskar_fits if avaliable.
+if(BUILD_OSKAR_MS AND BUILD_OSKAR_FITS)
+    target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
+        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
+        ${CUDA_CUBLAS_LIBRARIES})
+elseif(BUILD_OSKAR_MS)
     target_link_libraries(oskar_apps oskar oskar_ms ${CASACORE_LIBRARIES}
+        ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
+elseif(BUILD_OSKAR_FITS)
+    target_link_libraries(oskar_apps oskar oskar_fits ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 else()
     target_link_libraries(oskar_apps oskar

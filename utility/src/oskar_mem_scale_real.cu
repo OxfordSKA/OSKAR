@@ -71,60 +71,60 @@ int oskar_mem_scale_real(oskar_Mem* mem, double value)
 
     /* Check if elements are real, complex or matrix. */
     if (oskar_mem_is_complex(type))
-    	num_elements *= 2;
+        num_elements *= 2;
     if (oskar_mem_is_matrix(type))
-    	num_elements *= 4;
+        num_elements *= 4;
 
     /* Scale the vector. */
     if (oskar_mem_is_single(type))
     {
-    	if (location == OSKAR_LOCATION_CPU)
-    	{
-    		for (i = 0; i < num_elements; ++i)
-    		{
-    			((float*)(mem->data))[i] *= (float)value;
-    		}
-    	}
-    	else if (location == OSKAR_LOCATION_GPU)
-    	{
-    		num_threads = 256;
-    	    num_blocks  = (num_elements + num_threads - 1) / num_threads;
-    	    oskar_cudak_scale_real_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-    	    		(num_elements, value, (float*)(mem->data));
-    	    cudaDeviceSynchronize();
-    	    error = cudaPeekAtLastError();
-    	}
-    	else
-    	{
-    		return OSKAR_ERR_BAD_LOCATION;
-    	}
+        if (location == OSKAR_LOCATION_CPU)
+        {
+            for (i = 0; i < num_elements; ++i)
+            {
+                ((float*)(mem->data))[i] *= (float)value;
+            }
+        }
+        else if (location == OSKAR_LOCATION_GPU)
+        {
+            num_threads = 256;
+            num_blocks  = (num_elements + num_threads - 1) / num_threads;
+            oskar_cudak_scale_real_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                    (num_elements, value, (float*)(mem->data));
+            cudaDeviceSynchronize();
+            error = cudaPeekAtLastError();
+        }
+        else
+        {
+            return OSKAR_ERR_BAD_LOCATION;
+        }
     }
     else if (oskar_mem_is_double(type))
     {
-    	if (location == OSKAR_LOCATION_CPU)
-    	{
-    		for (i = 0; i < num_elements; ++i)
-    		{
-    			((double*)(mem->data))[i] *= value;
-    		}
-    	}
-    	else if (location == OSKAR_LOCATION_GPU)
-    	{
-    		num_threads = 256;
-    	    num_blocks  = (num_elements + num_threads - 1) / num_threads;
-    	    oskar_cudak_scale_real_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-    	    		(num_elements, value, (double*)(mem->data));
-    	    cudaDeviceSynchronize();
-    	    error = cudaPeekAtLastError();
-    	}
-    	else
-    	{
-    		return OSKAR_ERR_BAD_LOCATION;
-    	}
+        if (location == OSKAR_LOCATION_CPU)
+        {
+            for (i = 0; i < num_elements; ++i)
+            {
+                ((double*)(mem->data))[i] *= value;
+            }
+        }
+        else if (location == OSKAR_LOCATION_GPU)
+        {
+            num_threads = 256;
+            num_blocks  = (num_elements + num_threads - 1) / num_threads;
+            oskar_cudak_scale_real_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                    (num_elements, value, (double*)(mem->data));
+            cudaDeviceSynchronize();
+            error = cudaPeekAtLastError();
+        }
+        else
+        {
+            return OSKAR_ERR_BAD_LOCATION;
+        }
     }
     else
     {
-    	return OSKAR_ERR_BAD_DATA_TYPE;
+        return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     return error;
