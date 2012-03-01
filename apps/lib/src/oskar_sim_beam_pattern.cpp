@@ -35,8 +35,7 @@
 #include "fits/oskar_fits_write.h"
 #include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "math/oskar_linspace.h"
-#include "math/oskar_meshgrid.h"
+#include "math/oskar_evaluate_image_lm_grid.h"
 #include "math/oskar_sph_from_lm.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
@@ -71,83 +70,53 @@ int oskar_sim_beam_pattern(const char* settings_file)
         return OSKAR_ERR_SETTINGS;
     }
 
-    // Get the sky model and telescope model and copy both to GPU (slow step).
-    oskar_TelescopeModel* tel_cpu, *tel_gpu;
-    tel_cpu = oskar_set_up_telescope(&settings);
-    tel_gpu = new oskar_TelescopeModel(tel_cpu, OSKAR_LOCATION_GPU);
+    // Get the telescope model.
+    oskar_TelescopeModel* tel_cpu = oskar_set_up_telescope(&settings);
 
     // Get the image settings.
     int image_size = settings.image.size;
     int num_channels = settings.obs.num_channels;
     int num_pixels = image_size * image_size;
-    double fov_deg = settings.image.fov_deg;
-    double lm_max = sin((fov_deg / 2.0) * M_PI / 180.0);
+    double fov = settings.image.fov_deg * M_PI / 180;
     double ra0 = settings.obs.ra0_rad;
     double dec0 = settings.obs.dec0_rad;
 
     // Get time data.
-    int num_vis_dumps        = times->num_vis_dumps;
+    int num_times            = times->num_vis_dumps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
     double dt_dump           = times->dt_dump_days;
 
     // Allocate CPU memory big enough for data hyper-cube.
-    int num_elements = num_pixels * num_vis_dumps * num_channels;
+    int num_elements = num_pixels * num_times * num_channels;
     oskar_Mem data(type, OSKAR_LOCATION_CPU, num_elements);
     oskar_Mem image(type, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem beam_cpu(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU, num_pixels);
 
     // Generate l,m grid and equatorial coordinates for beam pattern pixels.
-    oskar_Mem l_cpu(type, OSKAR_LOCATION_CPU, image_size);
-    oskar_Mem m_cpu(type, OSKAR_LOCATION_CPU, image_size);
     oskar_Mem grid_l(type, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem grid_m(type, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem RA_cpu(type, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem Dec_cpu(type, OSKAR_LOCATION_CPU, num_pixels);
-
-    /*
-     * Note that FITS images conventionally have the LARGEST value of
-     * RA (=longitude) and the SMALLEST value of DEC (=latitude) at the
-     * lowest memory address, so therefore the grid l-values must start off
-     * positive and go negative, while the grid m-values start off negative
-     * and go positive.
-     */
     if (type == OSKAR_SINGLE)
     {
-        oskar_linspace_f(l_cpu, lm_max, -lm_max, image_size); // FITS convention.
-        oskar_linspace_f(m_cpu, -lm_max, lm_max, image_size);
-
-        // Slowest varying is m, fastest varying is l.
-        for (int j = 0, p = 0; j < image_size; ++j)
-        {
-            for (int i = 0; i < image_size; ++i, ++p)
-            {
-                ((float*)grid_l)[p] = ((float*)l_cpu)[i];
-                ((float*)grid_m)[p] = ((float*)m_cpu)[j];
-            }
-        }
+        oskar_evaluate_image_lm_grid_f(image_size, image_size, fov, fov,
+                grid_l, grid_m);
         oskar_sph_from_lm_f(num_pixels, ra0, dec0,
                 grid_l, grid_m, RA_cpu, Dec_cpu);
     }
     else if (type == OSKAR_DOUBLE)
     {
-        oskar_linspace_d(l_cpu, lm_max, -lm_max, image_size); // FITS convention.
-        oskar_linspace_d(m_cpu, -lm_max, lm_max, image_size);
-
-        // Slowest varying is m, fastest varying is l.
-        for (int j = 0, p = 0; j < image_size; ++j)
-        {
-            for (int i = 0; i < image_size; ++i, ++p)
-            {
-                ((double*)grid_l)[p] = ((double*)l_cpu)[i];
-                ((double*)grid_m)[p] = ((double*)m_cpu)[j];
-            }
-        }
+        oskar_evaluate_image_lm_grid_d(image_size, image_size, fov, fov,
+                grid_l, grid_m);
         oskar_sph_from_lm_d(num_pixels, ra0, dec0,
                 grid_l, grid_m, RA_cpu, Dec_cpu);
     }
 
     // All GPU memory used within these braces.
     {
+        // Copy telescope model to GPU.
+        oskar_TelescopeModel tel_gpu(tel_cpu, OSKAR_LOCATION_GPU);
+
         // Copy RA and Dec to GPU and allocate arrays for direction cosines.
         oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
         oskar_Mem Dec(&Dec_cpu, OSKAR_LOCATION_GPU);
@@ -166,7 +135,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
         for (int c = 0; c < num_channels; ++c)
         {
             // Initialise the random number generator.
-            oskar_Device_curand_state curand_state(tel_cpu->max_station_size);
+            oskar_Device_curand_state curand_state(tel_gpu.max_station_size);
             int seed = 0; // TODO get this from the settings file....
 //            curand_state.init(seed);
 
@@ -176,8 +145,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
                     c * settings.obs.frequency_inc_hz;
 
             // Copy the telescope model and scale coordinates to wavenumbers.
-            oskar_TelescopeModel telescope(tel_gpu, OSKAR_LOCATION_GPU);
-            err = telescope.multiply_by_wavenumber(frequency); // TODO CHECK.
+            oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
+            err = telescope.multiply_by_wavenumber(frequency);
             if (err) return err;
 
             // Get pointer to the station.
@@ -185,11 +154,11 @@ int oskar_sim_beam_pattern(const char* settings_file)
             oskar_StationModel* station = &(telescope.station[0]);
 
             // Start simulation.
-            for (int j = 0; j < num_vis_dumps; ++j)
+            for (int j = 0; j < num_times; ++j)
             {
                 // Start time for the visibility dump, in MJD(UTC).
                 printf("--> Generating beam for snapshot (%i / %i).\n",
-                        j+1, num_vis_dumps);
+                        j+1, num_times);
                 double t_dump = obs_start_mjd_utc + j * dt_dump;
                 double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
@@ -238,7 +207,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
                 }
 
                 // Save to global data store.
-                int offset = (j + c * num_vis_dumps) * num_pixels;
+                int offset = (j + c * num_times) * num_pixels;
                 err = oskar_mem_insert(&data, &image, offset);
                 if (err) return err;
             }
@@ -257,25 +226,14 @@ int oskar_sim_beam_pattern(const char* settings_file)
     double crota[] = {0.0, 0.0, 0.0, 0.0};
 
     // Axis types.
-    const char* ctype[] = {
-            "RA---SIN",
-            "DEC--SIN",
-            "UTC",
-            "FREQ"
-    };
-
-    // Axis comments.
-    const char* ctype_comment[] = {
-            "Right Ascension",
-            "Declination",
-            "Time",
-            "Frequency"
-    };
+    const char* ctype[] = {"RA---SIN", "DEC--SIN", "UTC", "FREQ"};
+    const char* ctype_comment[] = {"Right Ascension", "Declination",
+            "Time", "Frequency"};
 
     // Axis dimensions.
     naxes[0] = image_size; // width
     naxes[1] = image_size; // height
-    naxes[2] = num_vis_dumps;
+    naxes[2] = num_times;
     naxes[3] = num_channels;
 
     // Reference values.
@@ -285,8 +243,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
     crval[3] = settings.obs.start_frequency_hz;
 
     // Deltas.
-    cdelt[0] = -(fov_deg / image_size); // DELTA_RA
-    cdelt[1] = (fov_deg / image_size); // DELTA_DEC
+    cdelt[0] = -(settings.image.fov_deg / image_size); // DELTA_RA
+    cdelt[1] = (settings.image.fov_deg / image_size); // DELTA_DEC
     cdelt[2] = dt_dump; // DELTA_TIME
     cdelt[3] = settings.obs.frequency_inc_hz; // DELTA_CHANNEL
 
@@ -301,8 +259,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
             data.data, ctype, ctype_comment, crval, cdelt, crpix, crota);
 #endif
 
-    // Delete data structures.
-    delete tel_gpu;
+    // Delete telescope model.
     delete tel_cpu;
     cudaDeviceReset();
 

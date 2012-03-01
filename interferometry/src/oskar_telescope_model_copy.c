@@ -45,7 +45,7 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->station = realloc(dst->station,
             src->num_stations * sizeof(oskar_StationModel));
 
-    /* TODO CHECK. Copy each station. */
+    /* Copy each station. */
     for (i = 0; i < src->num_stations; ++i)
     {
         error = oskar_station_model_copy(&(dst->station[i]),
@@ -63,12 +63,15 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
 
     /* Copy remaining meta-data. */
     dst->num_stations = src->num_stations;
+    dst->max_station_size = src->max_station_size;
     dst->coord_units = src->coord_units;
     dst->identical_stations = src->identical_stations;
+    dst->disable_e_jones = src->disable_e_jones;
     dst->use_common_sky = src->use_common_sky;
     dst->ra0_rad = src->ra0_rad;
     dst->dec0_rad = src->dec0_rad;
-    dst->disable_e_jones = src->disable_e_jones;
+    dst->wavelength_metres = src->wavelength_metres;
+    dst->bandwidth_hz = src->bandwidth_hz;
 
     return OSKAR_SUCCESS;
 }

@@ -17,6 +17,7 @@ set(math_SRC
     src/oskar_cuda_jones_mul_scalar_c2.cu
     src/oskar_cuda_jones_set_real_scalar_1.cu
     src/oskar_cuda_jones_set_real_scalar_4.cu
+    src/oskar_evaluate_image_lm_grid.c
     src/oskar_healpix_angles_to_pix_ring.c
     src/oskar_healpix_npix_to_nside.c
     src/oskar_healpix_nside_to_npix.c

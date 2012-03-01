@@ -30,6 +30,7 @@
 #include "math/oskar_linspace.h"
 #include "math/oskar_sph_from_lm.h"
 #include "math/oskar_sph_to_lm.h"
+#include "math/oskar_evaluate_image_lm_grid.h"
 #include <cmath>
 #include <cstdlib>
 #include <cstdio>
@@ -47,41 +48,12 @@ void Test_sph_lm::test()
     double lon0 = 10.0 * M_PI / 180.0;
     double lat0 = 50.0 * M_PI / 180.0;
 
-    // Set up the grid boundaries.
-    double l_max = sin(0.5 * fov_lon_deg * M_PI / 180.0);
-    double m_max = sin(0.5 * fov_lat_deg * M_PI / 180.0);
-
-    /*
-     * Note that FITS images conventionally have the LARGEST value of
-     * RA (=longitude) and the SMALLEST value of DEC (=latitude) at the
-     * lowest memory address, so therefore the grid l-values must start off
-     * positive and go negative, while the grid m-values start off negative
-     * and go positive.
-     */
-
-    // Set up the grid spacing.
-    std::vector<double> l(num_l), m(num_m);
-    //oskar_linspace_d(&l[0], -l_max, l_max, num_l);
-    oskar_linspace_d(&l[0], l_max, -l_max, num_l); // FITS image convention.
-    oskar_linspace_d(&m[0], -m_max, m_max, num_m);
-
     // Set up the grid.
     int num_points = num_l * num_m;
     std::vector<double> grid_l(num_points), grid_m(num_points);
     std::vector<double> grid_RA(num_points), grid_Dec(num_points);
-
-    int p = 0;
-    // Slowest varying is m.
-    for (int j = 0; j < num_m; ++j)
-    {
-        // Fastest varying is l.
-        for (int i = 0; i < num_l; ++i)
-        {
-            grid_l[p] = l[i];
-            grid_m[p] = m[j];
-            ++p;
-        }
-    }
+    oskar_evaluate_image_lm_grid_d(num_l, num_m, fov_lon_deg * M_PI / 180.0,
+            fov_lat_deg * M_PI / 180.0, &grid_l[0], &grid_m[0]);
 
     // Convert from l,m grid to spherical coordinates.
     oskar_sph_from_lm_d(num_points, lon0, lat0, &grid_l[0], &grid_m[0],

@@ -52,7 +52,7 @@ int oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope
     err = oskar_telescope_model_scale_coords(telescope, wavenumber);
     if (err) return err;
 
-    /* TODO CHECK. Multiply station element positions by wavenumber. */
+    /* Multiply station element positions by wavenumber. */
     for (i = 0; i < telescope->num_stations; ++i)
     {
         err = oskar_station_model_multiply_by_wavenumber(&telescope->station[i],
