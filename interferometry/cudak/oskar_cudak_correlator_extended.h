@@ -94,7 +94,7 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
         const double* source_U, const double* source_V, const double* u,
         const double* v, const double* l, const double* m,
         const double freq, const double bandwidth,
-        const double gaussian_a, const double gaussian_b,
-        const double gaussian_c, double4c* vis);
+        const double* gaussian_a, const double* gaussian_b,
+        const double* gaussian_c, double4c* vis);
 
 #endif // OSKAR_CUDAK_CORRELATOR_EXTENDED_H_

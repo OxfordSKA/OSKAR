@@ -42,7 +42,7 @@ typedef struct curandStateXORWOW curandState;
 
 __global__
 void test_curand_generate(double* values, int num_values,
-        int num_per_thread, curandState* state);
+        int num_per_thread, curandState* state, int num_states);
 
 
 #endif /* TEST_CURAND_GENERATE_H_ */

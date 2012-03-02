@@ -65,9 +65,22 @@ int oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src)
     if (error) return error;
     error = oskar_mem_copy(&dst->rel_n, &src->rel_n);
     if (error) return error;
+    error = oskar_mem_copy(&dst->FWHM_major, &src->FWHM_major);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->FWHM_minor, &src->FWHM_minor);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->position_angle, &src->position_angle);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->gaussian_a, &src->gaussian_a);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->gaussian_b, &src->gaussian_b);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->gaussian_c, &src->gaussian_c);
+    if (error) return error;
 
     /* Copy meta data */
     dst->num_sources = src->num_sources;
+    dst->use_extended = src->use_extended;
 
     return error;
 }

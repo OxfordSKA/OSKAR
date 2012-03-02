@@ -25,7 +25,9 @@ set(sky_SRC
     src/oskar_ra_dec_to_hor_lmn.c
     src/oskar_ra_dec_to_rel_lmn_cuda.cu
     src/oskar_ra_dec_to_rel_lmn.c
+    src/oskar_sky_model_append_to_set.c
     src/oskar_sky_model_append.c
+    src/oskar_sky_model_combine_set.c
     src/oskar_sky_model_compute_relative_lmn.c
     src/oskar_sky_model_copy.c
     src/oskar_sky_model_filter_by_flux.c
@@ -34,12 +36,14 @@ set(sky_SRC
     src/oskar_sky_model_get_ptr.c
     src/oskar_sky_model_horizon_clip.cu
     src/oskar_sky_model_init.c
+    src/oskar_sky_model_insert.c
     src/oskar_sky_model_load.c
     src/oskar_sky_model_load_gsm.c
     src/oskar_sky_model_location.c
     src/oskar_sky_model_resize.c
     src/oskar_sky_model_rotate_to_position.c
     src/oskar_sky_model_scale_by_spectral_index.cu
+    src/oskar_sky_model_set_gaussian_parameters.c
     src/oskar_sky_model_set_source.c
     src/oskar_sky_model_split.c
     src/oskar_sky_model_type.c

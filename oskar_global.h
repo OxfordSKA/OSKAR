@@ -133,6 +133,9 @@ enum {
     /* Indicates that required data was not found in the binary file. */
     OSKAR_ERR_BINARY_TAG_NOT_FOUND = -21,
 
+    /* Indicates that the specified functionality isn't available for use */
+    OSKAR_ERR_FUNCTION_NOT_AVAILABLE = -22,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN              = -1000
 };

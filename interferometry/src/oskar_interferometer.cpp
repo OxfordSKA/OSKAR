@@ -184,7 +184,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
                 err = oskar_jones_join(&J, &K, &R);
                 if (err) return err;
 
-                // Produce visibilities.
                 err = oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v);
                 if (err) return err;
             }

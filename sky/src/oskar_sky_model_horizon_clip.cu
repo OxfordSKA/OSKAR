@@ -35,8 +35,8 @@
 #include <thrust/copy.h>
 
 struct is_true {
-    __host__ __device__
-    bool operator()(const int x) {return (bool)x;}
+        __host__ __device__
+        bool operator()(const int x) {return (bool)x;}
 };
 
 template<typename T>
@@ -137,8 +137,8 @@ static void copy_source_data(oskar_SkyModel* output, const oskar_SkyModel* input
 
 extern "C"
 int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
-		const oskar_SkyModel* input, const oskar_TelescopeModel* telescope,
-		double gast, oskar_Work* work)
+        const oskar_SkyModel* input, const oskar_TelescopeModel* telescope,
+        double gast, oskar_Work* work)
 {
     // Check for sane inputs.
     int err = 0;
@@ -154,6 +154,9 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
             input->location() != OSKAR_LOCATION_GPU ||
             work->real.location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
+
+    // Copy extended source flag
+    output->use_extended = input->use_extended;
 
     // Get the data dimensions.
     int num_sources = input->num_sources;
@@ -208,7 +211,7 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             // Update the mask.
             oskar_cudak_update_horizon_mask_f OSKAR_CUDAK_CONF(n_blk, n_thd)
-                    (num_sources, hor_n, mask);
+            (num_sources, hor_n, mask);
         }
 
         // Copy out source data based on the mask values.
@@ -236,7 +239,7 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             // Update the mask.
             oskar_cudak_update_horizon_mask_d OSKAR_CUDAK_CONF(n_blk, n_thd)
-                    (num_sources, hor_n, mask);
+            (num_sources, hor_n, mask);
         }
 
         // Copy out source data based on the mask values.

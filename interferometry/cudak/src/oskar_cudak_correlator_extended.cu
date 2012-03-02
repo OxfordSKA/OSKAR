@@ -102,6 +102,8 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
             // Evaluate gaussian source width term.
             float f = expf(-(a[t] * uu2 + 2 * b[t] * uuvv + c[t] * vv2));
 
+            rb *= f;
+
             // Construct source brightness matrix.
             float4c c_b;
             {
@@ -122,14 +124,14 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
             oskar_cudaf_mul_mat2c_mat2c_conj_trans_f(c_a, c_b);
 
             // Multiply result by bandwidth-smearing term.
-            sum.a.x += c_a.a.x * rb * f;
-            sum.a.y += c_a.a.y * rb * f;
-            sum.b.x += c_a.b.x * rb * f;
-            sum.b.y += c_a.b.y * rb * f;
-            sum.c.x += c_a.c.x * rb * f;
-            sum.c.y += c_a.c.y * rb * f;
-            sum.d.x += c_a.d.x * rb * f;
-            sum.d.y += c_a.d.y * rb * f;
+            sum.a.x += c_a.a.x * rb;
+            sum.a.y += c_a.a.y * rb;
+            sum.b.x += c_a.b.x * rb;
+            sum.b.y += c_a.b.y * rb;
+            sum.c.x += c_a.c.x * rb;
+            sum.c.y += c_a.c.y * rb;
+            sum.d.x += c_a.d.x * rb;
+            sum.d.y += c_a.d.y * rb;
         }
         smem_f[threadIdx.x] = sum;
     }
@@ -224,6 +226,8 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
             // Evaluate gaussian source width term.
             double f = exp(-(a[t] * uu2 + 2 * b[t] * uuvv + c[t] * vv2));
 
+            rb *= f;
+
             // Construct source brightness matrix.
             double4c c_b;
             {
@@ -244,14 +248,14 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
             oskar_cudaf_mul_mat2c_mat2c_conj_trans_d(c_a, c_b);
 
             // Multiply result by bandwidth-smearing term.
-            sum.a.x += c_a.a.x * rb * f;
-            sum.a.y += c_a.a.y * rb * f;
-            sum.b.x += c_a.b.x * rb * f;
-            sum.b.y += c_a.b.y * rb * f;
-            sum.c.x += c_a.c.x * rb * f;
-            sum.c.y += c_a.c.y * rb * f;
-            sum.d.x += c_a.d.x * rb * f;
-            sum.d.y += c_a.d.y * rb * f;
+            sum.a.x += c_a.a.x * rb;
+            sum.a.y += c_a.a.y * rb;
+            sum.b.x += c_a.b.x * rb;
+            sum.b.y += c_a.b.y * rb;
+            sum.c.x += c_a.c.x * rb;
+            sum.c.y += c_a.c.y * rb;
+            sum.d.x += c_a.d.x * rb;
+            sum.d.y += c_a.d.y * rb;
         }
         smem_d[threadIdx.x] = sum;
     }

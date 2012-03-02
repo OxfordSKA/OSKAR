@@ -20,16 +20,16 @@ set_target_properties(${bin_name}
 install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
 # BINARY: oskar_sim_interferometer_scalar
-set(bin_name oskar_sim_interferometer_scalar)
-add_executable(${bin_name} ${bin_name}_main.cpp)
-target_link_libraries(${bin_name} oskar oskar_apps ${QT_QTCORE_LIBRARY})
-set_target_properties(${bin_name}
-    PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-    INSTALL_RPATH_USE_LINK_PATH TRUE)
-install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+#set(bin_name oskar_sim_interferometer_scalar)
+#add_executable(${bin_name} ${bin_name}_main.cpp)
+#target_link_libraries(${bin_name} oskar oskar_apps ${QT_QTCORE_LIBRARY})
+#set_target_properties(${bin_name}
+#    PROPERTIES
+#    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+#    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+#    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+#    INSTALL_RPATH_USE_LINK_PATH TRUE)
+#install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
 # BINARY: oskar_sim_beam_pattern
 set(bin_name oskar_sim_beam_pattern)
@@ -59,15 +59,15 @@ if (BUILD_OSKAR_WIDGETS)
     include_directories(${QT_QTCORE_INCLUDE_DIR})
 
     # BINARY: oskar_viewer_sclar
-    add_executable(oskar_viewer_scalar oskar_viewer_scalar.cpp)
-    target_link_libraries(oskar_viewer_scalar oskar oskar_apps oskar_widgets
-        ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
-     set_target_properties(oskar_viewer_scalar
-        PROPERTIES
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE)
+#    add_executable(oskar_viewer_scalar oskar_viewer_scalar.cpp)
+#    target_link_libraries(oskar_viewer_scalar oskar oskar_apps oskar_widgets
+#        ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
+#     set_target_properties(oskar_viewer_scalar
+#        PROPERTIES
+#        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+#        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+#        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+#        INSTALL_RPATH_USE_LINK_PATH TRUE)
     #install(TARGETS oskar_viewer_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
     # BINARY: oskar_sim_gui

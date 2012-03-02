@@ -81,6 +81,12 @@ const char* oskar_get_error_string(int error)
             return "could not create settings structure";
         case OSKAR_ERR_CUDA_DEVICES:
             return "insufficient CUDA devices found";
+        case OSKAR_ERR_BAD_BINARY_FORMAT:
+            return "incompatible binary file format";
+        case OSKAR_ERR_BINARY_TAG_NOT_FOUND:
+            return "data tag not found";
+        case OSKAR_ERR_FUNCTION_NOT_AVAILABLE:
+            return "specified functionality not available";
         default:
             break;
     };

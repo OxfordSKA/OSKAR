@@ -46,15 +46,16 @@ extern "C" {
  * Creates a sky model from the simulation settings.
  *
  * @details
- * This function creates and returns a fully populated sky data structure
- * from the given settings object.
+ * This function creates and returns an array of fully populated sky data
+ * structures from the given settings object.
  *
  * The data in the structure that is returned resides in CPU memory.
  *
  * @param[in] settings A pointer to the settings structure.
  */
 OSKAR_EXPORT
-oskar_SkyModel* oskar_set_up_sky(const oskar_Settings* settings);
+int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
+        const oskar_Settings* settings);
 
 #ifdef __cplusplus
 }

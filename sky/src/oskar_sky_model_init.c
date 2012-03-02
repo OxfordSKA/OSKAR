@@ -51,6 +51,7 @@ int oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
 
     /* Set meta-data */
     model->num_sources = num_elements;
+    model->use_extended = OSKAR_FALSE;
 
     /* Initialise the memory. */
     error = oskar_mem_init(&model->RA, type, location, num_elements, owner);

@@ -35,7 +35,12 @@
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #define D2R M_PI/180.0
+#define ARCSEC2RAD M_PI/648000.0
 
 extern "C"
 int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
@@ -71,6 +76,14 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->input_sky_filter.radius_outer =
             s.value("radius_outer_deg").toDouble() * D2R;
     s.endGroup();
+    s.beginGroup("extended_sources");
+    sky->input_sky_extended_sources.FWHM_major =
+            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    sky->input_sky_extended_sources.FWHM_minor =
+                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    sky->input_sky_extended_sources.position_angle =
+                s.value("position_angle").toDouble() * D2R;
+    s.endGroup();
     s.endGroup();
 
     // GSM file.
@@ -90,6 +103,14 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             s.value("radius_inner_deg").toDouble() * D2R;
     sky->gsm_filter.radius_outer =
             s.value("radius_outer_deg").toDouble() * D2R;
+    s.endGroup();
+    s.beginGroup("extended_sources");
+    sky->gsm_extended_sources.FWHM_major =
+            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    sky->gsm_extended_sources.FWHM_minor =
+                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    sky->gsm_extended_sources.position_angle =
+                s.value("position_angle").toDouble() * D2R;
     s.endGroup();
     s.endGroup();
 
@@ -116,6 +137,14 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             s.value("radius_inner_deg").toDouble() * D2R;
     sky->generator.random_power_law.filter.radius_outer =
             s.value("radius_outer_deg").toDouble() * D2R;
+    s.endGroup();
+    s.beginGroup("extended_sources");
+    sky->generator.random_power_law.extended_sources.FWHM_major =
+            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    sky->generator.random_power_law.extended_sources.FWHM_minor =
+                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    sky->generator.random_power_law.extended_sources.position_angle =
+                s.value("position_angle").toDouble() * D2R;
     s.endGroup();
     s.endGroup();
 
@@ -147,6 +176,14 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->generator.random_broken_power_law.filter.radius_outer =
             s.value("radius_outer_deg").toDouble() * D2R;
     s.endGroup();
+    s.beginGroup("extended_sources");
+    sky->generator.random_broken_power_law.extended_sources.FWHM_major =
+            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    sky->generator.random_broken_power_law.extended_sources.FWHM_minor =
+                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    sky->generator.random_broken_power_law.extended_sources.position_angle =
+                s.value("position_angle").toDouble() * D2R;
+    s.endGroup();
     s.endGroup();
 
     // HEALPix generator settings.
@@ -160,6 +197,14 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             s.value("radius_inner_deg").toDouble() * D2R;
     sky->generator.healpix.filter.radius_outer =
             s.value("radius_outer_deg").toDouble() * D2R;
+    s.endGroup();
+    s.beginGroup("extended_sources");
+    sky->generator.healpix.extended_sources.FWHM_major =
+            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    sky->generator.healpix.extended_sources.FWHM_minor =
+                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    sky->generator.healpix.extended_sources.position_angle =
+                s.value("position_angle").toDouble() * D2R;
     s.endGroup();
     s.endGroup();
 

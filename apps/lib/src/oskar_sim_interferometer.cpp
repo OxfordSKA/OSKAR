@@ -45,6 +45,7 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_SettingsSky.h"
 #include "sky/oskar_sky_model_split.h"
+#include "sky/oskar_sky_model_free.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
@@ -77,25 +78,14 @@ int oskar_sim_interferometer(const char* settings_file)
     if (error) return error;
     if (device_count < num_devices) return OSKAR_ERR_CUDA_DEVICES;
 
-    // Construct sky and telescope.
-    oskar_SkyModel* sky_cpu = oskar_set_up_sky(&settings);
+    // Setup the telescope model.
     oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(&settings);
-    if (sky_cpu == NULL || telescope_cpu == NULL) return OSKAR_ERR_SETUP_FAIL;
+    if (telescope_cpu == NULL) return OSKAR_ERR_SETUP_FAIL;
 
-    // Split the sky model into chunks.
+    // Setup the sky model array.
     oskar_SkyModel* sky_chunk_cpu = NULL;
     int num_sky_chunks = 0;
-    if (sky_cpu->num_sources > 0)
-    {
-        int max_sources_per_chunk = min(settings.sim.max_sources_per_chunk,
-                (int)ceil((double)sky_cpu->num_sources / (double)num_devices));
-        error = oskar_sky_model_split(&sky_chunk_cpu, &num_sky_chunks,
-                max_sources_per_chunk, sky_cpu);
-        if (error) return error;
-        printf("** Splitting sky model of %i sources into %i chunks "
-                "(max %i per chunk).\n", sky_cpu->num_sources, num_sky_chunks,
-                max_sources_per_chunk);
-    }
+    error = oskar_set_up_sky(&num_sky_chunks, &sky_chunk_cpu, &settings);
 
     // Create the global visibility structure on the CPU.
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
@@ -217,7 +207,6 @@ int oskar_sim_interferometer(const char* settings_file)
 
     // Delete data structures.
     delete vis_global;
-    delete sky_cpu;
     delete telescope_cpu;
     for (int i = 0; i < num_devices; ++i)
     {
@@ -228,6 +217,8 @@ int oskar_sim_interferometer(const char* settings_file)
     }
     free(vis_acc);
     free(vis_temp);
+    for (int i = 0; i < num_sky_chunks; ++i)
+        oskar_sky_model_free(&sky_chunk_cpu[i]);
     free(sky_chunk_cpu);
     oskar_settings_free(&settings);
 

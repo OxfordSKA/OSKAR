@@ -26,63 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_model_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+
+#include "sky/oskar_sky_model_combine_set.h"
+#include "sky/oskar_sky_model_append.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_sky_model_free(oskar_SkyModel* model)
+int oskar_sky_model_combine_set(oskar_SkyModel* model,
+        const oskar_SkyModel* model_set, int num_models)
 {
-    int error = OSKAR_SUCCESS;
+    int total_sources, i, error;
 
-    if (model == NULL)
+    if (model == NULL || model_set == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Initialise the memory. */
-    error = oskar_mem_free(&model->RA);
-    if (error) return error;
-    error = oskar_mem_free(&model->Dec);
-    if (error) return error;
-    error = oskar_mem_free(&model->I);
-    if (error) return error;
-    error = oskar_mem_free(&model->Q);
-    if (error) return error;
-    error = oskar_mem_free(&model->U);
-    if (error) return error;
-    error = oskar_mem_free(&model->V);
-    if (error) return error;
-    error = oskar_mem_free(&model->reference_freq);
-    if (error) return error;
-    error = oskar_mem_free(&model->spectral_index);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_l);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_m);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_n);
-    if (error) return error;
-    error = oskar_mem_free(&model->FWHM_major);
-    if (error) return error;
-    error = oskar_mem_free(&model->FWHM_minor);
-    if (error) return error;
-    error = oskar_mem_free(&model->position_angle);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_a);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_b);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_c);
-    if (error) return error;
+    total_sources = 0;
+    for (i = 0; i < num_models; ++i)
+    {
+        total_sources += model_set[i].num_sources;
+    }
 
-    /* Set meta-data */
-    model->num_sources = 0;
-    model->use_extended = OSKAR_FALSE;
+    for (i = 0; i < num_models; ++i)
+    {
+        error = oskar_sky_model_append(model, &model_set[i]);
+        if (error) return error;
+    }
 
-    return error;
+    return OSKAR_SUCCESS;
 }
+
 
 #ifdef __cplusplus
 }

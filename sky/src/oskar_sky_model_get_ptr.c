@@ -29,7 +29,8 @@
 
 #include "sky/oskar_sky_model_get_ptr.h"
 #include "utility/oskar_mem_get_pointer.h"
-#include "stdlib.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,13 +44,11 @@ int oskar_sky_model_get_ptr(oskar_SkyModel* sky_ptr, const oskar_SkyModel* sky,
     if (sky == NULL || sky_ptr == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (offset < 0 || num_sources < 0 ||
-            sky->num_sources < offset + num_sources)
-    {
+    if (offset < 0 || num_sources < 0 || sky->num_sources < offset + num_sources)
         return OSKAR_ERR_OUT_OF_RANGE;
-    }
 
-    sky_ptr->num_sources = num_sources;
+    sky_ptr->num_sources  = num_sources;
+    sky_ptr->use_extended = sky->use_extended;
     err = oskar_mem_get_pointer(&sky_ptr->RA,  &sky->RA, offset, num_sources);
     if (err) return err;
     err = oskar_mem_get_pointer(&sky_ptr->Dec, &sky->Dec, offset, num_sources);

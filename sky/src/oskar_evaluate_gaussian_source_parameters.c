@@ -32,9 +32,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#ifndef M_SQRT_2_LN2_PI
-#define M_SQRT_2_LN2_PI 3.74781250258555160845195e-1 /* sqrt(2 * log_e(2)) / pi */
-#endif
+#define M_PI_2_2_LN_2 7.11941466249375271693034 /* pi^2 / (2 log_e(2)) */
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,9 +44,9 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
 {
     int i;
     double a, b, c;
-    double fwhm_maj, fwhm_min;
-    double cos_pa_2, sin_pa_2, sin_2pa, std_maj, std_min, pa;
-    double std_min_2, std_maj_2;
+    double fwhm_maj, fwhm_min, pa;
+    double cos_pa_2, sin_pa_2, sin_2pa;
+    double inv_std_min_2, inv_std_maj_2;
 
     if (gaussian_a == NULL || gaussian_b == NULL || gaussian_c == NULL ||
             FWHM_major == NULL || FWHM_minor == NULL || position_angle == NULL)
@@ -56,12 +54,12 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
-    if (num_sources != FWHM_major->private_num_elements ||
-            num_sources != FWHM_minor->private_num_elements ||
-            num_sources != position_angle->private_num_elements ||
-            num_sources != gaussian_a->private_num_elements ||
-            num_sources != gaussian_b->private_num_elements ||
-            num_sources != gaussian_c->private_num_elements)
+    if (num_sources > FWHM_major->private_num_elements ||
+            num_sources > FWHM_minor->private_num_elements ||
+            num_sources > position_angle->private_num_elements ||
+            num_sources > gaussian_a->private_num_elements ||
+            num_sources > gaussian_b->private_num_elements ||
+            num_sources > gaussian_c->private_num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
@@ -88,21 +86,15 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
         {
             fwhm_maj = ((double*)FWHM_major->data)[i];
             fwhm_min = ((double*)FWHM_minor->data)[i];
-
-            pa = ((double*)position_angle->data)[i];
-
-            std_maj = M_SQRT_2_LN2_PI / fwhm_maj;
-            std_min = M_SQRT_2_LN2_PI / fwhm_min;
-            printf("\n---- maj = %f, min = %f, pa = %f\n", std_maj, std_min, pa);
-            std_maj_2 = std_maj * std_maj;
-            std_min_2 = std_min * std_min;
+            pa       = ((double*)position_angle->data)[i];
+            inv_std_maj_2 = (fwhm_maj * fwhm_maj) * M_PI_2_2_LN_2;
+            inv_std_min_2 = (fwhm_min * fwhm_min) * M_PI_2_2_LN_2;
             cos_pa_2 = cos(pa) * cos(pa);
             sin_pa_2 = sin(pa) * sin(pa);
             sin_2pa  = sin(2.0 * pa);
-            a =  cos_pa_2 / (2.0 * std_min_2) + sin_pa_2 / (2.0 * std_maj_2);
-            b = -sin_2pa  / (4.0 * std_min_2) + sin_2pa  / (4.0 * std_maj_2);
-            c =  sin_pa_2 / (2.0 * std_min_2) + cos_pa_2 / (2.0 * std_maj_2);
-
+            a =  (cos_pa_2 * inv_std_min_2) / 2.0 + (sin_pa_2 * inv_std_maj_2) / 2.0;
+            b = -(sin_2pa  * inv_std_min_2) / 4.0 + (sin_2pa  * inv_std_maj_2) / 4.0;
+            c =  (sin_pa_2 * inv_std_min_2) / 2.0 + (cos_pa_2 * inv_std_maj_2) / 2.0;
             ((double*)gaussian_a->data)[i] = a;
             ((double*)gaussian_b->data)[i] = b;
             ((double*)gaussian_c->data)[i] = c;
@@ -120,18 +112,14 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
             fwhm_maj = ((float*)FWHM_major->data)[i];
             fwhm_min = ((float*)FWHM_minor->data)[i];
             pa       = ((float*)position_angle->data)[i];
-
-            std_maj = M_SQRT_2_LN2_PI / fwhm_maj;
-            std_min = M_SQRT_2_LN2_PI / fwhm_min;
-            std_maj_2 = std_maj * std_maj;
-            std_min_2 = std_min * std_min;
+            inv_std_maj_2 = (fwhm_maj * fwhm_maj) * M_PI_2_2_LN_2;
+            inv_std_min_2 = (fwhm_min * fwhm_min) * M_PI_2_2_LN_2;
             cos_pa_2 = cos(pa) * cos(pa);
             sin_pa_2 = sin(pa) * sin(pa);
             sin_2pa  = sin(2.0 * pa);
-            a =  cos_pa_2 / (2.0 * std_min_2) + sin_pa_2 / (2.0 * std_maj_2);
-            b = -sin_2pa  / (4.0 * std_min_2) + sin_2pa  / (4.0 * std_maj_2);
-            c =  sin_pa_2 / (2.0 * std_min_2) + cos_pa_2 / (2.0 * std_maj_2);
-
+            a =  (cos_pa_2 * inv_std_min_2) / 2.0 + (sin_pa_2 * inv_std_maj_2) / 2.0;
+            b = -(sin_2pa  * inv_std_min_2) / 4.0 + (sin_2pa  * inv_std_maj_2) / 4.0;
+            c =  (sin_pa_2 * inv_std_min_2) / 2.0 + (cos_pa_2 * inv_std_maj_2) / 2.0;
             ((float*)gaussian_a->data)[i] = (float)a;
             ((float*)gaussian_b->data)[i] = (float)b;
             ((float*)gaussian_c->data)[i] = (float)c;

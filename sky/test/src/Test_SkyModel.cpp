@@ -37,6 +37,8 @@
 #include "sky/oskar_sky_model_split.h"
 #include "sky/oskar_evaluate_sky_temperature.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
+#include "sky/oskar_sky_model_append_to_set.h"
+#include "sky/oskar_sky_model_insert.h"
 #include "utility/oskar_Work.h"
 #include "utility/oskar_get_error_string.h"
 
@@ -538,3 +540,116 @@ void Test_SkyModel::test_evaluate_gaussian_source_parameters()
 //                ((double*)sky.gaussian_c.data)[i]);
 //    }
 }
+
+
+void Test_SkyModel::test_insert()
+{
+    int type     = OSKAR_DOUBLE;
+    int location = OSKAR_LOCATION_CPU;
+    int dst_size = 60;
+    int src_size = 20;
+
+    oskar_SkyModel dst(type, location, dst_size);
+
+    oskar_SkyModel src(type, location, src_size);
+    for (int i = 0; i < src_size; ++i)
+    {
+        ((double*)src.RA.data)[i]             = (double)i + 0.0;
+        ((double*)src.Dec.data)[i]            = (double)i + 0.1;
+        ((double*)src.I.data)[i]              = (double)i + 0.2;
+        ((double*)src.Q.data)[i]              = (double)i + 0.3;
+        ((double*)src.U.data)[i]              = (double)i + 0.4;
+        ((double*)src.V.data)[i]              = (double)i + 0.5;
+        ((double*)src.reference_freq.data)[i] = (double)i + 0.6;
+        ((double*)src.spectral_index.data)[i] = (double)i + 0.7;
+        ((double*)src.rel_l.data)[i]          = (double)i + 0.8;
+        ((double*)src.rel_m.data)[i]          = (double)i * 2.0;
+        ((double*)src.rel_n.data)[i]          = (double)i * 3.0;
+        ((double*)src.FWHM_major.data)[i]     = (double)i * 4.0;
+        ((double*)src.FWHM_minor.data)[i]     = (double)i * 5.0;
+        ((double*)src.position_angle.data)[i] = (double)i * 6.0;
+        ((double*)src.gaussian_a.data)[i]     = (double)i * 7.0;
+        ((double*)src.gaussian_b.data)[i]     = (double)i * 8.0;
+        ((double*)src.gaussian_c.data)[i]     = (double)i * 9.0;
+    }
+
+    oskar_sky_model_insert(&dst, &src, 0);
+    oskar_sky_model_insert(&dst, &src, 20);
+    oskar_sky_model_insert(&dst, &src, 40);
+
+    double delta = 1.0e-10;
+
+    for (int j = 0; j < 3; ++j)
+    {
+        for (int i = 0; i < src_size; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.0, ((double*)src.RA.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.1, ((double*)src.Dec.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.2, ((double*)src.I.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.3, ((double*)src.Q.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.4, ((double*)src.U.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.5, ((double*)src.V.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.6, ((double*)src.reference_freq.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.7, ((double*)src.spectral_index.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i + 0.8, ((double*)src.rel_l.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 2.0, ((double*)src.rel_m.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 3.0, ((double*)src.rel_n.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 4.0, ((double*)src.FWHM_major.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 5.0, ((double*)src.FWHM_minor.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 6.0, ((double*)src.position_angle.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 7.0, ((double*)src.gaussian_a.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 8.0, ((double*)src.gaussian_b.data)[i], delta);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((double)i * 9.0, ((double*)src.gaussian_c.data)[i], delta);
+        }
+    }
+}
+
+
+void Test_SkyModel::test_sky_model_set()
+{
+    int number = 0;
+    int error = OSKAR_SUCCESS;
+    oskar_SkyModel* set = NULL;
+
+    int type = OSKAR_DOUBLE;
+    int location = OSKAR_LOCATION_CPU;
+    int max = 5;
+
+    int model_size = 6;
+    oskar_SkyModel model1(type, location, model_size);
+    for (int i = 0; i < model_size; ++i)
+    {
+        ((double*)model1.RA.data)[i] = (double)i;
+    }
+    error = oskar_sky_model_append_to_set(&number, &set, max, &model1);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+    model_size = 7;
+    oskar_SkyModel model2(type, location, model_size);
+    for (int i = 0; i < model_size; ++i)
+    {
+        ((double*)model2.RA.data)[i]         = (double)i + 0.5;
+        ((double*)model2.FWHM_major.data)[i] = (double)i * 0.75;
+    }
+    error = oskar_sky_model_append_to_set(&number, &set, max, &model2);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+//    printf("\n");
+//    printf("==========================\n");
+//    for (int i = 0; i < number; ++i)
+//    {
+//        printf("++ set[%i] no. sources = %i, use extended = %s\n",
+//                i, set[i].num_sources, set[i].use_extended ? "true" : "false");
+//        for (int s = 0; s < set[i].num_sources; ++s)
+//        {
+//            printf("  RA = %f, FWHM_major = %f\n",
+//                    ((double*)set[i].RA.data)[s],
+//                    ((double*)set[i].FWHM_major.data)[s]);
+//        }
+//    }
+//    printf("==========================\n");
+
+
+    if (set) free(set);
+}
+

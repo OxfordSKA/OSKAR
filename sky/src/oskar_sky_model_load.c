@@ -75,13 +75,15 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
         {
             /* Set defaults. */
             /*  (RA, Dec, I, Q, U, V, spix, freq0, FWHM maj, FWHM min, PA) */
+            int num_param = 11;
+            int num_required = 3;
             double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
             /* Ignore comment lines (lines starting with '#') */
             if (line[0] == '#') continue;
 
             /* Load source parameters (require at least RA, Dec, Stokes I). */
-            if (oskar_string_to_array_d(line, 8, par) < 3) continue;
+            if (oskar_string_to_array_d(line, num_param, par) < num_required) continue;
 
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
@@ -108,13 +110,15 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
         {
             /* Set defaults. */
             /*  (RA, Dec, I, Q, U, V, spix, freq0, FWHM maj, FWHM min, PA) */
+            int num_param = 11;
+            int num_required = 3;
             float par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
             /* Ignore comment lines (lines starting with '#') */
             if (line[0] == '#') continue;
 
             /* Load source parameters (require at least RA, Dec, Stokes I). */
-            if (oskar_string_to_array_f(line, 8, par) < 3) continue;
+            if (oskar_string_to_array_f(line, num_param, par) < num_required) continue;
 
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)

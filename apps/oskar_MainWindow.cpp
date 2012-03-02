@@ -69,6 +69,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Create and set up the actions.
     QAction* actOpen = new QAction("Open...", this);
+    QAction* actSaveAs = new QAction("Save Copy As...", this);
     QAction* actExit = new QAction("Exit", this);
     actHideUnset_ = new QAction("Hide Unset Items", this);
     actHideUnset_->setCheckable(true);
@@ -78,6 +79,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QAction* actRunInterferometer = new QAction("Run Interferometer", this);
     QAction* actRunBeamPattern = new QAction("Run Beam Pattern", this);
     connect(actOpen, SIGNAL(triggered()), this, SLOT(openSettings()));
+    connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(actHideUnset_, SIGNAL(toggled(bool)),
             this, SLOT(setHideIfUnset(bool)));
@@ -104,6 +106,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menubar->addAction(menuView->menuAction());
     menubar->addAction(menuRun->menuAction());
     menuFile->addAction(actOpen);
+    menuFile->addAction(actSaveAs);
     menuFile->addSeparator();
     menuFile->addAction(actExit);
     menuView->addAction(actHideUnset_);
@@ -154,6 +157,25 @@ void oskar_MainWindow::openSettings(QString filename)
         view_->restoreExpanded();
     }
 }
+
+void oskar_MainWindow::saveAs(QString filename)
+{
+    if (filename.isEmpty())
+    {
+        view_->saveExpanded();
+        filename = QFileDialog::getSaveFileName(this, "Save Settings File As ...");
+    }
+
+    settingsFile_ = filename;
+    if (settingsFile_.isEmpty()) return;
+
+    // Save the settings file.
+    view_->saveExpanded();
+    model_->saveSettingsFile(settingsFile_);
+    setWindowTitle("OSKAR GUI [" + settingsFile_ + "]");
+    view_->restoreExpanded();
+}
+
 
 // Protected methods.
 

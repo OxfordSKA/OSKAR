@@ -29,13 +29,14 @@
 #include "utility/cudak/oskar_cudak_curand_state_init.h"
 #include <curand_kernel.h>
 
-// FIXME This needs to be checked to ensure there are no invalid memory accesses.
-
 __global__
-void oskar_cudak_curand_state_init(curandState* state, unsigned long long seed,
-        unsigned long long offset, unsigned long long device_offset)
+void oskar_cudak_curand_state_init(curandState* state, int num_states,
+        unsigned long long seed, unsigned long long offset,
+        unsigned long long device_offset)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (idx >= num_states) return;
 
     /* curand_init(seed==sequence, sub-sequence, offset, state) */
     curand_init(seed, idx + device_offset, offset, &state[idx]);

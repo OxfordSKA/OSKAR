@@ -45,6 +45,9 @@ int oskar_sky_model_filter_by_radius(oskar_SkyModel* sky, double inner_radius,
     if (inner_radius == 0.0 && outer_radius == 0.0)
         return 0;
 
+    if (outer_radius < inner_radius)
+        return OSKAR_ERR_SETUP_FAIL;
+
     /* Get the type and location. */
     type = oskar_sky_model_type(sky);
     location = oskar_sky_model_location(sky);

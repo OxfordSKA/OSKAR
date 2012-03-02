@@ -60,13 +60,13 @@ void Test_sph_lm::test()
             &grid_RA[0], &grid_Dec[0]);
 
     // Print values.
-    printf("\n");
-    for (int i = 0; i < num_points; ++i)
-    {
-        printf("l,m = (%6.2f, %6.2f),    lon,lat = (%6.2f, %6.2f)\n",
-                grid_l[i], grid_m[i],
-                grid_RA[i] * 180 / M_PI, grid_Dec[i] * 180 / M_PI);
-    }
+//    printf("\n");
+//    for (int i = 0; i < num_points; ++i)
+//    {
+//        printf("l,m = (%6.2f, %6.2f),    lon,lat = (%6.2f, %6.2f)\n",
+//                grid_l[i], grid_m[i],
+//                grid_RA[i] * 180 / M_PI, grid_Dec[i] * 180 / M_PI);
+//    }
 
     // Check reverse direction.
     std::vector<double> temp_l(num_points), temp_m(num_points);

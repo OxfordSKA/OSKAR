@@ -44,12 +44,11 @@ extern "C" {
 /**
  * @brief Get a non-owned pointer to a subset of the specified sky model.
  *
- * @details
- *
- * @param sky_ptr
- * @param offset
- * @param num_sources
- * @param sky
+ * @param sky_ptr       Non-owned pointer to sky model.
+ * @param offset        Offset into sky model in number of sources to the pointer
+ *                      location created.
+ * @param num_sources   Number of sources belonging to the pointer created.
+ * @param sky           Sky model from which to create the pointer.
  *
  * @return An error code.
  */

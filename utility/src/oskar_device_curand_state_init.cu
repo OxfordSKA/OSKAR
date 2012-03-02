@@ -29,6 +29,8 @@
 #include "utility/oskar_device_curand_state_init.h"
 #include "utility/cudak/oskar_cudak_curand_state_init.h"
 #include <curand_kernel.h>
+#include <stdio.h>
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,7 +58,7 @@ int oskar_device_curand_state_init(curandState* d_states, int num_states,
 
     oskar_cudak_curand_state_init
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_states, seed, offset, device_offset);
+        (d_states, num_states, seed, offset, device_offset);
     error = cudaPeekAtLastError();
 
     return error;

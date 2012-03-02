@@ -26,62 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_model_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+
+#include "sky/oskar_sky_model_set_gaussian_parameters.h"
+#include "utility/oskar_mem_set_value_real.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_sky_model_free(oskar_SkyModel* model)
+int oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
+        double FWHM_major, double FWHM_minor, double position_angle)
 {
-    int error = OSKAR_SUCCESS;
+    int error;
 
-    if (model == NULL)
+    if (sky == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Initialise the memory. */
-    error = oskar_mem_free(&model->RA);
+    if (sky->num_sources > sky->FWHM_major.private_num_elements ||
+            sky->num_sources > sky->FWHM_minor.private_num_elements ||
+            sky->num_sources > sky->position_angle.private_num_elements)
+    {
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    }
+
+    error = oskar_mem_set_value_real(&sky->FWHM_major, FWHM_major);
     if (error) return error;
-    error = oskar_mem_free(&model->Dec);
+    error = oskar_mem_set_value_real(&sky->FWHM_minor, FWHM_minor);
     if (error) return error;
-    error = oskar_mem_free(&model->I);
-    if (error) return error;
-    error = oskar_mem_free(&model->Q);
-    if (error) return error;
-    error = oskar_mem_free(&model->U);
-    if (error) return error;
-    error = oskar_mem_free(&model->V);
-    if (error) return error;
-    error = oskar_mem_free(&model->reference_freq);
-    if (error) return error;
-    error = oskar_mem_free(&model->spectral_index);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_l);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_m);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_n);
-    if (error) return error;
-    error = oskar_mem_free(&model->FWHM_major);
-    if (error) return error;
-    error = oskar_mem_free(&model->FWHM_minor);
-    if (error) return error;
-    error = oskar_mem_free(&model->position_angle);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_a);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_b);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_c);
+    error = oskar_mem_set_value_real(&sky->position_angle, position_angle);
     if (error) return error;
 
-    /* Set meta-data */
-    model->num_sources = 0;
-    model->use_extended = OSKAR_FALSE;
-
-    return error;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

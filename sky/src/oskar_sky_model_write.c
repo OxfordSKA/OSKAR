@@ -30,12 +30,16 @@
 #include "sky/oskar_sky_model_write.h"
 #include "sky/oskar_sky_model_type.h"
 #include "sky/oskar_sky_model_location.h"
-#include "stdlib.h"
-#include "stdio.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
-#ifndef RAD2DEG
-#define RAD2DEG 57.295779513082
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
 #endif
+
+#define RAD2DEG 180.0/M_PI
+#define RAD2ARCSEC RAD2DEG * 3600.0
 
 #ifdef __cplusplus
 extern "C" {
@@ -65,7 +69,7 @@ int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
         for (i = 0; i < sky->num_sources; ++i)
         {
             fprintf(file, "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,"
-                    "% -12.6e,% -12.6e,% -12.6e,% -12.6f,% -12.6f,% -12.6f\n",
+                    "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e\n",
                     ((double*)sky->RA.data)[i] * RAD2DEG,
                     ((double*)sky->Dec.data)[i] * RAD2DEG,
                     ((double*)sky->I.data)[i],
@@ -74,8 +78,8 @@ int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
                     ((double*)sky->V.data)[i],
                     ((double*)sky->reference_freq.data)[i],
                     ((double*)sky->spectral_index.data)[i],
-                    ((double*)sky->FWHM_major.data)[i] * RAD2DEG * 3600.0,
-                    ((double*)sky->FWHM_minor.data)[i] * RAD2DEG * 3600.0,
+                    ((double*)sky->FWHM_major.data)[i] * RAD2ARCSEC,
+                    ((double*)sky->FWHM_minor.data)[i] * RAD2ARCSEC,
                     ((double*)sky->position_angle.data)[i] * RAD2DEG
             );
         }
@@ -85,7 +89,7 @@ int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
         for (i = 0; i < sky->num_sources; ++i)
         {
             fprintf(file, "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,"
-                    "% -12.6e,% -12.6e,% -12.6e,% -12.6f,% -12.6f,% -12.fe\n",
+                    "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.fe\n",
                     ((float*)sky->RA.data)[i] * RAD2DEG,
                     ((float*)sky->Dec.data)[i] * RAD2DEG,
                     ((float*)sky->I.data)[i],
@@ -94,8 +98,8 @@ int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
                     ((float*)sky->V.data)[i],
                     ((float*)sky->reference_freq.data)[i],
                     ((float*)sky->spectral_index.data)[i],
-                    ((float*)sky->FWHM_major.data)[i] * RAD2DEG * 3600.0,
-                    ((float*)sky->FWHM_minor.data)[i] * RAD2DEG * 3600.0,
+                    ((float*)sky->FWHM_major.data)[i] * RAD2ARCSEC,
+                    ((float*)sky->FWHM_minor.data)[i] * RAD2ARCSEC,
                     ((float*)sky->position_angle.data)[i] * RAD2DEG
             );
         }

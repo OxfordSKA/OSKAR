@@ -91,13 +91,15 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
     error = oskar_mem_realloc(&dst->rel_n, dst->num_sources);
     if (error) return error;
 
-    /* Resize arrays to hold gaussian source paramters */
+    /* Resize arrays to hold gaussian source parameters */
     error = oskar_mem_realloc(&dst->gaussian_a, dst->num_sources);
     if (error) return error;
     error = oskar_mem_realloc(&dst->gaussian_b, dst->num_sources);
     if (error) return error;
     error = oskar_mem_realloc(&dst->gaussian_c, dst->num_sources);
     if (error) return error;
+
+    dst->use_extended = (src->use_extended || dst->use_extended);
 
     return error;
 }

@@ -60,6 +60,8 @@ struct oskar_SkyModel
     oskar_Mem rel_l;          /**< Phase centre relative direction-cosines. */
     oskar_Mem rel_m;          /**< Phase centre relative direction-cosines. */
     oskar_Mem rel_n;          /**< Phase centre relative direction-cosines. */
+
+    int use_extended;         /**< Enable use of extended sources */
     oskar_Mem FWHM_major;     /**< Major axis FWHM for gaussian sources */
     oskar_Mem FWHM_minor;     /**< Minor axis FWHM for gaussian sources */
     oskar_Mem position_angle; /**< Position angle for gaussian sources */

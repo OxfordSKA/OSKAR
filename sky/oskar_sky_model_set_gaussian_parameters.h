@@ -26,52 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MAIN_WINDOW_H_
-#define OSKAR_MAIN_WINDOW_H_
 
-#include <QtGui/QMainWindow>
-#include <QtCore/QString>
+#ifndef OSKAR_SKY_MODEL_SET_GAUSSIAN_PARAMETERS_H_
+#define OSKAR_SKY_MODEL_SET_GAUSSIAN_PARAMETERS_H_
 
-class oskar_SettingsModel;
-class oskar_SettingsModelFilter;
-class oskar_SettingsView;
-class QAction;
-class QModelIndex;
-class QVBoxLayout;
-class QWidget;
+/**
+ * @file oskar_sky_model_set_gaussian_parameters.h
+ */
 
-class oskar_MainWindow : public QMainWindow
-{
-    Q_OBJECT
+#include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
 
-public:
-    oskar_MainWindow(QWidget* parent = 0);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-protected:
-    void closeEvent(QCloseEvent* event);
+/**
+ * @brief Set gaussian parameters in the sky model to specified values.
+ *
+ * @details
+ * Sets all gaussian source parameters in the sky model to the specified
+ * parameters.
+ *
+ * Note: this function will replace any existing values and should therefore
+ * be used with care!
+ *
+ * @param sky               An OSKAR sky model.
+ * @param FWHM_major        Major axis FWHM, in radians.
+ * @param FWHM_minor        Minor axis FWHM, in radians.
+ * @param position_angle    Position angle, in radians.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
+        double FWHM_major, double FWHM_minor, double position_angle);
 
-public slots:
-    void openSettings(QString filename = QString());
-    void saveAs(QString filename = QString());
+#ifdef __cplusplus
+}
+#endif
 
-private slots:
-    void runBeamPattern();
-    void runInterferometer();
-    void setHideIfUnset(bool value);
-
-private:
-    void runButton();
-    void runSim(int depth, QStringList outputfiles = QStringList());
-
-private:
-    QWidget* widget_;
-    QVBoxLayout* layout_;
-    oskar_SettingsModel* model_;
-    oskar_SettingsModelFilter* modelProxy_;
-    oskar_SettingsView* view_;
-    QAction* actHideUnset_;
-    QString settingsFile_;
-    int (*sim_function_)(const char*);
-};
-
-#endif // OSKAR_MAIN_WINDOW_H_
+#endif /* OSKAR_SKY_MODEL_SET_GAUSSIAN_PARAMETERS_H_ */

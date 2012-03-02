@@ -31,14 +31,16 @@
 
 __global__
 void test_curand_generate(double* values, int num_values,
-        int num_per_thread, curandState* state)
+        int num_per_thread, curandState* state, int num_states)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (tid >= num_states) return;
 
     for (int i = 0; i < num_per_thread; ++i)
     {
         int idx = num_per_thread * tid + i;
         if (idx >= num_values) continue;
-        values[idx] = curand_normal_double(&state[idx]);
+        values[idx] = curand_normal_double(&state[tid]);
     }
 }

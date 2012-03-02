@@ -47,6 +47,19 @@ struct oskar_SettingsSkyFilter
 typedef struct oskar_SettingsSkyFilter oskar_SettingsSkyFilter;
 
 /**
+ * @struct oskar_SettingsSkyExtendedSources
+ *
+ * @brief Holds extended source settings which apply to all sources.
+ */
+struct oskar_SettingsSkyExtendedSources
+{
+    double FWHM_major;      /**< Major axis FWHM in radians. */
+    double FWHM_minor;      /**< Minor axis FWHM in radians. */
+    double position_angle;  /**< Position angle in radians. */
+};
+typedef struct oskar_SettingsSkyExtendedSources oskar_SettingsSkyExtendedSources;
+
+/**
  * @struct oskar_SettingsSkyGeneratorPowerLaw
  *
  * @brief Structure to hold settings for a sky model power-law generator.
@@ -57,6 +70,7 @@ typedef struct oskar_SettingsSkyFilter oskar_SettingsSkyFilter;
 struct oskar_SettingsSkyGeneratorRandomPowerLaw
 {
     oskar_SettingsSkyFilter filter;
+    oskar_SettingsSkyExtendedSources extended_sources;
     int num_sources;
     double flux_min;
     double flux_max;
@@ -77,6 +91,7 @@ typedef struct oskar_SettingsSkyGeneratorRandomPowerLaw oskar_SettingsSkyGenerat
 struct oskar_SettingsSkyGeneratorRandomBrokenPowerLaw
 {
     oskar_SettingsSkyFilter filter;
+    oskar_SettingsSkyExtendedSources extended_sources;
     int num_sources;
     double flux_min;
     double flux_max;
@@ -98,6 +113,7 @@ typedef struct oskar_SettingsSkyGeneratorRandomBrokenPowerLaw oskar_SettingsSkyG
 struct oskar_SettingsSkyGeneratorHealpix
 {
     oskar_SettingsSkyFilter filter;
+    oskar_SettingsSkyExtendedSources extended_sources;
     int nside;
 };
 typedef struct oskar_SettingsSkyGeneratorHealpix oskar_SettingsSkyGeneratorHealpix;
@@ -151,8 +167,12 @@ struct oskar_SettingsSky
 {
     char* input_sky_file;  /**< Name of sky model file to load. */
     oskar_SettingsSkyFilter input_sky_filter;
+    oskar_SettingsSkyExtendedSources input_sky_extended_sources;
+
     char* gsm_file;        /**< Name of global sky model file to load. */
     oskar_SettingsSkyFilter gsm_filter;
+    oskar_SettingsSkyExtendedSources gsm_extended_sources;
+
     char* output_sky_file; /**< Optional name of output sky model. */
     oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
     oskar_SettingsSkyNoise noise_model; /**< Noise model parameters. */

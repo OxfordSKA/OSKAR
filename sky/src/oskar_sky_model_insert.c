@@ -26,62 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_sky_model_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+
+#include "sky/oskar_sky_model_insert.h"
+#include "utility/oskar_mem_insert.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_sky_model_free(oskar_SkyModel* model)
+int oskar_sky_model_insert(oskar_SkyModel* dst, const oskar_SkyModel* src,
+        int offset)
 {
     int error = OSKAR_SUCCESS;
 
-    if (model == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Initialise the memory. */
-    error = oskar_mem_free(&model->RA);
+    error = oskar_mem_insert(&dst->RA, &src->RA, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->Dec);
+    error = oskar_mem_insert(&dst->Dec, &src->Dec, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->I);
+    error = oskar_mem_insert(&dst->I, &src->I, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->Q);
+    error = oskar_mem_insert(&dst->Q, &src->Q, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->U);
+    error = oskar_mem_insert(&dst->U, &src->U, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->V);
+    error = oskar_mem_insert(&dst->V, &src->V, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->reference_freq);
+    error = oskar_mem_insert(&dst->reference_freq, &src->reference_freq, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->spectral_index);
+    error = oskar_mem_insert(&dst->spectral_index, &src->spectral_index, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->rel_l);
+    error = oskar_mem_insert(&dst->rel_l, &src->rel_l, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->rel_m);
+    error = oskar_mem_insert(&dst->rel_m, &src->rel_m, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->rel_n);
+    error = oskar_mem_insert(&dst->rel_n, &src->rel_n, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->FWHM_major);
+    error = oskar_mem_insert(&dst->FWHM_major, &src->FWHM_major, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->FWHM_minor);
+    error = oskar_mem_insert(&dst->FWHM_minor, &src->FWHM_minor, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->position_angle);
+    error = oskar_mem_insert(&dst->position_angle, &src->position_angle, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->gaussian_a);
+    error = oskar_mem_insert(&dst->gaussian_a, &src->gaussian_a, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->gaussian_b);
+    error = oskar_mem_insert(&dst->gaussian_b, &src->gaussian_b, offset);
     if (error) return error;
-    error = oskar_mem_free(&model->gaussian_c);
+    error = oskar_mem_insert(&dst->gaussian_c, &src->gaussian_c, offset);
     if (error) return error;
 
-    /* Set meta-data */
-    model->num_sources = 0;
-    model->use_extended = OSKAR_FALSE;
-
-    return error;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

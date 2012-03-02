@@ -40,8 +40,9 @@ struct curandStateXORWOW;
 typedef struct curandStateXORWOW curandState;
 
 __global__
-void oskar_cudak_curand_state_init(curandState* state, unsigned long long seed,
-        unsigned long long offset, unsigned long long device_offset);
+void oskar_cudak_curand_state_init(curandState* state, int num_states,
+        unsigned long long seed, unsigned long long offset,
+        unsigned long long device_offset);
 
 
 #endif /* OSKAR_CUDAK_CURAND_INIT_H_ */
