@@ -46,29 +46,29 @@ int oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean)
 
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (mem->private_location != OSKAR_LOCATION_CPU)
+    if (mem->location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    if (mem->private_type == OSKAR_DOUBLE)
+    if (mem->type == OSKAR_DOUBLE)
     {
-        for (i = 0; i < mem->private_num_elements; ++i)
+        for (i = 0; i < mem->num_elements; ++i)
         {
             r1 = oskar_random_gaussian(NULL);
             ((double*)mem->data)[i] += r1 * stddev + mean;
         }
     }
-    else if (mem->private_type == OSKAR_DOUBLE_COMPLEX)
+    else if (mem->type == OSKAR_DOUBLE_COMPLEX)
     {
-        for (i = 0; i < mem->private_num_elements; ++i)
+        for (i = 0; i < mem->num_elements; ++i)
         {
             r1 = oskar_random_gaussian(&r2);
             ((double2*)mem->data)[i].x += r1 * stddev + mean;
             ((double2*)mem->data)[i].y += r2 * stddev + mean;
         }
     }
-    else if (mem->private_type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+    else if (mem->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        for (i = 0; i < mem->private_num_elements; ++i)
+        for (i = 0; i < mem->num_elements; ++i)
         {
             r1 = oskar_random_gaussian(&r2);
             ((double4c*)mem->data)[i].a.x += r1 * stddev + mean;

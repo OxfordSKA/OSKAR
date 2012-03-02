@@ -36,8 +36,8 @@ extern "C" {
 
 int oskar_mem_append(oskar_Mem* to, const oskar_Mem* from)
 {
-	return oskar_mem_append_raw(to, from->data, from->private_type,
-			from->private_location, from->private_num_elements);
+	return oskar_mem_append_raw(to, from->data, from->type,
+			from->location, from->num_elements);
 }
 
 #ifdef __cplusplus

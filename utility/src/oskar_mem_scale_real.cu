@@ -59,15 +59,9 @@ int oskar_mem_scale_real(oskar_Mem* mem, double value)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get memory meta-data. */
-#ifdef __cplusplus
-    type = mem->type();
-    location = mem->location();
-    num_elements = mem->num_elements();
-#else
-    type = mem->private_type;
-    location = mem->private_location;
-    num_elements = mem->private_num_elements;
-#endif
+    type = mem->type;
+    location = mem->location;
+    num_elements = mem->num_elements;
 
     /* Check if elements are real, complex or matrix. */
     if (oskar_mem_is_complex(type))

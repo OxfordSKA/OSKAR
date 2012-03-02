@@ -50,8 +50,8 @@ int oskar_station_model_set_element_weight(oskar_StationModel* dst,
         return OSKAR_ERR_OUT_OF_RANGE;
 
 	/* Get the data type. */
-	type = dst->weight.private_type;
-	location = dst->weight.private_location;
+	type = dst->weight.type;
+	location = dst->weight.location;
     element_size = oskar_mem_element_size(type);
     offset_bytes = index * element_size;
 

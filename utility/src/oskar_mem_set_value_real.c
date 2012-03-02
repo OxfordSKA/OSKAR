@@ -39,9 +39,9 @@ int oskar_mem_set_value_real(oskar_Mem* mem, double val)
     int i, n, type, location;
 
     /* Get the data type, location, and number of elements. */
-    type = mem->private_type;
-    location = mem->private_location;
-    n = mem->private_num_elements;
+    type = mem->type;
+    location = mem->location;
+    n = mem->num_elements;
 
     if (location == OSKAR_LOCATION_CPU)
     {

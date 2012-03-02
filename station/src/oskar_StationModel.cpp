@@ -55,7 +55,7 @@ oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
   parent(NULL),
   element_pattern(NULL)
 {
-    if (oskar_station_model_init(this, other->x.type(), location,
+    if (oskar_station_model_init(this, other->x.type, location,
             other->num_elements))
         throw "error in oskar_station_model_init";
     if (oskar_station_model_copy(this, other))

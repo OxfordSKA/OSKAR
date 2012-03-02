@@ -50,13 +50,8 @@ int oskar_image_write(const oskar_Image* image, const char* filename)
     FILE* stream;
 
     /* Get the metadata. */
-#ifdef __cplusplus
-    num_elements = image->data.num_elements();
-    type = image->data.type();
-#else
-    num_elements = image->data.private_num_elements;
-    type = image->data.private_type;
-#endif
+    num_elements = image->data.num_elements;
+    type = image->data.type;
 
     /* Sanity check on inputs. */
     if (filename == NULL || image == NULL)

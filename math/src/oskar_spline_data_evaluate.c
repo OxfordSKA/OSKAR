@@ -50,22 +50,22 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
     int err = 0, num_points, type, location;
 
     /* Check arrays are consistent. */
-    num_points = theta->private_num_elements;
+    num_points = theta->num_elements;
 
     /* Check type. */
-    type = theta->private_type;
-    if (type != phi->private_type)
+    type = theta->type;
+    if (type != phi->type)
         return OSKAR_ERR_TYPE_MISMATCH;
-    if (!oskar_mem_is_complex(output->private_type))
+    if (!oskar_mem_is_complex(output->type))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check location. */
-    location = output->private_location;
-    if (location != spline->coeff_re.private_location ||
-            location != spline->knots_x_re.private_location ||
-            location != spline->knots_y_re.private_location ||
-            location != theta->private_location ||
-            location != phi->private_location)
+    location = output->location;
+    if (location != spline->coeff_re.location ||
+            location != spline->knots_x_re.location ||
+            location != spline->knots_y_re.location ||
+            location != theta->location ||
+            location != phi->location)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Check if data are in CPU memory. */

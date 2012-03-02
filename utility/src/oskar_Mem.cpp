@@ -44,35 +44,35 @@
 #include "utility/oskar_mem_type_check.h"
 #include <cstdlib>
 
-oskar_Mem::oskar_Mem(int owner)
-: private_type(0),
-  private_location(0),
-  private_num_elements(0),
-  private_owner(owner),
+oskar_Mem::oskar_Mem(int owner_)
+: type(0),
+  location(0),
+  num_elements(0),
+  owner(owner_),
   data(NULL)
 {
 }
 
-oskar_Mem::oskar_Mem(int type, int location, int n_elements, int owner)
-: private_type(0),
-  private_location(0),
-  private_num_elements(0),
-  private_owner(0),
+oskar_Mem::oskar_Mem(int mem_type, int mem_location, int size, int owner_)
+: type(0),
+  location(0),
+  num_elements(0),
+  owner(0),
   data(NULL)
 {
-    if (oskar_mem_init(this, type, location, n_elements, owner))
+    if (oskar_mem_init(this, mem_type, mem_location, size, owner_))
         throw "Error in oskar_mem_init.";
 }
 
-oskar_Mem::oskar_Mem(const oskar_Mem* other, int location, int owner)
-: private_type(0),
-  private_location(0),
-  private_num_elements(0),
-  private_owner(0),
+oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
+: type(0),
+  location(0),
+  num_elements(0),
+  owner(0),
   data(NULL)
 {
-    if (oskar_mem_init(this, other->type(), location, other->num_elements(),
-            owner))
+    if (oskar_mem_init(this, other->type, mem_location, other->num_elements,
+            owner_))
         throw "Error in oskar_mem_init.";
     if (oskar_mem_copy(this, other)) // Copy other to this.
         throw "Error in oskar_mem_copy.";
@@ -90,10 +90,10 @@ int oskar_Mem::append(const oskar_Mem* from)
 }
 
 int oskar_Mem::append_raw(const void* from, int from_type, int from_location,
-        int num_elements)
+        int from_size)
 {
     return oskar_mem_append_raw(this, from, from_type, from_location,
-            num_elements);
+            from_size);
 }
 
 int oskar_Mem::binary_file_read(const char* filename,
@@ -136,16 +136,16 @@ int oskar_Mem::copy_to(oskar_Mem* other) const
     return oskar_mem_copy(other, this); // Copy this to other.
 }
 
-oskar_Mem oskar_Mem::get_pointer(int offset, int num_elements) const
+oskar_Mem oskar_Mem::get_pointer(int offset, int size) const
 {
     oskar_Mem ptr;
-    if (oskar_mem_get_pointer(&ptr, this, offset, num_elements) != 0)
+    if (oskar_mem_get_pointer(&ptr, this, offset, size) != 0)
     {
         ptr.data = NULL;
-        ptr.private_location = 0;
-        ptr.private_num_elements = 0;
-        ptr.private_owner = 0;
-        ptr.private_type = 0;
+        ptr.location = 0;
+        ptr.num_elements = 0;
+        ptr.owner = 0;
+        ptr.type = 0;
     }
     return ptr;
 }
@@ -155,9 +155,9 @@ int oskar_Mem::insert(const oskar_Mem* src, int offset)
     return oskar_mem_insert(this, src, offset);
 }
 
-int oskar_Mem::resize(int num_elements)
+int oskar_Mem::resize(int size)
 {
-    return oskar_mem_realloc(this, num_elements);
+    return oskar_mem_realloc(this, size);
 }
 
 int oskar_Mem::scale_real(double value)
@@ -172,48 +172,48 @@ int oskar_Mem::set_value_real(double value)
 
 bool oskar_Mem::is_double() const
 {
-    return oskar_mem_is_double(this->type());
+    return oskar_mem_is_double(this->type);
 }
 
 bool oskar_Mem::is_single() const
 {
-    return oskar_mem_is_single(this->type());
+    return oskar_mem_is_single(this->type);
 }
 
 bool oskar_Mem::is_complex() const
 {
-    return oskar_mem_is_complex(this->type());
+    return oskar_mem_is_complex(this->type);
 }
 
 bool oskar_Mem::is_real() const
 {
-    return oskar_mem_is_real(this->type());
+    return oskar_mem_is_real(this->type);
 }
 
 bool oskar_Mem::is_scalar() const
 {
-    return oskar_mem_is_scalar(this->type());
+    return oskar_mem_is_scalar(this->type);
 }
 
 bool oskar_Mem::is_matrix() const
 {
-    return oskar_mem_is_matrix(this->type());
+    return oskar_mem_is_matrix(this->type);
 }
 
 // static method
-bool oskar_Mem::is_double(const int type)
+bool oskar_Mem::is_double(const int type_)
 {
-    return oskar_mem_is_double(type);
+    return oskar_mem_is_double(type_);
 }
 
 // static method
-bool oskar_Mem::is_complex(const int type)
+bool oskar_Mem::is_complex(const int type_)
 {
-    return oskar_mem_is_complex(type);
+    return oskar_mem_is_complex(type_);
 }
 
 // static method
-bool oskar_Mem::is_scalar(const int type)
+bool oskar_Mem::is_scalar(const int type_)
 {
-    return oskar_mem_is_scalar(type);
+    return oskar_mem_is_scalar(type_);
 }

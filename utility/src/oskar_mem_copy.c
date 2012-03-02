@@ -45,25 +45,25 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check the data types. */
-    if (src->private_type != dst->private_type)
+    if (src->type != dst->type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Only copy the pointer if destination does not own its memory. */
-    if (dst->private_owner == OSKAR_FALSE)
+    if (dst->owner == OSKAR_FALSE)
     {
         /* Disallow a pointer copy at a different location. */
-        if (dst->private_location != src->private_location)
+        if (dst->location != src->location)
             return OSKAR_ERR_BAD_LOCATION;
 
-        error = oskar_mem_get_pointer(dst, src, 0, src->private_num_elements);
+        error = oskar_mem_get_pointer(dst, src, 0, src->num_elements);
         if (error) return error;
     }
     else
     {
         /* Check the data dimensions and resize if required. */
-        if (src->private_num_elements > dst->private_num_elements)
+        if (src->num_elements > dst->num_elements)
         {
-            error = oskar_mem_realloc(dst, src->private_num_elements);
+            error = oskar_mem_realloc(dst, src->num_elements);
             if (error) return error;
         }
 

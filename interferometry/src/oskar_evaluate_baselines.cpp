@@ -43,17 +43,17 @@ int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Get data type, location and size.
-    type = station_u->type();
-    num_stations = station_u->num_elements();
+    type = station_u->type;
+    num_stations = station_u->num_elements;
     num_baselines = num_stations * (num_stations - 1) / 2;
 
     // Check that the data is in the right location.
-    if (station_u->location() != OSKAR_LOCATION_CPU ||
-            station_v->location() != OSKAR_LOCATION_CPU ||
-            station_w->location() != OSKAR_LOCATION_CPU ||
-            baseline_u->location() != OSKAR_LOCATION_CPU ||
-            baseline_v->location() != OSKAR_LOCATION_CPU ||
-            baseline_w->location() != OSKAR_LOCATION_CPU)
+    if (station_u->location != OSKAR_LOCATION_CPU ||
+            station_v->location != OSKAR_LOCATION_CPU ||
+            station_w->location != OSKAR_LOCATION_CPU ||
+            baseline_u->location != OSKAR_LOCATION_CPU ||
+            baseline_v->location != OSKAR_LOCATION_CPU ||
+            baseline_w->location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check that the memory is not NULL.
@@ -63,17 +63,17 @@ int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
-    if (station_v->num_elements() < num_stations ||
-            station_w->num_elements() < num_stations ||
-            baseline_u->num_elements() < num_baselines ||
-            baseline_v->num_elements() < num_baselines ||
-            baseline_w->num_elements() < num_baselines)
+    if (station_v->num_elements < num_stations ||
+            station_w->num_elements < num_stations ||
+            baseline_u->num_elements < num_baselines ||
+            baseline_v->num_elements < num_baselines ||
+            baseline_w->num_elements < num_baselines)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is of the right type.
-    if (station_v->type() != type || station_w->type() != type ||
-            baseline_u->type() != type || baseline_v->type() != type ||
-            baseline_w->type() != type)
+    if (station_v->type != type || station_w->type != type ||
+            baseline_u->type != type || baseline_v->type != type ||
+            baseline_w->type != type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
     if (type == OSKAR_SINGLE)

@@ -44,19 +44,19 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Make sure the arrays are on the GPU.
-    if (l->location() != OSKAR_LOCATION_GPU ||
-            m->location() != OSKAR_LOCATION_GPU ||
-            n->location() != OSKAR_LOCATION_GPU ||
-            RA->location() != OSKAR_LOCATION_GPU ||
-            Dec->location() != OSKAR_LOCATION_GPU)
+    if (l->location != OSKAR_LOCATION_GPU ||
+            m->location != OSKAR_LOCATION_GPU ||
+            n->location != OSKAR_LOCATION_GPU ||
+            RA->location != OSKAR_LOCATION_GPU ||
+            Dec->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // TODO check arguments properly!
     // Get the number of sources.
-//    int num_sources = RA->num_elements();
+//    int num_sources = RA->private_num_elements;
 
 //    // Check that the dimensions are correct.
-//    if (num_sources != Dec->num_elements())
+//    if (num_sources != Dec->private_num_elements)
 //        return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the structures contains some sources.
@@ -65,29 +65,29 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
 //    // Make sure the work arrays are long enough.
-//    if (l->num_elements() < num_sources ||
-//            m->num_elements() < num_sources ||
-//            n->num_elements() < num_sources)
+//    if (l->private_num_elements < num_sources ||
+//            m->private_num_elements < num_sources ||
+//            n->private_num_elements < num_sources)
 //        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Local apparent Sidereal Time, in radians.
     double last = gast + station->longitude_rad;
 
     // Double precision.
-    if (RA->type() == OSKAR_DOUBLE && Dec->type() == OSKAR_DOUBLE &&
-            l->type() == OSKAR_DOUBLE && m->type() == OSKAR_DOUBLE &&
-            n->type() == OSKAR_DOUBLE)
+    if (RA->type == OSKAR_DOUBLE && Dec->type == OSKAR_DOUBLE &&
+            l->type == OSKAR_DOUBLE && m->type == OSKAR_DOUBLE &&
+            n->type == OSKAR_DOUBLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_d(l->num_elements(), *RA, *Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_d(l->num_elements, *RA, *Dec,
                 last, station->latitude_rad, *l, *m, *n);
     }
 
     // Single precision.
-    else if (RA->type() == OSKAR_SINGLE && Dec->type() == OSKAR_SINGLE &&
-            l->type() == OSKAR_SINGLE && m->type() == OSKAR_SINGLE &&
-            n->type() == OSKAR_SINGLE)
+    else if (RA->type == OSKAR_SINGLE && Dec->type == OSKAR_SINGLE &&
+            l->type == OSKAR_SINGLE && m->type == OSKAR_SINGLE &&
+            n->type == OSKAR_SINGLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_f(l->num_elements(), *RA, *Dec,
+        return oskar_ra_dec_to_hor_lmn_cuda_f(l->num_elements, *RA, *Dec,
                 (float)last, (float)station->latitude_rad, *l, *m, *n);
     }
     else

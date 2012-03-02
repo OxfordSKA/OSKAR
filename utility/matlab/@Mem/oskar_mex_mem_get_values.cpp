@@ -46,13 +46,13 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     oskar_Mem* mem_orig = covert_mxArray_to_pointer<oskar_Mem>(in[0]);
 
     // Copy back to CPU (if needed).
-    oskar_Mem* mem = (mem_orig->location() == OSKAR_LOCATION_GPU) ?
+    oskar_Mem* mem = (mem_orig->location == OSKAR_LOCATION_GPU) ?
             new oskar_Mem(mem_orig, OSKAR_LOCATION_CPU) : mem_orig;
 
     mxArray* values = NULL;
-    int n = mem->num_elements();
+    int n = mem->num_elements;
 
-    switch (mem->type())
+    switch (mem->type)
     {
         case OSKAR_SINGLE:
         {
@@ -138,7 +138,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     };
 
     // Free up memory if a copy was made on the host.
-    if (mem_orig->location() == OSKAR_LOCATION_GPU) delete mem;
+    if (mem_orig->location == OSKAR_LOCATION_GPU) delete mem;
 
     out[0] = values;
 }

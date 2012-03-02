@@ -126,6 +126,6 @@ void Test_fits_write::test_method()
     crota[3] = 0.0;
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, data.type(), 4, naxes, data.data, ctype,
+    oskar_fits_write(filename, data.type, 4, naxes, data.data, ctype,
             ctype_comment, crval, cdelt, crpix, crota);
 }

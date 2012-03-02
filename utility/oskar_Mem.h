@@ -48,30 +48,19 @@ struct oskar_BinaryTagIndex;
  * @brief Structure to wrap a memory pointer either on the CPU or GPU.
  *
  * @details
- * This is a valid C-structure that holds a memory pointer either on the CPU
+ * This structure holds a pointer to memory either on the CPU
  * or GPU, and defines the type of the data that it points to.
  *
- * If using C++, then the meta-data is made private, and accessor methods
- * are provided. The C++ interface also provides a facility for the structure
- * to take ownership of the memory: If the value of the private_owner member
- * variable is set to true, the memory will be released automatically
- * when the structure is deleted.
+ * In C++, the structure can take ownership of the memory: If the value of the
+ * private_owner member variable is set to true, the memory will be released
+ * automatically when the structure is deleted.
  */
 struct oskar_Mem
 {
-#ifdef __cplusplus
-/* If C++, then make the meta-data private. */
-private:
-#endif
-    int private_type; /**< Enumerated element type of memory block. */
-    int private_location; /**< Address space of data pointer. */
-    int private_num_elements; /**< Number of elements in memory block. */
-    int private_owner; /**< Flag set if the structure owns the memory. */
-
-#ifdef __cplusplus
-/* If C++, then make the remaining members public. */
-public:
-#endif
+    int type; /**< Enumerated element type of memory block. */
+    int location; /**< Address space of data pointer. */
+    int num_elements; /**< Number of elements in memory block. */
+    int owner; /**< Flag set if the structure owns the memory. */
     void* data; /**< Data pointer. */
 
 #ifdef __cplusplus
@@ -83,10 +72,10 @@ public:
      * Constructs a new oskar_Mem data structure.
      * The pointer and data types are all set to 0.
      *
-     * @param[in] owner Bool flag specifying if the structure should take
-     *                  ownership of the memory (default = true).
+     * @param[in] owner_ Bool flag specifying if the structure should take
+     *                   ownership of the memory (default = true).
      */
-    oskar_Mem(int owner = 1);
+    oskar_Mem(int owner_ = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
@@ -95,13 +84,13 @@ public:
      * Constructs a new oskar_Mem data structure, allocating memory for it in
      * the specified location.
      *
-     * @param[in] type         Enumerated data type of memory contents (magic number).
-     * @param[in] location     Specify 0 for host memory, 1 for device memory.
-     * @param[in] num_elements Number of elements of type \p type in the array.
-     * @param[in] owner        Bool flag specifying if the structure should take
+     * @param[in] mem_type     Enumerated data type of memory contents (magic number).
+     * @param[in] mem_location Specify 0 for host memory, 1 for device memory.
+     * @param[in] size         Number of elements of type \p type in the array.
+     * @param[in] owner_       Bool flag specifying if the structure should take
      *                         ownership of the memory (default = true).
      */
-    oskar_Mem(int type, int location, int num_elements = 0, int owner = 1);
+    oskar_Mem(int mem_type, int mem_location, int size = 0, int owner_ = 1);
 
     /**
      * @brief Constructs and allocates data for an oskar_Mem data structure.
@@ -110,12 +99,12 @@ public:
      * Constructs a new oskar_Mem data structure, allocating memory for it in
      * the specified location.
      *
-     * @param[in] other    Enumerated data type of memory contents (magic number).
-     * @param[in] location Specify 0 for host memory, 1 for device memory.
-     * @param[in] owner    Bool flag specifying if the structure should take
-     *                     ownership of the memory (default = true).
+     * @param[in] other        Pointer to another oskar_Mem data structure.
+     * @param[in] mem_location Specify 0 for host memory, 1 for device memory.
+     * @param[in] owner_       Bool flag specifying if the structure should
+     *                         take ownership of the memory (default = true).
      */
-    oskar_Mem(const oskar_Mem* other, int location, int owner = 1);
+    oskar_Mem(const oskar_Mem* other, int mem_location, int owner_ = 1);
 
     /**
      * @brief Destroys the structure.
@@ -142,12 +131,12 @@ public:
      * @param[in] from          Location from which to append to the current memory.
      * @param[in] from_type     Enumerated type of memory to be appended.
      * @param[in] from_location Location to append from.
-     * @param[in] num_elements  Number of elements to append.
+     * @param[in] from_size     Number of elements to append.
      *
      * @return A CUDA or OSKAR error code.
      */
-    int append_raw(const void* from, int type, int from_location,
-            int num_elements);
+    int append_raw(const void* from, int from_type, int from_location,
+            int from_size);
 
     /**
      * @brief
@@ -256,11 +245,11 @@ public:
      * which it points.
      *
      * @param[in] offset       Element offset into memory.
-     * @param[in] num_elements Number of elements of this referred to by output.
+     * @param[in] size         Number of elements of this referred to by output.
      *
      * @return A structure containing the required pointer.
      */
-    oskar_Mem get_pointer(int offset, int num_elements) const;
+    oskar_Mem get_pointer(int offset, int size) const;
 
     /**
      * @brief
@@ -289,11 +278,11 @@ public:
      * Resizes the memory to the specified number of elements. The
      * memory type and location are preserved.
      *
-     * @param[in] num_elements The required number of elements.
+     * @param[in] size The required number of elements.
      *
      * @return A CUDA or OSKAR error code.
      */
-    int resize(int num_elements);
+    int resize(int size);
 
     /**
      * @brief
@@ -322,14 +311,7 @@ public:
      * @return A CUDA or OSKAR error code.
      */
     int set_value_real(double value);
-#endif
 
-#ifdef __cplusplus
-    /* If C++, then provide read-only accessor functions for the meta-data. */
-    int type() const {return private_type;}
-    int location() const {return private_location;}
-    int num_elements() const {return private_num_elements;}
-    bool owner() const {return private_owner;}
     bool is_double() const;
     bool is_single() const;
     bool is_complex() const;

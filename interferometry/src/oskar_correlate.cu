@@ -43,11 +43,11 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     bool single_precision = false, double_precision = false;
 
     // Check data location.
-    if (vis->location() != OSKAR_LOCATION_GPU ||
+    if (vis->location != OSKAR_LOCATION_GPU ||
             J->location() != OSKAR_LOCATION_GPU ||
             sky->location() != OSKAR_LOCATION_GPU ||
-            u->location() != OSKAR_LOCATION_GPU ||
-            v->location() != OSKAR_LOCATION_GPU)
+            u->location != OSKAR_LOCATION_GPU ||
+            v->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check if single precision.
@@ -71,12 +71,12 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     // Check the input dimensions.
     int n_stations = telescope->num_stations;
     int n_sources = sky->num_sources;
-    if (J->num_sources() != n_sources || u->num_elements() != n_stations ||
-            v->num_elements() != n_stations)
+    if (J->num_sources() != n_sources || u->num_elements != n_stations ||
+            v->num_elements != n_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check there is enough space for the result.
-    if (vis->num_elements() < n_stations * (n_stations - 1) / 2)
+    if (vis->num_elements < n_stations * (n_stations - 1) / 2)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Get bandwidth-smearing term.

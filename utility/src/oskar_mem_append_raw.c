@@ -51,22 +51,22 @@ int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check that the data types match. */
-    if (to->private_type != from_type)
+    if (to->type != from_type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Memory size being appended and offset into memory to append to. */
-    element_size = oskar_mem_element_size(to->private_type);
+    element_size = oskar_mem_element_size(to->type);
     mem_size = num_elements * element_size;
-    offset_bytes = to->private_num_elements * element_size;
+    offset_bytes = to->num_elements * element_size;
 
     /* Reallocate the memory block so it is big enough to hold the new data. */
-    error = oskar_mem_realloc(to, num_elements + to->private_num_elements);
+    error = oskar_mem_realloc(to, num_elements + to->num_elements);
     if (error != 0) return error;
 
     /* Append to the memory. */
     if (from_location == OSKAR_LOCATION_CPU)
     {
-        if (to->private_location == OSKAR_LOCATION_CPU)
+        if (to->location == OSKAR_LOCATION_CPU)
             memcpy((char*)(to->data) + offset_bytes, from, mem_size);
         else
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
@@ -74,7 +74,7 @@ int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
     }
     else if (from_location == OSKAR_LOCATION_GPU)
     {
-        if (to->private_location == OSKAR_LOCATION_CPU)
+        if (to->location == OSKAR_LOCATION_CPU)
             cudaMemcpy((char*)(to->data) + offset_bytes, from,
                     mem_size, cudaMemcpyDeviceToHost);
         else

@@ -61,7 +61,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Allocate memory returned to the MATLAB work-space.
     mwSize coord_dims[2] = { num_baselines, num_times};
     mwSize amp_dims[3]   = {num_baselines, num_times, num_channels};
-    mxClassID class_id = (vis->uu_metres.type() == OSKAR_DOUBLE) ?
+    mxClassID class_id = (vis->uu_metres.type == OSKAR_DOUBLE) ?
             mxDOUBLE_CLASS : mxSINGLE_CLASS;
     mxArray* uu = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* vv = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);

@@ -65,15 +65,15 @@ void Test_Mem::test_realloc()
     error = oskar_mem_realloc(&mem_gpu, 500);
     CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
             cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
-    CPPUNIT_ASSERT_EQUAL(500, mem_gpu.num_elements());
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_gpu.type());
+    CPPUNIT_ASSERT_EQUAL(500, mem_gpu.num_elements);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_gpu.type);
 
     oskar_Mem mem_cpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 100);
     error = oskar_mem_realloc(&mem_cpu, 1000);
     CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
             cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
-    CPPUNIT_ASSERT_EQUAL(1000, mem_cpu.num_elements());
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE_COMPLEX, mem_cpu.type());
+    CPPUNIT_ASSERT_EQUAL(1000, mem_cpu.num_elements);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE_COMPLEX, mem_cpu.type);
 }
 
 
@@ -85,10 +85,10 @@ void Test_Mem::test_append()
         double value1 = 1.0;
         vector<double> data1(num_values1, value1);
         mem_cpu.append_raw((const void*)&data1[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values1);
-        CPPUNIT_ASSERT_EQUAL(num_values1, mem_cpu.num_elements());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type());
-        for (int i = 0; i < mem_cpu.num_elements(); ++i)
+        CPPUNIT_ASSERT_EQUAL(num_values1, mem_cpu.num_elements);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type);
+        for (int i = 0; i < mem_cpu.num_elements; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(value1, ((double*)mem_cpu.data)[i], 1.0e-5);
         }
@@ -96,10 +96,10 @@ void Test_Mem::test_append()
         double value2 = 2.0;
         vector<double> data2(num_values2, value2);
         mem_cpu.append_raw((const void*)&data2[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values2);
-        CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_cpu.num_elements());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type());
-        for (int i = 0; i < mem_cpu.num_elements(); ++i)
+        CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_cpu.num_elements);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type);
+        for (int i = 0; i < mem_cpu.num_elements; ++i)
         {
             if (i < num_values1)
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(value1, ((double*)mem_cpu.data)[i], 1.0e-5);
@@ -117,11 +117,11 @@ void Test_Mem::test_append()
         error = mem_gpu.append_raw((const void*)&data1[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
                 cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
-        CPPUNIT_ASSERT_EQUAL(num_values1, mem_gpu.num_elements());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, mem_gpu.location());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, mem_gpu.type());
+        CPPUNIT_ASSERT_EQUAL(num_values1, mem_gpu.num_elements);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, mem_gpu.location);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, mem_gpu.type);
         oskar_Mem mem_temp(&mem_gpu, OSKAR_LOCATION_CPU);
-        for (int i = 0; i < mem_gpu.num_elements(); ++i)
+        for (int i = 0; i < mem_gpu.num_elements; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(value1, ((float*)mem_temp.data)[i], 1.0e-5);
         }
@@ -132,11 +132,11 @@ void Test_Mem::test_append()
         error = mem_gpu.append_raw((const void*)&data2[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2);
         CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
                 cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
-        CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_gpu.num_elements());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, mem_gpu.location());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, mem_gpu.type());
+        CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_gpu.num_elements);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, mem_gpu.location);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, mem_gpu.type);
         oskar_Mem mem_temp2(&mem_gpu, OSKAR_LOCATION_CPU);
-        for (int i = 0; i < mem_gpu.num_elements(); ++i)
+        for (int i = 0; i < mem_gpu.num_elements; ++i)
         {
             if (i < num_values1)
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(value1, ((float*)mem_temp2.data)[i], 1.0e-5);
@@ -879,7 +879,7 @@ void Test_Mem::test_binary()
         oskar_Mem mem_gpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU);
         error = mem_gpu.binary_file_read_ext(filename, &index, "AA", "BB", 2);
         CPPUNIT_ASSERT_EQUAL(0, error);
-        CPPUNIT_ASSERT_EQUAL(num_gpu, mem_gpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(num_gpu, mem_gpu.num_elements);
 
         // Copy back to CPU and examine contents.
         oskar_Mem mem_cpu(&mem_gpu, OSKAR_LOCATION_CPU);
@@ -903,7 +903,7 @@ void Test_Mem::test_binary()
         oskar_Mem mem_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_cpu);
         error = mem_cpu.binary_file_read_ext(filename, &index, "USER", "TEST", 987654);
         CPPUNIT_ASSERT_EQUAL(0, error);
-        CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements);
         float* data = (float*)mem_cpu;
         for (int i = 0; i < num_cpu; ++i)
         {
@@ -919,7 +919,7 @@ void Test_Mem::test_binary()
         CPPUNIT_ASSERT_EQUAL(0, error);
         error = mem_cpu.binary_file_read_ext(filename, &index, "DOESN'T", "EXIST", 10);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, error);
-        CPPUNIT_ASSERT_EQUAL(2 * num_cpu, mem_cpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(2 * num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
         for (int i = 0; i < 2 * num_cpu; ++i)
         {
@@ -927,7 +927,7 @@ void Test_Mem::test_binary()
         }
         error = mem_cpu.binary_file_read_ext(filename, &index, "", "", 11);
         CPPUNIT_ASSERT_EQUAL(0, error);
-        CPPUNIT_ASSERT_EQUAL(2 * num_cpu, mem_cpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(2 * num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
         for (int i = 0; i < 2 * num_cpu; ++i)
         {
@@ -941,7 +941,7 @@ void Test_Mem::test_binary()
         oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
         error = mem_cpu.binary_file_read_ext(filename, &index, "ONE", "TWO", 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
-        CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
         for (int i = 0; i < num_cpu; ++i)
         {
@@ -949,7 +949,7 @@ void Test_Mem::test_binary()
         }
         error = mem_cpu.binary_file_read_ext(filename, &index, "DOG", "CAT", 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
-        CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
         for (int i = 0; i < num_cpu; ++i)
         {
@@ -962,7 +962,7 @@ void Test_Mem::test_binary()
         oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
         error = mem_cpu.binary_file_read_ext(filename, &index, "DOESN'T", "EXIST", 10);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, error);
-        CPPUNIT_ASSERT_EQUAL(0, mem_cpu.num_elements());
+        CPPUNIT_ASSERT_EQUAL(0, mem_cpu.num_elements);
     }
 
     // Free the tag index.

@@ -41,8 +41,8 @@ int oskar_apply_element_weights_errors(oskar_Mem* weights, int num_weights,
     if (weights == NULL || weights_error == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (weights->location() != OSKAR_LOCATION_GPU ||
-            weights_error->location() != OSKAR_LOCATION_GPU)
+    if (weights->location != OSKAR_LOCATION_GPU ||
+            weights_error->location != OSKAR_LOCATION_GPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
@@ -51,15 +51,15 @@ int oskar_apply_element_weights_errors(oskar_Mem* weights, int num_weights,
     int num_blocks = (num_weights + num_threads - 1) / num_threads;
 
 
-    if (weights->type() == OSKAR_DOUBLE_COMPLEX &&
-            weights_error->type() == OSKAR_DOUBLE_COMPLEX)
+    if (weights->type == OSKAR_DOUBLE_COMPLEX &&
+            weights_error->type == OSKAR_DOUBLE_COMPLEX)
     {
         oskar_cudak_vec_mul_cc_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads)
             (num_weights, *weights, *weights_error, *weights);
     }
-    else if (weights->type() == OSKAR_SINGLE_COMPLEX &&
-            weights_error->type() == OSKAR_SINGLE_COMPLEX)
+    else if (weights->type == OSKAR_SINGLE_COMPLEX &&
+            weights_error->type == OSKAR_SINGLE_COMPLEX)
     {
         oskar_cudak_vec_mul_cc_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads)

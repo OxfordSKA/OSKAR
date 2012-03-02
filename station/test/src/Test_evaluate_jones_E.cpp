@@ -142,9 +142,9 @@ void Test_evaluate_jones_E::evaluate_e()
             num_sources);
 
     oskar_Work work_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, work_gpu.real.type());
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX, work_gpu.complex.type());
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, work_gpu.matrix.type());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, work_gpu.real.type);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX, work_gpu.complex.type);
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, work_gpu.matrix.type);
 
     error = oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast,
             &work_gpu, &curand_state);

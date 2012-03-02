@@ -37,9 +37,9 @@ extern "C" {
 int oskar_telescope_model_is_type(const oskar_TelescopeModel* telescope,
         int type)
 {
-    return (telescope->station_x.private_type == type &&
-            telescope->station_y.private_type == type &&
-            telescope->station_z.private_type == type);
+    return (telescope->station_x.type == type &&
+            telescope->station_y.type == type &&
+            telescope->station_z.type == type);
 }
 
 int oskar_telescope_model_type(const oskar_TelescopeModel* telescope)

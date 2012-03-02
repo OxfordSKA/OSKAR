@@ -49,19 +49,19 @@ int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
 
     // Check that the data is in the right location.
     if (R->location() != OSKAR_LOCATION_GPU ||
-            sky->RA.location() != OSKAR_LOCATION_GPU ||
-            sky->Dec.location() != OSKAR_LOCATION_GPU)
+            sky->RA.location != OSKAR_LOCATION_GPU ||
+            sky->Dec.location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check that the data is of the right type.
     if (R->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        if (sky->RA.type() != OSKAR_SINGLE || sky->Dec.type() != OSKAR_SINGLE)
+        if (sky->RA.type != OSKAR_SINGLE || sky->Dec.type != OSKAR_SINGLE)
             return OSKAR_ERR_TYPE_MISMATCH;
     }
     else if (R->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        if (sky->RA.type() != OSKAR_DOUBLE || sky->Dec.type() != OSKAR_DOUBLE)
+        if (sky->RA.type != OSKAR_DOUBLE || sky->Dec.type != OSKAR_DOUBLE)
             return OSKAR_ERR_TYPE_MISMATCH;
     }
     else

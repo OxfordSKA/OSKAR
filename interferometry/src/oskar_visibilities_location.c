@@ -36,10 +36,10 @@ extern "C" {
 
 int oskar_visibilities_is_location(const oskar_Visibilities* vis, int location)
 {
-    return (vis->uu_metres.private_location == location &&
-            vis->vv_metres.private_location == location &&
-            vis->ww_metres.private_location == location &&
-            vis->amplitude.private_location == location);
+    return (vis->uu_metres.location == location &&
+            vis->vv_metres.location == location &&
+            vis->ww_metres.location == location &&
+            vis->amplitude.location == location);
 }
 
 int oskar_visibilities_location(const oskar_Visibilities* vis)

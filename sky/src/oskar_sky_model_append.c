@@ -41,17 +41,17 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
 
     /* Check data dimensions. */
     num_sources = src->num_sources;
-    if (num_sources > src->RA.private_num_elements  ||
-            num_sources > src->Dec.private_num_elements ||
-            num_sources > src->I.private_num_elements ||
-            num_sources > src->Q.private_num_elements ||
-            num_sources > src->U.private_num_elements ||
-            num_sources > src->V.private_num_elements ||
-            num_sources > src->reference_freq.private_num_elements ||
-            num_sources > src->spectral_index.private_num_elements ||
-            num_sources > src->FWHM_major.private_num_elements ||
-            num_sources > src->FWHM_minor.private_num_elements ||
-            num_sources > src->position_angle.private_num_elements)
+    if (num_sources > src->RA.num_elements  ||
+            num_sources > src->Dec.num_elements ||
+            num_sources > src->I.num_elements ||
+            num_sources > src->Q.num_elements ||
+            num_sources > src->U.num_elements ||
+            num_sources > src->V.num_elements ||
+            num_sources > src->reference_freq.num_elements ||
+            num_sources > src->spectral_index.num_elements ||
+            num_sources > src->FWHM_major.num_elements ||
+            num_sources > src->FWHM_minor.num_elements ||
+            num_sources > src->position_angle.num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }

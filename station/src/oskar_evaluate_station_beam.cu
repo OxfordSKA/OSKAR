@@ -62,19 +62,19 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     }
 
     // Check that the relevant memory is on the GPU.
-    if (E->location() != OSKAR_LOCATION_GPU ||
+    if (E->location != OSKAR_LOCATION_GPU ||
             station->coord_location() != OSKAR_LOCATION_GPU ||
-            weights->location() != OSKAR_LOCATION_GPU ||
-            l->location() != OSKAR_LOCATION_GPU ||
-            m->location() != OSKAR_LOCATION_GPU ||
-            n->location() != OSKAR_LOCATION_GPU)
+            weights->location != OSKAR_LOCATION_GPU ||
+            l->location != OSKAR_LOCATION_GPU ||
+            m->location != OSKAR_LOCATION_GPU ||
+            n->location != OSKAR_LOCATION_GPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-    if (l->num_elements() != E->num_elements() ||
-            m->num_elements() != E->num_elements() ||
-            n->num_elements() != E->num_elements())
+    if (l->num_elements != E->num_elements ||
+            m->num_elements != E->num_elements ||
+            n->num_elements != E->num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
@@ -87,7 +87,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     oskar_Mem weights_error;
 
     // Resize the weights work array if needed.
-    if (weights->num_elements() < 2 * station->num_elements)
+    if (weights->num_elements < 2 * station->num_elements)
     {
         int error = weights->resize(2 * station->num_elements);
         if (error) return error;

@@ -44,20 +44,20 @@ int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check the data types. */
-    type = one->private_type;
-    if (type != two->private_type)
+    type = one->type;
+    if (type != two->type)
         return OSKAR_TRUE;
 
     /* Check the number of elements. */
-    if (num_elements <= 0 || num_elements > one->private_num_elements)
-        num_elements = one->private_num_elements;
-    if (num_elements > two->private_num_elements)
+    if (num_elements <= 0 || num_elements > one->num_elements)
+        num_elements = one->num_elements;
+    if (num_elements > two->num_elements)
         return OSKAR_TRUE;
     bytes_to_check = num_elements * oskar_mem_element_size(type);
 
     /* Check data location. */
-    if (one->private_location == OSKAR_LOCATION_CPU &&
-            two->private_location == OSKAR_LOCATION_CPU)
+    if (one->location == OSKAR_LOCATION_CPU &&
+            two->location == OSKAR_LOCATION_CPU)
     {
         const char *p1, *p2;
 

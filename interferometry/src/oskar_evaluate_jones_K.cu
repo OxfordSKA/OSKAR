@@ -46,40 +46,40 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
 
     // Check that the data dimensions are OK.
     if (K->num_sources() != sky->num_sources ||
-            K->num_stations() != u->num_elements() ||
-            K->num_stations() != v->num_elements() ||
-            K->num_stations() != w->num_elements())
+            K->num_stations() != u->num_elements ||
+            K->num_stations() != v->num_elements ||
+            K->num_stations() != w->num_elements)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.
     if (K->location() != OSKAR_LOCATION_GPU ||
-            sky->rel_l.location() != OSKAR_LOCATION_GPU ||
-            sky->rel_m.location() != OSKAR_LOCATION_GPU ||
-            sky->rel_n.location() != OSKAR_LOCATION_GPU ||
-            u->location() != OSKAR_LOCATION_GPU ||
-            v->location() != OSKAR_LOCATION_GPU ||
-            w->location() != OSKAR_LOCATION_GPU)
+            sky->rel_l.location != OSKAR_LOCATION_GPU ||
+            sky->rel_m.location != OSKAR_LOCATION_GPU ||
+            sky->rel_n.location != OSKAR_LOCATION_GPU ||
+            u->location != OSKAR_LOCATION_GPU ||
+            v->location != OSKAR_LOCATION_GPU ||
+            w->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check that the data is of the right type.
     if (K->type() == OSKAR_SINGLE_COMPLEX)
     {
-        if (sky->rel_l.type() != OSKAR_SINGLE ||
-                sky->rel_m.type() != OSKAR_SINGLE ||
-                sky->rel_n.type() != OSKAR_SINGLE ||
-                u->type() != OSKAR_SINGLE ||
-                v->type() != OSKAR_SINGLE ||
-                w->type() != OSKAR_SINGLE)
+        if (sky->rel_l.type != OSKAR_SINGLE ||
+                sky->rel_m.type != OSKAR_SINGLE ||
+                sky->rel_n.type != OSKAR_SINGLE ||
+                u->type != OSKAR_SINGLE ||
+                v->type != OSKAR_SINGLE ||
+                w->type != OSKAR_SINGLE)
             return OSKAR_ERR_TYPE_MISMATCH;
     }
     else if (K->type() == OSKAR_DOUBLE_COMPLEX)
     {
-        if (sky->rel_l.type() != OSKAR_DOUBLE ||
-                sky->rel_m.type() != OSKAR_DOUBLE ||
-                sky->rel_n.type() != OSKAR_DOUBLE ||
-                u->type() != OSKAR_DOUBLE ||
-                v->type() != OSKAR_DOUBLE ||
-                w->type() != OSKAR_DOUBLE)
+        if (sky->rel_l.type != OSKAR_DOUBLE ||
+                sky->rel_m.type != OSKAR_DOUBLE ||
+                sky->rel_n.type != OSKAR_DOUBLE ||
+                u->type != OSKAR_DOUBLE ||
+                v->type != OSKAR_DOUBLE ||
+                w->type != OSKAR_DOUBLE)
             return OSKAR_ERR_TYPE_MISMATCH;
     }
     else

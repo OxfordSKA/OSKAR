@@ -49,20 +49,20 @@ int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
-    if (errors->num_elements() < num_elements ||
-            gain->num_elements() < num_elements ||
-            gain_error->num_elements() < num_elements ||
-            phase->num_elements() < num_elements ||
-            phase_error->num_elements() < num_elements)
+    if (errors->num_elements < num_elements ||
+            gain->num_elements < num_elements ||
+            gain_error->num_elements < num_elements ||
+            phase->num_elements < num_elements ||
+            phase_error->num_elements < num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    if (errors->location() != OSKAR_LOCATION_GPU ||
-            gain->location() != OSKAR_LOCATION_GPU ||
-            gain_error->location() != OSKAR_LOCATION_GPU ||
-            phase->location() != OSKAR_LOCATION_GPU ||
-            phase_error->location() != OSKAR_LOCATION_GPU)
+    if (errors->location != OSKAR_LOCATION_GPU ||
+            gain->location != OSKAR_LOCATION_GPU ||
+            gain_error->location != OSKAR_LOCATION_GPU ||
+            phase->location != OSKAR_LOCATION_GPU ||
+            phase_error->location != OSKAR_LOCATION_GPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }

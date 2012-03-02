@@ -59,18 +59,18 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
         return OSKAR_ERR_OUT_OF_RANGE;
 
     /* Get the data type. */
-    if (dst->amp_gain.private_type != dst->amp_gain_error.private_type ||
-            dst->amp_gain.private_type != dst->phase_offset.private_type ||
-            dst->amp_gain.private_type != dst->phase_error.private_type)
+    if (dst->amp_gain.type != dst->amp_gain_error.type ||
+            dst->amp_gain.type != dst->phase_offset.type ||
+            dst->amp_gain.type != dst->phase_error.type)
         return OSKAR_ERR_TYPE_MISMATCH;
-    type = dst->amp_gain.private_type;
+    type = dst->amp_gain.type;
 
     /* Get the data location. */
-    if (dst->amp_gain.private_location != dst->amp_gain_error.private_location ||
-            dst->amp_gain.private_location != dst->phase_offset.private_location ||
-            dst->amp_gain.private_location != dst->phase_error.private_location)
+    if (dst->amp_gain.location != dst->amp_gain_error.location ||
+            dst->amp_gain.location != dst->phase_offset.location ||
+            dst->amp_gain.location != dst->phase_error.location)
         return OSKAR_ERR_BAD_LOCATION;
-    location = dst->amp_gain.private_location;
+    location = dst->amp_gain.location;
 
     if (location == OSKAR_LOCATION_CPU)
     {

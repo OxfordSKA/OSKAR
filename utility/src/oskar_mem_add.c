@@ -43,53 +43,53 @@ int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
     if (a == NULL || b == NULL || c == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (b->private_type != c->private_type ||
-            a->private_type != b->private_type ||
-            a->private_type != c->private_type)
+    if (b->type != c->type ||
+            a->type != b->type ||
+            a->type != c->type)
     {
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    if (b->private_num_elements != c->private_num_elements ||
-            a->private_num_elements != b->private_num_elements ||
-            a->private_num_elements != c->private_num_elements)
+    if (b->num_elements != c->num_elements ||
+            a->num_elements != b->num_elements ||
+            a->num_elements != c->num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    if (b->private_location != c->private_location ||
-            a->private_location != b->private_location ||
-            a->private_location != c->private_location)
+    if (b->location != c->location ||
+            a->location != b->location ||
+            a->location != c->location)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
 
     /* Note OSKAR_INT type currently not supported. */
-    if (a->private_type == OSKAR_INT)
+    if (a->type == OSKAR_INT)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Note device memory currently not supported. */
-    if (a->private_location == OSKAR_LOCATION_GPU)
+    if (a->location == OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     if (a->data == NULL || b->data == NULL || c->data == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    num_elements = a->private_num_elements;
+    num_elements = a->num_elements;
 
-    if (oskar_mem_is_matrix(a->private_type))
+    if (oskar_mem_is_matrix(a->type))
         num_elements *= 4;
-    if (oskar_mem_is_complex(a->private_type))
+    if (oskar_mem_is_complex(a->type))
         num_elements *= 2;
 
-    if (oskar_mem_is_double(a->private_type))
+    if (oskar_mem_is_double(a->type))
     {
         for (i = 0; i < num_elements; ++i)
         {
             ((double*)a->data)[i] = ((double*)b->data)[i] + ((double*)c->data)[i];
         }
     }
-    else if (oskar_mem_is_single(a->private_type))
+    else if (oskar_mem_is_single(a->type))
     {
         for (i = 0; i < num_elements; ++i)
         {

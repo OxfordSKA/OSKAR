@@ -146,13 +146,13 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the types match.
-    if (output->type() != input->type() || input->type() != work->real.type())
+    if (output->type() != input->type() || input->type() != work->real.type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
     // Check for the correct location.
     if (output->location() != OSKAR_LOCATION_GPU ||
             input->location() != OSKAR_LOCATION_GPU ||
-            work->real.location() != OSKAR_LOCATION_GPU)
+            work->real.location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Copy extended source flag
@@ -170,12 +170,12 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
     }
 
     // Resize the work buffers if necessary.
-    if (work->integer.num_elements() < num_sources)
+    if (work->integer.num_elements < num_sources)
     {
         err = work->integer.resize(num_sources);
         if (err) return err;
     }
-    if (work->real.num_elements() < 3 * num_sources)
+    if (work->real.num_elements < 3 * num_sources)
     {
         err = work->real.resize(3 * num_sources);
         if (err) return err;

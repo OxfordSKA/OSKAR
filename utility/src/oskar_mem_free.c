@@ -44,11 +44,11 @@ int oskar_mem_free(oskar_Mem* mem)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Only free the memory if the structure actually owns it. */
-    if (mem->private_owner && mem->data != NULL)
+    if (mem->owner && mem->data != NULL)
     {
         /* Check whether the memory is on the host or the device. */
         int location;
-        location = mem->private_location;
+        location = mem->location;
         if (location == OSKAR_LOCATION_CPU)
         {
             /* Free host memory. */
@@ -66,10 +66,10 @@ int oskar_mem_free(oskar_Mem* mem)
         }
     }
     mem->data = NULL;
-    mem->private_location = 0;
-    mem->private_num_elements = 0;
-    mem->private_type = 0;
-    mem->private_owner = 0;
+    mem->location = 0;
+    mem->num_elements = 0;
+    mem->type = 0;
+    mem->owner = 0;
     return err;
 }
 

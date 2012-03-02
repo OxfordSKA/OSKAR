@@ -43,10 +43,10 @@ int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements,
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Set the meta-data. */
-    mem->private_type = type;
-    mem->private_location = location;
-    mem->private_num_elements = n_elements;
-    mem->private_owner = owner;
+    mem->type = type;
+    mem->location = location;
+    mem->num_elements = n_elements;
+    mem->owner = owner;
     mem->data = NULL;
 
     /* Allocate memory. */

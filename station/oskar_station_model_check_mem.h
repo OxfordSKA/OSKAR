@@ -55,15 +55,15 @@ inline int oskar_station_model_coord_type(const oskar_StationModel* station)
     if (station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (station->x.type() == OSKAR_DOUBLE &&
-            station->y.type() == OSKAR_DOUBLE &&
-            station->z.type() == OSKAR_DOUBLE)
+    if (station->x.type == OSKAR_DOUBLE &&
+            station->y.type == OSKAR_DOUBLE &&
+            station->z.type == OSKAR_DOUBLE)
     {
         return OSKAR_DOUBLE;
     }
-    else if (station->x.type() == OSKAR_SINGLE &&
-            station->y.type() == OSKAR_SINGLE &&
-            station->z.type() == OSKAR_SINGLE)
+    else if (station->x.type == OSKAR_SINGLE &&
+            station->y.type == OSKAR_SINGLE &&
+            station->z.type == OSKAR_SINGLE)
     {
         return OSKAR_SINGLE;
     }
@@ -87,15 +87,15 @@ inline int oskar_station_model_coord_location(const oskar_StationModel* station)
     if (station == NULL)
          return OSKAR_ERR_INVALID_ARGUMENT;
 
-     if (station->x.location() == OSKAR_LOCATION_CPU &&
-             station->y.location() == OSKAR_LOCATION_CPU &&
-             station->z.location() == OSKAR_LOCATION_CPU)
+     if (station->x.location == OSKAR_LOCATION_CPU &&
+             station->y.location == OSKAR_LOCATION_CPU &&
+             station->z.location == OSKAR_LOCATION_CPU)
      {
          return OSKAR_LOCATION_CPU;
      }
-     else if (station->x.location() == OSKAR_LOCATION_GPU &&
-             station->y.location() == OSKAR_LOCATION_GPU &&
-             station->z.location() == OSKAR_LOCATION_GPU)
+     else if (station->x.location == OSKAR_LOCATION_GPU &&
+             station->y.location == OSKAR_LOCATION_GPU &&
+             station->z.location == OSKAR_LOCATION_GPU)
      {
          return OSKAR_LOCATION_GPU;
      }

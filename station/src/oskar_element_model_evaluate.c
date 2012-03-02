@@ -42,15 +42,15 @@ int oskar_element_model_evaluate(oskar_Mem* output,
     int location, type, precision, n_points, err = 0;
 
     /* Get the meta-data. */
-    location = output->private_location;
-    type = output->private_type;
-    n_points = phi->private_num_elements;
+    location = output->location;
+    type = output->type;
+    n_points = phi->num_elements;
 
     /* Check that data locations are on the GPU. */
-    if (output->private_location != OSKAR_LOCATION_GPU ||
-            phi->private_location != OSKAR_LOCATION_GPU ||
-            theta->private_location != OSKAR_LOCATION_GPU ||
-            work->real.private_location != OSKAR_LOCATION_GPU)
+    if (output->location != OSKAR_LOCATION_GPU ||
+            phi->location != OSKAR_LOCATION_GPU ||
+            theta->location != OSKAR_LOCATION_GPU ||
+            work->real.location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Check type. */
@@ -65,13 +65,13 @@ int oskar_element_model_evaluate(oskar_Mem* output,
 
     /* Check type consistency. */
     if (!((oskar_mem_is_single(type) &&
-            oskar_mem_is_single(phi->private_type) &&
-            oskar_mem_is_single(theta->private_type) &&
-            oskar_mem_is_single(work->real.private_type)) ||
+            oskar_mem_is_single(phi->type) &&
+            oskar_mem_is_single(theta->type) &&
+            oskar_mem_is_single(work->real.type)) ||
             (oskar_mem_is_double(type) &&
-                    oskar_mem_is_double(phi->private_type) &&
-                    oskar_mem_is_double(theta->private_type) &&
-                    oskar_mem_is_double(work->real.private_type))))
+                    oskar_mem_is_double(phi->type) &&
+                    oskar_mem_is_double(theta->type) &&
+                    oskar_mem_is_double(work->real.type))))
         return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Interpolate element pattern data. */

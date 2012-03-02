@@ -58,12 +58,12 @@ int oskar_spline_data_compute_regrid(oskar_SplineData* spline, int num_x, int nu
     oskar_Mem x_axis, y_axis;
 
     /* Get the data type. */
-    type = data->private_type;
+    type = data->type;
     if (!((type == OSKAR_SINGLE) || (type == OSKAR_DOUBLE)))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
-    if (data->private_location != OSKAR_LOCATION_CPU)
+    if (data->location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise and allocate spline data. */

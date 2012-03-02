@@ -44,9 +44,9 @@ int oskar_station_model_write_coords(const char* filename,
     if (filename == NULL || station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (station->x.private_location == OSKAR_LOCATION_GPU ||
-            station->y.private_location == OSKAR_LOCATION_GPU ||
-            station->z.private_location == OSKAR_LOCATION_GPU)
+    if (station->x.location == OSKAR_LOCATION_GPU ||
+            station->y.location == OSKAR_LOCATION_GPU ||
+            station->z.location == OSKAR_LOCATION_GPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
@@ -63,9 +63,9 @@ int oskar_station_model_write_coords(const char* filename,
     fprintf(file, "# latitude (radians)  = %f\n", station->latitude_rad);
     fprintf(file, "# altitude (metres)   = %f\n", station->altitude_metres);
     fprintf(file, "# local horizontal x(east), y(north), z(zenith) [metres]\n");
-    if (station->x.private_type == OSKAR_DOUBLE &&
-            station->y.private_type == OSKAR_DOUBLE &&
-            station->z.private_type == OSKAR_DOUBLE)
+    if (station->x.type == OSKAR_DOUBLE &&
+            station->y.type == OSKAR_DOUBLE &&
+            station->z.type == OSKAR_DOUBLE)
     {
         for (i = 0; i < station->num_elements; ++i)
         {
@@ -75,9 +75,9 @@ int oskar_station_model_write_coords(const char* filename,
                     ((double*)station->z.data)[i]);
         }
     }
-    else if (station->x.private_type == OSKAR_SINGLE &&
-            station->y.private_type == OSKAR_SINGLE &&
-            station->z.private_type == OSKAR_SINGLE)
+    else if (station->x.type == OSKAR_SINGLE &&
+            station->y.type == OSKAR_SINGLE &&
+            station->z.type == OSKAR_SINGLE)
     {
         for (i = 0; i < station->num_elements; ++i)
         {

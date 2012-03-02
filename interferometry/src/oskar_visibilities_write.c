@@ -54,19 +54,19 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
 
     /* Get the metadata. */
 #ifdef __cplusplus
-    uu_elements = vis->uu_metres.num_elements();
-    vv_elements = vis->vv_metres.num_elements();
-    ww_elements = vis->ww_metres.num_elements();
-    amp_elements = vis->amplitude.num_elements();
-    amp_type = vis->amplitude.type();
-    coord_type = vis->uu_metres.type();
+    uu_elements = vis->uu_metres.num_elements;
+    vv_elements = vis->vv_metres.num_elements;
+    ww_elements = vis->ww_metres.num_elements;
+    amp_elements = vis->amplitude.num_elements;
+    amp_type = vis->amplitude.type;
+    coord_type = vis->uu_metres.type;
 #else
-    uu_elements = vis->uu_metres.private_num_elements;
-    vv_elements = vis->vv_metres.private_num_elements;
-    ww_elements = vis->ww_metres.private_num_elements;
-    amp_elements = vis->amplitude.private_num_elements;
-    amp_type = vis->amplitude.private_type;
-    coord_type = vis->uu_metres.private_type;
+    uu_elements = vis->uu_metres.num_elements;
+    vv_elements = vis->vv_metres.num_elements;
+    ww_elements = vis->ww_metres.num_elements;
+    amp_elements = vis->amplitude.num_elements;
+    amp_type = vis->amplitude.type;
+    coord_type = vis->uu_metres.type;
 #endif
 
     /* Sanity check on inputs. */

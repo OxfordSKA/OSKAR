@@ -37,9 +37,9 @@ extern "C" {
 int oskar_telescope_model_is_location(const oskar_TelescopeModel* telescope,
         int location)
 {
-    return (telescope->station_x.private_location == location &&
-            telescope->station_y.private_location == location &&
-            telescope->station_z.private_location == location);
+    return (telescope->station_x.location == location &&
+            telescope->station_y.location == location &&
+            telescope->station_z.location == location);
 }
 
 int oskar_telescope_model_location(const oskar_TelescopeModel* telescope)

@@ -56,21 +56,22 @@ int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
-    if (u->num_elements() < num_stations ||
-            v->num_elements() < num_stations ||
-            w->num_elements() < num_stations ||
-            telescope->station_x.num_elements() < num_stations ||
-            telescope->station_y.num_elements() < num_stations ||
-            telescope->station_z.num_elements() < num_stations)
+    if (u->num_elements < num_stations ||
+            v->num_elements < num_stations ||
+            w->num_elements < num_stations ||
+            telescope->station_x.num_elements < num_stations ||
+            telescope->station_y.num_elements < num_stations ||
+            telescope->station_z.num_elements < num_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.
-    if (u->location() != location || v->location() != location ||
-            w->location() != location)
+    if (u->location != location || v->location != location ||
+            w->location != location)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check that the data is of the right type.
-    if (u->type() != type || v->type() != type || w->type() != type)
+    if (u->type != type || v->type != type ||
+            w->type != type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
     // Evaluate Greenwich Hour Angle of phase centre.

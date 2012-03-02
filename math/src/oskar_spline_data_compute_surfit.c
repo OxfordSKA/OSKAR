@@ -149,13 +149,13 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
     void *wrk1, *wrk2;
 
     /* Get the data type. */
-    type = data_re->private_type;
+    type = data_re->type;
     element_size = oskar_mem_element_size(type);
     if ((type != OSKAR_SINGLE) && (type != OSKAR_DOUBLE))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
-    if (data_re->private_location != OSKAR_LOCATION_CPU)
+    if (data_re->location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise and allocate spline data. */

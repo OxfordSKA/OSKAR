@@ -47,12 +47,12 @@ int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get the meta-data. */
-    n_elements_src = src->private_num_elements;
-    n_elements_dst = dst->private_num_elements;
-    type_src = src->private_type;
-    type_dst = dst->private_type;
-    location_src = src->private_location;
-    location_dst = dst->private_location;
+    n_elements_src = src->num_elements;
+    n_elements_dst = dst->num_elements;
+    type_src = src->type;
+    type_dst = dst->type;
+    location_src = src->location;
+    location_dst = dst->location;
 
     /* Return immediately if there is nothing to copy. */
     if (src->data == NULL || n_elements_src == 0)

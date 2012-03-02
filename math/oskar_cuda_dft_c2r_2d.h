@@ -118,4 +118,4 @@ int oskar_cuda_dft_c2r_2d_d(int n_in, const double* x_in, const double* y_in,
 }
 #endif
 
-#endif // OSKAR_CUDA_DFT_C2R_2D_H_
+#endif /* OSKAR_CUDA_DFT_C2R_2D_H_ */

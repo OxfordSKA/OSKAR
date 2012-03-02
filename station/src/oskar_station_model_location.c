@@ -37,14 +37,14 @@ extern "C" {
 int oskar_station_model_is_location(const oskar_StationModel* station,
         int location)
 {
-    return (station->x.private_location == location &&
-            station->y.private_location == location &&
-            station->z.private_location == location &&
-            station->weight.private_location == location &&
-            station->amp_gain.private_location == location &&
-            station->amp_gain_error.private_location == location &&
-            station->phase_offset.private_location == location &&
-            station->phase_error.private_location == location);
+    return (station->x.location == location &&
+            station->y.location == location &&
+            station->z.location == location &&
+            station->weight.location == location &&
+            station->amp_gain.location == location &&
+            station->amp_gain_error.location == location &&
+            station->phase_offset.location == location &&
+            station->phase_error.location == location);
 }
 
 int oskar_station_model_location(const oskar_StationModel* station)

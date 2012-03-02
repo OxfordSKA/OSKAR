@@ -26,35 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_FITS_WRITE_IMAGE_H_
-#define TEST_FITS_WRITE_IMAGE_H_
+#ifndef OSKAR_FITS_IMAGE_WRITE_H_
+#define OSKAR_FITS_IMAGE_WRITE_H_
 
 /**
- * @file Test_fits_write_image.h
+ * @file oskar_fits_image_write.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "imaging/oskar_Image.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Writes an OSKAR image structure to a FITS image file.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function writes an OSKAR image structure to a FITS image file.
+ *
+ * Note that astronomical FITS images have their first pixel at the
+ * BOTTOM LEFT of the image, and their last pixel at the TOP RIGHT
+ * of the image.
+ *
+ * Although the FITS documentation says that "the ordering of arrays in
+ * FITS files ... is more similar to the dimensionality of arrays in Fortran
+ * rather than C" (http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node75.html),
+ * confusingly, the fastest-varying dimension is across the columns - i.e.
+ * C-ordered!
+ *
+ * By convention, astronomical radio FITS images are written with the
+ * following axis parameter keywords:
+ *
+ * - CTYPE1 = 'RA---SIN'
+ * - CDELT1 = (negative value)
+ * - CTYPE2 = 'DEC--SIN'
+ * - CDELT2 = (positive value)
+ *
+ * The first pixel therefore corresponds to:
+ * - the LARGEST Right Ascension, and
+ * - the SMALLEST Declination.
+ *
+ * The last pixel corresponds to:
+ * - the SMALLEST Right Ascension, and
+ * - the LARGEST Declination.
+ *
+ * The fastest varying dimension is along the RA axis.
+ *
  */
-class Test_fits_write_image : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_fits_write_image);
-        CPPUNIT_TEST(test_method);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+void oskar_fits_image_write(const oskar_Image* image, const char* filename);
 
-    public:
-        // Test methods.
-        void test_method();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_fits_write_image);
-
-#endif // TEST_FITS_WRITE_IMAGE_H_
+#endif /* OSKAR_FITS_IMAGE_WRITE_H_ */

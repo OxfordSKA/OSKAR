@@ -46,6 +46,7 @@ extern "C" {
  *
  * @details
  * This function writes (multi-dimensional) image data to an OSKAR binary file.
+ * If the file already exists, it is overwritten.
  *
  * @param[in] image   Pointer to image structure to save.
  * @param[in] filename Name of file to write.

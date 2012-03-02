@@ -53,7 +53,7 @@ oskar_TelescopeModel::oskar_TelescopeModel(const oskar_TelescopeModel* other,
 : num_stations(0),
   station(NULL)
 {
-    if (oskar_telescope_model_init(this, other->station_x.type(), location,
+    if (oskar_telescope_model_init(this, other->station_x.type, location,
             other->num_stations))
         throw "Error in oskar_telescope_model_init.";
     if (oskar_telescope_model_copy(this, other)) // Copy other to this.

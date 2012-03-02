@@ -36,23 +36,23 @@ extern "C" {
 
 int oskar_sky_model_is_location(const oskar_SkyModel* sky, int location)
 {
-    return (sky->RA.private_location == location &&
-            sky->Dec.private_location == location &&
-            sky->I.private_location == location &&
-            sky->Q.private_location == location &&
-            sky->U.private_location == location &&
-            sky->V.private_location == location &&
-            sky->reference_freq.private_location == location &&
-            sky->spectral_index.private_location == location &&
-            sky->rel_l.private_location == location &&
-            sky->rel_m.private_location == location &&
-            sky->rel_n.private_location == location &&
-            sky->FWHM_major.private_location == location &&
-            sky->FWHM_major.private_location == location &&
-            sky->position_angle.private_location == location &&
-            sky->gaussian_a.private_location == location &&
-            sky->gaussian_b.private_location == location &&
-            sky->gaussian_c.private_location == location);
+    return (sky->RA.location == location &&
+            sky->Dec.location == location &&
+            sky->I.location == location &&
+            sky->Q.location == location &&
+            sky->U.location == location &&
+            sky->V.location == location &&
+            sky->reference_freq.location == location &&
+            sky->spectral_index.location == location &&
+            sky->rel_l.location == location &&
+            sky->rel_m.location == location &&
+            sky->rel_n.location == location &&
+            sky->FWHM_major.location == location &&
+            sky->FWHM_major.location == location &&
+            sky->position_angle.location == location &&
+            sky->gaussian_a.location == location &&
+            sky->gaussian_b.location == location &&
+            sky->gaussian_c.location == location);
 }
 
 int oskar_sky_model_location(const oskar_SkyModel* sky)

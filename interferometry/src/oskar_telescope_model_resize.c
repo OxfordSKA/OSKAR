@@ -59,8 +59,8 @@ int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int num_statio
         for (i = old_size; i < num_stations; ++i)
         {
             error = oskar_station_model_init(&(telescope->station[i]),
-                    telescope->station_x.private_type,
-                    telescope->station_x.private_location, 0);
+                    telescope->station_x.type,
+                    telescope->station_x.location, 0);
             if (error) return error;
         }
     }

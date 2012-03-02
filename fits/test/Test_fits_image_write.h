@@ -26,52 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGER_DFT_H_
-#define OSKAR_IMAGER_DFT_H_
+#ifndef TEST_FITS_IMAGE_WRITE_H_
+#define TEST_FITS_IMAGE_WRITE_H_
 
 /**
- * @file oskar_imager_dft.cu.h
+ * @file Test_fits_image_write.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- *
- * @param[in]  num_vis      Number of visibility values.
- * @param[in]  vis          Complex visibility amplitude.
- * @param[in]  u            Baseline u co-ordinate, in metres!
- * @param[in]  v            Baseline v co-ordinate, in metres!
- * @param[in]  frequency    Frequency, in Hz.
- * @param[in]  image_size   Number of image pixels along each dimension.
- * @param[in]  l            Image l coordinates.
- * @param[out] image        Image array, must be pre allocated to a size of
- *                          num_pixels * num_pixels.
- *
- * @return CUDA error code.
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-OSKAR_EXPORT
-int oskar_imager_dft_d(const unsigned num_vis, const double2* vis, double* u,
-        double* v, const double frequency, const unsigned image_size,
-        const double* l, double* image);
+class Test_fits_image_write : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_fits_image_write);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
+    public:
+        // Test methods.
+        void test_method();
+};
 
-OSKAR_EXPORT
-int oskar_imager_dft_f(const unsigned num_vis, const float2* vis, float* u,
-        float* v, const float frequency, const unsigned image_size,
-        const float* l, float* image);
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_fits_image_write);
 
-
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // OSKAR_IMAGER_DFT_H_
+#endif // TEST_FITS_IMAGE_WRITE_H_

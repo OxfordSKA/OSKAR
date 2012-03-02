@@ -26,28 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/test/Test_fits_write_image.h"
-#include "fits/oskar_fits_write_image.h"
-#include "utility/oskar_Mem.h"
+#include "fits/test/Test_fits_image_write.h"
+#include "fits/oskar_fits_image_write.h"
+#include "imaging/oskar_Image.h"
+#include "imaging/oskar_image_free.h"
+#include "imaging/oskar_image_init.h"
+#include "imaging/oskar_image_resize.h"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
 
-void Test_fits_write_image::test_method()
+void Test_fits_image_write::test_method()
 {
     int columns = 10; // width
     int rows = 20; // height
-    double ra0 = 10.0;
-    double dec0 = 80.0;
-    double pixel_scale = 0.1;
-    double freq = 100e6;
-    double bw = 1e5;
-    oskar_Mem data(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, columns * rows);
-    const char filename[] = "cpp_unit_test_image.fits";
+    int err;
+
+    // Create the image.
+    oskar_Image image;
+    err = oskar_image_init(&image, OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+    CPPUNIT_ASSERT_EQUAL(0, err);
+    err = oskar_image_resize(&image, columns, rows, 1, 1, 1);
+    CPPUNIT_ASSERT_EQUAL(0, err);
+
+    // Add image meta-data.
+    image.centre_ra_deg = 10.0;
+    image.centre_dec_deg = 80.0;
+    image.fov_ra_deg = 1.0;
+    image.fov_dec_deg = 2.0;
+    image.freq_start_hz = 100e6;
+    image.freq_inc_hz = 1e5;
 
     // Define test data.
-    double* d = (double*) data.data;
+    double* d = (double*) image.data;
     for (int r = 0, i = 0; r < rows; ++r)
     {
         for (int c = 0; c < columns; ++c, ++i)
@@ -56,6 +68,10 @@ void Test_fits_write_image::test_method()
         }
     }
 
-    oskar_fits_write_image(filename, data.type(), columns, rows, data.data,
-            ra0, dec0, pixel_scale, freq, bw);
+    // Write the data.
+    const char filename[] = "cpp_unit_test_image.fits";
+    oskar_fits_image_write(&image, filename);
+
+    // Free memory.
+    oskar_image_free(&image);
 }

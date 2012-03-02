@@ -64,23 +64,23 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         return OSKAR_ERR_BAD_UNITS;
 
     // Resize the weights work array if needed.
-    if (weights->num_elements() < 2 * station->num_elements)
+    if (weights->num_elements < 2 * station->num_elements)
     {
         int error = weights->resize(2 * station->num_elements);
         if (error) return error;
     }
 
     int num_antennas = station->num_elements;
-    size_t element_size = oskar_mem_element_size(beam->type());
-    int num_sources = l->num_elements();
+    size_t element_size = oskar_mem_element_size(beam->type);
+    int num_sources = l->num_elements;
 
     // Double precision.
-    if (beam->type() == OSKAR_DOUBLE_COMPLEX &&
+    if (beam->type == OSKAR_DOUBLE_COMPLEX &&
             station->coord_type() == OSKAR_DOUBLE &&
-            weights->type() == OSKAR_DOUBLE_COMPLEX &&
-            l->type() == OSKAR_DOUBLE &&
-            m->type() == OSKAR_DOUBLE &&
-            n->type() == OSKAR_DOUBLE)
+            weights->type == OSKAR_DOUBLE_COMPLEX &&
+            l->type == OSKAR_DOUBLE &&
+            m->type == OSKAR_DOUBLE &&
+            n->type == OSKAR_DOUBLE)
     {
         // DFT weights.
         int num_threads = 256;
@@ -113,17 +113,17 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         // Zero the value of any positions below the horizon.
         oskar_cudak_blank_below_horizon_scalar_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (n->num_elements(), *n, *beam);
+            (n->num_elements, *n, *beam);
     }
 
 
     // Single precision.
-    else if (beam->type() == OSKAR_SINGLE_COMPLEX &&
+    else if (beam->type == OSKAR_SINGLE_COMPLEX &&
             station->coord_type() == OSKAR_SINGLE &&
-            weights->type() == OSKAR_SINGLE_COMPLEX &&
-            l->type() == OSKAR_SINGLE &&
-            m->type() == OSKAR_SINGLE &&
-            n->type() == OSKAR_SINGLE)
+            weights->type == OSKAR_SINGLE_COMPLEX &&
+            l->type == OSKAR_SINGLE &&
+            m->type == OSKAR_SINGLE &&
+            n->type == OSKAR_SINGLE)
     {
         // DFT weights.
         int num_threads = 256;
@@ -144,7 +144,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         // Zero the value of any positions below the horizon.
         oskar_cudak_blank_below_horizon_scalar_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (n->num_elements(), *n, *beam);
+            (n->num_elements, *n, *beam);
     }
     else
     {

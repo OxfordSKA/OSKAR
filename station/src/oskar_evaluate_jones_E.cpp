@@ -63,14 +63,14 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
     if (telescope->station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (work->real.type() != OSKAR_DOUBLE && work->real.type() != OSKAR_SINGLE)
+    if (work->real.type != OSKAR_DOUBLE && work->real.type != OSKAR_SINGLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     if (E->location() != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Resize the work buffer if needed.
-    if (work->real.num_elements() < 3 * sky->num_sources)
+    if (work->real.num_elements < 3 * sky->num_sources)
     {
         error = work->real.resize(3 * sky->num_sources);
         if (error) return error;

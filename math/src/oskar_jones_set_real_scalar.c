@@ -43,8 +43,8 @@ int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
     if (jones == NULL) return -1;
 
     /* Get the meta-data. */
-    location = jones->ptr.private_location;
-    type = jones->ptr.private_type;
+    location = jones->ptr.location;
+    type = jones->ptr.type;
     err = 0;
 
     /* Check the location of the data. */

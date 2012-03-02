@@ -26,66 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_WRITE_IMAGE_H_
-#define OSKAR_FITS_WRITE_IMAGE_H_
+#ifndef OSKAR_MAKE_IMAGE_DFT_H_
+#define OSKAR_MAKE_IMAGE_DFT_H_
 
 /**
- * @file oskar_fits_write_image.h
+ * @file oskar_make_image_dft.h
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Writes a block of memory to a simple 2D FITS image.
+ * @brief Makes an image of a set of visibilities using a DFT.
  *
  * @details
- * This function writes the contents of a block of memory to a FITS image.
- * The supplied parameters are written into the FITS header.
+ * This function uses a DFT (on the GPU) to make an image of a set of
+ * visibilities. The arrays of direction cosines must both be the same
+ * length, and correspond to the required pixel positions in the final
+ * image (they do not necessarily need to be on a grid).
  *
- * This function is intended to be used for simple 2D images of one frequency
- * channel and one polarisation (Stokes I) only.
+ * The output image is purely real and the pixel order is the same as the
+ * input l,m positions.
  *
- * Note that astronomical FITS images have their first pixel at the
- * BOTTOM LEFT of the image, and their last pixel at the TOP RIGHT
- * of the image.
+ * @param[out] image        Output image.
+ * @param[in]  uu_metres    Baseline u co-ordinates, in metres.
+ * @param[in]  vv_metres    Baseline v co-ordinates, in metres.
+ * @param[in]  amp          Complex visibility amplitude.
+ * @param[in]  l            Array of image l coordinates.
+ * @param[in]  m            Array of image m coordinates.
+ * @param[in]  frequency_hz Frequency, in Hz.
  *
- * Although the FITS documentation says that "the ordering of arrays in
- * FITS files ... is more similar to the dimensionality of arrays in Fortran
- * rather than C" (http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node75.html),
- * confusingly, the fastest-varying dimension is across the columns - i.e.
- * C-ordered!
- *
- * By convention, astronomical radio FITS images are written with the
- * following axis parameter keywords:
- *
- * - CTYPE1 = 'RA---SIN'
- * - CDELT1 = (negative value)
- * - CTYPE2 = 'DEC--SIN'
- * - CDELT2 = (positive value)
- *
- * The first pixel therefore corresponds to:
- * - the LARGEST Right Ascension, and
- * - the SMALLEST Declination.
- *
- * The last pixel corresponds to:
- * - the SMALLEST Right Ascension, and
- * - the LARGEST Declination.
- *
- * The fastest varying dimension is along the RA axis.
- *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-void oskar_fits_write_image(const char* filename, int type, int width,
-        int height, void* data, double ra, double dec, double pixel_scale,
-        double frequency, double bandwidth);
+int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
+        const oskar_Mem* vv_metres, const oskar_Mem* amp, const oskar_Mem* l,
+        const oskar_Mem* m, double frequency_hz);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_FITS_WRITE_IMAGE_H_ */
+#endif /* OSKAR_MAKE_IMAGE_DFT_H_ */

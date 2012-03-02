@@ -39,18 +39,18 @@ int oskar_station_model_is_type(const oskar_StationModel* station, int type)
 {
     /* Check the type of the weights array. */
     if ((type == OSKAR_SINGLE &&
-            !oskar_mem_is_single(station->weight.private_type)) ||
+            !oskar_mem_is_single(station->weight.type)) ||
             (type == OSKAR_DOUBLE &&
-                    !oskar_mem_is_double(station->weight.private_type)))
+                    !oskar_mem_is_double(station->weight.type)))
         return 0;
 
-    return (station->x.private_type == type &&
-            station->y.private_type == type &&
-            station->z.private_type == type &&
-            station->amp_gain.private_type == type &&
-            station->amp_gain_error.private_type == type &&
-            station->phase_offset.private_type == type &&
-            station->phase_error.private_type == type);
+    return (station->x.type == type &&
+            station->y.type == type &&
+            station->z.type == type &&
+            station->amp_gain.type == type &&
+            station->amp_gain_error.type == type &&
+            station->phase_offset.type == type &&
+            station->phase_error.type == type);
 }
 
 int oskar_station_model_type(const oskar_StationModel* station)

@@ -60,25 +60,25 @@ int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
-    if (vis->uu_metres.num_elements() < num_baselines * num_vis_dumps ||
-            vis->vv_metres.num_elements() < num_baselines * num_vis_dumps ||
-            vis->ww_metres.num_elements() < num_baselines * num_vis_dumps ||
-            telescope->station_x.num_elements() < num_stations ||
-            telescope->station_y.num_elements() < num_stations ||
-            telescope->station_z.num_elements() < num_stations)
+    if (vis->uu_metres.num_elements < num_baselines * num_vis_dumps ||
+            vis->vv_metres.num_elements < num_baselines * num_vis_dumps ||
+            vis->ww_metres.num_elements < num_baselines * num_vis_dumps ||
+            telescope->station_x.num_elements < num_stations ||
+            telescope->station_y.num_elements < num_stations ||
+            telescope->station_z.num_elements < num_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.
     if (telescope->location() != OSKAR_LOCATION_CPU ||
-            vis->uu_metres.location() != OSKAR_LOCATION_CPU ||
-            vis->vv_metres.location() != OSKAR_LOCATION_CPU ||
-            vis->ww_metres.location() != OSKAR_LOCATION_CPU)
+            vis->uu_metres.location != OSKAR_LOCATION_CPU ||
+            vis->vv_metres.location != OSKAR_LOCATION_CPU ||
+            vis->ww_metres.location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check that the data is of the right type.
-    if (vis->uu_metres.type() != type ||
-            vis->vv_metres.type() != type ||
-            vis->ww_metres.type() != type)
+    if (vis->uu_metres.type != type ||
+            vis->vv_metres.type != type ||
+            vis->ww_metres.type != type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
     // Create a local CPU work buffer.

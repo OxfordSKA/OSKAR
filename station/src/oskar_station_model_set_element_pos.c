@@ -49,16 +49,16 @@ int oskar_station_model_set_element_pos(oskar_StationModel* dst,
         return OSKAR_ERR_OUT_OF_RANGE;
 
     /* Get the data type. */
-    if (dst->x.private_type != dst->y.private_type ||
-            dst->x.private_type != dst->z.private_type)
+    if (dst->x.type != dst->y.type ||
+            dst->x.type != dst->z.type)
         return OSKAR_ERR_TYPE_MISMATCH;
-    type = dst->x.private_type;
+    type = dst->x.type;
 
     /* Get the data location. */
-    if (dst->x.private_location != dst->y.private_location ||
-            dst->x.private_location != dst->z.private_location)
+    if (dst->x.location != dst->y.location ||
+            dst->x.location != dst->z.location)
         return OSKAR_ERR_BAD_LOCATION;
-    location = dst->x.private_location;
+    location = dst->x.location;
 
     if (location == OSKAR_LOCATION_CPU)
     {

@@ -54,33 +54,33 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
-    if (num_sources > FWHM_major->private_num_elements ||
-            num_sources > FWHM_minor->private_num_elements ||
-            num_sources > position_angle->private_num_elements ||
-            num_sources > gaussian_a->private_num_elements ||
-            num_sources > gaussian_b->private_num_elements ||
-            num_sources > gaussian_c->private_num_elements)
+    if (num_sources > FWHM_major->num_elements ||
+            num_sources > FWHM_minor->num_elements ||
+            num_sources > position_angle->num_elements ||
+            num_sources > gaussian_a->num_elements ||
+            num_sources > gaussian_b->num_elements ||
+            num_sources > gaussian_c->num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
     /* Return if memory is not on the CPU. */
-    if (gaussian_a->private_location != OSKAR_LOCATION_CPU ||
-            gaussian_b->private_location != OSKAR_LOCATION_CPU ||
-            gaussian_c->private_location != OSKAR_LOCATION_CPU ||
-            FWHM_major->private_location != OSKAR_LOCATION_CPU ||
-            FWHM_minor->private_location != OSKAR_LOCATION_CPU ||
-            position_angle->private_location != OSKAR_LOCATION_CPU)
+    if (gaussian_a->location != OSKAR_LOCATION_CPU ||
+            gaussian_b->location != OSKAR_LOCATION_CPU ||
+            gaussian_c->location != OSKAR_LOCATION_CPU ||
+            FWHM_major->location != OSKAR_LOCATION_CPU ||
+            FWHM_minor->location != OSKAR_LOCATION_CPU ||
+            position_angle->location != OSKAR_LOCATION_CPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-    if (gaussian_a->private_type == OSKAR_DOUBLE ||
-            gaussian_b->private_type == OSKAR_DOUBLE ||
-            gaussian_c->private_type == OSKAR_DOUBLE ||
-            FWHM_major->private_type == OSKAR_DOUBLE ||
-            FWHM_minor->private_type == OSKAR_DOUBLE ||
-            position_angle->private_type == OSKAR_DOUBLE)
+    if (gaussian_a->type == OSKAR_DOUBLE ||
+            gaussian_b->type == OSKAR_DOUBLE ||
+            gaussian_c->type == OSKAR_DOUBLE ||
+            FWHM_major->type == OSKAR_DOUBLE ||
+            FWHM_minor->type == OSKAR_DOUBLE ||
+            position_angle->type == OSKAR_DOUBLE)
     {
         for (i = 0; i < num_sources; ++i)
         {
@@ -100,12 +100,12 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
             ((double*)gaussian_c->data)[i] = c;
         }
     }
-    else if (gaussian_a->private_type == OSKAR_SINGLE ||
-            gaussian_b->private_type == OSKAR_SINGLE ||
-            gaussian_c->private_type == OSKAR_SINGLE ||
-            FWHM_major->private_type == OSKAR_SINGLE ||
-            FWHM_minor->private_type == OSKAR_SINGLE ||
-            position_angle->private_type == OSKAR_SINGLE)
+    else if (gaussian_a->type == OSKAR_SINGLE ||
+            gaussian_b->type == OSKAR_SINGLE ||
+            gaussian_c->type == OSKAR_SINGLE ||
+            FWHM_major->type == OSKAR_SINGLE ||
+            FWHM_minor->type == OSKAR_SINGLE ||
+            position_angle->type == OSKAR_SINGLE)
     {
         for (i = 0; i < num_sources; ++i)
         {

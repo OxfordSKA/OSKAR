@@ -57,13 +57,8 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get the meta-data. */
-#ifdef __cplusplus
-    type = mem->type();
-    location = mem->location();
-#else
-    type = mem->private_type;
-    location = mem->private_location;
-#endif
+    type = mem->type;
+    location = mem->location;
 
     /* Initialise temporary (to zero length). */
     oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
@@ -130,13 +125,8 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get the meta-data. */
-#ifdef __cplusplus
-    type = mem->type();
-    location = mem->location();
-#else
-    type = mem->private_type;
-    location = mem->private_location;
-#endif
+    type = mem->type;
+    location = mem->location;
 
     /* Initialise temporary (to zero length). */
     oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);

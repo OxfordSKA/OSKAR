@@ -11,7 +11,7 @@ target_link_libraries(test_uvfits_writer
 if (CPPUNIT_FOUND)
     set(fits_test_SRC
         src/CppUnitMain.cpp
-        src/Test_fits_write_image.cpp
+        src/Test_fits_image_write.cpp
         src/Test_fits_write.cpp
     )
 

@@ -36,23 +36,23 @@ extern "C" {
 
 int oskar_sky_model_is_type(const oskar_SkyModel* sky, int type)
 {
-    return (sky->RA.private_type == type &&
-            sky->Dec.private_type == type &&
-            sky->I.private_type == type &&
-            sky->Q.private_type == type &&
-            sky->U.private_type == type &&
-            sky->V.private_type == type &&
-            sky->reference_freq.private_type == type &&
-            sky->spectral_index.private_type == type &&
-            sky->rel_l.private_type == type &&
-            sky->rel_m.private_type == type &&
-            sky->rel_n.private_type == type &&
-            sky->FWHM_major.private_type == type &&
-            sky->FWHM_minor.private_type == type &&
-            sky->position_angle.private_type == type &&
-            sky->gaussian_a.private_type == type &&
-            sky->gaussian_b.private_type == type &&
-            sky->gaussian_c.private_type == type);
+    return (sky->RA.type == type &&
+            sky->Dec.type == type &&
+            sky->I.type == type &&
+            sky->Q.type == type &&
+            sky->U.type == type &&
+            sky->V.type == type &&
+            sky->reference_freq.type == type &&
+            sky->spectral_index.type == type &&
+            sky->rel_l.type == type &&
+            sky->rel_m.type == type &&
+            sky->rel_n.type == type &&
+            sky->FWHM_major.type == type &&
+            sky->FWHM_minor.type == type &&
+            sky->position_angle.type == type &&
+            sky->gaussian_a.type == type &&
+            sky->gaussian_b.type == type &&
+            sky->gaussian_c.type == type);
 }
 
 int oskar_sky_model_type(const oskar_SkyModel* sky)

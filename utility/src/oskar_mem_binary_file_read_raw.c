@@ -43,7 +43,7 @@ extern "C" {
 
 int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
 {
-    int err, type, location, num_elements, element_size;
+    int err, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
@@ -53,20 +53,11 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     if (mem == NULL || filename == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Get the meta-data. */
-#ifdef __cplusplus
-    type = mem->type();
-    location = mem->location();
-#else
-    type = mem->private_type;
-    location = mem->private_location;
-#endif
-
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_mem_init(&temp, mem->type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;
 
     /* Open the input file. */
     stream = fopen(filename, "rb");
@@ -78,7 +69,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     size_bytes = ftell(stream);
 
     /* Resize memory block so that it can hold the data. */
-    element_size = oskar_mem_element_size(type);
+    element_size = oskar_mem_element_size(mem->type);
     num_elements = (int)ceil(size_bytes / element_size);
     err = oskar_mem_realloc(data, num_elements);
     if (err)
@@ -102,7 +93,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     fclose(stream);
 
     /* Copy to GPU memory if required. */
-    if (location == OSKAR_LOCATION_GPU)
+    if (mem->location == OSKAR_LOCATION_GPU)
         err = oskar_mem_copy(mem, &temp);
 
     /* Free the temporary. */

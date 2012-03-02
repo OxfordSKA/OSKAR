@@ -44,12 +44,12 @@ int oskar_mem_alloc(oskar_Mem* mem)
     if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check if the structure owns the memory it points to. */
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (mem->owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Get the meta-data. */
-    n_elements = mem->private_num_elements;
-    location = mem->private_location;
-    type = mem->private_type;
+    n_elements = mem->num_elements;
+    location = mem->location;
+    type = mem->type;
 
     /* Check if allocation should happen or not. */
     if (n_elements == 0)

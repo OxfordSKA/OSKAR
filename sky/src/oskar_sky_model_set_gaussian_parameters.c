@@ -42,9 +42,9 @@ int oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
     if (sky == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (sky->num_sources > sky->FWHM_major.private_num_elements ||
-            sky->num_sources > sky->FWHM_minor.private_num_elements ||
-            sky->num_sources > sky->position_angle.private_num_elements)
+    if (sky->num_sources > sky->FWHM_major.num_elements ||
+            sky->num_sources > sky->FWHM_minor.num_elements ||
+            sky->num_sources > sky->position_angle.num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }

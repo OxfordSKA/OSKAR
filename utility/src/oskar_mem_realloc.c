@@ -47,17 +47,17 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check if the structure owns the memory it points to. */
-    if (mem->private_owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (mem->owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Get size of new and old memory blocks. */
-    element_size = oskar_mem_element_size(mem->private_type);
+    element_size = oskar_mem_element_size(mem->type);
     if (element_size == 0)
         return OSKAR_ERR_BAD_DATA_TYPE;
     new_size = num_elements * element_size;
-    old_size = mem->private_num_elements * element_size;
+    old_size = mem->num_elements * element_size;
 
     /* Check memory location. */
-    if (mem->private_location == OSKAR_LOCATION_CPU)
+    if (mem->location == OSKAR_LOCATION_CPU)
     {
         /* Reallocate the memory. */
         void* mem_new = NULL;
@@ -67,9 +67,9 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 
         /* Set the new meta-data. */
         mem->data = mem_new;
-        mem->private_num_elements = num_elements;
+        mem->num_elements = num_elements;
     }
-    else if (mem->private_location == OSKAR_LOCATION_GPU)
+    else if (mem->location == OSKAR_LOCATION_GPU)
     {
         /* Allocate a new block of memory. */
         size_t copy_size;
@@ -86,7 +86,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 
         /* Set the new meta-data. */
         mem->data = mem_new;
-        mem->private_num_elements = num_elements;
+        mem->num_elements = num_elements;
     }
     else
     {

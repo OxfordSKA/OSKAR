@@ -35,12 +35,12 @@ extern "C" {
 int oskar_spline_data_type(const oskar_SplineData* data)
 {
     int type;
-    type = data->knots_x_re.private_type;
-    if (type != data->knots_x_im.private_type ||
-            type != data->knots_y_re.private_type ||
-            type != data->knots_y_im.private_type ||
-            type != data->coeff_re.private_type ||
-            type != data->coeff_im.private_type)
+    type = data->knots_x_re.type;
+    if (type != data->knots_x_im.type ||
+            type != data->knots_y_re.type ||
+            type != data->knots_y_im.type ||
+            type != data->coeff_re.type ||
+            type != data->coeff_im.type)
         return OSKAR_ERR_TYPE_MISMATCH;
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;

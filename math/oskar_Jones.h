@@ -36,36 +36,21 @@
 #include "utility/oskar_Mem.h"
 
 /**
- * @brief Structure to hold Jones matrix meta-data.
+ * @brief Structure to hold Jones matrix and meta-data.
  *
  * @details
- * This is a valid C-structure that holds the memory pointer and meta-data
+ * This structure holds the memory pointer and meta-data
  * for a type of Jones matrix.
- *
- * If using C++, then the meta-data is made private, and read-only accessor
- * functions are also provided.
  *
  * The fastest-varying dimension is the source dimension; the slowest varying
  * is the station dimension.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 struct oskar_Jones
 {
-#ifdef __cplusplus
-/* If C++, then make the meta-data private. */
-private:
-#endif
     int private_num_stations; /**< Slowest varying dimension. */
     int private_num_sources;  /**< Fastest varying dimension. */
     int private_cap_stations; /**< Slowest varying dimension. */
     int private_cap_sources;  /**< Fastest varying dimension. */
-
-#ifdef __cplusplus
-/* If C++, then make the remaining members public. */
-public:
-#endif
     oskar_Mem ptr; /**< Pointer to the matrix data. */
 
 #ifdef __cplusplus
@@ -165,10 +150,10 @@ public:
      */
     int set_size(int num_stations, int num_sources);
 
-    int type() const {return ptr.type();}
+    int type() const {return ptr.type;}
     int num_sources() const {return private_num_sources;}
     int num_stations() const {return private_num_stations;}
-    int location() const {return ptr.location();}
+    int location() const {return ptr.location;}
 #endif
 };
 
