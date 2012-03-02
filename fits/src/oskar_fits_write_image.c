@@ -50,22 +50,21 @@ void oskar_fits_write_image(const char* filename, int type, int width,
     long naxes[4];
     double crval[4], crpix[4], cdelt[4], crota[4];
     fitsfile* fptr = NULL;
+    const char **ctype, **ctype_comment;
 
     /* Axis types. */
-    const char* ctype[] = {
-            "RA---SIN",
-            "DEC--SIN",
-            "FREQ",
-            "STOKES"
-    };
+    ctype = (const char**) calloc(4, sizeof(const char*));
+    ctype[0] = "RA---SIN";
+    ctype[1] = "DEC--SIN";
+    ctype[2] = "FREQ";
+    ctype[3] = "STOKES";
 
     /* Axis comments. */
-    const char* ctype_comment[] = {
-            "Right Ascension",
-            "Declination",
-            "Frequency",
-            "Polarisation"
-    };
+    ctype_comment = (const char**) calloc(4, sizeof(const char*));
+    ctype_comment[0] = "Right Ascension";
+    ctype_comment[1] = "Declination";
+    ctype_comment[2] = "Frequency";
+    ctype_comment[3] = "Polarisation";
 
     /* Axis dimensions. */
     naxes[0] = width;
@@ -119,6 +118,10 @@ void oskar_fits_write_image(const char* filename, int type, int width,
     /* Close the FITS file. */
     fits_close_file(fptr, &status);
     oskar_fits_check_status(status, "Closing file");
+
+    /* Free memory. */
+    free(ctype);
+    free(ctype_comment);
 }
 
 #ifdef __cplusplus

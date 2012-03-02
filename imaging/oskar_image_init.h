@@ -47,15 +47,21 @@ extern "C" {
  * @details
  * This function initialises an image structure.
  *
+ * The dimension order is set by default to:
+ * - RA (fastest varying)
+ * - Dec
+ * - Polarisation
+ * - Time
+ * - Channel (slowest varying)
+ *
+ * Use oskar_image_resize to allocate memory for the image data.
+ *
  * @param[in] image    Pointer to image structure.
  * @param[in] type     Data type of image.
  * @param[in] location Location of image data.
- * @param[in] width    Width of image.
- * @param[in] height   Height of image.
  */
 OSKAR_EXPORT
-int oskar_image_init(oskar_Image* image, int type, int location, int width,
-        int height);
+int oskar_image_init(oskar_Image* image, int type, int location);
 
 #ifdef __cplusplus
 }

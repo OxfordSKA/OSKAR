@@ -26,63 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_image_init.h"
+#ifndef OSKAR_IMAGE_RESIZE_H_
+#define OSKAR_IMAGE_RESIZE_H_
+
+/**
+ * @file oskar_image_resize.h
+ */
+
+#include "oskar_global.h"
 #include "imaging/oskar_Image.h"
-#include "utility/oskar_mem_init.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_image_init(oskar_Image* image, int type, int location)
-{
-    int err, *dim;
-
-    /* Sanity check on inputs. */
-    if (image == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Initialise memory. */
-    err = oskar_mem_init(&image->data, type, location, 0, 1);
-    if (err) return err;
-    err = oskar_mem_init(&image->dimension_order, OSKAR_INT,
-            OSKAR_LOCATION_CPU, 5, 1);
-    err = oskar_mem_init(&image->settings_path, OSKAR_CHAR,
-            OSKAR_LOCATION_CPU, 0, 1);
-    if (err) return err;
-
-    /* Set default dimension order. */
-    dim = (int*) image->dimension_order.data;
-    dim[0] = OSKAR_IMAGE_DIM_RA;
-    dim[1] = OSKAR_IMAGE_DIM_DEC;
-    dim[2] = OSKAR_IMAGE_DIM_POL;
-    dim[3] = OSKAR_IMAGE_DIM_TIME;
-    dim[4] = OSKAR_IMAGE_DIM_CHANNEL;
-
-    /* Initialise meta-data. */
-    image->centre_dec_deg = 0.0;
-    image->centre_ra_deg = 0.0;
-    image->fov_dec_deg = 0.0;
-    image->fov_ra_deg = 0.0;
-    image->freq_inc_hz = 0.0;
-    image->freq_start_hz = 0.0;
-    image->height = 0;
-    image->max = 0.0;
-    image->mean = 0.0;
-    image->min = 0.0;
-    image->num_channels = 0;
-    image->num_pols = 0;
-    image->num_times = 0;
-    image->rms = 0.0;
-    image->time_inc_sec = 0.0;
-    image->time_start_mjd_utc = 0.0;
-    image->variance = 0.0;
-    image->width = 0;
-
-    return OSKAR_SUCCESS;
-}
+/**
+ * @brief
+ * Resizes memory held by an image structure.
+ *
+ * @details
+ * This function resizes memory held by an image structure.
+ *
+ * @param[in] image          Pointer to image structure.
+ * @param[in] width          Required width of image in pixels.
+ * @param[in] height         Required height of image in pixels.
+ * @param[in] num_pols       Required size of polarisation dimension.
+ * @param[in] num_times      Required size of time dimension.
+ * @param[in] num_channels   Required size of frequency dimension.
+ */
+OSKAR_EXPORT
+int oskar_image_resize(oskar_Image* image, int width, int height,
+        int num_pols, int num_times, int num_channels);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGE_RESIZE_H_ */
