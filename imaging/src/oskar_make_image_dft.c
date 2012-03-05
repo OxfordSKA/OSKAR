@@ -44,7 +44,6 @@
 extern "C" {
 #endif
 
-#if 0
 int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         const oskar_Mem* vv_metres, const oskar_Mem* amp, const oskar_Mem* l,
         const oskar_Mem* m, double frequency_hz)
@@ -52,7 +51,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     oskar_Mem u, v, t_l, t_m, t_amp, t_image, *p_image;
     const oskar_Mem *p_l, *p_m, *p_amp;
     double wavenumber;
-    int err, type, loc_image, loc_amp, loc_l, loc_m, num_vis, num_pixels;
+    int err, type, num_vis, num_pixels;
 
     /* Check types. */
     type = image->type;
@@ -67,19 +66,13 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     if (num_pixels != m->num_elements)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
-    /* Get data locations. */
-    loc_image = image->location;
-    loc_amp = amp->location;
-    loc_l = l->location;
-    loc_m = m->location;
-
-    /* Compute the wavenumber. */
-    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-
-    /* Initialise all temporary array (to zero length). */
+    /* Initialise all temporary arrays (to zero length). */
     oskar_mem_init(&u, uu_metres->type, OSKAR_LOCATION_GPU, 0, 1);
     oskar_mem_init(&v, vv_metres->type, OSKAR_LOCATION_GPU, 0, 1);
-    oskar_mem_init(&t_l, vv_metres->type, OSKAR_LOCATION_GPU, 0, 1);
+    oskar_mem_init(&t_l, l->type, OSKAR_LOCATION_GPU, 0, 1);
+    oskar_mem_init(&t_m, m->type, OSKAR_LOCATION_GPU, 0, 1);
+    oskar_mem_init(&t_amp, amp->type, OSKAR_LOCATION_GPU, 0, 1);
+    oskar_mem_init(&t_image, image->type, OSKAR_LOCATION_GPU, 0, 1);
 
     /* Copy the baselines to temporary GPU memory. */
     err = oskar_mem_copy(&u, uu_metres);
@@ -88,48 +81,97 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     if (err) goto cleanup;
 
     /* Multiply baselines by the wavenumber. */
+    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
     err = oskar_mem_scale_real(&u, wavenumber);
-    if (err) return err;
+    if (err) goto cleanup;
     err = oskar_mem_scale_real(&v, wavenumber);
-    if (err) return err;
+    if (err) goto cleanup;
 
-    /* Check locations of the data. */
-    if (loc_image == OSKAR_LOCATION_CPU)
+    /* Check location of the image array. */
+    p_image = image;
+    if (image->location == OSKAR_LOCATION_CPU)
     {
         err = oskar_mem_init(&t_image, image->type, OSKAR_LOCATION_GPU,
                 image->num_elements, 1);
+        p_image = &t_image;
+    }
 
+    /* Check location of the l,m arrays. */
+    p_l = l;
+    p_m = m;
+    if (l->location == OSKAR_LOCATION_CPU)
+    {
+        err = oskar_mem_init(&t_l, l->type, OSKAR_LOCATION_GPU,
+                l->num_elements, 1);
+        if (err) goto cleanup;
+        err = oskar_mem_copy(&t_l, l);
+        if (err) goto cleanup;
+        p_l = &t_l;
+    }
+    if (m->location == OSKAR_LOCATION_CPU)
+    {
+        err = oskar_mem_init(&t_m, m->type, OSKAR_LOCATION_GPU,
+                m->num_elements, 1);
+        if (err) goto cleanup;
+        err = oskar_mem_copy(&t_m, m);
+        if (err) goto cleanup;
+        p_m = &t_m;
+    }
+
+    /* Check location of the amplitude array. */
+    p_amp = amp;
+    if (amp->location == OSKAR_LOCATION_CPU)
+    {
+        err = oskar_mem_init(&t_amp, amp->type, OSKAR_LOCATION_GPU,
+                amp->num_elements, 1);
+        if (err) goto cleanup;
+        err = oskar_mem_copy(&t_amp, amp);
+        if (err) goto cleanup;
+        p_amp = &t_amp;
     }
 
     if (type == OSKAR_DOUBLE)
     {
         /* Call DFT. */
         err = oskar_cuda_dft_c2r_2d_d(num_vis,
-                (double*)u.data, (double*)v.data, (double*)t_amp->data,
-                num_pixels, d_l, d_m, d_image);
+                (double*)(u.data), (double*)(v.data),
+                (const double*)(p_amp->data), num_pixels,
+                (const double*)(p_l->data), (const double*)(p_m->data),
+                (double*)(p_image->data));
+        if (err) goto cleanup;
     }
     else if (type == OSKAR_SINGLE)
     {
         /* Call DFT. */
-        err = oskar_cuda_dft_c2r_2d_f(num_vis, d_u, d_v, (double*)d_vis,
-                num_pixels, d_l, d_m, d_image);
+        err = oskar_cuda_dft_c2r_2d_f(num_vis,
+                (float*)(u.data), (float*)(v.data),
+                (const float*)(p_amp->data), num_pixels,
+                (const float*)(p_l->data), (const float*)(p_m->data),
+                (float*)(p_image->data));
+        if (err) goto cleanup;
     }
 
-    /* Copy back image to host memory. */
-    cudaMemcpy(image, d_image, mem_size_image, cudaMemcpyDeviceToHost);
+    /* Scale image by inverse of number of visibilities. */
+    err = oskar_mem_scale_real(p_image, 1.0 / num_vis);
+    if (err) goto cleanup;
 
-    for (unsigned i = 0; i < num_pixels; ++i)
+    /* Copy image back to host memory if required. */
+    if (image->location == OSKAR_LOCATION_CPU)
     {
-        image[i] /= (double)num_vis;
+        err = oskar_mem_copy(image, &t_image);
+        if (err) goto cleanup;
     }
 
     cleanup:
-    /* Free memory. */
+    /* Free temporary memory. */
     oskar_mem_free(&u);
     oskar_mem_free(&v);
+    oskar_mem_free(&t_l);
+    oskar_mem_free(&t_m);
+    oskar_mem_free(&t_amp);
+    oskar_mem_free(&t_image);
     return err;
 }
-#endif
 
 #ifdef __cplusplus
 }
