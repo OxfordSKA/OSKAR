@@ -38,16 +38,70 @@
 
 void Test_dipole_pattern::test()
 {
-    int num_sources = 1000;
+    int num_az = 360;
+    int num_el = 90;
+    int num_pixels = num_az * num_el;
     int num_threads = 256;
-    int num_blocks  = (num_sources + num_threads - 1) / num_threads;
+    int num_blocks  = (num_pixels + num_threads - 1) / num_threads;
+    oskar_Mem azimuth(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
+    oskar_Mem elevation(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
+    oskar_Mem l_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
+    oskar_Mem m_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
+    oskar_Mem n_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
 
+    // Generate azimuth and elevation.
+    double* az = (double*)azimuth;
+    double* el = (double*)elevation;
+    for (int j = 0; j < num_el; ++j)
+    {
+        for (int i = 0; i < num_az; ++i)
+        {
+            az[i + j * num_az] = i * ((2.0 * M_PI) / (num_az - 1));
+            el[i + j * num_az] = j * ((M_PI / 2.0) / (num_el - 1));
+        }
+    }
+
+    // Convert to direction cosines.
+    for (int i = 0; i < num_pixels; ++i)
+    {
+        double x, y, z;
+        double cos_el = cos(el[i]);
+        x = cos_el * sin(az[i]);
+        y = cos_el * cos(az[i]);
+        z = sin(el[i]);
+        ((double*)l_cpu)[i] = x;
+        ((double*)m_cpu)[i] = y;
+        ((double*)n_cpu)[i] = z;
+    }
+
+    // Copy to GPU.
+    oskar_Mem l(&l_cpu, OSKAR_LOCATION_GPU);
+    oskar_Mem m(&m_cpu, OSKAR_LOCATION_GPU);
+    oskar_Mem n(&n_cpu, OSKAR_LOCATION_GPU);
+
+    // Allocate GPU memory for result.
+    oskar_Mem pattern(OSKAR_DOUBLE_COMPLEX_MATRIX,
+            OSKAR_LOCATION_GPU, num_pixels);
+
+    // Call the kernel.
+    oskar_cudak_evaluate_dipole_pattern_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_pixels,
+            l, m, n, 0.0, 0.0, pattern);
+
+    cudaError_t err = cudaPeekAtLastError();
+    CPPUNIT_ASSERT_EQUAL(0, (int) err);
+
+    // Copy the memory back.
+    oskar_Mem pattern_cpu(&pattern, OSKAR_LOCATION_CPU);
 
     const char filename[] = "cpp_unit_test_dipole_pattern.dat";
     FILE* file = fopen(filename, "w");
-//    for (int i = 0; i < num_elements; ++i)
-//    {
-//        fprintf(file, "%f %f %f %f %f %f\n");
-//    }
+    double4c* p = (double4c*)pattern_cpu;
+    for (int i = 0; i < num_pixels; ++i)
+    {
+        fprintf(file, "%f %f %f %f %f %f %f %f %f %f\n", az[i], el[i],
+                p[i].a.x, p[i].a.y, p[i].b.x, p[i].b.y,
+                p[i].c.x, p[i].c.y, p[i].d.x, p[i].d.y);
+    }
     fclose(file);
 }

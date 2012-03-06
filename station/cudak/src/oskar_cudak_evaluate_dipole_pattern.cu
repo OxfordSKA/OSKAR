@@ -38,7 +38,7 @@ void oskar_cudak_evaluate_dipole_pattern_f(int num_sources, float* l,
 {
     // Source index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
-    if (s > num_sources) return;
+    if (s >= num_sources) return;
 
     // Convert direction cosines to azimuth/elevation.
     // Angle alpha is the angle of the source from the axis of the dipole.
@@ -72,7 +72,7 @@ void oskar_cudak_evaluate_dipole_pattern_d(int num_sources, double* l,
 {
     // Source index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
-    if (s > num_sources) return;
+    if (s >= num_sources) return;
 
     // Convert direction cosines to azimuth/elevation.
     // Angle alpha is the angle of the source from the axis of the dipole.

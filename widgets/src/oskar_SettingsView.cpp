@@ -62,6 +62,7 @@ void oskar_SettingsView::showFirstLevel()
 void oskar_SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)
 {
     resizeColumnToContents(0);
+    update();
 }
 
 void oskar_SettingsView::saveRestoreExpanded(const QModelIndex& parent,
