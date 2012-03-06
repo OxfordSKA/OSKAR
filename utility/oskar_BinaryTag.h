@@ -140,8 +140,9 @@ enum {
 /* Standard metadata tags. */
 enum {
     OSKAR_TAG_METADATA_DATE_TIME_STRING = 1,
-    OSKAR_TAG_METADATA_USERNAME = 2,
-    OSKAR_TAG_METADATA_CWD = 3
+    OSKAR_TAG_METADATA_OSKAR_VERSION_STRING = 2,
+    OSKAR_TAG_METADATA_USERNAME = 3,
+    OSKAR_TAG_METADATA_CWD = 4
 };
 
 /* Standard settings tags. */

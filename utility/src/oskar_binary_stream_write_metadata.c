@@ -49,8 +49,15 @@ int oskar_binary_stream_write_metadata(FILE* stream)
     str = oskar_system_clock_time(0, NULL);
     len = 1 + strlen(str);
     error = oskar_binary_stream_write(stream, OSKAR_CHAR,
-            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0,
-            len, str);
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING,
+            0, len, str);
+    if (error) return error;
+
+    /* Write the OSKAR version string. */
+    len = 1 + strlen(OSKAR_VERSION_STR);
+    error = oskar_binary_stream_write(stream, OSKAR_CHAR,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_OSKAR_VERSION_STRING,
+            0, len, OSKAR_VERSION_STR);
     if (error) return error;
 
     /* Write the current working directory. */
@@ -60,8 +67,8 @@ int oskar_binary_stream_write_metadata(FILE* stream)
     {
         len = 1 + strlen(str);
         error = oskar_binary_stream_write(stream, OSKAR_CHAR,
-                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD, 0,
-                len, str);
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD,
+                0, len, str);
         if (error) return error;
     }
 
@@ -71,8 +78,8 @@ int oskar_binary_stream_write_metadata(FILE* stream)
     {
         len = 1 + strlen(str);
         error = oskar_binary_stream_write(stream, OSKAR_CHAR,
-                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME, 0,
-                len, str);
+                OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME,
+                0, len, str);
         if (error) return error;
     }
 

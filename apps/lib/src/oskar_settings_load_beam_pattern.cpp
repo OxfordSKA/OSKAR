@@ -45,13 +45,19 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
 
     // Get output image file name.
     t = s.value("filename", "").toByteArray();
-    bp->filename = (char*)malloc(t.size() + 1);
-    strcpy(bp->filename, t.constData());
+    if (t.size() > 0)
+    {
+        bp->filename = (char*)malloc(t.size() + 1);
+        strcpy(bp->filename, t.constData());
+    }
 
     // Get output FITS file name.
     t = s.value("fits_image", "").toByteArray();
-    bp->fits_image = (char*)malloc(t.size() + 1);
-    strcpy(bp->fits_image, t.constData());
+    if (t.size() > 0)
+    {
+        bp->fits_image = (char*)malloc(t.size() + 1);
+        strcpy(bp->fits_image, t.constData());
+    }
 
     // Get image sizes.
     bp->fov_deg = s.value("fov_deg").toDouble();

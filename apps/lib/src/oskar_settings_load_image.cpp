@@ -45,8 +45,11 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
 
     // Get output image file name.
     t = s.value("filename", "").toByteArray();
-    im->filename = (char*)malloc(t.size() + 1);
-    strcpy(im->filename, t.constData());
+    if (t.size() > 0)
+    {
+        im->filename = (char*)malloc(t.size() + 1);
+        strcpy(im->filename, t.constData());
+    }
 
     // Get image sizes.
     im->fov_deg = s.value("fov_deg").toDouble();
