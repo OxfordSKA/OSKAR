@@ -26,51 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/test/Test_fits_image_write.h"
-#include "fits/oskar_fits_image_write.h"
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_image_free.h"
 #include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
-
-void Test_fits_image_write::test_method()
+oskar_Image::oskar_Image(int type, int location)
 {
-    int columns = 10; // width
-    int rows = 20; // height
-    int err;
+    oskar_image_init(this, type, location);
+}
 
-    // Create the image.
-    oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    CPPUNIT_ASSERT_EQUAL(0, err);
-    err = oskar_image_resize(&image, columns, rows, 1, 1, 1);
-    CPPUNIT_ASSERT_EQUAL(0, err);
-
-    // Add image meta-data.
-    image.centre_ra_deg = 10.0;
-    image.centre_dec_deg = 80.0;
-    image.fov_ra_deg = 1.0;
-    image.fov_dec_deg = 2.0;
-    image.freq_start_hz = 100e6;
-    image.freq_inc_hz = 1e5;
-
-    // Define test data.
-    double* d = (double*) image.data;
-    for (int r = 0, i = 0; r < rows; ++r)
-    {
-        for (int c = 0; c < columns; ++c, ++i)
-        {
-            d[i] = r + 2 * c;
-        }
-    }
-
-    // Write the data.
-    const char filename[] = "cpp_unit_test_image.fits";
-    oskar_fits_image_write(&image, filename);
-
-    // Free memory.
-    oskar_image_free(&image);
+oskar_Image::~oskar_Image()
+{
+    oskar_image_free(this);
 }

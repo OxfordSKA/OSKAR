@@ -32,6 +32,7 @@
 #include "imaging/oskar_SettingsImage.h"
 #include "interferometry/oskar_SettingsObservation.h"
 #include "sky/oskar_SettingsSky.h"
+#include "station/oskar_SettingsBeamPattern.h"
 #include "interferometry/oskar_SettingsTelescope.h"
 #include "utility/oskar_SettingsSimulator.h"
 #include "utility/oskar_Mem.h"
@@ -52,6 +53,7 @@ struct oskar_Settings
     oskar_SettingsImage image;
     oskar_SettingsSky sky;
     oskar_SettingsTelescope telescope;
+    oskar_SettingsBeamPattern beam_pattern;
 };
 typedef struct oskar_Settings oskar_Settings;
 

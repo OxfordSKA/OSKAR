@@ -62,6 +62,27 @@ struct oskar_Image
     double min;
     double max;
     double rms;
+
+#ifdef __cplusplus
+    /**
+     * @brief Constructs an oskar_Image data structure.
+     *
+     * @details
+     * Constructs a new oskar_Image data structure.
+     *
+     * @param[in] type     Enumerated data type of memory contents (magic number).
+     * @param[in] location Location of memory.
+     */
+    oskar_Image(int type, int location);
+
+    /**
+     * @brief Destroys an oskar_Image data structure.
+     *
+     * @details
+     * Destroys an oskar_Image data structure.
+     */
+    ~oskar_Image();
+#endif
 };
 typedef struct oskar_Image oskar_Image;
 

@@ -26,51 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/test/Test_fits_image_write.h"
-#include "fits/oskar_fits_image_write.h"
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
+#ifndef OSKAR_SETTINGS_LOAD_BEAM_PATTERN_H_
+#define OSKAR_SETTINGS_LOAD_BEAM_PATTERN_H_
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
+/**
+ * @file oskar_settings_load_beam_pattern.h
+ */
 
-void Test_fits_image_write::test_method()
-{
-    int columns = 10; // width
-    int rows = 20; // height
-    int err;
+#include "oskar_global.h"
+#include "station/oskar_SettingsBeamPattern.h"
 
-    // Create the image.
-    oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    CPPUNIT_ASSERT_EQUAL(0, err);
-    err = oskar_image_resize(&image, columns, rows, 1, 1, 1);
-    CPPUNIT_ASSERT_EQUAL(0, err);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Add image meta-data.
-    image.centre_ra_deg = 10.0;
-    image.centre_dec_deg = 80.0;
-    image.fov_ra_deg = 1.0;
-    image.fov_dec_deg = 2.0;
-    image.freq_start_hz = 100e6;
-    image.freq_inc_hz = 1e5;
+/**
+ * @brief
+ * Populates beam pattern settings from the given settings file.
+ *
+ * @details
+ * This function populates a beam pattern settings structure from the given
+ * settings file.
+ *
+ * @param[out] settings A pointer to a settings structure to populate.
+ * @param[in] filename  String containing name of settings file to read.
+ */
+OSKAR_EXPORT
+int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* settings,
+        const char* filename);
 
-    // Define test data.
-    double* d = (double*) image.data;
-    for (int r = 0, i = 0; r < rows; ++r)
-    {
-        for (int c = 0; c < columns; ++c, ++i)
-        {
-            d[i] = r + 2 * c;
-        }
-    }
-
-    // Write the data.
-    const char filename[] = "cpp_unit_test_image.fits";
-    oskar_fits_image_write(&image, filename);
-
-    // Free memory.
-    oskar_image_free(&image);
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_SETTINGS_LOAD_BEAM_PATTERN_H_ */

@@ -32,10 +32,13 @@
 #include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_sim_beam_pattern.h"
-#include "fits/oskar_fits_write.h"
+#include "fits/oskar_fits_image_write.h"
 #include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
+#include "imaging/oskar_Image.h"
+#include "imaging/oskar_image_resize.h"
+#include "imaging/oskar_image_write.h"
 #include "math/oskar_sph_from_lm.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
@@ -64,7 +67,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Check that a data file has been specified.
-    if (!settings.image.filename)
+    if (!settings.beam_pattern.filename && !settings.beam_pattern.fits_image)
     {
         fprintf(stderr, "ERROR: No image file specified.\n");
         return OSKAR_ERR_SETTINGS;
@@ -73,23 +76,41 @@ int oskar_sim_beam_pattern(const char* settings_file)
     // Get the telescope model.
     oskar_TelescopeModel* tel_cpu = oskar_set_up_telescope(&settings);
 
-    // Get the image settings.
-    int image_size = settings.image.size;
+    // Get the beam pattern settings.
+    int station_id = settings.beam_pattern.station_id;
+    int image_size = settings.beam_pattern.size;
     int num_channels = settings.obs.num_channels;
     int num_pixels = image_size * image_size;
-    double fov = settings.image.fov_deg * M_PI / 180;
+    double fov = settings.beam_pattern.fov_deg * M_PI / 180;
     double ra0 = settings.obs.ra0_rad;
     double dec0 = settings.obs.dec0_rad;
+
+    // Check station ID is within range.
+    if (station_id < 0 || station_id >= tel_cpu->num_stations)
+        return OSKAR_ERR_OUT_OF_RANGE;
 
     // Get time data.
     int num_times            = times->num_vis_dumps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
     double dt_dump           = times->dt_dump_days;
 
-    // Allocate CPU memory big enough for data hyper-cube.
-    int num_elements = num_pixels * num_times * num_channels;
-    oskar_Mem data(type, OSKAR_LOCATION_CPU, num_elements);
-    oskar_Mem image(type, OSKAR_LOCATION_CPU, num_pixels);
+    // Declare image hyper-cube.
+    oskar_Image data(type, OSKAR_LOCATION_CPU);
+    err = oskar_image_resize(&data, image_size, image_size, 1,
+            num_times, num_channels);
+    if (err) return err;
+
+    // Set image meta-data.
+    data.centre_ra_deg      = settings.obs.ra0_rad * 180.0 / M_PI;
+    data.centre_dec_deg     = settings.obs.dec0_rad * 180.0 / M_PI;
+    data.fov_ra_deg         = settings.beam_pattern.fov_deg;
+    data.fov_dec_deg        = settings.beam_pattern.fov_deg;
+    data.freq_start_hz      = settings.obs.start_frequency_hz;
+    data.freq_inc_hz        = settings.obs.frequency_inc_hz;
+    data.time_inc_sec       = settings.obs.time.dt_dump_days * 86400.0;
+    data.time_start_mjd_utc = settings.obs.time.obs_start_mjd_utc;
+
+    // Temporary CPU memory.
     oskar_Mem beam_cpu(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU, num_pixels);
 
     // Generate l,m grid and equatorial coordinates for beam pattern pixels.
@@ -144,14 +165,13 @@ int oskar_sim_beam_pattern(const char* settings_file)
             double frequency = settings.obs.start_frequency_hz +
                     c * settings.obs.frequency_inc_hz;
 
-            // Copy the telescope model and scale coordinates to wavenumbers.
+            // Copy the telescope model and scale coordinates to radians.
             oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
             err = telescope.multiply_by_wavenumber(frequency);
             if (err) return err;
 
             // Get pointer to the station.
-            // FIXME Currently station 0: Determine this from the settings file?
-            oskar_StationModel* station = &(telescope.station[0]);
+            oskar_StationModel* station = &(telescope.station[station_id]);
 
             // Start simulation.
             for (int j = 0; j < num_times; ++j)
@@ -183,9 +203,10 @@ int oskar_sim_beam_pattern(const char* settings_file)
                 if (err) return err;
 
                 // Convert from real/imaginary to power.
+                int offset = (j + c * num_times) * num_pixels;
                 if (type == OSKAR_SINGLE)
                 {
-                    float* img = (float*)image;
+                    float* img = (float*)data.data + offset;
                     float2* tc = (float2*)beam_cpu;
                     for (int i = 0; i < num_pixels; ++i)
                     {
@@ -196,7 +217,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
                 }
                 else if (type == OSKAR_DOUBLE)
                 {
-                    double* img = (double*)image;
+                    double* img = (double*)data.data + offset;
                     double2* tc = (double2*)beam_cpu;
                     for (int i = 0; i < num_pixels; ++i)
                     {
@@ -205,58 +226,24 @@ int oskar_sim_beam_pattern(const char* settings_file)
                         img[i] = sqrt(tx * tx + ty * ty);
                     }
                 }
-
-                // Save to global data store.
-                int offset = (j + c * num_times) * num_pixels;
-                err = oskar_mem_insert(&data, &image, offset);
-                if (err) return err;
             }
         }
         printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1e3);
     }
 
-    // Dump data to file.
-#ifdef OSKAR_NO_FITS
-    // No FITS library available.
-    // Write OSKAR binary file.
-#else
-    // FITS file OK.
-    long naxes[4];
-    double crval[4], crpix[4], cdelt[4];
-    double crota[] = {0.0, 0.0, 0.0, 0.0};
+    // Dump data to OSKAR image file if required.
+    if (settings.beam_pattern.filename)
+    {
+        err = oskar_image_write(&data, settings.beam_pattern.filename);
+        if (err) return err;
+    }
 
-    // Axis types.
-    const char* ctype[] = {"RA---SIN", "DEC--SIN", "UTC", "FREQ"};
-    const char* ctype_comment[] = {"Right Ascension", "Declination",
-            "Time", "Frequency"};
-
-    // Axis dimensions.
-    naxes[0] = image_size; // width
-    naxes[1] = image_size; // height
-    naxes[2] = num_times;
-    naxes[3] = num_channels;
-
-    // Reference values.
-    crval[0] = ra0 * 180.0 / M_PI;
-    crval[1] = dec0 * 180.0 / M_PI;
-    crval[2] = obs_start_mjd_utc;
-    crval[3] = settings.obs.start_frequency_hz;
-
-    // Deltas.
-    cdelt[0] = -(settings.image.fov_deg / image_size); // DELTA_RA
-    cdelt[1] = (settings.image.fov_deg / image_size); // DELTA_DEC
-    cdelt[2] = dt_dump; // DELTA_TIME
-    cdelt[3] = settings.obs.frequency_inc_hz; // DELTA_CHANNEL
-
-    // Reference pixels.
-    crpix[0] = (image_size + 1) / 2.0;
-    crpix[1] = (image_size + 1) / 2.0;
-    crpix[2] = 1.0;
-    crpix[3] = 1.0;
-
-    // Write multi-dimensional image data.
-    oskar_fits_write(settings.image.filename, data.type, 4, naxes,
-            data.data, ctype, ctype_comment, crval, cdelt, crpix, crota);
+#ifndef OSKAR_NO_FITS
+    // FITS library available.
+    if (settings.beam_pattern.fits_image)
+    {
+        oskar_fits_image_write(&data, settings.beam_pattern.fits_image);
+    }
 #endif
 
     // Delete telescope model.

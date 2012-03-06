@@ -47,6 +47,8 @@ void oskar_settings_free(oskar_Settings* settings)
     free(settings->telescope.station_layout_directory);
     free(settings->telescope.station.receiver_temperature_file);
     free(settings->image.filename);
+    free(settings->beam_pattern.filename);
+    free(settings->beam_pattern.fits_image);
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path);

@@ -26,51 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "fits/test/Test_fits_image_write.h"
-#include "fits/oskar_fits_image_write.h"
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_image_resize.h"
+#include "apps/lib/oskar_settings_load_beam_pattern.h"
 
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
+#include <cstring>
+#include <QtCore/QSettings>
+#include <QtCore/QByteArray>
+#include <QtCore/QVariant>
 
-void Test_fits_image_write::test_method()
+extern "C"
+int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
+        const char* filename)
 {
-    int columns = 10; // width
-    int rows = 20; // height
-    int err;
+    QByteArray t;
+    QSettings s(QString(filename), QSettings::IniFormat);
+    s.beginGroup("beam_pattern");
 
-    // Create the image.
-    oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    CPPUNIT_ASSERT_EQUAL(0, err);
-    err = oskar_image_resize(&image, columns, rows, 1, 1, 1);
-    CPPUNIT_ASSERT_EQUAL(0, err);
+    // Get output image file name.
+    t = s.value("filename", "").toByteArray();
+    bp->filename = (char*)malloc(t.size() + 1);
+    strcpy(bp->filename, t.constData());
 
-    // Add image meta-data.
-    image.centre_ra_deg = 10.0;
-    image.centre_dec_deg = 80.0;
-    image.fov_ra_deg = 1.0;
-    image.fov_dec_deg = 2.0;
-    image.freq_start_hz = 100e6;
-    image.freq_inc_hz = 1e5;
+    // Get output FITS file name.
+    t = s.value("fits_image", "").toByteArray();
+    bp->fits_image = (char*)malloc(t.size() + 1);
+    strcpy(bp->fits_image, t.constData());
 
-    // Define test data.
-    double* d = (double*) image.data;
-    for (int r = 0, i = 0; r < rows; ++r)
-    {
-        for (int c = 0; c < columns; ++c, ++i)
-        {
-            d[i] = r + 2 * c;
-        }
-    }
+    // Get image sizes.
+    bp->fov_deg = s.value("fov_deg").toDouble();
+    bp->size    = s.value("size").toUInt();
 
-    // Write the data.
-    const char filename[] = "cpp_unit_test_image.fits";
-    oskar_fits_image_write(&image, filename);
+    // Get station ID to use.
+    bp->station_id  = s.value("station_id").toUInt();
 
-    // Free memory.
-    oskar_image_free(&image);
+    return 0;
 }

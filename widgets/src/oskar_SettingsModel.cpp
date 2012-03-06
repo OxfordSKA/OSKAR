@@ -159,10 +159,18 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("observation/ms_filename", "Output Measurement Set name", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
     // Image settings.
-    setLabel("image", "Beam pattern settings");
-    registerSetting("image/filename", "Output image file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    registerSetting("image/fov_deg", "Field-of-view (deg)", oskar_SettingsItem::DOUBLE);
-    registerSetting("image/size", "Image dimension (pixels)", oskar_SettingsItem::INT);
+//    setLabel("image", "Image settings");
+//    registerSetting("image/filename", "Output image file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+//    registerSetting("image/fov_deg", "Field-of-view (deg)", oskar_SettingsItem::DOUBLE);
+//    registerSetting("image/size", "Image dimension (pixels)", oskar_SettingsItem::INT);
+
+    // Beam pattern settings.
+    setLabel("beam_pattern", "Beam pattern settings");
+    registerSetting("beam_pattern/filename", "Output OSKAR image file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("beam_pattern/fits_image", "Output FITS image file name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("beam_pattern/fov_deg", "Field-of-view (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("beam_pattern/size", "Image dimension (pixels)", oskar_SettingsItem::INT);
+    registerSetting("beam_pattern/station_id", "Station ID", oskar_SettingsItem::INT);
 }
 
 oskar_SettingsModel::~oskar_SettingsModel()
