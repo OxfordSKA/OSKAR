@@ -81,8 +81,8 @@ void Test_load_stations::test()
         CPPUNIT_ASSERT_EQUAL(num_antennas, (int)stations[j].num_elements);
         for (int i = 0; i < num_antennas; ++i)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i/10.0, ((float*)(stations[j].x))[i], err);
-            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i/10.0, ((float*)(stations[j].y))[i], err);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + i/10.0, ((float*)(stations[j].x_weights))[i], err);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - i/10.0, ((float*)(stations[j].y_weights))[i], err);
         }
     }
     CPPUNIT_ASSERT_EQUAL(1, telescope.identical_stations);

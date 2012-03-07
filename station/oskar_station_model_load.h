@@ -53,6 +53,9 @@ extern "C" {
  * - Element x-position, in metres.
  * - Element y-position, in metres.
  * - Element z-position, in metres [note: this currently has no effect!] (default 0).
+ * - Element x-delta, in metres (default 0).
+ * - Element y-delta, in metres (default 0).
+ * - Element z-delta, in metres (default 0).
  * - Element amplitude gain factor (default 1).
  * - Element amplitude gain error (default 0).
  * - Element phase offset in degrees (default 0).

@@ -120,22 +120,30 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
      * or gain factors. */
     if (!finished_identical_station_check)
     {
-        oskar_Mem *x0, *y0, *z0, *amp0, *phase0;
+        oskar_Mem *x_weights0, *y_weights0, *z_weights0, *amp0, *phase0;
+        oskar_Mem *x_signal0, *y_signal0, *z_signal0;
         int num_elements0;
-        x0 = &(model->station[0].x);
-        y0 = &(model->station[0].y);
-        z0 = &(model->station[0].z);
+        x_weights0 = &(model->station[0].x_weights);
+        y_weights0 = &(model->station[0].y_weights);
+        z_weights0 = &(model->station[0].z_weights);
+        x_signal0 = &(model->station[0].x_signal);
+        y_signal0 = &(model->station[0].y_signal);
+        z_signal0 = &(model->station[0].z_signal);
         amp0 = &(model->station[0].amp_gain);
         phase0 = &(model->station[0].phase_offset);
         num_elements0 = model->station[0].num_elements;
 
         for (i = 1; i < num_stations; ++i)
         {
-            oskar_Mem *x, *y, *z, *amp, *phase;
+            oskar_Mem *x_weights, *y_weights, *z_weights, *amp, *phase;
+            oskar_Mem *x_signal, *y_signal, *z_signal;
             int num_elements;
-            x = &(model->station[i].x);
-            y = &(model->station[i].y);
-            z = &(model->station[i].z);
+            x_weights = &(model->station[i].x_weights);
+            y_weights = &(model->station[i].y_weights);
+            z_weights = &(model->station[i].z_weights);
+            x_signal = &(model->station[i].x_signal);
+            y_signal = &(model->station[i].y_signal);
+            z_signal = &(model->station[i].z_signal);
             amp = &(model->station[i].amp_gain);
             phase = &(model->station[i].phase_offset);
             num_elements = model->station[i].num_elements;
@@ -148,27 +156,42 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             }
 
             /* Check if the memory contents are different. */
-            if (oskar_mem_different(x, x0, num_elements) == OSKAR_TRUE)
+            if (oskar_mem_different(x_weights, x_weights0, num_elements))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(y, y0, num_elements) == OSKAR_TRUE)
+            if (oskar_mem_different(y_weights, y_weights0, num_elements))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(z, z0, num_elements) == OSKAR_TRUE)
+            if (oskar_mem_different(z_weights, z_weights0, num_elements))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(amp, amp0, num_elements) == OSKAR_TRUE)
+            if (oskar_mem_different(x_signal, x_signal0, num_elements))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(phase, phase0, num_elements) == OSKAR_TRUE)
+            if (oskar_mem_different(y_signal, y_signal0, num_elements))
+            {
+                model->identical_stations = 0;
+                break;
+            }
+            if (oskar_mem_different(z_signal, z_signal0, num_elements))
+            {
+                model->identical_stations = 0;
+                break;
+            }
+            if (oskar_mem_different(amp, amp0, num_elements))
+            {
+                model->identical_stations = 0;
+                break;
+            }
+            if (oskar_mem_different(phase, phase0, num_elements))
             {
                 model->identical_stations = 0;
                 break;

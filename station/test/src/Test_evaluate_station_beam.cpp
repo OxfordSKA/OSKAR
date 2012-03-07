@@ -82,7 +82,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_cpu.coord_units = OSKAR_METRES;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
-    oskar_meshgrid_f(station_cpu.x, station_cpu.y, x_pos, station_dim,
+    oskar_meshgrid_f(station_cpu.x_weights, station_cpu.y_weights, x_pos, station_dim,
             x_pos, station_dim);
     free(x_pos);
     station_cpu.num_elements = num_antennas;

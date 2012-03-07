@@ -37,7 +37,7 @@ extern "C" {
 int oskar_station_model_init(oskar_StationModel* model, int type, int location,
         int num_elements)
 {
-    int complex_type, err = 0;
+    int err = 0;
 
     /* Check for sane inputs. */
     if (model == NULL)
@@ -46,10 +46,6 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     /* Check the type. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Determine the complex type. */
-    complex_type = (type == OSKAR_SINGLE) ?
-            OSKAR_SINGLE_COMPLEX : OSKAR_DOUBLE_COMPLEX;
 
     /* Initialise variables. */
     model->longitude_rad = 0.0;
@@ -60,13 +56,19 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->num_elements = num_elements;
 
     /* Initialise the memory. */
-    err = oskar_mem_init(&model->x, type, location, num_elements, 1);
+    err = oskar_mem_init(&model->x_signal, type, location, num_elements, 1);
     if (err) return err;
-    err = oskar_mem_init(&model->y, type, location, num_elements, 1);
+    err = oskar_mem_init(&model->y_signal, type, location, num_elements, 1);
     if (err) return err;
-    err = oskar_mem_init(&model->z, type, location, num_elements, 1);
+    err = oskar_mem_init(&model->z_signal, type, location, num_elements, 1);
     if (err) return err;
-    err = oskar_mem_init(&model->weight, complex_type, location, num_elements, 1);
+    err = oskar_mem_init(&model->x_weights, type, location, num_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->y_weights, type, location, num_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->z_weights, type, location, num_elements, 1);
+    if (err) return err;
+    err = oskar_mem_init(&model->weight, type | OSKAR_COMPLEX, location, num_elements, 1);
     if (err) return err;
     err = oskar_mem_init(&model->amp_gain, type, location, num_elements, 1);
     if (err) return err;

@@ -83,6 +83,8 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             s.value("element_phase_offset_deg", -1e99).toDouble() * D2R;
     tel->station.element_phase_error_rad =
             s.value("element_phase_error_deg", -1e99).toDouble() * D2R;
+    tel->station.element_position_error_xy_m =
+            s.value("element_position_error_xy_m", 0.0).toDouble();
 
     // Receiver temperature.
     tel->station.receiver_temperature = s.value("receiver_temperature", -1.0).toDouble();

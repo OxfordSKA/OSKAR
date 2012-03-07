@@ -133,7 +133,7 @@ struct oskar_TelescopeModel
      * - A positive return code indicates a CUDA error.
      * - A negative return code indicates an OSKAR error.
      */
-    int load_station_pos(const char* filename, double longitude,
+    int load_station_coords(const char* filename, double longitude,
             double latitude, double altitude);
 
     /**

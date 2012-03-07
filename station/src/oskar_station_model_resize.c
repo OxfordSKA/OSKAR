@@ -41,11 +41,17 @@ int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
     station->num_elements = n_elements;
 
     /* Resize the model data. */
-    error = oskar_mem_realloc(&station->x, n_elements);
+    error = oskar_mem_realloc(&station->x_signal, n_elements);
     if (error) return error;
-    error = oskar_mem_realloc(&station->y, n_elements);
+    error = oskar_mem_realloc(&station->y_signal, n_elements);
     if (error) return error;
-    error = oskar_mem_realloc(&station->z, n_elements);
+    error = oskar_mem_realloc(&station->z_signal, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->x_weights, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->y_weights, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->z_weights, n_elements);
     if (error) return error;
     error = oskar_mem_realloc(&station->weight, n_elements);
     if (error) return error;

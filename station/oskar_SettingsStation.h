@@ -49,6 +49,7 @@ struct oskar_SettingsStation
     double element_amp_error;
     double element_phase_offset_rad;
     double element_phase_error_rad;
+    double element_position_error_xy_m;
 };
 typedef struct oskar_SettingsStation oskar_SettingsStation;
 

@@ -44,11 +44,17 @@ int oskar_station_model_free(oskar_StationModel* model)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Free the element data. */
-    error = oskar_mem_free(&model->x);
+    error = oskar_mem_free(&model->x_signal);
     if (error) return error;
-    error = oskar_mem_free(&model->y);
+    error = oskar_mem_free(&model->y_signal);
     if (error) return error;
-    error = oskar_mem_free(&model->z);
+    error = oskar_mem_free(&model->z_signal);
+    if (error) return error;
+    error = oskar_mem_free(&model->x_weights);
+    if (error) return error;
+    error = oskar_mem_free(&model->y_weights);
+    if (error) return error;
+    error = oskar_mem_free(&model->z_weights);
     if (error) return error;
     error = oskar_mem_free(&model->weight);
     if (error) return error;

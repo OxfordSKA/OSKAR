@@ -37,16 +37,13 @@ extern "C" {
 
 int oskar_station_model_is_type(const oskar_StationModel* station, int type)
 {
-    /* Check the type of the weights array. */
-    if ((type == OSKAR_SINGLE &&
-            !oskar_mem_is_single(station->weight.type)) ||
-            (type == OSKAR_DOUBLE &&
-                    !oskar_mem_is_double(station->weight.type)))
-        return 0;
-
-    return (station->x.type == type &&
-            station->y.type == type &&
-            station->z.type == type &&
+    return (station->x_signal.type == type &&
+            station->y_signal.type == type &&
+            station->z_signal.type == type &&
+            station->x_weights.type == type &&
+            station->y_weights.type == type &&
+            station->z_weights.type == type &&
+            station->weight.type == (type | OSKAR_COMPLEX) &&
             station->amp_gain.type == type &&
             station->amp_gain_error.type == type &&
             station->phase_offset.type == type &&

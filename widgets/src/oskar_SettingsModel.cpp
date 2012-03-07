@@ -141,6 +141,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/station/element_amp_error", "Element amplitude gain standard deviation", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_phase_offset_deg", "Element phase offset (deg)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_phase_error_deg", "Element phase standard deviation (deg)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element_position_error_xy_m", "Element (x,y) position uncertainty standard deviation (m)", oskar_SettingsItem::DOUBLE);
 
     // Observation settings.
     setLabel("observation", "Observation settings");

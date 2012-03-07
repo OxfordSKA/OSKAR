@@ -269,6 +269,9 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     if (s->telescope.station.element_phase_error_rad > -1e10)
         pr_3f(3, w, "Element phase error (deg)",
                 s->telescope.station.element_phase_error_rad * R2D);
+    if (s->telescope.station.element_position_error_xy_m != 0.0)
+        pr_3f(3, w, "Element (x,y) position uncertainty standard deviation (m)",
+                s->telescope.station.element_position_error_xy_m);
 
     /* Print observation settings. */
     pr_k(1, w, "Observation settings", 1);
@@ -290,9 +293,20 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     if (s->image.size > 0)
     {
         pr_k(1, w, "Image settings", 1);
-        pr_s(2, w, "Output image file", s->image.filename);
         pr_3f(2, w, "Field-of-view (deg)", s->image.fov_deg);
         pr_i(2, w, "Dimension (pixels)", s->image.size);
+        pr_s(2, w, "Output image file", s->image.filename);
+    }
+
+    /* Print beam pattern settings. */
+    if (s->beam_pattern.size > 0)
+    {
+        pr_k(1, w, "Beam pattern settings", 1);
+        pr_3f(2, w, "Field-of-view (deg)", s->beam_pattern.fov_deg);
+        pr_i(2, w, "Dimension (pixels)", s->beam_pattern.size);
+        pr_i(2, w, "Station ID", s->beam_pattern.station_id);
+        pr_s(2, w, "Output OSKAR image file", s->beam_pattern.filename);
+        pr_s(2, w, "Output FITS image file", s->beam_pattern.fits_image);
     }
 
     printf("\n");

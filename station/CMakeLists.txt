@@ -27,8 +27,8 @@ set(station_SRC
     src/oskar_station_model_multiply_by_wavenumber.c
     src/oskar_station_model_resize.c
     src/oskar_station_model_scale_coords.c
+    src/oskar_station_model_set_element_coords.c
     src/oskar_station_model_set_element_errors.c
-    src/oskar_station_model_set_element_pos.c
     src/oskar_station_model_set_element_weight.c
     src/oskar_station_model_type.c
     src/oskar_station_model_write_coords.c

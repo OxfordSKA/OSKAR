@@ -37,9 +37,12 @@ extern "C" {
 int oskar_station_model_is_location(const oskar_StationModel* station,
         int location)
 {
-    return (station->x.location == location &&
-            station->y.location == location &&
-            station->z.location == location &&
+    return (station->x_signal.location == location &&
+            station->y_signal.location == location &&
+            station->z_signal.location == location &&
+            station->x_weights.location == location &&
+            station->y_weights.location == location &&
+            station->z_weights.location == location &&
             station->weight.location == location &&
             station->amp_gain.location == location &&
             station->amp_gain_error.location == location &&

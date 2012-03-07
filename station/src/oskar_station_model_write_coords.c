@@ -26,7 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+#include "station/oskar_station_model_location.h"
+#include "station/oskar_station_model_type.h"
 #include "station/oskar_station_model_write_coords.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -38,18 +39,17 @@ extern "C" {
 int oskar_station_model_write_coords(const char* filename,
         const oskar_StationModel* station)
 {
-    int i;
+    int i, location, type;
     FILE* file;
 
     if (filename == NULL || station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (station->x.location == OSKAR_LOCATION_GPU ||
-            station->y.location == OSKAR_LOCATION_GPU ||
-            station->z.location == OSKAR_LOCATION_GPU)
-    {
+    /* Get type and location. */
+    type = oskar_station_model_type(station);
+    location = oskar_station_model_location(station);
+    if (location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
-    }
 
     if (station->coord_units != OSKAR_METRES)
         return OSKAR_ERR_BAD_UNITS;
@@ -58,33 +58,39 @@ int oskar_station_model_write_coords(const char* filename,
     if (!file)
         return OSKAR_ERR_FILE_IO;
 
-    fprintf(file, "# num_antennas = %i\n", station->num_elements);
-    fprintf(file, "# longitude (radians) = %f\n", station->longitude_rad);
-    fprintf(file, "# latitude (radians)  = %f\n", station->latitude_rad);
-    fprintf(file, "# altitude (metres)   = %f\n", station->altitude_metres);
-    fprintf(file, "# local horizontal x(east), y(north), z(zenith) [metres]\n");
-    if (station->x.type == OSKAR_DOUBLE &&
-            station->y.type == OSKAR_DOUBLE &&
-            station->z.type == OSKAR_DOUBLE)
+    fprintf(file, "# Number of antennas  = %i\n", station->num_elements);
+    fprintf(file, "# Longitude [radians] = %f\n", station->longitude_rad);
+    fprintf(file, "# Latitude [radians]  = %f\n", station->latitude_rad);
+    fprintf(file, "# Altitude [metres]   = %f\n", station->altitude_metres);
+    fprintf(file, "# Local horizontal x(east), y(north), z(zenith), delta_x, delta_y, delta_z [metres]\n");
+    if (type == OSKAR_DOUBLE)
     {
+        double x, y, z, delta_x, delta_y, delta_z;
         for (i = 0; i < station->num_elements; ++i)
         {
-            fprintf(file, "% -12.6e,% -12.6e,% -12.6e\n",
-                    ((double*)station->x.data)[i],
-                    ((double*)station->y.data)[i],
-                    ((double*)station->z.data)[i]);
+            x = ((double*)station->x_weights.data)[i];
+            y = ((double*)station->y_weights.data)[i];
+            z = ((double*)station->z_weights.data)[i];
+            delta_x = ((double*)station->x_signal.data)[i] - x;
+            delta_y = ((double*)station->y_signal.data)[i] - y;
+            delta_z = ((double*)station->z_signal.data)[i] - z;
+            fprintf(file, "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e\n",
+                    x, y, z, delta_x, delta_y, delta_z);
         }
     }
-    else if (station->x.type == OSKAR_SINGLE &&
-            station->y.type == OSKAR_SINGLE &&
-            station->z.type == OSKAR_SINGLE)
+    else if (type == OSKAR_SINGLE)
     {
+        float x, y, z, delta_x, delta_y, delta_z;
         for (i = 0; i < station->num_elements; ++i)
         {
-            fprintf(file, "% -12.6e,% -12.6e,% -12.6e\n",
-                    ((float*)station->x.data)[i],
-                    ((float*)station->y.data)[i],
-                    ((float*)station->z.data)[i]);
+            x = ((float*)station->x_weights.data)[i];
+            y = ((float*)station->y_weights.data)[i];
+            z = ((float*)station->z_weights.data)[i];
+            delta_x = ((float*)station->x_signal.data)[i] - x;
+            delta_y = ((float*)station->y_signal.data)[i] - y;
+            delta_z = ((float*)station->z_signal.data)[i] - z;
+            fprintf(file, "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e\n",
+                    x, y, z, delta_x, delta_y, delta_z);
         }
     }
     else

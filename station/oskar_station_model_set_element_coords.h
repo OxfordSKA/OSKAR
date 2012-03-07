@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_SET_ELEMENT_POS_H_
-#define OSKAR_STATION_MODEL_SET_ELEMENT_POS_H_
+#ifndef OSKAR_STATION_MODEL_SET_ELEMENT_COORDS_H_
+#define OSKAR_STATION_MODEL_SET_ELEMENT_COORDS_H_
 
 /**
- * @file oskar_station_model_set_element_pos.h
+ * @file oskar_station_model_set_element_coords.h
  */
 
 #include "oskar_global.h"
@@ -48,18 +48,22 @@ extern "C" {
  * This function sets the coordinates of the specified element in the station
  * model, transferring data to the GPU if necessary.
  *
- * @param[in] dst   Station model structure to copy into.
- * @param[in] index Element array index to set.
- * @param[in] x     Element x position.
- * @param[in] y     Element y position.
- * @param[in] z     Element z position.
+ * @param[in] dst     Station model structure to copy into.
+ * @param[in] index   Element array index to set.
+ * @param[in] x       Element x position.
+ * @param[in] y       Element y position.
+ * @param[in] z       Element z position.
+ * @param[in] delta_x Element x delta.
+ * @param[in] delta_y Element y delta.
+ * @param[in] delta_z Element z delta.
  */
 OSKAR_EXPORT
-int oskar_station_model_set_element_pos(oskar_StationModel* dst,
-		int index, double x, double y, double z);
+int oskar_station_model_set_element_coords(oskar_StationModel* dst,
+        int index, double x, double y, double z, double delta_x,
+        double delta_y, double delta_z);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_MODEL_SET_ELEMENT_POS_H_ */
+#endif /* OSKAR_STATION_MODEL_SET_ELEMENT_COORDS_H_ */

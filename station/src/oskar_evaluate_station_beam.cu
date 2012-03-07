@@ -55,7 +55,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     if (station->coord_units != OSKAR_WAVENUMBERS)
         return OSKAR_ERR_BAD_UNITS;
 
-    if (E->is_null() || station->x.is_null() || station->y.is_null() ||
+    if (E->is_null() || station->x_weights.is_null() || station->y_weights.is_null() ||
             l->is_null() || m->is_null() || n->is_null())
     {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
@@ -63,7 +63,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
 
     // Check that the relevant memory is on the GPU.
     if (E->location != OSKAR_LOCATION_GPU ||
-            station->coord_location() != OSKAR_LOCATION_GPU ||
+            station->location() != OSKAR_LOCATION_GPU ||
             weights->location != OSKAR_LOCATION_GPU ||
             l->location != OSKAR_LOCATION_GPU ||
             m->location != OSKAR_LOCATION_GPU ||

@@ -44,11 +44,17 @@ int oskar_station_model_copy(oskar_StationModel* dst,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Copy the memory blocks. */
-    error = oskar_mem_copy(&dst->x, &src->x);
+    error = oskar_mem_copy(&dst->x_signal, &src->x_signal);
     if (error) return error;
-    error = oskar_mem_copy(&dst->y, &src->y);
+    error = oskar_mem_copy(&dst->y_signal, &src->y_signal);
     if (error) return error;
-    error = oskar_mem_copy(&dst->z, &src->z);
+    error = oskar_mem_copy(&dst->z_signal, &src->z_signal);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->x_weights, &src->x_weights);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->y_weights, &src->y_weights);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->z_weights, &src->z_weights);
     if (error) return error;
     error = oskar_mem_copy(&dst->weight, &src->weight);
     if (error) return error;

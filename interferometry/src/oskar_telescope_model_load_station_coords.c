@@ -29,9 +29,9 @@
 #include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
 #include "interferometry/oskar_horizon_plane_to_offset_geocentric_cartesian.h"
 #include "interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h"
-#include "interferometry/oskar_telescope_model_load_station_pos.h"
+#include "interferometry/oskar_telescope_model_load_station_coords.h"
 #include "interferometry/oskar_telescope_model_resize.h"
-#include "interferometry/oskar_telescope_model_set_station_pos.h"
+#include "interferometry/oskar_telescope_model_set_station_coords.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "station/oskar_StationModel.h"
@@ -44,7 +44,7 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_load_station_pos(oskar_TelescopeModel* telescope,
+int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         const char* filename, double longitude, double latitude,
         double altitude)
 {
@@ -99,7 +99,7 @@ int oskar_telescope_model_load_station_pos(oskar_TelescopeModel* telescope,
                 &par[0], &par[1], &par[2], longitude, latitude, &x, &y, &z);
 
         /* Store the offset geocentric coordinates. */
-        err = oskar_telescope_model_set_station_pos(telescope, n, x, y, z);
+        err = oskar_telescope_model_set_station_coords(telescope, n, x, y, z);
         if (err)
         {
             fclose(file);

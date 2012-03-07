@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_LOAD_STATION_POS_H_
-#define OSKAR_TELESCOPE_MODEL_LOAD_STATION_POS_H_
+#ifndef OSKAR_TELESCOPE_MODEL_SET_STATION_COORDS_H_
+#define OSKAR_TELESCOPE_MODEL_SET_STATION_COORDS_H_
 
 /**
- * @file oskar_telescope_model_load_station_pos.h
+ * @file oskar_telescope_model_set_station_coords.h
  */
 
 #include "oskar_global.h"
@@ -42,36 +42,24 @@ extern "C" {
 
 /**
  * @brief
- * Loads a telescope coordinate file that specifies the station locations
- * with respect to the local tangent plane.
+ * Sets the coordinates of a station in the telescope model.
  *
  * @details
- * A telescope station coordinate file is an ASCII text file containing two or
- * three columns of comma- or space-separated values that represent the station
- * (x,y,z) coordinates in the local tangent plane. Each line corresponds to the
- * position of one station, and the z coordinate is assumed to be zero if
- * omitted.
+ * This function sets the coordinates of the specified station in the telescope
+ * model, transferring data to the GPU if necessary.
  *
- * The coordinate system (ENU, or East-North-Up) is aligned so that the x-axis
- * points to the local geographic East, the y-axis to local geographic North,
- * and the z-axis to the local zenith. The origin is the tangent point with the
- * Earth's ellipsoid.
- *
- * The geodetic longitude and latitude of the origin must also be supplied.
- *
- * @param telescope  Telescope model structure to be populated.
- * @param filename   File name path to a telescope coordinate file.
- * @param longitude  Telescope centre longitude, in radians.
- * @param latitude   Telescope centre latitude, in radians.
- * @param altitude   Telescope centre altitude, in metres.
+ * @param[in] dst   Telescope model structure to copy into.
+ * @param[in] index Station array index to set.
+ * @param[in] x     Station x position.
+ * @param[in] y     Station y position.
+ * @param[in] z     Station z position.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_load_station_pos(oskar_TelescopeModel* telescope,
-        const char* filename, double longitude, double latitude,
-        double altitude);
+int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
+        int index, double x, double y, double z);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_TELESCOPE_MODEL_LOAD_STATION_POS_H_ */
+#endif /* OSKAR_TELESCOPE_MODEL_SET_STATION_COORDS_H_ */

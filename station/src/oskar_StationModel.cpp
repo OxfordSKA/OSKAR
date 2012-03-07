@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "station/oskar_StationModel.h"
 #include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_free.h"
@@ -35,14 +34,9 @@
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_multiply_by_wavenumber.h"
 #include "station/oskar_station_model_resize.h"
-#include "station/oskar_station_model_check_mem.h"
 #include "station/oskar_station_model_type.h"
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
-: num_elements(n_elements),
-  child(NULL),
-  parent(NULL),
-  element_pattern(NULL)
 {
     if (oskar_station_model_init(this, type, location, n_elements))
         throw "Error in oskar_station_model_init";
@@ -50,21 +44,18 @@ oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
 
 oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
         int location)
-: num_elements(other->num_elements),
-  child(NULL),
-  parent(NULL),
-  element_pattern(NULL)
 {
-    if (oskar_station_model_init(this, other->x.type, location,
+    if (oskar_station_model_init(this, other->type(), location,
             other->num_elements))
-        throw "error in oskar_station_model_init";
+        throw "Error in oskar_station_model_init";
     if (oskar_station_model_copy(this, other))
-        throw "error in oskar_station_model_copy";
+        throw "Error in oskar_station_model_copy";
 }
 
 oskar_StationModel::~oskar_StationModel()
 {
-    oskar_station_model_free(this);
+    if (oskar_station_model_free(this))
+        throw "Error in oskar_station_model_free";
 }
 
 int oskar_StationModel::copy_to(oskar_StationModel* other)
@@ -82,27 +73,17 @@ int oskar_StationModel::location() const
     return oskar_station_model_location(this);
 }
 
-int oskar_StationModel::resize(int n_elements)
-{
-    return oskar_station_model_resize(this, n_elements);
-}
-
 int oskar_StationModel::multiply_by_wavenumber(double frequency_hz)
 {
     return oskar_station_model_multiply_by_wavenumber(this, frequency_hz);
 }
 
+int oskar_StationModel::resize(int n_elements)
+{
+    return oskar_station_model_resize(this, n_elements);
+}
+
 int oskar_StationModel::type() const
 {
     return oskar_station_model_type(this);
-}
-
-int oskar_StationModel::coord_type() const
-{
-    return oskar_station_model_coord_type(this);
-}
-
-int oskar_StationModel::coord_location() const
-{
-    return oskar_station_model_coord_location(this);
 }

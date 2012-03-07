@@ -23,12 +23,12 @@ set(interferometry_SRC
     src/oskar_telescope_model_copy.c
     src/oskar_telescope_model_free.c
     src/oskar_telescope_model_init.c
-    src/oskar_telescope_model_load_station_pos.c
+    src/oskar_telescope_model_load_station_coords.c
     src/oskar_telescope_model_location.c
     src/oskar_telescope_model_multiply_by_wavenumber.c
     src/oskar_telescope_model_resize.c
     src/oskar_telescope_model_scale_coords.c
-    src/oskar_telescope_model_set_station_pos.c
+    src/oskar_telescope_model_set_station_coords.c
     src/oskar_telescope_model_type.c
     src/oskar_TelescopeModel.cpp
     src/oskar_visibilities_add_sky_noise.c

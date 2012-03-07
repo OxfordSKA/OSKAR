@@ -43,11 +43,17 @@ int oskar_station_model_scale_coords(oskar_StationModel* station, double value)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Scale the coordinates. */
-    error = oskar_mem_scale_real(&station->x, value);
+    error = oskar_mem_scale_real(&station->x_signal, value);
     if (error) return error;
-    error = oskar_mem_scale_real(&station->y, value);
+    error = oskar_mem_scale_real(&station->y_signal, value);
     if (error) return error;
-    error = oskar_mem_scale_real(&station->z, value);
+    error = oskar_mem_scale_real(&station->z_signal, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&station->x_weights, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&station->y_weights, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&station->z_weights, value);
     if (error) return error;
 
     return error;

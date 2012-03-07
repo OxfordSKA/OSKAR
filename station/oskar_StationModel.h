@@ -49,10 +49,13 @@ struct oskar_StationModel
     oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */
 
     /* Station element data. */
-    oskar_Mem x;      /**< x-position wrt local horizon, toward the East. */
-    oskar_Mem y;      /**< y-position wrt local horizon, toward the North. */
-    oskar_Mem z;      /**< z-position wrt local horizon, toward the zenith. */
-    int coord_units;  /**< Units of the x,y,z coordinates.*/
+    oskar_Mem x_signal;       /**< x-position wrt local horizon, toward the East. */
+    oskar_Mem y_signal;       /**< y-position wrt local horizon, toward the North. */
+    oskar_Mem z_signal;       /**< z-position wrt local horizon, toward the zenith. */
+    oskar_Mem x_weights;      /**< x-position wrt local horizon, toward the East. */
+    oskar_Mem y_weights;      /**< y-position wrt local horizon, toward the North. */
+    oskar_Mem z_weights;      /**< z-position wrt local horizon, toward the zenith. */
+    int coord_units;          /**< Units of the x,y,z coordinates.*/
 
     int apply_weight; /**< Bool switch to toggle complex element weight vector (default false) */
     oskar_Mem weight; /**< Element complex weight (set to 1 unless apodisation). */
@@ -154,6 +157,13 @@ struct oskar_StationModel
     int location() const;
 
     /**
+     * @brief Scales station coordinates from metres to wavenumber units.
+     *
+     * @param[in] frequency_hz Frequency, in Hz.
+     */
+    int multiply_by_wavenumber(double frequency_hz);
+
+    /**
      * @brief Resizes the station structure.
      *
      * @details
@@ -164,29 +174,10 @@ struct oskar_StationModel
     int resize(int n_elements);
 
     /**
-     * @brief Scales station coordinates from metres to wavenumber units.
-     *
-     * @param[in] frequency_hz Frequency, in Hz.
-     */
-    int multiply_by_wavenumber(double frequency_hz);
-
-    /**
      * @brief Returns the base type of all arrays in the structure, or an error
      * code if the types are inconsistent.
      */
     int type() const;
-
-    /**
-     * @brief Returns the oskar_Mem type ID of station coordinates or
-     * an error code if the coordinate type is invalid.
-     */
-    int coord_type() const;
-
-    /**
-     * @brief Returns the oskar_Mem location ID of the station coordinates or
-     * an error code if the coordinate type is invalid.
-     */
-    int coord_location() const;
 #endif
 };
 

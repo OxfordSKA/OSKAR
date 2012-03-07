@@ -31,7 +31,7 @@
 #include "interferometry/oskar_telescope_model_copy.h"
 #include "interferometry/oskar_telescope_model_free.h"
 #include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_telescope_model_load_station_pos.h"
+#include "interferometry/oskar_telescope_model_load_station_coords.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
 #include "interferometry/oskar_telescope_model_resize.h"
@@ -41,8 +41,6 @@
 
 oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
         int n_stations)
-: num_stations(0),
-  station(NULL)
 {
     if (oskar_telescope_model_init(this, type, location, n_stations))
         throw "Error in oskar_telescope_model_init.";
@@ -50,8 +48,6 @@ oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
 
 oskar_TelescopeModel::oskar_TelescopeModel(const oskar_TelescopeModel* other,
         int location)
-: num_stations(0),
-  station(NULL)
 {
     if (oskar_telescope_model_init(this, other->station_x.type, location,
             other->num_stations))
@@ -71,10 +67,10 @@ void oskar_TelescopeModel::analyse()
     oskar_telescope_model_analyse(this);
 }
 
-int oskar_TelescopeModel::load_station_pos(const char* filename,
+int oskar_TelescopeModel::load_station_coords(const char* filename,
         double longitude, double latitude, double altitude)
 {
-    return oskar_telescope_model_load_station_pos(this, filename,
+    return oskar_telescope_model_load_station_coords(this, filename,
             longitude, latitude, altitude);
 }
 

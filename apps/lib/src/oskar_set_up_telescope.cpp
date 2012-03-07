@@ -28,6 +28,7 @@
 
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_load_stations.h"
+#include "math/oskar_random_gaussian.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_set_value_real.h"
@@ -51,7 +52,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
     const char* station_dir = settings->telescope.station_layout_directory;
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
-    int err = telescope->load_station_pos(telescope_file,
+    int err = telescope->load_station_coords(telescope_file,
             settings->telescope.longitude_rad, settings->telescope.latitude_rad,
             settings->telescope.altitude_m);
     if (err)
@@ -128,6 +129,53 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         {
             oskar_mem_set_value_real(&telescope->station[i].phase_error,
                     settings->telescope.station.element_phase_error_rad);
+        }
+    }
+
+    // Override station element position errors if required.
+    if (settings->telescope.station.element_position_error_xy_m != 0.0)
+    {
+        srand(0); // FIXME Set random seed from settings file.
+        double p_err = settings->telescope.station.element_position_error_xy_m;
+        for (int i = 0; i < telescope->num_stations; ++i)
+        {
+            double delta_x, delta_y;
+            int type = telescope->station[i].type();
+            int num_elements = telescope->station[i].num_elements;
+            if (type == OSKAR_DOUBLE)
+            {
+                double *xs, *ys, *xw, *yw;
+                xs = (double*)(telescope->station[i].x_signal.data);
+                ys = (double*)(telescope->station[i].y_signal.data);
+                xw = (double*)(telescope->station[i].x_weights.data);
+                yw = (double*)(telescope->station[i].y_weights.data);
+                for (int j = 0; j < num_elements; ++j)
+                {
+                    // Generate Gaussians.
+                    delta_x = oskar_random_gaussian(&delta_y);
+                    delta_x *= p_err;
+                    delta_y *= p_err;
+                    xs[j] = xw[j] + delta_x;
+                    ys[j] = yw[j] + delta_y;
+                }
+            }
+            else if (type == OSKAR_SINGLE)
+            {
+                float *xs, *ys, *xw, *yw;
+                xs = (float*)(telescope->station[i].x_signal.data);
+                ys = (float*)(telescope->station[i].y_signal.data);
+                xw = (float*)(telescope->station[i].x_weights.data);
+                yw = (float*)(telescope->station[i].y_weights.data);
+                for (int j = 0; j < num_elements; ++j)
+                {
+                    // Generate Gaussians.
+                    delta_x = oskar_random_gaussian(&delta_y);
+                    delta_x *= p_err;
+                    delta_y *= p_err;
+                    xs[j] = xw[j] + delta_x;
+                    ys[j] = yw[j] + delta_y;
+                }
+            }
         }
     }
 

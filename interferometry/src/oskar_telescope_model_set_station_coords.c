@@ -32,7 +32,7 @@
 #include <stdlib.h>
 
 #include "interferometry/oskar_telescope_model_location.h"
-#include "interferometry/oskar_telescope_model_set_station_pos.h"
+#include "interferometry/oskar_telescope_model_set_station_coords.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "utility/oskar_mem_element_size.h"
@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_set_station_pos(oskar_TelescopeModel* dst,
+int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
         int index, double x, double y, double z)
 {
     int type, location;

@@ -76,7 +76,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
 
     // Double precision.
     if (beam->type == OSKAR_DOUBLE_COMPLEX &&
-            station->coord_type() == OSKAR_DOUBLE &&
+            station->type() == OSKAR_DOUBLE &&
             weights->type == OSKAR_DOUBLE_COMPLEX &&
             l->type == OSKAR_DOUBLE &&
             m->type == OSKAR_DOUBLE &&
@@ -86,7 +86,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
         oskar_cudak_dftw_2d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (num_antennas, station->x, station->y, l_beam,
+                (num_antennas, station->x_weights, station->y_weights, l_beam,
                         m_beam, *weights);
 
         if (station->apply_element_errors)
@@ -107,7 +107,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         size_t shared_mem_size = 2 * antennas_per_chunk * element_size;
         oskar_cudak_dftw_o2c_2d_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
-                (num_antennas, station->x, station->y,
+                (num_antennas, station->x_signal, station->y_signal,
                 *weights, num_sources, *l, *m, antennas_per_chunk, *beam);
 
         // Zero the value of any positions below the horizon.
@@ -119,7 +119,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
 
     // Single precision.
     else if (beam->type == OSKAR_SINGLE_COMPLEX &&
-            station->coord_type() == OSKAR_SINGLE &&
+            station->type() == OSKAR_SINGLE &&
             weights->type == OSKAR_SINGLE_COMPLEX &&
             l->type == OSKAR_SINGLE &&
             m->type == OSKAR_SINGLE &&
@@ -129,7 +129,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
         oskar_cudak_dftw_2d_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (num_antennas, station->x, station->y, l_beam,
+                (num_antennas, station->x_weights, station->y_weights, l_beam,
                         m_beam, *weights);
 
         // Evaluate beam pattern for each source.
@@ -138,7 +138,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         size_t shared_mem_size = 2 * antennas_per_chunk * element_size;
         oskar_cudak_dftw_o2c_2d_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
-            (num_antennas, station->x, station->y, *weights,
+            (num_antennas, station->x_signal, station->y_signal, *weights,
                     num_sources, *l, *m, antennas_per_chunk, *beam);
 
         // Zero the value of any positions below the horizon.

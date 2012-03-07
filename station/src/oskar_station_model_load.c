@@ -28,8 +28,8 @@
 
 #include "station/oskar_station_model_load.h"
 #include "station/oskar_station_model_resize.h"
+#include "station/oskar_station_model_set_element_coords.h"
 #include "station/oskar_station_model_set_element_errors.h"
-#include "station/oskar_station_model_set_element_pos.h"
 #include "station/oskar_station_model_set_element_weight.h"
 #include "station/oskar_station_model_type.h"
 #include "utility/oskar_getline.h"
@@ -67,14 +67,16 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
         /* Declare parameter array. */
-        double par[] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0};
+        /* x, y, z, delta_x, delta_y, delta_z, amp_gain, amp_error,
+         * phase_offset, phase_error, weight_re, weight_im */
+        double par[] = {0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0.};
         int read = 0;
 
         /* Ignore comment lines (lines starting with '#'). */
         if (line[0] == '#') continue;
 
         /* Load element coordinates. */
-        read = oskar_string_to_array_d(line, 9, par);
+        read = oskar_string_to_array_d(line, sizeof(par) / sizeof(double), par);
         if (read < 2) continue;
 
         /* Ensure enough space in arrays. */
@@ -89,22 +91,22 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
         }
 
         /* Store the data. */
-        err = oskar_station_model_set_element_pos(station, n,
-                par[0], par[1], par[2]);
+        err = oskar_station_model_set_element_coords(station, n,
+                par[0], par[1], par[2], par[3], par[4], par[5]);
         if (err)
         {
             fclose(file);
             return err;
         }
         err = oskar_station_model_set_element_errors(station, n,
-                par[3], par[4], par[5], par[6]);
+                par[6], par[7], par[8], par[9]);
         if (err)
         {
             fclose(file);
             return err;
         }
         err = oskar_station_model_set_element_weight(station, n,
-                par[7], par[8]);
+                par[10], par[11]);
         if (err)
         {
             fclose(file);

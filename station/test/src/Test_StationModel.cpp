@@ -79,11 +79,11 @@ void Test_StationModel::test_load_single()
     for (int i = 0; i < n_elements; ++i)
     {
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,
-                ((float*)station_model.x.data)[i], 1e-3);
+                ((float*)station_model.x_weights.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0,
-                ((float*)station_model.y.data)[i], 1e-3);
+                ((float*)station_model.y_weights.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/30.0,
-                ((float*)station_model.z.data)[i], 1e-3);
+                ((float*)station_model.z_weights.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
                 ((float2*)station_model.weight.data)[i].x, 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
@@ -128,11 +128,11 @@ void Test_StationModel::test_load_double()
     for (int i = 0; i < n_elements; ++i)
     {
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/10.0,
-                ((double*)station_model.x.data)[i], 1e-6);
+                ((double*)station_model.x_weights.data)[i], 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/20.0,
-                ((double*)station_model.y.data)[i], 1e-6);
+                ((double*)station_model.y_weights.data)[i], 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(i/30.0,
-                ((double*)station_model.z.data)[i], 1e-6);
+                ((double*)station_model.z_weights.data)[i], 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
                 ((double2*)station_model.weight.data)[i].x, 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,

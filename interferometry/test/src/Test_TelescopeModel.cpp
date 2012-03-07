@@ -103,7 +103,7 @@ void Test_TelescopeModel::test_load_telescope_cpu()
                 OSKAR_LOCATION_CPU);
 
         // Fill the telescope structure.
-        CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_pos(telescope_file_name,
+        CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_coords(telescope_file_name,
                 longitude, latitude, altitude));
         for (int i = 0; i < n_stations; ++i)
         {
@@ -148,9 +148,9 @@ void Test_TelescopeModel::test_load_telescope_cpu()
                 double x = t / 5.0;
                 double y = t / 6.0;
                 double z = t / 7.0;
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu->station[i].x))[j], 1e-5);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu->station[i].y))[j], 1e-5);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu->station[i].z))[j], 1e-5);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(x, ((double*)(tel_cpu->station[i].x_weights))[j], 1e-5);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(y, ((double*)(tel_cpu->station[i].y_weights))[j], 1e-5);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(z, ((double*)(tel_cpu->station[i].z_weights))[j], 1e-5);
             }
         }
 
