@@ -45,6 +45,7 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         const char* filename)
 {
     QByteArray t;
+    QString temp;
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("telescope");
 
@@ -69,22 +70,40 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     tel->latitude_rad  = s.value("latitude_deg", 0.0).toDouble() * D2R;
     tel->altitude_m    = s.value("altitude_m", 0.0).toDouble();
 
+    // Short baseline approximation.
+    tel->use_common_sky = s.value("use_common_sky", true).toBool();
+
     // Station settings.
     s.beginGroup("station");
     tel->station.enable_beam = s.value("enable_beam", true).toBool();
     tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
 
     // Station element settings (overrides).
-    tel->station.element_amp_gain =
-            s.value("element_amp_gain", -1e99).toDouble();
-    tel->station.element_amp_error =
-            s.value("element_amp_error", -1e99).toDouble();
-    tel->station.element_phase_offset_rad =
-            s.value("element_phase_offset_deg", -1e99).toDouble() * D2R;
-    tel->station.element_phase_error_rad =
-            s.value("element_phase_error_deg", -1e99).toDouble() * D2R;
+    tel->station.element_gain = s.value("element_gain", 0.0).toDouble();
+    tel->station.element_gain_error_fixed =
+            s.value("element_gain_error_fixed", 0.0).toDouble();
+    tel->station.element_gain_error_time =
+            s.value("element_gain_error_time", 0.0).toDouble();
+    tel->station.element_phase_error_fixed_rad =
+            s.value("element_phase_error_fixed_deg", 0.0).toDouble() * D2R;
+    tel->station.element_phase_error_time_rad =
+            s.value("element_phase_error_time_deg", 0.0).toDouble() * D2R;
     tel->station.element_position_error_xy_m =
             s.value("element_position_error_xy_m", 0.0).toDouble();
+
+    // Station element random seeds.
+    temp = s.value("seed_element_gain_errors").toString();
+    tel->station.seed_element_gain_errors = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    temp = s.value("seed_element_phase_errors").toString();
+    tel->station.seed_element_phase_errors = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    temp = s.value("seed_element_time_variable_errors").toString();
+    tel->station.seed_element_time_variable_errors = (temp.toUpper() == "TIME"
+            || temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    temp = s.value("seed_element_position_xy_errors").toString();
+    tel->station.seed_element_position_xy_errors = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
 
     // Receiver temperature.
     tel->station.receiver_temperature = s.value("receiver_temperature", -1.0).toDouble();

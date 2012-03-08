@@ -44,8 +44,8 @@ int oskar_station_model_is_location(const oskar_StationModel* station,
             station->y_weights.location == location &&
             station->z_weights.location == location &&
             station->weight.location == location &&
-            station->amp_gain.location == location &&
-            station->amp_gain_error.location == location &&
+            station->gain.location == location &&
+            station->gain_error.location == location &&
             station->phase_offset.location == location &&
             station->phase_error.location == location);
 }

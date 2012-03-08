@@ -45,11 +45,18 @@ struct oskar_SettingsStation
     char* receiver_temperature_file;
 
     /* Station element settings (can override those in the station files). */
-    double element_amp_gain;
-    double element_amp_error;
-    double element_phase_offset_rad;
-    double element_phase_error_rad;
+    double element_gain;
+    double element_gain_error_fixed;
+    double element_gain_error_time;
+    double element_phase_error_fixed_rad;
+    double element_phase_error_time_rad;
     double element_position_error_xy_m;
+
+    /* Random seeds. */
+    int seed_element_gain_errors;
+    int seed_element_phase_errors;
+    int seed_element_time_variable_errors;
+    int seed_element_position_xy_errors;
 };
 typedef struct oskar_SettingsStation oskar_SettingsStation;
 

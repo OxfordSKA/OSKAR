@@ -50,15 +50,15 @@ extern "C" {
  *
  * @param[in] dst           Station model structure to copy into.
  * @param[in] index         Element array index to set.
- * @param[in] amp_gain      Element amplitude gain.
- * @param[in] amp_error     Element amplitude error.
+ * @param[in] gain          Element gain.
+ * @param[in] gain_error    Element gain error.
  * @param[in] phase_offset  Element phase offset, in degrees.
  * @param[in] phase_error   Element phase error, in degrees.
  */
 OSKAR_EXPORT
 int oskar_station_model_set_element_errors(oskar_StationModel* dst,
-		int index, double amp_gain, double amp_error, double phase_offset,
-		double phase_error);
+        int index, double gain, double gain_error, double phase_offset,
+        double phase_error);
 
 #ifdef __cplusplus
 }

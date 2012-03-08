@@ -82,8 +82,8 @@ int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
                     (double*)phase_error->data, states);
     }
     /* Single precision */
-    else if (errors->is_double() && gain->is_double() && gain_error->is_double() &&
-            phase->is_double() && phase_error->is_double())
+    else if (errors->is_single() && gain->is_single() && gain_error->is_single() &&
+            phase->is_single() && phase_error->is_single())
     {
         oskar_cudak_evaluate_element_weights_errors_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads)

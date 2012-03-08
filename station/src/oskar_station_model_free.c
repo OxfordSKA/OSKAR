@@ -58,9 +58,9 @@ int oskar_station_model_free(oskar_StationModel* model)
     if (error) return error;
     error = oskar_mem_free(&model->weight);
     if (error) return error;
-    error = oskar_mem_free(&model->amp_gain);
+    error = oskar_mem_free(&model->gain);
     if (error) return error;
-    error = oskar_mem_free(&model->amp_gain_error);
+    error = oskar_mem_free(&model->gain_error);
     if (error) return error;
     error = oskar_mem_free(&model->phase_offset);
     if (error) return error;

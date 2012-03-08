@@ -90,8 +90,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     // This is required so that when splitting the sky into chunks or channels
     // antennas still have the same error value for the given time and seed.
     oskar_Device_curand_state curand_state(telescope->max_station_size);
-    int seed = 0; // TODO get this from the settings file....
-    curand_state.init(seed);
+    curand_state.init(telescope->seed_time_variable_errors);
 
     // Get time increments.
     int num_vis_dumps        = times->num_vis_dumps;

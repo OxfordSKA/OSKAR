@@ -51,6 +51,7 @@ struct oskar_TelescopeModel
     int identical_stations;      /**< True if all stations are identical. */
     int disable_e_jones;         /**< If True, E-Jones is disabled. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
+    int seed_time_variable_errors; /**< Random seed for time-variable errors. */
     double ra0_rad;              /**< Right Ascension of phase centre, in radians. */
     double dec0_rad;             /**< Declination of phase centre, in radians. */
     double wavelength_metres;    /**< Current wavelength of observation, in metres. */

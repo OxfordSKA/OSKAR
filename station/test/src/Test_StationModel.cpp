@@ -89,9 +89,9 @@ void Test_StationModel::test_load_single()
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
                 ((float2*)station_model.weight.data)[i].y, 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
-                ((float*)station_model.amp_gain.data)[i], 1e-3);
+                ((float*)station_model.gain.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((float*)station_model.amp_gain_error.data)[i], 1e-3);
+                ((float*)station_model.gain_error.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
                 ((float*)station_model.phase_offset.data)[i], 1e-3);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
@@ -138,9 +138,9 @@ void Test_StationModel::test_load_double()
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
                 ((double2*)station_model.weight.data)[i].y, 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0,
-                ((double*)station_model.amp_gain.data)[i], 1e-6);
+                ((double*)station_model.gain.data)[i], 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
-                ((double*)station_model.amp_gain_error.data)[i], 1e-6);
+                ((double*)station_model.gain_error.data)[i], 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,
                 ((double*)station_model.phase_offset.data)[i], 1e-6);
         CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,

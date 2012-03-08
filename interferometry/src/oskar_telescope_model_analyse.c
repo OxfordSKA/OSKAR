@@ -73,8 +73,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         if (type == OSKAR_DOUBLE)
         {
             double *amp, *amp_err, *phase, *phase_err;
-            amp       = (double*)(s->amp_gain.data);
-            amp_err   = (double*)(s->amp_gain_error.data);
+            amp       = (double*)(s->gain.data);
+            amp_err   = (double*)(s->gain_error.data);
             phase     = (double*)(s->phase_offset.data);
             phase_err = (double*)(s->phase_error.data);
 
@@ -95,8 +95,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         else if (type == OSKAR_SINGLE)
         {
             float *amp, *amp_err, *phase, *phase_err;
-            amp       = (float*)(s->amp_gain.data);
-            amp_err   = (float*)(s->amp_gain_error.data);
+            amp       = (float*)(s->gain.data);
+            amp_err   = (float*)(s->gain_error.data);
             phase     = (float*)(s->phase_offset.data);
             phase_err = (float*)(s->phase_error.data);
 
@@ -120,7 +120,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
      * or gain factors. */
     if (!finished_identical_station_check)
     {
-        oskar_Mem *x_weights0, *y_weights0, *z_weights0, *amp0, *phase0;
+        oskar_Mem *x_weights0, *y_weights0, *z_weights0, *gain0, *phase0;
         oskar_Mem *x_signal0, *y_signal0, *z_signal0;
         int num_elements0;
         x_weights0 = &(model->station[0].x_weights);
@@ -129,13 +129,13 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         x_signal0 = &(model->station[0].x_signal);
         y_signal0 = &(model->station[0].y_signal);
         z_signal0 = &(model->station[0].z_signal);
-        amp0 = &(model->station[0].amp_gain);
+        gain0 = &(model->station[0].gain);
         phase0 = &(model->station[0].phase_offset);
         num_elements0 = model->station[0].num_elements;
 
         for (i = 1; i < num_stations; ++i)
         {
-            oskar_Mem *x_weights, *y_weights, *z_weights, *amp, *phase;
+            oskar_Mem *x_weights, *y_weights, *z_weights, *gain, *phase;
             oskar_Mem *x_signal, *y_signal, *z_signal;
             int num_elements;
             x_weights = &(model->station[i].x_weights);
@@ -144,7 +144,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             x_signal = &(model->station[i].x_signal);
             y_signal = &(model->station[i].y_signal);
             z_signal = &(model->station[i].z_signal);
-            amp = &(model->station[i].amp_gain);
+            gain = &(model->station[i].gain);
             phase = &(model->station[i].phase_offset);
             num_elements = model->station[i].num_elements;
 
@@ -186,7 +186,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(amp, amp0, num_elements))
+            if (oskar_mem_different(gain, gain0, num_elements))
             {
                 model->identical_stations = 0;
                 break;
@@ -206,6 +206,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
     printf("  - Max station size       = %u\n", model->max_station_size);
     printf("  - Identical stations     = %s\n",
             model->identical_stations ? "true" : "false");
+    printf("  - Use common sky         = %s\n",
+            model->use_common_sky ? "true" : "false");
     printf("\n");
 }
 

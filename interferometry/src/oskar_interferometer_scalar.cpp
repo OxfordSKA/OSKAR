@@ -72,8 +72,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
 
     // Initialise the random number generator.
     oskar_Device_curand_state curand_state(telescope->max_station_size);
-    int seed = 0; // TODO get this from the settings file....
-    curand_state.init(seed);
+    curand_state.init(telescope->seed_time_variable_errors);
 
     // Calculate time increments.
     int num_vis_dumps        = times->num_vis_dumps;
@@ -98,7 +97,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
         // Compact sky model to temporary.
         oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
         err = oskar_sky_model_horizon_clip(&sky, &sky_gpu, &tel_gpu,
-        		gast, &work);
+                gast, &work);
         if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
         {
             // Skip iteration.

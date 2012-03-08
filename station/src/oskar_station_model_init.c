@@ -70,9 +70,9 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     if (err) return err;
     err = oskar_mem_init(&model->weight, type | OSKAR_COMPLEX, location, num_elements, 1);
     if (err) return err;
-    err = oskar_mem_init(&model->amp_gain, type, location, num_elements, 1);
+    err = oskar_mem_init(&model->gain, type, location, num_elements, 1);
     if (err) return err;
-    err = oskar_mem_init(&model->amp_gain_error, type, location, num_elements, 1);
+    err = oskar_mem_init(&model->gain_error, type, location, num_elements, 1);
     if (err) return err;
     err = oskar_mem_init(&model->phase_offset, type, location, num_elements, 1);
     if (err) return err;

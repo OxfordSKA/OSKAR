@@ -94,7 +94,7 @@ int main(int argc, char** argv)
                 freq);
         if (err) oskar_exit(err);
     }
-    printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1.0e3);
+    printf("=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
     err = oskar_evaluate_baseline_uvw(vis_global, tel_cpu, times);

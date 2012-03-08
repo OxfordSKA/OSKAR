@@ -179,7 +179,7 @@ int oskar_sim_interferometer(const char* settings_file)
         if (error) return error;
     }
 
-    printf("\n=== Simulation completed in %f sec.\n", timer.elapsed() / 1e3);
+    printf("\n=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(vis_global, telescope_cpu, times);

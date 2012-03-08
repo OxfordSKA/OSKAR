@@ -77,10 +77,12 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
     telescope->dec0_rad = settings->obs.dec0_rad;
 
     // Set other telescope parameters.
-    telescope->use_common_sky = true; // FIXME set this via the settings file.
+    telescope->use_common_sky = settings->telescope.use_common_sky;
     telescope->bandwidth_hz = settings->obs.channel_bandwidth_hz;
     telescope->wavelength_metres = 0.0; // This is set on a per-channel basis.
     telescope->disable_e_jones = ! (settings->telescope.station.enable_beam);
+    telescope->seed_time_variable_errors =
+            settings->telescope.station.seed_element_time_variable_errors;
 
     // Set other station parameters.
     for (int i = 0; i < telescope->num_stations; ++i)
@@ -92,50 +94,83 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
                 settings->telescope.station.normalise_beam;
     }
 
-    // Override station element amplitude gains if required.
-    if (settings->telescope.station.element_amp_gain > -1e10)
+    // Override station element systematic/fixed gain errors if required.
+    if (settings->telescope.station.element_gain > 0.0 ||
+            settings->telescope.station.element_gain_error_fixed > 0.0)
     {
+        srand(settings->telescope.station.seed_element_gain_errors);
+        double g = settings->telescope.station.element_gain;
+        double g_err = settings->telescope.station.element_gain_error_fixed;
+        if (g <= 0.0) g = 1.0;
         for (int i = 0; i < telescope->num_stations; ++i)
         {
-            oskar_mem_set_value_real(&telescope->station[i].amp_gain,
-                    settings->telescope.station.element_amp_gain);
+            int type = telescope->station[i].type();
+            int num_elements = telescope->station[i].num_elements;
+            if (type == OSKAR_DOUBLE)
+            {
+                double *gain = (double*)(telescope->station[i].gain.data);
+                for (int j = 0; j < num_elements; ++j)
+                    gain[j] = g + g_err * oskar_random_gaussian(0);
+            }
+            else if (type == OSKAR_SINGLE)
+            {
+                float *gain = (float*)(telescope->station[i].gain.data);
+                for (int j = 0; j < num_elements; ++j)
+                    gain[j] = g + g_err * oskar_random_gaussian(0);
+            }
         }
     }
 
-    // Override station element amplitude errors if required.
-    if (settings->telescope.station.element_amp_error > -1e10)
+    // Override station element time-variable gain errors if required.
+    if (settings->telescope.station.element_gain_error_time > 0.0)
     {
         for (int i = 0; i < telescope->num_stations; ++i)
         {
-            oskar_mem_set_value_real(&telescope->station[i].amp_gain_error,
-                    settings->telescope.station.element_amp_error);
+            oskar_mem_set_value_real(&telescope->station[i].gain_error,
+                    settings->telescope.station.element_gain_error_time);
         }
     }
 
-    // Override station element phase offsets if required.
-    if (settings->telescope.station.element_phase_offset_rad > -1e10)
+    // Override station element systematic/fixed phase errors if required.
+    if (settings->telescope.station.element_phase_error_fixed_rad > 0.0)
     {
+        srand(settings->telescope.station.seed_element_phase_errors);
+        double p_err = settings->telescope.station.element_phase_error_fixed_rad;
         for (int i = 0; i < telescope->num_stations; ++i)
         {
-            oskar_mem_set_value_real(&telescope->station[i].phase_offset,
-                    settings->telescope.station.element_phase_offset_rad);
+            int type = telescope->station[i].type();
+            int num_elements = telescope->station[i].num_elements;
+            if (type == OSKAR_DOUBLE)
+            {
+                double *phase;
+                phase = (double*)(telescope->station[i].phase_offset.data);
+                for (int j = 0; j < num_elements; ++j)
+                    phase[j] = p_err * oskar_random_gaussian(0);
+            }
+            else if (type == OSKAR_SINGLE)
+            {
+                float *phase;
+                phase = (float*)(telescope->station[i].phase_offset.data);
+                for (int j = 0; j < num_elements; ++j)
+                    phase[j] = p_err * oskar_random_gaussian(0);
+            }
         }
     }
 
-    // Override station element phase errors if required.
-    if (settings->telescope.station.element_phase_error_rad > -1e10)
+    // Override station element time-variable phase errors if required.
+    if (settings->telescope.station.element_phase_error_time_rad > 0.0)
     {
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             oskar_mem_set_value_real(&telescope->station[i].phase_error,
-                    settings->telescope.station.element_phase_error_rad);
+                    settings->telescope.station.element_phase_error_time_rad);
         }
     }
 
     // Override station element position errors if required.
-    if (settings->telescope.station.element_position_error_xy_m != 0.0)
+    if (settings->telescope.station.element_position_error_xy_m > 0.0)
     {
-        srand(0); // FIXME Set random seed from settings file.
+        srand(settings->telescope.station.seed_element_position_xy_errors);
         double p_err = settings->telescope.station.element_position_error_xy_m;
         for (int i = 0; i < telescope->num_stations; ++i)
         {
@@ -187,16 +222,15 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         double bandwidth = telescope->bandwidth_hz;
         const oskar_SettingsTime* time = &settings->obs.time;
         double integration_time = time->obs_length_seconds / time->num_vis_dumps;
-        vector<double> receiver_temp(num_channels, settings->telescope.station.receiver_temperature);
+        vector<double> receiver_temp(num_channels,
+                settings->telescope.station.receiver_temperature);
 
         // Load receiver temperatures from file.
         if (settings->telescope.station.receiver_temperature_file)
         {
-            if (strlen(settings->telescope.station.receiver_temperature_file) > 0)
-            {
-                //oskar_load_receiver_temperatures(settings->telescope.station.receiver_temperature_file);
-                printf("== WARNING: Receiver temperature files are not yet implemented.\n");
-            }
+            //oskar_load_receiver_temperatures(settings->telescope.station.receiver_temperature_file);
+            printf("== WARNING: Receiver temperature files "
+                    "are not yet implemented.\n");
         }
 
         for (int i = 0; i < telescope->num_stations; ++i)

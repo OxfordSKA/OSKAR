@@ -26,44 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-
-#include "station/oskar_evaluate_station_beam.h"
-
-#include "station/oskar_StationModel.h"
-#include "utility/oskar_Mem.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
+#include "station/oskar_evaluate_station_beam.h"
+#include "station/oskar_station_model_location.h"
+#include "station/oskar_StationModel.h"
 #include "utility/oskar_mem_get_pointer.h"
+#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_scale_real.h"
+#include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_Mem.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
-extern "C"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
         const double l_beam, const double m_beam, const oskar_Mem* l,
         const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* weights,
         oskar_Device_curand_state* curand_states)
 {
+    int error;
+    oskar_Mem weights_error;
+
+    /* Sanity check on inputs. */
     if (E == NULL || station == NULL || l == NULL || m == NULL || n == NULL ||
             weights == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // NOTE extra fields will have to be added to these check
-    // for element pattern data.
+    /* NOTE extra fields will have to be added to these check
+     * for element pattern data. */
 
     if (station->coord_units != OSKAR_WAVENUMBERS)
         return OSKAR_ERR_BAD_UNITS;
 
-    if (E->is_null() || station->x_weights.is_null() || station->y_weights.is_null() ||
-            l->is_null() || m->is_null() || n->is_null())
+    if (!E->data || !station->x_weights.data || !station->y_weights.data ||
+            !l->data || !m->data || !n->data)
     {
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
     }
 
-    // Check that the relevant memory is on the GPU.
+    /* Check that the relevant memory is on the GPU. */
     if (E->location != OSKAR_LOCATION_GPU ||
-            station->location() != OSKAR_LOCATION_GPU ||
+            oskar_station_model_location(station) != OSKAR_LOCATION_GPU ||
             weights->location != OSKAR_LOCATION_GPU ||
             l->location != OSKAR_LOCATION_GPU ||
             m->location != OSKAR_LOCATION_GPU ||
@@ -79,40 +87,42 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    if (E->is_real() || weights->is_real() || l->is_complex()
-            || m->is_complex() || n->is_complex())
+    /* Check the data types. */
+    if (oskar_mem_is_real(E->type) || oskar_mem_is_real(weights->type) ||
+            oskar_mem_is_complex(l->type) || oskar_mem_is_complex(m->type) ||
+            oskar_mem_is_complex(n->type))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    // Declare a non-owned Mem pointer to store the weights error work array.
-    oskar_Mem weights_error;
-
-    // Resize the weights work array if needed.
+    /* Resize the weights work array if needed. */
     if (weights->num_elements < 2 * station->num_elements)
     {
-        int error = weights->resize(2 * station->num_elements);
+        error = oskar_mem_realloc(weights, 2 * station->num_elements);
         if (error) return error;
     }
-    int error = oskar_mem_get_pointer(&weights_error, weights,
+
+    /* Non-owned Mem pointer to store the weights error work array. */
+    error = oskar_mem_get_pointer(&weights_error, weights,
             station->num_elements, station->num_elements);
     if (error) return error;
 
-    // No element pattern data. Assume isotropic antenna elements.
-    if (station->element_pattern == NULL && E->is_scalar())
+    /* No element pattern data. Assume isotropic antenna elements. */
+    if (station->element_pattern == NULL && oskar_mem_is_scalar(E->type))
     {
-        oskar_evaluate_station_beam_scalar(E, station, l_beam, m_beam,
+        error = oskar_evaluate_station_beam_scalar(E, station, l_beam, m_beam,
                 l, m, n, weights, &weights_error, curand_states);
+        if (error) return error;
 
         if (station->normalise_beam)
         {
-            E->scale_real(1.0/station->num_elements);
+            error = oskar_mem_scale_real(E, 1.0/station->num_elements);
+            if (error) return error;
         }
     }
 
-    // Make use of element pattern data.
-    else if (station->element_pattern != NULL && !E->is_scalar())
+    /* Make use of element pattern data. */
+    else if (station->element_pattern != NULL && !oskar_mem_is_scalar(E->type))
     {
-        // NOTE Element pattern data ---> not yet implemented.
-        return OSKAR_ERR_UNKNOWN;
+        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
     else
     {
@@ -121,3 +131,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
 
     return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif

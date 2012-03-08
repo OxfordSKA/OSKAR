@@ -106,7 +106,7 @@ void Test_evaluate_jones_E::evaluate_e()
 
     // Initialise the random number generator.
     oskar_Device_curand_state curand_state(num_antennas);
-    int seed = 0; // TODO get this from the settings file....
+    int seed = 0;
     curand_state.init(seed);
 
     // Construct a sky model.

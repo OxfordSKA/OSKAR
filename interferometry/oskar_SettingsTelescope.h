@@ -46,6 +46,7 @@ struct oskar_SettingsTelescope
     double longitude_rad;
     double latitude_rad;
     double altitude_m;
+    int use_common_sky;
     oskar_SettingsStation station;
 };
 typedef struct oskar_SettingsTelescope oskar_SettingsTelescope;

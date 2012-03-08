@@ -158,8 +158,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
         {
             // Initialise the random number generator.
             oskar_Device_curand_state curand_state(tel_gpu.max_station_size);
-            int seed = 0; // TODO get this from the settings file....
-            curand_state.init(seed);
+            curand_state.init(tel_gpu.seed_time_variable_errors);
 
             // Get the channel frequency.
             printf("\n--> Simulating channel (%d / %d).\n", c+1, num_channels);
@@ -229,7 +228,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
                 }
             }
         }
-        printf("=== Simulation completed in %f sec.\n", timer.elapsed() / 1e3);
+        printf("=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
     }
 
     // Dump data to OSKAR image file if required.

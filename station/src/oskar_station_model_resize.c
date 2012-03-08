@@ -55,9 +55,9 @@ int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
     if (error) return error;
     error = oskar_mem_realloc(&station->weight, n_elements);
     if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain, n_elements);
+    error = oskar_mem_realloc(&station->gain, n_elements);
     if (error) return error;
-    error = oskar_mem_realloc(&station->amp_gain_error, n_elements);
+    error = oskar_mem_realloc(&station->gain_error, n_elements);
     if (error) return error;
     error = oskar_mem_realloc(&station->phase_offset, n_elements);
     if (error) return error;

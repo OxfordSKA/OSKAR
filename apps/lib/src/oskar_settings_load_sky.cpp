@@ -125,8 +125,8 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->generator.random_power_law.flux_max = s.value("flux_max").toDouble();
     sky->generator.random_power_law.power = s.value("power").toDouble();
     temp = s.value("seed").toString();
-    sky->generator.random_power_law.seed = (temp.toUpper() == "TIME")
-            ? (int)time(NULL) : (int)temp.toDouble();
+    sky->generator.random_power_law.seed = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
     // Random power-law generator filter.
     s.beginGroup("filter");
     sky->generator.random_power_law.filter.flux_min =
@@ -163,8 +163,8 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->generator.random_broken_power_law.power2 =
             s.value("power2").toDouble();
     temp = s.value("seed").toString();
-    sky->generator.random_broken_power_law.seed = (temp.toUpper() == "TIME")
-            ? (int)time(NULL) : (int)temp.toDouble();
+    sky->generator.random_broken_power_law.seed = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
     // Random broken-power-law generator filter.
     s.beginGroup("filter");
     sky->generator.random_broken_power_law.filter.flux_min =
@@ -219,8 +219,8 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->noise_model.spectral_index =
             s.value("noise_model/spectral_index").toDouble();
     temp = s.value("noise_model/seed").toString();
-    sky->noise_model.seed = (temp.toUpper() == "TIME")
-            ? (int)time(NULL) : (int)temp.toDouble();
+    sky->noise_model.seed = (temp.toUpper() == "TIME" || temp.toInt() < 0)
+            ? (int)time(NULL) : temp.toInt();
 
     return 0;
 }

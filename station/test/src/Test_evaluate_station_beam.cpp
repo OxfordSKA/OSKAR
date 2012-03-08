@@ -127,7 +127,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
 
     // Initialise the random number generator.
     oskar_Device_curand_state curand_state(num_antennas);
-    int seed = 0; // TODO get this from the settings file....
+    int seed = 0;
     curand_state.init(seed);
     station_gpu.apply_element_errors = OSKAR_FALSE;
 

@@ -44,8 +44,8 @@ int oskar_station_model_is_type(const oskar_StationModel* station, int type)
             station->y_weights.type == type &&
             station->z_weights.type == type &&
             station->weight.type == (type | OSKAR_COMPLEX) &&
-            station->amp_gain.type == type &&
-            station->amp_gain_error.type == type &&
+            station->gain.type == type &&
+            station->gain_error.type == type &&
             station->phase_offset.type == type &&
             station->phase_error.type == type);
 }
