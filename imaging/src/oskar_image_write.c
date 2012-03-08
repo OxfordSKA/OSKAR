@@ -113,6 +113,8 @@ int oskar_image_write(const oskar_Image* image, const char* filename)
 
     /* Write other image metadata. */
     oskar_binary_stream_write_int(stream, grp,
+            OSKAR_IMAGE_TAG_IMAGE_TYPE, 0, image->image_type);
+    oskar_binary_stream_write_int(stream, grp,
             OSKAR_IMAGE_TAG_DATA_TYPE, 0, type);
     oskar_binary_stream_write_int(stream, grp,
             OSKAR_IMAGE_TAG_CENTRE_RA, 0, image->centre_ra_deg);
@@ -140,8 +142,6 @@ int oskar_image_write(const oskar_Image* image, const char* filename)
             OSKAR_IMAGE_TAG_MAX, 0, image->max);
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_IMAGE_TAG_RMS, 0, image->rms);
-    oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_POL_TYPE, 0, OSKAR_IMAGE_POL_TYPE_STOKES);
 
     /* Write the image data. */
     err = oskar_mem_binary_stream_write(&image->data, stream,

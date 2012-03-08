@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fitsio.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +46,7 @@ extern "C" {
 
 void oskar_fits_image_write(const oskar_Image* image, const char* filename)
 {
-    char key[FLEN_KEYWORD], value[FLEN_VALUE];
+    char value[FLEN_VALUE];
     int i, num_dimensions, status = 0, decimals = 10, type;
     long naxes[MAX_DIM];
     double crval[MAX_DIM], crpix[MAX_DIM], cdelt[MAX_DIM], crota[MAX_DIM];
@@ -67,21 +68,37 @@ void oskar_fits_image_write(const oskar_Image* image, const char* filename)
         dim = ((int*) image->dimension_order.data)[i];
         if (dim == OSKAR_IMAGE_DIM_RA)
         {
+            double max, inc, delta;
+
+            /* Compute pixel delta. */
+            max = sin(image->fov_ra_deg * M_PI / 360.0); /* Divide by 2. */
+            inc = max / (0.5 * image->width);
+            delta = -asin(inc) * 180.0 / M_PI; /* Negative convention. */
+
+            /* Set axis properties. */
             label[i] = "Right Ascension";
             ctype[i] = "RA---SIN";
             naxes[i] = image->width;
             crval[i] = image->centre_ra_deg;
-            cdelt[i] = -(image->fov_ra_deg / image->width); /* Convention */
+            cdelt[i] = delta;
             crpix[i] = (image->width + 1) / 2.0;
             crota[i] = 0.0;
         }
         else if (dim == OSKAR_IMAGE_DIM_DEC)
         {
+            double max, inc, delta;
+
+            /* Compute pixel delta. */
+            max = sin(image->fov_dec_deg * M_PI / 360.0); /* Divide by 2. */
+            inc = max / (0.5 * image->height);
+            delta = asin(inc) * 180.0 / M_PI;
+
+            /* Set axis properties. */
             label[i] = "Declination";
             ctype[i] = "DEC--SIN";
             naxes[i] = image->height;
             crval[i] = image->centre_dec_deg;
-            cdelt[i] = image->fov_dec_deg / image->height;
+            cdelt[i] = delta;
             crpix[i] = (image->height + 1) / 2.0;
             crota[i] = 0.0;
         }
@@ -110,25 +127,38 @@ void oskar_fits_image_write(const oskar_Image* image, const char* filename)
             label[i] = "Time";
             ctype[i] = "UTC";
             naxes[i] = image->num_times;
-            crval[i] = 1.0;
-            cdelt[i] = 1.0;
+            crval[i] = 0.0; /* Zero relative to MJD-OBS. */
+            cdelt[i] = image->time_inc_sec;
             crpix[i] = 1.0;
             crota[i] = 0.0;
         }
     }
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, type, num_dimensions, naxes, image->data.data, ctype,
-            label, crval, cdelt, crpix, crota);
+    oskar_fits_write(filename, type, num_dimensions, naxes, image->data.data,
+            ctype, label, crval, cdelt, crpix, crota);
 
     /* Open file for read/write access. */
     fits_open_file(&fptr, filename, READWRITE, &status);
 
     /* Write brightness unit keyword. */
-    strcpy(key, "BUNIT");
-    strcpy(value, "JY/BEAM");
-    fits_write_key_str(fptr, key, value, "Units of flux", &status);
-    oskar_fits_check_status(status, "Writing key: BUNIT");
+    if (image->image_type < 10)
+    {
+        strcpy(value, "JY/BEAM");
+        fits_write_key_str(fptr, "BUNIT", value, "Units of flux", &status);
+        oskar_fits_check_status(status, "Writing key: BUNIT");
+    }
+
+    /* Write time header keywords. */
+    strcpy(value, "UTC");
+    fits_write_key_str(fptr, "TIMESYS", value, NULL, &status);
+    oskar_fits_check_status(status, "Writing key: TIMESYS");
+    strcpy(value, "s");
+    fits_write_key_str(fptr, "TIMEUNIT", value, "Time axis units", &status);
+    oskar_fits_check_status(status, "Writing key: TIMEUNIT");
+    fits_write_key_dbl(fptr, "MJD-OBS", image->time_start_mjd_utc, decimals,
+            "Obs start time", &status);
+    oskar_fits_check_status(status, "Writing key: MJD-OBS");
 
     /* Write pointing keywords. */
     fits_write_key_dbl(fptr, "OBSRA", image->centre_ra_deg, decimals,

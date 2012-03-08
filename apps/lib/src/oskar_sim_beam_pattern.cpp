@@ -98,6 +98,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     oskar_Image data(type, OSKAR_LOCATION_CPU);
     err = oskar_image_resize(&data, image_size, image_size, 1,
             num_times, num_channels);
+    data.image_type = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
     if (err) return err;
 
     // Set image meta-data.
