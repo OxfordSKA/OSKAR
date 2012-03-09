@@ -39,6 +39,7 @@
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
 #include "sky/oskar_sky_model_append_to_set.h"
 #include "sky/oskar_sky_model_insert.h"
+#include "math/oskar_sph_to_lm.h"
 #include "utility/oskar_Work.h"
 #include "utility/oskar_get_error_string.h"
 
@@ -514,6 +515,81 @@ void Test_SkyModel::test_filter_by_radius()
     }
 }
 
+void Test_SkyModel::test_gaussian_source()
+{
+    double ra0  = 0.0  * M_PI/180;
+    double dec0 = 90.0 * M_PI/180;
+
+    double ra       = 0.0  * (M_PI / 180.0);
+    double dec      = 70.0 * (M_PI / 180.0);
+    double fwhm_maj = 1.0  * (M_PI / 180.0);
+    double fwhm_min = 1.0  * (M_PI / 180.0);
+    double pa       = 0.0 * (M_PI / 180.0);
+
+    double delta_ra_maj, delta_dec_maj, delta_ra_min, delta_dec_min;
+    double lon[4], lat[4];
+
+    delta_ra_maj  = (fwhm_maj / 2.0) * sin(pa);
+    delta_dec_maj = (fwhm_maj / 2.0) * cos(pa);
+
+    delta_ra_min  = (fwhm_min / 2.0) * cos(pa);
+    delta_dec_min = (fwhm_min / 2.0) * sin(pa);
+
+    lon[0] = ra - delta_ra_maj;
+    lon[1] = ra + delta_ra_maj;
+    lon[2] = ra - delta_ra_min;
+    lon[3] = ra + delta_ra_min;
+
+    lat[0] = dec - delta_dec_maj;
+    lat[1] = dec + delta_dec_maj;
+    lat[2] = dec - delta_dec_min;
+    lat[3] = dec + delta_dec_min;
+
+    double l[4], m[4];
+
+    oskar_sph_to_lm_d(4, ra0, dec0, lon, lat, l, m);
+
+    printf("\n");
+    printf("ra0, dec0              = %f, %f\n", ra0*(180.0/M_PI), dec0*(180.0/M_PI));
+    printf("ra, dec                = %f, %f\n", ra*180/M_PI, dec*180/M_PI);
+    printf("fwhm_maj, fwhm_min, pa = %f, %f, %f\n", fwhm_maj*180/M_PI,
+            fwhm_min*180/M_PI, pa*180/M_PI);
+    printf("delta ra (maj, min)    = %f, %f\n",
+            delta_ra_maj*180/M_PI, delta_ra_min*180/M_PI);
+    printf("delta dec (maj, min)   = %f, %f\n",
+            delta_dec_maj*180/M_PI, delta_dec_min*180/M_PI);
+    printf("\n");
+
+
+    double x_maj = l[1] - l[0];
+    double y_maj = m[1] - m[0];
+    double pa_lm_maj = M_PI/2.0 - atan2(y_maj, x_maj);
+    double fwhm_lm_maj = sqrt(pow(fabs(x_maj), 2.0) + pow(fabs(y_maj), 2.0));
+
+    double x_min = l[3] - l[2];
+    double y_min = m[3] - m[2];
+    double pa_lm_min = M_PI/2.0 - atan2(y_min, x_min);
+    double fwhm_lm_min = sqrt(pow(fabs(x_min), 2.0) + pow(fabs(y_min), 2.0));
+
+
+    printf("= major axis:\n");
+    printf("    lon, lat = %f->%f, %f->%f\n",
+            lon[0]*(180/M_PI), lon[1]*(180/M_PI),
+            lat[0]*(180/M_PI), lat[1]*(180/M_PI));
+    printf("    l,m      = %f->%f, %f->%f\n", l[0], l[1], m[0], m[1]);
+    printf("    x,y      = %f, %f\n", x_maj, y_maj);
+    printf("    pa_lm    = %f\n", pa_lm_maj * (180.0/M_PI));
+    printf("    fwhm     = %f\n", asin(fwhm_lm_maj)*180/M_PI);
+
+    printf("= minor axis:\n");
+    printf("    lon, lat = %f->%f, %f->%f\n",
+            lon[2]*(180/M_PI), lon[3]*(180/M_PI),
+            lat[2]*(180/M_PI), lat[3]*(180/M_PI));
+    printf("    l,m      = %f->%f, %f->%f\n", l[2], l[3], m[2], m[3]);
+    printf("    x,y      = %f, %f\n", x_min, y_min);
+    printf("    pa_lm    = %f\n", pa_lm_min * (180.0/M_PI));
+    printf("    fwhm     = %f\n", asin(fwhm_lm_min)*180/M_PI);
+}
 
 void Test_SkyModel::test_evaluate_gaussian_source_parameters()
 {
@@ -528,7 +604,7 @@ void Test_SkyModel::test_evaluate_gaussian_source_parameters()
             30 * deg2rad);
     oskar_evaluate_gaussian_source_parameters(num_sources, &sky.gaussian_a,
             &sky.gaussian_b, &sky.gaussian_c, &sky.FWHM_major, &sky.FWHM_minor,
-            &sky.position_angle);
+            &sky.position_angle, &sky.RA, &sky.Dec, 0, 40.0 * M_PI/180.0);
     //sky.write("temp_sky_gaussian.osm");
 
 //    printf("\n");

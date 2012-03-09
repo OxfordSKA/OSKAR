@@ -26,29 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-#define OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-
-/**
- * @file oskar_evaluate_gaussian_source_parameters.h
- */
-
-#include "oskar_global.h"
+#include <mex.h>
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_get_error_string.h"
+#include "math/oskar_sph_rotate_points.h"
+#include <cmath>
+#include <algorithm>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// MATLAB Entry function.
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+{
+    if (num_in != 4 || num_out > 2)
+    {
+        mexErrMsgTxt("Usage: \n"
+                "[lon lat] = oskar_rotate_points(lon, lat, rot_lon, rot_lat)\n"
+                "\n"
+                "** (Note: all angles are in radians!) **");
+    }
 
-OSKAR_EXPORT
-int oskar_evaluate_gaussian_source_parameters(int num_sources,
-        oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
-        oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0);
+    int rows    = mxGetM(in[0]);
+    int columns = mxGetN(in[0]);
+    int n = std::max(rows, columns);
 
-#ifdef __cplusplus
+    oskar_Mem lon(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, OSKAR_FALSE);
+    oskar_Mem lat(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, OSKAR_FALSE);
+
+    lon.data = mxGetData(in[0]);
+    lat.data = mxGetData(in[1]);
+    double rot_lon = mxGetScalar(in[2]);
+    double rot_lat = mxGetScalar(in[3]);
+
+    out[0] = mxCreateNumericMatrix(rows, columns, mxDOUBLE_CLASS, mxREAL);
+    out[1] = mxCreateNumericMatrix(rows, columns, mxDOUBLE_CLASS, mxREAL);
+
+    int err = oskar_sph_rotate_points(n, &lon, &lat, rot_lon, rot_lat);
+    if (err) mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR from "
+            "oskar_sph_rotate_points(): %s (%i)\n",
+            oskar_get_error_string(err), err);
+
+    double* lon_out = (double*)mxGetData(out[0]);
+    double* lat_out = (double*)mxGetData(out[1]);
+
+    for (int i = 0; i < n; ++i)
+    {
+        lon_out[i] = ((double*)lon.data)[i];
+        lat_out[i] = ((double*)lat.data)[i];
+    }
 }
-#endif
-
-#endif /* OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_ */

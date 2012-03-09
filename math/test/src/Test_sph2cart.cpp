@@ -26,29 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-#define OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-
-/**
- * @file oskar_evaluate_gaussian_source_parameters.h
- */
-
-#include "oskar_global.h"
+#include "math/test/Test_sph2cart.h"
+#include "math/oskar_sph2cart.h"
+#include "math/oskar_cart2sph.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_get_error_string.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <math.h>
 
-OSKAR_EXPORT
-int oskar_evaluate_gaussian_source_parameters(int num_sources,
-        oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
-        oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0);
 
-#ifdef __cplusplus
+void Test_sph2cart::test()
+{
+    int n = 1;
+    oskar_Mem x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem z(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+
+    oskar_Mem lon_in(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem lat_in(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem lon_out(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem lat_out(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+
+    ((double*)lon_in.data)[0] = 50.0 * M_PI/180.0;
+    ((double*)lat_in.data)[0] = 30.0 * M_PI/180.0;
+
+    int err = oskar_sph2cart(n, &x, &y, &z, &lon_in, &lat_in);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+
+    err = oskar_cart2sph(n, &lon_out, &lat_out, &x, &y, &z);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+
+    double delta = 1e-8;
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)lon_in.data)[0], ((double*)lon_out.data)[0], delta);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)lat_in.data)[0], ((double*)lat_out.data)[0], delta);
 }
-#endif
-
-#endif /* OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_ */

@@ -27,28 +27,63 @@
  */
 
 
-#ifndef OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-#define OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-
-/**
- * @file oskar_evaluate_gaussian_source_parameters.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include "math/oskar_sph_rotate_points.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_free.h"
+#include "math/oskar_sph2cart.h"
+#include "math/oskar_cart2sph.h"
+#include "math/oskar_rotate.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-OSKAR_EXPORT
-int oskar_evaluate_gaussian_source_parameters(int num_sources,
-        oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
-        oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0);
+int oskar_sph_rotate_points(int n, oskar_Mem* lon, oskar_Mem* lat,
+        double rot_lon, double rot_lat)
+{
+    oskar_Mem x, y, z;
+    int type, err;
+
+    if (lon == NULL || lat == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    if (lon->location != OSKAR_LOCATION_CPU || lat->location != OSKAR_LOCATION_CPU)
+        return OSKAR_ERR_BAD_LOCATION;
+
+    if (lon->num_elements > n || lat->num_elements > n)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    if (lon->type == OSKAR_DOUBLE && lat->type == OSKAR_DOUBLE)
+        type = OSKAR_DOUBLE;
+    else if (lon->type == OSKAR_SINGLE && lat->type == OSKAR_SINGLE)
+        type = OSKAR_SINGLE;
+    else
+        return OSKAR_ERR_BAD_DATA_TYPE;
+
+    err = oskar_mem_init(&x, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&y, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&z, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE);
+    if (err) return err;
+
+    err = oskar_sph2cart(n, &x, &y, &z, lon, lat);
+    if (err) return err;
+
+    err = oskar_rotate_sph(n, &x, &y, &z, rot_lon, rot_lat);
+    if (err) return err;
+
+    err = oskar_cart2sph(n, lon, lat, &x, &y, &z);
+    if (err) return err;
+
+    oskar_mem_free(&x);
+    oskar_mem_free(&y);
+    oskar_mem_free(&z);
+
+    return OSKAR_SUCCESS;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_ */

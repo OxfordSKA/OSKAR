@@ -15,8 +15,11 @@ if (CPPUNIT_FOUND)
         src/Test_Matrix3.cpp
         src/Test_Matrix4.cpp
         src/Test_linspace.cpp
+        src/Test_matrix_math.cpp
         src/Test_meshgrid.cpp
+        src/Test_rotate.cpp
         src/Test_sph_lm.cpp
+        src/Test_sph2cart.cpp
         src/Test_SphericalPositions.cpp
     )
 

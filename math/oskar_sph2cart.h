@@ -26,60 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SKY_MODEL_H_
-#define TEST_SKY_MODEL_H_
+
+#ifndef OSKAR_SPH2CART_H_
+#define OSKAR_SPH2CART_H_
 
 /**
- * @file Test_SkyModel.h
+ * @file oskar_sph2cart.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Transform spherical coordinates to Cartesian
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function implicitly assumes the radius of the sphere is 1.
+ *
+ * @param n     Number of points
+ * @param x     Cartesian x coordinate of points
+ * @param y     Cartesian y coordinate of points
+ * @param z     Cartesian z coordinate of points
+ * @param lon   Spherical longitude coordinate (phi), in radians.
+ * @param lat   Spherical latitude coordinate (theta), in radians.
+ *
+ * @return An error code.
  */
-class Test_SkyModel : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_SkyModel);
-        CPPUNIT_TEST(test_resize);
-        CPPUNIT_TEST(test_set_source);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_load);
-        CPPUNIT_TEST(test_compute_relative_lmn);
-        CPPUNIT_TEST(test_horizon_clip);
-        CPPUNIT_TEST(test_split);
-        CPPUNIT_TEST(test_evaluate_sky_temperature);
-        CPPUNIT_TEST(test_filter_by_radius);
-        CPPUNIT_TEST(test_gaussian_source);
-        CPPUNIT_TEST(test_evaluate_gaussian_source_parameters);
-        CPPUNIT_TEST(test_insert);
-        CPPUNIT_TEST(test_sky_model_set);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_sph2cart(int n, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
+        oskar_Mem* lon, oskar_Mem* lat);
 
-    public:
-        /// Test method.
-        void test_resize();
-        void test_set_source();
-        void test_append();
-        void test_load();
-        void test_compute_relative_lmn();
-        void test_horizon_clip();
-        void test_split();
-        void test_evaluate_sky_temperature();
-        void test_filter_by_radius();
-        void test_gaussian_source();
-        void test_evaluate_gaussian_source_parameters();
-        void test_insert();
-        void test_sky_model_set();
+#ifdef __cplusplus
+}
+#endif
 
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_SkyModel);
-
-#endif // TEST_SKY_MODEL_H_
+#endif /* OSKAR_SPH2CART_H_ */

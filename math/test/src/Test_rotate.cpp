@@ -26,29 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-#define OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-
-/**
- * @file oskar_evaluate_gaussian_source_parameters.h
- */
-
-#include "oskar_global.h"
+#include "math/test/Test_rotate.h"
+#include "math/oskar_rotate.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_get_error_string.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <math.h>
 
-OSKAR_EXPORT
-int oskar_evaluate_gaussian_source_parameters(int num_sources,
-        oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
-        oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0);
 
-#ifdef __cplusplus
+void Test_rotate::test()
+{
+    int n = 1;
+    oskar_Mem x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+    oskar_Mem z(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+
+    double angle = 20.0 * M_PI/180.0;
+
+    ((double*)x.data)[0] = 0.5;
+    ((double*)y.data)[0] = 0.2;
+    ((double*)z.data)[0] = 0.3;
+
+    int err = oskar_rotate_x(1, &x, &y, &z, angle);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    err = oskar_rotate_y(1, &x, &y, &z, angle);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    err = oskar_rotate_z(1, &x, &y, &z, angle);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 }
-#endif
-
-#endif /* OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_ */

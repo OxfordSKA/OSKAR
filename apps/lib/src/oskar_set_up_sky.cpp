@@ -96,7 +96,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             // Evaluate extended source parameters.
             error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
                     &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
-                    &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle);
+                    &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
+                    &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
             if (error) return error;
 
             // Compute source direction cosines (relative lmn)
@@ -150,7 +151,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             // Evaluate extended source parameters.
             error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
                     &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
-                    &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle);
+                    &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
+                    &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
             if (error) return error;
 
             // Compute source direction cosines (relative lmn)
@@ -211,7 +213,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         // Evaluate extended source parameters.
         error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
-                &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle);
+                &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
+                &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
 
         // Compute source direction cosines (relative lmn)
@@ -273,7 +276,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         // Evaluate extended source parameters.
         error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
-                &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle);
+                &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
+                &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
 
         // Compute source direction cosines (relative lmn)
@@ -337,7 +341,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         // Evaluate extended source parameters.
         error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
-                &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle);
+                &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
+                &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
 
         // Compute source direction cosines (relative lmn)

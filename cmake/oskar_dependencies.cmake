@@ -53,6 +53,9 @@ find_package(FFTW3 QUIET)
 find_package(CasaCore QUIET)
 find_package(CFitsio QUIET)
 find_package(Matlab QUIET)
+find_package(CBLAS QUIET)
+find_package(LAPACK QUIET)
+
 
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)
@@ -121,10 +124,25 @@ if (NOT CFITSIO_FOUND)
     add_definitions(-DOSKAR_NO_FITS)
 endif ()
 
+if (NOT CBLAS_FOUND)
+    message("================================================================================")
+    message("-- WARNING: cblas not found")
+    message("================================================================================")
+    add_definitions(-DOSKAR_NO_CBLAS)
+endif()
+
+if (NOT LAPACK_FOUND)
+    message("================================================================================")
+    message("-- WARNING: lapack not found")
+    message("================================================================================")
+    add_definitions(-DOSKAR_NO_LAPACK)
+endif()
+
+
+
 if (NOT BUILD_OSKAR)
     set(BUILD_OSKAR_PLATFORM OFF)
 endif()
-
 
 # ==== Prints a message saying which libraries are being built.
 if (BUILD_OSKAR)

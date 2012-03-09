@@ -27,28 +27,36 @@
  */
 
 
-#ifndef OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
-#define OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_
+#include <mex.h>
+#include "math/oskar_sph_from_lm.h"
+#include <cmath>
+#include <algorithm>
 
-/**
- * @file oskar_evaluate_gaussian_source_parameters.h
- */
+// MATLAB Entry function.
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+{
+    if (num_in != 4 || num_out > 2)
+    {
+        mexErrMsgTxt("Usage: [lon lat] = oskar_sph_from_lm(lon0, lat0, l, m)\n"
+                "-- Note: all angles are in radians!");
+    }
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+    double lon0 = mxGetScalar(in[0]);
+    double lat0 = mxGetScalar(in[1]);
+    double* l = (double*)mxGetData(in[2]);
+    double* m = (double*)mxGetData(in[3]);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    int rows    = mxGetM(in[2]);
+    int columns = mxGetN(in[2]);
+    int num_positions = std::max(rows, columns);
 
-OSKAR_EXPORT
-int oskar_evaluate_gaussian_source_parameters(int num_sources,
-        oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
-        oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0);
+    out[0] = mxCreateNumericMatrix(rows, columns, mxDOUBLE_CLASS, mxREAL);
+    out[1] = mxCreateNumericMatrix(rows, columns, mxDOUBLE_CLASS, mxREAL);
 
-#ifdef __cplusplus
+    double* lon = (double*)mxGetData(out[0]);
+    double* lat = (double*)mxGetData(out[1]);
+
+    oskar_sph_from_lm_d(num_positions, lon0, lat0, l, m, lon, lat);
 }
-#endif
 
-#endif /* OSKAR_EVALUATE_GAUSSIAN_SOURCE_PARAMETERS_H_ */
+

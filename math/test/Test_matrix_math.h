@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SKY_MODEL_H_
-#define TEST_SKY_MODEL_H_
+#ifndef TEST_MATRIX_MATH_H_
+#define TEST_MATRIX_MATH_H_
 
 /**
- * @file Test_SkyModel.h
+ * @file Test_matrix_math.h
  */
 
 #include <cppunit/extensions/HelperMacros.h>
@@ -42,44 +42,18 @@
  * This class uses the CppUnit testing framework to perform unit tests
  * on the class it is named after.
  */
-class Test_SkyModel : public CppUnit::TestFixture
+class Test_matrix_math : public CppUnit::TestFixture
 {
     public:
-        CPPUNIT_TEST_SUITE(Test_SkyModel);
-        CPPUNIT_TEST(test_resize);
-        CPPUNIT_TEST(test_set_source);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_load);
-        CPPUNIT_TEST(test_compute_relative_lmn);
-        CPPUNIT_TEST(test_horizon_clip);
-        CPPUNIT_TEST(test_split);
-        CPPUNIT_TEST(test_evaluate_sky_temperature);
-        CPPUNIT_TEST(test_filter_by_radius);
-        CPPUNIT_TEST(test_gaussian_source);
-        CPPUNIT_TEST(test_evaluate_gaussian_source_parameters);
-        CPPUNIT_TEST(test_insert);
-        CPPUNIT_TEST(test_sky_model_set);
+        CPPUNIT_TEST_SUITE(Test_matrix_math);
+        CPPUNIT_TEST(test_multiply);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        /// Test method.
-        void test_resize();
-        void test_set_source();
-        void test_append();
-        void test_load();
-        void test_compute_relative_lmn();
-        void test_horizon_clip();
-        void test_split();
-        void test_evaluate_sky_temperature();
-        void test_filter_by_radius();
-        void test_gaussian_source();
-        void test_evaluate_gaussian_source_parameters();
-        void test_insert();
-        void test_sky_model_set();
-
+        void test_multiply();
 };
 
 // Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_SkyModel);
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_matrix_math);
 
-#endif // TEST_SKY_MODEL_H_
+#endif // TEST_MATRIX_MATH_H_

@@ -26,60 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_SKY_MODEL_H_
-#define TEST_SKY_MODEL_H_
+
+#ifndef OSKAR_MATRIX_MULTIPLY_H_
+#define OSKAR_MATRIX_MULTIPLY_H_
 
 /**
- * @file Test_SkyModel.h
+ * @file oskar_matrix_multiply.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief Matrix multiplication with optional transpose, C = A * B.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This is an interface to BLAS gemm.
+ *
+ * @param C
+ * @param M
+ * @param N
+ * @param K
+ * @param transposeA
+ * @param transposeB
+ * @param A
+ * @param B
+ *
+ * @return An error code
  */
-class Test_SkyModel : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_SkyModel);
-        CPPUNIT_TEST(test_resize);
-        CPPUNIT_TEST(test_set_source);
-        CPPUNIT_TEST(test_append);
-        CPPUNIT_TEST(test_load);
-        CPPUNIT_TEST(test_compute_relative_lmn);
-        CPPUNIT_TEST(test_horizon_clip);
-        CPPUNIT_TEST(test_split);
-        CPPUNIT_TEST(test_evaluate_sky_temperature);
-        CPPUNIT_TEST(test_filter_by_radius);
-        CPPUNIT_TEST(test_gaussian_source);
-        CPPUNIT_TEST(test_evaluate_gaussian_source_parameters);
-        CPPUNIT_TEST(test_insert);
-        CPPUNIT_TEST(test_sky_model_set);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_matrix_multiply(oskar_Mem* C, int M, int N, int K, int transposeA,
+        int transposeB, const oskar_Mem* A, const oskar_Mem* B);
 
-    public:
-        /// Test method.
-        void test_resize();
-        void test_set_source();
-        void test_append();
-        void test_load();
-        void test_compute_relative_lmn();
-        void test_horizon_clip();
-        void test_split();
-        void test_evaluate_sky_temperature();
-        void test_filter_by_radius();
-        void test_gaussian_source();
-        void test_evaluate_gaussian_source_parameters();
-        void test_insert();
-        void test_sky_model_set();
+#ifdef __cplusplus
+}
+#endif
 
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_SkyModel);
-
-#endif // TEST_SKY_MODEL_H_
+#endif /* OSKAR_MATRIX_MULTIPLY_H_ */
