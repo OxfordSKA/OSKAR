@@ -28,11 +28,11 @@
 
 #include "station/test/Test_element_weights_errors.h"
 #include "station/oskar_evaluate_element_weights_errors.h"
-#include "station/oskar_apply_element_weights_errors.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_mem_init.h"
 #include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_element_multiply.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_Mem.h"
 
 #include <vector_functions.h>
 #include "utility/oskar_vector_types.h"
@@ -144,7 +144,7 @@ void Test_element_weights_errors::test_apply()
     int error = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
             &d_gain, &d_gain_error, &d_phase, &d_phase_error, states);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
-    error = oskar_apply_element_weights_errors(&d_weights, num_elements, &d_errors);
+    error = oskar_mem_element_multiply(&d_weights, &d_errors, num_elements);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     oskar_Mem h_errors(&d_errors, OSKAR_LOCATION_CPU);

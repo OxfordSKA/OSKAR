@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_APPLY_ELEMENT_WEIGHTS_ERRORS_H_
-#define OSKAR_APPLY_ELEMENT_WEIGHTS_ERRORS_H_
+#ifndef OSKAR_MEM_ELEMENT_MULTIPLY_H_
+#define OSKAR_MEM_ELEMENT_MULTIPLY_H_
 
 /**
- * @file oskar_apply_element_weights_errors.h
+ * @file oskar_mem_element_multiply.h
  */
 
 #include "oskar_global.h"
@@ -41,12 +40,31 @@
 extern "C" {
 #endif
 
+/**
+ * @brief
+ * Multiplies (element-wise) the contents of two arrays.
+ *
+ * @details
+ * This function multiplies each element of one array by each element in
+ * another array.
+ *
+ * Using Matlab syntax, this can be expressed as A = A .* B
+ *
+ * Arrays can be either in CPU or GPU memory.
+ *
+ * Currently, the only data types supported are OSKAR_SINGLE, OSKAR_DOUBLE,
+ * OSKAR_SINGLE_COMPLEX or OSKAR_DOUBLE_COMPLEX. Using any other data type
+ * will return an error.
+ *
+ * @param[in,out] A   Input and output array.
+ * @param[in]     B   Second input array.
+ * @param[in]     num If >0, use only this number of elements from A and B.
+ */
 OSKAR_EXPORT
-int oskar_apply_element_weights_errors(oskar_Mem* weights, int num_weights,
-        oskar_Mem* weights_error);
+int oskar_mem_element_multiply(oskar_Mem* A, const oskar_Mem* B, int num);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_APPLY_ELEMENT_WEIGHTS_ERRORS_H_ */
+#endif /* OSKAR_MEM_ELEMENT_MULTIPLY_H_ */

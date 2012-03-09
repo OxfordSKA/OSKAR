@@ -35,12 +35,14 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#include <vector_types.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
+#ifndef MAX
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
 void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
@@ -57,7 +59,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
     model->max_station_size = -INT_MAX;
     for (i = 0; i < num_stations; ++i)
     {
-        model->max_station_size = max(model->station[i].num_elements,
+        model->max_station_size = MAX(model->station[i].num_elements,
                 model->max_station_size);
     }
 
@@ -73,10 +75,12 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         if (type == OSKAR_DOUBLE)
         {
             double *amp, *amp_err, *phase, *phase_err;
+            double2 *weights;
             amp       = (double*)(s->gain.data);
             amp_err   = (double*)(s->gain_error.data);
             phase     = (double*)(s->phase_offset.data);
             phase_err = (double*)(s->phase_error.data);
+            weights   = (double2*)(s->weight.data);
 
             for (j = 0; j < s->num_elements; ++j)
             {
@@ -90,15 +94,21 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
                     model->identical_stations = 0;
                     finished_identical_station_check = 1;
                 }
+                if (weights[j].x != 1.0 || weights[j].y != 0.0)
+                {
+                    s->apply_weight = 1;
+                }
             }
         }
         else if (type == OSKAR_SINGLE)
         {
             float *amp, *amp_err, *phase, *phase_err;
+            float2 *weights;
             amp       = (float*)(s->gain.data);
             amp_err   = (float*)(s->gain_error.data);
             phase     = (float*)(s->phase_offset.data);
             phase_err = (float*)(s->phase_error.data);
+            weights   = (float2*)(s->weight.data);
 
             for (j = 0; j < s->num_elements; ++j)
             {
@@ -112,6 +122,10 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
                     model->identical_stations = 0;
                     finished_identical_station_check = 1;
                 }
+                if (weights[j].x != 1.0f || weights[j].y != 0.0)
+                {
+                    s->apply_weight = 1;
+                }
             }
         }
     }
@@ -122,6 +136,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
     {
         oskar_Mem *x_weights0, *y_weights0, *z_weights0, *gain0, *phase0;
         oskar_Mem *x_signal0, *y_signal0, *z_signal0;
+        oskar_Mem *weights0;
         int num_elements0;
         x_weights0 = &(model->station[0].x_weights);
         y_weights0 = &(model->station[0].y_weights);
@@ -131,12 +146,14 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         z_signal0 = &(model->station[0].z_signal);
         gain0 = &(model->station[0].gain);
         phase0 = &(model->station[0].phase_offset);
+        weights0 = &(model->station[0].weight);
         num_elements0 = model->station[0].num_elements;
 
         for (i = 1; i < num_stations; ++i)
         {
             oskar_Mem *x_weights, *y_weights, *z_weights, *gain, *phase;
             oskar_Mem *x_signal, *y_signal, *z_signal;
+            oskar_Mem *weights;
             int num_elements;
             x_weights = &(model->station[i].x_weights);
             y_weights = &(model->station[i].y_weights);
@@ -146,6 +163,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             z_signal = &(model->station[i].z_signal);
             gain = &(model->station[i].gain);
             phase = &(model->station[i].phase_offset);
+            weights = &(model->station[i].weight);
             num_elements = model->station[i].num_elements;
 
             /* Check if the number of elements is different. */
@@ -192,6 +210,11 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
                 break;
             }
             if (oskar_mem_different(phase, phase0, num_elements))
+            {
+                model->identical_stations = 0;
+                break;
+            }
+            if (oskar_mem_different(weights, weights0, num_elements))
             {
                 model->identical_stations = 0;
                 break;

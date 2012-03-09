@@ -28,18 +28,16 @@
 
 #include "oskar_global.h"
 
-#include "station/oskar_evaluate_station_beam_scalar.h"
-#include "station/cudak/oskar_cudak_blank_below_horizon.h"
-
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_Work.h"
-#include "utility/oskar_mem_element_size.h"
 #include "math/cudak/oskar_cudak_dftw_2d.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
-
-#include "station/oskar_StationModel.h"
 #include "station/oskar_evaluate_element_weights_errors.h"
-#include "station/oskar_apply_element_weights_errors.h"
+#include "station/oskar_evaluate_station_beam_scalar.h"
+#include "station/cudak/oskar_cudak_blank_below_horizon.h"
+#include "station/oskar_StationModel.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_Work.h"
+#include "utility/oskar_mem_element_multiply.h"
+#include "utility/oskar_mem_element_size.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -100,8 +98,16 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             if (error) return error;
 
             // Modify the weights (complex multiply with error vector) on the GPU
-            error = oskar_apply_element_weights_errors(weights, num_antennas,
-                    weights_error);
+            error = oskar_mem_element_multiply(weights, weights_error,
+                    num_antennas);
+            if (error) return error;
+        }
+
+        if (station->apply_weight)
+        {
+            // Modify the weights using those provided.
+            error = oskar_mem_element_multiply(weights, &station->weight,
+                    num_antennas);
             if (error) return error;
         }
 
@@ -145,8 +151,16 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             if (error) return error;
 
             // Modify the weights (complex multiply with error vector) on the GPU
-            error = oskar_apply_element_weights_errors(weights, num_antennas,
-                    weights_error);
+            error = oskar_mem_element_multiply(weights, weights_error,
+                    num_antennas);
+            if (error) return error;
+        }
+
+        if (station->apply_weight)
+        {
+            // Modify the weights using those provided.
+            error = oskar_mem_element_multiply(weights, &station->weight,
+                    num_antennas);
             if (error) return error;
         }
 

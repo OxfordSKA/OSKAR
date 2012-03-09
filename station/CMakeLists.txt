@@ -3,7 +3,6 @@
 #
 
 set(station_SRC
-    src/oskar_apply_element_weights_errors.cu
     src/oskar_beamPattern.cpp
     src/oskar_element_model_evaluate.c
     src/oskar_element_model_free.c
