@@ -43,6 +43,7 @@
 #include <QtGui/QToolBar>
 #include <QtGui/QVBoxLayout>
 #include <QtCore/QModelIndex>
+#include <QtCore/QTimer>
 
 oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 : QMainWindow(parent)
@@ -134,6 +135,10 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Optionally hide unset items.
     actHideUnset_->setChecked(settings.value("main_window/hide_unset_items").toBool());
+
+    // Restore the scroll bar position.
+    // A single-shot timer is used to do this after the main event loop starts.
+    QTimer::singleShot(0, view_, SLOT(restorePosition()));
 }
 
 void oskar_MainWindow::openSettings(QString filename)
@@ -183,6 +188,7 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
 {
     // Save the state of the tree view.
     view_->saveExpanded();
+    view_->savePosition();
 
     QSettings settings;
     settings.setValue("main_window/geometry", saveGeometry());

@@ -28,6 +28,7 @@
 
 #include "widgets/oskar_SettingsView.h"
 #include "widgets/oskar_SettingsModel.h"
+#include <QtGui/QScrollBar>
 
 oskar_SettingsView::oskar_SettingsView(QWidget* parent)
 : QTreeView(parent)
@@ -46,12 +47,25 @@ void oskar_SettingsView::restoreExpanded()
     saveRestoreExpanded(QModelIndex(), expanded, 1);
 }
 
+void oskar_SettingsView::restorePosition()
+{
+    QSettings settings;
+    QScrollBar* verticalScroll = verticalScrollBar();
+    verticalScroll->setValue(settings.value("settings_view/position").toInt());
+}
+
 void oskar_SettingsView::saveExpanded()
 {
     QSettings settings;
     QStringList expanded;
     saveRestoreExpanded(QModelIndex(), expanded, 0);
     settings.setValue("settings_view/expanded_items", expanded);
+}
+
+void oskar_SettingsView::savePosition()
+{
+    QSettings settings;
+    settings.setValue("settings_view/position", verticalScrollBar()->value());
 }
 
 void oskar_SettingsView::showFirstLevel()
