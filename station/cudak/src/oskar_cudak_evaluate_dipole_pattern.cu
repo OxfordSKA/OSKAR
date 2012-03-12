@@ -32,68 +32,108 @@
 
 // Single precision.
 __global__
-void oskar_cudak_evaluate_dipole_pattern_f(int num_sources, float* l,
-        float* m, float* n, float orientation_x, float orientation_y,
+void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
+        const float* l, const float* m, const float* n,
+        const float cos_orientation_x, const float sin_orientation_x,
+        const float cos_orientation_y, const float sin_orientation_y,
         float4c* pattern)
 {
     // Source index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
     if (s >= num_sources) return;
 
-    // Convert direction cosines to azimuth/elevation.
-    // Angle alpha is the angle of the source from the axis of the dipole.
-    float az, el, alpha, Ex, Ey;
-    oskar_cudaf_hor_lmn_to_az_el_f(l[s], m[s], n[s], &az, &el);
+    // Get source direction cosines.
+    const float ll = l[s]; // Component along x-axis.
+    const float lm = m[s]; // Component along y-axis.
+    const float ln = n[s]; // Component along z-axis.
 
-    // Evaluate ideal dipole beam for antenna nominally in direction of x.
-    alpha = (orientation_x - 0.5 * M_PI) + az;
-    Ex = sinf(alpha);
+    // Evaluate phi, the angle (co-azimuth) from East (x) towards North (y).
+    const float phi = atan2f(lm, ll);
+    float sin_phi, cos_phi;
+    sincosf(phi, &sin_phi, &cos_phi); // Cannot use direction cosines here.
 
-    // Evaluate ideal dipole beam for antenna nominally in direction of y.
-    alpha = orientation_y + az;
-    Ey = sinf(alpha);
+    // Evaluate unit vectors e_theta and e_phi at source position.
+    // cos_theta = ln
+    const float e_theta_x = ln * cos_phi; // Component of e_theta in x.
+    const float e_theta_y = ln * sin_phi; // Component of e_theta in y.
+    // e_phi_x = -sin_phi;
+    // e_phi_y = cos_phi;
+
+    // Dot products:
+    // g_phi_a   = a_x * e_phi_x   + a_y * e_phi_y;
+    // g_theta_a = a_x * e_theta_x + a_y * e_theta_y;
+    // g_phi_b   = b_x * e_phi_x   + b_y * e_phi_y;
+    // g_theta_b = b_x * e_theta_x + b_y * e_theta_y;
+    const float g_phi_a   = sin_orientation_x * -sin_phi
+            + cos_orientation_x * cos_phi;
+    const float g_theta_a = sin_orientation_x * e_theta_x
+            + cos_orientation_x * e_theta_y;
+    const float g_phi_b   = sin_orientation_y * -sin_phi
+            + cos_orientation_y * cos_phi;
+    const float g_theta_b = sin_orientation_y * e_theta_x
+            + cos_orientation_y * e_theta_y;
 
     // Store components.
-    pattern[s].a.x = 0.0;
-    pattern[s].a.y = -Ex;
-    pattern[s].b.x = 0.0;
-    pattern[s].b.y = 0.0;
-    pattern[s].c.x = 0.0;
-    pattern[s].c.y = -Ey;
-    pattern[s].d.x = 0.0;
-    pattern[s].d.y = 0.0;
+    pattern[s].a.x = g_phi_a;
+    pattern[s].a.y = 0.0f;
+    pattern[s].b.x = g_theta_a;
+    pattern[s].b.y = 0.0f;
+    pattern[s].c.x = g_phi_b;
+    pattern[s].c.y = 0.0f;
+    pattern[s].d.x = g_theta_b;
+    pattern[s].d.y = 0.0f;
 }
 
 // Double precision.
 __global__
-void oskar_cudak_evaluate_dipole_pattern_d(int num_sources, double* l,
-        double* m, double* n, double orientation_x, double orientation_y,
+void oskar_cudak_evaluate_dipole_pattern_d(const int num_sources,
+        const double* l, const double* m, const double* n,
+        const double cos_orientation_x, const double sin_orientation_x,
+        const double cos_orientation_y, const double sin_orientation_y,
         double4c* pattern)
 {
     // Source index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
     if (s >= num_sources) return;
 
-    // Convert direction cosines to azimuth/elevation.
-    // Angle alpha is the angle of the source from the axis of the dipole.
-    double az, el, alpha, Ex, Ey;
-    oskar_cudaf_hor_lmn_to_az_el_d(l[s], m[s], n[s], &az, &el);
+    // Get source direction cosines.
+    const double ll = l[s]; // Component along x-axis.
+    const double lm = m[s]; // Component along y-axis.
+    const double ln = n[s]; // Component along z-axis.
 
-    // Evaluate ideal dipole beam for antenna nominally in direction of x.
-    alpha = (orientation_x - 0.5 * M_PI) + az;
-    Ex = sin(alpha);
+    // Evaluate phi, the angle (co-azimuth) from East (x) towards North (y).
+    const double phi = atan2(lm, ll);
+    double sin_phi, cos_phi;
+    sincos(phi, &sin_phi, &cos_phi);
 
-    // Evaluate ideal dipole beam for antenna nominally in direction of y.
-    alpha = orientation_y + az;
-    Ey = sin(alpha);
+    // Evaluate unit vectors e_theta and e_phi at source position.
+    // cos_theta = ln
+    const double e_theta_x = ln * cos_phi; // Component of e_theta in x.
+    const double e_theta_y = ln * sin_phi; // Component of e_theta in y.
+    // e_phi_x = -sin_phi;
+    // e_phi_y = cos_phi;
+
+    // Dot products:
+    // g_phi_a   = a_x * e_phi_x   + a_y * e_phi_y;
+    // g_theta_a = a_x * e_theta_x + a_y * e_theta_y;
+    // g_phi_b   = b_x * e_phi_x   + b_y * e_phi_y;
+    // g_theta_b = b_x * e_theta_x + b_y * e_theta_y;
+    const double g_phi_a   = sin_orientation_x * -sin_phi
+            + cos_orientation_x * cos_phi;
+    const double g_theta_a = sin_orientation_x * e_theta_x
+            + cos_orientation_x * e_theta_y;
+    const double g_phi_b   = sin_orientation_y * -sin_phi
+            + cos_orientation_y * cos_phi;
+    const double g_theta_b = sin_orientation_y * e_theta_x
+            + cos_orientation_y * e_theta_y;
 
     // Store components.
-    pattern[s].a.x = 0.0;
-    pattern[s].a.y = Ex;
-    pattern[s].b.x = 0.0;
+    pattern[s].a.x = g_phi_a;
+    pattern[s].a.y = 0.0;
+    pattern[s].b.x = g_theta_a;
     pattern[s].b.y = 0.0;
-    pattern[s].c.x = 0.0;
-    pattern[s].c.y = Ey;
-    pattern[s].d.x = 0.0;
+    pattern[s].c.x = g_phi_b;
+    pattern[s].c.y = 0.0;
+    pattern[s].d.x = g_theta_b;
     pattern[s].d.y = 0.0;
 }

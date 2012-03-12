@@ -56,6 +56,9 @@
  * where phi and theta are the angles measured from x to y and from xy to z,
  * respectively.
  *
+ * The 'a' dipole is nominally along the x axis, and
+ * the 'b' dipole is nominally along the y axis.
+ *
  * @param[in] num_sources    Number of sources.
  * @param[in] l              Source direction cosines in x.
  * @param[in] m              Source direction cosines in y.
@@ -65,8 +68,10 @@
  * @param[out] pattern       Array of output Jones matrices per source.
  */
 __global__
-void oskar_cudak_evaluate_dipole_pattern_f(int num_sources, float* l,
-        float* m, float* n, float orientation_x, float orientation_y,
+void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
+        const float* l, const float* m, const float* n,
+        const float cos_orientation_x, const float sin_orientation_x,
+        const float cos_orientation_y, const float sin_orientation_y,
         float4c* pattern);
 
 /**
@@ -89,6 +94,9 @@ void oskar_cudak_evaluate_dipole_pattern_f(int num_sources, float* l,
  * where phi and theta are the angles measured from x to y and from xy to z,
  * respectively.
  *
+ * The 'a' dipole is nominally along the x axis, and
+ * the 'b' dipole is nominally along the y axis.
+ *
  * @param[in] num_sources    Number of sources.
  * @param[in] l              Source direction cosines in x.
  * @param[in] m              Source direction cosines in y.
@@ -98,8 +106,10 @@ void oskar_cudak_evaluate_dipole_pattern_f(int num_sources, float* l,
  * @param[out] pattern       Array of output Jones matrices per source.
  */
 __global__
-void oskar_cudak_evaluate_dipole_pattern_d(int num_sources, double* l,
-        double* m, double* n, double orientation_x, double orientation_y,
+void oskar_cudak_evaluate_dipole_pattern_d(const int num_sources,
+        const double* l, const double* m, const double* n,
+        const double cos_orientation_x, const double sin_orientation_x,
+        const double cos_orientation_y, const double sin_orientation_y,
         double4c* pattern);
 
 #endif /* OSKAR_CUDAK_EVALUATE_DIPOLE_PATTERN_H_ */

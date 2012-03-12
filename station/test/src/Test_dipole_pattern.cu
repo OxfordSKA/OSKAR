@@ -86,7 +86,7 @@ void Test_dipole_pattern::test()
     // Call the kernel.
     oskar_cudak_evaluate_dipole_pattern_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_pixels,
-            l, m, n, 0.0, 0.0, pattern);
+            l, m, n, 0.0, 1.0, 1.0, 0.0, pattern);
 
     cudaError_t err = cudaPeekAtLastError();
     CPPUNIT_ASSERT_EQUAL(0, (int) err);
