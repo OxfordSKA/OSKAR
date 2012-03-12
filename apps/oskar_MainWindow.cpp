@@ -50,6 +50,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 {
     // Create the central widget and main layout.
     setWindowTitle("OSKAR GUI");
+    setWindowIcon(QIcon(":/icons/oskar.ico"));
     widget_ = new QWidget(this);
     setCentralWidget(widget_);
     layout_ = new QVBoxLayout(widget_);
