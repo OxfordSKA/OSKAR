@@ -59,8 +59,9 @@ extern "C" {
  * @return An error code
  */
 OSKAR_EXPORT
-int oskar_matrix_multiply(oskar_Mem* C, int M, int N, int K, int transposeA,
-        int transposeB, const oskar_Mem* A, const oskar_Mem* B);
+int oskar_matrix_multiply(oskar_Mem* C,
+        int rows_A, int cols_A, int rows_B, int cols_B,
+        int transposeA, int transposeB, const oskar_Mem* A, const oskar_Mem* B);
 
 #ifdef __cplusplus
 }

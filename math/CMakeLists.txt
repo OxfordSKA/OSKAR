@@ -31,8 +31,11 @@ set(math_SRC
     src/oskar_jones_set_real_scalar.c
     src/oskar_Jones.cpp
     src/oskar_linspace.c
+    src/oskar_matrix_invert.c
     src/oskar_matrix_multiply.c
+    src/oskar_mean.c
     src/oskar_meshgrid.c
+    #src/oskar_mrdivide.c ## Do not use.. doesnt currently catch all cases! 
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
     src/oskar_random_power_law.c

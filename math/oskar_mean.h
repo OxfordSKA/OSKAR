@@ -26,46 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_MATRIX_MATH_H_
-#define TEST_MATRIX_MATH_H_
+
+#ifndef OSKAR_MEAN_H_
+#define OSKAR_MEAN_H_
 
 /**
- * @file Test_matrix_math.h
+ * @file oskar_mean.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief Evaluates the mean.
  *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * @param mean
+ * @param num_values
+ * @param values
+ *
+ * @return An error code.
  */
-class Test_matrix_math : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_matrix_math);
-        CPPUNIT_TEST(test_multiply);
-        CPPUNIT_TEST(test_invert);
-        CPPUNIT_TEST(solve);
-        CPPUNIT_TEST(dgels_test);
-        CPPUNIT_TEST(dgetrs_test);
-        //CPPUNIT_TEST(mrdivide);
-        CPPUNIT_TEST(sumX_div_XX);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_mean(double* mean, int num_values, const oskar_Mem* values);
 
-    public:
-        void test_multiply();
-        void test_invert();
-        void solve();
-        void dgels_test();
-        void dgetrs_test();
-        //void mrdivide();
-        void sumX_div_XX();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_matrix_math);
-
-#endif // TEST_MATRIX_MATH_H_
+#endif /* OSKAR_MEAN_H_ */

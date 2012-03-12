@@ -42,9 +42,13 @@
 extern "C" {
 #endif
 
-int oskar_matrix_multiply(oskar_Mem* C, int M, int N, int K,
+int oskar_matrix_multiply(oskar_Mem* C,
+        int rows_A, int cols_A, int rows_B, int cols_B,
         int transA, int transB, const oskar_Mem* A, const oskar_Mem* B)
 {
+    int M, N, K;
+    int LDA, LDB, LDC;
+
     if (A == NULL || B == NULL || C == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
@@ -60,24 +64,28 @@ int oskar_matrix_multiply(oskar_Mem* C, int M, int N, int K,
             /* [ C = alpha * A * B + beta * C ] */
 
             int tA, tB;
-            int lda, ldb, ldc;
             double alpha = 1.0, beta = 0.0;
+            M = (!transA) ? rows_A : cols_A;
+            N = (!transB) ? cols_B : rows_B;
+            K = (!transA) ? cols_A : rows_A;
+
+            if (K != ((!transB)? rows_B : cols_B))
+            {
+                return OSKAR_ERR_DIMENSION_MISMATCH;
+            }
 
             tA = transA ? CblasTrans : CblasNoTrans;
             tB = transB ? CblasTrans : CblasNoTrans;
 
-            lda = (transA) ? MAX(M, 1) : MAX(K, 1);
-            ldb = (transB) ? MAX(K, 1) : MAX(N, 1);
-            ldc = MAX(N, 1);
+            LDA = (!transA) ? MAX(K, 1) : MAX(M, 1);
+            LDB = (!transB) ? MAX(N, 1) : MAX(K, 1);
+            LDC = MAX(N, 1);
 
-            printf("trans a,b = %s, %s\n", transA?"true":"false", transB?"true":"false");
-            printf("M, N, K: %i %i %i\n", M, N, K);
-            printf("ld (a,b,c): %i %i %i\n", lda, ldb, ldc);
-
-            cblas_dgemm(CblasRowMajor, tA, tB, M, N, K, alpha, (double*)A->data,
-                    lda, (double*)B->data, ldb, beta, (double*)C->data, ldc);
+            cblas_dgemm(CblasRowMajor, tA, tB, M, N, K, alpha,
+                    (double*)A->data,
+                    LDA, (double*)B->data, LDB, beta, (double*)C->data, LDC);
 #else
-            /* TODO implement replacement for the blas funciton */
+            /* TODO implement replacement for the BLAS function */
             return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
         }
@@ -86,22 +94,8 @@ int oskar_matrix_multiply(oskar_Mem* C, int M, int N, int K,
         {
 #ifndef OSKAR_NO_CBLAS
             return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-/*            int tA, tB;
-            int lda, ldb, ldc;
-            float alpha = 1.0f, beta = 0.0f;
-
-            tA = (transA ? CblasTrans : CblasNoTrans);
-            tB = (transB ? CblasTrans : CblasNoTrans);
-
-            lda = (transA) ? MAX(1, K) : MAX(1, M);
-            ldb = (transB) ? MAX(1, N) : MAX(1, K);
-            ldc = MAX(1, M);
-
-            cblas_sgemm(CblasRowMajor, tA, tB, M, N, K, alpha, (float*)A->data,
-                    lda, (float*)B->data, ldb, beta, (float*)C->data, ldc);
-                    */
 #else
-            /* TODO implement replacement for the blas funciton */
+            /* TODO implement replacement for the BLAS function */
             return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
         }

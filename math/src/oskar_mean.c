@@ -26,46 +26,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_MATRIX_MATH_H_
-#define TEST_MATRIX_MATH_H_
 
-/**
- * @file Test_matrix_math.h
- */
+#include "math/oskar_mean.h"
+#include <stdlib.h>
 
-#include <cppunit/extensions/HelperMacros.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_matrix_math : public CppUnit::TestFixture
+int oskar_mean(double* mean, int num_values, const oskar_Mem* values)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_matrix_math);
-        CPPUNIT_TEST(test_multiply);
-        CPPUNIT_TEST(test_invert);
-        CPPUNIT_TEST(solve);
-        CPPUNIT_TEST(dgels_test);
-        CPPUNIT_TEST(dgetrs_test);
-        //CPPUNIT_TEST(mrdivide);
-        CPPUNIT_TEST(sumX_div_XX);
-        CPPUNIT_TEST_SUITE_END();
+    int i;
+    double sum = 0.0;
 
-    public:
-        void test_multiply();
-        void test_invert();
-        void solve();
-        void dgels_test();
-        void dgetrs_test();
-        //void mrdivide();
-        void sumX_div_XX();
-};
+    if (mean == NULL || values == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_matrix_math);
+    if (values->location == OSKAR_LOCATION_GPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
-#endif // TEST_MATRIX_MATH_H_
+    if (values->num_elements > num_values)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    if (values->type == OSKAR_DOUBLE)
+    {
+        for (i = 0; i < num_values; ++i)
+        {
+            sum += ((double*)values->data)[i];
+        }
+        *mean = sum/(double)num_values;
+    }
+    else if (values->type == OSKAR_SINGLE)
+    {
+        for (i = 0; i < num_values; ++i)
+        {
+            sum += (double)((float*)values->data)[i];
+        }
+        *mean = sum/(double)num_values;
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+
+    return OSKAR_SUCCESS;
+}
+
+#ifdef __cplusplus
+}
+#endif

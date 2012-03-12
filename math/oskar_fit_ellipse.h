@@ -26,46 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_MATRIX_MATH_H_
-#define TEST_MATRIX_MATH_H_
+
+#ifndef OSKAR_FIT_ELLIPSE_H_
+#define OSKAR_FIT_ELLIPSE_H_
 
 /**
- * @file Test_matrix_math.h
+ * @file oskar_fit_ellipse.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
 
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_matrix_math : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_matrix_math);
-        CPPUNIT_TEST(test_multiply);
-        CPPUNIT_TEST(test_invert);
-        CPPUNIT_TEST(solve);
-        CPPUNIT_TEST(dgels_test);
-        CPPUNIT_TEST(dgetrs_test);
-        //CPPUNIT_TEST(mrdivide);
-        CPPUNIT_TEST(sumX_div_XX);
-        CPPUNIT_TEST_SUITE_END();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    public:
-        void test_multiply();
-        void test_invert();
-        void solve();
-        void dgels_test();
-        void dgetrs_test();
-        //void mrdivide();
-        void sumX_div_XX();
-};
+OSKAR_EXPORT
+int oskar_fit_ellipse(double* a, double* b, double* phi,
+        int num_points, const oskar_Mem* l, const oskar_Mem* m);
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_matrix_math);
+#ifdef __cplusplus
+}
+#endif
 
-#endif // TEST_MATRIX_MATH_H_
+#endif /* OSKAR_FIT_ELLIPSE_H_ */
