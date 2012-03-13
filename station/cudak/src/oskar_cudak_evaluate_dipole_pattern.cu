@@ -104,7 +104,7 @@ void oskar_cudak_evaluate_dipole_pattern_d(const int num_sources,
     // Evaluate phi, the angle (co-azimuth) from East (x) towards North (y).
     const double phi = atan2(lm, ll);
     double sin_phi, cos_phi;
-    sincos(phi, &sin_phi, &cos_phi);
+    sincos(phi, &sin_phi, &cos_phi); // Cannot use direction cosines here.
 
     // Evaluate unit vectors e_theta and e_phi at source position.
     // cos_theta = ln

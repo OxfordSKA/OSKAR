@@ -26,8 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/test/Test_dipole_pattern.h"
-#include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
+#include "station/test/Test_evaluate_station_beam_dipoles.h"
+
+#include "station/cudak/oskar_cudak_evaluate_station_beam_dipoles.h"
+#include "station/oskar_evaluate_station_beam.h"
+#include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
 
@@ -35,14 +38,21 @@
 #include "utility/timer.h"
 #include "oskar_global.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
-void Test_dipole_pattern::test()
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#define C_0 299792458.0
+
+void Test_evaluate_station_beam_dipoles::test()
 {
-    int num_az = 360;
-    int num_el = 90;
+    double freq = 100e6;
+    int num_az = 800;
+    int num_el = 800;
     int num_pixels = num_az * num_el;
     int num_threads = 256;
     int num_blocks  = (num_pixels + num_threads - 1) / num_threads;
@@ -86,17 +96,59 @@ void Test_dipole_pattern::test()
     oskar_Mem pattern(OSKAR_DOUBLE_COMPLEX_MATRIX,
             OSKAR_LOCATION_GPU, num_pixels);
 
-    // Define antenna orientations.
-    double orientation_x = 80.0 * M_PI/180;
-    double orientation_y = 20.0 * M_PI/180;
+    // Generate antenna array.
+    int num_antennas_side = 100;
+    int num_antennas = num_antennas_side * num_antennas_side;
+    oskar_Mem antenna_x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_Mem antenna_y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_Mem antenna_z(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_Mem cos_orientation_x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_Mem sin_orientation_x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_Mem cos_orientation_y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+    oskar_Mem sin_orientation_y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_antennas);
+
+    // Generate square array of antennas.
+    const float sep = 0.5 * 2 * M_PI * freq / C_0; // Antenna separation, radians.
+    const float half_array_size = (num_antennas_side - 1) * sep / 2.0;
+    for (int x = 0; x < num_antennas_side; ++x)
+    {
+        for (int y = 0; y < num_antennas_side; ++y)
+        {
+            int i = y + x * num_antennas_side;
+
+            // Antenna positions.
+            ((double*)antenna_x)[i] = x * sep - half_array_size;
+            ((double*)antenna_y)[i] = y * sep - half_array_size;
+            ((double*)antenna_z)[i] = 0.0;
+
+            // Antenna orientations.
+            ((double*)cos_orientation_x)[i] = cos(90.0 * M_PI / 180);
+            ((double*)sin_orientation_x)[i] = sin(90.0 * M_PI / 180);
+            ((double*)cos_orientation_y)[i] = cos(0.0 * M_PI / 180);
+            ((double*)sin_orientation_y)[i] = sin(0.0 * M_PI / 180);
+        }
+    }
+
+    // TODO Generate the weights.
+    oskar_Mem weights_gpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, num_antennas);
+
+    // Copy all to GPU.
+    oskar_Mem antenna_x_gpu(&antenna_x, OSKAR_LOCATION_GPU);
+    oskar_Mem antenna_y_gpu(&antenna_y, OSKAR_LOCATION_GPU);
+    oskar_Mem antenna_z_gpu(&antenna_z, OSKAR_LOCATION_GPU);
+    oskar_Mem cos_orientation_x_gpu(&cos_orientation_x, OSKAR_LOCATION_GPU);
+    oskar_Mem sin_orientation_x_gpu(&sin_orientation_x, OSKAR_LOCATION_GPU);
+    oskar_Mem cos_orientation_y_gpu(&cos_orientation_y, OSKAR_LOCATION_GPU);
+    oskar_Mem sin_orientation_y_gpu(&sin_orientation_y, OSKAR_LOCATION_GPU);
 
     // Call the kernel.
+    int shared_mem = 224 * 9 * 8;
     TIMER_START
-    oskar_cudak_evaluate_dipole_pattern_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_pixels, l, m, n,
-            cos(orientation_x), sin(orientation_x),
-            cos(orientation_y), sin(orientation_y),
-            pattern);
+    oskar_cudak_evaluate_station_beam_dipoles_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (num_antennas, antenna_x_gpu,
+            antenna_y_gpu, antenna_z_gpu, cos_orientation_x_gpu, sin_orientation_x_gpu,
+            cos_orientation_y_gpu, sin_orientation_y_gpu, weights_gpu, num_pixels, l, m, n,
+            224, pattern);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished dipole pattern evaluation (%d points)", num_pixels)
 
@@ -106,7 +158,7 @@ void Test_dipole_pattern::test()
     // Copy the memory back.
     oskar_Mem pattern_cpu(&pattern, OSKAR_LOCATION_CPU);
 
-    const char filename[] = "cpp_unit_test_dipole_pattern.dat";
+    const char filename[] = "cpp_unit_test_station_beam_dipoles.dat";
     FILE* file = fopen(filename, "w");
     double4c* p = (double4c*)pattern_cpu;
     for (int i = 0; i < num_pixels; ++i)
@@ -117,3 +169,4 @@ void Test_dipole_pattern::test()
     }
     fclose(file);
 }
+

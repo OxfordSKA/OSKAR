@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_EVALUATE_DIPOLE_PATTERN_H_
-#define OSKAR_CUDAK_EVALUATE_DIPOLE_PATTERN_H_
+#ifndef OSKAR_CUDAK_EVALUATE_STATION_BEAM_DIPOLES_H_
+#define OSKAR_CUDAK_EVALUATE_STATION_BEAM_DIPOLES_H_
 
 /**
- * @file oskar_cudak_evaluate_dipole_pattern.h
+ * @file oskar_cudak_evaluate_station_beam_dipoles.h
  */
 
 #include "oskar_global.h"
@@ -38,11 +38,11 @@
 
 /**
  * @brief
- * Evaluates patterns of two perfect dipoles at source positions for given
- * orientations (single precision).
+ * Evaluates an aperture array station beam, assuming the array is composed of
+ * perfect dipoles (single precision).
  *
  * @details
- * This function evaluates the patterns of two perfect dipole antennas
+ * This function evaluates a beam from an aperture array of perfect dipoles
  * at the supplied source positions.
  *
  * The dipole orientation angles specify the dipole axis as the angle
@@ -50,8 +50,8 @@
  *
  * The output matrix is
  *
- * ( g_phi^a   g_theta^a )
- * ( g_phi^b   g_theta^b )
+ * ( e_phi^a   e_theta^a )
+ * ( e_phi^b   e_theta^b )
  *
  * where phi and theta are the angles measured from x to y and from xy to z,
  * respectively.
@@ -60,6 +60,8 @@
  * the 'b' dipole is nominally along the y axis.
  * The azimuth orientation of 'a' should normally be 90 degrees, and
  * the azimuth orientation of 'b' should normally be 0 degrees.
+ *
+ * The station beam is evaluated using a DFT.
  *
  * @param[in] num_sources        Number of sources.
  * @param[in] l                  Source direction cosines in x.
@@ -72,10 +74,12 @@
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 __global__
-void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
-        const float* l, const float* m, const float* n,
-        const float cos_orientation_x, const float sin_orientation_x,
-        const float cos_orientation_y, const float sin_orientation_y,
+void oskar_cudak_evaluate_station_beam_dipoles_f(const int num_antennas,
+        const float* x, const float* y, const float* z,
+        const float* cos_orientation_x, const float* sin_orientation_x,
+        const float* cos_orientation_y, const float* sin_orientation_y,
+        const float2* weights, const int num_sources, const float* l,
+        const float* m, const float* n, const int max_in_chunk,
         float4c* pattern);
 
 /**
@@ -114,10 +118,12 @@ void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 __global__
-void oskar_cudak_evaluate_dipole_pattern_d(const int num_sources,
-        const double* l, const double* m, const double* n,
-        const double cos_orientation_x, const double sin_orientation_x,
-        const double cos_orientation_y, const double sin_orientation_y,
+void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
+        const double* x, const double* y, const double* z,
+        const double* cos_orientation_x, const double* sin_orientation_x,
+        const double* cos_orientation_y, const double* sin_orientation_y,
+        const double2* weights, const int num_sources, const double* l,
+        const double* m, const double* n, const int max_in_chunk,
         double4c* pattern);
 
-#endif /* OSKAR_CUDAK_EVALUATE_DIPOLE_PATTERN_H_ */
+#endif /* OSKAR_CUDAK_EVALUATE_STATION_BEAM_DIPOLES_H_ */

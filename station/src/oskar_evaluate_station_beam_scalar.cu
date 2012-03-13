@@ -112,7 +112,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         }
 
         // Evaluate beam pattern for each source.
-        int antennas_per_chunk = 432;  // Should be multiple of 16.
+        int antennas_per_chunk = 448;  // Should be multiple of 16.
         num_blocks = (num_sources + num_threads - 1) / num_threads;
         size_t shared_mem_size = 2 * antennas_per_chunk * element_size;
         oskar_cudak_dftw_o2c_2d_d
@@ -165,7 +165,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         }
 
         // Evaluate beam pattern for each source.
-        int antennas_per_chunk = 864;  // Should be multiple of 16.
+        int antennas_per_chunk = 896;  // Should be multiple of 16.
         num_blocks = (num_sources + num_threads - 1) / num_threads;
         size_t shared_mem_size = 2 * antennas_per_chunk * element_size;
         oskar_cudak_dftw_o2c_2d_f

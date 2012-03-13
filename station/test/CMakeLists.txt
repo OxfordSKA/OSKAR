@@ -11,6 +11,7 @@ if (CPPUNIT_FOUND)
         src/Test_dipole_pattern.cu
         src/Test_element_weights_errors.cpp
         src/Test_evaluate_jones_E.cpp
+        src/Test_evaluate_station_beam_dipoles.cu
         src/Test_evaluate_station_beam.cpp
         src/Test_StationModel.cpp
     )
