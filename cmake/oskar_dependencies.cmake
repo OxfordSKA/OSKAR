@@ -56,7 +56,6 @@ find_package(Matlab QUIET)
 find_package(CBLAS QUIET)
 find_package(LAPACK QUIET)
 
-
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)
     message("================================================================================")

@@ -10,6 +10,11 @@ if (MATLAB_FOUND)
     oskar_mex(oskar_sph_rotate_to_position oskar_mex_sph_rotate_to_position.cpp)
     oskar_mex(oskar_sph_rotate_points oskar_mex_sph_rotate_points.cpp)
     oskar_mex(oskar_sph_from_lm oskar_mex_sph_from_lm.cpp)
+    oskar_mex(oskar_fit_ellipse oskar_mex_fit_ellipse.cpp)
+    target_link_libraries(oskar_fit_ellipse
+         /data/MATLAB/R2011b/bin/glnxa64/libmwlapack.so
+         /data/MATLAB/R2011b/bin/glnxa64/libmwblas.so
+    )
 
     add_subdirectory("@Jones")
 

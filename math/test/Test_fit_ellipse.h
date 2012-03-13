@@ -26,28 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_FIT_ELLIPSE_H_
-#define OSKAR_FIT_ELLIPSE_H_
+#ifndef TEST_FIT_ELLIPSE_H_
+#define TEST_FIT_ELLIPSE_H_
 
 /**
- * @file oskar_fit_ellipse.h
+ * @file Test_fit_ellipse.h
  */
 
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include <cppunit/extensions/HelperMacros.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_fit_ellipse : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_fit_ellipse);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST_SUITE_END();
 
-OSKAR_EXPORT
-int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
-        double* gauss_phi, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y);
+    public:
+        void test();
+};
 
-#ifdef __cplusplus
-}
-#endif
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_fit_ellipse);
 
-#endif /* OSKAR_FIT_ELLIPSE_H_ */
+#endif // TEST_FIT_ELLIPSE_H_

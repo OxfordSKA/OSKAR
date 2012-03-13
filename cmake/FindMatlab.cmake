@@ -5,6 +5,9 @@
 #  MATLAB_MEX_LIBRARY: path to libmex.lib
 #  MATLAB_MX_LIBRARY:  path to libmx.lib
 #  MATLAB_ENG_LIBRARY: path to libeng.lib
+#  MATLAB_QT_QTCORE_LIBRARY
+#  MATLAB_QT_QTGUI_LIBRARY
+#  MATLAB_QT_QTXML_LIBRARY
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.

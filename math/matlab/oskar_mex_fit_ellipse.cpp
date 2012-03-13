@@ -27,27 +27,55 @@
  */
 
 
-#ifndef OSKAR_FIT_ELLIPSE_H_
-#define OSKAR_FIT_ELLIPSE_H_
-
-/**
- * @file oskar_fit_ellipse.h
- */
-
-#include "oskar_global.h"
+#include <mex.h>
+#include "math/oskar_fit_ellipse.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_get_error_string.h"
+#include <cmath>
+#include <algorithm>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// MATLAB Entry function.
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+{
+    if (num_in != 2 || num_out > 3)
+    {
+        mexErrMsgTxt("Usage: [maj min phi] = oskar_fit_ellipse(x, y)\n");
+    }
 
-OSKAR_EXPORT
-int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
-        double* gauss_phi, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y);
+    int rows    = mxGetM(in[0]);
+    int columns = mxGetN(in[0]);
+    int num_points = std::max(rows, columns);
 
-#ifdef __cplusplus
+    double* x_ = (double*)mxGetData(in[0]);
+    double* y_ = (double*)mxGetData(in[1]);
+
+    oskar_Mem x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_TRUE);
+    oskar_Mem y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_TRUE);
+
+    for (int i = 0; i < num_points; ++i)
+    {
+        ((double*)x.data)[i] = x_[i];
+        ((double*)y.data)[i] = y_[i];
+        mexPrintf("[%i] % -.4f % -.4f\n", i, ((double*)x.data)[i],
+                ((double*)y.data)[i]);
+    }
+
+    mexPrintf("num_points = %i\n", num_points);
+
+//    out[0] = mxCreateDoubleScalar(0.0);
+//    out[1] = mxCreateDoubleScalar(0.0);
+//    out[2] = mxCreateDoubleScalar(0.0);
+
+//    double* maj = (double*)mxGetData(out[0]);
+//    double* min = (double*)mxGetData(out[1]);
+//    double* pa  = (double*)mxGetData(out[2]);
+
+    double maj = 0.0, min = 0.0, pa = 0.0;
+
+    int err = 0;
+    err = oskar_fit_ellipse(&maj, &min, &pa, num_points, &x, &y);
+    if (err) mexPrintf("ERROR: %i\n", err);
+        //mexErrMsgTxt(oskar_get_error_string(err));
 }
-#endif
 
-#endif /* OSKAR_FIT_ELLIPSE_H_ */
+

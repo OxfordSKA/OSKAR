@@ -10,12 +10,13 @@ if (CPPUNIT_FOUND)
     set(math_test_SRC
         src/CppUnitMain.cpp
         #src/Test_curand.cu
+        src/Test_fit_ellipse.cpp
         #src/Test_healpix.cpp
         #src/Test_Jones.cpp
         #src/Test_Matrix3.cpp
         #src/Test_Matrix4.cpp
         #src/Test_linspace.cpp
-        src/Test_matrix_math.cpp
+        #src/Test_matrix_math.cpp
         #src/Test_meshgrid.cpp
         #src/Test_rotate.cpp
         #src/Test_sph_lm.cpp
