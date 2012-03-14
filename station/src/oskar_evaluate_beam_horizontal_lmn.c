@@ -45,8 +45,8 @@ int oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
     /* Local apparent Sidereal Time, in radians. */
     last = gast + station->longitude_rad;
 
-    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0_rad, &station->dec0_rad, last,
-            station->latitude_rad, l, m, n);
+    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0_rad, &station->dec0_rad,
+            last, station->latitude_rad, l, m, n);
 }
 
 #ifdef __cplusplus

@@ -49,6 +49,7 @@ struct oskar_StationModel
     oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */
 
     /* Station element data. */
+    int array_is_3d;          /**< Flag set if array is 3-dimensional (default false). */
     oskar_Mem x_signal;       /**< x-position wrt local horizon, toward the East. */
     oskar_Mem y_signal;       /**< y-position wrt local horizon, toward the North. */
     oskar_Mem z_signal;       /**< z-position wrt local horizon, toward the zenith. */

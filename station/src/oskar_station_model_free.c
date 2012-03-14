@@ -104,6 +104,7 @@ int oskar_station_model_free(oskar_StationModel* model)
     model->dec0_rad = 0.0;
     model->single_element_model = 0;
     model->bit_depth = 0;
+    model->array_is_3d = 0;
 
     return 0;
 }

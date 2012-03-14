@@ -89,6 +89,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->apply_element_errors = OSKAR_FALSE;
     model->apply_weight = OSKAR_FALSE;
     model->normalise_beam = OSKAR_FALSE;
+    model->array_is_3d = OSKAR_FALSE;
     return err;
 }
 

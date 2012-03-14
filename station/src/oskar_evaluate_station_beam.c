@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
-        const double l_beam, const double m_beam, const oskar_Mem* l,
+        double l_beam, double m_beam, double n_beam, const oskar_Mem* l,
         const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* weights,
         oskar_Device_curand_state* curand_states)
 {
@@ -109,7 +109,7 @@ int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
     if (station->element_pattern == NULL && oskar_mem_is_scalar(E->type))
     {
         error = oskar_evaluate_station_beam_scalar(E, station, l_beam, m_beam,
-                l, m, n, weights, &weights_error, curand_states);
+                n_beam, l, m, n, weights, &weights_error, curand_states);
         if (error) return error;
 
         if (station->normalise_beam)

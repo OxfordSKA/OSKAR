@@ -26,13 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_dftw_2d.h"
+#include "math/cudak/oskar_cudak_dftw_3d.h"
 
 // Single precision.
 __global__
-void oskar_cudak_dftw_2d_f(const int n_in, const float* x_in,
-        const float* y_in, const float x_out, const float y_out,
-        float2* weights)
+void oskar_cudak_dftw_3d_f(const int n_in, const float* x_in,
+        const float* y_in, const float* z_in, const float x_out,
+        const float y_out, const float z_out, float2* weights)
 {
     // Get input index.
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -41,11 +41,13 @@ void oskar_cudak_dftw_2d_f(const int n_in, const float* x_in,
     // Cache input data from global memory.
     float cxi = x_in[i];
     float cyi = y_in[i];
+    float czi = z_in[i];
 
     // Compute the geometric phase of the output direction.
     float phase;
     phase =  cxi * x_out;
     phase += cyi * y_out;
+    phase += czi * z_out;
     float2 weight;
     sincosf(phase, &weight.y, &weight.x);
 
@@ -55,9 +57,9 @@ void oskar_cudak_dftw_2d_f(const int n_in, const float* x_in,
 
 // Double precision.
 __global__
-void oskar_cudak_dftw_2d_d(const int n_in, const double* x_in,
-        const double* y_in, const double x_out, const double y_out,
-        double2* weights)
+void oskar_cudak_dftw_3d_d(const int n_in, const double* x_in,
+        const double* y_in, const double* z_in, const double x_out,
+        const double y_out, const double z_out, double2* weights)
 {
     // Get input index.
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -66,11 +68,13 @@ void oskar_cudak_dftw_2d_d(const int n_in, const double* x_in,
     // Cache input data from global memory.
     double cxi = x_in[i];
     double cyi = y_in[i];
+    double czi = z_in[i];
 
     // Compute the geometric phase of the output direction.
     double phase;
     phase =  cxi * x_out;
     phase += cyi * y_out;
+    phase += czi * z_out;
     double2 weight;
     sincos(phase, &weight.y, &weight.x);
 

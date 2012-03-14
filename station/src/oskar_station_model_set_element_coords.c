@@ -56,6 +56,10 @@ int oskar_station_model_set_element_coords(oskar_StationModel* dst,
     type = oskar_station_model_type(dst);
     location = oskar_station_model_location(dst);
 
+    /* Check if z or delta_z is nonzero, and set 3D flag if so. */
+    if (z != 0.0 || delta_z != 0.0)
+        dst->array_is_3d = OSKAR_TRUE;
+
     /* Set up the data. */
     x_weights = x;
     y_weights = y;

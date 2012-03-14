@@ -48,9 +48,9 @@ extern "C" {
  * to the E-Jones matrices for a given station.
  *
  * @details
- * The station beam values are evaluated using a DFT on the GPU and as such
- * all memory, passed to and return from this function, must be allocated
- * in device memory prior to calling this function.
+ * The station beam amplitudes are evaluated using a DFT on the GPU, so
+ * all memory passed to and returned from this function must be allocated
+ * on the device.
  *
  * The detailed description of processing performed by this function will
  * depend on the presence of element pattern and hierarchical layout information
@@ -58,8 +58,8 @@ extern "C" {
  *
  * Note:
  * - Station x,y,z coordinates used by this function are assumed to be in
- * wave-number units.
- * - The \p work_weights buffer must be allocated on the GPU of complex type
+ * radians (i.e. pre-multiplied by the wavenumber).
+ * - The \p weights buffer must be allocated on the GPU of complex type
  * matching the same floating point precision as the rest of the memory
  * passed to the function.
  * - Horizontal n (\p hor_n) coordinates are used to remove sources below the
@@ -67,25 +67,24 @@ extern "C" {
  *
  * @param[out] beam          Array of station complex beam amplitudes returned.
  * @param[in]  station       Station model structure.
- * @param[in]  hor_l_beam    Beam phase centre horizontal l, in radians.
- * @param[in]  hor_m_beam    Beam phase centre horizontal m, in radians.
- * @param[in]  hor_l         Array of horizontal l directions for which the beam
- *                           should be evaluated, in radians.
- * @param[in]  hor_m         Array of horizontal m directions for which the beam
- *                           should be evaluated, in radians.
- * @param[in]  hor_n         Array of horizontal n directions for which the beam
- *                           should be evaluated, in radians.
- *
- * @param[in]  work_weights  Work buffer used to hold DFT weights.
+ * @param[in]  l_beam        Beam phase centre horizontal l (component along x).
+ * @param[in]  m_beam        Beam phase centre horizontal m (component along y).
+ * @param[in]  n_beam        Beam phase centre horizontal n (component along z).
+ * @param[in]  l             Array of horizontal l directions for which the beam
+ *                           should be evaluated (component along x).
+ * @param[in]  m             Array of horizontal m directions for which the beam
+ *                           should be evaluated (component along y).
+ * @param[in]  n             Array of horizontal m directions for which the beam
+ *                           should be evaluated (component along z).
+ * @param[in]  weights       Work buffer used to evaluate DFT weights.
  * @param[in]  curand_states Structure holding a set of curand states.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_station_beam(oskar_Mem* beam,
-        const oskar_StationModel* station, const double hor_l_beam,
-        const double hor_m_beam, const oskar_Mem* hor_l,
-        const oskar_Mem* hor_m, const oskar_Mem* hor_n, oskar_Mem* weights_work,
+int oskar_evaluate_station_beam(oskar_Mem* E, const oskar_StationModel* station,
+        double l_beam, double m_beam, double n_beam, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* weights,
         oskar_Device_curand_state* curand_states);
 
 #ifdef __cplusplus

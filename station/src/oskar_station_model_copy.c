@@ -80,6 +80,7 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     dst->apply_element_errors = src->apply_element_errors;
     dst->apply_weight = src->apply_weight;
     dst->normalise_beam = src->normalise_beam;
+    dst->array_is_3d = src->array_is_3d;
 
     /* TODO Work out how to deal with child stations. */
     /* TODO Work out how to deal with element pattern data. */

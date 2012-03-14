@@ -29,7 +29,9 @@
 #include "oskar_global.h"
 
 #include "math/cudak/oskar_cudak_dftw_2d.h"
+#include "math/cudak/oskar_cudak_dftw_3d.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
+#include "math/cudak/oskar_cudak_dftw_o2c_3d.h"
 #include "station/oskar_evaluate_element_weights_errors.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
 #include "station/cudak/oskar_cudak_blank_below_horizon.h"
@@ -48,17 +50,19 @@ extern "C" {
 #endif
 
 int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
-        const oskar_StationModel* station, const double l_beam,
-        const double m_beam, const oskar_Mem* l, const oskar_Mem* m,
+        const oskar_StationModel* station, double l_beam, double m_beam,
+        double n_beam, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
         oskar_Device_curand_state* curand_state)
 {
     int error = 0;
 
+    // Sanity check on inputs.
     if (beam == NULL || station == NULL || m == NULL ||
             l == NULL || n == NULL || weights == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
+    // Check that the antenna coordinates have been scaled by the wavenumber.
     if (station->coord_units != OSKAR_WAVENUMBERS)
         return OSKAR_ERR_BAD_UNITS;
 
@@ -70,7 +74,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
     }
 
     int num_antennas = station->num_elements;
-    size_t element_size = oskar_mem_element_size(beam->type);
+    size_t element_size = oskar_mem_element_size(l->type);
     int num_sources = l->num_elements;
 
     // Double precision.
@@ -81,13 +85,23 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             m->type == OSKAR_DOUBLE &&
             n->type == OSKAR_DOUBLE)
     {
-        // DFT weights.
+        // Compute DFT weights.
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
-        oskar_cudak_dftw_2d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (num_antennas, station->x_weights, station->y_weights, l_beam,
-                        m_beam, *weights);
+        if (station->array_is_3d)
+        {
+            oskar_cudak_dftw_3d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, station->x_weights, station->y_weights,
+                    station->z_weights, l_beam, m_beam, n_beam, *weights);
+        }
+        else
+        {
+            oskar_cudak_dftw_2d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, station->x_weights, station->y_weights, l_beam,
+                    m_beam, *weights);
+        }
 
+        // Apply time-variable errors.
         if (station->apply_element_errors)
         {
             // Evaluate weights errors.
@@ -103,6 +117,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             if (error) return error;
         }
 
+        // Apply apodisation weights.
         if (station->apply_weight)
         {
             // Modify the weights using those provided.
@@ -111,14 +126,28 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             if (error) return error;
         }
 
-        // Evaluate beam pattern for each source.
-        int antennas_per_chunk = 448;  // Should be multiple of 16.
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
-        size_t shared_mem_size = 2 * antennas_per_chunk * element_size;
-        oskar_cudak_dftw_o2c_2d_d
+        // Evaluate beam using DFT.
+        if (station->array_is_3d)
+        {
+            int antennas_per_chunk = 384;  // Should be multiple of 16.
+            num_blocks = (num_sources + num_threads - 1) / num_threads;
+            size_t shared_mem_size = 5 * antennas_per_chunk * element_size;
+            oskar_cudak_dftw_o2c_3d_d
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
-                (num_antennas, station->x_signal, station->y_signal,
-                *weights, num_sources, *l, *m, antennas_per_chunk, *beam);
+            (num_antennas, station->x_signal, station->y_signal,
+                    station->z_signal, *weights, num_sources, *l, *m, *n,
+                    antennas_per_chunk, *beam);
+        }
+        else
+        {
+            int antennas_per_chunk = 448;  // Should be multiple of 16.
+            num_blocks = (num_sources + num_threads - 1) / num_threads;
+            size_t shared_mem_size = 4 * antennas_per_chunk * element_size;
+            oskar_cudak_dftw_o2c_2d_d
+            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
+            (num_antennas, station->x_signal, station->y_signal,
+                    *weights, num_sources, *l, *m, antennas_per_chunk, *beam);
+        }
 
         // Zero the value of any positions below the horizon.
         oskar_cudak_blank_below_horizon_scalar_d
@@ -134,13 +163,23 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             m->type == OSKAR_SINGLE &&
             n->type == OSKAR_SINGLE)
     {
-        // DFT weights.
+        // Compute DFT weights.
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
-        oskar_cudak_dftw_2d_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (num_antennas, station->x_weights, station->y_weights, l_beam,
-                        m_beam, *weights);
+        if (station->array_is_3d)
+        {
+            oskar_cudak_dftw_3d_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, station->x_weights, station->y_weights,
+                    station->z_weights, l_beam, m_beam, n_beam, *weights);
+        }
+        else
+        {
+            oskar_cudak_dftw_2d_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+            (num_antennas, station->x_weights, station->y_weights, l_beam,
+                    m_beam, *weights);
+        }
 
+        // Apply time-variable errors.
         if (station->apply_element_errors)
         {
             // Evaluate weights errors.
@@ -156,6 +195,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             if (error) return error;
         }
 
+        // Apply apodisation weights.
         if (station->apply_weight)
         {
             // Modify the weights using those provided.
@@ -164,14 +204,30 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             if (error) return error;
         }
 
-        // Evaluate beam pattern for each source.
-        int antennas_per_chunk = 896;  // Should be multiple of 16.
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
-        size_t shared_mem_size = 2 * antennas_per_chunk * element_size;
-        oskar_cudak_dftw_o2c_2d_f
+        // Evaluate beam using DFT.
+        if (station->array_is_3d)
+        {
+            // Evaluate beam pattern for each source.
+            int antennas_per_chunk = 800;  // Should be multiple of 16.
+            num_blocks = (num_sources + num_threads - 1) / num_threads;
+            size_t shared_mem_size = 5 * antennas_per_chunk * element_size;
+            oskar_cudak_dftw_o2c_3d_f
+            OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
+            (num_antennas, station->x_signal, station->y_signal,
+                    station->z_signal, *weights, num_sources, *l, *m, *n,
+                    antennas_per_chunk, *beam);
+        }
+        else
+        {
+            // Evaluate beam pattern for each source.
+            int antennas_per_chunk = 896;  // Should be multiple of 16.
+            num_blocks = (num_sources + num_threads - 1) / num_threads;
+            size_t shared_mem_size = 4 * antennas_per_chunk * element_size;
+            oskar_cudak_dftw_o2c_2d_f
             OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem_size)
             (num_antennas, station->x_signal, station->y_signal, *weights,
                     num_sources, *l, *m, antennas_per_chunk, *beam);
+        }
 
         // Zero the value of any positions below the horizon.
         oskar_cudak_blank_below_horizon_scalar_f

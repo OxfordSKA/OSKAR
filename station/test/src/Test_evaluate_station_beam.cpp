@@ -40,6 +40,9 @@
 #include "math/oskar_meshgrid.h"
 #include "utility/oskar_Device_curand_state.h"
 
+#define TIMER_ENABLE 1
+#include "utility/timer.h"
+
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -137,8 +140,18 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     // Declare memory for the beam pattern.
     oskar_Mem beam_pattern(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
 
+    station_gpu.array_is_3d = 0;
+    TIMER_START
     error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, &l_gpu, &m_gpu, &n_gpu, &weights_gpu, &curand_state);
+            beam_m, beam_n, &l_gpu, &m_gpu, &n_gpu, &weights_gpu,
+            &curand_state);
+    TIMER_STOP("Finished station beam (2D)");
+    station_gpu.array_is_3d = 1;
+    TIMER_START
+    error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
+            beam_m, beam_n, &l_gpu, &m_gpu, &n_gpu, &weights_gpu,
+            &curand_state);
+    TIMER_STOP("Finished station beam (3D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy beam pattern back to CPU.
@@ -163,13 +176,6 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     --------------------------------------------------------------------------*/
 }
 
-
 void Test_evaluate_station_beam::performance_test()
 {
 }
-
-
-
-
-
-
