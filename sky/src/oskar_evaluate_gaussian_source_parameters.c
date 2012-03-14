@@ -28,7 +28,13 @@
 
 
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_free.h"
 #include "math/oskar_sph_to_lm.h"
+#include "math/oskar_sph_from_lm.h"
+#include "math/oskar_sph_rotate_points.h"
+#include "math/oskar_fit_ellipse.h"
+
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
@@ -47,16 +53,24 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
         oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
         oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0)
 {
-    int i;
+    int i, j, err;
     double a, b, c;
     int type;
     double fwhm_maj, fwhm_min, pa;
     double cos_pa_2, sin_pa_2, sin_2pa;
     double inv_std_min_2, inv_std_maj_2;
-    double ra, dec, delta_ra_maj, delta_dec_maj, delta_ra_min, delta_dec_min;
-    oskar_Mem lon, lat, l, m;
-    double cos_pa, sin_pa;
-    double delta_l_maj, delta_l_min, delta_m_maj, delta_m_min, pa_lm;
+    double ra, dec;
+    /*double delta_ra_maj, delta_dec_maj, delta_ra_min, delta_dec_min;*/
+    /*double delta_l_maj, delta_l_min, delta_m_maj, delta_m_min, pa_lm;*/
+    double ellipse_a, ellipse_b;
+
+    oskar_Mem l, m;
+    int ellipse_num_points;
+    double t;
+    oskar_Mem lon, lat;
+
+
+    err = OSKAR_SUCCESS;
 
     if (gaussian_a->type == OSKAR_DOUBLE &&
             gaussian_b->type == OSKAR_DOUBLE &&
@@ -85,11 +99,6 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    oskar_mem_init(&lon, type, OSKAR_LOCATION_CPU, 4);
-    oskar_mem_init(&lat, type, OSKAR_LOCATION_CPU, 4);
-    oskar_mem_init(&l, type, OSKAR_LOCATION_CPU, 4);
-    oskar_mem_init(&m, type, OSKAR_LOCATION_CPU, 4);
-
     if (gaussian_a == NULL || gaussian_b == NULL || gaussian_c == NULL ||
             FWHM_major == NULL || FWHM_minor == NULL || position_angle == NULL)
     {
@@ -117,47 +126,57 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
         return OSKAR_ERR_BAD_LOCATION;
     }
 
+    ellipse_num_points = 360/60 + 1;
+    err = oskar_mem_init(&l, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&m, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&lon, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&lat, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
+    if (err) return err;
+
     if (type == OSKAR_DOUBLE)
     {
+
         for (i = 0; i < num_sources; ++i)
         {
+            /* source parameters */
             ra  = ((double*)RA->data)[i];
             dec = ((double*)Dec->data)[i];
             fwhm_maj = ((double*)FWHM_major->data)[i];
             fwhm_min = ((double*)FWHM_minor->data)[i];
             pa       = ((double*)position_angle->data)[i];
 
-//            sin_pa = sin(pa);
-//            cos_pa = cos(pa);
-//
-//            delta_ra_maj  = fwhm_maj/2.0 * sin_pa;
-//            delta_dec_maj = fwhm_maj/2.0 * cos_pa;
-//            delta_ra_min  = fwhm_min/2.0 * cos_pa;
-//            delta_dec_min = fwhm_min/2.0 * sin_pa;
-//
-//            lon[0] = ra - delta_ra_maj;
-//            lon[1] = ra + delta_ra_maj;
-//            lon[2] = ra - delta_ra_min;
-//            lon[3] = ra + delta_ra_min;
-//
-//            lat[0] = dec - delta_dec_maj;
-//            lat[1] = dec + delta_dec_maj;
-//            lat[2] = dec - delta_dec_min;
-//            lat[3] = dec + delta_dec_min;
-//
-//            oskar_sph_from_lm_d(4, ra0, dec0, (double*)l.data, (double*)m.data,
-//                    (double*)lon.data, (double*)lat.data);
+            /* evaluate shape of ellipse on the lm plane */
+            /* TODO make this a function? (e.g. evaluate_lm_plane_gaussian() ) */
+            ellipse_a = fwhm_maj/2.0;
+            ellipse_b = fwhm_min/2.0;
+            for (j = 0; j < ellipse_num_points; ++j)
+            {
+                t = (double)j * 60.0 * M_PI/180.0;
+                ((double*)m.data)[j] = ellipse_a*cos(t)*cos(pa) -
+                        ellipse_b*sin(t)*sin(pa);
+                ((double*)l.data)[j] = ellipse_a*cos(t)*sin(pa) -
+                        ellipse_b*sin(t)*cos(pa);
+            }
 
-//            delta_l_maj = MAX(l[0], l[1]) - MIN(l[0], l[1]);
-//            delta_l_min = MAX(l[2], l[3]) - MIN(l[2], l[3]);
-//            delta_m_maj = MAX(m[0], m[1]) - MIN(m[0], m[1]);
-//            delta_m_min = MAX(m[2], m[3]) - MIN(m[2], m[3]);
-//
-//            pa_lm = atan2(delta_l_maj/2.0, delta_m_maj/2.0);
+            oskar_sph_from_lm_d(ellipse_num_points, 0.0, 0.0,
+                    (double*)l.data, (double*)m.data,
+                    (double*)lon.data, (double*)lat.data);
 
+            err = oskar_sph_rotate_points(ellipse_num_points, &lon, &lat, ra, dec);
+            if (err) return err;
 
+            oskar_sph_to_lm_d(ellipse_num_points, ra0, dec0,
+                    (double*)lon.data, (double*)lat.data,
+                    (double*)l.data, (double*)m.data);
 
+            err = oskar_fit_ellipse(&fwhm_maj, &fwhm_min, &pa,
+                    ellipse_num_points, &l, &m);
+            if (err) return err;
 
+            /* evaluate ellipse parameters */
             inv_std_maj_2 = (fwhm_maj * fwhm_maj) * M_PI_2_2_LN_2;
             inv_std_min_2 = (fwhm_min * fwhm_min) * M_PI_2_2_LN_2;
             cos_pa_2 = cos(pa) * cos(pa);
@@ -175,24 +194,15 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
     {
         for (i = 0; i < num_sources; ++i)
         {
-            // TODO: Convert to lm plane gaussian coordinates.
 
-            fwhm_maj = ((float*)FWHM_major->data)[i];
-            fwhm_min = ((float*)FWHM_minor->data)[i];
-            pa       = ((float*)position_angle->data)[i];
-            inv_std_maj_2 = (fwhm_maj * fwhm_maj) * M_PI_2_2_LN_2;
-            inv_std_min_2 = (fwhm_min * fwhm_min) * M_PI_2_2_LN_2;
-            cos_pa_2 = cos(pa) * cos(pa);
-            sin_pa_2 = sin(pa) * sin(pa);
-            sin_2pa  = sin(2.0 * pa);
-            a =  (cos_pa_2 * inv_std_min_2) / 2.0 + (sin_pa_2 * inv_std_maj_2) / 2.0;
-            b = -(sin_2pa  * inv_std_min_2) / 4.0 + (sin_2pa  * inv_std_maj_2) / 4.0;
-            c =  (sin_pa_2 * inv_std_min_2) / 2.0 + (cos_pa_2 * inv_std_maj_2) / 2.0;
-            ((float*)gaussian_a->data)[i] = (float)a;
-            ((float*)gaussian_b->data)[i] = (float)b;
-            ((float*)gaussian_c->data)[i] = (float)c;
         }
     }
+
+    /* clean up */
+    oskar_mem_free(&l);
+    oskar_mem_free(&m);
+    oskar_mem_free(&lon);
+    oskar_mem_free(&lat);
 
     return OSKAR_SUCCESS;
 }

@@ -303,7 +303,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     /* remove the orientation from the ellipse */
     if (MIN(fabs(b1/a1), fabs(b1/c1)) > orientation_tolerance)
     {
-        orientation_rad = 0.5 * atan2(b1,(c1-a1));
+        orientation_rad = 0.5 * atan2(b1,(c1-a1)) - M_PI/2,0;
         cos_phi = cos(orientation_rad);
         sin_phi = sin(orientation_rad);
         a2 = a1*cos_phi*cos_phi - b1*cos_phi*sin_phi + c1*sin_phi*sin_phi;
@@ -318,10 +318,11 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     }
     else
     {
+        /* FIXME this branch might not be needed when using atan2() */
         if ((c1-a1) < 0)
-            orientation_rad = M_PI/2.0;
-        else
             orientation_rad = 0.0;
+        else
+            orientation_rad = M_PI/2.0;
         cos_phi = cos(orientation_rad);
         sin_phi = sin(orientation_rad);
     }
