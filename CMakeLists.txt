@@ -100,12 +100,12 @@ if (BUILD_OSKAR)
     cuda_add_library(oskar ${oskar_SRC})
     target_link_libraries(oskar dierckx ${CUDA_LIBRARIES}
         ${CUDA_CUBLAS_LIBRARIES} ${CUDA_curand_LIBRARY})
-    if (CBLAS_FOUND)
-        target_link_libraries(oskar ${CBLAS_LIBRARIES})
+    if (OSKAR_USE_CBLAS)
+        target_link_libraries(oskar ${OSKAR_CBLAS})
     endif ()
-    if (LAPACK_FOUND)
-        target_link_libraries(oskar ${LAPACK_LIBRARIES})
-    endif ()            
+    if (OSKAR_USE_LAPACK)
+        target_link_libraries(oskar ${OSKAR_LAPACK})
+    endif ()
     set_target_properties(oskar PROPERTIES
         COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
         LINK_FLAGS "${OpenMP_CXX_FLAGS}"

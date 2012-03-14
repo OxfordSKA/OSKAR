@@ -16,7 +16,7 @@ if (CPPUNIT_FOUND)
         #src/Test_Matrix3.cpp
         #src/Test_Matrix4.cpp
         #src/Test_linspace.cpp
-        #src/Test_matrix_math.cpp
+        src/Test_matrix_math.cpp
         #src/Test_meshgrid.cpp
         #src/Test_rotate.cpp
         #src/Test_sph_lm.cpp
@@ -30,11 +30,11 @@ if (CPPUNIT_FOUND)
     cuda_add_executable(math_test ${math_test_SRC})
     target_link_libraries(math_test oskar oskar_math_test_cudak
         ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
-    if (LAPACK_FOUND)
-        target_link_libraries(math_test ${LAPACK_LIBRARIES})
+    if (OSKAR_USE_LAPACK)
+        target_link_libraries(math_test ${OSKAR_LAPACK})
     endif()
-    if (CBLAS_FOUND)
-        target_link_libraries(math_test ${CBLAS_LIBRARIES})
+    if (OSKAR_USE_CLAPACK)
+        target_link_libraries(math_test ${OSKAR_CBLAS})
     endif()
     
     add_test(math_test math_test)

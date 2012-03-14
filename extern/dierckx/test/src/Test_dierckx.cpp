@@ -336,15 +336,16 @@ void Test_dierckx::test_sphere()
     }
 
     // Check results are consistent.
+    double delta = 1e-5;
     CPPUNIT_ASSERT_EQUAL(nt_f, nt_c);
     CPPUNIT_ASSERT_EQUAL(np_f, np_c);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(fp_f, fp_c, 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(fp_f, fp_c, delta);
     for (int i = 0; i < nt_c; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(tt_f[i], tt_c[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(tt_f[i], tt_c[i], delta);
     for (int i = 0; i < np_c; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(tp_f[i], tp_c[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(tp_f[i], tp_c[i], delta);
     for (int i = 0; i < (ntest-4) * (npest-4); ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(c_f[i], c_c[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(c_f[i], c_c[i], delta);
 
     // Print knot positions.
     printf(" ## Pass %d has knots (nt,np)=(%d,%d), s=%.6f, fp=%.6f\n",

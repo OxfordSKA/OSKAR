@@ -49,13 +49,21 @@ if (CMAKE_COMPILER_IS_GNUCC)
 
 # === Intel compiler.
 elseif (NOT WIN32)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall")
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd2259")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -wd2259")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd1125")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -wd1125")
+
+    # Set release and debug flags.
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    list(APPEND CMAKE_C_FLAGS "-fPIC -std=c99")
-    list(APPEND CMAKE_CXX_FLAGS "-fPIC")
-    add_definitions(-Wall)
-    add_definitions(-Wcheck)
-    add_definitions(-wd2259)
-    add_definitions(-wd1125)
+    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0")
+    
+    
 
 # === Microsoft visual studio compiler.
 elseif (MSVC) # visual studio compiler.

@@ -18,9 +18,10 @@ find_path(MKL_INCLUDE_DIR mkl.h
     PATHS
     /opt/intel/Compiler/*/*/mkl/include/
     /opt/intel/mkl/*/include/
+    /opt/intel/*/mkl/*/include/
+    /opt/intel/*/mkl/include/
     /usr/include/
 )
-
 
 # Set the architecture specfic interface layer library name to look for.
 # ==============================================================================
@@ -70,6 +71,7 @@ foreach(mkl_lib ${mkl_lib_names})
         find_library(${mkl_lib}_LIBRARY
             NAMES ${mkl_lib}
             PATHS
+            /opt/intel/*/mkl/lib/intel64/
             /opt/intel/Compiler/*/*/mkl/lib/em64t/
             /opt/intel/mkl/*/lib/em64t/
             /usr/lib64

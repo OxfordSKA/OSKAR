@@ -46,36 +46,18 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int columns = mxGetN(in[0]);
     int num_points = std::max(rows, columns);
 
-    double* x_ = (double*)mxGetData(in[0]);
-    double* y_ = (double*)mxGetData(in[1]);
-
-    oskar_Mem x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_TRUE);
-    oskar_Mem y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_TRUE);
-
-    for (int i = 0; i < num_points; ++i)
-    {
-        ((double*)x.data)[i] = x_[i];
-        ((double*)y.data)[i] = y_[i];
-        mexPrintf("[%i] % -.4f % -.4f\n", i, ((double*)x.data)[i],
-                ((double*)y.data)[i]);
-    }
-
-    mexPrintf("num_points = %i\n", num_points);
-
-//    out[0] = mxCreateDoubleScalar(0.0);
-//    out[1] = mxCreateDoubleScalar(0.0);
-//    out[2] = mxCreateDoubleScalar(0.0);
-
-//    double* maj = (double*)mxGetData(out[0]);
-//    double* min = (double*)mxGetData(out[1]);
-//    double* pa  = (double*)mxGetData(out[2]);
+    oskar_Mem x(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_FALSE);
+    oskar_Mem y(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_FALSE);
+    x.data = mxGetData(in[0]);
+    y.data = mxGetData(in[1]);
 
     double maj = 0.0, min = 0.0, pa = 0.0;
+    int err = oskar_fit_ellipse(&maj, &min, &pa, num_points, &x, &y);
+    if (err) mexErrMsgTxt(oskar_get_error_string(err));
 
-    int err = 0;
-    err = oskar_fit_ellipse(&maj, &min, &pa, num_points, &x, &y);
-    if (err) mexPrintf("ERROR: %i\n", err);
-        //mexErrMsgTxt(oskar_get_error_string(err));
+    out[0] = mxCreateDoubleScalar(maj);
+    out[1] = mxCreateDoubleScalar(min);
+    out[2] = mxCreateDoubleScalar(pa);
 }
 
 

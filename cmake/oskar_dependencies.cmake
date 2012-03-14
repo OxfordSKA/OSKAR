@@ -11,6 +11,9 @@
 #   CppUnit
 #   Qt4
 #   Qwt5-qt4
+#   LAPACK 
+#   CBLAS
+#   MKL
 #
 # Dependencies for liboskar_ms:
 #------------------------------------------------------------------------------
@@ -53,6 +56,7 @@ find_package(FFTW3 QUIET)
 find_package(CasaCore QUIET)
 find_package(CFitsio QUIET)
 find_package(Matlab QUIET)
+#find_package(MKL QUIET)
 find_package(CBLAS QUIET)
 find_package(LAPACK QUIET)
 
@@ -123,18 +127,39 @@ if (NOT CFITSIO_FOUND)
     add_definitions(-DOSKAR_NO_FITS)
 endif ()
 
-if (NOT CBLAS_FOUND)
+if (MKL_FOUND)
+    message("================================================================================")
+    message("INFO: Using MKL for LAPACK AND BLAS.")
+    message("================================================================================")
+    set(OSKAR_LAPACK ${MKL_LIBRARIES})
+    set(OSKAR_BLAS ${MKL_LIBRARIES})
+    include_directories(${MKL_INCLUDE_DIR})
+    set(OSKAR_USE_LAPACK YES)
+    set(OSKAR_USE_CBLAS YES)
+    add_definitions(-DOSKAR_MKL_FOUND)
+else ()
+    if (LAPACK_FOUND)
+        set(OSKAR_LAPACK ${LAPACK_LIBRARIES})
+        set(OSKAR_USE_LAPACK YES)
+    endif ()
+    if (CBLAS_FOUND)
+        set(OSKAR_USE_CBLAS YES)
+        set(OSKAR_CBLAS ${CBLAS_LIBRARIES})
+    endif ()
+endif ()
+
+if (NOT OSKAR_USE_CBLAS)
+    add_definitions(-DOSKAR_NO_CBLAS)
     message("================================================================================")
     message("-- WARNING: cblas not found")
     message("================================================================================")
-    add_definitions(-DOSKAR_NO_CBLAS)
 endif()
 
-if (NOT LAPACK_FOUND)
+if (NOT OSKAR_USE_LAPACK)
+    add_definitions(-DOSKAR_NO_LAPACK)
     message("================================================================================")
     message("-- WARNING: lapack not found")
     message("================================================================================")
-    add_definitions(-DOSKAR_NO_LAPACK)
 endif()
 
 

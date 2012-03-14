@@ -46,25 +46,26 @@ extern "C" {
 
 #ifndef OSKAR_NO_LAPACK
 /* http://www.netlib.org/lapack/double/dgesv.f */
+/*
 extern void dgesv_(const int* n, const int* nrhs, double* A, const int lda,
         int* ipiv, double* B, const int* ldb, int* info);
 extern void sgesv_(const int* n, const int* nrhs, double* A, const int lda,
         int* ipiv, double* B, const int* ldb, int* info);
-
+*/
 
 /* http://www.netlib.org/lapack/double/dgetrf.f */
-extern void dgetrf_(const int* m, const int* n, double* A, const int* lda,
-        int* ipiv, int* info);
-extern void sgetrf_(const int* m, const int* n, float* A, const int* lda,
-        int* ipiv, int* info);
+extern void dgetrf_(const long* m, const long* n, double* A, const long* lda,
+        long* ipiv, long* info);
+extern void sgetrf_(const long* m, const long* n, float* A, const long* lda,
+        long* ipiv, long* info);
 
 /* http://www.netlib.org/lapack/double/dgetrs.f */
-extern void dgetrs_(const char* trans, const int* n, const int* nrhs,
-        double* A, const int* lda, int* ipiv, double* B, const int* lba,
-        int* info);
-extern void sgetrs_(const char* trans, const int* n, const int* nrhs,
-        float* A, const int* lda, int* ipiv, float* B, const int* lba,
-        int* info);
+extern void dgetrs_(const char* trans, const long* n, const long* nrhs,
+        double* A, const long* lda, long* ipiv, double* B, const long* lba,
+        long* info);
+extern void sgetrs_(const char* trans, const long* n, const long* nrhs,
+        float* A, const long* lda, long* ipiv, float* B, const long* lba,
+        long* info);
 #endif
 
 
@@ -74,7 +75,8 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         double* gauss_phi, int num_points, const oskar_Mem* x,
         const oskar_Mem* y)
 {
-    int i, j, type, location, err, rows_X, cols_X, n, m, lda, ldb, info, nrhs;
+    int i, j, type, location, err, rows_X, cols_X;
+    long n, m, lda, ldb, info, nrhs;
     double orientation_tolerance, orientation_rad, cos_phi, sin_phi;
     double a1, b1, c1, d1, e1;
     double a2, b2, c2, d2, e2;
@@ -236,50 +238,38 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     m = cols_X;
     lda = MAX(1, m);
 
-    err = oskar_mem_init(&ipiv, OSKAR_INT, location, MIN(m, n), OSKAR_TRUE);
+    /* Note: using double in place of long as its the right number of bytes */
+    err = oskar_mem_init(&ipiv, OSKAR_DOUBLE, location, MIN(m, n), OSKAR_TRUE);
     if (err) return err;
 
 #ifndef OSKAR_NO_LAPACK
     if (type == OSKAR_DOUBLE)
     {
-        dgetrf_(&m, &n, (double*)XX.data, &lda, (int*)ipiv.data, &info);
+        dgetrf_(&m, &n, (double*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0) return info;
 
         n = cols_X;
         ldb = MAX(1, n);
         nrhs = 1;
         trans = 'N';
-        dgetrs_(&trans, &n, &nrhs, (double*)XX.data, &lda, (int*)ipiv.data,
+        dgetrs_(&trans, &n, &nrhs, (double*)XX.data, &lda, (long*)ipiv.data,
                 (double*)sumX.data, &ldb, &info);
         if (info != 0) return info;
     }
     else
     {
-        sgetrf_(&m, &n, (float*)XX.data, &lda, (int*)ipiv.data, &info);
+        sgetrf_(&m, &n, (float*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0) return OSKAR_ERR_UNKNOWN;
 
         n = cols_X;
         ldb = MAX(1, n);
         nrhs = 1;
         trans = 'N';
-        sgetrs_(&trans, &n, &nrhs, (float*)XX.data, &lda, (int*)ipiv.data,
+        sgetrs_(&trans, &n, &nrhs, (float*)XX.data, &lda, (long*)ipiv.data,
                 (float*)sumX.data, &ldb, &info);
         if (info != 0) return OSKAR_ERR_UNKNOWN;
     }
 #endif
-
-//#ifndef OSKAR_NO_LAPACK
-//    if (type == OSKAR_DOUBLE)
-//    {
-//        dgesv_(&num_points, &cols_X, (double*)XX.data, &lda, (int*)ipiv.data, &info);
-//        if (info != 0) return OSKAR_ERR_UNKNOWN;
-//
-//    }
-//    else
-//    {
-//
-//    }
-//#endif
 
     /*
         printf("\n");
@@ -328,8 +318,11 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     }
     else
     {
-        orientation_rad = M_PI/2.0;
-        cos_phi = cos(orientation_rad); /* FIXME unnecessary */
+        if ((c1-a1) < 0)
+            orientation_rad = M_PI/2.0;
+        else
+            orientation_rad = 0.0;
+        cos_phi = cos(orientation_rad);
         sin_phi = sin(orientation_rad);
     }
 

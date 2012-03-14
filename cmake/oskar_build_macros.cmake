@@ -34,11 +34,11 @@ macro(oskar_mex name source)
     else ()
         message(CRITICAL "OSKAR_MEX: UNRECOGNISED SOURCE FILE EXTENSION!")
     endif ()
-
     target_link_libraries(${name} oskar ${MATLAB_LIBRARIES})
+    #INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR};/opt/intel/composerxe-2011.4.191/mkl/lib/intel64/"
     set_target_properties(${name} PROPERTIES
         PREFIX "" SUFFIX ".${MATLAB_MEXFILE_EXT}"
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
         INSTALL_RPATH_USE_LINK_PATH TRUE
         COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
         LINK_FLAGS ${MATLAB_CXX_FLAGS})

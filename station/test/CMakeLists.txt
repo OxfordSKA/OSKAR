@@ -30,3 +30,6 @@ endif()
 # Add standalone test for Meerkat beam.
 add_executable(meerkat_beam_test src/meerkat_beam_test.cpp)
 target_link_libraries(meerkat_beam_test oskar ${CUDA_LIBRARIES})
+    set_target_properties(meerkat_beam_test PROPERTIES
+       COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+       LINK_FLAGS "${OpenMP_CXX_FLAGS}")
