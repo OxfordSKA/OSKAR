@@ -273,7 +273,7 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
         int error = (*sim_function_)(settings);
         if (error)
         {
-            fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+            fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
                     oskar_get_error_string(error));
         }
     }
@@ -329,7 +329,7 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
                 int error = (*sim_function_)(settings);
                 if (error)
                 {
-                    fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+                    fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
                             oskar_get_error_string(error));
                 }
             }

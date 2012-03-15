@@ -44,6 +44,8 @@ extern "C" {
  * @brief Evaluate the parameters of a gaussian projected onto the tangent plane
  * given a description of a gaussian defined on the surface of a sphere.
  *
+ * Note: All values are in radians.
+ *
  * @param[out]  maj       Major axis of gaussian on tangent plane.
  * @param[out]  min       Minor axis of gaussian on tangent plane.
  * @param[out]  pa        Position angle of gaussian on tangent plane.
@@ -58,9 +60,10 @@ extern "C" {
  * @return An error code
  */
 OSKAR_EXPORT
-int oskar_project_gaussian_sph_to_lm(double *maj, double *min, double *pa,
-        double sph_maj, double sph_min, double sph_pa,
-        double lon, double lat, double lon0, double lat0);
+int oskar_project_gaussian_sph_to_lm(int num_points, oskar_Mem* maj,
+        oskar_Mem* min, oskar_Mem* pa, const oskar_Mem* sph_maj,
+        const oskar_Mem* sph_min, const oskar_Mem* sph_pa, const oskar_Mem* lon,
+        const oskar_Mem* lat, double lon0, double lat0);
 
 #ifdef __cplusplus
 }

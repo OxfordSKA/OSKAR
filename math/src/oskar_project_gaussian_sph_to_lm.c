@@ -43,27 +43,26 @@
 extern "C" {
 #endif
 
-int oskar_project_gaussian_sph_to_lm(double *maj, double *min, double *pa,
-        double sph_maj, double sph_min, double sph_pa,
-        double lon, double lat, double lon0, double lat0)
+int oskar_project_gaussian_sph_to_lm(int num_points, oskar_Mem* maj,
+        oskar_Mem* min, oskar_Mem* pa, const oskar_Mem* sph_maj,
+        const oskar_Mem* sph_min, const oskar_Mem* sph_pa, const oskar_Mem* lon,
+        const oskar_Mem* lat, double lon0, double lat0)
 {
-    int i, j, num_points, err;
-    oskar_Mem e_l, e_m, e_lon, e_lat;
+    int i, j, err;
+    int e_n; /* Number of points on the ellipse */
+    oskar_Mem e_l, e_m, e_lon, e_lat; /* Ellipse coordinates */
     double t, a, b;
 
-    num_points = 360.0/60.0;
-
-    /* FIXME FIXME
-     * mmm not really a good idea to have reallocate this memory for
-     * each source so make this function work for num_sources....
-     * FIXME FIXME
-     */
-    oskar_mem_init(&e_l, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_TRUE);
-    oskar_mem_init(&e_m, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_points, OSKAR_TRUE);
+    /* Allocate temp. memory used to store ellipse parameters */
+    e_n = 360.0/60.0;
+    oskar_mem_init(&e_l, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
+    oskar_mem_init(&e_m, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
+    oskar_mem_init(&e_lon, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
+    oskar_mem_init(&e_lat, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
 
     a = sph_maj/2.0;
     b = sph_min/2.0;
-    for (i = 0; i < num_points; ++i)
+    for (i = 0; i < e_n; ++i)
     {
         t = (double)i * 60.0 * M_PI/180.0;
         ((double*)e_m.data)[i] = a*cos(t)*cos(pa) + b*sin(t)*cos(pa);
@@ -73,6 +72,8 @@ int oskar_project_gaussian_sph_to_lm(double *maj, double *min, double *pa,
 
     oskar_mem_free(&e_l);
     oskar_mem_free(&e_m);
+    oskar_mem_free(&e_lat);
+    oskar_mem_free(&e_lon);
 
 
     return OSKAR_SUCCESS;

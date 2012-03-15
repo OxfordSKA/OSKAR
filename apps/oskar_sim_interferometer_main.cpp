@@ -48,7 +48,7 @@ int main(int argc, char** argv)
     // Check for errors.
     if (error)
     {
-        fprintf(stderr, ">>> Run failed (code %d): %s.\n", error,
+        fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
                 oskar_get_error_string(error));
     }
     return error;

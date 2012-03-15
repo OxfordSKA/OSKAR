@@ -86,6 +86,7 @@ int oskar_sim_interferometer(const char* settings_file)
     oskar_SkyModel* sky_chunk_cpu = NULL;
     int num_sky_chunks = 0;
     error = oskar_set_up_sky(&num_sky_chunks, &sky_chunk_cpu, &settings);
+    if (error) return error;
 
     // Create the global visibility structure on the CPU.
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;

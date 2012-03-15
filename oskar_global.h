@@ -136,8 +136,11 @@ enum {
     /* Indicates that the specified functionality isn't available for use */
     OSKAR_ERR_FUNCTION_NOT_AVAILABLE = -22,
 
+    /* Indicates the fitting elliptical source failed */
+    OSKAR_ERR_ELLIPSE_FIT_FAILED     = -23,
+
     /* Indicates that an unknown error occurred. */
-    OSKAR_ERR_UNKNOWN              = -1000
+    OSKAR_ERR_UNKNOWN                = -1000
 };
 
 

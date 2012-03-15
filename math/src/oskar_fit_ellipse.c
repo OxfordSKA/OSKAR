@@ -170,16 +170,16 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     }
 
     /*
-        printf("\n");
-        for (j = 0; j < num_points; ++j)
+    printf("\n");
+    for (j = 0; j < num_points; ++j)
+    {
+        for (i = 0; i < 5; ++i)
         {
-            for (i = 0; i < 5; ++i)
-            {
-                printf("% -.4f ", ((double*)X.data)[j * 5 + i]);
-            }
-            printf("\n");
+            printf("% -.4f ", ((double*)X.data)[j * 5 + i]);
         }
-     */
+        printf("\n");
+    }
+    */
 
 
     /* TODO result = sum(X) / (X' * X) */
@@ -246,7 +246,11 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     if (type == OSKAR_DOUBLE)
     {
         dgetrf_(&m, &n, (double*)XX.data, &lda, (long*)ipiv.data, &info);
-        if (info != 0) return info;
+        if (info != 0)
+        {
+            fprintf(stderr, "ERROR: dgetrf_() failed. info = %i.\n", info);
+            return OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        }
 
         n = cols_X;
         ldb = MAX(1, n);
@@ -254,12 +258,20 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         trans = 'N';
         dgetrs_(&trans, &n, &nrhs, (double*)XX.data, &lda, (long*)ipiv.data,
                 (double*)sumX.data, &ldb, &info);
-        if (info != 0) return info;
+        if (info != 0)
+        {
+            fprintf(stderr, "ERROR: dgetrs_() failed. info = %i.\n", info);
+            return OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        }
     }
     else
     {
         sgetrf_(&m, &n, (float*)XX.data, &lda, (long*)ipiv.data, &info);
-        if (info != 0) return OSKAR_ERR_UNKNOWN;
+        if (info != 0)
+        {
+            fprintf(stderr, "- ERROR: dgetrs_() failed. info = %i.\n", info);
+            return OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        }
 
         n = cols_X;
         ldb = MAX(1, n);
@@ -267,7 +279,11 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         trans = 'N';
         sgetrs_(&trans, &n, &nrhs, (float*)XX.data, &lda, (long*)ipiv.data,
                 (float*)sumX.data, &ldb, &info);
-        if (info != 0) return OSKAR_ERR_UNKNOWN;
+        if (info != 0)
+        {
+            fprintf(stderr, "ERROR: dgetrs_() failed. info = %i.\n", info);
+            return OSKAR_ERR_ELLIPSE_FIT_FAILED;
+        }
     }
 #endif
 
@@ -318,7 +334,6 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     }
     else
     {
-        /* FIXME this branch might not be needed when using atan2() */
         if ((c1-a1) < 0)
             orientation_rad = 0.0;
         else
@@ -331,8 +346,9 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     test = a1 * c1;
     if (test <= 0.0 )
     {
-        printf("test: %f\n", test);
-        return OSKAR_ERR_UNKNOWN;
+        fprintf(stderr, "ERROR: oskar_fit_ellipse(): "
+                "Solution of conic equation does not represent an ellipse.\n");
+        return OSKAR_ERR_ELLIPSE_FIT_FAILED;
     }
     else
     {

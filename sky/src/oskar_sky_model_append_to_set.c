@@ -128,8 +128,13 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
             FWHM_major = (type == OSKAR_DOUBLE) ?
                     ((double*)sky->FWHM_major.data)[i] :
                     ((float*)sky->FWHM_major.data)[i];
+
             /* If any source in the model is extended set the use extended flag */
-            if (FWHM_minor > 0.0 || FWHM_major > 0.0)
+            /* NOTE: this assumes that we can't evaluate extended line sources
+             * This may not be true in future
+             * if oskar_evaluate_gaussian_source_parameters() is updated...
+             */
+            if (FWHM_minor > 0.0 && FWHM_major > 0.0)
             {
                 sky->use_extended = OSKAR_TRUE;
                 break;
