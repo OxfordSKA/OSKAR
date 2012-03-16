@@ -26,12 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_evaluate_gridding_kernels.h"
-#include "stdlib.h"
-#include "math.h"
-#include "float.h"
-#include "string.h" // for memset
-#include "stdio.h"
+#include "imaging/fft/oskar_evaluate_gridding_kernels.h"
+
+#include <stdlib.h>
+#include <math.h>
+#include <float.h>
+#include <string.h> /* for memset */
+#include <stdio.h>
+#include <limits.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -61,36 +63,46 @@ void oskar_initialise_kernel_d(const double radius, oskar_GridKernel_d* kernel)
     kernel->centre     = kernel->oversample / 2 * kernel->num_cells;
     kernel->xinc       = 1.0 / kernel->oversample;
     kernel->amp     = (double*) malloc(kernel->size * sizeof(double));
-//    printf("radius     = %f\n", kernel->radius);
-//    printf("num cells  = %i\n", kernel->num_cells);
-//    printf("oversample = %i\n", kernel->oversample);
-//    printf("size       = %i\n", kernel->size);
-//    printf("centre     = %i\n", kernel->centre);
-//    printf("num cells  = %i\n", kernel->num_cells);
-//    printf("xinc       = %f\n", kernel->xinc);
+
+    /*
+    printf("radius     = %f\n", kernel->radius);
+    printf("num cells  = %i\n", kernel->num_cells);
+    printf("oversample = %i\n", kernel->oversample);
+    printf("size       = %i\n", kernel->size);
+    printf("centre     = %i\n", kernel->centre);
+    printf("num cells  = %i\n", kernel->num_cells);
+    printf("xinc       = %f\n", kernel->xinc);
+    */
 }
 
 
 /*
  * Based on AIPS convolution function type 1 (HELP UV1TYPE)
  * PARAM(1) -> Support size in cell 0.0 --> 0.5;
- *
  */
 void oskar_evaluate_pillbox_d(oskar_GridKernel_d* kernel)
 {
     int i;
+    double x, absx;
+
     oskar_initialise_kernel_d(0.5, kernel);
 
     for (i = 0; i < (int)kernel->size; ++i)
     {
-        const double x    = (i - (int)kernel->centre) * kernel->xinc;
-        const double absx = fabs(x);
-        if (fabs(absx - kernel->radius) < DBL_EPSILON)
+        x    = (i - (int)kernel->centre) * kernel->xinc;
+        absx = fabs(x);
+        if ( fabs(absx - kernel->radius) < DBL_EPSILON )
+        {
             kernel->amp[i] = 0.5;
+        }
         else if (absx > kernel->radius)
+        {
             kernel->amp[i] = 0.0;
+        }
         else
+        {
             kernel->amp[i] = 1.0;
+        }
     }
 }
 
@@ -123,43 +135,53 @@ void oskar_evaluate_exp_sinc_d(oskar_GridKernel_d* kernel)
 
 void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
 {
-    int i;
-    // AIPS: HELP UV5TYPE
-    // param1 => Support size. 0.0 -> 3.0 cells.
-    // param2 => ALPHA. 0.0 -> 1.0.
-    // param3 => Scale factor for support size. 0.0 -> 1.0.
+    int i, index;
+    double param1;
+    int iAlpha, nmax, eta, value;
 
-    double param1 = 2.0; // related to support radius.
-    //double param2 = 0.0; // related to alpha (0.0 = recommended?)
+
+    /*
+     AIPS: HELP UV5TYPE
+     param1 => Support size. 0.0 -> 3.0 cells.
+     param2 => ALPHA. 0.0 -> 1.0.
+     param3 => Scale factor for support size. 0.0 -> 1.0.
+     */
+
+    param1 = 2.0; // related to support radius.
+    /*double param2 = 0.0; // related to alpha (0.0 = recommended?) */
 
     oskar_initialise_kernel_d(param1, kernel);
     memset(kernel->amp, 0, kernel->size * sizeof(double));
 
-    // todo: check these defaults!
-    int iAlpha = 1;
-    // alpha[iAlpha] = {0, 1/2, 1, 3/2, 2}
-    //int iAlpha = MAX(0, MIN(4, 2.0 * param2 + 1.1));
-    //int im = MAX(3, MIN(7, 2.0 * param1 + 0.1));
-    //int im = 5;
-//    printf("iAlpha = %i, im = %i\n", iAlpha, im);
+    /* todo: check these defaults! */
+    iAlpha = 1;
+    /* alpha[iAlpha] = {0, 1/2, 1, 3/2, 2}
+    int iAlpha = MAX(0, MIN(4, 2.0 * param2 + 1.1));
+    int im = MAX(3, MIN(7, 2.0 * param1 + 0.1));
+    int im = 5;
+    printf("iAlpha = %i, im = %i\n", iAlpha, im);
+    */
 
-    int nmax = kernel->radius / kernel->xinc + 0.1;
-    //int nmax = kernel->centre;
-//    printf("nmax = %i\n", nmax);
+    nmax = kernel->radius / kernel->xinc + 0.1;
+    /*int nmax = kernel->centre;
+    printf("nmax = %i\n", nmax);
+    */
 
-    // Evaluate function.
+    /* Evaluate function. */
     for (i = 0; i < nmax; ++i)
     {
-        const double eta = i / (double)(nmax - 1);
-        double value = 0.0;
+        eta = i / (double)(nmax - 1);
+        value = 0.0;
         spheroidal_d(iAlpha, 0, eta, &value);
-        const int index = kernel->centre + i;
+        index = kernel->centre + i;
         kernel->amp[index] = value;
     }
 
     // Fill in the other half.
     for (i = 0; i < (int)kernel->centre-1; ++i)
+    {
         kernel->amp[kernel->centre - i] = kernel->amp[kernel->centre + i];
+    }
 }
 
 
@@ -167,6 +189,9 @@ void oskar_evaluate_spheroidal_d(oskar_GridKernel_d* kernel)
 
 void spheroidal_d(int iAlpha, int iflag, double eta, double* value)
 {
+    double x, eta2;
+    int j;
+
     // Look-up table (taken from AIPS SPHFN.FOR)
     double p5[9][4] =
     {
@@ -200,21 +225,19 @@ void spheroidal_d(int iAlpha, int iflag, double eta, double* value)
         return;
     }
 
-    double eta2 = pow(eta, 2.0);
-    int j = iAlpha;
+    eta2 = pow(eta, 2.0);
+    j = iAlpha;
 
     *value = 0.0;
-    if (fabs(eta) == 1.0)
-        return;
+    if (fabs(eta) == 1.0) return;
 
-    double x = eta2 - 1.0;
+    x = eta2 - 1.0;
 
     *value = (p5[0][j] + x * (p5[1][j] + x * (p5[2][j] + x * (p5[3][j] +
             x * (p5[4][j] + x * (p5[5][j] + x * p5[6][j] ))))))
             / (1.0 + x * q5[j]);
 
-    if (iflag > 0 || iAlpha == 0 || eta == 0.0)
-        return;
+    if (iflag > 0 || iAlpha == 0 || eta == 0.0) return;
 
     *value *= pow(1.0 - eta2, alpha[iAlpha]);
 }

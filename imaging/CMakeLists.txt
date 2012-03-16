@@ -2,9 +2,14 @@
 # src/imaging/CMakeLists.txt
 #
 
+
+#add_subdirectory(fft)
+add_subdirectory(matlab)
+
+# FIXME: probably shouldn't have this include if we want to enforce
+# header paths.
 include_directories(${oskar-lib_SOURCE_DIR}/imaging)
 
-add_subdirectory(matlab)
 
 # Add the source files in this directory.
 set(imaging_SRC

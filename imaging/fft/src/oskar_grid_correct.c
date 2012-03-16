@@ -26,12 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_grid_correct.h"
+#include "imaging/fft/oskar_grid_correct.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <limits.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -52,59 +53,63 @@ extern "C" {
 void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
         const unsigned grid_size, double** correction)
 {
-	int i, j;
-    // === Kernel x grid coordinates.
-    double* kernel_x = (double*) malloc(kernel->size * sizeof(double));
+	int i, j, grid_centre;
+	double *kernel_x, *f_sinc, *c_sinc, *correction1d;
+	double grid_inc, f, x, absx, correction_max;
+
+
+    /* === Kernel x grid coordinates. */
+    kernel_x = (double*) malloc(kernel->size * sizeof(double));
     for (i = 0; i < kernel->size; ++i)
         kernel_x[i] = (i - kernel->centre) * kernel->xinc;
 
-    // === Sinc term sinc(pi * f * x) / (pi * f * x)
-    int grid_centre = grid_size / 2;
-    double grid_inc = 1.0 / grid_size;
-    double* f_sinc = (double*) malloc(grid_size * sizeof(double));
-    double f = kernel->xinc;
+    /* === Sinc term sinc(pi * f * x) / (pi * f * x) */
+    grid_centre = grid_size / 2;
+    grid_inc = 1.0 / grid_size;
+    f_sinc = (double*) malloc(grid_size * sizeof(double));
+    f = kernel->xinc;
     for (i = 0; i < (int)grid_size; ++i)
     {
-        double x    = (i - grid_centre) * grid_inc;
-        double absx = fabs(x);
+        x    = (i - grid_centre) * grid_inc;
+        absx = fabs(x);
         if (absx < DBL_EPSILON)
             f_sinc[i] = 1.0;
         else
             f_sinc[i] = sin(M_PI * f * absx) / (M_PI * f * absx);
     }
 
-    // === DFT of convolution function
-    double* c_sinc = (double*) malloc(grid_size * sizeof(double));
+    /* === DFT of convolution function */
+    c_sinc = (double*) malloc(grid_size * sizeof(double));
     memset(c_sinc, 0, grid_size * sizeof(double));
     for (j = 0; j < (int)grid_size; ++j)
     {
-        double x = (j - grid_centre) * grid_inc;
+        x = (j - grid_centre) * grid_inc;
         for (i = 0; i < kernel->size; ++i)
         {
             c_sinc[j] += kernel->amp[i] * cos(-2 * M_PI * x * kernel_x[i]);
         }
     }
 
-    // === Combine terms to form 1d correction function.
-    double* correction1d = (double*) malloc(grid_size * sizeof(double));
+    /* === Combine terms to form 1d correction function. */
+    correction1d = (double*) malloc(grid_size * sizeof(double));
     for (i = 0; i < (int)grid_size; ++i)
     {
         correction1d[i] = f_sinc[i] * c_sinc[i];
-        //correction1d[i] = f_sinc[i];
-        //correction1d[i] = c_sinc[i];
+        /* correction1d[i] = f_sinc[i]; */
+        /* correction1d[i] = c_sinc[i]; */
     }
 
-    // === Find the maximum of the correction function.
-    // Note: same as normalising to the centre?
-    double correction_max = -DBL_MAX;
+    /* === Find the maximum of the correction function. */
+    /* Note: same as normalising to the centre? */
+    correction_max = -DBL_MAX;
     for (i = 0; i < (int)grid_size; ++i)
         correction_max = MAX(correction_max, correction1d[i]);
 
-    // === Normalise to the maximum.
+    /* === Normalise to the maximum. */
     for (i = 0; i < (int)grid_size; ++i)
         correction1d[i] /= correction_max;
 
-    // === Convert to a 2D correction screen.
+    /* === Convert to a 2D correction screen. */
     *correction = (double*) malloc(grid_size * grid_size * sizeof(double));
     for (j = 0; j < (int)grid_size; ++j)
     {
@@ -114,7 +119,7 @@ void oskar_evaluate_grid_correction_d(oskar_GridKernel_d* kernel,
         }
     }
 
-    // == Clean up.
+    /* == Clean up. */
     free(kernel_x);
     free(f_sinc);
     free(c_sinc);

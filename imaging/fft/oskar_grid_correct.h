@@ -34,7 +34,7 @@
  */
 
 #include "oskar_global.h"
-#include "imaging/oskar_GridKernel.h"
+#include "imaging/fft/oskar_GridKernel.h"
 
 #ifdef __cplusplus
 extern "C" {

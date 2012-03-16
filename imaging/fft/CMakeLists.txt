@@ -1,9 +1,9 @@
 #
 # src/imaging/fft/CMakeLists.txt
 #
-set(BUILD_OSKAR_IMAGING OFF)
+set(BUILD_OSKAR_IMAGING ON)
 
-if (BUILD_OSKAR_IMAGING)
+if (FFTW3_FOUND AND BUILD_OSKAR_IMAGING)
 
     # ==== Create list of source files for the oskar-lib imaging module.
     set(imaging_SRC
@@ -34,4 +34,4 @@ if (BUILD_OSKAR_IMAGING)
     # ==== Recurse into test subdirectory.
     add_subdirectory(test)
 
-endif (BUILD_OSKAR_IMAGING)
+endif (FFTW3_FOUND AND BUILD_OSKAR_IMAGING)

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_gridding.h"
+#include "imaging/fft/oskar_gridding.h"
 
 #include "utility/oskar_vector_types.h"
 
@@ -37,23 +37,30 @@
 extern "C" {
 #endif
 
-// FIXME This needs fixing to use the new visibility structure.
+/* FIXME This needs fixing to use the new visibility structure. */
 
-void oskar_evaluate_offset(const double x, const double pixel_size,
-        const unsigned kernel_oversample, int* grid_idx, int* kernel_idx);
-double oskar_round_away_from_zero(const double x);
-double oskar_round_towards_zero(const double x);
+void oskar_evaluate_offset(double x, double pixel_size,
+        unsigned kernel_oversample, int* grid_idx, int* kernel_idx);
+double oskar_round_away_from_zero(double x);
+double oskar_round_towards_zero(double x);
 
-double oskar_grid_standard(const oskar_VisData_d* vis,
+
+
+double oskar_grid_standard(const oskar_Visibilities* vis,
         const oskar_GridKernel_d* kernel, oskar_VisGrid_d* grid)
 {
-    int i, iy, ix;
-    double grid_sum = 0.0;
+    /*int i, iy, ix;*/
+    double grid_sum;
+    /*int support, g_centre;*/
+    /*int ix_grid, iy_grid, ix_kernel, iy_kernel;*/
 
-    int support  = (kernel->num_cells - 1) / 2;
-    int g_centre = grid->size / 2.0; // fixme: Will only work for even grids, should use floor() ?
-    int ix_grid, iy_grid, ix_kernel, iy_kernel;
+    /*support  = (kernel->num_cells - 1) / 2;*/
+    /* fixme: Will only work for even grids, should use floor() ...? */
+    /*g_centre = grid->size / 2.0;*/
 
+    grid_sum = 0.0;
+
+    /*
     for (i = 0; i < vis->num_samples; ++i)
     {
         oskar_evaluate_offset(vis->u[i], grid->pixel_separation,
@@ -91,34 +98,37 @@ double oskar_grid_standard(const oskar_VisData_d* vis,
             }
         }
     }
+    */
 
     return grid_sum;
 }
 
 
-void oskar_evaluate_offset(const double x, const double pixel_size,
-        const unsigned kernel_oversample, int* grid_idx, int* kernel_idx)
+void oskar_evaluate_offset(double x, double pixel_size,
+        unsigned kernel_oversample, int* grid_idx, int* kernel_idx)
 {
-    // Scale input coordinate to grid space units.
-    const double x_scaled = x / pixel_size;
+    double x_scaled, grid_delta, kernel_delta;
 
-    // Evaluate the closest grid cell.
+    /* Scale input coordinate to grid space units. */
+    x_scaled = x / pixel_size;
+
+    /* Evaluate the closest grid cell. */
     *grid_idx = (int) oskar_round_towards_zero(x_scaled);
 
-    // Evaluate the index of the convolution kernel at the closest grid cell.
-    const double grid_delta = (*grid_idx - x_scaled);
-    const double kernel_delta = grid_delta * kernel_oversample;
+    /* Evaluate the index of the convolution kernel at the closest grid cell. */
+    grid_delta = (*grid_idx - x_scaled);
+    kernel_delta = grid_delta * kernel_oversample;
     *kernel_idx = (int) oskar_round_towards_zero(kernel_delta);
 }
 
 
-double oskar_round_away_from_zero(const double x)
+double oskar_round_away_from_zero(double x)
 {
     return (x > 0.0f) ? floor(x + 0.5) : ceil(x - 0.5);
 }
 
 
-double oskar_round_towards_zero(const double x)
+double oskar_round_towards_zero(double x)
 {
     return (x > 0.0f) ? ceil(x - 0.5) : floor(x + 0.5);
 }

@@ -30,7 +30,7 @@
 #ifndef OSKAR_EVALUATE_GRIDDING_KERNEL_H_
 #define OSKAR_EVALUATE_GRIDDING_KERNEL_H_
 
-#include "imaging/oskar_GridKernel.h"
+#include "imaging/fft/oskar_GridKernel.h"
 #include "oskar_global.h"
 
 #ifdef __cplusplus

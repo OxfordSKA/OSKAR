@@ -1,5 +1,5 @@
-#include "imaging/oskar_GridKernel.h"
-#include "imaging/oskar_evaluate_gridding_kernels.h"
+#include "imaging/fft/oskar_GridKernel.h"
+#include "imaging/fft/oskar_evaluate_gridding_kernels.h"
 
 #include "widgets/plotting/oskar_PlotWidget.h"
 

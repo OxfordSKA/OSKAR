@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_VisGrid.h"
+#include "imaging/fft/oskar_VisGrid.h"
 
 #include "stdlib.h"
 #include "string.h"

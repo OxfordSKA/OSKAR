@@ -26,17 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_fft_imager.h"
+#include "imaging/fft/oskar_fft_imager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_fft_imager(const oskar_VisData_d* vis, const double image_size,
-        const double cell_size, double* image)
+void oskar_fft_imager(const oskar_Visibilities* vis, double image_size,
+        double cell_size, double* image)
 {
-
-
 }
 
 #ifdef __cplusplus

@@ -35,26 +35,26 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
-#include "imaging/oskar_GridKernel.h"
-#include "imaging/oskar_VisGrid.h"
+#include "imaging/fft/oskar_GridKernel.h"
+#include "imaging/fft/oskar_VisGrid.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// FIXME This needs fixing to use the new visibility structure.
+/* FIXME This needs fixing to use the new visibility structure. */
 
 /**
  *
- * @param[in]     vis      Structure containing visibility data.
- * @param[in]     kernel   Structure containing gridding kernel.
- * @param[in/out] grid     Structure containing visibility grid.
+ * @param[in]     vis    Structure containing visibility data.
+ * @param[in]     kernel Structure containing gridding kernel.
+ * @param[in/out] grid   Structure containing visibility grid.
  *
- * @return grid sum        The total amplitude contribution of the convolution
- *                         kernel to the grid.
+ * @return grid sum      The total amplitude contribution of the convolution
+ *                       kernel to the grid.
  */
 OSKAR_EXPORT
-double oskar_grid_standard(const oskar_VisData_d* vis,
+double oskar_grid_standard(const oskar_Visibilities* vis,
         const oskar_GridKernel_d* kernel, oskar_VisGrid_d* grid);
 
 

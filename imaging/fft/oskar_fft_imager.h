@@ -33,7 +33,7 @@
  * @file oskar_fft_imager.h
  */
 
-#include "interferometry/oskar_VisData.h"
+#include "interferometry/oskar_Visibilities.h"
 #include "oskar_global.h"
 
 #ifdef __cplusplus
@@ -41,8 +41,8 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-void oskar_fft_imager(const oskar_VisData_d* vis, const double image_size,
-        const double cell_size, double* image);
+void oskar_fft_imager(const oskar_Visibilities* vis, double image_size,
+        double cell_size, double* image);
 
 #ifdef __cplusplus
 }
