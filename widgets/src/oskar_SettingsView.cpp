@@ -35,7 +35,7 @@ oskar_SettingsView::oskar_SettingsView(QWidget* parent)
 {
     connect(this, SIGNAL(expanded(const QModelIndex&)),
             this, SLOT(resizeAfterExpand(const QModelIndex&)));
-    setAlternatingRowColors(true);
+    setAlternatingRowColors(false);
     setUniformRowHeights(true);
 }
 
