@@ -139,6 +139,9 @@ enum {
     /* Indicates the fitting elliptical source failed */
     OSKAR_ERR_ELLIPSE_FIT_FAILED     = -23,
 
+    /* Indicates an invalid range selection */
+    OSKAR_ERR_INVALID_RANGE          = -24,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                = -1000
 };

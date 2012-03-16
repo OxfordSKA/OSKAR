@@ -29,6 +29,8 @@
 #ifndef OSKAR_SETTINGS_IMAGE_H_
 #define OSKAR_SETTINGS_IMAGE_H_
 
+#include "imaging/oskar_Image.h"
+
 /**
  * @struct oskar_SettingsImage
  *
@@ -41,8 +43,22 @@ struct oskar_SettingsImage
 {
     double fov_deg;
     int size;
-    char* filename;
+
+    int channel_snapshots; /* bool, false = frequency synthesis */
+    int channel_range[2];  /* channel range (e.g. 1-1 = 1 channel,
+                            * 1-2 = 2 channels)*/
+
+    int time_snapshots;    /* bool, false = time synthesis */
+    int time_range[2];     /* time range */
+
+    int polarisation;      /* enum (value from OSKAR_IMAGE_TYPE_XXX )*/
+
+    int dft;               /* bool, true = DFT, false =  FFT */
+
+    char* filename;        /* OSKAR binary file name */
+    char* fits_file;       /* FITS file name */
 };
 typedef struct oskar_SettingsImage oskar_SettingsImage;
+
 
 #endif /* OSKAR_SETTINGS_IMAGE_H_ */

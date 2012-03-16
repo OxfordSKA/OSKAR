@@ -87,6 +87,10 @@ const char* oskar_get_error_string(int error)
             return "data tag not found";
         case OSKAR_ERR_FUNCTION_NOT_AVAILABLE:
             return "specified functionality not available";
+        case OSKAR_ERR_ELLIPSE_FIT_FAILED:
+            return "unable to fit ellipse";
+        case OSKAR_ERR_INVALID_RANGE:
+            return "invalid data range";
         default:
             break;
     };

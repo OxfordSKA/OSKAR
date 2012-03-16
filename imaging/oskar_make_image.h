@@ -26,48 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_set_up_visibilities.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_mem_copy.h"
 
-#include <cstdio>
-#include <cstdlib>
-#include <cmath>
+#ifndef OSKAR_MAKE_IMAGE_H_
+#define OSKAR_MAKE_IMAGE_H_
 
-extern "C"
-oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings* settings,
-        const oskar_TelescopeModel* tel_cpu, int type)
-{
-    int error;
+/**
+ * @file oskar_make_image.h
+ */
 
-    // Check the type.
-    if (!oskar_mem_is_complex(type))
-        return NULL;
+#include "oskar_global.h"
+#include "imaging/oskar_Image.h"
+#include "imaging/oskar_SettingsImage.h"
+#include "interferometry/oskar_Visibilities.h"
 
-    // Create the global visibility structure on the CPU.
-    const oskar_SettingsTime* times = &settings->obs.time;
-    int n_stations = tel_cpu->num_stations;
-    int n_channels = settings->obs.num_channels;
-    oskar_Visibilities* vis = new oskar_Visibilities(type, OSKAR_LOCATION_CPU,
-            n_channels, times->num_vis_dumps, n_stations * (n_stations - 1) /2);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Add meta-data.
-    vis->freq_start_hz = settings->obs.start_frequency_hz;
-    vis->freq_inc_hz = settings->obs.frequency_inc_hz;
-    vis->time_start_mjd_utc = times->obs_start_mjd_utc;
-    vis->time_inc_seconds = times->dt_dump_days * 86400.0;
-    vis->channel_bandwidth_hz = settings->obs.start_frequency_hz;
-    vis->phase_centre_ra_deg = settings->obs.ra0_rad * 180.0 / M_PI;
-    vis->phase_centre_dec_deg = settings->obs.dec0_rad * 180.0 / M_PI;
+OSKAR_EXPORT
+int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
+        const oskar_SettingsImage* settings);
 
-    // Add settings file path.
-    error = oskar_mem_copy(&vis->settings_path, &settings->settings_path);
-    if (error)
-    {
-        delete vis;
-        return NULL;
-    }
-
-    // Return the structure.
-    return vis;
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_MAKE_IMAGE_H_ */

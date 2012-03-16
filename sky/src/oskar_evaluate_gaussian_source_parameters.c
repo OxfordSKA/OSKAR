@@ -134,7 +134,6 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
 
     if (type == OSKAR_DOUBLE)
     {
-        printf("\n");
         for (i = 0; i < num_sources; ++i)
         {
             /* Source parameters */
@@ -177,9 +176,6 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
             }
             else if (err) return err;
 
-            printf("**** source [%i] %f %f %f\n", i,
-                    maj*180.0/M_PI, min*180.0/M_PI, pa*180.0/M_PI);
-
             /* Evaluate ellipse parameters */
             inv_std_maj_2 = (maj * maj) * M_PI_2_2_LN_2;
             inv_std_min_2 = (min * min) * M_PI_2_2_LN_2;
@@ -196,7 +192,61 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
     }
     else
     {
-        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        for (i = 0; i < num_sources; ++i)
+         {
+             /* Source parameters */
+             ra  = ((float*)RA->data)[i];
+             dec = ((float*)Dec->data)[i];
+             maj = ((float*)FWHM_major->data)[i];
+             min = ((float*)FWHM_minor->data)[i];
+             pa  = ((float*)position_angle->data)[i];
+
+             /* NOTE could maybe do something different from the projection below
+              * in the case of a line (ie maj or min == 0) as in this case
+              * there is no ellipse to project only two points....
+              * -- This continue could then be a if() .. else() instead.
+              */
+             if (maj == 0.0 && min == 0.0) continue;
+
+             /* Evaluate shape of ellipse on the lm plane */
+             ellipse_a = maj/2.0;
+             ellipse_b = min/2.0;
+             for (j = 0; j < ellipse_num_points; ++j)
+             {
+                 float t = (float)j * 60.0 * M_PI/180.0;
+                 ((float*)l.data)[j] = ellipse_a*cosf(t)*sinf(pa) + ellipse_b*sinf(t)*cosf(pa);
+                 ((float*)m.data)[j] = ellipse_a*cosf(t)*cosf(pa) - ellipse_b*sinf(t)*sinf(pa);
+             }
+             oskar_sph_from_lm_f(ellipse_num_points, 0.0, 0.0,
+                     (float*)l.data, (float*)m.data,
+                     (float*)lon.data, (float*)lat.data);
+             err = oskar_sph_rotate_points(ellipse_num_points, &lon, &lat, ra, dec);
+             if (err) return err;
+             oskar_sph_to_lm_f(ellipse_num_points, ra0, dec0,
+                     (float*)lon.data, (float*)lat.data,
+                     (float*)l.data, (float*)m.data);
+             err = oskar_fit_ellipse(&maj, &min, &pa,
+                     ellipse_num_points, &l, &m);
+             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
+             {
+                 printf("- WARNING: Gaussian ellipse solution failed for source %i\n", i);
+                 continue;
+             }
+             else if (err) return err;
+
+             /* Evaluate ellipse parameters */
+             inv_std_maj_2 = (maj * maj) * M_PI_2_2_LN_2;
+             inv_std_min_2 = (min * min) * M_PI_2_2_LN_2;
+             cos_pa_2 = cosf(pa) * cosf(pa);
+             sin_pa_2 = sinf(pa) * sinf(pa);
+             sin_2pa  = sinf(2.0 * pa);
+             a =  (cos_pa_2*inv_std_min_2)/2.0 + (sin_pa_2*inv_std_maj_2)/2.0;
+             b = -(sin_2pa *inv_std_min_2)/4.0 + (sin_2pa *inv_std_maj_2)/4.0;
+             c =  (sin_pa_2*inv_std_min_2)/2.0 + (cos_pa_2*inv_std_maj_2)/2.0;
+             ((float*)gaussian_a->data)[i] = a;
+             ((float*)gaussian_b->data)[i] = b;
+             ((float*)gaussian_c->data)[i] = c;
+         }
     }
 
     /* clean up */
