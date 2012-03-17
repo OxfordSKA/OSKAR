@@ -26,49 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_COPY_H_
-#define OSKAR_MEM_COPY_H_
-
-/**
- * @file oskar_mem_copy.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_assign.h"
+#include "utility/oskar_mem_get_pointer.h"
+#include "utility/oskar_mem_insert.h"
+#include "utility/oskar_mem_realloc.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Copies a block of memory to another block of memory.
- *
- * @details
- * This function copies data held in one structure to another structure.
- * Both data structures must be of the same data type.
- *
- * If the copy is not taking ownership of the memory then only the pointer
- * and the meta-data are copied.
- * FIXME behaviour of non owned copy ... replaced by oskar_mem_assign() ?
- *
- * If there is not enough memory in the destination structure, then it is
- * automatically resized to hold the required number of elements.
- *
- * @param[out] dst Pointer to destination data structure to copy into.
- * @param[in]  src Pointer to source data structure to copy from.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
- */
-OSKAR_EXPORT
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);
+int oskar_mem_assign(oskar_Mem* dst, const oskar_Mem* src)
+{
+    /* Sanity check on inputs. */
+    if (src == NULL || dst == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check the data types. */
+    if (src->type != dst->type)
+        return OSKAR_ERR_TYPE_MISMATCH;
+
+    /* If the destination memory is owned assignment is not possible */
+    if (dst->owner == OSKAR_TRUE)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    dst->data         = src->data;
+    dst->num_elements = src->num_elements;
+    dst->location     = src->location;
+    dst->type         = src->type;
+
+    return OSKAR_SUCCESS;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_MEM_COPY_H_ */

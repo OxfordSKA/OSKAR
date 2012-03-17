@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MEM_COPY_H_
-#define OSKAR_MEM_COPY_H_
+#ifndef OSKAR_MEM_ASSIGN_H_
+#define OSKAR_MEM_ASSIGN_H_
 
 /**
- * @file oskar_mem_copy.h
+ * @file oskar_mem_assign.h
  */
 
 #include "oskar_global.h"
@@ -42,33 +42,20 @@ extern "C" {
 
 /**
  * @brief
- * Copies a block of memory to another block of memory.
+ * Pointer assignment of one oskar_Mem pointer to another.
  *
  * @details
- * This function copies data held in one structure to another structure.
- * Both data structures must be of the same data type.
  *
- * If the copy is not taking ownership of the memory then only the pointer
- * and the meta-data are copied.
- * FIXME behaviour of non owned copy ... replaced by oskar_mem_assign() ?
+ * @param[out] dst Pointer to assign to.
+ * @param[in]  src Pointer to assign from.
  *
- * If there is not enough memory in the destination structure, then it is
- * automatically resized to hold the required number of elements.
- *
- * @param[out] dst Pointer to destination data structure to copy into.
- * @param[in]  src Pointer to source data structure to copy from.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);
+int oskar_mem_assign(oskar_Mem* dst, const oskar_Mem* src);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_MEM_COPY_H_ */
+#endif /* OSKAR_MEM_ASSIGN_H_ */

@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <mex.h>
 #include <cuda_runtime_api.h>
 #include <vector_functions.h>

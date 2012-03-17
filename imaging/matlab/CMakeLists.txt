@@ -9,7 +9,7 @@ if (MATLAB_FOUND)
     
     include_directories(${CUDA_INCLUDE_DIRS})
     
-    oskar_mex(oskar_make_image oskar_make_image.cpp)
+    oskar_mex(oskar_make_image oskar_mex_make_image.cpp)
     
     # Copy *.m files from current directory to destination.
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
