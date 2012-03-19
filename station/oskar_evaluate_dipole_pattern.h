@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_JONES_MUL_MAT2_H_
-#define OSKAR_CUDA_JONES_MUL_MAT2_H_
+#ifndef OSKAR_EVALUATE_DIPOLE_PATTERN_H_
+#define OSKAR_EVALUATE_DIPOLE_PATTERN_H_
 
 /**
- * @file oskar_cuda_jones_mul_mat2.h
+ * @file oskar_evaluate_dipole_pattern.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,44 +42,46 @@ extern "C" {
 
 /**
  * @brief
- * Function to multiply together two Jones matrices (single precision).
+ * Evaluates patterns of two perfect dipoles at source positions for given
+ * orientations.
  *
  * @details
- * This function multiplies together two complex Jones matrices to give a new
- * Jones matrix.
+ * This function evaluates the patterns of two perfect dipole antennas
+ * at the supplied source positions.
  *
- * The matrix multiplication is done in the order M = (J1 * J2).
+ * The dipole orientation angles specify the dipole axis as the angle
+ * East (x) from North (y).
  *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of first input Jones matrices.
- * @param[in] d_j2 Array of second input Jones matrices.
- * @param[out] d_m Array of output Jones matrices.
+ * The output matrix is
+ *
+ * ( g_phi^a   g_theta^a )
+ * ( g_phi^b   g_theta^b )
+ *
+ * where phi and theta are the angles measured from x to y and from xy to z,
+ * respectively.
+ *
+ * The 'a' dipole is nominally along the x axis, and
+ * the 'b' dipole is nominally along the y axis.
+ * The azimuth orientation of 'a' should normally be 90 degrees, and
+ * the azimuth orientation of 'b' should normally be 0 degrees.
+ *
+ * @param[out] pattern           Array of output Jones matrices per source.
+ * @param[in] l                  Source direction cosines in x.
+ * @param[in] m                  Source direction cosines in y.
+ * @param[in] n                  Source direction cosines in z.
+ * @param[in] cos_orientation_x  The cosine of the azimuth angle of nominal x dipole.
+ * @param[in] sin_orientation_x  The sine of the azimuth angle of nominal x dipole.
+ * @param[in] cos_orientation_y  The cosine of the azimuth angle of nominal y dipole.
+ * @param[in] sin_orientation_y  The sine of the azimuth angle of nominal y dipole.
  */
 OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat2_f(int n, const float4c* d_j1,
-        const float4c* d_j2, float4c* d_m);
-
-/**
- * @brief
- * Function to multiply together two Jones matrices (double precision).
- *
- * @details
- * This function multiplies together two complex Jones matrices to give a new
- * Jones matrix.
- *
- * The matrix multiplication is done in the order M = (J1 * J2).
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of first input Jones matrices.
- * @param[in] d_j2 Array of second input Jones matrices.
- * @param[out] d_m Array of output Jones matrices.
- */
-OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat2_d(int n, const double4c* d_j1,
-        const double4c* d_j2, double4c* d_m);
+int oskar_evaluate_dipole_pattern(oskar_Mem* pattern, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, double cos_orientation_x,
+        double sin_orientation_x, double cos_orientation_y,
+        double sin_orientation_y);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CUDA_JONES_MUL_MAT2_H_ */
+#endif /* OSKAR_EVALUATE_DIPOLE_PATTERN_H_ */

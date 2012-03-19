@@ -26,28 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_jones_set_real_scalar_1.h"
+#include "utility/oskar_work_free.h"
+#include "utility/oskar_mem_free.h"
+#include <stdlib.h>
 
-// Single precision.
-__global__
-void oskar_cudak_jones_set_real_scalar_1_f(int n, float2* s, float scalar)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int oskar_work_free(oskar_Work* work)
 {
-    // Get the array index ID that this thread is working on.
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    int error = 0;
 
-    // Set the value.
-    s[i] = make_float2(scalar, 0.0f);
+    if (work == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    error = oskar_mem_free(&work->integer);
+    if (error) return error;
+    error = oskar_mem_free(&work->real);
+    if (error) return error;
+    error = oskar_mem_free(&work->complex);
+    if (error) return error;
+    error = oskar_mem_free(&work->matrix);
+    if (error) return error;
+
+    work->used_integer = 0;
+    work->used_real = 0;
+    work->used_complex = 0;
+    work->used_matrix = 0;
+
+    return error;
 }
 
-// Double precision.
-__global__
-void oskar_cudak_jones_set_real_scalar_1_d(int n, double2* s, double scalar)
-{
-    // Get the array index ID that this thread is working on.
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
-
-    // Set the value.
-    s[i] = make_double2(scalar, 0.0);
+#ifdef __cplusplus
 }
+#endif

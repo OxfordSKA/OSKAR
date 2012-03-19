@@ -30,6 +30,7 @@
 #include "station/oskar_element_model_free.h"
 #include "utility/oskar_mem_free.h"
 #include <stdlib.h>
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,6 +67,14 @@ int oskar_station_model_free(oskar_StationModel* model)
     if (error) return error;
     error = oskar_mem_free(&model->phase_error);
     if (error) return error;
+    error = oskar_mem_free(&model->cos_orientation_x);
+    if (error) return error;
+    error = oskar_mem_free(&model->sin_orientation_x);
+    if (error) return error;
+    error = oskar_mem_free(&model->cos_orientation_y);
+    if (error) return error;
+    error = oskar_mem_free(&model->sin_orientation_y);
+    if (error) return error;
 
     /* Free the receiver noise data. */
     error = oskar_mem_free(&model->total_receiver_noise);
@@ -94,17 +103,31 @@ int oskar_station_model_free(oskar_StationModel* model)
         model->child = NULL;
     }
 
-    /* Clear remaining parameters. */
+    /* Initialise variables. */
+    model->station_type = OSKAR_STATION_TYPE_AA;
     model->num_elements = 0;
+    model->element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
+    model->array_is_3d = OSKAR_FALSE;
+    model->coord_units = OSKAR_METRES;
+    model->apply_element_errors = OSKAR_FALSE;
+    model->apply_element_weight = OSKAR_FALSE;
+    model->single_element_model = OSKAR_TRUE;
+    model->orientation_x = M_PI / 2.0;
+    model->orientation_y = 0.0;
+
+    model->child = NULL;
     model->parent = NULL;
+    model->element_pattern = NULL;
+
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;
     model->altitude_metres = 0.0;
     model->ra0_rad = 0.0;
     model->dec0_rad = 0.0;
-    model->single_element_model = 0;
+    model->normalise_beam = OSKAR_FALSE;
+    model->evaluate_array_factor = OSKAR_TRUE;
+    model->evaluate_element_factor = OSKAR_TRUE;
     model->bit_depth = 0;
-    model->array_is_3d = 0;
 
     return 0;
 }

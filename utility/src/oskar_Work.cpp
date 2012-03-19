@@ -26,32 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utility/oskar_Work.h"
+#include "utility/oskar_work_free.h"
 #include "utility/oskar_work_init.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 oskar_Work::oskar_Work(int type, int location)
 {
-    int error = oskar_work_init(this, type, location);
-    if (error) throw "Error in oskar_work_init";
+    if (oskar_work_init(this, type, location))
+        throw "Error in oskar_work_init.";
 }
 
 oskar_Work::oskar_Work(const oskar_Work* other, int location, int owner)
 : integer(&other->integer, location, owner),
   real(&other->real, location, owner),
   complex(&other->complex, location, owner),
-  matrix(&other->matrix, location, owner)
+  matrix(&other->matrix, location, owner),
+  used_integer(other->used_integer),
+  used_real(other->used_real),
+  used_complex(other->used_complex),
+  used_matrix(other->used_matrix)
 {
 }
 
 oskar_Work::~oskar_Work()
 {
+    if (oskar_work_free(this))
+        throw "Error in oskar_work_free.";
 }
-
-#ifdef __cplusplus
-}
-#endif

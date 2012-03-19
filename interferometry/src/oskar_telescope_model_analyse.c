@@ -96,7 +96,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
                 }
                 if (weights[j].x != 1.0 || weights[j].y != 0.0)
                 {
-                    s->apply_weight = 1;
+                    s->apply_element_weight = 1;
                 }
             }
         }
@@ -124,7 +124,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
                 }
                 if (weights[j].x != 1.0f || weights[j].y != 0.0)
                 {
-                    s->apply_weight = 1;
+                    s->apply_element_weight = 1;
                 }
             }
         }

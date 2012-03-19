@@ -66,24 +66,39 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     if (error) return error;
     error = oskar_mem_copy(&dst->phase_error, &src->phase_error);
     if (error) return error;
+    error = oskar_mem_copy(&dst->cos_orientation_x, &src->cos_orientation_x);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->sin_orientation_x, &src->sin_orientation_x);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->cos_orientation_y, &src->cos_orientation_y);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->sin_orientation_y, &src->sin_orientation_y);
+    if (error) return error;
 
     /* Copy the meta data. */
+    dst->station_type = src->station_type;
     dst->num_elements = src->num_elements;
+    dst->element_type = src->element_type;
+    dst->array_is_3d = src->array_is_3d;
+    dst->coord_units = src->coord_units;
+    dst->apply_element_errors = src->apply_element_errors;
+    dst->apply_element_weight = src->apply_element_weight;
+    dst->single_element_model = src->single_element_model;
+    dst->orientation_x = src->orientation_x;
+    dst->orientation_y = src->orientation_y;
+
+    /* TODO Work out how to deal with child stations. */
+    /* TODO Work out how to deal with element pattern data. */
+
     dst->longitude_rad = src->longitude_rad;
     dst->latitude_rad = src->latitude_rad;
     dst->altitude_metres = src->altitude_metres;
     dst->ra0_rad = src->ra0_rad;
     dst->dec0_rad = src->dec0_rad;
-    dst->single_element_model = src->single_element_model;
-    dst->bit_depth = src->bit_depth;
-    dst->coord_units = src->coord_units;
-    dst->apply_element_errors = src->apply_element_errors;
-    dst->apply_weight = src->apply_weight;
     dst->normalise_beam = src->normalise_beam;
-    dst->array_is_3d = src->array_is_3d;
-
-    /* TODO Work out how to deal with child stations. */
-    /* TODO Work out how to deal with element pattern data. */
+    dst->evaluate_array_factor = src->evaluate_array_factor;
+    dst->evaluate_element_factor = src->evaluate_element_factor;
+    dst->bit_depth = src->bit_depth;
 
     return 0;
 }

@@ -43,6 +43,10 @@ struct oskar_Work
     oskar_Mem real;
     oskar_Mem complex;
     oskar_Mem matrix;
+    int used_integer; /**< Counter to report how much of the integer array is in use. */
+    int used_real;    /**< Counter to report how much of the real array is in use. */
+    int used_complex; /**< Counter to report how much of the complex array is in use. */
+    int used_matrix;  /**< Counter to report how much of the matrix array is in use. */
 
 #ifdef __cplusplus
     /**

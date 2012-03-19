@@ -46,7 +46,7 @@ oskar_Jones::oskar_Jones(int type, int location, int num_stations,
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
 {
     if (oskar_jones_init(this, other->type(), location,
-            other->num_stations(), other->num_sources()))
+            other->num_stations, other->num_sources))
         throw "Error in oskar_jones_init.";
     if (oskar_jones_copy(this, other))
         throw "Error in oskar_jones_copy.";

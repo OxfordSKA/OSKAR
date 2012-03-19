@@ -35,6 +35,7 @@
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_Work.h"
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
@@ -94,6 +95,9 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_cpu.ra0_rad  = 0.0;
     station_cpu.dec0_rad = M_PI_2;
 
+    // Set the station meta-data.
+    station_cpu.element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
+
 //    error = oskar_station_model_write_coords("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
@@ -135,7 +139,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_gpu.apply_element_errors = OSKAR_FALSE;
 
     // Allocate weights work array.
-    oskar_Mem weights_gpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU);
+    oskar_Work work(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
 
     // Declare memory for the beam pattern.
     oskar_Mem beam_pattern(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_pixels);
@@ -143,13 +147,14 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_gpu.array_is_3d = 0;
     TIMER_START
     error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, &l_gpu, &m_gpu, &n_gpu, &weights_gpu,
+            beam_m, beam_n, &l_gpu, &m_gpu, &n_gpu, &work,
             &curand_state);
     TIMER_STOP("Finished station beam (2D)");
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     station_gpu.array_is_3d = 1;
     TIMER_START
     error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, &l_gpu, &m_gpu, &n_gpu, &weights_gpu,
+            beam_m, beam_n, &l_gpu, &m_gpu, &n_gpu, &work,
             &curand_state);
     TIMER_STOP("Finished station beam (3D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);

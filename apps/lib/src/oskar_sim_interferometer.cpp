@@ -51,7 +51,6 @@
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_add.h"
 
-#include <QtCore/QByteArray>
 #include <QtCore/QTime>
 
 #include <cstdio>

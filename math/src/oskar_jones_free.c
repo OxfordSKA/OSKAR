@@ -36,11 +36,11 @@ extern "C" {
 int oskar_jones_free(oskar_Jones* jones)
 {
     int err = 0;
-    jones->private_num_stations = 0;
-    jones->private_num_sources = 0;
-    jones->private_cap_stations = 0;
-    jones->private_cap_sources = 0;
-    err = oskar_mem_free(&jones->ptr);
+    jones->num_stations = 0;
+    jones->num_sources = 0;
+    jones->cap_stations = 0;
+    jones->cap_sources = 0;
+    err = oskar_mem_free(&jones->data);
     return err;
 }
 

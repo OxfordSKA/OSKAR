@@ -42,7 +42,6 @@
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_Work.h"
-#include <cstdio>
 
 #ifdef __cplusplus
 extern "C"
@@ -76,9 +75,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         if (error) return error;
     }
 
-
     // Get pointers to work arrays.
-    oskar_Mem* weights = &work->complex;
     double beam_l, beam_m, beam_n;
     oskar_Mem hor_l, hor_m, hor_n;
     error = oskar_mem_get_pointer(&hor_l, &work->real, 0, sky->num_sources);
@@ -89,7 +86,6 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
     error = oskar_mem_get_pointer(&hor_n, &work->real, 2 * sky->num_sources,
             sky->num_sources);
     if (error) return error;
-
 
     // Evaluate the station beam for each station for each source position.
     if (telescope->identical_stations && telescope->use_common_sky)
@@ -113,12 +109,12 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         error = oskar_jones_get_station_pointer(&E0, E, 0);
         if (error) return error;
         error = oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m,
-                beam_n, &hor_l, &hor_m, &hor_n, weights, curand_state);
+                beam_n, &hor_l, &hor_m, &hor_n, work, curand_state);
         if (error) return error;
 
         // Copy E for station 0 into memory for other stations.
         oskar_Mem E_station;
-        size_t mem_size = E->num_sources() * oskar_mem_element_size(E->type());
+        size_t mem_size = E->num_sources * oskar_mem_element_size(E->type());
         for (int i = 1; i < telescope->num_stations; ++i)
         {
             error = oskar_jones_get_station_pointer(&E_station, E, i);
@@ -149,7 +145,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station,
                         beam_l, beam_m, beam_n, &hor_l, &hor_m, &hor_n,
-                        weights, curand_state);
+                        work, curand_state);
                 if (error) return error;
             }
         }
@@ -171,7 +167,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station,
                         beam_l, beam_m, beam_n, &hor_l, &hor_m,  &hor_n,
-                        weights, curand_state);
+                        work, curand_state);
                 if (error) return error;
             }
         }

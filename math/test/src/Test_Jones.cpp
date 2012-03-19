@@ -541,7 +541,7 @@ void Test_Jones::test_set_ones_device()
         oskar_Jones* t = new oskar_Jones(j1, 0);
 
         // Check result.
-        float4c* ptr = (float4c*)t->ptr.data;
+        float4c* ptr = (float4c*)t->data.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].a.x, 1e-5);
@@ -574,7 +574,7 @@ void Test_Jones::test_set_ones_device()
         oskar_Jones* t = new oskar_Jones(j1, 0);
 
         // Check result.
-        double4c* ptr = (double4c*)t->ptr.data;
+        double4c* ptr = (double4c*)t->data.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].a.x, 1e-12);
@@ -613,7 +613,7 @@ void Test_Jones::test_set_ones_host()
         fail_on_error ( j1->set_real_scalar(1.0) );
 
         // Check result.
-        float4c* ptr = (float4c*)j1->ptr.data;
+        float4c* ptr = (float4c*)j1->data.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0f, ptr[i].a.x, 1e-5);
@@ -642,7 +642,7 @@ void Test_Jones::test_set_ones_host()
         fail_on_error ( j1->set_real_scalar(1.0) );
 
         // Check result.
-        double4c* ptr = (double4c*)j1->ptr.data;
+        double4c* ptr = (double4c*)j1->data.data;
         for (int i = 0; i < n; ++i)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, ptr[i].a.x, 1e-12);
@@ -937,25 +937,25 @@ oskar_Jones* Test_Jones::construct_jones_host(int type,
     int n = n_src * n_stat;
     if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        float4c* ptr = (float4c*)m->ptr.data;
+        float4c* ptr = (float4c*)m->data.data;
         for (int i = 0; i < n; ++i)
             construct_float4c_input(i + offset, ptr[i]);
     }
     else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        double4c* ptr = (double4c*)m->ptr.data;
+        double4c* ptr = (double4c*)m->data.data;
         for (int i = 0; i < n; ++i)
             construct_double4c_input(i + offset, ptr[i]);
     }
     else if (type == OSKAR_SINGLE_COMPLEX)
     {
-        float2* ptr = (float2*)m->ptr.data;
+        float2* ptr = (float2*)m->data.data;
         for (int i = 0; i < n; ++i)
             construct_float2_input(i + offset, ptr[i]);
     }
     else if (type == OSKAR_DOUBLE_COMPLEX)
     {
-        double2* ptr = (double2*)m->ptr.data;
+        double2* ptr = (double2*)m->data.data;
         for (int i = 0; i < n; ++i)
             construct_double2_input(i + offset, ptr[i]);
     }
@@ -996,10 +996,10 @@ void Test_Jones::check_matrix_matrix(const oskar_Jones* jones,
             new oskar_Jones(jones, 0) : jones;
 
     // Check the contents of the host buffer.
-    int n = jones->num_sources() * jones->num_stations();
+    int n = jones->num_sources * jones->num_stations;
     if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        float4c* ptr = (float4c*)temp->ptr.data;
+        float4c* ptr = (float4c*)temp->data.data;
         float4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -1020,7 +1020,7 @@ void Test_Jones::check_matrix_matrix(const oskar_Jones* jones,
     }
     else if (jones->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        double4c* ptr = (double4c*)temp->ptr.data;
+        double4c* ptr = (double4c*)temp->data.data;
         double4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -1053,10 +1053,10 @@ void Test_Jones::check_matrix_scalar(const oskar_Jones* jones,
             new oskar_Jones(jones, 0) : jones;
 
     // Check the contents of the host buffer.
-    int n = jones->num_sources() * jones->num_stations();
+    int n = jones->num_sources * jones->num_stations;
     if (jones->type() == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        float4c* ptr = (float4c*)temp->ptr.data;
+        float4c* ptr = (float4c*)temp->data.data;
         float4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -1074,7 +1074,7 @@ void Test_Jones::check_matrix_scalar(const oskar_Jones* jones,
     }
     else if (jones->type() == OSKAR_DOUBLE_COMPLEX_MATRIX)
     {
-        double4c* ptr = (double4c*)temp->ptr.data;
+        double4c* ptr = (double4c*)temp->data.data;
         double4c t;
         for (int i = 0; i < n; ++i)
         {
@@ -1107,10 +1107,10 @@ void Test_Jones::check_scalar_scalar(const oskar_Jones* jones,
             new oskar_Jones(jones, 0) : jones;
 
     // Check the contents of the host buffer.
-    int n = jones->num_sources() * jones->num_stations();
+    int n = jones->num_sources * jones->num_stations;
     if (jones->type() == OSKAR_SINGLE_COMPLEX)
     {
-        float2* ptr = (float2*)temp->ptr.data;
+        float2* ptr = (float2*)temp->data.data;
         float2 t;
         for (int i = 0; i < n; ++i)
         {
@@ -1122,7 +1122,7 @@ void Test_Jones::check_scalar_scalar(const oskar_Jones* jones,
     }
     else if (jones->type() == OSKAR_DOUBLE_COMPLEX)
     {
-        double2* ptr = (double2*)temp->ptr.data;
+        double2* ptr = (double2*)temp->data.data;
         double2 t;
         for (int i = 0; i < n; ++i)
         {

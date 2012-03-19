@@ -90,6 +90,9 @@ void Test_evaluate_jones_E::evaluate_e()
     station_cpu.ra0_rad  = 0.0;
     station_cpu.dec0_rad = M_PI_2;
 
+    // Set the station meta-data.
+    station_cpu.element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
+
     int num_stations = 2;
     oskar_TelescopeModel telescope_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU, num_stations);
     for (int i = 0; i < num_stations; ++i)

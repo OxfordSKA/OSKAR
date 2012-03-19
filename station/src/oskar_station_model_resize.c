@@ -63,6 +63,14 @@ int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
     if (error) return error;
     error = oskar_mem_realloc(&station->phase_error, n_elements);
     if (error) return error;
+    error = oskar_mem_realloc(&station->cos_orientation_x, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->sin_orientation_x, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->cos_orientation_y, n_elements);
+    if (error) return error;
+    error = oskar_mem_realloc(&station->sin_orientation_y, n_elements);
+    if (error) return error;
 
     return error;
 }

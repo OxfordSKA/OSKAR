@@ -30,6 +30,7 @@
 #include "station/oskar_station_model_resize.h"
 #include "station/oskar_station_model_set_element_coords.h"
 #include "station/oskar_station_model_set_element_errors.h"
+#include "station/oskar_station_model_set_element_orientation.h"
 #include "station/oskar_station_model_set_element_weight.h"
 #include "station/oskar_station_model_type.h"
 #include "utility/oskar_getline.h"
@@ -68,8 +69,10 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
     {
         /* Declare parameter array. */
         /* x, y, z, delta_x, delta_y, delta_z, amp_gain, amp_error,
-         * phase_offset, phase_error, weight_re, weight_im */
-        double par[] = {0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0.};
+         * phase_offset_deg, phase_error_deg, weight_re, weight_im,
+         * x_azimuth_deg, y_azimuth_deg */
+        double par[] = {0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                90., 0.};
         int read = 0;
 
         /* Ignore comment lines (lines starting with '#'). */
@@ -107,6 +110,13 @@ int oskar_station_model_load(oskar_StationModel* station, const char* filename)
         }
         err = oskar_station_model_set_element_weight(station, n,
                 par[10], par[11]);
+        if (err)
+        {
+            fclose(file);
+            return err;
+        }
+        err = oskar_station_model_set_element_orientation(station, n,
+                par[12], par[13]);
         if (err)
         {
             fclose(file);

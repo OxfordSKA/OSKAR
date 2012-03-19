@@ -36,11 +36,11 @@ extern "C" {
 int oskar_jones_copy(oskar_Jones* dst, const oskar_Jones* src)
 {
     int err = 0;
-    dst->private_num_stations = src->private_num_stations;
-    dst->private_num_sources = src->private_num_sources;
-    dst->private_cap_stations = src->private_cap_stations;
-    dst->private_cap_sources = src->private_cap_sources;
-    err = oskar_mem_copy(&dst->ptr, &src->ptr);
+    dst->num_stations = src->num_stations;
+    dst->num_sources = src->num_sources;
+    dst->cap_stations = src->cap_stations;
+    dst->cap_sources = src->cap_sources;
+    err = oskar_mem_copy(&dst->data, &src->data);
     return err;
 }
 

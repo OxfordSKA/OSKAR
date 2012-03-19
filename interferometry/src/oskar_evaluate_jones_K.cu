@@ -39,16 +39,16 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the memory is not NULL.
-    if (K->ptr.is_null() || sky->rel_l.is_null() ||
+    if (K->data.is_null() || sky->rel_l.is_null() ||
             sky->rel_m.is_null() || sky->rel_n.is_null() ||
             u->is_null() || v->is_null() || w->is_null())
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.
-    if (K->num_sources() != sky->num_sources ||
-            K->num_stations() != u->num_elements ||
-            K->num_stations() != v->num_elements ||
-            K->num_stations() != w->num_elements)
+    if (K->num_sources != sky->num_sources ||
+            K->num_stations != u->num_elements ||
+            K->num_stations != v->num_elements ||
+            K->num_stations != w->num_elements)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     // Check that the data is in the right location.
@@ -88,8 +88,8 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
     }
 
     // Get data sizes.
-    const int n_sources  = K->num_sources();
-    const int n_stations = K->num_stations();
+    const int n_sources  = K->num_sources;
+    const int n_stations = K->num_stations;
 
     // Evaluate Jones matrix.
     if (K->type() == OSKAR_SINGLE_COMPLEX)
@@ -103,7 +103,7 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         // Compute DFT phase weights for K.
         oskar_cudak_dftw_3d_seq_out_f OSKAR_CUDAK_CONF(n_blk, n_thd, s_mem)
         (n_stations, *u, *v, *w, n_sources, sky->rel_l, sky->rel_m, sky->rel_n,
-                K->ptr);
+                K->data);
     }
     else if (K->type() == OSKAR_DOUBLE_COMPLEX)
     {
@@ -116,7 +116,7 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         // Compute DFT phase weights for K.
         oskar_cudak_dftw_3d_seq_out_d OSKAR_CUDAK_CONF(n_blk, n_thd, s_mem)
         (n_stations, *u, *v, *w, n_sources, sky->rel_l, sky->rel_m, sky->rel_n,
-                K->ptr);
+                K->data);
     }
     else
     {

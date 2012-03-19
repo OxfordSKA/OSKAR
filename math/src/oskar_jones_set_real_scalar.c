@@ -27,8 +27,7 @@
  */
 
 #include "math/oskar_jones_set_real_scalar.h"
-#include "math/oskar_cuda_jones_set_real_scalar_1.h"
-#include "math/oskar_cuda_jones_set_real_scalar_4.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -37,92 +36,12 @@ extern "C" {
 
 int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
 {
-    int n_elements, location, type, i, err = 0;
-
     /* Check that the structure exists. */
-    if (jones == NULL) return -1;
+    if (jones == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Get the meta-data. */
-    location = jones->ptr.location;
-    type = jones->ptr.type;
-    err = 0;
-
-    /* Check the location of the data. */
-    n_elements = jones->private_num_sources * jones->private_num_stations;
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        if (type == OSKAR_SINGLE_COMPLEX)
-        {
-            float2* ptr = (float2*)jones->ptr.data;
-            for (i = 0; i < n_elements; ++i)
-            {
-                ptr[i].x = (float)scalar;
-                ptr[i].y = 0.0f;
-            }
-        }
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-        {
-            float4c* ptr = (float4c*)jones->ptr.data;
-            for (i = 0; i < n_elements; ++i)
-            {
-                ptr[i].a.x = (float)scalar;
-                ptr[i].a.y = 0.0f;
-                ptr[i].b.x = 0.0f;
-                ptr[i].b.y = 0.0f;
-                ptr[i].c.x = 0.0f;
-                ptr[i].c.y = 0.0f;
-                ptr[i].d.x = (float)scalar;
-                ptr[i].d.y = 0.0f;
-            }
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX)
-        {
-            double2* ptr = (double2*)jones->ptr.data;
-            for (i = 0; i < n_elements; ++i)
-            {
-                ptr[i].x = scalar;
-                ptr[i].y = 0.0;
-            }
-        }
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-        {
-            double4c* ptr = (double4c*)jones->ptr.data;
-            for (i = 0; i < n_elements; ++i)
-            {
-                ptr[i].a.x = scalar;
-                ptr[i].a.y = 0.0;
-                ptr[i].b.x = 0.0;
-                ptr[i].b.y = 0.0;
-                ptr[i].c.x = 0.0;
-                ptr[i].c.y = 0.0;
-                ptr[i].d.x = scalar;
-                ptr[i].d.y = 0.0;
-            }
-        }
-        else
-        {
-            return OSKAR_ERR_BAD_JONES_TYPE;
-        }
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        if (type == OSKAR_SINGLE_COMPLEX)
-            err = oskar_cuda_jones_set_real_scalar_1_f(n_elements,
-                    (float2*)jones->ptr.data, scalar);
-        else if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
-            err = oskar_cuda_jones_set_real_scalar_4_f(n_elements,
-                    (float4c*)jones->ptr.data, scalar);
-        else if (type == OSKAR_DOUBLE_COMPLEX)
-            err = oskar_cuda_jones_set_real_scalar_1_d(n_elements,
-                    (double2*)jones->ptr.data, scalar);
-        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-            err = oskar_cuda_jones_set_real_scalar_4_d(n_elements,
-                    (double4c*)jones->ptr.data, scalar);
-        else
-            return OSKAR_ERR_BAD_JONES_TYPE;
-    }
-
-    return err;
+    /* Set the value. */
+    return oskar_mem_set_value_real(&jones->data, scalar);
 }
 
 #ifdef __cplusplus

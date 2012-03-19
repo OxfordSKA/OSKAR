@@ -48,6 +48,7 @@
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_Work.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -150,6 +151,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
         oskar_Mem weights(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
         oskar_Mem beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU,
                 num_pixels);
+        oskar_Work work(type, OSKAR_LOCATION_GPU);
 
         // Loop over channels.
         QTime timer;
@@ -195,7 +197,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
 
                 // Evaluate the station beam.
                 err = oskar_evaluate_station_beam(&beam_pattern, station,
-                        beam_l, beam_m, beam_n, &l, &m, &n, &weights,
+                        beam_l, beam_m, beam_n, &l, &m, &n, &work,
                         &curand_state);
                 if (err) return err;
 

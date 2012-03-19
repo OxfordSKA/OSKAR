@@ -573,6 +573,52 @@ void Test_Mem::test_set_value_real()
 {
     int n = 100;
 
+    // Double precision real.
+    {
+        oskar_Mem mem(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
+        int err = oskar_mem_set_value_real(&mem, 4.5);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)mem)[i], 4.5, 1e-10);
+        }
+    }
+
+    // Double precision complex.
+    {
+        oskar_Mem mem(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, n);
+        int err = oskar_mem_set_value_real(&mem, 6.5);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double2*)mem2)[i].x, 6.5, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double2*)mem2)[i].y, 0.0, 1e-10);
+        }
+    }
+
+    // Double precision complex matrix.
+    {
+        oskar_Mem mem(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, n);
+        int err = oskar_mem_set_value_real(&mem, 6.5);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].a.x, 6.5, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].a.y, 0.0, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].b.x, 0.0, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].b.y, 0.0, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].c.x, 0.0, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].c.y, 0.0, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].d.x, 6.5, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)mem2)[i].d.y, 0.0, 1e-10);
+        }
+    }
+
     // Single precision real.
     {
         oskar_Mem mem(OSKAR_SINGLE, OSKAR_LOCATION_CPU, n);
@@ -581,60 +627,42 @@ void Test_Mem::test_set_value_real()
 
         for (int i = 0; i < n; ++i)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)mem)[i], 4.5, 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)mem)[i], 4.5, 1e-5);
         }
     }
 
-    // Double precision real.
+    // Single precision complex.
     {
-        oskar_Mem mem(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
-        int err = oskar_mem_set_value_real(&mem, 6.5);
-        CPPUNIT_ASSERT_EQUAL(0, err);
-
-        for (int i = 0; i < n; ++i)
-        {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)mem)[i], 6.5, 1e-10);
-        }
-    }
-
-    // Double precision complex.
-    {
-        oskar_Mem mem(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, n);
-        int err = oskar_mem_set_value_real(&mem, 6.5);
-        CPPUNIT_ASSERT(err != 0);
-    }
-
-    // Single precision real.
-    {
-        oskar_Mem mem(OSKAR_SINGLE, OSKAR_LOCATION_GPU, n);
-        int err = oskar_mem_set_value_real(&mem, 4.5);
-        CPPUNIT_ASSERT_EQUAL(0, err);
-
-        oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
-        for (int i = 0; i < n; ++i)
-        {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)mem2)[i], 4.5, 1e-6);
-        }
-    }
-
-    // Double precision real.
-    {
-        oskar_Mem mem(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, n);
+        oskar_Mem mem(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, n);
         int err = oskar_mem_set_value_real(&mem, 6.5);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
         for (int i = 0; i < n; ++i)
         {
-            CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)mem2)[i], 6.5, 1e-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float2*)mem2)[i].x, 6.5, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float2*)mem2)[i].y, 0.0, 1e-5);
         }
     }
 
-    // Double precision complex.
+    // Single precision complex matrix.
     {
-        oskar_Mem mem(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, n);
+        oskar_Mem mem(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, n);
         int err = oskar_mem_set_value_real(&mem, 6.5);
-        CPPUNIT_ASSERT(err != 0);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
+        for (int i = 0; i < n; ++i)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].a.x, 6.5, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].a.y, 0.0, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].b.x, 0.0, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].b.y, 0.0, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].c.x, 0.0, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].c.y, 0.0, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].d.x, 6.5, 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float4c*)mem2)[i].d.y, 0.0, 1e-5);
+        }
     }
 }
 

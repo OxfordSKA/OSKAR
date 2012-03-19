@@ -47,7 +47,11 @@ int oskar_station_model_is_type(const oskar_StationModel* station, int type)
             station->gain.type == type &&
             station->gain_error.type == type &&
             station->phase_offset.type == type &&
-            station->phase_error.type == type);
+            station->phase_error.type == type &&
+            station->cos_orientation_x.type == type &&
+            station->sin_orientation_x.type == type &&
+            station->cos_orientation_y.type == type &&
+            station->sin_orientation_y.type == type);
 }
 
 int oskar_station_model_type(const oskar_StationModel* station)

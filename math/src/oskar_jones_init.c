@@ -38,11 +38,11 @@ int oskar_jones_init(oskar_Jones* jones, int type, int location,
 {
     int n_elements, err = 0;
     n_elements = num_stations * num_sources;
-    jones->private_num_stations = num_stations;
-    jones->private_num_sources = num_sources;
-    jones->private_cap_stations = num_stations;
-    jones->private_cap_sources = num_sources;
-    err = oskar_mem_init(&jones->ptr, type, location, n_elements, OSKAR_TRUE);
+    jones->num_stations = num_stations;
+    jones->num_sources = num_sources;
+    jones->cap_stations = num_stations;
+    jones->cap_sources = num_sources;
+    err = oskar_mem_init(&jones->data, type, location, n_elements, OSKAR_TRUE);
     return err;
 }
 

@@ -47,7 +47,11 @@ int oskar_station_model_is_location(const oskar_StationModel* station,
             station->gain.location == location &&
             station->gain_error.location == location &&
             station->phase_offset.location == location &&
-            station->phase_error.location == location);
+            station->phase_error.location == location &&
+            station->cos_orientation_x.location == location &&
+            station->sin_orientation_x.location == location &&
+            station->cos_orientation_y.location == location &&
+            station->sin_orientation_y.location == location);
 }
 
 int oskar_station_model_location(const oskar_StationModel* station)

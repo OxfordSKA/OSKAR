@@ -46,8 +46,8 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     oskar_Jones* J = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
 
     int type         = J->type();
-    int num_stations = J->num_stations();
-    int num_sources  = J->num_sources();
+    int num_stations = J->num_stations;
+    int num_sources  = J->num_sources;
     mxArray* values  = NULL;
 
     // Copy back to CPU if needed.
@@ -61,7 +61,7 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         values = mxCreateNumericArray(num_dims, dims, mxSINGLE_CLASS, mxCOMPLEX);
         float* values_re = (float*)mxGetPr(values);
         float* values_im = (float*)mxGetPi(values);
-        float2* data = (float2*)J_local->ptr.data;
+        float2* data = (float2*)J_local->data.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[i] = data[i].x;
@@ -76,7 +76,7 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         values = mxCreateNumericArray(num_dims, dims, mxDOUBLE_CLASS, mxCOMPLEX);
         double* values_re = mxGetPr(values);
         double* values_im = mxGetPi(values);
-        double2* data = (double2*)J_local->ptr.data;
+        double2* data = (double2*)J_local->data.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[i] = data[i].x;
@@ -91,7 +91,7 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         values = mxCreateNumericArray(num_dims, dims, mxSINGLE_CLASS, mxCOMPLEX);
         float* values_re = (float*)mxGetPr(values);
         float* values_im = (float*)mxGetPi(values);
-        float4c* data = (float4c*)J_local->ptr.data;
+        float4c* data = (float4c*)J_local->data.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[4*i + 0] = data[i].a.x;
@@ -112,7 +112,7 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
         values = mxCreateNumericArray(num_dims, dims, mxDOUBLE_CLASS, mxCOMPLEX);
         double* values_re = mxGetPr(values);
         double* values_im = mxGetPi(values);
-        double4c* data = (double4c*)J_local->ptr.data;
+        double4c* data = (double4c*)J_local->data.data;
         for (int i = 0; i < num_stations * num_sources; ++i)
         {
             values_re[4*i + 0] = data[i].a.x;

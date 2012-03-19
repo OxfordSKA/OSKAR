@@ -43,42 +43,53 @@ typedef struct oskar_StationModel oskar_StationModel;
 
 struct oskar_StationModel
 {
-    int num_elements;
-    oskar_StationModel* child;  /**< NULL when there are no child stations. */
-    oskar_StationModel* parent; /**< Pointer to station's parent (NULL if none). */
-    oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */
+    int station_type;            /**< Type of the station (enumerator). */
+    int num_elements;            /**< Number of antenna elements in the station. */
 
     /* Station element data. */
-    int array_is_3d;          /**< Flag set if array is 3-dimensional (default false). */
-    oskar_Mem x_signal;       /**< x-position wrt local horizon, toward the East. */
-    oskar_Mem y_signal;       /**< y-position wrt local horizon, toward the North. */
-    oskar_Mem z_signal;       /**< z-position wrt local horizon, toward the zenith. */
-    oskar_Mem x_weights;      /**< x-position wrt local horizon, toward the East. */
-    oskar_Mem y_weights;      /**< y-position wrt local horizon, toward the North. */
-    oskar_Mem z_weights;      /**< z-position wrt local horizon, toward the zenith. */
-    int coord_units;          /**< Units of the x,y,z coordinates.*/
+    int element_type;            /**< Type of receptor element within station (enumerator). */
+    int array_is_3d;             /**< Flag set if array is 3-dimensional (default false). */
+    int coord_units;             /**< Units of the x,y,z coordinates. */
+    int apply_element_errors;    /**< Bool switch to toggle element gain and phase errors (default false) */
+    int apply_element_weight;    /**< Bool switch to toggle complex element weight vector (default false) */
+    int single_element_model;    /**< True if using a single common element pattern. */
+    double orientation_x;        /**< Orientation azimuth of nominal x dipole axis, in radians. */
+    double orientation_y;        /**< Orientation azimuth of nominal y dipole axis, in radians. */
+    oskar_Mem x_signal;          /**< x-position wrt local horizon, toward the East. */
+    oskar_Mem y_signal;          /**< y-position wrt local horizon, toward the North. */
+    oskar_Mem z_signal;          /**< z-position wrt local horizon, toward the zenith. */
+    oskar_Mem x_weights;         /**< x-position wrt local horizon, toward the East. */
+    oskar_Mem y_weights;         /**< y-position wrt local horizon, toward the North. */
+    oskar_Mem z_weights;         /**< z-position wrt local horizon, toward the zenith. */
+    oskar_Mem gain;              /**< Per element gain factor (default 1.0) */
+    oskar_Mem gain_error;        /**< Standard deviation of per element time-variable gain factor (default 0.0) */
+    oskar_Mem phase_offset;      /**< Per element systematic phase offset, in radians (default 0.0) */
+    oskar_Mem phase_error;       /**< Standard deviation of per element time-variable phase offset, in radians (default 0.0) */
+    oskar_Mem weight;            /**< Element complex weight (set to 1.0, 0.0 unless using apodisation). */
+    oskar_Mem cos_orientation_x; /**< Cosine azimuth of x dipole axis (default 0.0). */
+    oskar_Mem sin_orientation_x; /**< Sine azimuth of x dipole axis (default 1.0) */
+    oskar_Mem cos_orientation_y; /**< Cosine azimuth of y dipole axis (default 1.0) */
+    oskar_Mem sin_orientation_y; /**< Sine azimuth of y dipole axis (default 0.0) */
 
-    int apply_weight; /**< Bool switch to toggle complex element weight vector (default false) */
-    oskar_Mem weight; /**< Element complex weight (set to 1 unless apodisation). */
-
-    int apply_element_errors; /**< Bool switch to toggle element gain and phase errors (default false) */
-    oskar_Mem gain;           /**< Per element gain factor (default 1.0) */
-    oskar_Mem gain_error;     /**< Standard deviation of per element time-variable gain factor (default 0.0) */
-    oskar_Mem phase_offset;   /**< Per element systematic phase offset, in radians (default 0.0) */
-    oskar_Mem phase_error;    /**< Standard deviation of per element time-variable phase offset, in radians (default 0.0) */
-
+    /* Receiver noise per frequency. */
     oskar_Mem total_receiver_noise; /**< Total receiver noise stddev as a
                                          function of frequency, in Jy */
 
+    /* Station parent/child pointers. */
+    oskar_StationModel* child;   /**< NULL when there are no child stations. */
+    oskar_StationModel* parent;  /**< Pointer to station's parent (NULL if none). */
+    oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */
+
     /* Other station data. */
-    double longitude_rad;   /**< Geodetic longitude of station, in radians. */
-    double latitude_rad;    /**< Geodetic latitude of station, in radians. */
-    double altitude_metres; /**< Altitude of station above ellipsoid, in metres. */
-    double ra0_rad;         /**< Right ascension of beam phase centre, in radians. */
-    double dec0_rad;        /**< Declination of beam phase centre, in radians. */
-    int single_element_model; /**< True if using a single common element pattern. */
-    int normalise_beam; /**< True if the station beam should be normalised by the number of antennas. */
-    int bit_depth;    /**< Not implemented! */
+    double longitude_rad;        /**< Geodetic longitude of station, in radians. */
+    double latitude_rad;         /**< Geodetic latitude of station, in radians. */
+    double altitude_metres;      /**< Altitude of station above ellipsoid, in metres. */
+    double ra0_rad;              /**< Right ascension of beam phase centre, in radians. */
+    double dec0_rad;             /**< Declination of beam phase centre, in radians. */
+    int normalise_beam;          /**< True if the station beam should be normalised by the number of antennas. */
+    int evaluate_array_factor;   /**< True if the array factor should be evaluated. */
+    int evaluate_element_factor; /**< True if the element pattern should be evaluated. */
+    int bit_depth;               /**< Not implemented! */
 
 #ifdef __cplusplus
     /* If C++, provide constructors and methods. */
@@ -127,12 +138,15 @@ struct oskar_StationModel
      * - Element x-position, in metres.
      * - Element y-position, in metres.
      * - Element z-position, in metres (default 0).
-     * - Element multiplicative weight (real part, default 1).
-     * - Element multiplicative weight (imaginary part, default 0).
+     * - Element x-delta, in metres (default 0).
+     * - Element y-delta, in metres (default 0).
+     * - Element z-delta, in metres (default 0).
      * - Element amplitude gain factor (default 1).
      * - Element amplitude gain error (default 0).
      * - Element phase offset in degrees (default 0).
      * - Element phase error in degrees (default 0).
+     * - Element multiplicative weight (real part, default 1).
+     * - Element multiplicative weight (imaginary part, default 0).
      *
      * Only the first two columns are required to be present.
      *
@@ -180,6 +194,17 @@ struct oskar_StationModel
      */
     int type() const;
 #endif
+};
+
+enum {
+    OSKAR_STATION_TYPE_DISH,
+    OSKAR_STATION_TYPE_AA
+};
+
+enum {
+    OSKAR_STATION_ELEMENT_TYPE_POINT,
+    OSKAR_STATION_ELEMENT_TYPE_DIPOLE,
+    OSKAR_STATION_ELEMENT_TYPE_CUSTOM
 };
 
 #endif /* OSKAR_STATION_MODEL_H_ */

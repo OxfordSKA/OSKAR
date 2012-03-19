@@ -51,8 +51,8 @@
 void Test_evaluate_station_beam_dipoles::test()
 {
     double freq = 100e6;
-    int num_az = 800;
-    int num_el = 800;
+    int num_az = 360;
+    int num_el = 90;
     int num_pixels = num_az * num_el;
     int num_threads = 256;
     int num_blocks  = (num_pixels + num_threads - 1) / num_threads;

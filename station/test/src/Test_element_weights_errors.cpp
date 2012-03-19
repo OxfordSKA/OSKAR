@@ -144,7 +144,7 @@ void Test_element_weights_errors::test_apply()
     int error = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
             &d_gain, &d_gain_error, &d_phase, &d_phase_error, states);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
-    error = oskar_mem_element_multiply(&d_weights, &d_errors, num_elements);
+    error = oskar_mem_element_multiply(NULL, &d_weights, &d_errors, num_elements);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     oskar_Mem h_errors(&d_errors, OSKAR_LOCATION_CPU);

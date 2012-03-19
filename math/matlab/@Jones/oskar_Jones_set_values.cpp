@@ -112,7 +112,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         num_values *= dims[i];
     }
 
-    size_t mem_size_old = J->num_sources() * J->num_stations();
+    size_t mem_size_old = J->num_sources * J->num_stations;
     mem_size_old *= oskar_mem_element_size(J->type());
 
     size_t mem_size_new = (type == OSKAR_DOUBLE) ? num_values * sizeof(double2) :
@@ -137,7 +137,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         double* values_im = mxGetPi(in[1]);
         if (scalar)
         {
-            double2* data = (double2*)J_local->ptr.data;
+            double2* data = (double2*)J_local->data.data;
             for (int i = 0; i < num_sources * num_stations; ++i)
             {
                 data[i].x = values_re[i];
@@ -146,7 +146,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         else
         {
-            double4c* data = (double4c*)J_local->ptr.data;
+            double4c* data = (double4c*)J_local->data.data;
             for (int i = 0; i < num_stations * num_sources; ++i)
             {
                 data[i].a.x = values_re[4 * i + 0];
@@ -176,7 +176,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         float* values_im = (float*)mxGetPi(in[1]);
         if (scalar)
         {
-            float2* data = (float2*)J_local->ptr.data;
+            float2* data = (float2*)J_local->data.data;
             for (int i = 0; i < num_values; ++i)
             {
                 data[i].x = values_re[i];
@@ -185,7 +185,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         else
         {
-            float4c* data = (float4c*)J_local->ptr.data;
+            float4c* data = (float4c*)J_local->data.data;
             for (int i = 0; i < num_stations * num_sources; ++i)
             {
                 data[i].a.x = values_re[4*i + 0];

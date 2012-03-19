@@ -26,42 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_JONES_SET_REAL_SCALAR_4_H_
-#define OSKAR_CUDAK_JONES_SET_REAL_SCALAR_4_H_
+#ifndef OSKAR_WORK_FREE_H_
+#define OSKAR_WORK_FREE_H_
 
 /**
- * @file oskar_cudak_jones_set_real_scalar_4.h
+ * @file oskar_work_free.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include "utility/oskar_Work.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief
- * CUDA kernel to set all data to a real scalar (single precision).
+ * @brief Frees memory in an oskar_Work structure.
  *
- * @details
- * This kernel sets all the data in the array to a real scalar value.
+ * @param[in,out] work   Pointer to structure containing memory to free.
  *
- * @param[in] n      The size of the input array.
- * @param[in,out] j  Array of Jones matrices.
- * @param[in] scalar Set all values in array to this.
+ * @return An error code.
  */
-__global__
-void oskar_cudak_jones_set_real_scalar_4_f(int n, float4c* j, float scalar);
+int oskar_work_free(oskar_Work* work);
 
-/**
- * @brief
- * CUDA kernel to set all data to a real scalar (double precision).
- *
- * @details
- * This kernel sets all the data in the array to a real scalar value.
- *
- * @param[in] n      The size of the input array.
- * @param[in,out] j  Array of Jones matrices.
- * @param[in] scalar Set all values in array to this.
- */
-__global__
-void oskar_cudak_jones_set_real_scalar_4_d(int n, double4c* j, double scalar);
+#ifdef __cplusplus
+}
+#endif
 
-#endif // OSKAR_CUDAK_JONES_SET_REAL_SCALAR_4_H_
+#endif /* OSKAR_WORK_FREE_H_ */

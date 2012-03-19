@@ -54,12 +54,12 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
     oskar_Jones* J1 = covert_mxArray_to_pointer<oskar_Jones>(in[0]);
     oskar_Jones* J2 = covert_mxArray_to_pointer<oskar_Jones>(in[1]);
 
-    if (J1->num_sources() != J2->num_sources())
+    if (J1->num_sources != J2->num_sources)
     {
         mexErrMsgTxt("Unable to join two matrices with different source dimensions!");
     }
 
-    if (J1->num_stations() != J2->num_stations())
+    if (J1->num_stations != J2->num_stations)
     {
         mexErrMsgTxt("Unable to join two matrices with different station dimensions!");
     }
@@ -71,8 +71,8 @@ void mexFunction(int num_out,  mxArray** out, int num_in, const mxArray** in)
 
     // Construct a new oskar_Jones object to copy into as a mxArray.
     // Set up the memory to match the original object.
-    int num_sources  = J1->num_sources();
-    int num_stations = J1->num_stations();
+    int num_sources  = J1->num_sources;
+    int num_stations = J1->num_stations;
     const char* format_string = (J1->type() == OSKAR_DOUBLE_COMPLEX_MATRIX ||
             J1->type() == OSKAR_SINGLE_COMPLEX_MATRIX) ? "matrix" : "scalar";
     const char* type_string = (J1->type() == OSKAR_DOUBLE_COMPLEX_MATRIX ||

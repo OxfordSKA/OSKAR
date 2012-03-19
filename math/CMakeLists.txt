@@ -12,12 +12,6 @@ set(math_SRC
     src/oskar_angular_distance.c
     src/oskar_cart2sph.c
     src/oskar_cuda_dft_c2r_2d.cu
-    src/oskar_cuda_jones_mul_c2.cu
-    src/oskar_cuda_jones_mul_mat1_c1.cu
-    src/oskar_cuda_jones_mul_mat2.cu
-    src/oskar_cuda_jones_mul_scalar_c2.cu
-    src/oskar_cuda_jones_set_real_scalar_1.cu
-    src/oskar_cuda_jones_set_real_scalar_4.cu
     src/oskar_fit_ellipse.c
     src/oskar_healpix_angles_to_pix_ring.c
     src/oskar_healpix_npix_to_nside.c
@@ -27,7 +21,7 @@ set(math_SRC
     src/oskar_jones_free.c
     src/oskar_jones_get_station_pointer.c
     src/oskar_jones_init.c
-    src/oskar_jones_join.cpp
+    src/oskar_jones_join.c
     src/oskar_jones_set_size.c
     src/oskar_jones_set_real_scalar.c
     src/oskar_Jones.cpp
@@ -36,7 +30,7 @@ set(math_SRC
     src/oskar_matrix_multiply.c
     src/oskar_mean.c
     src/oskar_meshgrid.c
-    #src/oskar_mrdivide.c ## Do not use.. doesnt currently catch all cases! 
+    #src/oskar_mrdivide.c ## Do not use.. doesnt currently catch all cases!
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
     src/oskar_random_power_law.c

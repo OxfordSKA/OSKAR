@@ -78,4 +78,4 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2);
 }
 #endif
 
-#endif // OSKAR_JONES_JOIN_H_
+#endif /* OSKAR_JONES_JOIN_H_ */

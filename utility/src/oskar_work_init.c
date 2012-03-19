@@ -26,10 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utility/oskar_work_init.h"
 #include "utility/oskar_mem_init.h"
-#include "stdlib.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,9 +57,13 @@ int oskar_work_init(oskar_Work* work, const int type, const int location)
             location, 0, 1);
     if (error) return error;
 
+    work->used_integer = 0;
+    work->used_real = 0;
+    work->used_complex = 0;
+    work->used_matrix = 0;
+
     return error;
 }
-
 
 #ifdef __cplusplus
 }

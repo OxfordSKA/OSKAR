@@ -26,64 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cuda_runtime_api.h>
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_Mem.h"
+#include "math/oskar_jones_join.h"
+#include "utility/oskar_mem_element_multiply.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_set_value_real(oskar_Mem* mem, double val)
+int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
 {
-    int i, n, type, location;
+    int num_elements, n_sources1, n_sources2, n_sources3;
+    int n_stations1, n_stations2, n_stations3;
 
-    /* Get the data type, location, and number of elements. */
-    type = mem->type;
-    location = mem->location;
-    n = mem->num_elements;
+    /* Sanity check on inputs. */
+    if (j3 == NULL) j3 = j1;
+    if (j1 == NULL || j2 == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        if (type == OSKAR_DOUBLE)
-        {
-            double *v;
-            v = (double*)(mem->data);
-            for (i = 0; i < n; ++i) v[i] = val;
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            float *v;
-            v = (float*)(mem->data);
-            for (i = 0; i < n; ++i) v[i] = val;
-        }
-        else
-            return OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    else if (location == OSKAR_LOCATION_GPU)
-    {
-        if (type == OSKAR_DOUBLE)
-        {
-            double *v;
-            v = (double*)(mem->data);
-            for (i = 0; i < n; ++i)
-                cudaMemcpy(v + i, &val, sizeof(double), cudaMemcpyHostToDevice);
-        }
-        else if (type == OSKAR_SINGLE)
-        {
-            float t, *v;
-            t = (float) val;
-            v = (float*)(mem->data);
-            for (i = 0; i < n; ++i)
-                cudaMemcpy(v + i, &t, sizeof(float), cudaMemcpyHostToDevice);
-        }
-        else
-            return OSKAR_ERR_BAD_DATA_TYPE;
-    }
-    else
-        return OSKAR_ERR_BAD_LOCATION;
+    /* Get the dimensions of the input data. */
+    n_sources1 = j1->num_sources;
+    n_sources2 = j2->num_sources;
+    n_sources3 = j3->num_sources;
+    n_stations1 = j1->num_stations;
+    n_stations2 = j2->num_stations;
+    n_stations3 = j3->num_stations;
 
-    return OSKAR_SUCCESS;
+    /* Check the data dimensions. */
+    if (n_sources1 != n_sources2 || n_sources1 != n_sources3)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    if (n_stations1 != n_stations2 || n_stations1 != n_stations3)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    /* Multiply the array elements. */
+    num_elements = n_sources1 * n_stations1;
+    return oskar_mem_element_multiply(&j3->data, &j1->data, &j2->data,
+            num_elements);
 }
 
 #ifdef __cplusplus

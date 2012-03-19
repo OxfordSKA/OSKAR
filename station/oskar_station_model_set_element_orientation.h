@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
-#define OSKAR_CUDA_JONES_MUL_MAT1_C1_H_
+#ifndef OSKAR_STATION_MODEL_SET_ELEMENT_ORIENTATION_H_
+#define OSKAR_STATION_MODEL_SET_ELEMENT_ORIENTATION_H_
 
 /**
- * @file oskar_cuda_jones_mul_mat1_c1.h
+ * @file oskar_station_model_set_element_orientation.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,42 +42,23 @@ extern "C" {
 
 /**
  * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (single precision).
+ * Sets the orientation of the x- and y-dipole axes for an element.
  *
  * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
+ * This function sets the orientation of the specified element's dipoles in the
+ * station model, transferring data to the GPU if necessary.
  *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
+ * @param[in] dst              Station model structure to copy into.
+ * @param[in] index            Element array index to set.
+ * @param[in] orientation_x    Azimuth of the element's x dipole axis, in degrees.
+ * @param[in] orientation_y    Azimuth of the element's y dipole axis, in degrees.
  */
 OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_f(int n, const float4c* d_j1,
-        const float2* d_s1, float4c* d_m);
-
-/**
- * @brief
- * Function to multiply together a Jones matrix and a complex scalar
- * (double precision).
- *
- * @details
- * This function multiplies together a complex Jones matrix and a complex
- * scalar to give a new Jones matrix.
- *
- * @param[in] n  The size of the input arrays.
- * @param[in] d_j1 Array of input Jones matrices.
- * @param[in] d_s1 Array of input scalars.
- * @param[out] d_m Array of output Jones matrices.
- */
-OSKAR_EXPORT
-int oskar_cuda_jones_mul_mat1_c1_d(int n, const double4c* d_j1,
-        const double2* d_s1, double4c* d_m);
+int oskar_station_model_set_element_orientation(oskar_StationModel* dst,
+        int index, double orientation_x, double orientation_y);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CUDA_JONES_MUL_MAT1_C1_H_ */
+#endif /* OSKAR_STATION_MODEL_SET_ELEMENT_ORIENTATION_H_ */

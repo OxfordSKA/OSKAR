@@ -51,14 +51,14 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         return OSKAR_ERR_BAD_LOCATION;
 
     // Check if single precision.
-    single_precision = (vis->is_single() && J->ptr.is_single() &&
+    single_precision = (vis->is_single() && J->data.is_single() &&
             sky->I.is_single() && sky->Q.is_single() && sky->U.is_single() &&
             sky->V.is_single() && sky->rel_l.is_single() &&
             sky->rel_m.is_single() && u->is_single() && v->is_single());
 
     // If not single precision, check if double precision.
     if (!single_precision)
-        double_precision = (vis->is_double() && J->ptr.is_double() &&
+        double_precision = (vis->is_double() && J->data.is_double() &&
                 sky->I.is_double() && sky->Q.is_double() &&
                 sky->U.is_double() && sky->V.is_double() &&
                 sky->rel_l.is_double() && sky->rel_m.is_double() &&
@@ -71,7 +71,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     // Check the input dimensions.
     int n_stations = telescope->num_stations;
     int n_sources = sky->num_sources;
-    if (J->num_sources() != n_sources || u->num_elements != n_stations ||
+    if (J->num_sources != n_sources || u->num_elements != n_stations ||
             v->num_elements != n_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
@@ -86,7 +86,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     double bandwidth = telescope->bandwidth_hz;
 
     // Check type of Jones matrix.
-    if (J->ptr.is_matrix() && vis->is_matrix())
+    if (J->data.is_matrix() && vis->is_matrix())
     {
         // Call the kernel for full polarisation.
         if (double_precision)
@@ -99,7 +99,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
             {
                 oskar_cudak_correlator_extended_d
                     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-                    (n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U,
+                    (n_sources, n_stations, J->data, sky->I, sky->Q, sky->U,
                             sky->V, *u, *v, sky->rel_l, sky->rel_m,
                             freq, bandwidth, sky->gaussian_a, sky->gaussian_b,
                             sky->gaussian_c, *vis);
@@ -108,7 +108,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
             {
                 oskar_cudak_correlator_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-                (n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U, sky->V,
+                (n_sources, n_stations, J->data, sky->I, sky->Q, sky->U, sky->V,
                         *u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth, *vis);
             }
         }
@@ -122,7 +122,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
             {
                 oskar_cudak_correlator_extended_f
                     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-                    (n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U,
+                    (n_sources, n_stations, J->data, sky->I, sky->Q, sky->U,
                             sky->V, *u, *v, sky->rel_l, sky->rel_m,
                             freq, bandwidth, sky->gaussian_a, sky->gaussian_b,
                             sky->gaussian_c, *vis);
@@ -131,7 +131,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
             {
                 oskar_cudak_correlator_f
                     OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-                    (n_sources, n_stations, J->ptr, sky->I, sky->Q, sky->U, sky->V,
+                    (n_sources, n_stations, J->data, sky->I, sky->Q, sky->U, sky->V,
                             *u, *v, sky->rel_l, sky->rel_m, lambda_bandwidth, *vis);
             }
         }
@@ -150,7 +150,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
 
             oskar_cudak_correlator_scalar_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-                (n_sources, n_stations, J->ptr, sky->I, *u, *v, sky->rel_l,
+                (n_sources, n_stations, J->data, sky->I, *u, *v, sky->rel_l,
                         sky->rel_m, lambda_bandwidth, *vis);
         }
         else
@@ -161,7 +161,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
 
             oskar_cudak_correlator_scalar_f
                 OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem)
-                (n_sources, n_stations, J->ptr, sky->I, *u, *v, sky->rel_l,
+                (n_sources, n_stations, J->data, sky->I, *u, *v, sky->rel_l,
                         sky->rel_m, lambda_bandwidth, *vis);
         }
     }

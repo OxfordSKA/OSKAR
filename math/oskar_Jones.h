@@ -47,11 +47,11 @@
  */
 struct oskar_Jones
 {
-    int private_num_stations; /**< Slowest varying dimension. */
-    int private_num_sources;  /**< Fastest varying dimension. */
-    int private_cap_stations; /**< Slowest varying dimension. */
-    int private_cap_sources;  /**< Fastest varying dimension. */
-    oskar_Mem ptr; /**< Pointer to the matrix data. */
+    int num_stations; /**< Slowest varying dimension. */
+    int num_sources;  /**< Fastest varying dimension. */
+    int cap_stations; /**< Slowest varying dimension. */
+    int cap_sources;  /**< Fastest varying dimension. */
+    oskar_Mem data;   /**< Pointer to the matrix data. */
 
 #ifdef __cplusplus
     /* If C++, then provide constructors, a destructor and methods. */
@@ -150,10 +150,8 @@ struct oskar_Jones
      */
     int set_size(int num_stations, int num_sources);
 
-    int type() const {return ptr.type;}
-    int num_sources() const {return private_num_sources;}
-    int num_stations() const {return private_num_stations;}
-    int location() const {return ptr.location;}
+    int type() const {return data.type;}
+    int location() const {return data.location;}
 #endif
 };
 

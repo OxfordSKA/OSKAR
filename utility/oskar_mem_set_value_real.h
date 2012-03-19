@@ -46,10 +46,10 @@ extern "C" {
  *
  * @details
  * This function sets all the values in a block of memory to the same, real,
- * value.
+ * value. For complex types, the imaginary components are set to zero, and
+ * for matrix types, the off-diagonal elements are set to zero.
  *
- * Only single or double precision floating-point types are supported.
- * Other types will cause an error code to be returned.
+ * Integer types will cause an error code to be returned.
  *
  * @param[in] mem Pointer to the block of memory to update.
  * @param[in] val All memory elements will be set to this value.

@@ -47,8 +47,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Construct a new oskar_Jones object to copy into as a mxArray.
     // Set up the memory to match the original object.
-    int num_sources  = J->num_sources();
-    int num_stations = J->num_stations();
+    int num_sources  = J->num_sources;
+    int num_stations = J->num_stations;
     const char* format_string = (J->type() == OSKAR_DOUBLE_COMPLEX_MATRIX ||
             J->type() == OSKAR_SINGLE_COMPLEX_MATRIX) ? "matrix" : "scalar";
     const char* type_string = (J->type() == OSKAR_DOUBLE_COMPLEX_MATRIX ||

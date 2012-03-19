@@ -26,114 +26,470 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_element_multiply.h"
+#include "utility/oskar_vector_types.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-// Single precision.
+/* Single precision. */
+__device__
+static void oskar_cudaf_complex_multiply_f(const float2& a, const float2& b,
+        float2& c)
+{
+    c.x = a.x * b.x - a.y * b.y; /* RE*RE - IM*IM */
+    c.y = a.y * b.x + a.x * b.y; /* IM*RE + RE*IM */
+}
+
 __global__
-static void oskar_cudak_element_multiply_rr_f(int n, const float* a,
+static void oskar_cudak_element_multiply_rr_r_f(const int n, const float* a,
         const float* b, float* c)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
         c[i] = a[i] * b[i];
 }
 
 __global__
-static void oskar_cudak_element_multiply_cc_f(int n, const float2* a,
+static void oskar_cudak_element_multiply_cc_c_f(const int n, const float2* a,
         const float2* b, float2* c)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
     {
-        // Cache the input data.
-        float2 ac = a[i];
-        float2 bc = b[i];
-
-        // Complex multiply.
-        float2 cc;
-        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
-        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
-
+        float2 ac, bc, cc;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_f(ac, bc, cc);
         c[i] = cc;
     }
 }
 
-// Double precision.
 __global__
-static void oskar_cudak_element_multiply_rr_d(int n, const double* a,
+static void oskar_cudak_element_multiply_cc_m_f(const int n, const float2* a,
+        const float2* b, float4c* c)
+{
+    /* Get the array index ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        float2 ac, bc, cc;
+        float4c m;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_f(ac, bc, cc);
+
+        /* Store result in a matrix. */
+        m.a = cc;
+        m.b = make_float2(0.0f, 0.0f);
+        m.c = make_float2(0.0f, 0.0f);
+        m.d = cc;
+        c[i] = m;
+    }
+}
+
+__global__
+static void oskar_cudak_element_multiply_cm_m_f(const int n, const float2* a,
+        const float4c* b, float4c* c)
+{
+    /* Get the array index ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        float2 ac;
+        float4c bc, m;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_f(ac, bc.a, m.a);
+        oskar_cudaf_complex_multiply_f(ac, bc.b, m.b);
+        oskar_cudaf_complex_multiply_f(ac, bc.c, m.c);
+        oskar_cudaf_complex_multiply_f(ac, bc.d, m.d);
+        c[i] = m;
+    }
+}
+
+__global__
+static void oskar_cudak_element_multiply_mm_m_f(const int n, const float4c* a,
+        const float4c* b, float4c* c)
+{
+    /* Get the array index ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        float4c ac, bc, m;
+        float2 t;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_f(ac.a, bc.a, m.a);
+        oskar_cudaf_complex_multiply_f(ac.b, bc.c, t);
+        m.a.x += t.x;
+        m.a.y += t.y;
+        oskar_cudaf_complex_multiply_f(ac.a, bc.b, m.b);
+        oskar_cudaf_complex_multiply_f(ac.b, bc.d, t);
+        m.b.x += t.x;
+        m.b.y += t.y;
+        oskar_cudaf_complex_multiply_f(ac.c, bc.a, m.c);
+        oskar_cudaf_complex_multiply_f(ac.d, bc.c, t);
+        m.c.x += t.x;
+        m.c.y += t.y;
+        oskar_cudaf_complex_multiply_f(ac.c, bc.b, m.d);
+        oskar_cudaf_complex_multiply_f(ac.d, bc.d, t);
+        m.d.x += t.x;
+        m.d.y += t.y;
+        c[i] = m;
+    }
+}
+
+/* Double precision. */
+__device__
+static void oskar_cudaf_complex_multiply_d(const double2& a, const double2& b,
+        double2& c)
+{
+    c.x = a.x * b.x - a.y * b.y; /* RE*RE - IM*IM */
+    c.y = a.y * b.x + a.x * b.y; /* IM*RE + RE*IM */
+}
+
+__global__
+static void oskar_cudak_element_multiply_rr_r_d(const int n, const double* a,
         const double* b, double* c)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
         c[i] = a[i] * b[i];
 }
 
 __global__
-static void oskar_cudak_element_multiply_cc_d(int n, const double2* a,
+static void oskar_cudak_element_multiply_cc_c_d(const int n, const double2* a,
         const double2* b, double2* c)
 {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n)
     {
-        // Cache the input data.
-        double2 ac = a[i];
-        double2 bc = b[i];
-
-        // Complex multiply.
-        double2 cc;
-        cc.x = ac.x * bc.x - ac.y * bc.y; // RE*RE - IM*IM
-        cc.y = ac.y * bc.x + ac.x * bc.y; // IM*RE + RE*IM
-
+        double2 ac, bc, cc;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_d(ac, bc, cc);
         c[i] = cc;
+    }
+}
+
+__global__
+static void oskar_cudak_element_multiply_cc_m_d(const int n, const double2* a,
+        const double2* b, double4c* c)
+{
+    /* Get the array index ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        double2 ac, bc, cc;
+        double4c m;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_d(ac, bc, cc);
+
+        /* Store result in a matrix. */
+        m.a = cc;
+        m.b = make_double2(0.0, 0.0);
+        m.c = make_double2(0.0, 0.0);
+        m.d = cc;
+        c[i] = m;
+    }
+}
+
+__global__
+static void oskar_cudak_element_multiply_cm_m_d(const int n, const double2* a,
+        const double4c* b, double4c* c)
+{
+    /* Get the array index ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        double2 ac;
+        double4c bc, m;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_d(ac, bc.a, m.a);
+        oskar_cudaf_complex_multiply_d(ac, bc.b, m.b);
+        oskar_cudaf_complex_multiply_d(ac, bc.c, m.c);
+        oskar_cudaf_complex_multiply_d(ac, bc.d, m.d);
+        c[i] = m;
+    }
+}
+
+__global__
+static void oskar_cudak_element_multiply_mm_m_d(const int n, const double4c* a,
+        const double4c* b, double4c* c)
+{
+    /* Get the array index ID that this thread is working on. */
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n)
+    {
+        double4c ac, bc, m;
+        double2 t;
+        ac = a[i];
+        bc = b[i];
+        oskar_cudaf_complex_multiply_d(ac.a, bc.a, m.a);
+        oskar_cudaf_complex_multiply_d(ac.b, bc.c, t);
+        m.a.x += t.x;
+        m.a.y += t.y;
+        oskar_cudaf_complex_multiply_d(ac.a, bc.b, m.b);
+        oskar_cudaf_complex_multiply_d(ac.b, bc.d, t);
+        m.b.x += t.x;
+        m.b.y += t.y;
+        oskar_cudaf_complex_multiply_d(ac.c, bc.a, m.c);
+        oskar_cudaf_complex_multiply_d(ac.d, bc.c, t);
+        m.c.x += t.x;
+        m.c.y += t.y;
+        oskar_cudaf_complex_multiply_d(ac.c, bc.b, m.d);
+        oskar_cudaf_complex_multiply_d(ac.d, bc.d, t);
+        m.d.x += t.x;
+        m.d.y += t.y;
+        c[i] = m;
     }
 }
 
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_mem_element_multiply(oskar_Mem* A, const oskar_Mem* B, int num)
+int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
+        int num)
 {
+    oskar_Mem Ct, At, Bt, *Cp, *Ap;
+    const oskar_Mem *Bp;
+    int error = 0;
+
+    /* Sanity check on inputs. */
+    if (C == NULL) C = A;
     if (A == NULL || B == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
+    if (A->data == NULL || B->data == NULL || C->data == NULL)
+        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    if (A->location != OSKAR_LOCATION_GPU ||
-            B->location != OSKAR_LOCATION_GPU)
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
+    /* Set the number of elements to multiply. */
+    if (num <= 0) num = A->num_elements;
 
-    int num_threads = 128; /* FIXME work out what size this should be...? */
-    int num_blocks = (num + num_threads - 1) / num_threads;
+    /* Check that there are enough elements. */
+    if (B->num_elements < num || C->num_elements < num)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
-    if (A->type == OSKAR_DOUBLE &&
-            B->type == OSKAR_DOUBLE)
+    /* Copy data to GPU memory if required. */
+    oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU, 0, 1);
+    oskar_mem_init(&At, A->type, OSKAR_LOCATION_GPU, 0, 1);
+    oskar_mem_init(&Bt, B->type, OSKAR_LOCATION_GPU, 0, 1);
+    if (C->location != OSKAR_LOCATION_GPU)
     {
-        oskar_cudak_element_multiply_rr_d
-            OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *A, *B, *A);
-    }
-    else if (A->type == OSKAR_SINGLE &&
-            B->type == OSKAR_SINGLE)
-    {
-        oskar_cudak_element_multiply_rr_f
-            OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *A, *B, *A);
-    }
-    else if (A->type == OSKAR_DOUBLE_COMPLEX &&
-            B->type == OSKAR_DOUBLE_COMPLEX)
-    {
-        oskar_cudak_element_multiply_cc_d
-            OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *A, *B, *A);
-    }
-    else if (A->type == OSKAR_SINGLE_COMPLEX &&
-            B->type == OSKAR_SINGLE_COMPLEX)
-    {
-        oskar_cudak_element_multiply_cc_f
-            OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *A, *B, *A);
+        error = oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU,
+                C->num_elements, 1);
+        if (error) goto cleanup;
+        Cp = &Ct;
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        Cp = C;
+    }
+    if (A->location != OSKAR_LOCATION_GPU)
+    {
+        error = oskar_mem_copy(&At, A);
+        if (error) goto cleanup;
+        Ap = &At;
+    }
+    else
+    {
+        Ap = A;
+    }
+    if (B->location != OSKAR_LOCATION_GPU)
+    {
+        error = oskar_mem_copy(&Bt, B);
+        if (error) goto cleanup;
+        Bp = &Bt;
+    }
+    else
+    {
+        Bp = B;
     }
 
-    return OSKAR_SUCCESS;
+    /* Set error code to type mismatch by default. */
+    error = OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Multiply the elements. */
+    if (A->type == OSKAR_DOUBLE)
+    {
+        if (B->type == OSKAR_DOUBLE)
+        {
+            if (C->type == OSKAR_DOUBLE)
+            {
+                /* Real, real to real. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_rr_r_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+    }
+    else if (A->type == OSKAR_DOUBLE_COMPLEX)
+    {
+        if (B->type == OSKAR_DOUBLE_COMPLEX)
+        {
+            if (C->type == OSKAR_DOUBLE_COMPLEX)
+            {
+                /* Complex scalar, complex scalar to complex scalar. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cc_c_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+            else if (C->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                /* Complex scalar, complex scalar to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cc_m_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+        else if (B->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+        {
+            if (C->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                /* Complex scalar, complex matrix to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cm_m_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+    }
+    else if (A->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+    {
+        if (B->type == OSKAR_DOUBLE_COMPLEX)
+        {
+            if (C->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                /* Complex matrix, complex scalar to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cm_m_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Bp, *Ap, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+        else if (B->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+        {
+            if (C->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+            {
+                /* Complex matrix, complex matrix to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_mm_m_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+    }
+    else if (A->type == OSKAR_SINGLE)
+    {
+        if (B->type == OSKAR_SINGLE)
+        {
+            if (C->type == OSKAR_SINGLE)
+            {
+                /* Real, real to real. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_rr_r_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+    }
+    else if (A->type == OSKAR_SINGLE_COMPLEX)
+    {
+        if (B->type == OSKAR_SINGLE_COMPLEX)
+        {
+            if (C->type == OSKAR_SINGLE_COMPLEX)
+            {
+                /* Complex scalar, complex scalar to complex scalar. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cc_c_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+            else if (C->type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                /* Complex scalar, complex scalar to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cc_m_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+        else if (B->type == OSKAR_SINGLE_COMPLEX_MATRIX)
+        {
+            if (C->type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                /* Complex scalar, complex matrix to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cm_m_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+    }
+    else if (A->type == OSKAR_SINGLE_COMPLEX_MATRIX)
+    {
+        if (B->type == OSKAR_SINGLE_COMPLEX)
+        {
+            if (C->type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                /* Complex matrix, complex scalar to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_cm_m_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Bp, *Ap, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+        else if (B->type == OSKAR_SINGLE_COMPLEX_MATRIX)
+        {
+            if (C->type == OSKAR_SINGLE_COMPLEX_MATRIX)
+            {
+                /* Complex matrix, complex matrix to complex matrix. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num + num_threads - 1) / num_threads;
+                oskar_cudak_element_multiply_mm_m_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
+                cudaDeviceSynchronize();
+                error = (int) cudaPeekAtLastError();
+            }
+        }
+    }
+
+    /* Copy result back to host memory if required. */
+    if (C->location == OSKAR_LOCATION_CPU)
+        error = oskar_mem_copy(C, Cp);
+
+    cleanup:
+    oskar_mem_free(&Ct);
+    oskar_mem_free(&At);
+    oskar_mem_free(&Bt);
+    return error;
 }

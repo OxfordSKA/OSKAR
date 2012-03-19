@@ -37,13 +37,13 @@ int oskar_jones_set_size(oskar_Jones* jones, int num_stations, int num_sources)
     int capacity;
 
     /* Check size is within existing capacity. */
-    capacity = jones->private_cap_stations * jones->private_cap_sources;
+    capacity = jones->cap_stations * jones->cap_sources;
     if (num_stations * num_sources > capacity)
         return OSKAR_ERR_OUT_OF_RANGE;
 
     /* Set the new dimension sizes, but don't actually resize the memory. */
-    jones->private_num_stations = num_stations;
-    jones->private_num_sources = num_sources;
+    jones->num_stations = num_stations;
+    jones->num_sources = num_sources;
     return 0;
 }
 

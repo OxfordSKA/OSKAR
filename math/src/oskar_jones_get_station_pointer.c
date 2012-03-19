@@ -37,9 +37,9 @@ int oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
         int station_index)
 {
     int num_sources, offset;
-    num_sources = J->private_num_sources;
+    num_sources = J->num_sources;
     offset = station_index * num_sources;
-    return oskar_mem_get_pointer(J_station, &J->ptr, offset, num_sources);
+    return oskar_mem_get_pointer(J_station, &J->data, offset, num_sources);
 }
 
 #ifdef __cplusplus
