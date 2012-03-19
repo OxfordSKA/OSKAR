@@ -27,28 +27,17 @@
  */
 
 
-#ifndef OSKAR_MEX_VIS_FROM_MATLAB_STRUCT_H_
-#define OSKAR_MEX_VIS_FROM_MATLAB_STRUCT_H_
+#ifndef OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_
+#define OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_
 
 /**
- * @file oskar_mex_vis_from_matlab_struct.h
+ * @file oskar_mex_image_settings_from_matlab.h
  */
-
-#include <mex.h>
 
 #include "oskar_global.h"
+#include "imaging/oskar_SettingsImage.h"
+#include <mex.h>
 
-#include "interferometry/oskar_Visibilities.h"
+void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArray* in);
 
-
-/**
- * @brief Convert an mxArray structure to an oskar_Visibilities structure.
- *
- * @param v_out oskar_Visibilities structure to populate.
- * @param v_in  mxArray holding MATLAB workspace representation of an
- *              oskar_Visibility structure.
- */
-void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* v_in);
-
-
-#endif /* OSKAR_MEX_VIS_FROM_MATLAB_STRUCT_H_ */
+#endif /* OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_ */

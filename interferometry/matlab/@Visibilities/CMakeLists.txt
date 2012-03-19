@@ -8,6 +8,7 @@ if (MATLAB_FOUND)
     #set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/@Visibilties/private")
     #set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar")
     oskar_mex(oskar_visibilities_read     oskar_mex_visibilities_read.cpp)
+    target_link_libraries(oskar_visibilities_read oskar_mex_interferometry)
 
     # Copy *.m files from current directory to destination.
     #install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"

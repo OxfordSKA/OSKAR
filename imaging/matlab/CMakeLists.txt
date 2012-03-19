@@ -8,9 +8,15 @@ if (MATLAB_FOUND)
     include(oskar_build_macros)
     
     include_directories(${CUDA_INCLUDE_DIRS})
+
+    add_library(oskar_mex_imaging 
+        STATIC src/oskar_mex_image_settings_from_matlab.cpp)
     
     oskar_mex(oskar_make_image oskar_mex_make_image_old.cpp)
     oskar_mex(oskar_make_image_new oskar_mex_make_image.cpp)
+    target_link_libraries(oskar_make_image_new 
+        oskar_mex_imaging
+        oskar_mex_interferometry)
     
     # Copy *.m files from current directory to destination.
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"

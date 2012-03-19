@@ -36,6 +36,7 @@
 #include "imaging/oskar_make_image.h"
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_SettingsImage.h"
+#include "imaging/matlab/oskar_mex_image_settings_from_matlab.h"
 
 #include <cstdlib>
 
@@ -55,19 +56,22 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
 
     // Construct image settings structure.
     oskar_SettingsImage settings;
+    mexPrintf("= Loading settings structure... ");
+    oskar_mex_image_settings_from_matlab(&settings, in[1]);
+    mexPrintf("done.\n");
 
-    // Setup image object.
-    int type = OSKAR_DOUBLE;
-    oskar_Image image(type, OSKAR_LOCATION_CPU);
-
-    // Make image.
-    int err = oskar_make_image(&image, &vis, &settings);
-    if (err)
-    {
-        mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "oskar_make_image() failed with code %i: %s.\n",
-                err, oskar_get_error_string(err));
-    }
+//    // Setup image object.
+//    int type = OSKAR_DOUBLE;
+//    oskar_Image image(type, OSKAR_LOCATION_CPU);
+//
+//    // Make image.
+//    int err = oskar_make_image(&image, &vis, &settings);
+//    if (err)
+//    {
+//        mexErrMsgIdAndTxt("OSKAR:ERROR",
+//                "oskar_make_image() failed with code %i: %s.\n",
+//                err, oskar_get_error_string(err));
+//    }
 
     // Convert oskar_Image to MATLAB structure.
     // TODO
