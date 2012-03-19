@@ -80,9 +80,9 @@ struct oskar_Visibilities
     int num_baselines;           /**< Number of baselines. */
     double freq_start_hz;        /**< Start Frequency, in Hz. */
     double freq_inc_hz;          /**< Frequency increment, in Hz. */
+    double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
     double time_start_mjd_utc;   /**< Start time in MJD, UTC */
     double time_inc_seconds;     /**< Time increment, in seconds. */
-    double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
     double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees*/
     double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees */
 
