@@ -279,6 +279,12 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                 error = oskar_mem_element_multiply(NULL, EG, E_ptr, num_points);
                 if (error) return error;
             }
+            else if (!E_ptr && !G_ptr)
+            {
+                /* No evaluation: set EG to identity matrix. */
+                error = oskar_mem_set_value_real(EG, 1.0);
+                if (error) return error;
+            }
         }
 
         /* Release use of work arrays. */
