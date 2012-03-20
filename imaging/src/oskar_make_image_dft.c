@@ -30,11 +30,13 @@
 #include "math/oskar_cuda_dft_c2r_2d.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_scale_real.h"
 
 #include <math.h>
+#include <stdio.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -56,9 +58,12 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     /* Check types. */
     type = image->type;
     if (type != uu_metres->type || type != vv_metres->type ||
-            type != (amp->type | OSKAR_COMPLEX) ||
+            (type | OSKAR_COMPLEX) != amp->type ||
             type != l->type || type != m->type)
+    {
+        printf("FAIL!\n");
         return OSKAR_ERR_TYPE_MISMATCH;
+    }
 
     /* Get dimension sizes. */
     num_vis = amp->num_elements;
@@ -160,7 +165,8 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     {
         /* FIXME should this be insert as temp will go out of scope and this is
          * not always a deep copy! */
-        err = oskar_mem_copy(image, &t_image);
+        /*err = oskar_mem_copy(image, &t_image);*/
+        err = oskar_mem_insert(image, &t_image, 0);
         if (err) goto cleanup;
     }
 

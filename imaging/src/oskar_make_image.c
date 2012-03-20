@@ -47,6 +47,7 @@
 #include <math.h>
 
 #define SEC2DAYS 1.15740740740740740740741e-5
+#define C_0 299792458.0
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,7 +56,7 @@ extern "C" {
 int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
         const oskar_SettingsImage* settings)
 {
-    oskar_Mem l, m, stokes, uu, vv, amp, uu_ptr, vv_ptr;
+    oskar_Mem l, m, stokes, uu, vv, amp, uu_ptr, vv_ptr, im_slice;
     int t, c, p, i, j, k; /* loop indices */
     int type;
     int size, num_pixels, location, num_pols, num_times, num_chan; /* dims */
@@ -64,7 +65,8 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
     int num_vis_amps, num_vis_pols;
     int num_vis; /* number of visibilities passed to image per plane of the cube */
     /*int coord_offset, amp_offset;*/
-    double fov, freq;
+    double fov, freq0, lambda0, lambda, scaling;
+    int slice_offset;
     int err;
 
     /* Set the location for temporary memory used in this function */
@@ -287,8 +289,11 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
     image->time_inc_sec       = vis->time_inc_seconds;
     image->freq_start_hz      = vis->freq_start_hz +
             (chan_range[0] * vis->channel_bandwidth_hz);
-    image->freq_inc_hz        = vis->channel_bandwidth_hz;
     image->image_type         = pol_type;
+    /* TODO think a bit more about how best to set this for all scenarios
+     * channel averaging ... ? */
+    image->freq_inc_hz        = (settings->channel_snapshots) ?
+            vis->freq_inc_hz : 0.0;
     /* Note: mean, variance etc as these can't be defined for cubes! */
 
 
@@ -300,7 +305,7 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
         num_vis = vis->num_baselines;
         oskar_mem_init(&uu,  type, location, num_vis, OSKAR_FALSE);
         oskar_mem_init(&vv,  type, location, num_vis, OSKAR_FALSE);
-        oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_vis, OSKAR_FALSE);
+        oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
     }
     else if (settings->time_snapshots && !settings->channel_snapshots)
     {
@@ -341,14 +346,16 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
     for (c = 0; c < num_chan; ++c)
     {
         int ch_ = chan_range[0] + c;
-        double lambda0 = 0.0;
-        freq = 0.0;
+
+        freq0 = image->freq_start_hz + (image->freq_inc_hz) * c + vis->channel_bandwidth_hz/2.0;
+        lambda0 = C_0 / freq0;
 
         for (t = 0; t < num_times; ++t)
         {
-            int ti_ = time_range[0] + t;
-            /* ___ Get baseline coordinates needed for imaging ___ */
             int coord_offset;
+            int ti_ = time_range[0] + t;
+
+            /* ___ Get baseline coordinates needed for imaging ___ */
 
             /* Snapshots in frequency and time */
             if (settings->time_snapshots && settings->channel_snapshots)
@@ -367,8 +374,8 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
 
                 for (j = 0; j < (chan_range[1] - chan_range[0]); ++j)
                 {
-                    double lambda  = 0.0;
-                    double scaling = lambda0/lambda;
+                    lambda  = 0.0;
+                    scaling = lambda0/lambda;
                     for (i = 0; i < vis->num_baselines; ++i)
                     {
                         int idx = j*vis->num_baselines + i;
@@ -419,8 +426,6 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
 
             for (p = 0; p < num_pols; ++p)
             {
-
-
                 /* ___ Get visibility amplitudes for imaging ___ */
                 /* Snapshots in both frequency and time */
                 if (settings->time_snapshots && settings->channel_snapshots)
@@ -469,10 +474,15 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                         {
                             if (type == OSKAR_DOUBLE)
                             {
-                                double4c* v_ = (double4c*)vis->amplitude.data;
-                                double2* a_ = (double2*)amp.data;
-                                int idx = (ch_ * vis->num_times * vis->num_baselines) +
-                                        ti_ * vis->num_baselines;
+                                double4c* v_;
+                                double2* a_;
+                                int idx;
+
+                                a_ = (double2*)amp.data;
+                                v_ = (double4c*)vis->amplitude.data;
+                                idx = (ch_ * vis->num_times * vis->num_baselines) +
+                                        (ti_ * vis->num_baselines);
+
                                 for (j = 0; j < vis->num_baselines; ++j)
                                 {
                                     if (p == 0)
@@ -569,8 +579,12 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                 if (settings->dft)
                 {
                     /* NOTE the copy in dft needs sorting out */
-                    err = oskar_make_image_dft(&image->data, &uu, &vv, &amp,
-                            &l, &m, freq);
+                    slice_offset = c * num_times * num_pols * num_pixels +
+                            t * num_pols * num_pixels + p * num_pixels;
+                    oskar_mem_get_pointer(&im_slice, &image->data,
+                            slice_offset, num_pixels);
+                    err = oskar_make_image_dft(&im_slice, &uu, &vv, &amp,
+                            &l, &m, freq0);
                     if (err) return err;
                 }
                 else
@@ -578,7 +592,6 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                     /*err = fft()*/
                     return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
                 }
-
 
             } /* loop over image polarisation */
         } /* loop over image time */

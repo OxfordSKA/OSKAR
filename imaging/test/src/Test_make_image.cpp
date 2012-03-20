@@ -37,6 +37,7 @@
 #include "interferometry/oskar_visibilities_init.h"
 
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -52,7 +53,7 @@ void Test_make_image::test()
     int num_times     = 2;
     int num_baselines = 1;
 
-    //double freq       = C_0;
+    double freq       = C_0;
     //double lambda     = C_0 / freq;
 
     oskar_Visibilities vis;
@@ -62,6 +63,8 @@ void Test_make_image::test()
     double* vv_ = (double*)vis.vv_metres.data;
     double* ww_ = (double*)vis.ww_metres.data;
     double4c* amp_ = (double4c*)vis.amplitude.data;
+    vis.freq_start_hz = freq;
+    vis.freq_inc_hz   = 10.0e6;
 
     // time 0, baseline 0
     uu_[0] = -1.0;
@@ -107,12 +110,13 @@ void Test_make_image::test()
     settings.time_snapshots = OSKAR_TRUE;
     settings.time_range[0] = 0;
     settings.time_range[1] = 1;
-    settings.polarisation = OSKAR_IMAGE_TYPE_STOKES;
+    settings.polarisation = OSKAR_IMAGE_TYPE_POL_LINEAR;
     settings.dft = OSKAR_TRUE;
 
     oskar_Image image;
-    oskar_make_image(&image, &vis, &settings);
-
+    int err = oskar_make_image(&image, &vis, &settings);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
     int idx = 0;
-    oskar_image_write(&image, "temp_test_image.img", idx);
+    err = oskar_image_write(&image, "temp_test_image.img", idx);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 }
