@@ -65,6 +65,7 @@ struct oskar_Image
     double rms;
 
 #ifdef __cplusplus
+    /* Need a default constructor. */
     /**
      * @brief Constructs an oskar_Image data structure.
      *
@@ -74,7 +75,7 @@ struct oskar_Image
      * @param[in] type     Enumerated data type of memory contents (magic number).
      * @param[in] location Location of memory.
      */
-    oskar_Image(int type, int location);
+    oskar_Image(int type = OSKAR_DOUBLE, int location = OSKAR_LOCATION_CPU);
 
     /**
      * @brief Destroys an oskar_Image data structure.

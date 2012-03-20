@@ -237,7 +237,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     // Dump data to OSKAR image file if required.
     if (settings.beam_pattern.filename)
     {
-        err = oskar_image_write(&data, settings.beam_pattern.filename);
+        err = oskar_image_write(&data, settings.beam_pattern.filename, 0);
         if (err) return err;
     }
 

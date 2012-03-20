@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_IMAGE_WRITE_H_
-#define OSKAR_IMAGE_WRITE_H_
+#ifndef OSKAR_IMAGE_READ_H_
+#define OSKAR_IMAGE_READ_H_
 
 /**
- * @file oskar_image_write.h
+ * @file oskar_image_read.h
  */
 
 #include "oskar_global.h"
@@ -42,21 +42,21 @@ extern "C" {
 
 /**
  * @brief
- * Write an OSKAR image structure to an OSKAR binary file.
+ * Read an OSKAR image structure from an OSKAR binary file.
  *
  * @details
- * This function writes (multi-dimensional) image data to an OSKAR binary file.
- * If the file already exists, it is overwritten.
+ * This function reads (multi-dimensional) image data from an OSKAR binary
+ * file.
  *
- * @param[in] image   Pointer to image structure to save.
- * @param[in] filename Name of file to write.
- * @param[in] idx      Image index to write (set to 0 if unknown).
+ * @param[in] image   Pointer to empty or uninitialised image structure to fill.
+ * @param[in] filename Name of file to read.
+ * @param[in] idx      Image index to read from the file (set to 0 if unknown).
  */
 OSKAR_EXPORT
-int oskar_image_write(const oskar_Image* image, const char* filename, int idx);
+int oskar_image_read(oskar_Image* image, const char* filename, int idx);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_IMAGE_WRITE_H_ */
+#endif /* OSKAR_IMAGE_READ_H_ */
