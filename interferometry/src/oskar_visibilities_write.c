@@ -140,6 +140,11 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     oskar_binary_file_write_int(filename, grp,
             OSKAR_VIS_TAG_BASELINE_COORD_UNIT, 0,
             OSKAR_VIS_BASELINE_COORD_UNIT_METRES);
+    oskar_binary_file_write_double(filename, grp,
+            OSKAR_VIS_TAG_PHASE_CENTRE_RA, 0, vis->phase_centre_ra_deg);
+    oskar_binary_file_write_double(filename, grp,
+            OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, vis->phase_centre_dec_deg);
+
 
     /* Write the baseline coordinate arrays. */
     oskar_mem_binary_file_write(&vis->uu_metres, filename,

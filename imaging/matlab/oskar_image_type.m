@@ -14,6 +14,7 @@ classdef oskar_image_type < uint32
         YY(7)
         XY(8)
         YX(9)
+        beam_scalar(100)
     end
     
 end

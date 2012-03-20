@@ -28,11 +28,17 @@
 
 
 #include <mex.h>
+
+#include "oskar_global.h"
+
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
 #include "interferometry/matlab/oskar_mex_vis_to_matlab_struct.h"
+#include "utility/oskar_BinaryTag.h"
+#include "utility/oskar_mem_binary_file_read.h"
+#include "utility/oskar_binary_tag_index_free.h"
 #include <cstdio>
 #include <cstdlib>
 
@@ -47,6 +53,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Load the OSKAR visibilities structure from the specified file.
     int status = OSKAR_SUCCESS;
     oskar_Visibilities* vis = oskar_Visibilities::read(filename, &status);
+
     if (vis == NULL)
     {
         mexErrMsgIdAndTxt("OSKAR:error",
@@ -54,7 +61,18 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 filename, oskar_get_error_string(status));
     }
 
-    out[0] = oskar_mex_vis_to_matlab_struct(vis);
+    /* Read date field from binary file */
+    oskar_Mem date(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_BinaryTagIndex* index = NULL;
+    int err = oskar_mem_binary_file_read(&date, filename, &index,
+            OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING, 0);
+    oskar_binary_tag_index_free(&index);
+    if (err)
+    {
+        mexErrMsgTxt("ERROR: failed to read date field!\n");
+    }
+
+    out[0] = oskar_mex_vis_to_matlab_struct(vis, &date);
 
     // Clean up local memory.
     delete vis;

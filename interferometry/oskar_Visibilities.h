@@ -304,7 +304,9 @@ enum {
     OSKAR_VIS_TAG_BASELINE_UU = 13,
     OSKAR_VIS_TAG_BASELINE_VV = 14,
     OSKAR_VIS_TAG_BASELINE_WW = 15,
-    OSKAR_VIS_TAG_AMPLITUDE = 16
+    OSKAR_VIS_TAG_AMPLITUDE = 16,
+    OSKAR_VIS_TAG_PHASE_CENTRE_RA = 17,
+    OSKAR_VIS_TAG_PHASE_CENTRE_DEC = 18
 };
 
 /* Do not change the values below - these are merely dimension labels, not the

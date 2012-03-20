@@ -26,27 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_MEX_VIS_TO_MATLAB_STRUCT_H_
-#define OSKAR_MEX_VIS_TO_MATLAB_STRUCT_H_
-
-/**
- * @file oskar_mex_vis_to_matlab_struct.h
- */
-
-#include <mex.h>
-#include "oskar_global.h"
-#include "interferometry/oskar_Visibilities.h"
-
+#ifndef TEST_MAKE_IMAGE_H_
+#define TEST_MAKE_IMAGE_H_
 
 /**
- * @brief Convert an oskar_Visibilities structure to an mxArray object.
- *
- * @param v_in
- *
- * @return An mxArray containing a structure holding the oskar_Visibility structure.
+ * @file Test_make_image.h
  */
-mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
-        oskar_Mem* date);
 
-#endif /* OSKAR_MEX_VIS_TO_MATLAB_STRUCT_H_ */
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_make_image : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_make_image);
+        CPPUNIT_TEST(test);
+        CPPUNIT_TEST_SUITE_END();
+
+    public:
+        // Test Methods
+        void test();
+};
+
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_make_image);
+
+#endif // TEST_MAKE_IMAGE_H_

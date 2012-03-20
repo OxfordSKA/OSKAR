@@ -65,9 +65,10 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
 
     /* Read structure fields into local mxArrays */
     int num_fields = mxGetNumberOfFields(v_in);
-    if (!(num_fields == 26 || num_fields == 19))
+    if (!(num_fields == 27 || num_fields == 20))
     {
-        mexPrintf("\nnum_fields = %i\n", num_fields);
+        mexPrintf("\nERROR: input vis structure has %i fields, "
+                "expecting %i or %i.\n", num_fields, 27, 20);
         mex_vis_error_("incorrect number of fields");
     }
     int num_pols = (num_fields == 26) ? 4 : 1;
@@ -167,7 +168,7 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     if ((int)dims[0] != num_baselines) mex_vis_error_("dimension mismatch");
 
     /* Set coordinate fields */
-    size_t coord_size = num_channels * num_times * num_baselines;
+    size_t coord_size = num_times * num_baselines;
     coord_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
     memcpy(v_out->uu_metres.data, mxGetData(uu_), coord_size);
     memcpy(v_out->vv_metres.data, mxGetData(vv_), coord_size);

@@ -38,13 +38,14 @@
 #include <cstdlib>
 #include <cstring>
 
-mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in)
+mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
+        oskar_Mem* date)
 {
     mxArray* v_out = NULL;
 
-    if (v_in == NULL)
+    if (v_in == NULL || date == NULL)
     {
-        mexErrMsgTxt("ERROR: Invalid input vis data structure.\n");
+        mexErrMsgTxt("ERROR: Invalid arguments.\n");
     }
 
     int num_channels  = v_in->num_channels;
@@ -225,7 +226,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in)
     }
     if (v_in->num_polarisations() == 4)
     {
-        const char* fields[26] = {
+        const char* fields[27] = {
+                "date",
                 "settings_path",
                 "num_channels",
                 "num_times",
@@ -252,11 +254,12 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in)
                 "Q",
                 "U",
                 "V"};
-        v_out = mxCreateStructMatrix(1, 1, 26, fields);
+        v_out = mxCreateStructMatrix(1, 1, 27, fields);
     }
     else
     {
-        const char* fields[19] = {
+        const char* fields[20] = {
+                "date",
                 "settings_path",
                 "num_channels",
                 "num_times",
@@ -277,10 +280,11 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in)
                 "axis_order",
                 "xx"};
 
-        v_out = mxCreateStructMatrix(1, 1, 19, fields);
+        v_out = mxCreateStructMatrix(1, 1, 20, fields);
     }
 
     /* Populate structure */
+    mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
     mxSetField(v_out, 0, "settings_path",
             mxCreateString((char*)v_in->settings_path.data));
     mxSetField(v_out, 0, "num_channels",
@@ -321,6 +325,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in)
         mxSetField(v_out, 0, "U", U_);
         mxSetField(v_out, 0, "V", V_);
     }
+
 
     return v_out;
 }

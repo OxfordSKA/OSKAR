@@ -19,4 +19,4 @@ set(imaging_SRC
 )
 set(imaging_SRC "${imaging_SRC}" PARENT_SCOPE)
 
-#add_subdirectory(test)
+add_subdirectory(test)

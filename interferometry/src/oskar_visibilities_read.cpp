@@ -75,6 +75,10 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     vis = new oskar_Visibilities(amp_type, OSKAR_LOCATION_CPU,
             num_channels, num_times, num_baselines);
 
+    err = oskar_mem_binary_file_read(&vis->settings_path, filename, &index,
+            OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0);
+    if (err) goto cleanup;
+
     // Read visibility metadata.
     err = oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_FREQ_START_HZ, 0, &vis->freq_start_hz);
@@ -87,6 +91,12 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     if (err) goto cleanup;
     err = oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_TIME_INC_SEC, 0, &vis->time_inc_seconds);
+    if (err) goto cleanup;
+    err = oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_PHASE_CENTRE_RA, 0, &vis->phase_centre_ra_deg);
+    if (err) goto cleanup;
+    err = oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, &vis->phase_centre_dec_deg);
     if (err) goto cleanup;
 
     // Read the baseline coordinate arrays.
