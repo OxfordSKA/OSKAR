@@ -37,11 +37,12 @@
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_SettingsImage.h"
 #include "imaging/matlab/oskar_mex_image_settings_from_matlab.h"
+#include "imaging/matlab/oskar_mex_image_to_matlab_struct.h"
 
 #include <cstdlib>
 
 // MATLAB Entry function.
-void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
+void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 2 || num_out > 1)
     {
@@ -65,6 +66,7 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
     oskar_Image image(type, OSKAR_LOCATION_CPU);
 
     // Make image.
+    mexPrintf("= Making image... ");
     int err = oskar_make_image(&image, &vis, &settings);
     if (err)
     {
@@ -72,8 +74,8 @@ void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
                 "oskar_make_image() failed with code %i: %s.\n",
                 err, oskar_get_error_string(err));
     }
+    mexPrintf("done\n");
 
-    // Convert oskar_Image to MATLAB structure.
-    // TODO
+    out[0] = oskar_mex_image_to_matlab_struct(&image);
 }
 

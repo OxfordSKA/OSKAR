@@ -15,7 +15,7 @@ settings.channel_range(1) = -1;
 settings.channel_range(2) = -1;
 if exist('vis', 'var')
     settings.channel_range(1) = 0;
-    settings.channel_range(2) = vis.num_channels;
+    settings.channel_range(2) = vis.num_channels-1;
 end
 
 
@@ -24,7 +24,7 @@ settings.time_range(1) = -1;
 settings.time_range(2) = -1;
 if exist('vis', 'var')
     settings.time_range(1) = 0;
-    settings.time_range(2) = vis.num_times;
+    settings.time_range(2) = vis.num_times-1;
 end
 
 settings.polarisation = oskar_image_type.I;

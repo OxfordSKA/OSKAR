@@ -51,7 +51,7 @@ void Test_make_image::test()
     int location      = OSKAR_LOCATION_CPU;
     int num_channels  = 2;
     int num_times     = 2;
-    int num_baselines = 1;
+    int num_baselines = 2;
 
     double freq       = C_0;
     //double lambda     = C_0 / freq;
@@ -67,39 +67,36 @@ void Test_make_image::test()
     vis.freq_inc_hz   = 10.0e6;
 
     // time 0, baseline 0
-    uu_[0] = -1.0;
+    uu_[0] =  1.0;
     vv_[0] =  0.0;
     ww_[0] =  0.0;
-    // time 1, baseline 0
-    uu_[1] =  2.0;
-    vv_[1] =  2.0;
+    // time 0, baseline 1
+    uu_[1] =  0.0;
+    vv_[1] =  1.0;
     ww_[1] =  0.0;
+    // time 1, baseline 0
+    uu_[2] =  1.0;
+    vv_[2] =  1.0;
+    ww_[2] =  0.0;
+    // time 1, baseline 1
+    uu_[3] = -1.0;
+    vv_[3] =  1.0;
+    ww_[3] =  0.0;
 
     // channel 0, time 0, baseline 0
-    int i = 0;
-    amp_[i].a.x = 1.0; amp_[i].a.y = 0.0;
-    amp_[i].b.x = 1.0; amp_[i].b.y = 0.0;
-    amp_[i].c.x = 1.0; amp_[i].c.y = 0.0;
-    amp_[i].d.x = 1.0; amp_[i].d.y = 0.0;
-    // channel 0, time 1, baseline 0
-    i = 1;
-    amp_[i].a.x = 1.0; amp_[i].a.y = 0.0;
-    amp_[i].b.x = 1.0; amp_[i].b.y = 0.0;
-    amp_[i].c.x = 1.0; amp_[i].c.y = 0.0;
-    amp_[i].d.x = 1.0; amp_[i].d.y = 0.0;
-    // channel 1, time 0, baseline 0
-    i = 2;
-    amp_[i].a.x = 1.0; amp_[i].a.y = 0.0;
-    amp_[i].b.x = 1.0; amp_[i].b.y = 0.0;
-    amp_[i].c.x = 1.0; amp_[i].c.y = 0.0;
-    amp_[i].d.x = 1.0; amp_[i].d.y = 0.0;
-    // channel 1, time 1, baseline 0
-    i = 3;
-    amp_[i].a.x = 1.0; amp_[i].a.y = 0.0;
-    amp_[i].b.x = 1.0; amp_[i].b.y = 0.0;
-    amp_[i].c.x = 1.0; amp_[i].c.y = 0.0;
-    amp_[i].d.x = 1.0; amp_[i].d.y = 0.0;
-
+    for (int i = 0, c = 0; c < num_channels; ++c)
+    {
+        for (int t = 0; t < num_times; ++t)
+        {
+            for (int b = 0; b < num_baselines; ++b, ++i)
+            {
+                amp_[i].a.x = 1.0; amp_[i].a.y = 0.0;
+                amp_[i].b.x = 1.0; amp_[i].b.y = 0.0;
+                amp_[i].c.x = 1.0; amp_[i].c.y = 0.0;
+                amp_[i].d.x = 1.0; amp_[i].d.y = 0.0;
+            }
+        }
+    }
 
     oskar_SettingsImage settings;
     settings.fov_deg = 2.0;
@@ -116,6 +113,7 @@ void Test_make_image::test()
     oskar_Image image;
     int err = oskar_make_image(&image, &vis, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+
     int idx = 0;
     err = oskar_image_write(&image, "temp_test_image.img", idx);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);

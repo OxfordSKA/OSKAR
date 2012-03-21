@@ -82,9 +82,30 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     out->fov_deg = mxGetScalar(fov_);
     out->size = (int)mxGetScalar(size_);
     out->channel_snapshots = (int)mxGetScalar(channel_snapshots_);
-    memcpy(out->channel_range, mxGetData(channel_range_), 2 * sizeof(int));
+    if (mxGetClassID(channel_range_) == mxDOUBLE_CLASS)
+    {
+        double* channel_range = (double*)mxGetData(channel_range_);
+        out->channel_range[0] = (int)channel_range[0];
+        out->channel_range[1] = (int)channel_range[1];
+    }
+    else if (mxGetClassID(channel_range_) == mxINT32_CLASS)
+    {
+        int* channel_range = (int*)mxGetData(channel_range_);
+        out->channel_range[0] = (int)channel_range[0];
+        out->channel_range[1] = (int)channel_range[1];
+    }
+    else
+        mexErrMsgTxt("ERROR: invalid channel_range class.\n");
+
     out->time_snapshots = (int)mxGetScalar(time_snapshots_);
-    memcpy(out->time_range, mxGetData(time_range_), 2 * sizeof(int));
+    if (mxGetClassID(time_range_) == mxDOUBLE_CLASS)
+    {
+        double* time_range = (double*)mxGetData(time_range_);
+        out->time_range[0] = (int)time_range[0];
+        out->time_range[1] = (int)time_range[1];
+    }
+    else
+        mexErrMsgTxt("ERROR: expected class of time range to be double.\n");
 
     if (!mxIsClass(polarisation_, "oskar_image_type"))
         im_set_error_("invalid polarisation specification.");

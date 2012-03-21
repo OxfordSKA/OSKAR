@@ -93,6 +93,7 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
     mxArray* im_out = mxCreateStructMatrix(1, 1, 17, fields);
 
     /* Populate structure */
+    /* FIXME there is a problem either here or in matlab_vis -> oskar_vis in the settings path  */
     mxSetField(im_out, 0, "settings_path",
             mxCreateString((char*)im_in->settings_path.data));
     mxSetField(im_out, 0, "data", data_);

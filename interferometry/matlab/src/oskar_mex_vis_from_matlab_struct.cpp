@@ -65,13 +65,16 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
 
     /* Read structure fields into local mxArrays */
     int num_fields = mxGetNumberOfFields(v_in);
-    if (!(num_fields == 27 || num_fields == 20))
+    int num_fields_polarised = 27;
+    int num_fields_scalar = 20;
+    if (!(num_fields == num_fields_polarised || num_fields == num_fields_scalar))
     {
         mexPrintf("\nERROR: input vis structure has %i fields, "
-                "expecting %i or %i.\n", num_fields, 27, 20);
+                "expecting %i or %i.\n", num_fields, num_fields_polarised,
+                num_fields_scalar);
         mex_vis_error_("incorrect number of fields");
     }
-    int num_pols = (num_fields == 26) ? 4 : 1;
+    int num_pols = (num_fields == num_fields_polarised) ? 4 : 1;
     mxArray* settings_path_ = mxGetField(v_in, 0, "settings_path");
     if (!settings_path_) mex_vis_error_field_("settings_path");
     mxArray* num_channels_ = mxGetField(v_in, 0, "num_channels");
