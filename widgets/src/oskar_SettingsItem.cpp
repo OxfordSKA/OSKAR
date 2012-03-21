@@ -33,22 +33,25 @@
 
 oskar_SettingsItem::oskar_SettingsItem(const QString& key,
         const QString& subkey, int type, const QString& label,
-        const QVariant& defaultValue, oskar_SettingsItem* parent)
+        const QVariant& value, bool required, const QStringList& options,
+        oskar_SettingsItem* parent)
 {
     // Initialise constructed values.
     key_ = key;
     subkey_ = subkey;
     type_ = type;
     label_ = label;
-    default_ = defaultValue;
+    value_ = value;
+    options_ = options;
     parentItem_ = parent;
 
     // Initialise user-defined, runtime values.
     iterNum_ = 1;
     visible_ = 0;
     enabled_ = 1;
-    if (key.isEmpty())
-        value_ = defaultValue;
+
+    // Set required flag of this and all parents if this option is required.
+    setRequired(required);
 }
 
 oskar_SettingsItem::~oskar_SettingsItem()
@@ -80,7 +83,7 @@ int oskar_SettingsItem::childNumber() const
 
 const QVariant& oskar_SettingsItem::defaultValue() const
 {
-    return default_;
+    return defaultValue_;
 }
 
 bool oskar_SettingsItem::enabled() const
@@ -108,9 +111,28 @@ const QString& oskar_SettingsItem::label() const
     return label_;
 }
 
+const QStringList& oskar_SettingsItem::options() const
+{
+    return options_;
+}
+
 oskar_SettingsItem* oskar_SettingsItem::parent()
 {
     return parentItem_;
+}
+
+bool oskar_SettingsItem::required() const
+{
+    return required_;
+}
+
+void oskar_SettingsItem::setDefaultValue(const QVariant& value)
+{
+    if (type_ == LABEL)
+        return;
+    defaultValue_ = value;
+    if (type_ == DOUBLE)
+        defaultValue_.convert(QVariant::Double);
 }
 
 void oskar_SettingsItem::setEnabled(bool value)
@@ -175,6 +197,13 @@ int oskar_SettingsItem::visible() const
 }
 
 // Private members.
+
+void oskar_SettingsItem::setRequired(bool value)
+{
+    required_ = value;
+    if (value && parentItem_)
+        parentItem_->setRequired(value);
+}
 
 void oskar_SettingsItem::setVisible(bool value)
 {

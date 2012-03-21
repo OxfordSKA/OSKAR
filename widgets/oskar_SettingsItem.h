@@ -36,6 +36,7 @@
 #include <QtCore/QList>
 #include <QtCore/QVector>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QVariant>
 
 class oskar_SettingsItem
@@ -60,7 +61,8 @@ public:
 
 public:
     oskar_SettingsItem(const QString& key, const QString& subkey, int type,
-            const QString& label, const QVariant& defaultValue,
+            const QString& label, const QVariant& value, bool required = false,
+            const QStringList& options = QStringList(),
             oskar_SettingsItem* parent = 0);
     ~oskar_SettingsItem();
 
@@ -74,7 +76,10 @@ public:
     int iterationNum() const;
     const QString& key() const;
     const QString& label() const;
+    const QStringList& options() const;
     oskar_SettingsItem* parent();
+    bool required() const;
+    void setDefaultValue(const QVariant& value);
     void setEnabled(bool value);
     void setIterationInc(const QVariant& value);
     void setIterationNum(int value);
@@ -88,6 +93,7 @@ public:
     int visible() const;
 
 private:
+    void setRequired(bool value);
     void setVisible(bool value);
 
 private:
@@ -98,10 +104,12 @@ private:
     int type_; // Enumerated type.
     int visible_;
     bool enabled_;
+    bool required_;
     QString label_;
     QString tooltip_;
     QVariant value_;
-    QVariant default_;
+    QVariant defaultValue_;
+    QStringList options_;
     int iterNum_;
     QVariant iterInc_;
 };

@@ -38,6 +38,7 @@
 #include <QtGui/QSpinBox>
 #include <QtGui/QDateTimeEdit>
 #include <QtGui/QTimeEdit>
+#include <QtGui/QComboBox>
 
 #include <QtGui/QDialog>
 #include <QtGui/QDialogButtonBox>
@@ -107,6 +108,18 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             spinner->setRange(-1, INT_MAX);
             spinner->setSpecialValueText("time");
             editor = spinner;
+            break;
+        }
+        case oskar_SettingsItem::OPTIONS:
+        {
+            // Options list.
+            QComboBox* list = new QComboBox(parent);
+            QStringList options;
+            options = index.model()->data(index,
+                    oskar_SettingsModel::OptionsRole).toStringList();
+            list->setFrame(false);
+            list->addItems(options);
+            editor = list;
             break;
         }
         default:
@@ -288,6 +301,15 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
                 static_cast<QSpinBox*>(editor)->setValue(value.toInt());
             break;
         }
+        case oskar_SettingsItem::OPTIONS:
+        {
+            // Options list.
+            QString str = value.toString();
+            int i = static_cast<QComboBox*>(editor)->findText(str,
+                    Qt::MatchFixedString);
+            static_cast<QComboBox*>(editor)->setCurrentIndex(i);
+            break;
+        }
         default:
         {
             // Line editors.
@@ -337,6 +359,12 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
             // Random seed editors.
             int val = static_cast<QSpinBox*>(editor)->value();
             if (val < 0) value = "time"; else value = val;
+            break;
+        }
+        case oskar_SettingsItem::OPTIONS:
+        {
+            // Options list.
+            value = static_cast<QComboBox*>(editor)->currentText();
             break;
         }
         default:

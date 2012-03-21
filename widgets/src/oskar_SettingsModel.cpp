@@ -228,9 +228,11 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     else if (role == TypeRole)
         return item->type();
     else if (role == VisibleRole)
-        return item->visible();
+        return item->visible() || item->required();
     else if (role == EnabledRole)
         return item->enabled();
+    else if (role == OptionsRole)
+        return item->options();
     else if (role == IterationNumRole)
         return item->iterationNum();
     else if (role == IterationIncRole)
@@ -356,7 +358,7 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
         {
             // Append the group and set it as the new parent.
             append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
-                    QVariant(), parent);
+                    false, QStringList(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
@@ -366,7 +368,7 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
     if (!child.isValid())
     {
         append(key, keys.last(), oskar_SettingsItem::LABEL, keys.last(),
-                QVariant(), parent);
+                false, QStringList(), parent);
         child = index(rowCount(parent) - 1, 0, parent);
     }
     return child;
@@ -418,8 +420,8 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
 }
 
 void oskar_SettingsModel::registerSetting(const QString& key,
-        const QString& label, int type, const QVariant& defaultValue,
-        const QStringList& /*options*/)
+        const QString& label, int type, const QStringList& options,
+        bool required)
 {
     QStringList keys = key.split('/');
 
@@ -434,13 +436,42 @@ void oskar_SettingsModel::registerSetting(const QString& key,
         {
             // Append the group and set it as the new parent.
             append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
-                    QVariant(), parent);
+                    required, QStringList(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
 
     // Append the actual setting.
-    append(key, keys.last(), type, label, defaultValue, parent);
+    append(key, keys.last(), type, label, required, options, parent);
+
+    // Check if this is an output file.
+    if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
+        outputKeys_.append(key);
+}
+
+void oskar_SettingsModel::registerSetting(const QString& key,
+        const QString& label, int type, bool required)
+{
+    QStringList keys = key.split('/');
+
+    // Find the parent, creating groups as necessary.
+    QModelIndex parent, child;
+    for (int k = 0; k < keys.size() - 1; ++k)
+    {
+        child = getChild(keys[k], parent);
+        if (child.isValid())
+            parent = child;
+        else
+        {
+            // Append the group and set it as the new parent.
+            append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
+                    required, QStringList(), parent);
+            parent = index(rowCount(parent) - 1, 0, parent);
+        }
+    }
+
+    // Append the actual setting.
+    append(key, keys.last(), type, label, required, QStringList(), parent);
 
     // Check if this is an output file.
     if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
@@ -598,14 +629,14 @@ void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
 // Private methods.
 
 void oskar_SettingsModel::append(const QString& key, const QString& subkey,
-        int type, const QString& label, const QVariant& defaultValue,
-        const QModelIndex& parent)
+        int type, const QString& label, bool required,
+        const QStringList& options, const QModelIndex& parent)
 {
     oskar_SettingsItem *parentItem = getItem(parent);
 
     beginInsertRows(parent, rowCount(), rowCount());
     oskar_SettingsItem* item = new oskar_SettingsItem(key, subkey, type,
-            label, defaultValue, parentItem);
+            label, QVariant(), required, options, parentItem);
     parentItem->appendChild(item);
     endInsertRows();
     hash_.insert(key, item);

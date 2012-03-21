@@ -61,7 +61,8 @@ public:
         SetIterationRole,
         ClearIterationRole,
         OutputKeysRole,
-        LoadRole
+        LoadRole,
+        OptionsRole
     };
 
 public:
@@ -81,19 +82,21 @@ public:
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& label,
-            int type, const QVariant& defaultValue = QVariant(),
-            const QStringList& options = QStringList());
+            int type, bool required = false);
+    void registerSetting(const QString& key, const QString& label,
+            int type, const QStringList& options, bool required = false);
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     void saveSettingsFile(const QString& filename);
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
+    void setDefault(const QString& key, const QVariant& value);
     void setLabel(const QString& key, const QString& label);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
 
 private:
     void append(const QString& key, const QString& subkey, int type,
-            const QString& label, const QVariant& defaultValue,
+            const QString& label, bool required, const QStringList& options,
             const QModelIndex& parent = QModelIndex());
     QModelIndex getChild(const QString& subkey,
             const QModelIndex& parent = QModelIndex()) const;
