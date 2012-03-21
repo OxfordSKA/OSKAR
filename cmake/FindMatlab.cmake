@@ -67,7 +67,7 @@ ELSE( WIN32 )
       SET(MATLAB_ROOT $ENV{MATLAB_ROOT})
     ELSE($ENV{MATLAB_ROOT})
       SET(MATLAB_ROOT /opt/matlab)
-    ENDIF($ENV{MATLAB_ROOT})    
+    ENDIF($ENV{MATLAB_ROOT})
   ENDIF(NOT MATLAB_ROOT)
   # Regular x86
   IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
@@ -76,12 +76,13 @@ ELSE( WIN32 )
       /usr/local/matlab-7sp1/bin/glnx86/
       /opt/matlab-7sp1/bin/glnx86/
       )
-  # AMD64:    
+  # AMD64:
   ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
     SET(MATLAB_SYS
       $ENV{MATLAB_ROOT}/bin/glnxa64/
       /usr/local/MATLAB/R2011a/bin/glnxa64/
       /usr/local/MATLAB/R2011b/bin/glnxa64/
+      /usr/local/MATLAB/R2012a/bin/glnxa64/
       /usr/local/matlab/bin/glnxa64/
       /data/MATLAB/R2011b/bin/glnxa64/
       /Applications/MATLAB_R2011a.app/bin/maci64
@@ -95,13 +96,14 @@ ELSE( WIN32 )
   find_library(MATLAB_QT_QTCORE_LIBRARY QtCore ${MATLAB_SYS})
   find_library(MATLAB_QT_QTGUI_LIBRARY QtGui ${MATLAB_SYS})
   find_library(MATLAB_QT_QTXML_LIBRARY QtXml ${MATLAB_SYS})
-  
+
   find_path(MATLAB_INCLUDE_DIR
     "mex.h"
     PATHS
     $ENV{MATLAB_ROOT}/extern/include/
     /usr/local/MATLAB/R2011a/extern/include
     /usr/local/MATLAB/R2011b/extern/include
+    /usr/local/MATLAB/R2012a/extern/include
     /usr/local/matlab/extern/include/
     /data/MATLAB/R2011b/extern/include/
     /Applications/MATLAB_R2011a.app/extern/include/
