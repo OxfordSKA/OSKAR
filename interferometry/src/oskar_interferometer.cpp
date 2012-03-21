@@ -101,9 +101,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     double dt_ave            = times->dt_ave_days;
     double dt_fringe         = times->dt_fringe_days;
 
-    if (telescope->disable_e_jones)
-        printf("==> Station beam (E-Jones) disabled.\n");
-
     cudaMemGetInfo(&mem_free, &mem_total);
     cudaGetDevice(&device_id);
     cudaGetDeviceProperties(&device_prop, device_id);
@@ -154,16 +151,13 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             if (err) return err;
 
             // Evaluate station beam (Jones E).
-            if (!tel_gpu.disable_e_jones)
-            {
-                err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
-                        &work, &curand_state);
-                if (err) return err;
+            err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
+                    &work, &curand_state);
+            if (err) return err;
 
-                // Join Jones matrices (R = E * R).
-                err = oskar_jones_join(&R, &E, &R);
-                if (err) return err;
-            }
+            // Join Jones matrices (R = E * R).
+            err = oskar_jones_join(&R, &E, &R);
+            if (err) return err;
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {

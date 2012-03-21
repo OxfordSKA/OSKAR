@@ -49,7 +49,6 @@ struct oskar_TelescopeModel
     int max_station_size;        /**< Maximum station size (number of elements) */
     int coord_units;             /**< Units of the x,y,z coordinates.*/
     int identical_stations;      /**< True if all stations are identical. */
-    int disable_e_jones;         /**< If True, E-Jones is disabled. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
     int seed_time_variable_errors; /**< Random seed for time-variable errors. */
     double ra0_rad;              /**< Right Ascension of phase centre, in radians. */

@@ -136,8 +136,9 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/altitude_m", "Altitude [m]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/use_common_sky", "Use common sky (short baseline approximation)", oskar_SettingsItem::BOOL);
     setLabel("telescope/station", "Station settings");
-    registerSetting("telescope/station/enable_beam", "Enable station beam", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/station/normalise_beam", "Normalise station beam", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/evaluate_array_factor", "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/evaluate_element_factor", "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/normalise_beam", "Normalise array beam", oskar_SettingsItem::BOOL);
     registerSetting("telescope/station/element_gain", "Element gain", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_gain_error_fixed", "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_gain_error_time", "Element gain std.dev. (time-variable)", oskar_SettingsItem::DOUBLE);

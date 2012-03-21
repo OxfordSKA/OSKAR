@@ -75,9 +75,9 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
     vis = new oskar_Visibilities(amp_type, OSKAR_LOCATION_CPU,
             num_channels, num_times, num_baselines);
 
-    err = oskar_mem_binary_file_read(&vis->settings_path, filename, &index,
+    // Optionally read the settings path (ignore the error code).
+    oskar_mem_binary_file_read(&vis->settings_path, filename, &index,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0);
-    if (err) goto cleanup;
 
     // Read visibility metadata.
     err = oskar_binary_file_read_double(filename, &index, grp,

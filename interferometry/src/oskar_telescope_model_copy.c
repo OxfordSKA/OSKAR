@@ -66,7 +66,6 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->max_station_size = src->max_station_size;
     dst->coord_units = src->coord_units;
     dst->identical_stations = src->identical_stations;
-    dst->disable_e_jones = src->disable_e_jones;
     dst->use_common_sky = src->use_common_sky;
     dst->seed_time_variable_errors = src->seed_time_variable_errors;
     dst->ra0_rad = src->ra0_rad;

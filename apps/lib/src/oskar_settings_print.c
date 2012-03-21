@@ -257,7 +257,8 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_1f(2, w, "Altitude [m]", s->telescope.altitude_m);
     pr_b(2, w, "Use common sky", s->telescope.use_common_sky);
     pr_k(2, w, "Station settings", 1);
-    pr_b(3, w, "Enable station beam", s->telescope.station.enable_beam);
+    pr_b(3, w, "Enable array factor", s->telescope.station.evaluate_array_factor);
+    pr_b(3, w, "Enable element factor", s->telescope.station.evaluate_element_factor);
     pr_b(3, w, "Normalise station beam", s->telescope.station.normalise_beam);
     if (s->telescope.station.element_gain > 0.0)
     {

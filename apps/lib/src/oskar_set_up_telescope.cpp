@@ -80,7 +80,6 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
     telescope->use_common_sky = settings->telescope.use_common_sky;
     telescope->bandwidth_hz = settings->obs.channel_bandwidth_hz;
     telescope->wavelength_metres = 0.0; // This is set on a per-channel basis.
-    telescope->disable_e_jones = ! (settings->telescope.station.enable_beam);
     telescope->seed_time_variable_errors =
             settings->telescope.station.seed_element_time_variable_errors;
 
@@ -90,6 +89,10 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].single_element_model = true; // FIXME set this via the settings file.
+        telescope->station[i].evaluate_array_factor =
+                settings->telescope.station.evaluate_array_factor;
+        telescope->station[i].evaluate_element_factor =
+                settings->telescope.station.evaluate_element_factor;
         telescope->station[i].normalise_beam =
                 settings->telescope.station.normalise_beam;
     }

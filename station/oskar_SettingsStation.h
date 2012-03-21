@@ -39,7 +39,8 @@
  */
 struct oskar_SettingsStation
 {
-    int enable_beam;
+    int evaluate_array_factor;
+    int evaluate_element_factor;
     int normalise_beam;
     double receiver_temperature;
     char* receiver_temperature_file;
