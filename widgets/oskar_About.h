@@ -26,53 +26,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MAIN_WINDOW_H_
-#define OSKAR_MAIN_WINDOW_H_
+#ifndef OSKAR_ABOUT_H_
+#define OSKAR_ABOUT_H_
 
-#include <QtGui/QMainWindow>
-#include <QtCore/QString>
+/**
+ * @file oskar_About.h
+ */
 
-class oskar_SettingsModel;
-class oskar_SettingsModelFilter;
-class oskar_SettingsView;
-class QAction;
-class QModelIndex;
+#include <QtGui/QDialog>
+
+class QDialogButtonBox;
+class QLabel;
+class QTextEdit;
+class QTextDocument;
+class QHBoxLayout;
 class QVBoxLayout;
-class QWidget;
+class QSpacerItem;
 
-class oskar_MainWindow : public QMainWindow
+class oskar_About : public QDialog
 {
     Q_OBJECT
 
 public:
-    oskar_MainWindow(QWidget* parent = 0);
-
-protected:
-    void closeEvent(QCloseEvent* event);
-
-public slots:
-    void openSettings(QString filename = QString());
-    void saveAs(QString filename = QString());
-
-private slots:
-    void about();
-    void runBeamPattern();
-    void runInterferometer();
-    void setHideIfUnset(bool value);
+    oskar_About(QWidget *parent = 0);
 
 private:
-    void runButton();
-    void runSim(int depth, QStringList outputfiles = QStringList());
-
-private:
-    QWidget* widget_;
-    QVBoxLayout* layout_;
-    oskar_SettingsModel* model_;
-    oskar_SettingsModelFilter* modelProxy_;
-    oskar_SettingsView* view_;
-    QAction* actHideUnset_;
-    QString settingsFile_;
-    int (*sim_function_)(const char*);
+    // Widgets.
+    QDialogButtonBox* buttons_;
+    QLabel* icon_;
+    QLabel* title_;
+    QLabel* oerc_;
+    QLabel* oxford_;
+    QLabel* version_;
+    QLabel* date_;
+    QTextEdit* licence_;
+    QTextDocument* licenceText_;
+    QLabel* attribution1_;
+    QLabel* attribution2_;
+    QVBoxLayout* vLayoutMain_;
+    QVBoxLayout* vLayout1_;
+    QHBoxLayout* hLayout1_;
+    QHBoxLayout* hLayout2_;
+    QSpacerItem* verticalSpacer_;
 };
 
-#endif // OSKAR_MAIN_WINDOW_H_
+#endif /* OSKAR_ABOUT_H_ */

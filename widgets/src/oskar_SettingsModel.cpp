@@ -129,8 +129,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 
     // Telescope model settings.
     setLabel("telescope", "Telescope model settings");
-    registerSetting("telescope/station_positions_file", "Station positions file", oskar_SettingsItem::INPUT_FILE_NAME);
-    registerSetting("telescope/station_layout_directory", "Station layout directory", oskar_SettingsItem::INPUT_DIR_NAME);
+    registerSetting("telescope/station_positions_file", "Station positions file", oskar_SettingsItem::INPUT_FILE_NAME, true);
+    registerSetting("telescope/station_layout_directory", "Station layout directory", oskar_SettingsItem::INPUT_DIR_NAME, true);
     registerSetting("telescope/longitude_deg", "Longitude [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/latitude_deg", "Latitude [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/altitude_m", "Altitude [m]", oskar_SettingsItem::DOUBLE);
@@ -153,7 +153,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Observation settings.
     setLabel("observation", "Observation settings");
     registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT);
-    registerSetting("observation/start_frequency_hz", "Start frequency [Hz]", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/start_frequency_hz", "Start frequency [Hz]", oskar_SettingsItem::DOUBLE, true);
     registerSetting("observation/frequency_inc_hz", "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
     registerSetting("observation/channel_bandwidth_hz", "Channel bandwidth [Hz]", oskar_SettingsItem::DOUBLE);
     registerSetting("observation/phase_centre_ra_deg", "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE);
@@ -161,8 +161,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("observation/num_vis_dumps", "Number of visibility dumps", oskar_SettingsItem::INT);
     registerSetting("observation/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT);
     registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT);
-    registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME);
-    registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME);
+    registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME, true);
+    registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
     registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #ifndef OSKAR_NO_MS
     registerSetting("observation/ms_filename", "Output Measurement Set", oskar_SettingsItem::OUTPUT_FILE_NAME);
@@ -244,12 +244,18 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
             if (item->type() == oskar_SettingsItem::INPUT_FILE_NAME ||
                     item->type() == oskar_SettingsItem::INPUT_DIR_NAME)
             {
+                if (item->required())
+                    return QIcon(":/icons/open_required.png");
                 return QIcon(":/icons/open.png");
             }
             else if (item->type() == oskar_SettingsItem::OUTPUT_FILE_NAME)
             {
                 return QIcon(":/icons/save.png");
             }
+
+            // Check if a generic required item.
+            if (item->required() && item->type() != oskar_SettingsItem::LABEL)
+                return QIcon(":/icons/required.png");
         }
     }
 

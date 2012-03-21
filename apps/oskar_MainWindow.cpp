@@ -29,6 +29,7 @@
 #include "apps/oskar_MainWindow.h"
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "apps/lib/oskar_sim_interferometer.h"
+#include "widgets/oskar_About.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModel.h"
@@ -79,6 +80,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QAction* actShowFirstLevel = new QAction("Show First Level", this);
     QAction* actExpandAll = new QAction("Expand All", this);
     QAction* actCollapseAll = new QAction("Collapse All", this);
+    QAction* actAbout = new QAction("About OSKAR...", this);
     QAction* actRunInterferometer = new QAction("Run Interferometer", this);
     QAction* actRunBeamPattern = new QAction("Run Beam Pattern", this);
     connect(actOpen, SIGNAL(triggered()), this, SLOT(openSettings()));
@@ -90,6 +92,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
             view_, SLOT(showFirstLevel()));
     connect(actExpandAll, SIGNAL(triggered()), view_, SLOT(expandAll()));
     connect(actCollapseAll, SIGNAL(triggered()), view_, SLOT(collapseAll()));
+    connect(actAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(actRunInterferometer, SIGNAL(triggered()),
             this, SLOT(runInterferometer()));
     connect(actRunBeamPattern, SIGNAL(triggered()),
@@ -122,6 +125,8 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menuView->addAction(actShowFirstLevel);
     menuView->addAction(actExpandAll);
     menuView->addAction(actCollapseAll);
+    menuView->addSeparator();
+    menuView->addAction(actAbout);
     menuRun->addAction(actRunInterferometer);
     menuRun->addAction(actRunBeamPattern);
 
@@ -205,6 +210,12 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
 }
 
 // Private slots.
+
+void oskar_MainWindow::about()
+{
+    oskar_About aboutDialog(this);
+    aboutDialog.exec();
+}
 
 void oskar_MainWindow::runBeamPattern()
 {

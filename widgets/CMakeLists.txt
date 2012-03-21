@@ -16,12 +16,14 @@ if (Qwt5_FOUND)
         icons/icons.qrc
     )
     set(widgets_MOC_SRC
+        oskar_About.h
         oskar_DoubleSpinBox.h
         oskar_SettingsDelegate.h
         oskar_SettingsModel.h
         oskar_SettingsView.h
     )
     set(widgets_SRC
+        src/oskar_About.cpp
         src/oskar_DoubleSpinBox.cpp
         src/oskar_SettingsDelegate.cpp
         src/oskar_SettingsItem.cpp
