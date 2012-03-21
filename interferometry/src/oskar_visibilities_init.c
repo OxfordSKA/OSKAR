@@ -38,7 +38,7 @@ extern "C" {
 int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
         int num_channels, int num_times, int num_baselines)
 {
-    int coord_type, num_amps, num_coords, err = 0;
+    int type, num_amps, num_coords, err = 0;
 
     if (!oskar_mem_is_complex(amp_type))
         return OSKAR_ERR_BAD_DATA_TYPE;
@@ -47,7 +47,7 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Evaluate the coordinate type. */
-    coord_type = oskar_mem_is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+    type = oskar_mem_is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     /* Set dimensions. */
     vis->num_channels  = num_channels;
@@ -56,14 +56,25 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
     num_amps   = num_channels * num_times * num_baselines;
     num_coords = num_times * num_baselines;
 
+    /* Initialise meta-data. */
+    vis->freq_start_hz = 0.0;
+    vis->freq_inc_hz = 0.0;
+    vis->channel_bandwidth_hz = 0.0;
+    vis->time_start_mjd_utc = 0.0;
+    vis->time_inc_seconds = 0.0;
+    vis->phase_centre_ra_deg = 0.0;
+    vis->phase_centre_dec_deg = 0.0;
+
     /* Initialise memory. */
     err = oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->uu_metres, coord_type, location, num_coords, 1);
+    err = oskar_mem_init(&vis->sky_noise_stddev, type, location, 0, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->vv_metres, coord_type, location, num_coords, 1);
+    err = oskar_mem_init(&vis->uu_metres, type, location, num_coords, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->ww_metres, coord_type, location, num_coords, 1);
+    err = oskar_mem_init(&vis->vv_metres, type, location, num_coords, 1);
+    if (err) return err;
+    err = oskar_mem_init(&vis->ww_metres, type, location, num_coords, 1);
     if (err) return err;
     err = oskar_mem_init(&vis->amplitude, amp_type, location, num_amps, 1);
     if (err) return err;

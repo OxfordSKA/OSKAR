@@ -349,50 +349,49 @@ void Test_Visibilities::test_read_write()
 
     // Load the visibility structure from file.
     {
-        oskar_Visibilities* vis2 = oskar_Visibilities::read(filename);
-        CPPUNIT_ASSERT(vis2 != NULL);
-        CPPUNIT_ASSERT_EQUAL(amp_type, vis2->amplitude.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2->uu_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2->vv_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2->ww_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2->location());
-        CPPUNIT_ASSERT_EQUAL(num_channels, vis2->num_channels);
-        CPPUNIT_ASSERT_EQUAL(num_baselines, vis2->num_baselines);
-        CPPUNIT_ASSERT_EQUAL(num_times, vis2->num_times);
+        oskar_Visibilities vis2;
+        int err = oskar_Visibilities::read(&vis2, filename);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+        CPPUNIT_ASSERT_EQUAL(amp_type, vis2.amplitude.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.uu_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.vv_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.ww_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2.location());
+        CPPUNIT_ASSERT_EQUAL(num_channels, vis2.num_channels);
+        CPPUNIT_ASSERT_EQUAL(num_baselines, vis2.num_baselines);
+        CPPUNIT_ASSERT_EQUAL(num_times, vis2.num_times);
 
-        CPPUNIT_ASSERT_EQUAL(start_freq, vis2->freq_start_hz);
-        CPPUNIT_ASSERT_EQUAL(freq_inc, vis2->freq_inc_hz);
-        CPPUNIT_ASSERT_EQUAL(time_start_mjd_utc, vis2->time_start_mjd_utc);
-        CPPUNIT_ASSERT_EQUAL(time_inc_seconds, vis2->time_inc_seconds);
+        CPPUNIT_ASSERT_EQUAL(start_freq, vis2.freq_start_hz);
+        CPPUNIT_ASSERT_EQUAL(freq_inc, vis2.freq_inc_hz);
+        CPPUNIT_ASSERT_EQUAL(time_start_mjd_utc, vis2.time_start_mjd_utc);
+        CPPUNIT_ASSERT_EQUAL(time_inc_seconds, vis2.time_inc_seconds);
 
         // Check the data loaded correctly.
-        for (int i = 0, c = 0; c < vis2->num_channels; ++c)
+        for (int i = 0, c = 0; c < vis2.num_channels; ++c)
         {
-            for (int t = 0; t < vis2->num_times; ++t)
+            for (int t = 0; t < vis2.num_times; ++t)
             {
-                for (int b = 0; b < vis2->num_baselines; ++b, ++i)
+                for (int b = 0; b < vis2.num_baselines; ++b, ++i)
                 {
                     CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + 1.123f,
-                            ((float2*)vis2->amplitude.data)[i].x, 1.0e-6);
+                            ((float2*)vis2.amplitude.data)[i].x, 1.0e-6);
                     CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i - 0.456f,
-                            ((float2*)vis2->amplitude.data)[i].y, 1.0e-6);
+                            ((float2*)vis2.amplitude.data)[i].y, 1.0e-6);
                 }
             }
         }
-        for (int i = 0, t = 0; t < vis2->num_times; ++t)
+        for (int i = 0, t = 0; t < vis2.num_times; ++t)
         {
-            for (int b = 0; b < vis2->num_baselines; ++b, ++i)
+            for (int b = 0; b < vis2.num_baselines; ++b, ++i)
             {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL((float)t + 0.10f,
-                        ((float*)vis2->uu_metres.data)[i], 1.0e-6);
+                        ((float*)vis2.uu_metres.data)[i], 1.0e-6);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL((float)b + 0.20f,
-                        ((float*)vis2->vv_metres.data)[i], 1.0e-6);
+                        ((float*)vis2.vv_metres.data)[i], 1.0e-6);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL((float)i + 0.30f,
-                        ((float*)vis2->ww_metres.data)[i], 1.0e-6);
+                        ((float*)vis2.ww_metres.data)[i], 1.0e-6);
             }
         }
-        // Free memory.
-        delete vis2;
     }
 
     // Delete temporary file.

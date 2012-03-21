@@ -36,21 +36,26 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Returns a new visibility structure by reading the specified file.
  *
  * @details
  * Note: The loaded visibility structure will reside on the CPU.
  *
+ * @param[in,out]  vis  Pointer to empty or uninitialised visibility structure.
  * @param[in]  filename The filename to read from to.
- * @param[out] status   Error code.
  *
  * @return A pointer to the new visibility structure.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
-oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status);
+int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_VISIBILITIES_READ_H_ */

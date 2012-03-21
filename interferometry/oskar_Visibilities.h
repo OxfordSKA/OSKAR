@@ -174,17 +174,17 @@ struct oskar_Visibilities
     int write(const char* filename);
 
     /**
-     * @brief Returns a new visibility structure by reading the specified file.
+     * @brief Fills a visibility structure by reading the specified file.
      *
      * @details
      * Note: The loaded visibility structure will reside on the CPU.
      *
+     * @param[out] vis      A pointer to the visibility structure to fill.
      * @param[in]  filename The filename to read from.
-     * @param[out] status   Error code.
      *
      * @return A pointer to the new visibility structure.
      */
-    static oskar_Visibilities* read(const char* filename, int* status = NULL);
+    static int read(oskar_Visibilities* vis, const char* filename);
 
     /**
      * @brief Resize the memory in the visibility structure to the specified

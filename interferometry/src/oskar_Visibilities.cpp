@@ -29,6 +29,8 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_clear_contents.h"
+#include "interferometry/oskar_visibilities_copy.h"
+#include "interferometry/oskar_visibilities_free.h"
 #include "interferometry/oskar_visibilities_get_channel_amps.h"
 #include "interferometry/oskar_visibilities_init.h"
 #include "interferometry/oskar_visibilities_location.h"
@@ -41,42 +43,27 @@
 
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
         int num_channels, int num_times, int num_baselines)
-: num_channels(num_channels),
-  num_times(num_times),
-  num_baselines(num_baselines),
-  freq_start_hz(0.0),
-  freq_inc_hz(0.0),
-  channel_bandwidth_hz(0.0),
-  time_start_mjd_utc(0.0),
-  time_inc_seconds(0.0)
 {
     if (oskar_visibilities_init(this, amp_type, location, num_channels,
             num_times, num_baselines))
-    {
-        throw "error allocation visibility structure";
-    }
+        throw "Error in oskar_visibilities_init.";
 }
 
-// Copy constructor.
 oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
         int location)
-: num_channels(other->num_channels),
-  num_times(other->num_times),
-  num_baselines(other->num_baselines),
-  freq_start_hz(0.0),
-  freq_inc_hz(0.0),
-  channel_bandwidth_hz(0.0),
-  time_start_mjd_utc(0.0),
-  time_inc_seconds(0.0),
-  uu_metres(&other->uu_metres, location),
-  vv_metres(&other->vv_metres, location),
-  ww_metres(&other->ww_metres, location),
-  amplitude(&other->amplitude, location)
 {
+    if (oskar_visibilities_init(this, other->amplitude.type, location,
+            other->num_channels, other->num_times, other->num_baselines))
+        throw "Error in oskar_visibilities_init.";
+    if (oskar_visibilities_copy(this, other)) // Copy other to this.
+        throw "Error in oskar_visibilities_copy.";
+
 }
 
 oskar_Visibilities::~oskar_Visibilities()
 {
+    if (oskar_visibilities_free(this))
+        throw "Error in oskar_visibilities_free.";
 }
 
 int oskar_Visibilities::clear_contents()
@@ -89,9 +76,9 @@ int oskar_Visibilities::write(const char* filename)
     return oskar_visibilities_write(filename, this);
 }
 
-oskar_Visibilities* oskar_Visibilities::read(const char* filename, int* status)
+int oskar_Visibilities::read(oskar_Visibilities* vis, const char* filename)
 {
-    return oskar_visibilities_read(filename, status);
+    return oskar_visibilities_read(vis, filename);
 }
 
 int oskar_Visibilities::resize(int num_channels, int num_times, int num_baselines)
@@ -122,7 +109,6 @@ int oskar_Visibilities::add_sky_noise(const double* stddev, unsigned seed)
 {
     return oskar_visibilities_add_sky_noise(this, stddev, seed);
 }
-
 
 int oskar_Visibilities::location() const
 {

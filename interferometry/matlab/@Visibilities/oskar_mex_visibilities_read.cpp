@@ -52,9 +52,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Load the OSKAR visibilities structure from the specified file.
     int status = OSKAR_SUCCESS;
-    oskar_Visibilities* vis = oskar_Visibilities::read(filename, &status);
+    oskar_Visibilities vis;
+    status = oskar_Visibilities::read(&vis, filename);
 
-    if (vis == NULL)
+    if (status != OSKAR_SUCCESS)
     {
         mexErrMsgIdAndTxt("OSKAR:error",
                 "Error reading OSKAR visibilities data file: '%s'.\nERROR: %s.",
@@ -72,8 +73,5 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgTxt("ERROR: failed to read date field!\n");
     }
 
-    out[0] = oskar_mex_vis_to_matlab_struct(vis, &date);
-
-    // Clean up local memory.
-    delete vis;
+    out[0] = oskar_mex_vis_to_matlab_struct(&vis, &date);
 }

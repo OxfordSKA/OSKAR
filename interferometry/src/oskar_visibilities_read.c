@@ -28,6 +28,7 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_init.h"
 #include "utility/oskar_binary_file_read.h"
 #include "utility/oskar_binary_tag_index_free.h"
 #include "utility/oskar_BinaryTag.h"
@@ -39,25 +40,22 @@
 #include <stdio.h>
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
+
+int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
 {
-    // Visibility metadata.
+    /* Visibility metadata. */
     int num_channels = 0, num_times = 0, num_baselines = 0, amp_type = 0;
     int err = 0;
     oskar_BinaryTagIndex* index = NULL;
-    oskar_Visibilities* vis     = NULL;
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
 
-    // Sanity check on inputs.
+    /* Sanity check on inputs. */
     if (filename == NULL)
-    {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
-        return NULL;
-    }
+        return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Read visibility dimensions.
+    /* Read visibility dimensions. */
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_NUM_CHANNELS, 0, &num_channels);
     if (err) goto cleanup;
@@ -71,15 +69,16 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
             OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type);
     if (err) goto cleanup;
 
-    // Create the visibility structure.
-    vis = new oskar_Visibilities(amp_type, OSKAR_LOCATION_CPU,
+    /* Create the visibility structure. */
+    err = oskar_visibilities_init(vis, amp_type, OSKAR_LOCATION_CPU,
             num_channels, num_times, num_baselines);
+    if (err) return err;
 
-    // Optionally read the settings path (ignore the error code).
+    /* Optionally read the settings path (ignore the error code). */
     oskar_mem_binary_file_read(&vis->settings_path, filename, &index,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0);
 
-    // Read visibility metadata.
+    /* Read visibility metadata. */
     err = oskar_binary_file_read_double(filename, &index, grp,
             OSKAR_VIS_TAG_FREQ_START_HZ, 0, &vis->freq_start_hz);
     if (err) goto cleanup;
@@ -99,7 +98,7 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
             OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, &vis->phase_centre_dec_deg);
     if (err) goto cleanup;
 
-    // Read the baseline coordinate arrays.
+    /* Read the baseline coordinate arrays. */
     err = oskar_mem_binary_file_read(&vis->uu_metres, filename, &index, grp,
             OSKAR_VIS_TAG_BASELINE_UU, 0);
     if (err) goto cleanup;
@@ -110,20 +109,16 @@ oskar_Visibilities* oskar_visibilities_read(const char* filename, int* status)
             OSKAR_VIS_TAG_BASELINE_WW, 0);
     if (err) goto cleanup;
 
-    // Read the visibility data.
+    /* Read the visibility data. */
     err = oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
             OSKAR_VIS_TAG_AMPLITUDE, 0);
     if (err) goto cleanup;
 
-    // Normal return.
-    if (status) *status = OSKAR_SUCCESS;
-    oskar_binary_tag_index_free(&index);
-    return vis;
-
-    // Aborted return.
     cleanup:
-    if (status) *status = err;
-    if (vis) delete vis;
     oskar_binary_tag_index_free(&index);
-    return NULL;
+    return err;
 }
+
+#ifdef __cplusplus
+}
+#endif

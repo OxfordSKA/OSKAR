@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_INIT_H_
-#define OSKAR_VISIBILITIES_INIT_H_
+#ifndef OSKAR_VISIBILITIES_FREE_H_
+#define OSKAR_VISIBILITIES_FREE_H_
 
 /**
- * @file oskar_visibilities_init.h
+ * @file oskar_visibilities_free.h
  */
 
 #include "oskar_global.h"
@@ -41,24 +41,18 @@ extern "C" {
 #endif
 
 /**
- * @brief Initialise the specified oskar_Visibility data structure.
+ * @brief Free memory held by a visibility structure.
  *
  * @details
- * This function will overwrite any memory currently in the visibility structure.
+ * This function will free memory held by a visibility structure.
  *
- * @param vis               Pointer to the visibility data structure to initialise.
- * @param amp_type          OSKAR memory type for the visibility amplitudes.
- * @param location          Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
- * @param num_channels      Number of frequency channels.
- * @param num_times         Number of time samples.
- * @param num_baselines     Number of baselines.
+ * @param vis  Pointer to the visibility data structure to free.
  */
 OSKAR_EXPORT
-int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_baselines);
+int oskar_visibilities_free(oskar_Visibilities* vis);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_VISIBILITIES_INIT_H_ */
+#endif /* OSKAR_VISIBILITIES_FREE_H_ */

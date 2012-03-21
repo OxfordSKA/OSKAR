@@ -34,10 +34,12 @@ set(interferometry_SRC
     src/oskar_visibilities_add_sky_noise.c
     src/oskar_visibilities_evaluate_sky_noise_stddev.c
     src/oskar_visibilities_clear_contents.c
+    src/oskar_visibilities_copy.c
+    src/oskar_visibilities_free.c
     src/oskar_visibilities_get_channel_amps.c
     src/oskar_visibilities_init.c
     src/oskar_visibilities_location.c
-    src/oskar_visibilities_read.cpp
+    src/oskar_visibilities_read.c
     src/oskar_visibilities_resize.c
     src/oskar_visibilities_write.c
     src/oskar_Visibilities.cpp

@@ -26,39 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_INIT_H_
-#define OSKAR_VISIBILITIES_INIT_H_
-
-/**
- * @file oskar_visibilities_init.h
- */
-
-#include "oskar_global.h"
+#include "interferometry/oskar_visibilities_free.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_mem_free.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Initialise the specified oskar_Visibility data structure.
- *
- * @details
- * This function will overwrite any memory currently in the visibility structure.
- *
- * @param vis               Pointer to the visibility data structure to initialise.
- * @param amp_type          OSKAR memory type for the visibility amplitudes.
- * @param location          Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
- * @param num_channels      Number of frequency channels.
- * @param num_times         Number of time samples.
- * @param num_baselines     Number of baselines.
- */
-OSKAR_EXPORT
-int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_baselines);
+int oskar_visibilities_free(oskar_Visibilities* vis)
+{
+    int err = 0;
+
+    if (vis == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Clear meta-data. */
+    vis->num_channels  = 0;
+    vis->num_times     = 0;
+    vis->num_baselines = 0;
+    vis->freq_start_hz = 0.0;
+    vis->freq_inc_hz = 0.0;
+    vis->channel_bandwidth_hz = 0.0;
+    vis->time_start_mjd_utc = 0.0;
+    vis->time_inc_seconds = 0.0;
+    vis->phase_centre_ra_deg = 0.0;
+    vis->phase_centre_dec_deg = 0.0;
+
+    /* Free memory. */
+    err = oskar_mem_free(&vis->settings_path);
+    if (err) return err;
+    err = oskar_mem_free(&vis->sky_noise_stddev);
+    if (err) return err;
+    err = oskar_mem_free(&vis->uu_metres);
+    if (err) return err;
+    err = oskar_mem_free(&vis->vv_metres);
+    if (err) return err;
+    err = oskar_mem_free(&vis->ww_metres);
+    if (err) return err;
+    err = oskar_mem_free(&vis->amplitude);
+    if (err) return err;
+
+    return 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_VISIBILITIES_INIT_H_ */

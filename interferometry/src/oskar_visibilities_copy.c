@@ -26,39 +26,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_VISIBILITIES_INIT_H_
-#define OSKAR_VISIBILITIES_INIT_H_
-
-/**
- * @file oskar_visibilities_init.h
- */
-
-#include "oskar_global.h"
+#include "interferometry/oskar_visibilities_copy.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_mem_copy.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Initialise the specified oskar_Visibility data structure.
- *
- * @details
- * This function will overwrite any memory currently in the visibility structure.
- *
- * @param vis               Pointer to the visibility data structure to initialise.
- * @param amp_type          OSKAR memory type for the visibility amplitudes.
- * @param location          Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
- * @param num_channels      Number of frequency channels.
- * @param num_times         Number of time samples.
- * @param num_baselines     Number of baselines.
- */
-OSKAR_EXPORT
-int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_baselines);
+int oskar_visibilities_copy(oskar_Visibilities* dst,
+        const oskar_Visibilities* src)
+{
+    int err = 0;
+
+    if (dst == NULL || src == NULL)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Copy the meta-data. */
+    dst->num_channels  = src->num_channels;
+    dst->num_times     = src->num_times;
+    dst->num_baselines = src->num_baselines;
+    dst->freq_start_hz = src->freq_start_hz;
+    dst->freq_inc_hz = src->freq_inc_hz;
+    dst->channel_bandwidth_hz = src->channel_bandwidth_hz;
+    dst->time_start_mjd_utc = src->time_start_mjd_utc;
+    dst->time_inc_seconds = src->time_inc_seconds;
+    dst->phase_centre_ra_deg = src->phase_centre_ra_deg;
+    dst->phase_centre_dec_deg = src->phase_centre_dec_deg;
+
+    /* Copy the memory. */
+    err = oskar_mem_copy(&dst->settings_path, &src->settings_path);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->sky_noise_stddev, &src->sky_noise_stddev);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->uu_metres, &src->uu_metres);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->vv_metres, &src->vv_metres);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->ww_metres, &src->ww_metres);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->amplitude, &src->amplitude);
+    if (err) return err;
+
+    return 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_VISIBILITIES_INIT_H_ */
