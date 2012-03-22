@@ -27,6 +27,7 @@
  */
 
 #include "apps/lib/oskar_settings_load_telescope.h"
+#include "station/oskar_StationModel.h"
 
 #include <cmath>
 #include <cstdio>
@@ -75,6 +76,12 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
 
     // Station settings.
     s.beginGroup("station");
+    temp = s.value("station_type", "AA").toString().toUpper();
+    tel->station.station_type = (temp == "DISH") ?
+            OSKAR_STATION_TYPE_DISH : OSKAR_STATION_TYPE_AA;
+    temp = s.value("element_type", "DIPOLE").toString().toUpper();
+    tel->station.element_type = (temp == "DIPOLE") ?
+            OSKAR_STATION_ELEMENT_TYPE_DIPOLE : OSKAR_STATION_ELEMENT_TYPE_POINT;
     tel->station.evaluate_array_factor =
             s.value("evaluate_array_factor", true).toBool();
     tel->station.evaluate_element_factor =
@@ -82,34 +89,41 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
 
     // Station element settings (overrides).
-    tel->station.element_gain = s.value("element_gain", 0.0).toDouble();
-    tel->station.element_gain_error_fixed =
-            s.value("element_gain_error_fixed", 0.0).toDouble();
-    tel->station.element_gain_error_time =
-            s.value("element_gain_error_time", 0.0).toDouble();
-    tel->station.element_phase_error_fixed_rad =
-            s.value("element_phase_error_fixed_deg", 0.0).toDouble() * D2R;
-    tel->station.element_phase_error_time_rad =
-            s.value("element_phase_error_time_deg", 0.0).toDouble() * D2R;
-    tel->station.element_position_error_xy_m =
-            s.value("element_position_error_xy_m", 0.0).toDouble();
-    tel->station.element_x_orientation_error_rad =
-            s.value("element_x_orientation_error_deg", 0.0).toDouble() * D2R;
-    tel->station.element_y_orientation_error_rad =
-            s.value("element_y_orientation_error_deg", 0.0).toDouble() * D2R;
+    s.beginGroup("element");
+    tel->station.element.gain = s.value("gain", 0.0).toDouble();
+    tel->station.element.gain_error_fixed =
+            s.value("gain_error_fixed", 0.0).toDouble();
+    tel->station.element.gain_error_time =
+            s.value("gain_error_time", 0.0).toDouble();
+    tel->station.element.phase_error_fixed_rad =
+            s.value("phase_error_fixed_deg", 0.0).toDouble() * D2R;
+    tel->station.element.phase_error_time_rad =
+            s.value("phase_error_time_deg", 0.0).toDouble() * D2R;
+    tel->station.element.position_error_xy_m =
+            s.value("position_error_xy_m", 0.0).toDouble();
+    tel->station.element.x_orientation_error_rad =
+            s.value("x_orientation_error_deg", 0.0).toDouble() * D2R;
+    tel->station.element.y_orientation_error_rad =
+            s.value("y_orientation_error_deg", 0.0).toDouble() * D2R;
 
     // Station element random seeds.
-    temp = s.value("seed_element_gain_errors").toString();
-    tel->station.seed_element_gain_errors = (temp.toUpper() == "TIME" ||
+    temp = s.value("seed_gain_errors").toString();
+    tel->station.element.seed_gain_errors = (temp.toUpper() == "TIME" ||
             temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_element_phase_errors").toString();
-    tel->station.seed_element_phase_errors = (temp.toUpper() == "TIME" ||
+    temp = s.value("seed_phase_errors").toString();
+    tel->station.element.seed_phase_errors = (temp.toUpper() == "TIME" ||
             temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_element_time_variable_errors").toString();
-    tel->station.seed_element_time_variable_errors = (temp.toUpper() == "TIME"
+    temp = s.value("seed_time_variable_errors").toString();
+    tel->station.element.seed_time_variable_errors = (temp.toUpper() == "TIME"
             || temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_element_position_xy_errors").toString();
-    tel->station.seed_element_position_xy_errors = (temp.toUpper() == "TIME" ||
+    temp = s.value("seed_position_xy_errors").toString();
+    tel->station.element.seed_position_xy_errors = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    temp = s.value("seed_x_orientation_error").toString();
+    tel->station.element.seed_x_orientation_error = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    temp = s.value("seed_y_orientation_error").toString();
+    tel->station.element.seed_y_orientation_error = (temp.toUpper() == "TIME" ||
             temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
 
     // Receiver temperature.

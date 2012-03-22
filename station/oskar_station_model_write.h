@@ -26,30 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_STATION_H_
-#define OSKAR_SETTINGS_STATION_H_
-
-#include "station/oskar_SettingsElement.h"
+#ifndef OSKAR_STATION_MODEL_WRITE_H_
+#define OSKAR_STATION_MODEL_WRITE_H_
 
 /**
- * @struct oskar_SettingsStation
- *
- * @brief Structure to hold station model settings.
+ * @file oskar_station_model_write.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_StationModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Writes OSKAR station model data to an ASCII file.
  *
  * @details
- * The structure holds station model parameters.
+ * Writes data from the station model to an ASCII file
+ * consisting of a simple header describing the number of (antenna) elements
+ * in the station, the station longitude, latitude and altitude followed by
+ * a CSV list of the local horizontal x,y,z positions of the elements
+ * (in metres) and remaining station data.
+ *
+ * Note:
+ * - The oskar_Mem pointers holding the coordinates must reside on host (CPU).
+ * - The coordinates of the station file must be in metres.
+ *
+ * @param[in] filename Pathname of file to write.
+ * @param[in] station  Station model to write.
+ *
+ * @return An OSKAR error code.
  */
-struct oskar_SettingsStation
-{
-    int station_type;
-    int element_type;
-    int evaluate_array_factor;
-    int evaluate_element_factor;
-    int normalise_beam;
-    double receiver_temperature;
-    char* receiver_temperature_file;
-    oskar_SettingsElement element;
-};
-typedef struct oskar_SettingsStation oskar_SettingsStation;
+OSKAR_EXPORT
+int oskar_station_model_write(const char* filename,
+        const oskar_StationModel* station);
 
-#endif /* OSKAR_SETTINGS_STATION_H_ */
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_STATION_MODEL_WRITE_H_ */

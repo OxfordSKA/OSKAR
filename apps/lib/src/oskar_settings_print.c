@@ -27,6 +27,8 @@
  */
 
 #include "apps/lib/oskar_settings_print.h"
+#include "station/oskar_StationModel.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -257,59 +259,96 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_1f(2, w, "Altitude [m]", s->telescope.altitude_m);
     pr_b(2, w, "Use common sky", s->telescope.use_common_sky);
     pr_k(2, w, "Station settings", 1);
-    pr_b(3, w, "Enable array factor", s->telescope.station.evaluate_array_factor);
-    pr_b(3, w, "Enable element factor", s->telescope.station.evaluate_element_factor);
-    pr_b(3, w, "Normalise station beam", s->telescope.station.normalise_beam);
-    if (s->telescope.station.element_gain > 0.0)
+    pr_s(3, w, "Station type", s->telescope.station.station_type ==
+            OSKAR_STATION_TYPE_DISH ? "Dishes" : "Aperture Arrays");
+    pr_s(3, w, "Element type", s->telescope.station.element_type ==
+            OSKAR_STATION_ELEMENT_TYPE_DIPOLE ? "Dipoles" : "Points");
+    pr_b(3, w, "Evaluate array factor",
+            s->telescope.station.evaluate_array_factor);
+    pr_b(3, w, "Evaluate element factor",
+            s->telescope.station.evaluate_element_factor);
+    pr_b(3, w, "Normalise array beam", s->telescope.station.normalise_beam);
+    if (s->telescope.station.element.gain > 0.0 ||
+            s->telescope.station.element.gain_error_fixed > 0.0 ||
+            s->telescope.station.element.gain_error_time > 0.0 ||
+            s->telescope.station.element.phase_error_fixed_rad > 0.0 ||
+            s->telescope.station.element.phase_error_time_rad > 0.0 ||
+            s->telescope.station.element.position_error_xy_m > 0.0 ||
+            s->telescope.station.element.x_orientation_error_rad > 0.0 ||
+            s->telescope.station.element.y_orientation_error_rad > 0.0)
     {
-        pr_3f(3, w, "Element gain", s->telescope.station.element_gain);
+        pr_k(3, w, "Element settings (overrides)", 1);
     }
-    if (s->telescope.station.element_gain_error_fixed > 0.0)
+    if (s->telescope.station.element.gain > 0.0)
     {
-        pr_3f(3, w, "Element gain std.dev. (systematic)",
-                s->telescope.station.element_gain_error_fixed);
+        pr_3f(4, w, "Element gain", s->telescope.station.element.gain);
     }
-    if (s->telescope.station.element_gain_error_time > 0.0)
+    if (s->telescope.station.element.gain_error_fixed > 0.0)
     {
-        pr_3f(3, w, "Element gain std.dev. (time-variable)",
-                s->telescope.station.element_gain_error_time);
+        pr_3f(4, w, "Element gain std.dev. (systematic)",
+                s->telescope.station.element.gain_error_fixed);
     }
-    if (s->telescope.station.element_phase_error_fixed_rad > 0.0)
+    if (s->telescope.station.element.gain_error_time > 0.0)
     {
-        pr_3f(3, w, "Element phase std.dev. (systematic) [deg]",
-                s->telescope.station.element_phase_error_fixed_rad * R2D);
+        pr_3f(4, w, "Element gain std.dev. (time-variable)",
+                s->telescope.station.element.gain_error_time);
     }
-    if (s->telescope.station.element_phase_error_time_rad > 0.0)
+    if (s->telescope.station.element.phase_error_fixed_rad > 0.0)
     {
-        pr_3f(3, w, "Element phase std.dev. (time-variable) [deg]",
-                s->telescope.station.element_phase_error_time_rad * R2D);
+        pr_3f(4, w, "Element phase std.dev. (systematic) [deg]",
+                s->telescope.station.element.phase_error_fixed_rad * R2D);
     }
-    if (s->telescope.station.element_position_error_xy_m > 0.0)
+    if (s->telescope.station.element.phase_error_time_rad > 0.0)
     {
-        pr_3f(3, w, "Element (x,y) position std.dev [m]",
-                s->telescope.station.element_position_error_xy_m);
+        pr_3f(4, w, "Element phase std.dev. (time-variable) [deg]",
+                s->telescope.station.element.phase_error_time_rad * R2D);
     }
-    if (s->telescope.station.element_gain > 0.0 ||
-            s->telescope.station.element_gain_error_fixed > 0.0)
+    if (s->telescope.station.element.position_error_xy_m > 0.0)
     {
-        pr_i(3, w, "Random seed (systematic gain errors)",
-                s->telescope.station.seed_element_gain_errors);
+        pr_3f(4, w, "Element (x,y) position std.dev [m]",
+                s->telescope.station.element.position_error_xy_m);
     }
-    if (s->telescope.station.element_phase_error_fixed_rad > 0.0)
+    if (s->telescope.station.element.x_orientation_error_rad > 0.0)
     {
-        pr_i(3, w, "Random seed (systematic phase errors)",
-                s->telescope.station.seed_element_phase_errors);
+        pr_3f(4, w, "Element X-dipole orientation std.dev [deg]",
+                s->telescope.station.element.x_orientation_error_rad * R2D);
     }
-    if (s->telescope.station.element_gain_error_time > 0.0 ||
-            s->telescope.station.element_phase_error_time_rad > 0.0)
+    if (s->telescope.station.element.y_orientation_error_rad > 0.0)
     {
-        pr_i(3, w, "Random seed (time-variable errors)",
-                s->telescope.station.seed_element_time_variable_errors);
+        pr_3f(4, w, "Element Y-dipole orientation std.dev [deg]",
+                s->telescope.station.element.y_orientation_error_rad * R2D);
     }
-    if (s->telescope.station.element_position_error_xy_m > 0.0)
+    if (s->telescope.station.element.gain > 0.0 ||
+            s->telescope.station.element.gain_error_fixed > 0.0)
     {
-        pr_i(3, w, "Random seed (x,y position errors)",
-                s->telescope.station.seed_element_position_xy_errors);
+        pr_i(4, w, "Random seed (systematic gain errors)",
+                s->telescope.station.element.seed_gain_errors);
+    }
+    if (s->telescope.station.element.phase_error_fixed_rad > 0.0)
+    {
+        pr_i(4, w, "Random seed (systematic phase errors)",
+                s->telescope.station.element.seed_phase_errors);
+    }
+    if (s->telescope.station.element.gain_error_time > 0.0 ||
+            s->telescope.station.element.phase_error_time_rad > 0.0)
+    {
+        pr_i(4, w, "Random seed (time-variable errors)",
+                s->telescope.station.element.seed_time_variable_errors);
+    }
+    if (s->telescope.station.element.position_error_xy_m > 0.0)
+    {
+        pr_i(4, w, "Random seed (x,y position errors)",
+                s->telescope.station.element.seed_position_xy_errors);
+    }
+    if (s->telescope.station.element.x_orientation_error_rad > 0.0)
+    {
+        pr_i(4, w, "Random seed (X-dipole orientation errors)",
+                s->telescope.station.element.seed_x_orientation_error);
+    }
+    if (s->telescope.station.element.y_orientation_error_rad > 0.0)
+    {
+        pr_i(4, w, "Random seed (Y-dipole orientation errors)",
+                s->telescope.station.element.seed_y_orientation_error);
     }
 
     /* Print observation settings. */

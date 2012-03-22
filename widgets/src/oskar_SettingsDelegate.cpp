@@ -119,6 +119,8 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
                     oskar_SettingsModel::OptionsRole).toStringList();
             list->setFrame(false);
             list->addItems(options);
+            connect(list, SIGNAL(activated(int)),
+                    this, SLOT(commitAndCloseEditor(int)));
             editor = list;
             break;
         }
@@ -307,6 +309,7 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
             QString str = value.toString();
             int i = static_cast<QComboBox*>(editor)->findText(str,
                     Qt::MatchFixedString);
+            if (i < 0) i = 0;
             static_cast<QComboBox*>(editor)->setCurrentIndex(i);
             break;
         }
@@ -381,6 +384,15 @@ void oskar_SettingsDelegate::updateEditorGeometry(QWidget* editor,
         const QModelIndex& /*index*/) const
 {
     editor->setGeometry(option.rect);
+}
+
+// Private slots.
+
+void oskar_SettingsDelegate::commitAndCloseEditor(int /*index*/)
+{
+    QWidget* editor = static_cast<QWidget*>(sender());
+    emit commitData(editor);
+    closeEditor(editor);
 }
 
 // Private members.

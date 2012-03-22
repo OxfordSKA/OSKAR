@@ -26,45 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_STATION_MODEL_WRITE_COORDS_H_
-#define OSKAR_STATION_MODEL_WRITE_COORDS_H_
-
-/**
- * @file oskar_station_model_write_coords.h
- */
-
-#include "oskar_global.h"
-#include "station/oskar_StationModel.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef OSKAR_SETTINGS_ELEMENT_H_
+#define OSKAR_SETTINGS_ELEMENT_H_
 
 /**
- * @brief Writes coordinates of an OSKAR station model to file.
+ * @struct oskar_SettingsElement
+ *
+ * @brief Structure to hold station element settings.
  *
  * @details
- * Writes coordinates from the station model to an ASCII coordinates file
- * consisting of a simple header describing the number of (antenna) elements
- * in the station, the station longitude, latitude and altitude followed by
- * a CSV list of the local horizontal x,y,z positions of the elements, in metres.
- *
- * Note:
- * - The oskar_Mem pointers holding the coordinates must reside on host (CPU).
- * - The coordinates of the station file must be in metres.
- *
- * @param[in] filename Filename path written to.
- * @param[in] station  Station model containing coordinates to write.
- *
- * @return An OSKAR error code.
+ * The structure holds station element parameters that can be used to override
+ * those in the station files.
  */
-OSKAR_EXPORT
-int oskar_station_model_write_coords(const char* filename,
-        const oskar_StationModel* station);
+struct oskar_SettingsElement
+{
+    double gain;
+    double gain_error_fixed;
+    double gain_error_time;
+    double phase_error_fixed_rad;
+    double phase_error_time_rad;
+    double position_error_xy_m;
+    double x_orientation_error_rad;
+    double y_orientation_error_rad;
 
-#ifdef __cplusplus
-}
-#endif
+    /* Random seeds. */
+    int seed_gain_errors;
+    int seed_phase_errors;
+    int seed_time_variable_errors;
+    int seed_position_xy_errors;
+    int seed_x_orientation_error;
+    int seed_y_orientation_error;
+};
+typedef struct oskar_SettingsElement oskar_SettingsElement;
 
-#endif /* OSKAR_STATION_MODEL_WRITE_H_ */
+#endif /* OSKAR_SETTINGS_ELEMENT_H_ */

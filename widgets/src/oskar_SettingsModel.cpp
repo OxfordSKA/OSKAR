@@ -42,14 +42,18 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
   settings_(NULL),
   rootItem_(NULL)
 {
+    QString k;
+    QStringList options;
+
     // Set up the root item.
     rootItem_ = new oskar_SettingsItem(QString(), QString(),
             oskar_SettingsItem::LABEL, "Setting", "Value");
 
     // Simulator settings.
     setLabel("simulator", "Simulator settings");
-    registerSetting("simulator/double_precision", "Use double precision", oskar_SettingsItem::BOOL);
-    setTooltip("simulator/double_precision", "Determines whether double precision arithmetic is used for the simulation");
+    k = "simulator/double_precision";
+    registerSetting(k, "Use double precision", oskar_SettingsItem::BOOL);
+    setTooltip(k, "Determines whether double precision arithmetic is used");
     registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT);
     registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST);
 
@@ -136,21 +140,30 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/altitude_m", "Altitude [m]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/use_common_sky", "Use common sky (short baseline approximation)", oskar_SettingsItem::BOOL);
     setLabel("telescope/station", "Station settings");
+    options.clear();
+    options << "AA"; // << "Dish";
+    registerSetting("telescope/station/station_type", "Station type", oskar_SettingsItem::OPTIONS, options);
+    options.clear();
+    options << "Point" << "Dipole";
+    registerSetting("telescope/station/element_type", "Element type", oskar_SettingsItem::OPTIONS, options);
     registerSetting("telescope/station/evaluate_array_factor", "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL);
     registerSetting("telescope/station/evaluate_element_factor", "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL);
     registerSetting("telescope/station/normalise_beam", "Normalise array beam", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/station/element_gain", "Element gain", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_gain_error_fixed", "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_gain_error_time", "Element gain std.dev. (time-variable)", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_phase_error_fixed_deg", "Element phase std.dev. (systematic) [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_phase_error_time_deg", "Element phase std.dev. (time-variable) [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_position_error_xy_m", "Element (x,y) position std.dev. [m]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_x_orientation_error_deg", "Element X-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element_y_orientation_error_deg", "Element Y-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/seed_element_gain_errors", "Random seed (systematic gain errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/seed_element_phase_errors", "Random seed (systematic phase errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/seed_element_time_variable_errors", "Random seed (time-variable errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/seed_element_position_xy_errors", "Random seed (x,y position errors)", oskar_SettingsItem::RANDOM_SEED);
+    setLabel("telescope/station/element", "Element settings (overrides)");
+    registerSetting("telescope/station/element/gain", "Element gain", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/gain_error_fixed", "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/gain_error_time", "Element gain std.dev. (time-variable)", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/phase_error_fixed_deg", "Element phase std.dev. (systematic) [deg]", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/phase_error_time_deg", "Element phase std.dev. (time-variable) [deg]", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/position_error_xy_m", "Element (x,y) position std.dev. [m]", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/x_orientation_error_deg", "Element X-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/y_orientation_error_deg", "Element Y-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element/seed_gain_errors", "Random seed (systematic gain errors)", oskar_SettingsItem::RANDOM_SEED);
+    registerSetting("telescope/station/element/seed_phase_errors", "Random seed (systematic phase errors)", oskar_SettingsItem::RANDOM_SEED);
+    registerSetting("telescope/station/element/seed_time_variable_errors", "Random seed (time-variable errors)", oskar_SettingsItem::RANDOM_SEED);
+    registerSetting("telescope/station/element/seed_position_xy_errors", "Random seed (x,y position errors)", oskar_SettingsItem::RANDOM_SEED);
+    registerSetting("telescope/station/element/seed_x_orientation_error", "Random seed (X-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
+    registerSetting("telescope/station/element/seed_y_orientation_error", "Random seed (Y-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
 
     // Observation settings.
     setLabel("observation", "Observation settings");
@@ -225,6 +238,8 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     }
     else if (role == Qt::ToolTipRole)
         return item->tooltip();
+    else if (role == DefaultRole)
+        return item->defaultValue();
     else if (role == KeyRole)
         return item->key();
     else if (role == TypeRole)
@@ -287,7 +302,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         else if (role == Qt::SizeHintRole)
         {
             int width = QApplication::fontMetrics().width(item->label()) + 10;
-            return QSize(width, 24);
+            return QSize(width, 26);
         }
     }
 
@@ -507,18 +522,6 @@ void oskar_SettingsModel::saveSettingsFile(const QString& filename)
     }
 }
 
-void oskar_SettingsModel::setLabel(const QString& key, const QString& label)
-{
-    QModelIndex idx = index(key);
-    setData(idx, label);
-}
-
-void oskar_SettingsModel::setTooltip(const QString& key, const QString& tooltip)
-{
-    QModelIndex idx = index(key);
-    setData(idx, tooltip, Qt::ToolTipRole);
-}
-
 bool oskar_SettingsModel::setData(const QModelIndex& idx,
         const QVariant& value, int role)
 {
@@ -532,6 +535,12 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     if (role == Qt::ToolTipRole)
     {
         item->setTooltip(value.toString());
+        emit dataChanged(idx, idx);
+        return true;
+    }
+    else if (role == DefaultRole)
+    {
+        item->setDefaultValue(value);
         emit dataChanged(idx, idx);
         return true;
     }
@@ -622,6 +631,24 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     }
 
     return false;
+}
+
+void oskar_SettingsModel::setDefault(const QString& key, const QVariant& value)
+{
+    QModelIndex idx = index(key);
+    setData(idx, value, DefaultRole);
+}
+
+void oskar_SettingsModel::setLabel(const QString& key, const QString& label)
+{
+    QModelIndex idx = index(key);
+    setData(idx, label);
+}
+
+void oskar_SettingsModel::setTooltip(const QString& key, const QString& tooltip)
+{
+    QModelIndex idx = index(key);
+    setData(idx, tooltip, Qt::ToolTipRole);
 }
 
 void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)

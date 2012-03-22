@@ -62,6 +62,8 @@ extern "C" {
  * - Element phase error in degrees (default 0).
  * - Element multiplicative weight (real part, default 1).
  * - Element multiplicative weight (imaginary part, default 0).
+ * - Element X dipole axis azimuth, in degrees (default 90).
+ * - Element Y dipole axis azimuth, in degrees (default 0).
  *
  * Only the first two columns are required to be present.
  *

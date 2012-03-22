@@ -62,7 +62,8 @@ public:
         ClearIterationRole,
         OutputKeysRole,
         LoadRole,
-        OptionsRole
+        OptionsRole,
+        DefaultRole
     };
 
 public:

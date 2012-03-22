@@ -31,7 +31,7 @@
 #include "oskar_global.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "station/oskar_station_model_write_coords.h"
+#include "station/oskar_station_model_write.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
@@ -98,7 +98,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     // Set the station meta-data.
     station_cpu.element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
 
-//    error = oskar_station_model_write_coords("temp_test_station.txt", &station_cpu);
+//    error = oskar_station_model_write("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy the station structure to the gpu and scale the coordinates to wavenumbers.
