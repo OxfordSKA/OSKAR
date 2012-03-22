@@ -48,6 +48,8 @@
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_vector_types.h"
 #include "utility/oskar_Work.h"
 
 #include <cstdio>
@@ -56,9 +58,11 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QTime>
 
+extern "C"
 int oskar_sim_beam_pattern(const char* settings_file)
 {
     int err;
+    QTime timer;
 
     // Load the settings file.
     oskar_Settings settings;
@@ -81,7 +85,12 @@ int oskar_sim_beam_pattern(const char* settings_file)
     int station_id = settings.beam_pattern.station_id;
     int image_size = settings.beam_pattern.size;
     int num_channels = settings.obs.num_channels;
+    int num_pols = (settings.telescope.station.element_type ==
+            OSKAR_STATION_ELEMENT_TYPE_POINT) ? 1 : 4;
     int num_pixels = image_size * image_size;
+    int beam_pattern_data_type = type | OSKAR_COMPLEX;
+    if (num_pols == 4)
+        beam_pattern_data_type |= OSKAR_MATRIX;
     double fov = settings.beam_pattern.fov_deg * M_PI / 180;
     double ra0 = settings.obs.ra0_rad;
     double dec0 = settings.obs.dec0_rad;
@@ -96,24 +105,25 @@ int oskar_sim_beam_pattern(const char* settings_file)
     double dt_dump           = times->dt_dump_days;
 
     // Declare image hyper-cube.
-    oskar_Image data(type, OSKAR_LOCATION_CPU);
-    err = oskar_image_resize(&data, image_size, image_size, 1,
+    oskar_Image image_cube(type, OSKAR_LOCATION_CPU);
+    err = oskar_image_resize(&image_cube, image_size, image_size, num_pols,
             num_times, num_channels);
-    data.image_type = OSKAR_IMAGE_TYPE_BEAM_SCALAR;
     if (err) return err;
 
     // Set image meta-data.
-    data.centre_ra_deg      = settings.obs.ra0_rad * 180.0 / M_PI;
-    data.centre_dec_deg     = settings.obs.dec0_rad * 180.0 / M_PI;
-    data.fov_ra_deg         = settings.beam_pattern.fov_deg;
-    data.fov_dec_deg        = settings.beam_pattern.fov_deg;
-    data.freq_start_hz      = settings.obs.start_frequency_hz;
-    data.freq_inc_hz        = settings.obs.frequency_inc_hz;
-    data.time_inc_sec       = settings.obs.time.dt_dump_days * 86400.0;
-    data.time_start_mjd_utc = settings.obs.time.obs_start_mjd_utc;
+    image_cube.image_type         = (num_pols == 1) ?
+            OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
+    image_cube.centre_ra_deg      = settings.obs.ra0_rad * 180.0 / M_PI;
+    image_cube.centre_dec_deg     = settings.obs.dec0_rad * 180.0 / M_PI;
+    image_cube.fov_ra_deg         = settings.beam_pattern.fov_deg;
+    image_cube.fov_dec_deg        = settings.beam_pattern.fov_deg;
+    image_cube.freq_start_hz      = settings.obs.start_frequency_hz;
+    image_cube.freq_inc_hz        = settings.obs.frequency_inc_hz;
+    image_cube.time_inc_sec       = settings.obs.time.dt_dump_days * 86400.0;
+    image_cube.time_start_mjd_utc = settings.obs.time.obs_start_mjd_utc;
 
     // Temporary CPU memory.
-    oskar_Mem beam_cpu(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU, num_pixels);
+    oskar_Mem beam_cpu(beam_pattern_data_type, OSKAR_LOCATION_CPU, num_pixels);
 
     // Generate l,m grid and equatorial coordinates for beam pattern pixels.
     oskar_Mem grid_l(type, OSKAR_LOCATION_CPU, num_pixels);
@@ -149,12 +159,11 @@ int oskar_sim_beam_pattern(const char* settings_file)
 
         // Allocate weights work array and GPU memory for a beam pattern.
         oskar_Mem weights(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
-        oskar_Mem beam_pattern(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU,
+        oskar_Mem beam_pattern(beam_pattern_data_type, OSKAR_LOCATION_GPU,
                 num_pixels);
         oskar_Work work(type, OSKAR_LOCATION_GPU);
 
         // Loop over channels.
-        QTime timer;
         timer.start();
         for (int c = 0; c < num_channels; ++c)
         {
@@ -178,7 +187,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
             // Start simulation.
             for (int j = 0; j < num_times; ++j)
             {
-                // Start time for the visibility dump, in MJD(UTC).
+                // Start time for the data dump, in MJD(UTC).
                 printf("--> Generating beam for snapshot (%i / %i).\n",
                         j+1, num_times);
                 double t_dump = obs_start_mjd_utc + j * dt_dump;
@@ -205,39 +214,87 @@ int oskar_sim_beam_pattern(const char* settings_file)
                 err = oskar_mem_copy(&beam_cpu, &beam_pattern);
                 if (err) return err;
 
-                // Convert from real/imaginary to power.
-                int offset = (j + c * num_times) * num_pixels;
+                // Convert from complex to power or phase.
+                // Image cube has dimension order (from slowest to fastest):
+                // Channel, Time, Polarisation, Declination, Right Ascension.
+                int offset = (j + c * num_times) * num_pols * num_pixels;
                 if (type == OSKAR_SINGLE)
                 {
-                    float* img = (float*)data.data + offset;
-                    float2* tc = (float2*)beam_cpu;
-                    for (int i = 0; i < num_pixels; ++i)
+                    float* img = (float*)image_cube.data + offset;
+                    float tx, ty;
+                    if (oskar_mem_is_scalar(beam_pattern_data_type))
                     {
-                        float tx = tc[i].x;
-                        float ty = tc[i].y;
-                        img[i] = sqrt(tx * tx + ty * ty);
+                        float2* tc = (float2*)beam_cpu.data;
+                        for (int i = 0; i < num_pixels; ++i)
+                        {
+                            tx = tc[i].x;
+                            ty = tc[i].y;
+                            img[i] = sqrt(tx * tx + ty * ty);
+                        }
+                    }
+                    else
+                    {
+                        float4c* tc = (float4c*)beam_cpu.data;
+                        for (int i = 0; i < num_pixels; ++i)
+                        {
+                            tx = tc[i].a.x;
+                            ty = tc[i].a.y;
+                            img[i] = sqrt(tx * tx + ty * ty); // phi_X
+                            tx = tc[i].b.x;
+                            ty = tc[i].b.y;
+                            img[i + num_pixels] = sqrt(tx * tx + ty * ty); // theta_X
+                            tx = tc[i].c.x;
+                            ty = tc[i].c.y;
+                            img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
+                            tx = tc[i].d.x;
+                            ty = tc[i].d.y;
+                            img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
+                        }
                     }
                 }
                 else if (type == OSKAR_DOUBLE)
                 {
-                    double* img = (double*)data.data + offset;
-                    double2* tc = (double2*)beam_cpu;
-                    for (int i = 0; i < num_pixels; ++i)
+                    double* img = (double*)image_cube.data + offset;
+                    double tx, ty;
+                    if (oskar_mem_is_scalar(beam_pattern_data_type))
                     {
-                        double tx = tc[i].x;
-                        double ty = tc[i].y;
-                        img[i] = sqrt(tx * tx + ty * ty);
+                        double2* tc = (double2*)beam_cpu.data;
+                        for (int i = 0; i < num_pixels; ++i)
+                        {
+                            tx = tc[i].x;
+                            ty = tc[i].y;
+                            img[i] = sqrt(tx * tx + ty * ty);
+                        }
+                    }
+                    else
+                    {
+                        double4c* tc = (double4c*)beam_cpu.data;
+                        for (int i = 0; i < num_pixels; ++i)
+                        {
+                            tx = tc[i].a.x;
+                            ty = tc[i].a.y;
+                            img[i] = sqrt(tx * tx + ty * ty); // phi_X
+                            tx = tc[i].b.x;
+                            ty = tc[i].b.y;
+                            img[i + num_pixels] = sqrt(tx * tx + ty * ty); // theta_X
+                            tx = tc[i].c.x;
+                            ty = tc[i].c.y;
+                            img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
+                            tx = tc[i].d.x;
+                            ty = tc[i].d.y;
+                            img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
+                        }
                     }
                 }
             }
         }
-        printf("=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
     }
+    printf("=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
 
     // Dump data to OSKAR image file if required.
     if (settings.beam_pattern.filename)
     {
-        err = oskar_image_write(&data, settings.beam_pattern.filename, 0);
+        err = oskar_image_write(&image_cube, settings.beam_pattern.filename, 0);
         if (err) return err;
     }
 
@@ -245,7 +302,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     // FITS library available.
     if (settings.beam_pattern.fits_image)
     {
-        oskar_fits_image_write(&data, settings.beam_pattern.fits_image);
+        oskar_fits_image_write(&image_cube, settings.beam_pattern.fits_image);
     }
 #endif
 

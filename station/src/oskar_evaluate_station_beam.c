@@ -101,7 +101,8 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
 
         /* Determine the amount of workspace memory required. */
         workspace_complex += 2 * station->num_elements; /* For weights. */
-        if (station->single_element_model)
+        if (station->single_element_model ||
+                station->element_type == OSKAR_STATION_ELEMENT_TYPE_POINT)
         {
             if (station->evaluate_array_factor && oskar_mem_is_matrix(EG->type))
                 workspace_complex += num_points; /* For array factor. */
@@ -141,7 +142,8 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
         if (error) return error;
 
         /* Check whether using a common or unique element model. */
-        if (! station->single_element_model)
+        if ( ! station->single_element_model &&
+                station->element_type != OSKAR_STATION_ELEMENT_TYPE_POINT)
         {
             /* Unique receptor elements: E and G are not separable. */
             if (!station->evaluate_array_factor ||
@@ -290,6 +292,8 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
         /* Release use of work arrays. */
         work->used_complex -= workspace_complex;
         work->used_matrix -= workspace_matrix;
+        /*printf("Complex: %d, Matrix: %d\n", work->used_complex,
+                work->used_matrix);*/
     }
 
     return error;

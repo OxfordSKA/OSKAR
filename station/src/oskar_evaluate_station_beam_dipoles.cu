@@ -88,7 +88,7 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
 
     // Double precision.
     if (oskar_station_model_type(station) == OSKAR_DOUBLE &&
-            beam->type == OSKAR_DOUBLE_COMPLEX &&
+            beam->type == OSKAR_DOUBLE_COMPLEX_MATRIX &&
             weights->type == OSKAR_DOUBLE_COMPLEX &&
             l->type == OSKAR_DOUBLE &&
             m->type == OSKAR_DOUBLE &&
@@ -150,7 +150,7 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
 
     // Single precision.
     else if (oskar_station_model_type(station) == OSKAR_SINGLE &&
-            beam->type == OSKAR_SINGLE_COMPLEX &&
+            beam->type == OSKAR_SINGLE_COMPLEX_MATRIX &&
             weights->type == OSKAR_SINGLE_COMPLEX &&
             l->type == OSKAR_SINGLE &&
             m->type == OSKAR_SINGLE &&
@@ -208,6 +208,10 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
         oskar_cudak_blank_below_horizon_matrix_f
         OSKAR_CUDAK_CONF(num_blocks, num_threads)
         (n->num_elements, *n, *beam);
+    }
+    else
+    {
+        return OSKAR_ERR_BAD_DATA_TYPE;
     }
     cudaDeviceSynchronize();
     return (int)cudaPeekAtLastError();

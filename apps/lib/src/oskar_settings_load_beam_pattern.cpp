@@ -27,6 +27,7 @@
  */
 
 #include "apps/lib/oskar_settings_load_beam_pattern.h"
+#include "imaging/oskar_Image.h"
 
 #include <cstdio>
 #include <cstdlib>

@@ -27,6 +27,7 @@
  */
 
 #include "oskar_global.h"
+#include "station/cudak/oskar_cudak_blank_below_horizon.h"
 #include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_type_check.h"
@@ -76,6 +77,11 @@ int oskar_evaluate_dipole_pattern(oskar_Mem* pattern, const oskar_Mem* l,
                 (const float*)n->data, (float)cos_orientation_x,
                 (float)sin_orientation_x, (float)cos_orientation_y,
                 (float)sin_orientation_y, (float4c*)pattern->data);
+
+        /* Zero the value of any positions below the horizon. */
+        oskar_cudak_blank_below_horizon_matrix_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (n->num_elements, (const float*)n->data, (float4c*)pattern->data);
     }
     else if (type == OSKAR_DOUBLE)
     {
@@ -88,6 +94,11 @@ int oskar_evaluate_dipole_pattern(oskar_Mem* pattern, const oskar_Mem* l,
                 (const double*)n->data, cos_orientation_x,
                 sin_orientation_x, cos_orientation_y, sin_orientation_y,
                 (double4c*)pattern->data);
+
+        /* Zero the value of any positions below the horizon. */
+        oskar_cudak_blank_below_horizon_matrix_d
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (n->num_elements, (const double*)n->data, (double4c*)pattern->data);
     }
     cudaDeviceSynchronize();
     return (int)cudaPeekAtLastError();
