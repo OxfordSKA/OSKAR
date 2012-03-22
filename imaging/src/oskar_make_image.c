@@ -32,6 +32,9 @@
 #include "imaging/oskar_make_image_dft.h"
 #include "imaging/oskar_image_resize.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
+#include "imaging/oskar_get_image_baseline_coords.h"
+#include "imaging/oskar_get_image_stokes.h"
+#include "imaging/oskar_setup_image.h"
 
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
@@ -43,55 +46,46 @@
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_vector_types.h"
 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
 #define SEC2DAYS 1.15740740740740740740741e-5
-#define C_0 299792458.0
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
+int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
         const oskar_SettingsImage* settings)
 {
-    oskar_Mem l, m, stokes, uu, vv, amp, uu_ptr, vv_ptr, im_slice;
+    oskar_Mem l, m, stokes, uu, vv, amp, im_slice;
     int t, c, p, i, j, k; /* loop indices */
     int type;
     int size, num_pixels, location, num_pols, num_times, num_chan; /* dims */
     int pol_type;
     int time_range[2], chan_range[2];
-    int num_vis_amps, num_vis_pols;
+    int num_vis_pols;
     int num_vis; /* number of visibilities passed to image per plane of the cube */
-    double fov, freq0, lambda0, lambda, scaling;
+    double fov, freq0;
     int slice_offset;
     int err;
+    int idx;
 
     /* Set the location for temporary memory used in this function */
     location = OSKAR_LOCATION_CPU;
 
     /* ___ Set local variables ___ */
     /* data type */
-    if (image == NULL || vis == NULL || settings == NULL)
+    if (im == NULL || vis == NULL || settings == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    if (oskar_mem_is_double(vis->amplitude.type) &&
-            oskar_mem_is_double(image->data.type))
-    {
-        type = OSKAR_DOUBLE;
-    }
-    else if (oskar_mem_is_single(vis->amplitude.type) &&
-            oskar_mem_is_single(image->data.type))
-    {
-        type = OSKAR_SINGLE;
-    }
-    else
-        return OSKAR_ERR_BAD_DATA_TYPE;
 
+    type = (oskar_mem_is_double(vis->amplitude.type) &&
+            oskar_mem_is_double(im->data.type)) ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
-    /* image variables*/
+    /* image variables */
     size = settings->size;
     fov = settings->fov_deg * M_PI/180.0;
     time_range[0] = settings->time_range[0];
@@ -108,7 +102,7 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
             vis->num_channels-1 : 0;
     num_pixels = size*size;
     num_times = (settings->time_snapshots) ?
-            (time_range[1] - chan_range[0] + 1) : 1;
+            (time_range[1] - time_range[0] + 1) : 1;
     if (num_times < 1) return OSKAR_ERR_INVALID_RANGE;
     num_chan  = (settings->channel_snapshots) ?
             (chan_range[1] - chan_range[0] + 1) : 1;
@@ -134,7 +128,6 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* visibility variables */
-    num_vis_amps = vis->num_baselines * vis->num_channels * vis->num_times;
     num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
     /* sanity checks */
     if (num_times > vis->num_times || num_chan > vis->num_channels ||
@@ -147,177 +140,11 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
 
     /* ___ Evaluate IQUV if required ___ */
     oskar_mem_init(&stokes, type, location, 0, OSKAR_FALSE);
+    err = oskar_get_image_stokes(&stokes, vis, settings);
+    if (err) return err;
 
-    /* If the input data is polarised and a single stokes polarisation type is selected */
-    if (num_vis_pols == 4 && (pol_type == OSKAR_IMAGE_TYPE_STOKES_I ||
-            pol_type == OSKAR_IMAGE_TYPE_STOKES_Q ||
-            pol_type == OSKAR_IMAGE_TYPE_STOKES_U ||
-            pol_type == OSKAR_IMAGE_TYPE_STOKES_V))
-    {
-        printf("** evaluating (I | Q | U | V)\n");
-        /* I = 0.5 (XX + YY) */
-        switch (pol_type)
-        {
-            case OSKAR_IMAGE_TYPE_STOKES_I:
-            {
-                oskar_mem_init(&stokes, type | OSKAR_COMPLEX, location, num_vis_amps, OSKAR_TRUE);
-                for (i = 0; i < num_vis_amps; ++i)
-                {
-                    if (type == OSKAR_DOUBLE)
-                    {
-                        double4c* d_ = (double4c*)vis->amplitude.data;
-                        double2* s_ = ((double2*)stokes.data);
-                        s_[i].x = 0.5 * (d_[i].a.x + d_[i].d.x);
-                        s_[i].y = 0.5 * (d_[i].a.y + d_[i].d.y);
-                    }
-                    else
-                    {
-                        float4c* d_ = (float4c*)vis->amplitude.data;
-                        float2* s_ = (float2*)stokes.data;
-                        s_[i].x = 0.5 * (d_[i].a.x + d_[i].d.x);
-                        s_[i].y = 0.5 * (d_[i].a.y + d_[i].d.y);
-                    }
-                }
-                break;
-            }
-            case OSKAR_IMAGE_TYPE_STOKES_Q:
-            {
-                oskar_mem_init(&stokes, type | OSKAR_COMPLEX, location, num_vis_amps, OSKAR_TRUE);
-                for (i = 0; i < num_vis_amps; ++i)
-                {
-                    if (type == OSKAR_DOUBLE)
-                    {
-                        double4c* d_ = (double4c*)vis->amplitude.data;
-                        double2* s_ = (double2*)stokes.data;
-                        s_[i].x = 0.5 * (d_[i].a.x - d_[i].d.x);
-                        s_[i].y = 0.5 * (d_[i].a.y - d_[i].d.y);
-                    }
-                    else
-                    {
-                        float4c* d_ = (float4c*)vis->amplitude.data;
-                        float2* s_ = (float2*)stokes.data;
-                        s_[i].x = 0.5 * (d_[i].a.x - d_[i].d.x);
-                        s_[i].y = 0.5 * (d_[i].a.y - d_[i].d.y);
-                    }
-                }
-                break;
-            }
-            case OSKAR_IMAGE_TYPE_STOKES_U:
-            {
-                oskar_mem_init(&stokes, type | OSKAR_COMPLEX, location, num_vis_amps, OSKAR_TRUE);
-                for (i = 0; i < num_vis_amps; ++i)
-                {
-                    if (type == OSKAR_DOUBLE)
-                    {
-                        double4c* d_ = (double4c*)vis->amplitude.data;
-                        double2* s_ = (double2*)stokes.data;
-                        s_[i].x = 0.5 * (d_[i].b.x + d_[i].c.x);
-                        s_[i].y = 0.5 * (d_[i].b.y + d_[i].c.y);
-                    }
-                    else
-                    {
-                        float4c* d_ = (float4c*)vis->amplitude.data;
-                        float2* s_ = (float2*)stokes.data;
-                        s_[i].x = 0.5 * (d_[i].b.x + d_[i].c.x);
-                        s_[i].y = 0.5 * (d_[i].b.y + d_[i].c.y);
-                    }
-                }
-                break;
-            }
-            case OSKAR_IMAGE_TYPE_STOKES_V:
-            {
-                oskar_mem_init(&stokes, type | OSKAR_COMPLEX, location, num_vis_amps, OSKAR_TRUE);
-                for (i = 0; i < num_vis_amps; ++i)
-                {
-                    if (type == OSKAR_DOUBLE)
-                    {
-                        double4c* d_ = (double4c*)vis->amplitude.data;
-                        double2* s_ = (double2*)stokes.data;
-                        s_[i].x =  0.5 * (d_[i].b.y - d_[i].c.y);
-                        s_[i].y = -0.5 * (d_[i].b.x - d_[i].c.x);
-                    }
-                    else
-                    {
-                        float4c* d_ = (float4c*)vis->amplitude.data;
-                        float2* s_ = (float2*)stokes.data;
-                        s_[i].x =  0.5 * (d_[i].b.y - d_[i].c.y);
-                        s_[i].y = -0.5 * (d_[i].b.x - d_[i].c.x);
-                    }
-                }
-                break;
-            }
-            default:
-            {
-                return OSKAR_ERR_BAD_DATA_TYPE;
-            }
-        }; /* switch (pol_type) */
-    }
-    else if (num_vis_pols == 4 && pol_type == OSKAR_IMAGE_TYPE_STOKES)
-    {
-        printf("** evaluating stokes parameters\n");
-        oskar_mem_init(&stokes, vis->amplitude.type, location, num_vis_amps, OSKAR_TRUE);
-        for (i = 0; i < num_vis_amps; ++i)
-        {
-            if (type == OSKAR_DOUBLE)
-            {
-                double4c* d_ = (double4c*)vis->amplitude.data;
-                double4c* s_ = (double4c*)stokes.data;
-                /* I = 0.5 (XX + YY) */
-                s_[i].a.x =  0.5 * (d_[i].a.x + d_[i].d.x);
-                s_[i].a.y =  0.5 * (d_[i].a.y + d_[i].d.y);
-                /* Q = 0.5 (XX - YY)*/
-                s_[i].b.x =  0.5 * (d_[i].a.x - d_[i].d.x);
-                s_[i].b.y =  0.5 * (d_[i].a.y - d_[i].d.y);
-                /* U = 0.5 (XY + YX) */
-                s_[i].c.x =  0.5 * (d_[i].b.x + d_[i].c.x);
-                s_[i].c.y =  0.5 * (d_[i].b.y + d_[i].c.y);
-                /* V = -0.5i (XY - YX) */
-                s_[i].d.x =  0.5 * (d_[i].b.y - d_[i].c.y);
-                s_[i].d.y = -0.5 * (d_[i].b.x - d_[i].c.x);
-            }
-            else
-            {
-                float4c* d_ = (float4c*)vis->amplitude.data;
-                float4c* s_ = (float4c*)stokes.data;
-                /* I */
-                s_[i].a.x =  0.5 * (d_[i].a.x + d_[i].d.x);
-                s_[i].a.y =  0.5 * (d_[i].a.y + d_[i].d.y);
-                /* Q */
-                s_[i].b.x =  0.5 * (d_[i].a.x - d_[i].d.x);
-                s_[i].b.y =  0.5 * (d_[i].a.y - d_[i].d.y);
-                /* U */
-                s_[i].c.x =  0.5 * (d_[i].b.x + d_[i].c.x);
-                s_[i].c.y =  0.5 * (d_[i].b.y + d_[i].c.y);
-                /* V */
-                s_[i].d.x =  0.5 * (d_[i].b.y - d_[i].c.y);
-                s_[i].d.y = -0.5 * (d_[i].b.x - d_[i].c.x);
-            }
-        }
-    }
-
-
-    /* ___ Setup the image ___ **/
-    oskar_image_resize(image, size, size, num_pols, num_times, num_chan);
-    /* Set image meta-data */
-    /* Note: not changing the dimension order here from that defined in
-     * oskar_image_init() */
-    oskar_mem_copy(&image->settings_path, &vis->settings_path);
-    image->centre_ra_deg      = vis->phase_centre_ra_deg;
-    image->centre_dec_deg     = vis->phase_centre_dec_deg;
-    image->fov_ra_deg         = settings->fov_deg;
-    image->fov_dec_deg        = settings->fov_deg;
-    image->time_start_mjd_utc = vis->time_start_mjd_utc +
-            (time_range[0] * vis->time_inc_seconds * SEC2DAYS);
-    image->time_inc_sec       = vis->time_inc_seconds;
-    image->freq_start_hz      = vis->freq_start_hz +
-            (chan_range[0] * vis->channel_bandwidth_hz);
-    image->image_type         = pol_type;
-    /* TODO think a bit more about how best to set this for all scenarios
-     * channel averaging ... ? */
-    image->freq_inc_hz        = (settings->channel_snapshots) ?
-            vis->freq_inc_hz : 0.0;
-    /* Note: mean, variance etc as these can't be defined for cubes! */
-
+    /* Setup the image */
+    oskar_setup_image(im, vis, settings);
 
     /* Note: vis are channel -> time -> baseline order currently  */
     /*       vis coordinates are of length = num_times * num_baselines */
@@ -336,7 +163,15 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
         oskar_mem_init(&vv,  type, location, num_vis, OSKAR_TRUE);
         oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
     }
-    else
+    else if (!settings->time_snapshots && settings->channel_snapshots)
+    {
+        num_vis = vis->num_baselines * vis->num_times;
+        oskar_mem_init(&uu,  type, location, num_vis, OSKAR_TRUE);
+        oskar_mem_init(&vv,  type, location, num_vis, OSKAR_TRUE);
+        oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
+        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+    }
+    else /* freq and time synth */
     {
         num_vis = vis->num_baselines * vis->num_channels * vis->num_times;
         oskar_mem_init(&uu,  type, location, num_vis, OSKAR_TRUE);
@@ -344,8 +179,6 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
         oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
     }
 
-    oskar_mem_init(&uu_ptr, type, location, vis->num_baselines, OSKAR_FALSE);
-    oskar_mem_init(&vv_ptr, type, location, vis->num_baselines, OSKAR_FALSE);
     oskar_mem_init(&im_slice, type, location, num_pixels, OSKAR_FALSE);
 
 
@@ -369,87 +202,32 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     /* ___ Make the image ___ */
     for (c = 0; c < num_chan; ++c)
     {
-        int ch_ = chan_range[0] + c;
-
-        freq0 = image->freq_start_hz + (image->freq_inc_hz) * c + vis->channel_bandwidth_hz/2.0;
-        lambda0 = C_0 / freq0;
+        int channel = chan_range[0] + c;
+        freq0 = im->freq_start_hz + (im->freq_inc_hz) * c + vis->channel_bandwidth_hz/2.0;
 
         for (t = 0; t < num_times; ++t)
         {
-            int coord_offset;
-            int ti_ = time_range[0] + t;
+            int time = time_range[0] + t;
 
-            /* ___ Get baseline coordinates needed for imaging ___ */
-
-            /* Snapshots in frequency and time */
-            if (settings->time_snapshots && settings->channel_snapshots)
-            {
-                coord_offset = ti_ * vis->num_baselines;
-                oskar_mem_get_pointer(&uu, &vis->uu_metres, coord_offset, num_vis);
-                oskar_mem_get_pointer(&vv, &vis->vv_metres, coord_offset, num_vis);
-            }
-
-            /* Snapshots in time, frequency synthesis */
-            else if (settings->time_snapshots && !settings->channel_snapshots)
-            {
-                coord_offset = ti_ * vis->num_baselines;
-                oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
-                oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
-
-                for (j = 0; j < (chan_range[1] - chan_range[0]); ++j)
-                {
-                    lambda  = 0.0;
-                    scaling = lambda0/lambda;
-                    for (i = 0; i < vis->num_baselines; ++i)
-                    {
-                        int idx = j*vis->num_baselines + i;
-                        if (type == OSKAR_DOUBLE)
-                        {
-                            ((double*)uu.data)[idx] = ((double*)uu_ptr.data)[i] * scaling;
-                            ((double*)vv.data)[idx] = ((double*)vv_ptr.data)[i] * scaling;
-                        }
-                        else
-                        {
-                            ((float*)uu.data)[idx] = ((float*)uu_ptr.data)[i] * scaling;
-                            ((float*)vv.data)[idx] = ((float*)vv_ptr.data)[i] * scaling;
-                        }
-                    }
-                }
-            }
-
-            /* Frequency and time synthesis */
-            else
-            {
-                for (k = 0; k < (time_range[1] - time_range[0]); ++k)
-                {
-                    coord_offset = (time_range[0] + k) * vis->num_baselines;
-                    oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
-                    oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
-
-                    for (j = 0; j < (chan_range[1] - chan_range[0]); ++j)
-                    {
-                        double lambda  = 0.0;
-                        double scaling = lambda0/lambda;
-                        for (i = 0; i < vis->num_baselines; ++i)
-                        {
-                            int idx = j*vis->num_baselines + i;
-                            if (type == OSKAR_DOUBLE)
-                            {
-                                ((double*)uu.data)[idx] = ((double*)uu_ptr.data)[i] * scaling;
-                                ((double*)vv.data)[idx] = ((double*)vv_ptr.data)[i] * scaling;
-                            }
-                            else
-                            {
-                                ((float*)uu.data)[idx] = ((float*)uu_ptr.data)[i] * scaling;
-                                ((float*)vv.data)[idx] = ((float*)vv_ptr.data)[i] * scaling;
-                            }
-                        }
-                    }
-                }
-            }
+            /* Evaluate baseline coords needed for imaging */
+            err = oskar_get_image_baseline_coords(&uu, &vv, vis, time, channel, settings);
+            if (err) return err;
 
             for (p = 0; p < num_pols; ++p)
             {
@@ -457,7 +235,6 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                 /* Snapshots in both frequency and time */
                 if (settings->time_snapshots && settings->channel_snapshots)
                 {
-                    printf("-- (%i %i)\n", settings->time_snapshots, settings->channel_snapshots);
                     if (num_pols == 4)
                     {
                         if (pol_type == OSKAR_IMAGE_TYPE_STOKES)
@@ -466,9 +243,7 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                             {
                                 double4c* s_ = (double4c*)stokes.data;
                                 double2* a_  = (double2*)amp.data;
-                                int offset = (ch_ * vis->num_times * vis->num_baselines) +
-                                        ti_ * vis->num_baselines;
-                                printf("-- stokes, double\n");
+                                int offset = (channel * vis->num_times + time)*vis->num_baselines;
                                 for (j = 0; j < vis->num_baselines; ++j)
                                 {
                                     if (p == 0)
@@ -495,23 +270,42 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                             }
                             else /* type == OSKAR_SINGLE */
                             {
-                                printf("-- stokes, single\n");
-                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-                            }
+                                float4c* s_ = (float4c*)stokes.data;
+                                float2* a_  = (float2*)amp.data;
+                                int offset = (channel * vis->num_times + time) * vis->num_baselines;
+                                for (j = 0; j < vis->num_baselines; ++j)
+                                {
+                                    if (p == 0)
+                                    {
+                                        a_[j].x = s_[offset + j].a.x;
+                                        a_[j].y = s_[offset + j].a.y;
+                                    }
+                                    else if (p == 1)
+                                    {
+                                        a_[j].x = s_[offset + j].b.x;
+                                        a_[j].y = s_[offset + j].b.y;
+                                    }
+                                    else if (p == 2)
+                                    {
+                                        a_[j].x = s_[offset + j].c.x;
+                                        a_[j].y = s_[offset + j].c.y;
+                                    }
+                                    else if (p == 3)
+                                    {
+                                        a_[j].x = s_[offset + j].d.x;
+                                        a_[j].y = s_[offset + j].d.y;
+                                    }
+                                }
+                            } /* [end] else typ == SINGLE */
                         } /* if (pol_type == STOKES) */
-                        if (pol_type == OSKAR_IMAGE_TYPE_POL_LINEAR)
+                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_LINEAR)
                         {
                             if (type == OSKAR_DOUBLE)
                             {
-                                double4c* v_;
-                                double2* a_;
-                                int idx;
-                                printf("-- linear, double\n");
-
-                                a_ = (double2*)amp.data;
-                                v_ = (double4c*)vis->amplitude.data;
-                                idx = (ch_ * vis->num_times * vis->num_baselines) +
-                                        (ti_ * vis->num_baselines);
+                                double4c* v_ = (double4c*)vis->amplitude.data;
+                                double2* a_ = (double2*)amp.data;
+                                idx = (channel * vis->num_times + time) *
+                                        vis->num_baselines;
 
                                 for (j = 0; j < vis->num_baselines; ++j)
                                 {
@@ -539,10 +333,35 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                             }
                             else /* type == OSKAR_SINGLE */
                             {
-                                printf("-- linear, single\n");
-                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                                float2* a_ = (float2*)amp.data;
+                                float4c* v_ = (float4c*)vis->amplitude.data;
+                                idx = (channel * vis->num_times + time) * vis->num_baselines;
+                                for (j = 0; j < vis->num_baselines; ++j)
+                                {
+                                    if (p == 0)
+                                    {
+                                        a_[j].x = v_[idx + j].a.x;
+                                        a_[j].y = v_[idx + j].a.y;
+                                    }
+                                    else if (p == 1)
+                                    {
+                                        a_[j].x = v_[idx + j].b.x;
+                                        a_[j].y = v_[idx + j].b.y;
+                                    }
+                                    else if (p == 2)
+                                    {
+                                        a_[j].x = v_[idx + j].c.x;
+                                        a_[j].y = v_[idx + j].c.y;
+                                    }
+                                    else if (p == 3)
+                                    {
+                                        a_[j].x = v_[idx + j].d.x;
+                                        a_[j].y = v_[idx + j].d.y;
+                                    }
+                                }
                             }
-                        } /* if (pol_type == LINEAR) */
+                        } /* else if (pol_type == LINEAR) */
+                        else return OSKAR_ERR_DIMENSION_MISMATCH;
                     } /* if (num_pols == 4) */
                     else if (num_pols == 1)
                     {
@@ -555,9 +374,7 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                             {
                                 double2* v_ = (double2*)stokes.data;
                                 double2* a_ = (double2*)amp.data;
-                                int idx = (ch_ * vis->num_times * vis->num_baselines) +
-                                        ti_ * vis->num_baselines;
-                                printf("-- I|Q|U|V, double\n");
+                                idx = (channel * vis->num_times + time) * vis->num_baselines;
                                 for (j = 0; j < vis->num_baselines; ++j)
                                 {
                                     a_[j].x = v_[idx + j].x;
@@ -566,7 +383,399 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                             }
                             else /* type == OSKAR_SINGLE */
                             {
-                                printf("-- I|Q|U|V, single\n");
+                                float2* v_ = (float2*)stokes.data;
+                                float2* a_ = (float2*)amp.data;
+                                idx = (channel * vis->num_times + time) * vis->num_baselines;
+                                for (j = 0; j < vis->num_baselines; ++j)
+                                {
+                                    a_[j].x = v_[idx + j].x;
+                                    a_[j].y = v_[idx + j].y;
+                                }
+                            }
+                        } /* [end] if pol = I|Q|U|V */
+                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_XX ||
+                                pol_type == OSKAR_IMAGE_TYPE_POL_XY ||
+                                pol_type == OSKAR_IMAGE_TYPE_POL_YX ||
+                                pol_type == OSKAR_IMAGE_TYPE_POL_YY)
+                        {
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                double4c* v_ = (double4c*)vis->amplitude.data;
+                                double2* a_ = (double2*)amp.data;
+                                idx = (channel * vis->num_times + time) * vis->num_baselines;
+                                for (j = 0; j < vis->num_baselines; ++j)
+                                {
+                                    if (pol_type == OSKAR_IMAGE_TYPE_POL_XX)
+                                    {
+                                        a_[j].x = v_[idx + j].a.x;
+                                        a_[j].y = v_[idx + j].a.y;
+                                    }
+                                    else if (pol_type == OSKAR_IMAGE_TYPE_POL_XY)
+                                    {
+                                        a_[j].x = v_[idx + j].b.x;
+                                        a_[j].y = v_[idx + j].b.y;
+                                    }
+                                    else if (pol_type == OSKAR_IMAGE_TYPE_POL_YX)
+                                    {
+                                        a_[j].x = v_[idx + j].c.x;
+                                        a_[j].y = v_[idx + j].c.y;
+                                    }
+                                    else if (pol_type == OSKAR_IMAGE_TYPE_POL_YY)
+                                    {
+                                        a_[j].x = v_[idx + j].d.x;
+                                        a_[j].y = v_[idx + j].d.y;
+                                    }
+                                }
+                            }
+                            else /* type == OSKAR_SINGLE */
+                            {
+                                float4c* v_ = (float4c*)vis->amplitude.data;
+                                float2* a_ = (float2*)amp.data;
+                                idx = (channel * vis->num_times + time) * vis->num_baselines;
+                                for (j = 0; j < vis->num_baselines; ++j)
+                                {
+                                    if (pol_type == OSKAR_IMAGE_TYPE_POL_XX)
+                                    {
+                                        a_[j].x = v_[idx + j].a.x;
+                                        a_[j].y = v_[idx + j].a.y;
+                                    }
+                                    else if (pol_type == OSKAR_IMAGE_TYPE_POL_XY)
+                                    {
+                                        a_[j].x = v_[idx + j].b.x;
+                                        a_[j].y = v_[idx + j].b.y;
+                                    }
+                                    else if (pol_type == OSKAR_IMAGE_TYPE_POL_YX)
+                                    {
+                                        a_[j].x = v_[idx + j].c.x;
+                                        a_[j].y = v_[idx + j].c.y;
+                                    }
+                                    else if (pol_type == OSKAR_IMAGE_TYPE_POL_YY)
+                                    {
+                                        a_[j].x = v_[idx + j].d.x;
+                                        a_[j].y = v_[idx + j].d.y;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else return OSKAR_ERR_DIMENSION_MISMATCH;
+                }
+
+
+                /* Evaluate amps (snapshots in time, frequency synthesis) */
+                else if (settings->time_snapshots && !settings->channel_snapshots)
+                {
+                    if (num_pols == 4)
+                    {
+                        if (pol_type == OSKAR_IMAGE_TYPE_STOKES)
+                        {
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                double4c* v_ = (double4c*)stokes.data;
+                                double2* a_ = (double2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        if (p == 0)
+                                        {
+                                            a_[k].x = v_[idx].a.x;
+                                            a_[k].y = v_[idx].a.y;
+                                        }
+                                        else if (p == 1)
+                                        {
+                                            a_[k].x = v_[idx].b.x;
+                                            a_[k].y = v_[idx].b.y;
+                                        }
+                                        else if (p == 2)
+                                        {
+                                            a_[k].x = v_[idx].c.x;
+                                            a_[k].y = v_[idx].c.y;
+                                        }
+                                        else /* (p == 3) */
+                                        {
+                                            a_[k].x = v_[idx].d.x;
+                                            a_[k].y = v_[idx].d.y;
+                                        }
+                                    }
+                                }
+                            }
+                            else /* type == SINGLE */
+                            {
+                                float4c* v_ = (float4c*)stokes.data;
+                                float2* a_ = (float2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        if (p == 0)
+                                        {
+                                            a_[k].x = v_[idx].a.x;
+                                            a_[k].y = v_[idx].a.y;
+                                        }
+                                        else if (p == 1)
+                                        {
+                                            a_[k].x = v_[idx].b.x;
+                                            a_[k].y = v_[idx].b.y;
+                                        }
+                                        else if (p == 2)
+                                        {
+                                            a_[k].x = v_[idx].c.x;
+                                            a_[k].y = v_[idx].c.y;
+                                        }
+                                        else /* (p == 3) */
+                                        {
+                                            a_[k].x = v_[idx].d.x;
+                                            a_[k].y = v_[idx].d.y;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_LINEAR)
+                        {
+                            /* Time snapshots, freq synth, linear (4pol), double */
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                double4c* v_ = (double4c*)vis->amplitude.data;
+                                double2* a_ = (double2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        if (p == 0)
+                                        {
+                                            a_[k].x = v_[idx].a.x;
+                                            a_[k].y = v_[idx].a.y;
+                                        }
+                                        else if (p == 1)
+                                        {
+                                            a_[k].x = v_[idx].b.x;
+                                            a_[k].y = v_[idx].b.y;
+                                        }
+                                        else if (p == 2)
+                                        {
+                                            a_[k].x = v_[idx].c.x;
+                                            a_[k].y = v_[idx].c.y;
+                                        }
+                                        else /* (p == 3) */
+                                        {
+                                            a_[k].x = v_[idx].d.x;
+                                            a_[k].y = v_[idx].d.y;
+                                        }
+                                    }
+                                }
+                            }
+                            else /* type == SINGLE */
+                            {
+                                float4c* v_ = (float4c*)vis->amplitude.data;
+                                float2* a_ = (float2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        if (p == 0)
+                                        {
+                                            a_[k].x = v_[idx].a.x;
+                                            a_[k].y = v_[idx].a.y;
+                                        }
+                                        else if (p == 1)
+                                        {
+                                            a_[k].x = v_[idx].b.x;
+                                            a_[k].y = v_[idx].b.y;
+                                        }
+                                        else if (p == 2)
+                                        {
+                                            a_[k].x = v_[idx].c.x;
+                                            a_[k].y = v_[idx].c.y;
+                                        }
+                                        else /* (p == 3) */
+                                        {
+                                            a_[k].x = v_[idx].d.x;
+                                            a_[k].y = v_[idx].d.y;
+                                        }
+                                    }
+                                }
+                            } /* [end] else type == SINGLE */
+                        } /* [end] if linear */
+                    } /* [end] if (num_pols == 4) */
+                    else if (num_pols == 1)
+                    {
+                        if (pol_type == OSKAR_IMAGE_TYPE_STOKES_I ||
+                                pol_type == OSKAR_IMAGE_TYPE_STOKES_Q ||
+                                pol_type == OSKAR_IMAGE_TYPE_STOKES_U ||
+                                pol_type == OSKAR_IMAGE_TYPE_STOKES_V)
+                        {
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                double2* v_ = (double2*)stokes.data;
+                                double2* a_ = (double2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        a_[k].x = v_[idx].x;
+                                        a_[k].y = v_[idx].y;
+                                    }
+                                }
+                            }
+                            else /* type == SINGLE */
+                            {
+                                float2* v_ = (float2*)stokes.data;
+                                float2* a_ = (float2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        a_[k].x = v_[idx].x;
+                                        a_[k].y = v_[idx].y;
+                                    }
+                                }
+                            }
+                        }
+                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_XX ||
+                                pol_type == OSKAR_IMAGE_TYPE_POL_XY ||
+                                pol_type == OSKAR_IMAGE_TYPE_POL_YX ||
+                                pol_type == OSKAR_IMAGE_TYPE_POL_YY)
+                        {
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                /* time snapshots, freq synth, XX|XY|YX|YY (1pol), double */
+                                double4c* v_ = (double4c*)vis->amplitude.data;
+                                double2* a_ = (double2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        if (pol_type == OSKAR_IMAGE_TYPE_POL_XX)
+                                        {
+                                            a_[k].x = v_[idx].a.x;
+                                            a_[k].y = v_[idx].a.y;
+                                        }
+                                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_XY)
+                                        {
+                                            a_[k].x = v_[idx].b.x;
+                                            a_[k].y = v_[idx].b.y;
+                                        }
+                                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_YX)
+                                        {
+                                            a_[k].x = v_[idx].c.x;
+                                            a_[k].y = v_[idx].c.y;
+                                        }
+                                        else /* pol_type == OSKAR_IMAGE_TYPE_POL_YY */
+                                        {
+                                            a_[k].x = v_[idx].d.x;
+                                            a_[k].y = v_[idx].d.y;
+                                        }
+                                    }
+                                }
+                            }
+                            else /* type == SINGLE */
+                            {
+                                /* Time snapshots, freq synth, XX|XY|YX|YY (1pol), single */
+                                float4c* v_ = (float4c*)vis->amplitude.data;
+                                float2* a_ = (float2*)amp.data;
+                                /* Concatenate amplitudes from the frequencies */
+                                for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
+                                {
+                                    for (i = 0; i < vis->num_baselines; ++i, ++k)
+                                    {
+                                        idx = (j*vis->num_times+time)*vis->num_baselines+i;
+                                        if (pol_type == OSKAR_IMAGE_TYPE_POL_XX)
+                                        {
+                                            a_[k].x = v_[idx].a.x;
+                                            a_[k].y = v_[idx].a.y;
+                                        }
+                                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_XY)
+                                        {
+                                            a_[k].x = v_[idx].b.x;
+                                            a_[k].y = v_[idx].b.y;
+                                        }
+                                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_YX)
+                                        {
+                                            a_[k].x = v_[idx].c.x;
+                                            a_[k].y = v_[idx].c.y;
+                                        }
+                                        else /* pol_type == OSKAR_IMAGE_TYPE_POL_YY */
+                                        {
+                                            a_[k].x = v_[idx].d.x;
+                                            a_[k].y = v_[idx].d.y;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return OSKAR_ERR_DIMENSION_MISMATCH;
+                        }
+                    }
+                }
+                /* FIXME WRONG INDENT LEVEL ON THIS ELSE ... */
+                else /* Evaluate amps (frequency and time synthesis) */
+                {
+                    if (num_pols == 4)
+                    {
+                        if (pol_type == OSKAR_IMAGE_TYPE_STOKES)
+                        {
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                /* TODO time synth, freq synth, stokes (4pol), double */
+                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                            }
+                            else /* type == SINGLE */
+                            {
+                                /* TODO */
+                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                            }
+                        }
+                        else if (pol_type == OSKAR_IMAGE_TYPE_POL_LINEAR)
+                        {
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                /* TODO */
+                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                            }
+                            else /* type == SINGLE */
+                            {
+                                /* TODO */
+                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                            }
+                        }
+                        else
+                        {
+                            return OSKAR_ERR_DIMENSION_MISMATCH;
+                        }
+                    } /* if (num_pols == 4) */
+                    else if (num_pols == 1)
+                    {
+                        if (pol_type == OSKAR_IMAGE_TYPE_STOKES_I ||
+                                pol_type == OSKAR_IMAGE_TYPE_STOKES_Q ||
+                                pol_type == OSKAR_IMAGE_TYPE_STOKES_U ||
+                                pol_type == OSKAR_IMAGE_TYPE_STOKES_V)
+                        {
+                            if (type == OSKAR_DOUBLE)
+                            {
+                                /* TODO */
+                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                            }
+                            else /* type == SINGLE */
+                            {
+                                /* TODO */
                                 return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
                             }
                         }
@@ -577,67 +786,45 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
                         {
                             if (type == OSKAR_DOUBLE)
                             {
-                                double2* v_ = (double2*)vis->amplitude.data;
-                                double2* a_ = (double2*)amp.data;
-                                int idx = (ch_ * vis->num_times * vis->num_baselines) +
-                                        ti_ * vis->num_baselines;
-                                printf("-- XX|XY|YX|YY, double\n");
-                                for (j = 0; j < vis->num_baselines; ++j)
-                                {
-                                    a_[j].x = v_[idx + j].x;
-                                    a_[j].y = v_[idx + j].y;
-                                }
+                                /* TODO */
+                                return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
                             }
-                            else /* type == OSKAR_SINGLE */
+                            else /* type == SINGLE */
                             {
-                                printf("-- XX|XY|YX|YY, single\n");
+                                /* TODO */
                                 return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
                             }
                         }
-                    }
-                    else /* num_pols != (1 | 4) */
-                    {
-                        return OSKAR_ERR_DIMENSION_MISMATCH;
+                        else
+                        {
+                            return OSKAR_ERR_DIMENSION_MISMATCH;
+                        }
                     }
                 }
 
-                /* Snapshots in time, frequency synthesis */
-                else if (settings->time_snapshots && !settings->channel_snapshots)
-                {
-                    printf("-- (%i %i)\n", settings->time_snapshots, settings->channel_snapshots);
-                    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-                }
-
-                /* Frequency and time synthesis */
-                else
-                {
-                    printf("-- (%i %i)\n", settings->time_snapshots, settings->channel_snapshots);
-                    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-                }
+                /* Get a pointer to the slice of the image currently being
+                 * imaged */
+                slice_offset = c * num_times * num_pols * num_pixels +
+                        t * num_pols * num_pixels + p * num_pixels;
+                oskar_mem_get_pointer(&im_slice, &im->data,
+                        slice_offset, num_pixels);
 
                 /* ___ make the image ___ */
                 if (settings->dft)
                 {
-                    /* NOTE the copy in dft needs sorting out */
-                    slice_offset = c * num_times * num_pols * num_pixels +
-                            t * num_pols * num_pixels + p * num_pixels;
-                    oskar_mem_get_pointer(&im_slice, &image->data,
-                            slice_offset, num_pixels);
                     err = oskar_make_image_dft(&im_slice, &uu, &vv, &amp,
                             &l, &m, freq0);
                     if (err) return err;
                 }
                 else
                 {
-                    /*err = fft()*/
-                    printf("-- FFT!\n");
+                    /* FFT */
                     return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
                 }
 
             } /* loop over image polarisation */
         } /* loop over image time */
     } /* loop over image channels */
-
 
     /* Clean up */
     oskar_mem_free(&l);
@@ -646,14 +833,10 @@ int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
     oskar_mem_free(&uu);
     oskar_mem_free(&vv);
     oskar_mem_free(&amp);
-    oskar_mem_free(&uu_ptr);
-    oskar_mem_free(&vv_ptr);
     oskar_mem_free(&im_slice);
 
     return OSKAR_SUCCESS;
 }
-
-
 
 #ifdef __cplusplus
 }

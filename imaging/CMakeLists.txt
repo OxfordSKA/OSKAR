@@ -8,6 +8,9 @@ add_subdirectory(matlab)
 # Add the source files in this directory.
 set(imaging_SRC
     src/oskar_evaluate_image_lm_grid.c
+    src/oskar_get_image_vis_amps.c
+    src/oskar_get_image_baseline_coords.c
+    src/oskar_get_image_stokes.c
     src/oskar_image_free.c
     src/oskar_image_init.c
     src/oskar_image_read.c
@@ -16,6 +19,7 @@ set(imaging_SRC
     src/oskar_Image.cpp
     src/oskar_make_image_dft.c
     src/oskar_make_image.c
+    src/oskar_setup_image.c
 )
 set(imaging_SRC "${imaging_SRC}" PARENT_SCOPE)
 
