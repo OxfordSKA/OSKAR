@@ -26,41 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_STATION_H_
-#define OSKAR_SETTINGS_STATION_H_
+#ifndef OSKAR_STATION_MODEL_ANALYSE_H_
+#define OSKAR_STATION_MODEL_ANALYSE_H_
 
 /**
- * @struct oskar_SettingsStation
- *
- * @brief Structure to hold station model settings.
+ * @file oskar_station_model_analyse.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_StationModel.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Analyses a station model to determine its properties.
  *
  * @details
- * The structure holds station model parameters.
+ * This function analyses a station model to determine whether element errors
+ * and/or weights should be applied.
+ * The relevant flags within the structure are updated.
+ *
+ * @param[in,out] station Station model structure to analyse.
+ * @param[out] finished_identical_station_check Flag set if stations cannot be identical.
  */
-struct oskar_SettingsStation
-{
-    int evaluate_array_factor;
-    int evaluate_element_factor;
-    int normalise_beam;
-    double receiver_temperature;
-    char* receiver_temperature_file;
+OSKAR_EXPORT
+int oskar_station_model_analyse(oskar_StationModel* station,
+        int* finished_identical_station_check);
 
-    /* Station element settings (can override those in the station files). */
-    double element_gain;
-    double element_gain_error_fixed;
-    double element_gain_error_time;
-    double element_phase_error_fixed_rad;
-    double element_phase_error_time_rad;
-    double element_position_error_xy_m;
-    double element_x_orientation_error_rad;
-    double element_y_orientation_error_rad;
+#ifdef __cplusplus
+}
+#endif
 
-    /* Random seeds. */
-    int seed_element_gain_errors;
-    int seed_element_phase_errors;
-    int seed_element_time_variable_errors;
-    int seed_element_position_xy_errors;
-};
-typedef struct oskar_SettingsStation oskar_SettingsStation;
-
-#endif /* OSKAR_SETTINGS_STATION_H_ */
+#endif /* OSKAR_STATION_MODEL_ANALYSE_H_ */

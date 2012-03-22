@@ -145,6 +145,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/station/element_phase_error_fixed_deg", "Element phase std.dev. (systematic) [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_phase_error_time_deg", "Element phase std.dev. (time-variable) [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element_position_error_xy_m", "Element (x,y) position std.dev. [m]", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element_x_orientation_error_deg", "Element X-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
+    registerSetting("telescope/station/element_y_orientation_error_deg", "Element Y-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/seed_element_gain_errors", "Random seed (systematic gain errors)", oskar_SettingsItem::RANDOM_SEED);
     registerSetting("telescope/station/seed_element_phase_errors", "Random seed (systematic phase errors)", oskar_SettingsItem::RANDOM_SEED);
     registerSetting("telescope/station/seed_element_time_variable_errors", "Random seed (time-variable errors)", oskar_SettingsItem::RANDOM_SEED);

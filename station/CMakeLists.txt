@@ -20,6 +20,7 @@ set(station_SRC
     src/oskar_evaluate_station_beam_scalar.cu
     src/oskar_evaluate_station_beam.c
     src/oskar_evaluate_station_receiver_noise_stddev.c
+    src/oskar_station_model_analyse.c
     src/oskar_station_model_copy.c
     src/oskar_station_model_free.c
     src/oskar_station_model_init.c

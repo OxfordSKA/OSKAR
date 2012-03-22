@@ -93,6 +93,10 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             s.value("element_phase_error_time_deg", 0.0).toDouble() * D2R;
     tel->station.element_position_error_xy_m =
             s.value("element_position_error_xy_m", 0.0).toDouble();
+    tel->station.element_x_orientation_error_rad =
+            s.value("element_x_orientation_error_deg", 0.0).toDouble() * D2R;
+    tel->station.element_y_orientation_error_rad =
+            s.value("element_y_orientation_error_deg", 0.0).toDouble() * D2R;
 
     // Station element random seeds.
     temp = s.value("seed_element_gain_errors").toString();
