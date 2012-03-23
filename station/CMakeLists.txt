@@ -11,7 +11,7 @@ set(station_SRC
     src/oskar_element_model_load_meerkat.c
     src/oskar_evaluate_beam_horizontal_lmn.c
     src/oskar_evaluate_dipole_pattern.cu
-    src/oskar_evaluate_jones_E.cpp
+    src/oskar_evaluate_jones_E.c
     src/oskar_evaluate_source_horizontal_lmn.cpp
     src/oskar_evaluate_effective_area.c
     src/oskar_evaluate_element_weights_errors.cu

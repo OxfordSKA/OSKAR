@@ -40,6 +40,10 @@
 #include "utility/oskar_Work.h"
 #include "utility/oskar_Device_curand_state.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Evaluates a set of E-Jones matrices for a number of stations
  * and source directions.
@@ -58,12 +62,13 @@
  *
  * @return An error code.
  */
-#ifdef __cplusplus
-extern "C"
-#endif
 OSKAR_EXPORT
 int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const double gast,
+        const oskar_TelescopeModel* telescope, double gast,
         oskar_Work* work, oskar_Device_curand_state* curand_state);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_EVALUATE_JONES_E_H_ */

@@ -77,7 +77,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
     oskar_Jones J(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
     oskar_Jones R(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
-    oskar_Jones E(complex_scalar, OSKAR_LOCATION_GPU, n_stations, n_sources);
+    oskar_Jones E(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
     oskar_Jones K(complex_scalar, OSKAR_LOCATION_GPU, n_stations, n_sources);
     oskar_Mem vis(complex_matrix, OSKAR_LOCATION_GPU, n_baselines);
     oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stations, true);
