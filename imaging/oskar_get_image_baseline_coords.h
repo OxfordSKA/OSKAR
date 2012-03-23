@@ -60,13 +60,12 @@ extern "C" {
  * @param vv
  * @param vis
  * @param time
- * @param channel
  * @param settings
  * @return
  */
 OSKAR_EXPORT
 int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
-        const oskar_Visibilities* vis, int time, int channel,
+        const oskar_Visibilities* vis, int time,
         const oskar_SettingsImage* settings);
 
 #ifdef __cplusplus

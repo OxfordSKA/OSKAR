@@ -71,7 +71,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "oskar_make_image() failed with code %i: %s.\n",
+                "\noskar_make_image() failed with code %i: %s.\n",
                 err, oskar_get_error_string(err));
     }
     mexPrintf("done\n");

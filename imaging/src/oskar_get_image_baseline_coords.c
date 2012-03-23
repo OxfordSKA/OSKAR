@@ -38,8 +38,9 @@
 extern "C" {
 #endif
 
+
 int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
-        const oskar_Visibilities* vis, int time, int channel,
+        const oskar_Visibilities* vis, int time,
         const oskar_SettingsImage* settings)
 {
     int coord_offset;
@@ -51,7 +52,7 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     int i, j, k, idx;
     double freq, scaling;
     oskar_Mem uu_ptr, vv_ptr;
-    int err;
+    int err = OSKAR_SUCCESS;
 
     /* Setup local variables */
     err = OSKAR_SUCCESS;
@@ -76,26 +77,26 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     err = oskar_mem_init(&vv_ptr, type, location, vis->num_baselines, OSKAR_FALSE);
     if (err) return err;
 
-    /* == TIME SNAPSHOTS, FREQ SNAPSHOTS == */
+    /* ========================================= TIME SNAPSHOTS, FREQ SNAPSHOTS */
     if (settings->time_snapshots && settings->channel_snapshots)
     {
         coord_offset = time * vis->num_baselines;
         err = oskar_mem_get_pointer(uu, &vis->uu_metres, coord_offset, num_vis);
-        if (err) return err;
+        if (err) goto stop;
         err = oskar_mem_get_pointer(vv, &vis->vv_metres, coord_offset, num_vis);
-        if (err) return err;
+        if (err) goto stop;
     }
 
 
-    /* == TIME SNAPSHOTS, FREQ SYNTHESIS == */
+    /* ======================================== TIME SNAPSHOTS, FREQ SYNTHESIS */
     else if (settings->time_snapshots && !settings->channel_snapshots)
     {
         /* freq0 = mid freq of the imaging band. i.e. the freq we are imaging at */
         coord_offset = time * vis->num_baselines;
         err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
-        if (err) return err;
+        if (err) goto stop;
         err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
-        if (err) return err;
+        if (err) goto stop;
         for (j = 0; j < (chan_range[1] - chan_range[0] + 1); ++j)
         {
             freq = vis->freq_start_hz + ((chan_range[0] + j) * vis->freq_inc_hz);
@@ -117,13 +118,34 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
         }
     }
 
-    /* == TIME SYNTHESIS, FREQ SNAPSHOTS == */
+    /* ======================================== TIME SYNTHESIS, FREQ SNAPSHOTS */
     else if (!settings->time_snapshots && settings->channel_snapshots)
     {
-        /* TODO */
+        for (j = 0; j < (time_range[1] - time_range[0] + 1); ++j)
+        {
+            coord_offset = j * vis->num_baselines;
+            err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
+            if (err) goto stop;
+            err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
+            if (err) goto stop;
+            for (i = 0; i < vis->num_baselines; ++i)
+            {
+                idx = j*vis->num_baselines + i;
+                if (type == OSKAR_DOUBLE)
+                {
+                    ((double*)uu->data)[idx] = ((double*)uu_ptr.data)[i];
+                    ((double*)vv->data)[idx] = ((double*)vv_ptr.data)[i];
+                }
+                else
+                {
+                    ((float*)uu->data)[idx] = ((float*)uu_ptr.data)[i];
+                    ((float*)vv->data)[idx] = ((float*)vv_ptr.data)[i];
+                }
+            }
+        }
     }
 
-    /* == TIME SYNTHESIS, FREQ SYNTHESIS == */
+    /* ======================================== TIME SYNTHESIS, FREQ SYNTHESIS */
     else
     {
         int num_times_synth = (time_range[1]-time_range[0]+1);
@@ -135,9 +157,9 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
             {
                 coord_offset = (time_range[0] + k) * vis->num_baselines;
                 err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
-                if (err) return err;
+                if (err) goto stop;
                 err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
-                if (err) return err;
+                if (err) goto stop;
                 for (i = 0; i < vis->num_baselines; ++i)
                 {
                     idx = (j * num_times_synth + k) * vis->num_baselines + i;
@@ -157,12 +179,11 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     }
 
     /* Cleanup */
+    stop:
     err = oskar_mem_free(&uu_ptr);
-    if (err) return err;
     err = oskar_mem_free(&vv_ptr);
-    if (err) return err;
 
-    return OSKAR_SUCCESS;
+    return err;
 }
 
 
