@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_print.h"
 #include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_settings_load_beam_pattern.h"
 #include "apps/lib/oskar_settings_load_image.h"
@@ -36,6 +35,7 @@
 #include "apps/lib/oskar_settings_load_telescope.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_append_raw.h"
+#include "utility/oskar_settings_print.h"
 #include <string.h>
 
 #ifdef __cplusplus

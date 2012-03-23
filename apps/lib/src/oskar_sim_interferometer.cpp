@@ -29,9 +29,7 @@
 #include <cuda_runtime_api.h>
 #include <omp.h>
 
-#include "apps/lib/oskar_Settings.h"
 #include "apps/lib/oskar_settings_load.h"
-#include "apps/lib/oskar_settings_free.h"
 #include "apps/lib/oskar_set_up_sky.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_visibilities.h"
@@ -50,6 +48,8 @@
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_add.h"
+#include "utility/oskar_Settings.h"
+#include "utility/oskar_settings_free.h"
 
 #include <QtCore/QTime>
 

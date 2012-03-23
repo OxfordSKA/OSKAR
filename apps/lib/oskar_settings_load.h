@@ -34,7 +34,7 @@
  */
 
 #include "oskar_global.h"
-#include "apps/lib/oskar_Settings.h"
+#include "utility/oskar_Settings.h"
 
 #ifdef __cplusplus
 extern "C" {

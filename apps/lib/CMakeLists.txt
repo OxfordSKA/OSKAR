@@ -8,7 +8,6 @@ set(apps_SRC
     src/oskar_set_up_sky.cpp
     src/oskar_set_up_telescope.cpp
     src/oskar_set_up_visibilities.cpp
-    src/oskar_settings_free.c
     src/oskar_settings_load_beam_pattern.cpp
     src/oskar_settings_load_image.cpp
     src/oskar_settings_load_observation.cpp
@@ -16,7 +15,6 @@ set(apps_SRC
     src/oskar_settings_load_sky.cpp
     src/oskar_settings_load_telescope.cpp
     src/oskar_settings_load.c
-    src/oskar_settings_print.c
     src/oskar_sim_beam_pattern.cpp
     src/oskar_sim_interferometer.cpp
 )

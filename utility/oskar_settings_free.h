@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_PRINT_H_
-#define OSKAR_SETTINGS_PRINT_H_
+#ifndef OSKAR_SETTINGS_FREE_H_
+#define OSKAR_SETTINGS_FREE_H_
 
 /**
- * @file oskar_settings_print.h
+ * @file oskar_settings_free.h
  */
 
 #include "oskar_global.h"
-#include "apps/lib/oskar_Settings.h"
+#include "utility/oskar_Settings.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,20 +42,18 @@ extern "C" {
 
 /**
  * @brief
- * Prints the contents of the settings object to standard output.
+ * Frees the memory held by a settings structure.
  *
  * @details
- * This top-level function prints the contents of a populated settings
- * object to the standard output stream.
+ * This top-level function frees the memory held by a settings structure
  *
- * @param[out] settings A pointer to a populated settings structure.
- * @param[in] filename  String containing the name of the settings file.
+ * @param settings A pointer to the settings structure.
  */
 OSKAR_EXPORT
-void oskar_settings_print(const oskar_Settings* settings, const char* filename);
+void oskar_settings_free(oskar_Settings* settings);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SETTINGS_PRINT_H_ */
+#endif /* OSKAR_SETTINGS_FREE_H_ */

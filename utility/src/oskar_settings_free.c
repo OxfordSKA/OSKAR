@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_free.h"
+#include "utility/oskar_settings_free.h"
 #include "utility/oskar_mem_free.h"
 #include <stdlib.h>
 

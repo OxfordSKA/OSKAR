@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_settings_print.h"
+#include "utility/oskar_settings_print.h"
 #include "station/oskar_StationModel.h"
 
 #include <stdio.h>

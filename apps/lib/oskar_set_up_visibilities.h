@@ -34,7 +34,7 @@
  */
 
 #include "oskar_global.h"
-#include "apps/lib/oskar_Settings.h"
+#include "utility/oskar_Settings.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
 

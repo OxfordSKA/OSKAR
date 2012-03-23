@@ -27,8 +27,6 @@
  */
 
 #include <cuda_runtime_api.h>
-#include "apps/lib/oskar_Settings.h"
-#include "apps/lib/oskar_settings_free.h"
 #include "apps/lib/oskar_settings_load.h"
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_sim_beam_pattern.h"
@@ -49,6 +47,8 @@
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_Settings.h"
+#include "utility/oskar_settings_free.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_Work.h"
 
