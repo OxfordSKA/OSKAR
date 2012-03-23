@@ -77,10 +77,12 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
                 {
                     data = (double4c*)vis->amplitude.data;
+                    printf("linear, num_elements = %i\n");
                 }
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
                 {
                     data = (double4c*)stokes->data;
+                    printf("linear, num_elements = %i\n");
                 }
 
                 for (i = 0; i < vis->num_baselines; ++i)
