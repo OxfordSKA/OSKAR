@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,8 @@ int oskar_binary_file_read(const char* filename,
 
     /* Open the file for read. */
     stream = fopen(filename, "rb");
+    if (stream == NULL)
+        return OSKAR_ERR_FILE_IO;
 
     /* Read the data. */
     err = oskar_binary_stream_read(stream, index, data_type, id_group,
@@ -95,6 +97,8 @@ int oskar_binary_file_read_ext(const char* filename,
 
     /* Open the file for read. */
     stream = fopen(filename, "rb");
+    if (stream == NULL)
+        return OSKAR_ERR_FILE_IO;
 
     /* Read the data. */
     err = oskar_binary_stream_read_ext(stream, index, data_type, name_group,
