@@ -50,11 +50,24 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Extract arguments from MATLAB mxArray objects.
     const char* filename = mxArrayToString(in[0]);
 
+    // Check the filename exists (... is there better way to do this?)
+    mxArray* file_exists;
+    mxArray* args[2];
+    args[0] = mxCreateString(filename);
+    args[1] = mxCreateString("file");
+    mexCallMATLAB(1, &file_exists, 2, args, "exist");
+    int exists = (int)mxGetScalar(file_exists);
+    mexPrintf("file exists? ... %i\n", exists);
+    if (exists == 0)
+    {
+        mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: Specified visibility file (%s)"
+                " doesn't exist.\n", filename);
+    }
+
     // Load the OSKAR visibilities structure from the specified file.
     int status = OSKAR_SUCCESS;
     oskar_Visibilities vis;
     status = oskar_Visibilities::read(&vis, filename);
-
     if (status != OSKAR_SUCCESS)
     {
         mexErrMsgIdAndTxt("OSKAR:error",
