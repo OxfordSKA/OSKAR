@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_LOAD_H_
-#define OSKAR_STATION_MODEL_LOAD_H_
+#ifndef OSKAR_STATION_MODEL_LOAD_CONFIGURATION_H_
+#define OSKAR_STATION_MODEL_LOAD_CONFIGURATION_H_
 
 /**
- * @file oskar_station_model_load.h
+ * @file oskar_station_model_load_configuration.h
  */
 
 #include "oskar_global.h"
@@ -42,10 +42,10 @@ extern "C" {
 
 /**
  * @brief
- * Loads the station element data from a text file.
+ * Loads station element configuration data from a text file.
  *
  * @details
- * This function loads station element (antenna) data from a comma- or
+ * This function loads a station configuration from a comma- or
  * space-separated text file. Each line contains data for one element of the
  * station.
  *
@@ -81,10 +81,11 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_station_model_load(oskar_StationModel* station, const char* filename);
+int oskar_station_model_load_config(oskar_StationModel* station,
+        const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_MODEL_LOAD_H_ */
+#endif /* OSKAR_STATION_MODEL_LOAD_CONFIGURATION_H_ */

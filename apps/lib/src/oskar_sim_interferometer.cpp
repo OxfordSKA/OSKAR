@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@
 #include "interferometry/oskar_Visibilities.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_SettingsSky.h"
-#include "sky/oskar_sky_model_split.h"
 #include "sky/oskar_sky_model_free.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
@@ -57,8 +56,7 @@
 #include <cstdlib>
 #include <cmath>
 
-using std::min;
-
+extern "C"
 int oskar_sim_interferometer(const char* settings_file)
 {
     int error;

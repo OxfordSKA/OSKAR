@@ -26,48 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_station_model_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef TEST_TELESCOPE_MODEL_LOAD_SAVE_H_
+#define TEST_TELESCOPE_MODEL_LOAD_SAVE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file Test_telescope_model_load_save.h
+ */
 
-int oskar_telescope_model_free(oskar_TelescopeModel* telescope)
+#include <cppunit/extensions/HelperMacros.h>
+
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_telescope_model_load_save : public CppUnit::TestFixture
 {
-    int error = 0, i = 0;
+    public:
+        CPPUNIT_TEST_SUITE(Test_telescope_model_load_save);
+        CPPUNIT_TEST(test_1_level);
+        CPPUNIT_TEST(test_2_level);
+        CPPUNIT_TEST_SUITE_END();
 
-    /* Free the arrays. */
-    error = oskar_mem_free(&telescope->station_x);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_x_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z_hor);
-    if (error) return error;
+    public:
+        /// Test method.
+        void test_1_level();
+        void test_2_level();
+};
 
-    /* Free each station. */
-    for (i = 0; i < telescope->num_stations; ++i)
-    {
-        error = oskar_station_model_free(&telescope->station[i]);
-        if (error) return error;
-    }
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_telescope_model_load_save);
 
-    /* Free the station array. */
-    free(telescope->station);
-    telescope->station = NULL;
-
-    return 0;
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif // TEST_TELESCOPE_MODEL_LOAD_SAVE_H_

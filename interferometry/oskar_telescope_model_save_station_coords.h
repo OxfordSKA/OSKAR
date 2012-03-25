@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,45 +26,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_WRITE_H_
-#define OSKAR_STATION_MODEL_WRITE_H_
+#ifndef OSKAR_TELESCOPE_MODEL_SAVE_STATION_COORDS_H_
+#define OSKAR_TELESCOPE_MODEL_SAVE_STATION_COORDS_H_
 
 /**
- * @file oskar_station_model_write.h
+ * @file oskar_telescope_model_save_station_coords.h
  */
 
 #include "oskar_global.h"
-#include "station/oskar_StationModel.h"
+#include "interferometry/oskar_TelescopeModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Writes OSKAR station model data to an ASCII file.
+ * @brief
+ * Saves a telescope coordinate file that specifies the station locations
+ * with respect to the local tangent plane.
  *
  * @details
- * Writes data from the station model to an ASCII file
- * consisting of a simple header describing the number of (antenna) elements
- * in the station, the station longitude, latitude and altitude followed by
- * a CSV list of the local horizontal x,y,z positions of the elements
- * (in metres) and remaining station data.
+ * A telescope station coordinate file is an ASCII text file containing two or
+ * three columns of comma- or space-separated values that represent the station
+ * (x,y,z) coordinates in the local tangent plane. Each line corresponds to the
+ * position of one station, and the z coordinate is assumed to be zero if
+ * omitted.
  *
- * Note:
- * - The oskar_Mem pointers holding the coordinates must reside on host (CPU).
- * - The coordinates of the station file must be in metres.
+ * The coordinate system (ENU, or East-North-Up) is aligned so that the x-axis
+ * points to the local geographic East, the y-axis to local geographic North,
+ * and the z-axis to the local zenith. The origin is the tangent point with the
+ * Earth's ellipsoid.
  *
- * @param[in] filename Pathname of file to write.
- * @param[in] station  Station model to write.
- *
- * @return An OSKAR error code.
+ * @param telescope  Telescope model structure to save.
+ * @param filename   File name path to a telescope coordinate file.
  */
 OSKAR_EXPORT
-int oskar_station_model_write(const char* filename,
-        const oskar_StationModel* station);
+int oskar_telescope_model_save_station_coords(
+        const oskar_TelescopeModel* telescope, const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_MODEL_WRITE_H_ */
+#endif /* OSKAR_TELESCOPE_MODEL_SAVE_STATION_COORDS_H_ */

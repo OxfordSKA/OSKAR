@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,10 @@ int oskar_telescope_model_is_location(const oskar_TelescopeModel* telescope,
 {
     return (telescope->station_x.location == location &&
             telescope->station_y.location == location &&
-            telescope->station_z.location == location);
+            telescope->station_z.location == location &&
+            telescope->station_x_hor.location == location &&
+            telescope->station_y_hor.location == location &&
+            telescope->station_z_hor.location == location);
 }
 
 int oskar_telescope_model_location(const oskar_TelescopeModel* telescope)

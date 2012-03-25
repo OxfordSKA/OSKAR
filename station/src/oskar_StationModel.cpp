@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_station_model_init.h"
-#include "station/oskar_station_model_load.h"
+#include "station/oskar_station_model_load_config.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_multiply_by_wavenumber.h"
 #include "station/oskar_station_model_resize.h"
@@ -63,9 +63,9 @@ int oskar_StationModel::copy_to(oskar_StationModel* other)
     return oskar_station_model_copy(other, this); // Copy this to other.
 }
 
-int oskar_StationModel::load(const char* filename)
+int oskar_StationModel::load_configuration(const char* filename)
 {
-    return oskar_station_model_load(this, filename);
+    return oskar_station_model_load_config(this, filename);
 }
 
 int oskar_StationModel::location() const

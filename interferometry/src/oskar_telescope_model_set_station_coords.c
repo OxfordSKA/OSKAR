@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,8 @@ extern "C" {
 #endif
 
 int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
-        int index, double x, double y, double z)
+        int index, double x, double y, double z,
+        double x_hor, double y_hor, double z_hor)
 {
     int type, location;
 
@@ -63,6 +64,9 @@ int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
             ((double*)dst->station_x.data)[index] = x;
             ((double*)dst->station_y.data)[index] = y;
             ((double*)dst->station_z.data)[index] = z;
+            ((double*)dst->station_x_hor.data)[index] = x_hor;
+            ((double*)dst->station_y_hor.data)[index] = y_hor;
+            ((double*)dst->station_z_hor.data)[index] = z_hor;
             return 0;
         }
         else if (type == OSKAR_SINGLE)
@@ -70,6 +74,9 @@ int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
             ((float*)dst->station_x.data)[index] = (float)x;
             ((float*)dst->station_y.data)[index] = (float)y;
             ((float*)dst->station_z.data)[index] = (float)z;
+            ((float*)dst->station_x_hor.data)[index] = (float)x_hor;
+            ((float*)dst->station_y_hor.data)[index] = (float)y_hor;
+            ((float*)dst->station_z_hor.data)[index] = (float)z_hor;
             return 0;
         }
         else
@@ -88,19 +95,34 @@ int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_z.data) + offset_bytes, &z,
                     element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(dst->station_x_hor.data) + offset_bytes, &x_hor,
+                    element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(dst->station_y_hor.data) + offset_bytes, &y_hor,
+                    element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(dst->station_z_hor.data) + offset_bytes, &z_hor,
+                    element_size, cudaMemcpyHostToDevice);
             return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
-            float tx, ty, tz;
+            float tx, ty, tz, tx_hor, ty_hor, tz_hor;
             tx = (float) x;
             ty = (float) y;
             tz = (float) z;
+            tx_hor = (float) x_hor;
+            ty_hor = (float) y_hor;
+            tz_hor = (float) z_hor;
             cudaMemcpy((char*)(dst->station_x.data) + offset_bytes, &tx,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_y.data) + offset_bytes, &ty,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_z.data) + offset_bytes, &tz,
+                    element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(dst->station_x_hor.data) + offset_bytes, &tx_hor,
+                    element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(dst->station_y_hor.data) + offset_bytes, &ty_hor,
+                    element_size, cudaMemcpyHostToDevice);
+            cudaMemcpy((char*)(dst->station_z_hor.data) + offset_bytes, &tz_hor,
                     element_size, cudaMemcpyHostToDevice);
             return 0;
         }

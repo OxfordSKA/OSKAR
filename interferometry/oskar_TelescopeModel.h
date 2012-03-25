@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,11 +46,17 @@ struct oskar_TelescopeModel
     oskar_Mem station_x;         /**< Fixed x component of station coordinate. */
     oskar_Mem station_y;         /**< Fixed y component of station coordinate. */
     oskar_Mem station_z;         /**< Fixed z component of station coordinate. */
+    oskar_Mem station_x_hor;     /**< Fixed x component of station coordinate (horizon plane). */
+    oskar_Mem station_y_hor;     /**< Fixed y component of station coordinate (horizon plane). */
+    oskar_Mem station_z_hor;     /**< Fixed z component of station coordinate (horizon plane). */
     int max_station_size;        /**< Maximum station size (number of elements) */
     int coord_units;             /**< Units of the x,y,z coordinates.*/
     int identical_stations;      /**< True if all stations are identical. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
     int seed_time_variable_errors; /**< Random seed for time-variable errors. */
+    double longitude_rad;        /**< Geodetic longitude of telescope, in radians. */
+    double latitude_rad;         /**< Geodetic latitude of telescope, in radians. */
+    double altitude_m;           /**< Altitude of telescope above ellipsoid, in metres. */
     double ra0_rad;              /**< Right Ascension of phase centre, in radians. */
     double dec0_rad;             /**< Declination of phase centre, in radians. */
     double wavelength_metres;    /**< Current wavelength of observation, in metres. */
@@ -141,7 +147,7 @@ struct oskar_TelescopeModel
      * Loads the station element data from a text file.
      *
      * @details
-     * This function loads station element (antenna) data from a comma- or
+     * This function loads a station configuration from a comma- or
      * space-separated text file. Each line contains data for one element of the
      * station.
      *
@@ -149,12 +155,17 @@ struct oskar_TelescopeModel
      * - Element x-position, in metres.
      * - Element y-position, in metres.
      * - Element z-position, in metres (default 0).
-     * - Element multiplicative weight (real part, default 1).
-     * - Element multiplicative weight (imaginary part, default 0).
+     * - Element x-delta, in metres (default 0).
+     * - Element y-delta, in metres (default 0).
+     * - Element z-delta, in metres (default 0).
      * - Element amplitude gain factor (default 1).
      * - Element amplitude gain error (default 0).
      * - Element phase offset in degrees (default 0).
      * - Element phase error in degrees (default 0).
+     * - Element multiplicative weight (real part, default 1).
+     * - Element multiplicative weight (imaginary part, default 0).
+     * - Element X dipole axis azimuth, in degrees (default 90).
+     * - Element Y dipole axis azimuth, in degrees (default 0).
      *
      * Only the first two columns are required to be present.
      *
@@ -171,7 +182,7 @@ struct oskar_TelescopeModel
      * - A positive return code indicates a CUDA error.
      * - A negative return code indicates an OSKAR error.
      */
-    int load_station(int index, const char* filename);
+    int load_station_configuration(int index, const char* filename);
 
     /**
      * @brief Returns the location of all arrays in the structure, or an error

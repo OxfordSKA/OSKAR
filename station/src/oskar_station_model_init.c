@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
 
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;
-    model->altitude_metres = 0.0;
+    model->altitude_m = 0.0;
     model->ra0_rad = 0.0;
     model->dec0_rad = 0.0;
     model->normalise_beam = OSKAR_FALSE;

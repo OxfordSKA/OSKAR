@@ -59,7 +59,7 @@ int oskar_load_stations(oskar_StationModel* station, int num_stations,
     for (int i = 0; i < num_stations; ++i)
     {
         QByteArray filename = files.at(i).absoluteFilePath().toAscii();
-        station[i].load(filename);
+        station[i].load_configuration(filename);
     }
 
     return 0;

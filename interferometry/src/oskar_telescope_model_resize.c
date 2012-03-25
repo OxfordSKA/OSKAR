@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,12 @@ int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int num_statio
     error = oskar_mem_realloc(&(telescope->station_y), num_stations);
     if (error) return error;
     error = oskar_mem_realloc(&(telescope->station_z), num_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_x_hor), num_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_y_hor), num_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&(telescope->station_z_hor), num_stations);
     if (error) return error;
 
     /* Store the new size. */

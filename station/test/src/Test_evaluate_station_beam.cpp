@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 #include "oskar_global.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
-#include "station/oskar_station_model_write.h"
+#include "station/oskar_station_model_save_config.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
@@ -82,7 +82,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     // Set the station coordinates.
     station_cpu.longitude_rad = 0.0;
     station_cpu.latitude_rad  = M_PI_2;
-    station_cpu.altitude_metres  = 0.0;
+    station_cpu.altitude_m  = 0.0;
     station_cpu.coord_units = OSKAR_METRES;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);
@@ -98,7 +98,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     // Set the station meta-data.
     station_cpu.element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
 
-//    error = oskar_station_model_write("temp_test_station.txt", &station_cpu);
+//    error = oskar_station_model_save_configuration("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy the station structure to the gpu and scale the coordinates to wavenumbers.

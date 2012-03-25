@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,7 +80,7 @@ void Test_evaluate_jones_E::evaluate_e()
     oskar_StationModel station_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_antennas);
     station_cpu.longitude_rad = 0.0;
     station_cpu.latitude_rad  = M_PI_2;
-    station_cpu.altitude_metres  = 0.0;
+    station_cpu.altitude_m  = 0.0;
     station_cpu.coord_units = OSKAR_METRES;
     float* x_pos = (float*) malloc(station_dim * sizeof(float));
     oskar_linspace_f(x_pos, -station_size_m/2.0, station_size_m/2.0, station_dim);

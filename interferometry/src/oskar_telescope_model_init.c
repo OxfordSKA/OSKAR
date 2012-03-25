@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,13 +48,37 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
 
     /* Initialise the meta-data. */
     telescope->num_stations = num_stations;
+    telescope->max_station_size = 0;
+    telescope->coord_units = OSKAR_METRES;
+    telescope->identical_stations = 0;
+    telescope->use_common_sky = 1;
+    telescope->seed_time_variable_errors = 0;
+    telescope->longitude_rad = 0.0;
+    telescope->latitude_rad = 0.0;
+    telescope->altitude_m = 0.0;
+    telescope->ra0_rad = 0.0;
+    telescope->dec0_rad = 0.0;
+    telescope->wavelength_metres = 0.0;
+    telescope->bandwidth_hz = 0.0;
 
     /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_x, type, location, num_stations, 1);
+    err = oskar_mem_init(&telescope->station_x, type, location,
+            num_stations, 1);
     if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location, num_stations, 1);
+    err = oskar_mem_init(&telescope->station_y, type, location,
+            num_stations, 1);
     if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location, num_stations, 1);
+    err = oskar_mem_init(&telescope->station_z, type, location,
+            num_stations, 1);
+    if (err) return err;
+    err = oskar_mem_init(&telescope->station_x_hor, type, location,
+            num_stations, 1);
+    if (err) return err;
+    err = oskar_mem_init(&telescope->station_y_hor, type, location,
+            num_stations, 1);
+    if (err) return err;
+    err = oskar_mem_init(&telescope->station_z_hor, type, location,
+            num_stations, 1);
     if (err) return err;
 
     /* Initialise the station structures. */

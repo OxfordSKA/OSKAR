@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,12 @@ int oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
     error = oskar_mem_scale_real(&telescope->station_y, value);
     if (error) return error;
     error = oskar_mem_scale_real(&telescope->station_z, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&telescope->station_x_hor, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&telescope->station_y_hor, value);
+    if (error) return error;
+    error = oskar_mem_scale_real(&telescope->station_z_hor, value);
     if (error) return error;
 
     return error;

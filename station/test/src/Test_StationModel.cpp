@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "station/test/Test_StationModel.h"
-#include "station/oskar_station_model_load.h"
+#include "station/oskar_station_model_load_config.h"
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_vector_types.h"
 
@@ -72,7 +72,7 @@ void Test_StationModel::test_load_single()
 
     // Load the data.
     oskar_StationModel station_model(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load(&station_model, filename);
+    oskar_station_model_load_config(&station_model, filename);
 
     // Check the coordinates.
     CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);
@@ -121,7 +121,7 @@ void Test_StationModel::test_load_double()
 
     // Load the data.
     oskar_StationModel station_model(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load(&station_model, filename);
+    oskar_station_model_load_config(&station_model, filename);
 
     // Check the coordinates.
     CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);

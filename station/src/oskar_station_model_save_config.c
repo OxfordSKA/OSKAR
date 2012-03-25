@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
-#include "station/oskar_station_model_write.h"
+#include "station/oskar_station_model_save_config.h"
 #include "utility/oskar_vector_types.h"
 
 #include <math.h>
@@ -45,32 +45,38 @@ extern "C" {
 
 #define R2D (180.0 / M_PI)
 
-int oskar_station_model_write(const char* filename,
+int oskar_station_model_save_config(const char* filename,
         const oskar_StationModel* station)
 {
     int i, location, type;
     FILE* file;
 
+    /* Sanity check on inputs. */
     if (filename == NULL || station == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* Get type and location. */
+    /* Check type and location. */
     type = oskar_station_model_type(station);
     location = oskar_station_model_location(station);
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        return OSKAR_ERR_BAD_DATA_TYPE;
     if (location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
+    /* Check coordinate units are in metres. */
     if (station->coord_units != OSKAR_METRES)
         return OSKAR_ERR_BAD_UNITS;
 
+    /* Open the file. */
     file = fopen(filename, "w");
     if (!file)
         return OSKAR_ERR_FILE_IO;
 
-    fprintf(file, "# Number of antennas  = %i\n", station->num_elements);
+    /* Save the station data. */
+    fprintf(file, "# Number of elements  = %i\n", station->num_elements);
     fprintf(file, "# Longitude [radians] = %f\n", station->longitude_rad);
     fprintf(file, "# Latitude [radians]  = %f\n", station->latitude_rad);
-    fprintf(file, "# Altitude [metres]   = %f\n", station->altitude_metres);
+    fprintf(file, "# Altitude [metres]   = %f\n", station->altitude_m);
     fprintf(file, "# Local horizontal x(east), y(north), z(zenith) [metres], "
             "delta x, delta y, delta z [metres], gain, gain error, "
             "phase offset [deg], phase error [deg], weight(re), weight(im), "
@@ -137,12 +143,10 @@ int oskar_station_model_write(const char* filename,
                     x_azimuth, y_azimuth);
         }
     }
-    else
-    {
-        return OSKAR_ERR_BAD_DATA_TYPE;
-    }
 
+    /* Close the file. */
     fclose(file);
+
     return 0;
 }
 

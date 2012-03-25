@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ int oskar_station_model_copy(oskar_StationModel* dst,
 
     dst->longitude_rad = src->longitude_rad;
     dst->latitude_rad = src->latitude_rad;
-    dst->altitude_metres = src->altitude_metres;
+    dst->altitude_m = src->altitude_m;
     dst->ra0_rad = src->ra0_rad;
     dst->dec0_rad = src->dec0_rad;
     dst->normalise_beam = src->normalise_beam;

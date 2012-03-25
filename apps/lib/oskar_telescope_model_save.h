@@ -26,48 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
+#ifndef OSKAR_TELESCOPE_MODEL_SAVE_H_
+#define OSKAR_TELESCOPE_MODEL_SAVE_H_
+
+/**
+ * @file oskar_telescope_model_save.h
+ */
+
+#include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_station_model_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#include <cstdlib>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_free(oskar_TelescopeModel* telescope)
-{
-    int error = 0, i = 0;
-
-    /* Free the arrays. */
-    error = oskar_mem_free(&telescope->station_x);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_x_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z_hor);
-    if (error) return error;
-
-    /* Free each station. */
-    for (i = 0; i < telescope->num_stations; ++i)
-    {
-        error = oskar_station_model_free(&telescope->station[i]);
-        if (error) return error;
-    }
-
-    /* Free the station array. */
-    free(telescope->station);
-    telescope->station = NULL;
-
-    return 0;
-}
+/**
+ * @brief
+ * Saves a telescope model structure to a directory.
+ *
+ * @details
+ * This function saves a telescope model structure to the given
+ * directory path.
+ *
+ * @param[out] telescope  Pointer to telescope model structure to save.
+ * @param[in]  dir_path   Path to a telescope model directory structure.
+ *
+ * @return An OSKAR error code.
+ */
+OSKAR_EXPORT
+int oskar_telescope_model_save(const oskar_TelescopeModel* telescope,
+        const char* dir_path);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_TELESCOPE_MODEL_SAVE_H_ */

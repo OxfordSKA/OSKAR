@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #include "utility/oskar_mem_realloc.h"
 
 #include <cuda_runtime_api.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -64,6 +65,10 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
         mem_new = realloc(mem->data, new_size);
         if (mem_new == NULL)
             return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+
+        /* Initialise the new memory if it's larger than the old. */
+        if (new_size > old_size)
+            memset((char*)mem_new + old_size, 0, new_size - old_size);
 
         /* Set the new meta-data. */
         mem->data = mem_new;

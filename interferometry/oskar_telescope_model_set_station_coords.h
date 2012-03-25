@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,13 +50,17 @@ extern "C" {
  *
  * @param[in] dst   Telescope model structure to copy into.
  * @param[in] index Station array index to set.
- * @param[in] x     Station x position.
- * @param[in] y     Station y position.
- * @param[in] z     Station z position.
+ * @param[in] x     Station x position (ECEF).
+ * @param[in] y     Station y position (ECEF).
+ * @param[in] z     Station z position (ECEF).
+ * @param[in] x_hor Station x position (horizon plane).
+ * @param[in] y_hor Station y position (horizon plane).
+ * @param[in] z_hor Station z position (horizon plane).
  */
 OSKAR_EXPORT
 int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
-        int index, double x, double y, double z);
+        int index, double x, double y, double z,
+        double x_hor, double y_hor, double z_hor);
 
 #ifdef __cplusplus
 }

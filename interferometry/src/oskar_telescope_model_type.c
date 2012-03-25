@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,10 @@ int oskar_telescope_model_is_type(const oskar_TelescopeModel* telescope,
 {
     return (telescope->station_x.type == type &&
             telescope->station_y.type == type &&
-            telescope->station_z.type == type);
+            telescope->station_z.type == type &&
+            telescope->station_x_hor.type == type &&
+            telescope->station_y_hor.type == type &&
+            telescope->station_z_hor.type == type);
 }
 
 int oskar_telescope_model_type(const oskar_TelescopeModel* telescope)

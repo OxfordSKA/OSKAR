@@ -26,48 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_station_model_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+#ifndef OSKAR_STATION_MODEL_SAVE_CONFIGURATION_H_
+#define OSKAR_STATION_MODEL_SAVE_CONFIGURATION_H_
+
+/**
+ * @file oskar_station_model_save_configuration.h
+ */
+
+#include "oskar_global.h"
+#include "station/oskar_StationModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_free(oskar_TelescopeModel* telescope)
-{
-    int error = 0, i = 0;
-
-    /* Free the arrays. */
-    error = oskar_mem_free(&telescope->station_x);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_x_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z_hor);
-    if (error) return error;
-
-    /* Free each station. */
-    for (i = 0; i < telescope->num_stations; ++i)
-    {
-        error = oskar_station_model_free(&telescope->station[i]);
-        if (error) return error;
-    }
-
-    /* Free the station array. */
-    free(telescope->station);
-    telescope->station = NULL;
-
-    return 0;
-}
+/**
+ * @brief Writes OSKAR station model data to an ASCII file.
+ *
+ * @details
+ * Writes data from the station model to an ASCII file
+ * consisting of a simple header describing the number of (antenna) elements
+ * in the station, the station longitude, latitude and altitude followed by
+ * a CSV list of the local horizontal x,y,z positions of the elements
+ * (in metres) and remaining station data.
+ *
+ * Note:
+ * - The oskar_Mem pointers holding the coordinates must reside on host (CPU).
+ * - The coordinates of the station file must be in metres.
+ *
+ * @param[in] filename Pathname of file to write.
+ * @param[in] station  Station model to write.
+ *
+ * @return An OSKAR error code.
+ */
+OSKAR_EXPORT
+int oskar_station_model_save_config(const char* filename,
+        const oskar_StationModel* station);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_STATION_MODEL_SAVE_CONFIGURATION_H_ */

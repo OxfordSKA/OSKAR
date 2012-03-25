@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
 #include "interferometry/oskar_telescope_model_resize.h"
 #include "interferometry/oskar_telescope_model_type.h"
-#include "station/oskar_station_model_load.h"
+#include "station/oskar_station_model_load_config.h"
 #include <cstdlib>
 
 oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
@@ -79,11 +79,12 @@ int oskar_TelescopeModel::location() const
     return oskar_telescope_model_location(this);
 }
 
-int oskar_TelescopeModel::load_station(int index, const char* filename)
+int oskar_TelescopeModel::load_station_configuration(int index, const char* filename)
 {
     if (index >= this->num_stations)
         return OSKAR_ERR_OUT_OF_RANGE;
-    return oskar_station_model_load(&(this->station[index]), filename);
+    return oskar_station_model_load_config(&(this->station[index]),
+            filename);
 }
 
 int oskar_TelescopeModel::multiply_by_wavenumber(double frequency_hz)

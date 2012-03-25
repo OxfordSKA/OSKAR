@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FILE_UTILS_H_
-#define OSKAR_FILE_UTILS_H_
+#include "apps/lib/oskar_remove_dir.h"
 
-#include "oskar_global.h"
-#include <QtCore/QString>
+#include <QtCore/QByteArray>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern "C"
+bool oskar_remove_dir(const char* dir_name)
+{
+    bool result = false;
+    QDir dir;
+    dir.setPath(QString(dir_name));
+    if (dir.exists())
+    {
+        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot
+                | QDir::System | QDir::Hidden  | QDir::AllDirs
+                | QDir::Files, QDir::DirsFirst))
+        {
+            if (info.isDir())
+            {
+                // Recursive call to remove the directory.
+                QByteArray t = info.absoluteFilePath().toAscii();
+                result = oskar_remove_dir(t);
+            }
+            else
+            {
+                // Remove the file.
+                result = QFile::remove(info.absoluteFilePath());
+            }
 
-OSKAR_EXPORT
-bool oskar_remove_dir(const char* dir_name);
+            if (!result)
+                return result;
+        }
 
-
-#ifdef __cplusplus
+        // Remove the empty directory.
+        result = dir.rmdir(dir.absolutePath());
+    }
+    return result;
 }
-#endif
-
-#endif // OSKAR_FILE_UTILS_H_

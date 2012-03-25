@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,11 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
     if (!file)
         return OSKAR_ERR_FILE_IO;
 
+    /* Store the telescope centre longitude, latitude, and altitude. */
+    telescope->longitude_rad = longitude;
+    telescope->latitude_rad = latitude;
+    telescope->altitude_m = altitude;
+
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
     {
@@ -98,8 +103,9 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         oskar_horizon_plane_to_offset_geocentric_cartesian_d(1,
                 &par[0], &par[1], &par[2], longitude, latitude, &x, &y, &z);
 
-        /* Store the offset geocentric coordinates. */
-        err = oskar_telescope_model_set_station_coords(telescope, n, x, y, z);
+        /* Store the offset geocentric and horizon plane coordinates. */
+        err = oskar_telescope_model_set_station_coords(telescope, n, x, y, z,
+                par[0], par[1], par[2]);
         if (err)
         {
             fclose(file);
@@ -112,7 +118,7 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         oskar_geocentric_cartesian_to_geodetic_spherical(1, &x, &y, &z,
                 &(telescope->station[n].longitude_rad),
                 &(telescope->station[n].latitude_rad),
-                &(telescope->station[n].altitude_metres));
+                &(telescope->station[n].altitude_m));
 
         /* Increment counter. */
         ++n;

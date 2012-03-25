@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,12 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     if (error) return error;
     error = oskar_mem_copy(&dst->station_z, &src->station_z);
     if (error) return error;
+    error = oskar_mem_copy(&dst->station_x_hor, &src->station_x_hor);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->station_y_hor, &src->station_y_hor);
+    if (error) return error;
+    error = oskar_mem_copy(&dst->station_z_hor, &src->station_z_hor);
+    if (error) return error;
 
     /* Copy remaining meta-data. */
     dst->num_stations = src->num_stations;
@@ -68,6 +74,9 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->identical_stations = src->identical_stations;
     dst->use_common_sky = src->use_common_sky;
     dst->seed_time_variable_errors = src->seed_time_variable_errors;
+    dst->longitude_rad = src->longitude_rad;
+    dst->latitude_rad = src->latitude_rad;
+    dst->altitude_m = src->altitude_m;
     dst->ra0_rad = src->ra0_rad;
     dst->dec0_rad = src->dec0_rad;
     dst->wavelength_metres = src->wavelength_metres;

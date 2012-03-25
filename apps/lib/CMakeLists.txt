@@ -3,8 +3,8 @@
 #
 
 set(apps_SRC
-    src/oskar_file_utils.cpp
     src/oskar_load_stations.cpp
+    src/oskar_remove_dir.cpp
     src/oskar_set_up_sky.cpp
     src/oskar_set_up_telescope.cpp
     src/oskar_set_up_visibilities.cpp
@@ -17,6 +17,8 @@ set(apps_SRC
     src/oskar_settings_load.c
     src/oskar_sim_beam_pattern.cpp
     src/oskar_sim_interferometer.cpp
+    src/oskar_telescope_model_load.cpp
+    src/oskar_telescope_model_save.cpp
 )
 
 if(BUILD_OSKAR_MS)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,16 +49,19 @@ int oskar_station_model_analyse(oskar_StationModel* station,
     /* Get type. */
     type = oskar_station_model_type(station);
 
-    /* Determine if element errors should be applied. */
+    /* Set default station flags. */
+    station->array_is_3d = 0;
     station->apply_element_errors = 0;
     station->apply_element_weight = 0;
     station->single_element_model = 1;
 
     if (type == OSKAR_DOUBLE)
     {
-        double *amp, *amp_err, *phase, *phase_err;
+        double *z_signal, *z_weights, *amp, *amp_err, *phase, *phase_err;
         double *cos_x, *sin_x, *cos_y, *sin_y;
         double2 *weights;
+        z_signal  = (double*)(station->z_signal.data);
+        z_weights = (double*)(station->z_weights.data);
         amp       = (double*)(station->gain.data);
         amp_err   = (double*)(station->gain_error.data);
         phase     = (double*)(station->phase_offset.data);
@@ -71,6 +74,10 @@ int oskar_station_model_analyse(oskar_StationModel* station,
 
         for (i = 0; i < station->num_elements; ++i)
         {
+            if (z_signal[i] != 0.0 || z_weights[i] != 0.0)
+            {
+                station->array_is_3d = 1;
+            }
             if (amp[i] != 1.0 || phase[i] != 0.0)
             {
                 station->apply_element_errors = 1;
@@ -93,9 +100,11 @@ int oskar_station_model_analyse(oskar_StationModel* station,
     }
     else if (type == OSKAR_SINGLE)
     {
-        float *amp, *amp_err, *phase, *phase_err;
+        float *z_signal, *z_weights, *amp, *amp_err, *phase, *phase_err;
         float *cos_x, *sin_x, *cos_y, *sin_y;
         float2 *weights;
+        z_signal  = (float*)(station->z_signal.data);
+        z_weights = (float*)(station->z_weights.data);
         amp       = (float*)(station->gain.data);
         amp_err   = (float*)(station->gain_error.data);
         phase     = (float*)(station->phase_offset.data);
@@ -108,6 +117,10 @@ int oskar_station_model_analyse(oskar_StationModel* station,
 
         for (i = 0; i < station->num_elements; ++i)
         {
+            if (z_signal[i] != 0.0 || z_weights[i] != 0.0)
+            {
+                station->array_is_3d = 1;
+            }
             if (amp[i] != 1.0f || phase[i] != 0.0)
             {
                 station->apply_element_errors = 1;

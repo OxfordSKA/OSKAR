@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ struct oskar_StationModel
     /* Other station data. */
     double longitude_rad;        /**< Geodetic longitude of station, in radians. */
     double latitude_rad;         /**< Geodetic latitude of station, in radians. */
-    double altitude_metres;      /**< Altitude of station above ellipsoid, in metres. */
+    double altitude_m;           /**< Altitude of station above ellipsoid, in metres. */
     double ra0_rad;              /**< Right ascension of beam phase centre, in radians. */
     double dec0_rad;             /**< Declination of beam phase centre, in radians. */
     int normalise_beam;          /**< True if the station beam should be normalised by the number of antennas. */
@@ -130,7 +130,7 @@ struct oskar_StationModel
      * Loads the station element data from a text file.
      *
      * @details
-     * This function loads station element (antenna) data from a comma- or
+     * This function loads a station configuration from a comma- or
      * space-separated text file. Each line contains data for one element of the
      * station.
      *
@@ -147,6 +147,8 @@ struct oskar_StationModel
      * - Element phase error in degrees (default 0).
      * - Element multiplicative weight (real part, default 1).
      * - Element multiplicative weight (imaginary part, default 0).
+     * - Element X dipole axis azimuth, in degrees (default 90).
+     * - Element Y dipole axis azimuth, in degrees (default 0).
      *
      * Only the first two columns are required to be present.
      *
@@ -154,7 +156,6 @@ struct oskar_StationModel
      * x-axis points to the local geographic East, the y-axis to local
      * geographic North, and the z-axis to the local zenith.
      *
-     * @param[out] station Pointer to destination data structure to fill.
      * @param[in] filename Name of the data file to load.
      *
      * @return
@@ -163,7 +164,7 @@ struct oskar_StationModel
      * - A positive return code indicates a CUDA error.
      * - A negative return code indicates an OSKAR error.
      */
-    int load(const char* filename);
+    int load_configuration(const char* filename);
 
     /**
      * @brief Returns the location of all arrays in the structure, or an error

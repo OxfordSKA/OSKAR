@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,7 @@ void Test_TelescopeModel::test_load_telescope_cpu()
         for (int i = 0; i < n_stations; ++i)
         {
             sprintf(station_name, "%s_%d.dat", station_base, i);
-            CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station(i, station_name));
+            CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_configuration(i, station_name));
             CPPUNIT_ASSERT_EQUAL(n_elements, tel_cpu->station[i].num_elements);
         }
 

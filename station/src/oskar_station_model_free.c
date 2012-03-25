@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,6 +88,31 @@ int oskar_station_model_free(oskar_StationModel* model)
         model->element_pattern = NULL;
     }
 
+    /* Initialise variables. */
+    /* Do NOT set child or num_elements to 0 yet! */
+    model->station_type = OSKAR_STATION_TYPE_AA;
+    model->element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
+    model->array_is_3d = OSKAR_FALSE;
+    model->coord_units = OSKAR_METRES;
+    model->apply_element_errors = OSKAR_FALSE;
+    model->apply_element_weight = OSKAR_FALSE;
+    model->single_element_model = OSKAR_TRUE;
+    model->orientation_x = M_PI / 2.0;
+    model->orientation_y = 0.0;
+
+    model->parent = NULL;
+    model->element_pattern = NULL;
+
+    model->longitude_rad = 0.0;
+    model->latitude_rad = 0.0;
+    model->altitude_m = 0.0;
+    model->ra0_rad = 0.0;
+    model->dec0_rad = 0.0;
+    model->normalise_beam = OSKAR_FALSE;
+    model->evaluate_array_factor = OSKAR_TRUE;
+    model->evaluate_element_factor = OSKAR_TRUE;
+    model->bit_depth = 0;
+
     /* Recursively free the child stations. */
     if (model->child)
     {
@@ -102,32 +127,6 @@ int oskar_station_model_free(oskar_StationModel* model)
         free(model->child);
         model->child = NULL;
     }
-
-    /* Initialise variables. */
-    model->station_type = OSKAR_STATION_TYPE_AA;
-    model->num_elements = 0;
-    model->element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
-    model->array_is_3d = OSKAR_FALSE;
-    model->coord_units = OSKAR_METRES;
-    model->apply_element_errors = OSKAR_FALSE;
-    model->apply_element_weight = OSKAR_FALSE;
-    model->single_element_model = OSKAR_TRUE;
-    model->orientation_x = M_PI / 2.0;
-    model->orientation_y = 0.0;
-
-    model->child = NULL;
-    model->parent = NULL;
-    model->element_pattern = NULL;
-
-    model->longitude_rad = 0.0;
-    model->latitude_rad = 0.0;
-    model->altitude_metres = 0.0;
-    model->ra0_rad = 0.0;
-    model->dec0_rad = 0.0;
-    model->normalise_beam = OSKAR_FALSE;
-    model->evaluate_array_factor = OSKAR_TRUE;
-    model->evaluate_element_factor = OSKAR_TRUE;
-    model->bit_depth = 0;
 
     return 0;
 }

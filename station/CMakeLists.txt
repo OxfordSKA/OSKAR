@@ -24,17 +24,17 @@ set(station_SRC
     src/oskar_station_model_copy.c
     src/oskar_station_model_free.c
     src/oskar_station_model_init.c
-    src/oskar_station_model_load.c
+    src/oskar_station_model_load_config.c
     src/oskar_station_model_location.c
     src/oskar_station_model_multiply_by_wavenumber.c
     src/oskar_station_model_resize.c
+    src/oskar_station_model_save_config.c
     src/oskar_station_model_scale_coords.c
     src/oskar_station_model_set_element_coords.c
     src/oskar_station_model_set_element_errors.c
     src/oskar_station_model_set_element_orientation.c
     src/oskar_station_model_set_element_weight.c
     src/oskar_station_model_type.c
-    src/oskar_station_model_write.c
     src/oskar_StationModel.cpp
 )
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_file_utils.h"
+#ifndef OSKAR_REMOVE_DIR_H_
+#define OSKAR_REMOVE_DIR_H_
 
-#include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QFileInfoList>
+/**
+ * @file oskar_remove_dir.h
+ */
 
-#include <cstdio>
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool oskar_remove_dir(const char* dir_name)
-{
-    bool result = true;
-    QDir dir;
-    dir.setPath(QString(dir_name));
-    //printf("== Removing directory: %s\n", dir.absolutePath().toLatin1().data());
-    if ( dir.exists(dir.absolutePath()) )
-    {
-        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot
-                | QDir::System | QDir::Hidden  | QDir::AllDirs
-                | QDir::Files, QDir::DirsFirst))
-        {
-            if (info.isDir())
-                result = oskar_remove_dir(info.absoluteFilePath().toLatin1().data());
-
-            else
-                result = QFile::remove(info.absoluteFilePath());
-
-            if (!result)
-                return result;
-        }
-        result = dir.rmdir(dir.absolutePath());
-    }
-    return result;
-}
-
+/**
+ * @brief Removes a directory and its contents.
+ *
+ * @details
+ * This function recursively removes the named directory and its contents.
+ *
+ * @param[in] dir_name Name of the directory to remove.
+ */
+OSKAR_EXPORT
+bool oskar_remove_dir(const char* dir_name);
 
 #ifdef __cplusplus
 }
 #endif
 
-
+#endif /* OSKAR_REMOVE_DIR_H_ */

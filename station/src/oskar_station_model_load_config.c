@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_load.h"
+#include "station/oskar_station_model_load_config.h"
 #include "station/oskar_station_model_resize.h"
 #include "station/oskar_station_model_set_element_coords.h"
 #include "station/oskar_station_model_set_element_errors.h"
@@ -42,7 +42,8 @@
 extern "C" {
 #endif
 
-int oskar_station_model_load(oskar_StationModel* station, const char* filename)
+int oskar_station_model_load_config(oskar_StationModel* station,
+        const char* filename)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;

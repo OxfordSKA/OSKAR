@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 #ifndef OSKAR_WRITE_MS_H_
 #define OSKAR_WRITE_MS_H_
 
-
 /**
  * @file oskar_write_ms.h
  */
@@ -43,6 +42,18 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Writes data to a CASA Measurement Set.
+ *
+ * @details
+ * This function writes visibility data and telescope model data to a CASA
+ * Measurement Set.
+ *
+ * @param[in] ms_path   Pathname of the Measurement Set to write.
+ * @param[in] vis       Pointer to visibility structure to write.
+ * @param[in] telescope Pointer to telescope model data to write.
+ * @param[in] overwrite If true, then overwrite any existing Measurement Set.
+ */
 OSKAR_EXPORT
 int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
         const oskar_TelescopeModel* telescope, int overwrite);
@@ -51,4 +62,4 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
 }
 #endif
 
-#endif // OSKAR_WRITE_MS_H_
+#endif /* OSKAR_WRITE_MS_H_ */
