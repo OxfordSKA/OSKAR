@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,20 +50,12 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("telescope");
 
-    // Station positions file.
-    t = s.value("station_positions_file", "").toByteArray();
+    // Telescope configuration directory.
+    t = s.value("config_directory", "").toByteArray();
     if (t.size() > 0)
     {
-        tel->station_positions_file = (char*)malloc(t.size() + 1);
-        strcpy(tel->station_positions_file, t.constData());
-    }
-
-    // Station layout directory.
-    t = s.value("station_layout_directory", "").toByteArray();
-    if (t.size() > 0)
-    {
-        tel->station_layout_directory = (char*)malloc(t.size() + 1);
-        strcpy(tel->station_layout_directory, t.constData());
+        tel->config_directory = (char*)malloc(t.size() + 1);
+        strcpy(tel->config_directory, t.constData());
     }
 
     // Telescope location.

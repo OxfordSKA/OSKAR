@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,10 +152,10 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
     // Check for mouse double-click events.
     if (event->type() == QEvent::MouseButtonDblClick)
     {
-        if (type == oskar_SettingsItem::INPUT_FILE_NAME)
+        if (type == oskar_SettingsItem::TELESCOPE_DIR_NAME)
         {
-            QString name = QFileDialog::getOpenFileName(view_,
-                    "Input file name", value.toString());
+            QString name = QFileDialog::getExistingDirectory(view_,
+                    "Telescope directory", value.toString());
             if (!name.isNull())
             {
                 name = QDir::current().relativeFilePath(name);
@@ -164,10 +164,10 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             event->accept();
             return true;
         }
-        else if (type == oskar_SettingsItem::INPUT_DIR_NAME)
+        else if (type == oskar_SettingsItem::INPUT_FILE_NAME)
         {
-            QString name = QFileDialog::getExistingDirectory(view_,
-                    "Directory", value.toString());
+            QString name = QFileDialog::getOpenFileName(view_,
+                    "Input file name", value.toString());
             if (!name.isNull())
             {
                 name = QDir::current().relativeFilePath(name);

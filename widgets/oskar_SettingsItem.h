@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,8 @@ public:
         INT,
         DOUBLE,
         STRING,
+        TELESCOPE_DIR_NAME,
         OUTPUT_FILE_NAME,   /* e.g. visibility data. */
-        INPUT_DIR_NAME,     /* e.g. station directory. */
         INPUT_FILE_NAME,    /* e.g. sky model file. */
         INPUT_FILE_LIST,    /* e.g. MeerKAT antenna files. */
         INT_CSV_LIST,       /* e.g. CUDA device IDs. */

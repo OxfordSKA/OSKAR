@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,8 +133,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 
     // Telescope model settings.
     setLabel("telescope", "Telescope model settings");
-    registerSetting("telescope/station_positions_file", "Station positions file", oskar_SettingsItem::INPUT_FILE_NAME, true);
-    registerSetting("telescope/station_layout_directory", "Station layout directory", oskar_SettingsItem::INPUT_DIR_NAME, true);
+    registerSetting("telescope/config_directory", "Telescope directory", oskar_SettingsItem::TELESCOPE_DIR_NAME, true);
     registerSetting("telescope/longitude_deg", "Longitude [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/latitude_deg", "Latitude [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/altitude_m", "Altitude [m]", oskar_SettingsItem::DOUBLE);
@@ -259,7 +258,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         if (index.column() == 0)
         {
             if (item->type() == oskar_SettingsItem::INPUT_FILE_NAME ||
-                    item->type() == oskar_SettingsItem::INPUT_DIR_NAME)
+                    item->type() == oskar_SettingsItem::TELESCOPE_DIR_NAME)
             {
                 if (item->required())
                     return QIcon(":/icons/open_required.png");

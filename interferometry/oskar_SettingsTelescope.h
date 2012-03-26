@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,7 @@
  */
 struct oskar_SettingsTelescope
 {
-    char* station_positions_file;
-    char* station_layout_directory;
+    char* config_directory;
     double longitude_rad;
     double latitude_rad;
     double altitude_m;

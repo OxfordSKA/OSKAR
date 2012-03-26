@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_load_stations.h"
+#include "apps/lib/oskar_telescope_model_load.h"
 #include "math/oskar_random_gaussian.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
@@ -47,29 +47,22 @@ using namespace std;
 extern "C"
 oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
 {
-    // Load telescope model into CPU structure.
+    // Create the structure in CPU memory.
     oskar_TelescopeModel *telescope;
-    const char* telescope_file = settings->telescope.station_positions_file;
-    const char* station_dir = settings->telescope.station_layout_directory;
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     telescope = new oskar_TelescopeModel(type, OSKAR_LOCATION_CPU);
-    int err = telescope->load_station_coords(telescope_file,
-            settings->telescope.longitude_rad, settings->telescope.latitude_rad,
+
+    // Load the telescope configuration directory.
+    int err = oskar_telescope_model_load(telescope,
+            settings->telescope.config_directory,
+            settings->telescope.longitude_rad,
+            settings->telescope.latitude_rad,
             settings->telescope.altitude_m);
     if (err)
     {
-        fprintf(stderr, "== ERROR: Failed to load telescope geometry (%s).\n",
-                oskar_get_error_string(err));
-        return NULL;
-    }
-
-    // Load stations from directory.
-    err = oskar_load_stations(telescope->station, telescope->num_stations,
-            station_dir);
-    if (err)
-    {
-        fprintf(stderr, "== ERROR: Failed to load station geometry (%s).\n",
-                oskar_get_error_string(err));
+        fprintf(stderr, "== ERROR: Failed to load telescope configuration "
+                "(%s).\n", oskar_get_error_string(err));
+        delete telescope;
         return NULL;
     }
 

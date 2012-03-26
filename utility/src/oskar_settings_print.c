@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -252,8 +252,7 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
 
     /* Print telescope settings. */
     pr_k(1, w, "Telescope settings", 1);
-    pr_s(2, 0, "Telescope file", s->telescope.station_positions_file);
-    pr_s(2, 0, "Station directory", s->telescope.station_layout_directory);
+    pr_s(2, 0, "Telescope directory", s->telescope.config_directory);
     pr_1f(2, w, "Longitude [deg]", s->telescope.longitude_rad * R2D);
     pr_1f(2, w, "Latitude [deg]", s->telescope.latitude_rad * R2D);
     pr_1f(2, w, "Altitude [m]", s->telescope.altitude_m);

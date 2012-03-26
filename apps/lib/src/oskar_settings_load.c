@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,7 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
     settings->sky.gsm_file = 0;
     settings->sky.input_sky_file = 0;
     settings->sky.output_sky_file = 0;
-    settings->telescope.station_positions_file = 0;
-    settings->telescope.station_layout_directory = 0;
+    settings->telescope.config_directory = 0;
     settings->telescope.station.receiver_temperature_file = 0;
     settings->image.filename = 0;
     settings->beam_pattern.filename = 0;
