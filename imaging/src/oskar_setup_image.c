@@ -44,6 +44,7 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     int num_pols;
     int num_times;
     int num_chan;
+    int time_range[2], chan_range[2];
 
     /* Set local variables */
     pol = settings->polarisation;
@@ -67,11 +68,22 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     {
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
+
+    time_range[0] = settings->time_range[0];
+    time_range[1] = settings->time_range[1];
+    chan_range[0] = settings->channel_range[0];
+    chan_range[1] = settings->channel_range[1];
+    if (time_range[0] < 0) time_range[0] = 0;
+    if (time_range[1] < 0) time_range[1] = (settings->time_snapshots) ?
+            vis->num_times-1 : 0;
+    if (chan_range[0] < 0) chan_range[0] = 0;
+    if (chan_range[1] < 0) chan_range[1] = (settings->channel_snapshots) ?
+            vis->num_channels-1 : 0;
     num_times = (settings->time_snapshots) ?
-            (settings->time_range[1] - settings->time_range[0] + 1) : 1;
+            (time_range[1] - time_range[0] + 1) : 1;
     if (num_times < 1) return OSKAR_ERR_INVALID_RANGE;
     num_chan  = (settings->channel_snapshots) ?
-            (settings->channel_range[1] - settings->channel_range[0] + 1) : 1;
+            (chan_range[1] - chan_range[0] + 1) : 1;
     if (num_chan < 1) return OSKAR_ERR_INVALID_RANGE;
 
     /* Resize the image cube */

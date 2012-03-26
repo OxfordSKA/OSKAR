@@ -34,6 +34,8 @@
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_free.h"
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,19 +46,19 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
         const oskar_SettingsImage* settings)
 {
     int coord_offset;
-    int num_vis;
+    int num_vis_coords;
     int chan_range[2];
     int time_range[2];
     double im_freq_start_hz;
     int location, type;
-    int i, j, k, idx;
+    int i, j, t, k;
     double freq, scaling;
     oskar_Mem uu_ptr, vv_ptr;
     int err = OSKAR_SUCCESS;
 
     /* Setup local variables */
     err = OSKAR_SUCCESS;
-    num_vis = uu->num_elements;
+    num_vis_coords = vis->num_baselines;
     chan_range[0] = settings->channel_range[0];
     chan_range[1] = settings->channel_range[1];
     time_range[0] = settings->time_range[0];
@@ -81,9 +83,9 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     if (settings->time_snapshots && settings->channel_snapshots)
     {
         coord_offset = time * vis->num_baselines;
-        err = oskar_mem_get_pointer(uu, &vis->uu_metres, coord_offset, num_vis);
+        err = oskar_mem_get_pointer(uu, &vis->uu_metres, coord_offset, num_vis_coords);
         if (err) goto stop;
-        err = oskar_mem_get_pointer(vv, &vis->vv_metres, coord_offset, num_vis);
+        err = oskar_mem_get_pointer(vv, &vis->vv_metres, coord_offset, num_vis_coords);
         if (err) goto stop;
     }
 
@@ -93,26 +95,25 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     {
         /* freq0 = mid freq of the imaging band. i.e. the freq we are imaging at */
         coord_offset = time * vis->num_baselines;
-        err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
+        err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords);
         if (err) goto stop;
-        err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
+        err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords);
         if (err) goto stop;
-        for (j = 0; j < (chan_range[1] - chan_range[0] + 1); ++j)
+        for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
         {
-            freq = vis->freq_start_hz + ((chan_range[0] + j) * vis->freq_inc_hz);
+            freq = vis->freq_start_hz + j * vis->freq_inc_hz;
             scaling = freq/im_freq_start_hz;
-            for (i = 0; i < vis->num_baselines; ++i)
+            for (i = 0; i < vis->num_baselines; ++i, ++k)
             {
-                idx = j*vis->num_baselines + i;
                 if (type == OSKAR_DOUBLE)
                 {
-                    ((double*)uu->data)[idx] = ((double*)uu_ptr.data)[i] * scaling;
-                    ((double*)vv->data)[idx] = ((double*)vv_ptr.data)[i] * scaling;
+                    ((double*)uu->data)[k] = ((double*)uu_ptr.data)[i] * scaling;
+                    ((double*)vv->data)[k] = ((double*)vv_ptr.data)[i] * scaling;
                 }
                 else
                 {
-                    ((float*)uu->data)[idx] = ((float*)uu_ptr.data)[i] * scaling;
-                    ((float*)vv->data)[idx] = ((float*)vv_ptr.data)[i] * scaling;
+                    ((float*)uu->data)[k] = ((float*)uu_ptr.data)[i] * scaling;
+                    ((float*)vv->data)[k] = ((float*)vv_ptr.data)[i] * scaling;
                 }
             }
         }
@@ -121,25 +122,24 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     /* ======================================== TIME SYNTHESIS, FREQ SNAPSHOTS */
     else if (!settings->time_snapshots && settings->channel_snapshots)
     {
-        for (j = 0; j < (time_range[1] - time_range[0] + 1); ++j)
+        for (k = 0, t = time_range[0]; t <= time_range[1]; ++t)
         {
-            coord_offset = j * vis->num_baselines;
-            err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
+            coord_offset = t * vis->num_baselines;
+            err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords);
             if (err) goto stop;
-            err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
+            err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords);
             if (err) goto stop;
-            for (i = 0; i < vis->num_baselines; ++i)
+            for (i = 0; i < vis->num_baselines; ++i, ++k)
             {
-                idx = j*vis->num_baselines + i;
                 if (type == OSKAR_DOUBLE)
                 {
-                    ((double*)uu->data)[idx] = ((double*)uu_ptr.data)[i];
-                    ((double*)vv->data)[idx] = ((double*)vv_ptr.data)[i];
+                    ((double*)uu->data)[k] = ((double*)uu_ptr.data)[i];
+                    ((double*)vv->data)[k] = ((double*)vv_ptr.data)[i];
                 }
                 else
                 {
-                    ((float*)uu->data)[idx] = ((float*)uu_ptr.data)[i];
-                    ((float*)vv->data)[idx] = ((float*)vv_ptr.data)[i];
+                    ((float*)uu->data)[k] = ((float*)uu_ptr.data)[i];
+                    ((float*)vv->data)[k] = ((float*)vv_ptr.data)[i];
                 }
             }
         }
@@ -148,30 +148,29 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     /* ======================================== TIME SYNTHESIS, FREQ SYNTHESIS */
     else
     {
-        int num_times_synth = (time_range[1]-time_range[0]+1);
-        for (j = 0; j < (chan_range[1] - chan_range[0] + 1); ++j)
+        for (k = 0, j = chan_range[0]; j <= chan_range[1]; ++j)
         {
-            freq = vis->freq_start_hz + ((chan_range[0] + j) * vis->freq_inc_hz);
+            freq = vis->freq_start_hz + (j * vis->freq_inc_hz);
             scaling = freq/im_freq_start_hz;
-            for (k = 0; k < num_times_synth; ++k)
+
+            for (t = time_range[0]; t <= time_range[1]; ++t)
             {
-                coord_offset = (time_range[0] + k) * vis->num_baselines;
-                err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis);
+                coord_offset = t * vis->num_baselines;
+                err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords);
                 if (err) goto stop;
-                err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis);
+                err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords);
                 if (err) goto stop;
-                for (i = 0; i < vis->num_baselines; ++i)
+                for (i = 0; i < vis->num_baselines; ++i, ++k)
                 {
-                    idx = (j * num_times_synth + k) * vis->num_baselines + i;
                     if (type == OSKAR_DOUBLE)
                     {
-                        ((double*)uu->data)[idx] = ((double*)uu_ptr.data)[i] * scaling;
-                        ((double*)vv->data)[idx] = ((double*)vv_ptr.data)[i] * scaling;
+                        ((double*)uu->data)[k] = ((double*)uu_ptr.data)[i] * scaling;
+                        ((double*)vv->data)[k] = ((double*)vv_ptr.data)[i] * scaling;
                     }
                     else
                     {
-                        ((float*)uu->data)[idx] = ((float*)uu_ptr.data)[i] * scaling;
-                        ((float*)vv->data)[idx] = ((float*)vv_ptr.data)[i] * scaling;
+                        ((float*)uu->data)[k] = ((float*)uu_ptr.data)[i] * scaling;
+                        ((float*)vv->data)[k] = ((float*)vv_ptr.data)[i] * scaling;
                     }
                 }
             }

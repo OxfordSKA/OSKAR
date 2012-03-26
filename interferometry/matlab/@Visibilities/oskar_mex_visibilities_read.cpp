@@ -57,7 +57,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     args[1] = mxCreateString("file");
     mexCallMATLAB(1, &file_exists, 2, args, "exist");
     int exists = (int)mxGetScalar(file_exists);
-    mexPrintf("file exists? ... %i\n", exists);
     if (exists == 0)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: Specified visibility file (%s)"

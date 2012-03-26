@@ -66,30 +66,20 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
     {
         double2* a_ = (double2*)amps->data;
 
-
         /* ----------------------------------- TIME SNAPSHOTS, FREQ SNAPSHOTS */
         if (settings->time_snapshots && settings->channel_snapshots)
         {
-            idx = (channel * vis->num_times * time) * vis->num_baselines;
+            idx = (channel * vis->num_times + time) * vis->num_baselines;
             if (num_pols == 4)
             {
                 double4c* data;
                 if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
-                {
                     data = (double4c*)vis->amplitude.data;
-                    printf("linear, num_elements = %i\n");
-                }
                 else /* pol == OSKAR_IMAGE_TYPE_STOKES */
-                {
                     data = (double4c*)stokes->data;
-                    printf("linear, num_elements = %i\n");
-                }
 
                 for (i = 0; i < vis->num_baselines; ++i)
                 {
-                    printf("c = %i, t = %i, b = %i p = %i, i = %i, idx = %i\n",
-                            channel, time, i, p, i, idx);
-                    fflush(stdout);
                     if (p == 0)
                     {
                         a_[i].x = data[idx+i].a.x; a_[i].y= data[idx+i].a.y;
@@ -166,19 +156,19 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     {
                         if (p == 0)
                         {
-                            a_[k].x=data[idx+i].a.x; a_[i].y=data[idx+i].a.y;
+                            a_[k].x=data[idx+i].a.x; a_[k].y=data[idx+i].a.y;
                         }
                         else if (p == 1)
                         {
-                            a_[k].x=data[idx+i].b.x; a_[i].y=data[idx+i].b.y;
+                            a_[k].x=data[idx+i].b.x; a_[k].y=data[idx+i].b.y;
                         }
                         else if (p == 2)
                         {
-                            a_[k].x=data[idx+i].c.x; a_[i].y=data[idx+i].c.y;
+                            a_[k].x=data[idx+i].c.x; a_[k].y=data[idx+i].c.y;
                         }
                         else if (p == 3)
                         {
-                            a_[k].x=data[idx+i].d.x; a_[i].y=data[idx+i].d.y;
+                            a_[k].x=data[idx+i].d.x; a_[k].y=data[idx+i].d.y;
                         }
                     }
                 }
@@ -196,7 +186,7 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                         idx = (j*vis->num_times+time)*vis->num_baselines;
                         for (i = 0; i < vis->num_baselines;++i, ++k)
                         {
-                            a_[k].x=data[idx+i].x; a_[i].y=data[idx+i].y;
+                            a_[k].x=data[idx+i].x; a_[k].y=data[idx+i].y;
                         }
                     }
                 }
@@ -210,19 +200,19 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                         {
                             if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                             {
-                                a_[i].x=data[idx+i].a.x; a_[i].y=data[idx+i].a.y;
+                                a_[k].x=data[idx+i].a.x; a_[k].y=data[idx+i].a.y;
                             }
                             else if (pol == OSKAR_IMAGE_TYPE_POL_XY)
                             {
-                                a_[i].x=data[idx+i].b.x; a_[i].y=data[idx+i].b.y;
+                                a_[k].x=data[idx+i].b.x; a_[k].y=data[idx+i].b.y;
                             }
                             else if (pol == OSKAR_IMAGE_TYPE_POL_YX)
                             {
-                                a_[i].x=data[idx+i].c.x; a_[i].y=data[idx+i].c.y;
+                                a_[k].x=data[idx+i].c.x; a_[k].y=data[idx+i].c.y;
                             }
                             else if (pol == OSKAR_IMAGE_TYPE_POL_YY)
                             {
-                                a_[i].x=data[idx+i].d.x; a_[i].y=data[idx+i].d.y;
+                                a_[k].x=data[idx+i].d.x; a_[k].y=data[idx+i].d.y;
                             }
                         }
                     }
@@ -247,19 +237,19 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                     {
                         if (p == 0)
                         {
-                            a_[k].x=data[idx+i].a.x; a_[i].y=data[idx+i].a.y;
+                            a_[k].x=data[idx+i].a.x; a_[k].y=data[idx+i].a.y;
                         }
                         else if (p == 1)
                         {
-                            a_[k].x=data[idx+i].b.x; a_[i].y=data[idx+i].b.y;
+                            a_[k].x=data[idx+i].b.x; a_[k].y=data[idx+i].b.y;
                         }
                         else if (p == 2)
                         {
-                            a_[k].x=data[idx+i].c.x; a_[i].y=data[idx+i].c.y;
+                            a_[k].x=data[idx+i].c.x; a_[k].y=data[idx+i].c.y;
                         }
                         else if (p == 3)
                         {
-                            a_[k].x=data[idx+i].d.x; a_[i].y=data[idx+i].d.y;
+                            a_[k].x=data[idx+i].d.x; a_[k].y=data[idx+i].d.y;
                         }
                     }
                 }
@@ -277,7 +267,7 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                         idx = (channel*vis->num_times+j)*vis->num_baselines;
                         for (i = 0; i < vis->num_baselines;++i, ++k)
                         {
-                            a_[k].x=data[idx+i].x; a_[i].y=data[idx+i].y;
+                            a_[k].x=data[idx+i].x; a_[k].y=data[idx+i].y;
                         }
                     }
                 }
@@ -291,19 +281,19 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                         {
                             if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                             {
-                                a_[i].x=data[idx+i].a.x; a_[i].y=data[idx+i].a.y;
+                                a_[k].x=data[idx+i].a.x; a_[k].y=data[idx+i].a.y;
                             }
                             else if (pol == OSKAR_IMAGE_TYPE_POL_XY)
                             {
-                                a_[i].x=data[idx+i].b.x; a_[i].y=data[idx+i].b.y;
+                                a_[k].x=data[idx+i].b.x; a_[k].y=data[idx+i].b.y;
                             }
                             else if (pol == OSKAR_IMAGE_TYPE_POL_YX)
                             {
-                                a_[i].x=data[idx+i].c.x; a_[i].y=data[idx+i].c.y;
+                                a_[k].x=data[idx+i].c.x; a_[k].y=data[idx+i].c.y;
                             }
                             else if (pol == OSKAR_IMAGE_TYPE_POL_YY)
                             {
-                                a_[i].x=data[idx+i].d.x; a_[i].y=data[idx+i].d.y;
+                                a_[k].x=data[idx+i].d.x; a_[k].y=data[idx+i].d.y;
                             }
                         }
                     }
@@ -330,19 +320,19 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                         {
                             if (p == 0)
                             {
-                                a_[k].x=data[idx+i].a.x; a_[i].y=data[idx+i].a.y;
+                                a_[k].x=data[idx+i].a.x; a_[k].y=data[idx+i].a.y;
                             }
                             else if (p == 1)
                             {
-                                a_[k].x=data[idx+i].b.x; a_[i].y=data[idx+i].b.y;
+                                a_[k].x=data[idx+i].b.x; a_[k].y=data[idx+i].b.y;
                             }
                             else if (p == 2)
                             {
-                                a_[k].x=data[idx+i].c.x; a_[i].y=data[idx+i].c.y;
+                                a_[k].x=data[idx+i].c.x; a_[k].y=data[idx+i].c.y;
                             }
                             else if (p == 3)
                             {
-                                a_[k].x=data[idx+i].d.x; a_[i].y=data[idx+i].d.y;
+                                a_[k].x=data[idx+i].d.x; a_[k].y=data[idx+i].d.y;
                             }
                         }
                     }
@@ -363,7 +353,7 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                             idx = (j*vis->num_times+t)*vis->num_baselines;
                             for (i = 0; i < vis->num_baselines;++i, ++k)
                             {
-                                a_[k].x=data[idx+i].x; a_[i].y=data[idx+i].y;
+                                a_[k].x=data[idx+i].x; a_[k].y=data[idx+i].y;
                             }
                         }
                     }
@@ -380,19 +370,19 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
                             {
                                 if (pol == OSKAR_IMAGE_TYPE_POL_XX)
                                 {
-                                    a_[i].x=data[idx+i].a.x; a_[i].y=data[idx+i].a.y;
+                                    a_[k].x=data[idx+i].a.x; a_[k].y=data[idx+i].a.y;
                                 }
                                 else if (pol == OSKAR_IMAGE_TYPE_POL_XY)
                                 {
-                                    a_[i].x=data[idx+i].b.x; a_[i].y=data[idx+i].b.y;
+                                    a_[k].x=data[idx+i].b.x; a_[k].y=data[idx+i].b.y;
                                 }
                                 else if (pol == OSKAR_IMAGE_TYPE_POL_YX)
                                 {
-                                    a_[i].x=data[idx+i].c.x; a_[i].y=data[idx+i].c.y;
+                                    a_[k].x=data[idx+i].c.x; a_[k].y=data[idx+i].c.y;
                                 }
                                 else if (pol == OSKAR_IMAGE_TYPE_POL_YY)
                                 {
-                                    a_[i].x=data[idx+i].d.x; a_[i].y=data[idx+i].d.y;
+                                    a_[k].x=data[idx+i].d.x; a_[k].y=data[idx+i].d.y;
                                 }
                             }
                         }

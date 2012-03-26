@@ -139,7 +139,11 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
     /* ___ Evaluate IQUV if required ___ */
     oskar_mem_init(&stokes, type, location, 0, OSKAR_FALSE);
     err = oskar_get_image_stokes(&stokes, vis, settings);
-    if (err) return err;
+    if (err)
+    {
+        fprintf(stderr, "= ERROR: oskar_get_image_stokes() failed.\n");
+        return err;
+    }
 
     /* Setup the image */
     oskar_setup_image(im, vis, settings);
@@ -167,7 +171,6 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
         oskar_mem_init(&uu,  type, location, num_vis, OSKAR_TRUE);
         oskar_mem_init(&vv,  type, location, num_vis, OSKAR_TRUE);
         oskar_mem_init(&amp, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
-        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
     else /* freq and time synth */
     {
@@ -198,20 +201,15 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    printf("INFO: channel snapshots = %s\n",
+            settings->channel_snapshots ? "true":"false");
+    printf("INFO: channel range  = %i %i\n", chan_range[0], chan_range[1]);
+    printf("INFO: num channels   = %i\n", num_chan);
+    printf("INFO: time snapshots = %s\n",
+            settings->time_snapshots ? "true":"false");
+    printf("INFO: time range     = %i %i\n", time_range[0], time_range[1]);
+    printf("INFO: num times      = %i\n", num_times);
+    printf("INFO: num pols       = %i\n", num_pols);
 
     /* ___ Make the image ___ */
     for (c = 0; c < num_chan; ++c)
@@ -225,14 +223,22 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
 
             /* Evaluate baseline coords needed for imaging */
             err = oskar_get_image_baseline_coords(&uu, &vv, vis, time, settings);
-            if (err) goto stop;
+            if (err)
+            {
+                fprintf(stderr, "= ERROR: oskar_get_image_baseline_coords() failed.\n");
+                goto stop;
+            }
 
             for (p = 0; p < num_pols; ++p)
             {
                 /* ___ Get visibility amplitudes for imaging ___ */
                 err = oskar_get_image_vis_amps(&amp, vis, &stokes, settings,
                         channel, time, p);
-                if (err) goto stop;
+                if (err)
+                {
+                    fprintf(stderr, "= ERROR: oskar_get_image_vis_amps() failed.\n");
+                    goto stop;
+                }
 
                 /* Get a pointer to the slice of the image currently being
                  * imaged */
@@ -246,7 +252,11 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
                 {
                     err = oskar_make_image_dft(&im_slice, &uu, &vv, &amp,
                             &l, &m, freq0);
-                    if (err) goto stop;
+                    if (err)
+                    {
+                        fprintf(stderr, "= ERROR: oskar_make_image_dft() failed.\n");
+                        goto stop;
+                    }
                 }
                 else
                 {

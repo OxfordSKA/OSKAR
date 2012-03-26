@@ -33,6 +33,8 @@
 #include "utility/oskar_mem_assign.h"
 #include "utility/oskar_vector_types.h"
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -175,7 +177,7 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
                 /* I = 0.5 (XX + YY) */
                 s_[i].a.x =  0.5 * (d_[i].a.x + d_[i].d.x);
                 s_[i].a.y =  0.5 * (d_[i].a.y + d_[i].d.y);
-                /* Q = 0.5 (XX - YY)*/
+                /* Q = 0.5 (XX - YY) */
                 s_[i].b.x =  0.5 * (d_[i].a.x - d_[i].d.x);
                 s_[i].b.y =  0.5 * (d_[i].a.y - d_[i].d.y);
                 /* U = 0.5 (XY + YX) */
