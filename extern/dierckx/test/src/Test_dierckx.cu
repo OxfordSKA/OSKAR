@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -268,6 +268,7 @@ void Test_dierckx::test_sphere()
     int npest = ntest;
     int u = ntest - 7;
     int v = npest - 7;
+    int ncoeff = (ntest-4) * (npest-4);
     int lwrk1 = 185 + 52*v + 10*u + 14*u*v + 8*(u-1)*v*v + 8*m_in;
     int lwrk2 = 48 + 21*v + 7*u*v + 4*(u-1)*v*v;
     vector<float> wrk1(lwrk1), wrk2(lwrk2);
@@ -279,7 +280,7 @@ void Test_dierckx::test_sphere()
     // Set up the spline knots (Fortran).
     int nt_f = 0, np_f = 0; // Number of knots in theta and phi.
     vector<float> tt_f(ntest, 0.0), tp_f(npest, 0.0); // Knots in theta and phi.
-    vector<float> c_f((ntest-4) * (npest-4), 0.0); // Spline coefficients.
+    vector<float> c_f(ncoeff, 0.0); // Spline coefficients.
     float fp_f = 0.0; // Sum of squared residuals.
     {
         // Set initial smoothing factor.
@@ -310,7 +311,7 @@ void Test_dierckx::test_sphere()
     // Set up the spline knots (C).
     int nt_c = 0, np_c = 0; // Number of knots in theta and phi.
     vector<float> tt_c(ntest, 0.0), tp_c(npest, 0.0); // Knots in theta and phi.
-    vector<float> c_c((ntest-4) * (npest-4), 0.0); // Spline coefficients.
+    vector<float> c_c(ncoeff, 0.0); // Spline coefficients.
     float fp_c = 0.0; // Sum of squared residuals.
     {
         // Set initial smoothing factor.
@@ -347,7 +348,7 @@ void Test_dierckx::test_sphere()
         CPPUNIT_ASSERT_DOUBLES_EQUAL(tt_f[i], tt_c[i], delta);
     for (int i = 0; i < np_c; ++i)
         CPPUNIT_ASSERT_DOUBLES_EQUAL(tp_f[i], tp_c[i], delta);
-    for (int i = 0; i < (ntest-4) * (npest-4); ++i)
+    for (int i = 0; i < ncoeff; ++i)
         CPPUNIT_ASSERT_DOUBLES_EQUAL(c_f[i], c_c[i], delta);
 
     // Print knot positions.
@@ -427,13 +428,13 @@ void Test_dierckx::test_sphere()
         oskar_Mem theta_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
         oskar_Mem phi_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
         err = tt_cuda.append_raw(&tt_c[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, m_out);
+                OSKAR_LOCATION_CPU, nt_c);
         CPPUNIT_ASSERT_EQUAL(0, err);
         err = tp_cuda.append_raw(&tp_c[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, m_out);
+                OSKAR_LOCATION_CPU, np_c);
         CPPUNIT_ASSERT_EQUAL(0, err);
         err = c_cuda.append_raw(&c_c[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, m_out);
+                OSKAR_LOCATION_CPU, ncoeff);
         CPPUNIT_ASSERT_EQUAL(0, err);
         err = theta_out_cuda.append_raw(&theta_out[0], OSKAR_SINGLE,
                 OSKAR_LOCATION_CPU, m_out);
