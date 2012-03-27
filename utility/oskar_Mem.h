@@ -210,7 +210,7 @@ struct oskar_Mem
      * @return A CUDA or OSKAR error code.
      */
     int binary_file_write_ext(const char* filename, const char* name_group,
-            const char* name_tag, int user_index, int num_to_write) const;
+            const char* name_tag, int user_index = 0, int num_to_write = 0) const;
 
     /**
      * @brief

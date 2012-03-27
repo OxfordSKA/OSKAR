@@ -110,7 +110,6 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         memcpy(mxGetData(vv_), v_in->vv_metres.data, mem_size);
         memcpy(mxGetData(ww_), v_in->ww_metres.data, mem_size);
 
-
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
 
@@ -154,7 +153,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
             freq[i] = v_in->freq_start_hz + i * v_in->freq_inc_hz;
         }
     }
-    else
+    else /* (class_id == mxSINGLE_CLASS) */
     {
         float* xx_r = (float*)mxGetPr(xx_);
         float* xx_i = (float*)mxGetPi(xx_);

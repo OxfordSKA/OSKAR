@@ -43,9 +43,9 @@
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in != 1 || num_out > 1)
+    if (num_in > 2 || num_in < 1 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: data = oskar_binary_file_read(filename)\n");
+        mexErrMsgTxt("Usage: data = oskar_binary_file_read(filename, [skip_header])\n");
     }
 
     int err = OSKAR_SUCCESS;
@@ -53,6 +53,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     /* Get input args */
     char filename[100];
     mxGetString(in[0], filename, 100);
+    int skip_header = OSKAR_FALSE;
+    if (num_in == 2)
+    {
+        skip_header = (int)mxGetScalar(in[1]);
+    }
+
     FILE* file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -77,26 +83,30 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             "index",
             "data"
     };
-    out[0] = mxCreateStructMatrix(index->num_tags, 1, num_fields, fields);
-    for (int i = 0; i < index->num_tags; ++i)
+    int num_entries = skip_header ? index->num_tags - 4: index->num_tags;
+    int start_index = skip_header? 4 : 0;
+    int end_index   = index->num_tags;
+
+    out[0] = mxCreateStructMatrix(num_entries, 1, num_fields, fields);
+    for (int k = 0, i = start_index; i < end_index; ++i, ++k)
     {
-        mxSetField(out[0], i, fields[0],
+        mxSetField(out[0], k, fields[0],
                 mxCreateString(oskar_get_data_type_string(index->data_type[i])));
         if (index->extended[i])
         {
-            mxSetField(out[0], i, fields[1],
+            mxSetField(out[0], k, fields[1],
                     mxCreateString(index->name_group[i]));
-            mxSetField(out[0], i, fields[2],
+            mxSetField(out[0], k, fields[2],
                     mxCreateString(index->name_tag[i]));
         }
         else
         {
-            mxSetField(out[0], i, fields[1],
+            mxSetField(out[0], k, fields[1],
                     mxCreateDoubleScalar((double)index->id_group[i]));
-            mxSetField(out[0], i, fields[2],
+            mxSetField(out[0], k, fields[2],
                     mxCreateDoubleScalar((double)index->id_tag[i]));
         }
-        mxSetField(out[0], i, fields[3],
+        mxSetField(out[0], k, fields[3],
                 mxCreateDoubleScalar((double)index->user_index[i]));
         mxArray* data_ = NULL;
         void* data = NULL;
@@ -250,7 +260,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             }
             free(data);
         }
-        mxSetField(out[0], i, fields[4], data_);
+        mxSetField(out[0], k, fields[4], data_);
     }
 
     oskar_binary_tag_index_free(&index);

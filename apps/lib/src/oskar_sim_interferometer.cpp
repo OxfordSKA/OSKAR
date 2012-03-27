@@ -123,10 +123,11 @@ int oskar_sim_interferometer(const char* settings_file)
                 c * settings.obs.frequency_inc_hz;
 
         // Use OpenMP dynamic scheduling for loop over chunks.
-        #pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 1)
         for (int i = 0; i < num_sky_chunks; ++i)
         {
             if (error) continue;
+
             // Get thread ID for this chunk.
             int thread_id = omp_get_thread_num();
 
@@ -146,11 +147,13 @@ int oskar_sim_interferometer(const char* settings_file)
             error = oskar_interferometer(&(vis_temp[thread_id]),
                     &(sky_chunk_cpu[i]), telescope_cpu, times, freq);
             if (error) continue;
+
             error = oskar_mem_add(&(vis_acc[thread_id]),
                     &(vis_acc[thread_id]), &(vis_temp[thread_id]));
             if (error) continue;
+
         }
-        #pragma omp barrier
+#pragma omp barrier
         if (error) return error;
 
         oskar_Mem vis_amp;
@@ -162,6 +165,9 @@ int oskar_sim_interferometer(const char* settings_file)
         {
             error = oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i]);
             if (error) return error;
+
+            // Clear thread accumulation buffer
+            vis_acc[i].clear_contents();
         }
     }
 
@@ -173,7 +179,7 @@ int oskar_sim_interferometer(const char* settings_file)
                 settings.sky.noise_model.spectral_index);
         if (error) return error;
         error = vis_global->add_sky_noise(vis_global->sky_noise_stddev,
-            settings.sky.noise_model.seed);
+                settings.sky.noise_model.seed);
         if (error) return error;
     }
 
