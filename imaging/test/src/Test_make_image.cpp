@@ -38,6 +38,8 @@
 
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_binary_file_write.h"
+#include "utility/oskar_mem_binary_stream_write.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -117,4 +119,15 @@ void Test_make_image::test()
     int idx = 0;
     err = oskar_image_write(&image, "temp_test_image.img", idx);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+
+
+    const char* filename = "temp_test_make_image.dat";
+    oskar_mem_binary_file_write_ext(&vis.uu_metres, filename,
+            "mem", "uu_metres", 0, 0);
+    oskar_mem_binary_file_write_ext(&vis.vv_metres, filename,
+                "mem", "vv_metres", 0, 0);
+    oskar_mem_binary_file_write_ext(&vis.amplitude, filename,
+                    "mem", "vis_amp", 0, 0);
+    oskar_mem_binary_file_write_ext(&image.data, filename,
+                        "mem", "image", 0, 0);
 }

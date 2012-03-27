@@ -39,7 +39,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 1 || num_out > 2)
     {
-        mexErrMsgTxt("Usage: [ID's, headers] = oskar_binary_file_query(filename)\n");
+        mexErrMsgTxt("Usage: [index, headers] = oskar_binary_file_query(filename)\n");
     }
 
     /* Get input args */
@@ -68,34 +68,51 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             "index",
             "data_size",
     };
-    out[0] = mxCreateNumericMatrix(index->num_tags, 3, mxINT32_CLASS, mxREAL);
-    int* idx = (int*)mxGetData(out[0]);
+    out[0] = mxCreateCellMatrix(index->num_tags + 1, 6);
     out[1] = mxCreateStructMatrix(index->num_tags, 1, num_fields, fields);
+
+    mxSetCell(out[0], 0 * (index->num_tags + 1), mxCreateString("[ID]"));
+    mxSetCell(out[0], 1 * (index->num_tags + 1), mxCreateString("[TYPE]"));
+    mxSetCell(out[0], 2 * (index->num_tags + 1), mxCreateString("[GROUP]"));
+    mxSetCell(out[0], 3 * (index->num_tags + 1), mxCreateString("[TAG]"));
+    mxSetCell(out[0], 4 * (index->num_tags + 1), mxCreateString("[INDEX]"));
+    mxSetCell(out[0], 5 * (index->num_tags + 1), mxCreateString("[BYTES]"));
+
     for (int i = 0; i < index->num_tags; ++i)
     {
-        mxSetField(out[1], i, fields[0],
-                mxCreateString(oskar_get_data_type_string(index->data_type[i])));
+        mxSetCell(out[0], 0 * (index->num_tags + 1) + i + 1, mxCreateDoubleScalar((double)i+1));
+
+        const char* data_name = oskar_get_data_type_string(index->data_type[i]);
+        mxSetField(out[1], i, fields[0], mxCreateString(data_name));
+        mxSetCell(out[0], 1 * (index->num_tags + 1) + i + 1, mxCreateString(data_name));
         if (index->extended[i])
         {
             mxSetField(out[1], i, fields[1],
                     mxCreateString(index->name_group[i]));
+            mxSetCell(out[0], 2 * (index->num_tags + 1) + i + 1, mxCreateString(index->name_group[i]));
             mxSetField(out[1], i, fields[2],
                     mxCreateString(index->name_tag[i]));
+            mxSetCell(out[0], 3 * (index->num_tags + 1) + i + 1, mxCreateString(index->name_tag[i]));
         }
         else
         {
             mxSetField(out[1], i, fields[1],
                     mxCreateDoubleScalar((double)index->id_group[i]));
+            mxSetCell(out[0], 2 * (index->num_tags + 1) + i + 1,
+                    mxCreateDoubleScalar((double)index->id_group[i]));
             mxSetField(out[1], i, fields[2],
+                    mxCreateDoubleScalar((double)index->id_tag[i]));
+            mxSetCell(out[0], 3 * (index->num_tags + 1) + i + 1,
                     mxCreateDoubleScalar((double)index->id_tag[i]));
         }
         mxSetField(out[1], i, fields[3],
                 mxCreateDoubleScalar((double)index->user_index[i]));
+        mxSetCell(out[0], 4 * (index->num_tags + 1) + i + 1,
+                mxCreateDoubleScalar((double)index->user_index[i]));
         mxSetField(out[1], i, fields[4],
                 mxCreateDoubleScalar((double)index->data_size_bytes[i]));
-        idx[0 * index->num_tags + i] = index->id_group[i];
-        idx[1 * index->num_tags + i] = index->id_tag[i];
-        idx[2 * index->num_tags + i] = index->user_index[i];
+        mxSetCell(out[0], 5 * (index->num_tags + 1) + i + 1,
+                mxCreateDoubleScalar((double)index->data_size_bytes[i]));
     }
     oskar_binary_tag_index_free(&index);
     fclose(file);
