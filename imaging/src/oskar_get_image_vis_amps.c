@@ -59,6 +59,12 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
     chan_range[1] = settings->channel_range[1];
     time_range[0] = settings->time_range[0];
     time_range[1] = settings->time_range[1];
+    if (time_range[1] > vis->num_times-1) return OSKAR_ERR_OUT_OF_RANGE;
+    if (time_range[0] < 0) time_range[0] = 0;
+    if (time_range[1] < 0) time_range[1] = vis->num_times-1;
+    if (chan_range[1] > vis->num_channels-1) return OSKAR_ERR_OUT_OF_RANGE;
+    if (chan_range[0] < 0) chan_range[0] = 0;
+    if (chan_range[1] < 0) chan_range[1] = vis->num_channels-1;
 
 
     /* ================================================================= */

@@ -62,7 +62,14 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     chan_range[0] = settings->channel_range[0];
     chan_range[1] = settings->channel_range[1];
     time_range[0] = settings->time_range[0];
-    time_range[1] = settings->channel_range[1];
+    time_range[1] = settings->time_range[1];
+    if (time_range[1] > vis->num_times-1) return OSKAR_ERR_OUT_OF_RANGE;
+    if (time_range[0] < 0) time_range[0] = 0;
+    if (time_range[1] < 0) time_range[1] = vis->num_times-1;
+    if (chan_range[1] > vis->num_channels-1) return OSKAR_ERR_OUT_OF_RANGE;
+    if (chan_range[0] < 0) chan_range[0] = 0;
+    if (chan_range[1] < 0) chan_range[1] = vis->num_channels-1;
+
     if (settings->channel_snapshots)
     {
         im_freq_start_hz = vis->freq_start_hz + (chan_range[0] * vis->freq_inc_hz);
@@ -152,7 +159,6 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
         {
             freq = vis->freq_start_hz + (j * vis->freq_inc_hz);
             scaling = freq/im_freq_start_hz;
-
             for (t = time_range[0]; t <= time_range[1]; ++t)
             {
                 coord_offset = t * vis->num_baselines;
