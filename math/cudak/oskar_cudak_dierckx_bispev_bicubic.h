@@ -26,30 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_DIERCKX_BISPEV_H_
-#define OSKAR_CUDAK_DIERCKX_BISPEV_H_
+#ifndef OSKAR_CUDAK_DIERCKX_BISPEV_BICUBIC_H_
+#define OSKAR_CUDAK_DIERCKX_BISPEV_BICUBIC_H_
 
 /**
- * @file oskar_cudak_dierckx_bispev.h
+ * @file oskar_cudak_dierckx_bispev_bicubic.h
  */
 
 #include "oskar_global.h"
 
 /**
  * @brief
- * CUDA kernel to evaluate B-spline coefficients (single precision).
+ * CUDA kernel to evaluate bicubic B-spline coefficients (single precision).
  *
  * @details
- * This CUDA kernel evaluates B-spline coefficients to determine values of
- * a fitted surface at the specified points.
+ * This CUDA kernel evaluates bicubic B-spline coefficients to determine
+ * values of a fitted surface at the specified points.
  *
  * @param[in] tx     Array of knot positions in x.
  * @param[in] nx     Number of knot positions in x.
  * @param[in] ty     Array of knot positions in y.
  * @param[in] ny     Number of knot positions in y.
  * @param[in] c      Array of spline coefficients.
- * @param[in] kx     Order of spline in x (use 3 for bicubic).
- * @param[in] ky     Order of spline in y (use 3 for bicubic).
  * @param[in] n      Number of points to evaluate.
  * @param[in] x      Input x positions.
  * @param[in] y      Input y positions.
@@ -57,26 +55,23 @@
  * @param[out] z     Output surface values.
  */
 __global__
-void oskar_cudak_dierckx_bispev_f(const float* tx, const int nx,
-        const float* ty, const int ny, const float* c, const int kx,
-        const int ky, const int n, const float* x, const float* y,
-        const int stride, float* z);
+void oskar_cudak_dierckx_bispev_bicubic_f(const float* tx, const int nx,
+        const float* ty, const int ny, const float* c, const int n,
+        const float* x, const float* y, const int stride, float* z);
 
 /**
  * @brief
- * CUDA kernel to evaluate B-spline coefficients (double precision).
+ * CUDA kernel to evaluate bicubic B-spline coefficients (double precision).
  *
  * @details
- * This CUDA kernel evaluates B-spline coefficients to determine values of
- * a fitted surface at the specified points.
+ * This CUDA kernel evaluates bicubic B-spline coefficients to determine
+ * values of a fitted surface at the specified points.
  *
  * @param[in] tx     Array of knot positions in x.
  * @param[in] nx     Number of knot positions in x.
  * @param[in] ty     Array of knot positions in y.
  * @param[in] ny     Number of knot positions in y.
  * @param[in] c      Array of spline coefficients.
- * @param[in] kx     Order of spline in x (use 3 for bicubic).
- * @param[in] ky     Order of spline in y (use 3 for bicubic).
  * @param[in] n      Number of points to evaluate.
  * @param[in] x      Input x positions.
  * @param[in] y      Input y positions.
@@ -84,9 +79,8 @@ void oskar_cudak_dierckx_bispev_f(const float* tx, const int nx,
  * @param[out] z     Output surface values.
  */
 __global__
-void oskar_cudak_dierckx_bispev_d(const double* tx, const int nx,
-        const double* ty, const int ny, const double* c, const int kx,
-        const int ky, const int n, const double* x, const double* y,
-        const int stride, double* z);
+void oskar_cudak_dierckx_bispev_bicubic_d(const double* tx, const int nx,
+        const double* ty, const int ny, const double* c, const int n,
+        const double* x, const double* y, const int stride, double* z);
 
-#endif // OSKAR_CUDAK_DIERCKX_BISPEV_H_
+#endif // OSKAR_CUDAK_DIERCKX_BISPEV_BICUBIC_H_

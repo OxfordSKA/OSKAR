@@ -11,6 +11,8 @@ set(math_cuda_kernels_SRC
     src/oskar_cudak_dftw_3d.cu
     src/oskar_cudak_dftw_o2c_2d.cu
     src/oskar_cudak_dftw_o2c_3d.cu
+    src/oskar_cudak_dierckx_bispev.cu
+    src/oskar_cudak_dierckx_bispev_bicubic.cu
     src/oskar_cudak_mat_mul_cc.cu
     src/oskar_cudak_sph_to_lm.cu
     src/oskar_cudak_vec_mul_cc.cu

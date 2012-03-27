@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAF_DIERCKX_FPBISP1_H_
-#define OSKAR_CUDAF_DIERCKX_FPBISP1_H_
+#ifndef OSKAR_CUDAF_DIERCKX_FPBISP_SINGLE_H_
+#define OSKAR_CUDAF_DIERCKX_FPBISP_SINGLE_H_
 
 /**
- * @file oskar_cudaf_dierckx_fpbisp1.h
+ * @file oskar_cudaf_dierckx_fpbisp_single.h
  */
 
 #include "oskar_global.h"
@@ -44,7 +44,8 @@
  * CUDA device function to replace the fpbisp function from the DIERCKX
  * fitting library.
  */
-__device__ void oskar_cudaf_dierckx_fpbisp1_f(const float *tx, const int nx,
+__device__
+void oskar_cudaf_dierckx_fpbisp_single_f(const float *tx, const int nx,
         const float *ty, const int ny, const float *c, const int kx,
         const int ky, float x, float y, float *z)
 {
@@ -98,7 +99,8 @@ __device__ void oskar_cudaf_dierckx_fpbisp1_f(const float *tx, const int nx,
  * CUDA device function to replace the fpbisp function from the DIERCKX
  * fitting library.
  */
-__device__ void oskar_cudaf_dierckx_fpbisp1_d(const double *tx, const int nx,
+__device__
+void oskar_cudaf_dierckx_fpbisp_single_d(const double *tx, const int nx,
         const double *ty, const int ny, const double *c, const int kx,
         const int ky, double x, double y, double *z)
 {
@@ -144,4 +146,4 @@ __device__ void oskar_cudaf_dierckx_fpbisp1_d(const double *tx, const int nx,
     *z = t;
 }
 
-#endif // OSKAR_CUDAF_DIERCKX_FPBISP1_H_
+#endif // OSKAR_CUDAF_DIERCKX_FPBISP_SINGLE_H_

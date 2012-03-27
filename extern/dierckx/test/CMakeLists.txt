@@ -8,11 +8,11 @@ if (CPPUNIT_FOUND)
 
     set(dierckx_test_SRC
         src/CppUnitMain.cpp
-        src/Test_dierckx.cpp
+        src/Test_dierckx.cu
     )
 
-    add_executable(dierckx_test ${dierckx_test_SRC})
-    target_link_libraries(dierckx_test dierckx ${CPPUNIT_LIBRARIES})
+    cuda_add_executable(dierckx_test ${dierckx_test_SRC})
+    target_link_libraries(dierckx_test dierckx oskar ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
 
     add_test(dierckx_test dierckx_test)
 

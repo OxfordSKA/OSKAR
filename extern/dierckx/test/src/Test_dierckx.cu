@@ -29,6 +29,9 @@
 #include "extern/dierckx/test/Test_dierckx.h"
 #include "extern/dierckx/sphere.h"
 #include "extern/dierckx/bispev.h"
+#include "math/cudak/oskar_cudak_dierckx_bispev.h"
+#include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
+#include "utility/oskar_Mem.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -366,25 +369,32 @@ void Test_dierckx::test_sphere()
     int kwrk1 = sizeof(iwrk1) / sizeof(int);
     int lwrk = sizeof(wrk) / sizeof(float);
 
+    // Evaluate output point positions.
+    for (int p = 0, i = 0; p < size_phi_out; ++p)
+    {
+        float phi1 = p * (2.0 * M_PI) / (size_phi_out - 1);
+        for (int t = 0; t < size_theta_out; ++t, ++i)
+        {
+            float theta1 = t * (M_PI / 2.0) / (size_theta_out - 1);
+            theta_out[i] = theta1;
+            phi_out[i]   = phi1;
+        }
+    }
+
     // Evaluate surface (Fortran).
     {
         int kxy = 3; // Degree of spline (cubic).
         int one = 1;
         TIMER_START
-        for (int p = 0, i = 0; p < size_phi_out; ++p)
+        for (int i = 0; i < m_out; ++i)
         {
-            float phi1 = p * (2.0 * M_PI) / (size_phi_out - 1);
-            for (int t = 0; t < size_theta_out; ++t, ++i)
-            {
-                float theta1 = t * (M_PI / 2.0) / (size_theta_out - 1);
-                float val;
-                bispev_(&tt_f[0], &nt_f, &tp_f[0], &np_f, &c_f[0], &kxy, &kxy,
-                        &theta1, &one, &phi1, &one, &val, wrk, &lwrk, iwrk1,
-                        &kwrk1, &ier);
-                if (ier != 0)
-                    CPPUNIT_FAIL("ERROR: Spherical spline evaluation failed\n");
-                r_out_f[i] = val;
-            }
+            float val;
+            bispev_(&tt_f[0], &nt_f, &tp_f[0], &np_f, &c_f[0], &kxy, &kxy,
+                    &theta_out[i], &one, &phi_out[i], &one, &val, wrk, &lwrk,
+                    iwrk1, &kwrk1, &ier);
+            if (ier != 0)
+                CPPUNIT_FAIL("ERROR: Spherical spline evaluation failed\n");
+            r_out_f[i] = val;
         }
         TIMER_STOP("Finished sphere evaluation [Fortran] (%d points)", m_out);
     }
@@ -392,28 +402,77 @@ void Test_dierckx::test_sphere()
     // Evaluate surface (C).
     {
         TIMER_START
-        for (int p = 0, i = 0; p < size_phi_out; ++p)
+        for (int i = 0; i < m_out; ++i)
         {
-            float phi1 = p * (2.0 * M_PI) / (size_phi_out - 1);
-            for (int t = 0; t < size_theta_out; ++t, ++i)
-            {
-                float theta1 = t * (M_PI / 2.0) / (size_theta_out - 1);
-                float val;
-                bispev_f(&tt_c[0], nt_c, &tp_c[0], np_c, &c_c[0], 3, 3, &theta1,
-                        1, &phi1, 1, &val, wrk, lwrk, iwrk1, kwrk1, &ier);
-                if (ier != 0)
-                    CPPUNIT_FAIL("ERROR: Spherical spline evaluation failed\n");
-                r_out_c[i]   = val;
-                theta_out[i] = theta1;
-                phi_out[i]   = phi1;
-            }
+            float val;
+            bispev_f(&tt_c[0], nt_c, &tp_c[0], np_c, &c_c[0], 3, 3,
+                    &theta_out[i], 1, &phi_out[i], 1, &val, wrk, lwrk, iwrk1,
+                    kwrk1, &ier);
+            if (ier != 0)
+                CPPUNIT_FAIL("ERROR: Spherical spline evaluation failed\n");
+            r_out_c[i]   = val;
         }
         TIMER_STOP("Finished sphere evaluation [C] (%d points)", m_out);
     }
 
+    // Evaluate surface (CUDA).
+    oskar_Mem r_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_CPU, m_out);
+    {
+        int err;
+
+        // Copy memory to GPU.
+        oskar_Mem tt_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+        oskar_Mem tp_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+        oskar_Mem c_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+        oskar_Mem theta_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+        oskar_Mem phi_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+        err = tt_cuda.append_raw(&tt_c[0], OSKAR_SINGLE,
+                OSKAR_LOCATION_CPU, m_out);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+        err = tp_cuda.append_raw(&tp_c[0], OSKAR_SINGLE,
+                OSKAR_LOCATION_CPU, m_out);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+        err = c_cuda.append_raw(&c_c[0], OSKAR_SINGLE,
+                OSKAR_LOCATION_CPU, m_out);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+        err = theta_out_cuda.append_raw(&theta_out[0], OSKAR_SINGLE,
+                OSKAR_LOCATION_CPU, m_out);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+        err = phi_out_cuda.append_raw(&phi_out[0], OSKAR_SINGLE,
+                OSKAR_LOCATION_CPU, m_out);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+
+        // Allocate memory for result.
+        oskar_Mem r_out_cuda_temp(OSKAR_SINGLE, OSKAR_LOCATION_GPU, m_out);
+
+        // Call kernel.
+        int num_blocks, num_threads = 256;
+        num_blocks = (m_out + num_threads - 1) / num_threads;
+        TIMER_START
+        oskar_cudak_dierckx_bispev_bicubic_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (tt_cuda,
+                nt_c, tp_cuda, np_c, c_cuda, m_out, theta_out_cuda,
+                phi_out_cuda, 1, r_out_cuda_temp);
+//        oskar_cudak_dierckx_bispev_f
+//        OSKAR_CUDAK_CONF(num_blocks, num_threads) (tt_cuda,
+//                nt_c, tp_cuda, np_c, c_cuda, 3, 3, m_out, theta_out_cuda,
+//                phi_out_cuda, 1, r_out_cuda_temp);
+        cudaDeviceSynchronize();
+        err = (int) cudaPeekAtLastError();
+        CPPUNIT_ASSERT_EQUAL(0, err);
+        TIMER_STOP("Finished sphere evaluation [CUDA] (%d points)", m_out);
+
+        // Copy memory back.
+        err = r_out_cuda_temp.copy_to(&r_out_cuda);
+        CPPUNIT_ASSERT_EQUAL(0, err);
+    }
+
     // Check results are consistent.
     for (int i = 0; i < m_out; ++i)
+    {
         CPPUNIT_ASSERT_DOUBLES_EQUAL(r_out_f[i], r_out_c[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(r_out_c[i], ((float*)r_out_cuda)[i], 1e-6);
+    }
 
     // Write out the data.
     FILE* file = fopen("test_sphere.dat", "w");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAF_DIERCKX_FPBSPL_H_
-#define OSKAR_CUDAF_DIERCKX_FPBSPL_H_
+#ifndef OSKAR_CUDAF_DIERCKX_FPBSPL_BICUBIC_H_
+#define OSKAR_CUDAF_DIERCKX_FPBSPL_BICUBIC_H_
 
 /**
- * @file oskar_cudaf_dierckx_fpbspl.h
+ * @file oskar_cudaf_dierckx_fpbspl_bicubic.h
  */
 
 #include "oskar_global.h"
@@ -43,19 +43,19 @@
  * CUDA device function to replace the fpbspl function from the DIERCKX
  * fitting library.
  *
- * This routine evaluates the (k+1) non-zero b-splines of degree k
+ * This routine evaluates the (k+1) non-zero bicubic b-splines
  * at t(l) <= x < t(l+1) using the stable recurrence relation of
  * de Boor and Cox.
  */
 __device__
-void oskar_cudaf_dierckx_fpbspl_f(const float *t, const int k,
+void oskar_cudaf_dierckx_fpbspl_bicubic_f(const float *t,
         const float x, const int l, float *h)
 {
-    float f, hh[5];
+    float f, hh[3];
     int i, j, li, lj;
 
     h[0] = 1.0f;
-    for (j = 1; j <= k; ++j)
+    for (j = 1; j <= 3; ++j)
     {
         for (i = 0; i < j; ++i)
         {
@@ -81,19 +81,19 @@ void oskar_cudaf_dierckx_fpbspl_f(const float *t, const int k,
  * CUDA device function to replace the fpbspl function from the DIERCKX
  * fitting library.
  *
- * This routine evaluates the (k+1) non-zero b-splines of degree k
+ * This routine evaluates the (k+1) non-zero bicubic b-splines
  * at t(l) <= x < t(l+1) using the stable recurrence relation of
  * de Boor and Cox.
  */
 __device__
-void oskar_cudaf_dierckx_fpbspl_d(const double *t, const int k,
+void oskar_cudaf_dierckx_fpbspl_bicubic_d(const double *t,
         const double x, const int l, double *h)
 {
-    double f, hh[5];
+    double f, hh[3];
     int i, j, li, lj;
 
     h[0] = 1.0;
-    for (j = 1; j <= k; ++j)
+    for (j = 1; j <= 3; ++j)
     {
         for (i = 0; i < j; ++i)
         {
@@ -111,4 +111,4 @@ void oskar_cudaf_dierckx_fpbspl_d(const double *t, const int k,
     }
 }
 
-#endif // OSKAR_CUDAF_DIERCKX_FPBSPL_H_
+#endif // OSKAR_CUDAF_DIERCKX_FPBSPL_BICUBIC_H_
