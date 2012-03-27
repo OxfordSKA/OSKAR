@@ -40,41 +40,92 @@
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_vector_types.h"
 
+#include <string.h>
+
+#define STR_LENGTH 200
+
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in < 1 || num_in > 4 || num_out > 1)
     {
         mexErrMsgTxt("Usage: record = oskar_binary_file_read_record(filename,"
-                " [group id = 0], [tag id = 0], [index id = 0])\n");
+                " [group = 0], [tag = 0], [index = 0])\n");
     }
 
-    /* Get input args */
-    char filename[100];
+    /* Local variables */
+    int err = OSKAR_SUCCESS;
+    char filename[STR_LENGTH];
     int group_id = 0, tag_id = 0, index_id = 0;
-    mxGetString(in[0], filename, 100);
+    char group_name[STR_LENGTH], tag_name[STR_LENGTH];
+    group_name[0] = '\0';
+    tag_name[0] = '\0';
+    bool is_extended = false;
+
+    /* Get args */
+    mxGetString(in[0], filename, STR_LENGTH);
+
+    if (num_in == 2 && mxIsChar(in[1]))
+    {
+        is_extended = true;
+    }
+    else if (num_in == 3 || num_in == 4)
+    {
+        if (mxIsChar(in[1]) && mxIsChar(in[2]))
+            is_extended = true;
+        else if (mxIsDouble(in[1]) && mxIsDouble(in[2]))
+            is_extended = false;
+        else if (mxIsInt32(in[1]) && mxIsInt32(in[2]))
+            is_extended = false;
+        else
+            mexErrMsgTxt("ERROR: Specified Group & Tag must be of the same type"
+                    " (scalar or string).");
+    }
+
+    if (num_in >= 2)
+    {
+        if (mxIsDouble(in[1]))
+        {
+            group_id = (int)mxGetScalar(in[1]);
+        }
+        else if (mxIsChar(in[1]))
+        {
+            mxGetString(in[1], group_name, STR_LENGTH);
+        }
+    }
+    if (num_in >= 3)
+    {
+        if (mxIsDouble(in[2]))
+        {
+            tag_id = (int)mxGetScalar(in[2]);
+            is_extended = false;
+        }
+        else if (mxIsChar(in[2]))
+        {
+            mxGetString(in[2], tag_name, STR_LENGTH);
+            is_extended = true;
+        }
+    }
+    if (num_in >= 4)
+    {
+        index_id = (int)mxGetScalar(in[3]);
+    }
+
+    if (is_extended)
+        mexPrintf("= Reading record (tag.group.index) = %s.%s.%i\n",
+                group_name, tag_name, index_id);
+    else
+        mexPrintf("= Reading record (tag.group.index) = %i.%i.%i\n",
+                group_id, tag_id, index_id);
+
     FILE* file = fopen(filename, "r");
     if (file == NULL)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "Unable to open file (%s)\n.", filename);
     }
-    if (num_in == 2) group_id = (int)mxGetScalar(in[1]);
-    if (num_in == 3)
-    {
-        group_id = (int)mxGetScalar(in[1]);
-        tag_id = (int)mxGetScalar(in[2]);
-    }
-    if (num_in == 4)
-    {
-        group_id = (int)mxGetScalar(in[1]);
-        tag_id = (int)mxGetScalar(in[2]);
-        index_id = (int)mxGetScalar(in[3]);
-    }
-
-    mexPrintf("= Reading record %i.%i.%i\n", group_id, tag_id, index_id);
 
     oskar_BinaryTagIndex* index = NULL;
-    int err = oskar_binary_tag_index_create(&index, file);
+    err = oskar_binary_tag_index_create(&index, file);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
@@ -84,63 +135,58 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int idx = -1;
     for (int i = 0; i < index->num_tags; ++i)
     {
-        if (index->id_group[i] == group_id && index->id_tag[i] == tag_id &&
-                index->user_index[i] == index_id)
+        if (is_extended && index->extended[i])
         {
-            idx = i;
-            break;
+            if (strcmp(index->name_group[i], group_name) == 0 &&
+                    strcmp(index->name_tag[i], tag_name) == 0 &&
+                    index->user_index[i] == index_id)
+            {
+                idx = i;
+                break;
+            }
+        }
+        else if (!is_extended && !index->extended[i])
+        {
+            if (index->id_group[i] == group_id &&
+                    index->id_tag[i] == tag_id &&
+                    index->user_index[i] == index_id)
+            {
+                idx = i;
+                break;
+            }
         }
     }
 
     if (idx == -1)
-    {
         mexErrMsgTxt("ERROR: Specified group, tag and index not found in binary file\n");
-    }
 
-    if (index->extended[idx])
-    {
-        mexErrMsgTxt("ERROR: extended tags currently not handled by this function\n");
-    }
-
-    const char* fields[12] = {
-            "extended",
-            "data_type",
-            "data_type_name",
-            "group_id",
-            "group_name",
-            "tag_id",
-            "tag_name",
-            "user_index",
-            "data_offset",
-            "data_size",
-            "block_size",
+    int num_fields = 5;
+    const char* fields[5] = {
+            "type",
+            "group",
+            "tag",
+            "index",
             "data"
     };
-    out[0] = mxCreateStructMatrix(1, 1, 12, fields);
-    mxSetField(out[0], 0, fields[0],
-            mxCreateLogicalScalar(index->extended[idx] ? true : false));
-    mxSetField(out[0], 0, fields[1],
-            mxCreateDoubleScalar((double)index->data_type[idx]));
-    mxSetField(out[0], 0, fields[2],
-            mxCreateString(oskar_get_data_type_string(index->data_type[idx])));
+    out[0] = mxCreateStructMatrix(1, 1, num_fields, fields);
+    const char* data_name = oskar_get_data_type_string(index->data_type[idx]);
+    mxSetField(out[0], 0, fields[0], mxCreateString(data_name));
+    if (index->extended[idx])
+    {
+        mxSetField(out[0], 0, fields[1],
+                mxCreateString(index->name_group[idx]));
+        mxSetField(out[0], 0, fields[2],
+                mxCreateString(index->name_tag[idx]));
+    }
+    else
+    {
+        mxSetField(out[0], 0, fields[1],
+                mxCreateDoubleScalar((double)index->id_group[idx]));
+        mxSetField(out[0], 0, fields[2],
+                mxCreateDoubleScalar((double)index->id_tag[idx]));
+    }
     mxSetField(out[0], 0, fields[3],
-            mxCreateDoubleScalar((double)index->id_group[idx]));
-    mxSetField(out[0], 0, fields[4],
-            mxCreateString(index->name_group[idx]));
-    mxSetField(out[0], 0, fields[5],
-            mxCreateDoubleScalar((double)index->id_tag[idx]));
-    mxSetField(out[0], 0, fields[6],
-            mxCreateString(index->name_tag[idx]));
-    mxSetField(out[0], 0, fields[7],
             mxCreateDoubleScalar((double)index->user_index[idx]));
-    mxSetField(out[0], 0, fields[8],
-            mxCreateDoubleScalar((double)index->data_offset_bytes[idx]));
-    mxSetField(out[0], 0, fields[9],
-            mxCreateDoubleScalar((double)index->data_size_bytes[idx]));
-    mxSetField(out[0], 0, fields[10],
-            mxCreateDoubleScalar((double)index->block_size_bytes[idx]));
-
-
     mxArray* data_ = NULL;
     void* data = NULL;
     mwSize m = 0;
@@ -207,8 +253,22 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             break;
     };
 
-    err = oskar_binary_stream_read(file, &index, index->data_type[idx], group_id,
-            tag_id, index_id, index->data_size_bytes[idx], data);
+    if (index->extended[idx])
+    {
+        err = oskar_binary_stream_read_ext(file, &index,
+                (unsigned char)index->data_type[idx],
+                index->name_group[idx], index->name_tag[idx],
+                index->user_index[idx], (size_t)index->data_size_bytes[idx],
+                data);
+    }
+    else
+    {
+        err = oskar_binary_stream_read(file, &index,
+                (unsigned char)index->data_type[idx],
+                (unsigned char)group_id, (unsigned char)tag_id,
+                index->user_index[idx], (size_t)index->data_size_bytes[idx],
+                data);
+    }
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_file_read() "
@@ -277,7 +337,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         free(data);
     }
-    mxSetField(out[0], 0, fields[11], data_);
+    mxSetField(out[0], 0, fields[4], data_);
 
     fclose(file);
     err = oskar_binary_tag_index_free(&index);

@@ -60,54 +60,43 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     mexPrintf("= Binary file header loaded (%i tags found).\n", index->num_tags);
-
-    const char* fields[11] = {
-            "extended",
-            "data_type",
-            "data_type_name",
-            "group_id",
-            "group_name",
-            "tag_id",
-            "tag_name",
-            "user_index",
-            "data_offset",
+    int num_fields = 5;
+    const char* fields[5] = {
+            "type",
+            "group",
+            "tag",
+            "index",
             "data_size",
-            "block_size"
     };
     out[0] = mxCreateNumericMatrix(index->num_tags, 3, mxINT32_CLASS, mxREAL);
     int* idx = (int*)mxGetData(out[0]);
-    out[1] = mxCreateStructMatrix(index->num_tags, 1, 11, fields);
+    out[1] = mxCreateStructMatrix(index->num_tags, 1, num_fields, fields);
     for (int i = 0; i < index->num_tags; ++i)
     {
         mxSetField(out[1], i, fields[0],
-                mxCreateLogicalScalar(index->extended[i] ? true : false));
-        mxSetField(out[1], i, fields[1],
-                mxCreateDoubleScalar((double)index->data_type[i]));
-        mxSetField(out[1], i, fields[2],
                 mxCreateString(oskar_get_data_type_string(index->data_type[i])));
+        if (index->extended[i])
+        {
+            mxSetField(out[1], i, fields[1],
+                    mxCreateString(index->name_group[i]));
+            mxSetField(out[1], i, fields[2],
+                    mxCreateString(index->name_tag[i]));
+        }
+        else
+        {
+            mxSetField(out[1], i, fields[1],
+                    mxCreateDoubleScalar((double)index->id_group[i]));
+            mxSetField(out[1], i, fields[2],
+                    mxCreateDoubleScalar((double)index->id_tag[i]));
+        }
         mxSetField(out[1], i, fields[3],
-                mxCreateDoubleScalar((double)index->id_group[i]));
-        mxSetField(out[1], i, fields[4],
-                mxCreateString(index->name_group[i]));
-        mxSetField(out[1], i, fields[5],
-                mxCreateDoubleScalar((double)index->id_tag[i]));
-        mxSetField(out[1], i, fields[6],
-                mxCreateString(index->name_tag[i]));
-        mxSetField(out[1], i, fields[7],
                 mxCreateDoubleScalar((double)index->user_index[i]));
-        mxSetField(out[1], i, fields[8],
-                mxCreateDoubleScalar((double)index->data_offset_bytes[i]));
-        mxSetField(out[1], i, fields[9],
+        mxSetField(out[1], i, fields[4],
                 mxCreateDoubleScalar((double)index->data_size_bytes[i]));
-        mxSetField(out[1], i, fields[10],
-                mxCreateDoubleScalar((double)index->block_size_bytes[i]));
         idx[0 * index->num_tags + i] = index->id_group[i];
         idx[1 * index->num_tags + i] = index->id_tag[i];
         idx[2 * index->num_tags + i] = index->user_index[i];
     }
-
     oskar_binary_tag_index_free(&index);
     fclose(file);
 }
-
-
