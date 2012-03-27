@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,10 +42,10 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates a surface fitted by spherical splines at the given positions.
+ * Evaluates a surface fitted by splines at the given positions.
  *
  * @details
- * This function evaluates a surface fitted by spherical splines at the given
+ * This function evaluates a surface fitted by splines at the given
  * positions.
  *
  * @param[out] output Complex output values.

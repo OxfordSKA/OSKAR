@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,13 @@
 #include "math/oskar_spline_data_evaluate.h"
 #include "utility/oskar_mem_type_check.h"
 
+#define USE_FORTRAN_BISPEV 1
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef USE_FORTRAN_BISPEV
 /* Fortran function prototype. */
 void bispev_(const float tx[], const int* nx, const float ty[], const int* ny,
         const float c[], const int* kx, const int* ky, const float x[],
@@ -42,19 +45,20 @@ void bispev_(const float tx[], const int* nx, const float ty[], const int* ny,
 
 static int c1 = 1;
 static int c3 = 3;
+#endif
 
 int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
-        const oskar_SplineData* spline, const oskar_Mem* theta,
-        const oskar_Mem* phi)
+        const oskar_SplineData* spline, const oskar_Mem* x,
+        const oskar_Mem* y)
 {
     int err = 0, num_points, type, location;
 
     /* Check arrays are consistent. */
-    num_points = theta->num_elements;
+    num_points = x->num_elements;
 
     /* Check type. */
-    type = theta->type;
-    if (type != phi->type)
+    type = x->type;
+    if (type != y->type)
         return OSKAR_ERR_TYPE_MISMATCH;
     if (!oskar_mem_is_complex(output->type))
         return OSKAR_ERR_BAD_DATA_TYPE;
@@ -64,53 +68,54 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
     if (location != spline->coeff_re.location ||
             location != spline->knots_x_re.location ||
             location != spline->knots_y_re.location ||
-            location != theta->location ||
-            location != phi->location)
+            location != x->location ||
+            location != y->location)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Check if data are in CPU memory. */
     if (location == OSKAR_LOCATION_CPU)
     {
         /* Set up workspace. */
-        int i, iwrk1[2], j, kwrk1 = 2, lwrk = 8, nt, np;
+        int i, iwrk1[2], j, kwrk1 = 2, lwrk = 8, nx, ny;
 
         if (type == OSKAR_SINGLE)
         {
             float wrk[8];
             for (j = 0; j < 2; ++j)
             {
-                const float *knots_theta, *knots_phi, *coeff;
+                const float *knots_x, *knots_y, *coeff;
                 float *out;
                 if (j == 0) /* Real part. */
                 {
-                    nt          = spline->num_knots_x_re;
-                    np          = spline->num_knots_y_re;
-                    knots_theta = (const float*)spline->knots_x_re.data;
-                    knots_phi   = (const float*)spline->knots_y_re.data;
-                    coeff       = (const float*)spline->coeff_re.data;
-                    out         = (float*)output->data;
+                    nx      = spline->num_knots_x_re;
+                    ny      = spline->num_knots_y_re;
+                    knots_x = (const float*)spline->knots_x_re.data;
+                    knots_y = (const float*)spline->knots_y_re.data;
+                    coeff   = (const float*)spline->coeff_re.data;
+                    out     = (float*)output->data;
                 }
                 else  /* Imaginary part. */
                 {
-                    nt          = spline->num_knots_x_im;
-                    np          = spline->num_knots_y_im;
-                    knots_theta = (const float*)spline->knots_x_im.data;
-                    knots_phi   = (const float*)spline->knots_y_im.data;
-                    coeff       = (const float*)spline->coeff_im.data;
-                    out         = (float*)output->data + 1;
+                    nx      = spline->num_knots_x_im;
+                    ny      = spline->num_knots_y_im;
+                    knots_x = (const float*)spline->knots_x_im.data;
+                    knots_y = (const float*)spline->knots_y_im.data;
+                    coeff   = (const float*)spline->coeff_im.data;
+                    out     = (float*)output->data + 1;
                 }
 
                 for (i = 0; i < num_points; ++i)
                 {
-                    float theta1, phi1;
-                    theta1 = ((const float*)theta->data)[i];
-                    phi1 = ((const float*)phi->data)[i];
-                    bispev_(knots_theta, &nt, knots_phi, &np, coeff, &c3, &c3,
-                            &theta1, &c1, &phi1, &c1, &out[i * 2 * stride],
+                    float x1, y1;
+                    x1 = ((const float*)x->data)[i];
+                    y1 = ((const float*)y->data)[i];
+#ifdef USE_FORTRAN_BISPEV
+                    bispev_(knots_x, &nx, knots_y, &ny, coeff, &c3, &c3,
+                            &x1, &c1, &y1, &c1, &out[i * 2 * stride],
                             wrk, &lwrk, iwrk1, &kwrk1, &err);
-#if 0
-                    bispev_f(knots_theta, nt, knots_phi, np, coeff, 3, 3,
-                            &theta1, 1, &phi1, 1, &out[i * 2 * stride],
+#else
+                    bispev_f(knots_x, nx, knots_y, ny, coeff, 3, 3,
+                            &x1, 1, &y1, 1, &out[i * 2 * stride],
                             wrk, lwrk, iwrk1, kwrk1, &err);
 #endif
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
@@ -122,34 +127,34 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
             double wrk[8];
             for (j = 0; j < 2; ++j)
             {
-                const double *knots_theta, *knots_phi, *coeff;
+                const double *knots_x, *knots_y, *coeff;
                 double* out;
                 if (j == 0) /* Real part. */
                 {
-                    nt          = spline->num_knots_x_re;
-                    np          = spline->num_knots_y_re;
-                    knots_theta = (const double*)spline->knots_x_re.data;
-                    knots_phi   = (const double*)spline->knots_y_re.data;
-                    coeff       = (const double*)spline->coeff_re.data;
-                    out         = (double*)output->data;
+                    nx      = spline->num_knots_x_re;
+                    ny      = spline->num_knots_y_re;
+                    knots_x = (const double*)spline->knots_x_re.data;
+                    knots_y = (const double*)spline->knots_y_re.data;
+                    coeff   = (const double*)spline->coeff_re.data;
+                    out     = (double*)output->data;
                 }
                 else  /* Imaginary part. */
                 {
-                    nt          = spline->num_knots_x_im;
-                    np          = spline->num_knots_y_im;
-                    knots_theta = (const double*)spline->knots_x_im.data;
-                    knots_phi   = (const double*)spline->knots_y_im.data;
-                    coeff       = (const double*)spline->coeff_im.data;
-                    out         = (double*)output->data + 1;
+                    nx      = spline->num_knots_x_im;
+                    ny      = spline->num_knots_y_im;
+                    knots_x = (const double*)spline->knots_x_im.data;
+                    knots_y = (const double*)spline->knots_y_im.data;
+                    coeff   = (const double*)spline->coeff_im.data;
+                    out     = (double*)output->data + 1;
                 }
 
                 for (i = 0; i < num_points; ++i)
                 {
-                    double theta1, phi1;
-                    theta1 = ((const double*)theta->data)[i];
-                    phi1 = ((const double*)phi->data)[i];
-                    bispev_d(knots_theta, nt, knots_phi, np, coeff, 3, 3,
-                            &theta1, 1, &phi1, 1, &out[i * 2 * stride],
+                    double x1, y1;
+                    x1 = ((const double*)x->data)[i];
+                    y1 = ((const double*)y->data)[i];
+                    bispev_d(knots_x, nx, knots_y, ny, coeff, 3, 3,
+                            &x1, 1, &y1, 1, &out[i * 2 * stride],
                             wrk, lwrk, iwrk1, kwrk1, &err);
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
                 }
@@ -160,8 +165,14 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
     /* Check if data are in GPU memory. */
     else if (location == OSKAR_LOCATION_GPU)
     {
-        /* TODO Implement spline evaluation on GPU. */
-        return OSKAR_ERR_BAD_LOCATION;
+        if (type == OSKAR_SINGLE)
+        {
+
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+
+        }
     }
 
     return err;

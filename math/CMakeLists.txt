@@ -45,7 +45,7 @@ set(math_SRC
     src/oskar_spline_data_compute_regrid.c # Deprecated
     src/oskar_spline_data_compute_sphere.c
     src/oskar_spline_data_compute_surfit.c
-    src/oskar_spline_data_evaluate.c
+    src/oskar_spline_data_evaluate.cu
     src/oskar_spline_data_free.c
     src/oskar_spline_data_init.c
     src/oskar_spline_data_location.c
