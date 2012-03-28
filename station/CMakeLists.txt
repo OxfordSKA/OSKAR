@@ -4,7 +4,8 @@
 
 set(station_SRC
     src/oskar_beamPattern.cpp
-    src/oskar_element_model_evaluate.c
+    src/oskar_blank_below_horizon.cu
+    src/oskar_element_model_copy.c
     src/oskar_element_model_free.c
     src/oskar_element_model_init.c
     src/oskar_element_model_load.c
@@ -16,6 +17,7 @@ set(station_SRC
     src/oskar_evaluate_effective_area.c
     src/oskar_evaluate_element_weights_errors.cu
     src/oskar_evaluate_flux_density.c
+    src/oskar_evaluate_spline_pattern.cu
     src/oskar_evaluate_station_beam_dipoles.cu
     src/oskar_evaluate_station_beam_scalar.cu
     src/oskar_evaluate_station_beam.c

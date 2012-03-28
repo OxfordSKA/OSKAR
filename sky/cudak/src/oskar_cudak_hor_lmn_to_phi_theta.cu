@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,20 +29,18 @@
 #include "sky/cudak/oskar_cudak_hor_lmn_to_phi_theta.h"
 
 // Single precision.
-
 __global__
-void oskar_cudak_hor_lmn_to_phi_theta_f(int n, const float* p_l,
-        const float* p_m, const float* p_n, float* phi, float* theta)
+void oskar_cudak_hor_lmn_to_phi_theta_f(int num_points, const float* l,
+        const float* m, const float* n, float* phi, float* theta)
 {
     // Get the position ID that this thread is working on.
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    if (i >= num_points) return;
 
     // Get the data.
-    float x = p_l[i];
-    float y = p_m[i];
-    float z = p_n[i];
-    __syncthreads();
+    float x = l[i];
+    float y = m[i];
+    float z = n[i];
 
     // Cartesian to spherical.
     float p = atan2f(y, x); // Phi.
@@ -53,20 +51,18 @@ void oskar_cudak_hor_lmn_to_phi_theta_f(int n, const float* p_l,
 }
 
 // Double precision.
-
 __global__
-void oskar_cudak_hor_lmn_to_phi_theta_d(int n, const double* p_l,
-        const double* p_m, const double* p_n, double* phi, double* theta)
+void oskar_cudak_hor_lmn_to_phi_theta_d(int num_points, const double* l,
+        const double* m, const double* n, double* phi, double* theta)
 {
     // Get the position ID that this thread is working on.
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    if (i >= num_points) return;
 
     // Get the data.
-    double x = p_l[i];
-    double y = p_m[i];
-    double z = p_n[i];
-    __syncthreads();
+    double x = l[i];
+    double y = m[i];
+    double z = n[i];
 
     // Cartesian to spherical.
     double p = atan2(y, x); // Phi.

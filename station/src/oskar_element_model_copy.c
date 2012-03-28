@@ -26,37 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
-#include "math/cudak/oskar_cudaf_dierckx_fpbisp_single_bicubic.h"
+#include "station/oskar_element_model_copy.h"
+#include "math/oskar_spline_data_copy.h"
 
-// Single precision.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-__global__
-void oskar_cudak_dierckx_bispev_bicubic_f(const float* tx, const int nx,
-        const float* ty, const int ny, const float* c, const int n,
-        const float* x, const float* y, const int stride, float* z)
+int oskar_element_model_copy(oskar_ElementModel* dst,
+        const oskar_ElementModel* src)
 {
-    // Get the output position (pixel) ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+    int err;
 
-    // Call device function to evaluate surface.
-    oskar_cudaf_dierckx_fpbisp_single_bicubic_f(tx, nx, ty, ny, c,
-            x[i], y[i], &z[i * stride]);
+    dst->element_type = src->element_type;
+    dst->function_type = src->function_type;
+
+    err = oskar_spline_data_copy(&dst->port1_phi, &src->port1_phi);
+    if (err) return err;
+    err = oskar_spline_data_copy(&dst->port1_theta, &src->port1_theta);
+    if (err) return err;
+    err = oskar_spline_data_copy(&dst->port2_phi, &src->port1_theta);
+    if (err) return err;
+    err = oskar_spline_data_copy(&dst->port2_theta, &src->port2_theta);
+    if (err) return err;
+
+    return 0;
 }
 
-// Double precision.
-
-__global__
-void oskar_cudak_dierckx_bispev_bicubic_d(const double* tx, const int nx,
-        const double* ty, const int ny, const double* c, const int n,
-        const double* x, const double* y, const int stride, double* z)
-{
-    // Get the output position (pixel) ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
-
-    // Call device function to evaluate surface.
-    oskar_cudaf_dierckx_fpbisp_single_bicubic_d(tx, nx, ty, ny, c,
-            x[i], y[i], &z[i * stride]);
+#ifdef __cplusplus
 }
+#endif

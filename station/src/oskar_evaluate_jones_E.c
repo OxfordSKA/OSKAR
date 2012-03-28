@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,20 +69,27 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Resize the work buffer if needed. */
-    if (work->real.num_elements < 3 * sky->num_sources)
+    if (work->real.num_elements - work->used_real < 3 * sky->num_sources
+            + 2 * sky->num_sources)
     {
+        if (work->used_real != 0)
+            return OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* Work buffer in use. */
         error = oskar_mem_realloc(&work->real, 3 * sky->num_sources);
         if (error) return error;
     }
 
     /* Get pointers to work arrays. */
-    error = oskar_mem_get_pointer(&hor_l, &work->real, 0, sky->num_sources);
-    if (error) return error;
-    error = oskar_mem_get_pointer(&hor_m, &work->real, sky->num_sources,
+    error = oskar_mem_get_pointer(&hor_l, &work->real, work->used_real,
             sky->num_sources);
+    work->used_real += sky->num_sources;
     if (error) return error;
-    error = oskar_mem_get_pointer(&hor_n, &work->real, 2 * sky->num_sources,
+    error = oskar_mem_get_pointer(&hor_m, &work->real, work->used_real,
             sky->num_sources);
+    work->used_real += sky->num_sources;
+    if (error) return error;
+    error = oskar_mem_get_pointer(&hor_n, &work->real, work->used_real,
+            sky->num_sources);
+    work->used_real += sky->num_sources;
     if (error) return error;
 
     /* Evaluate beam for each station at each source position. */
@@ -171,6 +178,10 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             }
         }
     }
+
+    /* Release use of work arrays. */
+    work->used_real -= 3 * sky->num_sources;
+
     return 0;
 }
 

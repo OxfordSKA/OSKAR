@@ -27,6 +27,7 @@
  */
 
 #include "station/oskar_station_model_copy.h"
+#include "station/oskar_element_model_copy.h"
 #include "utility/oskar_mem_copy.h"
 #include <stdlib.h>
 
@@ -86,10 +87,6 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     dst->single_element_model = src->single_element_model;
     dst->orientation_x = src->orientation_x;
     dst->orientation_y = src->orientation_y;
-
-    /* TODO Work out how to deal with child stations. */
-    /* TODO Work out how to deal with element pattern data. */
-
     dst->longitude_rad = src->longitude_rad;
     dst->latitude_rad = src->latitude_rad;
     dst->altitude_m = src->altitude_m;
@@ -99,6 +96,18 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     dst->evaluate_array_factor = src->evaluate_array_factor;
     dst->evaluate_element_factor = src->evaluate_element_factor;
     dst->bit_depth = src->bit_depth;
+
+    /* TODO Work out how to deal with element pattern data properly! */
+    if (src->element_pattern)
+    {
+        dst->element_pattern = (oskar_ElementModel*)
+                malloc(sizeof(oskar_ElementModel));
+        error = oskar_element_model_copy(dst->element_pattern,
+                src->element_pattern);
+        if (error) return error;
+    }
+
+    /* TODO Work out how to deal with child stations. */
 
     return 0;
 }

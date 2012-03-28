@@ -50,8 +50,8 @@ extern "C" {
  *
  * @param[out] output Complex output values.
  * @param[in] spline  Pointer to data structure.
- * @param[in] theta   List of theta coordinates.
- * @param[in] phi     List of phi coordinates.
+ * @param[in] x       List of x coordinates.
+ * @param[in] y       List of y coordinates.
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -60,9 +60,8 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
-        const oskar_SplineData* spline, const oskar_Mem* theta,
-        const oskar_Mem* phi);
+int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
+        const oskar_SplineData* spline, const oskar_Mem* x, const oskar_Mem* y);
 
 #ifdef __cplusplus
 }

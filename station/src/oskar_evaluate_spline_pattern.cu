@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,23 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
+#include "math/oskar_spline_data_evaluate.h"
+#include "sky/cudak/oskar_cudak_hor_lmn_to_phi_theta.h"
+#include "station/oskar_evaluate_spline_pattern.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_get_pointer.h"
+#include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_type_check.h"
 
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_evaluate_dipole_pattern(oskar_Mem* pattern, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, double cos_orientation_x,
-        double sin_orientation_x, double cos_orientation_y,
-        double sin_orientation_y)
+int oskar_evaluate_spline_pattern(oskar_Mem* pattern,
+        const oskar_ElementModel* element, const oskar_Mem* l,
+        const oskar_Mem* m, const oskar_Mem* n, double /*cos_orientation_x*/,
+        double /*sin_orientation_x*/, double /*cos_orientation_y*/,
+        double /*sin_orientation_y*/, oskar_Work* work)
 {
-    int type, num_sources;
+    int error, type, num_sources;
+    oskar_Mem theta, phi;
 
     /* Sanity check on inputs. */
-    if (!l || !m || !n || !pattern)
+    if (!l || !m || !n || !pattern || !work)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check that all arrays are on the GPU. */
@@ -51,6 +56,13 @@ int oskar_evaluate_dipole_pattern(oskar_Mem* pattern, const oskar_Mem* l,
             n->location != OSKAR_LOCATION_GPU ||
             pattern->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
+
+    /* Check the data type. */
+    type = l->type;
+    if (type != m->type || type != n->type)
+        return OSKAR_ERR_TYPE_MISMATCH;
+    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
+        return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the pattern array is a complex matrix. */
     if (!oskar_mem_is_complex(pattern->type) ||
@@ -63,32 +75,63 @@ int oskar_evaluate_dipole_pattern(oskar_Mem* pattern, const oskar_Mem* l,
             pattern->num_elements < num_sources)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    /* Switch on the type. */
-    type = l->type;
+    /* Ensure enough memory in work buffer to evaluate theta and phi values. */
+    if (work->real.num_elements - work->used_real < 2 * num_sources)
+    {
+        if (work->used_real != 0)
+            return OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* Work buffer in use. */
+        error = oskar_mem_realloc(&work->real, 2 * num_sources);
+        if (error) return error;
+    }
+
+    /* Non-owned pointers to the theta and phi work arrays. */
+    error = oskar_mem_get_pointer(&theta, &work->real, work->used_real,
+            num_sources);
+    work->used_real += num_sources;
+    if (error) return error;
+    error = oskar_mem_get_pointer(&phi, &work->real, work->used_real,
+            num_sources);
+    work->used_real += num_sources;
+    if (error) return error;
+
+    /* Evaluate theta and phi. */
     if (type == OSKAR_SINGLE)
     {
-        int num_blocks, num_threads;
-        num_threads = 256;
+        int num_blocks, num_threads = 256;
         num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_evaluate_dipole_pattern_f
+        oskar_cudak_hor_lmn_to_phi_theta_f
         OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
                 (const float*)l->data, (const float*)m->data,
-                (const float*)n->data, (float)cos_orientation_x,
-                (float)sin_orientation_x, (float)cos_orientation_y,
-                (float)sin_orientation_y, (float4c*)pattern->data);
+                (const float*)n->data, (float*)phi.data, (float*)theta.data);
     }
     else if (type == OSKAR_DOUBLE)
     {
-        int num_blocks, num_threads;
-        num_threads = 256;
+        int num_blocks, num_threads = 256;
         num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_evaluate_dipole_pattern_d
+        oskar_cudak_hor_lmn_to_phi_theta_d
         OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
                 (const double*)l->data, (const double*)m->data,
-                (const double*)n->data, cos_orientation_x,
-                sin_orientation_x, cos_orientation_y, sin_orientation_y,
-                (double4c*)pattern->data);
+                (const double*)n->data, (double*)phi.data, (double*)theta.data);
     }
+
+    /* Evaluate the patterns. */
+    error = oskar_spline_data_evaluate(pattern, 0, 4, &element->port1_phi,
+            &theta, &phi);
+    if (error) return error;
+    error = oskar_spline_data_evaluate(pattern, 1, 4, &element->port1_theta,
+            &theta, &phi);
+    if (error) return error;
+    error = oskar_spline_data_evaluate(pattern, 2, 4, &element->port2_phi,
+            &theta, &phi);
+    if (error) return error;
+    error = oskar_spline_data_evaluate(pattern, 3, 4, &element->port2_theta,
+            &theta, &phi);
+    if (error) return error;
+
+    /* Release use of work arrays. */
+    work->used_real -= 2 * num_sources;
+
+    /* Report any CUDA error. */
     cudaDeviceSynchronize();
     return (int)cudaPeekAtLastError();
 }

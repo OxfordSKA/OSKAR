@@ -86,14 +86,14 @@ int main(int argc, char** argv)
     }
 
     // Evaluate the surface.
-    err = oskar_spline_data_evaluate(&output_theta, 1,
+    err = oskar_spline_data_evaluate(&output_theta, 0, 1,
             &pattern.port1_theta, &pt_theta, &pt_phi);
     if (err)
     {
         fprintf(stderr, "Error in oskar_spherical_spline_data_evaluate.");
         oskar_exit(err);
     }
-    err = oskar_spline_data_evaluate(&output_phi, 1,
+    err = oskar_spline_data_evaluate(&output_phi, 0, 1,
             &pattern.port1_phi, &pt_theta, &pt_phi);
     if (err)
     {

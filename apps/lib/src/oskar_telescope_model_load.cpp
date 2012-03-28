@@ -30,6 +30,8 @@
 #include "interferometry/oskar_telescope_model_load_station_coords.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_type.h"
+#include "station/oskar_element_model_init.h"
+#include "station/oskar_element_model_load.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_load_config.h"
 
@@ -61,6 +63,10 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         const char* element_file_x, const char* element_file_y, int depth)
 {
     int error;
+
+    // Check that the telescope model is in CPU memory.
+    if (oskar_telescope_model_location(telescope) != OSKAR_LOCATION_CPU)
+        return OSKAR_ERR_BAD_LOCATION;
 
     // Check that the directory exists.
     QDir dir;
@@ -145,7 +151,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
             {
                 error = oskar_station_model_init(&station->child[i],
                         oskar_telescope_model_type(telescope),
-                        oskar_telescope_model_location(telescope), 0);
+                        OSKAR_LOCATION_CPU, 0);
                 if (error) return error;
             }
         }
@@ -154,15 +160,31 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
             // There are no child stations.
             // Load element pattern data for the station,
             // if files have been found.
+            if (element_file_x || element_file_y)
+            {
+                // Allocate memory for the element pattern structure.
+                station->element_pattern = (oskar_ElementModel*)
+                        malloc(sizeof(oskar_ElementModel));
+                error = oskar_element_model_init(station->element_pattern,
+                        oskar_telescope_model_type(telescope),
+                        OSKAR_LOCATION_CPU);
+                if (error) return error;
+            }
             if (element_file_x)
             {
                 printf("Loading element pattern data (X): %s\n",
                         element_file_x);
+                error = oskar_element_model_load(station->element_pattern, 1,
+                        element_file_x, 1, 0.05, 0.0, 0.0);
+                if (error) return error;
             }
             if (element_file_y)
             {
                 printf("Loading element pattern data (Y): %s\n",
                         element_file_y);
+                error = oskar_element_model_load(station->element_pattern, 2,
+                        element_file_y, 1, 0.05, 0.0, 0.0);
+                if (error) return error;
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,52 +37,52 @@
 
 /**
  * @brief
- * CUDA kernel to compute angles phi and theta from horizontal direction
- * cosines (single precision).
+ * CUDA kernel to convert horizontal direction cosines to phi/theta
+ * (single precision).
  *
  * @details
- * This CUDA kernel computes the angles phi and theta from the given
- * horizontal direction cosines.
+ * This CUDA kernel converts horizontal direction cosines to co-azimuth
+ * and zenith distance.
  *
- * The directions are:
- * <li> l is parallel to x (pointing East), </li>
- * <li> m is parallel to y (pointing North), </li>
- * <li> n is parallel to z (pointing to the zenith). </li>
+ * The direction cosines are given with respect to geographic East, North and
+ * Up (x,y,z or l,m,n respectively). Phi is the angle measured from
+ * East through North (from x to y) and theta from the z axis to the xy-plane.
  *
- * @param[in] n      The number of points.
- * @param[in] p_l    The l-direction-cosines.
- * @param[in] p_m    The m-direction-cosines.
- * @param[in] p_n    The n-direction-cosines.
- * @param[out] phi   The phi angles, in radians.
- * @param[out] theta The theta angles, in radians.
+ * @param[in] num_points  Length of all arrays.
+ * @param[in] l           Direction cosine measured with respect to the x axis.
+ * @param[in] m           Direction cosine measured with respect to the y axis.
+ * @param[in] n           Direction cosine measured with respect to the z axis.
+ * @param[out] phi        Co-azimuth angle.
+ * @param[out] theta      Zenith distance.
  */
 __global__
-void oskar_cudak_hor_lmn_to_phi_theta_f(int n, const float* p_l,
-        const float* p_m, const float* p_n, float* phi, float* theta);
+void oskar_cudak_hor_lmn_to_phi_theta_f(const int num_points,
+        const float* l, const float* m, const float* n, float* phi,
+        float* theta);
 
 /**
  * @brief
- * CUDA kernel to compute angles phi and theta from horizontal direction
- * cosines (double precision).
+ * CUDA kernel to convert horizontal direction cosines to phi/theta
+ * (double precision).
  *
  * @details
- * This CUDA kernel computes the angles phi and theta from the given
- * horizontal direction cosines.
+ * This CUDA kernel converts horizontal direction cosines to co-azimuth
+ * and zenith distance.
  *
- * The directions are:
- * <li> l is parallel to x (pointing East), </li>
- * <li> m is parallel to y (pointing North), </li>
- * <li> n is parallel to z (pointing to the zenith). </li>
+ * The direction cosines are given with respect to geographic East, North and
+ * Up (x,y,z or l,m,n respectively). Phi is the angle measured from
+ * East through North (from x to y) and theta from the z axis to the xy-plane.
  *
- * @param[in] n      The number of points.
- * @param[in] p_l    The l-direction-cosines.
- * @param[in] p_m    The m-direction-cosines.
- * @param[in] p_n    The n-direction-cosines.
- * @param[out] phi   The phi angles, in radians.
- * @param[out] theta The theta angles, in radians.
+ * @param[in] num_points  Length of all arrays.
+ * @param[in] l           Direction cosine measured with respect to the x axis.
+ * @param[in] m           Direction cosine measured with respect to the y axis.
+ * @param[in] n           Direction cosine measured with respect to the z axis.
+ * @param[out] phi        Co-azimuth angle.
+ * @param[out] theta      Zenith distance.
  */
 __global__
-void oskar_cudak_hor_lmn_to_phi_theta_d(int n, const double* p_l,
-        const double* p_m, const double* p_n, double* phi, double* theta);
+void oskar_cudak_hor_lmn_to_phi_theta_d(const int num_points,
+        const double* l, const double* m, const double* n, double* phi,
+        double* theta);
 
-#endif // OSKAR_CUDAK_HOR_LMN_TO_PHI_THETA_H_
+#endif /* OSKAR_CUDAK_HOR_LMN_TO_PHI_THETA_H_ */

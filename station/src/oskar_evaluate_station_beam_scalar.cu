@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
 #include "math/cudak/oskar_cudak_dftw_o2c_3d.h"
 #include "station/oskar_evaluate_element_weights_errors.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
-#include "station/cudak/oskar_cudak_blank_below_horizon.h"
 #include "station/oskar_station_model_type.h"
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_Mem.h"
@@ -146,11 +145,6 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             (num_antennas, station->x_signal, station->y_signal,
                     *weights, num_sources, *l, *m, antennas_per_chunk, *beam);
         }
-
-        // Zero the value of any positions below the horizon.
-        oskar_cudak_blank_below_horizon_scalar_d
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (n->num_elements, *n, *beam);
     }
 
     // Single precision.
@@ -226,11 +220,6 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             (num_antennas, station->x_signal, station->y_signal, *weights,
                     num_sources, *l, *m, antennas_per_chunk, *beam);
         }
-
-        // Zero the value of any positions below the horizon.
-        oskar_cudak_blank_below_horizon_scalar_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (n->num_elements, *n, *beam);
     }
     else
     {

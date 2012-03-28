@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "station/oskar_blank_below_horizon.h"
 #include "station/oskar_evaluate_dipole_pattern.h"
+#include "station/oskar_evaluate_spline_pattern.h"
 #include "station/oskar_evaluate_station_beam_dipoles.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
 #include "station/oskar_evaluate_station_beam.h"
@@ -251,8 +253,27 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                     }
                     else
                     {
+                        double cos_x, sin_x, cos_y, sin_y;
+
+                        /* Get common dipole orientations.
+                         * NOTE: Currently unused! */
+                        cos_x = cos(station->orientation_x);
+                        sin_x = sin(station->orientation_x);
+                        cos_y = cos(station->orientation_y);
+                        sin_y = sin(station->orientation_y);
+
                         /* Evaluate spline pattern. */
-                        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+                        if (station->element_pattern)
+                        {
+                            error = oskar_evaluate_spline_pattern(G_ptr,
+                                    station->element_pattern, l, m, n,
+                                    cos_x, sin_x, cos_y, sin_y, work);
+                            if (error) return error;
+                        }
+                        else
+                        {
+                            return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+                        }
                     }
                 }
                 else
@@ -288,6 +309,10 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                 if (error) return error;
             }
         }
+
+        /* Blank sources below the horizon. */
+        error = oskar_blank_below_horizon(EG, n);
+        if (error) return error;
 
         /* Release use of work arrays. */
         work->used_complex -= workspace_complex;

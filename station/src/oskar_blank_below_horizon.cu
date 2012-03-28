@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,68 +27,72 @@
  */
 
 #include "oskar_global.h"
-#include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
+#include "station/cudak/oskar_cudak_blank_below_horizon.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_type_check.h"
 
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_evaluate_dipole_pattern(oskar_Mem* pattern, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, double cos_orientation_x,
-        double sin_orientation_x, double cos_orientation_y,
-        double sin_orientation_y)
+int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask)
 {
     int type, num_sources;
 
     /* Sanity check on inputs. */
-    if (!l || !m || !n || !pattern)
+    if (!mask || !data)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check that all arrays are on the GPU. */
-    if (l->location != OSKAR_LOCATION_GPU ||
-            m->location != OSKAR_LOCATION_GPU ||
-            n->location != OSKAR_LOCATION_GPU ||
-            pattern->location != OSKAR_LOCATION_GPU)
+    if (mask->location != OSKAR_LOCATION_GPU ||
+            data->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    /* Check that the pattern array is a complex matrix. */
-    if (!oskar_mem_is_complex(pattern->type) ||
-            !oskar_mem_is_matrix(pattern->type))
+    /* Check that the mask type is OK. */
+    if (mask->type != OSKAR_SINGLE && mask->type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the dimensions are OK. */
-    num_sources = l->num_elements;
-    if (m->num_elements < num_sources || n->num_elements < num_sources ||
-            pattern->num_elements < num_sources)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    num_sources = mask->num_elements;
+    if (data->num_elements < num_sources)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
-    /* Switch on the type. */
-    type = l->type;
-    if (type == OSKAR_SINGLE)
+    /* Zero the value of any positions below the horizon. */
+    type = data->type;
+    if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
     {
-        int num_blocks, num_threads;
-        num_threads = 256;
+        int num_blocks, num_threads = 256;
         num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_evaluate_dipole_pattern_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
-                (const float*)l->data, (const float*)m->data,
-                (const float*)n->data, (float)cos_orientation_x,
-                (float)sin_orientation_x, (float)cos_orientation_y,
-                (float)sin_orientation_y, (float4c*)pattern->data);
+        oskar_cudak_blank_below_horizon_matrix_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (num_sources, (const float*)mask->data, (float4c*)data->data);
     }
-    else if (type == OSKAR_DOUBLE)
+    else if (type == OSKAR_SINGLE_COMPLEX)
     {
-        int num_blocks, num_threads;
-        num_threads = 256;
+        int num_blocks, num_threads = 256;
         num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_evaluate_dipole_pattern_d
-        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
-                (const double*)l->data, (const double*)m->data,
-                (const double*)n->data, cos_orientation_x,
-                sin_orientation_x, cos_orientation_y, sin_orientation_y,
-                (double4c*)pattern->data);
+        oskar_cudak_blank_below_horizon_scalar_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (num_sources, (const float*)mask->data, (float2*)data->data);
     }
+    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+    {
+        int num_blocks, num_threads = 256;
+        num_blocks = (num_sources + num_threads - 1) / num_threads;
+        oskar_cudak_blank_below_horizon_matrix_d
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (num_sources, (const double*)mask->data, (double4c*)data->data);
+    }
+    else if (type == OSKAR_DOUBLE_COMPLEX)
+    {
+        int num_blocks, num_threads = 256;
+        num_blocks = (num_sources + num_threads - 1) / num_threads;
+        oskar_cudak_blank_below_horizon_scalar_d
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (num_sources, (const double*)mask->data, (double2*)data->data);
+    }
+    else
+        return OSKAR_ERR_BAD_DATA_TYPE;
+
+    /* Report any CUDA error. */
     cudaDeviceSynchronize();
     return (int)cudaPeekAtLastError();
 }

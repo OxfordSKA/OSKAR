@@ -204,6 +204,10 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     if (line) free(line);
     fclose(file);
 
+    /* Check if any data were loaded. */
+    if (n == 0)
+        goto cleanup;
+
     if (type == OSKAR_SINGLE)
     {
         file = fopen("dump.txt", "w");
@@ -232,6 +236,7 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     if (err) return err;
 
     /* Free temporary storage. */
+    cleanup:
     err = oskar_mem_free(&m_theta);
     if (err) return err;
     err = oskar_mem_free(&m_phi);

@@ -72,8 +72,12 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     tel->station.station_type = (temp == "DISH") ?
             OSKAR_STATION_TYPE_DISH : OSKAR_STATION_TYPE_AA;
     temp = s.value("element_type", "DIPOLE").toString().toUpper();
-    tel->station.element_type = (temp == "DIPOLE") ?
-            OSKAR_STATION_ELEMENT_TYPE_DIPOLE : OSKAR_STATION_ELEMENT_TYPE_POINT;
+    if (temp == "DIPOLE")
+        tel->station.element_type = OSKAR_STATION_ELEMENT_TYPE_DIPOLE;
+    else if (temp == "CUSTOM")
+        tel->station.element_type = OSKAR_STATION_ELEMENT_TYPE_CUSTOM;
+    else
+        tel->station.element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
     tel->station.evaluate_array_factor =
             s.value("evaluate_array_factor", true).toBool();
     tel->station.evaluate_element_factor =

@@ -7,8 +7,8 @@ set(station_cuda_kernels_SRC
     src/oskar_cudak_apodisation.cu
     src/oskar_cudak_blank_below_horizon.cu
     src/oskar_cudak_evaluate_dipole_pattern.cu
-    src/oskar_cudak_evaluate_station_beam_dipoles.cu
     src/oskar_cudak_evaluate_element_weights_errors.cu
+    src/oskar_cudak_evaluate_station_beam_dipoles.cu
 )
 set(station_cuda_kernels_SRC "${station_cuda_kernels_SRC}" PARENT_SCOPE)
 

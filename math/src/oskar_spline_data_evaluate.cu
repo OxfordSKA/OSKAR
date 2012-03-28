@@ -28,6 +28,7 @@
 
 #include "extern/dierckx/bispev.h"
 #include "math/oskar_spline_data_evaluate.h"
+#include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
 #include "utility/oskar_mem_type_check.h"
 
 #define USE_FORTRAN_BISPEV 1
@@ -47,14 +48,15 @@ static int c1 = 1;
 static int c3 = 3;
 #endif
 
-int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
-        const oskar_SplineData* spline, const oskar_Mem* x,
-        const oskar_Mem* y)
+int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
+        const oskar_SplineData* spline, const oskar_Mem* x, const oskar_Mem* y)
 {
-    int err = 0, num_points, type, location;
+    int err = 0, j, nx, ny, num_points, type, location;
 
     /* Check arrays are consistent. */
     num_points = x->num_elements;
+    if (y->num_elements != num_points)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check type. */
     type = x->type;
@@ -72,38 +74,40 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
             location != y->location)
         return OSKAR_ERR_BAD_LOCATION;
 
-    /* Check if data are in CPU memory. */
-    if (location == OSKAR_LOCATION_CPU)
+    /* Check data type. */
+    if (type == OSKAR_SINGLE)
     {
-        /* Set up workspace. */
-        int i, iwrk1[2], j, kwrk1 = 2, lwrk = 8, nx, ny;
-
-        if (type == OSKAR_SINGLE)
+        for (j = 0; j < 2; ++j)
         {
-            float wrk[8];
-            for (j = 0; j < 2; ++j)
+            const float *knots_x, *knots_y, *coeff;
+            float *out;
+            if (j == 0) /* Real part. */
             {
-                const float *knots_x, *knots_y, *coeff;
-                float *out;
-                if (j == 0) /* Real part. */
-                {
-                    nx      = spline->num_knots_x_re;
-                    ny      = spline->num_knots_y_re;
-                    knots_x = (const float*)spline->knots_x_re.data;
-                    knots_y = (const float*)spline->knots_y_re.data;
-                    coeff   = (const float*)spline->coeff_re.data;
-                    out     = (float*)output->data;
-                }
-                else  /* Imaginary part. */
-                {
-                    nx      = spline->num_knots_x_im;
-                    ny      = spline->num_knots_y_im;
-                    knots_x = (const float*)spline->knots_x_im.data;
-                    knots_y = (const float*)spline->knots_y_im.data;
-                    coeff   = (const float*)spline->coeff_im.data;
-                    out     = (float*)output->data + 1;
-                }
+                nx      = spline->num_knots_x_re;
+                ny      = spline->num_knots_y_re;
+                knots_x = (const float*)spline->knots_x_re.data;
+                knots_y = (const float*)spline->knots_y_re.data;
+                coeff   = (const float*)spline->coeff_re.data;
+                out     = (float*)output->data + (2 * offset);
+            }
+            else /* Imaginary part. */
+            {
+                nx      = spline->num_knots_x_im;
+                ny      = spline->num_knots_y_im;
+                knots_x = (const float*)spline->knots_x_im.data;
+                knots_y = (const float*)spline->knots_y_im.data;
+                coeff   = (const float*)spline->coeff_im.data;
+                out     = (float*)output->data + (2 * offset) + 1;
+            }
 
+            /* Check if data are in CPU memory. */
+            if (location == OSKAR_LOCATION_CPU)
+            {
+                /* Set up workspace. */
+                float wrk[8];
+                int i, iwrk1[2], kwrk1 = 2, lwrk = 8;
+
+                /* Evaluate surface at the points. */
                 for (i = 0; i < num_points; ++i)
                 {
                     float x1, y1;
@@ -121,33 +125,54 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
                 }
             }
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            double wrk[8];
-            for (j = 0; j < 2; ++j)
+            else if (location == OSKAR_LOCATION_GPU)
             {
-                const double *knots_x, *knots_y, *coeff;
-                double* out;
-                if (j == 0) /* Real part. */
-                {
-                    nx      = spline->num_knots_x_re;
-                    ny      = spline->num_knots_y_re;
-                    knots_x = (const double*)spline->knots_x_re.data;
-                    knots_y = (const double*)spline->knots_y_re.data;
-                    coeff   = (const double*)spline->coeff_re.data;
-                    out     = (double*)output->data;
-                }
-                else  /* Imaginary part. */
-                {
-                    nx      = spline->num_knots_x_im;
-                    ny      = spline->num_knots_y_im;
-                    knots_x = (const double*)spline->knots_x_im.data;
-                    knots_y = (const double*)spline->knots_y_im.data;
-                    coeff   = (const double*)spline->coeff_im.data;
-                    out     = (double*)output->data + 1;
-                }
+                /* Evaluate surface at the points by calling kernel. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num_points + num_threads - 1) / num_threads;
+                oskar_cudak_dierckx_bispev_bicubic_f
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (knots_x,
+                        nx, knots_y, ny, coeff, num_points,
+                        (const float*)x->data, (const float*)y->data,
+                        stride, out);
+            }
+            else
+                return OSKAR_ERR_BAD_LOCATION;
+        }
+    }
+    else if (type == OSKAR_DOUBLE)
+    {
+        for (j = 0; j < 2; ++j)
+        {
+            const double *knots_x, *knots_y, *coeff;
+            double* out;
+            if (j == 0) /* Real part. */
+            {
+                nx      = spline->num_knots_x_re;
+                ny      = spline->num_knots_y_re;
+                knots_x = (const double*)spline->knots_x_re.data;
+                knots_y = (const double*)spline->knots_y_re.data;
+                coeff   = (const double*)spline->coeff_re.data;
+                out     = (double*)output->data + (2 * offset);
+            }
+            else /* Imaginary part. */
+            {
+                nx      = spline->num_knots_x_im;
+                ny      = spline->num_knots_y_im;
+                knots_x = (const double*)spline->knots_x_im.data;
+                knots_y = (const double*)spline->knots_y_im.data;
+                coeff   = (const double*)spline->coeff_im.data;
+                out     = (double*)output->data + (2 * offset) + 1;
+            }
 
+            /* Check if data are in CPU memory. */
+            if (location == OSKAR_LOCATION_CPU)
+            {
+                /* Set up workspace. */
+                double wrk[8];
+                int i, iwrk1[2], kwrk1 = 2, lwrk = 8;
+
+                /* Evaluate surface at the points. */
                 for (i = 0; i < num_points; ++i)
                 {
                     double x1, y1;
@@ -159,22 +184,29 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int stride,
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
                 }
             }
+            else if (location == OSKAR_LOCATION_GPU)
+            {
+                /* Evaluate surface at the points by calling kernel. */
+                int num_blocks, num_threads = 256;
+                num_blocks = (num_points + num_threads - 1) / num_threads;
+                oskar_cudak_dierckx_bispev_bicubic_d
+                OSKAR_CUDAK_CONF(num_blocks, num_threads) (knots_x,
+                        nx, knots_y, ny, coeff, num_points,
+                        (const double*)x->data, (const double*)y->data,
+                        stride, out);
+            }
+            else
+                return OSKAR_ERR_BAD_LOCATION;
         }
     }
+    else
+        return OSKAR_ERR_BAD_DATA_TYPE;
 
-    /* Check if data are in GPU memory. */
-    else if (location == OSKAR_LOCATION_GPU)
+    if (location == OSKAR_LOCATION_GPU)
     {
-        if (type == OSKAR_SINGLE)
-        {
-
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-
-        }
+        cudaDeviceSynchronize();
+        err = (int) cudaPeekAtLastError();
     }
-
     return err;
 }
 

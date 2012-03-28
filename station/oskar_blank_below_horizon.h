@@ -26,37 +26,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
-#include "math/cudak/oskar_cudaf_dierckx_fpbisp_single_bicubic.h"
+#ifndef OSKAR_BLANK_BELOW_HORIZON_H_
+#define OSKAR_BLANK_BELOW_HORIZON_H_
 
-// Single precision.
+/**
+ * @file oskar_blank_below_horizon.h
+ */
 
-__global__
-void oskar_cudak_dierckx_bispev_bicubic_f(const float* tx, const int nx,
-        const float* ty, const int ny, const float* c, const int n,
-        const float* x, const float* y, const int stride, float* z)
-{
-    // Get the output position (pixel) ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
-    // Call device function to evaluate surface.
-    oskar_cudaf_dierckx_fpbisp_single_bicubic_f(tx, nx, ty, ny, c,
-            x[i], y[i], &z[i * stride]);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Function to blank sources below the horizon
+ *
+ * @details
+ * This function sets individual Jones matrices or scalars to zero for those
+ * sources that are below the horizon.
+ *
+ * For sources where the mask value is negative, the corresponding element
+ * of the Jones data array is set to zero.
+ *
+ * Note that both arrays must be in GPU memory.
+ *
+ * @param[in,out] data   Array of Jones matrices or scalars per source.
+ * @param[in] mask       Pointer to element model containing spline data.
+ */
+OSKAR_EXPORT
+int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask);
+
+#ifdef __cplusplus
 }
+#endif
 
-// Double precision.
-
-__global__
-void oskar_cudak_dierckx_bispev_bicubic_d(const double* tx, const int nx,
-        const double* ty, const int ny, const double* c, const int n,
-        const double* x, const double* y, const int stride, double* z)
-{
-    // Get the output position (pixel) ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
-
-    // Call device function to evaluate surface.
-    oskar_cudaf_dierckx_fpbisp_single_bicubic_d(tx, nx, ty, ny, c,
-            x[i], y[i], &z[i * stride]);
-}
+#endif /* OSKAR_BLANK_BELOW_HORIZON_H_ */

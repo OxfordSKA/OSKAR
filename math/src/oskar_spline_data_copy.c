@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_ELEMENT_MODEL_EVALUATE_H_
-#define OSKAR_ELEMENT_MODEL_EVALUATE_H_
-
-/**
- * @file oskar_element_model_evaluate.h
- */
-
-#include "oskar_global.h"
-#include "station/oskar_ElementModel.h"
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_Work.h"
+#include "math/oskar_spline_data_copy.h"
+#include "utility/oskar_mem_copy.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Evaluates the element pattern data at the source positions.
- *
- * @details
- * This function evaluates the embedded element pattern data at the source
- * positions.
- *
- * (UNFINISHED)
- */
-OSKAR_EXPORT
-int oskar_element_model_evaluate(oskar_Mem* output,
-        const oskar_ElementModel* pattern, const oskar_Mem* phi,
-        const oskar_Mem* theta, oskar_Work* work);
+int oskar_spline_data_copy(oskar_SplineData* dst, const oskar_SplineData* src)
+{
+    int err = 0;
+    dst->num_knots_x_re = src->num_knots_x_re;
+    dst->num_knots_y_re = src->num_knots_y_re;
+    dst->num_knots_x_im = src->num_knots_x_im;
+    dst->num_knots_y_im = src->num_knots_y_im;
+    err = oskar_mem_copy(&dst->knots_x_re, &src->knots_x_re);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->knots_y_re, &src->knots_y_re);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->coeff_re, &src->coeff_re);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->knots_x_im, &src->knots_x_im);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->knots_y_im, &src->knots_y_im);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->coeff_im, &src->coeff_im);
+    if (err) return err;
+
+    return 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_ELEMENT_MODEL_EVALUATE_H_ */

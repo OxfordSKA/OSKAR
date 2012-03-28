@@ -143,7 +143,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     options << "AA"; // << "Dish";
     registerSetting("telescope/station/station_type", "Station type", oskar_SettingsItem::OPTIONS, options);
     options.clear();
-    options << "Point" << "Dipole";
+    options << "Point" << "Dipole" << "Custom";
     registerSetting("telescope/station/element_type", "Element type", oskar_SettingsItem::OPTIONS, options);
     registerSetting("telescope/station/evaluate_array_factor", "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL);
     registerSetting("telescope/station/evaluate_element_factor", "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ extern "C" {
  *
  * @details
  * This function copies data held in one structure to another structure.
- * Both data structures must be of the same size and type.
  *
  * @param[out] dst Pointer to destination data structure to copy into.
  * @param[in]  src Pointer to source data structure to copy from.

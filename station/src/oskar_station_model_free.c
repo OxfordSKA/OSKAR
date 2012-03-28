@@ -85,6 +85,9 @@ int oskar_station_model_free(oskar_StationModel* model)
     {
         error = oskar_element_model_free(model->element_pattern);
         if (error) return error;
+
+        /* Free the structure pointer. */
+        free(model->element_pattern);
         model->element_pattern = NULL;
     }
 

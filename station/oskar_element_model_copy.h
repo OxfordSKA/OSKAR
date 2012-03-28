@@ -26,37 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
-#include "math/cudak/oskar_cudaf_dierckx_fpbisp_single_bicubic.h"
+#ifndef OSKAR_ELEMENT_MODEL_COPY_H_
+#define OSKAR_ELEMENT_MODEL_COPY_H_
 
-// Single precision.
+/**
+ * @file oskar_element_model_copy.h
+ */
 
-__global__
-void oskar_cudak_dierckx_bispev_bicubic_f(const float* tx, const int nx,
-        const float* ty, const int ny, const float* c, const int n,
-        const float* x, const float* y, const int stride, float* z)
-{
-    // Get the output position (pixel) ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
+#include "oskar_global.h"
+#include "station/oskar_ElementModel.h"
 
-    // Call device function to evaluate surface.
-    oskar_cudaf_dierckx_fpbisp_single_bicubic_f(tx, nx, ty, ny, c,
-            x[i], y[i], &z[i * stride]);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * Copies the contents of one data structure to another data structure.
+ *
+ * @details
+ * This function copies data held in one structure to another structure.
+ *
+ * @param[out] dst Pointer to destination data structure to copy into.
+ * @param[in]  src Pointer to source data structure to copy from.
+ *
+ * @return
+ * This function returns a code to indicate if there were errors in execution:
+ * - A return code of 0 indicates no error.
+ * - A positive return code indicates a CUDA error.
+ * - A negative return code indicates an OSKAR error.
+ */
+OSKAR_EXPORT
+int oskar_element_model_copy(oskar_ElementModel* dst,
+        const oskar_ElementModel* src);
+
+#ifdef __cplusplus
 }
+#endif
 
-// Double precision.
-
-__global__
-void oskar_cudak_dierckx_bispev_bicubic_d(const double* tx, const int nx,
-        const double* ty, const int ny, const double* c, const int n,
-        const double* x, const double* y, const int stride, double* z)
-{
-    // Get the output position (pixel) ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= n) return;
-
-    // Call device function to evaluate surface.
-    oskar_cudaf_dierckx_fpbisp_single_bicubic_d(tx, nx, ty, ny, c,
-            x[i], y[i], &z[i * stride]);
-}
+#endif /* OSKAR_ELEMENT_MODEL_COPY_H_ */
