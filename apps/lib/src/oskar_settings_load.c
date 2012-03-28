@@ -55,6 +55,7 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
     settings->sky.output_sky_file = 0;
     settings->telescope.config_directory = 0;
     settings->telescope.station.receiver_temperature_file = 0;
+    settings->image.input_vis_data = 0;
     settings->image.oskar_image = 0;
     settings->image.fits_image = 0;
     settings->beam_pattern.filename = 0;

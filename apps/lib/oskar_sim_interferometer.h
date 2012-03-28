@@ -44,7 +44,7 @@ extern "C" {
  * Main OSKAR interferometer simulation function.
  *
  * @details
- * This function acts as thought it were a stand-alone executable.
+ * This function acts as though it were a stand-alone executable.
  *
  * @param[in] settings_file Path to a settings file.
  */

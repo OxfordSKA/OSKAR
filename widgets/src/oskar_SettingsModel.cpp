@@ -209,6 +209,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     options.clear();
     options << "DFT" << "FFT";
     registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);
+    registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     registerSetting("image/oskar_image", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #ifndef OSKAR_NO_FITS
     registerSetting("image/fits_image", "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);

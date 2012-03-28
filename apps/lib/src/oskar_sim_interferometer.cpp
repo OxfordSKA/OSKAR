@@ -49,6 +49,11 @@
 #include "utility/oskar_mem_add.h"
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
+#include "imaging/oskar_make_image.h"
+#include "imaging/oskar_image_write.h"
+#ifndef OSKAR_NO_FITS
+#include "fits/oskar_fits_image_write.h"
+#endif
 
 #include <QtCore/QTime>
 
@@ -174,13 +179,15 @@ int oskar_sim_interferometer(const char* settings_file)
     // Add visibility noise.
     if (settings.sky.noise_model.type == OSKAR_NOISE_VLA_MEMO_146)
     {
-        printf("== Adding Gaussian visibility noise.\n");
-        error = vis_global->evaluate_sky_noise_stddev(telescope_cpu,
-                settings.sky.noise_model.spectral_index);
-        if (error) return error;
-        error = vis_global->add_sky_noise(vis_global->sky_noise_stddev,
-                settings.sky.noise_model.seed);
-        if (error) return error;
+        /* This branch is disabled until it can be tested further  */
+        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+//        printf("== Adding Gaussian visibility noise.\n");
+//        error = vis_global->evaluate_sky_noise_stddev(telescope_cpu,
+//                settings.sky.noise_model.spectral_index);
+//        if (error) return error;
+//        error = vis_global->add_sky_noise(vis_global->sky_noise_stddev,
+//                settings.sky.noise_model.seed);
+//        if (error) return error;
     }
 
     printf("\n=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
@@ -208,6 +215,22 @@ int oskar_sim_interferometer(const char* settings_file)
         if (error) return error;
     }
 #endif
+
+    if (settings.image.oskar_image || settings.image.fits_image)
+    {
+        oskar_Image image;
+        oskar_make_image(&image, vis_global, &settings.image);
+        if (settings.image.oskar_image)
+        {
+            oskar_image_write(&image, settings.image.oskar_image, 0);
+        }
+#ifndef OSKAR_NO_FITS
+        if (settings.image.fits_image)
+        {
+            oskar_fits_image_write(&image, settings.image.fits_image);
+        }
+#endif
+    }
 
     // Delete data structures.
     delete vis_global;

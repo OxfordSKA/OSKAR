@@ -28,11 +28,11 @@
 
 #include "apps/lib/oskar_write_ms.h"
 
-#include "ms/oskar_MeasurementSet.h"
 #include "apps/lib/oskar_remove_dir.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_vector_types.h"
+#include "ms/oskar_MeasurementSet.h"
 
 #include <QtCore/QDir>
 
@@ -228,7 +228,8 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
                     }
                 }
                 ms.addVisibilities(num_pols, num_channels, 1, &u, &v, &w,
-                        (float*)amp_tb, &ant1, &ant2, dt_vis_dump, dt_vis_dump, &vis_time);
+                        (float*)amp_tb, &ant1, &ant2, dt_vis_dump, dt_vis_dump,
+                        &vis_time);
             }
         }
         free(amp_tb);

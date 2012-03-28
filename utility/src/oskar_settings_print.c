@@ -381,6 +381,7 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         printf("= %i -> %i\n", s->image.time_range[0], s->image.time_range[1]);
         pr_i(2, w, "Polarisation", s->image.polarisation);
         pr_b(2, w, "Use DFT", s->image.dft);
+        pr_s(2, 0, "Input OSKAR visibility file", s->image.input_vis_data);
         pr_s(2, 0, "Output OSKAR image file", s->image.oskar_image);
         pr_s(2, 0, "Output FITS image file", s->image.fits_image);
     }

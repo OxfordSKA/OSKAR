@@ -58,11 +58,12 @@ private slots:
     void about();
     void runBeamPattern();
     void runInterferometer();
+    void runImager();
     void setHideIfUnset(bool value);
 
 private:
     void runButton();
-    void runSim(int depth, QStringList outputfiles = QStringList());
+    void run(int depth, QStringList outputfiles = QStringList());
 
 private:
     QWidget* widget_;

@@ -26,35 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_settings_free.h"
-#include "utility/oskar_mem_free.h"
-#include <stdlib.h>
+
+#ifndef OSKAR_IMAGER_H_
+#define OSKAR_IMAGER_H_
+
+/**
+ * @file oskar_imager.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
-{
-    /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    free(settings->obs.oskar_vis_filename);
-    free(settings->sim.cuda_device_ids);
-    free(settings->sky.gsm_file);
-    free(settings->sky.input_sky_file);
-    free(settings->sky.output_sky_file);
-    free(settings->telescope.config_directory);
-    free(settings->telescope.station.receiver_temperature_file);
-    free(settings->image.input_vis_data);
-    free(settings->image.oskar_image);
-    free(settings->image.fits_image);
-    free(settings->beam_pattern.filename);
-    free(settings->beam_pattern.fits_image);
-
-    /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
-}
+/**
+ * @brief Main OSKAR imager function.
+ *
+ * @param settings_file
+ * @return
+ */
+OSKAR_EXPORT
+int oskar_imager(const char* settings_file);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_IMAGER_H_ */

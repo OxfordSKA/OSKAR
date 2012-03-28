@@ -82,6 +82,13 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     temp = s.value("transform_type").toString().toUpper();
     im->dft = (temp == "DFT") ? true : false;
 
+    t = s.value("input_vis_data").toByteArray();
+    if (t.size() > 0)
+    {
+        im->input_vis_data = (char*)malloc(t.size() + 1);
+        strcpy(im->input_vis_data, t.constData());
+    }
+
     t = s.value("oskar_image").toByteArray();
     if (t.size() > 0)
     {

@@ -58,8 +58,11 @@ struct oskar_SettingsImage
                             * enum to handle DFT_2D, DFT_3D, FFT, WPROJ, APROJ ...
                             */
 
-    char* oskar_image;     /* OSKAR binary file name */
-    char* fits_image;      /* FITS file name */
+    char* input_vis_data;  /* Path to input visibility data (used when running
+                            * the imager as a standalone binary */
+
+    char* oskar_image;     /* OSKAR binary file name path */
+    char* fits_image;      /* FITS file name path */
 };
 typedef struct oskar_SettingsImage oskar_SettingsImage;
 

@@ -33,7 +33,7 @@
 
 int main(int argc, char** argv)
 {
-    int error;
+    int error = OSKAR_SUCCESS;
 
     // Parse command line.
     if (argc != 2)

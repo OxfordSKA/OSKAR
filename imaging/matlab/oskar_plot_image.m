@@ -34,7 +34,7 @@ axis equal;
 
 % Plot the image.
 rel_coords = linspace(-fov_deg/2, fov_deg/2, size(Image, 2));
-imagesc(rel_coords, rel_coords, fliplr(Image));
+imagesc(rel_coords, rel_coords, fliplr(Image'));
 
 % Set axis options.
 set(gca, 'YDir', 'normal');
@@ -47,7 +47,7 @@ ylabel('Relative Dec [deg]', 'FontSize', 11, 'FontName', 'Arial');
 %xlabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
 %ylabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
 title(fig_title, 'FontSize', 11, 'Color', 'white', 'FontName', 'Arial');
-colormap(jet(1024));
+colormap(hot(1024));
 c = colorbar;
 %ylabel(c, 'Brightness', 'FontName', 'Arial', 'FontSize', 11);
 axis square;

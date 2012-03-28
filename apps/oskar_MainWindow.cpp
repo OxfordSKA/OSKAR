@@ -29,6 +29,7 @@
 #include "apps/oskar_MainWindow.h"
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "apps/lib/oskar_sim_interferometer.h"
+#include "apps/lib/oskar_imager.h"
 #include "widgets/oskar_About.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
@@ -83,6 +84,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QAction* actAbout = new QAction("About OSKAR...", this);
     QAction* actRunInterferometer = new QAction("Run Interferometer", this);
     QAction* actRunBeamPattern = new QAction("Run Beam Pattern", this);
+    QAction* actRunImager = new QAction("Run Imager", this);
     connect(actOpen, SIGNAL(triggered()), this, SLOT(openSettings()));
     connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -97,6 +99,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
             this, SLOT(runInterferometer()));
     connect(actRunBeamPattern, SIGNAL(triggered()),
             this, SLOT(runBeamPattern()));
+    connect(actRunImager, SIGNAL(triggered()), this, SLOT(runImager()));
 
     // Set up keyboard shortcuts.
     actOpen->setShortcut(QKeySequence::Open);
@@ -129,12 +132,14 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menuView->addAction(actAbout);
     menuRun->addAction(actRunInterferometer);
     menuRun->addAction(actRunBeamPattern);
+    menuRun->addAction(actRunImager);
 
     // Create the toolbar.
     QToolBar* toolbar = new QToolBar(this);
     toolbar->setObjectName("Run");
     toolbar->addAction(actRunInterferometer);
     toolbar->addAction(actRunBeamPattern);
+    toolbar->addAction(actRunImager);
     addToolBar(Qt::TopToolBarArea, toolbar);
 
     // Load the settings.
@@ -193,8 +198,7 @@ void oskar_MainWindow::saveAs(QString filename)
     view_->restoreExpanded();
 }
 
-
-// Protected methods.
+// =========================================================  Protected methods.
 
 void oskar_MainWindow::closeEvent(QCloseEvent* event)
 {
@@ -209,7 +213,7 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
     QMainWindow::closeEvent(event);
 }
 
-// Private slots.
+// =========================================================  Private slots.
 
 void oskar_MainWindow::about()
 {
@@ -236,7 +240,13 @@ void oskar_MainWindow::setHideIfUnset(bool value)
     view_->restoreExpanded();
 }
 
-// Private members.
+void oskar_MainWindow::runImager()
+{
+    sim_function_ = &oskar_imager;
+    runButton();
+}
+
+// =========================================================  Private methods.
 
 void oskar_MainWindow::runButton()
 {
@@ -271,7 +281,7 @@ void oskar_MainWindow::runButton()
     }
 
     // Run simulation recursively.
-    runSim(0, outputFiles);
+    run(0, outputFiles);
 
     // Restore the output files.
     for (int i = 0; i < keys.size(); ++i)
@@ -280,7 +290,7 @@ void oskar_MainWindow::runButton()
     }
 }
 
-void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
+void oskar_MainWindow::run(int depth, QStringList outputFiles)
 {
     QByteArray settings = settingsFile_.toAscii();
     QStringList iterationKeys = model_->data(QModelIndex(),
@@ -338,7 +348,7 @@ void oskar_MainWindow::runSim(int depth, QStringList outputFiles)
             if (depth < iterationKeys.size() - 1)
             {
                 // If not, then call this function again.
-                runSim(depth + 1, outputFiles);
+                run(depth + 1, outputFiles);
             }
             else
             {

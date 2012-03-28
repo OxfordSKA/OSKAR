@@ -43,6 +43,18 @@ set_target_properties(${bin_name}
     INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
+# BINARY: oskar_make_image
+set(bin_name oskar_imager)
+add_executable(${bin_name} ${bin_name}_main.cpp)
+target_link_libraries(${bin_name} oskar oskar_apps ${QT_QTCORE_LIBRARY})
+set_target_properties(${bin_name}
+    PROPERTIES
+    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+    INSTALL_RPATH_USE_LINK_PATH TRUE)
+install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
+
 # BINARY: oskar_icrs_to_az_el
 add_executable(oskar_icrs_to_az_el oskar_icrs_to_az_el.cpp)
 target_link_libraries(oskar_icrs_to_az_el oskar)
@@ -75,11 +87,11 @@ if (BUILD_OSKAR_WIDGETS)
     #install(TARGETS oskar_viewer_scalar DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
     # BINARY: oskar_sim_gui
-    set(bin_name oskar_sim_gui)
-    set(oskar_sim_gui_SRC ${bin_name}_main.cpp oskar_MainWindow.cpp)
-    set(oskar_sim_gui_MOC_SRC oskar_MainWindow.h)
-    qt4_wrap_cpp(oskar_sim_gui_SRC ${oskar_sim_gui_MOC_SRC})
-    add_executable(${bin_name} ${oskar_sim_gui_SRC})
+    set(bin_name oskar_gui)
+    set(${bin_name}_SRC ${bin_name}_main.cpp oskar_MainWindow.cpp)
+    set(${bin_name}_MOC_SRC oskar_MainWindow.h)
+    qt4_wrap_cpp(${bin_name}_SRC ${${bin_name}_MOC_SRC})
+    add_executable(${bin_name} ${${bin_name}_SRC})
     target_link_libraries(${bin_name} oskar oskar_apps oskar_widgets
         ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
     set_target_properties(${bin_name}
