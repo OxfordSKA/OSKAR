@@ -56,7 +56,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     im->time_range[1] = s.value("time_end", -1).toInt();
 
     temp = s.value("polarisation").toString().toUpper();
-    if (temp.startsWith("STOKES"))
+    if (temp.startsWith("STOKES") || temp.isEmpty())
         im->polarisation = OSKAR_IMAGE_TYPE_STOKES;
     else if (temp == "I")
         im->polarisation = OSKAR_IMAGE_TYPE_STOKES_I;
@@ -93,7 +93,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     if (t.size() > 0)
     {
         im->fits_image = (char*)malloc(t.size() + 1);
-        strcpy(im->oskar_image, t.constData());
+        strcpy(im->fits_image, t.constData());
     }
 
     return OSKAR_SUCCESS;
