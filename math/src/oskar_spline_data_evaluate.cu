@@ -134,7 +134,7 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (knots_x,
                         nx, knots_y, ny, coeff, num_points,
                         (const float*)x->data, (const float*)y->data,
-                        stride, out);
+                        2 * stride, out);
             }
             else
                 return OSKAR_ERR_BAD_LOCATION;
@@ -193,7 +193,7 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (knots_x,
                         nx, knots_y, ny, coeff, num_points,
                         (const double*)x->data, (const double*)y->data,
-                        stride, out);
+                        2 * stride, out);
             }
             else
                 return OSKAR_ERR_BAD_LOCATION;
