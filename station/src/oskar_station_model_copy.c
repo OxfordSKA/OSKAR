@@ -26,8 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_copy.h"
 #include "station/oskar_element_model_copy.h"
+#include "station/oskar_element_model_init.h"
+#include "station/oskar_element_model_type.h"
+#include "station/oskar_station_model_copy.h"
+#include "station/oskar_station_model_location.h"
 #include "utility/oskar_mem_copy.h"
 #include <stdlib.h>
 
@@ -100,8 +103,17 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     /* TODO Work out how to deal with element pattern data properly! */
     if (src->element_pattern)
     {
+        /* Allocate memory for the element model structure. */
         dst->element_pattern = (oskar_ElementModel*)
                 malloc(sizeof(oskar_ElementModel));
+
+        /* Initialise the element model. */
+        error = oskar_element_model_init(dst->element_pattern,
+                oskar_element_model_type(src->element_pattern),
+                oskar_station_model_location(dst));
+        if (error) return error;
+
+        /* Copy the element model data. */
         error = oskar_element_model_copy(dst->element_pattern,
                 src->element_pattern);
         if (error) return error;
