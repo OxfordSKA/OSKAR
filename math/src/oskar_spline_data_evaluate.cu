@@ -31,7 +31,7 @@
 #include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
 #include "utility/oskar_mem_type_check.h"
 
-#define USE_FORTRAN_BISPEV 1
+#define USE_FORTRAN_BISPEV
 
 #ifdef __cplusplus
 extern "C" {
