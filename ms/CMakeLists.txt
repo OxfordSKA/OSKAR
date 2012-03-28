@@ -20,9 +20,9 @@ set_target_properties(oskar_ms
     PROPERTIES
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
     INSTALL_RPATH_USE_LINK_PATH TRUE
-    SOVERSION ${oskar-lib_SOVERSION})
+    SOVERSION ${OSKAR_VERSION})
 
-# ==== Install configuration for the oskar-lib ms module.
+# ==== Install configuration for the OSKAR ms module.
 install(TARGETS oskar_ms DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
 # ==== Recurse into test subdirectory.

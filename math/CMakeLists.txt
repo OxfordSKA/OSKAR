@@ -2,8 +2,6 @@
 # src/math/CMakeLists.txt
 #
 
-include_directories(${oskar-lib_SOURCE_DIR}/math)
-
 add_subdirectory(matlab)
 add_subdirectory(cudak)
 
@@ -30,7 +28,6 @@ set(math_SRC
     src/oskar_matrix_multiply.c
     src/oskar_mean.c
     src/oskar_meshgrid.c
-    #src/oskar_mrdivide.c ## Do not use.. doesnt currently catch all cases!
     src/oskar_random_broken_power_law.c
     src/oskar_random_gaussian.c
     src/oskar_random_power_law.c

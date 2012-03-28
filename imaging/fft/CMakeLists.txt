@@ -16,7 +16,7 @@ if (FFTW3_FOUND AND BUILD_OSKAR_IMAGING)
     )
     #set(imaging_SRC "${imaging_SRC}" PARENT_SCOPE)
 
-    # ==== Build the oskar-lib imaging module.
+    # ==== Build the OSKAR imaging module.
     add_library(oskar_imaging ${imaging_SRC})
     target_link_libraries(oskar_imaging
         ${FFTW3_FFTWF_LIBRARY}
@@ -27,7 +27,7 @@ if (FFTW3_FOUND AND BUILD_OSKAR_IMAGING)
         LINK_FLAGS "${OpenMP_CXX_FLAGS}"
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE
-        SOVERSION ${oskar-lib_SOVERSION})
+        SOVERSION ${OSKAR_VERSION})
 
     #install(TARGETS oskar_imaging LIBRARY DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 

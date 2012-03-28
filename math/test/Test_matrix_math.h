@@ -51,7 +51,6 @@ class Test_matrix_math : public CppUnit::TestFixture
         CPPUNIT_TEST(solve);
         CPPUNIT_TEST(dgels_test);
         CPPUNIT_TEST(dgetrs_test);
-        //CPPUNIT_TEST(mrdivide);
         CPPUNIT_TEST(sumX_div_XX);
         CPPUNIT_TEST_SUITE_END();
 
@@ -61,7 +60,6 @@ class Test_matrix_math : public CppUnit::TestFixture
         void solve();
         void dgels_test();
         void dgetrs_test();
-        //void mrdivide();
         void sumX_div_XX();
 };
 

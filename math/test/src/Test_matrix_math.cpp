@@ -31,7 +31,6 @@
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_get_error_string.h"
 #include "math/oskar_matrix_invert.h"
-#include "math/oskar_mrdivide.h"
 
 #include <cmath>
 #include <cstdio>
@@ -359,36 +358,6 @@ void Test_matrix_math::dgetrs_test()
 //    printf("\n");
 
 }
-
-
-//void Test_matrix_math::mrdivide()
-//{
-//    int rows_A = 3;
-//    int cols_A = 3;
-//    oskar_Mem A(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_A * cols_A);
-//    ((double*)A.data)[0] = 8; ((double*)A.data)[1]  = 1;  ((double*)A.data)[2] = 6;
-//    ((double*)A.data)[3] = 3;  ((double*)A.data)[4] = 5; ((double*)A.data)[5]  = 7;
-//    ((double*)A.data)[6] = 4;  ((double*)A.data)[7] = 9; ((double*)A.data)[8]  = 2;
-//
-//    int rows_B = 1;
-//    int cols_B = 1;
-//    oskar_Mem B(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_B * cols_B);
-//    ((double*)A.data)[0] = 3;
-//
-//    oskar_Mem C(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_A * cols_A);
-//    oskar_mrdivide(&C, &A, rows_A, cols_A, &B, rows_B, cols_B);
-//
-//    printf("\nmrdivide result:\n");
-//    for (int j = 0; j < rows_A; ++j)
-//    {
-//        for (int i = 0; i < cols_A; ++i)
-//        {
-//            printf("%f ", ((double*)C.data)[j * cols_A + i]);
-//        }
-//        printf("\n");
-//    }
-//}
-
 
 void Test_matrix_math::sumX_div_XX()
 {

@@ -13,15 +13,15 @@ if (CPPUNIT_FOUND)
         src/Test_fit_ellipse.cpp
         src/Test_healpix.cpp
         src/Test_Jones.cpp
-        #src/Test_Matrix3.cpp
-        #src/Test_Matrix4.cpp
+        src/Test_Matrix3.cpp
+        src/Test_Matrix4.cpp
         src/Test_linspace.cpp
         src/Test_matrix_math.cpp
-        #src/Test_meshgrid.cpp
+        src/Test_meshgrid.cpp
         src/Test_rotate.cpp
         src/Test_sph_lm.cpp
         src/Test_sph2cart.cpp
-        #src/Test_SphericalPositions.cpp
+        src/Test_SphericalPositions.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
@@ -42,7 +42,7 @@ endif()
 
 
 # QtTest
-if (QT_QTTEST_FOUND AND BUILD_OSKAR_WIDGETS)
+if (QT_QTTEST_FOUND AND Qwt5_FOUND)
 
     include_directories(
         ${Qwt5_INCLUDE_DIR}

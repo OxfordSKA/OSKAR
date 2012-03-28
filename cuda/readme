@@ -63,7 +63,7 @@ this goal.
 
 Questions:
 ----------
-- If most of oskar-lib will be CUDA based is it a good idea to have a single
+- If most of OSKAR will be CUDA based is it a good idea to have a single
   CUDA module? rather than ones for imaging, beam-pattern, beam-forming, utility
   etc. ?!
 - Should we try to expose a higher level interface to the library?

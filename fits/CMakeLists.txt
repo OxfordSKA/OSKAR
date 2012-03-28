@@ -14,21 +14,17 @@ set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
 
 # ==== Macros to build the FITS module.
 include_directories(${CFITSIO_INCLUDE_DIR})
-add_library(oskar_fits ${fits_SRC})
-target_link_libraries(oskar_fits ${CFITSIO_LIBRARIES})
-
-set_target_properties(oskar_fits
+set(libname oskar_fits)
+add_library(${libname} ${fits_SRC})
+target_link_libraries(${libname} ${CFITSIO_LIBRARIES})
+set_target_properties(${libname}
     PROPERTIES
     #PREFIX "lib"
     INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
     INSTALL_RPATH_USE_LINK_PATH TRUE
-    SOVERSION ${oskar-lib_SOVERSION})
+    SOVERSION ${OSKAR_VERSION})
+install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
-
-
-# ==== Install configuration for the FITS module.
-install(TARGETS oskar_fits DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-set_target_properties(oskar_fits PROPERTIES SOVERSION ${oskar-lib_SOVERSION})
 
 # ==== Recurse into test subdirectory.
 add_subdirectory(test)

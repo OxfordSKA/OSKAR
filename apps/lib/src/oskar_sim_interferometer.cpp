@@ -179,7 +179,7 @@ int oskar_sim_interferometer(const char* settings_file)
     // Add visibility noise.
     if (settings.sky.noise_model.type == OSKAR_NOISE_VLA_MEMO_146)
     {
-        /* This branch is disabled until it can be tested further  */
+        /* TODO This branch is disabled until it can be tested further */
         return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 //        printf("== Adding Gaussian visibility noise.\n");
 //        error = vis_global->evaluate_sky_noise_stddev(telescope_cpu,

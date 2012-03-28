@@ -28,7 +28,7 @@ if(BUILD_OSKAR_MS)
 endif()
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
 
-# ==== Macros to build the oskar-lib apps module.
+# ==== Macros to build the OSKAR apps module.
 include_directories(${QT_INCLUDE_DIR})
 include_directories(${CUDA_INCLUDE_DIRS})
 set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.dir/src)
@@ -56,7 +56,7 @@ set_target_properties(oskar_apps
     INSTALL_RPATH_USE_LINK_PATH TRUE
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-    SOVERSION ${oskar-lib_SOVERSION})
+    SOVERSION ${OSKAR_VERSION})
 
 # Install target for the apps library.
 install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})

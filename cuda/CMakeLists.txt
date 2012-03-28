@@ -5,7 +5,7 @@
 # ==== Recurse into the kernels sub-directory.
 add_subdirectory(kernels)
 
-# ==== Create list of source files for the oskar-lib cuda module.
+# ==== Create list of source files for the OSKAR cuda module.
 set(cuda_SRC
     #src/oskar_cuda_as2hi.cu
     #src/oskar_cuda_bf2hig.cu

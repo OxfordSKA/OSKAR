@@ -173,7 +173,7 @@ endif ()
 
 
 # === Set some include directories at the project level.
-include_directories(${oskar-lib_SOURCE_DIR})
+include_directories(${OSKAR_SOURCE_DIR})
 if (CFitsio_FOUND)
     include_directories(${CFITSIO_INCLUDE_DIR})
 endif()
