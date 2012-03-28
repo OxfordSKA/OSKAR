@@ -39,21 +39,62 @@ extern "C"
 int oskar_settings_load_image(oskar_SettingsImage* im,
         const char* filename)
 {
+    QString temp;
     QByteArray t;
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("image");
 
-    // Get output image file name.
-    t = s.value("filename", "").toByteArray();
+    im->fov_deg = s.value("fov_deg", 2.0).toDouble();
+    im->size = s.value("size", 256).toInt();
+
+    im->channel_snapshots = s.value("channel_snapshots", false).toBool();
+    im->channel_range[0] = s.value("channel_start", -1).toInt();
+    im->channel_range[1] = s.value("channel_end", -1).toInt();
+
+    im->time_snapshots = s.value("time_snapshots", false).toBool();
+    im->time_range[0] = s.value("time_start", -1).toInt();
+    im->time_range[1] = s.value("time_end", -1).toInt();
+
+    temp = s.value("polarisation").toString().toUpper();
+    if (temp.startsWith("STOKES"))
+        im->polarisation = OSKAR_IMAGE_TYPE_STOKES;
+    else if (temp == "I")
+        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_I;
+    else if (temp == "Q")
+        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_Q;
+    else if (temp == "U")
+        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_U;
+    else if (temp == "V")
+        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_V;
+    else if (temp.startsWith("LINEAR"))
+        im->polarisation = OSKAR_IMAGE_TYPE_POL_LINEAR;
+    else if (temp == "XX")
+        im->polarisation = OSKAR_IMAGE_TYPE_POL_XX;
+    else if (temp == "XY")
+        im->polarisation = OSKAR_IMAGE_TYPE_POL_XY;
+    else if (temp == "YX")
+        im->polarisation = OSKAR_IMAGE_TYPE_POL_YX;
+    else if (temp == "YY")
+        im->polarisation = OSKAR_IMAGE_TYPE_POL_YY;
+    else
+        return OSKAR_ERR_SETTINGS;
+
+    temp = s.value("transform_type").toString().toUpper();
+    im->dft = (temp == "DFT") ? true : false;
+
+    t = s.value("oskar_image").toByteArray();
     if (t.size() > 0)
     {
-        im->filename = (char*)malloc(t.size() + 1);
-        strcpy(im->filename, t.constData());
+        im->oskar_image = (char*)malloc(t.size() + 1);
+        strcpy(im->oskar_image, t.constData());
     }
 
-    // Get image sizes.
-    im->fov_deg = s.value("fov_deg").toDouble();
-    im->size    = s.value("size").toUInt();
+    t = s.value("fits_image").toByteArray();
+    if (t.size() > 0)
+    {
+        im->fits_image = (char*)malloc(t.size() + 1);
+        strcpy(im->oskar_image, t.constData());
+    }
 
-    return 0;
+    return OSKAR_SUCCESS;
 }

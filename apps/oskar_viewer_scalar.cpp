@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
     QString image_dir  = "./";
     //QString image_dir  = "./output/";
-    QString image_file = image_dir + settings.image.filename + "_channel_"
+    QString image_file = image_dir + settings.image.oskar_image + "_channel_"
             + QString::number(channel) + "_t_" + QString::number(t) + ".dat";
 
     FILE* file;

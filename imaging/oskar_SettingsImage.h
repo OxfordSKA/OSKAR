@@ -54,9 +54,12 @@ struct oskar_SettingsImage
     int polarisation;      /* enum (value from OSKAR_IMAGE_TYPE_XXX )*/
 
     int dft;               /* bool, true = DFT, false =  FFT */
+                           /* NOTE this might need to change to a transform type
+                            * enum to handle DFT_2D, DFT_3D, FFT, WPROJ, APROJ ...
+                            */
 
-    char* filename;        /* OSKAR binary file name */
-    char* fits_file;       /* FITS file name */
+    char* oskar_image;     /* OSKAR binary file name */
+    char* fits_image;      /* FITS file name */
 };
 typedef struct oskar_SettingsImage oskar_SettingsImage;
 

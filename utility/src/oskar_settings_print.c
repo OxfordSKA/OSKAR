@@ -72,6 +72,7 @@ static void pr_k(int depth, int width, const char* setting, int newline)
         break;
     default:
         sym = '-';
+        break;
     }
     printf("%c %s ", sym, setting);
 
@@ -371,8 +372,17 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     {
         pr_k(1, w, "Image settings", 1);
         pr_3f(2, w, "Field-of-view [deg]", s->image.fov_deg);
-        pr_i(2, w, "Dimension [pixels]", s->image.size);
-        pr_s(2, 0, "Output image file", s->image.filename);
+        pr_i(2, w, "Dimension (size) [pixels]", s->image.size);
+        pr_b(2, w, "Channel snapshots", s->image.channel_snapshots);
+        pr_k(2, w, "Channel range", OSKAR_FALSE);
+        printf("= %i -> %i\n", s->image.channel_range[0], s->image.channel_range[1]);
+        pr_b(2, w, "Time snapshots", s->image.time_snapshots);
+        pr_k(2, w, "Time range", OSKAR_FALSE);
+        printf("= %i -> %i\n", s->image.time_range[0], s->image.time_range[1]);
+        pr_i(2, w, "Polarisation", s->image.polarisation);
+        pr_b(2, w, "Use DFT", s->image.dft);
+        pr_s(2, 0, "Output OSKAR image file", s->image.oskar_image);
+        pr_s(2, 0, "Output FITS image file", s->image.fits_image);
     }
 
     /* Print beam pattern settings. */
