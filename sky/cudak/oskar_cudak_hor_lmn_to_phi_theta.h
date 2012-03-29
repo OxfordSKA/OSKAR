@@ -47,6 +47,7 @@
  * The direction cosines are given with respect to geographic East, North and
  * Up (x,y,z or l,m,n respectively). Phi is the angle measured from
  * East through North (from x to y) and theta from the z axis to the xy-plane.
+ * Phi is returned in the range 0 to 2 * pi.
  *
  * @param[in] num_points  Length of all arrays.
  * @param[in] l           Direction cosine measured with respect to the x axis.
@@ -72,6 +73,7 @@ void oskar_cudak_hor_lmn_to_phi_theta_f(const int num_points,
  * The direction cosines are given with respect to geographic East, North and
  * Up (x,y,z or l,m,n respectively). Phi is the angle measured from
  * East through North (from x to y) and theta from the z axis to the xy-plane.
+ * Phi is returned in the range 0 to 2 * pi.
  *
  * @param[in] num_points  Length of all arrays.
  * @param[in] l           Direction cosine measured with respect to the x axis.

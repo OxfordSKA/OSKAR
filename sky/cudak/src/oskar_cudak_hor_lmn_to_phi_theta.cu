@@ -28,6 +28,9 @@
 
 #include "sky/cudak/oskar_cudak_hor_lmn_to_phi_theta.h"
 
+#define PIf 3.14159265358979323846f
+#define PI  3.14159265358979323846
+
 // Single precision.
 __global__
 void oskar_cudak_hor_lmn_to_phi_theta_f(int num_points, const float* l,
@@ -43,7 +46,7 @@ void oskar_cudak_hor_lmn_to_phi_theta_f(int num_points, const float* l,
     float z = n[i];
 
     // Cartesian to spherical.
-    float p = atan2f(y, x); // Phi.
+    float p = atan2f(y, x) + PIf; // Phi in range 0 to 2 pi.
     x = sqrtf(x*x + y*y);
     y = atan2f(x, z); // Theta.
     phi[i] = p;
@@ -65,7 +68,7 @@ void oskar_cudak_hor_lmn_to_phi_theta_d(int num_points, const double* l,
     double z = n[i];
 
     // Cartesian to spherical.
-    double p = atan2(y, x); // Phi.
+    double p = atan2(y, x) + PI; // Phi in range 0 to 2 pi.
     x = sqrt(x*x + y*y);
     y = atan2(x, z); // Theta.
     phi[i] = p;

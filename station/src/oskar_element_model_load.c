@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_SplineData.h"
 #include "math/oskar_spline_data_compute_sphere.h"
+#include "math/oskar_spline_data_compute_surfit.h"
 #include "math/oskar_spline_data_type.h"
 #include "math/oskar_spline_data_location.h"
 
@@ -47,7 +48,11 @@
 extern "C" {
 #endif
 
-#define DEG2RAD 0.0174532925199432957692
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#define DEG2RAD (M_PI/180.0)
 
 int oskar_element_model_load(oskar_ElementModel* data, int i,
         const char* filename, int search, double avg_fractional_err,
@@ -131,6 +136,9 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
         /* Check that data was read correctly. */
         if (a != 6) continue;
 
+        /* Ignore any data below horizon. */
+        if (theta > 90.0) continue;
+
         /* Ignore any data at poles. */
         if (theta < 1e-6 || theta > (180.0 - 1e-6)) continue;
 
@@ -208,6 +216,148 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     if (n == 0)
         goto cleanup;
 
+    /* Copy data at phi boundaries. */
+    if (type == OSKAR_SINGLE)
+    {
+        int i;
+        i = n - 1;
+        while (((float*)m_phi.data)[i] > M_PI / 2)
+        {
+            /* Ensure enough space in arrays. */
+            if (n % 100 == 0)
+            {
+                int size;
+                size = n + 100;
+                err = oskar_mem_realloc(&m_theta, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&weight, size);
+                if (err) return err;
+            }
+            ((float*)m_theta.data)[n]    = ((float*)m_theta.data)[i];
+            ((float*)m_phi.data)[n]      = ((float*)m_phi.data)[i] - 2.0 * M_PI;
+            ((float*)m_theta_re.data)[n] = ((float*)m_theta_re.data)[i];
+            ((float*)m_theta_im.data)[n] = ((float*)m_theta_im.data)[i];
+            ((float*)m_phi_re.data)[n]   = ((float*)m_phi_re.data)[i];
+            ((float*)m_phi_im.data)[n]   = ((float*)m_phi_im.data)[i];
+            ((float*)weight.data)[n]     = ((float*)weight.data)[i];
+            ++n;
+            --i;
+        }
+        i = 0;
+        while (((float*)m_phi.data)[i] < M_PI / 2)
+        {
+            /* Ensure enough space in arrays. */
+            if (n % 100 == 0)
+            {
+                int size;
+                size = n + 100;
+                err = oskar_mem_realloc(&m_theta, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&weight, size);
+                if (err) return err;
+            }
+            ((float*)m_theta.data)[n]    = ((float*)m_theta.data)[i];
+            ((float*)m_phi.data)[n]      = ((float*)m_phi.data)[i] + 2.0 * M_PI;
+            ((float*)m_theta_re.data)[n] = ((float*)m_theta_re.data)[i];
+            ((float*)m_theta_im.data)[n] = ((float*)m_theta_im.data)[i];
+            ((float*)m_phi_re.data)[n]   = ((float*)m_phi_re.data)[i];
+            ((float*)m_phi_im.data)[n]   = ((float*)m_phi_im.data)[i];
+            ((float*)weight.data)[n]     = ((float*)weight.data)[i];
+            ++n;
+            ++i;
+        }
+    }
+    else if (type == OSKAR_DOUBLE)
+    {
+        int i;
+        i = n - 1;
+        while (((double*)m_phi.data)[i] > M_PI / 2)
+        {
+            /* Ensure enough space in arrays. */
+            if (n % 100 == 0)
+            {
+                int size;
+                size = n + 100;
+                err = oskar_mem_realloc(&m_theta, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&weight, size);
+                if (err) return err;
+            }
+            ((double*)m_theta.data)[n]    = ((double*)m_theta.data)[i];
+            ((double*)m_phi.data)[n]      = ((double*)m_phi.data)[i] - 2.0 * M_PI;
+            ((double*)m_theta_re.data)[n] = ((double*)m_theta_re.data)[i];
+            ((double*)m_theta_im.data)[n] = ((double*)m_theta_im.data)[i];
+            ((double*)m_phi_re.data)[n]   = ((double*)m_phi_re.data)[i];
+            ((double*)m_phi_im.data)[n]   = ((double*)m_phi_im.data)[i];
+            ((double*)weight.data)[n]     = ((double*)weight.data)[i];
+            ++n;
+            --i;
+        }
+        i = 0;
+        while (((double*)m_phi.data)[i] < M_PI / 2)
+        {
+            /* Ensure enough space in arrays. */
+            if (n % 100 == 0)
+            {
+                int size;
+                size = n + 100;
+                err = oskar_mem_realloc(&m_theta, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_theta_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_re, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&m_phi_im, size);
+                if (err) return err;
+                err = oskar_mem_realloc(&weight, size);
+                if (err) return err;
+            }
+            ((double*)m_theta.data)[n]    = ((double*)m_theta.data)[i];
+            ((double*)m_phi.data)[n]      = ((double*)m_phi.data)[i] + 2.0 * M_PI;
+            ((double*)m_theta_re.data)[n] = ((double*)m_theta_re.data)[i];
+            ((double*)m_theta_im.data)[n] = ((double*)m_theta_im.data)[i];
+            ((double*)m_phi_re.data)[n]   = ((double*)m_phi_re.data)[i];
+            ((double*)m_phi_im.data)[n]   = ((double*)m_phi_im.data)[i];
+            ((double*)weight.data)[n]     = ((double*)weight.data)[i];
+            ++n;
+            ++i;
+        }
+    }
+
     if (type == OSKAR_SINGLE)
     {
         file = fopen("dump.txt", "w");
@@ -225,12 +375,12 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
         fclose(file);
     }
 
-    /* Fit bicubic spherical splines to the surface data. */
-    err = oskar_spline_data_compute_sphere(data_theta, n,
+    /* Fit bicubic splines to the surface data. */
+    err = oskar_spline_data_compute_surfit(data_theta, n,
             &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, &weight,
             search, avg_fractional_err, s_real, s_imag);
     if (err) return err;
-    err = oskar_spline_data_compute_sphere(data_phi, n,
+    err = oskar_spline_data_compute_surfit(data_phi, n,
             &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, &weight,
             search, avg_fractional_err, s_real, s_imag);
     if (err) return err;

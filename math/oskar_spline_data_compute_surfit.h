@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,15 +42,15 @@ extern "C" {
 
 /**
  * @brief
- * Computes spherical spline data from a list of data points.
+ * Computes spline data from a list of data points.
  *
  * @details
- * This function constructs spherical splines from a list of data points.
+ * This function constructs splines from a list of data points.
  *
  * @param[in,out] spline     Pointer to data structure.
  * @param[in]     num_points Number of data points in all arrays.
- * @param[in]     theta      Array of theta positions.
- * @param[in]     phi        Array of phi positions.
+ * @param[in]     x          Array of x positions.
+ * @param[in]     y          Array of y positions.
  * @param[in]     data_re    Array of data points (real).
  * @param[in]     data_im    Array of data points (imaginary).
  * @param[in]     weight     Array of data point weights.
@@ -63,10 +63,10 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
-        int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
-        const oskar_Mem* data_re, const oskar_Mem* data_im,
-        const oskar_Mem* weight_re, const oskar_Mem* weight_im, int search,
-        double avg_fractional_err, double s_real, double s_imag);
+        int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* data_re,
+        const oskar_Mem* data_im, const oskar_Mem* weight_re,
+        const oskar_Mem* weight_im, int search, double avg_fractional_err,
+        double s_real, double s_imag);
 
 #ifdef __cplusplus
 }

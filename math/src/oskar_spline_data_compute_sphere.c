@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define USE_FORTRAN_SPHERE
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Returns the largest absolute (real) value in the array. */
-static float max_f(const oskar_Mem* data, int n)
+static float max_abs_f(const oskar_Mem* data, int n)
 {
     int i;
     float r = -FLT_MAX;
@@ -54,7 +60,7 @@ static float max_f(const oskar_Mem* data, int n)
 }
 
 /* Returns the largest absolute (real) value in the array. */
-static double max_d(const oskar_Mem* data, int n)
+static double max_abs_d(const oskar_Mem* data, int n)
 {
     int i;
     double r = -DBL_MAX;
@@ -67,15 +73,14 @@ static double max_d(const oskar_Mem* data, int n)
     return r;
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#ifdef USE_FORTRAN_SPHERE
+/* Fortran function prototype. */
 void sphere_(int* iopt, int* m, const float* theta, const float* phi,
         const float* r, const float* w, float* s, int* ntest, int* npest,
         float* eps, int* nt, float* tt, int* np, float* tp, float* c,
         float* fp, float* wrk1, int* lwrk1, float* wrk2, int* lwrk2,
         int* iwrk, int* kwrk, int* ier);
+#endif
 
 int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
         int num_points, const oskar_Mem* theta, const oskar_Mem* phi,
@@ -128,7 +133,7 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
     {
         /* Set up the surface fitting parameters. */
         float s, user_s, fp = 0.0;
-        float eps = 1e-6; /* Magnitude of float epsilon. */
+        float eps = 1e-5; /* Magnitude of float epsilon. */
 
         for (i = 0; i < 2; ++i)
         {
@@ -145,7 +150,7 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
                 weight          = (const float*)weight_re->data;
                 num_knots_theta = &spline->num_knots_x_re;
                 num_knots_phi   = &spline->num_knots_y_re;
-                peak_abs        = max_f(data_re, num_points);
+                peak_abs        = max_abs_f(data_re, num_points);
                 user_s          = (float)s_real;
             }
             else /* Imaginary part. */
@@ -157,7 +162,7 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
                 weight          = (const float*)weight_im->data;
                 num_knots_theta = &spline->num_knots_x_im;
                 num_knots_phi   = &spline->num_knots_y_im;
-                peak_abs        = max_f(data_im, num_points);
+                peak_abs        = max_abs_f(data_im, num_points);
                 user_s          = (float)s_imag;
             }
             do
@@ -168,21 +173,22 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
                 s = search ? 2.0 * term : user_s; /* Smoothing factor. */
                 for (k = 0, iopt = 0; k < maxiter; ++k)
                 {
-                    if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
-                    /*
-                    sphere_f(iopt, num_points, (const float*)theta->data,
-                            (const float*)phi->data, data,
-                            weight, s, est, est, eps,
-                            num_knots_theta, knots_theta, num_knots_phi,
-                            knots_phi, coeff, &fp, (float*)wrk1, lwrk1,
-                            (float*)wrk2, lwrk2, iwrk, kwrk, &err);
-                     */
+                    if (k > 0) iopt = 1; /* Set iopt to 1 if not first pass. */
+#ifdef USE_FORTRAN_SPHERE
                     sphere_(&iopt, &num_points, (const float*)theta->data,
                             (const float*)phi->data, data,
                             weight, &s, &est, &est, &eps,
                             num_knots_theta, knots_theta, num_knots_phi,
                             knots_phi, coeff, &fp, (float*)wrk1, &lwrk1,
                             (float*)wrk2, &lwrk2, iwrk, &kwrk, &err);
+#else
+                    sphere_f(iopt, num_points, (const float*)theta->data,
+                            (const float*)phi->data, data,
+                            weight, s, est, est, eps,
+                            num_knots_theta, knots_theta, num_knots_phi,
+                            knots_phi, coeff, &fp, (float*)wrk1, lwrk1,
+                            (float*)wrk2, lwrk2, iwrk, kwrk, &err);
+#endif
                     printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
 
                     /* Check for errors. */
@@ -248,7 +254,7 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
     {
         /* Set up the surface fitting parameters. */
         double s, user_s, fp = 0.0;
-        double eps = 1e-16; /* Magnitude of double epsilon. */
+        double eps = 1e-15; /* Magnitude of double epsilon. */
 
         for (i = 0; i < 2; ++i)
         {
@@ -265,7 +271,7 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
                 weight          = (const double*)weight_re->data;
                 num_knots_theta = &spline->num_knots_x_re;
                 num_knots_phi   = &spline->num_knots_y_re;
-                peak_abs        = max_d(data_re, num_points);
+                peak_abs        = max_abs_d(data_re, num_points);
                 user_s          = s_real;
             }
             else /* Imaginary part. */
@@ -277,7 +283,7 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
                 weight          = (const double*)weight_im->data;
                 num_knots_theta = &spline->num_knots_x_im;
                 num_knots_phi   = &spline->num_knots_y_im;
-                peak_abs        = max_d(data_im, num_points);
+                peak_abs        = max_abs_d(data_im, num_points);
                 user_s          = s_imag;
             }
             do
@@ -288,7 +294,7 @@ int oskar_spline_data_compute_sphere(oskar_SplineData* spline,
                 s = search ? 2.0 * term : user_s; /* Smoothing factor. */
                 for (k = 0, iopt = 0; k < maxiter; ++k)
                 {
-                    if (k > 0) iopt = 1; /* Set iopt to 1 if not the first pass. */
+                    if (k > 0) iopt = 1; /* Set iopt to 1 if not first pass. */
                     sphere_d(iopt, num_points, (const double*)theta->data,
                             (const double*)phi->data, data,
                             weight, s, est, est, eps,

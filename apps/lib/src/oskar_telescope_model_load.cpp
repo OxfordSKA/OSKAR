@@ -30,6 +30,8 @@
 #include "interferometry/oskar_telescope_model_load_station_coords.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_type.h"
+#include "station/oskar_ElementModel.h"
+#include "station/oskar_element_model_copy.h"
 #include "station/oskar_element_model_init.h"
 #include "station/oskar_element_model_load.h"
 #include "station/oskar_station_model_init.h"
@@ -37,6 +39,7 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
+#include <QtCore/QHash>
 
 static const char config_name[] = "config.txt";
 static const char layout_name[] = "layout.txt";
@@ -46,21 +49,24 @@ static const char element_y_name[] = "element_pattern_y.txt";
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         const char* dir_path, double longitude, double latitude,
         double altitude, oskar_StationModel* station,
-        const char* element_file_x, const char* element_file_y, int depth);
+        const char* element_file_x, const char* element_file_y, int depth,
+        QHash<QString, oskar_ElementModel*>& models);
 
 extern "C"
 int oskar_telescope_model_load(oskar_TelescopeModel* telescope,
         const char* dir_path, double longitude, double latitude,
         double altitude)
 {
+    QHash<QString, oskar_ElementModel*> models;
     return oskar_telescope_model_load_private(telescope, dir_path, longitude,
-            latitude, altitude, NULL, NULL, NULL, 0);
+            latitude, altitude, NULL, NULL, NULL, 0, models);
 }
 
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         const char* dir_path, double longitude, double latitude,
         double altitude, oskar_StationModel* station,
-        const char* element_file_x, const char* element_file_y, int depth)
+        const char* element_file_x, const char* element_file_y, int depth,
+        QHash<QString, oskar_ElementModel*>& models)
 {
     int error;
 
@@ -170,22 +176,45 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         OSKAR_LOCATION_CPU);
                 if (error) return error;
             }
-            if (element_file_x)
+
+            QString files;
+            if (element_file_x) files.append(element_file_x);
+            if (element_file_y) files.append(element_file_y);
+            if (files.length() > 0)
             {
-                printf("Loading element pattern data (X): %s\n",
-                        element_file_x);
-                error = oskar_element_model_load(station->element_pattern, 1,
-                        element_file_x, 1, 0.05, 0.0, 0.0);
-                if (error) return error;
+                // Check if this file combination has already been loaded.
+                if (models.contains(files))
+                {
+                    // Copy the element pattern data.
+                    error = oskar_element_model_copy(station->element_pattern,
+                            models.value(files));
+                    if (error) return error;
+                }
+                else
+                {
+                    // Load the element pattern data.
+                    if (element_file_x)
+                    {
+                        printf("Loading element pattern data (X): %s\n",
+                                element_file_x);
+                        error = oskar_element_model_load(station->element_pattern,
+                                1, element_file_x, 1, 0.02, 0.0, 0.0);
+                        if (error) return error;
+                    }
+                    if (element_file_y)
+                    {
+                        printf("Loading element pattern data (Y): %s\n",
+                                element_file_y);
+                        error = oskar_element_model_load(station->element_pattern,
+                                2, element_file_y, 1, 0.02, 0.0, 0.0);
+                        if (error) return error;
+                    }
+
+                    // Store the pointer to the element model for these files.
+                    models.insert(files, station->element_pattern);
+                }
             }
-            if (element_file_y)
-            {
-                printf("Loading element pattern data (Y): %s\n",
-                        element_file_y);
-                error = oskar_element_model_load(station->element_pattern, 2,
-                        element_file_y, 1, 0.05, 0.0, 0.0);
-                if (error) return error;
-            }
+
         }
     }
 
@@ -199,7 +228,8 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
 
         // Load this station.
         error = oskar_telescope_model_load_private(telescope, station_name,
-                0.0, 0.0, 0.0, s, element_file_x, element_file_y, depth + 1);
+                0.0, 0.0, 0.0, s, element_file_x, element_file_y, depth + 1,
+                models);
         if (error) return error;
     }
 
