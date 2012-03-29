@@ -14,6 +14,7 @@ qt4_add_resources(widgets_RCC_SRC
 )
 set(widgets_MOC_SRC
     oskar_About.h
+    oskar_ConfigFileModel.h
     oskar_DoubleSpinBox.h
     oskar_SettingsDelegate.h
     oskar_SettingsModel.h
@@ -21,6 +22,7 @@ set(widgets_MOC_SRC
 )
 set(widgets_SRC
     src/oskar_About.cpp
+    src/oskar_ConfigFileModel.cpp
     src/oskar_DoubleSpinBox.cpp
     src/oskar_SettingsDelegate.cpp
     src/oskar_SettingsItem.cpp
@@ -32,6 +34,7 @@ set(widgets_SRC
 qt4_wrap_cpp(widgets_SRC ${widgets_MOC_SRC})
 add_library(oskar_widgets ${widgets_SRC} ${widgets_RCC_SRC})
 target_link_libraries(oskar_widgets
+    oskar
     ${QT_QTCORE_LIBRARY}
     ${QT_QTGUI_LIBRARY})
 set_target_properties(oskar_widgets
