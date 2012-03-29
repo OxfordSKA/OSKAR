@@ -48,12 +48,10 @@
 extern "C" {
 #endif
 
+
 int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
         const oskar_TelescopeModel* telescope, int overwrite)
 {
-    // NOTE Currently the telescope model is needed for pointing and antenna
-    // positions.
-
     // Check if the ms path already exists and overwrite if specified.
     QDir dir;
     dir.setPath(QString(ms_path));

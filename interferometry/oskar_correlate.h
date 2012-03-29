@@ -42,10 +42,39 @@
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
+/**
+ * @brief Multiply a set of Jones matrices with a set of source brightness
+ * matrices to form visibilities (i.e. V = J B J).
+ *
+ * @details
+ * The source brightness matrices are specified in by means of an OSKAR sky
+ * model.
+ *
+ * The Jones matrices should have dimensions corresponding to the number of
+ * sources in the brightness matrix and the number of stations.
+ *
+ * Station u,v coordinates are specified in radians at the frequency of the
+ * simulation (i.e. multipled by the wavenumber).
+ *
+ * @param[out] vis        Visibility amplitudes.
+ * @param[in]  J          Set of Jones matrices/
+ * @param[in]  telescope  OSKAR telescope model.
+ * @param[in]  sky        OSKAR sky model.
+ * @param[in]  u          Station u coordinates, in radians.
+ * @param[in]  v          Station v coordinates, in radians.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
 int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
         const oskar_Mem* u, const oskar_Mem* v);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* OSKAR_CORRELATE_H_ */

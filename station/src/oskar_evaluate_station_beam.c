@@ -62,7 +62,7 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check the coordinate units. */
-    if (station->coord_units != OSKAR_WAVENUMBERS)
+    if (station->coord_units != OSKAR_RADIANS)
         return OSKAR_ERR_BAD_UNITS;
 
     /* Check that there is memory available. */

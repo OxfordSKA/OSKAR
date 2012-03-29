@@ -52,7 +52,6 @@ class Test_Visibilities : public CppUnit::TestFixture
         CPPUNIT_TEST(test_init);
         CPPUNIT_TEST(test_get_amps);
         CPPUNIT_TEST(test_read_write);
-        CPPUNIT_TEST(test_add_sky_noise);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -63,7 +62,6 @@ class Test_Visibilities : public CppUnit::TestFixture
         void test_init();
         void test_get_amps();
         void test_read_write();
-        void test_add_sky_noise();
 };
 
 // Register the test class.

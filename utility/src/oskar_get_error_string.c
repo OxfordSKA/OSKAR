@@ -78,7 +78,7 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_SETUP_FAIL:
             return "could not initialise sky or telescope model";
         case OSKAR_ERR_SETTINGS:
-            return "could not create settings structure";
+            return "settings error";
         case OSKAR_ERR_CUDA_DEVICES:
             return "insufficient CUDA devices found";
         case OSKAR_ERR_BAD_BINARY_FORMAT:

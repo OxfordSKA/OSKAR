@@ -41,6 +41,21 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Append a sky model into an array of sky models of fixed number of
+ * sources.
+ *
+ * @details
+ * This function is used to assemble a set of sky models (sky chunks) used to
+ * parallelise over in the interferometry simulation.
+ *
+ * @param number                Number of sky models in the set.
+ * @param set                   Pointer to set (array) of sky models.
+ * @param max_sources_per_model Maximum number of sources per sky model in the set.
+ * @param model                 SKy model to append into the set.
+ *
+ * @return An error code.
+ */
 OSKAR_EXPORT
 int oskar_sky_model_append_to_set(int* number, oskar_SkyModel** set,
         int max_sources_per_model, const oskar_SkyModel* model);

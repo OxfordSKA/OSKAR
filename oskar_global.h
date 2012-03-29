@@ -40,7 +40,7 @@
  * library. For example, in OSKAR version 2.1.3 this would expand to
  * 0x020103.
  */
-#define OSKAR_VERSION 0x015000
+#define OSKAR_VERSION 0x020000
 
 /**
  * @macro OSKAR_VERSION_STR
@@ -51,7 +51,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "1.50.0_pre-alpha"
+#define OSKAR_VERSION_STR "2.0.0_beta"
 
 /**
  * @brief
@@ -149,11 +149,11 @@ enum {
 
 /**
  * @brief
- * Enumerator to define coordinate units used by OSKAR.
+ * Enumerator to define units used by OSKAR.
  */
 enum {
     OSKAR_METRES      = 0x6666,
-    OSKAR_WAVENUMBERS = 0x7777
+    OSKAR_RADIANS     = 0x7777
 };
 
 

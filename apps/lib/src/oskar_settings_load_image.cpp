@@ -80,7 +80,14 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
         return OSKAR_ERR_SETTINGS;
 
     temp = s.value("transform_type").toString().toUpper();
-    im->dft = (temp == "DFT") ? true : false;
+    if (temp == "DFT 2D" || temp.isEmpty())
+        im->transform_type = OSKAR_IMAGE_DFT_2D;
+    else if (temp == "DFT 3D")
+        im->transform_type = OSKAR_IMAGE_DFT_3D;
+    else if (temp == "FFT")
+        im->transform_type = OSKAR_IMAGE_FFT;
+    else
+        return OSKAR_ERR_SETTINGS;
 
     t = s.value("input_vis_data").toByteArray();
     if (t.size() > 0)

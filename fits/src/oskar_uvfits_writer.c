@@ -176,7 +176,7 @@ void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
     fits_write_key_dbl(fits_file, s_key, zero, decimals, NULL, &status);
 }
 
-/* FIXME This needs fixing to use the new visibility structure. */
+/* __FIXME__ This needs fixing to use the new visibility structure. */
 #if 0
 void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
         const double* weight, const double* date, const double* baseline)

@@ -49,6 +49,9 @@ extern "C" {
  * This function writes visibility data and telescope model data to a CASA
  * Measurement Set.
  *
+ * Note: Currently the telescope model is needed for pointing and antenna
+ * positions.
+ *
  * @param[in] ms_path   Pathname of the Measurement Set to write.
  * @param[in] vis       Pointer to visibility structure to write.
  * @param[in] telescope Pointer to telescope model data to write.

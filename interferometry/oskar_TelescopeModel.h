@@ -50,13 +50,17 @@ struct oskar_TelescopeModel
     oskar_Mem station_y_hor;     /**< Fixed y component of station coordinate (horizon plane). */
     oskar_Mem station_z_hor;     /**< Fixed z component of station coordinate (horizon plane). */
     int max_station_size;        /**< Maximum station size (number of elements) */
-    int coord_units;             /**< Units of the x,y,z coordinates.*/
+    int coord_units;             /**< Units of the x,y,z coordinates .*/
+
     int identical_stations;      /**< True if all stations are identical. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
+
     int seed_time_variable_errors; /**< Random seed for time-variable errors. */
+
     double longitude_rad;        /**< Geodetic longitude of telescope, in radians. */
     double latitude_rad;         /**< Geodetic latitude of telescope, in radians. */
     double altitude_m;           /**< Altitude of telescope above ellipsoid, in metres. */
+
     double ra0_rad;              /**< Right Ascension of phase centre, in radians. */
     double dec0_rad;             /**< Declination of phase centre, in radians. */
     double wavelength_metres;    /**< Current wavelength of observation, in metres. */

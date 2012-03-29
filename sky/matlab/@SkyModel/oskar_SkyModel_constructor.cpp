@@ -42,7 +42,7 @@
 static int initialised = 0;
 static oskar_CudaDeviceInfo device;
 
-// FIXME register a cleanup function to do a cudaDeviceReset() ?
+// ___fixme___: register a cleanup function to do a cudaDeviceReset() ?
 // -- This would apply to all mex functions with CUDA library components?
 
 // Interface function.
@@ -61,7 +61,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* location_string = mxArrayToString(in[2]);
 
     // Construct type and location values.
-    // NOTE might be better to sort out types match between matlab and C/C++
+    // Note: might be better to sort out types match between matlab and C/C++
     // see note in utility/matlab/oskar_Mem_utility.h
     int type     = get_type(type_string);
     int location = get_location_id(location_string);

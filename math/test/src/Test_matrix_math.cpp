@@ -30,7 +30,6 @@
 #include "math/oskar_matrix_multiply.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_get_error_string.h"
-#include "math/oskar_matrix_invert.h"
 
 #include <cmath>
 #include <cstdio>
@@ -145,96 +144,6 @@ void Test_matrix_math::test_multiply()
 //        }
 //        printf("\n");
 //    }
-}
-
-
-void Test_matrix_math::test_invert()
-{
-    oskar_Mem A(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 9);
-    ((double*)A.data)[0] = 14; ((double*)A.data)[1] = 9;  ((double*)A.data)[2] = 3;
-    ((double*)A.data)[3] = 2;  ((double*)A.data)[4] = 11; ((double*)A.data)[5] = 15;
-    ((double*)A.data)[6] = 0;  ((double*)A.data)[7] = 12; ((double*)A.data)[8] = 17;
-
-    int err = oskar_matrix_invert(&A, 3);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
-
-//    printf("\n");
-//    for (int j = 0; j < 3; ++j)
-//    {
-//        for (int i = 0; i < 3; ++i)
-//        {
-//            printf("% -.4f ", ((double*)A.data)[j * 3 + i]);
-//        }
-//        printf("\n");
-//    }
-}
-
-void Test_matrix_math::solve()
-{
-    int rows_A = 3;
-    int cols_A = 3;
-    oskar_Mem A(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_A * cols_A);
-    ((double*)A.data)[0] = 14; ((double*)A.data)[1] = 9;  ((double*)A.data)[2] = 3;
-    ((double*)A.data)[3] = 2;  ((double*)A.data)[4] = 11; ((double*)A.data)[5] = 15;
-    ((double*)A.data)[6] = 0;  ((double*)A.data)[7] = 12; ((double*)A.data)[8] = 17;
-
-    // B = inv(A'*A);
-    oskar_Mem B(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_A * cols_A);
-    int err = oskar_matrix_multiply(&B, rows_A, cols_A, rows_A, cols_A,
-            OSKAR_TRUE, OSKAR_FALSE, &A, &A);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
-
-//    printf("\n");
-//    for (int j = 0; j < rows_A; ++j)
-//    {
-//        for (int i = 0; i < cols_A; ++i)
-//        {
-//            printf("% -.4f ", ((double*)B.data)[j * cols_A + i]);
-//        }
-//        printf("\n");
-//    }
-
-    err = oskar_matrix_invert(&B, 3);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
-
-//    printf("\n");
-//    for (int j = 0; j < rows_A; ++j)
-//    {
-//        for (int i = 0; i < cols_A; ++i)
-//        {
-//            printf("% -.4f ", ((double*)B.data)[j * cols_A + i]);
-//        }
-//        printf("\n");
-//    }
-
-    oskar_Mem sumA(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 1 * cols_A);
-    for (int j = 0; j < rows_A; ++j)
-    {
-        for (int i = 0; i < cols_A; ++i)
-        {
-            ((double*)sumA.data)[i] += ((double*)A.data)[j * cols_A + i];
-        }
-    }
-
-//    printf("\n");
-//    for (int i = 0; i < cols_A; ++i)
-//    {
-//        printf("% -.4f ", ((double*)sumA.data)[i]);
-//    }
-//    printf("\n");
-
-    // result = sum(A) * inv(A' * A);
-    oskar_Mem result(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 1 * cols_A);
-    err = oskar_matrix_multiply(&result, 1, cols_A, rows_A, cols_A,
-            OSKAR_FALSE, OSKAR_FALSE, &sumA, &B);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
-
-//    printf("\n");
-//    for (int i = 0; i < cols_A; ++i)
-//    {
-//        printf("% -.6f ", ((double*)result.data)[i]);
-//    }
-//    printf("\n");
 }
 
 

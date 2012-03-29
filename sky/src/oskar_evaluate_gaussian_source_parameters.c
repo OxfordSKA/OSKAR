@@ -143,7 +143,7 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
             min = ((double*)FWHM_minor->data)[i];
             pa  = ((double*)position_angle->data)[i];
 
-            /* NOTE could maybe do something different from the projection below
+            /* Note: could maybe do something different from the projection below
              * in the case of a line (ie maj or min == 0) as in this case
              * there is no ellipse to project only two points....
              * -- This continue could then be a if() .. else() instead.
@@ -201,7 +201,7 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
              min = ((float*)FWHM_minor->data)[i];
              pa  = ((float*)position_angle->data)[i];
 
-             /* NOTE could maybe do something different from the projection below
+             /* Note: could maybe do something different from the projection below
               * in the case of a line (ie maj or min == 0) as in this case
               * there is no ellipse to project only two points....
               * -- This continue could then be a if() .. else() instead.

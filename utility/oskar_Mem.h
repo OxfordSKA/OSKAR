@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -344,10 +344,13 @@ struct oskar_Mem
 };
 typedef struct oskar_Mem oskar_Mem;
 
-/* Define an enumerator for the type. */
-/* NOTE: All these must be small enough to fit into one byte (8 bits) only. */
-/* NOTE: To maintain binary data compatibility, do not modify any numbers
- * that appear in the list below! */
+/* Define an enumerator for the type.
+ *
+ * IMPORTANT:
+ * 1. All these must be small enough to fit into one byte (8 bits) only.
+ * 2. To maintain binary data compatibility, do not modify any numbers
+ *    that appear in the list below!
+ */
 enum {
     /* Byte (char): bit 0 set. */
     OSKAR_CHAR                   = 0x01,

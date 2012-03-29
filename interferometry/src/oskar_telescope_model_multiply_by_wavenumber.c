@@ -44,7 +44,8 @@ int oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope
     /* Check and update current units of station positions. */
     if (telescope->coord_units != OSKAR_METRES)
         return OSKAR_ERR_BAD_UNITS;
-    telescope->coord_units = OSKAR_WAVENUMBERS;
+
+    telescope->coord_units = OSKAR_RADIANS;
 
     /* Multiply station positions by wavenumber. */
     telescope->wavelength_metres = 299792458.0 / frequency_hz;

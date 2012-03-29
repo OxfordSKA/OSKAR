@@ -62,7 +62,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the antenna coordinates have been scaled by the wavenumber.
-    if (station->coord_units != OSKAR_WAVENUMBERS)
+    if (station->coord_units != OSKAR_RADIANS)
         return OSKAR_ERR_BAD_UNITS;
 
     // Check that there is enough space in the weights arrays.

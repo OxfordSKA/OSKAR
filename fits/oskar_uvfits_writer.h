@@ -85,7 +85,7 @@ void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
         const char* type, const char* comment, double scale,
         double zero);
 
-/* FIXME This needs fixing to use the new visibility structure.
+/* __FIXME__ This needs fixing to use the new visibility structure.
 
 OSKAR_EXPORT
 void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,

@@ -749,8 +749,6 @@ void Test_Mem::test_add()
         }
     }
 
-
-
     // Use Case: memory on the GPU.
     {
         int num_elements = 10;
@@ -770,12 +768,6 @@ void Test_Mem::test_add()
         int error = oskar_mem_add(&mem_C, &mem_A, &mem_B);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_DIMENSION_MISMATCH, error);
     }
-
-    // Note: this is far from extensive testing on this method which has been
-    // added as a quick hack for the multi-gpu performance tests for
-    // the ASTRON meeting Dec-2011.
-
-    // TODO add more testing.
 }
 
 void Test_Mem::test_add_noise()

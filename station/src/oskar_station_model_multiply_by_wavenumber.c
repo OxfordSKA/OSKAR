@@ -37,12 +37,13 @@ extern "C" {
 int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
         double frequency_hz)
 {
-	double wavenumber;
+    double wavenumber;
 
     /* Check and update current units. */
     if (station->coord_units != OSKAR_METRES)
         return OSKAR_ERR_BAD_UNITS;
-    station->coord_units = OSKAR_WAVENUMBERS;
+
+    station->coord_units = OSKAR_RADIANS;
 
     /* Scale to wavenumbers. */
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;

@@ -421,8 +421,6 @@ void Test_SkyModel::test_split()
     }
 
     // Copy subsets to the GPU.
-    // NOTE: this interface is not exactly ideal as it requires the user to use
-    // the low level function oskar_sky_model_init().
     oskar_SkyModel* sky_subset_gpu = NULL;
     sky_subset_gpu = (oskar_SkyModel*)malloc(num_subsets * sizeof(oskar_SkyModel));
     for (int i = 0; i < num_subsets; ++i)

@@ -207,7 +207,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
             << "Linear (XX,XY,YX,YY)" << "XX" << "XY" << "YX" << "YY";
     registerSetting("image/polarisation", "Polarisation", oskar_SettingsItem::OPTIONS, options);
     options.clear();
-    options << "DFT" << "FFT";
+    options << "DFT 2D" << "DFT 3D" << "FFT";
     registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);
     registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     registerSetting("image/oskar_image", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);

@@ -50,9 +50,16 @@ extern "C" {
  * centre and station (x,y,z) coordinates in the telescope data structure,
  * and the supplied Greenwich Apparent Sidereal Time.
  *
- * @param[out] u         Station u coordinates.
- * @param[out] v         Station v coordinates.
- * @param[out] w         Station w coordinates.
+ * Note:
+ * The units of u,v,w returned by the function depend on the units of station
+ * coordinates in the telescope model. For oskar_interferometer() this is
+ * assumed to be in radians at the current simulation frequency. This is achieved
+ * by scaling coordinates in a station model by the wavenumber cooresponding
+ * to the simulation frequency..
+ *
+ * @param[out] u         Station u coordinates, in telescope->coord_units units.
+ * @param[out] v         Station v coordinates, in telescope->coord_units units.
+ * @param[out] w         Station w coordinates, in telescope->coord_units units.
  * @param[in] telescope  Input telescope model.
  * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
  */

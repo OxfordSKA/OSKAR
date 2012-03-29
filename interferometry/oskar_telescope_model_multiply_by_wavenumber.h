@@ -41,14 +41,15 @@ extern "C" {
 #endif
 
 /**
- * @brief Converts all coordinates in a telescope structure to wavenumbers.
+ * @brief Converts all coordinates in a telescope structure to radians at
+ * the specified frequency by multiplying by the wavenumber.
  *
  * @details
  * This function recursively converts all the coordinates in a telescope
  * structure (the station x,y,z coordinates, <b>and</b> each station's element
- * coordinates) from metres to wavenumbers.
+ * coordinates) from metres to radians.
  *
- * The conversion is performed simply by multiplying the coordinates by the
+ * The conversion is performed by multiplying the coordinates by the
  * factor (2 pi) / lambda.
  *
  * @param telescope    Telescope model containing coordinates to scale.

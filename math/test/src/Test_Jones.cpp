@@ -83,7 +83,6 @@ void Test_Jones::test_join_inline_mat_mat_device()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
-        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_matrix(j1, 0, 1);
 
         // Free memory.
@@ -134,7 +133,6 @@ void Test_Jones::test_join_inline_mat_mat_device_host()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
-        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_matrix(j1, 0, 1);
 
         // Free memory.
@@ -185,7 +183,6 @@ void Test_Jones::test_join_inline_mat_mat_host()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
-        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_matrix(j1, 0, 1);
 
         // Free memory.
@@ -233,7 +230,6 @@ void Test_Jones::test_join_inline_mat_sca_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        // NOTE: this test fails on CUDA arch < 1.3
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
@@ -287,7 +283,6 @@ void Test_Jones::test_join_inline_mat_sca_device_host()
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.
-        // NOTE: this test fails on CUDA arch < 1.3
         check_matrix_scalar(j1, 0, 1);
 
         // Free memory.
@@ -335,7 +330,6 @@ void Test_Jones::test_join_inline_mat_sca_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        // NOTE: this test fails on CUDA arch < 1.3
         fail_on_error ( j1->join_from_right(j2) );
 
         // Check result.

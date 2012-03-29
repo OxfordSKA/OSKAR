@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/old/oskar_WProjectionGridKernel.h"
-#include "imaging/oskar_fft_utility.h"
+#include "imaging/fft/old/oskar_WProjectionGridKernel.h"
+#include "imaging/fft/oskar_fft_utility.h"
 
 #include "fftw3.h"
 
@@ -171,14 +171,14 @@ void oskar_WProjectionGridKernel::applyExpTaper(const unsigned innerSize, const 
 // todo(optimisation): Don't recreate the fftw plane each time this is called.
 void oskar_WProjectionGridKernel::cfft2d(const unsigned size, Complex * convFunc) const
 {
-    FFTUtility::fftPhase(size, size, convFunc);
+//    FFTUtility::fftPhase(size, size, convFunc);
     fftwf_complex * c = reinterpret_cast<fftwf_complex*>(convFunc);
     int sign = FFTW_FORWARD;
     unsigned flags = FFTW_ESTIMATE;
     fftwf_plan plan = fftwf_plan_dft_2d(size, size, c, c, sign, flags);
     fftwf_execute(plan);
     fftwf_destroy_plan(plan);
-    FFTUtility::fftPhase(size, size, convFunc);
+//    FFTUtility::fftPhase(size, size, convFunc);
 }
 
 
@@ -220,7 +220,7 @@ int oskar_WProjectionGridKernel::findCutoffIndex(const unsigned size,
 unsigned oskar_WProjectionGridKernel::evaluateCutoffPixelRadius(const unsigned size,
         const unsigned padding, const int cutoffIndex, const unsigned minRadius)
 {
-    // TODO(better way to do this using only half the size?)
+    // __todo__ (better way to do this using only half the size?)
     // Maximum possible number of pixels in the convolution function.
     unsigned maxPixels = (unsigned) floor((float)size / (float) padding);
     // Convolution functions need to be odd sized.
@@ -243,7 +243,7 @@ unsigned oskar_WProjectionGridKernel::evaluateCutoffPixelRadius(const unsigned s
         cutoffPixelRadius = (int) ceil((float)cutoffIndex / (float) padding);
     }
 
-    // Set upper limit to radius. TODO(should this ever happen?)
+    // Set upper limit to radius. __todo__ (should this ever happen?)
     if (cutoffPixelRadius > maxRadius)
         cutoffPixelRadius = maxRadius;
 

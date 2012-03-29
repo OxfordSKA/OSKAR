@@ -380,7 +380,14 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_k(2, w, "Time range", OSKAR_FALSE);
         printf("= %i -> %i\n", s->image.time_range[0], s->image.time_range[1]);
         pr_i(2, w, "Polarisation", s->image.polarisation);
-        pr_b(2, w, "Use DFT", s->image.dft);
+        pr_k(2, w, "Transform type", OSKAR_FALSE);
+        switch (s->image.transform_type)
+        {
+            case OSKAR_IMAGE_DFT_2D: { printf("= DFT_2D\n"); break; }
+            case OSKAR_IMAGE_DFT_3D: { printf("= DFT_3D\n"); break; }
+            case OSKAR_IMAGE_FFT:    { printf("= FFT\n");    break; }
+            default:                 { printf("= N/A\n");    break; }
+        };
         pr_s(2, 0, "Input OSKAR visibility file", s->image.input_vis_data);
         pr_s(2, 0, "Output OSKAR image file", s->image.oskar_image);
         pr_s(2, 0, "Output FITS image file", s->image.fits_image);

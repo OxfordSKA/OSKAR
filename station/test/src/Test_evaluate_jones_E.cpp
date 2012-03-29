@@ -72,8 +72,7 @@ void Test_evaluate_jones_E::evaluate_e()
 
     // Construct telescope model.
     // - construct a station model and load it into the telescope structure.
-    double frequency = 30e6; // TODO need to put this somewhere so that
-    // coords can be scaled to wave-numbers.
+    double frequency = 30e6;
     int station_dim = 100;
     double station_size_m = 180.0;
     int num_antennas = station_dim * station_dim;

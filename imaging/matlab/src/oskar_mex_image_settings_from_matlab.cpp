@@ -65,8 +65,8 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     if (!time_range_) im_set_error_field_("time_range");
     mxArray* polarisation_ = mxGetField(in, 0, "polarisation");
     if (!polarisation_) im_set_error_field_("polarisation");
-    mxArray* dft_ = mxGetField(in, 0, "dft");
-    if (!dft_) im_set_error_field_("dft");
+    mxArray* tranform_type_ = mxGetField(in, 0, "tranform_type");
+    if (!tranform_type_) im_set_error_field_("tranform_type");
     mxArray* filename_ = mxGetField(in, 0, "filename");
     if (!filename_) im_set_error_field_("filename");
     mxArray* fits_file_ = mxGetField(in, 0, "fits_file");
@@ -113,8 +113,9 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     mexCallMATLAB(1, &pol_id, 1, &polarisation_, "uint32");
     out->polarisation = (int)mxGetScalar(pol_id);
 
-    out->dft = (int)mxGetScalar(dft_);
-
-    // FIXME filename
-    // FIXME fits_file
+    if (!mxIsClass(tranform_type_, "oskar_image_transform"))
+        im_set_error_("invalid image transform type.");
+    mxArray* transform_id = mxCreateNumericMatrix(1,1,mxINT32_CLASS, mxREAL);
+    mexCallMATLAB(1, &transform_id, 1, &tranform_type_, "uint32");
+    out->transform_type = (int)mxGetScalar(transform_id);
 }

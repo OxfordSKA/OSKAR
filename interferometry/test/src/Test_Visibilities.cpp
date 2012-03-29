@@ -398,7 +398,3 @@ void Test_Visibilities::test_read_write()
     remove(filename);
 }
 
-void Test_Visibilities::test_add_sky_noise()
-{
-    // TODO
-}

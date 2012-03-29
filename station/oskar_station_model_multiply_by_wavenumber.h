@@ -41,8 +41,9 @@ extern "C" {
 #endif
 
 /**
- * @brief Convert the (x,y,z) coordinates of a station structure from metres
- * to wavenumbers.
+ * @brief Multiply the (x,y,z) coordinates of a station structure specified in
+ * metres by the wavenumber (2*pi/lambda) given by the specified frequency.
+ * This converts the coordinate units into radians at the specified frequency.
  *
  * @param station      Station model structure containing coordinates to scale.
  * @param frequency_hz The frequency, in Hz.

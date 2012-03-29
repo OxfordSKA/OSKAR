@@ -47,8 +47,6 @@ class Test_matrix_math : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(Test_matrix_math);
         CPPUNIT_TEST(test_multiply);
-        CPPUNIT_TEST(test_invert);
-        CPPUNIT_TEST(solve);
         CPPUNIT_TEST(dgels_test);
         CPPUNIT_TEST(dgetrs_test);
         CPPUNIT_TEST(sumX_div_XX);
@@ -56,8 +54,6 @@ class Test_matrix_math : public CppUnit::TestFixture
 
     public:
         void test_multiply();
-        void test_invert();
-        void solve();
         void dgels_test();
         void dgetrs_test();
         void sumX_div_XX();

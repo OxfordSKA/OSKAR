@@ -168,9 +168,6 @@ void Test_correlator::test_kernel_float()
     cudaFree(d_v);
     cudaFree(d_jones);
     cudaFree(d_vis);
-
-    // Check contents of memory.
-    // TODO tests missing?
 }
 
 /**

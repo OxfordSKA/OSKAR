@@ -62,7 +62,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
 
     // Scale GPU telescope coordinates by wavenumber.
-    err = tel_gpu.multiply_by_wavenumber(frequency); if (err) return err;
+    err = tel_gpu.multiply_by_wavenumber(frequency);
+    if (err) return err;
 
     // Scale by spectral index.
     err = sky_gpu.scale_by_spectral_index(frequency);

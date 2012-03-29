@@ -27,8 +27,8 @@
  */
 
 
-#include "apps/lib/oskar_Settings.h"
-#include "apps/lib/oskar_settings_free.h"
+#include "utility/oskar_Settings.h"
+#include "utility/oskar_settings_free.h"
 #include "apps/lib/oskar_settings_load.h"
 
 #include <QtGui/QApplication>
@@ -37,7 +37,6 @@
 
 #include "widgets/plotting/oskar_PlotWidget.h"
 
-
 #include "qwt_scale_widget.h"
 
 #include <cstdlib>
@@ -45,7 +44,6 @@
 #include <vector>
 #include <cmath>
 
-using namespace oskar; // FIXME: Remove oskar namespace?
 using namespace std;
 
 int main(int argc, char** argv)
@@ -115,34 +113,34 @@ int main(int argc, char** argv)
 
 
     //====== Plotting. =======================================================
-    QApplication app(argc, argv);
-
-    double fov_deg = settings.image.fov_deg;
-
-    PlotWidget plot1;
-    plot1.setCanvasBackground(Qt::black);
-
-    plot1.show();
-    QPalette p;
-    p.setColor(QPalette::Window, Qt::black);
-    p.setColor(QPalette::WindowText, Qt::white);
-    p.setColor(QPalette::Text, Qt::white);
-    plot1.setBackgroundRole(QPalette::Window);
-    plot1.setPalette(p);
-    double extent = fov_deg / 2.0;
-    plot1.plotImage(&image[0], image_size, image_size, -extent, extent,
-            -extent, extent);
-    plot1.setYLabel("Relative Declination (deg)");
-    plot1.setXLabel("Relative Right Ascension x cos(Dec) x -1 (deg)");
-    plot1.setTitle("Dirty image (channel = " + QString::number(channel) + ", "
-            " t = " + QString::number(t) + ")");
-    plot1.setScaleLabel("Brightness");
-
-    plot1.toggleGrid();
-    int status = 0;
-    status = app.exec();
+//    QApplication app(argc, argv);
+//
+//    double fov_deg = settings.image.fov_deg;
+//
+//    PlotWidget plot1;
+//    plot1.setCanvasBackground(Qt::black);
+//
+//    plot1.show();
+//    QPalette p;
+//    p.setColor(QPalette::Window, Qt::black);
+//    p.setColor(QPalette::WindowText, Qt::white);
+//    p.setColor(QPalette::Text, Qt::white);
+//    plot1.setBackgroundRole(QPalette::Window);
+//    plot1.setPalette(p);
+//    double extent = fov_deg / 2.0;
+//    plot1.plotImage(&image[0], image_size, image_size, -extent, extent,
+//            -extent, extent);
+//    plot1.setYLabel("Relative Declination (deg)");
+//    plot1.setXLabel("Relative Right Ascension x cos(Dec) x -1 (deg)");
+//    plot1.setTitle("Dirty image (channel = " + QString::number(channel) + ", "
+//            " t = " + QString::number(t) + ")");
+//    plot1.setScaleLabel("Brightness");
+//
+//    plot1.toggleGrid();
+//    int status = 0;
+//    status = app.exec();
     // ========================================================================
 
     oskar_settings_free(&settings);
-    return status;
+    return OSKAR_SUCCESS;
 }

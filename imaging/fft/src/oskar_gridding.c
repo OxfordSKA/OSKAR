@@ -37,8 +37,6 @@
 extern "C" {
 #endif
 
-/* FIXME This needs fixing to use the new visibility structure. */
-
 void oskar_evaluate_offset(double x, double pixel_size,
         unsigned kernel_oversample, int* grid_idx, int* kernel_idx);
 double oskar_round_away_from_zero(double x);

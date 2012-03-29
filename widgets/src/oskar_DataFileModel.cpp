@@ -85,9 +85,12 @@ void oskar_ConfigFileModel::loadConfigFile(const QString& filename)
 
 void oskar_ConfigFileModel::saveConfigFile()
 {
-    // FIXME this method will currently overwrite the current
+    // Note: This method will currently overwrite the current
     // configuration file removing all existing comments. This is
     // not ideal...
+    // -- maybe put the comments in the loaded table? (probably best solution)
+    // -- Alternatively save just the first block of comments... (less ideal)
+
 
     QString filename = configFile_ + ".edit";
     FILE* file = fopen(filename.toLatin1().data(), "w");

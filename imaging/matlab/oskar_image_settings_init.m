@@ -29,7 +29,7 @@ end
 
 settings.polarisation = oskar_image_type.I;
 
-settings.dft = true;
+settings.transform_type = oskar_image_transform.dft_2d;
 
 settings.filename = '';
 settings.fits_file = '';

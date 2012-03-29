@@ -77,7 +77,7 @@ void Test_element_weights_errors::test_evaluate()
     int error = curand_state.init(seed);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
-    /* Evaluate weights errors TODO: pass states to this function. */
+    /* Evaluate weights errors. */
     error = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
             &d_gain, &d_gain_error, &d_phase, &d_phase_error, curand_state);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
@@ -131,7 +131,6 @@ void Test_element_weights_errors::test_apply()
     d_phase.set_value_real(phase);
     d_phase_error.set_value_real(phase_error);
 
-    // TODO create a oskar_Mem::set_value_complex()
     for (int i = 0; i < num_elements; ++i)
     {
         ((double2*)h_weights.data)[i].x = weight.x;

@@ -67,10 +67,9 @@
  * represent a single polarisation axis whereas matrix elements store 4 polarisations
  * per data sample.
  *
- * NOTE Consider meta-data fields for frequency and time under review w.r.t.
- * names and interface for setting.
- * NOTE Consider storing a coord_type_id for the baseline coordinates similar
- * to the station model.
+ * Comments:
+ * - Consider storing a coord_type_id for the baseline coordinates similar
+ *   to the station model.
  */
 struct oskar_Visibilities
 {
@@ -234,7 +233,7 @@ struct oskar_Visibilities
      * a gaussian sky noise component to the visibility amplitudes.
      *
      * @details
-     * NOTE: the interface to this may change!
+     * WARNING: the interface to this may change!
      *
      * @param telescope         OSKAR telescope model structure.
      * @param spectral_index    Spectral index (used to evaluate the sky noise
@@ -250,7 +249,7 @@ struct oskar_Visibilities
      * visibilities, typically corresponding to sky noise.
      *
      * @details
-     * NOTE: the interface to this may change!
+     * WARNING: the interface to this may change!
      *
      * @param[in] stddev  Array (length num_channels) of the standard deviation
      *                    of the noise to add, in Janskys.

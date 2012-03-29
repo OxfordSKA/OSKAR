@@ -55,7 +55,7 @@ int oskar_imager(const char* settings_file)
 {
     int error = OSKAR_SUCCESS;
 
-    // NOTE: this could probably be replaced with oskar_image_settings_load()
+    // Note: this could probably be replaced with oskar_image_settings_load()
     oskar_Settings settings;
     error = oskar_settings_load(&settings, settings_file);
     if (error)
@@ -86,7 +86,6 @@ int oskar_imager(const char* settings_file)
         return error;
     }
 
-    // TODO add a timer?
     oskar_Image image;
     error = oskar_make_image(&image, &vis, &settings.image);
     if (error)
@@ -112,7 +111,7 @@ int oskar_imager(const char* settings_file)
     if (settings.image.fits_image)
     {
         printf("= Writing FITS image ... ");
-        // NOTE no error code returned from this function
+        // Note: currently there is no error code returned from this function.
         oskar_fits_image_write(&image, settings.image.fits_image);
         printf("done.\n");
     }

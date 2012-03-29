@@ -40,21 +40,16 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #endif
 
-#ifndef MAX
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* FIXME: clean up this function... */
 int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
         int max_sources_per_model, const oskar_SkyModel* model)
 {
     /* Declare variables */
     int free_space, space_required, num_extra_models, number_to_copy;
-    int i, j, type, location;
+    int i, j, model_type, model_location;
     int n, n_copy, error, from_offset;
     oskar_SkyModel model_ptr;
     size_t new_size;
@@ -62,18 +57,17 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
     if (set_size == NULL || set == NULL || model == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    /* TODO check consistency of model type and location with set */
-    type = oskar_sky_model_type(model);
-    location = oskar_sky_model_location(model);
+    model_type     = oskar_sky_model_type(model);
+    model_location = oskar_sky_model_location(model);
 
-    if (location != OSKAR_LOCATION_CPU)
+    if (model_location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Work out if the set needs to be resized and if so by how much */
     free_space = (*set_size == 0) ?
             0 : max_sources_per_model - (*set)[*set_size - 1].num_sources;
     space_required = model->num_sources - free_space;
-    num_extra_models = (int) ceil((double)space_required / (double)max_sources_per_model);
+    num_extra_models = (int)ceil((double)space_required/(double)max_sources_per_model);
 
     /* Resize the set */
     new_size = (*set_size + num_extra_models) * sizeof(oskar_SkyModel);
@@ -82,24 +76,19 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
     {
         oskar_SkyModel* sky = &((*set)[i]);
         /* Initialise the new models to resize the source fields */
-        oskar_sky_model_init(sky, type, location, max_sources_per_model);
+        oskar_sky_model_init(sky, model_type, model_location, max_sources_per_model);
         /* Set the number sources to zero as this is the number currently
          * allocated in the model. */
         sky->num_sources = 0;
     }
 
-
-    /* Copy sources from the model into models in the set. */
-
-    /* Loop over set entries with free space and copy sources into them... */
+    /* Copy sources from the model into the set. */
+    /*   Loop over set entries with free space and copy sources into them... */
     number_to_copy = model->num_sources;
     from_offset = 0;
-
-    /* Declare pointer into the sky model */
-
-    error = oskar_sky_model_init(&model_ptr, type, location, 0);
+    /*   Declare pointer into the sky model */
+    error = oskar_sky_model_init(&model_ptr, model_type, model_location, 0);
     if (error) return error;
-
     for (i = (*set_size-1 > 0) ? *set_size-1 : 0; i < *set_size + num_extra_models; ++i)
     {
         oskar_SkyModel* sky = &((*set)[i]);
@@ -114,7 +103,6 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
         number_to_copy  -= n_copy;
         from_offset     += n_copy;
     }
-
     /* Set the use extended flag if needed */
     for (j = (*set_size-1 > 0) ? *set_size-1 : 0; j < *set_size + num_extra_models; ++j)
     {
@@ -122,15 +110,15 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
         for (i = 0; i < sky->num_sources; ++i)
         {
             double FWHM_minor, FWHM_major;
-            FWHM_minor = (type == OSKAR_DOUBLE) ?
+            FWHM_minor = (model_type == OSKAR_DOUBLE) ?
                     ((double*)sky->FWHM_minor.data)[i] :
                     ((float*)sky->FWHM_minor.data)[i];
-            FWHM_major = (type == OSKAR_DOUBLE) ?
+            FWHM_major = (model_type == OSKAR_DOUBLE) ?
                     ((double*)sky->FWHM_major.data)[i] :
                     ((float*)sky->FWHM_major.data)[i];
 
             /* If any source in the model is extended set the use extended flag */
-            /* NOTE: this assumes that we can't evaluate extended line sources
+            /* __Note__ this assumes that we can't evaluate extended line sources
              * This may not be true in future
              * if oskar_evaluate_gaussian_source_parameters() is updated...
              */

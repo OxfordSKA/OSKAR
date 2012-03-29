@@ -37,9 +37,7 @@ int main(int /*argc*/, char** /*argv*/)
         ((double*)vis.ww_metres.data)[0] = 0.0;
         ((double2*)vis.amplitude.data)[0].x = 1.0;
         ((double2*)vis.amplitude.data)[0].y = 0.0;
-
-        /* FIXME should really not need the hermitian copy to be in the
-         * vis data! */
+        // note: really shouldn't need hermitian copy of the vis to be set
         ((double*)vis.uu_metres.data)[1] = u;
         ((double*)vis.vv_metres.data)[1] = 0.0;
         ((double*)vis.ww_metres.data)[1] = 0.0;

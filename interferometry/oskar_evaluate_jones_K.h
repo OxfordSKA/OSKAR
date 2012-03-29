@@ -54,11 +54,15 @@ extern "C" {
  * The output set of Jones matrices (K) are scalar complex values.
  * This function will return an error if an incorrect type is used.
  *
- * @param[out] K         Output set of Jones matrices.
- * @param[in] sky        Input sky model.
- * @param[in] u          Station u coordinates, in ??? FIXME units!
- * @param[in] v          Station v coordinates, in ??? FIXME units!
- * @param[in] w          Station w coordinates, in ??? FIXME units!
+ * Note:
+ * Station coordinates u,v,w should be specified in radians at the frequency
+ * for which K is evaluated.
+ *
+ * @param[out] K    Output set of Jones matrices.
+ * @param[in]  sky  Input sky model.
+ * @param[in]  u    Station u coordinates, in radians.
+ * @param[in]  v    Station v coordinates, in radians.
+ * @param[in]  w    Station w coordinates, in radians.
  */
 OSKAR_EXPORT
 int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,

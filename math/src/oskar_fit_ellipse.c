@@ -45,20 +45,11 @@ extern "C" {
 #endif
 
 #ifndef OSKAR_NO_LAPACK
-/* http://www.netlib.org/lapack/double/dgesv.f */
-/*
-extern void dgesv_(const int* n, const int* nrhs, double* A, const int lda,
-        int* ipiv, double* B, const int* ldb, int* info);
-extern void sgesv_(const int* n, const int* nrhs, double* A, const int lda,
-        int* ipiv, double* B, const int* ldb, int* info);
-*/
-
 /* http://www.netlib.org/lapack/double/dgetrf.f */
 extern void dgetrf_(const long* m, const long* n, double* A, const long* lda,
         long* ipiv, long* info);
 extern void sgetrf_(const long* m, const long* n, float* A, const long* lda,
         long* ipiv, long* info);
-
 /* http://www.netlib.org/lapack/double/dgetrs.f */
 extern void dgetrs_(const char* trans, const long* n, const long* nrhs,
         double* A, const long* lda, long* ipiv, double* B, const long* lba,
@@ -68,13 +59,14 @@ extern void sgetrs_(const char* trans, const long* n, const long* nrhs,
         long* info);
 #endif
 
-
-
-
 int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         double* gauss_phi, int num_points, const oskar_Mem* x,
         const oskar_Mem* y)
 {
+#ifdef OSKAR_NO_LAPACK
+    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+#endif
+
     int i, j, type, location, err, rows_X, cols_X;
     long n, m, lda, ldb, info, nrhs;
     double orientation_tolerance, orientation_rad, cos_phi, sin_phi;
@@ -92,10 +84,6 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     {
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
-
-#ifdef OSKAR_NO_LAPACK
-    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-#endif
 
     if (x->type == OSKAR_DOUBLE && y->type == OSKAR_DOUBLE)
         type = OSKAR_DOUBLE;
@@ -169,38 +157,13 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         }
     }
 
-    /*
-    printf("\n");
-    for (j = 0; j < num_points; ++j)
-    {
-        for (i = 0; i < 5; ++i)
-        {
-            printf("% -.4f ", ((double*)X.data)[j * 5 + i]);
-        }
-        printf("\n");
-    }
-    */
-
-
-    /* TODO result = sum(X) / (X' * X) */
+    /* result = sum(X) / (X' * X) */
     cols_X = 5;
     rows_X = num_points;
 
     err = oskar_matrix_multiply(&XX, rows_X, cols_X, rows_X, cols_X, OSKAR_TRUE,
             OSKAR_FALSE, &X, &X);
     if (err) return err;
-
-    /*
-        printf("\n");
-        for (j = 0; j < 5; ++j)
-        {
-            for (i = 0; i < 5; ++i)
-            {
-                printf("% -.4f ", ((double*)XX.data)[j * 5 + i]);
-            }
-            printf("\n");
-        }
-     */
 
     if (type == OSKAR_DOUBLE)
     {
@@ -223,22 +186,13 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         }
     }
 
-    /*
-        printf("\n");
-        for (j = 0; j < 5; ++j)
-        {
-            printf("%f ", ((double*)sumX.data)[j]);
-        }
-        printf("\n");
-     */
-
-
     info = 0;
     n = rows_X;
     m = cols_X;
     lda = MAX(1, m);
 
-    /* Note: using double in place of long as its the right number of bytes */
+    /* Note: using OSKAR_DOUBLE to create an array of 'long' as its the same
+     * number of bytes */
     err = oskar_mem_init(&ipiv, OSKAR_DOUBLE, location, MIN(m, n), OSKAR_TRUE);
     if (err) return err;
 
@@ -286,15 +240,6 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         }
     }
 #endif
-
-    /*
-        printf("\n");
-        for (j = 0; j < 5; ++j)
-        {
-            printf("%f ", ((double*)sumX.data)[j]);
-        }
-        printf("\n");
-     */
 
     /* extract parameters from conic equation */
     if (type == OSKAR_DOUBLE)

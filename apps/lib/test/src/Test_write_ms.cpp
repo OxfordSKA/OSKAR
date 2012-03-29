@@ -54,8 +54,6 @@ void Test_write_ms::test_write()
     int num_baselines = num_antennas * (num_antennas - 1) / 2;
 
     // Create a telescope structure and populate the relevant fields.
-    // TODO Does this have to be double for the ms writer to work?
-    // TODO Need any other fields?
     oskar_TelescopeModel telescope(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
             num_antennas);
     for (int i = 0; i < num_antennas; ++i)

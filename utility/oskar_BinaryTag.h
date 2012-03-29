@@ -124,8 +124,11 @@ struct oskar_BinaryTagIndex
 };
 typedef struct oskar_BinaryTagIndex oskar_BinaryTagIndex;
 
-/* NOTE: To maintain binary data compatibility, do not modify any numbers
- * that appear in the lists below! */
+/*
+ * IMPORTANT:
+ * To maintain binary data compatibility, do not modify any numbers
+ * that appear in the lists below!
+ */
 
 /* Standard tag groups. */
 enum {
