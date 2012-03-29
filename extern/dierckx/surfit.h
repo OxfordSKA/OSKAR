@@ -310,11 +310,11 @@ extern "C" {
  *  creation date : may 1979
  *  latest update : march 1987
  */
-void surfit(int *iopt, int *m, float *x, float *y, float *z, float *w,
-        float *xb, float *xe, float *yb, float *ye, int *kx, int *ky,
-        float *s, int *nxest, int *nyest, int *nmax, float *eps, int *nx,
+void surfit_f(int iopt, int m, float *x, float *y, const float *z,
+        const float *w, float xb, float xe, float yb, float ye, int kx,
+        int ky, float s, int nxest, int nyest, int nmax, float eps, int *nx,
         float *tx, int *ny, float *ty, float *c, float *fp, float *wrk1,
-        int *lwrk1, float *wrk2, int *lwrk2, int *iwrk, int *kwrk, int *ier);
+        int lwrk1, float *wrk2, int lwrk2, int *iwrk, int kwrk, int *ier);
 
 #ifdef __cplusplus
 }

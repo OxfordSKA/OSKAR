@@ -15,7 +15,9 @@ set(dierckx_SRC
     src/fprota.c
     src/fprpsp.c
     src/fpsphe.c
+    src/fpsurf.c
     src/sphere.c
+    src/surfit.c
 
     src/bispev.f
     src/fpback.f
