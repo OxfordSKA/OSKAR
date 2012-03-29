@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "widgets/oskar_ConfigFileModel.h"
+#include "widgets/oskar_DataFileModel.h"
 
 
 int main(int argc, char** argv)

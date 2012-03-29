@@ -1,7 +1,7 @@
 #
 # src/widgets/CMakeLists.txt
 #
-   
+
 # Plotting widgets.
 add_subdirectory(plotting)
 
@@ -14,7 +14,7 @@ qt4_add_resources(widgets_RCC_SRC
 )
 set(widgets_MOC_SRC
     oskar_About.h
-    oskar_ConfigFileModel.h
+    oskar_DataFileModel.h
     oskar_DoubleSpinBox.h
     oskar_SettingsDelegate.h
     oskar_SettingsModel.h
@@ -22,7 +22,7 @@ set(widgets_MOC_SRC
 )
 set(widgets_SRC
     src/oskar_About.cpp
-    src/oskar_ConfigFileModel.cpp
+    src/oskar_DataFileModel.cpp
     src/oskar_DoubleSpinBox.cpp
     src/oskar_SettingsDelegate.cpp
     src/oskar_SettingsItem.cpp

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "widgets/oskar_ConfigFileModel.h"
+#include "widgets/oskar_DataFileModel.h"
 #include <QtCore/QVector>
 
 #include "utility/oskar_getline.h"
