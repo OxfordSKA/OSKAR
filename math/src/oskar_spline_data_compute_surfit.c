@@ -195,6 +195,7 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
     wrk1 = malloc(lwrk1 * element_size);
     wrk2 = malloc(lwrk2 * element_size);
     iwrk = (int*)malloc(kwrk * sizeof(int));
+    printf("ALLOC: lwrk1: %d, kwrk: %d\n", lwrk1, kwrk);
 
     if (type == OSKAR_SINGLE)
     {
