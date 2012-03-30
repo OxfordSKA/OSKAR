@@ -64,6 +64,12 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
     obs->time.num_vis_ave    = s.value("num_vis_ave", 1).toInt();
     obs->time.num_fringe_ave = s.value("num_fringe_ave", 1).toInt();
 
+    // Range checks.
+    if (obs->num_channels <= 0) obs->num_channels = 1;
+    if (obs->time.num_vis_dumps <= 0) obs->time.num_vis_dumps = 1;
+    if (obs->time.num_vis_ave <= 0) obs->time.num_vis_ave = 1;
+    if (obs->time.num_fringe_ave <= 0) obs->time.num_fringe_ave = 1;
+
     // Get observation start time (if blank, then use current).
     QString str_st = s.value("start_time_utc").toString();
     QDateTime st = (str_st.isEmpty()) ?  QDateTime::currentDateTime().toUTC()
