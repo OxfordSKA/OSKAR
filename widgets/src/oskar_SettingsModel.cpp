@@ -54,7 +54,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     k = "simulator/double_precision";
     registerSetting(k, "Use double precision", oskar_SettingsItem::BOOL);
     setTooltip(k, "Determines whether double precision arithmetic is used");
-    registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT);
+    registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE);
     registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST);
 
     // Sky model file settings.
@@ -84,7 +84,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Sky model generator settings.
     setLabel("sky/generator", "Generators");
     setLabel("sky/generator/random_power_law", "Random, power-law in flux");
-    registerSetting("sky/generator/random_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT);
+    registerSetting("sky/generator/random_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
     registerSetting("sky/generator/random_power_law/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/power", "Power law index", oskar_SettingsItem::DOUBLE);
@@ -100,7 +100,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/generator/random_power_law/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
 
     setLabel("sky/generator/random_broken_power_law", "Random, broken power-law in flux");
-    registerSetting("sky/generator/random_broken_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT);
+    registerSetting("sky/generator/random_broken_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
     registerSetting("sky/generator/random_broken_power_law/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/power1", "Power law index 1", oskar_SettingsItem::DOUBLE);
@@ -118,7 +118,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/generator/random_broken_power_law/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
 
     setLabel("sky/generator/healpix", "HEALPix (uniform, all sky) grid");
-    registerSetting("sky/generator/healpix/nside", "Nside", oskar_SettingsItem::INT);
+    registerSetting("sky/generator/healpix/nside", "Nside", oskar_SettingsItem::INT_UNSIGNED);
     setLabel("sky/generator/healpix/filter", "Filter settings");
     registerSetting("sky/generator/healpix/filter/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
@@ -166,15 +166,15 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 
     // Observation settings.
     setLabel("observation", "Observation settings");
-    registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT);
+    registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT_POSITIVE);
     registerSetting("observation/start_frequency_hz", "Start frequency [Hz]", oskar_SettingsItem::DOUBLE, true);
     registerSetting("observation/frequency_inc_hz", "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
     registerSetting("observation/channel_bandwidth_hz", "Channel bandwidth [Hz]", oskar_SettingsItem::DOUBLE);
     registerSetting("observation/phase_centre_ra_deg", "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("observation/phase_centre_dec_deg", "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/num_vis_dumps", "Number of visibility dumps", oskar_SettingsItem::INT);
-    registerSetting("observation/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT);
-    registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT);
+    registerSetting("observation/num_vis_dumps", "Number of visibility dumps", oskar_SettingsItem::INT_POSITIVE);
+    registerSetting("observation/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT_POSITIVE);
+    registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
     registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME, true);
     registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
     registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
@@ -185,8 +185,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Beam pattern settings.
     setLabel("beam_pattern", "Beam pattern settings");
     registerSetting("beam_pattern/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("beam_pattern/size", "Image dimension [pixels]", oskar_SettingsItem::INT);
-    registerSetting("beam_pattern/station_id", "Station ID", oskar_SettingsItem::INT);
+    registerSetting("beam_pattern/size", "Image dimension [pixels]", oskar_SettingsItem::INT_UNSIGNED);
+    registerSetting("beam_pattern/station_id", "Station ID", oskar_SettingsItem::INT_UNSIGNED);
     registerSetting("beam_pattern/filename", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #ifndef OSKAR_NO_FITS
     registerSetting("beam_pattern/fits_image", "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
@@ -195,7 +195,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Image settings.
     setLabel("image", "Image settings");
     registerSetting("image/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("image/size", "Image dimension [pixels]", oskar_SettingsItem::INT);
+    registerSetting("image/size", "Image dimension [pixels]", oskar_SettingsItem::INT_UNSIGNED);
     registerSetting("image/channel_snapshots", "Channel snapshots", oskar_SettingsItem::BOOL);
     registerSetting("image/channel_start", "Channel start", oskar_SettingsItem::INT);
     registerSetting("image/channel_end", "Channel end", oskar_SettingsItem::INT);

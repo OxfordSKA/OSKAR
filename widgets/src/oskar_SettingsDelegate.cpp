@@ -72,6 +72,24 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             editor = spinner;
             break;
         }
+        case oskar_SettingsItem::INT_UNSIGNED:
+        {
+            // Spin box editors.
+            QSpinBox* spinner = new QSpinBox(parent);
+            spinner->setFrame(false);
+            spinner->setRange(0, INT_MAX);
+            editor = spinner;
+            break;
+        }
+        case oskar_SettingsItem::INT_POSITIVE:
+        {
+            // Spin box editors.
+            QSpinBox* spinner = new QSpinBox(parent);
+            spinner->setFrame(false);
+            spinner->setRange(1, INT_MAX);
+            editor = spinner;
+            break;
+        }
         case oskar_SettingsItem::DOUBLE:
         {
             // Double spin box editors.
@@ -217,6 +235,8 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             else
                 menu.addAction(strEnable);
             if (type == oskar_SettingsItem::INT ||
+                    type == oskar_SettingsItem::INT_UNSIGNED ||
+                    type == oskar_SettingsItem::INT_POSITIVE ||
                     type == oskar_SettingsItem::DOUBLE)
             {
                 QString key = mod->data(index,
@@ -268,6 +288,8 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
     switch (type)
     {
         case oskar_SettingsItem::INT:
+        case oskar_SettingsItem::INT_UNSIGNED:
+        case oskar_SettingsItem::INT_POSITIVE:
         {
             // Spin box editors.
             static_cast<QSpinBox*>(editor)->setValue(value.toInt());
@@ -332,6 +354,8 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
     switch (type)
     {
         case oskar_SettingsItem::INT:
+        case oskar_SettingsItem::INT_UNSIGNED:
+        case oskar_SettingsItem::INT_POSITIVE:
         {
             // Spin box editors.
             value = static_cast<QSpinBox*>(editor)->value();
@@ -413,7 +437,9 @@ void oskar_SettingsDelegate::setIterations(QAbstractItemModel* model,
     layout->addRow("Iterations", iterNum);
     QSpinBox* iterIncInt = NULL;
     oskar_DoubleSpinBox* iterIncDbl = NULL;
-    if (type == oskar_SettingsItem::INT)
+    if (type == oskar_SettingsItem::INT ||
+            type == oskar_SettingsItem::INT_UNSIGNED ||
+            type == oskar_SettingsItem::INT_POSITIVE)
     {
         iterIncInt = new QSpinBox(dialog);
         iterIncInt->setRange(-INT_MAX, INT_MAX);
@@ -438,7 +464,9 @@ void oskar_SettingsDelegate::setIterations(QAbstractItemModel* model,
     int num = model->data(index, oskar_SettingsModel::IterationNumRole).toInt();
     QVariant inc = model->data(index, oskar_SettingsModel::IterationIncRole);
     iterNum->setValue(num);
-    if (type == oskar_SettingsItem::INT)
+    if (type == oskar_SettingsItem::INT ||
+            type == oskar_SettingsItem::INT_UNSIGNED ||
+            type == oskar_SettingsItem::INT_POSITIVE)
         iterIncInt->setValue(inc.toInt());
     else if (type == oskar_SettingsItem::DOUBLE)
         iterIncDbl->setValue(inc.toDouble());
@@ -448,7 +476,9 @@ void oskar_SettingsDelegate::setIterations(QAbstractItemModel* model,
         // Set the iteration data.
         model->setData(index, iterNum->value(),
                 oskar_SettingsModel::IterationNumRole);
-        if (type == oskar_SettingsItem::INT)
+        if (type == oskar_SettingsItem::INT ||
+                type == oskar_SettingsItem::INT_UNSIGNED ||
+                type == oskar_SettingsItem::INT_POSITIVE)
             model->setData(index, iterIncInt->value(),
                     oskar_SettingsModel::IterationIncRole);
         else if (type == oskar_SettingsItem::DOUBLE)

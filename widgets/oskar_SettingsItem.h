@@ -46,6 +46,8 @@ public:
         LABEL,              /* e.g. "Sky model settings". */
         BOOL,               /* e.g. disable station beam. */
         INT,
+        INT_UNSIGNED,
+        INT_POSITIVE,
         DOUBLE,
         STRING,
         TELESCOPE_DIR_NAME,
