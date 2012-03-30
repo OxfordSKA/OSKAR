@@ -202,7 +202,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         dgetrf_(&m, &n, (double*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0)
         {
-            fprintf(stderr, "ERROR: dgetrf_() failed. info = %i.\n", info);
+            fprintf(stderr, "ERROR: dgetrf_() failed. info = %li.\n", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
 
@@ -214,7 +214,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
                 (double*)sumX.data, &ldb, &info);
         if (info != 0)
         {
-            fprintf(stderr, "ERROR: dgetrs_() failed. info = %i.\n", info);
+            fprintf(stderr, "ERROR: dgetrs_() failed. info = %li.\n", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
     }
@@ -223,7 +223,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         sgetrf_(&m, &n, (float*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0)
         {
-            fprintf(stderr, "- ERROR: dgetrs_() failed. info = %i.\n", info);
+            fprintf(stderr, "- ERROR: dgetrs_() failed. info = %li.\n", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
 
@@ -235,7 +235,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
                 (float*)sumX.data, &ldb, &info);
         if (info != 0)
         {
-            fprintf(stderr, "ERROR: dgetrs_() failed. info = %i.\n", info);
+            fprintf(stderr, "ERROR: dgetrs_() failed. info = %li.\n", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
     }
