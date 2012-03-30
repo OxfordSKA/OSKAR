@@ -40,14 +40,9 @@ extern "C" {
 int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
         const oskar_SettingsImage* settings)
 {
-    int pol;
-    int num_pols;
-    int num_times;
-    int num_chan;
-    int time_range[2], chan_range[2];
-
-    /* Set local variables */
-    pol = settings->polarisation;
+    // Polarisation settings.
+    int pol = settings->polarisation;
+    int num_pols = 0;
     if (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
             pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
             pol == OSKAR_IMAGE_TYPE_STOKES_U ||
@@ -69,30 +64,39 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    time_range[0] = settings->time_range[0];
-    time_range[1] = settings->time_range[1];
-    chan_range[0] = settings->channel_range[0];
-    chan_range[1] = settings->channel_range[1];
-    if (time_range[0] < 0) time_range[0] = 0;
-    if (time_range[1] < 0) time_range[1] = (settings->time_snapshots) ?
-            vis->num_times-1 : 0;
-    if (chan_range[0] < 0) chan_range[0] = 0;
-    if (chan_range[1] < 0) chan_range[1] = (settings->channel_snapshots) ?
-            vis->num_channels-1 : 0;
-    num_times = (settings->time_snapshots) ?
-            (time_range[1] - time_range[0] + 1) : 1;
+    // Set the time range for the image.
+    int im_time_range[2];
+    im_time_range[0] = (settings->time_range[0] < 0) ? 0 : settings->time_range[0];
+    if (settings->time_range[1] < 0)
+        im_time_range[1] = settings->time_snapshots ? vis->num_times-1 : 0;
+    else
+        im_time_range[1] = settings->time_range[1];
+    if (!settings->time_snapshots && im_time_range[1] > 0)
+        return OSKAR_ERR_INVALID_RANGE;
+    int num_times = (settings->time_snapshots) ?
+            (im_time_range[1] - im_time_range[0] + 1) : 1;
     if (num_times < 1) return OSKAR_ERR_INVALID_RANGE;
-    num_chan  = (settings->channel_snapshots) ?
-            (chan_range[1] - chan_range[0] + 1) : 1;
+
+    // Set the channel range for the image.
+    int im_chan_range[2];
+    im_chan_range[0] = (settings->channel_range[0] < 0) ? 0 : settings->channel_range[0];
+    if (settings->channel_range[1] < 0)
+        im_chan_range[1] = settings->channel_snapshots ? vis->num_channels-1 : 0;
+    else
+        im_chan_range[1] = settings->channel_range[1];
+    if (!settings->channel_snapshots && im_chan_range[1] > 0)
+        return OSKAR_ERR_INVALID_RANGE;
+    int num_chan  = (settings->channel_snapshots) ?
+            (im_chan_range[1] - im_chan_range[0] + 1) : 1;
     if (num_chan < 1) return OSKAR_ERR_INVALID_RANGE;
 
-    /* Resize the image cube */
+    // Resize the image cube
     oskar_image_resize(im, settings->size, settings->size,
             num_pols, num_times, num_chan);
 
-    /* Set image meta-data */
-    /* Note: not changing the dimension order here from that defined in
-     * oskar_image_init() */
+    // Set image meta-data
+    // __Note__ the dimension order used here is assumed unchanged from that
+    // defined in oskar_image_init()
     oskar_mem_copy(&im->settings_path, &vis->settings_path);
     im->centre_ra_deg      = vis->phase_centre_ra_deg;
     im->centre_dec_deg     = vis->phase_centre_dec_deg;
@@ -101,21 +105,19 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     im->time_start_mjd_utc = vis->time_start_mjd_utc +
             (settings->time_range[0] * vis->time_inc_seconds * SEC2DAYS);
     im->time_inc_sec       = vis->time_inc_seconds;
+    im->freq_inc_hz        = (settings->channel_snapshots) ? vis->freq_inc_hz : 0.0;
     if (settings->channel_snapshots)
     {
-        im->freq_start_hz = vis->freq_start_hz +
-                (settings->channel_range[0] * vis->freq_inc_hz);
-        im->freq_inc_hz = vis->freq_inc_hz;
+        im->freq_start_hz = vis->freq_start_hz + im_chan_range[0] * vis->freq_inc_hz;
     }
     else
     {
-        im->freq_start_hz = vis->freq_start_hz + (settings->channel_range[0] * vis->freq_inc_hz) +
-                ((settings->channel_range[1]-settings->channel_range[0]) *  vis->freq_inc_hz) / 2.0;
-        im->freq_inc_hz = 0.0;
+        im->freq_start_hz = vis->freq_start_hz +
+                (im_chan_range[1] - im_chan_range[0]) * vis->freq_start_hz;
     }
-    im->freq_inc_hz        = (settings->channel_snapshots) ? vis->freq_inc_hz : 0.0;
     im->image_type         = settings->polarisation;
-    /* Note: mean, variance etc as these can't be defined for cubes! */
+    // __Note__
+    // mean, variance etc... ignored here as these can't be defined for cubes!
 
     return OSKAR_SUCCESS;
 }

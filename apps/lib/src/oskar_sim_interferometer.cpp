@@ -123,9 +123,9 @@ int oskar_sim_interferometer(const char* settings_file)
     int num_channels = settings.obs.num_channels;
     for (int c = 0; c < num_channels; ++c)
     {
-        printf("\n<< Channel (%i / %i).\n", c + 1, num_channels);
         double freq = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
+        printf("\n<< Channel (%i / %i) [%.4f MHz].\n", c + 1, num_channels, freq/1e6);
 
         // Use OpenMP dynamic scheduling for loop over chunks.
 #pragma omp parallel for schedule(dynamic, 1)

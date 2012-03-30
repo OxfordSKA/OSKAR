@@ -53,19 +53,27 @@ extern "C" {
  * channel and time selection given the image settings of time and channel
  * range and snapshot imaging modes.
  *
+ * __Note__:
+ * While coordinates returned are in metres, when imaging in frequency
+ * synthesis mode meters must be scaled by (lambda0/lambda) = (freq / freq0)
+ * where lambda is the wavelength of the input channel and lambda0 is the
+ * wavelength of the image channel.
+ *
  * WARNING: This function is intended to ONLY be used with oskar_make_image().
  * WARNING: This function relies on uu and vv being preallocated correctly.
  *
- * @param uu
- * @param vv
- * @param vis
- * @param time
- * @param settings
- * @return
+ * @param uu         Baseline coordinates, in (scaled) metres.
+ * @param vv         Baseline coordinates, in (scaled) metres.
+ * @param vis        OSKAR visibility structure.
+ * @param vis_time   Time index of coordinates in the visibility data set.
+ * @param im_freq    Image frequency in Hz.
+ * @param settings   OSKAR image settings structure.
+ *
+ * @return An error code.
  */
 OSKAR_EXPORT
 int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
-        const oskar_Visibilities* vis, int time,
+        const oskar_Visibilities* vis, int vis_time, double im_freq,
         const oskar_SettingsImage* settings);
 
 #ifdef __cplusplus

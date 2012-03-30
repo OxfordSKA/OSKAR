@@ -128,8 +128,6 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
         double2* amp_tb = (double2*)malloc(num_channels * num_pols * sizeof(double2));
         for (int t = 0; t < num_times; ++t)
         {
-            // TODO check this is the correct midpoint time of the simulation
-            // vis dump.
             double vis_time = t_start_sec + (t * dt_vis_dump);
 
             for (int b = 0; b < num_baselines; ++b)
@@ -183,8 +181,6 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
         float2* amp_tb = (float2*)malloc(num_channels * num_pols * sizeof(float2));
         for (int t = 0; t < num_times; ++t)
         {
-            // TODO check this is the correct midpoint time of the simulation
-            // vis dump.
             float vis_time = t_start_sec + (t * dt_vis_dump);
 
             for (int b = 0; b < num_baselines; ++b)

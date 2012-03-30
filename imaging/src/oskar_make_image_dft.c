@@ -163,9 +163,6 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     /* Copy image back to host memory if required. */
     if (image->location == OSKAR_LOCATION_CPU)
     {
-        /* FIXME should this be insert as temp will go out of scope and this is
-         * not always a deep copy! */
-        /*err = oskar_mem_copy(image, &t_image);*/
         err = oskar_mem_insert(image, &t_image, 0);
         if (err) goto cleanup;
     }
