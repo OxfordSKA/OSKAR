@@ -198,7 +198,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         printf("Loading element pattern data (X): %s\n",
                                 element_file_x);
                         error = oskar_element_model_load(station->element_pattern,
-                                1, element_file_x, 1, 0.02, 0.0, 0.0);
+                                1, element_file_x, 1, 0.005, 0.0, 0.0);
                         if (error) return error;
                     }
                     if (element_file_y)
@@ -206,7 +206,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         printf("Loading element pattern data (Y): %s\n",
                                 element_file_y);
                         error = oskar_element_model_load(station->element_pattern,
-                                2, element_file_y, 1, 0.02, 0.0, 0.0);
+                                2, element_file_y, 1, 0.005, 0.0, 0.0);
                         if (error) return error;
                     }
 

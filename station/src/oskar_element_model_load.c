@@ -63,7 +63,7 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     oskar_SplineData *data_phi = NULL, *data_theta = NULL;
 
     /* Make these parameters. */
-    double overlap = 0.0 * M_PI / 180.0;
+    double overlap = 40.0 * M_PI / 180.0;
     double overlap_weight = 1.0;
     int ignore_below_horizon = 1;
     int ignore_at_poles = 1;

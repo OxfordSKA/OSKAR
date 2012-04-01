@@ -139,9 +139,6 @@ void surfit_(int* iopt, int* m, float* x, float* y, const float* z,
         int* nx, float* tx, int* ny, float* ty, float* c, float* fp,
         float* wrk1, int* lwrk1, float* wrk2, int* lwrk2, int* iwrk, int* kwrk,
         int* ier);
-
-static int kx = 3;
-static int ky = 3;
 #endif
 
 int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
@@ -150,11 +147,15 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
         const oskar_Mem* weight_im, int search, double avg_fractional_err,
         double s_real, double s_imag)
 {
-    int element_size, err, est, i, iopt, k = 0;
-    int kwrk, lwrk1, lwrk2, maxiter = 1000, type, u;
+    int element_size, err, i, k = 0, maxiter = 1000, type;
+    int b1, b2, bx, by, iopt, km, kwrk, lwrk1, lwrk2, ne, nxest, nyest, u, v;
+    int sqrt_num_points;
     int *iwrk;
     void *wrk1, *wrk2;
     double factor, factor_fraction;
+
+    /* Order of splines - do not change these values. */
+    int kx = 3, ky = 3;
 
     /* Set values (make these parameters). */
     factor = 0.9;
@@ -171,31 +172,48 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise and allocate spline data. */
-    est = 1.3 * (8 + (int)sqrt(num_points));
+    sqrt_num_points = (int)sqrt(num_points);
+    nxest = kx + 1 + sqrt_num_points;
+    nyest = ky + 1 + sqrt_num_points;
+    u = nxest - kx - 1;
+    v = nyest - ky - 1;
     err = oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_x_re, est);
+    err = oskar_mem_realloc(&spline->knots_x_re, nxest);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_y_re, est);
+    err = oskar_mem_realloc(&spline->knots_y_re, nyest);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->coeff_re, (est-4)*(est-4));
+    err = oskar_mem_realloc(&spline->coeff_re, u * v);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_x_im, est);
+    err = oskar_mem_realloc(&spline->knots_x_im, nxest);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_y_im, est);
+    err = oskar_mem_realloc(&spline->knots_y_im, nyest);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->coeff_im, (est-4)*(est-4));
+    err = oskar_mem_realloc(&spline->coeff_im, u * v);
     if (err) return err;
 
     /* Set up workspace. */
-    u = est - 7;
-    lwrk1 = 185 + 52*u + 10*u + 14*u*u + 8*(u-1)*u*u + 8*num_points;
-    lwrk2 = 48 + 21*u + 7*u*u + 4*(u-1)*u*u;
-    kwrk = num_points + u*u;
+    km = 1 + ((kx > ky) ? kx : ky);
+    ne = (nxest > nyest) ? nxest : nyest;
+    bx = kx * v + ky + 1;
+    by = ky * u + kx + 1;
+    if (bx <= by)
+    {
+        b1 = bx;
+        b2 = b1 + v - ky;
+    }
+    else
+    {
+        b1 = by;
+        b2 = b1 + u - kx;
+    }
+    lwrk1 = u * v * (2 + b1 + b2) +
+            2 * (u + v + km * (num_points + ne) + ne - kx - ky) + b2 + 1;
+    lwrk2 = u * v * (b2 + 1) + b2;
+    kwrk = num_points + (nxest - 2 * kx - 1) * (nyest - 2 * ky - 1);
     wrk1 = malloc(lwrk1 * element_size);
     wrk2 = malloc(lwrk2 * element_size);
     iwrk = (int*)malloc(kwrk * sizeof(int));
-    printf("ALLOC: lwrk1: %d, kwrk: %d\n", lwrk1, kwrk);
 
     if (type == OSKAR_SINGLE)
     {
@@ -250,14 +268,14 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
 #ifdef USE_FORTRAN_SURFIT
                     surfit_(&iopt, &num_points, (float*)x->data,
                             (float*)y->data, data, weight, &x_beg, &x_end,
-                            &y_beg, &y_end, &kx, &ky, &s, &est, &est, &est,
-                            &eps, num_knots_x, knots_x, num_knots_y, knots_y,
-                            coeff, &fp, (float*)wrk1, &lwrk1, (float*)wrk2,
-                            &lwrk2, iwrk, &kwrk, &err);
+                            &y_beg, &y_end, &kx, &ky, &s, &nxest, &nyest,
+                            &ne, &eps, num_knots_x, knots_x, num_knots_y,
+                            knots_y, coeff, &fp, (float*)wrk1, &lwrk1,
+                            (float*)wrk2, &lwrk2, iwrk, &kwrk, &err);
 #else
                     surfit_f(iopt, num_points, (float*)x->data,
                             (float*)y->data, data, weight, x_beg, x_end,
-                            y_beg, y_end, 3, 3, s, est, est, est, eps,
+                            y_beg, y_end, kx, ky, s, nxest, nyest, ne, eps,
                             num_knots_x, knots_x, num_knots_y, knots_y, coeff,
                             &fp, (float*)wrk1, lwrk1, (float*)wrk2, lwrk2,
                             iwrk, kwrk, &err);
@@ -375,7 +393,7 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                     if (k > 0) iopt = 1; /* Set iopt to 1 if not first pass. */
                     surfit_d(iopt, num_points, (double*)x->data,
                             (double*)y->data, data, weight, x_beg, x_end,
-                            y_beg, y_end, 3, 3, s, est, est, est, eps,
+                            y_beg, y_end, kx, ky, s, nxest, nyest, ne, eps,
                             num_knots_x, knots_x, num_knots_y, knots_y, coeff,
                             &fp, (double*)wrk1, lwrk1, (double*)wrk2, lwrk2,
                             iwrk, kwrk, &err);
