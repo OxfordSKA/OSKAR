@@ -54,10 +54,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
 
     // Load the telescope configuration directory.
     int err = oskar_telescope_model_load(telescope,
-            settings->telescope.config_directory,
-            settings->telescope.longitude_rad,
-            settings->telescope.latitude_rad,
-            settings->telescope.altitude_m);
+            &settings->telescope);
     if (err)
     {
         fprintf(stderr, "== ERROR: Failed to load telescope configuration "

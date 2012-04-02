@@ -214,6 +214,8 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
     wrk1 = malloc(lwrk1 * element_size);
     wrk2 = malloc(lwrk2 * element_size);
     iwrk = (int*)malloc(kwrk * sizeof(int));
+    if (wrk1 == NULL || wrk2 == NULL || iwrk == NULL)
+        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
 
     if (type == OSKAR_SINGLE)
     {
@@ -294,27 +296,10 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 }
 
                 /* Check for errors. */
-                if (err == 5)
+                if (err > 0 || err < -2)
                 {
-                    done = 1;
-                    err = 0;
-                    printf("Cannot add any more knots.\n");
-                    avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
-                    if (search)
-                        printf("%s surface fit to %.3f avg. frac. error "
-                                "(s=%.2e, fp=%.2e, k=%d).\n",
-                                (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
-                                s, fp, k);
-                    else
-                        printf("%s surface fit (s=%.2e, fp=%.2e).\n",
-                                (i == 0 ? "Real" : "Imag"), s, fp);
-                    printf("Number of knots (x: %d, y: %d)\n",
-                            *num_knots_x, *num_knots_y);
-                }
-                else if (err > 0 || err < -2)
-                {
-                    printf("Error finding spline coefficients (code %d).\n", err);
-                    if (!search)
+                    printf("Error (%d) finding spline coefficients.\n", err);
+                    if (!search || err == 10)
                     {
                         err = OSKAR_ERR_SPLINE_COEFF_FAIL;
                         goto stop;
@@ -327,14 +312,23 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 {
                     done = 1;
                     err = 0;
+                    if (err == 5)
+                    {
+                        printf("Cannot add any more knots.\n");
+                        avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
+                    }
                     if (search)
+                    {
                         printf("%s surface fit to %.3f avg. frac. error "
                                 "(s=%.2e, fp=%.2e, k=%d).\n",
                                 (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
                                 s, fp, k);
+                    }
                     else
+                    {
                         printf("%s surface fit (s=%.2e, fp=%.2e).\n",
                                 (i == 0 ? "Real" : "Imag"), s, fp);
+                    }
                     printf("Number of knots (x: %d, y: %d)\n",
                             *num_knots_x, *num_knots_y);
                 }
@@ -411,27 +405,10 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 }
 
                 /* Check for errors. */
-                if (err == 5)
+                if (err > 0 || err < -2)
                 {
-                    done = 1;
-                    err = 0;
-                    printf("Cannot add any more knots.\n");
-                    avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
-                    if (search)
-                        printf("%s surface fit to %.3f avg. frac. error "
-                                "(s=%.2e, fp=%.2e, k=%d).\n",
-                                (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
-                                s, fp, k);
-                    else
-                        printf("%s surface fit (s=%.2e, fp=%.2e).\n",
-                                (i == 0 ? "Real" : "Imag"), s, fp);
-                    printf("Number of knots (x: %d, y: %d)\n",
-                            *num_knots_x, *num_knots_y);
-                }
-                else if (err > 0 || err < -2)
-                {
-                    printf("Error finding spline coefficients (code %d).\n", err);
-                    if (!search)
+                    printf("Error (%d) finding spline coefficients.\n", err);
+                    if (!search || err == 10)
                     {
                         err = OSKAR_ERR_SPLINE_COEFF_FAIL;
                         goto stop;
@@ -444,14 +421,23 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 {
                     done = 1;
                     err = 0;
+                    if (err == 5)
+                    {
+                        printf("Cannot add any more knots.\n");
+                        avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
+                    }
                     if (search)
+                    {
                         printf("%s surface fit to %.3f avg. frac. error "
                                 "(s=%.2e, fp=%.2e, k=%d).\n",
                                 (i == 0 ? "Real" : "Imag"), avg_frac_err_loc,
                                 s, fp, k);
+                    }
                     else
+                    {
                         printf("%s surface fit (s=%.2e, fp=%.2e).\n",
                                 (i == 0 ? "Real" : "Imag"), s, fp);
+                    }
                     printf("Number of knots (x: %d, y: %d)\n",
                             *num_knots_x, *num_knots_y);
                 }

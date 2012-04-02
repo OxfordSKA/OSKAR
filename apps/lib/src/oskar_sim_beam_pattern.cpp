@@ -80,6 +80,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
 
     // Get the telescope model.
     oskar_TelescopeModel* tel_cpu = oskar_set_up_telescope(&settings);
+    if (tel_cpu == NULL)
+        return OSKAR_ERR_SETUP_FAIL;
 
     // Get the beam pattern settings.
     int station_id = settings.beam_pattern.station_id;

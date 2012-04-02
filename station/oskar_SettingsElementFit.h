@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,16 +45,18 @@ struct oskar_SettingsElementFit
     double overlap_angle_rad;
     int ignore_data_below_horizon;
     int ignore_data_at_pole;
-    double data_weight_at_boundaries_and_overlap_region;
+    double weight_boundaries;
+    double weight_overlap;
     int use_common_set;
-    oskar_SettingsSpline x_real_phi;
-    oskar_SettingsSpline x_imag_phi;
-    oskar_SettingsSpline x_real_theta;
-    oskar_SettingsSpline x_imag_theta;
-    oskar_SettingsSpline y_real_phi;
-    oskar_SettingsSpline y_imag_phi;
-    oskar_SettingsSpline y_real_theta;
-    oskar_SettingsSpline y_imag_theta;
+    oskar_SettingsSpline all;
+    oskar_SettingsSpline x_phi_real;
+    oskar_SettingsSpline x_phi_imag;
+    oskar_SettingsSpline x_theta_real;
+    oskar_SettingsSpline x_theta_imag;
+    oskar_SettingsSpline y_phi_real;
+    oskar_SettingsSpline y_phi_imag;
+    oskar_SettingsSpline y_theta_real;
+    oskar_SettingsSpline y_theta_imag;
 };
 typedef struct oskar_SettingsElementFit oskar_SettingsElementFit;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #define OSKAR_SETTINGS_STATION_H_
 
 #include "station/oskar_SettingsElement.h"
+#include "station/oskar_SettingsElementFit.h"
 
 /**
  * @struct oskar_SettingsStation
@@ -49,6 +50,7 @@ struct oskar_SettingsStation
     double receiver_temperature;
     char* receiver_temperature_file;
     oskar_SettingsElement element;
+    oskar_SettingsElementFit element_fit;
 };
 typedef struct oskar_SettingsStation oskar_SettingsStation;
 

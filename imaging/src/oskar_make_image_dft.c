@@ -60,10 +60,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     if (type != uu_metres->type || type != vv_metres->type ||
             (type | OSKAR_COMPLEX) != amp->type ||
             type != l->type || type != m->type)
-    {
-        printf("FAIL!\n");
         return OSKAR_ERR_TYPE_MISMATCH;
-    }
 
     /* Get dimension sizes. */
     num_vis = amp->num_elements;

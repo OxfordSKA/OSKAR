@@ -63,8 +63,9 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     oskar_SplineData *data_phi = NULL, *data_theta = NULL;
 
     /* Make these parameters. */
-    double overlap = 40.0 * M_PI / 180.0;
-    double overlap_weight = 1.0;
+    double overlap = 6.0 * M_PI / 180.0;
+    double overlap_weight = 4.0;
+    double boundary_weight = 20.0;
     int ignore_below_horizon = 1;
     int ignore_at_poles = 1;
 
@@ -228,7 +229,6 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     {
         int i;
         i = n - 1;
-
         while (((float*)m_phi.data)[i] > (2 * M_PI - overlap))
         {
             /* Ensure enough space in arrays. */
@@ -257,7 +257,7 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
             ((float*)m_theta_im.data)[n] = ((float*)m_theta_im.data)[i];
             ((float*)m_phi_re.data)[n]   = ((float*)m_phi_re.data)[i];
             ((float*)m_phi_im.data)[n]   = ((float*)m_phi_im.data)[i];
-            ((float*)weight.data)[n]     = ((float*)weight.data)[i] * overlap_weight;
+            ((float*)weight.data)[n]     = ((float*)weight.data)[i];
             ++n;
             --i;
         }
@@ -290,7 +290,7 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
             ((float*)m_theta_im.data)[n] = ((float*)m_theta_im.data)[i];
             ((float*)m_phi_re.data)[n]   = ((float*)m_phi_re.data)[i];
             ((float*)m_phi_im.data)[n]   = ((float*)m_phi_im.data)[i];
-            ((float*)weight.data)[n]     = ((float*)weight.data)[i] * overlap_weight;
+            ((float*)weight.data)[n]     = ((float*)weight.data)[i];
             ++n;
             ++i;
         }
@@ -327,7 +327,7 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
             ((double*)m_theta_im.data)[n] = ((double*)m_theta_im.data)[i];
             ((double*)m_phi_re.data)[n]   = ((double*)m_phi_re.data)[i];
             ((double*)m_phi_im.data)[n]   = ((double*)m_phi_im.data)[i];
-            ((double*)weight.data)[n]     = ((double*)weight.data)[i] * overlap_weight;
+            ((double*)weight.data)[n]     = ((double*)weight.data)[i];
             ++n;
             --i;
         }
@@ -360,9 +360,31 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
             ((double*)m_theta_im.data)[n] = ((double*)m_theta_im.data)[i];
             ((double*)m_phi_re.data)[n]   = ((double*)m_phi_re.data)[i];
             ((double*)m_phi_im.data)[n]   = ((double*)m_phi_im.data)[i];
-            ((double*)weight.data)[n]     = ((double*)weight.data)[i] * overlap_weight;
+            ((double*)weight.data)[n]     = ((double*)weight.data)[i];
             ++n;
             ++i;
+        }
+    }
+
+    /* Re-weight at boundaries and overlap region of phi. */
+    if (type == OSKAR_SINGLE)
+    {
+        for (i = 0; i < n; ++i)
+        {
+            if (fabs(cos(((float*)m_phi.data)[i]) - 1.0) < 0.001)
+                ((float*)weight.data)[i] = boundary_weight;
+            else if (cos(((float*)m_phi.data)[i]) > cos(overlap))
+                ((float*)weight.data)[i] = overlap_weight;
+        }
+    }
+    else
+    {
+        for (i = 0; i < n; ++i)
+        {
+            if (fabs(cos(((double*)m_phi.data)[i]) - 1.0) < 0.001)
+                ((double*)weight.data)[i] = boundary_weight;
+            else if (cos(((double*)m_phi.data)[i]) > cos(overlap))
+                ((double*)weight.data)[i] = overlap_weight;
         }
     }
 

@@ -31,6 +31,7 @@
 #include "apps/lib/oskar_telescope_model_save.h"
 #include "apps/lib/test/Test_telescope_model_load_save.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_SettingsTelescope.h"
 #include "interferometry/oskar_telescope_model_set_station_coords.h"
 #include "station/oskar_StationModel.h"
 #include "station/oskar_station_model_init.h"
@@ -79,10 +80,16 @@ void Test_telescope_model_load_save::test_1_level()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Load it back again.
+    oskar_SettingsTelescope settings;
+    settings.altitude_m = telescope.altitude_m;
+    settings.latitude_rad = telescope.latitude_rad;
+    settings.longitude_rad = telescope.longitude_rad;
+    settings.config_directory = (char*)malloc(1 + strlen(path));
+    strcpy(settings.config_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-    err = oskar_telescope_model_load(&telescope2, path, telescope.longitude_rad,
-            telescope.latitude_rad, telescope.altitude_m);
+    err = oskar_telescope_model_load(&telescope2, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    free(settings.config_directory);
 
     // Check the contents.
     CPPUNIT_ASSERT_EQUAL(telescope.num_stations, telescope2.num_stations);
@@ -176,10 +183,16 @@ void Test_telescope_model_load_save::test_2_level()
     file.close();
 
     // Load it back again.
+    oskar_SettingsTelescope settings;
+    settings.altitude_m = telescope.altitude_m;
+    settings.latitude_rad = telescope.latitude_rad;
+    settings.longitude_rad = telescope.longitude_rad;
+    settings.config_directory = (char*)malloc(1 + strlen(path));
+    strcpy(settings.config_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-    err = oskar_telescope_model_load(&telescope2, path, telescope.longitude_rad,
-            telescope.latitude_rad, telescope.altitude_m);
+    err = oskar_telescope_model_load(&telescope2, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    free(settings.config_directory);
 
     // Check the contents.
     CPPUNIT_ASSERT_EQUAL(telescope.num_stations, telescope2.num_stations);

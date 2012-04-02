@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_SettingsTelescope.h"
 #include <cstdlib>
 
 #ifdef __cplusplus
@@ -50,17 +51,13 @@ extern "C" {
  * directory path.
  *
  * @param[out] telescope  Pointer to empty telescope model structure to fill.
- * @param[in]  dir_path   Path to a telescope model directory structure.
- * @param[in]  longitude  Telescope centre longitude, in radians.
- * @param[in]  latitude   Telescope centre latitude, in radians.
- * @param[in]  altitude   Telescope centre altitude, in metres.
+ * @param[in]  settings   Pointer to telescope model settings.
  *
  * @return An OSKAR error code.
  */
 OSKAR_EXPORT
 int oskar_telescope_model_load(oskar_TelescopeModel* telescope,
-        const char* dir_path, double longitude, double latitude,
-        double altitude);
+        const oskar_SettingsTelescope* settings);
 
 #ifdef __cplusplus
 }

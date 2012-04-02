@@ -47,25 +47,24 @@ static const char element_x_name[] = "element_pattern_x.txt";
 static const char element_y_name[] = "element_pattern_y.txt";
 
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
-        const char* dir_path, double longitude, double latitude,
-        double altitude, oskar_StationModel* station,
-        const char* element_file_x, const char* element_file_y, int depth,
+        const oskar_SettingsTelescope* settings, const char* dir_path,
+        oskar_StationModel* station, const char* element_file_x,
+        const char* element_file_y, int depth,
         QHash<QString, oskar_ElementModel*>& models);
 
 extern "C"
 int oskar_telescope_model_load(oskar_TelescopeModel* telescope,
-        const char* dir_path, double longitude, double latitude,
-        double altitude)
+        const oskar_SettingsTelescope* settings)
 {
     QHash<QString, oskar_ElementModel*> models;
-    return oskar_telescope_model_load_private(telescope, dir_path, longitude,
-            latitude, altitude, NULL, NULL, NULL, 0, models);
+    return oskar_telescope_model_load_private(telescope, settings,
+            settings->config_directory, NULL, NULL, NULL, 0, models);
 }
 
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
-        const char* dir_path, double longitude, double latitude,
-        double altitude, oskar_StationModel* station,
-        const char* element_file_x, const char* element_file_y, int depth,
+        const oskar_SettingsTelescope* settings, const char* dir_path,
+        oskar_StationModel* station, const char* element_file_x,
+        const char* element_file_y, int depth,
         QHash<QString, oskar_ElementModel*>& models)
 {
     int error;
@@ -113,7 +112,8 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         // Load the station positions.
         QByteArray coord_path = dir.filePath(coord_file).toAscii();
         error = oskar_telescope_model_load_station_coords(telescope,
-                coord_path, longitude, latitude, altitude);
+                coord_path, settings->longitude_rad, settings->latitude_rad,
+                settings->altitude_m);
         if (error) return error;
 
         // Check that there are the right number of stations.
@@ -126,6 +126,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         {
             // There are no station directories.
             // Still need to set up the stations, though.
+            return OSKAR_ERR_SETUP_FAIL;
         }
     }
     else
@@ -198,7 +199,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         printf("Loading element pattern data (X): %s\n",
                                 element_file_x);
                         error = oskar_element_model_load(station->element_pattern,
-                                1, element_file_x, 1, 0.005, 0.0, 0.0);
+                                1, element_file_x, 1, 0.004, 0.0, 0.0);
                         if (error) return error;
                     }
                     if (element_file_y)
@@ -206,7 +207,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         printf("Loading element pattern data (Y): %s\n",
                                 element_file_y);
                         error = oskar_element_model_load(station->element_pattern,
-                                2, element_file_y, 1, 0.005, 0.0, 0.0);
+                                2, element_file_y, 1, 0.004, 0.0, 0.0);
                         if (error) return error;
                     }
 
@@ -227,8 +228,8 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         s = (depth == 0) ? &telescope->station[i] : &station->child[i];
 
         // Load this station.
-        error = oskar_telescope_model_load_private(telescope, station_name,
-                0.0, 0.0, 0.0, s, element_file_x, element_file_y, depth + 1,
+        error = oskar_telescope_model_load_private(telescope, settings,
+                station_name, s, element_file_x, element_file_y, depth + 1,
                 models);
         if (error) return error;
     }
