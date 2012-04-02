@@ -32,6 +32,8 @@
 #include "imaging/oskar_SettingsImage.h"
 #include "imaging/oskar_make_image.h"
 #include "imaging/oskar_image_write.h"
+#include "imaging/oskar_image_resize.h"
+#include "imaging/oskar_evaluate_image_lm_grid.h"
 
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_init.h"
@@ -41,9 +43,14 @@
 #include "utility/oskar_mem_binary_file_write.h"
 #include "utility/oskar_mem_binary_stream_write.h"
 
+#ifndef OSKAR_NO_FITS
+#include "fits/oskar_fits_image_write.h"
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 
 #define C_0 299792458.0
 
@@ -130,4 +137,29 @@ void Test_make_image::test()
                     "mem", "vis_amp", 0, 0);
     oskar_mem_binary_file_write_ext(&image.data, filename,
                         "mem", "image", 0, 0);
+}
+
+void  Test_make_image::image_lm_grid()
+{
+    // Fill image with lm grid.
+    int type = OSKAR_DOUBLE;
+    int location = OSKAR_LOCATION_CPU;
+    int size = 256;
+    int num_pixels = size * size;
+    double fov = 2.0 * M_PI/180.0;
+    oskar_Mem l(type, location, num_pixels);
+    oskar_Mem m(type, location, num_pixels);
+    oskar_evaluate_image_lm_grid_d(size, size, fov, fov, (double*)l.data,
+            (double*)m.data);
+
+    oskar_Image im;
+    oskar_image_resize(&im, size, size, 1, 1, 2);
+
+    memcpy(im.data.data, l.data, num_pixels * sizeof(double));
+    memcpy((double*)im.data.data + num_pixels, m.data, num_pixels * sizeof(double));
+
+#ifndef OSKAR_NO_FITS
+    oskar_fits_image_write(&im, "test_lm_grid.fits");
+#endif
+    oskar_image_write(&im, "test_lm_grid.img", 0);
 }
