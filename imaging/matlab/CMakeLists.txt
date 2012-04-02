@@ -13,11 +13,8 @@ if (MATLAB_FOUND)
         src/oskar_mex_image_settings_from_matlab.cpp
         src/oskar_mex_image_to_matlab_struct.cpp)
     
-    oskar_mex(oskar_make_image oskar_mex_make_image_old.cpp)
-    oskar_mex(oskar_make_image_new oskar_mex_make_image.cpp)
-    target_link_libraries(oskar_make_image_new 
-        oskar_mex_imaging
-        oskar_mex_interferometry)
+    oskar_mex(oskar_make_image oskar_mex_make_image.cpp)
+    target_link_libraries(oskar_make_image oskar_mex_imaging oskar_mex_interferometry)
     oskar_mex(oskar_image_read oskar_mex_image_read.cpp)
     target_link_libraries(oskar_image_read oskar_mex_imaging)
     
