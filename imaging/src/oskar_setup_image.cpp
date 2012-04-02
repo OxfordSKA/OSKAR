@@ -41,21 +41,22 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
         const oskar_SettingsImage* settings)
 {
     // Polarisation settings.
-    int pol = settings->polarisation;
+    int im_type = settings->image_type;
     int num_pols = 0;
-    if (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
-            pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
-            pol == OSKAR_IMAGE_TYPE_STOKES_U ||
-            pol == OSKAR_IMAGE_TYPE_STOKES_V ||
-            pol == OSKAR_IMAGE_TYPE_POL_XX ||
-            pol == OSKAR_IMAGE_TYPE_POL_YY ||
-            pol == OSKAR_IMAGE_TYPE_POL_XY ||
-            pol == OSKAR_IMAGE_TYPE_POL_YX)
+    if (im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
+            im_type == OSKAR_IMAGE_TYPE_STOKES_Q ||
+            im_type == OSKAR_IMAGE_TYPE_STOKES_U ||
+            im_type == OSKAR_IMAGE_TYPE_STOKES_V ||
+            im_type == OSKAR_IMAGE_TYPE_POL_XX ||
+            im_type == OSKAR_IMAGE_TYPE_POL_YY ||
+            im_type == OSKAR_IMAGE_TYPE_POL_XY ||
+            im_type == OSKAR_IMAGE_TYPE_POL_YX ||
+            im_type == OSKAR_IMAGE_TYPE_PSF)
     {
         num_pols = 1;
     }
-    else if (pol == OSKAR_IMAGE_TYPE_STOKES ||
-            pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
+    else if (im_type == OSKAR_IMAGE_TYPE_STOKES ||
+            im_type == OSKAR_IMAGE_TYPE_POL_LINEAR)
     {
         num_pols = 4;
     }
@@ -115,7 +116,7 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
         im->freq_start_hz = vis->freq_start_hz +
                 (im_chan_range[1] - im_chan_range[0]) * vis->freq_start_hz;
     }
-    im->image_type         = settings->polarisation;
+    im->image_type         = settings->image_type;
     // __Note__
     // mean, variance etc... ignored here as these can't be defined for cubes!
 

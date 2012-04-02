@@ -219,10 +219,12 @@ int oskar_sim_interferometer(const char* settings_file)
     if (settings.image.oskar_image || settings.image.fits_image)
     {
         oskar_Image image;
-        oskar_make_image(&image, vis_global, &settings.image);
+        error = oskar_make_image(&image, vis_global, &settings.image);
+        if (error) return error;
         if (settings.image.oskar_image)
         {
-            oskar_image_write(&image, settings.image.oskar_image, 0);
+            error = oskar_image_write(&image, settings.image.oskar_image, 0);
+            if (error) return error;
         }
 #ifndef OSKAR_NO_FITS
         if (settings.image.fits_image)

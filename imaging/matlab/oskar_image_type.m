@@ -1,7 +1,5 @@
 classdef oskar_image_type < uint32
-    %UNTITLED2 Summary of this function goes here
-    %   Detailed explanation goes here
-    
+
     enumeration
         stokes(0)
         IQUV(0)
@@ -14,6 +12,7 @@ classdef oskar_image_type < uint32
         YY(7)
         XY(8)
         YX(9)
+        PSF(10)
         beam_scalar(100)
     end
     

@@ -111,7 +111,7 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
         im_set_error_("invalid polarisation specification.");
     mxArray* pol_id = mxCreateNumericMatrix(1,1,mxINT32_CLASS, mxREAL);
     mexCallMATLAB(1, &pol_id, 1, &polarisation_, "uint32");
-    out->polarisation = (int)mxGetScalar(pol_id);
+    out->image_type = (int)mxGetScalar(pol_id);
 
     if (!mxIsClass(tranform_type_, "oskar_image_transform"))
         im_set_error_("invalid image transform type.");

@@ -44,7 +44,7 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
 {
     int type = oskar_mem_is_double(vis->amplitude.type) ?
             OSKAR_DOUBLE : OSKAR_SINGLE;
-    int pol = settings->polarisation;
+    int pol = settings->image_type;
     int num_pols = (pol ==  OSKAR_IMAGE_TYPE_STOKES ||
             pol == OSKAR_IMAGE_TYPE_POL_LINEAR) ? 4 : 1;
 
@@ -59,7 +59,6 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
             0 : settings->channel_range[0];
     vis_chan_range[1] = (settings->channel_range[1] < 0) ?
             vis->num_channels-1 : settings->channel_range[1];
-
 
     /* ================================================================= */
     if (type == OSKAR_DOUBLE)

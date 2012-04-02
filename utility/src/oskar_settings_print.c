@@ -379,14 +379,32 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_b(2, w, "Time snapshots", s->image.time_snapshots);
         pr_k(2, w, "Time range", OSKAR_FALSE);
         printf("= %i -> %i\n", s->image.time_range[0], s->image.time_range[1]);
-        pr_i(2, w, "Polarisation", s->image.polarisation);
+        pr_k(2, w, "Image type", OSKAR_FALSE);
+        switch (s->image.image_type)
+        {
+            case OSKAR_IMAGE_TYPE_POL_LINEAR:
+            { printf("= Linear (XX,XY,YX,YY)\n"); break; }
+            case OSKAR_IMAGE_TYPE_POL_XX:   { printf("= XX\n"); break; }
+            case OSKAR_IMAGE_TYPE_POL_XY:   { printf("= XY\n"); break; }
+            case OSKAR_IMAGE_TYPE_POL_YX:   { printf("= YX\n"); break; }
+            case OSKAR_IMAGE_TYPE_POL_YY:   { printf("= YY\n"); break; }
+            case OSKAR_IMAGE_TYPE_STOKES:
+            { printf("= Stokes (I,Q,U,V)\n"); break; }
+            case OSKAR_IMAGE_TYPE_STOKES_I: { printf("= Stokes I\n"); break; }
+            case OSKAR_IMAGE_TYPE_STOKES_Q: { printf("= Stokes Q\n"); break; }
+            case OSKAR_IMAGE_TYPE_STOKES_U: { printf("= Stokes U\n"); break; }
+            case OSKAR_IMAGE_TYPE_STOKES_V: { printf("= Stokes V\n"); break; }
+            case OSKAR_IMAGE_TYPE_PSF:      { printf("= PSF\n");      break; }
+            default:                 { printf("= ERROR BAD TYPE\n"); break; }
+        };
+
         pr_k(2, w, "Transform type", OSKAR_FALSE);
         switch (s->image.transform_type)
         {
             case OSKAR_IMAGE_DFT_2D: { printf("= DFT_2D\n"); break; }
             case OSKAR_IMAGE_DFT_3D: { printf("= DFT_3D\n"); break; }
             case OSKAR_IMAGE_FFT:    { printf("= FFT\n");    break; }
-            default:                 { printf("= N/A\n");    break; }
+            default:                 { printf("= ERROR BAD TYPE\n"); break; }
         };
         pr_s(2, 0, "Input OSKAR visibility file", s->image.input_vis_data);
         pr_s(2, 0, "Output OSKAR image file", s->image.oskar_image);

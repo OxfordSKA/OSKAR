@@ -44,14 +44,15 @@ struct oskar_SettingsImage
     double fov_deg;
     int size;
 
+    int image_type;        /* Polarisation selection or PSF
+                            * enum (value from OSKAR_IMAGE_TYPE_XXX ) */
+
     int channel_snapshots; /* bool, false = frequency synthesis */
     int channel_range[2];  /* channel range (e.g. 1-1 = 1 channel,
                             * 1-2 = 2 channels)*/
 
     int time_snapshots;    /* bool, false = time synthesis */
     int time_range[2];     /* time range */
-
-    int polarisation;      /* enum (value from OSKAR_IMAGE_TYPE_XXX )*/
 
     int transform_type;    /* enum (transform type) */
 

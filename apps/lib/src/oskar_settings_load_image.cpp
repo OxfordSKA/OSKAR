@@ -55,27 +55,29 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     im->time_range[0] = s.value("time_start", -1).toInt();
     im->time_range[1] = s.value("time_end", -1).toInt();
 
-    temp = s.value("polarisation").toString().toUpper();
+    temp = s.value("image_type").toString().toUpper();
     if (temp.startsWith("STOKES") || temp.isEmpty())
-        im->polarisation = OSKAR_IMAGE_TYPE_STOKES;
+        im->image_type = OSKAR_IMAGE_TYPE_STOKES;
     else if (temp == "I")
-        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_I;
+        im->image_type = OSKAR_IMAGE_TYPE_STOKES_I;
     else if (temp == "Q")
-        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_Q;
+        im->image_type = OSKAR_IMAGE_TYPE_STOKES_Q;
     else if (temp == "U")
-        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_U;
+        im->image_type = OSKAR_IMAGE_TYPE_STOKES_U;
     else if (temp == "V")
-        im->polarisation = OSKAR_IMAGE_TYPE_STOKES_V;
+        im->image_type = OSKAR_IMAGE_TYPE_STOKES_V;
     else if (temp.startsWith("LINEAR"))
-        im->polarisation = OSKAR_IMAGE_TYPE_POL_LINEAR;
+        im->image_type = OSKAR_IMAGE_TYPE_POL_LINEAR;
     else if (temp == "XX")
-        im->polarisation = OSKAR_IMAGE_TYPE_POL_XX;
+        im->image_type = OSKAR_IMAGE_TYPE_POL_XX;
     else if (temp == "XY")
-        im->polarisation = OSKAR_IMAGE_TYPE_POL_XY;
+        im->image_type = OSKAR_IMAGE_TYPE_POL_XY;
     else if (temp == "YX")
-        im->polarisation = OSKAR_IMAGE_TYPE_POL_YX;
+        im->image_type = OSKAR_IMAGE_TYPE_POL_YX;
     else if (temp == "YY")
-        im->polarisation = OSKAR_IMAGE_TYPE_POL_YY;
+        im->image_type = OSKAR_IMAGE_TYPE_POL_YY;
+    else if (temp == "PSF")
+        im->image_type = OSKAR_IMAGE_TYPE_PSF;
     else
         return OSKAR_ERR_SETTINGS;
 

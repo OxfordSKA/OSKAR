@@ -196,16 +196,17 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     setLabel("image", "Image settings");
     registerSetting("image/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("image/size", "Image dimension [pixels]", oskar_SettingsItem::INT_UNSIGNED);
+    options.clear();
+    options << "Stokes (I,Q,U,V)" << "I" << "Q" << "U" << "V"
+            << "Linear (XX,XY,YX,YY)" << "XX" << "XY" << "YX" << "YY"
+            << "PSF";
+    registerSetting("image/image_type", "Image type", oskar_SettingsItem::OPTIONS, options);
     registerSetting("image/channel_snapshots", "Channel snapshots", oskar_SettingsItem::BOOL);
     registerSetting("image/channel_start", "Channel start", oskar_SettingsItem::INT);
     registerSetting("image/channel_end", "Channel end", oskar_SettingsItem::INT);
     registerSetting("image/time_snapshots", "Time snapshots", oskar_SettingsItem::BOOL);
     registerSetting("image/time_start", "Time start", oskar_SettingsItem::INT);
     registerSetting("image/time_end", "Time end", oskar_SettingsItem::INT);
-    options.clear();
-    options << "Stokes (I,Q,U,V)" << "I" << "Q" << "U" << "V"
-            << "Linear (XX,XY,YX,YY)" << "XX" << "XY" << "YX" << "YY";
-    registerSetting("image/polarisation", "Polarisation", oskar_SettingsItem::OPTIONS, options);
     options.clear();
     options << "DFT 2D" << "DFT 3D" << "FFT";
     registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);

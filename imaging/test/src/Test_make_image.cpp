@@ -116,7 +116,7 @@ void Test_make_image::test()
     settings.time_snapshots = OSKAR_TRUE;
     settings.time_range[0] = 0;
     settings.time_range[1] = 1;
-    settings.polarisation = OSKAR_IMAGE_TYPE_POL_LINEAR;
+    settings.image_type = OSKAR_IMAGE_TYPE_POL_LINEAR;
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
     oskar_Image image;

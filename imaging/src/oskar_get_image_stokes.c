@@ -51,7 +51,7 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
 
     /* Local variables */
     num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
-    pol = settings->polarisation;
+    pol = settings->image_type;
     num_vis_amps = vis->num_baselines * vis->num_times * vis->num_channels;
     type = oskar_mem_is_double(vis->amplitude.type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
     location = OSKAR_LOCATION_CPU;
