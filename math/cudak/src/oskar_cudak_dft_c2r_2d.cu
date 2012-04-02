@@ -79,7 +79,7 @@ void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
             // Calculate the complex DFT weight.
             float2 weight;
             float a = c[i].x * xp_out + c[i].y * yp_out;
-            sincosf(a, &weight.y, &weight.x);
+            sincosf(-a, &weight.y, &weight.x);
 
             // Perform complex multiply-accumulate.
             // Output is real, so only evaluate the real part.
@@ -147,7 +147,7 @@ void oskar_cudak_dft_c2r_2d_d(int n_in, const double* x_in,
             // Calculate the complex DFT weight.
             double2 weight;
             double a = cd[i].x * xp_out + cd[i].y * yp_out;
-            sincos(a, &weight.y, &weight.x);
+            sincos(-a, &weight.y, &weight.x);
 
             // Perform complex multiply-accumulate.
             // Output is real, so only evaluate the real part.

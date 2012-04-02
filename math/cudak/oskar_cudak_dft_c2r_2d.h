@@ -56,6 +56,13 @@
  *
  * The kernel requires max_in_chunk * sizeof(float4) bytes of shared memory.
  *
+ * ============================================================================
+ * WARNING: Changed the sign of the DFT to negative for the 2.0.0-beta release
+ * to resolve image ordering problem when writing FITS files.
+ * This should be thought of as a hack as we find no clear justification for
+ * the phase of the DFT to have a native sign.
+ * ============================================================================
+ *
  * @param[in] n_in         Number of input points.
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
@@ -92,6 +99,13 @@ void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
  * number of input points.
  *
  * The kernel requires max_in_chunk * sizeof(double4) bytes of shared memory.
+ *
+ * ============================================================================
+ * WARNING: Changed the sign of the DFT to negative for the 2.0.0-beta release
+ * to resolve image ordering problem when writing FITS files.
+ * This should be thought of as a hack as we find no clear justification for
+ * the phase of the DFT to have a native sign.
+ * ============================================================================
  *
  * @param[in] n_in         Number of input points.
  * @param[in] x_in         Array of input x positions.
