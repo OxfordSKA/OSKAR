@@ -33,6 +33,7 @@
 #include "utility/oskar_get_error_string.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
 
+#include <cuda_runtime_api.h>
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QMessageBox>
@@ -144,4 +145,7 @@ oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QWidget *parent) : QDialog(parent)
 
     // Free the CUDA info structure.
     oskar_cuda_info_free(&info);
+
+    // Release the CUDA context.
+    cudaDeviceReset();
 }
