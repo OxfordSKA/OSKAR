@@ -392,12 +392,341 @@ int oskar_get_image_vis_amps(oskar_Mem* amps, const oskar_Visibilities* vis,
     } /* [end] if (type == OSKAR_DOUBLE) */
 
 
+
+
+
+
+    /* ================================================================= */
     /* ================================================================= */
     else /* (type == OSKAR_SINGLE) */
     {
-        // FIXME
-        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-    }
+        float2* a_ = (float2*)amps->data;
+
+        /* ----------------------------------- TIME SNAPSHOTS, FREQ SNAPSHOTS */
+        if (settings->time_snapshots && settings->channel_snapshots)
+        {
+            int idx = (vis_channel * vis->num_times + vis_time) * vis->num_baselines;
+            if (num_pols == 4)
+            {
+                float4c* data;
+                if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
+                    data = (float4c*)vis->amplitude.data;
+                else /* pol == OSKAR_IMAGE_TYPE_STOKES */
+                    data = (float4c*)stokes->data;
+
+                for (int b = 0; b < vis->num_baselines; ++b)
+                {
+                    if (p == 0)
+                    {
+                        a_[b].x = data[idx+b].a.x; a_[b].y= data[idx+b].a.y;
+                    }
+                    else if (p == 1)
+                    {
+                        a_[b].x=data[idx+b].b.x; a_[b].y=data[idx+b].b.y;
+                    }
+                    else if (p == 2)
+                    {
+                        a_[b].x=data[idx+b].c.x; a_[b].y=data[idx+b].c.y;
+                    }
+                    else if (p == 3)
+                    {
+                        a_[b].x=data[idx+b].d.x; a_[b].y=data[idx+b].d.y;
+                    }
+                }
+            }
+            else if (num_pols == 1)
+            {
+                if (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_U ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_V)
+                {
+                    float2* data = (float2*)stokes->data;
+                    for (int b = 0; b < vis->num_baselines; ++b)
+                    {
+                        a_[b].x = data[idx+b].x; a_[b].y = data[idx+b].y;
+                    }
+                }
+                else
+                {
+                    float4c* data = (float4c*)vis->amplitude.data;
+                    for (int b = 0; b < vis->num_baselines; ++b)
+                    {
+                        if (pol == OSKAR_IMAGE_TYPE_POL_XX)
+                        {
+                            a_[b].x=data[idx+b].a.x; a_[b].y=data[idx+b].a.y;
+                        }
+                        else if (pol == OSKAR_IMAGE_TYPE_POL_XY)
+                        {
+                            a_[b].x=data[idx+b].b.x; a_[b].y=data[idx+b].b.y;
+                        }
+                        else if (pol == OSKAR_IMAGE_TYPE_POL_YX)
+                        {
+                            a_[b].x=data[idx+b].c.x; a_[b].y=data[idx+b].c.y;
+                        }
+                        else if (pol == OSKAR_IMAGE_TYPE_POL_YY)
+                        {
+                            a_[b].x=data[idx+b].d.x; a_[b].y=data[idx+b].d.y;
+                        }
+                    }
+                }
+            } /* num_pols == 1 */
+        }
+
+
+
+        /* ---------------------------------- TIME SNAPSHOTS, FREQ SYNTHESIS */
+        else if (settings->time_snapshots && !settings->channel_snapshots)
+        {
+            if (num_pols == 4)
+            {
+                float4c* data;
+                if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
+                    data = (float4c*)vis->amplitude.data;
+                else /* pol == OSKAR_IMAGE_TYPE_STOKES */
+                    data = (float4c*)stokes->data;
+                for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+                {
+                    int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
+                    for (int b = 0; b < vis->num_baselines;++b, ++i)
+                    {
+                        if (p == 0)
+                        {
+                            a_[i].x=data[idx+b].a.x; a_[i].y=data[idx+b].a.y;
+                        }
+                        else if (p == 1)
+                        {
+                            a_[i].x=data[idx+b].b.x; a_[i].y=data[idx+b].b.y;
+                        }
+                        else if (p == 2)
+                        {
+                            a_[i].x=data[idx+b].c.x; a_[i].y=data[idx+b].c.y;
+                        }
+                        else if (p == 3)
+                        {
+                            a_[i].x=data[idx+b].d.x; a_[i].y=data[idx+b].d.y;
+                        }
+                    }
+                }
+            }
+            else /* (num_pols == 1) */
+            {
+                if (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_U ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_V)
+                {
+                    float2* data = (float2*)stokes->data;
+                    for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+                    {
+                        int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
+                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        {
+                            a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
+                        }
+                    }
+                }
+                else
+                {
+                    float4c* data = (float4c*)vis->amplitude.data;
+                    for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+                    {
+                        int idx = (c*vis->num_times+vis_time)*vis->num_baselines;
+                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        {
+                            if (pol == OSKAR_IMAGE_TYPE_POL_XX)
+                            {
+                                a_[i].x=data[idx+b].a.x; a_[i].y=data[idx+b].a.y;
+                            }
+                            else if (pol == OSKAR_IMAGE_TYPE_POL_XY)
+                            {
+                                a_[i].x=data[idx+b].b.x; a_[i].y=data[idx+b].b.y;
+                            }
+                            else if (pol == OSKAR_IMAGE_TYPE_POL_YX)
+                            {
+                                a_[i].x=data[idx+b].c.x; a_[i].y=data[idx+b].c.y;
+                            }
+                            else if (pol == OSKAR_IMAGE_TYPE_POL_YY)
+                            {
+                                a_[i].x=data[idx+b].d.x; a_[i].y=data[idx+b].d.y;
+                            }
+                        }
+                    }
+                }
+            } /* num_pols == 1 */
+        }
+
+        /* ---------------------------------- TIME SYNTHESIS, FREQ SNAPSHOTS */
+        else if (!settings->time_snapshots && settings->channel_snapshots)
+        {
+            if (num_pols == 4)
+            {
+                float4c* data;
+                if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
+                    data = (float4c*)vis->amplitude.data;
+                else /* pol == OSKAR_IMAGE_TYPE_STOKES */
+                    data = (float4c*)stokes->data;
+                for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
+                {
+                    int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
+                    for (int b = 0; b < vis->num_baselines;++b, ++i)
+                    {
+                        if (p == 0)
+                        {
+                            a_[i].x=data[idx+b].a.x; a_[i].y=data[idx+b].a.y;
+                        }
+                        else if (p == 1)
+                        {
+                            a_[i].x=data[idx+b].b.x; a_[i].y=data[idx+b].b.y;
+                        }
+                        else if (p == 2)
+                        {
+                            a_[i].x=data[idx+b].c.x; a_[i].y=data[idx+b].c.y;
+                        }
+                        else if (p == 3)
+                        {
+                            a_[i].x=data[idx+b].d.x; a_[i].y=data[idx+b].d.y;
+                        }
+                    }
+                }
+            }
+            else /* (num_pols == 1) */
+            {
+                if (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_U ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_V)
+                {
+                    float2* data = (float2*)stokes->data;
+                    for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
+                    {
+                        int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
+                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        {
+                            a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
+                        }
+                    }
+                }
+                else
+                {
+                    float4c* data = (float4c*)vis->amplitude.data;
+                    for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
+                    {
+                        int idx = (vis_channel*vis->num_times+t)*vis->num_baselines;
+                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        {
+                            if (pol == OSKAR_IMAGE_TYPE_POL_XX)
+                            {
+                                a_[i].x=data[idx+b].a.x; a_[i].y=data[idx+b].a.y;
+                            }
+                            else if (pol == OSKAR_IMAGE_TYPE_POL_XY)
+                            {
+                                a_[i].x=data[idx+b].b.x; a_[i].y=data[idx+b].b.y;
+                            }
+                            else if (pol == OSKAR_IMAGE_TYPE_POL_YX)
+                            {
+                                a_[i].x=data[idx+b].c.x; a_[i].y=data[idx+b].c.y;
+                            }
+                            else if (pol == OSKAR_IMAGE_TYPE_POL_YY)
+                            {
+                                a_[i].x=data[idx+b].d.x; a_[i].y=data[idx+b].d.y;
+                            }
+                        }
+                    }
+                }
+            } /* num_pols == 1 */
+        }
+
+        /* ----------------------------------- TIME SYNTHESIS, FREQ SYNTHESIS */
+        else
+        {
+            if (num_pols == 4)
+            {
+                float4c* data;
+                if (pol == OSKAR_IMAGE_TYPE_POL_LINEAR)
+                    data = (float4c*)vis->amplitude.data;
+                else /* pol == OSKAR_IMAGE_TYPE_STOKES */
+                    data = (float4c*)stokes->data;
+                for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+                {
+                    for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
+                    {
+                        int idx = (c*vis->num_times+t)*vis->num_baselines;
+                        for (int b = 0; b < vis->num_baselines;++b, ++i)
+                        {
+                            if (p == 0)
+                            {
+                                a_[i].x=data[idx+b].a.x; a_[i].y=data[idx+b].a.y;
+                            }
+                            else if (p == 1)
+                            {
+                                a_[i].x=data[idx+b].b.x; a_[i].y=data[idx+b].b.y;
+                            }
+                            else if (p == 2)
+                            {
+                                a_[i].x=data[idx+b].c.x; a_[i].y=data[idx+b].c.y;
+                            }
+                            else if (p == 3)
+                            {
+                                a_[i].x=data[idx+b].d.x; a_[i].y=data[idx+b].d.y;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (pol == OSKAR_IMAGE_TYPE_STOKES_I ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_Q ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_U ||
+                        pol == OSKAR_IMAGE_TYPE_STOKES_V)
+                {
+                    float2* data = (float2*)stokes->data;
+                    for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+                    {
+                        for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
+                        {
+                            int idx = (c*vis->num_times+t)*vis->num_baselines;
+                            for (int b = 0; b < vis->num_baselines;++b, ++i)
+                            {
+                                a_[i].x=data[idx+b].x; a_[i].y=data[idx+b].y;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    float4c* data = (float4c*)vis->amplitude.data;
+                    for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
+                    {
+                        for (int t = vis_time_range[0]; t <=vis_time_range[1]; ++t)
+                        {
+                            int idx = (c*vis->num_times+t)*vis->num_baselines;
+                            for (int b = 0; b < vis->num_baselines;++b, ++i)
+                            {
+                                if (pol == OSKAR_IMAGE_TYPE_POL_XX)
+                                {
+                                    a_[i].x=data[idx+b].a.x; a_[i].y=data[idx+b].a.y;
+                                }
+                                else if (pol == OSKAR_IMAGE_TYPE_POL_XY)
+                                {
+                                    a_[i].x=data[idx+b].b.x; a_[i].y=data[idx+b].b.y;
+                                }
+                                else if (pol == OSKAR_IMAGE_TYPE_POL_YX)
+                                {
+                                    a_[i].x=data[idx+b].c.x; a_[i].y=data[idx+b].c.y;
+                                }
+                                else if (pol == OSKAR_IMAGE_TYPE_POL_YY)
+                                {
+                                    a_[i].x=data[idx+b].d.x; a_[i].y=data[idx+b].d.y;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } // [end] (type == OSKAR_SINGLE)
 
 
     return OSKAR_SUCCESS;

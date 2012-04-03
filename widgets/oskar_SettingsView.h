@@ -51,6 +51,7 @@ public slots:
 
 private slots:
     void resizeAfterExpand(const QModelIndex& index);
+    void updateAfterCollapsed(const QModelIndex& index);
 
 private:
     void saveRestoreExpanded(const QModelIndex& parent, QStringList& list,

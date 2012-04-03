@@ -56,8 +56,12 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     im->time_range[1] = s.value("time_end", -1).toInt();
 
     temp = s.value("image_type").toString().toUpper();
+    QString type(temp);
     if (temp.startsWith("STOKES") || temp.isEmpty())
+    {
         im->image_type = OSKAR_IMAGE_TYPE_STOKES;
+        type = "STOKES";
+    }
     else if (temp == "I")
         im->image_type = OSKAR_IMAGE_TYPE_STOKES_I;
     else if (temp == "Q")
@@ -67,7 +71,10 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else if (temp == "V")
         im->image_type = OSKAR_IMAGE_TYPE_STOKES_V;
     else if (temp.startsWith("LINEAR"))
+    {
         im->image_type = OSKAR_IMAGE_TYPE_POL_LINEAR;
+        type = "LINEAR";
+    }
     else if (temp == "XX")
         im->image_type = OSKAR_IMAGE_TYPE_POL_XX;
     else if (temp == "XY")
@@ -98,16 +105,19 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
         strcpy(im->input_vis_data, t.constData());
     }
 
-    t = s.value("oskar_image").toByteArray();
+    t = s.value("oskar_image_root").toByteArray();
     if (t.size() > 0)
     {
+        // Construct filename from root.
+        t += "_" + type + ".img";
         im->oskar_image = (char*)malloc(t.size() + 1);
         strcpy(im->oskar_image, t.constData());
     }
 
-    t = s.value("fits_image").toByteArray();
+    t = s.value("fits_image_root").toByteArray();
     if (t.size() > 0)
     {
+        t += "_" + type + ".fits";
         im->fits_image = (char*)malloc(t.size() + 1);
         strcpy(im->fits_image, t.constData());
     }

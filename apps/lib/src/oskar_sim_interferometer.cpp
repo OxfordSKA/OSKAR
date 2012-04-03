@@ -219,16 +219,21 @@ int oskar_sim_interferometer(const char* settings_file)
     if (settings.image.oskar_image || settings.image.fits_image)
     {
         oskar_Image image;
+        printf("\n");
+        printf("=== Starting OSKAR imager ...\n");
         error = oskar_make_image(&image, vis_global, &settings.image);
+        printf("=== Imaging complete.\n\n");
         if (error) return error;
         if (settings.image.oskar_image)
         {
+            printf("--> Writing OSKAR image: '%s'\n", settings.image.oskar_image);
             error = oskar_image_write(&image, settings.image.oskar_image, 0);
             if (error) return error;
         }
 #ifndef OSKAR_NO_FITS
         if (settings.image.fits_image)
         {
+            printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
             oskar_fits_image_write(&image, settings.image.fits_image);
         }
 #endif
@@ -251,6 +256,6 @@ int oskar_sim_interferometer(const char* settings_file)
     free(sky_chunk_cpu);
     oskar_settings_free(&settings);
 
-    fprintf(stdout, "=== Run complete.\n");
+    fprintf(stdout, "\n=== Run complete.\n");
     return OSKAR_SUCCESS;
 }

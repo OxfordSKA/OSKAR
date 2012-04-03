@@ -31,6 +31,8 @@
 #include "imaging/oskar_image_resize.h"
 #include "utility/oskar_mem_copy.h"
 
+#include <cstdio>
+
 #define SEC2DAYS 1.15740740740740740740741e-5
 
 #ifdef __cplusplus
@@ -65,6 +67,19 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
+    // Set the channel range for the image.
+    int im_chan_range[2];
+    im_chan_range[0] = (settings->channel_range[0] < 0) ? 0 : settings->channel_range[0];
+    if (settings->channel_range[1] < 0)
+        im_chan_range[1] = settings->channel_snapshots ? vis->num_channels-1 : 0;
+    else
+        im_chan_range[1] = settings->channel_range[1];
+    if (!settings->channel_snapshots && im_chan_range[1] > 0)
+        return OSKAR_ERR_INVALID_RANGE;
+    int num_chan  = (settings->channel_snapshots) ?
+            (im_chan_range[1] - im_chan_range[0] + 1) : 1;
+    if (num_chan < 1) return OSKAR_ERR_INVALID_RANGE;
+
     // Set the time range for the image.
     int im_time_range[2];
     im_time_range[0] = (settings->time_range[0] < 0) ? 0 : settings->time_range[0];
@@ -78,18 +93,16 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
             (im_time_range[1] - im_time_range[0] + 1) : 1;
     if (num_times < 1) return OSKAR_ERR_INVALID_RANGE;
 
-    // Set the channel range for the image.
-    int im_chan_range[2];
-    im_chan_range[0] = (settings->channel_range[0] < 0) ? 0 : settings->channel_range[0];
-    if (settings->channel_range[1] < 0)
-        im_chan_range[1] = settings->channel_snapshots ? vis->num_channels-1 : 0;
-    else
-        im_chan_range[1] = settings->channel_range[1];
-    if (!settings->channel_snapshots && im_chan_range[1] > 0)
-        return OSKAR_ERR_INVALID_RANGE;
-    int num_chan  = (settings->channel_snapshots) ?
-            (im_chan_range[1] - im_chan_range[0] + 1) : 1;
-    if (num_chan < 1) return OSKAR_ERR_INVALID_RANGE;
+    int vis_chan_range[2];
+    vis_chan_range[0] = (settings->channel_range[0] < 0) ?
+            0 : settings->channel_range[0];
+    vis_chan_range[1] = (settings->channel_range[1] < 0) ?
+            vis->num_channels-1 : settings->channel_range[1];
+    int vis_time_range[2];
+    vis_time_range[0] = (settings->time_range[0] < 0) ?
+            0 : settings->time_range[0];
+    vis_time_range[1] = (settings->time_range[1] < 0) ?
+            vis->num_times-1 : settings->time_range[1];
 
     // Resize the image cube
     oskar_image_resize(im, settings->size, settings->size,
@@ -104,17 +117,17 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     im->fov_ra_deg         = settings->fov_deg;
     im->fov_dec_deg        = settings->fov_deg;
     im->time_start_mjd_utc = vis->time_start_mjd_utc +
-            (settings->time_range[0] * vis->time_inc_seconds * SEC2DAYS);
-    im->time_inc_sec       = vis->time_inc_seconds;
+            (vis_time_range[0] * vis->time_inc_seconds * SEC2DAYS);
+    im->time_inc_sec       = (settings->time_snapshots) ? vis->time_inc_seconds : 0.0;
     im->freq_inc_hz        = (settings->channel_snapshots) ? vis->freq_inc_hz : 0.0;
     if (settings->channel_snapshots)
     {
-        im->freq_start_hz = vis->freq_start_hz + im_chan_range[0] * vis->freq_inc_hz;
+        im->freq_start_hz = vis->freq_start_hz + vis_chan_range[0] * vis->freq_inc_hz;
     }
     else
     {
-        im->freq_start_hz = vis->freq_start_hz +
-                (im_chan_range[1] - im_chan_range[0]) * vis->freq_start_hz;
+        double chan0 = (vis_chan_range[1] - vis_chan_range[0]) / 2.0;
+        im->freq_start_hz = vis->freq_start_hz + chan0 * vis->freq_inc_hz;
     }
     im->image_type         = settings->image_type;
     // __Note__

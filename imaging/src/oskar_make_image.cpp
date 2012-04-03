@@ -200,7 +200,6 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
     for (int i = 0, c = 0; c < num_chan; ++c)
     {
         int vis_chan = im_chan_range[0] + c;
-        // FIXME This is not right for freq synth mode.
         double im_freq = im->freq_start_hz + c * im->freq_inc_hz;
 
         for (int t = 0; t < num_times; ++t)
@@ -214,15 +213,9 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
 
             for (int p = 0; p < num_pols; ++p, ++i)
             {
-//                int vis_pol = 0; // FIXME currently not used but could reduce
-                                   // length of oskar_get_image_vis_amps.
-//                if (num_pols == 4) vis_pol = p;
-//                else vis_pol = pol_type;
-
-                printf("--> making image (%i/%i): freq[%i] = %f MHz, time = %i, "
-                        "polarisation index = %i [%i,%i,%i]\n", i,
-                        (num_chan*num_times*num_pols),
-                        vis_chan, im_freq/1.0e6, vis_time, p, c, t, p);
+                printf("--> Making image [%3i/%3i]: freq = % -8.2f MHz, "
+                        "cube index = (%i, %i, %i)\n",
+                        i, (num_chan*num_times*num_pols), im_freq/1.0e6, c, t, p);
 
                 // Get visibility amplitudes for imaging.
                 if (im_type == OSKAR_IMAGE_TYPE_PSF)

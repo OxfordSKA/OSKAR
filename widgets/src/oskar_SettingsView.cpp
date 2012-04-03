@@ -35,7 +35,9 @@ oskar_SettingsView::oskar_SettingsView(QWidget* parent)
 {
     connect(this, SIGNAL(expanded(const QModelIndex&)),
             this, SLOT(resizeAfterExpand(const QModelIndex&)));
-    setAlternatingRowColors(false);
+    connect(this, SIGNAL(collapsed(const QModelIndex&)),
+            this, SLOT(updateAfterCollapsed(const QModelIndex&)));
+    setAlternatingRowColors(true);
     setUniformRowHeights(true);
 }
 
@@ -78,6 +80,13 @@ void oskar_SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)
     resizeColumnToContents(0);
     update();
 }
+
+
+void oskar_SettingsView::updateAfterCollapsed(const QModelIndex& /*index*/)
+{
+    update();
+}
+
 
 void oskar_SettingsView::saveRestoreExpanded(const QModelIndex& parent,
         QStringList& list, int restore)

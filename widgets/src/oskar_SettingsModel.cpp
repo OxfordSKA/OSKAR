@@ -202,18 +202,30 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
             << "PSF";
     registerSetting("image/image_type", "Image type", oskar_SettingsItem::OPTIONS, options);
     registerSetting("image/channel_snapshots", "Channel snapshots", oskar_SettingsItem::BOOL);
-    registerSetting("image/channel_start", "Channel start", oskar_SettingsItem::INT);
+    registerSetting("image/channel_start", "Channel start", oskar_SettingsItem::INT_UNSIGNED);
     registerSetting("image/channel_end", "Channel end", oskar_SettingsItem::INT);
+    setTooltip("image/channel_end", "End channel index range of visibility data to image.\n"
+            "A Value of -1 == use highest channel in the input data.\n");
     registerSetting("image/time_snapshots", "Time snapshots", oskar_SettingsItem::BOOL);
-    registerSetting("image/time_start", "Time start", oskar_SettingsItem::INT);
+    registerSetting("image/time_start", "Time start", oskar_SettingsItem::INT_UNSIGNED);
     registerSetting("image/time_end", "Time end", oskar_SettingsItem::INT);
+    setTooltip("image/time_end", "End time index range of visibility data to image.\n"
+            "A Value of -1 == use highest time in the input data.\n");
     options.clear();
     options << "DFT 2D" << "DFT 3D" << "FFT";
     registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);
     registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
-    registerSetting("image/oskar_image", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("image/oskar_image_root", "OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip("image/oskar_image_root",
+            "Path consisting of the root of the filename used to save the\n"
+            "output image. The full filename will be constructed as:\n"
+            "   <root>_type.img");
 #ifndef OSKAR_NO_FITS
-    registerSetting("image/fits_image", "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("image/fits_image_root", "FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip("image/fits_image_root",
+            "Path consisting of the root of the filename used to save the\n"
+            "output image. The full filename will be constructed as:\n"
+            "   <root>_type.fits");
 #endif
 
 }

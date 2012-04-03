@@ -86,6 +86,8 @@ int oskar_imager(const char* settings_file)
         return error;
     }
 
+    fprintf(stdout, "=== Starting OSKAR imager ...\n");
+
     oskar_Image image;
     error = oskar_make_image(&image, &vis, &settings.image);
     if (error)
@@ -94,10 +96,11 @@ int oskar_imager(const char* settings_file)
                 oskar_get_error_string(error));
         return error;
     }
+    fprintf(stdout, "=== Imaging complete.\n\n");
 
     if (settings.image.oskar_image)
     {
-        printf("= Writing OSKAR image ... ");
+        printf("--> Writing OSKAR image: '%s'\n", settings.image.oskar_image);
         error = oskar_image_write(&image, settings.image.oskar_image, 0);
         if (error)
         {
@@ -105,17 +108,17 @@ int oskar_imager(const char* settings_file)
                     oskar_get_error_string(error));
             return error;
         }
-        printf("done.\n");
     }
 #ifndef OSKAR_NO_FITS
     if (settings.image.fits_image)
     {
-        printf("= Writing FITS image ... ");
+        printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
         // Note: currently there is no error code returned from this function.
         oskar_fits_image_write(&image, settings.image.fits_image);
-        printf("done.\n");
     }
 #endif
+
+    fprintf(stdout, "\n=== Run complete.\n");
 
     return error;
 }
