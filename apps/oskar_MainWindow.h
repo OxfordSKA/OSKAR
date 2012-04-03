@@ -73,7 +73,7 @@ private:
     oskar_SettingsView* view_;
     QAction* actHideUnset_;
     QString settingsFile_;
-    int (*sim_function_)(const char*);
+    int (*run_function_)(const char*);
 };
 
 #endif // OSKAR_MAIN_WINDOW_H_

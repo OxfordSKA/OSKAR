@@ -223,13 +223,13 @@ void oskar_MainWindow::about()
 
 void oskar_MainWindow::runBeamPattern()
 {
-    sim_function_ = &oskar_sim_beam_pattern;
+    run_function_ = &oskar_sim_beam_pattern;
     runButton();
 }
 
 void oskar_MainWindow::runInterferometer()
 {
-    sim_function_ = &oskar_sim_interferometer;
+    run_function_ = &oskar_sim_interferometer;
     runButton();
 }
 
@@ -238,11 +238,12 @@ void oskar_MainWindow::setHideIfUnset(bool value)
     view_->saveExpanded();
     modelProxy_->setHideIfUnset(value);
     view_->restoreExpanded();
+    view_->update();
 }
 
 void oskar_MainWindow::runImager()
 {
-    sim_function_ = &oskar_imager;
+    run_function_ = &oskar_imager;
     runButton();
 }
 
@@ -297,7 +298,7 @@ void oskar_MainWindow::run(int depth, QStringList outputFiles)
             oskar_SettingsModel::IterationKeysRole).toStringList();
     if (iterationKeys.size() == 0)
     {
-        int error = (*sim_function_)(settings);
+        int error = (*run_function_)(settings);
         if (error)
         {
             fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
@@ -353,7 +354,7 @@ void oskar_MainWindow::run(int depth, QStringList outputFiles)
             else
             {
                 // Run the simulation with these settings.
-                int error = (*sim_function_)(settings);
+                int error = (*run_function_)(settings);
                 if (error)
                 {
                     fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
