@@ -52,10 +52,10 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Simulator settings.
     setLabel("simulator", "Simulator settings");
     k = "simulator/double_precision";
-    registerSetting(k, "Use double precision", oskar_SettingsItem::BOOL);
+    registerSetting(k, "Use double precision", oskar_SettingsItem::BOOL, false, true);
     setTooltip(k, "Determines whether double precision arithmetic is used");
-    registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE);
-    registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST);
+    registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE, false, 10000);
+    registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST, false, 0);
 
     // Sky model file settings.
     setLabel("sky", "Sky model settings");
@@ -137,17 +137,17 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/longitude_deg", "Longitude [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/latitude_deg", "Latitude [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/altitude_m", "Altitude [m]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/use_common_sky", "Use common sky (short baseline approximation)", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/use_common_sky", "Use common sky (short baseline approximation)", oskar_SettingsItem::BOOL, false, true);
     setLabel("telescope/station", "Station settings");
     options.clear();
     options << "AA"; // << "Dish";
-    registerSetting("telescope/station/station_type", "Station type", oskar_SettingsItem::OPTIONS, options);
+    registerSetting("telescope/station/station_type", "Station type", oskar_SettingsItem::OPTIONS, options, false, options[0]);
     options.clear();
     options << "Point" << "Dipole" << "Custom";
-    registerSetting("telescope/station/element_type", "Element type", oskar_SettingsItem::OPTIONS, options);
-    registerSetting("telescope/station/evaluate_array_factor", "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/station/evaluate_element_factor", "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL);
-    registerSetting("telescope/station/normalise_beam", "Normalise array beam", oskar_SettingsItem::BOOL);
+    registerSetting("telescope/station/element_type", "Element type", oskar_SettingsItem::OPTIONS, options, false, options[1]);
+    registerSetting("telescope/station/evaluate_array_factor", "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL, false, true);
+    registerSetting("telescope/station/evaluate_element_factor", "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL, false, true);
+    registerSetting("telescope/station/normalise_beam", "Normalise array beam", oskar_SettingsItem::BOOL, false, false);
     setLabel("telescope/station/element", "Element settings (overrides)");
     registerSetting("telescope/station/element/gain", "Element gain", oskar_SettingsItem::DOUBLE);
     registerSetting("telescope/station/element/gain_error_fixed", "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
@@ -265,6 +265,19 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
             font.setBold(true);
             return font;
         }
+        QVariant val = item->value();
+        if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
+        {
+            QFont font = QApplication::font();
+            font.setItalic(true);
+            return font;
+        }
+    }
+    if (role == Qt::ForegroundRole)
+    {
+        QVariant val = item->value();
+        if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
+            return QColor(Qt::darkBlue);
     }
     else if (role == Qt::ToolTipRole)
         return item->tooltip();
@@ -322,12 +335,18 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (role == Qt::DisplayRole || role == Qt::EditRole)
         {
-            return item->value();
+            QVariant val = item->value();
+            if (val.isNull())
+                val = item->defaultValue();
+            return val;
         }
         else if (role == Qt::CheckStateRole &&
                 item->type() == oskar_SettingsItem::BOOL)
         {
-            return item->value().toBool() ? Qt::Checked : Qt::Unchecked;
+            QVariant val = item->value();
+            if (val.isNull())
+                val = item->defaultValue();
+            return val.toBool() ? Qt::Checked : Qt::Unchecked;
         }
         else if (role == Qt::SizeHintRole)
         {
@@ -411,7 +430,7 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
         {
             // Append the group and set it as the new parent.
             append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
-                    false, QStringList(), parent);
+                    false, QVariant(), QStringList(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
@@ -421,7 +440,7 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
     if (!child.isValid())
     {
         append(key, keys.last(), oskar_SettingsItem::LABEL, keys.last(),
-                false, QStringList(), parent);
+                false, QVariant(), QStringList(), parent);
         child = index(rowCount(parent) - 1, 0, parent);
     }
     return child;
@@ -474,7 +493,7 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
 
 void oskar_SettingsModel::registerSetting(const QString& key,
         const QString& label, int type, const QStringList& options,
-        bool required)
+        bool required, const QVariant& defaultValue)
 {
     QStringList keys = key.split('/');
 
@@ -489,13 +508,14 @@ void oskar_SettingsModel::registerSetting(const QString& key,
         {
             // Append the group and set it as the new parent.
             append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
-                    required, QStringList(), parent);
+                    required, defaultValue, QStringList(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
 
     // Append the actual setting.
-    append(key, keys.last(), type, label, required, options, parent);
+    append(key, keys.last(), type, label, required, defaultValue, options,
+            parent);
 
     // Check if this is an output file.
     if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
@@ -503,7 +523,8 @@ void oskar_SettingsModel::registerSetting(const QString& key,
 }
 
 void oskar_SettingsModel::registerSetting(const QString& key,
-        const QString& label, int type, bool required)
+        const QString& label, int type, bool required,
+        const QVariant& defaultValue)
 {
     QStringList keys = key.split('/');
 
@@ -518,13 +539,14 @@ void oskar_SettingsModel::registerSetting(const QString& key,
         {
             // Append the group and set it as the new parent.
             append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
-                    required, QStringList(), parent);
+                    required, defaultValue, QStringList(), parent);
             parent = index(rowCount(parent) - 1, 0, parent);
         }
     }
 
     // Append the actual setting.
-    append(key, keys.last(), type, label, required, QStringList(), parent);
+    append(key, keys.last(), type, label, required, defaultValue,
+            QStringList(), parent);
 
     // Check if this is an output file.
     if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
@@ -653,7 +675,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
             QModelIndex i(idx);
             while (i.isValid())
             {
-                emit dataChanged(i, i);
+                emit dataChanged(i.sibling(0, 0), i.sibling(0, columnCount()-1));
                 i = i.parent();
             }
             return true;
@@ -695,13 +717,14 @@ void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
 
 void oskar_SettingsModel::append(const QString& key, const QString& subkey,
         int type, const QString& label, bool required,
-        const QStringList& options, const QModelIndex& parent)
+        const QVariant& defaultValue, const QStringList& options,
+        const QModelIndex& parent)
 {
     oskar_SettingsItem *parentItem = getItem(parent);
 
     beginInsertRows(parent, rowCount(), rowCount());
     oskar_SettingsItem* item = new oskar_SettingsItem(key, subkey, type,
-            label, QVariant(), required, options, parentItem);
+            label, QVariant(), required, defaultValue, options, parentItem);
     parentItem->appendChild(item);
     endInsertRows();
     hash_.insert(key, item);

@@ -83,9 +83,11 @@ public:
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& label,
-            int type, bool required = false);
+            int type, bool required = false,
+            const QVariant& defaultValue = QVariant());
     void registerSetting(const QString& key, const QString& label,
-            int type, const QStringList& options, bool required = false);
+            int type, const QStringList& options, bool required = false,
+            const QVariant& defaultValue = QVariant());
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     void saveSettingsFile(const QString& filename);
     bool setData(const QModelIndex& index, const QVariant& value,
@@ -97,8 +99,8 @@ public:
 
 private:
     void append(const QString& key, const QString& subkey, int type,
-            const QString& label, bool required, const QStringList& options,
-            const QModelIndex& parent = QModelIndex());
+            const QString& label, bool required, const QVariant& defaultValue,
+            const QStringList& options, const QModelIndex& parent);
     QModelIndex getChild(const QString& subkey,
             const QModelIndex& parent = QModelIndex()) const;
     oskar_SettingsItem* getItem(const QModelIndex& index) const;

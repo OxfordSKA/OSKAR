@@ -64,6 +64,7 @@ public:
 public:
     oskar_SettingsItem(const QString& key, const QString& subkey, int type,
             const QString& label, const QVariant& value, bool required = false,
+            const QVariant& defaultValue = QVariant(),
             const QStringList& options = QStringList(),
             oskar_SettingsItem* parent = 0);
     ~oskar_SettingsItem();

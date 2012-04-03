@@ -33,15 +33,25 @@
 
 oskar_SettingsItem::oskar_SettingsItem(const QString& key,
         const QString& subkey, int type, const QString& label,
-        const QVariant& value, bool required, const QStringList& options,
-        oskar_SettingsItem* parent)
+        const QVariant& value, bool required, const QVariant& defaultValue,
+        const QStringList& options, oskar_SettingsItem* parent)
 {
+    // Set default defaults.
+    if (type == DOUBLE)
+        defaultValue_ = 0.0;
+    else if (type == INT || type == INT_UNSIGNED || type == RANDOM_SEED)
+        defaultValue_ = 0;
+    else if (type == INT_POSITIVE)
+        defaultValue_ = 1;
+
     // Initialise constructed values.
     key_ = key;
     subkey_ = subkey;
     type_ = type;
     label_ = label;
     value_ = value;
+    if (!defaultValue.isNull())
+        defaultValue_ = defaultValue;
     options_ = options;
     parentItem_ = parent;
 
