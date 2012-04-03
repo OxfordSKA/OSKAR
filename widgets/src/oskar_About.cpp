@@ -31,136 +31,203 @@
 
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>
+#include <QtGui/QFont>
+#include <QtGui/QGroupBox>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
-#include <QtGui/QTextEdit>
+#include <QtGui/QTextBrowser>
 #include <QtGui/QTextDocument>
 #include <QtGui/QSizePolicy>
-#include <QtGui/QSpacerItem>
 #include <QtGui/QVBoxLayout>
 
 oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
 {
     // Set up the GUI.
-    vLayoutMain_ = new QVBoxLayout(this);
-    vLayout1_ = new QVBoxLayout;
-    hLayout1_ = new QHBoxLayout;
-    hLayout2_ = new QHBoxLayout;
+    QVBoxLayout* vLayoutMain = new QVBoxLayout(this);
+    QVBoxLayout* vLayout1 = new QVBoxLayout;
+    QHBoxLayout* hLayout1 = new QHBoxLayout;
+    QHBoxLayout* hLayout2 = new QHBoxLayout;
 
     // Create icon.
-    icon_ = new QLabel(this);
+    QLabel* icon = new QLabel(this);
     QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(icon_->sizePolicy().hasHeightForWidth());
-    icon_->setSizePolicy(sizePolicy);
-    icon_->setPixmap(QPixmap(QString::fromUtf8(":/icons/oskar-32x32.png")));
-    icon_->setAlignment(Qt::AlignCenter);
-    icon_->setMargin(10);
-    hLayout1_->addWidget(icon_);
+    sizePolicy.setHeightForWidth(icon->sizePolicy().hasHeightForWidth());
+    icon->setSizePolicy(sizePolicy);
+    icon->setPixmap(QPixmap(QString::fromUtf8(":/icons/oskar-32x32.png")));
+    icon->setAlignment(Qt::AlignCenter);
+    icon->setMargin(10);
+    hLayout1->addWidget(icon);
 
     // Create title.
     setWindowTitle("About OSKAR");
-    title_ = new QLabel("OSKAR-2", this);
-    title_->setFont(QFont("Arial", 28));
-    hLayout1_->addWidget(title_);
+    QLabel* title = new QLabel("OSKAR-2", this);
+    title->setFont(QFont("Arial", 28));
+    hLayout1->addWidget(title);
 
     // Add title block to vertical layout.
-    hLayout1_->setContentsMargins(0, 0, 80, 0);
-    vLayout1_->addLayout(hLayout1_);
+    hLayout1->setContentsMargins(0, 0, 80, 0);
+    vLayout1->addLayout(hLayout1);
 
     // Create version label.
-    version_ = new QLabel(QString("OSKAR Version %1")
+    QLabel* version = new QLabel(QString("OSKAR Version %1")
             .arg(OSKAR_VERSION_STR), this);
-    vLayout1_->addWidget(version_);
+    vLayout1->addWidget(version);
 
     // Create compilation date label.
-    date_ = new QLabel(QString("Build Date: %1, %2").
+    QLabel* date = new QLabel(QString("Build Date: %1, %2").
             arg(__DATE__).arg(__TIME__), this);
-    vLayout1_->addWidget(date_);
+    vLayout1->addWidget(date);
 
     // Add vertical spacer.
-    verticalSpacer_ = new QSpacerItem(20, 40, QSizePolicy::Minimum,
-            QSizePolicy::Expanding);
-    vLayout1_->addItem(verticalSpacer_);
+    vLayout1->addStretch();
 
     // Create logos.
-    oerc_ = new QLabel(this);
-    oerc_->setSizePolicy(sizePolicy);
-    oerc_->setPixmap(QPixmap(QString(":/icons/oerc-128x128.png")));
-    oerc_->setAlignment(Qt::AlignCenter);
-    oerc_->setMargin(4);
-    oxford_ = new QLabel(this);
-    oxford_->setSizePolicy(sizePolicy);
-    oxford_->setPixmap(QPixmap(QString(":/icons/oxford-128x128.png")));
-    oxford_->setAlignment(Qt::AlignCenter);
-    oxford_->setMargin(4);
-    hLayout2_->addLayout(vLayout1_);
-    hLayout2_->addWidget(oerc_);
-    hLayout2_->addWidget(oxford_);
+    QLabel* oerc = new QLabel(this);
+    oerc->setSizePolicy(sizePolicy);
+    oerc->setPixmap(QPixmap(QString(":/icons/oerc-128x128.png")));
+    oerc->setAlignment(Qt::AlignCenter);
+    oerc->setMargin(4);
+    QLabel* oxford = new QLabel(this);
+    oxford->setSizePolicy(sizePolicy);
+    oxford->setPixmap(QPixmap(QString(":/icons/oxford-128x128.png")));
+    oxford->setAlignment(Qt::AlignCenter);
+    oxford->setMargin(4);
+    hLayout2->addLayout(vLayout1);
+    hLayout2->addWidget(oerc);
+    hLayout2->addWidget(oxford);
 
     // Add top banner to main vertical layout.
-    vLayoutMain_->addLayout(hLayout2_);
+    vLayoutMain->addLayout(hLayout2);
 
-    // Create licence text.
-    licenceText_ = new QTextDocument(this);
-    QTextBlockFormat paragraph;
-    paragraph.setBottomMargin(10);
-    QTextCursor cursor(licenceText_);
-    cursor.setBlockFormat(paragraph);
-    cursor.insertText("Copyright (c) 2011-2012, The University of Oxford. \n"
-            "All rights reserved.");
-    cursor.insertList(QTextListFormat::ListDecimal);
-    cursor.insertText("Redistributions of source code must retain the above "
-            "copyright notice, this list of conditions and the following "
-            "disclaimer.");
-    cursor.insertBlock();
-    cursor.insertText("Redistributions in binary form must reproduce the "
-            "above copyright notice, this list of conditions and the "
-            "following disclaimer in the documentation and/or other "
-            "materials provided with the distribution.");
-    cursor.insertBlock();
-    cursor.insertText("Neither the name of the University of Oxford nor "
-            "the names of its contributors may be used to endorse or promote "
-            "products derived from this software without specific prior "
-            "written permission.");
-    cursor.insertBlock();
-    cursor.setBlockFormat(paragraph);
-    cursor.insertText("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS "
-            "AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED "
-            "WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED "
-            "WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR "
-            "PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT "
-            "HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, "
-            "INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES "
-            "(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS "
-            "OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS "
-            "INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, "
-            "WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING "
-            "NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF "
-            "THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH "
-            "DAMAGE.");
+    // Create license group.
+    QGroupBox* grpLic = new QGroupBox("License", this);
+    sizePolicy = grpLic->sizePolicy();
+    sizePolicy.setVerticalStretch(10);
+    grpLic->setSizePolicy(sizePolicy);
+    QVBoxLayout* vLayoutLic = new QVBoxLayout(grpLic);
+
+    // Create license text.
+    QTextDocument* licenseText = new QTextDocument(this);
+    {
+        QTextBlockFormat paragraph;
+        paragraph.setBottomMargin(10);
+        QTextCursor cursor(licenseText);
+        cursor.setBlockFormat(paragraph);
+        cursor.insertText("Copyright (c) 2011-2012, The University of Oxford. "
+                "\nAll rights reserved.");
+        cursor.insertList(QTextListFormat::ListDecimal);
+        cursor.insertText("Redistributions of source code must retain the "
+                "above copyright notice, this list of conditions and the "
+                "following disclaimer.");
+        cursor.insertBlock();
+        cursor.insertText("Redistributions in binary form must reproduce the "
+                "above copyright notice, this list of conditions and the "
+                "following disclaimer in the documentation and/or other "
+                "materials provided with the distribution.");
+        cursor.insertBlock();
+        cursor.insertText("Neither the name of the University of Oxford nor "
+                "the names of its contributors may be used to endorse or "
+                "promote products derived from this software without specific "
+                "prior written permission.");
+        cursor.insertBlock();
+        cursor.setBlockFormat(paragraph);
+        cursor.insertText("THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS "
+                "AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED "
+                "WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED "
+                "WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR "
+                "PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT "
+                "HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, "
+                "INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES "
+                "(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE "
+                "GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS "
+                "INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, "
+                "WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING "
+                "NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF "
+                "THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH "
+                "DAMAGE.");
+    }
 
     // Create license display.
-    licence_ = new QTextEdit(this);
-    licence_->setDocument(licenceText_);
-    sizePolicy = licence_->sizePolicy();
-    sizePolicy.setVerticalStretch(10);
-    licence_->setSizePolicy(sizePolicy);
-    licence_->setReadOnly(true);
-    vLayoutMain_->addWidget(licence_);
+    QTextBrowser* license = new QTextBrowser(this);
+    license->setDocument(licenseText);
+    license->setReadOnly(true);
+    vLayoutLic->addWidget(license);
 
-    // Create attribution labels.
-    attribution1_ = new QLabel("If you use OSKAR-2 in your research, please "
-            "reference the following publication:", this);
-    vLayoutMain_->addWidget(attribution1_);
-    attribution2_ = new QLabel("(Insert name of publication here) "
-            "MNRAS 2012, in prep.", this);
-    vLayoutMain_->addWidget(attribution2_);
+    // Add license group.
+    vLayoutMain->addWidget(grpLic);
+
+    // Create attribution group.
+    QGroupBox* grpAtt = new QGroupBox("Attribution", this);
+    sizePolicy = grpAtt->sizePolicy();
+    sizePolicy.setVerticalStretch(10);
+    grpAtt->setSizePolicy(sizePolicy);
+    QVBoxLayout* vLayoutAtt = new QVBoxLayout(grpAtt);
+
+    // Create attribution document.
+    QString html;
+    html.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" "
+            "\"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+            "<html><head></head><body>\n");
+    html.append("<p>OSKAR-2 has been developed using hardware "
+            "donated by NVIDIA UK.</p>");
+    html.append("<p>OSKAR-2 makes use of the following software "
+            "libraries:</p>");
+    html.append("<ul>");
+    html.append("<li>NVIDIA CUDA "
+                "(<a href=\"http://www.nvidia.com/object/cuda_home.html\">"
+                "http://www.nvidia.com/object/cuda_home.html</a>)</li>");
+    html.append("<li>DIERCKX for surface fitting using splines "
+                "(<a href=\"http://netlib.org/dierckx/\">"
+                "http://netlib.org/dierckx/</a>)</li>");
+    html.append("<li>The Qt cross-platform application framework "
+                "(<a href=\"http://qt.nokia.com/\">"
+                "http://qt.nokia.com/</a>)</li>");
+#ifndef OSKAR_NO_MS
+    html.append("<li>casacore for Measurement Set export "
+                "(<a href=\"http://code.google.com/p/casacore/\">"
+                "http://code.google.com/p/casacore/</a>)</li>");
+#endif
+#ifndef OSKAR_NO_FITS
+    html.append("<li>CFITSIO for FITS file export "
+                "(<a href=\"http://heasarc.gsfc.nasa.gov/fitsio/\">"
+                "http://heasarc.gsfc.nasa.gov/fitsio/</a>)</li>");
+#endif
+    html.append("</ul>");
+    html.append("<p>This research has made use of SAOImage DS9, developed "
+            "by Smithsonian Astrophysical Observatory.</p>");
+    html.append("</body></html>");
+
+    // Create attribution document display.
+    QTextBrowser* libs = new QTextBrowser(this);
+    libs->setOpenExternalLinks(true);
+    libs->setHtml(html);
+    libs->setReadOnly(true);
+    vLayoutAtt->addWidget(libs);
+
+    // Create acknowledgement labels.
+    QLabel* ack1 = new QLabel("If OSKAR-2 has been helpful in your research, "
+            "please give the following acknowledgement:", this);
+    vLayoutAtt->addWidget(ack1);
+    QLabel* ack2 = new QLabel("\"This research has made use of OSKAR-2, "
+            "developed at the University of Oxford.\"", this);
+    QFont italic = QApplication::font();
+    italic.setItalic(true);
+    ack2->setFont(italic);
+    vLayoutAtt->addWidget(ack2);
+    QLabel* ack3 = new QLabel("and/or reference the following publication:",
+            this);
+    vLayoutAtt->addWidget(ack3);
+    QLabel* ack4 = new QLabel("(Insert publication reference here...)", this);
+    vLayoutAtt->addWidget(ack4);
+
+    // Add attribution group.
+    vLayoutMain->addWidget(grpAtt);
 
     // Create close button.
-    buttons_ = new QDialogButtonBox(QDialogButtonBox::Ok,
+    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok,
             Qt::Horizontal, this);
-    connect(buttons_, SIGNAL(accepted()), this, SLOT(accept()));
-    vLayoutMain_->addWidget(buttons_);
+    connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
+    vLayoutMain->addWidget(buttons);
 }

@@ -35,39 +35,12 @@
 
 #include <QtGui/QDialog>
 
-class QDialogButtonBox;
-class QLabel;
-class QTextEdit;
-class QTextDocument;
-class QHBoxLayout;
-class QVBoxLayout;
-class QSpacerItem;
-
 class oskar_About : public QDialog
 {
     Q_OBJECT
 
 public:
     oskar_About(QWidget *parent = 0);
-
-private:
-    // Widgets.
-    QDialogButtonBox* buttons_;
-    QLabel* icon_;
-    QLabel* title_;
-    QLabel* oerc_;
-    QLabel* oxford_;
-    QLabel* version_;
-    QLabel* date_;
-    QTextEdit* licence_;
-    QTextDocument* licenceText_;
-    QLabel* attribution1_;
-    QLabel* attribution2_;
-    QVBoxLayout* vLayoutMain_;
-    QVBoxLayout* vLayout1_;
-    QHBoxLayout* hLayout1_;
-    QHBoxLayout* hLayout2_;
-    QSpacerItem* verticalSpacer_;
 };
 
 #endif /* OSKAR_ABOUT_H_ */
