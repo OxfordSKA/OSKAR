@@ -56,6 +56,7 @@ public slots:
 
 private slots:
     void about();
+    void cudaInfo();
     void runBeamPattern();
     void runInterferometer();
     void runImager();

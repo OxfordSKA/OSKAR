@@ -57,6 +57,8 @@ int oskar_cuda_info_print(const oskar_CudaInfo* info)
                 info->device[i].supports_double ? "true" : "false");
         printf("Global memory (MiB): %.1f\n",
                 info->device[i].global_memory_size / 1024.0);
+        printf("Free global memory (MiB): %.1f\n",
+                info->device[i].free_memory / 1024.0);
         printf("Number of multiprocessors: %d\n",
                 info->device[i].num_multiprocessors);
         printf("Number of CUDA cores: %d\n", info->device[i].num_cores);

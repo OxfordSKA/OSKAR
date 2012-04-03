@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@ struct oskar_CudaDeviceInfo
     } compute;
     int supports_double;       /**< True if device supports double precision. */
     int global_memory_size;    /**< Total size in kiB. */
+    int free_memory;           /**< Free memory in kiB. */
     int num_multiprocessors;   /**< Number of multiprocessors. */
     int num_cores;             /**< Number of CUDA cores. */
     int gpu_clock;             /**< GPU clock speed in kHz. */

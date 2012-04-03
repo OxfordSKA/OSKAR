@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
     int arch, device_count = 0;
     cudaError_t error;
     struct cudaDeviceProp device_prop;
-    size_t size;
+    size_t total_memory, free_memory;
 
     /* Set default values in case of errors. */
     device->name[0] = 0;
@@ -91,8 +91,8 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
     device->supports_double = 0;
     if (device_prop.major >= 2 || device_prop.minor >= 3)
         device->supports_double = 1;
-    size = device_prop.totalGlobalMem / 1024;
-    device->global_memory_size = size;
+    total_memory = device_prop.totalGlobalMem / 1024;
+    device->global_memory_size = total_memory;
     device->num_multiprocessors = device_prop.multiProcessorCount;
     arch = (device_prop.major << 4) + device_prop.minor;
     switch (arch)
@@ -129,6 +129,11 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
     device->memory_bus_width = -1;
     device->level_2_cache_size = -1;
 #endif
+
+    /* Get free memory size. */
+    cudaMemGetInfo(&free_memory, &total_memory);
+    free_memory /= 1024;
+    device->free_memory = free_memory;
 
     /* Get block properties. */
     device->shared_memory_size = device_prop.sharedMemPerBlock;

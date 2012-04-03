@@ -31,6 +31,7 @@
 #include "apps/lib/oskar_sim_interferometer.h"
 #include "apps/lib/oskar_imager.h"
 #include "widgets/oskar_About.h"
+#include "widgets/oskar_CudaInfoDisplay.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModel.h"
@@ -82,6 +83,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QAction* actExpandAll = new QAction("Expand All", this);
     QAction* actCollapseAll = new QAction("Collapse All", this);
     QAction* actAbout = new QAction("About OSKAR...", this);
+    QAction* actCudaInfo = new QAction("CUDA System Info...", this);
     QAction* actRunInterferometer = new QAction("Run Interferometer", this);
     QAction* actRunBeamPattern = new QAction("Run Beam Pattern", this);
     QAction* actRunImager = new QAction("Run Imager", this);
@@ -95,6 +97,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     connect(actExpandAll, SIGNAL(triggered()), view_, SLOT(expandAll()));
     connect(actCollapseAll, SIGNAL(triggered()), view_, SLOT(collapseAll()));
     connect(actAbout, SIGNAL(triggered()), this, SLOT(about()));
+    connect(actCudaInfo, SIGNAL(triggered()), this, SLOT(cudaInfo()));
     connect(actRunInterferometer, SIGNAL(triggered()),
             this, SLOT(runInterferometer()));
     connect(actRunBeamPattern, SIGNAL(triggered()),
@@ -130,6 +133,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menuView->addAction(actCollapseAll);
     menuView->addSeparator();
     menuView->addAction(actAbout);
+    menuView->addAction(actCudaInfo);
     menuRun->addAction(actRunInterferometer);
     menuRun->addAction(actRunBeamPattern);
     menuRun->addAction(actRunImager);
@@ -219,6 +223,12 @@ void oskar_MainWindow::about()
 {
     oskar_About aboutDialog(this);
     aboutDialog.exec();
+}
+
+void oskar_MainWindow::cudaInfo()
+{
+    oskar_CudaInfoDisplay infoDisplay(this);
+    infoDisplay.exec();
 }
 
 void oskar_MainWindow::runBeamPattern()
