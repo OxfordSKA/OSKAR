@@ -273,7 +273,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
             return font;
         }
     }
-    if (role == Qt::ForegroundRole)
+    else if (role == Qt::ForegroundRole)
     {
         QVariant val = item->value();
         if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
@@ -675,7 +675,8 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
             QModelIndex i(idx);
             while (i.isValid())
             {
-                emit dataChanged(i.sibling(0, 0), i.sibling(0, columnCount()-1));
+                emit dataChanged(i.sibling(i.row(), 0),
+                        i.sibling(i.row(), columnCount()-1));
                 i = i.parent();
             }
             return true;
