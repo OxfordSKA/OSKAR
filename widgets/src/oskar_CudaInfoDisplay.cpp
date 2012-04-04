@@ -47,14 +47,6 @@ oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QWidget *parent) : QDialog(parent)
     // Create the CUDA info structure.
     oskar_CudaInfo* info = NULL;
     int err = oskar_cuda_info_create(&info);
-    if (err)
-    {
-        QMessageBox::critical(parent, "CUDA Error",
-                QString("Could not obtain CUDA system info: %1").
-                arg(oskar_get_error_string(err)));
-        oskar_cuda_info_free(&info);
-        return;
-    }
 
     // Set up the GUI.
     setWindowTitle("CUDA System Info");
@@ -68,63 +60,73 @@ oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QWidget *parent) : QDialog(parent)
     // Create system info document.
     QString html;
     html.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" "
-            "\"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-            "<html><head></head><body>\n");
-    html.append("<p>");
-    html.append(QString("CUDA driver version: %1.%2<br />").
-            arg(info->driver_version / 1000).
-            arg((info->driver_version % 100) / 10));
-    html.append(QString("CUDA runtime version: %1.%2<br />").
-            arg(info->runtime_version / 1000).
-            arg((info->runtime_version % 100) / 10));
-    html.append(QString("Number of CUDA devices detected: %1<br />").
-            arg(info->num_devices));
-    html.append("</p>");
-    for (int i = 0; i < info->num_devices; ++i)
+    		"\"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+    		"<html><head></head><body>\n");
+    if (!err)
     {
-        html.append(QString("<p>Device [%1] name: %2</p>").
-                arg(i).arg(info->device[i].name));
-        html.append("<ul>");
-        html.append(QString("<li>Compute capability: %1.%2</li>").
-                arg(info->device[i].compute.capability.major).
-                arg(info->device[i].compute.capability.minor));
-        html.append(QString("<li>Supports double precision: %1</li>").
-                arg(info->device[i].supports_double ? "true" : "false"));
-        html.append(QString("<li>Global memory (MiB): %1</li>").
-                arg(info->device[i].global_memory_size / 1024.0));
-        html.append(QString("<li>Free global memory (MiB): %1</li>").
-                arg(info->device[i].free_memory / 1024.0));
-        html.append(QString("<li>Number of multiprocessors: %1</li>").
-                arg(info->device[i].num_multiprocessors));
-        html.append(QString("<li>Number of CUDA cores: %1</li>").
-                arg(info->device[i].num_cores));
-        html.append(QString("<li>GPU clock speed (MHz): %1</li>").
-                arg(info->device[i].gpu_clock / 1000.0));
-        html.append(QString("<li>Memory clock speed (MHz): %1</li>").
-                arg(info->device[i].memory_clock / 1000.0));
-        html.append(QString("<li>Memory bus width: %1-bit</li>").
-                arg(info->device[i].memory_bus_width));
-        html.append(QString("<li>Level-2 cache size (kiB): %1</li>").
-                arg(info->device[i].level_2_cache_size / 1024));
-        html.append(QString("<li>Shared memory size (kiB): %1</li>").
-                arg(info->device[i].shared_memory_size / 1024));
-        html.append(QString("<li>Registers per block: %1</li>").
-                arg(info->device[i].num_registers));
-        html.append(QString("<li>Warp size: %1</li>").
-                arg(info->device[i].warp_size));
-        html.append(QString("<li>Max threads per block: %1</li>").
-                arg(info->device[i].max_threads_per_block));
-        html.append(QString("<li>Max size of each dimension of a block: "
-                "(%1 x %2 x %3)</li>").
-                arg(info->device[i].max_threads_dim[0]).
-                arg(info->device[i].max_threads_dim[1]).
-                arg(info->device[i].max_threads_dim[2]));
-        html.append(QString("<li>Max size of each dimension of a grid: "
-                "(%1 x %2 x %3)</li>").
-                arg(info->device[i].max_grid_size[0]).
-                arg(info->device[i].max_grid_size[1]).
-                arg(info->device[i].max_grid_size[2]));
-        html.append("</ul>");
+    	html.append("<p>");
+    	html.append(QString("CUDA driver version: %1.%2<br />").
+    			arg(info->driver_version / 1000).
+    			arg((info->driver_version % 100) / 10));
+    	html.append(QString("CUDA runtime version: %1.%2<br />").
+    			arg(info->runtime_version / 1000).
+    			arg((info->runtime_version % 100) / 10));
+    	html.append(QString("Number of CUDA devices detected: %1<br />").
+    			arg(info->num_devices));
+    	html.append("</p>");
+    	for (int i = 0; i < info->num_devices; ++i)
+    	{
+    		html.append(QString("<p>Device [%1] name: %2</p>").
+    				arg(i).arg(info->device[i].name));
+    		html.append("<ul>");
+    		html.append(QString("<li>Compute capability: %1.%2</li>").
+    				arg(info->device[i].compute.capability.major).
+    				arg(info->device[i].compute.capability.minor));
+    		html.append(QString("<li>Supports double precision: %1</li>").
+    				arg(info->device[i].supports_double ? "true" : "false"));
+    		html.append(QString("<li>Global memory (MiB): %1</li>").
+    				arg(info->device[i].global_memory_size / 1024.0));
+    		html.append(QString("<li>Free global memory (MiB): %1</li>").
+    				arg(info->device[i].free_memory / 1024.0));
+    		html.append(QString("<li>Number of multiprocessors: %1</li>").
+    				arg(info->device[i].num_multiprocessors));
+    		html.append(QString("<li>Number of CUDA cores: %1</li>").
+    				arg(info->device[i].num_cores));
+    		html.append(QString("<li>GPU clock speed (MHz): %1</li>").
+    				arg(info->device[i].gpu_clock / 1000.0));
+    		html.append(QString("<li>Memory clock speed (MHz): %1</li>").
+    				arg(info->device[i].memory_clock / 1000.0));
+    		html.append(QString("<li>Memory bus width: %1-bit</li>").
+    				arg(info->device[i].memory_bus_width));
+    		html.append(QString("<li>Level-2 cache size (kiB): %1</li>").
+    				arg(info->device[i].level_2_cache_size / 1024));
+    		html.append(QString("<li>Shared memory size (kiB): %1</li>").
+    				arg(info->device[i].shared_memory_size / 1024));
+    		html.append(QString("<li>Registers per block: %1</li>").
+    				arg(info->device[i].num_registers));
+    		html.append(QString("<li>Warp size: %1</li>").
+    				arg(info->device[i].warp_size));
+    		html.append(QString("<li>Max threads per block: %1</li>").
+    				arg(info->device[i].max_threads_per_block));
+    		html.append(QString("<li>Max size of each dimension of a block: "
+    				"(%1 x %2 x %3)</li>").
+    				arg(info->device[i].max_threads_dim[0]).
+    				arg(info->device[i].max_threads_dim[1]).
+    				arg(info->device[i].max_threads_dim[2]));
+    		html.append(QString("<li>Max size of each dimension of a grid: "
+    				"(%1 x %2 x %3)</li>").
+    				arg(info->device[i].max_grid_size[0]).
+    				arg(info->device[i].max_grid_size[1]).
+    				arg(info->device[i].max_grid_size[2]));
+    		html.append("</ul>");
+    	}
+    }
+    else
+    {
+    	html.append("<p>");
+    	html.append(QString("Could not obtain CUDA system info: %1").
+    			arg(oskar_get_error_string(err)));
+    	html.append("</p>");
     }
     html.append("</body></html>");
 
@@ -147,5 +149,5 @@ oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QWidget *parent) : QDialog(parent)
     oskar_cuda_info_free(&info);
 
     // Release the CUDA context.
-    cudaDeviceReset();
+    if (!err) cudaDeviceReset();
 }
