@@ -94,7 +94,6 @@ if (BUILD_OSKAR)
         list(APPEND ${libname}_SRC utility/${file})
     endforeach ()
 
-    include_directories(${CUDA_INCLUDE_DIRS})
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
     cuda_add_library(${libname} ${${libname}_SRC})
     target_link_libraries(${libname} dierckx ${CUDA_LIBRARIES}
@@ -129,6 +128,8 @@ endif ()
 if (BUILD_OSKAR_FITS)
     add_subdirectory(fits)
 endif ()
+
+add_subdirectory(matlab)
 
 
 # ==== Install header tree.

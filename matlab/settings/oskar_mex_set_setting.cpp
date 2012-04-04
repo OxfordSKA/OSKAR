@@ -43,6 +43,9 @@ void mexFunction(int /*num_out*/, mxArray** /*out*/,
     }
 
     // Get Matlab inputs.
+
+    // FIXME check that both the key and value are string type.
+    //  - currently values which are not strigs result in unexpected results!
     char* filename  = mxArrayToString(in[0]);
     char* key       = mxArrayToString(in[1]);
     char* value     = mxArrayToString(in[2]);

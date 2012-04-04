@@ -5,8 +5,6 @@
 # Recurse into lib subdirectory.
 add_subdirectory(lib)
 
-include_directories(${QT_INCLUDE_DIR})
-
 # BINARY: oskar_sim_interferometer
 set(bin_name oskar_sim_interferometer)
 add_executable(${bin_name} ${bin_name}_main.cpp)
@@ -56,10 +54,9 @@ set_target_properties(${bin_name}
 install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
 if (BUILD_OSKAR_WIDGETS)
-    include_directories(${Qwt5_INCLUDE_DIR})
-    include_directories(${QT_QTGUI_INCLUDE_DIR})
-    include_directories(${QT_INCLUDE_DIR})
-    include_directories(${QT_QTCORE_INCLUDE_DIR})
+    #include_directories(${Qwt5_INCLUDE_DIR})
+    #include_directories(${QT_QTGUI_INCLUDE_DIR})
+    #include_directories(${QT_QTCORE_INCLUDE_DIR})
 
     # BINARY: oskar_viewer_sclar
 #    add_executable(oskar_viewer_scalar oskar_viewer_scalar.cpp)
