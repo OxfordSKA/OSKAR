@@ -6,7 +6,6 @@
 set(interferometry_SRC
     src/oskar_compute_baselines.c
     src/oskar_correlate.cu
-    src/oskar_cuda_correlator_lm_bw.cu # Deprecated.
     src/oskar_evaluate_baseline_noise_stddev.c
     src/oskar_evaluate_baseline_uvw.cpp
     src/oskar_evaluate_baselines.cpp

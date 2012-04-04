@@ -66,19 +66,15 @@ add_subdirectory(extern)
 
 # ==== Build main OSKAR library.
 if (BUILD_OSKAR)
-    #add_subdirectory(cuda) # Deprecated.
     add_subdirectory(imaging)
     add_subdirectory(interferometry)
     add_subdirectory(math)
     add_subdirectory(sky)
     add_subdirectory(station)
     add_subdirectory(utility)
-    
+
     set(libname oskar)
-    
-    #foreach (file ${cuda_SRC}) # Deprecated.
-    #    list(APPEND ${libname}_SRC cuda/${file})
-    #endforeach ()
+
     foreach (file ${imaging_SRC})
         list(APPEND ${libname}_SRC imaging/${file})
     endforeach ()

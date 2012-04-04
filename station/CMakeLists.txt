@@ -3,7 +3,6 @@
 #
 
 set(station_SRC
-    src/oskar_beamPattern.cpp
     src/oskar_blank_below_horizon.cu
     src/oskar_element_model_copy.c
     src/oskar_element_model_free.c

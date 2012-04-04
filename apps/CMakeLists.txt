@@ -55,19 +55,6 @@ set_target_properties(${bin_name}
     INSTALL_RPATH_USE_LINK_PATH TRUE)
 install(TARGETS ${bin_name} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
 
-# BINARY: oskar_icrs_to_az_el
-add_executable(oskar_icrs_to_az_el oskar_icrs_to_az_el.cpp)
-target_link_libraries(oskar_icrs_to_az_el oskar)
-#set_target_properties(oskar_icrs_to_az_el PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-set_target_properties(oskar_icrs_to_az_el PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-
-
-# BINARY: oskar_device_info
-cuda_add_executable(oskar_device_info device_info.cpp)
-target_link_libraries(oskar_device_info ${QT_QTCORE_LIBRARY})
-
 if (BUILD_OSKAR_WIDGETS)
     include_directories(${Qwt5_INCLUDE_DIR})
     include_directories(${QT_QTGUI_INCLUDE_DIR})

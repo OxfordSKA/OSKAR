@@ -23,7 +23,6 @@ set(utility_SRC
     src/oskar_cuda_info_create.c
     src/oskar_cuda_info_print.c
     src/oskar_cuda_info_free.c
-    src/oskar_cuda_memory.cu
     src/oskar_device_curand_state_init.cu
     src/oskar_Device_curand_state.cpp
     src/oskar_endian.c
