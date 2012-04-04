@@ -587,17 +587,21 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     // Get a pointer to the item.
     oskar_SettingsItem* item = getItem(idx);
 
+    // Get model indexes for the row.
+    QModelIndex topLeft = idx.sibling(idx.row(), 0);
+    QModelIndex bottomRight = idx.sibling(idx.row(), columnCount() - 1);
+
     // Check for role type.
     if (role == Qt::ToolTipRole)
     {
         item->setTooltip(value.toString());
-        emit dataChanged(idx, idx);
+        emit dataChanged(topLeft, bottomRight);
         return true;
     }
     else if (role == DefaultRole)
     {
         item->setDefaultValue(value);
-        emit dataChanged(idx, idx);
+        emit dataChanged(topLeft, bottomRight);
         return true;
     }
     else if (role == EnabledRole)
@@ -608,19 +612,19 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
         else
             settings_->remove(item->key());
         settings_->sync();
-        emit dataChanged(idx, idx);
+        emit dataChanged(topLeft, bottomRight);
         return true;
     }
     else if (role == IterationNumRole)
     {
         item->setIterationNum(value.toInt());
-        emit dataChanged(idx, idx);
+        emit dataChanged(topLeft, bottomRight);
         return true;
     }
     else if (role == IterationIncRole)
     {
         item->setIterationInc(value);
-        emit dataChanged(idx, idx);
+        emit dataChanged(topLeft, bottomRight);
         return true;
     }
     else if (role == SetIterationRole)
@@ -628,7 +632,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
         if (!iterationKeys_.contains(item->key()))
         {
             iterationKeys_.append(item->key());
-            emit dataChanged(idx, idx);
+            emit dataChanged(topLeft, bottomRight);
             return true;
         }
         return false;
@@ -639,7 +643,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
         if (i >= 0)
         {
             iterationKeys_.removeAt(i);
-            emit dataChanged(idx, idx);
+            emit dataChanged(topLeft, bottomRight);
             foreach (QString k, iterationKeys_)
             {
                 QModelIndex idx = index(k);
@@ -816,6 +820,7 @@ void oskar_SettingsModelFilter::setHideIfUnset(bool value)
         hideIfUnset_ = value;
         beginResetModel();
         endResetModel();
+        invalidateFilter();
     }
 }
 
