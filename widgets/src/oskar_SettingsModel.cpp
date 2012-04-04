@@ -195,25 +195,29 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Image settings.
     setLabel("image", "Image settings");
     registerSetting("image/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("image/size", "Image dimension [pixels]", oskar_SettingsItem::INT_UNSIGNED);
+    setDefault("image/fov_deg", 2);
+    registerSetting("image/size", "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE);
+    setDefault("image/size", 256);
     options.clear();
-    options << "Stokes (I,Q,U,V)" << "I" << "Q" << "U" << "V"
-            << "Linear (XX,XY,YX,YY)" << "XX" << "XY" << "YX" << "YY"
+    options << "Linear (XX,XY,YX,YY)" << "XX" << "XY" << "YX" << "YY"
+            << "Stokes (I,Q,U,V)" << "I" << "Q" << "U" << "V"
             << "PSF";
     registerSetting("image/image_type", "Image type", oskar_SettingsItem::OPTIONS, options);
+    setDefault("image/image_type", "I");
     registerSetting("image/channel_snapshots", "Channel snapshots", oskar_SettingsItem::BOOL);
+    setDefault("image/channel_snapshots", true);
     registerSetting("image/channel_start", "Channel start", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("image/channel_end", "Channel end", oskar_SettingsItem::INT);
-    setTooltip("image/channel_end", "End channel index range of visibility data to image.\n"
-            "A Value of -1 == use highest channel in the input data.\n");
+    registerSetting("image/channel_end", "Channel end", oskar_SettingsItem::AXIS_RANGE);
+    setDefault("image/channel_end", "max");
     registerSetting("image/time_snapshots", "Time snapshots", oskar_SettingsItem::BOOL);
+    setDefault("image/time_snapshots", true);
     registerSetting("image/time_start", "Time start", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("image/time_end", "Time end", oskar_SettingsItem::INT);
-    setTooltip("image/time_end", "End time index range of visibility data to image.\n"
-            "A Value of -1 == use highest time in the input data.\n");
+    registerSetting("image/time_end", "Time end", oskar_SettingsItem::AXIS_RANGE);
+    setDefault("image/time_end", "max");
     options.clear();
     options << "DFT 2D" << "DFT 3D" << "FFT";
     registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);
+    setDefault("image/transform_type", "DFT 2D");
     registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     registerSetting("image/oskar_image_root", "OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip("image/oskar_image_root",

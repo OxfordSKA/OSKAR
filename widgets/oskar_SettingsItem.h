@@ -57,6 +57,7 @@ public:
         INT_CSV_LIST,       /* e.g. CUDA device IDs. */
         OPTIONS,            /* e.g. noise type. */
         RANDOM_SEED,
+        AXIS_RANGE,
         DATE_TIME,          /* e.g. observation start time. */
         TIME                /* e.g. observation duration. */
     };

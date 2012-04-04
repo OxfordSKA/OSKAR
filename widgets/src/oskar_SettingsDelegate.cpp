@@ -128,6 +128,16 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             editor = spinner;
             break;
         }
+        case oskar_SettingsItem::AXIS_RANGE:
+        {
+            // Random seed editors.
+            QSpinBox* spinner = new QSpinBox(parent);
+            spinner->setFrame(false);
+            spinner->setRange(-1, INT_MAX);
+            spinner->setSpecialValueText("max");
+            editor = spinner;
+            break;
+        }
         case oskar_SettingsItem::OPTIONS:
         {
             // Options list.
@@ -148,6 +158,7 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             QLineEdit* line = new QLineEdit(parent);
             line->setFrame(false);
             editor = line;
+            break;
         }
     }
 
@@ -325,6 +336,15 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
                 static_cast<QSpinBox*>(editor)->setValue(value.toInt());
             break;
         }
+        case oskar_SettingsItem::AXIS_RANGE:
+        {
+            // Random seed editors.
+            if (value.toString().toUpper() == "MAX" || value.toInt() < 0)
+                static_cast<QSpinBox*>(editor)->setValue(-1);
+            else
+                static_cast<QSpinBox*>(editor)->setValue(value.toInt());
+            break;
+        }
         case oskar_SettingsItem::OPTIONS:
         {
             // Options list.
@@ -339,6 +359,7 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
         {
             // Line editors.
             static_cast<QLineEdit*>(editor)->setText(value.toString());
+            break;
         }
     }
 }
@@ -386,6 +407,13 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
             // Random seed editors.
             int val = static_cast<QSpinBox*>(editor)->value();
             if (val < 0) value = "time"; else value = val;
+            break;
+        }
+        case oskar_SettingsItem::AXIS_RANGE:
+        {
+            // Random seed editors.
+            int val = static_cast<QSpinBox*>(editor)->value();
+            if (val < 0) value = "max"; else value = val;
             break;
         }
         case oskar_SettingsItem::OPTIONS:

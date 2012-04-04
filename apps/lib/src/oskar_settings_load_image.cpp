@@ -44,20 +44,20 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("image");
 
-    im->fov_deg = s.value("fov_deg", 2.0).toDouble();
+    im->fov_deg = s.value("fov_deg", 2).toDouble();
     im->size = s.value("size", 256).toInt();
 
-    im->channel_snapshots = s.value("channel_snapshots", false).toBool();
-    im->channel_range[0] = s.value("channel_start", -1).toInt();
+    im->channel_snapshots = s.value("channel_snapshots", true).toBool();
+    im->channel_range[0] = s.value("channel_start", 0).toInt();
     im->channel_range[1] = s.value("channel_end", -1).toInt();
 
-    im->time_snapshots = s.value("time_snapshots", false).toBool();
-    im->time_range[0] = s.value("time_start", -1).toInt();
+    im->time_snapshots = s.value("time_snapshots", true).toBool();
+    im->time_range[0] = s.value("time_start", 0).toInt();
     im->time_range[1] = s.value("time_end", -1).toInt();
 
-    temp = s.value("image_type").toString().toUpper();
+    temp = s.value("image_type", "I").toString().toUpper();
     QString type(temp);
-    if (temp.startsWith("STOKES") || temp.isEmpty())
+    if (temp.startsWith("STOKES"))
     {
         im->image_type = OSKAR_IMAGE_TYPE_STOKES;
         type = "STOKES";
@@ -88,8 +88,8 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else
         return OSKAR_ERR_SETTINGS;
 
-    temp = s.value("transform_type").toString().toUpper();
-    if (temp == "DFT 2D" || temp.isEmpty())
+    temp = s.value("transform_type", "DFT 2D").toString().toUpper();
+    if (temp == "DFT 2D")
         im->transform_type = OSKAR_IMAGE_DFT_2D;
     else if (temp == "DFT 3D")
         im->transform_type = OSKAR_IMAGE_DFT_3D;

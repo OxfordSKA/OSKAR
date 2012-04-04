@@ -45,7 +45,7 @@ int main(int argc, char** argv)
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
-    error = oskar_imager(argv[2]);
+    error = oskar_imager(argv[1]);
     if (error)
     {
         fprintf(stderr, "\n>>> Imager failed (code %d): %s.\n", error,
