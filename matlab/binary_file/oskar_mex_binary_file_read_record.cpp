@@ -103,6 +103,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgIdAndTxt("OSKAR:ERROR", "Unable to open file (%s)\n.", filename);
     }
 
+    // Create an array of binary tag indices found in the file.
     oskar_BinaryTagIndex* index = NULL;
     err = oskar_binary_tag_index_create(&index, file);
     if (err)
@@ -111,6 +112,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 "failed with code %i: %s.\n", err, oskar_get_error_string(err));
     }
 
+    // Loop over indices to find the specified record.
     int idx = -1;
     for (int i = 0; i < index->num_tags; ++i)
     {
@@ -139,14 +141,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     if (idx == -1)
         mexErrMsgTxt("ERROR: Specified group, tag and index not found in binary file\n");
 
+
+    // Construct a MATLAB structure holding the record.
     int num_fields = 5;
-    const char* fields[5] = {
-            "type",
-            "group",
-            "tag",
-            "index",
-            "data"
-    };
+    const char* fields[5] = { "type", "group", "tag", "index", "data" };
     out[0] = mxCreateStructMatrix(1, 1, num_fields, fields);
     const char* data_name = oskar_get_data_type_string(index->data_type[idx]);
     mxSetField(out[0], 0, fields[0], mxCreateString(data_name));
