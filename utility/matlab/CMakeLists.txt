@@ -4,9 +4,6 @@
 
 if (MATLAB_FOUND)    
     include(oskar_build_macros)
-    set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+cuda")
-    # Note has to be *.cu to link correctly with this macro.
-    oskar_mex(device_info oskar_mex_device_info.cu) 
     
     add_subdirectory("@Mem")
     

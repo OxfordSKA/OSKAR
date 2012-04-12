@@ -238,9 +238,8 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
                 // Make the image
                 if (settings->transform_type == OSKAR_IMAGE_DFT_2D)
                 {
-                    temp_uu.binary_file_write_ext("im_data.dat", "data", "uu", i);
-                    temp_vv.binary_file_write_ext("im_data.dat", "data", "vv", i);
-
+//                    temp_uu.binary_file_write_ext("im_data.dat", "data", "uu", i);
+//                    temp_vv.binary_file_write_ext("im_data.dat", "data", "vv", i);
                     err = oskar_make_image_dft(&im_slice, &temp_uu, &temp_vv, &temp_amp,
                             &l, &m, im_freq);
                     if (err) return err;
