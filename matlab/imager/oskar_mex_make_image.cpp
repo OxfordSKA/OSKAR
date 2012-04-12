@@ -32,7 +32,6 @@
 #include <vector_functions.h> // This has to be before the OSKAR headers
 
 #include "interferometry/oskar_Visibilities.h"
-#include "interferometry/matlab/oskar_mex_vis_from_matlab_struct.h"
 
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
@@ -45,8 +44,11 @@
 #include "imaging/oskar_make_image.h"
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_SettingsImage.h"
-#include "imaging/matlab/oskar_mex_image_settings_from_matlab.h"
-#include "imaging/matlab/oskar_mex_image_to_matlab_struct.h"
+
+#include "matlab/image/lib/oskar_mex_image_settings_from_matlab.h"
+#include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
+
+#include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -109,6 +111,10 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else if (num_in == 6 || num_out > 1)
     {
+        //==========================================================
+        // FIXME: replace this branch with oskar_make_image_dft()
+        //==========================================================
+
         // Make sure visibility data array is complex.
         if (!mxIsComplex(in[2]))
             mexErrMsgTxt("Input visibility amplitude array must be complex");

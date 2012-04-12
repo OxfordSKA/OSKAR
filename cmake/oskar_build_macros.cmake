@@ -6,9 +6,6 @@
 #
 
 
-# Path to the mex function defintion file.
-set(mex_function_def ${OSKAR_SOURCE_DIR}/matlab/mex_function.def)
-
 #
 # http://www.cmake.org/Wiki/CMakeMacroParseArguments
 #
@@ -56,158 +53,21 @@ MACRO(CDR var junk)
 ENDMACRO(CDR)
 
 
-# Macro to build and install oskar mex functions.
-#
-# Usage:
-#       oskar_qt_mex(name source [extra_libs])
-#
-#       name       = name of mex function
-#       source     = source file containing mex function
-#       extra_libs = list of extra libraries to link against.
-#
-# Source files with the *.cu extension are build using the CUDA compiler.
-#
-macro(oskar_mex name source)
 
-    #message("= INFO: Building mex function: ${name} (${source})")
-
-    # TODO: Add script to find MATLAB and MATLAB_FOUND guard?
-    # TODO: Add critical fail on matlab not found.
-    # TODO: Add critical fail on not having set other required variables.
-
-    if (NOT DEFINED OSKAR_MEX_INSTALL_DIR)
-        #message("-- NOTE: OSKAR_MEX_INSTALL_DIR not defined in "
-        #        "source directory ${CMAKE_CURRENT_SOURCE_DIR}. "
-        #        "Using default: ${OSKAR_MATLAB_INSTALL_DIR}")
-        set(OSKAR_MEX_INSTALL_DIR ${OSKAR_MATLAB_INSTALL_DIR})
-    else()
-        #message("-- NOTE: OSKAR_MEX_INSTALL_DIR defined as ${OSKAR_MEX_INSTALL_DIR}")
-    endif ()
-
-    # Construct the build target name
-    get_filename_component(target ${source} NAME_WE)
-    #message("MEX: target = ${target}")
-    #message("     name   = ${name}")
-    #message("     dir    = ${OSKAR_MEX_INSTALL_DIR}\n")
-
-    # Find out if this is a CUDA or C/C++ source file based on the extension
-    # and use the appropriate add_library target.
-    get_filename_component(ext ${source} EXT)
-    if (${ext} STREQUAL ".cpp" OR ${ext} STREQUAL "*.c")
-        add_library(${target} SHARED ${source} ${mex_function_def})
-    elseif (${ext} STREQUAL ".cu")
-        cuda_add_library(${target} SHARED ${source} ${mex_function_def})
-    else ()
-        message(CRITICAL "OSKAR_MEX: UNRECOGNISED SOURCE FILE EXTENSION!")
-    endif ()
-
-    target_link_libraries(${target} 
-        oskar 
-        ${MATLAB_LIBRARIES}
-        ${ARGN})
-    
-    set_target_properties(${target} PROPERTIES
-        PREFIX ""
-        OUTPUT_NAME ${name} 
-        SUFFIX ".${MATLAB_MEXFILE_EXT}"
-        INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
-        LINK_FLAGS ${MATLAB_CXX_FLAGS})
-        
-    # Install target for mex function.
-    install(TARGETS ${target} DESTINATION ${OSKAR_MEX_INSTALL_DIR})
-endmacro(oskar_mex)
-
-
-
-
-
-# Macro to build and install oskar mex functions using Qt.
-#
-# Usage:
-#       oskar_qt_mex(name source [extra_libs])
-#
-#       name       = name of mex function
-#       source     = source file containing mex function
-#       extra_libs = list of extra libraries to link against.
-#
-# Source files with the *.cu extension are build using the CUDA compiler.
-#
-macro(oskar_qt_mex name source)
-
-    if (QT4_FOUND)
-
-        #message("= INFO: Building mex function: ${name} (${source})")
-
-        # TODO: Add script to find MATLAB and MATLAB_FOUND guard?
-        # TODO: Add critical fail on matlab not found.
-        # TODO: Add critical fail on not having set other required variables.
-
-        if (NOT DEFINED OSKAR_MEX_INSTALL_DIR)
-            #message("-- NOTE: OSKAR_MEX_INSTALL_DIR not defined in "
-            #        "source directory ${CMAKE_CURRENT_SOURCE_DIR}. "
-            #        "Using default: ${OSKAR_MATLAB_INSTALL_DIR}")
-            set(OSKAR_MEX_INSTALL_DIR ${OSKAR_MATLAB_INSTALL_DIR})
-        else()
-            #message("-- NOTE: OSKAR_MEX_INSTALL_DIR defined as ${OSKAR_MEX_INSTALL_DIR}")
-        endif ()
-
-        # Construct the build target name
-        get_filename_component(target ${source} NAME_WE)
-        #message("MEX: target = ${target}")
-        #message("     name   = ${name}")
-        #message("     dir    = ${OSKAR_MEX_INSTALL_DIR}\n")
-
-        # Find out if this is a CUDA or C/C++ source file based on the extension
-        # and use the appropriate add_library target.
-        get_filename_component(ext ${source} EXT)
-        if (${ext} STREQUAL ".cpp" OR ${ext} STREQUAL "*.c")
-            add_library(${target} SHARED ${source} ${mex_function_def})
-        elseif (${ext} STREQUAL ".cpp" OR ${ext} STREQUAL "*.c")
-            cuda_add_library(${target} SHARED ${source} ${mex_function_def})
-        else (${ext} STREQUAL ".cpp" OR ${ext} STREQUAL "*.c")
-            message(CRITICAL "OSKAR_MEX: UNRECOGNISED SOURCE FILE EXTENSION!")
-        endif (${ext} STREQUAL ".cpp" OR ${ext} STREQUAL "*.c")
-
-        target_link_libraries(${target} 
-            oskar 
-            ${MATLAB_QT_QTCORE_LIBRARY}
-            ${MATLAB_LIBRARIES}
-            ${ARGN})
-
-        set_target_properties(${target} PROPERTIES
-            PREFIX "" 
-            OUTPUT_NAME ${name}
-            SUFFIX ".${MATLAB_MEXFILE_EXT}"
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-            INSTALL_RPATH_USE_LINK_PATH TRUE
-            COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
-            LINK_FLAGS ${MATLAB_CXX_FLAGS})
-            
-        # Install target for mex function.
-        install(TARGETS ${target} DESTINATION ${OSKAR_MEX_INSTALL_DIR})
-
-    endif (QT4_FOUND)
-
-endmacro(oskar_qt_mex)
-
-
-
-# Macro to build oskar apps.
+# Macro to build and install oskar apps.
 #
 # Usage:
 #   oskar_app(name
 #         [NO_INSTALL] 
 #         source1 source2 ...
 #         [QT_MOC_SRC source1 source2 ...]
-#         [LIBS lib1 lib2 ...]
+#         [EXTRA_LIBS lib1 lib2 ...]
 #   )
 #
 # name       = Name of the app (binary name)
 # source1..N = List of sources from which to build the app
 # QT_MOC_SRC = List of QT moc headers which require a precompile step.
-# LIBS       = List of additional libraries to link the app against.
+# EXTRA_LIBS = List of additional libraries to link the app against.
 # NO_INSTALL = Do not install this app (i.e. dont add to the make install
 #              target).
 #
@@ -215,21 +75,21 @@ endmacro(oskar_qt_mex)
 #
 macro(OSKAR_APP)
     parse_arguments(APP   # prefix
-        "QT_MOC_SRC;LIBS" # arg names
+        "QT_MOC_SRC;EXTRA_LIBS" # arg names
         "NO_INSTALL"      # option names
         ${ARGN}
     )
     CAR(APP_NAME ${APP_DEFAULT_ARGS})
     CDR(APP_SOURCES ${APP_DEFAULT_ARGS})
     
-    #message("APP: NAME    = ${APP_NAME}")
-    #message("     SRC     = ${APP_SOURCES}")
-    #message("     MOC     = ${APP_QT_MOC_SRC}")
-    #message("     LIBS    = ${APP_LIBS}")
+    #message("APP: NAME       = ${APP_NAME}")
+    #message("     SRC        = ${APP_SOURCES}")
+    #message("     MOC        = ${APP_QT_MOC_SRC}")
+    #message("     EXTRA_LIBS = ${APP_EXTRA_LIBS}")
     #if (NOT APP_NO_INSTALL)
-    #    message("     INSTALL = yes")
+    #    message("     INSTALL    = yes")
     #else()
-    #    message("     INSTALL = no")
+    #    message("     INSTALL    = no")
     #endif()
     
     # Create a target name from the app name.
@@ -246,7 +106,7 @@ macro(OSKAR_APP)
     add_executable(${target} ${APP_SOURCES})
     target_link_libraries(${target} 
         oskar oskar_apps ${QT_QTCORE_LIBRARY} # default libs
-        ${APP_LIBS}                           # extra libs
+        ${APP_EXTRA_LIBS}                     # extra libs
     ) 
     set_target_properties(${target} PROPERTIES
         COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
@@ -262,6 +122,65 @@ macro(OSKAR_APP)
     endif()
     
 endmacro(OSKAR_APP)
+
+
+
+# Path to the mex function defintion file.
+set(mex_function_def ${OSKAR_SOURCE_DIR}/matlab/mex_function.def)
+
+# Macro to build and install oskar mex functions.
+#
+# Usage:
+#       oskar_qt_mex(name
+#           source 
+#           [EXTRA_LIBS lib1 lib2 ...])
+#
+#       name       = name of mex function
+#       source     = source file containing mex function
+#       EXTRA_LIBS = list of additional libraries to link against.
+#
+macro(OSKAR_MEX)
+
+    parse_arguments(MEX   # prefix
+        "EXTRA_LIBS"      # arg names
+        ""                # option names
+        ${ARGN}
+    )
+    CAR(MEX_NAME ${MEX_DEFAULT_ARGS})
+    CDR(MEX_SOURCES ${MEX_DEFAULT_ARGS})
+    
+    if (NOT MATLAB_FOUND)
+        message(CRITICAL "Unable to build mex functions without a MATLAB install!")
+    endif ()
+
+    if (NOT DEFINED OSKAR_MEX_INSTALL_DIR)
+        set(OSKAR_MEX_INSTALL_DIR ${OSKAR_MATLAB_INSTALL_DIR})
+    endif()
+
+    # Get a unique build target name
+    get_filename_component(target ${MEX_SOURCES} NAME_WE)
+
+    add_library(${target} SHARED ${MEX_SOURCES} ${mex_function_def})
+    target_link_libraries(${target} 
+        oskar ${MATLAB_LIBRARIES}  # Default libraries
+        ${MEX_EXTRA_LIBS})         # Extra libraries
+    set_target_properties(${target} PROPERTIES
+        PREFIX ""
+        OUTPUT_NAME ${MEX_NAME} 
+        SUFFIX ".${MATLAB_MEXFILE_EXT}"
+        INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
+        LINK_FLAGS ${MATLAB_CXX_FLAGS})
+        
+    # Install target for mex function.
+    install(TARGETS ${target} DESTINATION ${OSKAR_MEX_INSTALL_DIR})
+    
+endmacro(OSKAR_MEX)
+
+
+
+
 
 
 

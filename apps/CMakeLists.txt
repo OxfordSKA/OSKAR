@@ -21,5 +21,5 @@ oskar_app(${name} ${name}_main.cpp)
 if (BUILD_OSKAR_WIDGETS)
     oskar_app(oskar oskar_gui_main.cpp oskar_MainWindow.cpp 
         QT_MOC_SRC oskar_MainWindow.h
-        LIBS oskar_widgets ${QT_QTGUI_LIBRARY})
+        EXTRA_LIBS oskar_widgets ${QT_QTGUI_LIBRARY})
 endif ()

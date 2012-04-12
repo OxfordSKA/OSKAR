@@ -42,10 +42,12 @@ void mexFunction(int /*num_out*/, mxArray** /*out*/,
         mexErrMsgTxt("Usage: oskar_set_setting(filename, key, value)");
     }
 
-    // Get Matlab inputs.
-
-    // FIXME check that both the key and value are string type.
-    //  - currently values which are not strigs result in unexpected results!
+    // Get inputs from MATLAB
+    // Check: Key and value must be string type.
+    if (!(mxIsChar(in[1]) && mxIsChar(in[2])))
+    {
+        mexErrMsgTxt("ERROR: both key and value must be string type.");
+    }
     char* filename  = mxArrayToString(in[0]);
     char* key       = mxArrayToString(in[1]);
     char* value     = mxArrayToString(in[2]);

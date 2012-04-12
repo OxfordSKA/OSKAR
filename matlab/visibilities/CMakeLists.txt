@@ -10,4 +10,4 @@ add_library(mex_visibilties STATIC
 # Build mex functions.
 set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+visibilities")
 
-oskar_mex(read oskar_mex_visibilities_read.cpp mex_visibilties)
+oskar_mex(read oskar_mex_visibilities_read.cpp EXTRA_LIBS mex_visibilties)
