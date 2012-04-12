@@ -46,77 +46,57 @@
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in < 1 || num_in > 4 || num_out > 1)
+    if (num_in < 3 || num_in > 4 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: record = oskar_binary_file_read_record(filename,"
-                " [group = 0], [tag = 0], [index = 0])\n");
+        mexErrMsgTxt("Usage: record = read_record(filename, group, tag, [index = 0])\n");
     }
 
-    /* Local variables */
     int err = OSKAR_SUCCESS;
-    char filename[STR_LENGTH];
-    int group_id = 0, tag_id = 0, index_id = 0;
-    char group_name[STR_LENGTH], tag_name[STR_LENGTH];
-    group_name[0] = '\0';
-    tag_name[0] = '\0';
-    bool is_extended = false;
 
-    /* Get args */
+    // Get input arguments.
+    char filename[STR_LENGTH];
     mxGetString(in[0], filename, STR_LENGTH);
 
-    if (num_in == 2 && mxIsChar(in[1]))
-    {
-        is_extended = true;
-    }
-    else if (num_in == 3 || num_in == 4)
-    {
-        if (mxIsChar(in[1]) && mxIsChar(in[2]))
-            is_extended = true;
-        else if (mxIsDouble(in[1]) && mxIsDouble(in[2]))
-            is_extended = false;
-        else if (mxIsInt32(in[1]) && mxIsInt32(in[2]))
-            is_extended = false;
-        else
-            mexErrMsgTxt("ERROR: Specified Group & Tag must be of the same type"
-                    " (scalar or string).");
-    }
-
-    if (num_in >= 2)
-    {
-        if (mxIsDouble(in[1]))
-        {
-            group_id = (int)mxGetScalar(in[1]);
-        }
-        else if (mxIsChar(in[1]))
-        {
-            mxGetString(in[1], group_name, STR_LENGTH);
-        }
-    }
-    if (num_in >= 3)
-    {
-        if (mxIsDouble(in[2]))
-        {
-            tag_id = (int)mxGetScalar(in[2]);
-            is_extended = false;
-        }
-        else if (mxIsChar(in[2]))
-        {
-            mxGetString(in[2], tag_name, STR_LENGTH);
-            is_extended = true;
-        }
-    }
-    if (num_in >= 4)
+    int index_id = 0;
+    if (num_in == 4)
     {
         index_id = (int)mxGetScalar(in[3]);
     }
 
-    if (is_extended)
-        mexPrintf("= Reading record (tag.group.index) = %s.%s.%i\n",
-                group_name, tag_name, index_id);
-    else
-        mexPrintf("= Reading record (tag.group.index) = %i.%i.%i\n",
-                group_id, tag_id, index_id);
+    union { int id;  char name[STR_LENGTH]; } group, tag;
 
+    const mxArray* group_ = in[1];
+    const mxArray* tag_   = in[2];
+    bool is_extended = false;
+    if ( mxIsChar(group_) && mxIsChar(tag_) )
+    {
+        is_extended = true;
+        mxGetString(tag_, tag.name, STR_LENGTH);
+        mxGetString(group_, group.name, STR_LENGTH);
+        mexPrintf("------------------------------------------------\n");
+        mexPrintf("= Reading record (group.tag.index) = %s.%s.%i\n",
+                group.name, tag.name, index_id);
+        mexPrintf("------------------------------------------------\n");
+    }
+    else if ((mxIsDouble(group_) || mxIsInt32(group_)) &&
+            (mxIsDouble(tag_) || mxIsInt32(tag_)) )
+    {
+        is_extended = false;
+        tag.id = (int)mxGetScalar(tag_);
+        group.id = (int)mxGetScalar(group_);
+        mexPrintf("------------------------------------------------\n");
+        mexPrintf("= Reading record (group.tag.index) = %i.%i.%i\n",
+                group.id, tag.id, index_id);
+        mexPrintf("------------------------------------------------\n");
+    }
+    else
+    {
+        mexErrMsgTxt("ERROR: Specified Group & Tag must be of the same type"
+                " (scalar or string).");
+    }
+
+
+    // Open the binary file for reading.
     FILE* file = fopen(filename, "r");
     if (file == NULL)
     {
@@ -136,8 +116,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         if (is_extended && index->extended[i])
         {
-            if (strcmp(index->name_group[i], group_name) == 0 &&
-                    strcmp(index->name_tag[i], tag_name) == 0 &&
+            if (strcmp(index->name_group[i], group.name) == 0 &&
+                    strcmp(index->name_tag[i], tag.name) == 0 &&
                     index->user_index[i] == index_id)
             {
                 idx = i;
@@ -146,8 +126,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
         else if (!is_extended && !index->extended[i])
         {
-            if (index->id_group[i] == group_id &&
-                    index->id_tag[i] == tag_id &&
+            if (index->id_group[i] == group.id &&
+                    index->id_tag[i] == tag.id &&
                     index->user_index[i] == index_id)
             {
                 idx = i;
@@ -264,7 +244,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         err = oskar_binary_stream_read(file, &index,
                 (unsigned char)index->data_type[idx],
-                (unsigned char)group_id, (unsigned char)tag_id,
+                (unsigned char)group.id, (unsigned char)tag.id,
                 index->user_index[idx], (size_t)index->data_size_bytes[idx],
                 data);
     }
