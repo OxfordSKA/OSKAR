@@ -89,13 +89,15 @@ ELSE( WIN32 )
       )
   ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
-  find_library(MATLAB_MEX_LIBRARY mex  ${MATLAB_SYS})
-  find_library(MATLAB_MAT_LIBRARY mat  ${MATLAB_SYS})
-  find_library(MATLAB_MX_LIBRARY  mx   ${MATLAB_SYS})
-  find_library(MATLAB_ENG_LIBRARY eng  ${MATLAB_SYS})
-  find_library(MATLAB_QT_QTCORE_LIBRARY QtCore ${MATLAB_SYS})
-  find_library(MATLAB_QT_QTGUI_LIBRARY QtGui ${MATLAB_SYS})
-  find_library(MATLAB_QT_QTXML_LIBRARY QtXml ${MATLAB_SYS})
+  find_library(MATLAB_MEX_LIBRARY mex  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  find_library(MATLAB_MAT_LIBRARY mat  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  find_library(MATLAB_MX_LIBRARY  mx   PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  find_library(MATLAB_ENG_LIBRARY eng  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH) 
+  #find_library(MATLAB_QT_QTCORE_LIBRARY QtCore PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  #find_library(MATLAB_QT_QTGUI_LIBRARY  QtGui  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  #find_library(MATLAB_QT_QTXML_LIBRARY  QtXml  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  # HACK: find_library doesnt seem to be able to find versioned libraries... :(
+  find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4 PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
 
   find_path(MATLAB_INCLUDE_DIR
     "mex.h"

@@ -8,11 +8,6 @@ if (MATLAB_FOUND)
     # Note has to be *.cu to link correctly with this macro.
     oskar_mex(device_info oskar_mex_device_info.cu) 
     
-    set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}")
-    oskar_mex(oskar_binary_file_read oskar_mex_binary_file_read.cpp)
-    oskar_mex(oskar_binary_file_query oskar_mex_binary_file_query.cpp)
-    oskar_mex(oskar_binary_file_read_record oskar_mex_binary_file_read_record.cpp)
-    
     add_subdirectory("@Mem")
     
     add_subdirectory("@Type")
