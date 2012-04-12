@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
  */
 
 
-#include "imaging/matlab/oskar_mex_image_to_matlab_struct.h"
+#include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
 #include <cstring>
 #include <cstdlib>
 

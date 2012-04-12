@@ -27,7 +27,7 @@
  */
 
 
-#include "interferometry/matlab/oskar_mex_vis_from_matlab_struct.h"
+#include "matlab/visibilities/lib/oskar_mex_vis_from_matlab_struct.h"
 
 #include "interferometry/oskar_visibilities_init.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,32 +27,18 @@
  */
 
 
+#ifndef OSKAR_MEX_IMAGE_TO_MATLAB_STRUCT_H_
+#define OSKAR_MEX_IMAGE_TO_MATLAB_STRUCT_H_
+
+/**
+ * @file oskar_mex_image_to_matlab_struct.h
+ */
+
+
 #include <mex.h>
-
-#include "imaging/oskar_image_read.h"
+#include "oskar_global.h"
 #include "imaging/oskar_Image.h"
-#include "imaging/matlab/oskar_mex_image_to_matlab_struct.h"
 
-// MATLAB Entry function.
-void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
-{
-    if (num_in < 1 || num_in > 2 || num_out > 1)
-    {
-        mexErrMsgTxt("Usage: image = oskar_image_read(filename, [index])");
-    }
+mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* image);
 
-    const char* filename = mxArrayToString(in[0]);
-
-    int idx = 0;
-    if (num_in == 2)
-    {
-        idx = (int)mxGetScalar(in[1]);
-    }
-
-    oskar_Image image;
-    oskar_image_read(&image, filename, idx);
-
-    out[0] = oskar_mex_image_to_matlab_struct(&image);
-}
-
-
+#endif /* OSKAR_MEX_IMAGE_TO_MATLAB_STRUCT_H_ */

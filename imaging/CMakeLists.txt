@@ -3,7 +3,6 @@
 #
 
 #add_subdirectory(fft)
-add_subdirectory(matlab)
 
 # Add the source files in this directory.
 set(imaging_SRC

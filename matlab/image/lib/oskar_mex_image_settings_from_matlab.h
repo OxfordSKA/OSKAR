@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,17 @@
  */
 
 
-#ifndef OSKAR_MEX_IMAGE_TO_MATLAB_STRUCT_H_
-#define OSKAR_MEX_IMAGE_TO_MATLAB_STRUCT_H_
+#ifndef OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_
+#define OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_
 
 /**
- * @file oskar_mex_image_to_matlab_struct.h
+ * @file oskar_mex_image_settings_from_matlab.h
  */
 
-
-#include <mex.h>
 #include "oskar_global.h"
-#include "imaging/oskar_Image.h"
+#include "imaging/oskar_SettingsImage.h"
+#include <mex.h>
 
-mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* image);
+void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArray* in);
 
-#endif /* OSKAR_MEX_IMAGE_TO_MATLAB_STRUCT_H_ */
+#endif /* OSKAR_MEX_IMAGE_SETTINGS_FROM_MATLAB_H_ */

@@ -1,5 +1,5 @@
-function oskar_plot_image(Image, fov_deg, fig_title)
-% OSKAR_PLOT_IMAGE Plots an image in RA, Dec.
+function plot(Image, fov_deg, fig_title)
+% PLOT Plots an image in RA, Dec.
 %
 % Inputs:
 % Image     : Image to plot, as a square matrix.

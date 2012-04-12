@@ -26,6 +26,7 @@ if(BUILD_OSKAR_MS)
     include_directories(${CASACORE_INCLUDE_DIR}/casacore)
     list(APPEND apps_SRC src/oskar_write_ms.cpp)
 endif()
+
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
 
 # ==== Macros to build the OSKAR apps module.
@@ -47,6 +48,9 @@ else()
     target_link_libraries(oskar_apps oskar
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 endif()
+
+
+
 
 set_target_properties(oskar_apps
     PROPERTIES

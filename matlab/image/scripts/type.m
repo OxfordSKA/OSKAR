@@ -1,4 +1,4 @@
-classdef oskar_image_type < uint32
+classdef type < uint32
 
     enumeration
         stokes(0)

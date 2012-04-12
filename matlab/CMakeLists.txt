@@ -5,7 +5,7 @@
 if (MATLAB_FOUND)
 
     include(oskar_build_macros)
-    
+
     add_subdirectory(binary_file)
     add_subdirectory(cuda)
     add_subdirectory(image)

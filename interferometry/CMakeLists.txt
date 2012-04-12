@@ -56,4 +56,3 @@ endforeach ()
 set(interferometry_SRC "${interferometry_SRC}" PARENT_SCOPE)
 
 add_subdirectory(test)
-add_subdirectory(matlab)

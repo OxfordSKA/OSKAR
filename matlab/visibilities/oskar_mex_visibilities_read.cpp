@@ -32,13 +32,16 @@
 #include "oskar_global.h"
 
 #include "interferometry/oskar_Visibilities.h"
+
+#include "matlab/visibilities/lib/oskar_mex_vis_to_matlab_struct.h"
+
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
-#include "interferometry/matlab/oskar_mex_vis_to_matlab_struct.h"
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_mem_binary_file_read.h"
 #include "utility/oskar_binary_tag_index_free.h"
+
 #include <cstdio>
 #include <cstdlib>
 
