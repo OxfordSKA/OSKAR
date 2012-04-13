@@ -57,8 +57,5 @@ endforeach ()
 
 set(sky_SRC "${sky_SRC}" PARENT_SCOPE)
 
-# Build MATLAB mex functions.
-add_subdirectory(matlab)
-
 # Build tests.
 add_subdirectory(test)

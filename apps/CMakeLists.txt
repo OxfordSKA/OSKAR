@@ -5,6 +5,8 @@
 # Recurse into lib subdirectory.
 add_subdirectory(lib)
 
+include(oskar_build_macros)
+
 # BINARY: oskar_sim_interferometer
 set(name oskar_sim_interferometer)
 oskar_app(${name} ${name}_main.cpp)

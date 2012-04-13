@@ -2,7 +2,6 @@
 # src/math/CMakeLists.txt
 #
 
-add_subdirectory(matlab)
 add_subdirectory(cudak)
 
 # Add the source files in this directory.
