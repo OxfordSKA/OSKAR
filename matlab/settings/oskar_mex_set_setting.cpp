@@ -31,7 +31,7 @@
 #include <mex.h>
 
 //
-// mjd_utc = oskar_set_setting(filename, key, value)
+// oskar.settings.set(filename, key, value)
 //
 void mexFunction(int /*num_out*/, mxArray** /*out*/,
         int num_in, const mxArray** in)
