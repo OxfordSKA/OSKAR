@@ -9,14 +9,18 @@ function plot(Image, fov_deg, fig_title)
 % Outputs:
 % handle    : Handle to the figure.
 
+if (nargin < 2)
+    error('Usage: oskar.image.plot(data, fov_deg, [figure title])');
+end
+
 % Set the image title, if not already set.
 if ~exist('fig_title', 'var')
     fig_title = 'Image';
 end
 
 % Set up the figure.
-width  = 1000;
-height = 700;
+width  = 800;
+height = 600;
 screen_size = get(0, 'ScreenSize');
 left   = (screen_size(3) - (width  + 50));
 bottom = (screen_size(4) - (height + 75));
@@ -44,12 +48,10 @@ set(gca, 'YColor', 'white');
 set(gca, 'ZColor', 'white');
 xlabel('Relative RA * cos(Dec) [deg]', 'FontSize', 11, 'FontName', 'Arial');
 ylabel('Relative Dec [deg]', 'FontSize', 11, 'FontName', 'Arial');
-%xlabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
-%ylabel('Relative degrees', 'FontSize', 11, 'FontName', 'Arial');
 title(fig_title, 'FontSize', 11, 'Color', 'white', 'FontName', 'Arial');
-colormap(hot(1024));
+colormap(jet(1024));
 c = colorbar;
-%ylabel(c, 'Brightness', 'FontName', 'Arial', 'FontSize', 11);
+% ylabel(c, 'Brightness', 'FontName', 'Arial', 'FontSize', 11);
 axis square;
 grid on;
 

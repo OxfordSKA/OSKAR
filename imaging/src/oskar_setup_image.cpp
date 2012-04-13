@@ -30,6 +30,7 @@
 #include "imaging/oskar_setup_image.h"
 #include "imaging/oskar_image_resize.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_init.h"
 
 #include <cstdio>
 
@@ -111,6 +112,8 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     // Set image meta-data
     // __Note__ the dimension order used here is assumed unchanged from that
     // defined in oskar_image_init()
+    oskar_mem_init(&im->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
+            vis->settings_path.num_elements, OSKAR_TRUE);
     oskar_mem_copy(&im->settings_path, &vis->settings_path);
     im->centre_ra_deg      = vis->phase_centre_ra_deg;
     im->centre_dec_deg     = vis->phase_centre_dec_deg;
