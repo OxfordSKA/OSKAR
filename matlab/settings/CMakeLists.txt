@@ -2,6 +2,12 @@
 # src/matlab/settings/CMakeLists.txt
 #
 
-set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+settings")
+# Note: Needs the Qt4 headers from the dev package.
+if (QT4_FOUND) 
 
-oskar_mex(set oskar_mex_set_setting.cpp EXTRA_LIBS ${MATLAB_QT_QTCORE_LIBRARY})
+    set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+settings")
+    
+    oskar_mex(set oskar_mex_set_setting.cpp EXTRA_LIBS 
+        ${MATLAB_QT_QTCORE_LIBRARY})
+
+endif (QT4_FOUND)

@@ -95,7 +95,6 @@ if (CUDA_FOUND)
     cuda_build_clean_target()
 endif (CUDA_FOUND)
 
-
 # ==== Build other oskar libraries.
 add_subdirectory(apps)
 add_subdirectory(fits)

@@ -3,7 +3,7 @@
 #
 
 
-if (QT4_FOUND)
+if (QT4_FOUND AND CUDA_FOUND)
 
     # Build oskar_app library
     add_subdirectory(lib)

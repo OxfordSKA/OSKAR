@@ -10,7 +10,9 @@ if (CPPUNIT_FOUND)
         src/Test_MeasurementSet.cpp
     )
 
-    add_executable(msTest ${ms_test_SRC})
-    target_link_libraries(msTest oskar_ms ${CPPUNIT_LIBRARIES})
+    add_executable(ms_test ${ms_test_SRC})
+    target_link_libraries(ms_test oskar_ms ${CPPUNIT_LIBRARIES})
+
+    #add_test(ms_test ms_test)
 
 endif ()

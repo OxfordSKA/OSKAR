@@ -63,10 +63,6 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         double* gauss_phi, int num_points, const oskar_Mem* x,
         const oskar_Mem* y)
 {
-#ifdef OSKAR_NO_LAPACK
-    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-#endif
-
     int i, j, type, location, err, rows_X, cols_X;
     long n, m, lda, ldb, info, nrhs;
     double orientation_tolerance, orientation_rad, cos_phi, sin_phi;
@@ -79,6 +75,18 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     oskar_Mem x2, y2, X, XX, sumX, ipiv;
     char trans;
     err = OSKAR_SUCCESS;
+
+#ifdef OSKAR_NO_LAPACK
+    fprintf(stderr, "= ERROR: oskar_fit_ellise(): LAPACK required for"
+            "use of extended sources.\n");
+    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+#endif
+
+#ifdef OSKAR_NO_CBLAS
+    fprintf(stderr, "= ERROR: oskar_fit_ellise(): CBLAS required for"
+                "use of extended sources.\n");
+    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+#endif
 
     if (num_points < 5)
     {

@@ -2,9 +2,7 @@
 # src/extern/dierckx/test/CMakeLists.txt
 #
 
-if (CPPUNIT_FOUND)
-
-    include_directories(${CPPUNIT_INCLUDE_DIR})
+if (CPPUNIT_FOUND AND CUDA_FOUND)
 
     set(dierckx_test_SRC
         src/CppUnitMain.cpp
@@ -12,9 +10,13 @@ if (CPPUNIT_FOUND)
     )
 
     cuda_add_executable(dierckx_test ${dierckx_test_SRC})
-    target_link_libraries(dierckx_test dierckx oskar ${CPPUNIT_LIBRARIES} ${CUDA_LIBRARIES})
+    target_link_libraries(dierckx_test 
+        dierckx
+        oskar
+        ${CPPUNIT_LIBRARIES}
+        ${CUDA_LIBRARIES})
 
     add_test(dierckx_test dierckx_test)
 
-endif()
+endif (CPPUNIT_FOUND AND CUDA_FOUND)
 

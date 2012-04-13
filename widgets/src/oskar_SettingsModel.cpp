@@ -65,10 +65,12 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/oskar_source_file/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/oskar_source_file/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/oskar_source_file/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/oskar_source_file/extended_sources", "Extended source settings");
     registerSetting("sky/oskar_source_file/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/oskar_source_file/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/oskar_source_file/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+#endif
 
     registerSetting("sky/gsm_file", "Input Global Sky Model file", oskar_SettingsItem::INPUT_FILE_NAME);
     setLabel("sky/gsm_file/filter", "Filter settings");
@@ -76,10 +78,12 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/gsm_file/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/gsm_file/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/gsm_file/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/gsm_file/extended_sources", "Extended source settings");
     registerSetting("sky/gsm_file/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/gsm_file/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/gsm_file/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+#endif
 
     // Sky model generator settings.
     setLabel("sky/generator", "Generators");
@@ -94,10 +98,12 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/generator/random_power_law/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/generator/random_power_law/extended_sources", "Extended source settings");
     registerSetting("sky/generator/random_power_law/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_power_law/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+#endif
 
     setLabel("sky/generator/random_broken_power_law", "Random, broken power-law in flux");
     registerSetting("sky/generator/random_broken_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
@@ -112,10 +118,12 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/generator/random_broken_power_law/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/generator/random_broken_power_law/extended_sources", "Extended source settings");
     registerSetting("sky/generator/random_broken_power_law/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/random_broken_power_law/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+#endif
 
     setLabel("sky/generator/healpix", "HEALPix (uniform, all sky) grid");
     registerSetting("sky/generator/healpix/nside", "Nside", oskar_SettingsItem::INT_UNSIGNED);
@@ -124,11 +132,12 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("sky/generator/healpix/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/generator/healpix/extended_sources", "Extended source settings");
     registerSetting("sky/generator/healpix/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
     registerSetting("sky/generator/healpix/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
-
+#endif
     registerSetting("sky/output_sky_file", "Output OSKAR source file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
     // Telescope model settings.
@@ -215,7 +224,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("image/time_end", "Time end", oskar_SettingsItem::AXIS_RANGE);
     setDefault("image/time_end", "max");
     options.clear();
-    options << "DFT 2D" << "DFT 3D" << "FFT";
+    //options << "DFT 2D" << "DFT 3D" << "FFT";
+    options << "DFT 2D";
     registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);
     setDefault("image/transform_type", "DFT 2D");
     registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);

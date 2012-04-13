@@ -82,6 +82,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     settings->obs.dec0_rad);
             if (error) return error;
 
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
             // Apply extended source over-ride.
             double FWHM_major = settings->sky.input_sky_extended_sources.FWHM_major;
             double FWHM_minor = settings->sky.input_sky_extended_sources.FWHM_minor;
@@ -99,6 +100,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
                     &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
             if (error) return error;
+#endif
 
             // Compute source direction cosines (relative lmn)
             error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
@@ -137,6 +139,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     settings->obs.dec0_rad);
             if (error) return error;
 
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
             // Apply extended source over-ride.
             double FWHM_major = settings->sky.input_sky_extended_sources.FWHM_major;
             double FWHM_minor = settings->sky.input_sky_extended_sources.FWHM_minor;
@@ -154,6 +157,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
                     &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
             if (error) return error;
+#endif
 
             // Compute source direction cosines (relative lmn)
             error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
@@ -199,6 +203,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 settings->obs.dec0_rad);
         if (error) return error;
 
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
         // Apply extended source over-ride.
         double FWHM_major = settings->sky.generator.healpix.extended_sources.FWHM_major;
         double FWHM_minor = settings->sky.generator.healpix.extended_sources.FWHM_minor;
@@ -216,6 +221,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
                 &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
+#endif
 
         // Compute source direction cosines (relative lmn)
         error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
@@ -262,6 +268,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 settings->obs.dec0_rad);
         if (error) return error;
 
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
         // Apply extended source over-ride.
         double FWHM_major = settings->sky.generator.random_power_law.extended_sources.FWHM_major;
         double FWHM_minor = settings->sky.generator.random_power_law.extended_sources.FWHM_minor;
@@ -279,6 +286,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
                 &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
+#endif
 
         // Compute source direction cosines (relative lmn)
         error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
@@ -327,6 +335,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 settings->obs.dec0_rad);
         if (error) return error;
 
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
         // Apply extended source over-ride.
         double FWHM_major = settings->sky.generator.random_broken_power_law.extended_sources.FWHM_major;
         double FWHM_minor = settings->sky.generator.random_broken_power_law.extended_sources.FWHM_minor;
@@ -344,6 +353,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
                 &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
+#endif
 
         // Compute source direction cosines (relative lmn)
         error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
@@ -376,6 +386,9 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         printf("  - Num. sources                = %i\n", total_sources);
         printf("  - Num. chunks                 = %i\n", *num_chunks);
         printf("  - Num. extended source chunks = %i\n", num_extended_chunks);
+#if (defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
+        printf("  - NOTE: extended sources disabled as CBLAS and/or LAPACK not found.\n");
+#endif
         printf("\n");
     }
 

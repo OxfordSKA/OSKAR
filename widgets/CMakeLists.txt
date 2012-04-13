@@ -2,11 +2,10 @@
 # src/widgets/CMakeLists.txt
 #
 
-if (QT4_FOUND)
+if (QT4_FOUND AND CUDA_FOUND)
 
-    qt4_add_resources(widgets_RCC_SRC
-        icons/icons.qrc
-    )
+    qt4_add_resources(widgets_RCC_SRC icons/icons.qrc)
+    
     set(widgets_MOC_SRC
         oskar_About.h
         oskar_CudaInfoDisplay.h
@@ -43,4 +42,4 @@ if (QT4_FOUND)
     # Tests
     add_subdirectory(test)
 
-endif (QT4_FOUND)
+endif (QT4_FOUND AND CUDA_FOUND)

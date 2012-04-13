@@ -2,7 +2,7 @@
 # src/matlab/CMakeLists.txt
 #
 
-if (MATLAB_FOUND)
+if (MATLAB_FOUND AND CUDA_FOUND)
 
     add_subdirectory(binary_file)
     add_subdirectory(cuda)
@@ -12,5 +12,5 @@ if (MATLAB_FOUND)
     add_subdirectory(sky)
     add_subdirectory(visibilities)
 
-endif (MATLAB_FOUND)
+endif (MATLAB_FOUND AND CUDA_FOUND)
 

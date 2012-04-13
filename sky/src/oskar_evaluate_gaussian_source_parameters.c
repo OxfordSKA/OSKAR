@@ -65,7 +65,6 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
     int ellipse_num_points;
     oskar_Mem lon, lat;
 
-
     err = OSKAR_SUCCESS;
 
     if (gaussian_a->type == OSKAR_DOUBLE &&

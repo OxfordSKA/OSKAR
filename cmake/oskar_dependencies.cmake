@@ -9,9 +9,9 @@
 #
 # [optional]
 #   Qt4       (oskar_apps, oskar_widgets)
-#   MKL       (TODO check if really optional?)
-#   CBLAS     (TODO check if really optional?)
-#   LAPACK    (TODO check if really optional?) 
+#   MKL       (oskar, for extended sources)
+#   CBLAS     (oskar, for extended sources)
+#   LAPACK    (oskar, for extended sources) 
 #   casacore  (oskar_ms)
 #   cfitsio   (oskar_fits)
 #   MATLAB    (for MATLAB interface fuctions)
@@ -34,7 +34,7 @@ endif ()
 # ==== Find dependencies.
 find_package(CUDA 4.0 QUIET) # liboskar
 find_package(OpenMP QUIET)   # liboskar
-#find_package(MKL QUIET)      # liboskar
+#find_package(MKL QUIET)     # liboskar
 find_package(CBLAS QUIET)    # liboskar
 find_package(LAPACK QUIET)   # liboskar
 find_package(Qt4 4.5 QUIET)  # liboskar apps, liboskar_widgets, apps 
@@ -124,21 +124,29 @@ if (NOT CPPUNIT_FOUND)
 endif()
 
 # Prints a message saying which libraries are being built.
+message("================================================================================")
+message("-- INFO: The following OSKAR components will be built:")
 if (CUDA_FOUND)
-    message("==> Building: liboskar")
-endif ()
-if (QT4_FOUND AND CUDA_FOUND)
-    message("==> Building: liboskar_apps and OSKAR applications")
+    message("        - liboskar")
 endif ()
 if (CASACORE_FOUND)
-    message("==> Building: liboskar_ms")
-endif ()
-if (QT4_FOUND)
-    message("==> Building: liboskar_widgets")
+    message("        - liboskar_ms")
 endif ()
 if (CFITSIO_FOUND)
-    message("==> Building: liboskar_fits")
+    message("        - liboskar_fits")
 endif ()
+if (QT4_FOUND AND CUDA_FOUND)
+    message("        - liboskar_widgets")
+endif ()
+if (QT4_FOUND AND CUDA_FOUND)
+    message("        - liboskar_apps")
+    message("        - OSKAR applications")
+endif ()
+if (MATLAB_FOUND AND CUDA_FOUND)
+    message("        - OSKAR MATLAB interface functions")
+endif ()
+message("        - libdierckx (external library)")
+message("================================================================================")
 
 # Set a flag to tell cmake that dependencies have been checked.
 set(CHECKED_DEPENDENCIES YES)

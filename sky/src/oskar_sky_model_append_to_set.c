@@ -103,6 +103,7 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
         number_to_copy  -= n_copy;
         from_offset     += n_copy;
     }
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     /* Set the use extended flag if needed */
     for (j = (*set_size-1 > 0) ? *set_size-1 : 0; j < *set_size + num_extra_models; ++j)
     {
@@ -129,6 +130,7 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
             }
         }
     }
+#endif
 
     /* Update the set size */
     *set_size += num_extra_models;

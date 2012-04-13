@@ -10,7 +10,6 @@ if (CPPUNIT_FOUND)
     set(math_test_SRC
         src/CppUnitMain.cpp
         src/Test_curand.cu
-        src/Test_fit_ellipse.cpp
         src/Test_healpix.cpp
         src/Test_Jones.cpp
         src/Test_Matrix3.cpp
@@ -23,6 +22,9 @@ if (CPPUNIT_FOUND)
         src/Test_sph2cart.cpp
         src/Test_SphericalPositions.cpp
     )
+    if (OSKAR_USE_LAPACK AND OSKAR_USE_CLAPACK)
+        list(APPEND math_test_SRC src/Test_fit_ellipse.cpp)
+    endif ()
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
     include_directories(${CUDA_INCLUDE_DIRS})

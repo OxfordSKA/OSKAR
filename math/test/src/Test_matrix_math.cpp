@@ -109,11 +109,13 @@ void Test_matrix_math::test_multiply()
 
     oskar_Mem C(type, location, rows_C * cols_C);
 
+#if !defined (OSKAR_NO_CBLAS)
     int err = oskar_matrix_multiply(&C,
             rows_A, cols_A, rows_A, cols_A,
             transA, transB, &A, &A);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS,
             err);
+#endif
 
 //    printf("\nA:\n");
 //    for (int j = 0; j < rows_A; ++j)
@@ -149,6 +151,11 @@ void Test_matrix_math::test_multiply()
 
 void Test_matrix_math::dgels_test()
 {
+#if defined (OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
+    return;
+#endif
+
+
     int rows_A = 3;
     int cols_A = 3;
     oskar_Mem A(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_A * cols_A);
@@ -199,10 +206,8 @@ void Test_matrix_math::dgels_test()
 
 //    printf("- lwork = %i\n", lwork);
 
-#ifndef OSKAR_NO_LAPACK
     dgels_(&trans, &m, &n, &nrhs, (double*)(denom.data), &lda,
             (double*)(B.data), &ldb, (double*)work.data, &lwork, &info);
-#endif
 
 //    printf("\n");
 //    printf("- info    = %i\n", info);
@@ -221,6 +226,10 @@ void Test_matrix_math::dgels_test()
 
 void Test_matrix_math::dgetrs_test()
 {
+#if defined (OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK)
+    return;
+#endif
+
     int rows_A = 3;
     int cols_A = 3;
     oskar_Mem A(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_A * cols_A);
@@ -236,6 +245,7 @@ void Test_matrix_math::dgetrs_test()
 
     // denom = inv(A'*A);
     oskar_Mem denom(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, rows_A * cols_A);
+
     int err = oskar_matrix_multiply(&denom, rows_A, cols_A, rows_A, cols_A,
             OSKAR_TRUE, OSKAR_FALSE, &A, &A);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
@@ -246,18 +256,14 @@ void Test_matrix_math::dgetrs_test()
     oskar_Mem ipiv(OSKAR_INT, OSKAR_LOCATION_CPU, MIN(m,n));
     int info = 0;
 
-#ifndef OSKAR_NO_LAPACK
     dgetrf_(&m, &n, (double*)denom.data, &lda, (int*)ipiv.data, &info);
-#endif
 
     char trans = 'N';
     int ldb = MAX(1, n);
     int nrhs = 1;
 
-#ifndef OSKAR_NO_LAPACK
     dgetrs_(&trans, &n, &nrhs, (double*)denom.data, &lda, (int*)ipiv.data,
             (double*)B.data, &ldb, &info);
-#endif
 
 //    printf("\nresult:\n");
 //    for (int j = 0; j < cols_B; ++j)
