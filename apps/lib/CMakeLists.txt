@@ -21,9 +21,7 @@ set(apps_SRC
     src/oskar_telescope_model_load.cpp
     src/oskar_telescope_model_save.cpp
 )
-
-if(BUILD_OSKAR_MS)
-    include_directories(${CASACORE_INCLUDE_DIR}/casacore)
+if(CASACORE_FOUND)
     list(APPEND apps_SRC src/oskar_write_ms.cpp)
 endif()
 
@@ -34,14 +32,14 @@ set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/oskar_apps.
 cuda_add_library(oskar_apps ${apps_SRC})
 
 # Link in oskar_ms and oskar_fits if avaliable.
-if(BUILD_OSKAR_MS AND BUILD_OSKAR_FITS)
+if(CASACORE_FOUND AND CFITSIO_FOUND)
     target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
         ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
         ${CUDA_CUBLAS_LIBRARIES})
-elseif(BUILD_OSKAR_MS)
+elseif(CASACORE_FOUND)
     target_link_libraries(oskar_apps oskar oskar_ms ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
-elseif(BUILD_OSKAR_FITS)
+elseif(CFITSIO_FOUND)
     target_link_libraries(oskar_apps oskar oskar_fits ${CASACORE_LIBRARIES}
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 else()
@@ -49,15 +47,11 @@ else()
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 endif()
 
-
-
-
-set_target_properties(oskar_apps
-    PROPERTIES
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-    INSTALL_RPATH_USE_LINK_PATH TRUE
+set_target_properties(oskar_apps PROPERTIES
     COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
     LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+    INSTALL_RPATH_USE_LINK_PATH TRUE
     SOVERSION ${OSKAR_VERSION})
 
 # Install target for the apps library.

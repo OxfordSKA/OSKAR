@@ -174,7 +174,7 @@ endif ()
 
 # === Set some include directories at the project level.
 include_directories(${OSKAR_SOURCE_DIR})
-if (CFitsio_FOUND)
+if (CFITSIO_FOUND)
     include_directories(${CFITSIO_INCLUDE_DIR})
 endif()
 if (CUDA_FOUND)
@@ -183,3 +183,7 @@ endif ()
 if (QT4_FOUND)
     include_directories(${QT_INCLUDE_DIR})
 endif()
+if (CASACORE_FOUND)
+    include_directories(${CASACORE_INCLUDE_DIR}/casacore)
+endif()
+

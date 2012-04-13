@@ -30,34 +30,12 @@ if (NOT OSKAR_MATLAB_INSTALL_DIR)
     set(OSKAR_MATLAB_INSTALL_DIR "share/matlab/toolbox/oskar")
 endif()
 
-# ==== Set the libraries that are built by default.
-if (NOT DEFINED BUILD_OSKAR)
-    set(BUILD_OSKAR ON)
-endif ()
-
-if (NOT DEFINED BUILD_OSKAR_MS)
-    set(BUILD_OSKAR_MS ON)
-endif ()
-
-if (NOT DEFINED BUILD_OSKAR_IMAGING)
-    set(BUILD_OSKAR_IMAGING ON)
-endif ()
-
-if (NOT DEFINED BUILD_OSKAR_WIDGETS)
-    set(BUILD_OSKAR_WIDGETS ON)
-endif ()
-
-if (NOT DEFINED BUILD_OSKAR_APPS)
-    set(BUILD_OSKAR_APPS ON)
-endif()
-
-if (NOT DEFINED BUILD_OSKAR_FITS)
-    set(BUILD_OSKAR_FITS ON)
-endif ()
-
 # ==== Set dependencies and compiler options.
 include(oskar_dependencies)
 include(oskar_compiler_options)
+
+# ==== Include build macros used for apps and mex functions.
+include(oskar_build_macros)
 
 enable_testing()
 
@@ -65,7 +43,7 @@ enable_testing()
 add_subdirectory(extern)
 
 # ==== Build main OSKAR library.
-if (BUILD_OSKAR)
+if (CUDA_FOUND)
     add_subdirectory(imaging)
     add_subdirectory(interferometry)
     add_subdirectory(math)
@@ -96,8 +74,11 @@ if (BUILD_OSKAR)
 
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
     cuda_add_library(${libname} ${${libname}_SRC})
-    target_link_libraries(${libname} dierckx ${CUDA_LIBRARIES}
-        ${CUDA_CUBLAS_LIBRARIES} ${CUDA_curand_LIBRARY})
+    target_link_libraries(${libname} 
+        dierckx 
+        ${CUDA_LIBRARIES}
+        ${CUDA_CUBLAS_LIBRARIES} 
+        ${CUDA_curand_LIBRARY})
     if (OSKAR_USE_CBLAS)
         target_link_libraries(${libname} ${OSKAR_CBLAS})
     endif ()
@@ -112,25 +93,15 @@ if (BUILD_OSKAR)
         SOVERSION ${OSKAR_VERSION})
     install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     cuda_build_clean_target()
-endif (BUILD_OSKAR)
+endif (CUDA_FOUND)
 
 
 # ==== Build other oskar libraries.
-if (BUILD_OSKAR_MS)
-    add_subdirectory(ms)
-endif ()
-if (BUILD_OSKAR_WIDGETS)
-    add_subdirectory(widgets)
-endif ()
-if (BUILD_OSKAR_APPS)
-    add_subdirectory(apps)
-endif ()
-if (BUILD_OSKAR_FITS)
-    add_subdirectory(fits)
-endif ()
-
+add_subdirectory(apps)
+add_subdirectory(fits)
 add_subdirectory(matlab)
-
+add_subdirectory(ms)
+add_subdirectory(widgets)
 
 # ==== Install header tree.
 install(DIRECTORY "${OSKAR_SOURCE_DIR}/."

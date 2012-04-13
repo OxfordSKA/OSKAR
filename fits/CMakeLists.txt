@@ -2,30 +2,31 @@
 # src/fits/CMakeLists.txt
 #
 
-set(fits_SRC
-    src/oskar_fits_check_status.c
-    src/oskar_fits_image_write.c
-    src/oskar_fits_write_axis_header.c
-    src/oskar_fits_write.c
-    #src/oskar_fits_write_cube.c
-    src/oskar_uvfits_writer.c # Needs fixing for the new visibility structure.
-)
-set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
+if (CFITSIO_FOUND)
 
-# ==== Macros to build the FITS module.
-include_directories(${CFITSIO_INCLUDE_DIR})
-set(libname oskar_fits)
-add_library(${libname} ${fits_SRC})
-target_link_libraries(${libname} ${CFITSIO_LIBRARIES})
-set_target_properties(${libname}
-    PROPERTIES
-    #PREFIX "lib"
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    SOVERSION ${OSKAR_VERSION})
-install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
+    # Fits source code.
+    set(fits_SRC
+        src/oskar_fits_check_status.c
+        src/oskar_fits_image_write.c
+        src/oskar_fits_write_axis_header.c
+        src/oskar_fits_write.c
+        #src/oskar_fits_write_cube.c
+        #src/oskar_uvfits_writer.c
+    )
+    set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
 
+    # Build and install the oskar_fits libraray.
+    include_directories(${CFITSIO_INCLUDE_DIR})
+    set(libname oskar_fits)
+    add_library(${libname} ${fits_SRC})
+    target_link_libraries(${libname} ${CFITSIO_LIBRARIES})
+    set_target_properties(${libname} PROPERTIES
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        SOVERSION ${OSKAR_VERSION})
+    install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
-# ==== Recurse into test subdirectory.
-add_subdirectory(test)
+    # Unit tests.
+    add_subdirectory(test)
 
+endif (CFITSIO_FOUND)

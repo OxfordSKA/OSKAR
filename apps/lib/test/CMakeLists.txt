@@ -5,7 +5,6 @@
 if (CPPUNIT_FOUND)
 
     include_directories(${CPPUNIT_INCLUDE_DIR})
-    include_directories(${QT_INCLUDE_DIR})
 
     set(apps_test_SRC
         src/CppUnitMain.cpp
@@ -13,7 +12,7 @@ if (CPPUNIT_FOUND)
         src/Test_telescope_model_load_save.cpp
     )
 
-    if(BUILD_OSKAR_MS)
+    if (CASACORE_FOUND)
         list(APPEND apps_test_SRC src/Test_write_ms.cpp)
     endif ()
 
@@ -32,20 +31,3 @@ if (CPPUNIT_FOUND)
     add_test(apps_lib_test apps_lib_test)
 
 endif()
-
-
-
-if (BUILD_OSKAR_WIDGETS)
-    include_directories(${Qwt5_INCLUDE_DIR})
-    include_directories(${QT_QTGUI_INCLUDE_DIR})
-    include_directories(${QT_INCLUDE_DIR})
-    include_directories(${QT_QTCORE_INCLUDE_DIR})
-    #add_executable(imager_dft_test src/imager_dft_test.cpp)
-    #target_link_libraries(imager_dft_test
-    #    oskar_apps
-    #    oskar_widgets
-    #    oskar
-    #    ${QT_QTCORE_LIBRARY}
-    #    ${QT_QTGUI_LIBRARY}
-    #)
-endif ()

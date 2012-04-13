@@ -82,6 +82,10 @@ macro(OSKAR_APP)
     CAR(APP_NAME ${APP_DEFAULT_ARGS})
     CDR(APP_SOURCES ${APP_DEFAULT_ARGS})
     
+    if (NOT QT4_FOUND)
+        message(CRITIAL "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
+    endif ()
+    
     #message("APP: NAME       = ${APP_NAME}")
     #message("     SRC        = ${APP_SOURCES}")
     #message("     MOC        = ${APP_QT_MOC_SRC}")

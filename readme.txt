@@ -1,25 +1,34 @@
-oskar-lib repository structure (last update: 8 Aug 2011)
+OSKAR repository structure (last update: 13 Apr 2012)
 ================================================================================
 
 
-Top level src folder structure:
+Top level source folder structure:
 ===============================================================================
 
-Top level folder structure for oskar-lib.
+Top level folder structure for OSKAR.
 
 src
- |--- apps             : Application utility library and various applications
- |                       which make use of the rest of oskar.
+ |--- apps             : Applications directory containing application main()
+ |    |                  functions. 
+ |    |
+ |    |--- lib         : Application library. Utility functions used by OSKAR
+ |                       applications   
  |
  |--- cmake            : Build system macros.
  |
+ |--- extern           : External libraries used by OSKAR.
+ |    |
+ |    |--- dierckx     : Subroutines for calculating smoothing splines 
+ |
  |--- fits             : FITS format interface library.
  |
- |--- imaging          : FFT imager, simple post processing (CLEAN).
+ |--- imaging          : Image/imaging functions.
  |
- |--- interferometry   : Interferometry simulation wrappers.
+ |--- interferometry   : Interferometry functions.
  |
- |--- math             : Generic math functions.
+ |--- math             : Generic math funcitons.
+ |
+ |--- matlab           : Matlab interface to OSKAR.
  |
  |--- ms               : Measurement set writer.
  |
@@ -29,9 +38,9 @@ src
  |--- station          : Evaluation of beam pattern (E Jones),
  |                       station level processing, antenna level processing.
  |
- |--- utility          : Global headers, timer.
+ |--- utility          : Utility functions.
  |
- |--- widgets          : Qt widgets, plotting, GUI components.
+ |--- widgets          : GUI components.
 
 
 
@@ -46,10 +55,6 @@ folders.
          |    |
          |    |---src
          |
-         |--- (matlab)  : reserved placeholder for MATLAB MEX functions.
-         |
-         |--- (python)  : reserved placeholder for Python modules.
-         |
          |--- src       : C/C++ source code for module.
          |
          |--- test      : module tests / unit tests.
@@ -61,27 +66,21 @@ Libraries built
 ================================================================================
 
 * oskar                 : Main oskar simulation library.
-                        : Dependencies: CUDA(4.0+), CUBLAS, Thrust
 
-* oskar_imaging         : Imaging library (& post processing)
-                        : Dependencies: CUDA(4.0+), CUFFT, FFTW
-
-* oskar_ms              : Measurement set writer
-                        : Dependencies: casacore.
-
-* oskar_widgets         : Qt Widget set (plotting, general widgets)
-                        : Dependencies: Qt4, Qwt5-Qt4
+* dierckx               : Spline library.
 
 * oskar_apps            : Application utility library.
-                        : Dependencies: oskar_widgets, oskar, Qt, Qwt5-Qt4
 
 * oskar_fits            : FITS interface library.
-                        : Dependencies: CFITSIO
+
+* oskar_ms              : Measurement set writer.
+
+* oskar_widgets         : Qt Widgets.
 
 
-Matlab interface
+
+MATLAB interface
 ================================================================================
-    scripts/matlab      : Matlab wrapper scripts.
 
 Tab completion for mex functions:
 ---------------------------------
@@ -100,14 +99,3 @@ Tab completion for mex functions:
             <arg argn="1" ctype="FILE"/>
         </binding>
         
-
-
-
-
-Python interface
-================================================================================
-(Currently a placeholder - potentially useful as an interface with CASA)
-
-
-
-
