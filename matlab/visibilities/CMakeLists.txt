@@ -11,3 +11,9 @@ add_library(mex_visibilties STATIC
 set(OSKAR_MEX_INSTALL_DIR "${OSKAR_MATLAB_INSTALL_DIR}/+oskar/+visibilities")
 
 oskar_mex(read oskar_mex_visibilities_read.cpp EXTRA_LIBS mex_visibilties)
+
+# Install scripts
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/scripts/"
+    DESTINATION "${OSKAR_MEX_INSTALL_DIR}"
+    FILES_MATCHING PATTERN "*.m"
+    PATTERN ".svn" EXCLUDE)

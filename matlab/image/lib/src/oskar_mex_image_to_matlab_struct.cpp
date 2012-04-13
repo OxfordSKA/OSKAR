@@ -43,8 +43,8 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
     mxArray* type_ = mxCreateNumericMatrix(1,1, mxINT32_CLASS, mxREAL);
     int* type = (int*)mxGetData(type_);
     type[0] = im_in->image_type;
-    mexCallMATLAB(1, &image_type_, 1, &type_, "oskar_image_type");
-    if (strcmp(mxGetClassName(image_type_), "oskar_image_type"))
+    mexCallMATLAB(1, &image_type_, 1, &type_, "oskar.image.type");
+    if (strcmp(mxGetClassName(image_type_), "oskar.image.type"))
         mexErrMsgTxt("ERROR: invalid image type.\n");
 
     int* dim_order = (int*)im_in->dimension_order.data;

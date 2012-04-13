@@ -33,13 +33,13 @@
 
 void im_set_error_(const char* msg)
 {
-    mexErrMsgIdAndTxt("OSKAR:ERROR", "Invalid image settings structure (%s).\n",
+    mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: Invalid image settings structure (%s).\n",
             msg);
 }
 
 void im_set_error_field_(const char* msg)
 {
-    mexErrMsgIdAndTxt("OSKAR:ERROR", "Invalid image settings structure "
+    mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: Invalid image settings structure "
             "(missing field: %s).\n", msg);
 }
 
@@ -65,8 +65,8 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     if (!time_range_) im_set_error_field_("time_range");
     mxArray* polarisation_ = mxGetField(in, 0, "polarisation");
     if (!polarisation_) im_set_error_field_("polarisation");
-    mxArray* tranform_type_ = mxGetField(in, 0, "tranform_type");
-    if (!tranform_type_) im_set_error_field_("tranform_type");
+    mxArray* tranform_type_ = mxGetField(in, 0, "transform_type");
+    if (!tranform_type_) im_set_error_field_("transform_type");
     mxArray* filename_ = mxGetField(in, 0, "filename");
     if (!filename_) im_set_error_field_("filename");
     mxArray* fits_file_ = mxGetField(in, 0, "fits_file");
@@ -107,13 +107,13 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     else
         mexErrMsgTxt("ERROR: expected class of time range to be double.\n");
 
-    if (!mxIsClass(polarisation_, "oskar_image_type"))
+    if (!mxIsClass(polarisation_, "oskar.image.type"))
         im_set_error_("invalid polarisation specification.");
-    mxArray* pol_id = mxCreateNumericMatrix(1,1,mxINT32_CLASS, mxREAL);
+    mxArray* pol_id = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
     mexCallMATLAB(1, &pol_id, 1, &polarisation_, "uint32");
     out->image_type = (int)mxGetScalar(pol_id);
 
-    if (!mxIsClass(tranform_type_, "oskar_image_transform"))
+    if (!mxIsClass(tranform_type_, "oskar.image.transform"))
         im_set_error_("invalid image transform type.");
     mxArray* transform_id = mxCreateNumericMatrix(1,1,mxINT32_CLASS, mxREAL);
     mexCallMATLAB(1, &transform_id, 1, &tranform_type_, "uint32");

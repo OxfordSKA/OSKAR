@@ -97,15 +97,17 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         oskar_Image image(type, OSKAR_LOCATION_CPU);
 
         // Make image.
-        mexPrintf("= Making image... ");
+        mexPrintf("= Making image...\n");
+        mexEvalString("drawnow");
         int err = oskar_make_image(&image, &vis, &settings);
         if (err)
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
-                    "\noskar_make_image() failed with code %i: %s.\n",
+                    "\noskar.imager.run() failed with code %i: %s.\n",
                     err, oskar_get_error_string(err));
         }
-        mexPrintf("done\n");
+        mexEvalString("drawnow");
+        mexPrintf("= Make image complete\n");
 
         out[0] = oskar_mex_image_to_matlab_struct(&image);
     }
@@ -383,11 +385,11 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
     else
     {
-        mexErrMsgTxt("Usage: "
-                "image = image = oskar_make_image_new(vis, settings)\n"
-                "or\n"
-                "image = oskar_make_image(uu, vv, amp, frequency_hz, num_pixels,"
-                " field_of_view_deg)\n");
+        mexErrMsgTxt("Usage: \n"
+                "    image = oskar.imager.run(vis, settings)\n"
+                "       or\n"
+                "    image = oskar.imager.run(uu, vv, amp, frequency_hz, "
+                "num_pixels, field_of_view_deg)\n");
     }
 
 

@@ -38,7 +38,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in < 1 || num_in > 2 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: image = oskar_image_read(filename, [index])");
+        mexErrMsgTxt("Usage: image = oskar.image.read(filename, [index])");
     }
 
     const char* filename = mxArrayToString(in[0]);
