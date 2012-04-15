@@ -61,7 +61,7 @@ int oskar_image_init(oskar_Image* image, int type, int location)
     dim[4] = OSKAR_IMAGE_DIM_CHANNEL;
 
     /* Initialise meta-data. */
-    image->image_type = OSKAR_IMAGE_TYPE_STOKES;
+    image->image_type = OSKAR_IMAGE_TYPE_UNDEF;
     image->centre_dec_deg = 0.0;
     image->centre_ra_deg = 0.0;
     image->fov_dec_deg = 0.0;
