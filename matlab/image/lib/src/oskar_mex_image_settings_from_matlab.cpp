@@ -63,8 +63,8 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     if (!time_snapshots_) im_set_error_field_("time_snapshots");
     mxArray* time_range_ = mxGetField(in, 0, "time_range");
     if (!time_range_) im_set_error_field_("time_range");
-    mxArray* polarisation_ = mxGetField(in, 0, "polarisation");
-    if (!polarisation_) im_set_error_field_("polarisation");
+    mxArray* image_type_ = mxGetField(in, 0, "image_type");
+    if (!image_type_) im_set_error_field_("image_type");
     mxArray* tranform_type_ = mxGetField(in, 0, "transform_type");
     if (!tranform_type_) im_set_error_field_("transform_type");
     mxArray* filename_ = mxGetField(in, 0, "filename");
@@ -107,10 +107,10 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     else
         mexErrMsgTxt("ERROR: expected class of time range to be double.\n");
 
-    if (!mxIsClass(polarisation_, "oskar.image.type"))
+    if (!mxIsClass(image_type_, "oskar.image.type"))
         im_set_error_("invalid polarisation specification.");
     mxArray* pol_id = mxCreateNumericMatrix(1, 1, mxINT32_CLASS, mxREAL);
-    mexCallMATLAB(1, &pol_id, 1, &polarisation_, "uint32");
+    mexCallMATLAB(1, &pol_id, 1, &image_type_, "uint32");
     out->image_type = (int)mxGetScalar(pol_id);
 
     if (!mxIsClass(tranform_type_, "oskar.image.transform"))

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,13 @@
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 
-#include "imaging/oskar_make_image.h"
 #include "imaging/oskar_Image.h"
+#include "imaging/oskar_image_init.h"
+#include "imaging/oskar_image_resize.h"
+#include "imaging/oskar_make_image.h"
+#include "imaging/oskar_make_image_dft.h"
 #include "imaging/oskar_SettingsImage.h"
+#include "imaging/oskar_evaluate_image_lm_grid.h"
 
 #include "matlab/image/lib/oskar_mex_image_settings_from_matlab.h"
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
@@ -78,7 +82,33 @@ void cleanup(void)
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in == 2 || num_out > 1)
+    bool cube_imager = false;
+
+    if (num_in == 2 && num_out < 2)
+    {
+        cube_imager = true;
+    }
+    else if (num_in == 6 && num_out < 2)
+    {
+        cube_imager = false;
+    }
+    else
+    {
+        mexErrMsgTxt("Usage: \n"
+                "    image = oskar.imager.run(vis, settings)\n"
+                "       or\n"
+                "    image = oskar.imager.run(uu, vv, amp, frequency_hz, "
+                "num_pixels, field_of_view_deg)\n");
+    }
+
+    int err = OSKAR_SUCCESS;
+
+    oskar_Image image;
+    int location = OSKAR_LOCATION_CPU;
+
+
+    // Image with the oskar_make_image() function.
+    if (cube_imager)
     {
         // Load visibilities from MATLAB structure into a oskar_Visibilties structure.
         oskar_Visibilities vis;
@@ -94,44 +124,33 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Setup image object.
         int type = OSKAR_DOUBLE;
-        oskar_Image image(type, OSKAR_LOCATION_CPU);
+        oskar_image_init(&image, type, location);
 
         // Make image.
         mexPrintf("= Making image...\n");
         mexEvalString("drawnow");
-        int err = oskar_make_image(&image, &vis, &settings);
+        err = oskar_make_image(&image, &vis, &settings);
         if (err)
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
-                    "\noskar.imager.run() failed with code %i: %s.\n",
+                    "\noskar.imager.run() [oskar_make_image] "
+                    "failed with code %i: %s.\n",
                     err, oskar_get_error_string(err));
         }
         mexEvalString("drawnow");
         mexPrintf("= Make image complete\n");
-
-        out[0] = oskar_mex_image_to_matlab_struct(&image);
     }
-    else if (num_in == 6 || num_out > 1)
-    {
-        //==========================================================
-        // FIXME: replace this branch with oskar_make_image_dft()
-        //==========================================================
 
+
+
+    // Image with manual data selection.
+    else
+    {
         // Make sure visibility data array is complex.
         if (!mxIsComplex(in[2]))
+        {
             mexErrMsgTxt("Input visibility amplitude array must be complex");
-
-        // Retrieve scalar arguments.
-        double freq_hz = mxGetScalar(in[3]);
-        int image_size = (int)mxGetScalar(in[4]);
-        double fov_deg = mxGetScalar(in[5]);
-        double m_to_wavenumbers = 2.0 * M_PI * (freq_hz / c_0);
-
-        // Image parameters.
-        double lm_max = sin((fov_deg/2.0) * (M_PI / 180.0));
-        int num_pixels = image_size * image_size;
-        double sum = 0.0, im_min = DBL_MAX, im_max = -DBL_MAX, rms = 0.0,
-                var = 0.0, mean = 0.0, sum_squared = 0.0;
+        }
 
         // Evaluate the and check consistency of data precision.
         int type = 0;
@@ -152,6 +171,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             mexErrMsgTxt("uu, vv and amplitudes must be of the same type");
         }
 
+        // Retrieve input arguments.
+        double freq = mxGetScalar(in[3]);
+        int size    = (int)mxGetScalar(in[4]);
+        double fov_deg = mxGetScalar(in[5]);
+        double fov  = fov_deg * M_PI/180.0;
+
         // Evaluate the number of visibility samples are in the data.
         int num_baselines = mxGetM(in[0]);
         int num_times     = mxGetN(in[0]);
@@ -164,235 +189,75 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
 
         int num_samples = num_baselines * num_times;
-        mxArray* mxImage = NULL;
 
+        // Setup the image cube.
+        oskar_image_init(&image, type, location);
+        oskar_image_resize(&image, size, size, 1, 1, 1);
+        image.centre_ra_deg = 0.0;
+        image.centre_dec_deg = 0.0;
+        image.fov_ra_deg = fov_deg;
+        image.fov_dec_deg = fov_deg;
+        image.time_start_mjd_utc = 0.0;
+        image.time_inc_sec = 0.0;
+        image.freq_start_hz = 0.0;
+        image.freq_inc_hz = 0.0;
+        image.image_type = 0;
+
+        oskar_Mem uu(type, location, num_samples);
+        oskar_Mem vv(type, location, num_samples);
+        oskar_Mem amp(type | OSKAR_COMPLEX, location, num_samples);
+
+        int num_pixels = size * size;
+        oskar_Mem l(type, location, num_pixels);
+        oskar_Mem m(type, location, num_pixels);
+
+        // Setup imaging data.
         if (type == OSKAR_DOUBLE)
         {
-            double* uu_metres = (double*)mxGetData(in[0]);
-            double* vv_metres = (double*)mxGetData(in[1]);
-            double* uu = (double*)malloc(num_samples * sizeof(double));
-            double* vv = (double*)malloc(num_samples * sizeof(double));
-            double* re = (double*)mxGetPr(in[2]);
-            double* im = (double*)mxGetPi(in[2]);
-            double2* amp = (double2*)malloc(num_samples * sizeof(double2));
+            oskar_evaluate_image_lm_grid_d(size, size, fov, fov, l, m);
+            double* uu_ = (double*)mxGetData(in[0]);
+            double* vv_ = (double*)mxGetData(in[1]);
+            double* re_ = (double*)mxGetPr(in[2]);
+            double* im_ = (double*)mxGetPi(in[2]);
             for (int i = 0; i < num_samples; ++i)
             {
-                amp[i] = make_double2(re[i], im[i]);
-                uu[i] = uu_metres[i] * m_to_wavenumbers;
-                vv[i] = vv_metres[i] * m_to_wavenumbers;
+                ((double2*)amp.data)[i] = make_double2(re_[i], im_[i]);
+                ((double*)uu.data)[i] = uu_[i];
+                ((double*)vv.data)[i] = vv_[i];
             }
-
-            // Allocate memory for image and image coordinates.
-            mwSize dims[2] = {image_size, image_size};
-            mxImage = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-            double* image = (double*)mxGetData(mxImage);
-            double* lm = (double*)malloc(image_size * sizeof(double));
-            double* l = (double*)malloc(num_pixels * sizeof(double));
-            double* m = (double*)malloc(num_pixels * sizeof(double));
-            oskar_linspace_d(lm, -lm_max, lm_max, image_size);
-            oskar_meshgrid_d(l, m, lm, image_size, lm, image_size);
-
-            // Copy memory to the GPU.
-            double *d_l, *d_m, *d_uu, *d_vv, *d_amp;
-            cudaMalloc((void**)&d_l, num_pixels * sizeof(double));
-            cudaMalloc((void**)&d_m, num_pixels * sizeof(double));
-            cudaMemcpy(d_l, l, num_pixels * sizeof(double), cudaMemcpyHostToDevice);
-            cudaMemcpy(d_m, m, num_pixels * sizeof(double), cudaMemcpyHostToDevice);
-            cudaMalloc((void**)&d_uu, num_samples * sizeof(double));
-            cudaMalloc((void**)&d_vv, num_samples * sizeof(double));
-            cudaMalloc((void**)&d_amp, num_samples * sizeof(double2));
-            cudaMemcpy(d_uu, uu, num_samples * sizeof(double), cudaMemcpyHostToDevice);
-            cudaMemcpy(d_vv, vv, num_samples * sizeof(double), cudaMemcpyHostToDevice);
-            cudaMemcpy(d_amp, amp, num_samples * sizeof(double2), cudaMemcpyHostToDevice);
-
-            // Allocate device memory for the image.
-            double* d_image;
-            cudaMalloc((void**)&d_image, num_pixels * sizeof(double));
-
-            // DFT.
-            oskar_cuda_dft_c2r_2d_d(num_samples, d_uu, d_vv, d_amp, num_pixels,
-                    d_l, d_m, d_image);
-
-            // Copy back image
-            cudaMemcpy(image, d_image, num_pixels * sizeof(double), cudaMemcpyDeviceToHost);
-
-            // Scale by number of data samples.
-            for (int i = 0; i < num_pixels; ++i)
-            {
-                image[i] /= (double)num_samples;
-            }
-
-            // Transpose the image to FORTRAN / MATLAB order.
-            for (int j = 0; j < image_size; ++j)
-            {
-                for (int i = j; i < image_size; ++i)
-                {
-                    double temp = image[j * image_size + i];
-                    image[j * image_size + i] = image[i * image_size + j];
-                    image[i * image_size + j] = temp;
-                }
-            }
-
-
-            for (int i = 0; i < num_pixels; ++i)
-            {
-                sum += image[i];
-                sum_squared += image[i] * image[i];
-                im_min = min(im_min, image[i]);
-                im_max = max(im_max, image[i]);
-            }
-            mean = sum / num_pixels;
-            rms = sqrt(sum_squared / num_pixels);
-            for (int i = 0; i < num_pixels; ++i)
-            {
-                var = (image[i] - mean);
-                var *= var;
-            }
-
-            // Clean up memory
-            free(lm);
-            free(l);
-            free(m);
-            free(uu);
-            free(vv);
-            free(amp);
-            cudaFree(d_l);
-            cudaFree(d_m);
-            cudaFree(d_uu);
-            cudaFree(d_vv);
-            cudaFree(d_amp);
-            cudaFree(d_image);
         }
-        else if (type == OSKAR_SINGLE)
+        else // (type == OSKAR_SINGLE)
         {
-            float* uu_metres = (float*)mxGetData(in[0]);
-            float* vv_metres = (float*)mxGetData(in[1]);
-            float* uu = (float*)malloc(num_samples * sizeof(float));
-            float* vv = (float*)malloc(num_samples * sizeof(float));
-            float* re = (float*)mxGetPr(in[2]);
-            float* im = (float*)mxGetPi(in[2]);
-            float2* amp = (float2*)malloc(num_samples * sizeof(float2));
+            oskar_evaluate_image_lm_grid_f(size, size, fov, fov, l, m);
+            float* uu_ = (float*)mxGetData(in[0]);
+            float* vv_ = (float*)mxGetData(in[1]);
+            float* re_ = (float*)mxGetPr(in[2]);
+            float* im_ = (float*)mxGetPi(in[2]);
             for (int i = 0; i < num_samples; ++i)
             {
-                amp[i] = make_float2(re[i], im[i]);
-                uu[i] = uu_metres[i] * (float)m_to_wavenumbers;
-                vv[i] = vv_metres[i] * (float)m_to_wavenumbers;
+                ((float2*)amp.data)[i] = make_float2(re_[i], im_[i]);
+                ((float*)uu.data)[i] = uu_[i];
+                ((float*)vv.data)[i] = vv_[i];
             }
 
-            // Allocate memory for image and coordinate grid.
-            mwSize dims[2] = {image_size, image_size};
-            mxImage = mxCreateNumericArray(2, dims, mxSINGLE_CLASS, mxREAL);
-            float* image = (float*)mxGetData(mxImage);
-            float* lm = (float*)malloc(image_size * sizeof(float));
-            float* l = (float*)malloc(num_pixels * sizeof(float));
-            float* m = (float*)malloc(num_pixels * sizeof(float));
-            oskar_linspace_f(lm, (float)-lm_max, (float)lm_max, image_size);
-            oskar_meshgrid_f(l, m, lm, image_size, lm, image_size);
-
-            // Copy memory to the GPU.
-            float *d_l, *d_m, *d_uu, *d_vv, *d_amp;
-            cudaMalloc((void**)&d_l, num_pixels * sizeof(float));
-            cudaMalloc((void**)&d_m, num_pixels * sizeof(float));
-            cudaMemcpy(d_l, l, num_pixels * sizeof(float), cudaMemcpyHostToDevice);
-            cudaMemcpy(d_m, m, num_pixels * sizeof(float), cudaMemcpyHostToDevice);
-            cudaMalloc((void**)&d_uu, num_samples * sizeof(float));
-            cudaMalloc((void**)&d_vv, num_samples * sizeof(float));
-            cudaMalloc((void**)&d_amp, num_samples * sizeof(float2));
-            cudaMemcpy(d_uu, uu, num_samples * sizeof(float), cudaMemcpyHostToDevice);
-            cudaMemcpy(d_vv, vv, num_samples * sizeof(float), cudaMemcpyHostToDevice);
-            cudaMemcpy(d_amp, amp, num_samples * sizeof(float2), cudaMemcpyHostToDevice);
-
-            // Allocate device memory for the image.
-            float* d_image;
-            cudaMalloc((void**)&d_image, num_pixels * sizeof(float));
-
-            // DFT
-            oskar_cuda_dft_c2r_2d_f(num_samples, d_uu, d_vv, d_amp, num_pixels,
-                    d_l, d_m, d_image);
-
-            // Copy back image
-            cudaMemcpy(image, d_image, num_pixels * sizeof(float), cudaMemcpyDeviceToHost);
-
-            // Scale by number of data samples.
-            for (int i = 0; i < num_pixels; ++i)
-            {
-                image[i] /= (float)num_samples;
-            }
-
-            // Transpose the image to FORTRAN / MATLAB order.
-            for (int j = 0; j < image_size; ++j)
-            {
-                for (int i = j; i < image_size; ++i)
-                {
-                    float temp = image[j * image_size + i];
-                    image[j * image_size + i] = image[i * image_size + j];
-                    image[i * image_size + j] = temp;
-                }
-            }
-
-            for (int i = 0; i < num_pixels; ++i)
-            {
-                sum += image[i];
-                sum_squared += image[i] * image[i];
-                im_min = min((float)im_min, image[i]);
-                im_max = max((float)im_max, image[i]);
-            }
-
-            mean = sum / num_pixels;
-            rms = sqrt(sum_squared / num_pixels);
-            for (int i = 0; i < num_pixels; ++i)
-            {
-                var = (image[i] - mean);
-                var *= var;
-            }
-
-            // Clean up memory
-            free(lm);
-            free(l);
-            free(m);
-            free(uu);
-            free(vv);
-            free(amp);
-            cudaFree(d_l);
-            cudaFree(d_m);
-            cudaFree(d_uu);
-            cudaFree(d_vv);
-            cudaFree(d_amp);
-            cudaFree(d_image);
         }
-        else
+
+        // Make the image.
+        mexPrintf("= Making image...\n");
+        mexEvalString("drawnow");
+        err = oskar_make_image_dft(&image.data, &uu, &vv, &amp, &l, &m, freq);
+        if (err)
         {
-            mexErrMsgTxt("Failed to run oskar_dirty_image.");
+            mexErrMsgIdAndTxt("OSKAR:ERROR",
+                    "\noskar.imager.run() [oskar_make_image_dft] "
+                    "failed with code %i: %s.\n",
+                    err, oskar_get_error_string(err));
         }
-
-        // Create meta-data values.
-        mxArray* mxFreq = mxCreateNumericMatrix(1,1,mxDOUBLE_CLASS, mxREAL);
-        *(double*)mxGetData(mxFreq) = freq_hz;
-        mxArray* mxFOV = mxCreateNumericMatrix(1,1,mxDOUBLE_CLASS, mxREAL);
-        *(double*)mxGetData(mxFOV) = fov_deg;
-
-        const char* fields[8] = {"data", "frequency_hz", "fov_deg", "min",
-                "max", "mean", "rms", "variance"};
-        out[0] = mxCreateStructMatrix(1, 1, 8, fields);
-        mxSetField(out[0], 0, "data", mxImage);
-        mxSetField(out[0], 0, "frequency_hz", mxFreq);
-        mxSetField(out[0], 0, "fov_deg", mxFOV);
-        mxSetField(out[0], 0, "min", mxCreateDoubleScalar(im_min));
-        mxSetField(out[0], 0, "max", mxCreateDoubleScalar(im_max));
-        mxSetField(out[0], 0, "mean", mxCreateDoubleScalar(mean));
-        mxSetField(out[0], 0, "rms", mxCreateDoubleScalar(rms));
-        mxSetField(out[0], 0, "variance", mxCreateDoubleScalar(var));
-    }
-    else
-    {
-        mexErrMsgTxt("Usage: \n"
-                "    image = oskar.imager.run(vis, settings)\n"
-                "       or\n"
-                "    image = oskar.imager.run(uu, vv, amp, frequency_hz, "
-                "num_pixels, field_of_view_deg)\n");
+        mexEvalString("drawnow");
+        mexPrintf("= Make image complete\n");
     }
 
-
+    out[0] = oskar_mex_image_to_matlab_struct(&image);
 
     // Register cleanup function.
     mexAtExit(cleanup);

@@ -1,19 +1,26 @@
 classdef type < uint32
 
     enumeration
-        stokes(0)
-        IQUV(0)
-        I(1)
-        Q(2)
-        U(3)
-        V(4)
-        linear(5)
-        XX(6)
-        YY(7)
-        XY(8)
-        YX(9)
-        PSF(10)
+        undef(0)
+        UNDEF(0)
+        stokes(1)
+        STOKES(1)
+        IQUV(1)
+        I(2)
+        Q(3)
+        U(4)
+        V(5)
+        linear(6)
+        LINEAR(6)
+        XX(7)
+        YY(8)
+        XY(9)
+        YX(10)
+        
+        PSF(50)
+        
         beam_scalar(100)
+        BEAM_SCALAR(100)
     end
     
 end

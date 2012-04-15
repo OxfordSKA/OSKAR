@@ -1,11 +1,11 @@
 function settings = init_settings(fov_deg, size, vis)
 
-settings.fov_deg = 2;
+settings.fov_deg = 4;
 if exist('fov_deg', 'var')
     settings.fov_deg = fov_deg;
 end
 
-settings.size = 256;
+settings.size = 512;
 if exist('size', 'var')
     settings.size = size;
 end
@@ -27,7 +27,7 @@ if exist('vis', 'var')
     settings.time_range(2) = vis.num_times-1;
 end
 
-settings.polarisation = oskar.image.type.I;
+settings.image_type = oskar.image.type.linear;
 
 settings.transform_type = oskar.image.transform.dft_2d;
 
