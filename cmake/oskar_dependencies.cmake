@@ -4,7 +4,7 @@
 #
 # Dependencies:
 #------------------------------------------------------------------------------
-*
+#
 #   CUDA (>= 4.0)   (oskar, oskar_apps, oskar_widgets, OSKAR applications)
 #   Qt4             (oskar_apps, oskar_widgets, OSKAR applications)
 #   MKL             (oskar -> to enable extended sources)
