@@ -49,64 +49,69 @@ int oskar_matrix_multiply(oskar_Mem* C,
     int M, N, K;
     int LDA, LDB, LDC;
 
+#ifdef OSKAR_NO_CBLAS
+    fprintf(stderr, "= ERROR: oskar_matrix_multiply(): CBLAS currently "
+            "required for this function.\n");
+    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+#endif
+
     if (A == NULL || B == NULL || C == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-
-    if (A->location == OSKAR_LOCATION_CPU &&
+    if (!(A->location == OSKAR_LOCATION_CPU &&
             B->location == OSKAR_LOCATION_CPU &&
-            C->location == OSKAR_LOCATION_CPU)
+            C->location == OSKAR_LOCATION_CPU))
     {
-        if (A->type == OSKAR_DOUBLE && B->type == OSKAR_DOUBLE &&
-                C->type == OSKAR_DOUBLE)
-        {
-#ifndef OSKAR_NO_CBLAS
-            /* [ C = alpha * A * B + beta * C ] */
+        return OSKAR_ERR_BAD_LOCATION;
+    }
 
-            int tA, tB;
-            double alpha = 1.0, beta = 0.0;
-            M = (!transA) ? rows_A : cols_A;
-            N = (!transB) ? cols_B : rows_B;
-            K = (!transA) ? cols_A : rows_A;
-
-            if (K != ((!transB)? rows_B : cols_B))
-            {
-                return OSKAR_ERR_DIMENSION_MISMATCH;
-            }
-
-            tA = transA ? CblasTrans : CblasNoTrans;
-            tB = transB ? CblasTrans : CblasNoTrans;
-
-            LDA = (!transA) ? MAX(K, 1) : MAX(M, 1);
-            LDB = (!transB) ? MAX(N, 1) : MAX(K, 1);
-            LDC = MAX(N, 1);
-
-            cblas_dgemm(CblasRowMajor, tA, tB, M, N, K, alpha,
-                    (double*)A->data,
-                    LDA, (double*)B->data, LDB, beta, (double*)C->data, LDC);
-#else
-            /* TODO implement replacement for the BLAS function */
-            return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-#endif
-        }
-        else if (A->type == OSKAR_SINGLE && B->type == OSKAR_SINGLE &&
-                C->type == OSKAR_SINGLE)
-        {
-#ifndef OSKAR_NO_CBLAS
-            return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-#else
-            /* TODO implement replacement for the BLAS function */
-            return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-#endif
-        }
-        else
-        {
-            return OSKAR_ERR_BAD_DATA_TYPE;
-        }
+    int type;
+    if (A->type == OSKAR_DOUBLE && B->type == OSKAR_DOUBLE &&
+            C->type == OSKAR_DOUBLE)
+    {
+        type = OSKAR_DOUBLE;
+    }
+    else if (A->type == OSKAR_SINGLE && B->type == OSKAR_SINGLE &&
+            C->type == OSKAR_SINGLE)
+    {
+        type = OSKAR_SINGLE;
     }
     else
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        return OSKAR_ERR_BAD_DATA_TYPE;
+    }
+
+
+    /* [ C = alpha * A * B + beta * C ] */
+    int tA, tB;
+    double alpha = 1.0, beta = 0.0;
+    M = (!transA) ? rows_A : cols_A;
+    N = (!transB) ? cols_B : rows_B;
+    K = (!transA) ? cols_A : rows_A;
+
+    if (K != ((!transB)? rows_B : cols_B))
+    {
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+    }
+
+    tA = transA ? CblasTrans : CblasNoTrans;
+    tB = transB ? CblasTrans : CblasNoTrans;
+
+    LDA = (!transA) ? MAX(K, 1) : MAX(M, 1);
+    LDB = (!transB) ? MAX(N, 1) : MAX(K, 1);
+    LDC = MAX(N, 1);
+
+    if (type == OSKAR_DOUBLE)
+    {
+        cblas_dgemm(CblasRowMajor, tA, tB, M, N, K, alpha,
+                (double*)A->data,
+                LDA, (double*)B->data, LDB, beta, (double*)C->data, LDC);
+    }
+    else
+    {
+        cblas_sgemm(CblasRowMajor, tA, tB, M, N, K, (float)alpha,
+                (float*)A->data,
+                LDA, (float*)B->data, LDB, (float)beta, (float*)C->data, LDC);
     }
 
     return OSKAR_SUCCESS;

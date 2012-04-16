@@ -85,7 +85,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     double freq = C_0 / telescope->wavelength_metres;
     double bandwidth = telescope->bandwidth_hz;
 
-    // Check type of Jones matrix.
+    // Check type of Jones matrix
     if (J->data.is_matrix() && vis->is_matrix())
     {
         // Call the kernel for full polarisation.
@@ -136,6 +136,8 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
             }
         }
     }
+
+    // Jones type --> Scalar version
     else
     {
         if (sky->use_extended)
