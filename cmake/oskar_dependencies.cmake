@@ -2,20 +2,18 @@
 # src/cmake/oskar_dependencies.cmake:
 #
 #
-# Dependencies for liboskar:
+# Dependencies:
 #------------------------------------------------------------------------------
-# [required]
-#   CUDA (>= 4.0)
-#
-# [optional]
-#   Qt4       (oskar_apps, oskar_widgets)
-#   MKL       (oskar, for extended sources)
-#   CBLAS     (oskar, for extended sources)
-#   LAPACK    (oskar, for extended sources) 
-#   casacore  (oskar_ms)
-#   cfitsio   (oskar_fits)
-#   MATLAB    (for MATLAB interface fuctions)
-#   CppUnit   (unit test binaries)
+*
+#   CUDA (>= 4.0)   (oskar, oskar_apps, oskar_widgets, OSKAR applications)
+#   Qt4             (oskar_apps, oskar_widgets, OSKAR applications)
+#   MKL             (oskar -> to enable extended sources)
+#   CBLAS           (oskar -> to enable extended sources)
+#   LAPACK          (oskar -> to enable extended sources) 
+#   casacore        (oskar_ms)
+#   cfitsio         (oskar_fits)
+#   MATLAB          (for MATLAB interface fuctions)
+#   CppUnit         (unit test binaries)
 #
 # =============================================================================
 #

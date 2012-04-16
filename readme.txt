@@ -1,9 +1,23 @@
-OSKAR repository structure (last update: 13 Apr 2012)
-================================================================================
+--------------------------------------------------------------------------------
+| OSKAR 2.0.0-beta                                  last update: 16 April 2012 |
+--------------------------------------------------------------------------------
 
 
-Top level source folder structure:
-===============================================================================
+
+1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator
+--------------------------------------------------------------------------------
+
+The OSKAR package consists of a number of open source libraries and applications
+for the simulation of radio interferometers. OSKAR has been designed with a
+focus on simulating large aperture arrays, such as that of the SKA.
+
+
+2. OSKAR repository structure
+--------------------------------------------------------------------------------
+
+
+2.1 Top level source folder structure
+-------------------------------------
 
 Top level folder structure for OSKAR.
 
@@ -26,7 +40,7 @@ src
  |
  |--- interferometry   : Interferometry functions.
  |
- |--- math             : Generic math funcitons.
+ |--- math             : Generic math functions.
  |
  |--- matlab           : Matlab interface to OSKAR.
  |
@@ -45,8 +59,8 @@ src
 
 
 
-Sub-folder structure
-================================================================================
+2.2 Sub-folder structure
+------------------------
 
 Each of the top level module folders listed above will contain the following
 folders.
@@ -62,8 +76,8 @@ folders.
          |    |---src
 
 
-Libraries built
-================================================================================
+2.3 Libraries built
+-------------------
 
 * oskar                 : Main oskar simulation library.
 
@@ -79,11 +93,11 @@ Libraries built
 
 
 
-MATLAB interface
-================================================================================
+3. Notes: The OSKAR MATLAB interface
+--------------------------------------------------------------------------------
 
-Tab completion for mex functions:
----------------------------------
+3.1 Tab completion for mex functions
+-------------------------------------
 
     Edit the TC.xml file in the MATLAB root toolbox/local directory.
     
@@ -98,4 +112,3 @@ Tab completion for mex functions:
         <binding name="oskar_visibilities_read">
             <arg argn="1" ctype="FILE"/>
         </binding>
-        

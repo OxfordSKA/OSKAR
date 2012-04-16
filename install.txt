@@ -1,0 +1,62 @@
+--------------------------------------------------------------------------------
+| OSKAR 2.0.0-beta                                  last update: 16 April 2012 |
+--------------------------------------------------------------------------------
+
+1. Install Instructions
+--------------------------------------------------------------------------------
+
+The OSKAR simulation package can be built and installed by series of steps simple
+steps described below. The build system makes use of CMake (www.cmake.org) and
+is currently targeted at LINUX only. OS X (Darwin) and windows installs may 
+be possible but are not currently supported.
+
+OSKAR can be built with the following commands:
+
+    $ mkdir build
+    $ cd build
+    $ cmake [OPTIONS] ../path/to/top/level/CMakeLists.txt 
+    $ make
+
+OSKAR can then be installed with:
+
+    $ make install
+
+
+1.1 Build Options
+-----------------
+When running the cmake command a number of build options can be specified. 
+These are as follows: 
+
+    * -DCUDA_ARCH=<arch> (default: 2.0)
+        This option sets the target CUDA architecture for the compilation of
+        CUDA device code. 
+        <arch> must be one of either 1.3, 2.0, 2.1 or ALL. 
+
+    * -DCMAKE_INSTALL_PREFIX=<path> (default: /usr/local/)
+        Prefix install path when installing OSKAR (with make install).
+
+    * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
+        Build OSKAR in release or debug mode.
+
+
+1.2 Library modules & dependencies
+--------------------------------------------------------------------------------
+The OSKAR package consists a number of libraries and applications. 
+The dependencies for these are:
+
+    * liboskar              CUDA (>=4.0) 
+                            [CBLAS, LAPACK (to enable use of extended sources)]
+    * liboskar_apps         Qt (>=4.5), CUDA (>=4.0)
+    * liboskar_fits         cfitsio
+    * liboskar_ms           cascore
+    * liboskar_widgets      Qt (>=4.5), CUDA (>=4.0)
+    * Applications          CUDA (>=4.0), Qt (>=4.5)
+    * MATLAB interface      CUDA (>=4.0), Qt (>=4.5), MATLAB (>=R2010b)
+    * Unit test binaries    CppUnit
+
+The OSKAR CMAKE build system will compile as many components as possible given
+the set of dependencies it finds on the system. A list of which components
+are going to be built is written to the terminal when running the 'cmake'
+command.   
+
+
