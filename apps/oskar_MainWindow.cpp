@@ -113,18 +113,18 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     actCollapseAll->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
 
     // Create the menus.
-    QMenuBar* menubar = new QMenuBar(this);
-    setMenuBar(menubar);
-    QMenu* menuFile = new QMenu("File", menubar);
-    QMenu* menuView = new QMenu("View", menubar);
-    QMenu* menuRun = new QMenu("Run", menubar);
-    menubar->addAction(menuFile->menuAction());
-    menubar->addAction(menuView->menuAction());
-    menubar->addAction(menuRun->menuAction());
-    menuFile->addAction(actOpen);
-    menuFile->addAction(actSaveAs);
-    menuFile->addSeparator();
-    menuFile->addAction(actExit);
+    menubar_ = new QMenuBar(this);
+    setMenuBar(menubar_);
+    menuFile_ = new QMenu("File", menubar_);
+    QMenu* menuView = new QMenu("View", menubar_);
+    QMenu* menuRun = new QMenu("Run", menubar_);
+    menubar_->addAction(menuFile_->menuAction());
+    menubar_->addAction(menuView->menuAction());
+    menubar_->addAction(menuRun->menuAction());
+    menuFile_->addAction(actOpen);
+    menuFile_->addAction(actSaveAs);
+    menuFile_->addSeparator();
+    menuFile_->addAction(actExit);
     menuView->addAction(actHideUnset_);
     menuView->addSeparator();
     menuView->addAction(actShowFirstLevel);
@@ -136,6 +136,9 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menuRun->addAction(actRunInterferometer);
     menuRun->addAction(actRunBeamPattern);
     menuRun->addAction(actRunImager);
+
+    createRecentFileActions();
+    updateRecentFileActions();
 
     // Create the toolbar.
     QToolBar* toolbar = new QToolBar(this);
@@ -178,6 +181,8 @@ void oskar_MainWindow::openSettings(QString filename)
         model_->loadSettingsFile(filename);
         setWindowTitle("OSKAR GUI [" + filename + "]");
 
+        updateRecentFileList();
+
         // Restore the expanded items.
         view_->restoreExpanded();
     }
@@ -197,6 +202,9 @@ void oskar_MainWindow::saveAs(QString filename)
     // Save the settings file.
     view_->saveExpanded();
     model_->saveSettingsFile(settingsFile_);
+
+    updateRecentFileList();
+
     setWindowTitle("OSKAR GUI [" + settingsFile_ + "]");
     view_->restoreExpanded();
 }
@@ -242,6 +250,12 @@ void oskar_MainWindow::runInterferometer()
     runButton();
 }
 
+void oskar_MainWindow::runImager()
+{
+    run_function_ = &oskar_imager;
+    runButton();
+}
+
 void oskar_MainWindow::setHideIfUnset(bool value)
 {
     view_->saveExpanded();
@@ -250,11 +264,12 @@ void oskar_MainWindow::setHideIfUnset(bool value)
     view_->update();
 }
 
-void oskar_MainWindow::runImager()
+void oskar_MainWindow::openRecentFile()
 {
-    run_function_ = &oskar_imager;
-    runButton();
+    QAction* act = qobject_cast<QAction*>(sender());
+    if (act) openSettings(act->data().toString());
 }
+
 
 // =========================================================  Private methods.
 
@@ -379,3 +394,60 @@ void oskar_MainWindow::run(int depth, QStringList outputFiles)
         model_->setValue(key, start);
     }
 }
+
+
+void oskar_MainWindow::createRecentFileActions()
+{
+    for (int i = 0; i < MaxRecentFiles; ++i)
+    {
+        recentFiles_[i] = new QAction(this);
+        recentFiles_[i]->setVisible(false);
+        connect(recentFiles_[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
+    }
+    seperator_ = menuFile_->addSeparator();
+    for (int i = 0; i < MaxRecentFiles; ++i)
+    {
+        menuFile_->addAction(recentFiles_[i]);
+    }
+    menuFile_->addSeparator();
+}
+
+
+void oskar_MainWindow::updateRecentFileActions()
+{
+    QSettings settings;
+    QStringList files = settings.value("recent_files/files").toStringList();
+
+    int num_files = qMin(files.size(), (int)MaxRecentFiles);
+
+    for (int i = 0; i < num_files; ++i)
+    {
+        QFileInfo info(files[i]);
+        QString txt = tr("&%1 %2  [%3]").arg(i+1).arg(info.fileName()).
+                arg(info.absolutePath());
+        recentFiles_[i]->setText(txt);
+        recentFiles_[i]->setData(files[i]);
+        recentFiles_[i]->setVisible(true);
+    }
+    for (int i = num_files; i < MaxRecentFiles; ++i)
+    {
+        recentFiles_[i]->setVisible(false);
+    }
+    seperator_->setVisible(num_files > 0);
+}
+
+
+void oskar_MainWindow::updateRecentFileList()
+{
+    QSettings settings;
+    QStringList files = settings.value("recent_files/files").toStringList();
+    files.removeAll(settingsFile_);
+    files.prepend(settingsFile_);
+    while (files.size() > MaxRecentFiles)
+        files.removeLast();
+
+    settings.setValue("recent_files/files", files);
+
+    updateRecentFileActions();
+}
+

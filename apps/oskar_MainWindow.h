@@ -61,10 +61,15 @@ private slots:
     void runInterferometer();
     void runImager();
     void setHideIfUnset(bool value);
+    void openRecentFile();
 
 private:
     void runButton();
     void run(int depth, QStringList outputfiles = QStringList());
+
+    void createRecentFileActions();
+    void updateRecentFileActions();
+    void updateRecentFileList();
 
 private:
     QWidget* widget_;
@@ -75,6 +80,14 @@ private:
     QAction* actHideUnset_;
     QString settingsFile_;
     int (*run_function_)(const char*);
+
+    QMenuBar* menubar_;
+    QMenu* menuFile_;
+
+    enum { MaxRecentFiles = 3 };
+    QMenu* recentFileMenu_;
+    QAction* seperator_;
+    QAction* recentFiles_[MaxRecentFiles];
 };
 
 #endif // OSKAR_MAIN_WINDOW_H_
