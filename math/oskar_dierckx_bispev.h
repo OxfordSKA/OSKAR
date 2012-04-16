@@ -1,8 +1,8 @@
-#ifndef DIERCKX_BISPEV_H_
-#define DIERCKX_BISPEV_H_
+#ifndef OSKAR_DIERCKX_BISPEV_H_
+#define OSKAR_DIERCKX_BISPEV_H_
 
 /**
- * @file dierckx_bispev.h
+ * @file oskar_dierckx_bispev.h
  */
 
 #ifdef __cplusplus
@@ -79,7 +79,7 @@ extern "C" {
  *
  * latest update : march 1987
  */
-void dierckx_bispev_f(const float *tx, int nx, const float *ty, int ny,
+void oskar_dierckx_bispev_f(const float *tx, int nx, const float *ty, int ny,
     const float *c, int kx, int ky, const float *x, int mx, const float *y,
     int my, float *z, float *wrk, int lwrk, int *iwrk, int kwrk, int *ier);
 
@@ -153,7 +153,7 @@ void dierckx_bispev_f(const float *tx, int nx, const float *ty, int ny,
  *
  * latest update : march 1987
  */
-void dierckx_bispev_d(const double *tx, int nx, const double *ty, int ny,
+void oskar_dierckx_bispev_d(const double *tx, int nx, const double *ty, int ny,
     const double *c, int kx, int ky, const double *x, int mx, const double *y,
     int my, double *z, double *wrk, int lwrk, int *iwrk, int kwrk, int *ier);
 
@@ -161,4 +161,4 @@ void dierckx_bispev_d(const double *tx, int nx, const double *ty, int ny,
 }
 #endif
 
-#endif /* DIERCKX_BISPEV_H_ */
+#endif /* OSKAR_DIERCKX_BISPEV_H_ */

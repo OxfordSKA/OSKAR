@@ -1,11 +1,11 @@
-#include "math/dierckx_fprati.h"
+#include "math/oskar_dierckx_fprati.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-float dierckx_fprati_f(float *p1, float *f1, float p2, float f2, float *p3,
-        float *f3)
+float oskar_dierckx_fprati_f(float *p1, float *f1, float p2, float f2,
+        float *p3, float *f3)
 {
     /* Local variables */
     float p, h1, h2, h3;
@@ -40,8 +40,8 @@ float dierckx_fprati_f(float *p1, float *f1, float p2, float f2, float *p3,
     return p;
 }
 
-double dierckx_fprati_d(double *p1, double *f1, double p2, double f2, double *p3,
-        double *f3)
+double oskar_dierckx_fprati_d(double *p1, double *f1, double p2, double f2,
+        double *p3, double *f3)
 {
     /* Local variables */
     double p, h1, h2, h3;

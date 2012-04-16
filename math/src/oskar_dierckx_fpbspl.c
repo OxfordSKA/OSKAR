@@ -1,10 +1,10 @@
-#include "math/dierckx_fpbspl.h"
+#include "math/oskar_dierckx_fpbspl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h)
+void oskar_dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h)
 {
     /* Local variables */
     float f, hh[5];
@@ -34,7 +34,7 @@ void dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h)
     }
 }
 
-void dierckx_fpbspl_d(const double *t, int k, double x, int l, double *h)
+void oskar_dierckx_fpbspl_d(const double *t, int k, double x, int l, double *h)
 {
     /* Local variables */
     double f, hh[5];

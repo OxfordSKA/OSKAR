@@ -1,8 +1,8 @@
-#ifndef DIERCKX_SURFIT_H_
-#define DIERCKX_SURFIT_H_
+#ifndef OSKAR_DIERCKX_SURFIT_H_
+#define OSKAR_DIERCKX_SURFIT_H_
 
 /**
- * @file dierckx_surfit.h
+ * @file oskar_dierckx_surfit.h
  */
 
 #ifdef __cplusplus
@@ -310,11 +310,12 @@ extern "C" {
  *  creation date : may 1979
  *  latest update : march 1987
  */
-void dierckx_surfit_f(int iopt, int m, float *x, float *y, const float *z,
-        const float *w, float xb, float xe, float yb, float ye, int kx,
-        int ky, float s, int nxest, int nyest, int nmax, float eps, int *nx,
-        float *tx, int *ny, float *ty, float *c, float *fp, float *wrk1,
-        int lwrk1, float *wrk2, int lwrk2, int *iwrk, int kwrk, int *ier);
+void oskar_dierckx_surfit_f(int iopt, int m, float *x, float *y,
+        const float *z, const float *w, float xb, float xe, float yb,
+        float ye, int kx, int ky, float s, int nxest, int nyest, int nmax,
+        float eps, int *nx, float *tx, int *ny, float *ty, float *c,
+        float *fp, float *wrk1, int lwrk1, float *wrk2, int lwrk2,
+        int *iwrk, int kwrk, int *ier);
 
 /**
  * @details
@@ -617,14 +618,15 @@ void dierckx_surfit_f(int iopt, int m, float *x, float *y, const float *z,
  *  creation date : may 1979
  *  latest update : march 1987
  */
-void dierckx_surfit_d(int iopt, int m, double *x, double *y, const double *z,
-        const double *w, double xb, double xe, double yb, double ye, int kx,
-        int ky, double s, int nxest, int nyest, int nmax, double eps, int *nx,
-        double *tx, int *ny, double *ty, double *c, double *fp, double *wrk1,
-        int lwrk1, double *wrk2, int lwrk2, int *iwrk, int kwrk, int *ier);
+void oskar_dierckx_surfit_d(int iopt, int m, double *x, double *y,
+        const double *z, const double *w, double xb, double xe, double yb,
+        double ye, int kx, int ky, double s, int nxest, int nyest, int nmax,
+        double eps, int *nx, double *tx, int *ny, double *ty, double *c,
+        double *fp, double *wrk1, int lwrk1, double *wrk2, int lwrk2,
+        int *iwrk, int kwrk, int *ier);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* DIERCKX_SURFIT_H_ */
+#endif  /* OSKAR_DIERCKX_SURFIT_H_ */

@@ -1,11 +1,11 @@
-#include "math/dierckx_fpback.h"
+#include "math/oskar_dierckx_fpback.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_fpback_f(const float *a, const float *z, int n, int k, float *c,
-        int nest)
+void oskar_dierckx_fpback_f(const float *a, const float *z, int n, int k,
+        float *c, int nest)
 {
     /* Local variables */
     int i, j, l, m, i1, k1;
@@ -37,8 +37,8 @@ void dierckx_fpback_f(const float *a, const float *z, int n, int k, float *c,
     }
 }
 
-void dierckx_fpback_d(const double *a, const double *z, int n, int k, double *c,
-        int nest)
+void oskar_dierckx_fpback_d(const double *a, const double *z, int n, int k,
+        double *c, int nest)
 {
     /* Local variables */
     int i, j, l, m, i1, k1;

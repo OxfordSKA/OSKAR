@@ -1,11 +1,11 @@
-#include "math/dierckx_fpgivs.h"
+#include "math/oskar_dierckx_fpgivs.h"
 #include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_fpgivs_f(float piv, float *ww, float *cos_, float *sin_)
+void oskar_dierckx_fpgivs_f(float piv, float *ww, float *cos_, float *sin_)
 {
     float dd, store, t;
     store = fabsf(piv);
@@ -24,7 +24,7 @@ void dierckx_fpgivs_f(float piv, float *ww, float *cos_, float *sin_)
     *ww = dd;
 }
 
-void dierckx_fpgivs_d(double piv, double *ww, double *cos_, double *sin_)
+void oskar_dierckx_fpgivs_d(double piv, double *ww, double *cos_, double *sin_)
 {
     double dd, store, t;
     store = fabs(piv);

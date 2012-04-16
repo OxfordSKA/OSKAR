@@ -1,6 +1,6 @@
-#include "math/dierckx_fprank.h"
-#include "math/dierckx_fprota.h"
-#include "math/dierckx_fpgivs.h"
+#include "math/oskar_dierckx_fprank.h"
+#include "math/oskar_dierckx_fprota.h"
+#include "math/oskar_dierckx_fpgivs.h"
 
 #if 0
 /* Fortran function prototypes. */
@@ -14,7 +14,7 @@ extern int fpgivs_(float *, float *, float *, float *);
 extern "C" {
 #endif
 
-void dierckx_fprank_f(float *a, float *f, int n, int m, int na,
+void oskar_dierckx_fprank_f(float *a, float *f, int n, int m, int na,
         float tol, float *c, float *sq, int *rank, float *aa,
         float *ff, float *h)
 {
@@ -75,15 +75,15 @@ void dierckx_fprank_f(float *a, float *f, int n, int m, int na,
             else
             {
                 /* fpgivs_(&piv, &a[ii + a_dim1], &cos_, &sin_); */
-                dierckx_fpgivs_f(piv, &a[ii + a_dim1], &cos_, &sin_);
+                oskar_dierckx_fpgivs_f(piv, &a[ii + a_dim1], &cos_, &sin_);
                 /* fprota_(&cos_, &sin_, &yi, &f[ii]); */
-                dierckx_fprota_f(cos_, sin_, &yi, &f[ii]);
+                oskar_dierckx_fprota_f(cos_, sin_, &yi, &f[ii]);
                 if (i2 == 0) break;
                 for (j = 1; j <= i2; ++j)
                 {
                     j1 = j + 1;
                     /* fprota_(&cos_, &sin_, &h[j1], &a[ii + j1 * a_dim1]); */
-                    dierckx_fprota_f(cos_, sin_, &h[j1], &a[ii + j1 * a_dim1]);
+                    oskar_dierckx_fprota_f(cos_, sin_, &h[j1], &a[ii + j1 * a_dim1]);
                     h[j] = h[j1];
                 }
             }
@@ -176,7 +176,7 @@ void dierckx_fprank_f(float *a, float *f, int n, int m, int na,
             if (piv != 0.0)
             {
                 /* fpgivs_(&piv, &aa[jj + aa_dim1], &cos_, &sin_); */
-                dierckx_fpgivs_f(piv, &aa[jj + aa_dim1], &cos_, &sin_);
+                oskar_dierckx_fpgivs_f(piv, &aa[jj + aa_dim1], &cos_, &sin_);
                 if (j1 == 0) break;
                 kk = jj;
                 for (j2 = 1; j2 <= j1; ++j2)
@@ -184,7 +184,7 @@ void dierckx_fprank_f(float *a, float *f, int n, int m, int na,
                     j3 = j2 + 1;
                     --kk;
                     /* fprota_(&cos_, &sin_, &h[j3], &aa[kk + j3 * aa_dim1]); */
-                    dierckx_fprota_f(cos_, sin_, &h[j3], &aa[kk + j3 * aa_dim1]);
+                    oskar_dierckx_fprota_f(cos_, sin_, &h[j3], &aa[kk + j3 * aa_dim1]);
                     h[j2] = h[j3];
                 }
             }
@@ -297,7 +297,7 @@ void dierckx_fprank_f(float *a, float *f, int n, int m, int na,
     *sq += fac;
 }
 
-void dierckx_fprank_d(double *a, double *f, int n, int m, int na,
+void oskar_dierckx_fprank_d(double *a, double *f, int n, int m, int na,
         double tol, double *c, double *sq, int *rank, double *aa,
         double *ff, double *h)
 {
@@ -358,15 +358,15 @@ void dierckx_fprank_d(double *a, double *f, int n, int m, int na,
             else
             {
                 /* fpgivs_(&piv, &a[ii + a_dim1], &cos_, &sin_); */
-                dierckx_fpgivs_d(piv, &a[ii + a_dim1], &cos_, &sin_);
+                oskar_dierckx_fpgivs_d(piv, &a[ii + a_dim1], &cos_, &sin_);
                 /* fprota_(&cos_, &sin_, &yi, &f[ii]); */
-                dierckx_fprota_d(cos_, sin_, &yi, &f[ii]);
+                oskar_dierckx_fprota_d(cos_, sin_, &yi, &f[ii]);
                 if (i2 == 0) break;
                 for (j = 1; j <= i2; ++j)
                 {
                     j1 = j + 1;
                     /* fprota_(&cos_, &sin_, &h[j1], &a[ii + j1 * a_dim1]); */
-                    dierckx_fprota_d(cos_, sin_, &h[j1], &a[ii + j1 * a_dim1]);
+                    oskar_dierckx_fprota_d(cos_, sin_, &h[j1], &a[ii + j1 * a_dim1]);
                     h[j] = h[j1];
                 }
             }
@@ -459,7 +459,7 @@ void dierckx_fprank_d(double *a, double *f, int n, int m, int na,
             if (piv != 0.0)
             {
                 /* fpgivs_(&piv, &aa[jj + aa_dim1], &cos_, &sin_); */
-                dierckx_fpgivs_d(piv, &aa[jj + aa_dim1], &cos_, &sin_);
+                oskar_dierckx_fpgivs_d(piv, &aa[jj + aa_dim1], &cos_, &sin_);
                 if (j1 == 0) break;
                 kk = jj;
                 for (j2 = 1; j2 <= j1; ++j2)
@@ -467,7 +467,7 @@ void dierckx_fprank_d(double *a, double *f, int n, int m, int na,
                     j3 = j2 + 1;
                     --kk;
                     /* fprota_(&cos_, &sin_, &h[j3], &aa[kk + j3 * aa_dim1]); */
-                    dierckx_fprota_d(cos_, sin_, &h[j3], &aa[kk + j3 * aa_dim1]);
+                    oskar_dierckx_fprota_d(cos_, sin_, &h[j3], &aa[kk + j3 * aa_dim1]);
                     h[j2] = h[j3];
                 }
             }

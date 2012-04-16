@@ -6,21 +6,21 @@ add_subdirectory(cudak)
 
 # Add the source files in this directory.
 set(math_SRC
-    src/dierckx_bispev.c
-    src/dierckx_fpback.c
-    src/dierckx_fpbisp.c
-    src/dierckx_fpbspl.c
-    src/dierckx_fpdisc.c
-    src/dierckx_fpgivs.c
-    src/dierckx_fporde.c
-    src/dierckx_fprank.c
-    src/dierckx_fprati.c
-    src/dierckx_fprota.c
-    src/dierckx_fpsurf.c
-    src/dierckx_surfit.c
     src/oskar_angular_distance.c
     src/oskar_cart2sph.c
     src/oskar_cuda_dft_c2r_2d.cu
+    src/oskar_dierckx_bispev.c
+    src/oskar_dierckx_fpback.c
+    src/oskar_dierckx_fpbisp.c
+    src/oskar_dierckx_fpbspl.c
+    src/oskar_dierckx_fpdisc.c
+    src/oskar_dierckx_fpgivs.c
+    src/oskar_dierckx_fporde.c
+    src/oskar_dierckx_fprank.c
+    src/oskar_dierckx_fprati.c
+    src/oskar_dierckx_fprota.c
+    src/oskar_dierckx_fpsurf.c
+    src/oskar_dierckx_surfit.c
     src/oskar_fit_ellipse.c
     src/oskar_healpix_angles_to_pix_ring.c
     src/oskar_healpix_npix_to_nside.c

@@ -1,10 +1,11 @@
-#include "math/dierckx_fpdisc.h"
+#include "math/oskar_dierckx_fpdisc.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_fpdisc_f(const float *t, int n, int k2, float *b, int nest)
+void oskar_dierckx_fpdisc_f(const float *t, int n, int k2, float *b,
+        int nest)
 {
     /* Local variables */
     float h[12];
@@ -50,7 +51,8 @@ void dierckx_fpdisc_f(const float *t, int n, int k2, float *b, int nest)
     }
 }
 
-void dierckx_fpdisc_d(const double *t, int n, int k2, double *b, int nest)
+void oskar_dierckx_fpdisc_d(const double *t, int n, int k2, double *b,
+        int nest)
 {
     /* Local variables */
     double h[12];

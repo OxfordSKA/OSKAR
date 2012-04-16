@@ -1,8 +1,8 @@
-#ifndef DIERCKX_FPDISC_H_
-#define DIERCKX_FPDISC_H_
+#ifndef OSKAR_DIERCKX_FPDISC_H_
+#define OSKAR_DIERCKX_FPDISC_H_
 
 /**
- * @file dierckx_fpdisc.h
+ * @file oskar_dierckx_fpdisc.h
  */
 
 #ifdef __cplusplus
@@ -14,17 +14,19 @@ extern "C" {
  * Subroutine fpdisc calculates the discontinuity jumps of the kth
  * derivative of the b-splines of degree k at the knots t(k+2)..t(n-k-1)
  */
-void dierckx_fpdisc_f(const float *t, int n, int k2, float *b, int nest);
+void oskar_dierckx_fpdisc_f(const float *t, int n, int k2, float *b,
+        int nest);
 
 /**
  * @details
  * Subroutine fpdisc calculates the discontinuity jumps of the kth
  * derivative of the b-splines of degree k at the knots t(k+2)..t(n-k-1)
  */
-void dierckx_fpdisc_d(const double *t, int n, int k2, double *b, int nest);
+void oskar_dierckx_fpdisc_d(const double *t, int n, int k2, double *b,
+        int nest);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* DIERCKX_FPDISC_H_ */
+#endif /* OSKAR_DIERCKX_FPDISC_H_ */

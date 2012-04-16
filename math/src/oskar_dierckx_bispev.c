@@ -1,11 +1,11 @@
-#include "math/dierckx_bispev.h"
-#include "math/dierckx_fpbisp.h"
+#include "math/oskar_dierckx_bispev.h"
+#include "math/oskar_dierckx_fpbisp.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_bispev_f(const float *tx, int nx, const float *ty, int ny,
+void oskar_dierckx_bispev_f(const float *tx, int nx, const float *ty, int ny,
     const float *c, int kx, int ky, const float *x, int mx, const float *y,
     int my, float *z, float *wrk, int lwrk, int *iwrk, int kwrk, int *ier)
 {
@@ -30,11 +30,11 @@ void dierckx_bispev_f(const float *tx, int nx, const float *ty, int ny,
     }
     *ier = 0;
     iw = mx * (kx + 1);
-    dierckx_fpbisp_f(tx, nx, ty, ny, c, kx, ky, x, mx, y, my,
+    oskar_dierckx_fpbisp_f(tx, nx, ty, ny, c, kx, ky, x, mx, y, my,
         z, wrk, &wrk[iw], iwrk, &iwrk[mx]);
 }
 
-void dierckx_bispev_d(const double *tx, int nx, const double *ty, int ny,
+void oskar_dierckx_bispev_d(const double *tx, int nx, const double *ty, int ny,
     const double *c, int kx, int ky, const double *x, int mx, const double *y,
     int my, double *z, double *wrk, int lwrk, int *iwrk, int kwrk, int *ier)
 {
@@ -59,7 +59,7 @@ void dierckx_bispev_d(const double *tx, int nx, const double *ty, int ny,
     }
     *ier = 0;
     iw = mx * (kx + 1);
-    dierckx_fpbisp_d(tx, nx, ty, ny, c, kx, ky, x, mx, y, my,
+    oskar_dierckx_fpbisp_d(tx, nx, ty, ny, c, kx, ky, x, mx, y, my,
         z, wrk, &wrk[iw], iwrk, &iwrk[mx]);
 }
 

@@ -1,16 +1,17 @@
-#include "math/dierckx_surfit.h"
-#include "math/dierckx_fpsurf.h"
+#include "math/oskar_dierckx_surfit.h"
+#include "math/oskar_dierckx_fpsurf.h"
 #include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_surfit_f(int iopt, int m, float *x, float *y, const float *z,
-        const float *w, float xb, float xe, float yb, float ye, int kx,
-        int ky, float s, int nxest, int nyest, int nmax, float eps, int *nx,
-        float *tx, int *ny, float *ty, float *c, float *fp, float *wrk1,
-        int lwrk1, float *wrk2, int lwrk2, int *iwrk, int kwrk, int *ier)
+void oskar_dierckx_surfit_f(int iopt, int m, float *x, float *y,
+        const float *z, const float *w, float xb, float xe, float yb,
+        float ye, int kx, int ky, float s, int nxest, int nyest, int nmax,
+        float eps, int *nx, float *tx, int *ny, float *ty, float *c,
+        float *fp, float *wrk1, int lwrk1, float *wrk2, int lwrk2,
+        int *iwrk, int kwrk, int *ier)
 {
     /* Local variables */
     int i, la, lf, ki, lh, kn, lq, ib1, jb1, ib3, km1, km2, kx1, ky1,
@@ -117,18 +118,20 @@ void dierckx_surfit_f(int iopt, int m, float *x, float *y, const float *z,
     lby = lbx + nek;
     lsx = lby + nek;
     lsy = lsx + m * km1;
-    dierckx_fpsurf_f(iopt, m, &x[1], &y[1], &z[1], &w[1], xb, xe, yb, ye, kx, ky, s,
-            nxest, nyest, eps, tol, maxit, nest, ncest, nx, &tx[1], ny, &ty[1],
-            &c[1], fp, &wrk1[1], &wrk1[lfp], &wrk1[lco], &wrk1[lf], &wrk1[lff],
-            &wrk1[la], &wrk1[lq], &wrk1[lbx], &wrk1[lby], &wrk1[lsx],
-            &wrk1[lsy], &wrk1[lh], &iwrk[ki], &iwrk[kn], &wrk2[1], lwrk2, ier);
+    oskar_dierckx_fpsurf_f(iopt, m, &x[1], &y[1], &z[1], &w[1], xb, xe, yb, ye,
+            kx, ky, s, nxest, nyest, eps, tol, maxit, nest, ncest, nx, &tx[1],
+            ny, &ty[1], &c[1], fp, &wrk1[1], &wrk1[lfp], &wrk1[lco], &wrk1[lf],
+            &wrk1[lff], &wrk1[la], &wrk1[lq], &wrk1[lbx], &wrk1[lby],
+            &wrk1[lsx], &wrk1[lsy], &wrk1[lh], &iwrk[ki], &iwrk[kn], &wrk2[1],
+            lwrk2, ier);
 }
 
-void dierckx_surfit_d(int iopt, int m, double *x, double *y, const double *z,
-        const double *w, double xb, double xe, double yb, double ye, int kx,
-        int ky, double s, int nxest, int nyest, int nmax, double eps, int *nx,
-        double *tx, int *ny, double *ty, double *c, double *fp, double *wrk1,
-        int lwrk1, double *wrk2, int lwrk2, int *iwrk, int kwrk, int *ier)
+void oskar_dierckx_surfit_d(int iopt, int m, double *x, double *y,
+        const double *z, const double *w, double xb, double xe, double yb,
+        double ye, int kx, int ky, double s, int nxest, int nyest, int nmax,
+        double eps, int *nx, double *tx, int *ny, double *ty, double *c,
+        double *fp, double *wrk1, int lwrk1, double *wrk2, int lwrk2,
+        int *iwrk, int kwrk, int *ier)
 {
     /* Local variables */
     int i, la, lf, ki, lh, kn, lq, ib1, jb1, ib3, km1, km2, kx1, ky1,
@@ -235,11 +238,12 @@ void dierckx_surfit_d(int iopt, int m, double *x, double *y, const double *z,
     lby = lbx + nek;
     lsx = lby + nek;
     lsy = lsx + m * km1;
-    dierckx_fpsurf_d(iopt, m, &x[1], &y[1], &z[1], &w[1], xb, xe, yb, ye, kx, ky, s,
-            nxest, nyest, eps, tol, maxit, nest, ncest, nx, &tx[1], ny, &ty[1],
-            &c[1], fp, &wrk1[1], &wrk1[lfp], &wrk1[lco], &wrk1[lf], &wrk1[lff],
-            &wrk1[la], &wrk1[lq], &wrk1[lbx], &wrk1[lby], &wrk1[lsx],
-            &wrk1[lsy], &wrk1[lh], &iwrk[ki], &iwrk[kn], &wrk2[1], lwrk2, ier);
+    oskar_dierckx_fpsurf_d(iopt, m, &x[1], &y[1], &z[1], &w[1], xb, xe, yb, ye,
+            kx, ky, s, nxest, nyest, eps, tol, maxit, nest, ncest, nx, &tx[1],
+            ny, &ty[1], &c[1], fp, &wrk1[1], &wrk1[lfp], &wrk1[lco], &wrk1[lf],
+            &wrk1[lff], &wrk1[la], &wrk1[lq], &wrk1[lbx], &wrk1[lby],
+            &wrk1[lsx], &wrk1[lsy], &wrk1[lh], &iwrk[ki], &iwrk[kn], &wrk2[1],
+            lwrk2, ier);
 }
 
 #ifdef __cplusplus

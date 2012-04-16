@@ -1,10 +1,10 @@
-#include "math/dierckx_fporde.h"
+#include "math/oskar_dierckx_fporde.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_fporde_f(const float *x, const float *y, int m, int kx,
+void oskar_dierckx_fporde_f(const float *x, const float *y, int m, int kx,
         int ky, const float *tx, int nx, const float *ty, int ny,
         int *nummer, int *index, int nreg)
 {
@@ -44,7 +44,7 @@ void dierckx_fporde_f(const float *x, const float *y, int m, int kx,
     }
 }
 
-void dierckx_fporde_d(const double *x, const double *y, int m, int kx,
+void oskar_dierckx_fporde_d(const double *x, const double *y, int m, int kx,
         int ky, const double *tx, int nx, const double *ty, int ny,
         int *nummer, int *index, int nreg)
 {

@@ -1,11 +1,11 @@
-#include "math/dierckx_fpbisp.h"
-#include "math/dierckx_fpbspl.h"
+#include "math/oskar_dierckx_fpbisp.h"
+#include "math/oskar_dierckx_fpbspl.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void dierckx_fpbisp_f(const float *tx, int nx, const float *ty, int ny,
+void oskar_dierckx_fpbisp_f(const float *tx, int nx, const float *ty, int ny,
     const float *c, int kx, int ky, const float *x, int mx, const float *y,
     int my, float *z, float *wx, float *wy, int *lx, int *ly)
 {
@@ -38,7 +38,7 @@ void dierckx_fpbisp_f(const float *tx, int nx, const float *ty, int ny,
         if (arg < tb) arg = tb;
         if (arg > te) arg = te;
         while (!(arg < tx[l + 1] || l == nkx1)) l++;
-        dierckx_fpbspl_f(&tx[1], kx, arg, l, h);
+        oskar_dierckx_fpbspl_f(&tx[1], kx, arg, l, h);
         lx[i] = l - kx1;
         for (j = 1; j <= kx1; ++j)
         {
@@ -56,7 +56,7 @@ void dierckx_fpbisp_f(const float *tx, int nx, const float *ty, int ny,
         if (arg < tb) arg = tb;
         if (arg > te) arg = te;
         while (!(arg < ty[l + 1] || l == nky1)) l++;
-        dierckx_fpbspl_f(&ty[1], ky, arg, l, h);
+        oskar_dierckx_fpbspl_f(&ty[1], ky, arg, l, h);
         ly[i] = l - ky1;
         for (j = 1; j <= ky1; ++j)
         {
@@ -91,7 +91,7 @@ void dierckx_fpbisp_f(const float *tx, int nx, const float *ty, int ny,
     }
 }
 
-void dierckx_fpbisp_d(const double *tx, int nx, const double *ty, int ny,
+void oskar_dierckx_fpbisp_d(const double *tx, int nx, const double *ty, int ny,
     const double *c, int kx, int ky, const double *x, int mx, const double *y,
     int my, double *z, double *wx, double *wy, int *lx, int *ly)
 {
@@ -124,7 +124,7 @@ void dierckx_fpbisp_d(const double *tx, int nx, const double *ty, int ny,
         if (arg < tb) arg = tb;
         if (arg > te) arg = te;
         while (!(arg < tx[l + 1] || l == nkx1)) l++;
-        dierckx_fpbspl_d(&tx[1], kx, arg, l, h);
+        oskar_dierckx_fpbspl_d(&tx[1], kx, arg, l, h);
         lx[i] = l - kx1;
         for (j = 1; j <= kx1; ++j)
         {
@@ -142,7 +142,7 @@ void dierckx_fpbisp_d(const double *tx, int nx, const double *ty, int ny,
         if (arg < tb) arg = tb;
         if (arg > te) arg = te;
         while (!(arg < ty[l + 1] || l == nky1)) l++;
-        dierckx_fpbspl_d(&ty[1], ky, arg, l, h);
+        oskar_dierckx_fpbspl_d(&ty[1], ky, arg, l, h);
         ly[i] = l - ky1;
         for (j = 1; j <= ky1; ++j)
         {

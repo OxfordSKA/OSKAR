@@ -1,8 +1,8 @@
-#ifndef DIERCKX_FPRANK_H_
-#define DIERCKX_FPRANK_H_
+#ifndef OSKAR_DIERCKX_FPRANK_H_
+#define OSKAR_DIERCKX_FPRANK_H_
 
 /**
- * @file dierckx_fprank.h
+ * @file oskar_dierckx_fprank.h
  */
 
 #ifdef __cplusplus
@@ -28,7 +28,7 @@ extern "C" {
  *       to the sum of squared residuals.
  * rank : integer, which contains the rank of matrix a.
  */
-void dierckx_fprank_f(float *a, float *f, int n, int m, int na,
+void oskar_dierckx_fprank_f(float *a, float *f, int n, int m, int na,
         float tol, float *c, float *sq, int *rank, float *aa,
         float *ff, float *h);
 
@@ -51,7 +51,7 @@ void dierckx_fprank_f(float *a, float *f, int n, int m, int na,
  *       to the sum of squared residuals.
  * rank : integer, which contains the rank of matrix a.
  */
-void dierckx_fprank_d(double *a, double *f, int n, int m, int na,
+void oskar_dierckx_fprank_d(double *a, double *f, int n, int m, int na,
         double tol, double *c, double *sq, int *rank, double *aa,
         double *ff, double *h);
 
@@ -59,4 +59,4 @@ void dierckx_fprank_d(double *a, double *f, int n, int m, int na,
 }
 #endif
 
-#endif /* DIERCKX_FPRANK_H_ */
+#endif /* OSKAR_DIERCKX_FPRANK_H_ */

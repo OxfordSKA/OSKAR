@@ -1,8 +1,8 @@
-#ifndef DIERCKX_FPORDE_H_
-#define DIERCKX_FPORDE_H_
+#ifndef OSKAR_DIERCKX_FPORDE_H_
+#define OSKAR_DIERCKX_FPORDE_H_
 
 /**
- * @file dierckx_fporde.h
+ * @file oskar_dierckx_fporde.h
  */
 
 #ifdef __cplusplus
@@ -18,7 +18,7 @@ extern "C" {
  * first data point in the jth panel while nummer(i),i=1,2,...,m gives
  * the number of the next data point in the panel.
  */
-void dierckx_fporde_f(const float *x, const float *y, int m, int kx,
+void oskar_dierckx_fporde_f(const float *x, const float *y, int m, int kx,
         int ky, const float *tx, int nx, const float *ty, int ny,
         int *nummer, int *index, int nreg);
 
@@ -31,7 +31,7 @@ void dierckx_fporde_f(const float *x, const float *y, int m, int kx,
  * first data point in the jth panel while nummer(i),i=1,2,...,m gives
  * the number of the next data point in the panel.
  */
-void dierckx_fporde_d(const double *x, const double *y, int m, int kx,
+void oskar_dierckx_fporde_d(const double *x, const double *y, int m, int kx,
         int ky, const double *tx, int nx, const double *ty, int ny,
         int *nummer, int *index, int nreg);
 
@@ -39,4 +39,4 @@ void dierckx_fporde_d(const double *x, const double *y, int m, int kx,
 }
 #endif
 
-#endif /* DIERCKX_FPORDE_H_ */
+#endif /* OSKAR_DIERCKX_FPORDE_H_ */

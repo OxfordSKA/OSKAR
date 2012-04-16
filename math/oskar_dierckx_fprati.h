@@ -1,8 +1,8 @@
-#ifndef DIERCKX_FPRATI_H_
-#define DIERCKX_FPRATI_H_
+#ifndef OSKAR_DIERCKX_FPRATI_H_
+#define OSKAR_DIERCKX_FPRATI_H_
 
 /**
- * @file dierckx_fprati.h
+ * @file oskar_dierckx_fprati.h
  */
 
 #ifdef __cplusplus
@@ -15,8 +15,8 @@ extern "C" {
  * gives the value of p such that the rational interpolating function
  * of the form r(p) = (u*p+v)/(p+w) equals zero at p.
  */
-float dierckx_fprati_f(float *p1, float *f1, float p2, float f2, float *p3,
-        float *f3);
+float oskar_dierckx_fprati_f(float *p1, float *f1, float p2, float f2,
+        float *p3, float *f3);
 
 /**
  * @details
@@ -24,11 +24,11 @@ float dierckx_fprati_f(float *p1, float *f1, float p2, float f2, float *p3,
  * gives the value of p such that the rational interpolating function
  * of the form r(p) = (u*p+v)/(p+w) equals zero at p.
  */
-double dierckx_fprati_d(double *p1, double *f1, double p2, double f2, double *p3,
-        double *f3);
+double oskar_dierckx_fprati_d(double *p1, double *f1, double p2, double f2,
+        double *p3, double *f3);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* DIERCKX_FPRATI_H_ */
+#endif /* OSKAR_DIERCKX_FPRATI_H_ */

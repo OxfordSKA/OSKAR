@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/dierckx_bispev.h"
+#include "math/oskar_dierckx_bispev.h"
 #include "math/oskar_spline_data_evaluate.h"
 #include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
 #include "utility/oskar_mem_type_check.h"
@@ -120,7 +120,7 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
                             &x1, &c1, &y1, &c1, &out[i * 2 * stride],
                             wrk, &lwrk, iwrk1, &kwrk1, &err);
 #else
-                    dierckx_bispev_f(knots_x, nx, knots_y, ny, coeff, 3, 3,
+                    oskar_dierckx_bispev_f(knots_x, nx, knots_y, ny, coeff, 3, 3,
                             &x1, 1, &y1, 1, &out[i * 2 * stride],
                             wrk, lwrk, iwrk1, kwrk1, &err);
 #endif
@@ -180,7 +180,7 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
                     double x1, y1;
                     x1 = ((const double*)x->data)[i];
                     y1 = ((const double*)y->data)[i];
-                    dierckx_bispev_d(knots_x, nx, knots_y, ny, coeff, 3, 3,
+                    oskar_dierckx_bispev_d(knots_x, nx, knots_y, ny, coeff, 3, 3,
                             &x1, 1, &y1, 1, &out[i * 2 * stride],
                             wrk, lwrk, iwrk1, kwrk1, &err);
                     if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;

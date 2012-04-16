@@ -1,8 +1,8 @@
-#ifndef DIERCKX_FPBSPL_H_
-#define DIERCKX_FPBSPL_H_
+#ifndef OSKAR_DIERCKX_FPBSPL_H_
+#define OSKAR_DIERCKX_FPBSPL_H_
 
 /**
- * @file dierckx_fpbspl.h
+ * @file oskar_dierckx_fpbspl.h
  */
 
 #ifdef __cplusplus
@@ -15,7 +15,7 @@ extern "C" {
  * degree k at t(l) <= x < t(l+1) using the stable recurrence
  * relation of de Boor and Cox.
  */
-void dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h);
+void oskar_dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h);
 
 /**
  * @details
@@ -23,10 +23,10 @@ void dierckx_fpbspl_f(const float *t, int k, float x, int l, float *h);
  * degree k at t(l) <= x < t(l+1) using the stable recurrence
  * relation of de Boor and Cox.
  */
-void dierckx_fpbspl_d(const double *t, int k, double x, int l, double *h);
+void oskar_dierckx_fpbspl_d(const double *t, int k, double x, int l, double *h);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* DIERCKX_FPBSPL_H_ */
+#endif /* OSKAR_DIERCKX_FPBSPL_H_ */

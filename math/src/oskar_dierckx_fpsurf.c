@@ -1,12 +1,12 @@
-#include "math/dierckx_fpsurf.h"
-#include "math/dierckx_fpback.h"
-#include "math/dierckx_fpdisc.h"
-#include "math/dierckx_fporde.h"
-#include "math/dierckx_fprank.h"
-#include "math/dierckx_fpbspl.h"
-#include "math/dierckx_fprota.h"
-#include "math/dierckx_fpgivs.h"
-#include "math/dierckx_fprati.h"
+#include "math/oskar_dierckx_fpsurf.h"
+#include "math/oskar_dierckx_fpback.h"
+#include "math/oskar_dierckx_fpdisc.h"
+#include "math/oskar_dierckx_fporde.h"
+#include "math/oskar_dierckx_fprank.h"
+#include "math/oskar_dierckx_fpbspl.h"
+#include "math/oskar_dierckx_fprota.h"
+#include "math/oskar_dierckx_fpgivs.h"
+#include "math/oskar_dierckx_fprati.h"
 #include <math.h>
 
 #ifdef __cplusplus
@@ -27,14 +27,14 @@ extern int fpgivs_(float *, float *, float *, float *);
 extern float fprati_(float *, float *, float *, float *, float *, float *);
 #endif
 
-void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
-        const float *w, float xb, float xe, float yb, float ye, int kxx,
-        int kyy, float s, int nxest, int nyest, float eta, float tol,
-        int maxit, int nmax, int nc, int *nx0, float *tx, int *ny0, float *ty,
-        float *c, float *fp, float *fp0, float *fpint, float *coord,
-        float *f, float *ff, float *a, float *q, float *bx, float *by,
-        float *spx, float *spy, float *h, int *index, int *nummer,
-        float *wrk, int lwrk, int *ier)
+void oskar_dierckx_fpsurf_f(int iopt, int m, float *x, float *y,
+        const float *z, const float *w, float xb, float xe, float yb,
+        float ye, int kxx, int kyy, float s, int nxest, int nyest,
+        float eta, float tol, int maxit, int nmax, int nc, int *nx0,
+        float *tx, int *ny0, float *ty, float *c, float *fp, float *fp0,
+        float *fpint, float *coord, float *f, float *ff, float *a,
+        float *q, float *bx, float *by, float *spx, float *spy, float *h,
+        int *index, int *nummer, float *wrk, int lwrk, int *ier)
 {
     /* System generated locals */
     int a_offset, q_offset, bx_offset, by_offset;
@@ -232,7 +232,7 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
         /*  arrange the data points according to the panel they belong to. */
         /* fporde_(&x[1], &y[1], &m, &kx, &ky, &tx[1], &nx, &ty[1], &ny,
                 &nummer[1], &index[1], &nreg); */
-        dierckx_fporde_f(&x[1], &y[1], m, kx, ky, &tx[1], nx, &ty[1], ny,
+        oskar_dierckx_fporde_f(&x[1], &y[1], m, kx, ky, &tx[1], nx, &ty[1], ny,
                 &nummer[1], &index[1], nreg);
         /*  find ncof, the number of b-spline coefficients. */
         nk1x = nx - kx1;
@@ -272,11 +272,11 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
                 /*  evaluate for the x-direction, the (kx+1) non-zero
                  *  b-splines at x(in). */
                 /* fpbspl_(&tx[1], &nx, &kx, &x[in], &l1, hx); */
-                dierckx_fpbspl_f(&tx[1], kx, x[in], l1, hx);
+                oskar_dierckx_fpbspl_f(&tx[1], kx, x[in], l1, hx);
                 /*  evaluate for the y-direction, the (ky+1) non-zero
                  *  b-splines at y(in). */
                 /* fpbspl_(&ty[1], &ny, &ky, &y[in], &l2, hy); */
-                dierckx_fpbspl_f(&ty[1], ky, y[in], l2, hy);
+                oskar_dierckx_fpbspl_f(&ty[1], ky, y[in], l2, hy);
                 /*  store the value of these b-splines in spx and spy
                  *  respectively. */
                 for (i = 1; i <= kx1; ++i)
@@ -317,10 +317,10 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
                     /*  calculate the parameters of the givens
                      *  transformation. */
                     /* fpgivs_(&piv, &a[irot + nc], &cos_, &sin_); */
-                    dierckx_fpgivs_f(piv, &a[irot + nc], &cos_, &sin_);
+                    oskar_dierckx_fpgivs_f(piv, &a[irot + nc], &cos_, &sin_);
                     /*  apply that transformation to the right hand side. */
                     /* fprota_(&cos_, &sin_, &zi, &f[irot]); */
-                    dierckx_fprota_f(cos_, sin_, &zi, &f[irot]);
+                    oskar_dierckx_fprota_f(cos_, sin_, &zi, &f[irot]);
                     if (i == iband) break;
                     /*  apply that transformation to the left hand side. */
                     i2 = 1;
@@ -329,7 +329,8 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
                     {
                         ++i2;
                         /* fprota_(&cos_, &sin_, &h[j], &a[irot + i2 * nc]); */
-                        dierckx_fprota_f(cos_, sin_, &h[j], &a[irot + i2 * nc]);
+                        oskar_dierckx_fprota_f(cos_, sin_, &h[j],
+                                &a[irot + i2 * nc]);
                     }
                 }
                 /*  add the contribution of the row to the sum of squares
@@ -361,7 +362,7 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
         {
             /*  backward substitution in case of full rank. */
             /* fpback_(&a[a_offset], &f[1], &ncof, &iband, &c[1], &nc); */
-            dierckx_fpback_f(&a[a_offset], &f[1], ncof, iband, &c[1], nc);
+            oskar_dierckx_fpback_f(&a[a_offset], &f[1], ncof, iband, &c[1], nc);
             rank = ncof;
             for (i = 1; i <= ncof; ++i)
             {
@@ -391,8 +392,8 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
             la = lh + iband;
             /* fprank_(&q[q_offset], &ff[1], &ncof, &iband, &nc, &sigma, &c[1],
                     &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]); */
-            dierckx_fprank_f(&q[q_offset], &ff[1], ncof, iband, nc, sigma, &c[1],
-                    &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
+            oskar_dierckx_fprank_f(&q[q_offset], &ff[1], ncof, iband, nc,
+                    sigma, &c[1], &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
             for (i = 1; i <= ncof; ++i)
             {
                 q[i + nc] /= dmax;
@@ -569,7 +570,7 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
         /*  evaluate the discotinuity jumps of the kx-th order derivative of
          *  the b-splines at the knots tx(l),l=kx+2,...,nx-kx-1. */
         /* fpdisc_(&tx[1], &nx, &kx2, &bx[bx_offset], &nmax); */
-        dierckx_fpdisc_f(&tx[1], nx, kx2, &bx[bx_offset], nmax);
+        oskar_dierckx_fpdisc_f(&tx[1], nx, kx2, &bx[bx_offset], nmax);
     }
     ky2 = ky1 + 1;
     /*  test whether there are interior knots in the y-direction. */
@@ -578,7 +579,7 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
         /*  evaluate the discontinuity jumps of the ky-th order derivative of
          *  the b-splines at the knots ty(l),l=ky+2,...,ny-ky-1. */
         /* fpdisc_(&ty[1], &ny, &ky2, &by[by_offset], &nmax); */
-        dierckx_fpdisc_f(&ty[1], ny, ky2, &by[by_offset], nmax);
+        oskar_dierckx_fpdisc_f(&ty[1], ny, ky2, &by[by_offset], nmax);
     }
     /*  initial value for p. */
     p1 = 0.0;
@@ -654,11 +655,12 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
                             /*  calculate the parameters of the givens
                              *  transformation. */
                             /* fpgivs_(&piv, &q[irot + nc], &cos_, &sin_); */
-                            dierckx_fpgivs_f(piv, &q[irot + nc], &cos_, &sin_);
+                            oskar_dierckx_fpgivs_f(piv, &q[irot + nc],
+                                    &cos_, &sin_);
                             /*  apply that givens transformation to the right
                              *  hand side. */
                             /* fprota_(&cos_, &sin_, &zi, &ff[irot]); */
-                            dierckx_fprota_f(cos_, sin_, &zi, &ff[irot]);
+                            oskar_dierckx_fprota_f(cos_, sin_, &zi, &ff[irot]);
                             if (i2 == 0) break;
                             /*  apply that givens transformation to the left
                              *  hand side. */
@@ -666,7 +668,8 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
                             {
                                 l1 = l + 1;
                                 /* fprota_(&cos_, &sin_, &h[l1], &q[irot + l1 * nc]); */
-                                dierckx_fprota_f(cos_, sin_, &h[l1], &q[irot + l1 * nc]);
+                                oskar_dierckx_fprota_f(cos_, sin_, &h[l1],
+                                        &q[irot + l1 * nc]);
                             }
                         }
                         for (l = 1; l <= i2; ++l)
@@ -719,11 +722,12 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
                             /*  calculate the parameters of the givens
                              *  transformation. */
                             /* fpgivs_(&piv, &q[irot + nc], &cos_, &sin_); */
-                            dierckx_fpgivs_f(piv, &q[irot + nc], &cos_, &sin_);
+                            oskar_dierckx_fpgivs_f(piv, &q[irot + nc],
+                                    &cos_, &sin_);
                             /*  apply that givens transformation to the right
                              *  hand side. */
                             /* fprota_(&cos_, &sin_, &zi, &ff[irot]); */
-                            dierckx_fprota_f(cos_, sin_, &zi, &ff[irot]);
+                            oskar_dierckx_fprota_f(cos_, sin_, &zi, &ff[irot]);
                             if (i2 == 0) break;
                             /*  apply that givens transformation to the left
                              *  hand side. */
@@ -731,7 +735,8 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
                             {
                                 l1 = l + 1;
                                 /* fprota_(&cos_, &sin_, &h[l1], &q[irot + l1 * nc]); */
-                                dierckx_fprota_f(cos_, sin_, &h[l1], &q[irot + l1 * nc]);
+                                oskar_dierckx_fprota_f(cos_, sin_, &h[l1],
+                                        &q[irot + l1 * nc]);
                             }
                         }
                         for (l = 1; l <= i2; ++l)
@@ -765,7 +770,8 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
         {
             /*  backward substitution in case of full rank. */
             /* fpback_(&q[q_offset], &ff[1], &ncof, &iband4, &c[1], &nc); */
-            dierckx_fpback_f(&q[q_offset], &ff[1], ncof, iband4, &c[1], nc);
+            oskar_dierckx_fpback_f(&q[q_offset], &ff[1], ncof, iband4,
+                    &c[1], nc);
             rank = ncof;
         }
         else
@@ -782,8 +788,8 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
             la = lh + iband4;
             /* fprank_(&q[q_offset], &ff[1], &ncof, &iband4, &nc, &sigma, &c[1],
                     &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]); */
-            dierckx_fprank_f(&q[q_offset], &ff[1], ncof, iband4, nc, sigma, &c[1],
-                    &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
+            oskar_dierckx_fprank_f(&q[q_offset], &ff[1], ncof, iband4, nc,
+                    sigma, &c[1], &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
         }
         for (i = 1; i <= ncof; ++i)
         {
@@ -872,7 +878,7 @@ void dierckx_fpsurf_f(int iopt, int m, float *x, float *y, const float *z,
         }
         /*  find the new value of p. */
         /* p = fprati_(&p1, &f1, &p2, &f2, &p3, &f3); */
-        p = dierckx_fprati_f(&p1, &f1, p2, f2, &p3, &f3);
+        p = oskar_dierckx_fprati_f(&p1, &f1, p2, f2, &p3, &f3);
     }
     /*  test whether x and y are in the original order. */
 L830:
@@ -930,14 +936,14 @@ L830:
     *ny0 = ny;
 }
 
-void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
-        const double *w, double xb, double xe, double yb, double ye, int kxx,
-        int kyy, double s, int nxest, int nyest, double eta, double tol,
-        int maxit, int nmax, int nc, int *nx0, double *tx, int *ny0, double *ty,
-        double *c, double *fp, double *fp0, double *fpint, double *coord,
-        double *f, double *ff, double *a, double *q, double *bx, double *by,
-        double *spx, double *spy, double *h, int *index, int *nummer,
-        double *wrk, int lwrk, int *ier)
+void oskar_dierckx_fpsurf_d(int iopt, int m, double *x, double *y,
+        const double *z, const double *w, double xb, double xe, double yb,
+        double ye, int kxx, int kyy, double s, int nxest, int nyest,
+        double eta, double tol, int maxit, int nmax, int nc, int *nx0,
+        double *tx, int *ny0, double *ty, double *c, double *fp, double *fp0,
+        double *fpint, double *coord, double *f, double *ff, double *a,
+        double *q, double *bx, double *by, double *spx, double *spy, double *h,
+        int *index, int *nummer, double *wrk, int lwrk, int *ier)
 {
     /* System generated locals */
     int a_offset, q_offset, bx_offset, by_offset;
@@ -1135,7 +1141,7 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
         /*  arrange the data points according to the panel they belong to. */
         /* fporde_(&x[1], &y[1], &m, &kx, &ky, &tx[1], &nx, &ty[1], &ny,
                 &nummer[1], &index[1], &nreg); */
-        dierckx_fporde_d(&x[1], &y[1], m, kx, ky, &tx[1], nx, &ty[1], ny,
+        oskar_dierckx_fporde_d(&x[1], &y[1], m, kx, ky, &tx[1], nx, &ty[1], ny,
                 &nummer[1], &index[1], nreg);
         /*  find ncof, the number of b-spline coefficients. */
         nk1x = nx - kx1;
@@ -1175,11 +1181,11 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
                 /*  evaluate for the x-direction, the (kx+1) non-zero
                  *  b-splines at x(in). */
                 /* fpbspl_(&tx[1], &nx, &kx, &x[in], &l1, hx); */
-                dierckx_fpbspl_d(&tx[1], kx, x[in], l1, hx);
+                oskar_dierckx_fpbspl_d(&tx[1], kx, x[in], l1, hx);
                 /*  evaluate for the y-direction, the (ky+1) non-zero
                  *  b-splines at y(in). */
                 /* fpbspl_(&ty[1], &ny, &ky, &y[in], &l2, hy); */
-                dierckx_fpbspl_d(&ty[1], ky, y[in], l2, hy);
+                oskar_dierckx_fpbspl_d(&ty[1], ky, y[in], l2, hy);
                 /*  store the value of these b-splines in spx and spy
                  *  respectively. */
                 for (i = 1; i <= kx1; ++i)
@@ -1220,10 +1226,10 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
                     /*  calculate the parameters of the givens
                      *  transformation. */
                     /* fpgivs_(&piv, &a[irot + nc], &cos_, &sin_); */
-                    dierckx_fpgivs_d(piv, &a[irot + nc], &cos_, &sin_);
+                    oskar_dierckx_fpgivs_d(piv, &a[irot + nc], &cos_, &sin_);
                     /*  apply that transformation to the right hand side. */
                     /* fprota_(&cos_, &sin_, &zi, &f[irot]); */
-                    dierckx_fprota_d(cos_, sin_, &zi, &f[irot]);
+                    oskar_dierckx_fprota_d(cos_, sin_, &zi, &f[irot]);
                     if (i == iband) break;
                     /*  apply that transformation to the left hand side. */
                     i2 = 1;
@@ -1232,7 +1238,8 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
                     {
                         ++i2;
                         /* fprota_(&cos_, &sin_, &h[j], &a[irot + i2 * nc]); */
-                        dierckx_fprota_d(cos_, sin_, &h[j], &a[irot + i2 * nc]);
+                        oskar_dierckx_fprota_d(cos_, sin_, &h[j],
+                                &a[irot + i2 * nc]);
                     }
                 }
                 /*  add the contribution of the row to the sum of squares
@@ -1264,7 +1271,7 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
         {
             /*  backward substitution in case of full rank. */
             /* fpback_(&a[a_offset], &f[1], &ncof, &iband, &c[1], &nc); */
-            dierckx_fpback_d(&a[a_offset], &f[1], ncof, iband, &c[1], nc);
+            oskar_dierckx_fpback_d(&a[a_offset], &f[1], ncof, iband, &c[1], nc);
             rank = ncof;
             for (i = 1; i <= ncof; ++i)
             {
@@ -1294,7 +1301,8 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
             la = lh + iband;
             /* fprank_(&q[q_offset], &ff[1], &ncof, &iband, &nc, &sigma, &c[1],
                     &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]); */
-            dierckx_fprank_d(&q[q_offset], &ff[1], ncof, iband, nc, sigma, &c[1],
+            oskar_dierckx_fprank_d(&q[q_offset], &ff[1], ncof, iband, nc,
+                    sigma, &c[1],
                     &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
             for (i = 1; i <= ncof; ++i)
             {
@@ -1472,7 +1480,7 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
         /*  evaluate the discotinuity jumps of the kx-th order derivative of
          *  the b-splines at the knots tx(l),l=kx+2,...,nx-kx-1. */
         /* fpdisc_(&tx[1], &nx, &kx2, &bx[bx_offset], &nmax); */
-        dierckx_fpdisc_d(&tx[1], nx, kx2, &bx[bx_offset], nmax);
+        oskar_dierckx_fpdisc_d(&tx[1], nx, kx2, &bx[bx_offset], nmax);
     }
     ky2 = ky1 + 1;
     /*  test whether there are interior knots in the y-direction. */
@@ -1481,7 +1489,7 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
         /*  evaluate the discontinuity jumps of the ky-th order derivative of
          *  the b-splines at the knots ty(l),l=ky+2,...,ny-ky-1. */
         /* fpdisc_(&ty[1], &ny, &ky2, &by[by_offset], &nmax); */
-        dierckx_fpdisc_d(&ty[1], ny, ky2, &by[by_offset], nmax);
+        oskar_dierckx_fpdisc_d(&ty[1], ny, ky2, &by[by_offset], nmax);
     }
     /*  initial value for p. */
     p1 = 0.0;
@@ -1557,11 +1565,12 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
                             /*  calculate the parameters of the givens
                              *  transformation. */
                             /* fpgivs_(&piv, &q[irot + nc], &cos_, &sin_); */
-                            dierckx_fpgivs_d(piv, &q[irot + nc], &cos_, &sin_);
+                            oskar_dierckx_fpgivs_d(piv, &q[irot + nc],
+                                    &cos_, &sin_);
                             /*  apply that givens transformation to the right
                              *  hand side. */
                             /* fprota_(&cos_, &sin_, &zi, &ff[irot]); */
-                            dierckx_fprota_d(cos_, sin_, &zi, &ff[irot]);
+                            oskar_dierckx_fprota_d(cos_, sin_, &zi, &ff[irot]);
                             if (i2 == 0) break;
                             /*  apply that givens transformation to the left
                              *  hand side. */
@@ -1569,7 +1578,8 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
                             {
                                 l1 = l + 1;
                                 /* fprota_(&cos_, &sin_, &h[l1], &q[irot + l1 * nc]); */
-                                dierckx_fprota_d(cos_, sin_, &h[l1], &q[irot + l1 * nc]);
+                                oskar_dierckx_fprota_d(cos_, sin_, &h[l1],
+                                        &q[irot + l1 * nc]);
                             }
                         }
                         for (l = 1; l <= i2; ++l)
@@ -1622,11 +1632,12 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
                             /*  calculate the parameters of the givens
                              *  transformation. */
                             /* fpgivs_(&piv, &q[irot + nc], &cos_, &sin_); */
-                            dierckx_fpgivs_d(piv, &q[irot + nc], &cos_, &sin_);
+                            oskar_dierckx_fpgivs_d(piv, &q[irot + nc],
+                                    &cos_, &sin_);
                             /*  apply that givens transformation to the right
                              *  hand side. */
                             /* fprota_(&cos_, &sin_, &zi, &ff[irot]); */
-                            dierckx_fprota_d(cos_, sin_, &zi, &ff[irot]);
+                            oskar_dierckx_fprota_d(cos_, sin_, &zi, &ff[irot]);
                             if (i2 == 0) break;
                             /*  apply that givens transformation to the left
                              *  hand side. */
@@ -1634,7 +1645,8 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
                             {
                                 l1 = l + 1;
                                 /* fprota_(&cos_, &sin_, &h[l1], &q[irot + l1 * nc]); */
-                                dierckx_fprota_d(cos_, sin_, &h[l1], &q[irot + l1 * nc]);
+                                oskar_dierckx_fprota_d(cos_, sin_, &h[l1],
+                                        &q[irot + l1 * nc]);
                             }
                         }
                         for (l = 1; l <= i2; ++l)
@@ -1668,7 +1680,8 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
         {
             /*  backward substitution in case of full rank. */
             /* fpback_(&q[q_offset], &ff[1], &ncof, &iband4, &c[1], &nc); */
-            dierckx_fpback_d(&q[q_offset], &ff[1], ncof, iband4, &c[1], nc);
+            oskar_dierckx_fpback_d(&q[q_offset], &ff[1], ncof, iband4,
+                    &c[1], nc);
             rank = ncof;
         }
         else
@@ -1685,8 +1698,8 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
             la = lh + iband4;
             /* fprank_(&q[q_offset], &ff[1], &ncof, &iband4, &nc, &sigma, &c[1],
                     &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]); */
-            dierckx_fprank_d(&q[q_offset], &ff[1], ncof, iband4, nc, sigma, &c[1],
-                    &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
+            oskar_dierckx_fprank_d(&q[q_offset], &ff[1], ncof, iband4, nc,
+                    sigma, &c[1], &sq, &rank, &wrk[la], &wrk[lf], &wrk[lh]);
         }
         for (i = 1; i <= ncof; ++i)
         {
@@ -1775,7 +1788,7 @@ void dierckx_fpsurf_d(int iopt, int m, double *x, double *y, const double *z,
         }
         /*  find the new value of p. */
         /* p = fprati_(&p1, &f1, &p2, &f2, &p3, &f3); */
-        p = dierckx_fprati_d(&p1, &f1, p2, f2, &p3, &f3);
+        p = oskar_dierckx_fprati_d(&p1, &f1, p2, f2, &p3, &f3);
     }
     /*  test whether x and y are in the original order. */
 L830:
