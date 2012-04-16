@@ -31,6 +31,8 @@ These are as follows:
         This option sets the target CUDA architecture for the compilation of
         CUDA device code. 
         <arch> must be one of either 1.3, 2.0, 2.1 or ALL. 
+        (Note: 1.1 architecture may also work if running in single precision
+         although this architecture isn't officially supported by OSKAR.)
 
     * -DCMAKE_INSTALL_PREFIX=<path> (default: /usr/local/)
         Prefix install path when installing OSKAR (with make install).
