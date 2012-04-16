@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,13 +41,21 @@ int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    err = oskar_spline_data_init(&data->port1_phi, type, location);
+    err = oskar_spline_data_init(&data->port1_phi_re, type, location);
     if (err) return err;
-    err = oskar_spline_data_init(&data->port1_theta, type, location);
+    err = oskar_spline_data_init(&data->port1_phi_im, type, location);
     if (err) return err;
-    err = oskar_spline_data_init(&data->port2_phi, type, location);
+    err = oskar_spline_data_init(&data->port1_theta_re, type, location);
     if (err) return err;
-    err = oskar_spline_data_init(&data->port2_theta, type, location);
+    err = oskar_spline_data_init(&data->port1_theta_im, type, location);
+    if (err) return err;
+    err = oskar_spline_data_init(&data->port2_phi_re, type, location);
+    if (err) return err;
+    err = oskar_spline_data_init(&data->port2_phi_im, type, location);
+    if (err) return err;
+    err = oskar_spline_data_init(&data->port2_theta_re, type, location);
+    if (err) return err;
+    err = oskar_spline_data_init(&data->port2_theta_im, type, location);
     if (err) return err;
 
     return 0;

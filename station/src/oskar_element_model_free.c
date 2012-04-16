@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,21 @@ int oskar_element_model_free(oskar_ElementModel* data)
 {
     int err;
 
-    err = oskar_spline_data_free(&data->port1_phi);
+    err = oskar_spline_data_free(&data->port1_phi_re);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port1_theta);
+    err = oskar_spline_data_free(&data->port1_phi_im);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port2_phi);
+    err = oskar_spline_data_free(&data->port1_theta_re);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port2_theta);
+    err = oskar_spline_data_free(&data->port1_theta_im);
+    if (err) return err;
+    err = oskar_spline_data_free(&data->port2_phi_re);
+    if (err) return err;
+    err = oskar_spline_data_free(&data->port2_phi_im);
+    if (err) return err;
+    err = oskar_spline_data_free(&data->port2_theta_re);
+    if (err) return err;
+    err = oskar_spline_data_free(&data->port2_theta_im);
     if (err) return err;
 
     return 0;

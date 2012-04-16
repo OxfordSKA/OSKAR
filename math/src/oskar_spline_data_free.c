@@ -45,24 +45,6 @@ int oskar_spline_data_free(oskar_SplineData* data)
     err = oskar_mem_free(&data->coeff);
     if (err) return err;
 
-    /* FIXME deprecated! */
-    data->num_knots_x_re = 0;
-    data->num_knots_y_re = 0;
-    data->num_knots_x_im = 0;
-    data->num_knots_y_im = 0;
-    err = oskar_mem_free(&data->knots_x_re);
-    if (err) return err;
-    err = oskar_mem_free(&data->knots_y_re);
-    if (err) return err;
-    err = oskar_mem_free(&data->coeff_re);
-    if (err) return err;
-    err = oskar_mem_free(&data->knots_x_im);
-    if (err) return err;
-    err = oskar_mem_free(&data->knots_y_im);
-    if (err) return err;
-    err = oskar_mem_free(&data->coeff_im);
-    if (err) return err;
-
     return 0;
 }
 

@@ -49,14 +49,14 @@ struct oskar_SettingsElementFit
     double weight_overlap;
     int use_common_set;
     oskar_SettingsSpline all;
-    oskar_SettingsSpline x_phi_real;
-    oskar_SettingsSpline x_phi_imag;
-    oskar_SettingsSpline x_theta_real;
-    oskar_SettingsSpline x_theta_imag;
-    oskar_SettingsSpline y_phi_real;
-    oskar_SettingsSpline y_phi_imag;
-    oskar_SettingsSpline y_theta_real;
-    oskar_SettingsSpline y_theta_imag;
+    oskar_SettingsSpline x_phi_re;
+    oskar_SettingsSpline x_phi_im;
+    oskar_SettingsSpline x_theta_re;
+    oskar_SettingsSpline x_theta_im;
+    oskar_SettingsSpline y_phi_re;
+    oskar_SettingsSpline y_phi_im;
+    oskar_SettingsSpline y_theta_re;
+    oskar_SettingsSpline y_theta_im;
 };
 typedef struct oskar_SettingsElementFit oskar_SettingsElementFit;
 

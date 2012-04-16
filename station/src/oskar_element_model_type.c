@@ -38,10 +38,14 @@ extern "C" {
 
 int oskar_element_model_is_type(const oskar_ElementModel* element, int type)
 {
-    return (oskar_spline_data_type(&element->port1_phi) == type &&
-            oskar_spline_data_type(&element->port1_theta) == type &&
-            oskar_spline_data_type(&element->port2_phi) == type &&
-            oskar_spline_data_type(&element->port2_theta) == type);
+    return (oskar_spline_data_type(&element->port1_phi_re) == type &&
+            oskar_spline_data_type(&element->port1_theta_re) == type &&
+            oskar_spline_data_type(&element->port2_phi_re) == type &&
+            oskar_spline_data_type(&element->port2_theta_re) == type &&
+            oskar_spline_data_type(&element->port1_phi_im) == type &&
+            oskar_spline_data_type(&element->port1_theta_im) == type &&
+            oskar_spline_data_type(&element->port2_phi_im) == type &&
+            oskar_spline_data_type(&element->port2_theta_im) == type);
 }
 
 int oskar_element_model_type(const oskar_ElementModel* element)

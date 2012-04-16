@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BEAM_PATTERN_TEST_H
-#define BEAM_PATTERN_TEST_H
+#ifndef OSKAR_ELEMENT_MODEL_LOAD_CST_H_
+#define OSKAR_ELEMENT_MODEL_LOAD_CST_H_
 
 /**
- * @file BeamPatternTest.h
+ * @file oskar_element_model_load_cst.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "station/oskar_ElementModel.h"
+#include "station/oskar_SettingsElementFit.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief
+ * Loads an antenna pattern from an ASCII text file produced by CST.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ * This function loads antenna pattern data from a text file and fills the
+ * provided data structure.
+ *
+ * The data file must contain eight columns, in the following order:
+ * - <theta, deg>
+ * - <phi, deg>
+ * - <abs dir>
+ * - <abs theta>
+ * - <phase theta, deg>
+ * - <abs phi>
+ * - <phase phi, deg>
+ * - <ax. ratio>
+ *
+ * This is the format exported by the CST (Computer Simulation Technology)
+ * package.
+ *
+ * Amplitude values in dBi are detected, and converted to linear format
+ * on loading.
+ *
+ * The theta dimension is assumed to be the fastest varying.
+ *
+ * @param[out] data     Pointer to data structure to fill.
+ * @param[in]  filename Data file name.
+ * @param[in]  i        Index 1 or 2 (port number to load).
+ * @param[in]  settings Pointer to settings structure used for surface fitting.
  */
-class BeamPatternTest : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(BeamPatternTest);
-        CPPUNIT_TEST(test_method);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+int oskar_element_model_load_cst(oskar_ElementModel* data, int i,
+        const char* filename, const oskar_SettingsElementFit* settings);
 
-    public:
-        /// Set up context before running a test.
-        void setUp();
+#ifdef __cplusplus
+}
+#endif
 
-        /// Clean up after the test run.
-        void tearDown();
-
-    public:
-        /// Test method.
-        void test_method();
-};
-
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(BeamPatternTest);
-
-#endif // BEAM_PATTERN_TEST_H
+#endif /* OSKAR_ELEMENT_MODEL_LOAD_CST_H_ */

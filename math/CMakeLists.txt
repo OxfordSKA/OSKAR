@@ -49,7 +49,6 @@ set(math_SRC
     src/oskar_sph_rotate_to_position.c
     src/oskar_sph_to_lm.c
     src/oskar_sph2cart.c
-    src/oskar_spline_data_compute_surfit.c
     src/oskar_spline_data_copy.c
     src/oskar_spline_data_evaluate.cu
     src/oskar_spline_data_free.c

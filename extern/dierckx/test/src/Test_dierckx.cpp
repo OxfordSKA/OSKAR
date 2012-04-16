@@ -29,12 +29,12 @@
 #include "test/Test_dierckx.h"
 #include "math/oskar_SplineData.h"
 #include "math/oskar_SettingsSpline.h"
+#include "math/oskar_spline_data_copy.h"
 #include "math/oskar_spline_data_init.h"
-#include "math/oskar_dierckx_surfit.h"
-#include "math/oskar_dierckx_bispev.h"
-#include "math/cudak/oskar_cudak_dierckx_bispev.h"
-#include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
+#include "math/oskar_spline_data_surfit.h"
+#include "math/oskar_spline_data_evaluate.h"
 #include "utility/oskar_mem_all_headers.h"
+#include "utility/oskar_get_error_string.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -312,6 +312,8 @@ static int oskar_spline_data_surfit_fortran(oskar_SplineData* spline,
             }
         } while (settings->search_for_best_fit && !done);
     }
+    else
+        err = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Free work arrays. */
 stop:
@@ -322,17 +324,87 @@ stop:
     return err;
 }
 
+static int oskar_spline_data_evaluate_fortran(oskar_Mem* output, int offset,
+        int stride, oskar_SplineData* spline, const oskar_Mem* x,
+        const oskar_Mem* y)
+{
+    int err = 0, nx, ny, num_points, type, location;
+
+    /* Check arrays are consistent. */
+    num_points = x->num_elements;
+    if (y->num_elements != num_points)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    /* Check type. */
+    type = x->type;
+    if (type != y->type)
+        return OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Check location. */
+    location = output->location;
+    if (location != spline->coeff.location ||
+            location != spline->knots_x.location ||
+            location != spline->knots_y.location ||
+            location != x->location ||
+            location != y->location)
+        return OSKAR_ERR_BAD_LOCATION;
+
+    /* Check data type. */
+    if (type == OSKAR_SINGLE)
+    {
+        float *knots_x, *knots_y, *coeff;
+        float *out;
+        nx      = spline->num_knots_x;
+        ny      = spline->num_knots_y;
+        knots_x = (float*)spline->knots_x.data;
+        knots_y = (float*)spline->knots_y.data;
+        coeff   = (float*)spline->coeff.data;
+        out     = (float*)output->data + offset;
+
+        /* Check if data are in CPU memory. */
+        if (location == OSKAR_LOCATION_CPU)
+        {
+            /* Set up workspace. */
+            float wrk[8];
+            int i, iwrk1[2], kwrk1 = 2, lwrk = 8;
+            int kx = 3, ky = 3;
+            int one = 1;
+
+            /* Evaluate surface at the points. */
+            for (i = 0; i < num_points; ++i)
+            {
+                float x1, y1;
+                x1 = ((const float*)x->data)[i];
+                y1 = ((const float*)y->data)[i];
+                bispev_(knots_x, &nx, knots_y, &ny, coeff,
+                        &kx, &ky, &x1, &one, &y1, &one, &out[i * stride],
+                        wrk, &lwrk, iwrk1, &kwrk1, &err);
+                if (err != 0) return OSKAR_ERR_SPLINE_EVAL_FAIL;
+            }
+        }
+        else
+            return OSKAR_ERR_BAD_LOCATION;
+    }
+    else
+        return OSKAR_ERR_BAD_DATA_TYPE;
+
+    return err;
+}
 
 void Test_dierckx::test_surfit()
 {
-#if 0
+    int err;
+
     // Set data dimensions.
     int size_x_in = 20;
     int size_y_in = 10;
-    int num_points = size_x_in * size_y_in;
+    int num_points_in = size_x_in * size_y_in;
 
     // Set up the input data.
-    vector<float> x_in(num_points), y_in(num_points), z_in(num_points), w(num_points);
+    oskar_Mem x_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
+    oskar_Mem y_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
+    oskar_Mem z_in(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
+    oskar_Mem w(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_in);
     for (int y = 0, i = 0; y < size_y_in; ++y)
     {
         float y1 = y * (2.0 * M_PI) / (size_y_in - 1);
@@ -341,259 +413,127 @@ void Test_dierckx::test_surfit()
             float x1 = x * (M_PI / 2.0) / (size_x_in - 1);
 
             // Store the data points.
-            x_in[i] = x1;
-            y_in[i] = y1;
-            z_in[i] = cos(x1); // Value of the function at x,y.
-            w[i]    = 1.0; // Weight.
+            ((float*)x_in)[i] = x1;
+            ((float*)y_in)[i] = y1;
+            ((float*)z_in)[i] = cos(x1) * sin(y1); // Value of function at x,y.
+            ((float*)w)[i]    = 1.0; // Weight.
         }
     }
 
     // Set up the surface fitting parameters.
-    float noise = 5e-4; // Numerical noise on input data.
-    float eps = 1e-6; // Magnitude of float epsilon.
+    oskar_SettingsSpline settings;
+    settings.average_fractional_error = 0.002;
+    settings.average_fractional_error_factor_increase = 1.5;
+    settings.eps_double = 2e-8;
+    settings.eps_float = 4e-4;
+    settings.search_for_best_fit = 1;
+    settings.smoothness_factor_override = 1.0;
+    settings.smoothness_factor_reduction = 0.9;
 
-    // Order of splines - do not change these values.
-    int kx = 3, ky = 3;
-
-    // Set up workspace.
-    int sqrt_num_points = (int)sqrt(num_points);
-    int nxest = kx + 1 + sqrt_num_points;
-    int nyest = ky + 1 + sqrt_num_points;
-    int u = nxest - kx - 1;
-    int v = nyest - ky - 1;
-    int ncoeff = u * v;
-    int km = 1 + ((kx > ky) ? kx : ky);
-    int ne = (nxest > nyest) ? nxest : nyest;
-    int bx = kx * v + ky + 1;
-    int by = ky * u + kx + 1;
-    int b1, b2;
-    if (bx <= by)
-    {
-        b1 = bx;
-        b2 = b1 + v - ky;
-    }
-    else
-    {
-        b1 = by;
-        b2 = b1 + u - kx;
-    }
-    int lwrk1 = u * v * (2 + b1 + b2) +
-            2 * (u + v + km * (num_points + ne) + ne - kx - ky) + b2 + 1;
-    int lwrk2 = u * v * (b2 + 1) + b2;
-    int kwrk = num_points + (nxest - 2 * kx - 1) * (nyest - 2 * ky - 1);
-    vector<float> wrk1(lwrk1), wrk2(lwrk2);
-    vector<int> iwrk(kwrk);
-
-    int k = 0, ier = 0;
-    float s;
-
-    // Set up the spline knots (Fortran).
-    int nx_f = 0, ny_f = 0; // Number of knots in x and y.
-    vector<float> tx_f(nxest, 0.0), ty_f(nyest, 0.0); // Knots in x and y.
-    vector<float> c_f(ncoeff, 0.0); // Spline coefficients.
-    float fp_f = 0.0; // Sum of squared residuals.
-    {
-        // Set initial smoothing factor.
-        s = num_points + sqrt(2.0 * num_points);
-        int iopt = 0;
-        TIMER_START
-        for (k = 0; k < 1000; ++k)
-        {
-            if (k > 0) iopt = 1; // Set iopt to 1 if not the first pass.
-            surfit_(&iopt, &num_points, &x_in[0],
-                    &y_in[0], &z_in[0], &w[0], &x_beg, &x_end,
-                    &y_beg, &y_end, &kx, &ky, &s, &nxest, &nyest,
-                    &ne, &eps, num_knots_x, knots_x, num_knots_y,
-                    knots_y, coeff, &fp, (float*)wrk1, &lwrk1,
-                    (float*)wrk2, &lwrk2, iwrk, &kwrk, &err);
-
-            surfit_(&iopt, &num_points, &x_in[0], &y_in[0], &z_in[0], &w[0], &s,
-                    &ntest, &npest, &eps, &nx_f, &tx_f[0], &ny_f, &ty_f[0],
-                    &c_f[0], &fp_f, &wrk1[0], &lwrk1, &wrk2[0], &lwrk2,
-                    &iwrk[0], &kwrk, &ier);
-
-            // Check return code.
-            if (ier > 0 || ier < -2)
-                CPPUNIT_FAIL("Spline coefficient computation failed with code "
-                        + oskar_to_std_string(ier));
-            else if (ier == -2) s = fp_f * 0.9;
-            else s /= 1.2;
-
-            // Check if the fit is good enough.
-            if ((fp_f / num_points) < pow(2.0 * noise, 2)) break;
-        }
-        TIMER_STOP("Finished surfit precalculation [Fortran]");
-    }
-
-    // Set up the spline knots (C).
-    int nx_c = 0, ny_c = 0; // Number of knots in x and y.
-    vector<float> tx_c(ntest, 0.0), ty_c(npest, 0.0); // Knots in x and y.
-    vector<float> c_c(ncoeff, 0.0); // Spline coefficients.
-    float fp_c = 0.0; // Sum of squared residuals.
-    {
-        // Set initial smoothing factor.
-        s = num_points + sqrt(2.0 * num_points);
-        int iopt = 0;
-        TIMER_START
-        for (k = 0; k < 1000; ++k)
-        {
-            if (k > 0) iopt = 1; // Set iopt to 1 if not the first pass.
-            oskar_dierckx_surfit_f(iopt, num_points, &x_in[0], &y_in[0], &z_in[0], &w[0], s,
-                    ntest, npest, eps, &nx_c, &tx_c[0], &ny_c, &ty_c[0],
-                    &c_c[0], &fp_c, &wrk1[0], lwrk1, &wrk2[0], lwrk2,
-                    &iwrk[0], kwrk, &ier);
-
-            // Check return code.
-            if (ier > 0 || ier < -2)
-                CPPUNIT_FAIL("Spline coefficient computation failed with code "
-                        + oskar_to_std_string(ier));
-            else if (ier == -2) s = fp_c * 0.9;
-            else s /= 1.2;
-
-            // Check if the fit is good enough.
-            if ((fp_c / num_points) < pow(2.0 * noise, 2)) break;
-        }
-        TIMER_STOP("Finished surfit precalculation [C]");
-    }
+    // Set up the spline data (Fortran and C versions).
+    oskar_SplineData spline_data_fortran;
+    oskar_SplineData spline_data_c;
+    err = oskar_spline_data_surfit_fortran(&spline_data_fortran, num_points_in,
+            &x_in, &y_in, &z_in, &w, &settings);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    err = oskar_spline_data_surfit(&spline_data_c, num_points_in,
+            &x_in, &y_in, &z_in, &w, &settings);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Check results are consistent.
     double delta = 1e-5;
-    CPPUNIT_ASSERT_EQUAL(nx_f, nx_c);
-    CPPUNIT_ASSERT_EQUAL(ny_f, ny_c);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(fp_f, fp_c, delta);
-    for (int i = 0; i < nx_c; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(tx_f[i], tx_c[i], delta);
-    for (int i = 0; i < ny_c; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(ty_f[i], ty_c[i], delta);
-    for (int i = 0; i < ncoeff; ++i)
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(c_f[i], c_c[i], delta);
-
-    // Print knot positions.
-    printf(" ## Pass %d has knots (nx,ny)=(%d,%d), s=%.6f, fp=%.6f\n",
-            k + 1, nx_c, ny_c, s, fp_c);
-    printf("    x:\n");
-    for (int i = 0; i < nx_c; ++i) printf(" %.3f", tx_c[i]); printf("\n");
-    printf("    y:\n");
-    for (int i = 0; i < ny_c; ++i) printf(" %.3f", ty_c[i]); printf("\n\n");
-
-    // Output buffers.
-    int size_x_out = 100;
-    int size_y_out = 200;
-    int m_out = size_x_out * size_y_out;
-    vector<float> x_out(m_out), y_out(m_out);
-    vector<float> z_out_f(m_out), z_out_c(m_out);
-    int iwrk1[2];
-    float wrk[16];
-    int kwrk1 = sizeof(iwrk1) / sizeof(int);
-    int lwrk = sizeof(wrk) / sizeof(float);
+    CPPUNIT_ASSERT_EQUAL(spline_data_fortran.num_knots_x,
+            spline_data_c.num_knots_x);
+    CPPUNIT_ASSERT_EQUAL(spline_data_fortran.num_knots_y,
+            spline_data_c.num_knots_y);
+    for (int i = 0; i < spline_data_c.num_knots_x; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.knots_x)[i],
+                ((float*)spline_data_c.knots_x)[i], delta);
+    for (int i = 0; i < spline_data_c.num_knots_y; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.knots_y)[i],
+                ((float*)spline_data_c.knots_y)[i], delta);
+    for (int i = 0; i < spline_data_c.coeff.num_elements; ++i)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)spline_data_fortran.coeff)[i],
+                ((float*)spline_data_c.coeff)[i], delta);
 
     // Evaluate output point positions.
-    for (int p = 0, i = 0; p < size_y_out; ++p)
+    int size_x_out = 100;
+    int size_y_out = 200;
+    int num_points_out = size_x_out * size_y_out;
+    oskar_Mem x_out(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    oskar_Mem y_out(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    for (int y = 0, i = 0; y < size_y_out; ++y)
     {
-        float phi1 = p * (2.0 * M_PI) / (size_y_out - 1);
-        for (int t = 0; t < size_x_out; ++t, ++i)
+        float y1 = y * (2.0 * M_PI) / (size_y_out - 1);
+        for (int x = 0; x < size_x_out; ++x, ++i)
         {
-            float theta1 = t * (M_PI / 2.0) / (size_x_out - 1);
-            x_out[i] = theta1;
-            y_out[i]   = phi1;
+            float x1 = x * (M_PI / 2.0) / (size_x_out - 1);
+            ((float*)x_out)[i] = x1;
+            ((float*)y_out)[i] = y1;
         }
     }
 
     // Evaluate surface (Fortran).
-    {
-        int one = 1;
-        TIMER_START
-        for (int i = 0; i < m_out; ++i)
-        {
-            float val;
-            bispev_(&tx_f[0], &nx_f, &ty_f[0], &ny_f, &c_f[0], &kx, &ky,
-                    &x_out[i], &one, &y_out[i], &one, &val, wrk, &lwrk,
-                    iwrk1, &kwrk1, &ier);
-            if (ier != 0)
-                CPPUNIT_FAIL("ERROR: Spline evaluation failed\n");
-            z_out_f[i] = val;
-        }
-        TIMER_STOP("Finished surface evaluation [Fortran] (%d points)", m_out);
-    }
+    oskar_Mem z_out_fortran(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    TIMER_START
+    err = oskar_spline_data_evaluate_fortran(&z_out_fortran, 0, 1,
+            &spline_data_fortran, &x_out, &y_out);
+    TIMER_STOP("Finished surface evaluation [Fortran] (%d points)",
+            num_points_out);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Evaluate surface (C).
-    {
-        TIMER_START
-        for (int i = 0; i < m_out; ++i)
-        {
-            float val;
-            oskar_dierckx_bispev_f(&tx_c[0], nx_c, &ty_c[0], ny_c, &c_c[0], kx, ky,
-                    &x_out[i], 1, &y_out[i], 1, &val, wrk, lwrk, iwrk1,
-                    kwrk1, &ier);
-            if (ier != 0)
-                CPPUNIT_FAIL("ERROR: Spline evaluation failed\n");
-            z_out_c[i]   = val;
-        }
-        TIMER_STOP("Finished surface evaluation [C] (%d points)", m_out);
-    }
+    oskar_Mem z_out_c(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
+    TIMER_START
+    err = oskar_spline_data_evaluate(&z_out_c, 0, 1, &spline_data_c,
+            &x_out, &y_out);
+    TIMER_STOP("Finished surface evaluation [C] (%d points)", num_points_out);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Evaluate surface (CUDA).
-    oskar_Mem z_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_CPU, m_out);
+    oskar_Mem z_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_points_out);
     {
-        int err;
+        // Copy the spline data to the GPU.
+        oskar_SplineData spline_data_cuda;
+        err = oskar_spline_data_init(&spline_data_cuda, OSKAR_SINGLE,
+                OSKAR_LOCATION_GPU);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+        err = oskar_spline_data_copy(&spline_data_cuda, &spline_data_c);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
-        // Copy memory to GPU.
-        oskar_Mem tx_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-        oskar_Mem ty_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-        oskar_Mem c_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-        oskar_Mem x_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-        oskar_Mem y_out_cuda(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-        err = tx_cuda.append_raw(&tx_c[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, nx_c);
-        CPPUNIT_ASSERT_EQUAL(0, err);
-        err = ty_cuda.append_raw(&ty_c[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, ny_c);
-        CPPUNIT_ASSERT_EQUAL(0, err);
-        err = c_cuda.append_raw(&c_c[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, ncoeff);
-        CPPUNIT_ASSERT_EQUAL(0, err);
-        err = x_out_cuda.append_raw(&x_out[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, m_out);
-        CPPUNIT_ASSERT_EQUAL(0, err);
-        err = y_out_cuda.append_raw(&y_out[0], OSKAR_SINGLE,
-                OSKAR_LOCATION_CPU, m_out);
-        CPPUNIT_ASSERT_EQUAL(0, err);
+        // Copy the x,y positions to the GPU and allocate memory for result.
+        oskar_Mem x_out_temp(&x_out, OSKAR_LOCATION_GPU);
+        oskar_Mem y_out_temp(&y_out, OSKAR_LOCATION_GPU);
+        oskar_Mem z_out_temp(OSKAR_SINGLE, OSKAR_LOCATION_GPU, num_points_out);
 
-        // Allocate memory for result.
-        oskar_Mem z_out_cuda_temp(OSKAR_SINGLE, OSKAR_LOCATION_GPU, m_out);
-
-        // Call kernel.
-        int num_blocks, num_threads = 256;
-        num_blocks = (m_out + num_threads - 1) / num_threads;
+        // Do the evaluation.
         TIMER_START
-        oskar_cudak_dierckx_bispev_bicubic_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads) (tx_cuda,
-                nx_c, ty_cuda, ny_c, c_cuda, m_out, x_out_cuda,
-                y_out_cuda, 1, z_out_cuda_temp);
-        cudaDeviceSynchronize();
-        err = (int) cudaPeekAtLastError();
-        TIMER_STOP("Finished sphere evaluation [CUDA] (%d points)", m_out);
-        CPPUNIT_ASSERT_EQUAL(0, err);
+        err = oskar_spline_data_evaluate(&z_out_temp, 0, 1, &spline_data_cuda,
+                &x_out_temp, &y_out_temp);
+        TIMER_STOP("Finished surface evaluation [CUDA] (%d points)",
+                num_points_out);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
-        // Copy memory back.
-        err = z_out_cuda_temp.copy_to(&z_out_cuda);
-        CPPUNIT_ASSERT_EQUAL(0, err);
+        // Copy the memory back.
+        err = z_out_temp.copy_to(&z_out_cuda);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     }
 
     // Check results are consistent.
-    for (int i = 0; i < m_out; ++i)
+    for (int i = 0; i < num_points_out; ++i)
     {
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(z_out_f[i], z_out_c[i], 1e-6);
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(z_out_c[i], ((float*)z_out_cuda)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)z_out_fortran)[i],
+                ((float*)z_out_c)[i], 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)z_out_c)[i],
+                ((float*)z_out_cuda)[i], 1e-6);
     }
 
     // Write out the data.
     FILE* file = fopen("test_surfit.dat", "w");
-    for (int i = 0; i < m_out; ++i)
+    for (int i = 0; i < num_points_out; ++i)
     {
         fprintf(file, "%10.6f %10.6f %10.6f\n ",
-                x_out[i], y_out[i], z_out_c[i]);
+                ((float*)x_out)[i], ((float*)y_out)[i], ((float*)z_out_c)[i]);
     }
     fclose(file);
-#endif
 }

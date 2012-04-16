@@ -45,24 +45,6 @@ int oskar_spline_data_copy(oskar_SplineData* dst, const oskar_SplineData* src)
     err = oskar_mem_copy(&dst->coeff, &src->coeff);
     if (err) return err;
 
-    /* FIXME deprecated! */
-    dst->num_knots_x_re = src->num_knots_x_re;
-    dst->num_knots_y_re = src->num_knots_y_re;
-    dst->num_knots_x_im = src->num_knots_x_im;
-    dst->num_knots_y_im = src->num_knots_y_im;
-    err = oskar_mem_copy(&dst->knots_x_re, &src->knots_x_re);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->knots_y_re, &src->knots_y_re);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->coeff_re, &src->coeff_re);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->knots_x_im, &src->knots_x_im);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->knots_y_im, &src->knots_y_im);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->coeff_im, &src->coeff_im);
-    if (err) return err;
-
     return 0;
 }
 

@@ -7,9 +7,8 @@ set(station_SRC
     src/oskar_element_model_copy.c
     src/oskar_element_model_free.c
     src/oskar_element_model_init.c
-    src/oskar_element_model_load.c
+    src/oskar_element_model_load_cst.c
     src/oskar_element_model_type.c
-    src/oskar_element_model_load_meerkat.c
     src/oskar_evaluate_beam_horizontal_lmn.c
     src/oskar_evaluate_dipole_pattern.cu
     src/oskar_evaluate_jones_E.c

@@ -184,6 +184,25 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/station/element/seed_x_orientation_error", "Random seed (X-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
     registerSetting("telescope/station/element/seed_y_orientation_error", "Random seed (Y-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
 
+    // Element pattern fitting parameters.
+    setLabel("telescope/station/element_fit", "Element pattern fitting parameters");
+    registerSetting("telescope/station/element_fit/ignore_data_at_pole", "Ignore data at poles", oskar_SettingsItem::BOOL, false, true);
+    registerSetting("telescope/station/element_fit/ignore_data_below_horizon", "Ignore data below horizon", oskar_SettingsItem::BOOL, false, true);
+    registerSetting("telescope/station/element_fit/overlap_angle_deg", "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, false, 9.0);
+    registerSetting("telescope/station/element_fit/weight_boundaries", "Weighting at boundaries", oskar_SettingsItem::DOUBLE, false, 20.0);
+    registerSetting("telescope/station/element_fit/weight_overlap", "Weighting in overlap region", oskar_SettingsItem::DOUBLE, false, 4.0);
+    //registerSetting("telescope/station/element_fit/use_common_set", "Use common set", oskar_SettingsItem::BOOL, false, true);
+    setLabel("telescope/station/element_fit/all", "Common settings (used for all surfaces)");
+    registerSetting("telescope/station/element_fit/all/search_for_best_fit", "Search for best fit", oskar_SettingsItem::BOOL, false, true);
+    registerSetting("telescope/station/element_fit/all/average_fractional_error", "Average fractional error", oskar_SettingsItem::DOUBLE, false, 0.02);
+    registerSetting("telescope/station/element_fit/all/average_fractional_error_factor_increase", "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, false, 1.5);
+    registerSetting("telescope/station/element_fit/all/smoothness_factor_reduction", "Smoothness reduction factor", oskar_SettingsItem::DOUBLE, false, 0.9);
+    registerSetting("telescope/station/element_fit/all/eps_float", "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, false, 4e-4);
+    registerSetting("telescope/station/element_fit/all/eps_double", "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, false, 2e-8);
+    registerSetting("telescope/station/element_fit/all/smoothness_factor_override", "Smoothness factor override", oskar_SettingsItem::DOUBLE, false, 1.0);
+
+    // FIXME Add parameters for all eight surfaces!
+
     // Interferometer settings. (Note: Currently loaded into SettingsObservation)
     setLabel("interferometer", "Interferometer settings");
     registerSetting("interferometer/channel_bandwidth_hz", "Channel bandwidth [Hz]", oskar_SettingsItem::DOUBLE);
@@ -242,13 +261,13 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     registerSetting("image/oskar_image_root", "OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip("image/oskar_image_root",
-            "Path consisting of the root of the filename used to save the\n"
+            "Path consisting of the root of the filename used to save the "
             "output image. The full filename will be constructed as:\n"
             "   <root>_type.img");
 #ifndef OSKAR_NO_FITS
     registerSetting("image/fits_image_root", "FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip("image/fits_image_root",
-            "Path consisting of the root of the filename used to save the\n"
+            "Path consisting of the root of the filename used to save the "
             "output image. The full filename will be constructed as:\n"
             "   <root>_type.fits");
 #endif
@@ -847,8 +866,6 @@ void oskar_SettingsModelFilter::setHideIfUnset(bool value)
     if (value != hideIfUnset_)
     {
         hideIfUnset_ = value;
-        beginResetModel();
-        endResetModel();
         invalidateFilter();
     }
 }

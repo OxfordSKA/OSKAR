@@ -41,13 +41,21 @@ int oskar_element_model_copy(oskar_ElementModel* dst,
     dst->element_type = src->element_type;
     dst->function_type = src->function_type;
 
-    err = oskar_spline_data_copy(&dst->port1_phi, &src->port1_phi);
+    err = oskar_spline_data_copy(&dst->port1_phi_re, &src->port1_phi_re);
     if (err) return err;
-    err = oskar_spline_data_copy(&dst->port1_theta, &src->port1_theta);
+    err = oskar_spline_data_copy(&dst->port1_phi_im, &src->port1_phi_im);
     if (err) return err;
-    err = oskar_spline_data_copy(&dst->port2_phi, &src->port1_theta);
+    err = oskar_spline_data_copy(&dst->port1_theta_re, &src->port1_theta_re);
     if (err) return err;
-    err = oskar_spline_data_copy(&dst->port2_theta, &src->port2_theta);
+    err = oskar_spline_data_copy(&dst->port1_theta_im, &src->port1_theta_im);
+    if (err) return err;
+    err = oskar_spline_data_copy(&dst->port2_phi_re, &src->port1_theta_re);
+    if (err) return err;
+    err = oskar_spline_data_copy(&dst->port2_phi_im, &src->port1_theta_im);
+    if (err) return err;
+    err = oskar_spline_data_copy(&dst->port2_theta_re, &src->port2_theta_re);
+    if (err) return err;
+    err = oskar_spline_data_copy(&dst->port2_theta_im, &src->port2_theta_im);
     if (err) return err;
 
     return 0;

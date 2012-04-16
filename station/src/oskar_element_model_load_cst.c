@@ -26,14 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_load.h"
+#include "station/oskar_element_model_load_cst.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_vector_types.h"
+#include "math/oskar_SettingsSpline.h"
 #include "math/oskar_SplineData.h"
-#include "math/oskar_spline_data_compute_surfit.h"
+#include "math/oskar_spline_data_surfit.h"
 #include "math/oskar_spline_data_type.h"
 #include "math/oskar_spline_data_location.h"
 
@@ -53,20 +54,16 @@ extern "C" {
 
 #define DEG2RAD (M_PI/180.0)
 
-int oskar_element_model_load(oskar_ElementModel* data, int i,
-        const char* filename, int search, double avg_fractional_err,
-        double s_real, double s_imag)
+int oskar_element_model_load_cst(oskar_ElementModel* data, int i,
+        const char* filename, const oskar_SettingsElementFit* settings)
 {
     /* Initialise the flags and local data. */
     int n = 0, err = 0, type = 0;
-    oskar_SplineData *data_phi = NULL, *data_theta = NULL;
-
-    /* Make these parameters. */
-    double overlap = 6.0 * M_PI / 180.0;
-    double overlap_weight = 4.0;
-    double boundary_weight = 20.0;
-    int ignore_below_horizon = 1;
-    int ignore_at_poles = 1;
+    double cos_overlap;
+    oskar_SplineData *data_phi_re = 0, *data_theta_re = 0;
+    oskar_SplineData *data_phi_im = 0, *data_theta_im = 0;
+    const oskar_SettingsSpline *settings_phi_re = 0, *settings_theta_re = 0;
+    const oskar_SettingsSpline *settings_phi_im = 0, *settings_theta_im = 0;
 
     /* Declare the line buffer. */
     char *line = NULL, *dbi = NULL;
@@ -77,27 +74,66 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     oskar_Mem m_theta, m_phi, m_theta_re, m_theta_im, m_phi_re, m_phi_im,
     weight;
 
-    /* Get a pointer to the surface to fill. */
+    /* Sanity check on inputs. */
+    if (i != 1 && i != 2)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!data || !filename || !settings)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Get pointers to the surfaces to fill. */
     if (i == 1)
     {
-        data_phi = &data->port1_phi;
-        data_theta = &data->port1_theta;
+        data_phi_re = &data->port1_phi_re;
+        data_phi_im = &data->port1_phi_im;
+        data_theta_re = &data->port1_theta_re;
+        data_theta_im = &data->port1_theta_im;
     }
     else if (i == 2)
     {
-        data_phi = &data->port2_phi;
-        data_theta = &data->port2_theta;
+        data_phi_re = &data->port2_phi_re;
+        data_phi_im = &data->port2_phi_im;
+        data_theta_re = &data->port2_theta_re;
+        data_theta_im = &data->port2_theta_im;
     }
-    else return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Get pointers to the surface fit settings. */
+    if (settings->use_common_set)
+    {
+        settings_phi_re = &settings->all;
+        settings_phi_im = &settings->all;
+        settings_theta_re = &settings->all;
+        settings_theta_im = &settings->all;
+    }
+    else
+    {
+        if (i == 1)
+        {
+            settings_phi_re = &settings->x_phi_re;
+            settings_phi_im = &settings->x_phi_im;
+            settings_theta_re = &settings->x_theta_re;
+            settings_theta_im = &settings->x_theta_im;
+        }
+        else if (i == 2)
+        {
+            settings_phi_re = &settings->y_phi_re;
+            settings_phi_im = &settings->y_phi_im;
+            settings_theta_re = &settings->y_theta_re;
+            settings_theta_im = &settings->y_theta_im;
+        }
+    }
 
     /* Check the data types. */
-    type = oskar_spline_data_type(data_phi);
-    if (type != oskar_spline_data_type(data_theta))
+    type = oskar_spline_data_type(data_phi_re);
+    if (type != oskar_spline_data_type(data_phi_im) ||
+            type != oskar_spline_data_type(data_theta_re) ||
+            type != oskar_spline_data_type(data_theta_im))
         return OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check the locations. */
-    if (oskar_spline_data_location(data_phi) != OSKAR_LOCATION_CPU ||
-            oskar_spline_data_location(data_theta) != OSKAR_LOCATION_CPU)
+    if (oskar_spline_data_location(data_phi_re) != OSKAR_LOCATION_CPU ||
+            oskar_spline_data_location(data_phi_im) != OSKAR_LOCATION_CPU ||
+            oskar_spline_data_location(data_theta_re) != OSKAR_LOCATION_CPU ||
+            oskar_spline_data_location(data_theta_im) != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise temporary storage. */
@@ -143,10 +179,10 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
         if (a != 6) continue;
 
         /* Ignore any data below horizon. */
-        if (ignore_below_horizon && theta > 90.0) continue;
+        if (settings->ignore_data_below_horizon && theta > 90.0) continue;
 
         /* Ignore any data at poles. */
-        if (ignore_at_poles)
+        if (settings->ignore_data_at_pole)
             if (theta < 1e-6 || theta > (180.0 - 1e-6)) continue;
 
         /* Convert data to radians. */
@@ -161,19 +197,19 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
             int size;
             size = n + 100;
             err = oskar_mem_realloc(&m_theta, size);
-            if (err) return err;
+            if (err) goto cleanup;
             err = oskar_mem_realloc(&m_phi, size);
-            if (err) return err;
+            if (err) goto cleanup;
             err = oskar_mem_realloc(&m_theta_re, size);
-            if (err) return err;
+            if (err) goto cleanup;
             err = oskar_mem_realloc(&m_theta_im, size);
-            if (err) return err;
+            if (err) goto cleanup;
             err = oskar_mem_realloc(&m_phi_re, size);
-            if (err) return err;
+            if (err) goto cleanup;
             err = oskar_mem_realloc(&m_phi_im, size);
-            if (err) return err;
+            if (err) goto cleanup;
             err = oskar_mem_realloc(&weight, size);
-            if (err) return err;
+            if (err) goto cleanup;
         }
 
         /* Convert decibel to linear scale if necessary. */
@@ -220,15 +256,15 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     fclose(file);
 
     /* Check if any data were loaded. */
-    if (n == 0)
-        goto cleanup;
+    if (n == 0) goto cleanup;
 
     /* Copy data at phi boundaries. */
     if (type == OSKAR_SINGLE)
     {
         int i;
         i = n - 1;
-        while (((float*)m_phi.data)[i] > (2 * M_PI - overlap))
+        while (((float*)m_phi.data)[i] > (2 * M_PI -
+                settings->overlap_angle_rad))
         {
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
@@ -236,19 +272,19 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
                 int size;
                 size = n + 100;
                 err = oskar_mem_realloc(&m_theta, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&weight, size);
-                if (err) return err;
+                if (err) goto cleanup;
             }
             ((float*)m_theta.data)[n]    = ((float*)m_theta.data)[i];
             ((float*)m_phi.data)[n]      = ((float*)m_phi.data)[i] - 2.0 * M_PI;
@@ -261,7 +297,7 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
             --i;
         }
         i = 0;
-        while (((float*)m_phi.data)[i] < overlap)
+        while (((float*)m_phi.data)[i] < settings->overlap_angle_rad)
         {
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
@@ -269,19 +305,19 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
                 int size;
                 size = n + 100;
                 err = oskar_mem_realloc(&m_theta, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&weight, size);
-                if (err) return err;
+                if (err) goto cleanup;
             }
             ((float*)m_theta.data)[n]    = ((float*)m_theta.data)[i];
             ((float*)m_phi.data)[n]      = ((float*)m_phi.data)[i] + 2.0 * M_PI;
@@ -298,7 +334,8 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     {
         int i;
         i = n - 1;
-        while (((double*)m_phi.data)[i] > (2 * M_PI - overlap))
+        while (((double*)m_phi.data)[i] > (2 * M_PI -
+                settings->overlap_angle_rad))
         {
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
@@ -306,19 +343,19 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
                 int size;
                 size = n + 100;
                 err = oskar_mem_realloc(&m_theta, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&weight, size);
-                if (err) return err;
+                if (err) goto cleanup;
             }
             ((double*)m_theta.data)[n]    = ((double*)m_theta.data)[i];
             ((double*)m_phi.data)[n]      = ((double*)m_phi.data)[i] - 2.0 * M_PI;
@@ -331,7 +368,7 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
             --i;
         }
         i = 0;
-        while (((double*)m_phi.data)[i] < overlap)
+        while (((double*)m_phi.data)[i] < settings->overlap_angle_rad)
         {
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
@@ -339,19 +376,19 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
                 int size;
                 size = n + 100;
                 err = oskar_mem_realloc(&m_theta, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) return err;
+                if (err) goto cleanup;
                 err = oskar_mem_realloc(&weight, size);
-                if (err) return err;
+                if (err) goto cleanup;
             }
             ((double*)m_theta.data)[n]    = ((double*)m_theta.data)[i];
             ((double*)m_phi.data)[n]      = ((double*)m_phi.data)[i] + 2.0 * M_PI;
@@ -366,14 +403,15 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
     }
 
     /* Re-weight at boundaries and overlap region of phi. */
+    cos_overlap = cos(settings->overlap_angle_rad);
     if (type == OSKAR_SINGLE)
     {
         for (i = 0; i < n; ++i)
         {
             if (fabs(cos(((float*)m_phi.data)[i]) - 1.0) < 0.001)
-                ((float*)weight.data)[i] = boundary_weight;
-            else if (cos(((float*)m_phi.data)[i]) > cos(overlap))
-                ((float*)weight.data)[i] = overlap_weight;
+                ((float*)weight.data)[i] = settings->weight_boundaries;
+            else if (cos(((float*)m_phi.data)[i]) > cos_overlap)
+                ((float*)weight.data)[i] = settings->weight_overlap;
         }
     }
     else
@@ -381,12 +419,13 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
         for (i = 0; i < n; ++i)
         {
             if (fabs(cos(((double*)m_phi.data)[i]) - 1.0) < 0.001)
-                ((double*)weight.data)[i] = boundary_weight;
-            else if (cos(((double*)m_phi.data)[i]) > cos(overlap))
-                ((double*)weight.data)[i] = overlap_weight;
+                ((double*)weight.data)[i] = settings->weight_boundaries;
+            else if (cos(((double*)m_phi.data)[i]) > cos_overlap)
+                ((double*)weight.data)[i] = settings->weight_overlap;
         }
     }
 
+#if 0
     if (type == OSKAR_SINGLE)
     {
         file = fopen("dump.txt", "w");
@@ -419,35 +458,33 @@ int oskar_element_model_load(oskar_ElementModel* data, int i,
         }
         fclose(file);
     }
+#endif
 
     /* Fit bicubic splines to the surface data. */
-    err = oskar_spline_data_compute_surfit(data_theta, n,
-            &m_theta, &m_phi, &m_theta_re, &m_theta_im, &weight, &weight,
-            search, avg_fractional_err, s_real, s_imag);
-    if (err) return err;
-    err = oskar_spline_data_compute_surfit(data_phi, n,
-            &m_theta, &m_phi, &m_phi_re, &m_phi_im, &weight, &weight,
-            search, avg_fractional_err, s_real, s_imag);
-    if (err) return err;
+    err = oskar_spline_data_surfit(data_theta_re, n,
+            &m_theta, &m_phi, &m_theta_re, &weight, settings_theta_re);
+    if (err) goto cleanup;
+    err = oskar_spline_data_surfit(data_theta_im, n,
+            &m_theta, &m_phi, &m_theta_im, &weight, settings_theta_im);
+    if (err) goto cleanup;
+    err = oskar_spline_data_surfit(data_phi_re, n,
+            &m_theta, &m_phi, &m_phi_re, &weight, settings_phi_re);
+    if (err) goto cleanup;
+    err = oskar_spline_data_surfit(data_phi_im, n,
+            &m_theta, &m_phi, &m_phi_im, &weight, settings_phi_im);
+    if (err) goto cleanup;
 
     /* Free temporary storage. */
     cleanup:
-    err = oskar_mem_free(&m_theta);
-    if (err) return err;
-    err = oskar_mem_free(&m_phi);
-    if (err) return err;
-    err = oskar_mem_free(&m_theta_re);
-    if (err) return err;
-    err = oskar_mem_free(&m_theta_im);
-    if (err) return err;
-    err = oskar_mem_free(&m_phi_re);
-    if (err) return err;
-    err = oskar_mem_free(&m_phi_im);
-    if (err) return err;
-    err = oskar_mem_free(&weight);
-    if (err) return err;
+    oskar_mem_free(&m_theta);
+    oskar_mem_free(&m_phi);
+    oskar_mem_free(&m_theta_re);
+    oskar_mem_free(&m_theta_im);
+    oskar_mem_free(&m_phi_re);
+    oskar_mem_free(&m_phi_im);
+    oskar_mem_free(&weight);
 
-    return 0;
+    return err;
 }
 
 #ifdef __cplusplus

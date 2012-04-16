@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,18 +40,21 @@
  * @brief Structure to hold antenna (embedded element) pattern data.
  *
  * @details
- * This structure holds the bicubic spherical spline coefficients and knot
- * positions for both polarisations of the antenna element.
+ * This structure holds the spline coefficients and knot positions for
+ * both polarisations of the antenna element.
  */
 struct oskar_ElementModel
 {
-
     int element_type; /**< Specifies whether horizontal or wrt phase centre. */
     int function_type;
-    oskar_SplineData port1_phi;
-    oskar_SplineData port1_theta;
-    oskar_SplineData port2_phi;
-    oskar_SplineData port2_theta;
+    oskar_SplineData port1_phi_re;
+    oskar_SplineData port1_phi_im;
+    oskar_SplineData port1_theta_re;
+    oskar_SplineData port1_theta_im;
+    oskar_SplineData port2_phi_re;
+    oskar_SplineData port2_phi_im;
+    oskar_SplineData port2_theta_re;
+    oskar_SplineData port2_theta_im;
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
 

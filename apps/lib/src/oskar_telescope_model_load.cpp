@@ -33,7 +33,7 @@
 #include "station/oskar_ElementModel.h"
 #include "station/oskar_element_model_copy.h"
 #include "station/oskar_element_model_init.h"
-#include "station/oskar_element_model_load.h"
+#include "station/oskar_element_model_load_cst.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_load_config.h"
 
@@ -43,8 +43,8 @@
 
 static const char config_name[] = "config.txt";
 static const char layout_name[] = "layout.txt";
-static const char element_x_name[] = "element_pattern_x.txt";
-static const char element_y_name[] = "element_pattern_y.txt";
+static const char element_x_name_cst[] = "element_pattern_x.txt";
+static const char element_y_name_cst[] = "element_pattern_y.txt";
 
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings, const char* dir_path,
@@ -86,14 +86,14 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
 
     // Check for element pattern data.
     QByteArray element_x, element_y;
-    if (dir.exists(element_x_name))
+    if (dir.exists(element_x_name_cst))
     {
-        element_x = dir.absoluteFilePath(element_x_name).toAscii();
+        element_x = dir.absoluteFilePath(element_x_name_cst).toAscii();
         element_file_x = element_x.constData();
     }
-    if (dir.exists(element_y_name))
+    if (dir.exists(element_y_name_cst))
     {
-        element_y = dir.absoluteFilePath(element_y_name).toAscii();
+        element_y = dir.absoluteFilePath(element_y_name_cst).toAscii();
         element_file_y = element_y.constData();
     }
 
@@ -196,18 +196,18 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                     // Load the element pattern data.
                     if (element_file_x)
                     {
-                        printf("Loading element pattern data (X): %s\n",
+                        printf("Loading CST element pattern data (X): %s\n",
                                 element_file_x);
-                        error = oskar_element_model_load(station->element_pattern,
-                                1, element_file_x, 1, 0.004, 0.0, 0.0);
+                        error = oskar_element_model_load_cst(station->element_pattern,
+                                1, element_file_x, &settings->station.element_fit);
                         if (error) return error;
                     }
                     if (element_file_y)
                     {
-                        printf("Loading element pattern data (Y): %s\n",
+                        printf("Loading CST element pattern data (Y): %s\n",
                                 element_file_y);
-                        error = oskar_element_model_load(station->element_pattern,
-                                2, element_file_y, 1, 0.004, 0.0, 0.0);
+                        error = oskar_element_model_load_cst(station->element_pattern,
+                                2, element_file_y, &settings->station.element_fit);
                         if (error) return error;
                     }
 

@@ -44,40 +44,13 @@
  */
 struct oskar_SplineData
 {
-	int num_knots_x;      /**< Number of knots in x. */
-	int num_knots_y;      /**< Number of knots in y. */
-	oskar_Mem knots_x;    /**< Knot positions in x. */
-	oskar_Mem knots_y;    /**< Knot positions in y. */
-	oskar_Mem coeff;      /**< Spline coefficient array. */
-
-	/* FIXME the following are all deprecated! */
-    int num_knots_x_re;   /**< Number of knots in x(real) or theta(real). */
-    int num_knots_x_im;   /**< Number of knots in x(imag) or theta(imag). */
-    int num_knots_y_re;   /**< Number of knots in y(real) or phi(real). */
-    int num_knots_y_im;   /**< Number of knots in y(imag) or phi(imag). */
-    oskar_Mem knots_x_re; /**< Knot positions in x(real) or theta(real). */
-    oskar_Mem knots_x_im; /**< Knot positions in x(imag) or theta(imag). */
-    oskar_Mem knots_y_re; /**< Knot positions in y(real) or phi(real). */
-    oskar_Mem knots_y_im; /**< Knot positions in y(imag) or phi(imag). */
-    oskar_Mem coeff_re;   /**< Spline coefficient array (real). */
-    oskar_Mem coeff_im;   /**< Spline coefficient array (imag). */
+    int num_knots_x;      /**< Number of knots in x. */
+    int num_knots_y;      /**< Number of knots in y. */
+    oskar_Mem knots_x;    /**< Knot positions in x. */
+    oskar_Mem knots_y;    /**< Knot positions in y. */
+    oskar_Mem coeff;      /**< Spline coefficient array. */
 };
 
 typedef struct oskar_SplineData oskar_SplineData;
-
-/**
- * @brief Structure to hold complex spline data.
- *
- * @details
- * This structure holds the data required to construct a complex surface from
- * splines.
- */
-struct oskar_SplineDataComplex
-{
-	oskar_SplineData real;
-	oskar_SplineData imag;
-};
-
-typedef struct oskar_SplineDataComplex oskar_SplineDataComplex;
 
 #endif /* OSKAR_SPLINE_DATA_H_ */

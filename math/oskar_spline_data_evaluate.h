@@ -48,7 +48,7 @@ extern "C" {
  * This function evaluates a surface fitted by splines at the given
  * positions.
  *
- * @param[out] output Complex output values.
+ * @param[out] output Output values.
  * @param[in] spline  Pointer to data structure.
  * @param[in] x       List of x coordinates.
  * @param[in] y       List of y coordinates.
