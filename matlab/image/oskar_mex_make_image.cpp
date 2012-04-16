@@ -95,9 +95,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     else
     {
         mexErrMsgTxt("Usage: \n"
-                "    image = oskar.imager.run(vis, settings)\n"
+                "    image = oskar.image.make(vis, settings)\n"
                 "       or\n"
-                "    image = oskar.imager.run(uu, vv, amp, frequency_hz, "
+                "    image = oskar.image.make(uu, vv, amp, frequency_hz, "
                 "num_pixels, field_of_view_deg)\n");
     }
 
@@ -128,12 +128,12 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Make image.
         mexPrintf("= Making image...\n");
-        mexEvalString("drawnow");
+        mexEvalString("drawnow"); // Force flush of matlab print buffer
         err = oskar_make_image(&image, &vis, &settings);
         if (err)
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
-                    "\noskar.imager.run() [oskar_make_image] "
+                    "\noskar.image.make() [oskar_make_image] "
                     "failed with code %i: %s.\n",
                     err, oskar_get_error_string(err));
         }
@@ -249,7 +249,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         if (err)
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",
-                    "\noskar.imager.run() [oskar_make_image_dft] "
+                    "\noskar.image.make() [oskar_make_image_dft] "
                     "failed with code %i: %s.\n",
                     err, oskar_get_error_string(err));
         }
