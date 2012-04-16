@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "extern/dierckx/surfit.h"
+#include "math/dierckx_surfit.h"
 #include "math/oskar_spline_data_compute_surfit.h"
 #include "math/oskar_spline_data_init.h"
 #include "utility/oskar_Mem.h"
@@ -39,9 +39,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+/*
 #define USE_FORTRAN_SURFIT
-
+*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -275,7 +275,7 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                             knots_y, coeff, &fp, (float*)wrk1, &lwrk1,
                             (float*)wrk2, &lwrk2, iwrk, &kwrk, &err);
 #else
-                    surfit_f(iopt, num_points, (float*)x->data,
+                    dierckx_surfit_f(iopt, num_points, (float*)x->data,
                             (float*)y->data, data, weight, x_beg, x_end,
                             y_beg, y_end, kx, ky, s, nxest, nyest, ne, eps,
                             num_knots_x, knots_x, num_knots_y, knots_y, coeff,
@@ -385,7 +385,7 @@ int oskar_spline_data_compute_surfit(oskar_SplineData* spline,
                 for (k = 0, iopt = 0; k < maxiter; ++k)
                 {
                     if (k > 0) iopt = 1; /* Set iopt to 1 if not first pass. */
-                    surfit_d(iopt, num_points, (double*)x->data,
+                    dierckx_surfit_d(iopt, num_points, (double*)x->data,
                             (double*)y->data, data, weight, x_beg, x_end,
                             y_beg, y_end, kx, ky, s, nxest, nyest, ne, eps,
                             num_knots_x, knots_x, num_knots_y, knots_y, coeff,

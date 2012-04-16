@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,23 @@
  * @file oskar_interferometry.h
  */
 
-#include "oskar_compute_baselines.h"
-#include "oskar_cuda_correlator_lm_bw.h"
-#include "oskar_xyz_to_uvw.h"
+#include "interferometry/oskar_compute_baselines.h"
+#include "interferometry/oskar_correlate.h"
+#include "interferometry/oskar_evaluate_baseline_noise_stddev.h"
+#include "interferometry/oskar_evaluate_baseline_uvw.h"
+#include "interferometry/oskar_evaluate_baselines.h"
+#include "interferometry/oskar_evaluate_jones_K.h"
+#include "interferometry/oskar_evaluate_station_uvw.h"
+#include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
+#include "interferometry/oskar_geodetic_spherical_to_geocentric_cartesian.h"
+#include "interferometry/oskar_horizon_plane_to_geocentric_cartesian.h"
+#include "interferometry/oskar_horizon_plane_to_offset_geocentric_cartesian.h"
+#include "interferometry/oskar_interferometer_scalar.h"
+#include "interferometry/oskar_interferometer.h"
+#include "interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h"
+#include "interferometry/oskar_telescope_model_all_headers.h"
+#include "interferometry/oskar_visibilities_all_headers.h"
+#include "interferometry/oskar_xyz_to_uvw_cuda.h"
+#include "interferometry/oskar_xyz_to_uvw.h"
 
 #endif /* OSKAR_INTERFEROMETRY_H_ */

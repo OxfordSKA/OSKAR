@@ -2,13 +2,16 @@
 # src/extern/dierckx/test/CMakeLists.txt
 #
 
-if (CPPUNIT_FOUND AND CUDA_FOUND)
+if (CPPUNIT_FOUND AND CUDA_FOUND AND OSKAR_FOUND)
 
     set(dierckx_test_SRC
         src/CppUnitMain.cpp
         src/Test_dierckx.cu
     )
+    
+    message("OSKAR includes: ${OSKAR_INCLUDES}")
 
+    include_directories(${OSKAR_INCLUDES})
     cuda_add_executable(dierckx_test ${dierckx_test_SRC})
     target_link_libraries(dierckx_test 
         dierckx
@@ -18,5 +21,5 @@ if (CPPUNIT_FOUND AND CUDA_FOUND)
 
     add_test(dierckx_test dierckx_test)
 
-endif (CPPUNIT_FOUND AND CUDA_FOUND)
+endif (CPPUNIT_FOUND AND CUDA_FOUND AND OSKAR_FOUND)
 

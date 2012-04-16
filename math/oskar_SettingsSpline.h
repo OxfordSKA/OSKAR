@@ -40,13 +40,13 @@
  */
 struct oskar_SettingsSpline
 {
-    double eps_float; /**< Epsilon for single precision fit. */
-    double eps_double; /**< Epsilon for double precision fit. */
+    double eps_float; /**< Epsilon for single precision fit (try 4e-4). */
+    double eps_double; /**< Epsilon for double precision fit (try 2e-8). */
     double smoothness_factor_override; /**< Value to use for smoothness factor, if not searching. */
     int search_for_best_fit; /**< If true, then search for best fit using average fractional error. */
-    double smoothness_factor_reduction; /**< Factor to reduce smoothness factor by when searching. */
+    double smoothness_factor_reduction; /**< Factor to reduce smoothness factor by when searching (try 0.9). */
     double average_fractional_error; /**< Target average fractional error. */
-    double average_fractional_error_factor_increase; /**< In case of fitting failure, factor by which to increase allowed average fractional error. */
+    double average_fractional_error_factor_increase; /**< In case of fitting failure, factor by which to increase allowed average fractional error (try 1.5). */
 };
 typedef struct oskar_SettingsSpline oskar_SettingsSpline;
 

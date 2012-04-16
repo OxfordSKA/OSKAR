@@ -10,12 +10,11 @@ if (CFITSIO_FOUND)
         src/oskar_fits_image_write.c
         src/oskar_fits_write_axis_header.c
         src/oskar_fits_write.c
-        #src/oskar_fits_write_cube.c
         #src/oskar_uvfits_writer.c
     )
     set(fits_SRC "${fits_SRC}" PARENT_SCOPE)
 
-    # Build and install the oskar_fits libraray.
+    # Build and install the oskar_fits library.
     include_directories(${CFITSIO_INCLUDE_DIR})
     set(libname oskar_fits)
     add_library(${libname} ${fits_SRC})

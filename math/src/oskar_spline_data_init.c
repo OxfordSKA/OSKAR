@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,16 @@ extern "C" {
 int oskar_spline_data_init(oskar_SplineData* data, int type, int location)
 {
     int err = 0;
+    data->num_knots_x = 0;
+    data->num_knots_y = 0;
+    err = oskar_mem_init(&data->knots_x, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->knots_y, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&data->coeff, type, location, 0, OSKAR_TRUE);
+    if (err) return err;
+
+    /* FIXME deprecated! */
     data->num_knots_x_re = 0;
     data->num_knots_y_re = 0;
     data->num_knots_x_im = 0;

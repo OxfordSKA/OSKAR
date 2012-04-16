@@ -33,17 +33,25 @@
  * @file oskar_sky.h
  */
 
+#include "sky/oskar_date_time_to_mjd.h"
+#include "sky/oskar_equation_of_equinoxes_fast.h"
+#include "sky/oskar_evaluate_gaussian_source_parameters.h"
+#include "sky/oskar_evaluate_jones_R.h"
+#include "sky/oskar_evaluate_sky_temperature.h"
+#include "sky/oskar_galactic_to_fk5.h"
+#include "sky/oskar_generate_random_coordinate.h"
 #include "sky/oskar_ha_dec_to_az_el.h"
 #include "sky/oskar_ha_dec_to_hor_lmn.h"
+#include "sky/oskar_lm_to_n.h"
+#include "sky/oskar_mjd_to_gast_fast.h"
+#include "sky/oskar_mjd_to_gmst.h"
+#include "sky/oskar_mjd_to_last_fast.h"
+#include "sky/oskar_mjd_to_lmst.h"
 #include "sky/oskar_ra_dec_to_az_el_cuda.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
 #include "sky/oskar_ra_dec_to_hor_lmn.h"
 #include "sky/oskar_ra_dec_to_rel_lmn_cuda.h"
 #include "sky/oskar_ra_dec_to_rel_lmn.h"
-#include "sky/oskar_date_time_to_mjd.h"
-#include "sky/oskar_equation_of_equinoxes_fast.h"
-#include "sky/oskar_mjd_to_gmst.h"
-#include "sky/oskar_mjd_to_last_fast.h"
-#include "sky/oskar_mjd_to_lmst.h"
+#include "sky/oskar_sky_model_all_headers.h"
 
 #endif /* OSKAR_SKY_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,24 +36,21 @@
 #include "utility/oskar_Mem.h"
 
 /**
- * @brief Structure to hold complex spline data.
+ * @brief Structure to hold spline data.
  *
  * @details
- * This structure holds the data required to construct a complex surface from
+ * This structure holds the data required to construct a surface from
  * splines.
- *
- * If the input data are on a regular grid, the knot positions arrays
- * should always be at least size_x + 4 and size_y + 4 in length respectively,
- * where size is the size of the input data table dimension.
- *
- * If the input data are scattered across the approximation domain, the knot
- * position arrays should be of size e = 8 + sqrt(n), where n is the
- * number of scatter points used to define the surface. If storage space is
- * tight, then e = 8 + sqrt(n/2) may be sufficient.
- * The coefficient arrays should be of size (e-4) * (e-4), where e is as above.
  */
 struct oskar_SplineData
 {
+	int num_knots_x;      /**< Number of knots in x. */
+	int num_knots_y;      /**< Number of knots in y. */
+	oskar_Mem knots_x;    /**< Knot positions in x. */
+	oskar_Mem knots_y;    /**< Knot positions in y. */
+	oskar_Mem coeff;      /**< Spline coefficient array. */
+
+	/* FIXME the following are all deprecated! */
     int num_knots_x_re;   /**< Number of knots in x(real) or theta(real). */
     int num_knots_x_im;   /**< Number of knots in x(imag) or theta(imag). */
     int num_knots_y_re;   /**< Number of knots in y(real) or phi(real). */
@@ -67,5 +64,20 @@ struct oskar_SplineData
 };
 
 typedef struct oskar_SplineData oskar_SplineData;
+
+/**
+ * @brief Structure to hold complex spline data.
+ *
+ * @details
+ * This structure holds the data required to construct a complex surface from
+ * splines.
+ */
+struct oskar_SplineDataComplex
+{
+	oskar_SplineData real;
+	oskar_SplineData imag;
+};
+
+typedef struct oskar_SplineDataComplex oskar_SplineDataComplex;
 
 #endif /* OSKAR_SPLINE_DATA_H_ */

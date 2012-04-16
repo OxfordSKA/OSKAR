@@ -26,16 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_telescope_model_analyse.h"
-#include "interferometry/oskar_telescope_model_copy.h"
-#include "interferometry/oskar_telescope_model_free.h"
-#include "interferometry/oskar_telescope_model_init.h"
-#include "interferometry/oskar_telescope_model_load_station_coords.h"
-#include "interferometry/oskar_telescope_model_location.h"
-#include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
-#include "interferometry/oskar_telescope_model_resize.h"
-#include "interferometry/oskar_telescope_model_type.h"
+#include "interferometry/oskar_telescope_model_all_headers.h"
 #include "station/oskar_station_model_load_config.h"
 #include <cstdlib>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,9 @@ extern "C" {
 int oskar_spline_data_type(const oskar_SplineData* data)
 {
     int type;
-    type = data->knots_x_re.type;
-    if (type != data->knots_x_im.type ||
-            type != data->knots_y_re.type ||
-            type != data->knots_y_im.type ||
-            type != data->coeff_re.type ||
-            type != data->coeff_im.type)
+    type = data->knots_x.type;
+    if (type != data->knots_y.type ||
+            type != data->coeff.type)
         return OSKAR_ERR_TYPE_MISMATCH;
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;

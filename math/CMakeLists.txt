@@ -6,6 +6,18 @@ add_subdirectory(cudak)
 
 # Add the source files in this directory.
 set(math_SRC
+    src/dierckx_bispev.c
+    src/dierckx_fpback.c
+    src/dierckx_fpbisp.c
+    src/dierckx_fpbspl.c
+    src/dierckx_fpdisc.c
+    src/dierckx_fpgivs.c
+    src/dierckx_fporde.c
+    src/dierckx_fprank.c
+    src/dierckx_fprati.c
+    src/dierckx_fprota.c
+    src/dierckx_fpsurf.c
+    src/dierckx_surfit.c
     src/oskar_angular_distance.c
     src/oskar_cart2sph.c
     src/oskar_cuda_dft_c2r_2d.cu
@@ -37,14 +49,13 @@ set(math_SRC
     src/oskar_sph_rotate_to_position.c
     src/oskar_sph_to_lm.c
     src/oskar_sph2cart.c
-    src/oskar_spline_data_compute_regrid.c # Deprecated
-    src/oskar_spline_data_compute_sphere.c
     src/oskar_spline_data_compute_surfit.c
     src/oskar_spline_data_copy.c
     src/oskar_spline_data_evaluate.cu
     src/oskar_spline_data_free.c
     src/oskar_spline_data_init.c
     src/oskar_spline_data_location.c
+    src/oskar_spline_data_surfit.c
     src/oskar_spline_data_type.c
 )
 foreach (file ${math_cuda_kernels_SRC})

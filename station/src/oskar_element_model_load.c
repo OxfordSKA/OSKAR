@@ -33,7 +33,6 @@
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_SplineData.h"
-#include "math/oskar_spline_data_compute_sphere.h"
 #include "math/oskar_spline_data_compute_surfit.h"
 #include "math/oskar_spline_data_type.h"
 #include "math/oskar_spline_data_location.h"

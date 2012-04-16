@@ -3,7 +3,7 @@
 #
 
 # ==== Set the project name and specify the required CMAKE version.
-project(OSKAR CXX C Fortran)
+project(OSKAR CXX C)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # ==== Project version.
@@ -39,9 +39,6 @@ include(oskar_build_macros)
 
 enable_testing()
 
-# Build external libraries.
-add_subdirectory(extern)
-
 # ==== Build main OSKAR library.
 if (CUDA_FOUND)
     add_subdirectory(imaging)
@@ -75,9 +72,7 @@ if (CUDA_FOUND)
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
     cuda_add_library(${libname} ${${libname}_SRC})
     target_link_libraries(${libname} 
-        dierckx 
         ${CUDA_LIBRARIES}
-        ${CUDA_CUBLAS_LIBRARIES} 
         ${CUDA_curand_LIBRARY})
     if (OSKAR_USE_CBLAS)
         target_link_libraries(${libname} ${OSKAR_CBLAS})

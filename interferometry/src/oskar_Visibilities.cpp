@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_clear_contents.h"
-#include "interferometry/oskar_visibilities_copy.h"
-#include "interferometry/oskar_visibilities_free.h"
-#include "interferometry/oskar_visibilities_get_channel_amps.h"
-#include "interferometry/oskar_visibilities_init.h"
-#include "interferometry/oskar_visibilities_location.h"
-#include "interferometry/oskar_visibilities_read.h"
-#include "interferometry/oskar_visibilities_resize.h"
-#include "interferometry/oskar_visibilities_write.h"
-#include "interferometry/oskar_visibilities_evaluate_sky_noise_stddev.h"
-#include "interferometry/oskar_visibilities_add_sky_noise.h"
-#include "utility/oskar_mem_init.h"
+#include "interferometry/oskar_visibilities_all_headers.h"
 
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
         int num_channels, int num_times, int num_baselines)

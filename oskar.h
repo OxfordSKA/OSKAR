@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,10 @@
  * @file oskar.h
  */
 
-#include "cuda/oskar_cuda.h" // Deprecated!
 #include "interferometry/oskar_interferometry.h"
 #include "math/oskar_math.h"
 #include "sky/oskar_sky.h"
-#include "utility/oskar_util.h"
+#include "station/oskar_station.h"
+#include "utility/oskar_utility.h"
 
 #endif /* OSKAR_H_ */

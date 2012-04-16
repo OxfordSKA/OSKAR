@@ -26,15 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_StationModel.h"
-#include "station/oskar_station_model_copy.h"
-#include "station/oskar_station_model_free.h"
-#include "station/oskar_station_model_init.h"
-#include "station/oskar_station_model_load_config.h"
-#include "station/oskar_station_model_location.h"
-#include "station/oskar_station_model_multiply_by_wavenumber.h"
-#include "station/oskar_station_model_resize.h"
-#include "station/oskar_station_model_type.h"
+#include "station/oskar_station_model_all_headers.h"
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
 {

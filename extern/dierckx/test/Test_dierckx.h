@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,13 +46,11 @@ class Test_dierckx : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_dierckx);
-        CPPUNIT_TEST(test_regrid);
-        CPPUNIT_TEST(test_sphere);
+        CPPUNIT_TEST(test_surfit);
         CPPUNIT_TEST_SUITE_END();
 
     public:
-        void test_regrid();
-        void test_sphere();
+        void test_surfit();
 };
 
 // Register the test class.

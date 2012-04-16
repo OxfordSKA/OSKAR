@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,50 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_alloc.h"
-#include "utility/oskar_mem_append.h"
-#include "utility/oskar_mem_append_raw.h"
-#include "utility/oskar_mem_binary_file_read.h"
-#include "utility/oskar_mem_binary_file_write.h"
-#include "utility/oskar_mem_clear_contents.h"
-#include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_free.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_insert.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_mem_scale_real.h"
-#include "utility/oskar_mem_set_value_real.h"
-#include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_mem_all_headers.h"
 #include <cstdlib>
 
 oskar_Mem::oskar_Mem(int owner_)
-: type(0),
-  location(0),
-  num_elements(0),
-  owner(owner_),
-  data(NULL)
 {
+    oskar_mem_init(this, 0, 0, 0, owner_);
 }
 
 oskar_Mem::oskar_Mem(int mem_type, int mem_location, int size, int owner_)
-: type(0),
-  location(0),
-  num_elements(0),
-  owner(0),
-  data(NULL)
 {
     if (oskar_mem_init(this, mem_type, mem_location, size, owner_))
         throw "Error in oskar_mem_init.";
 }
 
 oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
-: type(0),
-  location(0),
-  num_elements(0),
-  owner(0),
-  data(NULL)
 {
     if (oskar_mem_init(this, other->type, mem_location, other->num_elements,
             owner_))

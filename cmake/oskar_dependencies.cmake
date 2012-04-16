@@ -37,7 +37,7 @@ find_package(OpenMP QUIET)   # liboskar
 #find_package(MKL QUIET)     # liboskar
 find_package(CBLAS QUIET)    # liboskar
 find_package(LAPACK QUIET)   # liboskar
-find_package(Qt4 4.5 QUIET)  # liboskar apps, liboskar_widgets, apps 
+find_package(Qt4 4.5 QUIET)  # liboskar_apps, liboskar_widgets, apps 
 find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
@@ -74,14 +74,14 @@ endif ()
 
 if (NOT OSKAR_USE_CBLAS)
     message("================================================================================")
-    message("-- WARNING: cblas not found.")
+    message("-- WARNING: CBLAS not found.")
     message("================================================================================")
     add_definitions(-DOSKAR_NO_CBLAS)
 endif()
 
 if (NOT OSKAR_USE_LAPACK)
     message("================================================================================")
-    message("-- WARNING: lapack not found.")
+    message("-- WARNING: LAPACK not found.")
     message("================================================================================")
     add_definitions(-DOSKAR_NO_LAPACK)
 endif()
@@ -103,8 +103,8 @@ endif()
 
 if (NOT CFITSIO_FOUND)
     message("================================================================================")
-    message("-- WARNING: cfitsio not found: "
-           "Unable to build FITS library.")
+    message("-- WARNING: CFITSIO not found: "
+           "Unable to build OSKAR FITS library.")
     message("================================================================================")
     add_definitions(-DOSKAR_NO_FITS)
 endif ()
@@ -145,7 +145,6 @@ endif ()
 if (MATLAB_FOUND AND CUDA_FOUND)
     message("        - OSKAR MATLAB interface functions")
 endif ()
-message("        - libdierckx (external library)")
 message("================================================================================")
 
 # Set a flag to tell cmake that dependencies have been checked.

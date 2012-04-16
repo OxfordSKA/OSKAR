@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,94 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sky/oskar_SkyModel.h"
-#include "sky/oskar_sky_model_append.h"
-#include "sky/oskar_sky_model_compute_relative_lmn.h"
-#include "sky/oskar_sky_model_filter_by_flux.h"
-#include "sky/oskar_sky_model_filter_by_radius.h"
-#include "sky/oskar_sky_model_copy.h"
-#include "sky/oskar_sky_model_load.h"
-#include "sky/oskar_sky_model_load_gsm.h"
-#include "sky/oskar_sky_model_write.h"
-#include "sky/oskar_sky_model_location.h"
-#include "sky/oskar_sky_model_resize.h"
-#include "sky/oskar_sky_model_scale_by_spectral_index.h"
-#include "sky/oskar_sky_model_set_source.h"
-#include "sky/oskar_sky_model_type.h"
+#include "sky/oskar_sky_model_all_headers.h"
 
 oskar_SkyModel::oskar_SkyModel(int type, int location, int num_sources)
-: num_sources(num_sources),
-  RA(type, location, num_sources),
-  Dec(type, location, num_sources),
-  I(type, location, num_sources),
-  Q(type, location, num_sources),
-  U(type, location, num_sources),
-  V(type, location, num_sources),
-  reference_freq(type, location, num_sources),
-  spectral_index(type, location, num_sources),
-  rel_l(type, location, num_sources),
-  rel_m(type, location, num_sources),
-  rel_n(type, location, num_sources),
-  use_extended(OSKAR_FALSE),
-  FWHM_major(type, location, num_sources),
-  FWHM_minor(type, location, num_sources),
-  position_angle(type, location, num_sources),
-  gaussian_a(type, location, num_sources),
-  gaussian_b(type, location, num_sources),
-  gaussian_c(type, location, num_sources)
 {
+    if (oskar_sky_model_init(this, type, location, num_sources))
+        throw "Error in oskar_sky_model_init.";
 }
 
 oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, int location)
-: num_sources(other->num_sources),
-  RA(&other->RA, location),
-  Dec(&other->Dec, location),
-  I(&other->I, location),
-  Q(&other->Q, location),
-  U(&other->U, location),
-  V(&other->V, location),
-  reference_freq(&other->reference_freq, location),
-  spectral_index(&other->spectral_index, location),
-  rel_l(&other->rel_l, location),
-  rel_m(&other->rel_m, location),
-  rel_n(&other->rel_n, location),
-  use_extended(other->use_extended),
-  FWHM_major(&other->FWHM_major, location),
-  FWHM_minor(&other->FWHM_minor, location),
-  position_angle(&other->position_angle, location),
-  gaussian_a(&other->gaussian_a, location),
-  gaussian_b(&other->gaussian_b, location),
-  gaussian_c(&other->gaussian_c, location)
 {
+    if (oskar_sky_model_init(this, other->type(), location, other->num_sources))
+        throw "Error in oskar_sky_model_init.";
+    if (oskar_sky_model_copy(this, other))
+        throw "Error in oskar_sky_model_copy.";
 }
 
 oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
-: num_sources(0),
-  RA(type, location, 0),
-  Dec(type, location, 0),
-  I(type, location, 0),
-  Q(type, location, 0),
-  U(type, location, 0),
-  V(type, location, 0),
-  reference_freq(type, location, 0),
-  spectral_index(type, location, 0),
-  rel_l(type, location, 0),
-  rel_m(type, location, 0),
-  rel_n(type, location, 0),
-  use_extended(OSKAR_FALSE),
-  FWHM_major(type, location, 0),
-  FWHM_minor(type, location, 0),
-  position_angle(type, location, 0),
-  gaussian_a(type, location, 0),
-  gaussian_b(type, location, 0),
-  gaussian_c(type, location, 0)
 {
-    if (oskar_sky_model_load(this, filename) != 0)
-        throw "Error in oskar_sky_model_load";
+    if (oskar_sky_model_init(this, type, location, 0))
+        throw "Error in oskar_sky_model_init.";
+    if (oskar_sky_model_load(this, filename))
+        throw "Error in oskar_sky_model_load.";
 }
 
 oskar_SkyModel::~oskar_SkyModel()
 {
+    if (oskar_sky_model_free(this))
+        throw "Error in oskar_sky_model_free.";
 }
 
 int oskar_SkyModel::append(const oskar_SkyModel* other)

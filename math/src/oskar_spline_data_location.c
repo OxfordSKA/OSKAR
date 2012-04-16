@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,12 +35,9 @@ extern "C" {
 int oskar_spline_data_location(const oskar_SplineData* data)
 {
     int location;
-    location = data->knots_x_re.location;
-    if (location != data->knots_x_im.location ||
-            location != data->knots_y_re.location ||
-            location != data->knots_y_im.location ||
-            location != data->coeff_re.location ||
-            location != data->coeff_im.location)
+    location = data->knots_x.location;
+    if (location != data->knots_y.location ||
+            location != data->coeff.location)
         return OSKAR_ERR_BAD_LOCATION;
     return location;
 }
