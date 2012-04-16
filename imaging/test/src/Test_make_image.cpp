@@ -119,7 +119,7 @@ void Test_make_image::test()
     settings.image_type = OSKAR_IMAGE_TYPE_POL_LINEAR;
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
-    oskar_Image image;
+    oskar_Image image(OSKAR_DOUBLE);
     int err = oskar_make_image(&image, &vis, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 
@@ -152,7 +152,7 @@ void  Test_make_image::image_lm_grid()
     oskar_evaluate_image_lm_grid_d(size, size, fov, fov, (double*)l.data,
             (double*)m.data);
 
-    oskar_Image im;
+    oskar_Image im(OSKAR_DOUBLE);
     oskar_image_resize(&im, size, size, 1, 1, 2);
 
     memcpy(im.data.data, l.data, num_pixels * sizeof(double));

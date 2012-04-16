@@ -36,6 +36,7 @@
 #include "imaging/oskar_get_image_stokes.h"
 #include "imaging/oskar_get_image_vis_amps.h"
 #include "imaging/oskar_setup_image.h"
+#include "imaging/oskar_image_init.h"
 
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
@@ -46,6 +47,7 @@
 #include "utility/oskar_mem_assign.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_get_data_type_string.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -71,6 +73,10 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
         return OSKAR_ERR_INVALID_ARGUMENT;
     int type = (oskar_mem_is_double(vis->amplitude.type) &&
             oskar_mem_is_double(im->data.type)) ? OSKAR_DOUBLE : OSKAR_SINGLE;
+
+    err = oskar_image_init(im, type, location);
+    if (err) return err;
+
     int size = settings->size;
     double fov = settings->fov_deg * M_PI/180.0;
 

@@ -425,6 +425,7 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         default:
         {
             value = static_cast<QLineEdit*>(editor)->text();
+            break;
         }
     }
 
