@@ -67,6 +67,11 @@ int oskar_image_read(oskar_Image* image, const char* filename, int idx)
     err = oskar_image_init(image, type, OSKAR_LOCATION_CPU);
     if (err) goto cleanup;
 
+
+    /* Optionally read the settings path (ignore the error code). */
+    oskar_mem_binary_stream_read(&image->settings_path, stream, &index,
+            OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0);
+
     /* Read the dimensions. */
     err = oskar_binary_stream_read_int(stream, &index, grp,
             OSKAR_IMAGE_TAG_NUM_PIXELS_WIDTH, idx, &image->width);
