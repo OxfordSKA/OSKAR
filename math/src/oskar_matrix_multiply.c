@@ -48,6 +48,9 @@ int oskar_matrix_multiply(oskar_Mem* C,
 {
     int M, N, K;
     int LDA, LDB, LDC;
+    int type;
+    int tA, tB;
+    double alpha = 1.0, beta = 0.0;
 
 #ifdef OSKAR_NO_CBLAS
     fprintf(stderr, "= ERROR: oskar_matrix_multiply(): CBLAS currently "
@@ -65,7 +68,6 @@ int oskar_matrix_multiply(oskar_Mem* C,
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-    int type;
     if (A->type == OSKAR_DOUBLE && B->type == OSKAR_DOUBLE &&
             C->type == OSKAR_DOUBLE)
     {
@@ -83,8 +85,6 @@ int oskar_matrix_multiply(oskar_Mem* C,
 
 
     /* [ C = alpha * A * B + beta * C ] */
-    int tA, tB;
-    double alpha = 1.0, beta = 0.0;
     M = (!transA) ? rows_A : cols_A;
     N = (!transB) ? cols_B : rows_B;
     K = (!transA) ? cols_A : rows_A;
