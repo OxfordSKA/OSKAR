@@ -99,7 +99,7 @@ int oskar_sim_interferometer(const char* settings_file)
     // (one per thread/GPU).
     oskar_Mem* vis_acc  = (oskar_Mem*)malloc(num_devices * sizeof(oskar_Mem));
     oskar_Mem* vis_temp = (oskar_Mem*)malloc(num_devices * sizeof(oskar_Mem));
-    int time_baseline = telescope_cpu->num_baselines() * times->num_vis_dumps;
+    int time_baseline = telescope_cpu->num_baselines() * times->num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
         error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
@@ -216,28 +216,37 @@ int oskar_sim_interferometer(const char* settings_file)
     }
 #endif
 
-    if (settings.image.oskar_image || settings.image.fits_image)
+
+    if (settings.obs.image_interferometer_output)
     {
-        oskar_Image image;
-        printf("\n");
-        printf("=== Starting OSKAR imager ...\n");
-        error = oskar_make_image(&image, vis_global, &settings.image);
-        printf("=== Imaging complete.\n\n");
-        if (error) return error;
-        if (settings.image.oskar_image)
+        if (settings.image.oskar_image || settings.image.fits_image)
         {
-            printf("--> Writing OSKAR image: '%s'\n", settings.image.oskar_image);
-            error = oskar_image_write(&image, settings.image.oskar_image, 0);
+            oskar_Image image;
+            printf("\n");
+            printf("=== Starting OSKAR imager ...\n");
+            error = oskar_make_image(&image, vis_global, &settings.image);
+            printf("=== Imaging complete.\n\n");
             if (error) return error;
-        }
+            if (settings.image.oskar_image)
+            {
+                printf("--> Writing OSKAR image: '%s'\n", settings.image.oskar_image);
+                error = oskar_image_write(&image, settings.image.oskar_image, 0);
+                if (error) return error;
+            }
 #ifndef OSKAR_NO_FITS
-        if (settings.image.fits_image)
-        {
-            printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
-            oskar_fits_image_write(&image, settings.image.fits_image);
-        }
+            if (settings.image.fits_image)
+            {
+                printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
+                oskar_fits_image_write(&image, settings.image.fits_image);
+            }
 #endif
+        }
+        else
+        {
+            fprintf(stderr, "= WARNING: No image output name specified (skipping OSKAR imager)\n");
+        }
     }
+
 
     // Delete data structures.
     delete vis_global;

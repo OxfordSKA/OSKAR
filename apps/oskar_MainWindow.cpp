@@ -108,7 +108,6 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     actOpen->setShortcut(QKeySequence::Open);
     actExit->setShortcut(QKeySequence::Quit);
     actHideUnset_->setShortcut(QKeySequence(Qt::ALT + Qt::Key_H));
-    actRunInterferometer->setShortcut(QKeySequence(Qt::ALT + Qt::Key_I));
     actShowFirstLevel->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     actExpandAll->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     actCollapseAll->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));

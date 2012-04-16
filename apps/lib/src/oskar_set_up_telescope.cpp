@@ -308,7 +308,7 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         int num_channels = settings->obs.num_channels;
         double bandwidth = telescope->bandwidth_hz;
         const oskar_SettingsTime* time = &settings->obs.time;
-        double integration_time = time->obs_length_seconds / time->num_vis_dumps;
+        double integration_time = time->obs_length_seconds / time->num_time_steps;
         vector<double> receiver_temp(num_channels,
                 settings->telescope.station.receiver_temperature);
 

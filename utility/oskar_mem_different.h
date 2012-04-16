@@ -52,7 +52,7 @@ extern "C" {
  * If the data types are different, then OSKAR_TRUE is returned immediately
  * without checking each element.
  *
- * NOTE: Data checks are currently only supported in CPU memory.
+ * Note: Data checks are currently only supported in CPU memory.
  *
  * @param[in] one Pointer to the first data structure.
  * @param[in] two Pointer to the second data structure.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,15 +41,19 @@
  */
 struct oskar_SettingsObservation
 {
+    double ra0_rad;
+    double dec0_rad;
+
     double start_frequency_hz;
     int num_channels;
     double frequency_inc_hz;
-    double channel_bandwidth_hz;
-    double ra0_rad;
-    double dec0_rad;
-    char* oskar_vis_filename;
-    char* ms_filename;
-    oskar_SettingsTime time;
+
+    oskar_SettingsTime time; /* Note: deprecated soon?! as now partly in interferometer group */
+
+    double channel_bandwidth_hz; /* Note: now in the interferometer settings group */
+    char* oskar_vis_filename; /* Note: now in the interferometer settings group */
+    char* ms_filename;        /* Note: now in the interferometer settings group */
+    int image_interferometer_output; /* Note: interferometer settings group */
 };
 typedef struct oskar_SettingsObservation oskar_SettingsObservation;
 

@@ -67,7 +67,7 @@ int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-    int num_threads = 128; /* FIXME work out what size this should be...? */
+    int num_threads = 128; /* Note: this might not be optimal! */
     int num_blocks = (num_elements + num_threads - 1) / num_threads;
 
     /* Generate weights errors */

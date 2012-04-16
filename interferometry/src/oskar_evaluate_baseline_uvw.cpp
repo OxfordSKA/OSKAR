@@ -46,7 +46,7 @@ int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
     int num_baselines = num_stations * (num_stations - 1) / 2;
 
     // Get time data.
-    int num_vis_dumps        = times->num_vis_dumps;
+    int num_vis_dumps        = times->num_time_steps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
     double dt_dump           = times->dt_dump_days;
 

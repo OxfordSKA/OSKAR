@@ -140,6 +140,17 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 #endif
     registerSetting("sky/output_sky_file", "Output OSKAR source file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
+    // Observation settings.
+    setLabel("observation", "Observation settings");
+    registerSetting("observation/phase_centre_ra_deg", "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/phase_centre_dec_deg", "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/start_frequency_hz", "Start frequency [Hz]", oskar_SettingsItem::DOUBLE, true);
+    registerSetting("observation/num_channels", "Number of frequency channels", oskar_SettingsItem::INT_POSITIVE);
+    registerSetting("observation/frequency_inc_hz", "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
+    registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME, true);
+    registerSetting("observation/num_time_steps", "Number of time steps", oskar_SettingsItem::INT_POSITIVE);
+    registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
+
     // Telescope model settings.
     setLabel("telescope", "Telescope model settings");
     registerSetting("telescope/config_directory", "Telescope directory", oskar_SettingsItem::TELESCOPE_DIR_NAME, true);
@@ -173,23 +184,23 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/station/element/seed_x_orientation_error", "Random seed (X-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
     registerSetting("telescope/station/element/seed_y_orientation_error", "Random seed (Y-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
 
-    // Observation settings.
-    setLabel("observation", "Observation settings");
-    registerSetting("observation/num_channels", "Number of channels", oskar_SettingsItem::INT_POSITIVE);
-    registerSetting("observation/start_frequency_hz", "Start frequency [Hz]", oskar_SettingsItem::DOUBLE, true);
-    registerSetting("observation/frequency_inc_hz", "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/channel_bandwidth_hz", "Channel bandwidth [Hz]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/phase_centre_ra_deg", "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/phase_centre_dec_deg", "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/num_vis_dumps", "Number of visibility dumps", oskar_SettingsItem::INT_POSITIVE);
-    registerSetting("observation/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT_POSITIVE);
-    registerSetting("observation/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
-    registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME, true);
-    registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
-    registerSetting("observation/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    // Interferometer settings. (Note: Currently loaded into SettingsObservation)
+    setLabel("interferometer", "Interferometer settings");
+    registerSetting("interferometer/channel_bandwidth_hz", "Channel bandwidth [Hz]", oskar_SettingsItem::DOUBLE);
+    registerSetting("interferometer/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT_POSITIVE);
+    setTooltip("interferometer/num_vis_ave", "Number of averaged evaluations of the full Measurement Equation per visibility dump.");
+    registerSetting("interferometer/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
+    setTooltip("interferometer/num_fringe_ave", "Number of averaged evaluations of the K-Jones matrix per Measurement Equation evaluation.");
+    registerSetting("interferometer/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #ifndef OSKAR_NO_MS
-    registerSetting("observation/ms_filename", "Output Measurement Set", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("interferometer/ms_filename", "Output Measurement Set", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #endif
+    registerSetting("interferometer/image_output", "Image simulation output",
+            oskar_SettingsItem::BOOL);
+    setDefault("interferometer/image_output", false);
+    setTooltip("interferometer/image_output", "Run the OSKAR imager on "
+            "completion of the interferometer simulation. For image settings "
+            "see the 'Image settings' group");
 
     // Beam pattern settings.
     setLabel("beam_pattern", "Beam pattern settings");
@@ -730,6 +741,14 @@ void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
 
     // Set the data.
     setData(idx, value, Qt::EditRole);
+}
+
+void oskar_SettingsModel::setDisabled(const QString& key, bool value)
+{
+    // Get the model index.
+    QModelIndex idx = index(key);
+    idx = idx.sibling(idx.row(), 1);
+    setData(idx, value, oskar_SettingsModel::EnabledRole);
 }
 
 // Private methods.

@@ -251,6 +251,17 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         }
     }
 
+    /* Print observation settings. */
+    pr_k(1, w, "Observation settings", 1);
+    pr_3f(2, w, "Phase centre RA [deg]", s->obs.ra0_rad * R2D);
+    pr_3f(2, w, "Phase centre Dec [deg]", s->obs.dec0_rad * R2D);
+    pr_3e(2, w, "Start frequency [Hz]", s->obs.start_frequency_hz);
+    pr_i(2, w, "Num. frequency channels", s->obs.num_channels);
+    pr_3e(2, w, "Frequency inc [Hz]", s->obs.frequency_inc_hz);
+    pr_f(2, w, "Start time (MJD)", s->obs.time.obs_start_mjd_utc);
+    pr_i(2, w, "Num. time steps", s->obs.time.num_time_steps);
+    pr_f(2, w, "Length [sec]", s->obs.time.obs_length_seconds);
+
     /* Print telescope settings. */
     pr_k(1, w, "Telescope settings", 1);
     pr_s(2, 0, "Telescope directory", s->telescope.config_directory);
@@ -351,21 +362,28 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
                 s->telescope.station.element.seed_y_orientation_error);
     }
 
-    /* Print observation settings. */
-    pr_k(1, w, "Observation settings", 1);
-    pr_i(2, w, "Num. channels", s->obs.num_channels);
-    pr_3e(2, w, "Start frequency [Hz]", s->obs.start_frequency_hz);
-    pr_3e(2, w, "Frequency inc [Hz]", s->obs.frequency_inc_hz);
-    pr_f(2, w, "Channel bandwidth [Hz]", s->obs.channel_bandwidth_hz);
-    pr_3f(2, w, "Phase centre RA [deg]", s->obs.ra0_rad * R2D);
-    pr_3f(2, w, "Phase centre Dec [deg]", s->obs.dec0_rad * R2D);
-    pr_f(2, w, "Start time (MJD)", s->obs.time.obs_start_mjd_utc);
-    pr_f(2, w, "Length [sec]", s->obs.time.obs_length_seconds);
-    pr_i(2, w, "Num. visibility dumps", s->obs.time.num_vis_dumps);
-    pr_i(2, w, "Num. visibility ave.", s->obs.time.num_vis_ave);
-    pr_i(2, w, "Num. fringe ave.", s->obs.time.num_fringe_ave);
-    pr_s(2, 0, "OSKAR visibility file", s->obs.oskar_vis_filename);
-    pr_s(2, 0, "Measurement Set name", s->obs.ms_filename);
+    /* Print Interferometer settings */
+    if (s->obs.oskar_vis_filename || s->obs.ms_filename)
+    {
+        pr_k(1, w, "Interferometer settings", 1);
+        pr_f(2, w, "Channel bandwidth [Hz]", s->obs.channel_bandwidth_hz);
+        pr_i(2, w, "Num. visibility ave.", s->obs.time.num_vis_ave);
+        pr_i(2, w, "Num. fringe ave.", s->obs.time.num_fringe_ave);
+        pr_s(2, 0, "OSKAR visibility file", s->obs.oskar_vis_filename);
+        pr_s(2, 0, "Measurement Set name", s->obs.ms_filename);
+        pr_b(2, w, "Image simulation output", s->obs.image_interferometer_output);
+    }
+
+    /* Print beam pattern settings. */
+    if (s->beam_pattern.size > 0)
+    {
+        pr_k(1, w, "Beam pattern settings", 1);
+        pr_3f(2, w, "Field-of-view [deg]", s->beam_pattern.fov_deg);
+        pr_i(2, w, "Dimension [pixels]", s->beam_pattern.size);
+        pr_i(2, w, "Station ID", s->beam_pattern.station_id);
+        pr_s(2, 0, "Output OSKAR image file", s->beam_pattern.filename);
+        pr_s(2, 0, "Output FITS image file", s->beam_pattern.fits_image);
+    }
 
     /* Print image settings. */
     if (s->image.size > 0)
@@ -409,17 +427,6 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_s(2, 0, "Input OSKAR visibility file", s->image.input_vis_data);
         pr_s(2, 0, "Output OSKAR image file", s->image.oskar_image);
         pr_s(2, 0, "Output FITS image file", s->image.fits_image);
-    }
-
-    /* Print beam pattern settings. */
-    if (s->beam_pattern.size > 0)
-    {
-        pr_k(1, w, "Beam pattern settings", 1);
-        pr_3f(2, w, "Field-of-view [deg]", s->beam_pattern.fov_deg);
-        pr_i(2, w, "Dimension [pixels]", s->beam_pattern.size);
-        pr_i(2, w, "Station ID", s->beam_pattern.station_id);
-        pr_s(2, 0, "Output OSKAR image file", s->beam_pattern.filename);
-        pr_s(2, 0, "Output FITS image file", s->beam_pattern.fits_image);
     }
 
     printf("\n");

@@ -49,7 +49,7 @@ oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings* settings,
     int n_stations = tel_cpu->num_stations;
     int n_channels = settings->obs.num_channels;
     oskar_Visibilities* vis = new oskar_Visibilities(type, OSKAR_LOCATION_CPU,
-            n_channels, times->num_vis_dumps, n_stations * (n_stations - 1) /2);
+            n_channels, times->num_time_steps, n_stations * (n_stations - 1) /2);
 
     // Add meta-data.
     vis->freq_start_hz = settings->obs.start_frequency_hz;

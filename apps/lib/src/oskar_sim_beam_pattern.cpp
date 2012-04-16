@@ -102,7 +102,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
         return OSKAR_ERR_OUT_OF_RANGE;
 
     // Get time data.
-    int num_times            = times->num_vis_dumps;
+    int num_times            = times->num_time_steps;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;
     double dt_dump           = times->dt_dump_days;
 

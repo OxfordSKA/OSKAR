@@ -34,7 +34,7 @@
 OSKAR_EXPORT
 struct oskar_SettingsTime
 {
-    int    num_vis_dumps;
+    int    num_time_steps;
     int    num_vis_ave;
     int    num_fringe_ave;
     double obs_start_mjd_utc;

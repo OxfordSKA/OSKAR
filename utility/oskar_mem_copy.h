@@ -50,7 +50,6 @@ extern "C" {
  *
  * If the copy is not taking ownership of the memory then only the pointer
  * and the meta-data are copied.
- * FIXME behaviour of non owned copy ... replaced by oskar_mem_assign() ?
  *
  * If there is not enough memory in the destination structure, then it is
  * automatically resized to hold the required number of elements.

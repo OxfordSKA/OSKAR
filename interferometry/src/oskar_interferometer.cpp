@@ -94,7 +94,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     curand_state.init(telescope->seed_time_variable_errors);
 
     // Get time increments.
-    int num_vis_dumps        = times->num_vis_dumps;
+    int num_vis_dumps        = times->num_time_steps;
     int num_vis_ave          = times->num_vis_ave;
     int num_fringe_ave       = times->num_fringe_ave;
     double obs_start_mjd_utc = times->obs_start_mjd_utc;

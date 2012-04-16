@@ -47,85 +47,97 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
 {
     QByteArray t;
     QSettings s(QString(filename), QSettings::IniFormat);
+
     s.beginGroup("observation");
+    {
+        // Get pointing direction.
+        obs->ra0_rad = s.value("phase_centre_ra_deg").toDouble() * M_PI / 180.0;
+        obs->dec0_rad = s.value("phase_centre_dec_deg").toDouble() * M_PI / 180.0;
 
-    // Get frequency / channel data.
-    obs->num_channels         = s.value("num_channels", 1).toInt();
-    obs->start_frequency_hz   = s.value("start_frequency_hz").toDouble();
-    obs->frequency_inc_hz     = s.value("frequency_inc_hz").toDouble();
-    obs->channel_bandwidth_hz = s.value("channel_bandwidth_hz").toDouble();
+        // Get frequency / channel data.
+        obs->start_frequency_hz   = s.value("start_frequency_hz").toDouble();
+        obs->num_channels         = s.value("num_channels", 1).toInt();
+        obs->frequency_inc_hz     = s.value("frequency_inc_hz").toDouble();
 
-    // Get pointing direction.
-    obs->ra0_rad = s.value("phase_centre_ra_deg").toDouble() * M_PI / 180.0;
-    obs->dec0_rad = s.value("phase_centre_dec_deg").toDouble() * M_PI / 180.0;
+        // Get observation start time (if blank, then use current).
+        QString str_st = s.value("start_time_utc").toString();
+        QDateTime st = (str_st.isEmpty()) ?  QDateTime::currentDateTime().toUTC()
+                : QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
+        if (!st.isValid())
+        {
+            fprintf(stderr, "ERROR: Invalid date string for 'start_time_utc' "
+                    "(format must be: 'd-M-yyyy h:m:s.z').\n");
+            return OSKAR_ERR_SETTINGS;
+        }
+        int year   = st.date().year();
+        int month  = st.date().month();
+        int day    = st.date().day();
+        int hour   = st.time().hour();
+        int minute = st.time().minute();
+        double second = st.time().second() + st.time().msec() / 1000.0;
 
-    // Get time data.
-    obs->time.num_vis_dumps  = s.value("num_vis_dumps", 1).toInt();
-    obs->time.num_vis_ave    = s.value("num_vis_ave", 1).toInt();
-    obs->time.num_fringe_ave = s.value("num_fringe_ave", 1).toInt();
+        // Compute start time as MJD(UTC).
+        double day_fraction = (hour + (minute / 60.0) + (second / 3600.0)) / 24.0;
+        obs->time.obs_start_mjd_utc = oskar_date_time_to_mjd(year, month, day,
+                day_fraction);
+
+        // Get number of time steps.
+        obs->time.num_time_steps  = s.value("num_time_steps", 1).toInt();
+
+        // Get observation length.
+        QString str_len = s.value("length").toString();
+        if (str_len.isEmpty()) str_len = "00:00:00.000";
+        QTime len = QTime::fromString(str_len, "h:m:s.z");
+        if (!len.isValid())
+        {
+            fprintf(stderr, "ERROR: Invalid time string for 'length' "
+                    "(format must be: 'h:m:s.z').\n");
+            return OSKAR_ERR_SETTINGS;
+        }
+        obs->time.obs_length_seconds = len.hour() * 3600.0 +
+                len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
+        obs->time.obs_length_days = obs->time.obs_length_seconds / 86400.0;
+    }
+    s.endGroup();
 
     // Range checks.
     if (obs->num_channels <= 0) obs->num_channels = 1;
-    if (obs->time.num_vis_dumps <= 0) obs->time.num_vis_dumps = 1;
+    if (obs->time.num_time_steps <= 0) obs->time.num_time_steps = 1;
+
+    s.beginGroup("interferometer");
+    {
+        obs->channel_bandwidth_hz = s.value("channel_bandwidth_hz").toDouble();
+        obs->time.num_vis_ave     = s.value("num_vis_ave", 1).toInt();
+        obs->time.num_fringe_ave  = s.value("num_fringe_ave", 1).toInt();
+
+        // Get output visibility file name.
+        t = s.value("oskar_vis_filename", "").toByteArray();
+        if (t.size() > 0)
+        {
+            obs->oskar_vis_filename = (char*)malloc(t.size() + 1);
+            strcpy(obs->oskar_vis_filename, t.constData());
+        }
+
+        // Get output MS file name.
+        t = s.value("ms_filename", "").toByteArray();
+        if (t.size() > 0)
+        {
+            obs->ms_filename = (char*)malloc(t.size() + 1);
+            strcpy(obs->ms_filename, t.constData());
+        }
+
+        obs->image_interferometer_output = s.value("image_output", false).toBool();
+    }
+    s.endGroup();
+
+    // Range checks.
     if (obs->time.num_vis_ave <= 0) obs->time.num_vis_ave = 1;
     if (obs->time.num_fringe_ave <= 0) obs->time.num_fringe_ave = 1;
 
-    // Get observation start time (if blank, then use current).
-    QString str_st = s.value("start_time_utc").toString();
-    QDateTime st = (str_st.isEmpty()) ?  QDateTime::currentDateTime().toUTC()
-            : QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
-    if (!st.isValid())
-    {
-        fprintf(stderr, "ERROR: Invalid date string for 'start_time_utc' "
-                "(format must be: 'd-M-yyyy h:m:s.z').\n");
-        return OSKAR_ERR_SETTINGS;
-    }
-    int year   = st.date().year();
-    int month  = st.date().month();
-    int day    = st.date().day();
-    int hour   = st.time().hour();
-    int minute = st.time().minute();
-    double second = st.time().second() + st.time().msec() / 1000.0;
-
-    // Compute start time as MJD(UTC).
-    double day_fraction = (hour + (minute / 60.0) + (second / 3600.0)) / 24.0;
-    obs->time.obs_start_mjd_utc = oskar_date_time_to_mjd(year, month, day,
-            day_fraction);
-
-    // Get observation length.
-    QString str_len = s.value("length").toString();
-    if (str_len.isEmpty()) str_len = "00:00:00.000";
-    QTime len = QTime::fromString(str_len, "h:m:s.z");
-    if (!len.isValid())
-    {
-        fprintf(stderr, "ERROR: Invalid time string for 'length' "
-                "(format must be: 'h:m:s.z').\n");
-        return OSKAR_ERR_SETTINGS;
-    }
-    obs->time.obs_length_seconds = len.hour() * 3600.0 +
-            len.minute() * 60.0 + len.second() + len.msec() / 1000.0;
-    obs->time.obs_length_days = obs->time.obs_length_seconds / 86400.0;
-
     // Compute intervals.
-    obs->time.dt_dump_days = obs->time.obs_length_days / obs->time.num_vis_dumps;
+    obs->time.dt_dump_days = obs->time.obs_length_days / obs->time.num_time_steps;
     obs->time.dt_ave_days = obs->time.dt_dump_days / obs->time.num_vis_ave;
     obs->time.dt_fringe_days = obs->time.dt_ave_days / obs->time.num_fringe_ave;
 
-    // Get output visibility file name.
-    t = s.value("oskar_vis_filename", "").toByteArray();
-    if (t.size() > 0)
-    {
-        obs->oskar_vis_filename = (char*)malloc(t.size() + 1);
-        strcpy(obs->oskar_vis_filename, t.constData());
-    }
-
-    // Get output MS file name.
-    t = s.value("ms_filename", "").toByteArray();
-    if (t.size() > 0)
-    {
-        obs->ms_filename = (char*)malloc(t.size() + 1);
-        strcpy(obs->ms_filename, t.constData());
-    }
-
-    return 0;
+    return OSKAR_SUCCESS;
 }

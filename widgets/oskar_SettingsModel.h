@@ -96,6 +96,7 @@ public:
     void setLabel(const QString& key, const QString& label);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
+    void setDisabled(const QString& key, bool value);
 
 private:
     void append(const QString& key, const QString& subkey, int type,
