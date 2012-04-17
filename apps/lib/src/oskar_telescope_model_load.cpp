@@ -43,8 +43,8 @@
 
 static const char config_name[] = "config.txt";
 static const char layout_name[] = "layout.txt";
-static const char element_x_name_cst[] = "element_pattern_x.txt";
-static const char element_y_name_cst[] = "element_pattern_y.txt";
+static const char element_x_name_cst[] = "element_pattern_x_cst.txt";
+static const char element_y_name_cst[] = "element_pattern_y_cst.txt";
 
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings, const char* dir_path,
@@ -84,7 +84,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
             QDir::Name);
     int num_station_dirs = stations.size();
 
-    // Check for element pattern data.
+    // Check for CST element pattern data.
     QByteArray element_x, element_y;
     if (dir.exists(element_x_name_cst))
     {
@@ -100,7 +100,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
     // Load the station layout file if we're at depth 0.
     if (depth == 0)
     {
-        // Check for presence of "layout.txt" or "configuration.txt".
+        // Check for presence of "layout.txt" or "config.txt".
         const char* coord_file = NULL;
         if (dir.exists(layout_name))
             coord_file = layout_name; // Override.
@@ -131,7 +131,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
     }
     else
     {
-        // Check for presence of "configuration.txt".
+        // Check for presence of "config.txt".
         if (dir.exists(config_name))
         {
             // Load the station data.
@@ -193,7 +193,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                 }
                 else
                 {
-                    // Load the element pattern data.
+                    // Load CST element pattern data.
                     if (element_file_x)
                     {
                         printf("Loading CST element pattern data (X): %s\n",

@@ -466,8 +466,9 @@ void oskar_MainWindow::updateRecentFileList()
 {
     QSettings settings;
     QStringList files = settings.value("recent_files/files").toStringList();
-    files.removeAll(settingsFile_);
-    files.prepend(settingsFile_);
+    QFileInfo file(settingsFile_);
+    files.removeAll(file.absoluteFilePath());
+    files.prepend(file.absoluteFilePath());
     while (files.size() > MaxRecentFiles)
         files.removeLast();
 
