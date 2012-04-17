@@ -48,12 +48,12 @@ The dependencies for these are:
 
     * liboskar              CUDA (>=4.0) 
                             [CBLAS, LAPACK (to enable use of extended sources)]
-    * liboskar_apps         Qt (>=4.5), CUDA (>=4.0)
+    * liboskar_apps         Qt (>=4.6), CUDA (>=4.0)
     * liboskar_fits         cfitsio
     * liboskar_ms           cascore
-    * liboskar_widgets      Qt (>=4.5), CUDA (>=4.0)
-    * Applications          CUDA (>=4.0), Qt (>=4.5)
-    * MATLAB interface      CUDA (>=4.0), Qt (>=4.5), MATLAB (>=R2010b)
+    * liboskar_widgets      Qt (>=4.6), CUDA (>=4.0)
+    * Applications          CUDA (>=4.0), Qt (>=4.6)
+    * MATLAB interface      CUDA (>=4.0), Qt (>=4.6), MATLAB (>=R2010b)
     * Unit test binaries    CppUnit
 
 The OSKAR CMAKE build system will compile as many components as possible given

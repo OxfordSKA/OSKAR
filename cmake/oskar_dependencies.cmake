@@ -6,7 +6,7 @@
 #------------------------------------------------------------------------------
 #
 #   CUDA (>= 4.0)   (oskar, oskar_apps, oskar_widgets, OSKAR applications)
-#   Qt4             (oskar_apps, oskar_widgets, OSKAR applications)
+#   Qt4 (>=4.6)     (oskar_apps, oskar_widgets, OSKAR applications)
 #   MKL             (oskar -> to enable extended sources)
 #   CBLAS           (oskar -> to enable extended sources)
 #   LAPACK          (oskar -> to enable extended sources) 
@@ -35,7 +35,7 @@ find_package(OpenMP QUIET)   # liboskar
 #find_package(MKL QUIET)     # liboskar
 find_package(CBLAS QUIET)    # liboskar
 find_package(LAPACK QUIET)   # liboskar
-find_package(Qt4 4.5 QUIET)  # liboskar_apps, liboskar_widgets, apps 
+find_package(Qt4 4.6 QUIET)  # liboskar_apps, liboskar_widgets, apps 
 find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
