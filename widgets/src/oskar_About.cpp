@@ -185,12 +185,9 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
 #endif
 #ifndef OSKAR_NO_CBLAS
     html.append("<li>CBLAS "
-                "(<a href=\"http://www.netlib.org/clapack/cblas/\">"
-                "http://www.netlib.org/clapack/cblas/</a>)</li>");
+                "(<a href=\"http://www.netlib.org/blas/\">"
+                "http://www.netlib.org/blas/</a>)</li>");
 #endif
-    html.append("<li>DIERCKX for surface fitting using splines "
-                "(<a href=\"http://netlib.org/dierckx/\">"
-                "http://netlib.org/dierckx/</a>)</li>");
     html.append("<li>The Qt cross-platform application framework "
                 "(<a href=\"http://qt.nokia.com/\">"
                 "http://qt.nokia.com/</a>)</li>");
@@ -223,6 +220,9 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     html.append("<li>The GCC toolchain "
                 "(<a href=\"http://gcc.gnu.org/\">"
                 "http://gcc.gnu.org/</a>)</li>");
+    html.append("<li>MATLAB "
+                "(<a href=\"http://www.mathworks.co.uk/products/matlab/\">"
+                "http://www.mathworks.co.uk/products/matlab/</a>)</li>");
     html.append("</ul>");
     html.append("<p>This research has made use of SAOImage DS9, developed "
             "by Smithsonian Astrophysical Observatory.</p>");
