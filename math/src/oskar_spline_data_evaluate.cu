@@ -30,6 +30,7 @@
 #include "math/oskar_spline_data_evaluate.h"
 #include "math/cudak/oskar_cudak_dierckx_bispev_bicubic.h"
 #include "utility/oskar_mem_type_check.h"
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +59,13 @@ int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
             location != x->location ||
             location != y->location)
         return OSKAR_ERR_BAD_LOCATION;
+
+    /* Check that the spline data has been set up. */
+    if (!spline->coeff.data || !spline->knots_x.data || !spline->knots_y.data)
+    {
+        fprintf(stderr, "Spline data not present for all surfaces.\n");
+        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    }
 
     /* Check data type. */
     if (type == OSKAR_SINGLE)

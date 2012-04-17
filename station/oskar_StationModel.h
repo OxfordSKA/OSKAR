@@ -47,7 +47,7 @@ struct oskar_StationModel
     int num_elements;            /**< Number of antenna elements in the station. */
 
     /* Station element data. */
-    int element_type;            /**< Type of receptor element within station (enumerator). */
+    int use_polarised_elements;  /**< Type of receptor element within station (enumerator). */
     int array_is_3d;             /**< Flag set if array is 3-dimensional (default false). */
     int coord_units;             /**< Units of the x,y,z coordinates. */
     int apply_element_errors;    /**< Bool switch to toggle element gain and phase errors (default false) */
@@ -200,12 +200,6 @@ struct oskar_StationModel
 enum {
     OSKAR_STATION_TYPE_DISH,
     OSKAR_STATION_TYPE_AA
-};
-
-enum {
-    OSKAR_STATION_ELEMENT_TYPE_POINT,
-    OSKAR_STATION_ELEMENT_TYPE_DIPOLE,
-    OSKAR_STATION_ELEMENT_TYPE_CUSTOM
 };
 
 #endif /* OSKAR_STATION_MODEL_H_ */

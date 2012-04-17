@@ -78,7 +78,7 @@ int oskar_telescope_model_save_station_coords(
         z_hor = (const float*)telescope->station_z_hor.data;
         for (i = 0; i < telescope->num_stations; ++i)
         {
-            fprintf(file, "% -12.6f,% -12.6f,% -12.6f\n",
+            fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
                     x_hor[i], y_hor[i], z_hor[i]);
         }
     }
@@ -90,7 +90,7 @@ int oskar_telescope_model_save_station_coords(
         z_hor = (const double*)telescope->station_z_hor.data;
         for (i = 0; i < telescope->num_stations; ++i)
         {
-            fprintf(file, "% -12.6f,% -12.6f,% -12.6f\n",
+            fprintf(file, "% 14.6f % 14.6f % 14.6f\n",
                     x_hor[i], y_hor[i], z_hor[i]);
         }
     }

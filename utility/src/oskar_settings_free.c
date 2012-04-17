@@ -44,6 +44,7 @@ void oskar_settings_free(oskar_Settings* settings)
     free(settings->sky.input_sky_file);
     free(settings->sky.output_sky_file);
     free(settings->telescope.config_directory);
+    free(settings->telescope.output_config_directory);
     free(settings->telescope.station.receiver_temperature_file);
     free(settings->image.input_vis_data);
     free(settings->image.oskar_image);

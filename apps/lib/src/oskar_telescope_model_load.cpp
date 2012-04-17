@@ -165,57 +165,61 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         else
         {
             // There are no child stations.
-            // Load element pattern data for the station,
-            // if files have been found.
-            if (element_file_x || element_file_y)
+            if (!settings->station.ignore_custom_element_patterns)
             {
-                // Allocate memory for the element pattern structure.
-                station->element_pattern = (oskar_ElementModel*)
-                        malloc(sizeof(oskar_ElementModel));
-                error = oskar_element_model_init(station->element_pattern,
-                        oskar_telescope_model_type(telescope),
-                        OSKAR_LOCATION_CPU);
-                if (error) return error;
-            }
-
-            QString files;
-            if (element_file_x) files.append(element_file_x);
-            if (element_file_y) files.append(element_file_y);
-            if (files.length() > 0)
-            {
-                // Check if this file combination has already been loaded.
-                if (models.contains(files))
+                // Load element pattern data for the station,
+                // if files have been found.
+                if (element_file_x || element_file_y)
                 {
-                    // Copy the element pattern data.
-                    error = oskar_element_model_copy(station->element_pattern,
-                            models.value(files));
+                    // Allocate memory for the element pattern structure.
+                    station->element_pattern = (oskar_ElementModel*)
+                                malloc(sizeof(oskar_ElementModel));
+                    error = oskar_element_model_init(station->element_pattern,
+                            oskar_telescope_model_type(telescope),
+                            OSKAR_LOCATION_CPU);
                     if (error) return error;
                 }
-                else
-                {
-                    // Load CST element pattern data.
-                    if (element_file_x)
-                    {
-                        printf("Loading CST element pattern data (X): %s\n",
-                                element_file_x);
-                        error = oskar_element_model_load_cst(station->element_pattern,
-                                1, element_file_x, &settings->station.element_fit);
-                        if (error) return error;
-                    }
-                    if (element_file_y)
-                    {
-                        printf("Loading CST element pattern data (Y): %s\n",
-                                element_file_y);
-                        error = oskar_element_model_load_cst(station->element_pattern,
-                                2, element_file_y, &settings->station.element_fit);
-                        if (error) return error;
-                    }
 
-                    // Store the pointer to the element model for these files.
-                    models.insert(files, station->element_pattern);
+                QString files;
+                if (element_file_x) files.append(element_file_x);
+                if (element_file_y) files.append(element_file_y);
+                if (files.length() > 0)
+                {
+                    // Check if this file combination has already been loaded.
+                    if (models.contains(files))
+                    {
+                        // Copy the element pattern data.
+                        error = oskar_element_model_copy(
+                                station->element_pattern, models.value(files));
+                        if (error) return error;
+                    }
+                    else
+                    {
+                        // Load CST element pattern data.
+                        if (element_file_x)
+                        {
+                            printf("Loading CST element pattern data (X): %s\n",
+                                    element_file_x);
+                            error = oskar_element_model_load_cst(
+                                    station->element_pattern, 1, element_file_x,
+                                    &settings->station.element_fit);
+                            if (error) return error;
+                        }
+                        if (element_file_y)
+                        {
+                            printf("Loading CST element pattern data (Y): %s\n",
+                                    element_file_y);
+                            error = oskar_element_model_load_cst(
+                                    station->element_pattern, 2, element_file_y,
+                                    &settings->station.element_fit);
+                            if (error) return error;
+                        }
+
+                        // Store pointer to the element model for these files.
+                        models.insert(files, station->element_pattern);
+                    }
                 }
             }
-
         }
     }
 

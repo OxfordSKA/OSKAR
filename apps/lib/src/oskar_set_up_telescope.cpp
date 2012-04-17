@@ -28,6 +28,7 @@
 
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_telescope_model_load.h"
+#include "apps/lib/oskar_telescope_model_save.h"
 #include "math/oskar_random_gaussian.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
@@ -81,8 +82,8 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
         telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].station_type =
                 settings->telescope.station.station_type;
-        telescope->station[i].element_type =
-                settings->telescope.station.element_type;
+        telescope->station[i].use_polarised_elements =
+                settings->telescope.station.use_polarised_elements;
         telescope->station[i].evaluate_array_factor =
                 settings->telescope.station.evaluate_array_factor;
         telescope->station[i].evaluate_element_factor =
@@ -334,6 +335,30 @@ oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings)
     // Analyse telescope model to determine whether stations are identical,
     // whether to apply element errors and/or weights.
     telescope->analyse();
+
+    // Save the telescope configuration in a new directory if required.
+    if (settings->telescope.output_config_directory)
+    {
+        // Check that the input and output directories are different.
+        if (strcmp(settings->telescope.output_config_directory,
+                settings->telescope.config_directory))
+        {
+            err = oskar_telescope_model_save(telescope,
+                    settings->telescope.output_config_directory);
+            if (err)
+            {
+                fprintf(stderr, "== ERROR: Failed to save telescope "
+                        "configuration (%s).\n", oskar_get_error_string(err));
+                delete telescope;
+                return NULL;
+            }
+        }
+        else
+        {
+            printf("== WARNING: Will not overwrite input "
+                    "telescope directory!\n");
+        }
+    }
 
     // Return the structure.
     return telescope;

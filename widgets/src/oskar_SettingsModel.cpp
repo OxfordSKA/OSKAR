@@ -162,9 +162,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     options.clear();
     options << "AA"; // << "Dish";
     registerSetting("telescope/station/station_type", "Station type", oskar_SettingsItem::OPTIONS, options, false, options[0]);
-    options.clear();
-    options << "Point" << "Dipole" << "Custom";
-    registerSetting("telescope/station/element_type", "Element type", oskar_SettingsItem::OPTIONS, options, false, options[1]);
+    registerSetting("telescope/station/use_polarised_elements", "Use polarised elements", oskar_SettingsItem::BOOL, false, true);
+    registerSetting("telescope/station/ignore_custom_element_patterns", "Ignore custom element patterns", oskar_SettingsItem::BOOL, false, false);
     registerSetting("telescope/station/evaluate_array_factor", "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL, false, true);
     registerSetting("telescope/station/evaluate_element_factor", "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL, false, true);
     registerSetting("telescope/station/normalise_beam", "Normalise array beam", oskar_SettingsItem::BOOL, false, false);
@@ -201,7 +200,9 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("telescope/station/element_fit/all/eps_double", "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, false, 2e-8);
     registerSetting("telescope/station/element_fit/all/smoothness_factor_override", "Smoothness factor override", oskar_SettingsItem::DOUBLE, false, 1.0);
 
-    // FIXME Add parameters for all eight surfaces!
+    // TODO Add parameters for all eight surfaces!
+
+    registerSetting("telescope/output_config_directory", "Output telescope directory", oskar_SettingsItem::OUTPUT_FILE_NAME);
 
     // Interferometer settings. (Note: Currently loaded into SettingsObservation)
     setLabel("interferometer", "Interferometer settings");
@@ -259,13 +260,13 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);
     setDefault("image/transform_type", "DFT 2D");
     registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
-    registerSetting("image/oskar_image_root", "OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("image/oskar_image_root", "Output OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip("image/oskar_image_root",
             "Path consisting of the root of the filename used to save the "
             "output image. The full filename will be constructed as:\n"
             "   <root>_type.img");
 #ifndef OSKAR_NO_FITS
-    registerSetting("image/fits_image_root", "FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("image/fits_image_root", "Output FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip("image/fits_image_root",
             "Path consisting of the root of the filename used to save the "
             "output image. The full filename will be constructed as:\n"
@@ -866,6 +867,8 @@ void oskar_SettingsModelFilter::setHideIfUnset(bool value)
     if (value != hideIfUnset_)
     {
         hideIfUnset_ = value;
+        beginResetModel();
+        endResetModel();
         invalidateFilter();
     }
 }

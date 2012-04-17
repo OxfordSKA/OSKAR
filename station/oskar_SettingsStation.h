@@ -43,7 +43,8 @@
 struct oskar_SettingsStation
 {
     int station_type;
-    int element_type;
+    int use_polarised_elements;
+    int ignore_custom_element_patterns;
     int evaluate_array_factor;
     int evaluate_element_factor;
     int normalise_beam;

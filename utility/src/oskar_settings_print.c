@@ -272,8 +272,10 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_k(2, w, "Station settings", 1);
     pr_s(3, w, "Station type", s->telescope.station.station_type ==
             OSKAR_STATION_TYPE_DISH ? "Dishes" : "Aperture Arrays");
-    pr_s(3, w, "Element type", s->telescope.station.element_type ==
-            OSKAR_STATION_ELEMENT_TYPE_DIPOLE ? "Dipoles" : "Points");
+    pr_b(3, w, "Use polarised elements",
+            s->telescope.station.use_polarised_elements);
+    pr_b(3, w, "Ignore custom element patterns",
+            s->telescope.station.ignore_custom_element_patterns);
     pr_b(3, w, "Evaluate array factor",
             s->telescope.station.evaluate_array_factor);
     pr_b(3, w, "Evaluate element factor",
@@ -361,16 +363,17 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_i(4, w, "Random seed (Y-dipole orientation errors)",
                 s->telescope.station.element.seed_y_orientation_error);
     }
+    pr_s(2, 0, "Output telescope directory", s->telescope.output_config_directory);
 
-    /* Print Interferometer settings */
+    /* Print interferometer settings */
     if (s->obs.oskar_vis_filename || s->obs.ms_filename)
     {
         pr_k(1, w, "Interferometer settings", 1);
         pr_f(2, w, "Channel bandwidth [Hz]", s->obs.channel_bandwidth_hz);
         pr_i(2, w, "Num. visibility ave.", s->obs.time.num_vis_ave);
         pr_i(2, w, "Num. fringe ave.", s->obs.time.num_fringe_ave);
-        pr_s(2, 0, "OSKAR visibility file", s->obs.oskar_vis_filename);
-        pr_s(2, 0, "Measurement Set name", s->obs.ms_filename);
+        pr_s(2, 0, "Output OSKAR visibility file", s->obs.oskar_vis_filename);
+        pr_s(2, 0, "Output Measurement Set name", s->obs.ms_filename);
         pr_b(2, w, "Image simulation output", s->obs.image_interferometer_output);
     }
 

@@ -104,9 +104,9 @@ int oskar_station_model_save_config(const char* filename,
                     ((double*)station->cos_orientation_x.data)[i]) * R2D;
             y_azimuth = atan2(((double*)station->sin_orientation_y.data)[i],
                     ((double*)station->cos_orientation_y.data)[i]) * R2D;
-            fprintf(file, "% -12.6f,% -12.6f,% -12.6f,% -12.6f,% -12.6f,"
-                    "% -12.6f,% -12.6f,% -12.6f,% -12.6f,% -12.6f,"
-                    "% -12.6f,% -12.6f,% -12.6f,% -12.6f\n",
+            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+                    "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+                    "% 14.6f % 14.6f % 14.6f % 14.6f\n",
                     x, y, z, delta_x, delta_y, delta_z, gain, gain_error,
                     phase_offset, phase_error, weight_re, weight_im,
                     x_azimuth, y_azimuth);
@@ -135,9 +135,9 @@ int oskar_station_model_save_config(const char* filename,
                     ((float*)station->cos_orientation_x.data)[i]) * R2D;
             y_azimuth = atan2(((float*)station->sin_orientation_y.data)[i],
                     ((float*)station->cos_orientation_y.data)[i]) * R2D;
-            fprintf(file, "% -12.6f,% -12.6f,% -12.6f,% -12.6f,% -12.6f,"
-                    "% -12.6f,% -12.6f,% -12.6f,% -12.6f,% -12.6f,"
-                    "% -12.6f,% -12.6f,% -12.6f,% -12.6f\n",
+            fprintf(file, "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+                    "% 14.6f % 14.6f % 14.6f % 14.6f % 14.6f "
+                    "% 14.6f % 14.6f % 14.6f % 14.6f\n",
                     x, y, z, delta_x, delta_y, delta_z, gain, gain_error,
                     phase_offset, phase_error, weight_re, weight_im,
                     x_azimuth, y_azimuth);

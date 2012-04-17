@@ -89,7 +89,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     /* Initialise variables. */
     model->station_type = OSKAR_STATION_TYPE_AA;
     model->num_elements = num_elements;
-    model->element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
+    model->use_polarised_elements = OSKAR_FALSE;
     model->array_is_3d = OSKAR_FALSE;
     model->coord_units = OSKAR_METRES;
     model->apply_element_errors = OSKAR_FALSE;

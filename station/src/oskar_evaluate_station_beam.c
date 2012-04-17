@@ -103,17 +103,16 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
 
         /* Determine the amount of workspace memory required. */
         workspace_complex += 2 * station->num_elements; /* For weights. */
-        if (station->single_element_model ||
-                station->element_type == OSKAR_STATION_ELEMENT_TYPE_POINT)
+        if (!station->use_polarised_elements || station->single_element_model)
         {
             if (station->evaluate_array_factor && oskar_mem_is_matrix(EG->type))
                 workspace_complex += num_points; /* For array factor. */
             if (station->evaluate_element_factor &&
-                    station->element_type == OSKAR_STATION_ELEMENT_TYPE_POINT)
+                    !station->use_polarised_elements)
                 workspace_complex += num_points; /* For element factor. */
             if (station->evaluate_element_factor &&
                     oskar_mem_is_scalar(EG->type) &&
-                    station->element_type != OSKAR_STATION_ELEMENT_TYPE_POINT)
+                    station->use_polarised_elements)
                 workspace_matrix += num_points; /* For element factor. */
         }
 
@@ -144,15 +143,14 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
         if (error) return error;
 
         /* Check whether using a common or unique element model. */
-        if ( ! station->single_element_model &&
-                station->element_type != OSKAR_STATION_ELEMENT_TYPE_POINT)
+        if (!station->single_element_model && station->use_polarised_elements)
         {
             /* Unique receptor elements: E and G are not separable. */
             if (!station->evaluate_array_factor ||
                     !station->evaluate_element_factor)
                 return OSKAR_ERR_SETTINGS;
 
-            if (station->element_type == OSKAR_STATION_ELEMENT_TYPE_DIPOLE)
+            if (!station->element_pattern)
             {
                 /* Call function to evaluate beam from dipoles that are
                  * oriented differently. */
@@ -217,7 +215,7 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
             /* Evaluate G if required. */
             if (station->evaluate_element_factor)
             {
-                if (station->element_type != OSKAR_STATION_ELEMENT_TYPE_POINT)
+                if (station->use_polarised_elements)
                 {
                     /* Get pointer to G. */
                     if (oskar_mem_is_matrix(EG->type))
@@ -235,8 +233,7 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                         G_ptr = &G_temp;
                     }
 
-                    if (station->element_type ==
-                            OSKAR_STATION_ELEMENT_TYPE_DIPOLE)
+                    if (!station->element_pattern)
                     {
                         double cos_x, sin_x, cos_y, sin_y;
 
@@ -263,17 +260,10 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                         sin_y = sin(station->orientation_y);
 
                         /* Evaluate spline pattern. */
-                        if (station->element_pattern)
-                        {
-                            error = oskar_evaluate_spline_pattern(G_ptr,
-                                    station->element_pattern, l, m, n,
-                                    cos_x, sin_x, cos_y, sin_y, work);
-                            if (error) return error;
-                        }
-                        else
-                        {
-                            return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-                        }
+                        error = oskar_evaluate_spline_pattern(G_ptr,
+                                station->element_pattern, l, m, n,
+                                cos_x, sin_x, cos_y, sin_y, work);
+                        if (error) return error;
                     }
                 }
                 else

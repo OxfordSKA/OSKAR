@@ -82,7 +82,7 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     /* Copy the meta data. */
     dst->station_type = src->station_type;
     dst->num_elements = src->num_elements;
-    dst->element_type = src->element_type;
+    dst->use_polarised_elements = src->use_polarised_elements;
     dst->array_is_3d = src->array_is_3d;
     dst->coord_units = src->coord_units;
     dst->apply_element_errors = src->apply_element_errors;

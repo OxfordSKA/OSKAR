@@ -96,7 +96,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_cpu.dec0_rad = M_PI_2;
 
     // Set the station meta-data.
-    station_cpu.element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
+    station_cpu.use_polarised_elements = false;
 
 //    error = oskar_station_model_save_configuration("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);

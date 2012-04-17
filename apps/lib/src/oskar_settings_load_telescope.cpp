@@ -58,6 +58,14 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         strcpy(tel->config_directory, t.constData());
     }
 
+    // Telescope output configuration directory.
+    t = s.value("output_config_directory", "").toByteArray();
+    if (t.size() > 0)
+    {
+        tel->output_config_directory = (char*)malloc(t.size() + 1);
+        strcpy(tel->output_config_directory, t.constData());
+    }
+
     // Telescope location.
     tel->longitude_rad = s.value("longitude_deg", 0.0).toDouble() * D2R;
     tel->latitude_rad  = s.value("latitude_deg", 0.0).toDouble() * D2R;
@@ -71,13 +79,10 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     temp = s.value("station_type", "AA").toString().toUpper();
     tel->station.station_type = (temp == "DISH") ?
             OSKAR_STATION_TYPE_DISH : OSKAR_STATION_TYPE_AA;
-    temp = s.value("element_type", "DIPOLE").toString().toUpper();
-    if (temp == "DIPOLE")
-        tel->station.element_type = OSKAR_STATION_ELEMENT_TYPE_DIPOLE;
-    else if (temp == "CUSTOM")
-        tel->station.element_type = OSKAR_STATION_ELEMENT_TYPE_CUSTOM;
-    else
-        tel->station.element_type = OSKAR_STATION_ELEMENT_TYPE_POINT;
+    tel->station.use_polarised_elements =
+            s.value("use_polarised_elements", true).toBool();
+    tel->station.ignore_custom_element_patterns =
+            s.value("ignore_custom_element_patterns", false).toBool();
     tel->station.evaluate_array_factor =
             s.value("evaluate_array_factor", true).toBool();
     tel->station.evaluate_element_factor =
@@ -158,7 +163,7 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             s.value("smoothness_factor_reduction", 0.9).toDouble();
     s.endGroup();
 
-    // FIXME Add parameters for all eight surfaces!
+    // TODO Add parameters for all eight surfaces!
 
     // End element fit group.
     s.endGroup();

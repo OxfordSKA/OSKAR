@@ -42,6 +42,7 @@
 struct oskar_SettingsTelescope
 {
     char* config_directory;
+    char* output_config_directory;
     double longitude_rad;
     double latitude_rad;
     double altitude_m;

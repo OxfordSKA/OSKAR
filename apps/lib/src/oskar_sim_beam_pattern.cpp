@@ -87,8 +87,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     int station_id = settings.beam_pattern.station_id;
     int image_size = settings.beam_pattern.size;
     int num_channels = settings.obs.num_channels;
-    int num_pols = (settings.telescope.station.element_type ==
-            OSKAR_STATION_ELEMENT_TYPE_POINT) ? 1 : 4;
+    int num_pols = settings.telescope.station.use_polarised_elements ? 4 : 1;
     int num_pixels = image_size * image_size;
     int beam_pattern_data_type = type | OSKAR_COMPLEX;
     if (num_pols == 4)
