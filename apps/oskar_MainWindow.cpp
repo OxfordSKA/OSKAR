@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
+#include <QtGui/QMessageBox>
 #include <QtGui/QToolBar>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QKeySequence>
@@ -52,8 +53,11 @@
 oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 : QMainWindow(parent)
 {
+    // Set the window title.
+    mainTitle_ = QString("OSKAR (%1)").arg(OSKAR_VERSION_STR);
+
     // Create the central widget and main layout.
-    setWindowTitle("OSKAR GUI");
+    setWindowTitle(mainTitle_);
     setWindowIcon(QIcon(":/icons/oskar.ico"));
     widget_ = new QWidget(this);
     setCentralWidget(widget_);
@@ -74,21 +78,21 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     layout_->addWidget(view_);
 
     // Create and set up the actions.
-    QAction* actOpen = new QAction("Open...", this);
-    QAction* actSaveAs = new QAction("Save Copy As...", this);
-    QAction* actExit = new QAction("Exit", this);
-    actHideUnset_ = new QAction("Hide Unset Items", this);
+    QAction* actOpen = new QAction("&Open...", this);
+    QAction* actSaveAs = new QAction("&Save As...", this);
+    QAction* actExit = new QAction("E&xit", this);
+    actHideUnset_ = new QAction("&Hide Unset Items", this);
     actHideUnset_->setCheckable(true);
-    QAction* actShowFirstLevel = new QAction("Show First Level", this);
-    QAction* actExpandAll = new QAction("Expand All", this);
-    QAction* actCollapseAll = new QAction("Collapse All", this);
-    QAction* actAbout = new QAction("About OSKAR...", this);
+    QAction* actShowFirstLevel = new QAction("Show &First Level", this);
+    QAction* actExpandAll = new QAction("&Expand All", this);
+    QAction* actCollapseAll = new QAction("&Collapse All", this);
+    QAction* actAbout = new QAction("&About OSKAR...", this);
     QAction* actCudaInfo = new QAction("CUDA System Info...", this);
-    QAction* actRunInterferometer = new QAction("Run Interferometer", this);
-    QAction* actRunBeamPattern = new QAction("Run Beam Pattern", this);
-    QAction* actRunImager = new QAction("Run Imager", this);
+    QAction* actRunInterferometer = new QAction("Run &Interferometer", this);
+    QAction* actRunBeamPattern = new QAction("Run &Beam Pattern", this);
+    QAction* actRunImager = new QAction("Run I&mager", this);
     connect(actOpen, SIGNAL(triggered()), this, SLOT(openSettings()));
-    connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
+    connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveSettingsAs()));
     connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(actHideUnset_, SIGNAL(toggled(bool)),
             this, SLOT(setHideIfUnset(bool)));
@@ -115,14 +119,16 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     // Create the menus.
     menubar_ = new QMenuBar(this);
     setMenuBar(menubar_);
-    menuFile_ = new QMenu("File", menubar_);
-    QMenu* menuView = new QMenu("View", menubar_);
-    QMenu* menuRun = new QMenu("Run", menubar_);
+    menuFile_ = new QMenu("&File", menubar_);
+    QMenu* menuView = new QMenu("&View", menubar_);
+    QMenu* menuRun = new QMenu("&Run", menubar_);
     menubar_->addAction(menuFile_->menuAction());
     menubar_->addAction(menuView->menuAction());
     menubar_->addAction(menuRun->menuAction());
     menuFile_->addAction(actOpen);
     menuFile_->addAction(actSaveAs);
+    createRecentFileActions();
+    updateRecentFileActions();
     menuFile_->addSeparator();
     menuFile_->addAction(actExit);
     menuView->addAction(actHideUnset_);
@@ -136,9 +142,6 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menuRun->addAction(actRunInterferometer);
     menuRun->addAction(actRunBeamPattern);
     menuRun->addAction(actRunImager);
-
-    createRecentFileActions();
-    updateRecentFileActions();
 
     // Create the toolbar.
     QToolBar* toolbar = new QToolBar(this);
@@ -169,44 +172,53 @@ void oskar_MainWindow::openSettings(QString filename)
     // Check if the supplied filename is empty, and prompt to open file if so.
     if (filename.isEmpty())
     {
-        view_->saveExpanded();
         filename = QFileDialog::getOpenFileName(this, "Open Settings",
                 settingsFile_);
     }
 
-    // Set the file if one was selected.
+    // Open the file if one was selected.
     if (!filename.isEmpty())
     {
+        view_->saveExpanded();
         settingsFile_ = filename;
         model_->loadSettingsFile(filename);
-        setWindowTitle("OSKAR GUI [" + filename + "]");
-
+        setWindowTitle(mainTitle_ + " [" + filename + "]");
         updateRecentFileList();
-
-        // Restore the expanded items.
         view_->restoreExpanded();
     }
 }
 
-void oskar_MainWindow::saveAs(QString filename)
+void oskar_MainWindow::saveSettingsAs(QString filename)
 {
+    // Check if the supplied filename is empty, and prompt to save file if so.
     if (filename.isEmpty())
     {
-        view_->saveExpanded();
-        filename = QFileDialog::getSaveFileName(this, "Save Settings File As ...");
+        filename = QFileDialog::getSaveFileName(this, "Save Settings",
+                settingsFile_);
     }
 
-    settingsFile_ = filename;
-    if (settingsFile_.isEmpty()) return;
+    // Save the file if one was selected.
+    if (!filename.isEmpty())
+    {
+        // Remove any existing file with this name.
+        if (QFile::exists(filename))
+        {
+            if (!QFile::remove(filename))
+            {
+                QMessageBox::critical(this, mainTitle_,
+                        QString("Could not overwrite file at %1").arg(filename),
+                        QMessageBox::Ok);
+                return;
+            }
+        }
 
-    // Save the settings file.
-    view_->saveExpanded();
-    model_->saveSettingsFile(settingsFile_);
-
-    updateRecentFileList();
-
-    setWindowTitle("OSKAR GUI [" + settingsFile_ + "]");
-    view_->restoreExpanded();
+        view_->saveExpanded();
+        settingsFile_ = filename;
+        model_->saveSettingsFile(filename);
+        setWindowTitle(mainTitle_ + " [" + filename + "]");
+        updateRecentFileList();
+        view_->restoreExpanded();
+    }
 }
 
 // =========================================================  Protected methods.
@@ -267,7 +279,30 @@ void oskar_MainWindow::setHideIfUnset(bool value)
 void oskar_MainWindow::openRecentFile()
 {
     QAction* act = qobject_cast<QAction*>(sender());
-    if (act) openSettings(act->data().toString());
+    if (act)
+    {
+        QString filename = act->data().toString();
+
+        if (QFile::exists(filename))
+        {
+            // If the file exists, then open it.
+            openSettings(filename);
+        }
+        else
+        {
+            // If the file doesn't exist, display a warning message.
+            QMessageBox::critical(this, mainTitle_,
+                    QString("File %1 not found").arg(filename),
+                    QMessageBox::Ok);
+
+            // Remove it from the list.
+            QSettings settings;
+            QStringList files = settings.value("recent_files/files").toStringList();
+            files.removeAll(filename);
+            settings.setValue("recent_files/files", files);
+            updateRecentFileActions();
+        }
+    }
 }
 
 
@@ -279,19 +314,9 @@ void oskar_MainWindow::runButton()
     if (settingsFile_.isEmpty())
     {
         // Get the name of the new settings file (return if empty).
-        settingsFile_ = QFileDialog::getSaveFileName(this, "Save Settings");
+        saveSettingsAs(QString());
         if (settingsFile_.isEmpty())
             return;
-
-        // Remove any existing file with this name.
-        if (QFile::exists(settingsFile_))
-            QFile::remove(settingsFile_);
-
-        // Save the settings file.
-        view_->saveExpanded();
-        model_->saveSettingsFile(settingsFile_);
-        setWindowTitle("OSKAR GUI [" + settingsFile_ + "]");
-        view_->restoreExpanded();
     }
 
     // Get the (list of) output file names.
@@ -402,14 +427,14 @@ void oskar_MainWindow::createRecentFileActions()
     {
         recentFiles_[i] = new QAction(this);
         recentFiles_[i]->setVisible(false);
-        connect(recentFiles_[i], SIGNAL(triggered()), this, SLOT(openRecentFile()));
+        connect(recentFiles_[i], SIGNAL(triggered()),
+                this, SLOT(openRecentFile()));
     }
-    seperator_ = menuFile_->addSeparator();
+    separator_ = menuFile_->addSeparator();
     for (int i = 0; i < MaxRecentFiles; ++i)
     {
         menuFile_->addAction(recentFiles_[i]);
     }
-    menuFile_->addSeparator();
 }
 
 
@@ -423,7 +448,7 @@ void oskar_MainWindow::updateRecentFileActions()
     for (int i = 0; i < num_files; ++i)
     {
         QFileInfo info(files[i]);
-        QString txt = tr("&%1 %2  [%3]").arg(i+1).arg(info.fileName()).
+        QString txt = QString("&%1 %2  [%3]").arg(i+1).arg(info.fileName()).
                 arg(info.absolutePath());
         recentFiles_[i]->setText(txt);
         recentFiles_[i]->setData(files[i]);
@@ -433,7 +458,7 @@ void oskar_MainWindow::updateRecentFileActions()
     {
         recentFiles_[i]->setVisible(false);
     }
-    seperator_->setVisible(num_files > 0);
+    separator_->setVisible(num_files > 0);
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,7 @@ protected:
 
 public slots:
     void openSettings(QString filename = QString());
-    void saveAs(QString filename = QString());
+    void saveSettingsAs(QString filename = QString());
 
 private slots:
     void about();
@@ -72,6 +72,7 @@ private:
     void updateRecentFileList();
 
 private:
+    QString mainTitle_;
     QWidget* widget_;
     QVBoxLayout* layout_;
     oskar_SettingsModel* model_;
@@ -86,7 +87,7 @@ private:
 
     enum { MaxRecentFiles = 3 };
     QMenu* recentFileMenu_;
-    QAction* seperator_;
+    QAction* separator_;
     QAction* recentFiles_[MaxRecentFiles];
 };
 
