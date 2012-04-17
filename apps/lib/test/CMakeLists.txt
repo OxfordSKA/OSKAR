@@ -8,7 +8,6 @@ if (CPPUNIT_FOUND)
 
     set(apps_test_SRC
         src/CppUnitMain.cpp
-        src/Test_load_stations.cpp
         src/Test_telescope_model_load_save.cpp
     )
 

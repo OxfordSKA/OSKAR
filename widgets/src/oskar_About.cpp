@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -159,7 +159,7 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
     vLayoutMain->addWidget(grpLic);
 
     // Create attribution group.
-    QGroupBox* grpAtt = new QGroupBox("Attribution", this);
+    QGroupBox* grpAtt = new QGroupBox("Attribution && Acknowledgements", this);
     sizePolicy = grpAtt->sizePolicy();
     sizePolicy.setVerticalStretch(10);
     grpAtt->setSizePolicy(sizePolicy);
@@ -172,12 +172,22 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
             "<html><head></head><body>\n");
     html.append("<p>OSKAR-2 has been developed using hardware "
             "donated by NVIDIA UK.</p>");
-    html.append("<p>OSKAR-2 makes use of the following software "
-            "libraries:</p>");
+    html.append("<p>OSKAR-2 directly links against or uses the following "
+            "software libraries:</p>");
     html.append("<ul>");
     html.append("<li>NVIDIA CUDA "
                 "(<a href=\"http://www.nvidia.com/object/cuda_home.html\">"
                 "http://www.nvidia.com/object/cuda_home.html</a>)</li>");
+#ifndef OSKAR_NO_LAPACK
+    html.append("<li>LAPACK "
+                "(<a href=\"http://www.netlib.org/lapack/\">"
+                "http://www.netlib.org/lapack/</a>)</li>");
+#endif
+#ifndef OSKAR_NO_CBLAS
+    html.append("<li>CBLAS "
+                "(<a href=\"http://www.netlib.org/clapack/cblas/\">"
+                "http://www.netlib.org/clapack/cblas/</a>)</li>");
+#endif
     html.append("<li>DIERCKX for surface fitting using splines "
                 "(<a href=\"http://netlib.org/dierckx/\">"
                 "http://netlib.org/dierckx/</a>)</li>");
@@ -194,6 +204,25 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
                 "(<a href=\"http://heasarc.gsfc.nasa.gov/fitsio/\">"
                 "http://heasarc.gsfc.nasa.gov/fitsio/</a>)</li>");
 #endif
+    html.append("</ul>");
+    html.append("<p>The following tools have been used during the development "
+            "of OSKAR-2:</p>");
+    html.append("<ul>");
+    html.append("<li>The CMake cross-platform build system "
+                "(<a href=\"http://www.cmake.org/\">"
+                "http://www.cmake.org/</a>)</li>");
+    html.append("<li>The CppUnit unit-testing framework "
+                "(<a href=\"http://www.freedesktop.org/wiki/Software/cppunit\">"
+                "http://www.freedesktop.org/wiki/Software/cppunit</a>)</li>");
+    html.append("<li>The Eclipse source-code IDE "
+                "(<a href=\"http://www.eclipse.org/\">"
+                "http://www.eclipse.org/</a>)</li>");
+    html.append("<li>The Valgrind memory checker "
+                "(<a href=\"http://valgrind.org/\">"
+                "http://valgrind.org/</a>)</li>");
+    html.append("<li>The GCC toolchain "
+                "(<a href=\"http://gcc.gnu.org/\">"
+                "http://gcc.gnu.org/</a>)</li>");
     html.append("</ul>");
     html.append("<p>This research has made use of SAOImage DS9, developed "
             "by Smithsonian Astrophysical Observatory.</p>");
