@@ -152,7 +152,7 @@ macro(OSKAR_MEX)
     )
     CAR(MEX_NAME ${MEX_DEFAULT_ARGS})
     CDR(MEX_SOURCES ${MEX_DEFAULT_ARGS})
-    
+
     if (NOT MATLAB_FOUND)
         message(CRITICAL "Unable to build mex functions without a MATLAB install!")
     endif ()
@@ -176,17 +176,15 @@ macro(OSKAR_MEX)
         INSTALL_RPATH_USE_LINK_PATH TRUE
         COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
         LINK_FLAGS ${MATLAB_CXX_FLAGS})
-        
+
     # Install target for mex function.
     install(TARGETS ${target} DESTINATION ${OSKAR_MEX_INSTALL_DIR})
-    
+
 endmacro(OSKAR_MEX)
-
-
 
 macro(get_svn_revision dir variable)
     find_program(SVN_EXECUTABLE svn DOC "subversion command line client")
-    if (SVN_EXECUTABLE)
+    if (SVN_EXECUTABLE AND EXISTS ${OSKAR_SOURCE_DIR}/.svn)
         execute_process(COMMAND ${SVN_EXECUTABLE} info ${dir}
             OUTPUT_VARIABLE ${variable}
             OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -194,10 +192,3 @@ macro(get_svn_revision dir variable)
             "\\2" ${variable} "${${variable}}")
     endif()
 endmacro(get_svn_revision)
-
-
-
-
-
-
-

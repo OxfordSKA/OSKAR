@@ -3,8 +3,10 @@
 #
 # Description:
 # Adds tagets: 
-#   1. package (binary package)
-#   2. package_source (source package) 
+#   1. dist (build the source package with included version file)
+# 
+#   2. package (binary package)
+#   3. package_source (source package) 
 # 
 # Notes:
 #
@@ -30,13 +32,11 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
 set(CPACK_PACKAGE_VERSION_MAJOR "${OSKAR_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${OSKAR_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${OSKAR_VERSION_PATCH}")
-set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}(${svn_revision})-beta")
-
-
-##set( CPACK_SOURCE_IGNORE_FILES
-##  -- check to see if .svn files are not in the source tarball!
-
-
+if (svn_revision)
+    set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}-beta-r${svn_revision}")
+else()
+    set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}-beta")
+endif()
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
 
 if (WIN32)
@@ -46,7 +46,7 @@ elseif (UNIX)
     #set(CPACK_GENERATOR "DEB;TGZ")
     set(CPACK_GENERATOR "TGZ")
     set(CPACK_SOURCE_GENERATOR "ZIP")
-    
+
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OSKAR developer team.")
     set(CPACK_DEBIAN_PACKAGE_VERSION "${OSKAR_VERSION}-beta")
     set(CPACK_DEBIAN_PACKAGE_SECTION "Science")
@@ -59,7 +59,7 @@ add_custom_target(write_version_file
     COMMAND ${CMAKE_COMMAND}
     ARGS 
     -DOSKAR_SOURCE_DIR=${OSKAR_SOURCE_DIR}
-    -DVERSION=${OSKAR_VERSION}\(${svn_revision}\)-beta
+    -DVERSION=${CPACK_PACKAGE_VERSION}
     -P ${OSKAR_SOURCE_DIR}/cmake/oskar_write_version_file.cmake
     COMMENT "Writing version file"
     VERBATIM)
@@ -69,4 +69,3 @@ add_custom_target(dist
     DEPENDS write_version_file 
     COMMENT "Packaging Source files"
     VERBATIM)
-
