@@ -1,0 +1,5 @@
+include(${OSKAR_SOURCE_DIR}/cmake/oskar_build_macros.cmake)
+get_svn_revision(${OSKAR_SOURCE_DIR} svn_revision)
+if (svn_revision)
+    file(WRITE ${OSKAR_SOURCE_DIR}/version.txt "OSKAR ${VERSION}")
+endif()

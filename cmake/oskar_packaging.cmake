@@ -19,14 +19,23 @@
 # deb file:///home/debs /
 #
 
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
+# Find the Subversion revision.
+include(oskar_build_macros)
+get_svn_revision(${OSKAR_SOURCE_DIR} svn_revision)
+
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/readme.txt")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OSKAR-${OSKAR_VERSION}")
 set(CPACK_PACKAGE_VENDOR "University of Oxford, Oxford e-Research Centre.")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
-SET(CPACK_PACKAGE_VERSION_MAJOR "${OSKAR_VERSION_MAJOR}")
-SET(CPACK_PACKAGE_VERSION_MINOR "${OSKAR_VERSION_MINOR}")
-SET(CPACK_PACKAGE_VERSION_PATCH "${OSKAR_VERSION_PATCH}")
-set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}-beta")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/copying.txt")
+set(CPACK_PACKAGE_VERSION_MAJOR "${OSKAR_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${OSKAR_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_PATCH "${OSKAR_VERSION_PATCH}")
+set(CPACK_PACKAGE_VERSION "${OSKAR_VERSION}(${svn_revision})-beta")
+
+
+##set( CPACK_SOURCE_IGNORE_FILES
+##  -- check to see if .svn files are not in the source tarball!
+
 
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY ON)
 
@@ -45,3 +54,19 @@ elseif (UNIX)
     #set(CPACK_DEBIAN_PACKAGE_DEPENDS "libcfitsio3 (>=3.0), libqt4-dev (>=4.5) ")
 endif ()
 include(CPack)
+
+add_custom_target(write_version_file
+    COMMAND ${CMAKE_COMMAND}
+    ARGS 
+    -DOSKAR_SOURCE_DIR=${OSKAR_SOURCE_DIR}
+    -DVERSION=${OSKAR_VERSION}\(${svn_revision}\)-beta
+    -P ${OSKAR_SOURCE_DIR}/cmake/oskar_write_version_file.cmake
+    COMMENT "Writing version file"
+    VERBATIM)
+
+add_custom_target(dist 
+    COMMAND ${CMAKE_MAKE_PROGRAM} package_source
+    DEPENDS write_version_file 
+    COMMENT "Packaging Source files"
+    VERBATIM)
+
