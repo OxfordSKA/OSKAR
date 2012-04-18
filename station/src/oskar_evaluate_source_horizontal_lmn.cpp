@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,22 +28,22 @@
 
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
-#include <cstdlib>
 #include <cstdio>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
-        oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
-        const oskar_StationModel* station, const double gast)
+int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
+        oskar_Mem* m, oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
+        const oskar_StationModel* station, double gast)
 {
-    if (RA == NULL || Dec == NULL || station == NULL ||
-            l == NULL || m == NULL || n == NULL)
+    double last;
+
+    if (!RA || !Dec || !station || !l || !m || !n)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Make sure the arrays are on the GPU.
+    /* Make sure the arrays are on the GPU. */
     if (l->location != OSKAR_LOCATION_GPU ||
             m->location != OSKAR_LOCATION_GPU ||
             n->location != OSKAR_LOCATION_GPU ||
@@ -51,44 +51,37 @@ int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
             Dec->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    // TODO check arguments properly!
-    // Get the number of sources.
-//    int num_sources = RA->private_num_elements;
+    /* Check that the dimensions are correct. */
+    if (num_sources > RA->num_elements || num_sources > Dec->num_elements ||
+            num_sources > l->num_elements || num_sources > m->num_elements ||
+            num_sources > n->num_elements)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
-//    // Check that the dimensions are correct.
-//    if (num_sources != Dec->private_num_elements)
-//        return OSKAR_ERR_DIMENSION_MISMATCH;
-
-    // Check that the structures contains some sources.
-    if (RA->is_null() || Dec->is_null() ||
-            l->is_null() || m->is_null() || n->is_null())
+    /* Check that the structures contains some sources. */
+    if (!RA->data || !Dec->data || !l->data || !m->data || !n->data)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-//    // Make sure the work arrays are long enough.
-//    if (l->private_num_elements < num_sources ||
-//            m->private_num_elements < num_sources ||
-//            n->private_num_elements < num_sources)
-//        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    /* Local Apparent Sidereal Time, in radians. */
+    last = gast + station->longitude_rad;
 
-    // Local apparent Sidereal Time, in radians.
-    double last = gast + station->longitude_rad;
-
-    // Double precision.
+    /* Double precision. */
     if (RA->type == OSKAR_DOUBLE && Dec->type == OSKAR_DOUBLE &&
             l->type == OSKAR_DOUBLE && m->type == OSKAR_DOUBLE &&
             n->type == OSKAR_DOUBLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_d(l->num_elements, *RA, *Dec,
-                last, station->latitude_rad, *l, *m, *n);
+        return oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, (double*)(RA->data),
+                (double*)(Dec->data), last, station->latitude_rad,
+                (double*)(l->data), (double*)(m->data), (double*)(n->data));
     }
 
-    // Single precision.
+    /* Single precision. */
     else if (RA->type == OSKAR_SINGLE && Dec->type == OSKAR_SINGLE &&
             l->type == OSKAR_SINGLE && m->type == OSKAR_SINGLE &&
             n->type == OSKAR_SINGLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_f(l->num_elements, *RA, *Dec,
-                (float)last, (float)station->latitude_rad, *l, *m, *n);
+        return oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, (float*)(RA->data),
+                (float*)(Dec->data), (float)last, (float)station->latitude_rad,
+                (float*)(l->data), (float*)(m->data), (float*)(n->data));
     }
     else
     {

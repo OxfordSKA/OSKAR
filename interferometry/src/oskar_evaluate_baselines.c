@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,26 +28,28 @@
 
 #include "interferometry/oskar_evaluate_baselines.h"
 #include "interferometry/oskar_compute_baselines.h"
-#include <cstdlib>
 
-extern "C"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
         oskar_Mem* baseline_w, const oskar_Mem* station_u,
         const oskar_Mem* station_v, const oskar_Mem* station_w)
 {
     int type, num_stations, num_baselines, error = 0;
 
-    // Assert that the parameters are not NULL.
-    if (baseline_u == NULL || baseline_v == NULL || baseline_w == NULL ||
-            station_u == NULL || station_v == NULL || station_w == NULL)
+    /* Sanity check on inputs. */
+    if (!baseline_u || !baseline_v || !baseline_w ||
+            !station_u || !station_v || !station_w)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Get data type, location and size.
+    /* Get data type, location and size. */
     type = station_u->type;
     num_stations = station_u->num_elements;
     num_baselines = num_stations * (num_stations - 1) / 2;
 
-    // Check that the data is in the right location.
+    /* Check that the data is in the right location. */
     if (station_u->location != OSKAR_LOCATION_CPU ||
             station_v->location != OSKAR_LOCATION_CPU ||
             station_w->location != OSKAR_LOCATION_CPU ||
@@ -56,13 +58,12 @@ int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
             baseline_w->location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    // Check that the memory is not NULL.
-    if (baseline_u->is_null() || baseline_v->is_null() ||
-            baseline_w->is_null() || station_u->is_null() ||
-            station_v->is_null() || station_w->is_null())
+    /* Check that the memory is not NULL. */
+    if (!baseline_u->data || !baseline_v->data || !baseline_w->data ||
+            !station_u->data || !station_v->data || !station_w->data)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    // Check that the data dimensions are OK.
+    /* Check that the data dimensions are OK. */
     if (station_v->num_elements < num_stations ||
             station_w->num_elements < num_stations ||
             baseline_u->num_elements < num_baselines ||
@@ -70,7 +71,7 @@ int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
             baseline_w->num_elements < num_baselines)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
-    // Check that the data is of the right type.
+    /* Check that the data is of the right type. */
     if (station_v->type != type || station_w->type != type ||
             baseline_u->type != type || baseline_v->type != type ||
             baseline_w->type != type)
@@ -78,13 +79,17 @@ int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
 
     if (type == OSKAR_SINGLE)
     {
-        oskar_compute_baselines_f(num_stations, *station_u, *station_v,
-                *station_w, *baseline_u, *baseline_v, *baseline_w);
+        oskar_compute_baselines_f(num_stations, (float*)(station_u->data),
+                (float*)(station_v->data), (float*)(station_w->data),
+                (float*)(baseline_u->data), (float*)(baseline_v->data),
+                (float*)(baseline_w->data));
     }
     else if (type == OSKAR_DOUBLE)
     {
-        oskar_compute_baselines_d(num_stations, *station_u, *station_v,
-                *station_w, *baseline_u, *baseline_v, *baseline_w);
+        oskar_compute_baselines_d(num_stations, (double*)(station_u->data),
+                (double*)(station_v->data), (double*)(station_w->data),
+                (double*)(baseline_u->data), (double*)(baseline_v->data),
+                (double*)(baseline_w->data));
     }
     else
     {
@@ -93,3 +98,7 @@ int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
 
     return error;
 }
+
+#ifdef __cplusplus
+}
+#endif

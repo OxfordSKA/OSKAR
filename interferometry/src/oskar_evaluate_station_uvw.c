@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,31 +31,32 @@
 #include "interferometry/oskar_telescope_model_type.h"
 #include "interferometry/oskar_xyz_to_uvw_cuda.h"
 #include "interferometry/oskar_xyz_to_uvw.h"
-#include <stdlib.h>
 
-extern "C"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         const oskar_TelescopeModel* telescope, double gast)
 {
     int type, location, num_stations, error = 0;
+    double ha0, dec0;
 
-    // Assert that the parameters are not NULL.
-    if (u == NULL || v == NULL || w == NULL || telescope == NULL)
+    /* Sanity check on inputs. */
+    if (!u || !v || !w || !telescope)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    // Get data type, location and size of the telescope structure.
+    /* Get data type, location and size of the telescope structure. */
     type = oskar_telescope_model_type(telescope);
     location = oskar_telescope_model_location(telescope);
     num_stations = telescope->num_stations;
 
-    // Check that the memory is not NULL.
-    if (u->is_null() || v->is_null() || w->is_null() ||
-            telescope->station_x.is_null() ||
-            telescope->station_y.is_null() ||
-            telescope->station_z.is_null())
+    /* Check that the memory is not NULL. */
+    if (!u->data || !v->data || !w->data || !telescope->station_x.data ||
+            !telescope->station_y.data || !telescope->station_z.data)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    // Check that the data dimensions are OK.
+    /* Check that the data dimensions are OK. */
     if (u->num_elements < num_stations ||
             v->num_elements < num_stations ||
             w->num_elements < num_stations ||
@@ -64,34 +65,38 @@ int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
             telescope->station_z.num_elements < num_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
-    // Check that the data is in the right location.
+    /* Check that the data is in the right location. */
     if (u->location != location || v->location != location ||
             w->location != location)
         return OSKAR_ERR_BAD_LOCATION;
 
-    // Check that the data is of the right type.
+    /* Check that the data is of the right type. */
     if (u->type != type || v->type != type ||
             w->type != type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
-    // Evaluate Greenwich Hour Angle of phase centre.
-    const double ha0 = gast - telescope->ra0_rad;
-    const double dec0 = telescope->dec0_rad;
+    /* Evaluate Greenwich Hour Angle of phase centre. */
+    ha0 = gast - telescope->ra0_rad;
+    dec0 = telescope->dec0_rad;
 
-    // Evaluate station u,v,w coordinates.
+    /* Evaluate station u,v,w coordinates. */
     if (location == OSKAR_LOCATION_GPU)
     {
         if (type == OSKAR_SINGLE)
         {
-            error = oskar_xyz_to_uvw_cuda_f(num_stations, telescope->station_x,
-                    telescope->station_y, telescope->station_z, (float)ha0,
-                    (float)dec0, *u, *v, *w);
+            error = oskar_xyz_to_uvw_cuda_f(num_stations,
+                    (float*)(telescope->station_x.data),
+                    (float*)(telescope->station_y.data),
+                    (float*)(telescope->station_z.data), (float)ha0, (float)dec0,
+                    (float*)(u->data), (float*)(v->data), (float*)(w->data));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            error = oskar_xyz_to_uvw_cuda_d(num_stations, telescope->station_x,
-                    telescope->station_y, telescope->station_z, ha0, dec0,
-                    *u, *v, *w);
+            error = oskar_xyz_to_uvw_cuda_d(num_stations,
+                    (double*)(telescope->station_x.data),
+                    (double*)(telescope->station_y.data),
+                    (double*)(telescope->station_z.data), ha0, dec0,
+                    (double*)(u->data), (double*)(v->data), (double*)(w->data));
         }
         else
         {
@@ -102,15 +107,19 @@ int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
     {
         if (type == OSKAR_SINGLE)
         {
-            oskar_xyz_to_uvw_f(num_stations, telescope->station_x,
-                    telescope->station_y, telescope->station_z, (float)ha0,
-                    (float)dec0, *u, *v, *w);
+            oskar_xyz_to_uvw_f(num_stations,
+                    (float*)(telescope->station_x.data),
+                    (float*)(telescope->station_y.data),
+                    (float*)(telescope->station_z.data), (float)ha0, (float)dec0,
+                    (float*)(u->data), (float*)(v->data), (float*)(w->data));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_xyz_to_uvw_d(num_stations, telescope->station_x,
-                    telescope->station_y, telescope->station_z, ha0, dec0,
-                    *u, *v, *w);
+            oskar_xyz_to_uvw_d(num_stations,
+                    (double*)(telescope->station_x.data),
+                    (double*)(telescope->station_y.data),
+                    (double*)(telescope->station_z.data), ha0, dec0,
+                    (double*)(u->data), (double*)(v->data), (double*)(w->data));
         }
         else
         {
@@ -124,3 +133,7 @@ int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
 
     return error;
 }
+
+#ifdef __cplusplus
+}
+#endif

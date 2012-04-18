@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,8 @@ struct oskar_SkyModel
      *                     OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
      * @param num_sources  Number of sources in the sky model.
      */
-    oskar_SkyModel(int type, int location, int num_sources = 0);
+    oskar_SkyModel(int type = OSKAR_DOUBLE, int location = OSKAR_LOCATION_CPU,
+            int num_sources = 0);
 
     /**
      * @brief Constructs a sky model, loading it from the specified file.

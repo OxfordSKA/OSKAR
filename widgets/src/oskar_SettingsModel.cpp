@@ -185,7 +185,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 
     // Element pattern fitting parameters.
     setLabel("telescope/station/element_fit", "Element pattern fitting parameters");
-    registerSetting("telescope/station/element_fit/ignore_data_at_pole", "Ignore data at poles", oskar_SettingsItem::BOOL, false, true);
+    registerSetting("telescope/station/element_fit/ignore_data_at_pole", "Ignore data at poles", oskar_SettingsItem::BOOL, false, false);
     registerSetting("telescope/station/element_fit/ignore_data_below_horizon", "Ignore data below horizon", oskar_SettingsItem::BOOL, false, true);
     registerSetting("telescope/station/element_fit/overlap_angle_deg", "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, false, 9.0);
     registerSetting("telescope/station/element_fit/weight_boundaries", "Weighting at boundaries", oskar_SettingsItem::DOUBLE, false, 20.0);
@@ -224,8 +224,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 
     // Beam pattern settings.
     setLabel("beam_pattern", "Beam pattern settings");
-    registerSetting("beam_pattern/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("beam_pattern/size", "Image dimension [pixels]", oskar_SettingsItem::INT_UNSIGNED);
+    registerSetting("beam_pattern/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE, false, 2.0);
+    registerSetting("beam_pattern/size", "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE, false, 256);
     registerSetting("beam_pattern/station_id", "Station ID", oskar_SettingsItem::INT_UNSIGNED);
     registerSetting("beam_pattern/filename", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #ifndef OSKAR_NO_FITS
@@ -235,7 +235,7 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     // Image settings.
     setLabel("image", "Image settings");
     registerSetting("image/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
-    setDefault("image/fov_deg", 2);
+    setDefault("image/fov_deg", 2.0);
     registerSetting("image/size", "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE);
     setDefault("image/size", 256);
     options.clear();

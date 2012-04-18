@@ -79,7 +79,8 @@ struct oskar_TelescopeModel
      * @param[in] location     Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
      * @param[in] num_stations Number of stations.
      */
-    oskar_TelescopeModel(int type, int location, int num_stations = 0);
+    oskar_TelescopeModel(int type = OSKAR_DOUBLE,
+            int location = OSKAR_LOCATION_CPU, int num_stations = 0);
 
     /**
      * @brief Constructs a telescope model structure from an existing one.

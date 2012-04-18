@@ -133,7 +133,7 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     // Station element fitting parameters (general).
     s.beginGroup("element_fit");
     tel->station.element_fit.ignore_data_at_pole =
-            s.value("ignore_data_at_pole", true).toBool();
+            s.value("ignore_data_at_pole", false).toBool();
     tel->station.element_fit.ignore_data_below_horizon =
             s.value("ignore_data_below_horizon", true).toBool();
     tel->station.element_fit.overlap_angle_rad =

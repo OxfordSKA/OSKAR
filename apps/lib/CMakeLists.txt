@@ -3,11 +3,11 @@
 #
 
 set(apps_SRC
-    src/oskar_imager.cpp
+    src/oskar_imager.c
     src/oskar_remove_dir.cpp
     src/oskar_set_up_sky.cpp
-    src/oskar_set_up_telescope.cpp
-    src/oskar_set_up_visibilities.cpp
+    src/oskar_set_up_telescope.c
+    src/oskar_set_up_visibilities.c
     src/oskar_settings_load_beam_pattern.cpp
     src/oskar_settings_load_image.cpp
     src/oskar_settings_load_observation.cpp

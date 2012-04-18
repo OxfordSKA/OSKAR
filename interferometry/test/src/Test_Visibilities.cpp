@@ -70,14 +70,14 @@ void Test_Visibilities::test_create()
     }
     {
         // Construct visibility data on the CPU and check accessor methods.
-        oskar_Visibilities vis(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
+        oskar_Visibilities vis(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
                 num_channels, num_times, num_baselines);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis.location());
 
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE_COMPLEX_MATRIX, vis.amplitude.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis.uu_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis.vv_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis.ww_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, vis.amplitude.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis.uu_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis.vv_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis.ww_metres.type);
         CPPUNIT_ASSERT_EQUAL(4, vis.num_polarisations());
         CPPUNIT_ASSERT_EQUAL(num_channels * num_times * num_baselines, vis.num_amps());
         CPPUNIT_ASSERT_EQUAL(vis.num_amps(), vis.amplitude.num_elements);
@@ -87,10 +87,10 @@ void Test_Visibilities::test_create()
 
         oskar_Visibilities vis2;
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2.location());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, vis2.amplitude.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.uu_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.vv_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.ww_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE_COMPLEX_MATRIX, vis2.amplitude.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis2.uu_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis2.vv_metres.type);
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis2.ww_metres.type);
         CPPUNIT_ASSERT_EQUAL(4, vis2.num_polarisations());
         CPPUNIT_ASSERT_EQUAL(0, vis2.num_amps());
         CPPUNIT_ASSERT_EQUAL(0, vis2.num_coords());

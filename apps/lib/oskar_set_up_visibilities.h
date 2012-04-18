@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,22 +44,24 @@ extern "C" {
 
 /**
  * @brief
- * Creates a visibility structure on the CPU for the whole simulation.
+ * Initialises a visibility structure in CPU memory for the whole simulation.
  *
  * @details
- * This function creates and returns an empty visibility structure in CPU
- * memory for the simulation to fill.
+ * This function initialises an empty visibility structure in CPU
+ * memory, which is filled during the simulation.
  *
- * @param[in] settings A reference to the settings object.
- * @param[in] tel_cpu  A pointer to the telescope model.
- * @param[in] type The type of the visibility data (must be a complex type).
+ * @param[in,out] vis   Pointer to empty or uninitialised visibility structure.
+ * @param[in] settings  A pointer to the settings structure.
+ * @param[in] telescope A pointer to the telescope model.
+ * @param[in] type      The type of the visibility data (must be complex type).
  */
 OSKAR_EXPORT
-oskar_Visibilities* oskar_set_up_visibilities(const oskar_Settings* settings,
-        const oskar_TelescopeModel* tel_cpu, int type);
+int oskar_set_up_visibilities(oskar_Visibilities* vis,
+        const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
+        int type);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // OSKAR_SET_UP_VISIBILITIES_H_
+#endif /* OSKAR_SET_UP_VISIBILITIES_H_ */

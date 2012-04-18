@@ -35,7 +35,6 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include <cstdlib>
 
 #ifdef __cplusplus
 extern "C" {

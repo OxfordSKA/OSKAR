@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_Mem.h"
 
@@ -43,28 +42,30 @@ extern "C" {
 #endif
 
 /**
- * @brief Wrapper function to evaluate the horizontal direction cosines
- * for all sources in the specified sky model for the specified Greenwich
- * apparent sidereal time.
+ * @brief Evaluates horizontal direction cosines for specified sources at the
+ * given time.
  *
  * @details
- * Converts source positions in the sky model from equatorial (RA, Dec)
- * coordinates to horizontal lmn coordinates at the specified time for the
- * station position specified by the station model longitude and latitude.
+ * This function converts source positions from equatorial (RA, Dec)
+ * coordinates to horizontal direction cosines at the specified Greenwich
+ * apparent sidereal time, using the longitude and latitude of the station
+ * model.
  *
- * @param[out] work    OSKAR E Jones work buffer structure containing arrays
- *                     to hold the hoizontal lmn coordinates of each source.
- * @param[in]  RA      Source Right Ascension values.
- * @param[in]  Dec     Source Declination values.
- * @param[in]  station Station Model.
- * @param[in]  gast    The Greenwich apparent sidereal time, in radians.
+ * @param[in] num_sources The number of source positions to process.
+ * @param[out] l          Source horizontal l direction cosines (x-components).
+ * @param[out] m          Source horizontal m direction cosines (y-components).
+ * @param[out] n          Source horizontal n direction cosines (z-components).
+ * @param[in]  RA         Source Right Ascension values.
+ * @param[in]  Dec        Source Declination values.
+ * @param[in]  station    Pointer to station model.
+ * @param[in]  gast       The Greenwich apparent sidereal time, in radians.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_source_horizontal_lmn(oskar_Mem* l, oskar_Mem* m,
-        oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
-        const oskar_StationModel* station, const double gast);
+int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
+        oskar_Mem* m, oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
+        const oskar_StationModel* station, double gast);
 
 #ifdef __cplusplus
 }

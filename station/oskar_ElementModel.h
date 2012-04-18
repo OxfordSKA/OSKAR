@@ -45,8 +45,6 @@
  */
 struct oskar_ElementModel
 {
-    int element_type; /**< Specifies whether horizontal or wrt phase centre. */
-    int function_type;
     oskar_SplineData port1_phi_re;
     oskar_SplineData port1_phi_im;
     oskar_SplineData port1_theta_re;
@@ -57,25 +55,5 @@ struct oskar_ElementModel
     oskar_SplineData port2_theta_im;
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
-
-/* Element type enumerator. */
-enum
-{
-    OSKAR_ELEMENT_FIXED,
-    OSKAR_ELEMENT_DISH
-};
-
-/* Function enumerator. */
-enum
-{
-    OSKAR_ELEMENT_SPLINE,
-    OSKAR_ELEMENT_GAUSSIAN,
-    OSKAR_ELEMENT_COS,
-    OSKAR_ELEMENT_COS_SQUARED,
-    OSKAR_ELEMENT_DIPOLE,
-    OSKAR_ELEMENT_DIPOLE_COS,
-    OSKAR_ELEMENT_DIPOLE_COS_SQUARED,
-    OSKAR_ELEMENT_DIPOLE_GAUSSIAN
-};
 
 #endif /* OSKAR_ELEMENT_MODEL_H_ */

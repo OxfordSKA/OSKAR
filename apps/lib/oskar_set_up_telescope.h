@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,18 +43,18 @@ extern "C" {
 
 /**
  * @brief
- * Creates a telescope model from the simulation settings.
+ * Initialises a telescope model from the simulation settings.
  *
  * @details
- * This function creates and returns a fully populated telescope data structure
- * from the given settings object.
+ * This function initialises and populates a telescope model structure in CPU
+ * memory from the given settings structure.
  *
- * The data in the structure that is returned resides in CPU memory.
- *
- * @param[in] settings A pointer to the settings structure.
+ * @param[in,out] telescope Pointer to empty or uninitialised telescope model.
+ * @param[in] settings      A pointer to the settings structure.
  */
 OSKAR_EXPORT
-oskar_TelescopeModel* oskar_set_up_telescope(const oskar_Settings* settings);
+int oskar_set_up_telescope(oskar_TelescopeModel *telescope,
+        const oskar_Settings* settings);
 
 #ifdef __cplusplus
 }

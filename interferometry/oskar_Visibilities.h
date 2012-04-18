@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,6 @@
 #include "utility/oskar_Mem.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include <stdlib.h>
-
-#define OSKAR_VIS_FILE_ID 0x1F4F
 
 /**
  * @brief Structure to hold visibility data.
@@ -123,7 +121,7 @@ struct oskar_Visibilities
      * @param num_times      Number of visibility time snapshots.
      * @param num_baselines  Number of baselines.
      */
-    oskar_Visibilities(int amp_type = OSKAR_SINGLE_COMPLEX_MATRIX,
+    oskar_Visibilities(int amp_type = OSKAR_DOUBLE_COMPLEX_MATRIX,
             int location = OSKAR_LOCATION_CPU, int num_channels = 0,
             int num_times = 0, int num_baselines = 0);
 

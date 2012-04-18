@@ -38,9 +38,6 @@ int oskar_element_model_copy(oskar_ElementModel* dst,
 {
     int err;
 
-    dst->element_type = src->element_type;
-    dst->function_type = src->function_type;
-
     err = oskar_spline_data_copy(&dst->port1_phi_re, &src->port1_phi_re);
     if (err) return err;
     err = oskar_spline_data_copy(&dst->port1_phi_im, &src->port1_phi_im);

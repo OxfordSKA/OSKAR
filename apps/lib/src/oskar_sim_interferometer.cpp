@@ -81,8 +81,9 @@ int oskar_sim_interferometer(const char* settings_file)
     if (device_count < num_devices) return OSKAR_ERR_CUDA_DEVICES;
 
     // Setup the telescope model.
-    oskar_TelescopeModel* telescope_cpu = oskar_set_up_telescope(&settings);
-    if (telescope_cpu == NULL) return OSKAR_ERR_SETUP_FAIL;
+    oskar_TelescopeModel telescope_cpu;
+    error = oskar_set_up_telescope(&telescope_cpu, &settings);
+    if (error) return OSKAR_ERR_SETUP_FAIL;
 
     // Setup the sky model array.
     oskar_SkyModel* sky_chunk_cpu = NULL;
@@ -92,14 +93,16 @@ int oskar_sim_interferometer(const char* settings_file)
 
     // Create the global visibility structure on the CPU.
     int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    oskar_Visibilities* vis_global = oskar_set_up_visibilities(&settings,
-            telescope_cpu, complex_matrix);
+    oskar_Visibilities vis_global;
+    error = oskar_set_up_visibilities(&vis_global, &settings, &telescope_cpu,
+            complex_matrix);
+    if (error) return error;
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
     // (one per thread/GPU).
     oskar_Mem* vis_acc  = (oskar_Mem*)malloc(num_devices * sizeof(oskar_Mem));
     oskar_Mem* vis_temp = (oskar_Mem*)malloc(num_devices * sizeof(oskar_Mem));
-    int time_baseline = telescope_cpu->num_baselines() * times->num_time_steps;
+    int time_baseline = telescope_cpu.num_baselines() * times->num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
         error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
@@ -150,19 +153,18 @@ int oskar_sim_interferometer(const char* settings_file)
 
             // Run simulation for this chunk.
             error = oskar_interferometer(&(vis_temp[thread_id]),
-                    &(sky_chunk_cpu[i]), telescope_cpu, times, freq);
+                    &(sky_chunk_cpu[i]), &telescope_cpu, times, freq);
             if (error) continue;
 
             error = oskar_mem_add(&(vis_acc[thread_id]),
                     &(vis_acc[thread_id]), &(vis_temp[thread_id]));
             if (error) continue;
-
         }
 #pragma omp barrier
         if (error) return error;
 
         oskar_Mem vis_amp;
-        error = vis_global->get_channel_amps(&vis_amp, c);
+        error = vis_global.get_channel_amps(&vis_amp, c);
         if (error) return error;
 
         // Accumulate into global vis structure.
@@ -193,7 +195,7 @@ int oskar_sim_interferometer(const char* settings_file)
     printf("\n=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
-    error = oskar_evaluate_baseline_uvw(vis_global, telescope_cpu, times);
+    error = oskar_evaluate_baseline_uvw(&vis_global, &telescope_cpu, times);
     if (error) return error;
 
     // Write global visibilities to disk.
@@ -201,7 +203,7 @@ int oskar_sim_interferometer(const char* settings_file)
     {
         printf("\n--> Writing visibility file: '%s'\n",
                 settings.obs.oskar_vis_filename);
-        error = vis_global->write(settings.obs.oskar_vis_filename);
+        error = vis_global.write(settings.obs.oskar_vis_filename);
         if (error) return error;
     }
 
@@ -210,47 +212,46 @@ int oskar_sim_interferometer(const char* settings_file)
     if (settings.obs.ms_filename)
     {
         printf("--> Writing Measurement Set: '%s'\n", settings.obs.ms_filename);
-        error = oskar_write_ms(settings.obs.ms_filename, vis_global,
-                telescope_cpu, true);
+        error = oskar_write_ms(settings.obs.ms_filename, &vis_global,
+                &telescope_cpu, true);
         if (error) return error;
     }
 #endif
 
-
+    // Make image(s) of the simulated visibilities if required.
     if (settings.obs.image_interferometer_output)
     {
         if (settings.image.oskar_image || settings.image.fits_image)
         {
             oskar_Image image;
-            printf("\n");
-            printf("=== Starting OSKAR imager ...\n");
-            error = oskar_make_image(&image, vis_global, &settings.image);
+            printf("\n=== Starting OSKAR imager...\n");
+            error = oskar_make_image(&image, &vis_global, &settings.image);
             printf("=== Imaging complete.\n\n");
             if (error) return error;
             if (settings.image.oskar_image)
             {
-                printf("--> Writing OSKAR image: '%s'\n", settings.image.oskar_image);
+                printf("--> Writing OSKAR image: '%s'\n",
+                        settings.image.oskar_image);
                 error = oskar_image_write(&image, settings.image.oskar_image, 0);
                 if (error) return error;
             }
 #ifndef OSKAR_NO_FITS
             if (settings.image.fits_image)
             {
-                printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
+                printf("--> Writing FITS image: '%s'\n",
+                        settings.image.fits_image);
                 oskar_fits_image_write(&image, settings.image.fits_image);
             }
 #endif
         }
         else
         {
-            fprintf(stderr, "= WARNING: No image output name specified (skipping OSKAR imager)\n");
+            fprintf(stderr, "= WARNING: No image output name specified "
+                    "(skipping OSKAR imager)\n");
         }
     }
 
-
-    // Delete data structures.
-    delete vis_global;
-    delete telescope_cpu;
+    // Free memory.
     for (int i = 0; i < num_devices; ++i)
     {
         error = oskar_mem_free(&vis_acc[i]);  if (error) return error;

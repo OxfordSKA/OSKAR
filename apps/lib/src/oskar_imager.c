@@ -26,26 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "apps/lib/oskar_imager.h"
-
 #include "apps/lib/oskar_settings_load.h"
-
-#include "interferometry/oskar_Visibilities.h"
-#include "utility/oskar_get_error_string.h"
-#include "utility/oskar_Settings.h"
-
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_make_image.h"
 #include "imaging/oskar_image_write.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_read.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_Settings.h"
+#include "utility/oskar_settings_free.h"
 
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_image_write.h"
 #endif
 
-#include <cstdio>
-#include <cstdlib>
-
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,10 +50,12 @@ extern "C" {
 
 int oskar_imager(const char* settings_file)
 {
-    int error = OSKAR_SUCCESS;
-
-    // Note: this could probably be replaced with oskar_image_settings_load()
+    int error;
     oskar_Settings settings;
+    oskar_Visibilities vis;
+    oskar_Image image;
+
+    /* Note: this could probably be replaced with oskar_settings_load_image() */
     error = oskar_settings_load(&settings, settings_file);
     if (error)
     {
@@ -77,8 +76,7 @@ int oskar_imager(const char* settings_file)
         return OSKAR_ERR_SETTINGS;
     }
 
-    oskar_Visibilities vis;
-    error = oskar_Visibilities::read(&vis, settings.image.input_vis_data);
+    error = oskar_visibilities_read(&vis, settings.image.input_vis_data);
     if (error)
     {
         fprintf(stderr, "\nERROR: oskar_Visibilities::read() failed!, %s\n",
@@ -86,9 +84,8 @@ int oskar_imager(const char* settings_file)
         return error;
     }
 
-    fprintf(stdout, "=== Starting OSKAR imager ...\n");
+    fprintf(stdout, "=== Starting OSKAR imager...\n");
 
-    oskar_Image image;
     error = oskar_make_image(&image, &vis, &settings.image);
     if (error)
     {
@@ -113,14 +110,14 @@ int oskar_imager(const char* settings_file)
     if (settings.image.fits_image)
     {
         printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
-        // Note: currently there is no error code returned from this function.
+        /* Note: currently there is no error code returned from this function. */
         oskar_fits_image_write(&image, settings.image.fits_image);
     }
 #endif
 
     fprintf(stdout, "\n=== Run complete.\n");
-
-    return error;
+    oskar_settings_free(&settings);
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

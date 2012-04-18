@@ -106,8 +106,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
                 station0, gast);
         if (error) return error;
-        error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n,
-                &sky->RA, &sky->Dec, station0, gast);
+        error = oskar_evaluate_source_horizontal_lmn(sky->num_sources,
+                &hor_l, &hor_m, &hor_n, &sky->RA, &sky->Dec, station0, gast);
         if (error) return error;
 
         /* Evaluate the station beam. */
@@ -136,8 +136,9 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
                     &beam_n, &telescope->station[0], gast);
             if (error) return error;
-            error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m, &hor_n,
-                    &sky->RA, &sky->Dec, &telescope->station[0], gast);
+            error = oskar_evaluate_source_horizontal_lmn(sky->num_sources,
+                    &hor_l, &hor_m, &hor_n, &sky->RA, &sky->Dec,
+                    &telescope->station[0], gast);
             if (error) return error;
 
             /* Loop over stations to evaluate E. */
@@ -166,8 +167,9 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
                         &beam_n, station, gast);
                 if (error) return error;
-                error = oskar_evaluate_source_horizontal_lmn(&hor_l, &hor_m,
-                        &hor_n, &sky->RA, &sky->Dec, station, gast);
+                error = oskar_evaluate_source_horizontal_lmn(sky->num_sources,
+                        &hor_l, &hor_m, &hor_n, &sky->RA, &sky->Dec, station,
+                        gast);
                 if (error) return error;
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;

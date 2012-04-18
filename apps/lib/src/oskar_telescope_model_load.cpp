@@ -37,6 +37,7 @@
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_load_config.h"
 
+#include <cstdlib>
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
 #include <QtCore/QHash>

@@ -99,7 +99,8 @@ struct oskar_StationModel
      * @details
      * Constructs an empty station model structure.
      */
-    oskar_StationModel(int type, int location, int n_elements = 0);
+    oskar_StationModel(int type = OSKAR_DOUBLE,
+            int location = OSKAR_LOCATION_CPU, int n_elements = 0);
 
     /**
      * @brief Constructs a copy of another station model structure.

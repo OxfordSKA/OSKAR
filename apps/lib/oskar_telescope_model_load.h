@@ -36,7 +36,6 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_SettingsTelescope.h"
-#include <cstdlib>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,6 +48,8 @@ extern "C" {
  * @details
  * This function populates a telescope model structure from the given
  * directory path.
+ *
+ * The telescope model must be initialised and in CPU memory.
  *
  * @param[out] telescope  Pointer to empty telescope model structure to fill.
  * @param[in]  settings   Pointer to telescope model settings.

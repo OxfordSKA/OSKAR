@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,9 +79,9 @@ int oskar_sim_beam_pattern(const char* settings_file)
     }
 
     // Get the telescope model.
-    oskar_TelescopeModel* tel_cpu = oskar_set_up_telescope(&settings);
-    if (tel_cpu == NULL)
-        return OSKAR_ERR_SETUP_FAIL;
+    oskar_TelescopeModel tel_cpu;
+    err = oskar_set_up_telescope(&tel_cpu, &settings);
+    if (err) return OSKAR_ERR_SETUP_FAIL;
 
     // Get the beam pattern settings.
     int station_id = settings.beam_pattern.station_id;
@@ -97,7 +97,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     double dec0 = settings.obs.dec0_rad;
 
     // Check station ID is within range.
-    if (station_id < 0 || station_id >= tel_cpu->num_stations)
+    if (station_id < 0 || station_id >= tel_cpu.num_stations)
         return OSKAR_ERR_OUT_OF_RANGE;
 
     // Get time data.
@@ -149,7 +149,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     // All GPU memory used within these braces.
     {
         // Copy telescope model to GPU.
-        oskar_TelescopeModel tel_gpu(tel_cpu, OSKAR_LOCATION_GPU);
+        oskar_TelescopeModel tel_gpu(&tel_cpu, OSKAR_LOCATION_GPU);
 
         // Copy RA and Dec to GPU and allocate arrays for direction cosines.
         oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
@@ -201,8 +201,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
                 if (err) return err;
 
                 // Evaluate horizontal l,m,n coordinates.
-                err = oskar_evaluate_source_horizontal_lmn(&l, &m, &n,
-                        &RA, &Dec, station, gast);
+                err = oskar_evaluate_source_horizontal_lmn(num_pixels,
+                        &l, &m, &n, &RA, &Dec, station, gast);
                 if (err) return err;
 
                 // Evaluate the station beam.
@@ -307,10 +307,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
     }
 #endif
 
-    // Delete telescope model.
-    delete tel_cpu;
     cudaDeviceReset();
-
     oskar_settings_free(&settings);
     return OSKAR_SUCCESS;
 }

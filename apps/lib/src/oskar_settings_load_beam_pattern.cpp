@@ -61,8 +61,8 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     }
 
     // Get image sizes.
-    bp->fov_deg = s.value("fov_deg").toDouble();
-    bp->size    = s.value("size").toUInt();
+    bp->fov_deg = s.value("fov_deg", 2.0).toDouble();
+    bp->size    = s.value("size", 256).toUInt();
 
     // Get station ID to use.
     bp->station_id  = s.value("station_id").toUInt();

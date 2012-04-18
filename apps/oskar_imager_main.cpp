@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 #include "apps/lib/oskar_imager.h"
 #include "utility/oskar_get_error_string.h"
 
@@ -41,7 +39,7 @@ int main(int argc, char** argv)
     // Parse command line.
     if (argc != 2)
     {
-        fprintf(stderr, "Usage: $ oskar_make_image [settings file]\n");
+        fprintf(stderr, "Usage: $ oskar_imager [settings file]\n");
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
@@ -54,4 +52,3 @@ int main(int argc, char** argv)
 
     return error;
 }
-
