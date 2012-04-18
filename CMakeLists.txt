@@ -16,7 +16,7 @@ set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION
 list(INSERT CMAKE_MODULE_PATH 0 ${OSKAR_SOURCE_DIR}/cmake)
 
 # ==== Setup install directory paths
-# Note: the install directory prefix is set by CMAKE_INSTALL_PRFEIX.
+# Note: the install directory prefix is set by -DCMAKE_INSTALL_PRFEIX=<path>
 if (NOT OSKAR_LIB_INSTALL_DIR)
     set(OSKAR_LIB_INSTALL_DIR "lib")
 endif()
