@@ -73,13 +73,17 @@ ELSE( WIN32 )
   IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
     SET(MATLAB_SYS
       $ENV{MATLAB_ROOT}/bin/glnx86/
-      /usr/local/matlab-7sp1/bin/glnx86/
-      /opt/matlab-7sp1/bin/glnx86/
+      /usr/local/MATLAB/R2010b/bin/glnx86/
+      /usr/local/MATLAB/R2011a/bin/glnx86/
+      /usr/local/MATLAB/R2011b/bin/glnx86/
+      /usr/local/MATLAB/R2012a/bin/glnx86/
+      /usr/local/matlab/bin/glnx86/
       )
   # AMD64:
   ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
     SET(MATLAB_SYS
       $ENV{MATLAB_ROOT}/bin/glnxa64/
+      /usr/local/MATLAB/R2010b/bin/glnxa64/
       /usr/local/MATLAB/R2011a/bin/glnxa64/
       /usr/local/MATLAB/R2011b/bin/glnxa64/
       /usr/local/MATLAB/R2012a/bin/glnxa64/
@@ -92,7 +96,7 @@ ELSE( WIN32 )
   find_library(MATLAB_MEX_LIBRARY mex  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   find_library(MATLAB_MAT_LIBRARY mat  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   find_library(MATLAB_MX_LIBRARY  mx   PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
-  find_library(MATLAB_ENG_LIBRARY eng  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH) 
+  find_library(MATLAB_ENG_LIBRARY eng  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   #find_library(MATLAB_QT_QTCORE_LIBRARY QtCore PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   #find_library(MATLAB_QT_QTGUI_LIBRARY  QtGui  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   #find_library(MATLAB_QT_QTXML_LIBRARY  QtXml  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
@@ -103,6 +107,7 @@ ELSE( WIN32 )
     "mex.h"
     PATHS
     $ENV{MATLAB_ROOT}/extern/include/
+    /usr/local/MATLAB/R2010b/extern/include
     /usr/local/MATLAB/R2011a/extern/include
     /usr/local/MATLAB/R2011b/extern/include
     /usr/local/MATLAB/R2012a/extern/include
