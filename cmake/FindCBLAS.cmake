@@ -10,14 +10,16 @@
 
 set(BLAS_FIND_REQUIRED true)
 
-find_path(CBLAS_INCLUDE_DIR cblas.h
+find_path(CBLAS_INCLUDE_DIR cblas.h gsl_cblas.h
+    PATHS
     /usr/include/atlas
     /usr/local/include/atlas
     /usr/include
     /usr/local/include
+    /usr/include/gsl
 )
 
-set(CBLAS_NAMES ${CBLAS_NAMES} cblas)
+set(CBLAS_NAMES ${CBLAS_NAMES} cblas gslcblas)
 
 
 find_library(CBLAS_LIBRARY

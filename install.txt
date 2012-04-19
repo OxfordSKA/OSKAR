@@ -86,8 +86,10 @@ The following environment variables affect the CMake build system:
 
     * MATLAB_ROOT
         The MATLAB root install directory used by CMake when searching for the
-        MATLAB dependency. (This should not have to be set if MATLAB is
-        installed in its default location.)
+        MATLAB dependency. This directory should contain the MATLAB 'extern'
+        directory. (Note that this variable should not normally need to be set,
+        but can be used if the default CMake macros fail to find MATLAB on your
+        system.)
 
 
 4. Testing the Installation
