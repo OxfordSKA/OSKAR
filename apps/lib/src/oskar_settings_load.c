@@ -59,8 +59,8 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
     settings->image.input_vis_data = 0;
     settings->image.oskar_image = 0;
     settings->image.fits_image = 0;
-    settings->beam_pattern.filename = 0;
-    settings->beam_pattern.fits_image = 0;
+    settings->beam_pattern.oskar_image_filename = 0;
+    settings->beam_pattern.fits_image_filename = 0;
 
     /* Load observation settings first. */
     error = oskar_settings_load_observation(&settings->obs, filename);

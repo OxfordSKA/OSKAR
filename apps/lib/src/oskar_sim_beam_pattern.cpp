@@ -72,7 +72,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Check that a data file has been specified.
-    if (!settings.beam_pattern.filename && !settings.beam_pattern.fits_image)
+    if (!settings.beam_pattern.oskar_image_filename &&
+            !settings.beam_pattern.fits_image_filename)
     {
         fprintf(stderr, "ERROR: No image file specified.\n");
         return OSKAR_ERR_SETTINGS;
@@ -293,17 +294,17 @@ int oskar_sim_beam_pattern(const char* settings_file)
     printf("=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
 
     // Dump data to OSKAR image file if required.
-    if (settings.beam_pattern.filename)
+    if (settings.beam_pattern.oskar_image_filename)
     {
-        err = oskar_image_write(&image_cube, settings.beam_pattern.filename, 0);
+        err = oskar_image_write(&image_cube, settings.beam_pattern.oskar_image_filename, 0);
         if (err) return err;
     }
 
 #ifndef OSKAR_NO_FITS
     // FITS library available.
-    if (settings.beam_pattern.fits_image)
+    if (settings.beam_pattern.fits_image_filename)
     {
-        oskar_fits_image_write(&image_cube, settings.beam_pattern.fits_image);
+        oskar_fits_image_write(&image_cube, settings.beam_pattern.fits_image_filename);
     }
 #endif
 

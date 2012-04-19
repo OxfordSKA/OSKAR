@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,8 @@ struct oskar_SettingsBeamPattern
 {
     double fov_deg;
     int size;
-    char* filename;
-    char* fits_image;
+    char* oskar_image_filename;
+    char* fits_image_filename;
     int station_id;
 };
 typedef struct oskar_SettingsBeamPattern oskar_SettingsBeamPattern;

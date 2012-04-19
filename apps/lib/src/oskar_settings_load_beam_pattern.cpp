@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,19 +45,19 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     s.beginGroup("beam_pattern");
 
     // Get output image file name.
-    t = s.value("filename", "").toByteArray();
+    t = s.value("oskar_image_filename", "").toByteArray();
     if (t.size() > 0)
     {
-        bp->filename = (char*)malloc(t.size() + 1);
-        strcpy(bp->filename, t.constData());
+        bp->oskar_image_filename = (char*)malloc(t.size() + 1);
+        strcpy(bp->oskar_image_filename, t.constData());
     }
 
     // Get output FITS file name.
-    t = s.value("fits_image", "").toByteArray();
+    t = s.value("fits_image_filename", "").toByteArray();
     if (t.size() > 0)
     {
-        bp->fits_image = (char*)malloc(t.size() + 1);
-        strcpy(bp->fits_image, t.constData());
+        bp->fits_image_filename = (char*)malloc(t.size() + 1);
+        strcpy(bp->fits_image_filename, t.constData());
     }
 
     // Get image sizes.

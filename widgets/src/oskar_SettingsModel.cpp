@@ -218,18 +218,18 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("interferometer/image_output", "Image simulation output",
             oskar_SettingsItem::BOOL);
     setDefault("interferometer/image_output", false);
-    setTooltip("interferometer/image_output", "Run the OSKAR imager on "
-            "completion of the interferometer simulation. For image settings "
-            "see the 'Image settings' group");
+    setTooltip("interferometer/image_output", "If true, run the OSKAR imager "
+            "on completion of the interferometer simulation. "
+            "For image settings, see the 'Image settings' group");
 
     // Beam pattern settings.
     setLabel("beam_pattern", "Beam pattern settings");
     registerSetting("beam_pattern/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE, false, 2.0);
     registerSetting("beam_pattern/size", "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE, false, 256);
     registerSetting("beam_pattern/station_id", "Station ID", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("beam_pattern/filename", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("beam_pattern/oskar_image_filename", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #ifndef OSKAR_NO_FITS
-    registerSetting("beam_pattern/fits_image", "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    registerSetting("beam_pattern/fits_image_filename", "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
 #endif
 
     // Image settings.
@@ -262,15 +262,15 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     registerSetting("image/oskar_image_root", "Output OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip("image/oskar_image_root",
-            "Path consisting of the root of the filename used to save the "
-            "output image. The full filename will be constructed as:\n"
-            "   <root>_type.img");
+            "Path consisting of the root of the OSKAR image filename used to "
+            "save the output image. The full filename will be constructed as "
+            "<root>_<image_type>.img");
 #ifndef OSKAR_NO_FITS
     registerSetting("image/fits_image_root", "Output FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip("image/fits_image_root",
-            "Path consisting of the root of the filename used to save the "
-            "output image. The full filename will be constructed as:\n"
-            "   <root>_type.fits");
+            "Path consisting of the root of the FITS image filename used to "
+            "save the output image. The full filename will be constructed as "
+            "<root>_<image_type>.fits");
 #endif
 
 }

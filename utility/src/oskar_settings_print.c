@@ -384,8 +384,8 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_3f(2, w, "Field-of-view [deg]", s->beam_pattern.fov_deg);
         pr_i(2, w, "Dimension [pixels]", s->beam_pattern.size);
         pr_i(2, w, "Station ID", s->beam_pattern.station_id);
-        pr_s(2, 0, "Output OSKAR image file", s->beam_pattern.filename);
-        pr_s(2, 0, "Output FITS image file", s->beam_pattern.fits_image);
+        pr_s(2, 0, "Output OSKAR image file", s->beam_pattern.oskar_image_filename);
+        pr_s(2, 0, "Output FITS image file", s->beam_pattern.fits_image_filename);
     }
 
     /* Print image settings. */

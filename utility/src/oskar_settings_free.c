@@ -49,8 +49,8 @@ void oskar_settings_free(oskar_Settings* settings)
     free(settings->image.input_vis_data);
     free(settings->image.oskar_image);
     free(settings->image.fits_image);
-    free(settings->beam_pattern.filename);
-    free(settings->beam_pattern.fits_image);
+    free(settings->beam_pattern.oskar_image_filename);
+    free(settings->beam_pattern.fits_image_filename);
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path);
