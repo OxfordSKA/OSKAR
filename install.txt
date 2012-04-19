@@ -1,22 +1,23 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.0.0-beta                                  Last update: 18 April 2012 |
+| OSKAR 2.0.0-beta                                  Last update: 19 April 2012 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
 --------------------------------------------------------------------------------
 The OSKAR simulation package can be built and installed by following the simple
 steps described below. The build system makes use of CMake (www.cmake.org) and
-is currently targeted at LINUX systems. Mac OS X (Darwin) and Windows installs
-may be possible, but are not currently supported.
+is currently targeted at LINUX systems. Mac OS X (Darwin) and Microsoft Windows
+installs may be possible, but are not currently supported.
 
 
 2. Dependencies
 --------------------------------------------------------------------------------
-The main components of OSKAR require CUDA 4.0 or later and Qt 4.6 or later to
-be installed on the target system, and also CBLAS and LAPACK for full
-functionality. Additionally, the CFITSIO and casacore libraries must be present
-if FITS images and Measurement Sets are to be exported. The MATLAB interface
-will be built if MATLAB 2010b or later is found.
+OSKAR depends on a number of other libraries. The main components of OSKAR
+require CUDA 4.0 or later and Qt 4.6 or later to te installed on the target
+system, and also CBLAS and LAPACK for full functionality. Additionally, the
+CFITSIO and casacore libraries must be present if FITS images and Measurement
+Sets are to be exported. The MATLAB interface will be built if MATLAB R2010b
+or later is found.
 
 The unit tests require the CppUnit testing framework.
 
@@ -26,7 +27,7 @@ further.
 The OSKAR CMake build system will compile and install as many components as
 possible according to the following dependencies being satisfied:
 
-    * CUDA (>=4.0)      
+    * CUDA (>=4.0)
         - Required for: liboskar, liboskar_apps, Applications, MATLAB interface
     * Qt (>=4.6)
         - Required for: liboskar_apps, Applications
@@ -41,7 +42,7 @@ possible according to the following dependencies being satisfied:
     * casacore
         - Required for: liboskar_ms
         - Optional for: liboskar_apps, Applications (for Measurement Set export)
-    * MATLAB (>=R2010b) 
+    * MATLAB (>=R2010b)
         - Required for: MATLAB interface.
     * CppUnit
         - Required for: Unit testing binaries.
@@ -49,7 +50,7 @@ possible according to the following dependencies being satisfied:
         - Required for: Makefile generation.
 
 
-3. Build Commands
+3. Building OSKAR
 --------------------------------------------------------------------------------
 OSKAR can be built by issuing the following commands:
 
@@ -62,8 +63,7 @@ OSKAR can then be installed with:
 
     $ make install
 
-
-4. Build Options
+3.1. Build Options
 --------------------------------------------------------------------------------
 When running the 'cmake' command a number of build options can be specified.
 These are as follows:
@@ -79,17 +79,21 @@ These are as follows:
 
     * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
         Build OSKAR in release or debug mode.
-        
-5. Environment variables affecting the build
+
+3.2. Environment Variables
 --------------------------------------------------------------------------------
 The following environment variables affect the CMake build system:
 
     * MATLAB_ROOT
         The MATLAB root install directory used by CMake when searching for the
-        MATLAB dependency. This should not have to be set if MATLAB is installed
-        in its default location.
+        MATLAB dependency. (This should not have to be set if MATLAB is
+        installed in its default location.)
 
-6. Testing the install
+
+4. Testing the Installation
+--------------------------------------------------------------------------------
+
+4.1 Unit Tests
 --------------------------------------------------------------------------------
 If OSKAR has been built with the CppUnit dependency present, a number of unit
 test binaries will be created. These can be run by typing the following command
@@ -97,16 +101,17 @@ from the build directory:
 
     $ make test
 
-It is expected that all of the tests pass. If any fails occur please
-report this by copying the terminal output to the email address:
-    
+All the unit tests should pass. If any fail, please report this by copying
+the terminal output and sending it, together with a description of the hardware
+in your machine and your version of OSKAR, to the email address:
+
     oskar@oerc.ox.ac.uk
-    
+
+4.2 Running the Example Simulation
+--------------------------------------------------------------------------------
 It is also advised, with any fresh install of OSKAR, to run the example
 simulation described in the documentation found at
 
     http://www.oerc.ox.ac.uk/research/oskar2
-    
+
 to establish if a simple simulation behaves as expected.
-
-
