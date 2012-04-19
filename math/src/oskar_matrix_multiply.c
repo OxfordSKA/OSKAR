@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "math/oskar_matrix_multiply.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -46,17 +45,16 @@ int oskar_matrix_multiply(oskar_Mem* C,
         int rows_A, int cols_A, int rows_B, int cols_B,
         int transA, int transB, const oskar_Mem* A, const oskar_Mem* B)
 {
+#ifdef OSKAR_NO_CBLAS
+    fprintf(stderr, "= ERROR: oskar_matrix_multiply(): CBLAS currently "
+            "required for this function.\n");
+    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+#else
     int M, N, K;
     int LDA, LDB, LDC;
     int type;
     int tA, tB;
     double alpha = 1.0, beta = 0.0;
-
-#ifdef OSKAR_NO_CBLAS
-    fprintf(stderr, "= ERROR: oskar_matrix_multiply(): CBLAS currently "
-            "required for this function.\n");
-    return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-#endif
 
     if (A == NULL || B == NULL || C == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -82,7 +80,6 @@ int oskar_matrix_multiply(oskar_Mem* C,
     {
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
-
 
     /* [ C = alpha * A * B + beta * C ] */
     M = (!transA) ? rows_A : cols_A;
@@ -115,8 +112,8 @@ int oskar_matrix_multiply(oskar_Mem* C,
     }
 
     return OSKAR_SUCCESS;
+#endif
 }
-
 
 #ifdef __cplusplus
 }
