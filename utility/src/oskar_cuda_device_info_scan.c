@@ -44,6 +44,9 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
     struct cudaDeviceProp device_prop;
     size_t total_memory, free_memory;
 
+    /* Set CUDA device. */
+    cudaSetDevice(id);
+
     /* Set default values in case of errors. */
     device->name[0] = 0;
     device->compute.capability.major = 0;
