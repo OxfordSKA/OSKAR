@@ -98,7 +98,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
             this, SLOT(setHideIfUnset(bool)));
     connect(actShowFirstLevel, SIGNAL(triggered()),
             view_, SLOT(showFirstLevel()));
-    connect(actExpandAll, SIGNAL(triggered()), view_, SLOT(expandAll()));
+    connect(actExpandAll, SIGNAL(triggered()), view_, SLOT(expandSettingsTree()));
     connect(actCollapseAll, SIGNAL(triggered()), view_, SLOT(collapseAll()));
     connect(actAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(actCudaInfo, SIGNAL(triggered()), this, SLOT(cudaInfo()));

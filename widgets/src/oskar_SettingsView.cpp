@@ -73,6 +73,15 @@ void oskar_SettingsView::savePosition()
 void oskar_SettingsView::showFirstLevel()
 {
     expandToDepth(0);
+    resizeColumnToContents(0);
+    update();
+}
+
+void oskar_SettingsView::expandSettingsTree()
+{
+    expandAll();
+    resizeColumnToContents(0);
+    update();
 }
 
 void oskar_SettingsView::resizeAfterExpand(const QModelIndex& /*index*/)

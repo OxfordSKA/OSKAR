@@ -48,6 +48,7 @@ public slots:
     void saveExpanded();
     void savePosition();
     void showFirstLevel();
+    void expandSettingsTree();
 
 private slots:
     void resizeAfterExpand(const QModelIndex& index);
