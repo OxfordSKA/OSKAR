@@ -66,6 +66,8 @@ add_custom_target(write_version_file
 
 add_custom_target(dist 
     COMMAND ${CMAKE_MAKE_PROGRAM} package_source
-    DEPENDS write_version_file 
     COMMENT "Packaging Source files"
     VERBATIM)
+    
+add_dependencies(dist write_version_file)
+
