@@ -24,7 +24,7 @@ Please ensure that the required dependencies are installed before proceeding
 further.
 
 The OSKAR CMake build system will compile and install as many components as
-possible according to:
+possible according to the following dependencies being satisfied:
 
     * CUDA (>=4.0)      
         - Required for: liboskar, liboskar_apps, Applications, MATLAB interface
@@ -45,6 +45,8 @@ possible according to:
         - Required for: MATLAB interface.
     * CppUnit
         - Required for: Unit testing binaries.
+    * CMake (>=2.8)
+        - Required for: Makefile generation.
 
 
 3. Build Commands
@@ -67,14 +69,44 @@ When running the 'cmake' command a number of build options can be specified.
 These are as follows:
 
     * -DCUDA_ARCH=<arch> (default: 2.0)
-        This option sets the target CUDA architecture for the compilation of
-        CUDA device code.
-        <arch> must be one of either 1.3, 2.0, 2.1 or ALL.
+        Sets the target architecture for the compilation of CUDA device code.
+        <arch> must be one of either: 1.3, 2.0, 2.1 or ALL.
         (Note: 1.1 architecture may also work if running in single precision,
          although this architecture isn't officially supported by OSKAR.)
 
     * -DCMAKE_INSTALL_PREFIX=<path> (default: /usr/local/)
-        Prefix install path when installing OSKAR (with make install).
+        Prefix install path used when installing OSKAR (with make install).
 
     * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
         Build OSKAR in release or debug mode.
+        
+5. Environment variables affecting the build
+--------------------------------------------------------------------------------
+The following environment variables affect the CMake build system:
+
+    * MATLAB_ROOT
+        The MATLAB root install directory used by CMake when searching for the
+        MATLAB dependency. This should not have to be set if MATLAB is installed
+        in its default location.
+
+6. Testing the install
+--------------------------------------------------------------------------------
+If OSKAR has been built with the CppUnit dependency present, a number of unit
+test binaries will be created. These can be run by typing the following command
+from the build directory:
+
+    $ make test
+
+It is expected that all of the tests pass. If any fails occur please
+report this by copying the terminal output to the email address:
+    
+    oskar@oerc.ox.ac.uk
+    
+It is also advised, with any fresh install of OSKAR, to run the example
+simulation described in the documentation found at
+
+    http://www.oerc.ox.ac.uk/research/oskar2
+    
+to establish if a simple simulation behaves as expected.
+
+
