@@ -53,224 +53,602 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     setLabel("simulator", "Simulator settings");
     k = "simulator/double_precision";
     registerSetting(k, "Use double precision", oskar_SettingsItem::BOOL, false, true);
-    setTooltip(k, "Determines whether double precision arithmetic is used");
-    registerSetting("simulator/max_sources_per_chunk", "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE, false, 10000);
-    registerSetting("simulator/cuda_device_ids", "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST, false, 0);
+    setTooltip(k, "Determines whether double precision arithmetic is used.");
+    k = "simulator/max_sources_per_chunk";
+    registerSetting(k, "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE, false, 10000);
+    setTooltip(k, "Maximum number of sources processed concurrently on a \n"
+            "single GPU.");
+    k = "simulator/cuda_device_ids";
+    registerSetting(k, "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST, false, 0);
+    setTooltip(k, "A comma-separated string containing device (GPU) IDs to \n"
+            "use on a multi-GPU system.");
 
     // Sky model file settings.
     setLabel("sky", "Sky model settings");
-    registerSetting("sky/oskar_source_file", "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_NAME);
+    k = "sky/oskar_source_file";
+    registerSetting(k, "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(k, "Path to an OSKAR sky model text file. See the accompanying\n"
+            "documentation for a description of an OSKAR sky model file.");
     setLabel("sky/oskar_source_file/filter", "Filter settings");
-    registerSetting("sky/oskar_source_file/filter/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/oskar_source_file/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/oskar_source_file/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/oskar_source_file/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/oskar_source_file/filter/flux_min";
+    registerSetting(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
+    k = "sky/oskar_source_file/filter/flux_max";
+    registerSetting(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
+    k = "sky/oskar_source_file/filter/radius_inner_deg";
+    registerSetting(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
+    k = "sky/oskar_source_file/filter/radius_outer_deg";
+    registerSetting(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/oskar_source_file/extended_sources", "Extended source settings");
-    registerSetting("sky/oskar_source_file/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/oskar_source_file/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/oskar_source_file/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/oskar_source_file/extended_sources/FWHM_major";
+    registerSetting(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Major axis FWHM of all sources in this group, in arc \n"
+            "seconds. WARNING: this overrides values in the file.");
+    k = "sky/oskar_source_file/extended_sources/FWHM_minor";
+    registerSetting(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc \n"
+            "seconds. WARNING: this overrides values in the file.");
+    k = "sky/oskar_source_file/extended_sources/position_angle";
+    registerSetting(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Position angle of all extended sources in this group \n"
+            "(from North to East), in degrees. WARNING: this overrides \n"
+            "values in the file.");
 #endif
 
-    registerSetting("sky/gsm_file", "Input Global Sky Model file", oskar_SettingsItem::INPUT_FILE_NAME);
+    k = "sky/gsm_file";
+    registerSetting(k, "Input Global Sky Model file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(k, "Path to a Global Sky Model file, pixellated using the \n"
+            "HEALPix RING scheme. This option can be used to load a GSM data \n"
+            "file produced from software written by Angelica de Oliveira, \n"
+            "available at https://www.cfa.harvard.edu/~adeolive/gsm/");
     setLabel("sky/gsm_file/filter", "Filter settings");
-    registerSetting("sky/gsm_file/filter/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/gsm_file/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/gsm_file/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/gsm_file/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/gsm_file/filter/flux_min";
+    registerSetting(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
+    k = "sky/gsm_file/filter/flux_max";
+    registerSetting(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
+    k = "sky/gsm_file/filter/radius_inner_deg";
+    registerSetting(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
+    k = "sky/gsm_file/filter/radius_outer_deg";
+    registerSetting(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/gsm_file/extended_sources", "Extended source settings");
-    registerSetting("sky/gsm_file/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/gsm_file/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/gsm_file/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/gsm_file/extended_sources/FWHM_major";
+    registerSetting(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Major axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/gsm_file/extended_sources/FWHM_minor";
+    registerSetting(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/gsm_file/extended_sources/position_angle";
+    registerSetting(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Position angle of all extended sources in this group \n"
+            "(from North to East), in degrees.");
 #endif
 
     // Sky model generator settings.
     setLabel("sky/generator", "Generators");
     setLabel("sky/generator/random_power_law", "Random, power-law in flux");
-    registerSetting("sky/generator/random_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("sky/generator/random_power_law/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/power", "Power law index", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/seed", "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    k = "sky/generator/random_power_law/num_sources";
+    registerSetting(k, "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "Number of sources scattered approximately uniformly over \n"
+            "the sphere (before filtering). A value greater than 0 will \n"
+            "activate the random power-law generator.");
+    k = "sky/generator/random_power_law/flux_min";
+    registerSetting(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum flux density in the random distribution, in Jy \n"
+            "(before filtering).");
+    k = "sky/generator/random_power_law/flux_max";
+    registerSetting(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum flux density in the random distribution, in Jy \n"
+            "(before filtering).");
+    k = "sky/generator/random_power_law/power";
+    registerSetting(k, "Power law index", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Power law exponent describing number per unit flux \n"
+            "density.");
+    k = "sky/generator/random_power_law/seed";
+    registerSetting(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for random \n"
+            "distributions.");
     setLabel("sky/generator/random_power_law/filter", "Filter settings");
-    registerSetting("sky/generator/random_power_law/filter/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/generator/random_power_law/filter/flux_min";
+    registerSetting(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
+    k = "sky/generator/random_power_law/filter/flux_max";
+    registerSetting(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
+    k = "sky/generator/random_power_law/filter/radius_inner_deg";
+    registerSetting(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
+    k = "sky/generator/random_power_law/filter/radius_outer_deg";
+    registerSetting(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    setLabel("sky/generator/random_power_law/extended_sources", "Extended source settings");
-    registerSetting("sky/generator/random_power_law/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_power_law/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setLabel("sky/generator/random_power_law/extended_sources",
+            "Extended source settings");
+    k = "sky/generator/random_power_law/extended_sources/FWHM_major";
+    registerSetting(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Major axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/generator/random_power_law/extended_sources/FWHM_minor";
+    registerSetting(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/generator/random_power_law/extended_sources/position_angle";
+    registerSetting(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Position angle of all extended sources in this group \n"
+            "(from North to East), in degrees.");
 #endif
 
-    setLabel("sky/generator/random_broken_power_law", "Random, broken power-law in flux");
-    registerSetting("sky/generator/random_broken_power_law/num_sources", "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("sky/generator/random_broken_power_law/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/power1", "Power law index 1", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/power2", "Power law index 2", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/threshold", "Threshold [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/seed", "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setLabel("sky/generator/random_broken_power_law",
+            "Random, broken power-law in flux");
+    k = "sky/generator/random_broken_power_law/num_sources";
+    registerSetting(k, "Number of sources", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "Number of sources scattered approximately uniformly over \n"
+            "the sphere (before filtering). A value greater than 0 will \n"
+            "activate the random broken-power-law generator.");
+    k = "sky/generator/random_broken_power_law/flux_min";
+    registerSetting(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum flux density in the random distribution, in Jy \n"
+            "(before filtering).");
+    k = "sky/generator/random_broken_power_law/flux_max";
+    registerSetting(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum flux density in the random distribution, in Jy \n"
+            "(before filtering).");
+    k = "sky/generator/random_broken_power_law/power1";
+    registerSetting(k, "Power law index 1", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Power law exponent describing number per unit flux \n"
+            "density in region 1.");
+    k = "sky/generator/random_broken_power_law/power2";
+    registerSetting(k, "Power law index 2", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Power law exponent describing number per unit flux \n"
+            "density in region 2.");
+    k = "sky/generator/random_broken_power_law/threshold";
+    registerSetting(k, "Threshold [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Threshold flux density for the intersection of region \n"
+            "1 and 2, in Jy. Region 1 is less than the threshold; \n"
+            "Region 2 is greater than the threshold.");
+    k = "sky/generator/random_broken_power_law/seed";
+    registerSetting(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for random distributions.");
     setLabel("sky/generator/random_broken_power_law/filter", "Filter settings");
-    registerSetting("sky/generator/random_broken_power_law/filter/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/generator/random_broken_power_law/filter/flux_min";
+    registerSetting(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
+    k = "sky/generator/random_broken_power_law/filter/flux_max";
+    registerSetting(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
+    k = "sky/generator/random_broken_power_law/filter/radius_inner_deg";
+    registerSetting(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
+    k = "sky/generator/random_broken_power_law/filter/radius_outer_deg";
+    registerSetting(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum angular distance from phase centre allowed by the \n"
+            "filter, in degrees.");
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-    setLabel("sky/generator/random_broken_power_law/extended_sources", "Extended source settings");
-    registerSetting("sky/generator/random_broken_power_law/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/random_broken_power_law/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setLabel("sky/generator/random_broken_power_law/extended_sources",
+            "Extended source settings");
+    k = "sky/generator/random_broken_power_law/extended_sources/FWHM_major";
+    registerSetting(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Major axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/generator/random_broken_power_law/extended_sources/FWHM_minor";
+    registerSetting(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/generator/random_broken_power_law/extended_sources/position_angle";
+    registerSetting(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Position angle of all extended sources in this group \n"
+            "(from North to East), in degrees.");
 #endif
 
     setLabel("sky/generator/healpix", "HEALPix (uniform, all sky) grid");
-    registerSetting("sky/generator/healpix/nside", "Nside", oskar_SettingsItem::INT_UNSIGNED);
+    k = "sky/generator/healpix/nside";
+    registerSetting(k, "Nside", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "HEALPix Nside parameter. A value greater than 0 will \n"
+            "activate the HEALPix generator, which will produce points \n"
+            "evenly spaced over the whole sky. The total number of points \n"
+            "is 12 * Nside * Nside.");
     setLabel("sky/generator/healpix/filter", "Filter settings");
-    registerSetting("sky/generator/healpix/filter/flux_min", "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/healpix/filter/flux_max", "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/healpix/filter/radius_inner_deg", "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/healpix/filter/radius_outer_deg", "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/generator/healpix/filter/flux_min";
+    registerSetting(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
+    k = "sky/generator/healpix/filter/flux_max";
+    registerSetting(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
+    k = "sky/generator/healpix/filter/radius_inner_deg";
+    registerSetting(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum angular distance from phase centre allowed by \n"
+            "the filter, in degrees.");
+    k = "sky/generator/healpix/filter/radius_outer_deg";
+    registerSetting(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maximum angular distance from phase centre allowed by \n"
+            "the filter, in degrees.");
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
     setLabel("sky/generator/healpix/extended_sources", "Extended source settings");
-    registerSetting("sky/generator/healpix/extended_sources/FWHM_major", "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/healpix/extended_sources/FWHM_minor", "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
-    registerSetting("sky/generator/healpix/extended_sources/position_angle", "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    k = "sky/generator/healpix/extended_sources/FWHM_major";
+    registerSetting(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Maxor axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/generator/healpix/extended_sources/FWHM_minor";
+    registerSetting(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc \n"
+            "seconds.");
+    k = "sky/generator/healpix/extended_sources/position_angle";
+    registerSetting(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Position angle of all extended sources in this group \n"
+            "(from North to East), in degrees.");
 #endif
-    registerSetting("sky/output_sky_file", "Output OSKAR source file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    k = "sky/output_sky_file";
+    registerSetting(k, "Output OSKAR source file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path used to save the final sky model structure \n"
+            "(useful for debugging). Leave blank if not required.");
 
     // Observation settings.
     setLabel("observation", "Observation settings");
-    registerSetting("observation/phase_centre_ra_deg", "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/phase_centre_dec_deg", "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/start_frequency_hz", "Start frequency [Hz]", oskar_SettingsItem::DOUBLE, true);
-    registerSetting("observation/num_channels", "Number of frequency channels", oskar_SettingsItem::INT_POSITIVE);
-    registerSetting("observation/frequency_inc_hz", "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
-    registerSetting("observation/start_time_utc", "Start time (UTC)", oskar_SettingsItem::DATE_TIME, true);
-    registerSetting("observation/num_time_steps", "Number of time steps", oskar_SettingsItem::INT_POSITIVE);
-    registerSetting("observation/length", "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
+    k = "observation/phase_centre_ra_deg";
+    registerSetting(k, "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Right Ascension of the observation pointing \n"
+            "(phase centre), in degrees.");
+    k = "observation/phase_centre_dec_deg";
+    registerSetting(k, "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Declination of the observation pointing (phase centre), \n"
+            "in degrees.");
+    k = "observation/start_frequency_hz";
+    registerSetting(k, "Start frequency [Hz]", oskar_SettingsItem::DOUBLE, true);
+    setTooltip(k, "The frequency at the midpoint of the first channel, in Hz.");
+    k = "observation/num_channels";
+    registerSetting(k, "Number of frequency channels", oskar_SettingsItem::INT_POSITIVE);
+    setTooltip(k, "Number of frequency channels / bands to use.");
+    k = "observation/frequency_inc_hz";
+    registerSetting(k, "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The frequency increment between successive channels, in Hz.");
+    k = "observation/start_time_utc";
+    registerSetting(k, "Start time (UTC)", oskar_SettingsItem::DATE_TIME, true);
+    setTooltip(k, "A string describing the start time and date for the \n"
+            "observation.");
+    k = "observation/num_time_steps";
+    registerSetting(k, "Number of time steps", oskar_SettingsItem::INT_POSITIVE);
+    setTooltip(k, "Number of time steps in the output data during the \n"
+            "observation length. This corresponds to the number of \n"
+            "correlator dumps for interferometer simulations, and the \n"
+            "number of beam pattern snapshots for beam pattern simulations.");
+    k = "observation/length";
+    registerSetting(k, "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
+    setTooltip(k, "A string describing the observation length, in hours, \n"
+            "minutes and seconds.");
 
     // Telescope model settings.
     setLabel("telescope", "Telescope model settings");
-    registerSetting("telescope/config_directory", "Telescope directory", oskar_SettingsItem::TELESCOPE_DIR_NAME, true);
-    registerSetting("telescope/longitude_deg", "Longitude [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/latitude_deg", "Latitude [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/altitude_m", "Altitude [m]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/use_common_sky", "Use common sky (short baseline approximation)", oskar_SettingsItem::BOOL, false, true);
+    k = "telescope/config_directory";
+    registerSetting(k, "Telescope directory", oskar_SettingsItem::TELESCOPE_DIR_NAME, true);
+    setTooltip(k, "Path to a directory containing the telescope configuration \n"
+            "data. See the accompanying documentation for a description of \n"
+            "an OSKAR telescope model directory.");
+    k = "telescope/longitude_deg";
+    registerSetting(k, "Longitude [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Telescope (east) longitude, in degrees.");
+    k = "telescope/latitude_deg";
+    registerSetting(k, "Latitude [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Telescope latitude, in degrees.");
+    k = "telescope/altitude_m";
+    registerSetting(k, "Altitude [m]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Telescope altitude, in metres.");
+    k = "telescope/use_common_sky";
+    registerSetting(k, "Use common sky (short baseline approximation)", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true, then use a short baseline approximation where \n"
+            "source positions are the same relative to every station. \n"
+            "If false, then re-evaluate all source positions and all \n"
+            "station beams.");
     setLabel("telescope/station", "Station settings");
     options.clear();
     options << "AA"; // << "Dish";
-    registerSetting("telescope/station/station_type", "Station type", oskar_SettingsItem::OPTIONS, options, false, options[0]);
-    registerSetting("telescope/station/use_polarised_elements", "Use polarised elements", oskar_SettingsItem::BOOL, false, true);
-    registerSetting("telescope/station/ignore_custom_element_patterns", "Ignore custom element patterns", oskar_SettingsItem::BOOL, false, false);
-    registerSetting("telescope/station/evaluate_array_factor", "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL, false, true);
-    registerSetting("telescope/station/evaluate_element_factor", "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL, false, true);
-    registerSetting("telescope/station/normalise_beam", "Normalise array beam", oskar_SettingsItem::BOOL, false, false);
+    k = "telescope/station/station_type";
+    registerSetting(k, "Station type", oskar_SettingsItem::OPTIONS, options, false, options[0]);
+    setTooltip(k, "The type of stations in the interferometer. Currently, \n"
+            "only Aperture Array (AA) stations are allowed.");
+    k = "telescope/station/use_polarised_elements";
+    registerSetting(k, "Use polarised elements", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true, then treat antennas as polarised; if false, \n"
+            "treat them as point-like.");
+    k = "telescope/station/ignore_custom_element_patterns";
+    registerSetting(k, "Ignore custom element patterns", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, then ignore any custom embedded element pattern \n"
+            "data files. If the option to use polarised elements is set, \n"
+            "then antennas will be treated as ideal dipoles.");
+    k = "telescope/station/evaluate_array_factor";
+    registerSetting(k, "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true, then the contribution to the station beam from \n"
+            "the array factor (given by beamforming the antennas in the \n"
+            "station) is evaluated. If false, then the array factor is \n"
+            "ignored.");
+    k = "telescope/station/evaluate_element_factor";
+    registerSetting(k, "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true, then the contribution to the station beam from \n"
+            "the element factor (given by the antenna response) is \n"
+            "evaluated. If false, then the element factor is ignored.");
+    k = "telescope/station/normalise_beam";
+    registerSetting(k, "Normalise array beam", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, the station beam will be normalised by dividing \n"
+            "by the square of the number of antennas in the station to give \n"
+            "a nominal peak value of 1.0; if false, then no normalisation is \n"
+            "performed.");
     setLabel("telescope/station/element", "Element settings (overrides)");
-    registerSetting("telescope/station/element/gain", "Element gain", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/gain_error_fixed", "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/gain_error_time", "Element gain std.dev. (time-variable)", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/phase_error_fixed_deg", "Element phase std.dev. (systematic) [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/phase_error_time_deg", "Element phase std.dev. (time-variable) [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/position_error_xy_m", "Element (x,y) position std.dev. [m]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/x_orientation_error_deg", "Element X-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/y_orientation_error_deg", "Element Y-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
-    registerSetting("telescope/station/element/seed_gain_errors", "Random seed (systematic gain errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/element/seed_phase_errors", "Random seed (systematic phase errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/element/seed_time_variable_errors", "Random seed (time-variable errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/element/seed_position_xy_errors", "Random seed (x,y position errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/element/seed_x_orientation_error", "Random seed (X-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
-    registerSetting("telescope/station/element/seed_y_orientation_error", "Random seed (Y-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
+    k = "telescope/station/element/gain";
+    registerSetting(k, "Element gain", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Mean element amplitude gain factor (default 1.0). \n"
+            "If set, this will override the contents of the station files.");
+    k = "telescope/station/element/gain_error_fixed";
+    registerSetting(k, "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Systematic element amplitude gain standard deviation \n"
+            "(default 0.0). If set, this will override the contents of \n"
+            "the station files.");
+    k = "telescope/station/element/gain_error_time";
+    registerSetting(k, "Element gain std.dev. (time-variable)", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Time-variable element amplitude gain standard deviation \n"
+            "(default 0.0). If set, this will override the contents of \n"
+            "the station files.");
+    k = "telescope/station/element/phase_error_fixed_deg";
+    registerSetting(k, "Element phase std.dev. (systematic) [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Systematic element phase standard deviation (default 0.0). \n"
+            "If set, this will override the contents of the station files.");
+    k = "telescope/station/element/phase_error_time_deg";
+    registerSetting(k, "Element phase std.dev. (time-variable) [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Time-variable element phase standard deviation \n"
+            "(default 0.0). If set, this will override the contents of the \n"
+            "station files.");
+    k = "telescope/station/element/position_error_xy_m";
+    registerSetting(k, "Element (x,y) position std.dev. [m]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The standard deviation of the antenna xy-position \n"
+            "uncertainties (default 0.0). If set, this will override the \n"
+            "contents of the station files.");
+    k = "telescope/station/element/x_orientation_error_deg";
+    registerSetting(k, "Element X-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The standard deviation of the antenna X-dipole orientation \n"
+            "error (default 0.0). If set, this will override the contents \n"
+            "of the station files.");
+    k = "telescope/station/element/y_orientation_error_deg";
+    registerSetting(k, "Element Y-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The standard deviation of the antenna Y-dipole orientation \n"
+            "error (default 0.0). If set, this will override the contents \n"
+            "of the station files.");
+    k = "telescope/station/element/seed_gain_errors";
+    registerSetting(k, "Random seed (systematic gain errors)", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for systematic gain \n"
+            "error distribution.");
+    k = "telescope/station/element/seed_phase_errors";
+    registerSetting(k, "Random seed (systematic phase errors)", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for systematic phase \n"
+            "error distribution.");
+    k = "telescope/station/element/seed_time_variable_errors";
+    registerSetting(k, "Random seed (time-variable errors)", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for time variable error \n"
+            "distributions.");
+    k = "telescope/station/element/seed_position_xy_errors";
+    registerSetting(k, "Random seed (x,y position errors)", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for antenna xy-position \n"
+            "error distribution.");
+    k = "telescope/station/element/seed_x_orientation_error";
+    registerSetting(k, "Random seed (X-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for antenna X dipole \n"
+            "orientation error distribution.");
+    k = "telescope/station/element/seed_y_orientation_error";
+    registerSetting(k, "Random seed (Y-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for antenna Y dipole \n"
+            "orientation error distribution.");
 
     // Element pattern fitting parameters.
     setLabel("telescope/station/element_fit", "Element pattern fitting parameters");
-    registerSetting("telescope/station/element_fit/ignore_data_at_pole", "Ignore data at poles", oskar_SettingsItem::BOOL, false, false);
-    registerSetting("telescope/station/element_fit/ignore_data_below_horizon", "Ignore data below horizon", oskar_SettingsItem::BOOL, false, true);
-    registerSetting("telescope/station/element_fit/overlap_angle_deg", "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, false, 9.0);
-    registerSetting("telescope/station/element_fit/weight_boundaries", "Weighting at boundaries", oskar_SettingsItem::DOUBLE, false, 20.0);
-    registerSetting("telescope/station/element_fit/weight_overlap", "Weighting in overlap region", oskar_SettingsItem::DOUBLE, false, 4.0);
+    k = "telescope/station/element_fit/ignore_data_at_pole";
+    registerSetting(k, "Ignore data at poles", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, then numerical element pattern data points at \n"
+            "theta = 0 and theta = 180 degrees are ignored.");
+    k = "telescope/station/element_fit/ignore_data_below_horizon";
+    registerSetting(k, "Ignore data below horizon", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true, then numerical element pattern data points \n"
+            "greater than theta = 90 degrees are ignored.");
+    k = "telescope/station/element_fit/overlap_angle_deg";
+    registerSetting(k, "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, false, 9.0);
+    setTooltip(k, "The amount of overlap used for copying numerical element \n"
+            "pattern data for phi < 0 and phi > 360 degrees. Use carefully \n"
+            "to minimise discontinuity at phi = 0.");
+    k = "telescope/station/element_fit/weight_boundaries";
+    registerSetting(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, false, 20.0);
+    setTooltip(k, "The weight given to numerical element pattern data at \n"
+            "phi = 0 and phi = 360, relative to 1.0. Use carefully to \n"
+            "minimise discontinuity at phi = 0.");
+    k = "telescope/station/element_fit/weight_overlap";
+    registerSetting(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, false, 4.0);
+    setTooltip(k, "The weight given to numerical element pattern data at \n"
+            "phi < 0 and phi > 360, relative to 1.0. Use carefully to \n"
+            "minimise discontinuity at phi = 0.");
     //registerSetting("telescope/station/element_fit/use_common_set", "Use common set", oskar_SettingsItem::BOOL, false, true);
-    setLabel("telescope/station/element_fit/all", "Common settings (used for all surfaces)");
-    registerSetting("telescope/station/element_fit/all/search_for_best_fit", "Search for best fit", oskar_SettingsItem::BOOL, false, true);
-    registerSetting("telescope/station/element_fit/all/average_fractional_error", "Average fractional error", oskar_SettingsItem::DOUBLE, false, 0.02);
-    registerSetting("telescope/station/element_fit/all/average_fractional_error_factor_increase", "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, false, 1.5);
-    registerSetting("telescope/station/element_fit/all/smoothness_factor_reduction", "Smoothness reduction factor", oskar_SettingsItem::DOUBLE, false, 0.9);
-    registerSetting("telescope/station/element_fit/all/eps_float", "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, false, 4e-4);
-    registerSetting("telescope/station/element_fit/all/eps_double", "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, false, 2e-8);
-    registerSetting("telescope/station/element_fit/all/smoothness_factor_override", "Smoothness factor override", oskar_SettingsItem::DOUBLE, false, 1.0);
+    setLabel("telescope/station/element_fit/all",
+            "Common settings (used for all surfaces)");
+    k = "telescope/station/element_fit/all/search_for_best_fit";
+    registerSetting(k, "Search for best fit", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true (the default) then any numerical element pattern \n"
+            "data will be fitted with smoothing splines, where the smoothness \n"
+            "factor is selected to give the requested average fractional \n"
+            "error. If false, the supplied smoothness factor is used instead.");
+    k = "telescope/station/element_fit/all/average_fractional_error";
+    registerSetting(k, "Average fractional error", oskar_SettingsItem::DOUBLE, false, 0.02);
+    setTooltip(k, "The target average fractional error between the fitted \n"
+            "surface and the numerical element pattern input data. \n"
+            "Choose this value carefully. A value that is too small may \n"
+            "introduce fitting artefacts, or may cause the fitting procedure \n"
+            "to fail. A value that is too large will cause detail to be lost \n"
+            "in the fitted surface. Values around 0.02 seem to produce \n"
+            "sensible results most of the time.");
+    k = "telescope/station/element_fit/all/average_fractional_error_factor_increase";
+    registerSetting(k, "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, false, 1.5);
+    setTooltip(k, "If the fitting procedure fails, this value gives the \n"
+            "factor by which to increase the allowed average fractional \n"
+            "error between the fitted surface and the numerical element \n"
+            "pattern input data, before trying again. Must be > 1.0.");
+    k = "telescope/station/element_fit/all/smoothness_factor_reduction";
+    registerSetting(k, "Smoothness reduction factor", oskar_SettingsItem::DOUBLE, false, 0.9);
+    setTooltip(k, "If searching for a smoothness factor, this is the factor \n"
+            "by which to reduce it until the average fractional error is \n"
+            "reached. Must be < 1.0.");
+    k = "telescope/station/element_fit/all/eps_float";
+    registerSetting(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, false, 4e-4);
+    setTooltip(k, "The value of epsilon used for fitting in single precision. \n"
+            "Suggested value approx. 1e-04.");
+    k = "telescope/station/element_fit/all/eps_double";
+    registerSetting(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, false, 2e-8);
+    setTooltip(k, "The value of epsilon used for fitting in double precision. \n"
+            "Suggested value approx. 1e-08.");
+    k = "telescope/station/element_fit/all/smoothness_factor_override";
+    registerSetting(k, "Smoothness factor override", oskar_SettingsItem::DOUBLE, false, 1.0);
+    setTooltip(k, "Smoothness factor used to fit smoothing splines to \n"
+            "numerical element pattern data, if not searching for a \n"
+            "best fit. Use only if you really know what you're doing!");
 
     // TODO Add parameters for all eight surfaces!
 
-    registerSetting("telescope/output_config_directory", "Output telescope directory", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    k = "telescope/output_config_directory";
+    registerSetting(k, "Output telescope directory", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path used to save the final telescope model directory, \n"
+            "excluding any element pattern data (useful for debugging). \n"
+            "Leave blank if not required.");
 
     // Interferometer settings. (Note: Currently loaded into SettingsObservation)
     setLabel("interferometer", "Interferometer settings");
-    registerSetting("interferometer/channel_bandwidth_hz", "Channel bandwidth [Hz]", oskar_SettingsItem::DOUBLE);
-    registerSetting("interferometer/num_vis_ave", "Number of visibility averages", oskar_SettingsItem::INT_POSITIVE);
-    setTooltip("interferometer/num_vis_ave", "Number of averaged evaluations of the full Measurement Equation per visibility dump.");
-    registerSetting("interferometer/num_fringe_ave", "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
-    setTooltip("interferometer/num_fringe_ave", "Number of averaged evaluations of the K-Jones matrix per Measurement Equation evaluation.");
-    registerSetting("interferometer/oskar_vis_filename", "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    k = "interferometer/channel_bandwidth_hz";
+    registerSetting(k, "Channel bandwidth [Hz]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The channel width, in Hz, used to simulate bandwidth \n"
+            "smearing. (Note that this can be different to the frequency \n"
+            "increment if channels do not cover a contiguous frequency \n"
+            "range.)");
+    k = "interferometer/num_vis_ave";
+    registerSetting(k, "Number of visibility averages", oskar_SettingsItem::INT_POSITIVE);
+    setTooltip(k, "Number of averaged evaluations of the full Measurement \n"
+            "Equation per visibility dump.");
+    k = "interferometer/num_fringe_ave";
+    registerSetting(k, "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
+    setTooltip(k, "Number of averaged evaluations of the K-Jones matrix per \n"
+            "Measurement Equation average.");
+    k = "interferometer/oskar_vis_filename";
+    registerSetting(k, "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path of the OSKAR visibility output file containing the \n"
+            "results of the simulation. Leave blank if not required.");
 #ifndef OSKAR_NO_MS
-    registerSetting("interferometer/ms_filename", "Output Measurement Set", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    k = "interferometer/ms_filename";
+    registerSetting(k, "Output Measurement Set", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path of the Measurement Set containing the results of the \n"
+            "simulation. Leave blank if not required.");
 #endif
-    registerSetting("interferometer/image_output", "Image simulation output",
-            oskar_SettingsItem::BOOL);
-    setDefault("interferometer/image_output", false);
-    setTooltip("interferometer/image_output", "If true, run the OSKAR imager "
-            "on completion of the interferometer simulation. "
-            "For image settings, see the 'Image settings' group");
+    k = "interferometer/image_output";
+    registerSetting(k, "Image simulation output", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, run the OSKAR imager on completion of the \n"
+            "interferometer simulation. For image settings, see the \n"
+            "'Image settings' group");
 
     // Beam pattern settings.
     setLabel("beam_pattern", "Beam pattern settings");
-    registerSetting("beam_pattern/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE, false, 2.0);
-    registerSetting("beam_pattern/size", "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE, false, 256);
-    registerSetting("beam_pattern/station_id", "Station ID", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("beam_pattern/oskar_image_filename", "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    k = "beam_pattern/fov_deg";
+    registerSetting(k, "Field-of-view [deg]", oskar_SettingsItem::DOUBLE, false, 2.0);
+    setTooltip(k, "Total field of view in degrees (max 180.0).");
+    k = "beam_pattern/size";
+    registerSetting(k, "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE, false, 256);
+    setTooltip(k, "Image width in one dimension (e.g. a value of 256 would \n"
+            "give a 256 by 256 image).");
+    k = "beam_pattern/station_id";
+    registerSetting(k, "Station ID", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "The station ID number (zero based) to select from the \n"
+            "telescope model when generating the beam pattern.");
+    k = "beam_pattern/oskar_image_filename";
+    registerSetting(k, "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path of the generated OSKAR image file. \n"
+            "Leave blank if not required.");
 #ifndef OSKAR_NO_FITS
-    registerSetting("beam_pattern/fits_image_filename", "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    k = "beam_pattern/fits_image_filename";
+    registerSetting(k, "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path of the generated FITS image file cube. \n"
+            "Leave blank if not required.");
 #endif
 
     // Image settings.
     setLabel("image", "Image settings");
-    registerSetting("image/fov_deg", "Field-of-view [deg]", oskar_SettingsItem::DOUBLE);
-    setDefault("image/fov_deg", 2.0);
-    registerSetting("image/size", "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE);
-    setDefault("image/size", 256);
+    k = "image/fov_deg";
+    registerSetting(k, "Field-of-view [deg]", oskar_SettingsItem::DOUBLE, false, 2.0);
+    setTooltip(k, "Total field of view in degrees.");
+    k = "image/size";
+    registerSetting(k, "Image dimension [pixels]", oskar_SettingsItem::INT_POSITIVE, false, 256);
+    setTooltip(k, "Image width in one dimension (e.g. a value of 256 would \n"
+            "give a 256 by 256 image).");
     options.clear();
     options << "Linear (XX,XY,YX,YY)" << "XX" << "XY" << "YX" << "YY"
             << "Stokes (I,Q,U,V)" << "I" << "Q" << "U" << "V"
             << "PSF";
-    registerSetting("image/image_type", "Image type", oskar_SettingsItem::OPTIONS, options);
+    k = "image/image_type";
+    registerSetting(k, "Image type", oskar_SettingsItem::OPTIONS, options);
+    setTooltip(k, "The type of image to generate. Note that the Stokes \n"
+            "parameter images (if selected) are uncalibrated. \n"
+            "The point spread function of the observation can be \n"
+            "generated using the PSF option.");
     setDefault("image/image_type", "I");
-    registerSetting("image/channel_snapshots", "Channel snapshots", oskar_SettingsItem::BOOL);
-    setDefault("image/channel_snapshots", true);
-    registerSetting("image/channel_start", "Channel start", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("image/channel_end", "Channel end", oskar_SettingsItem::AXIS_RANGE);
-    setDefault("image/channel_end", "max");
-    registerSetting("image/time_snapshots", "Time snapshots", oskar_SettingsItem::BOOL);
-    setDefault("image/time_snapshots", true);
-    registerSetting("image/time_start", "Time start", oskar_SettingsItem::INT_UNSIGNED);
-    registerSetting("image/time_end", "Time end", oskar_SettingsItem::AXIS_RANGE);
-    setDefault("image/time_end", "max");
+    k = "image/channel_snapshots";
+    registerSetting(k, "Channel snapshots", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true, then produce an image cube containing snapshots \n"
+            "for each frequency channel. If false, then use frequency-\n"
+            "synthesis to stack the channels in the final image.");
+    k = "image/channel_start";
+    registerSetting(k, "Channel start", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "The start channel index to include in the image or image cube.");
+    k = "image/channel_end";
+    registerSetting(k, "Channel end", oskar_SettingsItem::AXIS_RANGE);
+    setTooltip(k, "The end channel index to include in the image or image cube.");
+    setDefault(k, "max");
+    k = "image/time_snapshots";
+    registerSetting(k, "Time snapshots", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "If true, then produce an image cube containing snapshots \n"
+            "for each time step. If false, then use time-synthesis to stack \n"
+            "the times in the final image.");
+    k = "image/time_start";
+    registerSetting(k, "Time start", oskar_SettingsItem::INT_UNSIGNED);
+    setTooltip(k, "The start time index to include in the image or image cube.");
+    k = "image/time_end";
+    registerSetting(k, "Time end", oskar_SettingsItem::AXIS_RANGE);
+    setTooltip(k, "The end time index to include in the image or image cube.");
+    setDefault(k, "max");
     options.clear();
-    //options << "DFT 2D" << "DFT 3D" << "FFT";
-    options << "DFT 2D";
-    registerSetting("image/transform_type", "Transform type", oskar_SettingsItem::OPTIONS, options);
-    setDefault("image/transform_type", "DFT 2D");
-    registerSetting("image/input_vis_data", "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
-    registerSetting("image/oskar_image_root", "Output OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip("image/oskar_image_root",
-            "Path consisting of the root of the OSKAR image filename used to "
-            "save the output image. The full filename will be constructed as "
-            "<root>_<image_type>.img");
+    options << "DFT 2D"; // << "DFT 3D" << "FFT";
+    k = "image/transform_type";
+    registerSetting(k, "Transform type", oskar_SettingsItem::OPTIONS, options);
+    setTooltip(k, "The type of transform used to generate the image. \n"
+            "More options may be available in a later release.");
+    setDefault(k, options[0]);
+    k = "image/input_vis_data";
+    registerSetting(k, "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(k, "Path to the input OSKAR visibility data file.");
+    k = "image/oskar_image_root";
+    registerSetting(k, "Output OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path consisting of the root of the OSKAR image filename \n"
+            "used to save the output image. The full filename will be \n"
+            "constructed as <root>_<image_type>.img");
 #ifndef OSKAR_NO_FITS
-    registerSetting("image/fits_image_root", "Output FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip("image/fits_image_root",
-            "Path consisting of the root of the FITS image filename used to "
-            "save the output image. The full filename will be constructed as "
-            "<root>_<image_type>.fits");
+    k = "image/fits_image_root";
+    registerSetting(k, "Output FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path consisting of the root of the FITS image filename \n"
+            "used to save the output image. The full filename will be \n"
+            "constructed as <root>_<image_type>.fits");
 #endif
 
 }
