@@ -1,10 +1,3 @@
 2012-04-20  OSKAR 2.0.0-beta
-    
-    * First Release!
-    
-2012-04-21  OSKAR 2.0.1-beta
 
-    * some_file.ext: Fixed a horrible bug!
-    
-    * another_file.ext: Added a missing feature.
-    
+    * First release.

@@ -460,8 +460,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
             "theta = 0 and theta = 180 degrees are ignored.");
     k = "telescope/station/element_fit/ignore_data_below_horizon";
     registerSetting(k, "Ignore data below horizon", oskar_SettingsItem::BOOL, false, true);
-    setTooltip(k, "If true, then numerical element pattern data points \n"
-            "greater than theta = 90 degrees are ignored.");
+    setTooltip(k, "If true, then numerical element pattern data points at \n"
+            "theta > 90 degrees are ignored.");
     k = "telescope/station/element_fit/overlap_angle_deg";
     registerSetting(k, "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, false, 9.0);
     setTooltip(k, "The amount of overlap used for copying numerical element \n"
@@ -470,13 +470,13 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     k = "telescope/station/element_fit/weight_boundaries";
     registerSetting(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, false, 20.0);
     setTooltip(k, "The weight given to numerical element pattern data at \n"
-            "phi = 0 and phi = 360, relative to 1.0. Use carefully to \n"
-            "minimise discontinuity at phi = 0.");
+            "phi = 0 and phi = 360 degrees, relative to 1.0. Use \n"
+            "carefully to minimise discontinuity at phi = 0.");
     k = "telescope/station/element_fit/weight_overlap";
     registerSetting(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, false, 4.0);
     setTooltip(k, "The weight given to numerical element pattern data at \n"
-            "phi < 0 and phi > 360, relative to 1.0. Use carefully to \n"
-            "minimise discontinuity at phi = 0.");
+            "phi < 0 and phi > 360 degrees, relative to 1.0. Use \n"
+            "carefully to minimise discontinuity at phi = 0.");
     //registerSetting("telescope/station/element_fit/use_common_set", "Use common set", oskar_SettingsItem::BOOL, false, true);
     setLabel("telescope/station/element_fit/all",
             "Common settings (used for all surfaces)");
