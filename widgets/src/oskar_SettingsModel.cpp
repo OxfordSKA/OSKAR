@@ -702,6 +702,14 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
             return QColor(Qt::darkBlue);
     }
+    else if (role == Qt::BackgroundRole)
+    {
+        if (index.column() == 1)
+        {
+            QBrush brush(QColor(16, 16, 16, 16));
+            return brush;
+        }
+    }
     else if (role == Qt::ToolTipRole)
         return item->tooltip();
     else if (role == DefaultRole)
