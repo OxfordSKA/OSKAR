@@ -107,8 +107,7 @@ string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
 install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
         DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
         FILES_MATCHING PATTERN "*.h"
-        PATTERN ${install_dir} EXCLUDE
-        PATTERN ${bin_dir} EXCLUDE
+        PATTERN "${bin_dir}/${install_dir}" EXCLUDE
         PATTERN src  EXCLUDE
         PATTERN test EXCLUDE
         PATTERN .svn EXCLUDE)
