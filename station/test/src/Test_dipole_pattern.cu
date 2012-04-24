@@ -41,8 +41,8 @@
 
 void Test_dipole_pattern::test()
 {
-    int num_az = 360;
-    int num_el = 90;
+    int num_az = 361;
+    int num_el = 91;
     int num_pixels = num_az * num_el;
     int num_threads = 256;
     int num_blocks  = (num_pixels + num_threads - 1) / num_threads;
@@ -55,12 +55,12 @@ void Test_dipole_pattern::test()
     // Generate azimuth and elevation.
     double* az = (double*)azimuth;
     double* el = (double*)elevation;
-    for (int j = 0; j < num_el; ++j)
+    for (int i = 0; i < num_az; ++i)
     {
-        for (int i = 0; i < num_az; ++i)
+        for (int j = 0; j < num_el; ++j)
         {
-            az[i + j * num_az] = i * ((2.0 * M_PI) / (num_az - 1));
-            el[i + j * num_az] = j * ((M_PI / 2.0) / (num_el - 1));
+            az[j + i * num_el] = i * ((2.0 * M_PI) / (num_az - 1));
+            el[j + i * num_el] = j * ((M_PI / 2.0) / (num_el - 1));
         }
     }
 
@@ -87,8 +87,8 @@ void Test_dipole_pattern::test()
             OSKAR_LOCATION_GPU, num_pixels);
 
     // Define antenna orientations.
-    double orientation_x = 80.0 * M_PI/180;
-    double orientation_y = 20.0 * M_PI/180;
+    double orientation_x = 90.0 * M_PI/180;
+    double orientation_y = 0.0 * M_PI/180;
 
     // Call the kernel.
     TIMER_START

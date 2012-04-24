@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include "interferometry/oskar_telescope_model_analyse.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "station/oskar_ElementModel.h"
 #include "station/oskar_station_model_analyse.h"
 #include "utility/oskar_mem_different.h"
 #include "utility/oskar_mem_element_size.h"
@@ -83,6 +84,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         oskar_Mem *x_signal0, *y_signal0, *z_signal0;
         oskar_Mem *cos_x0, *sin_x0, *cos_y0, *sin_y0;
         oskar_Mem *weights0;
+        oskar_ElementModel* element_model0 = NULL;
+        oskar_Mem *filename_port1_0 = NULL, *filename_port2_0 = NULL;
         int station_type0, num_elements0, use_polarised_elements0, array_is_3d0;
         int apply_element_errors0, apply_element_weight0, single_element_model0;
         x_weights0 = &(model->station[0].x_weights);
@@ -105,6 +108,12 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         apply_element_errors0 = model->station[0].apply_element_errors;
         apply_element_weight0 = model->station[0].apply_element_weight;
         single_element_model0 = model->station[0].single_element_model;
+        element_model0 = model->station[0].element_pattern;
+        if (element_model0)
+        {
+            filename_port1_0 = &element_model0->filename_port1;
+            filename_port2_0 = &element_model0->filename_port2;
+        }
 
         for (i = 1; i < num_stations; ++i)
         {
@@ -112,6 +121,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             oskar_Mem *x_signal, *y_signal, *z_signal;
             oskar_Mem *cos_x, *sin_x, *cos_y, *sin_y;
             oskar_Mem *weights;
+            oskar_ElementModel* element_model = NULL;
+            oskar_Mem *filename_port1 = NULL, *filename_port2 = NULL;
             int station_type, num_elements, use_polarised_elements, array_is_3d;
             int apply_element_errors, apply_element_weight, single_element_model;
             x_weights = &(model->station[i].x_weights);
@@ -134,6 +145,12 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             apply_element_errors = model->station[i].apply_element_errors;
             apply_element_weight = model->station[i].apply_element_weight;
             single_element_model = model->station[i].single_element_model;
+            element_model = model->station[i].element_pattern;
+            if (element_model)
+            {
+                filename_port1 = &element_model->filename_port1;
+                filename_port2 = &element_model->filename_port2;
+            }
 
             /* Check if the meta-data are different. */
             if (station_type != station_type0 ||
@@ -146,6 +163,32 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             {
                 model->identical_stations = 0;
                 break;
+            }
+
+            /* Check if element patterns exist. */
+            if ( (element_model0 && !element_model) ||
+                    (!element_model0 && element_model) )
+            {
+                model->identical_stations = 0;
+                break;
+            }
+
+            /* Check if element pattern filenames are different. */
+            if (filename_port1_0 && filename_port1)
+            {
+                if (oskar_mem_different(filename_port1_0, filename_port1, 0))
+                {
+                    model->identical_stations = 0;
+                    break;
+                }
+            }
+            if (filename_port2_0 && filename_port2)
+            {
+                if (oskar_mem_different(filename_port2_0, filename_port2, 0))
+                {
+                    model->identical_stations = 0;
+                    break;
+                }
             }
 
             /* Check if the memory contents are different. */

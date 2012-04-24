@@ -494,7 +494,8 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
             "introduce fitting artefacts, or may cause the fitting procedure \n"
             "to fail. A value that is too large will cause detail to be lost \n"
             "in the fitted surface. Values around 0.02 seem to produce \n"
-            "sensible results most of the time.");
+            "sensible results most of the time, but smaller values \n"
+            "(e.g. 0.005) may be possible if the surface is simple.");
     k = "telescope/station/element_fit/all/average_fractional_error_factor_increase";
     registerSetting(k, "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, false, 1.5);
     setTooltip(k, "If the fitting procedure fails, this value gives the \n"
@@ -600,10 +601,16 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
     k = "image/image_type";
     registerSetting(k, "Image type", oskar_SettingsItem::OPTIONS, options);
     setTooltip(k, "The type of image to generate. Note that the Stokes \n"
-            "parameter images (if selected) are uncalibrated. \n"
+            "parameter images (if selected) are uncalibrated, \n"
+            "and are formed simply using the standard combinations \n"
+            "of the linear polarisations: \n"
+            "    I = 0.5 (XX + YY) \n"
+            "    Q = 0.5 (XX - YY) \n"
+            "    U = 0.5 (XY + YX) \n"
+            "    V = -0.5i (XY - YX) \n"
             "The point spread function of the observation can be \n"
             "generated using the PSF option.");
-    setDefault("image/image_type", "I");
+    setDefault(k, "I");
     k = "image/channel_snapshots";
     registerSetting(k, "Channel snapshots", oskar_SettingsItem::BOOL, false, true);
     setTooltip(k, "If true, then produce an image cube containing snapshots \n"
@@ -705,10 +712,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     else if (role == Qt::BackgroundRole)
     {
         if (index.column() == 1)
-        {
-            QBrush brush(QColor(16, 16, 16, 16));
-            return brush;
-        }
+            return QColor(16, 16, 16, 16);
     }
     else if (role == Qt::ToolTipRole)
         return item->tooltip();

@@ -69,11 +69,11 @@ extern "C" {
  *
  * @param[out] data     Pointer to data structure to fill.
  * @param[in]  filename Data file name.
- * @param[in]  i        Index 1 or 2 (port number to load).
+ * @param[in]  port     Port 1 or 2 (port number to load).
  * @param[in]  settings Pointer to settings structure used for surface fitting.
  */
 OSKAR_EXPORT
-int oskar_element_model_load_cst(oskar_ElementModel* data, int i,
+int oskar_element_model_load_cst(oskar_ElementModel* data, int port,
         const char* filename, const oskar_SettingsElementFit* settings);
 
 #ifdef __cplusplus

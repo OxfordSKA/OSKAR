@@ -124,7 +124,7 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
         oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* w,
         const oskar_SettingsSpline* settings)
 {
-    int element_size, err, k = 0, maxiter = 1000, type;
+    int element_size, err, k = 0, maxiter = 50, type;
     int b1, b2, bx, by, iopt, km, kwrk, lwrk1, lwrk2, ne, nxest, nyest, u, v;
     int sqrt_num_points;
     int *iwrk;
@@ -237,7 +237,7 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
                 else if (err == -2) s = fp;
 
                 /* Check if the fit is good enough. */
-                if (!settings->search_for_best_fit || fp < term || s < term)
+                if (!settings->search_for_best_fit || fp <= term || s <= term)
                     break;
 
                 /* Decrease smoothing factor. */
@@ -317,7 +317,7 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
                 else if (err == -2) s = fp;
 
                 /* Check if the fit is good enough. */
-                if (!settings->search_for_best_fit || fp < term || s < term)
+                if (!settings->search_for_best_fit || fp <= term || s <= term)
                     break;
 
                 /* Decrease smoothing factor. */

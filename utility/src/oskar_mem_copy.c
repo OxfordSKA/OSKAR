@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,8 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     /* Only copy the pointer if destination does not own its memory. */
     if (dst->owner == OSKAR_FALSE)
     {
+        /* FIXME is this really the behaviour we want? ... too confusing! */
+
         /* Disallow a pointer copy at a different location. */
         if (dst->location != src->location)
             return OSKAR_ERR_BAD_LOCATION;

@@ -28,6 +28,7 @@
 
 #include "station/oskar_element_model_copy.h"
 #include "math/oskar_spline_data_copy.h"
+#include "utility/oskar_mem_copy.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,6 +39,10 @@ int oskar_element_model_copy(oskar_ElementModel* dst,
 {
     int err;
 
+    err = oskar_mem_copy(&dst->filename_port1, &src->filename_port1);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->filename_port2, &src->filename_port2);
+    if (err) return err;
     err = oskar_spline_data_copy(&dst->port1_phi_re, &src->port1_phi_re);
     if (err) return err;
     err = oskar_spline_data_copy(&dst->port1_phi_im, &src->port1_phi_im);
@@ -46,9 +51,9 @@ int oskar_element_model_copy(oskar_ElementModel* dst,
     if (err) return err;
     err = oskar_spline_data_copy(&dst->port1_theta_im, &src->port1_theta_im);
     if (err) return err;
-    err = oskar_spline_data_copy(&dst->port2_phi_re, &src->port1_theta_re);
+    err = oskar_spline_data_copy(&dst->port2_phi_re, &src->port2_phi_re);
     if (err) return err;
-    err = oskar_spline_data_copy(&dst->port2_phi_im, &src->port1_theta_im);
+    err = oskar_spline_data_copy(&dst->port2_phi_im, &src->port2_phi_im);
     if (err) return err;
     err = oskar_spline_data_copy(&dst->port2_theta_re, &src->port2_theta_re);
     if (err) return err;

@@ -28,6 +28,7 @@
 
 #include "station/oskar_element_model_load_cst.h"
 #include "utility/oskar_getline.h"
+#include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_realloc.h"
@@ -54,11 +55,11 @@ extern "C" {
 
 #define DEG2RAD (M_PI/180.0)
 
-int oskar_element_model_load_cst(oskar_ElementModel* data, int i,
+int oskar_element_model_load_cst(oskar_ElementModel* data, int port,
         const char* filename, const oskar_SettingsElementFit* settings)
 {
     /* Initialise the flags and local data. */
-    int n = 0, err = 0, type = 0;
+    int n = 0, err = 0, type = 0, i;
     double cos_overlap;
     oskar_SplineData *data_phi_re = 0, *data_theta_re = 0;
     oskar_SplineData *data_phi_im = 0, *data_theta_im = 0;
@@ -75,20 +76,20 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, int i,
     weight;
 
     /* Sanity check on inputs. */
-    if (i != 1 && i != 2)
+    if (port != 1 && port != 2)
         return OSKAR_ERR_INVALID_ARGUMENT;
     if (!data || !filename || !settings)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get pointers to the surfaces to fill. */
-    if (i == 1)
+    if (port == 1)
     {
         data_phi_re = &data->port1_phi_re;
         data_phi_im = &data->port1_phi_im;
         data_theta_re = &data->port1_theta_re;
         data_theta_im = &data->port1_theta_im;
     }
-    else if (i == 2)
+    else if (port == 2)
     {
         data_phi_re = &data->port2_phi_re;
         data_phi_im = &data->port2_phi_im;
@@ -106,14 +107,14 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, int i,
     }
     else
     {
-        if (i == 1)
+        if (port == 1)
         {
             settings_phi_re = &settings->x_phi_re;
             settings_phi_im = &settings->x_phi_im;
             settings_theta_re = &settings->x_theta_re;
             settings_theta_im = &settings->x_theta_im;
         }
-        else if (i == 2)
+        else if (port == 2)
         {
             settings_phi_re = &settings->y_phi_re;
             settings_phi_im = &settings->y_phi_im;
@@ -473,6 +474,26 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, int i,
     err = oskar_spline_data_surfit(data_phi_im, n,
             &m_theta, &m_phi, &m_phi_im, &weight, settings_phi_im);
     if (err) goto cleanup;
+
+    /* Store the filename. */
+    if (port == 1)
+    {
+        err = oskar_mem_init(&data->filename_port1, OSKAR_CHAR,
+                OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+        if (err) return err;
+        err = oskar_mem_append_raw(&data->filename_port1, filename,
+                OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
+        if (err) return err;
+    }
+    else if (port == 2)
+    {
+        err = oskar_mem_init(&data->filename_port2, OSKAR_CHAR,
+                OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+        if (err) return err;
+        err = oskar_mem_append_raw(&data->filename_port2, filename,
+                OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
+        if (err) return err;
+    }
 
     /* Free temporary storage. */
     cleanup:

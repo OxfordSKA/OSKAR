@@ -45,6 +45,8 @@
  */
 struct oskar_ElementModel
 {
+    oskar_Mem filename_port1;
+    oskar_Mem filename_port2;
     oskar_SplineData port1_phi_re;
     oskar_SplineData port1_phi_im;
     oskar_SplineData port1_theta_re;

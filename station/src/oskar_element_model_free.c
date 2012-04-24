@@ -28,6 +28,7 @@
 
 #include "station/oskar_element_model_free.h"
 #include "math/oskar_spline_data_free.h"
+#include "utility/oskar_mem_free.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +38,10 @@ int oskar_element_model_free(oskar_ElementModel* data)
 {
     int err;
 
+    err = oskar_mem_free(&data->filename_port1);
+    if (err) return err;
+    err = oskar_mem_free(&data->filename_port2);
+    if (err) return err;
     err = oskar_spline_data_free(&data->port1_phi_re);
     if (err) return err;
     err = oskar_spline_data_free(&data->port1_phi_im);

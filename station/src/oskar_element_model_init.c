@@ -28,6 +28,7 @@
 
 #include "station/oskar_element_model_init.h"
 #include "math/oskar_spline_data_init.h"
+#include "utility/oskar_mem_init.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,6 +42,10 @@ int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
+    err = oskar_mem_init(&data->filename_port1, OSKAR_CHAR, location, 0, 1);
+    if (err) return err;
+    err = oskar_mem_init(&data->filename_port2, OSKAR_CHAR, location, 0, 1);
+    if (err) return err;
     err = oskar_spline_data_init(&data->port1_phi_re, type, location);
     if (err) return err;
     err = oskar_spline_data_init(&data->port1_phi_im, type, location);
