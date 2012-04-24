@@ -98,12 +98,14 @@ add_subdirectory(ms)
 add_subdirectory(widgets)
 
 # ==== Install header tree.
-string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
-math(EXPR x "${POS} + 1")
-string(SUBSTRING ${CMAKE_BINARY_DIR} ${x} -1 bin_dir)
-string(FIND ${CMAKE_INSTALL_PREFIX} "/" POS REVERSE)
-math(EXPR x "${POS} + 1")
-string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
+if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
+    string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
+    math(EXPR x "${POS} + 1")
+    string(SUBSTRING ${CMAKE_BINARY_DIR} ${x} -1 bin_dir)
+    string(FIND ${CMAKE_INSTALL_PREFIX} "/" POS REVERSE)
+    math(EXPR x "${POS} + 1")
+    string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
+endif()
 install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
         DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
         FILES_MATCHING PATTERN "*.h"
