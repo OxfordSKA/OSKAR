@@ -105,14 +105,29 @@ if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
     string(FIND ${CMAKE_INSTALL_PREFIX} "/" POS REVERSE)
     math(EXPR x "${POS} + 1")
     string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
-endif()
-install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
+    string(COMPARE EQUAL ${CMAKE_INSTALL_PREFIX} ${CMAKE_BINARY_DIR} test)
+    if (${test})
+        set(install_include_dir "${bin_dir}/include")
+    else ()
+        set(install_include_dir "${bin_dir}/${install_dir}/include")
+    endif()
+    message("== Excluding install include directory '${install_include_dir}'")
+    install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
         DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
         FILES_MATCHING PATTERN "*.h"
-        PATTERN "${bin_dir}/${install_dir}" EXCLUDE
+        PATTERN ${install_include_dir} EXCLUDE
         PATTERN src  EXCLUDE
         PATTERN test EXCLUDE
         PATTERN .svn EXCLUDE)
+else ()
+    install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
+            DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+            FILES_MATCHING PATTERN "*.h"
+            PATTERN src  EXCLUDE
+            PATTERN test EXCLUDE
+            PATTERN .svn EXCLUDE)
+endif()
+
 
 # ==== Include packaging script.
 include(oskar_packaging)
