@@ -41,8 +41,8 @@
 
 void Test_dipole_pattern::test()
 {
-    int num_az = 361;
-    int num_el = 91;
+    int num_az = 181;
+    int num_el = 46;
     int num_pixels = num_az * num_el;
     int num_threads = 256;
     int num_blocks  = (num_pixels + num_threads - 1) / num_threads;
