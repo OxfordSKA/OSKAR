@@ -98,14 +98,21 @@ add_subdirectory(ms)
 add_subdirectory(widgets)
 
 # ==== Install header tree.
+string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
+math(EXPR x "${POS} + 1")
+string(SUBSTRING ${CMAKE_BINARY_DIR} ${x} -1 bin_dir)
+string(FIND ${CMAKE_INSTALL_PREFIX} "/" POS REVERSE)
+math(EXPR x "${POS} + 1")
+string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
 install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
-    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-    FILES_MATCHING PATTERN "*.h"
-    PATTERN "src" EXCLUDE
-    PATTERN "test" EXCLUDE
-    PATTERN "matlab" EXCLUDE
-    PATTERN "python" EXCLUDE
-    PATTERN ".svn" EXCLUDE)
+        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+        FILES_MATCHING PATTERN "*.h"
+        PATTERN ${install_dir} EXCLUDE
+        PATTERN ${bin_dir} EXCLUDE
+        PATTERN src  EXCLUDE
+        PATTERN test EXCLUDE
+        PATTERN .svn EXCLUDE)
 
-# Include packaging options script.
+# ==== Include packaging script.
 include(oskar_packaging)
+
