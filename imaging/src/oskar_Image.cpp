@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,10 +32,12 @@
 
 oskar_Image::oskar_Image(int type, int location)
 {
-    oskar_image_init(this, type, location);
+    if (oskar_image_init(this, type, location))
+    	throw "Error in oskar_image_init.";
 }
 
 oskar_Image::~oskar_Image()
 {
-    oskar_image_free(this);
+    if (oskar_image_free(this))
+    	throw "Error in oskar_image_free.";
 }

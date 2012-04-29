@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@ extern "C" {
 
 int oskar_image_init(oskar_Image* image, int type, int location)
 {
-    int err, *dim;
+    int err;
 
     /* Sanity check on inputs. */
     if (image == NULL)
@@ -46,19 +46,16 @@ int oskar_image_init(oskar_Image* image, int type, int location)
     /* Initialise memory. */
     err = oskar_mem_init(&image->data, type, location, 0, 1);
     if (err) return err;
-    err = oskar_mem_init(&image->dimension_order, OSKAR_INT,
-            OSKAR_LOCATION_CPU, 5, 1);
     err = oskar_mem_init(&image->settings_path, OSKAR_CHAR,
             OSKAR_LOCATION_CPU, 0, 1);
     if (err) return err;
 
     /* Set default dimension order. */
-    dim = (int*) image->dimension_order.data;
-    dim[0] = OSKAR_IMAGE_DIM_RA;
-    dim[1] = OSKAR_IMAGE_DIM_DEC;
-    dim[2] = OSKAR_IMAGE_DIM_POL;
-    dim[3] = OSKAR_IMAGE_DIM_TIME;
-    dim[4] = OSKAR_IMAGE_DIM_CHANNEL;
+    image->dimension_order[0] = OSKAR_IMAGE_DIM_RA;
+    image->dimension_order[1] = OSKAR_IMAGE_DIM_DEC;
+    image->dimension_order[2] = OSKAR_IMAGE_DIM_POL;
+    image->dimension_order[3] = OSKAR_IMAGE_DIM_TIME;
+    image->dimension_order[4] = OSKAR_IMAGE_DIM_CHANNEL;
 
     /* Initialise meta-data. */
     image->image_type = OSKAR_IMAGE_TYPE_UNDEF;

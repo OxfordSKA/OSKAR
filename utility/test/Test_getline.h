@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,15 @@ class Test_getline : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(Test_getline);
         CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST(test_no_final_return_character);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
         void test_method();
+
+        /// Test method.
+        void test_no_final_return_character();
 };
 
 // Register the test class.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,6 @@ int oskar_image_read(oskar_Image* image, const char* filename, int idx)
     err = oskar_image_init(image, type, OSKAR_LOCATION_CPU);
     if (err) goto cleanup;
 
-
     /* Optionally read the settings path (ignore the error code). */
     oskar_mem_binary_stream_read(&image->settings_path, stream, &index,
             OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0);
@@ -90,8 +89,9 @@ int oskar_image_read(oskar_Image* image, const char* filename, int idx)
     if (err) goto cleanup;
 
     /* Read the dimension order. */
-    err = oskar_mem_binary_stream_read(&image->dimension_order, stream, &index, grp,
-            OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx);
+    err = oskar_binary_stream_read(stream, &index, OSKAR_INT, grp,
+            OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx, sizeof(image->dimension_order),
+            image->dimension_order);
     if (err) goto cleanup;
 
     /* Read other image metadata. */

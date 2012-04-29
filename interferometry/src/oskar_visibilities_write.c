@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,21 +53,12 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
 
     /* Get the metadata. */
-#ifdef __cplusplus
     uu_elements = vis->uu_metres.num_elements;
     vv_elements = vis->vv_metres.num_elements;
     ww_elements = vis->ww_metres.num_elements;
     amp_elements = vis->amplitude.num_elements;
     amp_type = vis->amplitude.type;
     coord_type = vis->uu_metres.type;
-#else
-    uu_elements = vis->uu_metres.num_elements;
-    vv_elements = vis->vv_metres.num_elements;
-    ww_elements = vis->ww_metres.num_elements;
-    amp_elements = vis->amplitude.num_elements;
-    amp_type = vis->amplitude.type;
-    coord_type = vis->uu_metres.type;
-#endif
 
     /* Sanity check on inputs. */
     if (filename == NULL || vis == NULL)
@@ -144,7 +135,6 @@ int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis
             OSKAR_VIS_TAG_PHASE_CENTRE_RA, 0, vis->phase_centre_ra_deg);
     oskar_binary_file_write_double(filename, grp,
             OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, vis->phase_centre_dec_deg);
-
 
     /* Write the baseline coordinate arrays. */
     oskar_mem_binary_file_write(&vis->uu_metres, filename,

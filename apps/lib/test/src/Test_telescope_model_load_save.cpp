@@ -85,6 +85,7 @@ void Test_telescope_model_load_save::test_1_level()
     settings.latitude_rad = telescope.latitude_rad;
     settings.longitude_rad = telescope.longitude_rad;
     settings.config_directory = (char*)malloc(1 + strlen(path));
+    settings.station.ignore_custom_element_patterns = true;
     strcpy(settings.config_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
     err = oskar_telescope_model_load(&telescope2, &settings);
@@ -188,6 +189,7 @@ void Test_telescope_model_load_save::test_2_level()
     settings.latitude_rad = telescope.latitude_rad;
     settings.longitude_rad = telescope.longitude_rad;
     settings.config_directory = (char*)malloc(1 + strlen(path));
+    settings.station.ignore_custom_element_patterns = true;
     strcpy(settings.config_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
     err = oskar_telescope_model_load(&telescope2, &settings);
@@ -234,5 +236,5 @@ void Test_telescope_model_load_save::test_2_level()
     }
 
     // Remove test directory.
-    //oskar_remove_dir(path);
+    oskar_remove_dir(path);
 }

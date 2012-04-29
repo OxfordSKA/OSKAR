@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,6 @@ int oskar_image_free(oskar_Image* image)
 
     /* Free memory. */
     err = oskar_mem_free(&image->data);
-    if (err) return err;
-    err = oskar_mem_free(&image->dimension_order);
     if (err) return err;
     err = oskar_mem_free(&image->settings_path);
     if (err) return err;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
 {
     /* Initialise the byte counter. */
     size_t size = 0;
+    int c;
 
     /* Check for sane inputs. */
     if (lineptr == NULL || n == NULL || stream == NULL)
@@ -57,10 +58,11 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
     for (;;)
     {
         /* Get the character. */
-        int i;
-        i = getc(stream);
-        if (i == EOF)
-            return OSKAR_ERR_EOF;
+        c = getc(stream);
+
+        /* Check if end-of-file or end-of-line has been reached. */
+        if (c == EOF || c == '\n')
+            break;
 
         /* Allocate space for size+1 bytes (including NULL terminator). */
         if (size + 1 >= *n)
@@ -76,16 +78,14 @@ int oskar_getline(char** lineptr, size_t* n, FILE* stream)
         }
 
         /* Store the character. */
-        (*lineptr)[size++] = i;
-
-        /* Check if end-of-line reached. */
-        if (i == '\n')
-            break;
+        (*lineptr)[size++] = c;
     }
 
     /* Add a NULL terminator. */
     (*lineptr)[size] = '\0';
 
-    /* Return the number of characters read. */
+    /* Return the number of characters read, or EOF as appropriate. */
+    if (c == EOF && size == 0)
+        return OSKAR_ERR_EOF;
     return size;
 }

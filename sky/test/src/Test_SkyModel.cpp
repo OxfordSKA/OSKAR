@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_filter_by_flux.h"
 #include "sky/oskar_sky_model_filter_by_radius.h"
+#include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_load.h"
@@ -723,7 +724,14 @@ void Test_SkyModel::test_sky_model_set()
 //    }
 //    printf("==========================\n");
 
-
-    if (set) free(set);
+    // Free the array of sky models.
+    if (set)
+    {
+    	for (int i = 0; i < number; ++i)
+    	{
+    		oskar_sky_model_free(&set[i]);
+    	}
+    	free(set);
+    }
 }
 

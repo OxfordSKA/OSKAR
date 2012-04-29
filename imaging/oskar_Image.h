@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,8 @@
 struct oskar_Image
 {
     oskar_Mem data;
-    oskar_Mem dimension_order;
     oskar_Mem settings_path;
+    int dimension_order[5];
     int image_type;
     int width;
     int height;

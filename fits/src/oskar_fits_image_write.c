@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ void oskar_fits_image_write(const oskar_Image* image, const char* filename)
     type = image->data.type;
 
     /* Get the number of dimensions. */
-    num_dimensions = image->dimension_order.num_elements;
+    num_dimensions = sizeof(image->dimension_order) / sizeof(int);
     if (num_dimensions > 10)
         return;
 
@@ -65,7 +65,7 @@ void oskar_fits_image_write(const oskar_Image* image, const char* filename)
     for (i = 0; i < num_dimensions; ++i)
     {
         int dim;
-        dim = ((int*) image->dimension_order.data)[i];
+        dim = image->dimension_order[i];
         if (dim == OSKAR_IMAGE_DIM_RA)
         {
             double max, inc, delta;

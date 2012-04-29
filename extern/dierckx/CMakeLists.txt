@@ -13,6 +13,9 @@ include_directories(${DIERCKX_SOURCE_DIR})
 find_package(CppUnit)
 find_package(OSKAR2)
 
+set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0")
+
 set(dierckx_SRC
     src/bispev.f
     src/fpback.f

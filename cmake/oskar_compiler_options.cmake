@@ -37,18 +37,12 @@ if (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-variadic-macros")
 
-    # Ignore warnings from CUDA headers by specifying them as system headers.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
-
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC")
 
     # Add release and debug flags.
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG")
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0")
 
 # === Intel compiler.
 elseif (NOT WIN32)
@@ -63,13 +57,9 @@ elseif (NOT WIN32)
     # Set release and debug flags.
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -DNDEBUG")
-    set(CMAKE_Fortran_FLAGS_DEBUG "-g -O0")
-    
-    
 
-# === Microsoft visual studio compiler.
-elseif (MSVC) # visual studio compiler.
+# === Microsoft Visual Studio compiler.
+elseif (MSVC)
     add_definitions(/wd4100) # NEED TO FIX ALL THESE!
     add_definitions(/wd4305) # NEED TO FIX ALL THESE!
     add_definitions(/wd4244) # NEED TO FIX ALL THESE!
@@ -80,7 +70,7 @@ else ()
     message("-- INFO: Unknown compiler.")
 endif ()
 
-# === Cuda
+# === CUDA
 if (CUDA_FOUND)
     # Use a separate set of flags for CUDA.
     if (NOT MSVC)
@@ -98,6 +88,12 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-long-long;)
         # Disable warning about missing initializers (for CUDA Thrust).
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-missing-field-initializers;)
+        # Disable warning about "variable '__f' set but not used".
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-unused-but-set-variable;)
+
+        # Ignore warnings from CUDA headers by specifying them as system headers.
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
+        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
     endif ()
 
     # Build mode specific flags.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,8 +108,9 @@ int oskar_image_write(const oskar_Image* image, const char* filename, int idx)
             OSKAR_IMAGE_TAG_NUM_CHANNELS, idx, image->num_channels);
 
     /* Write the dimension order. */
-    oskar_mem_binary_stream_write(&image->dimension_order, stream, grp,
-            OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx, 0);
+    oskar_binary_stream_write(stream, OSKAR_INT, grp,
+    		OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx,
+    		sizeof(image->dimension_order), image->dimension_order);
 
     /* Write other image metadata. */
     oskar_binary_stream_write_int(stream, grp,

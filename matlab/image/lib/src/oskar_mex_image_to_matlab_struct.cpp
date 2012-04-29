@@ -47,12 +47,11 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
     if (strcmp(mxGetClassName(image_type_), "oskar.image.type"))
         mexErrMsgTxt("ERROR: invalid image type.\n");
 
-    int* dim_order = (int*)im_in->dimension_order.data;
-    if (!(dim_order[0] == OSKAR_IMAGE_DIM_RA ||
-            dim_order[1] == OSKAR_IMAGE_DIM_DEC ||
-            dim_order[2] == OSKAR_IMAGE_DIM_POL ||
-            dim_order[3] == OSKAR_IMAGE_DIM_TIME ||
-            dim_order[4] == OSKAR_IMAGE_DIM_CHANNEL))
+    if (im_in->dimension_order[0] != OSKAR_IMAGE_DIM_RA ||
+    		im_in->dimension_order[1] != OSKAR_IMAGE_DIM_DEC ||
+    		im_in->dimension_order[2] != OSKAR_IMAGE_DIM_POL ||
+    		im_in->dimension_order[3] != OSKAR_IMAGE_DIM_TIME ||
+    		im_in->dimension_order[4] != OSKAR_IMAGE_DIM_CHANNEL)
     {
         mexErrMsgTxt("ERROR: image dimension order not supported.\n");
     }
