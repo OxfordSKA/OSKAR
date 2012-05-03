@@ -705,9 +705,14 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     }
     else if (role == Qt::ForegroundRole)
     {
-        QVariant val = item->value();
-        if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
-            return QColor(Qt::darkBlue);
+        if (item->enabled())
+        {
+            QVariant val = item->value();
+            if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
+                return QColor(Qt::darkBlue);
+        }
+        else
+            return QColor(Qt::gray);
     }
     else if (role == Qt::BackgroundRole)
     {
