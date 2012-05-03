@@ -1038,11 +1038,14 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     else if (role == EnabledRole)
     {
         item->setEnabled(value.toBool());
-        if (value.toBool())
-            settings_->setValue(item->key(), item->value());
-        else
-            settings_->remove(item->key());
-        settings_->sync();
+        if (settings_)
+        {
+            if (value.toBool())
+                settings_->setValue(item->key(), item->value());
+            else
+                settings_->remove(item->key());
+            settings_->sync();
+        }
         emit dataChanged(topLeft, bottomRight);
         return true;
     }
