@@ -168,8 +168,8 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     if (!(s->sky.gsm_filter.flux_min == 0.0 &&
             s->sky.gsm_filter.flux_max == 0.0))
     {
-        pr_3e(3, w, "Filter flux min [Jy]", s->sky.input_sky_filter.flux_min);
-        pr_3e(3, w, "Filter flux max [Jy]", s->sky.input_sky_filter.flux_max);
+        pr_3e(3, w, "Filter flux min [Jy]", s->sky.gsm_filter.flux_min);
+        pr_3e(3, w, "Filter flux max [Jy]", s->sky.gsm_filter.flux_max);
     }
     pr_s(2, 0, "Output OSKAR sky model", s->sky.output_sky_file);
 

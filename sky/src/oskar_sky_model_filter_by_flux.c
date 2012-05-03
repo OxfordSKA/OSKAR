@@ -31,6 +31,8 @@
 #include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_type.h"
 
+#include <float.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -41,8 +43,16 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
     int err = 0, type, location;
 
     /* Return immediately if no filtering should be done. */
-    if (min_I == 0.0 && max_I == 0.0)
+    if (min_I <= 0.0 && max_I <= 0.0)
         return 0;
+
+    /* If only the lower limit is set */
+    if (max_I <= 0.0 && min_I > 0.0)
+        max_I = DBL_MAX;
+
+    /* If only the upper limit is set */
+    if (min_I <= 0.0 && max_I > 0.0)
+        min_I = 0.0;
 
     /* Get the type and location. */
     type = oskar_sky_model_type(sky);
