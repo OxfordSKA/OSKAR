@@ -45,9 +45,6 @@ oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
   settings_(NULL),
   rootItem_(NULL)
 {
-    QString k;
-    QStringList options;
-
     // Set up the root item.
     rootItem_ = new oskar_SettingsItem(QString(), QString(),
             oskar_SettingsItem::LABEL, "Setting", "Value");
