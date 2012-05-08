@@ -14,15 +14,15 @@ if (CPPUNIT_FOUND)
         src/Test_Jones.cpp
         src/Test_Matrix3.cpp
         src/Test_Matrix4.cpp
+        src/Test_meshgrid.cpp
         src/Test_linspace.cpp
         src/Test_matrix_math.cpp
-        src/Test_meshgrid.cpp
         src/Test_rotate.cpp
         src/Test_sph_lm.cpp
         src/Test_sph2cart.cpp
         src/Test_SphericalPositions.cpp
     )
-    if (OSKAR_USE_LAPACK AND OSKAR_USE_CLAPACK)
+    if (OSKAR_USE_LAPACK AND OSKAR_USE_CBLAS)
         list(APPEND math_test_SRC src/Test_fit_ellipse.cpp)
     endif ()
 
@@ -35,30 +35,9 @@ if (CPPUNIT_FOUND)
     if (OSKAR_USE_LAPACK)
         target_link_libraries(math_test ${OSKAR_LAPACK})
     endif()
-    if (OSKAR_USE_CLAPACK)
+    if (OSKAR_USE_CBLAS)
         target_link_libraries(math_test ${OSKAR_CBLAS})
     endif()
 
     add_test(math_test math_test)
-endif()
-
-
-# QtTest
-if (QT_QTTEST_FOUND AND Qwt5_FOUND)
-
-    include_directories(
-        ${Qwt5_INCLUDE_DIR}
-        ${QT_INCLUDE_DIR}
-        ${QT_QTCORE_INCLUDE_DIR}
-        ${QT_QTGUI_INCLUDE_DIR}
-    )
-
-    qt4_wrap_cpp(QTest_Random_MOC QTest_Random.h)
-    add_executable(qtest_Random ${QTest_Random_MOC})
-    target_link_libraries(qtest_Random
-        oskar
-        oskar_widgets
-        ${QT_QTTEST_LIBRARY}
-        ${QT_QTGUI_LIBRARY}
-    )
 endif()
