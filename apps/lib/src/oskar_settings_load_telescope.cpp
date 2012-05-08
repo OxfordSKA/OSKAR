@@ -147,20 +147,20 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
 
     // Station element fitting parameters (for all).
     s.beginGroup("all");
+    tel->station.element_fit.all.search_for_best_fit =
+            s.value("search_for_best_fit", true).toBool();
     tel->station.element_fit.all.average_fractional_error =
             s.value("average_fractional_error", 0.02).toDouble();
     tel->station.element_fit.all.average_fractional_error_factor_increase =
             s.value("average_fractional_error_factor_increase", 1.5).toDouble();
-    tel->station.element_fit.all.eps_double =
-            s.value("eps_double", 2e-8).toDouble();
-    tel->station.element_fit.all.eps_float =
-            s.value("eps_float", 4e-4).toDouble();
-    tel->station.element_fit.all.search_for_best_fit =
-            s.value("search_for_best_fit", true).toBool();
-    tel->station.element_fit.all.smoothness_factor_override =
-            s.value("smoothness_factor_override", 1.0).toDouble();
     tel->station.element_fit.all.smoothness_factor_reduction =
             s.value("smoothness_factor_reduction", 0.9).toDouble();
+    tel->station.element_fit.all.eps_float =
+            s.value("eps_float", 4e-4).toDouble();
+    tel->station.element_fit.all.eps_double =
+            s.value("eps_double", 2e-8).toDouble();
+    tel->station.element_fit.all.smoothness_factor_override =
+            s.value("smoothness_factor_override", 1.0).toDouble();
     s.endGroup();
 
     // TODO Add parameters for all eight surfaces!
@@ -168,20 +168,5 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     // End element fit group.
     s.endGroup();
 
-    // Receiver temperature.
-    tel->station.receiver_temperature = s.value("receiver_temperature", -1.0).toDouble();
-    t = s.value("receiver_temperature_file", "").toByteArray();
-    if (t.size() > 0)
-    {
-        tel->station.receiver_temperature_file = (char*)malloc(t.size() + 1);
-        strcpy(tel->station.receiver_temperature_file, t.constData());
-    }
-    if (s.contains("receiver_temperature_file") &&
-            s.contains("receiver_temperature"))
-    {
-        printf("== WARNING: Receiver temperature specified in two different "
-                "ways, which may lead to unpredictable results!\n");
-    }
-
-    return 0;
+    return OSKAR_SUCCESS;
 }

@@ -49,11 +49,19 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
 
     im->channel_snapshots = s.value("channel_snapshots", true).toBool();
     im->channel_range[0] = s.value("channel_start", 0).toInt();
-    im->channel_range[1] = s.value("channel_end", -1).toInt();
+    temp = s.value("channel_end", "max").toString();
+    if (temp.compare("max", Qt::CaseInsensitive) == 0)
+        im->channel_range[1] = -1;
+    else
+        im->channel_range[1] = temp.toInt();
 
     im->time_snapshots = s.value("time_snapshots", true).toBool();
     im->time_range[0] = s.value("time_start", 0).toInt();
-    im->time_range[1] = s.value("time_end", -1).toInt();
+    temp = s.value("time_end", "max").toString();
+    if (temp.compare("max", Qt::CaseInsensitive) == 0)
+        im->time_range[1] = -1;
+    else
+        im->time_range[1] = temp.toInt();
 
     temp = s.value("image_type", "I").toString().toUpper();
     QString type(temp);

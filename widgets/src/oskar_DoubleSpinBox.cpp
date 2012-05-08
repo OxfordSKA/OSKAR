@@ -69,6 +69,11 @@ void oskar_DoubleSpinBox::setRange(double minimum, double maximum)
     v_->setRange(minimum, maximum, v_->decimals());
 }
 
+double oskar_DoubleSpinBox::rangeMin() const
+{
+    return min_;
+}
+
 void oskar_DoubleSpinBox::setSingleStep(double val)
 {
     singleStep_ = val;
@@ -166,15 +171,47 @@ void oskar_DoubleSpinBox::stepBy(int steps)
 
 QString oskar_DoubleSpinBox::textFromValue(double value) const
 {
-    if (text().contains('e', Qt::CaseInsensitive))
-        return QString::number(value, 'e', decimals());
+    QString t;
+
+    if (value <= min_ && !minText_.isEmpty())
+    {
+        t = minText_;
+    }
+    else if (text().contains('e', Qt::CaseInsensitive))
+    {
+        t = QString::number(value, 'e', decimals());
+    }
     else
-        return QString::number(value);
+    {
+        t = QString::number(value);
+    }
+
+    return t;
 }
 
 QValidator::State oskar_DoubleSpinBox::validate(QString& text, int& pos) const
 {
-    return v_->validate(text, pos);
+
+    QValidator::State state = QValidator::Invalid;
+
+    // If the minimum text is set allow typing it.
+    if (!minText_.isEmpty() && minText_.startsWith(text, Qt::CaseInsensitive))
+    {
+        if (text.compare(minText_, Qt::CaseInsensitive) == 0)
+        {
+            state = QValidator::Acceptable;
+        }
+        else
+        {
+            state = QValidator::Intermediate;
+        }
+    }
+    else
+    {
+        state = v_->validate(text, pos);
+    }
+
+    return state;
 }
 
 double oskar_DoubleSpinBox::value() const
@@ -184,7 +221,20 @@ double oskar_DoubleSpinBox::value() const
 
 double oskar_DoubleSpinBox::valueFromText(const QString& text) const
 {
-    return text.toDouble();
+    if (!minText_.isEmpty() && text.compare(minText_, Qt::CaseInsensitive) == 0)
+        return min_;
+    else
+        return text.toDouble();
+}
+
+void oskar_DoubleSpinBox::setMinText(const QString& text)
+{
+    minText_ = text;
+}
+
+QString oskar_DoubleSpinBox::minText() const
+{
+    return minText_;
 }
 
 void oskar_DoubleSpinBox::setValue(double val)

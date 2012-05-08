@@ -44,7 +44,7 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
 
     /* Return immediately if no filtering should be done. */
     if (min_I <= 0.0 && max_I <= 0.0)
-        return 0;
+        return OSKAR_SUCCESS;
 
     /* If only the lower limit is set */
     if (max_I <= 0.0 && min_I > 0.0)
@@ -53,6 +53,9 @@ int oskar_sky_model_filter_by_flux(oskar_SkyModel* sky,
     /* If only the upper limit is set */
     if (min_I <= 0.0 && max_I > 0.0)
         min_I = 0.0;
+
+    if (max_I < min_I)
+        return OSKAR_ERR_SETUP_FAIL;
 
     /* Get the type and location. */
     type = oskar_sky_model_type(sky);

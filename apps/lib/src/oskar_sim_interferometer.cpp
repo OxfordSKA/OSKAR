@@ -178,20 +178,6 @@ int oskar_sim_interferometer(const char* settings_file)
         }
     }
 
-    // Add visibility noise.
-    if (settings.sky.noise_model.type == OSKAR_NOISE_VLA_MEMO_146)
-    {
-        /* Note: This branch is disabled until it can be tested further */
-        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-//        printf("== Adding Gaussian visibility noise.\n");
-//        error = vis_global->evaluate_sky_noise_stddev(telescope_cpu,
-//                settings.sky.noise_model.spectral_index);
-//        if (error) return error;
-//        error = vis_global->add_sky_noise(vis_global->sky_noise_stddev,
-//                settings.sky.noise_model.seed);
-//        if (error) return error;
-    }
-
     printf("\n=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.

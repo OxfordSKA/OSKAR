@@ -49,6 +49,8 @@ public:
         INT_UNSIGNED,
         INT_POSITIVE,
         DOUBLE,
+        DOUBLE_MAX,
+        DOUBLE_MIN,
         STRING,
         TELESCOPE_DIR_NAME,
         OUTPUT_FILE_NAME,   /* e.g. visibility data. */

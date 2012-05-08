@@ -143,34 +143,40 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
     pr_k(1, w, "Sky settings", 1);
     pr_s(2, 0, "Input OSKAR sky model", s->sky.input_sky_file);
     if (!(s->sky.input_sky_filter.radius_inner == 0.0 &&
-            s->sky.input_sky_filter.radius_outer == 0.0))
+            s->sky.input_sky_filter.radius_outer >= M_PI/2.0))
     {
         pr_3f(3, w, "Filter radius inner [deg]",
                 s->sky.input_sky_filter.radius_inner * R2D);
         pr_3f(3, w, "Filter radius outer [deg]",
                 s->sky.input_sky_filter.radius_outer * R2D);
     }
-    if (!(s->sky.input_sky_filter.flux_min == 0.0 &&
-            s->sky.input_sky_filter.flux_max == 0.0))
+    if (s->sky.input_sky_filter.flux_min != 0.0)
     {
         pr_3e(3, w, "Filter flux min [Jy]", s->sky.input_sky_filter.flux_min);
+    }
+    if (s->sky.input_sky_filter.flux_max != 0.0)
+    {
         pr_3e(3, w, "Filter flux max [Jy]", s->sky.input_sky_filter.flux_max);
     }
+
     pr_s(2, 0, "Input GSM file", s->sky.gsm_file);
     if (!(s->sky.gsm_filter.radius_inner == 0.0 &&
-            s->sky.gsm_filter.radius_outer == 0.0))
+            s->sky.gsm_filter.radius_outer >= M_PI/2.0))
     {
         pr_3f(3, w, "Filter radius inner [deg]",
                 s->sky.gsm_filter.radius_inner * R2D);
         pr_3f(3, w, "Filter radius outer [deg]",
                 s->sky.gsm_filter.radius_outer * R2D);
     }
-    if (!(s->sky.gsm_filter.flux_min == 0.0 &&
-            s->sky.gsm_filter.flux_max == 0.0))
+    if (s->sky.gsm_filter.flux_min != 0.0)
     {
         pr_3e(3, w, "Filter flux min [Jy]", s->sky.gsm_filter.flux_min);
+    }
+    if (s->sky.gsm_filter.flux_max != 0.0)
+    {
         pr_3e(3, w, "Filter flux max [Jy]", s->sky.gsm_filter.flux_max);
     }
+
     pr_s(2, 0, "Output OSKAR sky model", s->sky.output_sky_file);
 
     /* Print sky generator settings. */
@@ -183,18 +189,20 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_3f(3, w, "Power law index", s->sky.generator.random_power_law.power);
         pr_i(3, w, "Random seed", s->sky.generator.random_power_law.seed);
         if (!(s->sky.generator.random_power_law.filter.radius_inner == 0.0 &&
-                s->sky.generator.random_power_law.filter.radius_outer == 0.0))
+                s->sky.generator.random_power_law.filter.radius_outer >= M_PI/2.0))
         {
             pr_3f(4, w, "Filter radius inner [deg]",
                     s->sky.generator.random_power_law.filter.radius_inner * R2D);
             pr_3f(4, w, "Filter radius outer [deg]",
                     s->sky.generator.random_power_law.filter.radius_outer * R2D);
         }
-        if (!(s->sky.generator.random_power_law.filter.flux_min == 0.0 &&
-                s->sky.generator.random_power_law.filter.flux_max == 0.0))
+        if (s->sky.generator.random_power_law.filter.flux_min != 0.0)
         {
             pr_3e(4, w, "Filter flux min [Jy]",
                     s->sky.generator.random_power_law.filter.flux_min);
+        }
+        if (s->sky.generator.random_power_law.filter.flux_max != 0.0)
+        {
             pr_3e(4, w, "Filter flux max [Jy]",
                     s->sky.generator.random_power_law.filter.flux_max);
         }
@@ -210,21 +218,24 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_3f(3, w, "Threshold [Jy]", s->sky.generator.random_broken_power_law.threshold);
         pr_i(3, w, "Random seed", s->sky.generator.random_broken_power_law.seed);
         if (!(s->sky.generator.random_broken_power_law.filter.radius_inner == 0.0 &&
-                s->sky.generator.random_broken_power_law.filter.radius_outer == 0.0))
+                s->sky.generator.random_broken_power_law.filter.radius_outer >= M_PI/2.0))
         {
             pr_3f(4, w, "Filter radius inner [deg]",
                     s->sky.generator.random_broken_power_law.filter.radius_inner * R2D);
             pr_3f(4, w, "Filter radius outer [deg]",
                     s->sky.generator.random_broken_power_law.filter.radius_outer * R2D);
         }
-        if (!(s->sky.generator.random_broken_power_law.filter.flux_min == 0.0 &&
-                s->sky.generator.random_broken_power_law.filter.flux_max == 0.0))
+        if (s->sky.generator.random_broken_power_law.filter.flux_min != 0.0)
         {
             pr_3e(4, w, "Filter flux min [Jy]",
                     s->sky.generator.random_broken_power_law.filter.flux_min);
+        }
+        if (s->sky.generator.random_broken_power_law.filter.flux_max != 0.0)
+        {
             pr_3e(4, w, "Filter flux max [Jy]",
                     s->sky.generator.random_broken_power_law.filter.flux_max);
         }
+
     }
     if (s->sky.generator.healpix.nside != 0)
     {
@@ -234,18 +245,20 @@ void oskar_settings_print(const oskar_Settings* s, const char* filename)
         pr_i(3, w, "Nside", s->sky.generator.healpix.nside);
         pr_i(5, w, "(Num. sources)", n);
         if (!(s->sky.generator.healpix.filter.radius_inner == 0.0 &&
-                s->sky.generator.healpix.filter.radius_outer == 0.0))
+                s->sky.generator.healpix.filter.radius_outer >= M_PI/2.0))
         {
             pr_3f(4, w, "Filter radius inner [deg]",
                     s->sky.generator.healpix.filter.radius_inner * R2D);
             pr_3f(4, w, "Filter radius outer [deg]",
                     s->sky.generator.healpix.filter.radius_outer * R2D);
         }
-        if (!(s->sky.generator.healpix.filter.flux_min == 0.0 &&
-                s->sky.generator.healpix.filter.flux_max == 0.0))
+        if (s->sky.generator.healpix.filter.flux_min != 0.0)
         {
             pr_3e(4, w, "Filter flux min [Jy]",
                     s->sky.generator.healpix.filter.flux_min);
+        }
+        if (s->sky.generator.healpix.filter.flux_max != 0.0)
+        {
             pr_3e(4, w, "Filter flux max [Jy]",
                     s->sky.generator.healpix.filter.flux_max);
         }

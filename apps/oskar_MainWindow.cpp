@@ -30,11 +30,11 @@
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "apps/lib/oskar_sim_interferometer.h"
 #include "apps/lib/oskar_imager.h"
+#include "apps/lib/oskar_SettingsModelApps.h"
 #include "widgets/oskar_About.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
-#include "widgets/oskar_SettingsModel.h"
 #include "widgets/oskar_SettingsView.h"
 #include "utility/oskar_get_error_string.h"
 
@@ -64,7 +64,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     layout_ = new QVBoxLayout(widget_);
 
     // Create and set up the settings model.
-    model_ = new oskar_SettingsModel(widget_);
+    model_ = new oskar_SettingsModelApps(widget_);
     modelProxy_ = new oskar_SettingsModelFilter(widget_);
     modelProxy_->setSourceModel(model_);
 

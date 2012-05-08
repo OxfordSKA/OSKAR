@@ -99,6 +99,24 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             editor = spinner;
             break;
         }
+        case oskar_SettingsItem::DOUBLE_MAX:
+        {
+            oskar_DoubleSpinBox* spinner = new oskar_DoubleSpinBox(parent);
+            spinner->setFrame(false);
+            spinner->setRange(-DBL_MIN, DBL_MAX);
+            spinner->setMinText("max");
+            editor = spinner;
+            break;
+        }
+        case oskar_SettingsItem::DOUBLE_MIN:
+        {
+            oskar_DoubleSpinBox* spinner = new oskar_DoubleSpinBox(parent);
+            spinner->setFrame(false);
+            spinner->setRange(-DBL_MIN, DBL_MAX);
+            spinner->setMinText("min");
+            editor = spinner;
+            break;
+        }
         case oskar_SettingsItem::DATE_TIME:
         {
             // Date and time editors.
@@ -312,6 +330,24 @@ void oskar_SettingsDelegate::setEditorData(QWidget* editor,
             static_cast<oskar_DoubleSpinBox*>(editor)->setValue(value.toDouble());
             break;
         }
+        case oskar_SettingsItem::DOUBLE_MAX:
+        {
+            oskar_DoubleSpinBox* e = static_cast<oskar_DoubleSpinBox*>(editor);
+            if (value.toString().toUpper() == "MAX" || value.toDouble() < 0.0)
+                e->setValue(e->rangeMin());
+            else
+                e->setValue(value.toDouble());
+            break;
+        }
+        case oskar_SettingsItem::DOUBLE_MIN:
+        {
+            oskar_DoubleSpinBox* e = static_cast<oskar_DoubleSpinBox*>(editor);
+            if (value.toString().toUpper() == "MIN" || value.toDouble() < 0.0)
+                e->setValue(e->rangeMin());
+            else
+                e->setValue(value.toDouble());
+            break;
+        }
         case oskar_SettingsItem::DATE_TIME:
         {
             // Date and time editors.
@@ -388,6 +424,24 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
             value = static_cast<oskar_DoubleSpinBox*>(editor)->value();
             break;
         }
+        case oskar_SettingsItem::DOUBLE_MAX:
+        {
+            // Double spin box editors.
+            oskar_DoubleSpinBox* e = static_cast<oskar_DoubleSpinBox*>(editor);
+            value = e->value();
+            if (value.toDouble() <= e->rangeMin())
+                value = e->minText();
+            break;
+        }
+        case oskar_SettingsItem::DOUBLE_MIN:
+        {
+            // Double spin box editors.
+            oskar_DoubleSpinBox* e = static_cast<oskar_DoubleSpinBox*>(editor);
+            value = e->value();
+            if (value.toDouble() <= e->rangeMin())
+                value = e->minText();
+            break;
+        }
         case oskar_SettingsItem::DATE_TIME:
         {
             // Date and time editors.
@@ -406,14 +460,20 @@ void oskar_SettingsDelegate::setModelData(QWidget* editor,
         {
             // Random seed editors.
             int val = static_cast<QSpinBox*>(editor)->value();
-            if (val < 0) value = "time"; else value = val;
+            if (val < 0)
+                value = static_cast<QSpinBox*>(editor)->specialValueText();
+            else
+                value = val;
             break;
         }
         case oskar_SettingsItem::AXIS_RANGE:
         {
             // Random seed editors.
             int val = static_cast<QSpinBox*>(editor)->value();
-            if (val < 0) value = "max"; else value = val;
+            if (val < 0)
+                value = static_cast<QSpinBox*>(editor)->specialValueText();
+            else
+                value = val;
             break;
         }
         case oskar_SettingsItem::OPTIONS:

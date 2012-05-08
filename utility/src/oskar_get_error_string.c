@@ -76,7 +76,7 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_SPLINE_EVAL_FAIL:
             return "spline evaluation failed";
         case OSKAR_ERR_SETUP_FAIL:
-            return "could not initialise sky or telescope model";
+            return "setup fail: could not initialise sky or telescope model";
         case OSKAR_ERR_SETTINGS:
             return "settings error";
         case OSKAR_ERR_CUDA_DEVICES:
@@ -90,7 +90,7 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_ELLIPSE_FIT_FAILED:
             return "unable to fit ellipse";
         case OSKAR_ERR_INVALID_RANGE:
-            return "invalid data range";
+            return "invalid range";
         default:
             break;
     };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,61 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_DOUBLE_SPIN_BOX_H_
-#define OSKAR_DOUBLE_SPIN_BOX_H_
+
+#ifndef OSKAR_SETTINGS_MODEL_APPS_H_
+#define OSKAR_SETTINGS_MODEL_APPS_H_
 
 /**
- * @file oskar_DoubleSpinBox.h
+ * @file oskar_SettingsModelApps.h
  */
 
-#include <QtGui/QAbstractSpinBox>
+#include "oskar_global.h"
+#include "widgets/oskar_SettingsModel.h"
 
-class QDoubleValidator;
-
-class oskar_DoubleSpinBox : public QAbstractSpinBox
+class oskar_SettingsModelApps : public oskar_SettingsModel
 {
     Q_OBJECT
 
 public:
-    oskar_DoubleSpinBox(QWidget* parent = 0);
-    QString cleanText() const;
-    int decimals() const;
-    void setDecimals(int prec);
-    void setRange(double minimum, double maximum);
-    double rangeMin() const;
-    void setSingleStep(double val);
-    double singleStep() const;
-    virtual void stepBy(int steps);
-    virtual QString textFromValue(double value) const;
-    virtual QValidator::State validate(QString& text, int& pos) const;
-    double value() const;
-    virtual double valueFromText(const QString& text) const;
-    void setMinText(const QString& text);
-    QString minText() const;
-
-public Q_SLOTS:
-    void setValue(double val);
-
-Q_SIGNALS:
-    void valueChanged(double d);
-    void valueChanged(const QString& text);
-
-protected:
-    virtual void focusInEvent(QFocusEvent* event);
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual StepEnabled stepEnabled() const;
-
-private Q_SLOTS:
-    void setValue();
+    oskar_SettingsModelApps(QObject* parent = 0);
+    virtual ~oskar_SettingsModelApps();
 
 private:
-    double value_;
-    double max_;
-    double min_;
-    QString minText_;
-    double singleStep_;
-    int decimals_;
-    QDoubleValidator* v_;
+    void init_settings_simulator();
+    void init_settings_sky_model();
+    void init_settings_observation();
+    void init_settings_telescope_model();
+    void init_settings_interferometer();
+    void init_settings_beampattern();
+    void init_settings_image();
 };
 
-#endif /* OSKAR_DOUBLE_SPIN_BOX_H_ */
+
+#endif /* OSKAR_SETTINGS_MODEL_APPS_H_ */

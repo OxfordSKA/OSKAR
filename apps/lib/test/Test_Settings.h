@@ -26,61 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_DOUBLE_SPIN_BOX_H_
-#define OSKAR_DOUBLE_SPIN_BOX_H_
+
+#ifndef TEST_SETTINGS_H_
+#define TEST_SETTINGS_H_
 
 /**
- * @file oskar_DoubleSpinBox.h
+ * @file Test_settings.h
  */
 
-#include <QtGui/QAbstractSpinBox>
+#include <cppunit/extensions/HelperMacros.h>
 
-class QDoubleValidator;
-
-class oskar_DoubleSpinBox : public QAbstractSpinBox
+/**
+ * @brief Unit test class that uses CppUnit.
+ *
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
+ */
+class Test_Settings : public CppUnit::TestFixture
 {
-    Q_OBJECT
+    public:
+        CPPUNIT_TEST_SUITE(Test_Settings);
+        CPPUNIT_TEST(test_read);
+        CPPUNIT_TEST_SUITE_END();
 
-public:
-    oskar_DoubleSpinBox(QWidget* parent = 0);
-    QString cleanText() const;
-    int decimals() const;
-    void setDecimals(int prec);
-    void setRange(double minimum, double maximum);
-    double rangeMin() const;
-    void setSingleStep(double val);
-    double singleStep() const;
-    virtual void stepBy(int steps);
-    virtual QString textFromValue(double value) const;
-    virtual QValidator::State validate(QString& text, int& pos) const;
-    double value() const;
-    virtual double valueFromText(const QString& text) const;
-    void setMinText(const QString& text);
-    QString minText() const;
-
-public Q_SLOTS:
-    void setValue(double val);
-
-Q_SIGNALS:
-    void valueChanged(double d);
-    void valueChanged(const QString& text);
-
-protected:
-    virtual void focusInEvent(QFocusEvent* event);
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual StepEnabled stepEnabled() const;
-
-private Q_SLOTS:
-    void setValue();
-
-private:
-    double value_;
-    double max_;
-    double min_;
-    QString minText_;
-    double singleStep_;
-    int decimals_;
-    QDoubleValidator* v_;
+    public:
+        void test_read();
 };
 
-#endif /* OSKAR_DOUBLE_SPIN_BOX_H_ */
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_Settings);
+
+#endif /* TEST_SETTINGS_H_ */

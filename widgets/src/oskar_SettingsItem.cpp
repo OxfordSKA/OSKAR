@@ -37,7 +37,7 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
         const QStringList& options, oskar_SettingsItem* parent)
 {
     // Set default defaults.
-    if (type == DOUBLE)
+    if (type == DOUBLE || type == DOUBLE_MAX || type == DOUBLE_MIN)
         defaultValue_ = 0.0;
     else if (type == INT || type == INT_UNSIGNED || type == RANDOM_SEED)
         defaultValue_ = 0;

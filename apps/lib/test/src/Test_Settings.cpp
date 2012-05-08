@@ -26,61 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_DOUBLE_SPIN_BOX_H_
-#define OSKAR_DOUBLE_SPIN_BOX_H_
 
-/**
- * @file oskar_DoubleSpinBox.h
- */
+#include "apps/lib/test/Test_Settings.h"
 
-#include <QtGui/QAbstractSpinBox>
+#include "apps/lib/oskar_settings_load.h"
+#include "utility/oskar_get_error_string.h"
+#include "oskar_global.h"
 
-class QDoubleValidator;
+#include <QtCore/QSettings>
 
-class oskar_DoubleSpinBox : public QAbstractSpinBox
+#include <cstdio>
+#include <cmath>
+
+
+void Test_Settings::test_read()
 {
-    Q_OBJECT
+    // Construct test settings file
+    {
+        QSettings settings("./temp.ini", QSettings::IniFormat);
+        settings.beginGroup("telescope/system_noise");
+        settings.setValue("seed", 1);
+        settings.endGroup();
+//        settings.setValue("sky/oskar_source_file/filter/flux_min", 1.0);
+//        settings.setValue("sky/oskar_source_file/filter/flux_max", 2.0);
+    }
 
-public:
-    oskar_DoubleSpinBox(QWidget* parent = 0);
-    QString cleanText() const;
-    int decimals() const;
-    void setDecimals(int prec);
-    void setRange(double minimum, double maximum);
-    double rangeMin() const;
-    void setSingleStep(double val);
-    double singleStep() const;
-    virtual void stepBy(int steps);
-    virtual QString textFromValue(double value) const;
-    virtual QValidator::State validate(QString& text, int& pos) const;
-    double value() const;
-    virtual double valueFromText(const QString& text) const;
-    void setMinText(const QString& text);
-    QString minText() const;
+    // Read settings
+    {
+        oskar_Settings settings;
+        int err = oskar_settings_load(&settings, "./temp.ini");
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    }
 
-public Q_SLOTS:
-    void setValue(double val);
+    remove("./temp.ini");
+}
 
-Q_SIGNALS:
-    void valueChanged(double d);
-    void valueChanged(const QString& text);
-
-protected:
-    virtual void focusInEvent(QFocusEvent* event);
-    virtual void keyPressEvent(QKeyEvent* event);
-    virtual StepEnabled stepEnabled() const;
-
-private Q_SLOTS:
-    void setValue();
-
-private:
-    double value_;
-    double max_;
-    double min_;
-    QString minText_;
-    double singleStep_;
-    int decimals_;
-    QDoubleValidator* v_;
-};
-
-#endif /* OSKAR_DOUBLE_SPIN_BOX_H_ */

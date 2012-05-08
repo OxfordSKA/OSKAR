@@ -90,6 +90,8 @@ if (CUDA_FOUND)
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-missing-field-initializers;)
         # Disable warning about "variable '__f' set but not used".
         list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-unused-but-set-variable;)
+        # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
+        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-unused-function;)
 
         # Ignore warnings from CUDA headers by specifying them as system headers.
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
