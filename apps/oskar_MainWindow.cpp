@@ -47,6 +47,7 @@
 #include <QtGui/QToolBar>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QKeySequence>
+#include <QtGui/QProgressDialog>
 #include <QtCore/QModelIndex>
 #include <QtCore/QTimer>
 
@@ -167,9 +168,9 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QTimer::singleShot(0, view_, SLOT(restorePosition()));
 }
 
-void oskar_MainWindow::openSettings(QString filename)
+void oskar_MainWindow::openSettings(QString filename, bool check)
 {
-    if (settingsFile_.isEmpty())
+    if (settingsFile_.isEmpty() && check)
     {
         int ret = QMessageBox::warning(this, "OSKAR",
                 "Opening a new file will discard any current unsaved modifications.\n"
@@ -178,7 +179,6 @@ void oskar_MainWindow::openSettings(QString filename)
         if (ret == QMessageBox::Cancel)
             return;
     }
-
 
     // Check if the supplied filename is empty, and prompt to open file if so.
     if (filename.isEmpty())
@@ -297,7 +297,7 @@ void oskar_MainWindow::openRecentFile()
         if (QFile::exists(filename))
         {
             // If the file exists, then open it.
-            openSettings(filename);
+            openSettings(filename, true);
         }
         else
         {
@@ -356,6 +356,7 @@ void oskar_MainWindow::run(int depth, QStringList outputFiles)
     QByteArray settings = settingsFile_.toAscii();
     QStringList iterationKeys = model_->data(QModelIndex(),
             oskar_SettingsModel::IterationKeysRole).toStringList();
+    QProgressDialog progress(this);
     if (iterationKeys.size() == 0)
     {
         int error = (*run_function_)(settings);

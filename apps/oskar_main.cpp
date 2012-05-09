@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
     // Load settings file if one is provided on the command line.
     if (argc > 1)
-        mainWindow.openSettings(QString(argv[1]));
+        mainWindow.openSettings(QString(argv[1]), false);
 
     // Show the main window and enter the event loop.
     mainWindow.show();

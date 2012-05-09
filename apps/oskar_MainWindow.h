@@ -51,7 +51,7 @@ protected:
     void closeEvent(QCloseEvent* event);
 
 public slots:
-    void openSettings(QString filename = QString());
+    void openSettings(QString filename = QString(), bool check = true);
     void saveSettingsAs(QString filename = QString());
 
 private slots:
