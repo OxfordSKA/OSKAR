@@ -142,6 +142,9 @@ enum {
     /* Indicates an invalid range selection */
     OSKAR_ERR_INVALID_RANGE          = -24,
 
+    /* Indicates a problem with FITS I/O */
+    OSKAR_ERR_FITS_IO                = -25,
+
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                = -1000
 };

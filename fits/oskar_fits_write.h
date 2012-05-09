@@ -87,9 +87,11 @@ extern "C" {
  * @param[in] cdelt      Array of CDELT keyword (delta) values for each axis.
  * @param[in] crpix      Array of CRPIX keyword (reference pixel) values for each axis.
  * @param[in] crpix      Array of CROTA keyword (rotation) values for each axis.
+ *
+ * @return An error code.
  */
 OSKAR_EXPORT
-void oskar_fits_write(const char* filename, int type, int naxis,
+int oskar_fits_write(const char* filename, int type, int naxis,
         long* naxes, void* data, const char** ctype, const char** ctype_desc,
         const double* crval, const double* cdelt, const double* crpix,
         const double* crota);

@@ -111,7 +111,13 @@ int oskar_imager(const char* settings_file)
     {
         printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
         /* Note: currently there is no error code returned from this function. */
-        oskar_fits_image_write(&image, settings.image.fits_image);
+        error = oskar_fits_image_write(&image, settings.image.fits_image);
+        if (error)
+        {
+            fprintf(stderr, "\nERROR: oskar_fits_image_write() failed!, %s\n",
+                    oskar_get_error_string(error));
+            return error;
+        }
     }
 #endif
 

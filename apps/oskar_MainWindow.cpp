@@ -47,7 +47,6 @@
 #include <QtGui/QToolBar>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QKeySequence>
-#include <QtGui/QProgressDialog>
 #include <QtCore/QModelIndex>
 #include <QtCore/QTimer>
 
@@ -342,7 +341,9 @@ void oskar_MainWindow::runButton()
     }
 
     // Run simulation recursively.
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     run(0, outputFiles);
+    QApplication::restoreOverrideCursor();
 
     // Restore the output files.
     for (int i = 0; i < keys.size(); ++i)
@@ -356,7 +357,6 @@ void oskar_MainWindow::run(int depth, QStringList outputFiles)
     QByteArray settings = settingsFile_.toAscii();
     QStringList iterationKeys = model_->data(QModelIndex(),
             oskar_SettingsModel::IterationKeysRole).toStringList();
-    QProgressDialog progress(this);
     if (iterationKeys.size() == 0)
     {
         int error = (*run_function_)(settings);

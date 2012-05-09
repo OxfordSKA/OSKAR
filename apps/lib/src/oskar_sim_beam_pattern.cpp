@@ -304,7 +304,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
     // FITS library available.
     if (settings.beam_pattern.fits_image_filename)
     {
-        oskar_fits_image_write(&image_cube, settings.beam_pattern.fits_image_filename);
+        err = oskar_fits_image_write(&image_cube, settings.beam_pattern.fits_image_filename);
+        if (err) return err;
     }
 #endif
 

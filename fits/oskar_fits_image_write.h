@@ -75,9 +75,10 @@ extern "C" {
  *
  * The fastest varying dimension is along the RA axis.
  *
+ * @return An error code.
  */
 OSKAR_EXPORT
-void oskar_fits_image_write(const oskar_Image* image, const char* filename);
+int oskar_fits_image_write(const oskar_Image* image, const char* filename);
 
 #ifdef __cplusplus
 }

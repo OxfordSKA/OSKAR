@@ -44,7 +44,7 @@ extern "C" {
 
 #define MAX_DIM 10
 
-void oskar_fits_image_write(const oskar_Image* image, const char* filename)
+int oskar_fits_image_write(const oskar_Image* image, const char* filename)
 {
     char value[FLEN_VALUE];
     int i, num_dimensions, status = 0, decimals = 10, type;
@@ -59,7 +59,7 @@ void oskar_fits_image_write(const oskar_Image* image, const char* filename)
     /* Get the number of dimensions. */
     num_dimensions = sizeof(image->dimension_order) / sizeof(int);
     if (num_dimensions > 10)
-        return;
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Loop over axes. */
     for (i = 0; i < num_dimensions; ++i)
@@ -135,11 +135,14 @@ void oskar_fits_image_write(const oskar_Image* image, const char* filename)
     }
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, type, num_dimensions, naxes, image->data.data,
+    status = oskar_fits_write(filename, type, num_dimensions, naxes, image->data.data,
             ctype, label, crval, cdelt, crpix, crota);
+    if (status) return status;
 
     /* Open file for read/write access. */
     fits_open_file(&fptr, filename, READWRITE, &status);
+    oskar_fits_check_status(status, "Opening FITS file.");
+    if (status) return OSKAR_ERR_FITS_IO;
 
     /* Write brightness unit keyword. */
     if (image->image_type < 10)
@@ -147,30 +150,39 @@ void oskar_fits_image_write(const oskar_Image* image, const char* filename)
         strcpy(value, "JY/BEAM");
         fits_write_key_str(fptr, "BUNIT", value, "Units of flux", &status);
         oskar_fits_check_status(status, "Writing key: BUNIT");
+        if (status) return OSKAR_ERR_FITS_IO;
     }
 
     /* Write time header keywords. */
     strcpy(value, "UTC");
     fits_write_key_str(fptr, "TIMESYS", value, NULL, &status);
     oskar_fits_check_status(status, "Writing key: TIMESYS");
+    if (status) return OSKAR_ERR_FITS_IO;
     strcpy(value, "s");
     fits_write_key_str(fptr, "TIMEUNIT", value, "Time axis units", &status);
     oskar_fits_check_status(status, "Writing key: TIMEUNIT");
+    if (status) return OSKAR_ERR_FITS_IO;
     fits_write_key_dbl(fptr, "MJD-OBS", image->time_start_mjd_utc, decimals,
             "Obs start time", &status);
     oskar_fits_check_status(status, "Writing key: MJD-OBS");
+    if (status) return OSKAR_ERR_FITS_IO;
 
     /* Write pointing keywords. */
     fits_write_key_dbl(fptr, "OBSRA", image->centre_ra_deg, decimals,
             "Pointing RA", &status);
     oskar_fits_check_status(status, "Writing key: OBSRA");
+    if (status) return OSKAR_ERR_FITS_IO;
     fits_write_key_dbl(fptr, "OBSDEC", image->centre_dec_deg, decimals,
             "Pointing DEC", &status);
     oskar_fits_check_status(status, "Writing key: OBSDEC");
+    if (status) return OSKAR_ERR_FITS_IO;
 
     /* Close the FITS file. */
     fits_close_file(fptr, &status);
     oskar_fits_check_status(status, "Closing file");
+    if (status) return OSKAR_ERR_FITS_IO;
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus
