@@ -169,6 +169,17 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
 void oskar_MainWindow::openSettings(QString filename)
 {
+    if (settingsFile_.isEmpty())
+    {
+        int ret = QMessageBox::warning(this, "OSKAR",
+                "Opening a new file will discard any current unsaved modifications.\n"
+                "Do you want to proceed?",
+                QMessageBox::Ok | QMessageBox::Cancel);
+        if (ret == QMessageBox::Cancel)
+            return;
+    }
+
+
     // Check if the supplied filename is empty, and prompt to open file if so.
     if (filename.isEmpty())
     {
