@@ -39,7 +39,7 @@ void mexFunction(int /*num_out*/, mxArray** /*out*/,
     // Parse inputs.
     if (num_in != 3)
     {
-        mexErrMsgTxt("Usage: oskar_set_setting(filename, key, value)");
+        mexErrMsgTxt("Usage: oskar.settings.set(filename, key, value)");
     }
 
     // Get inputs from MATLAB
