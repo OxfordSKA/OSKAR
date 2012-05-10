@@ -76,6 +76,14 @@ int oskar_sim_interferometer(const char* settings_file)
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     const oskar_SettingsTime* times = &settings.obs.time;
 
+    // Check that a data file has been specified.
+    if (!settings.obs.oskar_vis_filename &&
+            !settings.obs.ms_filename)
+    {
+        fprintf(stderr, "ERROR: No visibility file specified.\n");
+        return OSKAR_ERR_SETTINGS;
+    }
+
     // Find out how many GPUs we have.
     int device_count = 0;
     int num_devices = settings.sim.num_cuda_devices;

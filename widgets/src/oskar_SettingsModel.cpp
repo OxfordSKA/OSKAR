@@ -67,9 +67,27 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
 {
     // Check for roles that do not depend on the index.
     if (role == IterationKeysRole)
-        return iterationKeys_;
+    {
+        // Check if keys are actually enabled before returning the list.
+        QStringList keys;
+        for (int i = 0; i < iterationKeys_.size(); ++i)
+        {
+            if (getItem(iterationKeys_[i])->enabled())
+                keys.append(iterationKeys_[i]);
+        }
+        return keys;
+    }
     else if (role == OutputKeysRole)
-        return outputKeys_;
+    {
+        // Check if keys are actually enabled before returning the list.
+        QStringList keys;
+        for (int i = 0; i < outputKeys_.size(); ++i)
+        {
+            if (getItem(outputKeys_[i])->enabled())
+                keys.append(outputKeys_[i]);
+        }
+        return keys;
+    }
 
     // Get a pointer to the item.
     if (!index.isValid())
