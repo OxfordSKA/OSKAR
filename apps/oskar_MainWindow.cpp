@@ -31,6 +31,7 @@
 #include "apps/lib/oskar_sim_interferometer.h"
 #include "apps/lib/oskar_imager.h"
 #include "apps/lib/oskar_SettingsModelApps.h"
+#include "apps/lib/oskar_RunThread.h"
 #include "widgets/oskar_About.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
 #include "widgets/oskar_SettingsDelegate.h"
@@ -320,6 +321,8 @@ void oskar_MainWindow::openRecentFile()
 
 void oskar_MainWindow::runButton()
 {
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     // Save settings if they are not already saved.
     if (settingsFile_.isEmpty())
     {
@@ -341,15 +344,14 @@ void oskar_MainWindow::runButton()
     }
 
     // Run simulation recursively.
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     run(0, outputFiles);
-    QApplication::restoreOverrideCursor();
 
     // Restore the output files.
     for (int i = 0; i < keys.size(); ++i)
     {
         model_->setValue(keys[i], outputFiles[i]);
     }
+    QApplication::restoreOverrideCursor();
 }
 
 void oskar_MainWindow::run(int depth, QStringList outputFiles)
@@ -359,7 +361,27 @@ void oskar_MainWindow::run(int depth, QStringList outputFiles)
             oskar_SettingsModel::IterationKeysRole).toStringList();
     if (iterationKeys.size() == 0)
     {
-        int error = (*run_function_)(settings);
+        oskar_RunThread work(run_function_, settingsFile_);
+        QMessageBox msgBox(this);
+        msgBox.setText("Running OSKAR ...");
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle("OSKAR");
+        msgBox.setStandardButtons(QMessageBox::NoButton);
+        msgBox.setWindowFlags(Qt::Popup);
+        //msgBox.setWindowFlags(Qt::FramelessWindowHint);
+        //msgBox.setStyleSheet(QString::fromUtf8("background-color:rgb(255, 255, 0);"));
+        msgBox.setStyleSheet(QString::fromUtf8("background-color:rgb(176, 196, 222);"));
+        msgBox.resize(150, 100);
+
+        msgBox.show();
+        while (work.isRunning())
+        {
+            qApp->processEvents();
+            usleep(50000);
+        }
+        msgBox.close();
+        int error = work.status();
+//        int error = (*run_function_)(settings);
         if (error)
         {
             fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,

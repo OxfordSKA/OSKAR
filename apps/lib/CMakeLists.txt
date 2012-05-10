@@ -5,6 +5,7 @@
 set(apps_SRC
     src/oskar_imager.cpp
     src/oskar_remove_dir.cpp
+    src/oskar_RunThread.cpp
     src/oskar_set_up_sky.cpp
     src/oskar_set_up_telescope.c
     src/oskar_set_up_visibilities.c
