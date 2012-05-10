@@ -26,72 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MAIN_WINDOW_H_
-#define OSKAR_MAIN_WINDOW_H_
+#include "oskar_global.h"
+#include <QtCore/QSettings>
+#include <cstdio>
 
-#include <QtGui/QMainWindow>
-#include <QtCore/QString>
-
-class oskar_SettingsModel;
-class oskar_SettingsModelFilter;
-class oskar_SettingsView;
-class oskar_RunThread;
-class QAction;
-class QModelIndex;
-class QVBoxLayout;
-class QWidget;
-class QMessageBox;
-
-class oskar_MainWindow : public QMainWindow
+int main(int argc, char** argv)
 {
-    Q_OBJECT
+    // Parse command line.
+    if (argc != 4)
+    {
+        fprintf(stderr, "Usage: $ oskar_settings_set [settings file] [key] [value]\n");
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    }
+    char* filename = argv[1];
+    char* key      = argv[2];
+    char* value    = argv[3];
+    printf("File: %s\n", filename);
+    printf("    %s=%s\n", key, value);
 
-public:
-    oskar_MainWindow(QWidget* parent = 0);
+    // Set the value.
+    QSettings settings(QString(filename), QSettings::IniFormat);
+    settings.setValue(QString(key), QString(value));
+    settings.sync();
 
-protected:
-    void closeEvent(QCloseEvent* event);
-
-public slots:
-    void openSettings(QString filename = QString(), bool check = true);
-    void saveSettingsAs(QString filename = QString());
-
-private slots:
-    void about();
-    void cudaInfo();
-    void runBeamPattern();
-    void runInterferometer();
-    void runImager();
-    void setHideIfUnset(bool value);
-    void openRecentFile();
-
-private:
-    void runButton();
-
-    void createRecentFileActions();
-    void updateRecentFileActions();
-    void updateRecentFileList();
-
-private:
-    QString mainTitle_;
-    QWidget* widget_;
-    QVBoxLayout* layout_;
-    oskar_SettingsModel* model_;
-    oskar_SettingsModelFilter* modelProxy_;
-    oskar_SettingsView* view_;
-    QAction* actHideUnset_;
-    QString settingsFile_;
-    int (*run_function_)(const char*);
-
-    QMenuBar* menubar_;
-    QMenu* menuFile_;
-
-    enum { MaxRecentFiles = 3 };
-    QMenu* recentFileMenu_;
-    QAction* separator_;
-    QAction* recentFiles_[MaxRecentFiles];
-    oskar_RunThread* runThread_;
-    QMessageBox* msgBox_;
-};
-
-#endif // OSKAR_MAIN_WINDOW_H_
+    return OSKAR_SUCCESS;
+}

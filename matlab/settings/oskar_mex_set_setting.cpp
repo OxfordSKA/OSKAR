@@ -52,7 +52,7 @@ void mexFunction(int /*num_out*/, mxArray** /*out*/,
     char* key       = mxArrayToString(in[1]);
     char* value     = mxArrayToString(in[2]);
     mexPrintf("File: %s\n", filename);
-    mexPrintf("    %s = %s\n", key, value);
+    mexPrintf("    %s=%s\n", key, value);
 
     // Set the values.
     QSettings settings(QString(filename), QSettings::IniFormat);

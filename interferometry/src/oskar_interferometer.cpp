@@ -148,8 +148,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate parallactic angle rotation (Jones R).
-            err = oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast);
-            if (err) return err;
+//            err = oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast);
+//            if (err) return err;
 
             // Evaluate station beam (Jones E).
             err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
@@ -157,8 +157,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
             if (err) return err;
 
             // Join Jones matrices (R = E * R).
-            err = oskar_jones_join(&R, &E, &R);
-            if (err) return err;
+//            err = oskar_jones_join(&R, &E, &R);
+//            if (err) return err;
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {
@@ -175,7 +175,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
                 if (err) return err;
 
                 // Join Jones matrices (J = K * R).
-                err = oskar_jones_join(&J, &K, &R);
+                err = oskar_jones_join(&J, &K, &E);
                 if (err) return err;
 
                 err = oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v);

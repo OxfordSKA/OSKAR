@@ -28,6 +28,7 @@ endif()
 
 set(apps_MOC_SRC
     oskar_SettingsModelApps.h
+    oskar_RunThread.h
 )
 
 qt4_wrap_cpp(apps_SRC ${apps_MOC_SRC})

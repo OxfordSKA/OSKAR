@@ -166,6 +166,18 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     // Restore the scroll bar position.
     // A single-shot timer is used to do this after the main event loop starts.
     QTimer::singleShot(0, view_, SLOT(restorePosition()));
+
+    // Create the run thread.
+    runThread_ = new oskar_RunThread(model_, this);
+
+    // Set up the message box.
+    msgBox_ = new QMessageBox(this);
+    msgBox_->setText("OSKAR is running; please wait.");
+    msgBox_->setIcon(QMessageBox::Information);
+    msgBox_->setWindowTitle(mainTitle_);
+    msgBox_->setStandardButtons(QMessageBox::Cancel);
+    msgBox_->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    connect(runThread_, SIGNAL(finished()), msgBox_, SLOT(accept()));
 }
 
 void oskar_MainWindow::openSettings(QString filename, bool check)
@@ -344,7 +356,13 @@ void oskar_MainWindow::runButton()
     }
 
     // Run simulation recursively.
-    run(0, outputFiles);
+    runThread_->go(run_function_, settingsFile_, outputFiles);
+    int rval = msgBox_->exec();
+    if (rval == QMessageBox::Cancel)
+    {
+        runThread_->terminate();
+        runThread_->wait();
+    }
 
     // Restore the output files.
     for (int i = 0; i < keys.size(); ++i)
@@ -353,107 +371,6 @@ void oskar_MainWindow::runButton()
     }
     QApplication::restoreOverrideCursor();
 }
-
-void oskar_MainWindow::run(int depth, QStringList outputFiles)
-{
-    QByteArray settings = settingsFile_.toAscii();
-    QStringList iterationKeys = model_->data(QModelIndex(),
-            oskar_SettingsModel::IterationKeysRole).toStringList();
-    if (iterationKeys.size() == 0)
-    {
-        oskar_RunThread work(run_function_, settingsFile_);
-        QMessageBox msgBox(this);
-        msgBox.setText("Running OSKAR ...");
-        msgBox.setIcon(QMessageBox::Information);
-        msgBox.setWindowTitle("OSKAR");
-        msgBox.setStandardButtons(QMessageBox::NoButton);
-        msgBox.setWindowFlags(Qt::Popup);
-        //msgBox.setWindowFlags(Qt::FramelessWindowHint);
-        //msgBox.setStyleSheet(QString::fromUtf8("background-color:rgb(255, 255, 0);"));
-        msgBox.setStyleSheet(QString::fromUtf8("background-color:rgb(176, 196, 222);"));
-        msgBox.resize(150, 100);
-
-        msgBox.show();
-        while (work.isRunning())
-        {
-            qApp->processEvents();
-            usleep(50000);
-        }
-        msgBox.close();
-        int error = work.status();
-//        int error = (*run_function_)(settings);
-        if (error)
-        {
-            fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
-                    oskar_get_error_string(error));
-        }
-    }
-    else
-    {
-        QStringList outputKeys = model_->data(QModelIndex(),
-                oskar_SettingsModel::OutputKeysRole).toStringList();
-        QString key = iterationKeys[depth];
-        const oskar_SettingsItem* item = model_->getItem(key);
-        QVariant start = item->value();
-        QVariant inc = item->iterationInc();
-
-        // Modify all the output file names with the subkey name.
-        for (int i = 0; i < outputFiles.size(); ++i)
-        {
-            if (!outputFiles[i].isEmpty())
-            {
-                QString separator = (depth == 0) ? "__" : "_";
-                outputFiles[i].append(separator + item->subkey());
-            }
-        }
-        QStringList outputFilesStart = outputFiles;
-
-        for (int i = 0; i < item->iterationNum(); ++i)
-        {
-            // Set the settings file parameter.
-            QVariant val;
-            if (item->type() == oskar_SettingsItem::INT)
-                val = QVariant(start.toInt() + i * inc.toInt());
-            else if (item->type() == oskar_SettingsItem::DOUBLE)
-                val = QVariant(start.toDouble() + i * inc.toDouble());
-            model_->setValue(key, val);
-
-            // Modify all the output file names with the parameter value.
-            for (int i = 0; i < outputFiles.size(); ++i)
-            {
-                if (!outputFiles[i].isEmpty())
-                {
-                    outputFiles[i].append("_" + val.toString());
-                    model_->setValue(outputKeys[i], outputFiles[i]);
-                }
-            }
-
-            // Check if recursion depth has been reached.
-            if (depth < iterationKeys.size() - 1)
-            {
-                // If not, then call this function again.
-                run(depth + 1, outputFiles);
-            }
-            else
-            {
-                // Run the simulation with these settings.
-                int error = (*run_function_)(settings);
-                if (error)
-                {
-                    fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
-                            oskar_get_error_string(error));
-                }
-            }
-
-            // Restore the list of output file names.
-            outputFiles = outputFilesStart;
-        }
-
-        // Restore initial value.
-        model_->setValue(key, start);
-    }
-}
-
 
 void oskar_MainWindow::createRecentFileActions()
 {

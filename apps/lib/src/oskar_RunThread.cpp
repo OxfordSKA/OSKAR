@@ -26,50 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "apps/lib/oskar_RunThread.h"
+#include "widgets/oskar_SettingsModel.h"
+#include "widgets/oskar_SettingsItem.h"
+#include "utility/oskar_get_error_string.h"
 
-//oskar_RunDialog::oskar_RunDialog(QWidget* parent)
-//: QDialog(parent)
-//{
-//    text_ = new QTextEdit(this);
-//    text_->setText("Hello!");
-//    layout_ = new QVBoxLayout(this);
-//    layout_->addWidget(text_);
-//}
-//
-//oskar_RunDialog::~oskar_RunDialog()
-//{
-//}
+#include <QtCore/QVariant>
+#include <cstdio>
 
-oskar_RunThread::oskar_RunThread()
+oskar_RunThread::oskar_RunThread(oskar_SettingsModel* model,
+        QObject* parent)
+: QThread(parent)
 {
-}
-
-oskar_RunThread::oskar_RunThread(int (*run_function)(const char*),
-        QString settings_file)
-{
-    run_function_ = run_function;
-    settingsFile_ = settings_file;
-    start();
-}
-
-oskar_RunThread::~oskar_RunThread()
-{
+    model_ = model;
 }
 
 void oskar_RunThread::go(int (*run_function)(const char*),
-        QString settings_file)
+        QString settings_file, QStringList outputFiles)
 {
     run_function_ = run_function;
     settingsFile_ = settings_file;
+    outputFiles_ = outputFiles;
     start();
 }
 
 void oskar_RunThread::run()
 {
     QByteArray settings = settingsFile_.toAscii();
-    error_ = (*run_function_)(settings);
+    run(0, outputFiles_);
 }
 
 int oskar_RunThread::status() const
@@ -77,3 +61,82 @@ int oskar_RunThread::status() const
     return error_;
 }
 
+void oskar_RunThread::run(int depth, QStringList outputFiles)
+{
+    QByteArray settings = settingsFile_.toAscii();
+    QStringList iterationKeys = model_->data(QModelIndex(),
+            oskar_SettingsModel::IterationKeysRole).toStringList();
+    if (iterationKeys.size() == 0)
+    {
+        int error = (*run_function_)(settings);
+        if (error)
+        {
+            fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
+                    oskar_get_error_string(error));
+        }
+    }
+    else
+    {
+        QStringList outputKeys = model_->data(QModelIndex(),
+                oskar_SettingsModel::OutputKeysRole).toStringList();
+        QString key = iterationKeys[depth];
+        const oskar_SettingsItem* item = model_->getItem(key);
+        QVariant start = item->value();
+        QVariant inc = item->iterationInc();
+
+        // Modify all the output file names with the subkey name.
+        for (int i = 0; i < outputFiles.size(); ++i)
+        {
+            if (!outputFiles[i].isEmpty())
+            {
+                QString separator = (depth == 0) ? "__" : "_";
+                outputFiles[i].append(separator + item->subkey());
+            }
+        }
+        QStringList outputFilesStart = outputFiles;
+
+        for (int i = 0; i < item->iterationNum(); ++i)
+        {
+            // Set the settings file parameter.
+            QVariant val;
+            if (item->type() == oskar_SettingsItem::INT)
+                val = QVariant(start.toInt() + i * inc.toInt());
+            else if (item->type() == oskar_SettingsItem::DOUBLE)
+                val = QVariant(start.toDouble() + i * inc.toDouble());
+            model_->setValue(key, val);
+
+            // Modify all the output file names with the parameter value.
+            for (int i = 0; i < outputFiles.size(); ++i)
+            {
+                if (!outputFiles[i].isEmpty())
+                {
+                    outputFiles[i].append("_" + val.toString());
+                    model_->setValue(outputKeys[i], outputFiles[i]);
+                }
+            }
+
+            // Check if recursion depth has been reached.
+            if (depth < iterationKeys.size() - 1)
+            {
+                // If not, then call this function again.
+                run(depth + 1, outputFiles);
+            }
+            else
+            {
+                // Run the simulation with these settings.
+                int error = (*run_function_)(settings);
+                if (error)
+                {
+                    fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
+                            oskar_get_error_string(error));
+                }
+            }
+
+            // Restore the list of output file names.
+            outputFiles = outputFilesStart;
+        }
+
+        // Restore initial value.
+        model_->setValue(key, start);
+    }
+}

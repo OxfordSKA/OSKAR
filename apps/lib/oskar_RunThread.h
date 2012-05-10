@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_RUN_THREAD_H_
 #define OSKAR_RUN_THREAD_H_
 
@@ -36,42 +35,32 @@
 
 #include "oskar_global.h"
 
+class oskar_SettingsModel;
+
 #include <QtCore/QThread>
-//#include <QtGui/QTextEdit>
-//#include <QtGui/QVBoxLayout>
-//#include <QtGui/QDialog>
-
-//class oskar_RunDialog : public QDialog
-//{
-//    Q_OBJECT
-//
-//    public:
-//        oskar_RunDialog(QWidget* parent = 0);
-//        ~oskar_RunDialog();
-//
-//    private:
-//        QTextEdit* text_;
-//        QVBoxLayout* layout_;
-//};
-
-
+#include <QtCore/QStringList>
 
 class oskar_RunThread : public QThread
 {
-    public:
-        oskar_RunThread();
-        oskar_RunThread(int (*run_function)(const char*), QString settings_file);
-        ~oskar_RunThread();
+    Q_OBJECT
 
-        void go(int (*run_function)(const char*), QString settings_file);
+    public:
+        oskar_RunThread(oskar_SettingsModel* model, QObject* parent = 0);
+
+        void go(int (*run_function)(const char*), QString settings_file,
+                QStringList outputFiles);
         void run();
         int status() const;
+
+    private:
+        void run(int depth, QStringList outputFiles);
 
     private:
         int (*run_function_)(const char*);
         QString settingsFile_;
         int error_;
+        oskar_SettingsModel* model_;
+        QStringList outputFiles_;
 };
-
 
 #endif /* OSKAR_RUN_THREAD_H_ */
