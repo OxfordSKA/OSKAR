@@ -60,6 +60,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <vector>
+
+using std::vector;
 
 extern "C"
 int oskar_sim_interferometer(const char* settings_file)
@@ -100,8 +103,9 @@ int oskar_sim_interferometer(const char* settings_file)
 
     // Create temporary and accumulation buffers to hold visibility amplitudes
     // (one per thread/GPU).
-    oskar_Mem* vis_acc  = (oskar_Mem*)malloc(num_devices * sizeof(oskar_Mem));
-    oskar_Mem* vis_temp = (oskar_Mem*)malloc(num_devices * sizeof(oskar_Mem));
+    // These are held in standard vectors so that the memory will be released
+    // automatically if the function returns early, or is terminated.
+    vector<oskar_Mem> vis_acc(num_devices), vis_temp(num_devices);
     int time_baseline = telescope_cpu.num_baselines() * times->num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
@@ -237,20 +241,18 @@ int oskar_sim_interferometer(const char* settings_file)
         }
     }
 
-    // Free memory.
+    // Reset all CUDA devices.
     for (int i = 0; i < num_devices; ++i)
     {
-        error = oskar_mem_free(&vis_acc[i]);  if (error) return error;
-        error = oskar_mem_free(&vis_temp[i]); if (error) return error;
         cudaSetDevice(settings.sim.cuda_device_ids[i]);
         cudaDeviceReset();
     }
-    free(vis_acc);
-    free(vis_temp);
+
+    // FIXME Free sky chunks. This needs fixing in order to avoid
+    // potential memory leaks (free memory using a destructor instead).
     for (int i = 0; i < num_sky_chunks; ++i)
         oskar_sky_model_free(&sky_chunk_cpu[i]);
     free(sky_chunk_cpu);
-    oskar_settings_free(&settings);
 
     fprintf(stdout, "\n=== Run complete.\n");
     return OSKAR_SUCCESS;

@@ -175,7 +175,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     msgBox_->setText("OSKAR is running; please wait.");
     msgBox_->setIcon(QMessageBox::Information);
     msgBox_->setWindowTitle(mainTitle_);
-    msgBox_->setStandardButtons(QMessageBox::Cancel);
+    msgBox_->setStandardButtons(QMessageBox::NoButton);
     msgBox_->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     connect(runThread_, SIGNAL(finished()), msgBox_, SLOT(accept()));
 }
@@ -333,8 +333,6 @@ void oskar_MainWindow::openRecentFile()
 
 void oskar_MainWindow::runButton()
 {
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
     // Save settings if they are not already saved.
     if (settingsFile_.isEmpty())
     {
@@ -343,6 +341,9 @@ void oskar_MainWindow::runButton()
         if (settingsFile_.isEmpty())
             return;
     }
+
+    // Set the pointer to indicate that the application will be busy.
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     // Get the (list of) output file names.
     QStringList outputFiles;
@@ -356,19 +357,25 @@ void oskar_MainWindow::runButton()
     }
 
     // Run simulation recursively.
-    runThread_->go(run_function_, settingsFile_, outputFiles);
+    runThread_->start(run_function_, settingsFile_, outputFiles);
+#if 0
     int rval = msgBox_->exec();
     if (rval == QMessageBox::Cancel)
     {
         runThread_->terminate();
         runThread_->wait();
     }
+#else
+    msgBox_->exec();
+#endif
 
     // Restore the output files.
     for (int i = 0; i < keys.size(); ++i)
     {
         model_->setValue(keys[i], outputFiles[i]);
     }
+
+    // Restore the pointer.
     QApplication::restoreOverrideCursor();
 }
 

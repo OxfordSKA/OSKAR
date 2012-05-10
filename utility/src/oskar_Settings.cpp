@@ -26,34 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_FREE_H_
-#define OSKAR_SETTINGS_FREE_H_
-
-/**
- * @file oskar_settings_free.h
- */
-
-#include "oskar_global.h"
 #include "utility/oskar_Settings.h"
+#include "utility/oskar_settings_free.h"
+#include "utility/oskar_settings_init.h"
+#include <cstdlib>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
- * @brief
- * Frees the memory held by a settings structure.
- *
- * @details
- * This top-level function frees the memory held by a settings structure
- *
- * @param settings A pointer to the settings structure.
- */
-OSKAR_EXPORT
-int oskar_settings_free(oskar_Settings* settings);
-
-#ifdef __cplusplus
+oskar_Settings::oskar_Settings()
+{
+    if (oskar_settings_init(this))
+        throw "Error in oskar_settings_init.";
 }
-#endif
 
-#endif /* OSKAR_SETTINGS_FREE_H_ */
+oskar_Settings::~oskar_Settings()
+{
+    if (oskar_settings_free(this))
+        throw "Error in oskar_settings_free.";
+}

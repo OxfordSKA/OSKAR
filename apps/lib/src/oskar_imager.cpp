@@ -110,7 +110,6 @@ int oskar_imager(const char* settings_file)
     if (settings.image.fits_image)
     {
         printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
-        /* Note: currently there is no error code returned from this function. */
         error = oskar_fits_image_write(&image, settings.image.fits_image);
         if (error)
         {
@@ -122,7 +121,6 @@ int oskar_imager(const char* settings_file)
 #endif
 
     fprintf(stdout, "\n=== Run complete.\n");
-    oskar_settings_free(&settings);
     return OSKAR_SUCCESS;
 }
 

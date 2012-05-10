@@ -35,6 +35,7 @@
 #include "apps/lib/oskar_settings_load_telescope.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_append_raw.h"
+#include "utility/oskar_settings_init.h"
 #include "utility/oskar_settings_print.h"
 #include <string.h>
 
@@ -46,21 +47,9 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
 {
     int error;
 
-    /* Initialise all array pointers to NULL. */
-    settings->obs.ms_filename = 0;
-    settings->obs.oskar_vis_filename = 0;
-    settings->sim.cuda_device_ids = 0;
-    settings->sky.gsm_file = 0;
-    settings->sky.input_sky_file = 0;
-    settings->sky.output_sky_file = 0;
-    settings->telescope.config_directory = 0;
-    settings->telescope.output_config_directory = 0;
-    settings->telescope.station.receiver_temperature_file = 0;
-    settings->image.input_vis_data = 0;
-    settings->image.oskar_image = 0;
-    settings->image.fits_image = 0;
-    settings->beam_pattern.oskar_image_filename = 0;
-    settings->beam_pattern.fits_image_filename = 0;
+    /* Initialise the settings array. */
+    error = oskar_settings_init(settings);
+    if (error) return error;
 
     /* Load observation settings first. */
     error = oskar_settings_load_observation(&settings->obs, filename);
@@ -78,9 +67,6 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
     if (error) return error;
 
     /* Save the path to the settings file. */
-    error = oskar_mem_init(&settings->settings_path, OSKAR_CHAR,
-            OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (error) return error;
     error = oskar_mem_append_raw(&settings->settings_path, filename,
             OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
     if (error) return error;

@@ -317,56 +317,6 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope,
         }
     }
 
-    /* Evaluate station receiver noise (if any specified in the settings) */
-    if (settings->telescope.station.receiver_temperature_file ||
-            settings->telescope.station.receiver_temperature > 0.0)
-    {
-        int num_channels;
-        double bandwidth, integration_time;
-        const oskar_SettingsTime* time;
-        oskar_Mem receiver_temp;
-
-        num_channels = settings->obs.num_channels;
-        bandwidth = telescope->bandwidth_hz;
-        time = &settings->obs.time;
-        integration_time = time->obs_length_seconds / time->num_time_steps;
-        err = oskar_mem_init(&receiver_temp, OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-                num_channels, OSKAR_TRUE);
-        if (err)
-        {
-            oskar_mem_free(&receiver_temp);
-            return err;
-        }
-        err = oskar_mem_set_value_real(&receiver_temp,
-                settings->telescope.station.receiver_temperature);
-        if (err)
-        {
-            oskar_mem_free(&receiver_temp);
-            return err;
-        }
-
-        /* Load receiver temperatures from file. */
-        if (settings->telescope.station.receiver_temperature_file)
-        {
-            /* oskar_load_receiver_temperatures(settings->telescope.station.receiver_temperature_file); */
-            printf("== WARNING: Receiver temperature files "
-                    "are not yet implemented.\n");
-        }
-
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            oskar_StationModel* s;
-            s = &telescope->station[i];
-            oskar_mem_init(&(s->total_receiver_noise), OSKAR_DOUBLE,
-                    OSKAR_LOCATION_CPU, num_channels, OSKAR_TRUE);
-            oskar_evaluate_station_receiver_noise_stddev(
-                    (double*)(s->total_receiver_noise.data),
-                    (double*)receiver_temp.data, num_channels, bandwidth,
-                    integration_time, s->num_elements);
-        }
-        oskar_mem_free(&receiver_temp);
-    }
-
     /* Analyse telescope model to determine whether stations are identical,
      * whether to apply element errors and/or weights. */
     oskar_telescope_model_analyse(telescope);
@@ -400,4 +350,3 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope,
 #ifdef __cplusplus
 }
 #endif
-

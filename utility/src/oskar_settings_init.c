@@ -26,34 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_FREE_H_
-#define OSKAR_SETTINGS_FREE_H_
-
-/**
- * @file oskar_settings_free.h
- */
-
-#include "oskar_global.h"
-#include "utility/oskar_Settings.h"
+#include "utility/oskar_settings_init.h"
+#include "utility/oskar_mem_init.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Frees the memory held by a settings structure.
- *
- * @details
- * This top-level function frees the memory held by a settings structure
- *
- * @param settings A pointer to the settings structure.
- */
-OSKAR_EXPORT
-int oskar_settings_free(oskar_Settings* settings);
+int oskar_settings_init(oskar_Settings* settings)
+{
+    int error = 0;
+
+    /* Initialise all array pointers to NULL. */
+    settings->obs.ms_filename = 0;
+    settings->obs.oskar_vis_filename = 0;
+    settings->sim.cuda_device_ids = 0;
+    settings->sky.gsm_file = 0;
+    settings->sky.input_sky_file = 0;
+    settings->sky.output_sky_file = 0;
+    settings->telescope.config_directory = 0;
+    settings->telescope.output_config_directory = 0;
+    settings->telescope.station.receiver_temperature_file = 0;
+    settings->image.input_vis_data = 0;
+    settings->image.oskar_image = 0;
+    settings->image.fits_image = 0;
+    settings->beam_pattern.oskar_image_filename = 0;
+    settings->beam_pattern.fits_image_filename = 0;
+
+    /* Initialise pathname to settings file. */
+    error = oskar_mem_init(&settings->settings_path, OSKAR_CHAR,
+            OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    if (error) return error;
+
+    return error;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SETTINGS_FREE_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,11 @@ struct oskar_Settings
     oskar_SettingsSky sky;
     oskar_SettingsTelescope telescope;
     oskar_SettingsBeamPattern beam_pattern;
+
+#ifdef __cplusplus
+    oskar_Settings();
+    ~oskar_Settings();
+#endif
 };
 typedef struct oskar_Settings oskar_Settings;
 

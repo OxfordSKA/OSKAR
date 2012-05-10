@@ -310,6 +310,5 @@ int oskar_sim_beam_pattern(const char* settings_file)
 #endif
 
     cudaDeviceReset();
-    oskar_settings_free(&settings);
     return OSKAR_SUCCESS;
 }

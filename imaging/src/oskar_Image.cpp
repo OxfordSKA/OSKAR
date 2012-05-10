@@ -29,15 +29,16 @@
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_image_free.h"
 #include "imaging/oskar_image_init.h"
+#include <cstdio>
 
 oskar_Image::oskar_Image(int type, int location)
 {
     if (oskar_image_init(this, type, location))
-    	throw "Error in oskar_image_init.";
+        throw "Error in oskar_image_init.";
 }
 
 oskar_Image::~oskar_Image()
 {
     if (oskar_image_free(this))
-    	throw "Error in oskar_image_free.";
+        throw "Error in oskar_image_free.";
 }

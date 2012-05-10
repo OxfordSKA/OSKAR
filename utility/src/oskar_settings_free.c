@@ -34,26 +34,42 @@
 extern "C" {
 #endif
 
-void oskar_settings_free(oskar_Settings* settings)
+int oskar_settings_free(oskar_Settings* settings)
 {
     /* Free all settings arrays. */
     free(settings->obs.ms_filename);
+    settings->obs.ms_filename = 0;
     free(settings->obs.oskar_vis_filename);
+    settings->obs.oskar_vis_filename = 0;
     free(settings->sim.cuda_device_ids);
+    settings->sim.cuda_device_ids = 0;
     free(settings->sky.gsm_file);
+    settings->sky.gsm_file = 0;
     free(settings->sky.input_sky_file);
+    settings->sky.input_sky_file = 0;
     free(settings->sky.output_sky_file);
+    settings->sky.output_sky_file = 0;
     free(settings->telescope.config_directory);
+    settings->telescope.config_directory = 0;
     free(settings->telescope.output_config_directory);
+    settings->telescope.output_config_directory = 0;
     free(settings->telescope.station.receiver_temperature_file);
+    settings->telescope.station.receiver_temperature_file = 0;
     free(settings->image.input_vis_data);
+    settings->image.input_vis_data = 0;
     free(settings->image.oskar_image);
+    settings->image.oskar_image = 0;
     free(settings->image.fits_image);
+    settings->image.fits_image = 0;
     free(settings->beam_pattern.oskar_image_filename);
+    settings->beam_pattern.oskar_image_filename = 0;
     free(settings->beam_pattern.fits_image_filename);
+    settings->beam_pattern.fits_image_filename = 0;
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path);
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

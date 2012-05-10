@@ -34,32 +34,33 @@
 #include <QtCore/QVariant>
 #include <cstdio>
 
-oskar_RunThread::oskar_RunThread(oskar_SettingsModel* model,
-        QObject* parent)
+oskar_RunThread::oskar_RunThread(oskar_SettingsModel* model, QObject* parent)
 : QThread(parent)
 {
+    run_function_ = 0;
     model_ = model;
 }
 
-void oskar_RunThread::go(int (*run_function)(const char*),
-        QString settings_file, QStringList outputFiles)
+// Public methods.
+
+void oskar_RunThread::start(int (*run_function)(const char*),
+        QString settings_file, QStringList outputs)
 {
     run_function_ = run_function;
     settingsFile_ = settings_file;
-    outputFiles_ = outputFiles;
-    start();
+    outputFiles_ = outputs;
+    QThread::start();
 }
+
+// Protected methods.
 
 void oskar_RunThread::run()
 {
-    QByteArray settings = settingsFile_.toAscii();
+    // Run recursively.
     run(0, outputFiles_);
 }
 
-int oskar_RunThread::status() const
-{
-    return error_;
-}
+// Private methods.
 
 void oskar_RunThread::run(int depth, QStringList outputFiles)
 {

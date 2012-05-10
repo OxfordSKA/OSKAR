@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_FREE_H_
-#define OSKAR_SETTINGS_FREE_H_
+#ifndef OSKAR_SETTINGS_INIT_H_
+#define OSKAR_SETTINGS_INIT_H_
 
 /**
- * @file oskar_settings_free.h
+ * @file oskar_settings_init.h
  */
 
 #include "oskar_global.h"
@@ -42,18 +42,18 @@ extern "C" {
 
 /**
  * @brief
- * Frees the memory held by a settings structure.
+ * Initialises a settings structure.
  *
  * @details
- * This top-level function frees the memory held by a settings structure
+ * This function initialises pointers in an OSKAR settings structure.
  *
  * @param settings A pointer to the settings structure.
  */
 OSKAR_EXPORT
-int oskar_settings_free(oskar_Settings* settings);
+int oskar_settings_init(oskar_Settings* settings);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SETTINGS_FREE_H_ */
+#endif /* OSKAR_SETTINGS_INIT_H_ */

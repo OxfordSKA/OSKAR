@@ -44,23 +44,22 @@ class oskar_RunThread : public QThread
 {
     Q_OBJECT
 
-    public:
-        oskar_RunThread(oskar_SettingsModel* model, QObject* parent = 0);
+public:
+    oskar_RunThread(oskar_SettingsModel* model, QObject* parent = 0);
+    void start(int (*run_function)(const char*), QString settings_file,
+            QStringList outputs);
 
-        void go(int (*run_function)(const char*), QString settings_file,
-                QStringList outputFiles);
-        void run();
-        int status() const;
+protected:
+    void run();
 
-    private:
-        void run(int depth, QStringList outputFiles);
+private:
+    void run(int depth, QStringList outputFiles);
 
-    private:
-        int (*run_function_)(const char*);
-        QString settingsFile_;
-        int error_;
-        oskar_SettingsModel* model_;
-        QStringList outputFiles_;
+private:
+    int (*run_function_)(const char*);
+    oskar_SettingsModel* model_;
+    QString settingsFile_;
+    QStringList outputFiles_;
 };
 
 #endif /* OSKAR_RUN_THREAD_H_ */
