@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,12 +54,8 @@ extern "C" {
  * This corresponds to a rotation by the parallactic angle (q) for each source
  * and station. The Jones matrix is:
  *
- * ( sin(q)  -cos(q) )
- * ( cos(q)   sin(q) )
- *
- * Note that the sine and cosine are intentionally swapped with respect to a
- * normal 2D rotation, since the polarisation axes in the horizontal frame
- * are different to those in the equatorial frame.
+ * ( cos(q)  -sin(q) )
+ * ( sin(q)   cos(q) )
  *
  * @param[out] R         Output set of Jones matrices.
  * @param[in] sky        Input sky model.

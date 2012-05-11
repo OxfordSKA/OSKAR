@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,8 @@
  * station. This corresponds to a rotation by the parallactic angle (q) for
  * each source. The Jones matrix is:
  *
- * ( sin(q)  -cos(q) )
- * ( cos(q)   sin(q) )
- *
- * Note that the sine and cosine are intentionally swapped with respect to a
- * normal 2D rotation, since the polarisation axes in the horizontal frame
- * are different to those in the equatorial frame.
+ * ( cos(q)  -sin(q) )
+ * ( sin(q)   cos(q) )
  *
  * @param[in] ns       The number of source positions.
  * @param[in] ra       The source Right Ascensions in radians.
@@ -80,12 +76,8 @@ void oskar_cudak_evaluate_jones_R_f(int ns, const float* ra,
  * station. This corresponds to a rotation by the parallactic angle (q) for
  * each source. The Jones matrix is:
  *
- * ( sin(q)  -cos(q) )
- * ( cos(q)   sin(q) )
- *
- * Note that the sine and cosine are intentionally swapped with respect to a
- * normal 2D rotation, since the polarisation axes in the horizontal frame
- * are different to those in the equatorial frame.
+ * ( cos(q)  -sin(q) )
+ * ( sin(q)   cos(q) )
  *
  * @param[in] ns       The number of source positions.
  * @param[in] ra       The source Right Ascensions in radians.

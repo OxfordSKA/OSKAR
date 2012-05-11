@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,10 +59,10 @@ void oskar_cudak_evaluate_jones_R_f(int ns, const float* ra,
 
     // Compute the Jones matrix.
     float4c J;
-    J.a = make_float2(sin_a, 0.0f);
-    J.b = make_float2(-cos_a, 0.0f);
-    J.c = make_float2(cos_a, 0.0f);
-    J.d = make_float2(sin_a, 0.0f);
+    J.a = make_float2(cos_a, 0.0f);
+    J.b = make_float2(-sin_a, 0.0f);
+    J.c = make_float2(sin_a, 0.0f);
+    J.d = make_float2(cos_a, 0.0f);
 
     // Copy the Jones matrix to global memory.
     if (s < ns)
@@ -99,10 +99,10 @@ void oskar_cudak_evaluate_jones_R_d(int ns, const double* ra,
 
     // Compute the Jones matrix.
     double4c J;
-    J.a = make_double2(sin_a, 0.0);
-    J.b = make_double2(-cos_a, 0.0);
-    J.c = make_double2(cos_a, 0.0);
-    J.d = make_double2(sin_a, 0.0);
+    J.a = make_double2(cos_a, 0.0);
+    J.b = make_double2(-sin_a, 0.0);
+    J.c = make_double2(sin_a, 0.0);
+    J.d = make_double2(cos_a, 0.0);
 
     // Copy the Jones matrix to global memory.
     if (s < ns)

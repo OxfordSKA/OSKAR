@@ -77,10 +77,11 @@ int oskar_sim_interferometer(const char* settings_file)
     const oskar_SettingsTime* times = &settings.obs.time;
 
     // Check that a data file has been specified.
-    if (!settings.obs.oskar_vis_filename &&
-            !settings.obs.ms_filename)
+    if ( !(settings.obs.oskar_vis_filename || settings.obs.ms_filename ||
+            (settings.obs.image_interferometer_output &&
+                    (settings.image.oskar_image || settings.image.fits_image))))
     {
-        fprintf(stderr, "ERROR: No visibility file specified.\n");
+        fprintf(stderr, "ERROR: No output file specified.\n");
         return OSKAR_ERR_SETTINGS;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +50,8 @@
  *
  * The output matrix is
  *
- * ( g_phi^a   g_theta^a )
- * ( g_phi^b   g_theta^b )
+ * ( g_theta^a   g_phi^a )
+ * ( g_theta^b   g_phi^b )
  *
  * where phi and theta are the angles measured from x to y and from xy to z,
  * respectively.
@@ -92,8 +92,8 @@ void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
  *
  * The output matrix is
  *
- * ( g_phi^a   g_theta^a )
- * ( g_phi^b   g_theta^b )
+ * ( g_theta^a   g_phi^a )
+ * ( g_theta^b   g_phi^b )
  *
  * where phi and theta are the angles measured from x to y and from xy to z,
  * respectively.

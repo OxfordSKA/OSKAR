@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,13 +74,13 @@ void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
             + cos_orientation_y * e_theta_y;
 
     // Store components.
-    pattern[s].a.x = g_phi_a;
+    pattern[s].a.x = g_theta_a;
     pattern[s].a.y = 0.0f;
-    pattern[s].b.x = g_theta_a;
+    pattern[s].b.x = g_phi_a;
     pattern[s].b.y = 0.0f;
-    pattern[s].c.x = g_phi_b;
+    pattern[s].c.x = g_theta_b;
     pattern[s].c.y = 0.0f;
-    pattern[s].d.x = g_theta_b;
+    pattern[s].d.x = g_phi_b;
     pattern[s].d.y = 0.0f;
 }
 
@@ -128,12 +128,12 @@ void oskar_cudak_evaluate_dipole_pattern_d(const int num_sources,
             + cos_orientation_y * e_theta_y;
 
     // Store components.
-    pattern[s].a.x = g_phi_a;
+    pattern[s].a.x = g_theta_a;
     pattern[s].a.y = 0.0;
-    pattern[s].b.x = g_theta_a;
+    pattern[s].b.x = g_phi_a;
     pattern[s].b.y = 0.0;
-    pattern[s].c.x = g_phi_b;
+    pattern[s].c.x = g_theta_b;
     pattern[s].c.y = 0.0;
-    pattern[s].d.x = g_theta_b;
+    pattern[s].d.x = g_phi_b;
     pattern[s].d.y = 0.0;
 }

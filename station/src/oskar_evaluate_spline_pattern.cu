@@ -122,106 +122,30 @@ int oskar_evaluate_spline_pattern(oskar_Mem* pattern,
     }
 
     /* Evaluate the patterns. */
-    error = oskar_spline_data_evaluate(pattern, 0, 8, &element->port1_phi_re,
+    error = oskar_spline_data_evaluate(pattern, 0, 8, &element->port1_theta_re,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 1, 8, &element->port1_phi_im,
+    error = oskar_spline_data_evaluate(pattern, 1, 8, &element->port1_theta_im,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 2, 8, &element->port1_theta_re,
+    error = oskar_spline_data_evaluate(pattern, 2, 8, &element->port1_phi_re,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 3, 8, &element->port1_theta_im,
+    error = oskar_spline_data_evaluate(pattern, 3, 8, &element->port1_phi_im,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 4, 8, &element->port2_phi_re,
+    error = oskar_spline_data_evaluate(pattern, 4, 8, &element->port2_theta_re,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 5, 8, &element->port2_phi_im,
+    error = oskar_spline_data_evaluate(pattern, 5, 8, &element->port2_theta_im,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 6, 8, &element->port2_theta_re,
+    error = oskar_spline_data_evaluate(pattern, 6, 8, &element->port2_phi_re,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 7, 8, &element->port2_theta_im,
+    error = oskar_spline_data_evaluate(pattern, 7, 8, &element->port2_phi_im,
             &theta, &phi);
     if (error) return error;
-
-#if 0
-    {
-        /* TEST: Copy inputs to CPU memory. */
-        oskar_Mem theta_t(&theta, OSKAR_LOCATION_CPU);
-        oskar_Mem phi_t(&phi, OSKAR_LOCATION_CPU);
-        oskar_Mem p_t(pattern->type, OSKAR_LOCATION_CPU, num_sources);
-        oskar_ElementModel temp;
-        error = oskar_element_model_init(&temp, type, OSKAR_LOCATION_CPU);
-        if (error) return error;
-        error = oskar_element_model_copy(&temp, element);
-        if (error) return error;
-        error = oskar_spline_data_evaluate(&p_t, 0, 4, &temp.port1_phi,
-                &theta_t, &phi_t);
-        if (error) return error;
-        error = oskar_spline_data_evaluate(&p_t, 1, 4, &temp.port1_theta,
-                &theta_t, &phi_t);
-        if (error) return error;
-        error = oskar_spline_data_evaluate(&p_t, 2, 4, &temp.port2_phi,
-                &theta_t, &phi_t);
-        if (error) return error;
-        error = oskar_spline_data_evaluate(&p_t, 3, 4, &temp.port2_theta,
-                &theta_t, &phi_t);
-        if (error) return error;
-        error = oskar_element_model_free(&temp);
-        if (error) return error;
-
-        oskar_Mem p(pattern, OSKAR_LOCATION_CPU);
-        if (type == OSKAR_SINGLE)
-        {
-            double tol = 5e-6;
-            for (int i = 0; i < num_sources; ++i)
-            {
-                if (fabs(((float4c*)p_t)[i].a.x - ((float4c*)p)[i].a.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((float4c*)p_t)[i].a.y - ((float4c*)p)[i].a.y) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((float4c*)p_t)[i].b.x - ((float4c*)p)[i].b.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((float4c*)p_t)[i].b.y - ((float4c*)p)[i].b.y) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((float4c*)p_t)[i].c.x - ((float4c*)p)[i].c.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((float4c*)p_t)[i].c.y - ((float4c*)p)[i].c.y) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((float4c*)p_t)[i].d.x - ((float4c*)p)[i].d.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((float4c*)p_t)[i].d.y - ((float4c*)p)[i].d.y) > tol)
-                    printf("NOT EQUAL!\n");
-            }
-        }
-        else if (type == OSKAR_DOUBLE)
-        {
-            double tol = 1e-14;
-            for (int i = 0; i < num_sources; ++i)
-            {
-                if (fabs(((double4c*)p_t)[i].a.x - ((double4c*)p)[i].a.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((double4c*)p_t)[i].a.y - ((double4c*)p)[i].a.y) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((double4c*)p_t)[i].b.x - ((double4c*)p)[i].b.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((double4c*)p_t)[i].b.y - ((double4c*)p)[i].b.y) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((double4c*)p_t)[i].c.x - ((double4c*)p)[i].c.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((double4c*)p_t)[i].c.y - ((double4c*)p)[i].c.y) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((double4c*)p_t)[i].d.x - ((double4c*)p)[i].d.x) > tol)
-                    printf("NOT EQUAL!\n");
-                if (fabs(((double4c*)p_t)[i].d.y - ((double4c*)p)[i].d.y) > tol)
-                    printf("NOT EQUAL!\n");
-            }
-        }
-    }
-#endif
 
     /* Release use of work arrays. */
     work->used_real -= 2 * num_sources;

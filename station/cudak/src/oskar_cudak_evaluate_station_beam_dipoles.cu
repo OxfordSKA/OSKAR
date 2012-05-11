@@ -144,10 +144,10 @@ void oskar_cudak_evaluate_station_beam_dipoles_f(const int num_antennas,
     // Store result.
     if (s < num_sources)
     {
-        pattern[s].a = e_phi_a;
-        pattern[s].b = e_theta_a;
-        pattern[s].c = e_phi_b;
-        pattern[s].d = e_theta_b;
+        pattern[s].a = e_theta_a;
+        pattern[s].b = e_phi_a;
+        pattern[s].c = e_theta_b;
+        pattern[s].d = e_phi_b;
     }
 }
 
@@ -168,10 +168,10 @@ void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
 {
     // Source index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
-    double2 e_phi_a = make_double2(0.0f, 0.0f);
-    double2 e_theta_a = make_double2(0.0f, 0.0f);
-    double2 e_phi_b = make_double2(0.0f, 0.0f);
-    double2 e_theta_b = make_double2(0.0f, 0.0f);
+    double2 e_phi_a = make_double2(0.0, 0.0);
+    double2 e_theta_a = make_double2(0.0, 0.0);
+    double2 e_phi_b = make_double2(0.0, 0.0);
+    double2 e_theta_b = make_double2(0.0, 0.0);
 
     // Get source direction cosines.
     double ll = 0.0, lm = 0.0, ln = 0.0;
@@ -266,9 +266,9 @@ void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
     // Store result.
     if (s < num_sources)
     {
-        pattern[s].a = e_phi_a;
-        pattern[s].b = e_theta_a;
-        pattern[s].c = e_phi_b;
-        pattern[s].d = e_theta_b;
+        pattern[s].a = e_theta_a;
+        pattern[s].b = e_phi_a;
+        pattern[s].c = e_theta_b;
+        pattern[s].d = e_phi_b;
     }
 }
