@@ -27,15 +27,15 @@
  */
 
 #include "apps/oskar_MainWindow.h"
+#include "apps/oskar_RunThread.h"
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "apps/lib/oskar_sim_interferometer.h"
 #include "apps/lib/oskar_imager.h"
-#include "apps/lib/oskar_SettingsModelApps.h"
-#include "apps/lib/oskar_RunThread.h"
 #include "widgets/oskar_About.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
+#include "widgets/oskar_SettingsModelApps.h"
 #include "widgets/oskar_SettingsView.h"
 #include "utility/oskar_get_error_string.h"
 

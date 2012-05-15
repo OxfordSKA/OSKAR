@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # ==== Project version.
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 0)
-set(OSKAR_VERSION_PATCH 0)
+set(OSKAR_VERSION_PATCH 1)
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 
 # ==== Append the src/cmake directory to the module path.
@@ -71,7 +71,7 @@ if (CUDA_FOUND)
 
     set(CUDA_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${libname}.dir/src)
     cuda_add_library(${libname} ${${libname}_SRC})
-    target_link_libraries(${libname} 
+    target_link_libraries(${libname}
         ${CUDA_LIBRARIES}
         ${CUDA_curand_LIBRARY})
     if (OSKAR_USE_CBLAS)

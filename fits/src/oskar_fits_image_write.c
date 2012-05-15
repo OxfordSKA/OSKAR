@@ -137,7 +137,7 @@ int oskar_fits_image_write(const oskar_Image* image, const char* filename)
     /* Write multi-dimensional image data. */
     status = oskar_fits_write(filename, type, num_dimensions, naxes, image->data.data,
             ctype, label, crval, cdelt, crpix, crota);
-    if (status) return status;
+    if (status) return OSKAR_ERR_FITS_IO;
 
     /* Open file for read/write access. */
     fits_open_file(&fptr, filename, READWRITE, &status);

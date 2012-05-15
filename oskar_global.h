@@ -40,7 +40,7 @@
  * library. For example, in OSKAR version 2.1.3 this would expand to
  * 0x020103.
  */
-#define OSKAR_VERSION 0x020000
+#define OSKAR_VERSION 0x020001
 
 /**
  * @macro OSKAR_VERSION_STR
@@ -51,7 +51,7 @@
  * This macro expands to a string that specifies the OSKAR version number
  * (for example, "2.1.3").
  */
-#define OSKAR_VERSION_STR "2.0.0-beta"
+#define OSKAR_VERSION_STR "2.0.1-beta"
 
 /**
  * @brief

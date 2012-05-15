@@ -1,3 +1,18 @@
+2012-05-15  OSKAR 2.0.1-beta
+
+    * Fixed polarisation simulation by changing element order of R and G Jones
+      matrices. R is now a standard 2D rotation matrix, and G has elements
+      ordered theta-phi, rather than phi-theta.
+
+    * Fixed handling of settings parameters when using sky model flux filters.
+
+    * Fixed logic checks on simulation output file settings.
+
+    * Added binary utilities to modify and inspect settings files from
+      command line or shell scripts.
+
+    * Added message box in GUI to indicate when simulations are running.
+
 2012-04-25  OSKAR 2.0.0-beta
 
-    * First release.
+    * First pre-release.

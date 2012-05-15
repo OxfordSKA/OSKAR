@@ -29,8 +29,8 @@ if (QT4_FOUND AND CUDA_FOUND)
     oskar_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar
-    oskar_app(oskar oskar_main.cpp oskar_MainWindow.cpp
-        QT_MOC_SRC oskar_MainWindow.h
+    oskar_app(oskar oskar_main.cpp oskar_MainWindow.cpp oskar_RunThread.cpp
+        QT_MOC_SRC oskar_MainWindow.h oskar_RunThread.h
         EXTRA_LIBS oskar_widgets ${QT_QTGUI_LIBRARY})
 
 endif ()

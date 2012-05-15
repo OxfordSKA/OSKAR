@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_RunThread.h"
+#include "apps/oskar_RunThread.h"
 #include "widgets/oskar_SettingsModel.h"
 #include "widgets/oskar_SettingsItem.h"
 #include "utility/oskar_get_error_string.h"

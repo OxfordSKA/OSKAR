@@ -5,7 +5,6 @@
 set(apps_SRC
     src/oskar_imager.cpp
     src/oskar_remove_dir.cpp
-    src/oskar_RunThread.cpp
     src/oskar_set_up_sky.cpp
     src/oskar_set_up_telescope.c
     src/oskar_set_up_visibilities.c
@@ -16,7 +15,6 @@ set(apps_SRC
     src/oskar_settings_load_sky.cpp
     src/oskar_settings_load_telescope.cpp
     src/oskar_settings_load.c
-    src/oskar_SettingsModelApps.cpp
     src/oskar_sim_beam_pattern.cpp
     src/oskar_sim_interferometer.cpp
     src/oskar_telescope_model_load.cpp
@@ -26,13 +24,6 @@ if(CASACORE_FOUND)
     list(APPEND apps_SRC src/oskar_write_ms.cpp)
 endif()
 
-set(apps_MOC_SRC
-    oskar_SettingsModelApps.h
-    oskar_RunThread.h
-)
-
-qt4_wrap_cpp(apps_SRC ${apps_MOC_SRC})
-
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)
 
 # ==== Macros to build the OSKAR apps module.
@@ -41,19 +32,19 @@ cuda_add_library(oskar_apps ${apps_SRC})
 
 # Link in oskar_ms and oskar_fits if avaliable.
 if(CASACORE_FOUND AND CFITSIO_FOUND)
-    target_link_libraries(oskar_apps oskar oskar_widgets oskar_ms oskar_fits
+    target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
         ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
         ${CUDA_CUBLAS_LIBRARIES})
 elseif(CASACORE_FOUND)
-    target_link_libraries(oskar_apps oskar oskar_widgets oskar_ms
+    target_link_libraries(oskar_apps oskar oskar_ms
         ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
         ${CUDA_CUBLAS_LIBRARIES})
 elseif(CFITSIO_FOUND)
-    target_link_libraries(oskar_apps oskar oskar_widgets oskar_fits
+    target_link_libraries(oskar_apps oskar oskar_fits
         ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
         ${CUDA_CUBLAS_LIBRARIES})
 else()
-    target_link_libraries(oskar_apps oskar oskar_widgets
+    target_link_libraries(oskar_apps oskar
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
 endif()
 

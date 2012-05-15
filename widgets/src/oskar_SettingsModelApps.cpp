@@ -26,10 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "apps/lib/oskar_SettingsModelApps.h"
+#include "widgets/oskar_SettingsModelApps.h"
 #include "widgets/oskar_SettingsItem.h"
-
 
 oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
 : oskar_SettingsModel(parent)

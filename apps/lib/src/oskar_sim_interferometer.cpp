@@ -239,7 +239,8 @@ int oskar_sim_interferometer(const char* settings_file)
             {
                 printf("--> Writing FITS image: '%s'\n",
                         settings.image.fits_image);
-                oskar_fits_image_write(&image, settings.image.fits_image);
+                error = oskar_fits_image_write(&image, settings.image.fits_image);
+                if (error) return error;
             }
 #endif
         }
@@ -257,8 +258,8 @@ int oskar_sim_interferometer(const char* settings_file)
         cudaDeviceReset();
     }
 
-    // FIXME Free sky chunks. This needs fixing in order to avoid
-    // potential memory leaks (free memory using a destructor instead).
+    // FIXME Free sky chunks. This needs fixing in order to avoid potential
+    // memory leaks in case of errors (free memory using a destructor instead).
     for (int i = 0; i < num_sky_chunks; ++i)
         oskar_sky_model_free(&sky_chunk_cpu[i]);
     free(sky_chunk_cpu);
