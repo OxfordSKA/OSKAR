@@ -26,75 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MAIN_WINDOW_H_
-#define OSKAR_MAIN_WINDOW_H_
+#ifndef OSKAR_BINARY_LOCATIONS_H_
+#define OSKAR_BINARY_LOCATIONS_H_
 
-#include <QtGui/QMainWindow>
-#include <QtCore/QString>
+/**
+ * @file oskar_BinaryLocations.h
+ */
 
-class oskar_SettingsModel;
-class oskar_SettingsModelFilter;
-class oskar_SettingsView;
-class QAction;
-class QModelIndex;
-class QVBoxLayout;
-class QWidget;
-class QMessageBox;
+#include <QtGui/QDialog>
 
-class oskar_MainWindow : public QMainWindow
+class QLineEdit;
+
+class oskar_BinaryLocations : public QDialog
 {
     Q_OBJECT
 
 public:
-    oskar_MainWindow(QWidget* parent = 0);
+    oskar_BinaryLocations(QWidget *parent = 0);
 
-protected:
-    void closeEvent(QCloseEvent* event);
-
-public slots:
-    void openSettings(QString filename = QString(), bool check = true);
-    void saveSettingsAs(QString filename = QString());
+    QString beamPattern() const;
+    QString imager() const;
+    QString interferometer() const;
+    void setBeamPattern(const QString& value);
+    void setImager(const QString& value);
+    void setInterferometer(const QString& value);
 
 private slots:
-    void about();
-    void binLocations();
-    void cudaInfo();
-    void runBeamPattern();
-    void runInterferometer();
-    void runImager();
-    void setHideIfUnset(bool value);
-    void openRecentFile();
+    void setBeamPattern();
+    void setImager();
+    void setInterferometer();
 
 private:
-    void runButton();
-
-    void createRecentFileActions();
-    void updateRecentFileActions();
-    void updateRecentFileList();
-
-private:
-    QString mainTitle_;
-    QWidget* widget_;
-    QVBoxLayout* layout_;
-    oskar_SettingsModel* model_;
-    oskar_SettingsModelFilter* modelProxy_;
-    oskar_SettingsView* view_;
-    QAction* actHideUnset_;
-    QString settingsFile_;
-    QString run_binary_;
-
-    QMenuBar* menubar_;
-    QMenu* menuFile_;
-
-    enum { MaxRecentFiles = 3 };
-    QMenu* recentFileMenu_;
-    QAction* separator_;
-    QAction* recentFiles_[MaxRecentFiles];
-
-    // Binary path names.
-    QString binary_interferometer_;
-    QString binary_beam_pattern_;
-    QString binary_imager_;
+    QLineEdit* editInterferometer_;
+    QLineEdit* editBeamPattern_;
+    QLineEdit* editImager_;
 };
 
-#endif // OSKAR_MAIN_WINDOW_H_
+#endif /* OSKAR_BINARY_LOCATIONS_H_ */

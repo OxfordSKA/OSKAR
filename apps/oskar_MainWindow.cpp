@@ -28,6 +28,7 @@
 
 #include "apps/oskar_MainWindow.h"
 #include "widgets/oskar_About.h"
+#include "widgets/oskar_BinaryLocations.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
 #include "widgets/oskar_RunDialog.h"
 #include "widgets/oskar_SettingsDelegate.h"
@@ -47,6 +48,7 @@
 #include <QtGui/QKeySequence>
 #include <QtCore/QModelIndex>
 #include <QtCore/QTimer>
+#include <QtCore/QProcess>
 
 oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 : QMainWindow(parent)
@@ -79,6 +81,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QAction* actOpen = new QAction("&Open...", this);
     QAction* actSaveAs = new QAction("&Save As...", this);
     QAction* actExit = new QAction("E&xit", this);
+    QAction* actBinLocations = new QAction("&Binary Locations...", this);
     actHideUnset_ = new QAction("&Hide Unset Items", this);
     actHideUnset_->setCheckable(true);
     QAction* actShowFirstLevel = new QAction("Show &First Level", this);
@@ -92,6 +95,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     connect(actOpen, SIGNAL(triggered()), this, SLOT(openSettings()));
     connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveSettingsAs()));
     connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(actBinLocations, SIGNAL(triggered()), this, SLOT(binLocations()));
     connect(actHideUnset_, SIGNAL(toggled(bool)),
             this, SLOT(setHideIfUnset(bool)));
     connect(actShowFirstLevel, SIGNAL(triggered()),
@@ -118,9 +122,11 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menubar_ = new QMenuBar(this);
     setMenuBar(menubar_);
     menuFile_ = new QMenu("&File", menubar_);
+    QMenu* menuEdit = new QMenu("&Edit", menubar_);
     QMenu* menuView = new QMenu("&View", menubar_);
     QMenu* menuRun = new QMenu("&Run", menubar_);
     menubar_->addAction(menuFile_->menuAction());
+    menubar_->addAction(menuEdit->menuAction());
     menubar_->addAction(menuView->menuAction());
     menubar_->addAction(menuRun->menuAction());
     menuFile_->addAction(actOpen);
@@ -129,6 +135,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     updateRecentFileActions();
     menuFile_->addSeparator();
     menuFile_->addAction(actExit);
+    menuEdit->addAction(actBinLocations);
     menuView->addAction(actHideUnset_);
     menuView->addSeparator();
     menuView->addAction(actShowFirstLevel);
@@ -263,6 +270,20 @@ void oskar_MainWindow::about()
     aboutDialog.exec();
 }
 
+void oskar_MainWindow::binLocations()
+{
+    oskar_BinaryLocations binaryLocations(this);
+    binaryLocations.setBeamPattern(binary_beam_pattern_);
+    binaryLocations.setImager(binary_imager_);
+    binaryLocations.setInterferometer(binary_interferometer_);
+    if (binaryLocations.exec() == QDialog::Accepted)
+    {
+        binary_beam_pattern_ = binaryLocations.beamPattern();
+        binary_imager_ = binaryLocations.imager();
+        binary_interferometer_ = binaryLocations.interferometer();
+    }
+}
+
 void oskar_MainWindow::cudaInfo()
 {
     oskar_CudaInfoDisplay infoDisplay(this);
@@ -336,6 +357,22 @@ void oskar_MainWindow::runButton()
         saveSettingsAs(QString());
         if (settingsFile_.isEmpty())
             return;
+    }
+
+    // Check that the selected binary actually exists.
+    QProcess process;
+    process.start(run_binary_);
+    if (!process.waitForStarted())
+    {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(mainTitle_);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setText("The selected binary could not be found.");
+        msgBox.setInformativeText("Please edit the binary location and try again.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        binLocations();
+        return;
     }
 
     // Get the (list of) output file names.

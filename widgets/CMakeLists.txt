@@ -8,6 +8,7 @@ if (QT4_FOUND AND CUDA_FOUND)
 
     set(widgets_MOC_SRC
         oskar_About.h
+        oskar_BinaryLocations.h
         oskar_CudaInfoDisplay.h
         oskar_DataFileModel.h
         oskar_DoubleSpinBox.h
@@ -20,6 +21,7 @@ if (QT4_FOUND AND CUDA_FOUND)
     )
     set(widgets_SRC
         src/oskar_About.cpp
+        src/oskar_BinaryLocations.cpp
         src/oskar_CudaInfoDisplay.cpp
         src/oskar_DataFileModel.cpp
         src/oskar_DoubleSpinBox.cpp
