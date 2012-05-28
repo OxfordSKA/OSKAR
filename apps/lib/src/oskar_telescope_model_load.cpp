@@ -36,6 +36,7 @@
 #include "station/oskar_element_model_load_cst.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_load_config.h"
+#include "utility/oskar_log_message.h"
 
 #include <cstdlib>
 #include <QtCore/QDir>
@@ -48,24 +49,24 @@ static const char element_x_name_cst[] = "element_pattern_x_cst.txt";
 static const char element_y_name_cst[] = "element_pattern_y_cst.txt";
 
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
-        const oskar_SettingsTelescope* settings, const char* dir_path,
-        oskar_StationModel* station, const char* element_file_x,
-        const char* element_file_y, int depth,
+        oskar_Log* log, const oskar_SettingsTelescope* settings,
+        const char* dir_path, oskar_StationModel* station,
+        const char* element_file_x, const char* element_file_y, int depth,
         QHash<QString, oskar_ElementModel*>& models);
 
 extern "C"
-int oskar_telescope_model_load(oskar_TelescopeModel* telescope,
+int oskar_telescope_model_load(oskar_TelescopeModel* telescope, oskar_Log* log,
         const oskar_SettingsTelescope* settings)
 {
     QHash<QString, oskar_ElementModel*> models;
-    return oskar_telescope_model_load_private(telescope, settings,
+    return oskar_telescope_model_load_private(telescope, log, settings,
             settings->config_directory, NULL, NULL, NULL, 0, models);
 }
 
 static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
-        const oskar_SettingsTelescope* settings, const char* dir_path,
-        oskar_StationModel* station, const char* element_file_x,
-        const char* element_file_y, int depth,
+        oskar_Log* log, const oskar_SettingsTelescope* settings,
+        const char* dir_path, oskar_StationModel* station,
+        const char* element_file_x, const char* element_file_y, int depth,
         QHash<QString, oskar_ElementModel*>& models)
 {
     int error;
@@ -199,19 +200,21 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         // Load CST element pattern data.
                         if (element_file_x)
                         {
-                            printf("Loading CST element pattern data (X): %s\n",
-                                    element_file_x);
+                            oskar_log_message(log, 0, "Loading CST element "
+                                    "pattern data (X): %s", element_file_x);
                             error = oskar_element_model_load_cst(
-                                    station->element_pattern, 1, element_file_x,
+                                    station->element_pattern, log, 1,
+                                    element_file_x,
                                     &settings->station.element_fit);
                             if (error) return error;
                         }
                         if (element_file_y)
                         {
-                            printf("Loading CST element pattern data (Y): %s\n",
-                                    element_file_y);
+                            oskar_log_message(log, 0, "Loading CST element "
+                                    "pattern data (Y): %s", element_file_y);
                             error = oskar_element_model_load_cst(
-                                    station->element_pattern, 2, element_file_y,
+                                    station->element_pattern, log, 2,
+                                    element_file_y,
                                     &settings->station.element_fit);
                             if (error) return error;
                         }
@@ -233,7 +236,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
         s = (depth == 0) ? &telescope->station[i] : &station->child[i];
 
         // Load this station.
-        error = oskar_telescope_model_load_private(telescope, settings,
+        error = oskar_telescope_model_load_private(telescope, log, settings,
                 station_name, s, element_file_x, element_file_y, depth + 1,
                 models);
         if (error) return error;

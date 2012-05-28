@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Settings.h"
 
 #ifdef __cplusplus
@@ -49,10 +50,12 @@ extern "C" {
  * settings file.
  *
  * @param[out] settings A pointer to a settings structure to populate.
+ * @param[in,out] log A pointer to a log structure to use.
  * @param[in] filename  String containing name of settings file to read.
  */
 OSKAR_EXPORT
-int oskar_settings_load(oskar_Settings* settings, const char* filename);
+int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
+        const char* filename);
 
 #ifdef __cplusplus
 }

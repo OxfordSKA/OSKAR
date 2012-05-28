@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_IMAGER_H_
 #define OSKAR_IMAGER_H_
 
@@ -35,6 +34,7 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,11 +43,11 @@ extern "C" {
 /**
  * @brief Main OSKAR imager function.
  *
- * @param settings_file
- * @return
+ * @param[in] settings_file Path to a settings file.
+ * @param[in,out] log  Pointer to a log structure to use.
  */
 OSKAR_EXPORT
-int oskar_imager(const char* settings_file);
+int oskar_imager(const char* settings_file, oskar_Log* log);
 
 #ifdef __cplusplus
 }

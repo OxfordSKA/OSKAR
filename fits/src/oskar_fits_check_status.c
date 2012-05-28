@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "fits/oskar_fits_check_status.h"
+#include "utility/oskar_log_error.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,16 +38,17 @@
 extern "C" {
 #endif
 
-void oskar_fits_check_status(const int status, const char* message)
+void oskar_fits_check_status(oskar_Log* log, const int status,
+        const char* message)
 {
     /* No status error, return. */
     if (!status) return;
 
     /* Print user supplied message. */
-    fprintf(stderr, "\nFITS ERROR");
     if (strlen(message) > 0)
-        fprintf(stderr, ": %s.", message);
-    fprintf(stderr, "\n");
+        oskar_log_error(log, "FITS error: %s", message);
+    else
+        oskar_log_error(log, "FITS error");
 
     /* Print the CFITSIO error message. */
     fits_report_error(stderr, status);

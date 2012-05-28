@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_system_clock_time.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
+#include "utility/oskar_log_warning.h"
+#include "utility/oskar_log_write.h"
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-const char* oskar_system_clock_time(int utc, int* data)
+int oskar_log_warning(oskar_Log* log, const char* format, ...)
 {
-    static char str[80];
-    time_t unix_time;
-    struct tm* timeinfo;
+    int retval;
+    char code = 'W';
+    const char* prefix = "WARNING";
+    va_list args;
 
-    /* Get raw system time. */
-    unix_time = time(NULL);
+    /* Write to standard output. */
+    va_start(args, format);
+    oskar_log_writev_stdout(code, -1, 0, prefix, format, args);
+    va_end(args);
 
-    /* Convert to local time or UTC. */
-    if (utc)
-        timeinfo = gmtime(&unix_time);
-    else
-        timeinfo = localtime(&unix_time);
-
-    /* Save data. */
-    if (data)
-    {
-        data[0] = timeinfo->tm_year;
-        data[1] = timeinfo->tm_mon;
-        data[2] = timeinfo->tm_mday;
-        data[3] = timeinfo->tm_hour;
-        data[4] = timeinfo->tm_min;
-        data[5] = timeinfo->tm_sec;
-        data[6] = timeinfo->tm_isdst;
-    }
-
-    /* Convert to string. */
-    strftime(str, sizeof(str), "%Y-%m-%d, %H:%M:%S (%Z)", timeinfo);
-    return str;
+    /* Write to log file. */
+    va_start(args, format);
+    retval = oskar_log_writev(log, code, -1, 0, prefix, format, args);
+    va_end(args);
+    return retval;
 }
 
 #ifdef __cplusplus
 }
 #endif
-

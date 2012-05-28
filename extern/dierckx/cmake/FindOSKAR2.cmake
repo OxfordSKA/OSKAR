@@ -113,6 +113,19 @@ mark_as_advanced(OSKAR_INCLUDE_DIR)
 #
 ##############################
 
+find_library(OSKAR_LIBRARY NAMES oskar
+    PATHS
+    /usr/lib/
+    /usr/local/lib/
+    /usr/local/oskar/lib/
+    /usr/oskar/lib/
+    )
+if (${OSKAR_LIBRARY} MATCHES OSKAR_LIBRARY-NOTFOUND)
+    #message("oops")
+else()
+    list(APPEND OSKAR_LIBRARIES ${OSKAR_LIBRARY})
+endif ()
+
 foreach (module ${OSKAR_MODULES})
     string(TOUPPER ${module} _upper_oskar_module)
     set(lib_name "oskar_${module}")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,8 +178,8 @@ enum {
 
 /* Standard run info tags. */
 enum {
-    OSKAR_TAG_RUN_TIME = 1, /* (double; sec) */
-    OSKAR_TAG_RUN_LOG = 2
+    OSKAR_TAG_RUN_LOG = 1,
+    OSKAR_TAG_RUN_TIME = 2 /* (double; sec) */
 };
 
 #ifdef __cplusplus

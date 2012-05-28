@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,12 +45,13 @@ extern "C" {
  * Main OSKAR beam pattern simulation function.
  *
  * @details
- * This function acts as thought it were a stand-alone executable.
+ * This function acts as though it were a stand-alone executable.
  *
  * @param[in] settings_file Path to a settings file.
+ * @param[in,out] log  Pointer to a log structure to use.
  */
 OSKAR_EXPORT
-int oskar_sim_beam_pattern(const char* settings_file);
+int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log);
 
 #ifdef __cplusplus
 }

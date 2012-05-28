@@ -36,6 +36,7 @@
 #include "oskar_global.h"
 #include "station/oskar_ElementModel.h"
 #include "station/oskar_SettingsElementFit.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,14 +68,16 @@ extern "C" {
  *
  * The theta dimension is assumed to be the fastest varying.
  *
- * @param[out] data     Pointer to data structure to fill.
+ * @param[out] data     Pointer to element model data structure to fill.
+ * @param[in,out] log   Pointer to log structure to use.
  * @param[in]  filename Data file name.
  * @param[in]  port     Port 1 or 2 (port number to load).
  * @param[in]  settings Pointer to settings structure used for surface fitting.
  */
 OSKAR_EXPORT
-int oskar_element_model_load_cst(oskar_ElementModel* data, int port,
-        const char* filename, const oskar_SettingsElementFit* settings);
+int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
+        int port, const char* filename,
+        const oskar_SettingsElementFit* settings);
 
 #ifdef __cplusplus
 }

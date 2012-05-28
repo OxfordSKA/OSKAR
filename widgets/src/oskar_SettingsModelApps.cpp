@@ -59,6 +59,9 @@ void oskar_SettingsModelApps::init_settings_simulator()
     k = group + "/double_precision";
     registerSetting(k, "Use double precision", oskar_SettingsItem::BOOL, false, true);
     setTooltip(k, "Determines whether double precision arithmetic is used.");
+    k = group + "/keep_log_file";
+    registerSetting(k, "Keep log file", oskar_SettingsItem::BOOL, false, true);
+    setTooltip(k, "Determines whether a log file of the run will be kept on disk.");
     k = group + "/max_sources_per_chunk";
     registerSetting(k, "Max. number of sources per chunk", oskar_SettingsItem::INT_POSITIVE, false, 10000);
     setTooltip(k, "Maximum number of sources processed concurrently on a \n"

@@ -21,7 +21,7 @@ set(apps_SRC
     src/oskar_telescope_model_save.cpp
 )
 if(CASACORE_FOUND)
-    list(APPEND apps_SRC src/oskar_write_ms.cpp)
+    list(APPEND apps_SRC src/oskar_visibilities_write_ms.cpp)
 endif()
 
 set(apps_SRC "${apps_SRC}" PARENT_SCOPE)

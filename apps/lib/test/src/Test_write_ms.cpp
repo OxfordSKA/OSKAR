@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 
 
 #include "apps/lib/test/Test_write_ms.h"
-#include "apps/lib/oskar_write_ms.h"
+#include "apps/lib/oskar_visibilities_write_ms.h"
 
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_TelescopeModel.h"
@@ -107,7 +107,8 @@ void Test_write_ms::test_write()
 
     int overwrite = OSKAR_TRUE;
 
-    int error = oskar_write_ms(filename, &vis, &telescope, overwrite);
+    int error = oskar_visibilities_write_ms(&vis, NULL, &telescope,
+            filename, overwrite);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 

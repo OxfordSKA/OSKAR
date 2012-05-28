@@ -26,11 +26,21 @@ set(utility_SRC
     src/oskar_device_curand_state_init.cu
     src/oskar_Device_curand_state.cpp
     src/oskar_endian.c
-    src/oskar_exit.c
     src/oskar_file_exists.c
     src/oskar_get_data_type_string.c
     src/oskar_get_error_string.c
     src/oskar_getline.c
+    src/oskar_log_error.c
+    src/oskar_log_file_data.c
+    src/oskar_log_free.c
+    src/oskar_log_init.c
+    src/oskar_log_message.c
+    src/oskar_log_section.c
+    src/oskar_log_settings.c
+    src/oskar_log_value.c
+    src/oskar_log_warning.c
+    src/oskar_log_write.c
+    src/oskar_Log.cpp
     src/oskar_mem_add_gaussian_noise.c
     src/oskar_mem_add.c
     src/oskar_mem_alloc.c
@@ -57,10 +67,10 @@ set(utility_SRC
     src/oskar_Mem.cpp
     src/oskar_settings_free.c
     src/oskar_settings_init.c
-    src/oskar_settings_print.c
     src/oskar_Settings.cpp
     src/oskar_string_to_array.c
-    src/oskar_system_clock_time.c
+    src/oskar_system_clock_data.c
+    src/oskar_system_clock_string.c
     src/oskar_work_free.c
     src/oskar_work_init.c
     src/oskar_Work.cpp

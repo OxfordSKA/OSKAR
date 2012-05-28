@@ -11,6 +11,8 @@ if (QT4_FOUND AND CUDA_FOUND)
         oskar_CudaInfoDisplay.h
         oskar_DataFileModel.h
         oskar_DoubleSpinBox.h
+        oskar_RunDialog.h
+        oskar_RunThread.h
         oskar_SettingsDelegate.h
         oskar_SettingsModel.h
         oskar_SettingsModelApps.h
@@ -21,6 +23,8 @@ if (QT4_FOUND AND CUDA_FOUND)
         src/oskar_CudaInfoDisplay.cpp
         src/oskar_DataFileModel.cpp
         src/oskar_DoubleSpinBox.cpp
+        src/oskar_RunDialog.cpp
+        src/oskar_RunThread.cpp
         src/oskar_SettingsDelegate.cpp
         src/oskar_SettingsItem.cpp
         src/oskar_SettingsModel.cpp

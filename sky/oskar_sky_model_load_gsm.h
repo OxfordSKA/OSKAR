@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,10 +68,12 @@ extern "C" {
  * ignored.
  *
  * @param[out] sky       Pointer to sky model structure to fill.
+ * @param[in,out] log    Pointer to log structure to use.
  * @param[in]  filename  Path to the a source list file.
  */
 OSKAR_EXPORT
-int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename);
+int oskar_sky_model_load_gsm(oskar_SkyModel* sky, oskar_Log* log,
+        const char* filename);
 
 #ifdef __cplusplus
 }

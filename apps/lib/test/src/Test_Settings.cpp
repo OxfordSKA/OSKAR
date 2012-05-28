@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ void Test_Settings::test_read()
     // Read settings
     {
         oskar_Settings settings;
-        int err = oskar_settings_load(&settings, "./temp.ini");
+        int err = oskar_settings_load(&settings, NULL, "./temp.ini");
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
     }
 

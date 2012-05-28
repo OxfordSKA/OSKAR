@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_FIT_ELLIPSE_H_
 #define OSKAR_FIT_ELLIPSE_H_
 
@@ -35,6 +34,7 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 OSKAR_EXPORT
-int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
+int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
         double* gauss_phi, int num_points, const oskar_Mem* x,
         const oskar_Mem* y);
 

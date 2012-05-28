@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "oskar_visibilities_multiply_gaussian.h"
 #include <math.h>
 
@@ -42,6 +41,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* FIXME Is this function still used by anything? Can it be removed? */
 
 /*
  *  http://www.aips.nrao.edu/cgi-bin/ZXHLP2.PL?UVMOD

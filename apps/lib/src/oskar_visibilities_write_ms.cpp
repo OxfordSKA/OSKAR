@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "apps/lib/oskar_write_ms.h"
+#include "apps/lib/oskar_visibilities_write_ms.h"
 
 #include "apps/lib/oskar_remove_dir.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_log_message.h"
 #include "utility/oskar_vector_types.h"
 #include "ms/oskar_MeasurementSet.h"
 
@@ -49,8 +50,9 @@ extern "C" {
 #endif
 
 
-int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, int overwrite)
+int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
+        const oskar_TelescopeModel* telescope, const char* ms_path,
+        int overwrite)
 {
     // Check if the ms path already exists and overwrite if specified.
     QDir dir;
@@ -69,6 +71,9 @@ int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
             return OSKAR_ERR_UNKNOWN;
         }
     }
+
+    // Write a log message.
+    oskar_log_message(log, 0, "Writing Measurement Set: '%s'", ms_path);
 
     if (telescope->num_stations * (telescope->num_stations - 1) / 2 != vis->num_baselines)
         return OSKAR_ERR_DIMENSION_MISMATCH;

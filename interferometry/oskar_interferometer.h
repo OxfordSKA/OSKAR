@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@
 #include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "sky/oskar_SkyModel.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
@@ -52,15 +53,17 @@ extern "C" {
  * This function produces simulated visibilities from an interferometer.
  *
  * @param[out] vis_amp    Output visibilities.
+ * @param[in,out] log     Pointer to log structure to use.
  * @param[in]  sky        Sky model structure.
  * @param[in]  telescope  Telescope model structure.
  * @param[in]  times      Simulation time data.
  * @param[in]  frequency  Observation frequency in Hz.
  */
 OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SettingsTime* times,
-        double frequency);
+int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
+        const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
+        const oskar_SettingsTime* times, double frequency, int chunk_index,
+        int num_sky_chunks);
 
 #ifdef __cplusplus
 }

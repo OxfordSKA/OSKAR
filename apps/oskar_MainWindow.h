@@ -35,7 +35,6 @@
 class oskar_SettingsModel;
 class oskar_SettingsModelFilter;
 class oskar_SettingsView;
-class oskar_RunThread;
 class QAction;
 class QModelIndex;
 class QVBoxLayout;
@@ -81,7 +80,7 @@ private:
     oskar_SettingsView* view_;
     QAction* actHideUnset_;
     QString settingsFile_;
-    int (*run_function_)(const char*);
+    QString run_binary_;
 
     QMenuBar* menubar_;
     QMenu* menuFile_;
@@ -90,8 +89,11 @@ private:
     QMenu* recentFileMenu_;
     QAction* separator_;
     QAction* recentFiles_[MaxRecentFiles];
-    oskar_RunThread* runThread_;
-    QMessageBox* msgBox_;
+
+    // Binary path names.
+    QString binary_interferometer_;
+    QString binary_beam_pattern_;
+    QString binary_imager_;
 };
 
 #endif // OSKAR_MAIN_WINDOW_H_

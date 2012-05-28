@@ -26,43 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_WRITE_MS_H_
-#define OSKAR_WRITE_MS_H_
+#ifndef OSKAR_LOG_INIT_H_
+#define OSKAR_LOG_INIT_H_
 
 /**
- * @file oskar_write_ms.h
+ * @file oskar_log_init.h
  */
 
 #include "oskar_global.h"
-
-#include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_TelescopeModel.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Writes data to a CASA Measurement Set.
+ * @brief
+ * Initialises a log structure.
  *
  * @details
- * This function writes visibility data and telescope model data to a CASA
- * Measurement Set.
+ * This function initialises a log structure, opening a new log file.
+ * The filename is generated based on the current date and time.
  *
- * Note: Currently the telescope model is needed for pointing and antenna
- * positions.
+ * @param[in,out] log  Pointer to a log structure.
  *
- * @param[in] ms_path   Pathname of the Measurement Set to write.
- * @param[in] vis       Pointer to visibility structure to write.
- * @param[in] telescope Pointer to telescope model data to write.
- * @param[in] overwrite If true, then overwrite any existing Measurement Set.
+ * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_write_ms(const char* ms_path, const oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, int overwrite);
+int oskar_log_init(oskar_Log* log);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_WRITE_MS_H_ */
+#endif /* OSKAR_LOG_INIT_H_ */

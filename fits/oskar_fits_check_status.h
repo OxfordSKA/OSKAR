@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +49,8 @@ extern "C" {
  * if required.
  */
 OSKAR_EXPORT
-void oskar_fits_check_status(const int status, const char* message);
+void oskar_fits_check_status(oskar_Log* log, const int status,
+        const char* message);
 
 #ifdef __cplusplus
 }

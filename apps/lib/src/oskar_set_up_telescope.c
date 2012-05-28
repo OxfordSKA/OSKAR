@@ -35,6 +35,11 @@
 #include "station/oskar_evaluate_station_receiver_noise_stddev.h"
 #include "station/oskar_station_model_type.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_log_error.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_value.h"
+#include "utility/oskar_log_warning.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
@@ -50,21 +55,25 @@
 extern "C" {
 #endif
 
-int oskar_set_up_telescope(oskar_TelescopeModel *telescope,
+static const int width = 45;
+
+int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
         const oskar_Settings* settings)
 {
     int err, type, i, j;
+    const char* filename;
+    oskar_log_section(log, "Telescope model");
 
     /* Initialise the structure in CPU memory. */
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_telescope_model_init(telescope, type, OSKAR_LOCATION_CPU, 0);
 
     /* Load the telescope configuration directory. */
-    err = oskar_telescope_model_load(telescope, &settings->telescope);
+    err = oskar_telescope_model_load(telescope, log, &settings->telescope);
     if (err)
     {
-        fprintf(stderr, "== ERROR: Failed to load telescope configuration "
-                "(%s).\n", oskar_get_error_string(err));
+        oskar_log_error(log, "Failed to load telescope configuration (%s).",
+                oskar_get_error_string(err));
         return err;
     }
 
@@ -321,26 +330,41 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope,
      * whether to apply element errors and/or weights. */
     oskar_telescope_model_analyse(telescope);
 
+    /* Print summary data. */
+    oskar_log_message(log, 0, "Telescope model summary");
+    oskar_log_value(log, 1, width, "Num. stations", "%d",
+            telescope->num_stations);
+    oskar_log_value(log, 1, width, "Max station size", "%d",
+            telescope->max_station_size);
+    oskar_log_value(log, 1, width, "Identical stations", "%s",
+            telescope->identical_stations ? "true" : "false");
+    oskar_log_value(log, 1, width, "Use common sky", "%s",
+            telescope->use_common_sky ? "true" : "false");
+
     /* Save the telescope configuration in a new directory if required. */
-    if (settings->telescope.output_config_directory)
+    filename = settings->telescope.output_config_directory;
+    if (filename)
     {
-        /* Check that the input and output directories are different. */
-        if (strcmp(settings->telescope.output_config_directory,
-                settings->telescope.config_directory))
+        if (strlen(filename))
         {
-            err = oskar_telescope_model_save(telescope,
-                    settings->telescope.output_config_directory);
-            if (err)
+            /* Check that the input and output directories are different. */
+            if (strcmp(filename, settings->telescope.config_directory))
             {
-                fprintf(stderr, "== ERROR: Failed to save telescope "
-                        "configuration (%s).\n", oskar_get_error_string(err));
-                return err;
+                oskar_log_message(log, 1, "Writing telescope model to "
+                        "disk as: %s", filename);
+                err = oskar_telescope_model_save(telescope, filename);
+                if (err)
+                {
+                    oskar_log_error(log, "Failed to save telescope "
+                            "configuration (%s).", oskar_get_error_string(err));
+                    return err;
+                }
             }
-        }
-        else
-        {
-            printf("== WARNING: Will not overwrite input "
-                    "telescope directory!\n");
+            else
+            {
+                oskar_log_warning(log, "Will not overwrite input "
+                        "telescope directory!");
+            }
         }
     }
 

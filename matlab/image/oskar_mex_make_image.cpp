@@ -33,6 +33,7 @@
 
 #include "interferometry/oskar_Visibilities.h"
 
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
@@ -104,6 +105,8 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = OSKAR_SUCCESS;
 
     oskar_Image image;
+    oskar_Log log;
+    log.keep_file = 0;
     int location = OSKAR_LOCATION_CPU;
 
 
@@ -129,7 +132,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         // Make image.
         mexPrintf("= Making image...\n");
         mexEvalString("drawnow"); // Force flush of matlab print buffer
-        err = oskar_make_image(&image, &vis, &settings);
+        err = oskar_make_image(&image, &log, &vis, &settings);
         if (err)
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",

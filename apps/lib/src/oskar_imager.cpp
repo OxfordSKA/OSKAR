@@ -34,6 +34,11 @@
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_read.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_log_error.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_settings.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
 
@@ -41,67 +46,68 @@
 #include "fits/oskar_fits_image_write.h"
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_imager(const char* settings_file)
+int oskar_imager(const char* settings_file, oskar_Log* log)
 {
     int error;
     oskar_Settings settings;
     oskar_Visibilities vis;
     oskar_Image image;
 
-    /* Note: this could probably be replaced with oskar_settings_load_image() */
-    error = oskar_settings_load(&settings, settings_file);
+    oskar_log_section(log, "Loading settings file '%s'", settings_file);
+    error = oskar_settings_load(&settings, log, settings_file);
     if (error)
     {
-        fprintf(stderr, "\nERROR: oskar_settings_load() failed!, %s\n",
+        oskar_log_error(log, "Failure in oskar_settings_load() (%s).",
                 oskar_get_error_string(error));
         return error;
     }
 
+    // Log the relevant settings.
+    log->keep_file = settings.sim.keep_log_file;
+    oskar_log_settings_simulator(log, &settings);
+    oskar_log_settings_image(log, &settings);
+
     if (!(settings.image.oskar_image || settings.image.fits_image))
     {
-        fprintf(stderr, "ERROR: No output image file specified in the settings.\n");
+        oskar_log_error(log, "No output image file specified.");
         return OSKAR_ERR_SETTINGS;
     }
 
     if (!settings.image.input_vis_data)
     {
-        fprintf(stderr, "ERROR: No input visibility data specified in the settings.\n");
+        oskar_log_error(log, "No input visibility data file specified.");
         return OSKAR_ERR_SETTINGS;
     }
 
     error = oskar_visibilities_read(&vis, settings.image.input_vis_data);
     if (error)
     {
-        fprintf(stderr, "\nERROR: oskar_Visibilities::read() failed!, %s\n",
+        oskar_log_error(log, "Failure in oskar_visibilities_read() (%s).",
                 oskar_get_error_string(error));
         return error;
     }
 
-    fprintf(stdout, "=== Starting OSKAR imager...\n");
+    oskar_log_section(log, "Starting OSKAR imager...");
 
-    error = oskar_make_image(&image, &vis, &settings.image);
+    error = oskar_make_image(&image, log, &vis, &settings.image);
     if (error)
     {
-        fprintf(stderr, "\nERROR: oskar_make_image() failed!, %s\n",
+        oskar_log_error(log, "Failure in oskar_make_image() (%s).",
                 oskar_get_error_string(error));
         return error;
     }
-    fprintf(stdout, "=== Imaging complete.\n\n");
+    oskar_log_section(log, "Imaging complete.");
 
     if (settings.image.oskar_image)
     {
-        printf("--> Writing OSKAR image: '%s'\n", settings.image.oskar_image);
-        error = oskar_image_write(&image, settings.image.oskar_image, 0);
+        error = oskar_image_write(&image, log, settings.image.oskar_image, 0);
         if (error)
         {
-            fprintf(stderr, "\nERROR: oskar_image_write() failed!, %s\n",
+            oskar_log_error(log, "Failure in oskar_image_write() (%s).",
                     oskar_get_error_string(error));
             return error;
         }
@@ -109,18 +115,17 @@ int oskar_imager(const char* settings_file)
 #ifndef OSKAR_NO_FITS
     if (settings.image.fits_image)
     {
-        printf("--> Writing FITS image: '%s'\n", settings.image.fits_image);
-        error = oskar_fits_image_write(&image, settings.image.fits_image);
+        error = oskar_fits_image_write(&image, log, settings.image.fits_image);
         if (error)
         {
-            fprintf(stderr, "\nERROR: oskar_fits_image_write() failed!, %s\n",
+            oskar_log_error(log, "Failure in oskar_fits_image_write() (%s).",
                     oskar_get_error_string(error));
             return error;
         }
     }
 #endif
 
-    fprintf(stdout, "\n=== Run complete.\n");
+    oskar_log_section(log, "Run complete.");
     return OSKAR_SUCCESS;
 }
 

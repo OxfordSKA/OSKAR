@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,30 @@
 #include "math/oskar_random_broken_power_law.h"
 #include "sky/oskar_generate_random_coordinate.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
-#include "utility/oskar_get_error_string.h"
 #include "sky/oskar_sky_model_set_gaussian_parameters.h"
 #include "sky/oskar_sky_model_append_to_set.h"
 #include "sky/oskar_sky_model_combine_set.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_value.h"
+#include "utility/oskar_log_warning.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cmath>
-#include <cstdio>
-#include <cstdlib>
 #include <cstring>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
+static const int width = 45;
+
 extern "C"
 int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
-        const oskar_Settings* settings)
+        oskar_Log* log, const oskar_Settings* settings)
 {
     int error = OSKAR_SUCCESS;
+    oskar_log_section(log, "Sky model");
 
     // Sky model data type.
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
@@ -66,8 +71,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         {
             // Load into a temporary structure.
             oskar_SkyModel temp(type, location);
-            printf("--> Loading OSKAR sky model data... ");
-            fflush(stdout);
+            oskar_log_message(log, 0, "Loading sky model data...");
             error = temp.load(filename);
             if (error) return error;
 
@@ -95,15 +99,17 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             if (error) return error;
 
             // Evaluate extended source parameters.
-            error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
-                    &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
-                    &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                    &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
+            error = oskar_evaluate_gaussian_source_parameters(log,
+                    temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
+                    &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
+                    &temp.position_angle, &temp.RA, &temp.Dec,
+                    settings->obs.ra0_rad, settings->obs.dec0_rad);
             if (error) return error;
 #endif
 
             // Compute source direction cosines (relative lmn)
-            error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
+            error = temp.compute_relative_lmn(settings->obs.ra0_rad,
+                    settings->obs.dec0_rad);
             if (error) return error;
 
             // Append to chunks.
@@ -111,7 +117,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     max_sources_per_chunk, &temp);
             if (error) return error;
 
-            printf("done.\n");
+            oskar_log_message(log, 1, "done.");
         }
     }
 
@@ -123,9 +129,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         {
             // Load the sky model data into a temporary sky model.
             oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
-            printf("--> Loading GSM data... ");
-            fflush(stdout);
-            error = temp.load_gsm(filename);
+            oskar_log_message(log, 0, "Loading GSM data...");
+            error = temp.load_gsm(log, filename);
             if (error) return error;
 
             // Apply filters.
@@ -152,15 +157,17 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             if (error) return error;
 
             // Evaluate extended source parameters.
-            error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
-                    &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
-                    &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                    &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
+            error = oskar_evaluate_gaussian_source_parameters(log,
+                    temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
+                    &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
+                    &temp.position_angle, &temp.RA, &temp.Dec,
+                    settings->obs.ra0_rad, settings->obs.dec0_rad);
             if (error) return error;
 #endif
 
             // Compute source direction cosines (relative lmn)
-            error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
+            error = temp.compute_relative_lmn(settings->obs.ra0_rad,
+                    settings->obs.dec0_rad);
             if (error) return error;
 
             // Append to chunks.
@@ -168,7 +175,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     max_sources_per_chunk, &temp);
             if (error) return error;
 
-            printf("done.\n");
+            oskar_log_message(log, 1, "done.");
         }
     }
 
@@ -181,8 +188,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
         // Generate the new positions into a temporary sky model.
         oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, npix);
-        printf("--> Generating HEALPIX source positions... ");
-        fflush(stdout);
+        oskar_log_message(log, 0, "Generating HEALPIX source positions...");
         #pragma omp parallel for
         for (int i = 0; i < npix; ++i)
         {
@@ -216,15 +222,17 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         if (error) return error;
 
         // Evaluate extended source parameters.
-        error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
+        error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
+                &temp.RA, &temp.Dec, settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         if (error) return error;
 #endif
 
         // Compute source direction cosines (relative lmn)
-        error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
+        error = temp.compute_relative_lmn(settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         if (error) return error;
 
         // Append to chunks.
@@ -232,7 +240,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 max_sources_per_chunk, &temp);
         if (error) return error;
 
-        printf("done.\n");
+        oskar_log_message(log, 1, "done.");
     }
 
     // Random power-law generator.
@@ -247,8 +255,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         // Generate the new positions into a temporary sky model.
         oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, num_sources);
         srand(settings->sky.generator.random_power_law.seed);
-        printf("--> Generating random power law source distribution... ");
-        fflush(stdout);
+        oskar_log_message(log, 0,
+                "Generating random power law source distribution...");
         for (int i = 0; i < num_sources; ++i)
         {
             double ra, dec, b;
@@ -281,15 +289,17 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         if (error) return error;
 
         // Evaluate extended source parameters.
-        error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
+        error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
+                &temp.RA, &temp.Dec, settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         if (error) return error;
 #endif
 
         // Compute source direction cosines (relative lmn)
-        error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
+        error = temp.compute_relative_lmn(settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         if (error) return error;
 
         // Append to chunks.
@@ -297,7 +307,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 max_sources_per_chunk, &temp);
         if (error) return error;
 
-        printf("done.\n");
+        oskar_log_message(log, 1, "done.");
     }
 
     // Random broken power-law generator.
@@ -314,8 +324,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         // Generate the new positions into a temporary sky model.
         oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, num_sources);
         srand(settings->sky.generator.random_broken_power_law.seed);
-        printf("--> Generating random broken power law source distribution... ");
-        fflush(stdout);
+        oskar_log_message(log, 0,
+                "Generating random broken power law source distribution...");
         for (int i = 0; i < num_sources; ++i)
         {
             double ra, dec, b;
@@ -348,15 +358,17 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         if (error) return error;
 
         // Evaluate extended source parameters.
-        error = oskar_evaluate_gaussian_source_parameters(temp.num_sources,
+        error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, settings->obs.ra0_rad, settings->obs.dec0_rad);
+                &temp.RA, &temp.Dec, settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         if (error) return error;
 #endif
 
         // Compute source direction cosines (relative lmn)
-        error = temp.compute_relative_lmn(settings->obs.ra0_rad, settings->obs.dec0_rad);
+        error = temp.compute_relative_lmn(settings->obs.ra0_rad,
+                settings->obs.dec0_rad);
         if (error) return error;
 
         // Append to chunks.
@@ -364,13 +376,13 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 max_sources_per_chunk, &temp);
         if (error) return error;
 
-        printf("done.\n");
+        oskar_log_message(log, 1, "done.");
     }
 
 
     // Check if sky model contains no sources.
     if (*num_chunks == 0)
-        fprintf(stderr, "--> WARNING: Sky model contains no sources.\n");
+        oskar_log_warning(log, "Sky model contains no sources.");
     else
     {
         // Print summary data.
@@ -381,15 +393,15 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             if (((*sky_chunks)[i]).use_extended) ++num_extended_chunks;
         }
 
-        printf("\n");
-        printf("= Sky model\n");
-        printf("  - Num. sources                = %i\n", total_sources);
-        printf("  - Num. chunks                 = %i\n", *num_chunks);
-        printf("  - Num. extended source chunks = %i\n", num_extended_chunks);
+        oskar_log_message(log, 0, "Sky model summary");
+        oskar_log_value(log, 1, width, "Num. sources", "%d", total_sources);
+        oskar_log_value(log, 1, width, "Num. chunks", "%d", *num_chunks);
+        oskar_log_value(log, 1, width, "Num. extended source chunks", "%d",
+                num_extended_chunks);
 #if (defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-        printf("  - NOTE: extended sources disabled as CBLAS and/or LAPACK not found.\n");
+        oskar_log_warning(log, "Extended sources disabled, as "
+                "CBLAS and/or LAPACK were not found.");
 #endif
-        printf("\n");
     }
 
     // Write sky model out.
@@ -398,7 +410,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
     {
         if (strlen(filename))
         {
-            printf("--> Writing sky file to disk as: %s\n", filename);
+            oskar_log_message(log, 1, "Writing sky model file to disk as: %s",
+                    filename);
             oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, 0);
             oskar_sky_model_combine_set(&temp, *sky_chunks, *num_chunks);
             temp.write(filename);

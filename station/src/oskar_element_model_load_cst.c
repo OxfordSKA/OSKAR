@@ -55,8 +55,9 @@ extern "C" {
 
 #define DEG2RAD (M_PI/180.0)
 
-int oskar_element_model_load_cst(oskar_ElementModel* data, int port,
-        const char* filename, const oskar_SettingsElementFit* settings)
+int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
+        int port, const char* filename,
+        const oskar_SettingsElementFit* settings)
 {
     /* Initialise the flags and local data. */
     int n = 0, err = 0, type = 0, i;
@@ -461,18 +462,22 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, int port,
     }
 #endif
 
-    /* Fit bicubic splines to the surface data. */
-    err = oskar_spline_data_surfit(data_theta_re, n,
-            &m_theta, &m_phi, &m_theta_re, &weight, settings_theta_re);
+    /* Fit bicubic B-splines to the surface data. */
+    err = oskar_spline_data_surfit(data_theta_re, log, n,
+            &m_theta, &m_phi, &m_theta_re, &weight, settings_theta_re,
+            "theta [real]");
     if (err) goto cleanup;
-    err = oskar_spline_data_surfit(data_theta_im, n,
-            &m_theta, &m_phi, &m_theta_im, &weight, settings_theta_im);
+    err = oskar_spline_data_surfit(data_theta_im, log, n,
+            &m_theta, &m_phi, &m_theta_im, &weight, settings_theta_im,
+            "theta [imag]");
     if (err) goto cleanup;
-    err = oskar_spline_data_surfit(data_phi_re, n,
-            &m_theta, &m_phi, &m_phi_re, &weight, settings_phi_re);
+    err = oskar_spline_data_surfit(data_phi_re, log, n,
+            &m_theta, &m_phi, &m_phi_re, &weight, settings_phi_re,
+            "phi [real]");
     if (err) goto cleanup;
-    err = oskar_spline_data_surfit(data_phi_im, n,
-            &m_theta, &m_phi, &m_phi_im, &weight, settings_phi_im);
+    err = oskar_spline_data_surfit(data_phi_im, log, n,
+            &m_theta, &m_phi, &m_phi_im, &weight, settings_phi_im,
+            "phi [imag]");
     if (err) goto cleanup;
 
     /* Store the filename. */

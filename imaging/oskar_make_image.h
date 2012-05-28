@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_MAKE_IMAGE_H_
 #define OSKAR_MAKE_IMAGE_H_
 
@@ -38,14 +37,28 @@
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_SettingsImage.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * @brief Makes an image (cube) from visibility data.
+ *
+ * @details
+ * This function produces an image cube from the supplied visibility data.
+ * The size of the cube dimensions is determined using data in the supplied
+ * settings structure.
+ *
+ * @param[in,out] im Pointer to empty or uninitialised image structure.
+ * @param[in,out] log Pointer to log structure to use.
+ * @param[in] vis Pointer to input visibility data.
+ * @param[in] settings Pointer to image settings to use.
+ */
 OSKAR_EXPORT
-int oskar_make_image(oskar_Image* image, const oskar_Visibilities* vis,
-        const oskar_SettingsImage* settings);
+int oskar_make_image(oskar_Image* im, oskar_Log* log,
+        const oskar_Visibilities* vis, const oskar_SettingsImage* settings);
 
 #ifdef __cplusplus
 }

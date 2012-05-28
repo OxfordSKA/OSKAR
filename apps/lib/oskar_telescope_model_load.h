@@ -36,6 +36,7 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_SettingsTelescope.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,12 +53,13 @@ extern "C" {
  * The telescope model must be initialised and in CPU memory.
  *
  * @param[out] telescope  Pointer to empty telescope model structure to fill.
+ * @param[in,out] log     Pointer to log structure to use.
  * @param[in]  settings   Pointer to telescope model settings.
  *
  * @return An OSKAR error code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_load(oskar_TelescopeModel* telescope,
+int oskar_telescope_model_load(oskar_TelescopeModel* telescope, oskar_Log* log,
         const oskar_SettingsTelescope* settings);
 
 #ifdef __cplusplus

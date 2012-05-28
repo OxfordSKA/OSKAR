@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,47 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SYSTEM_CLOCK_TIME_H_
-#define OSKAR_SYSTEM_CLOCK_TIME_H_
-
-/**
- * @file oskar_system_clock_time.h
- */
-
-#include "oskar_global.h"
+#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_write.h"
+#include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Returns information about the system clock time.
- *
- * @details
- * This function returns a string containing the system date and time in
- * the format "yyyy-mm-dd, hh:mm:ss (timezone)".
- *
- * The data are also optionally returned in a 7-element array containing:
- * - data[0] = year
- * - data[1] = month
- * - data[2] = day of month
- * - data[3] = hour
- * - data[4] = minute
- * - data[5] = second
- * - data[6] = DST flag
- *
- * If not NULL on input, the \p data array must be able to hold at least 7
- * elements.
- *
- * @param[in] utc    If set, return UTC time; else return local time.
- * @param[out] data  If not NULL, this array must contain 7 elements in which
- *                   the system time and date information is returned.
- */
-OSKAR_EXPORT
-const char* oskar_system_clock_time(int utc, int* data);
+int oskar_log_section(oskar_Log* log, const char* format, ...)
+{
+    int retval;
+    char code = '=';
+    va_list args;
+
+    /* Write to standard output. */
+    va_start(args, format);
+    oskar_log_writev_stdout(code, -1, 0, 0, format, args);
+    va_end(args);
+
+    /* Write to log file. */
+    va_start(args, format);
+    retval = oskar_log_writev(log, code, -1, 0, 0, format, args);
+    va_end(args);
+    return retval;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_SYSTEM_CLOCK_TIME_H_ */

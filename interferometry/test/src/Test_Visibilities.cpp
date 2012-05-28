@@ -343,7 +343,7 @@ void Test_Visibilities::test_read_write()
                 ((float*)vis1.ww_metres.data)[i]     = (float)i + 0.3f;
             }
         }
-        int error = vis1.write(filename);
+        int error = vis1.write(NULL, filename);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     }
 

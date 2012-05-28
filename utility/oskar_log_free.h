@@ -26,40 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_RUN_THREAD_H_
-#define OSKAR_RUN_THREAD_H_
+#ifndef OSKAR_LOG_FREE_H_
+#define OSKAR_LOG_FREE_H_
 
 /**
- * @file oskar_RunThread.h
+ * @file oskar_log_free.h
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Log.h"
 
-class oskar_SettingsModel;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <QtCore/QThread>
-#include <QtCore/QStringList>
+/**
+ * @brief
+ * Frees memory held in a log structure.
+ *
+ * @details
+ * This function frees memory held in a log structure and closes the log file.
+ *
+ * @param[in,out] log  Pointer to a log structure.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_log_free(oskar_Log* log);
 
-class oskar_RunThread : public QThread
-{
-    Q_OBJECT
+#ifdef __cplusplus
+}
+#endif
 
-public:
-    oskar_RunThread(oskar_SettingsModel* model, QObject* parent = 0);
-    void start(int (*run_function)(const char*), QString settings_file,
-            QStringList outputs);
-
-protected:
-    void run();
-
-private:
-    void run(int depth, QStringList outputFiles);
-
-private:
-    int (*run_function_)(const char*);
-    oskar_SettingsModel* model_;
-    QString settingsFile_;
-    QStringList outputFiles_;
-};
-
-#endif /* OSKAR_RUN_THREAD_H_ */
+#endif /* OSKAR_LOG_FREE_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_SettingsObservation.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,12 +49,13 @@ extern "C" {
  * This function populates an observation structure from the given settings
  * file.
  *
- * @param[out] settings A pointer to a settings structure to populate.
+ * @param[out] obs A pointer to an observation settings structure to populate.
+ * @param[in,out] log A pointer to a log structure to use.
  * @param[in] filename  String containing name of settings file to read.
  */
 OSKAR_EXPORT
-int oskar_settings_load_observation(oskar_SettingsObservation* settings,
-        const char* filename);
+int oskar_settings_load_observation(oskar_SettingsObservation* obs,
+        oskar_Log* log, const char* filename);
 
 #ifdef __cplusplus
 }

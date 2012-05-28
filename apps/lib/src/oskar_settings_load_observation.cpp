@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,9 +28,9 @@
 
 #include "apps/lib/oskar_settings_load_observation.h"
 #include "sky/oskar_date_time_to_mjd.h"
+#include "utility/oskar_log_error.h"
 
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <QtCore/QSettings>
@@ -43,7 +43,7 @@
 
 extern "C"
 int oskar_settings_load_observation(oskar_SettingsObservation* obs,
-        const char* filename)
+        oskar_Log* log, const char* filename)
 {
     QByteArray t;
     QSettings s(QString(filename), QSettings::IniFormat);
@@ -64,8 +64,8 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         QDateTime st = QDateTime::fromString(str_st, "d-M-yyyy h:m:s.z");
         if (!st.isValid())
         {
-            fprintf(stderr, "ERROR: Invalid date string for 'start_time_utc' "
-                    "(format must be: 'd-M-yyyy h:m:s.z').\n");
+            oskar_log_error(log, "Invalid date string for 'start_time_utc' "
+                    "(format must be: 'd-M-yyyy h:m:s.z').");
             return OSKAR_ERR_SETTINGS;
         }
         int year   = st.date().year();
@@ -88,8 +88,8 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         QTime len = QTime::fromString(str_len, "h:m:s.z");
         if (!len.isValid())
         {
-            fprintf(stderr, "ERROR: Invalid time string for 'length' "
-                    "(format must be: 'h:m:s.z').\n");
+            oskar_log_error(log, "Invalid time string for 'length' "
+                    "(format must be: 'h:m:s.z').");
             return OSKAR_ERR_SETTINGS;
         }
         obs->time.obs_length_seconds = len.hour() * 3600.0 +

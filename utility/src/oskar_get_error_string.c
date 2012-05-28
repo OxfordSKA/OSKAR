@@ -76,7 +76,7 @@ const char* oskar_get_error_string(int error)
         case OSKAR_ERR_SPLINE_EVAL_FAIL:
             return "spline evaluation failed";
         case OSKAR_ERR_SETUP_FAIL:
-            return "setup fail: could not initialise sky or telescope model";
+            return "sky or telescope model set-up failed";
         case OSKAR_ERR_SETTINGS:
             return "settings error";
         case OSKAR_ERR_CUDA_DEVICES:

@@ -43,6 +43,11 @@
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
+#include "utility/oskar_log_error.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_settings.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_copy.h"
@@ -52,36 +57,41 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_Work.h"
 
-#include <cstdio>
-#include <cstdlib>
 #include <cmath>
-#include <QtCore/QByteArray>
 #include <QtCore/QTime>
 
 extern "C"
-int oskar_sim_beam_pattern(const char* settings_file)
+int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 {
     int err;
     QTime timer;
 
     // Load the settings file.
     oskar_Settings settings;
-    err = oskar_settings_load(&settings, settings_file);
+    oskar_log_section(log, "Loading settings file '%s'", settings_file);
+    err = oskar_settings_load(&settings, log, settings_file);
     if (err) return err;
     const oskar_SettingsTime* times = &settings.obs.time;
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
+
+    // Log the relevant settings.
+    log->keep_file = settings.sim.keep_log_file;
+    oskar_log_settings_simulator(log, &settings);
+    oskar_log_settings_observation(log, &settings);
+    oskar_log_settings_telescope(log, &settings);
+    oskar_log_settings_beam_pattern(log, &settings);
 
     // Check that a data file has been specified.
     if (!settings.beam_pattern.oskar_image_filename &&
             !settings.beam_pattern.fits_image_filename)
     {
-        fprintf(stderr, "ERROR: No image file specified.\n");
+        oskar_log_error(log, "No image file specified.");
         return OSKAR_ERR_SETTINGS;
     }
 
     // Get the telescope model.
     oskar_TelescopeModel tel_cpu;
-    err = oskar_set_up_telescope(&tel_cpu, &settings);
+    err = oskar_set_up_telescope(&tel_cpu, log, &settings);
     if (err) return OSKAR_ERR_SETUP_FAIL;
 
     // Get the beam pattern settings.
@@ -123,6 +133,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
     image_cube.freq_inc_hz        = settings.obs.frequency_inc_hz;
     image_cube.time_inc_sec       = settings.obs.time.dt_dump_days * 86400.0;
     image_cube.time_start_mjd_utc = settings.obs.time.obs_start_mjd_utc;
+    err = oskar_mem_copy(&image_cube.settings_path, &settings.settings_path);
+    if (err) return err;
 
     // Temporary CPU memory.
     oskar_Mem beam_cpu(beam_pattern_data_type, OSKAR_LOCATION_CPU, num_pixels);
@@ -166,6 +178,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
         oskar_Work work(type, OSKAR_LOCATION_GPU);
 
         // Loop over channels.
+        oskar_log_section(log, "Starting simulation...");
         timer.start();
         for (int c = 0; c < num_channels; ++c)
         {
@@ -174,9 +187,10 @@ int oskar_sim_beam_pattern(const char* settings_file)
             curand_state.init(tel_gpu.seed_time_variable_errors);
 
             // Get the channel frequency.
-            printf("\n--> Simulating channel (%d / %d).\n", c+1, num_channels);
             double frequency = settings.obs.start_frequency_hz +
                     c * settings.obs.frequency_inc_hz;
+            oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
+                    c + 1, num_channels, frequency / 1e6);
 
             // Copy the telescope model and scale coordinates to radians.
             oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
@@ -190,7 +204,7 @@ int oskar_sim_beam_pattern(const char* settings_file)
             for (int j = 0; j < num_times; ++j)
             {
                 // Start time for the data dump, in MJD(UTC).
-                printf("--> Generating beam for snapshot (%i / %i).\n",
+                oskar_log_message(log, 1, "Snapshot %4d/%d",
                         j+1, num_times);
                 double t_dump = obs_start_mjd_utc + j * dt_dump;
                 double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
@@ -241,16 +255,16 @@ int oskar_sim_beam_pattern(const char* settings_file)
                         {
                             tx = tc[i].a.x;
                             ty = tc[i].a.y;
-                            img[i] = sqrt(tx * tx + ty * ty); // phi_X
+                            img[i] = sqrt(tx * tx + ty * ty); // theta_X
                             tx = tc[i].b.x;
                             ty = tc[i].b.y;
-                            img[i + num_pixels] = sqrt(tx * tx + ty * ty); // theta_X
+                            img[i + num_pixels] = sqrt(tx * tx + ty * ty); // phi_X
                             tx = tc[i].c.x;
                             ty = tc[i].c.y;
-                            img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
+                            img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
                             tx = tc[i].d.x;
                             ty = tc[i].d.y;
-                            img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
+                            img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
                         }
                     }
                 }
@@ -275,28 +289,30 @@ int oskar_sim_beam_pattern(const char* settings_file)
                         {
                             tx = tc[i].a.x;
                             ty = tc[i].a.y;
-                            img[i] = sqrt(tx * tx + ty * ty); // phi_X
+                            img[i] = sqrt(tx * tx + ty * ty); // theta_X
                             tx = tc[i].b.x;
                             ty = tc[i].b.y;
-                            img[i + num_pixels] = sqrt(tx * tx + ty * ty); // theta_X
+                            img[i + num_pixels] = sqrt(tx * tx + ty * ty); // phi_X
                             tx = tc[i].c.x;
                             ty = tc[i].c.y;
-                            img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
+                            img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
                             tx = tc[i].d.x;
                             ty = tc[i].d.y;
-                            img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
+                            img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
                         }
                     }
                 }
             }
         }
     }
-    printf("=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
+    oskar_log_section(log, "Simulation completed in %.3f sec.",
+            timer.elapsed() / 1e3);
 
     // Dump data to OSKAR image file if required.
     if (settings.beam_pattern.oskar_image_filename)
     {
-        err = oskar_image_write(&image_cube, settings.beam_pattern.oskar_image_filename, 0);
+        err = oskar_image_write(&image_cube, log,
+                settings.beam_pattern.oskar_image_filename, 0);
         if (err) return err;
     }
 
@@ -304,7 +320,8 @@ int oskar_sim_beam_pattern(const char* settings_file)
     // FITS library available.
     if (settings.beam_pattern.fits_image_filename)
     {
-        err = oskar_fits_image_write(&image_cube, settings.beam_pattern.fits_image_filename);
+        err = oskar_fits_image_write(&image_cube, log,
+                settings.beam_pattern.fits_image_filename);
         if (err) return err;
     }
 #endif

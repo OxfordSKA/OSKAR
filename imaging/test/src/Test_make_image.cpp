@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,11 +120,11 @@ void Test_make_image::test()
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
     oskar_Image image(OSKAR_DOUBLE);
-    int err = oskar_make_image(&image, &vis, &settings);
+    int err = oskar_make_image(&image, NULL, &vis, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 
     int idx = 0;
-    err = oskar_image_write(&image, "temp_test_image.img", idx);
+    err = oskar_image_write(&image, NULL, "temp_test_image.img", idx);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 
 
@@ -159,7 +159,7 @@ void  Test_make_image::image_lm_grid()
     memcpy((double*)im.data.data + num_pixels, m.data, num_pixels * sizeof(double));
 
 #ifndef OSKAR_NO_FITS
-    oskar_fits_image_write(&im, "test_lm_grid.fits");
+    oskar_fits_image_write(&im, NULL, "test_lm_grid.fits");
 #endif
-    oskar_image_write(&im, "test_lm_grid.img", 0);
+    oskar_image_write(&im, NULL, "test_lm_grid.img", 0);
 }

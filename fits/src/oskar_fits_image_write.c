@@ -30,6 +30,8 @@
 #include "fits/oskar_fits_write.h"
 #include "fits/oskar_fits_write_axis_header.h"
 #include "fits/oskar_fits_check_status.h"
+#include "utility/oskar_getline.h"
+#include "utility/oskar_log_message.h"
 #include "utility/oskar_Mem.h"
 
 #include <stdlib.h>
@@ -44,7 +46,8 @@ extern "C" {
 
 #define MAX_DIM 10
 
-int oskar_fits_image_write(const oskar_Image* image, const char* filename)
+int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename)
 {
     char value[FLEN_VALUE];
     int i, num_dimensions, status = 0, decimals = 10, type;
@@ -52,6 +55,8 @@ int oskar_fits_image_write(const oskar_Image* image, const char* filename)
     double crval[MAX_DIM], crpix[MAX_DIM], cdelt[MAX_DIM], crota[MAX_DIM];
     fitsfile* fptr = NULL;
     const char *label[MAX_DIM], *ctype[MAX_DIM];
+    char* log_line_buffer = NULL;
+    size_t buffer_size = 0;
 
     /* Get the data type. */
     type = image->data.type;
@@ -60,6 +65,9 @@ int oskar_fits_image_write(const oskar_Image* image, const char* filename)
     num_dimensions = sizeof(image->dimension_order) / sizeof(int);
     if (num_dimensions > 10)
         return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    /* Write a log message. */
+    oskar_log_message(log, 0, "Writing FITS image file: '%s'", filename);
 
     /* Loop over axes. */
     for (i = 0; i < num_dimensions; ++i)
@@ -135,13 +143,13 @@ int oskar_fits_image_write(const oskar_Image* image, const char* filename)
     }
 
     /* Write multi-dimensional image data. */
-    status = oskar_fits_write(filename, type, num_dimensions, naxes, image->data.data,
-            ctype, label, crval, cdelt, crpix, crota);
+    status = oskar_fits_write(log, filename, type, num_dimensions, naxes,
+            image->data.data, ctype, label, crval, cdelt, crpix, crota);
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Open file for read/write access. */
     fits_open_file(&fptr, filename, READWRITE, &status);
-    oskar_fits_check_status(status, "Opening FITS file.");
+    oskar_fits_check_status(log, status, "Opening FITS file.");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Write brightness unit keyword. */
@@ -149,37 +157,51 @@ int oskar_fits_image_write(const oskar_Image* image, const char* filename)
     {
         strcpy(value, "JY/BEAM");
         fits_write_key_str(fptr, "BUNIT", value, "Units of flux", &status);
-        oskar_fits_check_status(status, "Writing key: BUNIT");
+        oskar_fits_check_status(log, status, "Writing key: BUNIT");
         if (status) return OSKAR_ERR_FITS_IO;
     }
 
     /* Write time header keywords. */
     strcpy(value, "UTC");
     fits_write_key_str(fptr, "TIMESYS", value, NULL, &status);
-    oskar_fits_check_status(status, "Writing key: TIMESYS");
+    oskar_fits_check_status(log, status, "Writing key: TIMESYS");
     if (status) return OSKAR_ERR_FITS_IO;
     strcpy(value, "s");
     fits_write_key_str(fptr, "TIMEUNIT", value, "Time axis units", &status);
-    oskar_fits_check_status(status, "Writing key: TIMEUNIT");
+    oskar_fits_check_status(log, status, "Writing key: TIMEUNIT");
     if (status) return OSKAR_ERR_FITS_IO;
     fits_write_key_dbl(fptr, "MJD-OBS", image->time_start_mjd_utc, decimals,
             "Obs start time", &status);
-    oskar_fits_check_status(status, "Writing key: MJD-OBS");
+    oskar_fits_check_status(log, status, "Writing key: MJD-OBS");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Write pointing keywords. */
     fits_write_key_dbl(fptr, "OBSRA", image->centre_ra_deg, decimals,
             "Pointing RA", &status);
-    oskar_fits_check_status(status, "Writing key: OBSRA");
+    oskar_fits_check_status(log, status, "Writing key: OBSRA");
     if (status) return OSKAR_ERR_FITS_IO;
     fits_write_key_dbl(fptr, "OBSDEC", image->centre_dec_deg, decimals,
             "Pointing DEC", &status);
-    oskar_fits_check_status(status, "Writing key: OBSDEC");
+    oskar_fits_check_status(log, status, "Writing key: OBSDEC");
     if (status) return OSKAR_ERR_FITS_IO;
+
+    /* Write log entries as FITS HISTORY keys. */
+    if (log)
+    {
+        if (log->file)
+        {
+            fseek(log->file, 0, SEEK_SET);
+            while (oskar_getline(&log_line_buffer,
+                    &buffer_size, log->file) != OSKAR_ERR_EOF)
+            {
+                fits_write_history(fptr, log_line_buffer, &status);
+            }
+        }
+    }
 
     /* Close the FITS file. */
     fits_close_file(fptr, &status);
-    oskar_fits_check_status(status, "Closing file");
+    oskar_fits_check_status(log, status, "Closing file");
     if (status) return OSKAR_ERR_FITS_IO;
 
     return OSKAR_SUCCESS;

@@ -39,6 +39,10 @@
 #include "interferometry/oskar_TelescopeModel.h"
 #include <stdlib.h>
 
+#ifdef __cplusplus
+#include "utility/oskar_Log.h"
+#endif
+
 /**
  * @brief Structure to hold visibility data.
  *
@@ -156,19 +160,18 @@ struct oskar_Visibilities
     int clear_contents();
 
     /**
-     * @brief Writes the contents of visibility structure to an OSKAR
-     * visibility dump file of the specified file name. This is a simple
-     * custom binary format.
+     * @brief Writes a visibility structure to an OSKAR binary file.
      *
      * @details
-     * Note: This function currently requires the visibility structure memory
-     * to reside on the CPU.
+     * This method writes out the given visibility structure to an OSKAR
+     * binary file of the given filename.
      *
-     * @param filename The filename to write to.
+     * @param log      Pointer to the log structure to use.
+     * @param filename The name of the file to which to write.
      *
      * @return An error code.
      */
-    int write(const char* filename);
+    int write(oskar_Log* log, const char* filename);
 
     /**
      * @brief Fills a visibility structure by reading the specified file.

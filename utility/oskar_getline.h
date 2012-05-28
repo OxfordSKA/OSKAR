@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ extern "C" {
  * Usage:
  * The following code will get a line of text from the stream:
  * \code
- *      FILE* fileptr = fopen("input.dat");
+ *      FILE* fileptr = fopen("input.dat", "r");
  *      char* line = NULL;
  *      size_t n = 0;
  *      oskar_getline(&line, &n, fileptr);

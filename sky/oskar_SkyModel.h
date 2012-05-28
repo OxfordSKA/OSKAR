@@ -34,6 +34,9 @@
  */
 
 #include "oskar_global.h"
+#ifdef __cplusplus
+#include "utility/oskar_Log.h"
+#endif
 #include "utility/oskar_Mem.h"
 #include <stdlib.h>
 
@@ -185,7 +188,7 @@ struct oskar_SkyModel
      *
      * @return An error code.
      */
-    int load_gsm(const char* filename);
+    int load_gsm(oskar_Log* log, const char* filename);
 
     /**
      * @brief Returns the memory location for memory in the sky structure

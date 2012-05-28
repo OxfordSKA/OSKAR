@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "imaging/oskar_Image.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,7 +79,8 @@ extern "C" {
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_fits_image_write(const oskar_Image* image, const char* filename);
+int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename);
 
 #ifdef __cplusplus
 }

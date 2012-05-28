@@ -30,7 +30,7 @@
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_system_clock_time.h"
+#include "utility/oskar_system_clock_string.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,7 +46,7 @@ int oskar_binary_stream_write_metadata(FILE* stream)
     size_t len;
 
     /* Write the system date and time. */
-    str = oskar_system_clock_time(0, NULL);
+    str = oskar_system_clock_string(0);
     len = 1 + strlen(str);
     error = oskar_binary_stream_write(stream, OSKAR_CHAR,
             OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING,

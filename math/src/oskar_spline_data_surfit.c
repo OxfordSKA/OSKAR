@@ -29,13 +29,14 @@
 #include "math/oskar_dierckx_surfit.h"
 #include "math/oskar_spline_data_surfit.h"
 #include "math/oskar_spline_data_init.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_section.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_realloc.h"
 #include <math.h>
 #include <float.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -120,9 +121,10 @@ static double oskar_mem_min(const oskar_Mem* data, int n)
     return r;
 }
 
-int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
-        oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* w,
-        const oskar_SettingsSpline* settings)
+int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
+        int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Mem* w, const oskar_SettingsSpline* settings,
+        const char* surface_name)
 {
     int element_size, err, k = 0, maxiter = 50, type;
     int b1, b2, bx, by, iopt, km, kwrk, lwrk1, lwrk2, ne, nxest, nyest, u, v;
@@ -153,6 +155,11 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
             z->location != OSKAR_LOCATION_CPU ||
             w->location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
+
+    /* Log message. */
+    oskar_log_message(log, 0, "");
+    oskar_log_message(log, 0, "Fitting B-splines to surface (%s)...",
+            surface_name);
 
     /* Get data boundaries. */
     x_beg = oskar_mem_min(x, num_points);
@@ -230,7 +237,8 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
                         &spline->num_knots_y, knots_y, coeff, &fp,
                         (float*)wrk1, lwrk1, (float*)wrk2, lwrk2, iwrk, kwrk,
                         &err);
-                printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
+                oskar_log_message(log, 1, "Iteration %d, s = %.4e, fp = %.4e",
+                        k, s, fp);
 
                 /* Check for errors. */
                 if (err > 0 || err < -2) break;
@@ -247,15 +255,16 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
             /* Check for errors. */
             if (err > 0 || err < -2)
             {
-                printf("Error (%d) finding spline coefficients.\n", err);
+                oskar_log_message(log, 1, "Error (%d) finding spline "
+                        "coefficients.", err);
                 if (!settings->search_for_best_fit || err == 10)
                 {
                     err = OSKAR_ERR_SPLINE_COEFF_FAIL;
                     goto stop;
                 }
                 avg_frac_err_loc *= settings->average_fractional_error_factor_increase;
-                printf("Increasing allowed average fractional error to %.3f.\n",
-                        avg_frac_err_loc);
+                oskar_log_message(log, 1, "Increasing allowed average "
+                        "fractional error to %.3f.", avg_frac_err_loc);
             }
             else
             {
@@ -263,20 +272,21 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
                 err = 0;
                 if (err == 5)
                 {
-                    printf("Cannot add any more knots.\n");
+                    oskar_log_message(log, 1, "Cannot add any more knots.");
                     avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
                 }
                 if (settings->search_for_best_fit)
                 {
-                    printf("Surface fit to %.3f avg. frac. error "
-                            "(s=%.2e, fp=%.2e, k=%d).\n", avg_frac_err_loc,
-                            s, fp, k);
+                    oskar_log_message(log, 1, "Surface fit to %.3f avg. "
+                            "frac. error (s=%.2e, fp=%.2e, k=%d).",
+                            avg_frac_err_loc, s, fp, k);
                 }
                 else
                 {
-                    printf("Surface fit (s=%.2e, fp=%.2e).\n", s, fp);
+                    oskar_log_message(log, 1, "Surface fit (s=%.2e, fp=%.2e).",
+                            s, fp);
                 }
-                printf("Number of knots (x: %d, y: %d)\n",
+                oskar_log_message(log, 1, "Number of knots (x: %d, y: %d).",
                         spline->num_knots_x, spline->num_knots_y);
             }
         } while (settings->search_for_best_fit && !done);
@@ -310,7 +320,8 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
                         knots_x, &spline->num_knots_y, knots_y, coeff, &fp,
                         (double*)wrk1, lwrk1, (double*)wrk2, lwrk2, iwrk, kwrk,
                         &err);
-                printf("Iteration %d, s = %.4e, fp = %.4e\n", k, s, fp);
+                oskar_log_message(log, 1, "Iteration %d, s = %.4e, fp = %.4e",
+                        k, s, fp);
 
                 /* Check for errors. */
                 if (err > 0 || err < -2) break;
@@ -327,15 +338,16 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
             /* Check for errors. */
             if (err > 0 || err < -2)
             {
-                printf("Error (%d) finding spline coefficients.\n", err);
+                oskar_log_message(log, 1, "Error (%d) finding spline "
+                        "coefficients.", err);
                 if (!settings->search_for_best_fit || err == 10)
                 {
                     err = OSKAR_ERR_SPLINE_COEFF_FAIL;
                     goto stop;
                 }
                 avg_frac_err_loc *= settings->average_fractional_error_factor_increase;
-                printf("Increasing allowed average fractional error to %.3f.\n",
-                        avg_frac_err_loc);
+                oskar_log_message(log, 1, "Increasing allowed average "
+                        "fractional error to %.3f.", avg_frac_err_loc);
             }
             else
             {
@@ -343,24 +355,26 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
                 err = 0;
                 if (err == 5)
                 {
-                    printf("Cannot add any more knots.\n");
+                    oskar_log_message(log, 1, "Cannot add any more knots.");
                     avg_frac_err_loc = sqrt(fp / num_points) / peak_abs;
                 }
                 if (settings->search_for_best_fit)
                 {
-                    printf("Surface fit to %.3f avg. frac. error "
-                            "(s=%.2e, fp=%.2e, k=%d).\n", avg_frac_err_loc,
-                            s, fp, k);
+                    oskar_log_message(log, 1, "Surface fit to %.3f avg. "
+                            "frac. error (s=%.2e, fp=%.2e, k=%d).",
+                            avg_frac_err_loc, s, fp, k);
                 }
                 else
                 {
-                    printf("Surface fit (s=%.2e, fp=%.2e).\n", s, fp);
+                    oskar_log_message(log, 1, "Surface fit (s=%.2e, fp=%.2e).",
+                            s, fp);
                 }
-                printf("Number of knots (x: %d, y: %d)\n",
+                oskar_log_message(log, 1, "Number of knots (x: %d, y: %d).",
                         spline->num_knots_x, spline->num_knots_y);
             }
         } while (settings->search_for_best_fit && !done);
     }
+    oskar_log_message(log, 0, "");
 
     /* Free work arrays. */
 stop:

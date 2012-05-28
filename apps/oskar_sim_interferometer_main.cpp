@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,10 @@
 
 #include "apps/lib/oskar_sim_interferometer.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_log_error.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_Log.h"
+
 #include <cstdlib>
 #include <cstdio>
 
@@ -42,14 +46,16 @@ int main(int argc, char** argv)
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
+    // Create the log.
+    oskar_Log log;
+
     // Run simulation.
-    error = oskar_sim_interferometer(argv[1]);
+    oskar_log_message(&log, 0, "Running binary %s", argv[0]);
+    error = oskar_sim_interferometer(argv[1], &log);
 
     // Check for errors.
     if (error)
-    {
-        fprintf(stderr, "\n>>> Run failed (code %d): %s.\n", error,
-                oskar_get_error_string(error));
-    }
+        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
+
     return error;
 }

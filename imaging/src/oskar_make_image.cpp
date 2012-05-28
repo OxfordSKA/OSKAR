@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "imaging/oskar_make_image.h"
 
 #include "imaging/oskar_make_image_dft.h"
@@ -38,6 +37,7 @@
 #include "imaging/oskar_setup_image.h"
 #include "imaging/oskar_image_init.h"
 
+#include "utility/oskar_log_message.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
@@ -49,8 +49,6 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_data_type_string.h"
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 
 #define SEC2DAYS 1.15740740740740740740741e-5
@@ -59,8 +57,8 @@
 extern "C" {
 #endif
 
-int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
-        const oskar_SettingsImage* settings)
+int oskar_make_image(oskar_Image* im, oskar_Log* log,
+        const oskar_Visibilities* vis, const oskar_SettingsImage* settings)
 {
     oskar_Mem l, m, stokes, temp_uu, temp_vv, temp_amp, im_slice;
     int err = OSKAR_SUCCESS;
@@ -207,6 +205,8 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
     {
         int vis_chan = im_chan_range[0] + c;
         double im_freq = im->freq_start_hz + c * im->freq_inc_hz;
+        oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
+                c + 1, num_chan, im_freq / 1e6);
 
         for (int t = 0; t < num_times; ++t)
         {
@@ -219,9 +219,9 @@ int oskar_make_image(oskar_Image* im, const oskar_Visibilities* vis,
 
             for (int p = 0; p < num_pols; ++p, ++i)
             {
-                printf("--> Making image [%3i/%3i]: freq = % -8.2f MHz, "
-                        "cube index = (%i, %i, %i)\n",
-                        i, (num_chan*num_times*num_pols), im_freq/1.0e6, c, t, p);
+                oskar_log_message(log, 1, "Making image %3i/%i, "
+                        "cube index = (%i, %i, %i)",
+                        i+1, (num_chan*num_times*num_pols), c, t, p);
 
                 // Get visibility amplitudes for imaging.
                 if (im_type == OSKAR_IMAGE_TYPE_PSF)

@@ -39,21 +39,24 @@
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_warning.h"
 #include <cstdio>
 
 extern "C"
-int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, const oskar_SettingsTime* times,
-        double frequency)
+int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
+        const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
+        const oskar_SettingsTime* times, double frequency, int chunk_index,
+        int num_sky_chunks)
 {
     int err = 0;
     int device_id = 0;
-    size_t mem_free, mem_total;
-    cudaDeviceProp device_prop;
 
+    // Check if sky model is empty.
     if (sky->num_sources == 0)
     {
-        printf("--> WARNING: No sources in sky model. Skipping ME evaluation.\n");
+        oskar_log_warning(log, "No sources in sky model. Skipping "
+                "Measurement Equation evaluation.");
         return OSKAR_SUCCESS;
     }
 
@@ -86,6 +89,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Work work(type, OSKAR_LOCATION_GPU);
 
+    // Declare a local sky model of sufficient size for the horizon clip.
+    oskar_SkyModel local_sky(type, OSKAR_LOCATION_GPU, n_sources);
+
     // Initialise the random number generator.
     // Note: This is reset to the same sequence per sky chunk and per channel.
     // This is required so that when splitting the sky into chunks or channels
@@ -102,36 +108,38 @@ int oskar_interferometer(oskar_Mem* vis_amp, const oskar_SkyModel* sky,
     double dt_ave            = times->dt_ave_days;
     double dt_fringe         = times->dt_fringe_days;
 
+    // Record GPU memory usage.
+    size_t mem_free, mem_total;
+    cudaDeviceProp device_prop;
     cudaMemGetInfo(&mem_free, &mem_total);
     cudaGetDevice(&device_id);
     cudaGetDeviceProperties(&device_prop, device_id);
-    printf("==> Device memory [%i, %s]: free %.1f MB, total %.1f MB.\n",
-            device_id, device_prop.name, mem_free/(1024.*1024.),
-            mem_total/(1024.*1024.));
+    oskar_log_message(log, 1, "Memory on device %d [%s] is %.1f%% used.",
+            device_id, device_prop.name,
+            100 * (1.0 - ((float)mem_free / (float)mem_total)));
 
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)
     {
         // Start time for the visibility dump, in MJD(UTC).
-        printf("--> Simulating snapshot (%-3i / %-3i) ", j+1, num_vis_dumps);
-
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         // Initialise visibilities for the dump to zero.
         err = vis.clear_contents();
         if (err) return err;
+
         // Compact sky model to temporary.
-        oskar_SkyModel local_sky(type, OSKAR_LOCATION_GPU);
         err = oskar_sky_model_horizon_clip(&local_sky, &sky_gpu, &tel_gpu,
                 gast, &work);
-        printf("[num sources = %i]\n", local_sky.num_sources);
-        if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
-        {
-            // Skip iteration.
-            printf("--> WARNING: No sources above horizon. Skipping.\n");
-            continue;
-        }
+
+        // Record number of visible sources in this snapshot.
+        oskar_log_message(log, 1, "Snapshot %4d/%d, chunk %4d/%d, "
+                "device %d [%d sources]", j+1, num_vis_dumps, chunk_index+1,
+                num_sky_chunks, device_id, local_sky.num_sources);
+
+        // Skip iteration if no sources above horizon.
+        if (err == OSKAR_ERR_NO_VISIBLE_SOURCES) continue;
         else if (err != 0) return err;
 
         // Set dimensions of Jones matrices (this is not a resize!).

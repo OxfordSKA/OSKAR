@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,9 @@
 #include "sky/oskar_sky_model_set_source.h"
 #include "sky/oskar_sky_model_type.h"
 #include "utility/oskar_getline.h"
+#include "utility/oskar_log_error.h"
 #include "utility/oskar_string_to_array.h"
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -48,7 +48,8 @@ extern "C" {
 
 static const double boltzmann = 1.3806488e-23; /* Boltzmann constant in J/K. */
 
-int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename)
+int oskar_sky_model_load_gsm(oskar_SkyModel* sky, oskar_Log* log,
+        const char* filename)
 {
     int err, i, n = 0, nside, type;
     FILE* file;
@@ -98,7 +99,7 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, const char* filename)
     if (oskar_healpix_nside_to_npix(nside) != n)
     {
         free(temp);
-        fprintf(stderr, "ERROR: Invalid GSM file.\n");
+        oskar_log_error(log, "Invalid GSM file.");
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 

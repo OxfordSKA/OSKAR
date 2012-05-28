@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
+#include "utility/oskar_log_warning.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
 #include "math/oskar_sph_to_lm.h"
@@ -37,7 +37,6 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <stdio.h>
 
 #define M_PI_2_2_LN_2 7.11941466249375271693034 /* pi^2 / (2 log_e(2)) */
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
@@ -47,12 +46,12 @@
 extern "C" {
 #endif
 
-int oskar_evaluate_gaussian_source_parameters(int num_sources,
+int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
         oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
         oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0)
 {
-    int i, j, err;
+    int i, j, err, num_failed = 0;
     double a, b, c;
     int type;
     double maj, min, pa;
@@ -166,11 +165,11 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
             oskar_sph_to_lm_d(ellipse_num_points, ra0, dec0,
                     (double*)lon.data, (double*)lat.data,
                     (double*)l.data, (double*)m.data);
-            err = oskar_fit_ellipse(&maj, &min, &pa,
+            err = oskar_fit_ellipse(log, &maj, &min, &pa,
                     ellipse_num_points, &l, &m);
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
-                printf("- WARNING: Gaussian ellipse solution failed for source %i\n", i);
+                ++num_failed;
                 continue;
             }
             else if (err) return err;
@@ -224,11 +223,11 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
              oskar_sph_to_lm_f(ellipse_num_points, ra0, dec0,
                      (float*)lon.data, (float*)lat.data,
                      (float*)l.data, (float*)m.data);
-             err = oskar_fit_ellipse(&maj, &min, &pa,
+             err = oskar_fit_ellipse(log, &maj, &min, &pa,
                      ellipse_num_points, &l, &m);
              if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
              {
-                 printf("- WARNING: Gaussian ellipse solution failed for source %i\n", i);
+                 ++num_failed;
                  continue;
              }
              else if (err) return err;
@@ -248,6 +247,13 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
          }
     }
 
+    /* Print a warning if fitting failed for some sources. */
+    if (num_failed > 0)
+    {
+        oskar_log_warning(log, "Gaussian ellipse solution failed "
+                "for %i sources.", num_failed);
+    }
+
     /* clean up */
     oskar_mem_free(&l);
     oskar_mem_free(&m);
@@ -256,7 +262,6 @@ int oskar_evaluate_gaussian_source_parameters(int num_sources,
 
     return OSKAR_SUCCESS;
 }
-
 
 #ifdef __cplusplus
 }

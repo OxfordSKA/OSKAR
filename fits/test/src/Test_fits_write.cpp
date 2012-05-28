@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,6 +126,6 @@ void Test_fits_write::test_method()
     crota[3] = 0.0;
 
     /* Write multi-dimensional image data. */
-    oskar_fits_write(filename, data.type, 4, naxes, data.data, ctype,
+    oskar_fits_write(NULL, filename, data.type, 4, naxes, data.data, ctype,
             ctype_comment, crval, cdelt, crpix, crota);
 }

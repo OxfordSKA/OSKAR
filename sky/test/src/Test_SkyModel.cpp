@@ -601,7 +601,7 @@ void Test_SkyModel::test_evaluate_gaussian_source_parameters()
             20 * 60 * asec2rad,
             10 * 60 * asec2rad,
             30 * deg2rad);
-    oskar_evaluate_gaussian_source_parameters(num_sources, &sky.gaussian_a,
+    oskar_evaluate_gaussian_source_parameters(NULL, num_sources, &sky.gaussian_a,
             &sky.gaussian_b, &sky.gaussian_c, &sky.FWHM_major, &sky.FWHM_minor,
             &sky.position_angle, &sky.RA, &sky.Dec, 0, 40.0 * M_PI/180.0);
     //sky.write("temp_sky_gaussian.osm");
@@ -727,11 +727,11 @@ void Test_SkyModel::test_sky_model_set()
     // Free the array of sky models.
     if (set)
     {
-    	for (int i = 0; i < number; ++i)
-    	{
-    		oskar_sky_model_free(&set[i]);
-    	}
-    	free(set);
+        for (int i = 0; i < number; ++i)
+        {
+            oskar_sky_model_free(&set[i]);
+        }
+        free(set);
     }
 }
 

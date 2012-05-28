@@ -58,9 +58,9 @@ int oskar_Visibilities::clear_contents()
     return oskar_visibilities_clear_contents(this);
 }
 
-int oskar_Visibilities::write(const char* filename)
+int oskar_Visibilities::write(oskar_Log* log, const char* filename)
 {
-    return oskar_visibilities_write(filename, this);
+    return oskar_visibilities_write(this, log, filename);
 }
 
 int oskar_Visibilities::read(oskar_Visibilities* vis, const char* filename)

@@ -34,15 +34,22 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_set_up_visibilities.h"
 #include "apps/lib/oskar_sim_interferometer.h"
-#include "apps/lib/oskar_write_ms.h"
+#include "apps/lib/oskar_visibilities_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
 #include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_write.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_SettingsSky.h"
 #include "sky/oskar_sky_model_free.h"
+#include "utility/oskar_log_error.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_settings.h"
+#include "utility/oskar_log_warning.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
@@ -57,7 +64,6 @@
 
 #include <QtCore/QTime>
 
-#include <cstdio>
 #include <cstdlib>
 #include <cmath>
 #include <vector>
@@ -65,23 +71,34 @@
 using std::vector;
 
 extern "C"
-int oskar_sim_interferometer(const char* settings_file)
+int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 {
     int error;
 
     // Load the settings file.
     oskar_Settings settings;
-    error = oskar_settings_load(&settings, settings_file);
+    oskar_log_section(log, "Loading settings file '%s'", settings_file);
+    error = oskar_settings_load(&settings, log, settings_file);
     if (error) return error;
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     const oskar_SettingsTime* times = &settings.obs.time;
+
+    // Log the relevant settings.
+    log->keep_file = settings.sim.keep_log_file;
+    oskar_log_settings_simulator(log, &settings);
+    oskar_log_settings_sky(log, &settings);
+    oskar_log_settings_observation(log, &settings);
+    oskar_log_settings_telescope(log, &settings);
+    oskar_log_settings_interferometer(log, &settings);
+    if (settings.obs.image_interferometer_output)
+        oskar_log_settings_image(log, &settings);
 
     // Check that a data file has been specified.
     if ( !(settings.obs.oskar_vis_filename || settings.obs.ms_filename ||
             (settings.obs.image_interferometer_output &&
                     (settings.image.oskar_image || settings.image.fits_image))))
     {
-        fprintf(stderr, "ERROR: No output file specified.\n");
+        oskar_log_error(log, "No output file specified.");
         return OSKAR_ERR_SETTINGS;
     }
 
@@ -92,15 +109,15 @@ int oskar_sim_interferometer(const char* settings_file)
     if (error) return error;
     if (device_count < num_devices) return OSKAR_ERR_CUDA_DEVICES;
 
-    // Setup the telescope model.
+    // Set up the telescope model.
     oskar_TelescopeModel telescope_cpu;
-    error = oskar_set_up_telescope(&telescope_cpu, &settings);
+    error = oskar_set_up_telescope(&telescope_cpu, log, &settings);
     if (error) return OSKAR_ERR_SETUP_FAIL;
 
-    // Setup the sky model array.
+    // Set up the sky model array.
     oskar_SkyModel* sky_chunk_cpu = NULL;
     int num_sky_chunks = 0;
-    error = oskar_set_up_sky(&num_sky_chunks, &sky_chunk_cpu, &settings);
+    error = oskar_set_up_sky(&num_sky_chunks, &sky_chunk_cpu, log, &settings);
     if (error) return error;
 
     // Create the global visibility structure on the CPU.
@@ -133,15 +150,16 @@ int oskar_sim_interferometer(const char* settings_file)
     omp_set_num_threads(num_devices);
 
     // Run the simulation.
-    printf("\n=== Starting simulation...\n");
+    oskar_log_section(log, "Starting simulation...");
     QTime timer;
     timer.start();
     int num_channels = settings.obs.num_channels;
     for (int c = 0; c < num_channels; ++c)
     {
-        double freq = settings.obs.start_frequency_hz +
+        double frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
-        printf("\n<< Channel (%i / %i) [%.4f MHz].\n", c + 1, num_channels, freq/1e6);
+        oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
+                c + 1, num_channels, frequency / 1e6);
 
         // Use OpenMP dynamic scheduling for loop over chunks.
 #pragma omp parallel for schedule(dynamic, 1)
@@ -154,19 +172,15 @@ int oskar_sim_interferometer(const char* settings_file)
 
             // Get device ID and device properties for this chunk.
             int device_id = settings.sim.cuda_device_ids[thread_id];
-            cudaDeviceProp device_prop;
-            cudaGetDeviceProperties(&device_prop, device_id);
 
             // Set the device to use for the chunk.
             error = cudaSetDevice(device_id);
             if (error) continue;
-            printf("\n*** Sky chunk (%i / %i : %i sources), device[%i] (%s).\n",
-                    i + 1, num_sky_chunks, sky_chunk_cpu[i].num_sources,
-                    device_id, device_prop.name);
 
             // Run simulation for this chunk.
-            error = oskar_interferometer(&(vis_temp[thread_id]),
-                    &(sky_chunk_cpu[i]), &telescope_cpu, times, freq);
+            error = oskar_interferometer(&(vis_temp[thread_id]), log,
+                    &(sky_chunk_cpu[i]), &telescope_cpu, times, frequency,
+                    i, num_sky_chunks);
             if (error) continue;
 
             error = oskar_mem_add(&(vis_acc[thread_id]),
@@ -190,8 +204,8 @@ int oskar_sim_interferometer(const char* settings_file)
             vis_acc[i].clear_contents();
         }
     }
-
-    printf("\n=== Simulation completed in %.3f sec.\n", timer.elapsed() / 1e3);
+    oskar_log_section(log, "Simulation completed in %.3f sec.",
+            timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
     error = oskar_evaluate_baseline_uvw(&vis_global, &telescope_cpu, times);
@@ -200,9 +214,8 @@ int oskar_sim_interferometer(const char* settings_file)
     // Write global visibilities to disk.
     if (settings.obs.oskar_vis_filename)
     {
-        printf("\n--> Writing visibility file: '%s'\n",
+        error = oskar_visibilities_write(&vis_global, log,
                 settings.obs.oskar_vis_filename);
-        error = vis_global.write(settings.obs.oskar_vis_filename);
         if (error) return error;
     }
 
@@ -210,9 +223,8 @@ int oskar_sim_interferometer(const char* settings_file)
     // Write Measurement Set.
     if (settings.obs.ms_filename)
     {
-        printf("--> Writing Measurement Set: '%s'\n", settings.obs.ms_filename);
-        error = oskar_write_ms(settings.obs.ms_filename, &vis_global,
-                &telescope_cpu, true);
+        error = oskar_visibilities_write_ms(&vis_global, log, &telescope_cpu,
+                settings.obs.ms_filename, true);
         if (error) return error;
     }
 #endif
@@ -223,31 +235,29 @@ int oskar_sim_interferometer(const char* settings_file)
         if (settings.image.oskar_image || settings.image.fits_image)
         {
             oskar_Image image;
-            printf("\n=== Starting OSKAR imager...\n");
-            error = oskar_make_image(&image, &vis_global, &settings.image);
-            printf("=== Imaging complete.\n\n");
+            oskar_log_section(log, "Starting OSKAR imager...");
+            error = oskar_make_image(&image, log, &vis_global, &settings.image);
+            oskar_log_section(log, "Imaging complete.");
             if (error) return error;
             if (settings.image.oskar_image)
             {
-                printf("--> Writing OSKAR image: '%s'\n",
-                        settings.image.oskar_image);
-                error = oskar_image_write(&image, settings.image.oskar_image, 0);
+                error = oskar_image_write(&image, log,
+                        settings.image.oskar_image, 0);
                 if (error) return error;
             }
 #ifndef OSKAR_NO_FITS
             if (settings.image.fits_image)
             {
-                printf("--> Writing FITS image: '%s'\n",
+                error = oskar_fits_image_write(&image, log,
                         settings.image.fits_image);
-                error = oskar_fits_image_write(&image, settings.image.fits_image);
                 if (error) return error;
             }
 #endif
         }
         else
         {
-            fprintf(stderr, "= WARNING: No image output name specified "
-                    "(skipping OSKAR imager)\n");
+            oskar_log_warning(log, "No image output name specified "
+                    "(skipping OSKAR imager)");
         }
     }
 
@@ -264,6 +274,6 @@ int oskar_sim_interferometer(const char* settings_file)
         oskar_sky_model_free(&sky_chunk_cpu[i]);
     free(sky_chunk_cpu);
 
-    fprintf(stdout, "\n=== Run complete.\n");
+    oskar_log_section(log, "Run complete.");
     return OSKAR_SUCCESS;
 }

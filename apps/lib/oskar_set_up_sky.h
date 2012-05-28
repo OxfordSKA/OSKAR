@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_Settings.h"
 
 #ifdef __cplusplus
@@ -51,11 +52,14 @@ extern "C" {
  *
  * The data in the structure that is returned resides in CPU memory.
  *
+ * @param[out] num_chunks The number of sky model chunks to use.
+ * @param[out] sky_chunks Pointer to the array of source chunks.
+ * @param[in,out] log  A pointer to the log structure to use.
  * @param[in] settings A pointer to the settings structure.
  */
 OSKAR_EXPORT
 int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
-        const oskar_Settings* settings);
+        oskar_Log* log, const oskar_Settings* settings);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ void Test_fits_image_write::test_method()
 
     // Write the data.
     const char filename[] = "cpp_unit_test_image.fits";
-    oskar_fits_image_write(&image, filename);
+    oskar_fits_image_write(&image, NULL, filename);
 
     // Free memory.
     oskar_image_free(&image);

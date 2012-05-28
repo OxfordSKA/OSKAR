@@ -32,22 +32,28 @@
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_binary_stream_write_header.h"
 #include "utility/oskar_binary_stream_write_metadata.h"
+#include "utility/oskar_log_file_data.h"
+#include "utility/oskar_log_message.h"
 #include "utility/oskar_mem_binary_stream_write.h"
 #include "utility/oskar_mem_binary_file_read_raw.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_image_write(const oskar_Image* image, const char* filename, int idx)
+int oskar_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename, int idx)
 {
     int err = 0, num, num_elements, type;
     unsigned char grp = OSKAR_TAG_GROUP_IMAGE;
     FILE* stream;
+    char* log_data = 0;
+    long log_size = 0;
 
     /* Get the metadata. */
     num_elements = image->data.num_elements;
@@ -67,6 +73,9 @@ int oskar_image_write(const oskar_Image* image, const char* filename, int idx)
     stream = fopen(filename, "wb");
     if (stream == NULL)
         return OSKAR_ERR_FILE_IO;
+
+    /* Write a log message. */
+    oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
 
     /* Write the header and common metadata. */
     err = oskar_binary_stream_write_header(stream);
@@ -95,6 +104,17 @@ int oskar_image_write(const oskar_Image* image, const char* filename, int idx)
         if (err) goto cleanup;
     }
 
+    /* If log exists, then write it out. */
+    log_data = oskar_log_file_data(log, &log_size);
+    if (log_data)
+    {
+        err = oskar_binary_stream_write(stream, OSKAR_CHAR,
+                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, idx, log_size,
+                log_data);
+        free(log_data);
+        if (err) goto cleanup;
+    }
+
     /* Write dimensions. */
     oskar_binary_stream_write_int(stream, grp,
             OSKAR_IMAGE_TAG_NUM_PIXELS_WIDTH, idx, image->width);
@@ -109,8 +129,8 @@ int oskar_image_write(const oskar_Image* image, const char* filename, int idx)
 
     /* Write the dimension order. */
     oskar_binary_stream_write(stream, OSKAR_INT, grp,
-    		OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx,
-    		sizeof(image->dimension_order), image->dimension_order);
+            OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx,
+            sizeof(image->dimension_order), image->dimension_order);
 
     /* Write other image metadata. */
     oskar_binary_stream_write_int(stream, grp,

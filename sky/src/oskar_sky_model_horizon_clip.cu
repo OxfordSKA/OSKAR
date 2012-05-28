@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,6 @@
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
 #include "sky/cudak/oskar_cudak_update_horizon_mask.h"
-#include <cstdio>
 
 #include <thrust/device_vector.h> // Must be included before thrust/copy.h
 #include <thrust/copy.h>
@@ -163,7 +162,7 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
     int num_stations = telescope->num_stations;
 
     // Resize the output structure if necessary.
-    if (output->num_sources < num_sources)
+    if (output->RA.num_elements < num_sources)
     {
         err = output->resize(num_sources);
         if (err) return err;

@@ -36,6 +36,7 @@
 #include "oskar_global.h"
 #include "math/oskar_SplineData.h"
 #include "math/oskar_SettingsSpline.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,13 +49,15 @@ extern "C" {
  * @details
  * This function constructs splines from a list of data points.
  *
- * @param[in,out] spline     Pointer to data structure.
- * @param[in]     num_points Number of data points in all arrays.
- * @param[in]     x          Array of x positions.
- * @param[in]     y          Array of y positions.
- * @param[in]     z          Array of data points.
- * @param[in]     w          Array of data point weights.
- * @param[in]     settings   Fitting parameters.
+ * @param[in,out] spline        Pointer to spline data structure.
+ * @param[in,out] log           Pointer to log structure to use.
+ * @param[in]     num_points    Number of data points in all arrays.
+ * @param[in]     x             Array of x positions.
+ * @param[in]     y             Array of y positions.
+ * @param[in]     z             Array of data points.
+ * @param[in]     w             Array of data point weights.
+ * @param[in]     settings      Fitting parameters.
+ * @param[in]     surface_name  Name of fitted surface (for log).
  *
  * @return
  * This function returns a code to indicate if there were errors in execution:
@@ -63,9 +66,10 @@ extern "C" {
  * - A negative return code indicates an OSKAR error.
  */
 OSKAR_EXPORT
-int oskar_spline_data_surfit(oskar_SplineData* spline, int num_points,
-		oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* w,
-        const oskar_SettingsSpline* settings);
+int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
+        int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Mem* w, const oskar_SettingsSpline* settings,
+        const char* surface_name);
 
 #ifdef __cplusplus
 }

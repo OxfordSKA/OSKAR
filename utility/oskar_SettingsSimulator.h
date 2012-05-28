@@ -42,6 +42,7 @@ struct oskar_SettingsSimulator
     int double_precision;
     int max_sources_per_chunk;
     int num_cuda_devices;
+    int keep_log_file;
     int* cuda_device_ids;
 };
 typedef struct oskar_SettingsSimulator oskar_SettingsSimulator;

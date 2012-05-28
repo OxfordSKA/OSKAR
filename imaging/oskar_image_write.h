@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "oskar_global.h"
 #include "imaging/oskar_Image.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,12 +49,14 @@ extern "C" {
  * This function writes (multi-dimensional) image data to an OSKAR binary file.
  * If the file already exists, it is overwritten.
  *
- * @param[in] image   Pointer to image structure to save.
+ * @param[in] image    Pointer to image structure to save.
+ * @param[in,out] log  Pointer to log structure to use.
  * @param[in] filename Name of file to write.
  * @param[in] idx      Image index to write (set to 0 if unknown).
  */
 OSKAR_EXPORT
-int oskar_image_write(const oskar_Image* image, const char* filename, int idx);
+int oskar_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename, int idx);
 
 #ifdef __cplusplus
 }

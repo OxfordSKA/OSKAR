@@ -33,17 +33,18 @@
 #include "apps/lib/oskar_settings_load_simulator.h"
 #include "apps/lib/oskar_settings_load_sky.h"
 #include "apps/lib/oskar_settings_load_telescope.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_append_raw.h"
 #include "utility/oskar_settings_init.h"
-#include "utility/oskar_settings_print.h"
 #include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_settings_load(oskar_Settings* settings, const char* filename)
+int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
+        const char* filename)
 {
     int error;
 
@@ -52,7 +53,7 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
     if (error) return error;
 
     /* Load observation settings first. */
-    error = oskar_settings_load_observation(&settings->obs, filename);
+    error = oskar_settings_load_observation(&settings->obs, log, filename);
     if (error) return error;
 
     error = oskar_settings_load_simulator(&settings->sim, filename);
@@ -70,9 +71,6 @@ int oskar_settings_load(oskar_Settings* settings, const char* filename)
     error = oskar_mem_append_raw(&settings->settings_path, filename,
             OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
     if (error) return error;
-
-    /* Print settings. */
-    oskar_settings_print(settings, filename);
 
     return OSKAR_SUCCESS;
 }

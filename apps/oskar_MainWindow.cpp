@@ -27,12 +27,9 @@
  */
 
 #include "apps/oskar_MainWindow.h"
-#include "apps/oskar_RunThread.h"
-#include "apps/lib/oskar_sim_beam_pattern.h"
-#include "apps/lib/oskar_sim_interferometer.h"
-#include "apps/lib/oskar_imager.h"
 #include "widgets/oskar_About.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
+#include "widgets/oskar_RunDialog.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModelApps.h"
@@ -157,6 +154,14 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     restoreGeometry(settings.value("main_window/geometry").toByteArray());
     restoreState(settings.value("main_window/state").toByteArray());
 
+    // Set up binary path names.
+    binary_interferometer_ = settings.value("binaries/interferometer",
+            "oskar_sim_interferometer").toString();
+    binary_beam_pattern_ = settings.value("binaries/beam_pattern",
+            "oskar_sim_beam_pattern").toString();
+    binary_imager_ = settings.value("binaries/imager",
+            "oskar_imager").toString();
+
     // First, restore the expanded items.
     view_->restoreExpanded();
 
@@ -166,18 +171,6 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     // Restore the scroll bar position.
     // A single-shot timer is used to do this after the main event loop starts.
     QTimer::singleShot(0, view_, SLOT(restorePosition()));
-
-    // Create the run thread.
-    runThread_ = new oskar_RunThread(model_, this);
-
-    // Set up the message box.
-    msgBox_ = new QMessageBox(this);
-    msgBox_->setText("OSKAR is running; please wait.");
-    msgBox_->setIcon(QMessageBox::Information);
-    msgBox_->setWindowTitle(mainTitle_);
-    msgBox_->setStandardButtons(QMessageBox::NoButton);
-    msgBox_->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-    connect(runThread_, SIGNAL(finished()), msgBox_, SLOT(accept()));
 }
 
 void oskar_MainWindow::openSettings(QString filename, bool check)
@@ -256,6 +249,9 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
     settings.setValue("main_window/geometry", saveGeometry());
     settings.setValue("main_window/state", saveState());
     settings.setValue("main_window/hide_unset_items", actHideUnset_->isChecked());
+    settings.setValue("binaries/interferometer", binary_interferometer_);
+    settings.setValue("binaries/beam_pattern", binary_beam_pattern_);
+    settings.setValue("binaries/imager", binary_imager_);
     QMainWindow::closeEvent(event);
 }
 
@@ -275,19 +271,19 @@ void oskar_MainWindow::cudaInfo()
 
 void oskar_MainWindow::runBeamPattern()
 {
-    run_function_ = &oskar_sim_beam_pattern;
+    run_binary_ = binary_beam_pattern_;
     runButton();
 }
 
 void oskar_MainWindow::runInterferometer()
 {
-    run_function_ = &oskar_sim_interferometer;
+    run_binary_ = binary_interferometer_;
     runButton();
 }
 
 void oskar_MainWindow::runImager()
 {
-    run_function_ = &oskar_imager;
+    run_binary_ = binary_imager_;
     runButton();
 }
 
@@ -342,9 +338,6 @@ void oskar_MainWindow::runButton()
             return;
     }
 
-    // Set the pointer to indicate that the application will be busy.
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
     // Get the (list of) output file names.
     QStringList outputFiles;
     QStringList keys = model_->data(QModelIndex(),
@@ -357,26 +350,15 @@ void oskar_MainWindow::runButton()
     }
 
     // Run simulation recursively.
-    runThread_->start(run_function_, settingsFile_, outputFiles);
-#if 0
-    int rval = msgBox_->exec();
-    if (rval == QMessageBox::Cancel)
-    {
-        runThread_->terminate();
-        runThread_->wait();
-    }
-#else
-    msgBox_->exec();
-#endif
+    oskar_RunDialog dialog(model_, this);
+    dialog.start(run_binary_, settingsFile_, outputFiles);
+    dialog.exec();
 
     // Restore the output files.
     for (int i = 0; i < keys.size(); ++i)
     {
         model_->setValue(keys[i], outputFiles[i]);
     }
-
-    // Restore the pointer.
-    QApplication::restoreOverrideCursor();
 }
 
 void oskar_MainWindow::createRecentFileActions()

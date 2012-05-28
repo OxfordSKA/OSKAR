@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,27 +33,31 @@
  * @file oskar_visibilities_write.h
  */
 
-
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Writes the contents of visibility structure to an OSKAR
- * visibility dump file of the specified file name.
+ * @brief
+ * Writes a visibility structure to an OSKAR binary file.
  *
  * @details
+ * This function writes out the given visibility structure to an OSKAR
+ * binary file of the given filename.
 
- * @param filename The filename to write to.
- * @param vis      The visibility structure to write.
+ * @param[in] vis      The visibility structure to write.
+ * @param[in,out] log  Pointer to log structure to use.
+ * @param[in] filename The filename to write to.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_write(const char* filename, const oskar_Visibilities* vis);
+int oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
+        const char* filename);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "math/oskar_fit_ellipse.h"
+#include "math/oskar_matrix_multiply.h"
 #include "math/oskar_mean.h"
+#include "utility/oskar_log_error.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
-#include "math/oskar_matrix_multiply.h"
 
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
@@ -59,7 +58,7 @@ extern void sgetrs_(const char* trans, const long* n, const long* nrhs,
         long* info);
 #endif
 
-int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
+int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
         double* gauss_phi, int num_points, const oskar_Mem* x,
         const oskar_Mem* y)
 {
@@ -77,14 +76,14 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     err = OSKAR_SUCCESS;
 
 #ifdef OSKAR_NO_LAPACK
-    fprintf(stderr, "= ERROR: oskar_fit_ellise(): LAPACK required for"
-            "use of extended sources.\n");
+    oskar_log_error(log, "oskar_fit_ellipse(): LAPACK required for "
+            "use of extended sources.");
     return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
 
 #ifdef OSKAR_NO_CBLAS
-    fprintf(stderr, "= ERROR: oskar_fit_ellise(): CBLAS required for"
-                "use of extended sources.\n");
+    oskar_log_error(log, "oskar_fit_ellipse(): CBLAS required for "
+            "use of extended sources.");
     return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #endif
 
@@ -210,7 +209,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         dgetrf_(&m, &n, (double*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0)
         {
-            fprintf(stderr, "ERROR: dgetrf_() failed. info = %li.\n", info);
+            oskar_log_error(log, "dgetrf_() failed, info = %li.", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
 
@@ -222,7 +221,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
                 (double*)sumX.data, &ldb, &info);
         if (info != 0)
         {
-            fprintf(stderr, "ERROR: dgetrs_() failed. info = %li.\n", info);
+            oskar_log_error(log, "dgetrs_() failed, info = %li.", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
     }
@@ -231,7 +230,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
         sgetrf_(&m, &n, (float*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0)
         {
-            fprintf(stderr, "- ERROR: dgetrs_() failed. info = %li.\n", info);
+            oskar_log_error(log, "sgetrf_() failed, info = %li.", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
 
@@ -243,7 +242,7 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
                 (float*)sumX.data, &ldb, &info);
         if (info != 0)
         {
-            fprintf(stderr, "ERROR: dgetrs_() failed. info = %li.\n", info);
+            oskar_log_error(log, "sgetrs_() failed, info = %li.", info);
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
     }
@@ -299,8 +298,8 @@ int oskar_fit_ellipse(double* gauss_maj, double* gauss_min,
     test = a1 * c1;
     if (test <= 0.0 )
     {
-        fprintf(stderr, "ERROR: oskar_fit_ellipse(): "
-                "Solution of conic equation does not represent an ellipse.\n");
+        oskar_log_error(log, "oskar_fit_ellipse(): "
+                "Solution of conic equation does not represent an ellipse.");
         return OSKAR_ERR_ELLIPSE_FIT_FAILED;
     }
     else

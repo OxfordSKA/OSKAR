@@ -436,8 +436,8 @@ void Test_dierckx::test_surfit()
     err = oskar_spline_data_surfit_fortran(&spline_data_fortran, num_points_in,
             &x_in, &y_in, &z_in, &w, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    err = oskar_spline_data_surfit(&spline_data_c, num_points_in,
-            &x_in, &y_in, &z_in, &w, &settings);
+    err = oskar_spline_data_surfit(&spline_data_c, NULL, num_points_in,
+            &x_in, &y_in, &z_in, &w, &settings, "test");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Check results are consistent.

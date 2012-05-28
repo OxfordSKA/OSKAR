@@ -28,7 +28,6 @@
 
 #include "math/oskar_matrix_multiply.h"
 #include <stdlib.h>
-#include <stdio.h>
 
 #define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
 #define MIN( a, b ) ( ((a) < (b)) ? (a) : (b) )
@@ -59,8 +58,6 @@ int oskar_matrix_multiply(oskar_Mem* C,
         int transA, int transB, const oskar_Mem* A, const oskar_Mem* B)
 {
 #ifdef OSKAR_NO_CBLAS
-    fprintf(stderr, "= ERROR: oskar_matrix_multiply(): CBLAS currently "
-            "required for this function.\n");
     return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
 #else
     int M, N, K;

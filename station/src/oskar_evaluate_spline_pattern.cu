@@ -82,6 +82,7 @@ int oskar_evaluate_spline_pattern(oskar_Mem* pattern,
             pattern->num_elements < num_sources)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
+    /* FIXME !! This doesn't work for interferometer simulations, since the buffer is already in use for the source horizontal l,m,n values !! */
     /* Ensure enough memory in work buffer to evaluate theta and phi values. */
     if (work->real.num_elements - work->used_real < 2 * num_sources)
     {

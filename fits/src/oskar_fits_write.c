@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-int oskar_fits_write(const char* filename, int type, int naxis,
+int oskar_fits_write(oskar_Log* log, const char* filename, int type, int naxis,
         long* naxes, void* data, const char** ctype, const char** ctype_desc,
         const double* crval, const double* cdelt, const double* crpix,
         const double* crota)
@@ -72,24 +72,24 @@ int oskar_fits_write(const char* filename, int type, int naxis,
 
     /* Create a new empty output FITS file. */
     fits_create_file(&fptr, filename, &status);
-    oskar_fits_check_status(status, "Creating file");
+    oskar_fits_check_status(log, status, "Creating file");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Create the new image. */
     fits_create_img(fptr, imagetype, naxis, naxes, &status);
-    oskar_fits_check_status(status, "Creating image");
+    oskar_fits_check_status(log, status, "Creating image");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Write date stamp. */
     fits_write_date(fptr, &status);
-    oskar_fits_check_status(status, "Writing date");
+    oskar_fits_check_status(log, status, "Writing date");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Write telescope keyword. */
     strcpy(key, "TELESCOP");
     strcpy(value, "OSKAR-2 SIMULATOR");
     fits_write_key_str(fptr,  key, value, NULL, &status);
-    oskar_fits_check_status(status, "Writing key: TELESCOP");
+    oskar_fits_check_status(log, status, "Writing key: TELESCOP");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Axis description headers. */
@@ -102,7 +102,7 @@ int oskar_fits_write(const char* filename, int type, int naxis,
     /* Write a history line. */
     fits_write_history(fptr,
             "This file was created using the OSKAR-2 simulator.", &status);
-    oskar_fits_check_status(status, "Writing history");
+    oskar_fits_check_status(log, status, "Writing history");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Write image data. */
@@ -111,12 +111,12 @@ int oskar_fits_write(const char* filename, int type, int naxis,
         num_elements *= naxes[i];
     }
     fits_write_img(fptr, datatype, 1, num_elements, data, &status);
-    oskar_fits_check_status(status, "Writing image data");
+    oskar_fits_check_status(log, status, "Writing image data");
     if (status) return OSKAR_ERR_FITS_IO;
 
     /* Close the FITS file. */
     fits_close_file(fptr, &status);
-    oskar_fits_check_status(status, "Closing file");
+    oskar_fits_check_status(log, status, "Closing file");
     if (status) return OSKAR_ERR_FITS_IO;
 
     return OSKAR_SUCCESS;

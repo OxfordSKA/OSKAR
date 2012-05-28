@@ -60,7 +60,7 @@ void Test_fit_ellipse::test()
         ((double*)y.data)[5] =  0.7407;
         ((double*)y.data)[6] =  0.7282;
 
-        int err = oskar_fit_ellipse(&maj, &min, &pa, num_points, &x, &y);
+        int err = oskar_fit_ellipse(NULL, &maj, &min, &pa, num_points, &x, &y);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 
         printf("\n%f %f %f\n", maj*180.0/M_PI, min*180.0/M_PI, pa*180.0/M_PI);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_PRINT_H_
-#define OSKAR_SETTINGS_PRINT_H_
+#ifndef OSKAR_LOG_WARNING_H_
+#define OSKAR_LOG_WARNING_H_
 
 /**
- * @file oskar_settings_print.h
+ * @file oskar_log_warning.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_Settings.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,20 +42,21 @@ extern "C" {
 
 /**
  * @brief
- * Prints the contents of the settings object to standard output.
+ * Writes a warning message to a log.
  *
  * @details
- * This top-level function prints the contents of a populated settings
- * object to the standard output stream.
+ * This function writes a warning message to the log.
  *
- * @param[out] settings A pointer to a populated settings structure.
- * @param[in] filename  String containing the name of the settings file.
+ * @param[in,out] log    Pointer to a log structure.
+ * @param[in]     format Format string (for printf()).
+ *
+ * @return An error code.
  */
 OSKAR_EXPORT
-void oskar_settings_print(const oskar_Settings* settings, const char* filename);
+int oskar_log_warning(oskar_Log* log, const char* format, ...);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SETTINGS_PRINT_H_ */
+#endif /* OSKAR_LOG_WARNING_H_ */

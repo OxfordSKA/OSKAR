@@ -33,8 +33,6 @@
 #include "station/oskar_station_model_analyse.h"
 #include "utility/oskar_mem_different.h"
 #include "utility/oskar_mem_element_size.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <limits.h>
 
 #include <vector_types.h>
@@ -259,17 +257,6 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             }
         }
     }
-
-    /* Print summary data. */
-    printf("\n");
-    printf("= Telescope model\n");
-    printf("  - Num. stations          = %u\n", model->num_stations);
-    printf("  - Max station size       = %u\n", model->max_station_size);
-    printf("  - Identical stations     = %s\n",
-            model->identical_stations ? "true" : "false");
-    printf("  - Use common sky         = %s\n",
-            model->use_common_sky ? "true" : "false");
-    printf("\n");
 }
 
 #ifdef __cplusplus

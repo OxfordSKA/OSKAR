@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_exit.h"
-#include "utility/oskar_get_error_string.h"
-#include <stdlib.h>
-#include <stdio.h>
+#include "utility/oskar_Log.h"
+#include "utility/oskar_log_free.h"
+#include "utility/oskar_log_init.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void oskar_exit(int error)
+oskar_Log::oskar_Log()
 {
-    fprintf(stderr, ">>> Exiting with error (%d): %s\n", error,
-            oskar_get_error_string(error));
-    exit(error);
+    if (oskar_log_init(this))
+        throw "Error in oskar_log_init.";
 }
 
-#ifdef __cplusplus
+oskar_Log::~oskar_Log()
+{
+    if (oskar_log_free(this))
+        throw "Error in oskar_log_free.";
 }
-#endif

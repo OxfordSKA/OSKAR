@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EXIT_H_
-#define OSKAR_EXIT_H_
+#ifndef OSKAR_SYSTEM_CLOCK_STRING_H_
+#define OSKAR_SYSTEM_CLOCK_STRING_H_
+
+/**
+ * @file oskar_system_clock_string.h
+ */
 
 #include "oskar_global.h"
 
@@ -36,23 +40,19 @@ extern "C" {
 #endif
 
 /**
- * @brief
- * Exits application and displays an OSKAR error message.
+ * @brief Returns a string containing the system clock time.
  *
  * @details
- * Call this function to immediately exit an application if an error is
- * encountered. The error code and corresponding error message are displayed.
+ * This function returns a string containing the system date and time in
+ * the format "yyyy-mm-dd, hh:mm:ss (timezone)".
  *
- * This function should only ever be called from applications, and should never
- * be called from any functions in the main library.
- *
- * @param[in] error The error code.
+ * @param[in] utc    If set, return UTC time; else return local time.
  */
 OSKAR_EXPORT
-void oskar_exit(int error);
+const char* oskar_system_clock_string(int utc);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EXIT_H_ */
+#endif /* OSKAR_SYSTEM_CLOCK_STRING_H_ */
