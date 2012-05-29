@@ -38,25 +38,25 @@ int oskar_element_model_free(oskar_ElementModel* data)
 {
     int err;
 
-    err = oskar_mem_free(&data->filename_port1);
+    err = oskar_mem_free(&data->filename_x);
     if (err) return err;
-    err = oskar_mem_free(&data->filename_port2);
+    err = oskar_mem_free(&data->filename_y);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port1_phi_re);
+    err = oskar_spline_data_free(&data->phi_re_x);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port1_phi_im);
+    err = oskar_spline_data_free(&data->phi_im_x);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port1_theta_re);
+    err = oskar_spline_data_free(&data->theta_re_x);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port1_theta_im);
+    err = oskar_spline_data_free(&data->theta_im_x);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port2_phi_re);
+    err = oskar_spline_data_free(&data->phi_re_y);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port2_phi_im);
+    err = oskar_spline_data_free(&data->phi_im_y);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port2_theta_re);
+    err = oskar_spline_data_free(&data->theta_re_y);
     if (err) return err;
-    err = oskar_spline_data_free(&data->port2_theta_im);
+    err = oskar_spline_data_free(&data->theta_im_y);
     if (err) return err;
 
     return 0;

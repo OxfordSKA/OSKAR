@@ -52,16 +52,21 @@ public:
     void stop();
 
 signals:
+    void aborted();
+    void completed();
+    void crashed();
+    void failed();
     void outputData(QString output);
 
 protected:
     void run();
 
 private:
+    void executeProcess();
     void run(int depth, QStringList outputFiles);
 
 private:
-    bool stopping_;
+    bool abort_;
     QMutex mutex_;
     oskar_SettingsModel* model_;
     QString binaryName_;

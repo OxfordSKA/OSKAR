@@ -35,7 +35,8 @@
 oskar_RunThread::oskar_RunThread(oskar_SettingsModel* model, QObject* parent)
 : QThread(parent)
 {
-    stopping_ = false;
+    qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
+    abort_ = false;
     process_ = NULL;
     model_ = model;
 }
@@ -45,6 +46,7 @@ oskar_RunThread::oskar_RunThread(oskar_SettingsModel* model, QObject* parent)
 void oskar_RunThread::start(QString binary_name, QString settings_file,
         QStringList outputs)
 {
+    abort_ = false;
     binaryName_ = binary_name;
     settingsFile_ = settings_file;
     outputFiles_ = outputs;
@@ -54,7 +56,7 @@ void oskar_RunThread::start(QString binary_name, QString settings_file,
 void oskar_RunThread::stop()
 {
     mutex_.lock();
-    stopping_ = true;
+    abort_ = true;
     if (process_)
         process_->kill();
     mutex_.unlock();
@@ -66,9 +68,52 @@ void oskar_RunThread::run()
 {
     // Run recursively.
     run(0, outputFiles_);
+    if (!abort_)
+        emit completed();
 }
 
 // Private methods.
+
+void oskar_RunThread::executeProcess()
+{
+    // Set up and start the process.
+    mutex_.lock();
+    process_ = new QProcess;
+    process_->setProcessChannelMode(QProcess::MergedChannels);
+    process_->start(binaryName_, QStringList() << settingsFile_);
+    process_->waitForStarted();
+    mutex_.unlock();
+
+    // Monitor the process while it is running.
+    while (process_->state() == QProcess::Running)
+    {
+        process_->waitForReadyRead(500);
+        QString output = process_->readAll();
+        if (!output.isEmpty())
+            emit outputData(output);
+    }
+
+    // Check status of the process.
+    mutex_.lock();
+    if (abort_)
+    {
+        // User aborted the run.
+        emit aborted();
+    }
+    else if (process_->exitStatus() == QProcess::CrashExit)
+    {
+        abort_ = true;
+        emit crashed();
+    }
+    else if (process_->exitCode() != 0)
+    {
+        abort_ = true;
+        emit failed();
+    }
+    delete process_;
+    process_ = NULL;
+    mutex_.unlock();
+}
 
 void oskar_RunThread::run(int depth, QStringList outputFiles)
 {
@@ -77,23 +122,7 @@ void oskar_RunThread::run(int depth, QStringList outputFiles)
             oskar_SettingsModel::IterationKeysRole).toStringList();
     if (iterationKeys.size() == 0)
     {
-        mutex_.lock();
-        process_ = new QProcess;
-        process_->setProcessChannelMode(QProcess::MergedChannels);
-        process_->start(binaryName_, QStringList() << settingsFile_);
-        process_->waitForStarted();
-        mutex_.unlock();
-        while (process_->state() == QProcess::Running)
-        {
-            process_->waitForReadyRead(500);
-            QString output = process_->readAll();
-            if (!output.isEmpty())
-                emit outputData(output);
-        }
-        mutex_.lock();
-        delete process_;
-        process_ = NULL;
-        mutex_.unlock();
+        executeProcess();
     }
     else
     {
@@ -138,36 +167,20 @@ void oskar_RunThread::run(int depth, QStringList outputFiles)
             }
 
             // Check if thread should stop.
-            bool stopping;
+            bool abort;
             mutex_.lock();
-            stopping = stopping_;
+            abort = abort_;
             mutex_.unlock();
 
             // Check if recursion depth has been reached.
-            if (depth < iterationKeys.size() - 1 && !stopping)
+            if (depth < iterationKeys.size() - 1 && !abort)
             {
                 // If not, then call this function again.
                 run(depth + 1, outputFiles);
             }
-            else if (!stopping)
+            else if (!abort)
             {
-                mutex_.lock();
-                process_ = new QProcess;
-                process_->setProcessChannelMode(QProcess::MergedChannels);
-                process_->start(binaryName_, QStringList() << settingsFile_);
-                process_->waitForStarted();
-                mutex_.unlock();
-                while (process_->state() == QProcess::Running)
-                {
-                    process_->waitForReadyRead(500);
-                    QString output = process_->readAll();
-                    if (!output.isEmpty())
-                        emit outputData(output);
-                }
-                mutex_.lock();
-                delete process_;
-                process_ = NULL;
-                mutex_.unlock();
+                executeProcess();
             }
 
             // Restore the list of output file names.

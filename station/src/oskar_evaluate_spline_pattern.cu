@@ -123,28 +123,28 @@ int oskar_evaluate_spline_pattern(oskar_Mem* pattern,
     }
 
     /* Evaluate the patterns. */
-    error = oskar_spline_data_evaluate(pattern, 0, 8, &element->port1_theta_re,
+    error = oskar_spline_data_evaluate(pattern, 0, 8, &element->theta_re_x,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 1, 8, &element->port1_theta_im,
+    error = oskar_spline_data_evaluate(pattern, 1, 8, &element->theta_im_x,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 2, 8, &element->port1_phi_re,
+    error = oskar_spline_data_evaluate(pattern, 2, 8, &element->phi_re_x,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 3, 8, &element->port1_phi_im,
+    error = oskar_spline_data_evaluate(pattern, 3, 8, &element->phi_im_x,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 4, 8, &element->port2_theta_re,
+    error = oskar_spline_data_evaluate(pattern, 4, 8, &element->theta_re_y,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 5, 8, &element->port2_theta_im,
+    error = oskar_spline_data_evaluate(pattern, 5, 8, &element->theta_im_y,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 6, 8, &element->port2_phi_re,
+    error = oskar_spline_data_evaluate(pattern, 6, 8, &element->phi_re_y,
             &theta, &phi);
     if (error) return error;
-    error = oskar_spline_data_evaluate(pattern, 7, 8, &element->port2_phi_im,
+    error = oskar_spline_data_evaluate(pattern, 7, 8, &element->phi_im_y,
             &theta, &phi);
     if (error) return error;
 

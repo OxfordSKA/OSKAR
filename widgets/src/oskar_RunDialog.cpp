@@ -29,14 +29,17 @@
 #include "oskar_global.h"
 #include "widgets/oskar_RunDialog.h"
 #include "widgets/oskar_RunThread.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <QtCore/QProcess>
 #include <QtCore/QSettings>
 #include <QtGui/QApplication>
 #include <QtGui/QCheckBox>
+#include <QtGui/QCloseEvent>
 #include <QtGui/QDialogButtonBox>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QLabel>
+#include <QtGui/QMessageBox>
 #include <QtGui/QPushButton>
 #include <QtGui/QScrollBar>
 #include <QtGui/QTextEdit>
@@ -45,17 +48,20 @@
 oskar_RunDialog::oskar_RunDialog(oskar_SettingsModel* model, QWidget *parent)
 : QDialog(parent)
 {
-    aborted_ = false;
+    finished_ = false;
 
     // Set up the thread.
     thread_ = new oskar_RunThread(model, this);
+    connect(thread_, SIGNAL(aborted()), this, SLOT(runAborted()));
+    connect(thread_, SIGNAL(completed()), this, SLOT(runCompleted()));
+    connect(thread_, SIGNAL(crashed()), this, SLOT(runCrashed()));
+    connect(thread_, SIGNAL(failed()), this, SLOT(runFailed()));
     connect(thread_, SIGNAL(finished()), this, SLOT(runFinished()));
     connect(thread_, SIGNAL(outputData(QString)),
             this, SLOT(appendOutput(QString)));
 
     // Set up the GUI.
     setWindowTitle("OSKAR Run Progress");
-    setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     setWindowModality(Qt::ApplicationModal);
     QVBoxLayout* vLayoutMain = new QVBoxLayout(this);
     QSettings settings;
@@ -74,7 +80,7 @@ oskar_RunDialog::oskar_RunDialog(oskar_SettingsModel* model, QWidget *parent)
 
     // Create check box.
     autoClose_ = new QCheckBox(this);
-    autoClose_->setText("Automatically close when run is over.");
+    autoClose_->setText("Automatically close when run completes successfully.");
     autoClose_->setChecked(settings.value("run_dialog/close_when_finished",
             false).toBool());
 
@@ -123,6 +129,18 @@ void oskar_RunDialog::start(const QString& binary_name,
     thread_->start(binary_name, settings_file, outputs);
 }
 
+// Protected methods.
+
+void oskar_RunDialog::closeEvent(QCloseEvent* event)
+{
+    if (finished_)
+        event->accept();
+    else
+        event->ignore();
+}
+
+// Private slots.
+
 void oskar_RunDialog::appendOutput(QString output)
 {
     if (output.size() > 0)
@@ -147,7 +165,6 @@ void oskar_RunDialog::buttonClicked(QAbstractButton* button)
     if (button == cancelButton_)
     {
         // Stop the running thread (kills the process).
-        aborted_ = true;
         thread_->stop();
         thread_->wait();
     }
@@ -158,15 +175,52 @@ void oskar_RunDialog::buttonClicked(QAbstractButton* button)
     }
 }
 
+void oskar_RunDialog::runAborted()
+{
+    labelText_->setText("Run aborted.");
+}
+
+void oskar_RunDialog::runCompleted()
+{
+    labelText_->setText("Run completed.");
+}
+
+void oskar_RunDialog::runCrashed()
+{
+    failed_ = true;
+    labelText_->setText("Run crashed.");
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(QString("OSKAR (%1)").arg(OSKAR_VERSION_STR));
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setText("Oops! Sorry, OSKAR seems to have crashed.");
+    msgBox.setInformativeText("Please report this problem by sending an email "
+            "to the oskar@oerc.ox.ac.uk support address, and provide details "
+            "of your version of OSKAR, your hardware configuration, your run "
+            "log, and what you were trying to do at the time.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+}
+
+void oskar_RunDialog::runFailed()
+{
+    failed_ = true;
+    labelText_->setText("Run failed.");
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(QString("OSKAR (%1)").arg(OSKAR_VERSION_STR));
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setText("Run failed: please see output log for details.");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
+}
+
 void oskar_RunDialog::runFinished()
 {
-    // Set the text label and button status.
-    if (aborted_)
-        labelText_->setText("Run cancelled.");
-    else
-        labelText_->setText("Run finished.");
+    finished_ = true;
+
+    // Set the button status.
     cancelButton_->setEnabled(false);
     closeButton_->setEnabled(true);
-    if (autoClose_->isChecked())
+    closeButton_->setFocus();
+    if (autoClose_->isChecked() && !failed_)
         accept();
 }

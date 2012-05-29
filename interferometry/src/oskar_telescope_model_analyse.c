@@ -109,8 +109,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
         element_model0 = model->station[0].element_pattern;
         if (element_model0)
         {
-            filename_port1_0 = &element_model0->filename_port1;
-            filename_port2_0 = &element_model0->filename_port2;
+            filename_port1_0 = &element_model0->filename_x;
+            filename_port2_0 = &element_model0->filename_y;
         }
 
         for (i = 1; i < num_stations; ++i)
@@ -146,8 +146,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             element_model = model->station[i].element_pattern;
             if (element_model)
             {
-                filename_port1 = &element_model->filename_port1;
-                filename_port2 = &element_model->filename_port2;
+                filename_port1 = &element_model->filename_x;
+                filename_port2 = &element_model->filename_y;
             }
 
             /* Check if the meta-data are different. */

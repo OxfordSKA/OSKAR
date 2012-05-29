@@ -37,8 +37,9 @@
 #include <QtGui/QDialog>
 
 class QAbstractButton;
-class QDialogButtonBox;
 class QCheckBox;
+class QCloseEvent;
+class QDialogButtonBox;
 class QLabel;
 class QTextEdit;
 class oskar_SettingsModel;
@@ -55,16 +56,24 @@ public:
     void start(const QString& binary_name,
             const QString& settings_file, QStringList outputs);
 
+protected:
+    void closeEvent(QCloseEvent*);
+
 private slots:
     void appendOutput(QString output);
-    void runFinished();
     void buttonClicked(QAbstractButton* button);
+    void runAborted();
+    void runCompleted();
+    void runCrashed();
+    void runFailed();
+    void runFinished();
 
 private:
     void run(int depth, QStringList outputFiles);
 
 private:
-    bool aborted_;
+    bool failed_;
+    bool finished_;
     QCheckBox* autoClose_;
     QTextEdit* display_;
     QLabel* labelText_;

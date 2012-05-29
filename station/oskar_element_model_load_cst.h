@@ -71,7 +71,7 @@ extern "C" {
  * @param[out] data     Pointer to element model data structure to fill.
  * @param[in,out] log   Pointer to log structure to use.
  * @param[in]  filename Data file name.
- * @param[in]  port     Port 1 or 2 (port number to load).
+ * @param[in]  port     Port number to load: 1 for X dipole, 2 for Y dipole.
  * @param[in]  settings Pointer to settings structure used for surface fitting.
  */
 OSKAR_EXPORT

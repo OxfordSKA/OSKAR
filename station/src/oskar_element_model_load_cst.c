@@ -85,17 +85,17 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
     /* Get pointers to the surfaces to fill. */
     if (port == 1)
     {
-        data_phi_re = &data->port1_phi_re;
-        data_phi_im = &data->port1_phi_im;
-        data_theta_re = &data->port1_theta_re;
-        data_theta_im = &data->port1_theta_im;
+        data_phi_re = &data->phi_re_x;
+        data_phi_im = &data->phi_im_x;
+        data_theta_re = &data->theta_re_x;
+        data_theta_im = &data->theta_im_x;
     }
     else if (port == 2)
     {
-        data_phi_re = &data->port2_phi_re;
-        data_phi_im = &data->port2_phi_im;
-        data_theta_re = &data->port2_theta_re;
-        data_theta_im = &data->port2_theta_im;
+        data_phi_re = &data->phi_re_y;
+        data_phi_im = &data->phi_im_y;
+        data_theta_re = &data->theta_re_y;
+        data_theta_im = &data->theta_im_y;
     }
 
     /* Get pointers to the surface fit settings. */
@@ -483,19 +483,19 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
     /* Store the filename. */
     if (port == 1)
     {
-        err = oskar_mem_init(&data->filename_port1, OSKAR_CHAR,
+        err = oskar_mem_init(&data->filename_x, OSKAR_CHAR,
                 OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
         if (err) return err;
-        err = oskar_mem_append_raw(&data->filename_port1, filename,
+        err = oskar_mem_append_raw(&data->filename_x, filename,
                 OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
         if (err) return err;
     }
     else if (port == 2)
     {
-        err = oskar_mem_init(&data->filename_port2, OSKAR_CHAR,
+        err = oskar_mem_init(&data->filename_y, OSKAR_CHAR,
                 OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
         if (err) return err;
-        err = oskar_mem_append_raw(&data->filename_port2, filename,
+        err = oskar_mem_append_raw(&data->filename_y, filename,
                 OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
         if (err) return err;
     }
