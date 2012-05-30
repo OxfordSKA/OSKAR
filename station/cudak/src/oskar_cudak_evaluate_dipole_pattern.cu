@@ -27,8 +27,54 @@
  */
 
 #include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
-#include "station/cudak/oskar_cudaf_hor_lmn_to_az_el.h"
 #include <math.h>
+
+#if 0
+// Single precision.
+__global__
+void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
+        const float* theta, const float* phi, const float orientation_x,
+        const float orientation_y, const int taper_func, float4c* pattern)
+{
+    // Source index being processed by the thread.
+    const int s = blockIdx.x * blockDim.x + threadIdx.x;
+    if (s >= num_sources) return;
+
+    // Get source direction cosines.
+    const float ln = cosf(theta[s]); // Component along z-axis.
+
+    // Get sine and cosine of angle phi.
+    float sin_phi, cos_phi;
+    sincosf(phi[s], &sin_phi, &cos_phi);
+
+    // Evaluate unit vectors e_theta and e_phi at source position.
+    // cos_theta = ln
+    const float e_theta_x = ln * cos_phi; // Component of e_theta in x.
+    const float e_theta_y = ln * sin_phi; // Component of e_theta in y.
+    // e_phi_x = -sin_phi;
+    // e_phi_y = cos_phi;
+
+    // Dot products:
+    // g_theta_a = a_x * e_theta_x + a_y * e_theta_y;
+    // g_phi_a   = a_x * e_phi_x   + a_y * e_phi_y;
+    // g_theta_b = b_x * e_theta_x + b_y * e_theta_y;
+    // g_phi_b   = b_x * e_phi_x   + b_y * e_phi_y;
+    const float g_theta_a = sin_orientation_x * e_theta_x
+            + cos_orientation_x * e_theta_y;
+    const float g_phi_a   = sin_orientation_x * -sin_phi
+            + cos_orientation_x * cos_phi;
+    const float g_theta_b = sin_orientation_y * e_theta_x
+            + cos_orientation_y * e_theta_y;
+    const float g_phi_b   = sin_orientation_y * -sin_phi
+            + cos_orientation_y * cos_phi;
+
+    // Store components.
+    pattern[s].a.x += g_theta_a;
+    pattern[s].b.x += g_phi_a;
+    pattern[s].c.x += g_theta_b;
+    pattern[s].d.x += g_phi_b;
+}
+#endif
 
 // Single precision.
 __global__
