@@ -444,8 +444,8 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     k = group + "/normalise_beam";
     registerSetting(k, "Normalise array beam", oskar_SettingsItem::BOOL, false, false);
     setTooltip(k, "If true, the station beam will be normalised by dividing \n"
-            "by the square of the number of antennas in the station to give \n"
-            "a nominal peak value of 1.0; if false, then no normalisation is \n"
+            "by the number of antennas in the station to give a nominal \n"
+            "peak value of 1.0; if false, then no normalisation is \n"
             "performed.");
 
     group = "telescope/station/element";
@@ -526,12 +526,12 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "pattern data for phi < 0 and phi > 360 degrees. Use carefully \n"
             "to minimise discontinuity at phi = 0.");
     k = group + "/weight_boundaries";
-    registerSetting(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, false, 20.0);
+    registerSetting(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, false, 2.0);
     setTooltip(k, "The weight given to numerical element pattern data at \n"
             "phi = 0 and phi = 360 degrees, relative to 1.0. Use \n"
             "carefully to minimise discontinuity at phi = 0.");
     k = group + "/weight_overlap";
-    registerSetting(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, false, 4.0);
+    registerSetting(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, false, 1.0);
     setTooltip(k, "The weight given to numerical element pattern data at \n"
             "phi < 0 and phi > 360 degrees, relative to 1.0. Use \n"
             "carefully to minimise discontinuity at phi = 0.");
@@ -546,32 +546,25 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "factor is selected to give the requested average fractional \n"
             "error. If false, the supplied smoothness factor is used instead.");
     k = group + "/average_fractional_error";
-    registerSetting(k, "Average fractional error", oskar_SettingsItem::DOUBLE, false, 0.02);
+    registerSetting(k, "Average fractional error", oskar_SettingsItem::DOUBLE, false, 0.002);
     setTooltip(k, "The target average fractional error between the fitted \n"
             "surface and the numerical element pattern input data. \n"
             "Choose this value carefully. A value that is too small may \n"
             "introduce fitting artefacts, or may cause the fitting procedure \n"
             "to fail. A value that is too large will cause detail to be lost \n"
-            "in the fitted surface. Values around 0.02 seem to produce \n"
-            "sensible results most of the time, but smaller values \n"
-            "(e.g. 0.005) may be possible if the surface is simple.");
+            "in the fitted surface.");
     k = group + "/average_fractional_error_factor_increase";
     registerSetting(k, "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, false, 1.5);
     setTooltip(k, "If the fitting procedure fails, this value gives the \n"
             "factor by which to increase the allowed average fractional \n"
             "error between the fitted surface and the numerical element \n"
             "pattern input data, before trying again. Must be > 1.0.");
-    k = group + "/smoothness_factor_reduction";
-    registerSetting(k, "Smoothness reduction factor", oskar_SettingsItem::DOUBLE, false, 0.9);
-    setTooltip(k, "If searching for a smoothness factor, this is the factor \n"
-            "by which to reduce it until the average fractional error is \n"
-            "reached. Must be < 1.0.");
     k = group + "/eps_float";
-    registerSetting(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, false, 4e-4);
+    registerSetting(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, false, 1e-4);
     setTooltip(k, "The value of epsilon used for fitting in single precision. \n"
             "Suggested value approx. 1e-04.");
     k = group + "/eps_double";
-    registerSetting(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, false, 2e-8);
+    registerSetting(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, false, 1e-8);
     setTooltip(k, "The value of epsilon used for fitting in double precision. \n"
             "Suggested value approx. 1e-08.");
     k = group + "/smoothness_factor_override";
@@ -580,16 +573,12 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "numerical element pattern data, if not searching for a \n"
             "best fit. Use only if you really know what you're doing!");
 
-    // TODO Add parameters for all eight surfaces!
-
     k = "telescope/output_config_directory";
     registerSetting(k, "Output telescope directory", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path used to save the final telescope model directory, \n"
             "excluding any element pattern data (useful for debugging). \n"
             "Leave blank if not required.");
 }
-
-
 
 
 void oskar_SettingsModelApps::init_settings_interferometer()

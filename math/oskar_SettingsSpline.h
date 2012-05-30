@@ -44,7 +44,6 @@ struct oskar_SettingsSpline
     double eps_double; /**< Epsilon for double precision fit. */
     double smoothness_factor_override; /**< Value to use for smoothness factor, if not searching. */
     int search_for_best_fit; /**< If true, then search for best fit using average fractional error. */
-    double smoothness_factor_reduction; /**< Factor to reduce smoothness factor by when searching. */
     double average_fractional_error; /**< Target average fractional error. */
     double average_fractional_error_factor_increase; /**< In case of fitting failure, factor by which to increase allowed average fractional error. */
 };
