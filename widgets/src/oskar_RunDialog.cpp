@@ -73,14 +73,21 @@ oskar_RunDialog::oskar_RunDialog(oskar_SettingsModel* model, QWidget *parent)
     // Create terminal output display.
     display_ = new QTextEdit(this);
     display_->setReadOnly(true);
-    QFont terminalFont("Dejavu Sans Mono");
+    QFont terminalFont;
+#ifdef Q_OS_WIN32
+    terminalFont.setFamily("Lucida Console");
+#else
+    terminalFont.setFamily("DejaVu Sans Mono");
+#endif
+    terminalFont.setPointSize(10);
     terminalFont.setStyleHint(QFont::TypeWriter);
     display_->setFont(terminalFont);
     display_->setMinimumSize(600, 300);
 
     // Create check box.
     autoClose_ = new QCheckBox(this);
-    autoClose_->setText("Automatically close when run completes successfully.");
+    autoClose_->setText("Automatically close when the run has completed "
+            "successfully.");
     autoClose_->setChecked(settings.value("run_dialog/close_when_finished",
             false).toBool());
 

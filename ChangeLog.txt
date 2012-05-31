@@ -1,3 +1,12 @@
+2012-mm-dd  (Next release)
+
+    * Embedded simulation log in output files.
+
+    * Added run progress dialog to show log in GUI, from which simulations can
+      be cancelled.
+
+    * Improved spline fitting procedure and updated default fitting parameters.
+
 2012-05-15  OSKAR 2.0.1-beta
 
     * Fixed polarisation simulation by changing element order of R and G Jones

@@ -27,6 +27,7 @@
  */
 
 #include "station/oskar_element_model_evaluate.h"
+#include "station/oskar_evaluate_spline_pattern.h"
 
 #define PIf 3.14159265358979323846f
 #define PI  3.14159265358979323846
@@ -34,7 +35,7 @@
 __global__
 void oskar_cudak_hor_lmn_to_modified_theta_phi_f(const int num,
         const float* l, const float* m, const float* n,
-        const float orientation, float* theta, float* phi)
+        const float delta_phi, float* theta, float* phi)
 {
     // Get the position ID that this thread is working on.
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
@@ -46,11 +47,35 @@ void oskar_cudak_hor_lmn_to_modified_theta_phi_f(const int num,
     float z = n[i];
 
     // Cartesian to spherical (with orientation offset).
-    float p = atan2f(y, x) - orientation;
+    float p = atan2f(y, x) + delta_phi;
     p = fmodf(p, 2.0f * PIf);
-    if (p < 0) p += 2.0f * PIf; // Phi in range 0 to 2 pi.
+    if (p < 0) p += 2.0f * PIf; // Get phi in range 0 to 2 pi.
     x = sqrtf(x*x + y*y);
     y = atan2f(x, z); // Theta.
+    phi[i] = p;
+    theta[i] = y;
+}
+
+__global__
+void oskar_cudak_hor_lmn_to_modified_theta_phi_d(const int num,
+        const double* l, const double* m, const double* n,
+        const double delta_phi, double* theta, double* phi)
+{
+    // Get the position ID that this thread is working on.
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= num) return;
+
+    // Get the data.
+    double x = l[i];
+    double y = m[i];
+    double z = n[i];
+
+    // Cartesian to spherical (with orientation offset).
+    double p = atan2(y, x) + delta_phi;
+    p = fmod(p, 2.0 * PI);
+    if (p < 0) p += 2.0 * PI; // Get phi in range 0 to 2 pi.
+    x = sqrt(x*x + y*y);
+    y = atan2(x, z); // Theta.
     phi[i] = p;
     theta[i] = y;
 }
@@ -59,12 +84,56 @@ void oskar_cudak_hor_lmn_to_modified_theta_phi_f(const int num,
 extern "C" {
 #endif
 
+int oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
+        double delta_phi, const oskar_Mem* l, const oskar_Mem* m,
+        const oskar_Mem* n)
+{
+    int error, num_sources, num_blocks, num_threads, type;
+
+    /* Sanity check on inputs. */
+    if (!theta || !phi || !l || !m || !n)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (port != 1 && port != 2)
+        return OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Get data type and number of sources. */
+    type = l->type;
+    num_sources = l->num_elements;
+
+    if (type == OSKAR_SINGLE)
+    {
+        num_threads = 256;
+        num_blocks = (num_sources + num_threads - 1) / num_threads;
+        oskar_cudak_hor_lmn_to_modified_theta_phi_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
+                ((const float*)l->data), ((const float*)m->data),
+                ((const float*)n->data), (float)delta_phi,
+                ((float*)theta->data), ((float*)phi->data));
+    }
+    else if (type == OSKAR_DOUBLE)
+    {
+        num_threads = 256;
+        num_blocks = (num_sources + num_threads - 1) / num_threads;
+        oskar_cudak_hor_lmn_to_modified_theta_phi_d
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
+                ((const double*)l->data), ((const double*)m->data),
+                ((const double*)n->data), delta_phi,
+                ((double*)theta->data), ((double*)phi->data));
+    }
+    else
+        return OSKAR_ERR_BAD_DATA_TYPE;
+
+    cudaDeviceSynchronize();
+    error = (int) cudaPeekAtLastError();
+    return error;
+}
+
 int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
         double orientation_x, double orientation_y, const oskar_Mem* l,
         const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* theta,
         oskar_Mem* phi)
 {
-    int error, double_precision, num_sources, num_blocks, num_threads;
+    int error, num_blocks, num_threads;
 
     /* Check that the output array is complex. */
     if (!oskar_mem_is_complex(G->type))
@@ -77,61 +146,74 @@ int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
             G->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    /* Check whether single or double precision. */
-    double_precision = oskar_mem_is_double(G->type);
-
-    /* Get number of sources. */
-    num_sources = l->num_elements;
+    /* Convert dipole axis orientations to delta values in phi. */
+    orientation_x -= 0.5 * PI;
 
     /* Evaluate polarised response if output array is matrix type. */
     if (oskar_mem_is_matrix(G->type) && model->polarised)
     {
-        if (double_precision)
-        {
+        /* Compute modified theta and phi coordinates for dipole X. */
+        error = oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                orientation_x, l, m, n);
+        if (error) return error;
 
+        /* Check if spline data present for dipole X. */
+        if (model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
+                model->phi_re_x.coeff.data && model->phi_im_x.coeff.data)
+        {
+            /* Evaluate spline pattern for dipole X. */
+            error = oskar_spline_data_evaluate(G, 0, 8, &model->theta_re_x,
+                    theta, phi);
+            if (error) return error;
+            error = oskar_spline_data_evaluate(G, 1, 8, &model->theta_im_x,
+                    theta, phi);
+            if (error) return error;
+            error = oskar_spline_data_evaluate(G, 2, 8, &model->phi_re_x,
+                    theta, phi);
+            if (error) return error;
+            error = oskar_spline_data_evaluate(G, 3, 8, &model->phi_im_x,
+                    theta, phi);
+            if (error) return error;
         }
         else
         {
-            /* Compute modified theta and phi coordinates for dipole X.
-             * Modify true values using orientation parameter. */
-            num_threads = 256;
-            num_blocks = (num_sources + num_threads - 1) / num_threads;
-            oskar_cudak_hor_lmn_to_modified_theta_phi_f
-            OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
-                    ((const float*)l->data), ((const float*)m->data),
-                    ((const float*)n->data), 0.5 * PIf - orientation_x,
-                    ((float*)theta->data), ((float*)phi->data));
+            /* Evaluate tapered dipole pattern for dipole X. */
+        }
 
-            /* Check if spline data present for dipole X. */
-            if (model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
-                    model->phi_re_x.coeff.data && model->phi_im_x.coeff.data)
-            {
-                /* Evaluate spline pattern for dipole X. */
-            }
-            else
-            {
-                /* Evaluate tapered dipole pattern for dipole X. */
-            }
+        /* Compute modified theta and phi coordinates for dipole Y. */
+        error = oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                orientation_y, l, m, n);
+        if (error) return error;
 
-            /* Compute modified theta and phi coordinates for dipole Y.
-             * Modify true values using orientation parameter. */
-
-            /* Check if spline data present for dipole Y. */
-            if (model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
-                    model->phi_re_y.coeff.data && model->phi_im_y.coeff.data)
-            {
-                /* Evaluate spline pattern for dipole Y. */
-            }
-            else
-            {
-                /* Evaluate tapered dipole pattern for dipole Y. */
-            }
+        /* Check if spline data present for dipole Y. */
+        if (model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
+                model->phi_re_y.coeff.data && model->phi_im_y.coeff.data)
+        {
+            /* Evaluate spline pattern for dipole Y. */
+            error = oskar_spline_data_evaluate(G, 4, 8, &model->theta_re_y,
+                    theta, phi);
+            if (error) return error;
+            error = oskar_spline_data_evaluate(G, 5, 8, &model->theta_im_y,
+                    theta, phi);
+            if (error) return error;
+            error = oskar_spline_data_evaluate(G, 6, 8, &model->phi_re_y,
+                    theta, phi);
+            if (error) return error;
+            error = oskar_spline_data_evaluate(G, 7, 8, &model->phi_im_y,
+                    theta, phi);
+            if (error) return error;
+        }
+        else
+        {
+            /* Evaluate tapered dipole pattern for dipole Y. */
         }
     }
 
     /* Evaluate scalar response if output array is scalar type. */
     else if (oskar_mem_is_scalar(G->type) && !model->polarised)
     {
+        /* Not yet implemented. */
+        return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
     else
         return OSKAR_ERR_BAD_DATA_TYPE;
