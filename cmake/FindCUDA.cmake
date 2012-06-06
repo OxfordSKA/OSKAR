@@ -579,7 +579,11 @@ macro(FIND_LIBRARY_LOCAL_FIRST _var _names _doc)
     NO_DEFAULT_PATH
     )
   # Search default search paths, after we search our own set of paths.
-  find_library(${_var} NAMES ${_names} PATH_SUFFIXES "nvidia-current" DOC ${_doc})
+  find_library(${_var} NAMES ${_names}
+    PATH_SUFFIXES
+    nvidia-current
+    nvidia-current-updates
+    DOC ${_doc})
 endmacro()
 
 # CUDA_LIBRARIES
