@@ -577,6 +577,11 @@ void oskar_SettingsModel::setDisabled(const QString& key, bool value)
     setData(idx, value, oskar_SettingsModel::EnabledRole);
 }
 
+bool oskar_SettingsModel::isModified() const
+{
+    return numModified(QModelIndex()) > 0;
+}
+
 
 // Private methods.
 
@@ -645,11 +650,34 @@ void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
         {
             const oskar_SettingsItem* item = getItem(idx);
             if (!item->value().isNull())
+            {
                 settings_->setValue(item->key(), item->value());
+            }
             saveFromParentIndex(idx);
         }
     }
 }
+
+int oskar_SettingsModel::numModified(const QModelIndex& parent) const
+{
+    int num_modified = 0;
+    int rows = rowCount(parent);
+    for (int i = 0; i < rows; ++i)
+    {
+        QModelIndex idx = index(i, 0, parent);
+        if (idx.isValid())
+        {
+            const oskar_SettingsItem* item = getItem(idx);
+            if (!item->value().isNull())
+            {
+                ++num_modified;
+            }
+            num_modified += numModified(idx);
+        }
+    }
+    return num_modified;
+}
+
 
 oskar_SettingsModelFilter::oskar_SettingsModelFilter(QObject* parent)
 : QSortFilterProxyModel(parent),
@@ -666,6 +694,7 @@ bool oskar_SettingsModelFilter::hideIfUnset() const
 {
     return hideIfUnset_;
 }
+
 
 // Public slots.
 

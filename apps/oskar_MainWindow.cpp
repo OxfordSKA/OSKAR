@@ -49,6 +49,7 @@
 #include <QtCore/QModelIndex>
 #include <QtCore/QTimer>
 #include <QtCore/QProcess>
+#include <QtGui/QCloseEvent>
 
 oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 : QMainWindow(parent)
@@ -180,9 +181,9 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QTimer::singleShot(0, view_, SLOT(restorePosition()));
 }
 
-void oskar_MainWindow::openSettings(QString filename, bool check)
+void oskar_MainWindow::openSettings(QString filename)
 {
-    if (settingsFile_.isEmpty() && check)
+    if (settingsFile_.isEmpty() && model_->isModified())
     {
         int ret = QMessageBox::warning(this, "OSKAR",
                 "Opening a new file will discard any current unsaved modifications.\n"
@@ -259,7 +260,28 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
     settings.setValue("binaries/interferometer", binary_interferometer_);
     settings.setValue("binaries/beam_pattern", binary_beam_pattern_);
     settings.setValue("binaries/imager", binary_imager_);
-    QMainWindow::closeEvent(event);
+    //QMainWindow::closeEvent(event);
+
+    if (settingsFile_.isEmpty() && model_->isModified())
+    {
+        int ret = QMessageBox::warning(this, "OSKAR",
+                "Exiting OSKAR will discard any unsaved modifications.\n"
+                "Do you want to proceed?",
+                QMessageBox::Ok | QMessageBox::Cancel | QMessageBox::Save, QMessageBox::Ok);
+        if (ret == QMessageBox::Ok)
+        {
+            event->accept();
+        }
+        else if (ret == QMessageBox::Save)
+        {
+            saveSettingsAs();
+            closeEvent(event);
+        }
+        else
+        {
+            event->ignore();
+        }
+    }
 }
 
 // =========================================================  Private slots.
@@ -326,7 +348,7 @@ void oskar_MainWindow::openRecentFile()
         if (QFile::exists(filename))
         {
             // If the file exists, then open it.
-            openSettings(filename, true);
+            openSettings(filename);
         }
         else
         {

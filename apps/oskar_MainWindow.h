@@ -52,7 +52,7 @@ protected:
     void closeEvent(QCloseEvent* event);
 
 public slots:
-    void openSettings(QString filename = QString(), bool check = true);
+    void openSettings(QString filename = QString());
     void saveSettingsAs(QString filename = QString());
 
 private slots:
@@ -95,6 +95,8 @@ private:
     QString binary_interferometer_;
     QString binary_beam_pattern_;
     QString binary_imager_;
+
+    bool isModified_;
 };
 
 #endif // OSKAR_MAIN_WINDOW_H_
