@@ -82,10 +82,11 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     oskar_log_settings_beam_pattern(log, &settings);
 
     // Check that a data file has been specified.
-    if (!settings.beam_pattern.oskar_image_filename &&
-            !settings.beam_pattern.fits_image_filename)
+    if (!(settings.beam_pattern.oskar_image_filename ||
+            settings.beam_pattern.fits_image_filename ||
+            settings.beam_pattern.oskar_voltage_pattern_binary))
     {
-        oskar_log_error(log, "No image file specified.");
+        oskar_log_error(log, "No output file(s) specified.");
         return OSKAR_ERR_SETTINGS;
     }
 
@@ -135,6 +136,33 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     image_cube.time_start_mjd_utc = settings.obs.time.obs_start_mjd_utc;
     err = oskar_mem_copy(&image_cube.settings_path, &settings.settings_path);
     if (err) return err;
+
+
+    // Declare image hyper-cube for voltage pattern.
+    // NOTE this, along with the image cube could allocate unacceptable
+    // amounts of memory in some cases.
+    // --- need a mode to write a slice at a time?
+    oskar_Image voltage_pattern_cube(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
+    if (settings.beam_pattern.oskar_voltage_pattern_binary)
+    {
+        err = oskar_image_resize(&voltage_pattern_cube, image_size, image_size,
+                num_pols, num_times, num_channels);
+        if (err) return err;
+
+        // Set voltage pattern meta-data.
+        voltage_pattern_cube.image_type         = (num_pols == 1) ?
+                OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
+        voltage_pattern_cube.centre_ra_deg      = settings.obs.ra0_rad * 180.0 / M_PI;
+        voltage_pattern_cube.centre_dec_deg     = settings.obs.dec0_rad * 180.0 / M_PI;
+        voltage_pattern_cube.fov_ra_deg         = settings.beam_pattern.fov_deg;
+        voltage_pattern_cube.fov_dec_deg        = settings.beam_pattern.fov_deg;
+        voltage_pattern_cube.freq_start_hz      = settings.obs.start_frequency_hz;
+        voltage_pattern_cube.freq_inc_hz        = settings.obs.frequency_inc_hz;
+        voltage_pattern_cube.time_inc_sec       = settings.obs.time.dt_dump_days * 86400.0;
+        voltage_pattern_cube.time_start_mjd_utc = settings.obs.time.obs_start_mjd_utc;
+        err = oskar_mem_copy(&voltage_pattern_cube.settings_path, &settings.settings_path);
+        if (err) return err;
+    }
 
     // Temporary CPU memory.
     oskar_Mem beam_cpu(beam_pattern_data_type, OSKAR_LOCATION_CPU, num_pixels);
@@ -201,12 +229,12 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
             oskar_StationModel* station = &(telescope.station[station_id]);
 
             // Start simulation.
-            for (int j = 0; j < num_times; ++j)
+            for (int t = 0; t < num_times; ++t)
             {
                 // Start time for the data dump, in MJD(UTC).
                 oskar_log_message(log, 1, "Snapshot %4d/%d",
-                        j+1, num_times);
-                double t_dump = obs_start_mjd_utc + j * dt_dump;
+                        t+1, num_times);
+                double t_dump = obs_start_mjd_utc + t * dt_dump;
                 double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
                 // Evaluate horizontal l,m,n for beam phase centre.
@@ -233,10 +261,15 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 // Convert from complex to power or phase.
                 // Image cube has dimension order (from slowest to fastest):
                 // Channel, Time, Polarisation, Declination, Right Ascension.
-                int offset = (j + c * num_times) * num_pols * num_pixels;
+                int offset = (t + c * num_times) * num_pols * num_pixels;
                 if (type == OSKAR_SINGLE)
                 {
                     float* img = (float*)image_cube.data + offset;
+                    float2* bp = NULL;
+                    if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                    {
+                        bp = &((float2*)voltage_pattern_cube.data)[offset];
+                    }
                     float tx, ty;
                     if (oskar_mem_is_scalar(beam_pattern_data_type))
                     {
@@ -246,6 +279,11 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                             tx = tc[i].x;
                             ty = tc[i].y;
                             img[i] = sqrt(tx * tx + ty * ty);
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i].x = tx;
+                                bp[i].y = ty;
+                            }
                         }
                     }
                     else
@@ -256,21 +294,46 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                             tx = tc[i].a.x;
                             ty = tc[i].a.y;
                             img[i] = sqrt(tx * tx + ty * ty); // theta_X
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i].x = tx;
+                                bp[i].y = ty;
+                            }
                             tx = tc[i].b.x;
                             ty = tc[i].b.y;
                             img[i + num_pixels] = sqrt(tx * tx + ty * ty); // phi_X
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i + num_pixels].x = tx;
+                                bp[i + num_pixels].y = ty;
+                            }
                             tx = tc[i].c.x;
                             ty = tc[i].c.y;
                             img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i + 2 * num_pixels].x = tx;
+                                bp[i + 2 * num_pixels].y = ty;
+                            }
                             tx = tc[i].d.x;
                             ty = tc[i].d.y;
                             img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i + 3 * num_pixels].x = tx;
+                                bp[i + 3 * num_pixels].y = ty;
+                            }
                         }
                     }
                 }
                 else if (type == OSKAR_DOUBLE)
                 {
                     double* img = (double*)image_cube.data + offset;
+                    double2* bp = NULL;
+                    if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                    {
+                        bp = &((double2*)voltage_pattern_cube.data)[offset];
+                    }
                     double tx, ty;
                     if (oskar_mem_is_scalar(beam_pattern_data_type))
                     {
@@ -280,6 +343,11 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                             tx = tc[i].x;
                             ty = tc[i].y;
                             img[i] = sqrt(tx * tx + ty * ty);
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i].x = tx;
+                                bp[i].y = ty;
+                            }
                         }
                     }
                     else
@@ -290,21 +358,43 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                             tx = tc[i].a.x;
                             ty = tc[i].a.y;
                             img[i] = sqrt(tx * tx + ty * ty); // theta_X
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i].x = tx;
+                                bp[i].y = ty;
+                            }
                             tx = tc[i].b.x;
                             ty = tc[i].b.y;
                             img[i + num_pixels] = sqrt(tx * tx + ty * ty); // phi_X
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i + num_pixels].x = tx;
+                                bp[i + num_pixels].y = ty;
+                            }
                             tx = tc[i].c.x;
                             ty = tc[i].c.y;
                             img[i + 2 * num_pixels] = sqrt(tx * tx + ty * ty); // theta_Y
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i + 2 * num_pixels].x = tx;
+                                bp[i + 2 * num_pixels].y = ty;
+                            }
                             tx = tc[i].d.x;
                             ty = tc[i].d.y;
                             img[i + 3 * num_pixels] = sqrt(tx * tx + ty * ty); // phi_Y
+                            if (settings.beam_pattern.oskar_voltage_pattern_binary)
+                            {
+                                bp[i + 3 * num_pixels].x = tx;
+                                bp[i + 3 * num_pixels].y = ty;
+                            }
+
                         }
                     }
                 }
-            }
-        }
-    }
+
+            } // Time loop
+        } // Channel loop
+    } // GPU memory section
     oskar_log_section(log, "Simulation completed in %.3f sec.",
             timer.elapsed() / 1e3);
 
@@ -325,6 +415,14 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         if (err) return err;
     }
 #endif
+
+    // Write voltage pattern image file (if required).
+    if (settings.beam_pattern.oskar_voltage_pattern_binary)
+    {
+        err = oskar_image_write(&voltage_pattern_cube, log,
+                settings.beam_pattern.oskar_voltage_pattern_binary, 0);
+        if (err) return err;
+    }
 
     cudaDeviceReset();
     return OSKAR_SUCCESS;

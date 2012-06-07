@@ -67,5 +67,30 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     // Get station ID to use.
     bp->station_id  = s.value("station_id").toUInt();
 
-    return 0;
+    // Get the output complex pattern image filename
+    t = s.value("oskar_complex_image_filename", "").toByteArray();
+    if (t.size() > 0)
+    {
+        bp->oskar_voltage_pattern_binary = (char*)malloc(t.size() + 1);
+        strcpy(bp->oskar_voltage_pattern_binary, t.constData());
+    }
+//    // Get the output complex pattern file paths
+//    QString root = s.value("complex_pattern_root", "").toString();
+//    if (!root.isEmpty())
+//    {
+//       if (s.value("complex_pattern_root/binary", true).toBool())
+//       {
+//           t = QString(root + ".dat").toAscii();
+//           bp->oskar_voltage_pattern_binary = (char*)malloc(t.size() + 1);
+//           strcpy(bp->oskar_voltage_pattern_binary, t.constData());
+//       }
+//       if (s.value("complex_pattern_root/ascii", false).toBool())
+//       {
+//           t = QString(root + ".txt").toAscii();
+//           bp->oskar_voltage_pattern_ascii = (char*)malloc(t.size() + 1);
+//           strcpy(bp->oskar_voltage_pattern_ascii, t.constData());
+//       }
+//    }
+
+    return OSKAR_SUCCESS;
 }

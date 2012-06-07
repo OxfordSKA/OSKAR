@@ -43,6 +43,7 @@ struct oskar_SettingsBeamPattern
     int size;
     char* oskar_image_filename;
     char* fits_image_filename;
+    char* oskar_voltage_pattern_binary;
     int station_id;
 };
 typedef struct oskar_SettingsBeamPattern oskar_SettingsBeamPattern;

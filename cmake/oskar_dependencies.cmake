@@ -9,7 +9,7 @@
 #   Qt4 (>=4.6)     (oskar_apps, oskar_widgets, OSKAR applications)
 #   MKL             (oskar -> to enable extended sources)
 #   CBLAS           (oskar -> to enable extended sources)
-#   LAPACK          (oskar -> to enable extended sources) 
+#   LAPACK          (oskar -> to enable extended sources)
 #   casacore        (oskar_ms)
 #   cfitsio         (oskar_fits)
 #   MATLAB          (for MATLAB interface fuctions)
@@ -35,7 +35,7 @@ find_package(OpenMP QUIET)   # liboskar
 #find_package(MKL QUIET)     # liboskar
 find_package(CBLAS QUIET)    # liboskar
 find_package(LAPACK QUIET)   # liboskar
-find_package(Qt4 4.6 QUIET)  # liboskar_apps, liboskar_widgets, apps 
+find_package(Qt4 4.6 QUIET)  # liboskar_apps, liboskar_widgets, apps
 find_package(CasaCore QUIET) # liboskar_ms
 find_package(CFitsio QUIET)  # liboskar_fits
 find_package(Matlab QUIET)   # mex functions
@@ -147,7 +147,7 @@ message("=======================================================================
 
 message("================================================================================")
 message("-- INFO: 'make install' will install OSKAR to:")
-message("-- INFO:   - Libraries         ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}/") 
+message("-- INFO:   - Libraries         ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}/")
 message("-- INFO:   - Headers           ${CMAKE_INSTALL_PREFIX}/${OSKAR_INCLUDE_INSTALL_DIR}/")
 if (QT4_FOUND AND CUDA_FOUND)
 message("-- INFO:   - Applications      ${CMAKE_INSTALL_PREFIX}/${OSKAR_BIN_INSTALL_DIR}/")
@@ -155,6 +155,7 @@ endif()
 if (MATLAB_FOUND AND CUDA_FOUND)
 message("-- INFO:   - MATLAB interface  ${CMAKE_INSTALL_PREFIX}/${OSKAR_MATLAB_INSTALL_DIR}/")
 endif()
+#message("-- NOTE: These paths can be changed using: '-DCMAKE_INSTALL_PREFIX=<path>'")
 message("================================================================================")
 
 # Set a flag to tell cmake that dependencies have been checked.

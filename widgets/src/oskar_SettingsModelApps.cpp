@@ -623,6 +623,7 @@ void oskar_SettingsModelApps::init_settings_interferometer()
 void oskar_SettingsModelApps::init_settings_beampattern()
 {
     QString k, group;
+    QStringList options;
 
     group = "beam_pattern";
     setLabel(group, "Beam pattern settings");
@@ -641,12 +642,35 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     registerSetting(k, "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path of the generated OSKAR image file. \n"
             "Leave blank if not required.");
+//    options.clear();
+//    options << "Power" << "Phase" << "Complex (voltage)";
+//    k = k + "/type";
+//    registerSetting(k, "Pattern type", oskar_SettingsItem::OPTIONS, options);
+//    setTooltip(k, "Beam pattern data type written to the OSKAR image file.");
+//    setDefault(k, options.at(0));
+
 #ifndef OSKAR_NO_FITS
     k = group + "/fits_image_filename";
     registerSetting(k, "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path of the generated FITS image file cube. \n"
             "Leave blank if not required.");
 #endif
+
+    k = group + "/oskar_complex_image_filename";
+    registerSetting(k, "Output complex (voltage) pattern file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "File name path of the generated complex (voltage) beam pattern. \n"
+            "The output is written to an OSKAR image file (binary) format. \n"
+            "Leave blank if not required.");
+//    k = group + "/complex_pattern_root";
+//    registerSetting(k, "Voltage pattern file (root file name path)", oskar_SettingsItem::OUTPUT_FILE_NAME);
+//    setTooltip(k, "Path consisting of the root of filename used to save the\n"
+//            "output complex (voltage) beam pattern. The full filename will be\n"
+//            "constructed as <root>.<ext> where <ext> is 'dat' for OSKAR binary\n"
+//            "format pattern files, and 'txt' for OSAKR ASCII table format files.");
+//    k = group + "/complex_pattern_root/binary";
+//    registerSetting(k, "Output in OSKAR binary format", oskar_SettingsItem::BOOL, false, true);
+//    k = group + "/complex_pattern_root/ascii";
+//    registerSetting(k, "Output in OSKAR ASCII format", oskar_SettingsItem::BOOL, false, false);
 }
 
 void oskar_SettingsModelApps::init_settings_image()

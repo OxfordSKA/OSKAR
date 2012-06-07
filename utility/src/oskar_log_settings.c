@@ -324,6 +324,17 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     LVI("Station ID", s->beam_pattern.station_id);
     LVS0("Output OSKAR image file", s->beam_pattern.oskar_image_filename);
     LVS0("Output FITS image file", s->beam_pattern.fits_image_filename);
+    LVS0("Output complex voltage pattern file", s->beam_pattern.oskar_voltage_pattern_binary);
+    /*
+    oskar_log_message(log, depth, "Output Image files:");
+    ++depth;
+    LVS0("OSKAR image format", s->beam_pattern.oskar_image_filename);
+    LVS0("FITS image format", s->beam_pattern.fits_image_filename);
+    oskar_log_message(log, --depth, "Output voltage pattern files:");
+    ++depth;
+    LVS0("OSKAR binary format", s->beam_pattern.oskar_voltage_pattern_binary);
+    LVS0("OSKAR ASCII format", s->beam_pattern.oskar_voltage_pattern_ascii);
+     */
 }
 
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)

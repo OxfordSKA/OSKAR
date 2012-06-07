@@ -28,6 +28,8 @@
 
 
 #include "matlab/image/lib/oskar_mex_image_to_matlab_struct.h"
+#include "utility/oskar_vector_types.h"
+#include "utility/oskar_mem_type_check.h"
 #include <cstring>
 #include <cstdlib>
 
@@ -39,24 +41,33 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
         mexErrMsgTxt("ERROR: oskar_mex_image_to_matlab_struct() Invalid argument.\n");
     }
 
-    mxArray* image_type_;
-    mxArray* type_ = mxCreateNumericMatrix(1,1, mxINT32_CLASS, mxREAL);
-    int* type = (int*)mxGetData(type_);
-    type[0] = im_in->image_type;
-    mexCallMATLAB(1, &image_type_, 1, &type_, "oskar.image.type");
-    if (strcmp(mxGetClassName(image_type_), "oskar.image.type"))
-        mexErrMsgTxt("ERROR: invalid image type.\n");
-
+    /* Check the dimension order is valid */
     if (im_in->dimension_order[0] != OSKAR_IMAGE_DIM_RA ||
-    		im_in->dimension_order[1] != OSKAR_IMAGE_DIM_DEC ||
-    		im_in->dimension_order[2] != OSKAR_IMAGE_DIM_POL ||
-    		im_in->dimension_order[3] != OSKAR_IMAGE_DIM_TIME ||
-    		im_in->dimension_order[4] != OSKAR_IMAGE_DIM_CHANNEL)
+            im_in->dimension_order[1] != OSKAR_IMAGE_DIM_DEC ||
+            im_in->dimension_order[2] != OSKAR_IMAGE_DIM_POL ||
+            im_in->dimension_order[3] != OSKAR_IMAGE_DIM_TIME ||
+            im_in->dimension_order[4] != OSKAR_IMAGE_DIM_CHANNEL)
     {
         mexErrMsgTxt("ERROR: image dimension order not supported.\n");
     }
-    mxClassID class_id = (im_in->data.type == OSKAR_DOUBLE) ?
-            mxDOUBLE_CLASS : mxSINGLE_CLASS;
+
+    /* Construct a MATLAB array to store the image data cube */
+    mxClassID class_id = mxDOUBLE_CLASS;
+    if (oskar_mem_is_double(im_in->data.type))
+        class_id = mxDOUBLE_CLASS;
+    else if (oskar_mem_is_single(im_in->data.type))
+        class_id = mxSINGLE_CLASS;
+    else
+        mexErrMsgTxt("ERROR: image data type not supported (1).\n");
+    mxComplexity flag;
+    if (oskar_mem_is_complex(im_in->data.type))
+        flag = mxCOMPLEX;
+    else if (oskar_mem_is_real(im_in->data.type))
+        flag = mxREAL;
+    else
+        mexErrMsgTxt("ERROR: image data type not supported (2).\n");
+    if (!oskar_mem_is_scalar(im_in->data.type))
+        mexErrMsgTxt("ERROR: image data type not supported (3).\n");
     mwSize im_dims[5] = {
             im_in->width,
             im_in->height,
@@ -64,10 +75,50 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
             im_in->num_times,
             im_in->num_channels
     };
-    mxArray* data_ = mxCreateNumericArray(5, im_dims, class_id, mxREAL);
-    size_t mem_size = im_in->data.num_elements;
-    mem_size *= (im_in->data.type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
-    memcpy(mxGetData(data_), im_in->data.data, mem_size);
+    mxArray* data_ = mxCreateNumericArray(5, im_dims, class_id, flag);
+
+    /* Copy the image data into the MATLAB data array */
+    if (flag == mxREAL)
+    {
+        size_t mem_size = im_in->data.num_elements;
+        mem_size *= (class_id == mxDOUBLE_CLASS) ? sizeof(double) : sizeof(float);
+        memcpy(mxGetData(data_), im_in->data.data, mem_size);
+    }
+    else /* flag == mxCOMPLEX */
+    {
+        int n = im_dims[0] * im_dims[1] * im_dims[2] * im_dims[3] * im_dims[4];
+        if (class_id == mxDOUBLE_CLASS)
+        {
+            double2* img = (double2*)im_in->data.data;
+            double* re = (double*)mxGetPr(data_);
+            double* im = (double*)mxGetPi(data_);
+            for (int i = 0; i < n; ++i)
+            {
+                re[i] = img[i].x;
+                im[i] = img[i].y;
+            }
+        }
+        else
+        {
+            float2* img = (float2*)im_in->data.data;
+            float* re = (float*)mxGetPr(data_);
+            float* im = (float*)mxGetPr(data_);
+            for (int i = 0; i < n; ++i)
+            {
+                re[i] = img[i].x;
+                im[i] = img[i].y;
+            }
+        }
+    }
+
+    /* Convert the image type enumerator to a MATLAB image type object */
+    mxArray* image_type_;
+    mxArray* type_ = mxCreateNumericMatrix(1,1, mxINT32_CLASS, mxREAL);
+    int* type = (int*)mxGetData(type_);
+    type[0] = im_in->image_type;
+    mexCallMATLAB(1, &image_type_, 1, &type_, "oskar.image.type");
+    if (strcmp(mxGetClassName(image_type_), "oskar.image.type"))
+        mexErrMsgTxt("ERROR: invalid image type.\n");
 
     /* Note: ignoring mean, variance, min, max, rms for now! */
     const char* fields[17] = {

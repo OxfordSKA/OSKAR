@@ -21,6 +21,8 @@ classdef type < uint32
         
         beam_scalar(100)
         BEAM_SCALAR(100)
+        beam_polarised(101)
+        BEAM_POLARISED(101)
     end
     
 end
