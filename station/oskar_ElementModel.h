@@ -45,11 +45,8 @@
  */
 struct oskar_ElementModel
 {
-    int polarised; /**< True if element is polarised; false if point-like. */
-    int tapering_function; /**< Type of tapering function on an ideal dipole. */
-    int zenith_relative; /**< True if coordinates are relative to the zenith;
-                              false if relative to the phase centre. */
-    double gaussian_fwhm_deg; /**< For a Gaussian taper, the FWHM in degrees. */
+    double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
+    int cos_power; /* For a cosine taper, the power of the cosine. */
     oskar_Mem filename_x;
     oskar_Mem filename_y;
     oskar_SplineData theta_re_x;
@@ -62,12 +59,5 @@ struct oskar_ElementModel
     oskar_SplineData phi_im_y;
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
-
-enum {
-    OSKAR_ELEMENT_TAPER_NONE = 0,
-    OSKAR_ELEMENT_TAPER_COS = 1,
-    OSKAR_ELEMENT_TAPER_COS_SQUARED = 2,
-    OSKAR_ELEMENT_TAPER_GAUSSIAN = 3
-};
 
 #endif /* OSKAR_ELEMENT_MODEL_H_ */

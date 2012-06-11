@@ -126,33 +126,6 @@ int oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
     return error;
 }
 
-// Device function to evaluate the response of the X-dipole (single precision).
-__device__
-void oskar_cudaf_evaluate_dipole_pattern_x_f(const float theta,
-        const float phi, float2* response_theta, float2* response_phi)
-{
-
-}
-
-// Device function to evaluate the response of the Y-dipole (single precision).
-__device__
-void oskar_cudaf_evaluate_dipole_pattern_y_f(const float theta,
-        const float phi, float2* response_theta, float2* response_phi)
-{
-
-}
-
-
-__global__
-void oskar_cudak_evaluate_dipole_pattern_f(const int num, const int port,
-        const float* theta, const float* phi, float2* response_theta,
-        float2* response_phi)
-{
-    // Get the position ID that this thread is working on.
-    const int i = blockDim.x * blockIdx.x + threadIdx.x;
-    if (i >= num) return;
-}
-
 int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
         double orientation_x, double orientation_y, const oskar_Mem* l,
         const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* theta,
@@ -175,7 +148,7 @@ int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
     orientation_x -= 0.5 * PI;
 
     /* Evaluate polarised response if output array is matrix type. */
-    if (oskar_mem_is_matrix(G->type) && model->polarised)
+    if (oskar_mem_is_matrix(G->type))
     {
         /* Compute modified theta and phi coordinates for dipole X. */
         error = oskar_hor_lmn_to_modified_theta_phi(theta, phi,
@@ -235,7 +208,7 @@ int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
     }
 
     /* Evaluate scalar response if output array is scalar type. */
-    else if (oskar_mem_is_scalar(G->type) && !model->polarised)
+    else if (oskar_mem_is_scalar(G->type))
     {
         /* Not yet implemented. */
         return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;

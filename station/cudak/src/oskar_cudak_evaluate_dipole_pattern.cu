@@ -27,54 +27,126 @@
  */
 
 #include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
-#include <math.h>
 
-#if 0
+#define M_2_SQRT_2LN2  2.35482004503094938202
+#define M_2_SQRT_2LN2f 2.35482004503094938202f
+
 // Single precision.
 __global__
 void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
-        const float* theta, const float* phi, const float orientation_x,
-        const float orientation_y, const int taper_func, float4c* pattern)
+        const float* theta, const float* phi, const int cos_power,
+        const float gaussian_fwhm_rad, const int return_x_dipole,
+        float4c* pattern)
 {
     // Source index being processed by the thread.
     const int s = blockIdx.x * blockDim.x + threadIdx.x;
     if (s >= num_sources) return;
 
-    // Get source direction cosines.
-    const float ln = cosf(theta[s]); // Component along z-axis.
-
-    // Get sine and cosine of angle phi.
-    float sin_phi, cos_phi;
+    // Get (modified) source vector components, relative to a dipole along x.
+    float theta_c, sin_phi, cos_phi, cos_theta;
+    theta_c = theta[s];
+    cos_theta = cosf(theta_c);
     sincosf(phi[s], &sin_phi, &cos_phi);
 
-    // Evaluate unit vectors e_theta and e_phi at source position.
-    // cos_theta = ln
-    const float e_theta_x = ln * cos_phi; // Component of e_theta in x.
-    const float e_theta_y = ln * sin_phi; // Component of e_theta in y.
-    // e_phi_x = -sin_phi;
-    // e_phi_y = cos_phi;
+    // Evaluate vectors e_theta and e_phi in x-direction at source position.
+    float e_theta = cos_theta * cos_phi;
+    float e_phi = -sin_phi;
 
-    // Dot products:
-    // g_theta_a = a_x * e_theta_x + a_y * e_theta_y;
-    // g_phi_a   = a_x * e_phi_x   + a_y * e_phi_y;
-    // g_theta_b = b_x * e_theta_x + b_y * e_theta_y;
-    // g_phi_b   = b_x * e_phi_x   + b_y * e_phi_y;
-    const float g_theta_a = sin_orientation_x * e_theta_x
-            + cos_orientation_x * e_theta_y;
-    const float g_phi_a   = sin_orientation_x * -sin_phi
-            + cos_orientation_x * cos_phi;
-    const float g_theta_b = sin_orientation_y * e_theta_x
-            + cos_orientation_y * e_theta_y;
-    const float g_phi_b   = sin_orientation_y * -sin_phi
-            + cos_orientation_y * cos_phi;
+    // Modify by cosine tapering function if required.
+    if (cos_power > 0)
+    {
+    	float f;
+    	f = (cos_power > 1) ? powf(cos_theta, cos_power) : cos_theta;
+    	e_theta *= f;
+    	e_phi *= f;
+    }
+
+    // Modify by Gaussian tapering function if required.
+    if (gaussian_fwhm_rad > 0.0f)
+    {
+    	float sigma, f;
+    	sigma = gaussian_fwhm_rad / M_2_SQRT_2LN2f;
+    	f = expf(theta_c * theta_c / (2.0f * sigma * sigma));
+    	e_theta *= f;
+    	e_phi *= f;
+    }
 
     // Store components.
-    pattern[s].a.x += g_theta_a;
-    pattern[s].b.x += g_phi_a;
-    pattern[s].c.x += g_theta_b;
-    pattern[s].d.x += g_phi_b;
+    if (return_x_dipole)
+    {
+        pattern[s].a.x = e_theta;
+        pattern[s].a.y = 0.0f;
+        pattern[s].b.x = e_phi;
+        pattern[s].b.y = 0.0f;
+    }
+    else
+    {
+        pattern[s].c.x = e_theta;
+        pattern[s].c.y = 0.0f;
+        pattern[s].d.x = e_phi;
+        pattern[s].d.y = 0.0f;
+    }
 }
-#endif
+
+// Double precision.
+__global__
+void oskar_cudak_evaluate_dipole_pattern_d(const int num_sources,
+        const double* theta, const double* phi, const int cos_power,
+        const double gaussian_fwhm_rad, const int return_x_dipole,
+        double4c* pattern)
+{
+    // Source index being processed by the thread.
+    const int s = blockIdx.x * blockDim.x + threadIdx.x;
+    if (s >= num_sources) return;
+
+    // Get (modified) source vector components, relative to a dipole along x.
+    double theta_c, sin_phi, cos_phi, cos_theta;
+    theta_c = theta[s];
+    cos_theta = cos(theta_c);
+    sincos(phi[s], &sin_phi, &cos_phi);
+
+    // Evaluate vectors e_theta and e_phi in x-direction at source position.
+    double e_theta = cos_theta * cos_phi;
+    double e_phi = -sin_phi;
+
+    // Modify by cosine tapering function if required.
+    if (cos_power > 0)
+    {
+    	double f;
+    	f = (cos_power > 1) ? pow(cos_theta, cos_power) : cos_theta;
+    	e_theta *= f;
+    	e_phi *= f;
+    }
+
+    // Modify by Gaussian tapering function if required.
+    if (gaussian_fwhm_rad > 0.0)
+    {
+    	double sigma, f;
+    	sigma = gaussian_fwhm_rad / M_2_SQRT_2LN2;
+    	f = exp(theta_c * theta_c / (2.0 * sigma * sigma));
+    	e_theta *= f;
+    	e_phi *= f;
+    }
+
+    // Store components.
+    if (return_x_dipole)
+    {
+        pattern[s].a.x = e_theta;
+        pattern[s].a.y = 0.0;
+        pattern[s].b.x = e_phi;
+        pattern[s].b.y = 0.0;
+    }
+    else
+    {
+        pattern[s].c.x = e_theta;
+        pattern[s].c.y = 0.0;
+        pattern[s].d.x = e_phi;
+        pattern[s].d.y = 0.0;
+    }
+}
+
+
+// DEPRECATED
 
 // Single precision.
 __global__
