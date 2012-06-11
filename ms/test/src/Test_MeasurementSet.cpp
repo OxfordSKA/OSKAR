@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 #include "ms/oskar_ms_create_meta1.h"
 #include "ms/oskar_ms_append_vis1.h"
 #include <vector>
+#include <complex>
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"

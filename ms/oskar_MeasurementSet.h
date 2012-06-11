@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,8 @@ namespace casa {
 class MeasurementSet;
 class MSColumns;
 class MSMainColumns;
+template <class T> class Vector;
 }
-
-#include <casa/Arrays/Vector.h>
 
 /**
  * @brief
@@ -323,9 +322,9 @@ protected:
             const casa::Vector<double>& chanWidths);
 
 protected:
-    casa::MeasurementSet* _ms;   ///< Pointer to the Measurement Set.
-    casa::MSColumns* _msc;       ///< Pointer to the sub-tables.
-    casa::MSMainColumns* _msmc;  ///< Pointer to the main columns.
+    casa::MeasurementSet* ms_;   ///< Pointer to the Measurement Set.
+    casa::MSColumns* msc_;       ///< Pointer to the sub-tables.
+    casa::MSMainColumns* msmc_;  ///< Pointer to the main columns.
 };
 
 #endif // OSKAR_MEASUREMENT_SET_H_
