@@ -5,6 +5,8 @@
 
 if (QT4_FOUND AND CUDA_FOUND)
 
+    include_directories(${QT_INCLUDE_DIR})
+
     # Build oskar_app library
     add_subdirectory(lib)
 

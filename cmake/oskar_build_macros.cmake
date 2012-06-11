@@ -11,7 +11,7 @@
 #
 MACRO(PARSE_ARGUMENTS prefix arg_names option_names)
   SET(DEFAULT_ARGS)
-  FOREACH(arg_name ${arg_names})    
+  FOREACH(arg_name ${arg_names})
     SET(${prefix}_${arg_name})
   ENDFOREACH(arg_name)
   FOREACH(option ${option_names})
@@ -20,16 +20,16 @@ MACRO(PARSE_ARGUMENTS prefix arg_names option_names)
 
   SET(current_arg_name DEFAULT_ARGS)
   SET(current_arg_list)
-  FOREACH(arg ${ARGN})            
-    SET(larg_names ${arg_names})    
-    LIST(FIND larg_names "${arg}" is_arg_name)                   
+  FOREACH(arg ${ARGN})
+    SET(larg_names ${arg_names})
+    LIST(FIND larg_names "${arg}" is_arg_name)
     IF (is_arg_name GREATER -1)
       SET(${prefix}_${current_arg_name} ${current_arg_list})
       SET(current_arg_name ${arg})
       SET(current_arg_list)
     ELSE (is_arg_name GREATER -1)
-      SET(loption_names ${option_names})    
-      LIST(FIND loption_names "${arg}" is_option)            
+      SET(loption_names ${option_names})
+      LIST(FIND loption_names "${arg}" is_option)
       IF (is_option GREATER -1)
          SET(${prefix}_${arg} TRUE)
       ELSE (is_option GREATER -1)
@@ -58,7 +58,7 @@ ENDMACRO(CDR)
 #
 # Usage:
 #   oskar_app(name
-#         [NO_INSTALL] 
+#         [NO_INSTALL]
 #         source1 source2 ...
 #         [QT_MOC_SRC source1 source2 ...]
 #         [EXTRA_LIBS lib1 lib2 ...]
@@ -81,11 +81,11 @@ macro(OSKAR_APP)
     )
     CAR(APP_NAME ${APP_DEFAULT_ARGS})
     CDR(APP_SOURCES ${APP_DEFAULT_ARGS})
-    
+
     if (NOT QT4_FOUND)
         message(CRITIAL "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
     endif ()
-    
+
     #message("APP: NAME       = ${APP_NAME}")
     #message("     SRC        = ${APP_SOURCES}")
     #message("     MOC        = ${APP_QT_MOC_SRC}")
@@ -95,23 +95,23 @@ macro(OSKAR_APP)
     #else()
     #    message("     INSTALL    = no")
     #endif()
-    
+
     # Create a target name from the app name.
     # Note:
     # - Appending app allows for binaries to exist with the same name
     # as targets used elsewhere.
     # - app targets can then be build individually using the command:
     #      $ make <name>_app
-    #   where <name> is the (binary) name of the app to be built. 
+    #   where <name> is the (binary) name of the app to be built.
     set(target "${APP_NAME}_app")
-    
+
     qt4_wrap_cpp(APP_SOURCES ${APP_QT_MOC_SRC})
-    
+
     add_executable(${target} ${APP_SOURCES})
-    target_link_libraries(${target} 
+    target_link_libraries(${target}
         oskar oskar_apps ${QT_QTCORE_LIBRARY} # default libs
         ${APP_EXTRA_LIBS}                     # extra libs
-    ) 
+    )
     set_target_properties(${target} PROPERTIES
         COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
         LINK_FLAGS    ${OpenMP_CXX_FLAGS}
@@ -119,12 +119,12 @@ macro(OSKAR_APP)
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE
     )
-    
+
     # Create the install target if the NO_INSTALL option isn't specified.
     if (NOT APP_NO_INSTALL)
         install(TARGETS ${target} DESTINATION ${OSKAR_BIN_INSTALL_DIR})
     endif()
-    
+
 endmacro(OSKAR_APP)
 
 
@@ -136,7 +136,7 @@ set(mex_function_def ${OSKAR_SOURCE_DIR}/matlab/mex_function.def)
 #
 # Usage:
 #       oskar_qt_mex(name
-#           source 
+#           source
 #           [EXTRA_LIBS lib1 lib2 ...])
 #
 #       name       = name of mex function
@@ -165,12 +165,12 @@ macro(OSKAR_MEX)
     get_filename_component(target ${MEX_SOURCES} NAME_WE)
 
     add_library(${target} SHARED ${MEX_SOURCES} ${mex_function_def})
-    target_link_libraries(${target} 
+    target_link_libraries(${target}
         oskar ${MATLAB_LIBRARIES}  # Default libraries
         ${MEX_EXTRA_LIBS})         # Extra libraries
     set_target_properties(${target} PROPERTIES
         PREFIX ""
-        OUTPUT_NAME ${MEX_NAME} 
+        OUTPUT_NAME ${MEX_NAME}
         SUFFIX ".${MATLAB_MEXFILE_EXT}"
         INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
         INSTALL_RPATH_USE_LINK_PATH TRUE
@@ -185,7 +185,7 @@ endmacro(OSKAR_MEX)
 macro(get_svn_revision dir variable)
     find_program(SVN_EXECUTABLE svn DOC "subversion command line client")
     if (SVN_EXECUTABLE AND EXISTS ${OSKAR_SOURCE_DIR}/.svn)
-        execute_process(COMMAND 
+        execute_process(COMMAND
             ${SVN_EXECUTABLE} info ${dir}/oskar_global.h
             OUTPUT_VARIABLE ${variable}
             OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -193,3 +193,25 @@ macro(get_svn_revision dir variable)
             "\\2" ${variable} "${${variable}}")
     endif()
 endmacro(get_svn_revision)
+
+# MACRO: Count the number of OSKAR components to b built
+macro(get_component_count var)
+    set(num 0)
+    if (CUDA_FOUND)
+        math(EXPR num '${num}+1')
+    endif()
+    if (CFITSIO_FOUND)
+        math(EXPR num '${num}+1')
+    endif ()
+    if (QT4_FOUND AND CUDA_FOUND)
+        math(EXPR num '${num}+1')
+    endif ()
+    if (QT4_FOUND AND CUDA_FOUND)
+        math(EXPR num '${num}+1')
+    endif ()
+    if (MATLAB_FOUND AND CUDA_FOUND)
+        math(EXPR num '${num}+1')
+    endif ()
+    set(${var} ${num})
+endmacro()
+

@@ -4,6 +4,8 @@
 
 if (MATLAB_FOUND AND CUDA_FOUND)
 
+    include_directories(${MATLAB_INCLUDE_DIR})
+
     add_subdirectory(binary_file)
     add_subdirectory(cuda)
     add_subdirectory(image)

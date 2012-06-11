@@ -122,8 +122,17 @@ if (NOT CPPUNIT_FOUND)
 endif()
 
 # Prints a message saying which libraries are being built.
+include(oskar_build_macros)
+get_component_count(num_components)
+if ("${num_components}" EQUAL 0)
+    message("========================================================================")
+    message("== ERROR: Unable to build any OSKAR components, check your dependencies!")
+    message("========================================================================")
+    message(FATAL_ERROR "")
+endif()
 message("================================================================================")
 message("-- INFO: The following OSKAR components will be built:")
+
 if (CUDA_FOUND)
     message("-- INFO:   - liboskar")
 endif ()
@@ -160,3 +169,9 @@ message("=======================================================================
 
 # Set a flag to tell cmake that dependencies have been checked.
 set(CHECKED_DEPENDENCIES YES)
+
+
+
+
+
+

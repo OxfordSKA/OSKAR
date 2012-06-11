@@ -2,20 +2,20 @@
 # src/CMakeLists.txt (top level CMakeLists.txt)
 #
 
-# ==== Set the project name and specify the required CMAKE version.
+# === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-# ==== Project version.
+# === Project version.
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 0)
 set(OSKAR_VERSION_PATCH 1)
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 
-# ==== Append the src/cmake directory to the module path.
+# === Append the src/cmake directory to the module path.
 list(INSERT CMAKE_MODULE_PATH 0 ${OSKAR_SOURCE_DIR}/cmake)
 
-# ==== Setup install directory paths
+# === Setup install directory paths
 # Note: the install directory prefix is set by -DCMAKE_INSTALL_PRFEIX=<path>
 if (NOT OSKAR_LIB_INSTALL_DIR)
     set(OSKAR_LIB_INSTALL_DIR "lib")
@@ -30,17 +30,22 @@ if (NOT OSKAR_MATLAB_INSTALL_DIR)
     set(OSKAR_MATLAB_INSTALL_DIR "share/matlab/toolbox/oskar")
 endif()
 
-# ==== Set dependencies and compiler options.
+# === Set dependencies and compiler options.
 include(oskar_dependencies)
 include(oskar_compiler_options)
 
-# ==== Include build macros used for apps and mex functions.
+# === Include build macros used for apps and mex functions.
 include(oskar_build_macros)
 
 enable_testing()
 
-# ==== Build main OSKAR library.
+# === Set the top level OSKAR source directory in the include path.
+include_directories(${OSKAR_SOURCE_DIR})
+
+# === Build main OSKAR library.
 if (CUDA_FOUND)
+    include_directories(${OSKAR_SOURCE_DIR})
+
     add_subdirectory(imaging)
     add_subdirectory(interferometry)
     add_subdirectory(math)
@@ -90,14 +95,14 @@ if (CUDA_FOUND)
     cuda_build_clean_target()
 endif (CUDA_FOUND)
 
-# ==== Build other oskar libraries.
+# === Build other oskar libraries.
 add_subdirectory(apps)
 add_subdirectory(fits)
 add_subdirectory(matlab)
 add_subdirectory(ms)
 add_subdirectory(widgets)
 
-# ==== Install header tree.
+# === Install header tree.
 if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
     string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
     math(EXPR x "${POS} + 1")
@@ -129,6 +134,6 @@ else ()
 endif()
 
 
-# ==== Include packaging script.
+# === Include packaging script.
 include(oskar_packaging)
 

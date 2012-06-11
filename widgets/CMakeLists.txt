@@ -4,6 +4,8 @@
 
 if (QT4_FOUND AND CUDA_FOUND)
 
+    include_directories(${QT_INCLUDE_DIR})
+
     qt4_add_resources(widgets_RCC_SRC icons/icons.qrc)
 
     set(widgets_MOC_SRC

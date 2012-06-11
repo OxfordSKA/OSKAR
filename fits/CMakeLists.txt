@@ -4,6 +4,8 @@
 
 if (CFITSIO_FOUND)
 
+    include_directories(${CFITSIO_INCLUDE_DIR})
+
     # Fits source code.
     set(fits_SRC
         src/oskar_fits_check_status.c

@@ -4,6 +4,8 @@
 
 if (CASACORE_FOUND)
 
+    include_directories(${CASACORE_INCLUDE_DIR}/casacore)
+
     set(ms_SRC
         src/oskar_MeasurementSet.cpp
         src/oskar_ms_append_vis.cpp
@@ -12,7 +14,7 @@ if (CASACORE_FOUND)
         src/oskar_ms_create_meta1.cpp
     )
     set(ms_SRC "${ms_SRC}" PARENT_SCOPE)
-    
+
     # Build and install the oskar_ms library.
     include_directories(${CASACORE_INCLUDE_DIR}/casacore)
     add_library(oskar_ms ${ms_SRC})
@@ -23,7 +25,7 @@ if (CASACORE_FOUND)
         INSTALL_RPATH_USE_LINK_PATH TRUE
         SOVERSION ${OSKAR_VERSION})
     install(TARGETS oskar_ms DESTINATION ${OSKAR_LIB_INSTALL_DIR})
-    
+
     # ==== Recurse into test subdirectory.
     add_subdirectory(test)
 

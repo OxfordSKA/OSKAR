@@ -2,7 +2,7 @@ if (NOT CHECKED_DEPENDENCIES)
     message(FATAL_ERROR "Please include oskar_dependencies.cmake before this script!")
 endif ()
 
-# === Set the build type to release if not otherwise specified.
+# Set the build type to release if not otherwise specified.
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE release)
 endif()
@@ -17,108 +17,87 @@ message("=======================================================================
 
 set(BUILD_SHARED_LIBS ON)
 
-# === GNU compiler.
-if (CMAKE_COMPILER_IS_GNUCC)
-    # Enable warnings.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wcast-align")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-qual")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wcast-qual")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion")
-    #set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wconversion")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfloat-equal")
-    #set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wfloat-equal")
+# Set general compiler flags.
+# ------------------------------------------------------------------------------
+if (NOT WIN32)
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
+    set(CMAKE_C_FLAGS_RELEASE   "-O2 -fPIC -DNDEBUG")
 
-    # Disable specified warnings.
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-long-long")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-long-long")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-variadic-macros")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wno-variadic-macros")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -fPIC -g -Wall")
+    set(CMAKE_C_FLAGS_DEBUG   "-O0 -fPIC -g -Wall")
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC")
+    if (CMAKE_COMPILER_IS_GNUCC)
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pedantic")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-align")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-qual")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-long-long")
+        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-variadic-macros")
+    endif ()
 
-    # Add release and debug flags.
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    set(CMAKE_C_FLAGS_RELEASE   "-O3 -DNDEBUG")
+    if (CMAKE_COMPILER_IS_GNUCXX)
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wextra")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-qual")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-long-long")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-variadic-macros")
+    endif()
 
-# === Intel compiler.
-elseif (NOT WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall")
+    if (${CMAKE_C_COMPILER} MATCHES "icc.*$")
+        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -wd2259")
+        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -wd1125")
+    endif ()
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd2259")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -wd2259")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd1125")
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -wd1125")
-
-    # Set release and debug flags.
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
-    set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
-
-# === Microsoft Visual Studio compiler.
-elseif (MSVC)
-    add_definitions(/wd4100) # NEED TO FIX ALL THESE!
-    add_definitions(/wd4305) # NEED TO FIX ALL THESE!
-    add_definitions(/wd4244) # NEED TO FIX ALL THESE!
-    add_definitions(-DQWT_DLL)
-
-# === No compiler found.
+    if (${CMAKE_CXX_COMPILER} MATCHES "icpc.*$")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd2259")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd1125")
+    endif ()
 else ()
-    message("-- INFO: Unknown compiler.")
+    message("-- WARNING: Unknown compiler!.")
 endif ()
 
-# === CUDA
+
+# Set CUDA releated compiler flags.
+# ------------------------------------------------------------------------------
 if (CUDA_FOUND)
-    # Use a separate set of flags for CUDA.
-    if (NOT MSVC)
-        set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-    endif ()
+    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
     set(CUDA_VERBOSE_BUILD OFF)
 
-    # Default flags.
-    if (NOT WIN32)
-        set(CUDA_NVCC_FLAGS --compiler-options;-Wall;)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wextra;)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-unused-parameter;)
-        #list(APPEND CUDA_NVCC_FLAGS --compiler-options;-pedantic;)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-variadic-macros;)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-long-long;)
+    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+    set(CUDA_VERBOSE_BUILD OFF)
+
+    # General NVCC compiler options.
+    list(APPEND CUDA_NVCC_FLAGS_RELEASE -O2;)
+    list(APPEND CUDA_NVCC_FLAGS_DEBUG -O0;)
+    list(APPEND CUDA_NVCC_FLAGS_DEBUG -g;)
+
+    # Options passed to the compiler NVCC encapsulates.
+    list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-O2;)
+    list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-O0;)
+    list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-g;)
+
+    if (CMAKE_COMPILER_IS_GNUCC)
+        list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-fPIC;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-fPIC;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wall;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wextra;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-parameter;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-variadic-macros;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-long-long;)
         # Disable warning about missing initializers (for CUDA Thrust).
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-missing-field-initializers;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-missing-field-initializers;)
         # Disable warning about "variable '__f' set but not used".
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-unused-but-set-variable;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-but-set-variable;)
         # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-Wno-unused-function;)
-
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-function;)
         # Ignore warnings from CUDA headers by specifying them as system headers.
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
-        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -isystem ${CUDA_INCLUDE_DIRS}")
-    endif ()
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
+        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
+    endif()
 
-    # Build mode specific flags.
-    if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
-        if (MSVC)
-            list(APPEND CUDA_NVCC_FLAGS --compiler-options;/wd4100;)
-        else ()
-            list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O2;)
-        endif ()
-        list(APPEND CUDA_NVCC_FLAGS -O2;)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-fPIC;)
-        #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
-        #list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-dlcm=cg)
-    else ()
-        if (NOT MSVC)
-            list(APPEND CUDA_NVCC_FLAGS --compiler-options;-O0;)
-            list(APPEND CUDA_NVCC_FLAGS --compiler-options;-g;)
-        endif ()
-        list(APPEND CUDA_NVCC_FLAGS -g;)
-        list(APPEND CUDA_NVCC_FLAGS -O0;)
-        list(APPEND CUDA_NVCC_FLAGS --compiler-options;-fPIC;)
-        list(APPEND CUDA_NVCC_FLAGS --ptxas-options=-v;)
-    endif ()
+    # PTX compiler options
+    list(APPEND CUDA_NVCC_FLAGS_DEBUG --ptxas-options=-v;)
 
     message("================================================================================")
     if (NOT DEFINED CUDA_ARCH)
@@ -154,34 +133,18 @@ if (CUDA_FOUND)
 endif (CUDA_FOUND)
 
 
-# === MATLAB mex functions.
+# Set MATLAB mex function compiler flags.
+# ------------------------------------------------------------------------------
 if (MATLAB_FOUND)
     if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         set(MATLAB_MEXFILE_EXT mexmaci64)
         link_directories(/usr/local/cuda/lib/)
         link_directories(/Applications/MATLAB_R2011a.app/bin/maci64/)
-        set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread -fPIC -flat_namespace -undefined suppress")
+        set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread -flat_namespace -undefined suppress")
     else ()
         set(MATLAB_MEXFILE_EXT mexa64)
-        #set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread -fPIC")
-        set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -pthread -fPIC")
+        #set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread")
+        set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -pthread")
     endif ()
-    include_directories(${MATLAB_INCLUDE_DIR})
 endif ()
-
-
-# === Set some include directories at the project level.
-include_directories(${OSKAR_SOURCE_DIR})
-if (CFITSIO_FOUND)
-    include_directories(${CFITSIO_INCLUDE_DIR})
-endif()
-if (CUDA_FOUND)
-    include_directories(${CUDA_INCLUDE_DIRS})
-endif ()
-if (QT4_FOUND)
-    include_directories(${QT_INCLUDE_DIR})
-endif()
-if (CASACORE_FOUND)
-    include_directories(${CASACORE_INCLUDE_DIR}/casacore)
-endif()
 
