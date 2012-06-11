@@ -47,11 +47,6 @@ struct oskar_SettingsBeamPattern
     char* oskar_image_complex;
     char* fits_image_power;
     char* fits_image_phase;
-
-    /* FIXME DEPRECATED */
-    char* oskar_image_filename;
-    char* fits_image_filename;
-    char* oskar_voltage_pattern_binary;
 };
 typedef struct oskar_SettingsBeamPattern oskar_SettingsBeamPattern;
 

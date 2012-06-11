@@ -61,10 +61,16 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->image.oskar_image = 0;
     free(settings->image.fits_image);
     settings->image.fits_image = 0;
-    free(settings->beam_pattern.oskar_image_filename);
-    settings->beam_pattern.oskar_image_filename = 0;
-    free(settings->beam_pattern.fits_image_filename);
-    settings->beam_pattern.fits_image_filename = 0;
+    free(settings->beam_pattern.oskar_image_complex);
+    settings->beam_pattern.oskar_image_complex = 0;
+    free(settings->beam_pattern.oskar_image_phase);
+    settings->beam_pattern.oskar_image_phase = 0;
+    free(settings->beam_pattern.oskar_image_power);
+    settings->beam_pattern.oskar_image_power = 0;
+    free(settings->beam_pattern.fits_image_phase);
+    settings->beam_pattern.fits_image_phase = 0;
+    free(settings->beam_pattern.fits_image_power);
+    settings->beam_pattern.fits_image_power = 0;
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path);

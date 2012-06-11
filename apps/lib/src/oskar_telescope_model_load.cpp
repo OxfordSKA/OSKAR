@@ -202,6 +202,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         {
                             oskar_log_message(log, 0, "Loading CST element "
                                     "pattern data (X): %s", element_file_x);
+                            oskar_log_message(log, 0, "");
                             error = oskar_element_model_load_cst(
                                     station->element_pattern, log, 1,
                                     element_file_x,
@@ -212,6 +213,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
                         {
                             oskar_log_message(log, 0, "Loading CST element "
                                     "pattern data (Y): %s", element_file_y);
+                            oskar_log_message(log, 0, "");
                             error = oskar_element_model_load_cst(
                                     station->element_pattern, log, 2,
                                     element_file_y,

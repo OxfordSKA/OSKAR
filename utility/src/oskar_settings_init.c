@@ -57,11 +57,6 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->beam_pattern.fits_image_power = 0;
     settings->beam_pattern.fits_image_phase = 0;
 
-    /* FIXME DEPRECATED */
-    settings->beam_pattern.oskar_image_filename = 0;
-    settings->beam_pattern.fits_image_filename = 0;
-    settings->beam_pattern.oskar_voltage_pattern_binary = 0;
-
     /* Initialise pathname to settings file. */
     error = oskar_mem_init(&settings->settings_path, OSKAR_CHAR,
             OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);

@@ -324,18 +324,13 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
     LVI("Station ID", s->beam_pattern.station_id);
     oskar_log_message(log, depth, "Output OSKAR Image files:");
     ++depth;
-    LVS0("Power   ", s->beam_pattern.oskar_image_power);
-    LVS0("Phase   ", s->beam_pattern.oskar_image_phase);
-    LVS0("Complex ", s->beam_pattern.oskar_image_complex);
+    LVS0("Power", s->beam_pattern.oskar_image_power);
+    LVS0("Phase", s->beam_pattern.oskar_image_phase);
+    LVS0("Complex", s->beam_pattern.oskar_image_complex);
     oskar_log_message(log, --depth, "Output FITS image files:");
     ++depth;
-    LVS0("Power   ", s->beam_pattern.fits_image_power);
-    LVS0("Phase   ", s->beam_pattern.fits_image_phase);
-    /* TODO DEPRECATED
-    LVS0("Output OSKAR image file", s->beam_pattern.oskar_image_filename);
-    LVS0("Output FITS image file", s->beam_pattern.fits_image_filename);
-    LVS0("Output complex voltage pattern file", s->beam_pattern.oskar_voltage_pattern_binary);
-    */
+    LVS0("Power", s->beam_pattern.fits_image_power);
+    LVS0("Phase", s->beam_pattern.fits_image_phase);
 }
 
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)

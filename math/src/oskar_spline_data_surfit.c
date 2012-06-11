@@ -154,7 +154,6 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Log message. */
-    oskar_log_message(log, 0, "");
     oskar_log_message(log, 0, "Fitting bicubic B-splines to surface (%s)...",
             surface_name);
 

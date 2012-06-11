@@ -190,11 +190,20 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
             QVariant val = item->value();
             if (val.isNull())
                 val = item->defaultValue();
-            QString str = val.toString();
-            QString defaultString = item->defaultValue().toString();
-            if (!item->enabled() && !defaultString.isEmpty())
-                str.append(QString(" [using %1]").arg(defaultString));
-            return str;
+            if (item->enabled())
+                return val;
+            else
+            {
+                QString str = val.toString();
+                QString defaultString = item->defaultValue().toString();
+                if (!defaultString.isEmpty())
+                {
+                    str.append(QString(" [using %1]").arg(defaultString));
+                    return str;
+                }
+                else
+                    return val;
+            }
         }
         else if (role == Qt::EditRole)
         {
