@@ -1,4 +1,4 @@
-2012-mm-dd  (Next release)
+2012-06-12  OSKAR 2.0.2-beta
 
     * Embedded simulation log in output files.
 
@@ -10,7 +10,9 @@
     * Updated simulation GUI close event behaviour to prompt if there are any
       unsaved changes.
 
-    * Enabled the output of complex (voltage) beam pattern files.
+    * Updated settings interface for the output of beam pattern images to
+      allow the output of power (amplitude), phase and complex (voltage)
+      patterns.
 
 2012-05-15  OSKAR 2.0.1-beta
 
