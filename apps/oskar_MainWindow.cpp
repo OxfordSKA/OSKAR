@@ -114,7 +114,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     // Set up keyboard shortcuts.
     actOpen->setShortcut(QKeySequence::Open);
     actExit->setShortcut(QKeySequence::Quit);
-    actHideUnset_->setShortcut(QKeySequence(Qt::ALT + Qt::Key_H));
+    actHideUnset_->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
     actShowFirstLevel->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     actExpandAll->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     actCollapseAll->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));

@@ -52,7 +52,9 @@ class oskar_SettingsModel : public QAbstractItemModel
 public:
     enum {
         KeyRole = Qt::UserRole,
+        ValueRole,
         TypeRole,
+        RequiredRole,
         VisibleRole,
         EnabledRole,
         IterationNumRole,

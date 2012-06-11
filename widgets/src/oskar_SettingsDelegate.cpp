@@ -251,33 +251,61 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
 
             // Set up the context menu.
             QMenu menu;
-            QString strClearValue = "Clear Value";
-            QString strDisable = "Disable";
-            QString strEnable = "Enable";
+            QString strResetValue = "Reset";
+            QString strDisable = "Toggle Default On";
+            QString strEnable = "Toggle Default Off";
             QString strClearIteration = "Clear Iteration";
             QString strEditIteration = "Edit Iteration Parameters";
             QString strIterate = QString("Iterate (Dimension %1)...").
                     arg(iterationKeys.size() + 1);
-            menu.addAction(strClearValue);
-            if (mod->data(index, oskar_SettingsModel::EnabledRole).toBool())
-                menu.addAction(strDisable);
-            else
-                menu.addAction(strEnable);
-            if (type == oskar_SettingsItem::INT ||
-                    type == oskar_SettingsItem::INT_UNSIGNED ||
-                    type == oskar_SettingsItem::INT_POSITIVE ||
-                    type == oskar_SettingsItem::DOUBLE)
+
+            // Check if value is enabled.
+            bool enabled = mod->data(index,
+                    oskar_SettingsModel::EnabledRole).toBool();
+            if (!enabled)
             {
-                QString key = mod->data(index,
-                        oskar_SettingsModel::KeyRole).toString();
-                menu.addSeparator();
-                if (iterationKeys.contains(key))
+                // Add enable action only.
+                menu.addAction(strEnable);
+            }
+            else
+            {
+                // Add reset and disable actions if value is not null.
+                QVariant val = mod->data(index, oskar_SettingsModel::ValueRole);
+                if (!val.isNull())
                 {
-                    menu.addAction(strEditIteration);
-                    menu.addAction(strClearIteration);
+                    menu.addAction(strResetValue);
+
+                    // Add disable action only if value is not required.
+                    if (!mod->data(index,
+                            oskar_SettingsModel::RequiredRole).toBool())
+                        menu.addAction(strDisable);
                 }
-                else
-                    menu.addAction(strIterate);
+
+                // Add iteration actions.
+                if (type == oskar_SettingsItem::INT ||
+                        type == oskar_SettingsItem::INT_UNSIGNED ||
+                        type == oskar_SettingsItem::INT_POSITIVE ||
+                        type == oskar_SettingsItem::DOUBLE)
+                {
+                    QString key = mod->data(index,
+                            oskar_SettingsModel::KeyRole).toString();
+                    if (!menu.isEmpty())
+                        menu.addSeparator();
+                    if (iterationKeys.contains(key))
+                    {
+                        menu.addAction(strEditIteration);
+                        menu.addAction(strClearIteration);
+                    }
+                    else
+                        menu.addAction(strIterate);
+                }
+            }
+
+            // Return if the menu is empty.
+            if (menu.isEmpty())
+            {
+                return QStyledItemDelegate::editorEvent(event, mod,
+                        option, index);
             }
 
             // Display the context menu.
@@ -286,7 +314,7 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             // Check which action was selected.
             if (action)
             {
-                if (action->text() == strClearValue)
+                if (action->text() == strResetValue)
                     mod->setData(index, QVariant(), Qt::EditRole);
                 else if (action->text() == strDisable)
                     mod->setData(index, false, oskar_SettingsModel::EnabledRole);

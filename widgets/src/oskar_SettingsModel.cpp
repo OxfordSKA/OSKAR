@@ -133,8 +133,12 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         return item->defaultValue();
     else if (role == KeyRole)
         return item->key();
+    else if (role == ValueRole)
+        return item->value();
     else if (role == TypeRole)
         return item->type();
+    else if (role == RequiredRole)
+        return item->required();
     else if (role == VisibleRole)
         return item->visible() || item->required();
     else if (role == EnabledRole)
@@ -181,7 +185,18 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     }
     else if (index.column() == 1)
     {
-        if (role == Qt::DisplayRole || role == Qt::EditRole)
+        if (role == Qt::DisplayRole)
+        {
+            QVariant val = item->value();
+            if (val.isNull())
+                val = item->defaultValue();
+            QString str = val.toString();
+            QString defaultString = item->defaultValue().toString();
+            if (!item->enabled() && !defaultString.isEmpty())
+                str.append(QString(" [using %1]").arg(defaultString));
+            return str;
+        }
+        else if (role == Qt::EditRole)
         {
             QVariant val = item->value();
             if (val.isNull())
