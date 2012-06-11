@@ -115,9 +115,14 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (item->enabled())
         {
-            QVariant val = item->value();
-            if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
-                return QColor(Qt::darkBlue);
+            if (item->valueSet())
+            {
+                // Define this colour for items which have been set by the user.
+                return QColor(Qt::blue);
+            }
+//            QVariant val = item->value();
+//            if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
+//                return QColor(Qt::darkBlue);
         }
         else
             return QColor(Qt::gray);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
         defaultValue_ = 0;
     else if (type == INT_POSITIVE)
         defaultValue_ = 1;
+    else if (type == BOOL)
+        defaultValue_ = false;
 
     // Initialise constructed values.
     key_ = key;
@@ -58,6 +60,7 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     // Initialise user-defined, runtime values.
     iterNum_ = 1;
     visible_ = 0;
+    valueSet_ = 0;
     enabled_ = 1;
 
     // Set required flag of this and all parents if this option is required.
@@ -175,7 +178,10 @@ void oskar_SettingsItem::setValue(const QVariant& value)
     if (type_ == LABEL)
         return;
     if (value_.isNull() != value.isNull())
+    {
+        setValueSet(!value.isNull());
         setVisible(!value.isNull());
+    }
     value_ = value;
     if (type_ == DOUBLE)
         value_.convert(QVariant::Double);
@@ -201,6 +207,11 @@ const QVariant& oskar_SettingsItem::value() const
     return value_;
 }
 
+int oskar_SettingsItem::valueSet() const
+{
+    return valueSet_;
+}
+
 int oskar_SettingsItem::visible() const
 {
     return visible_;
@@ -213,6 +224,16 @@ void oskar_SettingsItem::setRequired(bool value)
     required_ = value;
     if (value && parentItem_)
         parentItem_->setRequired(value);
+}
+
+void oskar_SettingsItem::setValueSet(bool value)
+{
+    if (value)
+        ++valueSet_;
+    else
+        --valueSet_;
+    if (parentItem_)
+        parentItem_->setValueSet(value);
 }
 
 void oskar_SettingsItem::setVisible(bool value)

@@ -96,11 +96,13 @@ public:
     const QString& tooltip() const;
     int type() const;
     const QVariant& value() const;
+    int valueSet() const;
     int visible() const;
 
 private:
     void setRequired(bool value);
     void setVisible(bool value);
+    void setValueSet(bool value);
 
 private:
     oskar_SettingsItem* parentItem_;
@@ -109,6 +111,7 @@ private:
     QString subkey_; // Short settings key.
     int type_; // Enumerated type.
     int visible_;
+    int valueSet_;
     bool enabled_;
     bool required_;
     QString label_;
