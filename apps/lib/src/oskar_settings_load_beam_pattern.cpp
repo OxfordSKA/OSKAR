@@ -67,30 +67,48 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
     // Get station ID to use.
     bp->station_id  = s.value("station_id").toUInt();
 
-    // Get the output complex pattern image filename
-    t = s.value("oskar_complex_image_filename", "").toByteArray();
-    if (t.size() > 0)
+    // Construct output file-names.
+    QString root = s.value("root_path", "").toString();
+    if (!root.isEmpty())
     {
-        bp->oskar_voltage_pattern_binary = (char*)malloc(t.size() + 1);
-        strcpy(bp->oskar_voltage_pattern_binary, t.constData());
+        // OSKAR image files.
+        s.beginGroup("oskar_image_file");
+        if (s.value("save_power", false).toBool())
+        {
+            t = QString(root + "_power.img").toAscii();
+            bp->oskar_image_power = (char*)malloc(t.size() + 1);
+            strcpy(bp->oskar_image_power, t.constData());
+        }
+        if (s.value("save_phase", false).toBool())
+        {
+            t = QString(root + "_phase.img").toAscii();
+            bp->oskar_image_phase = (char*)malloc(t.size() + 1);
+            strcpy(bp->oskar_image_phase, t.constData());
+        }
+        if (s.value("save_complex", false).toBool())
+        {
+            t = QString(root + "_complex.img").toAscii();
+            bp->oskar_image_complex = (char*)malloc(t.size() + 1);
+            strcpy(bp->oskar_image_complex, t.constData());
+        }
+        s.endGroup();
+
+        // FITS files.
+        s.beginGroup("fits_file");
+        if (s.value("save_power", false).toBool())
+        {
+            t = QString(root + "_power.fits").toAscii();
+            bp->fits_image_power = (char*)malloc(t.size() + 1);
+            strcpy(bp->fits_image_power, t.constData());
+        }
+        if (s.value("save_phase", false).toBool())
+        {
+            t = QString(root + "_phase.fits").toAscii();
+            bp->fits_image_phase = (char*)malloc(t.size() + 1);
+            strcpy(bp->fits_image_phase, t.constData());
+        }
+        s.endGroup();
     }
-//    // Get the output complex pattern file paths
-//    QString root = s.value("complex_pattern_root", "").toString();
-//    if (!root.isEmpty())
-//    {
-//       if (s.value("complex_pattern_root/binary", true).toBool())
-//       {
-//           t = QString(root + ".dat").toAscii();
-//           bp->oskar_voltage_pattern_binary = (char*)malloc(t.size() + 1);
-//           strcpy(bp->oskar_voltage_pattern_binary, t.constData());
-//       }
-//       if (s.value("complex_pattern_root/ascii", false).toBool())
-//       {
-//           t = QString(root + ".txt").toAscii();
-//           bp->oskar_voltage_pattern_ascii = (char*)malloc(t.size() + 1);
-//           strcpy(bp->oskar_voltage_pattern_ascii, t.constData());
-//       }
-//    }
 
     return OSKAR_SUCCESS;
 }

@@ -51,6 +51,13 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->image.input_vis_data = 0;
     settings->image.oskar_image = 0;
     settings->image.fits_image = 0;
+    settings->beam_pattern.oskar_image_power = 0;
+    settings->beam_pattern.oskar_image_phase = 0;
+    settings->beam_pattern.oskar_image_complex = 0;
+    settings->beam_pattern.fits_image_power = 0;
+    settings->beam_pattern.fits_image_phase = 0;
+
+    /* FIXME DEPRECATED */
     settings->beam_pattern.oskar_image_filename = 0;
     settings->beam_pattern.fits_image_filename = 0;
     settings->beam_pattern.oskar_voltage_pattern_binary = 0;
