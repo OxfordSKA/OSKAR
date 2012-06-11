@@ -41,10 +41,17 @@ struct oskar_SettingsBeamPattern
 {
     double fov_deg;
     int size;
+    int station_id;
+    char* oskar_image_power;
+    char* oskar_image_phase;
+    char* oskar_image_complex;
+    char* fits_image_power;
+    char* fits_image_phase;
+
+    /* DEPRECATED. */
     char* oskar_image_filename;
     char* fits_image_filename;
     char* oskar_voltage_pattern_binary;
-    int station_id;
 };
 typedef struct oskar_SettingsBeamPattern oskar_SettingsBeamPattern;
 

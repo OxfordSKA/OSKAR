@@ -638,6 +638,41 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     registerSetting(k, "Station ID", oskar_SettingsItem::INT_UNSIGNED);
     setTooltip(k, "The station ID number (zero based) to select from the \n"
             "telescope model when generating the beam pattern.");
+
+    k = group + "/root_path";
+    registerSetting(k, "Output root path name", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Root path name of the generated data file.\n"
+            "Appropriate suffixes and extensions will be added to this.");
+
+    // OSKAR image file options.
+    k = group + "/oskar_image_file";
+    setLabel(k, "OSKAR image file options");
+    k = group + "/oskar_image_file/save_power";
+    registerSetting(k, "Power (amplitude) pattern", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, save the amplitude power pattern in an OSKAR \n"
+            "image file.");
+    k = group + "/oskar_image_file/save_phase";
+    registerSetting(k, "Phase pattern", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, save the phase pattern in an OSKAR image file.");
+    k = group + "/oskar_image_file/save_complex";
+    registerSetting(k, "Complex (voltage) pattern", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, save the complex (real and imaginary) pattern \n"
+            "in an OSKAR image file.");
+
+#ifndef OSKAR_NO_FITS
+    // FITS file options.
+    k = group + "/fits_file";
+    setLabel(k, "FITS file options");
+    k = group + "/fits_file/save_power";
+    registerSetting(k, "Power (amplitude) pattern", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, save the amplitude power pattern in a FITS \n"
+            "image file.");
+    k = group + "/fits_file/save_phase";
+    registerSetting(k, "Phase pattern", oskar_SettingsItem::BOOL, false, false);
+    setTooltip(k, "If true, save the phase pattern in a FITS image file.");
+#endif
+
+    // DEPRECATED SECTION.
     k = group + "/oskar_image_filename";
     registerSetting(k, "Output OSKAR image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path of the generated OSKAR image file. \n"
@@ -648,14 +683,12 @@ void oskar_SettingsModelApps::init_settings_beampattern()
 //    registerSetting(k, "Pattern type", oskar_SettingsItem::OPTIONS, options);
 //    setTooltip(k, "Beam pattern data type written to the OSKAR image file.");
 //    setDefault(k, options.at(0));
-
 #ifndef OSKAR_NO_FITS
     k = group + "/fits_image_filename";
     registerSetting(k, "Output FITS image file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path of the generated FITS image file cube. \n"
             "Leave blank if not required.");
 #endif
-
     k = group + "/oskar_complex_image_filename";
     registerSetting(k, "Output complex (voltage) pattern file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "File name path of the generated complex (voltage) beam pattern. \n"
