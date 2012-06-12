@@ -10,30 +10,39 @@
 
 set(BLAS_FIND_REQUIRED true)
 
-find_path(CBLAS_INCLUDE_DIR cblas.h gsl_cblas.h
-    PATHS
-    /usr/include/atlas
-    /usr/local/include/atlas
-    /usr/include
-    /usr/local/include
-    /usr/include/gsl
-)
+if (CBLAS_INC_DIR)
+	find_path(CBLAS_INCLUDE_DIR cblas.h gsl_cblas.h
+    	PATHS ${CBLAS_INC_DIR} NO_DEFAULT_PATH)
+else()
+	find_path(CBLAS_INCLUDE_DIR cblas.h gsl_cblas.h
+    	PATHS
+	    /usr/include/atlas
+	    /usr/local/include/atlas
+	    /usr/include
+	    /usr/local/include
+	    /usr/include/gsl)
+endif()
+
 
 set(CBLAS_NAMES ${CBLAS_NAMES} cblas gslcblas)
 
-
-find_library(CBLAS_LIBRARY
-    NAMES ${CBLAS_NAMES}
-    PATHS
-    /usr/lib64/atlas
-    /usr/lib/atlas
-    /usr/local/lib64/atlas
-    /usr/local/lib/atlas
-    /usr/lib64
-    /usr/lib
-    /usr/local/lib64
-    /usr/local/lib
-)
+if (CBLAS_LIB_DIR)
+	find_library(CBLAS_LIBRARY
+    	NAMES ${CBLAS_NAMES}
+	    PATHS ${CBLAS_LIB_DIR} NO_DEFAULT_PATH)
+else()
+	find_library(CBLAS_LIBRARY
+    	NAMES ${CBLAS_NAMES}
+	    PATHS
+	    /usr/lib64/atlas
+	    /usr/lib/atlas
+	    /usr/local/lib64/atlas
+	    /usr/local/lib/atlas
+	    /usr/lib64
+	    /usr/lib
+	    /usr/local/lib64
+    	/usr/local/lib)
+endif()
 
 if (CBLAS_LIBRARY AND CBLAS_INCLUDE_DIR)
     set(CBLAS_LIBRARIES ${CBLAS_LIBRARY})
