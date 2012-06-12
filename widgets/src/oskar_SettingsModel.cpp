@@ -115,25 +115,33 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (item->enabled())
         {
+            if (item->critical())
+                return QColor(Qt::white);
             if (item->valueSet())
-            {
-                // Define this colour for items which have been set by the user.
                 return QColor(Qt::blue);
-            }
-//            QVariant val = item->value();
-//            if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
-//                return QColor(Qt::darkBlue);
         }
         else
-            return QColor(Qt::gray);
+            return QColor(Qt::red);
     }
     else if (role == Qt::BackgroundRole)
     {
+        if (item->critical())
+        {
+            if (index.column() == 0)
+                return QColor(0, 48, 255, 160);
+            else if (item->type() != oskar_SettingsItem::LABEL)
+                return QColor(255, 64, 64, 255);
+        }
         if (index.column() == 1)
             return QColor(16, 16, 16, 16);
     }
     else if (role == Qt::ToolTipRole)
-        return item->tooltip();
+    {
+        QString tooltip = item->tooltip();
+        if (item->critical() && !tooltip.isEmpty())
+            tooltip.append(" [Required]");
+        return tooltip;
+    }
     else if (role == DefaultRole)
         return item->defaultValue();
     else if (role == KeyRole)
@@ -161,18 +169,12 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
             if (item->type() == oskar_SettingsItem::INPUT_FILE_NAME ||
                     item->type() == oskar_SettingsItem::TELESCOPE_DIR_NAME)
             {
-                if (item->required())
-                    return QIcon(":/icons/open_required.png");
                 return QIcon(":/icons/open.png");
             }
             else if (item->type() == oskar_SettingsItem::OUTPUT_FILE_NAME)
             {
                 return QIcon(":/icons/save.png");
             }
-
-            // Check if a generic required item.
-            if (item->required() && item->type() != oskar_SettingsItem::LABEL)
-                return QIcon(":/icons/required.png");
         }
     }
 

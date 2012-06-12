@@ -76,6 +76,7 @@ public:
     oskar_SettingsItem* child(int row);
     int childCount() const;
     int childNumber() const;
+    int critical() const;
     const QVariant& defaultValue() const;
     bool enabled() const;
     const QVariant& iterationInc() const;
@@ -100,9 +101,10 @@ public:
     int visible() const;
 
 private:
+    void setCritical(bool value);
     void setRequired(bool value);
-    void setVisible(bool value);
     void setValueSet(bool value);
+    void setVisible(bool value);
 
 private:
     oskar_SettingsItem* parentItem_;
@@ -119,6 +121,7 @@ private:
     QVariant value_;
     QVariant defaultValue_;
     QStringList options_;
+    int critical_;
     int iterNum_;
     QVariant iterInc_;
 };

@@ -58,13 +58,16 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     parentItem_ = parent;
 
     // Initialise user-defined, runtime values.
+    critical_ = 0;
     iterNum_ = 1;
     visible_ = 0;
     valueSet_ = 0;
     enabled_ = 1;
 
     // Set required flag of this and all parents if this option is required.
+    required_ = false;
     setRequired(required);
+    setCritical(required);
 }
 
 oskar_SettingsItem::~oskar_SettingsItem()
@@ -92,6 +95,11 @@ int oskar_SettingsItem::childNumber() const
     if (parentItem_)
         return parentItem_->childItems_.indexOf(const_cast<oskar_SettingsItem*>(this));
     return 0;
+}
+
+int oskar_SettingsItem::critical() const
+{
+    return critical_;
 }
 
 const QVariant& oskar_SettingsItem::defaultValue() const
@@ -177,10 +185,12 @@ void oskar_SettingsItem::setValue(const QVariant& value)
 {
     if (type_ == LABEL)
         return;
-    if (value_.isNull() != value.isNull())
+    bool nullValue = value.isNull();
+    if (value_.isNull() != nullValue)
     {
-        setValueSet(!value.isNull());
-        setVisible(!value.isNull());
+        setValueSet(!nullValue);
+        setVisible(!nullValue);
+        setCritical(nullValue);
     }
     value_ = value;
     if (type_ == DOUBLE)
@@ -218,6 +228,18 @@ int oskar_SettingsItem::visible() const
 }
 
 // Private members.
+
+void oskar_SettingsItem::setCritical(bool value)
+{
+    if (!required_)
+        return;
+    if (value)
+        ++critical_;
+    else
+        --critical_;
+    if (parentItem_)
+        parentItem_->setCritical(value);
+}
 
 void oskar_SettingsItem::setRequired(bool value)
 {

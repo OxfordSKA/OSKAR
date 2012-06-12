@@ -372,16 +372,16 @@ void oskar_SettingsModelApps::init_settings_observation()
     registerSetting(k, "Start time (UTC)", oskar_SettingsItem::DATE_TIME, true);
     setTooltip(k, "A string describing the start time and date for the \n"
             "observation.");
+    k = group + "/length";
+    registerSetting(k, "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
+    setTooltip(k, "A string describing the observation length, in hours, \n"
+            "minutes and seconds.");
     k = group + "/num_time_steps";
     registerSetting(k, "Number of time steps", oskar_SettingsItem::INT_POSITIVE);
     setTooltip(k, "Number of time steps in the output data during the \n"
             "observation length. This corresponds to the number of \n"
             "correlator dumps for interferometer simulations, and the \n"
             "number of beam pattern snapshots for beam pattern simulations.");
-    k = group + "/length";
-    registerSetting(k, "Observation length (H:M:S)", oskar_SettingsItem::TIME, true);
-    setTooltip(k, "A string describing the observation length, in hours, \n"
-            "minutes and seconds.");
 }
 
 void oskar_SettingsModelApps::init_settings_telescope_model()
@@ -541,7 +541,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     setLabel(group, "Common settings (used for all surfaces)");
     k = group + "/search_for_best_fit";
     registerSetting(k, "Search for best fit", oskar_SettingsItem::BOOL, false, true);
-    setTooltip(k, "If true (the default) then any numerical element pattern \n"
+    setTooltip(k, "If true (the default), then any numerical element pattern \n"
             "data will be fitted with smoothing splines, where the smoothness \n"
             "factor is selected to give the requested average fractional \n"
             "error. If false, the supplied smoothness factor is used instead.");
@@ -642,7 +642,8 @@ void oskar_SettingsModelApps::init_settings_beampattern()
     k = group + "/root_path";
     registerSetting(k, "Output root path name", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Root path name of the generated data file.\n"
-            "Appropriate suffixes and extensions will be added to this.");
+            "Appropriate suffixes and extensions will be added to this,\n"
+            "based on the settings below.");
 
     // OSKAR image file options.
     k = group + "/oskar_image_file";
