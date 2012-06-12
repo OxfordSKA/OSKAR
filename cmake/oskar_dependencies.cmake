@@ -44,9 +44,13 @@ find_package(CppUnit QUIET)  # unit tests
 # ==== Work out which libraries to build.
 if (NOT CUDA_FOUND)
     message("================================================================================")
-    message("-- WARNING: CUDA not found: "
-            "Unable to build main OSKAR library.")
+    message("-- WARNING: CUDA toolkit not found: Unable to build main OSKAR library.")
     message("================================================================================")
+elseif (NOT CUDA_CUDA_LIBRARY)
+    message("================================================================================")
+    message("-- WARNING: CUDA driver library not found: Unable to build main OSKAR library.")
+    message("================================================================================")
+    set(CUDA_FOUND FALSE)
 endif ()
 
 if (MKL_FOUND)
