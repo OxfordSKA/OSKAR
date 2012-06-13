@@ -66,7 +66,7 @@ OSKAR can then be installed with:
 3.1. Build Options
 --------------------------------------------------------------------------------
 When running the 'cmake' command a number of build options can be specified.
-These are as follows:
+These are listed below.
 
     * -DCUDA_ARCH=<arch> (default: 2.0)
         Sets the target architecture for the compilation of CUDA device code.
@@ -76,6 +76,8 @@ These are as follows:
 
     * -DCMAKE_INSTALL_PREFIX=<path> (default: /usr/local/)
         Prefix install path used when installing OSKAR (with make install).
+
+Advanced Build Options:
 
     * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
         Build OSKAR in release or debug mode.
