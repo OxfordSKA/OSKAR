@@ -13,6 +13,7 @@ if (QT4_FOUND AND CUDA_FOUND)
         oskar_BinaryLocations.h
         oskar_CudaInfoDisplay.h
         oskar_DataFileModel.h
+        oskar_DocumentationDisplay.h
         oskar_DoubleSpinBox.h
         oskar_RunDialog.h
         oskar_RunThread.h
@@ -26,6 +27,7 @@ if (QT4_FOUND AND CUDA_FOUND)
         src/oskar_BinaryLocations.cpp
         src/oskar_CudaInfoDisplay.cpp
         src/oskar_DataFileModel.cpp
+        src/oskar_DocumentationDisplay.cpp
         src/oskar_DoubleSpinBox.cpp
         src/oskar_RunDialog.cpp
         src/oskar_RunThread.cpp

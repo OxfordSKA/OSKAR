@@ -30,6 +30,7 @@
 #include "widgets/oskar_About.h"
 #include "widgets/oskar_BinaryLocations.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
+#include "widgets/oskar_DocumentationDisplay.h"
 #include "widgets/oskar_RunDialog.h"
 #include "widgets/oskar_SettingsDelegate.h"
 #include "widgets/oskar_SettingsItem.h"
@@ -88,11 +89,12 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QAction* actShowFirstLevel = new QAction("Show &First Level", this);
     QAction* actExpandAll = new QAction("&Expand All", this);
     QAction* actCollapseAll = new QAction("&Collapse All", this);
-    QAction* actAbout = new QAction("&About OSKAR...", this);
-    QAction* actCudaInfo = new QAction("CUDA System Info...", this);
     QAction* actRunInterferometer = new QAction("Run &Interferometer", this);
     QAction* actRunBeamPattern = new QAction("Run &Beam Pattern", this);
     QAction* actRunImager = new QAction("Run I&mager", this);
+    QAction* actHelpDoc = new QAction("Documentation...", this);
+    QAction* actCudaInfo = new QAction("CUDA System Info...", this);
+    QAction* actAbout = new QAction("&About OSKAR...", this);
     connect(actOpen, SIGNAL(triggered()), this, SLOT(openSettings()));
     connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveSettingsAs()));
     connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -110,6 +112,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     connect(actRunBeamPattern, SIGNAL(triggered()),
             this, SLOT(runBeamPattern()));
     connect(actRunImager, SIGNAL(triggered()), this, SLOT(runImager()));
+    connect(actHelpDoc, SIGNAL(triggered()), this, SLOT(helpDoc()));
 
     // Set up keyboard shortcuts.
     actOpen->setShortcut(QKeySequence::Open);
@@ -126,10 +129,12 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     QMenu* menuEdit = new QMenu("&Edit", menubar_);
     QMenu* menuView = new QMenu("&View", menubar_);
     QMenu* menuRun = new QMenu("&Run", menubar_);
+    QMenu* menuHelp = new QMenu("&Help", menubar_);
     menubar_->addAction(menuFile_->menuAction());
     menubar_->addAction(menuEdit->menuAction());
     menubar_->addAction(menuView->menuAction());
     menubar_->addAction(menuRun->menuAction());
+    menubar_->addAction(menuHelp->menuAction());
     menuFile_->addAction(actOpen);
     menuFile_->addAction(actSaveAs);
     createRecentFileActions();
@@ -142,12 +147,13 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     menuView->addAction(actShowFirstLevel);
     menuView->addAction(actExpandAll);
     menuView->addAction(actCollapseAll);
-    menuView->addSeparator();
-    menuView->addAction(actAbout);
-    menuView->addAction(actCudaInfo);
     menuRun->addAction(actRunInterferometer);
     menuRun->addAction(actRunBeamPattern);
     menuRun->addAction(actRunImager);
+    menuHelp->addAction(actHelpDoc);
+    menuHelp->addSeparator();
+    menuHelp->addAction(actCudaInfo);
+    menuHelp->addAction(actAbout);
 
     // Create the toolbar.
     QToolBar* toolbar = new QToolBar(this);
@@ -310,6 +316,12 @@ void oskar_MainWindow::cudaInfo()
 {
     oskar_CudaInfoDisplay infoDisplay(this);
     infoDisplay.exec();
+}
+
+void oskar_MainWindow::helpDoc()
+{
+    oskar_DocumentationDisplay helpDisplay(this);
+    helpDisplay.exec();
 }
 
 void oskar_MainWindow::runBeamPattern()

@@ -26,78 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_MAIN_WINDOW_H_
-#define OSKAR_MAIN_WINDOW_H_
+#ifndef OSKAR_DOCUMENTATION_DISPLAY_H_
+#define OSKAR_DOCUMENTATION_DISPLAY_H_
 
-#include <QtGui/QMainWindow>
-#include <QtCore/QString>
+/**
+ * @file oskar_DocumentationDisplay.h
+ */
 
-class oskar_SettingsModel;
-class oskar_SettingsModelFilter;
-class oskar_SettingsView;
-class QAction;
-class QModelIndex;
-class QVBoxLayout;
-class QWidget;
-class QMessageBox;
+#include <QtGui/QDialog>
 
-class oskar_MainWindow : public QMainWindow
+class oskar_DocumentationDisplay : public QDialog
 {
     Q_OBJECT
 
 public:
-    oskar_MainWindow(QWidget* parent = 0);
-
-protected:
-    void closeEvent(QCloseEvent* event);
-
-public slots:
-    void openSettings(QString filename = QString());
-    void saveSettingsAs(QString filename = QString());
-
-private slots:
-    void about();
-    void binLocations();
-    void cudaInfo();
-    void helpDoc();
-    void runBeamPattern();
-    void runInterferometer();
-    void runImager();
-    void setHideIfUnset(bool value);
-    void openRecentFile();
-
-private:
-    void runButton();
-
-    void createRecentFileActions();
-    void updateRecentFileActions();
-    void updateRecentFileList();
-
-private:
-    QString mainTitle_;
-    QWidget* widget_;
-    QVBoxLayout* layout_;
-    oskar_SettingsModel* model_;
-    oskar_SettingsModelFilter* modelProxy_;
-    oskar_SettingsView* view_;
-    QAction* actHideUnset_;
-    QString settingsFile_;
-    QString run_binary_;
-
-    QMenuBar* menubar_;
-    QMenu* menuFile_;
-
-    enum { MaxRecentFiles = 3 };
-    QMenu* recentFileMenu_;
-    QAction* separator_;
-    QAction* recentFiles_[MaxRecentFiles];
-
-    // Binary path names.
-    QString binary_interferometer_;
-    QString binary_beam_pattern_;
-    QString binary_imager_;
-
-    bool isModified_;
+    oskar_DocumentationDisplay(QWidget *parent = 0);
 };
 
-#endif // OSKAR_MAIN_WINDOW_H_
+#endif /* OSKAR_DOCUMENTATION_DISPLAY_H_ */
