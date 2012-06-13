@@ -38,6 +38,77 @@
 
 /**
  * @brief
+ * Evaluates pattern of a perfect dipole at source positions (single precision).
+ *
+ * @details
+ * This CUDA kernel evaluates the pattern of a perfect dipole antenna
+ * at the supplied source positions.
+ *
+ * The output matrix is
+ *
+ * ( g_theta^a   g_phi^a )
+ * ( g_theta^b   g_phi^b )
+ *
+ * where phi and theta are the angles measured from x to y and from xy to z,
+ * respectively.
+ *
+ * The supplied theta and phi positions of the sources are the <b>modified</b>
+ * source positions. They must be adjusted relative to a dipole with its axis
+ * oriented along the x-direction.
+ *
+ * @param[in] num_sources        Number of sources.
+ * @param[in] theta              Source position (modified) theta values in rad.
+ * @param[in] phi                Source position (modified) phi values in rad.
+ * @param[in] cos_power          Power of cosine taper (use 0 if none).
+ * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
+ * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
+ * @param[out] pattern           Array of output Jones matrices per source.
+ */
+__global__
+void oskar_cudak_evaluate_dipole_pattern_f(const int num_sources,
+        const float* theta, const float* phi, const int cos_power,
+        const float gaussian_fwhm_rad, const int return_x_dipole,
+        float4c* pattern);
+
+/**
+ * @brief
+ * Evaluates pattern of a perfect dipole at source positions (double precision).
+ *
+ * @details
+ * This CUDA kernel evaluates the pattern of a perfect dipole antenna
+ * at the supplied source positions.
+ *
+ * The output matrix is
+ *
+ * ( g_theta^a   g_phi^a )
+ * ( g_theta^b   g_phi^b )
+ *
+ * where phi and theta are the angles measured from x to y and from xy to z,
+ * respectively.
+ *
+ * The supplied theta and phi positions of the sources are the <b>modified</b>
+ * source positions. They must be adjusted relative to a dipole with its axis
+ * oriented along the x-direction.
+ *
+ * @param[in] num_sources        Number of sources.
+ * @param[in] theta              Source position (modified) theta values in rad.
+ * @param[in] phi                Source position (modified) phi values in rad.
+ * @param[in] cos_power          Power of cosine taper (use 0 if none).
+ * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
+ * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
+ * @param[out] pattern           Array of output Jones matrices per source.
+ */
+__global__
+void oskar_cudak_evaluate_dipole_pattern_d(const int num_sources,
+        const double* theta, const double* phi, const int cos_power,
+        const double gaussian_fwhm_rad, const int return_x_dipole,
+        double4c* pattern);
+
+
+/* DEPRECATED FUNCTIONS BELOW */
+
+/**
+ * @brief
  * Evaluates patterns of two perfect dipoles at source positions for given
  * orientations (single precision).
  *

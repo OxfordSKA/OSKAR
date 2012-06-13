@@ -171,17 +171,6 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
             {
                 // Load element pattern data for the station,
                 // if files have been found.
-                if (element_file_x || element_file_y)
-                {
-                    // Allocate memory for the element pattern structure.
-                    station->element_pattern = (oskar_ElementModel*)
-                                malloc(sizeof(oskar_ElementModel));
-                    error = oskar_element_model_init(station->element_pattern,
-                            oskar_telescope_model_type(telescope),
-                            OSKAR_LOCATION_CPU);
-                    if (error) return error;
-                }
-
                 QString files;
                 if (element_file_x) files.append(element_file_x);
                 if (element_file_y) files.append(element_file_y);

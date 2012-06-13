@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "station/oskar_element_model_init.h"
 #include "station/oskar_station_model_init.h"
 #include "utility/oskar_mem_init.h"
 #include <stdlib.h>
@@ -100,7 +101,12 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
 
     model->child = NULL;
     model->parent = NULL;
-    model->element_pattern = NULL;
+
+    /* Allocate memory for the element model structure and initialise it. */
+    model->element_pattern = (oskar_ElementModel*)
+            malloc(sizeof(oskar_ElementModel));
+    err = oskar_element_model_init(model->element_pattern, type, location);
+    if (err) return err;
 
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;

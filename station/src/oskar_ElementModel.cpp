@@ -26,51 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "station/oskar_ElementModel.h"
+#include "station/oskar_element_model_copy.h"
 #include "station/oskar_element_model_init.h"
-#include "math/oskar_spline_data_init.h"
-#include "utility/oskar_mem_init.h"
+#include "station/oskar_element_model_free.h"
+#include "station/oskar_element_model_type.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
+oskar_ElementModel::oskar_ElementModel(int type, int location)
 {
-    int err;
-
-    /* Initialise variables. */
-    data->cos_power = 0;
-    data->gaussian_fwhm_rad = 0.0;
-
-    /* Check type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Initialise memory. */
-    err = oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1);
-    if (err) return err;
-    err = oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_re_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_im_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_re_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_im_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_re_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_im_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_re_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_im_y, type, location);
-    if (err) return err;
-
-    return 0;
+    if (oskar_element_model_init(this, type, location))
+        throw "Error in oskar_element_model_init";
 }
 
-#ifdef __cplusplus
+oskar_ElementModel::oskar_ElementModel(const oskar_ElementModel* other,
+        int location)
+{
+    if (oskar_element_model_init(this, other->type(), location))
+        throw "Error in oskar_element_model_init";
+    if (oskar_element_model_copy(this, other))
+        throw "Error in oskar_station_model_copy";
 }
-#endif
+
+oskar_ElementModel::~oskar_ElementModel()
+{
+    if (oskar_element_model_free(this))
+        throw "Error in oskar_element_model_free";
+}
+
+int oskar_ElementModel::type() const
+{
+    return oskar_element_model_type(this);
+}

@@ -103,10 +103,6 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     /* TODO Work out how to deal with element pattern data properly! */
     if (src->element_pattern)
     {
-        /* Allocate memory for the element model structure. */
-        dst->element_pattern = (oskar_ElementModel*)
-                malloc(sizeof(oskar_ElementModel));
-
         /* Initialise the element model. */
         error = oskar_element_model_init(dst->element_pattern,
                 oskar_element_model_type(src->element_pattern),

@@ -233,7 +233,7 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                         G_ptr = &G_temp;
                     }
 
-                    if (!station->element_pattern)
+                    if (!station->element_pattern->theta_im_x.coeff.data)
                     {
                         double cos_x, sin_x, cos_y, sin_y;
 

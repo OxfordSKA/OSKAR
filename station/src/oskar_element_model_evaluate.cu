@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "math/oskar_spline_data_evaluate.h"
 #include "station/oskar_element_model_evaluate.h"
-#include "station/oskar_evaluate_spline_pattern.h"
+#include "station/oskar_evaluate_tapered_dipole_pattern.h"
+#include "utility/oskar_mem_type_check.h"
 
 #define PIf 3.14159265358979323846f
 #define PI  3.14159265358979323846
@@ -127,11 +129,11 @@ int oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
 }
 
 int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
-        double orientation_x, double orientation_y, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* theta,
-        oskar_Mem* phi)
+        int use_polarised, double orientation_x, double orientation_y,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        oskar_Mem* theta, oskar_Mem* phi)
 {
-    int error, num_blocks, num_threads;
+    int error;
 
     /* Check that the output array is complex. */
     if (!oskar_mem_is_complex(G->type))
@@ -144,66 +146,82 @@ int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
             G->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    /* Convert dipole axis orientations to delta values in phi. */
-    orientation_x -= 0.5 * PI;
+    /* Convert dipole axis azimuths to phi values. */
+    orientation_x = PI/2 - orientation_x;
+    orientation_y = PI/2 - orientation_y;
 
     /* Evaluate polarised response if output array is matrix type. */
     if (oskar_mem_is_matrix(G->type))
     {
-        /* Compute modified theta and phi coordinates for dipole X. */
-        error = oskar_hor_lmn_to_modified_theta_phi(theta, phi,
-                orientation_x, l, m, n);
-        if (error) return error;
-
-        /* Check if spline data present for dipole X. */
-        if (model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
-                model->phi_re_x.coeff.data && model->phi_im_x.coeff.data)
+        if (use_polarised)
         {
-            /* Evaluate spline pattern for dipole X. */
-            error = oskar_spline_data_evaluate(G, 0, 8, &model->theta_re_x,
-                    theta, phi);
+            /* Compute modified theta and phi coordinates for dipole X. */
+            error = oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                    -orientation_x, l, m, n);
             if (error) return error;
-            error = oskar_spline_data_evaluate(G, 1, 8, &model->theta_im_x,
-                    theta, phi);
+
+            /* Check if spline data present for dipole X. */
+            if (model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
+                    model->phi_re_x.coeff.data && model->phi_im_x.coeff.data)
+            {
+                /* Evaluate spline pattern for dipole X. */
+                error = oskar_spline_data_evaluate(G, 0, 8, &model->theta_re_x,
+                        theta, phi);
+                if (error) return error;
+                error = oskar_spline_data_evaluate(G, 1, 8, &model->theta_im_x,
+                        theta, phi);
+                if (error) return error;
+                error = oskar_spline_data_evaluate(G, 2, 8, &model->phi_re_x,
+                        theta, phi);
+                if (error) return error;
+                error = oskar_spline_data_evaluate(G, 3, 8, &model->phi_im_x,
+                        theta, phi);
+                if (error) return error;
+            }
+            else
+            {
+                /* Evaluate tapered dipole pattern for dipole X. */
+                error = oskar_evaluate_tapered_dipole_pattern(G, theta, phi,
+                        model->cos_power, model->gaussian_fwhm_rad, 1);
+                if (error) return error;
+            }
+
+            /* Compute modified theta and phi coordinates for dipole Y. */
+            error = oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                    -orientation_y, l, m, n);
             if (error) return error;
-            error = oskar_spline_data_evaluate(G, 2, 8, &model->phi_re_x,
-                    theta, phi);
-            if (error) return error;
-            error = oskar_spline_data_evaluate(G, 3, 8, &model->phi_im_x,
-                    theta, phi);
-            if (error) return error;
+
+            /* Check if spline data present for dipole Y. */
+            if (model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
+                    model->phi_re_y.coeff.data && model->phi_im_y.coeff.data)
+            {
+                /* Evaluate spline pattern for dipole Y. */
+                error = oskar_spline_data_evaluate(G, 4, 8, &model->theta_re_y,
+                        theta, phi);
+                if (error) return error;
+                error = oskar_spline_data_evaluate(G, 5, 8, &model->theta_im_y,
+                        theta, phi);
+                if (error) return error;
+                error = oskar_spline_data_evaluate(G, 6, 8, &model->phi_re_y,
+                        theta, phi);
+                if (error) return error;
+                error = oskar_spline_data_evaluate(G, 7, 8, &model->phi_im_y,
+                        theta, phi);
+                if (error) return error;
+            }
+            else
+            {
+                /* Evaluate tapered dipole pattern for dipole Y. */
+                error = oskar_evaluate_tapered_dipole_pattern(G, theta, phi,
+                        model->cos_power, model->gaussian_fwhm_rad, 0);
+                if (error) return error;
+            }
         }
+
+        /* Don't use polarised element model. */
         else
         {
-            /* Evaluate tapered dipole pattern for dipole X. */
-        }
-
-        /* Compute modified theta and phi coordinates for dipole Y. */
-        error = oskar_hor_lmn_to_modified_theta_phi(theta, phi,
-                orientation_y, l, m, n);
-        if (error) return error;
-
-        /* Check if spline data present for dipole Y. */
-        if (model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
-                model->phi_re_y.coeff.data && model->phi_im_y.coeff.data)
-        {
-            /* Evaluate spline pattern for dipole Y. */
-            error = oskar_spline_data_evaluate(G, 4, 8, &model->theta_re_y,
-                    theta, phi);
-            if (error) return error;
-            error = oskar_spline_data_evaluate(G, 5, 8, &model->theta_im_y,
-                    theta, phi);
-            if (error) return error;
-            error = oskar_spline_data_evaluate(G, 6, 8, &model->phi_re_y,
-                    theta, phi);
-            if (error) return error;
-            error = oskar_spline_data_evaluate(G, 7, 8, &model->phi_im_y,
-                    theta, phi);
-            if (error) return error;
-        }
-        else
-        {
-            /* Evaluate tapered dipole pattern for dipole Y. */
+            return 0;
         }
     }
 

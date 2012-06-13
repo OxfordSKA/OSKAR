@@ -26,51 +26,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_init.h"
-#include "math/oskar_spline_data_init.h"
-#include "utility/oskar_mem_init.h"
+#ifndef OSKAR_EVALUATE_TAPERED_DIPOLE_PATTERN_H_
+#define OSKAR_EVALUATE_TAPERED_DIPOLE_PATTERN_H_
+
+/**
+ * @file oskar_evaluate_tapered_dipole_pattern.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
-{
-    int err;
-
-    /* Initialise variables. */
-    data->cos_power = 0;
-    data->gaussian_fwhm_rad = 0.0;
-
-    /* Check type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Initialise memory. */
-    err = oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1);
-    if (err) return err;
-    err = oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_re_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_im_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_re_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_im_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_re_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_im_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_re_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_im_y, type, location);
-    if (err) return err;
-
-    return 0;
-}
+/**
+ * @brief
+ * Evaluates pattern of a perfect dipole at source positions.
+ *
+ * @details
+ * This CUDA kernel evaluates the pattern of a perfect dipole antenna
+ * at the supplied source positions.
+ *
+ * The output matrix is
+ *
+ * ( g_theta^a   g_phi^a )
+ * ( g_theta^b   g_phi^b )
+ *
+ * where phi and theta are the angles measured from x to y and from xy to z,
+ * respectively.
+ *
+ * The supplied theta and phi positions of the sources are the <b>modified</b>
+ * source positions. They must be adjusted relative to a dipole with its axis
+ * oriented along the x-direction.
+ *
+ * @param[out] pattern           Array of output Jones matrices per source.
+ * @param[in] theta              Source position (modified) theta values in rad.
+ * @param[in] phi                Source position (modified) phi values in rad.
+ * @param[in] cos_power          Power of cosine taper (use 0 if none).
+ * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
+ * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
+ */
+OSKAR_EXPORT
+int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern,
+        const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
+        int gaussian_fwhm_rad, int return_x_dipole);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_EVALUATE_TAPERED_DIPOLE_PATTERN_H_ */

@@ -33,6 +33,7 @@
  * @file oskar_ElementModel.h
  */
 
+#include "oskar_global.h"
 #include "math/oskar_SplineData.h"
 #include "utility/oskar_Mem.h"
 
@@ -45,8 +46,8 @@
  */
 struct oskar_ElementModel
 {
-    double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
     int cos_power; /* For a cosine taper, the power of the cosine. */
+    double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
     oskar_Mem filename_x;
     oskar_Mem filename_y;
     oskar_SplineData theta_re_x;
@@ -57,6 +58,40 @@ struct oskar_ElementModel
     oskar_SplineData theta_im_y;
     oskar_SplineData phi_re_y;
     oskar_SplineData phi_im_y;
+
+#ifdef __cplusplus
+    /* If C++, provide constructors and methods. */
+    /**
+     * @brief Constructs an empty element model structure.
+     *
+     * @details
+     * Constructs an empty element model structure.
+     */
+    oskar_ElementModel(int type = OSKAR_DOUBLE,
+            int location = OSKAR_LOCATION_CPU);
+
+    /**
+     * @brief Constructs a copy of another element model structure.
+     *
+     * @details
+     * Copies an existing element model structure to the specified location.
+     */
+    oskar_ElementModel(const oskar_ElementModel* other, int location);
+
+    /**
+     * @brief Destroys the element model structure.
+     *
+     * @details
+     * Destroys the element model structure, freeing any memory it uses.
+     */
+    ~oskar_ElementModel();
+
+    /**
+     * @brief Returns the base type of all arrays in the structure, or an error
+     * code if the types are inconsistent.
+     */
+    int type() const;
+#endif
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
 

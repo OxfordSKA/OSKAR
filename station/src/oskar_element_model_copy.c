@@ -39,6 +39,9 @@ int oskar_element_model_copy(oskar_ElementModel* dst,
 {
     int err;
 
+    dst->cos_power = src->cos_power;
+    dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
+
     err = oskar_mem_copy(&dst->filename_x, &src->filename_x);
     if (err) return err;
     err = oskar_mem_copy(&dst->filename_y, &src->filename_y);

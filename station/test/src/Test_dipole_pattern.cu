@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "station/oskar_ElementModel.h"
+#include "station/oskar_element_model_evaluate.h"
 #include "station/test/Test_dipole_pattern.h"
 #include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_vector_types.h"
 
 #define TIMER_ENABLE 1
@@ -87,8 +90,8 @@ void Test_dipole_pattern::test()
             OSKAR_LOCATION_GPU, num_pixels);
 
     // Define antenna orientations.
-    double orientation_x = 90.0 * M_PI/180;
-    double orientation_y = 0.0 * M_PI/180;
+    double orientation_x = -120.0 * M_PI/180;
+    double orientation_y = 137.0 * M_PI/180;
 
     // Call the kernel.
     TIMER_START
@@ -105,6 +108,28 @@ void Test_dipole_pattern::test()
 
     // Copy the memory back.
     oskar_Mem pattern_cpu(&pattern, OSKAR_LOCATION_CPU);
+
+    // New evaluation.
+    oskar_ElementModel model;
+    oskar_Mem theta(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_pixels);
+    oskar_Mem phi(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_pixels);
+    int error = oskar_element_model_evaluate(&model, &pattern, 1, orientation_x,
+            orientation_y, &l, &m, &n, &theta, &phi);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+    // Copy the memory back.
+    oskar_Mem pattern_cpu2(&pattern, OSKAR_LOCATION_CPU);
+    for (int i = 0; i < num_pixels; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].a.x, ((double4c*)pattern_cpu2.data)[i].a.x, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].b.x, ((double4c*)pattern_cpu2.data)[i].b.x, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].c.x, ((double4c*)pattern_cpu2.data)[i].c.x, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].d.x, ((double4c*)pattern_cpu2.data)[i].d.x, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].a.y, ((double4c*)pattern_cpu2.data)[i].a.y, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].b.y, ((double4c*)pattern_cpu2.data)[i].b.y, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].c.y, ((double4c*)pattern_cpu2.data)[i].c.y, 1e-6);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double4c*)pattern_cpu.data)[i].d.y, ((double4c*)pattern_cpu2.data)[i].d.y, 1e-6);
+    }
 
     const char filename[] = "cpp_unit_test_dipole_pattern.dat";
     FILE* file = fopen(filename, "w");

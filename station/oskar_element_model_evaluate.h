@@ -51,6 +51,7 @@ extern "C" {
  *
  * @param[in] model  Pointer to element model structure.
  * @param[in,out]  G Pointer to memory into which to accumulate output data.
+ * @param[in] use_polarised If true, then treat element as polarised.
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
  * @param[in]      l Pointer to l-direction cosines.
@@ -67,9 +68,9 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
-        double orientation_x, double orientation_y, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, oskar_Mem* theta,
-        oskar_Mem* phi);
+        int use_polarised, double orientation_x, double orientation_y,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        oskar_Mem* theta, oskar_Mem* phi);
 
 #ifdef __cplusplus
 }
