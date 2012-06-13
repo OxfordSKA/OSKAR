@@ -546,7 +546,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "factor is selected to give the requested average fractional \n"
             "error. If false, the supplied smoothness factor is used instead.");
     k = group + "/average_fractional_error";
-    registerSetting(k, "Average fractional error", oskar_SettingsItem::DOUBLE, false, 0.002);
+    registerSetting(k, "Average fractional error", oskar_SettingsItem::DOUBLE, false, 0.02);
     setTooltip(k, "The target average fractional error between the fitted \n"
             "surface and the numerical element pattern input data. \n"
             "Choose this value carefully. A value that is too small may \n"

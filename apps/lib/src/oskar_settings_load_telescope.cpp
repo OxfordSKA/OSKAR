@@ -150,7 +150,7 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     tel->station.element_fit.all.search_for_best_fit =
             s.value("search_for_best_fit", true).toBool();
     tel->station.element_fit.all.average_fractional_error =
-            s.value("average_fractional_error", 0.002).toDouble();
+            s.value("average_fractional_error", 0.02).toDouble();
     tel->station.element_fit.all.average_fractional_error_factor_increase =
             s.value("average_fractional_error_factor_increase", 1.5).toDouble();
     tel->station.element_fit.all.eps_float =
