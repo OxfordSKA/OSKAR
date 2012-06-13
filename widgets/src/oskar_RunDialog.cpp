@@ -159,6 +159,9 @@ void oskar_RunDialog::appendOutput(QString output)
             scroll = true;
 
         // Append the output text.
+        QTextCursor cursor = display_->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        display_->setTextCursor(cursor);
         display_->insertPlainText(output);
 
         // Scroll to bottom if necessary.
