@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.0.0-beta                                  Last update: 19 April 2012 |
+| OSKAR 2.0-beta                                     Last update: 13 June 2012 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
@@ -13,7 +13,7 @@ installs may be possible, but are not currently supported.
 2. Dependencies
 --------------------------------------------------------------------------------
 OSKAR depends on a number of other libraries. The main components of OSKAR
-require CUDA 4.0 or later and Qt 4.6 or later to te installed on the target
+require CUDA 4.0 or later and Qt 4.6 or later to be installed on the target
 system, and also CBLAS and LAPACK for full functionality. Additionally, the
 CFITSIO and casacore libraries must be present if FITS images and Measurement
 Sets are to be exported. The MATLAB interface will be built if MATLAB R2010b
@@ -79,6 +79,34 @@ These are as follows:
 
     * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
         Build OSKAR in release or debug mode.
+        
+    * -DLAPACK_LIB_DIR=<path> (default: searches the default system library paths)  
+        Specifies a custom path in which to look for the LAPACK library (liblapack.so).
+        NOTE: This should only be used in special cases, where the version 
+        of LAPACK installed in the system library path can't be used to build
+        OSKAR.
+    
+    * -DCBLAS_LIB_DIR=<path> (default: searches the default system library paths)
+        Specifies a custom path in which to look for the CBLAS library 
+        (atlas: libcblas.so, gsl: libgslcblas.so)
+        NOTE: This should only be used in special cases, where the version 
+        of CBLAS installed in the system library path can't be used to build
+        OSKAR.
+    
+    * -DCFITSIO_LIB_DIR=<path> (default: searches the default system library paths)
+        Specifies a custom path in which to look for the CFITSIO library 
+        (libcfitsio.so)
+        NOTE: This should only be used in special cases, where the version 
+        of CFITSIO installed in the system library path can't be used to build
+        OSKAR.
+
+    * -DCFITSIO_INC_DIR=<path> (default: searches the default system include paths)
+        Specifies a custom path in which to look for the CFITSIO library 
+        headers (fitsio.h and others).
+        NOTE: This should only be used in special cases, where the version 
+        of CFITSIO headers installed in system include path can't be used to build
+        OSKAR.
+
 
 3.2. Environment Variables
 --------------------------------------------------------------------------------
@@ -90,6 +118,14 @@ The following environment variables affect the CMake build system:
         directory. (Note that this variable should not normally need to be set,
         but can be used if the default CMake macros fail to find MATLAB on your
         system.)
+
+3.3. Custom (Non-System) Qt4 Installations
+--------------------------------------------------------------------------------
+When searching for a valid Qt4 installation, the OSKAR CMake build system 
+queries the qmake binary in order to determine the location of the relevant
+libraries and headers. Therefore, all that is required to use a specific version
+of Qt4 is to add the location of the desired qmake binary to the beginning of
+the system search path.
 
 
 4. Testing the Installation

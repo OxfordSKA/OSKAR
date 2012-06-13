@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.0.0-beta                                  Last update: 17 April 2012 |
+| OSKAR 2.0-beta                                     Last update: 13 June 2012 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator
@@ -86,7 +86,7 @@ folders.
 
 3.2 Applications
 --------------------------------------------------------------------------------
-* oskar                    : Main OSKAR GUI Application. 
+* oskar                    : Main OSKAR GUI Application.
 * oskar_sim_interferometer : Command line application for interferometry simulations.
 * oskar_sim_beam_pattern   : Command line application for beamforming simulations.
 * oskar_imager             : Command line application for simple DFT imaging.
@@ -96,7 +96,7 @@ folders.
 An experimental MATLAB interface consisting of functions for:
 * Reading OSKAR visibility files
 * Reading OSKAR image files.
-* Making images by DFT.  
+* Making images by DFT.
 * Reading OSKAR source catalog files.
 * Reading OSKAR binary files.
 
