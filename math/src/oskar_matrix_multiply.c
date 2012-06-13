@@ -39,6 +39,19 @@ extern "C" {
 enum CBLAS_ORDER {CblasRowMajor=101, CblasColMajor=102};
 enum CBLAS_TRANSPOSE {CblasNoTrans=111, CblasTrans=112, CblasConjTrans=113};
 
+//#ifndef OSKAR_NO_BLAS
+//extern void sgemm_(const char* TransA, const char* TransB, const int M,
+//        const int N, const int K, const float alpha, const float* A,
+//        const int lda, const float* B, const int lbd, const float beta,
+//        const float* C, const int ldc);
+//
+//extern void dgemm_(const char* TransA, const char* TransB, const int M,
+//        const int N, const int K, const double alpha, const double* A,
+//        const int lda, const double* B, const int lbd, const double beta,
+//        const double* C, const int ldc);
+//#endif
+
+#ifndef OSKAR_NO_CBLAS
 void cblas_sgemm(const enum CBLAS_ORDER Order,
         const enum CBLAS_TRANSPOSE TransA,
         const enum CBLAS_TRANSPOSE TransB, const int M, const int N,
@@ -52,6 +65,7 @@ void cblas_dgemm(const enum CBLAS_ORDER Order,
         const int K, const double alpha, const double *A,
         const int lda, const double *B, const int ldb,
         const double beta, double *C, const int ldc);
+#endif
 
 int oskar_matrix_multiply(oskar_Mem* C,
         int rows_A, int cols_A, int rows_B, int cols_B,
