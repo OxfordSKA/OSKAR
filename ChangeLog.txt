@@ -1,4 +1,4 @@
-2012-06-12  OSKAR 2.0.2-beta
+2012-06-13  OSKAR 2.0.2-beta
 
     * Embedded simulation log in output files.
 
@@ -13,6 +13,16 @@
     * Updated settings interface for the output of beam pattern images to
       allow the output of power (amplitude), phase and complex (voltage)
       patterns.
+
+    * Updated the colour and formatting of options in the settings model used
+      for the OSKAR GUI in order to highlight the various types of settings
+      (required options, user specified values and defaults)
+
+    * Improved the logic used in the display of the GUI (settings model)
+      right click menu.
+
+    * Updated the CMake build system to improve compiler compatibility/portability
+      when building in the default (release) mode.
 
 2012-05-15  OSKAR 2.0.1-beta
 
