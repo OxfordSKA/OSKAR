@@ -70,7 +70,7 @@ extern "C" {
 OSKAR_EXPORT
 int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern,
         const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
-        int gaussian_fwhm_rad, int return_x_dipole);
+        double gaussian_fwhm_rad, int return_x_dipole);
 
 #ifdef __cplusplus
 }

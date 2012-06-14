@@ -45,7 +45,7 @@ oskar_BinaryLocations::oskar_BinaryLocations(QWidget *parent) : QDialog(parent)
     setWindowTitle("Binary Locations");
     QVBoxLayout* vLayoutMain = new QVBoxLayout(this);
     if (parent)
-        resize(0.85 * parent->width(), 0);
+        resize(int(0.85 * parent->width()), 0);
 
     // Create binary location group.
     QGroupBox* grp = new QGroupBox("OSKAR Binary Locations", this);
