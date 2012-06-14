@@ -1,3 +1,9 @@
+2012-06-XX OSKAR 2.0.3-beta
+
+    * Fixed a build system bug related to finding CBLAS.
+
+    * Added help dialog with link to documentation.
+
 2012-06-13  OSKAR 2.0.2-beta
 
     * Embedded simulation log in output files.
