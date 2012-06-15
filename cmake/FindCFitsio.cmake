@@ -32,7 +32,6 @@ endforeach (lib ${CFITSIO_NAMES})
 
 # handle the QUIETLY and REQUIRED arguments and set CFITSIO_FOUND to TRUE if.
 # all listed variables are TRUE
-include(FindPackageHandleCompat)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CFitsio DEFAULT_MSG
     CFITSIO_LIBRARIES CFITSIO_INCLUDE_DIR)
 

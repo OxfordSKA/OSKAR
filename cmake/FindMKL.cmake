@@ -97,7 +97,6 @@ endforeach(mkl_lib ${mkl_lib_names})
 
 # Handle the QUIETLY and REQUIRED arguments.
 # ==============================================================================
-include(FindPackageHandleCompat)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(MKL DEFAULT_MSG MKL_LIBRARIES)
 
 

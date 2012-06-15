@@ -7,19 +7,19 @@
 
 set(LAPACK_NAMES ${LAPACK_NAMES} lapack)
 if (LAPACK_LIB_DIR)
-	find_library(LAPACK_LIBRARY
-  		NAMES ${LAPACK_NAMES}
-    	PATHS ${LAPACK_LIB_DIR} NO_DEFAULT_PATH)	
+    find_library(LAPACK_LIBRARY
+          NAMES ${LAPACK_NAMES}
+        PATHS ${LAPACK_LIB_DIR} NO_DEFAULT_PATH)
 else()
-	find_library(LAPACK_LIBRARY
-    	NAMES ${LAPACK_NAMES}
-	    PATHS
-	    ${LAPACK_LIB_DIR}
-	    /usr/lib64
-	    /usr/lib
-	    /usr/local/lib64
-	    /usr/local/lib
-	    NO_DEFAULT_PATHS)	
+    find_library(LAPACK_LIBRARY
+        NAMES ${LAPACK_NAMES}
+        PATHS
+        ${LAPACK_LIB_DIR}
+        /usr/lib64
+        /usr/lib
+        /usr/local/lib64
+        /usr/local/lib
+        NO_DEFAULT_PATHS)
 endif()
 
 if (LAPACK_LIBRARY)
@@ -28,7 +28,6 @@ endif (LAPACK_LIBRARY)
 
 # handle the QUIETLY and REQUIRED arguments and set LAPACK_FOUND to TRUE if
 # all listed variables are TRUE
-include(FindPackageHandleCompat)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(LAPACK DEFAULT_MSG
                                   LAPACK_LIBRARY LAPACK_LIBRARIES)
 

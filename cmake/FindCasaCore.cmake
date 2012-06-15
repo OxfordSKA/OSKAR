@@ -79,7 +79,6 @@ endif (LAPACK_FOUND)
 
 # handle the QUIETLY and REQUIRED arguments and set CASACORE_FOUND to TRUE if.
 # all listed variables are TRUE
-include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CASACORE DEFAULT_MSG
     CASACORE_LIBRARIES CASACORE_INCLUDE_DIR)
 
