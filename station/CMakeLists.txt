@@ -40,6 +40,9 @@ set(station_SRC
     src/oskar_station_model_set_element_weight.c
     src/oskar_station_model_type.c
     src/oskar_StationModel.cpp
+    src/oskar_work_station_beam_free.c
+    src/oskar_work_station_beam_init.c
+    src/oskar_WorkStationBeam.cpp
 )
 
 # Add the CUDA kernels.
