@@ -10,6 +10,7 @@ if (CPPUNIT_FOUND)
         src/Test_MeasurementSet.cpp
     )
 
+	include_directories(${CPPUNIT_INCLUDE_DIR})
     add_executable(ms_test ${ms_test_SRC})
     target_link_libraries(ms_test oskar_ms ${CPPUNIT_LIBRARIES})
 

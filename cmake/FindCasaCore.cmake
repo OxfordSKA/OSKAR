@@ -65,15 +65,25 @@ endif ()
 # mmm this only works by luck by the looks of things...!
 if (LAPACK_FOUND)
     set(CASACORE_LINKER_FLAGS ${LAPACK_LINKER_FLAGS})
-    find_path(CASACORE_INCLUDE_DIR casacore)
+    
+	if (CASACORE_INC_DIR)
+		find_path(CASACORE_INCLUDE_DIR casacore 
+			PATHS ${CASACORE_INC_DIR} NO_DEFAULT_PATH)
+	else()
+	    find_path(CASACORE_INCLUDE_DIR casacore)
+	endif()
 
     foreach (module ${casacore_modules})
-        find_library(CASACORE_LIBRARY_${module} NAMES ${module}
-            PATHS ENV CASACORE_LIBRARY_PATH)
-        mark_as_advanced(CASACORE_LIBRARY_${module})
-        list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
-    endforeach ()
-
+		if (CASACORE_LIB_DIR)
+   	    	find_library(CASACORE_LIBRARY_${module} NAMES ${module}
+       	    	PATHS ${CASACORE_LIB_DIR} NO_DEFAULT_PATH)
+		else()
+	   	    find_library(CASACORE_LIBRARY_${module} NAMES ${module}
+        	    PATHS ENV CASACORE_LIBRARY_PATH)
+		endif()
+	    mark_as_advanced(CASACORE_LIBRARY_${module})
+    	list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
+ 	endforeach ()	
     list(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
 endif (LAPACK_FOUND)
 
@@ -82,9 +92,6 @@ endif (LAPACK_FOUND)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(CASACORE DEFAULT_MSG
     CASACORE_LIBRARIES CASACORE_INCLUDE_DIR)
 
-if (CASACORE_FOUND)
-    #
-else ()
+if (NOT CASACORE_FOUND)
     set(CASACORE_LIBRARIES)
-endif ()
-
+endif()
