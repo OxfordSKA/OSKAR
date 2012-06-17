@@ -69,9 +69,6 @@ private slots:
     void runFinished();
 
 private:
-    void run(int depth, QStringList outputFiles);
-
-private:
     bool failed_;
     bool finished_;
     QCheckBox* autoClose_;

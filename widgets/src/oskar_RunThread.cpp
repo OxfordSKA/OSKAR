@@ -35,7 +35,6 @@
 oskar_RunThread::oskar_RunThread(oskar_SettingsModel* model, QObject* parent)
 : QThread(parent)
 {
-    qRegisterMetaType<QProcess::ProcessError>("QProcess::ProcessError");
     abort_ = false;
     process_ = NULL;
     model_ = model;

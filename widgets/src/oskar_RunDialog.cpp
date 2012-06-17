@@ -48,6 +48,8 @@
 oskar_RunDialog::oskar_RunDialog(oskar_SettingsModel* model, QWidget *parent)
 : QDialog(parent)
 {
+    // Initialise members.
+    failed_ = false;
     finished_ = false;
 
     // Set up the thread.
