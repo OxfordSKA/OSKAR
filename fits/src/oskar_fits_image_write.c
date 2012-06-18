@@ -200,6 +200,7 @@ int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
     }
 
     /* Close the FITS file. */
+    free(log_line_buffer);
     fits_close_file(fptr, &status);
     oskar_fits_check_status(log, status, "Closing file");
     if (status) return OSKAR_ERR_FITS_IO;

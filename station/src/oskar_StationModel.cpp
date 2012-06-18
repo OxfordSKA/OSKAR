@@ -27,6 +27,7 @@
  */
 
 #include "station/oskar_station_model_all_headers.h"
+#include <cstdio>
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
 {

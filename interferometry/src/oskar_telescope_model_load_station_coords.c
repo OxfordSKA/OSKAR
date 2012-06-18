@@ -88,10 +88,10 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         read = oskar_string_to_array_d(line, 3, par);
         if (read < 2) continue;
 
-        /* Ensure enough space in arrays. */
-        if (n % 100 == 0)
+        /* FIXME Ensure enough space in arrays. */
+        if (n % 1 == 0)
         {
-            err = oskar_telescope_model_resize(telescope, n + 100);
+            err = oskar_telescope_model_resize(telescope, n + 1);
             if (err)
             {
                 fclose(file);
