@@ -97,9 +97,6 @@ ELSE( WIN32 )
   find_library(MATLAB_MAT_LIBRARY mat  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   find_library(MATLAB_MX_LIBRARY  mx   PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   find_library(MATLAB_ENG_LIBRARY eng  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
-  #find_library(MATLAB_QT_QTCORE_LIBRARY QtCore PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
-  #find_library(MATLAB_QT_QTGUI_LIBRARY  QtGui  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
-  #find_library(MATLAB_QT_QTXML_LIBRARY  QtXml  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   # HACK: find_library doesnt seem to be able to find versioned libraries... :(
   find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4 PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
 

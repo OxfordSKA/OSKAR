@@ -33,15 +33,16 @@
 #==============================================================================
 
 # NOTE: This order is important for static version of the library... don't mess with it!
+# --> Enabled only modules that required for libcasa_ms
 set(casacore_modules
-    casa_images
-    casa_mirlib
-    casa_components
-    casa_coordinates
-    casa_lattices
-    casa_msfits
+    #casa_images
+    #casa_mirlib
+    #casa_components
+    #casa_coordinates
+    #casa_lattices
+    #casa_msfits
     casa_ms
-    casa_fits
+    #casa_fits
     casa_measures
     casa_tables
     casa_scimath
@@ -61,29 +62,17 @@ else ()
   find_package(LAPACK REQUIRED)
 endif ()
 
-
 # mmm this only works by luck by the looks of things...!
 if (LAPACK_FOUND)
     set(CASACORE_LINKER_FLAGS ${LAPACK_LINKER_FLAGS})
-    
-	if (CASACORE_INC_DIR)
-		find_path(CASACORE_INCLUDE_DIR casacore 
-			PATHS ${CASACORE_INC_DIR} NO_DEFAULT_PATH)
-	else()
-	    find_path(CASACORE_INCLUDE_DIR casacore)
-	endif()
-
+    find_path(CASACORE_INCLUDE_DIR casacore HINTS ${CASACORE_INC_DIR})
     foreach (module ${casacore_modules})
-		if (CASACORE_LIB_DIR)
-   	    	find_library(CASACORE_LIBRARY_${module} NAMES ${module}
-       	    	PATHS ${CASACORE_LIB_DIR} NO_DEFAULT_PATH)
-		else()
-	   	    find_library(CASACORE_LIBRARY_${module} NAMES ${module}
-        	    PATHS ENV CASACORE_LIBRARY_PATH)
-		endif()
-	    mark_as_advanced(CASACORE_LIBRARY_${module})
-    	list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
- 	endforeach ()	
+        find_library(CASACORE_LIBRARY_${module} NAMES ${module}
+           HINTS ${CASACORE_LIB_DIR}
+           PATHS ENV CASACORE_LIBRARY_PATH)
+        mark_as_advanced(CASACORE_LIBRARY_${module})
+        list(APPEND CASACORE_LIBRARIES ${CASACORE_LIBRARY_${module}})
+     endforeach ()
     list(APPEND CASACORE_LIBRARIES ${LAPACK_LIBRARIES})
 endif (LAPACK_FOUND)
 

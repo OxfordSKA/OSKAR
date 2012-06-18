@@ -8,25 +8,17 @@
 #  CFITSIO_INCLUDE_DIR   = Directory where to find fitsio.h
 #
 
-if (CFITSIO_INC_DIR)
-    find_path(CFITSIO_INCLUDE_DIR fitsio.h
-        PATHS ${CFITSIO_INC_DIR} NO_DEFAULT_PATH)
-else()
-    find_path(CFITSIO_INCLUDE_DIR fitsio.h
-        PATHS
-        /usr/include/cfitsio/
-        /usr/include/)
-endif()
+find_path(CFITSIO_INCLUDE_DIR fitsio.h
+    HINTS ${CFITSIO_INC_DIR}
+    PATHS
+    /usr/include/cfitsio/
+    /usr/include/)
 
 set(CFITSIO_NAMES cfitsio)
 
 foreach (lib ${CFITSIO_NAMES})
-    if (CFITSIO_LIB_DIR)
-        find_library(CFITSIO_LIBRARY_${lib} NAMES ${lib}
-            PATHS ${CFITSIO_LIB_DIR} NO_DEFAULT_PATH)
-    else()
-        find_library(CFITSIO_LIBRARY_${lib} NAMES ${lib})
-    endif()
+    find_library(CFITSIO_LIBRARY_${lib} NAMES ${lib}
+        HINTS ${CFITSIO_LIB_DIR})
     list(APPEND CFITSIO_LIBRARIES ${CFITSIO_LIBRARY_${lib}})
 endforeach (lib ${CFITSIO_NAMES})
 

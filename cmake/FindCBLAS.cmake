@@ -11,23 +11,18 @@ set(BLAS_FIND_REQUIRED true)
 
 set(CBLAS_NAMES ${CBLAS_NAMES} cblas gslcblas)
 
-if (CBLAS_LIB_DIR)
-    find_library(CBLAS_LIBRARY
-        NAMES ${CBLAS_NAMES}
-        PATHS ${CBLAS_LIB_DIR} NO_DEFAULT_PATH)
-else()
-    find_library(CBLAS_LIBRARY
-        NAMES ${CBLAS_NAMES}
-        PATHS
-        /usr/lib64/atlas
-        /usr/lib/atlas
-        /usr/local/lib64/atlas
-        /usr/local/lib/atlas
-        /usr/lib64
-        /usr/lib
-        /usr/local/lib64
-        /usr/local/lib)
-endif()
+find_library(CBLAS_LIBRARY
+    NAMES ${CBLAS_NAMES}
+    HINTS ${CBLAS_LIB_DIR}
+    PATHS
+    /usr/lib64/atlas
+    /usr/lib/atlas
+    /usr/local/lib64/atlas
+    /usr/local/lib/atlas
+    /usr/lib64
+    /usr/lib
+    /usr/local/lib64
+    /usr/local/lib)
 
 if (CBLAS_LIBRARY)
     set(CBLAS_LIBRARIES ${CBLAS_LIBRARY})

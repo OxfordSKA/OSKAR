@@ -10,42 +10,28 @@ if (CPPUNIT_INCLUDE_DIR)
     set(CPPUNIT_FIND_QUIETLY TRUE)
 endif (CPPUNIT_INCLUDE_DIR)
 
-if (CPPUNIT_INC_DIR)
-	find_path(CPPUNIT_INCLUDE_DIR cppunit 
-		PATHS ${CPPUNIT_INC_DIR} NO_DEFAULT_PATH)
-else()
-	find_path(CPPUNIT_INCLUDE_DIR cppunit
-    	PATHS
-	    /usr/include/
-	    /usr/include/cppunit
-	    /usr/include/libcppunit
-	    ${CPPUNIT_INCLUDES})
-endif()
+find_path(CPPUNIT_INCLUDE_DIR cppunit
+    HINTS ${CPPUNIT_INC_DIR}
+    PATHS
+    /usr/include/
+    /usr/include/cppunit
+    /usr/include/libcppunit)
 
 set(CPPUNIT_NAMES cppunit cppunit_dll)
 
-if (CPPUNIT_LIB_DIR)
-	foreach( lib ${CPPUNIT_NAMES} )
-	    find_library(CPPUNIT_LIBRARY_${lib}  NAMES ${lib} 
-	    	PATHS ${CPPUNIT_LIB_DIR} NO_DEFAULT_PATH)
-	    if (NOT ${CPPUNIT_LIBRARY_${lib}} MATCHES "CPPUNIT_LIBRARY_${lib}-NOTFOUND")
-        	list(APPEND CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY_${lib}})
-    	endif ()
-	endforeach(lib)
-else()
-	foreach(lib ${CPPUNIT_NAMES})
-	    find_library(CPPUNIT_LIBRARY_${lib} NAMES ${lib}
-	    	PATHS 
-	    	/usr/local/lib
-	    	/usr/lib
-	    	/usr/lib/cppunit
-	    	/usr/local/lib/cppunit
-         	/usr/local/cppunit/lib)
-	    if (NOT ${CPPUNIT_LIBRARY_${lib}} MATCHES "CPPUNIT_LIBRARY_${lib}-NOTFOUND")
-        	list(APPEND CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY_${lib}})
-    	endif ()
-	endforeach(lib)
-endif()
+foreach(lib ${CPPUNIT_NAMES})
+    find_library(CPPUNIT_LIBRARY_${lib} NAMES ${lib}
+        HINTS ${CPPUNIT_LIB_DIR}
+        PATHS
+        /usr/local/lib
+        /usr/lib
+        /usr/lib/cppunit
+        /usr/local/lib/cppunit
+        /usr/local/cppunit/lib)
+    if (NOT ${CPPUNIT_LIBRARY_${lib}} MATCHES "CPPUNIT_LIBRARY_${lib}-NOTFOUND")
+        list(APPEND CPPUNIT_LIBRARIES ${CPPUNIT_LIBRARY_${lib}})
+    endif ()
+endforeach(lib)
 
 # handle the QUIETLY and REQUIRED arguments and set CPPUNIT_FOUND to TRUE if.
 # all listed variables are TRUE

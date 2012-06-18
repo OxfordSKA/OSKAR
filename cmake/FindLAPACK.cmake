@@ -6,21 +6,15 @@
 #  LAPACK_LIBRARY, where to find the LAPACK library.
 
 set(LAPACK_NAMES ${LAPACK_NAMES} lapack)
-if (LAPACK_LIB_DIR)
-    find_library(LAPACK_LIBRARY
-          NAMES ${LAPACK_NAMES}
-        PATHS ${LAPACK_LIB_DIR} NO_DEFAULT_PATH)
-else()
-    find_library(LAPACK_LIBRARY
-        NAMES ${LAPACK_NAMES}
-        PATHS
-        ${LAPACK_LIB_DIR}
-        /usr/lib64
-        /usr/lib
-        /usr/local/lib64
-        /usr/local/lib
-        NO_DEFAULT_PATHS)
-endif()
+
+find_library(LAPACK_LIBRARY
+    NAMES ${LAPACK_NAMES}
+    HINTS ${LAPACK_LIB_DIR}
+    PATHS
+    /usr/lib64
+    /usr/lib
+    /usr/local/lib64
+    /usr/local/lib)
 
 if (LAPACK_LIBRARY)
   set(LAPACK_LIBRARIES ${LAPACK_LIBRARY})
