@@ -1,15 +1,15 @@
-2012-06-XX  OSKAR 2.0.3-beta
-
-    * Fixed a build system bug related to finding CBLAS.
+2012-06-18  OSKAR 2.0.3-beta
 
     * Fixed a bug that could be encountered when evaluating a station beam
       using numerical element pattern data, with incorrect use of work
       buffers.
 
-    * Added extra parameters to the build system that can be used to override
-      or set the location of CppUnit and casacore.
+    * Fixed a build system bug related to finding CBLAS.
 
-    * Added help dialog with link to documentation.
+    * Added extra parameters to the build system that can be used to override 
+      the location of a number of library dependencies.
+
+    * Added help dialog with link to documentation to the OSKAR GUI.
 
 2012-06-13  OSKAR 2.0.2-beta
 
