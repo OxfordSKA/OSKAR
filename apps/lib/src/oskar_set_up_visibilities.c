@@ -74,6 +74,14 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
     error = oskar_mem_copy(&vis->settings_path, &settings->settings_path);
     if (error) return error;
 
+    /* Copy station coordinates from telescope model. */
+    error = oskar_mem_copy(&vis->x_metres, &telescope->station_x);
+    if (error) return error;
+    error = oskar_mem_copy(&vis->y_metres, &telescope->station_y);
+    if (error) return error;
+    error = oskar_mem_copy(&vis->z_metres, &telescope->station_z);
+    if (error) return error;
+
     return OSKAR_SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ int oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header)
         return OSKAR_ERR_FILE_IO;
 
     /* Check if this is a valid header. */
-    if (strcmp("OSKARBIN", header->magic) != 0)
+    if (strncmp("OSKARBIN", header->magic, 8) != 0)
     {
         fprintf(stderr, "Error: Invalid OSKAR binary file.\n");
         return OSKAR_ERR_BAD_BINARY_FORMAT;

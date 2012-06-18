@@ -29,7 +29,6 @@
 #include "apps/lib/oskar_visibilities_write_ms.h"
 
 #include "apps/lib/oskar_remove_dir.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_vector_types.h"
@@ -37,6 +36,7 @@
 
 #include <QtCore/QDir>
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -45,14 +45,9 @@
 #define DAYS_2_SEC 86400.0
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
+extern "C"
 int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
-        const oskar_TelescopeModel* telescope, const char* ms_path,
-        int overwrite)
+        const char* ms_path, int overwrite)
 {
     // Check if the Measurement Set already exists, and overwrite if specified.
     QDir dir;
@@ -75,10 +70,8 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
     // Write a log message.
     oskar_log_message(log, 0, "Writing Measurement Set: '%s'", ms_path);
 
-    if (telescope->num_stations * (telescope->num_stations - 1) / 2 != vis->num_baselines)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-
-    int num_antennas   = telescope->num_stations;
+    // Get dimensions.
+    int num_antennas   = vis->num_stations;
     int num_baselines  = vis->num_baselines;
     int num_pols       = vis->num_polarisations();
     int num_channels   = vis->num_channels;
@@ -87,25 +80,34 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
     double t_start_sec = vis->time_start_mjd_utc * DAYS_2_SEC + (dt_vis_dump / 2);
     double ref_freq    = vis->freq_start_hz;
     double chan_width  = vis->freq_inc_hz;
+    if (num_antennas * (num_antennas - 1) / 2 != num_baselines)
+        return OSKAR_ERR_DIMENSION_MISMATCH;
 
-    // Create an empty measurement set of the correct dimensions and meta-data.
+    // Create an empty Measurement Set.
     oskar_MeasurementSet ms;
     ms.create(ms_path);
-    if (telescope->type() == OSKAR_DOUBLE)
+
+    // Add the antenna positions.
+    if (vis->x_metres.type == OSKAR_DOUBLE)
     {
-        ms.addAntennas(num_antennas, (const double*)telescope->station_x,
-                (const double*)telescope->station_y, (const double*)telescope->station_z);
+        ms.addAntennas(num_antennas, (const double*)vis->x_metres,
+                (const double*)vis->y_metres, (const double*)vis->z_metres);
     }
-    else if (telescope->type() == OSKAR_SINGLE)
+    else if (vis->x_metres.type == OSKAR_SINGLE)
     {
-        ms.addAntennas(num_antennas, (const float*)telescope->station_x,
-                (const float*)telescope->station_y, (const float*)telescope->station_z);
+        ms.addAntennas(num_antennas, (const float*)vis->x_metres,
+                (const float*)vis->y_metres, (const float*)vis->z_metres);
     }
     else
     {
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
-    ms.addField(telescope->ra0_rad, telescope->dec0_rad);
+
+    // Add the field data.
+    ms.addField(vis->phase_centre_ra_deg * M_PI / 180,
+            vis->phase_centre_dec_deg * M_PI / 180);
+
+    // Add polarisation and channel data.
     ms.addPolarisation(num_pols);
     for (int i = 0; i < num_pols; ++i)
     {
@@ -128,6 +130,7 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
         }
     }
 
+    // Add visibilities and u,v,w coordinates.
     if (vis->amplitude.is_double())
     {
         double2* amp_tb = (double2*)malloc(num_channels * num_pols * sizeof(double2));
@@ -148,30 +151,30 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
                 // Construct the amplitude data for the given time, baseline.
                 for (int c = 0; c < num_channels; ++c)
                 {
+                    int idx = num_baselines * (c * num_times + t) + b;
+                    int i_out = c * num_pols;
                     if (num_pols == 1)
                     {
-                        int idx = num_baselines * (c * num_times + t) + b;
                         double2* vis_amp = &((double2*)vis->amplitude.data)[idx];
-                        // xx
-                        amp_tb[c * num_pols + 0].x = vis_amp->x;
-                        amp_tb[c * num_pols + 0].y = vis_amp->y;
+                        // XX
+                        amp_tb[i_out + 0].x = vis_amp->x;
+                        amp_tb[i_out + 0].y = vis_amp->y;
                     }
                     else
                     {
-                        int idx = num_baselines * (c * num_times + t) + b;
                         double4c* vis_amp = &((double4c*)vis->amplitude.data)[idx];
-                        // xx
-                        amp_tb[c * num_pols + 0].x = vis_amp->a.x;
-                        amp_tb[c * num_pols + 0].y = vis_amp->a.y;
-                        // xy
-                        amp_tb[c * num_pols + 1].x = vis_amp->b.x;
-                        amp_tb[c * num_pols + 1].y = vis_amp->b.y;
-                        // yx
-                        amp_tb[c * num_pols + 2].x = vis_amp->c.x;
-                        amp_tb[c * num_pols + 2].y = vis_amp->c.y;
-                        // yy
-                        amp_tb[c * num_pols + 3].x = vis_amp->d.x;
-                        amp_tb[c * num_pols + 3].y = vis_amp->d.y;
+                        // XX
+                        amp_tb[i_out + 0].x = vis_amp->a.x;
+                        amp_tb[i_out + 0].y = vis_amp->a.y;
+                        // XY
+                        amp_tb[i_out + 1].x = vis_amp->b.x;
+                        amp_tb[i_out + 1].y = vis_amp->b.y;
+                        // YX
+                        amp_tb[i_out + 2].x = vis_amp->c.x;
+                        amp_tb[i_out + 2].y = vis_amp->c.y;
+                        // YY
+                        amp_tb[i_out + 3].x = vis_amp->d.x;
+                        amp_tb[i_out + 3].y = vis_amp->d.y;
                     }
                 }
                 ms.addVisibilities(num_pols, num_channels, 1, &u, &v, &w,
@@ -200,30 +203,30 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
                 // Construct the amplitude data for the given time, baseline.
                 for (int c = 0; c < num_channels; ++c)
                 {
+                    int idx = num_baselines * (c * num_times + t) + b;
+                    int i_out = c * num_pols;
                     if (num_pols == 1)
                     {
-                        int idx = num_baselines * (c * num_times + t) + b;
                         float2* vis_amp = &((float2*)vis->amplitude.data)[idx];
-                        // xx
-                        amp_tb[c * num_pols + 0].x = vis_amp->x;
-                        amp_tb[c * num_pols + 0].y = vis_amp->y;
+                        // XX
+                        amp_tb[i_out + 0].x = vis_amp->x;
+                        amp_tb[i_out + 0].y = vis_amp->y;
                     }
                     else
                     {
-                        int idx = num_baselines * (c * num_times + t) + b;
                         float4c* vis_amp = &((float4c*)vis->amplitude.data)[idx];
-                        // xx
-                        amp_tb[c * num_pols + 0].x = vis_amp->a.x;
-                        amp_tb[c * num_pols + 0].y = vis_amp->a.y;
-                        // xy
-                        amp_tb[c * num_pols + 1].x = vis_amp->b.x;
-                        amp_tb[c * num_pols + 1].y = vis_amp->b.y;
-                        // yx
-                        amp_tb[c * num_pols + 2].x = vis_amp->c.x;
-                        amp_tb[c * num_pols + 2].y = vis_amp->c.y;
-                        // yy
-                        amp_tb[c * num_pols + 3].x = vis_amp->d.x;
-                        amp_tb[c * num_pols + 3].y = vis_amp->d.y;
+                        // XX
+                        amp_tb[i_out + 0].x = vis_amp->a.x;
+                        amp_tb[i_out + 0].y = vis_amp->a.y;
+                        // XY
+                        amp_tb[i_out + 1].x = vis_amp->b.x;
+                        amp_tb[i_out + 1].y = vis_amp->b.y;
+                        // YX
+                        amp_tb[i_out + 2].x = vis_amp->c.x;
+                        amp_tb[i_out + 2].y = vis_amp->c.y;
+                        // YY
+                        amp_tb[i_out + 3].x = vis_amp->d.x;
+                        amp_tb[i_out + 3].y = vis_amp->d.y;
                     }
                 }
                 ms.addVisibilities(num_pols, num_channels, 1, &u, &v, &w,
@@ -244,7 +247,3 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
 
     return OSKAR_SUCCESS;
 }
-
-#ifdef __cplusplus
-}
-#endif

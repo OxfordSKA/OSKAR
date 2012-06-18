@@ -55,8 +55,6 @@ int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
     double crval[MAX_DIM], crpix[MAX_DIM], cdelt[MAX_DIM], crota[MAX_DIM];
     fitsfile* fptr = NULL;
     const char *label[MAX_DIM], *ctype[MAX_DIM];
-    char* log_line_buffer = NULL;
-    size_t buffer_size = 0;
 
     /* Get the data type. */
     type = image->data.type;
@@ -190,17 +188,19 @@ int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
     {
         if (log->file)
         {
+            char* log_line_buffer = NULL;
+            size_t buffer_size = 0;
             fseek(log->file, 0, SEEK_SET);
             while (oskar_getline(&log_line_buffer,
                     &buffer_size, log->file) != OSKAR_ERR_EOF)
             {
                 fits_write_history(fptr, log_line_buffer, &status);
             }
+            if (log_line_buffer) free(log_line_buffer);
         }
     }
 
     /* Close the FITS file. */
-    free(log_line_buffer);
     fits_close_file(fptr, &status);
     oskar_fits_check_status(log, status, "Closing file");
     if (status) return OSKAR_ERR_FITS_IO;

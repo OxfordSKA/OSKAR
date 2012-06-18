@@ -53,37 +53,27 @@ void Test_write_ms::test_write()
     int num_times     = 5;
     int num_baselines = num_antennas * (num_antennas - 1) / 2;
 
-    // Create a telescope structure and populate the relevant fields.
-    oskar_TelescopeModel telescope(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-            num_antennas);
-    for (int i = 0; i < num_antennas; ++i)
-    {
-        ((double*)telescope.station_x)[i] = (double)i + 0.1;
-        ((double*)telescope.station_y)[i] = (double)i + 0.2;
-        ((double*)telescope.station_z)[i] = (double)i + 0.3;
-    }
-    telescope.ra0_rad  = 160.0 * (M_PI / 180.0);
-    telescope.dec0_rad = 89.0 * (M_PI / 180.0);
-
     // Create a visibility structure and fill in some data.
     oskar_Visibilities vis(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
             num_channels, num_times, num_antennas);
+    vis.phase_centre_ra_deg = 160.0;
+    vis.phase_centre_dec_deg = 89.0;
     for (int i = 0, c = 0; c < num_channels; ++c)
     {
         for (int t = 0; t < num_times; ++t)
         {
             for (int b = 0; b < num_baselines; ++b, ++i)
             {
-                // xx
+                // XX
                 ((double4c*)vis.amplitude.data)[i].a.x = (double)c + 0.1;
                 ((double4c*)vis.amplitude.data)[i].a.y = 0.05;
-                // xy
+                // XY
                 ((double4c*)vis.amplitude.data)[i].b.x = (double)t + 0.1;
                 ((double4c*)vis.amplitude.data)[i].b.y = 0.15;
-                // yx
+                // YX
                 ((double4c*)vis.amplitude.data)[i].c.x = (double)b + 0.1;
                 ((double4c*)vis.amplitude.data)[i].c.y = 0.25;
-                // yy
+                // YY
                 ((double4c*)vis.amplitude.data)[i].d.x = (double)i + 0.1;
                 ((double4c*)vis.amplitude.data)[i].d.y = 0.35;
             }
@@ -98,6 +88,12 @@ void Test_write_ms::test_write()
             ((double*)vis.ww_metres)[i] = (double)i + 0.003;
         }
     }
+    for (int i = 0; i < num_antennas; ++i)
+    {
+        ((double*)vis.x_metres)[i] = (double)i + 0.1;
+        ((double*)vis.y_metres)[i] = (double)i + 0.2;
+        ((double*)vis.z_metres)[i] = (double)i + 0.3;
+    }
     vis.freq_start_hz      = 222.22e6;
     vis.freq_inc_hz        = 11.1e6;
     vis.time_start_mjd_utc = oskar_date_time_to_mjd(2011, 11, 17, 0.0);
@@ -105,10 +101,7 @@ void Test_write_ms::test_write()
 
     const char* filename = "temp_test_write_ms.ms";
 
-    int overwrite = OSKAR_TRUE;
-
-    int error = oskar_visibilities_write_ms(&vis, NULL, &telescope,
-            filename, overwrite);
+    int error = oskar_visibilities_write_ms(&vis, NULL, filename, OSKAR_TRUE);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 

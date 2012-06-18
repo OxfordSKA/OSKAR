@@ -36,7 +36,6 @@
 #include "oskar_global.h"
 
 #include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
@@ -47,21 +46,15 @@ extern "C" {
  * @brief Writes data to a CASA Measurement Set.
  *
  * @details
- * This function writes visibility data and telescope model data to a CASA
- * Measurement Set.
- *
- * Note: Currently the telescope model is needed for pointing and antenna
- * positions.
+ * This function writes visibility data to a CASA Measurement Set.
  *
  * @param[in] vis       Pointer to visibility structure to write.
  * @param[in] ms_path   Pathname of the Measurement Set to write.
- * @param[in] telescope Pointer to telescope model data to write.
  * @param[in] overwrite If true, then overwrite any existing Measurement Set.
  */
 OSKAR_EXPORT
 int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
-        const oskar_TelescopeModel* telescope, const char* ms_path,
-        int overwrite);
+        const char* ms_path, int overwrite);
 
 #ifdef __cplusplus
 }

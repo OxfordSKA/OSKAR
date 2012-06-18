@@ -88,15 +88,15 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         read = oskar_string_to_array_d(line, 3, par);
         if (read < 2) continue;
 
-        /* FIXME Ensure enough space in arrays. */
-        if (n % 1 == 0)
+        /* Resize the telescope model to hold the station data.
+         * We can't resize to more than needed, since we would then lose track
+         * of the actual allocated size of the model when
+         * telescope->num_stations = n is finally set. */
+        err = oskar_telescope_model_resize(telescope, n + 1);
+        if (err)
         {
-            err = oskar_telescope_model_resize(telescope, n + 1);
-            if (err)
-            {
-                fclose(file);
-                return err;
-            }
+            fclose(file);
+            return err;
         }
 
         /* Convert horizon plane to offset geocentric cartesian coordinates. */

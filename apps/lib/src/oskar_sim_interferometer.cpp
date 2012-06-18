@@ -223,7 +223,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Write Measurement Set.
     if (settings.obs.ms_filename)
     {
-        error = oskar_visibilities_write_ms(&vis_global, log, &telescope_cpu,
+        error = oskar_visibilities_write_ms(&vis_global, log,
                 settings.obs.ms_filename, true);
         if (error) return error;
     }
