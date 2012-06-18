@@ -41,7 +41,6 @@
 #include "sky/oskar_sky_model_append_to_set.h"
 #include "sky/oskar_sky_model_insert.h"
 #include "math/oskar_sph_to_lm.h"
-#include "utility/oskar_Work.h"
 #include "utility/oskar_get_error_string.h"
 
 //#define TIMER_ENABLE

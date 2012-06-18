@@ -71,9 +71,6 @@ set(utility_SRC
     src/oskar_string_to_array.c
     src/oskar_system_clock_data.c
     src/oskar_system_clock_string.c
-    src/oskar_work_free.c
-    src/oskar_work_init.c
-    src/oskar_Work.cpp
 )
 foreach (file ${utility_cuda_kernels_SRC})
     list(APPEND utility_SRC cudak/${file})

@@ -38,7 +38,6 @@
 #include "station/oskar_station_model_type.h"
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_Work.h"
 #include "utility/oskar_mem_element_multiply.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_type_check.h"

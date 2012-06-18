@@ -35,7 +35,6 @@
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_Work.h"
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"

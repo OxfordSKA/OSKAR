@@ -55,7 +55,6 @@
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
 #include "utility/oskar_vector_types.h"
-#include "utility/oskar_Work.h"
 
 #include <cmath>
 #include <QtCore/QTime>
