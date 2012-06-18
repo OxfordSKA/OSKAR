@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.0-beta                                     Last update: 13 June 2012 |
+| OSKAR 2.0-beta                                     Last update: 18 June 2012 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
@@ -39,12 +39,12 @@ possible according to the following dependencies being satisfied:
     * CFITSIO
         - Required for: liboskar_fits
         - Optional for: liboskar_apps, Applications (for FITS file export)
-    * casacore
+    * casacore (>= 1.2.0)
         - Required for: liboskar_ms
         - Optional for: liboskar_apps, Applications (for Measurement Set export)
     * MATLAB (>=R2010b)
         - Required for: MATLAB interface.
-    * CppUnit
+    * CppUnit (1.12.1)
         - Required for: Unit testing binaries.
     * CMake (>=2.8)
         - Required for: Makefile generation.
@@ -108,6 +108,32 @@ Advanced Build Options:
         NOTE: This should only be used in special cases, where the version 
         of CFITSIO headers installed in system include path can't be used to build
         OSKAR.
+        
+    * -DCPPUNIT_LIB_DIR=<path> (default: searches the default system library paths)
+        Specifies a custom path in which to look for the CPPUNIT library 
+        (libcppunit.so).
+        Note: This should only be used in special cases, where the version of 
+        CPPUNIT installed in the system library path can't be used to build OSKAR.
+    
+    * -DCPPUNIT_INC_DIR=<path> (default: searches the default system include paths)
+        Specifies a custom path in which to look for the CPPUNIT library headers. 
+        This is the path to the top level cppunit include folder.
+        Note: This should only be used in special cases, where the version of 
+        CPPUNIT headers installed in system include path can't be used to build
+        OSKAR.
+       
+    * -DCASACORE_LIB_DIR=<path> (default: searches the default system library paths)
+        Specifies a custom path in which to look for the CasaCore libraries 
+        (libcasa_ms.so and others).
+        Note: This should only be used in special cases, where the version of
+        CasaCore installed in the system library path can't be used to build OSKAR.
+      
+    *	-DCASACORE_INC_DIR=<path> (default: searches the default system include paths)
+    	  Specifies a custom path in which to look for the CasaCore library headers.
+    	  This is the path to the top level casacore include folder.
+        Note: This should only be used in special cases, where the version of
+        CasaCore headers installed in system include path can't be used to build
+        OSKAR.    
 
 
 3.2. Environment Variables
