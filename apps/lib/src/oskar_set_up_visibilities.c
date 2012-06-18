@@ -42,7 +42,7 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
         const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
         int type)
 {
-    int error, num_stations, num_channels, num_baselines;
+    int error, num_stations, num_channels;
     const oskar_SettingsTime* times;
 
     /* Sanity check on inputs. */
@@ -57,9 +57,8 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
     times = &settings->obs.time;
     num_stations = telescope->num_stations;
     num_channels = settings->obs.num_channels;
-    num_baselines = num_stations * (num_stations - 1) / 2;
     error = oskar_visibilities_init(vis, type, OSKAR_LOCATION_CPU,
-            num_channels, times->num_time_steps, num_baselines);
+            num_channels, times->num_time_steps, num_stations);
     if (error) return error;
 
     /* Add meta-data. */

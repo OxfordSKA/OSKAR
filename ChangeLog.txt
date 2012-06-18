@@ -6,10 +6,13 @@
 
     * Fixed a build system bug related to finding CBLAS.
 
-    * Added extra parameters to the build system that can be used to override 
+    * Added extra parameters to the build system that can be used to override
       the location of a number of library dependencies.
 
     * Added help dialog with link to documentation to the OSKAR GUI.
+
+    * Updated visibility structure and OSKAR binary file to hold station
+      coordinates, to be more self-contained.
 
 2012-06-13  OSKAR 2.0.2-beta
 

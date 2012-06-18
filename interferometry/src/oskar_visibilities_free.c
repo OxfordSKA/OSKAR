@@ -44,6 +44,7 @@ int oskar_visibilities_free(oskar_Visibilities* vis)
     /* Clear meta-data. */
     vis->num_channels  = 0;
     vis->num_times     = 0;
+    vis->num_stations  = 0;
     vis->num_baselines = 0;
     vis->freq_start_hz = 0.0;
     vis->freq_inc_hz = 0.0;
@@ -57,6 +58,12 @@ int oskar_visibilities_free(oskar_Visibilities* vis)
     err = oskar_mem_free(&vis->settings_path);
     if (err) return err;
     err = oskar_mem_free(&vis->sky_noise_stddev);
+    if (err) return err;
+    err = oskar_mem_free(&vis->x_metres);
+    if (err) return err;
+    err = oskar_mem_free(&vis->y_metres);
+    if (err) return err;
+    err = oskar_mem_free(&vis->z_metres);
     if (err) return err;
     err = oskar_mem_free(&vis->uu_metres);
     if (err) return err;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,11 +51,11 @@ extern "C" {
  * @param location          Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCAITON_GPU).
  * @param num_channels      Number of frequency channels.
  * @param num_times         Number of time samples.
- * @param num_baselines     Number of baselines.
+ * @param num_stations      Number of stations.
  */
 OSKAR_EXPORT
 int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_baselines);
+        int num_channels, int num_times, int num_stations);
 
 #ifdef __cplusplus
 }

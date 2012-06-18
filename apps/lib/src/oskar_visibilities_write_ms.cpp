@@ -54,7 +54,7 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
         const oskar_TelescopeModel* telescope, const char* ms_path,
         int overwrite)
 {
-    // Check if the ms path already exists and overwrite if specified.
+    // Check if the Measurement Set already exists, and overwrite if specified.
     QDir dir;
     dir.setPath(QString(ms_path));
     if (dir.exists(dir.absolutePath()))
@@ -63,7 +63,7 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
         if (overwrite)
         {
             if (!oskar_remove_dir(ms_path))
-                return OSKAR_ERR_UNKNOWN;
+                return OSKAR_ERR_FILE_IO;
         }
         // No overwrite specified and directory already exists.
         else

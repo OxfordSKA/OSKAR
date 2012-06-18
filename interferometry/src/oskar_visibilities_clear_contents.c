@@ -40,6 +40,12 @@ int oskar_visibilities_clear_contents(oskar_Visibilities* vis)
     int err = 0;
     err = oskar_mem_clear_contents(&vis->amplitude);
     if (err) return err;
+    err = oskar_mem_clear_contents(&vis->x_metres);
+    if (err) return err;
+    err = oskar_mem_clear_contents(&vis->y_metres);
+    if (err) return err;
+    err = oskar_mem_clear_contents(&vis->z_metres);
+    if (err) return err;
     err = oskar_mem_clear_contents(&vis->uu_metres);
     if (err) return err;
     err = oskar_mem_clear_contents(&vis->vv_metres);

@@ -67,7 +67,7 @@ void Test_write_ms::test_write()
 
     // Create a visibility structure and fill in some data.
     oskar_Visibilities vis(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
-            num_channels, num_times, num_baselines);
+            num_channels, num_times, num_antennas);
     for (int i = 0, c = 0; c < num_channels; ++c)
     {
         for (int t = 0; t < num_times; ++t)

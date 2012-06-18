@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@ int oskar_visibilities_copy(oskar_Visibilities* dst,
     /* Copy the meta-data. */
     dst->num_channels  = src->num_channels;
     dst->num_times     = src->num_times;
+    dst->num_stations  = src->num_stations;
     dst->num_baselines = src->num_baselines;
     dst->freq_start_hz = src->freq_start_hz;
     dst->freq_inc_hz = src->freq_inc_hz;
@@ -58,6 +59,12 @@ int oskar_visibilities_copy(oskar_Visibilities* dst,
     err = oskar_mem_copy(&dst->settings_path, &src->settings_path);
     if (err) return err;
     err = oskar_mem_copy(&dst->sky_noise_stddev, &src->sky_noise_stddev);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->x_metres, &src->x_metres);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->y_metres, &src->y_metres);
+    if (err) return err;
+    err = oskar_mem_copy(&dst->z_metres, &src->z_metres);
     if (err) return err;
     err = oskar_mem_copy(&dst->uu_metres, &src->uu_metres);
     if (err) return err;

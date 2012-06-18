@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@
 
 
 #include "matlab/visibilities/lib/oskar_mex_vis_to_matlab_struct.h"
-#include "interferometry/oskar_visibilities_init.h"
 
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
@@ -50,6 +49,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
 
     int num_channels  = v_in->num_channels;
     int num_times     = v_in->num_times;
+    int num_stations  = v_in->num_stations;
     int num_baselines = v_in->num_baselines;
     int num_pols      = oskar_mem_is_scalar(v_in->amplitude.type) ? 1 : 4;
 
@@ -225,11 +225,12 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     }
     if (v_in->num_polarisations() == 4)
     {
-        const char* fields[27] = {
+        const char* fields[28] = {
                 "date",
                 "settings_path",
                 "num_channels",
                 "num_times",
+                "num_stations",
                 "num_baselines",
                 "freq_start_hz",
                 "freq_inc_hz",
@@ -253,15 +254,16 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "Q",
                 "U",
                 "V"};
-        v_out = mxCreateStructMatrix(1, 1, 27, fields);
+        v_out = mxCreateStructMatrix(1, 1, 28, fields);
     }
     else
     {
-        const char* fields[20] = {
+        const char* fields[21] = {
                 "date",
                 "settings_path",
                 "num_channels",
                 "num_times",
+                "num_stations",
                 "num_baselines",
                 "freq_start_hz",
                 "freq_inc_hz",
@@ -279,7 +281,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "axis_order",
                 "xx"};
 
-        v_out = mxCreateStructMatrix(1, 1, 20, fields);
+        v_out = mxCreateStructMatrix(1, 1, 21, fields);
     }
 
     /* Populate structure */
@@ -290,6 +292,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
             mxCreateDoubleScalar((double)num_channels));
     mxSetField(v_out, 0, "num_times",
             mxCreateDoubleScalar((double)num_times));
+    mxSetField(v_out, 0, "num_stations",
+            mxCreateDoubleScalar((double)num_stations));
     mxSetField(v_out, 0, "num_baselines",
             mxCreateDoubleScalar((double)num_baselines));
     mxSetField(v_out, 0, "freq_start_hz",

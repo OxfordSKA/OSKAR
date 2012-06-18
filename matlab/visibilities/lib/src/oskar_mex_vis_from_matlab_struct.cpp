@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,8 +65,8 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
 
     /* Read structure fields into local mxArrays */
     int num_fields = mxGetNumberOfFields(v_in);
-    int num_fields_polarised = 27;
-    int num_fields_scalar = 20;
+    int num_fields_polarised = 28;
+    int num_fields_scalar = 21;
     if (!(num_fields == num_fields_polarised || num_fields == num_fields_scalar))
     {
         mexPrintf("\nERROR: input vis structure has %i fields, "
@@ -81,6 +81,8 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     if (!num_channels_) mex_vis_error_field_("num_channels");
     mxArray* num_times_ = mxGetField(v_in, 0, "num_times");
     if (!num_times_) mex_vis_error_field_("num_times");
+    mxArray* num_stations_ = mxGetField(v_in, 0, "num_stations");
+    if (!num_stations_) mex_vis_error_field_("num_stations");
     mxArray* num_baselines_ = mxGetField(v_in, 0, "num_baselines");
     if (!num_baselines_) mex_vis_error_field_("num_baselines");
     mxArray* freq_start_hz_ = mxGetField(v_in, 0, "freq_start_hz");
@@ -125,6 +127,7 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     }
 
     /* Get dimensions */
+    int num_stations  = (int)mxGetScalar(num_stations_);
     int num_baselines = (int)mxGetScalar(num_baselines_);
     int num_times     = (int)mxGetScalar(num_times_);
     int num_channels  = (int)mxGetScalar(num_channels_);
@@ -138,7 +141,7 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     /* Initialise oskar_Visibility structure */
     int location = OSKAR_LOCATION_CPU;
     int err = oskar_visibilities_init(v_out, type | OSKAR_COMPLEX | OSKAR_MATRIX,
-            location, num_channels, num_times, num_baselines);
+            location, num_channels, num_times, num_stations);
     if (err) mexErrMsgIdAndTxt("OSKAR:ERROR", "oskar_visibilities_init() "
             "failed with code %i (%s).\n", err, oskar_get_error_string(err));
 
@@ -150,6 +153,7 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     memcpy(v_out->settings_path.data, str_settings_path, length*sizeof(char));
     v_out->num_channels = num_channels;
     v_out->num_times = num_times;
+    v_out->num_stations = num_stations;
     v_out->num_baselines = num_baselines;
     v_out->freq_start_hz = mxGetScalar(freq_start_hz_);
     v_out->freq_inc_hz = mxGetScalar(freq_inc_hz_);

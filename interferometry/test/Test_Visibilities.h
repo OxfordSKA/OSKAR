@@ -49,7 +49,6 @@ class Test_Visibilities : public CppUnit::TestFixture
         CPPUNIT_TEST(test_create);
         CPPUNIT_TEST(test_copy);
         CPPUNIT_TEST(test_resize);
-        CPPUNIT_TEST(test_init);
         CPPUNIT_TEST(test_get_amps);
         CPPUNIT_TEST(test_read_write);
         CPPUNIT_TEST_SUITE_END();
@@ -59,7 +58,6 @@ class Test_Visibilities : public CppUnit::TestFixture
         void test_create();
         void test_copy();
         void test_resize();
-        void test_init();
         void test_get_amps();
         void test_read_write();
 };

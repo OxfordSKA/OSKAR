@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "interferometry/oskar_visibilities_location.h"
 #include "utility/oskar_Mem.h"
 
@@ -36,7 +35,10 @@ extern "C" {
 
 int oskar_visibilities_is_location(const oskar_Visibilities* vis, int location)
 {
-    return (vis->uu_metres.location == location &&
+    return (vis->x_metres.location == location &&
+            vis->y_metres.location == location &&
+            vis->z_metres.location == location &&
+            vis->uu_metres.location == location &&
             vis->vv_metres.location == location &&
             vis->ww_metres.location == location &&
             vis->amplitude.location == location);

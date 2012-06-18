@@ -60,14 +60,14 @@ void Test_make_image::test()
     int location      = OSKAR_LOCATION_CPU;
     int num_channels  = 2;
     int num_times     = 2;
-    int num_baselines = 2;
+    int num_stations  = 2;
 
     double freq       = C_0;
     //double lambda     = C_0 / freq;
 
     oskar_Visibilities vis;
     oskar_visibilities_init(&vis, amp_type, location, num_channels, num_times,
-            num_baselines);
+            num_stations);
     double* uu_ = (double*)vis.uu_metres.data;
     double* vv_ = (double*)vis.vv_metres.data;
     double* ww_ = (double*)vis.ww_metres.data;
@@ -79,25 +79,17 @@ void Test_make_image::test()
     uu_[0] =  1.0;
     vv_[0] =  0.0;
     ww_[0] =  0.0;
-    // time 0, baseline 1
+    // time 1, baseline 0
     uu_[1] =  0.0;
     vv_[1] =  1.0;
     ww_[1] =  0.0;
-    // time 1, baseline 0
-    uu_[2] =  1.0;
-    vv_[2] =  1.0;
-    ww_[2] =  0.0;
-    // time 1, baseline 1
-    uu_[3] = -1.0;
-    vv_[3] =  1.0;
-    ww_[3] =  0.0;
 
     // channel 0, time 0, baseline 0
     for (int i = 0, c = 0; c < num_channels; ++c)
     {
         for (int t = 0; t < num_times; ++t)
         {
-            for (int b = 0; b < num_baselines; ++b, ++i)
+            for (int b = 0; b < vis.num_baselines; ++b, ++i)
             {
                 amp_[i].a.x = 1.0; amp_[i].a.y = 0.0;
                 amp_[i].b.x = 1.0; amp_[i].b.y = 0.0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,8 @@ extern "C" {
 int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
 {
     /* Visibility metadata. */
-    int num_channels = 0, num_times = 0, num_baselines = 0, amp_type = 0;
-    int err = 0;
+    int num_channels = 0, num_times = 0, num_stations = 0;
+    int amp_type = 0, err = 0;
     oskar_BinaryTagIndex* index = NULL;
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
 
@@ -63,7 +63,7 @@ int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
             OSKAR_VIS_TAG_NUM_TIMES, 0, &num_times);
     if (err) goto cleanup;
     err = oskar_binary_file_read_int(filename, &index, grp,
-            OSKAR_VIS_TAG_NUM_BASELINES, 0, &num_baselines);
+            OSKAR_VIS_TAG_NUM_STATIONS, 0, &num_stations);
     if (err) goto cleanup;
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type);
@@ -71,7 +71,7 @@ int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
 
     /* Create the visibility structure. */
     err = oskar_visibilities_init(vis, amp_type, OSKAR_LOCATION_CPU,
-            num_channels, num_times, num_baselines);
+            num_channels, num_times, num_stations);
     if (err) return err;
 
     /* Optionally read the settings path (ignore the error code). */
@@ -113,6 +113,14 @@ int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
     err = oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
             OSKAR_VIS_TAG_AMPLITUDE, 0);
     if (err) goto cleanup;
+
+    /* Try to read station coordinates, but don't worry if they're not here. */
+    oskar_mem_binary_file_read(&vis->x_metres, filename, &index, grp,
+            OSKAR_VIS_TAG_STATION_X, 0);
+    oskar_mem_binary_file_read(&vis->y_metres, filename, &index, grp,
+            OSKAR_VIS_TAG_STATION_Y, 0);
+    oskar_mem_binary_file_read(&vis->z_metres, filename, &index, grp,
+            OSKAR_VIS_TAG_STATION_Z, 0);
 
     cleanup:
     oskar_binary_tag_index_free(&index);

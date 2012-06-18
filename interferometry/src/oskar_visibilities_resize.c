@@ -35,16 +35,24 @@ extern "C" {
 #endif
 
 int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
-        int num_times, int num_baselines)
+        int num_times, int num_stations)
 {
-    int num_amps, num_coords, error = 0;
+    int num_amps, num_coords, num_baselines, error = 0;
 
+    num_baselines = num_stations * (num_stations - 1) / 2;
+    vis->num_stations  = num_stations;
     vis->num_channels  = num_channels;
     vis->num_times     = num_times;
     vis->num_baselines = num_baselines;
     num_amps   = num_channels * num_times * num_baselines;
     num_coords = num_times * num_baselines;
 
+    error = oskar_mem_realloc(&vis->x_metres, num_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&vis->y_metres, num_stations);
+    if (error) return error;
+    error = oskar_mem_realloc(&vis->z_metres, num_stations);
+    if (error) return error;
     error = oskar_mem_realloc(&vis->uu_metres, num_coords);
     if (error) return error;
     error = oskar_mem_realloc(&vis->vv_metres, num_coords);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,13 +48,13 @@ extern "C" {
  * @param vis            The visibility structure to resize.
  * @param num_channels   Number of frequency channels.
  * @param num_times      Number of visibility time snapshots.
- * @param num_baselines  Number of baselines.
+ * @param num_stations   Number of stations.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
 int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
-        int num_times, int num_baselines);
+        int num_times, int num_stations);
 
 #ifdef __cplusplus
 }

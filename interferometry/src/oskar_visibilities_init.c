@@ -36,9 +36,9 @@ extern "C" {
 #endif
 
 int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_baselines)
+        int num_channels, int num_times, int num_stations)
 {
-    int type, num_amps, num_coords, err = 0;
+    int type, num_amps, num_coords, num_baselines, err = 0;
 
     if (!oskar_mem_is_complex(amp_type))
         return OSKAR_ERR_BAD_DATA_TYPE;
@@ -50,6 +50,8 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
     type = oskar_mem_is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     /* Set dimensions. */
+    num_baselines = num_stations * (num_stations - 1) / 2;
+    vis->num_stations  = num_stations;
     vis->num_channels  = num_channels;
     vis->num_times     = num_times;
     vis->num_baselines = num_baselines;
@@ -69,6 +71,12 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
     err = oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1);
     if (err) return err;
     err = oskar_mem_init(&vis->sky_noise_stddev, type, location, 0, 1);
+    if (err) return err;
+    err = oskar_mem_init(&vis->x_metres, type, location, num_stations, 1);
+    if (err) return err;
+    err = oskar_mem_init(&vis->y_metres, type, location, num_stations, 1);
+    if (err) return err;
+    err = oskar_mem_init(&vis->z_metres, type, location, num_stations, 1);
     if (err) return err;
     err = oskar_mem_init(&vis->uu_metres, type, location, num_coords, 1);
     if (err) return err;

@@ -29,10 +29,10 @@
 #include "interferometry/oskar_visibilities_all_headers.h"
 
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
-        int num_channels, int num_times, int num_baselines)
+        int num_channels, int num_times, int num_stations)
 {
     if (oskar_visibilities_init(this, amp_type, location, num_channels,
-            num_times, num_baselines))
+            num_times, num_stations))
         throw "Error in oskar_visibilities_init.";
 }
 
@@ -40,11 +40,10 @@ oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
         int location)
 {
     if (oskar_visibilities_init(this, other->amplitude.type, location,
-            other->num_channels, other->num_times, other->num_baselines))
+            other->num_channels, other->num_times, other->num_stations))
         throw "Error in oskar_visibilities_init.";
     if (oskar_visibilities_copy(this, other)) // Copy other to this.
         throw "Error in oskar_visibilities_copy.";
-
 }
 
 oskar_Visibilities::~oskar_Visibilities()
@@ -68,16 +67,9 @@ int oskar_Visibilities::read(oskar_Visibilities* vis, const char* filename)
     return oskar_visibilities_read(vis, filename);
 }
 
-int oskar_Visibilities::resize(int num_channels, int num_times, int num_baselines)
+int oskar_Visibilities::resize(int num_channels, int num_times, int num_stations)
 {
-    return oskar_visibilities_resize(this, num_channels, num_times, num_baselines);
-}
-
-int oskar_Visibilities::init(int amp_type, int location, int num_channels,
-        int num_times, int num_baselines)
-{
-    return oskar_visibilities_init(this, amp_type, location, num_channels,
-            num_times, num_baselines);
+    return oskar_visibilities_resize(this, num_channels, num_times, num_stations);
 }
 
 int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)

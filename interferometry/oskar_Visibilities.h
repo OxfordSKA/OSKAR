@@ -78,7 +78,8 @@ struct oskar_Visibilities
     oskar_Mem settings_path;     /**< Path to settings file. */
     int num_channels;            /**< Number of frequency channels. */
     int num_times;               /**< Number of time samples. */
-    int num_baselines;           /**< Number of baselines. */
+    int num_stations;            /**< Number of interferometer stations. */
+    int num_baselines;           /**< Number of interferometer baselines. */
     double freq_start_hz;        /**< Start Frequency, in Hz. */
     double freq_inc_hz;          /**< Frequency increment, in Hz. */
     double channel_bandwidth_hz; /**< Frequency channel bandwidth, in Hz */
@@ -90,6 +91,9 @@ struct oskar_Visibilities
     oskar_Mem sky_noise_stddev;  /**< Standard deviation corresponding to all
                                       sky noise, per channel. */
 
+    oskar_Mem x_metres;          /**< Station x coordinates, in metres. */
+    oskar_Mem y_metres;          /**< Station y coordinates, in metres. */
+    oskar_Mem z_metres;          /**< Station z coordinates, in metres. */
     oskar_Mem uu_metres;         /**< Baseline coordinates, in metres. */
     oskar_Mem vv_metres;         /**< Baseline coordinates, in metres. */
     oskar_Mem ww_metres;         /**< Baseline coordinates, in metres. */
@@ -123,11 +127,11 @@ struct oskar_Visibilities
      * @param location       OSKAR memory location ID for data in the structure.
      * @param num_channels   Number of frequency channels.
      * @param num_times      Number of visibility time snapshots.
-     * @param num_baselines  Number of baselines.
+     * @param num_stations   Number of stations.
      */
     oskar_Visibilities(int amp_type = OSKAR_DOUBLE_COMPLEX_MATRIX,
             int location = OSKAR_LOCATION_CPU, int num_channels = 0,
-            int num_times = 0, int num_baselines = 0);
+            int num_times = 0, int num_stations = 0);
 
     /**
      * @brief Constructs a visibility structure at the specified location
@@ -192,30 +196,11 @@ struct oskar_Visibilities
      *
      * @param num_channels   Number of frequency channels.
      * @param num_times      Number of visibility time snapshots.
-     * @param num_baselines  Number of baselines.
+     * @param num_stations   Number of stations.
      *
      * @return An error code.
      */
-    int resize(int num_channels, int num_times, int num_baselines);
-
-    /**
-     * @brief Initialises the memory in the visibility structure
-     * to the specified dimensions, type and location.
-     *
-     * @details
-     * Warning: This function will erase any existing values in the visibility
-     * structure.
-     *
-     * @param amp_type       OSKAR type ID for visibility amplitudes.
-     * @param location       OSKAR memory location ID for data in the structure.
-     * @param num_channels   Number of frequency channels.
-     * @param num_times      Number of visibility time snapshots.
-     * @param num_baselines  Number of baselines.
-     *
-     * @return An error code.
-     */
-    int init(int amp_type, int location, int num_channels, int num_times,
-            int num_baselines);
+    int resize(int num_channels, int num_times, int num_stations);
 
     /**
      * @brief Returns an oskar_Mem pointer (non ownership) for the channel
@@ -306,7 +291,12 @@ enum {
     OSKAR_VIS_TAG_BASELINE_WW = 15,
     OSKAR_VIS_TAG_AMPLITUDE = 16,
     OSKAR_VIS_TAG_PHASE_CENTRE_RA = 17,
-    OSKAR_VIS_TAG_PHASE_CENTRE_DEC = 18
+    OSKAR_VIS_TAG_PHASE_CENTRE_DEC = 18,
+    OSKAR_VIS_TAG_NUM_STATIONS = 19,
+    OSKAR_VIS_TAG_STATION_COORD_UNIT = 20,
+    OSKAR_VIS_TAG_STATION_X = 21,
+    OSKAR_VIS_TAG_STATION_Y = 22,
+    OSKAR_VIS_TAG_STATION_Z = 23
 };
 
 /* Do not change the values below - these are merely dimension labels, not the
@@ -325,6 +315,10 @@ enum {
 
 enum {
     OSKAR_VIS_BASELINE_COORD_UNIT_METRES = 1
+};
+
+enum {
+    OSKAR_VIS_STATION_COORD_UNIT_METRES = 1
 };
 
 #endif /* OSKAR_VISIBILITIES_H_ */
