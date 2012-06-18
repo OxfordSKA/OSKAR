@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,9 @@
 
 #include "oskar_global.h"
 #include "station/oskar_StationModel.h"
+#include "station/oskar_WorkStationBeam.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_Device_curand_state.h"
-#include "utility/oskar_Work.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,6 +71,7 @@ extern "C" {
  * @param[in]  l_beam        Beam phase centre horizontal l (component along x).
  * @param[in]  m_beam        Beam phase centre horizontal m (component along y).
  * @param[in]  n_beam        Beam phase centre horizontal n (component along z).
+ * @param[in]  num_points    Number of points at which to evaluate beam.
  * @param[in]  l             Array of horizontal l directions for which the beam
  *                           should be evaluated (component along x).
  * @param[in]  m             Array of horizontal m directions for which the beam
@@ -84,9 +85,9 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station,
-        double l_beam, double m_beam, double n_beam, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, oskar_Work* work,
-        oskar_Device_curand_state* curand_states);
+        double l_beam, double m_beam, double n_beam, int num_points,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states);
 
 #ifdef __cplusplus
 }

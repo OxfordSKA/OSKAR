@@ -27,8 +27,7 @@
  */
 
 #include "station/oskar_blank_below_horizon.h"
-#include "station/oskar_evaluate_dipole_pattern.h"
-#include "station/oskar_evaluate_spline_pattern.h"
+#include "station/oskar_element_model_evaluate.h"
 #include "station/oskar_evaluate_station_beam_dipoles.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
 #include "station/oskar_evaluate_station_beam.h"
@@ -50,15 +49,14 @@ extern "C" {
 #endif
 
 int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station,
-        double l_beam, double m_beam, double n_beam, const oskar_Mem* l,
-        const oskar_Mem* m, const oskar_Mem* n, oskar_Work* work,
-        oskar_Device_curand_state* curand_states)
+        double l_beam, double m_beam, double n_beam, int num_points,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states)
 {
-    int error = 0, num_points;
+    int error = 0;
 
     /* Sanity check on inputs. */
-    if (EG == NULL || station == NULL || l == NULL || m == NULL || n == NULL ||
-            work == NULL)
+    if (!EG || !station || !l || !m || !n || !work || !curand_states)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Check the coordinate units. */
@@ -77,10 +75,9 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
             n->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
-    /* Check that the array sizes match. */
-    num_points = l->num_elements;
-    if (EG->num_elements != num_points || m->num_elements != num_points ||
-            n->num_elements != num_points)
+    /* Check that the array sizes are OK. */
+    if (EG->num_elements < num_points || l->num_elements < num_points ||
+            m->num_elements < num_points || n->num_elements < num_points)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check the data types. */
@@ -98,50 +95,6 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
     /* Check if the station is an aperture array. */
     else if (station->station_type == OSKAR_STATION_TYPE_AA)
     {
-        oskar_Mem weights, weights_error;
-        int workspace_complex = 0, workspace_matrix = 0;
-
-        /* Determine the amount of workspace memory required. */
-        workspace_complex += 2 * station->num_elements; /* For weights. */
-        if (!station->use_polarised_elements || station->single_element_model)
-        {
-            if (station->evaluate_array_factor && oskar_mem_is_matrix(EG->type))
-                workspace_complex += num_points; /* For array factor. */
-            if (station->evaluate_element_factor &&
-                    !station->use_polarised_elements)
-                workspace_complex += num_points; /* For element factor. */
-            if (station->evaluate_element_factor &&
-                    oskar_mem_is_scalar(EG->type) &&
-                    station->use_polarised_elements)
-                workspace_matrix += num_points; /* For element factor. */
-        }
-
-        /* Resize the work arrays if needed. */
-        if (work->complex.num_elements - work->used_complex < workspace_complex)
-        {
-            if (work->used_complex != 0)
-                return OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* Work buffer in use. */
-            error = oskar_mem_realloc(&work->complex, workspace_complex);
-            if (error) return error;
-        }
-        if (work->matrix.num_elements - work->used_matrix < workspace_matrix)
-        {
-            if (work->used_matrix != 0)
-                return OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* Work buffer in use. */
-            error = oskar_mem_realloc(&work->matrix, workspace_matrix);
-            if (error) return error;
-        }
-
-        /* Non-owned pointers to the weights and weights error work arrays. */
-        error = oskar_mem_get_pointer(&weights, &work->complex,
-                work->used_complex, station->num_elements);
-        work->used_complex += station->num_elements;
-        if (error) return error;
-        error = oskar_mem_get_pointer(&weights_error, &work->complex,
-                work->used_complex, station->num_elements);
-        work->used_complex += station->num_elements;
-        if (error) return error;
-
         /* Check whether using a common or unique element model. */
         if (!station->single_element_model && station->use_polarised_elements)
         {
@@ -150,16 +103,16 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                     !station->evaluate_element_factor)
                 return OSKAR_ERR_SETTINGS;
 
-            if (!station->element_pattern)
+            if (!station->element_pattern->theta_re_x.coeff.data)
             {
                 /* Call function to evaluate beam from dipoles that are
                  * oriented differently. */
                 error = oskar_evaluate_station_beam_dipoles(EG, station,
-                        l_beam, m_beam, n_beam, l, m, n, &weights,
-                        &weights_error, curand_states);
+                        l_beam, m_beam, n_beam, num_points, l, m, n,
+                        &work->weights, &work->weights_error, curand_states);
                 if (error) return error;
 
-                /* Normalise beam if required. */
+                /* Normalise array beam if required. */
                 if (station->normalise_beam)
                 {
                     error = oskar_mem_scale_real(EG,
@@ -169,41 +122,31 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
             }
             else
             {
-                /* Unique element patterns: not implemented. */
+                /* Unique spline patterns: not implemented. */
                 return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
             }
         }
         else
         {
             /* Common receptor elements: E and G are separable. */
-            oskar_Mem E_temp, G_temp, *E_ptr = NULL, *G_ptr = NULL;
+            oskar_Mem *E_ptr = NULL, *G_ptr = NULL;
 
             /* Evaluate E if required. */
             if (station->evaluate_array_factor)
             {
                 /* Get pointer to E. */
                 if (oskar_mem_is_scalar(EG->type))
-                {
-                    /* Use the memory passed to the function. */
-                    E_ptr = EG;
-                }
+                    E_ptr = EG; /* Use memory passed to the function. */
                 else
-                {
-                    /* Use work buffer. */
-                    error = oskar_mem_get_pointer(&E_temp, &work->complex,
-                            work->used_complex, num_points);
-                    work->used_complex += num_points;
-                    if (error) return error;
-                    E_ptr = &E_temp;
-                }
+                    E_ptr = &work->E; /* Use work buffer. */
 
                 /* Evaluate array factor. */
                 error = oskar_evaluate_station_beam_scalar(E_ptr, station,
-                        l_beam, m_beam, n_beam, l, m, n, &weights,
-                        &weights_error, curand_states);
+                        l_beam, m_beam, n_beam, num_points, l, m, n,
+                        &work->weights, &work->weights_error, curand_states);
                 if (error) return error;
 
-                /* Normalise beam if required. */
+                /* Normalise array beam if required. */
                 if (station->normalise_beam)
                 {
                     error = oskar_mem_scale_real(E_ptr,
@@ -213,67 +156,22 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
             }
 
             /* Evaluate G if required. */
-            if (station->evaluate_element_factor)
+            if (station->evaluate_element_factor &&
+                    station->use_polarised_elements)
             {
-                if (station->use_polarised_elements)
-                {
-                    /* Get pointer to G. */
-                    if (oskar_mem_is_matrix(EG->type))
-                    {
-                        /* Use the memory passed to the function. */
-                        G_ptr = EG;
-                    }
-                    else
-                    {
-                        /* Use work buffer. */
-                        error = oskar_mem_get_pointer(&G_temp, &work->matrix,
-                                work->used_matrix, num_points);
-                        work->used_matrix += num_points;
-                        if (error) return error;
-                        G_ptr = &G_temp;
-                    }
-
-                    if (!station->element_pattern->theta_im_x.coeff.data)
-                    {
-                        double cos_x, sin_x, cos_y, sin_y;
-
-                        /* Get common dipole orientations. */
-                        cos_x = cos(station->orientation_x);
-                        sin_x = sin(station->orientation_x);
-                        cos_y = cos(station->orientation_y);
-                        sin_y = sin(station->orientation_y);
-
-                        /* Evaluate dipole pattern. */
-                        error = oskar_evaluate_dipole_pattern(G_ptr, l, m, n,
-                                cos_x, sin_x, cos_y, sin_y);
-                        if (error) return error;
-                    }
-                    else
-                    {
-                        double cos_x, sin_x, cos_y, sin_y;
-
-                        /* Get common dipole orientations.
-                         * NOTE: Currently unused! */
-                        cos_x = cos(station->orientation_x);
-                        sin_x = sin(station->orientation_x);
-                        cos_y = cos(station->orientation_y);
-                        sin_y = sin(station->orientation_y);
-
-                        /* Evaluate spline pattern. */
-                        error = oskar_evaluate_spline_pattern(G_ptr,
-                                station->element_pattern, l, m, n,
-                                cos_x, sin_x, cos_y, sin_y, work);
-                        if (error) return error;
-                    }
-                }
+                /* Get pointer to G. */
+                if (oskar_mem_is_matrix(EG->type))
+                    G_ptr = EG; /* Use memory passed to the function. */
                 else
-                {
-                    /* Evaluate a taper for a point-like antenna. */
-                    /* Use the complex work buffer for G_ptr. */
-                    work->used_complex += num_points;
+                    G_ptr = &work->G; /* Use work buffer. */
 
-                    /* This may not be required? */
-                }
+                /* Evaluate element factor. */
+                error = oskar_element_model_evaluate(station->element_pattern,
+                        G_ptr, station->use_polarised_elements,
+                        station->orientation_x, station->orientation_y,
+                        num_points, l, m, n, &work->theta_modified,
+                        &work->phi_modified);
+                if (error) return error;
             }
 
             /* Element-wise multiply to join E and G. */
@@ -301,14 +199,8 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
         }
 
         /* Blank sources below the horizon. */
-        error = oskar_blank_below_horizon(EG, n);
+        error = oskar_blank_below_horizon(EG, n, num_points);
         if (error) return error;
-
-        /* Release use of work arrays. */
-        work->used_complex -= workspace_complex;
-        work->used_matrix -= workspace_matrix;
-        /*printf("Complex: %d, Matrix: %d\n", work->used_complex,
-                work->used_matrix);*/
     }
 
     return error;

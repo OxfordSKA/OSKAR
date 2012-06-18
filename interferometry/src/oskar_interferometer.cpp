@@ -51,6 +51,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 {
     int err = 0;
     int device_id = 0;
+    size_t mem_free = 0, mem_total = 0;
+    cudaDeviceProp device_prop;
 
     // Check if sky model is empty.
     if (sky->num_sources == 0)
@@ -87,7 +89,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
-    oskar_Work work(type, OSKAR_LOCATION_GPU);
+    oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
 
     // Declare a local sky model of sufficient size for the horizon clip.
     oskar_SkyModel local_sky(type, OSKAR_LOCATION_GPU, n_sources);
@@ -107,16 +109,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     double dt_dump           = times->dt_dump_days;
     double dt_ave            = times->dt_ave_days;
     double dt_fringe         = times->dt_fringe_days;
-
-    // Record GPU memory usage.
-    size_t mem_free, mem_total;
-    cudaDeviceProp device_prop;
-    cudaMemGetInfo(&mem_free, &mem_total);
-    cudaGetDevice(&device_id);
-    cudaGetDeviceProperties(&device_prop, device_id);
-    oskar_log_message(log, 1, "Memory on device %d [%s] is %.1f%% used.",
-            device_id, device_prop.name,
-            100 * (1.0 - ((float)mem_free / (float)mem_total)));
 
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)
@@ -200,6 +192,14 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         err = vis_amp->insert(&vis, j * n_baselines);
         if (err) return err;
     }
+
+    // Record GPU memory usage.
+    cudaMemGetInfo(&mem_free, &mem_total);
+    cudaGetDevice(&device_id);
+    cudaGetDeviceProperties(&device_prop, device_id);
+    oskar_log_message(log, 1, "Memory on device %d [%s] is %.1f%% used.",
+            device_id, device_prop.name,
+            100.0 * (1.0 - ((double)mem_free / (double)mem_total)));
 
     return OSKAR_SUCCESS;
 }

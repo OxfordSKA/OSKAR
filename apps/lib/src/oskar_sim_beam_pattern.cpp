@@ -187,18 +187,14 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         // Copy telescope model to GPU.
         oskar_TelescopeModel tel_gpu(&tel_cpu, OSKAR_LOCATION_GPU);
 
-        // Copy RA and Dec to GPU and allocate arrays for direction cosines.
+        // Copy RA and Dec to GPU.
         oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
         oskar_Mem Dec(&Dec_cpu, OSKAR_LOCATION_GPU);
-        oskar_Mem l(type, OSKAR_LOCATION_GPU, num_pixels);
-        oskar_Mem m(type, OSKAR_LOCATION_GPU, num_pixels);
-        oskar_Mem n(type, OSKAR_LOCATION_GPU, num_pixels);
 
-        // Allocate weights work array and GPU memory for a beam pattern.
-        oskar_Mem weights(type | OSKAR_COMPLEX, OSKAR_LOCATION_GPU);
+        // Declare work array and GPU memory for a beam pattern.
+        oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
         oskar_Mem beam_pattern(beam_pattern_data_type, OSKAR_LOCATION_GPU,
                 num_pixels);
-        oskar_Work work(type, OSKAR_LOCATION_GPU);
 
         // Loop over channels.
         oskar_log_section(log, "Starting simulation...");
@@ -240,13 +236,13 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
                 // Evaluate horizontal l,m,n coordinates.
                 err = oskar_evaluate_source_horizontal_lmn(num_pixels,
-                        &l, &m, &n, &RA, &Dec, station, gast);
+                        &work.x, &work.y, &work.z, &RA, &Dec, station, gast);
                 if (err) return err;
 
                 // Evaluate the station beam.
                 err = oskar_evaluate_station_beam(&beam_pattern, station,
-                        beam_l, beam_m, beam_n, &l, &m, &n, &work,
-                        &curand_state);
+                        beam_l, beam_m, beam_n, num_pixels, &work.x, &work.y,
+                        &work.z, &work, &curand_state);
                 if (err) return err;
 
                 // Copy beam pattern back to host memory.

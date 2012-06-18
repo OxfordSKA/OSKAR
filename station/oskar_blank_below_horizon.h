@@ -53,11 +53,13 @@ extern "C" {
  *
  * Note that both arrays must be in GPU memory.
  *
- * @param[in,out] data   Array of Jones matrices or scalars per source.
- * @param[in] mask       Pointer to element model containing spline data.
+ * @param[in,out] data    Array of Jones matrices or scalars per source.
+ * @param[in] mask        Array of mask values.
+ * @param[in] num_sources Number of sources in arrays.
  */
 OSKAR_EXPORT
-int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask);
+int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
+        int num_sources);
 
 #ifdef __cplusplus
 }

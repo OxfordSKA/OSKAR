@@ -28,21 +28,18 @@
 
 #include "oskar_global.h"
 
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
-#include "sky/oskar_SkyModel.h"
-#include "sky/oskar_sky_model_location.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_get_station_pointer.h"
+#include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_location.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
-#include "utility/oskar_mem_get_pointer.h"
+#include "station/oskar_WorkStationBeam.h"
 #include "utility/oskar_mem_insert.h"
-#include "utility/oskar_mem_realloc.h"
-#include "utility/oskar_Work.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,10 +47,9 @@ extern "C" {
 
 int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, double gast,
-        oskar_Work* work, oskar_Device_curand_state* curand_state)
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_state)
 {
     double beam_l, beam_m, beam_n;
-    oskar_Mem hor_l, hor_m, hor_n;
     int error, i;
 
     /* Sanity check on inputs. */
@@ -67,30 +63,6 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
             oskar_sky_model_location(sky) != OSKAR_LOCATION_GPU ||
             oskar_telescope_model_location(telescope) != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
-
-    /* Resize the work buffer if needed. */
-    if (work->real.num_elements - work->used_real < 3 * sky->num_sources
-            + 2 * sky->num_sources)
-    {
-        if (work->used_real != 0)
-            return OSKAR_ERR_MEMORY_ALLOC_FAILURE; /* Work buffer in use. */
-        error = oskar_mem_realloc(&work->real, 3 * sky->num_sources);
-        if (error) return error;
-    }
-
-    /* Get pointers to work arrays. */
-    error = oskar_mem_get_pointer(&hor_l, &work->real, work->used_real,
-            sky->num_sources);
-    work->used_real += sky->num_sources;
-    if (error) return error;
-    error = oskar_mem_get_pointer(&hor_m, &work->real, work->used_real,
-            sky->num_sources);
-    work->used_real += sky->num_sources;
-    if (error) return error;
-    error = oskar_mem_get_pointer(&hor_n, &work->real, work->used_real,
-            sky->num_sources);
-    work->used_real += sky->num_sources;
-    if (error) return error;
 
     /* Evaluate beam for each station at each source position. */
     if (telescope->identical_stations && telescope->use_common_sky)
@@ -107,14 +79,16 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 station0, gast);
         if (error) return error;
         error = oskar_evaluate_source_horizontal_lmn(sky->num_sources,
-                &hor_l, &hor_m, &hor_n, &sky->RA, &sky->Dec, station0, gast);
+                &work->x, &work->y, &work->z, &sky->RA, &sky->Dec, station0,
+                gast);
         if (error) return error;
 
         /* Evaluate the station beam. */
         error = oskar_jones_get_station_pointer(&E0, E, 0);
         if (error) return error;
         error = oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m,
-                beam_n, &hor_l, &hor_m, &hor_n, work, curand_state);
+                beam_n, sky->num_sources, &work->x, &work->y, &work->z, work,
+                curand_state);
         if (error) return error;
 
         /* Copy E for station 0 into memory for other stations. */
@@ -137,7 +111,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                     &beam_n, &telescope->station[0], gast);
             if (error) return error;
             error = oskar_evaluate_source_horizontal_lmn(sky->num_sources,
-                    &hor_l, &hor_m, &hor_n, &sky->RA, &sky->Dec,
+                    &work->x, &work->y, &work->z, &sky->RA, &sky->Dec,
                     &telescope->station[0], gast);
             if (error) return error;
 
@@ -150,8 +124,8 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station,
-                        beam_l, beam_m, beam_n, &hor_l, &hor_m, &hor_n,
-                        work, curand_state);
+                        beam_l, beam_m, beam_n, sky->num_sources, &work->x,
+                        &work->y, &work->z, work, curand_state);
                 if (error) return error;
             }
         }
@@ -168,21 +142,18 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
                         &beam_n, station, gast);
                 if (error) return error;
                 error = oskar_evaluate_source_horizontal_lmn(sky->num_sources,
-                        &hor_l, &hor_m, &hor_n, &sky->RA, &sky->Dec, station,
-                        gast);
+                        &work->x, &work->y, &work->z, &sky->RA, &sky->Dec,
+                        station, gast);
                 if (error) return error;
                 error = oskar_jones_get_station_pointer(&E_station, E, i);
                 if (error) return error;
                 error = oskar_evaluate_station_beam(&E_station, station,
-                        beam_l, beam_m, beam_n, &hor_l, &hor_m,  &hor_n,
-                        work, curand_state);
+                        beam_l, beam_m, beam_n, sky->num_sources, &work->x,
+                        &work->y, &work->z, work, curand_state);
                 if (error) return error;
             }
         }
     }
-
-    /* Release use of work arrays. */
-    work->used_real -= 3 * sky->num_sources;
 
     return 0;
 }

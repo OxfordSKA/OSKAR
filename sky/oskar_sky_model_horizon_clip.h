@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,9 @@
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "utility/oskar_Work.h"
+#include "sky/oskar_SkyModel.h"
+#include "station/oskar_WorkStationBeam.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,8 +58,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
-		const oskar_SkyModel* input, const oskar_TelescopeModel* telescope,
-		double gast, oskar_Work* work);
+        const oskar_SkyModel* input, const oskar_TelescopeModel* telescope,
+        double gast, oskar_WorkStationBeam* work);
 
 #ifdef __cplusplus
 }

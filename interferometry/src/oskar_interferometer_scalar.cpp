@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
     oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
-    oskar_Work work(type, OSKAR_LOCATION_GPU);
+    oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
 
     // Initialise the random number generator.
     oskar_Device_curand_state curand_state(telescope->max_station_size);

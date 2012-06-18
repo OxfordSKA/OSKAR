@@ -114,7 +114,7 @@ void Test_dipole_pattern::test()
     oskar_Mem theta(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_pixels);
     oskar_Mem phi(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_pixels);
     int error = oskar_element_model_evaluate(&model, &pattern, 1, orientation_x,
-            orientation_y, &l, &m, &n, &theta, &phi);
+            orientation_y, num_pixels, &l, &m, &n, &theta, &phi);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy the memory back.

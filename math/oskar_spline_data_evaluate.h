@@ -61,7 +61,8 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
-        const oskar_SplineData* spline, const oskar_Mem* x, const oskar_Mem* y);
+        const oskar_SplineData* spline, int num_points, const oskar_Mem* x,
+        const oskar_Mem* y);
 
 #ifdef __cplusplus
 }

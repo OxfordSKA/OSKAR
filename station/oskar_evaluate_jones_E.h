@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,10 @@
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "math/oskar_Jones.h"
-#include "utility/oskar_Work.h"
+#include "sky/oskar_SkyModel.h"
+#include "station/oskar_WorkStationBeam.h"
 #include "utility/oskar_Device_curand_state.h"
 
 #ifdef __cplusplus
@@ -57,7 +57,7 @@ extern "C" {
  * @param[in]  sky          Input sky model.
  * @param[in]  telescope    Input telescope model.
  * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
- * @param[in]  work         oskar_Mem structure to holding work arrays.
+ * @param[in]  work         Pointer to structure holding work arrays.
  * @param[in]  curand_state Structure holding curand states.
  *
  * @return An error code.
@@ -65,7 +65,7 @@ extern "C" {
 OSKAR_EXPORT
 int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, double gast,
-        oskar_Work* work, oskar_Device_curand_state* curand_state);
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_state);
 
 #ifdef __cplusplus
 }

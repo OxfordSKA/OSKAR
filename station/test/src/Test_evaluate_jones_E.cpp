@@ -143,11 +143,7 @@ void Test_evaluate_jones_E::evaluate_e()
     oskar_Jones E_gpu(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, num_stations,
             num_sources);
 
-    oskar_Work work_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, work_gpu.real.type);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX, work_gpu.complex.type);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, work_gpu.matrix.type);
-
+    oskar_WorkStationBeam work_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
     error = oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast,
             &work_gpu, &curand_state);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
@@ -156,14 +152,9 @@ void Test_evaluate_jones_E::evaluate_e()
     oskar_Jones E_cpu(&E_gpu, OSKAR_LOCATION_CPU);
 
     // Save to file for plotting.
-    oskar_Work work_cpu(&work_gpu, OSKAR_LOCATION_CPU);
-    oskar_Mem l, m, n;
-    error = oskar_mem_get_pointer(&l, &work_cpu.real, 0 * num_sources, num_sources);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    error = oskar_mem_get_pointer(&m, &work_cpu.real, 1 * num_sources, num_sources);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-    error = oskar_mem_get_pointer(&n, &work_cpu.real, 2 * num_sources, num_sources);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+    oskar_Mem l(&work_gpu.x, OSKAR_LOCATION_CPU);
+    oskar_Mem m(&work_gpu.y, OSKAR_LOCATION_CPU);
+    oskar_Mem n(&work_gpu.z, OSKAR_LOCATION_CPU);
     const char* filename = "temp_test_E_jones.txt";
     FILE* file = fopen(filename, "w");
     oskar_Mem E_station;
@@ -205,9 +196,3 @@ void Test_evaluate_jones_E::evaluate_e()
 void Test_evaluate_jones_E::performance_test()
 {
 }
-
-
-
-
-
-

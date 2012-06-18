@@ -33,9 +33,10 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask)
+int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
+        int num_sources)
 {
-    int type, num_sources;
+    int type;
 
     /* Sanity check on inputs. */
     if (!mask || !data)
@@ -51,7 +52,6 @@ int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask)
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the dimensions are OK. */
-    num_sources = mask->num_elements;
     if (data->num_elements < num_sources)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 

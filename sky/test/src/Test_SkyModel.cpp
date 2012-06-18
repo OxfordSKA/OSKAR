@@ -338,7 +338,7 @@ void Test_SkyModel::test_horizon_clip()
     CPPUNIT_ASSERT_EQUAL(0, err);
 
     // Create a work buffer.
-    oskar_Work work(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
+    oskar_WorkStationBeam work(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
 
     // Try calling compact: should fail.
     err = oskar_sky_model_horizon_clip(&sky_out, &sky_cpu, &telescope, 0.0, &work);

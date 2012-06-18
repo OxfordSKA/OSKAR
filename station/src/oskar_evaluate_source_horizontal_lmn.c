@@ -28,6 +28,7 @@
 
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
+#include "utility/oskar_mem_realloc.h"
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -38,6 +39,7 @@ int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
         oskar_Mem* m, oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
         const oskar_StationModel* station, double gast)
 {
+    int error;
     double last;
 
     if (!RA || !Dec || !station || !l || !m || !n)
@@ -52,10 +54,25 @@ int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the dimensions are correct. */
-    if (num_sources > RA->num_elements || num_sources > Dec->num_elements ||
-            num_sources > l->num_elements || num_sources > m->num_elements ||
-            num_sources > n->num_elements)
+    if (num_sources > RA->num_elements || num_sources > Dec->num_elements)
         return OSKAR_ERR_DIMENSION_MISMATCH;
+
+    /* Resize output arrays if needed. */
+    if (l->num_elements < num_sources)
+    {
+        error = oskar_mem_realloc(l, num_sources);
+        if (error) return error;
+    }
+    if (m->num_elements < num_sources)
+    {
+        error = oskar_mem_realloc(m, num_sources);
+        if (error) return error;
+    }
+    if (n->num_elements < num_sources)
+    {
+        error = oskar_mem_realloc(n, num_sources);
+        if (error) return error;
+    }
 
     /* Check that the structures contains some sources. */
     if (!RA->data || !Dec->data || !l->data || !m->data || !n->data)

@@ -39,6 +39,7 @@
 #include "utility/oskar_Work.h"
 #include "utility/oskar_mem_element_multiply.h"
 #include "utility/oskar_mem_element_size.h"
+#include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_type_check.h"
 
 #include <cstdlib>
@@ -49,11 +50,11 @@ extern "C"
 #endif
 int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
         const oskar_StationModel* station, double l_beam, double m_beam,
-        double n_beam, const oskar_Mem* l, const oskar_Mem* m,
+        double n_beam, int num_points, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
         oskar_Device_curand_state* curand_state)
 {
-    int error = 0, num_antennas, num_sources;
+    int error = 0, num_antennas;
     size_t element_size;
 
     // Sanity check on inputs.
@@ -71,9 +72,12 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
             weights_error->location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
+    // Check that the antenna coordinates have been scaled by the wavenumber.
+    if (station->coord_units != OSKAR_RADIANS)
+        return OSKAR_ERR_BAD_UNITS;
+
     // Check that the pattern array is a complex matrix.
-    if (!oskar_mem_is_complex(beam->type) ||
-            !oskar_mem_is_matrix(beam->type))
+    if (!oskar_mem_is_complex(beam->type) || !oskar_mem_is_matrix(beam->type))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     // Check that the weights are complex.
@@ -82,8 +86,26 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
 
     // Get the dimensions.
     num_antennas = station->num_elements;
-    num_sources  = l->num_elements;
     element_size = oskar_mem_element_size(l->type);
+
+    // Resize weights and weights error work arrays if required.
+    if (weights->num_elements < num_antennas)
+    {
+        error = oskar_mem_realloc(weights, num_antennas);
+        if (error) return error;
+    }
+    if (weights_error->num_elements < num_antennas)
+    {
+        error = oskar_mem_realloc(weights_error, num_antennas);
+        if (error) return error;
+    }
+
+    // Resize output array if required.
+    if (beam->num_elements < num_points)
+    {
+        error = oskar_mem_realloc(beam, num_points);
+        if (error) return error;
+    }
 
     // Double precision.
     if (oskar_station_model_type(station) == OSKAR_DOUBLE &&
@@ -130,7 +152,7 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
         {
             int max_in_chunk, shared_mem;
             num_threads = 256;
-            num_blocks = (num_sources + num_threads - 1) / num_threads;
+            num_blocks = (num_points + num_threads - 1) / num_threads;
             max_in_chunk = 224;
             shared_mem = 9 * max_in_chunk * element_size;
             oskar_cudak_evaluate_station_beam_dipoles_d
@@ -138,7 +160,7 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
                     station->x_signal, station->y_signal, station->z_signal,
                     station->cos_orientation_x, station->sin_orientation_x,
                     station->cos_orientation_y, station->sin_orientation_y,
-                    *weights, num_sources, *l, *m, *n, max_in_chunk, *beam);
+                    *weights, num_points, *l, *m, *n, max_in_chunk, *beam);
         }
     }
 
@@ -187,7 +209,7 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
         {
             int max_in_chunk, shared_mem;
             num_threads = 256;
-            num_blocks = (num_sources + num_threads - 1) / num_threads;
+            num_blocks = (num_points + num_threads - 1) / num_threads;
             max_in_chunk = 448;
             shared_mem = 9 * max_in_chunk * element_size;
             oskar_cudak_evaluate_station_beam_dipoles_f
@@ -195,7 +217,7 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
                     station->x_signal, station->y_signal, station->z_signal,
                     station->cos_orientation_x, station->sin_orientation_x,
                     station->cos_orientation_y, station->sin_orientation_y,
-                    *weights, num_sources, *l, *m, *n, max_in_chunk, *beam);
+                    *weights, num_points, *l, *m, *n, max_in_chunk, *beam);
         }
     }
     else

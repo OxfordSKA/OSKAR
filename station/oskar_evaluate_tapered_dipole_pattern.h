@@ -68,7 +68,7 @@ extern "C" {
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  */
 OSKAR_EXPORT
-int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern,
+int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern, int num_points,
         const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
         double gaussian_fwhm_rad, int return_x_dipole);
 

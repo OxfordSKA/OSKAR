@@ -36,14 +36,10 @@ extern "C" {
 #endif
 
 int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
-        const oskar_SplineData* spline, const oskar_Mem* x, const oskar_Mem* y)
+        const oskar_SplineData* spline, int num_points, const oskar_Mem* x,
+        const oskar_Mem* y)
 {
-    int err = 0, nx, ny, num_points, type, location;
-
-    /* Check arrays are consistent. */
-    num_points = x->num_elements;
-    if (y->num_elements != num_points)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+    int err = 0, nx, ny, type, location;
 
     /* Check type. */
     type = x->type;

@@ -34,11 +34,11 @@
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern,
+int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern, int num_points,
         const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
         double gaussian_fwhm_rad, int return_x_dipole)
 {
-    int type, num_sources;
+    int type;
 
     /* Sanity check on inputs. */
     if (!theta || !phi || !pattern)
@@ -56,8 +56,8 @@ int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern,
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the dimensions are OK. */
-    num_sources = theta->num_elements;
-    if (phi->num_elements < num_sources || pattern->num_elements < num_sources)
+    if (theta->num_elements < num_points || phi->num_elements < num_points ||
+            pattern->num_elements < num_points)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Switch on the type. */
@@ -65,9 +65,9 @@ int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern,
     if (type == OSKAR_SINGLE)
     {
         int num_blocks, num_threads = 256;
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
+        num_blocks = (num_points + num_threads - 1) / num_threads;
         oskar_cudak_evaluate_dipole_pattern_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points,
                 (const float*)theta->data, (const float*)phi->data,
                 cos_power, gaussian_fwhm_rad, return_x_dipole,
                 (float4c*)pattern->data);
@@ -75,9 +75,9 @@ int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern,
     else if (type == OSKAR_DOUBLE)
     {
         int num_blocks, num_threads = 256;
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
+        num_blocks = (num_points + num_threads - 1) / num_threads;
         oskar_cudak_evaluate_dipole_pattern_d
-        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_sources,
+        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points,
                 (const double*)theta->data, (const double*)phi->data,
                 cos_power, gaussian_fwhm_rad, return_x_dipole,
                 (double4c*)pattern->data);

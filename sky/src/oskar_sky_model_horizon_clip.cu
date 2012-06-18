@@ -137,7 +137,7 @@ static void copy_source_data(oskar_SkyModel* output, const oskar_SkyModel* input
 extern "C"
 int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
         const oskar_SkyModel* input, const oskar_TelescopeModel* telescope,
-        double gast, oskar_Work* work)
+        double gast, oskar_WorkStationBeam* work)
 {
     // Check for sane inputs.
     int err = 0;
@@ -145,13 +145,13 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the types match.
-    if (output->type() != input->type() || input->type() != work->real.type)
+    if (output->type() != input->type())
         return OSKAR_ERR_TYPE_MISMATCH;
 
     // Check for the correct location.
     if (output->location() != OSKAR_LOCATION_GPU ||
             input->location() != OSKAR_LOCATION_GPU ||
-            work->real.location != OSKAR_LOCATION_GPU)
+            work->x.location != OSKAR_LOCATION_GPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     // Copy extended source flag
@@ -169,23 +169,29 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
     }
 
     // Resize the work buffers if necessary.
-    if (work->integer.num_elements < num_sources)
+    if (work->horizon_mask.num_elements < num_sources)
     {
-        err = work->integer.resize(num_sources);
+        err = work->horizon_mask.resize(num_sources);
         if (err) return err;
     }
-    if (work->real.num_elements < 3 * num_sources)
+    if (work->x.num_elements < num_sources)
     {
-        err = work->real.resize(3 * num_sources);
+        err = work->x.resize(num_sources);
+        if (err) return err;
+    }
+    if (work->y.num_elements < num_sources)
+    {
+        err = work->y.resize(num_sources);
+        if (err) return err;
+    }
+    if (work->z.num_elements < num_sources)
+    {
+        err = work->z.resize(num_sources);
         if (err) return err;
     }
 
-    // Get pointers into work buffers.
-    oskar_Mem mask = work->integer.get_pointer(0, num_sources);
-    oskar_Mem hor_l = work->real.get_pointer(0, num_sources);
-    oskar_Mem hor_m = work->real.get_pointer(1 * num_sources, num_sources);
-    oskar_Mem hor_n = work->real.get_pointer(2 * num_sources, num_sources);
-    err = mask.clear_contents();
+    // Clear horizon mask.
+    err = work->horizon_mask.clear_contents();
     if (err) return err;
 
     if (input->type() == OSKAR_SINGLE)
@@ -205,16 +211,16 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             // Evaluate source horizontal l,m,n direction cosines.
             err = oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, input->RA,
-                    input->Dec, lst, latitude, hor_l, hor_m, hor_n);
+                    input->Dec, lst, latitude, work->x, work->y, work->z);
             if (err) return err;
 
             // Update the mask.
             oskar_cudak_update_horizon_mask_f OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (num_sources, hor_n, mask);
+            (num_sources, work->z, work->horizon_mask);
         }
 
         // Copy out source data based on the mask values.
-        copy_source_data<float>(output, input, mask);
+        copy_source_data<float>(output, input, work->horizon_mask);
     }
     else if (input->type() == OSKAR_DOUBLE)
     {
@@ -233,16 +239,16 @@ int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             // Evaluate source horizontal l,m,n direction cosines.
             err = oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, input->RA,
-                    input->Dec, lst, latitude, hor_l, hor_m, hor_n);
+                    input->Dec, lst, latitude, work->x, work->y, work->z);
             if (err) return err;
 
             // Update the mask.
             oskar_cudak_update_horizon_mask_d OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (num_sources, hor_n, mask);
+            (num_sources, work->z, work->horizon_mask);
         }
 
         // Copy out source data based on the mask values.
-        copy_source_data<double>(output, input, mask);
+        copy_source_data<double>(output, input, work->horizon_mask);
     }
     else
     {
