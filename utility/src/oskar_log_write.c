@@ -156,7 +156,7 @@ static void print_entry(FILE* stream, char code, int depth, int width,
     if (depth == -1000)
     {
         fprintf(stream, " |");
-        for (i = 0; i < 77; ++i)
+        for (i = 0; i < 68; ++i)
             fprintf(stream, "%c", code);
         fprintf(stream, "\n");
         return;

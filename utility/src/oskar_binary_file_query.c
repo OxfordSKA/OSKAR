@@ -95,6 +95,21 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
     oskar_log_line(log, ' ');
     oskar_log_message(log, 0, "File contains %d tags.", index->num_tags);
 
+    /* Display the run log if it is present. */
+    if (oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+            OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset) == OSKAR_SUCCESS)
+    {
+        oskar_Mem temp;
+        oskar_log_section(log, "Run log:");
+        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
+        oskar_mem_binary_stream_read(&temp, stream, &index,
+                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0);
+        oskar_mem_realloc(&temp, temp.num_elements + 1);
+        ((char*)temp.data)[temp.num_elements - 1] = 0; /* Null-terminate. */
+        oskar_log_message(log, depth, "\n%s", (char*)(temp.data));
+        oskar_mem_free(&temp);
+    }
+
     /* Iterate all tags in index. */
     oskar_log_section(log, "Standard tags:");
     oskar_log_message(log, -1, "[%3s] %-23s %5s.%-3s : %-10s (%s)",
@@ -498,21 +513,6 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 oskar_log_message(log, depth, "%s.%s : %d", group, tag, idx);
             }
         }
-    }
-
-    /* Display the run log. */
-    if (oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-            OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset) == OSKAR_SUCCESS)
-    {
-        oskar_Mem temp;
-        oskar_log_section(log, "Run log:");
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
-        oskar_mem_binary_stream_read(&temp, stream, &index,
-                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0);
-        oskar_mem_realloc(&temp, temp.num_elements + 1);
-        ((char*)temp.data)[temp.num_elements - 1] = 0; /* Null-terminate. */
-        oskar_log_message(log, depth, "\n%s", (char*)(temp.data));
-        oskar_mem_free(&temp);
     }
 
     /* Free the index. */

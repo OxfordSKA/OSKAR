@@ -35,6 +35,7 @@
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_binary_file_read.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -64,7 +65,19 @@ int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
     if (err) goto cleanup;
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_NUM_STATIONS, 0, &num_stations);
-    if (err) goto cleanup;
+    if (err == OSKAR_ERR_BINARY_TAG_NOT_FOUND)
+    {
+        /* Check for number of baselines if number of stations not present. */
+        int num_baselines = 0;
+        err = oskar_binary_file_read_int(filename, &index, grp,
+                OSKAR_VIS_TAG_NUM_BASELINES, 0, &num_baselines);
+        if (err) goto cleanup;
+
+        /* Convert baselines to stations (care using floating point here). */
+        num_stations = (int) floor(0.5 +
+                (1.0 + sqrt(1.0 + 8.0 * num_baselines)) / 2.0);
+    }
+    else if (err) goto cleanup;
     err = oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type);
     if (err) goto cleanup;

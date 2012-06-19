@@ -2,7 +2,6 @@
 # src/apps/CMakeLists.txt
 #
 
-
 if (QT4_FOUND AND CUDA_FOUND)
 
     include_directories(${QT_INCLUDE_DIR})
@@ -32,6 +31,10 @@ if (QT4_FOUND AND CUDA_FOUND)
 
     # BINARY: oskar_settings_get
     set(name oskar_settings_get)
+    oskar_app(${name} ${name}_main.cpp)
+
+    # BINARY: oskar_visibilities_to_ms
+    set(name oskar_visibilities_to_ms)
     oskar_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar

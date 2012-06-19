@@ -1,0 +1,72 @@
+/*
+ * Copyright (c) 2012, The University of Oxford
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 3. Neither the name of the University of Oxford nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "oskar_global.h"
+#include "interferometry/oskar_visibilities_read.h"
+#include "apps/lib/oskar_visibilities_write_ms.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_log_error.h"
+#include <cstdio>
+
+int main(int argc, char** argv)
+{
+    // Check if built with Measurement Set support.
+#ifndef OSKAR_NO_MS
+    int error;
+
+    // Parse command line.
+    if (argc != 3)
+    {
+        fprintf(stderr, "Usage: $ oskar_visibilities_to_ms [binary file] [MS name]\n");
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    }
+
+    // Load the visibility file.
+    oskar_Visibilities vis;
+    error = oskar_visibilities_read(&vis, argv[1]);
+    if (error)
+    {
+        oskar_log_error(0, oskar_get_error_string(error));
+        return error;
+    }
+
+    // Write out the visibilities as a Measurement Set.
+    error = oskar_visibilities_write_ms(&vis, 0, argv[2], 1);
+    if (error)
+    {
+        oskar_log_error(0, oskar_get_error_string(error));
+        return error;
+    }
+    return OSKAR_SUCCESS;
+
+#else
+    // No Measurement Set support.
+    oskar_log_error(0, "OSKAR was not compiled with Measurement Set support.");
+    return -1;
+#endif
+}
