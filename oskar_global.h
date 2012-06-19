@@ -66,87 +66,108 @@
  */
 enum {
     /* Indicates that no error has occurred. */
-    OSKAR_SUCCESS                  = 0,
+    OSKAR_SUCCESS                      = 0,
 
     /* Indicates that an end-of-file condition was encountered.
      * This is compatible with the standard C EOF macro (-1). */
-    OSKAR_ERR_EOF                  = -1,
+    OSKAR_ERR_EOF                      = -1,
 
     /* Indicates a file I/O error. */
-    OSKAR_ERR_FILE_IO              = -2,
+    OSKAR_ERR_FILE_IO                  = -2,
 
     /* Could indicate that an invalid NULL pointer is passed to a function. */
-    OSKAR_ERR_INVALID_ARGUMENT     = -3,
+    OSKAR_ERR_INVALID_ARGUMENT         = -3,
 
     /* Indicates that host memory allocation failed. */
-    OSKAR_ERR_MEMORY_ALLOC_FAILURE = -4,
+    OSKAR_ERR_MEMORY_ALLOC_FAILURE     = -4,
 
     /* Indicates that an array has not been allocated
      * (NULL pointer dereference). */
-    OSKAR_ERR_MEMORY_NOT_ALLOCATED = -5,
+    OSKAR_ERR_MEMORY_NOT_ALLOCATED     = -5,
 
     /* Indicates that the data types used for an operation are incompatible. */
-    OSKAR_ERR_TYPE_MISMATCH        = -6,
+    OSKAR_ERR_TYPE_MISMATCH            = -6,
 
     /* Indicates that the data dimensions do not match. */
-    OSKAR_ERR_DIMENSION_MISMATCH   = -7,
+    OSKAR_ERR_DIMENSION_MISMATCH       = -7,
 
     /* Indicates that the memory pointer location is not supported. */
-    OSKAR_ERR_BAD_LOCATION         = -8,
+    OSKAR_ERR_BAD_LOCATION             = -8,
 
     /* Indicates that the data type is not supported. */
-    OSKAR_ERR_BAD_DATA_TYPE        = -9,
+    OSKAR_ERR_BAD_DATA_TYPE            = -9,
 
     /* Indicates that the data type of a Jones matrix is not supported. */
-    OSKAR_ERR_BAD_JONES_TYPE       = -10,
+    OSKAR_ERR_BAD_JONES_TYPE           = -10,
 
     /* Indicates that the memory location is out of range. */
-    OSKAR_ERR_OUT_OF_RANGE         = -11,
+    OSKAR_ERR_OUT_OF_RANGE             = -11,
 
     /* Indicates that the OSKAR version is not compatible. */
-    OSKAR_ERR_VERSION_MISMATCH     = -12,
+    OSKAR_ERR_VERSION_MISMATCH         = -12,
 
     /* Indicates that there is an error in units of some quantity. */
-    OSKAR_ERR_BAD_UNITS            = -13,
+    OSKAR_ERR_BAD_UNITS                = -13,
 
     /* Indicates that there are no visible sources in the sky model. */
-    OSKAR_ERR_NO_VISIBLE_SOURCES   = -14,
+    OSKAR_ERR_NO_VISIBLE_SOURCES       = -14,
 
     /* Indicates that spline coefficient computation failed. */
-    OSKAR_ERR_SPLINE_COEFF_FAIL    = -15,
+    OSKAR_ERR_SPLINE_COEFF_FAIL        = -15,
 
     /* Indicates that spline evaluation failed. */
-    OSKAR_ERR_SPLINE_EVAL_FAIL     = -16,
+    OSKAR_ERR_SPLINE_EVAL_FAIL         = -16,
 
     /* Indicates that the sky or telescope structure could not be created. */
-    OSKAR_ERR_SETUP_FAIL           = -17,
+    OSKAR_ERR_SETUP_FAIL               = -17,
 
     /* Indicates that the settings file could not be opened. */
-    OSKAR_ERR_SETTINGS             = -18,
+    OSKAR_ERR_SETTINGS                 = -18,
 
     /* Indicates that there are not enough CUDA devices available. */
-    OSKAR_ERR_CUDA_DEVICES         = -19,
+    OSKAR_ERR_CUDA_DEVICES             = -19,
+
+    /* Indicates that the specified functionality isn't available for use. */
+    OSKAR_ERR_FUNCTION_NOT_AVAILABLE   = -20,
+
+    /* Indicates the fitting elliptical source failed. */
+    OSKAR_ERR_ELLIPSE_FIT_FAILED       = -21,
+
+    /* Indicates an invalid range selection. */
+    OSKAR_ERR_INVALID_RANGE            = -22,
+
+    /* Indicates a problem with FITS I/O. */
+    OSKAR_ERR_FITS_IO                  = -23,
+
+    /* Indicates that the file is not a valid OSKAR binary file. */
+    OSKAR_ERR_BINARY_FILE_INVALID      = -24,
 
     /* Indicates that the binary file format is incompatible. */
-    OSKAR_ERR_BAD_BINARY_FORMAT    = -20,
+    OSKAR_ERR_BAD_BINARY_FORMAT        = -25,
+
+    /* Indicates that the binary format version is unknown. */
+    OSKAR_ERR_BINARY_VERSION_UNKNOWN   = -26,
 
     /* Indicates that required data was not found in the binary file. */
-    OSKAR_ERR_BINARY_TAG_NOT_FOUND = -21,
+    OSKAR_ERR_BINARY_TAG_NOT_FOUND     = -27,
 
-    /* Indicates that the specified functionality isn't available for use */
-    OSKAR_ERR_FUNCTION_NOT_AVAILABLE = -22,
+    /* Indicates that the byte ordering is incompatible. */
+    OSKAR_ERR_BINARY_ENDIAN_MISMATCH   = -28,
 
-    /* Indicates the fitting elliptical source failed */
-    OSKAR_ERR_ELLIPSE_FIT_FAILED     = -23,
+    /* Indicates that the binary representation of integers is incompatible. */
+    OSKAR_ERR_BINARY_INT_MISMATCH      = -29,
 
-    /* Indicates an invalid range selection */
-    OSKAR_ERR_INVALID_RANGE          = -24,
+    /* Indicates that the binary representation of floats is incompatible. */
+    OSKAR_ERR_BINARY_FLOAT_MISMATCH    = -30,
 
-    /* Indicates a problem with FITS I/O */
-    OSKAR_ERR_FITS_IO                = -25,
+    /* Indicates that the binary representation of floats is incompatible. */
+    OSKAR_ERR_BINARY_DOUBLE_MISMATCH   = -31,
+
+    /* Indicates that the extended binary tag name is too long. */
+    OSKAR_ERR_BINARY_TAG_TOO_LONG      = -32,
 
     /* Indicates that an unknown error occurred. */
-    OSKAR_ERR_UNKNOWN                = -1000
+    OSKAR_ERR_UNKNOWN                  = -1000
 };
 
 

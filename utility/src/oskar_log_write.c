@@ -62,7 +62,7 @@ int oskar_log_writev(oskar_Log* log, char code, int depth, int width,
         const char* prefix, const char* format, va_list args)
 {
     /* Catch if both strings are NULL. */
-    if (!format && !prefix)
+    if (!format && !prefix && depth > -10)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Return if no log is set. */
@@ -121,7 +121,7 @@ int oskar_log_writev_stderr(char code, int depth, int width,
         const char* prefix, const char* format, va_list args)
 {
     /* Catch if both strings are NULL. */
-    if (!format && !prefix) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!format && !prefix && depth > -10) return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Print log entry to standard error. */
     print_entry(stderr, code, depth, width, prefix, format, args);
@@ -134,7 +134,7 @@ int oskar_log_writev_stdout(char code, int depth, int width,
         const char* prefix, const char* format, va_list args)
 {
     /* Catch if both strings are NULL. */
-    if (!format && !prefix) return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!format && !prefix && depth > -10) return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Print log entry to standard output. */
     print_entry(stdout, code, depth, width, prefix, format, args);
@@ -152,21 +152,32 @@ static void print_entry(FILE* stream, char code, int depth, int width,
     /* Ensure code is a printable character. */
     if (code < 32) code += 48;
 
+    /* Check if depth signifies a line. */
+    if (depth == -1000)
+    {
+        fprintf(stream, " |");
+        for (i = 0; i < 77; ++i)
+            fprintf(stream, "%c", code);
+        fprintf(stream, "\n");
+        return;
+    }
+
     /* Print a blank line around section headings and errors. */
-    if (depth < 0)
+    if (depth == -100)
         fprintf(stream, " |\n");
 
     /* Print the message code. */
     fprintf(stream, "%c|", code);
 
     /* Print leading whitespace for depth. */
-    for (i = 0; i < depth; ++i) fprintf(stream, "  ");
+    if (abs(depth) < 50)
+        for (i = 0; i < abs(depth); ++i) fprintf(stream, "  ");
 
     /* Print symbol for this depth.
      * All symbols should contain the same number of characters. */
     switch (depth)
     {
-    case -1:
+    case -100: /* Special case. */
         sym = "==";
         break;
     case 0:
@@ -184,8 +195,20 @@ static void print_entry(FILE* stream, char code, int depth, int width,
     case 4:
         sym = " -";
         break;
-    default:
+    case 5:
         sym = " *";
+        break;
+    case 6:
+        sym = " +";
+        break;
+    case 7:
+        sym = " -";
+        break;
+    case 8:
+        sym = " *";
+        break;
+    default: /* Negative depth means no symbol. */
+        sym = "  ";
         break;
     }
     fprintf(stream, "%s ", sym);
@@ -199,7 +222,7 @@ static void print_entry(FILE* stream, char code, int depth, int width,
             fprintf(stream, "%s", prefix);
 
             /* Print trailing whitespace. */
-            n = 2 * depth + 4 + strlen(prefix);
+            n = abs(2 * depth + 4 + strlen(prefix));
             for (i = 0; i < width - n; ++i) fprintf(stream, " ");
             if (format)
             {
@@ -218,7 +241,7 @@ static void print_entry(FILE* stream, char code, int depth, int width,
     fprintf(stream, "\n");
 
     /* Print a blank line around section headings and errors. */
-    if (depth < 0)
+    if (depth == -100)
         fprintf(stream, " |\n");
 }
 

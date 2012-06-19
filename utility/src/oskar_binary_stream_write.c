@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -139,7 +139,7 @@ int oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
     lgroup = strlen(name_group);
     ltag = strlen(name_tag);
     if (lgroup > 254 || ltag > 254)
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
+        return OSKAR_ERR_BINARY_TAG_TOO_LONG;
 
     /* Set up the tag identifiers */
     tag.flags = 0;

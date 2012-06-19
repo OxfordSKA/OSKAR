@@ -26,32 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_log_write.h"
-#include <stdarg.h>
+#ifndef OSKAR_BINARY_FILE_QUERY_H_
+#define OSKAR_BINARY_FILE_QUERY_H_
+
+/**
+ * @file oskar_binary_file_query.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_log_section(oskar_Log* log, const char* format, ...)
-{
-    int retval;
-    char code = '=';
-    va_list args;
-
-    /* Write to standard output. */
-    va_start(args, format);
-    oskar_log_writev_stdout(code, -100, 0, 0, format, args);
-    va_end(args);
-
-    /* Write to log file. */
-    va_start(args, format);
-    retval = oskar_log_writev(log, code, -100, 0, 0, format, args);
-    va_end(args);
-    return retval;
-}
+/**
+ * @brief Queries the contents of an OSKAR binary file.
+ *
+ * @details
+ * This function queries the given binary file and writes details of the tags
+ * it contains to the log.
+ *
+ * @param[in,out] log      Pointer to log structure.
+ * @param[in] filename     Name of binary file.
+ */
+OSKAR_EXPORT
+int oskar_binary_file_query(oskar_Log* log, const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_BINARY_FILE_QUERY_H_ */

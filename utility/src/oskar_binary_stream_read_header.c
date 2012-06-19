@@ -48,57 +48,23 @@ int oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header)
 
     /* Check if this is a valid header. */
     if (strncmp("OSKARBIN", header->magic, 8) != 0)
-    {
-        fprintf(stderr, "Error: Invalid OSKAR binary file.\n");
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
-    }
+        return OSKAR_ERR_BINARY_FILE_INVALID;
 
     /* Check if the format is compatible. */
     if (OSKAR_BINARY_FORMAT_VERSION != (int)(header->bin_version))
-    {
-        fprintf(stderr, "Error: Unknown OSKAR binary file format.\n");
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
-    }
+        return OSKAR_ERR_BINARY_VERSION_UNKNOWN;
 
     /* Check if the architecture is compatible. */
     if (oskar_endian() != (int)(header->endian))
-    {
-        fprintf(stderr, "Error: Incompatible architecture "
-                "(wrong data byte ordering).\n");
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
-    }
-
-    /* Check size of pointer type. */
-    if (sizeof(void*) < (size_t)(header->size_ptr))
-    {
-        fprintf(stderr, "Warning: (sizeof(void*) < file sizeof(void*)).\n");
-    }
+        return OSKAR_ERR_BINARY_ENDIAN_MISMATCH;
 
     /* Check size of data types. */
     if (sizeof(int) != (size_t)(header->size_int))
-    {
-        fprintf(stderr, "Error: Incompatible architecture "
-                "(sizeof(int) != file sizeof(int)).\n");
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
-    }
+        return OSKAR_ERR_BINARY_INT_MISMATCH;
     if (sizeof(float) != (size_t)(header->size_float))
-    {
-        fprintf(stderr, "Error: Incompatible architecture "
-                "(sizeof(float) != file sizeof(float)).\n");
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
-    }
+        return OSKAR_ERR_BINARY_FLOAT_MISMATCH;
     if (sizeof(double) != (size_t)(header->size_double))
-    {
-        fprintf(stderr, "Error: Incompatible architecture "
-                "(sizeof(double) != file sizeof(double)).\n");
-        return OSKAR_ERR_BAD_BINARY_FORMAT;
-    }
-
-    /* Check OSKAR version. */
-    if ((int)OSKAR_VERSION != oskar_binary_header_version(header))
-    {
-        fprintf(stderr, "Warning: OSKAR_VERSION mismatch.\n");
-    }
+        return OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
 
     return OSKAR_SUCCESS;
 }

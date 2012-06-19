@@ -43,12 +43,12 @@ int oskar_log_warning(oskar_Log* log, const char* format, ...)
 
     /* Write to standard output. */
     va_start(args, format);
-    oskar_log_writev_stdout(code, -1, 0, prefix, format, args);
+    oskar_log_writev_stdout(code, -100, 0, prefix, format, args);
     va_end(args);
 
     /* Write to log file. */
     va_start(args, format);
-    retval = oskar_log_writev(log, code, -1, 0, prefix, format, args);
+    retval = oskar_log_writev(log, code, -100, 0, prefix, format, args);
     va_end(args);
     return retval;
 }

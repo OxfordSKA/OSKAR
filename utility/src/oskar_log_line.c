@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_line.h"
 #include "utility/oskar_log_write.h"
 #include <stdarg.h>
 
@@ -34,21 +34,16 @@
 extern "C" {
 #endif
 
-int oskar_log_section(oskar_Log* log, const char* format, ...)
+int oskar_log_line(oskar_Log* log, char code)
 {
     int retval;
-    char code = '=';
     va_list args;
 
     /* Write to standard output. */
-    va_start(args, format);
-    oskar_log_writev_stdout(code, -100, 0, 0, format, args);
-    va_end(args);
+    oskar_log_writev_stdout(code, -1000, 0, 0, 0, args);
 
     /* Write to log file. */
-    va_start(args, format);
-    retval = oskar_log_writev(log, code, -100, 0, 0, format, args);
-    va_end(args);
+    retval = oskar_log_writev(log, code, -1000, 0, 0, 0, args);
     return retval;
 }
 

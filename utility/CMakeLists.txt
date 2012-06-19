@@ -6,6 +6,7 @@ add_subdirectory(cudak)
 
 # ==== Utility library source
 set(utility_SRC
+    src/oskar_binary_file_query.c
     src/oskar_binary_file_read.c
     src/oskar_binary_file_write.c
     src/oskar_binary_header_version.c
@@ -34,6 +35,7 @@ set(utility_SRC
     src/oskar_log_file_data.c
     src/oskar_log_free.c
     src/oskar_log_init.c
+    src/oskar_log_line.c
     src/oskar_log_message.c
     src/oskar_log_section.c
     src/oskar_log_settings.c

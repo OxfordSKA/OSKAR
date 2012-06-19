@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,7 +116,7 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
         /* If the bytes read are not a tag, then return an error. */
         if (tag.magic[0] != 'T' || tag.magic[1] != 'A' || tag.magic[2] != 'G' ||
                 tag.magic[3] != 0)
-            return OSKAR_ERR_BAD_BINARY_FORMAT;
+            return OSKAR_ERR_BINARY_FILE_INVALID;
 
         /* Get the data type and IDs. */
         idx->data_type[i] = (int) tag.data_type;
@@ -177,9 +177,9 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
 
             /* Copy the tag names into the index. */
             if (fread(idx->name_group[i], 1, lgroup, stream) != lgroup)
-                return OSKAR_ERR_BAD_BINARY_FORMAT;
+                return OSKAR_ERR_BINARY_FILE_INVALID;
             if (fread(idx->name_tag[i], 1, ltag, stream) != ltag)
-                return OSKAR_ERR_BAD_BINARY_FORMAT;
+                return OSKAR_ERR_BINARY_FILE_INVALID;
         }
 
         /* Store the current stream pointer as the data offset. */

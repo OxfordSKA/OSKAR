@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,10 +81,6 @@ const char* oskar_get_error_string(int error)
             return "settings error";
         case OSKAR_ERR_CUDA_DEVICES:
             return "insufficient CUDA devices found";
-        case OSKAR_ERR_BAD_BINARY_FORMAT:
-            return "incompatible binary file format";
-        case OSKAR_ERR_BINARY_TAG_NOT_FOUND:
-            return "data tag not found";
         case OSKAR_ERR_FUNCTION_NOT_AVAILABLE:
             return "specified functionality not available";
         case OSKAR_ERR_ELLIPSE_FIT_FAILED:
@@ -93,6 +89,24 @@ const char* oskar_get_error_string(int error)
             return "invalid range";
         case OSKAR_ERR_FITS_IO:
             return "problem reading or writing FITS file";
+        case OSKAR_ERR_BINARY_FILE_INVALID:
+            return "not an OSKAR binary file";
+        case OSKAR_ERR_BAD_BINARY_FORMAT:
+            return "incompatible binary file format";
+        case OSKAR_ERR_BINARY_VERSION_UNKNOWN:
+            return "binary format version not known";
+        case OSKAR_ERR_BINARY_TAG_NOT_FOUND:
+            return "data tag not found in file";
+        case OSKAR_ERR_BINARY_ENDIAN_MISMATCH:
+            return "incompatible byte ordering";
+        case OSKAR_ERR_BINARY_INT_MISMATCH:
+            return "incompatible integer format";
+        case OSKAR_ERR_BINARY_FLOAT_MISMATCH:
+            return "incompatible float format";
+        case OSKAR_ERR_BINARY_DOUBLE_MISMATCH:
+            return "incompatible double format";
+        case OSKAR_ERR_BINARY_TAG_TOO_LONG:
+            return "extended binary tag too long";
         default:
             break;
     };

@@ -82,12 +82,24 @@ int oskar_log_init(oskar_Log* log)
     do
     {
         ++i;
+        if (i == 1)
+        {
 #if __STDC_VERSION__ >= 199901L
-        n = snprintf(fname2, sizeof(fname2),
+            n = snprintf(fname2, sizeof(fname2),
 #else
-        n = sprintf(fname2,
+            n = sprintf(fname2,
 #endif
-                "%s_%d.log", fname1, i);
+                    "%s.log", fname1);
+        }
+        else
+        {
+#if __STDC_VERSION__ >= 199901L
+            n = snprintf(fname2, sizeof(fname2),
+#else
+            n = sprintf(fname2,
+#endif
+                    "%s_%d.log", fname1, i);
+        }
         if (n < 0 || n >= (int)sizeof(fname1))
             return OSKAR_ERR_UNKNOWN;
     }

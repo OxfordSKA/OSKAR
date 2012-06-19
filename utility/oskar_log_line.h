@@ -26,32 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_log_write.h"
-#include <stdarg.h>
+#ifndef OSKAR_LOG_LINE_H_
+#define OSKAR_LOG_LINE_H_
+
+/**
+ * @file oskar_log_line.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_log_section(oskar_Log* log, const char* format, ...)
-{
-    int retval;
-    char code = '=';
-    va_list args;
-
-    /* Write to standard output. */
-    va_start(args, format);
-    oskar_log_writev_stdout(code, -100, 0, 0, format, args);
-    va_end(args);
-
-    /* Write to log file. */
-    va_start(args, format);
-    retval = oskar_log_writev(log, code, -100, 0, 0, format, args);
-    va_end(args);
-    return retval;
-}
+/**
+ * @brief
+ * Writes a character symbol line to the log.
+ *
+ * @details
+ * This function writes a character symbol line to the log.
+ *
+ * @param[in,out] log    Pointer to a log structure.
+ * @param[in]     symbol Symbol to use for the line.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_log_line(oskar_Log* log, char symbol);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_LOG_LINE_H_ */

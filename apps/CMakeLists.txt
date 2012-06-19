@@ -10,6 +10,10 @@ if (QT4_FOUND AND CUDA_FOUND)
     # Build oskar_app library
     add_subdirectory(lib)
 
+    # BINARY: oskar_binary_file_query
+    set(name oskar_binary_file_query)
+    oskar_app(${name} ${name}_main.cpp)
+
     # BINARY: oskar_sim_interferometer
     set(name oskar_sim_interferometer)
     oskar_app(${name} ${name}_main.cpp)

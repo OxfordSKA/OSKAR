@@ -26,32 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_log_section.h"
-#include "utility/oskar_log_write.h"
-#include <stdarg.h>
+#include "oskar_global.h"
+#include "utility/oskar_binary_file_query.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_log_error.h"
+#include <cstdio>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int oskar_log_section(oskar_Log* log, const char* format, ...)
+int main(int argc, char** argv)
 {
-    int retval;
-    char code = '=';
-    va_list args;
+    // Parse command line.
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage: $ oskar_binary_file_query [binary file]\n");
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    }
 
-    /* Write to standard output. */
-    va_start(args, format);
-    oskar_log_writev_stdout(code, -100, 0, 0, format, args);
-    va_end(args);
+    // Query the file.
+    int error = oskar_binary_file_query(0, argv[1]);
+    if (error)
+    {
+        oskar_log_error(0, oskar_get_error_string(error));
+        return error;
+    }
 
-    /* Write to log file. */
-    va_start(args, format);
-    retval = oskar_log_writev(log, code, -100, 0, 0, format, args);
-    va_end(args);
-    return retval;
+    return OSKAR_SUCCESS;
 }
-
-#ifdef __cplusplus
-}
-#endif

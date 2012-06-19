@@ -89,7 +89,7 @@ int oskar_binary_tag_index_query_ext(const oskar_BinaryTagIndex* index,
     lgroup = 1 + strlen(name_group);
     ltag = 1 + strlen(name_tag);
     if (lgroup > 255 || ltag > 255)
-        return OSKAR_ERR_BINARY_TAG_NOT_FOUND;
+        return OSKAR_ERR_BINARY_TAG_TOO_LONG;
 
     /* Find the tag in the index. */
     for (i = 0; i < index->num_tags; ++i)
