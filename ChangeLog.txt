@@ -6,12 +6,12 @@
 
     * Fixed a build system bug related to finding CBLAS.
 
-    * Added a binary utility to export a visibility file to a Measurement Set.
-
-    * Added a binary utility to query the contents of an OSKAR binary file.
-
     * Added extra parameters to the build system that can be used to override
       the location of a number of library dependencies.
+
+    * Added a binary utility to convert an OSKAR visibility file to a Measurement Set.
+
+    * Added a binary utility to query the contents of an OSKAR binary file.
 
     * Added help dialog with link to documentation to the OSKAR GUI.
 
