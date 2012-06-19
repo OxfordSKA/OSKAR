@@ -47,14 +47,6 @@ static const char config_name[] = "config.txt";
 static const char layout_name[] = "layout.txt";
 static const char element_x_name_cst[] = "element_pattern_x_cst.txt";
 static const char element_y_name_cst[] = "element_pattern_y_cst.txt";
-// System noise files.
-static const char noise_freq_cst[]           = "noise_frequencies.txt";
-static const char antenna_temp_cst[]         = "antenna_temperature.txt";
-static const char receiver_temperature_cst[] = "receiver_temperature.txt";
-static const char radiation_efficiency_cst[] = "radiation_efficiency.txt";
-static const char effective_area_cst[]       = "effective_area.txt";
-static const char system_temperature_cst[]   = "system_temperature.txt";
-static const char flux_density_stddev_cst[]  = "flux_density_stddev.txt";
 
 // Private function prototypes
 //==============================================================================
@@ -116,7 +108,6 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
     if (!dir.exists()) return OSKAR_ERR_FILE_IO;
 
     // Get the set of data files in the current directory
-    // (noise and element pattern data).
     oskar_telescope_model_get_data_files(data_files, dir, depth);
 
     // Get a list of all stations in this directory, sorted by name.
@@ -188,40 +179,7 @@ static void oskar_telescope_model_get_data_files(
     {
         data_files[QString(element_y_name_cst)] = dir.absoluteFilePath(element_y_name_cst);
     }
-
-    // Check for system noise data.
-    if (depth <= 1)
-    {
-        if (dir.exists(noise_freq_cst) && depth == 0)
-        {
-            data_files[QString(noise_freq_cst)] = dir.absoluteFilePath(noise_freq_cst);
-        }
-        if (dir.exists(flux_density_stddev_cst))
-        {
-            data_files[QString(flux_density_stddev_cst)] = dir.absoluteFilePath(flux_density_stddev_cst);
-        }
-        if (dir.exists(system_temperature_cst))
-        {
-            data_files[QString(system_temperature_cst)] = dir.absoluteFilePath(system_temperature_cst);
-        }
-        if (dir.exists(antenna_temp_cst))
-        {
-            data_files[QString(antenna_temp_cst)] = dir.absoluteFilePath(antenna_temp_cst);
-        }
-        if (dir.exists(receiver_temperature_cst))
-        {
-            data_files[QString(receiver_temperature_cst)] = dir.absoluteFilePath(receiver_temperature_cst);
-        }
-        if (dir.exists(radiation_efficiency_cst))
-        {
-            data_files[QString(radiation_efficiency_cst)] = dir.absoluteFilePath(radiation_efficiency_cst);
-        }
-        if (dir.exists(effective_area_cst))
-        {
-            data_files[QString(effective_area_cst)] = dir.absoluteFilePath(effective_area_cst);
-        }
-    }
-}
+ }
 
 
 static int oskar_telescope_model_load_layout(

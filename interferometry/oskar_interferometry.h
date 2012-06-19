@@ -35,7 +35,6 @@
 
 #include "interferometry/oskar_compute_baselines.h"
 #include "interferometry/oskar_correlate.h"
-#include "interferometry/oskar_evaluate_baseline_noise_stddev.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_evaluate_baselines.h"
 #include "interferometry/oskar_evaluate_jones_K.h"

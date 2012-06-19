@@ -72,7 +72,7 @@ These are listed below.
         Sets the target architecture for the compilation of CUDA device code.
         <arch> must be one of either: 1.3, 2.0, 2.1 or ALL.
         (Note: 1.1 architecture may also work if running in single precision,
-         although this architecture isn't officially supported by OSKAR.)
+        although this architecture isn't officially supported by OSKAR.)
 
     * -DCMAKE_INSTALL_PREFIX=<path> (default: /usr/local/)
         Prefix install path used when installing OSKAR (with make install).
@@ -81,59 +81,59 @@ Advanced Build Options:
 
     * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
         Build OSKAR in release or debug mode.
-        
-    * -DLAPACK_LIB_DIR=<path> (default: searches the default system library paths)  
+
+    * -DLAPACK_LIB_DIR=<path> (default: searches the default system library paths)
         Specifies a custom path in which to look for the LAPACK library (liblapack.so).
-        NOTE: This should only be used in special cases, where the version 
+        NOTE: This should only be used in special cases, where the version
         of LAPACK installed in the system library path can't be used to build
         OSKAR.
-    
+
     * -DCBLAS_LIB_DIR=<path> (default: searches the default system library paths)
-        Specifies a custom path in which to look for the CBLAS library 
+        Specifies a custom path in which to look for the CBLAS library
         (atlas: libcblas.so, gsl: libgslcblas.so)
-        NOTE: This should only be used in special cases, where the version 
+        NOTE: This should only be used in special cases, where the version
         of CBLAS installed in the system library path can't be used to build
         OSKAR.
-    
+
     * -DCFITSIO_LIB_DIR=<path> (default: searches the default system library paths)
-        Specifies a custom path in which to look for the CFITSIO library 
+        Specifies a custom path in which to look for the CFITSIO library
         (libcfitsio.so)
-        NOTE: This should only be used in special cases, where the version 
+        NOTE: This should only be used in special cases, where the version
         of CFITSIO installed in the system library path can't be used to build
         OSKAR.
 
     * -DCFITSIO_INC_DIR=<path> (default: searches the default system include paths)
-        Specifies a custom path in which to look for the CFITSIO library 
+        Specifies a custom path in which to look for the CFITSIO library
         headers (fitsio.h and others).
-        NOTE: This should only be used in special cases, where the version 
+        NOTE: This should only be used in special cases, where the version
         of CFITSIO headers installed in system include path can't be used to build
         OSKAR.
-        
+
     * -DCPPUNIT_LIB_DIR=<path> (default: searches the default system library paths)
-        Specifies a custom path in which to look for the CPPUNIT library 
+        Specifies a custom path in which to look for the CPPUNIT library
         (libcppunit.so).
-        Note: This should only be used in special cases, where the version of 
+        Note: This should only be used in special cases, where the version of
         CPPUNIT installed in the system library path can't be used to build OSKAR.
-    
+
     * -DCPPUNIT_INC_DIR=<path> (default: searches the default system include paths)
-        Specifies a custom path in which to look for the CPPUNIT library headers. 
+        Specifies a custom path in which to look for the CPPUNIT library headers.
         This is the path to the top level cppunit include folder.
-        Note: This should only be used in special cases, where the version of 
+        Note: This should only be used in special cases, where the version of
         CPPUNIT headers installed in system include path can't be used to build
         OSKAR.
-       
+
     * -DCASACORE_LIB_DIR=<path> (default: searches the default system library paths)
-        Specifies a custom path in which to look for the CasaCore libraries 
+        Specifies a custom path in which to look for the CasaCore libraries
         (libcasa_ms.so and others).
         Note: This should only be used in special cases, where the version of
         CasaCore installed in the system library path can't be used to build OSKAR.
-      
-    *	-DCASACORE_INC_DIR=<path> (default: searches the default system include paths)
-    	  Specifies a custom path in which to look for the CasaCore library headers.
-    	  This is the path to the top level casacore include folder.
+
+    * -DCASACORE_INC_DIR=<path> (default: searches the default system include paths)
+        Specifies a custom path in which to look for the CasaCore library headers.
+        This is the path to the top level casacore include folder.
         Note: This should only be used in special cases, where the version of
         CasaCore headers installed in system include path can't be used to build
-        OSKAR.    
+        OSKAR.
 
 
 3.2. Environment Variables
@@ -149,7 +149,7 @@ The following environment variables affect the CMake build system:
 
 3.3. Custom (Non-System) Qt4 Installations
 --------------------------------------------------------------------------------
-When searching for a valid Qt4 installation, the OSKAR CMake build system 
+When searching for a valid Qt4 installation, the OSKAR CMake build system
 queries the qmake binary in order to determine the location of the relevant
 libraries and headers. Therefore, all that is required to use a specific version
 of Qt4 is to add the location of the desired qmake binary to the beginning of

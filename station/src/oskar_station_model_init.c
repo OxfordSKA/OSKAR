@@ -85,8 +85,6 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     if (err) return err;
     err = oskar_mem_init(&model->sin_orientation_y, type, location, num_elements, 1);
     if (err) return err;
-    err = oskar_mem_init(&model->total_receiver_noise, type, location, 0, 1);
-    if (err) return err;
 
     /* Initialise variables. */
     model->station_type = OSKAR_STATION_TYPE_AA;

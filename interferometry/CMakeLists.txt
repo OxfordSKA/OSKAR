@@ -6,7 +6,6 @@
 set(interferometry_SRC
     src/oskar_compute_baselines.c
     src/oskar_correlate.cu
-    src/oskar_evaluate_baseline_noise_stddev.c
     src/oskar_evaluate_baseline_uvw.c
     src/oskar_evaluate_baselines.c
     src/oskar_evaluate_jones_K.cu
@@ -31,8 +30,6 @@ set(interferometry_SRC
     src/oskar_telescope_model_set_station_coords.c
     src/oskar_telescope_model_type.c
     src/oskar_TelescopeModel.cpp
-    src/oskar_visibilities_add_sky_noise.c
-    src/oskar_visibilities_evaluate_sky_noise_stddev.c
     src/oskar_visibilities_clear_contents.c
     src/oskar_visibilities_copy.c
     src/oskar_visibilities_free.c

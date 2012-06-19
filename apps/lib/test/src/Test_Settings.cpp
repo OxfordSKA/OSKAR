@@ -44,11 +44,6 @@ void Test_Settings::test_read()
     // Construct test settings file
     {
         QSettings settings("./temp.ini", QSettings::IniFormat);
-        settings.beginGroup("telescope/system_noise");
-        settings.setValue("seed", 1);
-        settings.endGroup();
-//        settings.setValue("sky/oskar_source_file/filter/flux_min", 1.0);
-//        settings.setValue("sky/oskar_source_file/filter/flux_max", 2.0);
     }
 
     // Read settings

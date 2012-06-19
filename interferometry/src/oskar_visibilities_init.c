@@ -70,8 +70,6 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
     /* Initialise memory. */
     err = oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1);
     if (err) return err;
-    err = oskar_mem_init(&vis->sky_noise_stddev, type, location, 0, 1);
-    if (err) return err;
     err = oskar_mem_init(&vis->x_metres, type, location, num_stations, 1);
     if (err) return err;
     err = oskar_mem_init(&vis->y_metres, type, location, num_stations, 1);

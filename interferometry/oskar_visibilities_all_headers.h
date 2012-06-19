@@ -34,10 +34,8 @@
  */
 
 #include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_add_sky_noise.h"
 #include "interferometry/oskar_visibilities_clear_contents.h"
 #include "interferometry/oskar_visibilities_copy.h"
-#include "interferometry/oskar_visibilities_evaluate_sky_noise_stddev.h"
 #include "interferometry/oskar_visibilities_free.h"
 #include "interferometry/oskar_visibilities_get_channel_amps.h"
 #include "interferometry/oskar_visibilities_init.h"

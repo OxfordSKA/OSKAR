@@ -140,22 +140,6 @@ enum
 };
 
 /**
- * @struct oskar_SettingsSkyNoise
- *
- * @brief Structure to hold sky noise model settings.
- *
- * @details
- * The structure holds parameters for the sky noise model.
- */
-struct oskar_SettingsSkyNoise
-{
-    int type; /**< Noise model type. */
-    double spectral_index; /**< Frequency spectral index. */
-    int seed;
-};
-typedef struct oskar_SettingsSkyNoise oskar_SettingsSkyNoise;
-
-/**
  * @struct oskar_SettingsSky
  *
  * @brief Structure to hold sky model settings.
@@ -175,7 +159,6 @@ struct oskar_SettingsSky
 
     char* output_sky_file; /**< Optional name of output sky model. */
     oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
-    oskar_SettingsSkyNoise noise_model; /**< Noise model parameters. */
 };
 typedef struct oskar_SettingsSky oskar_SettingsSky;
 

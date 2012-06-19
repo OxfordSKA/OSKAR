@@ -57,8 +57,6 @@ int oskar_visibilities_free(oskar_Visibilities* vis)
     /* Free memory. */
     err = oskar_mem_free(&vis->settings_path);
     if (err) return err;
-    err = oskar_mem_free(&vis->sky_noise_stddev);
-    if (err) return err;
     err = oskar_mem_free(&vis->x_metres);
     if (err) return err;
     err = oskar_mem_free(&vis->y_metres);

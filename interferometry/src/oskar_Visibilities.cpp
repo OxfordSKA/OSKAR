@@ -77,18 +77,6 @@ int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)
     return oskar_visibilties_get_channel_amps(vis_amps, this, channel);
 }
 
-int oskar_Visibilities::evaluate_sky_noise_stddev(const oskar_TelescopeModel* telescope,
-        double spectral_index)
-{
-    return oskar_visibilities_evaluate_sky_noise_stddev(this, telescope,
-            spectral_index);
-}
-
-int oskar_Visibilities::add_sky_noise(const double* stddev, unsigned seed)
-{
-    return oskar_visibilities_add_sky_noise(this, stddev, seed);
-}
-
 int oskar_Visibilities::location() const
 {
     return oskar_visibilities_location(this);

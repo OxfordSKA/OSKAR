@@ -32,7 +32,6 @@
 #include "math/oskar_random_gaussian.h"
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_analyse.h"
-#include "station/oskar_evaluate_station_receiver_noise_stddev.h"
 #include "station/oskar_station_model_type.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_log_error.h"

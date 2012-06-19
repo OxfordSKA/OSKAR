@@ -71,10 +71,6 @@ struct oskar_StationModel
     oskar_Mem cos_orientation_y; /**< Cosine azimuth of y dipole axis (default 1.0) */
     oskar_Mem sin_orientation_y; /**< Sine azimuth of y dipole axis (default 0.0) */
 
-    /* Receiver noise per frequency. */
-    oskar_Mem total_receiver_noise; /**< Total receiver noise stddev as a
-                                         function of frequency, in Jy */
-
     /* Station parent/child pointers. */
     oskar_StationModel* child;   /**< NULL when there are no child stations. */
     oskar_StationModel* parent;  /**< Pointer to station's parent (NULL if none). */

@@ -76,10 +76,6 @@ int oskar_station_model_free(oskar_StationModel* model)
     error = oskar_mem_free(&model->sin_orientation_y);
     if (error) return error;
 
-    /* Free the receiver noise data. */
-    error = oskar_mem_free(&model->total_receiver_noise);
-    if (error) return error;
-
     /* Free the element pattern data if it exists. */
     if (model->element_pattern)
     {

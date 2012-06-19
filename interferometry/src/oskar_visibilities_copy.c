@@ -58,8 +58,6 @@ int oskar_visibilities_copy(oskar_Visibilities* dst,
     /* Copy the memory. */
     err = oskar_mem_copy(&dst->settings_path, &src->settings_path);
     if (err) return err;
-    err = oskar_mem_copy(&dst->sky_noise_stddev, &src->sky_noise_stddev);
-    if (err) return err;
     err = oskar_mem_copy(&dst->x_metres, &src->x_metres);
     if (err) return err;
     err = oskar_mem_copy(&dst->y_metres, &src->y_metres);

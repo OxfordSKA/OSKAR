@@ -88,9 +88,6 @@ struct oskar_Visibilities
     double phase_centre_ra_deg;  /**< Pointing phase centre RA, in degrees*/
     double phase_centre_dec_deg; /**< Pointing phase centre Dec, in degrees */
 
-    oskar_Mem sky_noise_stddev;  /**< Standard deviation corresponding to all
-                                      sky noise, per channel. */
-
     oskar_Mem x_metres;          /**< Station x coordinates, in metres. */
     oskar_Mem y_metres;          /**< Station y coordinates, in metres. */
     oskar_Mem z_metres;          /**< Station z coordinates, in metres. */
@@ -213,36 +210,6 @@ struct oskar_Visibilities
      * @return An error code.
      */
     int get_channel_amps(oskar_Mem* vis_amps, int channel);
-
-    /**
-     * @brief Evaluates the sky noise standard deviation for the addition of
-     * a gaussian sky noise component to the visibility amplitudes.
-     *
-     * @details
-     * WARNING: the interface to this may change!
-     *
-     * @param telescope         OSKAR telescope model structure.
-     * @param spectral_index    Spectral index (used to evaluate the sky noise
-     *                          frequency response, usually +0.75)
-     *
-     * @return An error code.
-     */
-    int evaluate_sky_noise_stddev(const oskar_TelescopeModel* telescope,
-            double spectral_index);
-
-    /**
-     * @brief Adds a frequency dependent gaussian noise component to the
-     * visibilities, typically corresponding to sky noise.
-     *
-     * @details
-     * WARNING: the interface to this may change!
-     *
-     * @param[in] stddev  Array (length num_channels) of the standard deviation
-     *                    of the noise to add, in Janskys.
-     *
-     * @return An error code.
-     */
-    int add_sky_noise(const double* stddev, unsigned seed = 666);
 
     /**
      * @brief Returns the number of baseline u,v,w coordinates.

@@ -20,7 +20,6 @@ set(station_SRC
     src/oskar_evaluate_station_beam_dipoles.cu
     src/oskar_evaluate_station_beam_scalar.cu
     src/oskar_evaluate_station_beam.c
-    src/oskar_evaluate_station_receiver_noise_stddev.c
     src/oskar_evaluate_tapered_dipole_pattern.cu
     src/oskar_station_model_analyse.c
     src/oskar_station_model_copy.c
