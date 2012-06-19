@@ -77,8 +77,6 @@ const char* oskar_get_error_string(int error)
             return "spline evaluation failed";
         case OSKAR_ERR_SETUP_FAIL:
             return "sky or telescope model set-up failed";
-        case OSKAR_ERR_SETTINGS:
-            return "settings error";
         case OSKAR_ERR_CUDA_DEVICES:
             return "insufficient CUDA devices found";
         case OSKAR_ERR_FUNCTION_NOT_AVAILABLE:
@@ -89,6 +87,8 @@ const char* oskar_get_error_string(int error)
             return "invalid range";
         case OSKAR_ERR_FITS_IO:
             return "problem reading or writing FITS file";
+
+        /* -100 to -150: OSKAR binary file errors*/
         case OSKAR_ERR_BINARY_FILE_INVALID:
             return "not an OSKAR binary file";
         case OSKAR_ERR_BAD_BINARY_FORMAT:
@@ -107,6 +107,24 @@ const char* oskar_get_error_string(int error)
             return "incompatible double format";
         case OSKAR_ERR_BINARY_TAG_TOO_LONG:
             return "extended binary tag too long";
+
+        /* -500 to -550: Settings errors */
+        case OSKAR_ERR_SETTINGS:
+            return "settings error";
+        case OSKAR_ERR_SETTINGS_SIMULATOR:
+            return "simulator settings error";
+        case OSKAR_ERR_SETTINGS_SKY:
+            return "sky settings error";
+        case OSKAR_ERR_SETTINGS_OBSERVATION:
+            return "settings observation error";
+        case OSKAR_ERR_SETTINGS_TELESCOPE:
+            return "telescope settings error";
+        case OSKAR_ERR_SETTINGS_INTERFEROMETER:
+            return "interferometer settings error";
+        case OSKAR_ERR_SETTINGS_BEAM_PATTERN:
+            return "beam pattern settings error";
+        case OSKAR_ERR_SETTINGS_IMAGE:
+            return "image settings error";
         default:
             break;
     };

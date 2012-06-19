@@ -121,50 +121,71 @@ enum {
     /* Indicates that the sky or telescope structure could not be created. */
     OSKAR_ERR_SETUP_FAIL               = -17,
 
-    /* Indicates that the settings file could not be opened. */
-    OSKAR_ERR_SETTINGS                 = -18,
-
     /* Indicates that there are not enough CUDA devices available. */
-    OSKAR_ERR_CUDA_DEVICES             = -19,
+    OSKAR_ERR_CUDA_DEVICES             = -18,
 
     /* Indicates that the specified functionality isn't available for use. */
-    OSKAR_ERR_FUNCTION_NOT_AVAILABLE   = -20,
+    OSKAR_ERR_FUNCTION_NOT_AVAILABLE   = -19,
 
     /* Indicates the fitting elliptical source failed. */
-    OSKAR_ERR_ELLIPSE_FIT_FAILED       = -21,
+    OSKAR_ERR_ELLIPSE_FIT_FAILED       = -20,
 
     /* Indicates an invalid range selection. */
-    OSKAR_ERR_INVALID_RANGE            = -22,
+    OSKAR_ERR_INVALID_RANGE            = -21,
 
     /* Indicates a problem with FITS I/O. */
-    OSKAR_ERR_FITS_IO                  = -23,
+    OSKAR_ERR_FITS_IO                  = -22,
 
     /* Indicates that the file is not a valid OSKAR binary file. */
-    OSKAR_ERR_BINARY_FILE_INVALID      = -24,
+    OSKAR_ERR_BINARY_FILE_INVALID      = -101,
 
     /* Indicates that the binary file format is incompatible. */
-    OSKAR_ERR_BAD_BINARY_FORMAT        = -25,
+    OSKAR_ERR_BAD_BINARY_FORMAT        = -102,
 
     /* Indicates that the binary format version is unknown. */
-    OSKAR_ERR_BINARY_VERSION_UNKNOWN   = -26,
+    OSKAR_ERR_BINARY_VERSION_UNKNOWN   = -103,
 
     /* Indicates that required data was not found in the binary file. */
-    OSKAR_ERR_BINARY_TAG_NOT_FOUND     = -27,
+    OSKAR_ERR_BINARY_TAG_NOT_FOUND     = -104,
 
     /* Indicates that the byte ordering is incompatible. */
-    OSKAR_ERR_BINARY_ENDIAN_MISMATCH   = -28,
+    OSKAR_ERR_BINARY_ENDIAN_MISMATCH   = -105,
 
     /* Indicates that the binary representation of integers is incompatible. */
-    OSKAR_ERR_BINARY_INT_MISMATCH      = -29,
+    OSKAR_ERR_BINARY_INT_MISMATCH      = -106,
 
     /* Indicates that the binary representation of floats is incompatible. */
-    OSKAR_ERR_BINARY_FLOAT_MISMATCH    = -30,
+    OSKAR_ERR_BINARY_FLOAT_MISMATCH    = -107,
 
     /* Indicates that the binary representation of floats is incompatible. */
-    OSKAR_ERR_BINARY_DOUBLE_MISMATCH   = -31,
+    OSKAR_ERR_BINARY_DOUBLE_MISMATCH   = -108,
 
     /* Indicates that the extended binary tag name is too long. */
-    OSKAR_ERR_BINARY_TAG_TOO_LONG      = -32,
+    OSKAR_ERR_BINARY_TAG_TOO_LONG      = -109,
+
+    /* Indicates an error relating to settings (in general). */
+    OSKAR_ERR_SETTINGS                 = -500,
+
+    /* Indicates an error relating to the simulator settings */
+    OSKAR_ERR_SETTINGS_SIMULATOR       = -501,
+
+    /* Indicates an error relating to the sky settings */
+    OSKAR_ERR_SETTINGS_SKY             = -502,
+
+    /* Indicates an error relating to the observation settings */
+    OSKAR_ERR_SETTINGS_OBSERVATION     = -503,
+
+    /* Indicates an error relating to the telescope model settings */
+    OSKAR_ERR_SETTINGS_TELESCOPE       = -504,
+
+    /* Indicates an error relating to the interferometer settings */
+    OSKAR_ERR_SETTINGS_INTERFEROMETER  = -505,
+
+    /* Indicates an error relating to the beam pattern settings */
+    OSKAR_ERR_SETTINGS_BEAM_PATTERN    = -506,
+
+    /* Indicates an error relating to the image settings */
+    OSKAR_ERR_SETTINGS_IMAGE           = -507,
 
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                  = -1000
