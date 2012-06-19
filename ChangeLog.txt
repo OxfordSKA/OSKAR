@@ -1,10 +1,14 @@
-2012-06-18  OSKAR 2.0.3-beta
+2012-06-19  OSKAR 2.0.3-beta
 
     * Fixed a bug that could be encountered when evaluating a station beam
       using numerical element pattern data, with incorrect use of work
       buffers.
 
     * Fixed a build system bug related to finding CBLAS.
+
+    * Added a binary utility to export a visibility file to a Measurement Set.
+
+    * Added a binary utility to query the contents of an OSKAR binary file.
 
     * Added extra parameters to the build system that can be used to override
       the location of a number of library dependencies.
