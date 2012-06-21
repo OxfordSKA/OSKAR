@@ -43,7 +43,6 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
         int type)
 {
     int error, num_stations, num_channels;
-    const oskar_SettingsTime* times;
 
     /* Sanity check on inputs. */
     if (!vis || !settings || !telescope)
@@ -54,18 +53,17 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
         return OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise the global visibility structure on the CPU. */
-    times = &settings->obs.time;
     num_stations = telescope->num_stations;
     num_channels = settings->obs.num_channels;
     error = oskar_visibilities_init(vis, type, OSKAR_LOCATION_CPU,
-            num_channels, times->num_time_steps, num_stations);
+            num_channels, settings->obs.num_time_steps, num_stations);
     if (error) return error;
 
     /* Add meta-data. */
     vis->freq_start_hz = settings->obs.start_frequency_hz;
     vis->freq_inc_hz = settings->obs.frequency_inc_hz;
-    vis->time_start_mjd_utc = times->obs_start_mjd_utc;
-    vis->time_inc_seconds = times->dt_dump_days * 86400.0;
+    vis->time_start_mjd_utc = settings->obs.start_mjd_utc;
+    vis->time_inc_seconds = settings->obs.dt_dump_days * 86400.0;
     vis->channel_bandwidth_hz = settings->obs.start_frequency_hz;
     vis->phase_centre_ra_deg = settings->obs.ra0_rad * 180.0 / M_PI;
     vis->phase_centre_dec_deg = settings->obs.dec0_rad * 180.0 / M_PI;

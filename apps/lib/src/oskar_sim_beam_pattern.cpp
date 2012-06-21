@@ -31,7 +31,6 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "fits/oskar_fits_image_write.h"
-#include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
 #include "imaging/oskar_Image.h"
@@ -70,7 +69,6 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     oskar_log_section(log, "Loading settings file '%s'", settings_file);
     err = oskar_settings_load(&settings, log, settings_file);
     if (err) return err;
-    const oskar_SettingsTime* times = &settings.obs.time;
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
     // Log the relevant settings.
@@ -92,9 +90,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     }
 
     // Get time data.
-    int num_times            = times->num_time_steps;
-    double obs_start_mjd_utc = times->obs_start_mjd_utc;
-    double dt_dump           = times->dt_dump_days;
+    int num_times            = settings.obs.num_time_steps;
+    double obs_start_mjd_utc = settings.obs.start_mjd_utc;
+    double dt_dump           = settings.obs.dt_dump_days;
 
     // Get the telescope model.
     oskar_TelescopeModel tel_cpu;
@@ -134,8 +132,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     complex_cube.fov_dec_deg        = settings.beam_pattern.fov_deg;
     complex_cube.freq_start_hz      = settings.obs.start_frequency_hz;
     complex_cube.freq_inc_hz        = settings.obs.frequency_inc_hz;
-    complex_cube.time_inc_sec       = settings.obs.time.dt_dump_days * 86400.0;
-    complex_cube.time_start_mjd_utc = settings.obs.time.obs_start_mjd_utc;
+    complex_cube.time_inc_sec       = settings.obs.dt_dump_days * 86400.0;
+    complex_cube.time_start_mjd_utc = settings.obs.start_mjd_utc;
     err = oskar_mem_copy(&complex_cube.settings_path, &settings.settings_path);
     if (err) return err;
 

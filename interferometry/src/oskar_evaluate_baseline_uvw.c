@@ -42,7 +42,8 @@ extern "C" {
 #endif
 
 int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, const oskar_SettingsTime* times)
+        const oskar_TelescopeModel* telescope,
+        const oskar_SettingsObservation* obs)
 {
     oskar_Mem u, v, w, work;
     oskar_Mem uu, vv, ww; /* Pointers. */
@@ -50,7 +51,7 @@ int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
     double obs_start_mjd_utc, dt_dump;
 
     /* Sanity check on inputs. */
-    if (vis == NULL || telescope == NULL || times == NULL)
+    if (vis == NULL || telescope == NULL || obs == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get data type and size of the telescope structure. */
@@ -59,9 +60,9 @@ int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
     num_baselines = num_stations * (num_stations - 1) / 2;
 
     /* Get time data. */
-    num_vis_dumps     = times->num_time_steps;
-    obs_start_mjd_utc = times->obs_start_mjd_utc;
-    dt_dump           = times->dt_dump_days;
+    num_vis_dumps     = obs->num_time_steps;
+    obs_start_mjd_utc = obs->start_mjd_utc;
+    dt_dump           = obs->dt_dump_days;
 
     /* Check that the memory is not NULL. */
     if (!vis->uu_metres.data || !vis->vv_metres.data || !vis->ww_metres.data ||

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,24 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_TIME_H_
-#define OSKAR_SETTINGS_TIME_H_
+#ifndef OSKAR_SETTINGS_INTERFEROMETER_H_
+#define OSKAR_SETTINGS_INTERFEROMETER_H_
 
-#include "oskar_global.h"
-
-OSKAR_EXPORT
-struct oskar_SettingsTime
+/**
+ * @struct oskar_SettingsInterferometer
+ *
+ * @brief Structure to hold interferometer settings.
+ *
+ * @details
+ * The structure holds observation parameters.
+ */
+struct oskar_SettingsInterferometer
 {
-    int    num_time_steps;
-    int    num_vis_ave;
-    int    num_fringe_ave;
-    double obs_start_mjd_utc;
-    double obs_length_seconds;
-    double obs_length_days;
-    double dt_dump_days;
-    double dt_ave_days;
-    double dt_fringe_days;
+    double channel_bandwidth_hz;
+    int num_vis_ave;
+    int num_fringe_ave;
+    char* oskar_vis_filename;
+    char* ms_filename;
+    int image_interferometer_output;
 };
-typedef struct oskar_SettingsTime oskar_SettingsTime;
+typedef struct oskar_SettingsInterferometer oskar_SettingsInterferometer;
 
-#endif /* OSKAR_SETTINGS_TIME_H_ */
+#endif /* OSKAR_SETTINGS_INTERFEROMETER_H_ */

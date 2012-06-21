@@ -39,8 +39,6 @@ int oskar_settings_init(oskar_Settings* settings)
     int error = 0;
 
     /* Initialise all array pointers to NULL. */
-    settings->obs.ms_filename = 0;
-    settings->obs.oskar_vis_filename = 0;
     settings->sim.cuda_device_ids = 0;
     settings->sky.gsm_file = 0;
     settings->sky.input_sky_file = 0;
@@ -48,14 +46,16 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->telescope.config_directory = 0;
     settings->telescope.output_config_directory = 0;
     settings->telescope.station.receiver_temperature_file = 0;
-    settings->image.input_vis_data = 0;
-    settings->image.oskar_image = 0;
-    settings->image.fits_image = 0;
+    settings->interferometer.ms_filename = 0;
+    settings->interferometer.oskar_vis_filename = 0;
     settings->beam_pattern.oskar_image_power = 0;
     settings->beam_pattern.oskar_image_phase = 0;
     settings->beam_pattern.oskar_image_complex = 0;
     settings->beam_pattern.fits_image_power = 0;
     settings->beam_pattern.fits_image_phase = 0;
+    settings->image.input_vis_data = 0;
+    settings->image.oskar_image = 0;
+    settings->image.fits_image = 0;
 
     /* Initialise pathname to settings file. */
     error = oskar_mem_init(&settings->settings_path, OSKAR_CHAR,

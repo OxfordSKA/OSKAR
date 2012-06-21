@@ -30,10 +30,11 @@
 #define OSKAR_SETTINGS_H_
 
 #include "imaging/oskar_SettingsImage.h"
-#include "interferometry/oskar_SettingsObservation.h"
 #include "sky/oskar_SettingsSky.h"
 #include "station/oskar_SettingsBeamPattern.h"
+#include "interferometry/oskar_SettingsObservation.h"
 #include "interferometry/oskar_SettingsTelescope.h"
+#include "interferometry/oskar_SettingsInterferometer.h"
 #include "utility/oskar_SettingsSimulator.h"
 #include "utility/oskar_Mem.h"
 
@@ -49,11 +50,12 @@ struct oskar_Settings
 {
     oskar_Mem settings_path;
     oskar_SettingsSimulator sim;
-    oskar_SettingsObservation obs;
-    oskar_SettingsImage image;
     oskar_SettingsSky sky;
+    oskar_SettingsObservation obs;
     oskar_SettingsTelescope telescope;
+    oskar_SettingsInterferometer interferometer;
     oskar_SettingsBeamPattern beam_pattern;
+    oskar_SettingsImage image;
 
 #ifdef __cplusplus
     oskar_Settings();

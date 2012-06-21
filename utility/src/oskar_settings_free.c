@@ -37,40 +37,40 @@ extern "C" {
 int oskar_settings_free(oskar_Settings* settings)
 {
     /* Free all settings arrays. */
-    free(settings->obs.ms_filename);
-    settings->obs.ms_filename = 0;
-    free(settings->obs.oskar_vis_filename);
-    settings->obs.oskar_vis_filename = 0;
     free(settings->sim.cuda_device_ids);
-    settings->sim.cuda_device_ids = 0;
+    settings->sim.cuda_device_ids = NULL;
     free(settings->sky.gsm_file);
-    settings->sky.gsm_file = 0;
+    settings->sky.gsm_file = NULL;
     free(settings->sky.input_sky_file);
-    settings->sky.input_sky_file = 0;
+    settings->sky.input_sky_file = NULL;
     free(settings->sky.output_sky_file);
-    settings->sky.output_sky_file = 0;
+    settings->sky.output_sky_file = NULL;
     free(settings->telescope.config_directory);
-    settings->telescope.config_directory = 0;
+    settings->telescope.config_directory = NULL;
     free(settings->telescope.output_config_directory);
-    settings->telescope.output_config_directory = 0;
+    settings->telescope.output_config_directory = NULL;
     free(settings->telescope.station.receiver_temperature_file);
-    settings->telescope.station.receiver_temperature_file = 0;
-    free(settings->image.input_vis_data);
-    settings->image.input_vis_data = 0;
-    free(settings->image.oskar_image);
-    settings->image.oskar_image = 0;
-    free(settings->image.fits_image);
-    settings->image.fits_image = 0;
+    settings->telescope.station.receiver_temperature_file = NULL;
+    free(settings->interferometer.ms_filename);
+    settings->interferometer.ms_filename = NULL;
+    free(settings->interferometer.oskar_vis_filename);
+    settings->interferometer.oskar_vis_filename = NULL;
     free(settings->beam_pattern.oskar_image_complex);
-    settings->beam_pattern.oskar_image_complex = 0;
+    settings->beam_pattern.oskar_image_complex = NULL;
     free(settings->beam_pattern.oskar_image_phase);
-    settings->beam_pattern.oskar_image_phase = 0;
+    settings->beam_pattern.oskar_image_phase = NULL;
     free(settings->beam_pattern.oskar_image_power);
-    settings->beam_pattern.oskar_image_power = 0;
+    settings->beam_pattern.oskar_image_power = NULL;
     free(settings->beam_pattern.fits_image_phase);
-    settings->beam_pattern.fits_image_phase = 0;
+    settings->beam_pattern.fits_image_phase = NULL;
     free(settings->beam_pattern.fits_image_power);
-    settings->beam_pattern.fits_image_power = 0;
+    settings->beam_pattern.fits_image_power = NULL;
+    free(settings->image.input_vis_data);
+    settings->image.input_vis_data = NULL;
+    free(settings->image.oskar_image);
+    settings->image.oskar_image = NULL;
+    free(settings->image.fits_image);
+    settings->image.fits_image = NULL;
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path);

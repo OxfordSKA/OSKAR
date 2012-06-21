@@ -37,7 +37,6 @@
 #include "apps/lib/oskar_visibilities_write_ms.h"
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
-#include "interferometry/oskar_SettingsTime.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_write.h"
@@ -81,7 +80,6 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     error = oskar_settings_load(&settings, log, settings_file);
     if (error) return error;
     int type = settings.sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    const oskar_SettingsTime* times = &settings.obs.time;
 
     // Log the relevant settings.
     log->keep_file = settings.sim.keep_log_file;
@@ -90,12 +88,13 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     oskar_log_settings_observation(log, &settings);
     oskar_log_settings_telescope(log, &settings);
     oskar_log_settings_interferometer(log, &settings);
-    if (settings.obs.image_interferometer_output)
+    if (settings.interferometer.image_interferometer_output)
         oskar_log_settings_image(log, &settings);
 
     // Check that a data file has been specified.
-    if ( !(settings.obs.oskar_vis_filename || settings.obs.ms_filename ||
-            (settings.obs.image_interferometer_output &&
+    if ( !(settings.interferometer.oskar_vis_filename ||
+            settings.interferometer.ms_filename ||
+            (settings.interferometer.image_interferometer_output &&
                     (settings.image.oskar_image || settings.image.fits_image))))
     {
         oskar_log_error(log, "No output file specified.");
@@ -132,7 +131,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // These are held in standard vectors so that the memory will be released
     // automatically if the function returns early, or is terminated.
     vector<oskar_Mem> vis_acc(num_devices), vis_temp(num_devices);
-    int time_baseline = telescope_cpu.num_baselines() * times->num_time_steps;
+    int time_baseline = telescope_cpu.num_baselines() * settings.obs.num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
         error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
@@ -179,7 +178,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
             // Run simulation for this chunk.
             error = oskar_interferometer(&(vis_temp[thread_id]), log,
-                    &(sky_chunk_cpu[i]), &telescope_cpu, times, frequency,
+                    &(sky_chunk_cpu[i]), &telescope_cpu, &settings, frequency,
                     i, num_sky_chunks);
             if (error) continue;
 
@@ -208,29 +207,29 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
-    error = oskar_evaluate_baseline_uvw(&vis_global, &telescope_cpu, times);
+    error = oskar_evaluate_baseline_uvw(&vis_global, &telescope_cpu, &settings.obs);
     if (error) return error;
 
     // Write global visibilities to disk.
-    if (settings.obs.oskar_vis_filename)
+    if (settings.interferometer.oskar_vis_filename)
     {
         error = oskar_visibilities_write(&vis_global, log,
-                settings.obs.oskar_vis_filename);
+                settings.interferometer.oskar_vis_filename);
         if (error) return error;
     }
 
 #ifndef OSKAR_NO_MS
     // Write Measurement Set.
-    if (settings.obs.ms_filename)
+    if (settings.interferometer.ms_filename)
     {
         error = oskar_visibilities_write_ms(&vis_global, log,
-                settings.obs.ms_filename, true);
+                settings.interferometer.ms_filename, true);
         if (error) return error;
     }
 #endif
 
     // Make image(s) of the simulated visibilities if required.
-    if (settings.obs.image_interferometer_output)
+    if (settings.interferometer.image_interferometer_output)
     {
         if (settings.image.oskar_image || settings.image.fits_image)
         {

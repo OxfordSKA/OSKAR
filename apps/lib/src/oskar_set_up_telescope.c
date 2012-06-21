@@ -82,7 +82,7 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
 
     /* Set other telescope parameters. */
     telescope->use_common_sky = settings->telescope.use_common_sky;
-    telescope->bandwidth_hz = settings->obs.channel_bandwidth_hz;
+    telescope->bandwidth_hz = settings->interferometer.channel_bandwidth_hz;
     telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
     telescope->seed_time_variable_errors =
             settings->telescope.station.element.seed_time_variable_errors;

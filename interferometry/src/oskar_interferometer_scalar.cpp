@@ -41,7 +41,7 @@
 extern "C"
 int oskar_interferometer_scalar(oskar_Mem* vis_amp,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
-        const oskar_SettingsTime* times, double frequency)
+        const oskar_Settings* settings, double frequency)
 {
     int err = OSKAR_SUCCESS;
 
@@ -75,13 +75,13 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
     curand_state.init(telescope->seed_time_variable_errors);
 
     // Calculate time increments.
-    int num_vis_dumps        = times->num_time_steps;
-    int num_vis_ave          = times->num_vis_ave;
-    int num_fringe_ave       = times->num_fringe_ave;
-    double obs_start_mjd_utc = times->obs_start_mjd_utc;
-    double dt_dump           = times->dt_dump_days;
-    double dt_ave            = times->dt_ave_days;
-    double dt_fringe         = times->dt_fringe_days;
+    int num_vis_dumps        = settings->obs.num_time_steps;
+    double obs_start_mjd_utc = settings->obs.start_mjd_utc;
+    int num_vis_ave          = settings->interferometer.num_vis_ave;
+    int num_fringe_ave       = settings->interferometer.num_fringe_ave;
+    double dt_dump   = settings->obs.dt_dump_days;
+    double dt_ave    = dt_dump / settings->interferometer.num_vis_ave;
+    double dt_fringe = dt_ave / settings->interferometer.num_fringe_ave;
 
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,17 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_BASELINE_UVW_H_
-#define OSKAR_EVALUATE_BASELINE_UVW_H_
+#ifndef OSKAR_SETTINGS_LOAD_INTERFEROMETER_H_
+#define OSKAR_SETTINGS_LOAD_INTERFEROMETER_H_
 
 /**
- * @file oskar_evaluate_baseline_uvw.h
+ * @file oskar_settings_load_interferometer.h
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SettingsObservation.h"
-#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_SettingsInterferometer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,27 +42,22 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the baseline (u,v,w) coordinates for the simulation and writes
- * them into the visibility data.
+ * Populates interferometer settings from the given settings file.
  *
  * @details
- * This function evaluates the baseline (u,v,w) coordinates from the beam phase
- * centre and station (x,y,z) coordinates in the telescope data structure,
- * and the supplied simulation time parameters.
+ * This function populates an interferometer structure from the given settings
+ * file.
  *
- * The baseline coordinates are written directly into the visibility data.
- *
- * @param[out] vis       Structure holding output baseline coordinates.
- * @param[in]  telescope Telescope model structure.
- * @param[in]  obs       Simulation observation settings (used for time data).
+ * @param[out]    settings A pointer to an interferometer settings structure to populate.
+ * @param[in,out] log      A pointer to a log structure to use.
+ * @param[in]     filename String containing name of settings file to read.
  */
 OSKAR_EXPORT
-int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope,
-        const oskar_SettingsObservation* obs);
+int oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
+        const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_BASELINE_UVW_H_ */
+#endif /* OSKAR_SETTINGS_LOAD_INTERFEROMETER_H_ */

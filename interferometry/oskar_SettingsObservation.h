@@ -29,8 +29,6 @@
 #ifndef OSKAR_SETTINGS_OBSERVATION_H_
 #define OSKAR_SETTINGS_OBSERVATION_H_
 
-#include "interferometry/oskar_SettingsTime.h"
-
 /**
  * @struct oskar_SettingsObservation
  *
@@ -48,12 +46,11 @@ struct oskar_SettingsObservation
     int num_channels;
     double frequency_inc_hz;
 
-    oskar_SettingsTime time; /* Note: deprecated soon?! as now partly in interferometer group */
-
-    double channel_bandwidth_hz; /* Note: now in the interferometer settings group */
-    char* oskar_vis_filename; /* Note: now in the interferometer settings group */
-    char* ms_filename;        /* Note: now in the interferometer settings group */
-    int image_interferometer_output; /* Note: interferometer settings group */
+    int    num_time_steps;
+    double start_mjd_utc;
+    double length_seconds;
+    double length_days;
+    double dt_dump_days;
 };
 typedef struct oskar_SettingsObservation oskar_SettingsObservation;
 

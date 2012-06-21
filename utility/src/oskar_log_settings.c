@@ -210,10 +210,11 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
     LV("Start frequency [Hz]", "%.3e", s->obs.start_frequency_hz);
     LV("Num. frequency channels", "%d", s->obs.num_channels);
     LV("Frequency inc [Hz]", "%.3e", s->obs.frequency_inc_hz);
-    LV("Start time (MJD)", "%f", s->obs.time.obs_start_mjd_utc);
-    LV("Num. time steps", "%d", s->obs.time.num_time_steps);
-    LV("Length [sec]", "%f", s->obs.time.obs_length_seconds);
+    LV("Start time (MJD)", "%f", s->obs.start_mjd_utc);
+    LV("Num. time steps", "%d", s->obs.num_time_steps);
+    LV("Length [sec]", "%f", s->obs.length_seconds);
 }
+
 
 void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
 {
@@ -306,12 +307,12 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     oskar_log_message(log, depth, "Interferometer settings");
     depth = 1;
-    LV("Channel bandwidth [Hz]", "%f", s->obs.channel_bandwidth_hz);
-    LVI("Num. visibility ave.", s->obs.time.num_vis_ave);
-    LVI("Num. fringe ave.", s->obs.time.num_fringe_ave);
-    LVS0("Output OSKAR visibility file", s->obs.oskar_vis_filename);
-    LVS0("Output Measurement Set name", s->obs.ms_filename);
-    LVB("Image simulation output", s->obs.image_interferometer_output);
+    LV("Channel bandwidth [Hz]", "%f", s->interferometer.channel_bandwidth_hz);
+    LVI("Num. visibility ave.", s->interferometer.num_vis_ave);
+    LVI("Num. fringe ave.", s->interferometer.num_fringe_ave);
+    LVS0("Output OSKAR visibility file", s->interferometer.oskar_vis_filename);
+    LVS0("Output Measurement Set name", s->interferometer.ms_filename);
+    LVB("Image simulation output", s->interferometer.image_interferometer_output);
 }
 
 void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s)
@@ -405,7 +406,7 @@ void oskar_log_settings(oskar_Log* log, const oskar_Settings* s,
     oskar_log_settings_telescope(log, s);
 
     /* Print interferometer settings */
-    if (s->obs.oskar_vis_filename || s->obs.ms_filename)
+    if (s->interferometer.oskar_vis_filename || s->interferometer.ms_filename)
         oskar_log_settings_interferometer(log, s);
 
     /* Print beam pattern settings. */

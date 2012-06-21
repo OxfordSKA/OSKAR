@@ -35,7 +35,7 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SettingsTime.h"
+#include "utility/oskar_Settings.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "sky/oskar_SkyModel.h"
 #include "utility/oskar_Mem.h"
@@ -54,13 +54,13 @@ extern "C" {
  * @param[out] vis_amp    Output visibilities.
  * @param[in] sky_gpu     Sky model structure.
  * @param[in] telescope   Telescope model structure.
- * @param[in] times       Simulation time data.
+ * @param[in] settings    Simulation settings.
  * @param[in] frequency   Observation frequency in Hz.
  */
 OSKAR_EXPORT
 int oskar_interferometer_scalar(oskar_Mem* vis_amp,
         const oskar_SkyModel* sky_gpu, const oskar_TelescopeModel* telescope,
-        const oskar_SettingsTime* times, double frequency);
+        const oskar_Settings* settings, double frequency);
 
 #ifdef __cplusplus
 }
