@@ -26,40 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_TO_SKY_MODEL_H_
-#define OSKAR_FITS_TO_SKY_MODEL_H_
+#include "fits/test/Test_fits_to_sky_model.h"
+#include "fits/oskar_fits_to_sky_model.h"
+#include "fits/oskar_fits_image_write.h"
+#include "imaging/oskar_Image.h"
+#include "imaging/oskar_image_free.h"
+#include "imaging/oskar_image_init.h"
+#include "imaging/oskar_image_resize.h"
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_Mem.h"
 
-/**
- * @file oskar_fits_to_sky_model.h
- */
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Log.h"
+void Test_fits_to_sky_model::test_method()
+{
+    // Write a test image.
+    int columns = 10; // width
+    int rows = 10; // height
+    int err;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+    // Create the image.
+    oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
+    err = oskar_image_resize(&image, columns, rows, 1, 1, 1);
+    CPPUNIT_ASSERT_EQUAL(0, err);
 
-/**
- * @brief
- * Reads a FITS file into a sky model structure.
- *
- * @details
- * This function reads data from a FITS file into an OSKAR sky model structure.
- *
- * @param[in,out] log    Pointer to log structure to use.
- * @param[in] filename   File name of FITS image to write.
- * @param[out] sky       Pointer to sky model to fill.
- *
- * @return An error code.
- */
-OSKAR_EXPORT
-int oskar_fits_to_sky_model(oskar_Log* log, const char* filename,
-        oskar_SkyModel* sky);
+    // Add image meta-data.
+    image.centre_ra_deg = 10.0;
+    image.centre_dec_deg = 80.0;
+    image.fov_ra_deg = 1.0;
+    image.fov_dec_deg = 1.0;
+    image.freq_start_hz = 100e6;
+    image.freq_inc_hz = 1e5;
 
-#ifdef __cplusplus
+    // Define test data.
+    double* d = (double*) image.data;
+    for (int r = 0, i = 0; r < rows; ++r)
+    {
+        for (int c = 0; c < columns; ++c, ++i)
+        {
+            d[i] = r + 2 * c;
+        }
+    }
+
+    // Write the data.
+    const char filename[] = "cpp_unit_test_image.fits";
+    oskar_fits_image_write(&image, NULL, filename);
+
+    // Free memory.
+    oskar_image_free(&image);
+
+    // Read the test image as a sky model.
+    oskar_SkyModel sky;
+    int error = oskar_fits_to_sky_model(0, filename, &sky);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+
+
 }
-#endif
-
-#endif /* OSKAR_FITS_TO_SKY_MODEL_H_ */

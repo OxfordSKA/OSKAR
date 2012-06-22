@@ -12,6 +12,7 @@ if (CPPUNIT_FOUND AND CUDA_FOUND)
         src/CppUnitMain.cpp
         src/Test_fits_image_write.cpp
         src/Test_fits_write.cpp
+        src/Test_fits_to_sky_model.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

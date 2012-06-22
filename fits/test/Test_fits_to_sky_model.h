@@ -26,40 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_FITS_TO_SKY_MODEL_H_
-#define OSKAR_FITS_TO_SKY_MODEL_H_
+#ifndef TEST_FITS_TO_SKY_MODEL_H_
+#define TEST_FITS_TO_SKY_MODEL_H_
 
 /**
- * @file oskar_fits_to_sky_model.h
+ * @file Test_fits_to_sky_model.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SkyModel.h"
-#include "utility/oskar_Log.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Reads a FITS file into a sky model structure.
+ * @brief Unit test class that uses CppUnit.
  *
  * @details
- * This function reads data from a FITS file into an OSKAR sky model structure.
- *
- * @param[in,out] log    Pointer to log structure to use.
- * @param[in] filename   File name of FITS image to write.
- * @param[out] sky       Pointer to sky model to fill.
- *
- * @return An error code.
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-OSKAR_EXPORT
-int oskar_fits_to_sky_model(oskar_Log* log, const char* filename,
-        oskar_SkyModel* sky);
+class Test_fits_to_sky_model : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_fits_to_sky_model);
+        CPPUNIT_TEST(test_method);
+        CPPUNIT_TEST_SUITE_END();
 
-#ifdef __cplusplus
-}
-#endif
+    public:
+        // Test methods.
+        void test_method();
+};
 
-#endif /* OSKAR_FITS_TO_SKY_MODEL_H_ */
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_fits_to_sky_model);
+
+#endif // TEST_FITS_TO_SKY_MODEL_H_
