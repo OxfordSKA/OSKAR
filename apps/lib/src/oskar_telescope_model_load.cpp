@@ -168,7 +168,7 @@ static int oskar_telescope_model_load_private(oskar_TelescopeModel* telescope,
 
 
 static void oskar_telescope_model_get_data_files(
-        QHash<QString, QString>& data_files, const QDir& dir, int depth)
+        QHash<QString, QString>& data_files, const QDir& dir, int /*depth*/)
 {
     // Check for CST element pattern data.
     if (dir.exists(element_x_name_cst))
