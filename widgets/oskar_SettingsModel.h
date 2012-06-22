@@ -126,17 +126,24 @@ class oskar_SettingsModelFilter : public QSortFilterProxyModel
 public:
     oskar_SettingsModelFilter(QObject* parent = 0);
     virtual ~oskar_SettingsModelFilter();
+    QVariant data(const QModelIndex& index, int role) const;
     bool hideIfUnset() const;
 
 public slots:
+    void setFilterText(QString value);
     void setHideIfUnset(bool value);
 
 protected:
-    virtual bool filterAcceptsRow(int source_row,
-            const QModelIndex& source_parent) const;
+    bool filterAcceptsChildren(int sourceRow,
+            const QModelIndex& sourceParent) const;
+    bool filterAcceptsCurrentRow(int sourceRow,
+            const QModelIndex& sourceParent) const;
+    virtual bool filterAcceptsRow(int sourceRow,
+            const QModelIndex& sourceParent) const;
 
 private:
     bool hideIfUnset_;
+    QString filterText_;
 };
 
 #endif /* OSKAR_SETTINGS_MODEL_H_ */

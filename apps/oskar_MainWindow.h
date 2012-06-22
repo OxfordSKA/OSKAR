@@ -37,9 +37,7 @@ class oskar_SettingsModelFilter;
 class oskar_SettingsView;
 class QAction;
 class QModelIndex;
-class QVBoxLayout;
 class QWidget;
-class QMessageBox;
 
 class oskar_MainWindow : public QMainWindow
 {
@@ -76,7 +74,6 @@ private:
 private:
     QString mainTitle_;
     QWidget* widget_;
-    QVBoxLayout* layout_;
     oskar_SettingsModel* model_;
     oskar_SettingsModelFilter* modelProxy_;
     oskar_SettingsView* view_;

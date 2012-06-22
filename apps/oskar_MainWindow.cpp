@@ -36,11 +36,12 @@
 #include "widgets/oskar_SettingsItem.h"
 #include "widgets/oskar_SettingsModelApps.h"
 #include "widgets/oskar_SettingsView.h"
-#include "utility/oskar_get_error_string.h"
 
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
+#include <QtGui/QFormLayout>
+#include <QtGui/QLineEdit>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
 #include <QtGui/QMessageBox>
@@ -63,12 +64,20 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     setWindowIcon(QIcon(":/icons/oskar.ico"));
     widget_ = new QWidget(this);
     setCentralWidget(widget_);
-    layout_ = new QVBoxLayout(widget_);
+    QVBoxLayout* v_layout = new QVBoxLayout(widget_);
+    QFormLayout* formLayout = new QFormLayout;
 
     // Create and set up the settings model.
     model_ = new oskar_SettingsModelApps(widget_);
     modelProxy_ = new oskar_SettingsModelFilter(widget_);
     modelProxy_->setSourceModel(model_);
+
+    // Create the search box.
+    QLineEdit* filterBox = new QLineEdit(widget_);
+    formLayout->addRow("Filter", filterBox);
+    connect(filterBox, SIGNAL(textChanged(QString)),
+            modelProxy_, SLOT(setFilterText(QString)));
+    v_layout->addLayout(formLayout);
 
     // Create and set up the settings view.
     view_ = new oskar_SettingsView(widget_);
@@ -77,7 +86,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     view_->setModel(modelProxy_);
     view_->setItemDelegate(delegate);
     view_->resizeColumnToContents(0);
-    layout_->addWidget(view_);
+    v_layout->addWidget(view_);
 
     // Create and set up the actions.
     QAction* actOpen = new QAction("&Open...", this);

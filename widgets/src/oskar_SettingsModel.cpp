@@ -38,6 +38,8 @@
 #include <cstdio>
 #include <cfloat>
 
+#include <QtCore/QDebug>
+
 #include "widgets/oskar_DoubleSpinBox.h"
 
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
@@ -721,6 +723,22 @@ oskar_SettingsModelFilter::~oskar_SettingsModelFilter()
 {
 }
 
+QVariant oskar_SettingsModelFilter::data(const QModelIndex& index,
+        int role) const
+{
+    if (!filterText_.isEmpty())
+    {
+        if (role == Qt::ForegroundRole && index.column() == 0)
+        {
+            QString label = QSortFilterProxyModel::data(index,
+                    Qt::DisplayRole).toString();
+            if (label.contains(filterText_, Qt::CaseInsensitive))
+                return QColor(Qt::darkGreen);
+        }
+    }
+    return QSortFilterProxyModel::data(index, role);
+}
+
 bool oskar_SettingsModelFilter::hideIfUnset() const
 {
     return hideIfUnset_;
@@ -728,6 +746,12 @@ bool oskar_SettingsModelFilter::hideIfUnset() const
 
 
 // Public slots.
+
+void oskar_SettingsModelFilter::setFilterText(QString value)
+{
+    filterText_ = value;
+    invalidate();
+}
 
 void oskar_SettingsModelFilter::setHideIfUnset(bool value)
 {
@@ -742,10 +766,55 @@ void oskar_SettingsModelFilter::setHideIfUnset(bool value)
 
 // Protected methods.
 
+bool oskar_SettingsModelFilter::filterAcceptsChildren(int sourceRow,
+        const QModelIndex& sourceParent) const
+{
+    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+    if (!idx.isValid())
+        return false;
+
+    int childCount = idx.model()->rowCount(idx);
+    for (int i = 0; i < childCount; ++i)
+    {
+        if (filterAcceptsCurrentRow(i, idx))
+            return true;
+        if (filterAcceptsChildren(i, idx))
+            return true;
+    }
+    return false;
+}
+
+bool oskar_SettingsModelFilter::filterAcceptsCurrentRow(int sourceRow,
+            const QModelIndex& sourceParent) const
+{
+    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+    bool visible = !(hideIfUnset_ && !(sourceModel()->data(idx,
+            oskar_SettingsModel::VisibleRole).toBool()));
+    QString labelCurrent = sourceModel()->data(idx, Qt::DisplayRole).toString();
+    bool pass = (labelCurrent.contains(filterText_, Qt::CaseInsensitive) ||
+            false) && visible;
+    return pass;
+}
+
 bool oskar_SettingsModelFilter::filterAcceptsRow(int sourceRow,
             const QModelIndex& sourceParent) const
 {
-    if (!hideIfUnset_) return true;
-    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
-    return sourceModel()->data(idx, oskar_SettingsModel::VisibleRole).toBool();
+    // Check if filter accepts this row.
+    if (filterAcceptsCurrentRow(sourceRow, sourceParent))
+        return true;
+
+    // Check if filter accepts any parent.
+    QModelIndex parent = sourceParent;
+    while (parent.isValid() && !hideIfUnset_)
+    {
+        if (filterAcceptsCurrentRow(parent.row(), parent.parent()))
+            return true;
+        parent = parent.parent();
+    }
+
+    // Check if filter accepts any child.
+    if (filterAcceptsChildren(sourceRow, sourceParent))
+        return true;
+
+    return false;
 }
