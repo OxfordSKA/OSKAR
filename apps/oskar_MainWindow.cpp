@@ -74,7 +74,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
 
     // Create the search box.
     QLineEdit* filterBox = new QLineEdit(widget_);
-    formLayout->addRow("Filter", filterBox);
+    formLayout->addRow("Settings View Filter", filterBox);
     connect(filterBox, SIGNAL(textChanged(QString)),
             modelProxy_, SLOT(setFilterText(QString)));
     v_layout->addLayout(formLayout);

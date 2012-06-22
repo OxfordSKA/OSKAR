@@ -728,12 +728,12 @@ QVariant oskar_SettingsModelFilter::data(const QModelIndex& index,
 {
     if (!filterText_.isEmpty())
     {
-        if (role == Qt::ForegroundRole && index.column() == 0)
+        if (role == Qt::BackgroundRole && index.column() == 0)
         {
             QString label = QSortFilterProxyModel::data(index,
                     Qt::DisplayRole).toString();
             if (label.contains(filterText_, Qt::CaseInsensitive))
-                return QColor(Qt::darkGreen);
+                return QColor("#FFFF9F");
         }
     }
     return QSortFilterProxyModel::data(index, role);
