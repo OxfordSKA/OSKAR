@@ -136,7 +136,7 @@ endif (CUDA_FOUND)
 # Set MATLAB mex function compiler flags.
 # ------------------------------------------------------------------------------
 if (MATLAB_FOUND)
-    if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    if (APPLE)
         set(MATLAB_MEXFILE_EXT mexmaci64)
         link_directories(/usr/local/cuda/lib/)
         link_directories(/Applications/MATLAB_R2011a.app/bin/maci64/)

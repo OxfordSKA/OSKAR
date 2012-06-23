@@ -98,7 +98,13 @@ ELSE( WIN32 )
   find_library(MATLAB_MX_LIBRARY  mx   PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   find_library(MATLAB_ENG_LIBRARY eng  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   # HACK: find_library doesnt seem to be able to find versioned libraries... :(
-  find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4 PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  if (NOT APPLE)    
+    find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4 
+      PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+  else ()
+    find_package(Qt4 4.6 QUIET)
+    set(MATLAB_QT_CORE_LIBRARY ${QT_QTCORE_LIBRARY})
+  endif()
 
   find_path(MATLAB_INCLUDE_DIR
     "mex.h"
