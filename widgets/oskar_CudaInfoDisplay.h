@@ -35,12 +35,22 @@
 
 #include <QtGui/QDialog>
 
+class QProcess;
+class QTextEdit;
+
 class oskar_CudaInfoDisplay : public QDialog
 {
     Q_OBJECT
 
 public:
-    oskar_CudaInfoDisplay(QWidget *parent = 0);
+    oskar_CudaInfoDisplay(QString processName, QWidget *parent = 0);
+
+private slots:
+    void readProcess();
+
+private:
+    QProcess* process_;
+    QTextEdit* display_;
 };
 
 #endif /* OSKAR_CUDA_INFO_DISPLAY_H_ */

@@ -27,117 +27,45 @@
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_cuda_info_create.h"
-#include "utility/oskar_cuda_info_free.h"
-#include "utility/oskar_CudaInfo.h"
-#include "utility/oskar_get_error_string.h"
 #include "widgets/oskar_CudaInfoDisplay.h"
 
-#include <cuda_runtime_api.h>
+#include <QtCore/QProcess>
 #include <QtGui/QApplication>
 #include <QtGui/QDialogButtonBox>
-#include <QtGui/QMessageBox>
 #include <QtGui/QGroupBox>
 #include <QtGui/QHBoxLayout>
-#include <QtGui/QTextBrowser>
+#include <QtGui/QScrollBar>
+#include <QtGui/QTextEdit>
 #include <QtGui/QVBoxLayout>
 
-oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QWidget *parent) : QDialog(parent)
+oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QString processName,
+        QWidget *parent) : QDialog(parent)
 {
-    // Create the CUDA info structure.
-    oskar_CudaInfo* info = NULL;
-    int err = oskar_cuda_info_create(&info);
-
     // Set up the GUI.
     setWindowTitle("CUDA System Info");
     QVBoxLayout* vLayoutMain = new QVBoxLayout(this);
 
     // Create system info group.
-    QGroupBox* grpAtt = new QGroupBox("CUDA System Info", this);
-    grpAtt->setMinimumSize(600, 300);
-    QVBoxLayout* vLayoutAtt = new QVBoxLayout(grpAtt);
+    QGroupBox* grp = new QGroupBox("CUDA System Info", this);
+    grp->setMinimumSize(600, 300);
+    QVBoxLayout* vLayoutGrp = new QVBoxLayout(grp);
 
-    // Create system info document.
-    QString html;
-    html.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" "
-            "\"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-            "<html><head></head><body>\n");
-    if (!err)
-    {
-        html.append("<p>");
-        html.append(QString("CUDA driver version: %1.%2<br />").
-                arg(info->driver_version / 1000).
-                arg((info->driver_version % 100) / 10));
-        html.append(QString("CUDA runtime version: %1.%2<br />").
-                arg(info->runtime_version / 1000).
-                arg((info->runtime_version % 100) / 10));
-        html.append(QString("Number of CUDA devices detected: %1<br />").
-                arg(info->num_devices));
-        html.append("</p>");
-        for (int i = 0; i < info->num_devices; ++i)
-        {
-            html.append(QString("<p>Device [%1] name: %2</p>").
-                    arg(i).arg(info->device[i].name));
-            html.append("<ul>");
-            html.append(QString("<li>Compute capability: %1.%2</li>").
-                    arg(info->device[i].compute.capability.major).
-                    arg(info->device[i].compute.capability.minor));
-            html.append(QString("<li>Supports double precision: %1</li>").
-                    arg(info->device[i].supports_double ? "true" : "false"));
-            html.append(QString("<li>Global memory (MiB): %1</li>").
-                    arg(info->device[i].global_memory_size / 1024.0));
-            html.append(QString("<li>Free global memory (MiB): %1</li>").
-                    arg(info->device[i].free_memory / 1024.0));
-            html.append(QString("<li>Number of multiprocessors: %1</li>").
-                    arg(info->device[i].num_multiprocessors));
-            html.append(QString("<li>Number of CUDA cores: %1</li>").
-                    arg(info->device[i].num_cores));
-            html.append(QString("<li>GPU clock speed (MHz): %1</li>").
-                    arg(info->device[i].gpu_clock / 1000.0));
-            html.append(QString("<li>Memory clock speed (MHz): %1</li>").
-                    arg(info->device[i].memory_clock / 1000.0));
-            html.append(QString("<li>Memory bus width: %1-bit</li>").
-                    arg(info->device[i].memory_bus_width));
-            html.append(QString("<li>Level-2 cache size (kiB): %1</li>").
-                    arg(info->device[i].level_2_cache_size / 1024));
-            html.append(QString("<li>Shared memory size (kiB): %1</li>").
-                    arg(info->device[i].shared_memory_size / 1024));
-            html.append(QString("<li>Registers per block: %1</li>").
-                    arg(info->device[i].num_registers));
-            html.append(QString("<li>Warp size: %1</li>").
-                    arg(info->device[i].warp_size));
-            html.append(QString("<li>Max threads per block: %1</li>").
-                    arg(info->device[i].max_threads_per_block));
-            html.append(QString("<li>Max size of each dimension of a block: "
-                    "(%1 x %2 x %3)</li>").
-                    arg(info->device[i].max_threads_dim[0]).
-                    arg(info->device[i].max_threads_dim[1]).
-                    arg(info->device[i].max_threads_dim[2]));
-            html.append(QString("<li>Max size of each dimension of a grid: "
-                    "(%1 x %2 x %3)</li>").
-                    arg(info->device[i].max_grid_size[0]).
-                    arg(info->device[i].max_grid_size[1]).
-                    arg(info->device[i].max_grid_size[2]));
-            html.append("</ul>");
-        }
-    }
-    else
-    {
-        html.append("<p>");
-        html.append(QString("Could not obtain CUDA system info: %1").
-                arg(oskar_get_error_string(err)));
-        html.append("</p>");
-    }
-    html.append("</body></html>");
-
-    // Create system info document display.
-    QTextBrowser* display = new QTextBrowser(this);
-    display->setHtml(html);
-    display->setReadOnly(true);
-    vLayoutAtt->addWidget(display);
+    // Create terminal output display.
+    display_ = new QTextEdit(this);
+    display_->setReadOnly(true);
+    QFont terminalFont;
+#ifdef Q_OS_WIN32
+    terminalFont.setFamily("Lucida Console");
+#else
+    terminalFont.setFamily("DejaVu Sans Mono");
+#endif
+    terminalFont.setPointSize(10);
+    terminalFont.setStyleHint(QFont::TypeWriter);
+    display_->setFont(terminalFont);
+    vLayoutGrp->addWidget(display_);
 
     // Add system info group.
-    vLayoutMain->addWidget(grpAtt);
+    vLayoutMain->addWidget(grp);
 
     // Create close button.
     QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Ok,
@@ -145,17 +73,25 @@ oskar_CudaInfoDisplay::oskar_CudaInfoDisplay(QWidget *parent) : QDialog(parent)
     connect(buttons, SIGNAL(accepted()), this, SLOT(accept()));
     vLayoutMain->addWidget(buttons);
 
-    // Release the CUDA context(s).
-    if (!err)
-    {
-        for (int i = 0; i < info->num_devices; ++i)
-        {
-            cudaSetDevice(i);
-            cudaDeviceReset();
-        }
-        cudaSetDevice(0);
-    }
+    // Run the process.
+    process_ = new QProcess(this);
+    process_->setProcessChannelMode(QProcess::MergedChannels);
+    connect(process_, SIGNAL(readyRead()), this, SLOT(readProcess()));
+    process_->start(processName, QProcess::ReadOnly);
+}
 
-    // Free the CUDA info structure.
-    oskar_cuda_info_free(&info);
+// Private slots.
+
+void oskar_CudaInfoDisplay::readProcess()
+{
+    QString result = QString(process_->readAll());
+    if (result.size() > 0)
+    {
+        // Append the output text.
+        QTextCursor cursor = display_->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        display_->setTextCursor(cursor);
+        display_->insertPlainText(result);
+        display_->verticalScrollBar()->setValue(0);
+    }
 }

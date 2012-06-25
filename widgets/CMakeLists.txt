@@ -12,7 +12,7 @@ if (QT4_FOUND AND CUDA_FOUND)
         oskar_About.h
         oskar_BinaryLocations.h
         oskar_CudaInfoDisplay.h
-        oskar_DataFileModel.h
+        #oskar_DataFileModel.h
         oskar_DocumentationDisplay.h
         oskar_DoubleSpinBox.h
         oskar_RunDialog.h
@@ -26,7 +26,7 @@ if (QT4_FOUND AND CUDA_FOUND)
         src/oskar_About.cpp
         src/oskar_BinaryLocations.cpp
         src/oskar_CudaInfoDisplay.cpp
-        src/oskar_DataFileModel.cpp
+        #src/oskar_DataFileModel.cpp
         src/oskar_DocumentationDisplay.cpp
         src/oskar_DoubleSpinBox.cpp
         src/oskar_RunDialog.cpp
@@ -42,7 +42,6 @@ if (QT4_FOUND AND CUDA_FOUND)
     qt4_wrap_cpp(widgets_SRC ${widgets_MOC_SRC})
     add_library(oskar_widgets ${widgets_SRC} ${widgets_RCC_SRC})
     target_link_libraries(oskar_widgets
-        oskar
         ${QT_QTCORE_LIBRARY}
         ${QT_QTGUI_LIBRARY})
     set_target_properties(oskar_widgets PROPERTIES

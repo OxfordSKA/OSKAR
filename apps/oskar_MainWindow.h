@@ -93,6 +93,7 @@ private:
     QString binary_interferometer_;
     QString binary_beam_pattern_;
     QString binary_imager_;
+    QString binary_cuda_info_;
 
     bool isModified_;
 };

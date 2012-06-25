@@ -45,14 +45,17 @@ public:
     oskar_BinaryLocations(QWidget *parent = 0);
 
     QString beamPattern() const;
+    QString cudaSystemInfo() const;
     QString imager() const;
     QString interferometer() const;
     void setBeamPattern(const QString& value);
+    void setCudaSystemInfo(const QString& value);
     void setImager(const QString& value);
     void setInterferometer(const QString& value);
 
 private slots:
     void setBeamPattern();
+    void setCudaSystemInfo();
     void setImager();
     void setInterferometer();
 
@@ -60,6 +63,7 @@ private:
     QLineEdit* editInterferometer_;
     QLineEdit* editBeamPattern_;
     QLineEdit* editImager_;
+    QLineEdit* editCudaSystemInfo_;
 };
 
 #endif /* OSKAR_BINARY_LOCATIONS_H_ */

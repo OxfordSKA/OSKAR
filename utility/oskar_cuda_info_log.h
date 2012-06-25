@@ -26,14 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDA_INFO_PRINT_H_
-#define OSKAR_CUDA_INFO_PRINT_H_
+#ifndef OSKAR_CUDA_INFO_LOG_H_
+#define OSKAR_CUDA_INFO_LOG_H_
 
 /**
- * @file oskar_cuda_info_print.h
+ * @file oskar_cuda_info_log.h
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Log.h"
 #include "utility/oskar_CudaInfo.h"
 
 #ifdef __cplusplus
@@ -47,19 +48,19 @@ extern "C" {
 #endif
 
 /**
- * @brief Print information about the CUDA environment and devices.
+ * @brief Log information about the CUDA environment and devices.
  *
  * @details
- * This function prints to standard output the contents of the
- * supplied data structure.
+ * This function writes the contents of the supplied data structure to the log.
  *
+ * @param[in,out] log Pointer to log structure to use.
  * @param[in] info    Pointer to info structure pointer.
  */
 OSKAR_EXPORT
-int oskar_cuda_info_print(const oskar_CudaInfo* info);
+int oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_CUDA_INFO_PRINT_H_ */
+#endif /* OSKAR_CUDA_INFO_LOG_H_ */

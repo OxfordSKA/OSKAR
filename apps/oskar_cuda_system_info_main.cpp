@@ -26,19 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/test/Test_CudaInfo.h"
+#include "oskar_global.h"
 #include "utility/oskar_CudaInfo.h"
 #include "utility/oskar_cuda_info_create.h"
 #include "utility/oskar_cuda_info_free.h"
 #include "utility/oskar_cuda_info_log.h"
-
+#include "utility/oskar_get_error_string.h"
+#include "utility/oskar_log_error.h"
 #include <cstdio>
-#include <cstdlib>
 
-void Test_CudaInfo::test()
+int main(int argc, char** /*argv*/)
 {
+    // Parse command line.
+    if (argc != 1)
+    {
+        fprintf(stderr, "Usage: $ oskar_cuda_system_info\n");
+        return OSKAR_ERR_INVALID_ARGUMENT;
+    }
+
+    // Create the CUDA info structure.
     oskar_CudaInfo* info = NULL;
-    oskar_cuda_info_create(&info);
-    oskar_cuda_info_log(0, info);
+    int error = oskar_cuda_info_create(&info);
+    if (error)
+    {
+        oskar_log_error(0, "Could not determine CUDA system information (%s)",
+                oskar_get_error_string(error));
+        oskar_cuda_info_free(&info);
+        return error;
+    }
+
+    // Log the CUDA system info.
+    oskar_cuda_info_log(NULL, info);
     oskar_cuda_info_free(&info);
+    return OSKAR_SUCCESS;
 }

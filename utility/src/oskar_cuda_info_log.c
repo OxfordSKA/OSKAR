@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,61 +26,70 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_CudaInfo.h"
-#include "utility/oskar_cuda_device_info_scan.h"
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <cuda_runtime_api.h>
+#include "utility/oskar_cuda_info_log.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_log_section.h"
+#include "utility/oskar_log_value.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_cuda_info_print(const oskar_CudaInfo* info)
+int oskar_cuda_info_log(oskar_Log* log, const oskar_CudaInfo* info)
 {
     int i;
+    int width = 40;
+
+    oskar_log_section(log, "CUDA System Information");
 
     /* Print driver and runtime version. */
-    printf("CUDA driver version: %d\n", info->driver_version);
-    printf("CUDA runtime version: %d\n", info->runtime_version);
-    printf("Number of CUDA devices detected: %d\n", info->num_devices);
+    oskar_log_value(log, 0, width, "CUDA driver version", "%d.%d",
+            info->driver_version / 1000, (info->driver_version % 100) / 10);
+    oskar_log_value(log, 0, width, "CUDA runtime version", "%d.%d",
+            info->runtime_version / 1000, (info->runtime_version % 100) / 10);
+    oskar_log_value(log, 0, width, "Number of CUDA devices detected", "%d",
+            info->num_devices);
 
     /* Print device array. */
     for (i = 0; i < info->num_devices; ++i)
     {
-        printf("Device [%d] name: %s\n", i, info->device[i].name);
-        printf("Compute capability: %d.%d\n",
+        oskar_log_message(log, 0, "Device %d (%s):", i, info->device[i].name);
+        oskar_log_value(log, 1, width, "Compute capability", "%d.%d",
                 info->device[i].compute.capability.major,
                 info->device[i].compute.capability.minor);
-        printf("Supports double precision: %s\n",
+        oskar_log_value(log, 1, width, "Supports double precision", "%s",
                 info->device[i].supports_double ? "true" : "false");
-        printf("Global memory (MiB): %.1f\n",
+        oskar_log_value(log, 1, width, "Global memory (MiB)", "%.1f",
                 info->device[i].global_memory_size / 1024.0);
-        printf("Free global memory (MiB): %.1f\n",
+        oskar_log_value(log, 1, width, "Free global memory (MiB)", "%.1f",
                 info->device[i].free_memory / 1024.0);
-        printf("Number of multiprocessors: %d\n",
+        oskar_log_value(log, 1, width, "Number of multiprocessors", "%d",
                 info->device[i].num_multiprocessors);
-        printf("Number of CUDA cores: %d\n", info->device[i].num_cores);
-        printf("GPU clock speed (MHz): %.1f\n",
+        oskar_log_value(log, 1, width, "Number of CUDA cores", "%d",
+                info->device[i].num_cores);
+        oskar_log_value(log, 1, width, "GPU clock speed (MHz)", "%.0f",
                 info->device[i].gpu_clock / 1000.0);
-        printf("Memory clock speed (MHz): %.1f\n",
+        oskar_log_value(log, 1, width, "Memory clock speed (MHz)", "%.0f",
                 info->device[i].memory_clock / 1000.0);
-        printf("Memory bus width: %d-bit\n",
+        oskar_log_value(log, 1, width, "Memory bus width", "%d-bit",
                 info->device[i].memory_bus_width);
-        printf("Level-2 cache size (kiB): %d\n",
+        oskar_log_value(log, 1, width, "Level-2 cache size (kiB)", "%d",
                 info->device[i].level_2_cache_size / 1024);
-        printf("Shared memory size (kiB): %d\n",
+        oskar_log_value(log, 1, width, "Shared memory size (kiB)", "%d",
                 info->device[i].shared_memory_size / 1024);
-        printf("Registers per block: %d\n", info->device[i].num_registers);
-        printf("Warp size: %d\n", info->device[i].warp_size);
-        printf("Max threads per block: %d\n",
+        oskar_log_value(log, 1, width, "Registers per block", "%d",
+                info->device[i].num_registers);
+        oskar_log_value(log, 1, width, "Warp size", "%d",
+                info->device[i].warp_size);
+        oskar_log_value(log, 1, width, "Max threads per block", "%d",
                 info->device[i].max_threads_per_block);
-        printf("Max size of each dimension of a block: (%d x %d x %d)\n",
+        oskar_log_value(log, 1, width, "Max dimensions of a thread block",
+                "(%d x %d x %d)",
                 info->device[i].max_threads_dim[0],
                 info->device[i].max_threads_dim[1],
                 info->device[i].max_threads_dim[2]);
-        printf("Max size of each dimension of a grid: (%d x %d x %d)\n",
+        oskar_log_value(log, 1, width, "Max dimensions of a grid",
+                "(%d x %d x %d)",
                 info->device[i].max_grid_size[0],
                 info->device[i].max_grid_size[1],
                 info->device[i].max_grid_size[2]);

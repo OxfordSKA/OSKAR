@@ -22,8 +22,8 @@ set(utility_SRC
     src/oskar_blank_parentheses.c
     src/oskar_cuda_device_info_scan.c
     src/oskar_cuda_info_create.c
-    src/oskar_cuda_info_print.c
     src/oskar_cuda_info_free.c
+    src/oskar_cuda_info_log.c
     src/oskar_device_curand_state_init.cu
     src/oskar_Device_curand_state.cpp
     src/oskar_endian.c

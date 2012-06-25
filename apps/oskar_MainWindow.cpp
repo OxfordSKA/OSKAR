@@ -184,6 +184,8 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
             "oskar_sim_beam_pattern").toString();
     binary_imager_ = settings.value("binaries/imager",
             "oskar_imager").toString();
+    binary_cuda_info_ = settings.value("binaries/cuda_info",
+            "oskar_cuda_system_info").toString();
 
     // First, restore the expanded items.
     view_->restoreExpanded();
@@ -251,6 +253,12 @@ void oskar_MainWindow::saveSettingsAs(QString filename)
             }
         }
 
+        // Try to open the file for writing.
+        QFile file(filename);
+        bool result = file.open(QFile::ReadWrite);
+        file.close();
+        if (!result) return;
+
         view_->saveExpanded();
         settingsFile_ = filename;
         model_->saveSettingsFile(filename);
@@ -275,7 +283,7 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
     settings.setValue("binaries/interferometer", binary_interferometer_);
     settings.setValue("binaries/beam_pattern", binary_beam_pattern_);
     settings.setValue("binaries/imager", binary_imager_);
-    //QMainWindow::closeEvent(event);
+    settings.setValue("binaries/cuda_info", binary_cuda_info_);
 
     if (settingsFile_.isEmpty() && model_->isModified())
     {
@@ -290,7 +298,12 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
         else if (ret == QMessageBox::Save)
         {
             saveSettingsAs();
-            closeEvent(event);
+
+            // Check if the save failed for any reason.
+            if (settingsFile_.isEmpty())
+                event->ignore();
+            else
+                event->accept();
         }
         else
         {
@@ -311,11 +324,13 @@ void oskar_MainWindow::binLocations()
 {
     oskar_BinaryLocations binaryLocations(this);
     binaryLocations.setBeamPattern(binary_beam_pattern_);
+    binaryLocations.setCudaSystemInfo(binary_cuda_info_);
     binaryLocations.setImager(binary_imager_);
     binaryLocations.setInterferometer(binary_interferometer_);
     if (binaryLocations.exec() == QDialog::Accepted)
     {
         binary_beam_pattern_ = binaryLocations.beamPattern();
+        binary_cuda_info_ = binaryLocations.cudaSystemInfo();
         binary_imager_ = binaryLocations.imager();
         binary_interferometer_ = binaryLocations.interferometer();
     }
@@ -323,7 +338,23 @@ void oskar_MainWindow::binLocations()
 
 void oskar_MainWindow::cudaInfo()
 {
-    oskar_CudaInfoDisplay infoDisplay(this);
+    // Check that the binary actually exists.
+    QProcess process;
+    process.start(binary_cuda_info_);
+    if (!process.waitForStarted())
+    {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(mainTitle_);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setText("The CUDA system info binary could not be found.");
+        msgBox.setInformativeText("Please edit the binary location and try again.");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        binLocations();
+        return;
+    }
+
+    oskar_CudaInfoDisplay infoDisplay(binary_cuda_info_, this);
     infoDisplay.exec();
 }
 

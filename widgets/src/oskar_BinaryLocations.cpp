@@ -77,6 +77,15 @@ oskar_BinaryLocations::oskar_BinaryLocations(QWidget *parent) : QDialog(parent)
     gridLayout->addWidget(editImager_, 2, 1);
     gridLayout->addWidget(browseImager, 2, 2);
 
+    QLabel* labelCudaSystemInfo = new QLabel("CUDA system info binary:", this);
+    editCudaSystemInfo_ = new QLineEdit(this);
+    QPushButton* browseCudaSystemInfo = new QPushButton("Browse...", this);
+    connect(browseCudaSystemInfo, SIGNAL(clicked()),
+            this, SLOT(setCudaSystemInfo()));
+    gridLayout->addWidget(labelCudaSystemInfo, 3, 0);
+    gridLayout->addWidget(editCudaSystemInfo_, 3, 1);
+    gridLayout->addWidget(browseCudaSystemInfo, 3, 2);
+
     // Add binary location group.
     vLayoutMain->addWidget(grp);
     vLayoutMain->addStretch();
@@ -94,6 +103,11 @@ QString oskar_BinaryLocations::beamPattern() const
     return editBeamPattern_->text();
 }
 
+QString oskar_BinaryLocations::cudaSystemInfo() const
+{
+    return editCudaSystemInfo_->text();
+}
+
 QString oskar_BinaryLocations::imager() const
 {
     return editImager_->text();
@@ -102,6 +116,11 @@ QString oskar_BinaryLocations::imager() const
 QString oskar_BinaryLocations::interferometer() const
 {
     return editInterferometer_->text();
+}
+
+void oskar_BinaryLocations::setCudaSystemInfo(const QString& value)
+{
+    editCudaSystemInfo_->setText(value);
 }
 
 void oskar_BinaryLocations::setBeamPattern(const QString& value)
@@ -126,6 +145,13 @@ void oskar_BinaryLocations::setBeamPattern()
     QString name = QFileDialog::getOpenFileName(this, "Beam Pattern Binary");
     if (!name.isEmpty())
         setBeamPattern(name);
+}
+
+void oskar_BinaryLocations::setCudaSystemInfo()
+{
+    QString name = QFileDialog::getOpenFileName(this, "CUDA System Info Binary");
+    if (!name.isEmpty())
+        setCudaSystemInfo(name);
 }
 
 void oskar_BinaryLocations::setImager()

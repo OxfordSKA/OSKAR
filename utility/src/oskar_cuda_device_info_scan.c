@@ -29,7 +29,6 @@
 #include "utility/oskar_cuda_device_info_scan.h"
 
 #include <cuda_runtime_api.h>
-#include <cuda.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -114,19 +113,15 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
         break;
     default:
         device->num_cores = -1;
+        break;
     }
     if (device->num_cores > 0)
         device->num_cores *= device->num_multiprocessors;
     device->gpu_clock = device_prop.clockRate;
-
-    /* Get extra memory information from driver API. */
 #if CUDART_VERSION >= 4000
-    cuDeviceGetAttribute(&device->memory_clock,
-            CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE, id);
-    cuDeviceGetAttribute(&device->memory_bus_width,
-            CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH, id);
-    cuDeviceGetAttribute(&device->level_2_cache_size,
-            CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE, id);
+    device->memory_clock = device_prop.memoryClockRate;
+    device->memory_bus_width = device_prop.memoryBusWidth;
+    device->level_2_cache_size = device_prop.l2CacheSize;
 #else
     device->memory_clock = -1;
     device->memory_bus_width = -1;
