@@ -2,7 +2,7 @@
 # src/fits/CMakeLists.txt
 #
 
-if (CFITSIO_FOUND)
+if (CFITSIO_FOUND AND CUDA_FOUND)
 
     include_directories(${CFITSIO_INCLUDE_DIR})
 
@@ -31,4 +31,4 @@ if (CFITSIO_FOUND)
     # Unit tests.
     add_subdirectory(test)
 
-endif (CFITSIO_FOUND)
+endif (CFITSIO_FOUND AND CUDA_FOUND)
