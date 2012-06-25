@@ -21,7 +21,7 @@ if (CFITSIO_FOUND)
     include_directories(${CFITSIO_INCLUDE_DIR})
     set(libname oskar_fits)
     add_library(${libname} ${fits_SRC})
-    target_link_libraries(${libname} ${CFITSIO_LIBRARIES})
+    target_link_libraries(${libname} ${CFITSIO_LIBRARIES} oskar)
     set_target_properties(${libname} PROPERTIES
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE
