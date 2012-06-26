@@ -56,7 +56,7 @@ extern "C" {
  */
 OSKAR_EXPORT
 int oskar_fits_to_sky_model(oskar_Log* log, const char* filename,
-        oskar_SkyModel* sky);
+        oskar_SkyModel* sky, double min_peak_fraction, double noise_floor);
 
 #ifdef __cplusplus
 }
