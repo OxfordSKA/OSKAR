@@ -34,7 +34,6 @@
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_set_source.h"
-#include "sky/oskar_sky_model_write.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_log_message.h"
@@ -58,11 +57,11 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
 {
     char value[FLEN_VALUE], card[FLEN_CARD];
     int i = 0, n = 0, num_pixels = 0, err = 0, status = 0, status2 = 0;
-    int naxis = 0, datatype = 0, imagetype = 0, anynul = 0;
+    int naxis = 0, datatype = 0, imagetype = 0, anynul = 0, x = 0, y = 0;
     int bytes_per_element = 0;
     int jy_beam = 0, jy_pixel = 0;
     fitsfile* fptr = NULL;
-    double peakval = 0.0, nulval = 0.0;
+    double peak_val = 0.0, nulval = 0.0, sin_delta1 = 0.0, sin_delta2 = 0.0;
     double crval1 = 0.0, crval2 = 0.0, crpix1 = 0.0, crpix2 = 0.0;
     double cdelt1 = 0.0, cdelt2 = 0.0, bmaj = 0.0, bmin = 0.0, beam_area = 0.0;
     long naxes[MAX_AXES];
@@ -138,11 +137,15 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     fits_read_key(fptr, TDOUBLE, "CDELT2", &cdelt2, NULL, &status);
     oskar_fits_check_status(ptr, status, "Reading CDELT2");
     if (status) return OSKAR_ERR_FITS_IO;
-    if (fabs(cdelt1) - fabs(cdelt2) > 1e-8)
+    if (fabs(fabs(cdelt1) - fabs(cdelt2)) > 1e-8)
     {
         oskar_log_error(ptr, "Map pixels are not square.");
         return OSKAR_ERR_FITS_IO;
     }
+
+    /* Compute sine of pixel deltas for inverse orthographic projection. */
+    sin_delta1 = sin(cdelt1 * M_PI / 180.0);
+    sin_delta2 = sin(cdelt2 * M_PI / 180.0);
 
     /* Read CRPIX values. */
     fits_read_key(fptr, TDOUBLE, "CRPIX1", &crpix1, NULL, &status);
@@ -159,6 +162,10 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     fits_read_key(fptr, TDOUBLE, "CRVAL2", &crval2, NULL, &status);
     oskar_fits_check_status(ptr, status, "Reading CRVAL2");
     if (status) return OSKAR_ERR_FITS_IO;
+
+    /* Convert to radians. */
+    crval1 *= M_PI / 180.0;
+    crval2 *= M_PI / 180.0;
 
     /* Read map units. */
     fits_read_key(fptr, TSTRING, "BUNIT", value, NULL, &status);
@@ -202,7 +209,6 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
             fits_read_record(fptr, i, card, &status);
             if (!strncmp(card, "HISTORY AIPS   CLEAN BMAJ", 25))
             {
-                printf("%s\n", card);
                 sscanf(card + 26, "%lf", &bmaj);
                 sscanf(card + 44, "%lf", &bmin);
             }
@@ -246,8 +252,8 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
         float* img = (float*)data;
         for (i = 0; i < num_pixels; ++i)
         {
-            if (img[i] > peakval)
-                peakval = img[i];
+            if (img[i] > peak_val)
+                peak_val = img[i];
         }
     }
     else if (datatype == TDOUBLE)
@@ -255,34 +261,31 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
         double* img = (double*)data;
         for (i = 0; i < num_pixels; ++i)
         {
-            if (img[i] > peakval)
-                peakval = img[i];
+            if (img[i] > peak_val)
+                peak_val = img[i];
         }
     }
+
+    /* Divide peak value by beam area if required. */
+    if (jy_beam) peak_val /= beam_area;
 
     /* Populate the sky model. */
     if (datatype == TFLOAT)
     {
-        float *img, ra = 0.0, dec = 0.0, val = 0.0, val_scaled = 0.0;
-        float l = 0.0, m = 0.0, f1, f2;
-        int x = 0, y = 0;
+        float *img, ra = 0.0, dec = 0.0, val = 0.0, l = 0.0, m = 0.0;
         img = (float*)data;
-        f1 = sin(cdelt1 * M_PI / 180.0);
-        f2 = sin(cdelt2 * M_PI / 180.0);
-        for (i = 0, x = 0; x < naxes[0]; ++x)
+        for (i = 0, y = 0; y < naxes[1]; ++y)
         {
-            for (y = 0; y < naxes[1]; ++y, ++i)
+            for (x = 0; x < naxes[0]; ++x, ++i)
             {
                 val = img[i];
-                val_scaled = (jy_beam) ? val / beam_area : val;
-                if (val > peakval * min_peak_fraction &&
-                        val_scaled > noise_floor)
+                if (jy_beam) val /= beam_area;
+                if (val > peak_val * min_peak_fraction && val > noise_floor)
                 {
                     /* Convert pixel positions to RA and Dec values. */
-                    l = f1 * (x - crpix1);
-                    m = f2 * (y - crpix2);
-                    oskar_sph_from_lm_f(1, crval1 * M_PI / 180,
-                            crval2 * M_PI / 180, &l, &m, &ra, &dec);
+                    l = sin_delta1 * (x - crpix1);
+                    m = sin_delta2 * (y - crpix2);
+                    oskar_sph_from_lm_f(1, crval1, crval2, &l, &m, &ra, &dec);
 
                     /* Store pixel data in sky model. */
                     /* Ensure enough space in arrays. */
@@ -292,7 +295,7 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
                         if (err) goto cleanup;
                     }
                     oskar_sky_model_set_source(&temp_sky, n, ra, dec,
-                            val_scaled, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                            val, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
                     ++n;
                 }
             }
@@ -300,17 +303,40 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     }
     else if (datatype == TDOUBLE)
     {
+        double *img, ra = 0.0, dec = 0.0, val = 0.0, l = 0.0, m = 0.0;
+        img = (double*)data;
+        for (i = 0, y = 0; y < naxes[1]; ++y)
+        {
+            for (x = 0; x < naxes[0]; ++x, ++i)
+            {
+                val = img[i];
+                if (jy_beam) val /= beam_area;
+                if (val > peak_val * min_peak_fraction && val > noise_floor)
+                {
+                    /* Convert pixel positions to RA and Dec values. */
+                    l = sin_delta1 * (x - crpix1);
+                    m = sin_delta2 * (y - crpix2);
+                    oskar_sph_from_lm_d(1, crval1, crval2, &l, &m, &ra, &dec);
+
+                    /* Store pixel data in sky model. */
+                    /* Ensure enough space in arrays. */
+                    if (n % 100 == 0)
+                    {
+                        err = oskar_sky_model_resize(&temp_sky, n + 100);
+                        if (err) goto cleanup;
+                    }
+                    oskar_sky_model_set_source(&temp_sky, n, ra, dec,
+                            val, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                    ++n;
+                }
+            }
+        }
     }
 
     /* Record the number of elements loaded. */
     temp_sky.num_sources = n;
     oskar_sky_model_append(sky, &temp_sky);
-
-    /* Report the number of sources loaded. */
-    oskar_log_message(ptr, 0, "Loaded %d sources from %s", n, filename);
-
-    /* TEST write out sky model. */
-    oskar_sky_model_write("test_fits_load.osm", sky);
+    oskar_log_message(ptr, 0, "Loaded %d pixels from %s", n, filename);
 
     /* Close the FITS file and free memory. */
     cleanup:
