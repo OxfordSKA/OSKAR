@@ -102,8 +102,6 @@ macro(QT_APP)
         ${APP_EXTRA_LIBS}                     # extra libs
     )
     set_target_properties(${target} PROPERTIES
-        COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
-        LINK_FLAGS    ${OpenMP_CXX_FLAGS}
         OUTPUT_NAME   ${APP_NAME}
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE

@@ -34,19 +34,16 @@ cuda_add_library(oskar_apps ${apps_SRC})
 # Link in oskar_ms and oskar_fits if avaliable.
 if(CASACORE_FOUND AND CFITSIO_FOUND)
     target_link_libraries(oskar_apps oskar oskar_ms oskar_fits
-        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
-        ${CUDA_CUBLAS_LIBRARIES})
+        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 elseif(CASACORE_FOUND)
     target_link_libraries(oskar_apps oskar oskar_ms
-        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
-        ${CUDA_CUBLAS_LIBRARIES})
+        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 elseif(CFITSIO_FOUND)
     target_link_libraries(oskar_apps oskar oskar_fits
-        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES}
-        ${CUDA_CUBLAS_LIBRARIES})
+        ${CASACORE_LIBRARIES} ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 else()
     target_link_libraries(oskar_apps oskar
-        ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES} ${CUDA_CUBLAS_LIBRARIES})
+        ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 endif()
 
 set_target_properties(oskar_apps PROPERTIES

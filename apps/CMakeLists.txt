@@ -29,17 +29,17 @@ if (QT4_FOUND AND CUDA_FOUND)
     set(name oskar_imager)
     oskar_qt_app(${name} ${name}_main.cpp)
 
-    # BINARY: oskar_settings_set
-    set(name oskar_settings_set)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
-    # BINARY: oskar_settings_get
-    set(name oskar_settings_get)
-    oskar_qt_app(${name} ${name}_main.cpp)
-
     # BINARY: oskar_visibilities_to_ms
     set(name oskar_visibilities_to_ms)
     oskar_qt_app(${name} ${name}_main.cpp)
+
+    # BINARY: oskar_settings_set
+    set(name oskar_settings_set)
+    qt_app(${name} ${name}_main.cpp)
+
+    # BINARY: oskar_settings_get
+    set(name oskar_settings_get)
+    qt_app(${name} ${name}_main.cpp)
 
     # BINARY: oskar
     qt_app(oskar oskar_main.cpp oskar_MainWindow.cpp
