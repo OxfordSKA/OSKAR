@@ -53,12 +53,14 @@ extern "C" {
 #define FACTOR (2.0*sqrt(2.0*log(2.0)))
 
 int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
-        oskar_SkyModel* sky, double min_peak_fraction, double noise_floor)
+        oskar_SkyModel* sky, double min_peak_fraction, double noise_floor,
+        int downsample_factor)
 {
     char value[FLEN_VALUE], card[FLEN_CARD];
-    int i = 0, n = 0, num_pixels = 0, err = 0, status = 0, status2 = 0;
-    int naxis = 0, datatype = 0, imagetype = 0, anynul = 0, x = 0, y = 0;
-    int bytes_per_element = 0;
+    int i = 0, j = 0, n = 0, num_pixels = 0, err = 0, status = 0, status2 = 0;
+    int naxis = 0, datatype = 0, imagetype = 0, anynul = 0;
+    int x = 0, y = 0, xx = 0, yy = 0, ix, iy;
+    int bytes_per_element = 0, width = 0, height = 0;
     int jy_beam = 0, jy_pixel = 0;
     fitsfile* fptr = NULL;
     double peak_val = 0.0, nulval = 0.0, sin_delta1 = 0.0, sin_delta2 = 0.0;
@@ -98,7 +100,7 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
         return OSKAR_ERR_FITS_IO;
     }
 
-    /* Check that FITS image contains only two dimensions. */
+    /* Check that the FITS image contains only two dimensions. */
     if (naxis > 2)
     {
         oskar_log_warning(ptr, "FITS image contains more than two dimensions. "
@@ -137,15 +139,11 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     fits_read_key(fptr, TDOUBLE, "CDELT2", &cdelt2, NULL, &status);
     oskar_fits_check_status(ptr, status, "Reading CDELT2");
     if (status) return OSKAR_ERR_FITS_IO;
-    if (fabs(fabs(cdelt1) - fabs(cdelt2)) > 1e-8)
+    if (fabs(fabs(cdelt1) - fabs(cdelt2)) > 1e-5)
     {
         oskar_log_error(ptr, "Map pixels are not square.");
         return OSKAR_ERR_FITS_IO;
     }
-
-    /* Compute sine of pixel deltas for inverse orthographic projection. */
-    sin_delta1 = sin(cdelt1 * M_PI / 180.0);
-    sin_delta2 = sin(cdelt2 * M_PI / 180.0);
 
     /* Read CRPIX values. */
     fits_read_key(fptr, TDOUBLE, "CRPIX1", &crpix1, NULL, &status);
@@ -211,6 +209,7 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
             {
                 sscanf(card + 26, "%lf", &bmaj);
                 sscanf(card + 44, "%lf", &bmin);
+                break;
             }
         }
     }
@@ -246,41 +245,122 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     oskar_fits_check_status(ptr, status, "Reading image data");
     if (status) goto cleanup;
 
-    /* Find peak value in image. */
+    /* Divide pixel values by beam area if required, blank any below noise
+     * floor, and find peak value. */
+    if (datatype == TFLOAT)
+    {
+        float f, v;
+        float* img = (float*)data;
+        f = (jy_beam) ? (1.0 / beam_area) : 1.0;
+        for (i = 0; i < num_pixels; ++i)
+        {
+            img[i] *= f;
+            v = img[i];
+            if (v < noise_floor)
+                img[i] = 0.0;
+            else if (v > peak_val)
+                peak_val = v;
+        }
+    }
+    else if (datatype == TDOUBLE)
+    {
+        double f, v;
+        double* img = (double*)data;
+        f = (jy_beam) ? (1.0 / beam_area) : 1.0;
+        for (i = 0; i < num_pixels; ++i)
+        {
+            img[i] *= f;
+            v = img[i];
+            if (v < noise_floor)
+                img[i] = 0.0;
+            else if (v > peak_val)
+                peak_val = v;
+        }
+    }
+
+    /* Down-sample the image. */
+    if (downsample_factor < 1) downsample_factor = 1;
+    width  = (naxes[0] + downsample_factor - 1) / downsample_factor;
+    height = (naxes[1] + downsample_factor - 1) / downsample_factor;
+
     if (datatype == TFLOAT)
     {
         float* img = (float*)data;
-        for (i = 0; i < num_pixels; ++i)
+        for (y = 0, i = 0, j = 0; y < height; ++y)
         {
-            if (img[i] > peak_val)
-                peak_val = img[i];
+            for (x = 0; x < width; ++x, ++j)
+            {
+                float new_val = 0.0;
+                for (yy = 0; yy < downsample_factor; ++yy)
+                {
+                    for (xx = 0; xx < downsample_factor; ++xx)
+                    {
+                        /* Calculate input indices. */
+                        ix = (xx + x * downsample_factor);
+                        iy = (yy + y * downsample_factor);
+                        i = (naxes[0] * iy) + ix;
+
+                        /* Check input index is in range. */
+                        if (ix >= naxes[0] || iy >= naxes[1] || i >= num_pixels)
+                            continue;
+
+                        /* Accumulate into a super-pixel. */
+                        new_val += img[i];
+                    }
+                }
+                img[j] = new_val;
+            }
         }
     }
     else if (datatype == TDOUBLE)
     {
         double* img = (double*)data;
-        for (i = 0; i < num_pixels; ++i)
+        for (y = 0, i = 0, j = 0; y < height; ++y)
         {
-            if (img[i] > peak_val)
-                peak_val = img[i];
+            for (x = 0; x < width; ++x, ++j)
+            {
+                double new_val = 0.0;
+                for (yy = 0; yy < downsample_factor; ++yy)
+                {
+                    for (xx = 0; xx < downsample_factor; ++xx)
+                    {
+                        /* Calculate input indices. */
+                        ix = (xx + x * downsample_factor);
+                        iy = (yy + y * downsample_factor);
+                        i = (naxes[0] * iy) + ix;
+
+                        /* Check input index is in range. */
+                        if (ix >= naxes[0] || iy >= naxes[1] || i >= num_pixels)
+                            continue;
+
+                        /* Accumulate into a super-pixel. */
+                        new_val += img[i];
+                    }
+                }
+                img[j] = new_val;
+            }
         }
     }
 
-    /* Divide peak value by beam area if required. */
-    if (jy_beam) peak_val /= beam_area;
+    /* Modify reference pixel values. */
+    crpix1 /= downsample_factor;
+    crpix2 /= downsample_factor;
+
+    /* Compute sine of pixel deltas for inverse orthographic projection. */
+    sin_delta1 = sin(downsample_factor * cdelt1 * M_PI / 180.0);
+    sin_delta2 = sin(downsample_factor * cdelt2 * M_PI / 180.0);
 
     /* Populate the sky model. */
     if (datatype == TFLOAT)
     {
         float *img, ra = 0.0, dec = 0.0, val = 0.0, l = 0.0, m = 0.0;
         img = (float*)data;
-        for (i = 0, y = 0; y < naxes[1]; ++y)
+        for (i = 0, y = 0; y < height; ++y)
         {
-            for (x = 0; x < naxes[0]; ++x, ++i)
+            for (x = 0; x < width; ++x, ++i)
             {
                 val = img[i];
-                if (jy_beam) val /= beam_area;
-                if (val > peak_val * min_peak_fraction && val > noise_floor)
+                if (val > peak_val * min_peak_fraction)
                 {
                     /* Convert pixel positions to RA and Dec values. */
                     l = sin_delta1 * (x - crpix1);
@@ -305,13 +385,12 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     {
         double *img, ra = 0.0, dec = 0.0, val = 0.0, l = 0.0, m = 0.0;
         img = (double*)data;
-        for (i = 0, y = 0; y < naxes[1]; ++y)
+        for (i = 0, y = 0; y < height; ++y)
         {
-            for (x = 0; x < naxes[0]; ++x, ++i)
+            for (x = 0; x < width; ++x, ++i)
             {
                 val = img[i];
-                if (jy_beam) val /= beam_area;
-                if (val > peak_val * min_peak_fraction && val > noise_floor)
+                if (val > peak_val * min_peak_fraction)
                 {
                     /* Convert pixel positions to RA and Dec values. */
                     l = sin_delta1 * (x - crpix1);
