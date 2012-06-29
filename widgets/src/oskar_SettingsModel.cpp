@@ -169,6 +169,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         if (index.column() == 0)
         {
             if (item->type() == oskar_SettingsItem::INPUT_FILE_NAME ||
+                    item->type() == oskar_SettingsItem::INPUT_FILE_LIST ||
                     item->type() == oskar_SettingsItem::TELESCOPE_DIR_NAME)
             {
                 return QIcon(":/icons/open.png");
@@ -196,6 +197,11 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (role == Qt::DisplayRole)
         {
+            if (item->type() == oskar_SettingsItem::INPUT_FILE_LIST)
+            {
+                QStringList list = item->value().toStringList();
+                return list.join(",");
+            }
             QVariant val = item->value();
             if (val.isNull())
                 val = item->defaultValue();

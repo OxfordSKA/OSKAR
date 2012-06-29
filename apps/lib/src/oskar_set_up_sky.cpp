@@ -27,6 +27,9 @@
  */
 
 #include "apps/lib/oskar_set_up_sky.h"
+#ifndef OSKAR_NO_FITS
+#include "fits/oskar_fits_to_sky_model.h"
+#endif
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
 #include "math/oskar_random_power_law.h"
@@ -60,7 +63,6 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
     // Sky model data type.
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    int location = OSKAR_LOCATION_CPU;
     int max_sources_per_chunk = settings->sim.max_sources_per_chunk;
 
     // OSKAR sky file.
@@ -70,7 +72,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         if (strlen(filename) > 0)
         {
             // Load into a temporary structure.
-            oskar_SkyModel temp(type, location);
+            oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
             oskar_log_message(log, 0, "Loading sky model data...");
             error = temp.load(filename);
             if (error) return error;
@@ -178,6 +180,41 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             oskar_log_message(log, 1, "done.");
         }
     }
+
+#ifndef OSKAR_NO_FITS
+    // Load FITS image files.
+    for (int i = 0; i < settings->sky.num_fits_files; ++i)
+    {
+        filename = settings->sky.fits_file[i];
+        if (filename)
+        {
+            if (strlen(filename) > 0)
+            {
+                // Load into a temporary structure.
+                oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
+                oskar_log_message(log, 0, "Loading FITS file %s ...", filename);
+                error = oskar_fits_to_sky_model(log, filename, &temp,
+                        settings->sky.fits_file_settings.spectral_index,
+                        settings->sky.fits_file_settings.min_peak_fraction,
+                        settings->sky.fits_file_settings.noise_floor,
+                        settings->sky.fits_file_settings.downsample_factor);
+                if (error) return error;
+
+                // Compute source direction cosines (relative lmn)
+                error = temp.compute_relative_lmn(settings->obs.ra0_rad,
+                        settings->obs.dec0_rad);
+                if (error) return error;
+
+                // Append to chunks.
+                error = oskar_sky_model_append_to_set(num_chunks, sky_chunks,
+                        max_sources_per_chunk, &temp);
+                if (error) return error;
+
+                oskar_log_message(log, 1, "done.");
+            }
+        }
+    }
+#endif
 
     // HEALPix generator.
     if (settings->sky.generator.healpix.nside != 0)

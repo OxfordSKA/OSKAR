@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #include <cstring>
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
+#include <QtCore/QStringList>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -46,6 +47,7 @@ extern "C"
 int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
 {
     QByteArray t;
+    QStringList list;
     QString temp;
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("sky");
@@ -128,6 +130,29 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->gsm_extended_sources.position_angle =
                 s.value("position_angle").toDouble() * D2R;
     s.endGroup();
+    s.endGroup();
+
+    // Input FITS files.
+    list = s.value("fits_file").toStringList();
+    sky->num_fits_files = list.size();
+    sky->fits_file = (char**)malloc(sky->num_fits_files * sizeof(char*));
+    for (int i = 0; i < sky->num_fits_files; ++i)
+    {
+        t = list[i].toAscii();
+        sky->fits_file[i] = (char*)malloc(t.size() + 1);
+        strcpy(sky->fits_file[i], t.constData());
+    }
+
+    // FITS import settings.
+    s.beginGroup("fits_file");
+    sky->fits_file_settings.downsample_factor =
+            s.value("downsample_factor", 1).toInt();
+    sky->fits_file_settings.min_peak_fraction =
+            s.value("min_peak_fraction", 0.02).toDouble();
+    sky->fits_file_settings.noise_floor =
+            s.value("noise_floor", 0.0).toDouble();
+    sky->fits_file_settings.spectral_index =
+            s.value("spectral_index", 0.0).toDouble();
     s.endGroup();
 
     // Generator settings.

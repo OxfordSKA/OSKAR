@@ -40,6 +40,8 @@ int oskar_settings_init(oskar_Settings* settings)
 
     /* Initialise all array pointers to NULL. */
     settings->sim.cuda_device_ids = 0;
+    settings->sky.num_fits_files = 0;
+    settings->sky.fits_file = 0;
     settings->sky.gsm_file = 0;
     settings->sky.input_sky_file = 0;
     settings->sky.output_sky_file = 0;

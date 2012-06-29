@@ -36,9 +36,18 @@ extern "C" {
 
 int oskar_settings_free(oskar_Settings* settings)
 {
+    int i = 0;
+
     /* Free all settings arrays. */
     free(settings->sim.cuda_device_ids);
     settings->sim.cuda_device_ids = NULL;
+    for (i = 0; i < settings->sky.num_fits_files; ++i)
+    {
+        free(settings->sky.fits_file[i]);
+        settings->sky.fits_file[i] = NULL;
+    }
+    free(settings->sky.fits_file);
+    settings->sky.fits_file = NULL;
     free(settings->sky.gsm_file);
     settings->sky.gsm_file = NULL;
     free(settings->sky.input_sky_file);

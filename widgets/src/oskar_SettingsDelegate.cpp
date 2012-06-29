@@ -223,6 +223,25 @@ bool oskar_SettingsDelegate::editorEvent(QEvent* event,
             event->accept();
             return true;
         }
+        else if (type == oskar_SettingsItem::INPUT_FILE_LIST)
+        {
+            QStringList list = value.toStringList();
+            QString dir;
+            if (!list.isEmpty())
+                dir = list[0];
+            list = QFileDialog::getOpenFileNames(view_,
+                    "Input file name(s)", dir);
+            if (!list.isEmpty())
+            {
+                for (int i = 0; i < list.size(); ++i)
+                {
+                    list[i] = QDir::current().relativeFilePath(list[i]);
+                }
+                mod->setData(index, list, Qt::EditRole);
+            }
+            event->accept();
+            return true;
+        }
         else if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
         {
             QString name = QFileDialog::getSaveFileName(view_,

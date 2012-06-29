@@ -164,6 +164,28 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "(from North to East), in degrees.");
 #endif
 
+#ifndef OSKAR_NO_FITS
+    // FITS file import settings.
+    k = "sky/fits_file";
+    registerSetting(k, "Input FITS file", oskar_SettingsItem::INPUT_FILE_LIST);
+    setTooltip(k, "FITS file(s) to use as a sky model.");
+
+    group = "sky/fits_file";
+    k = group + "/downsample_factor";
+    registerSetting(k, "Downsample factor", oskar_SettingsItem::INT_POSITIVE, false, 1);
+    setTooltip(k, "The factor by which to downsample the pixel grid.");
+    k = group + "/min_peak_fraction";
+    registerSetting(k, "Minimum fraction of peak", oskar_SettingsItem::DOUBLE, false, 0.02);
+    setTooltip(k, "The minimum allowed pixel value, as a fraction of the \n"
+            "peak value in the image.");
+    k = group + "/noise_floor";
+    registerSetting(k, "Noise floor [Jy/PIXEL]", oskar_SettingsItem::DOUBLE, false, 0.0);
+    setTooltip(k, "The noise floor of the image, in Jy/PIXEL.");
+    k = group + "/spectral_index";
+    registerSetting(k, "Spectral index", oskar_SettingsItem::DOUBLE, false, 0.0);
+    setTooltip(k, "The spectral index of each pixel.");
+#endif
+
     // Sky model generator settings.
     setLabel("sky/generator", "Generators");
 

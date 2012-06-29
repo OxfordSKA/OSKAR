@@ -43,25 +43,25 @@ class oskar_SettingsItem
 {
 public:
     enum {
-        LABEL,              /* e.g. "Sky model settings". */
-        BOOL,               /* e.g. disable station beam. */
-        INT,
-        INT_UNSIGNED,
-        INT_POSITIVE,
-        DOUBLE,
+        LABEL,              /**< Text label only (no data). */
+        BOOL,               /**< Boolean data type (true or false). */
+        INT,                /**< Generic integer data type. */
+        INT_UNSIGNED,       /**< Unsigned integer data type. */
+        INT_POSITIVE,       /**< Positive integer data type. */
+        DOUBLE,             /**< Generic double-precision data type. */
         DOUBLE_MAX,
         DOUBLE_MIN,
-        STRING,
-        TELESCOPE_DIR_NAME,
-        OUTPUT_FILE_NAME,   /* e.g. visibility data. */
-        INPUT_FILE_NAME,    /* e.g. sky model file. */
-        INPUT_FILE_LIST,    /* e.g. MeerKAT antenna files. */
-        INT_CSV_LIST,       /* e.g. CUDA device IDs. */
-        OPTIONS,            /* e.g. noise type. */
-        RANDOM_SEED,
+        STRING,             /**< Generic string data type. */
+        TELESCOPE_DIR_NAME, /**< Telescope directory string data type. */
+        OUTPUT_FILE_NAME,   /**< Output file name string data type. */
+        INPUT_FILE_NAME,    /**< Input file name string data type. */
+        INPUT_FILE_LIST,    /**< Input file string list data type. */
+        INT_CSV_LIST,       /**< Integer list data type (comma-separated). */
+        OPTIONS,            /**< Option list data type. */
+        RANDOM_SEED,        /**< Random seed data type. */
         AXIS_RANGE,
-        DATE_TIME,          /* e.g. observation start time. */
-        TIME                /* e.g. observation duration. */
+        DATE_TIME,          /**< Date and time data type. */
+        TIME                /**< Time data type. */
     };
 
 public:

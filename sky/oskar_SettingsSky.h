@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,20 @@ struct oskar_SettingsSkyExtendedSources
     double position_angle;  /**< Position angle in radians. */
 };
 typedef struct oskar_SettingsSkyExtendedSources oskar_SettingsSkyExtendedSources;
+
+/**
+ * @struct oskar_SettingsSkyFits
+ *
+ * @brief Holds FITS file import parameters.
+ */
+struct oskar_SettingsSkyFits
+{
+    double spectral_index;    /**< Spectral index value of pixels in file. */
+    double noise_floor;       /**< Noise floor in Jy. */
+    double min_peak_fraction; /**< Minimum fraction of peak value to accept. */
+    int downsample_factor;    /**< Factor by which to downsample pixel grid. */
+};
+typedef struct oskar_SettingsSkyFits oskar_SettingsSkyFits;
 
 /**
  * @struct oskar_SettingsSkyGeneratorPowerLaw
@@ -134,11 +148,6 @@ struct oskar_SettingsSkyGenerator
 };
 typedef struct oskar_SettingsSkyGenerator oskar_SettingsSkyGenerator;
 
-enum
-{
-    OSKAR_NOISE_VLA_MEMO_146
-};
-
 /**
  * @struct oskar_SettingsSky
  *
@@ -159,6 +168,10 @@ struct oskar_SettingsSky
 
     char* output_sky_file; /**< Optional name of output sky model. */
     oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
+
+    int num_fits_files;    /**< Number of FITS files to load. */
+    char** fits_file;      /**< List of FITS input sky model files. */
+    oskar_SettingsSkyFits fits_file_settings;
 };
 typedef struct oskar_SettingsSky oskar_SettingsSky;
 
