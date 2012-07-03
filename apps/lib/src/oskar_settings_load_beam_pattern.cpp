@@ -59,19 +59,19 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         s.beginGroup("oskar_image_file");
         if (s.value("save_power", false).toBool())
         {
-            t = QString(root + "_power.img").toAscii();
+            t = QString(root + "_POWER.img").toAscii();
             bp->oskar_image_power = (char*)malloc(t.size() + 1);
             strcpy(bp->oskar_image_power, t.constData());
         }
         if (s.value("save_phase", false).toBool())
         {
-            t = QString(root + "_phase.img").toAscii();
+            t = QString(root + "_PHASE.img").toAscii();
             bp->oskar_image_phase = (char*)malloc(t.size() + 1);
             strcpy(bp->oskar_image_phase, t.constData());
         }
         if (s.value("save_complex", false).toBool())
         {
-            t = QString(root + "_complex.img").toAscii();
+            t = QString(root + "_COMPLEX.img").toAscii();
             bp->oskar_image_complex = (char*)malloc(t.size() + 1);
             strcpy(bp->oskar_image_complex, t.constData());
         }
@@ -81,13 +81,13 @@ int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* bp,
         s.beginGroup("fits_file");
         if (s.value("save_power", false).toBool())
         {
-            t = QString(root + "_power.fits").toAscii();
+            t = QString(root + "_POWER.fits").toAscii();
             bp->fits_image_power = (char*)malloc(t.size() + 1);
             strcpy(bp->fits_image_power, t.constData());
         }
         if (s.value("save_phase", false).toBool())
         {
-            t = QString(root + "_phase.fits").toAscii();
+            t = QString(root + "_PHASE.fits").toAscii();
             bp->fits_image_phase = (char*)malloc(t.size() + 1);
             strcpy(bp->fits_image_phase, t.constData());
         }

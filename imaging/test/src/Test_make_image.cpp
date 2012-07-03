@@ -76,12 +76,12 @@ void Test_make_image::test()
     vis.freq_inc_hz   = 10.0e6;
 
     // time 0, baseline 0
-    uu_[0] =  1.0;
+    uu_[0] =  100.0;
     vv_[0] =  0.0;
     ww_[0] =  0.0;
     // time 1, baseline 0
-    uu_[1] =  0.0;
-    vv_[1] =  1.0;
+    uu_[1] =  100.0;
+    vv_[1] =  0.0;
     ww_[1] =  0.0;
 
     // channel 0, time 0, baseline 0
@@ -91,10 +91,10 @@ void Test_make_image::test()
         {
             for (int b = 0; b < vis.num_baselines; ++b, ++i)
             {
-                amp_[i].a.x = 1.0; amp_[i].a.y = 0.0;
-                amp_[i].b.x = 1.0; amp_[i].b.y = 0.0;
-                amp_[i].c.x = 1.0; amp_[i].c.y = 0.0;
-                amp_[i].d.x = 1.0; amp_[i].d.y = 0.0;
+                amp_[i].a.x = 0.0; amp_[i].a.y = 0.0;
+                amp_[i].b.x = 0.0; amp_[i].b.y = 4.0;
+                amp_[i].c.x = 0.0; amp_[i].c.y = 2.0;
+                amp_[i].d.x = 0.0; amp_[i].d.y = 0.0;
             }
         }
     }
@@ -104,11 +104,11 @@ void Test_make_image::test()
     settings.size    = 256;
     settings.channel_snapshots = OSKAR_TRUE;
     settings.channel_range[0] = 0;
-    settings.channel_range[1] = 1;
-    settings.time_snapshots = OSKAR_TRUE;
+    settings.channel_range[1] = -1;
+    settings.time_snapshots = OSKAR_FALSE;
     settings.time_range[0] = 0;
-    settings.time_range[1] = 1;
-    settings.image_type = OSKAR_IMAGE_TYPE_POL_LINEAR;
+    settings.time_range[1] = -1;
+    settings.image_type = OSKAR_IMAGE_TYPE_STOKES;
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
     oskar_Image image(OSKAR_DOUBLE);
@@ -119,6 +119,10 @@ void Test_make_image::test()
     err = oskar_image_write(&image, NULL, "temp_test_image.img", idx);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 
+#ifndef OSKAR_NO_FITS
+    err = oskar_fits_image_write(&image, NULL, "test.fits");
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+#endif
 
     const char* filename = "temp_test_make_image.dat";
     oskar_mem_binary_file_write_ext(&vis.uu_metres, filename,

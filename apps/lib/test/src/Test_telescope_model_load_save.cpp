@@ -27,7 +27,7 @@
  */
 
 #include "apps/lib/oskar_remove_dir.h"
-#include "apps/lib/oskar_telescope_model_load.h"
+#include "apps/lib/oskar_telescope_model_config_load.h"
 #include "apps/lib/oskar_telescope_model_save.h"
 #include "apps/lib/test/Test_telescope_model_load_save.h"
 #include "interferometry/oskar_TelescopeModel.h"
@@ -88,7 +88,7 @@ void Test_telescope_model_load_save::test_1_level()
     settings.station.ignore_custom_element_patterns = true;
     strcpy(settings.config_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-    err = oskar_telescope_model_load(&telescope2, NULL, &settings);
+    err = oskar_telescope_model_config_load(&telescope2, NULL, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     free(settings.config_directory);
 
@@ -192,7 +192,7 @@ void Test_telescope_model_load_save::test_2_level()
     settings.station.ignore_custom_element_patterns = true;
     strcpy(settings.config_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-    err = oskar_telescope_model_load(&telescope2, NULL, &settings);
+    err = oskar_telescope_model_config_load(&telescope2, NULL, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     free(settings.config_directory);
 

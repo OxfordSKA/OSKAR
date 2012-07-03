@@ -26,16 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_TELESCOPE_MODEL_LOAD_H_
-#define OSKAR_TELESCOPE_MODEL_LOAD_H_
+#ifndef OSKAR_TELESCOPE_MODEL_CONFIG_LOAD_H_
+#define OSKAR_TELESCOPE_MODEL_CONFIG_LOAD_H_
 
 /**
- * @file oskar_telescope_model_load.h
+ * @file oskar_telescope_model_config_load.h
  */
 
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SettingsTelescope.h"
+#include "utility/oskar_Settings.h"
 #include "utility/oskar_Log.h"
 
 #ifdef __cplusplus
@@ -44,26 +44,42 @@ extern "C" {
 
 /**
  * @brief
- * Populates a telescope model structure from a directory.
+ * Loads the layout.txt and config.txt files from a telescope model directory
+ * populating the relevant parts of an OSKAR telescope model structure.
  *
  * @details
- * This function populates a telescope model structure from the given
- * directory path.
- *
  * The telescope model must be initialised and in CPU memory.
  *
- * @param[out] telescope  Pointer to empty telescope model structure to fill.
- * @param[in,out] log     Pointer to log structure to use.
- * @param[in]  settings   Pointer to telescope model settings.
+ * @param[out]    telescope  Pointer to empty telescope model structure to fill.
+ * @param[in,out] log        Pointer to log structure to use.
+ * @param[in]     settings   Pointer to and OSKAR telescope settings structure.
  *
  * @return An OSKAR error code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_load(oskar_TelescopeModel* telescope, oskar_Log* log,
+int oskar_telescope_model_config_load(oskar_TelescopeModel* telescope,
+        oskar_Log* log, const oskar_SettingsTelescope* settings);
+
+/**
+ * @brief
+ * Overrides settings loaded in config.txt files based on values specified
+ * in the settings.
+ *
+ * @details
+ * The telescope model must be initialised and in CPU memory.
+ *
+ * @param[out]    telescope  Pointer to empty telescope model structure to fill.
+ * @param[in]     settings   Pointer to and OSKAR telescope settings structure.
+ *
+ * @return An OSKAR error code.
+ */
+OSKAR_EXPORT
+int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_TELESCOPE_MODEL_LOAD_H_ */
+#endif /* OSKAR_TELESCOPE_MODEL_CONFIG_LOAD_H_ */

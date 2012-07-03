@@ -27,24 +27,26 @@
  */
 
 #include "apps/lib/oskar_set_up_telescope.h"
-#include "apps/lib/oskar_telescope_model_load.h"
+#include "apps/lib/oskar_telescope_model_config_load.h"
+#include "apps/lib/oskar_telescope_model_element_pattern_load.h"
+
+
 #include "apps/lib/oskar_telescope_model_save.h"
-#include "math/oskar_random_gaussian.h"
+
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_analyse.h"
-#include "station/oskar_station_model_type.h"
 #include "utility/oskar_get_error_string.h"
+
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
 #include "utility/oskar_log_value.h"
 #include "utility/oskar_log_warning.h"
+
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_set_value_real.h"
 
-#include <math.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,274 +58,37 @@ extern "C" {
 
 static const int width = 45;
 
+/* private functions */
+static void set_metadata(oskar_TelescopeModel *telescope,
+        const oskar_Settings* settings);
+static int save_telescope(oskar_TelescopeModel *telescope,
+        const oskar_SettingsTelescope* settings, oskar_Log* log, const char* dir);
+
 int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
         const oskar_Settings* settings)
 {
-    int err, type, i, j;
-    const char* filename;
+    int err, type;
     oskar_log_section(log, "Telescope model");
 
     /* Initialise the structure in CPU memory. */
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_telescope_model_init(telescope, type, OSKAR_LOCATION_CPU, 0);
 
-    /* Load the telescope configuration directory. */
-    err = oskar_telescope_model_load(telescope, log, &settings->telescope);
-    if (err)
-    {
-        oskar_log_error(log, "Failed to load telescope configuration (%s).",
-                oskar_get_error_string(err));
-        return err;
-    }
+    /* Load the layout and configuration */
+    err = oskar_telescope_model_config_load(telescope, log, &settings->telescope);
+    if (err) return err;
 
-    /* Set phase centre. */
-    telescope->ra0_rad = settings->obs.ra0_rad;
-    telescope->dec0_rad = settings->obs.dec0_rad;
+    /* Apply configuration overrides */
+    err = oskar_telescope_model_config_override(telescope, &settings->telescope);
+    if (err) return err;
 
-    /* Set other telescope parameters. */
-    telescope->use_common_sky = settings->telescope.use_common_sky;
-    telescope->bandwidth_hz = settings->interferometer.channel_bandwidth_hz;
-    telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
-    telescope->seed_time_variable_errors =
-            settings->telescope.station.element.seed_time_variable_errors;
+    /* Load element pattern data */
+    err = oskar_telescope_model_element_pattern_load(telescope, log,
+            &settings->telescope);
+    if (err) return err;
 
-    /* Set other station parameters. */
-    for (i = 0; i < telescope->num_stations; ++i)
-    {
-        telescope->station[i].ra0_rad = telescope->ra0_rad;
-        telescope->station[i].dec0_rad = telescope->dec0_rad;
-        telescope->station[i].station_type =
-                settings->telescope.station.station_type;
-        telescope->station[i].use_polarised_elements =
-                settings->telescope.station.use_polarised_elements;
-        telescope->station[i].evaluate_array_factor =
-                settings->telescope.station.evaluate_array_factor;
-        telescope->station[i].evaluate_element_factor =
-                settings->telescope.station.evaluate_element_factor;
-        telescope->station[i].normalise_beam =
-                settings->telescope.station.normalise_beam;
-    }
-
-    /* Override station element systematic/fixed gain errors if required. */
-    if (settings->telescope.station.element.gain > 0.0 ||
-            settings->telescope.station.element.gain_error_fixed > 0.0)
-    {
-        double g, g_err;
-        g = settings->telescope.station.element.gain;
-        g_err = settings->telescope.station.element.gain_error_fixed;
-        if (g <= 0.0) g = 1.0;
-        srand(settings->telescope.station.element.seed_gain_errors);
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            int num_elements;
-            num_elements = telescope->station[i].num_elements;
-            type = oskar_station_model_type(&telescope->station[i]);
-            if (type == OSKAR_DOUBLE)
-            {
-                double *gain;
-                gain = (double*)(telescope->station[i].gain.data);
-                for (j = 0; j < num_elements; ++j)
-                    gain[j] = g + g_err * oskar_random_gaussian(0);
-            }
-            else if (type == OSKAR_SINGLE)
-            {
-                float *gain;
-                gain = (float*)(telescope->station[i].gain.data);
-                for (j = 0; j < num_elements; ++j)
-                    gain[j] = g + g_err * oskar_random_gaussian(0);
-            }
-        }
-    }
-
-    /* Override station element time-variable gain errors if required. */
-    if (settings->telescope.station.element.gain_error_time > 0.0)
-    {
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            oskar_mem_set_value_real(&telescope->station[i].gain_error,
-                    settings->telescope.station.element.gain_error_time);
-        }
-    }
-
-    /* Override station element systematic/fixed phase errors if required. */
-    if (settings->telescope.station.element.phase_error_fixed_rad > 0.0)
-    {
-        double p_err;
-        p_err = settings->telescope.station.element.phase_error_fixed_rad;
-        srand(settings->telescope.station.element.seed_phase_errors);
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            int num_elements;
-            num_elements = telescope->station[i].num_elements;
-            type = oskar_station_model_type(&telescope->station[i]);
-            if (type == OSKAR_DOUBLE)
-            {
-                double *phase;
-                phase = (double*)(telescope->station[i].phase_offset.data);
-                for (j = 0; j < num_elements; ++j)
-                    phase[j] = p_err * oskar_random_gaussian(0);
-            }
-            else if (type == OSKAR_SINGLE)
-            {
-                float *phase;
-                phase = (float*)(telescope->station[i].phase_offset.data);
-                for (j = 0; j < num_elements; ++j)
-                    phase[j] = p_err * oskar_random_gaussian(0);
-            }
-        }
-    }
-
-    /* Override station element time-variable phase errors if required. */
-    if (settings->telescope.station.element.phase_error_time_rad > 0.0)
-    {
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            oskar_mem_set_value_real(&telescope->station[i].phase_error,
-                    settings->telescope.station.element.phase_error_time_rad);
-        }
-    }
-
-    /* Override station element position errors if required. */
-    if (settings->telescope.station.element.position_error_xy_m > 0.0)
-    {
-        double p_err, delta_x, delta_y;
-        p_err = settings->telescope.station.element.position_error_xy_m;
-        srand(settings->telescope.station.element.seed_position_xy_errors);
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            int num_elements;
-            type = oskar_station_model_type(&telescope->station[i]);
-            num_elements = telescope->station[i].num_elements;
-            if (type == OSKAR_DOUBLE)
-            {
-                double *xs, *ys, *xw, *yw;
-                xs = (double*)(telescope->station[i].x_signal.data);
-                ys = (double*)(telescope->station[i].y_signal.data);
-                xw = (double*)(telescope->station[i].x_weights.data);
-                yw = (double*)(telescope->station[i].y_weights.data);
-                for (j = 0; j < num_elements; ++j)
-                {
-                    /* Generate random numbers from Gaussian distribution. */
-                    delta_x = oskar_random_gaussian(&delta_y);
-                    delta_x *= p_err;
-                    delta_y *= p_err;
-                    xs[j] = xw[j] + delta_x;
-                    ys[j] = yw[j] + delta_y;
-                }
-            }
-            else if (type == OSKAR_SINGLE)
-            {
-                float *xs, *ys, *xw, *yw;
-                xs = (float*)(telescope->station[i].x_signal.data);
-                ys = (float*)(telescope->station[i].y_signal.data);
-                xw = (float*)(telescope->station[i].x_weights.data);
-                yw = (float*)(telescope->station[i].y_weights.data);
-                for (j = 0; j < num_elements; ++j)
-                {
-                    /* Generate random numbers from Gaussian distribution. */
-                    delta_x = oskar_random_gaussian(&delta_y);
-                    delta_x *= p_err;
-                    delta_y *= p_err;
-                    xs[j] = xw[j] + delta_x;
-                    ys[j] = yw[j] + delta_y;
-                }
-            }
-        }
-    }
-
-    /* Add variation to x-dipole orientations if required. */
-    if (settings->telescope.station.element.x_orientation_error_rad > 0.0)
-    {
-        double p_err;
-        p_err = settings->telescope.station.element.x_orientation_error_rad;
-        srand(settings->telescope.station.element.seed_x_orientation_error);
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            int num_elements;
-            double delta, angle;
-            type = oskar_station_model_type(&telescope->station[i]);
-            num_elements = telescope->station[i].num_elements;
-            if (type == OSKAR_DOUBLE)
-            {
-                double *cos_x, *sin_x;
-                cos_x = (double*)(telescope->station[i].cos_orientation_x.data);
-                sin_x = (double*)(telescope->station[i].sin_orientation_x.data);
-                for (j = 0; j < num_elements; ++j)
-                {
-                    /* Generate random number from Gaussian distribution. */
-                    delta = p_err * oskar_random_gaussian(0);
-
-                    /* Get the new angle. */
-                    angle = delta + atan2(sin_x[j], cos_x[j]);
-                    cos_x[j] = cos(angle);
-                    sin_x[j] = sin(angle);
-                }
-            }
-            else if (type == OSKAR_SINGLE)
-            {
-                float *cos_x, *sin_x;
-                cos_x = (float*)(telescope->station[i].cos_orientation_x.data);
-                sin_x = (float*)(telescope->station[i].sin_orientation_x.data);
-                for (j = 0; j < num_elements; ++j)
-                {
-                    /* Generate random number from Gaussian distribution. */
-                    delta = p_err * oskar_random_gaussian(0);
-
-                    /* Get the new angle. */
-                    angle = delta + atan2(sin_x[j], cos_x[j]);
-                    cos_x[j] = (float) cos(angle);
-                    sin_x[j] = (float) sin(angle);
-                }
-            }
-        }
-    }
-
-    /* Add variation to y-dipole orientations if required. */
-    if (settings->telescope.station.element.y_orientation_error_rad > 0.0)
-    {
-        double p_err;
-        p_err = settings->telescope.station.element.y_orientation_error_rad;
-        srand(settings->telescope.station.element.seed_y_orientation_error);
-        for (i = 0; i < telescope->num_stations; ++i)
-        {
-            int num_elements;
-            double delta, angle;
-            type = oskar_station_model_type(&telescope->station[i]);
-            num_elements = telescope->station[i].num_elements;
-            if (type == OSKAR_DOUBLE)
-            {
-                double *cos_y, *sin_y;
-                cos_y = (double*)(telescope->station[i].cos_orientation_y.data);
-                sin_y = (double*)(telescope->station[i].sin_orientation_y.data);
-                for (j = 0; j < num_elements; ++j)
-                {
-                    /* Generate random number from Gaussian distribution. */
-                    delta = p_err * oskar_random_gaussian(0);
-
-                    /* Get the new angle. */
-                    angle = delta + atan2(sin_y[j], cos_y[j]);
-                    cos_y[j] = cos(angle);
-                    sin_y[j] = sin(angle);
-                }
-            }
-            else if (type == OSKAR_SINGLE)
-            {
-                float *cos_y, *sin_y;
-                cos_y = (float*)(telescope->station[i].cos_orientation_y.data);
-                sin_y = (float*)(telescope->station[i].sin_orientation_y.data);
-                for (j = 0; j < num_elements; ++j)
-                {
-                    /* Generate random number from Gaussian distribution. */
-                    delta = p_err * oskar_random_gaussian(0);
-
-                    /* Get the new angle. */
-                    angle = delta + atan2(sin_y[j], cos_y[j]);
-                    cos_y[j] = (float) cos(angle);
-                    sin_y[j] = (float) sin(angle);
-                }
-            }
-        }
-    }
+    /* Set telescope model meta-data */
+    set_metadata(telescope, settings);
 
     /* Analyse telescope model to determine whether stations are identical,
      * whether to apply element errors and/or weights. */
@@ -331,40 +96,68 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
 
     /* Print summary data. */
     oskar_log_message(log, 0, "Telescope model summary");
-    oskar_log_value(log, 1, width, "Num. stations", "%d",
-            telescope->num_stations);
-    oskar_log_value(log, 1, width, "Max station size", "%d",
-            telescope->max_station_size);
-    oskar_log_value(log, 1, width, "Identical stations", "%s",
-            telescope->identical_stations ? "true" : "false");
-    oskar_log_value(log, 1, width, "Use common sky", "%s",
-            telescope->use_common_sky ? "true" : "false");
+    oskar_log_value(log, 1, width, "Num. stations", "%d", telescope->num_stations);
+    oskar_log_value(log, 1, width, "Max station size", "%d", telescope->max_station_size);
+    oskar_log_value(log, 1, width, "Identical stations", "%s", telescope->identical_stations ? "true" : "false");
+    oskar_log_value(log, 1, width, "Use common sky", "%s", telescope->use_common_sky ? "true" : "false");
 
-    /* Save the telescope configuration in a new directory if required. */
-    filename = settings->telescope.output_config_directory;
-    if (filename)
+    /* Save the telescope configuration in a new directory, if required. */
+    err = save_telescope(telescope, &settings->telescope, log,
+            settings->telescope.output_config_directory);
+    if (err) return err;
+
+    return OSKAR_SUCCESS;
+}
+
+
+
+static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* settings)
+{
+    int i, seed;
+    telescope->ra0_rad        = settings->obs.ra0_rad;
+    telescope->dec0_rad       = settings->obs.dec0_rad;
+    telescope->use_common_sky = settings->telescope.use_common_sky;
+    telescope->bandwidth_hz   = settings->interferometer.channel_bandwidth_hz;
+    telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
+    seed = settings->telescope.station.element.seed_time_variable_errors;
+    telescope->seed_time_variable_errors = seed;
+    for (i = 0; i < telescope->num_stations; ++i)
     {
-        if (strlen(filename))
-        {
-            /* Check that the input and output directories are different. */
-            if (strcmp(filename, settings->telescope.config_directory))
-            {
-                oskar_log_message(log, 1, "Writing telescope model to "
-                        "disk as: %s", filename);
-                err = oskar_telescope_model_save(telescope, filename);
-                if (err)
-                {
-                    oskar_log_error(log, "Failed to save telescope "
-                            "configuration (%s).", oskar_get_error_string(err));
-                    return err;
-                }
-            }
-            else
-            {
-                oskar_log_warning(log, "Will not overwrite input "
-                        "telescope directory!");
-            }
-        }
+        telescope->station[i].ra0_rad = telescope->ra0_rad;
+        telescope->station[i].dec0_rad = telescope->dec0_rad;
+        telescope->station[i].station_type =settings->telescope.station.station_type;
+        telescope->station[i].use_polarised_elements = settings->telescope.station.use_polarised_elements;
+        telescope->station[i].evaluate_array_factor = settings->telescope.station.evaluate_array_factor;
+        telescope->station[i].evaluate_element_factor = settings->telescope.station.evaluate_element_factor;
+        telescope->station[i].normalise_beam = settings->telescope.station.normalise_beam;
+    }
+}
+
+static int save_telescope(oskar_TelescopeModel *telescope,
+        const oskar_SettingsTelescope* settings, oskar_Log* log, const char* dir)
+{
+    int err = OSKAR_SUCCESS;
+
+    /* No output directory specified = Do nothing. */
+    if (!dir) return OSKAR_SUCCESS;
+
+    /* Empty output directory specified = Do nothing. */
+    if (!strlen(dir)) return OSKAR_SUCCESS;
+
+    /* Check that the input and output directories are different. */
+    if (!strcmp(dir, settings->config_directory))
+    {
+        oskar_log_warning(log, "Will not overwrite input telescope directory!");
+        return OSKAR_SUCCESS;
+    }
+
+    oskar_log_message(log, 1, "Writing telescope model to disk as: %s", dir);
+    err = oskar_telescope_model_save(telescope, dir);
+    if (err)
+    {
+        oskar_log_error(log, "Failed to save telescope "
+                "configuration (%s).", oskar_get_error_string(err));
+        return err;
     }
 
     return OSKAR_SUCCESS;
