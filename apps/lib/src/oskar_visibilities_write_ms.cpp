@@ -83,6 +83,11 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
     if (num_antennas * (num_antennas - 1) / 2 != num_baselines)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
+    // Set channel width to be greater than 0, if it isn't already.
+    // This is required for the Measurement Set to be valid.
+    if (! (chan_width > 0.0))
+        chan_width = 1.0;
+
     // Create an empty Measurement Set.
     oskar_MeasurementSet ms;
     ms.create(ms_path);
