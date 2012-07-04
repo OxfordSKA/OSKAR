@@ -43,6 +43,9 @@ const char* oskar_get_error_string(int error)
     /* Return a string describing the OSKAR error code. */
     switch (error)
     {
+        case OSKAR_SUCCESS:
+            /* This case should never be caught unless something went wrong! */
+            return "no error reported!";
         case OSKAR_ERR_EOF:
             return "end of file";
         case OSKAR_ERR_FILE_IO:
