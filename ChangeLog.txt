@@ -1,3 +1,19 @@
+2012-xx-xx  OSKAR 2.x.x-beta
+
+    * Fixed a problem encountered when loading a Measurement Set in CASA
+      containing only one frequency channel.
+
+    * Added the ability to load FITS images directly as a sky model.
+
+    * Added a binary utility to convert a FITS image to a sky model file.
+
+    * Added a binary utility to display CUDA system information.
+
+    * Added a view filter in the GUI to show and highlight only settings of
+      interest.
+
+    * Removed dependency on main OSKAR library from widgets library and GUI.
+
 2012-06-19  OSKAR 2.0.3-beta
 
     * Fixed a bug that could be encountered when evaluating a station beam
@@ -9,7 +25,8 @@
     * Added extra parameters to the build system that can be used to override
       the location of a number of library dependencies.
 
-    * Added a binary utility to convert an OSKAR visibility file to a Measurement Set.
+    * Added a binary utility to convert an OSKAR visibility file to a
+      Measurement Set.
 
     * Added a binary utility to query the contents of an OSKAR binary file.
 
@@ -36,7 +53,7 @@
 
     * Updated the colour and formatting of options in the settings model used
       for the OSKAR GUI in order to highlight the various types of settings
-      (required options, user specified values and defaults)
+      (required options, user specified values and defaults).
 
     * Improved the logic used in the display of the GUI (settings model)
       right-click menu.
