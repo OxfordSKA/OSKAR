@@ -31,13 +31,13 @@
 #include <cstdlib>
 #include <cstring>
 
-void im_set_error_(const char* msg)
+static void im_set_error_(const char* msg)
 {
     mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: Invalid image settings structure (%s).\n",
             msg);
 }
 
-void im_set_error_field_(const char* msg)
+static void im_set_error_field_(const char* msg)
 {
     mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: Invalid image settings structure "
             "(missing field: %s).\n", msg);
