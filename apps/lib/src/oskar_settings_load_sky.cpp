@@ -60,12 +60,15 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
         strcpy(sky->output_sky_file, t.constData());
     }
 
-    // Input OSKAR sky model file.
-    t = s.value("oskar_source_file").toByteArray();
-    if (t.size() > 0)
+    // Input OSKAR sky model files.
+    list = s.value("oskar_source_file").toStringList();
+    sky->num_sky_files = list.size();
+    sky->input_sky_file = (char**)malloc(sky->num_sky_files * sizeof(char*));
+    for (int i = 0; i < sky->num_sky_files; ++i)
     {
-        sky->input_sky_file = (char*)malloc(t.size() + 1);
-        strcpy(sky->input_sky_file, t.constData());
+        t = list[i].toAscii();
+        sky->input_sky_file[i] = (char*)malloc(t.size() + 1);
+        strcpy(sky->input_sky_file[i], t.constData());
     }
 
     // Input OSKAR sky model filter.

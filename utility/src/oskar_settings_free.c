@@ -50,6 +50,11 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->sky.fits_file = NULL;
     free(settings->sky.gsm_file);
     settings->sky.gsm_file = NULL;
+    for (i = 0; i < settings->sky.num_sky_files; ++i)
+    {
+        free(settings->sky.input_sky_file[i]);
+        settings->sky.input_sky_file[i] = NULL;
+    }
     free(settings->sky.input_sky_file);
     settings->sky.input_sky_file = NULL;
     free(settings->sky.output_sky_file);

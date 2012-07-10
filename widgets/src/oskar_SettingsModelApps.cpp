@@ -81,7 +81,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     setLabel(group, "Sky model settings");
 
     k = group + "/oskar_source_file";
-    registerSetting(k, "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_NAME);
+    registerSetting(k, "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_LIST);
     setTooltip(k, "Path to an OSKAR sky model text file. See the accompanying\n"
             "documentation for a description of an OSKAR sky model file.");
 

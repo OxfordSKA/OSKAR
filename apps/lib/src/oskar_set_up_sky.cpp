@@ -59,67 +59,71 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         oskar_Log* log, const oskar_Settings* settings)
 {
     int error = OSKAR_SUCCESS;
+    const char* filename;
     oskar_log_section(log, "Sky model");
 
     // Sky model data type.
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     int max_sources_per_chunk = settings->sim.max_sources_per_chunk;
 
-    // OSKAR sky file.
-    const char* filename = settings->sky.input_sky_file;
-    if (filename)
+    // Load OSKAR sky files.
+    for (int i = 0; i < settings->sky.num_sky_files; ++i)
     {
-        if (strlen(filename) > 0)
+        filename = settings->sky.input_sky_file[i];
+        if (filename)
         {
-            // Load into a temporary structure.
-            oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
-            oskar_log_message(log, 0, "Loading sky model data...");
-            error = temp.load(filename);
-            if (error) return error;
+            if (strlen(filename) > 0)
+            {
+                // Load into a temporary structure.
+                oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
+                oskar_log_message(log, 0, "Loading source file %s ...", filename);
+                error = temp.load(filename);
+                if (error) return error;
 
-            // Apply filters.
-            double inner = settings->sky.input_sky_filter.radius_inner;
-            double outer = settings->sky.input_sky_filter.radius_outer;
-            double flux_min = settings->sky.input_sky_filter.flux_min;
-            double flux_max = settings->sky.input_sky_filter.flux_max;
-            error = temp.filter_by_flux(flux_min, flux_max);
-            if (error) return error;
-            error = temp.filter_by_radius(inner, outer, settings->obs.ra0_rad,
-                    settings->obs.dec0_rad);
-            if (error) return error;
+                // Apply filters.
+                double inner = settings->sky.input_sky_filter.radius_inner;
+                double outer = settings->sky.input_sky_filter.radius_outer;
+                double flux_min = settings->sky.input_sky_filter.flux_min;
+                double flux_max = settings->sky.input_sky_filter.flux_max;
+                error = temp.filter_by_flux(flux_min, flux_max);
+                if (error) return error;
+                error = temp.filter_by_radius(inner, outer, settings->obs.ra0_rad,
+                        settings->obs.dec0_rad);
+                if (error) return error;
 
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
-            // Apply extended source over-ride.
-            double FWHM_major = settings->sky.input_sky_extended_sources.FWHM_major;
-            double FWHM_minor = settings->sky.input_sky_extended_sources.FWHM_minor;
-            double position_angle = settings->sky.input_sky_extended_sources.position_angle;
-            if (FWHM_major > 0.0 || FWHM_minor > 0.0)
-            {
-                error = oskar_sky_model_set_gaussian_parameters(&temp, FWHM_major,
-                        FWHM_minor, position_angle);
-            }
-            if (error) return error;
+                // Apply extended source over-ride.
+                double FWHM_major = settings->sky.input_sky_extended_sources.FWHM_major;
+                double FWHM_minor = settings->sky.input_sky_extended_sources.FWHM_minor;
+                double position_angle = settings->sky.input_sky_extended_sources.position_angle;
+                if (FWHM_major > 0.0 || FWHM_minor > 0.0)
+                {
+                    error = oskar_sky_model_set_gaussian_parameters(&temp, FWHM_major,
+                            FWHM_minor, position_angle);
+                }
+                if (error) return error;
 
-            // Evaluate extended source parameters.
-            error = oskar_evaluate_gaussian_source_parameters(log,
-                    temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
-                    &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
-                    &temp.position_angle, &temp.RA, &temp.Dec,
-                    settings->obs.ra0_rad, settings->obs.dec0_rad);
-            if (error) return error;
+                // Evaluate extended source parameters.
+                error = oskar_evaluate_gaussian_source_parameters(log,
+                        temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
+                        &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
+                        &temp.position_angle, &temp.RA, &temp.Dec,
+                        settings->obs.ra0_rad, settings->obs.dec0_rad);
+                if (error) return error;
 #endif
 
-            // Compute source direction cosines (relative lmn)
-            error = temp.compute_relative_lmn(settings->obs.ra0_rad,
-                    settings->obs.dec0_rad);
-            if (error) return error;
+                // Compute source direction cosines (relative lmn)
+                error = temp.compute_relative_lmn(settings->obs.ra0_rad,
+                        settings->obs.dec0_rad);
+                if (error) return error;
 
-            // Append to chunks.
-            error = oskar_sky_model_append_to_set(num_chunks, sky_chunks,
-                    max_sources_per_chunk, &temp);
-            if (error) return error;
+                // Append to chunks.
+                error = oskar_sky_model_append_to_set(num_chunks, sky_chunks,
+                        max_sources_per_chunk, &temp);
+                if (error) return error;
 
-            oskar_log_message(log, 1, "done.");
+                oskar_log_message(log, 1, "done.");
+            }
         }
     }
 

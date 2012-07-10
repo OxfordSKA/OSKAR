@@ -73,25 +73,37 @@ void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
 
 void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
 {
-    int depth = 0;
+    int depth = 0, i = 0;
     oskar_log_message(log, depth, "Sky model settings");
 
     /* Input OSKAR source file settings. */
     depth = 1;
-    LVS0("Input OSKAR source file", s->sky.input_sky_file);
-    ++depth;
-    if (!(s->sky.input_sky_filter.radius_inner == 0.0 &&
-            s->sky.input_sky_filter.radius_outer >= M_PI/2.0))
+    if (s->sky.num_sky_files > 0)
     {
-        LV("Filter radius inner [deg]", "%.3f",
-                s->sky.input_sky_filter.radius_inner * R2D);
-        LV("Filter radius outer [deg]", "%.3f",
-                s->sky.input_sky_filter.radius_outer * R2D);
+        oskar_log_message(log, depth, "Input OSKAR source file(s)");
+        ++depth;
+        ++depth;
+        for (i = 0; i < s->sky.num_sky_files; ++i)
+        {
+            oskar_log_message(log, depth, "File %2d: %s", i,
+                    s->sky.input_sky_file[i]);
+        }
+        --depth;
+        if (!(s->sky.input_sky_filter.radius_inner == 0.0 &&
+                s->sky.input_sky_filter.radius_outer >= M_PI/2.0))
+        {
+            LV("Filter radius inner [deg]", "%.3f",
+                    s->sky.input_sky_filter.radius_inner * R2D);
+            LV("Filter radius outer [deg]", "%.3f",
+                    s->sky.input_sky_filter.radius_outer * R2D);
+        }
+        if (s->sky.input_sky_filter.flux_min != 0.0)
+            LV("Filter flux min [Jy]", "%.3e",
+                    s->sky.input_sky_filter.flux_min);
+        if (s->sky.input_sky_filter.flux_max != 0.0)
+            LV("Filter flux max [Jy]", "%.3e",
+                    s->sky.input_sky_filter.flux_max);
     }
-    if (s->sky.input_sky_filter.flux_min != 0.0)
-        LV("Filter flux min [Jy]", "%.3e", s->sky.input_sky_filter.flux_min);
-    if (s->sky.input_sky_filter.flux_max != 0.0)
-        LV("Filter flux max [Jy]", "%.3e", s->sky.input_sky_filter.flux_max);
 
     /* GSM file settings. */
     depth = 1;

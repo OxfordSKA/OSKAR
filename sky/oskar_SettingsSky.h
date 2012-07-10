@@ -158,7 +158,8 @@ typedef struct oskar_SettingsSkyGenerator oskar_SettingsSkyGenerator;
  */
 struct oskar_SettingsSky
 {
-    char* input_sky_file;  /**< Name of sky model file to load. */
+    int num_sky_files;     /**< Number of sky model files to load. */
+    char** input_sky_file; /**< List of sky model files to load. */
     oskar_SettingsSkyFilter input_sky_filter;
     oskar_SettingsSkyExtendedSources input_sky_extended_sources;
 
