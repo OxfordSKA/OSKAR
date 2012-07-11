@@ -36,7 +36,7 @@ enum
 {
     CIRCULAR = 0,
     SPIRAL_ARCHIMEDEAN = 1,
-    SPIRAL_LOG = 2,
+    SPIRAL_LOG = 2
 };
 
 struct settings
@@ -164,7 +164,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
             break;
         }
     };
-};
+}
 
 
 

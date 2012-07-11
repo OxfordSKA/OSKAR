@@ -38,7 +38,7 @@
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 1 || num_out > 1)
-        mexErrMsgTxt("Usage: sky = oskar_sky_model_read(filename)");
+        mexErrMsgTxt("Usage: sky = oskar.sky.load(filename)");
 
     // Extract arguments from MATLAB maxArray objects.
     const char* filename = mxArrayToString(in[0]);
