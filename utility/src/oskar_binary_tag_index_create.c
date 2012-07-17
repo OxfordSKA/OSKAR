@@ -51,10 +51,6 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
     idx = (oskar_BinaryTagIndex*) malloc(sizeof(oskar_BinaryTagIndex));
     *index = idx;
 
-    /* Read header. */
-    error = oskar_binary_stream_read_header(stream, &header);
-    if (error) return error;
-
     /* Initialise tag index. */
     idx->num_tags = 0;
     idx->extended = 0;
@@ -67,6 +63,10 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
     idx->data_offset_bytes = 0;
     idx->data_size_bytes = 0;
     idx->block_size_bytes = 0;
+
+    /* Read header. */
+    error = oskar_binary_stream_read_header(stream, &header);
+    if (error) return error;
 
     /* Read all tags in the stream. */
     for (i = 0; OSKAR_TRUE; ++i)
