@@ -63,6 +63,11 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 "- type\n"
                 "- num_points\n"
                 "- radius\n"
+                "Circular settings:\n"
+                "- x spacing\n"
+                "- y spacing\n"
+                "- x error (perturbation std.dev.)"
+                "- y error (perturbation std.dev.)"
                 "Sprial settings:\n"
                 "- num_revs\n"
                 "- theta_start\n"
@@ -165,7 +170,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         }
     };
 }
-
 
 
 static void error_field(const char* msg)

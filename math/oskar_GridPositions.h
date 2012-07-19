@@ -31,8 +31,6 @@
 
 /**
  * @file GridPositions.h
- *
- * @brief This file defines functions to generate positions on a 2D grid.
  */
 
 #include <cmath>
@@ -43,11 +41,7 @@
 #endif
 
 /**
- * @brief Class used for generating positions on a grid.
- *
- * @details
- * This class provides functions to generate positions on a 2D grid,
- * with optional shape filtering.
+ * @brief Class used for generating coordinates.
  */
 class oskar_GridPositions
 {
@@ -58,14 +52,15 @@ public:
 
     /// Generates positions in an Archimedean spiral. ( r = r0 + b * theta )
     template <typename T>
-    static void spiralArchimedean(const unsigned n, T * x, T * y,
-            const float rMax, const float r0, const float nRevs,
-            const float thetaStartDeg);
+    static void spiralArchimedean(unsigned n, T * x, T * y,
+            double rMax, double r0, double nRevs,
+            double thetaStartDeg);
 
     /// Generates positions in an Log spiral. ( r = a * exp(b * theta) )
     template <typename T>
-    static void spiralLog(const unsigned n, T * x, T * y, const float rMax,
-            const float a, const float nRevs, const float thetaStartDeg);
+    static void spiralLog(unsigned n, T * x, T * y,
+            double rMax, double a, double nRevs,
+            double thetaStartDeg);
 };
 
 /*=============================================================================
@@ -73,8 +68,24 @@ public:
  *---------------------------------------------------------------------------*/
 
 /**
- * @details
+ * @brief
  * Generates positions on a (randomised) grid within a circle.
+ *
+ * @details
+ * Positions are generated on a perturbed grid. The distance of points away
+ * from their grid positions is determined by the value of \p xe and \p ye,
+ * the std.dev. of the position error from the non-perturbed grid point.
+ *
+ * @param seed      Random number seed used for grid perturbation.
+ * @param radius    Radius to which the grid is cut.
+ * @param xs        X grid spacing
+ * @param ys        Y grid spacing
+ * @param xe        X std.dev. error
+ * @param ye        Y std.dev. error
+ * @param x         Array of generated x positions
+ * @param y         Array of generated x positions
+ *
+ * @return Number of points generated
  */
 template<typename T>
 int oskar_GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
@@ -122,14 +133,14 @@ int oskar_GridPositions::circular(int seed, T radius, T xs, T ys, T xe, T ye,
  * @param thetaStartDeg[in] Start angle for spiral positions (default 0.0)
  */
 template <typename T>
-void oskar_GridPositions::spiralArchimedean(const unsigned n, T * x, T * y,
-        const float rMax = 1.0f, const float r0 = 0.0f, const float nRevs = 1.0f,
-        const float thetaStartDeg = 0.0f)
+void oskar_GridPositions::spiralArchimedean(unsigned n, T * x, T * y,
+        double rMax = 1.0f, double r0 = 0.0f, double nRevs = 1.0f,
+        double thetaStartDeg = 0.0f)
 {
-    const float deg2rad = M_PI / 180.0f;
-    const float thetaIncDeg = (360.0f * nRevs) / (float)(n - 1);
-    const float thetaMaxDeg = thetaStartDeg + thetaIncDeg * (n - 1);
-    const float b = (rMax - r0) / (thetaMaxDeg * deg2rad);
+    double deg2rad = M_PI / 180.0f;
+    double thetaIncDeg = (360.0f * nRevs) / (float)(n - 1);
+    double thetaMaxDeg = thetaStartDeg + thetaIncDeg * (n - 1);
+    double b = (rMax - r0) / (thetaMaxDeg * deg2rad);
     for (unsigned i = 0; i < n; ++i)
     {
         const T thetaRads = (thetaStartDeg + (T)i * thetaIncDeg) * deg2rad;
@@ -153,9 +164,9 @@ void oskar_GridPositions::spiralArchimedean(const unsigned n, T * x, T * y,
  * @param thetaStartDeg[in]     Start position angle.
  */
 template <typename T>
-void oskar_GridPositions::spiralLog(const unsigned n, T * x, T * y,
-        const float rMax = 1.0f, const float a = 0.1f, const float nRevs = 1.0f,
-        const float thetaStartDeg = 0.0f)
+void oskar_GridPositions::spiralLog(unsigned n, T * x, T * y,
+        double rMax = 1.0f, double a = 0.1f, double nRevs = 1.0f,
+        double thetaStartDeg = 0.0f)
 {
     const float deg2rad = M_PI / 180.0f;
     const float thetaIncDeg = (360.0f * nRevs) / (float)(n - 1);
