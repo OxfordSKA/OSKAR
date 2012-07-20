@@ -46,7 +46,7 @@
  * @details
  * The structure holds all settings parameters.
  */
-struct oskar_Settings
+struct OSKAR_EXPORT oskar_Settings
 {
     oskar_Mem settings_path;
     oskar_SettingsSimulator sim;

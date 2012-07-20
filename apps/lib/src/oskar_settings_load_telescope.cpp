@@ -33,11 +33,16 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <QtCore/QSettings>
 #include <QtCore/QFileInfo>
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>
 #include <QtCore/QString>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 #define D2R (M_PI/180.0)
 

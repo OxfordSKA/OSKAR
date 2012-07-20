@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
  * @file oskar_SettingsModel.h
  */
 
+#include "oskar_global.h"
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QHash>
 #include <QtCore/QList>
@@ -45,7 +46,7 @@
 
 class oskar_SettingsItem;
 
-class oskar_SettingsModel : public QAbstractItemModel
+class OSKAR_EXPORT oskar_SettingsModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -119,7 +120,7 @@ private:
     QStringList outputKeys_;
 };
 
-class oskar_SettingsModelFilter : public QSortFilterProxyModel
+class OSKAR_EXPORT oskar_SettingsModelFilter : public QSortFilterProxyModel
 {
     Q_OBJECT
 

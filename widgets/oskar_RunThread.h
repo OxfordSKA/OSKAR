@@ -42,7 +42,7 @@
 
 class oskar_SettingsModel;
 
-class oskar_RunThread : public QThread
+class OSKAR_EXPORT oskar_RunThread : public QThread
 {
     Q_OBJECT
 

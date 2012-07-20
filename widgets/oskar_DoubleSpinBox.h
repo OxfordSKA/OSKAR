@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,12 @@
  * @file oskar_DoubleSpinBox.h
  */
 
+#include "oskar_global.h"
 #include <QtGui/QAbstractSpinBox>
 
 class QDoubleValidator;
 
-class oskar_DoubleSpinBox : public QAbstractSpinBox
+class OSKAR_EXPORT oskar_DoubleSpinBox : public QAbstractSpinBox
 {
     Q_OBJECT
 

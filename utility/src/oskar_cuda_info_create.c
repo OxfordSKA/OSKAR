@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "utility/oskar_CudaInfo.h"
+#include "utility/oskar_cuda_info_create.h"
 #include "utility/oskar_cuda_device_info_scan.h"
 #include <stdlib.h>
 #include <stdio.h>

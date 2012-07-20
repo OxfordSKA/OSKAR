@@ -41,6 +41,10 @@
 #include <QtCore/QTime>
 #include <QtCore/QString>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 extern "C"
 int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         oskar_Log* log, const char* filename)

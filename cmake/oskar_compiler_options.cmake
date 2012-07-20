@@ -42,7 +42,7 @@ if (NOT WIN32)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-qual")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-long-long")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-variadic-macros")
-    endif()
+    endif ()
 
     if (${CMAKE_C_COMPILER} MATCHES "icc.*$")
         set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -wd2259")
@@ -54,7 +54,19 @@ if (NOT WIN32)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd1125")
     endif ()
 else ()
-    message("-- WARNING: Unknown compiler!.")
+    if (MSVC)
+        # Disable warning about loss of precision converting double to float.
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /wd4244")
+        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /wd4244")
+        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   /wd4244")
+        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}   /wd4244")
+        
+        # Disable nonsensical warning about fopen.
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /wd4996")
+        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /wd4996")
+        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   /wd4996")
+        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}   /wd4996")
+    endif ()
 endif ()
 
 
@@ -67,38 +79,40 @@ if (CUDA_FOUND)
     set(CUDA_PROPAGATE_HOST_FLAGS OFF)
     set(CUDA_VERBOSE_BUILD OFF)
 
-    # General NVCC compiler options.
-    list(APPEND CUDA_NVCC_FLAGS_RELEASE -O2;)
-    list(APPEND CUDA_NVCC_FLAGS_DEBUG -O0;)
-    list(APPEND CUDA_NVCC_FLAGS_DEBUG -g;)
+	if (NOT WIN32)
+        # General NVCC compiler options.
+        list(APPEND CUDA_NVCC_FLAGS_RELEASE -O2;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -O0;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG -g;)
 
-    # Options passed to the compiler NVCC encapsulates.
-    list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-O2;)
-    list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-O0;)
-    list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-g;)
+        # Options passed to the compiler NVCC encapsulates.
+        list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-O2;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-O0;)
+        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-g;)
 
-    if (CMAKE_COMPILER_IS_GNUCC)
-        list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-fPIC;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-fPIC;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wall;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wextra;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-parameter;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-variadic-macros;)
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-long-long;)
-        # Disable warning about missing initializers (for CUDA Thrust).
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-missing-field-initializers;)
-        # Disable warning about "variable '__f' set but not used".
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-but-set-variable;)
-        # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
-        list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-function;)
-        # Ignore warnings from CUDA headers by specifying them as system headers.
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
-        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
+        if (CMAKE_COMPILER_IS_GNUCC)
+            list(APPEND CUDA_NVCC_FLAGS_RELEASE --compiler-options;-fPIC;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-fPIC;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wall;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wextra;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-parameter;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-variadic-macros;)
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-long-long;)
+            # Disable warning about missing initializers (for CUDA Thrust).
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-missing-field-initializers;)
+            # Disable warning about "variable '__f' set but not used".
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-but-set-variable;)
+            # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
+            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-function;)
+            # Ignore warnings from CUDA headers by specifying them as system headers.
+            set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
+            set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
+        endif()
+
+        # PTX compiler options
+        #list(APPEND CUDA_NVCC_FLAGS_DEBUG --ptxas-options=-v;)
     endif()
-
-    # PTX compiler options
-    #list(APPEND CUDA_NVCC_FLAGS_DEBUG --ptxas-options=-v;)
-
+    
     message("================================================================================")
     if (NOT DEFINED CUDA_ARCH)
         message("-- INFO: Building CUDA device code for architecture 2.0.")

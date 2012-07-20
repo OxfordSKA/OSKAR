@@ -29,6 +29,7 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_init.h"
+#include "interferometry/oskar_visibilities_read.h"
 #include "utility/oskar_binary_file_read.h"
 #include "utility/oskar_binary_tag_index_free.h"
 #include "utility/oskar_BinaryTag.h"

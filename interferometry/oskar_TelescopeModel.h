@@ -39,7 +39,7 @@
  *
  * @details
  */
-struct oskar_TelescopeModel
+struct OSKAR_EXPORT oskar_TelescopeModel
 {
     int num_stations;            /**< Number of stations in the model. */
     oskar_StationModel* station; /**< Array of station structures. */

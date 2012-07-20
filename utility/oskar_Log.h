@@ -40,7 +40,7 @@
 #include <omp.h>
 #endif
 
-struct oskar_Log
+struct OSKAR_EXPORT oskar_Log
 {
     int keep_file; /**< Flag true if log file will be retained on completion. */
     int size; /**< The number of entries in the log. */

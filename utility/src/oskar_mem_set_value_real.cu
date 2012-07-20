@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include <cuda_runtime_api.h>
+#include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"

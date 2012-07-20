@@ -233,7 +233,8 @@ enum {
  *   http://msdn.microsoft.com/en-us/library/a90k134d(v=VS.90).aspx
  */
 #if (defined(_WIN32) || defined(__WIN32__))
-    #ifdef oskar_EXPORTS
+    #if (defined(oskar_EXPORTS) || defined(oskar_widgets_EXPORTS) \
+            || defined(oskar_fits_EXPORTS) || defined(oskar_apps_EXPORTS))
         #ifndef OSKAR_EXPORT
             #define OSKAR_EXPORT __declspec(dllexport)
         #endif

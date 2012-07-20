@@ -32,6 +32,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 #include <QtCore/QStringList>

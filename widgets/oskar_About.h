@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,10 @@
  * @file oskar_About.h
  */
 
+#include "oskar_global.h"
 #include <QtGui/QDialog>
 
-class oskar_About : public QDialog
+class OSKAR_EXPORT oskar_About : public QDialog
 {
     Q_OBJECT
 

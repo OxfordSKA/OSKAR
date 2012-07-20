@@ -41,7 +41,7 @@
 struct oskar_StationModel;
 typedef struct oskar_StationModel oskar_StationModel;
 
-struct oskar_StationModel
+struct OSKAR_EXPORT oskar_StationModel
 {
     int station_type;            /**< Type of the station (enumerator). */
     int num_elements;            /**< Number of antenna elements in the station. */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
  * @file oskar_ConfigFileModel.h
  */
 
+#include "oskar_global.h"
 #include <QtCore/QAbstractTableModel>
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
@@ -42,7 +43,7 @@
 
 #include "sky/oskar_SkyModel.h"
 
-class oskar_ConfigFileModel : public QAbstractTableModel
+class OSKAR_EXPORT oskar_ConfigFileModel : public QAbstractTableModel
 {
     public:
         Q_OBJECT

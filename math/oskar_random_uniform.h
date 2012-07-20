@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
  * @file oskar_random_uniform.h
  */
 
+#include "oskar_global.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,6 +50,7 @@ extern "C" {
  * The random number generator may be seeded by calling srand() prior to this
  * function.
  */
+OSKAR_EXPORT
 double oskar_random_uniform(void);
 
 #ifdef __cplusplus

@@ -28,6 +28,7 @@
 
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_write.h"
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_binary_stream_write_header.h"
 #include "utility/oskar_binary_stream_write_metadata.h"

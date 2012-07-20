@@ -37,6 +37,9 @@ include(oskar_compiler_options)
 # === Include build macros used for apps and mex functions.
 include(oskar_build_macros)
 
+# Configure MSVC runtime.
+configure_msvc_runtime()
+
 enable_testing()
 
 # === Set the top level OSKAR source directory in the include path.

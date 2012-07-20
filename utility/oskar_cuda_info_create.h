@@ -37,12 +37,6 @@
 #include "utility/oskar_CudaInfo.h"
 
 #ifdef __cplusplus
-#include <cstdio>
-#else
-#include <stdio.h>
-#endif
-
-#ifdef __cplusplus
 extern "C" {
 #endif
 

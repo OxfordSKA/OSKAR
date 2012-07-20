@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ extern "C" {
  *
  * @return 1 if double, 0 if single.
  */
-static inline int oskar_mem_is_double(const int mem_type)
+static int oskar_mem_is_double(const int mem_type)
 {
     return ((mem_type & 0x0F) == OSKAR_DOUBLE);
 }
@@ -67,7 +67,7 @@ static inline int oskar_mem_is_double(const int mem_type)
  *
  * @return 1 if single, 0 if double.
  */
-static inline int oskar_mem_is_single(const int mem_type)
+static int oskar_mem_is_single(const int mem_type)
 {
     return ((mem_type & 0x0F) == OSKAR_SINGLE);
 }
@@ -83,7 +83,7 @@ static inline int oskar_mem_is_single(const int mem_type)
  *
  * @return 1 if complex, 0 if real.
  */
-static inline int oskar_mem_is_complex(const int mem_type)
+static int oskar_mem_is_complex(const int mem_type)
 {
     return ((mem_type & OSKAR_COMPLEX) == OSKAR_COMPLEX);
 }
@@ -99,7 +99,7 @@ static inline int oskar_mem_is_complex(const int mem_type)
  *
  * @return 1 if real, 0 if complex.
  */
-static inline int oskar_mem_is_real(const int mem_type)
+static int oskar_mem_is_real(const int mem_type)
 {
     return ((mem_type & OSKAR_COMPLEX) == 0);
 }
@@ -115,7 +115,7 @@ static inline int oskar_mem_is_real(const int mem_type)
  *
  * @return 1 if matrix, 0 if scalar.
  */
-static inline int oskar_mem_is_matrix(const int mem_type)
+static int oskar_mem_is_matrix(const int mem_type)
 {
     return ((mem_type & OSKAR_MATRIX) == OSKAR_MATRIX);
 }
@@ -131,7 +131,7 @@ static inline int oskar_mem_is_matrix(const int mem_type)
  *
  * @return 1 if scalar, 0 if matrix.
  */
-static inline int oskar_mem_is_scalar(const int mem_type)
+static int oskar_mem_is_scalar(const int mem_type)
 {
     return ((mem_type & OSKAR_MATRIX) == 0);
 }

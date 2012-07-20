@@ -58,6 +58,10 @@
 #include <cmath>
 #include <QtCore/QTime>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 extern "C"
 int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 {

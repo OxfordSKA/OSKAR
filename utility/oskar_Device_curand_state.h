@@ -39,7 +39,7 @@
 struct curandStateXORWOW;
 typedef struct curandStateXORWOW curandState;
 
-struct oskar_Device_curand_state
+struct OSKAR_EXPORT oskar_Device_curand_state
 {
     int num_states;     /**< Number of curand states */
     curandState* state; /**< Array of curand states */

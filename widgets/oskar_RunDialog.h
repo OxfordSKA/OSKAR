@@ -33,6 +33,7 @@
  * @file oskar_RunDialog.h
  */
 
+#include "oskar_global.h"
 #include <QtCore/QStringList>
 #include <QtGui/QDialog>
 
@@ -45,7 +46,7 @@ class QTextEdit;
 class oskar_SettingsModel;
 class oskar_RunThread;
 
-class oskar_RunDialog : public QDialog
+class OSKAR_EXPORT oskar_RunDialog : public QDialog
 {
     Q_OBJECT
 

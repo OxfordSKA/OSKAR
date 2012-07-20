@@ -270,7 +270,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // FIXME Free sky chunks. This needs fixing in order to avoid potential
     // memory leaks in case of errors (free memory using a destructor instead).
     for (int i = 0; i < num_sky_chunks; ++i)
+    {
         oskar_sky_model_free(&sky_chunk_cpu[i]);
+    }
     free(sky_chunk_cpu);
 
     oskar_log_section(log, "Run complete.");

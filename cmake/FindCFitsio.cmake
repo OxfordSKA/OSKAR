@@ -12,13 +12,14 @@ find_path(CFITSIO_INCLUDE_DIR fitsio.h
     HINTS ${CFITSIO_INC_DIR}
     PATHS
     /usr/include/cfitsio/
-    /usr/include/)
+    /usr/include/
+	"C:\\cfitsio")
 
 set(CFITSIO_NAMES cfitsio)
 
 foreach (lib ${CFITSIO_NAMES})
     find_library(CFITSIO_LIBRARY_${lib} NAMES ${lib}
-        HINTS ${CFITSIO_LIB_DIR})
+        HINTS ${CFITSIO_LIB_DIR} ${CFITSIO_INCLUDE_DIR})
     list(APPEND CFITSIO_LIBRARIES ${CFITSIO_LIBRARY_${lib}})
 endforeach (lib ${CFITSIO_NAMES})
 

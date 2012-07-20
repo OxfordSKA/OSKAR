@@ -54,7 +54,7 @@
  *
  * Depending on the mode of operation, not all of these arrays will be used.
  */
-struct oskar_WorkStationBeam
+struct OSKAR_EXPORT oskar_WorkStationBeam
 {
     oskar_Mem horizon_mask;   /* Integer. */
     oskar_Mem x;              /* Real scalar. */

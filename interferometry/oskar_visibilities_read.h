@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,15 +41,16 @@ extern "C" {
 #endif
 
 /**
- * @brief Returns a new visibility structure by reading the specified file.
+ * @brief Fills a visibility structure by reading the specified file.
  *
  * @details
- * Note: The loaded visibility structure will reside on the CPU.
+ * This function fills an empty or uninitialised visibility structure by
+ * reading the specified file.
  *
  * @param[in,out]  vis  Pointer to empty or uninitialised visibility structure.
- * @param[in]  filename The filename to read from to.
+ * @param[in]  filename The filename to read from.
  *
- * @return A pointer to the new visibility structure.
+ * @return An error code.
  */
 OSKAR_EXPORT
 int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename);

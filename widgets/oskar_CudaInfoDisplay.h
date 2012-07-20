@@ -33,12 +33,13 @@
  * @file oskar_CudaInfoDisplay.h
  */
 
+#include "oskar_global.h"
 #include <QtGui/QDialog>
 
 class QProcess;
 class QTextEdit;
 
-class oskar_CudaInfoDisplay : public QDialog
+class OSKAR_EXPORT oskar_CudaInfoDisplay : public QDialog
 {
     Q_OBJECT
 

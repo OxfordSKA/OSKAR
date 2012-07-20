@@ -33,11 +33,12 @@
  * @file oskar_BinaryLocations.h
  */
 
+#include "oskar_global.h"
 #include <QtGui/QDialog>
 
 class QLineEdit;
 
-class oskar_BinaryLocations : public QDialog
+class OSKAR_EXPORT oskar_BinaryLocations : public QDialog
 {
     Q_OBJECT
 

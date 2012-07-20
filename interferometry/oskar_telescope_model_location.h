@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,6 +54,7 @@ extern "C" {
 
  * @return 1 (true) if the telescope model is of the specified location, 0 otherwise.
  */
+OSKAR_EXPORT
 int oskar_telescope_model_is_location(const oskar_TelescopeModel* telescope,
 		int location);
 
@@ -65,6 +66,7 @@ int oskar_telescope_model_is_location(const oskar_TelescopeModel* telescope,
  *
  * @return oskar_Mem data location or error code.
  */
+OSKAR_EXPORT
 int oskar_telescope_model_location(const oskar_TelescopeModel* telescope);
 
 #ifdef __cplusplus

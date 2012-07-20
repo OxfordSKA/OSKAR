@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,10 @@
  * @file oskar_SettingsView.h
  */
 
+#include "oskar_global.h"
 #include <QtGui/QTreeView>
 
-class oskar_SettingsView : public QTreeView
+class OSKAR_EXPORT oskar_SettingsView : public QTreeView
 {
     Q_OBJECT
 

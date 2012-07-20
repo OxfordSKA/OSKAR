@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@
  * @file oskar_SettingsDelegate.h
  */
 
+#include "oskar_global.h"
 #include <QtGui/QStyledItemDelegate>
 #include <QtGui/QWidget>
 #include <QtCore/QModelIndex>
@@ -40,7 +41,7 @@
 class oskar_SettingsItem;
 class oskar_SettingsModel;
 
-class oskar_SettingsDelegate : public QStyledItemDelegate
+class OSKAR_EXPORT oskar_SettingsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 

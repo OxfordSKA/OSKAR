@@ -55,7 +55,7 @@ struct oskar_BinaryTagIndex;
  * private_owner member variable is set to true, the memory will be released
  * automatically when the structure is deleted.
  */
-struct oskar_Mem
+struct OSKAR_EXPORT oskar_Mem
 {
     int type; /**< Enumerated element type of memory block. */
     int location; /**< Address space of data pointer. */

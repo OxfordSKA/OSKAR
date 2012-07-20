@@ -33,13 +33,14 @@
  * @file oskar_SettingsItem.h
  */
 
+#include "oskar_global.h"
 #include <QtCore/QList>
 #include <QtCore/QVector>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 
-class oskar_SettingsItem
+class OSKAR_EXPORT oskar_SettingsItem
 {
 public:
     enum {

@@ -73,7 +73,7 @@
  * - Consider storing a coord_type_id for the baseline coordinates similar
  *   to the station model.
  */
-struct oskar_Visibilities
+struct OSKAR_EXPORT oskar_Visibilities
 {
     oskar_Mem settings_path;     /**< Path to settings file. */
     int num_channels;            /**< Number of frequency channels. */

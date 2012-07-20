@@ -49,7 +49,7 @@
  * The structure holds source parameters for the global sky model used by the
  * OSKAR simulator.
  */
-struct oskar_SkyModel
+struct OSKAR_EXPORT oskar_SkyModel
 {
     int num_sources;          /**< Number of sources in the sky model. */
     oskar_Mem RA;             /**< Right ascension, in radians. */

@@ -39,7 +39,7 @@
  * @details
  * This structure holds data for a multi-dimensional image hyper-cube.
  */
-struct oskar_Image
+struct OSKAR_EXPORT oskar_Image
 {
     oskar_Mem data;
     oskar_Mem settings_path;

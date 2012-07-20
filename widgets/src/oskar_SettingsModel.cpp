@@ -105,13 +105,6 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
             font.setBold(true);
             return font;
         }
-        QVariant val = item->value();
-        if (val.isNull() && item->type() != oskar_SettingsItem::LABEL)
-        {
-            QFont font = QApplication::font();
-            font.setItalic(true);
-            return font;
-        }
     }
     else if (role == Qt::ForegroundRole)
     {
@@ -121,6 +114,8 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
                 return QColor(Qt::white);
             if (item->valueSet())
                 return QColor(Qt::blue);
+            else
+                return QColor(64, 64, 64);
         }
         else
             return QColor(Qt::red);

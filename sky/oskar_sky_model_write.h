@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 
 #ifndef OSKAR_SKY_MODEL_WRITE_H_
 #define OSKAR_SKY_MODEL_WRITE_H_
@@ -56,6 +55,7 @@ extern "C" {
  *
  * @return An OSKAR error code.
  */
+OSKAR_EXPORT
 int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky);
 
 #ifdef __cplusplus

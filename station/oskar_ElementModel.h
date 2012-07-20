@@ -44,7 +44,7 @@
  * This structure holds the spline coefficients and knot positions for
  * both polarisations of the antenna element.
  */
-struct oskar_ElementModel
+struct OSKAR_EXPORT oskar_ElementModel
 {
     int cos_power; /* For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
