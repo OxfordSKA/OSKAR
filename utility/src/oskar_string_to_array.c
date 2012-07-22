@@ -37,8 +37,6 @@ extern "C" {
 
 #ifdef _WIN32
 #define strtok_r(s,d,p) strtok_s(s,d,p)
-#else
-extern char* strtok_r(char*, const char*, char**);
 #endif
 
 /* Single precision. */
