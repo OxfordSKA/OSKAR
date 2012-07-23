@@ -141,50 +141,50 @@ int oskar_Mem::set_value_real(double value)
     return oskar_mem_set_value_real(this, value);
 }
 
-bool oskar_Mem::is_double() const
+int oskar_Mem::is_double() const
 {
     return oskar_mem_is_double(this->type);
 }
 
-bool oskar_Mem::is_single() const
+int oskar_Mem::is_single() const
 {
     return oskar_mem_is_single(this->type);
 }
 
-bool oskar_Mem::is_complex() const
+int oskar_Mem::is_complex() const
 {
     return oskar_mem_is_complex(this->type);
 }
 
-bool oskar_Mem::is_real() const
+int oskar_Mem::is_real() const
 {
     return oskar_mem_is_real(this->type);
 }
 
-bool oskar_Mem::is_scalar() const
+int oskar_Mem::is_scalar() const
 {
     return oskar_mem_is_scalar(this->type);
 }
 
-bool oskar_Mem::is_matrix() const
+int oskar_Mem::is_matrix() const
 {
     return oskar_mem_is_matrix(this->type);
 }
 
 // static method
-bool oskar_Mem::is_double(const int type_)
+int oskar_Mem::is_double(const int type_)
 {
     return oskar_mem_is_double(type_);
 }
 
 // static method
-bool oskar_Mem::is_complex(const int type_)
+int oskar_Mem::is_complex(const int type_)
 {
     return oskar_mem_is_complex(type_);
 }
 
 // static method
-bool oskar_Mem::is_scalar(const int type_)
+int oskar_Mem::is_scalar(const int type_)
 {
     return oskar_mem_is_scalar(type_);
 }

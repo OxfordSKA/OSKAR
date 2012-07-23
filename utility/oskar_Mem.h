@@ -312,16 +312,16 @@ struct OSKAR_EXPORT oskar_Mem
      */
     int set_value_real(double value);
 
-    bool is_double() const;
-    bool is_single() const;
-    bool is_complex() const;
-    bool is_real() const;
-    bool is_scalar() const;
-    bool is_matrix() const;
-    bool is_null() const {return (data == 0);}
-    static bool is_double(const int mem_type);
-    static bool is_complex(const int mem_type);
-    static bool is_scalar(const int mem_type);
+    int is_double() const;
+    int is_single() const;
+    int is_complex() const;
+    int is_real() const;
+    int is_scalar() const;
+    int is_matrix() const;
+    int is_null() const {return (data == 0);}
+    static int is_double(const int mem_type);
+    static int is_complex(const int mem_type);
+    static int is_scalar(const int mem_type);
 
     /* Convenience pointer casts. */
     operator char*() {return (char*)data;}

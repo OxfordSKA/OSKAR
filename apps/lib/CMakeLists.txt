@@ -47,12 +47,20 @@ else()
         ${QT_QTCORE_LIBRARY} ${CUDA_LIBRARIES})
 endif()
 
-set_target_properties(oskar_apps PROPERTIES
-    COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-    LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-    INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    SOVERSION ${OSKAR_VERSION})
+if (MSVC)
+    set_target_properties(oskar_apps PROPERTIES
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        SOVERSION ${OSKAR_VERSION})
+else ()
+    set_target_properties(oskar_apps PROPERTIES
+        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+        INSTALL_RPATH_USE_LINK_PATH TRUE
+        SOVERSION ${OSKAR_VERSION})
+endif()
 
 # Install target for the apps library.
 install(TARGETS oskar_apps DESTINATION ${OSKAR_LIB_INSTALL_DIR})

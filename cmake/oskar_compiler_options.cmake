@@ -7,13 +7,13 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE release)
 endif()
 
-message("================================================================================")
+message("===============================================================================")
 if (CMAKE_BUILD_TYPE MATCHES RELEASE|[Rr]elease)
     message("-- INFO: Building in release mode.")
 else ()
     message("-- INFO: Building in debug mode.")
 endif()
-message("================================================================================")
+message("===============================================================================")
 
 set(BUILD_SHARED_LIBS ON)
 
@@ -53,33 +53,30 @@ if (NOT WIN32)
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd2259")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd1125")
     endif ()
-else ()
-    if (MSVC)
-        # Disable warning about loss of precision converting double to float.
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /wd4244")
-        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /wd4244")
-        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   /wd4244")
-        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}   /wd4244")
-        
-        # Disable nonsensical warning about fopen.
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /wd4996")
-        set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /wd4996")
-        set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   /wd4996")
-        set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}   /wd4996")
-    endif ()
+elseif (MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /D QT_NO_DEBUG /D QT_NO_DEBUG_OUTPUT")
+    
+    # Disable warning about loss of precision converting double to float.
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4244")
+    set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}   /wd4244")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /wd4244")
+    set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}     /wd4244")
+    
+    # Disable nonsensical warning about fopen.
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /wd4996")
+    set(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}   /wd4996")
+    set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /wd4996")
+    set(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}     /wd4996")
 endif ()
 
 
 # Set CUDA releated compiler flags.
 # ------------------------------------------------------------------------------
 if (CUDA_FOUND)
-    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-    set(CUDA_VERBOSE_BUILD OFF)
-
-    set(CUDA_PROPAGATE_HOST_FLAGS OFF)
-    set(CUDA_VERBOSE_BUILD OFF)
-
 	if (NOT WIN32)
+        set(CUDA_PROPAGATE_HOST_FLAGS OFF)
+        set(CUDA_VERBOSE_BUILD OFF)
+
         # General NVCC compiler options.
         list(APPEND CUDA_NVCC_FLAGS_RELEASE -O2;)
         list(APPEND CUDA_NVCC_FLAGS_DEBUG -O0;)
@@ -111,9 +108,9 @@ if (CUDA_FOUND)
 
         # PTX compiler options
         #list(APPEND CUDA_NVCC_FLAGS_DEBUG --ptxas-options=-v;)
-    endif()
-    
-    message("================================================================================")
+    endif ()
+
+    message("===============================================================================")
     if (NOT DEFINED CUDA_ARCH)
         message("-- INFO: Building CUDA device code for architecture 2.0.")
         message("-- INFO: The target CUDA architecture can be changed by using the option:")
@@ -146,7 +143,7 @@ if (CUDA_FOUND)
     else()
         message(FATAL_ERROR "-- CUDA_ARCH ${CUDA_ARCH} not recognised!")
     endif()
-    message("================================================================================")
+    message("===============================================================================")
     add_definitions(-DCUDA_ARCH=${CUDA_ARCH})
 endif (CUDA_FOUND)
 

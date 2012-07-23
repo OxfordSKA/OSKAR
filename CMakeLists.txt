@@ -38,7 +38,7 @@ include(oskar_compiler_options)
 include(oskar_build_macros)
 
 # Configure MSVC runtime.
-configure_msvc_runtime()
+OSKAR_SET_MSVC_RUNTIME()
 
 enable_testing()
 
@@ -48,6 +48,7 @@ include_directories(${OSKAR_SOURCE_DIR})
 # === Build main OSKAR library.
 if (CUDA_FOUND)
     include_directories(${OSKAR_SOURCE_DIR})
+    #set(CUDA_VERBOSE_BUILD ON)
 
     add_subdirectory(imaging)
     add_subdirectory(interferometry)
@@ -88,12 +89,22 @@ if (CUDA_FOUND)
     if (OSKAR_USE_LAPACK)
         target_link_libraries(${libname} ${OSKAR_LAPACK})
     endif ()
-    set_target_properties(${libname} PROPERTIES
-        COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
-        LINK_FLAGS "${OpenMP_CXX_FLAGS}"
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-        SOVERSION ${OSKAR_VERSION})
+    if (MSVC)
+        set_target_properties(${libname} PROPERTIES
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+            SOVERSION ${OSKAR_VERSION}
+        )
+    else ()
+        set_target_properties(${libname} PROPERTIES
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            LINK_FLAGS "${OpenMP_CXX_FLAGS}"
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+            SOVERSION ${OSKAR_VERSION}
+        )
+    endif()
     install(TARGETS ${libname} DESTINATION ${OSKAR_LIB_INSTALL_DIR})
     cuda_build_clean_target()
 endif (CUDA_FOUND)

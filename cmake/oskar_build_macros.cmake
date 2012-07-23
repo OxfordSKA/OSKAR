@@ -155,13 +155,22 @@ macro(OSKAR_APP)
         oskar               # default libs
         ${APP_EXTRA_LIBS}   # extra libs
     )
-    set_target_properties(${target} PROPERTIES
-        COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
-        LINK_FLAGS    ${OpenMP_CXX_FLAGS}
-        OUTPUT_NAME   ${APP_NAME}
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-    )
+    if (MSVC)
+        set_target_properties(${target} PROPERTIES
+            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
+            OUTPUT_NAME   ${APP_NAME}
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+        )
+    else ()
+        set_target_properties(${target} PROPERTIES
+            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
+            LINK_FLAGS    ${OpenMP_CXX_FLAGS}
+            OUTPUT_NAME   ${APP_NAME}
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+        )
+    endif()
 
     # Create the install target if the NO_INSTALL option isn't specified.
     if (NOT APP_NO_INSTALL)
@@ -229,13 +238,22 @@ macro(OSKAR_QT_APP)
         oskar oskar_apps ${QT_QTCORE_LIBRARY} # default libs
         ${APP_EXTRA_LIBS}                     # extra libs
     )
-    set_target_properties(${target} PROPERTIES
-        COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
-        LINK_FLAGS    ${OpenMP_CXX_FLAGS}
-        OUTPUT_NAME   ${APP_NAME}
-        INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
-        INSTALL_RPATH_USE_LINK_PATH TRUE
-    )
+    if (MSVC)
+        set_target_properties(${target} PROPERTIES
+            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
+            OUTPUT_NAME   ${APP_NAME}
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+        )
+    else ()
+        set_target_properties(${target} PROPERTIES
+            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
+            LINK_FLAGS    ${OpenMP_CXX_FLAGS}
+            OUTPUT_NAME   ${APP_NAME}
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+        )
+    endif ()
 
     # Create the install target if the NO_INSTALL option isn't specified.
     if (NOT APP_NO_INSTALL)
@@ -310,7 +328,7 @@ macro(get_svn_revision dir variable)
     endif()
 endmacro(get_svn_revision)
 
-# MACRO: Count the number of OSKAR components to b built
+# MACRO: Count the number of OSKAR components to be built
 macro(get_component_count var)
     set(num 0)
     if (CUDA_FOUND)
@@ -322,50 +340,43 @@ macro(get_component_count var)
     if (QT4_FOUND AND CUDA_FOUND)
         math(EXPR num '${num}+1')
     endif ()
-    if (QT4_FOUND AND CUDA_FOUND)
-        math(EXPR num '${num}+1')
-    endif ()
     if (MATLAB_FOUND AND CUDA_FOUND)
         math(EXPR num '${num}+1')
     endif ()
     set(${var} ${num})
 endmacro()
 
-macro(configure_msvc_runtime)
-  if(MSVC)
-    # Default to statically-linked runtime.
-    if("${MSVC_RUNTIME}" STREQUAL "")
-      set(MSVC_RUNTIME "static")
-    endif()
-    # Set compiler options.
-    set(variables
-      CMAKE_C_FLAGS_DEBUG
-      CMAKE_C_FLAGS_MINSIZEREL
-      CMAKE_C_FLAGS_RELEASE
-      CMAKE_C_FLAGS_RELWITHDEBINFO
-      CMAKE_CXX_FLAGS_DEBUG
-      CMAKE_CXX_FLAGS_MINSIZEREL
-      CMAKE_CXX_FLAGS_RELEASE
-      CMAKE_CXX_FLAGS_RELWITHDEBINFO
-    )
-    if(${MSVC_RUNTIME} STREQUAL "static")
-      message(STATUS
-        "MSVC -> forcing use of statically-linked runtime."
-      )
-      foreach(variable ${variables})
-        if(${variable} MATCHES "/MD")
-          string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
-        endif()
-      endforeach()
-    else()
-      message(STATUS
-        "MSVC -> forcing use of dynamically-linked runtime."
-      )
-      foreach(variable ${variables})
-        if(${variable} MATCHES "/MT")
-          string(REGEX REPLACE "/MT" "/MD" ${variable} "${${variable}}")
-        endif()
-      endforeach()
-    endif()
-  endif()
+macro(OSKAR_SET_MSVC_RUNTIME)
+    if (MSVC)
+        # Default to statically-linked runtime.
+        if ("${MSVC_RUNTIME}" STREQUAL "")
+            set (MSVC_RUNTIME "static")
+        endif ()
+        # Set compiler options.
+        set(vars
+            CMAKE_C_FLAGS_DEBUG
+            CMAKE_C_FLAGS_MINSIZEREL
+            CMAKE_C_FLAGS_RELEASE
+            CMAKE_C_FLAGS_RELWITHDEBINFO
+            CMAKE_CXX_FLAGS_DEBUG
+            CMAKE_CXX_FLAGS_MINSIZEREL
+            CMAKE_CXX_FLAGS_RELEASE
+            CMAKE_CXX_FLAGS_RELWITHDEBINFO
+        )
+        if (${MSVC_RUNTIME} STREQUAL "static")
+            message(STATUS "MSVC: using statically-linked runtime.")
+            foreach (var ${vars})
+                if (${var} MATCHES "/MD")
+                    string(REGEX REPLACE "/MD" "/MT" ${var} "${${var}}")
+                endif ()
+            endforeach ()
+        else ()
+            message(STATUS "MSVC: using dynamically-linked runtime.")
+            foreach (var ${vars})
+                if (${var} MATCHES "/MT")
+                    string(REGEX REPLACE "/MT" "/MD" ${var} "${${var}}")
+                endif ()
+             endforeach ()
+        endif ()
+    endif ()
 endmacro()

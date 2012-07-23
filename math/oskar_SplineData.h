@@ -33,6 +33,7 @@
  * @file oskar_SplineData.h
  */
 
+#include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 
 /**
@@ -42,7 +43,7 @@
  * This structure holds the data required to construct a surface from
  * splines.
  */
-struct oskar_SplineData
+struct OSKAR_EXPORT oskar_SplineData
 {
     int num_knots_x;      /**< Number of knots in x. */
     int num_knots_y;      /**< Number of knots in y. */
