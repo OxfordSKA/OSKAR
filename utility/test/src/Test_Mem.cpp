@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -214,63 +214,63 @@ void Test_Mem::test_type_check()
 {
     {
         oskar_Mem mem(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-        CPPUNIT_ASSERT_EQUAL(false, mem.is_double());
-        CPPUNIT_ASSERT_EQUAL(false, mem.is_complex());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL(false, oskar_Mem::is_double(OSKAR_SINGLE));
-        CPPUNIT_ASSERT_EQUAL(false, oskar_Mem::is_complex(OSKAR_SINGLE));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_scalar(OSKAR_SINGLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_double());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_complex());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_double(OSKAR_SINGLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_complex(OSKAR_SINGLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_SINGLE));
     }
 
     {
         oskar_Mem mem(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0);
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_double());
-        CPPUNIT_ASSERT_EQUAL(false, mem.is_complex());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_double(OSKAR_DOUBLE));
-        CPPUNIT_ASSERT_EQUAL(false, oskar_Mem::is_complex(OSKAR_DOUBLE));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_scalar(OSKAR_DOUBLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_double());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_complex());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_double(OSKAR_DOUBLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_complex(OSKAR_DOUBLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_DOUBLE));
     }
 
     {
         oskar_Mem mem(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_CPU, 0);
-        CPPUNIT_ASSERT_EQUAL(false, mem.is_double());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_complex());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL(false, oskar_Mem::is_double(OSKAR_SINGLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_complex(OSKAR_SINGLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_scalar(OSKAR_SINGLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_double());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_double(OSKAR_SINGLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_SINGLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_SINGLE_COMPLEX));
     }
 
     {
         oskar_Mem mem(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 0);
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_double());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_complex());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_double(OSKAR_DOUBLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_complex(OSKAR_DOUBLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_scalar(OSKAR_DOUBLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_double());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_double(OSKAR_DOUBLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_DOUBLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_DOUBLE_COMPLEX));
 
     }
 
     {
         oskar_Mem mem(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0);
-        CPPUNIT_ASSERT_EQUAL(false, mem.is_double());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_complex());
-        CPPUNIT_ASSERT_EQUAL(false, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL(false, oskar_Mem::is_double(OSKAR_SINGLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_complex(OSKAR_SINGLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL(false, oskar_Mem::is_scalar(OSKAR_SINGLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_double());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_scalar());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_double(OSKAR_SINGLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_SINGLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_scalar(OSKAR_SINGLE_COMPLEX_MATRIX));
     }
 
     {
         oskar_Mem mem(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 0);
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_double());
-        CPPUNIT_ASSERT_EQUAL(true, mem.is_complex());
-        CPPUNIT_ASSERT_EQUAL(false, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_double(OSKAR_DOUBLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL(true, oskar_Mem::is_complex(OSKAR_DOUBLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL(false, oskar_Mem::is_scalar(OSKAR_DOUBLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_double());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_scalar());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_double(OSKAR_DOUBLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_DOUBLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_scalar(OSKAR_DOUBLE_COMPLEX_MATRIX));
     }
 }
 
