@@ -29,6 +29,8 @@
 #ifndef OSKAR_SETTINGS_INTERFEROMETER_H_
 #define OSKAR_SETTINGS_INTERFEROMETER_H_
 
+#include "interferometry/oskar_SettingsSystemNoise.h"
+
 /**
  * @struct oskar_SettingsInterferometer
  *
@@ -42,6 +44,9 @@ struct oskar_SettingsInterferometer
     double channel_bandwidth_hz;
     int num_vis_ave;
     int num_fringe_ave;
+
+    oskar_SettingsSystemNoise noise; /**< system noise model parameters. */
+
     char* oskar_vis_filename;
     char* ms_filename;
     int image_interferometer_output;

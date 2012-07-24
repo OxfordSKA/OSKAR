@@ -9,21 +9,22 @@ if (CPPUNIT_FOUND)
 
     set(math_test_SRC
         src/CppUnitMain.cpp
-        src/Test_curand.cu
-        src/Test_healpix.cpp
-        src/Test_Jones.cpp
-        src/Test_Matrix3.cpp
-        src/Test_Matrix4.cpp
-        src/Test_meshgrid.cpp
-        src/Test_linspace.cpp
-        src/Test_matrix_math.cpp
-        src/Test_rotate.cpp
-        src/Test_sph_lm.cpp
-        src/Test_sph2cart.cpp
-        src/Test_SphericalPositions.cpp
+        #src/Test_curand.cu
+        src/Test_find_closest_match.cpp
+        #src/Test_healpix.cpp
+        #src/Test_Jones.cpp
+        #src/Test_Matrix3.cpp
+        #src/Test_Matrix4.cpp
+        #src/Test_meshgrid.cpp
+        #src/Test_linspace.cpp
+        #src/Test_matrix_math.cpp
+        #src/Test_rotate.cpp
+        #src/Test_sph_lm.cpp
+        #src/Test_sph2cart.cpp
+        #src/Test_SphericalPositions.cpp
     )
     if (OSKAR_USE_LAPACK AND OSKAR_USE_CBLAS)
-        list(APPEND math_test_SRC src/Test_fit_ellipse.cpp)
+        #list(APPEND math_test_SRC src/Test_fit_ellipse.cpp)
     endif ()
 
     include_directories(${CPPUNIT_INCLUDE_DIR})

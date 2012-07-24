@@ -14,7 +14,6 @@ set(station_SRC
     src/oskar_evaluate_beam_horizontal_lmn.c
     src/oskar_evaluate_jones_E.c
     src/oskar_evaluate_source_horizontal_lmn.c
-    src/oskar_evaluate_effective_area.c
     src/oskar_evaluate_element_weights_errors.cu
     src/oskar_evaluate_flux_density.c
     src/oskar_evaluate_station_beam_dipoles.cu
@@ -37,6 +36,10 @@ set(station_SRC
     src/oskar_station_model_set_element_weight.c
     src/oskar_station_model_type.c
     src/oskar_StationModel.cpp
+    src/oskar_system_noise_model_copy.c
+    src/oskar_system_noise_model_free.c
+    src/oskar_system_noise_model_init.c
+    src/oskar_system_noise_model_load_cst.c
     src/oskar_work_station_beam_free.c
     src/oskar_work_station_beam_init.c
     src/oskar_WorkStationBeam.cpp

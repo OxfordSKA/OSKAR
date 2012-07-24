@@ -42,26 +42,27 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the sky temperature (in Kelvin) according to VLA memo 146 at a
- * number of frequencies.
+ * Evaluates the sky temperature (in Kelvin).
  *
  * @details
- * Note: The output \p temperature array must be preallocated to length
- * \p num_channels.
+ * See VLA memo 146.
  *
- * Usually the value of \p spectral_index should be set to +0.75.
+ * Sensible defaults:
+ *  - \p freq0: 408.0e6
+ *  - \p temp0: 20.0
+ *  - \p spectral_index: 0.75.
  *
- * @param[out] temperature      Array of sky temperatures as a function of frequency, in Kelvin.
- * @param[in]  num_channels     Number of frequency channels.
- * @param[in]  start_freq_hz    Start frequency, in Hz.
- * @param[in]  freq_inc_hz      Frequency increment, in Hz.
- * @param[in]  spectral_index   Spectral index of the frequency.
+ * @param[out] temp           The sky temperature, in K.
+ * @param[in]  freq           Observation frequency, in Hz.
+ * @param[in]  freq0          Reference frequency, in Hz.
+ * @param[in]  temp0          Temperature at the reference frequency, in K.
+ * @param[in]  spectral_index Spectral index of the frequency.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_sky_temperature(double* temperature, int num_channels,
-        double start_freq_hz, double freq_inc_hz, double spectral_index);
+int oskar_evaluate_sky_temperature(double* temp, double freq,
+        double freq0, double temp0, double spectral_index);
 
 #ifdef __cplusplus
 }

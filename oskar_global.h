@@ -30,8 +30,6 @@
 #define OSKAR_GLOBAL_H_
 
 /**
- * @macro OSKAR_VERSION
- *
  * @brief Macro used to determine the version of OSKAR.
  *
  * @details
@@ -43,8 +41,6 @@
 #define OSKAR_VERSION 0x020003
 
 /**
- * @macro OSKAR_VERSION_STR
- *
  * @brief Macro used to return the version of OSKAR as a text string.
  *
  * @details
@@ -118,8 +114,7 @@ enum {
     /* Indicates that spline evaluation failed. */
     OSKAR_ERR_SPLINE_EVAL_FAIL         = -16,
 
-    /* Indicates that the sky or telescope structure could not be created. */
-    OSKAR_ERR_SETUP_FAIL               = -17,
+    /* NOTE -17 missing: moved to 600 */
 
     /* Indicates that there are not enough CUDA devices available. */
     OSKAR_ERR_CUDA_DEVICES             = -18,
@@ -181,11 +176,23 @@ enum {
     /* Indicates an error relating to the interferometer settings */
     OSKAR_ERR_SETTINGS_INTERFEROMETER  = -505,
 
+    /* Indicates an error relating to the interferometer noise settings */
+    OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE  = -506,
+
     /* Indicates an error relating to the beam pattern settings */
-    OSKAR_ERR_SETTINGS_BEAM_PATTERN    = -506,
+    OSKAR_ERR_SETTINGS_BEAM_PATTERN    = -507,
 
     /* Indicates an error relating to the image settings */
-    OSKAR_ERR_SETTINGS_IMAGE           = -507,
+    OSKAR_ERR_SETTINGS_IMAGE           = -508,
+
+    /* Indicates a failure to setup a model data structure */
+    OSKAR_ERR_SETUP_FAIL               = -600,
+
+    /* Indicates a failure to setup the telescope model */
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE     = -601,
+
+    /* Indicates a failure to setup the telescope model */
+    OSKAR_ERR_SETUP_FAIL_SKY           = -602,
 
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                  = -1000

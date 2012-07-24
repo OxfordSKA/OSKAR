@@ -46,6 +46,8 @@
 #include "fits/oskar_fits_image_write.h"
 #endif
 
+#include <QtCore/QTime>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -93,6 +95,8 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 
     oskar_log_section(log, "Starting OSKAR imager...");
 
+    QTime timer;
+    timer.start();
     error = oskar_make_image(&image, log, &vis, &settings.image);
     if (error)
     {
@@ -100,7 +104,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
                 oskar_get_error_string(error));
         return error;
     }
-    oskar_log_section(log, "Imaging complete.");
+    oskar_log_section(log, "Imaging completed in %.3f sec.", timer.elapsed()/1.0e3);
 
     if (settings.image.oskar_image)
     {

@@ -92,11 +92,14 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
          * We can't resize to more than needed, since we would then lose track
          * of the actual allocated size of the model when
          * telescope->num_stations = n is finally set. */
-        err = oskar_telescope_model_resize(telescope, n + 1);
-        if (err)
+        if (telescope->num_stations <= n)
         {
-            fclose(file);
-            return err;
+            err = oskar_telescope_model_resize(telescope, n + 1);
+            if (err)
+            {
+                fclose(file);
+                return err;
+            }
         }
 
         /* Convert horizon plane to offset geocentric cartesian coordinates. */
@@ -134,7 +137,7 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
     if (line) free(line);
     fclose(file);
 
-    return 0;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

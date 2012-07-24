@@ -63,9 +63,9 @@ int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
     if (error) return error;
     error = oskar_settings_load_telescope(&settings->telescope, filename);
     if (error) return error;
-    error = oskar_settings_load_interferometer(&settings->interferometer, filename);
-    if (error) return error;
     error = oskar_settings_load_beam_pattern(&settings->beam_pattern, filename);
+    if (error) return error;
+    error = oskar_settings_load_interferometer(&settings->interferometer, filename);
     if (error) return error;
     error = oskar_settings_load_image(&settings->image, filename);
     if (error) return error;

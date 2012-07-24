@@ -34,6 +34,7 @@
  */
 
 #include <cppunit/extensions/HelperMacros.h>
+#include <QtCore/QtCore>
 
 /**
  * @brief Unit test class that uses CppUnit.
@@ -46,14 +47,30 @@ class Test_telescope_model_load_save : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_telescope_model_load_save);
+        CPPUNIT_TEST(test_0_level);
         CPPUNIT_TEST(test_1_level);
         CPPUNIT_TEST(test_2_level);
+        CPPUNIT_TEST(test_load_telescope_noise_stddev);
+        CPPUNIT_TEST(test_load_telescope_noise_sensitivity);
+        CPPUNIT_TEST(test_load_telescope_noise_t_sys);
+        CPPUNIT_TEST(test_load_telescope_noise_t_components);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         /// Test method.
+        void test_0_level();
         void test_1_level();
         void test_2_level();
+
+        void test_load_telescope_noise_stddev();
+        void test_load_telescope_noise_sensitivity();
+        void test_load_telescope_noise_t_sys();
+        void test_load_telescope_noise_t_components();
+
+    private:
+        void generate_noisy_telescope(const QString& dir,
+                int num_stations, int write_depth, const QVector<double>& freqs,
+                const QHash< QString, QVector<double> >& noise);
 };
 
 // Register the test class.

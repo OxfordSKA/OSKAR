@@ -27,36 +27,44 @@
  */
 
 
-#include "station/oskar_evaluate_effective_area.h"
-#include <stdlib.h>
+#ifndef OSKAR_EVALUATE_STATION_RECEIVER_NOISE_STDDEV_H_
+#define OSKAR_EVALUATE_STATION_RECEIVER_NOISE_STDDEV_H_
 
-#ifndef c_0
-#define c_0 299792458.0
-#endif
+/**
+ * @file oskar_evaluate_station_receiver_noise_stddev.h
+ */
+
+#include "oskar_global.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_effective_area(double* effective_area, int num_channels,
-        double start_freq, double freq_inc, int num_antennas)
-{
-    int c;
-    double freq, lambda;
-
-    if (effective_area == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    for (c = 0; c < num_channels; ++c)
-    {
-        freq = start_freq + freq_inc * c;
-        lambda = c_0 / freq;
-        effective_area[c] = num_antennas *  lambda * lambda / 2.0;
-    }
-
-    return OSKAR_SUCCESS;
-}
+/**
+ * @brief
+ * Evaluate the receiver noise standard deviation as a function of frequency
+ * for a given station of the specified parameters.
+ *
+ * @details
+ * Note: Receiver or antenna temperatures are assumed be normalised by the
+ * effective antenna area!.
+ *
+ * @param station_noise_stddev  Total station receiver noise standard deviation
+ * @param receiver_temperature  Receiver temperature per channel, in Kelvin.
+ * @param num_channels          Number of frequency channels.
+ * @param bandwidth             Channel bandwidth, in Hz.
+ * @param integration_time      Integration time, in seconds.
+ * @param num_antennas          Number of antennas in the station.
+ *
+ * @return An error code.
+ */
+OSKAR_EXPORT
+int oskar_evaluate_station_receiver_noise_stddev(double* station_noise_stddev,
+        const double* receiver_temperature, int num_channels, double bandwidth,
+        double integration_time, int num_antennas);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_EVALUATE_STATION_RECEIVER_NOISE_STDDEV_H_ */

@@ -28,6 +28,7 @@
 
 #include "station/oskar_element_model_init.h"
 #include "station/oskar_station_model_init.h"
+#include "station/oskar_system_noise_model_init.h"
 #include "utility/oskar_mem_init.h"
 #include <stdlib.h>
 #include <math.h>
@@ -116,6 +117,9 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->evaluate_array_factor = OSKAR_TRUE;
     model->evaluate_element_factor = OSKAR_TRUE;
     model->bit_depth = 0;
+
+    err = oskar_system_noise_model_init(&model->noise, type, location);
+    if (err) return err;
 
     return OSKAR_SUCCESS;
 }

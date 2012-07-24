@@ -26,27 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_EVALUATE_EFFECTIVE_AREA_H_
-#define OSKAR_EVALUATE_EFFECTIVE_AREA_H_
+#ifndef OSKAR_SYSTEM_NOISE_MODEL_INIT_H_
+#define OSKAR_SYSTEM_NOISE_MODEL_INIT_H_
 
 /**
- * @file oskar_evaluate_effective_area.h
+ * @file oskar_system_noise_model_init.h
  */
 
 #include "oskar_global.h"
-
+#include "station/oskar_SystemNoiseModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * @brief
+ * Initialises the system noise model data structure.
+ *
+ * @details
+ * This function initialises the system noise model data structure.
+ * All memory arrays will be empty (i.e. zero-sized).
+ *
+ * @param[in] data     Pointer to data structure.
+ * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
+ * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ */
 OSKAR_EXPORT
-int oskar_evaluate_effective_area(double* effective_area, int num_channels,
-        double start_freq, double freq_inc, int num_antennas);
+int oskar_system_noise_model_init(oskar_SystemNoiseModel* noise, int type,
+        int location);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_EFFECTIVE_AREA_H_ */
+#endif /* OSKAR_SYSTEM_NOISE_MODEL_INIT_H_ */

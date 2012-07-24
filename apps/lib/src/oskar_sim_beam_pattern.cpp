@@ -204,7 +204,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         {
             // Initialise the random number generator.
             oskar_Device_curand_state curand_state(tel_gpu.max_station_size);
-            curand_state.init(tel_gpu.seed_time_variable_errors);
+            curand_state.init(tel_gpu.seed_time_variable_station_element_errors);
 
             // Get the channel frequency.
             double frequency = settings.obs.start_frequency_hz +

@@ -35,20 +35,13 @@
 extern "C" {
 #endif
 
-int oskar_evaluate_sky_temperature(double* temperature, int num_channels,
-        double start_freq, double freq_inc, double spectral_index)
+int oskar_evaluate_sky_temperature(double* temp, double freq,
+        double freq0, double temp0, double spectral_index)
 {
-    int c;
-    double freq;
-
-    if (temperature == NULL)
+    if (temp == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
-    for (c = 0; c < num_channels; ++c)
-    {
-        freq = start_freq + freq_inc * c;
-        temperature[c] = 20.0 * pow((408e6 / freq), 2.0 + spectral_index);
-    }
+    *temp = temp0 * pow((freq0 / freq), 2.0 + spectral_index);
 
     return OSKAR_SUCCESS;
 }

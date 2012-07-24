@@ -111,12 +111,12 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     // GSM filter.
     s.beginGroup("gsm_file");
     s.beginGroup("filter");
-    temp = s.value("flux_min", "min").toString();
+    temp = s.value("flux_min").toString();
     if (temp.compare("min", Qt::CaseInsensitive) == 0)
         sky->gsm_filter.flux_min = 0.0;
     else
         sky->gsm_filter.flux_min = temp.toDouble();
-    temp = s.value("flux_max", "max").toString();
+    temp = s.value("flux_max").toString();
     if (temp.compare("max", Qt::CaseInsensitive) == 0)
         sky->gsm_filter.flux_max = 0.0;
     else

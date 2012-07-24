@@ -52,7 +52,7 @@ extern "C" {
  *
  * @param[out]    telescope  Pointer to empty telescope model structure to fill.
  * @param[in,out] log        Pointer to log structure to use.
- * @param[in]     settings   Pointer to and OSKAR telescope settings structure.
+ * @param[in]     settings   Pointer to an OSKAR telescope settings structure.
  *
  * @return An OSKAR error code.
  */

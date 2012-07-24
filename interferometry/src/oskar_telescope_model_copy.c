@@ -73,7 +73,7 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->coord_units = src->coord_units;
     dst->identical_stations = src->identical_stations;
     dst->use_common_sky = src->use_common_sky;
-    dst->seed_time_variable_errors = src->seed_time_variable_errors;
+    dst->seed_time_variable_station_element_errors = src->seed_time_variable_station_element_errors;
     dst->longitude_rad = src->longitude_rad;
     dst->latitude_rad = src->latitude_rad;
     dst->altitude_m = src->altitude_m;

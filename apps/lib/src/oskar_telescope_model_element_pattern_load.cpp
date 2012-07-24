@@ -31,6 +31,7 @@
 #include "interferometry/oskar_telescope_model_load_station_coords.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_type.h"
+#include "interferometry/oskar_telescope_model_resize.h"
 #include "station/oskar_ElementModel.h"
 #include "station/oskar_element_model_copy.h"
 #include "station/oskar_element_model_init.h"
@@ -46,6 +47,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QHash>
 
+// Element pattern filenames.
 static const char element_x_cst_file[] = "element_pattern_x_cst.txt";
 static const char element_y_cst_file[] = "element_pattern_y_cst.txt";
 
@@ -102,6 +104,8 @@ static int load_directories(oskar_TelescopeModel* telescope,
         int depth, QHash<QString, QString>& files,
         QHash<QString, oskar_ElementModel*>& models)
 {
+    int err = OSKAR_SUCCESS;
+
     // Update the dictionary of element files for the current station directory.
     update_element_files(files, cwd);
 
@@ -110,18 +114,23 @@ static int load_directories(oskar_TelescopeModel* telescope,
     children = cwd.entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
     int num_children = children.size();
 
-    // Check the station / child arrays have already been allocated.
-    // This can be done by calling oskar_telescope_load_config() first.
-    // NOTE: perhaps it would be also a good idea to allocate here
-    // to make it possible to load element pattern data without loading
-    // config (config.txt files) first.
+    // If the station / child arrays haven't been allocated
+    // (by oskar_telescope_load_config() for example), allocate them.
     if (depth == 0 && telescope->station == NULL)
     {
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        err = oskar_telescope_model_resize(telescope, num_children);
+        if (err) return err;
     }
     else if (depth > 0 && num_children > 0 && station->child == NULL)
     {
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        int type = oskar_telescope_model_type(telescope);
+        station->child = (oskar_StationModel*) malloc(num_children*sizeof(oskar_StationModel));
+        for (int i = 0; i < num_children; ++i)
+        {
+            err = oskar_station_model_init(&station->child[i], type,
+                    OSKAR_LOCATION_CPU, 0);
+            if (err) return err;
+        }
     }
 
     // Loop over, and descend into the child stations.
@@ -135,7 +144,7 @@ static int load_directories(oskar_TelescopeModel* telescope,
         QDir child_dir(cwd.filePath(children[i]));
 
         // Load this (child) station.
-        int err = load_directories(telescope, log, settings, child_dir, s,
+        err = load_directories(telescope, log, settings, child_dir, s,
                 depth + 1, files, models);
         if (err) return err;
     }
@@ -144,7 +153,7 @@ static int load_directories(oskar_TelescopeModel* telescope,
     // to the deepest element file found in the tree.
     if (num_children == 0)
     {
-        int err = load_element_patterns(log, settings, station, files, models);
+        err = load_element_patterns(log, settings, station, files, models);
         if (err) return err;
     }
 

@@ -72,7 +72,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
 
     // Initialise the random number generator.
     oskar_Device_curand_state curand_state(telescope->max_station_size);
-    curand_state.init(telescope->seed_time_variable_errors);
+    curand_state.init(telescope->seed_time_variable_station_element_errors);
 
     // Calculate time increments.
     int num_vis_dumps        = settings->obs.num_time_steps;

@@ -63,14 +63,6 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         strcpy(tel->config_directory, t.constData());
     }
 
-    // Telescope output configuration directory.
-    t = s.value("output_config_directory", "").toByteArray();
-    if (t.size() > 0)
-    {
-        tel->output_config_directory = (char*)malloc(t.size() + 1);
-        strcpy(tel->output_config_directory, t.constData());
-    }
-
     // Telescope location.
     tel->longitude_rad = s.value("longitude_deg", 0.0).toDouble() * D2R;
     tel->latitude_rad  = s.value("latitude_deg", 0.0).toDouble() * D2R;
@@ -81,93 +73,105 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
 
     // Station settings.
     s.beginGroup("station");
-    temp = s.value("station_type", "AA").toString().toUpper();
-    tel->station.station_type = (temp == "DISH") ?
-            OSKAR_STATION_TYPE_DISH : OSKAR_STATION_TYPE_AA;
-    tel->station.use_polarised_elements =
-            s.value("use_polarised_elements", true).toBool();
-    tel->station.ignore_custom_element_patterns =
-            s.value("ignore_custom_element_patterns", false).toBool();
-    tel->station.evaluate_array_factor =
-            s.value("evaluate_array_factor", true).toBool();
-    tel->station.evaluate_element_factor =
-            s.value("evaluate_element_factor", true).toBool();
-    tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
+    {
+        temp = s.value("station_type", "AA").toString().toUpper();
+        tel->station.station_type = (temp == "DISH") ?
+                OSKAR_STATION_TYPE_DISH : OSKAR_STATION_TYPE_AA;
+        tel->station.use_polarised_elements =
+                s.value("use_polarised_elements", true).toBool();
+        tel->station.ignore_custom_element_patterns =
+                s.value("ignore_custom_element_patterns", false).toBool();
+        tel->station.evaluate_array_factor =
+                s.value("evaluate_array_factor", true).toBool();
+        tel->station.evaluate_element_factor =
+                s.value("evaluate_element_factor", true).toBool();
+        tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
 
-    // Station element settings (overrides).
-    s.beginGroup("element");
-    tel->station.element.gain = s.value("gain", 0.0).toDouble();
-    tel->station.element.gain_error_fixed =
-            s.value("gain_error_fixed", 0.0).toDouble();
-    tel->station.element.gain_error_time =
-            s.value("gain_error_time", 0.0).toDouble();
-    tel->station.element.phase_error_fixed_rad =
-            s.value("phase_error_fixed_deg", 0.0).toDouble() * D2R;
-    tel->station.element.phase_error_time_rad =
-            s.value("phase_error_time_deg", 0.0).toDouble() * D2R;
-    tel->station.element.position_error_xy_m =
-            s.value("position_error_xy_m", 0.0).toDouble();
-    tel->station.element.x_orientation_error_rad =
-            s.value("x_orientation_error_deg", 0.0).toDouble() * D2R;
-    tel->station.element.y_orientation_error_rad =
-            s.value("y_orientation_error_deg", 0.0).toDouble() * D2R;
+        // Station element settings (overrides).
+        s.beginGroup("element");
+        {
+            tel->station.element.gain = s.value("gain", 0.0).toDouble();
+            tel->station.element.gain_error_fixed =
+                    s.value("gain_error_fixed", 0.0).toDouble();
+            tel->station.element.gain_error_time =
+                    s.value("gain_error_time", 0.0).toDouble();
+            tel->station.element.phase_error_fixed_rad =
+                    s.value("phase_error_fixed_deg", 0.0).toDouble() * D2R;
+            tel->station.element.phase_error_time_rad =
+                    s.value("phase_error_time_deg", 0.0).toDouble() * D2R;
+            tel->station.element.position_error_xy_m =
+                    s.value("position_error_xy_m", 0.0).toDouble();
+            tel->station.element.x_orientation_error_rad =
+                    s.value("x_orientation_error_deg", 0.0).toDouble() * D2R;
+            tel->station.element.y_orientation_error_rad =
+                    s.value("y_orientation_error_deg", 0.0).toDouble() * D2R;
 
-    // Station element random seeds.
-    temp = s.value("seed_gain_errors").toString();
-    tel->station.element.seed_gain_errors = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_phase_errors").toString();
-    tel->station.element.seed_phase_errors = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_time_variable_errors").toString();
-    tel->station.element.seed_time_variable_errors = (temp.toUpper() == "TIME"
-            || temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_position_xy_errors").toString();
-    tel->station.element.seed_position_xy_errors = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_x_orientation_error").toString();
-    tel->station.element.seed_x_orientation_error = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-    temp = s.value("seed_y_orientation_error").toString();
-    tel->station.element.seed_y_orientation_error = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+            // Station element random seeds.
+            temp = s.value("seed_gain_errors").toString();
+            tel->station.element.seed_gain_errors = (temp.toUpper() == "TIME" ||
+                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+            temp = s.value("seed_phase_errors").toString();
+            tel->station.element.seed_phase_errors = (temp.toUpper() == "TIME" ||
+                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+            temp = s.value("seed_time_variable_errors").toString();
+            tel->station.element.seed_time_variable_errors = (temp.toUpper() == "TIME"
+                    || temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+            temp = s.value("seed_position_xy_errors").toString();
+            tel->station.element.seed_position_xy_errors = (temp.toUpper() == "TIME" ||
+                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+            temp = s.value("seed_x_orientation_error").toString();
+            tel->station.element.seed_x_orientation_error = (temp.toUpper() == "TIME" ||
+                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+            temp = s.value("seed_y_orientation_error").toString();
+            tel->station.element.seed_y_orientation_error = (temp.toUpper() == "TIME" ||
+                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
 
-    // End element group.
-    s.endGroup();
+        }
+        s.endGroup(); // End element group.
 
-    // Station element fitting parameters (general).
-    s.beginGroup("element_fit");
-    tel->station.element_fit.ignore_data_at_pole =
-            s.value("ignore_data_at_pole", false).toBool();
-    tel->station.element_fit.ignore_data_below_horizon =
-            s.value("ignore_data_below_horizon", true).toBool();
-    tel->station.element_fit.overlap_angle_rad =
-            s.value("overlap_angle_deg", 9.0).toDouble() * D2R;
-    tel->station.element_fit.use_common_set =
-            s.value("use_common_set", true).toBool();
-    tel->station.element_fit.weight_boundaries =
-            s.value("weight_boundaries", 2.0).toDouble();
-    tel->station.element_fit.weight_overlap =
-            s.value("weight_overlap", 1.0).toDouble();
+        // Station element fitting parameters (general).
+        s.beginGroup("element_fit");
+        {
+            tel->station.element_fit.ignore_data_at_pole =
+                    s.value("ignore_data_at_pole", false).toBool();
+            tel->station.element_fit.ignore_data_below_horizon =
+                    s.value("ignore_data_below_horizon", true).toBool();
+            tel->station.element_fit.overlap_angle_rad =
+                    s.value("overlap_angle_deg", 9.0).toDouble() * D2R;
+            tel->station.element_fit.use_common_set =
+                    s.value("use_common_set", true).toBool();
+            tel->station.element_fit.weight_boundaries =
+                    s.value("weight_boundaries", 2.0).toDouble();
+            tel->station.element_fit.weight_overlap =
+                    s.value("weight_overlap", 1.0).toDouble();
 
-    // Station element fitting parameters (for all surfaces).
-    s.beginGroup("all");
-    tel->station.element_fit.all.search_for_best_fit =
-            s.value("search_for_best_fit", true).toBool();
-    tel->station.element_fit.all.average_fractional_error =
-            s.value("average_fractional_error", 0.02).toDouble();
-    tel->station.element_fit.all.average_fractional_error_factor_increase =
-            s.value("average_fractional_error_factor_increase", 1.5).toDouble();
-    tel->station.element_fit.all.eps_float =
-            s.value("eps_float", 1e-4).toDouble();
-    tel->station.element_fit.all.eps_double =
-            s.value("eps_double", 1e-8).toDouble();
-    tel->station.element_fit.all.smoothness_factor_override =
-            s.value("smoothness_factor_override", 1.0).toDouble();
-    s.endGroup();
+            // Station element fitting parameters (for all surfaces).
+            s.beginGroup("all");
+            tel->station.element_fit.all.search_for_best_fit =
+                    s.value("search_for_best_fit", true).toBool();
+            tel->station.element_fit.all.average_fractional_error =
+                    s.value("average_fractional_error", 0.02).toDouble();
+            tel->station.element_fit.all.average_fractional_error_factor_increase =
+                    s.value("average_fractional_error_factor_increase", 1.5).toDouble();
+            tel->station.element_fit.all.eps_float =
+                    s.value("eps_float", 1e-4).toDouble();
+            tel->station.element_fit.all.eps_double =
+                    s.value("eps_double", 1e-8).toDouble();
+            tel->station.element_fit.all.smoothness_factor_override =
+                    s.value("smoothness_factor_override", 1.0).toDouble();
+            s.endGroup();
+        }
+        s.endGroup(); // End element fit group.
+    }
+    s.endGroup(); // End station group
 
-    // End element fit group.
-    s.endGroup();
+    // Telescope output configuration directory.
+    t = s.value("output_config_directory", "").toByteArray();
+    if (t.size() > 0)
+    {
+        tel->output_config_directory = (char*)malloc(t.size() + 1);
+        strcpy(tel->output_config_directory, t.constData());
+    }
 
     return OSKAR_SUCCESS;
 }

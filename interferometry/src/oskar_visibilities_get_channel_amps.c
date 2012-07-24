@@ -46,8 +46,7 @@ int oskar_visibilties_get_channel_amps(oskar_Mem* vis_amp,
     num_elements = vis->num_times * vis->num_baselines;
     offset = channel * num_elements;
 
-    return oskar_mem_get_pointer(vis_amp, &vis->amplitude,
-            offset, num_elements);
+    return oskar_mem_get_pointer(vis_amp, &vis->amplitude, offset, num_elements);
 }
 
 #ifdef __cplusplus

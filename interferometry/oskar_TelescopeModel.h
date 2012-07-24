@@ -55,7 +55,8 @@ struct OSKAR_EXPORT oskar_TelescopeModel
     int identical_stations;      /**< True if all stations are identical. */
     int use_common_sky;          /**< True if all stations should use common source positions. */
 
-    int seed_time_variable_errors; /**< Random seed for time-variable errors. */
+    /** Random seed for time-variable station element errors (amplitude and phase). */
+    int seed_time_variable_station_element_errors;
 
     double longitude_rad;        /**< Geodetic longitude of telescope, in radians. */
     double latitude_rad;         /**< Geodetic latitude of telescope, in radians. */

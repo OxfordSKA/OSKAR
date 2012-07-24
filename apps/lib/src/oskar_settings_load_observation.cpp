@@ -70,7 +70,7 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         {
             oskar_log_error(log, "Invalid date string for 'start_time_utc' "
                     "(format must be: 'd-M-yyyy h:m:s.z').");
-            return OSKAR_ERR_SETTINGS;
+            return OSKAR_ERR_SETTINGS_OBSERVATION;
         }
         int year   = st.date().year();
         int month  = st.date().month();
@@ -94,7 +94,7 @@ int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         {
             oskar_log_error(log, "Invalid time string for 'length' "
                     "(format must be: 'h:m:s.z').");
-            return OSKAR_ERR_SETTINGS;
+            return OSKAR_ERR_SETTINGS_OBSERVATION;
         }
         obs->length_seconds = len.hour() * 3600.0 +
                 len.minute() * 60.0 + len.second() + len.msec() / 1000.0;

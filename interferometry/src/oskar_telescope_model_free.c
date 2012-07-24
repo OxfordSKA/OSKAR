@@ -31,6 +31,7 @@
 #include "station/oskar_station_model_free.h"
 #include "utility/oskar_mem_free.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

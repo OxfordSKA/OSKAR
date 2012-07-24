@@ -78,8 +78,6 @@ const char* oskar_get_error_string(int error)
             return "spline coefficient computation failed";
         case OSKAR_ERR_SPLINE_EVAL_FAIL:
             return "spline evaluation failed";
-        case OSKAR_ERR_SETUP_FAIL:
-            return "sky or telescope model set-up failed";
         case OSKAR_ERR_CUDA_DEVICES:
             return "insufficient CUDA devices found";
         case OSKAR_ERR_FUNCTION_NOT_AVAILABLE:
@@ -124,10 +122,23 @@ const char* oskar_get_error_string(int error)
             return "telescope settings error";
         case OSKAR_ERR_SETTINGS_INTERFEROMETER:
             return "interferometer settings error";
+        case OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE:
+            return "interferometer noise settings error";
         case OSKAR_ERR_SETTINGS_BEAM_PATTERN:
             return "beam pattern settings error";
         case OSKAR_ERR_SETTINGS_IMAGE:
             return "image settings error";
+
+        /* -600 to -620: Data model setup errors */
+        case OSKAR_ERR_SETUP_FAIL:
+            return "set-up failed";
+
+        case OSKAR_ERR_SETUP_FAIL_TELESCOPE:
+            return "failed to setup telescope model";
+
+        case OSKAR_ERR_SETUP_FAIL_SKY:
+            return "failed to setup sky model";
+
         default:
             break;
     };

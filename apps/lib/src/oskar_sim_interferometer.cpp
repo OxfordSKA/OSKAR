@@ -38,11 +38,14 @@
 #include "interferometry/oskar_evaluate_baseline_uvw.h"
 #include "interferometry/oskar_interferometer.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_SettingsTelescope.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_write.h"
+#include "interferometry/oskar_visibilities_add_system_noise.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_SettingsSky.h"
 #include "sky/oskar_sky_model_free.h"
+#include "sky/oskar_evaluate_sky_temperature.h" // TODO sky noise header
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
@@ -111,7 +114,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Set up the telescope model.
     oskar_TelescopeModel telescope_cpu;
     error = oskar_set_up_telescope(&telescope_cpu, log, &settings);
-    if (error) return OSKAR_ERR_SETUP_FAIL;
+    if (error) return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
 
     // Set up the sky model array.
     oskar_SkyModel* sky_chunk_cpu = NULL;
@@ -203,6 +206,16 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             vis_acc[i].clear_contents();
         }
     }
+
+    // Add uncorrelated system noise to the visibilities.
+    if (settings.interferometer.noise.enable)
+    {
+        int seed = settings.interferometer.noise.seed;
+        error = oskar_visibilities_add_system_noise(&vis_global, &telescope_cpu,
+                seed, settings.interferometer.noise.area_projection);
+        if (error) return error;
+    }
+
     oskar_log_section(log, "Simulation completed in %.3f sec.",
             timer.elapsed() / 1e3);
 
@@ -235,20 +248,19 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         {
             oskar_Image image;
             oskar_log_section(log, "Starting OSKAR imager...");
+            timer.restart();
             error = oskar_make_image(&image, log, &vis_global, &settings.image);
-            oskar_log_section(log, "Imaging complete.");
+            oskar_log_section(log, "Imaging completed in %.3f sec.", timer.elapsed()/1.0e3);
             if (error) return error;
             if (settings.image.oskar_image)
             {
-                error = oskar_image_write(&image, log,
-                        settings.image.oskar_image, 0);
+                error = oskar_image_write(&image, log, settings.image.oskar_image, 0);
                 if (error) return error;
             }
 #ifndef OSKAR_NO_FITS
             if (settings.image.fits_image)
             {
-                error = oskar_fits_image_write(&image, log,
-                        settings.image.fits_image);
+                error = oskar_fits_image_write(&image, log, settings.image.fits_image);
                 if (error) return error;
             }
 #endif

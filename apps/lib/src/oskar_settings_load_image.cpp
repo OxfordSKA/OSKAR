@@ -94,7 +94,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else if (temp == "PSF")
         im->image_type = OSKAR_IMAGE_TYPE_PSF;
     else
-        return OSKAR_ERR_SETTINGS;
+        return OSKAR_ERR_SETTINGS_IMAGE;
 
     temp = s.value("transform_type", "DFT 2D").toString().toUpper();
     if (temp == "DFT 2D")
@@ -104,7 +104,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else if (temp == "FFT")
         im->transform_type = OSKAR_IMAGE_FFT;
     else
-        return OSKAR_ERR_SETTINGS;
+        return OSKAR_ERR_SETTINGS_IMAGE;
 
     t = s.value("input_vis_data").toByteArray();
     if (t.size() > 0)

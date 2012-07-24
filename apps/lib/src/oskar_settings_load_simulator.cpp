@@ -56,5 +56,5 @@ int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
         sim->cuda_device_ids[i] = devs[i].toInt();
     }
 
-    return 0;
+    return OSKAR_SUCCESS;
 }

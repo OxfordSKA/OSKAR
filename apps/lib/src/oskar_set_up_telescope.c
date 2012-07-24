@@ -29,7 +29,7 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_telescope_model_config_load.h"
 #include "apps/lib/oskar_telescope_model_element_pattern_load.h"
-
+#include "apps/lib/oskar_telescope_model_noise_load.h"
 
 #include "apps/lib/oskar_telescope_model_save.h"
 
@@ -87,6 +87,10 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
             &settings->telescope);
     if (err) return err;
 
+    /* Load noise data */
+    err = oskar_telescope_model_noise_load(telescope, log, settings);
+    if (err) return err;
+
     /* Set telescope model meta-data */
     set_metadata(telescope, settings);
 
@@ -120,7 +124,7 @@ static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* 
     telescope->bandwidth_hz   = settings->interferometer.channel_bandwidth_hz;
     telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
     seed = settings->telescope.station.element.seed_time_variable_errors;
-    telescope->seed_time_variable_errors = seed;
+    telescope->seed_time_variable_station_element_errors = seed;
     for (i = 0; i < telescope->num_stations; ++i)
     {
         telescope->station[i].ra0_rad = telescope->ra0_rad;

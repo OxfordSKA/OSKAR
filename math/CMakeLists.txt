@@ -21,6 +21,7 @@ set(math_SRC
     src/oskar_dierckx_fprota.c
     src/oskar_dierckx_fpsurf.c
     src/oskar_dierckx_surfit.c
+    src/oskar_find_closest_match.c
     src/oskar_fit_ellipse.c
     src/oskar_healpix_angles_to_pix_ring.c
     src/oskar_healpix_npix_to_nside.c

@@ -55,3 +55,4 @@ if (QT4_FOUND AND CUDA_FOUND)
     set(name oskar_visibilities_to_ms)
     oskar_qt_app(${name} ${name}_main.cpp)
 endif ()
+

@@ -32,6 +32,7 @@
 #include "station/oskar_StationModel.h"
 #include "station/oskar_station_model_init.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +53,7 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
     telescope->coord_units = OSKAR_METRES;
     telescope->identical_stations = 0;
     telescope->use_common_sky = 1;
-    telescope->seed_time_variable_errors = 0;
+    telescope->seed_time_variable_station_element_errors = 0;
     telescope->longitude_rad = 0.0;
     telescope->latitude_rad = 0.0;
     telescope->altitude_m = 0.0;
@@ -92,7 +93,7 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
         if (err) return err;
     }
 
-    return 0;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

@@ -36,6 +36,7 @@
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 #include "station/oskar_ElementModel.h"
+#include "station/oskar_SystemNoiseModel.h"
 
 /* Forward declaration. */
 struct oskar_StationModel;
@@ -75,6 +76,9 @@ struct OSKAR_EXPORT oskar_StationModel
     oskar_StationModel* child;   /**< NULL when there are no child stations. */
     oskar_StationModel* parent;  /**< Pointer to station's parent (NULL if none). */
     oskar_ElementModel* element_pattern; /**< NULL if there are child stations. */
+
+    /* System noise model */
+    oskar_SystemNoiseModel noise;
 
     /* Other station data. */
     double longitude_rad;        /**< Geodetic longitude of station, in radians. */

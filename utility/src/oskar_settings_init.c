@@ -37,28 +37,36 @@ extern "C" {
 int oskar_settings_init(oskar_Settings* settings)
 {
     int error = 0;
+    oskar_SettingsSystemNoise* noise = &settings->interferometer.noise;
 
     /* Initialise all array pointers to NULL. */
-    settings->sim.cuda_device_ids = 0;
+    settings->sim.cuda_device_ids = NULL;
     settings->sky.num_fits_files = 0;
-    settings->sky.fits_file = 0;
-    settings->sky.gsm_file = 0;
-    settings->sky.num_sky_files = 0;
-    settings->sky.input_sky_file = 0;
-    settings->sky.output_sky_file = 0;
-    settings->telescope.config_directory = 0;
-    settings->telescope.output_config_directory = 0;
-    settings->telescope.station.receiver_temperature_file = 0;
-    settings->interferometer.ms_filename = 0;
-    settings->interferometer.oskar_vis_filename = 0;
-    settings->beam_pattern.oskar_image_power = 0;
-    settings->beam_pattern.oskar_image_phase = 0;
-    settings->beam_pattern.oskar_image_complex = 0;
-    settings->beam_pattern.fits_image_power = 0;
-    settings->beam_pattern.fits_image_phase = 0;
-    settings->image.input_vis_data = 0;
-    settings->image.oskar_image = 0;
-    settings->image.fits_image = 0;
+    settings->sky.fits_file = NULL;
+    settings->sky.gsm_file = NULL;
+    settings->sky.input_sky_file = NULL;
+    settings->sky.output_sky_file = NULL;
+    settings->telescope.config_directory = NULL;
+    settings->telescope.output_config_directory = NULL;
+    settings->telescope.station.receiver_temperature_file = NULL;
+    settings->interferometer.ms_filename = NULL;
+    settings->interferometer.oskar_vis_filename = NULL;
+    settings->beam_pattern.oskar_image_power = NULL;
+    settings->beam_pattern.oskar_image_phase = NULL;
+    settings->beam_pattern.oskar_image_complex = NULL;
+    settings->beam_pattern.fits_image_power = NULL;
+    settings->beam_pattern.fits_image_phase = NULL;
+    settings->image.input_vis_data = NULL;
+    settings->image.oskar_image = NULL;
+    settings->image.fits_image = NULL;
+    noise->freq.file = NULL;
+    noise->value.stddev.file = NULL;
+    noise->value.sensitivity.file = NULL;
+    noise->value.t_sys.file = NULL;
+    noise->value.t_rec.file = NULL;
+    noise->value.t_ant.file = NULL;
+    noise->value.radiation_efficiency.file = NULL;
+    noise->value.area.file = NULL;
 
     /* Initialise pathname to settings file. */
     error = oskar_mem_init(&settings->settings_path, OSKAR_CHAR,

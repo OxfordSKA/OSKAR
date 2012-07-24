@@ -28,8 +28,10 @@
 
 #include "station/oskar_station_model_free.h"
 #include "station/oskar_element_model_free.h"
+#include "station/oskar_system_noise_model_free.h"
 #include "utility/oskar_mem_free.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
 #ifndef M_PI
@@ -131,7 +133,11 @@ int oskar_station_model_free(oskar_StationModel* model)
         model->child = NULL;
     }
 
-    return 0;
+    /* Free the noise model if it exists */
+    error = oskar_system_noise_model_free(&model->noise);
+    if (error) return error;
+
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

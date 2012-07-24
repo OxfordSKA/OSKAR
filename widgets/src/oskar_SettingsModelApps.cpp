@@ -603,6 +603,269 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
 }
 
 
+void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& root)
+{
+    QStringList options;
+
+    QString key = root + "/system_noise";
+    setLabel(key, "System Noise");
+    {
+        QString root = key;
+
+        QString key = root + "/enable";
+        registerSetting(key, "Enable", oskar_SettingsItem::BOOL, false, false);
+
+        key = root + "/seed";
+        registerSetting(key, "Noise seed", oskar_SettingsItem::RANDOM_SEED);
+
+        key = root + "/area_projection";
+        registerSetting(key, "Effective area projection", oskar_SettingsItem::BOOL, false, true);
+
+        // --- Frequencies
+        key = root + "/freq";
+        options.clear();
+        options << "Telescope model"
+                << "Use observation settings"
+                << "Data file"
+                << "Range";
+        registerSetting(key, "Frequency specification", oskar_SettingsItem::OPTIONS, options);
+        setDefault(key, options.at(0));
+        {
+            QString root = key;
+            QString key = root + "/file";
+            registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+            key = root + "/range";
+            setLabel(key, "Range");
+            {
+                QString root = key;
+                QString key = root + "/number";
+                registerSetting(key, "Number of frequencies", oskar_SettingsItem::INT_UNSIGNED);
+                key = root + "/start";
+                registerSetting(key, "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
+                key = root + "/inc";
+                registerSetting(key, "frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
+            }
+        }
+
+        // --- Noise vales.
+        key = root + "/spec";
+        options.clear();
+        options << "Telescope model priority"
+                << "Flux density std.dev"
+                << "Sensitivity"
+                << "System temperature and area"
+                << "Component temperatures and area";
+        registerSetting(key, "Noise specification", oskar_SettingsItem::OPTIONS, options);
+        setDefault(key, options.at(0));
+
+        {
+            // --- Flux density std.dev.
+            QString root = key;
+            QString key = root + "/stddev";
+            options.clear();
+            options << "No override"
+                    << "Data file"
+                    << "Range";
+            registerSetting(key, "Flux density std.dev.", oskar_SettingsItem::OPTIONS, options);
+            setDefault(key, options.at(0));
+            {
+                QString root = key;
+                QString key = root  + "/file";
+                registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+                key = root + "/range";
+                setLabel(key, "Range");
+                {
+                    QString root = key;
+                    QString key = root + "/start";
+                    registerSetting(key, "Start (Jy)", oskar_SettingsItem::DOUBLE);
+                    key = root + "/end";
+                    registerSetting(key, "End (Jy)", oskar_SettingsItem::DOUBLE);
+                }
+            }
+        }
+
+        // --- A/T
+        {
+            QString root = key;
+            QString key = root + "/sensitivity";
+            options.clear();
+            options << "No override"
+                    << "Data file"
+                    << "Range";
+            registerSetting(key, "Sensitivity", oskar_SettingsItem::OPTIONS, options);
+            setDefault(key, options.at(0));
+            {
+                QString root = key;
+                QString key = root  + "/file";
+                registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+                key = root  + "/range";
+                setLabel(key, "Range");
+                {
+                    QString root = key;
+                    QString key = root + "/start";
+                    registerSetting(key, "Start (K/m^2)", oskar_SettingsItem::DOUBLE);
+                    key = root  + "/end";
+                    registerSetting(key, "End (K/m^2)", oskar_SettingsItem::DOUBLE);
+                }
+            }
+        }
+
+        // --- System Temperature
+        {
+            QString root = key;
+            QString key = root + "/t_sys";
+            options.clear();
+            options << "No override"
+                    << "Data file"
+                    << "Range";
+            registerSetting(key, "System temperature", oskar_SettingsItem::OPTIONS, options);
+            setDefault(key, options.at(0));
+            {
+                QString root = key;
+                QString key = root + "/file";
+                registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+                key = root + "/range";
+                setLabel(key, "Range");
+                {
+                    QString root = key;
+                    QString key = root + "/start";
+                    registerSetting(key, "Start (K)", oskar_SettingsItem::DOUBLE);
+                    key = root + "/end";
+                    registerSetting(key, "End (K)", oskar_SettingsItem::DOUBLE);
+                }
+            }
+        }
+
+        // --- Component temperatures
+        {
+            QString root = key;
+            QString key = root + "/temp";
+            setLabel(key, "System temperature components");
+            {
+                QString root = key;
+
+                // --- Ambient
+                QString key = root + "/ambient";
+                registerSetting(key, "Ambient temperature (K)", oskar_SettingsItem::DOUBLE);
+
+                // --- Receiver
+                key = root + "/receiver";
+                options.clear();
+                options << "No override"
+                        << "Data file"
+                        << "Range";
+                registerSetting(key, "Receiver temperature", oskar_SettingsItem::OPTIONS, options);
+                setDefault(key, options.at(0));
+                {
+                    QString root = key;
+                    QString key = root + "/file";
+                    registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+                    key = root + "/range";
+                    setLabel(key, "Range");
+                    {
+                        QString root = key;
+                        QString key = root + "/start";
+                        registerSetting(key, "Start (K)", oskar_SettingsItem::DOUBLE);
+                        key = root + "/end";
+                        registerSetting(key, "End (K)", oskar_SettingsItem::DOUBLE);
+                    }
+                }
+
+                // --- Antenna
+                key = root + "/antenna";
+                options.clear();
+                options << "No override"
+                        << "Data file"
+                        << "Range"
+                        << "Spectral index model (VLA memo 146)";
+                registerSetting(key, "Antenna temperature", oskar_SettingsItem::OPTIONS, options);
+                setDefault(key, options.at(0));
+                {
+                    QString root = key;
+                    QString key = root + "/file";
+                    registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+                    key = root + "/range";
+                    setLabel(key, "Range");
+                    {
+                        QString root = key;
+                        QString key = root + "/start";
+                        registerSetting(key, "Start (K)", oskar_SettingsItem::DOUBLE);
+                        key = root + "/end";
+                        registerSetting(key, "End (K)", oskar_SettingsItem::DOUBLE);
+                    }
+                    key = root + "/model";
+                    setLabel(key, "Spectral index model");
+                    {
+                        QString root = key;
+                        QString key = root + "/specral_index";
+                        registerSetting(key, "Noise spectral index", oskar_SettingsItem::DOUBLE);
+                        setDefault(key, 2.75);
+                        key = root + "/temp_408";
+                        registerSetting(key, "temperature at 408MHz (K)", oskar_SettingsItem::DOUBLE);
+                        setDefault(key, 20.0);
+                    }
+                }
+
+                // --- Radiation efficiency.
+                key = root + "/radiation_efficiency";
+                options.clear();
+                options << "No override"
+                        << "Data file"
+                        << "Range";
+                registerSetting(key, "Radiation efficiency", oskar_SettingsItem::OPTIONS, options);
+                setDefault(key, options.at(0));
+                {
+                    QString root = key;
+                    QString key = root + "/file";
+                    registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+                    key = root + "/range";
+                    setLabel(key, "Range");
+                    {
+                        QString root = key;
+                        QString key = root + "/start";
+                        registerSetting(key, "Start", oskar_SettingsItem::DOUBLE);
+                        key = root + "/end";
+                        registerSetting(key, "End", oskar_SettingsItem::DOUBLE);
+                    }
+                }
+            }
+        }
+
+        // --- Effective Area
+        {
+            QString root = key;
+            QString key = root + "/area";
+            options.clear();
+            options << "No override"
+                    << "Data file"
+                    << "Range";
+                    //<< "Area Model";
+            registerSetting(key, "Effective Area", oskar_SettingsItem::OPTIONS, options);
+            setDefault(key, options.at(0));
+            {
+                QString root = key;
+                key = root + "/file";
+                registerSetting(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
+                key = root + "/range";
+                setLabel(key, "Range");
+                {
+                    QString root = key;
+                    QString key = root + "/start";
+                    registerSetting(key, "Start (m^2)", oskar_SettingsItem::DOUBLE);
+                    key = root + "/end";
+                    registerSetting(key, "End (m^2)", oskar_SettingsItem::DOUBLE);
+                }
+//                key = root + "/model";
+//                options.clear();
+//                options << "Sparse AA" << "Dense AA";
+//                registerSetting(key, "Area model", oskar_SettingsItem::OPTIONS, options);
+//                setDefault(key, options.at(0));
+            }
+        }
+    }
+}
+
+
 void oskar_SettingsModelApps::init_settings_interferometer()
 {
     QString k, group;
@@ -625,6 +888,9 @@ void oskar_SettingsModelApps::init_settings_interferometer()
     registerSetting(k, "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
     setTooltip(k, "Number of averaged evaluations of the K-Jones matrix per \n"
             "Measurement Equation average.");
+
+    init_settings_system_noise_model("interferometer");
+
     k = group + "/oskar_vis_filename";
     registerSetting(k, "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path of the OSKAR visibility output file containing the \n"

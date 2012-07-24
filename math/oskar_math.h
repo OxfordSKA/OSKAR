@@ -33,7 +33,6 @@
  * @file oskar_math.h
  */
 
-#include "oskar_mat_tri_c.h"
 #include "oskar_cuda_dft_c2r_2d.h"
 
 #endif // OSKAR_MATH_H_

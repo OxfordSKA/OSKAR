@@ -43,7 +43,6 @@
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "station/oskar_evaluate_effective_area.h"
 #include "station/oskar_evaluate_element_weights_errors.h"
 #include "station/oskar_evaluate_flux_density.h"
 #include "station/oskar_evaluate_station_beam_dipoles.h"

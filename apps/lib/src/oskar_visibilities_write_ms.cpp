@@ -79,6 +79,8 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
     double dt_vis_dump = vis->time_inc_seconds;
     double t_start_sec = vis->time_start_mjd_utc * DAYS_2_SEC + (dt_vis_dump / 2);
     double ref_freq    = vis->freq_start_hz;
+    /* NOTE should the chan_width == freq_inc or channel bandwidth...
+     * these are in general different numbers */
     double chan_width  = vis->freq_inc_hz;
     if (num_antennas * (num_antennas - 1) / 2 != num_baselines)
         return OSKAR_ERR_DIMENSION_MISMATCH;
