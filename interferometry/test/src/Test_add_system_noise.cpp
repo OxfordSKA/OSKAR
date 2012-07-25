@@ -40,6 +40,7 @@
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_Settings.h"
+#include "utility/oskar_settings_init.h"
 
 #include "imaging/oskar_make_image.h"
 #include "imaging/oskar_image_write.h"
@@ -66,10 +67,11 @@ void Test_add_system_noise::test_stddev()
 
     // Setup some settings
     oskar_Settings settings;
+    oskar_settings_init(&settings);
 
     // Setup the telescope model.
     oskar_TelescopeModel telescope;
-    int num_stations = 30;
+    int num_stations = 10;
     int num_noise_values = 2;
     double freq_start = 20.0e6;
     double freq_inc   = 10.0e6;
@@ -117,7 +119,7 @@ void Test_add_system_noise::test_stddev()
     // Setup the visibilities structure.
     oskar_Visibilities vis;
     int num_channels = 1;
-    int num_times = 200;
+    int num_times = 5;
     err = oskar_visibilities_init(&vis, type | OSKAR_COMPLEX | OSKAR_MATRIX,
             location, num_channels, num_times, num_stations);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
@@ -174,7 +176,6 @@ void Test_add_system_noise::test_stddev()
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     check_image_stats(&image, &telescope);
-
 }
 
 void Test_add_system_noise::generate_range(oskar_Mem* data, int number, double start, double inc)

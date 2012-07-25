@@ -41,11 +41,12 @@ int oskar_settings_init(oskar_Settings* settings)
 
     /* Initialise all array pointers to NULL. */
     settings->sim.cuda_device_ids = NULL;
+    settings->sky.num_sky_files = 0;
+    settings->sky.input_sky_file = NULL;
+    settings->sky.gsm_file = NULL;
+    settings->sky.output_sky_file = NULL;
     settings->sky.num_fits_files = 0;
     settings->sky.fits_file = NULL;
-    settings->sky.gsm_file = NULL;
-    settings->sky.input_sky_file = NULL;
-    settings->sky.output_sky_file = NULL;
     settings->telescope.config_directory = NULL;
     settings->telescope.output_config_directory = NULL;
     settings->telescope.station.receiver_temperature_file = NULL;
