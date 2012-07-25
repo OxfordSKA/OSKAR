@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,7 @@ extern "C" {
    20      44      Padding to 64 byte length (reserved for future use).
    @endverbatim
  */
-struct oskar_BinaryHeader
+struct OSKAR_EXPORT oskar_BinaryHeader
 {
     char magic[9];              /* Start + 0 */
     char bin_version;           /* Start + 9 */

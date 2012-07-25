@@ -50,7 +50,7 @@ extern "C" {
  * @param[in] settings_file Path to a settings file.
  * @param[in,out] log  Pointer to a log structure to use.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_sim_interferometer(const char* settings_file, oskar_Log* log);
 
 #ifdef __cplusplus

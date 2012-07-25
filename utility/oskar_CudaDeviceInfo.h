@@ -45,7 +45,7 @@ extern "C" {
  * @details
  * This structure holds information about a CUDA device.
  */
-struct oskar_CudaDeviceInfo
+struct OSKAR_EXPORT oskar_CudaDeviceInfo
 {
     char name[256];            /**< String holding device name. */
     union {

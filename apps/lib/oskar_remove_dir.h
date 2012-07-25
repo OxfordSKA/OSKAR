@@ -47,7 +47,7 @@ extern "C" {
  *
  * @param[in] dir_name Name of the directory to remove.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 bool oskar_remove_dir(const char* dir_name);
 
 #ifdef __cplusplus

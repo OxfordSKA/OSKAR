@@ -33,6 +33,7 @@
  * @file oskar_SystemNoiseModel.h
  */
 
+#include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 
 /**
@@ -41,7 +42,7 @@
  * @details
  * This structure holds system noise data.
  */
-struct oskar_SystemNoiseModel
+struct OSKAR_EXPORT oskar_SystemNoiseModel
 {
     oskar_Mem frequency;
     oskar_Mem stddev;

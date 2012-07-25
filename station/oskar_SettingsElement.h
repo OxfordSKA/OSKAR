@@ -30,6 +30,12 @@
 #define OSKAR_SETTINGS_ELEMENT_H_
 
 /**
+ * @file oskar_SettingsElement.h
+ */
+
+#include "oskar_global.h"
+
+/**
  * @struct oskar_SettingsElement
  *
  * @brief Structure to hold station element settings.
@@ -38,7 +44,7 @@
  * The structure holds station element parameters that can be used to override
  * those in the station files.
  */
-struct oskar_SettingsElement
+struct OSKAR_EXPORT oskar_SettingsElement
 {
     double gain;
     double gain_error_fixed;

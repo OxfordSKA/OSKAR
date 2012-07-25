@@ -38,7 +38,7 @@
 
 class QLineEdit;
 
-class OSKAR_EXPORT oskar_BinaryLocations : public QDialog
+class OSKAR_WIDGETS_EXPORT oskar_BinaryLocations : public QDialog
 {
     Q_OBJECT
 

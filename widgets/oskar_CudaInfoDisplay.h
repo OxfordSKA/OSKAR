@@ -39,7 +39,7 @@
 class QProcess;
 class QTextEdit;
 
-class OSKAR_EXPORT oskar_CudaInfoDisplay : public QDialog
+class OSKAR_WIDGETS_EXPORT oskar_CudaInfoDisplay : public QDialog
 {
     Q_OBJECT
 

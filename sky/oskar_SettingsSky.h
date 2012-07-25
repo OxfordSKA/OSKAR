@@ -30,6 +30,12 @@
 #define OSKAR_SETTINGS_SKY_H_
 
 /**
+ * @file oskar_SettingsSky.h
+ */
+
+#include "oskar_global.h"
+
+/**
  * @struct oskar_SettingsSkyFilter
  *
  * @brief Structure to hold sky model filter settings.
@@ -37,7 +43,7 @@
  * @details
  * The structure holds parameters for a source filter.
  */
-struct oskar_SettingsSkyFilter
+struct OSKAR_EXPORT oskar_SettingsSkyFilter
 {
     double flux_min;
     double flux_max;
@@ -51,7 +57,7 @@ typedef struct oskar_SettingsSkyFilter oskar_SettingsSkyFilter;
  *
  * @brief Holds extended source settings which apply to all sources.
  */
-struct oskar_SettingsSkyExtendedSources
+struct OSKAR_EXPORT oskar_SettingsSkyExtendedSources
 {
     double FWHM_major;      /**< Major axis FWHM in radians. */
     double FWHM_minor;      /**< Minor axis FWHM in radians. */
@@ -64,7 +70,7 @@ typedef struct oskar_SettingsSkyExtendedSources oskar_SettingsSkyExtendedSources
  *
  * @brief Holds FITS file import parameters.
  */
-struct oskar_SettingsSkyFits
+struct OSKAR_EXPORT oskar_SettingsSkyFits
 {
     double spectral_index;    /**< Spectral index value of pixels in file. */
     double noise_floor;       /**< Noise floor in Jy. */
@@ -81,7 +87,7 @@ typedef struct oskar_SettingsSkyFits oskar_SettingsSkyFits;
  * @details
  * The structure holds parameters for a sky model power-law generator.
  */
-struct oskar_SettingsSkyGeneratorRandomPowerLaw
+struct OSKAR_EXPORT oskar_SettingsSkyGeneratorRandomPowerLaw
 {
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
@@ -102,7 +108,7 @@ typedef struct oskar_SettingsSkyGeneratorRandomPowerLaw oskar_SettingsSkyGenerat
  * The structure holds parameters for a sky model random broken-power-law
  * generator.
  */
-struct oskar_SettingsSkyGeneratorRandomBrokenPowerLaw
+struct OSKAR_EXPORT oskar_SettingsSkyGeneratorRandomBrokenPowerLaw
 {
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
@@ -124,7 +130,7 @@ typedef struct oskar_SettingsSkyGeneratorRandomBrokenPowerLaw oskar_SettingsSkyG
  * @details
  * The structure holds parameters for a sky model HEALPix grid generator.
  */
-struct oskar_SettingsSkyGeneratorHealpix
+struct OSKAR_EXPORT oskar_SettingsSkyGeneratorHealpix
 {
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
@@ -140,7 +146,7 @@ typedef struct oskar_SettingsSkyGeneratorHealpix oskar_SettingsSkyGeneratorHealp
  * @details
  * The structure holds parameters for all the sky model generators.
  */
-struct oskar_SettingsSkyGenerator
+struct OSKAR_EXPORT oskar_SettingsSkyGenerator
 {
     oskar_SettingsSkyGeneratorHealpix healpix;
     oskar_SettingsSkyGeneratorRandomPowerLaw random_power_law;
@@ -156,7 +162,7 @@ typedef struct oskar_SettingsSkyGenerator oskar_SettingsSkyGenerator;
  * @details
  * The structure holds parameters to construct a sky model.
  */
-struct oskar_SettingsSky
+struct OSKAR_EXPORT oskar_SettingsSky
 {
     int num_sky_files;     /**< Number of sky model files to load. */
     char** input_sky_file; /**< List of sky model files to load. */

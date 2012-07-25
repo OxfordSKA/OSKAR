@@ -38,7 +38,7 @@
 
 class QDoubleValidator;
 
-class OSKAR_EXPORT oskar_DoubleSpinBox : public QAbstractSpinBox
+class OSKAR_WIDGETS_EXPORT oskar_DoubleSpinBox : public QAbstractSpinBox
 {
     Q_OBJECT
 

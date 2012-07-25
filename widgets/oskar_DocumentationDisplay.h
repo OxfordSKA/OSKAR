@@ -36,7 +36,7 @@
 #include "oskar_global.h"
 #include <QtGui/QDialog>
 
-class OSKAR_EXPORT oskar_DocumentationDisplay : public QDialog
+class OSKAR_WIDGETS_EXPORT oskar_DocumentationDisplay : public QDialog
 {
     Q_OBJECT
 

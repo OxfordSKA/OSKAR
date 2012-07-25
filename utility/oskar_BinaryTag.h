@@ -82,7 +82,7 @@ extern "C" {
  * Note that the block size is the total number of bytes until the next tag,
  * including any extended tag names.
  */
-struct oskar_BinaryTag
+struct OSKAR_EXPORT oskar_BinaryTag
 {
     char magic[4];           /**< Magic number (ASCII "TAG"). */
     unsigned char flags;     /**< Bit 7 set indicates an extended tag. */
@@ -108,7 +108,7 @@ typedef struct oskar_BinaryTag oskar_BinaryTag;
  * and the offset in bytes from the start of the file of each data block.
  * It can be used to find an item of the required type.
  */
-struct oskar_BinaryTagIndex
+struct OSKAR_EXPORT oskar_BinaryTagIndex
 {
     int num_tags;             /**< Number of tags in the index. */
     int* extended;            /**< Array of flags (if true, tag is extended). */

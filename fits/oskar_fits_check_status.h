@@ -48,7 +48,7 @@ extern "C" {
  * This function checks the FITS status code and prints out an error message
  * if required.
  */
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_fits_check_status(oskar_Log* log, const int status,
         const char* message);
 

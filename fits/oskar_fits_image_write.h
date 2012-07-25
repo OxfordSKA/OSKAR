@@ -78,7 +78,7 @@ extern "C" {
  *
  * @return An error code.
  */
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 int oskar_fits_image_write(const oskar_Image* image, oskar_Log* log,
         const char* filename);
 

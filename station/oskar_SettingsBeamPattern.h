@@ -30,6 +30,12 @@
 #define OSKAR_SETTINGS_BEAM_PATTERN_H_
 
 /**
+ * @file oskar_SettingsBeamPattern.h
+ */
+
+#include "oskar_global.h"
+
+/**
  * @struct oskar_SettingsBeamPattern
  *
  * @brief Structure to hold beam pattern settings.
@@ -37,7 +43,7 @@
  * @details
  * The structure holds parameters for making a beam pattern.
  */
-struct oskar_SettingsBeamPattern
+struct OSKAR_EXPORT oskar_SettingsBeamPattern
 {
     double fov_deg;
     int size;

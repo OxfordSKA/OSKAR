@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,32 +67,32 @@ struct oskar_uvfits_header
 
 
 
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_uvfits_create(const char* filename, oskar_uvfits* fits);
 
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_uvfits_close(fitsfile* fits_file);
 
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_uvfits_write_groups_header(fitsfile* fits_file, long long num_vis);
 
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_uvfits_write_header(fitsfile* fits_file, const char* filename, double ra0,
         double dec0, double frequency0, double date0);
 
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_uvfits_write_param_header(fitsfile* fits_file, int id,
         const char* type, const char* comment, double scale,
         double zero);
 
 /* __FIXME__ This needs fixing to use the new visibility structure.
 
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_uvfits_write_data(fitsfile* fits_file, const oskar_VisData_d* vis,
         const double* weight, const double* date, const double* baseline);
 */
 
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 int oskar_uvfits_baseline_id(int ant1, int ant2);
 
 

@@ -32,6 +32,12 @@
 #include "interferometry/oskar_SettingsSystemNoise.h"
 
 /**
+ * @file oskar_SettingsInterferometer.h
+ */
+
+#include "oskar_global.h"
+
+/**
  * @struct oskar_SettingsInterferometer
  *
  * @brief Structure to hold interferometer settings.
@@ -39,7 +45,7 @@
  * @details
  * The structure holds observation parameters.
  */
-struct oskar_SettingsInterferometer
+struct OSKAR_EXPORT oskar_SettingsInterferometer
 {
     double channel_bandwidth_hz;
     int num_vis_ave;

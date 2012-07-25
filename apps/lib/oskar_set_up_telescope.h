@@ -54,7 +54,7 @@ extern "C" {
  * @param[in,out] log       A pointer to the log structure to use.
  * @param[in] settings      A pointer to the settings structure.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
         const oskar_Settings* settings);
 

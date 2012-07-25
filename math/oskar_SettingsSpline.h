@@ -30,6 +30,12 @@
 #define OSKAR_SETTINGS_SPLINE_H_
 
 /**
+ * @file oskar_SettingsSpline.h
+ */
+
+#include "oskar_global.h"
+
+/**
  * @struct oskar_SettingsSpline
  *
  * @brief Structure to hold settings for spline surface fitting.
@@ -38,7 +44,7 @@
  * The structure holds settings used to parameterise the spline surface fitting
  * procedure.
  */
-struct oskar_SettingsSpline
+struct OSKAR_EXPORT oskar_SettingsSpline
 {
     double eps_float; /**< Epsilon for single precision fit. */
     double eps_double; /**< Epsilon for double precision fit. */

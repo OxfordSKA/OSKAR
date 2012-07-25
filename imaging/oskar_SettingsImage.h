@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,11 @@
 #ifndef OSKAR_SETTINGS_IMAGE_H_
 #define OSKAR_SETTINGS_IMAGE_H_
 
+/**
+ * @file oskar_SettingsImage.h
+ */
+
+#include "oskar_global.h"
 #include "imaging/oskar_Image.h"
 
 /**
@@ -39,7 +44,7 @@
  * @details
  * The structure holds parameters for imaging.
  */
-struct oskar_SettingsImage
+struct OSKAR_EXPORT oskar_SettingsImage
 {
     double fov_deg;
     int size;

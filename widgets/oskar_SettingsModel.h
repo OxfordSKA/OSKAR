@@ -46,7 +46,7 @@
 
 class oskar_SettingsItem;
 
-class OSKAR_EXPORT oskar_SettingsModel : public QAbstractItemModel
+class OSKAR_WIDGETS_EXPORT oskar_SettingsModel : public QAbstractItemModel
 {
     Q_OBJECT
 
@@ -120,7 +120,7 @@ private:
     QStringList outputKeys_;
 };
 
-class OSKAR_EXPORT oskar_SettingsModelFilter : public QSortFilterProxyModel
+class OSKAR_WIDGETS_EXPORT oskar_SettingsModelFilter : public QSortFilterProxyModel
 {
     Q_OBJECT
 

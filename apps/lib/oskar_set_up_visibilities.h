@@ -55,7 +55,7 @@ extern "C" {
  * @param[in] telescope A pointer to the telescope model.
  * @param[in] type      The type of the visibility data (must be complex type).
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_set_up_visibilities(oskar_Visibilities* vis,
         const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
         int type);

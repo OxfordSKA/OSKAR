@@ -240,20 +240,31 @@ enum {
  *   http://msdn.microsoft.com/en-us/library/a90k134d(v=VS.90).aspx
  */
 #if (defined(_WIN32) || defined(__WIN32__))
-    #if (defined(oskar_EXPORTS) || defined(oskar_widgets_EXPORTS) \
-            || defined(oskar_fits_EXPORTS) || defined(oskar_apps_EXPORTS))
-        #ifndef OSKAR_EXPORT
-            #define OSKAR_EXPORT __declspec(dllexport)
-        #endif
+    #if (defined(oskar_EXPORTS))
+        #define OSKAR_EXPORT __declspec(dllexport)
     #else
-        #ifndef OSKAR_EXPORT
-            #define OSKAR_EXPORT
-        #endif
+        #define OSKAR_EXPORT __declspec(dllimport)
+    #endif
+    #if (defined(oskar_fits_EXPORTS))
+        #define OSKAR_FITS_EXPORT __declspec(dllexport)
+    #else
+        #define OSKAR_FITS_EXPORT __declspec(dllimport)
+    #endif
+    #if (defined(oskar_widgets_EXPORTS))
+        #define OSKAR_WIDGETS_EXPORT __declspec(dllexport)
+    #else
+        #define OSKAR_WIDGETS_EXPORT __declspec(dllimport)
+    #endif
+    #if (defined(oskar_apps_EXPORTS))
+        #define OSKAR_APPS_EXPORT __declspec(dllexport)
+    #else
+        #define OSKAR_APPS_EXPORT __declspec(dllimport)
     #endif
 #else
-    #ifndef OSKAR_EXPORT
-        #define OSKAR_EXPORT
-    #endif
+    #define OSKAR_EXPORT
+    #define OSKAR_FITS_EXPORT
+    #define OSKAR_WIDGETS_EXPORT
+    #define OSKAR_APPS_EXPORT
 #endif
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ extern "C" {
  * @details
  * This function writes axis header keywords and data to a FITS file.
  */
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 void oskar_fits_write_axis_header(fitsfile* fits_file, int axis_id,
         const char* ctype, const char* ctype_comment, double crval,
         double cdelt, double crpix, double crota);

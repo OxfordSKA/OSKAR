@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_TELESCOPE_MODEL_NOISE_LOAD_H_
 #define OSKAR_TELESCOPE_MODEL_NOISE_LOAD_H_
 
@@ -57,7 +56,7 @@ extern "C" {
  *
  * @return An OSKAR error code.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_Settings* settings);
 

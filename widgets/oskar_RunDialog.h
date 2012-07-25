@@ -46,7 +46,7 @@ class QTextEdit;
 class oskar_SettingsModel;
 class oskar_RunThread;
 
-class OSKAR_EXPORT oskar_RunDialog : public QDialog
+class OSKAR_WIDGETS_EXPORT oskar_RunDialog : public QDialog
 {
     Q_OBJECT
 

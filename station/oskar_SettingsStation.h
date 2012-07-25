@@ -29,6 +29,11 @@
 #ifndef OSKAR_SETTINGS_STATION_H_
 #define OSKAR_SETTINGS_STATION_H_
 
+/**
+ * @file oskar_SettingsStation.h
+ */
+
+#include "oskar_global.h"
 #include "station/oskar_SettingsElement.h"
 #include "station/oskar_SettingsElementFit.h"
 
@@ -40,7 +45,7 @@
  * @details
  * The structure holds station model parameters.
  */
-struct oskar_SettingsStation
+struct OSKAR_EXPORT oskar_SettingsStation
 {
     int station_type;
     int use_polarised_elements;

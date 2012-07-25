@@ -82,7 +82,6 @@ static int evaluate_t_sys(oskar_Mem* t_sys, const oskar_Mem* t_rec,
         double num_freqs);
 static int evaluate_range(oskar_Mem* values, int num_values, double start, double end);
 
-extern "C"
 int oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_Settings* settings)
 {

@@ -29,6 +29,11 @@
 #ifndef OSKAR_SETTINGS_TELESCOPE_H_
 #define OSKAR_SETTINGS_TELESCOPE_H_
 
+/**
+ * @file oskar_SettingsTelescope.h
+ */
+
+#include "oskar_global.h"
 #include "station/oskar_SettingsStation.h"
 
 /**
@@ -39,7 +44,7 @@
  * @details
  * The structure holds telescope model parameters.
  */
-struct oskar_SettingsTelescope
+struct OSKAR_EXPORT oskar_SettingsTelescope
 {
     char* config_directory;
     char* output_config_directory;

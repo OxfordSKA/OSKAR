@@ -60,7 +60,7 @@ extern "C" {
  *
  * @return An OSKAR error code.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_telescope_model_element_pattern_load(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_SettingsTelescope* settings);
 

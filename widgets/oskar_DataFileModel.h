@@ -43,7 +43,7 @@
 
 #include "sky/oskar_SkyModel.h"
 
-class OSKAR_EXPORT oskar_ConfigFileModel : public QAbstractTableModel
+class OSKAR_WIDGETS_EXPORT oskar_ConfigFileModel : public QAbstractTableModel
 {
     public:
         Q_OBJECT

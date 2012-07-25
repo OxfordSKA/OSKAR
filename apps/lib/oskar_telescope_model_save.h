@@ -53,7 +53,7 @@ extern "C" {
  *
  * @return An OSKAR error code.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_telescope_model_save(const oskar_TelescopeModel* telescope,
         const char* dir_path);
 

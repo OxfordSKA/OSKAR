@@ -30,6 +30,12 @@
 #define OSKAR_SETTINGS_OBSERVATION_H_
 
 /**
+ * @file oskar_SettingsObservation.h
+ */
+
+#include "oskar_global.h"
+
+/**
  * @struct oskar_SettingsObservation
  *
  * @brief Structure to hold observation settings.
@@ -37,7 +43,7 @@
  * @details
  * The structure holds observation parameters.
  */
-struct oskar_SettingsObservation
+struct OSKAR_EXPORT oskar_SettingsObservation
 {
     double ra0_rad;
     double dec0_rad;

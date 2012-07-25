@@ -56,7 +56,7 @@ extern "C" {
  *
  * @return An OSKAR error code.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_telescope_model_config_load(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_SettingsTelescope* settings);
 
@@ -73,7 +73,7 @@ int oskar_telescope_model_config_load(oskar_TelescopeModel* telescope,
  *
  * @return An OSKAR error code.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings);
 

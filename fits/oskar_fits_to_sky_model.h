@@ -54,7 +54,7 @@ extern "C" {
  *
  * @return An error code.
  */
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
         oskar_SkyModel* sky, double spectral_index, double min_peak_fraction,
         double noise_floor, int downsample_factor);

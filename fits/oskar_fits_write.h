@@ -92,7 +92,7 @@ extern "C" {
  *
  * @return An error code.
  */
-OSKAR_EXPORT
+OSKAR_FITS_EXPORT
 int oskar_fits_write(oskar_Log* log, const char* filename, int type, int naxis,
         long* naxes, void* data, const char** ctype, const char** ctype_desc,
         const double* crval, const double* cdelt, const double* crpix,

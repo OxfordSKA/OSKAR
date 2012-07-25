@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@ extern "C" {
  * @param[out] settings A pointer to a settings structure to populate.
  * @param[in] filename  String containing name of settings file to read.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_settings_load_beam_pattern(oskar_SettingsBeamPattern* settings,
         const char* filename);
 

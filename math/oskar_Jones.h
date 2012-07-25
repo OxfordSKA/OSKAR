@@ -33,6 +33,7 @@
  * @file oskar_Jones.h
  */
 
+#include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 
 /**
@@ -45,7 +46,7 @@
  * The fastest-varying dimension is the source dimension; the slowest varying
  * is the station dimension.
  */
-struct oskar_Jones
+struct OSKAR_EXPORT oskar_Jones
 {
     int num_stations; /**< Slowest varying dimension. */
     int num_sources;  /**< Fastest varying dimension. */

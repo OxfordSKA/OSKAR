@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ extern "C" {
  * This structure holds information about the CUDA environment and
  * devices in the system.
  */
-struct oskar_CudaInfo
+struct OSKAR_EXPORT oskar_CudaInfo
 {
     int num_devices;              /**< Number of installed CUDA devices. */
     int driver_version;           /**< CUDA driver version. */

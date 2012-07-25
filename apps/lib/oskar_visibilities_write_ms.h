@@ -52,7 +52,7 @@ extern "C" {
  * @param[in] ms_path   Pathname of the Measurement Set to write.
  * @param[in] overwrite If true, then overwrite any existing Measurement Set.
  */
-OSKAR_EXPORT
+OSKAR_APPS_EXPORT
 int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
         const char* ms_path, int overwrite);
 

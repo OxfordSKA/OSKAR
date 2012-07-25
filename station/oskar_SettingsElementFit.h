@@ -29,6 +29,11 @@
 #ifndef OSKAR_SETTINGS_ELEMENT_FIT_H_
 #define OSKAR_SETTINGS_ELEMENT_FIT_H_
 
+/**
+ * @file oskar_SettingsElementFit.h
+ */
+
+#include "oskar_global.h"
 #include "math/oskar_SettingsSpline.h"
 
 /**
@@ -40,7 +45,7 @@
  * The structure holds station element parameters that can be used to override
  * those in the station files.
  */
-struct oskar_SettingsElementFit
+struct OSKAR_EXPORT oskar_SettingsElementFit
 {
     double overlap_angle_rad;
     int ignore_data_below_horizon;
