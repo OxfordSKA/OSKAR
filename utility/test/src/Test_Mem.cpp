@@ -988,3 +988,21 @@ void Test_Mem::test_binary()
     // Free the tag index.
     oskar_binary_tag_index_free(&index);
 }
+
+void Test_Mem::test_copy_gpu()
+{
+    int n = 100;
+    oskar_Mem cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n, OSKAR_TRUE);
+    double* cpu_ = (double*)cpu.data;
+    for (int i = 0; i < n; ++i)
+    {
+        cpu_[i] = (double)i;
+    }
+
+    {
+        oskar_Mem gpu(&cpu, OSKAR_LOCATION_GPU);
+    }
+
+    //cudaDeviceReset();
+}
+
