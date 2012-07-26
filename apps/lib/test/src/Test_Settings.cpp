@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
+#include <cuda_runtime_api.h>
 #include "apps/lib/test/Test_Settings.h"
 
 #include "apps/lib/oskar_settings_load.h"
@@ -44,6 +44,9 @@ void Test_Settings::test_read()
     // Construct test settings file
     {
         QSettings settings("./temp.ini", QSettings::IniFormat);
+        settings.beginGroup("observation");
+        settings.setValue("num_channels", 2);
+        settings.endGroup();
     }
 
     // Read settings

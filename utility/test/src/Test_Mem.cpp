@@ -44,6 +44,7 @@
 #include "utility/oskar_file_exists.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_Settings.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -1001,8 +1002,10 @@ void Test_Mem::test_copy_gpu()
 
     {
         oskar_Mem gpu(&cpu, OSKAR_LOCATION_GPU);
+        oskar_Mem cpu2(&gpu, OSKAR_LOCATION_CPU);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(cpu_[5],((double*)cpu2.data)[5], 1e-6);
     }
 
-    //cudaDeviceReset();
+    cudaDeviceReset();
 }
 

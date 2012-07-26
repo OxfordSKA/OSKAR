@@ -46,16 +46,16 @@ class Test_Mem : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_Mem);
-        //CPPUNIT_TEST(test_alloc);
-        //CPPUNIT_TEST(test_realloc);
-        //CPPUNIT_TEST(test_append);
-        //CPPUNIT_TEST(test_different);
-        //CPPUNIT_TEST(test_type_check);
-        //CPPUNIT_TEST(test_scale_real);
-        //CPPUNIT_TEST(test_set_value_real);
-        //CPPUNIT_TEST(test_add);
-        //CPPUNIT_TEST(test_add_noise);
-        //CPPUNIT_TEST(test_binary);
+        CPPUNIT_TEST(test_alloc);
+        CPPUNIT_TEST(test_realloc);
+        CPPUNIT_TEST(test_append);
+        CPPUNIT_TEST(test_different);
+        CPPUNIT_TEST(test_type_check);
+        CPPUNIT_TEST(test_scale_real);
+        CPPUNIT_TEST(test_set_value_real);
+        CPPUNIT_TEST(test_add);
+        CPPUNIT_TEST(test_add_noise);
+        CPPUNIT_TEST(test_binary);
         CPPUNIT_TEST(test_copy_gpu);
         CPPUNIT_TEST_SUITE_END();
 
