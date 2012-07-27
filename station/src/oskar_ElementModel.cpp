@@ -34,23 +34,24 @@
 
 oskar_ElementModel::oskar_ElementModel(int type, int location)
 {
-    if (oskar_element_model_init(this, type, location))
-        throw "Error in oskar_element_model_init";
+	int err = oskar_element_model_init(this, type, location);
+	if (err) throw err;
 }
 
 oskar_ElementModel::oskar_ElementModel(const oskar_ElementModel* other,
         int location)
 {
-    if (oskar_element_model_init(this, other->type(), location))
-        throw "Error in oskar_element_model_init";
-    if (oskar_element_model_copy(this, other))
-        throw "Error in oskar_station_model_copy";
+	int err;
+	err = oskar_element_model_init(this, other->type(), location);
+	if (err) throw err;
+	err = oskar_element_model_copy(this, other);
+	if (err) throw err;
 }
 
 oskar_ElementModel::~oskar_ElementModel()
 {
-    if (oskar_element_model_free(this))
-        throw "Error in oskar_element_model_free";
+	int err = oskar_element_model_free(this);
+	if (err) throw err;
 }
 
 int oskar_ElementModel::type() const

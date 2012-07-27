@@ -33,24 +33,25 @@
 oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,
         int n_stations)
 {
-    if (oskar_telescope_model_init(this, type, location, n_stations))
-        throw "Error in oskar_telescope_model_init.";
+	int err = oskar_telescope_model_init(this, type, location, n_stations);
+    if (err) throw err;
 }
 
 oskar_TelescopeModel::oskar_TelescopeModel(const oskar_TelescopeModel* other,
         int location)
 {
-    if (oskar_telescope_model_init(this, other->station_x.type, location,
-            other->num_stations))
-        throw "Error in oskar_telescope_model_init.";
-    if (oskar_telescope_model_copy(this, other)) // Copy other to this.
-        throw "Error in oskar_telescope_model_copy.";
+	int err;
+	err = oskar_telescope_model_init(this, other->station_x.type, location,
+            other->num_stations);
+    if (err) throw err;
+    err = oskar_telescope_model_copy(this, other); // Copy other to this.
+    if (err) throw err;
 }
 
 oskar_TelescopeModel::~oskar_TelescopeModel()
 {
-    if (oskar_telescope_model_free(this))
-        throw "Error in oskar_telescope_model_free.";
+	int err = oskar_telescope_model_free(this);
+    if (err) throw err;
 }
 
 void oskar_TelescopeModel::analyse()

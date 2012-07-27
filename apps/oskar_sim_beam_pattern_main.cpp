@@ -37,7 +37,7 @@
 
 int main(int argc, char** argv)
 {
-    int error;
+    int error = OSKAR_SUCCESS;
 
     // Parse command line.
     if (argc != 2)
@@ -48,14 +48,21 @@ int main(int argc, char** argv)
 
     // Create the log.
     oskar_Log log;
-
-    // Run simulation.
     oskar_log_message(&log, 0, "Running binary %s", argv[0]);
-    error = oskar_sim_beam_pattern(argv[1], &log);
 
-    // Check for errors.
-    if (error)
-        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
+	try
+	{
+		// Run simulation.
+		error = oskar_sim_beam_pattern(argv[1], &log);
+	}
+	catch (int code)
+	{
+		error = code;
+	}
+
+	// Check for errors.
+	if (error)
+		oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
 
     return error;
 }

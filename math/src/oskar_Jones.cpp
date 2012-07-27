@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,23 +39,24 @@
 oskar_Jones::oskar_Jones(int type, int location, int num_stations,
         int num_sources)
 {
-    if (oskar_jones_init(this, type, location, num_stations, num_sources))
-        throw "Error in oskar_jones_init.";
+	int err = oskar_jones_init(this, type, location, num_stations, num_sources);
+    if (err) throw err;
 }
 
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
 {
-    if (oskar_jones_init(this, other->type(), location,
-            other->num_stations, other->num_sources))
-        throw "Error in oskar_jones_init.";
-    if (oskar_jones_copy(this, other))
-        throw "Error in oskar_jones_copy.";
+	int err;
+	err = oskar_jones_init(this, other->type(), location,
+            other->num_stations, other->num_sources);
+    if (err) throw err;
+    err = oskar_jones_copy(this, other);
+    if (err) throw err;
 }
 
 oskar_Jones::~oskar_Jones()
 {
-    if (oskar_jones_free(this))
-        throw "Error in oskar_jones_free.";
+	int err = oskar_jones_free(this);
+    if (err) throw err;
 }
 
 int oskar_Jones::copy_to(oskar_Jones* other)

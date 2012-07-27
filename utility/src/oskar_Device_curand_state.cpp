@@ -38,13 +38,15 @@ oskar_Device_curand_state::oskar_Device_curand_state(int num_states)
 {
     int err = cudaMalloc((void**)&(this->state), num_states * sizeof(curandState));
     this->num_states = num_states;
-    if (err != CUDA_SUCCESS)
-        throw "Error allocating memory oskar_Device_state::curand_state.";
+    if (err) throw err;
 }
 
 oskar_Device_curand_state::~oskar_Device_curand_state()
 {
-    if (state != NULL) cudaFree(state);
+	int err = 0;
+    if (state != NULL)
+    	err = cudaFree(state);
+    if (err) throw err;
 }
 
 int oskar_Device_curand_state::init(int seed, int offset, int use_device_offset)

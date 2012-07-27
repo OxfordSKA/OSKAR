@@ -36,23 +36,24 @@ oskar_Mem::oskar_Mem(int owner_)
 
 oskar_Mem::oskar_Mem(int mem_type, int mem_location, int size, int owner_)
 {
-    if (oskar_mem_init(this, mem_type, mem_location, size, owner_))
-        throw "Error in oskar_mem_init.";
+	int err = oskar_mem_init(this, mem_type, mem_location, size, owner_);
+    if (err) throw err;
 }
 
 oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
 {
-    if (oskar_mem_init(this, other->type, mem_location, other->num_elements,
-            owner_))
-        throw "Error in oskar_mem_init.";
-    if (oskar_mem_copy(this, other)) // Copy other to this.
-        throw "Error in oskar_mem_copy.";
+	int err;
+	err = oskar_mem_init(this, other->type, mem_location, other->num_elements,
+            owner_);
+    if (err) throw err;
+    err = oskar_mem_copy(this, other); // Copy other to this.
+    if (err) throw err;
 }
 
 oskar_Mem::~oskar_Mem()
 {
-    if (oskar_mem_free(this))
-        throw "Error in oskar_mem_free.";
+	int err = oskar_mem_free(this);
+    if (err) throw err;
 }
 
 int oskar_Mem::append(const oskar_Mem* from)

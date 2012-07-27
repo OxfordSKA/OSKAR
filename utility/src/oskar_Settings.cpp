@@ -33,12 +33,12 @@
 
 oskar_Settings::oskar_Settings()
 {
-    if (oskar_settings_init(this))
-        throw "Error in oskar_settings_init.";
+	int err = oskar_settings_init(this);
+    if (err) throw err;
 }
 
 oskar_Settings::~oskar_Settings()
 {
-    if (oskar_settings_free(this))
-        throw "Error in oskar_settings_free.";
+	int err = oskar_settings_free(this);
+    if (err) throw err;
 }

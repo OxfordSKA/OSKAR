@@ -32,12 +32,12 @@
 
 oskar_Log::oskar_Log()
 {
-    if (oskar_log_init(this))
-        throw "Error in oskar_log_init.";
+	int err = oskar_log_init(this);
+    if (err) throw err;
 }
 
 oskar_Log::~oskar_Log()
 {
-    if (oskar_log_free(this))
-        throw "Error in oskar_log_free.";
+	int err = oskar_log_free(this);
+    if (err) throw err;
 }

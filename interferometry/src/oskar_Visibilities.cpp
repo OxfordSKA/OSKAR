@@ -31,25 +31,26 @@
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
         int num_channels, int num_times, int num_stations)
 {
-    if (oskar_visibilities_init(this, amp_type, location, num_channels,
-            num_times, num_stations))
-        throw "Error in oskar_visibilities_init.";
+	int err = oskar_visibilities_init(this, amp_type, location, num_channels,
+            num_times, num_stations);
+    if (err) throw err;
 }
 
 oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
         int location)
 {
-    if (oskar_visibilities_init(this, other->amplitude.type, location,
-            other->num_channels, other->num_times, other->num_stations))
-        throw "Error in oskar_visibilities_init.";
-    if (oskar_visibilities_copy(this, other)) // Copy other to this.
-        throw "Error in oskar_visibilities_copy.";
+	int err;
+	err = oskar_visibilities_init(this, other->amplitude.type, location,
+            other->num_channels, other->num_times, other->num_stations);
+    if (err) throw err;
+    err = oskar_visibilities_copy(this, other); // Copy other to this.
+    if (err) throw err;
 }
 
 oskar_Visibilities::~oskar_Visibilities()
 {
-    if (oskar_visibilities_free(this))
-        throw "Error in oskar_visibilities_free.";
+	int err = oskar_visibilities_free(this);
+    if (err) throw err;
 }
 
 int oskar_Visibilities::clear_contents()
