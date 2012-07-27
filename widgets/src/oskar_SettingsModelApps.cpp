@@ -889,7 +889,9 @@ void oskar_SettingsModelApps::init_settings_interferometer()
     setTooltip(k, "Number of averaged evaluations of the K-Jones matrix per \n"
             "Measurement Equation average.");
 
+#if 0
     init_settings_system_noise_model("interferometer");
+#endif
 
     k = group + "/oskar_vis_filename";
     registerSetting(k, "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);

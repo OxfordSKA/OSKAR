@@ -619,15 +619,19 @@ endif()
 # some platforms.
 find_library_local_first(CUDA_CUDA_LIBRARY cuda "\"cuda\" library (older versions only).")
 
+##
+## NOTE: OSKAR change: we dont think we need libcuda.so in the link list.
+## if this is no longer the case remove the comments from the section below
+## to add libcuda.so back into CUDA_LIBRARIES.
+##
 # Add cuda library to the link line only if it is found.
-if (CUDA_CUDA_LIBRARY)
-  set(CUDA_LIBRARIES ${CUDA_LIBRARIES} ${CUDA_CUDA_LIBRARY})
-endif(CUDA_CUDA_LIBRARY)
+#if (CUDA_CUDA_LIBRARY)
+#  set(CUDA_LIBRARIES ${CUDA_LIBRARIES} ${CUDA_CUDA_LIBRARY})
+#endif(CUDA_CUDA_LIBRARY)
 
 mark_as_advanced(
   CUDA_CUDA_LIBRARY
-  CUDA_CUDART_LIBRARY
-  )
+  CUDA_CUDART_LIBRARY)
 
 #######################
 # Look for some of the toolkit helper libraries

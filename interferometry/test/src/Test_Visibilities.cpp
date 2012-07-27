@@ -43,9 +43,9 @@ void Test_Visibilities::test_create()
     // Throw an error for non complex visibility data types.
     {
         CPPUNIT_ASSERT_THROW(oskar_Visibilities vis(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
-                num_channels, num_times, num_stations), char*);
+                num_channels, num_times, num_stations), int);
         CPPUNIT_ASSERT_THROW(oskar_Visibilities vis(OSKAR_DOUBLE, OSKAR_LOCATION_CPU,
-                num_channels, num_times, num_stations), char*);
+                num_channels, num_times, num_stations), int);
     }
 
     // Don't expect to throw for complex types.
