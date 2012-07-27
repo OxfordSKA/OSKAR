@@ -1,4 +1,4 @@
-2012-xx-xx  OSKAR 2.x.x-beta
+2012-07-27  OSKAR 2.0.4-beta
 
     * Fixed a problem encountered when loading a Measurement Set in CASA
       containing only one frequency channel.
@@ -6,9 +6,9 @@
     * Fixed a problem encountered when attempting to load an invalid OSKAR
       binary file.
 
-    * Added the ability to load FITS images directly as a sky model.
+    * Fixed uncaught exceptions in simulation applications.
 
-    * Added a binary utility to convert a FITS image to a sky model file.
+    * Added the ability to load FITS images directly as a sky model.
 
     * Added a binary utility to display CUDA system information.
 

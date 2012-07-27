@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # === Project version.
 set(OSKAR_VERSION_MAJOR 2)
 set(OSKAR_VERSION_MINOR 0)
-set(OSKAR_VERSION_PATCH 3)
+set(OSKAR_VERSION_PATCH 4)
 set(OSKAR_VERSION "${OSKAR_VERSION_MAJOR}.${OSKAR_VERSION_MINOR}.${OSKAR_VERSION_PATCH}")
 
 # === Append the src/cmake directory to the module path.
