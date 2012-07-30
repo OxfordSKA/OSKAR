@@ -1,3 +1,11 @@
+2012-mm-dd OSKAR 2.x.y-beta
+
+    * Fixed a problem in the OSKAR imager where selection of certain
+      time and channel ranges incorrectly resulted in an error message making
+      it impossible to image sub-ranges of the data cube.
+
+    * Added the ability to add uncorrelated noise to the visibility data.
+
 2012-07-27  OSKAR 2.0.4-beta
 
     * Fixed a problem encountered when loading a Measurement Set in CASA
