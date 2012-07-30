@@ -26,19 +26,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_image_free.h"
-#include "imaging/oskar_image_init.h"
-#include <cstdio>
 
-oskar_Image::oskar_Image(int type, int location)
-{
-    int err = oskar_image_init(this, type, location);
-    if (err) throw err;
-}
+#ifndef OSKAR_IMAGE_EVALUATE_RANGES_H_
+#define OSKAR_IMAGE_EVALUATE_RANGES_H_
 
-oskar_Image::~oskar_Image()
-{
-    int err = oskar_image_free(this);
-    if (err) throw err;
+/**
+ * @file oskar_image_evaluate_ranges.h
+ */
+
+#include "oskar_global.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+OSKAR_EXPORT
+int oskar_evaluate_image_range(int* range, int snapshots,
+        const int* settings_range, int num_vis_times);
+
+OSKAR_EXPORT
+int oskar_evaluate_image_data_range(int* range, const int* settings_range,
+        int num_data_values);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_IMAGE_EVALUATE_RANGES_H_ */

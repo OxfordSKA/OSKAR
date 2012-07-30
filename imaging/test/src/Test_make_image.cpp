@@ -34,6 +34,7 @@
 #include "imaging/oskar_image_write.h"
 #include "imaging/oskar_image_resize.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
+#include "imaging/oskar_image_evaluate_ranges.h"
 
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_init.h"
@@ -128,11 +129,11 @@ void Test_make_image::test()
     oskar_mem_binary_file_write_ext(&vis.uu_metres, filename,
             "mem", "uu_metres", 0, 0);
     oskar_mem_binary_file_write_ext(&vis.vv_metres, filename,
-                "mem", "vv_metres", 0, 0);
+            "mem", "vv_metres", 0, 0);
     oskar_mem_binary_file_write_ext(&vis.amplitude, filename,
-                    "mem", "vis_amp", 0, 0);
+            "mem", "vis_amp", 0, 0);
     oskar_mem_binary_file_write_ext(&image.data, filename,
-                        "mem", "image", 0, 0);
+            "mem", "image", 0, 0);
 }
 
 void  Test_make_image::image_lm_grid()
@@ -159,3 +160,322 @@ void  Test_make_image::image_lm_grid()
 #endif
     oskar_image_write(&im, NULL, "test_lm_grid.img", 0);
 }
+
+void Test_make_image::image_range()
+{
+    int range[2];
+
+    // Use case: snapshots, 0->2, 5 vis times
+    // Expect: no fail, image range: 0->2
+    {
+        int num_vis_times = 5;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {0, 2};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+    }
+
+    // Use case: synth, 0->2, 5 vis times
+    // Expect: no fail, image range: 0->0
+    {
+        int num_vis_times = 5;
+        int snapshots = OSKAR_FALSE;
+        int settings_range[2] = {0, 2};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+    }
+
+    // Use case: snapshots, 0->2, 3 vis times
+    // Expect: no fail, image range: 0->2
+    {
+        int num_vis_times = 3;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {0, 2};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+    }
+
+    // Use case: snapshots, 0->2, 2 vis times
+    // Expect: fail
+    {
+        int num_vis_times = 2;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {0, 2};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_ERR_INVALID_RANGE, err);
+    }
+
+    // Use case: snapshots, 3->5, 6 vis times
+    // Expect: no fail, range 0->2
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {3, 5};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+    }
+
+    // Use case: synth, 3->5, 6 vis times
+    // Expect: no fail, range 0->0
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_FALSE;
+        int settings_range[2] = {3, 5};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+    }
+
+    // Use case: synth, -1->5, 6 vis times
+    // Expect: no fail, range 0->0
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_FALSE;
+        int settings_range[2] = {-1, 5};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+    }
+
+    // Use case: synth, -1->-1, 6 vis times
+    // Expect: no fail, range 0->0
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_FALSE;
+        int settings_range[2] = {-1, -1};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+    }
+
+    // Use case: snapshots, -1->-1, 6 vis times
+    // Expect: no fail, range 0->5
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {-1, -1};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+    }
+
+    // Use case: snapshots, -1->3, 6 vis times
+    // Expect: no fail, range 0->3
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {-1, 3};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(3, range[1]);
+    }
+
+    // Use case: snapshots, 1->-1, 6 vis times
+    // Expect: no fail, range 0->4
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {1, -1};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(4, range[1]);
+    }
+
+    // Use case: snapshots, 5->5, 6 vis times
+    // Expect: no fail, range 0->0
+    {
+        int num_vis_times = 6;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {5, 5};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(0, range[1]);
+    }
+
+    // Use case: snapshots, 5->2, 10 vis times
+    // Expect: fail
+    {
+        int num_vis_times = 10;
+        int snapshots = OSKAR_TRUE;
+        int settings_range[2] = {5, 2};
+
+        int err = oskar_evaluate_image_range(range, snapshots, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_ERR_INVALID_RANGE, err);
+    }
+
+}
+
+void Test_make_image::data_range()
+{
+    int range[2];
+
+    // Use case: 0->2, 6 vis times
+    // Expect: no fail, range 0->2
+    {
+        int num_vis_times = 6;
+        int settings_range[2] = {0, 2};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(2, range[1]);
+    }
+
+    // Use case: 2->5, 6 vis times
+    // Expect: no fail, range 2->5
+    {
+        int num_vis_times = 6;
+        int settings_range[2] = {2, 5};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(2, range[0]);
+        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+    }
+
+    // Use case: 2->-1, 6 vis times
+    // Expect: no fail, range 2->5
+    {
+        int num_vis_times = 6;
+        int settings_range[2] = {2, -1};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(2, range[0]);
+        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+    }
+
+    // Use case: -1->4, 6 vis times
+    // Expect: no fail, range 0->4
+    {
+        int num_vis_times = 6;
+        int settings_range[2] = {-1, 4};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(4, range[1]);
+    }
+
+    // Use case: -1->-1, 6 vis times
+    // Expect: no fail, range 0->5
+    {
+        int num_vis_times = 6;
+        int settings_range[2] = {-1, -1};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_SUCCESS, err);
+
+        CPPUNIT_ASSERT_EQUAL(0, range[0]);
+        CPPUNIT_ASSERT_EQUAL(5, range[1]);
+    }
+
+    // Use case: -1->5, 3 vis times
+    // Expect: fail
+    {
+        int num_vis_times = 3;
+        int settings_range[2] = {-1, 5};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_ERR_INVALID_RANGE, err);
+    }
+
+    // Use case: 5->-1, 3 vis times
+    // Expect: fail
+    {
+        int num_vis_times = 3;
+        int settings_range[2] = {5, -1};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_ERR_INVALID_RANGE, err);
+    }
+
+    // Use case: 5->2, 10 vis times
+    // Expect: fail
+    {
+        int num_vis_times = 10;
+        int settings_range[2] = {5, 2};
+        int err = oskar_evaluate_image_data_range(range, settings_range,
+                num_vis_times);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err),
+                (int)OSKAR_ERR_INVALID_RANGE, err);
+    }
+}
+
+
+

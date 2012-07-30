@@ -28,6 +28,7 @@
 
 
 #include "imaging/oskar_get_image_baseline_coords.h"
+#include "imaging/oskar_image_evaluate_ranges.h"
 
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_type_check.h"
@@ -51,15 +52,13 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
 
     // Data ranges for frequency and time synthesis.
     int vis_time_range[2];
-    vis_time_range[0] = (settings->time_range[0] < 0) ?
-            0 : settings->time_range[0];
-    vis_time_range[1] = (settings->time_range[1] < 0) ?
-            vis->num_times-1 : settings->time_range[1];
+    err = oskar_evaluate_image_data_range(vis_time_range, settings->time_range,
+            vis->num_times);
+    if (err) return err;
     int vis_chan_range[2];
-    vis_chan_range[0] = (settings->channel_range[0] < 0) ?
-            0 : settings->channel_range[0];
-    vis_chan_range[1] = (settings->channel_range[1] < 0) ?
-            vis->num_channels-1 : settings->channel_range[1];
+    err = oskar_evaluate_image_data_range(vis_chan_range, settings->channel_range,
+            vis->num_channels);
+    if (err) return err;
 
     // Declare temporary pointers into visibility coordinate arrays.
     int type = vis->amplitude.is_double() ? OSKAR_DOUBLE : OSKAR_SINGLE;

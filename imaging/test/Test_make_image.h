@@ -46,14 +46,18 @@ class Test_make_image : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_make_image);
-        CPPUNIT_TEST(test);
-        CPPUNIT_TEST(image_lm_grid);
+        //CPPUNIT_TEST(test);
+        //CPPUNIT_TEST(image_lm_grid);
+        CPPUNIT_TEST(image_range);
+        CPPUNIT_TEST(data_range);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         // Test Methods
         void test();
         void image_lm_grid();
+        void image_range();
+        void data_range();
 };
 
 // Register the test class.
