@@ -62,8 +62,8 @@ int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
 
     fprintf(file, "# num_sources = %i\n", sky->num_sources);
     fprintf(file, "# RA(deg), Dec(deg), I(Jy), Q(Jy), U(Jy), V(Jy),"
-            " ref. freq.(Hz), spectral index, FWHM major, FWHM minor,"
-            " position angle(deg)\n");
+            " ref. freq.(Hz), spectral index, FWHM major (arcsec), "
+            "FWHM minor (arcsec), position angle(deg)\n");
     if (oskar_sky_model_type(sky) == OSKAR_DOUBLE)
     {
         for (i = 0; i < sky->num_sources; ++i)
