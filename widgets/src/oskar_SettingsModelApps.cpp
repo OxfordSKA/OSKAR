@@ -614,7 +614,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
         QString root = key;
 
         QString key = root + "/enable";
-        registerSetting(key, "Enable", oskar_SettingsItem::BOOL, false, false);
+        registerSetting(key, "Enabled", oskar_SettingsItem::BOOL, false, false);
 
         key = root + "/seed";
         registerSetting(key, "Noise seed", oskar_SettingsItem::RANDOM_SEED);
@@ -652,10 +652,12 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
         key = root + "/spec";
         options.clear();
         options << "Telescope model priority"
-                << "Flux density std.dev"
+                << "Flux density std.dev."
                 << "Sensitivity"
-                << "System temperature and area"
+                << "System temperature and effective area";
+#if 0
                 << "Component temperatures and area";
+#endif
         registerSetting(key, "Noise specification", oskar_SettingsItem::OPTIONS, options);
         setDefault(key, options.at(0));
 
@@ -737,6 +739,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             }
         }
 
+#if 0
         // --- Component temperatures
         {
             QString root = key;
@@ -831,6 +834,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 }
             }
         }
+#endif
 
         // --- Effective Area
         {
@@ -890,9 +894,7 @@ void oskar_SettingsModelApps::init_settings_interferometer()
     setTooltip(k, "Number of averaged evaluations of the K-Jones matrix per \n"
             "Measurement Equation average.");
 
-#if 0
     init_settings_system_noise_model("interferometer");
-#endif
 
     k = group + "/oskar_vis_filename";
     registerSetting(k, "Output OSKAR visibility file", oskar_SettingsItem::OUTPUT_FILE_NAME);

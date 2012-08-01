@@ -55,10 +55,12 @@ static const char freq_file[]        = "noise_frequencies.txt";
 static const char stddev_file[]      = "flux_density_stddev.txt";
 static const char sensitivity_file[] = "sensitivity.txt";
 static const char t_sys_file[]       = "system_temperature.txt";
+#if 0
 static const char t_ant_file[]       = "antenna_temperature.txt";
 static const char t_rec_file[]       = "receiver_temperature.txt";
 static const char t_amb_file[]       = "ambient_temperature.txt";
 static const char rad_eff_file[]     = "radiation_efficiency.txt";
+#endif
 static const char area_file[]        = "effective_area.txt";
 
 // Private function prototypes
@@ -77,9 +79,11 @@ static int sensitivity_to_stddev(oskar_Mem* stddev, const oskar_Mem* sensitivity
 static int t_sys_to_stddev(oskar_Mem* stddev, const oskar_Mem* t_sys,
         const oskar_Mem* area, int num_freqs, double bandwidth,
         double integration_time);
+#if 0
 static int evaluate_t_sys(oskar_Mem* t_sys, const oskar_Mem* t_rec,
         const oskar_Mem* t_ant, double t_amb, const oskar_Mem* rad_eff,
         double num_freqs);
+#endif
 static int evaluate_range(oskar_Mem* values, int num_values, double start, double end);
 
 int oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
@@ -276,7 +280,7 @@ static void update_noise_files(QHash<QString, QString>& files, const QDir& dir)
 
     if (dir.exists(t_sys_file))
         files[QString(t_sys_file)] = dir.absoluteFilePath(t_sys_file);
-
+#if 0
     if (dir.exists(t_ant_file))
         files[QString(t_ant_file)] = dir.absoluteFilePath(t_ant_file);
 
@@ -288,7 +292,7 @@ static void update_noise_files(QHash<QString, QString>& files, const QDir& dir)
 
     if (dir.exists(rad_eff_file))
         files[QString(rad_eff_file)] = dir.absoluteFilePath(rad_eff_file);
-
+#endif
     if (dir.exists(area_file))
         files[QString(area_file)] = dir.absoluteFilePath(area_file);
 }
@@ -353,6 +357,7 @@ static int load_noise_stddev(const oskar_Settings* settings,
                 err = t_sys_to_stddev(&noise->stddev, &t_sys, &area, num_freqs, bandwidth, integration_time);
                 if (err) return err;
             }
+#if 0
             // (t_ant | t_rec | t_amb) && A_eff && rad. eff.
             else if ((QFile::exists(data_files[t_ant_file]) ||
                     QFile::exists(data_files[t_rec_file]) ||
@@ -405,6 +410,7 @@ static int load_noise_stddev(const oskar_Settings* settings,
                         bandwidth, integration_time);
                 if (err) return err;
             }
+#endif
             else
                 return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
             break;
@@ -513,6 +519,7 @@ static int load_noise_stddev(const oskar_Settings* settings,
             break;
         }
 
+#if 0
         // Component temp priority
         case OSKAR_SYSTEM_NOISE_TEMPS:
         {
@@ -635,6 +642,7 @@ static int load_noise_stddev(const oskar_Settings* settings,
             if (err) return err;
             break;
         }
+#endif
         default:
             return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
     };
@@ -669,46 +677,6 @@ static int load_noise_stddev(const oskar_Settings* settings,
                 if (err) return err;
                 break;
             }
-//            case OSKAR_SYSTEM_NOISE_AREA_MODEL:
-//            {
-//                double station_radius = 0.0; // TODO
-//
-//                switch (ns->value.area.model_type)
-//                {
-//                    case OSKAR_SYSTEM_NOISE_AREA_SPARSE:
-//                    {
-//                        if (type == OSKAR_DOUBLE)
-//                        {
-//                            double* area_ = (double*)area.data;
-//
-//                        }
-//                        else
-//                        {
-//                            float* area_ = (float*)area.data;
-//
-//                        }
-//                        break;
-//                    }
-//                    case OSKAR_SYSTEM_NOISE_AREA_DENSE:
-//                    {
-//                        if (type == OSKAR_DOUBLE)
-//                        {
-//                            double* area_ = (double*)area.data;
-//
-//                        }
-//                        else
-//                        {
-//                            float* area_ = (float*)area.data;
-//
-//                        }
-//                        break;
-//                    }
-//                    default:
-//                        return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-//
-//                };
-//                break;
-//            }
             default:
                 return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
         };
@@ -802,6 +770,7 @@ static int t_sys_to_stddev(oskar_Mem* stddev, const oskar_Mem* t_sys,
     return OSKAR_SUCCESS;
 }
 
+#if 0
 static int evaluate_t_sys(oskar_Mem* t_sys, const oskar_Mem* t_rec,
         const oskar_Mem* t_ant, double t_amb, const oskar_Mem* rad_eff,
         double num_freqs)
@@ -851,6 +820,7 @@ static int evaluate_t_sys(oskar_Mem* t_sys, const oskar_Mem* t_rec,
 
     return OSKAR_SUCCESS;
 }
+#endif
 
 static int evaluate_range(oskar_Mem* values, int num_values, double start, double end)
 {

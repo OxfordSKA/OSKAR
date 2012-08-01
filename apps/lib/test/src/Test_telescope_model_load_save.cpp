@@ -576,6 +576,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
 }
 
 
+#if 0
 void Test_telescope_model_load_save::test_load_telescope_noise_t_components()
 {
     QString root = "./temp_test_noise_t_components";
@@ -686,7 +687,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_components()
 
     oskar_remove_dir(path.data());
 }
-
+#endif
 
 void Test_telescope_model_load_save::generate_noisy_telescope(
         const QString& dir, int num_stations, int write_depth,
