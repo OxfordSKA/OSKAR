@@ -47,6 +47,6 @@
  * @return An mxArray containing a structure holding the oskar_Visibility structure.
  */
 mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
-        oskar_Mem* date);
+        oskar_Mem* date, const char* filename);
 
 #endif /* OSKAR_MEX_VIS_TO_MATLAB_STRUCT_H_ */

@@ -37,7 +37,7 @@ include(oskar_compiler_options)
 # === Include build macros used for apps and mex functions.
 include(oskar_build_macros)
 
-# Configure MSVC runtime.
+# Configure MSVC runtime. NOTE: should this not be in the compiler_options.cmake?
 OSKAR_SET_MSVC_RUNTIME()
 
 enable_testing()

@@ -699,7 +699,6 @@ static int load_noise_stddev(const oskar_Settings* settings,
 static int sensitivity_to_stddev(oskar_Mem* stddev, const oskar_Mem* sensitivity,
         int num_freqs, double bandwidth, double integration_time)
 {
-    // FIXME: factor of 2 correct?
     double factor = 1.0 / sqrt(2.0 * bandwidth * integration_time);
 
     if (stddev == NULL || sensitivity == NULL)
@@ -736,7 +735,7 @@ static int t_sys_to_stddev(oskar_Mem* stddev, const oskar_Mem* t_sys,
         double integration_time)
 {
     double k_B = 1.3806488e-23;
-    // FIXME: factor correct?
+    // FIXME: is the factor of 2.0 in the numerator correct?
     double factor = (2.0 * k_B * 1.0e26) / sqrt(2.0 * bandwidth * integration_time);
 
     if (stddev == NULL || t_sys == NULL || area == NULL)

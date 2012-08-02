@@ -48,7 +48,7 @@
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     if (num_in != 1 || num_out > 1)
-        mexErrMsgTxt("Usage: vis = oskar_visibilities_read(filename)");
+        mexErrMsgTxt("Usage: vis = oskar.visibilities.read(filename)");
 
     // Extract arguments from MATLAB mxArray objects.
     const char* filename = mxArrayToString(in[0]);
@@ -88,5 +88,5 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgTxt("ERROR: failed to read date field!\n");
     }
 
-    out[0] = oskar_mex_vis_to_matlab_struct(&vis, &date);
+    out[0] = oskar_mex_vis_to_matlab_struct(&vis, &date, filename);
 }

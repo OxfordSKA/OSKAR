@@ -37,8 +37,11 @@
 #include <cstdlib>
 #include <cstring>
 
+#define NUM_FIELDS_POL 29
+#define NUM_FIELDS_UNPOL 22
+
 mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
-        oskar_Mem* date)
+        oskar_Mem* date, const char* filename)
 {
     mxArray* v_out = NULL;
 
@@ -225,7 +228,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     }
     if (v_in->num_polarisations() == 4)
     {
-        const char* fields[28] = {
+        const char* fields[NUM_FIELDS_POL] = {
+                "filename",
                 "date",
                 "settings_path",
                 "num_channels",
@@ -254,11 +258,12 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "Q",
                 "U",
                 "V"};
-        v_out = mxCreateStructMatrix(1, 1, 28, fields);
+        v_out = mxCreateStructMatrix(1, 1, NUM_FIELDS_POL, fields);
     }
     else
     {
-        const char* fields[21] = {
+        const char* fields[NUM_FIELDS_UNPOL] = {
+                "filename",
                 "date",
                 "settings_path",
                 "num_channels",
@@ -281,10 +286,11 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "axis_order",
                 "xx"};
 
-        v_out = mxCreateStructMatrix(1, 1, 21, fields);
+        v_out = mxCreateStructMatrix(1, 1, NUM_FIELDS_UNPOL, fields);
     }
 
     /* Populate structure */
+    mxSetField(v_out, 0, "filename", mxCreateString(filename));
     mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
     mxSetField(v_out, 0, "settings_path",
             mxCreateString((char*)v_in->settings_path.data));
