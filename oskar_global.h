@@ -218,6 +218,16 @@ enum {
     OSKAR_TRUE  = 1
 };
 
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+#    define OSKAR_OS_WIN32
+#endif
+#if (defined(WIN64) || defined(_WIN64) || defined(__WIN64__))
+#    define OSKAR_OS_WIN64
+#endif
+
+#if (defined(OSKAR_OS_WIN32) || defined(OSKAR_OS_WIN64))
+#    define OSKAR_OS_WIN
+#endif
 
 /**
  * @def OSKAR_EXPORT
@@ -239,32 +249,40 @@ enum {
  * For more information see:
  *   http://msdn.microsoft.com/en-us/library/a90k134d(v=VS.90).aspx
  */
-#if (defined(_WIN32) || defined(__WIN32__))
-    #if (defined(oskar_EXPORTS))
-        #define OSKAR_EXPORT __declspec(dllexport)
-    #else
-        #define OSKAR_EXPORT __declspec(dllimport)
-    #endif
-    #if (defined(oskar_fits_EXPORTS))
-        #define OSKAR_FITS_EXPORT __declspec(dllexport)
-    #else
-        #define OSKAR_FITS_EXPORT __declspec(dllimport)
-    #endif
-    #if (defined(oskar_widgets_EXPORTS))
-        #define OSKAR_WIDGETS_EXPORT __declspec(dllexport)
-    #else
-        #define OSKAR_WIDGETS_EXPORT __declspec(dllimport)
-    #endif
-    #if (defined(oskar_apps_EXPORTS))
-        #define OSKAR_APPS_EXPORT __declspec(dllexport)
-    #else
-        #define OSKAR_APPS_EXPORT __declspec(dllimport)
-    #endif
+#ifndef OSKAR_DECL_EXPORT
+#    ifdef OSKAR_OS_WIN
+#        define OSKAR_DECL_EXPORT __declspec(dllexport)
+#    else
+#        define OSKAR_DECL_EXPORT
+#    endif
+#endif
+#ifndef OSKAR_DECL_IMPORT
+#    ifdef OSKAR_OS_WIN
+#        define OSKAR_DECL_IMPORT __declspec(dllimport)
+#    else
+#        define OSKAR_DECL_IMPORT
+#    endif
+#endif
+
+#ifdef oskar_EXPORTS
+#    define OSKAR_EXPORT OSKAR_DECL_EXPORT
 #else
-    #define OSKAR_EXPORT
-    #define OSKAR_FITS_EXPORT
-    #define OSKAR_WIDGETS_EXPORT
-    #define OSKAR_APPS_EXPORT
+#    define OSKAR_EXPORT OSKAR_DECL_IMPORT
+#endif
+#ifdef oskar_fits_EXPORTS
+#    define OSKAR_FITS_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_FITS_EXPORT OSKAR_DECL_IMPORT
+#endif
+#ifdef oskar_widgets_EXPORTS
+#    define OSKAR_WIDGETS_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_WIDGETS_EXPORT OSKAR_DECL_IMPORT
+#endif
+#ifdef oskar_apps_EXPORTS
+#    define OSKAR_APPS_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_APPS_EXPORT OSKAR_DECL_IMPORT
 #endif
 
 /**
