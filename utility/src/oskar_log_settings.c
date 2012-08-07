@@ -372,14 +372,15 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
         {
             case OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL:
             { value = "Telescope model (default priority)"; break; }
-            case OSKAR_SYSTEM_NOISE_STDDEV:
-            { value = "Flux density std.dev."; break; }
+            case OSKAR_SYSTEM_NOISE_RMS:
+            { value = "RMS Flux density"; break; }
             case OSKAR_SYSTEM_NOISE_SENSITIVITY:
             { value = "Sensitivity"; break; }
             case OSKAR_SYSTEM_NOISE_SYS_TEMP:
-            { value = "System temperature & effective area"; break; }
-            case OSKAR_SYSTEM_NOISE_TEMPS:
-            { value = "System temperature components & effective area"; break; }
+            {
+                value = "System temperature, effective area & system efficiency";
+                break;
+            }
             default:
             { value = "ERROR INVALID VALUE"; break; }
 
@@ -390,10 +391,10 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
         depth++;
         switch (n->value.specification)
         {
-            case OSKAR_SYSTEM_NOISE_STDDEV:
+            case OSKAR_SYSTEM_NOISE_RMS:
             {
                 const char* override;
-                switch (n->value.stddev.override)
+                switch (n->value.rms.override)
                 {
                     case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                     { override = "No override"; break;}
@@ -425,68 +426,8 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
                 break;
             }
             case OSKAR_SYSTEM_NOISE_SYS_TEMP:
-            case OSKAR_SYSTEM_NOISE_TEMPS:
             {
-                const char* override;
-                if (n->value.specification == OSKAR_SYSTEM_NOISE_SYS_TEMP)
-                {
-                    switch (n->value.t_sys.override)
-                    {
-                        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-                        { override = "No override"; break;}
-                        case OSKAR_SYSTEM_NOISE_DATA_FILE:
-                        { override = "Data file"; break;}
-                        case OSKAR_SYSTEM_NOISE_RANGE:
-                        { override = "Range"; break;}
-                        default:
-                        { value = "ERROR INVALID VALUE"; break; }
-                    };
-                    LVS("System temperature override", override);
-                }
-                else
-                {
-                    switch (n->value.t_rec.override)
-                    {
-                        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-                        { override = "No override"; break;}
-                        case OSKAR_SYSTEM_NOISE_DATA_FILE:
-                        { override = "Data file"; break;}
-                        case OSKAR_SYSTEM_NOISE_RANGE:
-                        { override = "Range"; break;}
-                        default:
-                        { value = "ERROR INVALID VALUE"; break; }
-                    };
-                    LVS("Receiver temperature override", override);
-
-                    switch (n->value.t_ant.override)
-                    {
-                        case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-                        { override = "No override"; break;}
-                        case OSKAR_SYSTEM_NOISE_DATA_FILE:
-                        { override = "Data file"; break;}
-                        case OSKAR_SYSTEM_NOISE_RANGE:
-                        { override = "Range"; break;}
-                        case OSKAR_SYSTEM_NOISE_SPIX_MODEL:
-                        { override = "Spectral index model"; break;}
-                        default:
-                        { value = "ERROR INVALID VALUE"; break; }
-                    };
-                    LVS("Antenna temperature override", override);
-                }
-                switch (n->value.area.override)
-                {
-                    case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
-                    { override = "No override"; break;}
-                    case OSKAR_SYSTEM_NOISE_DATA_FILE:
-                    { override = "Data file"; break;}
-                    case OSKAR_SYSTEM_NOISE_RANGE:
-                    { override = "Range"; break;}
-                    case OSKAR_SYSTEM_NOISE_AREA_MODEL:
-                    { override = "Area model"; break;}
-                    default:
-                    { value = "ERROR INVALID VALUE"; break; }
-                };
-                LVS("Effective Area override", override);
+                // TODO
                 break;
             }
             default: { break; }

@@ -90,20 +90,16 @@ int oskar_settings_free(oskar_Settings* settings)
     /* Free noise settings pointers */
     free(noise->freq.file);
     noise->freq.file = NULL;
-    free(noise->value.stddev.file);
-    noise->value.stddev.file = NULL;
+    free(noise->value.rms.file);
+    noise->value.rms.file = NULL;
     free(noise->value.sensitivity.file);
     noise->value.sensitivity.file = NULL;
     free(noise->value.t_sys.file);
     noise->value.t_sys.file = NULL;
-    free(noise->value.t_rec.file);
-    noise->value.t_rec.file = NULL;
-    free(noise->value.t_ant.file);
-    noise->value.t_ant.file = NULL;
-    free(noise->value.radiation_efficiency.file);
-    noise->value.radiation_efficiency.file = NULL;
     free(noise->value.area.file);
     noise->value.area.file = NULL;
+    free(noise->value.efficiency.file);
+    noise->value.efficiency.file = NULL;
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path);

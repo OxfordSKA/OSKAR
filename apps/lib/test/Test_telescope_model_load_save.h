@@ -50,10 +50,9 @@ class Test_telescope_model_load_save : public CppUnit::TestFixture
         CPPUNIT_TEST(test_0_level);
         CPPUNIT_TEST(test_1_level);
         CPPUNIT_TEST(test_2_level);
-        CPPUNIT_TEST(test_load_telescope_noise_stddev);
+        CPPUNIT_TEST(test_load_telescope_noise_rms);
         CPPUNIT_TEST(test_load_telescope_noise_sensitivity);
         CPPUNIT_TEST(test_load_telescope_noise_t_sys);
-        //CPPUNIT_TEST(test_load_telescope_noise_t_components);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -62,10 +61,9 @@ class Test_telescope_model_load_save : public CppUnit::TestFixture
         void test_1_level();
         void test_2_level();
 
-        void test_load_telescope_noise_stddev();
+        void test_load_telescope_noise_rms();
         void test_load_telescope_noise_sensitivity();
         void test_load_telescope_noise_t_sys();
-        //void test_load_telescope_noise_t_components();
 
     private:
         void generate_noisy_telescope(const QString& dir,

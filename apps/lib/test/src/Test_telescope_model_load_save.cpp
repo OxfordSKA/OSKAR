@@ -96,7 +96,6 @@ void Test_telescope_model_load_save::test_0_level()
 }
 
 
-
 void Test_telescope_model_load_save::test_1_level()
 {
     int err = 0;
@@ -179,6 +178,7 @@ void Test_telescope_model_load_save::test_1_level()
     // Remove test directory.
     oskar_remove_dir(path);
 }
+
 
 void Test_telescope_model_load_save::test_2_level()
 {
@@ -298,14 +298,14 @@ void Test_telescope_model_load_save::test_2_level()
 // TODO: check combinations of telescope model loading and overrides...
 //
 
-void Test_telescope_model_load_save::test_load_telescope_noise_stddev()
+void Test_telescope_model_load_save::test_load_telescope_noise_rms()
 {
     // Test cases that should be considered.
     // -- stddev file at various depths
     // -- number of noise values vs number of stddev
     // -- different modes of getting stddev and freq data.
 
-    QString root = "./temp_test_noise_stddev";
+    QString root = "./temp_test_noise_rms";
     int num_stations = 2;
     int depth = 0;
     int num_values = 5;
@@ -326,7 +326,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_stddev()
     }
 
     QHash<QString, QVector<double> > noise_;
-    noise_["flux_density_stddev.txt"] = stddev;
+    noise_["rms.txt"] = stddev;
 
     // Generate the telescope
     generate_noisy_telescope(root, num_stations, depth, freq_values, noise_);
@@ -345,7 +345,6 @@ void Test_telescope_model_load_save::test_load_telescope_noise_stddev()
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
 
-
     int err = oskar_telescope_model_noise_load(&telescope, NULL, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
@@ -361,7 +360,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_stddev()
             {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         stddev[j],
-                        ((double*)noise->stddev.data)[j],
+                        ((double*)noise->rms.data)[j],
                         1.0e-6);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         freq_values[j],
@@ -372,7 +371,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_stddev()
             {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         stddev[j],
-                        ((float*)noise->stddev.data)[j],
+                        ((float*)noise->rms.data)[j],
                         1.0e-5);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         freq_values[j],
@@ -384,8 +383,6 @@ void Test_telescope_model_load_save::test_load_telescope_noise_stddev()
 
     oskar_remove_dir(path.data());
 }
-
-
 
 
 void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
@@ -452,7 +449,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
             {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         sensitivity[j] / sqrt(2.0 * bandwidth * integration_time),
-                        ((double*)noise->stddev.data)[j],
+                        ((double*)noise->rms.data)[j],
                         1.0e-6);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         freq_values[j],
@@ -463,7 +460,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
             {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         sensitivity[j] / sqrtf(2.0 * bandwidth * integration_time),
-                        ((float*)noise->stddev.data)[j],
+                        ((float*)noise->rms.data)[j],
                         1.0e-5);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         freq_values[j],
@@ -506,9 +503,16 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
         area_values[i] = i * 5.3 + 1000.0;
     }
 
+    QVector<double> efficiency_values(num_areas);
+    for (int i = 0; i < num_freqs; ++i)
+    {
+        area_values[i] = 0.8;
+    }
+
     QHash<QString, QVector<double> > noise_;
-    noise_["system_temperature.txt"] = t_sys;
-    noise_["effective_area.txt"] = area_values;
+    noise_["t_sys.txt"] = t_sys;
+    noise_["area.txt"] = area_values;
+    noise_["efficiency.txt"] = efficiency_values;
 
     // Generate the telescope
     generate_noisy_telescope(root, num_stations, depth, freq_values, noise_);
@@ -550,8 +554,8 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
             if (type == OSKAR_DOUBLE)
             {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                        (t_sys[j] / area_values[j]) * factor,
-                        ((double*)noise->stddev.data)[j],
+                        (t_sys[j] / (area_values[j] * efficiency_values[j])) * factor,
+                        ((double*)noise->rms.data)[j],
                         1.0e-6);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         freq_values[j],
@@ -561,8 +565,8 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
             else
             {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                        (t_sys[j] / area_values[j]) * factor,
-                        ((float*)noise->stddev.data)[j],
+                        (t_sys[j] / (area_values[j] * efficiency_values[j])) * factor,
+                        ((float*)noise->rms.data)[j],
                         1.0e-5);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
                         freq_values[j],
@@ -575,124 +579,10 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
     oskar_remove_dir(path.data());
 }
 
-
-#if 0
-void Test_telescope_model_load_save::test_load_telescope_noise_t_components()
-{
-    QString root = "./temp_test_noise_t_components";
-    int num_stations = 2;
-    int depth = 1;
-    int num_values = 5;
-    int num_freqs = 5;
-    int num_areas = 5;
-    int num_efficiencies = 5;
-    int type = OSKAR_DOUBLE;
-    int location = OSKAR_LOCATION_CPU;
-
-    QVector<double> freq_values(num_freqs);
-    for (int i = 0; i < num_freqs; ++i)
-        freq_values[i] = 20.0e6 + i * 10.0e6;
-
-    QVector<double> t_ant(5);
-    for (int i = 0; i < num_values; ++i)
-        t_ant[i] = i * 5.0 + 100.0;
-
-    QVector<double> t_rec(5);
-    for (int i = 0; i < num_values; ++i)
-        t_rec[i] = i * 0.25 + 20.0;
-
-    QVector<double> t_amb(1, 5.0);
-
-    QVector<double> area(num_areas);
-    for (int i = 0; i < num_freqs; ++i)
-        area[i] = i * 5.3 + 1000.0;
-
-    QVector<double> efficiency(num_efficiencies, 1.0);
-
-    QHash<QString, QVector<double> > noise_;
-    noise_["receiver_temperature.txt"] = t_rec;
-    noise_["effective_area.txt"] = area;
-    noise_["radiation_efficiency.txt"] = efficiency;
-    noise_["receiver_temperature.txt"] = t_rec;
-    noise_["antenna_temperature.txt"] = t_ant;
-    noise_["ambient_temperature.txt"] = t_amb;
-
-    // Generate the telescope
-    generate_noisy_telescope(root, num_stations, depth, freq_values, noise_);
-
-    oskar_TelescopeModel telescope(type, location, 0);
-    oskar_Settings settings;
-    oskar_settings_init(&settings);
-    settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
-    QByteArray path = root.toAscii();
-    settings.telescope.config_directory = (char*)malloc(root.size() + 1);
-    strcpy(settings.telescope.config_directory, path.constData());
-    oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
-    noise->enable = OSKAR_TRUE;
-    noise->seed = 0;
-    noise->area_projection = OSKAR_FALSE;
-    noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-
-    double bandwidth = 10.0e6;
-    settings.interferometer.channel_bandwidth_hz = bandwidth;
-    settings.obs.length_seconds = 60 * 60;
-    settings.obs.num_time_steps = 36;
-    double integration_time = settings.obs.length_seconds /
-            (double)settings.obs.num_time_steps;
-
-    int err = oskar_telescope_model_noise_load(&telescope, NULL, &settings);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-
-    CPPUNIT_ASSERT_EQUAL(telescope.num_stations, num_stations);
-    double k_B = 1.3806488e-23;
-    double factor = (2.0 * k_B * 1.0e26) / sqrt(2.0 * bandwidth * integration_time);
-    // Check the loaded std.dev. values
-    for (int i = 0; i < telescope.num_stations; ++i)
-    {
-        oskar_SystemNoiseModel* noise = &telescope.station[i].noise;
-        int num_values = noise->frequency.num_elements;
-        for (int j = 0; j < num_values; ++j)
-        {
-            if (type == OSKAR_DOUBLE)
-            {
-                double t_sys = efficiency[j] * t_ant[j];
-                t_sys += (1.0 - efficiency[j]) * t_amb[0];
-                t_sys += t_rec[j];
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                        (t_sys / area[j]) * factor,
-                        ((double*)noise->stddev.data)[j],
-                        1.0e-6);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                        freq_values[j],
-                        ((double*)noise->frequency.data)[j],
-                        1.0e-6);
-            }
-            else
-            {
-                float t_sys = efficiency[j] * t_ant[j];
-                t_sys += (1.0 - efficiency[j]) * t_amb[0];
-                t_sys += t_rec[j];
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                        (t_sys / area[j]) * factor,
-                        ((float*)noise->stddev.data)[j],
-                        1.0e-5);
-                CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                        freq_values[j],
-                        ((float*)noise->frequency.data)[j],
-                        1.0e-5);
-            }
-        }
-    }
-
-    oskar_remove_dir(path.data());
-}
-#endif
 
 void Test_telescope_model_load_save::generate_noisy_telescope(
         const QString& dir, int num_stations, int write_depth,
-        const QVector<double>& freqs,
-        const QHash< QString, QVector<double> >& noise)
+        const QVector<double>& freqs, const QHash< QString, QVector<double> >& noise)
 {
     QDir root(dir);
 
@@ -757,6 +647,5 @@ void Test_telescope_model_load_save::generate_noisy_telescope(
             }
         }
     }
-
 }
 

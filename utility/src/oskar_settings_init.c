@@ -61,13 +61,11 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->image.oskar_image = NULL;
     settings->image.fits_image = NULL;
     noise->freq.file = NULL;
-    noise->value.stddev.file = NULL;
+    noise->value.rms.file = NULL;
     noise->value.sensitivity.file = NULL;
     noise->value.t_sys.file = NULL;
-    noise->value.t_rec.file = NULL;
-    noise->value.t_ant.file = NULL;
-    noise->value.radiation_efficiency.file = NULL;
     noise->value.area.file = NULL;
+    noise->value.efficiency.file = NULL;
 
     /* Initialise pathname to settings file. */
     error = oskar_mem_init(&settings->settings_path, OSKAR_CHAR,

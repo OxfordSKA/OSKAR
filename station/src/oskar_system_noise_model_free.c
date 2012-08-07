@@ -39,7 +39,7 @@ int oskar_system_noise_model_free(oskar_SystemNoiseModel* noise)
 
     status = oskar_mem_free(&noise->frequency);
     if (status) return status;
-    status = oskar_mem_free(&noise->stddev);
+    status = oskar_mem_free(&noise->rms);
     if (status) return status;
 
     return status;

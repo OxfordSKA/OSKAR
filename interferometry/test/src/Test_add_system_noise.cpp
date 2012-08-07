@@ -109,7 +109,7 @@ void Test_add_system_noise::test_stddev()
         oskar_Mem* freqs = &(telescope.station[i].noise.frequency);
         generate_range(freqs, num_noise_values, freq_start, freq_inc);
 
-        oskar_Mem* stddev = &(telescope.station[i].noise.stddev);
+        oskar_Mem* stddev = &(telescope.station[i].noise.rms);
         generate_range(stddev, num_noise_values, stddev_start, stddev_inc);
     }
     telescope.ra0_rad = 0.0;
@@ -247,7 +247,7 @@ void Test_add_system_noise::check_image_stats(oskar_Image* image,
             }
         }
     }
-    oskar_Mem* s = &tel->station[0].noise.stddev;
+    oskar_Mem* s = &tel->station[0].noise.rms;
     int num_baselines = (tel->num_stations * tel->num_stations - 1) / 2;
 
     for (int c = 0; c < num_channels; ++c)

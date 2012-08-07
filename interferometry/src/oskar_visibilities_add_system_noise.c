@@ -75,7 +75,7 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
     double s1, s2, s;
     double ra, dec, hor_l, hor_m, hor_n;
     oskar_Mem* noise_freq;
-    oskar_Mem* noise_stddev;
+    oskar_Mem* noise_rms;
     double mean = 0.0;
     double r1, r2;
     int idx;
@@ -117,25 +117,26 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
                 /* Retrieve the std.dev. for the baseline antennas. */
                 a1 = ((int*)ant1.data)[b];
                 noise_freq = &telescope->station[a1].noise.frequency;
-                noise_stddev = &telescope->station[a1].noise.stddev;
+                noise_rms = &telescope->station[a1].noise.rms;
                 err = oskar_find_closest_match(&is1, vis_freq, noise_freq);
                 if (noise_freq->type == OSKAR_DOUBLE)
-                    s1 = ((double*)noise_stddev->data)[is1];
+                    s1 = ((double*)noise_rms->data)[is1];
                 else
-                    s1 = ((float*)noise_stddev->data)[is1];
+                    s1 = ((float*)noise_rms->data)[is1];
 
                 a2 = ((int*)ant2.data)[b];
                 noise_freq = &telescope->station[a2].noise.frequency;
-                noise_stddev = &telescope->station[a2].noise.stddev;
+                noise_rms = &telescope->station[a2].noise.rms;
                 err = oskar_find_closest_match(&is2, vis_freq, noise_freq);
                 if (noise_freq->type == OSKAR_DOUBLE)
-                    s2 = ((double*)noise_stddev->data)[is2];
+                    s2 = ((double*)noise_rms->data)[is2];
                 else
-                    s2 = ((float*)noise_stddev->data)[is2];
+                    s2 = ((float*)noise_rms->data)[is2];
 
                 /* Combine antenna std.devs. to evaluate the baseline std.dev.
                  * see (Wrobel & Walker 1999) */
-                s = sqrt(s1*s2);
+                /* TODO establish if the sqrt(2) is needed - visibilties are complex --> noise in the image drops by sqrt(2)? */
+                s = sqrt(s1*s2) * sqrt(2);
 
                 /* Apply effective a simple area projection (if required) */
                 if (area_projection)

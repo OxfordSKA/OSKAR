@@ -45,7 +45,7 @@
 struct OSKAR_EXPORT oskar_SystemNoiseModel
 {
     oskar_Mem frequency;
-    oskar_Mem stddev;
+    oskar_Mem rms;
 };
 typedef struct oskar_SystemNoiseModel oskar_SystemNoiseModel;
 

@@ -44,7 +44,7 @@ int oskar_system_noise_model_init(oskar_SystemNoiseModel* noise, int type,
 
     status = oskar_mem_init(&noise->frequency, type, location, 0, OSKAR_TRUE);
     if (status) return status;
-    status = oskar_mem_init(&noise->stddev, type, location, 0, OSKAR_TRUE);
+    status = oskar_mem_init(&noise->rms, type, location, 0, OSKAR_TRUE);
     if (status) return status;
 
     return status;

@@ -40,7 +40,7 @@ int oskar_system_noise_model_copy(oskar_SystemNoiseModel* dst,
 
     err = oskar_mem_copy(&dst->frequency, &src->frequency);
     if (err) return err;
-    err = oskar_mem_copy(&dst->stddev, &src->stddev);
+    err = oskar_mem_copy(&dst->rms, &src->rms);
     if (err) return err;
 
     return err;

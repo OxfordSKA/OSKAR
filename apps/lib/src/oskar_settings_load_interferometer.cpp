@@ -41,17 +41,15 @@
 #include <QtCore/QTime>
 #include <QtCore/QString>
 
-// =============================================================================
+// local (private) methods
 static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename);
 static int load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq, QSettings& s);
 static int load_noise_values(oskar_SettingsSystemNoiseValue* value, QSettings& s);
 static int load_noise_type(oskar_SettingsSystemNoiseType* stddev, QSettings& s,
         const QString& name);
-static int load_noise_t_ant(oskar_SettingsSystemNoiseTAnt* t_ant, QSettings& s);
-static int load_noise_area(oskar_SettingsSystemNoiseArea* area, QSettings& s);
 static void get_filename(char** filename, const QSettings& s, const QString& key,
         const QString& defaultValue = "");
-//=============================================================================
+
 
 extern "C"
 int oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
@@ -106,7 +104,7 @@ static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename)
 
     s.beginGroup("interferometer");
     {
-        s.beginGroup("system_noise");
+        s.beginGroup("noise");
         {
             /* Enable / disable */
             noise->enable = s.value("enable", false).toBool();
@@ -127,7 +125,7 @@ static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename)
             error = load_noise_values(&noise->value, s);
             if (error) return error;
         }
-        s.endGroup(); // system_noise
+        s.endGroup(); // noise
     }
     s.endGroup(); // interferometer
 
@@ -140,7 +138,7 @@ static int load_noise_freqs(oskar_SettingsSystemNoiseFreq* freq,
     QString temp = s.value("freq", "T").toString().toUpper();
     if (temp.startsWith("T"))
         freq->specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    else if (temp.startsWith("U"))
+    else if (temp.startsWith("O"))
         freq->specification = OSKAR_SYSTEM_NOISE_OBS_SETTINGS;
     else if (temp.startsWith("D"))
         freq->specification = OSKAR_SYSTEM_NOISE_DATA_FILE;
@@ -171,48 +169,38 @@ static int load_noise_values(oskar_SettingsSystemNoiseValue* value,
 {
     int error = OSKAR_SUCCESS;
 
-    QString temp = s.value("spec", "T").toString().toUpper();
-    if (temp.startsWith("T"))
+    QString temp = s.value("values", "TEL").toString().toUpper();
+    if (temp.startsWith("TEL"))
         value->specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
-    else if (temp.startsWith("F"))
-        value->specification = OSKAR_SYSTEM_NOISE_STDDEV;
-    else if (temp.startsWith("SEN"))
+    else if (temp.startsWith("R"))
+        value->specification = OSKAR_SYSTEM_NOISE_RMS;
+    else if (temp.startsWith("S"))
         value->specification = OSKAR_SYSTEM_NOISE_SENSITIVITY;
-    else if(temp.startsWith("SYS"))
+    else if(temp.startsWith("TEMP"))
         value->specification = OSKAR_SYSTEM_NOISE_SYS_TEMP;
-    else if(temp.startsWith("C"))
-        value->specification = OSKAR_SYSTEM_NOISE_TEMPS;
     else
         return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
 
-    s.beginGroup("spec");
+    s.beginGroup("values");
     {
-        error = load_noise_type(&value->stddev, s, "stddev");
+        error = load_noise_type(&value->rms, s, "rms");
         if (error) return error;
 
         error = load_noise_type(&value->sensitivity, s, "sensitivity");
         if (error) return error;
 
-        error = load_noise_type(&value->t_sys, s, "t_sys");
-        if (error) return error;
-
-        s.beginGroup("temp");
+        s.beginGroup("components");
         {
-            value->t_amb = s.value("ambient", 0.0).toDouble();
-
-            error = load_noise_type(&value->t_rec, s, "receiver");
+            error = load_noise_type(&value->t_sys, s, "t_sys");
             if (error) return error;
 
-            error = load_noise_t_ant(&value->t_ant, s);
+            error = load_noise_type(&value->area, s, "area");
             if (error) return error;
 
-            error = load_noise_type(&value->radiation_efficiency, s, "radiation_efficiency");
+            error = load_noise_type(&value->efficiency, s, "efficiency");
             if (error) return error;
         }
         s.endGroup();
-
-        error = load_noise_area(&value->area, s);
-        if (error) return error;
     }
     s.endGroup(); // spec
 
@@ -242,79 +230,6 @@ static int load_noise_type(oskar_SettingsSystemNoiseType* type, QSettings& s,
             type->end    = s.value("end").toDouble();
         }
         s.endGroup(); // range
-    }
-    s.endGroup();
-
-    return OSKAR_SUCCESS;
-}
-
-
-static int load_noise_t_ant(oskar_SettingsSystemNoiseTAnt* t_ant, QSettings& s)
-{
-    QString temp = s.value("antenna", "N").toString().toUpper();
-    if (temp.startsWith("N"))
-        t_ant->override = OSKAR_SYSTEM_NOISE_NO_OVERRIDE;
-    else if (temp.startsWith("D"))
-        t_ant->override = OSKAR_SYSTEM_NOISE_DATA_FILE;
-    else if (temp.startsWith("R"))
-        t_ant->override = OSKAR_SYSTEM_NOISE_RANGE;
-    else if (temp.startsWith("S"))
-        t_ant->override = OSKAR_SYSTEM_NOISE_SPIX_MODEL;
-    else
-        return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-
-    s.beginGroup("antenna");
-    {
-        get_filename(&t_ant->file, s, "file");
-        s.beginGroup("range");
-        {
-            t_ant->start  = s.value("start", 0.0).toDouble();
-            t_ant->end    = s.value("end", 0.0).toDouble();
-        }
-        s.endGroup();
-        s.beginGroup("model");
-        {
-            t_ant->model_spix  = s.value("specral_index", 2.75).toDouble();
-            t_ant->model_t_408 = s.value("temp_408", 20.0).toDouble();
-        }
-        s.endGroup();
-    }
-    s.endGroup();
-
-    return OSKAR_SUCCESS;
-}
-
-
-static int load_noise_area(oskar_SettingsSystemNoiseArea* area, QSettings& s)
-{
-    QString temp = s.value("area", "N").toString().toUpper();
-    if (temp.startsWith("N"))
-        area->override = OSKAR_SYSTEM_NOISE_NO_OVERRIDE;
-    else if (temp.startsWith("D"))
-        area->override = OSKAR_SYSTEM_NOISE_DATA_FILE;
-    else if (temp.startsWith("R"))
-        area->override = OSKAR_SYSTEM_NOISE_RANGE;
-//    else if (temp.startsWith("A"))
-//        area->override = OSKAR_SYSTEM_NOISE_AREA_MODEL;
-    else
-        return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
-
-    s.beginGroup("area");
-    {
-        get_filename(&area->file, s, "file");
-        s.beginGroup("range");
-        {
-            area->start  = s.value("start", 0.0).toDouble();
-            area->end    = s.value("end", 0.0).toDouble();
-        }
-        s.endGroup();
-//        QString temp = s.value("model", "S").toString().toUpper();
-//        if (temp.startsWith("S"))
-//            area->model_type = OSKAR_SYSTEM_NOISE_AREA_SPARSE;
-//        else if (temp.startsWith("D"))
-//            area->model_type = OSKAR_SYSTEM_NOISE_AREA_DENSE;
-//        else
-//            return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
     }
     s.endGroup();
 
