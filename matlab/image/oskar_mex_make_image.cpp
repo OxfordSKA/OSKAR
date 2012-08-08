@@ -260,7 +260,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexPrintf("= Make image complete\n");
     }
 
-    out[0] = oskar_mex_image_to_matlab_struct(&image);
+    out[0] = oskar_mex_image_to_matlab_struct(&image, NULL);
 
     // Register cleanup function.
     mexAtExit(cleanup);

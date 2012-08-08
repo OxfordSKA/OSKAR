@@ -60,7 +60,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 err, oskar_get_error_string(err));
     }
 
-    out[0] = oskar_mex_image_to_matlab_struct(&image);
+    out[0] = oskar_mex_image_to_matlab_struct(&image, filename);
 }
 
 

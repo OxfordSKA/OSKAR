@@ -33,7 +33,8 @@
 #include <cstring>
 #include <cstdlib>
 
-mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
+mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in,
+        const char* filename)
 {
 
     if (im_in == NULL)
@@ -121,7 +122,8 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
         mexErrMsgTxt("ERROR: invalid image type.\n");
 
     /* Note: ignoring mean, variance, min, max, rms for now! */
-    const char* fields[17] = {
+    const char* fields[] = {
+            "filename",
             "settings_path",
             "data",
             "dimension_order",
@@ -140,9 +142,17 @@ mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* im_in)
             "freq_start_hz",
             "freq_inc_hz"
     };
-    mxArray* im_out = mxCreateStructMatrix(1, 1, 17, fields);
+    mxArray* im_out = mxCreateStructMatrix(1, 1, 18, fields);
 
     /* Populate structure */
+    if (filename != NULL)
+    {
+        mxSetField(im_out, 0, "filename", mxCreateString(filename));
+    }
+    else
+    {
+        mxSetField(im_out, 0, "filename", mxCreateString("n/a"));
+    }
     mxSetField(im_out, 0, "settings_path",
             mxCreateString((char*)im_in->settings_path.data));
     mxSetField(im_out, 0, "data", data_);

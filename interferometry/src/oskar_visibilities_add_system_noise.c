@@ -135,8 +135,7 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
 
                 /* Combine antenna std.devs. to evaluate the baseline std.dev.
                  * see (Wrobel & Walker 1999) */
-                /* TODO establish if the sqrt(2) is needed - visibilties are complex --> noise in the image drops by sqrt(2)? */
-                s = sqrt(s1*s2) * sqrt(2);
+                s = sqrt(s1*s2);
 
                 /* Apply effective a simple area projection (if required) */
                 if (area_projection)

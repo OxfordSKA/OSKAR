@@ -290,7 +290,8 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     }
 
     /* Populate structure */
-    mxSetField(v_out, 0, "filename", mxCreateString(filename));
+    if (filename != NULL)
+        mxSetField(v_out, 0, "filename", mxCreateString(filename));
     mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
     mxSetField(v_out, 0, "settings_path",
             mxCreateString((char*)v_in->settings_path.data));

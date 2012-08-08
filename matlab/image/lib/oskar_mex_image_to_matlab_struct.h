@@ -39,6 +39,7 @@
 #include "oskar_global.h"
 #include "imaging/oskar_Image.h"
 
-mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* image);
+mxArray* oskar_mex_image_to_matlab_struct(const oskar_Image* image,
+        const char* filename);
 
 #endif /* OSKAR_MEX_IMAGE_TO_MATLAB_STRUCT_H_ */

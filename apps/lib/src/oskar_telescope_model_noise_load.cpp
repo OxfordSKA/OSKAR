@@ -45,6 +45,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <cfloat>
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,7 +70,6 @@ static void update_noise_files(QHash<QString, QString>& files, const QDir& dir);
 static int load_noise_stddev(const oskar_Settings* s,
         oskar_SystemNoiseModel* noise, QHash<QString, QString>& data_files,
         QHash<QString, oskar_Mem*>& loaded);
-
 static int sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
         int num_freqs, double bandwidth, double integration_time);
 static int t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
@@ -294,8 +294,10 @@ static int load_noise_stddev(const oskar_Settings* settings,
             (double)settings->obs.num_time_steps;
     double bandwidth = settings->interferometer.channel_bandwidth_hz;
 
-    // NOTE When loading files make sure the number of values loaded
-    // matches the number of noise frequencies!
+    if (bandwidth < DBL_MIN || integration_time < DBL_MIN)
+    {
+        return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+    }
 
     // Telescope model priority.
     switch (ns->value.specification)
