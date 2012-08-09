@@ -6,6 +6,12 @@
 
     * Added the ability to add uncorrelated noise to the visibility data.
 
+    * Fixed a bug which caused a list of cuda device id's to be ignored if
+      specified inside quotes.
+
+    * Removed error reporting from fitting ellipses to Gaussian sources as this
+      resulted in unhelpful numbers of warning messages.
+
 2012-07-27  OSKAR 2.0.4-beta
 
     * Fixed a problem encountered when loading a Measurement Set in CASA
