@@ -35,6 +35,8 @@
 #include <QtCore/QVariant>
 #include <QtCore/QStringList>
 
+#include <QtCore/QDebug>
+
 extern "C"
 int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
         const char* filename)
@@ -48,12 +50,13 @@ int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
     sim->keep_log_file = s.value("keep_log_file", true).toBool();
 
     // Get the device IDs to use.
-    QStringList devs = s.value("cuda_device_ids", "0").toStringList();
-    sim->num_cuda_devices = devs.size();
-    sim->cuda_device_ids = (int*)malloc(devs.size() * sizeof(int));
-    for (int i = 0; i < devs.size(); ++i)
+    QString devs = s.value("cuda_device_ids", "0").toString();
+    QStringList devsList = devs.split(",");
+    sim->num_cuda_devices = devsList.size();
+    sim->cuda_device_ids = (int*)malloc(devsList.size() * sizeof(int));
+    for (int i = 0; i < devsList.size(); ++i)
     {
-        sim->cuda_device_ids[i] = devs[i].toInt();
+        sim->cuda_device_ids[i] = devsList[i].toInt();
     }
 
     return OSKAR_SUCCESS;
