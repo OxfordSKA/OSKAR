@@ -116,8 +116,14 @@ add_subdirectory(matlab)
 add_subdirectory(ms)
 add_subdirectory(widgets)
 
-# === Install header tree.
-if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
+# === Install header tree
+if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local" AND ${CMAKE_PATCH_VERSION} GREATER 6)
+    # The following code is designed to avoid a nasty recursion if the build
+    # directory and install directories are found inside the source tree.
+    # string(FIND ...) was added in 2.8.6 however so if using a version
+    # before this just go ahead and hope for the best!
+    # Note: this can probably be fixed by using some REGEX command instead of
+    # find at some point...
     string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
     math(EXPR x "${POS} + 1")
     string(SUBSTRING ${CMAKE_BINARY_DIR} ${x} -1 bin_dir)
