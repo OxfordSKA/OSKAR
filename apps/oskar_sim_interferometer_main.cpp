@@ -52,17 +52,17 @@ int main(int argc, char** argv)
 
     try
     {
-    	// Run simulation.
-    	error = oskar_sim_interferometer(argv[1], &log);
+        // Run simulation.
+        error = oskar_sim_interferometer(argv[1], &log);
     }
     catch (int code)
     {
-		error = code;
+        error = code;
     }
 
-	// Check for errors.
-	if (error)
-		oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
+    // Check for errors.
+    if (error)
+        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
 
     return error;
 }

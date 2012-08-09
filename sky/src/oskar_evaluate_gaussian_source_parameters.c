@@ -255,7 +255,8 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     if (num_failed > 0)
     {
         oskar_log_warning(log, "Gaussian ellipse solution failed "
-                "for %i sources.", num_failed);
+                "for %i sources. These sources will be simulated as point objects.",
+                num_failed);
     }
 
     /* clean up */

@@ -213,7 +213,7 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
         dgetrf_(&m, &n, (double*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0)
         {
-            oskar_log_error(log, "dgetrf_() failed, info = %li.", info);
+            /*oskar_log_error(log, "dgetrf_() failed, info = %li.", info);*/
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
 
@@ -225,7 +225,7 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
                 (double*)sumX.data, &ldb, &info);
         if (info != 0)
         {
-            oskar_log_error(log, "dgetrs_() failed, info = %li.", info);
+            /*oskar_log_error(log, "dgetrs_() failed, info = %li.", info);*/
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
     }
@@ -234,7 +234,7 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
         sgetrf_(&m, &n, (float*)XX.data, &lda, (long*)ipiv.data, &info);
         if (info != 0)
         {
-            oskar_log_error(log, "sgetrf_() failed, info = %li.", info);
+            /*oskar_log_error(log, "sgetrf_() failed, info = %li.", info);*/
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
 
@@ -246,7 +246,7 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
                 (float*)sumX.data, &ldb, &info);
         if (info != 0)
         {
-            oskar_log_error(log, "sgetrs_() failed, info = %li.", info);
+            /*oskar_log_error(log, "sgetrs_() failed, info = %li.", info);*/
             return OSKAR_ERR_ELLIPSE_FIT_FAILED;
         }
     }
@@ -302,8 +302,8 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
     test = a1 * c1;
     if (test <= 0.0 )
     {
-        oskar_log_error(log, "oskar_fit_ellipse(): "
-                "Solution of conic equation does not represent an ellipse.");
+        /*oskar_log_error(log, "oskar_fit_ellipse(): "
+                "Solution of conic equation does not represent an ellipse.");*/
         return OSKAR_ERR_ELLIPSE_FIT_FAILED;
     }
     else
