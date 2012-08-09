@@ -116,21 +116,20 @@ add_subdirectory(matlab)
 add_subdirectory(ms)
 add_subdirectory(widgets)
 
-# === Install header tree
-if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local" AND ${CMAKE_PATCH_VERSION} GREATER 6)
-    # The following code is designed to avoid a nasty recursion if the build
-    # directory and install directories are found inside the source tree.
-    # string(FIND ...) was added in 2.8.6 however so if using a version
-    # before this just go ahead and hope for the best!
-    # Note: this can probably be fixed by using some REGEX command instead of
-    # find at some point...
-    string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
-    math(EXPR x "${POS} + 1")
-    string(SUBSTRING ${CMAKE_BINARY_DIR} ${x} -1 bin_dir)
-    string(FIND ${CMAKE_INSTALL_PREFIX} "/" POS REVERSE)
-    math(EXPR x "${POS} + 1")
-    string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
+# === Install header tree.
+if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
+    #string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
+    #math(EXPR x "${POS} + 1")
+    #string(SUBSTRING ${CMAKE_BINARY_DIR} ${x} -1 bin_dir)
+    #string(FIND ${CMAKE_INSTALL_PREFIX} "/" POS REVERSE)
+    #math(EXPR x "${POS} + 1")
+    #string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
+        
+    string(REGEX MATCH "[^/|\\][a-zA-z0-9|_|-]+$" bin_dir ${CMAKE_BINARY_DIR})
+    string(REGEX MATCH "[^/|\\]([a-zA-z0-9|_|-]+$)" install_dir ${CMAKE_INSTALL_PREFIX})
+    
     string(COMPARE EQUAL ${CMAKE_INSTALL_PREFIX} ${CMAKE_BINARY_DIR} test)
+    
     if (${test})
         set(install_include_dir "${bin_dir}/include")
     else ()
@@ -141,6 +140,7 @@ if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local" AND ${CMAKE_PATCH_VERSION} 
         DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
         FILES_MATCHING PATTERN "*.h"
         PATTERN ${install_include_dir} EXCLUDE
+        PATTERN build EXCLUDE
         PATTERN src  EXCLUDE
         PATTERN test EXCLUDE
         PATTERN .svn EXCLUDE)
@@ -148,6 +148,7 @@ else ()
     install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
             DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
             FILES_MATCHING PATTERN "*.h"
+            PATTERN build EXCLUDE
             PATTERN src  EXCLUDE
             PATTERN test EXCLUDE
             PATTERN .svn EXCLUDE)
