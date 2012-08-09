@@ -54,6 +54,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     size_t mem_free = 0, mem_total = 0;
     cudaDeviceProp device_prop;
 
+    cudaGetDevice(&device_id);
+
     // Check if sky model is empty.
     if (sky->num_sources == 0)
     {
@@ -195,7 +197,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
     // Record GPU memory usage.
     cudaMemGetInfo(&mem_free, &mem_total);
-    cudaGetDevice(&device_id);
     cudaGetDeviceProperties(&device_prop, device_id);
     oskar_log_message(log, 1, "Memory on device %d [%s] is %.1f%% used.",
             device_id, device_prop.name,

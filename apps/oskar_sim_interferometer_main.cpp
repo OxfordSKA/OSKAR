@@ -62,7 +62,10 @@ int main(int argc, char** argv)
 
     // Check for errors.
     if (error)
-        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
+    {
+        oskar_log_error(&log, "Run failed with code %i: %s.", error,
+                oskar_get_error_string(error));
+    }
 
     return error;
 }

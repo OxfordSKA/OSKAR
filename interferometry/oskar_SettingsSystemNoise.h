@@ -40,7 +40,7 @@ enum
     OSKAR_SYSTEM_NOISE_SENSITIVITY,
     OSKAR_SYSTEM_NOISE_SYS_TEMP,
 
-    OSKAR_SYSTEM_NOISE_NO_OVERRIDE,
+    OSKAR_SYSTEM_NOISE_NO_OVERRIDE
 };
 
 /* System noise frequency settings structure */
