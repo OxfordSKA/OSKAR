@@ -26,56 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "imaging/oskar_image_init.h"
-#include "imaging/oskar_Image.h"
-#include "utility/oskar_mem_init.h"
-#include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef OSKAR_IMAGESTATS_H_
+#define OSKAR_IMAGESTATS_H_
 
-int oskar_image_init(oskar_Image* image, int type, int location)
+#include "oskar_global.h"
+
+/**
+ * @file oskar_ImageStats.h
+ */
+
+struct OSKAR_EXPORT oskar_ImageStats
 {
-    int err;
+    double min;   /* Minimum */
+    double max;   /* Maximum */
+    double mean;  /* Mean */
+    double rms;   /* root mean square */
+    double var;   /* variance */
+    double std;   /* standard deviation */
 
-    /* Sanity check on inputs. */
-    if (image == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+};
+typedef struct oskar_ImageStats oskar_ImageStats;
 
-    /* Initialise memory. */
-    err = oskar_mem_init(&image->data, type, location, 0, 1);
-    if (err) return err;
-    err = oskar_mem_init(&image->settings_path, OSKAR_CHAR,
-            OSKAR_LOCATION_CPU, 0, 1);
-    if (err) return err;
-
-    /* Set default dimension order. */
-    image->dimension_order[0] = OSKAR_IMAGE_DIM_RA;
-    image->dimension_order[1] = OSKAR_IMAGE_DIM_DEC;
-    image->dimension_order[2] = OSKAR_IMAGE_DIM_POL;
-    image->dimension_order[3] = OSKAR_IMAGE_DIM_TIME;
-    image->dimension_order[4] = OSKAR_IMAGE_DIM_CHANNEL;
-
-    /* Initialise meta-data. */
-    image->image_type = OSKAR_IMAGE_TYPE_UNDEF;
-    image->centre_dec_deg = 0.0;
-    image->centre_ra_deg = 0.0;
-    image->fov_dec_deg = 0.0;
-    image->fov_ra_deg = 0.0;
-    image->freq_inc_hz = 0.0;
-    image->freq_start_hz = 0.0;
-    image->height = 0;
-    image->num_channels = 0;
-    image->num_pols = 0;
-    image->num_times = 0;
-    image->time_inc_sec = 0.0;
-    image->time_start_mjd_utc = 0.0;
-    image->width = 0;
-
-    return OSKAR_SUCCESS;
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif /* OSKAR_IMAGESTATS_H_ */

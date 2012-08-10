@@ -122,21 +122,6 @@ int oskar_image_read(oskar_Image* image, const char* filename, int idx)
     err = oskar_binary_stream_read_double(stream, &index, grp,
             OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, &image->freq_inc_hz);
     if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_MEAN, idx, &image->mean);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_VARIANCE, idx, &image->variance);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_MIN, idx, &image->min);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_MAX, idx, &image->max);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_RMS, idx, &image->rms);
-    if (err) goto cleanup;
 
     /* Read the image data. */
     err = oskar_mem_binary_stream_read(&image->data, stream, &index,
@@ -145,6 +130,7 @@ int oskar_image_read(oskar_Image* image, const char* filename, int idx)
     cleanup:
     oskar_binary_tag_index_free(&index);
     fclose(stream);
+
     return err;
 }
 

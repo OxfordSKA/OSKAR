@@ -12,6 +12,7 @@ set(imaging_SRC
     src/oskar_get_image_stokes.c
     src/oskar_image_evaluate_ranges.c
     src/oskar_image_free.c
+    src/oskar_image_get_stats.c
     src/oskar_image_init.c
     src/oskar_image_read.c
     src/oskar_image_resize.c

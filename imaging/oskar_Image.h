@@ -58,11 +58,6 @@ struct OSKAR_EXPORT oskar_Image
     double time_inc_sec;
     double freq_start_hz;
     double freq_inc_hz;
-    double mean;
-    double variance;
-    double min;
-    double max;
-    double rms;
 
 #ifdef __cplusplus
     /* Need a default constructor. */

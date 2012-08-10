@@ -28,6 +28,10 @@ if (CUDA_FOUND)
     set(name oskar_binary_file_query)
     oskar_app(${name} ${name}_main.cpp)
 
+    # BINARY: oskar_image_stats
+    set(name oskar_image_stats)
+    oskar_app(${name} ${name}_main.cpp)
+
     #if (CFITSIO_FOUND)
     #    # BINARY: oskar_fits_to_sky_model
     #    set(name oskar_fits_to_sky_model)

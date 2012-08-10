@@ -195,7 +195,8 @@ enum {
     OSKAR_ERR_SETUP_FAIL_SKY           = -602,
 
     /* Indicates that an unknown error occurred. */
-    OSKAR_ERR_UNKNOWN                  = -1000
+    OSKAR_ERR_UNKNOWN                  = -1000,
+    OSKAR_FAIL                         = -1001
 };
 
 

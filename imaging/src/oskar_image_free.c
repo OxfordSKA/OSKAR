@@ -57,16 +57,11 @@ int oskar_image_free(oskar_Image* image)
     image->freq_inc_hz = 0.0;
     image->freq_start_hz = 0.0;
     image->height = 0;
-    image->max = 0.0;
-    image->mean = 0.0;
-    image->min = 0.0;
     image->num_channels = 0;
     image->num_pols = 0;
     image->num_times = 0;
-    image->rms = 0.0;
     image->time_inc_sec = 0.0;
     image->time_start_mjd_utc = 0.0;
-    image->variance = 0.0;
     image->width = 0;
 
     return OSKAR_SUCCESS;

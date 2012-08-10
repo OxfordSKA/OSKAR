@@ -153,16 +153,6 @@ int oskar_image_write(const oskar_Image* image, oskar_Log* log,
             OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, image->freq_start_hz);
     oskar_binary_stream_write_double(stream, grp,
             OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, image->freq_inc_hz);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_MEAN, idx, image->mean);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_VARIANCE, idx, image->variance);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_MIN, idx, image->min);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_MAX, idx, image->max);
-    oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_RMS, idx, image->rms);
 
     /* Write the image data. */
     err = oskar_mem_binary_stream_write(&image->data, stream,
