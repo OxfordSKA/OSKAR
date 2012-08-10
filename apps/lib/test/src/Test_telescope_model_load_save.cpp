@@ -345,7 +345,9 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     settings.obs.length_seconds = 1;
+    settings.obs.num_time_steps = 1;
     settings.interferometer.channel_bandwidth_hz = 1;
+
 
     int err = oskar_telescope_model_noise_load(&telescope, NULL, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
@@ -428,6 +430,9 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
     noise->area_projection = OSKAR_FALSE;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
+    settings.obs.length_seconds = 1;
+    settings.obs.num_time_steps = 1;
+    settings.interferometer.channel_bandwidth_hz = 1;
 
     double bandwidth = 10.0e6;
     settings.interferometer.channel_bandwidth_hz = bandwidth;
@@ -532,6 +537,9 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
     noise->area_projection = OSKAR_FALSE;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
+    settings.obs.length_seconds = 1;
+    settings.obs.num_time_steps = 1;
+    settings.interferometer.channel_bandwidth_hz = 1;
 
     double bandwidth = 10.0e6;
     settings.interferometer.channel_bandwidth_hz = bandwidth;

@@ -67,7 +67,7 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
 static int load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
         const QString& filepath);
 static void update_noise_files(QHash<QString, QString>& files, const QDir& dir);
-static int load_noise_stddev(const oskar_Settings* s,
+static int load_noise_rms(const oskar_Settings* s,
         oskar_SystemNoiseModel* noise, QHash<QString, QString>& data_files,
         QHash<QString, oskar_Mem*>& loaded);
 static int sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
@@ -169,7 +169,7 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
     // Noise files can't currently be deeper than depth 1 (stations).
     if (num_children == 0 && depth <= 1)
     {
-        int err = load_noise_stddev(settings, &station->noise, files, loaded);
+        int err = load_noise_rms(settings, &station->noise, files, loaded);
         if (err) return err;
     }
 
@@ -279,7 +279,7 @@ static void update_noise_files(QHash<QString, QString>& files, const QDir& dir)
         files[QString(efficiency_file)] = dir.absoluteFilePath(efficiency_file);
 }
 
-static int load_noise_stddev(const oskar_Settings* settings,
+static int load_noise_rms(const oskar_Settings* settings,
         oskar_SystemNoiseModel* noise, QHash<QString, QString>& data_files,
         QHash<QString, oskar_Mem*>& /*loaded*/)
 {
