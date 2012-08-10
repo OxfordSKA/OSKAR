@@ -27,29 +27,16 @@
  */
 
 #include "interferometry/oskar_visibilities_add_system_noise.h"
-
-/* TODO fix headers (not all of these are needed) */
 #include "interferometry/oskar_Visibilities.h"
-#include "interferometry/oskar_visibilities_get_channel_amps.h"
-
-#include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_init.h"
-#include "utility/oskar_mem_add_gaussian_noise.h"
-#include "utility/oskar_vector_types.h"
-#include "utility/oskar_mem_type_check.h"
-#include "utility/oskar_mem_free.h"
-
-#include "sky/oskar_evaluate_sky_temperature.h"
-#include "sky/oskar_mjd_to_last_fast.h"
-#include "sky/oskar_ra_dec_to_hor_lmn.h"
-
-#include "interferometry/oskar_evaluate_baseline_noise_stddev.h"
-
 #include "math/oskar_random_gaussian.h"
 #include "math/oskar_find_closest_match.h"
+#include "sky/oskar_mjd_to_last_fast.h"
+#include "sky/oskar_ra_dec_to_hor_lmn.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_vector_types.h"
+#include "utility/oskar_mem_free.h"
 
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
