@@ -427,7 +427,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
             }
             case OSKAR_SYSTEM_NOISE_SYS_TEMP:
             {
-                // TODO
+                /* TODO */
                 break;
             }
             default: { break; }

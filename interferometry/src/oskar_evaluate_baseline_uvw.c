@@ -32,26 +32,23 @@
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_init.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
+int oskar_evaluate_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
         const oskar_TelescopeModel* telescope,
-        const oskar_SettingsObservation* obs)
+        const oskar_SettingsObservation* obs, oskar_Mem* work)
 {
-    oskar_Mem u, v, w, work;
-    oskar_Mem uu, vv, ww; /* Pointers. */
+    oskar_Mem u, v, w, uu_dump, vv_dump, ww_dump; /* Pointers. */
     int err, i, type, num_stations, num_baselines, num_vis_dumps;
     double obs_start_mjd_utc, dt_dump;
 
     /* Sanity check on inputs. */
-    if (vis == NULL || telescope == NULL || obs == NULL)
+    if (!uu || !vv || !ww || !work || !telescope || !obs)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Get data type and size of the telescope structure. */
@@ -65,41 +62,39 @@ int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
     dt_dump           = obs->dt_dump_days;
 
     /* Check that the memory is not NULL. */
-    if (!vis->uu_metres.data || !vis->vv_metres.data || !vis->ww_metres.data ||
-            !telescope->station_x.data || !telescope->station_y.data ||
-            !telescope->station_z.data)
+    if (!uu->data || !vv->data || !ww->data || !telescope->station_x.data ||
+            !telescope->station_y.data || !telescope->station_z.data ||
+            !work->data)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Check that the data dimensions are OK. */
-    if (vis->uu_metres.num_elements < num_baselines * num_vis_dumps ||
-            vis->vv_metres.num_elements < num_baselines * num_vis_dumps ||
-            vis->ww_metres.num_elements < num_baselines * num_vis_dumps ||
+    if (uu->num_elements < num_baselines * num_vis_dumps ||
+            vv->num_elements < num_baselines * num_vis_dumps ||
+            ww->num_elements < num_baselines * num_vis_dumps ||
             telescope->station_x.num_elements < num_stations ||
             telescope->station_y.num_elements < num_stations ||
-            telescope->station_z.num_elements < num_stations)
+            telescope->station_z.num_elements < num_stations ||
+            work->num_elements < 3 * num_stations)
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check that the data is in the right location. */
     if (oskar_telescope_model_location(telescope) != OSKAR_LOCATION_CPU ||
-            vis->uu_metres.location != OSKAR_LOCATION_CPU ||
-            vis->vv_metres.location != OSKAR_LOCATION_CPU ||
-            vis->ww_metres.location != OSKAR_LOCATION_CPU)
+            uu->location != OSKAR_LOCATION_CPU ||
+            vv->location != OSKAR_LOCATION_CPU ||
+            ww->location != OSKAR_LOCATION_CPU)
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the data is of the right type. */
-    if (vis->uu_metres.type != type ||
-            vis->vv_metres.type != type ||
-            vis->ww_metres.type != type)
+    if (uu->type != type || vv->type != type || ww->type != type ||
+            work->type != type)
         return OSKAR_ERR_TYPE_MISMATCH;
 
-    /* Create a local CPU work buffer. */
-    err = oskar_mem_init(&work, type, OSKAR_LOCATION_CPU, 3 * num_stations, 1);
+    /* Get pointers from work buffer. */
+    err = oskar_mem_get_pointer(&u, work, 0, num_stations);
     if (err) return err;
-    err = oskar_mem_get_pointer(&u, &work, 0, num_stations);
+    err = oskar_mem_get_pointer(&v, work, 1 * num_stations, num_stations);
     if (err) return err;
-    err = oskar_mem_get_pointer(&v, &work, 1 * num_stations, num_stations);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&w, &work, 2 * num_stations, num_stations);
+    err = oskar_mem_get_pointer(&w, work, 2 * num_stations, num_stations);
     if (err) return err;
 
     /* Loop over dumps. */
@@ -115,23 +110,21 @@ int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
         if (err) return err;
 
         /* Extract pointers to baseline u,v,w coordinates for this dump. */
-        err = oskar_mem_get_pointer(&uu, &vis->uu_metres, i * num_baselines,
+        err = oskar_mem_get_pointer(&uu_dump, uu, i * num_baselines,
                 num_baselines);
         if (err) return err;
-        err = oskar_mem_get_pointer(&vv, &vis->vv_metres, i * num_baselines,
+        err = oskar_mem_get_pointer(&vv_dump, vv, i * num_baselines,
                 num_baselines);
         if (err) return err;
-        err = oskar_mem_get_pointer(&ww, &vis->ww_metres, i * num_baselines,
+        err = oskar_mem_get_pointer(&ww_dump, ww, i * num_baselines,
                 num_baselines);
         if (err) return err;
 
         /* Compute baselines from station positions. */
-        err = oskar_evaluate_baselines(&uu, &vv, &ww, &u, &v, &w);
+        err = oskar_evaluate_baselines(&uu_dump, &vv_dump, &ww_dump,
+                &u, &v, &w);
         if (err) return err;
     }
-
-    /* Free the work buffer. */
-    oskar_mem_free(&work);
 
     return 0;
 }

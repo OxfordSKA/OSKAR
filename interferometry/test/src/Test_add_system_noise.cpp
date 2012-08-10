@@ -146,7 +146,9 @@ void Test_add_system_noise::test_stddev()
     settings.obs.length_days = settings.obs.length_seconds / 86400.0;
     settings.obs.dt_dump_days = vis.time_inc_seconds / 86400.0;
 
-    err = oskar_evaluate_baseline_uvw(&vis, &telescope, &settings.obs);
+    oskar_Mem work_uvw(type, OSKAR_LOCATION_CPU, 3 * num_stations);
+    err = oskar_evaluate_baseline_uvw(&vis.uu_metres, &vis.vv_metres,
+            &vis.ww_metres, &telescope, &settings.obs, &work_uvw);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
 //    err = oskar_visibilities_write(&vis, NULL, "temp_test.vis");

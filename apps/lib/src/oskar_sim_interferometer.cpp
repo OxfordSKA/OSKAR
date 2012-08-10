@@ -220,7 +220,10 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             timer.elapsed() / 1e3);
 
     // Compute baseline u,v,w coordinates for simulation.
-    error = oskar_evaluate_baseline_uvw(&vis_global, &telescope_cpu, &settings.obs);
+    oskar_Mem work_uvw(type, OSKAR_LOCATION_CPU, 3 * telescope_cpu.num_stations);
+    error = oskar_evaluate_baseline_uvw(&vis_global.uu_metres,
+            &vis_global.vv_metres, &vis_global.ww_metres, &telescope_cpu,
+            &settings.obs, &work_uvw);
     if (error) return error;
 
     // Write global visibilities to disk.

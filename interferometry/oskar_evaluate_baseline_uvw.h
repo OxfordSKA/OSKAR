@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
 #include "oskar_global.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_SettingsObservation.h"
-#include "interferometry/oskar_Visibilities.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,24 +44,27 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the baseline (u,v,w) coordinates for the simulation and writes
- * them into the visibility data.
+ * Evaluates the baseline (u,v,w) coordinates for the simulation.
  *
  * @details
  * This function evaluates the baseline (u,v,w) coordinates from the beam phase
  * centre and station (x,y,z) coordinates in the telescope data structure,
  * and the supplied simulation time parameters.
  *
- * The baseline coordinates are written directly into the visibility data.
+ * The output coordinates are for the whole observation, so the output arrays
+ * must have dimension of (at least) num_baselines * num_vis_dumps.
  *
- * @param[out] vis       Structure holding output baseline coordinates.
+ * @param[out] uu        Output baseline u coordinates for whole observation.
+ * @param[out] vv        Output baseline v coordinates for whole observation.
+ * @param[out] ww        Output baseline w coordinates for whole observation.
  * @param[in]  telescope Telescope model structure.
  * @param[in]  obs       Simulation observation settings (used for time data).
+ * @param[in,out]  work  Pointer to work buffer to use (>= 3 * num_stations).
  */
 OSKAR_EXPORT
-int oskar_evaluate_baseline_uvw(oskar_Visibilities* vis,
+int oskar_evaluate_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
         const oskar_TelescopeModel* telescope,
-        const oskar_SettingsObservation* obs);
+        const oskar_SettingsObservation* obs, oskar_Mem* work);
 
 #ifdef __cplusplus
 }
