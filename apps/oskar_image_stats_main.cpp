@@ -32,9 +32,6 @@
 #include "imaging/oskar_image_get_stats.h"
 #include "imaging/oskar_image_read.h"
 #include "utility/oskar_get_error_string.h"
-#include "utility/oskar_log_error.h"
-#include "utility/oskar_log_message.h"
-#include "utility/oskar_Log.h"
 
 #include <cstdio>
 #include <cstdlib>
