@@ -344,6 +344,8 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
     noise->area_projection = OSKAR_FALSE;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
+    settings.obs.length_seconds = 1;
+    settings.interferometer.channel_bandwidth_hz = 1;
 
     int err = oskar_telescope_model_noise_load(&telescope, NULL, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
