@@ -20,6 +20,7 @@ set(utility_SRC
     src/oskar_binary_tag_index_free.c
     src/oskar_binary_tag_index_query.c
     src/oskar_blank_parentheses.c
+    src/oskar_cuda_check_error.c
     src/oskar_cuda_device_info_scan.c
     src/oskar_cuda_info_create.c
     src/oskar_cuda_info_free.c

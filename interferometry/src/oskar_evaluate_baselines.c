@@ -27,76 +27,114 @@
  */
 
 #include "interferometry/oskar_evaluate_baselines.h"
-#include "interferometry/oskar_compute_baselines.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_baselines(oskar_Mem* baseline_u, oskar_Mem* baseline_v,
-        oskar_Mem* baseline_w, const oskar_Mem* station_u,
-        const oskar_Mem* station_v, const oskar_Mem* station_w)
+/* Single precision. */
+void oskar_evaluate_baselines_f(float* uu, float* vv, float* ww,
+        int num_stations, const float* u, const float* v, const float* w)
 {
-    int type, num_stations, num_baselines, error = 0;
+    int s1, s2, b; /* Station and baseline indices. */
+    for (s1 = 0, b = 0; s1 < num_stations; ++s1)
+    {
+        for (s2 = s1 + 1; s2 < num_stations; ++s2, ++b)
+        {
+            uu[b] = u[s2] - u[s1];
+            vv[b] = v[s2] - v[s1];
+            ww[b] = w[s2] - w[s1];
+        }
+    }
+}
 
-    /* Sanity check on inputs. */
-    if (!baseline_u || !baseline_v || !baseline_w ||
-            !station_u || !station_v || !station_w)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+/* Double precision. */
+void oskar_evaluate_baselines_d(double* uu, double* vv, double* ww,
+        int num_stations, const double* u, const double* v, const double* w)
+{
+    int s1, s2, b; /* Station and baseline indices. */
+    for (s1 = 0, b = 0; s1 < num_stations; ++s1)
+    {
+        for (s2 = s1 + 1; s2 < num_stations; ++s2, ++b)
+        {
+            uu[b] = u[s2] - u[s1];
+            vv[b] = v[s2] - v[s1];
+            ww[b] = w[s2] - w[s1];
+        }
+    }
+}
+
+/* Wrapper. */
+void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
+        int* status)
+{
+    int type, location, num_stations, num_baselines;
+
+    /* Check all inputs. */
+    if (!uu || !vv || !ww || !u || !v || !w || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Get data type, location and size. */
-    type = station_u->type;
-    num_stations = station_u->num_elements;
+    type = u->type;
+    location = u->location;
+    num_stations = u->num_elements;
     num_baselines = num_stations * (num_stations - 1) / 2;
 
-    /* Check that the data is in the right location. */
-    if (station_u->location != OSKAR_LOCATION_CPU ||
-            station_v->location != OSKAR_LOCATION_CPU ||
-            station_w->location != OSKAR_LOCATION_CPU ||
-            baseline_u->location != OSKAR_LOCATION_CPU ||
-            baseline_v->location != OSKAR_LOCATION_CPU ||
-            baseline_w->location != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    /* Check that the data are in the right location. */
+    if (v->location != location ||
+            w->location != location ||
+            uu->location != location ||
+            vv->location != location ||
+            ww->location != location)
+        *status = OSKAR_ERR_BAD_LOCATION;
+    /* TODO: Allow GPU memory here. */
+    if (location != OSKAR_LOCATION_CPU)
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the memory is not NULL. */
-    if (!baseline_u->data || !baseline_v->data || !baseline_w->data ||
-            !station_u->data || !station_v->data || !station_w->data)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (!uu->data || !vv->data || !ww->data ||
+            !u->data || !v->data || !w->data)
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Check that the data dimensions are OK. */
-    if (station_v->num_elements < num_stations ||
-            station_w->num_elements < num_stations ||
-            baseline_u->num_elements < num_baselines ||
-            baseline_v->num_elements < num_baselines ||
-            baseline_w->num_elements < num_baselines)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+    if (v->num_elements < num_stations ||
+            w->num_elements < num_stations ||
+            uu->num_elements < num_baselines ||
+            vv->num_elements < num_baselines ||
+            ww->num_elements < num_baselines)
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Check that the data is of the right type. */
-    if (station_v->type != type || station_w->type != type ||
-            baseline_u->type != type || baseline_v->type != type ||
-            baseline_w->type != type)
-        return OSKAR_ERR_TYPE_MISMATCH;
+    if (v->type != type || w->type != type ||
+            uu->type != type || vv->type != type || ww->type != type)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     if (type == OSKAR_SINGLE)
     {
-        oskar_compute_baselines_f(num_stations, (float*)(station_u->data),
-                (float*)(station_v->data), (float*)(station_w->data),
-                (float*)(baseline_u->data), (float*)(baseline_v->data),
-                (float*)(baseline_w->data));
+        oskar_evaluate_baselines_f((float*)(uu->data), (float*)(vv->data),
+                (float*)(ww->data), num_stations, (float*)(u->data),
+                (float*)(v->data), (float*)(w->data));
     }
     else if (type == OSKAR_DOUBLE)
     {
-        oskar_compute_baselines_d(num_stations, (double*)(station_u->data),
-                (double*)(station_v->data), (double*)(station_w->data),
-                (double*)(baseline_u->data), (double*)(baseline_v->data),
-                (double*)(baseline_w->data));
+        oskar_evaluate_baselines_d((double*)(uu->data), (double*)(vv->data),
+                (double*)(ww->data), num_stations, (double*)(u->data),
+                (double*)(v->data), (double*)(w->data));
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    return error;
 }
 
 #ifdef __cplusplus

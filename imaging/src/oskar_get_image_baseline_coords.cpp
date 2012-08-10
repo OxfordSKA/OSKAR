@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,9 +69,9 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     if (settings->time_snapshots && settings->channel_snapshots)
     {
         int coord_offset = vis_time * vis->num_baselines;
-        err = oskar_mem_get_pointer(uu, &vis->uu_metres, coord_offset, num_vis_coords);
+        oskar_mem_get_pointer(uu, &vis->uu_metres, coord_offset, num_vis_coords, &err);
         if (err) return err;
-        err = oskar_mem_get_pointer(vv, &vis->vv_metres, coord_offset, num_vis_coords);
+        oskar_mem_get_pointer(vv, &vis->vv_metres, coord_offset, num_vis_coords, &err);
         if (err) return err;
     }
 
@@ -79,9 +79,9 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
     else if (settings->time_snapshots && !settings->channel_snapshots)
     {
         int coord_offset = vis_time * vis->num_baselines;
-        err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords);
+        oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords, &err);
         if (err) return err;
-        err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords);
+        oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords, &err);
         if (err) return err;
 
         for (int i = 0, c = vis_chan_range[0]; c <= vis_chan_range[1]; ++c)
@@ -110,9 +110,9 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
         for (int i = 0, t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
         {
             int coord_offset = t * vis->num_baselines;
-            err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords);
+            oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords, &err);
             if (err) return err;
-            err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords);
+            oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords, &err);
             if (err) return err;
 
             for (int b = 0; b < vis->num_baselines; ++b, ++i)
@@ -142,9 +142,9 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
             for (int t = vis_time_range[0]; t <= vis_time_range[1]; ++t)
             {
                 int coord_offset = t * vis->num_baselines;
-                err = oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords);
+                oskar_mem_get_pointer(&uu_ptr, &vis->uu_metres, coord_offset, num_vis_coords, &err);
                 if (err) return err;
-                err = oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords);
+                oskar_mem_get_pointer(&vv_ptr, &vis->vv_metres, coord_offset, num_vis_coords, &err);
                 if (err) return err;
 
                 for (int b = 0; b < vis->num_baselines; ++b, ++i)

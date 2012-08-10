@@ -30,6 +30,7 @@
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_realloc.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -52,12 +53,16 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
     if (dst->owner == OSKAR_FALSE)
     {
         /* FIXME is this really the behaviour we want? ... too confusing! */
+        printf("\n*************\n");
+        printf("************* If you see this message, please let us know!\n");
+        printf("*************\n\n");
+        fflush(stdout);
 
         /* Disallow a pointer copy at a different location. */
         if (dst->location != src->location)
             return OSKAR_ERR_BAD_LOCATION;
 
-        error = oskar_mem_get_pointer(dst, src, 0, src->num_elements);
+        oskar_mem_get_pointer(dst, src, 0, src->num_elements, &error);
         if (error) return error;
     }
     else

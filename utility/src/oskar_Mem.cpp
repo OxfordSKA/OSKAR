@@ -36,14 +36,14 @@ oskar_Mem::oskar_Mem(int owner_)
 
 oskar_Mem::oskar_Mem(int mem_type, int mem_location, int size, int owner_)
 {
-	int err = oskar_mem_init(this, mem_type, mem_location, size, owner_);
+    int err = oskar_mem_init(this, mem_type, mem_location, size, owner_);
     if (err) throw err;
 }
 
 oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
 {
-	int err;
-	err = oskar_mem_init(this, other->type, mem_location, other->num_elements,
+    int err;
+    err = oskar_mem_init(this, other->type, mem_location, other->num_elements,
             owner_);
     if (err) throw err;
     err = oskar_mem_copy(this, other); // Copy other to this.
@@ -52,7 +52,7 @@ oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
 
 oskar_Mem::~oskar_Mem()
 {
-	int err = oskar_mem_free(this);
+    int err = oskar_mem_free(this);
     if (err) throw err;
 }
 
@@ -111,7 +111,9 @@ int oskar_Mem::copy_to(oskar_Mem* other) const
 oskar_Mem oskar_Mem::get_pointer(int offset, int size) const
 {
     oskar_Mem ptr;
-    if (oskar_mem_get_pointer(&ptr, this, offset, size) != 0)
+    int err = 0;
+    oskar_mem_get_pointer(&ptr, this, offset, size, &err);
+    if (err)
     {
         ptr.data = NULL;
         ptr.location = 0;

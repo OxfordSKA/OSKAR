@@ -31,7 +31,7 @@
 #include "interferometry/oskar_interferometer.h"
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/oskar_evaluate_jones_K.h"
-#include "interferometry/oskar_evaluate_station_uvw.h"
+#include "interferometry/oskar_evaluate_uvw_station.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_join.h"
 #include "sky/oskar_evaluate_jones_R.h"
@@ -169,7 +169,10 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 double gast = oskar_mjd_to_gast_fast(t_fringe + dt_fringe / 2);
 
                 // Evaluate station u,v,w coordinates.
-                err = oskar_evaluate_station_uvw(&u, &v, &w, &tel_gpu, gast);
+                oskar_evaluate_uvw_station(&u, &v, &w, tel_gpu.num_stations,
+                        &tel_gpu.station_x, &tel_gpu.station_y,
+                        &tel_gpu.station_z, tel_gpu.ra0_rad, tel_gpu.dec0_rad,
+                        gast, &err);
                 if (err) return err;
 
                 // Evaluate interferometer phase (Jones K).

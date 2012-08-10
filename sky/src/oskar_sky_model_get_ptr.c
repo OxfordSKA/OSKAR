@@ -49,50 +49,36 @@ int oskar_sky_model_get_ptr(oskar_SkyModel* sky_ptr, const oskar_SkyModel* sky,
 
     sky_ptr->num_sources  = num_sources;
     sky_ptr->use_extended = sky->use_extended;
-    err = oskar_mem_get_pointer(&sky_ptr->RA,  &sky->RA, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->Dec, &sky->Dec, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->I, &sky->I, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->Q, &sky->Q, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->U, &sky->U, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->V, &sky->V, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->reference_freq, &sky->reference_freq,
-            offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->spectral_index, &sky->spectral_index,
-            offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->rel_l, &sky->rel_l, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->rel_m, &sky->rel_m, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->rel_n, &sky->rel_n, offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->FWHM_major, &sky->FWHM_major,
-            offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->FWHM_minor, &sky->FWHM_minor,
-            offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->position_angle, &sky->position_angle,
-            offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->gaussian_a, &sky->gaussian_a,
-            offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->gaussian_b, &sky->gaussian_b,
-            offset, num_sources);
-    if (err) return err;
-    err = oskar_mem_get_pointer(&sky_ptr->gaussian_c, &sky->gaussian_c,
-            offset, num_sources);
-    if (err) return err;
+    oskar_mem_get_pointer(&sky_ptr->RA,  &sky->RA, offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->Dec, &sky->Dec, offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->I, &sky->I, offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->Q, &sky->Q, offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->U, &sky->U, offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->V, &sky->V, offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->reference_freq, &sky->reference_freq,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->spectral_index, &sky->spectral_index,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->rel_l, &sky->rel_l,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->rel_m, &sky->rel_m,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->rel_n, &sky->rel_n,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->FWHM_major, &sky->FWHM_major,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->FWHM_minor, &sky->FWHM_minor,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->position_angle, &sky->position_angle,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->gaussian_a, &sky->gaussian_a,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->gaussian_b, &sky->gaussian_b,
+            offset, num_sources, &err);
+    oskar_mem_get_pointer(&sky_ptr->gaussian_c, &sky->gaussian_c,
+            offset, num_sources, &err);
 
-    return OSKAR_SUCCESS;
+    return err;
 }
 
 #ifdef __cplusplus

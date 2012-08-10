@@ -232,8 +232,8 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
 
                 // Get pointer to slice of the image cube.
                 int slice_offset = ((c * im_num_times + t) * num_pols + p) * num_pixels;
-                err = oskar_mem_get_pointer(&im_slice, &im->data, slice_offset,
-                        num_pixels);
+                oskar_mem_get_pointer(&im_slice, &im->data, slice_offset,
+                        num_pixels, &err);
                 if (err) return err;
 
                 // Make the image

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,42 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_compute_baselines.h"
+#include "utility/oskar_cuda_check_error.h"
+#include <cuda_runtime_api.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Single precision. */
-void oskar_compute_baselines_f(int na, const float* au,
-        const float* av, const float* aw, float* bu, float* bv, float* bw)
+void oskar_cuda_check_error(int* status)
 {
-    int a1, a2, b; /* Station and baseline indices. */
-    for (a1 = 0, b = 0; a1 < na; ++a1)
-    {
-        for (a2 = a1 + 1; a2 < na; ++a2, ++b)
-        {
-            bu[b] = au[a2] - au[a1];
-            bv[b] = av[a2] - av[a1];
-            bw[b] = aw[a2] - aw[a1];
-        }
-    }
-}
+    int code;
 
-/* Double precision. */
-void oskar_compute_baselines_d(int na, const double* au,
-        const double* av, const double* aw, double* bu, double* bv, double* bw)
-{
-    int a1, a2, b; /* Station and baseline indices. */
-    for (a1 = 0, b = 0; a1 < na; ++a1)
-    {
-        for (a2 = a1 + 1; a2 < na; ++a2, ++b)
-        {
-            bu[b] = au[a2] - au[a1];
-            bv[b] = av[a2] - av[a1];
-            bw[b] = aw[a2] - aw[a1];
-        }
-    }
+    /* Check inputs. */
+    if (!status) return;
+
+    /* Check for CUDA errors. */
+#ifndef NDEBUG
+    /* Call cudaDeviceSynchronize only in debug builds. */
+    cudaDeviceSynchronize();
+#endif
+    code = cudaPeekAtLastError();
+    if (code) *status = code;
 }
 
 #ifdef __cplusplus

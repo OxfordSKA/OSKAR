@@ -4,12 +4,11 @@
 
 # Add the source files in this directory.
 set(interferometry_SRC
-    src/oskar_compute_baselines.c
     src/oskar_correlate.cu
-    src/oskar_evaluate_baseline_uvw.c
     src/oskar_evaluate_baselines.c
     src/oskar_evaluate_jones_K.cu
-    src/oskar_evaluate_station_uvw.c
+    src/oskar_evaluate_uvw_baseline.c
+    src/oskar_evaluate_uvw_station.c
     src/oskar_geocentric_cartesian_to_geodetic_spherical.c
     src/oskar_geodetic_spherical_to_geocentric_cartesian.c
     src/oskar_horizon_plane_to_geocentric_cartesian.c

@@ -32,7 +32,7 @@
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_visibilities_init.h"
 #include "interferometry/oskar_visibilities_write.h"
-#include "interferometry/oskar_evaluate_baseline_uvw.h"
+#include "interferometry/oskar_evaluate_uvw_baseline.h"
 
 #include "station/oskar_station_model_init.h"
 
@@ -147,8 +147,12 @@ void Test_add_system_noise::test_stddev()
     settings.obs.dt_dump_days = vis.time_inc_seconds / 86400.0;
 
     oskar_Mem work_uvw(type, OSKAR_LOCATION_CPU, 3 * num_stations);
-    err = oskar_evaluate_baseline_uvw(&vis.uu_metres, &vis.vv_metres,
-            &vis.ww_metres, &telescope, &settings.obs, &work_uvw);
+    oskar_evaluate_uvw_baseline(&vis.uu_metres, &vis.vv_metres,
+            &vis.ww_metres, telescope.num_stations, &telescope.station_x,
+            &telescope.station_y, &telescope.station_z, telescope.ra0_rad,
+            telescope.dec0_rad, settings.obs.num_time_steps,
+            settings.obs.start_mjd_utc, settings.obs.dt_dump_days,
+            &work_uvw, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
 //    err = oskar_visibilities_write(&vis, NULL, "temp_test.vis");

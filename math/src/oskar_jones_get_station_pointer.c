@@ -36,10 +36,11 @@ extern "C" {
 int oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
         int station_index)
 {
-    int num_sources, offset;
+    int num_sources, offset, err = 0;
     num_sources = J->num_sources;
     offset = station_index * num_sources;
-    return oskar_mem_get_pointer(J_station, &J->data, offset, num_sources);
+    oskar_mem_get_pointer(J_station, &J->data, offset, num_sources, &err);
+    return err;
 }
 
 #ifdef __cplusplus

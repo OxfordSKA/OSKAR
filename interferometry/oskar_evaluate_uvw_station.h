@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_STATION_UVW_H_
-#define OSKAR_EVALUATE_STATION_UVW_H_
+#ifndef OSKAR_EVALUATE_UVW_STATION_H_
+#define OSKAR_EVALUATE_UVW_STATION_H_
 
 /**
- * @file oskar_evaluate_station_uvw.h
+ * @file oskar_evaluate_uvw_station.h
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
@@ -46,29 +45,30 @@ extern "C" {
  * Evaluates the station (u,v,w) coordinates.
  *
  * @details
- * This function evaluates the station (u,v,w) coordinates from the beam phase
- * centre and station (x,y,z) coordinates in the telescope data structure,
- * and the supplied Greenwich Apparent Sidereal Time.
+ * This function evaluates the station (u,v,w) coordinates using the
+ * station (x,y,z) coordinates, the supplied phase tracking centre, and
+ * the Greenwich Apparent Sidereal Time.
  *
- * Note:
- * The units of u,v,w returned by the function depend on the units of station
- * coordinates in the telescope model. For oskar_interferometer() this is
- * assumed to be in radians at the current simulation frequency. This is achieved
- * by scaling coordinates in a station model by the wavenumber cooresponding
- * to the simulation frequency..
- *
- * @param[out] u         Station u coordinates, in telescope->coord_units units.
- * @param[out] v         Station v coordinates, in telescope->coord_units units.
- * @param[out] w         Station w coordinates, in telescope->coord_units units.
- * @param[in] telescope  Input telescope model.
- * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
+ * @param[out] u           Output station u coordinates.
+ * @param[out] v           Output station v coordinates.
+ * @param[out] w           Output station w coordinates.
+ * @param[in] num_stations The size of the station coordinate arrays.
+ * @param[in] x            Input station x coordinates (ECEF or related frame).
+ * @param[in] y            Input station y coordinates (ECEF or related frame).
+ * @param[in] z            Input station z coordinates (ECEF or related frame).
+ * @param[in] ra0_rad      The Right Ascension of the phase centre, in radians.
+ * @param[in] dec0_rad     The Declination of the phase centre, in radians.
+ * @param[in] gast         The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
-        const oskar_TelescopeModel* telescope, double gast);
+void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
+        int num_stations, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, double ra0_rad, double dec0_rad, double gast,
+        int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_STATION_UVW_H_ */
+#endif /* OSKAR_EVALUATE_UVW_STATION_H_ */

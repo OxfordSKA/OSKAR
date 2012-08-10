@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 // Single precision.
-int oskar_xyz_to_uvw_cuda_f(int n, const float* d_x, const float* d_y,
+void oskar_xyz_to_uvw_cuda_f(int n, const float* d_x, const float* d_y,
         const float* d_z, float ha0, float dec0, float* d_u, float* d_v,
         float* d_w)
 {
@@ -45,12 +45,10 @@ int oskar_xyz_to_uvw_cuda_f(int n, const float* d_x, const float* d_y,
     // Call the CUDA kernel.
     oskar_cudak_xyz_to_uvw_f OSKAR_CUDAK_CONF(n_blk, n_thd)
     (n, d_x, d_y, d_z, ha0, dec0, d_u, d_v, d_w);
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
 }
 
 // Double precision.
-int oskar_xyz_to_uvw_cuda_d(int n, const double* d_x, const double* d_y,
+void oskar_xyz_to_uvw_cuda_d(int n, const double* d_x, const double* d_y,
         const double* d_z, double ha0, double dec0, double* d_u, double* d_v,
         double* d_w)
 {
@@ -61,8 +59,6 @@ int oskar_xyz_to_uvw_cuda_d(int n, const double* d_x, const double* d_y,
     // Call the CUDA kernel.
     oskar_cudak_xyz_to_uvw_d OSKAR_CUDAK_CONF(n_blk, n_thd)
     (n, d_x, d_y, d_z, ha0, dec0, d_u, d_v, d_w);
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
 }
 
 #ifdef __cplusplus

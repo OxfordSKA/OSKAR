@@ -26,48 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_BASELINE_UVW_H_
-#define OSKAR_EVALUATE_BASELINE_UVW_H_
+#ifndef OSKAR_CUDA_CHECK_ERROR_H_
+#define OSKAR_CUDA_CHECK_ERROR_H_
 
 /**
- * @file oskar_evaluate_baseline_uvw.h
+ * @file oskar_cuda_check_error.h
  */
 
 #include "oskar_global.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "interferometry/oskar_SettingsObservation.h"
-#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief
- * Evaluates the baseline (u,v,w) coordinates for the simulation.
+ * @brief Checks if a CUDA error occurred.
  *
  * @details
- * This function evaluates the baseline (u,v,w) coordinates from the beam phase
- * centre and station (x,y,z) coordinates in the telescope data structure,
- * and the supplied simulation time parameters.
+ * This function checks to see if a CUDA error occurred.
+ * In debug builds, a call to cudaDeviceSynchronize is made before the check.
  *
- * The output coordinates are for the whole observation, so the output arrays
- * must have dimension of (at least) num_baselines * num_vis_dumps.
- *
- * @param[out] uu        Output baseline u coordinates for whole observation.
- * @param[out] vv        Output baseline v coordinates for whole observation.
- * @param[out] ww        Output baseline w coordinates for whole observation.
- * @param[in]  telescope Telescope model structure.
- * @param[in]  obs       Simulation observation settings (used for time data).
- * @param[in,out]  work  Pointer to work buffer to use (>= 3 * num_stations).
+ * @param[out] status  Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_baseline_uvw(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
-        const oskar_TelescopeModel* telescope,
-        const oskar_SettingsObservation* obs, oskar_Mem* work);
+void oskar_cuda_check_error(int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_BASELINE_UVW_H_ */
+#endif /* OSKAR_CUDA_CHECK_ERROR_H_ */

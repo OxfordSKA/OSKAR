@@ -26,112 +26,117 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_evaluate_station_uvw.h"
-#include "interferometry/oskar_telescope_model_location.h"
-#include "interferometry/oskar_telescope_model_type.h"
+#include "interferometry/oskar_evaluate_uvw_station.h"
 #include "interferometry/oskar_xyz_to_uvw_cuda.h"
 #include "interferometry/oskar_xyz_to_uvw.h"
+#include "utility/oskar_cuda_check_error.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_station_uvw(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
-        const oskar_TelescopeModel* telescope, double gast)
+void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
+        int num_stations, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, double ra0_rad, double dec0_rad, double gast,
+        int* status)
 {
-    int type, location, num_stations, error = 0;
-    double ha0, dec0;
+    int type, location;
+    double ha0_rad;
 
-    /* Sanity check on inputs. */
-    if (!u || !v || !w || !telescope)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!u || !v || !w || !x || !y || !z || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
-    /* Get data type, location and size of the telescope structure. */
-    type = oskar_telescope_model_type(telescope);
-    location = oskar_telescope_model_location(telescope);
-    num_stations = telescope->num_stations;
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get data type and location of the input coordinates. */
+    type = x->type;
+    location = x->location;
 
     /* Check that the memory is not NULL. */
-    if (!u->data || !v->data || !w->data || !telescope->station_x.data ||
-            !telescope->station_y.data || !telescope->station_z.data)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (!u->data || !v->data || !w->data || !x->data || !y->data || !z->data)
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Check that the data dimensions are OK. */
     if (u->num_elements < num_stations ||
             v->num_elements < num_stations ||
             w->num_elements < num_stations ||
-            telescope->station_x.num_elements < num_stations ||
-            telescope->station_y.num_elements < num_stations ||
-            telescope->station_z.num_elements < num_stations)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+            x->num_elements < num_stations ||
+            y->num_elements < num_stations ||
+            z->num_elements < num_stations)
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
-    /* Check that the data is in the right location. */
-    if (u->location != location || v->location != location ||
+    /* Check that the data are in the right location. */
+    if (y->location != location ||
+            z->location != location ||
+            u->location != location ||
+            v->location != location ||
             w->location != location)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the data is of the right type. */
-    if (u->type != type || v->type != type ||
-            w->type != type)
-        return OSKAR_ERR_TYPE_MISMATCH;
+    if (y->type != type || z->type != type ||
+            u->type != type || v->type != type || w->type != type)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Evaluate Greenwich Hour Angle of phase centre. */
-    ha0 = gast - telescope->ra0_rad;
-    dec0 = telescope->dec0_rad;
+    ha0_rad = gast - ra0_rad;
 
     /* Evaluate station u,v,w coordinates. */
     if (location == OSKAR_LOCATION_GPU)
     {
         if (type == OSKAR_SINGLE)
         {
-            error = oskar_xyz_to_uvw_cuda_f(num_stations,
-                    (float*)(telescope->station_x.data),
-                    (float*)(telescope->station_y.data),
-                    (float*)(telescope->station_z.data), (float)ha0, (float)dec0,
+            oskar_xyz_to_uvw_cuda_f(num_stations,
+                    (float*)(x->data), (float*)(y->data), (float*)(z->data),
+                    (float)ha0_rad, (float)dec0_rad,
                     (float*)(u->data), (float*)(v->data), (float*)(w->data));
         }
         else if (type == OSKAR_DOUBLE)
         {
-            error = oskar_xyz_to_uvw_cuda_d(num_stations,
-                    (double*)(telescope->station_x.data),
-                    (double*)(telescope->station_y.data),
-                    (double*)(telescope->station_z.data), ha0, dec0,
+            oskar_xyz_to_uvw_cuda_d(num_stations,
+                    (double*)(x->data), (double*)(y->data), (double*)(z->data),
+                    ha0_rad, dec0_rad,
                     (double*)(u->data), (double*)(v->data), (double*)(w->data));
         }
         else
         {
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
+        oskar_cuda_check_error(status);
     }
     else if (location == OSKAR_LOCATION_CPU)
     {
         if (type == OSKAR_SINGLE)
         {
             oskar_xyz_to_uvw_f(num_stations,
-                    (float*)(telescope->station_x.data),
-                    (float*)(telescope->station_y.data),
-                    (float*)(telescope->station_z.data), (float)ha0, (float)dec0,
+                    (float*)(x->data), (float*)(y->data), (float*)(z->data),
+                    (float)ha0_rad, (float)dec0_rad,
                     (float*)(u->data), (float*)(v->data), (float*)(w->data));
         }
         else if (type == OSKAR_DOUBLE)
         {
             oskar_xyz_to_uvw_d(num_stations,
-                    (double*)(telescope->station_x.data),
-                    (double*)(telescope->station_y.data),
-                    (double*)(telescope->station_z.data), ha0, dec0,
+                    (double*)(x->data), (double*)(y->data), (double*)(z->data),
+                    ha0_rad, dec0_rad,
                     (double*)(u->data), (double*)(v->data), (double*)(w->data));
         }
         else
         {
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
     }
     else
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
-
-    return error;
 }
 
 #ifdef __cplusplus

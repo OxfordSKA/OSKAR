@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_get_pointer.h"
@@ -36,21 +34,31 @@
 extern "C" {
 #endif
 
-int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        int offset, int num_elements)
+void oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
+        int offset, int num_elements, int* status)
 {
     size_t element_size, offset_bytes;
 
-    /* Sanity check on inputs. */
-    if (ptr == NULL || src == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!ptr || !src || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check that the new pointer will be valid. */
     if (offset + num_elements > src->num_elements)
-        return OSKAR_ERR_OUT_OF_RANGE;
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+
+    /* Get the element size. */
+    element_size = oskar_mem_element_size(src->type);
+    if (element_size == 0)
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Compute the offset for the new pointer. */
-    element_size = oskar_mem_element_size(src->type);
     offset_bytes = offset * element_size;
 
     /* Initialise the new meta-data. */
@@ -59,11 +67,8 @@ int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
     ptr->data = (void*)((char*)(src->data) + offset_bytes);
     ptr->location = src->location;
     ptr->owner = OSKAR_FALSE;
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus
 }
 #endif
-

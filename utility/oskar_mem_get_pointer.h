@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,11 @@ extern "C" {
 #endif
 
 /**
- * @brief Returns oskar_Mem structure which holds a pointer to memory held
- * within another oskar_Mem structure.
+ * @brief Gets a pointer to memory held within another oskar_Mem structure.
  *
  * @details
- * Note: The returned structure will not hold ownership of the memory to
+ * This function gets a pointer to memory held within another oskar_Mem
+ * structure. The output structure will not take ownership of the memory to
  * which it points.
  *
  * Warning: If the pointer \p ptr returned already owns memory, this will be
@@ -54,18 +54,13 @@ extern "C" {
  * @param[out] ptr         Output structure holding a pointer to a location
  *                         in memory and its associated meta-data.
  * @param[in] src          Input structure from which the pointer is derived.
- * @param[in] offset       Offset into \p src in elements.
+ * @param[in] offset       Element offset into \p src.
  * @param[in] num_elements Number of elements of \p src referred to by \p ptr.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
-        int offset, int num_elements);
+void oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
+        int offset, int num_elements, int* status);
 
 #ifdef __cplusplus
 }
