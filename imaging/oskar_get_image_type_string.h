@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GET_ERROR_STRING_H_
-#define OSKAR_GET_ERROR_STRING_H_
+
+#ifndef OSKAR_GET_IMAGE_TYPE_STRING_H_
+#define OSKAR_GET_IMAGE_TYPE_STRING_H_
 
 /**
- * @file oskar_get_error_string.h
+ * @file oskar_get_image_type_string.h
  */
 
 #include "oskar_global.h"
@@ -39,23 +40,19 @@
 extern "C" {
 #endif
 
+
 /**
- * @brief Returns a string describing the specified error code.
+ * @brief Return a string describing the image type.
  *
- * @details
- * As all OSKAR defined error codes are negative, if the error code is positive
- * it is assumed to be a CUDA error and an error message from
- * cudaGetErrorString() is returned.
+ * @param[in] An OSKAR image type enumerator value.
  *
- * @param[in] error An OSKAR error code.
- *
- * @return String describing the error.
+ * @return String describing the image type.
  */
 OSKAR_EXPORT
-const char* oskar_get_error_string(int error);
+const char* oskar_get_image_type_string(int type);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_GET_ERROR_STRING_H_ */
+#endif /* OSKAR_GET_IMAGE_TYPE_STRING_H_ */

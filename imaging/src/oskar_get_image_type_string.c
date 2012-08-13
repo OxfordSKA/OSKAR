@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,36 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_GET_ERROR_STRING_H_
-#define OSKAR_GET_ERROR_STRING_H_
 
-/**
- * @file oskar_get_error_string.h
- */
-
-#include "oskar_global.h"
+#include "imaging/oskar_get_image_type_string.h"
+#include "imaging/oskar_Image.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Returns a string describing the specified error code.
- *
- * @details
- * As all OSKAR defined error codes are negative, if the error code is positive
- * it is assumed to be a CUDA error and an error message from
- * cudaGetErrorString() is returned.
- *
- * @param[in] error An OSKAR error code.
- *
- * @return String describing the error.
- */
-OSKAR_EXPORT
-const char* oskar_get_error_string(int error);
+const char* oskar_get_image_type_string(int type)
+{
+    switch (type)
+    {
+        case OSKAR_IMAGE_TYPE_STOKES:
+            return "Stokes I,Q,U,V";
+        case OSKAR_IMAGE_TYPE_STOKES_I:
+            return "Stokes I";
+        case OSKAR_IMAGE_TYPE_STOKES_Q:
+            return "Stokes Q";
+        case OSKAR_IMAGE_TYPE_STOKES_U:
+            return "Stokes U";
+        case OSKAR_IMAGE_TYPE_STOKES_V:
+            return "Stokes V";
+        case OSKAR_IMAGE_TYPE_POL_LINEAR:
+            return "Linear XX,XY,YX,YY";
+        case OSKAR_IMAGE_TYPE_POL_XX:
+            return "Linear XX";
+        case OSKAR_IMAGE_TYPE_POL_XY:
+            return "Linear XY";
+        case OSKAR_IMAGE_TYPE_POL_YX:
+            return "Linear YX";
+        case OSKAR_IMAGE_TYPE_POL_YY:
+            return "Linear YY";
+        case OSKAR_IMAGE_TYPE_PSF:
+            return "PSF";
+        case OSKAR_IMAGE_TYPE_BEAM_SCALAR:
+            return "Beam (scalar)";
+        case OSKAR_IMAGE_TYPE_BEAM_POLARISED:
+            return "Beam (polarised)";
+        default:
+            break;
+    };
+    return "unknown type.";
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_GET_ERROR_STRING_H_ */

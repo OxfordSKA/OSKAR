@@ -10,6 +10,7 @@ set(imaging_SRC
     src/oskar_get_image_vis_amps.cpp
     src/oskar_get_image_baseline_coords.cpp
     src/oskar_get_image_stokes.c
+    src/oskar_get_image_type_string.c
     src/oskar_image_evaluate_ranges.c
     src/oskar_image_free.c
     src/oskar_image_get_stats.c

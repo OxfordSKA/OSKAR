@@ -129,7 +129,7 @@ enum {
     OSKAR_IMAGE_TYPE_STOKES_U = 4,
     OSKAR_IMAGE_TYPE_STOKES_V = 5,
 
-    OSKAR_IMAGE_TYPE_POL_LINEAR = 6, /* all linear polarisations */
+    OSKAR_IMAGE_TYPE_POL_LINEAR = 6, /* all linear polarisations XX,XY,YX,YY */
     OSKAR_IMAGE_TYPE_POL_XX     = 7,
     OSKAR_IMAGE_TYPE_POL_YY     = 8,
     OSKAR_IMAGE_TYPE_POL_XY     = 9,
