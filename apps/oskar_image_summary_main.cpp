@@ -156,7 +156,6 @@ int main(int argc, char** argv)
         if (verbose)
         {
             oskar_BinaryTagIndex* index = NULL;
-            oskar_BinaryHeader header;
             FILE* stream = fopen(filename, "rb");
             if (!stream)
                 return OSKAR_ERR_FILE_IO;

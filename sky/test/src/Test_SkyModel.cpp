@@ -36,7 +36,6 @@
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_split.h"
-#include "sky/oskar_evaluate_sky_temperature.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
 #include "sky/oskar_sky_model_append_to_set.h"
 #include "sky/oskar_sky_model_insert.h"
@@ -449,19 +448,6 @@ void Test_SkyModel::test_split()
     free(sky_subset);
 }
 
-void Test_SkyModel::test_evaluate_sky_temperature()
-{
-    int num_channels = 30;
-    double start_freq = 10e6; // Hz
-    double freq_inc   = 5e6;  // Hz
-    double spectral_index = 0.75;
-    double* temp = (double*)malloc(num_channels * sizeof(double));
-
-    oskar_evaluate_sky_temperature(temp, num_channels, start_freq, freq_inc,
-            spectral_index);
-
-    free(temp);
-}
 
 void Test_SkyModel::test_filter_by_radius()
 {

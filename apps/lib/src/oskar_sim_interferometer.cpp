@@ -45,7 +45,6 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_SettingsSky.h"
 #include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_evaluate_sky_temperature.h" // TODO sky noise header
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
