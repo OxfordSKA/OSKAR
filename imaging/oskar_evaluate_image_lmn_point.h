@@ -26,65 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_IMAGE_H_
-#define OSKAR_SETTINGS_IMAGE_H_
+
+#ifndef OSKAR_EVALUATE_IMAGE_LMN_POINT_H_
+#define OSKAR_EVALUATE_IMAGE_LMN_POINT_H_
 
 /**
- * @file oskar_SettingsImage.h
+ * @file oskar_evaluate_image_lm_point.h
  */
 
 #include "oskar_global.h"
-#include "imaging/oskar_Image.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
- * @struct oskar_SettingsImage
+ * TODO name? oskar_evaluate_relative_lnm() might be better?
  *
- * @brief Structure to hold image settings.
+ * @brief Evaluates the @p l, @p m, @p n coordinates of a point at @p ra,
+ * @p dec relative to an image phase centre at @p ra0,  @p dec0
  *
  * @details
- * The structure holds parameters for imaging.
+ * Used for phase rotation of visibilities.
+ *
+ * @param l     Direction cosine
+ * @param m     Direction cosine
+ * @param n     Direction cosine
+ * @param ra0   Phase reference position, in radians.
+ * @param dec0  Phase reference position, in radians.
+ * @param ra    Phase direction, in radians.
+ * @param dec   Phase direction, in radians.
  */
-struct OSKAR_EXPORT oskar_SettingsImage
-{
-    double fov_deg;
-    int size;
+OSKAR_EXPORT
+void oskar_evaluate_image_lmn_point(double*l, double* m, double* n,
+        double ra0, double dec0, double ra, double dec);
 
-    int image_type;        /* Polarisation selection or PSF
-                            * enum (value from OSKAR_IMAGE_TYPE_XXX ) */
+#ifdef __cplusplus
+}
+#endif
 
-    int channel_snapshots; /* bool, false = frequency synthesis */
-    int channel_range[2];  /* channel range (e.g. 1-1 = 1 channel,
-                            * 1-2 = 2 channels)*/
-
-    int time_snapshots;    /* bool, false = time synthesis */
-    int time_range[2];     /* time range */
-
-    int transform_type;    /* enum (transform type) */
-
-    char* input_vis_data;  /* Path to input visibility data (used when running
-                            * the imager as a standalone binary */
-
-    int direction_type;    /* enum, specification of imaging direction */
-    double ra_deg;         /* custom image pointing direction */
-    double dec_deg;        /* custom image pointing direction */
-
-    char* oskar_image;     /* OSKAR binary file name path */
-    char* fits_image;      /* FITS file name path */
-};
-typedef struct oskar_SettingsImage oskar_SettingsImage;
-
-enum
-{
-    OSKAR_IMAGE_DFT_2D,
-    OSKAR_IMAGE_DFT_3D,
-    OSKAR_IMAGE_FFT
-};
-
-enum
-{
-    OSKAR_IMAGE_DIRECTION_OBSERVATION, /* Observation (primary beam) direction */
-    OSKAR_IMAGE_DIRECTION_RA_DEC
-};
-
-
-#endif /* OSKAR_SETTINGS_IMAGE_H_ */
+#endif /* OSKAR_EVALUATE_IMAGE_LMN_POINT_H_ */

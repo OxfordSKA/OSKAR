@@ -60,20 +60,30 @@ extern "C" {
  * wavelength of the image channel.
  *
  * WARNING: This function is intended to ONLY be used with oskar_make_image().
- * WARNING: This function relies on uu and vv being preallocated correctly.
+ * WARNING: This function relies on uu, vv and ww being preallocated correctly.
  *
- * @param uu         Baseline coordinates, in (scaled) metres.
- * @param vv         Baseline coordinates, in (scaled) metres.
- * @param vis        OSKAR visibility structure.
- * @param vis_time   Time index of coordinates in the visibility data set.
- * @param im_freq    Image frequency in Hz.
- * @param settings   OSKAR image settings structure.
+ * @param[out] uu            Baseline coordinates for the image, in (scaled) metres.
+ * @param[out] vv            Baseline coordinates for the image, in (scaled) metres.
+ * @param[out] ww            Baseline coordinates for the image, in (scaled) metres.
+ * @param[in]  vis_uu        Baseline coordinates in the visibility data set, in metres.
+ * @param[in]  vis_vv        Baseline coordinates in the visibility data set, in metres.
+ * @param[in]  vis_ww        Baseline coordinates in the visibility data set, in metres.
+ * @param[in]  num_times     Number of times in the visibility data set
+ * @param[in]  num_baseline  Number of baselines in the visibility data set.
+ * @param[in]  num_channels  Number of baselines in the visibility data set.
+ * @param[in]  freq_start_hz Start frequency of visibility data set, in Hz.
+ * @param[in]  freq_inc_hz   Frequency increment of visibility data set, in Hz.
+ * @param[in]  vis_time      Time index of coordinates in the visibility data set.
+ * @param[in]  im_freq       Image frequency in Hz.
+ * @param[in]  settings      OSKAR image settings structure.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv,
-        const oskar_Visibilities* vis, int vis_time, double im_freq,
+int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
+        const oskar_Mem* vis_uu, const oskar_Mem* vis_vv, const oskar_Mem* vis_ww,
+        int num_times, int num_baselines, int num_channels,
+        double freq_start_hz, double freq_inc_hz, int vis_time, double im_freq,
         const oskar_SettingsImage* settings);
 
 #ifdef __cplusplus

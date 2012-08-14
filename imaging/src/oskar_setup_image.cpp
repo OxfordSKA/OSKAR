@@ -105,10 +105,20 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     oskar_mem_init(&im->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
             vis->settings_path.num_elements, OSKAR_TRUE);
     oskar_mem_copy(&im->settings_path, &vis->settings_path);
-    im->centre_ra_deg = vis->phase_centre_ra_deg;
-    im->centre_dec_deg = vis->phase_centre_dec_deg;
+
     im->fov_ra_deg = settings->fov_deg;
     im->fov_dec_deg = settings->fov_deg;
+
+    if (settings->direction_type)
+    {
+        im->centre_ra_deg = vis->phase_centre_ra_deg;
+        im->centre_dec_deg = vis->phase_centre_dec_deg;
+    }
+    else
+    {
+        im->centre_ra_deg = settings->ra_deg;
+        im->centre_dec_deg = settings->dec_deg;
+    }
 
     im->time_start_mjd_utc = vis->time_start_mjd_utc + (vis_time_range[0] * vis->time_inc_seconds * SEC2DAYS);
     // TODO for time synthesis the time inc should be 0...? need to determine
@@ -128,9 +138,6 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
         im->freq_start_hz = vis->freq_start_hz + chan0 * vis->freq_inc_hz;
     }
     im->image_type         = settings->image_type;
-
-    // __Note__
-    // mean, variance etc... ignored here as these can't be defined for cubes!
 
     return OSKAR_SUCCESS;
 }

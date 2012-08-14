@@ -27,46 +27,27 @@
  */
 
 
-#ifndef OSKAR_IMAGE_GET_STATS_H_
-#define OSKAR_IMAGE_GET_STATS_H_
+#include "imaging/oskar_evaluate_image_lmn_point.h"
 
-/**
- * @file oskar_image_get_stats.h
- */
-
-#include "oskar_global.h"
-#include "oskar_Image.h"
-#include "oskar_ImageStats.h"
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Returns a number of statistics on the image data stored in the
- * image cube @p image and specified by the cube indices @p pol, @p time, and
- * @p channel.
- *
- * @details
- * Note: The OSKAR image cube passed to this function must be in CPU memory.
- *
- * @param[out]    stats   Pointer to a structure containing the calculated image
- *                        statistics.
- * @param[in]     image   Pointer to an OSKAR image cube structure
- * @param[in]     pol     Polarisation index of the image plane for which
- *                        statistics are evaluated.
- * @param[in]     time    Time index of the image plane for which
- *                        statistics are evaluated.
- * @param[in]     channel Channel index of the image plane for which
- *                        statistics are evaluated.
- * @param[in,out] status  Status return code.
- */
-OSKAR_EXPORT
-void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
-        int pol, int time, int channel, int* status);
+void oskar_evaluate_image_lmn_point(double*l, double* m, double* n,
+        double ra0, double dec0, double ra, double dec)
+{
+    double delta_ra, delta_dec;
+
+    delta_ra = (ra - ra0) * cos(dec);
+    delta_dec = (dec - dec0);
+
+    *l = sin(delta_ra);
+    *m = sin(delta_dec);
+    *n = sqrt(1 - (*l) * (*l) - (*m) * (*m));
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* OSKAR_IMAGE_GET_STATS_H_ */

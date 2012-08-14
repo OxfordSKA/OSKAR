@@ -952,6 +952,7 @@ void oskar_SettingsModelApps::init_settings_image()
     registerSetting(k, "Time end", oskar_SettingsItem::AXIS_RANGE);
     setTooltip(k, "The end time index to include in the image or image cube.");
     setDefault(k, "max");
+
     options.clear();
     options << "DFT 2D"; // << "DFT 3D" << "FFT";
     k = group + "/transform_type";
@@ -959,6 +960,26 @@ void oskar_SettingsModelApps::init_settings_image()
     setTooltip(k, "The type of transform used to generate the image. \n"
             "More options may be available in a later release.");
     setDefault(k, options[0]);
+
+    options.clear();
+    options << "Observation direction (default)"
+            << "RA, Dec. (override)";
+    k = group + "/direction";
+    registerSetting(k, "Image centre direction", oskar_SettingsItem::OPTIONS, options);
+    setTooltip(k, "Specifies the direction of the image phase centre.\n\n"
+            "- If 'Observation direction' is selected, the image is centred on\n"
+            "  the pointing direction of the primary beam.\n"
+            "- If 'RA, Dec.' is selected, the image is centred on the values of\n"
+            "  RA and Dec. found below.");
+    setDefault(k, options[0]);
+    registerSetting(k + "/ra_deg", "Image centre RA (degrees)", oskar_SettingsItem::DOUBLE);
+    setTooltip(k + "/ra_deg", "The Right Ascension of the image phase centre. This value\n"
+            "is used if the image centre direction is set to 'RA, Dec. (override)'.");
+    registerSetting(k + "/dec_deg", "Image centre Dec. (degrees)", oskar_SettingsItem::DOUBLE);
+    setTooltip(k + "/dec_deg", "The Declination of the image phase centre. This value\n"
+            "is used if the image centre direction is set to 'RA, Dec. (override)'.");
+
+
     k = group + "/input_vis_data";
     registerSetting(k, "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to the input OSKAR visibility data file.");

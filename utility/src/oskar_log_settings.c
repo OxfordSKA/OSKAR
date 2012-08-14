@@ -495,6 +495,27 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
     };
     LVS("Image type", option);
 
+    switch (s->image.direction_type)
+    {
+        case OSKAR_IMAGE_DIRECTION_OBSERVATION:
+        {
+            LVS("Image centre", "Observation direction (default)");
+            break;
+        }
+        case OSKAR_IMAGE_DIRECTION_RA_DEC:
+        {
+            LVS("Image centre", "RA, Dec. (override)");
+            ++depth;
+            LV("Image centre RA", "%.3f", s->image.ra_deg);
+            LV("Image centre Dec.", "%.3f", s->image.dec_deg);
+            --depth;
+            break;
+        }
+        default:
+            break;
+    };
+
+
     /* Transform type. */
     switch (s->image.transform_type)
     {

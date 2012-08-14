@@ -106,6 +106,18 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     else
         return OSKAR_ERR_SETTINGS_IMAGE;
 
+    temp = s.value("direction", "Observation pointing direction").toString();
+    if (temp.startsWith("O", Qt::CaseInsensitive))
+        im->direction_type = OSKAR_IMAGE_DIRECTION_OBSERVATION;
+    else if (temp.startsWith("R", Qt::CaseInsensitive))
+        im->direction_type = OSKAR_IMAGE_DIRECTION_RA_DEC;
+    else
+        return OSKAR_ERR_SETTINGS_IMAGE;
+
+    im->ra_deg  = s.value("direction/ra_deg", 0.0).toDouble();
+    im->dec_deg = s.value("direction/dec_deg", 0.0).toDouble();
+
+
     t = s.value("input_vis_data").toByteArray();
     if (t.size() > 0)
     {

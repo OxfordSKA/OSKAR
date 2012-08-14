@@ -15,6 +15,9 @@
     * Added oskar_image_stats application which reports a number of statistics
       about an OSKAR image.
 
+    * Added an OSKAR imager option to allow images to be made away from the
+      observation phase centre.
+
 2012-07-27  OSKAR 2.0.4-beta
 
     * Fixed a problem encountered when loading a Measurement Set in CASA
