@@ -54,6 +54,12 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     size_t mem_free = 0, mem_total = 0;
     cudaDeviceProp device_prop;
 
+    // Always clear the output array to ensure that all visibilities are zero
+    // if there are never any visible sources in the sky model.
+    err = vis_amp->clear_contents();
+    if (err) return err;
+
+    // Get the current device ID.
     cudaGetDevice(&device_id);
 
     // Check if sky model is empty.
