@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,6 @@ void oskar_sph_to_lm_f(int num_positions, float lon0, float lat0,
     sinLat0 = sin(lat0);
     cosLat0 = cos(lat0);
 
-    #pragma omp parallel for
     for (i = 0; i < num_positions; ++i)
     {
         float cosLat, sinLat, sinLon, cosLon, relLon, pLat, ll, mm;
@@ -62,6 +61,59 @@ void oskar_sph_to_lm_f(int num_positions, float lon0, float lat0,
 
 /* Double precision. */
 void oskar_sph_to_lm_d(int num_positions, double lon0, double lat0,
+        const double* lon, const double* lat, double* l, double* m)
+{
+    int i;
+    double sinLat0, cosLat0;
+    sinLat0 = sin(lat0);
+    cosLat0 = cos(lat0);
+
+    for (i = 0; i < num_positions; ++i)
+    {
+        double cosLat, sinLat, sinLon, cosLon, relLon, pLat, ll, mm;
+        pLat = lat[i];
+        relLon = lon[i];
+        relLon -= lon0;
+        sinLon = sin(relLon);
+        cosLon = cos(relLon);
+        sinLat = sin(pLat);
+        cosLat = cos(pLat);
+        ll = cosLat * sinLon;
+        mm = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
+        l[i] = ll;
+        m[i] = mm;
+    }
+}
+
+/* Single precision OpenMP. */
+void oskar_sph_to_lm_omp_f(int num_positions, float lon0, float lat0,
+        const float* lon, const float* lat, float* l, float* m)
+{
+    int i;
+    float sinLat0, cosLat0;
+    sinLat0 = sin(lat0);
+    cosLat0 = cos(lat0);
+
+    #pragma omp parallel for
+    for (i = 0; i < num_positions; ++i)
+    {
+        float cosLat, sinLat, sinLon, cosLon, relLon, pLat, ll, mm;
+        pLat = lat[i];
+        relLon = lon[i];
+        relLon -= lon0;
+        sinLon = sinf(relLon);
+        cosLon = cosf(relLon);
+        sinLat = sinf(pLat);
+        cosLat = cosf(pLat);
+        ll = cosLat * sinLon;
+        mm = cosLat0 * sinLat - sinLat0 * cosLat * cosLon;
+        l[i] = ll;
+        m[i] = mm;
+    }
+}
+
+/* Double precision OpenMP. */
+void oskar_sph_to_lm_omp_d(int num_positions, double lon0, double lat0,
         const double* lon, const double* lat, double* l, double* m)
 {
     int i;
