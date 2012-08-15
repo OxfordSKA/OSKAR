@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,54 @@ void oskar_sph_to_lm_f(int num_positions, float lon0, float lat0,
  */
 OSKAR_EXPORT
 void oskar_sph_to_lm_d(int num_positions, double lon0, double lat0,
+        const double* lon, const double* lat, double* l, double* m);
+
+/**
+ * @brief
+ * Project spherical coordinates using OpenMP (single precision).
+ *
+ * @details
+ * Projects spherical coordinates at the specified tangent point using the
+ * orthographic tangent-plane projection.
+ *
+ * For normal fields of view at normal latitudes (i.e. not at the poles),
+ * the minimum and maximum values of l and m correspond to
+ * the minimum and maximum values of the longitude and latitude, respectively.
+ *
+ * @param[in] num_positions Number of positions.
+ * @param[in] lon0          Longitude of the field centre, in radians.
+ * @param[in] lat0          Latitude of the field centre, in radians.
+ * @param[in] lon           Array of longitude values, in radians.
+ * @param[in] lat           Array of latitude values, in radians.
+ * @param[out] l            Array of l-positions in cosine space.
+ * @param[out] m            Array of m-positions in cosine space.
+ */
+OSKAR_EXPORT
+void oskar_sph_to_lm_omp_f(int num_positions, float lon0, float lat0,
+        const float* lon, const float* lat, float* l, float* m);
+
+/**
+ * @brief
+ * Project spherical coordinates using OpenMP (double precision).
+ *
+ * @details
+ * Projects spherical coordinates at the specified tangent point using the
+ * orthographic tangent-plane projection.
+ *
+ * For normal fields of view at normal latitudes (i.e. not at the poles),
+ * the minimum and maximum values of l and m correspond to
+ * the minimum and maximum values of the longitude and latitude, respectively.
+ *
+ * @param[in] num_positions Number of positions.
+ * @param[in] lon0          Longitude of the field centre, in radians.
+ * @param[in] lat0          Latitude of the field centre, in radians.
+ * @param[in] lon           Array of longitude values, in radians.
+ * @param[in] lat           Array of latitude values, in radians.
+ * @param[out] l            Array of l-positions in cosine space.
+ * @param[out] m            Array of m-positions in cosine space.
+ */
+OSKAR_EXPORT
+void oskar_sph_to_lm_omp_d(int num_positions, double lon0, double lat0,
         const double* lon, const double* lat, double* l, double* m);
 
 #ifdef __cplusplus
