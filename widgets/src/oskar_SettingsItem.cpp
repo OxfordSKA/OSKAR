@@ -60,9 +60,9 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
     // Initialise user-defined, runtime values.
     critical_ = 0;
     iterNum_ = 1;
-    visible_ = 0;
     valueSet_ = 0;
-    enabled_ = 1;
+    enabled_ = true;
+    hidden_ = false;
 
     // Set required flag of this and all parents if this option is required.
     required_ = false;
@@ -73,6 +73,11 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
 oskar_SettingsItem::~oskar_SettingsItem()
 {
     qDeleteAll(childItems_);
+}
+
+void oskar_SettingsItem::addDependent(const QString& key)
+{
+    dependentKeys_.append(key);
 }
 
 void oskar_SettingsItem::appendChild(oskar_SettingsItem* item)
@@ -107,9 +112,29 @@ const QVariant& oskar_SettingsItem::defaultValue() const
     return defaultValue_;
 }
 
+const QString& oskar_SettingsItem::dependencyKey() const
+{
+    return dependencyKey_;
+}
+
+const QVariant& oskar_SettingsItem::dependencyValue() const
+{
+    return dependencyValue_;
+}
+
+const QList<QString>& oskar_SettingsItem::dependentKeys() const
+{
+    return dependentKeys_;
+}
+
 bool oskar_SettingsItem::enabled() const
 {
     return enabled_;
+}
+
+bool oskar_SettingsItem::hidden() const
+{
+    return hidden_;
 }
 
 const QVariant& oskar_SettingsItem::iterationInc() const
@@ -161,6 +186,15 @@ void oskar_SettingsItem::setEnabled(bool value)
     enabled_ = value;
 }
 
+void oskar_SettingsItem::setHidden(bool value)
+{
+    hidden_ = value;
+    foreach (oskar_SettingsItem* item, childItems_)
+    {
+        item->setHidden(value);
+    }
+}
+
 void oskar_SettingsItem::setIterationInc(const QVariant& value)
 {
     iterInc_ = value;
@@ -189,12 +223,21 @@ void oskar_SettingsItem::setValue(const QVariant& value)
     if (value_.isNull() != nullValue)
     {
         setValueSet(!nullValue);
-        setVisible(!nullValue);
         setCritical(nullValue);
     }
     value_ = value;
     if (type_ == DOUBLE)
         value_.convert(QVariant::Double);
+}
+
+void oskar_SettingsItem::setDependencyKey(const QString& key)
+{
+    dependencyKey_ = key;
+}
+
+void oskar_SettingsItem::setDependencyValue(const QVariant& value)
+{
+    dependencyValue_ = value;
 }
 
 const QString& oskar_SettingsItem::subkey() const
@@ -217,14 +260,14 @@ const QVariant& oskar_SettingsItem::value() const
     return value_;
 }
 
+QVariant oskar_SettingsItem::valueOrDefault() const
+{
+    return (value_.isNull() ? defaultValue_ : value_);
+}
+
 int oskar_SettingsItem::valueSet() const
 {
     return valueSet_;
-}
-
-int oskar_SettingsItem::visible() const
-{
-    return visible_;
 }
 
 // Private members.
@@ -256,14 +299,4 @@ void oskar_SettingsItem::setValueSet(bool value)
         --valueSet_;
     if (parentItem_)
         parentItem_->setValueSet(value);
-}
-
-void oskar_SettingsItem::setVisible(bool value)
-{
-    if (value)
-        ++visible_;
-    else
-        --visible_;
-    if (parentItem_)
-        parentItem_->setVisible(value);
 }

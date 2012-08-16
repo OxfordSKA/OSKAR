@@ -66,7 +66,11 @@ public:
         OutputKeysRole,
         LoadRole,
         OptionsRole,
-        DefaultRole
+        DefaultRole,
+        DependencyKeyRole,
+        DependencyValueRole,
+        DependentKeyRole,
+        HiddenRole
     };
 
 public:
@@ -82,7 +86,6 @@ public:
     QModelIndex index(int row, int column,
             const QModelIndex& parent = QModelIndex()) const;
     QModelIndex index(const QString& key);
-    QMap<int, QVariant> itemData (const QModelIndex& index) const;
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& label,
@@ -99,7 +102,8 @@ public:
     void setLabel(const QString& key, const QString& label);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
-    void setDisabled(const QString& key, bool value);
+    void setDependencies(const QString& key, const QString& dependency_key,
+            const QVariant& dependency_value);
     bool isModified() const;
 
 private:
@@ -110,6 +114,7 @@ private:
             const QModelIndex& parent = QModelIndex()) const;
     oskar_SettingsItem* getItem(const QModelIndex& index) const;
     void loadFromParentIndex(const QModelIndex& parent);
+    void restoreAll(const QModelIndex& parent = QModelIndex());
     void saveFromParentIndex(const QModelIndex& parent);
     int numModified(const QModelIndex& parent) const;
 
@@ -128,22 +133,23 @@ public:
     oskar_SettingsModelFilter(QObject* parent = 0);
     virtual ~oskar_SettingsModelFilter();
     QVariant data(const QModelIndex& index, int role) const;
-    bool hideIfUnset() const;
+    bool hideUnsetItems() const;
 
 public slots:
     void setFilterText(QString value);
-    void setHideIfUnset(bool value);
+    void setHideUnsetItems(bool value);
 
 protected:
     bool filterAcceptsChildren(int sourceRow,
             const QModelIndex& sourceParent) const;
+    bool filterAcceptsCurrentRow(const QModelIndex& idx) const;
     bool filterAcceptsCurrentRow(int sourceRow,
             const QModelIndex& sourceParent) const;
     virtual bool filterAcceptsRow(int sourceRow,
             const QModelIndex& sourceParent) const;
 
 private:
-    bool hideIfUnset_;
+    bool hideUnsetItems_;
     QString filterText_;
 };
 

@@ -73,13 +73,18 @@ public:
             oskar_SettingsItem* parent = 0);
     ~oskar_SettingsItem();
 
+    void addDependent(const QString& key);
     void appendChild(oskar_SettingsItem* child);
     oskar_SettingsItem* child(int row);
     int childCount() const;
     int childNumber() const;
     int critical() const;
     const QVariant& defaultValue() const;
+    const QString& dependencyKey() const;
+    const QVariant& dependencyValue() const;
+    const QList<QString>& dependentKeys() const;
     bool enabled() const;
+    bool hidden() const;
     const QVariant& iterationInc() const;
     int iterationNum() const;
     const QString& key() const;
@@ -89,23 +94,25 @@ public:
     bool required() const;
     void setDefaultValue(const QVariant& value);
     void setEnabled(bool value);
+    void setHidden(bool value);
     void setIterationInc(const QVariant& value);
     void setIterationNum(int value);
     void setLabel(const QString& value);
     void setTooltip(const QString& value);
     void setValue(const QVariant& value);
+    void setDependencyKey(const QString& key);
+    void setDependencyValue(const QVariant& value);
     const QString& subkey() const;
     const QString& tooltip() const;
     int type() const;
     const QVariant& value() const;
+    QVariant valueOrDefault() const;
     int valueSet() const;
-    int visible() const;
 
 private:
     void setCritical(bool value);
     void setRequired(bool value);
     void setValueSet(bool value);
-    void setVisible(bool value);
 
 private:
     oskar_SettingsItem* parentItem_;
@@ -113,9 +120,9 @@ private:
     QString key_; // Full settings key for the item.
     QString subkey_; // Short settings key.
     int type_; // Enumerated type.
-    int visible_;
     int valueSet_;
     bool enabled_;
+    bool hidden_;
     bool required_;
     QString label_;
     QString tooltip_;
@@ -125,6 +132,9 @@ private:
     int critical_;
     int iterNum_;
     QVariant iterInc_;
+    QString dependencyKey_;
+    QVariant dependencyValue_;
+    QList<QString> dependentKeys_;
 };
 
 #endif /* OSKAR_SETTINGS_ITEM_H_ */

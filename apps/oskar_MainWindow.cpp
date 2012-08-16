@@ -109,7 +109,7 @@ oskar_MainWindow::oskar_MainWindow(QWidget* parent)
     connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(actBinLocations, SIGNAL(triggered()), this, SLOT(binLocations()));
     connect(actHideUnset_, SIGNAL(toggled(bool)),
-            this, SLOT(setHideIfUnset(bool)));
+            this, SLOT(setHideUnsetItems(bool)));
     connect(actShowFirstLevel, SIGNAL(triggered()),
             view_, SLOT(showFirstLevel()));
     connect(actExpandAll, SIGNAL(triggered()), view_, SLOT(expandSettingsTree()));
@@ -382,10 +382,10 @@ void oskar_MainWindow::runImager()
     runButton();
 }
 
-void oskar_MainWindow::setHideIfUnset(bool value)
+void oskar_MainWindow::setHideUnsetItems(bool value)
 {
     view_->saveExpanded();
-    modelProxy_->setHideIfUnset(value);
+    modelProxy_->setHideUnsetItems(value);
     view_->restoreExpanded();
     view_->update();
 }

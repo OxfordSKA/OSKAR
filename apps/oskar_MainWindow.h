@@ -61,7 +61,7 @@ private slots:
     void runBeamPattern();
     void runInterferometer();
     void runImager();
-    void setHideIfUnset(bool value);
+    void setHideUnsetItems(bool value);
     void openRecentFile();
 
 private:

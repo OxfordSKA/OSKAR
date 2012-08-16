@@ -39,6 +39,27 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_interferometer();
     init_settings_beampattern();
     init_settings_image();
+
+    // FIXME THESE ARE FOR TESTING ONLY - Remove this section.
+    ///////////////////////////////////////////////////////////////////////////
+    setLabel("test", "Test group");
+
+    registerSetting("test/item1", "Item 1 (If true, then show Item 2)",
+            oskar_SettingsItem::BOOL, false, false);
+    registerSetting("test/item2", "Item 2 (Dependent on Item 1 being true)",
+            oskar_SettingsItem::BOOL, false, false);
+    registerSetting("test/item2/item2_1", "Item 2.1",
+            oskar_SettingsItem::BOOL, false, false);
+    setDependencies("test/item2", "test/item1", true);
+
+    QStringList opts;
+    opts << "Option 1 (Show subkey)" << "Option 2 (Hide subkey)";
+    registerSetting("test/item3", "Item 3",
+            oskar_SettingsItem::OPTIONS, opts, false, opts[0]);
+    registerSetting("test/item3/item3_1", "Item 3.1",
+            oskar_SettingsItem::BOOL, false, false);
+    setDependencies("test/item3/item3_1", "test/item3", opts[0]);
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 

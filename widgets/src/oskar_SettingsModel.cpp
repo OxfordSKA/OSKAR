@@ -108,6 +108,8 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     }
     else if (role == Qt::ForegroundRole)
     {
+        if (item->hidden())
+            return QColor(Qt::gray);
         if (item->enabled())
         {
             if (item->critical())
@@ -149,8 +151,10 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         return item->type();
     else if (role == RequiredRole)
         return item->required();
+    else if (role == HiddenRole)
+        return item->hidden();
     else if (role == VisibleRole)
-        return item->visible() || item->required();
+        return item->valueSet() || item->required();
     else if (role == EnabledRole)
         return item->enabled();
     else if (role == OptionsRole)
@@ -197,9 +201,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
                 QStringList list = item->value().toStringList();
                 return list.join(",");
             }
-            QVariant val = item->value();
-            if (val.isNull())
-                val = item->defaultValue();
+            QVariant val = item->valueOrDefault();
             if (item->enabled())
                 return val;
             else
@@ -217,17 +219,12 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         }
         else if (role == Qt::EditRole)
         {
-            QVariant val = item->value();
-            if (val.isNull())
-                val = item->defaultValue();
-            return val;
+            return item->valueOrDefault();
         }
         else if (role == Qt::CheckStateRole &&
                 item->type() == oskar_SettingsItem::BOOL)
         {
-            QVariant val = item->value();
-            if (val.isNull())
-                val = item->defaultValue();
+            QVariant val = item->valueOrDefault();
             return val.toBool() ? Qt::Checked : Qt::Unchecked;
         }
         else if (role == Qt::SizeHintRole)
@@ -246,16 +243,14 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
         return 0;
 
     oskar_SettingsItem* item = getItem(index);
-    if (!item->enabled())
+    if (!item->enabled() || item->hidden())
         return Qt::ItemIsSelectable;
 
-    if (index.column() == 0 ||
-            item->type() == oskar_SettingsItem::LABEL)
+    if (index.column() == 0 || item->type() == oskar_SettingsItem::LABEL)
     {
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     }
-    else if (index.column() == 1 &&
-            item->type() == oskar_SettingsItem::BOOL)
+    else if (index.column() == 1 && item->type() == oskar_SettingsItem::BOOL)
     {
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
                 Qt::ItemIsUserCheckable;
@@ -328,23 +323,13 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
     return child;
 }
 
-QMap<int, QVariant> oskar_SettingsModel::itemData(const QModelIndex& index) const
-{
-    QMap<int, QVariant> d;
-    d.insert(KeyRole, data(index, KeyRole));
-    d.insert(TypeRole, data(index, TypeRole));
-    d.insert(VisibleRole, data(index, VisibleRole));
-    d.insert(IterationNumRole, data(index, IterationNumRole));
-    d.insert(IterationIncRole, data(index, IterationIncRole));
-    d.insert(IterationKeysRole, data(index, IterationKeysRole));
-    d.insert(OutputKeysRole, data(index, OutputKeysRole));
-    return d;
-}
-
 void oskar_SettingsModel::loadSettingsFile(const QString& filename)
 {
     if (!filename.isEmpty())
     {
+        // Check if any settings are currently disabled, and enable them if so.
+        restoreAll();
+
         // Delete any existing settings object.
         if (settings_)
             delete settings_;
@@ -444,6 +429,9 @@ void oskar_SettingsModel::saveSettingsFile(const QString& filename)
 {
     if (!filename.isEmpty())
     {
+        // Check if any settings are currently disabled, and enable them if so.
+        restoreAll();
+
         // Delete any existing settings object.
         if (settings_)
             delete settings_;
@@ -479,6 +467,30 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
     else if (role == DefaultRole)
     {
         item->setDefaultValue(value);
+        emit dataChanged(topLeft, bottomRight);
+        return true;
+    }
+    else if (role == DependencyKeyRole)
+    {
+        item->setDependencyKey(value.toString());
+        emit dataChanged(topLeft, bottomRight);
+        return true;
+    }
+    else if (role == DependencyValueRole)
+    {
+        item->setDependencyValue(value);
+        emit dataChanged(topLeft, bottomRight);
+        return true;
+    }
+    else if (role == DependentKeyRole)
+    {
+        item->addDependent(value.toString());
+        emit dataChanged(topLeft, bottomRight);
+        return true;
+    }
+    else if (role == HiddenRole)
+    {
+        item->setHidden(value.toBool());
         emit dataChanged(topLeft, bottomRight);
         return true;
     }
@@ -568,6 +580,23 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
                         i.sibling(i.row(), columnCount()-1));
                 i = i.parent();
             }
+
+            // Check for dependents.
+            for (int i = 0; i < item->dependentKeys().size(); ++i)
+            {
+                QModelIndex idx_dependent = index(item->dependentKeys().at(i));
+                oskar_SettingsItem* dependent = getItem(idx_dependent);
+                if (dependent->dependencyValue() == item->valueOrDefault()
+                        && dependent->hidden())
+                {
+                    setData(idx_dependent, false, HiddenRole);
+                }
+                else if (dependent->dependencyValue() != item->valueOrDefault()
+                        && !dependent->hidden())
+                {
+                    setData(idx_dependent, true, HiddenRole);
+                }
+            }
             return true;
         }
     }
@@ -579,6 +608,26 @@ void oskar_SettingsModel::setDefault(const QString& key, const QVariant& value)
 {
     QModelIndex idx = index(key);
     setData(idx, value, DefaultRole);
+}
+
+void oskar_SettingsModel::setDependencies(const QString& key,
+        const QString& dependency_key, const QVariant& dependency_value)
+{
+    // Set dependencies of this key.
+    QModelIndex idx_dependent = index(key);
+    setData(idx_dependent, dependency_key, DependencyKeyRole);
+    setData(idx_dependent, dependency_value, DependencyValueRole);
+
+    // Add this key to the list of dependents (of the dependency key!).
+    QModelIndex idx_dependency = index(dependency_key);
+    setData(idx_dependency, key, DependentKeyRole);
+
+    // Do the initial check and set the flag to indicate whether hidden or not.
+    oskar_SettingsItem* dependency = getItem(idx_dependency);
+    if (dependency->dependencyValue() == dependency_value)
+        setData(idx_dependent, false, HiddenRole);
+    else
+        setData(idx_dependent, true, HiddenRole);
 }
 
 void oskar_SettingsModel::setLabel(const QString& key, const QString& label)
@@ -601,14 +650,6 @@ void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
 
     // Set the data.
     setData(idx, value, Qt::EditRole);
-}
-
-void oskar_SettingsModel::setDisabled(const QString& key, bool value)
-{
-    // Get the model index.
-    QModelIndex idx = index(key);
-    idx = idx.sibling(idx.row(), 1);
-    setData(idx, value, oskar_SettingsModel::EnabledRole);
 }
 
 bool oskar_SettingsModel::isModified() const
@@ -674,6 +715,21 @@ void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
     }
 }
 
+void oskar_SettingsModel::restoreAll(const QModelIndex& parent)
+{
+    int rows = rowCount(parent);
+    for (int i = 0; i < rows; ++i)
+    {
+        QModelIndex idx = index(i, 0, parent);
+        if (idx.isValid())
+        {
+            const oskar_SettingsItem* item = getItem(idx);
+            setData(idx.sibling(idx.row(), 1), true, EnabledRole);
+            restoreAll(idx);
+        }
+    }
+}
+
 void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
 {
     int rows = rowCount(parent);
@@ -715,7 +771,7 @@ int oskar_SettingsModel::numModified(const QModelIndex& parent) const
 
 oskar_SettingsModelFilter::oskar_SettingsModelFilter(QObject* parent)
 : QSortFilterProxyModel(parent),
-  hideIfUnset_(false)
+  hideUnsetItems_(false)
 {
     setDynamicSortFilter(true);
 }
@@ -740,9 +796,9 @@ QVariant oskar_SettingsModelFilter::data(const QModelIndex& index,
     return QSortFilterProxyModel::data(index, role);
 }
 
-bool oskar_SettingsModelFilter::hideIfUnset() const
+bool oskar_SettingsModelFilter::hideUnsetItems() const
 {
-    return hideIfUnset_;
+    return hideUnsetItems_;
 }
 
 
@@ -754,14 +810,12 @@ void oskar_SettingsModelFilter::setFilterText(QString value)
     invalidate();
 }
 
-void oskar_SettingsModelFilter::setHideIfUnset(bool value)
+void oskar_SettingsModelFilter::setHideUnsetItems(bool value)
 {
-    if (value != hideIfUnset_)
+    if (value != hideUnsetItems_)
     {
-        hideIfUnset_ = value;
-        beginResetModel();
-        endResetModel();
-        invalidateFilter();
+        hideUnsetItems_ = value;
+        invalidate();
     }
 }
 
@@ -785,11 +839,10 @@ bool oskar_SettingsModelFilter::filterAcceptsChildren(int sourceRow,
     return false;
 }
 
-bool oskar_SettingsModelFilter::filterAcceptsCurrentRow(int sourceRow,
-            const QModelIndex& sourceParent) const
+bool oskar_SettingsModelFilter::filterAcceptsCurrentRow(
+            const QModelIndex& idx) const
 {
-    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
-    bool visible = !(hideIfUnset_ && !(sourceModel()->data(idx,
+    bool visible = !(hideUnsetItems_ && !(sourceModel()->data(idx,
             oskar_SettingsModel::VisibleRole).toBool()));
     QString labelCurrent = sourceModel()->data(idx, Qt::DisplayRole).toString();
     bool pass = (labelCurrent.contains(filterText_, Qt::CaseInsensitive) ||
@@ -797,16 +850,28 @@ bool oskar_SettingsModelFilter::filterAcceptsCurrentRow(int sourceRow,
     return pass;
 }
 
+bool oskar_SettingsModelFilter::filterAcceptsCurrentRow(int sourceRow,
+            const QModelIndex& sourceParent) const
+{
+    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+    return filterAcceptsCurrentRow(idx);
+}
+
 bool oskar_SettingsModelFilter::filterAcceptsRow(int sourceRow,
             const QModelIndex& sourceParent) const
 {
+    // Check if the item is hidden.
+    QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+    if (sourceModel()->data(idx, oskar_SettingsModel::HiddenRole).toBool())
+        return false;
+
     // Check if filter accepts this row.
-    if (filterAcceptsCurrentRow(sourceRow, sourceParent))
+    if (filterAcceptsCurrentRow(idx))
         return true;
 
     // Check if filter accepts any parent.
     QModelIndex parent = sourceParent;
-    while (parent.isValid() && !hideIfUnset_)
+    while (parent.isValid() && !hideUnsetItems_)
     {
         if (filterAcceptsCurrentRow(parent.row(), parent.parent()))
             return true;
