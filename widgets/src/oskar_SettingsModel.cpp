@@ -230,6 +230,65 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+void oskar_SettingsModel::declare(const QString& key, const QString& label,
+        int type, const QVariant& defaultValue, bool required)
+{
+    // Find the parent, creating groups as necessary.
+    QStringList keys = key.split('/');
+    QModelIndex parent, child;
+    for (int k = 0; k < keys.size() - 1; ++k)
+    {
+        child = getChild(keys[k], parent);
+        if (child.isValid())
+            parent = child;
+        else
+        {
+            // Append the group and set it as the new parent.
+            append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
+                    required, QVariant(), QStringList(), parent);
+            parent = index(rowCount(parent) - 1, 0, parent);
+        }
+    }
+
+    // Append the actual setting.
+    append(key, keys.last(), type, label, required, defaultValue,
+            QStringList(), parent);
+
+    // Check if this is an output file.
+    if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
+        outputKeys_.append(key);
+}
+
+void oskar_SettingsModel::declare(const QString& key, const QString& label,
+        const QStringList& options, int defaultIndex, bool required)
+{
+    // Get the default value.
+    QVariant defaultValue;
+    if (defaultIndex < options.size())
+        defaultValue = options[defaultIndex];
+
+    // Find the parent, creating groups as necessary.
+    QStringList keys = key.split('/');
+    QModelIndex parent, child;
+    for (int k = 0; k < keys.size() - 1; ++k)
+    {
+        child = getChild(keys[k], parent);
+        if (child.isValid())
+            parent = child;
+        else
+        {
+            // Append the group and set it as the new parent.
+            append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
+                    required, QVariant(), QStringList(), parent);
+            parent = index(rowCount(parent) - 1, 0, parent);
+        }
+    }
+
+    // Append the actual setting.
+    append(key, keys.last(), oskar_SettingsItem::OPTIONS, label, required,
+            defaultValue, options, parent);
+}
+
 Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
@@ -354,68 +413,6 @@ QModelIndex oskar_SettingsModel::parent(const QModelIndex& index) const
         return QModelIndex();
 
     return createIndex(parentItem->childNumber(), 0, parentItem);
-}
-
-void oskar_SettingsModel::registerSetting(const QString& key,
-        const QString& label, int type, const QStringList& options,
-        bool required, const QVariant& defaultValue)
-{
-    QStringList keys = key.split('/');
-
-    // Find the parent, creating groups as necessary.
-    QModelIndex parent, child;
-    for (int k = 0; k < keys.size() - 1; ++k)
-    {
-        child = getChild(keys[k], parent);
-        if (child.isValid())
-            parent = child;
-        else
-        {
-            // Append the group and set it as the new parent.
-            append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
-                    required, defaultValue, QStringList(), parent);
-            parent = index(rowCount(parent) - 1, 0, parent);
-        }
-    }
-
-    // Append the actual setting.
-    append(key, keys.last(), type, label, required, defaultValue, options,
-            parent);
-
-    // Check if this is an output file.
-    if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
-        outputKeys_.append(key);
-}
-
-void oskar_SettingsModel::registerSetting(const QString& key,
-        const QString& label, int type, bool required,
-        const QVariant& defaultValue)
-{
-    QStringList keys = key.split('/');
-
-    // Find the parent, creating groups as necessary.
-    QModelIndex parent, child;
-    for (int k = 0; k < keys.size() - 1; ++k)
-    {
-        child = getChild(keys[k], parent);
-        if (child.isValid())
-            parent = child;
-        else
-        {
-            // Append the group and set it as the new parent.
-            append(key, keys[k], oskar_SettingsItem::LABEL, keys[k],
-                    required, defaultValue, QStringList(), parent);
-            parent = index(rowCount(parent) - 1, 0, parent);
-        }
-    }
-
-    // Append the actual setting.
-    append(key, keys.last(), type, label, required, defaultValue,
-            QStringList(), parent);
-
-    // Check if this is an output file.
-    if (type == oskar_SettingsItem::OUTPUT_FILE_NAME)
-        outputKeys_.append(key);
 }
 
 int oskar_SettingsModel::rowCount(const QModelIndex& parent) const
@@ -611,7 +608,7 @@ void oskar_SettingsModel::setDefault(const QString& key, const QVariant& value)
     setData(idx, value, DefaultRole);
 }
 
-void oskar_SettingsModel::setDependencies(const QString& key,
+void oskar_SettingsModel::setDependency(const QString& key,
         const QString& dependency_key, const QVariant& dependency_value)
 {
     // Check that both keys have been registered, and return immediately if not.

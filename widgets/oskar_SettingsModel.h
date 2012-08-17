@@ -78,6 +78,11 @@ public:
 
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
     QVariant data(const QModelIndex& index, int role) const;
+    void declare(const QString& key, const QString& label, int type,
+            const QVariant& defaultValue = QVariant(), bool required = false);
+    void declare(const QString& key, const QString& label,
+            const QStringList& options, int defaultIndex = 0,
+            bool required = false);
     Qt::ItemFlags flags(const QModelIndex& index) const;
     const oskar_SettingsItem* getItem(const QString& key) const;
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -88,18 +93,12 @@ public:
     bool isModified() const;
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
-    void registerSetting(const QString& key, const QString& label,
-            int type, bool required = false,
-            const QVariant& defaultValue = QVariant());
-    void registerSetting(const QString& key, const QString& label,
-            int type, const QStringList& options, bool required = false,
-            const QVariant& defaultValue = QVariant());
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     void saveSettingsFile(const QString& filename);
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
     void setDefault(const QString& key, const QVariant& value);
-    void setDependencies(const QString& key, const QString& dependency_key,
+    void setDependency(const QString& key, const QString& dependency_key,
             const QVariant& dependency_value);
     void setLabel(const QString& key, const QString& label);
     void setTooltip(const QString& key, const QString& tooltip);
