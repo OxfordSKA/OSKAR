@@ -109,16 +109,18 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     im->fov_ra_deg = settings->fov_deg;
     im->fov_dec_deg = settings->fov_deg;
 
-    if (settings->direction_type)
+    if (settings->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
     {
         im->centre_ra_deg = vis->phase_centre_ra_deg;
         im->centre_dec_deg = vis->phase_centre_dec_deg;
     }
-    else
+    else if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
         im->centre_ra_deg = settings->ra_deg;
         im->centre_dec_deg = settings->dec_deg;
     }
+    else
+        return OSKAR_ERR_SETTINGS_IMAGE;
 
     im->time_start_mjd_utc = vis->time_start_mjd_utc + (vis_time_range[0] * vis->time_inc_seconds * SEC2DAYS);
     // TODO for time synthesis the time inc should be 0...? need to determine

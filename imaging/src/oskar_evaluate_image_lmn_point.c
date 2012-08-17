@@ -40,7 +40,7 @@ void oskar_evaluate_image_lmn_point(double*l, double* m, double* n,
 {
     double delta_ra, delta_dec;
 
-    delta_ra = (ra - ra0) * cos(dec);
+    delta_ra = (ra - ra0) * cos(dec0);
     delta_dec = (dec - dec0);
 
     *l = sin(delta_ra);

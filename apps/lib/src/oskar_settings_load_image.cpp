@@ -117,7 +117,6 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     im->ra_deg  = s.value("direction/ra_deg", 0.0).toDouble();
     im->dec_deg = s.value("direction/dec_deg", 0.0).toDouble();
 
-
     t = s.value("input_vis_data").toByteArray();
     if (t.size() > 0)
     {
