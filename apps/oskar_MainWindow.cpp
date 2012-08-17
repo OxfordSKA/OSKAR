@@ -202,10 +202,10 @@ void oskar_MainWindow::openSettings(QString filename)
 {
     if (settingsFile_.isEmpty() && model_->isModified())
     {
-        int ret = QMessageBox::warning(this, "OSKAR",
-                "Opening a new file will discard any current unsaved modifications.\n"
+        int ret = QMessageBox::warning(this, mainTitle_,
+                "Opening a new file will discard unsaved modifications.\n"
                 "Do you want to proceed?",
-                QMessageBox::Ok | QMessageBox::Cancel);
+                QMessageBox::Open | QMessageBox::Cancel);
         if (ret == QMessageBox::Cancel)
             return;
     }
@@ -287,11 +287,12 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
 
     if (settingsFile_.isEmpty() && model_->isModified())
     {
-        int ret = QMessageBox::warning(this, "OSKAR",
-                "Exiting OSKAR will discard any unsaved modifications.\n"
+        int ret = QMessageBox::warning(this, mainTitle_,
+                "Exiting OSKAR will discard unsaved modifications.\n"
                 "Do you want to proceed?",
-                QMessageBox::Ok | QMessageBox::Cancel | QMessageBox::Save, QMessageBox::Ok);
-        if (ret == QMessageBox::Ok)
+                QMessageBox::Discard | QMessageBox::Cancel | QMessageBox::Save,
+                QMessageBox::Discard);
+        if (ret == QMessageBox::Discard)
         {
             event->accept();
         }
