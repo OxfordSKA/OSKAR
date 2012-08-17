@@ -500,7 +500,10 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
         if (settings_)
         {
             if (value.toBool())
-                settings_->setValue(item->key(), item->value());
+            {
+                if (item->value().isValid())
+                    settings_->setValue(item->key(), item->value());
+            }
             else
                 settings_->remove(item->key());
             settings_->sync();
@@ -613,6 +616,10 @@ void oskar_SettingsModel::setDefault(const QString& key, const QVariant& value)
 void oskar_SettingsModel::setDependencies(const QString& key,
         const QString& dependency_key, const QVariant& dependency_value)
 {
+    // Check that both keys have been registered, and return immediately if not.
+    if (!hash_.contains(key) || !hash_.contains(dependency_key))
+        return;
+
     // Set dependencies of this key.
     QModelIndex idx_dependent = index(key);
     setData(idx_dependent, dependency_key, DependencyKeyRole);
@@ -624,7 +631,7 @@ void oskar_SettingsModel::setDependencies(const QString& key,
 
     // Do the initial check and set the flag to indicate whether hidden or not.
     oskar_SettingsItem* dependency = getItem(idx_dependency);
-    if (dependency->dependencyValue() == dependency_value)
+    if (dependency->valueOrDefault() == dependency_value)
         setData(idx_dependent, false, HiddenRole);
     else
         setData(idx_dependent, true, HiddenRole);
@@ -724,7 +731,8 @@ void oskar_SettingsModel::restoreAll(const QModelIndex& parent)
         if (idx.isValid())
         {
             const oskar_SettingsItem* item = getItem(idx);
-            setData(idx.sibling(idx.row(), 1), true, EnabledRole);
+            if (!item->enabled())
+                setData(idx.sibling(idx.row(), 1), true, EnabledRole);
             restoreAll(idx);
         }
     }
@@ -740,9 +748,7 @@ void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
         {
             const oskar_SettingsItem* item = getItem(idx);
             if (!item->value().isNull())
-            {
                 settings_->setValue(item->key(), item->value());
-            }
             saveFromParentIndex(idx);
         }
     }
@@ -759,9 +765,7 @@ int oskar_SettingsModel::numModified(const QModelIndex& parent) const
         {
             const oskar_SettingsItem* item = getItem(idx);
             if (!item->value().isNull())
-            {
                 ++num_modified;
-            }
             num_modified += numModified(idx);
         }
     }
