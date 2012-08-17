@@ -260,7 +260,7 @@ const QVariant& oskar_SettingsItem::value() const
     return value_;
 }
 
-QVariant oskar_SettingsItem::valueOrDefault() const
+const QVariant& oskar_SettingsItem::valueOrDefault() const
 {
     return (value_.isNull() ? defaultValue_ : value_);
 }

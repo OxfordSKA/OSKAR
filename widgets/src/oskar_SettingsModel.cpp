@@ -189,15 +189,14 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     {
         if (role == Qt::DisplayRole)
         {
-            if (item->type() == oskar_SettingsItem::INPUT_FILE_LIST)
+            QVariant val = item->valueOrDefault();
+            if (item->type() == oskar_SettingsItem::INPUT_FILE_LIST ||
+                    val.type() == QVariant::StringList)
             {
-                QStringList list = item->value().toStringList();
+                QStringList list = val.toStringList();
                 return list.join(",");
             }
-            QVariant val = item->valueOrDefault();
-            if (item->enabled())
-                return val;
-            else
+            if (!item->enabled())
             {
                 QString str = val.toString();
                 QString defaultString = item->defaultValue().toString();
@@ -206,13 +205,18 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
                     str.append(QString(" [using %1]").arg(defaultString));
                     return str;
                 }
-                else
-                    return val;
             }
+            return val;
         }
         else if (role == Qt::EditRole)
         {
-            return item->valueOrDefault();
+            QVariant val = item->valueOrDefault();
+            if (val.type() == QVariant::StringList)
+            {
+                QStringList list = val.toStringList();
+                return list.join(",");
+            }
+            return val;
         }
         else if (role == Qt::CheckStateRole &&
                 item->type() == oskar_SettingsItem::BOOL)

@@ -105,7 +105,7 @@ public:
     const QString& tooltip() const;
     int type() const;
     const QVariant& value() const;
-    QVariant valueOrDefault() const;
+    const QVariant& valueOrDefault() const;
     int valueSet() const;
 
 private:

@@ -50,8 +50,12 @@ int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
     sim->keep_log_file = s.value("keep_log_file", true).toBool();
 
     // Get the device IDs to use.
-    QString devs = s.value("cuda_device_ids", "0").toString();
-    QStringList devsList = devs.split(",");
+    QStringList devsList;
+    QVariant devs = s.value("cuda_device_ids", "0");
+    if (devs.type() == QVariant::StringList)
+        devsList = devs.toStringList();
+    else if (devs.type() == QVariant::String)
+        devsList = devs.toString().split(",");
     sim->num_cuda_devices = devsList.size();
     sim->cuda_device_ids = (int*)malloc(devsList.size() * sizeof(int));
     for (int i = 0; i < devsList.size(); ++i)
