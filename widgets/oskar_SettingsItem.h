@@ -35,7 +35,6 @@
 
 #include "oskar_global.h"
 #include <QtCore/QList>
-#include <QtCore/QVector>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>

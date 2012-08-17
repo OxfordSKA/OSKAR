@@ -37,7 +37,6 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QHash>
 #include <QtCore/QList>
-#include <QtCore/QMap>
 #include <QtCore/QModelIndex>
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
@@ -86,6 +85,7 @@ public:
     QModelIndex index(int row, int column,
             const QModelIndex& parent = QModelIndex()) const;
     QModelIndex index(const QString& key);
+    bool isModified() const;
     void loadSettingsFile(const QString& filename);
     QModelIndex parent(const QModelIndex& index) const;
     void registerSetting(const QString& key, const QString& label,
@@ -99,12 +99,12 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value,
             int role = Qt::EditRole);
     void setDefault(const QString& key, const QVariant& value);
+    void setDependencies(const QString& key, const QString& dependency_key,
+            const QVariant& dependency_value);
     void setLabel(const QString& key, const QString& label);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
-    void setDependencies(const QString& key, const QString& dependency_key,
-            const QVariant& dependency_value);
-    bool isModified() const;
+    QHash<QString, QVariant> settings() const;
 
 private:
     void append(const QString& key, const QString& subkey, int type,
@@ -114,13 +114,13 @@ private:
             const QModelIndex& parent = QModelIndex()) const;
     oskar_SettingsItem* getItem(const QModelIndex& index) const;
     void loadFromParentIndex(const QModelIndex& parent);
+    int numModified(const QModelIndex& parent) const;
     void restoreAll(const QModelIndex& parent = QModelIndex());
     void saveFromParentIndex(const QModelIndex& parent);
-    int numModified(const QModelIndex& parent) const;
 
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;
-    QHash<QString, oskar_SettingsItem*> hash_;
+    QHash<QString, oskar_SettingsItem*> itemHash_;
     QStringList iterationKeys_;
     QStringList outputKeys_;
 };

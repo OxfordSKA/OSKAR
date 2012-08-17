@@ -29,18 +29,11 @@
 #include "widgets/oskar_SettingsModel.h"
 #include "widgets/oskar_SettingsItem.h"
 #include <QtGui/QApplication>
-#include <QtGui/QBrush>
 #include <QtGui/QFontMetrics>
 #include <QtGui/QIcon>
-#include <QtCore/QVector>
 #include <QtCore/QSize>
 #include <QtCore/QVariant>
-#include <cstdio>
 #include <cfloat>
-
-#include <QtCore/QDebug>
-
-#include "widgets/oskar_DoubleSpinBox.h"
 
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent),
@@ -261,7 +254,7 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
 
 const oskar_SettingsItem* oskar_SettingsModel::getItem(const QString& key) const
 {
-    return hash_.value(key);
+    return itemHash_.value(key);
 }
 
 QVariant oskar_SettingsModel::headerData(int section,
@@ -321,6 +314,11 @@ QModelIndex oskar_SettingsModel::index(const QString& key)
         child = index(rowCount(parent) - 1, 0, parent);
     }
     return child;
+}
+
+bool oskar_SettingsModel::isModified() const
+{
+    return numModified(QModelIndex()) > 0;
 }
 
 void oskar_SettingsModel::loadSettingsFile(const QString& filename)
@@ -617,7 +615,7 @@ void oskar_SettingsModel::setDependencies(const QString& key,
         const QString& dependency_key, const QVariant& dependency_value)
 {
     // Check that both keys have been registered, and return immediately if not.
-    if (!hash_.contains(key) || !hash_.contains(dependency_key))
+    if (!itemHash_.contains(key) || !itemHash_.contains(dependency_key))
         return;
 
     // Set dependencies of this key.
@@ -659,9 +657,14 @@ void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
     setData(idx, value, Qt::EditRole);
 }
 
-bool oskar_SettingsModel::isModified() const
+QHash<QString, QVariant> oskar_SettingsModel::settings() const
 {
-    return numModified(QModelIndex()) > 0;
+    QHash<QString, QVariant> hash;
+    foreach (oskar_SettingsItem* item, itemHash_)
+    {
+        hash.insert(item->key(), item->valueOrDefault());
+    }
+    return hash;
 }
 
 
@@ -679,7 +682,7 @@ void oskar_SettingsModel::append(const QString& key, const QString& subkey,
             label, QVariant(), required, defaultValue, options, parentItem);
     parentItem->appendChild(item);
     endInsertRows();
-    hash_.insert(key, item);
+    itemHash_.insert(key, item);
 }
 
 QModelIndex oskar_SettingsModel::getChild(const QString& subkey,
@@ -722,6 +725,24 @@ void oskar_SettingsModel::loadFromParentIndex(const QModelIndex& parent)
     }
 }
 
+int oskar_SettingsModel::numModified(const QModelIndex& parent) const
+{
+    int num_modified = 0;
+    int rows = rowCount(parent);
+    for (int i = 0; i < rows; ++i)
+    {
+        QModelIndex idx = index(i, 0, parent);
+        if (idx.isValid())
+        {
+            const oskar_SettingsItem* item = getItem(idx);
+            if (!item->value().isNull())
+                ++num_modified;
+            num_modified += numModified(idx);
+        }
+    }
+    return num_modified;
+}
+
 void oskar_SettingsModel::restoreAll(const QModelIndex& parent)
 {
     int rows = rowCount(parent);
@@ -752,24 +773,6 @@ void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
             saveFromParentIndex(idx);
         }
     }
-}
-
-int oskar_SettingsModel::numModified(const QModelIndex& parent) const
-{
-    int num_modified = 0;
-    int rows = rowCount(parent);
-    for (int i = 0; i < rows; ++i)
-    {
-        QModelIndex idx = index(i, 0, parent);
-        if (idx.isValid())
-        {
-            const oskar_SettingsItem* item = getItem(idx);
-            if (!item->value().isNull())
-                ++num_modified;
-            num_modified += numModified(idx);
-        }
-    }
-    return num_modified;
 }
 
 
