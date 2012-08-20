@@ -76,69 +76,29 @@ extern "C" {
 int oskar_make_image(oskar_Image* im, oskar_Log* log,
         const oskar_Visibilities* vis, const oskar_SettingsImage* settings)
 {
-    oskar_Mem l, m;
-    oskar_Mem stokes;
-    oskar_Mem im_slice;
-    oskar_Mem vis_im;              /* Visibility amplitudes used for imaging. */
-    oskar_Mem uu_im, vv_im, ww_im; /* baseline coordinates used for imaging. */
-    /* baseline coordinates rotated to new phase centre. */
-    oskar_Mem uu_rot, vv_rot, ww_rot;
-    /* Unrotated visibilities, used for phase rotation. */
-    oskar_Mem uu_temp, vv_temp, ww_temp;
-    oskar_Mem work_uvw;
-    int err, location, type;
-    double delta_l, delta_m, delta_n;
-    double ra0_rad, dec0_rad;
-    int size;
-    double fov;
-    int im_chan_range[2];
-    int im_num_chan;
-    int im_num_times;
-    int im_time_range[2];
-    int num_pixels;
-    int im_type;
-    int num_pols;
-    int num_vis_pols;
-    int num_vis;
-    int i, c, t, p;
-    int slice_offset;
-
-
-    err = OSKAR_SUCCESS;
+    int err = OSKAR_SUCCESS;
 
     /* The location of temporary memory used by this function (needs to be CPU). */
-    location = OSKAR_LOCATION_CPU;
+    int location = OSKAR_LOCATION_CPU;
 
     /* Local variables. */
     if (im == NULL || vis == NULL || settings == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
-    type = (oskar_mem_is_double(vis->amplitude.type) &&
+    int type = (oskar_mem_is_double(vis->amplitude.type) &&
             oskar_mem_is_double(im->data.type)) ? OSKAR_DOUBLE : OSKAR_SINGLE;
-
-    /* Work array for baseline evaluation. */
-    err = oskar_mem_init(&work_uvw, type, location, 3 * vis->num_stations, OSKAR_TRUE);
-    if (err) return err;
-    /* Variables used for uvw rotation. */
-    ra0_rad = vis->phase_centre_ra_deg * DEG2RAD;
-    dec0_rad = vis->phase_centre_dec_deg * DEG2RAD;
-
-
-    err = oskar_mem_init(&uu_rot, type, location, 0, OSKAR_FALSE);
-    if (err) return err;
-    err = oskar_mem_init(&vv_rot, type, location, 0, OSKAR_FALSE);
-    if (err) return err;
-    err = oskar_mem_init(&ww_rot, type, location, 0, OSKAR_FALSE);
-    if (err) return err;
-
 
     /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
      * for the new pointing centre as well as a set of baseline coordinates
      * corresponding to the user specified imaging direction.
      */
+    double delta_l, delta_m, delta_n;
+    oskar_Mem uu_rot, vv_rot, ww_rot;
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
         double ra_rad = settings->ra_deg * DEG2RAD;
         double dec_rad = settings->dec_deg * DEG2RAD;
+        double ra0_rad = vis->phase_centre_ra_deg * DEG2RAD;
+        double dec0_rad = vis->phase_centre_dec_deg * DEG2RAD;
         double l1, m1, n1;
         int num_elements = vis->num_baselines * vis->num_times;
 
@@ -149,12 +109,11 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         delta_n = 1 - n1;
 
         err = oskar_mem_init(&uu_rot, type, location, num_elements, OSKAR_TRUE);
-        if (err) return err;
         err = oskar_mem_init(&vv_rot, type, location, num_elements, OSKAR_TRUE);
-        if (err) return err;
         err = oskar_mem_init(&ww_rot, type, location, num_elements, OSKAR_TRUE);
-        if (err) return err;
 
+        /* Work array for baseline evaluation. */
+        oskar_Mem work_uvw(type, location, 3 * vis->num_stations);
         oskar_evaluate_uvw_baseline(&uu_rot, &vv_rot,
                 &ww_rot, vis->num_stations,
                 &vis->x_metres, &vis->y_metres, &vis->z_metres,
@@ -167,24 +126,26 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     err = oskar_image_init(im, type, location);
     if (err) return err;
 
-    size = settings->size;
-    fov = settings->fov_deg * M_PI/180.0;
+    int size = settings->size;
+    double fov = settings->fov_deg * M_PI/180.0;
 
     /* Set the channel range for the image cube [output range]. */
+    int im_chan_range[2];
     err = oskar_evaluate_image_range(im_chan_range, settings->channel_snapshots,
             settings->channel_range, vis->num_channels);
     if (err) return err;
-    im_num_chan = im_chan_range[1] - im_chan_range[0] + 1;
+    int im_num_chan = im_chan_range[1] - im_chan_range[0] + 1;
 
     /* Set the time range for the image cube [output range]. */
+    int im_time_range[2];
     err = oskar_evaluate_image_range(im_time_range, settings->time_snapshots,
             settings->time_range, vis->num_times);
     if (err) return err;
-    im_num_times = im_time_range[1] - im_time_range[0] + 1;
+    int im_num_times = im_time_range[1] - im_time_range[0] + 1;
 
-    num_pixels = size*size;
-    im_type = settings->image_type;
-    num_pols = 0;
+    int num_pixels = size*size;
+    int im_type = settings->image_type;
+    int num_pols = 0;
     if (im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
             im_type == OSKAR_IMAGE_TYPE_STOKES_Q ||
             im_type == OSKAR_IMAGE_TYPE_STOKES_U ||
@@ -204,7 +165,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     }
     else return OSKAR_ERR_BAD_DATA_TYPE;
 
-    num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
+    int num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
     if (im_num_times > vis->num_times || im_num_chan > vis->num_channels ||
             num_pols > num_vis_pols)
     {
@@ -217,15 +178,11 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     }
 
     /* Evaluate Stokes parameters  (if required) */
-    err = oskar_mem_init(&stokes, type, location, 0, OSKAR_FALSE);
-    if (err) return err;
+    oskar_Mem stokes(type, location, 0, OSKAR_FALSE);
     err = oskar_get_image_stokes(&stokes, vis, settings);
     if (err) return err;
 
-    /* Note: vis are channel -> time -> baseline order currently  */
-    /*       vis coordinates are of length = num_times * num_baselines */
-    /*       vis amp is of length = num_channels * num_times * num_baselines */
-    num_vis = 0;
+    int num_vis = 0;
     if (settings->time_snapshots && settings->channel_snapshots)
         num_vis = vis->num_baselines;
     else if (settings->time_snapshots && !settings->channel_snapshots)
@@ -234,48 +191,30 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         num_vis = vis->num_baselines * vis->num_times;
     else /* Time and frequency synthesis */
         num_vis = vis->num_baselines * vis->num_channels * vis->num_times;
-
-
-    err = oskar_mem_init(&uu_im, type, location, num_vis, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&vv_im, type, location, num_vis, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&ww_im, type, location, num_vis, OSKAR_TRUE);
-    if (err) return err;
-
-    err = oskar_mem_init(&uu_temp, type, location, 0, OSKAR_FALSE);
-    if (err) return err;
-    err = oskar_mem_init(&vv_temp, type, location, 0, OSKAR_FALSE);
-    if (err) return err;
-    err = oskar_mem_init(&ww_temp, type, location, 0, OSKAR_FALSE);
-    if (err) return err;
+    oskar_Mem uu_im(type, location, num_vis);
+    oskar_Mem vv_im(type, location, num_vis);
+    oskar_Mem ww_im(type, location, num_vis);
+    oskar_Mem uu_temp, vv_temp, ww_temp;
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
         err = oskar_mem_init(&uu_temp, type, location, num_vis, OSKAR_TRUE);
-        if (err) return err;
         err = oskar_mem_init(&vv_temp, type, location, num_vis, OSKAR_TRUE);
-        if (err) return err;
         err = oskar_mem_init(&ww_temp, type, location, num_vis, OSKAR_TRUE);
-        if (err) return err;
     }
-    oskar_mem_init(&vis_im, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
+    oskar_Mem vis_im(type | OSKAR_COMPLEX, location, num_vis);
 
     /* Allocate pixel coordinate grid required for the DFT imager. */
-    if (settings->transform_type == OSKAR_IMAGE_DFT_2D)
+    oskar_Mem l(type, location, num_pixels);
+    oskar_Mem m(type, location, num_pixels);
+    if (type == OSKAR_SINGLE)
     {
-        /* Generate lm grid. */
-        oskar_mem_init(&l, type, location, num_pixels, OSKAR_TRUE);
-        oskar_mem_init(&m, type, location, num_pixels, OSKAR_TRUE);
-        if (type == OSKAR_SINGLE)
-        {
-            oskar_evaluate_image_lm_grid_f(size, size, fov, fov, (float*)l.data,
-                    (float*)m.data);
-        }
-        else
-        {
-            oskar_evaluate_image_lm_grid_d(size, size, fov, fov, (double*)l.data,
-                    (double*)m.data);
-        }
+        oskar_evaluate_image_lm_grid_f(size, size, fov, fov, (float*)l.data,
+                (float*)m.data);
+    }
+    else
+    {
+        oskar_evaluate_image_lm_grid_d(size, size, fov, fov, (double*)l.data,
+                (double*)m.data);
     }
 
     /* Setup the image cube. */
@@ -283,17 +222,17 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     if (err) return err;
 
     /* Declare a pointer to the slice of the image cube being imaged. */
-    oskar_mem_init(&im_slice, type, location, num_pixels, OSKAR_FALSE);
+    oskar_Mem im_slice(type, location, num_pixels, OSKAR_FALSE);
 
     /* Construct the image cube. */
-    for (i = 0, c = 0; c < im_num_chan; ++c)
+    for (int i = 0, c = 0; c < im_num_chan; ++c)
     {
         int vis_chan = im_chan_range[0] + c;
         double im_freq = im->freq_start_hz + c * im->freq_inc_hz;
         oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, im_num_chan, im_freq / 1e6);
 
-        for (t = 0; t < im_num_times; ++t)
+        for (int t = 0; t < im_num_times; ++t)
         {
             int vis_time = im_time_range[0] + t;
 
@@ -328,7 +267,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             else
                 return OSKAR_ERR_SETTINGS_IMAGE;
 
-            for (p = 0; p < num_pols; ++p, ++i)
+            for (int p = 0; p < num_pols; ++p, ++i)
             {
                 oskar_log_message(log, 1, "Making image %3i/%i, "
                         "cube index (c=%i, t=%i, p=%i)",
@@ -356,7 +295,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 }
 
                 /* Get pointer to slice of the image cube. */
-                slice_offset = ((c * im_num_times + t) * num_pols + p) * num_pixels;
+                int slice_offset = ((c * im_num_times + t) * num_pols + p) * num_pixels;
                 oskar_mem_get_pointer(&im_slice, &im->data, slice_offset,
                         num_pixels, &err);
                 if (err) return err;
@@ -375,38 +314,6 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             }
         }
     }
-
-
-    err = oskar_mem_free(&l);
-    if (err) return err;
-    oskar_mem_free(&m);
-    if (err) return err;
-    oskar_mem_free(&stokes);
-    if (err) return err;
-    oskar_mem_free(&im_slice);
-    if (err) return err;
-    oskar_mem_free(&vis_im);
-    if (err) return err;
-    oskar_mem_free(&uu_im);
-    if (err) return err;
-    oskar_mem_free(&vv_im);
-    if (err) return err;
-    oskar_mem_free(&ww_im);
-    if (err) return err;
-    oskar_mem_free(&uu_rot);
-    if (err) return err;
-    oskar_mem_free(&vv_rot);
-    if (err) return err;
-    oskar_mem_free(&ww_rot);
-    if (err) return err;
-    oskar_mem_free(&uu_temp);
-    if (err) return err;
-    oskar_mem_free(&vv_temp);
-    if (err) return err;
-    oskar_mem_free(&ww_temp);
-    if (err) return err;
-    oskar_mem_free(&work_uvw);
-    if (err) return err;
 
     return err;
 }
