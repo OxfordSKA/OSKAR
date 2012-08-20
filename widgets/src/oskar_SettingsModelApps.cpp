@@ -981,13 +981,19 @@ void oskar_SettingsModelApps::init_settings_image()
             "  the pointing direction of the primary beam.\n"
             "- If 'RA, Dec.' is selected, the image is centred on the values of\n"
             "  RA and Dec. found below.");
-    declare(k + "/ra_deg", "Image centre RA (degrees)", oskar_SettingsItem::DOUBLE);
-    setTooltip(k + "/ra_deg", "The Right Ascension of the image phase centre. This value\n"
-            "is used if the image centre direction is set to 'RA, Dec. (override)'.");
-    declare(k + "/dec_deg", "Image centre Dec. (degrees)", oskar_SettingsItem::DOUBLE);
-    setTooltip(k + "/dec_deg", "The Declination of the image phase centre. This value\n"
-            "is used if the image centre direction is set to 'RA, Dec. (override)'.");
-
+    {
+        QString group = k;
+        k = group + "/ra_deg";
+        declare(k, "Image centre RA (degrees)", oskar_SettingsItem::DOUBLE);
+        setTooltip(k, "The Right Ascension of the image phase centre. This value\n"
+                "is used if the image centre direction is set to 'RA, Dec. (override)'.");
+        setDependency(k, group, options[1]);
+        k = group + "/dec_deg";
+        declare(k, "Image centre Dec. (degrees)", oskar_SettingsItem::DOUBLE);
+        setTooltip(k, "The Declination of the image phase centre. This value\n"
+                "is used if the image centre direction is set to 'RA, Dec. (override)'.");
+        setDependency(k, group, options[1]);
+    }
 
     k = group + "/input_vis_data";
     declare(k, "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
