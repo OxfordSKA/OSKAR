@@ -51,25 +51,25 @@ class OSKAR_WIDGETS_EXPORT oskar_SettingsModel : public QAbstractItemModel
 
 public:
     enum {
-        KeyRole = Qt::UserRole,
+        KeyRole = Qt::UserRole, // 32
         ValueRole,
         TypeRole,
-        RequiredRole,
+        RequiredRole, // 35
         VisibleRole,
         EnabledRole,
         IterationNumRole,
         IterationIncRole,
-        IterationKeysRole,
+        IterationKeysRole, // 40
         SetIterationRole,
         ClearIterationRole,
         OutputKeysRole,
         LoadRole,
-        OptionsRole,
+        OptionsRole, // 45
         DefaultRole,
         DependencyKeyRole,
         DependencyValueRole,
         DependentKeyRole,
-        HiddenRole
+        HiddenRole // 50
     };
 
 public:

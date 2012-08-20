@@ -34,6 +34,7 @@
 #include <QtCore/QSize>
 #include <QtCore/QVariant>
 #include <cfloat>
+#include <QtCore/QDebug>
 
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent),
@@ -569,7 +570,16 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
                 if (data.isNull())
                     settings_->remove(item->key());
                 else
+                {
                     settings_->setValue(item->key(), data);
+                    for (int i = 0; i < item->childCount(); ++i)
+                    {
+                        oskar_SettingsItem* child = item->child(i);
+                        QModelIndex childIdx = index(child->key());
+                        childIdx = childIdx.sibling(childIdx.row(), columnCount() - 1);
+                        setData(childIdx, child->value(), Qt::EditRole);
+                    }
+                }
                 settings_->sync();
             }
 
