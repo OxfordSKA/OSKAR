@@ -87,7 +87,6 @@ struct oskar_SettingsSystemNoise
 {
     int enable;                  /* bool, enable/disable noise addition */
     int seed;                    /* Random number seed */
-    int area_projection;         /* bool, enable/disable area projection */
 
     /* Frequencies */
     oskar_SettingsSystemNoiseFreq freq;

@@ -48,8 +48,7 @@ extern "C" {
 #endif
 
 int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, unsigned seed,
-        int area_projection)
+        const oskar_TelescopeModel* telescope, unsigned seed)
 {
     int err;
     int c, t, b;
@@ -123,17 +122,6 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
                 /* Combine antenna std.devs. to evaluate the baseline std.dev.
                  * see (Wrobel & Walker 1999) */
                 s = sqrt(s1*s2);
-
-                /* Apply effective a simple area projection (if required) */
-                if (area_projection)
-                {
-                    ra = telescope->station[a1].ra0_rad;
-                    dec = telescope->station[a1].dec0_rad;
-                    err = oskar_ra_dec_to_hor_lmn_d(1, &ra, &dec, last,
-                            telescope->latitude_rad, &hor_l, &hor_m, &hor_n);
-                    if (err) return err;
-                    s /= hor_n;
-                }
 
                 /* Apply noise */
                 switch (vis->amplitude.type)

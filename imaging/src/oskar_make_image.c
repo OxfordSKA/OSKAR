@@ -49,6 +49,8 @@
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_assign.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_data_type_string.h"
 
@@ -62,59 +64,90 @@
 
 #define SEC2DAYS 1.15740740740740740740741e-5
 
-// uu, vv, ww are in metres
+/* uu, vv, ww are in metres */
 static void phase_rotate_vis_amps(oskar_Mem* amps, int num_vis, int type,
         double delta_l, double delta_m, double delta_n, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* ww, double freq);
 
-extern "C"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int oskar_make_image(oskar_Image* im, oskar_Log* log,
         const oskar_Visibilities* vis, const oskar_SettingsImage* settings)
 {
     oskar_Mem l, m;
     oskar_Mem stokes;
     oskar_Mem im_slice;
-    oskar_Mem vis_im;              // Visibility amplitudes used for imaging.
-    oskar_Mem uu_im, vv_im, ww_im; // baseline coordinates used for imaging.
-    // baseline coordinates rotated to new phase centre.
+    oskar_Mem vis_im;              /* Visibility amplitudes used for imaging. */
+    oskar_Mem uu_im, vv_im, ww_im; /* baseline coordinates used for imaging. */
+    /* baseline coordinates rotated to new phase centre. */
     oskar_Mem uu_rot, vv_rot, ww_rot;
-    // Unrotated visibilities, used for phase rotation.
+    /* Unrotated visibilities, used for phase rotation. */
     oskar_Mem uu_temp, vv_temp, ww_temp;
+    oskar_Mem work_uvw;
+    int err, location, type;
+    double delta_l, delta_m, delta_n;
+    double ra0_rad, dec0_rad;
+    int size;
+    double fov;
+    int im_chan_range[2];
+    int im_num_chan;
+    int im_num_times;
+    int im_time_range[2];
+    int num_pixels;
+    int im_type;
+    int num_pols;
+    int num_vis_pols;
+    int num_vis;
+    int i, c, t, p;
+    int slice_offset;
 
 
-    int err = OSKAR_SUCCESS;
+    err = OSKAR_SUCCESS;
 
-    // The location of temporary memory used by this function (needs to be CPU).
-    int location = OSKAR_LOCATION_CPU;
+    /* The location of temporary memory used by this function (needs to be CPU). */
+    location = OSKAR_LOCATION_CPU;
 
-    // Local variables.
+    /* Local variables. */
     if (im == NULL || vis == NULL || settings == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
-    int type = (oskar_mem_is_double(vis->amplitude.type) &&
+    type = (oskar_mem_is_double(vis->amplitude.type) &&
             oskar_mem_is_double(im->data.type)) ? OSKAR_DOUBLE : OSKAR_SINGLE;
 
-    // Work array for baseline evaluation.
-    oskar_Mem work_uvw(type, location, 3 * vis->num_stations, OSKAR_TRUE);
-    // Variables used for uvw rotation.
-    double delta_l, delta_m, delta_n;
-    double ra0_rad = vis->phase_centre_ra_deg * DEG2RAD;
-    double dec0_rad = vis->phase_centre_dec_deg * DEG2RAD;
+    /* Work array for baseline evaluation. */
+    err = oskar_mem_init(&work_uvw, type, location, 3 * vis->num_stations, OSKAR_TRUE);
+    if (err) return err;
+    /* Variables used for uvw rotation. */
+    ra0_rad = vis->phase_centre_ra_deg * DEG2RAD;
+    dec0_rad = vis->phase_centre_dec_deg * DEG2RAD;
 
-    // If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
-    // for the new pointing centre as well as a set of baseline coordinates
-    // corresponding to the user specified imaging direction.
+
+    err = oskar_mem_init(&uu_rot, type, location, 0, OSKAR_FALSE);
+    if (err) return err;
+    err = oskar_mem_init(&vv_rot, type, location, 0, OSKAR_FALSE);
+    if (err) return err;
+    err = oskar_mem_init(&ww_rot, type, location, 0, OSKAR_FALSE);
+    if (err) return err;
+
+
+    /* If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
+     * for the new pointing centre as well as a set of baseline coordinates
+     * corresponding to the user specified imaging direction.
+     */
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
         double ra_rad = settings->ra_deg * DEG2RAD;
         double dec_rad = settings->dec_deg * DEG2RAD;
         double l1, m1, n1;
-        oskar_evaluate_image_lmn_point(&l1, &m1, &n1,
-                ra0_rad, dec0_rad, ra_rad,dec_rad);
+        int num_elements = vis->num_baselines * vis->num_times;
+
+        oskar_evaluate_image_lmn_point(&l1, &m1, &n1, ra0_rad, dec0_rad,
+                ra_rad, dec_rad);
         delta_l = 0 - l1;
         delta_m = 0 - m1;
         delta_n = 1 - n1;
 
-        int num_elements = vis->num_baselines * vis->num_times;
         err = oskar_mem_init(&uu_rot, type, location, num_elements, OSKAR_TRUE);
         if (err) return err;
         err = oskar_mem_init(&vv_rot, type, location, num_elements, OSKAR_TRUE);
@@ -134,26 +167,24 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     err = oskar_image_init(im, type, location);
     if (err) return err;
 
-    int size = settings->size;
-    double fov = settings->fov_deg * M_PI/180.0;
+    size = settings->size;
+    fov = settings->fov_deg * M_PI/180.0;
 
-    // Set the channel range for the image cube [output range].
-    int im_chan_range[2];
+    /* Set the channel range for the image cube [output range]. */
     err = oskar_evaluate_image_range(im_chan_range, settings->channel_snapshots,
             settings->channel_range, vis->num_channels);
     if (err) return err;
-    int im_num_chan = im_chan_range[1] - im_chan_range[0] + 1;
+    im_num_chan = im_chan_range[1] - im_chan_range[0] + 1;
 
-    // Set the time range for the image cube [output range].
-    int im_time_range[2];
+    /* Set the time range for the image cube [output range]. */
     err = oskar_evaluate_image_range(im_time_range, settings->time_snapshots,
             settings->time_range, vis->num_times);
     if (err) return err;
-    int im_num_times = im_time_range[1] - im_time_range[0] + 1;
+    im_num_times = im_time_range[1] - im_time_range[0] + 1;
 
-    int num_pixels = size*size;
-    int im_type = settings->image_type;
-    int num_pols = 0;
+    num_pixels = size*size;
+    im_type = settings->image_type;
+    num_pols = 0;
     if (im_type == OSKAR_IMAGE_TYPE_STOKES_I ||
             im_type == OSKAR_IMAGE_TYPE_STOKES_Q ||
             im_type == OSKAR_IMAGE_TYPE_STOKES_U ||
@@ -173,7 +204,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     }
     else return OSKAR_ERR_BAD_DATA_TYPE;
 
-    int num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
+    num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
     if (im_num_times > vis->num_times || im_num_chan > vis->num_channels ||
             num_pols > num_vis_pols)
     {
@@ -185,7 +216,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         return OSKAR_ERR_SETTINGS;
     }
 
-    // Evaluate Stokes parameters  (if required)
+    /* Evaluate Stokes parameters  (if required) */
     err = oskar_mem_init(&stokes, type, location, 0, OSKAR_FALSE);
     if (err) return err;
     err = oskar_get_image_stokes(&stokes, vis, settings);
@@ -194,7 +225,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     /* Note: vis are channel -> time -> baseline order currently  */
     /*       vis coordinates are of length = num_times * num_baselines */
     /*       vis amp is of length = num_channels * num_times * num_baselines */
-    int num_vis = 0;
+    num_vis = 0;
     if (settings->time_snapshots && settings->channel_snapshots)
         num_vis = vis->num_baselines;
     else if (settings->time_snapshots && !settings->channel_snapshots)
@@ -203,18 +234,33 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         num_vis = vis->num_baselines * vis->num_times;
     else /* Time and frequency synthesis */
         num_vis = vis->num_baselines * vis->num_channels * vis->num_times;
-    oskar_mem_init(&uu_im,  type, location, num_vis, OSKAR_TRUE);
-    oskar_mem_init(&vv_im,  type, location, num_vis, OSKAR_TRUE);
-    oskar_mem_init(&ww_im,  type, location, num_vis, OSKAR_TRUE);
+
+
+    err = oskar_mem_init(&uu_im, type, location, num_vis, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&vv_im, type, location, num_vis, OSKAR_TRUE);
+    if (err) return err;
+    err = oskar_mem_init(&ww_im, type, location, num_vis, OSKAR_TRUE);
+    if (err) return err;
+
+    err = oskar_mem_init(&uu_temp, type, location, 0, OSKAR_FALSE);
+    if (err) return err;
+    err = oskar_mem_init(&vv_temp, type, location, 0, OSKAR_FALSE);
+    if (err) return err;
+    err = oskar_mem_init(&ww_temp, type, location, 0, OSKAR_FALSE);
+    if (err) return err;
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
-        oskar_mem_init(&uu_temp,  type, location, num_vis, OSKAR_TRUE);
-        oskar_mem_init(&vv_temp,  type, location, num_vis, OSKAR_TRUE);
-        oskar_mem_init(&ww_temp,  type, location, num_vis, OSKAR_TRUE);
+        err = oskar_mem_init(&uu_temp, type, location, num_vis, OSKAR_TRUE);
+        if (err) return err;
+        err = oskar_mem_init(&vv_temp, type, location, num_vis, OSKAR_TRUE);
+        if (err) return err;
+        err = oskar_mem_init(&ww_temp, type, location, num_vis, OSKAR_TRUE);
+        if (err) return err;
     }
     oskar_mem_init(&vis_im, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
 
-    // Allocate pixel coordinate grid required for the DFT imager.
+    /* Allocate pixel coordinate grid required for the DFT imager. */
     if (settings->transform_type == OSKAR_IMAGE_DFT_2D)
     {
         /* Generate lm grid. */
@@ -232,26 +278,26 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         }
     }
 
-    // Setup the image cube.
+    /* Setup the image cube. */
     err = oskar_setup_image(im, vis, settings);
     if (err) return err;
 
-    // Declare a pointer to the slice of the image cube being imaged.
+    /* Declare a pointer to the slice of the image cube being imaged. */
     oskar_mem_init(&im_slice, type, location, num_pixels, OSKAR_FALSE);
 
-    // Construct the image cube.
-    for (int i = 0, c = 0; c < im_num_chan; ++c)
+    /* Construct the image cube. */
+    for (i = 0, c = 0; c < im_num_chan; ++c)
     {
         int vis_chan = im_chan_range[0] + c;
         double im_freq = im->freq_start_hz + c * im->freq_inc_hz;
         oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, im_num_chan, im_freq / 1e6);
 
-        for (int t = 0; t < im_num_times; ++t)
+        for (t = 0; t < im_num_times; ++t)
         {
             int vis_time = im_time_range[0] + t;
 
-            // Evaluate baseline coordinates needed for imaging.
+            /* Evaluate baseline coordinates needed for imaging. */
             if (settings->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
             {
                 err = oskar_get_image_baseline_coords(&uu_im, &vv_im, &ww_im,
@@ -263,7 +309,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             }
             else if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
             {
-                // Rotated coordinates (used for imaging)
+                /* Rotated coordinates (used for imaging) */
                 err = oskar_get_image_baseline_coords(&uu_im, &vv_im,
                         &ww_im, &uu_rot, &vv_rot, &ww_rot, vis->num_times,
                         vis->num_baselines, vis->num_channels,
@@ -271,7 +317,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                         im_freq, settings);
                 if (err) return err;
 
-                // Unrotated coordinates (used for phase rotation)
+                /* Unrotated coordinates (used for phase rotation) */
                 err = oskar_get_image_baseline_coords(&uu_temp, &vv_temp,
                         &ww_temp, &vis->uu_metres, &vis->vv_metres, &vis->ww_metres,
                         vis->num_times, vis->num_baselines, vis->num_channels,
@@ -282,16 +328,17 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             else
                 return OSKAR_ERR_SETTINGS_IMAGE;
 
-            for (int p = 0; p < num_pols; ++p, ++i)
+            for (p = 0; p < num_pols; ++p, ++i)
             {
                 oskar_log_message(log, 1, "Making image %3i/%i, "
                         "cube index (c=%i, t=%i, p=%i)",
                         i+1, (im_num_chan*im_num_times*num_pols), c, t, p);
 
-                // Get visibility amplitudes for imaging.
+                /* Get visibility amplitudes for imaging. */
                 if (im_type == OSKAR_IMAGE_TYPE_PSF)
                 {
-                    vis_im.set_value_real(1.0);
+                    err = oskar_mem_set_value_real(&vis_im, 1.0);
+                    if (err) return err;
                 }
                 else
                 {
@@ -299,7 +346,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                             vis_chan, vis_time, p);
                     if (err) return err;
 
-                    // Phase rotate the visibilities.
+                    /* Phase rotate the visibilities. */
                     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
                     {
                         phase_rotate_vis_amps(&vis_im, num_vis, type,
@@ -308,13 +355,13 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                     }
                 }
 
-                // Get pointer to slice of the image cube.
-                int slice_offset = ((c * im_num_times + t) * num_pols + p) * num_pixels;
+                /* Get pointer to slice of the image cube. */
+                slice_offset = ((c * im_num_times + t) * num_pols + p) * num_pixels;
                 oskar_mem_get_pointer(&im_slice, &im->data, slice_offset,
                         num_pixels, &err);
                 if (err) return err;
 
-                // Make the image
+                /* Make the image */
                 if (settings->transform_type == OSKAR_IMAGE_DFT_2D)
                 {
                     err = oskar_make_image_dft(&im_slice, &uu_im, &vv_im, &vis_im,
@@ -329,22 +376,62 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         }
     }
 
+
+    err = oskar_mem_free(&l);
+    if (err) return err;
+    oskar_mem_free(&m);
+    if (err) return err;
+    oskar_mem_free(&stokes);
+    if (err) return err;
+    oskar_mem_free(&im_slice);
+    if (err) return err;
+    oskar_mem_free(&vis_im);
+    if (err) return err;
+    oskar_mem_free(&uu_im);
+    if (err) return err;
+    oskar_mem_free(&vv_im);
+    if (err) return err;
+    oskar_mem_free(&ww_im);
+    if (err) return err;
+    oskar_mem_free(&uu_rot);
+    if (err) return err;
+    oskar_mem_free(&vv_rot);
+    if (err) return err;
+    oskar_mem_free(&ww_rot);
+    if (err) return err;
+    oskar_mem_free(&uu_temp);
+    if (err) return err;
+    oskar_mem_free(&vv_temp);
+    if (err) return err;
+    oskar_mem_free(&ww_temp);
+    if (err) return err;
+    oskar_mem_free(&work_uvw);
+    if (err) return err;
+
     return err;
 }
 
 
-// TODO make this a stand-alone function?
-// See:
-// Cornwell, T.J., & Perley, R.A., 1992,
-// "Radio-interferometric imaging of very large fields"
-//
+#ifdef __cplusplus
+}
+#endif
+
+
+/*
+ * TODO make this a stand-alone function?
+ *
+ * Ref:
+ * Cornwell, T.J., & Perley, R.A., 1992,
+ * "Radio-interferometric imaging of very large fields"
+ */
 static void phase_rotate_vis_amps(oskar_Mem* amps, int num_vis, int type,
         double delta_l, double delta_m, double delta_n, const oskar_Mem* uu,
         const oskar_Mem* vv, const oskar_Mem* ww, double freq)
 {
+    int i;
     double inv_lambda = freq / 299792458.0;
 
-    // This would be also easier as can avoid polarisation this way too...
+    /* This would be also easier as can avoid polarisation this way too... */
     if (type == OSKAR_DOUBLE)
     {
         double* uu_ = (double*)uu->data;
@@ -352,7 +439,7 @@ static void phase_rotate_vis_amps(oskar_Mem* amps, int num_vis, int type,
         double* ww_ = (double*)ww->data;
         double2* amp_ = (double2*)amps->data;
 
-        for (int i = 0; i < num_vis; ++i)
+        for (i = 0; i < num_vis; ++i)
         {
             double u = uu_[i] * inv_lambda;
             double v = vv_[i] * inv_lambda;
@@ -373,7 +460,7 @@ static void phase_rotate_vis_amps(oskar_Mem* amps, int num_vis, int type,
         float* ww_ = (float*)ww->data;
         float2* amp_ = (float2*)amps->data;
 
-        for (int i = 0; i < num_vis; ++i)
+        for (i = 0; i < num_vis; ++i)
         {
             float u = uu_[i] * inv_lambda;
             float v = vv_[i] * inv_lambda;

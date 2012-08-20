@@ -50,12 +50,12 @@ class Test_add_system_noise : public CppUnit::TestFixture
 {
     public:
         CPPUNIT_TEST_SUITE(Test_add_system_noise);
-        CPPUNIT_TEST(test_stddev);
+        CPPUNIT_TEST(test_rms);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         // Test Methods
-        void test_stddev();
+        void test_rms();
 
     private:
         void generate_range(oskar_Mem* data, int number, double start, double inc);

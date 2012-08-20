@@ -57,12 +57,11 @@
 #include <cfloat>
 #include <vector>
 
-void Test_add_system_noise::test_stddev()
+void Test_add_system_noise::test_rms()
 {
     int err = OSKAR_SUCCESS;
     int type = OSKAR_DOUBLE;
     int location = OSKAR_LOCATION_CPU;
-    int area_projection = OSKAR_FALSE;
     int seed = 0;
 
     // Setup some settings
@@ -115,7 +114,6 @@ void Test_add_system_noise::test_stddev()
     telescope.ra0_rad = 0.0;
     telescope.dec0_rad = 60.0 * (180.0 / M_PI);
 
-
     // Setup the visibilities structure.
     oskar_Visibilities vis;
     int num_channels = 1;
@@ -130,8 +128,9 @@ void Test_add_system_noise::test_stddev()
     vis.channel_bandwidth_hz = 0.15e6;
     vis.phase_centre_ra_deg = telescope.ra0_rad * (180.0/M_PI);
     vis.phase_centre_dec_deg = telescope.dec0_rad * (180.0/M_PI);
+    vis.num_stations = num_stations;
 
-    err = oskar_visibilities_add_system_noise(&vis, &telescope, seed, area_projection);
+    err = oskar_visibilities_add_system_noise(&vis, &telescope, seed);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Evaluate baseline coordinates
@@ -159,6 +158,7 @@ void Test_add_system_noise::test_stddev()
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     oskar_Image image;
+    settings.image.input_vis_data = NULL;
     settings.image.size = 1024;
     settings.image.fov_deg = 0.75;
     settings.image.image_type = OSKAR_IMAGE_TYPE_POL_XX;
@@ -169,19 +169,27 @@ void Test_add_system_noise::test_stddev()
     settings.image.time_range[0] = 0;
     settings.image.time_range[1] = -1;
     settings.image.transform_type = OSKAR_IMAGE_DFT_2D;
-    settings.image.input_vis_data = NULL;
+    settings.image.direction_type = OSKAR_IMAGE_DIRECTION_OBSERVATION;
     std::string filename = "temp_test_image.img";
     settings.image.oskar_image = (char*)malloc(filename.size() + 1);
     strcpy(settings.image.oskar_image, filename.c_str());
     settings.image.fits_image = NULL;
 
-    err = oskar_make_image(&image, NULL, &vis, &settings.image);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
-//    err = oskar_image_write(&image, NULL, settings.image.oskar_image, 0);
-//    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    try
+    {
+        err = oskar_make_image(&image, 0, &vis, &(settings.image));
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    }
+    catch (const int& err)
+    {
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_SUCCESS, err);
+    }
 
-    check_image_stats(&image, &telescope);
+    //    err = oskar_image_write(&image, NULL, settings.image.oskar_image, 0);
+    //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+
+    //check_image_stats(&image, &telescope);
 }
 
 void Test_add_system_noise::generate_range(oskar_Mem* data, int number, double start, double inc)
@@ -243,10 +251,10 @@ void Test_add_system_noise::check_image_stats(oskar_Image* image,
                 }
                 double im_mean = im_sum / num_pixels;
                 double im_rms = sqrt(im_sum_sq / num_pixels);
-//                printf("    min  = %f\n", im_min);
-//                printf("    max  = %f\n", im_max);
-//                printf("    mean = %f\n", im_mean);
-//                printf("    rms  = %f\n", im_rms);
+                //                printf("    min  = %f\n", im_min);
+                //                printf("    max  = %f\n", im_max);
+                //                printf("    mean = %f\n", im_mean);
+                //                printf("    rms  = %f\n", im_rms);
                 ave_rms[c * num_pols + p] += im_rms;
                 ave_mean[c * num_pols + p] += im_mean;
                 slice++;

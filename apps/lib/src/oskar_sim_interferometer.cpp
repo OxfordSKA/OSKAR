@@ -210,8 +210,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     if (settings.interferometer.noise.enable)
     {
         int seed = settings.interferometer.noise.seed;
-        error = oskar_visibilities_add_system_noise(&vis_global, &tel_cpu,
-                seed, settings.interferometer.noise.area_projection);
+        error = oskar_visibilities_add_system_noise(&vis_global, &tel_cpu, seed);
         if (error) return error;
     }
 

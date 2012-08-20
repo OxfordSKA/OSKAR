@@ -341,7 +341,6 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
     noise->enable = OSKAR_TRUE;
     noise->seed = 0;
-    noise->area_projection = OSKAR_FALSE;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     settings.obs.length_seconds = 1;
@@ -427,7 +426,6 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
     noise->enable = OSKAR_TRUE;
     noise->seed = 0;
-    noise->area_projection = OSKAR_FALSE;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     settings.obs.length_seconds = 1;
@@ -534,7 +532,6 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
     noise->enable = OSKAR_TRUE;
     noise->seed = 0;
-    noise->area_projection = OSKAR_FALSE;
     noise->value.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     noise->freq.specification = OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL;
     settings.obs.length_seconds = 1;

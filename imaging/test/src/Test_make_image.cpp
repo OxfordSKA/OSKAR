@@ -110,6 +110,7 @@ void Test_make_image::test()
     settings.time_range[0] = 0;
     settings.time_range[1] = -1;
     settings.image_type = OSKAR_IMAGE_TYPE_STOKES;
+    settings.direction_type = OSKAR_IMAGE_DIRECTION_OBSERVATION;
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
     oskar_Image image(OSKAR_DOUBLE);
@@ -121,7 +122,7 @@ void Test_make_image::test()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 
 #ifndef OSKAR_NO_FITS
-    err = oskar_fits_image_write(&image, NULL, "test.fits");
+    err = oskar_fits_image_write(&image, NULL, "temp_test_image.fits");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
 #endif
 

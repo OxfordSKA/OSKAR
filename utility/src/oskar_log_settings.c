@@ -332,7 +332,6 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     {
         const char* value;
         LVI("Seed", n->seed);
-        LVB("Apply area projection", n->area_projection);
         /* Noise frequency */
         switch (n->freq.specification)
         {

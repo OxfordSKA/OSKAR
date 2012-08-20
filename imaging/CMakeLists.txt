@@ -21,7 +21,7 @@ set(imaging_SRC
     src/oskar_image_write.c
     src/oskar_Image.cpp
     src/oskar_make_image_dft.c
-    src/oskar_make_image.cpp
+    src/oskar_make_image.c
     src/oskar_setup_image.cpp
 )
 set(imaging_SRC "${imaging_SRC}" PARENT_SCOPE)

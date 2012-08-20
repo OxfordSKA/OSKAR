@@ -114,9 +114,6 @@ static int load_noise(oskar_SettingsSystemNoise* noise, const char* filename)
             noise->seed = (temp == "TIME" || temp.toInt() < 0) ?
                     (int)time(NULL) : temp.toInt();
 
-            /* Area projection */
-            noise->area_projection = s.value("area_projection", true).toBool();
-
             /* Load frequency settings */
             error = load_noise_freqs(&noise->freq, s);
             if (error) return error;

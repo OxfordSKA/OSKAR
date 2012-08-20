@@ -641,9 +641,6 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
         key = root + "/seed";
         declare(key, "Noise seed", oskar_SettingsItem::RANDOM_SEED);
 
-        key = root + "/area_projection";
-        declare(key, "Effective area projection", oskar_SettingsItem::BOOL, true);
-
         // --- Frequencies
         key = root + "/freq";
         options.clear();

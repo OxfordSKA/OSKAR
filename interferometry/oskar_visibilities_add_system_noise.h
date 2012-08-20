@@ -48,14 +48,12 @@ extern "C" {
  * @param[in/out] vis             Visibility structure to which to add noise.
  * @param[in]     telescope
  * @param[in]     seed            Seed for the random number generator.
- * @param[in]     area_projection Boolean toggle for effective area projection.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
 int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
-        const oskar_TelescopeModel* telescope, unsigned seed,
-        int area_projection);
+        const oskar_TelescopeModel* telescope, unsigned seed);
 
 #ifdef __cplusplus
 }
