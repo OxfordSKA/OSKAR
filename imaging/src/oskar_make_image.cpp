@@ -71,8 +71,17 @@ extern "C"
 int oskar_make_image(oskar_Image* im, oskar_Log* log,
         const oskar_Visibilities* vis, const oskar_SettingsImage* settings)
 {
-    oskar_Mem l, m, stokes, temp_uu, temp_vv, temp_ww, temp_amp, im_slice;
-    oskar_Mem uu_rot, vv_rot, ww_rot, temp_uu_rot, temp_vv_rot, temp_ww_rot;
+    oskar_Mem l, m;
+    oskar_Mem stokes;
+    oskar_Mem im_slice;
+    oskar_Mem vis_im;              // Visibility amplitudes used for imaging.
+    oskar_Mem uu_im, vv_im, ww_im; // baseline coordinates used for imaging.
+    // baseline coordinates rotated to new phase centre.
+    oskar_Mem uu_rot, vv_rot, ww_rot;
+    // Unrotated visibilities, used for phase rotation.
+    oskar_Mem uu_temp, vv_temp, ww_temp;
+
+
     int err = OSKAR_SUCCESS;
 
     // The location of temporary memory used by this function (needs to be CPU).
@@ -90,23 +99,20 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     double delta_l, delta_m, delta_n;
     double ra0_rad = vis->phase_centre_ra_deg * DEG2RAD;
     double dec0_rad = vis->phase_centre_dec_deg * DEG2RAD;
-    double ra_rad = settings->ra_deg * DEG2RAD;
-    double dec_rad = settings->dec_deg * DEG2RAD;
-
 
     // If imaging away from the beam direction, evaluate l0-l, m0-m, n0-n
     // for the new pointing centre as well as a set of baseline coordinates
     // corresponding to the user specified imaging direction.
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
+        double ra_rad = settings->ra_deg * DEG2RAD;
+        double dec_rad = settings->dec_deg * DEG2RAD;
         double l1, m1, n1;
         oskar_evaluate_image_lmn_point(&l1, &m1, &n1,
                 ra0_rad, dec0_rad, ra_rad,dec_rad);
-        delta_l = -l1;
-        delta_m = -m1;
-        delta_n = 1- n1;
-        printf("%f %f --> %f %f %f\n", settings->ra_deg, settings->dec_deg,
-                delta_l, delta_m, delta_n);
+        delta_l = 0 - l1;
+        delta_m = 0 - m1;
+        delta_n = 1 - n1;
 
         int num_elements = vis->num_baselines * vis->num_times;
         err = oskar_mem_init(&uu_rot, type, location, num_elements, OSKAR_TRUE);
@@ -123,11 +129,6 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 vis->time_start_mjd_utc, vis->time_inc_seconds * SEC2DAYS,
                 &work_uvw, &err);
         if (err) return err;
-
-//        remove("uvw_data.dat");
-//        uu0.binary_file_write_ext("uvw_data.dat", "data", "uu", 0);
-//        vv0.binary_file_write_ext("uvw_data.dat", "data", "vv", 0);
-//        ww0.binary_file_write_ext("uvw_data.dat", "data", "ww", 0);
     }
 
     err = oskar_image_init(im, type, location);
@@ -202,16 +203,16 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         num_vis = vis->num_baselines * vis->num_times;
     else /* Time and frequency synthesis */
         num_vis = vis->num_baselines * vis->num_channels * vis->num_times;
-    oskar_mem_init(&temp_uu,  type, location, num_vis, OSKAR_TRUE);
-    oskar_mem_init(&temp_vv,  type, location, num_vis, OSKAR_TRUE);
-    oskar_mem_init(&temp_ww,  type, location, num_vis, OSKAR_TRUE);
+    oskar_mem_init(&uu_im,  type, location, num_vis, OSKAR_TRUE);
+    oskar_mem_init(&vv_im,  type, location, num_vis, OSKAR_TRUE);
+    oskar_mem_init(&ww_im,  type, location, num_vis, OSKAR_TRUE);
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
-        oskar_mem_init(&temp_uu_rot,  type, location, num_vis, OSKAR_TRUE);
-        oskar_mem_init(&temp_vv_rot,  type, location, num_vis, OSKAR_TRUE);
-        oskar_mem_init(&temp_ww_rot,  type, location, num_vis, OSKAR_TRUE);
+        oskar_mem_init(&uu_temp,  type, location, num_vis, OSKAR_TRUE);
+        oskar_mem_init(&vv_temp,  type, location, num_vis, OSKAR_TRUE);
+        oskar_mem_init(&ww_temp,  type, location, num_vis, OSKAR_TRUE);
     }
-    oskar_mem_init(&temp_amp, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
+    oskar_mem_init(&vis_im, type | OSKAR_COMPLEX, location, num_vis, OSKAR_TRUE);
 
     // Allocate pixel coordinate grid required for the DFT imager.
     if (settings->transform_type == OSKAR_IMAGE_DFT_2D)
@@ -253,7 +254,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             // Evaluate baseline coordinates needed for imaging.
             if (settings->direction_type == OSKAR_IMAGE_DIRECTION_OBSERVATION)
             {
-                err = oskar_get_image_baseline_coords(&temp_uu, &temp_vv, &temp_ww,
+                err = oskar_get_image_baseline_coords(&uu_im, &vv_im, &ww_im,
                         &vis->uu_metres, &vis->vv_metres, &vis->ww_metres,
                         vis->num_times, vis->num_baselines, vis->num_channels,
                         vis->freq_start_hz, vis->freq_inc_hz,
@@ -263,16 +264,16 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
             else if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
             {
                 // Rotated coordinates (used for imaging)
-                err = oskar_get_image_baseline_coords(&temp_uu_rot, &temp_vv_rot,
-                        &temp_ww_rot, &uu_rot, &vv_rot, &ww_rot, vis->num_times,
+                err = oskar_get_image_baseline_coords(&uu_im, &vv_im,
+                        &ww_im, &uu_rot, &vv_rot, &ww_rot, vis->num_times,
                         vis->num_baselines, vis->num_channels,
                         vis->freq_start_hz, vis->freq_inc_hz, vis_time,
                         im_freq, settings);
                 if (err) return err;
 
                 // Unrotated coordinates (used for phase rotation)
-                err = oskar_get_image_baseline_coords(&temp_uu, &temp_vv,
-                        &temp_ww, &vis->uu_metres, &vis->vv_metres, &vis->ww_metres,
+                err = oskar_get_image_baseline_coords(&uu_temp, &vv_temp,
+                        &ww_temp, &vis->uu_metres, &vis->vv_metres, &vis->ww_metres,
                         vis->num_times, vis->num_baselines, vis->num_channels,
                         vis->freq_start_hz, vis->freq_inc_hz, vis_time,
                         im_freq, settings);
@@ -290,20 +291,20 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 // Get visibility amplitudes for imaging.
                 if (im_type == OSKAR_IMAGE_TYPE_PSF)
                 {
-                    temp_amp.set_value_real(1.0);
+                    vis_im.set_value_real(1.0);
                 }
                 else
                 {
-                    err = oskar_get_image_vis_amps(&temp_amp, vis, &stokes, settings,
+                    err = oskar_get_image_vis_amps(&vis_im, vis, &stokes, settings,
                             vis_chan, vis_time, p);
                     if (err) return err;
 
                     // Phase rotate the visibilities.
                     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
                     {
-                        phase_rotate_vis_amps(&temp_amp, num_vis, type,
-                                delta_l, delta_m, delta_n, &temp_uu, &temp_vv,
-                                &temp_ww, im_freq);
+                        phase_rotate_vis_amps(&vis_im, num_vis, type,
+                                delta_l, delta_m, delta_n, &uu_temp, &vv_temp,
+                                &ww_temp, im_freq);
                     }
                 }
 
@@ -316,10 +317,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 // Make the image
                 if (settings->transform_type == OSKAR_IMAGE_DFT_2D)
                 {
-//                    Un-comment these for debugging:
-//                    temp_uu.binary_file_write_ext("im_data.dat", "data", "uu", i);
-//                    temp_vv.binary_file_write_ext("im_data.dat", "data", "vv", i);
-                    err = oskar_make_image_dft(&im_slice, &temp_uu, &temp_vv, &temp_amp,
+                    err = oskar_make_image_dft(&im_slice, &uu_im, &vv_im, &vis_im,
                             &l, &m, im_freq);
                     if (err) return err;
                 }
