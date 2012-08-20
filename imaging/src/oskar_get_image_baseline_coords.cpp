@@ -76,7 +76,6 @@ int oskar_get_image_baseline_coords(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     {
         int coord_offset = vis_time * num_baselines;
         size_t element_size = oskar_mem_element_size(type);
-        printf("coord_offset = %i\n", coord_offset);
         memcpy(uu->data, (void*)((char*)vis_uu->data + element_size * coord_offset), element_size * num_baselines);
         memcpy(vv->data, (void*)((char*)vis_vv->data + element_size * coord_offset), element_size * num_baselines);
         memcpy(ww->data, (void*)((char*)vis_ww->data + element_size * coord_offset), element_size * num_baselines);
