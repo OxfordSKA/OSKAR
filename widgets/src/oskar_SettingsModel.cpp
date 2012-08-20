@@ -576,6 +576,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
                     {
                         oskar_SettingsItem* child = item->child(i);
                         QModelIndex childIdx = index(child->key());
+                        if (settings_->allKeys().contains(child->key())) continue;
                         childIdx = childIdx.sibling(childIdx.row(), columnCount() - 1);
                         setData(childIdx, child->value(), Qt::EditRole);
                     }
