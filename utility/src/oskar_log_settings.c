@@ -77,9 +77,9 @@ static void oskar_log_settings_sky_extended(oskar_Log* log, int depth,
 {
     if (!(s->FWHM_major == 0.0 && s->FWHM_minor == 0.0))
     {
-        LV("FWHM major [arcsec]", "%.3f", s->FWHM_major);
-        LV("FWHM minor [arcsec]", "%.3f", s->FWHM_minor);
-        LV("Position angle [deg]", "%.3f", s->position_angle);
+        LV("FWHM major [arcsec]", "%.3f", s->FWHM_major * 3600*(180/M_PI));
+        LV("FWHM minor [arcsec]", "%.3f", s->FWHM_minor * 3600*(180/M_PI));
+        LV("Position angle [deg]", "%.3f", s->position_angle * 180/M_PI);
     }
 }
 
