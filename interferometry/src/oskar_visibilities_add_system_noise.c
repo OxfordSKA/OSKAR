@@ -56,10 +56,8 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
     int location = OSKAR_LOCATION_CPU;
     int a1, a2;
     double vis_freq;
-    double dt_dump, t_start, last;
     int is1, is2;
     double s1, s2, s;
-    double ra, dec, hor_l, hor_m, hor_n;
     oskar_Mem* noise_freq;
     oskar_Mem* noise_rms;
     double mean = 0.0;
@@ -86,18 +84,12 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
         }
     }
 
-    dt_dump = vis->time_inc_seconds / DAYS_2_SEC;
-    t_start = vis->time_start_mjd_utc + dt_dump / 2.0;
-
     for (idx = 0, c = 0; c < vis->num_channels; ++c)
     {
         vis_freq = vis->freq_start_hz + c * vis->freq_inc_hz;
 
         for (t = 0; t < vis->num_times; ++t)
         {
-            last = oskar_mjd_to_last_fast_d(t_start + t * dt_dump,
-                    telescope->longitude_rad);
-
             for (b = 0; b < vis->num_baselines; ++b)
             {
                 /* Retrieve the std.dev. for the baseline antennas. */
