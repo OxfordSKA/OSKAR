@@ -157,6 +157,9 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
         return item->iterationNum();
     else if (role == IterationIncRole)
         return item->iterationInc();
+    // Note: Maybe icons should be disabled unless there is an icon
+    // for everything. This would avoid indentation level problems with
+    // option trees of depth greater than 1.
     else if (role == Qt::DecorationRole)
     {
         if (index.column() == 0)

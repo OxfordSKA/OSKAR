@@ -58,6 +58,23 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     declare("test/item3/item3_1", "Item 3.1",
             oskar_SettingsItem::BOOL, false);
     setDependency("test/item3/item3_1", "test/item3", opts[0]);
+
+    // FIXME: This test fails as when Item 4 is set to true, Item 5.1 *AND*
+    // item 5.2 are visible...
+    // Note: The solution to this may be tricky as it results in an implicit
+    // dependency when drawing dependent items...
+    declare("test/item4", "Item 4 (if true then show item 5)",
+            oskar_SettingsItem::BOOL, false);
+    opts.clear();
+    opts << "Show 5.1" << "Show 5.2";
+    declare("test/item5", "Item 5", opts);
+    setDependency("test/item5", "test/item4", true);
+    declare("test/item5/item5_1", "Item 5.1", oskar_SettingsItem::STRING, "value");
+    setDependency("test/item5/item5_1", "test/item5", opts[0]);
+    declare("test/item5/item5_2", "Item 5.2", oskar_SettingsItem::STRING, "value");
+    setDependency("test/item5/item5_2", "test/item5", opts[1]);
+
+
     ///////////////////////////////////////////////////////////////////////////
 }
 
@@ -653,28 +670,26 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             QString root = key;
             QString key = root + "/file";
             declare(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
-            key = root + "/range";
-            setLabel(key, "Range");
-            {
-                QString root = key;
-                QString key = root + "/number";
-                declare(key, "Number of frequencies", oskar_SettingsItem::INT_UNSIGNED);
-                key = root + "/start";
-                declare(key, "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
-                key = root + "/inc";
-                declare(key, "Frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
-            }
+            setDependency(key, root, options[2]);
+            key = root + "/number";
+            declare(key, "Number of frequencies", oskar_SettingsItem::INT_UNSIGNED);
+            setDependency(key, root, options[3]);
+            key = root + "/start";
+            declare(key, "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
+            setDependency(key, root, options[3]);
+            key = root + "/inc";
+            declare(key, "Frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
+            setDependency(key, root, options[3]);
         }
 
         // --- Noise vales.
         key = root + "/values";
-        options.clear();
-        options << "Telescope model priority"
-                << "RMS flux density"
-                << "Sensitivity"
-                << "Temperature, area, and system efficiency";
-        declare(key, "Noise values", options);
-
+        QStringList noiseOptions;
+        noiseOptions << "Telescope model priority"
+                     << "RMS flux density"
+                     << "Sensitivity"
+                     << "Temperature, area, and system efficiency";
+        declare(key, "Noise values", noiseOptions);
         {
             // --- RMS Flux density
             QString root = key;
@@ -684,19 +699,19 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                     << "Data file"
                     << "Range";
             declare(key, "RMS flux density", options);
+            setDependency(key, root, noiseOptions[1]);
             {
                 QString root = key;
                 QString key = root  + "/file";
                 declare(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
-                key = root + "/range";
-                setLabel(key, "Range");
-                {
-                    QString root = key;
-                    QString key = root + "/start";
-                    declare(key, "Start (Jy)", oskar_SettingsItem::DOUBLE);
-                    key = root + "/end";
-                    declare(key, "End (Jy)", oskar_SettingsItem::DOUBLE);
-                }
+                setDependency(key, root, options[1]);
+
+                key = root + "/start";
+                declare(key, "Start (Jy)", oskar_SettingsItem::DOUBLE);
+                setDependency(key, root, options[2]);
+                key = root + "/end";
+                declare(key, "End (Jy)", oskar_SettingsItem::DOUBLE);
+                setDependency(key, root, options[2]);
             }
         }
 
@@ -709,6 +724,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                     << "Data file"
                     << "Range";
             declare(key, "Sensitivity", options);
+            setDependency(key, root, noiseOptions[2]);
             {
                 QString root = key;
                 QString key = root  + "/file";
@@ -730,6 +746,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             QString root = key;
             QString key = root + "/components";
             setLabel(key, "Temperature, area, and efficiency");
+            setDependency(key, root, noiseOptions[3]);
 
             // --- System Temperature
             {
