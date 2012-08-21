@@ -45,6 +45,7 @@
 extern "C" {
 #endif
 
+
 /* Column width for key prefixes. */
 static const int w = 45;
 
@@ -70,6 +71,19 @@ void oskar_log_settings_simulator(oskar_Log* log, const oskar_Settings* s)
     LVI("Num. CUDA devices", s->sim.num_cuda_devices);
     LVI("Max sources per chunk", s->sim.max_sources_per_chunk);
 }
+
+static void oskar_log_settings_sky_extended(oskar_Log* log, int depth,
+        const oskar_SettingsSkyExtendedSources* s)
+{
+    if (!(s->FWHM_major == 0.0 && s->FWHM_minor == 0.0))
+    {
+        LV("FWHM major [arcsec]", "%.3f", s->FWHM_major);
+        LV("FWHM minor [arcsec]", "%.3f", s->FWHM_minor);
+        LV("Position angle [deg]", "%.3f", s->position_angle);
+    }
+}
+
+
 
 void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
 {
@@ -103,6 +117,8 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         if (s->sky.input_sky_filter.flux_max != 0.0)
             LV("Filter flux max [Jy]", "%.3e",
                     s->sky.input_sky_filter.flux_max);
+        oskar_log_settings_sky_extended(log, depth,
+                &s->sky.input_sky_extended_sources);
     }
 
     /* GSM file settings. */
@@ -121,6 +137,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         LV("Filter flux min [Jy]", "%.3e", s->sky.gsm_filter.flux_min);
     if (s->sky.gsm_filter.flux_max != 0.0)
         LV("Filter flux max [Jy]", "%.3e", s->sky.gsm_filter.flux_max);
+    oskar_log_settings_sky_extended(log, depth, &s->sky.gsm_extended_sources);
 
     /* Output OSKAR source file settings. */
     depth = 1;
@@ -152,6 +169,8 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         if (s->sky.generator.random_power_law.filter.flux_max != 0.0)
             LV("Filter flux max [Jy]", "%.3e",
                     s->sky.generator.random_power_law.filter.flux_max);
+        oskar_log_settings_sky_extended(log, depth,
+                &s->sky.generator.random_power_law.extended_sources);
     }
 
     /* Random broken power-law generator settings. */
@@ -182,6 +201,8 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         if (s->sky.generator.random_broken_power_law.filter.flux_max != 0.0)
             LV("Filter flux max [Jy]", "%.3e",
                     s->sky.generator.random_broken_power_law.filter.flux_max);
+        oskar_log_settings_sky_extended(log, depth,
+                &s->sky.generator.random_broken_power_law.extended_sources);
     }
 
     /* HEALPix generator settings. */
@@ -209,6 +230,9 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         if (s->sky.generator.healpix.filter.flux_max != 0.0)
             LV("Filter flux max [Jy]", "%.3e",
                     s->sky.generator.healpix.filter.flux_max);
+        oskar_log_settings_sky_extended(log, depth,
+                &s->sky.generator.healpix.extended_sources);
+
     }
 }
 
