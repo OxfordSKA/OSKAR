@@ -152,9 +152,9 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
 #if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
             // Apply extended source over-ride.
-            double FWHM_major = settings->sky.input_sky_extended_sources.FWHM_major;
-            double FWHM_minor = settings->sky.input_sky_extended_sources.FWHM_minor;
-            double position_angle = settings->sky.input_sky_extended_sources.position_angle;
+            double FWHM_major = settings->sky.gsm_extended_sources.FWHM_major;
+            double FWHM_minor = settings->sky.gsm_extended_sources.FWHM_minor;
+            double position_angle = settings->sky.gsm_extended_sources.position_angle;
             if (FWHM_major > 0.0 || FWHM_minor > 0.0)
             {
                 error = oskar_sky_model_set_gaussian_parameters(&temp, FWHM_major,
