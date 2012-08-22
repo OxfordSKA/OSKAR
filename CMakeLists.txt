@@ -118,42 +118,30 @@ add_subdirectory(widgets)
 
 # === Install header tree.
 if (NOT ${CMAKE_INSTALL_PREFIX} MATCHES "/usr/local")
-    #string(FIND ${CMAKE_BINARY_DIR} "/" POS REVERSE)
-    #math(EXPR x "${POS} + 1")
-    #string(SUBSTRING ${CMAKE_BINARY_DIR} ${x} -1 bin_dir)
-    #string(FIND ${CMAKE_INSTALL_PREFIX} "/" POS REVERSE)
-    #math(EXPR x "${POS} + 1")
-    #string(SUBSTRING ${CMAKE_INSTALL_PREFIX} ${x} -1 install_dir)
-        
     string(REGEX MATCH "[^/|\\][a-zA-z0-9|_|-]+$" bin_dir ${CMAKE_BINARY_DIR})
     string(REGEX MATCH "[^/|\\]([a-zA-z0-9|_|-]+$)" install_dir ${CMAKE_INSTALL_PREFIX})
-    
-    string(COMPARE EQUAL ${CMAKE_INSTALL_PREFIX} ${CMAKE_BINARY_DIR} test)
-    
-    if (${test})
+    string(COMPARE EQUAL ${CMAKE_INSTALL_PREFIX} ${CMAKE_BINARY_DIR} install_in_build_dir)
+    if ($install_in_build_dir)
         set(install_include_dir "${bin_dir}/include")
     else ()
         set(install_include_dir "${bin_dir}/${install_dir}/include")
     endif()
-    message("== Excluding install include directory '${install_include_dir}'")
-    install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
-        DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-        FILES_MATCHING PATTERN "*.h"
-        PATTERN ${install_include_dir} EXCLUDE
-        PATTERN build EXCLUDE
-        PATTERN src  EXCLUDE
-        PATTERN test EXCLUDE
-        PATTERN .svn EXCLUDE)
-else ()
-    install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
-            DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
-            FILES_MATCHING PATTERN "*.h"
-            PATTERN build EXCLUDE
-            PATTERN src  EXCLUDE
-            PATTERN test EXCLUDE
-            PATTERN .svn EXCLUDE)
-endif()
-
+    #message("== Excluding install include directory '${install_include_dir}'")
+else()
+    set(install_include_dir "${CMAKE_INSTALL_PREFIX}/include")
+endif ()
+install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
+    DESTINATION ${OSKAR_INCLUDE_INSTALL_DIR}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN ${install_include_dir} EXCLUDE
+    PATTERN build EXCLUDE
+    PATTERN .settings EXCLUDE
+    PATTERN cmake EXCLUDE
+    PATTERN matlab EXCLUDE
+    PATTERN dierckx EXCLUDE
+    PATTERN src  EXCLUDE
+    PATTERN test EXCLUDE
+    PATTERN .svn EXCLUDE)
 
 # === Include packaging script.
 include(oskar_packaging)
