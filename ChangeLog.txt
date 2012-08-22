@@ -20,6 +20,17 @@
 
     * Added oskar_image_stats application to report various statistics
       about an OSKAR image.
+      #### TODO if this change is added into the release it needs app doc ###
+
+    * Updated options for writing image files.
+      #### TODO if this change is kept make sure to update settings doc ###
+
+    * The settings GUI now allows for the visibility of certain options to be
+      based on the value of another option. The display of various settings
+      have been updated to make use of this facility.
+
+    * Added MATLAB function for plotting of visibility data.
+
 
 2012-07-27  OSKAR 2.0.4-beta
 

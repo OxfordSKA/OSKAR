@@ -929,6 +929,7 @@ void oskar_SettingsModelApps::init_settings_image()
     QString k, group;
     QStringList options;
 
+    // FIXME change this back to a label...
     group = "image";
     setLabel(group, "Image settings");
 
@@ -978,13 +979,14 @@ void oskar_SettingsModelApps::init_settings_image()
     declare(k, "Time end", oskar_SettingsItem::AXIS_RANGE, "max");
     setTooltip(k, "The end time index to include in the image or image cube.");
 
+#if 0
     options.clear();
     options << "DFT 2D"; // << "DFT 3D" << "FFT";
     k = group + "/transform_type";
     declare(k, "Transform type", options);
     setTooltip(k, "The type of transform used to generate the image. \n"
             "More options may be available in a later release.");
-
+#endif
     options.clear();
     options << "Observation direction (default)"
             << "RA, Dec. (override)";
@@ -1009,9 +1011,37 @@ void oskar_SettingsModelApps::init_settings_image()
         setDependency(k, group, options[1]);
     }
 
+    // TODO Clarify tooltip for the case where image interferometer output is selected...
     k = group + "/input_vis_data";
     declare(k, "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to the input OSKAR visibility data file.");
+
+    // TODO update documentation on these settings.
+    // TODO nest options somehow..?
+    k = group + "/root";
+    declare(k, "Output image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path consisting of the root of the image filename \n"
+            "used to save the output image. The full filename will be \n"
+            "constructed as <root>_<image_type>.<extension>");
+
+    k = group + "/fits_image";
+    declare(k, "Save FITS image", oskar_SettingsItem::BOOL, true);
+    setTooltip(k, "If true, save the image in FITS format.");
+
+    k = group + "/oskar_image";
+    declare(k, "Save OSKAR image", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If true, save the image in OSKAR image binary format.");
+
+    k = group + "/overwrite";
+    declare(k, "Overwrite existing images", oskar_SettingsItem::BOOL, true);
+    setTooltip(k, "If true, when making a new image existing image files will be overwritten.\n"
+            "If false, and an existing image of the specified name already exists,\n"
+            "further images will be created by appending an number to the existing\n"
+            "filename in the pattern: <filename>-<N>.<extension>, where N starts at 1 and is\n"
+            "incremented for each new image created.\n");
+
+
+#if 0
     k = group + "/oskar_image_root";
     declare(k, "Output OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path consisting of the root of the OSKAR image filename \n"
@@ -1024,5 +1054,6 @@ void oskar_SettingsModelApps::init_settings_image()
     setTooltip(k, "Path consisting of the root of the FITS image filename \n"
             "used to save the output image. The full filename will be \n"
             "constructed as <root>_<image_type>.fits");
+#endif
 #endif
 }

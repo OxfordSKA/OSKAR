@@ -34,6 +34,7 @@
 #include <QtCore/QSettings>
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>
+#include <QtCore/QFile>
 
 extern "C"
 int oskar_settings_load_image(oskar_SettingsImage* im,
@@ -124,6 +125,70 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
         strcpy(im->input_vis_data, t.constData());
     }
 
+    bool overwrite = s.value("overwrite", true).toBool();
+    t = s.value("root").toByteArray();
+    if (t.size() > 0)
+    {
+        t += "_" + type;
+        // Construct FITS filename
+        if (s.value("fits_image", true).toBool())
+        {
+            if (!overwrite)
+            {
+                if (QFile::exists(QString(t) + ".fits"))
+                {
+                    int i = 1;
+                    while (true)
+                    {
+                        QString test = QString(t) + "-" + QString::number(i);
+                        test += ".fits";
+                        if (!QFile::exists(QString(test)))
+                        {
+                            t = test.toAscii();
+                            break;
+                        }
+                        ++i;
+                    }
+                }
+            }
+            else
+            {
+                t += ".fits";
+            }
+            im->fits_image = (char*)malloc(t.size() + 1);
+            strcpy(im->fits_image, t.constData());
+        }
+        // Construct OSKAR filename
+        if (s.value("oskar_image", false).toBool())
+        {
+            if (!overwrite)
+            {
+                if (QFile::exists(QString(t) + ".img"))
+                {
+                    int i = 1;
+                    while (true)
+                    {
+                        QString test = QString(t) + "-" + QString::number(i);
+                        test += ".fits";
+                        if (!QFile::exists(QString(test)))
+                        {
+                            t = test.toAscii();
+                            break;
+                        }
+                        ++i;
+                    }
+                }
+            }
+            else
+            {
+                t += ".img";
+            }
+            im->oskar_image = (char*)malloc(t.size() + 1);
+            strcpy(im->oskar_image, t.constData());
+        }
+    }
+
+#if 0
     t = s.value("oskar_image_root").toByteArray();
     if (t.size() > 0)
     {
@@ -140,6 +205,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
         im->fits_image = (char*)malloc(t.size() + 1);
         strcpy(im->fits_image, t.constData());
     }
+#endif
 
     return OSKAR_SUCCESS;
 }
