@@ -37,9 +37,6 @@
 #include <cstdlib>
 #include <cstring>
 
-#define NUM_FIELDS_POL 29
-#define NUM_FIELDS_UNPOL 22
-
 mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         oskar_Mem* date, const char* filename)
 {
@@ -57,10 +54,14 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     int num_pols      = oskar_mem_is_scalar(v_in->amplitude.type) ? 1 : 4;
 
     // Allocate memory returned to the MATLAB work-space.
-    mwSize coord_dims[2] = { num_baselines, num_times};
-    mwSize amp_dims[3]   = {num_baselines, num_times, num_channels};
-    mxClassID class_id   = (v_in->uu_metres.type == OSKAR_DOUBLE) ?
+    mwSize coord_dims[]   = { num_baselines, num_times};
+    mwSize amp_dims[]     = {num_baselines, num_times, num_channels};
+    mwSize station_dims[] = { num_stations };
+    mxClassID class_id    = (v_in->uu_metres.type == OSKAR_DOUBLE) ?
             mxDOUBLE_CLASS : mxSINGLE_CLASS;
+    mxArray* x_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
+    mxArray* y_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
+    mxArray* z_  = mxCreateNumericArray(1, station_dims, class_id, mxREAL);
     mxArray* uu_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* vv_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
     mxArray* ww_ = mxCreateNumericArray(2, coord_dims, class_id, mxREAL);
@@ -112,6 +113,11 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         memcpy(mxGetData(uu_), v_in->uu_metres.data, mem_size);
         memcpy(mxGetData(vv_), v_in->vv_metres.data, mem_size);
         memcpy(mxGetData(ww_), v_in->ww_metres.data, mem_size);
+
+        mem_size = num_stations * sizeof(double);
+        memcpy(mxGetData(x_), v_in->x_metres.data, mem_size);
+        memcpy(mxGetData(y_), v_in->y_metres.data, mem_size);
+        memcpy(mxGetData(z_), v_in->z_metres.data, mem_size);
 
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
@@ -184,6 +190,11 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         memcpy(mxGetData(vv_), v_in->vv_metres.data, mem_size);
         memcpy(mxGetData(ww_), v_in->ww_metres.data, mem_size);
 
+        mem_size = num_stations * sizeof(float);
+        memcpy(mxGetData(x_), v_in->x_metres.data, mem_size);
+        memcpy(mxGetData(y_), v_in->y_metres.data, mem_size);
+        memcpy(mxGetData(z_), v_in->z_metres.data, mem_size);
+
         for (int i = 0; i < num_channels * num_times * num_baselines; ++i)
         {
 
@@ -228,7 +239,7 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     }
     if (v_in->num_polarisations() == 4)
     {
-        const char* fields[NUM_FIELDS_POL] = {
+        const char* fields[] = {
                 "filename",
                 "date",
                 "settings_path",
@@ -246,6 +257,9 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "frequency",
                 "time",
                 "coord_units",
+                "station_x",
+                "station_y",
+                "station_z",
                 "uu",
                 "vv",
                 "ww",
@@ -258,11 +272,11 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "Q",
                 "U",
                 "V"};
-        v_out = mxCreateStructMatrix(1, 1, NUM_FIELDS_POL, fields);
+        v_out = mxCreateStructMatrix(1, 1, 32, fields);
     }
     else
     {
-        const char* fields[NUM_FIELDS_UNPOL] = {
+        const char* fields[] = {
                 "filename",
                 "date",
                 "settings_path",
@@ -280,16 +294,19 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
                 "frequency",
                 "time",
                 "coord_units",
+                "station_x",
+                "station_y",
+                "station_z",
                 "uu",
                 "vv",
                 "ww",
                 "axis_order",
                 "xx"};
 
-        v_out = mxCreateStructMatrix(1, 1, NUM_FIELDS_UNPOL, fields);
+        v_out = mxCreateStructMatrix(1, 1, 25, fields);
     }
 
-    /* Populate structure */
+    /* Populate structure TODO convert some of this to nested structure format */
     if (filename != NULL)
         mxSetField(v_out, 0, "filename", mxCreateString(filename));
     mxSetField(v_out, 0, "date", mxCreateString((char*)date->data));
@@ -320,6 +337,9 @@ mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
     mxSetField(v_out, 0, "frequency", frequency);
     mxSetField(v_out, 0, "time", time);
     mxSetField(v_out, 0, "coord_units", mxCreateString("metres"));
+    mxSetField(v_out, 0, "station_x", x_);
+    mxSetField(v_out, 0, "station_y", y_);
+    mxSetField(v_out, 0, "station_z", z_);
     mxSetField(v_out, 0, "uu", uu_);
     mxSetField(v_out, 0, "vv", vv_);
     mxSetField(v_out, 0, "ww", ww_);

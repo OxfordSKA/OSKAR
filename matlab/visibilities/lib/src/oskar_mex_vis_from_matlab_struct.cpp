@@ -39,7 +39,6 @@
 #include <cstdlib>
 #include <cstring>
 
-
 void mex_vis_error_(const char* msg)
 {
     mexErrMsgIdAndTxt("OSKAR:ERROR", "Invalid input vis. structure (%s).\n",
@@ -105,6 +104,12 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     if (!time_) mex_vis_error_field_("time");
     mxArray* coord_units_ = mxGetField(v_in, 0, "coord_units");
     if (!coord_units_) mex_vis_error_field_("coord_units");
+    mxArray* x_ = mxGetField(v_in, 0, "station_x");
+    if (!x_) mex_vis_error_field_("station_x");
+    mxArray* y_ = mxGetField(v_in, 0, "station_y");
+    if (!y_) mex_vis_error_field_("station_y");
+    mxArray* z_ = mxGetField(v_in, 0, "station_z");
+    if (!z_) mex_vis_error_field_("station_z");
     mxArray* uu_ = mxGetField(v_in, 0, "uu");
     if (!uu_) mex_vis_error_field_("uu");
     mxArray* vv_ = mxGetField(v_in, 0, "vv");
@@ -180,6 +185,12 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     memcpy(v_out->uu_metres.data, mxGetData(uu_), coord_size);
     memcpy(v_out->vv_metres.data, mxGetData(vv_), coord_size);
     memcpy(v_out->ww_metres.data, mxGetData(ww_), coord_size);
+
+    size_t mem_size = num_stations;
+    mem_size *= (type == OSKAR_DOUBLE) ? sizeof(double) : sizeof(float);
+    memcpy(v_out->x_metres.data, mxGetData(x_), mem_size);
+    memcpy(v_out->y_metres.data, mxGetData(y_), mem_size);
+    memcpy(v_out->z_metres.data, mxGetData(z_), mem_size);
 
     /* Set amplitude fields */
     if (num_pols == 4)
