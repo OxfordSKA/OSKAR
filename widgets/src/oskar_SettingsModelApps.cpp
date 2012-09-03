@@ -61,8 +61,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
 
     // FIXME: This test fails as when Item 4 is set to true, Item 5.1 *AND*
     // item 5.2 are visible...
-    // Note: The solution to this may be tricky as it results in an implicit
-    // dependency when drawing dependent items...
+    // TODO Check if it works OK now.
     declare("test/item4", "Item 4 (if true then show item 5)",
             oskar_SettingsItem::BOOL, false);
     opts.clear();

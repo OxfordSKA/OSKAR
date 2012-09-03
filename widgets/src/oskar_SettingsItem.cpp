@@ -134,7 +134,10 @@ bool oskar_SettingsItem::enabled() const
 
 bool oskar_SettingsItem::hidden() const
 {
-    return hidden_;
+    if (parentItem_)
+        return hidden_ || parentItem_->hidden();
+    else
+        return hidden_;
 }
 
 const QVariant& oskar_SettingsItem::iterationInc() const
@@ -189,10 +192,6 @@ void oskar_SettingsItem::setEnabled(bool value)
 void oskar_SettingsItem::setHidden(bool value)
 {
     hidden_ = value;
-    foreach (oskar_SettingsItem* item, childItems_)
-    {
-        item->setHidden(value);
-    }
 }
 
 void oskar_SettingsItem::setIterationInc(const QVariant& value)
