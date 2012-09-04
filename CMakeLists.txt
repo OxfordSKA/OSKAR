@@ -135,6 +135,8 @@ install(DIRECTORY "${OSKAR_SOURCE_DIR}/."
     FILES_MATCHING PATTERN "*.h"
     PATTERN ${install_include_dir} EXCLUDE
     PATTERN build EXCLUDE
+    PATTERN release EXCLUDE
+    PATTERN debug EXCLUDE
     PATTERN .settings EXCLUDE
     PATTERN cmake EXCLUDE
     PATTERN matlab EXCLUDE

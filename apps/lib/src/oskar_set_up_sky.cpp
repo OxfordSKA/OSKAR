@@ -107,7 +107,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 error = oskar_evaluate_gaussian_source_parameters(log,
                         temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
                         &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
-                        &temp.position_angle, &temp.RA, &temp.Dec,
+                        &temp.position_angle, &temp.RA, &temp.Dec, &temp.I,
                         settings->obs.ra0_rad, settings->obs.dec0_rad);
                 if (error) return error;
 #endif
@@ -163,10 +163,12 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             if (error) return error;
 
             // Evaluate extended source parameters.
+            // FIXME added temp.I as a hack to see if zeroing failed sources
+            // makes a significant difference to simulations
             error = oskar_evaluate_gaussian_source_parameters(log,
                     temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
                     &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
-                    &temp.position_angle, &temp.RA, &temp.Dec,
+                    &temp.position_angle, &temp.RA, &temp.Dec, &temp.I,
                     settings->obs.ra0_rad, settings->obs.dec0_rad);
             if (error) return error;
 #endif
@@ -266,7 +268,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, settings->obs.ra0_rad,
+                &temp.RA, &temp.Dec, &temp.I, settings->obs.ra0_rad,
                 settings->obs.dec0_rad);
         if (error) return error;
 #endif
@@ -333,7 +335,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, settings->obs.ra0_rad,
+                &temp.RA, &temp.Dec, &temp.I, settings->obs.ra0_rad,
                 settings->obs.dec0_rad);
         if (error) return error;
 #endif
@@ -402,7 +404,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, settings->obs.ra0_rad,
+                &temp.RA, &temp.Dec, &temp.I, settings->obs.ra0_rad,
                 settings->obs.dec0_rad);
         if (error) return error;
 #endif

@@ -50,10 +50,11 @@
 extern "C" {
 #endif
 
+// FIXME HACK 'I' added as hack
 int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
         oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0)
+        oskar_Mem* RA, oskar_Mem* Dec, oskar_Mem* I, double ra0, double dec0)
 {
     int i, j, err, num_failed = 0;
     double a, b, c;
@@ -61,7 +62,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     double maj, min, pa;
     double cos_pa_2, sin_pa_2, sin_2pa;
     double inv_std_min_2, inv_std_maj_2;
-    double ra, dec;
+    double ra, dec, I_;
     double ellipse_a, ellipse_b;
 
     oskar_Mem l, m;
@@ -173,6 +174,8 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
                     ellipse_num_points, &l, &m);
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
+                // FIXME HACK
+                ((double*)I->data)[i] = 0.0;
                 ++num_failed;
                 continue;
             }
@@ -231,6 +234,8 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
                      ellipse_num_points, &l, &m);
              if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
              {
+                 // FIXME HACK
+                 ((float*)I->data)[i] = 0.0;
                  ++num_failed;
                  continue;
              }

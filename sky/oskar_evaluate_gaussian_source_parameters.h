@@ -45,7 +45,7 @@ OSKAR_EXPORT
 int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
         oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, double ra0, double dec0);
+        oskar_Mem* RA, oskar_Mem* Dec, oskar_Mem* I, double ra0, double dec0);
 
 #ifdef __cplusplus
 }
