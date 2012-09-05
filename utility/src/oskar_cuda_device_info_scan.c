@@ -111,6 +111,9 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
     case 0x21:
         device->num_cores = 48;
         break;
+    case 0x30:
+        device->num_cores = 192;
+        break;
     default:
         device->num_cores = -1;
         break;
