@@ -82,7 +82,7 @@ macro(QT_APP)
     CDR(APP_SOURCES ${APP_DEFAULT_ARGS})
 
     if (NOT QT4_FOUND)
-        message(CRITIAL "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
+        message(CRITICAL "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
     endif ()
 
     # Create a target name from the app name.
@@ -157,17 +157,17 @@ macro(OSKAR_APP)
     )
     if (MSVC)
         set_target_properties(${target} PROPERTIES
-            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
-            OUTPUT_NAME   ${APP_NAME}
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            OUTPUT_NAME   "${APP_NAME}"
+            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
             INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     else ()
         set_target_properties(${target} PROPERTIES
-            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
-            LINK_FLAGS    ${OpenMP_CXX_FLAGS}
-            OUTPUT_NAME   ${APP_NAME}
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            LINK_FLAGS    "${OpenMP_CXX_FLAGS}"
+            OUTPUT_NAME   "${APP_NAME}"
+            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
             INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     endif()
@@ -209,7 +209,7 @@ macro(OSKAR_QT_APP)
     CDR(APP_SOURCES ${APP_DEFAULT_ARGS})
 
     if (NOT QT4_FOUND)
-        message(CRITIAL "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
+        message(CRITICAL "Unable to build oskar app ${APP_NAME}, Qt4 not found!")
     endif ()
 
     #message("APP: NAME       = ${APP_NAME}")
@@ -240,17 +240,17 @@ macro(OSKAR_QT_APP)
     )
     if (MSVC)
         set_target_properties(${target} PROPERTIES
-            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
-            OUTPUT_NAME   ${APP_NAME}
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            OUTPUT_NAME   "${APP_NAME}"
+            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
             INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     else ()
         set_target_properties(${target} PROPERTIES
-            COMPILE_FLAGS ${OpenMP_CXX_FLAGS}
-            LINK_FLAGS    ${OpenMP_CXX_FLAGS}
-            OUTPUT_NAME   ${APP_NAME}
-            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
+            LINK_FLAGS    "${OpenMP_CXX_FLAGS}"
+            OUTPUT_NAME   "${APP_NAME}"
+            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
             INSTALL_RPATH_USE_LINK_PATH TRUE
         )
     endif ()
