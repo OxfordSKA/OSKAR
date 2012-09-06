@@ -203,11 +203,13 @@ void oskar_MainWindow::openSettings(QString filename)
 {
     if (settingsFile_.isEmpty() && model_->isModified())
     {
-        int ret = QMessageBox::warning(this, mainTitle_,
-                "Opening a new file will discard unsaved modifications.\n"
-                "Do you want to proceed?",
-                QMessageBox::Open | QMessageBox::Cancel);
-        if (ret == QMessageBox::Cancel)
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(mainTitle_);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Opening a new file will discard unsaved modifications.");
+        msgBox.setInformativeText("Do you want to proceed?");
+        msgBox.setStandardButtons(QMessageBox::Open | QMessageBox::Cancel);
+        if (msgBox.exec() == QMessageBox::Cancel)
             return;
     }
 
@@ -288,11 +290,15 @@ void oskar_MainWindow::closeEvent(QCloseEvent* event)
 
     if (settingsFile_.isEmpty() && model_->isModified())
     {
-        int ret = QMessageBox::warning(this, mainTitle_,
-                "Exiting OSKAR will discard unsaved modifications.\n"
-                "Do you want to proceed?",
-                QMessageBox::Discard | QMessageBox::Cancel | QMessageBox::Save,
-                QMessageBox::Discard);
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(mainTitle_);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Exiting OSKAR will discard unsaved modifications.");
+        msgBox.setInformativeText("Do you want to proceed?");
+        msgBox.setStandardButtons(QMessageBox::Discard | QMessageBox::Cancel |
+                QMessageBox::Save);
+        msgBox.setDefaultButton(QMessageBox::Discard);
+        int ret = msgBox.exec();
         if (ret == QMessageBox::Discard)
         {
             event->accept();
