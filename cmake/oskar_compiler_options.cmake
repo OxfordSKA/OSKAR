@@ -99,13 +99,15 @@ if (CUDA_FOUND)
             list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-long-long;)
             # Disable warning about missing initializers (for CUDA Thrust).
             list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-missing-field-initializers;)
-            # Disable warning about "variable '__f' set but not used".
-            list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-but-set-variable;)
             # Disable warning about "unsigned int* __get_precalculated_matrix(int) defined but not used".
             list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-function;)
             # Ignore warnings from CUDA headers by specifying them as system headers.
             set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
             set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} -isystem ${CUDA_INCLUDE_DIRS}")
+            if (NOT APPLE)
+                # Disable warning about "variable '__f' set but not used".
+                list(APPEND CUDA_NVCC_FLAGS_DEBUG --compiler-options;-Wno-unused-but-set-variable;)
+            endif ()
         endif()
 
         # PTX compiler options
