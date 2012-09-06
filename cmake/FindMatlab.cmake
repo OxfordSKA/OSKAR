@@ -119,8 +119,10 @@ ELSE( WIN32 )
 
   # HACK: find_library doesnt seem to be able to find versioned libraries... :(
   if (NOT APPLE)    
-    find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4 
-      PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
+    find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4
+        HINTS $ENV{MATLAB_ROOT}/bin/glnxa64/
+        PATHS ${MATLAB_LIB_PATHS} 
+        NO_DEFAULT_PATH)
   else ()
     find_package(Qt4 4.6 QUIET)
     set(MATLAB_QT_CORE_LIBRARY ${QT_QTCORE_LIBRARY})
