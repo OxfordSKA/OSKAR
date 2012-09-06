@@ -155,14 +155,15 @@ endif (CUDA_FOUND)
 # Set MATLAB mex function compiler flags.
 # ------------------------------------------------------------------------------
 if (MATLAB_FOUND)
+    # TODO the MEXFILE extension should probably be set by FindMatlab.cmake... 
     if (APPLE)
         set(MATLAB_MEXFILE_EXT mexmaci64)
+        # TODO ... find a way to avoid these link directories
         link_directories(/usr/local/cuda/lib/)
-        link_directories(/Applications/MATLAB_R2011a.app/bin/maci64/)
+        link_directories(${MATLAB_BINARY_DIR}/maci64)
         set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread -flat_namespace -undefined suppress")
     else ()
         set(MATLAB_MEXFILE_EXT mexa64)
-        #set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -DMX_COMPAT_32 -pthread")
         set(MATLAB_CXX_FLAGS "-DMATLAB_MEX_FILE -pthread")
     endif ()
 endif ()

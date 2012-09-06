@@ -302,19 +302,23 @@ macro(OSKAR_MEX)
     target_link_libraries(${target}
         oskar ${MATLAB_LIBRARIES}  # Default libraries
         ${MEX_EXTRA_LIBS})         # Extra libraries
+
     set_target_properties(${target} PROPERTIES
-        PREFIX ""
-        OUTPUT_NAME ${MEX_NAME}
-        SUFFIX ".${MATLAB_MEXFILE_EXT}"
+        PREFIX        ""
+        OUTPUT_NAME   ${MEX_NAME}
+        SUFFIX        ".${MATLAB_MEXFILE_EXT}"
+        COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
+        LINK_FLAGS    ${MATLAB_CXX_FLAGS}
         INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}"
         INSTALL_RPATH_USE_LINK_PATH TRUE
-        COMPILE_FLAGS ${MATLAB_CXX_FLAGS}
-        LINK_FLAGS ${MATLAB_CXX_FLAGS})
+    )
 
     # Install target for mex function.
     install(TARGETS ${target} DESTINATION ${OSKAR_MEX_INSTALL_DIR})
 
 endmacro(OSKAR_MEX)
+
+
 
 macro(get_svn_revision dir variable)
     find_program(SVN_EXECUTABLE svn DOC "subversion command line client")

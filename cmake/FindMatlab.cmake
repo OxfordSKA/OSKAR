@@ -1,10 +1,15 @@
 # - this module looks for Matlab
+#
 # Defines:
 #  MATLAB_INCLUDE_DIR: include path for mex.h, engine.h
 #  MATLAB_LIBRARIES:   required libraries: libmex, etc
-#  MATLAB_MEX_LIBRARY: path to libmex.lib
-#  MATLAB_MX_LIBRARY:  path to libmx.lib
-#  MATLAB_ENG_LIBRARY: path to libeng.lib
+#
+#  MATLAB_BINARY_DIR: path to matlab binaries
+#
+#  MATLAB_MEX_LIBRARY: filename path to mex library
+#  MATLAB_MX_LIBRARY:  filename path to mx library
+#  MATLAB_ENG_LIBRARY: filename path to end library
+#
 #  MATLAB_QT_QTCORE_LIBRARY
 #  MATLAB_QT_QTGUI_LIBRARY
 #  MATLAB_QT_QTXML_LIBRARY
@@ -23,12 +28,10 @@
 # edited to reflect some of the changes from:
 #   http://public.kitware.com/Bug/view.php?id=8207
 #
-#
-#
 
+set(LIB_NAMES mex mat mx eng) 
 
-
-SET(MATLAB_FOUND 0)
+SET(MATLAB_FOUND FALSE)
 IF(WIN32)
   IF(${CMAKE_GENERATOR} MATCHES "Visual Studio .*" OR ${CMAKE_GENERATOR} MATCHES "NMake Makefiles")
     SET(MATLAB_ROOT "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB\\7.0;MATLABROOT]/extern/lib/win32/microsoft/")
@@ -62,6 +65,7 @@ IF(WIN32)
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB\\7.0;MATLABROOT]/extern/include"
     )
 ELSE( WIN32 )
+
   IF(NOT MATLAB_ROOT)
     IF($ENV{MATLAB_ROOT})
       SET(MATLAB_ROOT $ENV{MATLAB_ROOT})
@@ -69,36 +73,50 @@ ELSE( WIN32 )
       SET(MATLAB_ROOT /opt/matlab)
     ENDIF($ENV{MATLAB_ROOT})
   ENDIF(NOT MATLAB_ROOT)
-  # Regular x86
+  
   IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    SET(MATLAB_SYS
-      $ENV{MATLAB_ROOT}/bin/glnx86/
-      /usr/local/MATLAB/R2010b/bin/glnx86/
-      /usr/local/MATLAB/R2011a/bin/glnx86/
-      /usr/local/MATLAB/R2011b/bin/glnx86/
-      /usr/local/MATLAB/R2012a/bin/glnx86/
-      /usr/local/matlab/bin/glnx86/
-      )
-  # AMD64:
+
+    # ==== x86 ====
+    set(MATLAB_LIB_PATHS
+      /usr/local/MATLAB/R2010b/bin/glnx86
+      /usr/local/MATLAB/R2011a/bin/glnx86
+      /usr/local/MATLAB/R2011b/bin/glnx86
+      /usr/local/MATLAB/R2012a/bin/glnx86
+    )
+  
+    foreach (lib ${LIB_NAMES})
+        string(TOUPPER ${lib} _LIB)
+        find_library(MATLAB_${_LIB}_LIBRARY ${lib} 
+            HINTS $ENV{MATLAB_ROOT}/bin/glnx86/
+            PATHS ${MATLAB_LIB_PATHS}
+        )
+    endforeach ()
+      
   ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    SET(MATLAB_SYS
-      $ENV{MATLAB_ROOT}/bin/glnxa64/
-      /usr/local/MATLAB/R2010b/bin/glnxa64/
-      /usr/local/MATLAB/R2011a/bin/glnxa64/
-      /usr/local/MATLAB/R2011b/bin/glnxa64/
-      /usr/local/MATLAB/R2012a/bin/glnxa64/
-      /usr/local/matlab/bin/glnxa64/
-      /data/MATLAB/R2011b/bin/glnxa64/
+  
+    # ==== x86_64 ====
+    set(MATLAB_LIB_PATHS
+      /usr/local/MATLAB/R2010b/bin/glnxa64
+      /usr/local/MATLAB/R2011a/bin/glnxa64
+      /usr/local/MATLAB/R2011b/bin/glnxa64
+      /usr/local/MATLAB/R2012a/bin/glnxa64
+      /usr/local/matlab/bin/glnxa64
+      /data/MATLAB/R2012a/bin/glnxa64
       /Applications/MATLAB_R2011a.app/bin/maci64
       /Applications/MATLAB_R2012a.app/bin/maci64
       /Applications/MATLAB_R2012b.app/bin/maci64
-      )
+    )
+
+    foreach (lib ${LIB_NAMES})
+        string(TOUPPER ${lib} _LIB)
+        find_library(MATLAB_${_LIB}_LIBRARY ${lib} 
+            HINTS $ENV{MATLAB_ROOT}/bin/glnxa64/
+            PATHS ${MATLAB_LIB_PATHS}
+        )
+    endforeach ()
+    
   ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
-  find_library(MATLAB_MEX_LIBRARY mex  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
-  find_library(MATLAB_MAT_LIBRARY mat  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
-  find_library(MATLAB_MX_LIBRARY  mx   PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
-  find_library(MATLAB_ENG_LIBRARY eng  PATHS ${MATLAB_SYS} NO_DEFAULT_PATH)
   # HACK: find_library doesnt seem to be able to find versioned libraries... :(
   if (NOT APPLE)    
     find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4 
@@ -110,31 +128,47 @@ ELSE( WIN32 )
 
   find_path(MATLAB_INCLUDE_DIR
     "mex.h"
+    HINTS
+    $ENV{MATLAB_ROOT}/extern/include
     PATHS
-    $ENV{MATLAB_ROOT}/extern/include/
     /usr/local/MATLAB/R2010b/extern/include
     /usr/local/MATLAB/R2011a/extern/include
     /usr/local/MATLAB/R2011b/extern/include
     /usr/local/MATLAB/R2012a/extern/include
-    /usr/local/matlab/extern/include/
-    /data/MATLAB/R2011b/extern/include/
-    /Applications/MATLAB_R2011a.app/extern/include/
-    /Applications/MATLAB_R2012a.app/extern/include/
-    /Applications/MATLAB_R2012b.app/extern/include/
-    )
+    /usr/local/matlab/extern/include
+    /data/MATLAB/R2011b/extern/include
+    /data/MATLAB/R2012a/extern/include
+    /Applications/MATLAB_R2011a.app/extern/include
+    /Applications/MATLAB_R2012a.app/extern/include
+    /Applications/MATLAB_R2012b.app/extern/include
+  )
 ENDIF(WIN32)
 
+
 # This is common to UNIX and Win32:
-SET(MATLAB_LIBRARIES
-  ${MATLAB_MEX_LIBRARY}
-  ${MATLAB_MAT_LIBRARY}
-  ${MATLAB_MX_LIBRARY}
-  ${MATLAB_ENG_LIBRARY}
-)
+foreach (lib ${LIB_NAMES})
+    string(TOUPPER ${lib} _LIB)
+    list(APPEND MATLAB_LIBRARIES ${MATLAB_${_LIB}_LIBRARY})
+endforeach ()
 
 IF(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES)
-  SET(MATLAB_FOUND 1)
+  SET(MATLAB_FOUND TRUE)
 ENDIF(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES)
+
+# Find the MATLAB binary path
+find_path(MATLAB_BINARY_DIR mex 
+    HINTS
+    $ENV{MATLAB_ROOT}
+    PATHS
+    /usr/local/MATLAB/2010b/bin
+    /usr/local/MATLAB/2011a/bin
+    /usr/local/MATLAB/2011b/bin
+    /usr/local/MATLAB/2012a/bin
+    /data/MATLAB/R2012a/bin
+    /Applications/MATLAB_R2011a.app/bin
+    /Applications/MATLAB_R2012a.app/bin
+    /Applications/MATLAB_R2012b.app/bin
+)
 
 MARK_AS_ADVANCED(
   MATLAB_LIBRARIES
