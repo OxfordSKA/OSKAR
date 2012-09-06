@@ -90,6 +90,8 @@ ELSE( WIN32 )
       /usr/local/matlab/bin/glnxa64/
       /data/MATLAB/R2011b/bin/glnxa64/
       /Applications/MATLAB_R2011a.app/bin/maci64
+      /Applications/MATLAB_R2012a.app/bin/maci64
+      /Applications/MATLAB_R2012b.app/bin/maci64
       )
   ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
@@ -117,6 +119,8 @@ ELSE( WIN32 )
     /usr/local/matlab/extern/include/
     /data/MATLAB/R2011b/extern/include/
     /Applications/MATLAB_R2011a.app/extern/include/
+    /Applications/MATLAB_R2012a.app/extern/include/
+    /Applications/MATLAB_R2012b.app/extern/include/
     )
 ENDIF(WIN32)
 
