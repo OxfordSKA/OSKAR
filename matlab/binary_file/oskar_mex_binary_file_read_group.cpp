@@ -28,6 +28,7 @@
 
 
 #include <mex.h>
+#include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_BinaryTag.h"
 #include "utility/oskar_binary_tag_index_query.h"
@@ -227,7 +228,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             float* re = (float*)mxGetPr(data_);
             float* im = (float*)mxGetPi(data_);
-            for (unsigned j = 0; j < m; ++j)
+            for (unsigned j = 0; j < (unsigned)m; ++j)
             {
                 re[j] = ((float2*)data)[j].x;
                 im[j] = ((float2*)data)[j].y;
@@ -238,7 +239,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             double* re = mxGetPr(data_);
             double* im = mxGetPi(data_);
-            for (unsigned j = 0; j < m; ++j)
+            for (unsigned j = 0; j < (unsigned)m; ++j)
             {
                 re[j] = ((double2*)data)[j].x;
                 im[j] = ((double2*)data)[j].y;
@@ -249,7 +250,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             float* re = (float*)mxGetPr(data_);
             float* im = (float*)mxGetPi(data_);
-            for (unsigned j = 0; j < m; ++j)
+            for (unsigned j = 0; j < (unsigned)m; ++j)
             {
                 re[4*j+0] = ((float4c*)data)[j].a.x;
                 im[4*j+0] = ((float4c*)data)[j].a.y;
@@ -266,7 +267,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             double* re = mxGetPr(data_);
             double* im = mxGetPi(data_);
-            for (unsigned j = 0; j < m; ++j)
+            for (unsigned j = 0; j < (unsigned)m; ++j)
             {
                 re[4*j+0] = ((double4c*)data)[j].a.x;
                 im[4*j+0] = ((double4c*)data)[j].a.y;

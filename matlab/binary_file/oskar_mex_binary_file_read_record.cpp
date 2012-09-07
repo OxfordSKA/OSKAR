@@ -262,7 +262,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         float* re = (float*)mxGetPr(data_);
         float* im = (float*)mxGetPi(data_);
-        for (unsigned i = 0; i < m; ++i)
+        for (unsigned i = 0; i < (unsigned)m; ++i)
         {
             re[i] = ((float2*)data)[i].x;
             im[i] = ((float2*)data)[i].y;
@@ -273,7 +273,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         double* re = mxGetPr(data_);
         double* im = mxGetPi(data_);
-        for (unsigned i = 0; i < m; ++i)
+        for (unsigned i = 0; i < (unsigned)m; ++i)
         {
             re[i] = ((double2*)data)[i].x;
             im[i] = ((double2*)data)[i].y;
@@ -284,7 +284,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         float* re = (float*)mxGetPr(data_);
         float* im = (float*)mxGetPi(data_);
-        for (unsigned i = 0; i < m; ++i)
+        for (unsigned i = 0; i < (unsigned)m; ++i)
         {
             re[4*i+0] = ((float4c*)data)[i].a.x;
             im[4*i+0] = ((float4c*)data)[i].a.y;
@@ -301,7 +301,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     {
         double* re = mxGetPr(data_);
         double* im = mxGetPi(data_);
-        for (unsigned i = 0; i < m; ++i)
+        for (unsigned i = 0; i < (unsigned)m; ++i)
         {
             re[4*i+0] = ((double4c*)data)[i].a.x;
             im[4*i+0] = ((double4c*)data)[i].a.y;

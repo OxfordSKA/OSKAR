@@ -50,7 +50,7 @@
 extern "C" {
 #endif
 
-// FIXME HACK 'I' added as hack
+/* FIXME HACK 'I' added as hack */
 int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
         oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
@@ -62,7 +62,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     double maj, min, pa;
     double cos_pa_2, sin_pa_2, sin_2pa;
     double inv_std_min_2, inv_std_maj_2;
-    double ra, dec, I_;
+    double ra, dec;
     double ellipse_a, ellipse_b;
 
     oskar_Mem l, m;
