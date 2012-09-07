@@ -6,6 +6,7 @@
 set(interferometry_SRC
     src/oskar_correlate.cu
     src/oskar_evaluate_baselines.c
+    src/oskar_evaluate_baselines_cuda.cu
     src/oskar_evaluate_jones_K.cu
     src/oskar_evaluate_uvw_baseline.c
     src/oskar_evaluate_uvw_station.c

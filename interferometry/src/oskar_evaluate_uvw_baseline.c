@@ -86,9 +86,6 @@ void oskar_evaluate_uvw_baseline(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
             uu->location != location || vv->location != location ||
             ww->location != location)
         *status = OSKAR_ERR_BAD_LOCATION;
-    /* TODO: Allow GPU memory here. */
-    if (location != OSKAR_LOCATION_CPU)
-        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Get pointers from work buffer. */
     oskar_mem_get_pointer(&u, work, 0, num_stations, status);

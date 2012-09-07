@@ -94,9 +94,6 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
             vv->location != location ||
             ww->location != location)
         *status = OSKAR_ERR_BAD_LOCATION;
-    /* TODO: Allow GPU memory here. */
-    if (location != OSKAR_LOCATION_CPU)
-        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the memory is not NULL. */
     if (!uu->data || !vv->data || !ww->data ||
@@ -119,21 +116,39 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    if (type == OSKAR_SINGLE)
+    if (location == OSKAR_LOCATION_CPU)
     {
-        oskar_evaluate_baselines_f((float*)(uu->data), (float*)(vv->data),
-                (float*)(ww->data), num_stations, (float*)(u->data),
-                (float*)(v->data), (float*)(w->data));
+        if (type == OSKAR_SINGLE)
+        {
+            oskar_evaluate_baselines_f((float*)(uu->data), (float*)(vv->data),
+                    (float*)(ww->data), num_stations, (float*)(u->data),
+                    (float*)(v->data), (float*)(w->data));
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            oskar_evaluate_baselines_d((double*)(uu->data), (double*)(vv->data),
+                    (double*)(ww->data), num_stations, (double*)(u->data),
+                    (double*)(v->data), (double*)(w->data));
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
-    else if (type == OSKAR_DOUBLE)
+    else if (location == OSKAR_LOCATION_GPU)
     {
-        oskar_evaluate_baselines_d((double*)(uu->data), (double*)(vv->data),
-                (double*)(ww->data), num_stations, (double*)(u->data),
-                (double*)(v->data), (double*)(w->data));
-    }
-    else
-    {
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        /* TODO Allow GPU memory here. */
+        *status = OSKAR_ERR_BAD_LOCATION;
+        if (type == OSKAR_SINGLE)
+        {
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
     }
 }
 
