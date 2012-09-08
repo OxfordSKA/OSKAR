@@ -27,6 +27,8 @@
  */
 
 #include "interferometry/oskar_evaluate_baselines.h"
+#include "interferometry/oskar_evaluate_baselines_cuda.h"
+#include "utility/oskar_cuda_check_error.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,7 +89,12 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     num_stations = u->num_elements;
     num_baselines = num_stations * (num_stations - 1) / 2;
 
-    /* Check that the data are in the right location. */
+    /* Check that the data types match. */
+    if (v->type != type || w->type != type ||
+            uu->type != type || vv->type != type || ww->type != type)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+
+    /* Check that the data locations match. */
     if (v->location != location ||
             w->location != location ||
             uu->location != location ||
@@ -107,11 +114,6 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
             vv->num_elements < num_baselines ||
             ww->num_elements < num_baselines)
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
-
-    /* Check that the data is of the right type. */
-    if (v->type != type || w->type != type ||
-            uu->type != type || vv->type != type || ww->type != type)
-        *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -137,18 +139,28 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
-        /* TODO Allow GPU memory here. */
-        *status = OSKAR_ERR_BAD_LOCATION;
+#ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
+            oskar_evaluate_baselines_cuda_f((float*)(uu->data),
+                    (float*)(vv->data), (float*)(ww->data), num_stations,
+                    (float*)(u->data), (float*)(v->data), (float*)(w->data));
+            oskar_cuda_check_error(status);
         }
         else if (type == OSKAR_DOUBLE)
         {
+            oskar_evaluate_baselines_cuda_d((double*)(uu->data),
+                    (double*)(vv->data), (double*)(ww->data), num_stations,
+                    (double*)(u->data), (double*)(v->data), (double*)(w->data));
+            oskar_cuda_check_error(status);
         }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
 }
 

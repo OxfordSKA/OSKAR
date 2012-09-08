@@ -68,7 +68,7 @@ void oskar_evaluate_baselines_cudak_f(float* uu, float* vv, float* ww,
     for (int s2 = s1 + threadIdx.x + 1; s2 < num_stations; s2 += blockDim.x)
     {
         /* Determine baseline index from station IDs. */
-        int b = s2 * (num_stations - 1) - (s2 - 1) * s2/2 + s1 - s2 - 1;
+        int b = s1 * (num_stations - 1) - (s1 - 1) * s1/2 + s2 - s1 - 1;
 
         /* Compute baselines. */
         uu[b] = u[s2] - u[s1];
@@ -89,7 +89,7 @@ void oskar_evaluate_baselines_cudak_d(double* uu, double* vv, double* ww,
     for (int s2 = s1 + threadIdx.x + 1; s2 < num_stations; s2 += blockDim.x)
     {
         /* Determine baseline index from station IDs. */
-        int b = s2 * (num_stations - 1) - (s2 - 1) * s2/2 + s1 - s2 - 1;
+        int b = s1 * (num_stations - 1) - (s1 - 1) * s1/2 + s2 - s1 - 1;
 
         /* Compute baselines. */
         uu[b] = u[s2] - u[s1];

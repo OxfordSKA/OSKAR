@@ -158,6 +158,9 @@ enum {
     /* Indicates that the extended binary tag name is too long. */
     OSKAR_ERR_BINARY_TAG_TOO_LONG      = -109,
 
+    /* Indicates that CUDA was not found by the build system. */
+    OSKAR_ERR_CUDA_NOT_AVAILABLE       = -400,
+
     /* Indicates an error relating to settings (in general). */
     OSKAR_ERR_SETTINGS                 = -500,
 

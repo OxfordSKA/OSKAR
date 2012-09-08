@@ -53,6 +53,12 @@ elseif (NOT CUDA_CUDA_LIBRARY)
     set(CUDA_FOUND FALSE)
 endif ()
 
+if (CUDA_FOUND)
+    add_definitions(-DOSKAR_HAVE_CUDA)
+else ()
+    add_definitions(-DOSKAR_NO_CUDA)
+endif ()
+
 if (MKL_FOUND)
     message("===============================================================================")
     message("INFO: Using MKL for LAPACK AND BLAS.")
