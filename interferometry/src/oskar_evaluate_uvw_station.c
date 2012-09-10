@@ -27,14 +27,88 @@
  */
 
 #include "interferometry/oskar_evaluate_uvw_station.h"
-#include "interferometry/oskar_xyz_to_uvw_cuda.h"
-#include "interferometry/oskar_xyz_to_uvw.h"
+#include "interferometry/oskar_evaluate_uvw_station_cuda.h"
 #include "utility/oskar_cuda_check_error.h"
+
+#include <math.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Single precision. */
+void oskar_evaluate_uvw_station_f(float* u, float* v, float* w,
+        int num_stations, const float* x, const float* y, const float* z,
+        double ha0_rad, double dec0_rad)
+{
+    int i;
+    double sinHa0, cosHa0, sinDec0, cosDec0;
+
+    /* Precompute trig. */
+    sinHa0  = sin(ha0_rad);
+    cosHa0  = cos(ha0_rad);
+    sinDec0 = sin(dec0_rad);
+    cosDec0 = cos(dec0_rad);
+
+    /* Loop over points. */
+    for (i = 0; i < num_stations; ++i)
+    {
+        double xi, yi, zi, ut, vt, wt;
+
+        /* Get the input coordinates. */
+        xi = (double) (x[i]);
+        yi = (double) (y[i]);
+        zi = (double) (z[i]);
+
+        /* Apply rotation matrix. */
+        ut =  xi * sinHa0 + yi * cosHa0;
+        vt = sinDec0 * (-xi * cosHa0 + yi * sinHa0) + zi * cosDec0;
+        wt = cosDec0 * (xi * cosHa0 - yi * sinHa0) + zi * sinDec0;
+
+        /* Save the rotated values. */
+        u[i] = (float)ut;
+        v[i] = (float)vt;
+        w[i] = (float)wt;
+    }
+}
+
+/* Double precision. */
+void oskar_evaluate_uvw_station_d(double* u, double* v, double* w,
+        int num_stations, const double* x, const double* y, const double* z,
+        double ha0_rad, double dec0_rad)
+{
+    int i;
+    double sinHa0, cosHa0, sinDec0, cosDec0;
+
+    /* Precompute trig. */
+    sinHa0  = sin(ha0_rad);
+    cosHa0  = cos(ha0_rad);
+    sinDec0 = sin(dec0_rad);
+    cosDec0 = cos(dec0_rad);
+
+    /* Loop over points. */
+    for (i = 0; i < num_stations; ++i)
+    {
+        double xi, yi, zi, ut, vt, wt;
+
+        /* Get the input coordinates. */
+        xi = x[i];
+        yi = y[i];
+        zi = z[i];
+
+        /* Apply rotation matrix. */
+        ut =  xi * sinHa0 + yi * cosHa0;
+        vt = sinDec0 * (-xi * cosHa0 + yi * sinHa0) + zi * cosDec0;
+        wt = cosDec0 * (xi * cosHa0 - yi * sinHa0) + zi * sinDec0;
+
+        /* Save the rotated values. */
+        u[i] = ut;
+        v[i] = vt;
+        w[i] = wt;
+    }
+}
+
+/* Wrapper. */
 void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
         int num_stations, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, double ra0_rad, double dec0_rad, double gast,
@@ -92,41 +166,46 @@ void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
     /* Evaluate station u,v,w coordinates. */
     if (location == OSKAR_LOCATION_GPU)
     {
+#ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_SINGLE)
         {
-            oskar_xyz_to_uvw_cuda_f(num_stations,
+            oskar_evaluate_uvw_station_cuda_f((float*)(u->data),
+                    (float*)(v->data), (float*)(w->data), num_stations,
                     (float*)(x->data), (float*)(y->data), (float*)(z->data),
-                    (float)ha0_rad, (float)dec0_rad,
-                    (float*)(u->data), (float*)(v->data), (float*)(w->data));
+                    (float)ha0_rad, (float)dec0_rad);
+            oskar_cuda_check_error(status);
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_xyz_to_uvw_cuda_d(num_stations,
+            oskar_evaluate_uvw_station_cuda_d((double*)(u->data),
+                    (double*)(v->data), (double*)(w->data), num_stations,
                     (double*)(x->data), (double*)(y->data), (double*)(z->data),
-                    ha0_rad, dec0_rad,
-                    (double*)(u->data), (double*)(v->data), (double*)(w->data));
+                    ha0_rad, dec0_rad);
+            oskar_cuda_check_error(status);
         }
         else
         {
             *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
-        oskar_cuda_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else if (location == OSKAR_LOCATION_CPU)
     {
         if (type == OSKAR_SINGLE)
         {
-            oskar_xyz_to_uvw_f(num_stations,
+            oskar_evaluate_uvw_station_f((float*)(u->data),
+                    (float*)(v->data), (float*)(w->data), num_stations,
                     (float*)(x->data), (float*)(y->data), (float*)(z->data),
-                    (float)ha0_rad, (float)dec0_rad,
-                    (float*)(u->data), (float*)(v->data), (float*)(w->data));
+                    (float)ha0_rad, (float)dec0_rad);
         }
         else if (type == OSKAR_DOUBLE)
         {
-            oskar_xyz_to_uvw_d(num_stations,
+            oskar_evaluate_uvw_station_d((double*)(u->data),
+                    (double*)(v->data), (double*)(w->data), num_stations,
                     (double*)(x->data), (double*)(y->data), (double*)(z->data),
-                    ha0_rad, dec0_rad,
-                    (double*)(u->data), (double*)(v->data), (double*)(w->data));
+                    ha0_rad, dec0_rad);
         }
         else
         {

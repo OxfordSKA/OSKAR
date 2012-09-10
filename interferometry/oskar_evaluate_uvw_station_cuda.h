@@ -26,15 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_UVW_STATION_H_
-#define OSKAR_EVALUATE_UVW_STATION_H_
+#ifndef OSKAR_EVALUATE_UVW_STATION_CUDA_H_
+#define OSKAR_EVALUATE_UVW_STATION_CUDA_H_
 
 /**
- * @file oskar_evaluate_uvw_station.h
+ * @file oskar_evaluate_uvw_station_cuda.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,36 +41,62 @@ extern "C" {
 
 /**
  * @brief
- * Transforms station (x,y,z) coordinates to (u,v,w) coordinates
+ * Transforms station (x,y,z) coordinates to (u,v,w) coordinates using CUDA
  * (single precision).
  *
  * @details
- * Given the hour angle and declination of the phase tracking centre, this
+ * Given the hour angle and declination of the phase tracking centre, this CUDA
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
  *
- * @param[out] u            Output station u coordinates.
- * @param[out] v            Output station v coordinates.
- * @param[out] w            Output station w coordinates.
+ * @param[out] d_u          Output station u coordinates.
+ * @param[out] d_v          Output station v coordinates.
+ * @param[out] d_w          Output station w coordinates.
  * @param[in]  num_stations The size of the station coordinate arrays.
- * @param[in]  x            Input station x coordinates (ECEF or related frame).
- * @param[in]  y            Input station y coordinates (ECEF or related frame).
- * @param[in]  z            Input station z coordinates (ECEF or related frame).
+ * @param[in]  d_x          Input station x coordinates (ECEF or related frame).
+ * @param[in]  d_y          Input station y coordinates (ECEF or related frame).
+ * @param[in]  d_z          Input station z coordinates (ECEF or related frame).
  * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
  */
 OSKAR_EXPORT
-void oskar_evaluate_uvw_station_f(float* u, float* v, float* w,
-        int num_stations, const float* x, const float* y, const float* z,
-        double ha0_rad, double dec0_rad);
+void oskar_evaluate_uvw_station_cuda_f(float* d_u, float* d_v, float* d_w,
+        int num_stations, const float* d_x, const float* d_y,
+        const float* d_z, float ha0_rad, float dec0_rad);
 
 /**
  * @brief
- * Transforms station (x,y,z) coordinates to (u,v,w) coordinates
+ * Transforms station (x,y,z) coordinates to (u,v,w) coordinates using CUDA
  * (double precision).
  *
  * @details
- * Given the hour angle and declination of the phase tracking centre, this
+ * Given the hour angle and declination of the phase tracking centre, this CUDA
  * function transforms the station (x,y,z) coordinates to (u,v,w) coordinates.
+ *
+ * @param[out] d_u          Output station u coordinates.
+ * @param[out] d_v          Output station v coordinates.
+ * @param[out] d_w          Output station w coordinates.
+ * @param[in]  num_stations The size of the station coordinate arrays.
+ * @param[in]  d_x          Input station x coordinates (ECEF or related frame).
+ * @param[in]  d_y          Input station y coordinates (ECEF or related frame).
+ * @param[in]  d_z          Input station z coordinates (ECEF or related frame).
+ * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
+ * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_uvw_station_cuda_d(double* d_u, double* d_v, double* d_w,
+        int num_stations, const double* d_x, const double* d_y,
+        const double* d_z, double ha0_rad, double dec0_rad);
+
+#ifdef __CUDACC__
+
+/**
+ * @brief
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (single precision).
+ *
+ * @details
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (single precision).
  *
  * @param[out] u            Output station u coordinates.
  * @param[out] v            Output station v coordinates.
@@ -84,18 +109,19 @@ void oskar_evaluate_uvw_station_f(float* u, float* v, float* w,
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
  */
 OSKAR_EXPORT
-void oskar_evaluate_uvw_station_d(double* u, double* v, double* w,
-        int num_stations, const double* x, const double* y, const double* z,
-        double ha0_rad, double dec0_rad);
+__global__
+void oskar_evaluate_uvw_station_cudak_f(float* u, float* v, float* w,
+        int num_stations, const float* x, const float* y, const float* z,
+        float ha0_rad, float dec0_rad);
 
 /**
  * @brief
- * Evaluates the station (u,v,w) coordinates.
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (double precision).
  *
  * @details
- * This function evaluates the station (u,v,w) coordinates using the
- * station (x,y,z) coordinates, the supplied phase tracking centre, and
- * the Greenwich Apparent Sidereal Time.
+ * CUDA kernel to rotate station (x,y,z) to (u,v,w) coordinates
+ * (double precision).
  *
  * @param[out] u            Output station u coordinates.
  * @param[out] v            Output station v coordinates.
@@ -104,19 +130,19 @@ void oskar_evaluate_uvw_station_d(double* u, double* v, double* w,
  * @param[in]  x            Input station x coordinates (ECEF or related frame).
  * @param[in]  y            Input station y coordinates (ECEF or related frame).
  * @param[in]  z            Input station z coordinates (ECEF or related frame).
- * @param[in]  ra0_rad      The Right Ascension of the phase centre, in radians.
+ * @param[in]  ha0_rad      The Hour Angle of the phase centre, in radians.
  * @param[in]  dec0_rad     The Declination of the phase centre, in radians.
- * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
- * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_uvw_station(oskar_Mem* u, oskar_Mem* v, oskar_Mem* w,
-        int num_stations, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, double ra0_rad, double dec0_rad, double gast,
-        int* status);
+__global__
+void oskar_evaluate_uvw_station_cudak_d(double* u, double* v, double* w,
+        int num_stations, const double* x, const double* y, const double* z,
+        double ha0_rad, double dec0_rad);
+
+#endif /* __CUDACC__ */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_UVW_STATION_H_ */
+#endif /* OSKAR_EVALUATE_UVW_STATION_CUDA_H_ */

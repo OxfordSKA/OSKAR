@@ -111,6 +111,7 @@ void oskar_evaluate_baselines_cuda_d(double* d_uu, double* d_vv, double* d_ww,
  * @param[in]  v            The station v-positions.
  * @param[in]  w            The station w-positions.
  */
+OSKAR_EXPORT
 __global__
 void oskar_evaluate_baselines_cudak_f(float* uu, float* vv, float* ww,
         int num_stations, const float* u, const float* v, const float* w);
@@ -135,6 +136,7 @@ void oskar_evaluate_baselines_cudak_f(float* uu, float* vv, float* ww,
  * @param[in]  v            The station v-positions.
  * @param[in]  w            The station w-positions.
  */
+OSKAR_EXPORT
 __global__
 void oskar_evaluate_baselines_cudak_d(double* uu, double* vv, double* ww,
         int num_stations, const double* u, const double* v, const double* w);

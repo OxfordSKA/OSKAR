@@ -10,6 +10,7 @@ set(interferometry_SRC
     src/oskar_evaluate_jones_K.cu
     src/oskar_evaluate_uvw_baseline.c
     src/oskar_evaluate_uvw_station.c
+    src/oskar_evaluate_uvw_station_cuda.cu
     src/oskar_geocentric_cartesian_to_geodetic_spherical.c
     src/oskar_geodetic_spherical_to_geocentric_cartesian.c
     src/oskar_horizon_plane_to_geocentric_cartesian.c
@@ -41,8 +42,6 @@ set(interferometry_SRC
     src/oskar_visibilities_resize.c
     src/oskar_visibilities_write.c
     src/oskar_Visibilities.cpp
-    src/oskar_xyz_to_uvw_cuda.cu
-    src/oskar_xyz_to_uvw.c
 )
 
 # Add the CUDA kernels.
