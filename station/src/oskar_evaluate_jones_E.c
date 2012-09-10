@@ -40,6 +40,7 @@
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_WorkStationBeam.h"
 #include "utility/oskar_mem_insert.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -155,7 +156,7 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         }
     }
 
-    return 0;
+    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

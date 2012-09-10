@@ -29,6 +29,7 @@
 #include "station/oskar_blank_below_horizon.h"
 #include "station/oskar_element_model_evaluate.h"
 #include "station/oskar_evaluate_station_beam_dipoles.h"
+#include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_station_model_location.h"
@@ -92,6 +93,13 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
         return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
     }
 
+    else if (station->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+    {
+        double fwhm_deg = 1.0; /* FIXME */
+        oskar_evaluate_station_beam_gaussian(EG, num_points, l, m, fwhm_deg, &error);
+        if (error) return error;
+    }
+
     /* Check if the station is an aperture array. */
     else if (station->station_type == OSKAR_STATION_TYPE_AA)
     {
@@ -115,8 +123,7 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                 /* Normalise array beam if required. */
                 if (station->normalise_beam)
                 {
-                    error = oskar_mem_scale_real(EG,
-                            1.0 / station->num_elements);
+                    error = oskar_mem_scale_real(EG, 1.0/station->num_elements);
                     if (error) return error;
                 }
             }
@@ -149,8 +156,7 @@ int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station
                 /* Normalise array beam if required. */
                 if (station->normalise_beam)
                 {
-                    error = oskar_mem_scale_real(E_ptr,
-                            1.0 / station->num_elements);
+                    error = oskar_mem_scale_real(E_ptr, 1.0/station->num_elements);
                     if (error) return error;
                 }
             }

@@ -41,20 +41,13 @@
 extern "C" {
 #endif
 
-/* Notes / Questions:
- *
- * - Underlying function here is just to evaluate a 2D gaussian
- *    - need n coordinate?
- * - Parameters to specify the 2D Gaussian?
- *    - Is circular sufficient
- * - Include parameters to specify a pointing error?
- * - GPU kernel
- */
 
 /**
- * @brief Evaluates scalar station beam station beam amplitudes.
+ * @brief Evaluates scalar station beam station beam amplitudes in the form of
+ * a circular Gaussian specified by its full width at half maximum, \p fwhm_deg.
  *
  * @details
+ * FIXME this function will not work with beam normalisation in the GUI...
  *
  * @param beam
  * @param num_points
