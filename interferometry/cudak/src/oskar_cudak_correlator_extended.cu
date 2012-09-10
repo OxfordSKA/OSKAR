@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,15 @@
 #include "math/cudak/oskar_cudaf_sinc.h"
 #include <math.h>
 
-#define PI_OVER_C     1.0479225109758409060653E-8  // pi / c
-#define PI_OVER_Cf    1.0479225109758409060653E-8f // pi / c
 #define ONE_OVER_2PI  0.159154943091895335768884   // 1 / (2 * pi)
 #define ONE_OVER_2PIf 0.159154943091895335768884f  // 1 / (2 * pi)
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
+
+#ifndef M_PIf
+#define M_PIf 3.14159265358979323846f
 #endif
 
 // Indices into the visibility/baseline matrix.
@@ -78,8 +80,8 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
 
         // Modify the baseline UV-distance to include the common components
         // of the bandwidth smearing term.
-        uu *= PI_OVER_Cf * bandwidth / freq;
-        vv *= PI_OVER_Cf * bandwidth / freq;
+        uu *= M_PIf * bandwidth / freq;
+        vv *= M_PIf * bandwidth / freq;
     }
     __syncthreads();
 
@@ -202,8 +204,8 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
 
         // Modify the baseline UV-distance to include the common components
         // of the bandwidth smearing term.
-        uu *= PI_OVER_C * bandwidth / freq;
-        vv *= PI_OVER_C * bandwidth / freq;
+        uu *= M_PI * bandwidth / freq;
+        vv *= M_PI * bandwidth / freq;
     }
     __syncthreads();
 
