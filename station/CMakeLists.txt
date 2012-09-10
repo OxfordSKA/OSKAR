@@ -17,6 +17,7 @@ set(station_SRC
     src/oskar_evaluate_element_weights_errors.cu
     src/oskar_evaluate_flux_density.c
     src/oskar_evaluate_station_beam_dipoles.cu
+    src/oskar_evaluate_station_beam_gaussian.cu
     src/oskar_evaluate_station_beam_scalar.cu
     src/oskar_evaluate_station_beam.c
     src/oskar_evaluate_tapered_dipole_pattern.cu

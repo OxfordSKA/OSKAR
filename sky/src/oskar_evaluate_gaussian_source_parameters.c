@@ -174,7 +174,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
                     ellipse_num_points, &l, &m);
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
-                // FIXME HACK
+                /* FIXME HACK */
                 ((double*)I->data)[i] = 0.0;
                 ++num_failed;
                 continue;
@@ -234,7 +234,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
                      ellipse_num_points, &l, &m);
              if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
              {
-                 // FIXME HACK
+                 /* FIXME HACK */
                  ((float*)I->data)[i] = 0.0;
                  ++num_failed;
                  continue;

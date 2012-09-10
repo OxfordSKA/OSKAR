@@ -928,7 +928,6 @@ void oskar_SettingsModelApps::init_settings_image()
     QString k, group;
     QStringList options;
 
-    // FIXME change this back to a label...
     group = "image";
     setLabel(group, "Image settings");
 
@@ -1038,7 +1037,6 @@ void oskar_SettingsModelApps::init_settings_image()
             "further images will be created by appending an number to the existing\n"
             "filename in the pattern: <filename>-<N>.<extension>, where N starts at 1 and is\n"
             "incremented for each new image created.\n");
-
 
 #if 0
     k = group + "/oskar_image_root";

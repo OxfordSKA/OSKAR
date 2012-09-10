@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,38 +27,52 @@
  */
 
 
-#ifndef TEST_EVALUATE_STATION_BEAM_H_
-#define TEST_EVALUATE_STATION_BEAM_H_
+#ifndef OSKAR_EVALUATE_STATION_BEAM_GAUSSIAN_H_
+#define OSKAR_EVALUATE_STATION_BEAM_GAUSSIAN_H_
 
 /**
- * @file Test_evalute_station_beam.h
+ * @file oskar_evaluate_station_beam_gaussian.h
  */
 
-#include <cppunit/extensions/HelperMacros.h>
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* Notes / Questions:
+ *
+ * - Underlying function here is just to evaluate a 2D gaussian
+ *    - need n coordinate?
+ * - Parameters to specify the 2D Gaussian?
+ *    - Is circular sufficient
+ * - Include parameters to specify a pointing error?
+ * - GPU kernel
+ */
 
 /**
- * @brief Unit test class that uses CppUnit.
+ * @brief Evaluates scalar station beam station beam amplitudes.
  *
  * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
+ *
+ * @param beam
+ * @param num_points
+ * @param l
+ * @param m
+ * @param n
+ * @param fwhm_deg
+ * @param err
+ *
+ * @return
  */
-class Test_evaluate_station_beam : public CppUnit::TestFixture
-{
-    public:
-        CPPUNIT_TEST_SUITE(Test_evaluate_station_beam);
-        CPPUNIT_TEST(test_fail_conditions);
-        CPPUNIT_TEST(evaluate_test_pattern);
-        CPPUNIT_TEST(evaluate_gaussian_pattern);
-        CPPUNIT_TEST_SUITE_END();
+OSKAR_EXPORT
+void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
+        int num_points, const oskar_Mem* l, const oskar_Mem* m,
+        double fwhm_deg, int* err);
 
-    public:
-        void test_fail_conditions();
-        void evaluate_test_pattern();
-        void evaluate_gaussian_pattern();
-};
+#ifdef __cplusplus
+}
+#endif
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_evaluate_station_beam);
-
-#endif // TEST_EVALUATE_STATION_BEAM_H_
+#endif /* OSKAR_EVALUATE_STATION_BEAM_GAUSSIAN_H_ */

@@ -29,6 +29,7 @@
 
 #include "sky/oskar_sky_model_set_gaussian_parameters.h"
 #include "utility/oskar_mem_set_value_real.h"
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

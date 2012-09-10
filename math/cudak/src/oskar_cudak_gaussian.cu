@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,38 +27,36 @@
  */
 
 
-#ifndef TEST_EVALUATE_STATION_BEAM_H_
-#define TEST_EVALUATE_STATION_BEAM_H_
+#include "math/cudak/oskar_cudak_gaussian.h"
 
-/**
- * @file Test_evalute_station_beam.h
- */
 
-#include <cppunit/extensions/HelperMacros.h>
-
-/**
- * @brief Unit test class that uses CppUnit.
- *
- * @details
- * This class uses the CppUnit testing framework to perform unit tests
- * on the class it is named after.
- */
-class Test_evaluate_station_beam : public CppUnit::TestFixture
+__global__
+void oskar_cudak_gaussian_f(float2* z, int n, const float* x, const float* y,
+        float std)
 {
-    public:
-        CPPUNIT_TEST_SUITE(Test_evaluate_station_beam);
-        CPPUNIT_TEST(test_fail_conditions);
-        CPPUNIT_TEST(evaluate_test_pattern);
-        CPPUNIT_TEST(evaluate_gaussian_pattern);
-        CPPUNIT_TEST_SUITE_END();
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
 
-    public:
-        void test_fail_conditions();
-        void evaluate_test_pattern();
-        void evaluate_gaussian_pattern();
-};
+    float x_ = x[i];
+    float y_ = y[i];
 
-// Register the test class.
-CPPUNIT_TEST_SUITE_REGISTRATION(Test_evaluate_station_beam);
+    float arg = (x_*x_ + y_*y_) / (2.0 * std * std);
+    z[i].x = expf(-arg);
+    z[i].y = 0.0;
+}
 
-#endif // TEST_EVALUATE_STATION_BEAM_H_
+
+__global__
+void oskar_cudak_gaussian_d(double2* z, int n, const double* x, const double* y,
+        double std)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    double x_ = x[i];
+    double y_ = y[i];
+
+    double arg = (x_*x_ + y_*y_) / (2.0 * std * std);
+    z[i].x = expf(-arg);
+    z[i].y = 0.0;
+}

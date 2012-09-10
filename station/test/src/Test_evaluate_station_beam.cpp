@@ -32,6 +32,7 @@
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_station_model_save_config.h"
+#include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
@@ -39,6 +40,9 @@
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 #include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_mem_binary_file_write.h"
+#include "math/oskar_linspace.h"
+#include "math/oskar_meshgrid.h"
 
 #define TIMER_ENABLE 1
 #include "utility/timer.h"
@@ -180,6 +184,122 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     --------------------------------------------------------------------------*/
 }
 
-void Test_evaluate_station_beam::performance_test()
+
+void Test_evaluate_station_beam::evaluate_gaussian_pattern()
 {
+    int err = 0;
+    double fwhm = 1.0;
+    int size = 512;
+    int num_points = size * size;
+    double lm_minmax = 0.2;
+    bool save_results = false;
+
+    // Double CPU
+    {
+        int type = OSKAR_DOUBLE;
+        int location = OSKAR_LOCATION_CPU;
+        oskar_Mem x(type, location, size);
+        oskar_linspace_d((double*)x.data, -lm_minmax, lm_minmax, size);
+        oskar_Mem l(type, location, num_points);
+        oskar_Mem m(type, location, num_points);
+        oskar_meshgrid_d((double*)l.data, (double*)m.data,
+                (double*)x.data, size, (double*)x.data, size);
+        oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
+
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+
+        // Write output to file.
+        if (save_results)
+        {
+            const char* filename = "temp_beam_double_cpu.dat";
+            remove(filename);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements);
+        }
+    }
+
+    // Single CPU
+    {
+        int type = OSKAR_SINGLE;
+        int location = OSKAR_LOCATION_CPU;
+        oskar_Mem x(type, location, size);
+        oskar_linspace_f((float*)x.data, -lm_minmax, lm_minmax, size);
+        oskar_Mem l(type, location, num_points);
+        oskar_Mem m(type, location, num_points);
+        oskar_meshgrid_f((float*)l.data, (float*)m.data,
+                (float*)x.data, size, (float*)x.data, size);
+        oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
+
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+
+        // Write output to file.
+        if (save_results)
+        {
+            const char* filename = "temp_beam_single_cpu.dat";
+            remove(filename);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements);
+        }
+    }
+
+    // Double GPU
+    {
+        int type = OSKAR_DOUBLE;
+        int location = OSKAR_LOCATION_GPU;
+
+        oskar_Mem xcpu(type, OSKAR_LOCATION_CPU, size);
+        oskar_linspace_d((double*)xcpu.data, -lm_minmax, lm_minmax, size);
+        oskar_Mem lcpu(type, OSKAR_LOCATION_CPU, num_points);
+        oskar_Mem mcpu(type, OSKAR_LOCATION_CPU, num_points);
+        oskar_meshgrid_d((double*)lcpu.data, (double*)mcpu.data,
+                (double*)xcpu.data, size, (double*)xcpu.data, size);
+
+        oskar_Mem l(&lcpu, location);
+        oskar_Mem m(&mcpu, location);
+        oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
+
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+
+        oskar_Mem beam_cpu(&beam, OSKAR_LOCATION_CPU);
+
+        // Write output to file.
+        if (save_results)
+        {
+            const char* filename = "temp_beam_double_gpu.dat";
+            remove(filename);
+            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements);
+        }
+    }
+
+    // Single GPU
+    {
+        int type = OSKAR_SINGLE;
+        int location = OSKAR_LOCATION_GPU;
+
+        oskar_Mem xcpu(type, OSKAR_LOCATION_CPU, size);
+        oskar_linspace_f((float*)xcpu.data, -lm_minmax, lm_minmax, size);
+        oskar_Mem lcpu(type, OSKAR_LOCATION_CPU, num_points);
+        oskar_Mem mcpu(type, OSKAR_LOCATION_CPU, num_points);
+        oskar_meshgrid_f((float*)lcpu.data, (float*)mcpu.data,
+                (float*)xcpu.data, size, (float*)xcpu.data, size);
+
+        oskar_Mem l(&lcpu, location);
+        oskar_Mem m(&mcpu, location);
+        oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
+
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+
+        oskar_Mem beam_cpu(&beam, OSKAR_LOCATION_CPU);
+
+        // Write output to file.
+        if (save_results)
+        {
+            const char* filename = "temp_beam_single_gpu.dat";
+            remove(filename);
+            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements);
+        }
+    }
+
 }
