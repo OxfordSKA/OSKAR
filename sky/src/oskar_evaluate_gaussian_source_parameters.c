@@ -53,8 +53,9 @@ extern "C" {
 /* FIXME HACK 'I' added as hack */
 int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
-        oskar_Mem* FWHM_major, oskar_Mem* FWHM_minor, oskar_Mem* position_angle,
-        oskar_Mem* RA, oskar_Mem* Dec, oskar_Mem* I, double ra0, double dec0)
+        const oskar_Mem* FWHM_major, const oskar_Mem* FWHM_minor,
+        const oskar_Mem* position_angle, const oskar_Mem* RA,
+        const oskar_Mem* Dec, oskar_Mem* I, double ra0, double dec0)
 {
     int i, j, err, num_failed = 0;
     double a, b, c;

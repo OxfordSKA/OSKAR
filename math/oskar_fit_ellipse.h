@@ -41,6 +41,23 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Fits a 2D ellipse to the locus of points specified by the arrays @p x
+ * and @p y.
+ *
+ * @details
+ * Uses the LAPACK functions (D|S)GETRS and (D|S)GETRF
+ *
+ * @param log          OSKAR message log object
+ * @param gauss_maj    Major axis of the fitted ellipse
+ * @param gauss_min    Minor axis of the fitted ellipse
+ * @param gauss_phi    Position angle of the fitted ellipse
+ * @param num_points   Number of points to fit
+ * @param x            Array of x coordinates to fit the ellipse to
+ * @param y            Array of y coordinates to fit the ellispe to
+ *
+ * @return An error code
+ */
 OSKAR_EXPORT
 int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
         double* gauss_phi, int num_points, const oskar_Mem* x,
