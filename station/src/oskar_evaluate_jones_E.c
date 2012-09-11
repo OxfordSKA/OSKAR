@@ -113,7 +113,6 @@ int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
 }
 
 
-
 /* Optimisation 1:
  * With a common sky (horizon) and identical stations, all station beams
  * will be the same. This function evaluates the beam once (for station 0) and
