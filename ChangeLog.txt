@@ -3,6 +3,8 @@
     * Fixed a bug which caused visibility data from sky model chunks containing
       no sources to be accumulated incorrectly.
 
+    * Fixed simulation of bandwidth smearing for extended sources.
+
     * Fixed a bug which caused a list of CUDA device IDs to be ignored if
       specified inside quotes.
 
@@ -23,7 +25,8 @@
       #### TODO if this change is added into the release it needs app doc ###
 
     * Updated options for writing image files.
-      #### TODO if this change is kept make sure to update settings doc ###
+      #### TODO if this change is kept make sure to update settings doc
+           and example data ###
 
     * The settings GUI now allows for the visibility of certain options to be
       based on the value of another option. The display of various settings

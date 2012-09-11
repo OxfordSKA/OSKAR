@@ -45,32 +45,34 @@
 #endif
 
 // Indices into the visibility/baseline matrix.
-#define AI blockIdx.x // Column index.
-#define AJ blockIdx.y // Row index.
+#define SI blockIdx.x // Column index.
+#define SJ blockIdx.y // Row index.
 
 extern __shared__ float4c  smem_f[];
 extern __shared__ double4c smem_d[];
 
 // Single precision.
 __global__
-void oskar_cudak_correlator_extended_f(const int ns, const int na,
-        const float4c* jones, const float* source_I, const float* source_Q,
-        const float* source_U, const float* source_V, const float* u,
-        const float* v, const float* l, const float* m,
-        const float freq, const float bandwidth,
-        const float* a, const float* b, const float* c, float4c* vis)
+void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
+        const int num_stations, const float4c* jones, const float* source_I,
+        const float* source_Q, const float* source_U, const float* source_V,
+        const float* u, const float* v, const float* x, const float* y,
+        const float* z, const float* l, const float* m, const float freq,
+        const float bandwidth, const float time_interval, const float gha0,
+        const float dec0, const float* a, const float* b, const float* c,
+        float4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
-    if (AJ >= AI) return;
+    if (SJ >= SI) return;
 
     // Common things per thread block.
     __device__ __shared__ float uu, vv, uu2, vv2, uuvv;
     if (threadIdx.x == 0)
     {
         // Baseline UV-distance, in wavelengths.
-        uu   = (u[AI] - u[AJ]) * ONE_OVER_2PIf;
-        vv   = (v[AI] - v[AJ]) * ONE_OVER_2PIf;
+        uu   = (u[SI] - u[SJ]) * ONE_OVER_2PIf;
+        vv   = (v[SI] - v[SJ]) * ONE_OVER_2PIf;
 
         // Quantities needed for evaluating source with gaussian term.
         uu2  = uu * uu;
@@ -85,8 +87,8 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
     __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
-    const float4c* station_i = &jones[ns * AI];
-    const float4c* station_j = &jones[ns * AJ];
+    const float4c* station_i = &jones[num_sources * SI];
+    const float4c* station_j = &jones[num_sources * SJ];
 
     // Each thread loops over a subset of the sources.
     {
@@ -95,13 +97,14 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
         sum.b = make_float2(0.0f, 0.0f);
         sum.c = make_float2(0.0f, 0.0f);
         sum.d = make_float2(0.0f, 0.0f);
-        for (int t = threadIdx.x; t < ns; t += blockDim.x)
+        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
             // Compute bandwidth-smearing term first (register optimisation).
-            float rb = oskar_cudaf_sinc_f(uu * l[t] + vv * m[t]);
+            float rb = oskar_cudaf_sinc_f(uu * source_l[t] + vv * source_m[t]);
 
             // Evaluate gaussian source width term.
-            float f = expf(-(a[t] * uu2 + b[t] * uuvv + c[t] * vv2));
+            float f = expf(-(source_a[t] * uu2 +
+                    source_b[t] * uuvv + source_c[t] * vv2));
 
             rb *= f;
 
@@ -160,7 +163,7 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
         }
 
         // Determine 1D index.
-        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+        int idx = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
 
         // Modify existing visibility.
         vis[idx].a.x += sum.a.x;
@@ -176,24 +179,26 @@ void oskar_cudak_correlator_extended_f(const int ns, const int na,
 
 // Double precision.
 __global__
-void oskar_cudak_correlator_extended_d(const int ns, const int na,
-        const double4c* jones, const double* source_I, const double* source_Q,
-        const double* source_U, const double* source_V, const double* u,
-        const double* v, const double* l, const double* m,
-        const double freq, const double bandwidth,
-        const double* a, const double* b, const double* c, double4c* vis)
+void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
+        const int num_stations, const double4c* jones, const double* source_I,
+        const double* source_Q, const double* source_U, const double* source_V,
+        const double* u, const double* v, const double* x, const double* y,
+        const double* z, const double* l, const double* m, const double freq,
+        const double bandwidth, const double time_interval, const double gha0,
+        const double dec0, const double* a, const double* b, const double* c,
+        double4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
-    if (AJ >= AI) return;
+    if (SJ >= SI) return;
 
     // Common things per thread block.
     __device__ __shared__ double uu, vv, uu2, vv2, uuvv;
     if (threadIdx.x == 0)
     {
         // Baseline UV-distance, in wavelengths.
-        uu   = (u[AI] - u[AJ]) * ONE_OVER_2PI;
-        vv   = (v[AI] - v[AJ]) * ONE_OVER_2PI;
+        uu   = (u[SI] - u[SJ]) * ONE_OVER_2PI;
+        vv   = (v[SI] - v[SJ]) * ONE_OVER_2PI;
 
         // Quantities needed for evaluating source with gaussian term.
         uu2  = uu * uu;
@@ -208,8 +213,8 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
     __syncthreads();
 
     // Get pointers to both source vectors for station i and j.
-    const double4c* station_i = &jones[ns * AI];
-    const double4c* station_j = &jones[ns * AJ];
+    const double4c* station_i = &jones[num_sources * SI];
+    const double4c* station_j = &jones[num_sources * SJ];
 
     // Each thread loops over a subset of the sources.
     {
@@ -218,7 +223,7 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
         sum.b = make_double2(0.0, 0.0);
         sum.c = make_double2(0.0, 0.0);
         sum.d = make_double2(0.0, 0.0);
-        for (int t = threadIdx.x; t < ns; t += blockDim.x)
+        for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
             // Compute bandwidth-smearing term first (register optimisation).
             double rb = oskar_cudaf_sinc_d(uu * l[t] + vv * m[t]);
@@ -283,7 +288,7 @@ void oskar_cudak_correlator_extended_d(const int ns, const int na,
         }
 
         // Determine 1D index.
-        int idx = AJ*(na-1) - (AJ-1)*AJ/2 + AI - AJ - 1;
+        int idx = SJ*(num_stations-1) - (SJ-1)*SJ/2 + SI - SJ - 1;
 
         // Modify existing visibility.
         vis[idx].a.x += sum.a.x;
