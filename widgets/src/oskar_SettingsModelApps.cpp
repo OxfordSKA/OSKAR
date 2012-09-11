@@ -477,7 +477,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     group = "telescope/station";
     setLabel(group, "Station settings");
     options.clear();
-    options << "AA"; // << "Dish";
+    options << "AA" << "Gaussian beam"; // << "Dish";
     k = group + "/station_type";
     declare(k, "Station type", options);
     setTooltip(k, "The type of stations in the interferometer. Currently, \n"

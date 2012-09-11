@@ -74,9 +74,15 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     // Station settings.
     s.beginGroup("station");
     {
-        temp = s.value("station_type", "AA").toString().toUpper();
-        tel->station.station_type = (temp == "DISH") ?
-                OSKAR_STATION_TYPE_DISH : OSKAR_STATION_TYPE_AA;
+        temp = s.value("station_type", "AA").toString();
+        if (temp.startsWith("A", Qt::CaseInsensitive))
+            tel->station.station_type = OSKAR_STATION_TYPE_AA;
+        else if (temp.startsWith("G", Qt::CaseInsensitive))
+            tel->station.station_type = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
+        else
+            return OSKAR_ERR_SETTINGS_TELESCOPE;
+
+
         tel->station.use_polarised_elements =
                 s.value("use_polarised_elements", true).toBool();
         tel->station.ignore_custom_element_patterns =

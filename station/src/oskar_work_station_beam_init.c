@@ -50,11 +50,11 @@ int oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
     if (error) return error;
     error = oskar_mem_init(&work->phi_modified, type, location, 0, 1);
     if (error) return error;
-    error = oskar_mem_init(&work->x, type, location, 0, 1);
+    error = oskar_mem_init(&work->hor_l, type, location, 0, 1);
     if (error) return error;
-    error = oskar_mem_init(&work->y, type, location, 0, 1);
+    error = oskar_mem_init(&work->hor_m, type, location, 0, 1);
     if (error) return error;
-    error = oskar_mem_init(&work->z, type, location, 0, 1);
+    error = oskar_mem_init(&work->hor_n, type, location, 0, 1);
     if (error) return error;
     error = oskar_mem_init(&work->weights, (type | OSKAR_COMPLEX),
             location, 0, 1);

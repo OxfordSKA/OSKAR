@@ -57,9 +57,15 @@
 struct OSKAR_EXPORT oskar_WorkStationBeam
 {
     oskar_Mem horizon_mask;   /* Integer. */
-    oskar_Mem x;              /* Real scalar. */
-    oskar_Mem y;              /* Real scalar. */
-    oskar_Mem z;              /* Real scalar. */
+
+    oskar_Mem hor_l;          /* Real scalar. -- TODO change to x,y,z ... and also beam_l,m,n .. (and others?) where needed */
+    oskar_Mem hor_m;          /* Real scalar. */
+    oskar_Mem hor_n;          /* Real scalar. */
+
+    oskar_Mem l;              /* Real scalar. - TODO THESE dont exist yet... Tangent plane l,m,n */
+    oskar_Mem m;              /* Real scalar. */
+    oskar_Mem n;              /* Real scalar. */
+
     oskar_Mem theta_modified; /* Real scalar. */
     oskar_Mem phi_modified;   /* Real scalar. */
     oskar_Mem weights;        /* Complex scalar. */

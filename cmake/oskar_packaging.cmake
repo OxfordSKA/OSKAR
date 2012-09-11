@@ -45,6 +45,11 @@ if (WIN32)
 elseif (UNIX)
     #set(CPACK_GENERATOR "DEB;TGZ")
     set(CPACK_GENERATOR "TGZ")
+    #if (APPLE )
+    #    set(CPACK_GENERATOR "Bundle")
+    #    set(CPACK_BUNDLE_NAME "oskar")
+    #    set(CPACK_BUNDLE_PLIST
+    #endif()
     set(CPACK_SOURCE_GENERATOR "ZIP")
 
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "OSKAR developer team.")

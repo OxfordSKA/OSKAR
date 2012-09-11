@@ -46,11 +46,11 @@ int oskar_work_station_beam_free(oskar_WorkStationBeam* work)
     if (error) return error;
     error = oskar_mem_free(&work->phi_modified);
     if (error) return error;
-    error = oskar_mem_free(&work->x);
+    error = oskar_mem_free(&work->hor_l);
     if (error) return error;
-    error = oskar_mem_free(&work->y);
+    error = oskar_mem_free(&work->hor_m);
     if (error) return error;
-    error = oskar_mem_free(&work->z);
+    error = oskar_mem_free(&work->hor_n);
     if (error) return error;
     error = oskar_mem_free(&work->weights);
     if (error) return error;
