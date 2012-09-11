@@ -659,7 +659,7 @@ void oskar_SettingsModel::setLabel(const QString& key, const QString& label)
 void oskar_SettingsModel::setTooltip(const QString& key, const QString& tooltip)
 {
     QModelIndex idx = index(key);
-    setData(idx, tooltip, Qt::ToolTipRole);
+    setData(idx, "<p>" + tooltip + "</p>", Qt::ToolTipRole);
 }
 
 void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
@@ -884,8 +884,10 @@ bool oskar_SettingsModelFilter::filterAcceptsRow(int sourceRow,
 {
     // Check if the item is hidden.
     QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+#if 0
     if (sourceModel()->data(idx, oskar_SettingsModel::HiddenRole).toBool())
         return false;
+#endif
 
     // Check if filter accepts this row.
     if (filterAcceptsCurrentRow(idx))

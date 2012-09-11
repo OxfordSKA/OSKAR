@@ -648,10 +648,23 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
 
     QString key = root + "/noise";
     setLabel(key, "System noise");
-    setTooltip(key,
-    "Settings controlling the addition of uncorrelated, direction independent,\n"
-    "system noise. This noise, if enabled, is added to the visibilities at the\n"
-    "end of the interferometry simulation.");
+//    setTooltip(key,
+//    "Settings controlling the addition of uncorrelated, direction independent,\n"
+//    "system noise. This noise, if enabled, is added to the visibilities at the\n"
+//    "end of the interferometry simulation.");
+    QString txt =
+            "<div style=\"position:absolute;z-index:0;left:0px;top:0px;\">"
+            "<ul>"
+            "<li>Hello</li>"
+            "</ul>"
+            "<br>"
+            "<img src=\"/Users/bmort/oskar2/widgets/icons/oskar-128x128.png\">"
+            "</div>";
+    txt = "<p>Settings\n controlling the addition of uncorrelated, direction independent, "
+            "system noise. This noise, if enabled, is added to the visibilities at the "
+            "end of the interferometry simulation.</p>";
+    setTooltip(key, txt);
+
     {
         QString root = key;
 
@@ -665,6 +678,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
         key = root + "/seed";
         declare(key, "Noise seed", oskar_SettingsItem::RANDOM_SEED);
         setTooltip(key, "Random number generator seed.");
+        setDependency(key, root + "/enable", true);
 
         // --- Frequencies
         key = root + "/freq";
@@ -674,6 +688,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 << "Data file"
                 << "Range";
         declare(key, "Frequency specification", options);
+        setDependency(key, root + "/enable", true);
         setTooltip(key,
         "Specification of frequencies for which noise values are defined.\n"
         "\n"
@@ -717,6 +732,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                      << "Sensitivity"
                      << "Temperature, area, and system efficiency";
         declare(key, "Noise values", noiseOptions);
+        setDependency(key, root + "/enable", true);
         setTooltip(key,
         "Specification of noise values, which define the noise RMS level. Noise\n"
         "values are interpreted as a function of frequency according to the\n"
@@ -1133,9 +1149,11 @@ void oskar_SettingsModelApps::init_settings_image()
             "used to save the output image. The full filename will be \n"
             "constructed as <root>_<image_type>.<extension>");
 
+#ifndef OSKAR_NO_FITS
     k = group + "/fits_image";
     declare(k, "Save FITS image", oskar_SettingsItem::BOOL, true);
     setTooltip(k, "If true, save the image in FITS format.");
+#endif
 
     k = group + "/oskar_image";
     declare(k, "Save OSKAR image", oskar_SettingsItem::BOOL, false);
@@ -1143,25 +1161,12 @@ void oskar_SettingsModelApps::init_settings_image()
 
     k = group + "/overwrite";
     declare(k, "Overwrite existing images", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true, when making a new image existing image files will be overwritten.\n"
-            "If false, and an existing image of the specified name already exists,\n"
-            "further images will be created by appending an number to the existing\n"
-            "filename in the pattern: <filename>-<N>.<extension>, where N starts at 1 and is\n"
-            "incremented for each new image created.\n");
-
-#if 0
-    k = group + "/oskar_image_root";
-    declare(k, "Output OSKAR image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip(k, "Path consisting of the root of the OSKAR image filename \n"
-            "used to save the output image. The full filename will be \n"
-            "constructed as <root>_<image_type>.img");
-
-#ifndef OSKAR_NO_FITS
-    k = group + "/fits_image_root";
-    declare(k, "Output FITS image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip(k, "Path consisting of the root of the FITS image filename \n"
-            "used to save the output image. The full filename will be \n"
-            "constructed as <root>_<image_type>.fits");
-#endif
-#endif
+    setTooltip(k, "If <b>true</b>, existing image files will be overwritten. "
+            "If <b>false</b>, new image files of the same name will be "
+            "created by appending an number to the existing filename with the "
+            "pattern:"
+            "<br>"
+            "&nbsp;&nbsp;<code><b>&lt;filename&gt;-&lt;N&gt;.&lt;extension&gt;</b></code>,"
+            "<br>"
+            "where N starts at 1 and is incremented for each new image created.");
 }
