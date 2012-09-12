@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
         unsigned char id_tag, int user_index)
 {
-    int err;
+    int err = 0;
     FILE* stream;
 
     /* Sanity check on inputs. */
@@ -74,7 +74,7 @@ int oskar_mem_binary_file_read_ext(oskar_Mem* mem, const char* filename,
         oskar_BinaryTagIndex** index, const char* name_group,
         const char* name_tag, int user_index)
 {
-    int err;
+    int err = 0;
     FILE* stream;
 
     /* Sanity check on inputs. */

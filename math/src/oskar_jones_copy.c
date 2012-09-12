@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,23 @@
 extern "C" {
 #endif
 
-int oskar_jones_copy(oskar_Jones* dst, const oskar_Jones* src)
+void oskar_jones_copy(oskar_Jones* dst, const oskar_Jones* src, int* status)
 {
-    int err = 0;
+    /* Check all inputs. */
+    if (!src || !dst || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     dst->num_stations = src->num_stations;
     dst->num_sources = src->num_sources;
     dst->cap_stations = src->cap_stations;
     dst->cap_sources = src->cap_sources;
-    err = oskar_mem_copy(&dst->data, &src->data);
-    return err;
+    oskar_mem_copy(&dst->data, &src->data, status);
 }
 
 #ifdef __cplusplus

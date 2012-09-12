@@ -43,7 +43,7 @@ extern "C" {
 
 int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
 {
-    int err, num_elements, element_size;
+    int err = 0, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
@@ -94,7 +94,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
 
     /* Copy to GPU memory if required. */
     if (mem->location == OSKAR_LOCATION_GPU)
-        err = oskar_mem_copy(mem, &temp);
+        oskar_mem_copy(mem, &temp, &err);
 
     /* Free the temporary. */
     oskar_mem_free(&temp);

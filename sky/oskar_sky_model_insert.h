@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_SKY_MODEL_INSERT_H_
 #define OSKAR_SKY_MODEL_INSERT_H_
 
@@ -51,12 +50,11 @@ extern "C" {
  * @param dst       Sky model to insert into.
  * @param src       Sky model to insert from.
  * @param offset    Offset into the destination sky model (number of sources).
- *
- * @return An error code.
- */
+ * @param[in,out]  status   Status return code.
+*/
 OSKAR_EXPORT
-int oskar_sky_model_insert(oskar_SkyModel* dst, const oskar_SkyModel* src,
-        int offset);
+void oskar_sky_model_insert(oskar_SkyModel* dst, const oskar_SkyModel* src,
+        int offset, int* status);
 
 #ifdef __cplusplus
 }

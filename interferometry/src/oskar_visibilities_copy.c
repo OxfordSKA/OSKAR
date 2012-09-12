@@ -56,21 +56,14 @@ int oskar_visibilities_copy(oskar_Visibilities* dst,
     dst->phase_centre_dec_deg = src->phase_centre_dec_deg;
 
     /* Copy the memory. */
-    err = oskar_mem_copy(&dst->settings_path, &src->settings_path);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->x_metres, &src->x_metres);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->y_metres, &src->y_metres);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->z_metres, &src->z_metres);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->uu_metres, &src->uu_metres);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->vv_metres, &src->vv_metres);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->ww_metres, &src->ww_metres);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->amplitude, &src->amplitude);
+    oskar_mem_copy(&dst->settings_path, &src->settings_path, &err);
+    oskar_mem_copy(&dst->x_metres, &src->x_metres, &err);
+    oskar_mem_copy(&dst->y_metres, &src->y_metres, &err);
+    oskar_mem_copy(&dst->z_metres, &src->z_metres, &err);
+    oskar_mem_copy(&dst->uu_metres, &src->uu_metres, &err);
+    oskar_mem_copy(&dst->vv_metres, &src->vv_metres, &err);
+    oskar_mem_copy(&dst->ww_metres, &src->ww_metres, &err);
+    oskar_mem_copy(&dst->amplitude, &src->amplitude, &err);
     if (err) return err;
 
     return 0;

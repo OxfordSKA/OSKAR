@@ -156,7 +156,7 @@ static int evaluate_E_common_sky_identical_stations(oskar_Jones* E,
         oskar_Mem E_station;
         error = oskar_jones_get_station_pointer(&E_station, E, i);
         if (error) return error;
-        error = oskar_mem_insert(&E_station, &E0, 0);
+        oskar_mem_insert(&E_station, &E0, 0, &error);
         if (error) return error;
     }
 

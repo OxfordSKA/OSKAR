@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
     /* Declare variables */
     int free_space, space_required, num_extra_models, number_to_copy;
     int i, j, model_type, model_location;
-    int n, n_copy, error, from_offset;
+    int n, n_copy, error = 0, from_offset;
     oskar_SkyModel model_ptr;
     size_t new_size;
 
@@ -97,7 +97,7 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
         n_copy = MIN(free_space, number_to_copy);
         error = oskar_sky_model_get_ptr(&model_ptr, model, from_offset, n_copy);
         if (error) return error;
-        error = oskar_sky_model_insert(sky, &model_ptr, n);
+        oskar_sky_model_insert(sky, &model_ptr, n, &error);
         if (error) return error;
         sky->num_sources = n_copy + n;
         number_to_copy  -= n_copy;

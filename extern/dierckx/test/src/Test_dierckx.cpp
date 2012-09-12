@@ -391,7 +391,7 @@ static int oskar_spline_data_evaluate_fortran(oskar_Mem* output, int offset,
 
 void Test_dierckx::test_surfit()
 {
-    int err;
+    int err = 0;
 
     // Set data dimensions.
     int size_x_in = 20;
@@ -496,7 +496,7 @@ void Test_dierckx::test_surfit()
         err = oskar_spline_data_init(&spline_data_cuda, OSKAR_SINGLE,
                 OSKAR_LOCATION_GPU);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-        err = oskar_spline_data_copy(&spline_data_cuda, &spline_data_c);
+        oskar_spline_data_copy(&spline_data_cuda, &spline_data_c, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
         // Copy the x,y positions to the GPU and allocate memory for result.
@@ -513,7 +513,7 @@ void Test_dierckx::test_surfit()
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
         // Copy the memory back.
-        err = z_out_temp.copy_to(&z_out_cuda);
+        oskar_mem_copy(&z_out_cuda, &z_out_temp, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     }
 

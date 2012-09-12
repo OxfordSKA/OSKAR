@@ -45,11 +45,10 @@ oskar_Jones::oskar_Jones(int type, int location, int num_stations,
 
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
 {
-    int err;
+    int err = 0;
     err = oskar_jones_init(this, other->type(), location,
             other->num_stations, other->num_sources);
-    if (err) throw err;
-    err = oskar_jones_copy(this, other);
+    oskar_jones_copy(this, other, &err);
     if (err) throw err;
 }
 
@@ -57,11 +56,6 @@ oskar_Jones::~oskar_Jones()
 {
     int err = oskar_jones_free(this);
     if (err) throw err;
-}
-
-int oskar_Jones::copy_to(oskar_Jones* other)
-{
-    return oskar_jones_copy(other, this); // Copy this to other.
 }
 
 int oskar_Jones::join_from_right(const oskar_Jones* other)

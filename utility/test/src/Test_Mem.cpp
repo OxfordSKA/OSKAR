@@ -37,6 +37,10 @@
 #include "utility/oskar_mem_add.h"
 #include "utility/oskar_mem_add_gaussian_noise.h"
 #include "utility/oskar_mem_append.h"
+#include "utility/oskar_mem_append_raw.h"
+#include "utility/oskar_mem_binary_file_read.h"
+#include "utility/oskar_mem_binary_file_write.h"
+#include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_different.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_set_value_real.h"
@@ -85,7 +89,8 @@ void Test_Mem::test_append()
         int num_values1 = 10;
         double value1 = 1.0;
         vector<double> data1(num_values1, value1);
-        mem_cpu.append_raw((const void*)&data1[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values1);
+        oskar_mem_append_raw(&mem_cpu, (const void*)&data1[0], OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, num_values1);
         CPPUNIT_ASSERT_EQUAL(num_values1, mem_cpu.num_elements);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type);
@@ -96,7 +101,8 @@ void Test_Mem::test_append()
         int num_values2 = 5;
         double value2 = 2.0;
         vector<double> data2(num_values2, value2);
-        mem_cpu.append_raw((const void*)&data2[0], OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_values2);
+        oskar_mem_append_raw(&mem_cpu, (const void*)&data2[0], OSKAR_DOUBLE,
+                OSKAR_LOCATION_CPU, num_values2);
         CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_cpu.num_elements);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type);
@@ -115,7 +121,8 @@ void Test_Mem::test_append()
         float value1 = 1.0;
         vector<float> data1(num_values1, value1);
         int error = 0;
-        error = mem_gpu.append_raw((const void*)&data1[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1);
+        error = oskar_mem_append_raw(&mem_gpu, (const void*)&data1[0],
+                OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1);
         CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
                 cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
         CPPUNIT_ASSERT_EQUAL(num_values1, mem_gpu.num_elements);
@@ -130,7 +137,8 @@ void Test_Mem::test_append()
         int num_values2 = 5;
         float value2 = 2.0;
         vector<float> data2(num_values2, value2);
-        error = mem_gpu.append_raw((const void*)&data2[0], OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2);
+        error = oskar_mem_append_raw(&mem_gpu, (const void*)&data2[0],
+                OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2);
         CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
                 cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
         CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_gpu.num_elements);
@@ -810,7 +818,8 @@ void Test_Mem::test_binary()
         }
 
         // Save CPU data.
-        error = mem_cpu.binary_file_write_ext(filename, "USER", "TEST", 987654, 0);
+        error = oskar_mem_binary_file_write_ext(&mem_cpu, filename,
+                "USER", "TEST", 987654, 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
     }
 
@@ -828,10 +837,12 @@ void Test_Mem::test_binary()
         }
 
         // Copy data to GPU.
-        mem_cpu.copy_to(&mem_gpu);
+        oskar_mem_copy(&mem_gpu, &mem_cpu, &error);
+        CPPUNIT_ASSERT_EQUAL(0, error);
 
         // Save GPU data.
-        error = mem_gpu.binary_file_write_ext(filename, "AA", "BB", 2, 0);
+        error = oskar_mem_binary_file_write_ext(&mem_gpu, filename,
+                "AA", "BB", 2, 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
     }
 
@@ -852,7 +863,8 @@ void Test_Mem::test_binary()
         }
 
         // Save CPU data.
-        error = mem_cpu.binary_file_write_ext(filename, "", "", 10, 0);
+        error = oskar_mem_binary_file_write_ext(&mem_cpu, filename,
+                "", "", 10, 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
 
         // Fill array with data.
@@ -862,7 +874,8 @@ void Test_Mem::test_binary()
         }
 
         // Save CPU data.
-        error = mem_cpu.binary_file_write_ext(filename, "", "", 11, 0);
+        error = oskar_mem_binary_file_write_ext(&mem_cpu, filename,
+                "", "", 11, 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
     }
 
@@ -878,7 +891,8 @@ void Test_Mem::test_binary()
         }
 
         // Save CPU data.
-        error = mem_cpu.binary_file_write_ext(filename, "DOG", "CAT", 0, 0);
+        error = oskar_mem_binary_file_write_ext(&mem_cpu, filename,
+                "DOG", "CAT", 0, 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
 
         // Fill array with data.
@@ -888,7 +902,8 @@ void Test_Mem::test_binary()
         }
 
         // Save CPU data.
-        error = mem_cpu.binary_file_write_ext(filename, "ONE", "TWO", 0, 0);
+        error = oskar_mem_binary_file_write_ext(&mem_cpu, filename,
+                "ONE", "TWO", 0, 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
     }
 
@@ -898,7 +913,8 @@ void Test_Mem::test_binary()
     // Load GPU data.
     {
         oskar_Mem mem_gpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU);
-        error = mem_gpu.binary_file_read_ext(filename, &index, "AA", "BB", 2);
+        error = oskar_mem_binary_file_read_ext(&mem_gpu, filename, &index,
+                "AA", "BB", 2);
         CPPUNIT_ASSERT_EQUAL(0, error);
         CPPUNIT_ASSERT_EQUAL(num_gpu, mem_gpu.num_elements);
 
@@ -922,7 +938,8 @@ void Test_Mem::test_binary()
     // Load CPU data.
     {
         oskar_Mem mem_cpu(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_cpu);
-        error = mem_cpu.binary_file_read_ext(filename, &index, "USER", "TEST", 987654);
+        error = oskar_mem_binary_file_read_ext(&mem_cpu, filename, &index,
+                "USER", "TEST", 987654);
         CPPUNIT_ASSERT_EQUAL(0, error);
         CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements);
         float* data = (float*)mem_cpu;
@@ -936,9 +953,11 @@ void Test_Mem::test_binary()
     {
         double* data;
         oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 2 * num_cpu);
-        error = mem_cpu.binary_file_read_ext(filename, &index, "", "", 10);
+        error = oskar_mem_binary_file_read_ext(&mem_cpu, filename, &index,
+                "", "", 10);
         CPPUNIT_ASSERT_EQUAL(0, error);
-        error = mem_cpu.binary_file_read_ext(filename, &index, "DOESN'T", "EXIST", 10);
+        error = oskar_mem_binary_file_read_ext(&mem_cpu, filename, &index,
+                "DOESN'T", "EXIST", 10);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, error);
         CPPUNIT_ASSERT_EQUAL(2 * num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
@@ -946,7 +965,8 @@ void Test_Mem::test_binary()
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 500.0, data[i], 1e-8);
         }
-        error = mem_cpu.binary_file_read_ext(filename, &index, "", "", 11);
+        error = oskar_mem_binary_file_read_ext(&mem_cpu, filename, &index,
+                "", "", 11);
         CPPUNIT_ASSERT_EQUAL(0, error);
         CPPUNIT_ASSERT_EQUAL(2 * num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
@@ -960,7 +980,8 @@ void Test_Mem::test_binary()
     {
         double* data;
         oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-        error = mem_cpu.binary_file_read_ext(filename, &index, "ONE", "TWO", 0);
+        error = oskar_mem_binary_file_read_ext(&mem_cpu, filename, &index,
+                "ONE", "TWO", 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
         CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
@@ -968,7 +989,8 @@ void Test_Mem::test_binary()
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 127.0, data[i], 1e-8);
         }
-        error = mem_cpu.binary_file_read_ext(filename, &index, "DOG", "CAT", 0);
+        error = oskar_mem_binary_file_read_ext(&mem_cpu, filename, &index,
+                "DOG", "CAT", 0);
         CPPUNIT_ASSERT_EQUAL(0, error);
         CPPUNIT_ASSERT_EQUAL(num_cpu, mem_cpu.num_elements);
         data = (double*)mem_cpu;
@@ -981,7 +1003,8 @@ void Test_Mem::test_binary()
     // Try to load data that isn't present.
     {
         oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-        error = mem_cpu.binary_file_read_ext(filename, &index, "DOESN'T", "EXIST", 10);
+        error = oskar_mem_binary_file_read_ext(&mem_cpu, filename, &index,
+                "DOESN'T", "EXIST", 10);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, error);
         CPPUNIT_ASSERT_EQUAL(0, mem_cpu.num_elements);
     }

@@ -37,17 +37,24 @@
 extern "C" {
 #endif
 
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
+void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!src || !dst || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
-    /* Sanity check on inputs. */
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check the data types. */
     if (src->type != dst->type)
-        return OSKAR_ERR_TYPE_MISMATCH;
+    {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
     /* Only copy the pointer if destination does not own its memory. */
     if (dst->owner == OSKAR_FALSE)
@@ -60,26 +67,19 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
 
         /* Disallow a pointer copy at a different location. */
         if (dst->location != src->location)
-            return OSKAR_ERR_BAD_LOCATION;
+            *status = OSKAR_ERR_BAD_LOCATION;
 
-        oskar_mem_get_pointer(dst, src, 0, src->num_elements, &error);
-        if (error) return error;
+        oskar_mem_get_pointer(dst, src, 0, src->num_elements, status);
     }
     else
     {
-        /* Check the data dimensions and resize if required. */
+        /* Check the data dimensions, and resize if required. */
         if (src->num_elements > dst->num_elements)
-        {
-            oskar_mem_realloc(dst, src->num_elements, &error);
-            if (error) return error;
-        }
+            oskar_mem_realloc(dst, src->num_elements, status);
 
         /* Copy the memory. */
-        error = oskar_mem_insert(dst, src, 0);
-        if (error) return error;
+        oskar_mem_insert(dst, src, 0, status);
     }
-
-    return error;
 }
 
 #ifdef __cplusplus

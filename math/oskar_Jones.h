@@ -91,16 +91,6 @@ struct OSKAR_EXPORT oskar_Jones
     ~oskar_Jones();
 
     /**
-     * @brief Copies the memory contents of this structure to another.
-     *
-     * @details
-     * Copies the memory contents and meta-data of this structure to another.
-     *
-     * @param[in] other Pointer to the oskar_Jones structure to copy.
-     */
-    int copy_to(oskar_Jones* other);
-
-    /**
      * @brief Combines this data with the other Jones matrix.
      *
      * @details

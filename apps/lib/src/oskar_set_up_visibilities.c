@@ -46,7 +46,7 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
         const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
         int type)
 {
-    int error, num_stations, num_channels;
+    int error = 0, num_stations, num_channels;
 
     /* Sanity check on inputs. */
     if (!vis || !settings || !telescope)
@@ -73,15 +73,13 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
     vis->phase_centre_dec_deg = settings->obs.dec0_rad * 180.0 / M_PI;
 
     /* Add settings file path. */
-    error = oskar_mem_copy(&vis->settings_path, &settings->settings_path);
+    oskar_mem_copy(&vis->settings_path, &settings->settings_path, &error);
     if (error) return error;
 
     /* Copy station coordinates from telescope model. */
-    error = oskar_mem_copy(&vis->x_metres, &telescope->station_x);
-    if (error) return error;
-    error = oskar_mem_copy(&vis->y_metres, &telescope->station_y);
-    if (error) return error;
-    error = oskar_mem_copy(&vis->z_metres, &telescope->station_z);
+    oskar_mem_copy(&vis->x_metres, &telescope->station_x, &error);
+    oskar_mem_copy(&vis->y_metres, &telescope->station_y, &error);
+    oskar_mem_copy(&vis->z_metres, &telescope->station_z, &error);
     if (error) return error;
 
     return OSKAR_SUCCESS;

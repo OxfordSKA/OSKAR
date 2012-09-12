@@ -65,7 +65,7 @@
 extern "C"
 int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 {
-    int err;
+    int err = 0;
     QTime timer;
 
     // Load the settings file.
@@ -138,7 +138,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     complex_cube.freq_inc_hz        = settings.obs.frequency_inc_hz;
     complex_cube.time_inc_sec       = settings.obs.dt_dump_days * 86400.0;
     complex_cube.time_start_mjd_utc = settings.obs.start_mjd_utc;
-    err = oskar_mem_copy(&complex_cube.settings_path, &settings.settings_path);
+    oskar_mem_copy(&complex_cube.settings_path, &settings.settings_path, &err);
     if (err) return err;
 
     // Declare image hyper-cube.
@@ -157,7 +157,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     image_cube.freq_inc_hz        = complex_cube.freq_inc_hz;
     image_cube.time_inc_sec       = complex_cube.time_inc_sec;
     image_cube.time_start_mjd_utc = complex_cube.time_start_mjd_utc;
-    err = oskar_mem_copy(&image_cube.settings_path, &settings.settings_path);
+    oskar_mem_copy(&image_cube.settings_path, &settings.settings_path, &err);
     if (err) return err;
 
     // Temporary CPU memory.
@@ -248,7 +248,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 if (err) return err;
 
                 // Copy beam pattern back to host memory.
-                err = oskar_mem_copy(&beam_cpu, &beam_pattern);
+                oskar_mem_copy(&beam_cpu, &beam_pattern, &err);
                 if (err) return err;
 
                 // Save complex beam pattern data in the right order.

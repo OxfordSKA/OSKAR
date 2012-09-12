@@ -45,8 +45,7 @@ oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
     int err;
     err = oskar_mem_init(this, other->type, mem_location, other->num_elements,
             owner_);
-    if (err) throw err;
-    err = oskar_mem_copy(this, other); // Copy other to this.
+    oskar_mem_copy(this, other, &err); // Copy other to this.
     if (err) throw err;
 }
 
@@ -54,74 +53,6 @@ oskar_Mem::~oskar_Mem()
 {
     int err = oskar_mem_free(this);
     if (err) throw err;
-}
-
-int oskar_Mem::append(const oskar_Mem* from)
-{
-    return oskar_mem_append(this, from);
-}
-
-int oskar_Mem::append_raw(const void* from, int from_type, int from_location,
-        int from_size)
-{
-    return oskar_mem_append_raw(this, from, from_type, from_location,
-            from_size);
-}
-
-int oskar_Mem::binary_file_read(const char* filename,
-        oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index)
-{
-    return oskar_mem_binary_file_read(this, filename, index, id_group,
-            id_tag, user_index);
-}
-
-int oskar_Mem::binary_file_read_ext(const char* filename,
-        oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index)
-{
-    return oskar_mem_binary_file_read_ext(this, filename, index, name_group,
-            name_tag, user_index);
-}
-
-int oskar_Mem::binary_file_write(const char* filename, unsigned char id_group,
-        unsigned char id_tag, int user_index, int num_to_write) const
-{
-    return oskar_mem_binary_file_write(this, filename, id_group,
-            id_tag, user_index, num_to_write);
-}
-
-int oskar_Mem::binary_file_write_ext(const char* filename, const char* name_group,
-        const char* name_tag, int user_index, int num_to_write) const
-{
-    return oskar_mem_binary_file_write_ext(this, filename, name_group,
-            name_tag, user_index, num_to_write);
-}
-
-int oskar_Mem::copy_to(oskar_Mem* other) const
-{
-    return oskar_mem_copy(other, this); // Copy this to other.
-}
-
-oskar_Mem oskar_Mem::get_pointer(int offset, int size) const
-{
-    oskar_Mem ptr;
-    int err = 0;
-    oskar_mem_get_pointer(&ptr, this, offset, size, &err);
-    if (err)
-    {
-        ptr.data = NULL;
-        ptr.location = 0;
-        ptr.num_elements = 0;
-        ptr.owner = 0;
-        ptr.type = 0;
-    }
-    return ptr;
-}
-
-int oskar_Mem::insert(const oskar_Mem* src, int offset)
-{
-    return oskar_mem_insert(this, src, offset);
 }
 
 int oskar_Mem::scale_real(double value)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,65 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "sky/oskar_sky_model_copy.h"
 #include "utility/oskar_mem_copy.h"
-#include "stdlib.h"
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src)
+void oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src,
+        int* status)
 {
-    int error = OSKAR_SUCCESS;
+    /* Check all inputs. */
+    if (!src || !dst || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Copy the memory blocks */
-    error = oskar_mem_copy(&dst->RA, &src->RA);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->Dec, &src->Dec);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->I, &src->I);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->Q, &src->Q);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->U, &src->U);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->V, &src->V);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->reference_freq, &src->reference_freq);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->spectral_index, &src->spectral_index);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->rel_l, &src->rel_l);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->rel_m, &src->rel_m);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->rel_n, &src->rel_n);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->FWHM_major, &src->FWHM_major);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->FWHM_minor, &src->FWHM_minor);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->position_angle, &src->position_angle);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->gaussian_a, &src->gaussian_a);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->gaussian_b, &src->gaussian_b);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->gaussian_c, &src->gaussian_c);
-    if (error) return error;
+    oskar_mem_copy(&dst->RA, &src->RA, status);
+    oskar_mem_copy(&dst->Dec, &src->Dec, status);
+    oskar_mem_copy(&dst->I, &src->I, status);
+    oskar_mem_copy(&dst->Q, &src->Q, status);
+    oskar_mem_copy(&dst->U, &src->U, status);
+    oskar_mem_copy(&dst->V, &src->V, status);
+    oskar_mem_copy(&dst->reference_freq, &src->reference_freq, status);
+    oskar_mem_copy(&dst->spectral_index, &src->spectral_index, status);
+    oskar_mem_copy(&dst->rel_l, &src->rel_l, status);
+    oskar_mem_copy(&dst->rel_m, &src->rel_m, status);
+    oskar_mem_copy(&dst->rel_n, &src->rel_n, status);
+    oskar_mem_copy(&dst->FWHM_major, &src->FWHM_major, status);
+    oskar_mem_copy(&dst->FWHM_minor, &src->FWHM_minor, status);
+    oskar_mem_copy(&dst->position_angle, &src->position_angle, status);
+    oskar_mem_copy(&dst->gaussian_a, &src->gaussian_a, status);
+    oskar_mem_copy(&dst->gaussian_b, &src->gaussian_b, status);
+    oskar_mem_copy(&dst->gaussian_c, &src->gaussian_c, status);
 
     /* Copy meta data */
     dst->num_sources = src->num_sources;
     dst->use_extended = src->use_extended;
-
-    return error;
 }
-
 
 #ifdef __cplusplus
 }

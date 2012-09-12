@@ -54,17 +54,12 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     }
 
     /* Copy the coordinates. */
-    error = oskar_mem_copy(&dst->station_x, &src->station_x);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_y, &src->station_y);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_z, &src->station_z);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_x_hor, &src->station_x_hor);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_y_hor, &src->station_y_hor);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->station_z_hor, &src->station_z_hor);
+    oskar_mem_copy(&dst->station_x, &src->station_x, &error);
+    oskar_mem_copy(&dst->station_y, &src->station_y, &error);
+    oskar_mem_copy(&dst->station_z, &src->station_z, &error);
+    oskar_mem_copy(&dst->station_x_hor, &src->station_x_hor, &error);
+    oskar_mem_copy(&dst->station_y_hor, &src->station_y_hor, &error);
+    oskar_mem_copy(&dst->station_z_hor, &src->station_z_hor, &error);
     if (error) return error;
 
     /* Copy remaining meta-data. */

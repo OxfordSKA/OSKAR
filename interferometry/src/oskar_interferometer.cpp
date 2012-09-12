@@ -43,6 +43,7 @@
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_warning.h"
 #include "utility/oskar_mem_clear_contents.h"
+#include "utility/oskar_mem_insert.h"
 #include <cstdio>
 
 extern "C"
@@ -201,7 +202,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         if (status) return status;
 
         // Add visibilities to global data.
-        status = vis_amp->insert(&vis, j * n_baselines);
+        oskar_mem_insert(vis_amp, &vis, j * n_baselines, &status);
         if (status) return status;
     }
 

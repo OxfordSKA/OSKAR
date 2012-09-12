@@ -36,11 +36,10 @@ oskar_SkyModel::oskar_SkyModel(int type, int location, int num_sources)
 
 oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, int location)
 {
-    int err;
+    int err = 0;
     err = oskar_sky_model_init(this, other->type(), location,
             other->num_sources);
-    if (err) throw err;
-    err = oskar_sky_model_copy(this, other);
+    oskar_sky_model_copy(this, other, &err);
     if (err) throw err;
 }
 
@@ -67,11 +66,6 @@ int oskar_SkyModel::append(const oskar_SkyModel* other)
 int oskar_SkyModel::compute_relative_lmn(double ra0, double dec0)
 {
     return oskar_sky_model_compute_relative_lmn(this, ra0, dec0);
-}
-
-int oskar_SkyModel::copy_to(oskar_SkyModel* other)
-{
-    return oskar_sky_model_copy(other, this);
 }
 
 int oskar_SkyModel::filter_by_flux(double min_I, double max_I)

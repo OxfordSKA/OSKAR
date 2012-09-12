@@ -48,35 +48,21 @@ int oskar_station_model_copy(oskar_StationModel* dst,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Copy the memory blocks. */
-    error = oskar_mem_copy(&dst->x_signal, &src->x_signal);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->y_signal, &src->y_signal);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->z_signal, &src->z_signal);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->x_weights, &src->x_weights);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->y_weights, &src->y_weights);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->z_weights, &src->z_weights);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->weight, &src->weight);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->gain, &src->gain);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->gain_error, &src->gain_error);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->phase_offset, &src->phase_offset);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->phase_error, &src->phase_error);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->cos_orientation_x, &src->cos_orientation_x);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->sin_orientation_x, &src->sin_orientation_x);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->cos_orientation_y, &src->cos_orientation_y);
-    if (error) return error;
-    error = oskar_mem_copy(&dst->sin_orientation_y, &src->sin_orientation_y);
+    oskar_mem_copy(&dst->x_signal, &src->x_signal, &error);
+    oskar_mem_copy(&dst->y_signal, &src->y_signal, &error);
+    oskar_mem_copy(&dst->z_signal, &src->z_signal, &error);
+    oskar_mem_copy(&dst->x_weights, &src->x_weights, &error);
+    oskar_mem_copy(&dst->y_weights, &src->y_weights, &error);
+    oskar_mem_copy(&dst->z_weights, &src->z_weights, &error);
+    oskar_mem_copy(&dst->weight, &src->weight, &error);
+    oskar_mem_copy(&dst->gain, &src->gain, &error);
+    oskar_mem_copy(&dst->gain_error, &src->gain_error, &error);
+    oskar_mem_copy(&dst->phase_offset, &src->phase_offset, &error);
+    oskar_mem_copy(&dst->phase_error, &src->phase_error, &error);
+    oskar_mem_copy(&dst->cos_orientation_x, &src->cos_orientation_x, &error);
+    oskar_mem_copy(&dst->sin_orientation_x, &src->sin_orientation_x, &error);
+    oskar_mem_copy(&dst->cos_orientation_y, &src->cos_orientation_y, &error);
+    oskar_mem_copy(&dst->sin_orientation_y, &src->sin_orientation_y, &error);
     if (error) return error;
 
     /* Copy the meta data. */
@@ -110,8 +96,8 @@ int oskar_station_model_copy(oskar_StationModel* dst,
         if (error) return error;
 
         /* Copy the element model data. */
-        error = oskar_element_model_copy(dst->element_pattern,
-                src->element_pattern);
+        oskar_element_model_copy(dst->element_pattern,
+                src->element_pattern, &error);
         if (error) return error;
     }
 

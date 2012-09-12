@@ -139,13 +139,6 @@ struct OSKAR_EXPORT oskar_SkyModel
     int compute_relative_lmn(double ra0, double dec0);
 
     /**
-     * @brief Copies this sky model to another
-     *
-     * @return An error code.
-     */
-    int copy_to(oskar_SkyModel* other);
-
-    /**
      * @brief Filter sources by flux.
      *
      * @param min_I Minimum value of Stokes I.

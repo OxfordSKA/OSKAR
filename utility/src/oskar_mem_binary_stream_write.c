@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ int oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
         unsigned char id_group, unsigned char id_tag, int user_index,
         int num_to_write)
 {
-    int err, type, location, num_elements;
+    int err = 0, type, location, num_elements;
     oskar_Mem temp;
     size_t size_bytes;
     const oskar_Mem* data = NULL;
@@ -73,7 +73,7 @@ int oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
     else if (location == OSKAR_LOCATION_GPU)
     {
         /* Copy to temporary. */
-        err = oskar_mem_copy(&temp, mem);
+        oskar_mem_copy(&temp, mem, &err);
         if (err)
         {
             oskar_mem_free(&temp);
@@ -96,7 +96,7 @@ int oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
         const char* name_group, const char* name_tag, int user_index,
         int num_to_write)
 {
-    int err, type, location, num_elements;
+    int err = 0, type, location, num_elements;
     oskar_Mem temp;
     size_t size_bytes;
     const oskar_Mem* data = NULL;
@@ -127,7 +127,7 @@ int oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
     else if (location == OSKAR_LOCATION_GPU)
     {
         /* Copy to temporary. */
-        err = oskar_mem_copy(&temp, mem);
+        oskar_mem_copy(&temp, mem, &err);
         if (err)
         {
             oskar_mem_free(&temp);

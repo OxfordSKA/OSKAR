@@ -34,36 +34,32 @@
 extern "C" {
 #endif
 
-int oskar_element_model_copy(oskar_ElementModel* dst,
-        const oskar_ElementModel* src)
+void oskar_element_model_copy(oskar_ElementModel* dst,
+        const oskar_ElementModel* src, int* status)
 {
-    int err;
+    /* Check all inputs. */
+    if (!dst || !src || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     dst->cos_power = src->cos_power;
     dst->gaussian_fwhm_rad = src->gaussian_fwhm_rad;
 
-    err = oskar_mem_copy(&dst->filename_x, &src->filename_x);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->filename_y, &src->filename_y);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->phi_re_x, &src->phi_re_x);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->phi_im_x, &src->phi_im_x);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->theta_re_x, &src->theta_re_x);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->theta_im_x, &src->theta_im_x);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->phi_re_y, &src->phi_re_y);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->phi_im_y, &src->phi_im_y);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->theta_re_y, &src->theta_re_y);
-    if (err) return err;
-    err = oskar_spline_data_copy(&dst->theta_im_y, &src->theta_im_y);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_copy(&dst->filename_x, &src->filename_x, status);
+    oskar_mem_copy(&dst->filename_y, &src->filename_y, status);
+    oskar_spline_data_copy(&dst->phi_re_x, &src->phi_re_x, status);
+    oskar_spline_data_copy(&dst->phi_im_x, &src->phi_im_x, status);
+    oskar_spline_data_copy(&dst->theta_re_x, &src->theta_re_x, status);
+    oskar_spline_data_copy(&dst->theta_im_x, &src->theta_im_x, status);
+    oskar_spline_data_copy(&dst->phi_re_y, &src->phi_re_y, status);
+    oskar_spline_data_copy(&dst->phi_im_y, &src->phi_im_y, status);
+    oskar_spline_data_copy(&dst->theta_re_y, &src->theta_re_y, status);
+    oskar_spline_data_copy(&dst->theta_im_y, &src->theta_im_y, status);
 }
 
 #ifdef __cplusplus

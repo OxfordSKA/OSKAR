@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -291,7 +291,7 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
     }
     if (A->location != OSKAR_LOCATION_GPU)
     {
-        error = oskar_mem_copy(&At, A);
+        oskar_mem_copy(&At, A, &error);
         if (error) goto cleanup;
         Ap = &At;
     }
@@ -301,7 +301,7 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
     }
     if (B->location != OSKAR_LOCATION_GPU)
     {
-        error = oskar_mem_copy(&Bt, B);
+        oskar_mem_copy(&Bt, B, &error);
         if (error) goto cleanup;
         Bp = &Bt;
     }
@@ -485,7 +485,7 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
 
     /* Copy result back to host memory if required. */
     if (C->location == OSKAR_LOCATION_CPU)
-        error = oskar_mem_copy(C, Cp);
+        oskar_mem_copy(C, Cp, &error);
 
     cleanup:
     oskar_mem_free(&Ct);

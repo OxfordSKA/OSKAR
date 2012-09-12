@@ -33,19 +33,24 @@
 extern "C" {
 #endif
 
-int oskar_spline_data_copy(oskar_SplineData* dst, const oskar_SplineData* src)
+void oskar_spline_data_copy(oskar_SplineData* dst, const oskar_SplineData* src,
+        int* status)
 {
-    int err = 0;
+    /* Check all inputs. */
+    if (!dst || !src || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     dst->num_knots_x = src->num_knots_x;
     dst->num_knots_y = src->num_knots_y;
-    err = oskar_mem_copy(&dst->knots_x, &src->knots_x);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->knots_y, &src->knots_y);
-    if (err) return err;
-    err = oskar_mem_copy(&dst->coeff, &src->coeff);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_copy(&dst->knots_x, &src->knots_x, status);
+    oskar_mem_copy(&dst->knots_y, &src->knots_y, status);
+    oskar_mem_copy(&dst->coeff, &src->coeff, status);
 }
 
 #ifdef __cplusplus

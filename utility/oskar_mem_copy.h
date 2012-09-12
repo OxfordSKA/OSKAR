@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,23 +48,15 @@ extern "C" {
  * This function copies data held in one structure to another structure.
  * Both data structures must be of the same data type.
  *
- * If the copy is not taking ownership of the memory then only the pointer
- * and the meta-data are copied.
- *
  * If there is not enough memory in the destination structure, then it is
  * automatically resized to hold the required number of elements.
  *
- * @param[out] dst Pointer to destination data structure to copy into.
- * @param[in]  src Pointer to source data structure to copy from.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[out] dst          Pointer to destination data structure to copy into.
+ * @param[in]  src          Pointer to source data structure to copy from.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src);
+void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status);
 
 #ifdef __cplusplus
 }

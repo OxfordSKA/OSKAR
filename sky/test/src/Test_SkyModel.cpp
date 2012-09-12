@@ -29,6 +29,7 @@
 #include "interferometry/oskar_TelescopeModel.h"
 #include "sky/test/Test_SkyModel.h"
 #include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_copy.h"
 #include "sky/oskar_sky_model_filter_by_flux.h"
 #include "sky/oskar_sky_model_filter_by_radius.h"
 #include "sky/oskar_sky_model_free.h"
@@ -386,13 +387,14 @@ void Test_SkyModel::test_split()
 {
     int num_sources = 2139;
     int max_sources_per_subset = 510;
+    int error = 0;
 
     oskar_SkyModel sky_full(OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_sources);
     oskar_SkyModel* sky_subset = NULL;
 
     // Split the sky model into a number of subsets.
     int num_subsets = 0;
-    int error = oskar_sky_model_split(&sky_subset, &num_subsets,
+    error = oskar_sky_model_split(&sky_subset, &num_subsets,
             max_sources_per_subset, &sky_full);
 
     // Check if the split worked as expected.
@@ -437,7 +439,7 @@ void Test_SkyModel::test_split()
         error = oskar_sky_model_init(&sky_subset_gpu[i], sky_subset[i].type(),
                 OSKAR_LOCATION_GPU, 0);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-        error = sky_subset[i].copy_to(&sky_subset_gpu[i]);
+        oskar_sky_model_copy(&sky_subset_gpu[i], &sky_subset[i], &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     }
 
@@ -618,6 +620,7 @@ void Test_SkyModel::test_insert()
     int location = OSKAR_LOCATION_CPU;
     int dst_size = 60;
     int src_size = 20;
+    int status = 0;
 
     oskar_SkyModel dst(type, location, dst_size);
 
@@ -643,9 +646,10 @@ void Test_SkyModel::test_insert()
         ((double*)src.gaussian_c.data)[i]     = (double)i * 9.0;
     }
 
-    oskar_sky_model_insert(&dst, &src, 0);
-    oskar_sky_model_insert(&dst, &src, 20);
-    oskar_sky_model_insert(&dst, &src, 40);
+    oskar_sky_model_insert(&dst, &src, 0, &status);
+    oskar_sky_model_insert(&dst, &src, 20, &status);
+    oskar_sky_model_insert(&dst, &src, 40, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     double delta = 1.0e-10;
 

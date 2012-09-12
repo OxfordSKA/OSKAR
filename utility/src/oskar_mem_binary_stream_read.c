@@ -47,7 +47,7 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
         oskar_BinaryTagIndex** index, unsigned char id_group,
         unsigned char id_tag, int user_index)
 {
-    int err, type, location, num_elements, element_size;
+    int err = 0, type, location, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
@@ -102,7 +102,7 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
 
     /* Copy to GPU memory if required. */
     if (location == OSKAR_LOCATION_GPU)
-        err = oskar_mem_copy(mem, &temp);
+        oskar_mem_copy(mem, &temp, &err);
 
     /* Free the temporary. */
     oskar_mem_free(&temp);
@@ -114,7 +114,7 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
         oskar_BinaryTagIndex** index, const char* name_group,
         const char* name_tag, int user_index)
 {
-    int err, type, location, num_elements, element_size;
+    int err = 0, type, location, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
@@ -170,7 +170,7 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
 
     /* Copy to GPU memory if required. */
     if (location == OSKAR_LOCATION_GPU)
-        err = oskar_mem_copy(mem, &temp);
+        oskar_mem_copy(mem, &temp, &err);
 
     /* Free the temporary. */
     oskar_mem_free(&temp);

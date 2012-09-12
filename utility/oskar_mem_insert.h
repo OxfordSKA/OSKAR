@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,18 +52,14 @@ extern "C" {
  * memory in the destination structure to hold the result: otherwise, an error
  * is returned.
  *
- * @param[out] dst    Pointer to destination data structure to copy into.
- * @param[in]  src    Pointer to source data structure to copy from.
- * @param[in]  offset Offset into destination memory block.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[out] dst          Pointer to destination data structure to copy into.
+ * @param[in]  src          Pointer to source data structure to copy from.
+ * @param[in]  offset       Offset into destination memory block.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset);
+void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
+        int* status);
 
 #ifdef __cplusplus
 }

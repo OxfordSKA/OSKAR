@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     oskar_Mem u, v, t_l, t_m, t_amp, t_image, *p_image;
     const oskar_Mem *p_l, *p_m, *p_amp;
     double wavenumber;
-    int err, type, num_vis, num_pixels;
+    int err = 0, type, num_vis, num_pixels;
 
     /* Check types. */
     type = image->type;
@@ -77,9 +77,8 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     oskar_mem_init(&t_image, image->type, OSKAR_LOCATION_GPU, 0, 1);
 
     /* Copy the baselines to temporary GPU memory. */
-    err = oskar_mem_copy(&u, uu_metres);
-    if (err) goto cleanup;
-    err = oskar_mem_copy(&v, vv_metres);
+    oskar_mem_copy(&u, uu_metres, &err);
+    oskar_mem_copy(&v, vv_metres, &err);
     if (err) goto cleanup;
 
     /* Multiply baselines by the wavenumber. */
@@ -106,7 +105,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         err = oskar_mem_init(&t_l, l->type, OSKAR_LOCATION_GPU,
                 l->num_elements, 1);
         if (err) goto cleanup;
-        err = oskar_mem_copy(&t_l, l);
+        oskar_mem_copy(&t_l, l, &err);
         if (err) goto cleanup;
         p_l = &t_l;
     }
@@ -115,7 +114,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         err = oskar_mem_init(&t_m, m->type, OSKAR_LOCATION_GPU,
                 m->num_elements, 1);
         if (err) goto cleanup;
-        err = oskar_mem_copy(&t_m, m);
+        oskar_mem_copy(&t_m, m, &err);
         if (err) goto cleanup;
         p_m = &t_m;
     }
@@ -127,7 +126,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
         err = oskar_mem_init(&t_amp, amp->type, OSKAR_LOCATION_GPU,
                 amp->num_elements, 1);
         if (err) goto cleanup;
-        err = oskar_mem_copy(&t_amp, amp);
+        oskar_mem_copy(&t_amp, amp, &err);
         if (err) goto cleanup;
         p_amp = &t_amp;
     }
@@ -160,7 +159,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     /* Copy image back to host memory if required. */
     if (image->location == OSKAR_LOCATION_CPU)
     {
-        err = oskar_mem_insert(image, &t_image, 0);
+        oskar_mem_insert(image, &t_image, 0, &err);
         if (err) goto cleanup;
     }
 

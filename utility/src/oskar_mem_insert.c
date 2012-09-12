@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,15 +36,22 @@
 extern "C" {
 #endif
 
-int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset)
+void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
+        int* status)
 {
     int n_elements_src, n_elements_dst, type_src, type_dst;
     int location_src, location_dst, bytes, start;
     void* destination;
 
-    /* Sanity check on inputs. */
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!src || !dst || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Get the meta-data. */
     n_elements_src = src->num_elements;
@@ -56,15 +63,21 @@ int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset)
 
     /* Return immediately if there is nothing to copy. */
     if (src->data == NULL || n_elements_src == 0)
-        return 0;
+        return;
 
     /* Check the data types. */
     if (type_src != type_dst)
-        return OSKAR_ERR_TYPE_MISMATCH;
+    {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
     /* Check the data dimensions. */
     if (n_elements_src > (n_elements_dst - offset))
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
     /* Get the number of bytes to copy. */
     bytes = oskar_mem_element_size(type_src) * n_elements_src;
@@ -76,7 +89,7 @@ int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset)
             && location_dst == OSKAR_LOCATION_CPU)
     {
         memcpy(destination, src->data, bytes);
-        return 0;
+        return;
     }
 
     /* Host to device. */
@@ -84,7 +97,8 @@ int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset)
             && location_dst == OSKAR_LOCATION_GPU)
     {
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyHostToDevice);
-        return cudaPeekAtLastError();
+        *status = cudaPeekAtLastError();
+        return;
     }
 
     /* Device to host. */
@@ -92,7 +106,8 @@ int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset)
             && location_dst == OSKAR_LOCATION_CPU)
     {
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToHost);
-        return cudaPeekAtLastError();
+        *status = cudaPeekAtLastError();
+        return;
     }
 
     /* Device to device. */
@@ -100,10 +115,11 @@ int oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset)
             && location_dst == OSKAR_LOCATION_GPU)
     {
         cudaMemcpy(destination, src->data, bytes, cudaMemcpyDeviceToDevice);
-        return cudaPeekAtLastError();
+        *status = cudaPeekAtLastError();
+        return;
     }
 
-    return OSKAR_ERR_BAD_LOCATION;
+    *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

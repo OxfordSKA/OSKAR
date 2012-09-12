@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_SKY_MODEL_COPY_H_
 #define OSKAR_SKY_MODEL_COPY_H_
 
@@ -44,13 +43,13 @@ extern "C" {
 /**
  * @brief Copies the contents of one data structure to another.
  *
- * @param[out] dst Pointer to destination structure to copy into.
- * @param[in]  src Pointer to source structure to copy from.
- *
- * @return An error code.
- */
+ * @param[out] dst          Pointer to destination structure to copy into.
+ * @param[in]  src          Pointer to source structure to copy from.
+ * @param[in,out]  status   Status return code.
+*/
 OSKAR_EXPORT
-int oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src);
+void oskar_sky_model_copy(oskar_SkyModel* dst, const oskar_SkyModel* src,
+        int* status);
 
 #ifdef __cplusplus
 }

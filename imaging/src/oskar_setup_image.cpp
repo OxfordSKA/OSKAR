@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,8 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     // defined in oskar_image_init()
     oskar_mem_init(&im->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
             vis->settings_path.num_elements, OSKAR_TRUE);
-    oskar_mem_copy(&im->settings_path, &vis->settings_path);
+    oskar_mem_copy(&im->settings_path, &vis->settings_path, &err);
+    if (err) return err;
 
     im->fov_ra_deg = settings->fov_deg;
     im->fov_dec_deg = settings->fov_deg;

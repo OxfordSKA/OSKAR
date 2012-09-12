@@ -199,8 +199,8 @@ static int load_element_patterns(oskar_Log* log, const oskar_SettingsTelescope* 
         if (models.contains(files))
         {
             // Copy the element pattern data.
-            error = oskar_element_model_copy(
-                    station->element_pattern, models.value(files));
+            oskar_element_model_copy(station->element_pattern,
+                    models.value(files), &error);
             if (error) return error;
         }
         else

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #include "station/oskar_evaluate_element_weights_errors.h"
 #include "utility/oskar_Device_curand_state.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_multiply.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
@@ -51,7 +52,7 @@ void Test_element_weights_errors::test_evaluate()
     double element_gain_error  = 0.0;
     double element_phase       = 0.0 * M_PI;
     double element_phase_error = 0.0  * M_PI;
-    int seed = 0;
+    int error = 0, seed = 0;
 
     oskar_Mem h_gain(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements);
     oskar_Mem h_gain_error(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_elements);
@@ -74,7 +75,7 @@ void Test_element_weights_errors::test_evaluate()
     oskar_Mem d_errors(&h_errors, OSKAR_LOCATION_GPU);
 
     oskar_Device_curand_state curand_state(num_elements);
-    int error = curand_state.init(seed);
+    error = curand_state.init(seed);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     /* Evaluate weights errors. */
@@ -83,11 +84,12 @@ void Test_element_weights_errors::test_evaluate()
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     /* Copy memory back to CPU to inspect it. */
-    d_gain.copy_to(&h_gain);
-    d_gain_error.copy_to(&h_gain_error);
-    d_phase.copy_to(&h_phase);
-    d_phase_error.copy_to(&h_phase_error);
-    d_errors.copy_to(&h_errors);
+    oskar_mem_copy(&h_gain, &d_gain, &error);
+    oskar_mem_copy(&h_gain_error, &d_gain_error, &error);
+    oskar_mem_copy(&h_phase, &d_phase, &error);
+    oskar_mem_copy(&h_phase_error, &d_phase_error, &error);
+    oskar_mem_copy(&h_errors, &d_errors, &error);
+    CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     FILE* file = fopen("temp_test_element_errors.dat", "w");
     for (int i = 0; i < num_elements; ++i)

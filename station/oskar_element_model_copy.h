@@ -47,18 +47,13 @@ extern "C" {
  * @details
  * This function copies data held in one structure to another structure.
  *
- * @param[out] dst Pointer to destination data structure to copy into.
- * @param[in]  src Pointer to source data structure to copy from.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[out] dst          Pointer to destination data structure to copy into.
+ * @param[in]  src          Pointer to source data structure to copy from.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_element_model_copy(oskar_ElementModel* dst,
-        const oskar_ElementModel* src);
+void oskar_element_model_copy(oskar_ElementModel* dst,
+        const oskar_ElementModel* src, int* status);
 
 #ifdef __cplusplus
 }

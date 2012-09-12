@@ -162,7 +162,7 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         for (int i = 1; i < num_children; ++i)
         {
             oskar_Mem* dst = &(telescope->station[i].noise.frequency);
-            err = oskar_mem_copy(dst, freqs);
+            oskar_mem_copy(dst, freqs, &err);
             if (err) return err;
         }
     }
