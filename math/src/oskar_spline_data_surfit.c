@@ -171,11 +171,9 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
     v = nyest - ky - 1;
     err = oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_x, nxest);
-    if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_y, nyest);
-    if (err) return err;
-    err = oskar_mem_realloc(&spline->coeff, u * v);
+    oskar_mem_realloc(&spline->knots_x, nxest, &err);
+    oskar_mem_realloc(&spline->knots_y, nyest, &err);
+    oskar_mem_realloc(&spline->coeff, u * v, &err);
     if (err) return err;
 
     /* Set up workspace. */

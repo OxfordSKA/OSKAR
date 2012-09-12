@@ -38,24 +38,33 @@
 extern "C" {
 #endif
 
-int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
+void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
 {
     size_t element_size, new_size, old_size;
-    int error = 0;
 
-    /* Check for sane inputs. */
-    if (mem == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check if the structure owns the memory it points to. */
-    if (mem->owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (mem->owner == 0)
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     /* Get size of new and old memory blocks. */
     element_size = oskar_mem_element_size(mem->type);
     if (element_size == 0)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     new_size = num_elements * element_size;
     old_size = mem->num_elements * element_size;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check memory location. */
     if (mem->location == OSKAR_LOCATION_CPU)
@@ -64,7 +73,10 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
         void* mem_new = NULL;
         mem_new = realloc(mem->data, new_size);
         if (mem_new == NULL)
-            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        {
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
 
         /* Initialise the new memory if it's larger than the old. */
         if (new_size > old_size)
@@ -87,7 +99,7 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
 
         /* Free the old block. */
         cudaFree(mem->data);
-        error = cudaPeekAtLastError();
+        *status = cudaPeekAtLastError();
 
         /* Set the new meta-data. */
         mem->data = mem_new;
@@ -95,9 +107,8 @@ int oskar_mem_realloc(oskar_Mem* mem, int num_elements)
     }
     else
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
-    return error;
 }
 
 #ifdef __cplusplus

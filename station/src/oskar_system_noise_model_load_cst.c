@@ -40,6 +40,8 @@
 extern "C" {
 #endif
 
+/* FIXME Why is this called _cst? (Should it be _csv?) */
+
 int oskar_system_noise_model_load_cst(oskar_Mem* mem, const char* filename)
 {
     int status = OSKAR_SUCCESS, n = 0;
@@ -83,7 +85,7 @@ int oskar_system_noise_model_load_cst(oskar_Mem* mem, const char* filename)
 
         if (mem->num_elements <= n)
         {
-            status = oskar_mem_realloc(mem, n + 1);
+            oskar_mem_realloc(mem, n + 1, &status);
             if (status) goto cleanup;
         }
 

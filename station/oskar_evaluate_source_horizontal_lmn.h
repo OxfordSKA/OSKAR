@@ -59,13 +59,12 @@ extern "C" {
  * @param[in]  Dec        Source Declination values.
  * @param[in]  station    Pointer to station model.
  * @param[in]  gast       The Greenwich apparent sidereal time, in radians.
- *
- * @return An error code.
+ * @param[in,out]  status Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
+void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
         oskar_Mem* m, oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
-        const oskar_StationModel* station, double gast);
+        const oskar_StationModel* station, double gast, int* status);
 
 #ifdef __cplusplus
 }

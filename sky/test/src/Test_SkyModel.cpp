@@ -35,6 +35,7 @@
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_split.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
 #include "sky/oskar_sky_model_append_to_set.h"
@@ -50,15 +51,18 @@
 
 void Test_SkyModel::test_resize()
 {
+    int status = 0;
     // Resizing on the GPU in single precision
     {
         oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_GPU, 10);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky->type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky->location());
         CPPUNIT_ASSERT_EQUAL(10, sky->num_sources);
-        sky->resize(1);
+        oskar_sky_model_resize(sky, 1, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(1, sky->num_sources);
-        sky->resize(20);
+        oskar_sky_model_resize(sky, 20, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(20, sky->num_sources);
         delete sky;
     }
@@ -68,9 +72,11 @@ void Test_SkyModel::test_resize()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, sky->type());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, sky->location());
         CPPUNIT_ASSERT_EQUAL(10, sky->num_sources);
-        sky->resize(1);
+        oskar_sky_model_resize(sky, 1, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(1, sky->num_sources);
-        sky->resize(20);
+        oskar_sky_model_resize(sky, 20, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(20, sky->num_sources);
         delete sky;
     }
@@ -86,9 +92,11 @@ void Test_SkyModel::test_set_source()
     // still zero size.
     int error = sky->set_source(0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 200.0e6, -0.7);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_OUT_OF_RANGE, error);
+    error = 0;
 
     // Resize the model to 2 sources.
-    sky->resize(2);
+    oskar_sky_model_resize(sky, 2, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     CPPUNIT_ASSERT_EQUAL(2, sky->num_sources);
 
     // Set values of these 2 sources.
@@ -314,7 +322,8 @@ void Test_SkyModel::test_horizon_clip()
     double lon_start = 0.0;
     double lat_end = 90.0;
     double lon_end = 330.0;
-    sky_cpu.resize(n_sources);
+    oskar_sky_model_resize(&sky_cpu, n_sources, &err);
+    CPPUNIT_ASSERT_EQUAL(0, err);
 
     // Generate grid.
     for (int i = 0, k = 0; i < n_lat; ++i)
@@ -339,8 +348,9 @@ void Test_SkyModel::test_horizon_clip()
     oskar_WorkStationBeam work(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
 
     // Try calling compact: should fail.
-    err = oskar_sky_model_horizon_clip(&sky_out, &sky_cpu, &telescope, 0.0, &work);
+    oskar_sky_model_horizon_clip(&sky_out, &sky_cpu, &telescope, 0.0, &work, &err);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BAD_LOCATION, err);
+    err = 0;
 
     {
         // Copy sky data to GPU.
@@ -354,7 +364,7 @@ void Test_SkyModel::test_horizon_clip()
         }
 
         TIMER_START
-        err = oskar_sky_model_horizon_clip(&sky_out, sky_gpu, &telescope, 0.0, &work);
+        oskar_sky_model_horizon_clip(&sky_out, sky_gpu, &telescope, 0.0, &work, &err);
         TIMER_STOP("Done sky model compaction (%d sources)", n_sources)
         CPPUNIT_ASSERT_EQUAL(0, err);
         CPPUNIT_ASSERT_EQUAL(n_sources / 2, sky_out.num_sources);

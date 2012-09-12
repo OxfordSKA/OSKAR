@@ -26,10 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "station/oskar_evaluate_station_beam_gaussian.h"
-#include "utility/oskar_mem_realloc.h"
 #include "math/cudak/oskar_cudak_gaussian.h"
+#include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_cuda_check_error.h"
 
 #include <math.h>
 
@@ -41,22 +41,23 @@
 extern "C" {
 #endif
 
-
 void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        double fwhm_deg, int* err)
+        double fwhm_deg, int* status)
 {
     int type, location;
 
-    if ((!beam || !l || !m) && *err == OSKAR_SUCCESS)
+    /* Check all inputs. */
+    if (!beam || !l || !m || !status)
     {
-        *err = OSKAR_ERR_INVALID_ARGUMENT;
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
         return;
     }
 
-    if (*err) return;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
-    /* Get type and check consistency */
+    /* Get type and check consistency. */
     if (beam->type == (OSKAR_DOUBLE | OSKAR_COMPLEX) ||
             l->type == OSKAR_DOUBLE ||
             m->type == OSKAR_DOUBLE)
@@ -71,41 +72,25 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     }
     else
     {
-        *err = OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
 
-    /* Get location and check consistency */
-    if (beam->location == OSKAR_LOCATION_CPU ||
-            l->location == OSKAR_LOCATION_CPU ||
-            m->location == OSKAR_LOCATION_CPU)
-    {
-        location = OSKAR_LOCATION_CPU;
-    }
-    else if (beam->location == OSKAR_LOCATION_GPU ||
-            l->location == OSKAR_LOCATION_GPU ||
-            m->location == OSKAR_LOCATION_GPU)
-    {
-        location = OSKAR_LOCATION_GPU;
-    }
-    else
-    {
-        *err = OSKAR_ERR_BAD_LOCATION;
-        return;
-    }
+    /* Get location and check consistency. */
+    location = beam->location;
+    if (location != l->location || location != m->location)
+        *status = OSKAR_ERR_BAD_LOCATION;
 
+    /* Check that length of input arrays are consistent. */
     if (l->num_elements != num_points || m->num_elements != num_points)
-    {
-        *err = OSKAR_ERR_DIMENSION_MISMATCH;
-        return;
-    }
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
-    /* Resize output array if needed */
+    /* Resize output array if needed. */
     if (beam->num_elements < num_points)
-    {
-        *err = oskar_mem_realloc(beam, num_points);
-        if (*err) return;
-    }
+        oskar_mem_realloc(beam, num_points, status);
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     double fwhm_rad = fwhm_deg * (M_PI / 180.0);
     double fwhm_lm = sin(fwhm_rad);
@@ -140,7 +125,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         }
 
     }
-    /* GPU version */
+    /* GPU version. */
     else
     {
         int num_threads = 256;
@@ -157,6 +142,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
             ((float2*)beam->data, num_points, (float*)l->data,
                     (float*)m->data, std);
         }
+        oskar_cuda_check_error(status);
     }
 }
 

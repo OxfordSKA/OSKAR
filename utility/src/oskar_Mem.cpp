@@ -98,11 +98,6 @@ int oskar_Mem::binary_file_write_ext(const char* filename, const char* name_grou
             name_tag, user_index, num_to_write);
 }
 
-int oskar_Mem::clear_contents()
-{
-    return oskar_mem_clear_contents(this);
-}
-
 int oskar_Mem::copy_to(oskar_Mem* other) const
 {
     return oskar_mem_copy(other, this); // Copy this to other.
@@ -127,11 +122,6 @@ oskar_Mem oskar_Mem::get_pointer(int offset, int size) const
 int oskar_Mem::insert(const oskar_Mem* src, int offset)
 {
     return oskar_mem_insert(this, src, offset);
-}
-
-int oskar_Mem::resize(int size)
-{
-    return oskar_mem_realloc(this, size);
 }
 
 int oskar_Mem::scale_real(double value)

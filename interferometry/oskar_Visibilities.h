@@ -188,18 +188,6 @@ struct OSKAR_EXPORT oskar_Visibilities
     static int read(oskar_Visibilities* vis, const char* filename);
 
     /**
-     * @brief Resize the memory in the visibility structure to the specified
-     * dimensions.
-     *
-     * @param num_channels   Number of frequency channels.
-     * @param num_times      Number of visibility time snapshots.
-     * @param num_stations   Number of stations.
-     *
-     * @return An error code.
-     */
-    int resize(int num_channels, int num_times, int num_stations);
-
-    /**
      * @brief Returns an oskar_Mem pointer (non ownership) for the channel
      * amplitudes of the specified channel.
      *

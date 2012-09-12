@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,21 +38,14 @@ extern "C" {
 int oskar_visibilities_clear_contents(oskar_Visibilities* vis)
 {
     int err = 0;
-    err = oskar_mem_clear_contents(&vis->amplitude);
-    if (err) return err;
-    err = oskar_mem_clear_contents(&vis->x_metres);
-    if (err) return err;
-    err = oskar_mem_clear_contents(&vis->y_metres);
-    if (err) return err;
-    err = oskar_mem_clear_contents(&vis->z_metres);
-    if (err) return err;
-    err = oskar_mem_clear_contents(&vis->uu_metres);
-    if (err) return err;
-    err = oskar_mem_clear_contents(&vis->vv_metres);
-    if (err) return err;
-    err = oskar_mem_clear_contents(&vis->ww_metres);
-    if (err) return err;
-    return 0;
+    oskar_mem_clear_contents(&vis->amplitude, &err);
+    oskar_mem_clear_contents(&vis->x_metres, &err);
+    oskar_mem_clear_contents(&vis->y_metres, &err);
+    oskar_mem_clear_contents(&vis->z_metres, &err);
+    oskar_mem_clear_contents(&vis->uu_metres, &err);
+    oskar_mem_clear_contents(&vis->vv_metres, &err);
+    oskar_mem_clear_contents(&vis->ww_metres, &err);
+    return err;
 }
 
 #ifdef __cplusplus

@@ -213,18 +213,6 @@ struct OSKAR_EXPORT oskar_Mem
             const char* name_tag, int user_index = 0, int num_to_write = 0) const;
 
     /**
-     * @brief
-     * Clears contents of the memory held by the structure.
-     *
-     * @details
-     * This functions clears (i.e. sets to all bits zero) the contents of the
-     * memory block held by the structure.
-     *
-     * @return A CUDA or OSKAR error code.
-     */
-    int clear_contents();
-
-    /**
      * @brief Copies the memory contents of this structure to another.
      *
      * @details
@@ -269,20 +257,6 @@ struct OSKAR_EXPORT oskar_Mem
      * @return A CUDA or OSKAR error code.
      */
     int insert(const oskar_Mem* src, int offset);
-
-    /**
-     * @brief
-     * Resizes the memory block.
-     *
-     * @details
-     * Resizes the memory to the specified number of elements. The
-     * memory type and location are preserved.
-     *
-     * @param[in] size The required number of elements.
-     *
-     * @return A CUDA or OSKAR error code.
-     */
-    int resize(int size);
 
     /**
      * @brief

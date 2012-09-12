@@ -34,6 +34,7 @@
 #include "interferometry/oskar_evaluate_uvw_station.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_join.h"
+#include "math/oskar_jones_set_size.h"
 #include "sky/oskar_evaluate_jones_R.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
@@ -41,6 +42,7 @@
 #include "utility/oskar_Device_curand_state.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_warning.h"
+#include "utility/oskar_mem_clear_contents.h"
 #include <cstdio>
 
 extern "C"
@@ -49,15 +51,15 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         const oskar_Settings* settings, double frequency, int chunk_index,
         int num_sky_chunks)
 {
-    int err = 0;
+    int status = OSKAR_SUCCESS;
     int device_id = 0;
     size_t mem_free = 0, mem_total = 0;
     cudaDeviceProp device_prop;
 
     // Always clear the output array to ensure that all visibilities are zero
     // if there are never any visible sources in the sky model.
-    err = vis_amp->clear_contents();
-    if (err) return err;
+    oskar_mem_clear_contents(vis_amp, &status);
+    if (status) return status;
 
     // Get the current device ID.
     cudaGetDevice(&device_id);
@@ -75,12 +77,12 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
 
     // Scale GPU telescope coordinates by wavenumber.
-    err = tel_gpu.multiply_by_wavenumber(frequency);
-    if (err) return err;
+    status = tel_gpu.multiply_by_wavenumber(frequency);
+    if (status) return status;
 
     // Scale by spectral index.
-    err = sky_gpu.scale_by_spectral_index(frequency);
-    if (err) return err;
+    status = sky_gpu.scale_by_spectral_index(frequency);
+    if (status) return status;
 
     // Initialise blocks of Jones matrices and visibilities.
     int type = sky_gpu.type();
@@ -126,12 +128,11 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         // Initialise visibilities for the dump to zero.
-        err = vis.clear_contents();
-        if (err) return err;
+        oskar_mem_clear_contents(&vis, &status);
 
         // Compact sky model to temporary.
-        err = oskar_sky_model_horizon_clip(&local_sky, &sky_gpu, &tel_gpu,
-                gast, &work);
+        oskar_sky_model_horizon_clip(&local_sky, &sky_gpu, &tel_gpu, gast,
+                &work, &status);
 
         // Record number of visible sources in this snapshot.
         oskar_log_message(log, 1, "Snapshot %4d/%d, chunk %4d/%d, "
@@ -139,14 +140,14 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 num_sky_chunks, device_id, local_sky.num_sources);
 
         // Skip iteration if no sources above horizon.
-        if (err == OSKAR_ERR_NO_VISIBLE_SOURCES) continue;
-        else if (err != 0) return err;
+        if (local_sky.num_sources == 0) continue;
 
         // Set dimensions of Jones matrices (this is not a resize!).
-        err = J.set_size(n_stations, local_sky.num_sources); if (err) return err;
-        err = R.set_size(n_stations, local_sky.num_sources); if (err) return err;
-        err = E.set_size(n_stations, local_sky.num_sources); if (err) return err;
-        err = K.set_size(n_stations, local_sky.num_sources); if (err) return err;
+        oskar_jones_set_size(&J, n_stations, local_sky.num_sources, &status);
+        oskar_jones_set_size(&R, n_stations, local_sky.num_sources, &status);
+        oskar_jones_set_size(&E, n_stations, local_sky.num_sources, &status);
+        oskar_jones_set_size(&K, n_stations, local_sky.num_sources, &status);
+        if (status) return status;
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
@@ -156,17 +157,17 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate parallactic angle rotation (Jones R).
-            err = oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast);
-            if (err) return err;
+            status = oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast);
+            if (status) return status;
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
+            status = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
                     &work, &curand_state);
-            if (err) return err;
+            if (status) return status;
 
             // Join Jones matrices (R = E * R).
-            err = oskar_jones_join(&R, &E, &R);
-            if (err) return err;
+            status = oskar_jones_join(&R, &E, &R);
+            if (status) return status;
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {
@@ -178,30 +179,30 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 oskar_evaluate_uvw_station(&u, &v, &w, tel_gpu.num_stations,
                         &tel_gpu.station_x, &tel_gpu.station_y,
                         &tel_gpu.station_z, tel_gpu.ra0_rad, tel_gpu.dec0_rad,
-                        gast, &err);
-                if (err) return err;
+                        gast, &status);
+                if (status) return status;
 
                 // Evaluate interferometer phase (Jones K).
-                err = oskar_evaluate_jones_K(&K, &local_sky, &u, &v, &w);
-                if (err) return err;
+                status = oskar_evaluate_jones_K(&K, &local_sky, &u, &v, &w);
+                if (status) return status;
 
                 // Join Jones matrices (J = K * R).
-                err = oskar_jones_join(&J, &K, &R);
-                if (err) return err;
+                status = oskar_jones_join(&J, &K, &R);
+                if (status) return status;
 
                 // Form baseline pairs.
-                err = oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v);
-                if (err) return err;
+                status = oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v);
+                if (status) return status;
             }
         }
 
         // Divide visibilities by number of averages.
-        err = vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
-        if (err) return err;
+        status = vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
+        if (status) return status;
 
         // Add visibilities to global data.
-        err = vis_amp->insert(&vis, j * n_baselines);
-        if (err) return err;
+        status = vis_amp->insert(&vis, j * n_baselines);
+        if (status) return status;
     }
 
     // Record GPU memory usage.

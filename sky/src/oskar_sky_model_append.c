@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,20 +84,14 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
     dst->num_sources += src->num_sources;
 
     /* Resize arrays to hold the direction cosines. */
-    error = oskar_mem_realloc(&dst->rel_l, dst->num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&dst->rel_m, dst->num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&dst->rel_n, dst->num_sources);
-    if (error) return error;
+    oskar_mem_realloc(&dst->rel_l, dst->num_sources, &error);
+    oskar_mem_realloc(&dst->rel_m, dst->num_sources, &error);
+    oskar_mem_realloc(&dst->rel_n, dst->num_sources, &error);
 
     /* Resize arrays to hold gaussian source parameters */
-    error = oskar_mem_realloc(&dst->gaussian_a, dst->num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&dst->gaussian_b, dst->num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&dst->gaussian_c, dst->num_sources);
-    if (error) return error;
+    oskar_mem_realloc(&dst->gaussian_a, dst->num_sources, &error);
+    oskar_mem_realloc(&dst->gaussian_b, dst->num_sources, &error);
+    oskar_mem_realloc(&dst->gaussian_c, dst->num_sources, &error);
 
     dst->use_extended = (src->use_extended || dst->use_extended);
 

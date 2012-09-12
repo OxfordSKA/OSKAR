@@ -198,19 +198,13 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
         {
             int size;
             size = n + 100;
-            err = oskar_mem_realloc(&m_theta, size);
-            if (err) goto cleanup;
-            err = oskar_mem_realloc(&m_phi, size);
-            if (err) goto cleanup;
-            err = oskar_mem_realloc(&m_theta_re, size);
-            if (err) goto cleanup;
-            err = oskar_mem_realloc(&m_theta_im, size);
-            if (err) goto cleanup;
-            err = oskar_mem_realloc(&m_phi_re, size);
-            if (err) goto cleanup;
-            err = oskar_mem_realloc(&m_phi_im, size);
-            if (err) goto cleanup;
-            err = oskar_mem_realloc(&weight, size);
+            oskar_mem_realloc(&m_theta, size, &err);
+            oskar_mem_realloc(&m_phi, size, &err);
+            oskar_mem_realloc(&m_theta_re, size, &err);
+            oskar_mem_realloc(&m_theta_im, size, &err);
+            oskar_mem_realloc(&m_phi_re, size, &err);
+            oskar_mem_realloc(&m_phi_im, size, &err);
+            oskar_mem_realloc(&weight, size, &err);
             if (err) goto cleanup;
         }
 
@@ -273,19 +267,13 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
             {
                 int size;
                 size = n + 100;
-                err = oskar_mem_realloc(&m_theta, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&weight, size);
+                oskar_mem_realloc(&m_theta, size, &err);
+                oskar_mem_realloc(&m_phi, size, &err);
+                oskar_mem_realloc(&m_theta_re, size, &err);
+                oskar_mem_realloc(&m_theta_im, size, &err);
+                oskar_mem_realloc(&m_phi_re, size, &err);
+                oskar_mem_realloc(&m_phi_im, size, &err);
+                oskar_mem_realloc(&weight, size, &err);
                 if (err) goto cleanup;
             }
             ((float*)m_theta.data)[n]    = ((float*)m_theta.data)[i];
@@ -306,19 +294,13 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
             {
                 int size;
                 size = n + 100;
-                err = oskar_mem_realloc(&m_theta, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&weight, size);
+                oskar_mem_realloc(&m_theta, size, &err);
+                oskar_mem_realloc(&m_phi, size, &err);
+                oskar_mem_realloc(&m_theta_re, size, &err);
+                oskar_mem_realloc(&m_theta_im, size, &err);
+                oskar_mem_realloc(&m_phi_re, size, &err);
+                oskar_mem_realloc(&m_phi_im, size, &err);
+                oskar_mem_realloc(&weight, size, &err);
                 if (err) goto cleanup;
             }
             ((float*)m_theta.data)[n]    = ((float*)m_theta.data)[i];
@@ -344,19 +326,13 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
             {
                 int size;
                 size = n + 100;
-                err = oskar_mem_realloc(&m_theta, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&weight, size);
+                oskar_mem_realloc(&m_theta, size, &err);
+                oskar_mem_realloc(&m_phi, size, &err);
+                oskar_mem_realloc(&m_theta_re, size, &err);
+                oskar_mem_realloc(&m_theta_im, size, &err);
+                oskar_mem_realloc(&m_phi_re, size, &err);
+                oskar_mem_realloc(&m_phi_im, size, &err);
+                oskar_mem_realloc(&weight, size, &err);
                 if (err) goto cleanup;
             }
             ((double*)m_theta.data)[n]    = ((double*)m_theta.data)[i];
@@ -377,19 +353,13 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
             {
                 int size;
                 size = n + 100;
-                err = oskar_mem_realloc(&m_theta, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_theta_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_re, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&m_phi_im, size);
-                if (err) goto cleanup;
-                err = oskar_mem_realloc(&weight, size);
+                oskar_mem_realloc(&m_theta, size, &err);
+                oskar_mem_realloc(&m_phi, size, &err);
+                oskar_mem_realloc(&m_theta_re, size, &err);
+                oskar_mem_realloc(&m_theta_im, size, &err);
+                oskar_mem_realloc(&m_phi_re, size, &err);
+                oskar_mem_realloc(&m_phi_im, size, &err);
+                oskar_mem_realloc(&weight, size, &err);
                 if (err) goto cleanup;
             }
             ((double*)m_theta.data)[n]    = ((double*)m_theta.data)[i];

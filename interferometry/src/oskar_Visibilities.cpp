@@ -31,7 +31,7 @@
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
         int num_channels, int num_times, int num_stations)
 {
-	int err = oskar_visibilities_init(this, amp_type, location, num_channels,
+    int err = oskar_visibilities_init(this, amp_type, location, num_channels,
             num_times, num_stations);
     if (err) throw err;
 }
@@ -39,8 +39,8 @@ oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
 oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
         int location)
 {
-	int err;
-	err = oskar_visibilities_init(this, other->amplitude.type, location,
+    int err;
+    err = oskar_visibilities_init(this, other->amplitude.type, location,
             other->num_channels, other->num_times, other->num_stations);
     if (err) throw err;
     err = oskar_visibilities_copy(this, other); // Copy other to this.
@@ -49,7 +49,7 @@ oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
 
 oskar_Visibilities::~oskar_Visibilities()
 {
-	int err = oskar_visibilities_free(this);
+    int err = oskar_visibilities_free(this);
     if (err) throw err;
 }
 
@@ -66,11 +66,6 @@ int oskar_Visibilities::write(oskar_Log* log, const char* filename)
 int oskar_Visibilities::read(oskar_Visibilities* vis, const char* filename)
 {
     return oskar_visibilities_read(vis, filename);
-}
-
-int oskar_Visibilities::resize(int num_channels, int num_times, int num_stations)
-{
-    return oskar_visibilities_resize(this, num_channels, num_times, num_stations);
 }
 
 int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)

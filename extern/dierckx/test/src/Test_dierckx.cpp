@@ -155,7 +155,7 @@ static int oskar_spline_data_surfit_fortran(oskar_SplineData* spline,
         int num_points, oskar_Mem* x, oskar_Mem* y, oskar_Mem* z,
         oskar_Mem* w, const oskar_SettingsSpline* settings)
 {
-    int element_size, err, k = 0, maxiter = 1000, type;
+    int element_size, err = 0, k = 0, maxiter = 1000, type;
     int b1, b2, bx, by, iopt, km, kwrk, lwrk1, lwrk2, ne, nxest, nyest, u, v;
     int sqrt_num_points;
     int *iwrk;
@@ -199,11 +199,9 @@ static int oskar_spline_data_surfit_fortran(oskar_SplineData* spline,
     v = nyest - ky - 1;
     err = oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
     if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_x, nxest);
-    if (err) return err;
-    err = oskar_mem_realloc(&spline->knots_y, nyest);
-    if (err) return err;
-    err = oskar_mem_realloc(&spline->coeff, u * v);
+    oskar_mem_realloc(&spline->knots_x, nxest, &err);
+    oskar_mem_realloc(&spline->knots_y, nyest, &err);
+    oskar_mem_realloc(&spline->coeff, u * v, &err);
     if (err) return err;
 
     /* Set up workspace. */

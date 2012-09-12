@@ -236,8 +236,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 if (err) return err;
 
                 // Evaluate horizontal l,m,n coordinates.
-                err = oskar_evaluate_source_horizontal_lmn(num_pixels,
-                        &work.hor_l, &work.hor_m, &work.hor_n, &RA, &Dec, station, gast);
+                oskar_evaluate_source_horizontal_lmn(num_pixels,
+                        &work.hor_l, &work.hor_m, &work.hor_n, &RA, &Dec,
+                        station, gast, &err);
                 if (err) return err;
 
                 // Evaluate the station beam.

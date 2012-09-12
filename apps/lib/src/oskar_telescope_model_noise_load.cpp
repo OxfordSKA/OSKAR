@@ -39,6 +39,7 @@
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_realloc.h"
 
 #include <QtCore/QtCore>
 
@@ -236,7 +237,8 @@ static int load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
             start = noise->freq.start;
             inc = noise->freq.inc;
         }
-        freqs->resize(num_freqs);
+        oskar_mem_realloc(freqs, num_freqs, &err);
+        if (err) return err;
         if (freqs->type == OSKAR_DOUBLE)
         {
             double* freqs_ = (double*)freqs->data;
@@ -537,6 +539,8 @@ static int load_noise_rms(const oskar_Settings* settings,
 static int sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
         int num_freqs, double bandwidth, double integration_time)
 {
+    int err = 0; /* FIXME Replace with status code. */
+
     double factor = 1.0 / sqrt(2.0 * bandwidth * integration_time);
 
     if (rms == NULL || sensitivity == NULL)
@@ -546,7 +550,10 @@ static int sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     if (rms->num_elements != num_freqs)
-        rms->resize(num_freqs);
+    {
+        oskar_mem_realloc(rms, num_freqs, &err);
+        if (err) return err;
+    }
 
     if (sensitivity->type == OSKAR_DOUBLE && rms->type == OSKAR_DOUBLE)
     {
@@ -574,6 +581,7 @@ static int t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
 {
     double k_B = 1.3806488e-23;
     double factor = (2.0 * k_B * 1.0e26) / sqrt(2.0 * bandwidth * integration_time);
+    int err; /* FIXME Replace with status code. */
 
     if (rms == NULL || t_sys == NULL || area == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -582,7 +590,10 @@ static int t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
         return OSKAR_ERR_DIMENSION_MISMATCH;
 
     if (rms->num_elements != num_freqs)
-        rms->resize(num_freqs);
+    {
+        oskar_mem_realloc(rms, num_freqs, &err);
+        if (err) return err;
+    }
 
     if (t_sys->type == OSKAR_DOUBLE && area->type == OSKAR_DOUBLE && rms->type == OSKAR_DOUBLE)
     {
@@ -610,12 +621,16 @@ static int t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
 
 static int evaluate_range(oskar_Mem* values, int num_values, double start, double end)
 {
+    int err = 0; /* FIXME Replace with status code. */
     if (!values) return OSKAR_ERR_INVALID_ARGUMENT;
 
     double inc = (end - start) / (double)num_values;
 
     if (values->num_elements != num_values)
-        values->resize(num_values);
+    {
+        oskar_mem_realloc(values, num_values, &err);
+        if (err) return err;
+    }
 
     if (values->type == OSKAR_DOUBLE)
     {

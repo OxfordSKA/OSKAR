@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,14 +46,13 @@ extern "C" {
  * @details
  * Resizes the memory arrays held by the station structure.
  *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  station       Pointer to station model.
+ * @param[in]      num_elements  New number of elements in station model.
+ * @param[in,out]  status        Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements);
+void oskar_station_model_resize(oskar_StationModel* station, int num_elements,
+        int* status);
 
 #ifdef __cplusplus
 }

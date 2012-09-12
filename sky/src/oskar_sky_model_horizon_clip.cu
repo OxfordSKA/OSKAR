@@ -27,8 +27,12 @@
  */
 
 #include "sky/oskar_sky_model_horizon_clip.h"
+#include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
 #include "sky/cudak/oskar_cudak_update_horizon_mask.h"
+#include "utility/oskar_cuda_check_error.h"
+#include "utility/oskar_mem_clear_contents.h"
+#include "utility/oskar_mem_realloc.h"
 
 #include <thrust/device_vector.h> // Must be included before thrust/copy.h
 #include <thrust/copy.h>
@@ -135,130 +139,115 @@ static void copy_source_data(oskar_SkyModel* output, const oskar_SkyModel* input
 }
 
 extern "C"
-int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
+void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
         const oskar_SkyModel* input, const oskar_TelescopeModel* telescope,
-        double gast, oskar_WorkStationBeam* work)
+        double gast, oskar_WorkStationBeam* work, int* status)
 {
-    // Check for sane inputs.
-    int err = 0;
-    if (output == NULL || input == NULL || telescope == NULL || work == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!output || !input || !telescope || !work || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
-    // Check that the types match.
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check that the types match. */
     if (output->type() != input->type())
-        return OSKAR_ERR_TYPE_MISMATCH;
+        *status = OSKAR_ERR_TYPE_MISMATCH;
 
-    // Check for the correct location.
+    /* Check for the correct location. */
     if (output->location() != OSKAR_LOCATION_GPU ||
             input->location() != OSKAR_LOCATION_GPU ||
             work->hor_l.location != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
 
-    // Copy extended source flag
+    /* Copy extended source flag. */
     output->use_extended = input->use_extended;
 
-    // Get the data dimensions.
+    /* Get the data dimensions. */
     int num_sources = input->num_sources;
     int num_stations = telescope->num_stations;
 
-    // Resize the output structure if necessary.
+    /* Resize the output structure if necessary. */
     if (output->RA.num_elements < num_sources)
-    {
-        err = output->resize(num_sources);
-        if (err) return err;
-    }
+        oskar_sky_model_resize(output, num_sources, status);
 
-    // Resize the work buffers if necessary.
+    /* Resize the work buffers if necessary. */
     if (work->horizon_mask.num_elements < num_sources)
-    {
-        err = work->horizon_mask.resize(num_sources);
-        if (err) return err;
-    }
+        oskar_mem_realloc(&work->horizon_mask, num_sources, status);
     if (work->hor_l.num_elements < num_sources)
-    {
-        err = work->hor_l.resize(num_sources);
-        if (err) return err;
-    }
+        oskar_mem_realloc(&work->hor_l, num_sources, status);
     if (work->hor_m.num_elements < num_sources)
-    {
-        err = work->hor_m.resize(num_sources);
-        if (err) return err;
-    }
+        oskar_mem_realloc(&work->hor_m, num_sources, status);
     if (work->hor_n.num_elements < num_sources)
-    {
-        err = work->hor_n.resize(num_sources);
-        if (err) return err;
-    }
+        oskar_mem_realloc(&work->hor_n, num_sources, status);
 
-    // Clear horizon mask.
-    err = work->horizon_mask.clear_contents();
-    if (err) return err;
+    /* Clear horizon mask. */
+    oskar_mem_clear_contents(&work->horizon_mask, status);
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     if (input->type() == OSKAR_SINGLE)
     {
-        // Threads per block, blocks.
+        /* Threads per block, blocks. */
         int n_thd = 256;
         int n_blk = (num_sources + n_thd - 1) / n_thd;
 
-        // Create the mask.
+        /* Create the mask. */
         for (int i = 0; i < num_stations; ++i)
         {
-            // Get the station position.
+            /* Get the station position. */
             double longitude, latitude, lst;
             longitude = telescope->station[i].longitude_rad;
             latitude  = telescope->station[i].latitude_rad;
             lst = gast + longitude;
 
-            // Evaluate source horizontal l,m,n direction cosines.
-            err = oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, input->RA,
+            /* Evaluate source horizontal l,m,n direction cosines. */
+            oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, input->RA,
                     input->Dec, lst, latitude, work->hor_l, work->hor_m, work->hor_n);
-            if (err) return err;
 
-            // Update the mask.
+            /* Update the mask. */
             oskar_cudak_update_horizon_mask_f OSKAR_CUDAK_CONF(n_blk, n_thd)
             (num_sources, work->hor_n, work->horizon_mask);
         }
 
-        // Copy out source data based on the mask values.
+        /* Copy out source data based on the mask values. */
         copy_source_data<float>(output, input, work->horizon_mask);
+        oskar_cuda_check_error(status);
     }
     else if (input->type() == OSKAR_DOUBLE)
     {
-        // Threads per block, blocks.
+        /* Threads per block, blocks. */
         int n_thd = 256;
         int n_blk = (num_sources + n_thd - 1) / n_thd;
 
-        // Create the mask.
+        /* Create the mask. */
         for (int i = 0; i < num_stations; ++i)
         {
-            // Get the station position.
+            /* Get the station position. */
             double longitude, latitude, lst;
             longitude = telescope->station[i].longitude_rad;
             latitude  = telescope->station[i].latitude_rad;
             lst = gast + longitude;
 
-            // Evaluate source horizontal l,m,n direction cosines.
-            err = oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, input->RA,
+            /* Evaluate source horizontal l,m,n direction cosines. */
+            oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, input->RA,
                     input->Dec, lst, latitude, work->hor_l, work->hor_m, work->hor_n);
-            if (err) return err;
 
-            // Update the mask.
+            /* Update the mask. */
             oskar_cudak_update_horizon_mask_d OSKAR_CUDAK_CONF(n_blk, n_thd)
             (num_sources, work->hor_n, work->horizon_mask);
         }
 
-        // Copy out source data based on the mask values.
+        /* Copy out source data based on the mask values. */
         copy_source_data<double>(output, input, work->horizon_mask);
+        oskar_cuda_check_error(status);
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    // Check if there are no sources in the new model.
-    if (output->num_sources == 0)
-        return OSKAR_ERR_NO_VISIBLE_SOURCES;
-
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
 }

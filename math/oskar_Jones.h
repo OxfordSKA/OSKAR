@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,20 +136,6 @@ struct OSKAR_EXPORT oskar_Jones
      * @param[in] other Pointer to the oskar_Jones structure to set.
      */
     int set_real_scalar(double scalar);
-
-    /**
-     * @brief Sets the actual size of the collection of Jones matrices.
-     *
-     * @details
-     * This sets the size of the data dimensions without actually performing
-     * a resize.
-     *
-     * The new size must be less than or equal to the existing capacity.
-     *
-     * @param[in] num_stations Number of elements in the station dimension.
-     * @param[in] num_sources Number of elements in the source dimension.
-     */
-    int set_size(int num_stations, int num_sources);
 
     int type() const {return data.type;}
     int location() const {return data.location;}

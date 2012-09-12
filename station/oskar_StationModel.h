@@ -181,16 +181,6 @@ struct OSKAR_EXPORT oskar_StationModel
     int multiply_by_wavenumber(double frequency_hz);
 
     /**
-     * @brief Resizes the station structure.
-     *
-     * @details
-     * Resizes the memory arrays held by the station structure.
-     *
-     * @param[in] n_elements The new number of elements the arrays can hold.
-     */
-    int resize(int n_elements);
-
-    /**
      * @brief Returns the base type of all arrays in the structure, or an error
      * code if the types are inconsistent.
      */

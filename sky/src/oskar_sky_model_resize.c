@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,49 +33,38 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources)
+void oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources, int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!sky || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     sky->num_sources = num_sources;
 
     /* Resize the model data. */
-    error = oskar_mem_realloc(&sky->RA, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->Dec, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->I, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->Q, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->U, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->V, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->reference_freq, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->spectral_index, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->rel_l, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->rel_m, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->rel_n, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->FWHM_major, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->FWHM_minor, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->position_angle, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->gaussian_a, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->gaussian_b, num_sources);
-    if (error) return error;
-    error = oskar_mem_realloc(&sky->gaussian_c, num_sources);
-    if (error) return error;
-
-    return error;
+    oskar_mem_realloc(&sky->RA, num_sources, status);
+    oskar_mem_realloc(&sky->Dec, num_sources, status);
+    oskar_mem_realloc(&sky->I, num_sources, status);
+    oskar_mem_realloc(&sky->Q, num_sources, status);
+    oskar_mem_realloc(&sky->U, num_sources, status);
+    oskar_mem_realloc(&sky->V, num_sources, status);
+    oskar_mem_realloc(&sky->reference_freq, num_sources, status);
+    oskar_mem_realloc(&sky->spectral_index, num_sources, status);
+    oskar_mem_realloc(&sky->rel_l, num_sources, status);
+    oskar_mem_realloc(&sky->rel_m, num_sources, status);
+    oskar_mem_realloc(&sky->rel_n, num_sources, status);
+    oskar_mem_realloc(&sky->FWHM_major, num_sources, status);
+    oskar_mem_realloc(&sky->FWHM_minor, num_sources, status);
+    oskar_mem_realloc(&sky->position_angle, num_sources, status);
+    oskar_mem_realloc(&sky->gaussian_a, num_sources, status);
+    oskar_mem_realloc(&sky->gaussian_b, num_sources, status);
+    oskar_mem_realloc(&sky->gaussian_c, num_sources, status);
 }
 
 #ifdef __cplusplus

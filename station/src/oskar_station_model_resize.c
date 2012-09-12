@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,46 +33,38 @@
 extern "C" {
 #endif
 
-int oskar_station_model_resize(oskar_StationModel* station, int n_elements)
+void oskar_station_model_resize(oskar_StationModel* station, int n_elements,
+        int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!station || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Set the new number of elements. */
     station->num_elements = n_elements;
 
     /* Resize the model data. */
-    error = oskar_mem_realloc(&station->x_signal, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->y_signal, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->z_signal, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->x_weights, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->y_weights, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->z_weights, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->weight, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->gain, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->gain_error, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_offset, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->phase_error, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->cos_orientation_x, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->sin_orientation_x, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->cos_orientation_y, n_elements);
-    if (error) return error;
-    error = oskar_mem_realloc(&station->sin_orientation_y, n_elements);
-    if (error) return error;
-
-    return error;
+    oskar_mem_realloc(&station->x_signal, n_elements, status);
+    oskar_mem_realloc(&station->y_signal, n_elements, status);
+    oskar_mem_realloc(&station->z_signal, n_elements, status);
+    oskar_mem_realloc(&station->x_weights, n_elements, status);
+    oskar_mem_realloc(&station->y_weights, n_elements, status);
+    oskar_mem_realloc(&station->z_weights, n_elements, status);
+    oskar_mem_realloc(&station->weight, n_elements, status);
+    oskar_mem_realloc(&station->gain, n_elements, status);
+    oskar_mem_realloc(&station->gain_error, n_elements, status);
+    oskar_mem_realloc(&station->phase_offset, n_elements, status);
+    oskar_mem_realloc(&station->phase_error, n_elements, status);
+    oskar_mem_realloc(&station->cos_orientation_x, n_elements, status);
+    oskar_mem_realloc(&station->sin_orientation_x, n_elements, status);
+    oskar_mem_realloc(&station->cos_orientation_y, n_elements, status);
+    oskar_mem_realloc(&station->sin_orientation_y, n_elements, status);
 }
 
 #ifdef __cplusplus

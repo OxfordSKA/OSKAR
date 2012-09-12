@@ -63,14 +63,14 @@ void Test_Mem::test_realloc()
     int error = 0;
 
     oskar_Mem mem_gpu(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, 0);
-    error = oskar_mem_realloc(&mem_gpu, 500);
+    oskar_mem_realloc(&mem_gpu, 500, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
             cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
     CPPUNIT_ASSERT_EQUAL(500, mem_gpu.num_elements);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_gpu.type);
 
     oskar_Mem mem_cpu(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, 100);
-    error = oskar_mem_realloc(&mem_cpu, 1000);
+    oskar_mem_realloc(&mem_cpu, 1000, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
             cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
     CPPUNIT_ASSERT_EQUAL(1000, mem_cpu.num_elements);

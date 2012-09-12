@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 // Single precision.
-int oskar_ra_dec_to_hor_lmn_cuda_f(int n, const float* ra,
+void oskar_ra_dec_to_hor_lmn_cuda_f(int n, const float* ra,
         const float* dec, float lst, float lat, float* hor_l, float* hor_m,
         float* hor_n)
 {
@@ -50,15 +50,10 @@ int oskar_ra_dec_to_hor_lmn_cuda_f(int n, const float* ra,
     float sinLat = sinf(lat);
     oskar_cudak_ha_dec_to_hor_lmn_f <<< n_blk_in, n_thd >>> (n, ha, dec,
             cosLat, sinLat, hor_l, hor_m, hor_n);
-    cudaDeviceSynchronize();
-    cudaError_t errCuda = cudaPeekAtLastError();
-    if (errCuda != cudaSuccess) return errCuda;
-
-    return 0;
 }
 
 // Double precision.
-int oskar_ra_dec_to_hor_lmn_cuda_d(int n, const double* ra,
+void oskar_ra_dec_to_hor_lmn_cuda_d(int n, const double* ra,
         const double* dec, double lst, double lat, double* hor_l, double* hor_m,
         double* hor_n)
 {
@@ -73,11 +68,6 @@ int oskar_ra_dec_to_hor_lmn_cuda_d(int n, const double* ra,
     double sinLat = sin(lat);
     oskar_cudak_ha_dec_to_hor_lmn_d <<< n_blk_in, n_thd >>> (n, ha, dec,
             cosLat, sinLat, hor_l, hor_m, hor_n);
-    cudaDeviceSynchronize();
-    cudaError_t errCuda = cudaPeekAtLastError();
-    if (errCuda != cudaSuccess) return errCuda;
-
-    return 0;
 }
 
 #ifdef __cplusplus

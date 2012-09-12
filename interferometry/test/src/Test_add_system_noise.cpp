@@ -194,7 +194,8 @@ void Test_add_system_noise::test_rms()
 
 void Test_add_system_noise::generate_range(oskar_Mem* data, int number, double start, double inc)
 {
-    int err = oskar_mem_realloc(data, number);
+    int err = 0;
+    oskar_mem_realloc(data, number, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     for (int i = 0; i < number; ++i)

@@ -52,6 +52,7 @@
 #include "utility/oskar_log_warning.h"
 #include "utility/oskar_Log.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_add.h"
@@ -201,8 +202,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             error = oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i]);
             if (error) return error;
 
-            // Clear thread accumulation buffer
-            vis_acc[i].clear_contents();
+            // Clear thread accumulation buffer.
+            oskar_mem_clear_contents(&vis_acc[i], &error);
         }
     }
 

@@ -31,15 +31,15 @@
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
 {
-	int err = oskar_station_model_init(this, type, location, n_elements);
+    int err = oskar_station_model_init(this, type, location, n_elements);
     if (err) throw err;
 }
 
 oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
         int location)
 {
-	int err;
-	err = oskar_station_model_init(this, other->type(), location,
+    int err;
+    err = oskar_station_model_init(this, other->type(), location,
             other->num_elements);
     if (err) throw err;
     err = oskar_station_model_copy(this, other);
@@ -48,7 +48,7 @@ oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
 
 oskar_StationModel::~oskar_StationModel()
 {
-	int err = oskar_station_model_free(this);
+    int err = oskar_station_model_free(this);
     if (err) throw err;
 }
 
@@ -70,11 +70,6 @@ int oskar_StationModel::location() const
 int oskar_StationModel::multiply_by_wavenumber(double frequency_hz)
 {
     return oskar_station_model_multiply_by_wavenumber(this, frequency_hz);
-}
-
-int oskar_StationModel::resize(int n_elements)
-{
-    return oskar_station_model_resize(this, n_elements);
 }
 
 int oskar_StationModel::type() const

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     /* Resize memory block so that it can hold the data. */
     element_size = oskar_mem_element_size(mem->type);
     num_elements = (int)ceil(size_bytes / element_size);
-    err = oskar_mem_realloc(data, num_elements);
+    oskar_mem_realloc(data, num_elements, &err);
     if (err)
     {
         oskar_mem_free(&temp);

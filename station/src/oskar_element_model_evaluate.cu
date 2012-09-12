@@ -133,7 +133,7 @@ int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* theta, oskar_Mem* phi)
 {
-    int error;
+    int error = 0;
 
     /* Check that the output array is complex. */
     if (!oskar_mem_is_complex(G->type))
@@ -149,19 +149,19 @@ int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
     /* Ensure there is enough space in the theta and phi work arrays. */
     if (theta->num_elements < num_points)
     {
-        error = oskar_mem_realloc(theta, num_points);
+        oskar_mem_realloc(theta, num_points, &error);
         if (error) return error;
     }
     if (phi->num_elements < num_points)
     {
-        error = oskar_mem_realloc(phi, num_points);
+        oskar_mem_realloc(phi, num_points, &error);
         if (error) return error;
     }
 
     /* Resize output array if required. */
     if (G->num_elements < num_points)
     {
-        error = oskar_mem_realloc(G, num_points);
+        oskar_mem_realloc(G, num_points, &error);
         if (error) return error;
     }
 

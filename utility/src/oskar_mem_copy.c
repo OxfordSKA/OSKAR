@@ -70,7 +70,7 @@ int oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src)
         /* Check the data dimensions and resize if required. */
         if (src->num_elements > dst->num_elements)
         {
-            error = oskar_mem_realloc(dst, src->num_elements);
+            oskar_mem_realloc(dst, src->num_elements, &error);
             if (error) return error;
         }
 

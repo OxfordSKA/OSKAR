@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
-		int from_location, int num_elements)
+        int from_location, int num_elements)
 {
     int error = 0;
     size_t element_size, mem_size, offset_bytes;
@@ -60,8 +60,8 @@ int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
     offset_bytes = to->num_elements * element_size;
 
     /* Reallocate the memory block so it is big enough to hold the new data. */
-    error = oskar_mem_realloc(to, num_elements + to->num_elements);
-    if (error != 0) return error;
+    oskar_mem_realloc(to, num_elements + to->num_elements, &error);
+    if (error) return error;
 
     /* Append to the memory. */
     if (from_location == OSKAR_LOCATION_CPU)

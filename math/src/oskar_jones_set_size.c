@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,19 +32,32 @@
 extern "C" {
 #endif
 
-int oskar_jones_set_size(oskar_Jones* jones, int num_stations, int num_sources)
+void oskar_jones_set_size(oskar_Jones* jones, int num_stations,
+        int num_sources, int* status)
 {
     int capacity;
+
+    /* Check all inputs. */
+    if (!jones || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check size is within existing capacity. */
     capacity = jones->cap_stations * jones->cap_sources;
     if (num_stations * num_sources > capacity)
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
     /* Set the new dimension sizes, but don't actually resize the memory. */
     jones->num_stations = num_stations;
     jones->num_sources = num_sources;
-    return 0;
 }
 
 #ifdef __cplusplus

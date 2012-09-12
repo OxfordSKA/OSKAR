@@ -60,7 +60,7 @@ static const char* oskar_get_data_type_string(char data_type);
 int oskar_binary_file_query(oskar_Log* log, const char* filename)
 {
     FILE* stream;
-    int version = 0, extended_tags = 0, depth = -4, error, i;
+    int version = 0, extended_tags = 0, depth = -4, error = 0, i;
     oskar_BinaryTagIndex* index = NULL;
     oskar_BinaryHeader header;
     oskar_Mem temp;
@@ -104,7 +104,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
         oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
         oskar_mem_binary_stream_read(&temp, stream, &index,
                 OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0);
-        oskar_mem_realloc(&temp, temp.num_elements + 1);
+        oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
         ((char*)temp.data)[temp.num_elements - 1] = 0; /* Null-terminate. */
         oskar_log_message(log, depth, "\n%s", (char*)(temp.data));
         oskar_mem_free(&temp);

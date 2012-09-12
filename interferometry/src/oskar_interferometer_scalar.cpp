@@ -26,35 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
+
 #include "interferometry/oskar_interferometer_scalar.h"
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/oskar_evaluate_jones_K.h"
 #include "interferometry/oskar_evaluate_uvw_station.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_join.h"
+#include "math/oskar_jones_set_size.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_log_message.h"
+#include "utility/oskar_mem_clear_contents.h"
+#include "utility/oskar_log_warning.h"
 #include <cstdio>
 
 extern "C"
-int oskar_interferometer_scalar(oskar_Mem* vis_amp,
+int oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
-        const oskar_Settings* settings, double frequency)
+        const oskar_Settings* settings, double frequency, int chunk_index,
+        int num_sky_chunks)
 {
-    int err = OSKAR_SUCCESS;
+    int status = OSKAR_SUCCESS;
+    int device_id = 0;
+    size_t mem_free = 0, mem_total = 0;
+    cudaDeviceProp device_prop;
+
+    // Always clear the output array to ensure that all visibilities are zero
+    // if there are never any visible sources in the sky model.
+    oskar_mem_clear_contents(vis_amp, &status);
+    if (status) return status;
+
+    // Get the current device ID.
+    cudaGetDevice(&device_id);
+
+    // Check if sky model is empty.
+    if (sky->num_sources == 0)
+    {
+        oskar_log_warning(log, "No sources in sky model. Skipping "
+                "Measurement Equation evaluation.");
+        return OSKAR_SUCCESS;
+    }
 
     // Copy telescope model and sky model for frequency scaling.
     oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
     oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
 
     // Scale GPU telescope coordinates by wavenumber.
-    err = tel_gpu.multiply_by_wavenumber(frequency); if (err) return err;
+    status = tel_gpu.multiply_by_wavenumber(frequency); if (status) return status;
 
     // Scale by spectral index.
-    err = sky_gpu.scale_by_spectral_index(frequency);
-    if (err) return err;
+    status = sky_gpu.scale_by_spectral_index(frequency);
+    if (status) return status;
 
     // Initialise blocks of Jones matrices and visibilities.
     int type = sky_gpu.type();
@@ -70,11 +96,14 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
     oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
     oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
 
+    // Declare a local sky model of sufficient size for the horizon clip.
+    oskar_SkyModel local_sky(type, OSKAR_LOCATION_GPU, n_sources);
+
     // Initialise the random number generator.
     oskar_Device_curand_state curand_state(telescope->max_station_size);
     curand_state.init(telescope->seed_time_variable_station_element_errors);
 
-    // Calculate time increments.
+    // Get time increments.
     int num_vis_dumps        = settings->obs.num_time_steps;
     double obs_start_mjd_utc = settings->obs.start_mjd_utc;
     int num_vis_ave          = settings->interferometer.num_vis_ave;
@@ -92,23 +121,24 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
         // Initialise visibilities for the dump to zero.
-        err = vis.clear_contents(); if (err) return err;
+        oskar_mem_clear_contents(&vis, &status);
 
         // Compact sky model to temporary.
-        oskar_SkyModel sky(type, OSKAR_LOCATION_GPU);
-        err = oskar_sky_model_horizon_clip(&sky, &sky_gpu, &tel_gpu,
-                gast, &work);
-        if (err == OSKAR_ERR_NO_VISIBLE_SOURCES)
-        {
-            // Skip iteration.
-            printf("--> WARNING: No sources above horizon. Skipping.\n");
-            continue;
-        }
-        else if (err != 0) return err;
+        oskar_sky_model_horizon_clip(&local_sky, &sky_gpu, &tel_gpu,
+                gast, &work, &status);
+
+        // Record number of visible sources in this snapshot.
+        oskar_log_message(log, 1, "Snapshot %4d/%d, chunk %4d/%d, "
+                "device %d [%d sources]", j+1, num_vis_dumps, chunk_index+1,
+                num_sky_chunks, device_id, local_sky.num_sources);
+
+        // Skip iteration if no sources above horizon.
+        if (local_sky.num_sources == 0) continue;
 
         // Set dimensions of Jones matrices (this is not a resize!).
-        err = E.set_size(n_stations, sky.num_sources); if (err) return err;
-        err = K.set_size(n_stations, sky.num_sources); if (err) return err;
+        oskar_jones_set_size(&E, n_stations, local_sky.num_sources, &status);
+        oskar_jones_set_size(&K, n_stations, local_sky.num_sources, &status);
+        if (status) return status;
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
@@ -118,9 +148,9 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate station beam (Jones E).
-            err = oskar_evaluate_jones_E(&E, &sky, &tel_gpu, gast, &work,
+            status = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work,
                     &curand_state);
-            if (err) return err;
+            if (status) return status;
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {
@@ -132,29 +162,39 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp,
                 oskar_evaluate_uvw_station(&u, &v, &w, tel_gpu.num_stations,
                         &tel_gpu.station_x, &tel_gpu.station_y,
                         &tel_gpu.station_z, tel_gpu.ra0_rad, tel_gpu.dec0_rad,
-                        gast, &err);
-                if (err) return err;
+                        gast, &status);
+                if (status) return status;
 
                 // Evaluate interferometer phase (Jones K).
-                err = oskar_evaluate_jones_K(&K, &sky, &u, &v, &w);
-                if (err) return err;
+                status = oskar_evaluate_jones_K(&K, &local_sky, &u, &v, &w);
+                if (status) return status;
 
                 // Join Jones matrices (K = K * E).
-                err = oskar_jones_join(&K, &K, &E); if (err) return err;
+                status = oskar_jones_join(&K, &K, &E);
+                if (status) return status;
 
                 // Produce visibilities.
-                err = oskar_correlate(&vis, &K, &tel_gpu, &sky, &u, &v);
-                if (err) return err;
+                status = oskar_correlate(&vis, &K, &tel_gpu, &local_sky, &u, &v);
+                if (status) return status;
             }
         }
 
         // Divide visibilities by number of averages.
-        err = vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
-        if (err) return err;
+        status = vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
+        if (status) return status;
 
         // Add visibilities to global data.
-        err = vis_amp->insert(&vis, j * n_baselines); if (err) return err;
+        status = vis_amp->insert(&vis, j * n_baselines);
+        if (status) return status;
     }
+
+
+    // Record GPU memory usage.
+    cudaMemGetInfo(&mem_free, &mem_total);
+    cudaGetDeviceProperties(&device_prop, device_id);
+    oskar_log_message(log, 1, "Memory on device %d [%s] is %.1f%% used.",
+            device_id, device_prop.name,
+            100.0 * (1.0 - ((double)mem_free / (double)mem_total)));
 
     return OSKAR_SUCCESS;
 }

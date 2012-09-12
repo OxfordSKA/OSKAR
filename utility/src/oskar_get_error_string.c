@@ -72,8 +72,6 @@ const char* oskar_get_error_string(int error)
             return "incompatible OSKAR version";
         case OSKAR_ERR_BAD_UNITS:
             return "invalid units";
-        case OSKAR_ERR_NO_VISIBLE_SOURCES:
-            return "no visible sources in sky model";
         case OSKAR_ERR_SPLINE_COEFF_FAIL:
             return "spline coefficient computation failed";
         case OSKAR_ERR_SPLINE_EVAL_FAIL:

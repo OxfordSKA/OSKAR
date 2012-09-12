@@ -86,7 +86,7 @@ int oskar_station_model_load_config(oskar_StationModel* station,
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
         {
-            err = oskar_station_model_resize(station, n + 100);
+            oskar_station_model_resize(station, n + 100, &err);
             if (err)
             {
                 fclose(file);

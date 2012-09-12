@@ -33,7 +33,6 @@
  * @file oskar_visibilities_resize.h
  */
 
-
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
@@ -45,16 +44,15 @@ extern "C" {
  * @brief Resize the memory in the visibility structure to the specified
  * dimensions.
  *
- * @param vis            The visibility structure to resize.
- * @param num_channels   Number of frequency channels.
- * @param num_times      Number of visibility time snapshots.
- * @param num_stations   Number of stations.
- *
- * @return An error code.
+ * @param[in,out]  vis           The visibility structure to resize.
+ * @param[in]      num_channels  Number of frequency channels.
+ * @param[in]      num_times     Number of visibility time snapshots.
+ * @param[in]      num_stations  Number of stations.
+ * @param[in,out]  status        Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
-        int num_times, int num_stations);
+void oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
+        int num_times, int num_stations, int* status);
 
 #ifdef __cplusplus
 }

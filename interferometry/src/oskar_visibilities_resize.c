@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,20 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
-        int num_times, int num_stations)
+void oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
+        int num_times, int num_stations, int* status)
 {
-    int num_amps, num_coords, num_baselines, error = 0;
+    int num_amps, num_coords, num_baselines;
+
+    /* Check all inputs. */
+    if (!vis || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     num_baselines = num_stations * (num_stations - 1) / 2;
     vis->num_stations  = num_stations;
@@ -47,22 +57,13 @@ int oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
     num_amps   = num_channels * num_times * num_baselines;
     num_coords = num_times * num_baselines;
 
-    error = oskar_mem_realloc(&vis->x_metres, num_stations);
-    if (error) return error;
-    error = oskar_mem_realloc(&vis->y_metres, num_stations);
-    if (error) return error;
-    error = oskar_mem_realloc(&vis->z_metres, num_stations);
-    if (error) return error;
-    error = oskar_mem_realloc(&vis->uu_metres, num_coords);
-    if (error) return error;
-    error = oskar_mem_realloc(&vis->vv_metres, num_coords);
-    if (error) return error;
-    error = oskar_mem_realloc(&vis->ww_metres, num_coords);
-    if (error) return error;
-    error = oskar_mem_realloc(&vis->amplitude, num_amps);
-    if (error) return error;
-
-    return error;
+    oskar_mem_realloc(&vis->x_metres, num_stations, status);
+    oskar_mem_realloc(&vis->y_metres, num_stations, status);
+    oskar_mem_realloc(&vis->z_metres, num_stations, status);
+    oskar_mem_realloc(&vis->uu_metres, num_coords, status);
+    oskar_mem_realloc(&vis->vv_metres, num_coords, status);
+    oskar_mem_realloc(&vis->ww_metres, num_coords, status);
+    oskar_mem_realloc(&vis->amplitude, num_amps, status);
 }
 
 #ifdef __cplusplus

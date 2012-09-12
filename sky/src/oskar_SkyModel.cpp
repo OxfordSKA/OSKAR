@@ -101,11 +101,6 @@ int oskar_SkyModel::location() const
     return oskar_sky_model_location(this);
 }
 
-int oskar_SkyModel::resize(int num_sources)
-{
-    return oskar_sky_model_resize(this, num_sources);
-}
-
 int oskar_SkyModel::scale_by_spectral_index(double frequency)
 {
     return oskar_sky_model_scale_by_spectral_index(this, frequency);

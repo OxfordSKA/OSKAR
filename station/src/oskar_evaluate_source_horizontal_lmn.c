@@ -29,21 +29,28 @@
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_cuda_check_error.h"
 #include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
+void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
         oskar_Mem* m, oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
-        const oskar_StationModel* station, double gast)
+        const oskar_StationModel* station, double gast, int* status)
 {
-    int error;
     double last;
 
-    if (!RA || !Dec || !station || !l || !m || !n)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!RA || !Dec || !station || !l || !m || !n || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Make sure the arrays are on the GPU. */
     if (l->location != OSKAR_LOCATION_GPU ||
@@ -51,32 +58,26 @@ int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
             n->location != OSKAR_LOCATION_GPU ||
             RA->location != OSKAR_LOCATION_GPU ||
             Dec->location != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the dimensions are correct. */
     if (num_sources > RA->num_elements || num_sources > Dec->num_elements)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Resize output arrays if needed. */
     if (l->num_elements < num_sources)
-    {
-        error = oskar_mem_realloc(l, num_sources);
-        if (error) return error;
-    }
+        oskar_mem_realloc(l, num_sources, status);
     if (m->num_elements < num_sources)
-    {
-        error = oskar_mem_realloc(m, num_sources);
-        if (error) return error;
-    }
+        oskar_mem_realloc(m, num_sources, status);
     if (n->num_elements < num_sources)
-    {
-        error = oskar_mem_realloc(n, num_sources);
-        if (error) return error;
-    }
+        oskar_mem_realloc(n, num_sources, status);
 
     /* Check that the structures contains some sources. */
     if (!RA->data || !Dec->data || !l->data || !m->data || !n->data)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Local Apparent Sidereal Time, in radians. */
     last = gast + station->longitude_rad;
@@ -86,9 +87,10 @@ int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
             l->type == OSKAR_DOUBLE && m->type == OSKAR_DOUBLE &&
             n->type == OSKAR_DOUBLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, (double*)(RA->data),
+        oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, (double*)(RA->data),
                 (double*)(Dec->data), last, station->latitude_rad,
                 (double*)(l->data), (double*)(m->data), (double*)(n->data));
+        oskar_cuda_check_error(status);
     }
 
     /* Single precision. */
@@ -96,13 +98,14 @@ int oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
             l->type == OSKAR_SINGLE && m->type == OSKAR_SINGLE &&
             n->type == OSKAR_SINGLE)
     {
-        return oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, (float*)(RA->data),
+        oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, (float*)(RA->data),
                 (float*)(Dec->data), (float)last, (float)station->latitude_rad,
                 (float*)(l->data), (float*)(m->data), (float*)(n->data));
+        oskar_cuda_check_error(status);
     }
     else
     {
-        return OSKAR_ERR_TYPE_MISMATCH;
+        *status = OSKAR_ERR_TYPE_MISMATCH;
     }
 }
 

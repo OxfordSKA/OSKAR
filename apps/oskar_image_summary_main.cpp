@@ -170,7 +170,8 @@ int main(int argc, char** argv)
                 error = oskar_mem_binary_stream_read(&temp, stream, &index,
                         OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0);
                 if (error) return OSKAR_FAIL;
-                temp.resize(temp.num_elements + 1);
+                oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
+                if (error) return OSKAR_FAIL;
                 ((char*)temp.data)[temp.num_elements - 1] = 0;
                 printf("- Run Log:\n");
                 printf("%s", (char*)(temp.data));

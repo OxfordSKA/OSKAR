@@ -105,9 +105,6 @@ enum {
     /* Indicates that there is an error in units of some quantity. */
     OSKAR_ERR_BAD_UNITS                = -13,
 
-    /* Indicates that there are no visible sources in the sky model. */
-    OSKAR_ERR_NO_VISIBLE_SOURCES       = -14,
-
     /* Indicates that spline coefficient computation failed. */
     OSKAR_ERR_SPLINE_COEFF_FAIL        = -15,
 

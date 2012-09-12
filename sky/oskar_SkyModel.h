@@ -197,15 +197,6 @@ struct OSKAR_EXPORT oskar_SkyModel
     int location() const;
 
     /**
-     * @brief Resizes the sky model the specified number of sources.
-     *
-     * @param num_sources Number of sources to resize to.
-     *
-     * @return error code.
-     */
-    int resize(int num_sources);
-
-    /**
      * @brief
      * Scales all current source brightnesses according to the spectral index
      * for the given frequency.

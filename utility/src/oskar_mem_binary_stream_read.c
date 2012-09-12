@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
 
     /* Resize memory block if necessary, so that it can hold the data. */
     num_elements = (int)ceil((double)size_bytes / (double)element_size);
-    err = oskar_mem_realloc(data, num_elements);
+    oskar_mem_realloc(data, num_elements, &err);
     if (err)
     {
         oskar_mem_free(&temp);
@@ -149,7 +149,7 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
 
     /* Resize memory block if necessary, so that it can hold the data. */
     num_elements = (int)ceil((double)size_bytes / (double)element_size);
-    err = oskar_mem_realloc(data, num_elements);
+    oskar_mem_realloc(data, num_elements, &err);
     if (err)
     {
         oskar_mem_free(&temp);

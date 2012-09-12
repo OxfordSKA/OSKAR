@@ -39,14 +39,14 @@
 oskar_Jones::oskar_Jones(int type, int location, int num_stations,
         int num_sources)
 {
-	int err = oskar_jones_init(this, type, location, num_stations, num_sources);
+    int err = oskar_jones_init(this, type, location, num_stations, num_sources);
     if (err) throw err;
 }
 
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
 {
-	int err;
-	err = oskar_jones_init(this, other->type(), location,
+    int err;
+    err = oskar_jones_init(this, other->type(), location,
             other->num_stations, other->num_sources);
     if (err) throw err;
     err = oskar_jones_copy(this, other);
@@ -55,7 +55,7 @@ oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
 
 oskar_Jones::~oskar_Jones()
 {
-	int err = oskar_jones_free(this);
+    int err = oskar_jones_free(this);
     if (err) throw err;
 }
 
@@ -77,9 +77,4 @@ int oskar_Jones::join_to_left(oskar_Jones* other) const
 int oskar_Jones::set_real_scalar(double scalar)
 {
     return oskar_jones_set_real_scalar(this, scalar);
-}
-
-int oskar_Jones::set_size(int num_stations, int num_sources)
-{
-    return oskar_jones_set_size(this, num_stations, num_sources);
 }

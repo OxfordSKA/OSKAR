@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,19 @@
 extern "C" {
 #endif
 
-int oskar_mem_clear_contents(oskar_Mem* mem)
+void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
 {
-    int error = 0;
     size_t size;
 
-    /* Check for sane inputs. */
-    if (mem == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Compute the size. */
     size = mem->num_elements * oskar_mem_element_size(mem->type);
@@ -58,14 +63,12 @@ int oskar_mem_clear_contents(oskar_Mem* mem)
     else if (mem->location == OSKAR_LOCATION_GPU)
     {
         cudaMemset(mem->data, 0, size);
-        error = cudaPeekAtLastError();
+        *status = cudaPeekAtLastError();
     }
     else
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
-
-    return error;
 }
 
 #ifdef __cplusplus

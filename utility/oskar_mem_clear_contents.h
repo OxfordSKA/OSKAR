@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,14 +48,11 @@ extern "C" {
  * This functions clears (i.e. sets to all bits zero) the contents of the
  * memory block held by the structure.
  *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in]      dst      Pointer to memory to clear.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_clear_contents(oskar_Mem* dst);
+void oskar_mem_clear_contents(oskar_Mem* dst, int* status);
 
 #ifdef __cplusplus
 }

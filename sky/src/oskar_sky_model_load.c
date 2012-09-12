@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,8 +88,8 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
             {
-                int err;
-                err = oskar_sky_model_resize(&temp_sky, n + 100);
+                int err = 0;
+                oskar_sky_model_resize(&temp_sky, n + 100, &err);
                 if (err)
                 {
                     oskar_sky_model_free(&temp_sky);
@@ -123,8 +123,8 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
             {
-                int err;
-                err = oskar_sky_model_resize(&temp_sky, n + 100);
+                int err = 0;
+                oskar_sky_model_resize(&temp_sky, n + 100, &err);
                 if (err)
                 {
                     oskar_sky_model_free(&temp_sky);

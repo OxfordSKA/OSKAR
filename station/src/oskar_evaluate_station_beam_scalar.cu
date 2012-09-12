@@ -93,19 +93,19 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
     // Resize weights and weights error work arrays if required.
     if (weights->num_elements < num_antennas)
     {
-        error = oskar_mem_realloc(weights, num_antennas);
+        oskar_mem_realloc(weights, num_antennas, &error);
         if (error) return error;
     }
     if (weights_error->num_elements < num_antennas)
     {
-        error = oskar_mem_realloc(weights_error, num_antennas);
+        oskar_mem_realloc(weights_error, num_antennas, &error);
         if (error) return error;
     }
 
     // Resize output array if required.
     if (beam->num_elements < num_points)
     {
-        error = oskar_mem_realloc(beam, num_points);
+        oskar_mem_realloc(beam, num_points, &error);
         if (error) return error;
     }
 

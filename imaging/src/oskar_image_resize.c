@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ extern "C" {
 int oskar_image_resize(oskar_Image* image, int width, int height,
         int num_pols, int num_times, int num_channels)
 {
-    int err, num_elements;
+    int err = 0, num_elements;
 
     /* Sanity check on inputs. */
     if (image == NULL)
@@ -46,7 +46,7 @@ int oskar_image_resize(oskar_Image* image, int width, int height,
 
     /* Reallocate memory. */
     num_elements = width * height * num_pols * num_times * num_channels;
-    err = oskar_mem_realloc(&image->data, num_elements);
+    oskar_mem_realloc(&image->data, num_elements, &err);
     if (err) return err;
 
     /* Set meta-data. */

@@ -29,6 +29,7 @@
 #include "station/test/Test_evaluate_jones_E.h"
 
 #include "sky/oskar_sky_model_write.h"
+#include "sky/oskar_sky_model_resize.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_get_station_pointer.h"
 #include "math/oskar_linspace.h"
@@ -131,7 +132,8 @@ void Test_evaluate_jones_E::evaluate_e()
             set_centre_after, rho, force_centre_point, force_to_edges,
             projection_type);
     num_sources = positions.generate(0, 0);
-    sky_cpu.resize(num_sources);
+    oskar_sky_model_resize(&sky_cpu, num_sources, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     positions.generate(sky_cpu.RA, sky_cpu.Dec);
 
 //    error = oskar_sky_model_write("temp_test_sky.txt", &sky_cpu);

@@ -55,11 +55,12 @@ extern "C" {
  * @param[in]  input     The input sky model.
  * @param[in]  telescope The telescope model.
  * @param[in]  work      Work arrays.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_horizon_clip(oskar_SkyModel* output,
+void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
         const oskar_SkyModel* input, const oskar_TelescopeModel* telescope,
-        double gast, oskar_WorkStationBeam* work);
+        double gast, oskar_WorkStationBeam* work, int* status);
 
 #ifdef __cplusplus
 }

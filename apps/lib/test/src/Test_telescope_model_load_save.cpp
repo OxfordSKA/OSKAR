@@ -37,6 +37,7 @@
 #include "interferometry/oskar_telescope_model_set_station_coords.h"
 #include "station/oskar_StationModel.h"
 #include "station/oskar_station_model_init.h"
+#include "station/oskar_station_model_resize.h"
 #include "station/oskar_station_model_set_element_coords.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_settings_init.h"
@@ -117,7 +118,7 @@ void Test_telescope_model_load_save::test_1_level()
         err = oskar_telescope_model_set_station_coords(&telescope, i,
                 0.0, 0.0, 0.0, (double) i, (double) (2 * i), (double) (3 * i));
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-        err = telescope.station[i].resize(num_elements);
+        oskar_station_model_resize(&telescope.station[i], num_elements, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
         for (int j = 0; j < num_elements; ++j)
@@ -202,7 +203,7 @@ void Test_telescope_model_load_save::test_2_level()
         err = oskar_telescope_model_set_station_coords(&telescope, i,
                 0.0, 0.0, 0.0, (double) i, (double) (2 * i), (double) (3 * i));
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-        err = telescope.station[i].resize(num_tiles);
+        oskar_station_model_resize(&telescope.station[i], num_tiles, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         telescope.station[i].child = (oskar_StationModel*)
                         malloc(sizeof(oskar_StationModel) * num_tiles);

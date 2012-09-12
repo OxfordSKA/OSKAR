@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
 #include "utility/oskar_vector_types.h"
 #include "interferometry/test/Test_Visibilities.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_resize.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_get_pointer.h"
@@ -192,14 +193,15 @@ void Test_Visibilities::test_copy()
 
 void Test_Visibilities::test_resize()
 {
+    int status = 0;
     {
         oskar_Visibilities vis_cpu;
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis_cpu.location());
         CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_channels);
         CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_times);
         CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_baselines);
-        int error = vis_cpu.resize(5, 10, 2);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+        oskar_visibilities_resize(&vis_cpu, 5, 10, 2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(5, vis_cpu.num_channels);
         CPPUNIT_ASSERT_EQUAL(10, vis_cpu.num_times);
         CPPUNIT_ASSERT_EQUAL(2, vis_cpu.num_stations);
@@ -212,8 +214,8 @@ void Test_Visibilities::test_resize()
         CPPUNIT_ASSERT_EQUAL(0, vis_gpu.num_times);
         CPPUNIT_ASSERT_EQUAL(0, vis_gpu.num_baselines);
         CPPUNIT_ASSERT_EQUAL(0, vis_gpu.num_channels);
-        int error = vis_gpu.resize(5, 10, 2);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+        oskar_visibilities_resize(&vis_gpu, 5, 10, 2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(5, vis_gpu.num_channels);
         CPPUNIT_ASSERT_EQUAL(10, vis_gpu.num_times);
         CPPUNIT_ASSERT_EQUAL(1, vis_gpu.num_baselines);
