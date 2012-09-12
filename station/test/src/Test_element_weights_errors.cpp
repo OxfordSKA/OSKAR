@@ -33,6 +33,7 @@
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_multiply.h"
 #include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_Mem.h"
 
 #include <vector_functions.h>
@@ -128,10 +129,10 @@ void Test_element_weights_errors::test_apply()
     oskar_Mem d_phase_error(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
     oskar_Mem h_weights(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, num_elements);
 
-    d_gain.set_value_real(gain);
-    d_gain_error.set_value_real(gain_error);
-    d_phase.set_value_real(phase);
-    d_phase_error.set_value_real(phase_error);
+    oskar_mem_set_value_real(&d_gain, gain);
+    oskar_mem_set_value_real(&d_gain_error, gain_error);
+    oskar_mem_set_value_real(&d_phase, phase);
+    oskar_mem_set_value_real(&d_phase_error, phase_error);
 
     for (int i = 0; i < num_elements; ++i)
     {
@@ -189,10 +190,10 @@ void Test_element_weights_errors::test_reinit()
     oskar_Mem d_phase(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
     oskar_Mem d_phase_error(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
 
-    d_gain.set_value_real(gain);
-    d_gain_error.set_value_real(gain_error);
-    d_phase.set_value_real(phase);
-    d_phase_error.set_value_real(phase_error);
+    oskar_mem_set_value_real(&d_gain, gain);
+    oskar_mem_set_value_real(&d_gain_error, gain_error);
+    oskar_mem_set_value_real(&d_phase, phase);
+    oskar_mem_set_value_real(&d_phase_error, phase_error);
 
     int num_channels = 2;
     int num_chunks = 3;

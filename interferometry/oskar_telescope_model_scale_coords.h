@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,12 +49,11 @@ extern "C" {
  *
  * @param telescope Telescope model structure containing coordinates to scale.
  * @param value     Scaling factor.
- *
- * @return An error code.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
-        double value);
+void oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
+        double value, int* status);
 
 #ifdef __cplusplus
 }

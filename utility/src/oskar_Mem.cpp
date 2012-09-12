@@ -55,16 +55,6 @@ oskar_Mem::~oskar_Mem()
     if (err) throw err;
 }
 
-int oskar_Mem::scale_real(double value)
-{
-    return oskar_mem_scale_real(this, value);
-}
-
-int oskar_Mem::set_value_real(double value)
-{
-    return oskar_mem_set_value_real(this, value);
-}
-
 int oskar_Mem::is_double() const
 {
     return oskar_mem_is_double(this->type);

@@ -42,6 +42,7 @@ int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
         double frequency_hz)
 {
     double wavenumber;
+    int error = 0;
 
     /* Check and update current units. */
     if (station->coord_units != OSKAR_METRES)
@@ -51,7 +52,8 @@ int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
 
     /* Scale to wavenumbers. */
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    return oskar_station_model_scale_coords(station, wavenumber);
+    oskar_station_model_scale_coords(station, wavenumber, &error);
+    return error;
 }
 
 #ifdef __cplusplus

@@ -191,7 +191,7 @@ static int evaluate_EG_AA(oskar_Mem* EG, const oskar_StationModel* station,
             /* Normalise array beam if required. */
             if (station->normalise_beam)
             {
-                error = oskar_mem_scale_real(E_ptr, 1.0/station->num_elements);
+                oskar_mem_scale_real(E_ptr, 1.0/station->num_elements, &error);
                 if (error) return error;
             }
         }
@@ -263,7 +263,7 @@ static int evaluate_EG_AA(oskar_Mem* EG, const oskar_StationModel* station,
             /* Normalise array beam if required. */
             if (station->normalise_beam)
             {
-                error = oskar_mem_scale_real(EG, 1.0/station->num_elements);
+                oskar_mem_scale_real(EG, 1.0/station->num_elements, &error);
                 if (error) return error;
             }
         }

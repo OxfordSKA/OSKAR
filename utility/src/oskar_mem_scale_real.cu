@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_Mem.h"
 
 // Single precision kernel.
@@ -50,76 +51,76 @@ static void oskar_cudak_scale_real_d(int n, double s, double* a)
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_mem_scale_real(oskar_Mem* mem, double value)
+void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
 {
-    int type, location, num_elements, i, num_threads, num_blocks, error = 0;
+    int num_elements, i, num_threads, num_blocks;
 
-    /* Check for sane inputs. */
-    if (mem == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Get memory meta-data. */
-    type = mem->type;
-    location = mem->location;
     num_elements = mem->num_elements;
 
     /* Check if elements are real, complex or matrix. */
-    if (oskar_mem_is_complex(type))
+    if (oskar_mem_is_complex(mem->type))
         num_elements *= 2;
-    if (oskar_mem_is_matrix(type))
+    if (oskar_mem_is_matrix(mem->type))
         num_elements *= 4;
 
     /* Scale the vector. */
-    if (oskar_mem_is_single(type))
+    if (oskar_mem_is_single(mem->type))
     {
-        if (location == OSKAR_LOCATION_CPU)
+        if (mem->location == OSKAR_LOCATION_CPU)
         {
             for (i = 0; i < num_elements; ++i)
             {
                 ((float*)(mem->data))[i] *= (float)value;
             }
         }
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (mem->location == OSKAR_LOCATION_GPU)
         {
             num_threads = 256;
             num_blocks  = (num_elements + num_threads - 1) / num_threads;
             oskar_cudak_scale_real_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
                     (num_elements, value, (float*)(mem->data));
-            cudaDeviceSynchronize();
-            error = cudaPeekAtLastError();
+            oskar_cuda_check_error(status);
         }
         else
         {
-            return OSKAR_ERR_BAD_LOCATION;
+            *status = OSKAR_ERR_BAD_LOCATION;
         }
     }
-    else if (oskar_mem_is_double(type))
+    else if (oskar_mem_is_double(mem->type))
     {
-        if (location == OSKAR_LOCATION_CPU)
+        if (mem->location == OSKAR_LOCATION_CPU)
         {
             for (i = 0; i < num_elements; ++i)
             {
                 ((double*)(mem->data))[i] *= value;
             }
         }
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (mem->location == OSKAR_LOCATION_GPU)
         {
             num_threads = 256;
             num_blocks  = (num_elements + num_threads - 1) / num_threads;
             oskar_cudak_scale_real_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
                     (num_elements, value, (double*)(mem->data));
-            cudaDeviceSynchronize();
-            error = cudaPeekAtLastError();
+            oskar_cuda_check_error(status);
         }
         else
         {
-            return OSKAR_ERR_BAD_LOCATION;
+            *status = OSKAR_ERR_BAD_LOCATION;
         }
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    return error;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,16 @@ extern "C" {
 #endif
 
 /**
- * @brief Scale the coordinates (x,y,z) of a station structure by the specfied
+ * @brief Scale the coordinates (x,y,z) of a station structure by the specified
  * value.
  *
  * @param station Station model structure containing coordinates to scale.
  * @param value   Scaling factor.
- *
- * @return An error code.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_scale_coords(oskar_StationModel* station, double value);
+void oskar_station_model_scale_coords(oskar_StationModel* station, double value,
+        int* status);
 
 #ifdef __cplusplus
 }

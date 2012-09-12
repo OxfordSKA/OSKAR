@@ -115,41 +115,12 @@ struct OSKAR_EXPORT oskar_Mem
      */
     ~oskar_Mem();
 
-    /**
-     * @brief
-     * Scales the contents of the memory by a real number.
-     *
-     * @details
-     * This function multiplies all the elements in a block of memory by a real
-     * number.
-     *
-     * @param[in] value Value by which to scale.
-     *
-     * @return A CUDA or OSKAR error code.
-     */
-    int scale_real(double value);
-
-    /**
-     * @brief
-     * Sets the contents of the memory to a real number.
-     *
-     * @details
-     * This function sets all the elements in a block of memory to a real
-     * number.
-     *
-     * @param[in] value Value to set.
-     *
-     * @return A CUDA or OSKAR error code.
-     */
-    int set_value_real(double value);
-
     int is_double() const;
     int is_single() const;
     int is_complex() const;
     int is_real() const;
     int is_scalar() const;
     int is_matrix() const;
-    int is_null() const {return (data == 0);}
     static int is_double(const int mem_type);
     static int is_complex(const int mem_type);
     static int is_scalar(const int mem_type);

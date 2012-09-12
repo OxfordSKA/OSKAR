@@ -34,30 +34,26 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
-        double value)
+void oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
+        double value, int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!telescope || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
-    /* Sanity check on inputs. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Scale the coordinates. */
-    error = oskar_mem_scale_real(&telescope->station_x, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&telescope->station_y, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&telescope->station_z, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&telescope->station_x_hor, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&telescope->station_y_hor, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&telescope->station_z_hor, value);
-    if (error) return error;
-
-    return error;
+    oskar_mem_scale_real(&telescope->station_x, value, status);
+    oskar_mem_scale_real(&telescope->station_y, value, status);
+    oskar_mem_scale_real(&telescope->station_z, value, status);
+    oskar_mem_scale_real(&telescope->station_x_hor, value, status);
+    oskar_mem_scale_real(&telescope->station_y_hor, value, status);
+    oskar_mem_scale_real(&telescope->station_z_hor, value, status);
 }
 
 #ifdef __cplusplus

@@ -44,6 +44,7 @@
 #include "utility/oskar_log_warning.h"
 #include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_mem_insert.h"
+#include "utility/oskar_mem_scale_real.h"
 #include <cstdio>
 
 extern "C"
@@ -198,8 +199,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         }
 
         // Divide visibilities by number of averages.
-        status = vis.scale_real(1.0 / (num_fringe_ave * num_vis_ave));
-        if (status) return status;
+        oskar_mem_scale_real(&vis, 1.0 / (num_fringe_ave * num_vis_ave),
+                &status);
 
         // Add visibilities to global data.
         oskar_mem_insert(vis_amp, &vis, j * n_baselines, &status);

@@ -44,6 +44,7 @@
 #include "utility/oskar_mem_different.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_set_value_real.h"
+#include "utility/oskar_mem_scale_real.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_file_exists.h"
 #include "utility/oskar_get_error_string.h"
@@ -286,6 +287,7 @@ void Test_Mem::test_type_check()
 void Test_Mem::test_scale_real()
 {
     int n = 100;
+    int status = 0;
 
     // Single precision real.
     {
@@ -298,7 +300,8 @@ void Test_Mem::test_scale_real()
         }
 
         // Scale.
-        mem_cpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_cpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check contents.
         for (int i = 0; i < n; ++i)
@@ -311,7 +314,8 @@ void Test_Mem::test_scale_real()
         oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
         // Scale again.
-        mem_gpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_gpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy back and check contents.
         oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
@@ -334,7 +338,8 @@ void Test_Mem::test_scale_real()
         }
 
         // Scale.
-        mem_cpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_cpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check contents.
         for (int i = 0; i < n; ++i)
@@ -349,7 +354,8 @@ void Test_Mem::test_scale_real()
         oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
         // Scale again.
-        mem_gpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_gpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy back and check contents.
         oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
@@ -380,7 +386,8 @@ void Test_Mem::test_scale_real()
         }
 
         // Scale.
-        mem_cpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_cpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check contents.
         for (int i = 0; i < n; ++i)
@@ -407,7 +414,8 @@ void Test_Mem::test_scale_real()
         oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
         // Scale again.
-        mem_gpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_gpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy back and check contents.
         oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
@@ -443,7 +451,8 @@ void Test_Mem::test_scale_real()
         }
 
         // Scale.
-        mem_cpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_cpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check contents.
         for (int i = 0; i < n; ++i)
@@ -456,7 +465,8 @@ void Test_Mem::test_scale_real()
         oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
         // Scale again.
-        mem_gpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_gpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy back and check contents.
         oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
@@ -479,7 +489,8 @@ void Test_Mem::test_scale_real()
         }
 
         // Scale.
-        mem_cpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_cpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check contents.
         for (int i = 0; i < n; ++i)
@@ -494,7 +505,8 @@ void Test_Mem::test_scale_real()
         oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
         // Scale again.
-        mem_gpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_gpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy back and check contents.
         oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);
@@ -525,7 +537,8 @@ void Test_Mem::test_scale_real()
         }
 
         // Scale.
-        mem_cpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_cpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check contents.
         for (int i = 0; i < n; ++i)
@@ -552,7 +565,8 @@ void Test_Mem::test_scale_real()
         oskar_Mem mem_gpu(&mem_cpu, OSKAR_LOCATION_GPU);
 
         // Scale again.
-        mem_gpu.scale_real(2.0);
+        oskar_mem_scale_real(&mem_gpu, 2.0, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy back and check contents.
         oskar_Mem mem_cpu2(&mem_gpu, OSKAR_LOCATION_CPU);

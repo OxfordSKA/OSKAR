@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,29 +34,26 @@
 extern "C" {
 #endif
 
-int oskar_station_model_scale_coords(oskar_StationModel* station, double value)
+void oskar_station_model_scale_coords(oskar_StationModel* station, double value,
+        int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!station || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
-    /* Sanity check on inputs. */
-    if (station == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Scale the coordinates. */
-    error = oskar_mem_scale_real(&station->x_signal, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&station->y_signal, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&station->z_signal, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&station->x_weights, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&station->y_weights, value);
-    if (error) return error;
-    error = oskar_mem_scale_real(&station->z_weights, value);
-    if (error) return error;
-
-    return error;
+    oskar_mem_scale_real(&station->x_signal, value, status);
+    oskar_mem_scale_real(&station->y_signal, value, status);
+    oskar_mem_scale_real(&station->z_signal, value, status);
+    oskar_mem_scale_real(&station->x_weights, value, status);
+    oskar_mem_scale_real(&station->y_weights, value, status);
+    oskar_mem_scale_real(&station->z_weights, value, status);
 }
 
 #ifdef __cplusplus

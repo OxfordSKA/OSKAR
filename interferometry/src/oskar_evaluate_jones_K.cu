@@ -38,9 +38,8 @@ int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     // Check that the memory is not NULL.
-    if (K->data.is_null() || sky->rel_l.is_null() ||
-            sky->rel_m.is_null() || sky->rel_n.is_null() ||
-            u->is_null() || v->is_null() || w->is_null())
+    if (!K->data.data || !sky->rel_l.data || !sky->rel_m.data ||
+            !sky->rel_n.data || !u->data || !v->data || !w->data)
         return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
     // Check that the data dimensions are OK.

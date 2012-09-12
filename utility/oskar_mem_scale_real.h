@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,15 +50,10 @@ extern "C" {
  *
  * @param[in] mem Pointer to the block of memory to scale.
  * @param[in] value Value by which to scale.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_scale_real(oskar_Mem* mem, double value);
+void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status);
 
 #ifdef __cplusplus
 }

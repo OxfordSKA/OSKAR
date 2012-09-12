@@ -6,7 +6,6 @@ add_subdirectory(cudak)
 
 # ==== Utility library source
 set(utility_SRC
-    src/oskar_ArgumentParser.cpp
     src/oskar_binary_file_query.c
     src/oskar_binary_file_read.c
     src/oskar_binary_file_write.c

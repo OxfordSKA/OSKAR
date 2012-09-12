@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +54,7 @@ int oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope
     /* Multiply station positions by wavenumber. */
     telescope->wavelength_metres = 299792458.0 / frequency_hz;
     wavenumber = 2.0 * M_PI / telescope->wavelength_metres;
-    err = oskar_telescope_model_scale_coords(telescope, wavenumber);
+    oskar_telescope_model_scale_coords(telescope, wavenumber, &err);
     if (err) return err;
 
     /* Multiply station element positions by wavenumber. */

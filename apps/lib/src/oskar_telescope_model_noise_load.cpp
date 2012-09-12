@@ -581,7 +581,7 @@ static int t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
 {
     double k_B = 1.3806488e-23;
     double factor = (2.0 * k_B * 1.0e26) / sqrt(2.0 * bandwidth * integration_time);
-    int err; /* FIXME Replace with status code. */
+    int err = 0; /* FIXME Replace with status code. */
 
     if (rms == NULL || t_sys == NULL || area == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;

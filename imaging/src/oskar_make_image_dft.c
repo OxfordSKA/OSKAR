@@ -79,13 +79,11 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     /* Copy the baselines to temporary GPU memory. */
     oskar_mem_copy(&u, uu_metres, &err);
     oskar_mem_copy(&v, vv_metres, &err);
-    if (err) goto cleanup;
 
     /* Multiply baselines by the wavenumber. */
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    err = oskar_mem_scale_real(&u, wavenumber);
-    if (err) goto cleanup;
-    err = oskar_mem_scale_real(&v, wavenumber);
+    oskar_mem_scale_real(&u, wavenumber, &err);
+    oskar_mem_scale_real(&v, wavenumber, &err);
     if (err) goto cleanup;
 
     /* Check location of the image array. */
@@ -104,7 +102,6 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     {
         err = oskar_mem_init(&t_l, l->type, OSKAR_LOCATION_GPU,
                 l->num_elements, 1);
-        if (err) goto cleanup;
         oskar_mem_copy(&t_l, l, &err);
         if (err) goto cleanup;
         p_l = &t_l;
@@ -113,7 +110,6 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     {
         err = oskar_mem_init(&t_m, m->type, OSKAR_LOCATION_GPU,
                 m->num_elements, 1);
-        if (err) goto cleanup;
         oskar_mem_copy(&t_m, m, &err);
         if (err) goto cleanup;
         p_m = &t_m;
@@ -125,7 +121,6 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     {
         err = oskar_mem_init(&t_amp, amp->type, OSKAR_LOCATION_GPU,
                 amp->num_elements, 1);
-        if (err) goto cleanup;
         oskar_mem_copy(&t_amp, amp, &err);
         if (err) goto cleanup;
         p_amp = &t_amp;
@@ -153,8 +148,7 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     }
 
     /* Scale image by inverse of number of visibilities. */
-    err = oskar_mem_scale_real(p_image, 1.0 / num_vis);
-    if (err) goto cleanup;
+    oskar_mem_scale_real(p_image, 1.0 / num_vis, &err);
 
     /* Copy image back to host memory if required. */
     if (image->location == OSKAR_LOCATION_CPU)
