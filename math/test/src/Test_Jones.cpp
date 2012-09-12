@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,9 @@
 #include <vector_functions.h>
 #include <cuda_runtime_api.h>
 #include "math/oskar_jones_join.h"
+#include "math/oskar_jones_set_real_scalar.h"
 #include "math/oskar_Jones.h"
+#include "utility/oskar_get_error_string.h"
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_cuda_device_info_scan.h"
 
@@ -70,7 +72,7 @@ Test_Jones::~Test_Jones()
 void Test_Jones::test_join_inline_mat_mat_device()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -80,7 +82,8 @@ void Test_Jones::test_join_inline_mat_mat_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_matrix(j1, 0, 1);
@@ -101,7 +104,8 @@ void Test_Jones::test_join_inline_mat_mat_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_matrix(j1, 0, 1);
@@ -120,7 +124,7 @@ void Test_Jones::test_join_inline_mat_mat_device()
 void Test_Jones::test_join_inline_mat_mat_device_host()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -130,7 +134,8 @@ void Test_Jones::test_join_inline_mat_mat_device_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_matrix(j1, 0, 1);
@@ -151,7 +156,8 @@ void Test_Jones::test_join_inline_mat_mat_device_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_matrix(j1, 0, 1);
@@ -170,7 +176,7 @@ void Test_Jones::test_join_inline_mat_mat_device_host()
 void Test_Jones::test_join_inline_mat_mat_host()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -180,7 +186,8 @@ void Test_Jones::test_join_inline_mat_mat_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_matrix(j1, 0, 1);
@@ -201,7 +208,8 @@ void Test_Jones::test_join_inline_mat_mat_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_matrix(j1, 0, 1);
@@ -220,7 +228,7 @@ void Test_Jones::test_join_inline_mat_mat_host()
 void Test_Jones::test_join_inline_mat_sca_device()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -230,7 +238,8 @@ void Test_Jones::test_join_inline_mat_sca_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_scalar(j1, 0, 1);
@@ -251,7 +260,8 @@ void Test_Jones::test_join_inline_mat_sca_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_scalar(j1, 0, 1);
@@ -270,7 +280,7 @@ void Test_Jones::test_join_inline_mat_sca_device()
 void Test_Jones::test_join_inline_mat_sca_device_host()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -280,7 +290,8 @@ void Test_Jones::test_join_inline_mat_sca_device_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_scalar(j1, 0, 1);
@@ -301,7 +312,8 @@ void Test_Jones::test_join_inline_mat_sca_device_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_scalar(j1, 0, 1);
@@ -320,7 +332,7 @@ void Test_Jones::test_join_inline_mat_sca_device_host()
 void Test_Jones::test_join_inline_mat_sca_host()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -330,7 +342,8 @@ void Test_Jones::test_join_inline_mat_sca_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_scalar(j1, 0, 1);
@@ -351,7 +364,8 @@ void Test_Jones::test_join_inline_mat_sca_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_matrix_scalar(j1, 0, 1);
@@ -370,7 +384,7 @@ void Test_Jones::test_join_inline_mat_sca_host()
 void Test_Jones::test_join_inline_sca_sca_device()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -380,7 +394,8 @@ void Test_Jones::test_join_inline_sca_sca_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_scalar_scalar(j1, 0, 1);
@@ -401,7 +416,8 @@ void Test_Jones::test_join_inline_sca_sca_device()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_scalar_scalar(j1, 0, 1);
@@ -420,7 +436,7 @@ void Test_Jones::test_join_inline_sca_sca_device()
 void Test_Jones::test_join_inline_sca_sca_device_host()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -430,7 +446,8 @@ void Test_Jones::test_join_inline_sca_sca_device_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_scalar_scalar(j1, 0, 1);
@@ -451,7 +468,8 @@ void Test_Jones::test_join_inline_sca_sca_device_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_scalar_scalar(j1, 0, 1);
@@ -470,7 +488,7 @@ void Test_Jones::test_join_inline_sca_sca_device_host()
 void Test_Jones::test_join_inline_sca_sca_host()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
 
     // Single precision test.
     {
@@ -480,7 +498,8 @@ void Test_Jones::test_join_inline_sca_sca_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_scalar_scalar(j1, 0, 1);
@@ -501,7 +520,8 @@ void Test_Jones::test_join_inline_sca_sca_host()
                 n_stat, n_src, 1);
 
         // Call wrapper function.
-        fail_on_error ( j1->join_from_right(j2) );
+        oskar_jones_join(j1, j1, j2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         check_scalar_scalar(j1, 0, 1);
@@ -520,7 +540,7 @@ void Test_Jones::test_join_inline_sca_sca_host()
 void Test_Jones::test_set_ones_device()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 100;
+    int n_stat = 25, n_src = 100, status = 0;
     int n = n_src * n_stat;
 
     // Single precision test.
@@ -529,7 +549,8 @@ void Test_Jones::test_set_ones_device()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy result to CPU.
         oskar_Jones* t = new oskar_Jones(j1, 0);
@@ -562,7 +583,8 @@ void Test_Jones::test_set_ones_device()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy result to CPU.
         oskar_Jones* t = new oskar_Jones(j1, 0);
@@ -595,7 +617,7 @@ void Test_Jones::test_set_ones_device()
 void Test_Jones::test_set_ones_host()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 10;
+    int n_stat = 25, n_src = 10, status = 0;
     int n = n_src * n_stat;
 
     // Single precision test.
@@ -604,7 +626,8 @@ void Test_Jones::test_set_ones_host()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         float4c* ptr = (float4c*)j1->data.data;
@@ -633,7 +656,8 @@ void Test_Jones::test_set_ones_host()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
         double4c* ptr = (double4c*)j1->data.data;
@@ -662,7 +686,7 @@ void Test_Jones::test_set_ones_host()
 void Test_Jones::test_performance()
 {
     // Set-up some test parameters.
-    int n_stat = 25, n_src = 50000;
+    int n_stat = 25, n_src = 50000, status = 0;
 
     // Single precision test.
     {
@@ -674,13 +698,16 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
-        fail_on_error ( j2->set_real_scalar(2.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        status = oskar_jones_set_real_scalar(j2, 2.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J3 = J1 * J2.
         TIMER_START
-        fail_on_error( oskar_jones_join(j3, j1, j2) );
+        oskar_jones_join(j3, j1, j2, &status);
         TIMER_STOP("Finished out-of-place join")
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Free memory.
         delete j1;
@@ -696,13 +723,16 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
-        fail_on_error ( j2->set_real_scalar(2.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        status = oskar_jones_set_real_scalar(j2, 2.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J2 = J1 * J2.
         TIMER_START
-        fail_on_error( oskar_jones_join(j2, j1, j2) );
+        oskar_jones_join(j2, j1, j2, &status);
         TIMER_STOP("Finished in-place join")
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Free memory.
         delete j1;
@@ -712,7 +742,7 @@ void Test_Jones::test_performance()
     // Return if no double precision support.
     if (!device_->supports_double) return;
 
-    // Single precision test.
+    // Double precision test.
     {
         oskar_Jones* j1 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX,
                 OSKAR_LOCATION_GPU, n_stat, n_src);
@@ -722,13 +752,16 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
-        fail_on_error ( j2->set_real_scalar(2.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        status = oskar_jones_set_real_scalar(j2, 2.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J3 = J1 * J2.
         TIMER_START
-        fail_on_error( oskar_jones_join(j3, j1, j2) );
+        oskar_jones_join(j3, j1, j2, &status);
         TIMER_STOP("Finished out-of-place join")
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Free memory.
         delete j1;
@@ -736,7 +769,7 @@ void Test_Jones::test_performance()
         delete j3;
     }
 
-    // Single precision test.
+    // Double precision test.
     {
         oskar_Jones* j1 = new oskar_Jones(OSKAR_DOUBLE_COMPLEX,
                 OSKAR_LOCATION_GPU, n_stat, n_src);
@@ -744,13 +777,16 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        fail_on_error ( j1->set_real_scalar(1.0) );
-        fail_on_error ( j2->set_real_scalar(2.0) );
+        status = oskar_jones_set_real_scalar(j1, 1.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+        status = oskar_jones_set_real_scalar(j2, 2.0);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J2 = J1 * J2.
         TIMER_START
-        fail_on_error( oskar_jones_join(j2, j1, j2) );
+        oskar_jones_join(j2, j1, j2, &status);
         TIMER_STOP("Finished in-place join")
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Free memory.
         delete j1;
@@ -1129,17 +1165,4 @@ void Test_Jones::check_scalar_scalar(const oskar_Jones* jones,
 
     // Free temporary host buffer.
     if (jones->location() == 1) delete temp;
-}
-
-/**
- * @details
- * Checks for errors and fails the test if one is found.
- */
-void Test_Jones::fail_on_error(int err)
-{
-    if (err > 0)
-        CPPUNIT_FAIL("CUDA error, code " + oskar_to_std_string(err) +
-                ": " + cudaGetErrorString((cudaError_t)err));
-    else if (err < 0)
-        CPPUNIT_FAIL("OSKAR error, code " + oskar_to_std_string(err));
 }

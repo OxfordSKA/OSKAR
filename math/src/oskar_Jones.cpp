@@ -57,18 +57,3 @@ oskar_Jones::~oskar_Jones()
     int err = oskar_jones_free(this);
     if (err) throw err;
 }
-
-int oskar_Jones::join_from_right(const oskar_Jones* other)
-{
-    return oskar_jones_join(NULL, this, other);
-}
-
-int oskar_Jones::join_to_left(oskar_Jones* other) const
-{
-    return oskar_jones_join(NULL, other, this);
-}
-
-int oskar_Jones::set_real_scalar(double scalar)
-{
-    return oskar_jones_set_real_scalar(this, scalar);
-}

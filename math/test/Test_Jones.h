@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -108,7 +108,6 @@ class Test_Jones : public CppUnit::TestFixture
                 int offset1, int offset2);
         void check_scalar_scalar(const oskar_Jones* data,
                 int offset1, int offset2);
-        void fail_on_error(int err);
 
     private:
         oskar_CudaDeviceInfo* device_;

@@ -90,43 +90,6 @@ struct OSKAR_EXPORT oskar_Jones
      */
     ~oskar_Jones();
 
-    /**
-     * @brief Combines this data with the other Jones matrix.
-     *
-     * @details
-     * This multiplies every Jones matrix in this structure with those in
-     * the other structure.
-     *
-     * Matrix multiplication is done in the order (this) = (this) * (other).
-     *
-     * @param[in] other Pointer to the oskar_Jones structure to merge.
-     */
-    int join_from_right(const oskar_Jones* other);
-
-    /**
-     * @brief Combines this data with the other Jones matrix.
-     *
-     * @details
-     * This multiplies every Jones matrix in this structure with those in
-     * the other structure.
-     *
-     * Matrix multiplication is done in the order (other) = (other) * (this).
-     *
-     * @param[in] other Pointer to the oskar_Jones structure to merge.
-     */
-    int join_to_left(oskar_Jones* other) const;
-
-    /**
-     * @brief Sets all the data elements to a real scalar.
-     *
-     * @details
-     * This sets all the Jones matrices in the structure to a real scalar
-     * number.
-     *
-     * @param[in] other Pointer to the oskar_Jones structure to set.
-     */
-    int set_real_scalar(double scalar);
-
     int type() const {return data.type;}
     int location() const {return data.location;}
 #endif

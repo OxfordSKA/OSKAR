@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,15 +64,11 @@ extern "C" {
  * @param[in,out] j1 On input, pointer to data structure for the first set of
  *                   matrices; on output, the result, if \p j3 is NULL.
  * @param[in]     j2 Pointer to data structure for the second set of matrices.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2);
+void oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2,
+        int* status);
 
 #ifdef __cplusplus
 }

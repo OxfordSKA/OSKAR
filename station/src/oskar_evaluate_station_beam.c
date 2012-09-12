@@ -218,16 +218,14 @@ static int evaluate_EG_AA(oskar_Mem* EG, const oskar_StationModel* station,
         if (E_ptr && G_ptr)
         {
             /* Use E_ptr and G_ptr. */
-            error = oskar_mem_element_multiply(EG, E_ptr, G_ptr,
-                    num_points);
+            oskar_mem_element_multiply(EG, E_ptr, G_ptr, num_points, &error);
             if (error) return error;
         }
         else if (E_ptr && oskar_mem_is_matrix(EG->type))
         {
             /* Join E with an identity matrix in EG. */
             error = oskar_mem_set_value_real(EG, 1.0);
-            if (error) return error;
-            error = oskar_mem_element_multiply(NULL, EG, E_ptr, num_points);
+            oskar_mem_element_multiply(NULL, EG, E_ptr, num_points, &error);
             if (error) return error;
         }
         else if (!E_ptr && !G_ptr)

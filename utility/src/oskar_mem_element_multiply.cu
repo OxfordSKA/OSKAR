@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
@@ -253,26 +254,40 @@ static void oskar_cudak_element_multiply_mm_m_d(const int n, const double4c* a,
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
-        int num)
+void oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
+        int num, int* status)
 {
     oskar_Mem Ct, At, Bt, *Cp, *Ap;
     const oskar_Mem *Bp;
-    int error = 0;
+    int error = OSKAR_ERR_TYPE_MISMATCH; /* Set to type mismatch by default. */
 
-    /* Sanity check on inputs. */
+    /* Check all inputs. */
     if (C == NULL) C = A;
-    if (A == NULL || B == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    if (A->data == NULL || B->data == NULL || C->data == NULL)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (!C || !A || !B || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check memory is allocated. */
+    if (!A->data || !B->data || !C->data)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Set the number of elements to multiply. */
     if (num <= 0) num = A->num_elements;
 
     /* Check that there are enough elements. */
     if (B->num_elements < num || C->num_elements < num)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Copy data to GPU memory if required. */
     oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU, 0, 1);
@@ -280,9 +295,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
     oskar_mem_init(&Bt, B->type, OSKAR_LOCATION_GPU, 0, 1);
     if (C->location != OSKAR_LOCATION_GPU)
     {
-        error = oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU,
+        *status = oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU,
                 C->num_elements, 1);
-        if (error) goto cleanup;
         Cp = &Ct;
     }
     else
@@ -291,8 +305,7 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
     }
     if (A->location != OSKAR_LOCATION_GPU)
     {
-        oskar_mem_copy(&At, A, &error);
-        if (error) goto cleanup;
+        oskar_mem_copy(&At, A, status);
         Ap = &At;
     }
     else
@@ -301,8 +314,7 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
     }
     if (B->location != OSKAR_LOCATION_GPU)
     {
-        oskar_mem_copy(&Bt, B, &error);
-        if (error) goto cleanup;
+        oskar_mem_copy(&Bt, B, status);
         Bp = &Bt;
     }
     else
@@ -310,8 +322,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
         Bp = B;
     }
 
-    /* Set error code to type mismatch by default. */
-    error = OSKAR_ERR_TYPE_MISMATCH;
+    /* Check if safe to proceed. */
+    if (*status) goto cleanup;
 
     /* Multiply the elements. */
     if (A->type == OSKAR_DOUBLE)
@@ -325,8 +337,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_rr_r_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
     }
@@ -341,8 +353,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cc_c_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
             else if (C->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
             {
@@ -351,8 +363,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cc_m_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
         else if (B->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
@@ -364,8 +376,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cm_m_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
     }
@@ -380,8 +392,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cm_m_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Bp, *Ap, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
         else if (B->type == OSKAR_DOUBLE_COMPLEX_MATRIX)
@@ -393,8 +405,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_mm_m_d
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
     }
@@ -409,8 +421,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_rr_r_f
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
     }
@@ -425,8 +437,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cc_c_f
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
             else if (C->type == OSKAR_SINGLE_COMPLEX_MATRIX)
             {
@@ -435,8 +447,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cc_m_f
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
         else if (B->type == OSKAR_SINGLE_COMPLEX_MATRIX)
@@ -448,8 +460,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cm_m_f
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
     }
@@ -464,8 +476,8 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_cm_m_f
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Bp, *Ap, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
         else if (B->type == OSKAR_SINGLE_COMPLEX_MATRIX)
@@ -477,19 +489,21 @@ int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
                 num_blocks = (num + num_threads - 1) / num_threads;
                 oskar_cudak_element_multiply_mm_m_f
                 OSKAR_CUDAK_CONF(num_blocks, num_threads) (num, *Ap, *Bp, *Cp);
-                cudaDeviceSynchronize();
-                error = (int) cudaPeekAtLastError();
+                oskar_cuda_check_error(status);
+                error = 0;
             }
         }
     }
 
+    /* Check for type mismatch error. */
+    if (error) *status = error;
+
     /* Copy result back to host memory if required. */
     if (C->location == OSKAR_LOCATION_CPU)
-        oskar_mem_copy(C, Cp, &error);
+        oskar_mem_copy(C, Cp, status);
 
     cleanup:
     oskar_mem_free(&Ct);
     oskar_mem_free(&At);
     oskar_mem_free(&Bt);
-    return error;
 }

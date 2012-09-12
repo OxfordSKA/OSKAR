@@ -172,7 +172,7 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
                 if (status) return status;
 
                 // Join Jones matrices (K = K * E).
-                status = oskar_jones_join(&K, &K, &E);
+                oskar_jones_join(&K, &K, &E, &status);
                 if (status) return status;
 
                 // Produce visibilities.

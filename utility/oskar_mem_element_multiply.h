@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,10 +59,11 @@ extern "C" {
  * @param[in,out] A   Input and/or output array.
  * @param[in]     B   Second input array.
  * @param[in]     num If >0, use only this number of elements from A and B.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
-        int num);
+void oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
+        int num, int* status);
 
 #ifdef __cplusplus
 }

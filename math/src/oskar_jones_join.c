@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,15 +34,22 @@
 extern "C" {
 #endif
 
-int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
+void oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2,
+        int* status)
 {
     int num_elements, n_sources1, n_sources2, n_sources3;
     int n_stations1, n_stations2, n_stations3;
 
-    /* Sanity check on inputs. */
+    /* Check all inputs. */
     if (j3 == NULL) j3 = j1;
-    if (j1 == NULL || j2 == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!j1 || !j2 || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Get the dimensions of the input data. */
     n_sources1 = j1->num_sources;
@@ -54,14 +61,14 @@ int oskar_jones_join(oskar_Jones* j3, oskar_Jones* j1, const oskar_Jones* j2)
 
     /* Check the data dimensions. */
     if (n_sources1 != n_sources2 || n_sources1 != n_sources3)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
     if (n_stations1 != n_stations2 || n_stations1 != n_stations3)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
     /* Multiply the array elements. */
     num_elements = n_sources1 * n_stations1;
-    return oskar_mem_element_multiply(&j3->data, &j1->data, &j2->data,
-            num_elements);
+    oskar_mem_element_multiply(&j3->data, &j1->data, &j2->data,
+            num_elements, status);
 }
 
 #ifdef __cplusplus

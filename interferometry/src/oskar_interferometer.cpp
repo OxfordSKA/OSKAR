@@ -168,7 +168,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             if (status) return status;
 
             // Join Jones matrices (R = E * R).
-            status = oskar_jones_join(&R, &E, &R);
+            oskar_jones_join(&R, &E, &R, &status);
             if (status) return status;
 
             for (int k = 0; k < num_fringe_ave; ++k)
@@ -189,7 +189,7 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 if (status) return status;
 
                 // Join Jones matrices (J = K * R).
-                status = oskar_jones_join(&J, &K, &R);
+                oskar_jones_join(&J, &K, &R, &status);
                 if (status) return status;
 
                 // Form baseline pairs.
