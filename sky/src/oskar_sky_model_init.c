@@ -29,6 +29,7 @@
 #include "sky/oskar_sky_model_init.h"
 #include "utility/oskar_mem_init.h"
 #include <stdlib.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -88,7 +89,6 @@ int oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
     if (error) return error;
     error = oskar_mem_init(&model->gaussian_c, type, location, num_elements, owner);
     if (error) return error;
-
 
     return error;
 }

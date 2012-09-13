@@ -58,7 +58,7 @@ void oskar_mem_scale_real(oskar_Mem* mem, double value, int* status)
     /* Check all inputs. */
     if (!mem || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

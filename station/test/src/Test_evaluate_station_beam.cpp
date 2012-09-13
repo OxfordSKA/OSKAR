@@ -149,16 +149,16 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
 
     station_gpu.array_is_3d = 0;
     TIMER_START
-    error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, num_pixels, &l_gpu, &m_gpu, &n_gpu, &work,
-            &curand_state);
+    oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
+            beam_m, beam_n, num_pixels, HORIZONTAL_LMN, &l_gpu, &m_gpu, &n_gpu,
+            &n_gpu, &work, &curand_state, &error);
     TIMER_STOP("Finished station beam (2D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     station_gpu.array_is_3d = 1;
     TIMER_START
-    error = oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, num_pixels, &l_gpu, &m_gpu, &n_gpu, &work,
-            &curand_state);
+    oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
+            beam_m, beam_n, num_pixels, HORIZONTAL_LMN, &l_gpu, &m_gpu, &n_gpu,
+            &n_gpu, &work, &curand_state, &error);
     TIMER_STOP("Finished station beam (3D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 

@@ -2,6 +2,11 @@
 # src/CMakeLists.txt (top level CMakeLists.txt)
 #
 
+# HACK FOR OS X to prevent the C++ compiler using clang
+if (APPLE AND NOT CMAKE_CXX_COMPILER)
+    set(CMAKE_CXX_COMPILER g++)
+endif()
+
 # === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)

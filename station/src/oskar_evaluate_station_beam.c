@@ -31,6 +31,7 @@
 #include "station/oskar_evaluate_station_beam_dipoles.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
+#include "station/oskar_evaluate_station_beam_AA.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
@@ -50,233 +51,131 @@ extern "C" {
 #endif
 
 /* Private functions */
-static int parse_inputs(oskar_Mem* EG, const oskar_StationModel* station,
-        int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_states);
-static int evaluate_EG_AA(oskar_Mem* EG, const oskar_StationModel* station,
-        double l_beam, double m_beam, double n_beam, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states);
+static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
+        int num_points, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Mem* horizon_mask,
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
+        int* status);
 
-
-int oskar_evaluate_station_beam(oskar_Mem* EG, const oskar_StationModel* station,
-        double l_beam, double m_beam, double n_beam, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states)
+void oskar_evaluate_station_beam(
+        oskar_Mem* beam,
+        const oskar_StationModel* station,
+        double beam_x,
+        double beam_y,
+        double beam_z,
+        int num_points,
+        coord_type type,
+        const oskar_Mem* x,
+        const oskar_Mem* y,
+        const oskar_Mem* z,
+        const oskar_Mem* horizon_mask,
+        oskar_WorkStationBeam* work,
+        oskar_Device_curand_state* curand_states,
+        int* status)
 {
-    int error = OSKAR_SUCCESS;
+    check_inputs(beam, station, num_points, x, y, z, horizon_mask, work,
+            curand_states, status);
+    if (*status) return;
 
-    /* Sanity check on inputs. */
-    error = parse_inputs(EG, station, num_points, l, m, n, work, curand_states);
 
-    /* Evaluate the station beam for specified station type */
     switch (station->station_type)
     {
         /* Aperture array station */
         case OSKAR_STATION_TYPE_AA:
         {
-            error = evaluate_EG_AA(EG, station, l_beam, m_beam, n_beam,
-                    num_points, l, m, n, work, curand_states);
-            if (error) return error;
+            oskar_evaluate_station_beam_AA(beam, station, beam_x, beam_y,
+                    beam_z, num_points, x, y, z, work, curand_states, status);
+            if (*status) return;
             break;
         }
 
         /* Circular Gaussian beam */
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-            /* FIXME how to set/get this ...? should be in the station model */
-            double fwhm_deg = 1.0;
-            /* FIXME need phase centre relative l,m */
-            oskar_evaluate_station_beam_gaussian(EG, num_points, l, m, fwhm_deg, &error);
-            if (error) return error;
-            /* FIXME horizon clip needed */
+            //            /* FIXME how to set/get this ...? should be in the station model */
+            //            double fwhm_deg = 1.0;
+            //            /* FIXME need phase centre relative l,m */
+            //            oskar_evaluate_station_beam_gaussian(EG, num_points, l, m, fwhm_deg, &error);
+            //            if (error) return error;
+            //            /* FIXME horizon clip needed */
             break;
         }
 
         /* Dish */
         case OSKAR_STATION_TYPE_DISH:
         {
-            return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
         }
 
         default:
         {
-            return OSKAR_ERR_SETTINGS_INTERFEROMETER;
+            *status = OSKAR_ERR_SETTINGS_INTERFEROMETER;
+            return;
         }
-    }
 
-    return error;
+    };
 }
 
 
 
-
-
-/* Private functions */
-
-static int parse_inputs(oskar_Mem* EG, const oskar_StationModel* station,
-        int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_states)
+static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
+        int num_points, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Mem* horizon_mask,
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
+        int* status)
 {
     /* Sanity check on inputs. */
-    if (!EG || !station || !l || !m || !n || !work || !curand_states)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    if (!beam || !station || !x || !y || !z || !horizon_mask || !work ||
+            !curand_states || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    if (*status) return;
 
     /* Check the coordinate units. */
     if (station->coord_units != OSKAR_RADIANS)
-        return OSKAR_ERR_BAD_UNITS;
+    {
+        *status = OSKAR_ERR_BAD_UNITS;
+        return;
+    }
 
     /* Check that there is memory available. */
-    if (!EG->data || !l->data || !m->data || !n->data)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (!beam->data || !x->data || !y->data || !z->data)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Check that the relevant memory is on the GPU. */
     if (oskar_station_model_location(station) != OSKAR_LOCATION_GPU ||
-            EG->location != OSKAR_LOCATION_GPU ||
-            l->location != OSKAR_LOCATION_GPU ||
-            m->location != OSKAR_LOCATION_GPU ||
-            n->location != OSKAR_LOCATION_GPU)
+            beam->location != OSKAR_LOCATION_GPU ||
+            x->location != OSKAR_LOCATION_GPU ||
+            y->location != OSKAR_LOCATION_GPU ||
+            z->location != OSKAR_LOCATION_GPU)
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
     }
 
     /* Check that the array sizes are OK. */
-    if (EG->num_elements < num_points || l->num_elements < num_points ||
-            m->num_elements < num_points || n->num_elements < num_points)
+    if (beam->num_elements < num_points || x->num_elements < num_points ||
+            y->num_elements < num_points || z->num_elements < num_points)
     {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
     }
 
     /* Check the data types. */
-    if (oskar_mem_is_real(EG->type) || oskar_mem_is_complex(l->type) ||
-            oskar_mem_is_complex(m->type) || oskar_mem_is_complex(n->type))
+    if (oskar_mem_is_real(beam->type) || oskar_mem_is_complex(x->type) ||
+            oskar_mem_is_complex(y->type) || oskar_mem_is_complex(x->type))
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
     }
 
-    return OSKAR_SUCCESS;
-}
-
-
-static int evaluate_EG_AA(oskar_Mem* EG, const oskar_StationModel* station,
-        double l_beam, double m_beam, double n_beam, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states)
-{
-    int error = OSKAR_SUCCESS;
-
-    /* Common element model for all detectors in the station. */
-    if (station->single_element_model)
-    {
-        /* E and G are separable. */
-        oskar_Mem *E_ptr = NULL, *G_ptr = NULL;
-
-        /* Evaluate E if required. */
-        if (station->evaluate_array_factor)
-        {
-            /* Get pointer to E. */
-            if (oskar_mem_is_scalar(EG->type))
-                E_ptr = EG; /* Use memory passed to the function. */
-            else
-                E_ptr = &work->E; /* Use work buffer. */
-
-            /* Evaluate array factor. */
-            error = oskar_evaluate_station_beam_scalar(E_ptr, station,
-                    l_beam, m_beam, n_beam, num_points, l, m, n,
-                    &work->weights, &work->weights_error, curand_states);
-            if (error) return error;
-
-            /* Normalise array beam if required. */
-            if (station->normalise_beam)
-            {
-                oskar_mem_scale_real(E_ptr, 1.0/station->num_elements, &error);
-                if (error) return error;
-            }
-        }
-
-        /* Evaluate G if required. */
-        if (station->evaluate_element_factor && station->use_polarised_elements)
-        {
-            /* Get pointer to G. */
-            if (oskar_mem_is_matrix(EG->type))
-                G_ptr = EG; /* Use memory passed to the function. */
-            else
-                G_ptr = &work->G; /* Use work buffer. */
-
-            /* Evaluate element factor. */
-            error = oskar_element_model_evaluate(station->element_pattern,
-                    G_ptr, station->use_polarised_elements,
-                    station->orientation_x, station->orientation_y,
-                    num_points, l, m, n, &work->theta_modified,
-                    &work->phi_modified);
-            if (error) return error;
-        }
-
-        /* Element-wise multiply to join E and G. */
-        if (E_ptr && G_ptr)
-        {
-            /* Use E_ptr and G_ptr. */
-            oskar_mem_element_multiply(EG, E_ptr, G_ptr, num_points, &error);
-            if (error) return error;
-        }
-        else if (E_ptr && oskar_mem_is_matrix(EG->type))
-        {
-            /* Join E with an identity matrix in EG. */
-            error = oskar_mem_set_value_real(EG, 1.0);
-            oskar_mem_element_multiply(NULL, EG, E_ptr, num_points, &error);
-            if (error) return error;
-        }
-        else if (!E_ptr && !G_ptr)
-        {
-            /* No evaluation: set EG to identity matrix. */
-            error = oskar_mem_set_value_real(EG, 1.0);
-            if (error) return error;
-        }
-    }
-
-
-    /* Different element model per detector in the station */
-    /* Can't separate E and G evaluation */
-    else /* (!station->single_element_model) */
-    {
-        /* With unique detector elements: E and G are not separable. */
-        if (!(station->evaluate_array_factor && station->evaluate_element_factor))
-            return OSKAR_ERR_SETTINGS;
-
-        if (!station->use_polarised_elements)
-            return OSKAR_ERR_SETTINGS;
-
-        /* FIXME logic here is a bit messy... */
-        if (!station->element_pattern->theta_re_x.coeff.data)
-        {
-            /* Call function to evaluate beam from dipoles that are
-             * oriented differently. */
-            error = oskar_evaluate_station_beam_dipoles(EG, station,
-                    l_beam, m_beam, n_beam, num_points, l, m, n,
-                    &work->weights, &work->weights_error, curand_states);
-            if (error) return error;
-
-            /* Normalise array beam if required. */
-            if (station->normalise_beam)
-            {
-                oskar_mem_scale_real(EG, 1.0/station->num_elements, &error);
-                if (error) return error;
-            }
-        }
-        else
-        {
-            /* Unique spline patterns: not implemented. */
-            return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-        }
-    }
-
-    /* Blank (zero) sources below the horizon. */
-    error = oskar_blank_below_horizon(EG, n, num_points);
-    if (error) return error;
-
-    return OSKAR_SUCCESS;
 }
 
 

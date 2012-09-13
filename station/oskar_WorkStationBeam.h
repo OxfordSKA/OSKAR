@@ -73,6 +73,8 @@ struct OSKAR_EXPORT oskar_WorkStationBeam
     oskar_Mem G;              /* Complex matrix. */
     oskar_Mem E;              /* Complex scalar. */
 
+    // TODO cuda random number states could go here...?
+
 #ifdef __cplusplus
     /**
      * @brief Constructor.

@@ -74,7 +74,6 @@ class Test_SkyModel : public CppUnit::TestFixture
         void test_evaluate_gaussian_source_parameters();
         void test_insert();
         void test_sky_model_set();
-
 };
 
 // Register the test class.

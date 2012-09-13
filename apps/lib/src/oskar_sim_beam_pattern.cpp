@@ -242,9 +242,10 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 if (err) return err;
 
                 // Evaluate the station beam.
-                err = oskar_evaluate_station_beam(&beam_pattern, station,
-                        beam_l, beam_m, beam_n, num_pixels, &work.hor_l, &work.hor_m,
-                        &work.hor_n, &work, &curand_state);
+                oskar_evaluate_station_beam(&beam_pattern, station,
+                        beam_l, beam_m, beam_n, num_pixels, HORIZONTAL_LMN,
+                        &work.hor_l, &work.hor_m, &work.hor_n, &work.hor_n,
+                        &work, &curand_state, &err);
                 if (err) return err;
 
                 // Copy beam pattern back to host memory.

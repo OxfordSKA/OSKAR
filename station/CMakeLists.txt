@@ -14,6 +14,7 @@ set(station_SRC
     src/oskar_evaluate_beam_horizontal_lmn.c
     src/oskar_evaluate_jones_E.c
     src/oskar_evaluate_source_horizontal_lmn.c
+    src/oskar_evaluate_station_beam_AA.c
     src/oskar_evaluate_element_weights_errors.cu
     src/oskar_evaluate_flux_density.c
     src/oskar_evaluate_station_beam_dipoles.cu
