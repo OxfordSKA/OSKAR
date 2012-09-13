@@ -324,9 +324,6 @@ enum {
 
 
 /* Function to set the status to invalid argument if not already set */
-#ifdef __cplusplus
-extern "C"
-#endif
 static void oskar_set_invalid_argument(int* status)
 {
     if (status)
