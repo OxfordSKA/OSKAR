@@ -194,7 +194,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         int num_samples = num_baselines * num_times;
 
         // Setup the image cube.
-        oskar_image_init(&image, type, location);
+        oskar_image_init(&image, type, location, &err);
         oskar_image_resize(&image, size, size, 1, 1, 1);
         image.centre_ra_deg = 0.0;
         image.centre_dec_deg = 0.0;
