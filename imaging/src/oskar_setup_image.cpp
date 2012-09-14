@@ -103,7 +103,7 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
     // __Note__ the dimension order used here is assumed unchanged from that
     // defined in oskar_image_init()
     oskar_mem_init(&im->settings_path, OSKAR_CHAR, OSKAR_LOCATION_CPU,
-            vis->settings_path.num_elements, OSKAR_TRUE);
+            vis->settings_path.num_elements, OSKAR_TRUE, &err);
     oskar_mem_copy(&im->settings_path, &vis->settings_path, &err);
     if (err) return err;
 

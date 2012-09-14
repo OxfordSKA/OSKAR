@@ -31,17 +31,18 @@
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
         int num_channels, int num_times, int num_stations)
 {
-    int err = oskar_visibilities_init(this, amp_type, location, num_channels,
-            num_times, num_stations);
+    int err = 0;
+    oskar_visibilities_init(this, amp_type, location, num_channels,
+            num_times, num_stations, &err);
     if (err) throw err;
 }
 
 oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
         int location)
 {
-    int err;
-    err = oskar_visibilities_init(this, other->amplitude.type, location,
-            other->num_channels, other->num_times, other->num_stations);
+    int err = 0;
+    oskar_visibilities_init(this, other->amplitude.type, location,
+            other->num_channels, other->num_times, other->num_stations, &err);
     if (err) throw err;
     err = oskar_visibilities_copy(this, other); // Copy other to this.
     if (err) throw err;

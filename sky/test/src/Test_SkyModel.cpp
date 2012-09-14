@@ -436,8 +436,8 @@ void Test_SkyModel::test_split()
     sky_subset_gpu = (oskar_SkyModel*)malloc(num_subsets * sizeof(oskar_SkyModel));
     for (int i = 0; i < num_subsets; ++i)
     {
-        error = oskar_sky_model_init(&sky_subset_gpu[i], sky_subset[i].type(),
-                OSKAR_LOCATION_GPU, 0);
+        oskar_sky_model_init(&sky_subset_gpu[i], sky_subset[i].type(),
+                OSKAR_LOCATION_GPU, 0, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
         oskar_sky_model_copy(&sky_subset_gpu[i], &sky_subset[i], &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);

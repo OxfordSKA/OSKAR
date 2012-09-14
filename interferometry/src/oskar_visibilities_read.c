@@ -84,8 +84,8 @@ int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
     if (err) goto cleanup;
 
     /* Create the visibility structure. */
-    err = oskar_visibilities_init(vis, amp_type, OSKAR_LOCATION_CPU,
-            num_channels, num_times, num_stations);
+    oskar_visibilities_init(vis, amp_type, OSKAR_LOCATION_CPU,
+            num_channels, num_times, num_stations, &err);
     if (err) return err;
 
     /* Optionally read the settings path (ignore the error code). */

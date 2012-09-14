@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,11 +61,9 @@ int oskar_sph_rotate_points(int n, oskar_Mem* lon, oskar_Mem* lat,
     else
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    err = oskar_mem_init(&x, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&y, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&z, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE);
+    oskar_mem_init(&x, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE, &err);
+    oskar_mem_init(&y, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE, &err);
+    oskar_mem_init(&z, type, OSKAR_LOCATION_CPU, n, OSKAR_TRUE, &err);
     if (err) return err;
 
     err = oskar_sph2cart(n, &x, &y, &z, lon, lat);

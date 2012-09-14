@@ -139,19 +139,13 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
         return OSKAR_ERR_BAD_LOCATION;
 
     /* Initialise temporary storage. */
-    err = oskar_mem_init(&m_theta, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&m_phi, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&m_theta_re, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&m_theta_im, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&m_phi_re, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&m_phi_im, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&weight, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_mem_init(&m_theta, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&m_phi, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&m_theta_re, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&m_theta_im, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&m_phi_re, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&m_phi_im, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&weight, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
     if (err) return err;
 
     /* Open the file. */
@@ -453,8 +447,8 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
     /* Store the filename. */
     if (port == 1)
     {
-        err = oskar_mem_init(&data->filename_x, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+        oskar_mem_init(&data->filename_x, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
+                OSKAR_TRUE, &err);
         if (err) return err;
         err = oskar_mem_append_raw(&data->filename_x, filename,
                 OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
@@ -462,8 +456,8 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
     }
     else if (port == 2)
     {
-        err = oskar_mem_init(&data->filename_y, OSKAR_CHAR,
-                OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+        oskar_mem_init(&data->filename_y, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
+                OSKAR_TRUE, &err);
         if (err) return err;
         err = oskar_mem_append_raw(&data->filename_y, filename,
                 OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));

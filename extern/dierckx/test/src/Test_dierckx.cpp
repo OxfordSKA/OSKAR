@@ -197,8 +197,7 @@ static int oskar_spline_data_surfit_fortran(oskar_SplineData* spline,
     nyest = ky + 1 + sqrt_num_points;
     u = nxest - kx - 1;
     v = nyest - ky - 1;
-    err = oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU);
-    if (err) return err;
+    oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU, &err);
     oskar_mem_realloc(&spline->knots_x, nxest, &err);
     oskar_mem_realloc(&spline->knots_y, nyest, &err);
     oskar_mem_realloc(&spline->coeff, u * v, &err);
@@ -493,8 +492,8 @@ void Test_dierckx::test_surfit()
     {
         // Copy the spline data to the GPU.
         oskar_SplineData spline_data_cuda;
-        err = oskar_spline_data_init(&spline_data_cuda, OSKAR_SINGLE,
-                OSKAR_LOCATION_GPU);
+        oskar_spline_data_init(&spline_data_cuda, OSKAR_SINGLE,
+                OSKAR_LOCATION_GPU, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         oskar_spline_data_copy(&spline_data_cuda, &spline_data_c, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);

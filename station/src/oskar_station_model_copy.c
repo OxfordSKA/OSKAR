@@ -90,10 +90,9 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     if (src->element_pattern)
     {
         /* Initialise the element model. */
-        error = oskar_element_model_init(dst->element_pattern,
+        oskar_element_model_init(dst->element_pattern,
                 oskar_element_model_type(src->element_pattern),
-                oskar_station_model_location(dst));
-        if (error) return error;
+                oskar_station_model_location(dst), &error);
 
         /* Copy the element model data. */
         oskar_element_model_copy(dst->element_pattern,

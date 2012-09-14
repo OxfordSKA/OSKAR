@@ -32,7 +32,8 @@
 
 oskar_WorkStationBeam::oskar_WorkStationBeam(int type, int location)
 {
-	int err = oskar_work_station_beam_init(this, type, location);
+	int err = 0;
+	oskar_work_station_beam_init(this, type, location, &err);
     if (err) throw err;
 }
 

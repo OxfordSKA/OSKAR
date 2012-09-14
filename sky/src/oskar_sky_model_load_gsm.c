@@ -55,7 +55,7 @@ static const double boltzmann = 1.3806488e-23; /* Boltzmann constant in J/K. */
 int oskar_sky_model_load_gsm(oskar_SkyModel* sky, oskar_Log* log,
         const char* filename)
 {
-    int err, i, n = 0, nside, type;
+    int err = 0, i, n = 0, nside, type;
     FILE* file;
     char* line = NULL;
     size_t bufsize = 0;
@@ -108,7 +108,7 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, oskar_Log* log,
     }
 
     /* Initialise the temporary sky model. */
-    err = oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, n);
+    oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, n, &err);
     if (err)
     {
         free(temp);

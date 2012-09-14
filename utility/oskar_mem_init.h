@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,16 +53,11 @@ extern "C" {
  * @param[in] location Specify 0 for host memory, 1 for device memory.
  * @param[in] n_elements Number of elements of type \p type in the array.
  * @param[in] owner Flag to specify whether the structure should own the memory.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements,
-        int owner);
+void oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements,
+        int owner, int* status);
 
 #ifdef __cplusplus
 }

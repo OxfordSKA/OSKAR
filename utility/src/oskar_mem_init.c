@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,6 @@
  */
 
 #include "utility/oskar_mem_alloc.h"
-#include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
 
 #include <stdlib.h>
@@ -36,24 +35,27 @@
 extern "C" {
 #endif
 
-int oskar_mem_init(oskar_Mem* mem, int type, int location, int n_elements,
-        int owner)
+void oskar_mem_init(oskar_Mem* mem, int type, int location, int num_elements,
+        int owner, int* status)
 {
-    /* Check that the structure exists. */
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
-    /* Set the meta-data. */
+    /* Initialise meta-data.
+     * (This must happen regardless of the status code.) */
     mem->type = type;
     mem->location = location;
-    mem->num_elements = n_elements;
+    mem->num_elements = num_elements;
     mem->owner = owner;
     mem->data = NULL;
 
     /* Allocate memory. */
     if (owner)
-        return oskar_mem_alloc(mem);
-    else
-        return 0;
+        oskar_mem_alloc(mem, status);
 }
 
 #ifdef __cplusplus

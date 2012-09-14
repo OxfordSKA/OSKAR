@@ -33,7 +33,8 @@
 
 oskar_Image::oskar_Image(int type, int location)
 {
-    int err = oskar_image_init(this, type, location);
+    int err = 0;
+    oskar_image_init(this, type, location, &err);
     if (err) throw err;
 }
 

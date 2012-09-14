@@ -55,6 +55,7 @@ void mex_vis_error_field_(const char* msg)
 
 void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* v_in)
 {
+    int err = 0;
     if (v_in == NULL || v_out == NULL)
         mexErrMsgTxt("ERROR: Invalid inputs.\n");
 
@@ -145,8 +146,8 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
 
     /* Initialise oskar_Visibility structure */
     int location = OSKAR_LOCATION_CPU;
-    int err = oskar_visibilities_init(v_out, type | OSKAR_COMPLEX | OSKAR_MATRIX,
-            location, num_channels, num_times, num_stations);
+    oskar_visibilities_init(v_out, type | OSKAR_COMPLEX | OSKAR_MATRIX,
+            location, num_channels, num_times, num_stations, &err);
     if (err) mexErrMsgIdAndTxt("OSKAR:ERROR", "oskar_visibilities_init() "
             "failed with code %i (%s).\n", err, oskar_get_error_string(err));
 
@@ -154,7 +155,8 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     int length = mxGetN(settings_path_);
     char str_settings_path[200];
     mxGetString(settings_path_, str_settings_path, 200);
-    oskar_mem_init(&(v_out->settings_path), OSKAR_CHAR, location, length, OSKAR_TRUE);
+    oskar_mem_init(&(v_out->settings_path), OSKAR_CHAR, location, length,
+            OSKAR_TRUE, &err);
     memcpy(v_out->settings_path.data, str_settings_path, length*sizeof(char));
     v_out->num_channels = num_channels;
     v_out->num_times = num_times;

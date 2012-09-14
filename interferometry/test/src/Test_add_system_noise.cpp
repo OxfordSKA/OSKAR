@@ -77,7 +77,7 @@ void Test_add_system_noise::test_rms()
     double stddev_start = 1.0;
     double stddev_inc = 1.0;
     double r_stddev = 5000.0;
-    err = oskar_telescope_model_init(&telescope, type, location, num_stations);
+    oskar_telescope_model_init(&telescope, type, location, num_stations, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     for (int i = 0; i < num_stations; ++i)
@@ -118,8 +118,8 @@ void Test_add_system_noise::test_rms()
     oskar_Visibilities vis;
     int num_channels = 1;
     int num_times = 5;
-    err = oskar_visibilities_init(&vis, type | OSKAR_COMPLEX | OSKAR_MATRIX,
-            location, num_channels, num_times, num_stations);
+    oskar_visibilities_init(&vis, type | OSKAR_COMPLEX | OSKAR_MATRIX,
+            location, num_channels, num_times, num_stations, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     vis.freq_start_hz = freq_start;
     vis.freq_inc_hz = freq_inc;

@@ -61,7 +61,7 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     location = mem->location;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
 
     /* Check if data is in CPU or GPU memory. */
     data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;
@@ -129,7 +129,7 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     location = mem->location;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
 
     /* Check if data is in CPU or GPU memory. */
     data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;

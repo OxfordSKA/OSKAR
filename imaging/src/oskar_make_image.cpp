@@ -108,9 +108,9 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
         delta_m = 0 - m1;
         delta_n = 1 - n1;
 
-        err = oskar_mem_init(&uu_rot, type, location, num_elements, OSKAR_TRUE);
-        err = oskar_mem_init(&vv_rot, type, location, num_elements, OSKAR_TRUE);
-        err = oskar_mem_init(&ww_rot, type, location, num_elements, OSKAR_TRUE);
+        oskar_mem_init(&uu_rot, type, location, num_elements, OSKAR_TRUE, &err);
+        oskar_mem_init(&vv_rot, type, location, num_elements, OSKAR_TRUE, &err);
+        oskar_mem_init(&ww_rot, type, location, num_elements, OSKAR_TRUE, &err);
 
         /* Work array for baseline evaluation. */
         oskar_Mem work_uvw(type, location, 3 * vis->num_stations);
@@ -120,10 +120,9 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 ra_rad, dec_rad, vis->num_times,
                 vis->time_start_mjd_utc, vis->time_inc_seconds * SEC2DAYS,
                 &work_uvw, &err);
-        if (err) return err;
     }
 
-    err = oskar_image_init(im, type, location);
+    oskar_image_init(im, type, location, &err);
     if (err) return err;
 
     int size = settings->size;
@@ -197,9 +196,10 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
     oskar_Mem uu_temp, vv_temp, ww_temp;
     if (settings->direction_type == OSKAR_IMAGE_DIRECTION_RA_DEC)
     {
-        err = oskar_mem_init(&uu_temp, type, location, num_vis, OSKAR_TRUE);
-        err = oskar_mem_init(&vv_temp, type, location, num_vis, OSKAR_TRUE);
-        err = oskar_mem_init(&ww_temp, type, location, num_vis, OSKAR_TRUE);
+        oskar_mem_init(&uu_temp, type, location, num_vis, OSKAR_TRUE, &err);
+        oskar_mem_init(&vv_temp, type, location, num_vis, OSKAR_TRUE, &err);
+        oskar_mem_init(&ww_temp, type, location, num_vis, OSKAR_TRUE, &err);
+        if (err) return err;
     }
     oskar_Mem vis_im(type | OSKAR_COMPLEX, location, num_vis);
 

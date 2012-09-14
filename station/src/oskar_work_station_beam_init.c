@@ -33,42 +33,32 @@
 extern "C" {
 #endif
 
-int oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
-        int location)
+void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
+        int location, int* status)
 {
-    int error = 0;
-
-    if (!work)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!work || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    error = oskar_mem_init(&work->horizon_mask, OSKAR_INT, location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->theta_modified, type, location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->phi_modified, type, location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->hor_l, type, location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->hor_m, type, location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->hor_n, type, location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->weights, (type | OSKAR_COMPLEX),
-            location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->weights_error, (type | OSKAR_COMPLEX),
-            location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->E, (type | OSKAR_COMPLEX), location, 0, 1);
-    if (error) return error;
-    error = oskar_mem_init(&work->G, (type | OSKAR_COMPLEX | OSKAR_MATRIX),
-            location, 0, 1);
-    if (error) return error;
-
-    return error;
+    oskar_mem_init(&work->horizon_mask, OSKAR_INT, location, 0, 1, status);
+    oskar_mem_init(&work->theta_modified, type, location, 0, 1, status);
+    oskar_mem_init(&work->phi_modified, type, location, 0, 1, status);
+    oskar_mem_init(&work->hor_l, type, location, 0, 1, status);
+    oskar_mem_init(&work->hor_m, type, location, 0, 1, status);
+    oskar_mem_init(&work->hor_n, type, location, 0, 1, status);
+    oskar_mem_init(&work->weights, (type | OSKAR_COMPLEX),
+            location, 0, 1, status);
+    oskar_mem_init(&work->weights_error, (type | OSKAR_COMPLEX),
+            location, 0, 1, status);
+    oskar_mem_init(&work->E, (type | OSKAR_COMPLEX), location, 0, 1, status);
+    oskar_mem_init(&work->G, (type | OSKAR_COMPLEX | OSKAR_MATRIX),
+            location, 0, 1, status);
 }
 
 #ifdef __cplusplus

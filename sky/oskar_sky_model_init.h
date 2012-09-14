@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,13 +49,11 @@ extern "C" {
  * @param[in]  type         Enumerated data type of memory contents (magic number).
  * @param[in]  location     Specify 0 for host memory, 1 for device memory.
  * @param[in]  num_elements Number of elements of type \p type in the array.
- *
- * @return An error code.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
-        int num_elements);
-
+void oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
+        int num_elements, int* status);
 
 #ifdef __cplusplus
 }

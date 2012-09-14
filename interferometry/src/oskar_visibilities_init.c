@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,23 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_stations)
+void oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
+        int num_channels, int num_times, int num_stations, int* status)
 {
-    int type, num_amps, num_coords, num_baselines, err = 0;
+    int type, num_amps, num_coords, num_baselines;
+
+    /* Check all inputs. */
+    if (!vis || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     if (!oskar_mem_is_complex(amp_type))
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     if (location != OSKAR_LOCATION_GPU && location != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Evaluate the coordinate type. */
     type = oskar_mem_is_double(amp_type) ? OSKAR_DOUBLE : OSKAR_SINGLE;
@@ -68,24 +75,14 @@ int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
     vis->phase_centre_dec_deg = 0.0;
 
     /* Initialise memory. */
-    err = oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->x_metres, type, location, num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->y_metres, type, location, num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->z_metres, type, location, num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->uu_metres, type, location, num_coords, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->vv_metres, type, location, num_coords, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->ww_metres, type, location, num_coords, 1);
-    if (err) return err;
-    err = oskar_mem_init(&vis->amplitude, amp_type, location, num_amps, 1);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_init(&vis->settings_path, OSKAR_CHAR, location, 0, 1, status);
+    oskar_mem_init(&vis->x_metres, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->y_metres, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->z_metres, type, location, num_stations, 1, status);
+    oskar_mem_init(&vis->uu_metres, type, location, num_coords, 1, status);
+    oskar_mem_init(&vis->vv_metres, type, location, num_coords, 1, status);
+    oskar_mem_init(&vis->ww_metres, type, location, num_coords, 1, status);
+    oskar_mem_init(&vis->amplitude, amp_type, location, num_amps, 1, status);
 }
 
 #ifdef __cplusplus

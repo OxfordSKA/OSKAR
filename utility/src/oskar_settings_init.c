@@ -68,9 +68,8 @@ int oskar_settings_init(oskar_Settings* settings)
     noise->value.efficiency.file = NULL;
 
     /* Initialise pathname to settings file. */
-    error = oskar_mem_init(&settings->settings_path, OSKAR_CHAR,
-            OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-    if (error) return error;
+    oskar_mem_init(&settings->settings_path, OSKAR_CHAR,
+            OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &error);
 
     return error;
 }

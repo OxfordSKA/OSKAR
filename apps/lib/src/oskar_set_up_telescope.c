@@ -67,12 +67,12 @@ static int save_telescope(oskar_TelescopeModel *telescope,
 int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
         const oskar_Settings* settings)
 {
-    int err, type;
+    int err = 0, type;
     oskar_log_section(log, "Telescope model");
 
     /* Initialise the structure in CPU memory. */
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    oskar_telescope_model_init(telescope, type, OSKAR_LOCATION_CPU, 0);
+    oskar_telescope_model_init(telescope, type, OSKAR_LOCATION_CPU, 0, &err);
 
     /* Load the layout and configuration */
     err = oskar_telescope_model_config_load(telescope, log, &settings->telescope);

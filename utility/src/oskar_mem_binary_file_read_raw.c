@@ -54,7 +54,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, mem->type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_mem_init(&temp, mem->type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
 
     /* Check if data is in CPU or GPU memory. */
     data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;

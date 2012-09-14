@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,27 @@
 extern "C" {
 #endif
 
-int oskar_jones_init(oskar_Jones* jones, int type, int location,
-        int num_stations, int num_sources)
+void oskar_jones_init(oskar_Jones* jones, int type, int location,
+        int num_stations, int num_sources, int* status)
 {
-    int n_elements, err = 0;
+    int n_elements;
+
+    /* Check all inputs. */
+    if (!jones || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Initialise all members.
+     * (This must happen regardless of the status code.) */
     n_elements = num_stations * num_sources;
     jones->num_stations = num_stations;
     jones->num_sources = num_sources;
     jones->cap_stations = num_stations;
     jones->cap_sources = num_sources;
-    err = oskar_mem_init(&jones->data, type, location, n_elements, OSKAR_TRUE);
-    return err;
+    oskar_mem_init(&jones->data, type, location, n_elements, OSKAR_TRUE,
+            status);
 }
 
 #ifdef __cplusplus

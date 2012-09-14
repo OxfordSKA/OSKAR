@@ -62,13 +62,14 @@ void Test_make_image::test()
     int num_channels  = 2;
     int num_times     = 2;
     int num_stations  = 2;
+    int error = 0;
 
     double freq       = C_0;
     //double lambda     = C_0 / freq;
 
     oskar_Visibilities vis;
     oskar_visibilities_init(&vis, amp_type, location, num_channels, num_times,
-            num_stations);
+            num_stations, &error);
     double* uu_ = (double*)vis.uu_metres.data;
     double* vv_ = (double*)vis.vv_metres.data;
     double* ww_ = (double*)vis.ww_metres.data;

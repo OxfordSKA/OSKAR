@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,16 +53,11 @@ extern "C" {
  * @param[in] location Enumerated memory location (magic number).
  * @param[in] num_stations Number of elements in the station dimension.
  * @param[in] num_sources Number of elements in the source dimension.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_jones_init(oskar_Jones* jones, int type, int location,
-        int num_stations, int num_sources);
+void oskar_jones_init(oskar_Jones* jones, int type, int location,
+        int num_stations, int num_sources, int* status);
 
 #ifdef __cplusplus
 }

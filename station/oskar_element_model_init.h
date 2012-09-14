@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,9 +51,11 @@ extern "C" {
  * @param[in] data     Pointer to data structure.
  * @param[in] type     Type flag (valid types are OSKAR_SINGLE or OSKAR_DOUBLE).
  * @param[in] location Location flag (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_element_model_init(oskar_ElementModel* data, int type, int location);
+void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
+        int* status);
 
 #ifdef __cplusplus
 }

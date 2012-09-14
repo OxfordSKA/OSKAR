@@ -94,7 +94,7 @@ int oskar_image_write(const oskar_Image* image, oskar_Log* log,
         if (err) goto cleanup;
 
         /* Write the settings file. */
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
+        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &err);
         err = oskar_mem_binary_file_read_raw(&temp,
                 (const char*) image->settings_path.data);
         if (err) goto cleanup;

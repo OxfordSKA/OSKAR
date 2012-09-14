@@ -34,9 +34,15 @@
 extern "C" {
 #endif
 
-int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
+void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
+        int* status)
 {
-    int err;
+    /* Check all inputs. */
+    if (!data || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
 
     /* Initialise variables. */
     data->cos_power = 0;
@@ -44,31 +50,19 @@ int oskar_element_model_init(oskar_ElementModel* data, int type, int location)
 
     /* Check type. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise memory. */
-    err = oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1);
-    if (err) return err;
-    err = oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_re_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_im_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_re_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_im_x, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_re_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->phi_im_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_re_y, type, location);
-    if (err) return err;
-    err = oskar_spline_data_init(&data->theta_im_y, type, location);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1, status);
+    oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1, status);
+    oskar_spline_data_init(&data->phi_re_x, type, location, status);
+    oskar_spline_data_init(&data->phi_im_x, type, location, status);
+    oskar_spline_data_init(&data->theta_re_x, type, location, status);
+    oskar_spline_data_init(&data->theta_im_x, type, location, status);
+    oskar_spline_data_init(&data->phi_re_y, type, location, status);
+    oskar_spline_data_init(&data->phi_im_y, type, location, status);
+    oskar_spline_data_init(&data->theta_re_y, type, location, status);
+    oskar_spline_data_init(&data->theta_im_y, type, location, status);
 }
 
 #ifdef __cplusplus

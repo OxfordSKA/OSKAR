@@ -33,21 +33,22 @@
 extern "C" {
 #endif
 
-int oskar_system_noise_model_init(oskar_SystemNoiseModel* noise, int type,
-        int location)
+void oskar_system_noise_model_init(oskar_SystemNoiseModel* noise, int type,
+        int location, int* status)
 {
-    int status = OSKAR_SUCCESS;
+    /* Check all inputs. */
+    if (!noise || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Check type. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    status = oskar_mem_init(&noise->frequency, type, location, 0, OSKAR_TRUE);
-    if (status) return status;
-    status = oskar_mem_init(&noise->rms, type, location, 0, OSKAR_TRUE);
-    if (status) return status;
-
-    return status;
+    oskar_mem_init(&noise->frequency, type, location, 0, OSKAR_TRUE, status);
+    oskar_mem_init(&noise->rms, type, location, 0, OSKAR_TRUE, status);
 }
 
 #ifdef __cplusplus

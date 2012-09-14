@@ -39,15 +39,16 @@
 oskar_Jones::oskar_Jones(int type, int location, int num_stations,
         int num_sources)
 {
-    int err = oskar_jones_init(this, type, location, num_stations, num_sources);
+    int err = 0;
+    oskar_jones_init(this, type, location, num_stations, num_sources, &err);
     if (err) throw err;
 }
 
 oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
 {
     int err = 0;
-    err = oskar_jones_init(this, other->type(), location,
-            other->num_stations, other->num_sources);
+    oskar_jones_init(this, other->type(), location,
+            other->num_stations, other->num_sources, &err);
     oskar_jones_copy(this, other, &err);
     if (err) throw err;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,10 +50,11 @@ extern "C" {
  * @param[in] type         Array element type (OSKAR_SINGLE or OSKAR_DOUBLE).
  * @param[in] location     Memory location (OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU).
  * @param[in] num_stations Number of stations.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int num_stations);
+void oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
+        int location, int num_stations, int* status);
 
 #ifdef __cplusplus
 }

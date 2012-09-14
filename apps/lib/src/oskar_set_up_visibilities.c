@@ -59,9 +59,8 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
     /* Initialise the global visibility structure on the CPU. */
     num_stations = telescope->num_stations;
     num_channels = settings->obs.num_channels;
-    error = oskar_visibilities_init(vis, type, OSKAR_LOCATION_CPU,
-            num_channels, settings->obs.num_time_steps, num_stations);
-    if (error) return error;
+    oskar_visibilities_init(vis, type, OSKAR_LOCATION_CPU,
+            num_channels, settings->obs.num_time_steps, num_stations, &error);
 
     /* Add meta-data. */
     vis->freq_start_hz = settings->obs.start_frequency_hz;
@@ -74,15 +73,13 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
 
     /* Add settings file path. */
     oskar_mem_copy(&vis->settings_path, &settings->settings_path, &error);
-    if (error) return error;
 
     /* Copy station coordinates from telescope model. */
     oskar_mem_copy(&vis->x_metres, &telescope->station_x, &error);
     oskar_mem_copy(&vis->y_metres, &telescope->station_y, &error);
     oskar_mem_copy(&vis->z_metres, &telescope->station_z, &error);
-    if (error) return error;
 
-    return OSKAR_SUCCESS;
+    return error;
 }
 
 #ifdef __cplusplus

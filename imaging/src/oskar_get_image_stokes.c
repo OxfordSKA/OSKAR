@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,7 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
     int type;
     int i;
     int location;
+    int error = 0;
 
     /* Local variables */
     num_vis_pols = oskar_mem_is_matrix(vis->amplitude.type) ? 4 : 1;
@@ -69,7 +70,8 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
             case OSKAR_IMAGE_TYPE_STOKES_I:
             {
                 oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE);
+                        num_vis_amps, OSKAR_TRUE, &error);
+                if (error) return error;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
@@ -92,7 +94,8 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
             case OSKAR_IMAGE_TYPE_STOKES_Q:
             {
                 oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE);
+                        num_vis_amps, OSKAR_TRUE, &error);
+                if (error) return error;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
@@ -115,7 +118,8 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
             case OSKAR_IMAGE_TYPE_STOKES_U:
             {
                 oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE);
+                        num_vis_amps, OSKAR_TRUE, &error);
+                if (error) return error;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
@@ -138,7 +142,8 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
             case OSKAR_IMAGE_TYPE_STOKES_V:
             {
                 oskar_mem_init(stokes, type | OSKAR_COMPLEX, location,
-                        num_vis_amps, OSKAR_TRUE);
+                        num_vis_amps, OSKAR_TRUE, &error);
+                if (error) return error;
                 for (i = 0; i < num_vis_amps; ++i)
                 {
                     if (type == OSKAR_DOUBLE)
@@ -167,7 +172,8 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
     else if (num_vis_pols == 4 && pol == OSKAR_IMAGE_TYPE_STOKES)
     {
         oskar_mem_init(stokes, vis->amplitude.type, location, num_vis_amps,
-                OSKAR_TRUE);
+                OSKAR_TRUE, &error);
+        if (error) return error;
         for (i = 0; i < num_vis_amps; ++i)
         {
             if (type == OSKAR_DOUBLE)
@@ -210,7 +216,8 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
     {
         if (pol != OSKAR_IMAGE_TYPE_STOKES_I) return OSKAR_ERR_UNKNOWN;
         oskar_mem_init(stokes, vis->amplitude.type, location, num_vis_amps,
-                OSKAR_FALSE);
+                OSKAR_FALSE, &error);
+        if (error) return error;
         oskar_mem_assign(stokes, &vis->amplitude);
     }
 

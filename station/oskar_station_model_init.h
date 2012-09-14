@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,16 +51,11 @@ extern "C" {
  * @param[in]  type         Enumerated data type of memory contents (magic number).
  * @param[in]  location     Specify 0 for host memory, 1 for device memory.
  * @param[in]  num_elements Number of elements of type \p type in the array.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_init(oskar_StationModel* model, int type, int location,
-        int num_elements);
+void oskar_station_model_init(oskar_StationModel* model, int type, int location,
+        int num_elements, int* status);
 
 #ifdef __cplusplus
 }

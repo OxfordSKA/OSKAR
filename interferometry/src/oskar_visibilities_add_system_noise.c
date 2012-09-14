@@ -50,7 +50,7 @@ extern "C" {
 int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
         const oskar_TelescopeModel* telescope, unsigned seed)
 {
-    int err;
+    int err = 0;
     int c, t, b;
     oskar_Mem ant1, ant2;
     int location = OSKAR_LOCATION_CPU;
@@ -70,9 +70,8 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
     srand(seed);
 
     /* Evaluate baseline antenna id's. Needed for lookup of station std.dev. */
-    err = oskar_mem_init(&ant1, OSKAR_INT, location, vis->num_baselines, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&ant2, OSKAR_INT, location, vis->num_baselines, OSKAR_TRUE);
+    oskar_mem_init(&ant1, OSKAR_INT, location, vis->num_baselines, OSKAR_TRUE, &err);
+    oskar_mem_init(&ant2, OSKAR_INT, location, vis->num_baselines, OSKAR_TRUE, &err);
     if (err) return err;
     for (b = 0, a1 = 0; a1 < telescope->num_stations; ++a1)
     {

@@ -31,16 +31,17 @@
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
 {
-    int err = oskar_station_model_init(this, type, location, n_elements);
+    int err = 0;
+    oskar_station_model_init(this, type, location, n_elements, &err);
     if (err) throw err;
 }
 
 oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
         int location)
 {
-    int err;
-    err = oskar_station_model_init(this, other->type(), location,
-            other->num_elements);
+    int err = 0;
+    oskar_station_model_init(this, other->type(), location,
+            other->num_elements, &err);
     if (err) throw err;
     err = oskar_station_model_copy(this, other);
     if (err) throw err;

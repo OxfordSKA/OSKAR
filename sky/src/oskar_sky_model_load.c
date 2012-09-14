@@ -47,7 +47,7 @@ static const double arcsec2rad = 4.84813681109535993589914e-6;
 
 int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
 {
-    int type, n = 0;
+    int type, n = 0, error = 0;
     FILE* file;
     char* line = NULL;
     size_t bufsize = 0;
@@ -67,7 +67,7 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
     if (file == NULL) return OSKAR_ERR_FILE_IO;
 
     /* Initialise the temporary sky model. */
-    oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, 0);
+    oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, 0, &error);
 
     if (type == OSKAR_DOUBLE)
     {

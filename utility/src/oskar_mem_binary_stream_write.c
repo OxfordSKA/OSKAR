@@ -58,7 +58,7 @@ int oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
     num_elements = mem->num_elements;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
 
     /* Get the total number of bytes to write. */
     if (num_to_write <= 0)
@@ -112,7 +112,7 @@ int oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
     num_elements = mem->num_elements;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
 
     /* Get the total number of bytes to write. */
     if (num_to_write <= 0)

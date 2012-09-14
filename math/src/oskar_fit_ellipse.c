@@ -105,15 +105,11 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
 
     location = OSKAR_LOCATION_CPU;
 
-    err = oskar_mem_init(&x2, type, location, num_points, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&y2, type, location, num_points, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&X, type, location, 5 * num_points, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&XX, type, location, 5 * num_points, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&sumX, type, location, 5, OSKAR_TRUE);
+    oskar_mem_init(&x2, type, location, num_points, OSKAR_TRUE, &err);
+    oskar_mem_init(&y2, type, location, num_points, OSKAR_TRUE, &err);
+    oskar_mem_init(&X, type, location, 5 * num_points, OSKAR_TRUE, &err);
+    oskar_mem_init(&XX, type, location, 5 * num_points, OSKAR_TRUE, &err);
+    oskar_mem_init(&sumX, type, location, 5, OSKAR_TRUE, &err);
     if (err) return err;
 
     /* remove bias of ellipse */
@@ -204,7 +200,7 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
 
     /* Note: using OSKAR_DOUBLE to create an array of 'long' as its the same
      * number of bytes */
-    err = oskar_mem_init(&ipiv, OSKAR_DOUBLE, location, MIN(m, n), OSKAR_TRUE);
+    oskar_mem_init(&ipiv, OSKAR_DOUBLE, location, MIN(m, n), OSKAR_TRUE, &err);
     if (err) return err;
 
 #ifndef OSKAR_NO_LAPACK

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,62 +35,47 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
-        int num_elements)
+void oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
+        int num_elements, int* status)
 {
     int error = OSKAR_SUCCESS;
     int owner = OSKAR_TRUE;
 
-    if (model == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!model || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     if (location != OSKAR_LOCATION_CPU && location != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Set meta-data */
     model->num_sources = num_elements;
     model->use_extended = OSKAR_FALSE;
 
     /* Initialise the memory. */
-    error = oskar_mem_init(&model->RA, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->Dec, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->I, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->Q, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->U, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->V, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->reference_freq, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->spectral_index, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->rel_l, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->rel_m, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->rel_n, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->FWHM_major, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->FWHM_minor, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->position_angle, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->gaussian_a, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->gaussian_b, type, location, num_elements, owner);
-    if (error) return error;
-    error = oskar_mem_init(&model->gaussian_c, type, location, num_elements, owner);
-    if (error) return error;
-
-    return error;
+    oskar_mem_init(&model->RA, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->Dec, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->I, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->Q, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->U, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->V, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->reference_freq, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->spectral_index, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->rel_l, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->rel_m, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->rel_n, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->FWHM_major, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->FWHM_minor, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->position_angle, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->gaussian_a, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->gaussian_b, type, location, num_elements, owner, status);
+    oskar_mem_init(&model->gaussian_c, type, location, num_elements, owner, status);
 }
 
 #ifdef __cplusplus

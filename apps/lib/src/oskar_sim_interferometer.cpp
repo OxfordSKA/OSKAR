@@ -137,11 +137,10 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     int time_baseline = tel_cpu.num_baselines() * settings.obs.num_time_steps;
     for (int i = 0; i < num_devices; ++i)
     {
-        error = oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
-                time_baseline, true);
-        if (error) return error;
-        error = oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
-                time_baseline, true);
+        oskar_mem_init(&vis_acc[i], complex_matrix, OSKAR_LOCATION_CPU,
+                time_baseline, true, &error);
+        oskar_mem_init(&vis_temp[i], complex_matrix, OSKAR_LOCATION_CPU,
+                time_baseline, true, &error);
         if (error) return error;
         error = cudaSetDevice(settings.sim.cuda_device_ids[i]);
         if (error) return error;

@@ -76,7 +76,7 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
     {
         oskar_SkyModel* sky = &((*set)[i]);
         /* Initialise the new models to resize the source fields */
-        oskar_sky_model_init(sky, model_type, model_location, max_sources_per_model);
+        oskar_sky_model_init(sky, model_type, model_location, max_sources_per_model, &error);
         /* Set the number sources to zero as this is the number currently
          * allocated in the model. */
         sky->num_sources = 0;
@@ -87,7 +87,7 @@ int oskar_sky_model_append_to_set(int* set_size, oskar_SkyModel** set,
     number_to_copy = model->num_sources;
     from_offset = 0;
     /*   Declare pointer into the sky model */
-    error = oskar_sky_model_init(&model_ptr, model_type, model_location, 0);
+    oskar_sky_model_init(&model_ptr, model_type, model_location, 0, &error);
     if (error) return error;
     for (i = (*set_size-1 > 0) ? *set_size-1 : 0; i < *set_size + num_extra_models; ++i)
     {

@@ -433,7 +433,7 @@ static int allocate_children(oskar_StationModel* station, int num_children, int 
     // Initialise each child station.
     for (int i = 0; i < num_children; ++i)
     {
-        error = oskar_station_model_init(&station->child[i], type, OSKAR_LOCATION_CPU, 0);
+        oskar_station_model_init(&station->child[i], type, OSKAR_LOCATION_CPU, 0, &error);
         if (error) return error;
     }
 

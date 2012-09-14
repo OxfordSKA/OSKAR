@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,16 +35,27 @@
 extern "C" {
 #endif
 
-int oskar_mem_alloc(oskar_Mem* mem)
+void oskar_mem_alloc(oskar_Mem* mem, int* status)
 {
     int n_elements, location, type, err = 0;
     size_t element_size, bytes;
 
-    /* Check that the structure exists. */
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check if the structure owns the memory it points to. */
-    if (mem->owner == 0) return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    if (!mem->owner)
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Get the meta-data. */
     n_elements = mem->num_elements;
@@ -53,12 +64,15 @@ int oskar_mem_alloc(oskar_Mem* mem)
 
     /* Check if allocation should happen or not. */
     if (n_elements == 0)
-        return 0;
+        return;
 
     /* Get the memory size. */
     element_size = oskar_mem_element_size(type);
     if (element_size == 0)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
     bytes = n_elements * element_size;
 
     /* Check whether the memory should be on the host or the device. */
@@ -67,20 +81,19 @@ int oskar_mem_alloc(oskar_Mem* mem)
         /* Allocate host memory. */
         mem->data = calloc(bytes, 1);
         if (mem->data == NULL)
-            err = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
         /* Allocate GPU memory. */
         cudaMalloc(&mem->data, bytes);
         cudaMemset(mem->data, 0, bytes);
-        err = cudaPeekAtLastError();
+        *status = cudaPeekAtLastError();
     }
     else
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
-    return err;
 }
 
 #ifdef __cplusplus

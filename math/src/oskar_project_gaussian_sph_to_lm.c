@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,17 +48,18 @@ int oskar_project_gaussian_sph_to_lm(int num_points, oskar_Mem* maj,
         const oskar_Mem* sph_min, const oskar_Mem* sph_pa, const oskar_Mem* lon,
         const oskar_Mem* lat, double lon0, double lat0)
 {
-    int i, j, err;
+    int i, j, err = 0;
     int e_n; /* Number of points on the ellipse */
     oskar_Mem e_l, e_m, e_lon, e_lat; /* Ellipse coordinates */
     double t, a, b;
 
     /* Allocate temp. memory used to store ellipse parameters */
     e_n = 360.0/60.0;
-    oskar_mem_init(&e_l, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
-    oskar_mem_init(&e_m, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
-    oskar_mem_init(&e_lon, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
-    oskar_mem_init(&e_lat, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE);
+    oskar_mem_init(&e_l, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE, &err);
+    oskar_mem_init(&e_m, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE, &err);
+    oskar_mem_init(&e_lon, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE, &err);
+    oskar_mem_init(&e_lat, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, e_n, OSKAR_TRUE, &err);
+    if (err) return err;
 
     a = sph_maj/2.0;
     b = sph_min/2.0;

@@ -42,50 +42,36 @@
 extern "C" {
 #endif
 
-int oskar_station_model_init(oskar_StationModel* model, int type, int location,
-        int num_elements)
+void oskar_station_model_init(oskar_StationModel* model, int type, int location,
+        int num_elements, int* status)
 {
-    int err = 0;
-
-    /* Check for sane inputs. */
-    if (model == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!model || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Check the type. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise the memory. */
-    err = oskar_mem_init(&model->x_signal, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->y_signal, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->z_signal, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->x_weights, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->y_weights, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->z_weights, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->weight, type | OSKAR_COMPLEX, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->gain, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->gain_error, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->phase_offset, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->phase_error, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->cos_orientation_x, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->sin_orientation_x, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->cos_orientation_y, type, location, num_elements, 1);
-    if (err) return err;
-    err = oskar_mem_init(&model->sin_orientation_y, type, location, num_elements, 1);
-    if (err) return err;
+    oskar_mem_init(&model->x_signal, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->y_signal, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->z_signal, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->x_weights, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->y_weights, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->z_weights, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->weight, type | OSKAR_COMPLEX, location, num_elements, 1, status);
+    oskar_mem_init(&model->gain, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->gain_error, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->phase_offset, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->phase_error, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->cos_orientation_x, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->sin_orientation_x, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->cos_orientation_y, type, location, num_elements, 1, status);
+    oskar_mem_init(&model->sin_orientation_y, type, location, num_elements, 1, status);
 
     /* Initialise variables. */
     model->station_type = OSKAR_STATION_TYPE_AA;
@@ -105,8 +91,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     /* Allocate memory for the element model structure and initialise it. */
     model->element_pattern = (oskar_ElementModel*)
             malloc(sizeof(oskar_ElementModel));
-    err = oskar_element_model_init(model->element_pattern, type, location);
-    if (err) return err;
+    oskar_element_model_init(model->element_pattern, type, location, status);
 
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;
@@ -118,10 +103,7 @@ int oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->evaluate_element_factor = OSKAR_TRUE;
     model->bit_depth = 0;
 
-    err = oskar_system_noise_model_init(&model->noise, type, location);
-    if (err) return err;
-
-    return OSKAR_SUCCESS;
+    oskar_system_noise_model_init(&model->noise, type, location, status);
 }
 
 #ifdef __cplusplus

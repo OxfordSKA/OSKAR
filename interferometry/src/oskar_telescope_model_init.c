@@ -38,14 +38,17 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
-        int location, int num_stations)
+void oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
+        int location, int num_stations, int* status)
 {
-    int i = 0, err = 0;
+    int i = 0;
 
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!telescope || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Initialise the meta-data. */
     telescope->num_stations = num_stations;
@@ -63,24 +66,18 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
     telescope->bandwidth_hz = 0.0;
 
     /* Initialise the arrays. */
-    err = oskar_mem_init(&telescope->station_x, type, location,
-            num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y, type, location,
-            num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z, type, location,
-            num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_x_hor, type, location,
-            num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_y_hor, type, location,
-            num_stations, 1);
-    if (err) return err;
-    err = oskar_mem_init(&telescope->station_z_hor, type, location,
-            num_stations, 1);
-    if (err) return err;
+    oskar_mem_init(&telescope->station_x, type, location,
+            num_stations, 1, status);
+    oskar_mem_init(&telescope->station_y, type, location,
+            num_stations, 1, status);
+    oskar_mem_init(&telescope->station_z, type, location,
+            num_stations, 1, status);
+    oskar_mem_init(&telescope->station_x_hor, type, location,
+            num_stations, 1, status);
+    oskar_mem_init(&telescope->station_y_hor, type, location,
+            num_stations, 1, status);
+    oskar_mem_init(&telescope->station_z_hor, type, location,
+            num_stations, 1, status);
 
     /* Initialise the station structures. */
     telescope->station = NULL;
@@ -88,12 +85,9 @@ int oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
         telescope->station = malloc(num_stations * sizeof(oskar_StationModel));
     for (i = 0; i < num_stations; ++i)
     {
-        err = oskar_station_model_init(&(telescope->station[i]), type,
-                location, 0);
-        if (err) return err;
+        oskar_station_model_init(&(telescope->station[i]), type, location, 0,
+                status);
     }
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

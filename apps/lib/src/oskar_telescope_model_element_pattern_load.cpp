@@ -127,8 +127,8 @@ static int load_directories(oskar_TelescopeModel* telescope,
         station->child = (oskar_StationModel*) malloc(num_children*sizeof(oskar_StationModel));
         for (int i = 0; i < num_children; ++i)
         {
-            err = oskar_station_model_init(&station->child[i], type,
-                    OSKAR_LOCATION_CPU, 0);
+            oskar_station_model_init(&station->child[i], type,
+                    OSKAR_LOCATION_CPU, 0, &err);
             if (err) return err;
         }
     }

@@ -30,23 +30,24 @@
 
 oskar_SkyModel::oskar_SkyModel(int type, int location, int num_sources)
 {
-    int err = oskar_sky_model_init(this, type, location, num_sources);
+    int err = 0;
+    oskar_sky_model_init(this, type, location, num_sources, &err);
     if (err) throw err;
 }
 
 oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, int location)
 {
     int err = 0;
-    err = oskar_sky_model_init(this, other->type(), location,
-            other->num_sources);
+    oskar_sky_model_init(this, other->type(), location,
+            other->num_sources, &err);
     oskar_sky_model_copy(this, other, &err);
     if (err) throw err;
 }
 
 oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
 {
-    int err;
-    err = oskar_sky_model_init(this, type, location, 0);
+    int err = 0;
+    oskar_sky_model_init(this, type, location, 0, &err);
     if (err) throw err;
     err = oskar_sky_model_load(this, filename);
     if (err) throw err;

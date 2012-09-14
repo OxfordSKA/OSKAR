@@ -127,7 +127,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Setup image object.
         int type = OSKAR_DOUBLE;
-        oskar_image_init(&image, type, location);
+        oskar_image_init(&image, type, location, &err);
 
         // Make image.
         mexPrintf("= Making image...\n");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,23 +42,19 @@ extern "C" {
 
 /**
  * @brief
- * Initialises a spherical spline data structure.
+ * Initialises a spline data structure.
  *
  * @details
- * This function initialises a spherical spline data structure.
+ * This function initialises a spline data structure.
  *
  * @param[in,out] data Pointer to data structure.
  * @param[in] type Enumerated type of data structure.
  * @param[in] location Enumerated location of memory held in data structure.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_spline_data_init(oskar_SplineData* data, int type, int location);
+void oskar_spline_data_init(oskar_SplineData* data, int type, int location,
+        int* status);
 
 #ifdef __cplusplus
 }

@@ -101,7 +101,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
     {
         oskar_Mem temp;
         oskar_log_section(log, "Run log:");
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
+        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &error);
         oskar_mem_binary_stream_read(&temp, stream, &index,
                 OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0);
         oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
@@ -133,7 +133,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
             type  = (char) (index->data_type[i]);
             idx   = index->user_index[i];
             bytes = index->data_size_bytes[i];
-            oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, 1);
+            oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, 1, &error);
 
             /* Display tag data. */
             oskar_log_message(log, -1, "[%3d] %-23s %5d.%-3d : %-10d (%d bytes)",

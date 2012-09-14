@@ -155,6 +155,7 @@ macro(OSKAR_APP)
         oskar               # default libs
         ${APP_EXTRA_LIBS}   # extra libs
     )
+    # We do need the OpenMP flags here, otherwise programs will crash.
     if (MSVC)
         set_target_properties(${target} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"
@@ -238,6 +239,7 @@ macro(OSKAR_QT_APP)
         oskar oskar_apps ${QT_QTCORE_LIBRARY} # default libs
         ${APP_EXTRA_LIBS}                     # extra libs
     )
+    # We do need the OpenMP flags here, otherwise programs will crash.
     if (MSVC)
         set_target_properties(${target} PROPERTIES
             COMPILE_FLAGS "${OpenMP_CXX_FLAGS}"

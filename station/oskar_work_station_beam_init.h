@@ -50,11 +50,10 @@ extern "C" {
  * @param[in,out] work      Pointer to structure to be initialised.
  * @param[in]     type      OSKAR memory type ID.
  * @param[in]     location  OSKAR memory location ID.
- *
- * @return An error code.
+ * @param[in,out]  status   Status return code.
  */
-int oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
-        int location);
+void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
+        int location, int* status);
 
 #ifdef __cplusplus
 }

@@ -78,7 +78,7 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     if (downsample_factor < 1) downsample_factor = 1;
 
     /* Initialise the temporary sky model. */
-    oskar_sky_model_init(&temp_sky, sky->RA.type, OSKAR_LOCATION_CPU, 0);
+    oskar_sky_model_init(&temp_sky, sky->RA.type, OSKAR_LOCATION_CPU, 0, &err);
 
     /* Open the FITS file. */
     fits_open_file(&fptr, filename, READONLY, &status);

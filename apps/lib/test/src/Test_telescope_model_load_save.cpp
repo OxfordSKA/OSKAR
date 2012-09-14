@@ -214,8 +214,8 @@ void Test_telescope_model_load_save::test_2_level()
                     j, (double) (10 * i + j), (double) (20 * i + j),
                     (double) (30 * i + j), 0.0, 0.0, 0.0);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-            err = oskar_station_model_init(&telescope.station[i].child[j],
-                    OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_elements);
+            oskar_station_model_init(&telescope.station[i].child[j],
+                    OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_elements, &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
             for (int k = 0; k < num_elements; ++k)

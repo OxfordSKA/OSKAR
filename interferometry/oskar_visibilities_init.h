@@ -52,10 +52,11 @@ extern "C" {
  * @param num_channels      Number of frequency channels.
  * @param num_times         Number of time samples.
  * @param num_stations      Number of stations.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
-        int num_channels, int num_times, int num_stations);
+void oskar_visibilities_init(oskar_Visibilities* vis, int amp_type, int location,
+        int num_channels, int num_times, int num_stations, int* status);
 
 #ifdef __cplusplus
 }

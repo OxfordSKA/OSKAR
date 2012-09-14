@@ -67,7 +67,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     double ellipse_a, ellipse_b;
 
     oskar_Mem l, m;
-    int ellipse_num_points;
+    int ellipse_points;
     oskar_Mem lon, lat;
 
     err = OSKAR_SUCCESS;
@@ -126,14 +126,11 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         return OSKAR_ERR_BAD_LOCATION;
     }
 
-    ellipse_num_points = 360/60;
-    err = oskar_mem_init(&l, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&m, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&lon, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
-    if (err) return err;
-    err = oskar_mem_init(&lat, type, OSKAR_LOCATION_CPU, ellipse_num_points, OSKAR_TRUE);
+    ellipse_points = 360/60;
+    oskar_mem_init(&l, type, OSKAR_LOCATION_CPU, ellipse_points, OSKAR_TRUE, &err);
+    oskar_mem_init(&m, type, OSKAR_LOCATION_CPU, ellipse_points, OSKAR_TRUE, &err);
+    oskar_mem_init(&lon, type, OSKAR_LOCATION_CPU, ellipse_points, OSKAR_TRUE, &err);
+    oskar_mem_init(&lat, type, OSKAR_LOCATION_CPU, ellipse_points, OSKAR_TRUE, &err);
     if (err) return err;
 
     if (type == OSKAR_DOUBLE)
@@ -157,22 +154,22 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
             /* Evaluate shape of ellipse on the lm plane */
             ellipse_a = maj/2.0;
             ellipse_b = min/2.0;
-            for (j = 0; j < ellipse_num_points; ++j)
+            for (j = 0; j < ellipse_points; ++j)
             {
                 double t = (double)j * 60.0 * M_PI/180.0;
                 ((double*)l.data)[j] = ellipse_a*cos(t)*sin(pa) + ellipse_b*sin(t)*cos(pa);
                 ((double*)m.data)[j] = ellipse_a*cos(t)*cos(pa) - ellipse_b*sin(t)*sin(pa);
             }
-            oskar_sph_from_lm_d(ellipse_num_points, 0.0, 0.0,
+            oskar_sph_from_lm_d(ellipse_points, 0.0, 0.0,
                     (double*)l.data, (double*)m.data,
                     (double*)lon.data, (double*)lat.data);
-            err = oskar_sph_rotate_points(ellipse_num_points, &lon, &lat, ra, dec);
+            err = oskar_sph_rotate_points(ellipse_points, &lon, &lat, ra, dec);
             if (err) return err;
-            oskar_sph_to_lm_d(ellipse_num_points, ra0, dec0,
+            oskar_sph_to_lm_d(ellipse_points, ra0, dec0,
                     (double*)lon.data, (double*)lat.data,
                     (double*)l.data, (double*)m.data);
             err = oskar_fit_ellipse(log, &maj, &min, &pa,
-                    ellipse_num_points, &l, &m);
+                    ellipse_points, &l, &m);
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
                 /* FIXME HACK */
@@ -217,22 +214,22 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
              /* Evaluate shape of ellipse on the lm plane */
              ellipse_a = maj/2.0;
              ellipse_b = min/2.0;
-             for (j = 0; j < ellipse_num_points; ++j)
+             for (j = 0; j < ellipse_points; ++j)
              {
                  float t = (float)j * 60.0 * M_PI/180.0;
                  ((float*)l.data)[j] = ellipse_a*cosf(t)*sinf(pa) + ellipse_b*sinf(t)*cosf(pa);
                  ((float*)m.data)[j] = ellipse_a*cosf(t)*cosf(pa) - ellipse_b*sinf(t)*sinf(pa);
              }
-             oskar_sph_from_lm_f(ellipse_num_points, 0.0, 0.0,
+             oskar_sph_from_lm_f(ellipse_points, 0.0, 0.0,
                      (float*)l.data, (float*)m.data,
                      (float*)lon.data, (float*)lat.data);
-             err = oskar_sph_rotate_points(ellipse_num_points, &lon, &lat, ra, dec);
+             err = oskar_sph_rotate_points(ellipse_points, &lon, &lat, ra, dec);
              if (err) return err;
-             oskar_sph_to_lm_f(ellipse_num_points, ra0, dec0,
+             oskar_sph_to_lm_f(ellipse_points, ra0, dec0,
                      (float*)lon.data, (float*)lat.data,
                      (float*)l.data, (float*)m.data);
              err = oskar_fit_ellipse(log, &maj, &min, &pa,
-                     ellipse_num_points, &l, &m);
+                     ellipse_points, &l, &m);
              if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
              {
                  /* FIXME HACK */

@@ -103,7 +103,7 @@ int oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
         if (err) goto cleanup;
 
         /* Write the settings file. */
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1);
+        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &err);
         err = oskar_mem_binary_file_read_raw(&temp,
                 (const char*) vis->settings_path.data);
         if (err) goto cleanup;
@@ -134,7 +134,7 @@ int oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
             OSKAR_VIS_TAG_NUM_BASELINES, 0, vis->num_baselines);
 
     /* Write the dimension order. */
-    oskar_mem_init(&temp, OSKAR_INT, OSKAR_LOCATION_CPU, 4, 1);
+    oskar_mem_init(&temp, OSKAR_INT, OSKAR_LOCATION_CPU, 4, 1, &err);
     dim = (int*) temp.data;
     dim[0] = OSKAR_VIS_DIM_CHANNEL;
     dim[1] = OSKAR_VIS_DIM_TIME;

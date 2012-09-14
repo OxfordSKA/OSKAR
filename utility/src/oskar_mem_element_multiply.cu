@@ -290,13 +290,13 @@ void oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
     }
 
     /* Copy data to GPU memory if required. */
-    oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU, 0, 1);
-    oskar_mem_init(&At, A->type, OSKAR_LOCATION_GPU, 0, 1);
-    oskar_mem_init(&Bt, B->type, OSKAR_LOCATION_GPU, 0, 1);
+    oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU, 0, 1, status);
+    oskar_mem_init(&At, A->type, OSKAR_LOCATION_GPU, 0, 1, status);
+    oskar_mem_init(&Bt, B->type, OSKAR_LOCATION_GPU, 0, 1, status);
     if (C->location != OSKAR_LOCATION_GPU)
     {
-        *status = oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU,
-                C->num_elements, 1);
+        oskar_mem_init(&Ct, C->type, OSKAR_LOCATION_GPU,
+                C->num_elements, 1, status);
         Cp = &Ct;
     }
     else

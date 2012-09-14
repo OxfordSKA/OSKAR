@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,9 +59,10 @@ extern "C" {
  * @param[in] image    Pointer to image structure.
  * @param[in] type     Data type of image.
  * @param[in] location Location of image data.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_image_init(oskar_Image* image, int type, int location);
+void oskar_image_init(oskar_Image* image, int type, int location, int* status);
 
 #ifdef __cplusplus
 }

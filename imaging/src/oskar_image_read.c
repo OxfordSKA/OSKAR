@@ -64,7 +64,7 @@ int oskar_image_read(oskar_Image* image, const char* filename, int idx)
     if (err) goto cleanup;
 
     /* Initialise the image. */
-    err = oskar_image_init(image, type, OSKAR_LOCATION_CPU);
+    oskar_image_init(image, type, OSKAR_LOCATION_CPU, &err);
     if (err) goto cleanup;
 
     /* Optionally read the settings path (ignore the error code). */
