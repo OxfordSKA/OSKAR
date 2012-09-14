@@ -69,12 +69,15 @@ int oskar_log_init(oskar_Log* log)
     /* Construct log file name root. */
 #if __STDC_VERSION__ >= 199901L
     n = snprintf(fname1, sizeof(fname1),
-#else
-    n = sprintf(fname1,
-#endif
             "oskar_%.4d-%.2d-%.2d_%.2d%.2d%.2d",
             time_data[5], time_data[4], time_data[3],
             time_data[2], time_data[1], time_data[0]);
+#else
+    n = sprintf(fname1,
+            "oskar_%.4d-%.2d-%.2d_%.2d%.2d%.2d",
+            time_data[5], time_data[4], time_data[3],
+            time_data[2], time_data[1], time_data[0]);
+#endif
     if (n < 0 || n >= (int)sizeof(fname1))
         return OSKAR_ERR_UNKNOWN;
 
@@ -85,20 +88,18 @@ int oskar_log_init(oskar_Log* log)
         if (i == 1)
         {
 #if __STDC_VERSION__ >= 199901L
-            n = snprintf(fname2, sizeof(fname2),
+            n = snprintf(fname2, sizeof(fname2), "%s.log", fname1);
 #else
-            n = sprintf(fname2,
+            n = sprintf(fname2, "%s.log", fname1);
 #endif
-                    "%s.log", fname1);
         }
         else
         {
 #if __STDC_VERSION__ >= 199901L
-            n = snprintf(fname2, sizeof(fname2),
+            n = snprintf(fname2, sizeof(fname2), "%s_%d.log", fname1, i);
 #else
-            n = sprintf(fname2,
+            n = sprintf(fname2, "%s_%d.log", fname1, i);
 #endif
-                    "%s_%d.log", fname1, i);
         }
         if (n < 0 || n >= (int)sizeof(fname1))
             return OSKAR_ERR_UNKNOWN;

@@ -36,8 +36,6 @@ extern "C" {
 
 void oskar_image_init(oskar_Image* image, int type, int location, int* status)
 {
-    int err;
-
     /* Check all inputs. */
     if (!image || !status)
     {

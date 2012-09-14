@@ -38,7 +38,6 @@ extern "C" {
 void oskar_sky_model_init(oskar_SkyModel* model, int type, int location,
         int num_elements, int* status)
 {
-    int error = OSKAR_SUCCESS;
     int owner = OSKAR_TRUE;
 
     /* Check all inputs. */
