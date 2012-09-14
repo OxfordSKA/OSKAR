@@ -79,7 +79,7 @@ extern "C" {
  * @param[in/out] status        OSKAR status code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_station_beam_AA(oskar_Mem* beam,
+void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
         double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, oskar_WorkStationBeam* work,

@@ -74,7 +74,7 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     // Station settings.
     s.beginGroup("station");
     {
-        temp = s.value("station_type", "AA").toString();
+        temp = s.value("station_type", "Aperture Array").toString();
         if (temp.startsWith("A", Qt::CaseInsensitive))
             tel->station.station_type = OSKAR_STATION_TYPE_AA;
         else if (temp.startsWith("G", Qt::CaseInsensitive))

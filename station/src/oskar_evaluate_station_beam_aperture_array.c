@@ -27,7 +27,7 @@
  */
 
 
-#include "station/oskar_evaluate_station_beam_AA.h"
+#include "station/oskar_evaluate_station_beam_aperture_array.h"
 
 #include "station/oskar_evaluate_station_beam_scalar.h"
 #include "station/oskar_element_model_evaluate.h"
@@ -45,12 +45,20 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_station_beam_AA(oskar_Mem* beam,
+void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
         double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, oskar_WorkStationBeam* work,
         oskar_Device_curand_state* curand_states, int* status)
 {
+    if (!beam || !station || !x || !y || !z || !work || !curand_states ||
+            !status)
+    {
+        oskar_set_invalid_argument(status);
+    }
+
+    if (*status) return;
+
     /* Common element model for all detectors in the station. */
     if (station->single_element_model)
     {

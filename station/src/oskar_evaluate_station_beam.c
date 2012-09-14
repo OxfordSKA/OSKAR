@@ -31,7 +31,7 @@
 #include "station/oskar_evaluate_station_beam_dipoles.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "station/oskar_evaluate_station_beam_scalar.h"
-#include "station/oskar_evaluate_station_beam_AA.h"
+#include "station/oskar_evaluate_station_beam_aperture_array.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
@@ -57,20 +57,13 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
         int* status);
 
-void oskar_evaluate_station_beam(
-        oskar_Mem* beam,
-        const oskar_StationModel* station,
-        double beam_x,
-        double beam_y,
-        double beam_z,
-        int num_points,
-        coord_type type,
-        const oskar_Mem* x,
-        const oskar_Mem* y,
-        const oskar_Mem* z,
-        const oskar_Mem* horizon_mask,
-        oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_states,
+
+
+void oskar_evaluate_station_beam(oskar_Mem* beam,
+        const oskar_StationModel* station, double beam_x, double beam_y,
+        double beam_z, int num_points, coord_type type, const oskar_Mem* x,
+        const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* horizon_mask,
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
         int* status)
 {
     check_inputs(beam, station, num_points, x, y, z, horizon_mask, work,
@@ -83,8 +76,9 @@ void oskar_evaluate_station_beam(
         /* Aperture array station */
         case OSKAR_STATION_TYPE_AA:
         {
-            oskar_evaluate_station_beam_AA(beam, station, beam_x, beam_y,
-                    beam_z, num_points, x, y, z, work, curand_states, status);
+            oskar_evaluate_station_beam_aperture_array(beam, station, beam_x,
+                    beam_y, beam_z, num_points, x, y, z, work, curand_states,
+                    status);
             if (*status) return;
             break;
         }
@@ -92,12 +86,14 @@ void oskar_evaluate_station_beam(
         /* Circular Gaussian beam */
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-            //            /* FIXME how to set/get this ...? should be in the station model */
-            //            double fwhm_deg = 1.0;
-            //            /* FIXME need phase centre relative l,m */
-            //            oskar_evaluate_station_beam_gaussian(EG, num_points, l, m, fwhm_deg, &error);
-            //            if (error) return error;
-            //            /* FIXME horizon clip needed */
+#if 0
+            /* FIXME how to set/get this ...? should be in the station model */
+            double fwhm_deg = 1.0;
+            /* FIXME need phase centre relative l,m */
+            oskar_evaluate_station_beam_gaussian(EG, num_points, l, m, fwhm_deg, &error);
+            if (error) return error;
+            /* FIXME horizon clip needed */
+#endif
             break;
         }
 
@@ -175,7 +171,6 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         *status = OSKAR_ERR_BAD_DATA_TYPE;
         return;
     }
-
 }
 
 

@@ -145,7 +145,7 @@ static int evaluate_E_common_sky_identical_stations(oskar_Jones* E,
     /* Evaluate the station beam. */
     error = oskar_jones_get_station_pointer(&E0, E, 0);
     oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, beam_n,
-            sky->num_sources, HORIZONTAL_LMN, &work->hor_l, &work->hor_m,
+            sky->num_sources, HORIZONTAL_XYZ, &work->hor_l, &work->hor_m,
             &work->hor_n, &work->hor_n, work, curand_state, &error);
     if (error) return error;
 
@@ -194,7 +194,7 @@ static int evaluate_E_common_sky_different_stations(oskar_Jones* E,
         station = &telescope->station[i];
         error = oskar_jones_get_station_pointer(&E_station, E, i);
         oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m, beam_n,
-                sky->num_sources, HORIZONTAL_LMN, &work->hor_l, &work->hor_m,
+                sky->num_sources, HORIZONTAL_XYZ, &work->hor_l, &work->hor_m,
                 &work->hor_n, &work->hor_n, work, curand_state, &error);
         if (error) return error;
     }
@@ -231,7 +231,7 @@ static int evaluate_E_different_sky(oskar_Jones* E,
         if (error) return error;
         error = oskar_jones_get_station_pointer(&E_station, E, i);
         oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m, beam_n,
-                sky->num_sources, HORIZONTAL_LMN, &work->hor_l, &work->hor_m,
+                sky->num_sources, HORIZONTAL_XYZ, &work->hor_l, &work->hor_m,
                 &work->hor_n, &work->hor_n, work, curand_state, &error);
         if (error) return error;
     }

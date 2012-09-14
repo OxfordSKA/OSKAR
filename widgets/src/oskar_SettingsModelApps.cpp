@@ -474,14 +474,15 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "If false, then re-evaluate all source positions and all \n"
             "station beams.");
 
+    // Station settings
     group = "telescope/station";
     setLabel(group, "Station settings");
     options.clear();
-    options << "AA" << "Gaussian beam"; // << "Dish";
+    options << "Aperture Array"
+            << "Gaussian beam";
     k = group + "/station_type";
     declare(k, "Station type", options);
-    setTooltip(k, "The type of stations in the interferometer. Currently, \n"
-            "only Aperture Array (AA) stations are allowed.");
+    setTooltip(k, "The type of stations in the interferometer.");
     k = group + "/use_polarised_elements";
     declare(k, "Use polarised elements", oskar_SettingsItem::BOOL, true);
     setTooltip(k, "If true, then treat antennas as polarised; if false, \n"
