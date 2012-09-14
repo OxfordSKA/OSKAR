@@ -36,39 +36,29 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
-        const oskar_TelescopeModel* src)
+void oskar_telescope_model_copy(oskar_TelescopeModel* dst,
+        const oskar_TelescopeModel* src, int* status)
 {
-    int error = OSKAR_SUCCESS, i = 0;
+    int i = 0;
 
-    /* Ensure there is enough room in the station array. */
-    dst->station = realloc(dst->station,
-            src->num_stations * sizeof(oskar_StationModel));
-
-    /* Copy each station. */
-    for (i = 0; i < src->num_stations; ++i)
+    /* Check all inputs. */
+    if (!src || !dst || !status)
     {
-        error = oskar_station_model_copy(&(dst->station[i]),
-                &(src->station[i]));
-        if (error) return error;
+        oskar_set_invalid_argument(status);
+        return;
     }
 
-    /* Copy the coordinates. */
-    oskar_mem_copy(&dst->station_x, &src->station_x, &error);
-    oskar_mem_copy(&dst->station_y, &src->station_y, &error);
-    oskar_mem_copy(&dst->station_z, &src->station_z, &error);
-    oskar_mem_copy(&dst->station_x_hor, &src->station_x_hor, &error);
-    oskar_mem_copy(&dst->station_y_hor, &src->station_y_hor, &error);
-    oskar_mem_copy(&dst->station_z_hor, &src->station_z_hor, &error);
-    if (error) return error;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
-    /* Copy remaining meta-data. */
+    /* Copy the meta-data. */
     dst->num_stations = src->num_stations;
     dst->max_station_size = src->max_station_size;
     dst->coord_units = src->coord_units;
     dst->identical_stations = src->identical_stations;
     dst->use_common_sky = src->use_common_sky;
-    dst->seed_time_variable_station_element_errors = src->seed_time_variable_station_element_errors;
+    dst->seed_time_variable_station_element_errors =
+            src->seed_time_variable_station_element_errors;
     dst->longitude_rad = src->longitude_rad;
     dst->latitude_rad = src->latitude_rad;
     dst->altitude_m = src->altitude_m;
@@ -77,7 +67,24 @@ int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->wavelength_metres = src->wavelength_metres;
     dst->bandwidth_hz = src->bandwidth_hz;
 
-    return OSKAR_SUCCESS;
+    /* Ensure there is enough room in the station array. */
+    dst->station = realloc(dst->station,
+            src->num_stations * sizeof(oskar_StationModel));
+
+    /* Copy each station. */
+    for (i = 0; i < src->num_stations; ++i)
+    {
+        oskar_station_model_copy(&(dst->station[i]), &(src->station[i]),
+                status);
+    }
+
+    /* Copy the coordinates. */
+    oskar_mem_copy(&dst->station_x, &src->station_x, status);
+    oskar_mem_copy(&dst->station_y, &src->station_y, status);
+    oskar_mem_copy(&dst->station_z, &src->station_z, status);
+    oskar_mem_copy(&dst->station_x_hor, &src->station_x_hor, status);
+    oskar_mem_copy(&dst->station_y_hor, &src->station_y_hor, status);
+    oskar_mem_copy(&dst->station_z_hor, &src->station_z_hor, status);
 }
 
 #ifdef __cplusplus

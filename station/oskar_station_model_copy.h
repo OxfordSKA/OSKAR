@@ -49,16 +49,11 @@ extern "C" {
  *
  * @param[out] dst Pointer to destination data structure to copy into.
  * @param[in]  src Pointer to source data structure to copy from.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_copy(oskar_StationModel* dst,
-        const oskar_StationModel* src);
+void oskar_station_model_copy(oskar_StationModel* dst,
+        const oskar_StationModel* src, int* status);
 
 #ifdef __cplusplus
 }

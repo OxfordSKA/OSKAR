@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,15 +53,10 @@ extern "C" {
  *
  * @param[in] mem Pointer to the block of memory to update.
  * @param[in] val All memory elements will be set to this value.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_set_value_real(oskar_Mem* mem, double val);
+void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,11 @@ extern "C" {
  *
  * @param[in,out] dst    Pointer to destination visibility data structure.
  * @param[in]     src    Pointer to source visibility data structure.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_copy(oskar_Visibilities* dst,
-        const oskar_Visibilities* src);
+void oskar_visibilities_copy(oskar_Visibilities* dst,
+        const oskar_Visibilities* src, int* status);
 
 #ifdef __cplusplus
 }

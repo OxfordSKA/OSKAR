@@ -38,7 +38,7 @@ void oskar_sky_model_resize(oskar_SkyModel* sky, int num_sources, int* status)
     /* Check all inputs. */
     if (!sky || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

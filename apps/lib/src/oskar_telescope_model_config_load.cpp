@@ -96,6 +96,8 @@ extern "C"
 int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings)
 {
+    int error = 0;
+
     // Override station element systematic/fixed gain errors if required.
     if (settings->station.element.gain > 0.0 ||
             settings->station.element.gain_error_fixed > 0.0)
@@ -129,7 +131,8 @@ int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             oskar_mem_set_value_real(&telescope->station[i].gain_error,
-                    settings->station.element.gain_error_time);
+                    settings->station.element.gain_error_time, &error);
+            if (error) return error;
         }
     }
 
@@ -164,7 +167,8 @@ int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             oskar_mem_set_value_real(&telescope->station[i].phase_error,
-                    settings->station.element.phase_error_time_rad);
+                    settings->station.element.phase_error_time_rad, &error);
+            if (error) return error;
         }
     }
 

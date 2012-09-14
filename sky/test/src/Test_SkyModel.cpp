@@ -29,6 +29,7 @@
 #include "interferometry/oskar_TelescopeModel.h"
 #include "sky/test/Test_SkyModel.h"
 #include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_append.h"
 #include "sky/oskar_sky_model_copy.h"
 #include "sky/oskar_sky_model_filter_by_flux.h"
 #include "sky/oskar_sky_model_filter_by_radius.h"
@@ -123,6 +124,7 @@ void Test_SkyModel::test_set_source()
 
 void Test_SkyModel::test_append()
 {
+    int status = 0;
     int sky1_num_sources = 2;
     oskar_SkyModel* sky1 = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_GPU,
             sky1_num_sources);
@@ -139,7 +141,8 @@ void Test_SkyModel::test_append()
         double value = (double)i + 0.5;
         sky2->set_source(i, value, value, value, value, value, value, value, value);
     }
-    sky1->append(sky2);
+    oskar_sky_model_append(sky1, sky2, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky1->location());
     oskar_SkyModel sky_temp(sky1, OSKAR_LOCATION_CPU);
     CPPUNIT_ASSERT_EQUAL(sky1_num_sources + sky2_num_sorces, sky_temp.num_sources);

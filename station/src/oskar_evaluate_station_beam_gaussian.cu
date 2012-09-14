@@ -50,7 +50,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     /* Check all inputs. */
     if (!beam || !l || !m || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

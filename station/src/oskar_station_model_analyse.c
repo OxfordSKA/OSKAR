@@ -28,6 +28,7 @@
 
 #include "station/oskar_station_model_analyse.h"
 #include "station/oskar_station_model_type.h"
+#include "station/oskar_station_model_location.h"
 #include "station/oskar_StationModel.h"
 #include <stdlib.h>
 
@@ -37,17 +38,31 @@
 extern "C" {
 #endif
 
-int oskar_station_model_analyse(oskar_StationModel* station,
-        int* finished_identical_station_check)
+void oskar_station_model_analyse(oskar_StationModel* station,
+        int* finished_identical_station_check, int* status)
 {
-    int i, type;
+    int i, type, location;
 
-    /* Sanity check on inputs. */
-    if (station == NULL || finished_identical_station_check == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!station || !finished_identical_station_check || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Get type. */
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get type and location. */
     type = oskar_station_model_type(station);
+    location = oskar_station_model_location(station);
+
+    /* Check station model is in CPU-accessible memory. */
+    if (location != OSKAR_LOCATION_CPU)
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     /* Set default station flags. */
     station->array_is_3d = 0;
@@ -141,8 +156,6 @@ int oskar_station_model_analyse(oskar_StationModel* station,
             }
         }
     }
-
-    return 0;
 }
 
 #ifdef __cplusplus

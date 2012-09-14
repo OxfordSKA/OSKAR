@@ -39,6 +39,7 @@ void oskar_cuda_check_error(int* status)
 
     /* Check inputs. */
     if (!status) return;
+    if (*status) return;
 
     /* Check for CUDA errors. */
 #ifndef NDEBUG

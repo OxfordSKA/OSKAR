@@ -146,7 +146,7 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
     /* Check all inputs. */
     if (!output || !input || !telescope || !work || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_MEM_ADD_H_
 #define OSKAR_MEM_ADD_H_
 
@@ -52,12 +51,11 @@ extern "C" {
  * @param[out] a oskar_Mem pointer with the result of adding b and c.
  * @param[in]  b oskar_Mem pointer
  * @param[in]  c oskar_Mem pointer
- *
- * @return An OSKAR error code.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c);
-
+void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
+        int* status);
 
 #ifdef __cplusplus
 }

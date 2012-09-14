@@ -40,7 +40,7 @@ void oskar_telescope_model_scale_coords(oskar_TelescopeModel* telescope,
     /* Check all inputs. */
     if (!telescope || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

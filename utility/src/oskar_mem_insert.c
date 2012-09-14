@@ -46,7 +46,7 @@ void oskar_mem_insert(oskar_Mem* dst, const oskar_Mem* src, int offset,
     /* Check all inputs. */
     if (!src || !dst || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

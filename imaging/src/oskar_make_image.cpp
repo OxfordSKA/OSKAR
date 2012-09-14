@@ -276,7 +276,7 @@ int oskar_make_image(oskar_Image* im, oskar_Log* log,
                 /* Get visibility amplitudes for imaging. */
                 if (im_type == OSKAR_IMAGE_TYPE_PSF)
                 {
-                    err = oskar_mem_set_value_real(&vis_im, 1.0);
+                    oskar_mem_set_value_real(&vis_im, 1.0, &err);
                     if (err) return err;
                 }
                 else

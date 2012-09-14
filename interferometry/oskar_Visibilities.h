@@ -151,16 +151,6 @@ struct OSKAR_EXPORT oskar_Visibilities
     ~oskar_Visibilities();
 
     /**
-     * @brief Clears contents of the visibility structure.
-     *
-     * @details
-     * Clears the memory contents of the visibility data.
-     *
-     * @return An error code.
-     */
-    int clear_contents();
-
-    /**
      * @brief Writes a visibility structure to an OSKAR binary file.
      *
      * @details

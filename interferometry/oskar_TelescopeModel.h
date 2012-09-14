@@ -106,17 +106,6 @@ struct OSKAR_EXPORT oskar_TelescopeModel
 
     /**
      * @brief
-     * Analyses a telescope model to determine its properties.
-     *
-     * @details
-     * This function analyses a telescope model to determine whether all
-     * stations are identical and whether element errors and/or weights
-     * should be applied. The relevant flags within the structure are updated.
-     */
-    void analyse();
-
-    /**
-     * @brief
      * Loads a telescope coordinate file that specifies the station locations
      * with respect to the local tangent plane.
      *

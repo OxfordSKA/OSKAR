@@ -117,9 +117,19 @@ static void oskar_cudak_set_value_real_m_d(const int n, double4c* p,
 extern "C" {
 #endif
 
-int oskar_mem_set_value_real(oskar_Mem* mem, double val)
+void oskar_mem_set_value_real(oskar_Mem* mem, double val, int* status)
 {
     int i, n, type, location;
+
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Get the data type, location, and number of elements. */
     type = mem->type;
@@ -181,7 +191,7 @@ int oskar_mem_set_value_real(oskar_Mem* mem, double val)
             }
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
@@ -228,12 +238,10 @@ int oskar_mem_set_value_real(oskar_Mem* mem, double val)
                     num_threads) (n, (float4c*)(mem->data), (float)val);
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else
-        return OSKAR_ERR_BAD_LOCATION;
-
-    return OSKAR_SUCCESS;
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

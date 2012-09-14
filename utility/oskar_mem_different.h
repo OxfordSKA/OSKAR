@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,15 +57,15 @@ extern "C" {
  * @param[in] one Pointer to the first data structure.
  * @param[in] two Pointer to the second data structure.
  * @param[in] num_elements Number of elements to check.
+ * @param[in,out]  status   Status return code.
  *
  * @return
  * This function returns OSKAR_TRUE (1) if the contents of the blocks of memory
  * are different, or OSKAR_FALSE (0) if the contents are the same.
- * OSKAR error codes (values < 0) may also be returned.
  */
 OSKAR_EXPORT
 int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
-        int num_elements);
+        int num_elements, int* status);
 
 #ifdef __cplusplus
 }

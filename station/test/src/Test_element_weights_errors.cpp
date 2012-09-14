@@ -110,6 +110,7 @@ void Test_element_weights_errors::test_evaluate()
 void Test_element_weights_errors::test_apply()
 {
     int num_elements   = 10000;
+    int status = 0;
 
     double gain        = 1.5;
     double gain_error  = 0.2;
@@ -129,10 +130,10 @@ void Test_element_weights_errors::test_apply()
     oskar_Mem d_phase_error(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
     oskar_Mem h_weights(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_CPU, num_elements);
 
-    oskar_mem_set_value_real(&d_gain, gain);
-    oskar_mem_set_value_real(&d_gain_error, gain_error);
-    oskar_mem_set_value_real(&d_phase, phase);
-    oskar_mem_set_value_real(&d_phase_error, phase_error);
+    oskar_mem_set_value_real(&d_gain, gain, &status);
+    oskar_mem_set_value_real(&d_gain_error, gain_error, &status);
+    oskar_mem_set_value_real(&d_phase, phase, &status);
+    oskar_mem_set_value_real(&d_phase_error, phase_error, &status);
 
     for (int i = 0; i < num_elements; ++i)
     {
@@ -178,6 +179,7 @@ void Test_element_weights_errors::test_apply()
 void Test_element_weights_errors::test_reinit()
 {
     int num_elements   = 5;
+    int status = 0;
 
     double gain        = 1.5;
     double gain_error  = 0.2;
@@ -190,10 +192,10 @@ void Test_element_weights_errors::test_reinit()
     oskar_Mem d_phase(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
     oskar_Mem d_phase_error(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_elements);
 
-    oskar_mem_set_value_real(&d_gain, gain);
-    oskar_mem_set_value_real(&d_gain_error, gain_error);
-    oskar_mem_set_value_real(&d_phase, phase);
-    oskar_mem_set_value_real(&d_phase_error, phase_error);
+    oskar_mem_set_value_real(&d_gain, gain, &status);
+    oskar_mem_set_value_real(&d_gain_error, gain_error, &status);
+    oskar_mem_set_value_real(&d_phase, phase, &status);
+    oskar_mem_set_value_real(&d_phase_error, phase_error, &status);
 
     int num_channels = 2;
     int num_chunks = 3;

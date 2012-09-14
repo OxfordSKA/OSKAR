@@ -39,7 +39,7 @@ void oskar_image_init(oskar_Image* image, int type, int location, int* status)
     /* Check all inputs. */
     if (!image || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

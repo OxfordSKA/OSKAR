@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_
 #define OSKAR_MEM_ADD_GAUSSIAN_NOISE_H_
 
@@ -41,7 +40,8 @@
 extern "C" {
 #endif
 
-int oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean);
+void oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean,
+        int* status);
 
 #ifdef __cplusplus
 }

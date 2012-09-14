@@ -38,7 +38,7 @@ extern "C" {
 int oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
         double FWHM_major, double FWHM_minor, double position_angle)
 {
-    int error;
+    int error = 0;
 
     if (sky == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;
@@ -50,14 +50,11 @@ int oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    error = oskar_mem_set_value_real(&sky->FWHM_major, FWHM_major);
-    if (error) return error;
-    error = oskar_mem_set_value_real(&sky->FWHM_minor, FWHM_minor);
-    if (error) return error;
-    error = oskar_mem_set_value_real(&sky->position_angle, position_angle);
-    if (error) return error;
+    oskar_mem_set_value_real(&sky->FWHM_major, FWHM_major, &error);
+    oskar_mem_set_value_real(&sky->FWHM_minor, FWHM_minor, &error);
+    oskar_mem_set_value_real(&sky->position_angle, position_angle, &error);
 
-    return OSKAR_SUCCESS;
+    return error;
 }
 
 #ifdef __cplusplus

@@ -42,7 +42,7 @@ void oskar_mem_get_pointer(oskar_Mem* ptr, const oskar_Mem* src,
     /* Check all inputs. */
     if (!ptr || !src || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

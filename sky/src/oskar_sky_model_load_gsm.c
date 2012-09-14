@@ -146,10 +146,10 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, oskar_Log* log,
 
     /* Append data to model and free temporary storage. */
     free(temp);
-    oskar_sky_model_append(sky, &temp_sky);
+    oskar_sky_model_append(sky, &temp_sky, &err);
     oskar_sky_model_free(&temp_sky);
 
-    return 0;
+    return err;
 }
 
 #ifdef __cplusplus

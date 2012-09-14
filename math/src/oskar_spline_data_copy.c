@@ -39,7 +39,7 @@ void oskar_spline_data_copy(oskar_SplineData* dst, const oskar_SplineData* src,
     /* Check all inputs. */
     if (!dst || !src || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

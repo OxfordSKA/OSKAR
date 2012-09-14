@@ -449,19 +449,15 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
     {
         oskar_mem_init(&data->filename_x, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
                 OSKAR_TRUE, &err);
-        if (err) return err;
-        err = oskar_mem_append_raw(&data->filename_x, filename,
-                OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
-        if (err) return err;
+        oskar_mem_append_raw(&data->filename_x, filename, OSKAR_CHAR,
+                OSKAR_LOCATION_CPU, 1 + strlen(filename), &err);
     }
     else if (port == 2)
     {
         oskar_mem_init(&data->filename_y, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0,
                 OSKAR_TRUE, &err);
-        if (err) return err;
-        err = oskar_mem_append_raw(&data->filename_y, filename,
-                OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
-        if (err) return err;
+        oskar_mem_append_raw(&data->filename_y, filename, OSKAR_CHAR,
+                OSKAR_LOCATION_CPU, 1 + strlen(filename), &err);
     }
 
     /* Free temporary storage. */

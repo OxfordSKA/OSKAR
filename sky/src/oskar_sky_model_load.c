@@ -123,13 +123,12 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
             {
-                int err = 0;
-                oskar_sky_model_resize(&temp_sky, n + 100, &err);
-                if (err)
+                oskar_sky_model_resize(&temp_sky, n + 100, &error);
+                if (error)
                 {
                     oskar_sky_model_free(&temp_sky);
                     fclose(file);
-                    return err;
+                    return error;
                 }
             }
             oskar_sky_model_set_source(&temp_sky, n,
@@ -142,7 +141,7 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
 
     /* Record the number of elements loaded. */
     temp_sky.num_sources = n;
-    oskar_sky_model_append(sky, &temp_sky);
+    oskar_sky_model_append(sky, &temp_sky, &error);
 
     /* Free the temporary sky model. */
     oskar_sky_model_free(&temp_sky);
@@ -151,7 +150,7 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
     if (line) free(line);
     fclose(file);
 
-    return 0;
+    return error;
 }
 
 #ifdef __cplusplus

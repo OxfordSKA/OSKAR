@@ -456,7 +456,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             oskar_log_message(log, 1, "Writing sky model file to disk as: %s",
                     filename);
             oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, 0);
-            oskar_sky_model_combine_set(&temp, *sky_chunks, *num_chunks);
+            oskar_sky_model_combine_set(&temp, *sky_chunks, *num_chunks, &error);
             temp.write(filename);
         }
     }

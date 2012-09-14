@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,11 @@ extern "C" {
  *
  * @param dst Telescope model structure to copy into.
  * @param src Telescope model structure to copy from.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_copy(oskar_TelescopeModel* dst,
-        const oskar_TelescopeModel* src);
+void oskar_telescope_model_copy(oskar_TelescopeModel* dst,
+        const oskar_TelescopeModel* src, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
  * @file oskar_visibilities_clear_contents.h
  */
 
-
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 
@@ -48,9 +47,10 @@ extern "C" {
  * This function clears the contents of the memory in the structure.
  *
  * @param vis  Pointer to the visibility data structure to clear.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_clear_contents(oskar_Visibilities* vis);
+void oskar_visibilities_clear_contents(oskar_Visibilities* vis, int* status);
 
 #ifdef __cplusplus
 }

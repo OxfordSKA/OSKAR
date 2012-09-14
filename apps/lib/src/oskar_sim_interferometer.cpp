@@ -184,9 +184,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
                     i, num_sky_chunks);
             if (error) continue;
 
-            error = oskar_mem_add(&(vis_acc[thread_id]),
-                    &(vis_acc[thread_id]), &(vis_temp[thread_id]));
-            if (error) continue;
+            oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
+                    &(vis_temp[thread_id]), &error);
         }
 #pragma omp barrier
         if (error) return error;
@@ -198,8 +197,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         // Accumulate into global vis structure.
         for (int i = 0; i < num_devices; ++i)
         {
-            error = oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i]);
-            if (error) return error;
+            oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i], &error);
 
             // Clear thread accumulation buffer.
             oskar_mem_clear_contents(&vis_acc[i], &error);

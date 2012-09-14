@@ -96,7 +96,8 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
 
     /* Analyse telescope model to determine whether stations are identical,
      * whether to apply element errors and/or weights. */
-    oskar_telescope_model_analyse(telescope);
+    oskar_telescope_model_analyse(telescope, &err);
+    if (err) return err;
 
     /* Print summary data. */
     oskar_log_message(log, 0, "Telescope model summary");

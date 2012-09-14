@@ -384,7 +384,7 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
 
     /* Record the number of elements loaded. */
     temp_sky.num_sources = j;
-    oskar_sky_model_append(sky, &temp_sky);
+    oskar_sky_model_append(sky, &temp_sky, &err);
     oskar_log_message(ptr, 0, "Loaded %d pixels from %s", j, filename);
 
     /* Close the FITS file and free memory. */

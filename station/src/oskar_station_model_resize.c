@@ -39,7 +39,7 @@ void oskar_station_model_resize(oskar_StationModel* station, int n_elements,
     /* Check all inputs. */
     if (!station || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

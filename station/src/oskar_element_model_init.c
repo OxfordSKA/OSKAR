@@ -40,7 +40,7 @@ void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
     /* Check all inputs. */
     if (!data || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

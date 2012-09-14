@@ -115,15 +115,6 @@ struct OSKAR_EXPORT oskar_SkyModel
     ~oskar_SkyModel();
 
     /**
-     * @brief Appends the specified sky model the the current sky model.
-     *
-     * @param other Sky model to append.
-     *
-     * @return error code.
-     */
-    int append(const oskar_SkyModel* other);
-
-    /**
      * @brief Computes the source l,m,n direction cosines relative to phase
      * centre.
      *

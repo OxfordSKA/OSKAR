@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,11 @@ extern "C" {
  * stations are identical and whether element errors and/or weights
  * should be applied. The relevant flags within the structure are updated.
  *
- * @param model Telescope model structure to analyse.
+ * @param[in,out] model Telescope model structure to analyse.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-void oskar_telescope_model_analyse(oskar_TelescopeModel* model);
+void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status);
 
 #ifdef __cplusplus
 }

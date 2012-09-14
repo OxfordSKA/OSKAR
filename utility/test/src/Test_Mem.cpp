@@ -85,13 +85,15 @@ void Test_Mem::test_realloc()
 
 void Test_Mem::test_append()
 {
+    int status = 0;
     {
         oskar_Mem mem_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0);
         int num_values1 = 10;
         double value1 = 1.0;
         vector<double> data1(num_values1, value1);
         oskar_mem_append_raw(&mem_cpu, (const void*)&data1[0], OSKAR_DOUBLE,
-                OSKAR_LOCATION_CPU, num_values1);
+                OSKAR_LOCATION_CPU, num_values1, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(num_values1, mem_cpu.num_elements);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type);
@@ -103,7 +105,8 @@ void Test_Mem::test_append()
         double value2 = 2.0;
         vector<double> data2(num_values2, value2);
         oskar_mem_append_raw(&mem_cpu, (const void*)&data2[0], OSKAR_DOUBLE,
-                OSKAR_LOCATION_CPU, num_values2);
+                OSKAR_LOCATION_CPU, num_values2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_cpu.num_elements);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, mem_cpu.location);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, mem_cpu.type);
@@ -121,11 +124,9 @@ void Test_Mem::test_append()
         int num_values1 = 10;
         float value1 = 1.0;
         vector<float> data1(num_values1, value1);
-        int error = 0;
-        error = oskar_mem_append_raw(&mem_gpu, (const void*)&data1[0],
-                OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
-                cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
+        oskar_mem_append_raw(&mem_gpu, (const void*)&data1[0],
+                OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values1, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(num_values1, mem_gpu.num_elements);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, mem_gpu.location);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, mem_gpu.type);
@@ -138,10 +139,9 @@ void Test_Mem::test_append()
         int num_values2 = 5;
         float value2 = 2.0;
         vector<float> data2(num_values2, value2);
-        error = oskar_mem_append_raw(&mem_gpu, (const void*)&data2[0],
-                OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE((error > 0) ? std::string("CUDA ERROR: ") +
-                cudaGetErrorString((cudaError_t)error) : "OSKAR ERROR", 0, error);
+        oskar_mem_append_raw(&mem_gpu, (const void*)&data2[0],
+                OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_values2, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         CPPUNIT_ASSERT_EQUAL(num_values1 + num_values2, mem_gpu.num_elements);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, mem_gpu.location);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, mem_gpu.type);
@@ -158,20 +158,20 @@ void Test_Mem::test_append()
 
 void Test_Mem::test_different()
 {
-    int error, value;
+    int error = 0, value;
 
     // Test two memory blocks that are the same.
     {
         oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
         oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
 
-        error = oskar_mem_set_value_real(&one, 4.4);
-        CPPUNIT_ASSERT_EQUAL(0, error);
-        error = oskar_mem_set_value_real(&two, 4.4);
+        oskar_mem_set_value_real(&one, 4.4, &error);
+        oskar_mem_set_value_real(&two, 4.4, &error);
         CPPUNIT_ASSERT_EQUAL(0, error);
 
-        value = oskar_mem_different(&one, &two, 0);
+        value = oskar_mem_different(&one, &two, 0, &error);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, value);
+        CPPUNIT_ASSERT_EQUAL(0, error);
     }
 
     // Test two memory blocks that are different.
@@ -179,13 +179,13 @@ void Test_Mem::test_different()
         oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
         oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
 
-        error = oskar_mem_set_value_real(&one, 4.4);
-        CPPUNIT_ASSERT_EQUAL(0, error);
-        error = oskar_mem_set_value_real(&two, 4.2);
+        oskar_mem_set_value_real(&one, 4.4, &error);
+        oskar_mem_set_value_real(&two, 4.2, &error);
         CPPUNIT_ASSERT_EQUAL(0, error);
 
-        value = oskar_mem_different(&one, &two, 0);
+        value = oskar_mem_different(&one, &two, 0, &error);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, value);
+        CPPUNIT_ASSERT_EQUAL(0, error);
     }
 
     // Test two memory blocks that are different by one element.
@@ -193,14 +193,14 @@ void Test_Mem::test_different()
         oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
         oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
 
-        error = oskar_mem_set_value_real(&one, 1.0);
-        CPPUNIT_ASSERT_EQUAL(0, error);
-        error = oskar_mem_set_value_real(&two, 1.0);
+        oskar_mem_set_value_real(&one, 1.0, &error);
+        oskar_mem_set_value_real(&two, 1.0, &error);
         CPPUNIT_ASSERT_EQUAL(0, error);
         ((float*)(two.data))[4] = 1.1;
 
-        value = oskar_mem_different(&one, &two, 0);
+        value = oskar_mem_different(&one, &two, 0, &error);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, value);
+        CPPUNIT_ASSERT_EQUAL(0, error);
     }
 
     // Test two memory blocks that are different by one element, but only up to
@@ -209,14 +209,14 @@ void Test_Mem::test_different()
         oskar_Mem one(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
         oskar_Mem two(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 20);
 
-        error = oskar_mem_set_value_real(&one, 1.0);
-        CPPUNIT_ASSERT_EQUAL(0, error);
-        error = oskar_mem_set_value_real(&two, 1.0);
+        oskar_mem_set_value_real(&one, 1.0, &error);
+        oskar_mem_set_value_real(&two, 1.0, &error);
         CPPUNIT_ASSERT_EQUAL(0, error);
         ((float*)(two.data))[4] = 1.1;
 
-        value = oskar_mem_different(&one, &two, 4);
+        value = oskar_mem_different(&one, &two, 4, &error);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, value);
+        CPPUNIT_ASSERT_EQUAL(0, error);
     }
 }
 
@@ -594,12 +594,12 @@ void Test_Mem::test_scale_real()
 
 void Test_Mem::test_set_value_real()
 {
-    int n = 100;
+    int n = 100, err = 0;
 
     // Double precision real.
     {
         oskar_Mem mem(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, n);
-        int err = oskar_mem_set_value_real(&mem, 4.5);
+        oskar_mem_set_value_real(&mem, 4.5, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         for (int i = 0; i < n; ++i)
@@ -611,7 +611,7 @@ void Test_Mem::test_set_value_real()
     // Double precision complex.
     {
         oskar_Mem mem(OSKAR_DOUBLE_COMPLEX, OSKAR_LOCATION_GPU, n);
-        int err = oskar_mem_set_value_real(&mem, 6.5);
+        oskar_mem_set_value_real(&mem, 6.5, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
@@ -625,7 +625,7 @@ void Test_Mem::test_set_value_real()
     // Double precision complex matrix.
     {
         oskar_Mem mem(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, n);
-        int err = oskar_mem_set_value_real(&mem, 6.5);
+        oskar_mem_set_value_real(&mem, 6.5, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
@@ -645,7 +645,7 @@ void Test_Mem::test_set_value_real()
     // Single precision real.
     {
         oskar_Mem mem(OSKAR_SINGLE, OSKAR_LOCATION_CPU, n);
-        int err = oskar_mem_set_value_real(&mem, 4.5);
+        oskar_mem_set_value_real(&mem, 4.5, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         for (int i = 0; i < n; ++i)
@@ -657,7 +657,7 @@ void Test_Mem::test_set_value_real()
     // Single precision complex.
     {
         oskar_Mem mem(OSKAR_SINGLE_COMPLEX, OSKAR_LOCATION_GPU, n);
-        int err = oskar_mem_set_value_real(&mem, 6.5);
+        oskar_mem_set_value_real(&mem, 6.5, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
@@ -671,7 +671,7 @@ void Test_Mem::test_set_value_real()
     // Single precision complex matrix.
     {
         oskar_Mem mem(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, n);
-        int err = oskar_mem_set_value_real(&mem, 6.5);
+        oskar_mem_set_value_real(&mem, 6.5, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         oskar_Mem mem2(&mem, OSKAR_LOCATION_CPU);
@@ -691,6 +691,7 @@ void Test_Mem::test_set_value_real()
 
 void Test_Mem::test_add()
 {
+    int error = 0;
     // Use case: Two CPU oskar_Mem matrix pointers are added together.
     {
         int num_elements = 10;
@@ -712,7 +713,7 @@ void Test_Mem::test_add()
         }
 
         oskar_Mem mem_C(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
-        int error = oskar_mem_add(&mem_C, &mem_A, &mem_B);
+        oskar_mem_add(&mem_C, &mem_A, &mem_B, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
         float4c* C = (float4c*)mem_C.data;
@@ -756,7 +757,7 @@ void Test_Mem::test_add()
             CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, B[i].d.y, delta);
         }
 
-        int error = oskar_mem_add(&mem_B, &mem_A, &mem_B);
+        oskar_mem_add(&mem_B, &mem_A, &mem_B, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
         for (int i = 0; i < num_elements; ++i)
@@ -778,8 +779,9 @@ void Test_Mem::test_add()
         oskar_Mem mem_A(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, num_elements);
         oskar_Mem mem_B(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, num_elements);
         oskar_Mem mem_C(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, num_elements);
-        int error = oskar_mem_add(&mem_C, &mem_A, &mem_B);
+        oskar_mem_add(&mem_C, &mem_A, &mem_B, &error);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BAD_LOCATION, error);
+        error = 0;
     }
 
     // Use Case: Dimension mismatch in mem pointers being added.
@@ -787,9 +789,10 @@ void Test_Mem::test_add()
         int num_elements = 10;
         oskar_Mem mem_A(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
         oskar_Mem mem_B(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
-        oskar_Mem mem_C(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_GPU, 5);
-        int error = oskar_mem_add(&mem_C, &mem_A, &mem_B);
+        oskar_Mem mem_C(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, 5);
+        oskar_mem_add(&mem_C, &mem_A, &mem_B, &error);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_DIMENSION_MISMATCH, error);
+        error = 0;
     }
 }
 
@@ -798,11 +801,12 @@ void Test_Mem::test_add_noise()
     int num_elements = 1000;
     double stddev = 0.1;
     double mean = 5.0;
+    int status = 0;
 
     // Test case: add Gaussian noise.
     {
         oskar_Mem values(OSKAR_DOUBLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU, num_elements);
-        oskar_mem_add_gaussian_noise(&values, stddev, mean);
+        oskar_mem_add_gaussian_noise(&values, stddev, mean, &status);
         FILE* file;
         file = fopen("temp_mem_noise.dat", "wb");
         fwrite(values.data, sizeof(double4c), num_elements, file);

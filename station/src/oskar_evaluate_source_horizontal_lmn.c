@@ -45,7 +45,7 @@ void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
     /* Check all inputs. */
     if (!RA || !Dec || !station || !l || !m || !n || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

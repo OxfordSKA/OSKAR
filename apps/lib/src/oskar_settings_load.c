@@ -71,9 +71,8 @@ int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
     if (error) return error;
 
     /* Save the path to the settings file. */
-    error = oskar_mem_append_raw(&settings->settings_path, filename,
-            OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename));
-    if (error) return error;
+    oskar_mem_append_raw(&settings->settings_path, filename,
+            OSKAR_CHAR, OSKAR_LOCATION_CPU, 1 + strlen(filename), &error);
 
     return OSKAR_SUCCESS;
 }

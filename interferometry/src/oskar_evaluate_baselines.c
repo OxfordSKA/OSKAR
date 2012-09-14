@@ -76,7 +76,7 @@ void oskar_evaluate_baselines(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     /* Check all inputs. */
     if (!uu || !vv || !ww || !u || !v || !w || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

@@ -46,7 +46,7 @@ void oskar_image_get_stats(oskar_ImageStats* stats, const oskar_Image* image,
     /* Check all inputs. */
     if (stats == NULL || image == NULL || status == NULL)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
     if (*status) return;

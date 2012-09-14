@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,15 +50,10 @@ extern "C" {
  *
  * @param[out] to    Pointer to structure to which to append.
  * @param[in] from   Pointer to structure to which to append from.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_append(oskar_Mem* to, const oskar_Mem* from);
+void oskar_mem_append(oskar_Mem* to, const oskar_Mem* from, int* status);
 
 #ifdef __cplusplus
 }

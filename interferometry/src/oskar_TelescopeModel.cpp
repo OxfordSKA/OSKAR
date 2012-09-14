@@ -44,8 +44,7 @@ oskar_TelescopeModel::oskar_TelescopeModel(const oskar_TelescopeModel* other,
     int err = 0;
     oskar_telescope_model_init(this, other->station_x.type, location,
             other->num_stations, &err);
-    if (err) throw err;
-    err = oskar_telescope_model_copy(this, other); // Copy other to this.
+    oskar_telescope_model_copy(this, other, &err); // Copy other to this.
     if (err) throw err;
 }
 
@@ -53,11 +52,6 @@ oskar_TelescopeModel::~oskar_TelescopeModel()
 {
     int err = oskar_telescope_model_free(this);
     if (err) throw err;
-}
-
-void oskar_TelescopeModel::analyse()
-{
-    oskar_telescope_model_analyse(this);
 }
 
 int oskar_TelescopeModel::load_station_coords(const char* filename,

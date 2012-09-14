@@ -42,7 +42,7 @@ void oskar_visibilities_resize(oskar_Visibilities* vis, int num_channels,
     /* Check all inputs. */
     if (!vis || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

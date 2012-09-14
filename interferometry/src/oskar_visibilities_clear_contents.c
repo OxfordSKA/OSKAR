@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "interferometry/oskar_visibilities_clear_contents.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_mem_clear_contents.h"
@@ -35,17 +34,22 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_clear_contents(oskar_Visibilities* vis)
+void oskar_visibilities_clear_contents(oskar_Visibilities* vis, int* status)
 {
-    int err = 0;
-    oskar_mem_clear_contents(&vis->amplitude, &err);
-    oskar_mem_clear_contents(&vis->x_metres, &err);
-    oskar_mem_clear_contents(&vis->y_metres, &err);
-    oskar_mem_clear_contents(&vis->z_metres, &err);
-    oskar_mem_clear_contents(&vis->uu_metres, &err);
-    oskar_mem_clear_contents(&vis->vv_metres, &err);
-    oskar_mem_clear_contents(&vis->ww_metres, &err);
-    return err;
+    /* Check all inputs. */
+    if (!vis || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    oskar_mem_clear_contents(&vis->amplitude, status);
+    oskar_mem_clear_contents(&vis->x_metres, status);
+    oskar_mem_clear_contents(&vis->y_metres, status);
+    oskar_mem_clear_contents(&vis->z_metres, status);
+    oskar_mem_clear_contents(&vis->uu_metres, status);
+    oskar_mem_clear_contents(&vis->vv_metres, status);
+    oskar_mem_clear_contents(&vis->ww_metres, status);
 }
 
 #ifdef __cplusplus

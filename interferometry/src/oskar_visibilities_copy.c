@@ -34,13 +34,18 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_copy(oskar_Visibilities* dst,
-        const oskar_Visibilities* src)
+void oskar_visibilities_copy(oskar_Visibilities* dst,
+        const oskar_Visibilities* src, int* status)
 {
-    int err = 0;
+    /* Check all inputs. */
+    if (!src || !dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    if (dst == NULL || src == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Copy the meta-data. */
     dst->num_channels  = src->num_channels;
@@ -56,17 +61,14 @@ int oskar_visibilities_copy(oskar_Visibilities* dst,
     dst->phase_centre_dec_deg = src->phase_centre_dec_deg;
 
     /* Copy the memory. */
-    oskar_mem_copy(&dst->settings_path, &src->settings_path, &err);
-    oskar_mem_copy(&dst->x_metres, &src->x_metres, &err);
-    oskar_mem_copy(&dst->y_metres, &src->y_metres, &err);
-    oskar_mem_copy(&dst->z_metres, &src->z_metres, &err);
-    oskar_mem_copy(&dst->uu_metres, &src->uu_metres, &err);
-    oskar_mem_copy(&dst->vv_metres, &src->vv_metres, &err);
-    oskar_mem_copy(&dst->ww_metres, &src->ww_metres, &err);
-    oskar_mem_copy(&dst->amplitude, &src->amplitude, &err);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_copy(&dst->settings_path, &src->settings_path, status);
+    oskar_mem_copy(&dst->x_metres, &src->x_metres, status);
+    oskar_mem_copy(&dst->y_metres, &src->y_metres, status);
+    oskar_mem_copy(&dst->z_metres, &src->z_metres, status);
+    oskar_mem_copy(&dst->uu_metres, &src->uu_metres, status);
+    oskar_mem_copy(&dst->vv_metres, &src->vv_metres, status);
+    oskar_mem_copy(&dst->ww_metres, &src->ww_metres, status);
+    oskar_mem_copy(&dst->amplitude, &src->amplitude, status);
 }
 
 #ifdef __cplusplus

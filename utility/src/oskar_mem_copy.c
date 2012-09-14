@@ -42,7 +42,7 @@ void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
     /* Check all inputs. */
     if (!src || !dst || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

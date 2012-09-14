@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,12 +47,11 @@ extern "C" {
  * @param model      Sky model to combine into.
  * @param model_set  Set of sky models to combine.
  * @param num_models Number of models in the set.
- *
- * @return An error code.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_combine_set(oskar_SkyModel* model,
-        const oskar_SkyModel* model_set, int num_models);
+void oskar_sky_model_combine_set(oskar_SkyModel* model,
+        const oskar_SkyModel* model_set, int num_models, int* status);
 
 #ifdef __cplusplus
 }

@@ -549,7 +549,7 @@ void Test_Jones::test_set_ones_device()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy result to CPU.
@@ -583,7 +583,7 @@ void Test_Jones::test_set_ones_device()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Copy result to CPU.
@@ -626,7 +626,7 @@ void Test_Jones::test_set_ones_host()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
@@ -656,7 +656,7 @@ void Test_Jones::test_set_ones_host()
                 n_stat, n_src, 0);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Check result.
@@ -698,9 +698,8 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-        status = oskar_jones_set_real_scalar(j2, 2.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
+        oskar_jones_set_real_scalar(j2, 2.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J3 = J1 * J2.
@@ -723,9 +722,8 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-        status = oskar_jones_set_real_scalar(j2, 2.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
+        oskar_jones_set_real_scalar(j2, 2.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J2 = J1 * J2.
@@ -752,9 +750,8 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-        status = oskar_jones_set_real_scalar(j2, 2.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
+        oskar_jones_set_real_scalar(j2, 2.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J3 = J1 * J2.
@@ -777,9 +774,8 @@ void Test_Jones::test_performance()
                 OSKAR_LOCATION_GPU, n_stat, n_src);
 
         // Call wrapper function.
-        status = oskar_jones_set_real_scalar(j1, 1.0);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-        status = oskar_jones_set_real_scalar(j2, 2.0);
+        oskar_jones_set_real_scalar(j1, 1.0, &status);
+        oskar_jones_set_real_scalar(j2, 2.0, &status);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
         // Join J2 = J1 * J2.

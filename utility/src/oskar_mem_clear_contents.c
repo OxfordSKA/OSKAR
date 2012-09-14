@@ -45,7 +45,7 @@ void oskar_mem_clear_contents(oskar_Mem* mem, int* status)
     /* Check all inputs. */
     if (!mem || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

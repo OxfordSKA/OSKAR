@@ -38,32 +38,18 @@
 extern "C" {
 #endif
 
-int oskar_station_model_copy(oskar_StationModel* dst,
-        const oskar_StationModel* src)
+void oskar_station_model_copy(oskar_StationModel* dst,
+        const oskar_StationModel* src, int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!src || !dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Check that all pointers are not NULL. */
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    /* Copy the memory blocks. */
-    oskar_mem_copy(&dst->x_signal, &src->x_signal, &error);
-    oskar_mem_copy(&dst->y_signal, &src->y_signal, &error);
-    oskar_mem_copy(&dst->z_signal, &src->z_signal, &error);
-    oskar_mem_copy(&dst->x_weights, &src->x_weights, &error);
-    oskar_mem_copy(&dst->y_weights, &src->y_weights, &error);
-    oskar_mem_copy(&dst->z_weights, &src->z_weights, &error);
-    oskar_mem_copy(&dst->weight, &src->weight, &error);
-    oskar_mem_copy(&dst->gain, &src->gain, &error);
-    oskar_mem_copy(&dst->gain_error, &src->gain_error, &error);
-    oskar_mem_copy(&dst->phase_offset, &src->phase_offset, &error);
-    oskar_mem_copy(&dst->phase_error, &src->phase_error, &error);
-    oskar_mem_copy(&dst->cos_orientation_x, &src->cos_orientation_x, &error);
-    oskar_mem_copy(&dst->sin_orientation_x, &src->sin_orientation_x, &error);
-    oskar_mem_copy(&dst->cos_orientation_y, &src->cos_orientation_y, &error);
-    oskar_mem_copy(&dst->sin_orientation_y, &src->sin_orientation_y, &error);
-    if (error) return error;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Copy the meta data. */
     dst->station_type = src->station_type;
@@ -86,23 +72,37 @@ int oskar_station_model_copy(oskar_StationModel* dst,
     dst->evaluate_element_factor = src->evaluate_element_factor;
     dst->bit_depth = src->bit_depth;
 
+    /* Copy the memory blocks. */
+    oskar_mem_copy(&dst->x_signal, &src->x_signal, status);
+    oskar_mem_copy(&dst->y_signal, &src->y_signal, status);
+    oskar_mem_copy(&dst->z_signal, &src->z_signal, status);
+    oskar_mem_copy(&dst->x_weights, &src->x_weights, status);
+    oskar_mem_copy(&dst->y_weights, &src->y_weights, status);
+    oskar_mem_copy(&dst->z_weights, &src->z_weights, status);
+    oskar_mem_copy(&dst->weight, &src->weight, status);
+    oskar_mem_copy(&dst->gain, &src->gain, status);
+    oskar_mem_copy(&dst->gain_error, &src->gain_error, status);
+    oskar_mem_copy(&dst->phase_offset, &src->phase_offset, status);
+    oskar_mem_copy(&dst->phase_error, &src->phase_error, status);
+    oskar_mem_copy(&dst->cos_orientation_x, &src->cos_orientation_x, status);
+    oskar_mem_copy(&dst->sin_orientation_x, &src->sin_orientation_x, status);
+    oskar_mem_copy(&dst->cos_orientation_y, &src->cos_orientation_y, status);
+    oskar_mem_copy(&dst->sin_orientation_y, &src->sin_orientation_y, status);
+
     /* TODO Work out how to deal with element pattern data properly! */
     if (src->element_pattern)
     {
         /* Initialise the element model. */
         oskar_element_model_init(dst->element_pattern,
                 oskar_element_model_type(src->element_pattern),
-                oskar_station_model_location(dst), &error);
+                oskar_station_model_location(dst), status);
 
         /* Copy the element model data. */
         oskar_element_model_copy(dst->element_pattern,
-                src->element_pattern, &error);
-        if (error) return error;
+                src->element_pattern, status);
     }
 
     /* TODO Work out how to deal with child stations. */
-
-    return 0;
 }
 
 #ifdef __cplusplus

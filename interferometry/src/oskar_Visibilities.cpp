@@ -43,8 +43,7 @@ oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
     int err = 0;
     oskar_visibilities_init(this, other->amplitude.type, location,
             other->num_channels, other->num_times, other->num_stations, &err);
-    if (err) throw err;
-    err = oskar_visibilities_copy(this, other); // Copy other to this.
+    oskar_visibilities_copy(this, other, &err); // Copy other to this.
     if (err) throw err;
 }
 
@@ -52,11 +51,6 @@ oskar_Visibilities::~oskar_Visibilities()
 {
     int err = oskar_visibilities_free(this);
     if (err) throw err;
-}
-
-int oskar_Visibilities::clear_contents()
-{
-    return oskar_visibilities_clear_contents(this);
 }
 
 int oskar_Visibilities::write(oskar_Log* log, const char* filename)

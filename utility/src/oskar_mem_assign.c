@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,35 +27,38 @@
  */
 
 #include "utility/oskar_mem_assign.h"
-#include "utility/oskar_mem_get_pointer.h"
-#include "utility/oskar_mem_insert.h"
-#include "utility/oskar_mem_realloc.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_mem_assign(oskar_Mem* dst, const oskar_Mem* src)
+void oskar_mem_assign(oskar_Mem* dst, const oskar_Mem* src, int* status)
 {
-    /* Sanity check on inputs. */
-    if (src == NULL || dst == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!src || !dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check the data types. */
     if (src->type != dst->type)
-        return OSKAR_ERR_TYPE_MISMATCH;
+        *status = OSKAR_ERR_TYPE_MISMATCH;
 
-    /* If the destination memory is owned assignment is not possible */
+    /* If the destination memory is owned, then assignment is not possible. */
     if (dst->owner == OSKAR_TRUE)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+        *status = OSKAR_ERR_INVALID_ARGUMENT;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     dst->data         = src->data;
     dst->num_elements = src->num_elements;
     dst->location     = src->location;
     dst->type         = src->type;
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,14 +34,17 @@
 extern "C" {
 #endif
 
-int oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar)
+void oskar_jones_set_real_scalar(oskar_Jones* jones, double scalar, int* status)
 {
-    /* Check that the structure exists. */
-    if (jones == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!jones || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Set the value. */
-    return oskar_mem_set_value_real(&jones->data, scalar);
+    oskar_mem_set_value_real(&jones->data, scalar, status);
 }
 
 #ifdef __cplusplus

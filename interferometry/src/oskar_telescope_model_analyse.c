@@ -45,9 +45,19 @@ extern "C" {
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
+void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
 {
     int i, finished_identical_station_check, num_stations;
+
+    /* Check all inputs. */
+    if (!model || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Set flags. */
     finished_identical_station_check = 0;
@@ -67,8 +77,12 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
     {
         oskar_StationModel* s;
         s = &model->station[i];
-        oskar_station_model_analyse(s, &finished_identical_station_check);
+        oskar_station_model_analyse(s, &finished_identical_station_check,
+                status);
     }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check if the stations have different element positions, phase offsets
      * or gain factors. */
@@ -174,7 +188,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             /* Check if element pattern filenames are different. */
             if (filename_port1_0 && filename_port1)
             {
-                if (oskar_mem_different(filename_port1_0, filename_port1, 0))
+                if (oskar_mem_different(filename_port1_0, filename_port1, 0,
+                        status))
                 {
                     model->identical_stations = 0;
                     break;
@@ -182,7 +197,8 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             }
             if (filename_port2_0 && filename_port2)
             {
-                if (oskar_mem_different(filename_port2_0, filename_port2, 0))
+                if (oskar_mem_different(filename_port2_0, filename_port2, 0,
+                        status))
                 {
                     model->identical_stations = 0;
                     break;
@@ -190,67 +206,70 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model)
             }
 
             /* Check if the memory contents are different. */
-            if (oskar_mem_different(x_weights, x_weights0, num_elements))
+            if (oskar_mem_different(x_weights, x_weights0, num_elements,
+                    status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(y_weights, y_weights0, num_elements))
+            if (oskar_mem_different(y_weights, y_weights0, num_elements,
+                    status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(z_weights, z_weights0, num_elements))
+            if (oskar_mem_different(z_weights, z_weights0, num_elements,
+                    status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(x_signal, x_signal0, num_elements))
+            if (oskar_mem_different(x_signal, x_signal0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(y_signal, y_signal0, num_elements))
+            if (oskar_mem_different(y_signal, y_signal0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(z_signal, z_signal0, num_elements))
+            if (oskar_mem_different(z_signal, z_signal0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(gain, gain0, num_elements))
+            if (oskar_mem_different(gain, gain0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(phase, phase0, num_elements))
+            if (oskar_mem_different(phase, phase0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(weights, weights0, num_elements))
+            if (oskar_mem_different(weights, weights0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(cos_x, cos_x0, num_elements))
+            if (oskar_mem_different(cos_x, cos_x0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(sin_x, sin_x0, num_elements))
+            if (oskar_mem_different(sin_x, sin_x0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(cos_y, cos_y0, num_elements))
+            if (oskar_mem_different(cos_y, cos_y0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;
             }
-            if (oskar_mem_different(sin_y, sin_y0, num_elements))
+            if (oskar_mem_different(sin_y, sin_y0, num_elements, status))
             {
                 model->identical_stations = 0;
                 break;

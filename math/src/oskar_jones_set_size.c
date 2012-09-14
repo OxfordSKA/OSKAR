@@ -40,7 +40,7 @@ void oskar_jones_set_size(oskar_Jones* jones, int num_stations,
     /* Check all inputs. */
     if (!jones || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

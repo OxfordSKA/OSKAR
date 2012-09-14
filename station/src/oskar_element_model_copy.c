@@ -40,7 +40,7 @@ void oskar_element_model_copy(oskar_ElementModel* dst,
     /* Check all inputs. */
     if (!dst || !src || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

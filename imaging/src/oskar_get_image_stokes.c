@@ -217,8 +217,7 @@ int oskar_get_image_stokes(oskar_Mem* stokes, const oskar_Visibilities* vis,
         if (pol != OSKAR_IMAGE_TYPE_STOKES_I) return OSKAR_ERR_UNKNOWN;
         oskar_mem_init(stokes, vis->amplitude.type, location, num_vis_amps,
                 OSKAR_FALSE, &error);
-        if (error) return error;
-        oskar_mem_assign(stokes, &vis->amplitude);
+        oskar_mem_assign(stokes, &vis->amplitude, &error);
     }
 
     return OSKAR_SUCCESS;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utility/oskar_mem_add_gaussian_noise.h"
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_random_gaussian.h"
@@ -39,15 +38,27 @@
 extern "C" {
 #endif
 
-int oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean)
+void oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean,
+        int* status)
 {
     int i;
     double r1, r2;
 
-    if (mem == NULL) return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     if (mem->location != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     if (mem->type == OSKAR_DOUBLE)
     {
@@ -85,9 +96,7 @@ int oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean)
         }
     }
     else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return OSKAR_SUCCESS;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
 #ifdef __cplusplus

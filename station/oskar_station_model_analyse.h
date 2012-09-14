@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,10 +51,11 @@ extern "C" {
  *
  * @param[in,out] station Station model structure to analyse.
  * @param[out] finished_identical_station_check Flag set if stations cannot be identical.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_analyse(oskar_StationModel* station,
-        int* finished_identical_station_check);
+void oskar_station_model_analyse(oskar_StationModel* station,
+        int* finished_identical_station_check, int* status);
 
 #ifdef __cplusplus
 }

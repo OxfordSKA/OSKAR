@@ -35,9 +35,20 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
+void oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src,
+        int* status)
 {
-    int num_sources, error = 0;
+    int num_sources;
+
+    /* Check all inputs. */
+    if (!dst || !src || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check data dimensions. */
     num_sources = src->num_sources;
@@ -53,49 +64,36 @@ int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src)
             num_sources > src->FWHM_minor.num_elements ||
             num_sources > src->position_angle.num_elements)
     {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
     /* Append to the sky model. */
-    error = oskar_mem_append(&dst->RA, &src->RA);
-    if (error) return error;
-    error = oskar_mem_append(&dst->Dec, &src->Dec);
-    if (error) return error;
-    error = oskar_mem_append(&dst->I, &src->I);
-    if (error) return error;
-    error = oskar_mem_append(&dst->Q, &src->Q);
-    if (error) return error;
-    error = oskar_mem_append(&dst->U, &src->U);
-    if (error) return error;
-    error = oskar_mem_append(&dst->V, &src->V);
-    if (error) return error;
-    error = oskar_mem_append(&dst->reference_freq, &src->reference_freq);
-    if (error) return error;
-    error = oskar_mem_append(&dst->spectral_index, &src->spectral_index);
-    if (error) return error;
-    error = oskar_mem_append(&dst->FWHM_major, &src->FWHM_major);
-    if (error) return error;
-    error = oskar_mem_append(&dst->FWHM_minor, &src->FWHM_minor);
-    if (error) return error;
-    error = oskar_mem_append(&dst->position_angle, &src->position_angle);
-    if (error) return error;
+    oskar_mem_append(&dst->RA, &src->RA, status);
+    oskar_mem_append(&dst->Dec, &src->Dec, status);
+    oskar_mem_append(&dst->I, &src->I, status);
+    oskar_mem_append(&dst->Q, &src->Q, status);
+    oskar_mem_append(&dst->U, &src->U, status);
+    oskar_mem_append(&dst->V, &src->V, status);
+    oskar_mem_append(&dst->reference_freq, &src->reference_freq, status);
+    oskar_mem_append(&dst->spectral_index, &src->spectral_index, status);
+    oskar_mem_append(&dst->FWHM_major, &src->FWHM_major, status);
+    oskar_mem_append(&dst->FWHM_minor, &src->FWHM_minor, status);
+    oskar_mem_append(&dst->position_angle, &src->position_angle, status);
 
     /* Update the number of sources. */
     dst->num_sources += src->num_sources;
 
     /* Resize arrays to hold the direction cosines. */
-    oskar_mem_realloc(&dst->rel_l, dst->num_sources, &error);
-    oskar_mem_realloc(&dst->rel_m, dst->num_sources, &error);
-    oskar_mem_realloc(&dst->rel_n, dst->num_sources, &error);
+    oskar_mem_realloc(&dst->rel_l, dst->num_sources, status);
+    oskar_mem_realloc(&dst->rel_m, dst->num_sources, status);
+    oskar_mem_realloc(&dst->rel_n, dst->num_sources, status);
 
     /* Resize arrays to hold gaussian source parameters */
-    oskar_mem_realloc(&dst->gaussian_a, dst->num_sources, &error);
-    oskar_mem_realloc(&dst->gaussian_b, dst->num_sources, &error);
-    oskar_mem_realloc(&dst->gaussian_c, dst->num_sources, &error);
+    oskar_mem_realloc(&dst->gaussian_a, dst->num_sources, status);
+    oskar_mem_realloc(&dst->gaussian_b, dst->num_sources, status);
+    oskar_mem_realloc(&dst->gaussian_c, dst->num_sources, status);
 
     dst->use_extended = (src->use_extended || dst->use_extended);
-
-    return error;
 }
 
 #ifdef __cplusplus

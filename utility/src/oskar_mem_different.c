@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,19 @@ extern "C" {
 #endif
 
 int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
-        int num_elements)
+        int num_elements, int* status)
 {
     int type, bytes_to_check, i;
 
-    /* Sanity check on inputs. */
-    if (one == NULL || two == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!one || !two || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return OSKAR_TRUE;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return OSKAR_TRUE;
 
     /* Check the data types. */
     type = one->type;
@@ -75,7 +81,8 @@ int oskar_mem_different(const oskar_Mem* one, const oskar_Mem* two,
     }
 
     /* Data checks are currently only supported in CPU memory. */
-    return OSKAR_ERR_BAD_LOCATION;
+    *status = OSKAR_ERR_BAD_LOCATION;
+    return OSKAR_TRUE;
 }
 
 #ifdef __cplusplus

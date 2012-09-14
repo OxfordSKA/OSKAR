@@ -40,19 +40,24 @@
 extern "C" {
 #endif
 
-int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
-        int from_location, int num_elements)
+void oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
+        int from_location, int num_elements, int* status)
 {
-    int error = 0;
     size_t element_size, mem_size, offset_bytes;
 
-    /* Check for sane inputs. */
-    if (to == NULL || from == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!to || !from || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check that the data types match. */
     if (to->type != from_type)
-        return OSKAR_ERR_TYPE_MISMATCH;
+        *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* Memory size being appended and offset into memory to append to. */
     element_size = oskar_mem_element_size(to->type);
@@ -60,8 +65,10 @@ int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
     offset_bytes = to->num_elements * element_size;
 
     /* Reallocate the memory block so it is big enough to hold the new data. */
-    oskar_mem_realloc(to, num_elements + to->num_elements, &error);
-    if (error) return error;
+    oskar_mem_realloc(to, num_elements + to->num_elements, status);
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Append to the memory. */
     if (from_location == OSKAR_LOCATION_CPU)
@@ -83,9 +90,8 @@ int oskar_mem_append_raw(oskar_Mem* to, const void* from, int from_type,
     }
     else
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
-    return error;
 }
 
 #ifdef __cplusplus

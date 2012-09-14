@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,10 +34,17 @@
 extern "C" {
 #endif
 
-int oskar_mem_append(oskar_Mem* to, const oskar_Mem* from)
+void oskar_mem_append(oskar_Mem* to, const oskar_Mem* from, int* status)
 {
-	return oskar_mem_append_raw(to, from->data, from->type,
-			from->location, from->num_elements);
+    /* Check all inputs. */
+    if (!from || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+	oskar_mem_append_raw(to, from->data, from->type, from->location,
+	        from->num_elements, status);
 }
 
 #ifdef __cplusplus

@@ -49,7 +49,7 @@ void oskar_evaluate_uvw_baseline(oskar_Mem* uu, oskar_Mem* vv, oskar_Mem* ww,
     /* Check all inputs. */
     if (!uu || !vv || !ww || !x || !y || !z || !work || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

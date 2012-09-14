@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,53 +34,66 @@
 extern "C" {
 #endif
 
-
 /* a = b + c */
-int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
+void oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c,
+        int* status)
 {
     int i, num_elements;
 
-    if (a == NULL || b == NULL || c == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!a || !b || !c || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check data types. */
     if (b->type != c->type ||
             a->type != b->type ||
             a->type != c->type)
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 
+    /* Check number of elements. */
     if (b->num_elements != c->num_elements ||
             a->num_elements != b->num_elements ||
             a->num_elements != c->num_elements)
     {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
+    /* Check locations. */
     if (b->location != c->location ||
             a->location != b->location ||
             a->location != c->location)
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
 
-    /* Note OSKAR_INT type currently not supported. */
-    if (a->type == OSKAR_INT)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+    /* Note that OSKAR_INT and OSKAR_CHAR types are not supported. */
+    if (a->type == OSKAR_INT || a->type == OSKAR_CHAR)
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    /* Note device memory currently not supported. */
+    /* Note that device memory is not supported. */
     if (a->location == OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     if (a->data == NULL || b->data == NULL || c->data == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
+    /* Get the total number of elements. */
     num_elements = a->num_elements;
-
     if (oskar_mem_is_matrix(a->type))
         num_elements *= 4;
     if (oskar_mem_is_complex(a->type))
         num_elements *= 2;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     if (oskar_mem_is_double(a->type))
     {
@@ -98,10 +111,8 @@ int oskar_mem_add(oskar_Mem* a, const oskar_Mem* b, const oskar_Mem* c)
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

@@ -38,7 +38,7 @@ void oskar_jones_copy(oskar_Jones* dst, const oskar_Jones* src, int* status)
     /* Check all inputs. */
     if (!src || !dst || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

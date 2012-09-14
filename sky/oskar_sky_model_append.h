@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,9 +50,11 @@ extern "C" {
  *
  * @param[out] dst Pointer to destination sky model.
  * @param[in]  src Pointer to source sky model.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src);
+void oskar_sky_model_append(oskar_SkyModel* dst, const oskar_SkyModel* src,
+        int* status);
 
 #ifdef __cplusplus
 }

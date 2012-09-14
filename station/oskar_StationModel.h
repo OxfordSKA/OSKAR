@@ -119,14 +119,6 @@ struct OSKAR_EXPORT oskar_StationModel
     ~oskar_StationModel();
 
     /**
-     * @brief Copies this station model structure to another.
-     *
-     * @details
-     * Copies the memory in this station model to that in another.
-     */
-    int copy_to(oskar_StationModel* other);
-
-    /**
      * @brief
      * Loads the station element data from a text file.
      *

@@ -59,11 +59,6 @@ oskar_SkyModel::~oskar_SkyModel()
     if (err) throw err;
 }
 
-int oskar_SkyModel::append(const oskar_SkyModel* other)
-{
-    return oskar_sky_model_append(this, other);
-}
-
 int oskar_SkyModel::compute_relative_lmn(double ra0, double dec0)
 {
     return oskar_sky_model_compute_relative_lmn(this, ra0, dec0);

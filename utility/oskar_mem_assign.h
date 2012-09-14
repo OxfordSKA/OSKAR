@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,11 +48,10 @@ extern "C" {
  *
  * @param[out] dst Pointer to assign to.
  * @param[in]  src Pointer to assign from.
- *
- * @return An error code.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_assign(oskar_Mem* dst, const oskar_Mem* src);
+void oskar_mem_assign(oskar_Mem* dst, const oskar_Mem* src, int* status);
 
 #ifdef __cplusplus
 }

@@ -39,7 +39,7 @@ void oskar_sky_model_insert(oskar_SkyModel* dst, const oskar_SkyModel* src,
     /* Check all inputs. */
     if (!src || !dst || !status)
     {
-        if (status) *status = OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
         return;
     }
 

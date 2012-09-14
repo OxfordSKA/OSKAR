@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,15 +34,21 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_combine_set(oskar_SkyModel* model,
-        const oskar_SkyModel* model_set, int num_models)
+void oskar_sky_model_combine_set(oskar_SkyModel* model,
+        const oskar_SkyModel* model_set, int num_models, int* status)
 {
-    int total_sources, i, error;
+    int total_sources = 0, i = 0;
 
-    if (model == NULL || model_set == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!model || !model_set || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    total_sources = 0;
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     for (i = 0; i < num_models; ++i)
     {
         total_sources += model_set[i].num_sources;
@@ -50,11 +56,8 @@ int oskar_sky_model_combine_set(oskar_SkyModel* model,
 
     for (i = 0; i < num_models; ++i)
     {
-        error = oskar_sky_model_append(model, &model_set[i]);
-        if (error) return error;
+        oskar_sky_model_append(model, &model_set[i], status);
     }
-
-    return OSKAR_SUCCESS;
 }
 
 

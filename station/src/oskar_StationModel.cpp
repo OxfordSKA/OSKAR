@@ -42,8 +42,7 @@ oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
     int err = 0;
     oskar_station_model_init(this, other->type(), location,
             other->num_elements, &err);
-    if (err) throw err;
-    err = oskar_station_model_copy(this, other);
+    oskar_station_model_copy(this, other, &err);
     if (err) throw err;
 }
 
@@ -51,11 +50,6 @@ oskar_StationModel::~oskar_StationModel()
 {
     int err = oskar_station_model_free(this);
     if (err) throw err;
-}
-
-int oskar_StationModel::copy_to(oskar_StationModel* other)
-{
-    return oskar_station_model_copy(other, this); // Copy this to other.
 }
 
 int oskar_StationModel::load_configuration(const char* filename)

@@ -51,12 +51,15 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_Mem* z, oskar_WorkStationBeam* work,
         oskar_Device_curand_state* curand_states, int* status)
 {
+    /* Check all inputs. */
     if (!beam || !station || !x || !y || !z || !work || !curand_states ||
             !status)
     {
         oskar_set_invalid_argument(status);
+        return;
     }
 
+    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Common element model for all detectors in the station. */
@@ -78,14 +81,11 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
             *status = oskar_evaluate_station_beam_scalar(E_ptr, station,
                     beam_x, beam_y, beam_z, num_points, x, y, z,
                     &work->weights, &work->weights_error, curand_states);
-            if (*status) return;
 
             /* Normalise array beam if required. */
             if (station->normalise_beam)
-            {
                 oskar_mem_scale_real(E_ptr, 1.0/station->num_elements, status);
-                if (*status) return;
-            }
+            if (*status) return;
         }
 
         /* Evaluate G if required. */
@@ -111,21 +111,19 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         {
             /* Use E_ptr and G_ptr. */
             oskar_mem_element_multiply(beam, E_ptr, G_ptr, num_points, status);
-            if (*status) return;
         }
         else if (E_ptr && oskar_mem_is_matrix(beam->type))
         {
             /* Join E with an identity matrix in EG. */
-            *status = oskar_mem_set_value_real(beam, 1.0);
+            oskar_mem_set_value_real(beam, 1.0, status);
             oskar_mem_element_multiply(NULL, beam, E_ptr, num_points, status);
-            if (*status) return;
         }
         else if (!E_ptr && !G_ptr)
         {
             /* No evaluation: set EG to identity matrix. */
-            *status = oskar_mem_set_value_real(beam, 1.0);
-            if (*status) return;
+            oskar_mem_set_value_real(beam, 1.0, status);
         }
+        if (*status) return;
     }
 
 
@@ -154,14 +152,11 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
             *status = oskar_evaluate_station_beam_dipoles(beam, station,
                     beam_x, beam_y, beam_z, num_points, x, y, z,
                     &work->weights, &work->weights_error, curand_states);
-            if (*status) return;
 
             /* Normalise array beam if required. */
             if (station->normalise_beam)
-            {
                 oskar_mem_scale_real(beam, 1.0/station->num_elements, status);
-                if (*status) return;
-            }
+            if (*status) return;
         }
         else
         {
@@ -173,7 +168,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
 
     /* Blank (zero) sources below the horizon. */
     *status = oskar_blank_below_horizon(beam, z, num_points);
-    if (*status) return;
 }
 
 
