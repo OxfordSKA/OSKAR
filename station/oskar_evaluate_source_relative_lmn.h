@@ -27,31 +27,45 @@
  */
 
 
-#ifndef OSKAR_CUDAK_GAUSSIAN_H_
-#define OSKAR_CUDAK_GAUSSIAN_H_
+#ifndef OSKAR_EVALUATE_SOURCE_RELATIVE_LMN_H_
+#define OSKAR_EVALUATE_SOURCE_RELATIVE_LMN_H_
 
 /**
- * @file oskar_cudak_gaussian.h
+ * @file oskar_evaluate_source_relative_lmn.h
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_vector_types.h"
+#include "station/oskar_StationModel.h"
+#include "utility/oskar_Mem.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-__global__
-void oskar_cudak_gaussian_f(float2* z, int n, const float* x, const float* y,
-        float std);
+/**
+ * @brief Evaluates relative direction cosines for specified sources.
+ *
+ * @details
+ * This function converts source positions from equatorial (RA, Dec)
+ * coordinates to direction cosines relative to the beam pointing direction
+ * specified in the station model.
+ *
+ * @param[in] num_sources The number of source positions to process.
+ * @param[out] l          Source relative l direction cosines (x-components).
+ * @param[out] m          Source relative m direction cosines (y-components).
+ * @param[out] n          Source relative n direction cosines (z-components).
+ * @param[in]  RA         Source Right Ascension values.
+ * @param[in]  Dec        Source Declination values.
+ * @param[in]  station    Pointer to station model.
+ * @param[in,out]  status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_source_relative_lmn(int num_sources, oskar_Mem* l,
+        oskar_Mem* m, oskar_Mem* n, const oskar_Mem* RA, const oskar_Mem* Dec,
+        const oskar_StationModel* station, int* status);
 
-__global__
-void oskar_cudak_gaussian_d(double2* z, int n, const double* x, const double* y,
-        double std);
+#ifdef __cplusplus
+}
+#endif
 
-__global__
-void oskar_cudak_gaussian_mf(float4c* z, int n, const float* x, const float* y,
-        float std);
-
-__global__
-void oskar_cudak_gaussian_md(double4c* z, int n, const double* x, const double* y,
-        double std);
-
-#endif /* OSKAR_CUDAK_GAUSSIAN_H_ */
+#endif /* OSKAR_EVALUATE_SOURCE_RELATIVE_LMN_H_ */

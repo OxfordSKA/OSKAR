@@ -84,6 +84,7 @@ void oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->single_element_model = OSKAR_TRUE;
     model->orientation_x = M_PI / 2.0;
     model->orientation_y = 0.0;
+    model->gaussian_beam_fwhm_deg = 0.0;
 
     model->child = NULL;
     model->parent = NULL;

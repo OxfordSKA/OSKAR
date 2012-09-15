@@ -43,8 +43,8 @@
 extern "C" {
 #endif
 
-enum OSKAR_COORD_TYPE { HORIZONTAL_XYZ, PHASE_CENTRE_XYZ };
-typedef enum OSKAR_COORD_TYPE coord_type;
+enum OSKAR_STATION_BEAM_COORD_TYPE { HORIZONTAL_XYZ, PHASE_CENTRE_XYZ };
+typedef enum OSKAR_STATION_BEAM_COORD_TYPE oskar_station_beam_coord_type;
 
 /**
  * @brief Evaluates the value of a station beam at a number of discrete
@@ -89,10 +89,10 @@ typedef enum OSKAR_COORD_TYPE coord_type;
 OSKAR_EXPORT
 void oskar_evaluate_station_beam(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
-        double beam_z, int num_points, coord_type type, const oskar_Mem* x,
-        const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* horizon_mask,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
-        int* status);
+        double beam_z, int num_points, oskar_station_beam_coord_type type,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Mem* horizon_mask, oskar_WorkStationBeam* work,
+        oskar_Device_curand_state* curand_states, int* status);
 
 #ifdef __cplusplus
 }

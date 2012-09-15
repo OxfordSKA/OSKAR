@@ -33,6 +33,7 @@
 #include "station/oskar_station_model_location.h"
 #include "utility/oskar_mem_copy.h"
 #include <stdlib.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,6 +72,7 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     dst->evaluate_array_factor = src->evaluate_array_factor;
     dst->evaluate_element_factor = src->evaluate_element_factor;
     dst->bit_depth = src->bit_depth;
+    dst->gaussian_beam_fwhm_deg = src->gaussian_beam_fwhm_deg;
 
     /* Copy the memory blocks. */
     oskar_mem_copy(&dst->x_signal, &src->x_signal, status);

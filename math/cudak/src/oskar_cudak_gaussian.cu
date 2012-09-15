@@ -57,6 +57,52 @@ void oskar_cudak_gaussian_d(double2* z, int n, const double* x, const double* y,
     double y_ = y[i];
 
     double arg = (x_*x_ + y_*y_) / (2.0 * std * std);
-    z[i].x = expf(-arg);
+    z[i].x = exp(-arg);
     z[i].y = 0.0;
+}
+
+
+__global__
+void oskar_cudak_gaussian_mf(float4c* z, int n, const float* x, const float* y,
+        float std)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    float x_ = x[i];
+    float y_ = y[i];
+
+    float arg = (x_*x_ + y_*y_) / (2.0 * std * std);
+    float value = expf(-arg);
+    z[i].a.x = value;
+    z[i].a.y = 0.0;
+    z[i].b.x = 0.0;
+    z[i].b.y = 0.0;
+    z[i].c.x = 0.0;
+    z[i].c.y = 0.0;
+    z[i].d.x = value;
+    z[i].d.y = 0.0;
+}
+
+
+__global__
+void oskar_cudak_gaussian_md(double4c* z, int n, const double* x, const double* y,
+        double std)
+{
+    const int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i >= n) return;
+
+    double x_ = x[i];
+    double y_ = y[i];
+
+    double arg = (x_*x_ + y_*y_) / (2.0 * std * std);
+    double value = exp(-arg);
+    z[i].a.x = value;
+    z[i].a.y = 0.0;
+    z[i].b.x = 0.0;
+    z[i].b.y = 0.0;
+    z[i].c.x = 0.0;
+    z[i].c.y = 0.0;
+    z[i].d.x = value;
+    z[i].d.y = 0.0;
 }

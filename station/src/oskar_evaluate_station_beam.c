@@ -58,24 +58,27 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         int* status);
 
 
-
 void oskar_evaluate_station_beam(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
-        double beam_z, int num_points, coord_type type, const oskar_Mem* x,
-        const oskar_Mem* y, const oskar_Mem* z, const oskar_Mem* horizon_mask,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
-        int* status)
+        double beam_z, int num_points, oskar_station_beam_coord_type type,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        const oskar_Mem* horizon_mask, oskar_WorkStationBeam* work,
+        oskar_Device_curand_state* curand_states, int* status)
 {
     check_inputs(beam, station, num_points, x, y, z, horizon_mask, work,
             curand_states, status);
     if (*status) return;
-
 
     switch (station->station_type)
     {
         /* Aperture array station */
         case OSKAR_STATION_TYPE_AA:
         {
+            if (type != HORIZONTAL_XYZ)
+            {
+                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                return;
+            }
             oskar_evaluate_station_beam_aperture_array(beam, station, beam_x,
                     beam_y, beam_z, num_points, x, y, z, work, curand_states,
                     status);
@@ -86,14 +89,18 @@ void oskar_evaluate_station_beam(oskar_Mem* beam,
         /* Circular Gaussian beam */
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-#if 0
-            /* FIXME how to set/get this ...? should be in the station model */
-            double fwhm_deg = 1.0;
-            /* FIXME need phase centre relative l,m */
-            oskar_evaluate_station_beam_gaussian(EG, num_points, l, m, fwhm_deg, &error);
-            if (error) return error;
-            /* FIXME horizon clip needed */
-#endif
+            if (type != PHASE_CENTRE_XYZ)
+            {
+                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
+                return;
+            }
+            oskar_evaluate_station_beam_gaussian(beam, num_points, x, y,
+                    station->gaussian_beam_fwhm_deg, status);
+            if (*status) return;
+
+            /* Blank (zero) sources below the horizon. */
+            *status = oskar_blank_below_horizon(beam, horizon_mask, num_points);
+            if (*status) return;
             break;
         }
 

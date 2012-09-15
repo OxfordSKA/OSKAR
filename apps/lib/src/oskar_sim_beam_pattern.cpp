@@ -41,6 +41,7 @@
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
+#include "station/oskar_evaluate_source_relative_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_log_message.h"
@@ -54,6 +55,8 @@
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
 #include "utility/oskar_vector_types.h"
+
+#include "utility/oskar_mem_binary_file_write.h"
 
 #include <cmath>
 #include <QtCore/QTime>
@@ -237,16 +240,41 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
                 // Evaluate horizontal l,m,n coordinates.
                 oskar_evaluate_source_horizontal_lmn(num_pixels,
-                        &work.hor_l, &work.hor_m, &work.hor_n, &RA, &Dec,
+                        &work.hor_x, &work.hor_y, &work.hor_z, &RA, &Dec,
                         station, gast, &err);
                 if (err) return err;
 
                 // Evaluate the station beam.
-                oskar_evaluate_station_beam(&beam_pattern, station,
-                        beam_l, beam_m, beam_n, num_pixels, HORIZONTAL_XYZ,
-                        &work.hor_l, &work.hor_m, &work.hor_n, &work.hor_n,
-                        &work, &curand_state, &err);
-                if (err) return err;
+                switch (station->station_type)
+                {
+                    case OSKAR_STATION_TYPE_AA:
+                    {
+                        oskar_evaluate_station_beam(&beam_pattern, station,
+                                beam_l, beam_m, beam_n, num_pixels, HORIZONTAL_XYZ,
+                                &work.hor_x, &work.hor_y, &work.hor_z, &work.hor_z,
+                                &work, &curand_state, &err);
+                        if (err) return err;
+                        break;
+                    }
+                    case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
+                    {
+                        oskar_evaluate_source_relative_lmn(num_pixels,
+                                &work.rel_x, &work.rel_y, &work.rel_z, &RA, &Dec,
+                                station, &err);
+                        if (err) return err;
+                        oskar_evaluate_station_beam(&beam_pattern, station,
+                                beam_l, beam_m, beam_n, num_pixels, PHASE_CENTRE_XYZ,
+                                &work.rel_x, &work.rel_y, &work.rel_z, &work.hor_z,
+                                &work, &curand_state, &err);
+                        if (err) return err;
+                        break;
+                    }
+                    default:
+                    {
+                        return OSKAR_ERR_SETTINGS_TELESCOPE;
+                        break;
+                    }
+                }
 
                 // Copy beam pattern back to host memory.
                 oskar_mem_copy(&beam_cpu, &beam_pattern, &err);

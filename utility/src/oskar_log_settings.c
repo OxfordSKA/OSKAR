@@ -266,8 +266,22 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
     /* Station model settings. */
     oskar_log_message(log, depth, "Station model settings");
     ++depth;
-    LVS("Station type", s->telescope.station.station_type ==
-            OSKAR_STATION_TYPE_DISH ? "Dishes" : "Aperture Arrays");
+    switch (s->telescope.station.station_type)
+    {
+        case OSKAR_STATION_TYPE_AA:
+            LVS("Station type", "Aperture Arrays");
+            break;
+        case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
+            LVS("Station type", "Gaussian beam");
+            ++depth;
+            LV("Beam FWHM [deg]", "%.3f", s->telescope.station.gaussian_beam_fwhm_deg);
+            --depth;
+            break;
+        default:
+            LVS("Station type", "ERROR UNKNOWN");
+            break;
+    }
+
     LVB("Use polarised elements", s->telescope.station.use_polarised_elements);
     LVB("Ignore custom element patterns",
             s->telescope.station.ignore_custom_element_patterns);

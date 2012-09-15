@@ -42,6 +42,7 @@
 struct oskar_StationModel;
 typedef struct oskar_StationModel oskar_StationModel;
 
+
 struct OSKAR_EXPORT oskar_StationModel
 {
     int station_type;            /**< Type of the station (enumerator). */
@@ -90,6 +91,10 @@ struct OSKAR_EXPORT oskar_StationModel
     int evaluate_array_factor;   /**< True if the array factor should be evaluated. */
     int evaluate_element_factor; /**< True if the element pattern should be evaluated. */
     int bit_depth;               /**< Not implemented! */
+
+    double gaussian_beam_fwhm_deg; /**< FWHM of gaussian station beam, only used
+                                       the GAUSSIAN_BEAM station types. */
+
 
 #ifdef __cplusplus
     /* If C++, provide constructors and methods. */
@@ -181,9 +186,9 @@ struct OSKAR_EXPORT oskar_StationModel
 };
 
 enum {
-    OSKAR_STATION_TYPE_DISH,
+    OSKAR_STATION_TYPE_AA,
     OSKAR_STATION_TYPE_GAUSSIAN_BEAM,
-    OSKAR_STATION_TYPE_AA
+    OSKAR_STATION_TYPE_DISH
 };
 
 #endif /* OSKAR_STATION_MODEL_H_ */

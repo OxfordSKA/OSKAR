@@ -154,9 +154,9 @@ void Test_evaluate_jones_E::evaluate_e()
     oskar_Jones E_cpu(&E_gpu, OSKAR_LOCATION_CPU);
 
     // Save to file for plotting.
-    oskar_Mem l(&work_gpu.hor_l, OSKAR_LOCATION_CPU);
-    oskar_Mem m(&work_gpu.hor_m, OSKAR_LOCATION_CPU);
-    oskar_Mem n(&work_gpu.hor_n, OSKAR_LOCATION_CPU);
+    oskar_Mem l(&work_gpu.hor_x, OSKAR_LOCATION_CPU);
+    oskar_Mem m(&work_gpu.hor_y, OSKAR_LOCATION_CPU);
+    oskar_Mem n(&work_gpu.hor_z, OSKAR_LOCATION_CPU);
     const char* filename = "temp_test_E_jones.txt";
     FILE* file = fopen(filename, "w");
     oskar_Mem E_station;

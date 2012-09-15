@@ -50,19 +50,19 @@ int main(int argc, char** argv)
     oskar_Log log;
     oskar_log_message(&log, 0, "Running binary %s", argv[0]);
 
-	try
-	{
-		// Run simulation.
-		error = oskar_sim_beam_pattern(argv[1], &log);
-	}
-	catch (int code)
-	{
-		error = code;
-	}
+    try
+    {
+        // Run simulation.
+        error = oskar_sim_beam_pattern(argv[1], &log);
+    }
+    catch (int code)
+    {
+        error = code;
+    }
 
-	// Check for errors.
-	if (error)
-		oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
+    // Check for errors.
+    if (error)
+        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
 
     return error;
 }

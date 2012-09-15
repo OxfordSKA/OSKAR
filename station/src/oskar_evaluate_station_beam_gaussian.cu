@@ -29,9 +29,11 @@
 #include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "math/cudak/oskar_cudak_gaussian.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_cuda_check_error.h"
 
 #include <math.h>
+#include <stdio.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288
@@ -46,6 +48,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         double fwhm_deg, int* status)
 {
     int type, location;
+    int i;
 
     /* Check all inputs. */
     if (!beam || !l || !m || !status)
@@ -58,14 +61,16 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     if (*status) return;
 
     /* Get type and check consistency. */
-    if (beam->type == (OSKAR_DOUBLE | OSKAR_COMPLEX) ||
-            l->type == OSKAR_DOUBLE ||
+    if (oskar_mem_is_double(beam->type) &&
+            oskar_mem_is_complex(beam->type) &&
+            l->type == OSKAR_DOUBLE &&
             m->type == OSKAR_DOUBLE)
     {
         type = OSKAR_DOUBLE;
     }
-    else if (beam->type == (OSKAR_SINGLE | OSKAR_COMPLEX) ||
-            l->type == OSKAR_SINGLE ||
+    else if (oskar_mem_is_single(beam->type) &&
+            oskar_mem_is_complex(beam->type) &&
+            l->type == OSKAR_SINGLE &&
             m->type == OSKAR_SINGLE)
     {
         type = OSKAR_SINGLE;
@@ -73,6 +78,12 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     else
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+
+    if (fwhm_deg == 0.0)
+    {
+        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         return;
     }
 
@@ -101,26 +112,66 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     {
         if (type == OSKAR_DOUBLE)
         {
-            int i;
-            for (i = 0; i < num_points; ++i)
+            if (oskar_mem_is_scalar(beam->type))
             {
-                double l_ = ((double*)l->data)[i];
-                double m_ = ((double*)m->data)[i];
-                double arg = (l_*l_ + m_*m_) / (2.0 * var);
-                ((double2*)beam->data)[i].x = exp(-arg);
-                ((double2*)beam->data)[i].y = 0.0;
+                for (i = 0; i < num_points; ++i)
+                {
+                    double l_ = ((double*)l->data)[i];
+                    double m_ = ((double*)m->data)[i];
+                    double arg = (l_*l_ + m_*m_) / (2.0 * var);
+                    ((double2*)beam->data)[i].x = exp(-arg);
+                    ((double2*)beam->data)[i].y = 0.0;
+                }
+            }
+            else
+            {
+                for (i = 0; i < num_points; ++i)
+                {
+                    double l_ = ((double*)l->data)[i];
+                    double m_ = ((double*)m->data)[i];
+                    double arg = (l_*l_ + m_*m_) / (2.0 * var);
+                    double value = exp(-arg);
+                    ((double4c*)beam->data)[i].a.x = value;
+                    ((double4c*)beam->data)[i].a.y = 0.0;
+                    ((double4c*)beam->data)[i].b.x = 0.0;
+                    ((double4c*)beam->data)[i].b.y = 0.0;
+                    ((double4c*)beam->data)[i].c.x = 0.0;
+                    ((double4c*)beam->data)[i].c.y = 0.0;
+                    ((double4c*)beam->data)[i].d.x = value;
+                    ((double4c*)beam->data)[i].d.y = 0.0;
+                }
             }
         }
         else /* type == OSKAR_SINGLE */
         {
-            int i;
-            for (i = 0; i < num_points; ++i)
+            if (oskar_mem_is_scalar(beam->type))
             {
-                float l_ = ((float*)l->data)[i];
-                float m_ = ((float*)m->data)[i];
-                float arg = (l_*l_ + m_*m_) / (2.0 * var);
-                ((float2*)beam->data)[i].x = expf(-arg);
-                ((float2*)beam->data)[i].y = 0.0;
+                for (i = 0; i < num_points; ++i)
+                {
+                    float l_ = ((float*)l->data)[i];
+                    float m_ = ((float*)m->data)[i];
+                    float arg = (l_*l_ + m_*m_) / (2.0 * var);
+                    ((float2*)beam->data)[i].x = expf(-arg);
+                    ((float2*)beam->data)[i].y = 0.0;
+                }
+            }
+            else
+            {
+                for (i = 0; i < num_points; ++i)
+                {
+                    float l_ = ((float*)l->data)[i];
+                    float m_ = ((float*)m->data)[i];
+                    float arg = (l_*l_ + m_*m_) / (2.0 * var);
+                    float value = expf(-arg);
+                    ((float4c*)beam->data)[i].a.x = value;
+                    ((float4c*)beam->data)[i].a.y = 0.0;
+                    ((float4c*)beam->data)[i].b.x = 0.0;
+                    ((float4c*)beam->data)[i].b.y = 0.0;
+                    ((float4c*)beam->data)[i].c.x = 0.0;
+                    ((float4c*)beam->data)[i].c.y = 0.0;
+                    ((float4c*)beam->data)[i].d.x = value;
+                    ((float4c*)beam->data)[i].d.y = 0.0;
+                }
             }
         }
 
@@ -132,15 +183,33 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         int num_blocks = (num_points + num_threads - 1) / num_threads;
         if (type == OSKAR_DOUBLE)
         {
-            oskar_cudak_gaussian_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            ((double2*)beam->data, num_points, (double*)l->data,
-                    (double*)m->data, std);
+            if (oskar_mem_is_scalar(beam->type))
+            {
+                oskar_cudak_gaussian_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                ((double2*)beam->data, num_points, (double*)l->data,
+                        (double*)m->data, std);
+            }
+            else
+            {
+                oskar_cudak_gaussian_md OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                ((double4c*)beam->data, num_points, (double*)l->data,
+                        (double*)m->data, std);
+            }
         }
         else /* type == OSKAR_SINGLE */
         {
-            oskar_cudak_gaussian_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            ((float2*)beam->data, num_points, (float*)l->data,
-                    (float*)m->data, std);
+            if (oskar_mem_is_scalar(beam->type))
+            {
+                oskar_cudak_gaussian_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                ((float2*)beam->data, num_points, (float*)l->data,
+                        (float*)m->data, std);
+            }
+            else
+            {
+                oskar_cudak_gaussian_mf OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                ((float4c*)beam->data, num_points, (float*)l->data,
+                        (float*)m->data, std);
+            }
         }
         oskar_cuda_check_error(status);
     }

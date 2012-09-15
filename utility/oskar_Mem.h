@@ -153,7 +153,8 @@ typedef struct oskar_Mem oskar_Mem;
  * 2. To maintain binary data compatibility, do not modify any numbers
  *    that appear in the list below!
  */
-enum {
+enum OSKAR_MEM_TYPE
+{
     /* Byte (char): bit 0 set. */
     OSKAR_CHAR                   = 0x01,
 
@@ -184,10 +185,13 @@ enum {
     /* Matrix complex double (double4c). */
     OSKAR_DOUBLE_COMPLEX_MATRIX  = OSKAR_DOUBLE | OSKAR_COMPLEX | OSKAR_MATRIX
 };
+typedef enum OSKAR_MEM_TYPE oskar_mem_type;
 
-enum {
+enum OSKAR_MEM_LOCATION
+{
     OSKAR_LOCATION_CPU = 0,
     OSKAR_LOCATION_GPU = 1
 };
+typedef enum OSKAR_MEM_LOCATION oskar_mem_location;
 
 #endif /* OSKAR_MEM_H_ */

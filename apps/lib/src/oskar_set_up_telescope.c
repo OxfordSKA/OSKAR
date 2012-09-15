@@ -82,22 +82,37 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
     err = oskar_telescope_model_config_override(telescope, &settings->telescope);
     if (err) return err;
 
-    /* Load element pattern data */
-    err = oskar_telescope_model_element_pattern_load(telescope, log,
-            &settings->telescope);
-    if (err) return err;
-
     /* Load noise data */
     err = oskar_telescope_model_noise_load(telescope, log, settings);
     if (err) return err;
 
+    switch (settings->telescope.station.station_type)
+    {
+        case OSKAR_STATION_TYPE_AA:
+        {
+            /* Load element pattern data */
+            err = oskar_telescope_model_element_pattern_load(telescope, log,
+                    &settings->telescope);
+            if (err) return err;
+
+            /* Analyse telescope model to determine whether stations are identical,
+             * whether to apply element errors and/or weights. */
+            oskar_telescope_model_analyse(telescope, &err);
+            if (err) return err;
+            break;
+        }
+        case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
+        {
+            /* NOTE if FWHM files are used in the station model this wont be correct */
+            telescope->identical_stations = OSKAR_TRUE;
+            break;
+        }
+        default:
+            return OSKAR_ERR_SETTINGS_TELESCOPE;
+    }
+
     /* Set telescope model meta-data */
     set_metadata(telescope, settings);
-
-    /* Analyse telescope model to determine whether stations are identical,
-     * whether to apply element errors and/or weights. */
-    oskar_telescope_model_analyse(telescope, &err);
-    if (err) return err;
 
     /* Print summary data. */
     oskar_log_message(log, 0, "Telescope model summary");
@@ -128,6 +143,7 @@ static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* 
     telescope->seed_time_variable_station_element_errors = seed;
     for (i = 0; i < telescope->num_stations; ++i)
     {
+        telescope->station[i].station_type = settings->telescope.station.station_type;
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
         telescope->station[i].station_type =settings->telescope.station.station_type;
@@ -135,6 +151,7 @@ static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* 
         telescope->station[i].evaluate_array_factor = settings->telescope.station.evaluate_array_factor;
         telescope->station[i].evaluate_element_factor = settings->telescope.station.evaluate_element_factor;
         telescope->station[i].normalise_beam = settings->telescope.station.normalise_beam;
+        telescope->station[i].gaussian_beam_fwhm_deg = settings->telescope.station.gaussian_beam_fwhm_deg;
     }
 }
 

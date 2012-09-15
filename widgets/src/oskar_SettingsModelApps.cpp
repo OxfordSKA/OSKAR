@@ -509,6 +509,11 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
             "by the number of antennas in the station to give a nominal \n"
             "peak value of 1.0; if false, then no normalisation is \n"
             "performed.");
+    k = group + "/gaussian_beam_fwhm_deg";
+    declare(k, "Gaussian beam FWHM override (deg)", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The FWHM of the Gaussian beam of all stations. Used if the "
+            "station type is set to <b>'Gaussian beam'</b>.");
+    setDependency(k, "telescope/station/station_type", "Gaussian beam");
 
     group = "telescope/station/element";
     setLabel(group, "Element settings (overrides)");

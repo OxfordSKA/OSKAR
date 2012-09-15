@@ -192,7 +192,7 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
     int size = 512;
     int num_points = size * size;
     double lm_minmax = 0.2;
-    bool save_results = false;
+    bool save_results = true;
 
     // Double CPU
     {

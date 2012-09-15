@@ -160,7 +160,7 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
     /* Check for the correct location. */
     if (output->location() != OSKAR_LOCATION_GPU ||
             input->location() != OSKAR_LOCATION_GPU ||
-            work->hor_l.location != OSKAR_LOCATION_GPU)
+            work->hor_x.location != OSKAR_LOCATION_GPU)
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Copy extended source flag. */
@@ -177,12 +177,12 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
     /* Resize the work buffers if necessary. */
     if (work->horizon_mask.num_elements < num_sources)
         oskar_mem_realloc(&work->horizon_mask, num_sources, status);
-    if (work->hor_l.num_elements < num_sources)
-        oskar_mem_realloc(&work->hor_l, num_sources, status);
-    if (work->hor_m.num_elements < num_sources)
-        oskar_mem_realloc(&work->hor_m, num_sources, status);
-    if (work->hor_n.num_elements < num_sources)
-        oskar_mem_realloc(&work->hor_n, num_sources, status);
+    if (work->hor_x.num_elements < num_sources)
+        oskar_mem_realloc(&work->hor_x, num_sources, status);
+    if (work->hor_y.num_elements < num_sources)
+        oskar_mem_realloc(&work->hor_y, num_sources, status);
+    if (work->hor_z.num_elements < num_sources)
+        oskar_mem_realloc(&work->hor_z, num_sources, status);
 
     /* Clear horizon mask. */
     oskar_mem_clear_contents(&work->horizon_mask, status);
@@ -207,11 +207,11 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             /* Evaluate source horizontal l,m,n direction cosines. */
             oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, input->RA,
-                    input->Dec, lst, latitude, work->hor_l, work->hor_m, work->hor_n);
+                    input->Dec, lst, latitude, work->hor_x, work->hor_y, work->hor_z);
 
             /* Update the mask. */
             oskar_cudak_update_horizon_mask_f OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (num_sources, work->hor_n, work->horizon_mask);
+            (num_sources, work->hor_z, work->horizon_mask);
         }
 
         /* Copy out source data based on the mask values. */
@@ -235,11 +235,11 @@ void oskar_sky_model_horizon_clip(oskar_SkyModel* output,
 
             /* Evaluate source horizontal l,m,n direction cosines. */
             oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, input->RA,
-                    input->Dec, lst, latitude, work->hor_l, work->hor_m, work->hor_n);
+                    input->Dec, lst, latitude, work->hor_x, work->hor_y, work->hor_z);
 
             /* Update the mask. */
             oskar_cudak_update_horizon_mask_d OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (num_sources, work->hor_n, work->horizon_mask);
+            (num_sources, work->hor_z, work->horizon_mask);
         }
 
         /* Copy out source data based on the mask values. */

@@ -53,6 +53,7 @@ struct OSKAR_EXPORT oskar_SettingsStation
     int evaluate_array_factor;
     int evaluate_element_factor;
     int normalise_beam;
+    double gaussian_beam_fwhm_deg;
     double receiver_temperature;
     char* receiver_temperature_file;
     oskar_SettingsElement element;

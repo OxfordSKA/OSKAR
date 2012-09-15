@@ -82,9 +82,15 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         else
             return OSKAR_ERR_SETTINGS_TELESCOPE;
 
-
         tel->station.use_polarised_elements =
                 s.value("use_polarised_elements", true).toBool();
+
+//        if (tel->station.use_polarised_elements &&
+//                tel->station.station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+//        {
+//            return OSKAR_ERR_SETTINGS_TELESCOPE;
+//        }
+
         tel->station.ignore_custom_element_patterns =
                 s.value("ignore_custom_element_patterns", false).toBool();
         tel->station.evaluate_array_factor =
@@ -92,6 +98,8 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         tel->station.evaluate_element_factor =
                 s.value("evaluate_element_factor", true).toBool();
         tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
+        tel->station.gaussian_beam_fwhm_deg = s.value("gaussian_beam_fwhm_deg",
+                0.0).toDouble();
 
         // Station element settings (overrides).
         s.beginGroup("element");
