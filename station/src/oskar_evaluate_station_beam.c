@@ -74,7 +74,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam,
         /* Aperture array station */
         case OSKAR_STATION_TYPE_AA:
         {
-            if (type != HORIZONTAL_XYZ)
+            if (type != OSKAR_BEAM_COORDS_HORIZONTAL_XYZ)
             {
                 *status = OSKAR_ERR_SETTINGS_TELESCOPE;
                 return;
@@ -89,7 +89,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam,
         /* Circular Gaussian beam */
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-            if (type != PHASE_CENTRE_XYZ)
+            if (type != OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ)
             {
                 *status = OSKAR_ERR_SETTINGS_TELESCOPE;
                 return;

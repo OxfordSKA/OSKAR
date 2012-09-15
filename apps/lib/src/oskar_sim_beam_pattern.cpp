@@ -250,7 +250,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                     case OSKAR_STATION_TYPE_AA:
                     {
                         oskar_evaluate_station_beam(&beam_pattern, station,
-                                beam_l, beam_m, beam_n, num_pixels, HORIZONTAL_XYZ,
+                                beam_l, beam_m, beam_n, num_pixels,
+                                OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
                                 &work.hor_x, &work.hor_y, &work.hor_z, &work.hor_z,
                                 &work, &curand_state, &err);
                         if (err) return err;
@@ -263,7 +264,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                                 station, &err);
                         if (err) return err;
                         oskar_evaluate_station_beam(&beam_pattern, station,
-                                beam_l, beam_m, beam_n, num_pixels, PHASE_CENTRE_XYZ,
+                                beam_l, beam_m, beam_n, num_pixels,
+                                OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ,
                                 &work.rel_x, &work.rel_y, &work.rel_z, &work.hor_z,
                                 &work, &curand_state, &err);
                         if (err) return err;
