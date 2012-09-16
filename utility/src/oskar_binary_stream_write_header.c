@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,23 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_write_header(FILE* stream)
+void oskar_binary_stream_write_header(FILE* stream, int* status)
 {
-    /* Construct binary header. */
     int version = OSKAR_VERSION;
     oskar_BinaryHeader header;
     char magic[] = "OSKARBIN";
+
+    /* Check all inputs. */
+    if (!stream || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Construct binary header. */
     strcpy(header.magic, magic);
     header.bin_version = OSKAR_BINARY_FORMAT_VERSION;
     header.endian      = (char)oskar_endian();
@@ -70,9 +81,7 @@ int oskar_binary_stream_write_header(FILE* stream)
 
     /* Write header to stream. */
     if (fwrite(&header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
-        return OSKAR_ERR_FILE_IO;
-
-    return OSKAR_SUCCESS;
+        *status = OSKAR_ERR_FILE_IO;
 }
 
 #ifdef __cplusplus

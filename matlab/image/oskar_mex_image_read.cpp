@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <mex.h>
 
 #include "imaging/oskar_image_read.h"
@@ -37,6 +36,7 @@
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
+    int err = 0;
     if (num_in < 1 || num_in > 2 || num_out > 1)
     {
         mexErrMsgTxt("Usage: image = oskar.image.read(filename, [index = 0])");
@@ -52,7 +52,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     oskar_Image image;
-    int err = oskar_image_read(&image, filename, idx);
+    oskar_image_read(&image, filename, idx, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR",
@@ -62,5 +62,3 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     out[0] = oskar_mex_image_to_matlab_struct(&image, filename);
 }
-
-

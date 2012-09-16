@@ -44,57 +44,62 @@
 extern "C" {
 #endif
 
-int oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
+void oskar_mem_binary_file_read(oskar_Mem* mem, const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index)
+        unsigned char id_tag, int user_index, int* status)
 {
-    int err = 0;
     FILE* stream;
 
-    /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL || index == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !filename || !index || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Open the input file. */
     stream = fopen(filename, "rb");
-    if (stream == NULL)
-        return OSKAR_ERR_FILE_IO;
+    if (!stream)
+        *status = OSKAR_ERR_FILE_IO;
 
     /* Read from the file. */
-    err = oskar_mem_binary_stream_read(mem, stream, index,
-            id_group, id_tag, user_index);
+    oskar_mem_binary_stream_read(mem, stream, index,
+            id_group, id_tag, user_index, status);
 
-    /* Close the input file and check for errors. */
-    fclose(stream);
-
-    return err;
+    /* Close the input file. */
+    if (stream) fclose(stream);
 }
 
-int oskar_mem_binary_file_read_ext(oskar_Mem* mem, const char* filename,
+void oskar_mem_binary_file_read_ext(oskar_Mem* mem, const char* filename,
         oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index)
+        const char* name_tag, int user_index, int* status)
 {
-    int err = 0;
     FILE* stream;
 
-    /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL || index == NULL ||
-            name_group == NULL || name_tag == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !filename || !index || !name_group || !name_tag || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Open the input file. */
     stream = fopen(filename, "rb");
-    if (stream == NULL)
-        return OSKAR_ERR_FILE_IO;
+    if (!stream)
+        *status = OSKAR_ERR_FILE_IO;
 
     /* Read from the file. */
-    err = oskar_mem_binary_stream_read_ext(mem, stream, index,
-            name_group, name_tag, user_index);
+    oskar_mem_binary_stream_read_ext(mem, stream, index,
+            name_group, name_tag, user_index, status);
 
-    /* Close the input file and check for errors. */
-    fclose(stream);
-
-    return err;
+    /* Close the input file. */
+    if (stream) fclose(stream);
 }
 
 #ifdef __cplusplus

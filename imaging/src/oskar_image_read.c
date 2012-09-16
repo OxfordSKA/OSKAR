@@ -42,96 +42,88 @@
 extern "C" {
 #endif
 
-int oskar_image_read(oskar_Image* image, const char* filename, int idx)
+void oskar_image_read(oskar_Image* image, const char* filename, int idx,
+        int* status)
 {
-    int err = 0, type;
+    int type, tag_error = 0;
     unsigned char grp = OSKAR_TAG_GROUP_IMAGE;
     FILE* stream;
     oskar_BinaryTagIndex* index = NULL;
 
-    /* Sanity check on inputs. */
-    if (filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!image || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Open the stream. */
     stream = fopen(filename, "rb");
     if (stream == NULL)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Read the data type. */
-    err = oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_DATA_TYPE, idx, &type);
-    if (err) goto cleanup;
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_DATA_TYPE, idx, &type, status);
 
     /* Initialise the image. */
-    oskar_image_init(image, type, OSKAR_LOCATION_CPU, &err);
-    if (err) goto cleanup;
+    oskar_image_init(image, type, OSKAR_LOCATION_CPU, status);
 
     /* Optionally read the settings path (ignore the error code). */
     oskar_mem_binary_stream_read(&image->settings_path, stream, &index,
-            OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0);
+            OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, &tag_error);
 
     /* Read the dimensions. */
-    err = oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_NUM_PIXELS_WIDTH, idx, &image->width);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_NUM_PIXELS_HEIGHT, idx, &image->height);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_NUM_POLS, idx, &image->num_pols);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_NUM_TIMES, idx, &image->num_times);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_NUM_CHANNELS, idx, &image->num_channels);
-    if (err) goto cleanup;
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_NUM_PIXELS_WIDTH, idx, &image->width, status);
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_NUM_PIXELS_HEIGHT, idx, &image->height, status);
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_NUM_POLS, idx, &image->num_pols, status);
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_NUM_TIMES, idx, &image->num_times, status);
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_NUM_CHANNELS, idx, &image->num_channels, status);
 
     /* Read the dimension order. */
-    err = oskar_binary_stream_read(stream, &index, OSKAR_INT, grp,
+    oskar_binary_stream_read(stream, &index, OSKAR_INT, grp,
             OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx, sizeof(image->dimension_order),
-            image->dimension_order);
-    if (err) goto cleanup;
+            image->dimension_order, status);
 
     /* Read other image metadata. */
-    err = oskar_binary_stream_read_int(stream, &index, grp,
-            OSKAR_IMAGE_TAG_IMAGE_TYPE, idx, &image->image_type);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_RA, idx, &image->centre_ra_deg);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, &image->centre_dec_deg);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_RA, idx, &image->fov_ra_deg);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FOV_DEC, idx, &image->fov_dec_deg);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_TIME_START_MJD_UTC, idx, &image->time_start_mjd_utc);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_TIME_INC_SEC, idx, &image->time_inc_sec);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, &image->freq_start_hz);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_read_double(stream, &index, grp,
-            OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, &image->freq_inc_hz);
-    if (err) goto cleanup;
+    oskar_binary_stream_read_int(stream, &index, grp,
+            OSKAR_IMAGE_TAG_IMAGE_TYPE, idx, &image->image_type, status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_CENTRE_RA, idx, &image->centre_ra_deg, status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, &image->centre_dec_deg, status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_FOV_RA, idx, &image->fov_ra_deg, status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_FOV_DEC, idx, &image->fov_dec_deg, status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_TIME_START_MJD_UTC, idx, &image->time_start_mjd_utc,
+            status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_TIME_INC_SEC, idx, &image->time_inc_sec, status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, &image->freq_start_hz, status);
+    oskar_binary_stream_read_double(stream, &index, grp,
+            OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, &image->freq_inc_hz, status);
 
     /* Read the image data. */
-    err = oskar_mem_binary_stream_read(&image->data, stream, &index,
-            grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx);
+    oskar_mem_binary_stream_read(&image->data, stream, &index,
+            grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx, status);
 
-    cleanup:
-    oskar_binary_tag_index_free(&index);
+    /* Free the index and close the stream. */
+    oskar_binary_tag_index_free(&index, status);
     fclose(stream);
-
-    return err;
 }
 
 #ifdef __cplusplus

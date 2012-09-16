@@ -49,11 +49,11 @@ extern "C" {
  *
  * @param[in,out]  vis  Pointer to empty or uninitialised visibility structure.
  * @param[in]  filename The filename to read from.
- *
- * @return An error code.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename);
+void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
+        int* status);
 
 #ifdef __cplusplus
 }

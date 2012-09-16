@@ -57,24 +57,37 @@ static const int width = 40;
 
 static const char* oskar_get_data_type_string(char data_type);
 
-int oskar_binary_file_query(oskar_Log* log, const char* filename)
+void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
 {
     FILE* stream;
-    int version = 0, extended_tags = 0, depth = -4, error = 0, i;
+    int version = 0, extended_tags = 0, depth = -4, i, tag_not_present = 0;
     oskar_BinaryTagIndex* index = NULL;
     oskar_BinaryHeader header;
     oskar_Mem temp;
     size_t data_size = 0;
     long int data_offset = 0;
 
+    /* Check all inputs. */
+    if (!filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Open the file. */
     stream = fopen(filename, "rb");
     if (!stream)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Read the header from the stream. */
-    error = oskar_binary_stream_read_header(stream, &header);
-    if (error) return error;
+    oskar_binary_stream_read_header(stream, &header, status);
+    if (*status) return;
     version = oskar_binary_header_version(&header);
 
     /* Log file header data. */
@@ -91,23 +104,25 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
             (version & 0x0000ff));
 
     /* Create the tag index and close the stream. */
-    oskar_binary_tag_index_create(&index, stream);
+    oskar_binary_tag_index_create(&index, stream, status);
     oskar_log_line(log, ' ');
     oskar_log_message(log, 0, "File contains %d tags.", index->num_tags);
 
     /* Display the run log if it is present. */
-    if (oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-            OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset) == OSKAR_SUCCESS)
+    oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+                OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset,
+                &tag_not_present);
+    if (!tag_not_present)
     {
         oskar_Mem temp;
         oskar_log_section(log, "Run log:");
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &error);
+        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
         oskar_mem_binary_stream_read(&temp, stream, &index,
-                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0);
-        oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
+                OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, status);
+        oskar_mem_realloc(&temp, temp.num_elements + 1, status);
         ((char*)temp.data)[temp.num_elements - 1] = 0; /* Null-terminate. */
         oskar_log_message(log, depth, "\n%s", (char*)(temp.data));
-        oskar_mem_free(&temp, &error);
+        oskar_mem_free(&temp, status);
     }
 
     /* Iterate all tags in index. */
@@ -133,7 +148,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
             type  = (char) (index->data_type[i]);
             idx   = index->user_index[i];
             bytes = index->data_size_bytes[i];
-            oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, 1, &error);
+            oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, 1, status);
 
             /* Display tag data. */
             oskar_log_message(log, -1, "[%3d] %-23s %5d.%-3d : %-10d (%d bytes)",
@@ -145,28 +160,28 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 if (tag == OSKAR_TAG_METADATA_DATE_TIME_STRING)
                 {
                     oskar_mem_binary_stream_read(&temp, stream, &index,
-                            group, tag, idx);
+                            group, tag, idx, status);
                     oskar_log_message(log, depth, "Date: %s",
                             (char*)(temp.data));
                 }
                 else if (tag == OSKAR_TAG_METADATA_OSKAR_VERSION_STRING)
                 {
                     oskar_mem_binary_stream_read(&temp, stream, &index,
-                            group, tag, idx);
+                            group, tag, idx, status);
                     oskar_log_message(log, depth, "OSKAR version: %s",
                             (char*)(temp.data));
                 }
                 else if (tag == OSKAR_TAG_METADATA_CWD)
                 {
                     oskar_mem_binary_stream_read(&temp, stream, &index,
-                            group, tag, idx);
+                            group, tag, idx, status);
                     oskar_log_message(log, depth, "Working directory: %s",
                             (char*)(temp.data));
                 }
                 else if (tag == OSKAR_TAG_METADATA_USERNAME)
                 {
                     oskar_mem_binary_stream_read(&temp, stream, &index,
-                            group, tag, idx);
+                            group, tag, idx, status);
                     oskar_log_message(log, depth, "Username: %s",
                             (char*)(temp.data));
                 }
@@ -180,7 +195,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 else if (tag == OSKAR_TAG_SETTINGS_PATH)
                 {
                     oskar_mem_binary_stream_read(&temp, stream, &index,
-                            group, tag, idx);
+                            group, tag, idx, status);
                     oskar_log_message(log, depth, "Settings file path: %s",
                             (char*)(temp.data));
                 }
@@ -214,21 +229,21 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Image width: %d", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_NUM_PIXELS_HEIGHT)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Image height: %d", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_NUM_POLS)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Number of polarisations: %d", val);
                 }
@@ -236,14 +251,14 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Number of times: %d", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_NUM_CHANNELS)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Number of channels: %d", val);
                 }
@@ -251,14 +266,14 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Centre RA [deg]: %.3f", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_CENTRE_DEC)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Centre Dec [deg]: %.3f", val);
                 }
@@ -266,7 +281,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Field-of-view RA [deg]: %.3f", val);
                 }
@@ -274,7 +289,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Field-of-view Dec [deg]: %.3f", val);
                 }
@@ -282,7 +297,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Start time [MJD, UTC]: %.5f", val);
                 }
@@ -290,14 +305,14 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Time inc [s]: %.1f", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_FREQ_START_HZ)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Frequency start [Hz]: %.3e", val);
                 }
@@ -305,7 +320,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Frequency inc [Hz]: %.3e", val);
                 }
@@ -313,35 +328,35 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Mean: %.3e", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_VARIANCE)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Variance: %.3e", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_MIN)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Min: %.3e", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_MAX)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Max: %.3e", val);
                 }
                 else if (tag == OSKAR_IMAGE_TAG_RMS)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "RMS: %.3e", val);
                 }
             }
@@ -351,7 +366,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Number of channels: %d", val);
                 }
@@ -359,14 +374,14 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Number of times: %d", val);
                 }
                 else if (tag == OSKAR_VIS_TAG_NUM_BASELINES)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Number of baselines: %d", val);
                 }
@@ -386,7 +401,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Frequency start [Hz]: %.3e", val);
                 }
@@ -394,7 +409,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Frequency inc [Hz]: %.3e", val);
                 }
@@ -402,7 +417,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Start time [MJD, UTC]: %.5f", val);
                 }
@@ -410,7 +425,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth, "Time inc [s]: %.1f", val);
                 }
                 else if (tag == OSKAR_VIS_TAG_POL_TYPE)
@@ -441,7 +456,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Phase centre RA [deg]: %.3f", val);
                 }
@@ -449,7 +464,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     double val = 0;
                     oskar_binary_stream_read_double(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Phase centre Dec [deg]: %.3f", val);
                 }
@@ -457,7 +472,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
                 {
                     int val = 0;
                     oskar_binary_stream_read_int(stream, &index, group, tag,
-                            idx, &val);
+                            idx, &val, status);
                     oskar_log_message(log, depth,
                             "Number of stations: %d", val);
                 }
@@ -480,7 +495,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
             }
 
             /* Free temp array. */
-            oskar_mem_free(&temp, &error);
+            oskar_mem_free(&temp, status);
         }
     }
 
@@ -517,9 +532,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
 
     /* Free the index. */
     fclose(stream);
-    oskar_binary_tag_index_free(&index);
-
-    return OSKAR_SUCCESS;
+    oskar_binary_tag_index_free(&index, status);
 }
 
 static const char* oskar_get_data_type_string(char data_type)

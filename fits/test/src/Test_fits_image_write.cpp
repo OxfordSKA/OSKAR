@@ -45,7 +45,7 @@ void Test_fits_image_write::test_method()
 
     // Create the image.
     oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    err = oskar_image_resize(&image, columns, rows, 1, 1, 1);
+    oskar_image_resize(&image, columns, rows, 1, 1, 1, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
 
     // Add image meta-data.

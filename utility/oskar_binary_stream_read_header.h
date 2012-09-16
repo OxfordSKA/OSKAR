@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,9 +54,11 @@ extern "C" {
  *
  * @param[in,out] stream An input stream.
  * @param[in,out] header Pointer to a header structure to fill.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header);
+void oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header,
+        int* status);
 
 #ifdef __cplusplus
 }

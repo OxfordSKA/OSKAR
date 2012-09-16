@@ -37,36 +37,57 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header)
+void oskar_binary_stream_read_header(FILE* stream, oskar_BinaryHeader* header,
+        int* status)
 {
+    /* Check all inputs. */
+    if (!stream || !header || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Set stream pointer to beginning. */
     rewind(stream);
 
     /* Read the header from the stream. */
     if (fread(header, sizeof(oskar_BinaryHeader), 1, stream) != 1)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Check if this is a valid header. */
     if (strncmp("OSKARBIN", header->magic, 8) != 0)
-        return OSKAR_ERR_BINARY_FILE_INVALID;
+    {
+        *status = OSKAR_ERR_BINARY_FILE_INVALID;
+        return;
+    }
 
     /* Check if the format is compatible. */
     if (OSKAR_BINARY_FORMAT_VERSION != (int)(header->bin_version))
-        return OSKAR_ERR_BINARY_VERSION_UNKNOWN;
+    {
+        *status = OSKAR_ERR_BINARY_VERSION_UNKNOWN;
+        return;
+    }
 
     /* Check if the architecture is compatible. */
     if (oskar_endian() != (int)(header->endian))
-        return OSKAR_ERR_BINARY_ENDIAN_MISMATCH;
+    {
+        *status = OSKAR_ERR_BINARY_ENDIAN_MISMATCH;
+        return;
+    }
 
     /* Check size of data types. */
     if (sizeof(int) != (size_t)(header->size_int))
-        return OSKAR_ERR_BINARY_INT_MISMATCH;
+        *status = OSKAR_ERR_BINARY_INT_MISMATCH;
     if (sizeof(float) != (size_t)(header->size_float))
-        return OSKAR_ERR_BINARY_FLOAT_MISMATCH;
+        *status = OSKAR_ERR_BINARY_FLOAT_MISMATCH;
     if (sizeof(double) != (size_t)(header->size_double))
-        return OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
-
-    return OSKAR_SUCCESS;
+        *status = OSKAR_ERR_BINARY_DOUBLE_MISMATCH;
 }
 
 #ifdef __cplusplus

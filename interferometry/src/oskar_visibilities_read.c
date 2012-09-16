@@ -45,100 +45,96 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_read(oskar_Visibilities* vis, const char* filename)
+void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
+        int* status)
 {
     /* Visibility metadata. */
-    int num_channels = 0, num_times = 0, num_stations = 0;
-    int amp_type = 0, err = 0;
+    int num_channels = 0, num_times = 0, num_stations = 0, tag_error = 0;
+    int amp_type = 0;
     oskar_BinaryTagIndex* index = NULL;
     unsigned char grp = OSKAR_TAG_GROUP_VISIBILITY;
 
-    /* Sanity check on inputs. */
-    if (filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Read visibility dimensions. */
-    err = oskar_binary_file_read_int(filename, &index, grp,
-            OSKAR_VIS_TAG_NUM_CHANNELS, 0, &num_channels);
-    if (err) goto cleanup;
-    err = oskar_binary_file_read_int(filename, &index, grp,
-            OSKAR_VIS_TAG_NUM_TIMES, 0, &num_times);
-    if (err) goto cleanup;
-    err = oskar_binary_file_read_int(filename, &index, grp,
-            OSKAR_VIS_TAG_NUM_STATIONS, 0, &num_stations);
-    if (err == OSKAR_ERR_BINARY_TAG_NOT_FOUND)
+    oskar_binary_file_read_int(filename, &index, grp,
+            OSKAR_VIS_TAG_NUM_CHANNELS, 0, &num_channels, status);
+    oskar_binary_file_read_int(filename, &index, grp,
+            OSKAR_VIS_TAG_NUM_TIMES, 0, &num_times, status);
+    oskar_binary_file_read_int(filename, &index, grp,
+            OSKAR_VIS_TAG_NUM_STATIONS, 0, &num_stations, &tag_error);
+    if (tag_error == OSKAR_ERR_BINARY_TAG_NOT_FOUND)
     {
         /* Check for number of baselines if number of stations not present. */
         int num_baselines = 0;
-        err = oskar_binary_file_read_int(filename, &index, grp,
-                OSKAR_VIS_TAG_NUM_BASELINES, 0, &num_baselines);
-        if (err) goto cleanup;
+        oskar_binary_file_read_int(filename, &index, grp,
+                OSKAR_VIS_TAG_NUM_BASELINES, 0, &num_baselines, status);
 
         /* Convert baselines to stations (care using floating point here). */
         num_stations = (int) floor(0.5 +
                 (1.0 + sqrt(1.0 + 8.0 * num_baselines)) / 2.0);
     }
-    else if (err) goto cleanup;
-    err = oskar_binary_file_read_int(filename, &index, grp,
-            OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type);
-    if (err) goto cleanup;
+    else if (tag_error) *status = tag_error;
+    oskar_binary_file_read_int(filename, &index, grp,
+            OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type, status);
 
     /* Create the visibility structure. */
     oskar_visibilities_init(vis, amp_type, OSKAR_LOCATION_CPU,
-            num_channels, num_times, num_stations, &err);
-    if (err) return err;
+            num_channels, num_times, num_stations, status);
 
     /* Optionally read the settings path (ignore the error code). */
+    tag_error = 0;
     oskar_mem_binary_file_read(&vis->settings_path, filename, &index,
-            OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0);
+            OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, &tag_error);
 
     /* Read visibility metadata. */
-    err = oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_FREQ_START_HZ, 0, &vis->freq_start_hz);
-    if (err) goto cleanup;
-    err = oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_FREQ_INC_HZ, 0, &vis->freq_inc_hz);
-    if (err) goto cleanup;
-    err = oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, &vis->time_start_mjd_utc);
-    if (err) goto cleanup;
-    err = oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_TIME_INC_SEC, 0, &vis->time_inc_seconds);
-    if (err) goto cleanup;
-    err = oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_PHASE_CENTRE_RA, 0, &vis->phase_centre_ra_deg);
-    if (err) goto cleanup;
-    err = oskar_binary_file_read_double(filename, &index, grp,
-            OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, &vis->phase_centre_dec_deg);
-    if (err) goto cleanup;
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_FREQ_START_HZ, 0, &vis->freq_start_hz, status);
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_FREQ_INC_HZ, 0, &vis->freq_inc_hz, status);
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_TIME_START_MJD_UTC, 0, &vis->time_start_mjd_utc,
+            status);
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_TIME_INC_SEC, 0, &vis->time_inc_seconds, status);
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_PHASE_CENTRE_RA, 0, &vis->phase_centre_ra_deg,
+            status);
+    oskar_binary_file_read_double(filename, &index, grp,
+            OSKAR_VIS_TAG_PHASE_CENTRE_DEC, 0, &vis->phase_centre_dec_deg,
+            status);
 
     /* Read the baseline coordinate arrays. */
-    err = oskar_mem_binary_file_read(&vis->uu_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_BASELINE_UU, 0);
-    if (err) goto cleanup;
-    err = oskar_mem_binary_file_read(&vis->vv_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_BASELINE_VV, 0);
-    if (err) goto cleanup;
-    err = oskar_mem_binary_file_read(&vis->ww_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_BASELINE_WW, 0);
-    if (err) goto cleanup;
+    oskar_mem_binary_file_read(&vis->uu_metres, filename, &index, grp,
+            OSKAR_VIS_TAG_BASELINE_UU, 0, status);
+    oskar_mem_binary_file_read(&vis->vv_metres, filename, &index, grp,
+            OSKAR_VIS_TAG_BASELINE_VV, 0, status);
+    oskar_mem_binary_file_read(&vis->ww_metres, filename, &index, grp,
+            OSKAR_VIS_TAG_BASELINE_WW, 0, status);
 
     /* Read the visibility data. */
-    err = oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
-            OSKAR_VIS_TAG_AMPLITUDE, 0);
-    if (err) goto cleanup;
+    oskar_mem_binary_file_read(&vis->amplitude, filename, &index, grp,
+            OSKAR_VIS_TAG_AMPLITUDE, 0, status);
 
-    /* Try to read station coordinates, but don't worry if they're not here. */
+    /* Optionally read station coordinates, (ignore the error code). */
+    tag_error = 0;
     oskar_mem_binary_file_read(&vis->x_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_STATION_X, 0);
+            OSKAR_VIS_TAG_STATION_X, 0, &tag_error);
     oskar_mem_binary_file_read(&vis->y_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_STATION_Y, 0);
+            OSKAR_VIS_TAG_STATION_Y, 0, &tag_error);
     oskar_mem_binary_file_read(&vis->z_metres, filename, &index, grp,
-            OSKAR_VIS_TAG_STATION_Z, 0);
+            OSKAR_VIS_TAG_STATION_Z, 0, &tag_error);
 
-    cleanup:
-    oskar_binary_tag_index_free(&index);
-    return err;
+    /* Free the tag index. */
+    oskar_binary_tag_index_free(&index, status);
 }
 
 #ifdef __cplusplus

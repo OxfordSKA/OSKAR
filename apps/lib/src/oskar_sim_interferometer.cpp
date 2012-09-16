@@ -228,8 +228,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // Write global visibilities to disk.
     if (settings.interferometer.oskar_vis_filename)
     {
-        error = oskar_visibilities_write(&vis_global, log,
-                settings.interferometer.oskar_vis_filename);
+        oskar_visibilities_write(&vis_global, log,
+                settings.interferometer.oskar_vis_filename, &error);
         if (error) return error;
     }
 
@@ -256,7 +256,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             if (error) return error;
             if (settings.image.oskar_image)
             {
-                error = oskar_image_write(&image, log, settings.image.oskar_image, 0);
+                oskar_image_write(&image, log, settings.image.oskar_image, 0,
+                        &error);
                 if (error) return error;
             }
 #ifndef OSKAR_NO_FITS

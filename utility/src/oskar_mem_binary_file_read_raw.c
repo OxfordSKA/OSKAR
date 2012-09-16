@@ -41,20 +41,27 @@
 extern "C" {
 #endif
 
-int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
+void oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename,
+        int* status)
 {
-    int err = 0, num_elements, element_size;
+    int num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
     FILE* stream;
 
-    /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, mem->type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&temp, mem->type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Check if data is in CPU or GPU memory. */
     data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;
@@ -62,7 +69,10 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     /* Open the input file. */
     stream = fopen(filename, "rb");
     if (stream == NULL)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Get the file size. */
     fseek(stream, 0, SEEK_END);
@@ -71,12 +81,12 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     /* Resize memory block so that it can hold the data. */
     element_size = oskar_mem_element_size(mem->type);
     num_elements = (int)ceil(size_bytes / element_size);
-    oskar_mem_realloc(data, num_elements, &err);
-    if (err)
+    oskar_mem_realloc(data, num_elements, status);
+    if (*status)
     {
-        oskar_mem_free(&temp, &err);
+        oskar_mem_free(&temp, status);
         fclose(stream);
-        return err;
+        return;
     }
     size_bytes = num_elements * element_size;
 
@@ -84,9 +94,10 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     fseek(stream, 0, SEEK_SET);
     if (fread(data->data, 1, size_bytes, stream) != size_bytes)
     {
-        oskar_mem_free(&temp, &err);
+        oskar_mem_free(&temp, status);
         fclose(stream);
-        return OSKAR_ERR_FILE_IO;
+        *status = OSKAR_ERR_FILE_IO;
+        return;
     }
 
     /* Close the input file. */
@@ -94,12 +105,10 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
 
     /* Copy to GPU memory if required. */
     if (mem->location == OSKAR_LOCATION_GPU)
-        oskar_mem_copy(mem, &temp, &err);
+        oskar_mem_copy(mem, &temp, status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, &err);
-
-    return err;
+    oskar_mem_free(&temp, status);
 }
 
 #ifdef __cplusplus

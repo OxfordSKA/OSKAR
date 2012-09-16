@@ -56,12 +56,16 @@ oskar_Visibilities::~oskar_Visibilities()
 
 int oskar_Visibilities::write(oskar_Log* log, const char* filename)
 {
-    return oskar_visibilities_write(this, log, filename);
+    int err = 0;
+    oskar_visibilities_write(this, log, filename, &err);
+    return err;
 }
 
 int oskar_Visibilities::read(oskar_Visibilities* vis, const char* filename)
 {
-    return oskar_visibilities_read(vis, filename);
+    int err = 0;
+    oskar_visibilities_read(vis, filename, &err);
+    return err;
 }
 
 int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)

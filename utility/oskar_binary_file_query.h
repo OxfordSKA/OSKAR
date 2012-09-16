@@ -49,9 +49,10 @@ extern "C" {
  *
  * @param[in,out] log      Pointer to log structure.
  * @param[in] filename     Name of binary file.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_query(oskar_Log* log, const char* filename);
+void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status);
 
 #ifdef __cplusplus
 }

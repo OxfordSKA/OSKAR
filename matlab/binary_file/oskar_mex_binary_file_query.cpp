@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
+    int err = 0;
     if (num_in != 1 || num_out > 2)
     {
         mexErrMsgTxt("Usage: [index, headers] = oskar_binary_file_query(filename)\n");
@@ -57,7 +58,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     oskar_BinaryTagIndex* index = NULL;
-    int err = oskar_binary_tag_index_create(&index, file);
+    oskar_binary_tag_index_create(&index, file, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
@@ -120,6 +121,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxSetCell(out[0], 5 * (num_records + 1) + i + 1,
                 mxCreateDoubleScalar((double)index->data_size_bytes[i]));
     }
-    oskar_binary_tag_index_free(&index);
+    oskar_binary_tag_index_free(&index, &err);
     fclose(file);
 }

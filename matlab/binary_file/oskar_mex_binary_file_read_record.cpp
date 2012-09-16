@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,7 +105,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Create an array of binary tag indices found in the file.
     oskar_BinaryTagIndex* index = NULL;
-    err = oskar_binary_tag_index_create(&index, file);
+    oskar_binary_tag_index_create(&index, file, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
@@ -232,19 +232,19 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     if (index->extended[idx])
     {
-        err = oskar_binary_stream_read_ext(file, &index,
+        oskar_binary_stream_read_ext(file, &index,
                 (unsigned char)index->data_type[idx],
                 index->name_group[idx], index->name_tag[idx],
                 index->user_index[idx], (size_t)index->data_size_bytes[idx],
-                data);
+                data, &err);
     }
     else
     {
-        err = oskar_binary_stream_read(file, &index,
+        oskar_binary_stream_read(file, &index,
                 (unsigned char)index->data_type[idx],
                 (unsigned char)group.id, (unsigned char)tag.id,
                 index->user_index[idx], (size_t)index->data_size_bytes[idx],
-                data);
+                data, &err);
     }
     if (err)
     {
@@ -317,7 +317,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxSetField(out[0], 0, fields[4], data_);
 
     fclose(file);
-    err = oskar_binary_tag_index_free(&index);
+    oskar_binary_tag_index_free(&index, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_free() "

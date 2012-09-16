@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     {
         // Load the image into memory.
         oskar_Image image;
-        error = oskar_image_read(&image, filename, 0);
+        oskar_image_read(&image, filename, 0, &error);
         if (error)
         {
             fprintf(stderr, "ERROR: Failed to open specified image file: %s.\n",

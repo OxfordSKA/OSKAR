@@ -54,7 +54,7 @@ extern "C" {
 
 int oskar_imager(const char* settings_file, oskar_Log* log)
 {
-    int error;
+    int error = 0;
     oskar_Settings settings;
     oskar_Visibilities vis;
     oskar_Image image;
@@ -85,7 +85,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
         return OSKAR_ERR_SETTINGS;
     }
 
-    error = oskar_visibilities_read(&vis, settings.image.input_vis_data);
+    oskar_visibilities_read(&vis, settings.image.input_vis_data, &error);
     if (error)
     {
         oskar_log_error(log, "Failure in oskar_visibilities_read() (%s).",
@@ -108,7 +108,7 @@ int oskar_imager(const char* settings_file, oskar_Log* log)
 
     if (settings.image.oskar_image)
     {
-        error = oskar_image_write(&image, log, settings.image.oskar_image, 0);
+        oskar_image_write(&image, log, settings.image.oskar_image, 0, &error);
         if (error)
         {
             oskar_log_error(log, "Failure in oskar_image_write() (%s).",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,20 @@
 extern "C" {
 #endif
 
-int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index)
+void oskar_binary_tag_index_free(oskar_BinaryTagIndex** index, int* status)
 {
     int i;
 
-    /* Sanity check on inputs. */
-    if (index == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!index || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Check if index needs to be freed. */
     if (*index == NULL)
-        return OSKAR_SUCCESS;
+        return;
 
     /* Free string data. */
     for (i = 0; i < (*index)->num_tags; ++i)
@@ -68,8 +71,6 @@ int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index)
     /* Free the structure itself. */
     free(*index);
     *index = NULL;
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

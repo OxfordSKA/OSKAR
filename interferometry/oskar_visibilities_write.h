@@ -52,12 +52,11 @@ extern "C" {
  * @param[in] vis      The visibility structure to write.
  * @param[in,out] log  Pointer to log structure to use.
  * @param[in] filename The filename to write to.
- *
- * @return An error code.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
-        const char* filename);
+void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }

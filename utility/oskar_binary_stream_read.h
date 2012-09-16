@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,11 +64,12 @@ extern "C" {
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of memory available at \p data, in bytes.
  * @param[out] data        Pointer to memory block to write into.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
+void oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
-        int user_index, size_t data_size, void* data);
+        int user_index, size_t data_size, void* data, int* status);
 
 /**
  * @brief Reads a single double-precision value from an input stream.
@@ -85,11 +86,12 @@ int oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read_double(FILE* stream,
+void oskar_binary_stream_read_double(FILE* stream,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, double* value);
+        unsigned char id_tag, int user_index, double* value, int* status);
 
 /**
  * @brief Reads a single integer value from an input stream.
@@ -106,11 +108,12 @@ int oskar_binary_stream_read_double(FILE* stream,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read_int(FILE* stream,
+void oskar_binary_stream_read_int(FILE* stream,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, int* value);
+        unsigned char id_tag, int user_index, int* value, int* status);
 
 /**
  * @brief Reads a block of binary data for a single tag from an input stream.
@@ -130,11 +133,12 @@ int oskar_binary_stream_read_int(FILE* stream,
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of memory available at \p data, in bytes.
  * @param[out] data        Pointer to memory block to write into.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
+void oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
         unsigned char data_type, const char* name_group, const char* name_tag,
-        int user_index, size_t data_size, void* data);
+        int user_index, size_t data_size, void* data, int* status);
 
 /**
  * @brief Reads a single double-precision value from an input stream.
@@ -151,11 +155,12 @@ int oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read_ext_double(FILE* stream,
+void oskar_binary_stream_read_ext_double(FILE* stream,
         oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, double* value);
+        const char* name_tag, int user_index, double* value, int* status);
 
 /**
  * @brief Reads a single integer value from an input stream.
@@ -172,11 +177,12 @@ int oskar_binary_stream_read_ext_double(FILE* stream,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_read_ext_int(FILE* stream,
+void oskar_binary_stream_read_ext_int(FILE* stream,
         oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, int* value);
+        const char* name_tag, int user_index, int* value, int* status);
 
 #ifdef __cplusplus
 }

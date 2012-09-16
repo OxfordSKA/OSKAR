@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     {
         // Load the image into memory.
         oskar_Image image;
-        error = oskar_image_read(&image, filename, 0);
+        oskar_image_read(&image, filename, 0, &error);
         if (error)
         {
             fprintf(stderr, "ERROR: Failed to open specified image file: %s.\n",
@@ -159,17 +159,18 @@ int main(int argc, char** argv)
             FILE* stream = fopen(filename, "rb");
             if (!stream)
                 return OSKAR_ERR_FILE_IO;
-            oskar_binary_tag_index_create(&index, stream);
+            oskar_binary_tag_index_create(&index, stream, &error);
             size_t data_size = 0;
             long int data_offset = 0;
+            int tag_error = 0;
 
-            if (oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
-                    OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset) == OSKAR_SUCCESS)
+            oskar_binary_tag_index_query(index, OSKAR_CHAR, OSKAR_TAG_GROUP_RUN,
+                    OSKAR_TAG_RUN_LOG, 0, &data_size, &data_offset, &tag_error);
+            if (!tag_error)
             {
                 oskar_Mem temp(OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE);
-                error = oskar_mem_binary_stream_read(&temp, stream, &index,
-                        OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0);
-                if (error) return OSKAR_FAIL;
+                oskar_mem_binary_stream_read(&temp, stream, &index,
+                        OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, 0, &error);
                 oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
                 if (error) return OSKAR_FAIL;
                 ((char*)temp.data)[temp.num_elements - 1] = 0;
@@ -177,7 +178,7 @@ int main(int argc, char** argv)
                 printf("%s", (char*)(temp.data));
             }
             fclose(stream);
-            oskar_binary_tag_index_free(&index);
+            oskar_binary_tag_index_free(&index, &error);
         }
     }
     catch (int code)

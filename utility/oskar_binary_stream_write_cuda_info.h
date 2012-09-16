@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,12 @@ extern "C" {
  * This function writes standard CUDA device information to an output stream.
  *
  * @param[in,out] stream An output stream.
+ * @param[in] cuda_info  Pointer to CUDA information structure to write out.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_cuda_info(FILE* stream,
-        const oskar_CudaInfo* cuda_info);
+void oskar_binary_stream_write_cuda_info(FILE* stream,
+        const oskar_CudaInfo* cuda_info, int* status);
 
 #ifdef __cplusplus
 }

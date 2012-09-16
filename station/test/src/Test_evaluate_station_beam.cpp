@@ -216,7 +216,8 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_double_cpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
 
@@ -240,7 +241,8 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_single_cpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
 
@@ -270,7 +272,8 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_double_gpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements);
+            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
 
@@ -300,7 +303,8 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         {
             const char* filename = "temp_beam_single_gpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements);
+            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements, &err);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
 

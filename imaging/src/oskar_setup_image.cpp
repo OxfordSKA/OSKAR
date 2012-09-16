@@ -97,7 +97,8 @@ int oskar_setup_image(oskar_Image* im, const oskar_Visibilities* vis,
 
     // Resize the image cube
     oskar_image_resize(im, settings->size, settings->size,
-            num_pols, im_num_times, im_num_chan);
+            num_pols, im_num_times, im_num_chan, &err);
+    if (err) return err;
 
     // Set image meta-data
     // __Note__ the dimension order used here is assumed unchanged from that

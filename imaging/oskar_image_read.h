@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,9 +51,11 @@ extern "C" {
  * @param[in] image   Pointer to empty or uninitialised image structure to fill.
  * @param[in] filename Name of file to read.
  * @param[in] idx      Image index to read from the file (set to 0 if unknown).
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_image_read(oskar_Image* image, const char* filename, int idx);
+void oskar_image_read(oskar_Image* image, const char* filename, int idx,
+        int* status);
 
 #ifdef __cplusplus
 }

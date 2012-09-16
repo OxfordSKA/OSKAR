@@ -35,19 +35,24 @@
 extern "C" {
 #endif
 
-int oskar_image_resize(oskar_Image* image, int width, int height,
-        int num_pols, int num_times, int num_channels)
+void oskar_image_resize(oskar_Image* image, int width, int height,
+        int num_pols, int num_times, int num_channels, int* status)
 {
-    int err = 0, num_elements;
+    int num_elements;
 
-    /* Sanity check on inputs. */
-    if (image == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!image || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Reallocate memory. */
     num_elements = width * height * num_pols * num_times * num_channels;
-    oskar_mem_realloc(&image->data, num_elements, &err);
-    if (err) return err;
+    oskar_mem_realloc(&image->data, num_elements, status);
 
     /* Set meta-data. */
     image->width = width;
@@ -55,8 +60,6 @@ int oskar_image_resize(oskar_Image* image, int width, int height,
     image->num_pols = num_pols;
     image->num_times = num_times;
     image->num_channels = num_channels;
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

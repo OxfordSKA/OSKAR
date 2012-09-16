@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,15 +67,15 @@ extern "C" {
  * @code
  * oskar_BinaryTagIndex* index = NULL;
  * oskar_binary_file_read(filename, &index, data_type1, group_id1,
- *         tag_id1, 0, data_size1, data1);
+ *         tag_id1, 0, data_size1, data1, status);
  * oskar_binary_file_read(filename, &index, data_type2, group_id2,
- *         tag_id2, 0, data_size2, data2);
+ *         tag_id2, 0, data_size2, data2, status);
  * @endcode
  *
  * The index should be freed by the caller using:
  *
  * @code
- * oskar_binary_tag_index_free(&index);
+ * oskar_binary_tag_index_free(&index, status);
  * @endcode
  *
  * @param[in] filename     Name of binary file.
@@ -86,12 +86,13 @@ extern "C" {
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of memory available at \p data, in bytes.
  * @param[out] data        Pointer to memory block to write into.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read(const char* filename,
+void oskar_binary_file_read(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        size_t data_size, void* data);
+        size_t data_size, void* data, int* status);
 
 /**
  * @brief Reads a single double-precision value from a binary file.
@@ -114,15 +115,15 @@ int oskar_binary_file_read(const char* filename,
  * @code
  * oskar_BinaryTagIndex* index = NULL;
  * oskar_binary_file_read_double(filename, &index, group_id1,
- *         tag_id1, 0, &my_double1);
+ *         tag_id1, 0, &my_double1, status);
  * oskar_binary_file_read_double(filename, &index, group_id2,
- *         tag_id2, 0, &my_double2);
+ *         tag_id2, 0, &my_double2, status);
  * @endcode
  *
  * The index should be freed by the caller using:
  *
  * @code
- * oskar_binary_tag_index_free(&index);
+ * oskar_binary_tag_index_free(&index, status);
  * @endcode
  *
  * @param[in] filename     Name of binary file.
@@ -131,11 +132,12 @@ int oskar_binary_file_read(const char* filename,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_double(const char* filename,
+void oskar_binary_file_read_double(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, double* value);
+        unsigned char id_tag, int user_index, double* value, int* status);
 
 /**
  * @brief Reads a single integer value from a binary file.
@@ -158,15 +160,15 @@ int oskar_binary_file_read_double(const char* filename,
  * @code
  * oskar_BinaryTagIndex* index = NULL;
  * oskar_binary_file_read_int(filename, &index, group_id1,
- *         tag_id1, 0, &my_int1);
+ *         tag_id1, 0, &my_int1, status);
  * oskar_binary_file_read_int(filename, &index, group_id2,
- *         tag_id2, 0, &my_int2);
+ *         tag_id2, 0, &my_int2, status);
  * @endcode
  *
  * The index should be freed by the caller using:
  *
  * @code
- * oskar_binary_tag_index_free(&index);
+ * oskar_binary_tag_index_free(&index, status);
  * @endcode
  *
  * @param[in] filename     Name of binary file.
@@ -175,11 +177,12 @@ int oskar_binary_file_read_double(const char* filename,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_int(const char* filename,
+void oskar_binary_file_read_int(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, int* value);
+        unsigned char id_tag, int user_index, int* value, int* status);
 
 /**
  * @brief Reads a block of binary data from a binary file.
@@ -202,15 +205,15 @@ int oskar_binary_file_read_int(const char* filename,
  * @code
  * oskar_BinaryTagIndex* index = NULL;
  * oskar_binary_file_read_ext(filename, &index, data_type1, group_name1,
- *         tag_name1, 0, data_size1, data1);
+ *         tag_name1, 0, data_size1, data1, status);
  * oskar_binary_file_read_ext(filename, &index, data_type2, group_name2,
- *         tag_name2, 0, data_size2, data2);
+ *         tag_name2, 0, data_size2, data2, status);
  * @endcode
  *
  * The index should be freed by the caller using:
  *
  * @code
- * oskar_binary_tag_index_free(&index);
+ * oskar_binary_tag_index_free(&index, status);
  * @endcode
  *
  * @param[in] filename     Name of binary file.
@@ -221,12 +224,13 @@ int oskar_binary_file_read_int(const char* filename,
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of memory available at \p data, in bytes.
  * @param[out] data        Pointer to memory block to write into.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_ext(const char* filename,
+void oskar_binary_file_read_ext(const char* filename,
         oskar_BinaryTagIndex** index, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
-        size_t data_size, void* data);
+        size_t data_size, void* data, int* status);
 
 /**
  * @brief Reads a single double-precision value from a binary file.
@@ -249,15 +253,15 @@ int oskar_binary_file_read_ext(const char* filename,
  * @code
  * oskar_BinaryTagIndex* index = NULL;
  * oskar_binary_file_read_ext_double(filename, &index, group_name1,
- *         tag_name1, 0, &my_double1);
+ *         tag_name1, 0, &my_double1, status);
  * oskar_binary_file_read_ext_double(filename, &index, group_name2,
- *         tag_name2, 0, &my_double2);
+ *         tag_name2, 0, &my_double2, status);
  * @endcode
  *
  * The index should be freed by the caller using:
  *
  * @code
- * oskar_binary_tag_index_free(&index);
+ * oskar_binary_tag_index_free(&index, status);
  * @endcode
  *
  * @param[in] filename     Name of binary file.
@@ -266,11 +270,12 @@ int oskar_binary_file_read_ext(const char* filename,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_ext_double(const char* filename,
+void oskar_binary_file_read_ext_double(const char* filename,
         oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, double* value);
+        const char* name_tag, int user_index, double* value, int* status);
 
 /**
  * @brief Reads a single integer value from a binary file.
@@ -293,15 +298,15 @@ int oskar_binary_file_read_ext_double(const char* filename,
  * @code
  * oskar_BinaryTagIndex* index = NULL;
  * oskar_binary_file_read_ext_int(filename, &index, group_name1,
- *         tag_name1, 0, &my_int1);
+ *         tag_name1, 0, &my_int1, status);
  * oskar_binary_file_read_ext_int(filename, &index, group_name2,
- *         tag_name2, 0, &my_int2);
+ *         tag_name2, 0, &my_int2, status);
  * @endcode
  *
  * The index should be freed by the caller using:
  *
  * @code
- * oskar_binary_tag_index_free(&index);
+ * oskar_binary_tag_index_free(&index, status);
  * @endcode
  *
  * @param[in] filename     Name of binary file.
@@ -310,11 +315,12 @@ int oskar_binary_file_read_ext_double(const char* filename,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[out] value       Pointer to output value.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_read_ext_int(const char* filename,
+void oskar_binary_file_read_ext_int(const char* filename,
         oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, int* value);
+        const char* name_tag, int user_index, int* value, int* status);
 
 #ifdef __cplusplus
 }

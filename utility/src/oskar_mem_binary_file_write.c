@@ -40,111 +40,98 @@
 extern "C" {
 #endif
 
-int oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
+void oskar_mem_binary_file_write(const oskar_Mem* mem, const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int num_to_write)
+        int num_to_write, int* status)
 {
-    int err = 0, type, location, num_elements;
+    int type;
     oskar_Mem temp;
     size_t size_bytes;
     const oskar_Mem* data = NULL;
 
-    /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Get the meta-data. */
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get the data type. */
     type = mem->type;
-    location = mem->location;
-    num_elements = mem->num_elements;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Get the total number of bytes to write. */
     if (num_to_write <= 0)
-        num_to_write = num_elements;
+        num_to_write = mem->num_elements;
     size_bytes = num_to_write * oskar_mem_element_size(type);
 
     /* Check if data is in CPU or GPU memory. */
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        data = mem;
-    }
-    else if (location == OSKAR_LOCATION_GPU)
+    data = mem;
+    if (mem->location == OSKAR_LOCATION_GPU)
     {
         /* Copy to temporary. */
-        oskar_mem_copy(&temp, mem, &err);
-        if (err)
-        {
-            oskar_mem_free(&temp, &err);
-            return err;
-        }
+        oskar_mem_copy(&temp, mem, status);
         data = &temp;
     }
 
     /* Save the memory to a binary file. */
-    err = oskar_binary_file_write(filename, (unsigned char)type,
-            id_group, id_tag, user_index, size_bytes, data->data);
+    oskar_binary_file_write(filename, (unsigned char)type,
+            id_group, id_tag, user_index, size_bytes, data->data, status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, &err);
-
-    return err;
+    oskar_mem_free(&temp, status);
 }
 
-int oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
+void oskar_mem_binary_file_write_ext(const oskar_Mem* mem, const char* filename,
         const char* name_group, const char* name_tag, int user_index,
-        int num_to_write)
+        int num_to_write, int* status)
 {
-    int err = 0, type, location, num_elements;
+    int type;
     oskar_Mem temp;
     size_t size_bytes;
     const oskar_Mem* data = NULL;
 
-    /* Sanity check on inputs. */
-    if (mem == NULL || filename == NULL ||
-            name_group == NULL || name_tag == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !filename || !name_group || !name_tag || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Get the meta-data. */
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get the data type. */
     type = mem->type;
-    location = mem->location;
-    num_elements = mem->num_elements;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Get the total number of bytes to write. */
     if (num_to_write <= 0)
-        num_to_write = num_elements;
+        num_to_write = mem->num_elements;
     size_bytes = num_to_write * oskar_mem_element_size(type);
 
     /* Check if data is in CPU or GPU memory. */
-    if (location == OSKAR_LOCATION_CPU)
-    {
-        data = mem;
-    }
-    else if (location == OSKAR_LOCATION_GPU)
+    data = mem;
+    if (mem->location == OSKAR_LOCATION_GPU)
     {
         /* Copy to temporary. */
-        oskar_mem_copy(&temp, mem, &err);
-        if (err)
-        {
-            oskar_mem_free(&temp, &err);
-            return err;
-        }
+        oskar_mem_copy(&temp, mem, status);
         data = &temp;
     }
 
     /* Save the memory to a binary file. */
-    err = oskar_binary_file_write_ext(filename, (unsigned char)type,
-            name_group, name_tag, user_index, size_bytes, data->data);
+    oskar_binary_file_write_ext(filename, (unsigned char)type,
+            name_group, name_tag, user_index, size_bytes, data->data, status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, &err);
-
-    return err;
+    oskar_mem_free(&temp, status);
 }
 
 #ifdef __cplusplus

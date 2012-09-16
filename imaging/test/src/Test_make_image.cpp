@@ -115,32 +115,33 @@ void Test_make_image::test()
     settings.transform_type = OSKAR_IMAGE_DFT_2D;
 
     oskar_Image image(OSKAR_DOUBLE);
-    int err = oskar_make_image(&image, NULL, &vis, &settings);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    error = oskar_make_image(&image, NULL, &vis, &settings);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     int idx = 0;
-    err = oskar_image_write(&image, NULL, "temp_test_image.img", idx);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    oskar_image_write(&image, NULL, "temp_test_image.img", idx, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
 #ifndef OSKAR_NO_FITS
-    err = oskar_fits_image_write(&image, NULL, "temp_test_image.fits");
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), (int)OSKAR_SUCCESS, err);
+    error = oskar_fits_image_write(&image, NULL, "temp_test_image.fits");
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 #endif
 
     const char* filename = "temp_test_make_image.dat";
     oskar_mem_binary_file_write_ext(&vis.uu_metres, filename,
-            "mem", "uu_metres", 0, 0);
+            "mem", "uu_metres", 0, 0, &error);
     oskar_mem_binary_file_write_ext(&vis.vv_metres, filename,
-            "mem", "vv_metres", 0, 0);
+            "mem", "vv_metres", 0, 0, &error);
     oskar_mem_binary_file_write_ext(&vis.amplitude, filename,
-            "mem", "vis_amp", 0, 0);
+            "mem", "vis_amp", 0, 0, &error);
     oskar_mem_binary_file_write_ext(&image.data, filename,
-            "mem", "image", 0, 0);
+            "mem", "image", 0, 0, &error);
 }
 
 void  Test_make_image::image_lm_grid()
 {
     // Fill image with lm grid.
+    int error = 0;
     int type = OSKAR_DOUBLE;
     int location = OSKAR_LOCATION_CPU;
     int size = 256;
@@ -152,7 +153,7 @@ void  Test_make_image::image_lm_grid()
             (double*)m.data);
 
     oskar_Image im(OSKAR_DOUBLE);
-    oskar_image_resize(&im, size, size, 1, 1, 2);
+    oskar_image_resize(&im, size, size, 1, 1, 2, &error);
 
     memcpy(im.data.data, l.data, num_pixels * sizeof(double));
     memcpy((double*)im.data.data + num_pixels, m.data, num_pixels * sizeof(double));
@@ -160,7 +161,7 @@ void  Test_make_image::image_lm_grid()
 #ifndef OSKAR_NO_FITS
     oskar_fits_image_write(&im, NULL, "test_lm_grid.fits");
 #endif
-    oskar_image_write(&im, NULL, "test_lm_grid.img", 0);
+    oskar_image_write(&im, NULL, "test_lm_grid.img", 0, &error);
 }
 
 void Test_make_image::image_range()

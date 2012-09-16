@@ -39,26 +39,33 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_write_metadata(FILE* stream)
+void oskar_binary_stream_write_metadata(FILE* stream, int* status)
 {
-    int error;
     const char* str;
     size_t len;
+
+    /* Check all inputs. */
+    if (!stream || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Write the system date and time. */
     str = oskar_system_clock_string(0);
     len = 1 + strlen(str);
-    error = oskar_binary_stream_write(stream, OSKAR_CHAR,
+    oskar_binary_stream_write(stream, OSKAR_CHAR,
             OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_DATE_TIME_STRING,
-            0, len, str);
-    if (error) return error;
+            0, len, str, status);
 
     /* Write the OSKAR version string. */
     len = 1 + strlen(OSKAR_VERSION_STR);
-    error = oskar_binary_stream_write(stream, OSKAR_CHAR,
+    oskar_binary_stream_write(stream, OSKAR_CHAR,
             OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_OSKAR_VERSION_STRING,
-            0, len, OSKAR_VERSION_STR);
-    if (error) return error;
+            0, len, OSKAR_VERSION_STR, status);
 
     /* Write the current working directory. */
     str = getenv("PWD");
@@ -66,10 +73,9 @@ int oskar_binary_stream_write_metadata(FILE* stream)
     if (str)
     {
         len = 1 + strlen(str);
-        error = oskar_binary_stream_write(stream, OSKAR_CHAR,
+        oskar_binary_stream_write(stream, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_CWD,
-                0, len, str);
-        if (error) return error;
+                0, len, str, status);
     }
 
     /* Write the username. */
@@ -79,13 +85,10 @@ int oskar_binary_stream_write_metadata(FILE* stream)
     if (str)
     {
         len = 1 + strlen(str);
-        error = oskar_binary_stream_write(stream, OSKAR_CHAR,
+        oskar_binary_stream_write(stream, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_METADATA, OSKAR_TAG_METADATA_USERNAME,
-                0, len, str);
-        if (error) return error;
+                0, len, str, status);
     }
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

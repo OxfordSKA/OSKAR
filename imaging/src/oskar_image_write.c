@@ -46,42 +46,51 @@
 extern "C" {
 #endif
 
-int oskar_image_write(const oskar_Image* image, oskar_Log* log,
-        const char* filename, int idx)
+void oskar_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename, int idx, int* status)
 {
-    int err = 0, num, num_elements, type;
+    int num, type;
     unsigned char grp = OSKAR_TAG_GROUP_IMAGE;
     FILE* stream;
     char* log_data = 0;
     long log_size = 0;
 
-    /* Get the metadata. */
-    num_elements = image->data.num_elements;
-    type = image->data.type;
+    /* Check all inputs. */
+    if (!image || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Sanity check on inputs. */
-    if (filename == NULL || image == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get the metadata. */
+    type = image->data.type;
 
     /* Check dimensions. */
     num = image->num_channels * image->num_times * image->num_pols *
             image->width * image->height;
-    if (num != num_elements)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+    if (num != image->data.num_elements)
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     /* Open the stream. */
     stream = fopen(filename, "wb");
     if (stream == NULL)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Write a log message. */
     oskar_log_message(log, 0, "Writing OSKAR image file: '%s'", filename);
 
     /* Write the header and common metadata. */
-    err = oskar_binary_stream_write_header(stream);
-    if (err) goto cleanup;
-    err = oskar_binary_stream_write_metadata(stream);
-    if (err) goto cleanup;
+    oskar_binary_stream_write_header(stream, status);
+    oskar_binary_stream_write_metadata(stream, status);
 
     /* If settings path is set, write out the data. */
     if (image->settings_path.data)
@@ -89,78 +98,75 @@ int oskar_image_write(const oskar_Image* image, oskar_Log* log,
         oskar_Mem temp;
 
         /* Write the settings path. */
-        err = oskar_mem_binary_stream_write(&image->settings_path, stream,
-                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, idx, 0);
-        if (err) goto cleanup;
+        oskar_mem_binary_stream_write(&image->settings_path, stream,
+                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, idx, 0,
+                status);
 
         /* Write the settings file. */
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, &err);
-        err = oskar_mem_binary_file_read_raw(&temp,
-                (const char*) image->settings_path.data);
-        if (err) goto cleanup;
-        err = oskar_mem_binary_stream_write(&temp, stream,
-                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0);
-        oskar_mem_free(&temp, &err);
-        if (err) goto cleanup;
+        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
+        oskar_mem_binary_file_read_raw(&temp,
+                (const char*) image->settings_path.data, status);
+        oskar_mem_binary_stream_write(&temp, stream,
+                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0, status);
+        oskar_mem_free(&temp, status);
     }
 
     /* If log exists, then write it out. */
     log_data = oskar_log_file_data(log, &log_size);
     if (log_data)
     {
-        err = oskar_binary_stream_write(stream, OSKAR_CHAR,
+        oskar_binary_stream_write(stream, OSKAR_CHAR,
                 OSKAR_TAG_GROUP_RUN, OSKAR_TAG_RUN_LOG, idx, log_size,
-                log_data);
+                log_data, status);
         free(log_data);
-        if (err) goto cleanup;
     }
 
     /* Write dimensions. */
     oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_NUM_PIXELS_WIDTH, idx, image->width);
+            OSKAR_IMAGE_TAG_NUM_PIXELS_WIDTH, idx, image->width, status);
     oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_NUM_PIXELS_HEIGHT, idx, image->height);
+            OSKAR_IMAGE_TAG_NUM_PIXELS_HEIGHT, idx, image->height, status);
     oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_NUM_POLS, idx, image->num_pols);
+            OSKAR_IMAGE_TAG_NUM_POLS, idx, image->num_pols, status);
     oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_NUM_TIMES, idx, image->num_times);
+            OSKAR_IMAGE_TAG_NUM_TIMES, idx, image->num_times, status);
     oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_NUM_CHANNELS, idx, image->num_channels);
+            OSKAR_IMAGE_TAG_NUM_CHANNELS, idx, image->num_channels, status);
 
     /* Write the dimension order. */
     oskar_binary_stream_write(stream, OSKAR_INT, grp,
             OSKAR_IMAGE_TAG_DIMENSION_ORDER, idx,
-            sizeof(image->dimension_order), image->dimension_order);
+            sizeof(image->dimension_order), image->dimension_order, status);
 
     /* Write other image metadata. */
     oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_IMAGE_TYPE, idx, image->image_type);
+            OSKAR_IMAGE_TAG_IMAGE_TYPE, idx, image->image_type, status);
     oskar_binary_stream_write_int(stream, grp,
-            OSKAR_IMAGE_TAG_DATA_TYPE, idx, type);
+            OSKAR_IMAGE_TAG_DATA_TYPE, idx, type, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_CENTRE_RA, idx, image->centre_ra_deg);
+            OSKAR_IMAGE_TAG_CENTRE_RA, idx, image->centre_ra_deg, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, image->centre_dec_deg);
+            OSKAR_IMAGE_TAG_CENTRE_DEC, idx, image->centre_dec_deg, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_FOV_RA, idx, image->fov_ra_deg);
+            OSKAR_IMAGE_TAG_FOV_RA, idx, image->fov_ra_deg, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_FOV_DEC, idx, image->fov_dec_deg);
+            OSKAR_IMAGE_TAG_FOV_DEC, idx, image->fov_dec_deg, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_TIME_START_MJD_UTC, idx, image->time_start_mjd_utc);
+            OSKAR_IMAGE_TAG_TIME_START_MJD_UTC, idx, image->time_start_mjd_utc,
+            status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_TIME_INC_SEC, idx, image->time_inc_sec);
+            OSKAR_IMAGE_TAG_TIME_INC_SEC, idx, image->time_inc_sec, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, image->freq_start_hz);
+            OSKAR_IMAGE_TAG_FREQ_START_HZ, idx, image->freq_start_hz, status);
     oskar_binary_stream_write_double(stream, grp,
-            OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, image->freq_inc_hz);
+            OSKAR_IMAGE_TAG_FREQ_INC_HZ, idx, image->freq_inc_hz, status);
 
     /* Write the image data. */
-    err = oskar_mem_binary_stream_write(&image->data, stream,
-            grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx, 0);
+    oskar_mem_binary_stream_write(&image->data, stream,
+            grp, OSKAR_IMAGE_TAG_IMAGE_DATA, idx, 0, status);
 
-    cleanup:
+    /* Close the file. */
     fclose(stream);
-    return err;
 }
 
 #ifdef __cplusplus

@@ -195,7 +195,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
         // Setup the image cube.
         oskar_image_init(&image, type, location, &err);
-        oskar_image_resize(&image, size, size, 1, 1, 1);
+        oskar_image_resize(&image, size, size, 1, 1, 1, &err);
         image.centre_ra_deg = 0.0;
         image.centre_dec_deg = 0.0;
         image.fov_ra_deg = fov_deg;

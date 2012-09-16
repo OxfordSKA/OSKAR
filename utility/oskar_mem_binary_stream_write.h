@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,17 +59,12 @@ extern "C" {
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[in] num_to_write If > 0, only the first \p num_elements are written.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
+void oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int num_to_write);
+        int num_to_write, int* status);
 
 /**
  * @brief
@@ -84,17 +79,12 @@ int oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[in] num_to_write If > 0, only the first \p num_elements are written.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
+void oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
         const char* name_group, const char* name_tag, int user_index,
-        int num_to_write);
+        int num_to_write, int* status);
 
 #ifdef __cplusplus
 }

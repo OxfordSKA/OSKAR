@@ -42,7 +42,8 @@ int main(int argc, char** argv)
     }
 
     // Query the file.
-    int error = oskar_binary_file_query(0, argv[1]);
+    int error = 0;
+    oskar_binary_file_query(0, argv[1], &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

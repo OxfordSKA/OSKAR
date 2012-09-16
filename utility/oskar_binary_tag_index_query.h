@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,11 +62,12 @@ extern "C" {
  * @param[in] user_index   User-defined index.
  * @param[out] data_size   The size of the data, in bytes.
  * @param[out] data_offset The data offset from the start of the file, in bytes.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
+void oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
-        int user_index, size_t* data_size, long* data_offset);
+        int user_index, size_t* data_size, long* data_offset, int* status);
 
 /**
  * @brief Return the block size, data size and offset associated with a tag.
@@ -86,12 +87,13 @@ int oskar_binary_tag_index_query(const oskar_BinaryTagIndex* index,
  * @param[out] block_size  The total size of the block, in bytes.
  * @param[out] data_size   The size of the data, in bytes.
  * @param[out] data_offset The data offset from the start of the file, in bytes.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_tag_index_query_ext(const oskar_BinaryTagIndex* index,
+void oskar_binary_tag_index_query_ext(const oskar_BinaryTagIndex* index,
         unsigned char data_type, const char* name_group, const char* name_tag,
         int user_index, size_t* block_size, size_t* data_size,
-        long* data_offset);
+        long* data_offset, int* status);
 
 #ifdef __cplusplus
 }

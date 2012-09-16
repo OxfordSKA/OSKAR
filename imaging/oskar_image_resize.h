@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,11 @@ extern "C" {
  * @param[in] num_pols       Required size of polarisation dimension.
  * @param[in] num_times      Required size of time dimension.
  * @param[in] num_channels   Required size of frequency dimension.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-int oskar_image_resize(oskar_Image* image, int width, int height,
-        int num_pols, int num_times, int num_channels);
+void oskar_image_resize(oskar_Image* image, int width, int height,
+        int num_pols, int num_times, int num_channels, int* status);
 
 #ifdef __cplusplus
 }

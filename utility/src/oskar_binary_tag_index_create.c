@@ -41,11 +41,19 @@ extern "C" {
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
-int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
+void oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream,
+        int* status)
 {
     oskar_BinaryHeader header;
     oskar_BinaryTagIndex* idx;
-    int error, i;
+    int i;
+
+    /* Check all inputs. */
+    if (!index || !stream || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Allocate index. */
     idx = (oskar_BinaryTagIndex*) malloc(sizeof(oskar_BinaryTagIndex));
@@ -65,8 +73,8 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
     idx->block_size_bytes = 0;
 
     /* Read header. */
-    error = oskar_binary_stream_read_header(stream, &header);
-    if (error) return error;
+    oskar_binary_stream_read_header(stream, &header, status);
+    if (*status) return;
 
     /* Read all tags in the stream. */
     for (i = 0; OSKAR_TRUE; ++i)
@@ -116,7 +124,10 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
         /* If the bytes read are not a tag, then return an error. */
         if (tag.magic[0] != 'T' || tag.magic[1] != 'A' || tag.magic[2] != 'G' ||
                 tag.magic[3] != 0)
-            return OSKAR_ERR_BINARY_FILE_INVALID;
+        {
+            *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            return;
+        }
 
         /* Get the data type and IDs. */
         idx->data_type[i] = (int) tag.data_type;
@@ -177,9 +188,10 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
 
             /* Copy the tag names into the index. */
             if (fread(idx->name_group[i], 1, lgroup, stream) != lgroup)
-                return OSKAR_ERR_BINARY_FILE_INVALID;
+                *status = OSKAR_ERR_BINARY_FILE_INVALID;
             if (fread(idx->name_tag[i], 1, ltag, stream) != ltag)
-                return OSKAR_ERR_BINARY_FILE_INVALID;
+                *status = OSKAR_ERR_BINARY_FILE_INVALID;
+            if (*status) return;
         }
 
         /* Store the current stream pointer as the data offset. */
@@ -191,8 +203,6 @@ int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream)
         /* Save the number of tags read from the stream. */
         idx->num_tags = i + 1;
     }
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

@@ -43,7 +43,7 @@ int oskar_sph_rotate_points(int n, oskar_Mem* lon, oskar_Mem* lat,
         double rot_lon, double rot_lat)
 {
     oskar_Mem x, y, z;
-    int type, err;
+    int type, err = 0;
 
     if (lon == NULL || lat == NULL)
         return OSKAR_ERR_INVALID_ARGUMENT;

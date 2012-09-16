@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,10 @@ extern "C" {
  * This function frees memory held by a tag index.
  *
  * @param[in,out] index  Pointer to index structure to free.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_tag_index_free(oskar_BinaryTagIndex** index);
+void oskar_binary_tag_index_free(oskar_BinaryTagIndex** index, int* status);
 
 #ifdef __cplusplus
 }

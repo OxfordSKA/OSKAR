@@ -53,10 +53,11 @@ extern "C" {
  * @param[in,out] log  Pointer to log structure to use.
  * @param[in] filename Name of file to write.
  * @param[in] idx      Image index to write (set to 0 if unknown).
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_image_write(const oskar_Image* image, oskar_Log* log,
-        const char* filename, int idx);
+void oskar_image_write(const oskar_Image* image, oskar_Log* log,
+        const char* filename, int idx, int* status);
 
 #ifdef __cplusplus
 }

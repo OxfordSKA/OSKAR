@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,111 +38,134 @@
 extern "C" {
 #endif
 
-int oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
+void oskar_binary_stream_read(FILE* stream, oskar_BinaryTagIndex** index,
         unsigned char data_type, unsigned char id_group, unsigned char id_tag,
-        int user_index, size_t data_size, void* data)
+        int user_index, size_t data_size, void* data, int* status)
 {
-    int err;
     size_t block_size = 0;
     long block_offset = 0;
 
-    /* Sanity check on inputs. */
-    if (stream == NULL || index == NULL || data == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!stream || !index || !data || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Index the stream if necessary. */
     if (*index == NULL)
     {
-        err = oskar_binary_tag_index_create(index, stream);
-        if (err) return err;
+        oskar_binary_tag_index_create(index, stream, status);
+        if (*status) return;
     }
 
     /* Query the tag index to get the block size and offset. */
-    err = oskar_binary_tag_index_query(*index, data_type, id_group,
-            id_tag, user_index, &block_size, &block_offset);
-    if (err) return err;
+    oskar_binary_tag_index_query(*index, data_type, id_group,
+            id_tag, user_index, &block_size, &block_offset, status);
+    if (*status) return;
 
     /* Check that there is enough memory in the block. */
     if (data_size < block_size)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Copy the data out of the stream. */
     if (fseek(stream, block_offset, SEEK_SET) != 0)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
     if (fread(data, 1, block_size, stream) != block_size)
-        return OSKAR_ERR_FILE_IO;
-
-    return OSKAR_SUCCESS;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 }
 
-int oskar_binary_stream_read_double(FILE* stream,
+void oskar_binary_stream_read_double(FILE* stream,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, double* value)
+        unsigned char id_tag, int user_index, double* value, int* status)
 {
-    return oskar_binary_stream_read(stream, index, OSKAR_DOUBLE,
-            id_group, id_tag, user_index, sizeof(double), value);
+    oskar_binary_stream_read(stream, index, OSKAR_DOUBLE,
+            id_group, id_tag, user_index, sizeof(double), value, status);
 }
 
-int oskar_binary_stream_read_int(FILE* stream,
+void oskar_binary_stream_read_int(FILE* stream,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index, int* value)
+        unsigned char id_tag, int user_index, int* value, int* status)
 {
-    return oskar_binary_stream_read(stream, index, OSKAR_INT,
-            id_group, id_tag, user_index, sizeof(int), value);
+    oskar_binary_stream_read(stream, index, OSKAR_INT,
+            id_group, id_tag, user_index, sizeof(int), value, status);
 }
 
-int oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
+void oskar_binary_stream_read_ext(FILE* stream, oskar_BinaryTagIndex** index,
         unsigned char data_type, const char* name_group, const char* name_tag,
-        int user_index, size_t data_size, void* data)
+        int user_index, size_t data_size, void* data, int* status)
 {
-    int err;
     size_t block_size = 0;
     long block_offset = 0;
 
-    /* Sanity check on inputs. */
-    if (stream == NULL || index == NULL || data == NULL ||
-            name_group == NULL || name_tag == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!stream || !index || !data || !name_group || !name_tag || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Index the stream if necessary. */
     if (*index == NULL)
     {
-        err = oskar_binary_tag_index_create(index, stream);
-        if (err) return err;
+        oskar_binary_tag_index_create(index, stream, status);
+        if (*status) return;
     }
 
     /* Query the tag index to get the block size and offset. */
-    err = oskar_binary_tag_index_query_ext(*index, data_type, name_group,
-            name_tag, user_index, NULL, &block_size, &block_offset);
-    if (err) return err;
+    oskar_binary_tag_index_query_ext(*index, data_type, name_group,
+            name_tag, user_index, NULL, &block_size, &block_offset, status);
+    if (*status) return;
 
     /* Check that there is enough memory in the block. */
     if (data_size < block_size)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+    {
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Copy the data out of the stream. */
     if (fseek(stream, block_offset, SEEK_SET) != 0)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
     if (fread(data, 1, block_size, stream) != block_size)
-        return OSKAR_ERR_FILE_IO;
-
-    return OSKAR_SUCCESS;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 }
 
-int oskar_binary_stream_read_ext_double(FILE* stream,
+void oskar_binary_stream_read_ext_double(FILE* stream,
         oskar_BinaryTagIndex** index,  const char* name_group,
-        const char* name_tag, int user_index, double* value)
+        const char* name_tag, int user_index, double* value, int* status)
 {
-    return oskar_binary_stream_read_ext(stream, index, OSKAR_DOUBLE,
-            name_group, name_tag, user_index, sizeof(double), value);
+    oskar_binary_stream_read_ext(stream, index, OSKAR_DOUBLE,
+            name_group, name_tag, user_index, sizeof(double), value, status);
 }
 
-int oskar_binary_stream_read_ext_int(FILE* stream,
+void oskar_binary_stream_read_ext_int(FILE* stream,
         oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index, int* value)
+        const char* name_tag, int user_index, int* value, int* status)
 {
-    return oskar_binary_stream_read_ext(stream, index, OSKAR_INT,
-            name_group, name_tag, user_index, sizeof(int), value);
+    oskar_binary_stream_read_ext(stream, index, OSKAR_INT,
+            name_group, name_tag, user_index, sizeof(int), value, status);
 }
 
 #ifdef __cplusplus

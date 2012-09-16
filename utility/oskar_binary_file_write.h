@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,11 +70,12 @@ extern "C" {
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of memory block, in bytes.
  * @param[out] data        Pointer to memory block.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write(const char* filename, unsigned char data_type,
+void oskar_binary_file_write(const char* filename, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        size_t data_size, const void* data);
+        size_t data_size, const void* data, int* status);
 
 /**
  * @brief Appends a single double-precision value to a binary file.
@@ -99,11 +100,12 @@ int oskar_binary_file_write(const char* filename, unsigned char data_type,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_double(const char* filename,
+void oskar_binary_file_write_double(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        double value);
+        double value, int* status);
 
 /**
  * @brief Appends a single integer value to a binary file.
@@ -128,11 +130,12 @@ int oskar_binary_file_write_double(const char* filename,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_int(const char* filename,
+void oskar_binary_file_write_int(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int value);
+        int value, int* status);
 
 /**
  * @brief Appends a block of binary data to a binary file.
@@ -159,11 +162,12 @@ int oskar_binary_file_write_int(const char* filename,
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of memory block, in bytes.
  * @param[out] data        Pointer to memory block.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
+void oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
-        size_t data_size, const void* data);
+        size_t data_size, const void* data, int* status);
 
 /**
  * @brief Appends a single double-precision value to a binary file.
@@ -188,11 +192,12 @@ int oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_ext_double(const char* filename,
+void oskar_binary_file_write_ext_double(const char* filename,
         const char* name_group, const char* name_tag, int user_index,
-        double value);
+        double value, int* status);
 
 /**
  * @brief Appends a single integer value to a binary file.
@@ -217,11 +222,12 @@ int oskar_binary_file_write_ext_double(const char* filename,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_file_write_ext_int(const char* filename,
+void oskar_binary_file_write_ext_int(const char* filename,
         const char* name_group, const char* name_tag, int user_index,
-        int value);
+        int value, int* status);
 
 #ifdef __cplusplus
 }

@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 {
     // Check if built with Measurement Set support.
 #ifndef OSKAR_NO_MS
-    int error;
+    int error = 0;
 
     // Parse command line.
     if (argc != 3)
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
     // Load the visibility file.
     oskar_Visibilities vis;
-    error = oskar_visibilities_read(&vis, argv[1]);
+    oskar_visibilities_read(&vis, argv[1], &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

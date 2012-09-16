@@ -127,9 +127,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
     // Declare image hyper-cube for complex voltage pattern.
     oskar_Image complex_cube(type | OSKAR_COMPLEX, OSKAR_LOCATION_CPU);
-    err = oskar_image_resize(&complex_cube, image_size, image_size,
-            num_pols, num_times, num_channels);
-    if (err) return err;
+    oskar_image_resize(&complex_cube, image_size, image_size,
+            num_pols, num_times, num_channels, &err);
 
     // Set complex voltage pattern meta-data.
     complex_cube.image_type         = (num_pols == 1) ?
@@ -143,13 +142,11 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     complex_cube.time_inc_sec       = settings.obs.dt_dump_days * 86400.0;
     complex_cube.time_start_mjd_utc = settings.obs.start_mjd_utc;
     oskar_mem_copy(&complex_cube.settings_path, &settings.settings_path, &err);
-    if (err) return err;
 
     // Declare image hyper-cube.
     oskar_Image image_cube(type, OSKAR_LOCATION_CPU);
-    err = oskar_image_resize(&image_cube, image_size, image_size, num_pols,
-            num_times, num_channels);
-    if (err) return err;
+    oskar_image_resize(&image_cube, image_size, image_size, num_pols,
+            num_times, num_channels, &err);
 
     // Set image meta-data.
     image_cube.image_type         = complex_cube.image_type;
@@ -340,8 +337,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     // Write out complex data if required.
     if (settings.beam_pattern.oskar_image_complex)
     {
-        err = oskar_image_write(&complex_cube, log,
-                settings.beam_pattern.oskar_image_complex, 0);
+        oskar_image_write(&complex_cube, log,
+                settings.beam_pattern.oskar_image_complex, 0, &err);
         if (err) return err;
     }
 
@@ -374,8 +371,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         // Write OSKAR image
         if (settings.beam_pattern.oskar_image_power)
         {
-            err = oskar_image_write(&image_cube, log,
-                    settings.beam_pattern.oskar_image_power, 0);
+            oskar_image_write(&image_cube, log,
+                    settings.beam_pattern.oskar_image_power, 0, &err);
             if (err) return err;
         }
 #ifndef OSKAR_NO_FITS
@@ -416,8 +413,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         // Write OSKAR image
         if (settings.beam_pattern.oskar_image_phase)
         {
-            err = oskar_image_write(&image_cube, log,
-                    settings.beam_pattern.oskar_image_phase, 0);
+            oskar_image_write(&image_cube, log,
+                    settings.beam_pattern.oskar_image_phase, 0, &err);
             if (err) return err;
         }
 #ifndef OSKAR_NO_FITS

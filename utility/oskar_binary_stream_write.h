@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,11 +63,12 @@ extern "C" {
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of data block, in bytes.
  * @param[out] data        Pointer to memory block to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
+void oskar_binary_stream_write(FILE* stream, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        size_t data_size, const void* data);
+        size_t data_size, const void* data, int* status);
 
 /**
  * @brief Writes a single double-precision value to an output stream.
@@ -85,10 +86,11 @@ int oskar_binary_stream_write(FILE* stream, unsigned char data_type,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_double(FILE* stream, unsigned char id_group,
-        unsigned char id_tag, int user_index, double value);
+void oskar_binary_stream_write_double(FILE* stream, unsigned char id_group,
+        unsigned char id_tag, int user_index, double value, int* status);
 
 /**
  * @brief Writes a single integer value to an output stream.
@@ -106,10 +108,11 @@ int oskar_binary_stream_write_double(FILE* stream, unsigned char id_group,
  * @param[in] id_tag       Tag identifier.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_int(FILE* stream, unsigned char id_group,
-        unsigned char id_tag, int user_index, int value);
+void oskar_binary_stream_write_int(FILE* stream, unsigned char id_group,
+        unsigned char id_tag, int user_index, int value, int* status);
 
 /**
  * @brief Writes a block of binary data to an output stream.
@@ -129,11 +132,12 @@ int oskar_binary_stream_write_int(FILE* stream, unsigned char id_group,
  * @param[in] user_index   User-defined index.
  * @param[in] data_size    Size of data block, in bytes.
  * @param[out] data        Pointer to memory block to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
+void oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
-        size_t data_size, const void* data);
+        size_t data_size, const void* data, int* status);
 
 /**
  * @brief Writes a single double-precision value to an output stream.
@@ -151,10 +155,11 @@ int oskar_binary_stream_write_ext(FILE* stream, unsigned char data_type,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_ext_double(FILE* stream, const char* name_group,
-        const char* name_tag, int user_index, double value);
+void oskar_binary_stream_write_ext_double(FILE* stream, const char* name_group,
+        const char* name_tag, int user_index, double value, int* status);
 
 /**
  * @brief Writes a single integer value to an output stream.
@@ -172,10 +177,11 @@ int oskar_binary_stream_write_ext_double(FILE* stream, const char* name_group,
  * @param[in] name_tag     Tag name.
  * @param[in] user_index   User-defined index.
  * @param[in] value        Value to write.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_stream_write_ext_int(FILE* stream, const char* name_group,
-        const char* name_tag, int user_index, int value);
+void oskar_binary_stream_write_ext_int(FILE* stream, const char* name_group,
+        const char* name_tag, int user_index, int value, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@
 void Test_binary_file::test_stream()
 {
     char filename[] = "cpp_unit_test_binary_stream.dat";
-    int err;
+    int err = 0;
 
     // Create some data.
     int a1 = 65, b1 = 66, c1 = 67;
@@ -73,41 +73,41 @@ void Test_binary_file::test_stream()
         FILE* stream = fopen(filename, "wb");
 
         // Write the header.
-        oskar_binary_stream_write_header(stream);
+        oskar_binary_stream_write_header(stream, &err);
 
         // Write data.
-        err = oskar_binary_stream_write_int(stream, 0, 0, 12345, a1);
+        oskar_binary_stream_write_int(stream, 0, 0, 12345, a1, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i + 1000.0;
-            err = oskar_binary_stream_write(stream, OSKAR_DOUBLE,
-                    1, 10, 987654321, size_double, &data_double[0]);
+            oskar_binary_stream_write(stream, OSKAR_DOUBLE,
+                    1, 10, 987654321, size_double, &data_double[0], &err);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 10;
-            err = oskar_binary_stream_write(stream, OSKAR_INT,
-                    2, 20, 1, size_int, &data_int[0]);
+            oskar_binary_stream_write(stream, OSKAR_INT,
+                    2, 20, 1, size_int, &data_int[0], &err);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
-        err = oskar_binary_stream_write_int(stream, 0, 0, 2, c1);
+        oskar_binary_stream_write_int(stream, 0, 0, 2, c1, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 75;
-            err = oskar_binary_stream_write(stream, OSKAR_INT,
-                    14, 5, 6, size_int, &data_int[0]);
+            oskar_binary_stream_write(stream, OSKAR_INT,
+                    14, 5, 6, size_int, &data_int[0], &err);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
-        err = oskar_binary_stream_write_int(stream, 12, 0, 0, b1);
+        oskar_binary_stream_write_int(stream, 12, 0, 0, b1, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i * 1234.0;
-            err = oskar_binary_stream_write(stream, OSKAR_DOUBLE,
-                    4, 0, 3, size_double, &data_double[0]);
+            oskar_binary_stream_write(stream, OSKAR_DOUBLE,
+                    4, 0, 3, size_double, &data_double[0], &err);
         }
 
         // Close the file.
@@ -119,7 +119,7 @@ void Test_binary_file::test_stream()
 
     // Read the header back.
     oskar_BinaryHeader header;
-    err = oskar_binary_stream_read_header(stream, &header);
+    oskar_binary_stream_read_header(stream, &header, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
 
     // Check the contents of the header.
@@ -136,18 +136,18 @@ void Test_binary_file::test_stream()
 
     // Create the tag index.
     oskar_BinaryTagIndex* idx = NULL;
-    err = oskar_binary_tag_index_create(&idx, stream);
+    oskar_binary_tag_index_create(&idx, stream, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     CPPUNIT_ASSERT_EQUAL(7, idx->num_tags);
 
     // Read the single numbers back and check values.
-    err = oskar_binary_stream_read_int(stream, &idx, 0, 0, 12345, &a);
+    oskar_binary_stream_read_int(stream, &idx, 0, 0, 12345, &a, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     CPPUNIT_ASSERT_EQUAL(a1, a);
-    err = oskar_binary_stream_read_int(stream, &idx, 12, 0, 0, &b);
+    oskar_binary_stream_read_int(stream, &idx, 12, 0, 0, &b, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     CPPUNIT_ASSERT_EQUAL(b1, b);
-    err = oskar_binary_stream_read_int(stream, &idx, 0, 0, 2, &c);
+    oskar_binary_stream_read_int(stream, &idx, 0, 0, 2, &c, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     CPPUNIT_ASSERT_EQUAL(c1, c);
 
@@ -155,11 +155,11 @@ void Test_binary_file::test_stream()
     {
         std::vector<double> data_double(num_elements_double);
         std::vector<int> data_int(num_elements_int);
-        err = oskar_binary_stream_read(stream, &idx, OSKAR_INT,
-                2, 20, 1, size_int, &data_int[0]);
+        oskar_binary_stream_read(stream, &idx, OSKAR_INT,
+                2, 20, 1, size_int, &data_int[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
-        err = oskar_binary_stream_read(stream, &idx, OSKAR_DOUBLE,
-                4, 0, 3, size_double, &data_double[0]);
+        oskar_binary_stream_read(stream, &idx, OSKAR_DOUBLE,
+                4, 0, 3, size_double, &data_double[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         for (int i = 0; i < num_elements_double; ++i)
             CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 1234.0, data_double[i], 1e-8);
@@ -169,11 +169,11 @@ void Test_binary_file::test_stream()
     {
         std::vector<double> data_double(num_elements_double);
         std::vector<int> data_int(num_elements_int);
-        err = oskar_binary_stream_read(stream, &idx, OSKAR_INT,
-                14, 5, 6, size_int, &data_int[0]);
+        oskar_binary_stream_read(stream, &idx, OSKAR_INT,
+                14, 5, 6, size_int, &data_int[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
-        err = oskar_binary_stream_read(stream, &idx, OSKAR_DOUBLE,
-                1, 10, 987654321, size_double, &data_double[0]);
+        oskar_binary_stream_read(stream, &idx, OSKAR_DOUBLE,
+                1, 10, 987654321, size_double, &data_double[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         for (int i = 0; i < num_elements_double; ++i)
             CPPUNIT_ASSERT_DOUBLES_EQUAL(i + 1000.0, data_double[i], 1e-8);
@@ -184,15 +184,16 @@ void Test_binary_file::test_stream()
     // Look for a tag that isn't there.
     {
         double t;
-        err = oskar_binary_stream_read_double(stream, &idx, 255, 0, 0, &t);
+        oskar_binary_stream_read_double(stream, &idx, 255, 0, 0, &t, &err);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, err);
+        err = 0;
     }
 
     // Close the file.
     fclose(stream);
 
     // Free the tag index.
-    oskar_binary_tag_index_free(&idx);
+    oskar_binary_tag_index_free(&idx, &err);
 
     // Remove the file.
     remove(filename);
@@ -205,7 +206,7 @@ void Test_binary_file::test_stream()
 void Test_binary_file::test_file()
 {
     char filename[] = "cpp_unit_test_binary_file.dat";
-    int err;
+    int err = 0;
 
     // If the file exists, delete it.
     if (oskar_file_exists(filename))
@@ -226,50 +227,50 @@ void Test_binary_file::test_file()
         std::vector<int> data_int(num_elements_int);
 
         // Write data.
-        err = oskar_binary_file_write_int(filename, 0, 0, 12345, a1);
+        oskar_binary_file_write_int(filename, 0, 0, 12345, a1, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i + 1000.0;
-            err = oskar_binary_file_write(filename, OSKAR_DOUBLE,
-                    1, 10, 987654321, size_double, &data_double[0]);
+            oskar_binary_file_write(filename, OSKAR_DOUBLE,
+                    1, 10, 987654321, size_double, &data_double[0], &err);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 10;
-            err = oskar_binary_file_write(filename, OSKAR_INT,
-                    2, 20, 1, size_int, &data_int[0]);
+            oskar_binary_file_write(filename, OSKAR_INT,
+                    2, 20, 1, size_int, &data_int[0], &err);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
-        err = oskar_binary_file_write_int(filename, 0, 0, 2, c1);
+        oskar_binary_file_write_int(filename, 0, 0, 2, c1, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_int; ++i)
                 data_int[i] = i * 75;
-            err = oskar_binary_file_write(filename, OSKAR_INT,
-                    14, 5, 6, size_int, &data_int[0]);
+            oskar_binary_file_write(filename, OSKAR_INT,
+                    14, 5, 6, size_int, &data_int[0], &err);
             CPPUNIT_ASSERT_EQUAL(0, err);
         }
-        err = oskar_binary_file_write_int(filename, 12, 0, 0, b1);
+        oskar_binary_file_write_int(filename, 12, 0, 0, b1, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         {
             for (int i = 0; i < num_elements_double; ++i)
                 data_double[i] = i * 1234.0;
-            err = oskar_binary_file_write(filename, OSKAR_DOUBLE,
-                    4, 0, 3, size_double, &data_double[0]);
+            oskar_binary_file_write(filename, OSKAR_DOUBLE,
+                    4, 0, 3, size_double, &data_double[0], &err);
         }
     }
 
     // Read the single numbers back and check values.
     oskar_BinaryTagIndex* idx = NULL;
-    err = oskar_binary_file_read_int(filename, &idx, 0, 0, 12345, &a);
+    oskar_binary_file_read_int(filename, &idx, 0, 0, 12345, &a, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     CPPUNIT_ASSERT_EQUAL(a1, a);
-    err = oskar_binary_file_read_int(filename, &idx, 12, 0, 0, &b);
+    oskar_binary_file_read_int(filename, &idx, 12, 0, 0, &b, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     CPPUNIT_ASSERT_EQUAL(b1, b);
-    err = oskar_binary_file_read_int(filename, &idx, 0, 0, 2, &c);
+    oskar_binary_file_read_int(filename, &idx, 0, 0, 2, &c, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
     CPPUNIT_ASSERT_EQUAL(c1, c);
 
@@ -277,11 +278,11 @@ void Test_binary_file::test_file()
     {
         std::vector<double> data_double(num_elements_double);
         std::vector<int> data_int(num_elements_int);
-        err = oskar_binary_file_read(filename, &idx, OSKAR_INT,
-                2, 20, 1, size_int, &data_int[0]);
+        oskar_binary_file_read(filename, &idx, OSKAR_INT,
+                2, 20, 1, size_int, &data_int[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
-        err = oskar_binary_file_read(filename, &idx, OSKAR_DOUBLE,
-                4, 0, 3, size_double, &data_double[0]);
+        oskar_binary_file_read(filename, &idx, OSKAR_DOUBLE,
+                4, 0, 3, size_double, &data_double[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         for (int i = 0; i < num_elements_double; ++i)
             CPPUNIT_ASSERT_DOUBLES_EQUAL(i * 1234.0, data_double[i], 1e-8);
@@ -291,11 +292,11 @@ void Test_binary_file::test_file()
     {
         std::vector<double> data_double(num_elements_double);
         std::vector<int> data_int(num_elements_int);
-        err = oskar_binary_file_read(filename, &idx, OSKAR_INT,
-                14, 5, 6, size_int, &data_int[0]);
+        oskar_binary_file_read(filename, &idx, OSKAR_INT,
+                14, 5, 6, size_int, &data_int[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
-        err = oskar_binary_file_read(filename, &idx, OSKAR_DOUBLE,
-                1, 10, 987654321, size_double, &data_double[0]);
+        oskar_binary_file_read(filename, &idx, OSKAR_DOUBLE,
+                1, 10, 987654321, size_double, &data_double[0], &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
         for (int i = 0; i < num_elements_double; ++i)
             CPPUNIT_ASSERT_DOUBLES_EQUAL(i + 1000.0, data_double[i], 1e-8);
@@ -306,12 +307,13 @@ void Test_binary_file::test_file()
     // Look for a tag that isn't there.
     {
         double t;
-        err = oskar_binary_file_read_double(filename, &idx, 255, 0, 0, &t);
+        oskar_binary_file_read_double(filename, &idx, 255, 0, 0, &t, &err);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_BINARY_TAG_NOT_FOUND, err);
+        err = 0;
     }
 
     // Free the tag index.
-    oskar_binary_tag_index_free(&idx);
+    oskar_binary_tag_index_free(&idx, &err);
 
     // Remove the file.
 //    remove(filename);

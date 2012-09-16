@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,154 +42,140 @@
 extern "C" {
 #endif
 
-int oskar_binary_file_write(const char* filename, unsigned char data_type,
+void oskar_binary_file_write(const char* filename, unsigned char data_type,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        size_t data_size, const void* data)
+        size_t data_size, const void* data, int* status)
 {
     FILE* stream;
-    int err;
 
-    /* Sanity check on inputs. */
-    if (filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Open the file for read and append. */
     stream = fopen(filename, "a+b");
+    if (!stream)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Check if the file is empty. */
     fseek(stream, 0, SEEK_END);
     if (ftell(stream) == 0)
     {
         /* If the file is empty, then write the header. */
-        err = oskar_binary_stream_write_header(stream);
-        if (err)
-        {
-            fclose(stream);
-            return err;
-        }
+        oskar_binary_stream_write_header(stream, status);
 
         /* Write standard metadata. */
-        err = oskar_binary_stream_write_metadata(stream);
-        if (err)
-        {
-            fclose(stream);
-            return err;
-        }
+        oskar_binary_stream_write_metadata(stream, status);
     }
     else
     {
-        /* If the file is not empty, then check the header. */
+        /* If the file is not empty, check the header (update status flag). */
         oskar_BinaryHeader header;
-        err = oskar_binary_stream_read_header(stream, &header);
-        if (err)
-        {
-            fclose(stream);
-            return err;
-        }
+        oskar_binary_stream_read_header(stream, &header, status);
 
         /* Seek to end of file. */
         fseek(stream, 0, SEEK_END);
     }
 
     /* Write the data. */
-    err = oskar_binary_stream_write(stream, data_type,
-            id_group, id_tag, user_index, data_size, data);
+    oskar_binary_stream_write(stream, data_type, id_group, id_tag,
+            user_index, data_size, data, status);
 
     /* Close the file. */
     fclose(stream);
-
-    return err;
 }
 
-int oskar_binary_file_write_double(const char* filename,
+void oskar_binary_file_write_double(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        double value)
+        double value, int* status)
 {
-    return oskar_binary_file_write(filename, OSKAR_DOUBLE, id_group,
-            id_tag, user_index, sizeof(double), &value);
+    oskar_binary_file_write(filename, OSKAR_DOUBLE, id_group,
+            id_tag, user_index, sizeof(double), &value, status);
 }
 
-int oskar_binary_file_write_int(const char* filename,
+void oskar_binary_file_write_int(const char* filename,
         unsigned char id_group, unsigned char id_tag, int user_index,
-        int value)
+        int value, int* status)
 {
-    return oskar_binary_file_write(filename, OSKAR_INT, id_group,
-            id_tag, user_index, sizeof(int), &value);
+    oskar_binary_file_write(filename, OSKAR_INT, id_group,
+            id_tag, user_index, sizeof(int), &value, status);
 }
 
-int oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
+void oskar_binary_file_write_ext(const char* filename, unsigned char data_type,
         const char* name_group, const char* name_tag, int user_index,
-        size_t data_size, const void* data)
+        size_t data_size, const void* data, int* status)
 {
     FILE* stream;
-    int err;
 
-    /* Sanity check on inputs. */
-    if (filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Open the file for read and append. */
     stream = fopen(filename, "a+b");
+    if (!stream)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Check if the file is empty. */
     fseek(stream, 0, SEEK_END);
     if (ftell(stream) == 0)
     {
         /* If the file is empty, then write the header. */
-        err = oskar_binary_stream_write_header(stream);
-        if (err)
-        {
-            fclose(stream);
-            return err;
-        }
+        oskar_binary_stream_write_header(stream, status);
 
         /* Write standard metadata. */
-        err = oskar_binary_stream_write_metadata(stream);
-        if (err)
-        {
-            fclose(stream);
-            return err;
-        }
+        oskar_binary_stream_write_metadata(stream, status);
     }
     else
     {
-        /* If the file is not empty, then check the header. */
+        /* If the file is not empty, check the header (update status flag). */
         oskar_BinaryHeader header;
-        err = oskar_binary_stream_read_header(stream, &header);
-        if (err)
-        {
-            fclose(stream);
-            return err;
-        }
+        oskar_binary_stream_read_header(stream, &header, status);
 
         /* Seek to end of file. */
         fseek(stream, 0, SEEK_END);
     }
 
     /* Write the data. */
-    err = oskar_binary_stream_write_ext(stream, data_type,
-            name_group, name_tag, user_index, data_size, data);
+    oskar_binary_stream_write_ext(stream, data_type, name_group, name_tag,
+            user_index, data_size, data, status);
 
     /* Close the file. */
     fclose(stream);
-
-    return err;
 }
 
-int oskar_binary_file_write_ext_double(const char* filename,
+void oskar_binary_file_write_ext_double(const char* filename,
         const char* name_group, const char* name_tag, int user_index,
-        double value)
+        double value, int* status)
 {
-    return oskar_binary_file_write_ext(filename, OSKAR_DOUBLE, name_group,
-            name_tag, user_index, sizeof(double), &value);
+    oskar_binary_file_write_ext(filename, OSKAR_DOUBLE, name_group,
+            name_tag, user_index, sizeof(double), &value, status);
 }
 
-int oskar_binary_file_write_ext_int(const char* filename,
+void oskar_binary_file_write_ext_int(const char* filename,
         const char* name_group, const char* name_tag, int user_index,
-        int value)
+        int value, int* status)
 {
-    return oskar_binary_file_write_ext(filename, OSKAR_INT, name_group,
-            name_tag, user_index, sizeof(int), &value);
+    oskar_binary_file_write_ext(filename, OSKAR_INT, name_group,
+            name_tag, user_index, sizeof(int), &value, status);
 }
 
 #ifdef __cplusplus

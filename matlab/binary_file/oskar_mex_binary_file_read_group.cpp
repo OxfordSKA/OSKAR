@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,12 +48,12 @@
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
+    int err = 0;
     if (num_in != 2 || num_out > 1)
     {
         mexErrMsgTxt("Usage: records = read_group(filename, group)\n");
     }
 
-    int err = OSKAR_SUCCESS;
 
 
     // Get input arguments.
@@ -82,7 +82,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Create binary tag index (the record header?)
     oskar_BinaryTagIndex* index = NULL;
-    err = oskar_binary_tag_index_create(&index, file);
+    oskar_binary_tag_index_create(&index, file, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: oskar_binary_tag_index_create() "
@@ -193,23 +193,23 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         };
         if (index->extended[i])
         {
-            err = oskar_binary_stream_read_ext(file, &index,
+            oskar_binary_stream_read_ext(file, &index,
                     (unsigned char)index->data_type[i],
                     index->name_group[i],
                     index->name_tag[i],
                     index->user_index[i],
                     (size_t)index->data_size_bytes[i],
-                    data);
+                    data, &err);
         }
         else
         {
-            err = oskar_binary_stream_read(file, &index,
+            oskar_binary_stream_read(file, &index,
                     (unsigned char)index->data_type[i],
                     (unsigned char)index->id_group[i],
                     (unsigned char)index->id_tag[i],
                     index->user_index[i],
                     (size_t)index->data_size_bytes[i],
-                    data);
+                    data, &err);
         }
         if (err)
         {
@@ -311,6 +311,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     // Clean up
-    oskar_binary_tag_index_free(&index);
+    oskar_binary_tag_index_free(&index, &err);
     fclose(file);
 }

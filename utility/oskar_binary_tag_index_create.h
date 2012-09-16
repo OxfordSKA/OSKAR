@@ -58,20 +58,22 @@ extern "C" {
  *
  * @code
  * oskar_BinaryTagIndex* index = NULL;
- * oskar_binary_tag_index_create(&index, stream);
+ * oskar_binary_tag_index_create(&index, stream, status);
  * @endcode
  *
  * The index structure should be freed using
  *
  * @code
- * oskar_binary_tag_index_free(&index);
+ * oskar_binary_tag_index_free(&index, status);
  * @endcode
  *
  * @param[in,out] index   Pointer to index structure pointer.
  * @param[in,out] stream  An input stream to index.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-int oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream);
+void oskar_binary_tag_index_create(oskar_BinaryTagIndex** index, FILE* stream,
+        int* status);
 
 #ifdef __cplusplus
 }

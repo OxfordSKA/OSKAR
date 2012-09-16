@@ -43,139 +43,114 @@
 extern "C" {
 #endif
 
-int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
+void oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
         oskar_BinaryTagIndex** index, unsigned char id_group,
-        unsigned char id_tag, int user_index)
+        unsigned char id_tag, int user_index, int* status)
 {
-    int err = 0, type, location, num_elements, element_size;
+    int type, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
 
-    /* Sanity check on inputs. */
-    if (mem == NULL || stream == NULL || index == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !stream || !index || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Get the meta-data. */
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get the data type. */
     type = mem->type;
-    location = mem->location;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
-    {
-        err = oskar_binary_tag_index_create(index, stream);
-        if (err) return err;
-    }
+        oskar_binary_tag_index_create(index, stream, status);
 
     /* Query the tag index to find out how big the block is. */
     element_size = oskar_mem_element_size(type);
-    err = oskar_binary_tag_index_query(*index, (unsigned char)type,
-            id_group, id_tag, user_index, &size_bytes, NULL);
-    if (err) return err;
+    oskar_binary_tag_index_query(*index, (unsigned char)type,
+            id_group, id_tag, user_index, &size_bytes, NULL, status);
+    if (*status) return;
 
     /* Resize memory block if necessary, so that it can hold the data. */
     num_elements = (int)ceil((double)size_bytes / (double)element_size);
-    oskar_mem_realloc(data, num_elements, &err);
-    if (err)
-    {
-        oskar_mem_free(&temp, &err);
-        return err;
-    }
+    oskar_mem_realloc(data, num_elements, status);
     size_bytes = num_elements * element_size;
 
     /* Load the memory. */
-    err = oskar_binary_stream_read(stream, index, (unsigned char)type,
-            id_group, id_tag, user_index, size_bytes, data->data);
-
-    /* Check for errors. */
-    if (err)
-    {
-        oskar_mem_free(&temp, &err);
-        return err;
-    }
+    oskar_binary_stream_read(stream, index, (unsigned char)type,
+            id_group, id_tag, user_index, size_bytes, data->data, status);
 
     /* Copy to GPU memory if required. */
-    if (location == OSKAR_LOCATION_GPU)
-        oskar_mem_copy(mem, &temp, &err);
+    if (mem->location == OSKAR_LOCATION_GPU)
+        oskar_mem_copy(mem, &temp, status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, &err);
-
-    return err;
+    oskar_mem_free(&temp, status);
 }
 
-int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
+void oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
         oskar_BinaryTagIndex** index, const char* name_group,
-        const char* name_tag, int user_index)
+        const char* name_tag, int user_index, int* status)
 {
-    int err = 0, type, location, num_elements, element_size;
+    int type, num_elements, element_size;
     oskar_Mem temp;
     size_t size_bytes;
     oskar_Mem* data = NULL;
 
-    /* Sanity check on inputs. */
-    if (mem == NULL || stream == NULL || index == NULL ||
-            name_group == NULL || name_tag == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mem || !stream || !index || !name_group || !name_tag || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Get the meta-data. */
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get the data type. */
     type = mem->type;
-    location = mem->location;
 
     /* Initialise temporary (to zero length). */
-    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, &err);
+    oskar_mem_init(&temp, type, OSKAR_LOCATION_CPU, 0, OSKAR_TRUE, status);
 
     /* Check if data is in CPU or GPU memory. */
-    data = (location == OSKAR_LOCATION_CPU) ? mem : &temp;
+    data = (mem->location == OSKAR_LOCATION_CPU) ? mem : &temp;
 
     /* Create the tag index if it doesn't already exist. */
     if (*index == NULL)
-    {
-        err = oskar_binary_tag_index_create(index, stream);
-        if (err) return err;
-    }
+        oskar_binary_tag_index_create(index, stream, status);
 
     /* Query the tag index to find out how big the block is. */
     element_size = oskar_mem_element_size(type);
-    err = oskar_binary_tag_index_query_ext(*index, (unsigned char)type,
-            name_group, name_tag, user_index, NULL, &size_bytes, NULL);
-    if (err) return err;
+    oskar_binary_tag_index_query_ext(*index, (unsigned char)type,
+            name_group, name_tag, user_index, NULL, &size_bytes, NULL, status);
+    if (*status) return;
 
     /* Resize memory block if necessary, so that it can hold the data. */
     num_elements = (int)ceil((double)size_bytes / (double)element_size);
-    oskar_mem_realloc(data, num_elements, &err);
-    if (err)
-    {
-        oskar_mem_free(&temp, &err);
-        return err;
-    }
+    oskar_mem_realloc(data, num_elements, status);
     size_bytes = num_elements * element_size;
 
     /* Load the memory. */
-    err = oskar_binary_stream_read_ext(stream, index, (unsigned char)type,
-            name_group, name_tag, user_index, size_bytes, data->data);
-
-    /* Check for errors. */
-    if (err)
-    {
-        oskar_mem_free(&temp, &err);
-        return err;
-    }
+    oskar_binary_stream_read_ext(stream, index, (unsigned char)type,
+            name_group, name_tag, user_index, size_bytes, data->data, status);
 
     /* Copy to GPU memory if required. */
-    if (location == OSKAR_LOCATION_GPU)
-        oskar_mem_copy(mem, &temp, &err);
+    if (mem->location == OSKAR_LOCATION_GPU)
+        oskar_mem_copy(mem, &temp, status);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp, &err);
-
-    return err;
+    oskar_mem_free(&temp, status);
 }
 
 #ifdef __cplusplus
