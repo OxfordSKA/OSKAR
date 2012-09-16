@@ -38,13 +38,20 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int num_stations)
+void oskar_telescope_model_resize(oskar_TelescopeModel* telescope,
+        int num_stations, int* status)
 {
-    int error = 0, old_size = 0;
+    int i, old_size = 0;
 
-    /* Sanity check on inputs. */
-    if (telescope == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!telescope || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Get the old size. */
     old_size = telescope->num_stations;
@@ -52,32 +59,30 @@ int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int num_statio
     /* Resize the station array. */
     telescope->station = realloc(telescope->station,
             num_stations * sizeof(oskar_StationModel));
-    if (num_stations > old_size)
+    if (!telescope->station)
     {
-        /* Initialise new stations. */
-        int i = 0;
-        for (i = old_size; i < num_stations; ++i)
-        {
-            oskar_station_model_init(&(telescope->station[i]),
-                    telescope->station_x.type,
-                    telescope->station_x.location, 0, &error);
-            if (error) return error;
-        }
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return;
+    }
+
+    /* Initialise new stations. */
+    for (i = old_size; i < num_stations; ++i)
+    {
+        oskar_station_model_init(&(telescope->station[i]),
+                telescope->station_x.type,
+                telescope->station_x.location, 0, status);
     }
 
     /* Resize the remaining arrays. */
-    oskar_mem_realloc(&(telescope->station_x), num_stations, &error);
-    oskar_mem_realloc(&(telescope->station_y), num_stations, &error);
-    oskar_mem_realloc(&(telescope->station_z), num_stations, &error);
-    oskar_mem_realloc(&(telescope->station_x_hor), num_stations, &error);
-    oskar_mem_realloc(&(telescope->station_y_hor), num_stations, &error);
-    oskar_mem_realloc(&(telescope->station_z_hor), num_stations, &error);
-    if (error) return error;
+    oskar_mem_realloc(&(telescope->station_x), num_stations, status);
+    oskar_mem_realloc(&(telescope->station_y), num_stations, status);
+    oskar_mem_realloc(&(telescope->station_z), num_stations, status);
+    oskar_mem_realloc(&(telescope->station_x_hor), num_stations, status);
+    oskar_mem_realloc(&(telescope->station_y_hor), num_stations, status);
+    oskar_mem_realloc(&(telescope->station_z_hor), num_stations, status);
 
     /* Store the new size. */
     telescope->num_stations = num_stations;
-
-    return error;
 }
 
 #ifdef __cplusplus

@@ -118,8 +118,7 @@ static int load_directories(oskar_TelescopeModel* telescope,
     // (by oskar_telescope_load_config() for example), allocate them.
     if (depth == 0 && telescope->station == NULL)
     {
-        err = oskar_telescope_model_resize(telescope, num_children);
-        if (err) return err;
+        oskar_telescope_model_resize(telescope, num_children, &err);
     }
     else if (depth > 0 && num_children > 0 && station->child == NULL)
     {
@@ -129,9 +128,9 @@ static int load_directories(oskar_TelescopeModel* telescope,
         {
             oskar_station_model_init(&station->child[i], type,
                     OSKAR_LOCATION_CPU, 0, &err);
-            if (err) return err;
         }
     }
+    if (err) return err;
 
     // Loop over, and descend into the child stations.
     for (int i = 0; i < num_children; ++i)

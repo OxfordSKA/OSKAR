@@ -109,7 +109,7 @@ int oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
         if (err) goto cleanup;
         err = oskar_mem_binary_stream_write(&temp, stream,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0);
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         if (err) goto cleanup;
     }
 
@@ -142,7 +142,7 @@ int oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
     dim[3] = OSKAR_VIS_DIM_POLARISATION;
     oskar_mem_binary_stream_write(&temp, stream, grp,
             OSKAR_VIS_TAG_DIMENSION_ORDER, 0, 0);
-    oskar_mem_free(&temp);
+    oskar_mem_free(&temp, &err);
 
     /* Write other visibility metadata. */
     oskar_binary_stream_write_int(stream, grp,

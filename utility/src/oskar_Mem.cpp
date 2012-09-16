@@ -53,7 +53,8 @@ oskar_Mem::oskar_Mem(const oskar_Mem* other, int mem_location, int owner_)
 
 oskar_Mem::~oskar_Mem()
 {
-    int err = oskar_mem_free(this);
+    int err = 0;
+    oskar_mem_free(this, &err);
     if (err) throw err;
 }
 
@@ -85,22 +86,4 @@ int oskar_Mem::is_scalar() const
 int oskar_Mem::is_matrix() const
 {
     return oskar_mem_is_matrix(this->type);
-}
-
-// static method
-int oskar_Mem::is_double(const int type_)
-{
-    return oskar_mem_is_double(type_);
-}
-
-// static method
-int oskar_Mem::is_complex(const int type_)
-{
-    return oskar_mem_is_complex(type_);
-}
-
-// static method
-int oskar_Mem::is_scalar(const int type_)
-{
-    return oskar_mem_is_scalar(type_);
 }

@@ -57,7 +57,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         const oskar_Mem* position_angle, const oskar_Mem* RA,
         const oskar_Mem* Dec, oskar_Mem* I, double ra0, double dec0)
 {
-    int i, j, err, num_failed = 0;
+    int i, j, err = 0, num_failed = 0;
     double a, b, c;
     int type;
     double maj, min, pa;
@@ -66,11 +66,8 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     double ra, dec;
     double ellipse_a, ellipse_b;
 
-    oskar_Mem l, m;
+    oskar_Mem l, m, lon, lat;
     int ellipse_points;
-    oskar_Mem lon, lat;
-
-    err = OSKAR_SUCCESS;
 
     if (gaussian_a->type == OSKAR_DOUBLE &&
             gaussian_b->type == OSKAR_DOUBLE &&
@@ -263,10 +260,10 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     }
 
     /* clean up */
-    oskar_mem_free(&l);
-    oskar_mem_free(&m);
-    oskar_mem_free(&lon);
-    oskar_mem_free(&lat);
+    oskar_mem_free(&l, &err);
+    oskar_mem_free(&m, &err);
+    oskar_mem_free(&lon, &err);
+    oskar_mem_free(&lat, &err);
 
     return OSKAR_SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,15 +48,10 @@ extern "C" {
  * This function frees memory held by the data structure.
  *
  * @param[out] model Pointer to data structure to free.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_free(oskar_StationModel* model);
+void oskar_station_model_free(oskar_StationModel* model, int* status);
 
 #ifdef __cplusplus
 }

@@ -94,7 +94,7 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
          * telescope->num_stations = n is finally set. */
         if (telescope->num_stations <= n)
         {
-            err = oskar_telescope_model_resize(telescope, n + 1);
+            oskar_telescope_model_resize(telescope, n + 1, &err);
             if (err)
             {
                 fclose(file);

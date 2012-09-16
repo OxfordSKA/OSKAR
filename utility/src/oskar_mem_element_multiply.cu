@@ -503,7 +503,7 @@ void oskar_mem_element_multiply(oskar_Mem* C, oskar_Mem* A, const oskar_Mem* B,
         oskar_mem_copy(C, Cp, status);
 
     cleanup:
-    oskar_mem_free(&Ct);
-    oskar_mem_free(&At);
-    oskar_mem_free(&Bt);
+    oskar_mem_free(&Ct, status);
+    oskar_mem_free(&At, status);
+    oskar_mem_free(&Bt, status);
 }

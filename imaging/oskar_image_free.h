@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,9 +48,10 @@ extern "C" {
  * This function frees memory held by an image structure.
  *
  * @param[in] image    Pointer to image structure.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_image_free(oskar_Image* image);
+void oskar_image_free(oskar_Image* image, int* status);
 
 #ifdef __cplusplus
 }

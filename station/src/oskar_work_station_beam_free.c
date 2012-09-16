@@ -33,41 +33,28 @@
 extern "C" {
 #endif
 
-int oskar_work_station_beam_free(oskar_WorkStationBeam* work)
+void oskar_work_station_beam_free(oskar_WorkStationBeam* work, int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!work || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    if (!work)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    error = oskar_mem_free(&work->horizon_mask);
-    if (error) return error;
-    error = oskar_mem_free(&work->theta_modified);
-    if (error) return error;
-    error = oskar_mem_free(&work->phi_modified);
-    if (error) return error;
-    error = oskar_mem_free(&work->hor_x);
-    if (error) return error;
-    error = oskar_mem_free(&work->hor_y);
-    if (error) return error;
-    error = oskar_mem_free(&work->hor_z);
-    if (error) return error;
-    error = oskar_mem_free(&work->rel_x);
-    if (error) return error;
-    error = oskar_mem_free(&work->rel_y);
-    if (error) return error;
-    error = oskar_mem_free(&work->rel_z);
-    if (error) return error;
-    error = oskar_mem_free(&work->weights);
-    if (error) return error;
-    error = oskar_mem_free(&work->weights_error);
-    if (error) return error;
-    error = oskar_mem_free(&work->E);
-    if (error) return error;
-    error = oskar_mem_free(&work->G);
-    if (error) return error;
-
-    return error;
+    oskar_mem_free(&work->horizon_mask, status);
+    oskar_mem_free(&work->theta_modified, status);
+    oskar_mem_free(&work->phi_modified, status);
+    oskar_mem_free(&work->hor_x, status);
+    oskar_mem_free(&work->hor_y, status);
+    oskar_mem_free(&work->hor_z, status);
+    oskar_mem_free(&work->rel_x, status);
+    oskar_mem_free(&work->rel_y, status);
+    oskar_mem_free(&work->rel_z, status);
+    oskar_mem_free(&work->weights, status);
+    oskar_mem_free(&work->weights_error, status);
+    oskar_mem_free(&work->E, status);
+    oskar_mem_free(&work->G, status);
 }
 
 #ifdef __cplusplus

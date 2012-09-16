@@ -47,11 +47,10 @@ extern "C" {
  * This function frees memory in a data structure used to hold work buffers
  * for calculating a station beam.
  *
- * @param[in,out] work   Pointer to structure containing memory to free.
- *
- * @return An error code.
+ * @param[in,out]  work   Pointer to structure containing memory to free.
+ * @param[in,out]  status   Status return code.
  */
-int oskar_work_station_beam_free(oskar_WorkStationBeam* work);
+void oskar_work_station_beam_free(oskar_WorkStationBeam* work, int* status);
 
 #ifdef __cplusplus
 }

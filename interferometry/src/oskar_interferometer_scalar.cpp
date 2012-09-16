@@ -32,6 +32,7 @@
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/oskar_evaluate_jones_K.h"
 #include "interferometry/oskar_evaluate_uvw_station.h"
+#include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_join.h"
 #include "math/oskar_jones_set_size.h"
@@ -78,7 +79,8 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
 
     // Scale GPU telescope coordinates by wavenumber.
-    status = tel_gpu.multiply_by_wavenumber(frequency); if (status) return status;
+    status = oskar_telescope_model_multiply_by_wavenumber(&tel_gpu, frequency);
+    if (status) return status;
 
     // Scale by spectral index.
     status = sky_gpu.scale_by_spectral_index(frequency);

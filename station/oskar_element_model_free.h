@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,10 +48,11 @@ extern "C" {
  * This function frees memory that is used to hold the embedded element
  * pattern data.
  *
- * @param[in] h_data  Data structure.
+ * @param[in] data  Data structure.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_element_model_free(oskar_ElementModel* h_data);
+void oskar_element_model_free(oskar_ElementModel* data, int* status);
 
 #ifdef __cplusplus
 }

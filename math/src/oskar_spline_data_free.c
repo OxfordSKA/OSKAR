@@ -33,19 +33,20 @@
 extern "C" {
 #endif
 
-int oskar_spline_data_free(oskar_SplineData* data)
+void oskar_spline_data_free(oskar_SplineData* data, int* status)
 {
-    int err = 0;
+    /* Check all inputs. */
+    if (!data || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
     data->num_knots_x = 0;
     data->num_knots_y = 0;
-    err = oskar_mem_free(&data->knots_x);
-    if (err) return err;
-    err = oskar_mem_free(&data->knots_y);
-    if (err) return err;
-    err = oskar_mem_free(&data->coeff);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_free(&data->knots_x, status);
+    oskar_mem_free(&data->knots_y, status);
+    oskar_mem_free(&data->coeff, status);
 }
 
 #ifdef __cplusplus

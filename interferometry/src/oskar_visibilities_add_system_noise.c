@@ -177,10 +177,10 @@ int oskar_visibilities_add_system_noise(oskar_Visibilities* vis,
         }
     }
 
-    oskar_mem_free(&ant1);
-    oskar_mem_free(&ant2);
+    oskar_mem_free(&ant1, &err);
+    oskar_mem_free(&ant2, &err);
 
-    return OSKAR_SUCCESS;
+    return err;
 }
 
 

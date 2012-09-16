@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,15 +48,10 @@ extern "C" {
  * This function releases memory held by a Jones matrix data structure.
  *
  * @param[in,out] jones Pointer to data structure.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_jones_free(oskar_Jones* jones);
+void oskar_jones_free(oskar_Jones* jones, int* status);
 
 #ifdef __cplusplus
 }

@@ -37,7 +37,7 @@ extern "C" {
 int oskar_settings_free(oskar_Settings* settings)
 {
     oskar_SettingsSystemNoise* noise = &settings->interferometer.noise;
-    int i = 0;
+    int i = 0, err = 0;
 
     /* Free all settings arrays. */
     free(settings->sim.cuda_device_ids);
@@ -102,9 +102,9 @@ int oskar_settings_free(oskar_Settings* settings)
     noise->value.efficiency.file = NULL;
 
     /* Free pathname to settings file. */
-    oskar_mem_free(&settings->settings_path);
+    oskar_mem_free(&settings->settings_path, &err);
 
-    return OSKAR_SUCCESS;
+    return err;
 }
 
 #ifdef __cplusplus

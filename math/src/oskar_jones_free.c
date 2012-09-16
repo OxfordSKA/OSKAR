@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,15 +33,20 @@
 extern "C" {
 #endif
 
-int oskar_jones_free(oskar_Jones* jones)
+void oskar_jones_free(oskar_Jones* jones, int* status)
 {
-    int err = 0;
+    /* Check all inputs. */
+    if (!jones || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
     jones->num_stations = 0;
     jones->num_sources = 0;
     jones->cap_stations = 0;
     jones->cap_sources = 0;
-    err = oskar_mem_free(&jones->data);
-    return err;
+    oskar_mem_free(&jones->data, status);
 }
 
 #ifdef __cplusplus

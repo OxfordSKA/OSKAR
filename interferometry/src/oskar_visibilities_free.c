@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,12 +34,14 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_free(oskar_Visibilities* vis)
+void oskar_visibilities_free(oskar_Visibilities* vis, int* status)
 {
-    int err = 0;
-
-    if (vis == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!vis || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Clear meta-data. */
     vis->num_channels  = 0;
@@ -55,24 +57,14 @@ int oskar_visibilities_free(oskar_Visibilities* vis)
     vis->phase_centre_dec_deg = 0.0;
 
     /* Free memory. */
-    err = oskar_mem_free(&vis->settings_path);
-    if (err) return err;
-    err = oskar_mem_free(&vis->x_metres);
-    if (err) return err;
-    err = oskar_mem_free(&vis->y_metres);
-    if (err) return err;
-    err = oskar_mem_free(&vis->z_metres);
-    if (err) return err;
-    err = oskar_mem_free(&vis->uu_metres);
-    if (err) return err;
-    err = oskar_mem_free(&vis->vv_metres);
-    if (err) return err;
-    err = oskar_mem_free(&vis->ww_metres);
-    if (err) return err;
-    err = oskar_mem_free(&vis->amplitude);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_free(&vis->settings_path, status);
+    oskar_mem_free(&vis->x_metres, status);
+    oskar_mem_free(&vis->y_metres, status);
+    oskar_mem_free(&vis->z_metres, status);
+    oskar_mem_free(&vis->uu_metres, status);
+    oskar_mem_free(&vis->vv_metres, status);
+    oskar_mem_free(&vis->ww_metres, status);
+    oskar_mem_free(&vis->amplitude, status);
 }
 
 #ifdef __cplusplus

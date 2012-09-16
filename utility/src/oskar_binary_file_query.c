@@ -107,7 +107,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
         oskar_mem_realloc(&temp, temp.num_elements + 1, &error);
         ((char*)temp.data)[temp.num_elements - 1] = 0; /* Null-terminate. */
         oskar_log_message(log, depth, "\n%s", (char*)(temp.data));
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &error);
     }
 
     /* Iterate all tags in index. */
@@ -480,7 +480,7 @@ int oskar_binary_file_query(oskar_Log* log, const char* filename)
             }
 
             /* Free temp array. */
-            oskar_mem_free(&temp);
+            oskar_mem_free(&temp, &error);
         }
     }
 

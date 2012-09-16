@@ -55,6 +55,7 @@ oskar_Jones::oskar_Jones(const oskar_Jones* other, int location)
 
 oskar_Jones::~oskar_Jones()
 {
-    int err = oskar_jones_free(this);
+    int err = 0;
+    oskar_jones_free(this, &err);
     if (err) throw err;
 }

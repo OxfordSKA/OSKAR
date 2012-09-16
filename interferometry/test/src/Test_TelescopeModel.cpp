@@ -27,8 +27,11 @@
  */
 
 #include "interferometry/test/Test_TelescopeModel.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_horizon_plane_to_offset_geocentric_cartesian.h"
+#include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_load_station_coords.h"
+#include "station/oskar_station_model_load_config.h"
+#include "utility/oskar_get_error_string.h"
 #include <cmath>
 #include <cstdio>
 
@@ -91,6 +94,7 @@ void Test_TelescopeModel::tearDown()
 void Test_TelescopeModel::test_load_telescope_cpu()
 {
     char station_name[80];
+    int status = 0;
 
     // Set the location.
     double longitude = 30.0 * M_PI / 180.0;
@@ -103,12 +107,14 @@ void Test_TelescopeModel::test_load_telescope_cpu()
                 OSKAR_LOCATION_CPU);
 
         // Fill the telescope structure.
-        CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_coords(telescope_file_name,
-                longitude, latitude, altitude));
+        status = oskar_telescope_model_load_station_coords(tel_cpu,
+                telescope_file_name, longitude, latitude, altitude);
+        CPPUNIT_ASSERT_EQUAL(0, status);
         for (int i = 0; i < n_stations; ++i)
         {
             sprintf(station_name, "%s_%d.dat", station_base, i);
-            CPPUNIT_ASSERT_EQUAL(0, tel_cpu->load_station_configuration(i, station_name));
+            status = oskar_station_model_load_config(&(tel_cpu->station[i]), station_name);
+            CPPUNIT_ASSERT_EQUAL(0, status);
             CPPUNIT_ASSERT_EQUAL(n_elements, tel_cpu->station[i].num_elements);
         }
 
@@ -157,8 +163,8 @@ void Test_TelescopeModel::test_load_telescope_cpu()
         // Delete the CPU structure.
         delete tel_cpu;
     }
-    catch (const char* msg)
+    catch (int code)
     {
-        CPPUNIT_FAIL(msg);
+        CPPUNIT_FAIL(oskar_get_error_string(code));
     }
 }

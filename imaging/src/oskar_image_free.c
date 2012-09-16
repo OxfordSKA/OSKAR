@@ -29,25 +29,23 @@
 #include "imaging/oskar_image_init.h"
 #include "imaging/oskar_Image.h"
 #include "utility/oskar_mem_free.h"
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_image_free(oskar_Image* image)
+void oskar_image_free(oskar_Image* image, int* status)
 {
-    int err;
-
-    /* Sanity check on inputs. */
-    if (image == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!image || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Free memory. */
-    err = oskar_mem_free(&image->data);
-    if (err) return err;
-    err = oskar_mem_free(&image->settings_path);
-    if (err) return err;
+    oskar_mem_free(&image->data, status);
+    oskar_mem_free(&image->settings_path, status);
 
     /* Clear meta-data. */
     image->centre_dec_deg = 0.0;
@@ -63,8 +61,6 @@ int oskar_image_free(oskar_Image* image)
     image->time_inc_sec = 0.0;
     image->time_start_mjd_utc = 0.0;
     image->width = 0;
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

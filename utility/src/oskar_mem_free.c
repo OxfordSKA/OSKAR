@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@
  */
 
 #include "utility/oskar_mem_free.h"
+#include "utility/oskar_cuda_check_error.h"
 
 #include <cuda_runtime_api.h>
 #include <stdlib.h>
@@ -35,34 +36,38 @@
 extern "C" {
 #endif
 
-int oskar_mem_free(oskar_Mem* mem)
+void oskar_mem_free(oskar_Mem* mem, int* status)
 {
-    int err = 0;
+    /* Check all inputs. */
+    if (!mem || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Check that the structure exists. */
-    if (mem == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Must proceed with trying to free the memory, regardless of the
+     * status code value. */
 
     /* Only free the memory if the structure actually owns it. */
-    if (mem->owner && mem->data != NULL)
+    if (mem->owner && mem->data)
     {
         /* Check whether the memory is on the host or the device. */
-        int location;
-        location = mem->location;
-        if (location == OSKAR_LOCATION_CPU)
+        if (mem->location == OSKAR_LOCATION_CPU)
         {
             /* Free host memory. */
             free(mem->data);
         }
-        else if (location == OSKAR_LOCATION_GPU)
+        else if (mem->location == OSKAR_LOCATION_GPU)
         {
+
             /* Free GPU memory. */
             cudaFree(mem->data);
-            err = cudaPeekAtLastError();
-        }
-        else
-        {
-            return OSKAR_ERR_BAD_LOCATION;
+            if (!(*status))
+            {
+                int cuda_error;
+                cuda_error = cudaPeekAtLastError();
+                if (cuda_error) *status = cuda_error;
+            }
         }
     }
     mem->data = NULL;
@@ -70,7 +75,6 @@ int oskar_mem_free(oskar_Mem* mem)
     mem->num_elements = 0;
     mem->type = 0;
     mem->owner = 0;
-    return err;
 }
 
 #ifdef __cplusplus

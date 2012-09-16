@@ -74,7 +74,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     oskar_mem_realloc(data, num_elements, &err);
     if (err)
     {
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         fclose(stream);
         return err;
     }
@@ -84,7 +84,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
     fseek(stream, 0, SEEK_SET);
     if (fread(data->data, 1, size_bytes, stream) != size_bytes)
     {
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         fclose(stream);
         return OSKAR_ERR_FILE_IO;
     }
@@ -97,7 +97,7 @@ int oskar_mem_binary_file_read_raw(oskar_Mem* mem, const char* filename)
         oskar_mem_copy(mem, &temp, &err);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp);
+    oskar_mem_free(&temp, &err);
 
     return err;
 }

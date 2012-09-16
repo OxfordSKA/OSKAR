@@ -49,7 +49,8 @@ oskar_Visibilities::oskar_Visibilities(const oskar_Visibilities* other,
 
 oskar_Visibilities::~oskar_Visibilities()
 {
-    int err = oskar_visibilities_free(this);
+    int err = 0;
+    oskar_visibilities_free(this, &err);
     if (err) throw err;
 }
 
@@ -65,7 +66,7 @@ int oskar_Visibilities::read(oskar_Visibilities* vis, const char* filename)
 
 int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)
 {
-    return oskar_visibilties_get_channel_amps(vis_amps, this, channel);
+    return oskar_visibilities_get_channel_amps(vis_amps, this, channel);
 }
 
 int oskar_Visibilities::location() const

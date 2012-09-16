@@ -236,5 +236,5 @@ void Test_fits_to_sky_model::test_method()
     }
 
     // Free memory.
-    oskar_image_free(&image);
+    oskar_image_free(&image, &err);
 }

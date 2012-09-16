@@ -75,9 +75,9 @@ int oskar_sph_rotate_points(int n, oskar_Mem* lon, oskar_Mem* lat,
     err = oskar_cart2sph(n, lon, lat, &x, &y, &z);
     if (err) return err;
 
-    oskar_mem_free(&x);
-    oskar_mem_free(&y);
-    oskar_mem_free(&z);
+    oskar_mem_free(&x, &err);
+    oskar_mem_free(&y, &err);
+    oskar_mem_free(&z, &err);
 
     return OSKAR_SUCCESS;
 }

@@ -285,7 +285,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     // memory leaks in case of errors (free memory using a destructor instead).
     for (int i = 0; i < num_sky_chunks; ++i)
     {
-        oskar_sky_model_free(&sky_chunk_cpu[i]);
+        oskar_sky_model_free(&sky_chunk_cpu[i], &error);
     }
     free(sky_chunk_cpu);
 

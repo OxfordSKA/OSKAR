@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,54 +34,37 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_free(oskar_SkyModel* model)
+void oskar_sky_model_free(oskar_SkyModel* model, int* status)
 {
-    int error = OSKAR_SUCCESS;
-
-    if (model == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!model || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Initialise the memory. */
-    error = oskar_mem_free(&model->RA);
-    if (error) return error;
-    error = oskar_mem_free(&model->Dec);
-    if (error) return error;
-    error = oskar_mem_free(&model->I);
-    if (error) return error;
-    error = oskar_mem_free(&model->Q);
-    if (error) return error;
-    error = oskar_mem_free(&model->U);
-    if (error) return error;
-    error = oskar_mem_free(&model->V);
-    if (error) return error;
-    error = oskar_mem_free(&model->reference_freq);
-    if (error) return error;
-    error = oskar_mem_free(&model->spectral_index);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_l);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_m);
-    if (error) return error;
-    error = oskar_mem_free(&model->rel_n);
-    if (error) return error;
-    error = oskar_mem_free(&model->FWHM_major);
-    if (error) return error;
-    error = oskar_mem_free(&model->FWHM_minor);
-    if (error) return error;
-    error = oskar_mem_free(&model->position_angle);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_a);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_b);
-    if (error) return error;
-    error = oskar_mem_free(&model->gaussian_c);
-    if (error) return error;
+    oskar_mem_free(&model->RA, status);
+    oskar_mem_free(&model->Dec, status);
+    oskar_mem_free(&model->I, status);
+    oskar_mem_free(&model->Q, status);
+    oskar_mem_free(&model->U, status);
+    oskar_mem_free(&model->V, status);
+    oskar_mem_free(&model->reference_freq, status);
+    oskar_mem_free(&model->spectral_index, status);
+    oskar_mem_free(&model->rel_l, status);
+    oskar_mem_free(&model->rel_m, status);
+    oskar_mem_free(&model->rel_n, status);
+    oskar_mem_free(&model->FWHM_major, status);
+    oskar_mem_free(&model->FWHM_minor, status);
+    oskar_mem_free(&model->position_angle, status);
+    oskar_mem_free(&model->gaussian_a, status);
+    oskar_mem_free(&model->gaussian_b, status);
+    oskar_mem_free(&model->gaussian_c, status);
 
     /* Set meta-data */
     model->num_sources = 0;
     model->use_extended = OSKAR_FALSE;
-
-    return error;
 }
 
 #ifdef __cplusplus

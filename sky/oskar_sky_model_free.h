@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,11 +45,10 @@ extern "C" {
  * Frees memory held by the data structure.
  *
  * @param[out] model        Pointer to data structure.
- *
- * @return An error code.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_free(oskar_SkyModel* model);
+void oskar_sky_model_free(oskar_SkyModel* model, int* status);
 
 #ifdef __cplusplus
 }

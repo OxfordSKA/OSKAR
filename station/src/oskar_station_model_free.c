@@ -42,51 +42,36 @@
 extern "C" {
 #endif
 
-int oskar_station_model_free(oskar_StationModel* model)
+void oskar_station_model_free(oskar_StationModel* model, int* status)
 {
-    int error = 0;
-
-    /* Check for sane inputs. */
-    if (model == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!model || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
     /* Free the element data. */
-    error = oskar_mem_free(&model->x_signal);
-    if (error) return error;
-    error = oskar_mem_free(&model->y_signal);
-    if (error) return error;
-    error = oskar_mem_free(&model->z_signal);
-    if (error) return error;
-    error = oskar_mem_free(&model->x_weights);
-    if (error) return error;
-    error = oskar_mem_free(&model->y_weights);
-    if (error) return error;
-    error = oskar_mem_free(&model->z_weights);
-    if (error) return error;
-    error = oskar_mem_free(&model->weight);
-    if (error) return error;
-    error = oskar_mem_free(&model->gain);
-    if (error) return error;
-    error = oskar_mem_free(&model->gain_error);
-    if (error) return error;
-    error = oskar_mem_free(&model->phase_offset);
-    if (error) return error;
-    error = oskar_mem_free(&model->phase_error);
-    if (error) return error;
-    error = oskar_mem_free(&model->cos_orientation_x);
-    if (error) return error;
-    error = oskar_mem_free(&model->sin_orientation_x);
-    if (error) return error;
-    error = oskar_mem_free(&model->cos_orientation_y);
-    if (error) return error;
-    error = oskar_mem_free(&model->sin_orientation_y);
-    if (error) return error;
+    oskar_mem_free(&model->x_signal, status);
+    oskar_mem_free(&model->y_signal, status);
+    oskar_mem_free(&model->z_signal, status);
+    oskar_mem_free(&model->x_weights, status);
+    oskar_mem_free(&model->y_weights, status);
+    oskar_mem_free(&model->z_weights, status);
+    oskar_mem_free(&model->weight, status);
+    oskar_mem_free(&model->gain, status);
+    oskar_mem_free(&model->gain_error, status);
+    oskar_mem_free(&model->phase_offset, status);
+    oskar_mem_free(&model->phase_error, status);
+    oskar_mem_free(&model->cos_orientation_x, status);
+    oskar_mem_free(&model->sin_orientation_x, status);
+    oskar_mem_free(&model->cos_orientation_y, status);
+    oskar_mem_free(&model->sin_orientation_y, status);
 
     /* Free the element pattern data if it exists. */
     if (model->element_pattern)
     {
-        error = oskar_element_model_free(model->element_pattern);
-        if (error) return error;
+        oskar_element_model_free(model->element_pattern, status);
 
         /* Free the structure pointer. */
         free(model->element_pattern);
@@ -124,8 +109,7 @@ int oskar_station_model_free(oskar_StationModel* model)
         int i = 0;
         for (i = 0; i < model->num_elements; ++i)
         {
-            error = oskar_station_model_free(&(model->child[i]));
-            if (error) return error;
+            oskar_station_model_free(&(model->child[i]), status);
         }
 
         /* Free the array. */
@@ -133,11 +117,8 @@ int oskar_station_model_free(oskar_StationModel* model)
         model->child = NULL;
     }
 
-    /* Free the noise model if it exists */
-    error = oskar_system_noise_model_free(&model->noise);
-    if (error) return error;
-
-    return OSKAR_SUCCESS;
+    /* Free the noise model. */
+    oskar_system_noise_model_free(&model->noise, status);
 }
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,10 +46,11 @@ extern "C" {
  * @details
  * This function will free memory held by a visibility structure.
  *
- * @param vis  Pointer to the visibility data structure to free.
+ * @param[in,out]  vis  Pointer to the visibility data structure to free.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_free(oskar_Visibilities* vis);
+void oskar_visibilities_free(oskar_Visibilities* vis, int* status);
 
 #ifdef __cplusplus
 }

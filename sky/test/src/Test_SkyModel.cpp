@@ -27,6 +27,7 @@
  */
 
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_resize.h"
 #include "sky/test/Test_SkyModel.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_append.h"
@@ -345,7 +346,7 @@ void Test_SkyModel::test_horizon_clip()
     // Create a telescope model.
     int n_stations = 25;
     oskar_TelescopeModel telescope(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-    err = telescope.resize(n_stations);
+    oskar_telescope_model_resize(&telescope, n_stations, &err);
     CPPUNIT_ASSERT_EQUAL(0, err);
 
     // Create a work buffer.
@@ -731,7 +732,7 @@ void Test_SkyModel::test_sky_model_set()
     {
         for (int i = 0; i < number; ++i)
         {
-            oskar_sky_model_free(&set[i]);
+            oskar_sky_model_free(&set[i], &error);
         }
         free(set);
     }

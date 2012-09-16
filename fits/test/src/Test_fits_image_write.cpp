@@ -41,7 +41,7 @@ void Test_fits_image_write::test_method()
 {
     int columns = 10; // width
     int rows = 20; // height
-    int err;
+    int err = 0;
 
     // Create the image.
     oskar_Image image(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
@@ -71,5 +71,5 @@ void Test_fits_image_write::test_method()
     oskar_fits_image_write(&image, NULL, filename);
 
     // Free memory.
-    oskar_image_free(&image);
+    oskar_image_free(&image, &err);
 }

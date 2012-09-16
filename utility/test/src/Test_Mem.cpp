@@ -45,6 +45,7 @@
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_mem_scale_real.h"
+#include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_file_exists.h"
 #include "utility/oskar_get_error_string.h"
@@ -227,9 +228,9 @@ void Test_Mem::test_type_check()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_double());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_complex());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_double(OSKAR_SINGLE));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_complex(OSKAR_SINGLE));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_SINGLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_mem_is_double(OSKAR_SINGLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_mem_is_complex(OSKAR_SINGLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_scalar(OSKAR_SINGLE));
     }
 
     {
@@ -237,9 +238,9 @@ void Test_Mem::test_type_check()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_double());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_complex());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_double(OSKAR_DOUBLE));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_complex(OSKAR_DOUBLE));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_DOUBLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_double(OSKAR_DOUBLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_mem_is_complex(OSKAR_DOUBLE));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_scalar(OSKAR_DOUBLE));
     }
 
     {
@@ -247,9 +248,9 @@ void Test_Mem::test_type_check()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_double());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_double(OSKAR_SINGLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_SINGLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_SINGLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_mem_is_double(OSKAR_SINGLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_complex(OSKAR_SINGLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_scalar(OSKAR_SINGLE_COMPLEX));
     }
 
     {
@@ -257,9 +258,9 @@ void Test_Mem::test_type_check()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_double());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_double(OSKAR_DOUBLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_DOUBLE_COMPLEX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_scalar(OSKAR_DOUBLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_double(OSKAR_DOUBLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_complex(OSKAR_DOUBLE_COMPLEX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_scalar(OSKAR_DOUBLE_COMPLEX));
 
     }
 
@@ -268,9 +269,9 @@ void Test_Mem::test_type_check()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_double());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_double(OSKAR_SINGLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_SINGLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_scalar(OSKAR_SINGLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_mem_is_double(OSKAR_SINGLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_complex(OSKAR_SINGLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_mem_is_scalar(OSKAR_SINGLE_COMPLEX_MATRIX));
     }
 
     {
@@ -278,9 +279,9 @@ void Test_Mem::test_type_check()
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_double());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, mem.is_complex());
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, mem.is_scalar());
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_double(OSKAR_DOUBLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_Mem::is_complex(OSKAR_DOUBLE_COMPLEX_MATRIX));
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_Mem::is_scalar(OSKAR_DOUBLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_double(OSKAR_DOUBLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_TRUE, oskar_mem_is_complex(OSKAR_DOUBLE_COMPLEX_MATRIX));
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_FALSE, oskar_mem_is_scalar(OSKAR_DOUBLE_COMPLEX_MATRIX));
     }
 }
 

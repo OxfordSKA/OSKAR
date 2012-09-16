@@ -322,12 +322,12 @@ int oskar_fit_ellipse(oskar_Log* log, double* gauss_maj, double* gauss_min,
     }
 
     /* clean up */
-    err = oskar_mem_free(&x2);
-    err = oskar_mem_free(&y2);
-    err = oskar_mem_free(&X);
-    err = oskar_mem_free(&XX);
-    err = oskar_mem_free(&sumX);
-    err = oskar_mem_free(&ipiv);
+    oskar_mem_free(&x2, &err);
+    oskar_mem_free(&y2, &err);
+    oskar_mem_free(&X, &err);
+    oskar_mem_free(&XX, &err);
+    oskar_mem_free(&sumX, &err);
+    oskar_mem_free(&ipiv, &err);
 
     return err;
 }

@@ -41,7 +41,6 @@ struct float2;
 struct float4c;
 struct double2;
 struct double4c;
-struct oskar_BinaryTagIndex;
 #endif
 
 /**
@@ -121,9 +120,6 @@ struct OSKAR_EXPORT oskar_Mem
     int is_real() const;
     int is_scalar() const;
     int is_matrix() const;
-    static int is_double(const int mem_type);
-    static int is_complex(const int mem_type);
-    static int is_scalar(const int mem_type);
 
     /* Convenience pointer casts. */
     operator char*() {return (char*)data;}

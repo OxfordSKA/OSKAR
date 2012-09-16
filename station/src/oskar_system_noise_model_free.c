@@ -33,16 +33,17 @@
 extern "C" {
 #endif
 
-int oskar_system_noise_model_free(oskar_SystemNoiseModel* noise)
+void oskar_system_noise_model_free(oskar_SystemNoiseModel* noise, int* status)
 {
-    int status = OSKAR_SUCCESS;
+    /* Check all inputs. */
+    if (!noise || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    status = oskar_mem_free(&noise->frequency);
-    if (status) return status;
-    status = oskar_mem_free(&noise->rms);
-    if (status) return status;
-
-    return status;
+    oskar_mem_free(&noise->frequency, status);
+    oskar_mem_free(&noise->rms, status);
 }
 
 #ifdef __cplusplus

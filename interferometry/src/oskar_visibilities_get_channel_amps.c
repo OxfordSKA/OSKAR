@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 extern "C" {
 #endif
 
-int oskar_visibilties_get_channel_amps(oskar_Mem* vis_amp,
+int oskar_visibilities_get_channel_amps(oskar_Mem* vis_amp,
         const oskar_Visibilities* vis, int channel)
 {
     int num_elements, offset, err = 0;

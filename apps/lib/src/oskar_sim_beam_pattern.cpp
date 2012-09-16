@@ -32,6 +32,7 @@
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "fits/oskar_fits_image_write.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
 #include "imaging/oskar_Image.h"
 #include "imaging/oskar_image_resize.h"
@@ -217,7 +218,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
             // Copy the telescope model and scale coordinates to radians.
             oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
-            err = telescope.multiply_by_wavenumber(frequency);
+            err = oskar_telescope_model_multiply_by_wavenumber(&telescope,
+                    frequency);
             if (err) return err;
 
             // Get pointer to the station.

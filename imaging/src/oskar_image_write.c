@@ -100,7 +100,7 @@ int oskar_image_write(const oskar_Image* image, oskar_Log* log,
         if (err) goto cleanup;
         err = oskar_mem_binary_stream_write(&temp, stream,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0);
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         if (err) goto cleanup;
     }
 

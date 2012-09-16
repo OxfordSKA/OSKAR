@@ -136,20 +136,23 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
     // (by oskar_telescope_load_config() for example), allocate them.
     if (depth == 0 && telescope->station == NULL)
     {
-        err = oskar_telescope_model_resize(telescope, num_children);
-        if (err) return err;
+        oskar_telescope_model_resize(telescope, num_children, &err);
     }
     else if (depth > 0 && num_children > 0 && station->child == NULL)
     {
         int type = oskar_telescope_model_type(telescope);
-        station->child = (oskar_StationModel*) malloc(num_children*sizeof(oskar_StationModel));
+        station->child = (oskar_StationModel*) malloc(num_children *
+                sizeof(oskar_StationModel));
+        if (!station->child)
+            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+
         for (int i = 0; i < num_children; ++i)
         {
             oskar_station_model_init(&station->child[i], type,
                     OSKAR_LOCATION_CPU, 0, &err);
-            if (err) return err;
         }
     }
+    if (err) return err;
 
     // Load noise frequency values. (noise files can only be at depth 0).
     if (depth == 0)

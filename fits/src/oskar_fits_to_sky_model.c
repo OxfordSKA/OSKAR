@@ -391,7 +391,7 @@ int oskar_fits_to_sky_model(oskar_Log* ptr, const char* filename,
     cleanup:
     fits_close_file(fptr, &status);
     if (data) free(data);
-    oskar_sky_model_free(&temp_sky);
+    oskar_sky_model_free(&temp_sky, &err);
     if (status) return OSKAR_ERR_FITS_IO;
     return err;
 }

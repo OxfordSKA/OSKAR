@@ -76,7 +76,7 @@ int oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
         oskar_mem_copy(&temp, mem, &err);
         if (err)
         {
-            oskar_mem_free(&temp);
+            oskar_mem_free(&temp, &err);
             return err;
         }
         data = &temp;
@@ -87,7 +87,7 @@ int oskar_mem_binary_stream_write(const oskar_Mem* mem, FILE* stream,
             id_group, id_tag, user_index, size_bytes, data->data);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp);
+    oskar_mem_free(&temp, &err);
 
     return err;
 }
@@ -130,7 +130,7 @@ int oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
         oskar_mem_copy(&temp, mem, &err);
         if (err)
         {
-            oskar_mem_free(&temp);
+            oskar_mem_free(&temp, &err);
             return err;
         }
         data = &temp;
@@ -141,7 +141,7 @@ int oskar_mem_binary_stream_write_ext(const oskar_Mem* mem, FILE* stream,
             name_group, name_tag, user_index, size_bytes, data->data);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp);
+    oskar_mem_free(&temp, &err);
 
     return err;
 }

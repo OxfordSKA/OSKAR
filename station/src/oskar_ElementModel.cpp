@@ -50,7 +50,8 @@ oskar_ElementModel::oskar_ElementModel(const oskar_ElementModel* other,
 
 oskar_ElementModel::~oskar_ElementModel()
 {
-    int err = oskar_element_model_free(this);
+    int err = 0;
+    oskar_element_model_free(this, &err);
     if (err) throw err;
 }
 

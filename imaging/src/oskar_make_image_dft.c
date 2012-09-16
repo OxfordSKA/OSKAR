@@ -153,12 +153,12 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
 
     cleanup:
     /* Free temporary memory. */
-    oskar_mem_free(&u);
-    oskar_mem_free(&v);
-    oskar_mem_free(&t_l);
-    oskar_mem_free(&t_m);
-    oskar_mem_free(&t_amp);
-    oskar_mem_free(&t_image);
+    oskar_mem_free(&u, &err);
+    oskar_mem_free(&v, &err);
+    oskar_mem_free(&t_l, &err);
+    oskar_mem_free(&t_m, &err);
+    oskar_mem_free(&t_amp, &err);
+    oskar_mem_free(&t_image, &err);
     return err;
 }
 

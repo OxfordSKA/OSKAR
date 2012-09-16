@@ -71,10 +71,10 @@ int oskar_project_gaussian_sph_to_lm(int num_points, oskar_Mem* maj,
     }
 
 
-    oskar_mem_free(&e_l);
-    oskar_mem_free(&e_m);
-    oskar_mem_free(&e_lat);
-    oskar_mem_free(&e_lon);
+    oskar_mem_free(&e_l, &err);
+    oskar_mem_free(&e_m, &err);
+    oskar_mem_free(&e_lat, &err);
+    oskar_mem_free(&e_lon, &err);
 
 
     return OSKAR_SUCCESS;

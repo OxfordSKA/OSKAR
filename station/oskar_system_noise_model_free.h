@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,10 @@ extern "C" {
  * @details
  * This function frees memory that is used to hold the system noise model data.
  *
- * @param[in] h_data  Data structure.
+ * @param[in] noise  Pointer to data structure.
  */
 OSKAR_EXPORT
-int oskar_system_noise_model_free(oskar_SystemNoiseModel* h_data);
+void oskar_system_noise_model_free(oskar_SystemNoiseModel* noise, int* status);
 
 #ifdef __cplusplus
 }

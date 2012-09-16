@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,11 +47,13 @@ extern "C" {
  * @details
  * Resizes a telescope model structure.
  *
- * @param telescope    Telescope model structure to resize.
- * @param num_stations New number of stations.
+ * @param[in,out] telescope     Telescope model structure to resize.
+ * @param[in]     num_stations  New number of stations.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_resize(oskar_TelescopeModel* telescope, int num_stations);
+void oskar_telescope_model_resize(oskar_TelescopeModel* telescope,
+        int num_stations, int* status);
 
 #ifdef __cplusplus
 }

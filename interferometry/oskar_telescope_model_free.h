@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,11 @@ extern "C" {
  * @details
  * Frees memory used by a telescope model structure.
  *
- * @param telescope Telescope model structure to free.
+ * @param[in,out] telescope Telescope model structure to free.
+ * @param[in,out]  status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_free(oskar_TelescopeModel* telescope);
+void oskar_telescope_model_free(oskar_TelescopeModel* telescope, int* status);
 
 #ifdef __cplusplus
 }

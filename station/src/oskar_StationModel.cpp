@@ -48,7 +48,8 @@ oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
 
 oskar_StationModel::~oskar_StationModel()
 {
-    int err = oskar_station_model_free(this);
+    int err = 0;
+    oskar_station_model_free(this, &err);
     if (err) throw err;
 }
 

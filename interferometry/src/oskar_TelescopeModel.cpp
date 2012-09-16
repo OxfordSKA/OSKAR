@@ -50,41 +50,7 @@ oskar_TelescopeModel::oskar_TelescopeModel(const oskar_TelescopeModel* other,
 
 oskar_TelescopeModel::~oskar_TelescopeModel()
 {
-    int err = oskar_telescope_model_free(this);
+    int err = 0;
+    oskar_telescope_model_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_TelescopeModel::load_station_coords(const char* filename,
-        double longitude, double latitude, double altitude)
-{
-    return oskar_telescope_model_load_station_coords(this, filename,
-            longitude, latitude, altitude);
-}
-
-int oskar_TelescopeModel::location() const
-{
-    return oskar_telescope_model_location(this);
-}
-
-int oskar_TelescopeModel::load_station_configuration(int index, const char* filename)
-{
-    if (index >= this->num_stations)
-        return OSKAR_ERR_OUT_OF_RANGE;
-    return oskar_station_model_load_config(&(this->station[index]),
-            filename);
-}
-
-int oskar_TelescopeModel::multiply_by_wavenumber(double frequency_hz)
-{
-    return oskar_telescope_model_multiply_by_wavenumber(this, frequency_hz);
-}
-
-int oskar_TelescopeModel::resize(int n_stations)
-{
-    return oskar_telescope_model_resize(this, n_stations);
-}
-
-int oskar_TelescopeModel::type() const
-{
-    return oskar_telescope_model_type(this);
 }

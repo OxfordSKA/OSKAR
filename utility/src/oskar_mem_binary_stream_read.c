@@ -84,7 +84,7 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     oskar_mem_realloc(data, num_elements, &err);
     if (err)
     {
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         return err;
     }
     size_bytes = num_elements * element_size;
@@ -96,7 +96,7 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
     /* Check for errors. */
     if (err)
     {
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         return err;
     }
 
@@ -105,7 +105,7 @@ int oskar_mem_binary_stream_read(oskar_Mem* mem, FILE* stream,
         oskar_mem_copy(mem, &temp, &err);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp);
+    oskar_mem_free(&temp, &err);
 
     return err;
 }
@@ -152,7 +152,7 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     oskar_mem_realloc(data, num_elements, &err);
     if (err)
     {
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         return err;
     }
     size_bytes = num_elements * element_size;
@@ -164,7 +164,7 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
     /* Check for errors. */
     if (err)
     {
-        oskar_mem_free(&temp);
+        oskar_mem_free(&temp, &err);
         return err;
     }
 
@@ -173,7 +173,7 @@ int oskar_mem_binary_stream_read_ext(oskar_Mem* mem, FILE* stream,
         oskar_mem_copy(mem, &temp, &err);
 
     /* Free the temporary. */
-    oskar_mem_free(&temp);
+    oskar_mem_free(&temp, &err);
 
     return err;
 }

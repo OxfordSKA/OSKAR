@@ -462,13 +462,13 @@ int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
 
     /* Free temporary storage. */
     cleanup:
-    oskar_mem_free(&m_theta);
-    oskar_mem_free(&m_phi);
-    oskar_mem_free(&m_theta_re);
-    oskar_mem_free(&m_theta_im);
-    oskar_mem_free(&m_phi_re);
-    oskar_mem_free(&m_phi_im);
-    oskar_mem_free(&weight);
+    oskar_mem_free(&m_theta, &err);
+    oskar_mem_free(&m_phi, &err);
+    oskar_mem_free(&m_theta_re, &err);
+    oskar_mem_free(&m_theta_im, &err);
+    oskar_mem_free(&m_phi_re, &err);
+    oskar_mem_free(&m_phi_im, &err);
+    oskar_mem_free(&weight, &err);
 
     return err;
 }

@@ -34,32 +34,25 @@
 extern "C" {
 #endif
 
-int oskar_element_model_free(oskar_ElementModel* data)
+void oskar_element_model_free(oskar_ElementModel* data, int* status)
 {
-    int err;
+    /* Check all inputs. */
+    if (!data || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    err = oskar_mem_free(&data->filename_x);
-    if (err) return err;
-    err = oskar_mem_free(&data->filename_y);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->phi_re_x);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->phi_im_x);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->theta_re_x);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->theta_im_x);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->phi_re_y);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->phi_im_y);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->theta_re_y);
-    if (err) return err;
-    err = oskar_spline_data_free(&data->theta_im_y);
-    if (err) return err;
-
-    return 0;
+    oskar_mem_free(&data->filename_x, status);
+    oskar_mem_free(&data->filename_y, status);
+    oskar_spline_data_free(&data->phi_re_x, status);
+    oskar_spline_data_free(&data->phi_im_x, status);
+    oskar_spline_data_free(&data->theta_re_x, status);
+    oskar_spline_data_free(&data->theta_im_x, status);
+    oskar_spline_data_free(&data->phi_re_y, status);
+    oskar_spline_data_free(&data->phi_im_y, status);
+    oskar_spline_data_free(&data->theta_re_y, status);
+    oskar_spline_data_free(&data->theta_im_y, status);
 }
 
 #ifdef __cplusplus

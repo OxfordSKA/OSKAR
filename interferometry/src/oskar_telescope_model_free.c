@@ -37,36 +37,27 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_free(oskar_TelescopeModel* telescope)
+void oskar_telescope_model_free(oskar_TelescopeModel* telescope, int* status)
 {
-    int error = 0, i = 0;
+    int i = 0;
 
     /* Free the arrays. */
-    error = oskar_mem_free(&telescope->station_x);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_x_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_y_hor);
-    if (error) return error;
-    error = oskar_mem_free(&telescope->station_z_hor);
-    if (error) return error;
+    oskar_mem_free(&telescope->station_x, status);
+    oskar_mem_free(&telescope->station_y, status);
+    oskar_mem_free(&telescope->station_z, status);
+    oskar_mem_free(&telescope->station_x_hor, status);
+    oskar_mem_free(&telescope->station_y_hor, status);
+    oskar_mem_free(&telescope->station_z_hor, status);
 
     /* Free each station. */
     for (i = 0; i < telescope->num_stations; ++i)
     {
-        error = oskar_station_model_free(&telescope->station[i]);
-        if (error) return error;
+        oskar_station_model_free(&telescope->station[i], status);
     }
 
     /* Free the station array. */
     free(telescope->station);
     telescope->station = NULL;
-
-    return 0;
 }
 
 #ifdef __cplusplus

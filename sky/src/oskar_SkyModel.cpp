@@ -55,7 +55,8 @@ oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
 
 oskar_SkyModel::~oskar_SkyModel()
 {
-    int err = oskar_sky_model_free(this);
+    int err = 0;
+    oskar_sky_model_free(this, &err);
     if (err) throw err;
 }
 
