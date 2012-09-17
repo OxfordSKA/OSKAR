@@ -48,6 +48,7 @@
 struct OSKAR_EXPORT oskar_SettingsInterferometer
 {
     double channel_bandwidth_hz;
+    double time_int_sec;
     int num_vis_ave;
     int num_fringe_ave;
 

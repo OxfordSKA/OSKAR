@@ -138,6 +138,7 @@ static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* 
     telescope->dec0_rad       = settings->obs.dec0_rad;
     telescope->use_common_sky = settings->telescope.use_common_sky;
     telescope->bandwidth_hz   = settings->interferometer.channel_bandwidth_hz;
+    telescope->time_int_sec   = settings->interferometer.time_int_sec;
     telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
     seed = settings->telescope.station.element.seed_time_variable_errors;
     telescope->seed_time_variable_station_element_errors = seed;

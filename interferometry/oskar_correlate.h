@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,13 +65,14 @@ extern "C" {
  * @param[in]  sky        OSKAR sky model.
  * @param[in]  u          Station u coordinates, in radians.
  * @param[in]  v          Station v coordinates, in radians.
+ * @param[in]  gast       Greenwich apparent sidereal time, in radians.
  *
  * @return An error code.
  */
 OSKAR_EXPORT
 int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v);
+        const oskar_Mem* u, const oskar_Mem* v, double gast);
 
 #ifdef __cplusplus
 }

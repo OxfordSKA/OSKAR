@@ -40,6 +40,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_beampattern();
     init_settings_image();
 
+#if 0
     // FIXME THESE ARE FOR TESTING ONLY - Remove this section.
     ///////////////////////////////////////////////////////////////////////////
     setLabel("test", "Test group");
@@ -59,9 +60,6 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
             oskar_SettingsItem::BOOL, false);
     setDependency("test/item3/item3_1", "test/item3", opts[0]);
 
-    // FIXME: This test fails as when Item 4 is set to true, Item 5.1 *AND*
-    // item 5.2 are visible...
-    // TODO Check if it works OK now.
     declare("test/item4", "Item 4 (if true then show item 5)",
             oskar_SettingsItem::BOOL, false);
     opts.clear();
@@ -72,9 +70,8 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     setDependency("test/item5/item5_1", "test/item5", opts[0]);
     declare("test/item5/item5_2", "Item 5.2", oskar_SettingsItem::STRING, "value");
     setDependency("test/item5/item5_2", "test/item5", opts[1]);
-
-
     ///////////////////////////////////////////////////////////////////////////
+#endif
 }
 
 
@@ -975,6 +972,10 @@ void oskar_SettingsModelApps::init_settings_interferometer()
             "smearing. (Note that this can be different to the frequency \n"
             "increment if channels do not cover a contiguous frequency \n"
             "range.)");
+    k = group + "/time_int_sec";
+    declare(k, "Time integration [sec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The time integration, in seconds, used to simulate time \n"
+            "average smearing.");
     k = group + "/num_vis_ave";
     declare(k, "Number of visibility averages", oskar_SettingsItem::INT_POSITIVE);
     setTooltip(k, "Number of averaged evaluations of the full Measurement \n"

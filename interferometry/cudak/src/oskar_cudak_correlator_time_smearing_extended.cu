@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/cudak/oskar_cudak_correlator_extended.h"
+#include "interferometry/cudak/oskar_cudak_correlator_time_smearing_extended.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2h.h"
 #include "math/cudak/oskar_cudaf_mul_mat2c_mat2c_conj_trans.h"
@@ -44,6 +44,9 @@
 #define M_PIf 3.14159265358979323846f
 #endif
 
+#define OMEGA_EARTH  7.272205217e-5  // radians/sec
+#define OMEGA_EARTHf 7.272205217e-5f // radians/sec
+
 // Indices into the visibility/baseline matrix.
 #define SI blockIdx.x // Column index.
 #define SJ blockIdx.y // Row index.
@@ -56,11 +59,12 @@ __global__
 void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
         const int num_stations, const float4c* jones, const float* source_I,
         const float* source_Q, const float* source_U, const float* source_V,
-        const float* u, const float* v, const float* x, const float* y,
-        const float* z, const float* l, const float* m, const float freq,
-        const float bandwidth, const float time_interval, const float gha0,
-        const float dec0, const float* a, const float* b, const float* c,
-        float4c* vis)
+        const float* source_l, const float* source_m, const float* source_n,
+        const float* source_a, const float* source_b, const float* source_c,
+        const float* station_u, const float* station_v,
+        const float* station_x, const float* station_y, const float freq_hz,
+        const float bandwidth_hz, const float time_int_sec,
+        const float gha0_rad, const float dec0_rad, float4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
@@ -68,21 +72,39 @@ void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
 
     // Common things per thread block.
     __device__ __shared__ float uu, vv, uu2, vv2, uuvv;
+    __device__ __shared__ float du_dt, dv_dt, dw_dt;
     if (threadIdx.x == 0)
     {
-        // Baseline UV-distance, in wavelengths.
-        uu   = (u[SI] - u[SJ]) * ONE_OVER_2PIf;
-        vv   = (v[SI] - v[SJ]) * ONE_OVER_2PIf;
+        float xx, yy, rot_angle, temp;
+        float fractional_bandwidth, sin_HA, cos_HA, sin_Dec, cos_Dec;
 
-        // Quantities needed for evaluating source with gaussian term.
+        // Baseline distances, in wavelengths.
+        uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PIf;
+        vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PIf;
+        xx = (station_x[SI] - station_x[SJ]) * ONE_OVER_2PIf;
+        yy = (station_y[SI] - station_y[SJ]) * ONE_OVER_2PIf;
+
+        // Quantities needed for evaluating source with Gaussian term.
         uu2  = uu * uu;
         vv2  = vv * vv;
         uuvv = 2.0f * uu * vv;
 
-        // Modify the baseline UV-distance to include the common components
+        // Modify the baseline distance to include the common components
         // of the bandwidth smearing term.
-        uu *= M_PIf * bandwidth / freq;
-        vv *= M_PIf * bandwidth / freq;
+        fractional_bandwidth = bandwidth_hz / freq_hz;
+        uu *= M_PIf * fractional_bandwidth;
+        vv *= M_PIf * fractional_bandwidth;
+
+        // Compute the derivatives for time-average smearing.
+        rot_angle = OMEGA_EARTHf * time_int_sec;
+        sin_HA = sinf(gha0_rad);
+        cos_HA = cosf(gha0_rad);
+        sin_Dec = sinf(dec0_rad);
+        cos_Dec = cosf(dec0_rad);
+        temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
+        du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
+        dv_dt = temp * sin_Dec;
+        dw_dt = -temp * cos_Dec;
     }
     __syncthreads();
 
@@ -99,14 +121,22 @@ void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
         sum.d = make_float2(0.0f, 0.0f);
         for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
+            // Get source direction cosines.
+            float l = source_l[t];
+            float m = source_m[t];
+            float n = source_n[t];
+
             // Compute bandwidth-smearing term first (register optimisation).
-            float rb = oskar_cudaf_sinc_f(uu * source_l[t] + vv * source_m[t]);
+            float rb = oskar_cudaf_sinc_f(uu * l + vv * m);
+
+            // Compute time-smearing term.
+            float rt = oskar_cudaf_sinc_f(du_dt * l + dv_dt * m + dw_dt * n);
 
             // Evaluate gaussian source width term.
             float f = expf(-(source_a[t] * uu2 +
                     source_b[t] * uuvv + source_c[t] * vv2));
 
-            rb *= f;
+            rb *= rt * f;
 
             // Construct source brightness matrix.
             float4c c_b;
@@ -127,7 +157,7 @@ void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
             c_b = station_j[t];
             oskar_cudaf_mul_mat2c_mat2c_conj_trans_f(c_a, c_b);
 
-            // Multiply result by bandwidth-smearing term.
+            // Multiply result by smearing term.
             sum.a.x += c_a.a.x * rb;
             sum.a.y += c_a.a.y * rb;
             sum.b.x += c_a.b.x * rb;
@@ -182,11 +212,12 @@ __global__
 void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
         const int num_stations, const double4c* jones, const double* source_I,
         const double* source_Q, const double* source_U, const double* source_V,
-        const double* u, const double* v, const double* x, const double* y,
-        const double* z, const double* l, const double* m, const double freq,
-        const double bandwidth, const double time_interval, const double gha0,
-        const double dec0, const double* a, const double* b, const double* c,
-        double4c* vis)
+        const double* source_l, const double* source_m, const double* source_n,
+        const double* source_a, const double* source_b, const double* source_c,
+        const double* station_u, const double* station_v,
+        const double* station_x, const double* station_y, const double freq_hz,
+        const double bandwidth_hz, const double time_int_sec,
+        const double gha0_rad, const double dec0_rad, double4c* vis)
 {
     // Return immediately if we're in the lower triangular half of the
     // visibility matrix.
@@ -194,21 +225,39 @@ void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
 
     // Common things per thread block.
     __device__ __shared__ double uu, vv, uu2, vv2, uuvv;
+    __device__ __shared__ double du_dt, dv_dt, dw_dt;
     if (threadIdx.x == 0)
     {
-        // Baseline UV-distance, in wavelengths.
-        uu   = (u[SI] - u[SJ]) * ONE_OVER_2PI;
-        vv   = (v[SI] - v[SJ]) * ONE_OVER_2PI;
+        double xx, yy, rot_angle, temp;
+        double fractional_bandwidth, sin_HA, cos_HA, sin_Dec, cos_Dec;
 
-        // Quantities needed for evaluating source with gaussian term.
+        // Baseline distances, in wavelengths.
+        uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PI;
+        vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PI;
+        xx = (station_x[SI] - station_x[SJ]) * ONE_OVER_2PI;
+        yy = (station_y[SI] - station_y[SJ]) * ONE_OVER_2PI;
+
+        // Quantities needed for evaluating source with Gaussian term.
         uu2  = uu * uu;
         vv2  = vv * vv;
         uuvv = 2.0 * uu * vv;
 
-        // Modify the baseline UV-distance to include the common components
+        // Modify the baseline distance to include the common components
         // of the bandwidth smearing term.
-        uu *= M_PI * bandwidth / freq;
-        vv *= M_PI * bandwidth / freq;
+        fractional_bandwidth = bandwidth_hz / freq_hz;
+        uu *= M_PI * fractional_bandwidth;
+        vv *= M_PI * fractional_bandwidth;
+
+        // Compute the derivatives for time-average smearing.
+        rot_angle = OMEGA_EARTH * time_int_sec;
+        sin_HA = sin(gha0_rad);
+        cos_HA = cos(gha0_rad);
+        sin_Dec = sin(dec0_rad);
+        cos_Dec = cos(dec0_rad);
+        temp = (xx * sin_HA + yy * cos_HA) * rot_angle;
+        du_dt = (xx * cos_HA - yy * sin_HA) * rot_angle;
+        dv_dt = temp * sin_Dec;
+        dw_dt = -temp * cos_Dec;
     }
     __syncthreads();
 
@@ -225,13 +274,22 @@ void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
         sum.d = make_double2(0.0, 0.0);
         for (int t = threadIdx.x; t < num_sources; t += blockDim.x)
         {
+            // Get source direction cosines.
+            double l = source_l[t];
+            double m = source_m[t];
+            double n = source_n[t];
+
             // Compute bandwidth-smearing term first (register optimisation).
-            double rb = oskar_cudaf_sinc_d(uu * l[t] + vv * m[t]);
+            double rb = oskar_cudaf_sinc_d(uu * l + vv * m);
+
+            // Compute time-smearing term.
+            double rt = oskar_cudaf_sinc_d(du_dt * l + dv_dt * m + dw_dt * n);
 
             // Evaluate gaussian source width term.
-            double f = exp(-(a[t] * uu2 + b[t] * uuvv + c[t] * vv2));
+            double f = exp(-(source_a[t] * uu2 +
+                    source_b[t] * uuvv + source_c[t] * vv2));
 
-            rb *= f;
+            rb *= rt * f;
 
             // Construct source brightness matrix.
             double4c c_b;
@@ -252,7 +310,7 @@ void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
             c_b = station_j[t];
             oskar_cudaf_mul_mat2c_mat2c_conj_trans_d(c_a, c_b);
 
-            // Multiply result by bandwidth-smearing term.
+            // Multiply result by smearing term.
             sum.a.x += c_a.a.x * rb;
             sum.a.y += c_a.a.y * rb;
             sum.b.x += c_a.b.x * rb;
@@ -277,14 +335,14 @@ void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
         sum.d = make_double2(0.0, 0.0);
         for (int i = 0; i < blockDim.x; ++i)
         {
-            sum.a.x += smem_d[i].a.x;
-            sum.a.y += smem_d[i].a.y;
-            sum.b.x += smem_d[i].b.x;
-            sum.b.y += smem_d[i].b.y;
-            sum.c.x += smem_d[i].c.x;
-            sum.c.y += smem_d[i].c.y;
-            sum.d.x += smem_d[i].d.x;
-            sum.d.y += smem_d[i].d.y;
+            sum.a.x += smem_f[i].a.x;
+            sum.a.y += smem_f[i].a.y;
+            sum.b.x += smem_f[i].b.x;
+            sum.b.y += smem_f[i].b.y;
+            sum.c.x += smem_f[i].c.x;
+            sum.c.y += smem_f[i].c.y;
+            sum.d.x += smem_f[i].d.x;
+            sum.d.y += smem_f[i].d.y;
         }
 
         // Determine 1D index.

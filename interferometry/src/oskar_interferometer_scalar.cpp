@@ -177,7 +177,8 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
                 if (status) return status;
 
                 // Produce visibilities.
-                status = oskar_correlate(&vis, &K, &tel_gpu, &local_sky, &u, &v);
+                status = oskar_correlate(&vis, &K, &tel_gpu, &local_sky,
+                        &u, &v, gast);
                 if (status) return status;
             }
         }

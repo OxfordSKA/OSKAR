@@ -66,6 +66,7 @@ struct OSKAR_EXPORT oskar_TelescopeModel
     double dec0_rad;             /**< Declination of phase centre, in radians. */
     double wavelength_metres;    /**< Current wavelength of observation, in metres. */
     double bandwidth_hz;         /**< Channel bandwidth, in Hz. */
+    double time_int_sec;         /**< Time integration (for smearing), in sec. */
 
 #ifdef __cplusplus
     /* If C++, then provide constructors and methods. */

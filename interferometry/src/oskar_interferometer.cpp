@@ -193,7 +193,8 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
                 if (status) return status;
 
                 // Form baseline pairs.
-                status = oskar_correlate(&vis, &J, &tel_gpu, &local_sky, &u, &v);
+                status = oskar_correlate(&vis, &J, &tel_gpu, &local_sky,
+                        &u, &v, gast);
                 if (status) return status;
             }
         }

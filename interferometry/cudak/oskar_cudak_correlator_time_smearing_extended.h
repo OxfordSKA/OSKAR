@@ -53,30 +53,33 @@
  * @param[in] source_Q      Source Stokes Q values, in Jy.
  * @param[in] source_U      Source Stokes U values, in Jy.
  * @param[in] source_V      Source Stokes V values, in Jy.
- * @param[in] l             Source l-direction cosines from phase centre.
- * @param[in] m             Source m-direction cosines from phase centre.
- * @param[in] a             Source Gaussian parameter a.
- * @param[in] b             Source Gaussian parameter b.
- * @param[in] c             Source Gaussian parameter c.
- * @param[in] u             Station u-coordinates multiplied by the wavenumber.
- * @param[in] v             Station v-coordinates multiplied by the wavenumber.
- * @param[in] x             Station x-coordinates multiplied by the wavenumber.
- * @param[in] y             Station y-coordinates multiplied by the wavenumber.
- * @param[in] z             Station z-coordinates multiplied by the wavenumber.
- * @param[in] freq          Frequency, in Hz.
- * @param[in] bandwidth     Channel bandwidth, in Hz.
- * @param[in] time_interval Time averaging interval, in seconds.
+ * @param[in] source_l      Source l-direction cosines from phase centre.
+ * @param[in] source_m      Source m-direction cosines from phase centre.
+ * @param[in] source_n      Source n-direction cosines from phase centre.
+ * @param[in] source_a      Source Gaussian parameter a.
+ * @param[in] source_b      Source Gaussian parameter b.
+ * @param[in] source_c      Source Gaussian parameter c.
+ * @param[in] station_u     Station u-coordinates multiplied by the wavenumber.
+ * @param[in] station_v     Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_x     Station x-coordinates multiplied by the wavenumber.
+ * @param[in] station_y     Station y-coordinates multiplied by the wavenumber.
+ * @param[in] freq_hz       Frequency, in Hz.
+ * @param[in] bandwidth_hz  Channel bandwidth, in Hz.
+ * @param[in] time_int_sec  Time averaging interval, in seconds.
+ * @param[in] gha0_rad      Greenwich Hour Angle of phase centre, in radians.
+ * @param[in] dec0_rad      Declination of phase centre, in radians.
  * @param[in,out] vis       Modified output complex visibilities.
  */
 __global__
 void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
         const int num_stations, const float4c* jones, const float* source_I,
         const float* source_Q, const float* source_U, const float* source_V,
-        const float* u, const float* v, const float* x, const float* y,
-        const float* z, const float* l, const float* m, const float freq,
-        const float bandwidth, const float time_interval, const float gha0,
-        const float dec0, const float* a, const float* b, const float* c,
-        float4c* vis);
+        const float* source_l, const float* source_m, const float* source_n,
+        const float* source_a, const float* source_b, const float* source_c,
+        const float* station_u, const float* station_v,
+        const float* station_x, const float* station_y, const float freq_hz,
+        const float bandwidth_hz, const float time_int_sec,
+        const float gha0_rad, const float dec0_rad, float4c* vis);
 
 /**
  * @brief
@@ -86,26 +89,39 @@ void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
  * Gaussian parameters a,b, and c are assumed to be evaluated when the
  * sky model is loaded.
  *
- * @param[in] ns               Number of sources.
- * @param[in] na               Number of stations.
- * @param[in] u                Station u-coordinates multipled by the wavenumber.
- * @param[in] v                Station v-coordinates multipled by the wavenumber.
- * @param[in] l                Distance from phase centre for each source.
- * @param[in] m                Distance from phase centre for each source.
- * @param[in] freq             Frequency, in Hz.
- * @param[in] bandwidth        Channel bandwidth, in Hz.
- * @param[in] gaussian_a       Extended source gaussian parameter a (per source)
- * @param[in] gaussian_b       Extended source gaussian parameter b (per source)
- * @param[in] gaussian_c       Extended source gaussian parameter c (per source)
- * @param[in,out] vis          Modified output complex visibilities.
+ * @param[in] num_sources   Number of sources.
+ * @param[in] num_stations  Number of stations.
+ * @param[in] jones         Matrix of Jones matrices to correlate.
+ * @param[in] source_I      Source Stokes I values, in Jy.
+ * @param[in] source_Q      Source Stokes Q values, in Jy.
+ * @param[in] source_U      Source Stokes U values, in Jy.
+ * @param[in] source_V      Source Stokes V values, in Jy.
+ * @param[in] source_l      Source l-direction cosines from phase centre.
+ * @param[in] source_m      Source m-direction cosines from phase centre.
+ * @param[in] source_n      Source n-direction cosines from phase centre.
+ * @param[in] source_a      Source Gaussian parameter a.
+ * @param[in] source_b      Source Gaussian parameter b.
+ * @param[in] source_c      Source Gaussian parameter c.
+ * @param[in] station_u     Station u-coordinates multiplied by the wavenumber.
+ * @param[in] station_v     Station v-coordinates multiplied by the wavenumber.
+ * @param[in] station_x     Station x-coordinates multiplied by the wavenumber.
+ * @param[in] station_y     Station y-coordinates multiplied by the wavenumber.
+ * @param[in] freq_hz       Frequency, in Hz.
+ * @param[in] bandwidth_hz  Channel bandwidth, in Hz.
+ * @param[in] time_int_sec  Time averaging interval, in seconds.
+ * @param[in] gha0_rad      Greenwich Hour Angle of phase centre, in radians.
+ * @param[in] dec0_rad      Declination of phase centre, in radians.
+ * @param[in,out] vis       Modified output complex visibilities.
  */
 __global__
-void oskar_cudak_correlator_extended_d(const int ns, const int na,
-        const double4c* jones, const double* source_I, const double* source_Q,
-        const double* source_U, const double* source_V, const double* u,
-        const double* v, const double* l, const double* m,
-        const double freq, const double bandwidth,
-        const double* gaussian_a, const double* gaussian_b,
-        const double* gaussian_c, double4c* vis);
+void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
+        const int num_stations, const double4c* jones, const double* source_I,
+        const double* source_Q, const double* source_U, const double* source_V,
+        const double* source_l, const double* source_m, const double* source_n,
+        const double* source_a, const double* source_b, const double* source_c,
+        const double* station_u, const double* station_v,
+        const double* station_x, const double* station_y, const double freq_hz,
+        const double bandwidth_hz, const double time_int_sec,
+        const double gha0_rad, const double dec0_rad, double4c* vis);
 
-#endif // OSKAR_CUDAK_CORRELATOR_TIME_SMEARING_EXTENDED_H_
+#endif /* OSKAR_CUDAK_CORRELATOR_TIME_SMEARING_EXTENDED_H_ */
