@@ -33,10 +33,8 @@
  * @file oskar_Visibilities.h
  */
 
-
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -151,45 +149,6 @@ struct OSKAR_EXPORT oskar_Visibilities
     ~oskar_Visibilities();
 
     /**
-     * @brief Writes a visibility structure to an OSKAR binary file.
-     *
-     * @details
-     * This method writes out the given visibility structure to an OSKAR
-     * binary file of the given filename.
-     *
-     * @param log      Pointer to the log structure to use.
-     * @param filename The name of the file to which to write.
-     *
-     * @return An error code.
-     */
-    int write(oskar_Log* log, const char* filename);
-
-    /**
-     * @brief Fills a visibility structure by reading the specified file.
-     *
-     * @details
-     * Note: The loaded visibility structure will reside on the CPU.
-     *
-     * @param[out] vis      A pointer to the visibility structure to fill.
-     * @param[in]  filename The filename to read from.
-     *
-     * @return A pointer to the new visibility structure.
-     */
-    static int read(oskar_Visibilities* vis, const char* filename);
-
-    /**
-     * @brief Returns an oskar_Mem pointer (non ownership) for the channel
-     * amplitudes of the specified channel.
-     *
-     * @param vis_amps oskar_Mem pointer to the amplitudes for the specified
-     *                 channel.
-     * @param channel  Channel index for requested amplitudes
-     *
-     * @return An error code.
-     */
-    int get_channel_amps(oskar_Mem* vis_amps, int channel);
-
-    /**
      * @brief Returns the number of baseline u,v,w coordinates.
      */
     int num_coords() const
@@ -200,11 +159,6 @@ struct OSKAR_EXPORT oskar_Visibilities
      */
     int num_amps() const
     { return num_channels * num_times * num_baselines; }
-
-    /**
-     * @brief Returns the OSKAR location ID of the visibilities structure.
-     */
-    int location() const;
 
     /**
      * @brief Returns the number of polarisations for each visibility sample.

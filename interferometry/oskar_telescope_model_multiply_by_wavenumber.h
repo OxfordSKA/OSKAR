@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,14 +52,13 @@ extern "C" {
  * The conversion is performed by multiplying the coordinates by the
  * factor (2 pi) / lambda.
  *
- * @param telescope    Telescope model containing coordinates to scale.
- * @param frequency_hz The frequency, in Hz.
- *
- * @return An error code.
+ * @param[in,out] telescope    Telescope model containing coordinates to scale.
+ * @param[in]     frequency_hz The frequency, in Hz.
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope,
-        double frequency_hz);
+void oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope,
+        double frequency_hz, int* status);
 
 #ifdef __cplusplus
 }

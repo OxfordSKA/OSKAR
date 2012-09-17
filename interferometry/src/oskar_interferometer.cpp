@@ -39,6 +39,7 @@
 #include "sky/oskar_evaluate_jones_R.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
+#include "sky/oskar_sky_model_scale_by_spectral_index.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "utility/oskar_Device_curand_state.h"
 #include "utility/oskar_log_message.h"
@@ -62,7 +63,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     // Always clear the output array to ensure that all visibilities are zero
     // if there are never any visible sources in the sky model.
     oskar_mem_clear_contents(vis_amp, &status);
-    if (status) return status;
 
     // Get the current device ID.
     cudaGetDevice(&device_id);
@@ -80,11 +80,10 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
 
     // Scale GPU telescope coordinates by wavenumber.
-    status = oskar_telescope_model_multiply_by_wavenumber(&tel_gpu, frequency);
-    if (status) return status;
+    oskar_telescope_model_multiply_by_wavenumber(&tel_gpu, frequency, &status);
 
-    // Scale by spectral index.
-    status = sky_gpu.scale_by_spectral_index(frequency);
+    // Scale sky model by spectral index.
+    oskar_sky_model_scale_by_spectral_index(&sky_gpu, frequency, &status);
     if (status) return status;
 
     // Initialise blocks of Jones matrices and visibilities.

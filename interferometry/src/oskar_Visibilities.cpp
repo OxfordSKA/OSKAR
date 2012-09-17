@@ -26,7 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_visibilities_all_headers.h"
+#include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_copy.h"
+#include "interferometry/oskar_visibilities_free.h"
+#include "interferometry/oskar_visibilities_init.h"
 
 oskar_Visibilities::oskar_Visibilities(int amp_type, int location,
         int num_channels, int num_times, int num_stations)
@@ -52,28 +55,4 @@ oskar_Visibilities::~oskar_Visibilities()
     int err = 0;
     oskar_visibilities_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_Visibilities::write(oskar_Log* log, const char* filename)
-{
-    int err = 0;
-    oskar_visibilities_write(this, log, filename, &err);
-    return err;
-}
-
-int oskar_Visibilities::read(oskar_Visibilities* vis, const char* filename)
-{
-    int err = 0;
-    oskar_visibilities_read(vis, filename, &err);
-    return err;
-}
-
-int oskar_Visibilities::get_channel_amps(oskar_Mem* vis_amps, int channel)
-{
-    return oskar_visibilities_get_channel_amps(vis_amps, this, channel);
-}
-
-int oskar_Visibilities::location() const
-{
-    return oskar_visibilities_location(this);
 }

@@ -40,6 +40,7 @@
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_SettingsTelescope.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_get_channel_amps.h"
 #include "interferometry/oskar_visibilities_write.h"
 #include "interferometry/oskar_visibilities_add_system_noise.h"
 #include "sky/oskar_SkyModel.h"
@@ -191,7 +192,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         if (error) return error;
 
         oskar_Mem vis_amp;
-        error = vis_global.get_channel_amps(&vis_amp, c);
+        oskar_visibilities_get_channel_amps(&vis_amp, &vis_global, c, &error);
         if (error) return error;
 
         // Accumulate into global vis structure.

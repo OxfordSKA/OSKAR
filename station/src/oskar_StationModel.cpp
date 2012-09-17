@@ -26,7 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_all_headers.h"
+#include "station/oskar_StationModel.h"
+#include "station/oskar_station_model_copy.h"
+#include "station/oskar_station_model_free.h"
+#include "station/oskar_station_model_init.h"
+#include "station/oskar_station_model_type.h"
 #include <cstdio>
 
 oskar_StationModel::oskar_StationModel(int type, int location, int n_elements)
@@ -51,21 +55,6 @@ oskar_StationModel::~oskar_StationModel()
     int err = 0;
     oskar_station_model_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_StationModel::load_configuration(const char* filename)
-{
-    return oskar_station_model_load_config(this, filename);
-}
-
-int oskar_StationModel::location() const
-{
-    return oskar_station_model_location(this);
-}
-
-int oskar_StationModel::multiply_by_wavenumber(double frequency_hz)
-{
-    return oskar_station_model_multiply_by_wavenumber(this, frequency_hz);
 }
 
 int oskar_StationModel::type() const

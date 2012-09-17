@@ -141,7 +141,7 @@ int oskar_sky_model_load_gsm(oskar_SkyModel* sky, oskar_Log* log,
 
         /* Store pixel data. */
         oskar_sky_model_set_source(&temp_sky, i,
-                ra, dec, temp[i], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                ra, dec, temp[i], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, &err);
     }
 
     /* Append data to model and free temporary storage. */

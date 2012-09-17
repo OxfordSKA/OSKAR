@@ -29,7 +29,11 @@
 #include "utility/oskar_vector_types.h"
 #include "interferometry/test/Test_Visibilities.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "interferometry/oskar_visibilities_get_channel_amps.h"
+#include "interferometry/oskar_visibilities_location.h"
+#include "interferometry/oskar_visibilities_read.h"
 #include "interferometry/oskar_visibilities_resize.h"
+#include "interferometry/oskar_visibilities_write.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_get_pointer.h"
@@ -73,7 +77,8 @@ void Test_Visibilities::test_create()
         // Construct visibility data on the CPU and check accessor methods.
         oskar_Visibilities vis(OSKAR_SINGLE_COMPLEX_MATRIX, OSKAR_LOCATION_CPU,
                 num_channels, num_times, num_stations);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis.location());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU,
+                oskar_visibilities_location(&vis));
 
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, vis.amplitude.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis.uu_metres.type);
@@ -87,7 +92,8 @@ void Test_Visibilities::test_create()
         CPPUNIT_ASSERT_EQUAL(vis.num_coords(), vis.ww_metres.num_elements);
 
         oskar_Visibilities vis2;
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2.location());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU,
+                oskar_visibilities_location(&vis2));
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE_COMPLEX_MATRIX, vis2.amplitude.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis2.uu_metres.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_DOUBLE, vis2.vv_metres.type);
@@ -106,7 +112,8 @@ void Test_Visibilities::test_create()
         CPPUNIT_ASSERT_EQUAL(num_channels, vis.num_channels);
         CPPUNIT_ASSERT_EQUAL(num_times, vis.num_times);
         CPPUNIT_ASSERT_EQUAL(num_stations, vis.num_stations);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, vis.location());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU,
+                oskar_visibilities_location(&vis));
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE_COMPLEX_MATRIX, vis.amplitude.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis.uu_metres.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis.vv_metres.type);
@@ -154,13 +161,15 @@ void Test_Visibilities::test_copy()
 
     // Copy to GPU
     oskar_Visibilities vis2(&vis1, OSKAR_LOCATION_GPU);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, vis2.location());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU,
+            oskar_visibilities_location(&vis2));
     CPPUNIT_ASSERT_EQUAL(vis1.num_amps(), vis2.num_amps());
     CPPUNIT_ASSERT_EQUAL(vis1.num_coords(), vis2.num_coords());
 
     // Copy back to CPU and check values.
     oskar_Visibilities vis3(&vis2, OSKAR_LOCATION_CPU);
-    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis3.location());
+    CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU,
+            oskar_visibilities_location(&vis3));
     CPPUNIT_ASSERT_EQUAL(vis1.num_amps(), vis3.num_amps());
     CPPUNIT_ASSERT_EQUAL(vis1.num_coords(), vis3.num_coords());
     for (int i = 0, c = 0; c < vis3.num_channels; ++c)
@@ -196,7 +205,8 @@ void Test_Visibilities::test_resize()
     int status = 0;
     {
         oskar_Visibilities vis_cpu;
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis_cpu.location());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU,
+                oskar_visibilities_location(&vis_cpu));
         CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_channels);
         CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_times);
         CPPUNIT_ASSERT_EQUAL(0, vis_cpu.num_baselines);
@@ -249,8 +259,9 @@ void Test_Visibilities::test_get_amps()
 
     for (int i = 0, c = 0; c < vis.num_channels; ++c)
     {
+        int error = 0;
         oskar_Mem vis_amps;
-        int error = vis.get_channel_amps(&vis_amps, c);
+        oskar_visibilities_get_channel_amps(&vis_amps, &vis, c, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
         CPPUNIT_ASSERT_EQUAL(num_times * vis.num_baselines, vis_amps.num_elements);
         CPPUNIT_ASSERT_EQUAL(amp_type, vis_amps.type);
@@ -274,6 +285,7 @@ void Test_Visibilities::test_get_amps()
 
 void Test_Visibilities::test_read_write()
 {
+    int status = 0;
     int num_channels     = 10;
     int num_times        = 10;
     int num_stations     = 20;
@@ -313,20 +325,21 @@ void Test_Visibilities::test_read_write()
                 ((float*)vis1.ww_metres.data)[i]     = (float)i + 0.3f;
             }
         }
-        int error = vis1.write(NULL, filename);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
+        oskar_visibilities_write(&vis1, NULL, filename, &status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     }
 
     // Load the visibility structure from file.
     {
         oskar_Visibilities vis2;
-        int err = oskar_Visibilities::read(&vis2, filename);
-        CPPUNIT_ASSERT_EQUAL(0, err);
+        oskar_visibilities_read(&vis2, filename, &status);
+        CPPUNIT_ASSERT_EQUAL(0, status);
         CPPUNIT_ASSERT_EQUAL(amp_type, vis2.amplitude.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.uu_metres.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.vv_metres.type);
         CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, vis2.ww_metres.type);
-        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU, vis2.location());
+        CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_CPU,
+                oskar_visibilities_location(&vis2));
         CPPUNIT_ASSERT_EQUAL(num_channels, vis2.num_channels);
         CPPUNIT_ASSERT_EQUAL(num_stations * (num_stations - 1) / 2, vis2.num_baselines);
         CPPUNIT_ASSERT_EQUAL(num_times, vis2.num_times);

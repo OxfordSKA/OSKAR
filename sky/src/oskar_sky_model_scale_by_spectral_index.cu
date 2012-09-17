@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,27 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_scale_by_spectral_index.h"
+#include "sky/oskar_sky_model_type.h"
 #include "sky/cudak/oskar_cudak_scale_brightness_by_spectral_index.h"
+#include "utility/oskar_cuda_check_error.h"
 #include <cstdio>
 
 extern "C"
-int oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
-        double frequency)
+void oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
+        double frequency, int* status)
 {
-    // Check for sane inputs.
-    if (model == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!model || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    // Check for the correct location.
-    if (model->location() != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
-    // Get the type and dimensions.
-    int type = model->type();
+    /* Check for the correct location. */
+    if (oskar_sky_model_location(model) != OSKAR_LOCATION_GPU)
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
+
+    /* Get the type and dimensions. */
+    int type = oskar_sky_model_type(model);
     int num_sources = model->num_sources;
 
-    // Scale the brightnesses.
+    /* Scale the brightnesses. */
     if (type == OSKAR_SINGLE)
     {
         int num_threads = 256;
@@ -56,6 +68,7 @@ int oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
                         frequency, model->reference_freq,
                         model->spectral_index, model->I, model->Q,
                         model->U, model->V);
+        oskar_cuda_check_error(status);
     }
     else if (type == OSKAR_DOUBLE)
     {
@@ -66,12 +79,10 @@ int oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
                         frequency, model->reference_freq,
                         model->spectral_index, model->I, model->Q,
                         model->U, model->V);
+        oskar_cuda_check_error(status);
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
 }

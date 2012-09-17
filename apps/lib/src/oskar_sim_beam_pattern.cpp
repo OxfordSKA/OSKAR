@@ -215,8 +215,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
             // Copy the telescope model and scale coordinates to radians.
             oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
-            err = oskar_telescope_model_multiply_by_wavenumber(&telescope,
-                    frequency);
+            oskar_telescope_model_multiply_by_wavenumber(&telescope,
+                    frequency, &err);
             if (err) return err;
 
             // Get pointer to the station.

@@ -39,32 +39,41 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope,
-        double frequency_hz)
+void oskar_telescope_model_multiply_by_wavenumber(oskar_TelescopeModel* telescope,
+        double frequency_hz, int* status)
 {
-    int i, err = 0;
+    int i;
     double wavenumber;
+
+    /* Check all inputs. */
+    if (!telescope || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check and update current units of station positions. */
     if (telescope->coord_units != OSKAR_METRES)
-        return OSKAR_ERR_BAD_UNITS;
-
+    {
+        *status = OSKAR_ERR_BAD_UNITS;
+        return;
+    }
     telescope->coord_units = OSKAR_RADIANS;
 
     /* Multiply station positions by wavenumber. */
     telescope->wavelength_metres = 299792458.0 / frequency_hz;
     wavenumber = 2.0 * M_PI / telescope->wavelength_metres;
-    oskar_telescope_model_scale_coords(telescope, wavenumber, &err);
-    if (err) return err;
+    oskar_telescope_model_scale_coords(telescope, wavenumber, status);
 
     /* Multiply station element positions by wavenumber. */
     for (i = 0; i < telescope->num_stations; ++i)
     {
-        err = oskar_station_model_multiply_by_wavenumber(&telescope->station[i],
-                frequency_hz);
-        if (err) return err;
+        oskar_station_model_multiply_by_wavenumber(&telescope->station[i],
+                frequency_hz, status);
     }
-    return err;
 }
 
 #ifdef __cplusplus

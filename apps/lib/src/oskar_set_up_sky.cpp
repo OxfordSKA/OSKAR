@@ -34,11 +34,16 @@
 #include "math/oskar_healpix_pix_to_angles_ring.h"
 #include "math/oskar_random_power_law.h"
 #include "math/oskar_random_broken_power_law.h"
-#include "sky/oskar_generate_random_coordinate.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
-#include "sky/oskar_sky_model_set_gaussian_parameters.h"
+#include "sky/oskar_generate_random_coordinate.h"
 #include "sky/oskar_sky_model_append_to_set.h"
 #include "sky/oskar_sky_model_combine_set.h"
+#include "sky/oskar_sky_model_compute_relative_lmn.h"
+#include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_load_gsm.h"
+#include "sky/oskar_sky_model_set_gaussian_parameters.h"
+#include "sky/oskar_sky_model_set_source.h"
+#include "sky/oskar_sky_model_write.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
 #include "utility/oskar_log_value.h"
@@ -77,7 +82,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 // Load into a temporary structure.
                 oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
                 oskar_log_message(log, 0, "Loading source file %s ...", filename);
-                error = temp.load(filename);
+                oskar_sky_model_load(&temp, filename, &error);
                 if (error) return error;
 
                 // Apply filters.
@@ -113,8 +118,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 #endif
 
                 // Compute source direction cosines (relative lmn)
-                error = temp.compute_relative_lmn(settings->obs.ra0_rad,
-                        settings->obs.dec0_rad);
+                oskar_sky_model_compute_relative_lmn(&temp,
+                        settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
                 if (error) return error;
 
                 // Append to chunks.
@@ -136,7 +141,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             // Load the sky model data into a temporary sky model.
             oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
             oskar_log_message(log, 0, "Loading GSM data...");
-            error = temp.load_gsm(log, filename);
+            error = oskar_sky_model_load_gsm(&temp, log, filename);
             if (error) return error;
 
             // Apply filters.
@@ -174,8 +179,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 #endif
 
             // Compute source direction cosines (relative lmn)
-            error = temp.compute_relative_lmn(settings->obs.ra0_rad,
-                    settings->obs.dec0_rad);
+            oskar_sky_model_compute_relative_lmn(&temp,
+                    settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
             if (error) return error;
 
             // Append to chunks.
@@ -207,8 +212,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 if (error) return error;
 
                 // Compute source direction cosines (relative lmn)
-                error = temp.compute_relative_lmn(settings->obs.ra0_rad,
-                        settings->obs.dec0_rad);
+                oskar_sky_model_compute_relative_lmn(&temp,
+                        settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
                 if (error) return error;
 
                 // Append to chunks.
@@ -238,7 +243,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             double ra, dec;
             oskar_healpix_pix_to_angles_ring(nside, i, &dec, &ra);
             dec = M_PI / 2.0 - dec;
-            temp.set_source(i, ra, dec, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            oskar_sky_model_set_source(&temp, i, ra, dec, 1.0, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, &error);
         }
 
         // Apply filters.
@@ -274,8 +280,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 #endif
 
         // Compute source direction cosines (relative lmn)
-        error = temp.compute_relative_lmn(settings->obs.ra0_rad,
-                settings->obs.dec0_rad);
+        oskar_sky_model_compute_relative_lmn(&temp,
+                settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
         if (error) return error;
 
         // Append to chunks.
@@ -305,7 +311,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             double ra, dec, b;
             oskar_generate_random_coordinate(&ra, &dec);
             b = oskar_random_power_law(min, max, power);
-            temp.set_source(i, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
+            oskar_sky_model_set_source(&temp, i, ra, dec, b, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, &error);
         }
 
         // Apply filters.
@@ -341,8 +348,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 #endif
 
         // Compute source direction cosines (relative lmn)
-        error = temp.compute_relative_lmn(settings->obs.ra0_rad,
-                settings->obs.dec0_rad);
+        oskar_sky_model_compute_relative_lmn(&temp,
+                settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
         if (error) return error;
 
         // Append to chunks.
@@ -374,7 +381,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             double ra, dec, b;
             oskar_generate_random_coordinate(&ra, &dec);
             b = oskar_random_broken_power_law(min, max, threshold, power1, power2);
-            temp.set_source(i, ra, dec, b, 0.0, 0.0, 0.0, 0.0, 0.0);
+            oskar_sky_model_set_source(&temp, i, ra, dec, b, 0.0, 0.0, 0.0,
+                    0.0, 0.0, 0.0, 0.0, 0.0, &error);
         }
 
         // Apply filters.
@@ -410,8 +418,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 #endif
 
         // Compute source direction cosines (relative lmn)
-        error = temp.compute_relative_lmn(settings->obs.ra0_rad,
-                settings->obs.dec0_rad);
+        oskar_sky_model_compute_relative_lmn(&temp,
+                settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
         if (error) return error;
 
         // Append to chunks.
@@ -457,7 +465,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     filename);
             oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, 0);
             oskar_sky_model_combine_set(&temp, *sky_chunks, *num_chunks, &error);
-            temp.write(filename);
+            oskar_sky_model_write(filename, &temp, &error);
         }
     }
 

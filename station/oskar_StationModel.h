@@ -124,60 +124,6 @@ struct OSKAR_EXPORT oskar_StationModel
     ~oskar_StationModel();
 
     /**
-     * @brief
-     * Loads the station element data from a text file.
-     *
-     * @details
-     * This function loads a station configuration from a comma- or
-     * space-separated text file. Each line contains data for one element of the
-     * station.
-     *
-     * The file may have the following columns, in the following order:
-     * - Element x-position, in metres.
-     * - Element y-position, in metres.
-     * - Element z-position, in metres (default 0).
-     * - Element x-delta, in metres (default 0).
-     * - Element y-delta, in metres (default 0).
-     * - Element z-delta, in metres (default 0).
-     * - Element amplitude gain factor (default 1).
-     * - Element amplitude gain error (default 0).
-     * - Element phase offset in degrees (default 0).
-     * - Element phase error in degrees (default 0).
-     * - Element multiplicative weight (real part, default 1).
-     * - Element multiplicative weight (imaginary part, default 0).
-     * - Element X dipole axis azimuth, in degrees (default 90).
-     * - Element Y dipole axis azimuth, in degrees (default 0).
-     *
-     * Only the first two columns are required to be present.
-     *
-     * The coordinate system (ENU, or East-North-Up) is aligned so that the
-     * x-axis points to the local geographic East, the y-axis to local
-     * geographic North, and the z-axis to the local zenith.
-     *
-     * @param[in] filename Name of the data file to load.
-     *
-     * @return
-     * This function returns a code to indicate if there were errors in execution:
-     * - A return code of 0 indicates no error.
-     * - A positive return code indicates a CUDA error.
-     * - A negative return code indicates an OSKAR error.
-     */
-    int load_configuration(const char* filename);
-
-    /**
-     * @brief Returns the location of all arrays in the structure, or an error
-     * code if the locations are inconsistent.
-     */
-    int location() const;
-
-    /**
-     * @brief Scales station coordinates from metres to wavenumber units.
-     *
-     * @param[in] frequency_hz Frequency, in Hz.
-     */
-    int multiply_by_wavenumber(double frequency_hz);
-
-    /**
      * @brief Returns the base type of all arrays in the structure, or an error
      * code if the types are inconsistent.
      */

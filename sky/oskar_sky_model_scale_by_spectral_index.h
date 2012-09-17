@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,12 +54,11 @@ extern "C" {
  *
  * @param[in,out] model The sky model to re-scale.
  * @param[in] frequency The frequency, in Hz.
- *
- * @return An OSKAR or CUDA error code.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
-        double frequency);
+void oskar_sky_model_scale_by_spectral_index(oskar_SkyModel* model,
+        double frequency, int* status);
 
 #ifdef __cplusplus
 }

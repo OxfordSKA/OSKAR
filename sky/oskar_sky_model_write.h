@@ -41,22 +41,23 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes an OSKAR Sky model to file.
+ * @brief Writes an OSKAR sky model to a text file.
  *
  * @details
- * Writes the specified OSKAR sky model to an ASCII file consisting of a simple
- * header ...
+ * Writes the specified OSKAR sky model to an ASCII text file.
+ * The file contains a simple header, describing the number of sources written,
+ * and the data file columns.
  *
  * Note:
  * - The sky model must reside in host (CPU) memory.
  *
- * @param[in] filename  Filename path written to.
- * @param[in] sky       Sky model to write.
- *
- * @return An OSKAR error code.
+ * @param[in] filename    Output filename.
+ * @param[in] sky         Sky model to write.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky);
+void oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky,
+        int* status);
 
 #ifdef __cplusplus
 }

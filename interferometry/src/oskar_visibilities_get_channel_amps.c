@@ -35,19 +35,26 @@
 extern "C" {
 #endif
 
-int oskar_visibilities_get_channel_amps(oskar_Mem* vis_amp,
-        const oskar_Visibilities* vis, int channel)
+void oskar_visibilities_get_channel_amps(oskar_Mem* vis_amp,
+        const oskar_Visibilities* vis, int channel, int* status)
 {
-    int num_elements, offset, err = 0;
+    int num_elements, offset;
 
-    if (vis_amp == NULL || vis == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!vis_amp || !vis || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get pointer to memory at start of this channel. */
     num_elements = vis->num_times * vis->num_baselines;
     offset = channel * num_elements;
-
-    oskar_mem_get_pointer(vis_amp, &vis->amplitude, offset, num_elements, &err);
-    return err;
+    oskar_mem_get_pointer(vis_amp, &vis->amplitude, offset, num_elements,
+            status);
 }
 
 #ifdef __cplusplus

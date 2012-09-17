@@ -34,9 +34,6 @@
  */
 
 #include "oskar_global.h"
-#ifdef __cplusplus
-#include "utility/oskar_Log.h"
-#endif
 #include "utility/oskar_Mem.h"
 #include <stdlib.h>
 
@@ -86,20 +83,6 @@ struct OSKAR_EXPORT oskar_SkyModel
             int num_sources = 0);
 
     /**
-     * @brief Constructs a sky model, loading it from the specified file.
-     *
-     * @details
-     * Loads the sky model from a OSKAR source text file.
-     *
-     * @param filename     Path to a file containing an OSKAR sky model.
-     * @param type         Data type for the sky model (either OSKAR_SINGLE,
-     *                     or OSKAR_DOUBLE)
-     * @param location     Memory location of the constructed sky model
-     *                     (either OSKAR_LOCATION_CPU or OSKAR_LOCATION_GPU)
-     */
-    oskar_SkyModel(const char* filename, int type, int location);
-
-    /**
      * @brief Constructs a sky model by copying the supplied sky
      * model to the specified location.
      *
@@ -113,21 +96,6 @@ struct OSKAR_EXPORT oskar_SkyModel
      * @brief Destroys the sky model.
      */
     ~oskar_SkyModel();
-
-    /**
-     * @brief Computes the source l,m,n direction cosines relative to phase
-     * centre.
-     *
-     * @details
-     * Assumes that the RA and Dec arrays have already been populated, and
-     * that the data is on the GPU.
-     *
-     * @param[in] ra0 Right Ascension of phase centre, in radians.
-     * @param[in] dec0 Declination of phase centre, in radians.
-     *
-     * @return error code.
-     */
-    int compute_relative_lmn(double ra0, double dec0);
 
     /**
      * @brief Filter sources by flux.
@@ -155,89 +123,16 @@ struct OSKAR_EXPORT oskar_SkyModel
             double ra0, double dec0);
 
     /**
-     * @brief Loads an OSKAR source text file into the current sky structure.
-     * Sources from the file are appended to the end of the current structure.
-     *
-     * @param filename  Path to a file containing an OSKAR sky model.
-     *
-     * @return An error code.
-     */
-    int load(const char* filename);
-
-    /**
-     * @brief Loads a GSM text file into the current sky structure.
-     * Pixels from the file are appended to the end of the current structure.
-     *
-     * @param filename  Path to a GSM file.
-     *
-     * @return An error code.
-     */
-    int load_gsm(oskar_Log* log, const char* filename);
-
-    /**
      * @brief Returns the memory location for memory in the sky structure
      * or error code if the types are inconsistent.
      */
     int location() const;
 
     /**
-     * @brief
-     * Scales all current source brightnesses according to the spectral index
-     * for the given frequency.
-     *
-     * @details
-     * This function scales all the existing source brightnesses using the
-     * spectral index and the given frequency.
-     *
-     * Note that the scaling is done relative to the current brightness, and
-     * should therefore be performed only on a temporary copy of the original
-     * sky model.
-     *
-     * @param[in] frequency The frequency, in Hz.
-     *
-     * @return An OSKAR or CUDA error code.
-     */
-    int scale_by_spectral_index(double frequency);
-
-    /**
-     * @brief Sets the parameters for the source at the specified
-     * index in the sky model.
-     *
-     * @param index             Source index.
-     * @param ra                Right ascension, in radians.
-     * @param dec               Declination, in radians.
-     * @param I                 Stokes-I, in Jy.
-     * @param Q                 Stokes-Q, in Jy.
-     * @param U                 Stokes-U, in Jy.
-     * @param V                 Stokes-V, in Jy.
-     * @param ref_frequency     Reference frequency, in Hz.
-     * @param spectral_index    Spectral index.
-     * @param FWHM_major        Major axis FWHM, radians.
-     * @param FWHM_minor        Minor axis FWHM, radians.
-     * @param position_angle    Position angle, radians.
-     *
-     * @return error code.
-     */
-    int set_source(int index, double ra, double dec, double I, double Q,
-            double U, double V, double ref_frequency, double spectral_index,
-            double FWHM_major = 0.0, double FWHM_minor = 0.0,
-            double position_angle = 0.0);
-
-    /**
      * @brief Returns the memory type for memory in the sky structure
      * or error code if the types are inconsistent.
      */
     int type() const;
-
-    /**
-     * @brief Writes the current contents of teh sky structure to an OSKAR
-     * source text file.
-     *
-     * @param filename Path to a file to write to.
-     *
-     * @return An error code.
-     */
-    int write(const char* filename);
 #endif
 };
 typedef struct oskar_SkyModel oskar_SkyModel;

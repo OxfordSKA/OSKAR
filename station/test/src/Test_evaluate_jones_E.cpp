@@ -37,6 +37,7 @@
 #include "math/oskar_SphericalPositions.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_station_model_copy.h"
+#include "station/oskar_station_model_multiply_by_wavenumber.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_vector_types.h"
@@ -99,7 +100,8 @@ void Test_evaluate_jones_E::evaluate_e()
     {
         oskar_station_model_copy(&telescope_gpu.station[i], &station_cpu, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-        error = telescope_gpu.station[i].multiply_by_wavenumber(frequency);
+        oskar_station_model_multiply_by_wavenumber(&(telescope_gpu.station[i]),
+                frequency, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
         telescope_gpu.station[i].apply_element_errors = OSKAR_FALSE;
     }

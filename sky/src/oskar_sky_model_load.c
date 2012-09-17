@@ -45,29 +45,43 @@ extern "C" {
 static const double deg2rad = 1.74532925199432957692369e-2;
 static const double arcsec2rad = 4.84813681109535993589914e-6;
 
-int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
+void oskar_sky_model_load(oskar_SkyModel* sky, const char* filename,
+        int* status)
 {
-    int type, n = 0, error = 0;
+    int type, n = 0;
     FILE* file;
     char* line = NULL;
     size_t bufsize = 0;
     oskar_SkyModel temp_sky;
 
-    /* Check for sane inputs. */
-    if (sky == NULL || filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!sky || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Get the data type. */
     type = oskar_sky_model_type(sky);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 
     /* Open the file. */
     file = fopen(filename, "r");
-    if (file == NULL) return OSKAR_ERR_FILE_IO;
+    if (file == NULL)
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Initialise the temporary sky model. */
-    oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, 0, &error);
+    oskar_sky_model_init(&temp_sky, type, OSKAR_LOCATION_CPU, 0, status);
 
     if (type == OSKAR_DOUBLE)
     {
@@ -83,23 +97,25 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
             if (line[0] == '#') continue;
 
             /* Load source parameters (require at least RA, Dec, Stokes I). */
-            if (oskar_string_to_array_d(line, num_param, par) < num_required) continue;
+            if (oskar_string_to_array_d(line, num_param, par) < num_required)
+                continue;
 
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
             {
-                oskar_sky_model_resize(&temp_sky, n + 100, &error);
-                if (error)
+                oskar_sky_model_resize(&temp_sky, n + 100, status);
+                if (*status)
                 {
-                    oskar_sky_model_free(&temp_sky, &error);
+                    oskar_sky_model_free(&temp_sky, status);
                     fclose(file);
-                    return error;
+                    return;
                 }
             }
             oskar_sky_model_set_source(&temp_sky, n,
                     par[0] * deg2rad, par[1] * deg2rad,
                     par[2], par[3], par[4], par[5], par[6], par[7],
-                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad);
+                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad,
+                    status);
             ++n;
         }
     }
@@ -117,39 +133,39 @@ int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename)
             if (line[0] == '#') continue;
 
             /* Load source parameters (require at least RA, Dec, Stokes I). */
-            if (oskar_string_to_array_f(line, num_param, par) < num_required) continue;
+            if (oskar_string_to_array_f(line, num_param, par) < num_required)
+                continue;
 
             /* Ensure enough space in arrays. */
             if (n % 100 == 0)
             {
-                oskar_sky_model_resize(&temp_sky, n + 100, &error);
-                if (error)
+                oskar_sky_model_resize(&temp_sky, n + 100, status);
+                if (*status)
                 {
-                    oskar_sky_model_free(&temp_sky, &error);
+                    oskar_sky_model_free(&temp_sky, status);
                     fclose(file);
-                    return error;
+                    return;
                 }
             }
             oskar_sky_model_set_source(&temp_sky, n,
                     par[0] * deg2rad, par[1] * deg2rad,
                     par[2], par[3], par[4], par[5], par[6], par[7],
-                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad);
+                    par[8] * arcsec2rad, par[9] * arcsec2rad, par[10] * deg2rad,
+                    status);
             ++n;
         }
     }
 
     /* Record the number of elements loaded. */
     temp_sky.num_sources = n;
-    oskar_sky_model_append(sky, &temp_sky, &error);
+    oskar_sky_model_append(sky, &temp_sky, status);
 
     /* Free the temporary sky model. */
-    oskar_sky_model_free(&temp_sky, &error);
+    oskar_sky_model_free(&temp_sky, status);
 
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);
-
-    return error;
 }
 
 #ifdef __cplusplus

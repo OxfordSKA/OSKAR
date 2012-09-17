@@ -38,22 +38,32 @@
 extern "C" {
 #endif
 
-int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
-        double frequency_hz)
+void oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
+        double frequency_hz, int* status)
 {
     double wavenumber;
-    int error = 0;
+
+    /* Check all inputs. */
+    if (!station || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check and update current units. */
     if (station->coord_units != OSKAR_METRES)
-        return OSKAR_ERR_BAD_UNITS;
-
+    {
+        *status = OSKAR_ERR_BAD_UNITS;
+        return;
+    }
     station->coord_units = OSKAR_RADIANS;
 
     /* Scale to wavenumbers. */
     wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    oskar_station_model_scale_coords(station, wavenumber, &error);
-    return error;
+    oskar_station_model_scale_coords(station, wavenumber, status);
 }
 
 #ifdef __cplusplus

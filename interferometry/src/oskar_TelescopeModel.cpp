@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "interferometry/oskar_telescope_model_all_headers.h"
-#include "station/oskar_station_model_load_config.h"
+#include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_copy.h"
+#include "interferometry/oskar_telescope_model_free.h"
+#include "interferometry/oskar_telescope_model_init.h"
 #include <cstdlib>
 
 oskar_TelescopeModel::oskar_TelescopeModel(int type, int location,

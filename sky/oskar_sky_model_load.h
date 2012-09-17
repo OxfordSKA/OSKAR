@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,20 +59,21 @@ extern "C" {
  * - FWHM of minor axis (arcseconds),
  * - Position angle of gaussian axis (deg)
  *
- *
- * Columns 4 to 11 (Q, U, V, Reference frequency and Spectral index) are optional
- * and defaulted to zero if omitted.
+ * Columns 4 to 11 (Q, U, V, Reference frequency, Spectral index and
+ * extended source parameters) are optional and default to zero if omitted.
  *
  * The columns must be space or comma separated.
  *
- * Lines beginning with a hash symbol (#) are treated as comments and therefore
- * ignored.
+ * Lines beginning with a hash symbol (#) are treated as comments, and
+ * therefore ignored.
  *
  * @param[out] sky       Pointer to sky model structure to fill.
  * @param[in]  filename  Path to the a source list file.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_load(oskar_SkyModel* sky, const char* filename);
+void oskar_sky_model_load(oskar_SkyModel* sky, const char* filename,
+        int* status);
 
 #ifdef __cplusplus
 }

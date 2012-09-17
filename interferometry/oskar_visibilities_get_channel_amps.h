@@ -41,7 +41,6 @@
 extern "C" {
 #endif
 
-
 /**
  * @brief Returns a non-owned pointer to the visibility amplitudes for the
  * specified channel.
@@ -50,12 +49,11 @@ extern "C" {
  *                      specified channel.
  * @param[in]  vis      Visibility structure to extract the amplitudes from.
  * @param[in]  channel  Channel index.
- *
- * @return An error code.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_visibilities_get_channel_amps(oskar_Mem* vis_amp,
-        const oskar_Visibilities* vis, int channel);
+void oskar_visibilities_get_channel_amps(oskar_Mem* vis_amp,
+        const oskar_Visibilities* vis, int channel, int* status);
 
 #ifdef __cplusplus
 }

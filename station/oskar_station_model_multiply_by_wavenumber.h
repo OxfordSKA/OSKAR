@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,14 +45,13 @@ extern "C" {
  * metres by the wavenumber (2*pi/lambda) given by the specified frequency.
  * This converts the coordinate units into radians at the specified frequency.
  *
- * @param station      Station model structure containing coordinates to scale.
- * @param frequency_hz The frequency, in Hz.
- *
- * @return An error code.
+ * @param[in,out] station  Station model containing coordinates to scale.
+ * @param[in] frequency_hz The frequency, in Hz.
+ * @param[in,out] status   Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
-        double frequency_hz);
+void oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
+        double frequency_hz, int* status);
 
 #ifdef __cplusplus
 }

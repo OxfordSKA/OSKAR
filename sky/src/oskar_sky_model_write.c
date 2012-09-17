@@ -45,26 +45,48 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
+void oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky,
+        int* status)
 {
-    int i;
+    int i, type;
     FILE* file;
 
-    if (filename == NULL || sky == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!filename || !sky || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check sky model is in CPU memory. */
     if (oskar_sky_model_location(sky) == OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
+    /* Open the output file. */
     file = fopen(filename, "w");
     if (!file)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
-    fprintf(file, "# num_sources = %i\n", sky->num_sources);
-    fprintf(file, "# RA(deg), Dec(deg), I(Jy), Q(Jy), U(Jy), V(Jy),"
-            " ref. freq.(Hz), spectral index, FWHM major (arcsec), "
-            "FWHM minor (arcsec), position angle(deg)\n");
-    if (oskar_sky_model_type(sky) == OSKAR_DOUBLE)
+    /* Get the data type. */
+    type = oskar_sky_model_type(sky);
+
+    /* Print a helpful header. */
+    fprintf(file, "# Number of sources: %i\n", sky->num_sources);
+    fprintf(file, "# RA (deg), Dec (deg), I (Jy), Q (Jy), U (Jy), V (Jy),"
+            " Ref. freq. (Hz), Spectral index, FWHM major (arcsec), "
+            "FWHM minor (arcsec), Position angle (deg)\n");
+
+    /* Print out sky model in ASCII format. */
+    if (type == OSKAR_DOUBLE)
     {
         for (i = 0; i < sky->num_sources; ++i)
         {
@@ -84,7 +106,7 @@ int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
             );
         }
     }
-    else if (oskar_sky_model_type(sky) == OSKAR_SINGLE)
+    else if (type == OSKAR_SINGLE)
     {
         for (i = 0; i < sky->num_sources; ++i)
         {
@@ -106,11 +128,10 @@ int oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky)
     }
     else
     {
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 
     fclose(file);
-    return 0;
 }
 
 #ifdef __cplusplus

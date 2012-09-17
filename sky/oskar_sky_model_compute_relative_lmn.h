@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,10 +54,11 @@ extern "C" {
  * @param[in,out] sky Pointer to sky model structure.
  * @param[in] ra0 Right Ascension of phase centre, in radians.
  * @param[in] dec0 Declination of phase centre, in radians.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
-        double dec0);
+void oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
+        double dec0, int* status);
 
 #ifdef __cplusplus
 }

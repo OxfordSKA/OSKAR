@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     }
 
     // Write out the sky model.
-    error = oskar_sky_model_write(argv[2], &sky);
+    oskar_sky_model_write(argv[2], &sky, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

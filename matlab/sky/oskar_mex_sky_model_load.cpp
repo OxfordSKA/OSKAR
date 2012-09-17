@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <mex.h>
 #include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_free.h"
+#include "sky/oskar_sky_model_init.h"
+#include "sky/oskar_sky_model_load.h"
 #include "utility/oskar_get_error_string.h"
 
 #include <cstdio>
@@ -37,6 +39,7 @@
 // MATLAB Entry function.
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
+    int status = 0;
     if (num_in != 1 || num_out > 1)
         mexErrMsgTxt("Usage: sky = oskar.sky.load(filename)");
 
@@ -44,26 +47,18 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     const char* filename = mxArrayToString(in[0]);
 
     // Load the OSKAR sky model structure from the specified file.
-    oskar_SkyModel* sky = NULL;
-    try
+    oskar_SkyModel sky;
+    oskar_sky_model_init(&sky, OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0, &status);
+    oskar_sky_model_load(&sky, filename, &status);
+
+    if (status)
     {
-        sky = new oskar_SkyModel(filename, OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    }
-    catch (const char* error)
-    {
-        mexErrMsgIdAndTxt("OSKAR:error",
+        mexErrMsgIdAndTxt("OSKAR:ERROR",
                 "Error reading OSKAR sky model file: '%s'.\nERROR: %s.",
-                filename, error);
+                filename, oskar_get_error_string(status));
     }
 
-    if (sky == NULL)
-    {
-        mexErrMsgIdAndTxt("OSKAR:error",
-                "Error reading OSKAR sky model file: '%s'.", filename);
-    }
-
-
-    int num_sources = sky->num_sources;
+    int num_sources = sky.num_sources;
     mxClassID class_id = mxDOUBLE_CLASS;
     mxArray* ra = mxCreateNumericMatrix(num_sources, 1, class_id, mxREAL);
     mxArray* dec = mxCreateNumericMatrix(num_sources, 1, class_id, mxREAL);
@@ -91,17 +86,17 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     for (int i = 0; i < num_sources; ++i)
     {
-        ra_ptr[i]    = ((double*)sky->RA.data)[i];
-        dec_ptr[i]   = ((double*)sky->Dec.data)[i];
-        I_ptr[i]     = ((double*)sky->I.data)[i];
-        Q_ptr[i]     = ((double*)sky->Q.data)[i];
-        U_ptr[i]     = ((double*)sky->U.data)[i];
-        V_ptr[i]     = ((double*)sky->V.data)[i];
-        spix_ptr[i]  = ((double*)sky->spectral_index.data)[i];
-        freq0_ptr[i] = ((double*)sky->reference_freq.data)[i];
-        rel_l_ptr[i] = ((double*)sky->rel_l.data)[i];
-        rel_m_ptr[i] = ((double*)sky->rel_m.data)[i];
-        rel_n_ptr[i] = ((double*)sky->rel_n.data)[i];
+        ra_ptr[i]    = ((double*)(sky.RA.data))[i];
+        dec_ptr[i]   = ((double*)(sky.Dec.data))[i];
+        I_ptr[i]     = ((double*)(sky.I.data))[i];
+        Q_ptr[i]     = ((double*)(sky.Q.data))[i];
+        U_ptr[i]     = ((double*)(sky.U.data))[i];
+        V_ptr[i]     = ((double*)(sky.V.data))[i];
+        spix_ptr[i]  = ((double*)(sky.spectral_index.data))[i];
+        freq0_ptr[i] = ((double*)(sky.reference_freq.data))[i];
+        rel_l_ptr[i] = ((double*)(sky.rel_l.data))[i];
+        rel_m_ptr[i] = ((double*)(sky.rel_m.data))[i];
+        rel_n_ptr[i] = ((double*)(sky.rel_n.data))[i];
     }
 
     const char* fields[13] = { "RA", "Dec", "I", "Q", "U", "V",
@@ -122,7 +117,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     mxSetField(out[0], 0, "rel_m", rel_m);
     mxSetField(out[0], 0, "rel_n", rel_n);
 
-    if (sky != NULL) delete sky;
+    oskar_sky_model_free(&sky, &status);
 }
 
 

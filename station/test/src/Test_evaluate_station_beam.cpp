@@ -33,6 +33,7 @@
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_station_model_save_config.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"
+#include "station/oskar_station_model_multiply_by_wavenumber.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
@@ -107,7 +108,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     // Copy the station structure to the gpu and scale the coordinates to wavenumbers.
     oskar_StationModel station_gpu(&station_cpu, OSKAR_LOCATION_GPU);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_METRES, station_gpu.coord_units);
-    station_gpu.multiply_by_wavenumber(frequency);
+    oskar_station_model_multiply_by_wavenumber(&station_gpu, frequency, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Evaluate horizontal l,m,n for beam phase centre.
     double beam_l, beam_m, beam_n;

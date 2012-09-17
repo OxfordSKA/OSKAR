@@ -32,6 +32,7 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_append.h"
 #include "sky/oskar_sky_model_copy.h"
+#include "sky/oskar_sky_model_compute_relative_lmn.h"
 #include "sky/oskar_sky_model_filter_by_flux.h"
 #include "sky/oskar_sky_model_filter_by_radius.h"
 #include "sky/oskar_sky_model_free.h"
@@ -40,6 +41,7 @@
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_split.h"
+#include "sky/oskar_sky_model_set_source.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
 #include "sky/oskar_sky_model_append_to_set.h"
 #include "sky/oskar_sky_model_insert.h"
@@ -93,7 +95,9 @@ void Test_SkyModel::test_set_source()
 
     // Try to set a source into the model - this should fail as the model is
     // still zero size.
-    int error = sky->set_source(0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 200.0e6, -0.7);
+    int error = 0;
+    oskar_sky_model_set_source(sky, 0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
+            200.0e6, -0.7, 0.0, 0.0, 0.0, &error);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_ERR_OUT_OF_RANGE, error);
     error = 0;
 
@@ -103,8 +107,10 @@ void Test_SkyModel::test_set_source()
     CPPUNIT_ASSERT_EQUAL(2, sky->num_sources);
 
     // Set values of these 2 sources.
-    error = sky->set_source(0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 200.0e6, -0.7);
-    error = sky->set_source(1, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 250.0e6, -0.8);
+    oskar_sky_model_set_source(sky, 0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
+            200.0e6, -0.7, 0.0, 0.0, 0.0, &error);
+    oskar_sky_model_set_source(sky, 1, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5,
+            250.0e6, -0.8, 0.0, 0.0, 0.0, &error);
     CPPUNIT_ASSERT_EQUAL(0, error);
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_SINGLE, sky->type());
     CPPUNIT_ASSERT_EQUAL((int)OSKAR_LOCATION_GPU, sky->location());
@@ -132,7 +138,9 @@ void Test_SkyModel::test_append()
     for (int i = 0; i < sky1_num_sources; ++i)
     {
         double value = (double)i;
-        sky1->set_source(i, value, value, value, value, value, value, value, value);
+        oskar_sky_model_set_source(sky1, i, value, value,
+                value, value, value, value,
+                value, value, 0.0, 0.0, 0.0, &status);
     }
     int sky2_num_sorces = 3;
     oskar_SkyModel* sky2 = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_CPU,
@@ -140,7 +148,9 @@ void Test_SkyModel::test_append()
     for (int i = 0; i < sky2_num_sorces; ++i)
     {
         double value = (double)i + 0.5;
-        sky2->set_source(i, value, value, value, value, value, value, value, value);
+        oskar_sky_model_set_source(sky2, i, value, value,
+                value, value, value, value,
+                value, value, 0.0, 0.0, 0.0, &status);
     }
     oskar_sky_model_append(sky1, sky2, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
@@ -166,6 +176,7 @@ void Test_SkyModel::test_append()
 
 void Test_SkyModel::test_load()
 {
+    int err = 0;
     const double deg2rad = 0.0174532925199432957692;
     const char* filename = "temp_sources.osm";
 
@@ -184,7 +195,7 @@ void Test_SkyModel::test_load()
 
 
         oskar_SkyModel* sky = new oskar_SkyModel(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-        int err = oskar_sky_model_load(sky, filename);
+        oskar_sky_model_load(sky, filename, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         // Cleanup.
@@ -227,7 +238,7 @@ void Test_SkyModel::test_load()
         // Load the sky model onto the GPU.
         oskar_SkyModel* sky_gpu = new oskar_SkyModel(OSKAR_SINGLE,
                 OSKAR_LOCATION_GPU, 0);
-        int err = oskar_sky_model_load(sky_gpu, filename);
+        oskar_sky_model_load(sky_gpu, filename, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
 
         // Cleanup.
@@ -284,13 +295,13 @@ void Test_SkyModel::test_compute_relative_lmn()
     int error = 0;
     for (int i = 0; i < n; ++i)
     {
-        error = sky->set_source(i, ra[i], dec[i], 1.0, 2.0, 3.0, 4.0,
-                200.0e6, -0.7);
+        oskar_sky_model_set_source(sky, i, ra[i], dec[i], 1.0, 2.0, 3.0, 4.0,
+                200.0e6, -0.7, 0.0, 0.0, 0.0, &error);
     }
     CPPUNIT_ASSERT_EQUAL(0, error);
 
     // Compute l,m direction cosines.
-    sky->compute_relative_lmn(ra0, dec0);
+    oskar_sky_model_compute_relative_lmn(sky, ra0, dec0, &error);
 
     // Copy data back to CPU.
     oskar_SkyModel sky_temp(sky, OSKAR_LOCATION_CPU);
@@ -337,9 +348,10 @@ void Test_SkyModel::test_horizon_clip()
         {
             double ra = lon_start + j * (lon_end - lon_start) / (n_lon - 1);
             double dec = lat_start + i * (lat_end - lat_start) / (n_lat - 1);
-            sky_cpu.set_source(k, ra * deg2rad, dec * deg2rad,
+            oskar_sky_model_set_source(&sky_cpu, k, ra * deg2rad, dec * deg2rad,
                     double(k), double(2*k), double(3*k), double(4*k),
-                    double(5*k), double(6*k));
+                    double(5*k), double(6*k), 0.0, 0.0, 0.0, &err);
+            CPPUNIT_ASSERT_EQUAL(0, err);
         }
     }
 
@@ -473,8 +485,9 @@ void Test_SkyModel::test_filter_by_radius()
     oskar_SkyModel sky(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_sources);
     for (int i = 0; i < num_sources; ++i)
     {
-        err = sky.set_source(i, 0.0, i * ((M_PI / 2) / (num_sources - 1)),
-                i, 1.0, 2.0, 3.0, i * 100, i * 200);
+        oskar_sky_model_set_source(&sky, i, 0.0, i * ((M_PI / 2) / (num_sources - 1)),
+                (double)i, 1.0, 2.0, 3.0, i * 100.0, i * 200.0,
+                0.0, 0.0, 0.0, &err);
         CPPUNIT_ASSERT_EQUAL(0, err);
     }
 
@@ -597,11 +610,12 @@ void Test_SkyModel::test_evaluate_gaussian_source_parameters()
     const double deg2rad  = M_PI / 180.0;
 
     int num_sources = 1;
+    int status = 0;
     oskar_SkyModel sky(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_sources);
-    sky.set_source(0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    oskar_sky_model_set_source(&sky, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
             20 * 60 * asec2rad,
             10 * 60 * asec2rad,
-            30 * deg2rad);
+            30 * deg2rad, &status);
     oskar_evaluate_gaussian_source_parameters(NULL, num_sources, &sky.gaussian_a,
             &sky.gaussian_b, &sky.gaussian_c, &sky.FWHM_major, &sky.FWHM_minor,
             &sky.position_angle, &sky.RA, &sky.Dec, &sky.I, 0, 40.0 * M_PI/180.0);

@@ -44,25 +44,11 @@ oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, int location)
     if (err) throw err;
 }
 
-oskar_SkyModel::oskar_SkyModel(const char* filename, int type, int location)
-{
-    int err = 0;
-    oskar_sky_model_init(this, type, location, 0, &err);
-    if (err) throw err;
-    err = oskar_sky_model_load(this, filename);
-    if (err) throw err;
-}
-
 oskar_SkyModel::~oskar_SkyModel()
 {
     int err = 0;
     oskar_sky_model_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_SkyModel::compute_relative_lmn(double ra0, double dec0)
-{
-    return oskar_sky_model_compute_relative_lmn(this, ra0, dec0);
 }
 
 int oskar_SkyModel::filter_by_flux(double min_I, double max_I)
@@ -77,42 +63,12 @@ int oskar_SkyModel::filter_by_radius(double inner_radius, double outer_radius,
             ra0, dec0);
 }
 
-int oskar_SkyModel::load(const char* filename)
-{
-    return oskar_sky_model_load(this, filename);
-}
-
-int oskar_SkyModel::load_gsm(oskar_Log* log, const char* filename)
-{
-    return oskar_sky_model_load_gsm(this, log, filename);
-}
-
 int oskar_SkyModel::location() const
 {
     return oskar_sky_model_location(this);
 }
 
-int oskar_SkyModel::scale_by_spectral_index(double frequency)
-{
-    return oskar_sky_model_scale_by_spectral_index(this, frequency);
-}
-
-int oskar_SkyModel::set_source(int index, double ra, double dec, double I,
-        double Q, double U, double V, double ref_frequency,
-        double spectral_index, double FWHM_major, double FWHM_minor,
-        double position_angle)
-{
-    return oskar_sky_model_set_source(this, index, ra, dec, I, Q, U, V,
-            ref_frequency, spectral_index, FWHM_major, FWHM_minor,
-            position_angle);
-}
-
 int oskar_SkyModel::type() const
 {
     return oskar_sky_model_type(this);
-}
-
-int oskar_SkyModel::write(const char* filename)
-{
-    return oskar_sky_model_write(filename, this);
 }

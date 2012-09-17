@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,18 +36,32 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
-        double dec0)
+void oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
+        double dec0, int* status)
 {
     int type, location, err = 0;
 
-    /* Check for sane inputs. */
-    if (sky == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!sky || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Get the data location and type. */
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check the data location and type. */
     location = oskar_sky_model_location(sky);
     type = oskar_sky_model_type(sky);
+    if (!(type == OSKAR_SINGLE || type == OSKAR_DOUBLE))
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Convert coordinates. */
     if (location == OSKAR_LOCATION_GPU)
@@ -68,10 +82,6 @@ int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
                     ra0, dec0, (double*)sky->rel_l.data,
                     (double*)sky->rel_m.data, (double*)sky->rel_n.data);
         }
-        else
-        {
-            return OSKAR_ERR_BAD_DATA_TYPE;
-        }
     }
     else if (location == OSKAR_LOCATION_CPU)
     {
@@ -91,17 +101,13 @@ int oskar_sky_model_compute_relative_lmn(oskar_SkyModel* sky, double ra0,
                     ra0, dec0, (double*)sky->rel_l.data,
                     (double*)sky->rel_m.data, (double*)sky->rel_n.data);
         }
-        else
-        {
-            return OSKAR_ERR_BAD_DATA_TYPE;
-        }
     }
     else
     {
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
 
-    return err;
+    if (err) *status = err;
 }
 
 #ifdef __cplusplus

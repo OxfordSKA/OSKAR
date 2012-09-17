@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,14 +38,28 @@
 extern "C" {
 #endif
 
-int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
+void oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         double dec, double I, double Q, double U, double V, double ref_frequency,
         double spectral_index, double FWHM_major, double FWHM_minor,
-        double position_angle)
+        double position_angle, int* status)
 {
     int type, location;
+
+    /* Check all inputs. */
+    if (!sky || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     if (index >= sky->num_sources)
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
     /* Get the data location and type. */
     location = oskar_sky_model_location(sky);
@@ -152,10 +166,9 @@ int oskar_sky_model_set_source(oskar_SkyModel* sky, int index, double ra,
         }
         else
         {
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
         }
     }
-    return 0;
 }
 
 #ifdef __cplusplus
