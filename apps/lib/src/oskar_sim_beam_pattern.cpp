@@ -217,10 +217,10 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
             oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
             oskar_telescope_model_multiply_by_wavenumber(&telescope,
                     frequency, &err);
-            if (err) return err;
 
             // Get pointer to the station.
             oskar_StationModel* station = &(telescope.station[station_id]);
+            int station_type = station->station_type;
 
             // Start simulation.
             for (int t = 0; t < num_times; ++t)
@@ -231,50 +231,37 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 double t_dump = obs_start_mjd_utc + t * dt_dump;
                 double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
-                // Evaluate horizontal l,m,n for beam phase centre.
+                // Evaluate horizontal l,m,n for beam phase centre and sources.
                 double beam_l, beam_m, beam_n;
-                err = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
-                        &beam_n, station, gast);
-                if (err) return err;
-
-                // Evaluate horizontal l,m,n coordinates.
+                oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
+                        &beam_n, station, gast, &err);
                 oskar_evaluate_source_horizontal_lmn(num_pixels,
                         &work.hor_x, &work.hor_y, &work.hor_z, &RA, &Dec,
                         station, gast, &err);
-                if (err) return err;
 
                 // Evaluate the station beam.
-                switch (station->station_type)
+                if (station_type == OSKAR_STATION_TYPE_AA)
                 {
-                    case OSKAR_STATION_TYPE_AA:
-                    {
-                        oskar_evaluate_station_beam(&beam_pattern, station,
-                                beam_l, beam_m, beam_n, num_pixels,
-                                OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
-                                &work.hor_x, &work.hor_y, &work.hor_z, &work.hor_z,
-                                &work, &curand_state, &err);
-                        if (err) return err;
-                        break;
-                    }
-                    case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
-                    {
-                        oskar_evaluate_source_relative_lmn(num_pixels,
-                                &work.rel_x, &work.rel_y, &work.rel_z, &RA, &Dec,
-                                station, &err);
-                        if (err) return err;
-                        oskar_evaluate_station_beam(&beam_pattern, station,
-                                beam_l, beam_m, beam_n, num_pixels,
-                                OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ,
-                                &work.rel_x, &work.rel_y, &work.rel_z, &work.hor_z,
-                                &work, &curand_state, &err);
-                        if (err) return err;
-                        break;
-                    }
-                    default:
-                    {
-                        return OSKAR_ERR_SETTINGS_TELESCOPE;
-                        break;
-                    }
+                    oskar_evaluate_station_beam(&beam_pattern, station,
+                            beam_l, beam_m, beam_n, num_pixels,
+                            OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
+                            &work.hor_x, &work.hor_y, &work.hor_z,
+                            &work.hor_z, &work, &curand_state, &err);
+                }
+                else if (station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+                {
+                    oskar_evaluate_source_relative_lmn(num_pixels,
+                            &work.rel_x, &work.rel_y, &work.rel_z,
+                            &RA, &Dec, station, &err);
+                    oskar_evaluate_station_beam(&beam_pattern, station,
+                            beam_l, beam_m, beam_n, num_pixels,
+                            OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ,
+                            &work.rel_x, &work.rel_y, &work.rel_z,
+                            &work.hor_z, &work, &curand_state, &err);
+                }
+                else
+                {
+                    return OSKAR_ERR_SETTINGS_TELESCOPE;
                 }
 
                 // Copy beam pattern back to host memory.

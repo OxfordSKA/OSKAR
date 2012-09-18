@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 /* Single precision. */
-int oskar_ra_dec_to_hor_lmn_f(int n, const float* ra, const float* dec,
+void oskar_ra_dec_to_hor_lmn_f(int n, const float* ra, const float* dec,
         float lst, float lat, float* hor_l, float* hor_m, float* hor_n)
 {
     /* Determine source Hour Angles (HA = LST - RA). */
@@ -47,12 +47,10 @@ int oskar_ra_dec_to_hor_lmn_f(int n, const float* ra, const float* dec,
 
     /* Determine horizontal l,m,n positions (destroys contents of ha). */
     oskar_ha_dec_to_hor_lmn_f(n, ha, dec, lat, hor_l, hor_m, hor_n);
-
-    return 0;
 }
 
 /* Double precision. */
-int oskar_ra_dec_to_hor_lmn_d(int n, const double* ra, const double* dec,
+void oskar_ra_dec_to_hor_lmn_d(int n, const double* ra, const double* dec,
         double lst, double lat, double* hor_l, double* hor_m, double* hor_n)
 {
     /* Determine source Hour Angles (HA = LST - RA). */
@@ -65,8 +63,6 @@ int oskar_ra_dec_to_hor_lmn_d(int n, const double* ra, const double* dec,
 
     /* Determine horizontal l,m,n positions (destroys contents of ha). */
     oskar_ha_dec_to_hor_lmn_d(n, ha, dec, lat, hor_l, hor_m, hor_n);
-
-    return 0;
 }
 
 #ifdef __cplusplus

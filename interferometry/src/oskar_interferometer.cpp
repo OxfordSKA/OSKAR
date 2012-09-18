@@ -163,13 +163,11 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             if (status) return status;
 
             // Evaluate station beam (Jones E).
-            status = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
-                    &work, &curand_state);
-            if (status) return status;
+            oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
+                    &work, &curand_state, &status);
 
             // Join Jones matrices (R = E * R).
             oskar_jones_join(&R, &E, &R, &status);
-            if (status) return status;
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {

@@ -167,7 +167,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     }
 
     /* Blank (zero) sources below the horizon. */
-    *status = oskar_blank_below_horizon(beam, z, num_points);
+    oskar_blank_below_horizon(beam, z, num_points, status);
 }
 
 

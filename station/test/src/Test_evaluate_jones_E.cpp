@@ -148,8 +148,8 @@ void Test_evaluate_jones_E::evaluate_e()
             num_sources);
 
     oskar_WorkStationBeam work_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU);
-    error = oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast,
-            &work_gpu, &curand_state);
+    oskar_evaluate_jones_E(&E_gpu, &sky_gpu, &telescope_gpu, gast,
+            &work_gpu, &curand_state, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy the Jones matrix back to the CPU.
@@ -164,7 +164,7 @@ void Test_evaluate_jones_E::evaluate_e()
     oskar_Mem E_station;
     for (int j = 0; j < num_stations; ++j)
     {
-        error = oskar_jones_get_station_pointer(&E_station, &E_cpu, j);
+        oskar_jones_get_station_pointer(&E_station, &E_cpu, j, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
         for (int i = 0; i < num_sources; ++i)
         {

@@ -59,13 +59,13 @@ extern "C" {
  * @param[in]  gast         The Greenwich Apparent Sidereal Time, in radians.
  * @param[in]  work         Pointer to structure holding work arrays.
  * @param[in]  curand_state Structure holding curand states.
- *
- * @return An error code.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
+void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, double gast,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_state);
+        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_state,
+        int* status);
 
 #ifdef __cplusplus
 }

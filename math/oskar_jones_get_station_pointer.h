@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,12 +50,11 @@ extern "C" {
  * @param[in]  J               OSKAR Jones structure containing Jones matrices
  *                             for a number of stations and sources.
  * @param[in]  station_index   Station index in \p J.
- *
- * @return error code.
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-int oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
-        int station_index);
+void oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
+        int station_index, int* status);
 
 #ifdef __cplusplus
 }

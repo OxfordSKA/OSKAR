@@ -141,7 +141,6 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
         // Set dimensions of Jones matrices (this is not a resize!).
         oskar_jones_set_size(&E, n_stations, local_sky.num_sources, &status);
         oskar_jones_set_size(&K, n_stations, local_sky.num_sources, &status);
-        if (status) return status;
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
@@ -151,9 +150,8 @@ int oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
             // Evaluate station beam (Jones E).
-            status = oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work,
-                    &curand_state);
-            if (status) return status;
+            oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work,
+                    &curand_state, &status);
 
             for (int k = 0; k < num_fringe_ave; ++k)
             {

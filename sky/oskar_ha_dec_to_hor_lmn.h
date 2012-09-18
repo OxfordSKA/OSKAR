@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,8 +58,8 @@ extern "C" {
  * @param[out] hor_n The source n-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-int oskar_ha_dec_to_hor_lmn_f(int n, const float* ha, const float* dec,
-		float lat, float* hor_l, float* hor_m, float* hor_n);
+void oskar_ha_dec_to_hor_lmn_f(int n, const float* ha, const float* dec,
+        float lat, float* hor_l, float* hor_m, float* hor_n);
 
 /**
  * @brief
@@ -80,8 +80,8 @@ int oskar_ha_dec_to_hor_lmn_f(int n, const float* ha, const float* dec,
  * @param[out] hor_n The source n-direction-cosines in the horizontal system.
  */
 OSKAR_EXPORT
-int oskar_ha_dec_to_hor_lmn_d(int n, const double* ha, const double* dec,
-		double lat, double* hor_l, double* hor_m, double* hor_n);
+void oskar_ha_dec_to_hor_lmn_d(int n, const double* ha, const double* dec,
+        double lat, double* hor_l, double* hor_m, double* hor_n);
 
 #ifdef __cplusplus
 }

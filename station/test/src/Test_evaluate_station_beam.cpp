@@ -113,8 +113,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
 
     // Evaluate horizontal l,m,n for beam phase centre.
     double beam_l, beam_m, beam_n;
-    error = oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
-            &station_gpu, gast);
+    oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
+            &station_gpu, gast, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Evalute horizontal l,m positions at which to generate the beam pattern.

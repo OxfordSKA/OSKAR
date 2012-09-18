@@ -27,33 +27,44 @@
  */
 
 #include "oskar_global.h"
+#include "station/oskar_blank_below_horizon.h"
 #include "station/cudak/oskar_cudak_blank_below_horizon.h"
+#include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C"
 #endif
-int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
-        int num_sources)
+void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
+        int num_sources, int* status)
 {
     int type;
 
-    /* Sanity check on inputs. */
-    if (!mask || !data)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!mask || !data || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check that all arrays are on the GPU. */
     if (mask->location != OSKAR_LOCATION_GPU ||
             data->location != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the mask type is OK. */
     if (mask->type != OSKAR_SINGLE && mask->type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the dimensions are OK. */
     if (data->num_elements < num_sources)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Zero the value of any positions below the horizon. */
     type = data->type;
@@ -90,9 +101,8 @@ int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
         (num_sources, (const double*)mask->data, (double2*)data->data);
     }
     else
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Report any CUDA error. */
-    cudaDeviceSynchronize();
-    return (int)cudaPeekAtLastError();
+    oskar_cuda_check_error(status);
 }

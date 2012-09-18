@@ -56,10 +56,11 @@ extern "C" {
  * @param[in,out] data    Array of Jones matrices or scalars per source.
  * @param[in] mask        Array of mask values.
  * @param[in] num_sources Number of sources in arrays.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-int oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
-        int num_sources);
+void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
+        int num_sources, int* status);
 
 #ifdef __cplusplus
 }

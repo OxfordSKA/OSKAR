@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,12 +55,11 @@ extern "C" {
  *                        station beam phase centre in horizontal lmn coordinates.
  * @param[in]  station    OSKAR Station structure.
  * @param[in]  gast       The Greenwich apparent sidereal time, in radians.
- *
- * @return An error code.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast);
+void oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
+        const oskar_StationModel* station, const double gast, int* status);
 
 #ifdef __cplusplus
 }

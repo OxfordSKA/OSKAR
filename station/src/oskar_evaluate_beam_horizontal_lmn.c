@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,18 +34,25 @@
 extern "C" {
 #endif
 
-int oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
-        const oskar_StationModel* station, const double gast)
+void oskar_evaluate_beam_horizontal_lmn(double* l, double* m, double* n,
+        const oskar_StationModel* station, const double gast, int* status)
 {
     double last;
 
-    if (station == NULL || l == NULL || m == NULL || n == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!l || !m || !n || !station || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Local apparent Sidereal Time, in radians. */
     last = gast + station->longitude_rad;
 
-    return oskar_ra_dec_to_hor_lmn_d(1, &station->ra0_rad, &station->dec0_rad,
+    oskar_ra_dec_to_hor_lmn_d(1, &station->ra0_rad, &station->dec0_rad,
             last, station->latitude_rad, l, m, n);
 }
 

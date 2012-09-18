@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,21 @@
 extern "C" {
 #endif
 
-int oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
-        int station_index)
+void oskar_jones_get_station_pointer(oskar_Mem* J_station, const oskar_Jones* J,
+        int station_index, int* status)
 {
-    int num_sources, offset, err = 0;
+    int num_sources, offset;
+
+    /* Check all inputs. */
+    if (!J_station || !J || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
     num_sources = J->num_sources;
     offset = station_index * num_sources;
-    oskar_mem_get_pointer(J_station, &J->data, offset, num_sources, &err);
-    return err;
+    oskar_mem_get_pointer(J_station, &J->data, offset, num_sources, status);
 }
 
 #ifdef __cplusplus
