@@ -93,8 +93,10 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that length of input arrays are consistent. */
-    if (l->num_elements != num_points || m->num_elements != num_points)
+    if (l->num_elements < num_points || m->num_elements < num_points)
+    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
+    }
 
     /* Resize output array if needed. */
     if (beam->num_elements < num_points)

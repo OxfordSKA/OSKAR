@@ -56,11 +56,11 @@ struct double4c;
  */
 struct OSKAR_EXPORT oskar_Mem
 {
-    int type; /**< Enumerated element type of memory block. */
-    int location; /**< Address space of data pointer. */
+    int type;         /**< Enumerated element type of memory block. */
+    int location;     /**< Address space of data pointer. */
     int num_elements; /**< Number of elements in memory block. */
-    int owner; /**< Flag set if the structure owns the memory. */
-    void* data; /**< Data pointer. */
+    int owner;        /**< Flag set if the structure owns the memory. */
+    void* data;       /**< Data pointer. */
 
 #ifdef __cplusplus
     /* If C++, then provide constructors and a destructor. */
