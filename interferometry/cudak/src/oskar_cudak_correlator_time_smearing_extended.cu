@@ -81,8 +81,8 @@ void oskar_cudak_correlator_time_smearing_extended_f(const int num_sources,
         // Baseline distances, in wavelengths.
         uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PIf;
         vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PIf;
-        xx = (station_x[SI] - station_x[SJ]) * ONE_OVER_2PIf;
-        yy = (station_y[SI] - station_y[SJ]) * ONE_OVER_2PIf;
+        xx = (station_x[SI] - station_x[SJ]) * 0.5f;
+        yy = (station_y[SI] - station_y[SJ]) * 0.5f;
 
         // Quantities needed for evaluating source with Gaussian term.
         uu2  = uu * uu;
@@ -234,8 +234,8 @@ void oskar_cudak_correlator_time_smearing_extended_d(const int num_sources,
         // Baseline distances, in wavelengths.
         uu = (station_u[SI] - station_u[SJ]) * ONE_OVER_2PI;
         vv = (station_v[SI] - station_v[SJ]) * ONE_OVER_2PI;
-        xx = (station_x[SI] - station_x[SJ]) * ONE_OVER_2PI;
-        yy = (station_y[SI] - station_y[SJ]) * ONE_OVER_2PI;
+        xx = (station_x[SI] - station_x[SJ]) * 0.5;
+        yy = (station_y[SI] - station_y[SJ]) * 0.5;
 
         // Quantities needed for evaluating source with Gaussian term.
         uu2  = uu * uu;

@@ -73,8 +73,8 @@ void oskar_cudak_correlator_time_smearing_f(const int num_sources,
         fractional_bandwidth = bandwidth_hz / freq_hz;
         uu = (station_u[SI] - station_u[SJ]) * 0.5f * fractional_bandwidth;
         vv = (station_v[SI] - station_v[SJ]) * 0.5f * fractional_bandwidth;
-        xx = (station_x[SI] - station_x[SJ]) * ONE_OVER_2PIf;
-        yy = (station_y[SI] - station_y[SJ]) * ONE_OVER_2PIf;
+        xx = (station_x[SI] - station_x[SJ]) * 0.5f;
+        yy = (station_y[SI] - station_y[SJ]) * 0.5f;
 
         // Compute the derivatives for time-average smearing.
         rot_angle = OMEGA_EARTHf * time_int_sec;
@@ -211,8 +211,8 @@ void oskar_cudak_correlator_time_smearing_d(const int num_sources,
         fractional_bandwidth = bandwidth_hz / freq_hz;
         uu = (station_u[SI] - station_u[SJ]) * 0.5 * fractional_bandwidth;
         vv = (station_v[SI] - station_v[SJ]) * 0.5 * fractional_bandwidth;
-        xx = (station_x[SI] - station_x[SJ]) * ONE_OVER_2PI;
-        yy = (station_y[SI] - station_y[SJ]) * ONE_OVER_2PI;
+        xx = (station_x[SI] - station_x[SJ]) * 0.5;
+        yy = (station_y[SI] - station_y[SJ]) * 0.5;
 
         // Compute the derivatives for time-average smearing.
         rot_angle = OMEGA_EARTH * time_int_sec;
