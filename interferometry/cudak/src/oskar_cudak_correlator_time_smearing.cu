@@ -297,14 +297,14 @@ void oskar_cudak_correlator_time_smearing_d(const int num_sources,
         sum.d = make_double2(0.0, 0.0);
         for (int i = 0; i < blockDim.x; ++i)
         {
-            sum.a.x += smem_f[i].a.x;
-            sum.a.y += smem_f[i].a.y;
-            sum.b.x += smem_f[i].b.x;
-            sum.b.y += smem_f[i].b.y;
-            sum.c.x += smem_f[i].c.x;
-            sum.c.y += smem_f[i].c.y;
-            sum.d.x += smem_f[i].d.x;
-            sum.d.y += smem_f[i].d.y;
+            sum.a.x += smem_d[i].a.x;
+            sum.a.y += smem_d[i].a.y;
+            sum.b.x += smem_d[i].b.x;
+            sum.b.y += smem_d[i].b.y;
+            sum.c.x += smem_d[i].c.x;
+            sum.c.y += smem_d[i].c.y;
+            sum.d.x += smem_d[i].d.x;
+            sum.d.y += smem_d[i].d.y;
         }
 
         // Determine 1D index.
