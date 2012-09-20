@@ -106,7 +106,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     oskar_Image image;
     oskar_Log log;
-    log.keep_file = 0;
+    log.keep_file = OSKAR_TRUE;
     int location = OSKAR_LOCATION_CPU;
 
 

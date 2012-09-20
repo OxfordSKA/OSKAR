@@ -35,9 +35,12 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_realloc.h"
 
 #include <cstdlib>
 #include <cstring>
+
+#include <matrix.h>
 
 void mex_vis_error_(const char* msg)
 {
@@ -65,8 +68,8 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
 
     /* Read structure fields into local mxArrays */
     int num_fields = mxGetNumberOfFields(v_in);
-    int num_fields_polarised = 28;
-    int num_fields_scalar = 21;
+    int num_fields_polarised = 32;
+    int num_fields_scalar = 25;
     if (!(num_fields == num_fields_polarised || num_fields == num_fields_scalar))
     {
         mexPrintf("\nERROR: input vis structure has %i fields, "
@@ -74,6 +77,7 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
                 num_fields_scalar);
         mex_vis_error_("incorrect number of fields");
     }
+
     int num_pols = (num_fields == num_fields_polarised) ? 4 : 1;
     mxArray* settings_path_ = mxGetField(v_in, 0, "settings_path");
     if (!settings_path_) mex_vis_error_field_("settings_path");
@@ -148,16 +152,27 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
     int location = OSKAR_LOCATION_CPU;
     oskar_visibilities_init(v_out, type | OSKAR_COMPLEX | OSKAR_MATRIX,
             location, num_channels, num_times, num_stations, &err);
-    if (err) mexErrMsgIdAndTxt("OSKAR:ERROR", "oskar_visibilities_init() "
-            "failed with code %i (%s).\n", err, oskar_get_error_string(err));
+    if (err)
+    {
+        mexErrMsgIdAndTxt("OSKAR:ERROR", "oskar_visibilities_init() "
+            "failed with code %i: %s.\n", err, oskar_get_error_string(err));
+    }
 
     /* Set meta-data */
     int length = mxGetN(settings_path_);
-    char str_settings_path[200];
-    mxGetString(settings_path_, str_settings_path, 200);
-    oskar_mem_init(&(v_out->settings_path), OSKAR_CHAR, location, length,
-            OSKAR_TRUE, &err);
-    memcpy(v_out->settings_path.data, str_settings_path, length*sizeof(char));
+    size_t buflen = (length * sizeof(mxChar)) + 1;;
+    char* buffer = (char*)mxMalloc(buflen);
+    mxGetString(settings_path_, buffer, (mwSize)buflen);
+    oskar_mem_realloc(&(v_out->settings_path), length + 1, &err);
+    if (err)
+    {
+        mexErrMsgIdAndTxt("OSKAR:ERROR", "oskar_mem_init() "
+                " failed with code %i: %s.\n", err,
+                oskar_get_error_string(err));
+    }
+    strcpy((char*)(v_out->settings_path.data), buffer);
+    mxFree(buffer);
+
     v_out->num_channels = num_channels;
     v_out->num_times = num_times;
     v_out->num_stations = num_stations;
@@ -287,4 +302,19 @@ void oskar_mex_vis_from_matlab_struct(oskar_Visibilities* v_out, const mxArray* 
             }
         }
     }
+
+#if 0
+    mexPrintf("settings path     = '%s'\n", (char*)v_out->settings_path.data);
+    mexPrintf("num_channels      = %i\n", v_out->num_channels);
+    mexPrintf("num_time          = %i\n", v_out->num_times);
+    mexPrintf("num_stations      = %i\n", v_out->num_stations);
+    mexPrintf("num_baselines     = %i\n", v_out->num_baselines);
+    mexPrintf("start freq.       = %f\n", v_out->freq_start_hz);
+    mexPrintf("freq inc          = %f\n", v_out->freq_inc_hz);
+    mexPrintf("channel bandwidth = %f\n", v_out->channel_bandwidth_hz);
+    mexPrintf("start time        = %f\n", v_out->time_start_mjd_utc);
+    mexPrintf("time inc          = %f\n", v_out->time_inc_seconds);
+    mexPrintf("ra0               = %f\n", v_out->phase_centre_ra_deg);
+    mexPrintf("dec0              = %f\n", v_out->phase_centre_dec_deg);
+#endif
 }

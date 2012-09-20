@@ -611,6 +611,8 @@ void Test_SkyModel::test_evaluate_gaussian_source_parameters()
 
     int num_sources = 1;
     int status = 0;
+    int zero_failed_sources = OSKAR_FALSE;
+
     oskar_SkyModel sky(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_sources);
     oskar_sky_model_set_source(&sky, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
             20 * 60 * asec2rad,
@@ -618,7 +620,8 @@ void Test_SkyModel::test_evaluate_gaussian_source_parameters()
             30 * deg2rad, &status);
     oskar_evaluate_gaussian_source_parameters(NULL, num_sources, &sky.gaussian_a,
             &sky.gaussian_b, &sky.gaussian_c, &sky.FWHM_major, &sky.FWHM_minor,
-            &sky.position_angle, &sky.RA, &sky.Dec, &sky.I, 0, 40.0 * M_PI/180.0);
+            &sky.position_angle, &sky.RA, &sky.Dec, zero_failed_sources,
+            &sky.I, 0, 40.0 * M_PI/180.0);
 //    sky.write("temp_sky_gaussian.osm");
 
 //    printf("\n");

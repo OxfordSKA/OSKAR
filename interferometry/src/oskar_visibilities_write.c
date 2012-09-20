@@ -104,6 +104,9 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
     oskar_binary_stream_write_header(stream, status);
     oskar_binary_stream_write_metadata(stream, status);
 
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* If settings path is set, write out the data. */
     if (vis->settings_path.data)
     {
@@ -112,15 +115,18 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
                 OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, 0, 0,
                 status);
 
-        /* Write the settings file. */
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
-        oskar_mem_binary_file_read_raw(&temp,
-                (const char*) vis->settings_path.data, status);
-        oskar_mem_binary_stream_write(&temp, stream,
-                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
-        oskar_mem_free(&temp, status);
+        /* Check the file exists */
+        if (oskar_file_exists((const char*)vis->settings_path.data))
+        {
+            /* Write the settings file. */
+            oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
+            oskar_mem_binary_file_read_raw(&temp,
+                    (const char*) vis->settings_path.data, status);
+            oskar_mem_binary_stream_write(&temp, stream,
+                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, 0, 0, status);
+            oskar_mem_free(&temp, status);
+        }
     }
-
     /* If log exists, then write it out. */
     log_data = oskar_log_file_data(log, &log_size);
     if (log_data)
@@ -142,6 +148,7 @@ void oskar_visibilities_write(const oskar_Visibilities* vis, oskar_Log* log,
             OSKAR_VIS_TAG_NUM_BASELINES, 0, vis->num_baselines, status);
 
     /* Write the dimension order. */
+    if (*status) return;
     oskar_mem_init(&temp, OSKAR_INT, OSKAR_LOCATION_CPU, 4, 1, status);
     dim = (int*) temp.data;
     dim[0] = OSKAR_VIS_DIM_CHANNEL;

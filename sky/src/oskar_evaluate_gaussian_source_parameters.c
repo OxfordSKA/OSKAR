@@ -50,12 +50,12 @@
 extern "C" {
 #endif
 
-/* FIXME HACK 'I' added as hack */
 int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
         const oskar_Mem* FWHM_major, const oskar_Mem* FWHM_minor,
         const oskar_Mem* position_angle, const oskar_Mem* RA,
-        const oskar_Mem* Dec, oskar_Mem* I, double ra0, double dec0)
+        const oskar_Mem* Dec, int zero_failed_sources, oskar_Mem* I,
+        double ra0, double dec0)
 {
     int i, j, err = 0, num_failed = 0;
     double a, b, c;
@@ -65,7 +65,6 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     double inv_std_min_2, inv_std_maj_2;
     double ra, dec;
     double ellipse_a, ellipse_b;
-
     oskar_Mem l, m, lon, lat;
     int ellipse_points;
 
@@ -169,8 +168,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
                     ellipse_points, &l, &m);
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
-                /* FIXME HACK */
-                ((double*)I->data)[i] = 0.0;
+                if (zero_failed_sources) ((double*)I->data)[i] = 0.0;
                 ++num_failed;
                 err = 0;
                 continue;
@@ -230,8 +228,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
                     ellipse_points, &l, &m);
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
-                /* FIXME HACK */
-                ((float*)I->data)[i] = 0.0;
+                if (zero_failed_sources) ((float*)I->data)[i] = 0.0;
                 ++num_failed;
                 err = 0;
                 continue;

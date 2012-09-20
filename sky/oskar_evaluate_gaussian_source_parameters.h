@@ -63,6 +63,9 @@ extern "C" {
  *
  * TODO better description of how this works... (see MATLAB code)
  *
+ * FIXME if zero failed sources stays in the code, it will need to be modified
+ * to also take Q,U,V
+ *
  *
  * @param log             OSKAR message log object
  * @param num_sources     Number of sources (length of source arrays)
@@ -74,6 +77,9 @@ extern "C" {
  * @param position_angle  Source position angle array
  * @param RA              Source right ascension array
  * @param Dec             Source declination array
+ * @param zero_failed_sources Bool to set to zero the amplitude of sources
+ *                        where the Gaussian solution fails
+ * @param I               Unpolarised source flux density.
  * @param ra0             Right ascension of the observation phase centre
  * @param dec0            Declination of the observation phase centre
  *
@@ -84,7 +90,8 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         oskar_Mem* gaussian_a, oskar_Mem* gaussian_b, oskar_Mem* gaussian_c,
         const oskar_Mem* FWHM_major, const oskar_Mem* FWHM_minor,
         const oskar_Mem* position_angle, const oskar_Mem* RA,
-        const oskar_Mem* Dec, oskar_Mem* I, double ra0, double dec0);
+        const oskar_Mem* Dec, int zero_failed_sources, oskar_Mem* I,
+        double ra0, double dec0);
 
 #ifdef __cplusplus
 }

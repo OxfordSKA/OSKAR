@@ -37,6 +37,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <matrix.h>
+
 mxArray* oskar_mex_vis_to_matlab_struct(const oskar_Visibilities* v_in,
         oskar_Mem* date, const char* filename)
 {

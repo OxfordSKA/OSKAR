@@ -71,6 +71,10 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     int max_sources_per_chunk = settings->sim.max_sources_per_chunk;
 
+    // Bool switch to set to zero the amplitude of sources where no gaussian
+    // source solution can be found.
+    int zero_failed_sources = OSKAR_FALSE;
+
     // Load OSKAR sky files.
     for (int i = 0; i < settings->sky.num_sky_files; ++i)
     {
@@ -112,7 +116,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 error = oskar_evaluate_gaussian_source_parameters(log,
                         temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
                         &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
-                        &temp.position_angle, &temp.RA, &temp.Dec, &temp.I,
+                        &temp.position_angle, &temp.RA, &temp.Dec,
+                        zero_failed_sources, &temp.I,
                         settings->obs.ra0_rad, settings->obs.dec0_rad);
                 if (error) return error;
 #endif
@@ -173,8 +178,9 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             error = oskar_evaluate_gaussian_source_parameters(log,
                     temp.num_sources, &temp.gaussian_a, &temp.gaussian_b,
                     &temp.gaussian_c, &temp.FWHM_major, &temp.FWHM_minor,
-                    &temp.position_angle, &temp.RA, &temp.Dec, &temp.I,
-                    settings->obs.ra0_rad, settings->obs.dec0_rad);
+                    &temp.position_angle, &temp.RA, &temp.Dec,
+                    zero_failed_sources, &temp.I, settings->obs.ra0_rad,
+                    settings->obs.dec0_rad);
             if (error) return error;
 #endif
 
@@ -274,8 +280,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, &temp.I, settings->obs.ra0_rad,
-                settings->obs.dec0_rad);
+                &temp.RA, &temp.Dec, zero_failed_sources, &temp.I,
+                settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
 #endif
 
@@ -342,7 +348,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, &temp.I, settings->obs.ra0_rad,
+                &temp.RA, &temp.Dec, zero_failed_sources, &temp.I,
+                settings->obs.ra0_rad,
                 settings->obs.dec0_rad);
         if (error) return error;
 #endif
@@ -412,8 +419,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         error = oskar_evaluate_gaussian_source_parameters(log, temp.num_sources,
                 &temp.gaussian_a, &temp.gaussian_b, &temp.gaussian_c,
                 &temp.FWHM_major, &temp.FWHM_minor, &temp.position_angle,
-                &temp.RA, &temp.Dec, &temp.I, settings->obs.ra0_rad,
-                settings->obs.dec0_rad);
+                &temp.RA, &temp.Dec, zero_failed_sources, &temp.I,
+                settings->obs.ra0_rad, settings->obs.dec0_rad);
         if (error) return error;
 #endif
 
