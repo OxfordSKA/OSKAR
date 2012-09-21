@@ -88,7 +88,7 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     double bandwidth = telescope->bandwidth_hz;
 
     // Get time-average smearing term and Greenwich hour angle.
-    double time_avg = telescope->time_int_sec;
+    double time_avg = telescope->time_average_sec;
     double gha0 = gast - telescope->ra0_rad;
 
     // Check type of Jones matrix

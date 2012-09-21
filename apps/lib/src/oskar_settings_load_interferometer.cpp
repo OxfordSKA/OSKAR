@@ -61,9 +61,9 @@ int oskar_settings_load_interferometer(oskar_SettingsInterferometer* settings,
     s.beginGroup("interferometer");
     {
         settings->channel_bandwidth_hz = s.value("channel_bandwidth_hz").toDouble();
-        settings->time_int_sec    = s.value("time_int_sec", 0.0).toDouble();
-        settings->num_vis_ave     = s.value("num_vis_ave", 1).toInt();
-        settings->num_fringe_ave  = s.value("num_fringe_ave", 1).toInt();
+        settings->time_average_sec = s.value("time_average_sec", 0.0).toDouble();
+        settings->num_vis_ave      = s.value("num_vis_ave", 1).toInt();
+        settings->num_fringe_ave   = s.value("num_fringe_ave", 1).toInt();
 
         // Get output visibility file name.
         t = s.value("oskar_vis_filename", "").toByteArray();

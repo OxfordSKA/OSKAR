@@ -64,7 +64,7 @@ void oskar_telescope_model_init(oskar_TelescopeModel* telescope, int type,
     telescope->dec0_rad = 0.0;
     telescope->wavelength_metres = 0.0;
     telescope->bandwidth_hz = 0.0;
-    telescope->time_int_sec = 0.0;
+    telescope->time_average_sec = 0.0;
 
     /* Initialise the arrays. */
     oskar_mem_init(&telescope->station_x, type, location,

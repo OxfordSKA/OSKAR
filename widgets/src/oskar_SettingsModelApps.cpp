@@ -957,7 +957,6 @@ void oskar_SettingsModelApps::init_settings_interferometer()
 {
     QString k, group;
 
-    // NOTE Currently loaded into SettingsObservation
     group = "interferometer";
     setLabel(group, "Interferometer settings");
 
@@ -967,10 +966,10 @@ void oskar_SettingsModelApps::init_settings_interferometer()
             "smearing. (Note that this can be different to the frequency "
             "increment if channels do not cover a contiguous frequency "
             "range.)");
-    k = group + "/time_int_sec";
-    declare(k, "Time integration [sec]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "The time integration, in seconds, used to simulate time "
-            "average smearing.");
+    k = group + "/time_average_sec";
+    declare(k, "Time average [sec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "The correlator time-average duration, in seconds, used to "
+            "simulate time averaging smearing.");
     k = group + "/num_vis_ave";
     declare(k, "Number of visibility averages", oskar_SettingsItem::INT_POSITIVE);
     setTooltip(k, "Number of averaged evaluations of the full Measurement "

@@ -66,7 +66,7 @@ void oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->dec0_rad = src->dec0_rad;
     dst->wavelength_metres = src->wavelength_metres;
     dst->bandwidth_hz = src->bandwidth_hz;
-    dst->time_int_sec = src->time_int_sec;
+    dst->time_average_sec = src->time_average_sec;
 
     /* Ensure there is enough room in the station array. */
     dst->station = realloc(dst->station,
