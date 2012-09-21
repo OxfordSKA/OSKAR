@@ -30,36 +30,42 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_write.h"
 #include "utility/oskar_get_error_string.h"
-#include "matlab/sky/lib/oskar_mex_sky_to_matlab_struct.h"
+#include "matlab/sky/lib/oskar_mex_sky_from_matlab_struct.h"
 
 #include <cstdio>
 #include <cstdlib>
 
 // MATLAB Entry function.
-void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
 {
     int status = 0;
-    if (num_in != 1 || num_out > 1)
+    if (num_in != 2 || num_out > 0)
     {
-        mexErrMsgTxt("Usage: sky = oskar.sky.load(filename)");
+        mexErrMsgTxt(
+                "Usage: \n"
+                "   oskar.sky.write(filename, sky)\n"
+                "\n"
+                "Description:\n"
+                "   Writes a MATLAB OSKAR sky model structure to an OSKAR sky "
+                "   model binary file");
     }
 
     // Extract arguments from MATLAB maxArray objects.
     const char* filename = mxArrayToString(in[0]);
+    oskar_SkyModel sky;
+    oskar_mex_sky_from_matlab_struct(&sky, in[1]);
+
 
     // Load the OSKAR sky model structure from the specified file.
-    oskar_SkyModel sky;
-    oskar_sky_model_load(&sky, filename, &status);
+    oskar_sky_model_write(filename, &sky, &status);
     if (status)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR",
-                "Error reading OSKAR sky model file: '%s'.\nERROR: %s.",
+                "Error saving OSKAR sky model file: '%s'.\nERROR: %s.",
                 filename, oskar_get_error_string(status));
     }
-
-    out[0] = oskar_mex_sky_to_matlab_struct(&sky, filename);
 
     oskar_sky_model_free(&sky, &status);
     if (status)

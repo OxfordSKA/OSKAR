@@ -30,7 +30,7 @@
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_read.h"
 #include "utility/oskar_get_error_string.h"
 #include "matlab/sky/lib/oskar_mex_sky_to_matlab_struct.h"
 
@@ -43,7 +43,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int status = 0;
     if (num_in != 1 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: sky = oskar.sky.load(filename)");
+        mexErrMsgTxt("Usage: sky = oskar.sky.read(filename)");
     }
 
     // Extract arguments from MATLAB maxArray objects.
@@ -51,7 +51,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 
     // Load the OSKAR sky model structure from the specified file.
     oskar_SkyModel sky;
-    oskar_sky_model_load(&sky, filename, &status);
+    oskar_sky_model_read(&sky, filename, OSKAR_LOCATION_CPU, &status);
     if (status)
     {
         mexErrMsgIdAndTxt("OSKAR:ERROR",
