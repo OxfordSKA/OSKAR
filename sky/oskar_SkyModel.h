@@ -64,7 +64,7 @@ struct OSKAR_EXPORT oskar_SkyModel
     int use_extended;         /**< Enable use of extended sources */
     oskar_Mem FWHM_major;     /**< Major axis FWHM for gaussian sources */
     oskar_Mem FWHM_minor;     /**< Minor axis FWHM for gaussian sources */
-    oskar_Mem position_angle; /**< Position angle for gaussian sources */
+    oskar_Mem position_angle; /**< Position angle for gaussian sources, (FIXME units?!) */
     oskar_Mem gaussian_a;     /**< Gaussian source width parameter */
     oskar_Mem gaussian_b;     /**< Gaussian source width parameter */
     oskar_Mem gaussian_c;     /**< Gaussian source width parameter */

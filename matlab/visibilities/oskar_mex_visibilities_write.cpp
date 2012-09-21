@@ -44,18 +44,17 @@
 
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
-    if (num_in != 2 || num_out > 1)
+    if (num_in != 2 || num_out > 0)
     {
-        mexErrMsgTxt("Usage: vis = oskar.visibilities.write(vis, filename)");
+        mexErrMsgTxt("Usage: oskar.visibilities.write(filename, vis)");
     }
 
     int status = OSKAR_SUCCESS;
 
     // Extract arguments from MATLAB mxArray objects.
+    const char* filename = mxArrayToString(in[0]);
     oskar_Visibilities vis;
-
-    oskar_mex_vis_from_matlab_struct(&vis, in[0]);
-    const char* filename = mxArrayToString(in[1]);
+    oskar_mex_vis_from_matlab_struct(&vis, in[1]);
 
     oskar_visibilities_write(&vis, 0, filename, &status);
     if (status)

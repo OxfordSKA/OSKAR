@@ -105,8 +105,6 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     int err = OSKAR_SUCCESS;
 
     oskar_Image image;
-    oskar_Log log;
-    log.keep_file = OSKAR_TRUE;
     int location = OSKAR_LOCATION_CPU;
 
 
@@ -132,7 +130,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         // Make image.
         mexPrintf("= Making image...\n");
         mexEvalString("drawnow"); // Force flush of matlab print buffer
-        err = oskar_make_image(&image, &log, &vis, &settings);
+        err = oskar_make_image(&image, 0, &vis, &settings);
         if (err)
         {
             mexErrMsgIdAndTxt("OSKAR:ERROR",

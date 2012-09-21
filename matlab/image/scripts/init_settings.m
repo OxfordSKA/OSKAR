@@ -31,7 +31,7 @@ settings.image_type = oskar.image.type.linear;
 
 settings.transform_type = oskar.image.transform.dft_2d;
 
-settings.filename = '';
-settings.fits_file = '';
+%settings.filename = '';
+%settings.fits_file = '';
 
 end

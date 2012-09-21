@@ -42,14 +42,14 @@
 
 #include <matrix.h>
 
-void mex_vis_error_(const char* msg)
+static void mex_vis_error_(const char* msg)
 {
     mexErrMsgIdAndTxt("OSKAR:ERROR", "Invalid input vis. structure (%s).\n",
             msg);
 }
 
 
-void mex_vis_error_field_(const char* msg)
+static void mex_vis_error_field_(const char* msg)
 {
     mexErrMsgIdAndTxt("OSKAR:ERROR", "Invalid input vis. structure "
             "(missing field: %s).\n", msg);

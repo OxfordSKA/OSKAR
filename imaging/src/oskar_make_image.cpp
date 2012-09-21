@@ -55,6 +55,7 @@
 #include "utility/oskar_get_data_type_string.h"
 
 #include <math.h>
+#include <stddef.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

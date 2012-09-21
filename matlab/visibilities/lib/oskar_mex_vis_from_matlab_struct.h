@@ -35,9 +35,7 @@
  */
 
 #include <mex.h>
-
 #include "oskar_global.h"
-
 #include "interferometry/oskar_Visibilities.h"
 
 

@@ -32,6 +32,7 @@
 
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_visibilities_read.h"
+#include "interferometry/oskar_visibilities_free.h"
 
 #include "matlab/visibilities/lib/oskar_mex_vis_to_matlab_struct.h"
 
@@ -90,4 +91,11 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     }
 
     out[0] = oskar_mex_vis_to_matlab_struct(&vis, &date, filename);
+
+    oskar_visibilities_free(&vis, &status);
+    if (status)
+    {
+        mexErrMsgIdAndTxt("oskar:error", "ERROR: %s\n",
+                oskar_get_error_string(status));
+    }
 }

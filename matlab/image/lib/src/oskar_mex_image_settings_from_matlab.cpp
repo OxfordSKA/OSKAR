@@ -31,6 +31,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <matrix.h>
+
 static void im_set_error_(const char* msg)
 {
     mexErrMsgIdAndTxt("OSKAR:ERROR", "ERROR: Invalid image settings structure (%s).\n",
@@ -67,10 +69,10 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     if (!image_type_) im_set_error_field_("image_type");
     mxArray* tranform_type_ = mxGetField(in, 0, "transform_type");
     if (!tranform_type_) im_set_error_field_("transform_type");
-    mxArray* filename_ = mxGetField(in, 0, "filename");
-    if (!filename_) im_set_error_field_("filename");
-    mxArray* fits_file_ = mxGetField(in, 0, "fits_file");
-    if (!fits_file_) im_set_error_field_("fits_file");
+//    mxArray* filename_ = mxGetField(in, 0, "filename");
+//    if (!filename_) im_set_error_field_("filename");
+//    mxArray* fits_file_ = mxGetField(in, 0, "fits_file");
+//    if (!fits_file_) im_set_error_field_("fits_file");
 
     /* Validity check */
     if (mxGetN(channel_range_) != 2)
@@ -118,4 +120,27 @@ void oskar_mex_image_settings_from_matlab(oskar_SettingsImage* out, const mxArra
     mxArray* transform_id = mxCreateNumericMatrix(1,1,mxINT32_CLASS, mxREAL);
     mexCallMATLAB(1, &transform_id, 1, &tranform_type_, "uint32");
     out->transform_type = (int)mxGetScalar(transform_id);
+
+    out->direction_type = OSKAR_IMAGE_DIRECTION_OBSERVATION;
+    out->ra_deg = 0.0;
+    out->dec_deg = 0.0;
+
+    mexPrintf("\n");
+    mexPrintf("FOV (deg) = %f\n", out->fov_deg);
+    mexPrintf("size      = %f\n", out->size);
+    mexPrintf("channel snapshots = %s\n",
+            out->channel_snapshots ? "true" : "false");
+    mexPrintf("channel range = %i -> %i\n", out->channel_range[0],
+            out->channel_range[1]);
+    mexPrintf("time snapshots = %s\n",
+            out->time_snapshots ? "true" : "false");
+    mexPrintf("time range = %i -> %i\n", out->time_range[0],
+            out->time_range[1]);
+    mexPrintf("transform type = %i\n", out->transform_type);
+    mexPrintf("direction type = %i\n", out->direction_type);
+    mexPrintf("ra0 (deg) = %f\n", out->ra_deg);
+    mexPrintf("dec0 (deg) = %f\n", out->dec_deg);
+    mexPrintf("oskar_image = '%s'\n", out->oskar_image);
+    mexPrintf("fits image = '%s'\n", out->fits_image);
+    mexPrintf("\n");
 }
