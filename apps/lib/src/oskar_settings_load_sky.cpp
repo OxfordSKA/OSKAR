@@ -53,12 +53,20 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("sky");
 
-    // Output OSKAR sky model file.
-    t = s.value("output_sky_file").toByteArray();
+    // Output OSKAR sky model text file.
+    t = s.value("output_text_file").toByteArray();
     if (t.size() > 0)
     {
-        sky->output_sky_file = (char*)malloc(t.size() + 1);
-        strcpy(sky->output_sky_file, t.constData());
+        sky->output_text_file = (char*)malloc(t.size() + 1);
+        strcpy(sky->output_text_file, t.constData());
+    }
+
+    // Output OSKAR sky model binary file.
+    t = s.value("output_binary_file").toByteArray();
+    if (t.size() > 0)
+    {
+        sky->output_binary_file = (char*)malloc(t.size() + 1);
+        strcpy(sky->output_binary_file, t.constData());
     }
 
     // Input OSKAR sky model files.

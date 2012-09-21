@@ -137,7 +137,8 @@ enum {
     OSKAR_TAG_GROUP_SETTINGS = 3,
     OSKAR_TAG_GROUP_RUN = 4,
     OSKAR_TAG_GROUP_VISIBILITY = 5,
-    OSKAR_TAG_GROUP_IMAGE = 6
+    OSKAR_TAG_GROUP_IMAGE = 6,
+    OSKAR_TAG_GROUP_SKY_MODEL = 7
 };
 
 /* Standard metadata tags. */

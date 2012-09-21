@@ -41,9 +41,11 @@
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_load_gsm.h"
+#include "sky/oskar_sky_model_read.h"
 #include "sky/oskar_sky_model_save.h"
 #include "sky/oskar_sky_model_set_gaussian_parameters.h"
 #include "sky/oskar_sky_model_set_source.h"
+#include "sky/oskar_sky_model_write.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
 #include "utility/oskar_log_value.h"
@@ -83,11 +85,23 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         {
             if (strlen(filename) > 0)
             {
+                int binary_file_error = 0;
+
                 // Load into a temporary structure.
+                binary_file_error = 0;
                 oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
                 oskar_log_message(log, 0, "Loading source file %s ...", filename);
-                oskar_sky_model_load(&temp, filename, &error);
-                if (error) return error;
+
+                // Try to read sky model as a binary file first.
+                // If this fails, read it as an ASCII file.
+                oskar_sky_model_read(&temp, filename, OSKAR_LOCATION_CPU,
+                        &binary_file_error);
+                if (binary_file_error)
+                    oskar_sky_model_load(&temp, filename, &error);
+                if (error) {
+                    printf("EEEEEEK\n");
+                    return error;
+                }
 
                 // Apply filters.
                 double inner = settings->sky.input_sky_filter.radius_inner;
@@ -462,17 +476,35 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 #endif
     }
 
-    // Write sky model out.
-    filename = settings->sky.output_sky_file;
-    if (filename)
+    // Write sky model out if needed.
+    if (settings->sky.output_text_file || settings->sky.output_binary_file)
     {
-        if (strlen(filename))
+        // Concatenate chunks into a single sky model.
+        oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, 0);
+        oskar_sky_model_combine_set(&temp, *sky_chunks, *num_chunks, &error);
+
+        // Write text file.
+        filename = settings->sky.output_text_file;
+        if (filename)
         {
-            oskar_log_message(log, 1, "Writing sky model file to disk as: %s",
-                    filename);
-            oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, 0);
-            oskar_sky_model_combine_set(&temp, *sky_chunks, *num_chunks, &error);
-            oskar_sky_model_save(filename, &temp, &error);
+            if (strlen(filename))
+            {
+                oskar_log_message(log, 1, "Writing sky model text file to "
+                        "disk as: %s", filename);
+                oskar_sky_model_save(filename, &temp, &error);
+            }
+        }
+
+        // Write binary file.
+        filename = settings->sky.output_binary_file;
+        if (filename)
+        {
+            if (strlen(filename))
+            {
+                oskar_log_message(log, 1, "Writing sky model binary file to "
+                        "disk as: %s", filename);
+                oskar_sky_model_write(filename, &temp, &error);
+            }
         }
     }
 

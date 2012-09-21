@@ -115,9 +115,9 @@ void oskar_SettingsModelApps::init_settings_sky_model()
 
     k = group + "/oskar_source_file";
     declare(k, "Input OSKAR source file", oskar_SettingsItem::INPUT_FILE_LIST);
-    setTooltip(k, "Paths to one or more OSKAR sky model text files. See the "
-            "accompanying documentation for a description of an OSKAR sky "
-            "model file.");
+    setTooltip(k, "Paths to one or more OSKAR sky model text or binary files. "
+            "See the accompanying documentation for a description of an "
+            "OSKAR sky model file.");
 
     group = "sky/oskar_source_file/filter";
     setLabel(group, "Filter settings");
@@ -388,11 +388,17 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "(from North to East), in degrees.");
 #endif
 
-    k = "sky/output_sky_file";
-    declare(k, "Output OSKAR source file",
+    k = "sky/output_binary_file";
+    declare(k, "Output OSKAR sky model binary file",
             oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip(k, "Path used to save the final sky model structure "
-            "(useful for debugging). Leave blank if not required.");
+    setTooltip(k, "Path used to save the final sky model structure as an "
+            "OSKAR binary file. Leave blank if not required.");
+
+    k = "sky/output_text_file";
+    declare(k, "Output OSKAR sky model text file",
+            oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "Path used to save the final sky model structure as a "
+            "text file (useful for debugging). Leave blank if not required.");
 }
 
 void oskar_SettingsModelApps::init_settings_observation()

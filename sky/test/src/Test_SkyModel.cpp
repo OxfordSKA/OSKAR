@@ -30,25 +30,12 @@
 #include "interferometry/oskar_telescope_model_resize.h"
 #include "sky/test/Test_SkyModel.h"
 #include "sky/oskar_SkyModel.h"
-#include "sky/oskar_sky_model_append.h"
-#include "sky/oskar_sky_model_copy.h"
-#include "sky/oskar_sky_model_compute_relative_lmn.h"
-#include "sky/oskar_sky_model_filter_by_flux.h"
-#include "sky/oskar_sky_model_filter_by_radius.h"
-#include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_sky_model_horizon_clip.h"
-#include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_load.h"
-#include "sky/oskar_sky_model_resize.h"
-#include "sky/oskar_sky_model_split.h"
-#include "sky/oskar_sky_model_set_source.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
-#include "sky/oskar_sky_model_append_to_set.h"
-#include "sky/oskar_sky_model_insert.h"
+#include "sky/oskar_sky_model_all_headers.h"
 #include "math/oskar_sph_to_lm.h"
 #include "utility/oskar_get_error_string.h"
 
-//#define TIMER_ENABLE
+#define TIMER_ENABLE
 #include "utility/timer.h"
 #include <cstdio>
 #include <cstdlib>
@@ -753,5 +740,83 @@ void Test_SkyModel::test_sky_model_set()
         }
         free(set);
     }
+}
+
+void Test_SkyModel::test_read_write()
+{
+    oskar_SkyModel sky;
+    int type = OSKAR_DOUBLE;
+    int location = OSKAR_LOCATION_CPU;
+    int status = 0;
+    int num_sources = 12345;
+    oskar_sky_model_init(&sky, type, location, num_sources, &status);
+    const char* filename = "test_sky_model_write.osm";
+
+    // Fill sky model with some test data.
+    for (int i = 0; i < num_sources; ++i)
+    {
+        double ra = 1.0 * i;
+        double dec = 2.1 * i;
+        double I = 3.2 * i;
+        double Q = 4.3 * i;
+        double U = 5.4 * i;
+        double V = 6.5 * i;
+        double freq0 = 7.6 * i;
+        double spix = 8.7 * i;
+        double maj = 9.8 * i;
+        double min = 10.9 * i;
+        double pa = 11.1 * i;
+        oskar_sky_model_set_source(&sky, i, ra, dec, I, Q, U, V,
+                freq0, spix, maj, min, pa, &status);
+    }
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+    // Write it to a file.
+    TIMER_START
+    oskar_sky_model_write(filename, &sky, &status);
+    TIMER_STOP("Writing binary sky file (%d sources)", num_sources);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+    // Read the data file into a new sky model structure.
+    oskar_SkyModel sky2;
+    TIMER_START
+    oskar_sky_model_read(&sky2, filename, location, &status);
+    TIMER_STOP("Reading binary sky file (%d sources)", num_sources);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+    // Check the contents of the sky model.
+    CPPUNIT_ASSERT_EQUAL(sky.num_sources, sky2.num_sources);
+    for (int i = 0; i < num_sources; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.RA.data))[i],
+                ((double*)(sky2.RA.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.Dec.data))[i],
+                ((double*)(sky2.Dec.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.I.data))[i],
+                ((double*)(sky2.I.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.Q.data))[i],
+                ((double*)(sky2.Q.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.U.data))[i],
+                ((double*)(sky2.U.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.V.data))[i],
+                ((double*)(sky2.V.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.reference_freq.data))[i],
+                ((double*)(sky2.reference_freq.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.spectral_index.data))[i],
+                ((double*)(sky2.spectral_index.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.FWHM_major.data))[i],
+                ((double*)(sky2.FWHM_major.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.FWHM_minor.data))[i],
+                ((double*)(sky2.FWHM_minor.data))[i], 1e-10);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((double*)(sky.position_angle.data))[i],
+                ((double*)(sky2.position_angle.data))[i], 1e-10);
+    }
+
+    // Free memory in both sky model structures.
+    oskar_sky_model_free(&sky2, &status);
+    oskar_sky_model_free(&sky, &status);
+
+    // Remove the data file.
+    remove(filename);
 }
 

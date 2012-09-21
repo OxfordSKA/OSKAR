@@ -139,9 +139,10 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         LV("Filter flux max [Jy]", "%.3e", s->sky.gsm_filter.flux_max);
     oskar_log_settings_sky_extended(log, depth, &s->sky.gsm_extended_sources);
 
-    /* Output OSKAR source file settings. */
+    /* Output OSKAR sky model file settings. */
     depth = 1;
-    LVS0("Output OSKAR source file", s->sky.output_sky_file);
+    LVS0("Output OSKAR sky model text file", s->sky.output_text_file);
+    LVS0("Output OSKAR sky model binary file", s->sky.output_binary_file);
 
     /* Random power-law generator settings. */
     depth = 1;

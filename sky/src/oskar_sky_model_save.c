@@ -89,8 +89,8 @@ void oskar_sky_model_save(const char* filename, const oskar_SkyModel* sky,
     {
         for (i = 0; i < sky->num_sources; ++i)
         {
-            fprintf(file, "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,"
-                    "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e\n",
+            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,"
+                    "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
                     ((double*)sky->RA.data)[i] * RAD2DEG,
                     ((double*)sky->Dec.data)[i] * RAD2DEG,
                     ((double*)sky->I.data)[i],
@@ -109,8 +109,8 @@ void oskar_sky_model_save(const char* filename, const oskar_SkyModel* sky,
     {
         for (i = 0; i < sky->num_sources; ++i)
         {
-            fprintf(file, "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,"
-                    "% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.6e,% -12.fe\n",
+            fprintf(file, "% 11.6f,% 11.6f,% 12.6e,% 12.6e,% 12.6e,"
+                    "% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 12.6e,% 11.6f\n",
                     ((float*)sky->RA.data)[i] * RAD2DEG,
                     ((float*)sky->Dec.data)[i] * RAD2DEG,
                     ((float*)sky->I.data)[i],

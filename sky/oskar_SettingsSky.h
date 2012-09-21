@@ -173,7 +173,8 @@ struct OSKAR_EXPORT oskar_SettingsSky
     oskar_SettingsSkyFilter gsm_filter;
     oskar_SettingsSkyExtendedSources gsm_extended_sources;
 
-    char* output_sky_file; /**< Optional name of output sky model. */
+    char* output_text_file; /**< Optional name of output sky model text file. */
+    char* output_binary_file; /**< Optional name of output sky model binary file. */
     oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
 
     int num_fits_files;    /**< Number of FITS files to load. */

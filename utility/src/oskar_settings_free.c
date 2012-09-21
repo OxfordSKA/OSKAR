@@ -58,8 +58,10 @@ int oskar_settings_free(oskar_Settings* settings)
     }
     free(settings->sky.input_sky_file);
     settings->sky.input_sky_file = NULL;
-    free(settings->sky.output_sky_file);
-    settings->sky.output_sky_file = NULL;
+    free(settings->sky.output_binary_file);
+    settings->sky.output_binary_file = NULL;
+    free(settings->sky.output_text_file);
+    settings->sky.output_text_file = NULL;
     free(settings->telescope.config_directory);
     settings->telescope.config_directory = NULL;
     free(settings->telescope.output_config_directory);

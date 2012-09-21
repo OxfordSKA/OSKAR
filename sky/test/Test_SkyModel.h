@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         CPPUNIT_TEST(test_evaluate_gaussian_source_parameters);
         CPPUNIT_TEST(test_insert);
         CPPUNIT_TEST(test_sky_model_set);
+        CPPUNIT_TEST(test_read_write);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -74,6 +75,7 @@ class Test_SkyModel : public CppUnit::TestFixture
         void test_evaluate_gaussian_source_parameters();
         void test_insert();
         void test_sky_model_set();
+        void test_read_write();
 };
 
 // Register the test class.

@@ -88,7 +88,7 @@ void oskar_sky_model_load(oskar_SkyModel* sky, const char* filename,
         while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
         {
             /* Set defaults. */
-            /*  (RA, Dec, I, Q, U, V, spix, freq0, FWHM maj, FWHM min, PA) */
+            /*  (RA, Dec, I, Q, U, V, freq0, spix, FWHM maj, FWHM min, PA) */
             int num_param = 11;
             int num_required = 3;
             double par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -124,7 +124,7 @@ void oskar_sky_model_load(oskar_SkyModel* sky, const char* filename,
         while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
         {
             /* Set defaults. */
-            /*  (RA, Dec, I, Q, U, V, spix, freq0, FWHM maj, FWHM min, PA) */
+            /*  (RA, Dec, I, Q, U, V, freq0, spix, FWHM maj, FWHM min, PA) */
             int num_param = 11;
             int num_required = 3;
             float par[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};

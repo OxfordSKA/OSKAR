@@ -26,38 +26,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_ALL_HEADERS_H_
-#define OSKAR_SKY_MODEL_ALL_HEADERS_H_
+#ifndef OSKAR_SKY_MODEL_WRITE_H_
+#define OSKAR_SKY_MODEL_WRITE_H_
 
 /**
- * @file oskar_sky_model_all_headers.h
+ * @file oskar_sky_model_write.h
  */
 
+#include "oskar_global.h"
 #include "sky/oskar_SkyModel.h"
-#include "sky/oskar_sky_model_append_to_set.h"
-#include "sky/oskar_sky_model_append.h"
-#include "sky/oskar_sky_model_combine_set.h"
-#include "sky/oskar_sky_model_compute_relative_lmn.h"
-#include "sky/oskar_sky_model_copy.h"
-#include "sky/oskar_sky_model_filter_by_flux.h"
-#include "sky/oskar_sky_model_filter_by_radius.h"
-#include "sky/oskar_sky_model_free.h"
-#include "sky/oskar_sky_model_get_ptr.h"
-#include "sky/oskar_sky_model_horizon_clip.h"
-#include "sky/oskar_sky_model_init.h"
-#include "sky/oskar_sky_model_insert.h"
-#include "sky/oskar_sky_model_load.h"
-#include "sky/oskar_sky_model_load_gsm.h"
-#include "sky/oskar_sky_model_location.h"
-#include "sky/oskar_sky_model_read.h"
-#include "sky/oskar_sky_model_resize.h"
-#include "sky/oskar_sky_model_rotate_to_position.h"
-#include "sky/oskar_sky_model_save.h"
-#include "sky/oskar_sky_model_scale_by_spectral_index.h"
-#include "sky/oskar_sky_model_set_gaussian_parameters.h"
-#include "sky/oskar_sky_model_set_source.h"
-#include "sky/oskar_sky_model_split.h"
-#include "sky/oskar_sky_model_type.h"
-#include "sky/oskar_sky_model_write.h"
 
-#endif /* OSKAR_SKY_MODEL_ALL_HEADERS_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief Writes an OSKAR sky model to a binary file.
+ *
+ * @details
+ * Writes the specified OSKAR sky model to a binary file.
+ *
+ * @param[in] filename    Output filename.
+ * @param[in] sky         Sky model to write.
+ * @param[in,out] status  Status return code.
+ */
+OSKAR_EXPORT
+void oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky,
+        int* status);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_SKY_MODEL_WRITE_H_ */

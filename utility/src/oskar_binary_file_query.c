@@ -28,6 +28,7 @@
 
 #include "imaging/oskar_Image.h"
 #include "interferometry/oskar_Visibilities.h"
+#include "sky/oskar_SkyModel.h"
 #include "utility/oskar_binary_stream_read.h"
 #include "utility/oskar_binary_file_query.h"
 #include "utility/oskar_binary_stream_read_header.h"
@@ -491,6 +492,69 @@ void oskar_binary_file_query(oskar_Log* log, const char* filename, int* status)
                 else if (tag == OSKAR_VIS_TAG_STATION_Z)
                 {
                     oskar_log_message(log, depth, "Station Z coordinates");
+                }
+            }
+            else if (group == OSKAR_TAG_GROUP_SKY_MODEL)
+            {
+                if (tag == OSKAR_SKY_TAG_NUM_SOURCES)
+                {
+                    int val = 0;
+                    oskar_binary_stream_read_int(stream, &index, group, tag,
+                            idx, &val, status);
+                    oskar_log_message(log, depth,
+                            "Number of sources: %d", val);
+                }
+                else if (tag == OSKAR_SKY_TAG_DATA_TYPE)
+                {
+                    int val = 0;
+                    oskar_binary_stream_read_int(stream, &index, group, tag,
+                            idx, &val, status);
+                    oskar_log_message(log, depth,
+                            "Data type: %s", oskar_get_data_type_string(val));
+                }
+                else if (tag == OSKAR_SKY_TAG_RA)
+                {
+                    oskar_log_message(log, depth, "Right Ascension values");
+                }
+                else if (tag == OSKAR_SKY_TAG_DEC)
+                {
+                    oskar_log_message(log, depth, "Declination values");
+                }
+                else if (tag == OSKAR_SKY_TAG_STOKES_I)
+                {
+                    oskar_log_message(log, depth, "Stokes I values");
+                }
+                else if (tag == OSKAR_SKY_TAG_STOKES_Q)
+                {
+                    oskar_log_message(log, depth, "Stokes Q values");
+                }
+                else if (tag == OSKAR_SKY_TAG_STOKES_U)
+                {
+                    oskar_log_message(log, depth, "Stokes U values");
+                }
+                else if (tag == OSKAR_SKY_TAG_STOKES_V)
+                {
+                    oskar_log_message(log, depth, "Stokes V values");
+                }
+                else if (tag == OSKAR_SKY_TAG_REF_FREQ)
+                {
+                    oskar_log_message(log, depth, "Reference frequency values");
+                }
+                else if (tag == OSKAR_SKY_TAG_SPECTRAL_INDEX)
+                {
+                    oskar_log_message(log, depth, "Spectral index values");
+                }
+                else if (tag == OSKAR_SKY_TAG_FWHM_MAJOR)
+                {
+                    oskar_log_message(log, depth, "Gaussian FWHM (major) values");
+                }
+                else if (tag == OSKAR_SKY_TAG_FWHM_MINOR)
+                {
+                    oskar_log_message(log, depth, "Gaussian FWHM (minor) values");
+                }
+                else if (tag == OSKAR_SKY_TAG_POSITION_ANGLE)
+                {
+                    oskar_log_message(log, depth, "Gaussian position angle values");
                 }
             }
 

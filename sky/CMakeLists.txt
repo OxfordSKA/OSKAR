@@ -37,6 +37,7 @@ set(sky_SRC
     src/oskar_sky_model_load.c
     src/oskar_sky_model_load_gsm.c
     src/oskar_sky_model_location.c
+    src/oskar_sky_model_read.c
     src/oskar_sky_model_resize.c
     src/oskar_sky_model_rotate_to_position.c
     src/oskar_sky_model_save.c
@@ -45,6 +46,7 @@ set(sky_SRC
     src/oskar_sky_model_set_source.c
     src/oskar_sky_model_split.c
     src/oskar_sky_model_type.c
+    src/oskar_sky_model_write.c
     src/oskar_SkyModel.cpp
 )
 

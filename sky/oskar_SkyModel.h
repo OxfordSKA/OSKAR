@@ -137,4 +137,22 @@ struct OSKAR_EXPORT oskar_SkyModel
 };
 typedef struct oskar_SkyModel oskar_SkyModel;
 
+/* To maintain binary compatibility, do not change the values
+ * in the lists below. */
+enum {
+    OSKAR_SKY_TAG_NUM_SOURCES = 1,
+    OSKAR_SKY_TAG_DATA_TYPE = 2,
+    OSKAR_SKY_TAG_RA = 3,
+    OSKAR_SKY_TAG_DEC = 4,
+    OSKAR_SKY_TAG_STOKES_I = 5,
+    OSKAR_SKY_TAG_STOKES_Q = 6,
+    OSKAR_SKY_TAG_STOKES_U = 7,
+    OSKAR_SKY_TAG_STOKES_V = 8,
+    OSKAR_SKY_TAG_REF_FREQ = 9,
+    OSKAR_SKY_TAG_SPECTRAL_INDEX = 10,
+    OSKAR_SKY_TAG_FWHM_MAJOR = 11,
+    OSKAR_SKY_TAG_FWHM_MINOR = 12,
+    OSKAR_SKY_TAG_POSITION_ANGLE = 13
+};
+
 #endif /* OSKAR_SKY_MODEL_H_ */
