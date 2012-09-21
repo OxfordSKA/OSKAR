@@ -30,7 +30,7 @@
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_to_sky_model.h"
 #endif
-#include "sky/oskar_sky_model_write.h"
+#include "sky/oskar_sky_model_save.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_log_error.h"
 #include <cstdio>
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     }
 
     // Write out the sky model.
-    oskar_sky_model_write(argv[2], &sky, &error);
+    oskar_sky_model_save(argv[2], &sky, &error);
     if (error)
     {
         oskar_log_error(0, oskar_get_error_string(error));

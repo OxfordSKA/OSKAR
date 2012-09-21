@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "sky/oskar_sky_model_write.h"
+#include "sky/oskar_sky_model_save.h"
 #include "sky/oskar_sky_model_type.h"
 #include "sky/oskar_sky_model_location.h"
 #include <stdlib.h>
@@ -45,7 +44,7 @@
 extern "C" {
 #endif
 
-void oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky,
+void oskar_sky_model_save(const char* filename, const oskar_SkyModel* sky,
         int* status)
 {
     int i, type;

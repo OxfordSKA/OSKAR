@@ -41,9 +41,9 @@
 #include "sky/oskar_sky_model_compute_relative_lmn.h"
 #include "sky/oskar_sky_model_load.h"
 #include "sky/oskar_sky_model_load_gsm.h"
+#include "sky/oskar_sky_model_save.h"
 #include "sky/oskar_sky_model_set_gaussian_parameters.h"
 #include "sky/oskar_sky_model_set_source.h"
-#include "sky/oskar_sky_model_write.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
 #include "utility/oskar_log_value.h"
@@ -472,7 +472,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                     filename);
             oskar_SkyModel temp(type, OSKAR_LOCATION_CPU, 0);
             oskar_sky_model_combine_set(&temp, *sky_chunks, *num_chunks, &error);
-            oskar_sky_model_write(filename, &temp, &error);
+            oskar_sky_model_save(filename, &temp, &error);
         }
     }
 

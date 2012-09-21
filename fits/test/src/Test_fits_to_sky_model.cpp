@@ -33,7 +33,7 @@
 #include "imaging/oskar_image_free.h"
 #include "imaging/oskar_image_init.h"
 #include "imaging/oskar_image_resize.h"
-#include "sky/oskar_sky_model_write.h"
+#include "sky/oskar_sky_model_save.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_Mem.h"
 
@@ -132,7 +132,7 @@ void Test_fits_to_sky_model::test_method()
             }
         }
 
-        oskar_sky_model_write("test_grid.osm", &sky_temp, &err);
+        oskar_sky_model_save("test_grid.osm", &sky_temp, &err);
     }
 
     // Load the sky model (with downsampling, with noise floor).
@@ -209,17 +209,17 @@ void Test_fits_to_sky_model::test_method()
         // Read Cyg A model.
         oskar_fits_to_sky_model(0, "Cyg_A-P.model.FITS",
                 &sky_Cyg_A_4, spectral_index, 0.02, 0.0, 4);
-        oskar_sky_model_write("temp_test_Cyg_A_model_4.osm", &sky_Cyg_A_4, &err);
+        oskar_sky_model_save("temp_test_Cyg_A_model_4.osm", &sky_Cyg_A_4, &err);
 
         // Read Cyg A model.
         oskar_fits_to_sky_model(0, "Cyg_A-P.model.FITS",
                 &sky_Cyg_A_3, spectral_index, 0.02, 0.0, 3);
-        oskar_sky_model_write("temp_test_Cyg_A_model_3.osm", &sky_Cyg_A_3, &err);
+        oskar_sky_model_save("temp_test_Cyg_A_model_3.osm", &sky_Cyg_A_3, &err);
 
         // Read Cas A model.
         oskar_fits_to_sky_model(0, "Cas_A-P.models.FITS",
                 &sky_Cas_A_2, spectral_index, 0.02, 0.0, 2);
-        oskar_sky_model_write("temp_test_Cas_A_model_2.osm", &sky_Cas_A_2, &err);
+        oskar_sky_model_save("temp_test_Cas_A_model_2.osm", &sky_Cas_A_2, &err);
     }
     {
         oskar_SkyModel sky_Cyg_A, sky_Cas_A;
@@ -227,12 +227,12 @@ void Test_fits_to_sky_model::test_method()
         // Read Cyg A model.
         oskar_fits_to_sky_model(0, "Cyg_A-P.model.FITS",
                 &sky_Cyg_A, spectral_index, 0.02, 0.0, 1);
-        oskar_sky_model_write("temp_test_Cyg_A_model_1.osm", &sky_Cyg_A, &err);
+        oskar_sky_model_save("temp_test_Cyg_A_model_1.osm", &sky_Cyg_A, &err);
 
         // Read Cas A model.
         oskar_fits_to_sky_model(0, "Cas_A-P.models.FITS",
                 &sky_Cas_A, spectral_index, 0.02, 0.0, 1);
-        oskar_sky_model_write("temp_test_Cas_A_model_1.osm", &sky_Cas_A, &err);
+        oskar_sky_model_save("temp_test_Cas_A_model_1.osm", &sky_Cas_A, &err);
     }
 
     // Free memory.

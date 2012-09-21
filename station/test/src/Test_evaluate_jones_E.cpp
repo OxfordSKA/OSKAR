@@ -28,8 +28,8 @@
 
 #include "station/test/Test_evaluate_jones_E.h"
 
-#include "sky/oskar_sky_model_write.h"
 #include "sky/oskar_sky_model_resize.h"
+#include "sky/oskar_sky_model_save.h"
 #include "math/oskar_Jones.h"
 #include "math/oskar_jones_get_station_pointer.h"
 #include "math/oskar_linspace.h"

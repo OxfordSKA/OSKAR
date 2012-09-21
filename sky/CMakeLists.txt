@@ -39,12 +39,12 @@ set(sky_SRC
     src/oskar_sky_model_location.c
     src/oskar_sky_model_resize.c
     src/oskar_sky_model_rotate_to_position.c
+    src/oskar_sky_model_save.c
     src/oskar_sky_model_scale_by_spectral_index.cu
     src/oskar_sky_model_set_gaussian_parameters.c
     src/oskar_sky_model_set_source.c
     src/oskar_sky_model_split.c
     src/oskar_sky_model_type.c
-    src/oskar_sky_model_write.c
     src/oskar_SkyModel.cpp
 )
 

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SKY_MODEL_WRITE_H_
-#define OSKAR_SKY_MODEL_WRITE_H_
+#ifndef OSKAR_SKY_MODEL_SAVE_H_
+#define OSKAR_SKY_MODEL_SAVE_H_
 
 /**
- * @file oskar_sky_model_write.h
+ * @file oskar_sky_model_save.h
  */
 
 #include "oskar_global.h"
@@ -41,10 +41,10 @@ extern "C" {
 #endif
 
 /**
- * @brief Writes an OSKAR sky model to a text file.
+ * @brief Saves an OSKAR sky model to a text file.
  *
  * @details
- * Writes the specified OSKAR sky model to an ASCII text file.
+ * Saves the specified OSKAR sky model to an ASCII text file.
  * The file contains a simple header, describing the number of sources written,
  * and the data file columns.
  *
@@ -56,11 +56,11 @@ extern "C" {
  * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-void oskar_sky_model_write(const char* filename, const oskar_SkyModel* sky,
+void oskar_sky_model_save(const char* filename, const oskar_SkyModel* sky,
         int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SKY_MODEL_WRITE_H_ */
+#endif /* OSKAR_SKY_MODEL_SAVE_H_ */

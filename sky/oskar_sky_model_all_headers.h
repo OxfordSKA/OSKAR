@@ -51,11 +51,11 @@
 #include "sky/oskar_sky_model_location.h"
 #include "sky/oskar_sky_model_resize.h"
 #include "sky/oskar_sky_model_rotate_to_position.h"
+#include "sky/oskar_sky_model_save.h"
 #include "sky/oskar_sky_model_scale_by_spectral_index.h"
 #include "sky/oskar_sky_model_set_gaussian_parameters.h"
 #include "sky/oskar_sky_model_set_source.h"
 #include "sky/oskar_sky_model_split.h"
 #include "sky/oskar_sky_model_type.h"
-#include "sky/oskar_sky_model_write.h"
 
 #endif /* OSKAR_SKY_MODEL_ALL_HEADERS_H_ */
