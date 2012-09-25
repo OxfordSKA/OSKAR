@@ -103,7 +103,7 @@ QVariant oskar_SettingsModel::data(const QModelIndex& index, int role) const
     else if (role == Qt::ForegroundRole)
     {
         if (item->hidden())
-            return QColor(Qt::gray);
+            return QColor(Qt::lightGray);
         if (item->enabled())
         {
             if (item->critical())
@@ -312,8 +312,7 @@ Qt::ItemFlags oskar_SettingsModel::flags(const QModelIndex& index) const
     }
     else if (index.column() == 1 && item->type() == oskar_SettingsItem::BOOL)
     {
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable |
-                Qt::ItemIsUserCheckable;
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable |  Qt::ItemIsUserCheckable;
     }
 
     return Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;

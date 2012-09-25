@@ -196,6 +196,12 @@ static int load_noise_values(oskar_SettingsSystemNoiseValue* value,
             if (error) return error;
 
             error = load_noise_type(&value->efficiency, s, "efficiency");
+            if (value->efficiency.start < 0.0 || value->efficiency.start > 1.0)
+                return OSKAR_ERR_SETTINGS_INTERFEROMETER;
+            if (value->efficiency.end < 0.0 || value->efficiency.end > 1.0)
+                 return OSKAR_ERR_SETTINGS_INTERFEROMETER;
+            if (value->efficiency.start > value->efficiency.end)
+                return OSKAR_ERR_SETTINGS_INTERFEROMETER;
             if (error) return error;
         }
         s.endGroup();
