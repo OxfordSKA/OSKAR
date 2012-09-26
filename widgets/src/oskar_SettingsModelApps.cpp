@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+q * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -680,14 +680,17 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 << "Range";
         declare(key, "Frequency specification", options);
         setDependency(key, root + "/enable", true);
-        setTooltip(key,  "Specification of the list of frequencies at which noise values are defined:"
+        setTooltip(key,  "Specification of the list of frequencies at which "
+                "noise values are defined:"
                 "<ul>"
-                "<li><b>Telescope model</b>: frequencies are loaded from the data file in the "
-                "telescope model directory.</li>"
-                "<li><b>Observation settings</b>: frequencies are defined by the observation "
-                "settings.</li>"
-                "<li><b>Data file</b>: frequencies are loaded from the specified data file.</li>"
-                "<li><b>Range</b>: frequencies are specified by the range parameters.</li>"
+                "<li><b>Telescope model</b>: frequencies are loaded from the "
+                "data file in the telescope model directory.</li>"
+                "<li><b>Observation settings</b>: frequencies are defined by "
+                "the observation settings.</li>"
+                "<li><b>Data file</b>: frequencies are loaded from the "
+                "specified data file.</li>"
+                "<li><b>Range</b>: frequencies are specified by the range "
+                "parameters.</li>"
                 "</ul>");
         {
             QString root = key;
@@ -720,17 +723,20 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
         setDependency(key, root + "/enable", true);
         setTooltip(key,  "Noise value specification type:"
                 "<ul>"
-                "<li><b>Telescope model priority</b>: values are loaded from files in the "
-                "telescope model directory, according to the default file type priority.</li>"
-                "<li><b>RMS flux density</b>: use values specified in terms of noise RMS flux "
-                "density. </li>"
-                "<li><b>Sensitivity</b>: use values specified in terms of station sensitivity.</li>"
-                "<li><b>Temperature ...</b>: use values specified by the system temperature, "
-                "effective area, and system efficiency.</li>"
+                "<li><b>Telescope model priority</b>: values are loaded from "
+                "files in the telescope model directory, according to the "
+                "default file type priority.</li>"
+                "<li><b>RMS flux density</b>: use values specified in terms of "
+                "noise RMS flux density. </li>"
+                "<li><b>Sensitivity</b>: use values specified in terms of "
+                "station sensitivity.</li>"
+                "<li><b>Temperature ...</b>: use values specified by the "
+                "system temperature, effective area, and system efficiency.</li>"
                 "</ul>"
-                "<i>Note: Noise values are interpreted as a function of frequency. The "
-                "list of frequencies to which noise values correspond is specified by the noise "
-                "frequency selection.</i>.");
+                "<i>Note: Noise values are interpreted as a function of "
+                "frequency. The list of frequencies to which noise values "
+                "correspond, is based upon the value of the the noise frequency "
+                "specification.</i>.");
 
         // --- RMS flux density
         {
@@ -743,11 +749,12 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             declare(key, "RMS flux density", options);
             setTooltip(key, "Root mean square (RMS) flux density specification:"
                     "<ul>"
-                    "<li><b>No override</b>: values are loaded from RMS files found in the "
-                    "telescope model directory.</li>"
-                    "<li><b>Data file</b>: values are loaded from the specified file.</li>"
-                    "<li><b>Range</b>: values are evaluated according to the specified range "
-                    "parameters.</li>"
+                    "<li><b>No override</b>: values are loaded from RMS files "
+                    "found in the telescope model directory.</li>"
+                    "<li><b>Data file</b>: values are loaded from the specified "
+                    "file.</li>"
+                    "<li><b>Range</b>: values are evaluated according to the "
+                    "specified range parameters.</li>"
                     "</ul>");
             setDependency(key, root, noiseOptions[1]);
             {
@@ -779,11 +786,13 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             setDependency(key, root, noiseOptions[2]);
             setTooltip(key, "Sensitivity specification type:"
                     "<ul>"
-                    "<li><b>No override</b>: values are loaded from sensitivity files found in the "
-                    "telescope model directory.</li>"
-                    "<li><b>Data file</b>: values are loaded from the specified file.</li>"
-                    "<li><b>Range</b>: values are evaluated according to the specified range "
-                    "parameters.</li>"
+                    "<li><b>No override</b>: values are loaded from "
+                    "sensitivity files found in the telescope model "
+                    "directory.</li>"
+                    "<li><b>Data file</b>: values are loaded from the specified "
+                    "file.</li>"
+                    "<li><b>Range</b>: values are evaluated according to the "
+                    "specified range parameters.</li>"
                     "</ul>");
             {
                 QString root = key;
@@ -820,11 +829,13 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 declare(key, "System temperature", options);
                 setTooltip(key, "System temperature specification type:"
                         "<ul>"
-                        "<li><b>No override</b>: values are loaded from system temperature files found "
-                        "in the telescope model directory.</li>"
-                        "<li><b>Data file</b>: values are loaded from the specified file.</li>"
-                        "<li><b>Range</b>: values are evaluated according to the specified range "
-                        "parameters.</li>"
+                        "<li><b>No override</b>: values are loaded from system "
+                        "temperature files found in the telescope model "
+                        "directory.</li>"
+                        "<li><b>Data file</b>: values are loaded from the "
+                        "specified file.</li>"
+                        "<li><b>Range</b>: values are evaluated according to "
+                        "the specified range parameters.</li>"
                         "</ul>");
                 {
                     QString root = key;
@@ -854,11 +865,13 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 declare(key, "Effective Area", options);
                 setTooltip(key, "Station effective area specification type:"
                         "<ul>"
-                        "<li><b>No override</b>: values are loaded from effective area files found "
-                        "in the telescope model directory.</li>"
-                        "<li><b>Data file</b>: values are loaded from the specified file.</li>"
-                        "<li><b>Range</b>: values are evaluated according to the specified range "
-                        "parameters.</li>"
+                        "<li><b>No override</b>: values are loaded from "
+                        "effective area files found in the telescope model "
+                        "directory.</li>"
+                        "<li><b>Data file</b>: values are loaded from the "
+                        "specified file.</li>"
+                        "<li><b>Range</b>: values are evaluated according to "
+                        "the specified range parameters.</li>"
                         "</ul>");
                 {
                     QString root = key;
@@ -867,13 +880,15 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                     setDependency(key, root, options[1]);
                     setTooltip(key, "Data file containing effective area value(s).");
                     key = root + "/start";
-                    declare(key, "Start (m^2)", oskar_SettingsItem::DOUBLE);
+                    declare(key, "Start (square metres)", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
-                    setTooltip(key, "Effective area range start value, in m<sup>2</sup>.");
+                    setTooltip(key, "Effective area range start value, in "
+                            "m<sup>2</sup>.");
                     key = root + "/end";
-                    declare(key, "End (m^2)", oskar_SettingsItem::DOUBLE);
+                    declare(key, "End (square metres)", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
-                    setTooltip(key, "Effective area range end value, in m<sup>2</sup>.");
+                    setTooltip(key, "Effective area range end value, in "
+                            "m<sup>2</sup>.");
                 }
             }
 
@@ -888,26 +903,31 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 declare(key, "System Efficiency", options);
                 setTooltip(key, "Station system efficiency specification type."
                         "<ul>"
-                        "<li><b>No override</b>: values are loaded from system efficiency files found "
-                        "in the telescope model directory.</li>"
-                        "<li><b>Data file</b>: values are loaded from the specified file.</li>"
-                        "<li><b>Range</b>: values are evaluated according to the specified range "
-                        "parameters.</li>"
+                        "<li><b>No override</b>: values are loaded from system "
+                        "efficiency files found in the telescope model "
+                        "directory.</li>"
+                        "<li><b>Data file</b>: values are loaded from the "
+                        "specified file.</li>"
+                        "<li><b>Range</b>: values are evaluated according to "
+                        "the specified range parameters.</li>"
                         "</ul>");
                 {
                     QString root = key;
                     key = root + "/file";
                     declare(key, "Data file", oskar_SettingsItem::INPUT_FILE_NAME);
                     setDependency(key, root, options[1]);
-                    setTooltip(key, "Data file containing system efficiency value(s).");
+                    setTooltip(key, "Data file containing system efficiency "
+                            "value(s).");
                     key = root + "/start";
                     declare(key, "Start", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
-                    setTooltip(key, "System efficiency range start value (allowed range: 0.0 to 1.0).");
+                    setTooltip(key, "System efficiency range start value "
+                            "(allowed range: 0.0 to 1.0).");
                     key = root + "/end";
                     declare(key, "End", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
-                    setTooltip(key, "System efficiency range end value (allowed range: 0.0 to 1.0).");
+                    setTooltip(key, "System efficiency range end value "
+                            "(allowed range: 0.0 to 1.0).");
                 }
             }
         } // [ Temperature, Area and efficiency. ]
