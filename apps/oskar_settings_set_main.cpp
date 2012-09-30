@@ -46,8 +46,9 @@ int main(int argc, char** argv)
 
     // Set the value.
     QSettings settings(QString(filename), QSettings::IniFormat);
+    if (!settings.contains("version"))
+        settings.setValue("version", OSKAR_VERSION_STR);
     settings.setValue(QString(key), QString(value));
-    settings.sync();
 
     return OSKAR_SUCCESS;
 }

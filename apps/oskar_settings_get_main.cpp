@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     if (!QFile::exists(filename))
     {
-        fprintf(stderr, "ERROR: Specified settings file '%s' not found!.", filename);
+        fprintf(stderr, "ERROR: Specified settings file '%s' not found.", filename);
         usage();
         return OSKAR_ERR_INVALID_ARGUMENT;
     }

@@ -569,6 +569,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
             // Set the data in the settings file.
             if ((role != LoadRole) && settings_)
             {
+                setVersion();
                 if (data.isNull())
                     settings_->remove(item->key());
                 else
@@ -681,6 +682,13 @@ QHash<QString, QVariant> oskar_SettingsModel::settings() const
     return hash;
 }
 
+QString oskar_SettingsModel::version() const
+{
+    if (settings_)
+       return settings_->value("version").toString();
+    return QString();
+}
+
 
 // Private methods.
 
@@ -786,6 +794,16 @@ void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
                 settings_->setValue(item->key(), item->value());
             saveFromParentIndex(idx);
         }
+    }
+}
+
+void oskar_SettingsModel::setVersion()
+{
+    if (settings_)
+    {
+        // Write a version key only if it doesn't already exist in the file.
+        if (!settings_->contains("version"))
+            settings_->setValue("version", OSKAR_VERSION_STR);
     }
 }
 

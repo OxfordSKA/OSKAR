@@ -104,6 +104,7 @@ public:
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
     QHash<QString, QVariant> settings() const;
+    QString version() const;
 
 private:
     void append(const QString& key, const QString& subkey, int type,
@@ -116,6 +117,7 @@ private:
     int numModified(const QModelIndex& parent) const;
     void restoreAll(const QModelIndex& parent = QModelIndex());
     void saveFromParentIndex(const QModelIndex& parent);
+    void setVersion();
 
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;
