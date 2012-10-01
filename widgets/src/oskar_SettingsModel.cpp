@@ -440,6 +440,7 @@ void oskar_SettingsModel::saveSettingsFile(const QString& filename)
 
         // Create new settings object from supplied filename.
         settings_ = new QSettings(filename, QSettings::IniFormat);
+        setVersion();
 
         // Set the contents of the file.
         saveFromParentIndex(QModelIndex());
