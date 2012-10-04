@@ -7,7 +7,8 @@ set(sky_SRC
     src/oskar_date_time_to_mjd.c
     src/oskar_equation_of_equinoxes_fast.c
     src/oskar_evaluate_gaussian_source_parameters.c
-    src/oskar_evaluate_jones_R.cu
+    src/oskar_evaluate_jones_R_cuda.cu
+    src/oskar_evaluate_jones_R.c
     src/oskar_galactic_to_fk5.c
     src/oskar_generate_random_coordinate.c
     src/oskar_ha_dec_to_az_el.c

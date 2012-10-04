@@ -68,7 +68,8 @@ struct OSKAR_EXPORT oskar_Jones
      * @param[in] num_stations Number of elements in the station dimension.
      * @param[in] num_sources Number of elements in the source dimension.
      */
-    oskar_Jones(int type, int location, int num_stations, int num_sources);
+    oskar_Jones(int type = OSKAR_DOUBLE, int location = OSKAR_LOCATION_CPU,
+            int num_stations = 0, int num_sources = 0);
 
     /**
      * @brief Copies an oskar_Jones data structure.

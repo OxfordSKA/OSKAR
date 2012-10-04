@@ -61,10 +61,11 @@ extern "C" {
  * @param[in] sky        Input sky model.
  * @param[in] telescope  Input telescope model.
  * @param[in] gast       The Greenwich Apparent Sidereal Time, in radians.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
-        const oskar_TelescopeModel* telescope, double gast);
+void oskar_evaluate_jones_R(oskar_Jones* R, const oskar_SkyModel* sky,
+        const oskar_TelescopeModel* telescope, double gast, int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,20 +43,21 @@ extern "C" {
  * @brief Generates a pair of random source coordinates.
  *
  * @details
- * Note: In order to modify the positions of coordinates returned change the
+ * This function generates a pair of random source coordinates such that
+ * a large distribution of points will be evenly scattered over the sphere
+ * (i.e. no clustering near the poles).
+ *
+ * Note: In order to modify the positions of coordinates returned, change the
  * random number generator seed with the function srand().
  *
- * @param[out] ra   Right Ascension coordinate returned.
- * @param[out] dec  Declination coordinate returned.
- *
- * @return An error code.
+ * @param[out] longitude   Longitude coordinate returned.
+ * @param[out] latitude    Latitude coordinate returned.
  */
 OSKAR_EXPORT
-int oskar_generate_random_coordinate(double* ra, double* dec);
+void oskar_generate_random_coordinate(double* longitude, double* latitude);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* OSKAR_GENERATE_RANDOM_COORDINATE_H_ */

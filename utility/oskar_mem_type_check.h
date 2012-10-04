@@ -42,6 +42,24 @@ extern "C" {
 
 /**
  * @brief
+ * Returns the base type of an OSKAR memory data element enumerator.
+ *
+ * @details
+ * Returns the base type of an OSKAR memory data element enumerator
+ * (OSKAR_SINGLE, OSKAR_DOUBLE, OSKAR_INT, or OSKAR_CHAR), ignoring complex
+ * or matrix types.
+ *
+ * @param[in] mem_type Type of oskar_Mem structure.
+ *
+ * @return The base type of the memory.
+ */
+static int oskar_mem_base_type(const int mem_type)
+{
+    return (mem_type & 0x0F);
+}
+
+/**
+ * @brief
  * Checks if the OSKAR memory pointer data element is double precision.
  *
  * @details

@@ -32,19 +32,30 @@
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/oskar_evaluate_jones_K.h"
 #include "interferometry/oskar_evaluate_uvw_station.h"
+#include "interferometry/oskar_telescope_model_copy.h"
+#include "interferometry/oskar_telescope_model_free.h"
+#include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
 #include "math/oskar_Jones.h"
+#include "math/oskar_jones_free.h"
+#include "math/oskar_jones_init.h"
 #include "math/oskar_jones_join.h"
 #include "math/oskar_jones_set_size.h"
 #include "sky/oskar_evaluate_jones_R.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
+#include "sky/oskar_sky_model_copy.h"
+#include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_horizon_clip.h"
+#include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_scale_by_spectral_index.h"
+#include "sky/oskar_sky_model_type.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "utility/oskar_Device_curand_state.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_warning.h"
 #include "utility/oskar_mem_clear_contents.h"
+#include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_scale_real.h"
 #include <cstdio>
@@ -56,9 +67,14 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         int num_sky_chunks)
 {
     int status = OSKAR_SUCCESS;
-    int device_id = 0;
+    int device_id = 0, type, n_stations, n_baselines, n_src;
+    int complx, matrix;
     size_t mem_free = 0, mem_total = 0;
     cudaDeviceProp device_prop;
+    oskar_Jones J, R, E, K;
+    oskar_Mem vis, u, v, w;
+    oskar_SkyModel sky_gpu, local_sky;
+    oskar_TelescopeModel tel_gpu;
 
     // Always clear the output array to ensure that all visibilities are zero
     // if there are never any visible sources in the sky model.
@@ -75,36 +91,38 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         return OSKAR_SUCCESS;
     }
 
-    // Copy telescope model and sky model for frequency scaling.
-    oskar_TelescopeModel tel_gpu(telescope, OSKAR_LOCATION_GPU);
-    oskar_SkyModel sky_gpu(sky, OSKAR_LOCATION_GPU);
+    // Get data type and dimensions.
+    type = oskar_sky_model_type(sky);
+    n_stations = telescope->num_stations;
+    n_baselines = n_stations * (n_stations - 1) / 2;
+    n_src = sky->num_sources;
+    complx = type | OSKAR_COMPLEX;
+    matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
 
-    // Scale GPU telescope coordinates by wavenumber.
+    // Copy telescope model for frequency scaling.
+    oskar_telescope_model_init(&tel_gpu, type, OSKAR_LOCATION_GPU,
+            n_stations, &status);
+    oskar_telescope_model_copy(&tel_gpu, telescope, &status);
     oskar_telescope_model_multiply_by_wavenumber(&tel_gpu, frequency, &status);
 
-    // Scale sky model by spectral index.
+    // Copy sky model for frequency scaling.
+    oskar_sky_model_init(&sky_gpu, type, OSKAR_LOCATION_GPU, n_src, &status);
+    oskar_sky_model_copy(&sky_gpu, sky, &status);
     oskar_sky_model_scale_by_spectral_index(&sky_gpu, frequency, &status);
-    if (status) return status;
+
+    // Initialise a local sky model of sufficient size for the horizon clip.
+    oskar_sky_model_init(&local_sky, type, OSKAR_LOCATION_GPU, n_src, &status);
 
     // Initialise blocks of Jones matrices and visibilities.
-    int type = sky_gpu.type();
-    int n_stations = tel_gpu.num_stations;
-    int n_baselines = n_stations * (n_stations - 1) / 2;
-    int n_sources = sky_gpu.num_sources;
-    int complex_scalar = type | OSKAR_COMPLEX;
-    int complex_matrix = type | OSKAR_COMPLEX | OSKAR_MATRIX;
-    oskar_Jones J(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
-    oskar_Jones R(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
-    oskar_Jones E(complex_matrix, OSKAR_LOCATION_GPU, n_stations, n_sources);
-    oskar_Jones K(complex_scalar, OSKAR_LOCATION_GPU, n_stations, n_sources);
-    oskar_Mem vis(complex_matrix, OSKAR_LOCATION_GPU, n_baselines);
-    oskar_Mem u(type, OSKAR_LOCATION_GPU, n_stations, true);
-    oskar_Mem v(type, OSKAR_LOCATION_GPU, n_stations, true);
-    oskar_Mem w(type, OSKAR_LOCATION_GPU, n_stations, true);
+    oskar_jones_init(&J, matrix, OSKAR_LOCATION_GPU, n_stations, n_src, &status);
+    oskar_jones_init(&R, matrix, OSKAR_LOCATION_GPU, n_stations, n_src, &status);
+    oskar_jones_init(&E, matrix, OSKAR_LOCATION_GPU, n_stations, n_src, &status);
+    oskar_jones_init(&K, complx, OSKAR_LOCATION_GPU, n_stations, n_src, &status);
+    oskar_mem_init(&vis, matrix, OSKAR_LOCATION_GPU, n_baselines, 1, &status);
+    oskar_mem_init(&u, type, OSKAR_LOCATION_GPU, n_stations, 1, &status);
+    oskar_mem_init(&v, type, OSKAR_LOCATION_GPU, n_stations, 1, &status);
+    oskar_mem_init(&w, type, OSKAR_LOCATION_GPU, n_stations, 1, &status);
     oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
-
-    // Declare a local sky model of sufficient size for the horizon clip.
-    oskar_SkyModel local_sky(type, OSKAR_LOCATION_GPU, n_sources);
 
     // Initialise the random number generator.
     // Note: This is reset to the same sequence per sky chunk and per channel.
@@ -125,6 +143,9 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
     // Start simulation.
     for (int j = 0; j < num_vis_dumps; ++j)
     {
+        // Check status code.
+        if (status) continue;
+
         // Start time for the visibility dump, in MJD(UTC).
         double t_dump = obs_start_mjd_utc + j * dt_dump;
         double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
@@ -149,7 +170,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         oskar_jones_set_size(&R, n_stations, local_sky.num_sources, &status);
         oskar_jones_set_size(&E, n_stations, local_sky.num_sources, &status);
         oskar_jones_set_size(&K, n_stations, local_sky.num_sources, &status);
-        if (status) return status;
 
         // Average snapshot.
         for (int i = 0; i < num_vis_ave; ++i)
@@ -158,15 +178,10 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             double t_ave = t_dump + i * dt_ave;
             double gast = oskar_mjd_to_gast_fast(t_ave + dt_ave / 2);
 
-            // Evaluate parallactic angle rotation (Jones R).
-            status = oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast);
-            if (status) return status;
-
-            // Evaluate station beam (Jones E).
-            oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast,
-                    &work, &curand_state, &status);
-
-            // Join Jones matrices (R = E * R).
+            // Evaluate parallactic angle (R), station beam (E), and join them.
+            oskar_evaluate_jones_R(&R, &local_sky, &tel_gpu, gast, &status);
+            oskar_evaluate_jones_E(&E, &local_sky, &tel_gpu, gast, &work,
+                    &curand_state, &status);
             oskar_jones_join(&R, &E, &R, &status);
 
             for (int k = 0; k < num_fringe_ave; ++k)
@@ -203,7 +218,6 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
 
         // Add visibilities to global data.
         oskar_mem_insert(vis_amp, &vis, j * n_baselines, &status);
-        if (status) return status;
     }
 
     // Record GPU memory usage.
@@ -213,5 +227,18 @@ int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
             device_id, device_prop.name,
             100.0 * (1.0 - ((double)mem_free / (double)mem_total)));
 
-    return OSKAR_SUCCESS;
+    // Free memory.
+    oskar_mem_free(&u, &status);
+    oskar_mem_free(&v, &status);
+    oskar_mem_free(&w, &status);
+    oskar_mem_free(&vis, &status);
+    oskar_jones_free(&J, &status);
+    oskar_jones_free(&R, &status);
+    oskar_jones_free(&E, &status);
+    oskar_jones_free(&K, &status);
+    oskar_sky_model_free(&local_sky, &status);
+    oskar_sky_model_free(&sky_gpu, &status);
+    oskar_telescope_model_free(&tel_gpu, &status);
+
+    return status;
 }
