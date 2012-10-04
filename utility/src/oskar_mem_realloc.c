@@ -54,7 +54,10 @@ void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
 
     /* Check if the structure owns the memory it points to. */
     if (mem->owner == 0)
+    {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        return;
+    }
 
     /* Get size of new and old memory blocks. */
     element_size = oskar_mem_element_size(mem->type);
@@ -78,7 +81,7 @@ void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
             return;
         }
 
-        /* Initialise the new memory if it's larger than the old. */
+        /* Initialise the new memory if it's larger than the old block. */
         if (new_size > old_size)
             memset((char*)mem_new + old_size, 0, new_size - old_size);
 
@@ -88,10 +91,11 @@ void oskar_mem_realloc(oskar_Mem* mem, int num_elements, int* status)
     }
     else if (mem->location == OSKAR_LOCATION_GPU)
     {
-        /* Allocate a new block of memory. */
+        /* Allocate and initialise a new block of memory. */
         size_t copy_size;
         void* mem_new = NULL;
         cudaMalloc(&mem_new, new_size);
+        cudaMemset(mem_new, 0, new_size);
 
         /* Copy contents of old block to new block. */
         copy_size = (old_size > new_size) ? new_size : old_size;
