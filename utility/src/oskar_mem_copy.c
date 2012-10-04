@@ -27,11 +27,8 @@
  */
 
 #include "utility/oskar_mem_copy.h"
-#include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_realloc.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,30 +53,12 @@ void oskar_mem_copy(oskar_Mem* dst, const oskar_Mem* src, int* status)
         return;
     }
 
-    /* Only copy the pointer if destination does not own its memory. */
-    if (dst->owner == OSKAR_FALSE)
-    {
-        /* FIXME is this really the behaviour we want? ... too confusing! */
-        printf("\n*************\n");
-        printf("************* If you see this message, please let us know!\n");
-        printf("*************\n\n");
-        fflush(stdout);
+    /* Check the data dimensions, and resize if required. */
+    if (src->num_elements > dst->num_elements)
+        oskar_mem_realloc(dst, src->num_elements, status);
 
-        /* Disallow a pointer copy at a different location. */
-        if (dst->location != src->location)
-            *status = OSKAR_ERR_BAD_LOCATION;
-
-        oskar_mem_get_pointer(dst, src, 0, src->num_elements, status);
-    }
-    else
-    {
-        /* Check the data dimensions, and resize if required. */
-        if (src->num_elements > dst->num_elements)
-            oskar_mem_realloc(dst, src->num_elements, status);
-
-        /* Copy the memory. */
-        oskar_mem_insert(dst, src, 0, status);
-    }
+    /* Copy the memory. */
+    oskar_mem_insert(dst, src, 0, status);
 }
 
 #ifdef __cplusplus
