@@ -38,7 +38,7 @@
 #include "math/oskar_Jones.h"
 #include "sky/oskar_SkyModel.h"
 #include "station/oskar_WorkStationBeam.h"
-#include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_CurandState.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,7 +64,7 @@ extern "C" {
 OSKAR_EXPORT
 void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, double gast,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_state,
+        oskar_WorkStationBeam* work, oskar_CurandState* curand_state,
         int* status);
 
 #ifdef __cplusplus

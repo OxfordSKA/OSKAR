@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,31 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_Device_curand_state.h"
-#include "utility/oskar_device_curand_state_init.h"
-#include <cstdlib>
-#include <cstdio>
+#include "utility/oskar_curand_state_free.h"
+#include "utility/oskar_cuda_check_error.h"
+#include <cuda_runtime_api.h>
 
-#include <cuda.h>
-#include <curand_kernel.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-oskar_Device_curand_state::oskar_Device_curand_state(int num_states)
+void oskar_curand_state_free(oskar_CurandState* state, int* status)
 {
-    int err = cudaMalloc((void**)&(this->state), num_states * sizeof(curandState));
-    this->num_states = num_states;
-    if (err) throw err;
+    /* Check all inputs. */
+    if (!state || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Free device memory. */
+    if (state->state)
+        cudaFree(state->state);
+    oskar_cuda_check_error(status);
 }
 
-oskar_Device_curand_state::~oskar_Device_curand_state()
-{
-	int err = 0;
-    if (state != NULL)
-    	err = cudaFree(state);
-    if (err) throw err;
+#ifdef __cplusplus
 }
-
-int oskar_Device_curand_state::init(int seed, int offset, int use_device_offset)
-{
-    return oskar_device_curand_state_init(this->state, this->num_states,
-        seed, offset, use_device_offset);
-}
+#endif

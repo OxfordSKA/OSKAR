@@ -54,7 +54,7 @@ extern "C" {
 static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         int num_points, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, const oskar_Mem* horizon_mask,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
+        oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
         int* status);
 
 
@@ -63,7 +63,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam,
         double beam_z, int num_points, oskar_station_beam_coord_type coord_type,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         const oskar_Mem* horizon_mask, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_states, int* status)
+        oskar_CurandState* curand_states, int* status)
 {
     check_inputs(beam, station, num_points, x, y, z, horizon_mask, work,
             curand_states, status);
@@ -114,7 +114,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam,
 static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         int num_points, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, const oskar_Mem* horizon_mask,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_states,
+        oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
         int* status)
 {
     /* Sanity check on inputs. */

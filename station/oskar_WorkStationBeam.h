@@ -87,7 +87,8 @@ struct OSKAR_EXPORT oskar_WorkStationBeam
      *                     OSKAR_DOUBLE).
      * @param[in] location OSKAR memory location ID.
      */
-    oskar_WorkStationBeam(int type, int location);
+    oskar_WorkStationBeam(int type = OSKAR_DOUBLE,
+            int location = OSKAR_LOCATION_GPU);
 
     /**
      * @brief Destructor.

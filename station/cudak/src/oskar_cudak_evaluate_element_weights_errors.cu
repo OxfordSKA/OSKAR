@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ __global__
 void oskar_cudak_evaluate_element_weights_errors_d(double2* errors, int n,
         const double* amp_gain, const double* amp_error,
         const double* phase_offset, const double* phase_error,
-        curandState* state)
+        curandStateXORWOW* state)
 {
     /* Thread index == antenna element */
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -56,7 +56,7 @@ __global__
 void oskar_cudak_evaluate_element_weights_errors_f(float2* errors, int n,
         const float* amp_gain, const float* amp_error,
         const float* phase_offset, const float* phase_error,
-        curandState* state)
+        curandStateXORWOW* state)
 {
     /* Thread index == antenna element */
     int idx = blockIdx.x * blockDim.x + threadIdx.x;

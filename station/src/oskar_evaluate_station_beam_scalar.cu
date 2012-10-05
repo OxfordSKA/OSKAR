@@ -54,7 +54,7 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
         const oskar_StationModel* station, double l_beam, double m_beam,
         double n_beam, int num_points, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
-        oskar_Device_curand_state* curand_state)
+        oskar_CurandState* curand_state)
 {
     int error = 0, num_antennas;
     size_t element_size;

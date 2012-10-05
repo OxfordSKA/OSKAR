@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/cudak/oskar_cudak_curand_state_init.h"
-#include <curand_kernel.h>
+#ifndef OSKAR_CURAND_STATE_INIT_H_
+#define OSKAR_CURAND_STATE_INIT_H_
 
-__global__
-void oskar_cudak_curand_state_init(curandState* state, int num_states,
-        unsigned long long seed, unsigned long long offset,
-        unsigned long long device_offset)
-{
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+/**
+ * @file oskar_curand_state_init.h
+ */
 
-    if (idx >= num_states) return;
+#include "oskar_global.h"
+#include "utility/oskar_CurandState.h"
 
-    /* curand_init(seed==sequence, sub-sequence, offset, state) */
-    curand_init(seed, idx + device_offset, offset, &state[idx]);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+OSKAR_EXPORT
+void oskar_curand_state_init(oskar_CurandState* state, int num_states,
+        int seed, int offset, int use_device_offset, int* status);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* OSKAR_CURAND_STATE_INIT_H_ */

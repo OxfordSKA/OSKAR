@@ -44,6 +44,8 @@
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "station/oskar_evaluate_source_relative_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
+#include "utility/oskar_curand_state_free.h"
+#include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
@@ -105,7 +107,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     // Get the telescope model.
     oskar_TelescopeModel tel_cpu;
     err = oskar_set_up_telescope(&tel_cpu, log, &settings);
-    if (err) return OSKAR_ERR_SETUP_FAIL;
+    if (err) return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
 
     // Get the beam pattern settings.
     int station_id = settings.beam_pattern.station_id;
@@ -204,8 +206,10 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         for (int c = 0; c < num_channels; ++c)
         {
             // Initialise the random number generator.
-            oskar_Device_curand_state curand_state(tel_gpu.max_station_size);
-            curand_state.init(tel_gpu.seed_time_variable_station_element_errors);
+            oskar_CurandState curand_state;
+            oskar_curand_state_init(&curand_state, tel_gpu.max_station_size,
+                    tel_gpu.seed_time_variable_station_element_errors, 0, 0,
+                    &err);
 
             // Get the channel frequency.
             double frequency = settings.obs.start_frequency_hz +
@@ -316,6 +320,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 }
 
             } // Time loop
+
+            // Free the CURAND state memory.
+            oskar_curand_state_free(&curand_state, &err);
         } // Channel loop
     } // GPU memory section
     oskar_log_section(log, "Simulation completed in %.3f sec.",

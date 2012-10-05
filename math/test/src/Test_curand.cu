@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "math/test/Test_curand.h"
 
 #include "oskar_global.h"
-#include "utility/cudak/oskar_cudak_curand_state_init.h"
 #include "math/test/cudak/test_curand_generate.h"
-#include "utility/oskar_Device_curand_state.h"
-#include "utility/oskar_device_curand_state_init.h"
+#include "utility/oskar_curand_state_free.h"
+#include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_Mem.h"
 
 #include <cuda.h>
-#include <curand_kernel.h>
-#include <thrust/device_vector.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -56,9 +52,10 @@ void Test_curand::test()
     int num_threads = 100;
     int num_values_per_thread = 1;
     int device_offset = 0;
+    int status = 0;
     FILE* file = NULL;
-//    const char* filename = "temp_test_curand.txt";
-//    file = fopen(filename, "w");
+    const char* filename = "temp_test_curand.txt";
+    file = fopen(filename, "w");
 
     int num_values = num_threads * num_values_per_thread;
     int num_states = num_threads;
@@ -69,8 +66,10 @@ void Test_curand::test()
 
     int num_blocks = (num_values + num_threads - 1) / num_threads;
 
-    curandState* d_states;
-    cudaMalloc((void**)&d_states, num_states * sizeof(curandState));
+    // Create and initialise the CURAND states.
+    oskar_CurandState curand_state;
+    oskar_curand_state_init(&curand_state, num_states, seed, offset,
+            device_offset, &status);
 
     if (file)
     {
@@ -86,18 +85,14 @@ void Test_curand::test()
         fprintf(file, "--------\n");
     }
 
-    // Initialise the random number generator.
-    oskar_cudak_curand_state_init
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_states, num_states, seed, offset, device_offset);
-
     // Generate some random numbers.
     int num_sets = 3;
     for (int j = 0; j < num_sets; ++j)
     {
         test_curand_generate
             OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (d_values, num_values, num_values_per_thread, d_states, num_states);
+            (d_values, num_values, num_values_per_thread, curand_state.state,
+                    num_states);
         cudaMemcpy(h_values, d_values, num_values * sizeof(double), cudaMemcpyDeviceToHost);
         if (file)
         {
@@ -110,54 +105,53 @@ void Test_curand::test()
     }
 
     if (file) fclose(file);
-    if (d_states) cudaFree(d_states);
     if (d_values) cudaFree(d_values);
     if (h_values) free(h_values);
+    oskar_curand_state_free(&curand_state, &status);
 }
 
 
 void Test_curand::test_state_allocation()
 {
+    FILE* file = NULL;
+    const char* filename = "temp_test_curand_1.txt";
+    file = fopen(filename, "w");
+
+    // Allocate a number of CURAND states.
+    int offset = 0;
+    int seed = 0;
+    int num_states = (int)2e5;
+    int status = 0;
+    oskar_CurandState curand_state;
+    oskar_curand_state_init(&curand_state, num_states, seed, offset,
+            0, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+
+    int num_iter = 1;
+    int num_blocks  = 2;
+    int num_threads = 20;
+    int num_per_thread = 1;
+    int num_values = num_blocks * num_threads * num_per_thread;
+    oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);
+
+    for (int i = 0; i < num_iter; ++i)
     {
-        FILE* file = NULL;
-//        const char* filename = "temp_test_curand_1.txt";
-//        file = fopen(filename, "w");
+        test_curand_generate
+        OSKAR_CUDAK_CONF(num_blocks, num_threads)
+        (d_values, num_values, num_per_thread, curand_state.state, num_states);
 
-        // Allocate a number of curand states.
-        int offset = 0;
-        int seed = 0;
-        int num_states = (int)2e5;
-        thrust::device_vector<curandState> d_states(num_states);
-        int error = oskar_device_curand_state_init(thrust::raw_pointer_cast(&d_states[0]),
-                num_states, seed, offset, OSKAR_FALSE);
-        CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
+        oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
 
-        int num_iter = 1;
-        int num_blocks  = 2;
-        int num_threads = 20;
-        int num_per_thread = 1;
-        int num_values = num_blocks * num_threads * num_per_thread;
-        oskar_Mem d_values(OSKAR_DOUBLE, OSKAR_LOCATION_GPU, num_values);
-
-        for (int i = 0; i < num_iter; ++i)
+        if (file)
         {
-            test_curand_generate
-                OSKAR_CUDAK_CONF(num_blocks, num_threads)
-                (d_values, num_values, num_per_thread,
-                        thrust::raw_pointer_cast(&d_states[0]), num_states);
-
-            oskar_Mem h_values(&d_values, OSKAR_LOCATION_CPU);
-
-            if (file)
+            for (int i = 0; i < num_values; ++i)
             {
-                for (int i = 0; i < num_values; ++i)
-                {
-                    fprintf(file, "%i %f\n", i, ((double*)h_values.data)[i]);
-                }
+                fprintf(file, "%i %f\n", i, ((double*)h_values.data)[i]);
             }
         }
-        if (file) fclose(file);
     }
+    if (file) fclose(file);
+    oskar_curand_state_free(&curand_state, &status);
 }
 
 
@@ -184,8 +178,9 @@ void Test_curand::test_multi_device()
         // Allocate a number of curand states.
         int seed = 0;
         int num_states = (int)2e5;
-        oskar_Device_curand_state d_states(num_states);
-        error = d_states.init(seed);
+        oskar_CurandState d_states;
+        oskar_curand_state_init(&d_states, num_states, seed, 0, 0, &error);
+
         CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
         int num_iter = 2;
@@ -214,6 +209,7 @@ void Test_curand::test_multi_device()
             }
         }
         fclose(file);
+        oskar_curand_state_free(&d_states, &error);
+        CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
     }
 }
-

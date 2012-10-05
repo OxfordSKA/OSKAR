@@ -38,7 +38,7 @@
 #include "station/oskar_StationModel.h"
 #include "station/oskar_WorkStationBeam.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_CurandState.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,7 +83,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
         double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
         const oskar_Mem* z, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_states, int* status);
+        oskar_CurandState* curand_states, int* status);
 
 
 #ifdef __cplusplus

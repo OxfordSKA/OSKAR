@@ -26,39 +26,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sky/oskar_sky_model_location.h"
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
 #include "interferometry/cudak/oskar_cudak_correlator.h"
 #include "interferometry/cudak/oskar_cudak_correlator_extended.h"
 #include "interferometry/cudak/oskar_cudak_correlator_time_smearing_extended.h"
 #include "interferometry/cudak/oskar_cudak_correlator_time_smearing.h"
+#include "utility/oskar_cuda_check_error.h"
 #include <stdio.h>
 
 #define C_0 299792458.0
 
 extern "C"
-int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
+void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, double gast)
+        const oskar_Mem* u, const oskar_Mem* v, double gast, int* status)
 {
-    // Type flags.
+    int location, n_stations, n_sources;
     bool single_precision = false, double_precision = false;
 
-    // Check data location.
-    if (vis->location != OSKAR_LOCATION_GPU ||
-            J->location() != OSKAR_LOCATION_GPU ||
-            sky->location() != OSKAR_LOCATION_GPU ||
-            u->location != OSKAR_LOCATION_GPU ||
-            v->location != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    /* Check all inputs. */
+    if (!vis || !J || !telescope || !sky || !u || !v || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    // Check if single precision.
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get the data dimensions. */
+    n_stations = telescope->num_stations;
+    n_sources = sky->num_sources;
+
+    /* Check data locations. */
+    location = oskar_sky_model_location(sky);
+    if (location != OSKAR_LOCATION_GPU)
+        *status = OSKAR_ERR_BAD_LOCATION;
+    if (vis->location != location || J->data.location != location ||
+            u->location != location || v->location != location ||
+            telescope->station_x.location != location ||
+            telescope->station_y.location != location)
+        *status = OSKAR_ERR_BAD_LOCATION;
+
+    /* Check if single precision. */
     single_precision = (vis->is_single() && J->data.is_single() &&
             sky->I.is_single() && sky->Q.is_single() && sky->U.is_single() &&
             sky->V.is_single() && sky->rel_l.is_single() &&
             sky->rel_m.is_single() && u->is_single() && v->is_single());
 
-    // If not single precision, check if double precision.
+    /* If not single precision, check if double precision. */
     if (!single_precision)
         double_precision = (vis->is_double() && J->data.is_double() &&
                 sky->I.is_double() && sky->Q.is_double() &&
@@ -66,35 +84,36 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                 sky->rel_l.is_double() && sky->rel_m.is_double() &&
                 u->is_double() && v->is_double());
 
-    // If neither single or double precision, return error.
+    /* If neither single or double precision, return error. */
     if (!single_precision && !double_precision)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
-    // Check the input dimensions.
-    int n_stations = telescope->num_stations;
-    int n_sources = sky->num_sources;
+    /* Check the input dimensions. */
     if (J->num_sources != n_sources || u->num_elements != n_stations ||
             v->num_elements != n_stations)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
-    // Check there is enough space for the result.
+    /* Check there is enough space for the result. */
     if (vis->num_elements < n_stations * (n_stations - 1) / 2)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
-    // Get bandwidth-smearing term.
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get bandwidth-smearing term. */
     double lambda_bandwidth = telescope->wavelength_metres *
             telescope->bandwidth_hz;
     double freq = C_0 / telescope->wavelength_metres;
     double bandwidth = telescope->bandwidth_hz;
 
-    // Get time-average smearing term and Greenwich hour angle.
+    /* Get time-average smearing term and Greenwich hour angle. */
     double time_avg = telescope->time_average_sec;
     double gha0 = gast - telescope->ra0_rad;
 
-    // Check type of Jones matrix
+    /* Check type of Jones matrix. */
     if (J->data.is_matrix() && vis->is_matrix())
     {
-        // Call the kernel for full polarisation.
+        /* Call the kernel for full polarisation. */
         if (double_precision)
         {
             dim3 num_threads(128, 1);
@@ -197,13 +216,16 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         }
     }
 
-    // Jones type --> Scalar version
+    /* Jones type --> Scalar version. */
     else
     {
         if (sky->use_extended)
-            return OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        {
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+            return;
+        }
 
-        // Call the kernel for scalar simulation.
+        /* Call the kernel for scalar simulation. */
         if (double_precision)
         {
             dim3 num_threads(128, 1);
@@ -228,6 +250,5 @@ int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         }
     }
 
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    oskar_cuda_check_error(status);
 }

@@ -7,7 +7,8 @@ set(interferometry_SRC
     src/oskar_correlate.cu
     src/oskar_evaluate_baselines.c
     src/oskar_evaluate_baselines_cuda.cu
-    src/oskar_evaluate_jones_K.cu
+    src/oskar_evaluate_jones_K.c
+    src/oskar_evaluate_jones_K_cuda.cu
     src/oskar_evaluate_uvw_baseline.c
     src/oskar_evaluate_uvw_station.c
     src/oskar_evaluate_uvw_station_cuda.cu
@@ -15,8 +16,8 @@ set(interferometry_SRC
     src/oskar_geodetic_spherical_to_geocentric_cartesian.c
     src/oskar_horizon_plane_to_geocentric_cartesian.c
     src/oskar_horizon_plane_to_offset_geocentric_cartesian.c
-    src/oskar_interferometer_scalar.cpp
-    src/oskar_interferometer.cpp
+    src/oskar_interferometer_scalar.c
+    src/oskar_interferometer.c
     src/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.c
     src/oskar_telescope_model_analyse.c
     src/oskar_telescope_model_copy.c

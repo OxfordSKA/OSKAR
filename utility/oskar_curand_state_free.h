@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,44 +26,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_device_curand_state_init.h"
-#include "utility/cudak/oskar_cudak_curand_state_init.h"
-#include <curand_kernel.h>
-#include <stdio.h>
+#ifndef OSKAR_CURAND_STATE_FREE_H_
+#define OSKAR_CURAND_STATE_FREE_H_
 
+/**
+ * @file oskar_curand_state_free.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_CurandState.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_device_curand_state_init(curandState* d_states, int num_states,
-        int seed, int offset, int use_device_offset)
-{
-    if (d_states == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
-
-    int error = OSKAR_SUCCESS;
-    int num_threads = 128;
-    int num_blocks = (num_states + num_threads - 1) / num_threads;
-
-    // Note: device_offset allocates different states from same seed to span
-    // multiple GPUs.
-    int device_offset = 0;
-    if (use_device_offset)
-    {
-        int device_id = 0;
-        cudaGetDevice(&device_id);
-        device_offset = device_id * num_states;
-    }
-
-    oskar_cudak_curand_state_init
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (d_states, num_states, seed, offset, device_offset);
-    error = cudaPeekAtLastError();
-
-    return error;
-}
+/**
+ * @brief Frees memory held in an OSKAR CURAND state structure.
+ *
+ * @param[in,out] state  Pointer to structure to free.
+ * @param[in,out] status Status return code.
+ */
+OSKAR_EXPORT
+void oskar_curand_state_free(oskar_CurandState* state, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_CURAND_STATE_FREE_H_ */

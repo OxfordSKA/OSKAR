@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,8 @@
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
 
-/* Forward declarations. */
+/* Forward declaration. */
 struct curandStateXORWOW;
-typedef struct curandStateXORWOW curandState;
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +47,7 @@ OSKAR_EXPORT
 int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        curandState* states);
+        curandStateXORWOW* states);
 
 #ifdef __cplusplus
 }

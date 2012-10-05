@@ -28,7 +28,8 @@
 
 #include "station/test/Test_element_weights_errors.h"
 #include "station/oskar_evaluate_element_weights_errors.h"
-#include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_curand_state_init.h"
+#include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_element_multiply.h"
@@ -75,8 +76,8 @@ void Test_element_weights_errors::test_evaluate()
     oskar_Mem d_phase_error(&h_phase_error, OSKAR_LOCATION_GPU);
     oskar_Mem d_errors(&h_errors, OSKAR_LOCATION_GPU);
 
-    oskar_Device_curand_state curand_state(num_elements);
-    error = curand_state.init(seed);
+    oskar_CurandState curand_state;
+    oskar_curand_state_init(&curand_state, num_elements, seed, 0, 0, &error);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     /* Evaluate weights errors. */
@@ -104,6 +105,8 @@ void Test_element_weights_errors::test_evaluate()
                 ((double2*)h_errors.data)[i].y);
     }
     fclose(file);
+    oskar_curand_state_free(&curand_state, &error);
+    CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 }
 
 
@@ -134,6 +137,7 @@ void Test_element_weights_errors::test_apply()
     oskar_mem_set_value_real(&d_gain_error, gain_error, &status);
     oskar_mem_set_value_real(&d_phase, phase, &status);
     oskar_mem_set_value_real(&d_phase_error, phase_error, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     for (int i = 0; i < num_elements; ++i)
     {
@@ -142,13 +146,14 @@ void Test_element_weights_errors::test_apply()
     }
     oskar_Mem d_weights(&h_weights, OSKAR_LOCATION_GPU);
 
-    oskar_Device_curand_state states(num_elements);
-    states.init(0);
-    int error = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
+    oskar_CurandState states;
+    oskar_curand_state_init(&states, num_elements, 0, 0, 0, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    status = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
             &d_gain, &d_gain_error, &d_phase, &d_phase_error, states);
-    CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
-    oskar_mem_element_multiply(NULL, &d_weights, &d_errors, num_elements, &error);
-    CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
+    oskar_mem_element_multiply(NULL, &d_weights, &d_errors, num_elements, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     oskar_Mem h_errors(&d_errors, OSKAR_LOCATION_CPU);
     oskar_Mem h_weights_out(&d_weights, OSKAR_LOCATION_CPU);
@@ -173,6 +178,7 @@ void Test_element_weights_errors::test_apply()
                 ((double2*)h_weights_out.data)[i].y);
     }
     fclose(file);
+    oskar_curand_state_free(&states, &status);
 }
 
 
@@ -196,6 +202,7 @@ void Test_element_weights_errors::test_reinit()
     oskar_mem_set_value_real(&d_gain_error, gain_error, &status);
     oskar_mem_set_value_real(&d_phase, phase, &status);
     oskar_mem_set_value_real(&d_phase_error, phase_error, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     int num_channels = 2;
     int num_chunks = 3;
@@ -209,8 +216,9 @@ void Test_element_weights_errors::test_reinit()
         for (int chunk = 0; chunk < num_chunks; ++chunk)
         {
             fprintf(file, "  chunk: %i\n", chunk);
-            oskar_Device_curand_state states(num_elements);
-            states.init(0);
+            oskar_CurandState states;
+            oskar_curand_state_init(&states, num_elements, 0, 0, 0, &status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
             for (int t = 0; t < num_times; ++t)
             {
@@ -218,9 +226,9 @@ void Test_element_weights_errors::test_reinit()
                 for (int s = 0; s < num_stations; ++s)
                 {
                     fprintf(file, "      station: %i  ==> ", s);
-                    int error = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
+                    status = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
                             &d_gain, &d_gain_error, &d_phase, &d_phase_error, states);
-                    CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
+                    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
                     oskar_Mem h_errors(&d_errors, OSKAR_LOCATION_CPU);
                     for (int i = 0; i < num_elements; ++i)
                     {
@@ -231,6 +239,8 @@ void Test_element_weights_errors::test_reinit()
                     fprintf(file, "\n");
                 }
             }
+            oskar_curand_state_free(&states, &status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         }
     }
     fclose(file);

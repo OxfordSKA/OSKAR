@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 __global__
 void test_curand_generate(double* values, int num_values,
-        int num_per_thread, curandState* state, int num_states)
+        int num_per_thread, curandStateXORWOW* state, int num_states)
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 

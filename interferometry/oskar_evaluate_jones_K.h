@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,15 +58,17 @@ extern "C" {
  * Station coordinates u,v,w should be specified in radians at the frequency
  * for which K is evaluated.
  *
- * @param[out] K    Output set of Jones matrices.
- * @param[in]  sky  Input sky model.
- * @param[in]  u    Station u coordinates, in radians.
- * @param[in]  v    Station v coordinates, in radians.
- * @param[in]  w    Station w coordinates, in radians.
+ * @param[out] K         Output set of Jones matrices.
+ * @param[in]  sky       Input sky model.
+ * @param[in]  u         Station u coordinates, in radians.
+ * @param[in]  v         Station v coordinates, in radians.
+ * @param[in]  w         Station w coordinates, in radians.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w);
+void oskar_evaluate_jones_K(oskar_Jones* K, const oskar_SkyModel* sky,
+        const oskar_Mem* u, const oskar_Mem* v, const oskar_Mem* w,
+        int* status);
 
 #ifdef __cplusplus
 }

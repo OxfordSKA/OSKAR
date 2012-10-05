@@ -38,6 +38,8 @@
 #include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_station_model_copy.h"
 #include "station/oskar_station_model_multiply_by_wavenumber.h"
+#include "utility/oskar_curand_state_free.h"
+#include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_get_error_string.h"
 #include "utility/oskar_mem_get_pointer.h"
 #include "utility/oskar_vector_types.h"
@@ -110,9 +112,10 @@ void Test_evaluate_jones_E::evaluate_e()
     // Other fields of the telescope structure are not used for E?!
 
     // Initialise the random number generator.
-    oskar_Device_curand_state curand_state(num_antennas);
+    oskar_CurandState curand_state;
     int seed = 0;
-    curand_state.init(seed);
+    oskar_curand_state_init(&curand_state, num_antennas, seed, 0, 0, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Construct a sky model.
     int num_sources = 0;
@@ -194,6 +197,8 @@ void Test_evaluate_jones_E::evaluate_e()
         station = 1;
         scatter3(l(:,station),m(:,station),n(:,station),2,amp(:,station));
      */
+    oskar_curand_state_free(&curand_state, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 
 

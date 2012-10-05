@@ -2,8 +2,6 @@
 # src/utility/CMakeLists.txt
 #
 
-add_subdirectory(cudak)
-
 # ==== Utility library source
 set(utility_SRC
     src/oskar_binary_file_query.c
@@ -25,8 +23,8 @@ set(utility_SRC
     src/oskar_cuda_info_create.c
     src/oskar_cuda_info_free.c
     src/oskar_cuda_info_log.c
-    src/oskar_device_curand_state_init.cu
-    src/oskar_Device_curand_state.cpp
+    src/oskar_curand_state_free.c
+    src/oskar_curand_state_init.cu
     src/oskar_endian.c
     src/oskar_file_exists.c
     src/oskar_get_data_type_string.c
@@ -75,9 +73,6 @@ set(utility_SRC
     src/oskar_system_clock_data.c
     src/oskar_system_clock_string.c
 )
-foreach (file ${utility_cuda_kernels_SRC})
-    list(APPEND utility_SRC cudak/${file})
-endforeach ()
 set(utility_SRC "${utility_SRC}" PARENT_SCOPE)
 
 # === Recurse into test directory.

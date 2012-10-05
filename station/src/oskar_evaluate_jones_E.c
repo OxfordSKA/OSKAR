@@ -50,19 +50,19 @@ extern "C" {
 static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         double gast, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_state, int* status);
+        oskar_CurandState* curand_state, int* status);
 static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         double gast, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_state, int* status);
+        oskar_CurandState* curand_state, int* status);
 static void evaluate_E_different_sky(oskar_Jones* E,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         double gast, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_state, int* status);
+        oskar_CurandState* curand_state, int* status);
 
 void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
         const oskar_TelescopeModel* telescope, double gast,
-        oskar_WorkStationBeam* work, oskar_Device_curand_state* curand_state,
+        oskar_WorkStationBeam* work, oskar_CurandState* curand_state,
         int* status)
 {
     /* Check all inputs. */
@@ -122,7 +122,7 @@ void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
 static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         double gast, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_state, int* status)
+        oskar_CurandState* curand_state, int* status)
 {
     double beam_l, beam_m, beam_n;
     int i;
@@ -193,7 +193,7 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
 static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         double gast, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_state, int* status)
+        oskar_CurandState* curand_state, int* status)
 {
     double beam_l, beam_m, beam_n;
     int i;
@@ -256,7 +256,7 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
 static void evaluate_E_different_sky(oskar_Jones* E,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         double gast, oskar_WorkStationBeam* work,
-        oskar_Device_curand_state* curand_state, int* status)
+        oskar_CurandState* curand_state, int* status)
 {
     double beam_l, beam_m, beam_n;
     int i;

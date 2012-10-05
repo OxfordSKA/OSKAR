@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef TEST_CURAND_GENERATE_H_
 #define TEST_CURAND_GENERATE_H_
 
@@ -36,13 +35,11 @@
 
 #include "oskar_global.h"
 
-/* Forward declarations. */
+/* Forward declaration. */
 struct curandStateXORWOW;
-typedef struct curandStateXORWOW curandState;
 
 __global__
 void test_curand_generate(double* values, int num_values,
-        int num_per_thread, curandState* state, int num_states);
-
+        int num_per_thread, curandStateXORWOW* state, int num_states);
 
 #endif /* TEST_CURAND_GENERATE_H_ */

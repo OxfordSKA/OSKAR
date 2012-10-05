@@ -180,10 +180,9 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             if (error) continue;
 
             // Run simulation for this chunk.
-            error = oskar_interferometer(&(vis_temp[thread_id]), log,
+            oskar_interferometer(&(vis_temp[thread_id]), log,
                     &(sky_chunk_cpu[i]), &tel_cpu, &settings, frequency,
-                    i, num_sky_chunks);
-            if (error) continue;
+                    i, num_sky_chunks, &error);
 
             oskar_mem_add(&(vis_acc[thread_id]), &(vis_acc[thread_id]),
                     &(vis_temp[thread_id]), &error);
@@ -283,8 +282,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
         cudaDeviceReset();
     }
 
-    // FIXME Free sky chunks. This needs fixing in order to avoid potential
-    // memory leaks in case of errors (free memory using a destructor instead).
+    // Free sky chunks.
     for (int i = 0; i < num_sky_chunks; ++i)
     {
         oskar_sky_model_free(&sky_chunk_cpu[i], &error);

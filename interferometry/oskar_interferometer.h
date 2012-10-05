@@ -60,12 +60,13 @@ extern "C" {
  * @param[in]     frequency      Observation frequency in Hz.
  * @param[in]     chunk_index    Sky chunk (index) to be processed.
  * @param[in]     num_sky_chunks Total number of sky chunks.
+ * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-int oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
+void oskar_interferometer(oskar_Mem* vis_amp, oskar_Log* log,
         const oskar_SkyModel* sky, const oskar_TelescopeModel* telescope,
         const oskar_Settings* settings, double frequency, int chunk_index,
-        int num_sky_chunks);
+        int num_sky_chunks, int* status);
 
 #ifdef __cplusplus
 }

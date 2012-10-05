@@ -33,7 +33,6 @@
  * @file oskar_correlate.h
  */
 
-
 #include "oskar_global.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "interferometry/oskar_TelescopeModel.h"
@@ -47,7 +46,7 @@ extern "C" {
 
 /**
  * @brief Multiply a set of Jones matrices with a set of source brightness
- * matrices to form visibilities (i.e. V = J B J).
+ * matrices to form visibilities (i.e. V = J B J*).
  *
  * @details
  * The source brightness matrices are specified in by means of an OSKAR sky
@@ -66,13 +65,12 @@ extern "C" {
  * @param[in]  u          Station u coordinates, in radians.
  * @param[in]  v          Station v coordinates, in radians.
  * @param[in]  gast       Greenwich apparent sidereal time, in radians.
- *
- * @return An error code.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-int oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
+void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
-        const oskar_Mem* u, const oskar_Mem* v, double gast);
+        const oskar_Mem* u, const oskar_Mem* v, double gast, int* status);
 
 #ifdef __cplusplus
 }

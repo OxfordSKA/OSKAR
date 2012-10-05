@@ -28,6 +28,10 @@
 
 #include "sky/oskar_evaluate_jones_R_cuda.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Kernel wrappers. ======================================================== */
 
 /* Single precision. */
@@ -63,6 +67,10 @@ void oskar_evaluate_jones_R_cuda_d(double4c* d_jones, int num_sources,
     oskar_evaluate_jones_R_cudak_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
             (d_jones, num_sources, d_ra, d_dec, cos_lat, sin_lat, lst_rad);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 
 /* Kernels. ================================================================ */

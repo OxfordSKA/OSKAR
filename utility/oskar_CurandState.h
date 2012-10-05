@@ -26,53 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_DEVICE_CURAND_STATE_H_
-#define OSKAR_DEVICE_CURAND_STATE_H_
+#ifndef OSKAR_CURAND_STATE_H_
+#define OSKAR_CURAND_STATE_H_
 
 /**
- * @file oskar_Device_curand_state.h
+ * @file oskar_CurandState.h
  */
 
 #include "oskar_global.h"
 
-/* Forward declarations. */
+/* Forward declaration. */
 struct curandStateXORWOW;
-typedef struct curandStateXORWOW curandState;
 
-struct OSKAR_EXPORT oskar_Device_curand_state
+struct OSKAR_EXPORT oskar_CurandState
 {
-    int num_states;     /**< Number of curand states */
-    curandState* state; /**< Array of curand states */
+    int num_states;                  /**< Number of CURAND states. */
+    struct curandStateXORWOW* state; /**< Array of CURAND states in device memory. */
 
 #ifdef __cplusplus
-    /**
-     * @brief Constructor
-     *
-     * @param[in] num_states Number of curand states to allocate.
-     */
-    oskar_Device_curand_state(int num_states);
-
-    /**
-     * @brief Destructor
-     */
-    ~oskar_Device_curand_state();
-
-    /**
-     * @brief Initialise curand states.
-     *
-     * @param[in] seed
-     * @param[in] offset
-     *
-     * @return An error code.
-     */
-    int init(int seed, int offset = 0, int use_device_offset = OSKAR_FALSE);
-
     /* Convenience pointer casts. */
-    operator const curandState*() const { return state; }
-    operator curandState*() { return state; }
+    operator const curandStateXORWOW*() const { return state; }
+    operator curandStateXORWOW*() { return state; }
 #endif
 };
-typedef struct oskar_Device_curand_state oskar_Device_curand_state;
+typedef struct oskar_CurandState oskar_CurandState;
 
-
-#endif /* OSKAR_DEVICE_CURAND_STATE_H_ */
+#endif /* OSKAR_CURAND_STATE_H_ */

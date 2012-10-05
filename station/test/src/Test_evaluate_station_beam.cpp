@@ -40,7 +40,8 @@
 #include "utility/oskar_vector_types.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
-#include "utility/oskar_Device_curand_state.h"
+#include "utility/oskar_curand_state_free.h"
+#include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_mem_binary_file_write.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
@@ -138,9 +139,10 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     oskar_Mem n_gpu(&n_cpu, OSKAR_LOCATION_GPU);
 
     // Initialise the random number generator.
-    oskar_Device_curand_state curand_state(num_antennas);
+    oskar_CurandState curand_state;
     int seed = 0;
-    curand_state.init(seed);
+    oskar_curand_state_init(&curand_state, num_antennas, seed, 0, 0, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     station_gpu.apply_element_errors = OSKAR_FALSE;
 
     // Allocate weights work array.
@@ -186,6 +188,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
         data = dlmread('temp_test_beam_pattern.txt');
         imagesc(log10(reshape(data(:,3), 401, 401).^2));
     --------------------------------------------------------------------------*/
+    oskar_curand_state_free(&curand_state, &error);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 }
 
 
