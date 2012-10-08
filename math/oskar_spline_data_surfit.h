@@ -58,18 +58,13 @@ extern "C" {
  * @param[in]     w             Array of data point weights.
  * @param[in]     settings      Fitting parameters.
  * @param[in]     surface_name  Name of fitted surface (for log).
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
+void oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
         int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z,
         const oskar_Mem* w, const oskar_SettingsSpline* settings,
-        const char* surface_name);
+        const char* surface_name, int* status);
 
 #ifdef __cplusplus
 }

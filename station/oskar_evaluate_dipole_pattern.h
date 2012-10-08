@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_TAPERED_DIPOLE_PATTERN_H_
-#define OSKAR_EVALUATE_TAPERED_DIPOLE_PATTERN_H_
+#ifndef OSKAR_EVALUATE_DIPOLE_PATTERN_H_
+#define OSKAR_EVALUATE_DIPOLE_PATTERN_H_
 
 /**
- * @file oskar_evaluate_tapered_dipole_pattern.h
+ * @file oskar_evaluate_dipole_pattern.h
  */
 
 #include "oskar_global.h"
@@ -66,14 +66,15 @@ extern "C" {
  * @param[in] cos_power          Power of cosine taper (use 0 if none).
  * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
+ * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern, int num_points,
+void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
         const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
-        double gaussian_fwhm_rad, int return_x_dipole);
+        double gaussian_fwhm_rad, int return_x_dipole, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_TAPERED_DIPOLE_PATTERN_H_ */
+#endif /* OSKAR_EVALUATE_DIPOLE_PATTERN_H_ */

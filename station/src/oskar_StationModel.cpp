@@ -44,7 +44,7 @@ oskar_StationModel::oskar_StationModel(const oskar_StationModel* other,
         int location)
 {
     int err = 0;
-    oskar_station_model_init(this, other->type(), location,
+    oskar_station_model_init(this, oskar_station_model_type(other), location,
             other->num_elements, &err);
     oskar_station_model_copy(this, other, &err);
     if (err) throw err;
@@ -55,9 +55,4 @@ oskar_StationModel::~oskar_StationModel()
     int err = 0;
     oskar_station_model_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_StationModel::type() const
-{
-    return oskar_station_model_type(this);
 }

@@ -12,6 +12,8 @@ set(station_SRC
     src/oskar_element_model_type.c
     src/oskar_ElementModel.cpp
     src/oskar_evaluate_beam_horizontal_lmn.c
+    src/oskar_evaluate_dipole_pattern.c
+    src/oskar_evaluate_dipole_pattern_cuda.cu
     src/oskar_evaluate_jones_E.c
     src/oskar_evaluate_source_horizontal_lmn.c
     src/oskar_evaluate_source_relative_lmn.c
@@ -22,7 +24,6 @@ set(station_SRC
     src/oskar_evaluate_station_beam_gaussian.cu
     src/oskar_evaluate_station_beam_scalar.cu
     src/oskar_evaluate_station_beam.c
-    src/oskar_evaluate_tapered_dipole_pattern.cu
     src/oskar_station_model_analyse.c
     src/oskar_station_model_copy.c
     src/oskar_station_model_free.c

@@ -95,7 +95,6 @@ struct OSKAR_EXPORT oskar_StationModel
     double gaussian_beam_fwhm_deg; /**< FWHM of gaussian station beam, only used
                                        the GAUSSIAN_BEAM station types. */
 
-
 #ifdef __cplusplus
     /* If C++, provide constructors and methods. */
     /**
@@ -122,12 +121,6 @@ struct OSKAR_EXPORT oskar_StationModel
      * Destroys the station model structure, freeing any memory it uses.
      */
     ~oskar_StationModel();
-
-    /**
-     * @brief Returns the base type of all arrays in the structure, or an error
-     * code if the types are inconsistent.
-     */
-    int type() const;
 #endif
 };
 

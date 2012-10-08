@@ -26,39 +26,76 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_dierckx_bispev.h"
+#include "math/oskar_dierckx_bispev_cuda.h"
 #include "math/cudak/oskar_cudaf_dierckx_fpbisp_single.h"
 
-// Single precision.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+/* Kernel wrappers. ======================================================== */
+
+/* Single precision. */
+void oskar_dierckx_bispev_cuda_f(const float* d_tx, int nx,
+        const float* d_ty, int ny, const float* d_c, int kx, int ky,
+        int n, const float* d_x, const float* d_y, int stride, float* d_z)
+{
+    /* Evaluate surface at the points by calling kernel. */
+    int num_blocks, num_threads = 256;
+    num_blocks = (n + num_threads - 1) / num_threads;
+    oskar_dierckx_bispev_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_tx, nx, d_ty, ny, d_c,
+            kx, ky, n, d_x, d_y, stride, d_z);
+}
+
+/* Double precision. */
+void oskar_dierckx_bispev_cuda_d(const double* d_tx, int nx,
+        const double* d_ty, int ny, const double* d_c, int kx, int ky,
+        int n, const double* d_x, const double* d_y, int stride, double* d_z)
+{
+    /* Evaluate surface at the points by calling kernel. */
+    int num_blocks, num_threads = 256;
+    num_blocks = (n + num_threads - 1) / num_threads;
+    oskar_dierckx_bispev_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads) (d_tx, nx, d_ty, ny, d_c,
+            kx, ky, n, d_x, d_y, stride, d_z);
+}
+
+
+/* Kernels. ================================================================ */
+
+/* Single precision. */
 __global__
-void oskar_cudak_dierckx_bispev_f(const float* tx, const int nx,
+void oskar_dierckx_bispev_cudak_f(const float* tx, const int nx,
         const float* ty, const int ny, const float* c, const int kx,
         const int ky, const int n, const float* x, const float* y,
         const int stride, float* z)
 {
-    // Get the output position (pixel) ID that this thread is working on.
+    /* Get the output position (pixel) ID that this thread is working on. */
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= n) return;
 
-    // Call device function to evaluate surface.
+    /* Call device function to evaluate surface. */
     oskar_cudaf_dierckx_fpbisp_single_f(tx, nx, ty, ny, c, kx, ky,
             x[i], y[i], &z[i * stride]);
 }
 
-// Double precision.
-
+/* Double precision. */
 __global__
-void oskar_cudak_dierckx_bispev_d(const double* tx, const int nx,
+void oskar_dierckx_bispev_cudak_d(const double* tx, const int nx,
         const double* ty, const int ny, const double* c, const int kx,
         const int ky, const int n, const double* x, const double* y,
         const int stride, double* z)
 {
-    // Get the output position (pixel) ID that this thread is working on.
+    // Get the output position (pixel) ID that this thread is working on. */
     const int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i >= n) return;
 
-    // Call device function to evaluate surface.
+    // Call device function to evaluate surface. */
     oskar_cudaf_dierckx_fpbisp_single_d(tx, nx, ty, ny, c, kx, ky,
             x[i], y[i], &z[i * stride]);
 }
+
+#ifdef __cplusplus
+}
+#endif

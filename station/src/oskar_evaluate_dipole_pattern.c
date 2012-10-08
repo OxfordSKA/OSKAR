@@ -27,61 +27,82 @@
  */
 
 #include "oskar_global.h"
-#include "station/cudak/oskar_cudak_evaluate_dipole_pattern.h"
+#include "station/oskar_evaluate_dipole_pattern_cuda.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_type_check.h"
+#include "utility/oskar_cuda_check_error.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
-int oskar_evaluate_tapered_dipole_pattern(oskar_Mem* pattern, int num_points,
+
+/* Wrapper. */
+void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
         const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
-        double gaussian_fwhm_rad, int return_x_dipole)
+        double gaussian_fwhm_rad, int return_x_dipole, int* status)
 {
-    int type;
+    int type, location;
 
-    /* Sanity check on inputs. */
-    if (!theta || !phi || !pattern)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!theta || !phi || !pattern || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    /* Check that all arrays are on the GPU. */
-    if (theta->location != OSKAR_LOCATION_GPU ||
-            phi->location != OSKAR_LOCATION_GPU ||
-            pattern->location != OSKAR_LOCATION_GPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get the meta-data. */
+    location = pattern->location;
+    type = theta->type;
+
+    /* Check that all arrays are co-located. */
+    if (theta->location != location || phi->location != location)
+        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the pattern array is a complex matrix. */
     if (!oskar_mem_is_complex(pattern->type) ||
             !oskar_mem_is_matrix(pattern->type))
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that the dimensions are OK. */
     if (theta->num_elements < num_points || phi->num_elements < num_points ||
             pattern->num_elements < num_points)
-        return OSKAR_ERR_MEMORY_NOT_ALLOCATED;
+        *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    /* Switch on the type. */
-    type = theta->type;
-    if (type == OSKAR_SINGLE)
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check the location. */
+    if (location == OSKAR_LOCATION_GPU)
     {
-        int num_blocks, num_threads = 256;
-        num_blocks = (num_points + num_threads - 1) / num_threads;
-        oskar_cudak_evaluate_dipole_pattern_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points,
-                (const float*)theta->data, (const float*)phi->data,
-                cos_power, gaussian_fwhm_rad, return_x_dipole,
-                (float4c*)pattern->data);
+#ifdef OSKAR_HAVE_CUDA
+        if (type == OSKAR_SINGLE)
+        {
+            oskar_evaluate_dipole_pattern_cuda_f(num_points,
+                    (const float*)theta->data, (const float*)phi->data,
+                    cos_power, gaussian_fwhm_rad, return_x_dipole,
+                    (float4c*)pattern->data);
+        }
+        else if (type == OSKAR_DOUBLE)
+        {
+            oskar_evaluate_dipole_pattern_cuda_d(num_points,
+                    (const double*)theta->data, (const double*)phi->data,
+                    cos_power, gaussian_fwhm_rad, return_x_dipole,
+                    (double4c*)pattern->data);
+        }
+        oskar_cuda_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
-    else if (type == OSKAR_DOUBLE)
+    else if (location == OSKAR_LOCATION_CPU)
     {
-        int num_blocks, num_threads = 256;
-        num_blocks = (num_points + num_threads - 1) / num_threads;
-        oskar_cudak_evaluate_dipole_pattern_d
-        OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points,
-                (const double*)theta->data, (const double*)phi->data,
-                cos_power, gaussian_fwhm_rad, return_x_dipole,
-                (double4c*)pattern->data);
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
-    cudaDeviceSynchronize();
-    return (int)cudaPeekAtLastError();
 }
+
+#ifdef __cplusplus
+}
+#endif

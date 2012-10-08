@@ -121,10 +121,10 @@ static double oskar_mem_min(const oskar_Mem* data, int n)
     return r;
 }
 
-int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
+void oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
         int num_points, oskar_Mem* x, oskar_Mem* y, const oskar_Mem* z,
         const oskar_Mem* w, const oskar_SettingsSpline* settings,
-        const char* surface_name)
+        const char* surface_name, int* status)
 {
     int element_size, err = 0, type;
     int b1, b2, bx, by, km, kwrk, lwrk1, lwrk2, ne, nxest, nyest, u, v;
@@ -136,22 +136,36 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
     /* Order of splines - do not change these values. */
     int kx = 3, ky = 3;
 
+    /* Check all inputs. */
+    if (!spline || !x || !y || !z || !w || !settings || !surface_name ||
+            !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Check that parameters are within allowed ranges. */
     if (settings->average_fractional_error_factor_increase <= 1.0)
-        return OSKAR_ERR_SETTINGS;
+        *status = OSKAR_ERR_SETTINGS;
 
     /* Get the data type. */
     type = z->type;
     element_size = oskar_mem_element_size(type);
     if ((type != OSKAR_SINGLE) && (type != OSKAR_DOUBLE))
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check that input data is on the CPU. */
     if (x->location != OSKAR_LOCATION_CPU ||
             y->location != OSKAR_LOCATION_CPU ||
             z->location != OSKAR_LOCATION_CPU ||
             w->location != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_BAD_LOCATION;
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Log message. */
     oskar_log_message(log, 0, "Fitting bicubic B-splines to surface (%s)...",
@@ -169,11 +183,13 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
     nyest = ky + 1 + 3 * sqrt_num_points / 2;
     u = nxest - kx - 1;
     v = nyest - ky - 1;
-    oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU, &err);
-    oskar_mem_realloc(&spline->knots_x, nxest, &err);
-    oskar_mem_realloc(&spline->knots_y, nyest, &err);
-    oskar_mem_realloc(&spline->coeff, u * v, &err);
-    if (err) return err;
+    oskar_spline_data_init(spline, type, OSKAR_LOCATION_CPU, status);
+    oskar_mem_realloc(&spline->knots_x, nxest, status);
+    oskar_mem_realloc(&spline->knots_y, nyest, status);
+    oskar_mem_realloc(&spline->coeff, u * v, status);
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Set up workspace. */
     km = 1 + ((kx > ky) ? kx : ky);
@@ -200,7 +216,10 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
     /*oskar_log_message(log, 0, "Work arrays: lwrk1=%d, lwrk2=%d, kwrk=%d",
             lwrk1, lwrk2, kwrk);*/
     if (wrk1 == NULL || wrk2 == NULL || iwrk == NULL)
-        return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+    {
+        *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        return;
+    }
 
     if (type == OSKAR_SINGLE)
     {
@@ -230,8 +249,7 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
             /* Check for errors. */
             if (err == 0 || err == -1 || err == -2)
             {
-                err = OSKAR_SUCCESS; /* Normal return. */
-                done = 1;
+                done = 1; /* Normal return. */
                 if (settings->search_for_best_fit)
                     oskar_log_message(log, 1, "Surface fitted to %.3f average. "
                             "frac. error (s=%.2e).", avg_frac_err_loc, s);
@@ -247,7 +265,7 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
                 if (!settings->search_for_best_fit || err >= 10 ||
                         avg_frac_err_loc == 0.0)
                 {
-                    err = OSKAR_ERR_SPLINE_COEFF_FAIL;
+                    *status = OSKAR_ERR_SPLINE_COEFF_FAIL;
                     done = 1;
                     oskar_log_message(log, 1, "Aborting!");
                 }
@@ -290,8 +308,7 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
             /* Check for errors. */
             if (err == 0 || err == -1 || err == -2)
             {
-                err = OSKAR_SUCCESS; /* Normal return. */
-                done = 1;
+                done = 1; /* Normal return. */
                 if (settings->search_for_best_fit)
                     oskar_log_message(log, 1, "Surface fitted to %.3f average "
                             "frac. error (s=%.2e).", avg_frac_err_loc, s);
@@ -307,7 +324,7 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
                 if (!settings->search_for_best_fit || err >= 10 ||
                         avg_frac_err_loc == 0.0)
                 {
-                    err = OSKAR_ERR_SPLINE_COEFF_FAIL;
+                    *status = OSKAR_ERR_SPLINE_COEFF_FAIL;
                     done = 1;
                     oskar_log_message(log, 1, "Aborting!");
                 }
@@ -329,8 +346,6 @@ int oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
     free(iwrk);
     free(wrk2);
     free(wrk1);
-
-    return err;
 }
 
 #ifdef __cplusplus

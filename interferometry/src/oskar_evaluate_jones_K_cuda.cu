@@ -27,7 +27,6 @@
  */
 
 #include "interferometry/oskar_evaluate_jones_K_cuda.h"
-#include "math/cudak/oskar_cudak_dftw_3d_seq_out.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +46,7 @@ void oskar_evaluate_jones_K_cuda_f(float2* d_jones, int num_stations,
     const size_t s_mem = 3 * (num_threads.x + num_threads.y) * sizeof(float);
 
     /* Compute DFT phase weights for K. */
-    oskar_cudak_dftw_3d_seq_out_f
+    oskar_evaluate_jones_K_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
     (num_stations, d_u, d_v, d_w, num_sources, d_l, d_m, d_n, d_jones);
 }
@@ -64,7 +63,7 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
     const size_t s_mem = 3 * (num_threads.x + num_threads.y) * sizeof(double);
 
     /* Compute DFT phase weights for K. */
-    oskar_cudak_dftw_3d_seq_out_d
+    oskar_evaluate_jones_K_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads, s_mem)
     (num_stations, d_u, d_v, d_w, num_sources, d_l, d_m, d_n, d_jones);
 }
@@ -75,3 +74,101 @@ void oskar_evaluate_jones_K_cuda_d(double2* d_jones, int num_stations,
 
 
 /* Kernels. ================================================================ */
+
+/* Shared memory pointers used by the kernels. */
+extern __shared__ float smem_f[];
+extern __shared__ double smem_d[];
+
+/* Single precision. */
+__global__
+void oskar_evaluate_jones_K_cudak_f(const int n_in, const float* x_in,
+        const float* y_in, const float* z_in, const int n_out,
+        const float* x_out, const float* y_out, const float* z_out,
+        float2* weights)
+{
+    const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
+    const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */
+
+    /* Cache input and output data from global memory. */
+    float* cxo = smem_f;
+    float* cyo = &cxo[blockDim.x];
+    float* czo = &cyo[blockDim.x];
+    float* cxi = &czo[blockDim.x];
+    float* cyi = &cxi[blockDim.y];
+    float* czi = &cyi[blockDim.y];
+    if (s < n_out && threadIdx.y == 0)
+    {
+        cxo[threadIdx.x] = x_out[s];
+        cyo[threadIdx.x] = y_out[s];
+        czo[threadIdx.x] = z_out[s];
+    }
+    if (a < n_in && threadIdx.x == 0)
+    {
+        cxi[threadIdx.y] = x_in[a];
+        cyi[threadIdx.y] = y_in[a];
+        czi[threadIdx.y] = z_in[a];
+    }
+    __syncthreads();
+
+    /* Compute the geometric phase of the output direction. */
+    float phase;
+    phase =  cxi[threadIdx.y] * cxo[threadIdx.x];
+    phase += cyi[threadIdx.y] * cyo[threadIdx.x];
+    phase += czi[threadIdx.y] * czo[threadIdx.x];
+    float2 weight;
+    sincosf(phase, &weight.y, &weight.x);
+
+    /* Write result to global memory. */
+    if (s < n_out && a < n_in)
+    {
+        const int w = s + n_out * a;
+        weights[w] = weight;
+    }
+}
+
+/* Double precision. */
+__global__
+void oskar_evaluate_jones_K_cudak_d(const int n_in, const double* x_in,
+        const double* y_in, const double* z_in, const int n_out,
+        const double* x_out, const double* y_out, const double* z_out,
+        double2* weights)
+{
+    const int s = blockDim.x * blockIdx.x + threadIdx.x; /* Output index. */
+    const int a = blockDim.y * blockIdx.y + threadIdx.y; /* Input index. */
+
+    /* Cache input and output data from global memory. */
+    double* cxo = smem_d;
+    double* cyo = &cxo[blockDim.x];
+    double* czo = &cyo[blockDim.x];
+    double* cxi = &czo[blockDim.x];
+    double* cyi = &cxi[blockDim.y];
+    double* czi = &cyi[blockDim.y];
+    if (s < n_out && threadIdx.y == 0)
+    {
+        cxo[threadIdx.x] = x_out[s];
+        cyo[threadIdx.x] = y_out[s];
+        czo[threadIdx.x] = z_out[s];
+    }
+    if (a < n_in && threadIdx.x == 0)
+    {
+        cxi[threadIdx.y] = x_in[a];
+        cyi[threadIdx.y] = y_in[a];
+        czi[threadIdx.y] = z_in[a];
+    }
+    __syncthreads();
+
+    /* Compute the geometric phase of the output direction. */
+    double phase;
+    phase =  cxi[threadIdx.y] * cxo[threadIdx.x];
+    phase += cyi[threadIdx.y] * cyo[threadIdx.x];
+    phase += czi[threadIdx.y] * czo[threadIdx.x];
+    double2 weight;
+    sincos(phase, &weight.y, &weight.x);
+
+    /* Write result to global memory. */
+    if (s < n_out && a < n_in)
+    {
+        const int w = s + n_out * a;
+        weights[w] = weight;
+    }
+}

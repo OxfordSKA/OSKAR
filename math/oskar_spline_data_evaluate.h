@@ -48,21 +48,16 @@ extern "C" {
  * This function evaluates a surface fitted by splines at the given
  * positions.
  *
- * @param[out] output Output values.
- * @param[in] spline  Pointer to data structure.
- * @param[in] x       List of x coordinates.
- * @param[in] y       List of y coordinates.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[out] output     Output values.
+ * @param[in] spline      Pointer to data structure.
+ * @param[in] x           List of x coordinates.
+ * @param[in] y           List of y coordinates.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
-int oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
+void oskar_spline_data_evaluate(oskar_Mem* output, int offset, int stride,
         const oskar_SplineData* spline, int num_points, const oskar_Mem* x,
-        const oskar_Mem* y);
+        const oskar_Mem* y, int* status);
 
 #ifdef __cplusplus
 }

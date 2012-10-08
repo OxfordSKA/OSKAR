@@ -9,6 +9,8 @@ set(math_SRC
     src/oskar_angular_distance.c
     src/oskar_cart2sph.c
     src/oskar_cuda_dft_c2r_2d.cu
+    src/oskar_dierckx_bispev_bicubic_cuda.cu
+    src/oskar_dierckx_bispev_cuda.cu
     src/oskar_dierckx_bispev.c
     src/oskar_dierckx_fpback.c
     src/oskar_dierckx_fpbisp.c
@@ -51,7 +53,7 @@ set(math_SRC
     src/oskar_sph_to_lm.c
     src/oskar_sph2cart.c
     src/oskar_spline_data_copy.c
-    src/oskar_spline_data_evaluate.cu
+    src/oskar_spline_data_evaluate.c
     src/oskar_spline_data_free.c
     src/oskar_spline_data_init.c
     src/oskar_spline_data_location.c
