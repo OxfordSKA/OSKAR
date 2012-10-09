@@ -50,6 +50,7 @@ private:
     void init_settings_sky_model();
     void init_settings_observation();
     void init_settings_telescope_model();
+    void init_settings_telescope_model2();
     void init_settings_interferometer();
     void init_settings_system_noise_model(const QString& root);
     void init_settings_beampattern();
