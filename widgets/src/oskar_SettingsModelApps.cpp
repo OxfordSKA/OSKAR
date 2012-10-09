@@ -841,12 +841,14 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     // Element pattern functional type.
     group = root + "/aperture_array/element_pattern";
     k = group + "/functional_type";
-    declare(k, "Functional pattern type", QStringList() << "Isotropic (unpolarised)" << "Geometric dipole");
+    declare(k, "Functional pattern type", QStringList() << "Geometric dipole"
+            << "Isotropic (unpolarised)");
     setDependency(k, k_numerical, false);
     group = root + "/aperture_array/element_pattern/taper";
     setLabel(group, "Tapering options");
     k = group + "/type";
-    declare(k, "Functional tapering type", QStringList() << "None" << "Cosine" << "Gaussian");
+    declare(k, "Functional tapering type", QStringList() << "None"
+            << "Cosine" << "Gaussian");
     k = group + "/cosine_power";
     declare(k, "Cosine power", oskar_SettingsItem::INT_UNSIGNED);
     setDependency(k, group + "/type", "Cosine");
