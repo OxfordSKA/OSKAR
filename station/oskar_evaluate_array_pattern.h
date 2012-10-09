@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_STATION_BEAM_DIPOLES_H_
-#define OSKAR_EVALUATE_STATION_BEAM_DIPOLES_H_
+#ifndef OSKAR_EVALUATE_ARRAY_PATTERN_H_
+#define OSKAR_EVALUATE_ARRAY_PATTERN_H_
 
 /**
- * @file oskar_evaluate_station_beam_dipoles.h
+ * @file oskar_evaluate_array_pattern.h
  */
 
 #include "oskar_global.h"
@@ -43,30 +43,11 @@ extern "C" {
 #endif
 
 /**
- * @brief
- * Evaluates a beam from a station which is composed of dipoles at different
- * orientations.
+ * @brief Evaluates the value of a station beam at a number of discrete
+ * positions for the given station and beam direction. This is equivalent
+ * to the Array Factor or scalar E-Jones.
  *
  * @details
- * This function evaluates a beam from a station which is composed of dipoles
- * at different orientations at the supplied source positions.
- *
- * The dipole orientation angles specify the dipole axis as the angle
- * East (x) from North (y).
- *
- * The output matrix is
- *
- * ( g_theta^a   g_phi^a )
- * ( g_theta^b   g_phi^b )
- *
- * where phi and theta are the angles measured from x to y and from xy to z,
- * respectively.
- *
- * The 'a' dipole is nominally along the x axis, and
- * the 'b' dipole is nominally along the y axis.
- * The azimuth orientation of 'a' should normally be 90 degrees, and
- * the azimuth orientation of 'b' should normally be 0 degrees.
- *
  * The station beam amplitudes are evaluated using a DFT on the GPU, so
  * all memory passed to and returned from this function must be allocated
  * on the device.
@@ -80,7 +61,7 @@ extern "C" {
  * - Horizontal n (\p hor_n) coordinates are used to remove sources below the
  * horizon (i.e. where n < 0).
  *
- * @param[out] beam          Array of output Jones matrices per source.
+ * @param[out] beam          Array of station complex beam amplitudes returned.
  * @param[in]  station       Station model structure.
  * @param[in]  l_beam        Beam phase centre horizontal l (component along x).
  * @param[in]  m_beam        Beam phase centre horizontal m (component along y).
@@ -95,9 +76,11 @@ extern "C" {
  * @param[in]  weights       Work buffer used to evaluate DFT weights.
  * @param[in]  weights_error Work buffer used to evaluate DFT weights errors.
  * @param[in]  curand_state  Structure holding a set of curand states.
+ *
+ * @return An error code.
  */
 OSKAR_EXPORT
-int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
+int oskar_evaluate_array_pattern(oskar_Mem* beam,
         const oskar_StationModel* station, double l_beam, double m_beam,
         double n_beam, int num_points, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
@@ -107,4 +90,4 @@ int oskar_evaluate_station_beam_dipoles(oskar_Mem* beam,
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_STATION_BEAM_DIPOLES_H_ */
+#endif /* OSKAR_EVALUATE_ARRAY_PATTERN_H_ */

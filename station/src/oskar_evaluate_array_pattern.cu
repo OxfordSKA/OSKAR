@@ -28,17 +28,14 @@
 
 #include "oskar_global.h"
 
-#include "math/cudak/oskar_cudak_dftw_2d.h"
-#include "math/cudak/oskar_cudak_dftw_3d.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_2d.h"
 #include "math/cudak/oskar_cudak_dftw_o2c_3d.h"
-#include "station/oskar_evaluate_element_weights_errors.h"
-#include "station/oskar_evaluate_station_beam_scalar.h"
+#include "station/oskar_evaluate_array_pattern.h"
+#include "station/oskar_evaluate_element_weights.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_element_multiply.h"
 #include "utility/oskar_mem_element_size.h"
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_mem_realloc.h"
@@ -50,7 +47,7 @@
 extern "C" {
 #endif
 
-int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
+int oskar_evaluate_array_pattern(oskar_Mem* beam,
         const oskar_StationModel* station, double l_beam, double m_beam,
         double n_beam, int num_points, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
@@ -82,32 +79,20 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
     if (!oskar_mem_is_complex(beam->type) || oskar_mem_is_matrix(beam->type))
         return OSKAR_ERR_BAD_DATA_TYPE;
 
-    // Check that the weights are complex.
-    if (!oskar_mem_is_complex(weights->type))
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
     // Get the dimensions.
     num_antennas = station->num_elements;
     element_size = oskar_mem_element_size(l->type);
 
-    // Resize weights and weights error work arrays if required.
-    if (weights->num_elements < num_antennas)
-    {
-        oskar_mem_realloc(weights, num_antennas, &error);
-        if (error) return error;
-    }
-    if (weights_error->num_elements < num_antennas)
-    {
-        oskar_mem_realloc(weights_error, num_antennas, &error);
-        if (error) return error;
-    }
-
     // Resize output array if required.
     if (beam->num_elements < num_points)
-    {
         oskar_mem_realloc(beam, num_points, &error);
-        if (error) return error;
-    }
+
+    // Generate the beamforming weights.
+    oskar_evaluate_element_weights(weights, weights_error, station,
+            l_beam, m_beam, n_beam, curand_state, &error);
+
+    // Check if safe to proceed.
+    if (error) return error;
 
     // Double precision.
     if (oskar_station_model_type(station) == OSKAR_DOUBLE &&
@@ -117,45 +102,8 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             m->type == OSKAR_DOUBLE &&
             n->type == OSKAR_DOUBLE)
     {
-        // Compute DFT weights.
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
-        if (station->array_is_3d)
-        {
-            oskar_cudak_dftw_3d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, station->x_weights, station->y_weights,
-                    station->z_weights, l_beam, m_beam, n_beam, *weights);
-        }
-        else
-        {
-            oskar_cudak_dftw_2d_d OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, station->x_weights, station->y_weights, l_beam,
-                    m_beam, *weights);
-        }
-
-        // Apply time-variable errors.
-        if (station->apply_element_errors)
-        {
-            // Evaluate weights errors.
-            error = oskar_evaluate_element_weights_errors(weights_error,
-                    num_antennas, &station->gain, &station->gain_error,
-                    &station->phase_offset, &station->phase_error,
-                    *curand_state);
-
-            // Modify the weights (complex multiply with error vector) on the GPU
-            oskar_mem_element_multiply(NULL, weights, weights_error,
-                    num_antennas, &error);
-            if (error) return error;
-        }
-
-        // Apply apodisation weights.
-        if (station->apply_element_weight)
-        {
-            // Modify the weights using those provided.
-            oskar_mem_element_multiply(NULL, weights, &station->weight,
-                    num_antennas, &error);
-            if (error) return error;
-        }
 
         // Evaluate beam using DFT.
         if (station->array_is_3d)
@@ -189,45 +137,8 @@ int oskar_evaluate_station_beam_scalar(oskar_Mem* beam,
             m->type == OSKAR_SINGLE &&
             n->type == OSKAR_SINGLE)
     {
-        // Compute DFT weights.
         int num_threads = 256;
         int num_blocks = (num_antennas + num_threads - 1) / num_threads;
-        if (station->array_is_3d)
-        {
-            oskar_cudak_dftw_3d_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, station->x_weights, station->y_weights,
-                    station->z_weights, l_beam, m_beam, n_beam, *weights);
-        }
-        else
-        {
-            oskar_cudak_dftw_2d_f OSKAR_CUDAK_CONF(num_blocks, num_threads)
-            (num_antennas, station->x_weights, station->y_weights, l_beam,
-                    m_beam, *weights);
-        }
-
-        // Apply time-variable errors.
-        if (station->apply_element_errors)
-        {
-            // Evaluate weights errors.
-            error = oskar_evaluate_element_weights_errors(weights_error,
-                    num_antennas, &station->gain, &station->gain_error,
-                    &station->phase_offset, &station->phase_error,
-                    *curand_state);
-
-            // Modify the weights (complex multiply with error vector) on the GPU
-            oskar_mem_element_multiply(NULL, weights, weights_error,
-                    num_antennas, &error);
-            if (error) return error;
-        }
-
-        // Apply apodisation weights.
-        if (station->apply_element_weight)
-        {
-            // Modify the weights using those provided.
-            oskar_mem_element_multiply(NULL, weights, &station->weight,
-                    num_antennas, &error);
-            if (error) return error;
-        }
 
         // Evaluate beam using DFT.
         if (station->array_is_3d)

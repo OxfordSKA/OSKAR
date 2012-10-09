@@ -5,8 +5,8 @@
 set(math_cuda_kernels_SRC
     src/oskar_cudak_dft_c2r_2d.cu
     src/oskar_cudak_dftsw_c2c_2d.cu
-    src/oskar_cudak_dftw_2d.cu
-    src/oskar_cudak_dftw_3d.cu
+    #src/oskar_cudak_dftw_2d.cu # Deprecated
+    #src/oskar_cudak_dftw_3d.cu # Deprecated
     src/oskar_cudak_dftw_o2c_2d.cu
     src/oskar_cudak_dftw_o2c_3d.cu
     src/oskar_cudak_gaussian.cu

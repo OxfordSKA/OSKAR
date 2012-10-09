@@ -26,20 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "station/oskar_evaluate_station_beam_aperture_array.h"
 
-#include "station/oskar_evaluate_station_beam_scalar.h"
+#include "station/oskar_evaluate_array_pattern.h"
+#include "station/oskar_evaluate_array_pattern_dipoles.h"
 #include "station/oskar_element_model_evaluate.h"
-#include "station/oskar_evaluate_station_beam_dipoles.h"
 #include "station/oskar_blank_below_horizon.h"
 
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_mem_scale_real.h"
 #include "utility/oskar_mem_element_multiply.h"
 #include "utility/oskar_mem_set_value_real.h"
-
-#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,7 +63,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     if (station->single_element_model)
     {
         /* E and G are separable. */
-        oskar_Mem *E_ptr = NULL, *G_ptr = NULL;
+        oskar_Mem *E_ptr = 0, *G_ptr = 0;
 
         /* Evaluate E if required. */
         if (station->evaluate_array_factor)
@@ -78,7 +75,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
                 E_ptr = &work->E; /* Use work buffer. */
 
             /* Evaluate array factor. */
-            *status = oskar_evaluate_station_beam_scalar(E_ptr, station,
+            *status = oskar_evaluate_array_pattern(E_ptr, station,
                     beam_x, beam_y, beam_z, num_points, x, y, z,
                     &work->weights, &work->weights_error, curand_states);
 
@@ -116,7 +113,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         {
             /* Join E with an identity matrix in EG. */
             oskar_mem_set_value_real(beam, 1.0, status);
-            oskar_mem_element_multiply(NULL, beam, E_ptr, num_points, status);
+            oskar_mem_element_multiply(0, beam, E_ptr, num_points, status);
         }
         else if (!E_ptr && !G_ptr)
         {
@@ -149,14 +146,13 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         {
             /* Call function to evaluate beam from dipoles that are
              * oriented differently. */
-            *status = oskar_evaluate_station_beam_dipoles(beam, station,
-                    beam_x, beam_y, beam_z, num_points, x, y, z,
-                    &work->weights, &work->weights_error, curand_states);
+            oskar_evaluate_array_pattern_dipoles(beam, station, beam_x,
+                    beam_y, beam_z, num_points, x, y, z, &work->weights,
+                    &work->weights_error, curand_states, status);
 
             /* Normalise array beam if required. */
             if (station->normalise_beam)
                 oskar_mem_scale_real(beam, 1.0/station->num_elements, status);
-            if (*status) return;
         }
         else
         {

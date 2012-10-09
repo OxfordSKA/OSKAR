@@ -26,15 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_EVALUATE_STATION_BEAM_DIPOLES_H_
-#define OSKAR_CUDAK_EVALUATE_STATION_BEAM_DIPOLES_H_
+#ifndef OSKAR_EVALUATE_ARRAY_PATTERN_DIPOLES_CUDA_H_
+#define OSKAR_EVALUATE_ARRAY_PATTERN_DIPOLES_CUDA_H_
 
 /**
- * @file oskar_cudak_evaluate_station_beam_dipoles.h
+ * @file oskar_evaluate_array_pattern_dipoles_cuda.h
  */
 
 #include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+OSKAR_EXPORT
+void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
+        const float* x, const float* y, const float* z,
+        const float* cos_orientation_x, const float* sin_orientation_x,
+        const float* cos_orientation_y, const float* sin_orientation_y,
+        const float2* weights, int num_sources, const float* l,
+        const float* m, const float* n, float4c* pattern);
+
+OSKAR_EXPORT
+void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
+        const double* x, const double* y, const double* z,
+        const double* cos_orientation_x, const double* sin_orientation_x,
+        const double* cos_orientation_y, const double* sin_orientation_y,
+        const double2* weights, int num_sources, const double* l,
+        const double* m, const double* n, double4c* pattern);
+
+#ifdef __CUDACC__
 
 /**
  * @brief
@@ -73,8 +95,9 @@
  * @param[in] sin_orientation_y  The sine of the azimuth angle of nominal y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
+OSKAR_EXPORT
 __global__
-void oskar_cudak_evaluate_station_beam_dipoles_f(const int num_antennas,
+void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
         const float* x, const float* y, const float* z,
         const float* cos_orientation_x, const float* sin_orientation_x,
         const float* cos_orientation_y, const float* sin_orientation_y,
@@ -117,8 +140,9 @@ void oskar_cudak_evaluate_station_beam_dipoles_f(const int num_antennas,
  * @param[in] sin_orientation_y  The sine of the azimuth angle of nominal y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
+OSKAR_EXPORT
 __global__
-void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
+void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
         const double* x, const double* y, const double* z,
         const double* cos_orientation_x, const double* sin_orientation_x,
         const double* cos_orientation_y, const double* sin_orientation_y,
@@ -126,4 +150,10 @@ void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
         const double* m, const double* n, const int max_in_chunk,
         double4c* pattern);
 
-#endif /* OSKAR_CUDAK_EVALUATE_STATION_BEAM_DIPOLES_H_ */
+#endif /* __CUDACC__ */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_EVALUATE_ARRAY_PATTERN_DIPOLES_CUDA_H_ */

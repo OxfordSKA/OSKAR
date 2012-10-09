@@ -26,30 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
-#define OSKAR_CUDAK_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_
+#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_H_
+#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_H_
 
 /**
- * @file oskar_cudak_evaluate_element_weights_errors.h
+ * @file oskar_evaluate_element_weights.h
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "oskar_global.h"
+#include "station/oskar_StationModel.h"
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_CurandState.h"
 
-/* Forward declaration. */
-struct curandStateXORWOW;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-__global__
-void oskar_cudak_evaluate_element_weights_errors_d(double2* errors, int n,
-        const double* amp_gain, const double* amp_error,
-        const double* phase_offset, const double* phase_error,
-        curandStateXORWOW* state);
+/**
+ * @brief
+ * Top-level function to evaluate element beamforming weights for the station.
+ *
+ * @details
+ * This function evaluates the required element beamforming weights.
+ * These weights are a combination of:
+ *
+ * - Geometric DFT phases.
+ * - Systematic and random gain and phase variations.
+ * - User-supplied apodisation weights.
+ *
+ * The \p weights and \p weights_error arrays are resized to hold the weights
+ * if necessary.
+ *
+ * @param[in,out] weights       Output array of beamforming weights.
+ * @param[in,out] weights_error Work array, for calculating the weights error.
+ * @param[in] station           Pointer to station model.
+ * @param[in] x_beam            Beam direction cosine, horizontal x-component.
+ * @param[in] y_beam            Beam direction cosine, horizontal y-component.
+ * @param[in] z_beam            Beam direction cosine, horizontal z-component.
+ * @param[in,out] curand_state  Random number generator states.
+ * @param[in,out] status        Status return code.
+ */
+void oskar_evaluate_element_weights(oskar_Mem* weights,
+        oskar_Mem* weights_error, const oskar_StationModel* station,
+        double x_beam, double y_beam, double z_beam,
+        oskar_CurandState* curand_state, int* status);
 
-__global__
-void oskar_cudak_evaluate_element_weights_errors_f(float2* errors, int n,
-        const float* amp_gain, const float* amp_error,
-        const float* phase_offset, const float* phase_error,
-        curandStateXORWOW* state);
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* OSKAR_CUDAK_EVALUATE_ELEMENT_WEIGHTS_ERRORS_H_ */
+#endif /* OSKAR_EVALUATE_ELEMENT_WEIGHTS_H_ */

@@ -28,10 +28,8 @@
 
 #include "station/oskar_blank_below_horizon.h"
 #include "station/oskar_element_model_evaluate.h"
-#include "station/oskar_evaluate_station_beam_dipoles.h"
-#include "station/oskar_evaluate_station_beam_gaussian.h"
-#include "station/oskar_evaluate_station_beam_scalar.h"
 #include "station/oskar_evaluate_station_beam_aperture_array.h"
+#include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
@@ -168,7 +166,6 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         return;
     }
 }
-
 
 #ifdef __cplusplus
 }

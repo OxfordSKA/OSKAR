@@ -26,19 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "station/oskar_blank_below_horizon.h"
-#include "station/cudak/oskar_cudak_blank_below_horizon.h"
+#include "station/oskar_blank_below_horizon_cuda.h"
 #include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
-extern "C"
+extern "C" {
 #endif
+
 void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
         int num_sources, int* status)
 {
-    int type;
+    int type, location;
 
     /* Check all inputs. */
     if (!mask || !data || !status)
@@ -50,10 +50,10 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Check that all arrays are on the GPU. */
-    if (mask->location != OSKAR_LOCATION_GPU ||
-            data->location != OSKAR_LOCATION_GPU)
-        *status = OSKAR_ERR_BAD_LOCATION;
+    /* Check that all arrays are co-located. */
+    location = data->location;
+    if (mask->location != location)
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
 
     /* Check that the mask type is OK. */
     if (mask->type != OSKAR_SINGLE && mask->type != OSKAR_DOUBLE)
@@ -68,41 +68,44 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
 
     /* Zero the value of any positions below the horizon. */
     type = data->type;
-    if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+    if (location == OSKAR_LOCATION_GPU)
     {
-        int num_blocks, num_threads = 256;
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_blank_below_horizon_matrix_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (num_sources, (const float*)mask->data, (float4c*)data->data);
-    }
-    else if (type == OSKAR_SINGLE_COMPLEX)
-    {
-        int num_blocks, num_threads = 256;
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_blank_below_horizon_scalar_f
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (num_sources, (const float*)mask->data, (float2*)data->data);
-    }
-    else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
-    {
-        int num_blocks, num_threads = 256;
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_blank_below_horizon_matrix_d
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (num_sources, (const double*)mask->data, (double4c*)data->data);
-    }
-    else if (type == OSKAR_DOUBLE_COMPLEX)
-    {
-        int num_blocks, num_threads = 256;
-        num_blocks = (num_sources + num_threads - 1) / num_threads;
-        oskar_cudak_blank_below_horizon_scalar_d
-        OSKAR_CUDAK_CONF(num_blocks, num_threads)
-        (num_sources, (const double*)mask->data, (double2*)data->data);
+#ifdef OSKAR_HAVE_CUDA
+        if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+        {
+            oskar_blank_below_horizon_matrix_cuda_f
+            ((float4c*)data->data, num_sources, (const float*)mask->data);
+        }
+        else if (type == OSKAR_SINGLE_COMPLEX)
+        {
+            oskar_blank_below_horizon_scalar_cuda_f
+            ((float2*)data->data, num_sources, (const float*)mask->data);
+        }
+        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+        {
+            oskar_blank_below_horizon_matrix_cuda_d
+            ((double4c*)data->data, num_sources, (const double*)mask->data);
+        }
+        else if (type == OSKAR_DOUBLE_COMPLEX)
+        {
+            oskar_blank_below_horizon_scalar_cuda_d
+            ((double2*)data->data, num_sources, (const double*)mask->data);
+        }
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+
+        /* Report any CUDA error. */
+        oskar_cuda_check_error(status);
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Report any CUDA error. */
-    oskar_cuda_check_error(status);
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+    }
 }
+
+#ifdef __cplusplus
+}
+#endif

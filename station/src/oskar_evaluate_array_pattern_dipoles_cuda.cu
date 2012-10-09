@@ -26,17 +26,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/cudak/oskar_cudak_evaluate_station_beam_dipoles.h"
-#include <math.h>
+#include "station/oskar_evaluate_array_pattern_dipoles_cuda.h"
 
-// Single precision.
-// Value for max_in_chunk should be 448 in single precision.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float2 smem[];
+/* Kernel wrappers. ======================================================== */
 
+/* Single precision. */
+void oskar_evaluate_array_pattern_dipoles_cuda_f(int num_antennas,
+        const float* x, const float* y, const float* z,
+        const float* cos_orientation_x, const float* sin_orientation_x,
+        const float* cos_orientation_y, const float* sin_orientation_y,
+        const float2* weights, int num_sources, const float* l,
+        const float* m, const float* n, float4c* pattern)
+{
+    int max_in_chunk = 448, shared_mem, num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    shared_mem = 9 * max_in_chunk * sizeof(float);
+    oskar_evaluate_array_pattern_dipoles_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (num_antennas,
+            x, y, z, cos_orientation_x, sin_orientation_x,
+            cos_orientation_y, sin_orientation_y,
+            weights, num_sources, l, m, n, max_in_chunk, pattern);
+}
+
+/* Double precision. */
+void oskar_evaluate_array_pattern_dipoles_cuda_d(int num_antennas,
+        const double* x, const double* y, const double* z,
+        const double* cos_orientation_x, const double* sin_orientation_x,
+        const double* cos_orientation_y, const double* sin_orientation_y,
+        const double2* weights, int num_sources, const double* l,
+        const double* m, const double* n, double4c* pattern)
+{
+    int max_in_chunk = 224, shared_mem, num_blocks, num_threads = 256;
+    num_blocks = (num_sources + num_threads - 1) / num_threads;
+    shared_mem = 9 * max_in_chunk * sizeof(double);
+    oskar_evaluate_array_pattern_dipoles_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (num_antennas,
+            x, y, z, cos_orientation_x, sin_orientation_x,
+            cos_orientation_y, sin_orientation_y,
+            weights, num_sources, l, m, n, max_in_chunk, pattern);
+}
+
+
+/* Kernels. ================================================================ */
+
+/* Shared memory pointers used by the kernels. */
+extern __shared__ float2 smem_f[];
+extern __shared__ double2 smem_d[];
+
+/* Single precision. */
+/* Value for max_in_chunk should be 448 in single precision. */
 __global__
-void oskar_cudak_evaluate_station_beam_dipoles_f(const int num_antennas,
+void oskar_evaluate_array_pattern_dipoles_cudak_f(const int num_antennas,
         const float* x, const float* y, const float* z,
         const float* cos_orientation_x, const float* sin_orientation_x,
         const float* cos_orientation_y, const float* sin_orientation_y,
@@ -72,7 +116,7 @@ void oskar_cudak_evaluate_station_beam_dipoles_f(const int num_antennas,
     // e_phi_y = cos_phi;
 
     // Initialise shared memory caches.
-    float2* cw = smem; // Cached weights.
+    float2* cw = smem_f; // Cached weights.
     float2* cp = cw + max_in_chunk; // Cached x,y positions.
     float2* cox = cp + max_in_chunk; // Cached orientation x data.
     float2* coy = cox + max_in_chunk; // Cached orientation y data.
@@ -151,14 +195,10 @@ void oskar_cudak_evaluate_station_beam_dipoles_f(const int num_antennas,
     }
 }
 
-// Double precision.
-// Value for max_in_chunk should be 224 in double precision.
-
-// Shared memory pointer used by the kernel.
-extern __shared__ double2 smemd[];
-
+/* Double precision. */
+/* Value for max_in_chunk should be 224 in double precision. */
 __global__
-void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
+void oskar_evaluate_array_pattern_dipoles_cudak_d(const int num_antennas,
         const double* x, const double* y, const double* z,
         const double* cos_orientation_x, const double* sin_orientation_x,
         const double* cos_orientation_y, const double* sin_orientation_y,
@@ -194,7 +234,7 @@ void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
     // e_phi_y = cos_phi;
 
     // Initialise shared memory caches.
-    double2* cw = smemd; // Cached weights.
+    double2* cw = smem_d; // Cached weights.
     double2* cp = cw + max_in_chunk; // Cached x,y positions.
     double2* cox = cp + max_in_chunk; // Cached orientation x data.
     double2* coy = cox + max_in_chunk; // Cached orientation y data.
@@ -272,3 +312,7 @@ void oskar_cudak_evaluate_station_beam_dipoles_d(const int num_antennas,
         pattern[s].d = e_phi_b;
     }
 }
+
+#ifdef __cplusplus
+}
+#endif

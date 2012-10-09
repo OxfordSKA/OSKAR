@@ -35,19 +35,17 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
-
-/* Forward declaration. */
-struct curandStateXORWOW;
+#include "utility/oskar_CurandState.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 OSKAR_EXPORT
-int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
+void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        curandStateXORWOW* states);
+        oskar_CurandState* states, int* status);
 
 #ifdef __cplusplus
 }

@@ -26,47 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_init.h"
-#include "math/oskar_spline_data_init.h"
-#include "utility/oskar_mem_init.h"
+#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_
+
+/**
+ * @file oskar_evaluate_element_weights_dft.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
-        int* status)
-{
-    /* Check all inputs. */
-    if (!data || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
-
-    /* Initialise variables. */
-    data->type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
-    data->taper_type = OSKAR_ELEMENT_MODEL_TAPER_NONE;
-    data->cos_power = 0;
-    data->gaussian_fwhm_rad = 0.0;
-
-    /* Check type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Initialise memory. */
-    oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1, status);
-    oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1, status);
-    oskar_spline_data_init(&data->phi_re_x, type, location, status);
-    oskar_spline_data_init(&data->phi_im_x, type, location, status);
-    oskar_spline_data_init(&data->theta_re_x, type, location, status);
-    oskar_spline_data_init(&data->theta_im_x, type, location, status);
-    oskar_spline_data_init(&data->phi_re_y, type, location, status);
-    oskar_spline_data_init(&data->phi_im_y, type, location, status);
-    oskar_spline_data_init(&data->theta_re_y, type, location, status);
-    oskar_spline_data_init(&data->theta_im_y, type, location, status);
-}
+/**
+ * @brief
+ * Wrapper function to compute DFT element phase weights.
+ *
+ * @details
+ * This function computes the DFT phase weights for each element.
+ *
+ * @param[out] weights       Output DFT phase weights per element.
+ * @param[in] num_elements   The number of elements in the array.
+ * @param[in] x              Element x positions, in radians.
+ * @param[in] y              Element y positions, in radians.
+ * @param[in] z              Element z positions, in radians.
+ * @param[in] x_beam         Beam x direction cosine.
+ * @param[in] y_beam         Beam y direction cosine.
+ * @param[in] z_beam         Beam z direction cosine.
+ */
+OSKAR_EXPORT
+void oskar_evaluate_element_weights_dft(oskar_Mem* weights, int num_elements,
+        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
+        double x_beam, double y_beam, double z_beam, int* status);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_EVALUATE_ELEMENT_WEIGHTS_DFT_H_ */

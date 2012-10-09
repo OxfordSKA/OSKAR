@@ -81,8 +81,9 @@ void Test_element_weights_errors::test_evaluate()
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     /* Evaluate weights errors. */
-    error = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
-            &d_gain, &d_gain_error, &d_phase, &d_phase_error, curand_state);
+    oskar_evaluate_element_weights_errors(&d_errors, num_elements,
+            &d_gain, &d_gain_error, &d_phase, &d_phase_error, &curand_state,
+            &error);
     CPPUNIT_ASSERT_MESSAGE(oskar_get_error_string(error), error == OSKAR_SUCCESS);
 
     /* Copy memory back to CPU to inspect it. */
@@ -149,8 +150,8 @@ void Test_element_weights_errors::test_apply()
     oskar_CurandState states;
     oskar_curand_state_init(&states, num_elements, 0, 0, 0, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
-    status = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
-            &d_gain, &d_gain_error, &d_phase, &d_phase_error, states);
+    oskar_evaluate_element_weights_errors(&d_errors, num_elements,
+            &d_gain, &d_gain_error, &d_phase, &d_phase_error, &states, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
     oskar_mem_element_multiply(NULL, &d_weights, &d_errors, num_elements, &status);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
@@ -226,8 +227,9 @@ void Test_element_weights_errors::test_reinit()
                 for (int s = 0; s < num_stations; ++s)
                 {
                     fprintf(file, "      station: %i  ==> ", s);
-                    status = oskar_evaluate_element_weights_errors(&d_errors, num_elements,
-                            &d_gain, &d_gain_error, &d_phase, &d_phase_error, states);
+                    oskar_evaluate_element_weights_errors(&d_errors, num_elements,
+                            &d_gain, &d_gain_error, &d_phase, &d_phase_error,
+                            &states, &status);
                     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
                     oskar_Mem h_errors(&d_errors, OSKAR_LOCATION_CPU);
                     for (int i = 0; i < num_elements; ++i)

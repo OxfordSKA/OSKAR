@@ -43,7 +43,8 @@ oskar_ElementModel::oskar_ElementModel(const oskar_ElementModel* other,
         int location)
 {
     int err = 0;
-    oskar_element_model_init(this, other->type(), location, &err);
+    oskar_element_model_init(this, oskar_element_model_type(other),
+            location, &err);
     oskar_element_model_copy(this, other, &err);
     if (err) throw err;
 }
@@ -53,9 +54,4 @@ oskar_ElementModel::~oskar_ElementModel()
     int err = 0;
     oskar_element_model_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_ElementModel::type() const
-{
-    return oskar_element_model_type(this);
 }

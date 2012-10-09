@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
+
 #include "station/test/Test_evaluate_station_beam_dipoles.h"
 
-#include "station/cudak/oskar_cudak_evaluate_station_beam_dipoles.h"
+#include "station/oskar_evaluate_array_pattern_dipoles_cuda.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
@@ -54,8 +56,6 @@ void Test_evaluate_station_beam_dipoles::test()
     int num_az = 360;
     int num_el = 90;
     int num_pixels = num_az * num_el;
-    int num_threads = 256;
-    int num_blocks  = (num_pixels + num_threads - 1) / num_threads;
     oskar_Mem azimuth(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem elevation(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
     oskar_Mem l_cpu(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, num_pixels);
@@ -142,14 +142,11 @@ void Test_evaluate_station_beam_dipoles::test()
     oskar_Mem sin_orientation_y(&sin_orn_y_cpu, OSKAR_LOCATION_GPU);
 
     // Call the kernel.
-    int max_in_chunk = 224;
-    int shared_mem = max_in_chunk * 9 * sizeof(double);
     TIMER_START
-    oskar_cudak_evaluate_station_beam_dipoles_d
-    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (num_antennas,
+    oskar_evaluate_array_pattern_dipoles_cuda_d (num_antennas,
             antenna_x, antenna_y, antenna_z, cos_orientation_x,
             sin_orientation_x, cos_orientation_y, sin_orientation_y,
-            weights, num_pixels, l, m, n, max_in_chunk, pattern);
+            weights, num_pixels, l, m, n, pattern);
     cudaDeviceSynchronize();
     TIMER_STOP("Finished station beam evaluation using dipoles (%d points)",
             num_pixels)

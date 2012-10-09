@@ -105,6 +105,9 @@ enum {
     /* Indicates that there is an error in units of some quantity. */
     OSKAR_ERR_BAD_UNITS                = -13,
 
+    /* Indicates that arrays are in different locations. */
+    OSKAR_ERR_LOCATION_MISMATCH        = -14,
+
     /* Indicates that spline coefficient computation failed. */
     OSKAR_ERR_SPLINE_COEFF_FAIL        = -15,
 
@@ -318,6 +321,8 @@ enum {
     #define __constant__
     #define __forceinline__
     #define OSKAR_CUDAK_CONF(...)
+    #define OSKAR_HAVE_CUDA
+    #define __CUDACC__
 #else
     #define OSKAR_CUDAK_CONF(...) <<< __VA_ARGS__ >>>
 #endif

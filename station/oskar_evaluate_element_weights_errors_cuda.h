@@ -26,51 +26,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/cudak/oskar_cudak_evaluate_element_weights_errors.h"
+#ifndef OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_CUDA_H_
+#define OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_CUDA_H_
 
-#include <curand_kernel.h>
+/**
+ * @file oskar_evaluate_element_weights_errors_cuda.h
+ */
 
-__global__
-void oskar_cudak_evaluate_element_weights_errors_d(double2* errors, int n,
-        const double* amp_gain, const double* amp_error,
+#include "oskar_global.h"
+#include "utility/oskar_vector_types.h"
+
+/* Forward declaration. */
+struct curandStateXORWOW;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+OSKAR_EXPORT
+void oskar_evaluate_element_weights_errors_cuda_f(float2* errors,
+        int num_elements, const float* amp_gain, const float* amp_error,
+        const float* phase_offset, const float* phase_error,
+        struct curandStateXORWOW* state);
+
+OSKAR_EXPORT
+void oskar_evaluate_element_weights_errors_cuda_d(double2* errors,
+        int num_elements, const double* amp_gain, const double* amp_error,
         const double* phase_offset, const double* phase_error,
-        curandStateXORWOW* state)
-{
-    /* Thread index == antenna element */
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        struct curandStateXORWOW* state);
 
-    /* Return if index is out of range */
-    if (idx >= n) return;
+#ifdef __CUDACC__
 
-    /* Generate 2 pseudo-random numbers with mean 0.0 and stddev 1.0 */
-    double2 r = curand_normal2_double(&state[idx]);
-
-    /* Evaluate the real and imag. components of the error weight for the antenna */
-    double amp = amp_gain[idx] + (r.x * amp_error[idx]);
-    double arg = phase_offset[idx] + (r.y * phase_error[idx]);
-    errors[idx].x = amp * cos(arg);
-    errors[idx].y = amp * sin(arg);
-}
-
+OSKAR_EXPORT
 __global__
-void oskar_cudak_evaluate_element_weights_errors_f(float2* errors, int n,
+void oskar_evaluate_element_weights_errors_cudak_f(float2* errors, int n,
         const float* amp_gain, const float* amp_error,
         const float* phase_offset, const float* phase_error,
-        curandStateXORWOW* state)
-{
-    /* Thread index == antenna element */
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        struct curandStateXORWOW* state);
 
-    /* Return if index is out of range */
-    if (idx >= n) return;
+OSKAR_EXPORT
+__global__
+void oskar_evaluate_element_weights_errors_cudak_d(double2* errors, int n,
+        const double* amp_gain, const double* amp_error,
+        const double* phase_offset, const double* phase_error,
+        struct curandStateXORWOW* state);
 
-    /* Generate 2 pseudo-random numbers with mean 0.0 and stddev 1.0 */
-    float2 r = curand_normal2(&state[idx]);
+#endif /* __CUDACC__ */
 
-    /* Evaluate the real and imag. components of the error weight for the antenna */
-    float amp = amp_gain[idx] + r.x * amp_error[idx];
-    float arg = phase_offset[idx] + r.y * phase_error[idx];
-    errors[idx].x = amp * cosf(arg);
-    errors[idx].y = amp * sinf(arg);
+#ifdef __cplusplus
 }
+#endif
 
+#endif /* OSKAR_EVALUATE_ELEMENT_WEIGHTS_ERRORS_CUDA_H_ */

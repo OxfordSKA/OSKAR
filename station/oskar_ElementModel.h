@@ -46,7 +46,9 @@
  */
 struct OSKAR_EXPORT oskar_ElementModel
 {
-    int cos_power; /* For a cosine taper, the power of the cosine. */
+    int type; /**< Numerical, geometric dipole or isotropic. */
+    int taper_type; /**< Tapering type. */
+    int cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
     oskar_Mem filename_x;
     oskar_Mem filename_y;
@@ -85,14 +87,20 @@ struct OSKAR_EXPORT oskar_ElementModel
      * Destroys the element model structure, freeing any memory it uses.
      */
     ~oskar_ElementModel();
-
-    /**
-     * @brief Returns the base type of all arrays in the structure, or an error
-     * code if the types are inconsistent.
-     */
-    int type() const;
 #endif
 };
 typedef struct oskar_ElementModel oskar_ElementModel;
+
+enum {
+    OSKAR_ELEMENT_MODEL_TYPE_NUMERICAL,
+    OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE,
+    OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC
+};
+
+enum {
+    OSKAR_ELEMENT_MODEL_TAPER_NONE,
+    OSKAR_ELEMENT_MODEL_TAPER_COSINE,
+    OSKAR_ELEMENT_MODEL_TAPER_GAUSSIAN
+};
 
 #endif /* OSKAR_ELEMENT_MODEL_H_ */

@@ -27,78 +27,91 @@
  */
 
 #include "station/oskar_evaluate_element_weights_errors.h"
-#include "station/cudak/oskar_cudak_evaluate_element_weights_errors.h"
-
-#include <stdio.h>
-#include <stdlib.h>
+#include "station/oskar_evaluate_element_weights_errors_cuda.h"
+#include "utility/oskar_mem_type_check.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
+/* Wrapper. */
+void oskar_evaluate_element_weights_errors(oskar_Mem* errors, int num_elements,
         const oskar_Mem* gain, const oskar_Mem* gain_error,
         const oskar_Mem* phase, const oskar_Mem* phase_error,
-        curandStateXORWOW* states)
+        oskar_CurandState* curand_states, int* status)
 {
-    int error = OSKAR_SUCCESS;
+    int type, location;
 
-    if (errors == NULL || gain == NULL || gain_error == NULL ||
-            phase == NULL || phase_error == NULL || states == NULL)
+    /* Check all inputs. */
+    if (!errors || !gain || !gain_error || !phase || !phase_error ||
+            !curand_states || !status)
     {
-        return OSKAR_ERR_INVALID_ARGUMENT;
+        oskar_set_invalid_argument(status);
+        return;
     }
 
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check array dimensions are OK. */
     if (errors->num_elements < num_elements ||
             gain->num_elements < num_elements ||
             gain_error->num_elements < num_elements ||
             phase->num_elements < num_elements ||
             phase_error->num_elements < num_elements)
-    {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
-    }
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
 
-    if (errors->location != OSKAR_LOCATION_GPU ||
-            gain->location != OSKAR_LOCATION_GPU ||
-            gain_error->location != OSKAR_LOCATION_GPU ||
-            phase->location != OSKAR_LOCATION_GPU ||
-            phase_error->location != OSKAR_LOCATION_GPU)
-    {
-        return OSKAR_ERR_BAD_LOCATION;
-    }
+    /* Check for location mismatch. */
+    location = errors->location;
+    if (gain->location != location ||
+            gain_error->location != location ||
+            phase->location != location ||
+            phase_error->location != location)
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
 
-    int num_threads = 128; /* Note: this might not be optimal! */
-    int num_blocks = (num_elements + num_threads - 1) / num_threads;
+    /* Check types. */
+    type = oskar_mem_base_type(errors->type);
+    if (!oskar_mem_is_complex(errors->type) ||
+            oskar_mem_is_matrix(errors->type))
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+    if (gain->type != type || phase->type != type ||
+            gain_error->type != type || phase_error->type != type)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
 
-    /* Generate weights errors */
-    /* Double precision */
-    if (errors->is_double() && gain->is_double() && gain_error->is_double() &&
-            phase->is_double() && phase_error->is_double())
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Generate weights errors. */
+    if (location == OSKAR_LOCATION_GPU)
     {
-        oskar_cudak_evaluate_element_weights_errors_d
-            OSKAR_CUDAK_CONF(num_blocks, num_threads)
+#ifdef OSKAR_HAVE_CUDA
+        if (type == OSKAR_DOUBLE)
+        {
+            oskar_evaluate_element_weights_errors_cuda_d
             ((double2*)errors->data, num_elements, (double*)gain->data,
                     (double*)gain_error->data, (double*)phase->data,
-                    (double*)phase_error->data, states);
-    }
-    /* Single precision */
-    else if (errors->is_single() && gain->is_single() && gain_error->is_single() &&
-            phase->is_single() && phase_error->is_single())
-    {
-        oskar_cudak_evaluate_element_weights_errors_f
-            OSKAR_CUDAK_CONF(num_blocks, num_threads)
+                    (double*)phase_error->data, curand_states->state);
+        }
+        else if (type == OSKAR_SINGLE)
+        {
+            oskar_evaluate_element_weights_errors_cuda_f
             ((float2*)errors->data, num_elements, (float*)gain->data,
                     (float*)gain_error->data, (float*)phase->data,
-                    (float*)phase_error->data, states);
+                    (float*)phase_error->data, curand_states->state);
+        }
+        else
+        {
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
+        }
+#else
+        *status = OSKAR_ERR_CUDA_NOT_AVAILABLE;
+#endif
     }
     else
     {
-        error = OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_LOCATION;
     }
-
-    return error;
 }
-
 
 #ifdef __cplusplus
 }
