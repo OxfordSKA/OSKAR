@@ -278,6 +278,11 @@ enum {
 #else
 #    define OSKAR_FITS_EXPORT OSKAR_DECL_IMPORT
 #endif
+#ifdef oskar_ms_EXPORTS
+#    define OSKAR_MS_EXPORT OSKAR_DECL_EXPORT
+#else
+#    define OSKAR_MS_EXPORT OSKAR_DECL_IMPORT
+#endif
 #ifdef oskar_widgets_EXPORTS
 #    define OSKAR_WIDGETS_EXPORT OSKAR_DECL_EXPORT
 #else

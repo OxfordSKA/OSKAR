@@ -33,6 +33,8 @@
  * @file oskar_MeasurementSet.h
  */
 
+#include "oskar_global.h"
+
 // CASA declarations.
 namespace casa {
 class MeasurementSet;
@@ -75,7 +77,7 @@ template <class T> class Vector;
  * </endcode>
  *
  */
-class oskar_MeasurementSet
+class OSKAR_MS_EXPORT oskar_MeasurementSet
 {
 public:
     /**
