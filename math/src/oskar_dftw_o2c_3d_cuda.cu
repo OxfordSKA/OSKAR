@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,16 +26,57 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_dftw_o2c_3d.h"
+#include "math/oskar_dftw_o2c_3d_cuda.h"
 
-// Single precision.
-// Value for max_in_chunk should be 800 in single precision.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float2 smem[];
+/* Kernel wrappers. ======================================================== */
 
+/* Single precision. */
+void oskar_dftw_o2c_3d_cuda_f(int n_in, const float* d_x_in,
+        const float* d_y_in, const float* d_z_in, const float2* d_weights_in,
+        int n_out, const float* d_x_out, const float* d_y_out,
+        const float* d_z_out, float2* d_output)
+{
+    int num_blocks, num_threads = 256;
+    int shared_mem, max_in_chunk = 800; /* Should be multiple of 16. */
+    num_blocks = (n_out + num_threads - 1) / num_threads;
+    shared_mem = 5 * max_in_chunk * sizeof(float);
+    oskar_dftw_o2c_3d_cudak_f
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in,
+            d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
+            d_z_out, max_in_chunk, d_output);
+}
+
+/* Double precision. */
+void oskar_dftw_o2c_3d_cuda_d(int n_in, const double* d_x_in,
+        const double* d_y_in, const double* d_z_in, const double2* d_weights_in,
+        int n_out, const double* d_x_out, const double* d_y_out,
+        const double* d_z_out, double2* d_output)
+{
+    int num_blocks, num_threads = 256;
+    int shared_mem, max_in_chunk = 384; /* Should be multiple of 16. */
+    num_blocks = (n_out + num_threads - 1) / num_threads;
+    shared_mem = 5 * max_in_chunk * sizeof(double);
+    oskar_dftw_o2c_3d_cudak_d
+    OSKAR_CUDAK_CONF(num_blocks, num_threads, shared_mem) (n_in,
+            d_x_in, d_y_in, d_z_in, d_weights_in, n_out, d_x_out, d_y_out,
+            d_z_out, max_in_chunk, d_output);
+}
+
+
+/* Kernels. ================================================================ */
+
+/* Shared memory pointers used by the kernels. */
+extern __shared__ float2 smem_f[];
+extern __shared__ double2 smem_d[];
+
+/* Single precision. */
+/* Value for max_in_chunk should be 800 in single precision. */
 __global__
-void oskar_cudak_dftw_o2c_3d_f(const int n_in, const float* x_in,
+void oskar_dftw_o2c_3d_cudak_f(const int n_in, const float* x_in,
         const float* y_in, const float* z_in, const float2* weights_in,
         const int n_out, const float* x_out, const float* y_out,
         const float* z_out, const int max_in_chunk, float2* output)
@@ -56,7 +97,7 @@ void oskar_cudak_dftw_o2c_3d_f(const int n_in, const float* x_in,
 
     // Initialise shared memory caches.
     // Input positions are cached as float2 for speed increase.
-    float2* cw = smem; // Cached input weights.
+    float2* cw = smem_f; // Cached input weights.
     float2* cp = cw + max_in_chunk; // Cached input x,y positions.
     float* cz = (float*)(cp + max_in_chunk); // Cached input z positions.
 
@@ -105,14 +146,10 @@ void oskar_cudak_dftw_o2c_3d_f(const int n_in, const float* x_in,
         output[i_out] = out;
 }
 
-// Double precision.
-// Value for max_in_chunk should be 384 in double precision.
-
-// Shared memory pointer used by the kernel.
-extern __shared__ double2 smemd[];
-
+/* Double precision. */
+/* Value for max_in_chunk should be 384 in double precision. */
 __global__
-void oskar_cudak_dftw_o2c_3d_d(const int n_in, const double* x_in,
+void oskar_dftw_o2c_3d_cudak_d(const int n_in, const double* x_in,
         const double* y_in, const double* z_in, const double2* weights_in,
         const int n_out, const double* x_out, const double* y_out,
         const double* z_out, const int max_in_chunk, double2* output)
@@ -132,7 +169,7 @@ void oskar_cudak_dftw_o2c_3d_d(const int n_in, const double* x_in,
     }
 
     // Initialise shared memory caches.
-    double2* cw = smemd; // Cached input weights.
+    double2* cw = smem_d; // Cached input weights.
     double2* cp = cw + max_in_chunk; // Cached input x,y positions.
     double* cz = (double*)(cp + max_in_chunk); // Cached input z positions.
 
@@ -180,3 +217,7 @@ void oskar_cudak_dftw_o2c_3d_d(const int n_in, const double* x_in,
     if (i_out < n_out)
         output[i_out] = out;
 }
+
+#ifdef __cplusplus
+}
+#endif

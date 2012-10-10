@@ -26,8 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_evaluate_array_pattern_dipoles.h"
-#include "station/oskar_evaluate_array_pattern_dipoles_cuda.h"
+#include "math/oskar_dftw_o2c_2d_cuda.h"
+#include "math/oskar_dftw_o2c_3d_cuda.h"
+#include "station/oskar_evaluate_array_pattern.h"
 #include "station/oskar_evaluate_element_weights.h"
 #include "station/oskar_station_model_location.h"
 #include "station/oskar_station_model_type.h"
@@ -39,7 +40,7 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
+void oskar_evaluate_array_pattern(oskar_Mem* beam,
         const oskar_StationModel* station, double l_beam, double m_beam,
         double n_beam, int num_points, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
@@ -78,7 +79,7 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
     /* Check for correct data types. */
     if (!oskar_mem_is_complex(beam->type) ||
             !oskar_mem_is_complex(weights->type) ||
-            !oskar_mem_is_matrix(beam->type) ||
+            oskar_mem_is_matrix(beam->type) ||
             oskar_mem_is_matrix(weights->type))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
     if (l->type != type || m->type != type || n->type != type ||
@@ -103,36 +104,54 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
 #ifdef OSKAR_HAVE_CUDA
         if (type == OSKAR_DOUBLE)
         {
-            oskar_evaluate_array_pattern_dipoles_cuda_d(station->num_elements,
-                    (const double*)station->x_signal.data,
-                    (const double*)station->y_signal.data,
-                    (const double*)station->z_signal.data,
-                    (const double*)station->cos_orientation_x.data,
-                    (const double*)station->sin_orientation_x.data,
-                    (const double*)station->cos_orientation_y.data,
-                    (const double*)station->sin_orientation_y.data,
-                    (const double2*)weights->data, num_points,
-                    (const double*)l->data,
-                    (const double*)m->data,
-                    (const double*)n->data,
-                    (double4c*)beam);
+            if (station->array_is_3d)
+            {
+                oskar_dftw_o2c_3d_cuda_d(station->num_elements,
+                        (const double*)station->x_signal.data,
+                        (const double*)station->y_signal.data,
+                        (const double*)station->z_signal.data,
+                        (const double2*)weights->data, num_points,
+                        (const double*)l->data,
+                        (const double*)m->data,
+                        (const double*)n->data,
+                        (double2*)beam->data);
+            }
+            else
+            {
+                oskar_dftw_o2c_2d_cuda_d(station->num_elements,
+                        (const double*)station->x_signal.data,
+                        (const double*)station->y_signal.data,
+                        (const double2*)weights->data, num_points,
+                        (const double*)l->data,
+                        (const double*)m->data,
+                        (double2*)beam->data);
+            }
             oskar_cuda_check_error(status);
         }
         else if (type == OSKAR_SINGLE)
         {
-            oskar_evaluate_array_pattern_dipoles_cuda_f(station->num_elements,
-                    (const float*)station->x_signal.data,
-                    (const float*)station->y_signal.data,
-                    (const float*)station->z_signal.data,
-                    (const float*)station->cos_orientation_x.data,
-                    (const float*)station->sin_orientation_x.data,
-                    (const float*)station->cos_orientation_y.data,
-                    (const float*)station->sin_orientation_y.data,
-                    (const float2*)weights->data, num_points,
-                    (const float*)l->data,
-                    (const float*)m->data,
-                    (const float*)n->data,
-                    (float4c*)beam);
+            if (station->array_is_3d)
+            {
+                oskar_dftw_o2c_3d_cuda_f(station->num_elements,
+                        (const float*)station->x_signal.data,
+                        (const float*)station->y_signal.data,
+                        (const float*)station->z_signal.data,
+                        (const float2*)weights->data, num_points,
+                        (const float*)l->data,
+                        (const float*)m->data,
+                        (const float*)n->data,
+                        (float2*)beam->data);
+            }
+            else
+            {
+                oskar_dftw_o2c_2d_cuda_f(station->num_elements,
+                        (const float*)station->x_signal.data,
+                        (const float*)station->y_signal.data,
+                        (const float2*)weights->data, num_points,
+                        (const float*)l->data,
+                        (const float*)m->data,
+                        (float2*)beam->data);
+            }
             oskar_cuda_check_error(status);
         }
         else

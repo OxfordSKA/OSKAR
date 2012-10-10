@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,80 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "math/cudak/oskar_cudak_dft_c2r_2d.h"
+#include "math/oskar_dft_c2r_2d_cuda.h"
 
-// Shared memory pointer used by the kernel.
-extern __shared__ float4 c[];
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// Single precision.
+/* Kernel wrappers. ======================================================== */
 
+/* Single precision. */
+void oskar_dft_c2r_2d_cuda_f(int n_in, const float* x_in, const float* y_in,
+        const float2* data_in, int n_out, const float* x_out,
+        const float* y_out, float* output)
+{
+    int num_blocks, num_threads = 384;
+    int chunk_size, max_in_chunk, max_out_chunk, shared, start;
+
+    /* Initialise. */
+    max_in_chunk = 896; /* Should be multiple of 16. */
+    max_out_chunk = 65536; /* Manageable output chunk size. */
+    shared = 2 * max_in_chunk * sizeof(float2);
+
+    /* Loop over output chunks. */
+    for (start = 0; start < n_out; start += max_out_chunk)
+    {
+        chunk_size = n_out - start;
+        if (chunk_size > max_out_chunk) chunk_size = max_out_chunk;
+
+        /* Invoke kernel to compute the (partial) DFT on the device. */
+        num_blocks = (chunk_size + num_threads - 1) / num_threads;
+        oskar_dft_c2r_2d_cudak_f
+        OSKAR_CUDAK_CONF(num_blocks, num_threads, shared) (n_in, x_in, y_in,
+                data_in, chunk_size, x_out + start, y_out + start,
+                max_in_chunk, output + start);
+    }
+}
+
+/* Double precision. */
+void oskar_dft_c2r_2d_cuda_d(int n_in, const double* x_in, const double* y_in,
+        const double2* data_in, int n_out, const double* x_out,
+        const double* y_out, double* output)
+{
+    int num_blocks, num_threads = 384;
+    int chunk_size, max_in_chunk, max_out_chunk, shared, start;
+
+    /* Initialise. */
+    max_in_chunk = 448; /* Should be multiple of 16. */
+    max_out_chunk = 32768; /* Manageable output chunk size. */
+    shared = 2 * max_in_chunk * sizeof(double2);
+
+    /* Loop over output chunks. */
+    for (start = 0; start < n_out; start += max_out_chunk)
+    {
+        chunk_size = n_out - start;
+        if (chunk_size > max_out_chunk) chunk_size = max_out_chunk;
+
+        // Invoke kernel to compute the (partial) DFT on the device. */
+        num_blocks = (chunk_size + num_threads - 1) / num_threads;
+        oskar_dft_c2r_2d_cudak_d
+        OSKAR_CUDAK_CONF(num_blocks, num_threads, shared) (n_in, x_in, y_in,
+                data_in, chunk_size, x_out + start, y_out + start,
+                max_in_chunk, output + start);
+    }
+}
+
+
+/* Kernels. ================================================================ */
+
+/* Shared memory pointers used by the kernels. */
+extern __shared__ float4 smem_f[];
+extern __shared__ double4 smem_d[];
+
+/* Single precision. */
 __global__
-void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
+void oskar_dft_c2r_2d_cudak_f(int n_in, const float* x_in,
         const float* y_in, const float2* data_in, const int n_out,
         const float* x_out, const float* y_out, const int max_in_chunk,
         float* output)
@@ -64,10 +129,10 @@ void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
         for (int t = threadIdx.x; t < chunk_size; t += blockDim.x)
         {
             const int g = start + t; // Global input index.
-            c[t].x = x_in[g];
-            c[t].y = y_in[g];
-            c[t].z = data_in[g].x;
-            c[t].w = data_in[g].y;
+            smem_f[t].x = x_in[g];
+            smem_f[t].y = y_in[g];
+            smem_f[t].z = data_in[g].x;
+            smem_f[t].w = data_in[g].y;
         }
 
         // Must synchronise before computing partial output for these inputs.
@@ -78,13 +143,13 @@ void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
         {
             // Calculate the complex DFT weight.
             float2 weight;
-            float a = c[i].x * xp_out + c[i].y * yp_out;
+            float a = smem_f[i].x * xp_out + smem_f[i].y * yp_out;
             sincosf(-a, &weight.y, &weight.x);
 
             // Perform complex multiply-accumulate.
             // Output is real, so only evaluate the real part.
-            out += c[i].z * weight.x; // RE*RE
-            out -= c[i].w * weight.y; // IM*IM
+            out += smem_f[i].z * weight.x; // RE*RE
+            out -= smem_f[i].w * weight.y; // IM*IM
         }
 
         // Must synchronise again before loading in a new input block.
@@ -96,13 +161,9 @@ void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
         output[i_out] = out;
 }
 
-// Shared memory pointer used by the kernel.
-extern __shared__ double4 cd[];
-
-// Double precision.
-
+/* Double precision. */
 __global__
-void oskar_cudak_dft_c2r_2d_d(int n_in, const double* x_in,
+void oskar_dft_c2r_2d_cudak_d(int n_in, const double* x_in,
         const double* y_in, const double2* data_in, const int n_out,
         const double* x_out, const double* y_out, const int max_in_chunk,
         double* output)
@@ -132,10 +193,10 @@ void oskar_cudak_dft_c2r_2d_d(int n_in, const double* x_in,
         for (int t = threadIdx.x; t < chunk_size; t += blockDim.x)
         {
             const int g = start + t; // Global input index.
-            cd[t].x = x_in[g];
-            cd[t].y = y_in[g];
-            cd[t].z = data_in[g].x;
-            cd[t].w = data_in[g].y;
+            smem_d[t].x = x_in[g];
+            smem_d[t].y = y_in[g];
+            smem_d[t].z = data_in[g].x;
+            smem_d[t].w = data_in[g].y;
         }
 
         // Must synchronise before computing partial output for these inputs.
@@ -146,13 +207,13 @@ void oskar_cudak_dft_c2r_2d_d(int n_in, const double* x_in,
         {
             // Calculate the complex DFT weight.
             double2 weight;
-            double a = cd[i].x * xp_out + cd[i].y * yp_out;
+            double a = smem_d[i].x * xp_out + smem_d[i].y * yp_out;
             sincos(-a, &weight.y, &weight.x);
 
             // Perform complex multiply-accumulate.
             // Output is real, so only evaluate the real part.
-            out += cd[i].z * weight.x; // RE*RE
-            out -= cd[i].w * weight.y; // IM*IM
+            out += smem_d[i].z * weight.x; // RE*RE
+            out -= smem_d[i].w * weight.y; // IM*IM
         }
 
         // Must synchronise again before loading in a new input block.
@@ -163,3 +224,7 @@ void oskar_cudak_dft_c2r_2d_d(int n_in, const double* x_in,
     if (i_out < n_out)
         output[i_out] = out;
 }
+
+#ifdef __cplusplus
+}
+#endif

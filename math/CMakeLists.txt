@@ -8,7 +8,9 @@ add_subdirectory(cudak)
 set(math_SRC
     src/oskar_angular_distance.c
     src/oskar_cart2sph.c
-    src/oskar_cuda_dft_c2r_2d.cu
+    src/oskar_dft_c2r_2d_cuda.cu
+    src/oskar_dftw_o2c_2d_cuda.cu
+    src/oskar_dftw_o2c_3d_cuda.cu
     src/oskar_dierckx_bispev_bicubic_cuda.cu
     src/oskar_dierckx_bispev_cuda.cu
     src/oskar_dierckx_bispev.c

@@ -27,7 +27,6 @@
  */
 
 #include "math/oskar_dierckx_bispev_bicubic_cuda.h"
-#include "math/cudak/oskar_cudaf_dierckx_fpbisp_single_bicubic.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +61,189 @@ void oskar_dierckx_bispev_bicubic_cuda_d(const double* d_tx, int nx,
 }
 
 
-/* Kernels. ================================================================ */
+/* Kernels and device functions. ========================================== */
+
+/**
+ * @brief
+ * CUDA device function for fpbspl from DIERCKX library (single precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbspl function from the DIERCKX
+ * fitting library.
+ *
+ * This routine evaluates the (k+1) non-zero bicubic b-splines
+ * at t(l) <= x < t(l+1) using the stable recurrence relation of
+ * de Boor and Cox.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbspl_bicubic_f(const float *t,
+        const float x, const int l, float *h)
+{
+    float f, hh[3];
+    int i, j, li, lj;
+
+    h[0] = 1.0f;
+    for (j = 1; j <= 3; ++j)
+    {
+        for (i = 0; i < j; ++i)
+        {
+            hh[i] = h[i];
+        }
+        h[0] = 0.0f;
+        for (i = 0; i < j; ++i)
+        {
+            li = l + i;
+            lj = li - j;
+            f = hh[i] / (t[li] - t[lj]);
+            h[i] += f * (t[li] - x);
+            h[i + 1] = f * (x - t[lj]);
+        }
+    }
+}
+
+/**
+ * @brief
+ * CUDA device function for fpbspl from DIERCKX library (double precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbspl function from the DIERCKX
+ * fitting library.
+ *
+ * This routine evaluates the (k+1) non-zero bicubic b-splines
+ * at t(l) <= x < t(l+1) using the stable recurrence relation of
+ * de Boor and Cox.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbspl_bicubic_d(const double *t,
+        const double x, const int l, double *h)
+{
+    double f, hh[3];
+    int i, j, li, lj;
+
+    h[0] = 1.0;
+    for (j = 1; j <= 3; ++j)
+    {
+        for (i = 0; i < j; ++i)
+        {
+            hh[i] = h[i];
+        }
+        h[0] = 0.0;
+        for (i = 0; i < j; ++i)
+        {
+            li = l + i;
+            lj = li - j;
+            f = hh[i] / (t[li] - t[lj]);
+            h[i] += f * (t[li] - x);
+            h[i + 1] = f * (x - t[lj]);
+        }
+    }
+}
+
+/**
+ * @brief
+ * CUDA device function for fpbisp from DIERCKX library (single precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbisp function from the DIERCKX
+ * fitting library.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbisp_single_bicubic_f(const float *tx,
+        const int nx, const float *ty, const int ny, const float *c,
+        float x, float y, float *z)
+{
+    int j, l, l1, l2, nk1, lx;
+    float wx[4], wy[4], t;
+
+    /* Do x. */
+    nk1 = nx - 4;
+    t = tx[3];
+    if (x < t) x = t;
+    t = tx[nk1];
+    if (x > t) x = t;
+    l = 4;
+    while (!(x < tx[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_bicubic_f(tx, x, l, wx);
+    lx = l - 4;
+
+    /* Do y. */
+    nk1 = ny - 4;
+    t = ty[3];
+    if (y < t) y = t;
+    t = ty[nk1];
+    if (y > t) y = t;
+    l = 4;
+    while (!(y < ty[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_bicubic_f(ty, y, l, wy);
+    l1 = lx * nk1 + (l - 4);
+
+    /* Evaluate surface using coefficients. */
+    t = 0.0f;
+    for (l = 0; l <= 3; ++l)
+    {
+        l2 = l1;
+        for (j = 0; j <= 3; ++j)
+        {
+            t += c[l2] * wx[l] * wy[j];
+            ++l2;
+        }
+        l1 += nk1;
+    }
+    *z = t;
+}
+
+/**
+ * @brief
+ * CUDA device function for fpbisp from DIERCKX library (double precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbisp function from the DIERCKX
+ * fitting library.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbisp_single_bicubic_d(const double *tx,
+        const int nx, const double *ty, const int ny, const double *c,
+        double x, double y, double *z)
+{
+    int j, l, l1, l2, nk1, lx;
+    double wx[4], wy[4], t;
+
+    /* Do x. */
+    nk1 = nx - 4;
+    t = tx[3];
+    if (x < t) x = t;
+    t = tx[nk1];
+    if (x > t) x = t;
+    l = 4;
+    while (!(x < tx[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_bicubic_d(tx, x, l, wx);
+    lx = l - 4;
+
+    /* Do y. */
+    nk1 = ny - 4;
+    t = ty[3];
+    if (y < t) y = t;
+    t = ty[nk1];
+    if (y > t) y = t;
+    l = 4;
+    while (!(y < ty[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_bicubic_d(ty, y, l, wy);
+    l1 = lx * nk1 + (l - 4);
+
+    /* Evaluate surface using coefficients. */
+    t = 0.0;
+    for (l = 0; l <= 3; ++l)
+    {
+        l2 = l1;
+        for (j = 0; j <= 3; ++j)
+        {
+            t += c[l2] * wx[l] * wy[j];
+            ++l2;
+        }
+        l1 += nk1;
+    }
+    *z = t;
+}
 
 /* Single precision. */
 __global__

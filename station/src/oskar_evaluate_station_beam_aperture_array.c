@@ -75,9 +75,9 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
                 E_ptr = &work->E; /* Use work buffer. */
 
             /* Evaluate array factor. */
-            *status = oskar_evaluate_array_pattern(E_ptr, station,
+            oskar_evaluate_array_pattern(E_ptr, station,
                     beam_x, beam_y, beam_z, num_points, x, y, z,
-                    &work->weights, &work->weights_error, curand_states);
+                    &work->weights, &work->weights_error, curand_states, status);
 
             /* Normalise array beam if required. */
             if (station->normalise_beam)
@@ -120,7 +120,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
             /* No evaluation: set EG to identity matrix. */
             oskar_mem_set_value_real(beam, 1.0, status);
         }
-        if (*status) return;
     }
 
 

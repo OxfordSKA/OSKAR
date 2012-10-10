@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,22 +26,91 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_DFTW_O2C_3D_H_
-#define OSKAR_CUDAK_DFTW_O2C_3D_H_
+#ifndef OSKAR_DFTW_O2C_2D_CUDA_H_
+#define OSKAR_DFTW_O2C_2D_CUDA_H_
 
 /**
- * @file oskar_cudak_dftw_o2c_3d.h
+ * @file oskar_dftw_o2c_2d_cuda.h
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_vector_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief
- * CUDA kernel to perform a 3D real-to-complex single-precision DFT using
+ * CUDA function to perform a 2D real-to-complex single-precision DFT using
  * supplied weights, where all input signals are implicitly of amplitude 1.0.
  *
  * @details
- * This CUDA kernel performs a 3D real-to-complex DFT, where all the input
+ * This CUDA function performs a 2D real-to-complex DFT, where all the input
+ * signals are implicitly assumed to be of amplitude 1.0.
+ *
+ * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ *
+ * The computed points are returned in the \p d_output array, which must be
+ * pre-sized to length n_out. The values in the \p d_output array are
+ * the complex values for each output position.
+ *
+ * Note that all pointers refer to device memory.
+ *
+ * @param[in] n_in         Number of input points.
+ * @param[in] d_x_in       Array of input x positions.
+ * @param[in] d_y_in       Array of input y positions.
+ * @param[in] d_weights_in Array of complex DFT weights.
+ * @param[in] n_out        Number of output points.
+ * @param[in] d_x_out      Array of output 1/x positions.
+ * @param[in] d_y_out      Array of output 1/y positions.
+ * @param[out] d_output    Array of computed output points (see note, above).
+ */
+OSKAR_EXPORT
+void oskar_dftw_o2c_2d_cuda_f(int n_in, const float* d_x_in,
+        const float* d_y_in, const float2* d_weights_in, int n_out,
+        const float* d_x_out, const float* d_y_out, float2* d_output);
+
+/**
+ * @brief
+ * CUDA function to perform a 2D real-to-complex double-precision DFT using
+ * supplied weights, where all input signals are implicitly of amplitude 1.0.
+ *
+ * @details
+ * This CUDA function performs a 2D real-to-complex DFT, where all the input
+ * signals are implicitly assumed to be of amplitude 1.0.
+ *
+ * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
+ *
+ * The computed points are returned in the \p d_output array, which must be
+ * pre-sized to length n_out. The values in the \p d_output array are
+ * the complex values for each output position.
+ *
+ * Note that all pointers refer to device memory.
+ *
+ * @param[in] n_in         Number of input points.
+ * @param[in] d_x_in       Array of input x positions.
+ * @param[in] d_y_in       Array of input y positions.
+ * @param[in] d_weights_in Array of complex DFT weights.
+ * @param[in] n_out        Number of output points.
+ * @param[in] d_x_out      Array of output 1/x positions.
+ * @param[in] d_y_out      Array of output 1/y positions.
+ * @param[out] d_output    Array of computed output points (see note, above).
+ */
+OSKAR_EXPORT
+void oskar_dftw_o2c_2d_cuda_d(int n_in, const double* d_x_in,
+        const double* d_y_in, const double2* d_weights_in, int n_out,
+        const double* d_x_out, const double* d_y_out, double2* d_output);
+
+#ifdef __CUDACC__
+
+/**
+ * @brief
+ * CUDA kernel to perform a 2D real-to-complex single-precision DFT using
+ * supplied weights, where all input signals are implicitly of amplitude 1.0.
+ *
+ * @details
+ * This CUDA kernel performs a 2D real-to-complex DFT, where all the input
  * signals are implicitly assumed to be of amplitude 1.0.
  *
  * Each thread evaluates a single output point, looping over all the input
@@ -57,20 +126,19 @@
  * @param[in] n_in         Number of input points.
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
- * @param[in] z_in         Array of input z positions.
  * @param[in] weights_in   Array of complex DFT weights.
  * @param[in] n_out        Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
- * @param[in] z_out        Array of output 1/z positions.
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[out] output      Array of computed output points (see note, above).
  */
+OSKAR_EXPORT
 __global__
-void oskar_cudak_dftw_o2c_3d_f(const int n_in, const float* x_in,
-        const float* y_in, const float* z_in, const float2* weights_in,
-        const int n_out, const float* x_out, const float* y_out,
-        const float* z_out, const int max_in_chunk, float2* output);
+void oskar_dftw_o2c_2d_cudak_f(const int n_in, const float* x_in,
+        const float* y_in, const float2* weights_in, const int n_out,
+        const float* x_out, const float* y_out, const int max_in_chunk,
+        float2* output);
 
 /**
  * @brief
@@ -94,19 +162,24 @@ void oskar_cudak_dftw_o2c_3d_f(const int n_in, const float* x_in,
  * @param[in] n_in         Number of input points.
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
- * @param[in] z_in         Array of input z positions.
  * @param[in] weights_in   Array of complex DFT weights.
  * @param[in] n_out        Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
- * @param[in] z_out        Array of output 1/z positions.
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[out] output      Array of computed output points (see note, above).
  */
+OSKAR_EXPORT
 __global__
-void oskar_cudak_dftw_o2c_3d_d(const int n_in, const double* x_in,
-        const double* y_in, const double* z_in, const double2* weights_in,
-        const int n_out, const double* x_out, const double* y_out,
-        const double* z_out, const int max_in_chunk, double2* output);
+void oskar_dftw_o2c_2d_cudak_d(const int n_in, const double* x_in,
+        const double* y_in, const double2* weights_in, const int n_out,
+        const double* x_out, const double* y_out, const int max_in_chunk,
+        double2* output);
 
-#endif // OSKAR_CUDAK_DFTW_O2C_3D_H_
+#endif /* __CUDACC__ */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_DFTW_O2C_2D_CUDA_H_ */

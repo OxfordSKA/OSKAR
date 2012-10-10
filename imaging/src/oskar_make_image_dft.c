@@ -27,7 +27,8 @@
  */
 
 #include "imaging/oskar_make_image_dft.h"
-#include "math/oskar_cuda_dft_c2r_2d.h"
+#include "math/oskar_dft_c2r_2d_cuda.h"
+#include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_insert.h"
@@ -128,20 +129,20 @@ int oskar_make_image_dft(oskar_Mem* image, const oskar_Mem* uu_metres,
     if (type == OSKAR_DOUBLE)
     {
         /* Call DFT. */
-        err = oskar_cuda_dft_c2r_2d_d(num_vis,
-                (double*)(u.data), (double*)(v.data),
-                (const double*)(p_amp->data), num_pixels,
+        oskar_dft_c2r_2d_cuda_d(num_vis, (double*)(u.data), (double*)(v.data),
+                (const double2*)(p_amp->data), num_pixels,
                 (const double*)(p_l->data), (const double*)(p_m->data),
                 (double*)(p_image->data));
+        oskar_cuda_check_error(&err);
     }
     else if (type == OSKAR_SINGLE)
     {
         /* Call DFT. */
-        err = oskar_cuda_dft_c2r_2d_f(num_vis,
-                (float*)(u.data), (float*)(v.data),
-                (const float*)(p_amp->data), num_pixels,
+        oskar_dft_c2r_2d_cuda_f(num_vis, (float*)(u.data), (float*)(v.data),
+                (const float2*)(p_amp->data), num_pixels,
                 (const float*)(p_l->data), (const float*)(p_m->data),
                 (float*)(p_image->data));
+        oskar_cuda_check_error(&err);
     }
 
     /* Scale image by inverse of number of visibilities. */

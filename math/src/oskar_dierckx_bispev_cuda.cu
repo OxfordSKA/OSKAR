@@ -27,7 +27,6 @@
  */
 
 #include "math/oskar_dierckx_bispev_cuda.h"
-#include "math/cudak/oskar_cudaf_dierckx_fpbisp_single.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +61,193 @@ void oskar_dierckx_bispev_cuda_d(const double* d_tx, int nx,
 }
 
 
-/* Kernels. ================================================================ */
+/* Kernels and device functions. ========================================== */
+
+/**
+ * @brief
+ * CUDA device function for fpbspl from DIERCKX library (single precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbspl function from the DIERCKX
+ * fitting library.
+ *
+ * This routine evaluates the (k+1) non-zero b-splines of degree k
+ * at t(l) <= x < t(l+1) using the stable recurrence relation of
+ * de Boor and Cox.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbspl_f(const float *t, const int k,
+        const float x, const int l, float *h)
+{
+    float f, hh[5];
+    int i, j, li, lj;
+
+    h[0] = 1.0f;
+    for (j = 1; j <= k; ++j)
+    {
+        for (i = 0; i < j; ++i)
+        {
+            hh[i] = h[i];
+        }
+        h[0] = 0.0f;
+        for (i = 0; i < j; ++i)
+        {
+            li = l + i;
+            lj = li - j;
+            f = hh[i] / (t[li] - t[lj]);
+            h[i] += f * (t[li] - x);
+            h[i + 1] = f * (x - t[lj]);
+        }
+    }
+}
+
+/**
+ * @brief
+ * CUDA device function for fpbspl from DIERCKX library (double precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbspl function from the DIERCKX
+ * fitting library.
+ *
+ * This routine evaluates the (k+1) non-zero b-splines of degree k
+ * at t(l) <= x < t(l+1) using the stable recurrence relation of
+ * de Boor and Cox.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbspl_d(const double *t, const int k,
+        const double x, const int l, double *h)
+{
+    double f, hh[5];
+    int i, j, li, lj;
+
+    h[0] = 1.0;
+    for (j = 1; j <= k; ++j)
+    {
+        for (i = 0; i < j; ++i)
+        {
+            hh[i] = h[i];
+        }
+        h[0] = 0.0;
+        for (i = 0; i < j; ++i)
+        {
+            li = l + i;
+            lj = li - j;
+            f = hh[i] / (t[li] - t[lj]);
+            h[i] += f * (t[li] - x);
+            h[i + 1] = f * (x - t[lj]);
+        }
+    }
+}
+
+/**
+ * @brief
+ * CUDA device function for fpbisp from DIERCKX library (single precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbisp function from the DIERCKX
+ * fitting library.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbisp_single_f(const float *tx, const int nx,
+        const float *ty, const int ny, const float *c, const int kx,
+        const int ky, float x, float y, float *z)
+{
+    int j, l, l1, l2, k1, nk1, lx;
+    float wx[6], wy[6], t;
+
+    // Do x.
+    k1 = kx + 1;
+    nk1 = nx - k1;
+    t = tx[kx];
+    if (x < t) x = t;
+    t = tx[nk1];
+    if (x > t) x = t;
+    l = k1;
+    while (!(x < tx[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_f(tx, kx, x, l, wx);
+    lx = l - k1;
+
+    // Do y.
+    k1 = ky + 1;
+    nk1 = ny - k1;
+    t = ty[ky];
+    if (y < t) y = t;
+    t = ty[nk1];
+    if (y > t) y = t;
+    l = k1;
+    while (!(y < ty[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_f(ty, ky, y, l, wy);
+    l1 = lx * nk1 + (l - k1);
+
+    // Evaluate surface using coefficients.
+    t = 0.0f;
+    for (l = 0; l <= kx; ++l)
+    {
+        l2 = l1;
+        for (j = 0; j <= ky; ++j)
+        {
+            t += c[l2] * wx[l] * wy[j];
+            ++l2;
+        }
+        l1 += nk1;
+    }
+    *z = t;
+}
+
+/**
+ * @brief
+ * CUDA device function for fpbisp from DIERCKX library (double precision).
+ *
+ * @details
+ * CUDA device function to replace the fpbisp function from the DIERCKX
+ * fitting library.
+ */
+__device__
+void oskar_cudaf_dierckx_fpbisp_single_d(const double *tx, const int nx,
+        const double *ty, const int ny, const double *c, const int kx,
+        const int ky, double x, double y, double *z)
+{
+    int j, l, l1, l2, k1, nk1, lx;
+    double wx[6], wy[6], t;
+
+    // Do x.
+    k1 = kx + 1;
+    nk1 = nx - k1;
+    t = tx[kx];
+    if (x < t) x = t;
+    t = tx[nk1];
+    if (x > t) x = t;
+    l = k1;
+    while (!(x < tx[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_d(tx, kx, x, l, wx);
+    lx = l - k1;
+
+    // Do y.
+    k1 = ky + 1;
+    nk1 = ny - k1;
+    t = ty[ky];
+    if (y < t) y = t;
+    t = ty[nk1];
+    if (y > t) y = t;
+    l = k1;
+    while (!(y < ty[l] || l == nk1)) l++;
+    oskar_cudaf_dierckx_fpbspl_d(ty, ky, y, l, wy);
+    l1 = lx * nk1 + (l - k1);
+
+    // Evaluate surface using coefficients.
+    t = 0.0;
+    for (l = 0; l <= kx; ++l)
+    {
+        l2 = l1;
+        for (j = 0; j <= ky; ++j)
+        {
+            t += c[l2] * wx[l] * wy[j];
+            ++l2;
+        }
+        l1 += nk1;
+    }
+    *z = t;
+}
 
 /* Single precision. */
 __global__

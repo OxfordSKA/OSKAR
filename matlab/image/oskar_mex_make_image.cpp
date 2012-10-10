@@ -38,7 +38,6 @@
 #include "utility/oskar_vector_types.h"
 #include "utility/oskar_get_error_string.h"
 
-#include "math/oskar_cuda_dft_c2r_2d.h"
 #include "math/oskar_linspace.h"
 #include "math/oskar_meshgrid.h"
 

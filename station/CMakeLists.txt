@@ -12,7 +12,7 @@ set(station_SRC
     src/oskar_element_model_load_cst.c
     src/oskar_element_model_type.c
     src/oskar_ElementModel.cpp
-    src/oskar_evaluate_array_pattern.cu
+    src/oskar_evaluate_array_pattern.c
     src/oskar_evaluate_array_pattern_dipoles_cuda.cu
     src/oskar_evaluate_array_pattern_dipoles.c
     src/oskar_evaluate_beam_horizontal_lmn.c

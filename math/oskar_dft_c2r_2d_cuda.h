@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,87 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_CUDAK_DFT_C2R_2D_H_
-#define OSKAR_CUDAK_DFT_C2R_2D_H_
+#ifndef OSKAR_DFT_C2R_2D_CUDA_H_
+#define OSKAR_DFT_C2R_2D_CUDA_H_
 
 /**
- * @file oskar_cudak_dft_c2r_2d.h
+ * @file oskar_dft_c2r_2d_cuda.h
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_vector_types.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @brief
+ * CUDA wrapper to perform a 2D complex-to-real single-precision DFT.
+ *
+ * @details
+ * Computes a real output from a set of complex input data, using CUDA to
+ * evaluate a 2D Direct Fourier Transform (DFT).
+ *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
+ * This function must be supplied with the input x- and y-positions, and the
+ * output x- and y-positions. The input positions must be pre-multiplied by a
+ * factor k (= 2pi / lambda), and the output positions are direction cosines.
+ *
+ * The fastest-varying dimension in the output array is along x. The output is
+ * assumed to be completely real, so the conjugate copy of the input data
+ * should not be supplied.
+ *
+ * @param[in] n_in         Number of input points.
+ * @param[in] x_in         Array of input x positions.
+ * @param[in] y_in         Array of input y positions.
+ * @param[in] data_in      Array of complex input data (length 2 * n_in).
+ * @param[in] n_out        Number of output points.
+ * @param[in] x_out        Array of output 1/x positions.
+ * @param[in] y_out        Array of output 1/y positions.
+ * @param[out] output      Array of computed output points.
+ */
+OSKAR_EXPORT
+void oskar_dft_c2r_2d_cuda_f(int n_in, const float* x_in, const float* y_in,
+        const float2* data_in, int n_out, const float* x_out,
+        const float* y_out, float* output);
+
+/**
+ * @brief
+ * CUDA wrapper to perform a 2D complex-to-real double-precision DFT.
+ *
+ * @details
+ * Computes a real output from a set of complex input data, using CUDA to
+ * evaluate a 2D Direct Fourier Transform (DFT).
+ *
+ * Note that all pointers are device pointers, and must not be dereferenced
+ * in host code.
+ *
+ * This function must be supplied with the input x- and y-positions, and the
+ * output x- and y-positions. The input positions must be pre-multiplied by a
+ * factor k (= 2 pi / lambda), and the output positions are direction cosines.
+ *
+ * The fastest-varying dimension in the output array is along x. The output is
+ * assumed to be completely real, so the conjugate copy of the input data
+ * should not be supplied.
+ *
+ * @param[in] n_in         Number of input points.
+ * @param[in] x_in         Array of input x positions.
+ * @param[in] y_in         Array of input y positions.
+ * @param[in] data_in      Array of complex input data (length 2 * n_in).
+ * @param[in] n_out        Number of output points.
+ * @param[in] x_out        Array of output 1/x positions.
+ * @param[in] y_out        Array of output 1/y positions.
+ * @param[out] output      Array of computed output points.
+ */
+OSKAR_EXPORT
+void oskar_dft_c2r_2d_cuda_d(int n_in, const double* x_in, const double* y_in,
+        const double2* data_in, int n_out, const double* x_out,
+        const double* y_out, double* output);
+
+#ifdef __CUDACC__
 
 /**
  * @brief
@@ -60,7 +133,7 @@
  * WARNING: Changed the sign of the DFT to negative for the 2.0.0-beta release
  * to resolve image ordering problem when writing FITS files.
  * This should be thought of as a hack as we find no clear justification for
- * the phase of the DFT to have a native sign.
+ * the phase of the DFT to have a negative sign.
  * ============================================================================
  *
  * @param[in] n_in         Number of input points.
@@ -73,8 +146,9 @@
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[out] output      Array of computed output points.
  */
+OSKAR_EXPORT
 __global__
-void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
+void oskar_dft_c2r_2d_cudak_f(int n_in, const float* x_in,
         const float* y_in, const float2* data_in, const int n_out,
         const float* x_out, const float* y_out, const int max_in_chunk,
         float* output);
@@ -104,7 +178,7 @@ void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
  * WARNING: Changed the sign of the DFT to negative for the 2.0.0-beta release
  * to resolve image ordering problem when writing FITS files.
  * This should be thought of as a hack as we find no clear justification for
- * the phase of the DFT to have a native sign.
+ * the phase of the DFT to have a negative sign.
  * ============================================================================
  *
  * @param[in] n_in         Number of input points.
@@ -117,10 +191,17 @@ void oskar_cudak_dft_c2r_2d_f(int n_in, const float* x_in,
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[out] output      Array of computed output points.
  */
+OSKAR_EXPORT
 __global__
-void oskar_cudak_dft_c2r_2d_d(int n_in, const double* x_in,
+void oskar_dft_c2r_2d_cudak_d(int n_in, const double* x_in,
         const double* y_in, const double2* data_in, const int n_out,
         const double* x_out, const double* y_out, const int max_in_chunk,
         double* output);
 
-#endif // OSKAR_CUDAK_DFT_C2R_2D_H_
+#endif /* __CUDACC__ */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_DFT_C2R_2D_CUDA_H_ */
