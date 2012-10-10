@@ -42,7 +42,7 @@
 #include "utility/oskar_Log.h"
 #include "utility/oskar_mem_init.h"
 
-void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
+void mexFunction(int num_out, mxArray** /*out*/, int num_in, const mxArray** in)
 {
     if (num_in != 2 || num_out > 0)
     {
