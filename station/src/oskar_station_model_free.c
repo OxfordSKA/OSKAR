@@ -81,7 +81,6 @@ void oskar_station_model_free(oskar_StationModel* model, int* status)
     /* Initialise variables. */
     /* Do NOT set child or num_elements to 0 yet! */
     model->station_type = OSKAR_STATION_TYPE_AA;
-    model->use_polarised_elements = OSKAR_FALSE;
     model->array_is_3d = OSKAR_FALSE;
     model->coord_units = OSKAR_METRES;
     model->apply_element_errors = OSKAR_FALSE;
@@ -100,8 +99,6 @@ void oskar_station_model_free(oskar_StationModel* model, int* status)
     model->dec0_rad = 0.0;
     model->normalise_beam = OSKAR_FALSE;
     model->evaluate_array_factor = OSKAR_TRUE;
-    model->evaluate_element_factor = OSKAR_TRUE;
-    model->bit_depth = 0;
 
     /* Recursively free the child stations. */
     if (model->child)

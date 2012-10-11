@@ -84,22 +84,17 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
                 oskar_mem_scale_real(E_ptr, 1.0/station->num_elements, status);
         }
 
-        /* Evaluate G if required. */
-        if (station->evaluate_element_factor && station->use_polarised_elements)
-        {
-            /* Get pointer to G. */
-            if (oskar_mem_is_matrix(beam->type))
-                G_ptr = beam; /* Use memory passed to the function. */
-            else
-                G_ptr = &work->G; /* Use work buffer. */
+        /* Get pointer to G. */
+        if (oskar_mem_is_matrix(beam->type))
+            G_ptr = beam; /* Use memory passed to the function. */
+        else
+            G_ptr = &work->G; /* Use work buffer. */
 
-            /* Evaluate element factor. */
-            oskar_element_model_evaluate(station->element_pattern,
-                    G_ptr, station->use_polarised_elements,
-                    station->orientation_x, station->orientation_y,
-                    num_points, x, y, z, &work->theta_modified,
-                    &work->phi_modified, status);
-        }
+        /* Evaluate element factor. */
+        oskar_element_model_evaluate(station->element_pattern,
+                G_ptr, station->orientation_x, station->orientation_y,
+                num_points, x, y, z, &work->theta_modified,
+                &work->phi_modified, status);
 
         /* Element-wise multiply to join E and G. */
         if (E_ptr && G_ptr)
@@ -113,11 +108,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
             oskar_mem_set_value_real(beam, 1.0, status);
             oskar_mem_element_multiply(0, beam, E_ptr, num_points, status);
         }
-        else if (!E_ptr && !G_ptr)
-        {
-            /* No evaluation: set EG to identity matrix. */
-            oskar_mem_set_value_real(beam, 1.0, status);
-        }
     }
 
 
@@ -126,10 +116,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     else /* (!station->single_element_model) */
     {
         /* With unique detector elements: E and G are not separable. */
-        if (!(station->evaluate_array_factor && station->evaluate_element_factor))
-            *status = OSKAR_ERR_SETTINGS;
-
-        if (!station->use_polarised_elements)
+        if (!station->evaluate_array_factor)
             *status = OSKAR_ERR_SETTINGS;
 
         /* FIXME logic here is a bit messy... */

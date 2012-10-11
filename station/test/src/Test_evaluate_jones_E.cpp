@@ -94,7 +94,6 @@ void Test_evaluate_jones_E::evaluate_e()
     station_cpu.dec0_rad = M_PI_2;
 
     // Set the station meta-data.
-    station_cpu.use_polarised_elements = false;
 
     int num_stations = 2;
     oskar_TelescopeModel telescope_gpu(OSKAR_SINGLE, OSKAR_LOCATION_GPU, num_stations);

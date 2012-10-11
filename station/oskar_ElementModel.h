@@ -46,7 +46,8 @@
  */
 struct OSKAR_EXPORT oskar_ElementModel
 {
-    int type; /**< Numerical, geometric dipole or isotropic. */
+    int use_numerical; /**< Use numerical rather than functional pattern if set. */
+    int type; /**< Geometric dipole or isotropic. */
     int taper_type; /**< Tapering type. */
     int cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
@@ -92,7 +93,6 @@ struct OSKAR_EXPORT oskar_ElementModel
 typedef struct oskar_ElementModel oskar_ElementModel;
 
 enum {
-    OSKAR_ELEMENT_MODEL_TYPE_NUMERICAL,
     OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE,
     OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC
 };

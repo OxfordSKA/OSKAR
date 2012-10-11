@@ -47,6 +47,7 @@ void oskar_element_model_copy(oskar_ElementModel* dst,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    dst->use_numerical = src->use_numerical;
     dst->type = src->type;
     dst->taper_type = src->taper_type;
     dst->cos_power = src->cos_power;

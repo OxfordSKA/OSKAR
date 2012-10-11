@@ -68,13 +68,13 @@ extern "C"
 int oskar_telescope_model_element_pattern_load(oskar_TelescopeModel* telescope,
         oskar_Log* log, const oskar_SettingsTelescope* settings)
 {
-    if (settings->station.ignore_custom_element_patterns)
+    if (!settings->aperture_array.element_pattern.enable_numerical_patterns)
         return OSKAR_SUCCESS;
 
     QHash<QString, oskar_ElementModel*> models;
     QHash<QString, QString> data_files;
 
-    QDir telescope_dir(settings->config_directory);
+    QDir telescope_dir(settings->input_directory);
     if (!telescope_dir.exists()) return OSKAR_ERR_FILE_IO;
 
     // Check that the telescope model is in CPU memory.
@@ -211,17 +211,18 @@ static int load_element_patterns(oskar_Log* log, const oskar_SettingsTelescope* 
                         "pattern data (X): %s", element_file_x);
                 oskar_log_message(log, 0, "");
                 error = oskar_element_model_load_cst(station->element_pattern,
-                        log, 1, element_file_x, &settings->station.element_fit);
+                        log, 1, element_file_x,
+                        &settings->aperture_array.element_pattern.fit);
                 if (error) return error;
             }
             if (element_file_y)
             {
-
                 oskar_log_message(log, 0, "Loading CST element "
                         "pattern data (Y): %s", element_file_y);
                 oskar_log_message(log, 0, "");
                 error = oskar_element_model_load_cst(station->element_pattern,
-                        log, 2, element_file_y, &settings->station.element_fit);
+                        log, 2, element_file_y,
+                        &settings->aperture_array.element_pattern.fit);
                 if (error) return error;
             }
 

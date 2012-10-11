@@ -76,7 +76,6 @@ void oskar_station_model_init(oskar_StationModel* model, int type, int location,
     /* Initialise variables. */
     model->station_type = OSKAR_STATION_TYPE_AA;
     model->num_elements = num_elements;
-    model->use_polarised_elements = OSKAR_FALSE;
     model->array_is_3d = OSKAR_FALSE;
     model->coord_units = OSKAR_METRES;
     model->apply_element_errors = OSKAR_FALSE;
@@ -101,8 +100,6 @@ void oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->dec0_rad = 0.0;
     model->normalise_beam = OSKAR_FALSE;
     model->evaluate_array_factor = OSKAR_TRUE;
-    model->evaluate_element_factor = OSKAR_TRUE;
-    model->bit_depth = 0;
 
     oskar_system_noise_model_init(&model->noise, type, location, status);
 }

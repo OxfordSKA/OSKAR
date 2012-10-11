@@ -113,7 +113,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     int station_id = settings.beam_pattern.station_id;
     int image_size = settings.beam_pattern.size;
     int num_channels = settings.obs.num_channels;
-    int num_pols = settings.telescope.station.use_polarised_elements ? 4 : 1;
+    int num_pols = settings.telescope.aperture_array.element_pattern.functional_type ==
+            OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC ? 1 : 4;
     int num_pixels = image_size * image_size;
     int num_pixels_total = num_pixels * num_times * num_channels * num_pols;
     int beam_pattern_data_type = type | OSKAR_COMPLEX;

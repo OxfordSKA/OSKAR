@@ -26,48 +26,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_element_model_init.h"
-#include "math/oskar_spline_data_init.h"
-#include "utility/oskar_mem_init.h"
+#ifndef OSKAR_SETTINGS_ELEMENT_TAPER_H_
+#define OSKAR_SETTINGS_ELEMENT_TAPER_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/**
+ * @file oskar_SettingsElementTaper.h
+ */
 
-void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
-        int* status)
+#include "oskar_global.h"
+
+/**
+ * @struct oskar_SettingsElementTaper
+ *
+ * @brief Structure to hold settings for the station element tapering.
+ *
+ * @details
+ * The structure holds settings for the station element tapering.
+ */
+struct OSKAR_EXPORT oskar_SettingsElementTaper
 {
-    /* Check all inputs. */
-    if (!data || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+    int type;
+    double cosine_power;
+    double gaussian_fwhm_rad;
+};
+typedef struct oskar_SettingsElementTaper oskar_SettingsElementTaper;
 
-    /* Initialise variables. */
-    data->use_numerical = 0;
-    data->type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
-    data->taper_type = OSKAR_ELEMENT_MODEL_TAPER_NONE;
-    data->cos_power = 0;
-    data->gaussian_fwhm_rad = 0.0;
-
-    /* Check type. */
-    if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
-
-    /* Initialise memory. */
-    oskar_mem_init(&data->filename_x, OSKAR_CHAR, location, 0, 1, status);
-    oskar_mem_init(&data->filename_y, OSKAR_CHAR, location, 0, 1, status);
-    oskar_spline_data_init(&data->phi_re_x, type, location, status);
-    oskar_spline_data_init(&data->phi_im_x, type, location, status);
-    oskar_spline_data_init(&data->theta_re_x, type, location, status);
-    oskar_spline_data_init(&data->theta_im_x, type, location, status);
-    oskar_spline_data_init(&data->phi_re_y, type, location, status);
-    oskar_spline_data_init(&data->phi_im_y, type, location, status);
-    oskar_spline_data_init(&data->theta_re_y, type, location, status);
-    oskar_spline_data_init(&data->theta_im_y, type, location, status);
-}
-
-#ifdef __cplusplus
-}
-#endif
+#endif /* OSKAR_SETTINGS_ELEMENT_TAPER_H_ */

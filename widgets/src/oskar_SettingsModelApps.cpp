@@ -42,7 +42,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_image();
 
 #if 0
-    // FIXME THESE ARE FOR TESTING ONLY - Remove this section.
+    // THESE ARE FOR TESTING ONLY - Remove this section.
     ///////////////////////////////////////////////////////////////////////////
     setLabel("test", "Test group");
 
@@ -470,13 +470,6 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     k = group + "/altitude_m";
     declare(k, "Altitude [m]", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Telescope altitude, in metres.");
-    k = group + "/use_common_sky";
-    declare(k, "Use common sky (short baseline approximation)",
-            oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true, then use a short baseline approximation where "
-            "source positions are the same relative to every station. "
-            "If false, then re-evaluate all source positions and all "
-            "station beams.");
 
     // Station settings
     group = "telescope/station";
@@ -803,7 +796,15 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     //registerSetting("telescope/station/element_fit/use_common_set", "Use common set", oskar_SettingsItem::BOOL, true);
 
     group = root + "/aperture_array/element_pattern/fit/all";
-    setLabel(group, "Common settings (used for all surfaces)");
+    setLabel(group, "Common settings (for all surfaces)");
+    k = group + "/eps_float";
+    declare(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, 1e-4);
+    setTooltip(k, "The value of epsilon used for fitting in single precision. "
+            "Suggested value approx. 1e-04.");
+    k = group + "/eps_double";
+    declare(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, 1e-8);
+    setTooltip(k, "The value of epsilon used for fitting in double precision. "
+            "Suggested value approx. 1e-08.");
     k = group + "/search_for_best_fit";
     declare(k, "Search for best fit", oskar_SettingsItem::BOOL, true);
     setTooltip(k, "If true (the default), then any numerical element pattern "
@@ -824,14 +825,6 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
             "factor by which to increase the allowed average fractional "
             "error between the fitted surface and the numerical element "
             "pattern input data, before trying again. Must be > 1.0.");
-    k = group + "/eps_float";
-    declare(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, 1e-4);
-    setTooltip(k, "The value of epsilon used for fitting in single precision. "
-            "Suggested value approx. 1e-04.");
-    k = group + "/eps_double";
-    declare(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, 1e-8);
-    setTooltip(k, "The value of epsilon used for fitting in double precision. "
-            "Suggested value approx. 1e-08.");
     k = group + "/smoothness_factor_override";
     declare(k, "Smoothness factor override", oskar_SettingsItem::DOUBLE, 1.0);
     setTooltip(k, "Smoothness factor used to fit smoothing splines to "
@@ -843,14 +836,15 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     k = group + "/functional_type";
     declare(k, "Functional pattern type", QStringList() << "Geometric dipole"
             << "Isotropic (unpolarised)");
-    setDependency(k, k_numerical, false);
+    setTooltip(k, "The type of functional pattern to apply to the elements, "
+            "if not using a numerically-defined pattern.");
     group = root + "/aperture_array/element_pattern/taper";
     setLabel(group, "Tapering options");
     k = group + "/type";
-    declare(k, "Functional tapering type", QStringList() << "None"
+    declare(k, "Tapering type", QStringList() << "None"
             << "Cosine" << "Gaussian");
     k = group + "/cosine_power";
-    declare(k, "Cosine power", oskar_SettingsItem::INT_UNSIGNED);
+    declare(k, "Cosine power", oskar_SettingsItem::DOUBLE);
     setDependency(k, group + "/type", "Cosine");
     k = group + "/gaussian_fwhm_deg";
     declare(k, "Gaussian FWHM [deg]", oskar_SettingsItem::DOUBLE);
@@ -1181,6 +1175,13 @@ void oskar_SettingsModelApps::init_settings_interferometer()
     declare(k, "Number of fringe averages", oskar_SettingsItem::INT_POSITIVE);
     setTooltip(k, "Number of averaged evaluations of the K-Jones matrix per "
             "Measurement Equation average.");
+    k = group + "/use_common_sky";
+    declare(k, "Use common sky (short baseline approximation)",
+            oskar_SettingsItem::BOOL, true);
+    setTooltip(k, "If <b>true</b>, then use a short baseline approximation "
+            "where source positions are the same relative to every station. "
+            "If <b>false</b>, then re-evaluate all source positions and all "
+            "station beams.");
 
     init_settings_system_noise_model("interferometer");
 

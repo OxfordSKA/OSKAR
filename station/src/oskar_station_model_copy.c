@@ -55,7 +55,6 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     /* Copy the meta data. */
     dst->station_type = src->station_type;
     dst->num_elements = src->num_elements;
-    dst->use_polarised_elements = src->use_polarised_elements;
     dst->array_is_3d = src->array_is_3d;
     dst->coord_units = src->coord_units;
     dst->apply_element_errors = src->apply_element_errors;
@@ -70,8 +69,6 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     dst->dec0_rad = src->dec0_rad;
     dst->normalise_beam = src->normalise_beam;
     dst->evaluate_array_factor = src->evaluate_array_factor;
-    dst->evaluate_element_factor = src->evaluate_element_factor;
-    dst->bit_depth = src->bit_depth;
     dst->gaussian_beam_fwhm_deg = src->gaussian_beam_fwhm_deg;
 
     /* Copy the memory blocks. */

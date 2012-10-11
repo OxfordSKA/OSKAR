@@ -34,7 +34,7 @@
  */
 
 #include "oskar_global.h"
-#include "station/oskar_SettingsElement.h"
+#include "station/oskar_SettingsArrayElement.h"
 #include "station/oskar_SettingsElementFit.h"
 
 /**
@@ -54,9 +54,7 @@ struct OSKAR_EXPORT oskar_SettingsStation
     int evaluate_element_factor;
     int normalise_beam;
     double gaussian_beam_fwhm_deg;
-    double receiver_temperature;
-    char* receiver_temperature_file;
-    oskar_SettingsElement element;
+    oskar_SettingsArrayElement element;
     oskar_SettingsElementFit element_fit;
 };
 typedef struct oskar_SettingsStation oskar_SettingsStation;

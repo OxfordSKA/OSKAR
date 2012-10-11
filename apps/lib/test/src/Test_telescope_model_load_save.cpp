@@ -81,15 +81,15 @@ void Test_telescope_model_load_save::test_0_level()
         settings.altitude_m    = altitude_m;
         settings.latitude_rad  = latitude_rad;
         settings.longitude_rad = longitude_rad;
-        settings.config_directory = (char*)malloc(1 + strlen(path));
-        settings.station.ignore_custom_element_patterns = true;
-        strcpy(settings.config_directory, path);
+        settings.input_directory = (char*)malloc(1 + strlen(path));
+        settings.aperture_array.element_pattern.enable_numerical_patterns = false;
+        strcpy(settings.input_directory, path);
 
         oskar_TelescopeModel telescope;
         err = oskar_telescope_model_config_load(&telescope, NULL, &settings);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
-        free(settings.config_directory);
+        free(settings.input_directory);
     }
 
     // Remove test directory.
@@ -139,13 +139,13 @@ void Test_telescope_model_load_save::test_1_level()
     settings.altitude_m = telescope.altitude_m;
     settings.latitude_rad = telescope.latitude_rad;
     settings.longitude_rad = telescope.longitude_rad;
-    settings.config_directory = (char*)malloc(1 + strlen(path));
-    settings.station.ignore_custom_element_patterns = true;
-    strcpy(settings.config_directory, path);
+    settings.input_directory = (char*)malloc(1 + strlen(path));
+    settings.aperture_array.element_pattern.enable_numerical_patterns = false;
+    strcpy(settings.input_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
     err = oskar_telescope_model_config_load(&telescope2, NULL, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    free(settings.config_directory);
+    free(settings.input_directory);
 
     // Check the contents.
     CPPUNIT_ASSERT_EQUAL(telescope.num_stations, telescope2.num_stations);
@@ -244,13 +244,13 @@ void Test_telescope_model_load_save::test_2_level()
     settings.altitude_m = telescope.altitude_m;
     settings.latitude_rad = telescope.latitude_rad;
     settings.longitude_rad = telescope.longitude_rad;
-    settings.config_directory = (char*)malloc(1 + strlen(path));
-    settings.station.ignore_custom_element_patterns = true;
-    strcpy(settings.config_directory, path);
+    settings.input_directory = (char*)malloc(1 + strlen(path));
+    settings.aperture_array.element_pattern.enable_numerical_patterns = false;
+    strcpy(settings.input_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
     err = oskar_telescope_model_config_load(&telescope2, NULL, &settings);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-    free(settings.config_directory);
+    free(settings.input_directory);
 
     // Check the contents.
     CPPUNIT_ASSERT_EQUAL(telescope.num_stations, telescope2.num_stations);
@@ -337,8 +337,8 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
     oskar_settings_init(&settings);
     settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
     QByteArray path = root.toAscii();
-    settings.telescope.config_directory = (char*)malloc(root.size() + 1);
-    strcpy(settings.telescope.config_directory, path.constData());
+    settings.telescope.input_directory = (char*)malloc(root.size() + 1);
+    strcpy(settings.telescope.input_directory, path.constData());
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
     noise->enable = OSKAR_TRUE;
     noise->seed = 0;
@@ -422,8 +422,8 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
     oskar_settings_init(&settings);
     settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
     QByteArray path = root.toAscii();
-    settings.telescope.config_directory = (char*)malloc(root.size() + 1);
-    strcpy(settings.telescope.config_directory, path.constData());
+    settings.telescope.input_directory = (char*)malloc(root.size() + 1);
+    strcpy(settings.telescope.input_directory, path.constData());
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
     noise->enable = OSKAR_TRUE;
     noise->seed = 0;
@@ -528,8 +528,8 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
     oskar_settings_init(&settings);
     settings.sim.double_precision = (type == OSKAR_DOUBLE) ? OSKAR_TRUE : OSKAR_FALSE;
     QByteArray path = root.toAscii();
-    settings.telescope.config_directory = (char*)malloc(root.size() + 1);
-    strcpy(settings.telescope.config_directory, path.constData());
+    settings.telescope.input_directory = (char*)malloc(root.size() + 1);
+    strcpy(settings.telescope.input_directory, path.constData());
     oskar_SettingsSystemNoise* noise = &settings.interferometer.noise;
     noise->enable = OSKAR_TRUE;
     noise->seed = 0;

@@ -73,7 +73,7 @@ int oskar_telescope_model_config_load(oskar_TelescopeModel* telescope,
     int status = OSKAR_SUCCESS;
 
     // Check that the directory exists.
-    QDir telescope_dir(settings->config_directory);
+    QDir telescope_dir(settings->input_directory);
     if (!telescope_dir.exists()) return OSKAR_ERR_FILE_IO;
 
     // Check that the telescope model is in CPU memory.
@@ -99,13 +99,14 @@ int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
     int error = 0;
 
     // Override station element systematic/fixed gain errors if required.
-    if (settings->station.element.gain > 0.0 ||
-            settings->station.element.gain_error_fixed > 0.0)
+    if (settings->aperture_array.array_pattern.element.gain > 0.0 ||
+            settings->aperture_array.array_pattern.element.gain_error_fixed > 0.0)
     {
-        double g = settings->station.element.gain;
-        double g_err = settings->station.element.gain_error_fixed;
+        double g, g_err;
+        g = settings->aperture_array.array_pattern.element.gain;
+        g_err = settings->aperture_array.array_pattern.element.gain_error_fixed;
         if (g <= 0.0) g = 1.0;
-        srand(settings->station.element.seed_gain_errors);
+        srand(settings->aperture_array.array_pattern.element.seed_gain_errors);
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             int num_elements = telescope->station[i].num_elements;
@@ -126,21 +127,23 @@ int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
     }
 
     // Override station element time-variable gain errors if required.
-    if (settings->station.element.gain_error_time > 0.0)
+    if (settings->aperture_array.array_pattern.element.gain_error_time > 0.0)
     {
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             oskar_mem_set_value_real(&telescope->station[i].gain_error,
-                    settings->station.element.gain_error_time, &error);
+                    settings->aperture_array.array_pattern.element.gain_error_time,
+                    &error);
             if (error) return error;
         }
     }
 
     // Override station element systematic/fixed phase errors if required.
-    if (settings->station.element.phase_error_fixed_rad > 0.0)
+    if (settings->aperture_array.array_pattern.element.phase_error_fixed_rad > 0.0)
     {
-        double p_err = settings->station.element.phase_error_fixed_rad;
-        srand(settings->station.element.seed_phase_errors);
+        double p_err;
+        p_err = settings->aperture_array.array_pattern.element.phase_error_fixed_rad;
+        srand(settings->aperture_array.array_pattern.element.seed_phase_errors);
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             int num_elements;
@@ -162,22 +165,22 @@ int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
     }
 
     // Override station element time-variable phase errors if required.
-    if (settings->station.element.phase_error_time_rad > 0.0)
+    if (settings->aperture_array.array_pattern.element.phase_error_time_rad > 0.0)
     {
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             oskar_mem_set_value_real(&telescope->station[i].phase_error,
-                    settings->station.element.phase_error_time_rad, &error);
+                    settings->aperture_array.array_pattern.element.phase_error_time_rad, &error);
             if (error) return error;
         }
     }
 
     // Override station element position errors if required.
-    if (settings->station.element.position_error_xy_m > 0.0)
+    if (settings->aperture_array.array_pattern.element.position_error_xy_m > 0.0)
     {
-        double delta_x, delta_y;
-        double p_err = settings->station.element.position_error_xy_m;
-        srand(settings->station.element.seed_position_xy_errors);
+        double delta_x, delta_y, p_err;
+        p_err = settings->aperture_array.array_pattern.element.position_error_xy_m;
+        srand(settings->aperture_array.array_pattern.element.seed_position_xy_errors);
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             int type = oskar_station_model_type(&telescope->station[i]);
@@ -220,10 +223,11 @@ int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
     }
 
     // Add variation to x-dipole orientations if required.
-    if (settings->station.element.x_orientation_error_rad > 0.0)
+    if (settings->aperture_array.array_pattern.element.x_orientation_error_rad > 0.0)
     {
-        double p_err = settings->station.element.x_orientation_error_rad;
-        srand(settings->station.element.seed_x_orientation_error);
+        double p_err;
+        p_err = settings->aperture_array.array_pattern.element.x_orientation_error_rad;
+        srand(settings->aperture_array.array_pattern.element.seed_x_orientation_error);
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             double delta, angle;
@@ -265,11 +269,11 @@ int oskar_telescope_model_config_override(oskar_TelescopeModel* telescope,
     }
 
     // Add variation to y-dipole orientations if required.
-    if (settings->station.element.y_orientation_error_rad > 0.0)
+    if (settings->aperture_array.array_pattern.element.y_orientation_error_rad > 0.0)
     {
         double p_err;
-        p_err = settings->station.element.y_orientation_error_rad;
-        srand(settings->station.element.seed_y_orientation_error);
+        p_err = settings->aperture_array.array_pattern.element.y_orientation_error_rad;
+        srand(settings->aperture_array.array_pattern.element.seed_y_orientation_error);
         for (int i = 0; i < telescope->num_stations; ++i)
         {
             double delta, angle;

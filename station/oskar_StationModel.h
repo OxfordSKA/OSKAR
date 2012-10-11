@@ -49,7 +49,7 @@ struct OSKAR_EXPORT oskar_StationModel
     int num_elements;            /**< Number of antenna elements in the station. */
 
     /* Station element data. */
-    int use_polarised_elements;  /**< Type of receptor element within station (enumerator). */
+    /*int use_polarised_elements; DEPRECATED Type of receptor element within station (enumerator). */
     int array_is_3d;             /**< Flag set if array is 3-dimensional (default false). */
     int coord_units;             /**< Units of the x,y,z coordinates. */
     int apply_element_errors;    /**< Bool switch to toggle element gain and phase errors (default false) */
@@ -89,8 +89,7 @@ struct OSKAR_EXPORT oskar_StationModel
     double dec0_rad;             /**< Declination of beam phase centre, in radians. */
     int normalise_beam;          /**< True if the station beam should be normalised by the number of antennas. */
     int evaluate_array_factor;   /**< True if the array factor should be evaluated. */
-    int evaluate_element_factor; /**< True if the element pattern should be evaluated. */
-    int bit_depth;               /**< Not implemented! */
+    /*int evaluate_element_factor; True if the element pattern should be evaluated. */
 
     double gaussian_beam_fwhm_deg; /**< FWHM of gaussian station beam, only used
                                        the GAUSSIAN_BEAM station types. */

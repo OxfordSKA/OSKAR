@@ -35,6 +35,8 @@
 
 #include "oskar_global.h"
 #include "station/oskar_SettingsStation.h"
+#include "station/oskar_SettingsApertureArray.h"
+#include "station/oskar_SettingsGaussianBeam.h"
 
 /**
  * @struct oskar_SettingsTelescope
@@ -46,13 +48,16 @@
  */
 struct OSKAR_EXPORT oskar_SettingsTelescope
 {
-    char* config_directory;
-    char* output_config_directory;
+    char* input_directory;
+    char* output_directory;
     double longitude_rad;
     double latitude_rad;
     double altitude_m;
-    int use_common_sky;
-    oskar_SettingsStation station;
+    /*int use_common_sky; DEPRECATED (moved to interferometer settings) */
+    int station_type;
+    /*oskar_SettingsStation station; DEPRECATED */
+    oskar_SettingsApertureArray aperture_array;
+    oskar_SettingsGaussianBeam gaussian_beam;
 };
 typedef struct oskar_SettingsTelescope oskar_SettingsTelescope;
 

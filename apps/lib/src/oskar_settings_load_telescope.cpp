@@ -28,6 +28,7 @@
 
 #include "apps/lib/oskar_settings_load_telescope.h"
 #include "station/oskar_StationModel.h"
+#include "station/oskar_ElementModel.h"
 
 #include <cmath>
 #include <cstdio>
@@ -46,6 +47,12 @@
 
 #define D2R (M_PI/180.0)
 
+static int get_seed(const QVariant& t)
+{
+    return (t.toString().toLower() == "time" || t.toInt() < 0) ?
+            (int)time(NULL) : t.toInt();
+}
+
 extern "C"
 int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
         const char* filename)
@@ -55,12 +62,12 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("telescope");
 
-    // Telescope configuration directory.
-    t = s.value("config_directory", "").toByteArray();
+    // Telescope input directory.
+    t = s.value("input_directory", "").toByteArray();
     if (t.size() > 0)
     {
-        tel->config_directory = (char*)malloc(t.size() + 1);
-        strcpy(tel->config_directory, t.constData());
+        tel->input_directory = (char*)malloc(t.size() + 1);
+        strcpy(tel->input_directory, t.constData());
     }
 
     // Telescope location.
@@ -68,123 +75,142 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     tel->latitude_rad  = s.value("latitude_deg", 0.0).toDouble() * D2R;
     tel->altitude_m    = s.value("altitude_m", 0.0).toDouble();
 
-    // Short baseline approximation.
-    tel->use_common_sky = s.value("use_common_sky", true).toBool();
+    // Station type.
+    temp = s.value("station_type", "Aperture array").toString();
+    if (temp.startsWith("A", Qt::CaseInsensitive))
+        tel->station_type = OSKAR_STATION_TYPE_AA;
+    else if (temp.startsWith("G", Qt::CaseInsensitive))
+        tel->station_type = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
+    else
+        return OSKAR_ERR_SETTINGS_TELESCOPE;
 
-    // Station settings.
-    s.beginGroup("station");
+    // Aperture array settings.
+    s.beginGroup("aperture_array");
     {
-        temp = s.value("station_type", "Aperture Array").toString();
-        if (temp.startsWith("A", Qt::CaseInsensitive))
-            tel->station.station_type = OSKAR_STATION_TYPE_AA;
-        else if (temp.startsWith("G", Qt::CaseInsensitive))
-            tel->station.station_type = OSKAR_STATION_TYPE_GAUSSIAN_BEAM;
-        else
-            return OSKAR_ERR_SETTINGS_TELESCOPE;
-
-        tel->station.use_polarised_elements =
-                s.value("use_polarised_elements", true).toBool();
-
-//        if (tel->station.use_polarised_elements &&
-//                tel->station.station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
-//        {
-//            return OSKAR_ERR_SETTINGS_TELESCOPE;
-//        }
-
-        tel->station.ignore_custom_element_patterns =
-                s.value("ignore_custom_element_patterns", false).toBool();
-        tel->station.evaluate_array_factor =
-                s.value("evaluate_array_factor", true).toBool();
-        tel->station.evaluate_element_factor =
-                s.value("evaluate_element_factor", true).toBool();
-        tel->station.normalise_beam = s.value("normalise_beam", false).toBool();
-        tel->station.gaussian_beam_fwhm_deg = s.value("gaussian_beam_fwhm_deg",
-                0.0).toDouble();
-
-        // Station element settings (overrides).
-        s.beginGroup("element");
+        oskar_SettingsApertureArray* aa = &tel->aperture_array;
+        s.beginGroup("array_pattern");
         {
-            tel->station.element.gain = s.value("gain", 0.0).toDouble();
-            tel->station.element.gain_error_fixed =
-                    s.value("gain_error_fixed", 0.0).toDouble();
-            tel->station.element.gain_error_time =
-                    s.value("gain_error_time", 0.0).toDouble();
-            tel->station.element.phase_error_fixed_rad =
-                    s.value("phase_error_fixed_deg", 0.0).toDouble() * D2R;
-            tel->station.element.phase_error_time_rad =
-                    s.value("phase_error_time_deg", 0.0).toDouble() * D2R;
-            tel->station.element.position_error_xy_m =
-                    s.value("position_error_xy_m", 0.0).toDouble();
-            tel->station.element.x_orientation_error_rad =
-                    s.value("x_orientation_error_deg", 0.0).toDouble() * D2R;
-            tel->station.element.y_orientation_error_rad =
-                    s.value("y_orientation_error_deg", 0.0).toDouble() * D2R;
+            oskar_SettingsArrayPattern* ap = &aa->array_pattern;
+            ap->enable = s.value("enable", true).toBool();
+            ap->normalise = s.value("normalise", false).toBool();
 
-            // Station element random seeds.
-            temp = s.value("seed_gain_errors").toString();
-            tel->station.element.seed_gain_errors = (temp.toUpper() == "TIME" ||
-                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-            temp = s.value("seed_phase_errors").toString();
-            tel->station.element.seed_phase_errors = (temp.toUpper() == "TIME" ||
-                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-            temp = s.value("seed_time_variable_errors").toString();
-            tel->station.element.seed_time_variable_errors = (temp.toUpper() == "TIME"
-                    || temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-            temp = s.value("seed_position_xy_errors").toString();
-            tel->station.element.seed_position_xy_errors = (temp.toUpper() == "TIME" ||
-                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-            temp = s.value("seed_x_orientation_error").toString();
-            tel->station.element.seed_x_orientation_error = (temp.toUpper() == "TIME" ||
-                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
-            temp = s.value("seed_y_orientation_error").toString();
-            tel->station.element.seed_y_orientation_error = (temp.toUpper() == "TIME" ||
-                    temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+            // Array element settings (overrides).
+            s.beginGroup("element");
+            {
+                oskar_SettingsArrayElement* ae = &aa->array_pattern.element;
+                ae->gain = s.value("gain", 0.0).toDouble();
+                ae->gain_error_fixed =
+                        s.value("gain_error_fixed", 0.0).toDouble();
+                ae->gain_error_time =
+                        s.value("gain_error_time", 0.0).toDouble();
+                ae->phase_error_fixed_rad =
+                        s.value("phase_error_fixed_deg", 0.0).toDouble() * D2R;
+                ae->phase_error_time_rad =
+                        s.value("phase_error_time_deg", 0.0).toDouble() * D2R;
+                ae->position_error_xy_m =
+                        s.value("position_error_xy_m", 0.0).toDouble();
+                ae->x_orientation_error_rad =
+                        s.value("x_orientation_error_deg", 0.0).toDouble() * D2R;
+                ae->y_orientation_error_rad =
+                        s.value("y_orientation_error_deg", 0.0).toDouble() * D2R;
 
+                // Station element random seeds.
+                ae->seed_gain_errors = get_seed(s.value("seed_gain_errors"));
+                ae->seed_phase_errors = get_seed(s.value("seed_phase_errors"));
+                ae->seed_time_variable_errors =
+                        get_seed(s.value("seed_time_variable_errors"));
+                ae->seed_position_xy_errors =
+                        get_seed(s.value("seed_position_xy_errors"));
+                ae->seed_x_orientation_error =
+                        get_seed(s.value("seed_x_orientation_error"));
+                ae->seed_y_orientation_error =
+                        get_seed(s.value("seed_y_orientation_error"));
+            }
+            s.endGroup(); // End array element group.
         }
-        s.endGroup(); // End element group.
+        s.endGroup(); // End array pattern group.
 
-        // Station element fitting parameters (general).
-        s.beginGroup("element_fit");
+        // Element pattern settings.
+        s.beginGroup("element_pattern");
         {
-            tel->station.element_fit.ignore_data_at_pole =
-                    s.value("ignore_data_at_pole", false).toBool();
-            tel->station.element_fit.ignore_data_below_horizon =
-                    s.value("ignore_data_below_horizon", true).toBool();
-            tel->station.element_fit.overlap_angle_rad =
-                    s.value("overlap_angle_deg", 9.0).toDouble() * D2R;
-            tel->station.element_fit.use_common_set =
-                    s.value("use_common_set", true).toBool();
-            tel->station.element_fit.weight_boundaries =
-                    s.value("weight_boundaries", 2.0).toDouble();
-            tel->station.element_fit.weight_overlap =
-                    s.value("weight_overlap", 1.0).toDouble();
+            oskar_SettingsElementPattern* ep = &aa->element_pattern;
+            ep->enable_numerical_patterns =
+                    s.value("enable_numerical", true).toBool();
 
-            // Station element fitting parameters (for all surfaces).
-            s.beginGroup("all");
-            tel->station.element_fit.all.search_for_best_fit =
-                    s.value("search_for_best_fit", true).toBool();
-            tel->station.element_fit.all.average_fractional_error =
-                    s.value("average_fractional_error", 0.02).toDouble();
-            tel->station.element_fit.all.average_fractional_error_factor_increase =
-                    s.value("average_fractional_error_factor_increase", 1.5).toDouble();
-            tel->station.element_fit.all.eps_float =
-                    s.value("eps_float", 1e-4).toDouble();
-            tel->station.element_fit.all.eps_double =
-                    s.value("eps_double", 1e-8).toDouble();
-            tel->station.element_fit.all.smoothness_factor_override =
-                    s.value("smoothness_factor_override", 1.0).toDouble();
-            s.endGroup();
+            // Station element fitting parameters (general).
+            s.beginGroup("fit");
+            {
+                oskar_SettingsElementFit* ef = &ep->fit;
+                ef->ignore_data_at_pole =
+                        s.value("ignore_data_at_pole", false).toBool();
+                ef->ignore_data_below_horizon =
+                        s.value("ignore_data_below_horizon", true).toBool();
+                ef->overlap_angle_rad =
+                        s.value("overlap_angle_deg", 9.0).toDouble() * D2R;
+                ef->use_common_set =
+                        s.value("use_common_set", true).toBool();
+                ef->weight_boundaries =
+                        s.value("weight_boundaries", 2.0).toDouble();
+                ef->weight_overlap =
+                        s.value("weight_overlap", 1.0).toDouble();
+
+                // Station element fitting parameters (for all surfaces).
+                s.beginGroup("all");
+                ef->all.eps_float =
+                        s.value("eps_float", 1e-4).toDouble();
+                ef->all.eps_double =
+                        s.value("eps_double", 1e-8).toDouble();
+                ef->all.search_for_best_fit =
+                        s.value("search_for_best_fit", true).toBool();
+                ef->all.average_fractional_error =
+                        s.value("average_fractional_error", 0.02).toDouble();
+                ef->all.average_fractional_error_factor_increase =
+                        s.value("average_fractional_error_factor_increase", 1.5).toDouble();
+                ef->all.smoothness_factor_override =
+                        s.value("smoothness_factor_override", 1.0).toDouble();
+                s.endGroup();
+            }
+            s.endGroup(); // End element fit group.
+
+            temp = s.value("functional_type", "Geometric dipole").toString();
+            if (temp.startsWith("G", Qt::CaseInsensitive))
+                ep->functional_type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
+            else if (temp.startsWith("I", Qt::CaseInsensitive))
+                ep->functional_type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
+            else
+                return OSKAR_ERR_SETTINGS_TELESCOPE;
+
+            s.beginGroup("taper");
+            {
+                temp = s.value("type", "None").toString();
+                if (temp.startsWith("N", Qt::CaseInsensitive))
+                    ep->taper.type = OSKAR_ELEMENT_MODEL_TAPER_NONE;
+                else if (temp.startsWith("C", Qt::CaseInsensitive))
+                    ep->taper.type = OSKAR_ELEMENT_MODEL_TAPER_COSINE;
+                else if (temp.startsWith("G", Qt::CaseInsensitive))
+                    ep->taper.type = OSKAR_ELEMENT_MODEL_TAPER_GAUSSIAN;
+                else
+                    return OSKAR_ERR_SETTINGS_TELESCOPE;
+            }
+            s.endGroup(); // End taper group.
         }
-        s.endGroup(); // End element fit group.
+        s.endGroup(); // End element pattern group.
     }
-    s.endGroup(); // End station group
+    s.endGroup(); // End aperture array group.
 
-    // Telescope output configuration directory.
-    t = s.value("output_config_directory", "").toByteArray();
+    // Gaussian beam settings.
+    s.beginGroup("gaussian_beam");
+    {
+        tel->gaussian_beam.fwhm_deg = s.value("fwhm_deg", 0.0).toDouble();
+    }
+    s.endGroup(); // End Gaussian beam group
+
+    // Telescope output directory.
+    t = s.value("output_directory", "").toByteArray();
     if (t.size() > 0)
     {
-        tel->output_config_directory = (char*)malloc(t.size() + 1);
-        strcpy(tel->output_config_directory, t.constData());
+        tel->output_directory = (char*)malloc(t.size() + 1);
+        strcpy(tel->output_directory, t.constData());
     }
 
     return OSKAR_SUCCESS;

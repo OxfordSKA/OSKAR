@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,43 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_ELEMENT_H_
-#define OSKAR_SETTINGS_ELEMENT_H_
+#ifndef OSKAR_SETTINGS_GAUSSIAN_BEAM_H_
+#define OSKAR_SETTINGS_GAUSSIAN_BEAM_H_
 
 /**
- * @file oskar_SettingsElement.h
+ * @file oskar_SettingsGaussianBeam.h
  */
 
 #include "oskar_global.h"
 
 /**
- * @struct oskar_SettingsElement
+ * @struct oskar_SettingsGaussianBeam
  *
- * @brief Structure to hold station element settings.
+ * @brief Structure to hold settings for stations with a Gaussian beam.
  *
  * @details
- * The structure holds station element parameters that can be used to override
- * those in the station files.
+ * The structure holds settings for stations with a Gaussian beam.
  */
-struct OSKAR_EXPORT oskar_SettingsElement
+struct OSKAR_EXPORT oskar_SettingsGaussianBeam
 {
-    double gain;
-    double gain_error_fixed;
-    double gain_error_time;
-    double phase_error_fixed_rad;
-    double phase_error_time_rad;
-    double position_error_xy_m;
-    double x_orientation_error_rad;
-    double y_orientation_error_rad;
-
-    /* Random seeds. */
-    int seed_gain_errors;
-    int seed_phase_errors;
-    int seed_time_variable_errors;
-    int seed_position_xy_errors;
-    int seed_x_orientation_error;
-    int seed_y_orientation_error;
+    double fwhm_deg;
 };
-typedef struct oskar_SettingsElement oskar_SettingsElement;
+typedef struct oskar_SettingsGaussianBeam oskar_SettingsGaussianBeam;
 
-#endif /* OSKAR_SETTINGS_ELEMENT_H_ */
+#endif /* OSKAR_SETTINGS_GAUSSIAN_BEAM_H_ */

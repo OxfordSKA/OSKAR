@@ -88,7 +88,7 @@ int oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
     QHash<QString, QString> files;
     QHash<QString, oskar_Mem*> loaded;
 
-    QDir telescope_dir(settings->telescope.config_directory);
+    QDir telescope_dir(settings->telescope.input_directory);
     if (!telescope_dir.exists()) return OSKAR_ERR_FILE_IO;
 
     // Check that the telescope model is in CPU memory.

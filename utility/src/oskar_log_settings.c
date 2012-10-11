@@ -83,7 +83,19 @@ static void oskar_log_settings_sky_extended(oskar_Log* log, int depth,
     }
 }
 
-
+static void oskar_log_settings_sky_filter(oskar_Log* log, int depth,
+        const oskar_SettingsSkyFilter* f)
+{
+    if (!(f->radius_inner == 0.0 && f->radius_outer >= M_PI / 2.0))
+    {
+        LV("Filter radius inner [deg]", "%.3f", f->radius_inner * R2D);
+        LV("Filter radius outer [deg]", "%.3f", f->radius_outer * R2D);
+    }
+    if (f->flux_min != 0.0)
+        LV("Filter flux min [Jy]", "%.3e", f->flux_min);
+    if (f->flux_max != 0.0)
+        LV("Filter flux max [Jy]", "%.3e", f->flux_max);
+}
 
 void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
 {
@@ -103,20 +115,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
                     s->sky.input_sky_file[i]);
         }
         --depth;
-        if (!(s->sky.input_sky_filter.radius_inner == 0.0 &&
-                s->sky.input_sky_filter.radius_outer >= M_PI/2.0))
-        {
-            LV("Filter radius inner [deg]", "%.3f",
-                    s->sky.input_sky_filter.radius_inner * R2D);
-            LV("Filter radius outer [deg]", "%.3f",
-                    s->sky.input_sky_filter.radius_outer * R2D);
-        }
-        if (s->sky.input_sky_filter.flux_min != 0.0)
-            LV("Filter flux min [Jy]", "%.3e",
-                    s->sky.input_sky_filter.flux_min);
-        if (s->sky.input_sky_filter.flux_max != 0.0)
-            LV("Filter flux max [Jy]", "%.3e",
-                    s->sky.input_sky_filter.flux_max);
+        oskar_log_settings_sky_filter(log, depth, &s->sky.input_sky_filter);
         oskar_log_settings_sky_extended(log, depth,
                 &s->sky.input_sky_extended_sources);
     }
@@ -125,116 +124,69 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
     LVS0("Input GSM file", s->sky.gsm_file);
     ++depth;
-    if (!(s->sky.gsm_filter.radius_inner == 0.0 &&
-            s->sky.gsm_filter.radius_outer >= M_PI/2.0))
-    {
-        LV("Filter radius inner [deg]", "%.3f",
-                s->sky.gsm_filter.radius_inner * R2D);
-        LV("Filter radius outer [deg]", "%.3f",
-                s->sky.gsm_filter.radius_outer * R2D);
-    }
-    if (s->sky.gsm_filter.flux_min != 0.0)
-        LV("Filter flux min [Jy]", "%.3e", s->sky.gsm_filter.flux_min);
-    if (s->sky.gsm_filter.flux_max != 0.0)
-        LV("Filter flux max [Jy]", "%.3e", s->sky.gsm_filter.flux_max);
+    oskar_log_settings_sky_filter(log, depth, &s->sky.gsm_filter);
     oskar_log_settings_sky_extended(log, depth, &s->sky.gsm_extended_sources);
-
-    /* Output OSKAR sky model file settings. */
-    depth = 1;
-    LVS0("Output OSKAR sky model text file", s->sky.output_text_file);
-    LVS0("Output OSKAR sky model binary file", s->sky.output_binary_file);
 
     /* Random power-law generator settings. */
     depth = 1;
     if (s->sky.generator.random_power_law.num_sources != 0)
     {
+        const oskar_SettingsSkyGeneratorRandomPowerLaw* gen =
+                &s->sky.generator.random_power_law;
+
         oskar_log_message(log, depth, "Generator (random power law)");
         ++depth;
-        LVI("Num. sources", s->sky.generator.random_power_law.num_sources);
-        LV("Flux min [Jy]", "%.3e", s->sky.generator.random_power_law.flux_min);
-        LV("Flux max [Jy]", "%.3e", s->sky.generator.random_power_law.flux_max);
-        LV("Power law index", "%.3f", s->sky.generator.random_power_law.power);
-        LVI("Random seed", s->sky.generator.random_power_law.seed);
+        LVI("Num. sources", gen->num_sources);
+        LV("Flux min [Jy]", "%.3e", gen->flux_min);
+        LV("Flux max [Jy]", "%.3e", gen->flux_max);
+        LV("Power law index", "%.3f", gen->power);
+        LVI("Random seed", gen->seed);
         ++depth;
-        if (!(s->sky.generator.random_power_law.filter.radius_inner == 0.0 &&
-                s->sky.generator.random_power_law.filter.radius_outer >= M_PI/2.0))
-        {
-            LV("Filter radius inner [deg]", "%.3f",
-                    s->sky.generator.random_power_law.filter.radius_inner * R2D);
-            LV("Filter radius outer [deg]", "%.3f",
-                    s->sky.generator.random_power_law.filter.radius_outer * R2D);
-        }
-        if (s->sky.generator.random_power_law.filter.flux_min != 0.0)
-            LV("Filter flux min [Jy]", "%.3e",
-                    s->sky.generator.random_power_law.filter.flux_min);
-        if (s->sky.generator.random_power_law.filter.flux_max != 0.0)
-            LV("Filter flux max [Jy]", "%.3e",
-                    s->sky.generator.random_power_law.filter.flux_max);
-        oskar_log_settings_sky_extended(log, depth,
-                &s->sky.generator.random_power_law.extended_sources);
+        oskar_log_settings_sky_filter(log, depth, &gen->filter);
+        oskar_log_settings_sky_extended(log, depth, &gen->extended_sources);
     }
 
     /* Random broken power-law generator settings. */
     depth = 1;
     if (s->sky.generator.random_broken_power_law.num_sources != 0)
     {
+        const oskar_SettingsSkyGeneratorRandomBrokenPowerLaw* gen =
+                &s->sky.generator.random_broken_power_law;
+
         oskar_log_message(log, depth, "Generator (random broken power law)");
         ++depth;
-        LVI("Num. sources", s->sky.generator.random_broken_power_law.num_sources);
-        LV("Flux min [Jy]", "%.3e", s->sky.generator.random_broken_power_law.flux_min);
-        LV("Flux max [Jy]", "%.3e", s->sky.generator.random_broken_power_law.flux_max);
-        LV("Power law index 1", "%.3f", s->sky.generator.random_broken_power_law.power1);
-        LV("Power law index 2", "%.3f", s->sky.generator.random_broken_power_law.power2);
-        LV("Threshold [Jy]", "%.3f", s->sky.generator.random_broken_power_law.threshold);
-        LVI("Random seed", s->sky.generator.random_broken_power_law.seed);
+        LVI("Num. sources", gen->num_sources);
+        LV("Flux min [Jy]", "%.3e", gen->flux_min);
+        LV("Flux max [Jy]", "%.3e", gen->flux_max);
+        LV("Power law index 1", "%.3f", gen->power1);
+        LV("Power law index 2", "%.3f", gen->power2);
+        LV("Threshold [Jy]", "%.3f", gen->threshold);
+        LVI("Random seed", gen->seed);
         ++depth;
-        if (!(s->sky.generator.random_broken_power_law.filter.radius_inner == 0.0 &&
-                s->sky.generator.random_broken_power_law.filter.radius_outer >= M_PI/2.0))
-        {
-            LV("Filter radius inner [deg]", "%.3f",
-                    s->sky.generator.random_broken_power_law.filter.radius_inner * R2D);
-            LV("Filter radius outer [deg]", "%.3f",
-                    s->sky.generator.random_broken_power_law.filter.radius_outer * R2D);
-        }
-        if (s->sky.generator.random_broken_power_law.filter.flux_min != 0.0)
-            LV("Filter flux min [Jy]", "%.3e",
-                    s->sky.generator.random_broken_power_law.filter.flux_min);
-        if (s->sky.generator.random_broken_power_law.filter.flux_max != 0.0)
-            LV("Filter flux max [Jy]", "%.3e",
-                    s->sky.generator.random_broken_power_law.filter.flux_max);
-        oskar_log_settings_sky_extended(log, depth,
-                &s->sky.generator.random_broken_power_law.extended_sources);
+        oskar_log_settings_sky_filter(log, depth, &gen->filter);
+        oskar_log_settings_sky_extended(log, depth, &gen->extended_sources);
     }
 
     /* HEALPix generator settings. */
     depth = 1;
     if (s->sky.generator.healpix.nside != 0)
     {
-        int n;
-        n = 12 * (int)pow(s->sky.generator.healpix.nside, 2.0);
+        const oskar_SettingsSkyGeneratorHealpix* gen =
+                &s->sky.generator.healpix;
+
         oskar_log_message(log, depth, "Generator (HEALPix)");
         ++depth;
-        LVI("Nside", s->sky.generator.healpix.nside);
-        LVI("(Num. sources)", n);
+        LVI("Nside", gen->nside);
+        LVI("(Num. sources)", (12 * (gen->nside) * (gen->nside)));
         ++depth;
-        if (!(s->sky.generator.healpix.filter.radius_inner == 0.0 &&
-                s->sky.generator.healpix.filter.radius_outer >= M_PI/2.0))
-        {
-            LV("Filter radius inner [deg]", "%.3f",
-                    s->sky.generator.healpix.filter.radius_inner * R2D);
-            LV("Filter radius outer [deg]", "%.3f",
-                    s->sky.generator.healpix.filter.radius_outer * R2D);
-        }
-        if (s->sky.generator.healpix.filter.flux_min != 0.0)
-            LV("Filter flux min [Jy]", "%.3e",
-                    s->sky.generator.healpix.filter.flux_min);
-        if (s->sky.generator.healpix.filter.flux_max != 0.0)
-            LV("Filter flux max [Jy]", "%.3e",
-                    s->sky.generator.healpix.filter.flux_max);
-        oskar_log_settings_sky_extended(log, depth,
-                &s->sky.generator.healpix.extended_sources);
-
+        oskar_log_settings_sky_filter(log, depth, &gen->filter);
+        oskar_log_settings_sky_extended(log, depth, &gen->extended_sources);
     }
+
+    /* Output OSKAR sky model file settings. */
+    depth = 1;
+    LVS0("Output OSKAR sky model text file", s->sky.output_text_file);
+    LVS0("Output OSKAR sky model binary file", s->sky.output_binary_file);
 }
 
 void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
@@ -258,99 +210,202 @@ void oskar_log_settings_telescope(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     oskar_log_message(log, depth, "Telescope model settings");
     depth = 1;
-    LVS0("Telescope directory", s->telescope.config_directory);
+    LVS0("Input directory", s->telescope.input_directory);
     LV("Longitude [deg]", "%.1f", s->telescope.longitude_rad * R2D);
     LV("Latitude [deg]", "%.1f", s->telescope.latitude_rad * R2D);
     LV("Altitude [m]", "%.1f", s->telescope.altitude_m);
-    LVB("Use common sky", s->telescope.use_common_sky);
 
-    /* Station model settings. */
-    oskar_log_message(log, depth, "Station model settings");
-    ++depth;
-    switch (s->telescope.station.station_type)
+    /* Aperture array settings. */
+    if (s->telescope.station_type == OSKAR_STATION_TYPE_AA)
     {
-        case OSKAR_STATION_TYPE_AA:
-            LVS("Station type", "Aperture Arrays");
-            break;
-        case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
-            LVS("Station type", "Gaussian beam");
+        const oskar_SettingsApertureArray* aa = &s->telescope.aperture_array;
+
+        LVS("Station type", "Aperture array");
+        oskar_log_message(log, depth, "Aperture array settings");
+        ++depth;
+
+        /* Array pattern settings. */
+        {
+            const oskar_SettingsArrayPattern* ap = &aa->array_pattern;
+            const oskar_SettingsArrayElement* ae = &ap->element;
+
+            oskar_log_message(log, depth, "Array pattern settings");
             ++depth;
-            LV("Beam FWHM [deg]", "%.3f", s->telescope.station.gaussian_beam_fwhm_deg);
+            LVB("Enable array pattern", ap->enable);
+            if (ap->enable)
+            {
+                LVB("Normalise array pattern", ap->normalise);
+
+                /* Array element settings. */
+                if (ae->apodisation_type > 0 ||
+                        ae->gain > 0.0 ||
+                        ae->gain_error_fixed > 0.0 ||
+                        ae->gain_error_time > 0.0 ||
+                        ae->phase_error_fixed_rad > 0.0 ||
+                        ae->phase_error_time_rad > 0.0 ||
+                        ae->position_error_xy_m > 0.0 ||
+                        ae->x_orientation_error_rad > 0.0 ||
+                        ae->y_orientation_error_rad > 0.0)
+                {
+                    oskar_log_message(log,depth,"Element settings (overrides)");
+                    ++depth;
+                    switch (ae->apodisation_type)
+                    {
+                    case 0:
+                        LVS("Apodisation type", "None");
+                        break;
+                    default:
+                        LVS("Apodisation type", "Unknown");
+                        break;
+                    }
+                    if (ae->gain > 0.0)
+                        LV("Element gain", "%.3f", ae->gain);
+                    if (ae->gain_error_fixed > 0.0)
+                        LV("Element gain std.dev. (systematic)", "%.3f",
+                                ae->gain_error_fixed);
+                    if (ae->gain_error_time > 0.0)
+                        LV("Element gain std.dev. (time-variable)", "%.3f",
+                                ae->gain_error_time);
+                    if (ae->phase_error_fixed_rad > 0.0)
+                        LV("Element phase std.dev. (systematic) [deg]", "%.3f",
+                                ae->phase_error_fixed_rad * R2D);
+                    if (ae->phase_error_time_rad > 0.0)
+                        LV("Element phase std.dev. (time-variable) [deg]","%.3f",
+                                ae->phase_error_time_rad * R2D);
+                    if (ae->position_error_xy_m > 0.0)
+                        LV("Element (x,y) position std.dev [m]", "%.3f",
+                                ae->position_error_xy_m);
+                    if (ae->x_orientation_error_rad > 0.0)
+                        LV("Element X-dipole orientation std.dev [deg]", "%.3f",
+                                ae->x_orientation_error_rad * R2D);
+                    if (ae->y_orientation_error_rad > 0.0)
+                        LV("Element Y-dipole orientation std.dev [deg]", "%.3f",
+                                ae->y_orientation_error_rad * R2D);
+                    if (ae->gain > 0.0 || ae->gain_error_fixed > 0.0)
+                        LVI("Random seed (systematic gain errors)",
+                                ae->seed_gain_errors);
+                    if (ae->phase_error_fixed_rad > 0.0)
+                        LVI("Random seed (systematic phase errors)",
+                                ae->seed_phase_errors);
+                    if (ae->gain_error_time > 0.0 ||
+                            ae->phase_error_time_rad > 0.0)
+                        LVI("Random seed (time-variable errors)",
+                                ae->seed_time_variable_errors);
+                    if (ae->position_error_xy_m > 0.0)
+                        LVI("Random seed (x,y position errors)",
+                                ae->seed_position_xy_errors);
+                    if (ae->x_orientation_error_rad > 0.0)
+                        LVI("Random seed (X-dipole orientation errors)",
+                                ae->seed_x_orientation_error);
+                    if (ae->y_orientation_error_rad > 0.0)
+                        LVI("Random seed (Y-dipole orientation errors)",
+                                ae->seed_y_orientation_error);
+                    --depth;
+                } /* [Element setting overrides] */
+            } /* [Enable array pattern] */
             --depth;
-            break;
-        default:
-            LVS("Station type", "ERROR UNKNOWN");
-            break;
-    }
+        } /* [Array pattern settings] */
 
-    LVB("Use polarised elements", s->telescope.station.use_polarised_elements);
-    LVB("Ignore custom element patterns",
-            s->telescope.station.ignore_custom_element_patterns);
-    LVB("Evaluate array factor",
-            s->telescope.station.evaluate_array_factor);
-    LVB("Evaluate element factor",
-            s->telescope.station.evaluate_element_factor);
-    LVB("Normalise array beam", s->telescope.station.normalise_beam);
+        /* Element pattern settings. */
+        {
+            const oskar_SettingsElementPattern* ep = &aa->element_pattern;
 
-    /* Element model settings. */
-    if (s->telescope.station.element.gain > 0.0 ||
-            s->telescope.station.element.gain_error_fixed > 0.0 ||
-            s->telescope.station.element.gain_error_time > 0.0 ||
-            s->telescope.station.element.phase_error_fixed_rad > 0.0 ||
-            s->telescope.station.element.phase_error_time_rad > 0.0 ||
-            s->telescope.station.element.position_error_xy_m > 0.0 ||
-            s->telescope.station.element.x_orientation_error_rad > 0.0 ||
-            s->telescope.station.element.y_orientation_error_rad > 0.0)
+            oskar_log_message(log, depth, "Element pattern settings");
+            ++depth;
+            LVB("Enable numerical patterns", ep->enable_numerical_patterns);
+            if (ep->enable_numerical_patterns)
+            {
+                const oskar_SettingsElementFit* ef = &ep->fit;
+
+                oskar_log_message(log, depth, "Element pattern fitting "
+                        "parameters");
+                ++depth;
+                LVB("Ignore data at poles", ef->ignore_data_at_pole);
+                LVB("Ignore data below horizon", ef->ignore_data_below_horizon);
+                LV("Overlap angle [deg]", "%.1f", ef->overlap_angle_rad * R2D);
+                LV("Weighting at boundaries", "%.1f", ef->weight_boundaries);
+                LV("Weighting in overlap region", "%.1f", ef->weight_overlap);
+                oskar_log_message(log, depth, "Common settings (for all surfaces)");
+                ++depth;
+                LV("Epsilon (single precision)", "%.3e", ef->all.eps_float);
+                LV("Epsilon (double precision)", "%.3e", ef->all.eps_double);
+                LVB("Search for best fit", ef->all.search_for_best_fit);
+                if (ef->all.search_for_best_fit)
+                {
+                    LV("Average fractional error", "%.4f",
+                            ef->all.average_fractional_error);
+                    LV("Average fractional error factor increase", "%.1f",
+                            ef->all.average_fractional_error_factor_increase);
+                }
+                else
+                {
+                    LV("Smoothness factor override", "%.4e",
+                            ef->all.smoothness_factor_override);
+                }
+                --depth;
+                --depth;
+            } /* [Enable numerical patterns] */
+
+            switch (ep->functional_type)
+            {
+            case OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC:
+                LVS("Functional pattern type", "Isotropic");
+                break;
+            case OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE:
+                LVS("Functional pattern type", "Geometric dipole");
+                break;
+            default:
+                LVS("Functional pattern type", "Unknown");
+                break;
+            }
+
+            /* Tapering options. */
+            {
+                oskar_log_message(log, depth, "Tapering options");
+                ++depth;
+                switch (ep->taper.type)
+                {
+                case OSKAR_ELEMENT_MODEL_TAPER_NONE:
+                    LVS("Tapering type", "None");
+                    break;
+                case OSKAR_ELEMENT_MODEL_TAPER_COSINE:
+                    LVS("Tapering type", "Cosine");
+                    ++depth;
+                    LV("Cosine power", "%.1f", ep->taper.cosine_power);
+                    --depth;
+                    break;
+                case OSKAR_ELEMENT_MODEL_TAPER_GAUSSIAN:
+                    LVS("Tapering type", "Gaussian");
+                    ++depth;
+                    LV("Gaussian FWHM [deg]", "%.1f",
+                            ep->taper.gaussian_fwhm_rad * R2D);
+                    --depth;
+                    break;
+                default:
+                    LVS("Tapering type", "Unknown");
+                    break;
+                }
+                --depth;
+            } /* [Tapering options] */
+            --depth;
+        } /* [Element pattern settings] */
+        --depth;
+    } /* [Aperture array settings] */
+
+    /* Gaussian beam settings. */
+    else if (s->telescope.station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
     {
-        oskar_log_message(log, depth, "Element settings (overrides)");
+        LVS("Station type", "Gaussian beam");
+        oskar_log_message(log, depth, "Gaussian beam settings");
+        ++depth;
+        LV("Gaussian FWHM [deg]", "%.4f",
+                s->telescope.gaussian_beam.fwhm_deg);
+        --depth;
     }
-    ++depth;
-    if (s->telescope.station.element.gain > 0.0)
-        LV("Element gain", "%.3f", s->telescope.station.element.gain);
-    if (s->telescope.station.element.gain_error_fixed > 0.0)
-        LV("Element gain std.dev. (systematic)", "%.3f",
-                s->telescope.station.element.gain_error_fixed);
-    if (s->telescope.station.element.gain_error_time > 0.0)
-        LV("Element gain std.dev. (time-variable)", "%.3f",
-                s->telescope.station.element.gain_error_time);
-    if (s->telescope.station.element.phase_error_fixed_rad > 0.0)
-        LV("Element phase std.dev. (systematic) [deg]", "%.3f",
-                s->telescope.station.element.phase_error_fixed_rad * R2D);
-    if (s->telescope.station.element.phase_error_time_rad > 0.0)
-        LV("Element phase std.dev. (time-variable) [deg]", "%.3f",
-                s->telescope.station.element.phase_error_time_rad * R2D);
-    if (s->telescope.station.element.position_error_xy_m > 0.0)
-        LV("Element (x,y) position std.dev [m]", "%.3f",
-                s->telescope.station.element.position_error_xy_m);
-    if (s->telescope.station.element.x_orientation_error_rad > 0.0)
-        LV("Element X-dipole orientation std.dev [deg]", "%.3f",
-                s->telescope.station.element.x_orientation_error_rad * R2D);
-    if (s->telescope.station.element.y_orientation_error_rad > 0.0)
-        LV("Element Y-dipole orientation std.dev [deg]", "%.3f",
-                s->telescope.station.element.y_orientation_error_rad * R2D);
-    if (s->telescope.station.element.gain > 0.0 ||
-            s->telescope.station.element.gain_error_fixed > 0.0)
-        LVI("Random seed (systematic gain errors)",
-                s->telescope.station.element.seed_gain_errors);
-    if (s->telescope.station.element.phase_error_fixed_rad > 0.0)
-        LVI("Random seed (systematic phase errors)",
-                s->telescope.station.element.seed_phase_errors);
-    if (s->telescope.station.element.gain_error_time > 0.0 ||
-            s->telescope.station.element.phase_error_time_rad > 0.0)
-        LVI("Random seed (time-variable errors)",
-                s->telescope.station.element.seed_time_variable_errors);
-    if (s->telescope.station.element.position_error_xy_m > 0.0)
-        LVI("Random seed (x,y position errors)",
-                s->telescope.station.element.seed_position_xy_errors);
-    if (s->telescope.station.element.x_orientation_error_rad > 0.0)
-        LVI("Random seed (X-dipole orientation errors)",
-                s->telescope.station.element.seed_x_orientation_error);
-    if (s->telescope.station.element.y_orientation_error_rad > 0.0)
-        LVI("Random seed (Y-dipole orientation errors)",
-                s->telescope.station.element.seed_y_orientation_error);
 
+    /* Telescope model output directory. */
     depth = 1;
-    LVS0("Output telescope directory", s->telescope.output_config_directory);
+    LVS0("Output directory", s->telescope.output_directory);
 }
 
 void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
@@ -361,8 +416,11 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     depth = 1;
 
     LV("Channel bandwidth [Hz]", "%f", s->interferometer.channel_bandwidth_hz);
+    LV("Time average [sec]", "%f", s->interferometer.time_average_sec);
     LVI("Num. visibility ave.", s->interferometer.num_vis_ave);
     LVI("Num. fringe ave.", s->interferometer.num_fringe_ave);
+    LVB("Use common sky (short baseline approximation)",
+            s->interferometer.use_common_sky);
 
     /* Noise */
     LVB("Enabled system noise", n->enable);
@@ -591,7 +649,8 @@ void oskar_log_settings(oskar_Log* log, const oskar_Settings* s,
     oskar_log_settings_telescope(log, s);
 
     /* Print interferometer settings */
-    if (s->interferometer.oskar_vis_filename || s->interferometer.ms_filename)
+    if (s->interferometer.oskar_vis_filename || s->interferometer.ms_filename ||
+            s->interferometer.image_interferometer_output)
         oskar_log_settings_interferometer(log, s);
 
     /* Print beam pattern settings. */

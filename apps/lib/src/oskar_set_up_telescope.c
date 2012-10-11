@@ -86,7 +86,7 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
     err = oskar_telescope_model_noise_load(telescope, log, settings);
     if (err) return err;
 
-    switch (settings->telescope.station.station_type)
+    switch (settings->telescope.station_type)
     {
         case OSKAR_STATION_TYPE_AA:
         {
@@ -123,7 +123,7 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
 
     /* Save the telescope configuration in a new directory, if required. */
     err = save_telescope(telescope, &settings->telescope, log,
-            settings->telescope.output_config_directory);
+            settings->telescope.output_directory);
     if (err) return err;
 
     return OSKAR_SUCCESS;
@@ -136,23 +136,20 @@ static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* 
     int i, seed;
     telescope->ra0_rad        = settings->obs.ra0_rad;
     telescope->dec0_rad       = settings->obs.dec0_rad;
-    telescope->use_common_sky = settings->telescope.use_common_sky;
+    telescope->use_common_sky = settings->interferometer.use_common_sky;
     telescope->bandwidth_hz   = settings->interferometer.channel_bandwidth_hz;
     telescope->time_average_sec = settings->interferometer.time_average_sec;
     telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
-    seed = settings->telescope.station.element.seed_time_variable_errors;
+    seed = settings->telescope.aperture_array.array_pattern.element.seed_time_variable_errors;
     telescope->seed_time_variable_station_element_errors = seed;
     for (i = 0; i < telescope->num_stations; ++i)
     {
-        telescope->station[i].station_type = settings->telescope.station.station_type;
+        telescope->station[i].station_type = settings->telescope.station_type;
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
-        telescope->station[i].station_type =settings->telescope.station.station_type;
-        telescope->station[i].use_polarised_elements = settings->telescope.station.use_polarised_elements;
-        telescope->station[i].evaluate_array_factor = settings->telescope.station.evaluate_array_factor;
-        telescope->station[i].evaluate_element_factor = settings->telescope.station.evaluate_element_factor;
-        telescope->station[i].normalise_beam = settings->telescope.station.normalise_beam;
-        telescope->station[i].gaussian_beam_fwhm_deg = settings->telescope.station.gaussian_beam_fwhm_deg;
+        telescope->station[i].evaluate_array_factor = settings->telescope.aperture_array.array_pattern.enable;
+        telescope->station[i].normalise_beam = settings->telescope.aperture_array.array_pattern.normalise;
+        telescope->station[i].gaussian_beam_fwhm_deg = settings->telescope.gaussian_beam.fwhm_deg;
     }
 }
 
@@ -168,7 +165,7 @@ static int save_telescope(oskar_TelescopeModel *telescope,
     if (!strlen(dir)) return OSKAR_SUCCESS;
 
     /* Check that the input and output directories are different. */
-    if (!strcmp(dir, settings->config_directory))
+    if (!strcmp(dir, settings->input_directory))
     {
         oskar_log_warning(log, "Will not overwrite input telescope directory!");
         return OSKAR_SUCCESS;

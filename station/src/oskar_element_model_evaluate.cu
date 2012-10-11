@@ -176,9 +176,9 @@ void oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
 }
 
 void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
-        int use_polarised, double orientation_x, double orientation_y,
-        int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_Mem* theta, oskar_Mem* phi, int* status)
+        double orientation_x, double orientation_y, int num_points,
+        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
+        oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
     /* Check all inputs. */
     if (!model || !G || !l || !m || !n || !theta || !phi || !status)
@@ -207,76 +207,68 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
     /* Evaluate polarised response if output array is matrix type. */
     if (oskar_mem_is_matrix(G->type))
     {
-        if (use_polarised)
+        double delta_phi_x, delta_phi_y;
+
+        /* Check if spline data present for dipole X. */
+        if (model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
+                model->phi_re_x.coeff.data && model->phi_im_x.coeff.data)
         {
-            double delta_phi_x, delta_phi_y;
+            /* Compute modified theta and phi coordinates for dipole X. */
+            delta_phi_x = PI/2 - orientation_x;
+            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                    delta_phi_x, num_points, l, m, n, status);
 
-            /* Check if spline data present for dipole X. */
-            if (model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
-                    model->phi_re_x.coeff.data && model->phi_im_x.coeff.data)
-            {
-                /* Compute modified theta and phi coordinates for dipole X. */
-                delta_phi_x = PI/2 - orientation_x;
-                oskar_hor_lmn_to_modified_theta_phi(theta, phi,
-                        delta_phi_x, num_points, l, m, n, status);
-
-                /* Evaluate spline pattern for dipole X. */
-                oskar_spline_data_evaluate(G, 0, 8, &model->theta_re_x,
-                        num_points, theta, phi, status);
-                oskar_spline_data_evaluate(G, 1, 8, &model->theta_im_x,
-                        num_points, theta, phi, status);
-                oskar_spline_data_evaluate(G, 2, 8, &model->phi_re_x,
-                        num_points, theta, phi, status);
-                oskar_spline_data_evaluate(G, 3, 8, &model->phi_im_x,
-                        num_points, theta, phi, status);
-            }
-            else
-            {
-                /* Compute modified theta and phi coordinates for dipole X. */
-                delta_phi_x = orientation_x - PI/2; /* TODO check the order. */
-                oskar_hor_lmn_to_modified_theta_phi(theta, phi,
-                        delta_phi_x, num_points, l, m, n, status);
-
-                /* Evaluate dipole pattern for dipole X. */
-                oskar_evaluate_dipole_pattern(G, num_points, theta, phi, 1,
-                        status);
-            }
-
-            /* Check if spline data present for dipole Y. */
-            if (model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
-                    model->phi_re_y.coeff.data && model->phi_im_y.coeff.data)
-            {
-                /* Compute modified theta and phi coordinates for dipole X. */
-                delta_phi_y = -orientation_y;
-                oskar_hor_lmn_to_modified_theta_phi(theta, phi,
-                        delta_phi_y, num_points, l, m, n, status);
-
-                /* Evaluate spline pattern for dipole Y. */
-                oskar_spline_data_evaluate(G, 4, 8, &model->theta_re_y,
-                        num_points, theta, phi, status);
-                oskar_spline_data_evaluate(G, 5, 8, &model->theta_im_y,
-                        num_points, theta, phi, status);
-                oskar_spline_data_evaluate(G, 6, 8, &model->phi_re_y,
-                        num_points, theta, phi, status);
-                oskar_spline_data_evaluate(G, 7, 8, &model->phi_im_y,
-                        num_points, theta, phi, status);
-            }
-            else
-            {
-                /* Compute modified theta and phi coordinates for dipole X. */
-                delta_phi_y = orientation_y - PI/2; /* TODO check the order. */
-                oskar_hor_lmn_to_modified_theta_phi(theta, phi,
-                        delta_phi_y, num_points, l, m, n, status);
-
-                /* Evaluate dipole pattern for dipole Y. */
-                oskar_evaluate_dipole_pattern(G, num_points, theta, phi, 0,
-                        status);
-            }
+            /* Evaluate spline pattern for dipole X. */
+            oskar_spline_data_evaluate(G, 0, 8, &model->theta_re_x,
+                    num_points, theta, phi, status);
+            oskar_spline_data_evaluate(G, 1, 8, &model->theta_im_x,
+                    num_points, theta, phi, status);
+            oskar_spline_data_evaluate(G, 2, 8, &model->phi_re_x,
+                    num_points, theta, phi, status);
+            oskar_spline_data_evaluate(G, 3, 8, &model->phi_im_x,
+                    num_points, theta, phi, status);
         }
-
-        /* Don't use polarised element model. */
         else
         {
+            /* Compute modified theta and phi coordinates for dipole X. */
+            delta_phi_x = orientation_x - PI/2; /* TODO check the order. */
+            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                    delta_phi_x, num_points, l, m, n, status);
+
+            /* Evaluate dipole pattern for dipole X. */
+            oskar_evaluate_dipole_pattern(G, num_points, theta, phi, 1,
+                    status);
+        }
+
+        /* Check if spline data present for dipole Y. */
+        if (model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
+                model->phi_re_y.coeff.data && model->phi_im_y.coeff.data)
+        {
+            /* Compute modified theta and phi coordinates for dipole X. */
+            delta_phi_y = -orientation_y;
+            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                    delta_phi_y, num_points, l, m, n, status);
+
+            /* Evaluate spline pattern for dipole Y. */
+            oskar_spline_data_evaluate(G, 4, 8, &model->theta_re_y,
+                    num_points, theta, phi, status);
+            oskar_spline_data_evaluate(G, 5, 8, &model->theta_im_y,
+                    num_points, theta, phi, status);
+            oskar_spline_data_evaluate(G, 6, 8, &model->phi_re_y,
+                    num_points, theta, phi, status);
+            oskar_spline_data_evaluate(G, 7, 8, &model->phi_im_y,
+                    num_points, theta, phi, status);
+        }
+        else
+        {
+            /* Compute modified theta and phi coordinates for dipole X. */
+            delta_phi_y = orientation_y - PI/2; /* TODO check the order. */
+            oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                    delta_phi_y, num_points, l, m, n, status);
+
+            /* Evaluate dipole pattern for dipole Y. */
+            oskar_evaluate_dipole_pattern(G, num_points, theta, phi, 0,
+                    status);
         }
     }
 

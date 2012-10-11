@@ -43,7 +43,7 @@
  * @brief Structure to hold interferometer settings.
  *
  * @details
- * The structure holds observation parameters.
+ * This structure holds interferometer settings.
  */
 struct OSKAR_EXPORT oskar_SettingsInterferometer
 {
@@ -57,6 +57,7 @@ struct OSKAR_EXPORT oskar_SettingsInterferometer
     char* oskar_vis_filename;
     char* ms_filename;
     int image_interferometer_output;
+    int use_common_sky;
 };
 typedef struct oskar_SettingsInterferometer oskar_SettingsInterferometer;
 
