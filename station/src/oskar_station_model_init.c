@@ -99,7 +99,7 @@ void oskar_station_model_init(oskar_StationModel* model, int type, int location,
     model->ra0_rad = 0.0;
     model->dec0_rad = 0.0;
     model->normalise_beam = OSKAR_FALSE;
-    model->evaluate_array_factor = OSKAR_TRUE;
+    model->enable_array_pattern = OSKAR_TRUE;
 
     oskar_system_noise_model_init(&model->noise, type, location, status);
 }

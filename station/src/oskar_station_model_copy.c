@@ -68,7 +68,7 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     dst->ra0_rad = src->ra0_rad;
     dst->dec0_rad = src->dec0_rad;
     dst->normalise_beam = src->normalise_beam;
-    dst->evaluate_array_factor = src->evaluate_array_factor;
+    dst->enable_array_pattern = src->enable_array_pattern;
     dst->gaussian_beam_fwhm_deg = src->gaussian_beam_fwhm_deg;
 
     /* Copy the memory blocks. */

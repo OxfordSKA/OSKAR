@@ -60,7 +60,9 @@ void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
     oskar_mem_init(&work->weights_error, (type | OSKAR_COMPLEX), location, 0, 1,
             status);
     oskar_mem_init(&work->E, (type | OSKAR_COMPLEX), location, 0, 1, status);
-    oskar_mem_init(&work->G, (type | OSKAR_COMPLEX | OSKAR_MATRIX), location, 0,
+    oskar_mem_init(&work->G_matrix, (type | OSKAR_COMPLEX | OSKAR_MATRIX), location, 0,
+            1, status);
+    oskar_mem_init(&work->G_scalar, (type | OSKAR_COMPLEX), location, 0,
             1, status);
 }
 

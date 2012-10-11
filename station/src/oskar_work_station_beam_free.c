@@ -54,7 +54,8 @@ void oskar_work_station_beam_free(oskar_WorkStationBeam* work, int* status)
     oskar_mem_free(&work->weights, status);
     oskar_mem_free(&work->weights_error, status);
     oskar_mem_free(&work->E, status);
-    oskar_mem_free(&work->G, status);
+    oskar_mem_free(&work->G_matrix, status);
+    oskar_mem_free(&work->G_scalar, status);
 }
 
 #ifdef __cplusplus

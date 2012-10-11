@@ -105,6 +105,7 @@ void Test_evaluate_jones_E::evaluate_e()
                 frequency, &error);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
         telescope_gpu.station[i].apply_element_errors = OSKAR_FALSE;
+        telescope_gpu.station[i].element_pattern->type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
     }
     telescope_gpu.identical_stations = OSKAR_TRUE;
     telescope_gpu.use_common_sky = OSKAR_TRUE;

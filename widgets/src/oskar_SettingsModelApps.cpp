@@ -35,7 +35,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_simulator();
     init_settings_sky_model();
     init_settings_observation();
-    init_settings_telescope_model();
+//    init_settings_telescope_model();
     init_settings_telescope_model2();
     init_settings_interferometer();
     init_settings_beampattern();
@@ -648,9 +648,9 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
 {
     QString k, root, group;
     QStringList options;
-    root = "telescope2";
+    root = "telescope";
 
-    setLabel(root, "Telescope model settings (NEW)");
+    setLabel(root, "Telescope model settings");
     group = root;
 
     k = root + "/input_directory";

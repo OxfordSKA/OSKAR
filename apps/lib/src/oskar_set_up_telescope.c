@@ -147,7 +147,7 @@ static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* 
         telescope->station[i].station_type = settings->telescope.station_type;
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
-        telescope->station[i].evaluate_array_factor = settings->telescope.aperture_array.array_pattern.enable;
+        telescope->station[i].enable_array_pattern = settings->telescope.aperture_array.array_pattern.enable;
         telescope->station[i].normalise_beam = settings->telescope.aperture_array.array_pattern.normalise;
         telescope->station[i].gaussian_beam_fwhm_deg = settings->telescope.gaussian_beam.fwhm_deg;
     }

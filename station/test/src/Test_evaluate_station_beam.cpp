@@ -26,6 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
+
 #include "station/test/Test_evaluate_station_beam.h"
 
 #include "oskar_global.h"
@@ -101,6 +103,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_cpu.dec0_rad = M_PI_2;
 
     // Set the station meta-data.
+    station_cpu.element_pattern->type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
 
     //    error = oskar_station_model_save_configuration("temp_test_station.txt", &station_cpu);
 //    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
@@ -156,6 +159,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
             beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
             &l_gpu, &m_gpu, &n_gpu,
             &n_gpu, &work, &curand_state, &error);
+    cudaDeviceSynchronize();
     TIMER_STOP("Finished station beam (2D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     station_gpu.array_is_3d = 1;
@@ -164,6 +168,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
             beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
             &l_gpu, &m_gpu, &n_gpu,
             &n_gpu, &work, &curand_state, &error);
+    cudaDeviceSynchronize();
     TIMER_STOP("Finished station beam (3D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 

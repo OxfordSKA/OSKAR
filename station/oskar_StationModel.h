@@ -88,7 +88,7 @@ struct OSKAR_EXPORT oskar_StationModel
     double ra0_rad;              /**< Right ascension of beam phase centre, in radians. */
     double dec0_rad;             /**< Declination of beam phase centre, in radians. */
     int normalise_beam;          /**< True if the station beam should be normalised by the number of antennas. */
-    int evaluate_array_factor;   /**< True if the array factor should be evaluated. */
+    int enable_array_pattern;   /**< True if the array factor should be evaluated. */
     /*int evaluate_element_factor; True if the element pattern should be evaluated. */
 
     double gaussian_beam_fwhm_deg; /**< FWHM of gaussian station beam, only used

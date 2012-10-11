@@ -66,13 +66,10 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         oskar_Mem *E_ptr = 0, *G_ptr = 0;
 
         /* Evaluate E if required. */
-        if (station->evaluate_array_factor)
+        if (station->enable_array_pattern)
         {
             /* Get pointer to E. */
-            if (oskar_mem_is_scalar(beam->type))
-                E_ptr = beam; /* Use memory passed to the function. */
-            else
-                E_ptr = &work->E; /* Use work buffer. */
+            E_ptr = (oskar_mem_is_scalar(beam->type) ? beam : &work->E);
 
             /* Evaluate array factor. */
             oskar_evaluate_array_pattern(E_ptr, station,
@@ -85,16 +82,20 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         }
 
         /* Get pointer to G. */
-        if (oskar_mem_is_matrix(beam->type))
-            G_ptr = beam; /* Use memory passed to the function. */
-        else
-            G_ptr = &work->G; /* Use work buffer. */
+        if (!(station->element_pattern->type == OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC &&
+                station->element_pattern->taper_type == OSKAR_ELEMENT_MODEL_TAPER_NONE))
+        {
+            if (station->element_pattern->type != OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC)
+                G_ptr = (oskar_mem_is_matrix(beam->type) ? beam : &work->G_matrix);
+            else
+                G_ptr = (!E_ptr ? beam : &work->G_scalar);
 
-        /* Evaluate element factor. */
-        oskar_element_model_evaluate(station->element_pattern,
-                G_ptr, station->orientation_x, station->orientation_y,
-                num_points, x, y, z, &work->theta_modified,
-                &work->phi_modified, status);
+            /* Evaluate element factor. */
+            oskar_element_model_evaluate(station->element_pattern,
+                    G_ptr, station->orientation_x, station->orientation_y,
+                    num_points, x, y, z, &work->theta_modified,
+                    &work->phi_modified, status);
+        }
 
         /* Element-wise multiply to join E and G. */
         if (E_ptr && G_ptr)
@@ -110,13 +111,12 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         }
     }
 
-
     /* Different element model per detector in the station */
     /* Can't separate E and G evaluation */
     else /* (!station->single_element_model) */
     {
         /* With unique detector elements: E and G are not separable. */
-        if (!station->evaluate_array_factor)
+        if (!station->enable_array_pattern)
             *status = OSKAR_ERR_SETTINGS;
 
         /* FIXME logic here is a bit messy... */
