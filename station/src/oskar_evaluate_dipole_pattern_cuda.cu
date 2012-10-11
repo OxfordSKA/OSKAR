@@ -39,41 +39,35 @@ extern "C" {
 
 /* Single precision. */
 void oskar_evaluate_dipole_pattern_cuda_f(int num_points,
-        const float* d_theta, const float* d_phi, int cos_power,
-        float gaussian_fwhm_rad, int return_x_dipole,
+        const float* d_theta, const float* d_phi, int return_x_dipole,
         float4c* d_pattern)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_points + num_threads - 1) / num_threads;
     oskar_evaluate_dipole_pattern_cudak_f
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
-            cos_power, gaussian_fwhm_rad, return_x_dipole, d_pattern);
+            return_x_dipole, d_pattern);
 }
 
 /* Double precision. */
 void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
-        const double* d_theta, const double* d_phi, int cos_power,
-        double gaussian_fwhm_rad, int return_x_dipole,
+        const double* d_theta, const double* d_phi, int return_x_dipole,
         double4c* d_pattern)
 {
     int num_blocks, num_threads = 256;
     num_blocks = (num_points + num_threads - 1) / num_threads;
     oskar_evaluate_dipole_pattern_cudak_d
     OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points, d_theta, d_phi,
-            cos_power, gaussian_fwhm_rad, return_x_dipole, d_pattern);
+            return_x_dipole, d_pattern);
 }
 
 
 /* Kernels. ================================================================ */
 
-#define M_2_SQRT_2LN2  2.35482004503094938202
-#define M_2_SQRT_2LN2f 2.35482004503094938202f
-
 /* Single precision. */
 __global__
 void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
-        const float* theta, const float* phi, const int cos_power,
-        const float gaussian_fwhm_rad, const int return_x_dipole,
+        const float* theta, const float* phi, const int return_x_dipole,
         float4c* pattern)
 {
     float theta_c, sin_phi, cos_phi, cos_theta, e_theta, e_phi;
@@ -90,25 +84,6 @@ void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
     /* Evaluate vectors e_theta and e_phi in x-direction at source position. */
     e_theta = cos_theta * cos_phi;
     e_phi = -sin_phi;
-
-    /* Modify by cosine tapering function if required. */
-    if (cos_power > 0)
-    {
-        float f;
-        f = (cos_power > 1) ? powf(cos_theta, cos_power) : cos_theta;
-        e_theta *= f;
-        e_phi *= f;
-    }
-
-    /* Modify by Gaussian tapering function if required. */
-    if (gaussian_fwhm_rad > 0.0f)
-    {
-        float sigma, f;
-        sigma = gaussian_fwhm_rad / M_2_SQRT_2LN2f;
-        f = expf(theta_c * theta_c / (2.0f * sigma * sigma));
-        e_theta *= f;
-        e_phi *= f;
-    }
 
     /* Store components. */
     if (return_x_dipole)
@@ -130,8 +105,7 @@ void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
 /* Double precision. */
 __global__
 void oskar_evaluate_dipole_pattern_cudak_d(const int num_points,
-        const double* theta, const double* phi, const int cos_power,
-        const double gaussian_fwhm_rad, const int return_x_dipole,
+        const double* theta, const double* phi, const int return_x_dipole,
         double4c* pattern)
 {
     double theta_c, sin_phi, cos_phi, cos_theta, e_theta, e_phi;
@@ -148,25 +122,6 @@ void oskar_evaluate_dipole_pattern_cudak_d(const int num_points,
     /* Evaluate vectors e_theta and e_phi in x-direction at source position. */
     e_theta = cos_theta * cos_phi;
     e_phi = -sin_phi;
-
-    /* Modify by cosine tapering function if required. */
-    if (cos_power > 0)
-    {
-        double f;
-        f = (cos_power > 1) ? pow(cos_theta, cos_power) : cos_theta;
-        e_theta *= f;
-        e_phi *= f;
-    }
-
-    /* Modify by Gaussian tapering function if required. */
-    if (gaussian_fwhm_rad > 0.0)
-    {
-        double sigma, f;
-        sigma = gaussian_fwhm_rad / M_2_SQRT_2LN2;
-        f = exp(theta_c * theta_c / (2.0 * sigma * sigma));
-        e_theta *= f;
-        e_phi *= f;
-    }
 
     /* Store components. */
     if (return_x_dipole)

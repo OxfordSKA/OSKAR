@@ -63,15 +63,13 @@ extern "C" {
  * @param[out] pattern           Array of output Jones matrices per source.
  * @param[in] theta              Source position (modified) theta values in rad.
  * @param[in] phi                Source position (modified) phi values in rad.
- * @param[in] cos_power          Power of cosine taper (use 0 if none).
- * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[in,out] status         Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
-        const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
-        double gaussian_fwhm_rad, int return_x_dipole, int* status);
+        const oskar_Mem* theta, const oskar_Mem* phi, int return_x_dipole,
+        int* status);
 
 #ifdef __cplusplus
 }

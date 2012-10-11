@@ -38,8 +38,8 @@ extern "C" {
 
 /* Wrapper. */
 void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
-        const oskar_Mem* theta, const oskar_Mem* phi, int cos_power,
-        double gaussian_fwhm_rad, int return_x_dipole, int* status)
+        const oskar_Mem* theta, const oskar_Mem* phi, int return_x_dipole,
+        int* status)
 {
     int type, location;
 
@@ -82,15 +82,13 @@ void oskar_evaluate_dipole_pattern(oskar_Mem* pattern, int num_points,
         {
             oskar_evaluate_dipole_pattern_cuda_f(num_points,
                     (const float*)theta->data, (const float*)phi->data,
-                    cos_power, gaussian_fwhm_rad, return_x_dipole,
-                    (float4c*)pattern->data);
+                    return_x_dipole, (float4c*)pattern->data);
         }
         else if (type == OSKAR_DOUBLE)
         {
             oskar_evaluate_dipole_pattern_cuda_d(num_points,
                     (const double*)theta->data, (const double*)phi->data,
-                    cos_power, gaussian_fwhm_rad, return_x_dipole,
-                    (double4c*)pattern->data);
+                    return_x_dipole, (double4c*)pattern->data);
         }
         oskar_cuda_check_error(status);
 #else

@@ -34,7 +34,6 @@
  */
 
 #include "oskar_global.h"
-#include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
@@ -46,7 +45,7 @@ extern "C" {
  * Function to blank sources below the horizon using CUDA (single precision).
  *
  * @details
- * This CUDA kernel sets individual Jones scalars to zero for those
+ * This CUDA function sets individual Jones scalars to zero for those
  * sources that are below the horizon.
  *
  * For sources where the mask value is negative, the corresponding element
@@ -67,7 +66,7 @@ void oskar_blank_below_horizon_scalar_cuda_f(float2* d_jones,
  * Function to blank sources below the horizon using CUDA (single precision).
  *
  * @details
- * This CUDA kernel sets individual Jones matrices to zero for those
+ * This CUDA function sets individual Jones matrices to zero for those
  * sources that are below the horizon.
  *
  * For sources where the mask value is negative, the corresponding element
@@ -88,7 +87,7 @@ void oskar_blank_below_horizon_matrix_cuda_f(float4c* d_jones,
  * Function to blank sources below the horizon using CUDA (double precision).
  *
  * @details
- * This CUDA kernel sets individual Jones scalars to zero for those
+ * This CUDA function sets individual Jones scalars to zero for those
  * sources that are below the horizon.
  *
  * For sources where the mask value is negative, the corresponding element
@@ -109,7 +108,7 @@ void oskar_blank_below_horizon_scalar_cuda_d(double2* d_jones,
  * Function to blank sources below the horizon using CUDA (double precision).
  *
  * @details
- * This CUDA kernel sets individual Jones matrices to zero for those
+ * This CUDA function sets individual Jones matrices to zero for those
  * sources that are below the horizon.
  *
  * For sources where the mask value is negative, the corresponding element

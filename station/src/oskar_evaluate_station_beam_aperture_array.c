@@ -82,7 +82,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
             /* Normalise array beam if required. */
             if (station->normalise_beam)
                 oskar_mem_scale_real(E_ptr, 1.0/station->num_elements, status);
-            if (*status) return;
         }
 
         /* Evaluate G if required. */
@@ -95,12 +94,11 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
                 G_ptr = &work->G; /* Use work buffer. */
 
             /* Evaluate element factor. */
-            *status = oskar_element_model_evaluate(station->element_pattern,
+            oskar_element_model_evaluate(station->element_pattern,
                     G_ptr, station->use_polarised_elements,
                     station->orientation_x, station->orientation_y,
                     num_points, x, y, z, &work->theta_modified,
-                    &work->phi_modified);
-            if (*status) return;
+                    &work->phi_modified, status);
         }
 
         /* Element-wise multiply to join E and G. */
@@ -129,16 +127,10 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     {
         /* With unique detector elements: E and G are not separable. */
         if (!(station->evaluate_array_factor && station->evaluate_element_factor))
-        {
             *status = OSKAR_ERR_SETTINGS;
-            return;
-        }
 
         if (!station->use_polarised_elements)
-        {
             *status = OSKAR_ERR_SETTINGS;
-            return;
-        }
 
         /* FIXME logic here is a bit messy... */
         if (!station->element_pattern->theta_re_x.coeff.data)
@@ -157,7 +149,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         {
             /* Unique spline patterns: not implemented. */
             *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
-            return;
         }
     }
 

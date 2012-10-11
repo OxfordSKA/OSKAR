@@ -3,6 +3,10 @@
 #
 
 set(station_SRC
+    src/oskar_apply_element_taper_cosine_cuda.cu
+    src/oskar_apply_element_taper_cosine.c
+    src/oskar_apply_element_taper_gaussian_cuda.cu
+    src/oskar_apply_element_taper_gaussian.c
     src/oskar_blank_below_horizon_cuda.cu
     src/oskar_blank_below_horizon.c
     src/oskar_element_model_copy.c

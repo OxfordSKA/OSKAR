@@ -60,18 +60,13 @@ extern "C" {
  * @param[in]      n Pointer to n-direction cosines.
  * @param[out] theta Pointer to work array for computing theta values.
  * @param[out] phi   Pointer to work array for computing phi values.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
+void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
         int use_polarised, double orientation_x, double orientation_y,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_Mem* theta, oskar_Mem* phi);
+        const oskar_Mem* n, oskar_Mem* theta, oskar_Mem* phi, int* status);
 
 #ifdef __cplusplus
 }

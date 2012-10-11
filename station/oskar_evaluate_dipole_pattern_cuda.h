@@ -67,15 +67,12 @@ extern "C" {
  * @param[in] num_points         Number of points.
  * @param[in] d_theta            Source position (modified) theta values in rad.
  * @param[in] d_phi              Source position (modified) phi values in rad.
- * @param[in] cos_power          Power of cosine taper (use 0 if none).
- * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] d_pattern         Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
 void oskar_evaluate_dipole_pattern_cuda_f(int num_points,
-        const float* d_theta, const float* d_phi, int cos_power,
-        float gaussian_fwhm_rad, int return_x_dipole,
+        const float* d_theta, const float* d_phi, int return_x_dipole,
         float4c* d_pattern);
 
 /**
@@ -104,15 +101,12 @@ void oskar_evaluate_dipole_pattern_cuda_f(int num_points,
  * @param[in] num_points         Number of points.
  * @param[in] d_theta            Source position (modified) theta values in rad.
  * @param[in] d_phi              Source position (modified) phi values in rad.
- * @param[in] cos_power          Power of cosine taper (use 0 if none).
- * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] d_pattern         Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
 void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
-        const double* d_theta, const double* d_phi, int cos_power,
-        double gaussian_fwhm_rad, int return_x_dipole,
+        const double* d_theta, const double* d_phi, int return_x_dipole,
         double4c* d_pattern);
 
 #ifdef __CUDACC__
@@ -140,16 +134,13 @@ void oskar_evaluate_dipole_pattern_cuda_d(int num_points,
  * @param[in] num_points         Number of points.
  * @param[in] theta              Source position (modified) theta values in rad.
  * @param[in] phi                Source position (modified) phi values in rad.
- * @param[in] cos_power          Power of cosine taper (use 0 if none).
- * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
 __global__
 void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
-        const float* theta, const float* phi, const int cos_power,
-        const float gaussian_fwhm_rad, const int return_x_dipole,
+        const float* theta, const float* phi, const int return_x_dipole,
         float4c* pattern);
 
 /**
@@ -175,16 +166,13 @@ void oskar_evaluate_dipole_pattern_cudak_f(const int num_points,
  * @param[in] num_points         Number of points.
  * @param[in] theta              Source position (modified) theta values in rad.
  * @param[in] phi                Source position (modified) phi values in rad.
- * @param[in] cos_power          Power of cosine taper (use 0 if none).
- * @param[in] gaussian_fwhm_rad  Gaussian FWHM of taper (use 0 if none).
  * @param[in] return_x_dipole    If true, return X dipole; else return Y dipole.
  * @param[out] pattern           Array of output Jones matrices per source.
  */
 OSKAR_EXPORT
 __global__
 void oskar_evaluate_dipole_pattern_cudak_d(const int num_points,
-        const double* theta, const double* phi, const int cos_power,
-        const double gaussian_fwhm_rad, const int return_x_dipole,
+        const double* theta, const double* phi, const int return_x_dipole,
         double4c* pattern);
 
 #endif /* __CUDACC__ */
