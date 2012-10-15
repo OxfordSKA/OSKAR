@@ -150,22 +150,21 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
         {
             oskar_jones_get_station_pointer(&E0, E, 0, status);
             oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, beam_n,
-                    sky->num_sources, OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
-                    &work->hor_x, &work->hor_y,
-                    &work->hor_z, &work->hor_z, work, curand_state, status);
+                    sky->num_sources, OSKAR_BEAM_COORDS_HORIZONTAL,
+                    &work->hor_x, &work->hor_y, &work->hor_z, &work->hor_z,
+                    work, curand_state, status);
             break;
         }
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
             oskar_evaluate_source_relative_lmn(sky->num_sources,
-                    &work->rel_x, &work->rel_y, &work->rel_z, &sky->RA,
+                    &work->rel_l, &work->rel_m, &work->rel_n, &sky->RA,
                     &sky->Dec, station0, status);
             oskar_jones_get_station_pointer(&E0, E, 0, status);
             oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, beam_n,
-                    sky->num_sources, OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ,
-                    &work->rel_x,
-                    &work->rel_y, &work->rel_z, &work->hor_z, work,
-                    curand_state, status);
+                    sky->num_sources, OSKAR_BEAM_COORDS_PHASE_CENTRE,
+                    &work->rel_l, &work->rel_m, &work->rel_n, &work->hor_z,
+                    work, curand_state, status);
             break;
         }
         default:
@@ -221,7 +220,7 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
                 oskar_jones_get_station_pointer(&E_station, E, i, status);
                 oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
                         beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_HORIZONTAL_XYZ, &work->hor_x,
+                        OSKAR_BEAM_COORDS_HORIZONTAL, &work->hor_x,
                         &work->hor_y, &work->hor_z, &work->hor_z, work,
                         curand_state, status);
                 break;
@@ -229,13 +228,13 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
             case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
             {
                 oskar_evaluate_source_relative_lmn(sky->num_sources,
-                        &work->rel_x, &work->rel_y, &work->rel_z, &sky->RA,
+                        &work->rel_l, &work->rel_m, &work->rel_n, &sky->RA,
                         &sky->Dec, station, status);
                 oskar_jones_get_station_pointer(&E_station, E, 0, status);
                 oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
                         beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ, &work->rel_x,
-                        &work->rel_y, &work->rel_z, &work->hor_z, work,
+                        OSKAR_BEAM_COORDS_PHASE_CENTRE, &work->rel_l,
+                        &work->rel_m, &work->rel_n, &work->hor_z, work,
                         curand_state, status);
                 break;
             }
@@ -282,7 +281,7 @@ static void evaluate_E_different_sky(oskar_Jones* E,
                 oskar_jones_get_station_pointer(&E_station, E, i, status);
                 oskar_evaluate_station_beam(&E_station, station, beam_l,
                         beam_m, beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
+                        OSKAR_BEAM_COORDS_HORIZONTAL,
                         &work->hor_x, &work->hor_y, &work->hor_z, &work->hor_z,
                         work, curand_state, status);
                 break;
@@ -290,13 +289,13 @@ static void evaluate_E_different_sky(oskar_Jones* E,
             case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
             {
                 oskar_evaluate_source_relative_lmn(sky->num_sources,
-                        &work->rel_x, &work->rel_y, &work->rel_z, &sky->RA,
+                        &work->rel_l, &work->rel_m, &work->rel_n, &sky->RA,
                         &sky->Dec, station, status);
                 oskar_jones_get_station_pointer(&E_station, E, 0, status);
                 oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
                         beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ, &work->rel_x,
-                        &work->rel_y, &work->rel_z, &work->hor_z, work,
+                        OSKAR_BEAM_COORDS_PHASE_CENTRE, &work->rel_l,
+                        &work->rel_m, &work->rel_n, &work->hor_z, work,
                         curand_state, status);
                 break;
             }

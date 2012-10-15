@@ -46,10 +46,9 @@
  */
 struct OSKAR_EXPORT oskar_ElementModel
 {
-    int use_numerical; /**< Use numerical rather than functional pattern if set. */
     int type; /**< Geometric dipole or isotropic. */
     int taper_type; /**< Tapering type. */
-    int cos_power; /**< For a cosine taper, the power of the cosine. */
+    double cos_power; /**< For a cosine taper, the power of the cosine. */
     double gaussian_fwhm_rad; /**< For a Gaussian taper, the FWHM in radians. */
     oskar_Mem filename_x;
     oskar_Mem filename_y;

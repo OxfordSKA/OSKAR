@@ -249,19 +249,19 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 {
                     oskar_evaluate_station_beam(&beam_pattern, station,
                             beam_l, beam_m, beam_n, num_pixels,
-                            OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
+                            OSKAR_BEAM_COORDS_HORIZONTAL,
                             &work.hor_x, &work.hor_y, &work.hor_z,
                             &work.hor_z, &work, &curand_state, &err);
                 }
                 else if (station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
                 {
                     oskar_evaluate_source_relative_lmn(num_pixels,
-                            &work.rel_x, &work.rel_y, &work.rel_z,
+                            &work.rel_l, &work.rel_m, &work.rel_n,
                             &RA, &Dec, station, &err);
                     oskar_evaluate_station_beam(&beam_pattern, station,
                             beam_l, beam_m, beam_n, num_pixels,
-                            OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ,
-                            &work.rel_x, &work.rel_y, &work.rel_z,
+                            OSKAR_BEAM_COORDS_PHASE_CENTRE,
+                            &work.rel_l, &work.rel_m, &work.rel_n,
                             &work.hor_z, &work, &curand_state, &err);
                 }
                 else

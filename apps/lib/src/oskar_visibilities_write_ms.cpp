@@ -31,6 +31,7 @@
 #include "apps/lib/oskar_remove_dir.h"
 #include "interferometry/oskar_Visibilities.h"
 #include "utility/oskar_log_message.h"
+#include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_vector_types.h"
 #include "ms/oskar_MeasurementSet.h"
 
@@ -138,7 +139,7 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
     }
 
     // Add visibilities and u,v,w coordinates.
-    if (vis->amplitude.is_double())
+    if (oskar_mem_is_double(vis->amplitude.type))
     {
         double2* amp_tb = (double2*)malloc(num_channels * num_pols * sizeof(double2));
         for (int t = 0; t < num_times; ++t)
@@ -191,7 +192,7 @@ int oskar_visibilities_write_ms(const oskar_Visibilities* vis, oskar_Log* log,
         }
         free(amp_tb);
     }
-    else if (vis->amplitude.is_single())
+    else if (oskar_mem_is_single(vis->amplitude.type))
     {
         float2* amp_tb = (float2*)malloc(num_channels * num_pols * sizeof(float2));
         for (int t = 0; t < num_times; ++t)

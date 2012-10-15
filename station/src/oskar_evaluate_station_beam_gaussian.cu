@@ -47,8 +47,7 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
         double fwhm_deg, int* status)
 {
-    int type, location;
-    int i;
+    int i, type, location;
 
     /* Check all inputs. */
     if (!beam || !l || !m || !status)
@@ -90,13 +89,11 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
     /* Get location and check consistency. */
     location = beam->location;
     if (location != l->location || location != m->location)
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
 
     /* Check that length of input arrays are consistent. */
     if (l->num_elements < num_points || m->num_elements < num_points)
-    {
         *status = OSKAR_ERR_DIMENSION_MISMATCH;
-    }
 
     /* Resize output array if needed. */
     if (beam->num_elements < num_points)
@@ -176,7 +173,6 @@ void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
                 }
             }
         }
-
     }
     /* GPU version. */
     else

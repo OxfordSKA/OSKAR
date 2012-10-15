@@ -45,10 +45,9 @@ void oskar_element_model_init(oskar_ElementModel* data, int type, int location,
     }
 
     /* Initialise variables. */
-    data->use_numerical = 0;
     data->type = OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE;
     data->taper_type = OSKAR_ELEMENT_MODEL_TAPER_NONE;
-    data->cos_power = 0;
+    data->cos_power = 0.0;
     data->gaussian_fwhm_rad = 0.0;
 
     /* Check type. */

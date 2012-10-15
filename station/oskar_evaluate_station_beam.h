@@ -45,8 +45,8 @@ extern "C" {
 
 enum OSKAR_STATION_BEAM_COORD_TYPE
 {
-    OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
-    OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ
+    OSKAR_BEAM_COORDS_HORIZONTAL,
+    OSKAR_BEAM_COORDS_PHASE_CENTRE
 };
 typedef enum OSKAR_STATION_BEAM_COORD_TYPE oskar_station_beam_coord_type;
 
@@ -56,10 +56,6 @@ typedef enum OSKAR_STATION_BEAM_COORD_TYPE oskar_station_beam_coord_type;
  * to the E-Jones matrices for a given station.
  *
  * @details
- * The station beam amplitudes are evaluated using a DFT on the GPU, so
- * all memory passed to and returned from this function must be allocated
- * on the device.
- *
  * The detailed description of processing performed by this function will
  * depend on the presence of element pattern and hierarchical layout information
  * within the station structure.
@@ -67,33 +63,32 @@ typedef enum OSKAR_STATION_BEAM_COORD_TYPE oskar_station_beam_coord_type;
  * Note:
  * - Station x,y,z coordinates used by this function are assumed to be in
  * radians (i.e. pre-multiplied by the wavenumber).
- * - The \p weights buffer must be allocated on the GPU of complex type
- * matching the same floating point precision as the rest of the memory
- * passed to the function.
- * - Horizontal n (\p hor_n) coordinates are used to remove sources below the
- * horizon (i.e. where n < 0).
+ * - Mask (\p horizon_mask) values are used to remove sources below the horizon
+ * (i.e. where the value is less than 0).
  *
- * @param[out] EG            Array of station complex beam amplitudes returned.
+ * @param[out] beam          Array of station complex beam amplitudes returned.
  * @param[in]  station       Station model structure.
- * @param[in]  l_beam        Beam phase centre horizontal l (component along x).
- * @param[in]  m_beam        Beam phase centre horizontal m (component along y).
- * @param[in]  n_beam        Beam phase centre horizontal n (component along z).
+ * @param[in]  beam_x        Beam phase centre x-coordinate.
+ * @param[in]  beam_y        Beam phase centre y-coordinate.
+ * @param[in]  beam_z        Beam phase centre z-coordinate.
  * @param[in]  num_points    Number of points at which to evaluate beam.
- * @param[in]  l             Array of horizontal l directions for which the beam
- *                           should be evaluated (component along x).
- * @param[in]  m             Array of horizontal m directions for which the beam
- *                           should be evaluated (component along y).
- * @param[in]  n             Array of horizontal m directions for which the beam
- *                           should be evaluated (component along z).
+ * @param[in] coord_type     Coordinate type enumerator.
+ * @param[in]  x             Array of direction cosines along x for which the
+ *                           beam should be evaluated.
+ * @param[in]  y             Array of direction cosines along y for which the
+ *                           beam should be evaluated.
+ * @param[in]  z             Array of direction cosines along z for which the
+ *                           beam should be evaluated.
+ * @param[in]  horizon_mask  Array of source horizon mask values
+ *                           (values > 0 mean the source is above the horizon).
  * @param[in]  work          Pointer to a work buffer.
  * @param[in]  curand_states Structure holding a set of curand states.
- *
- * @return An error code.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
-        double beam_z, int num_points, oskar_station_beam_coord_type type,
+        double beam_z, int num_points, oskar_station_beam_coord_type coord_type,
         const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
         const oskar_Mem* horizon_mask, oskar_WorkStationBeam* work,
         oskar_CurandState* curand_states, int* status);

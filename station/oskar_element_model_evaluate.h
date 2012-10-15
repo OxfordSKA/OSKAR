@@ -49,16 +49,16 @@ extern "C" {
  * This function evaluates the element pattern model at the given source
  * positions.
  *
- * @param[in] model  Pointer to element model structure.
- * @param[in,out]  G Pointer to memory into which to accumulate output data.
+ * @param[in] model      Pointer to element model structure.
+ * @param[in,out] output Pointer to memory into which to accumulate output data.
  * @param[in] orientation_x Azimuth of X dipole in radians.
  * @param[in] orientation_y Azimuth of Y dipole in radians.
- * @param[in]  num_points    Number of points at which to evaluate beam.
- * @param[in]      l Pointer to l-direction cosines.
- * @param[in]      m Pointer to m-direction cosines.
- * @param[in]      n Pointer to n-direction cosines.
- * @param[out] theta Pointer to work array for computing theta values.
- * @param[out] phi   Pointer to work array for computing phi values.
+ * @param[in] num_points Number of points at which to evaluate beam.
+ * @param[in] l          Pointer to l-direction cosines.
+ * @param[in] m          Pointer to m-direction cosines.
+ * @param[in] n          Pointer to n-direction cosines.
+ * @param[out] theta     Pointer to work array for computing theta values.
+ * @param[out] phi       Pointer to work array for computing phi values.
  * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT

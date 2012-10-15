@@ -35,11 +35,7 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
-#include <stdlib.h>
-
-#ifdef __cplusplus
-#include "utility/oskar_Log.h"
-#endif
+#include "utility/oskar_mem_type_check.h"
 
 /**
  * @brief Structure to hold visibility data.
@@ -164,7 +160,7 @@ struct OSKAR_EXPORT oskar_Visibilities
      * @brief Returns the number of polarisations for each visibility sample.
      */
     int num_polarisations() const
-    { return amplitude.is_scalar() ? 1 : 4; }
+    { return oskar_mem_is_scalar(amplitude.type) ? 1 : 4; }
 #endif
 };
 

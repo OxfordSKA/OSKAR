@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utility/oskar_mem_all_headers.h"
-#include <cstdlib>
+#include "utility/oskar_Mem.h"
+#include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
 
 oskar_Mem::oskar_Mem(int owner_)
 {
@@ -56,34 +58,4 @@ oskar_Mem::~oskar_Mem()
     int err = 0;
     oskar_mem_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_Mem::is_double() const
-{
-    return oskar_mem_is_double(this->type);
-}
-
-int oskar_Mem::is_single() const
-{
-    return oskar_mem_is_single(this->type);
-}
-
-int oskar_Mem::is_complex() const
-{
-    return oskar_mem_is_complex(this->type);
-}
-
-int oskar_Mem::is_real() const
-{
-    return oskar_mem_is_real(this->type);
-}
-
-int oskar_Mem::is_scalar() const
-{
-    return oskar_mem_is_scalar(this->type);
-}
-
-int oskar_Mem::is_matrix() const
-{
-    return oskar_mem_is_matrix(this->type);
 }

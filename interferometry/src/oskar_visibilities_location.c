@@ -46,7 +46,7 @@ int oskar_visibilities_is_location(const oskar_Visibilities* vis, int location)
 
 int oskar_visibilities_location(const oskar_Visibilities* vis)
 {
-    if (vis == NULL)
+    if (!vis)
         return OSKAR_ERR_INVALID_ARGUMENT;
 
     if (oskar_visibilities_is_location(vis, OSKAR_LOCATION_CPU))

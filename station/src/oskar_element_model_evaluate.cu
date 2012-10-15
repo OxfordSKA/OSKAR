@@ -27,10 +27,13 @@
  */
 
 #include "math/oskar_spline_data_evaluate.h"
+#include "station/oskar_apply_element_taper_cosine.h"
+#include "station/oskar_apply_element_taper_gaussian.h"
 #include "station/oskar_element_model_evaluate.h"
 #include "station/oskar_evaluate_dipole_pattern.h"
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_mem_realloc.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include "utility/oskar_cuda_check_error.h"
 
 #define PIf 3.14159265358979323846f
@@ -175,13 +178,15 @@ void oskar_hor_lmn_to_modified_theta_phi(oskar_Mem* theta, oskar_Mem* phi,
     }
 }
 
-void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
-        double orientation_x, double orientation_y, int num_points,
-        const oskar_Mem* l, const oskar_Mem* m, const oskar_Mem* n,
-        oskar_Mem* theta, oskar_Mem* phi, int* status)
+void oskar_element_model_evaluate(const oskar_ElementModel* model,
+        oskar_Mem* output, double orientation_x, double orientation_y,
+        int num_points, const oskar_Mem* l, const oskar_Mem* m,
+        const oskar_Mem* n, oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
+    int spline_x = 0, spline_y = 0;
+
     /* Check all inputs. */
-    if (!model || !G || !l || !m || !n || !theta || !phi || !status)
+    if (!model || !output || !l || !m || !n || !theta || !phi || !status)
     {
         oskar_set_invalid_argument(status);
         return;
@@ -190,8 +195,14 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    /* Check if spline data is present for x or y dipole. */
+    spline_x = model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
+            model->phi_re_x.coeff.data && model->phi_im_x.coeff.data;
+    spline_y = model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
+            model->phi_re_y.coeff.data && model->phi_im_y.coeff.data;
+
     /* Check that the output array is complex. */
-    if (!oskar_mem_is_complex(G->type))
+    if (!oskar_mem_is_complex(output->type))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Ensure there is enough space in the theta and phi work arrays. */
@@ -201,17 +212,23 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
         oskar_mem_realloc(phi, num_points, status);
 
     /* Resize output array if required. */
-    if (G->num_elements < num_points)
-        oskar_mem_realloc(G, num_points, status);
+    if (output->num_elements < num_points)
+        oskar_mem_realloc(output, num_points, status);
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check if element type is isotropic. */
+    if (model->type == OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC)
+        oskar_mem_set_value_real(output, 1.0, status);
 
     /* Evaluate polarised response if output array is matrix type. */
-    if (oskar_mem_is_matrix(G->type))
+    if (oskar_mem_is_matrix(output->type))
     {
         double delta_phi_x, delta_phi_y;
 
         /* Check if spline data present for dipole X. */
-        if (model->theta_re_x.coeff.data && model->theta_im_x.coeff.data &&
-                model->phi_re_x.coeff.data && model->phi_im_x.coeff.data)
+        if (spline_x)
         {
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_x = PI/2 - orientation_x;
@@ -219,16 +236,16 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
                     delta_phi_x, num_points, l, m, n, status);
 
             /* Evaluate spline pattern for dipole X. */
-            oskar_spline_data_evaluate(G, 0, 8, &model->theta_re_x,
+            oskar_spline_data_evaluate(output, 0, 8, &model->theta_re_x,
                     num_points, theta, phi, status);
-            oskar_spline_data_evaluate(G, 1, 8, &model->theta_im_x,
+            oskar_spline_data_evaluate(output, 1, 8, &model->theta_im_x,
                     num_points, theta, phi, status);
-            oskar_spline_data_evaluate(G, 2, 8, &model->phi_re_x,
+            oskar_spline_data_evaluate(output, 2, 8, &model->phi_re_x,
                     num_points, theta, phi, status);
-            oskar_spline_data_evaluate(G, 3, 8, &model->phi_im_x,
+            oskar_spline_data_evaluate(output, 3, 8, &model->phi_im_x,
                     num_points, theta, phi, status);
         }
-        else
+        else if (model->type == OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE)
         {
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_x = orientation_x - PI/2; /* TODO check the order. */
@@ -236,30 +253,29 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
                     delta_phi_x, num_points, l, m, n, status);
 
             /* Evaluate dipole pattern for dipole X. */
-            oskar_evaluate_dipole_pattern(G, num_points, theta, phi, 1,
+            oskar_evaluate_dipole_pattern(output, num_points, theta, phi, 1,
                     status);
         }
 
         /* Check if spline data present for dipole Y. */
-        if (model->theta_re_y.coeff.data && model->theta_im_y.coeff.data &&
-                model->phi_re_y.coeff.data && model->phi_im_y.coeff.data)
+        if (spline_y)
         {
-            /* Compute modified theta and phi coordinates for dipole X. */
+            /* Compute modified theta and phi coordinates for dipole Y. */
             delta_phi_y = -orientation_y;
             oskar_hor_lmn_to_modified_theta_phi(theta, phi,
                     delta_phi_y, num_points, l, m, n, status);
 
             /* Evaluate spline pattern for dipole Y. */
-            oskar_spline_data_evaluate(G, 4, 8, &model->theta_re_y,
+            oskar_spline_data_evaluate(output, 4, 8, &model->theta_re_y,
                     num_points, theta, phi, status);
-            oskar_spline_data_evaluate(G, 5, 8, &model->theta_im_y,
+            oskar_spline_data_evaluate(output, 5, 8, &model->theta_im_y,
                     num_points, theta, phi, status);
-            oskar_spline_data_evaluate(G, 6, 8, &model->phi_re_y,
+            oskar_spline_data_evaluate(output, 6, 8, &model->phi_re_y,
                     num_points, theta, phi, status);
-            oskar_spline_data_evaluate(G, 7, 8, &model->phi_im_y,
+            oskar_spline_data_evaluate(output, 7, 8, &model->phi_im_y,
                     num_points, theta, phi, status);
         }
-        else
+        else if (model->type == OSKAR_ELEMENT_MODEL_TYPE_GEOMETRIC_DIPOLE)
         {
             /* Compute modified theta and phi coordinates for dipole X. */
             delta_phi_y = orientation_y - PI/2; /* TODO check the order. */
@@ -267,19 +283,22 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model, oskar_Mem* G,
                     delta_phi_y, num_points, l, m, n, status);
 
             /* Evaluate dipole pattern for dipole Y. */
-            oskar_evaluate_dipole_pattern(G, num_points, theta, phi, 0,
+            oskar_evaluate_dipole_pattern(output, num_points, theta, phi, 0,
                     status);
         }
     }
 
-    /* Evaluate scalar response if output array is scalar type. */
-    else if (oskar_mem_is_scalar(G->type))
+    /* Apply element tapering, if specified. */
+    if (model->taper_type == OSKAR_ELEMENT_MODEL_TAPER_COSINE)
     {
-        /* Not yet implemented. */
-        *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+        oskar_apply_element_taper_cosine(output, num_points,
+                model->cos_power, theta, status);
     }
-    else
-        *status = OSKAR_ERR_BAD_DATA_TYPE;
+    else if (model->taper_type == OSKAR_ELEMENT_MODEL_TAPER_GAUSSIAN)
+    {
+        oskar_apply_element_taper_gaussian(output, num_points,
+                model->gaussian_fwhm_rad, theta, status);
+    }
 }
 
 #ifdef __cplusplus

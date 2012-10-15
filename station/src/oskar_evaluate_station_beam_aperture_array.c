@@ -62,52 +62,47 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     /* Common element model for all detectors in the station. */
     if (station->single_element_model)
     {
-        /* E and G are separable. */
-        oskar_Mem *E_ptr = 0, *G_ptr = 0;
+        /* Array pattern and element pattern are separable. */
+        oskar_Mem *array = 0, *element = 0;
 
-        /* Evaluate E if required. */
+        /* Evaluate array pattern if required. */
         if (station->enable_array_pattern)
         {
-            /* Get pointer to E. */
-            E_ptr = (oskar_mem_is_scalar(beam->type) ? beam : &work->E);
+            /* Get pointer to array pattern. */
+            array = (oskar_mem_is_scalar(beam->type) ? beam : &work->E);
 
             /* Evaluate array factor. */
-            oskar_evaluate_array_pattern(E_ptr, station,
+            oskar_evaluate_array_pattern(array, station,
                     beam_x, beam_y, beam_z, num_points, x, y, z,
                     &work->weights, &work->weights_error, curand_states, status);
 
             /* Normalise array beam if required. */
             if (station->normalise_beam)
-                oskar_mem_scale_real(E_ptr, 1.0/station->num_elements, status);
+                oskar_mem_scale_real(array, 1.0/station->num_elements, status);
         }
 
-        /* Get pointer to G. */
-        if (!(station->element_pattern->type == OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC &&
-                station->element_pattern->taper_type == OSKAR_ELEMENT_MODEL_TAPER_NONE))
-        {
-            if (station->element_pattern->type != OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC)
-                G_ptr = (oskar_mem_is_matrix(beam->type) ? beam : &work->G_matrix);
-            else
-                G_ptr = (!E_ptr ? beam : &work->G_scalar);
+        /* Get pointer to element pattern. */
+        if (station->element_pattern->type != OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC)
+            element = (oskar_mem_is_matrix(beam->type) ? beam : &work->G_matrix);
+        else
+            element = (!array ? beam : &work->G_scalar);
 
-            /* Evaluate element factor. */
-            oskar_element_model_evaluate(station->element_pattern,
-                    G_ptr, station->orientation_x, station->orientation_y,
-                    num_points, x, y, z, &work->theta_modified,
-                    &work->phi_modified, status);
-        }
+        /* Evaluate element factor. */
+        oskar_element_model_evaluate(station->element_pattern,
+                element, station->orientation_x, station->orientation_y,
+                num_points, x, y, z, &work->theta_modified,
+                &work->phi_modified, status);
 
         /* Element-wise multiply to join E and G. */
-        if (E_ptr && G_ptr)
+        if (array && element)
         {
-            /* Use E_ptr and G_ptr. */
-            oskar_mem_element_multiply(beam, E_ptr, G_ptr, num_points, status);
+            oskar_mem_element_multiply(beam, array, element, num_points, status);
         }
-        else if (E_ptr && oskar_mem_is_matrix(beam->type))
+        else if (array && oskar_mem_is_matrix(beam->type))
         {
-            /* Join E with an identity matrix in EG. */
+            /* Join array pattern with an identity matrix in output beam. */
             oskar_mem_set_value_real(beam, 1.0, status);
-            oskar_mem_element_multiply(0, beam, E_ptr, num_points, status);
+            oskar_mem_element_multiply(0, beam, array, num_points, status);
         }
     }
 
@@ -115,15 +110,14 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     /* Can't separate E and G evaluation */
     else /* (!station->single_element_model) */
     {
-        /* With unique detector elements: E and G are not separable. */
+        /* Must evaluate array pattern, so check that this is enabled. */
         if (!station->enable_array_pattern)
             *status = OSKAR_ERR_SETTINGS;
 
-        /* FIXME logic here is a bit messy... */
+        /* Check that there are no spline coefficients. */
         if (!station->element_pattern->theta_re_x.coeff.data)
         {
-            /* Call function to evaluate beam from dipoles that are
-             * oriented differently. */
+            /* Evaluate beam from dipoles that are oriented differently. */
             oskar_evaluate_array_pattern_dipoles(beam, station, beam_x,
                     beam_y, beam_z, num_points, x, y, z, &work->weights,
                     &work->weights_error, curand_states, status);

@@ -62,13 +62,9 @@ struct OSKAR_EXPORT oskar_WorkStationBeam
     oskar_Mem hor_y;          /* Real scalar. */
     oskar_Mem hor_z;          /* Real scalar. */
 
-    oskar_Mem rel_x;          /* Real scalar */
-    oskar_Mem rel_y;
-    oskar_Mem rel_z;
-
-    oskar_Mem l;              /* Real scalar. - TODO THESE dont exist yet... Tangent plane l,m,n */
-    oskar_Mem m;              /* Real scalar. */
-    oskar_Mem n;              /* Real scalar. */
+    oskar_Mem rel_l;          /* Real scalar */
+    oskar_Mem rel_m;          /* Real scalar. */
+    oskar_Mem rel_n;          /* Real scalar. */
 
     oskar_Mem theta_modified; /* Real scalar. */
     oskar_Mem phi_modified;   /* Real scalar. */

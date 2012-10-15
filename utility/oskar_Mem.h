@@ -51,7 +51,7 @@ struct double4c;
  * or GPU, and defines the type of the data that it points to.
  *
  * In C++, the structure can take ownership of the memory: If the value of the
- * private_owner member variable is set to true, the memory will be released
+ * \p owner variable is set to true, the memory will be released
  * automatically when the structure is deleted.
  */
 struct OSKAR_EXPORT oskar_Mem
@@ -113,13 +113,6 @@ struct OSKAR_EXPORT oskar_Mem
      * then the memory is also freed.
      */
     ~oskar_Mem();
-
-    int is_double() const;
-    int is_single() const;
-    int is_complex() const;
-    int is_real() const;
-    int is_scalar() const;
-    int is_matrix() const;
 
     /* Convenience pointer casts. */
     operator char*() {return (char*)data;}

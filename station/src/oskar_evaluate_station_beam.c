@@ -55,7 +55,6 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
         int* status);
 
-
 void oskar_evaluate_station_beam(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
         double beam_z, int num_points, oskar_station_beam_coord_type coord_type,
@@ -72,7 +71,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam,
         /* Aperture array station */
         case OSKAR_STATION_TYPE_AA:
         {
-            if (coord_type != OSKAR_BEAM_COORDS_HORIZONTAL_XYZ)
+            if (coord_type != OSKAR_BEAM_COORDS_HORIZONTAL)
                 *status = OSKAR_ERR_SETTINGS_TELESCOPE;
             oskar_evaluate_station_beam_aperture_array(beam, station, beam_x,
                     beam_y, beam_z, num_points, x, y, z, work, curand_states,
@@ -83,7 +82,7 @@ void oskar_evaluate_station_beam(oskar_Mem* beam,
         /* Circular Gaussian beam */
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-            if (coord_type != OSKAR_BEAM_COORDS_PHASE_CENTRE_XYZ)
+            if (coord_type != OSKAR_BEAM_COORDS_PHASE_CENTRE)
                 *status = OSKAR_ERR_SETTINGS_TELESCOPE;
             oskar_evaluate_station_beam_gaussian(beam, num_points, x, y,
                     station->gaussian_beam_fwhm_deg, status);
@@ -115,7 +114,7 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
         int* status)
 {
-    /* Sanity check on inputs. */
+    /* Check all inputs. */
     if (!beam || !station || !x || !y || !z || !horizon_mask || !work ||
             !curand_states || !status)
     {
@@ -123,6 +122,7 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
         return;
     }
 
+    /* Check if safe to proceed. */
     if (*status) return;
 
     /* Check the coordinate units. */
@@ -136,17 +136,6 @@ static void check_inputs(oskar_Mem* beam, const oskar_StationModel* station,
     if (!beam->data || !x->data || !y->data || !z->data)
     {
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
-        return;
-    }
-
-    /* Check that the relevant memory is on the GPU. */
-    if (oskar_station_model_location(station) != OSKAR_LOCATION_GPU ||
-            beam->location != OSKAR_LOCATION_GPU ||
-            x->location != OSKAR_LOCATION_GPU ||
-            y->location != OSKAR_LOCATION_GPU ||
-            z->location != OSKAR_LOCATION_GPU)
-    {
-        *status = OSKAR_ERR_BAD_LOCATION;
         return;
     }
 

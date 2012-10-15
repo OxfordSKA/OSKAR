@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_EVALUATE_STATION_BEAM_GAUSSIAN_H_
 #define OSKAR_EVALUATE_STATION_BEAM_GAUSSIAN_H_
 
@@ -41,28 +40,26 @@
 extern "C" {
 #endif
 
-
 /**
- * @brief Evaluates scalar station beam station beam amplitudes in the form of
- * a circular Gaussian specified by its full width at half maximum, \p fwhm_deg.
+ * @brief
+ * Evaluates a Gaussian station beam.
  *
  * @details
- * FIXME this function will not work with beam normalisation in the GUI...
+ * This function evaluates scalar station beam amplitudes in the form of
+ * a circular Gaussian, specified by its full width at half maximum,
+ * \p fwhm_deg.
  *
- * @param beam
- * @param num_points
- * @param l
- * @param m
- * @param n
- * @param fwhm_deg
- * @param err
- *
- * @return
+ * @param[out] beam       Output beam values.
+ * @param[in] num_points  Number of points at which to evaluate beam.
+ * @param[in] l           Beam l-direction cosines.
+ * @param[in] m           Beam m-direction cosines.
+ * @param[in] fwhm_deg    Gaussian FWHM of beam, in degrees.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam_gaussian(oskar_Mem* beam,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        double fwhm_deg, int* err);
+        double fwhm_deg, int* status);
 
 #ifdef __cplusplus
 }

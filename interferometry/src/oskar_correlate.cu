@@ -27,6 +27,7 @@
  */
 
 #include "sky/oskar_sky_model_location.h"
+#include "sky/oskar_sky_model_type.h"
 #include "interferometry/oskar_correlate.h"
 #include "interferometry/cudak/oskar_cudak_correlator_scalar.h"
 #include "interferometry/cudak/oskar_cudak_correlator.h"
@@ -34,6 +35,7 @@
 #include "interferometry/cudak/oskar_cudak_correlator_time_smearing_extended.h"
 #include "interferometry/cudak/oskar_cudak_correlator_time_smearing.h"
 #include "utility/oskar_cuda_check_error.h"
+#include "utility/oskar_mem_type_check.h"
 #include <stdio.h>
 
 #define C_0 299792458.0
@@ -43,8 +45,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         const oskar_TelescopeModel* telescope, const oskar_SkyModel* sky,
         const oskar_Mem* u, const oskar_Mem* v, double gast, int* status)
 {
-    int location, n_stations, n_sources;
-    bool single_precision = false, double_precision = false;
+    int base_type, location, n_stations, n_sources;
 
     /* Check all inputs. */
     if (!vis || !J || !telescope || !sky || !u || !v || !status)
@@ -68,24 +69,17 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
             u->location != location || v->location != location ||
             telescope->station_x.location != location ||
             telescope->station_y.location != location)
-        *status = OSKAR_ERR_BAD_LOCATION;
+        *status = OSKAR_ERR_LOCATION_MISMATCH;
 
-    /* Check if single precision. */
-    single_precision = (vis->is_single() && J->data.is_single() &&
-            sky->I.is_single() && sky->Q.is_single() && sky->U.is_single() &&
-            sky->V.is_single() && sky->rel_l.is_single() &&
-            sky->rel_m.is_single() && u->is_single() && v->is_single());
-
-    /* If not single precision, check if double precision. */
-    if (!single_precision)
-        double_precision = (vis->is_double() && J->data.is_double() &&
-                sky->I.is_double() && sky->Q.is_double() &&
-                sky->U.is_double() && sky->V.is_double() &&
-                sky->rel_l.is_double() && sky->rel_m.is_double() &&
-                u->is_double() && v->is_double());
+    /* Check for consistent data types. */
+    base_type = oskar_sky_model_type(sky);
+    if (oskar_mem_base_type(vis->type) != base_type ||
+            oskar_mem_base_type(J->data.type) != base_type ||
+            u->type != base_type || v->type != base_type)
+        *status = OSKAR_ERR_TYPE_MISMATCH;
 
     /* If neither single or double precision, return error. */
-    if (!single_precision && !double_precision)
+    if (base_type != OSKAR_SINGLE && base_type != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Check the input dimensions. */
@@ -111,10 +105,10 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
     double gha0 = gast - telescope->ra0_rad;
 
     /* Check type of Jones matrix. */
-    if (J->data.is_matrix() && vis->is_matrix())
+    if (oskar_mem_is_matrix(J->data.type) && oskar_mem_is_matrix(vis->type))
     {
         /* Call the kernel for full polarisation. */
-        if (double_precision)
+        if (base_type == OSKAR_DOUBLE)
         {
             dim3 num_threads(128, 1);
             dim3 num_blocks(n_stations, n_stations);
@@ -164,7 +158,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                 }
             }
         }
-        else
+        else if (base_type == OSKAR_SINGLE)
         {
             dim3 num_threads(128, 1);
             dim3 num_blocks(n_stations, n_stations);
@@ -226,7 +220,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
         }
 
         /* Call the kernel for scalar simulation. */
-        if (double_precision)
+        if (base_type == OSKAR_DOUBLE)
         {
             dim3 num_threads(128, 1);
             dim3 num_blocks(n_stations, n_stations);
@@ -237,7 +231,7 @@ void oskar_correlate(oskar_Mem* vis, const oskar_Jones* J,
                 (n_sources, n_stations, J->data, sky->I, *u, *v, sky->rel_l,
                         sky->rel_m, lambda_bandwidth, *vis);
         }
-        else
+        else if (base_type == OSKAR_SINGLE)
         {
             dim3 num_threads(128, 1);
             dim3 num_blocks(n_stations, n_stations);

@@ -763,8 +763,21 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     // Element pattern settings.
     group = root + "/aperture_array/element_pattern";
     setLabel(group, "Element pattern settings");
+
+    // Element pattern functional type.
+    group = root + "/aperture_array/element_pattern";
+    k = group + "/functional_type";
+    declare(k, "Functional pattern type", QStringList() << "Geometric dipole"
+            << "Isotropic (unpolarised)");
+    setTooltip(k, "The type of functional pattern to apply to the elements, "
+            "if not using a numerically-defined pattern.");
+
+    // Element pattern numerical option.
     QString k_numerical = group + "/enable_numerical";
-    declare(k_numerical, "Enable numerical patterns", oskar_SettingsItem::BOOL, true);
+    declare(k_numerical, "Enable numerical patterns if present", oskar_SettingsItem::BOOL, true);
+    setTooltip(k_numerical, "Make use of any available numerical element "
+            "pattern files. If numerical pattern data are missing, the "
+            "functional type will be used instead.");
 
     // Element pattern fitting parameters.
     group = root + "/aperture_array/element_pattern/fit";
@@ -831,13 +844,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
             "numerical element pattern data, if not searching for a "
             "best fit. Use only if you really know what you're doing!");
 
-    // Element pattern functional type.
-    group = root + "/aperture_array/element_pattern";
-    k = group + "/functional_type";
-    declare(k, "Functional pattern type", QStringList() << "Geometric dipole"
-            << "Isotropic (unpolarised)");
-    setTooltip(k, "The type of functional pattern to apply to the elements, "
-            "if not using a numerically-defined pattern.");
+    // Element tapering options.
     group = root + "/aperture_array/element_pattern/taper";
     setLabel(group, "Tapering options");
     k = group + "/type";

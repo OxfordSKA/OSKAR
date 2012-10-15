@@ -156,7 +156,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_gpu.array_is_3d = 0;
     TIMER_START
     oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
+            beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL,
             &l_gpu, &m_gpu, &n_gpu,
             &n_gpu, &work, &curand_state, &error);
     cudaDeviceSynchronize();
@@ -165,7 +165,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_gpu.array_is_3d = 1;
     TIMER_START
     oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL_XYZ,
+            beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL,
             &l_gpu, &m_gpu, &n_gpu,
             &n_gpu, &work, &curand_state, &error);
     cudaDeviceSynchronize();

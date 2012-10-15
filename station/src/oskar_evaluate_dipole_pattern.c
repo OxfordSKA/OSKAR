@@ -26,9 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
 #include "station/oskar_evaluate_dipole_pattern_cuda.h"
-#include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_cuda_check_error.h"
 
