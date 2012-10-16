@@ -49,7 +49,7 @@ struct OSKAR_EXPORT oskar_StationModel
     int num_elements;            /**< Number of antenna elements in the station. */
 
     /* Station element data. */
-    /*int use_polarised_elements; DEPRECATED Type of receptor element within station (enumerator). */
+    int use_polarised_elements;  /**< Flag set if station elements are polarised. */
     int array_is_3d;             /**< Flag set if array is 3-dimensional (default false). */
     int coord_units;             /**< Units of the x,y,z coordinates. */
     int apply_element_errors;    /**< Bool switch to toggle element gain and phase errors (default false) */

@@ -98,7 +98,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
         oskar_Mem *weights0;
         oskar_ElementModel* element_model0 = NULL;
         oskar_Mem *filename_port1_0 = NULL, *filename_port2_0 = NULL;
-        int station_type0, num_elements0, array_is_3d0;
+        int station_type0, num_elements0, use_polarised_elements0, array_is_3d0;
         int apply_element_errors0, apply_element_weight0, single_element_model0;
         x_weights0 = &(model->station[0].x_weights);
         y_weights0 = &(model->station[0].y_weights);
@@ -115,6 +115,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
         sin_y0 = &(model->station[0].sin_orientation_y);
         station_type0 = model->station[0].station_type;
         num_elements0 = model->station[0].num_elements;
+        use_polarised_elements0 = model->station[0].use_polarised_elements;
         array_is_3d0 = model->station[0].array_is_3d;
         apply_element_errors0 = model->station[0].apply_element_errors;
         apply_element_weight0 = model->station[0].apply_element_weight;
@@ -134,7 +135,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
             oskar_Mem *weights;
             oskar_ElementModel* element_model = NULL;
             oskar_Mem *filename_port1 = NULL, *filename_port2 = NULL;
-            int station_type, num_elements, array_is_3d;
+            int station_type, num_elements, use_polarised_elements, array_is_3d;
             int apply_element_errors, apply_element_weight, single_element_model;
             x_weights = &(model->station[i].x_weights);
             y_weights = &(model->station[i].y_weights);
@@ -151,6 +152,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
             sin_y = &(model->station[i].sin_orientation_y);
             station_type = model->station[i].station_type;
             num_elements = model->station[i].num_elements;
+            use_polarised_elements = model->station[i].use_polarised_elements;
             array_is_3d = model->station[i].array_is_3d;
             apply_element_errors = model->station[i].apply_element_errors;
             apply_element_weight = model->station[i].apply_element_weight;
@@ -165,6 +167,7 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
             /* Check if the meta-data are different. */
             if (station_type != station_type0 ||
                     num_elements != num_elements0 ||
+                    use_polarised_elements != use_polarised_elements0 ||
                     array_is_3d != array_is_3d0 ||
                     apply_element_errors != apply_element_errors0 ||
                     apply_element_weight != apply_element_weight0 ||

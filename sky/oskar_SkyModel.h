@@ -98,31 +98,6 @@ struct OSKAR_EXPORT oskar_SkyModel
     ~oskar_SkyModel();
 
     /**
-     * @brief Filter sources by flux.
-     *
-     * @param min_I Minimum value of Stokes I.
-     * @param max_I Maximum value of Stokes I.
-     *
-     * @return An error code.
-     */
-    int filter_by_flux(double min_I, double max_I);
-
-    /**
-     * @brief This function removes sources from a sky model that lie within
-     * \p inner_radius or beyond \p outer_radius.
-     *
-     * @param[out] sky Pointer to sky model.
-     * @param[in] inner_radius Inner radius in radians.
-     * @param[in] outer_radius Outer radius in radians.
-     * @param[in] ra0 Right ascension of the phase centre in radians.
-     * @param[in] dec0 Declination of the phase centre in radians.
-     *
-     * @return An error code.
-     */
-    int filter_by_radius(double inner_radius, double outer_radius,
-            double ra0, double dec0);
-
-    /**
      * @brief Returns the memory location for memory in the sky structure
      * or error code if the types are inconsistent.
      */

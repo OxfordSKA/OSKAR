@@ -35,6 +35,7 @@
 
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_analyse.h"
+#include "interferometry/oskar_telescope_model_config_override.h"
 #include "utility/oskar_get_error_string.h"
 
 #include "utility/oskar_log_error.h"
@@ -73,13 +74,14 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
     /* Initialise the structure in CPU memory. */
     type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
     oskar_telescope_model_init(telescope, type, OSKAR_LOCATION_CPU, 0, &err);
+    if (err) return err;
 
     /* Load the layout and configuration */
     err = oskar_telescope_model_config_load(telescope, log, &settings->telescope);
     if (err) return err;
 
     /* Apply configuration overrides */
-    err = oskar_telescope_model_config_override(telescope, &settings->telescope);
+    oskar_telescope_model_config_override(telescope, &settings->telescope, &err);
     if (err) return err;
 
     /* Load noise data */
@@ -103,7 +105,7 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
         }
         case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
         {
-            /* NOTE if FWHM files are used in the station model this wont be correct */
+            /* FIXME If FWHM files are used in the station model, this won't be correct. */
             telescope->identical_stations = OSKAR_TRUE;
             break;
         }
@@ -119,7 +121,6 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
     oskar_log_value(log, 1, width, "Num. stations", "%d", telescope->num_stations);
     oskar_log_value(log, 1, width, "Max station size", "%d", telescope->max_station_size);
     oskar_log_value(log, 1, width, "Identical stations", "%s", telescope->identical_stations ? "true" : "false");
-    oskar_log_value(log, 1, width, "Use common sky", "%s", telescope->use_common_sky ? "true" : "false");
 
     /* Save the telescope configuration in a new directory, if required. */
     err = save_telescope(telescope, &settings->telescope, log,
@@ -130,26 +131,32 @@ int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
 }
 
 
-
 static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* settings)
 {
     int i, seed;
+    const oskar_SettingsApertureArray* aa = &settings->telescope.aperture_array;
     telescope->ra0_rad        = settings->obs.ra0_rad;
     telescope->dec0_rad       = settings->obs.dec0_rad;
     telescope->use_common_sky = settings->interferometer.use_common_sky;
     telescope->bandwidth_hz   = settings->interferometer.channel_bandwidth_hz;
     telescope->time_average_sec = settings->interferometer.time_average_sec;
     telescope->wavelength_metres = 0.0; /* This is set on a per-channel basis. */
-    seed = settings->telescope.aperture_array.array_pattern.element.seed_time_variable_errors;
+    seed = aa->array_pattern.element.seed_time_variable_errors;
     telescope->seed_time_variable_station_element_errors = seed;
     for (i = 0; i < telescope->num_stations; ++i)
     {
         telescope->station[i].station_type = settings->telescope.station_type;
         telescope->station[i].ra0_rad = telescope->ra0_rad;
         telescope->station[i].dec0_rad = telescope->dec0_rad;
-        telescope->station[i].enable_array_pattern = settings->telescope.aperture_array.array_pattern.enable;
-        telescope->station[i].normalise_beam = settings->telescope.aperture_array.array_pattern.normalise;
-        telescope->station[i].gaussian_beam_fwhm_deg = settings->telescope.gaussian_beam.fwhm_deg;
+        telescope->station[i].enable_array_pattern =
+                aa->array_pattern.enable;
+        telescope->station[i].normalise_beam =
+                settings->telescope.aperture_array.array_pattern.normalise;
+        telescope->station[i].gaussian_beam_fwhm_deg =
+                settings->telescope.gaussian_beam.fwhm_deg;
+        telescope->station[i].use_polarised_elements =
+                !(aa->element_pattern.functional_type ==
+                        OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC);
     }
 }
 

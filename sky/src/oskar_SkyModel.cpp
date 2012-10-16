@@ -38,7 +38,7 @@ oskar_SkyModel::oskar_SkyModel(int type, int location, int num_sources)
 oskar_SkyModel::oskar_SkyModel(const oskar_SkyModel* other, int location)
 {
     int err = 0;
-    oskar_sky_model_init(this, other->type(), location,
+    oskar_sky_model_init(this, oskar_sky_model_type(other), location,
             other->num_sources, &err);
     oskar_sky_model_copy(this, other, &err);
     if (err) throw err;
@@ -49,18 +49,6 @@ oskar_SkyModel::~oskar_SkyModel()
     int err = 0;
     oskar_sky_model_free(this, &err);
     if (err) throw err;
-}
-
-int oskar_SkyModel::filter_by_flux(double min_I, double max_I)
-{
-    return oskar_sky_model_filter_by_flux(this, min_I, max_I);
-}
-
-int oskar_SkyModel::filter_by_radius(double inner_radius, double outer_radius,
-        double ra0, double dec0)
-{
-    return oskar_sky_model_filter_by_radius(this, inner_radius, outer_radius,
-            ra0, dec0);
 }
 
 int oskar_SkyModel::location() const

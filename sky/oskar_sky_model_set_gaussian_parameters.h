@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef OSKAR_SKY_MODEL_SET_GAUSSIAN_PARAMETERS_H_
 #define OSKAR_SKY_MODEL_SET_GAUSSIAN_PARAMETERS_H_
 
@@ -51,16 +50,16 @@ extern "C" {
  * Note: this function will replace any existing values and should therefore
  * be used with care!
  *
- * @param sky               An OSKAR sky model.
- * @param FWHM_major        Major axis FWHM, in radians.
- * @param FWHM_minor        Minor axis FWHM, in radians.
- * @param position_angle    Position angle, in radians.
- *
- * @return An error code.
+ * @param[in,out] sky           An OSKAR sky model.
+ * @param[in] FWHM_major        Major axis FWHM, in radians.
+ * @param[in] FWHM_minor        Minor axis FWHM, in radians.
+ * @param[in] position_angle    Position angle, in radians.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
-int oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
-        double FWHM_major, double FWHM_minor, double position_angle);
+void oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
+        double FWHM_major, double FWHM_minor, double position_angle,
+        int* status);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +26,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "sky/oskar_sky_model_set_gaussian_parameters.h"
 #include "utility/oskar_mem_set_value_real.h"
-#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
-        double FWHM_major, double FWHM_minor, double position_angle)
+void oskar_sky_model_set_gaussian_parameters(oskar_SkyModel* sky,
+        double FWHM_major, double FWHM_minor, double position_angle,
+        int* status)
 {
-    int error = 0;
+    /* Check all inputs. */
+    if (!sky || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    if (sky == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     if (sky->num_sources > sky->FWHM_major.num_elements ||
             sky->num_sources > sky->FWHM_minor.num_elements ||
             sky->num_sources > sky->position_angle.num_elements)
     {
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
     }
 
-    oskar_mem_set_value_real(&sky->FWHM_major, FWHM_major, &error);
-    oskar_mem_set_value_real(&sky->FWHM_minor, FWHM_minor, &error);
-    oskar_mem_set_value_real(&sky->position_angle, position_angle, &error);
-
-    return error;
+    oskar_mem_set_value_real(&sky->FWHM_major, FWHM_major, status);
+    oskar_mem_set_value_real(&sky->FWHM_minor, FWHM_minor, status);
+    oskar_mem_set_value_real(&sky->position_angle, position_angle, status);
 }
 
 #ifdef __cplusplus

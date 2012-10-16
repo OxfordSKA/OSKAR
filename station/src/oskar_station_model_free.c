@@ -81,6 +81,7 @@ void oskar_station_model_free(oskar_StationModel* model, int* status)
     /* Initialise variables. */
     /* Do NOT set child or num_elements to 0 yet! */
     model->station_type = OSKAR_STATION_TYPE_AA;
+    model->use_polarised_elements = OSKAR_TRUE;
     model->array_is_3d = OSKAR_FALSE;
     model->coord_units = OSKAR_METRES;
     model->apply_element_errors = OSKAR_FALSE;

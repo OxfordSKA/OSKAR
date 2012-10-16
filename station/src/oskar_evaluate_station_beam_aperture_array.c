@@ -69,7 +69,8 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         if (station->enable_array_pattern)
         {
             /* Get pointer to array pattern. */
-            array = (oskar_mem_is_scalar(beam->type) ? beam : &work->E);
+            array = (oskar_mem_is_scalar(beam->type) ?
+                    beam : &work->array_pattern);
 
             /* Evaluate array factor. */
             oskar_evaluate_array_pattern(array, station,
@@ -93,7 +94,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
                 num_points, x, y, z, &work->theta_modified,
                 &work->phi_modified, status);
 
-        /* Element-wise multiply to join E and G. */
+        /* Element-wise multiply to join array and element pattern. */
         if (array && element)
         {
             oskar_mem_element_multiply(beam, array, element, num_points, status);

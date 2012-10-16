@@ -72,7 +72,7 @@ struct OSKAR_EXPORT oskar_WorkStationBeam
     oskar_Mem weights_error;  /* Complex scalar. */
     oskar_Mem G_matrix;       /* Complex matrix. */
     oskar_Mem G_scalar;       /* Complex scalar. */
-    oskar_Mem E;              /* Complex scalar. */
+    oskar_Mem array_pattern;  /* Complex scalar. */
 
     /* TODO cuda random number states could go here...? */
 

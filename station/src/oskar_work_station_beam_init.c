@@ -55,15 +55,16 @@ void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
     oskar_mem_init(&work->rel_l, type, location, 0, 1, status);
     oskar_mem_init(&work->rel_m, type, location, 0, 1, status);
     oskar_mem_init(&work->rel_n, type, location, 0, 1, status);
-    oskar_mem_init(&work->weights, (type | OSKAR_COMPLEX), location, 0, 1,
-            status);
-    oskar_mem_init(&work->weights_error, (type | OSKAR_COMPLEX), location, 0, 1,
-            status);
-    oskar_mem_init(&work->E, (type | OSKAR_COMPLEX), location, 0, 1, status);
-    oskar_mem_init(&work->G_matrix, (type | OSKAR_COMPLEX | OSKAR_MATRIX), location, 0,
-            1, status);
-    oskar_mem_init(&work->G_scalar, (type | OSKAR_COMPLEX), location, 0,
-            1, status);
+    oskar_mem_init(&work->weights, (type | OSKAR_COMPLEX),
+            location, 0, 1, status);
+    oskar_mem_init(&work->weights_error, (type | OSKAR_COMPLEX),
+            location, 0, 1, status);
+    oskar_mem_init(&work->array_pattern, (type | OSKAR_COMPLEX),
+            location, 0, 1, status);
+    oskar_mem_init(&work->G_matrix, (type | OSKAR_COMPLEX | OSKAR_MATRIX),
+            location, 0, 1, status);
+    oskar_mem_init(&work->G_scalar, (type | OSKAR_COMPLEX),
+            location, 0, 1, status);
 }
 
 #ifdef __cplusplus

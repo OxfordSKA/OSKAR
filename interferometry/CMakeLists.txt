@@ -20,6 +20,7 @@ set(interferometry_SRC
     src/oskar_interferometer.c
     src/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.c
     src/oskar_telescope_model_analyse.c
+    src/oskar_telescope_model_config_override.c
     src/oskar_telescope_model_copy.c
     src/oskar_telescope_model_free.c
     src/oskar_telescope_model_init.c
