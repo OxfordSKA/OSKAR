@@ -230,27 +230,31 @@ void oskar_MainWindow::openSettings(QString filename)
         updateRecentFileList();
         view_->restoreExpanded();
 
-        // Check the version of OSKAR that created the file.
-        if (model_->version().isEmpty())
+        // Check the version of OSKAR that created the file, if it exists.
+        if (QFile::exists(filename))
         {
-            QMessageBox msgBox(this);
-            msgBox.setWindowTitle(mainTitle_);
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setText("This file was created by an unknown version of OSKAR.");
-            msgBox.setInformativeText("Please check all settings carefully, "
-                    "as the keys may have changed.");
-            msgBox.exec();
-        }
-        else if (model_->version() != OSKAR_VERSION_STR)
-        {
-            QMessageBox msgBox(this);
-            msgBox.setWindowTitle(mainTitle_);
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setText(QString("This file was created by OSKAR %1.")
-                    .arg(model_->version()));
-            msgBox.setInformativeText("Please check all settings carefully, "
-                    "as the keys may have changed since that version.");
-            msgBox.exec();
+            if (model_->version().isEmpty())
+            {
+                QMessageBox msgBox(this);
+                msgBox.setWindowTitle(mainTitle_);
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("This file was created by an unknown version "
+                        "of OSKAR.");
+                msgBox.setInformativeText("Please check all settings carefully, "
+                        "as the keys may have changed.");
+                msgBox.exec();
+            }
+            else if (model_->version() != OSKAR_VERSION_STR)
+            {
+                QMessageBox msgBox(this);
+                msgBox.setWindowTitle(mainTitle_);
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText(QString("This file was created by OSKAR %1.")
+                        .arg(model_->version()));
+                msgBox.setInformativeText("Please check all settings carefully, "
+                        "as the keys may have changed since that version.");
+                msgBox.exec();
+            }
         }
     }
 }
