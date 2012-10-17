@@ -56,23 +56,19 @@
  */
 struct OSKAR_EXPORT oskar_WorkStationBeam
 {
-    oskar_Mem horizon_mask;   /* Integer. */
+    oskar_Mem horizon_mask;            /* Integer. */
 
-    oskar_Mem hor_x;          /* Real scalar. */
-    oskar_Mem hor_y;          /* Real scalar. */
-    oskar_Mem hor_z;          /* Real scalar. */
+    oskar_Mem hor_x;                   /* Real scalar. */
+    oskar_Mem hor_y;                   /* Real scalar. */
+    oskar_Mem hor_z;                   /* Real scalar. */
 
-    oskar_Mem rel_l;          /* Real scalar */
-    oskar_Mem rel_m;          /* Real scalar. */
-    oskar_Mem rel_n;          /* Real scalar. */
-
-    oskar_Mem theta_modified; /* Real scalar. */
-    oskar_Mem phi_modified;   /* Real scalar. */
-    oskar_Mem weights;        /* Complex scalar. */
-    oskar_Mem weights_error;  /* Complex scalar. */
-    oskar_Mem G_matrix;       /* Complex matrix. */
-    oskar_Mem G_scalar;       /* Complex scalar. */
-    oskar_Mem array_pattern;  /* Complex scalar. */
+    oskar_Mem theta_modified;          /* Real scalar. */
+    oskar_Mem phi_modified;            /* Real scalar. */
+    oskar_Mem weights;                 /* Complex scalar. */
+    oskar_Mem weights_error;           /* Complex scalar. */
+    oskar_Mem element_pattern_matrix;  /* Complex matrix. */
+    oskar_Mem element_pattern_scalar;  /* Complex scalar. */
+    oskar_Mem array_pattern;           /* Complex scalar. */
 
     /* TODO cuda random number states could go here...? */
 

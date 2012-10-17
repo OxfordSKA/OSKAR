@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,18 +50,19 @@ extern "C" {
  *
  * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
  *
- * @param[in] n      The number of points.
- * @param[in] d_ra     The input position Right Ascensions in radians.
- * @param[in] d_dec    The input position Declinations in radians.
- * @param[in] ra0    The Right Ascension of the reference point in radians.
- * @param[in] dec0   The Declination of the reference point in radians.
- * @param[out] d_l   The l-direction-cosines relative to the reference point.
- * @param[out] d_m   The m-direction-cosines relative to the reference point.
- * @param[out] d_n   The n-direction-cosines relative to the reference point.
+ * @param[in] num_points The number of points.
+ * @param[in] h_ra       The input position Right Ascensions in radians.
+ * @param[in] h_dec      The input position Declinations in radians.
+ * @param[in] ra0_rad    The Right Ascension of the reference point in radians.
+ * @param[in] dec0_rad   The Declination of the reference point in radians.
+ * @param[out] h_l       The l-direction-cosines relative to the reference point.
+ * @param[out] h_m       The m-direction-cosines relative to the reference point.
+ * @param[out] h_n       The n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-int oskar_ra_dec_to_rel_lmn_f(int n, const float* h_ra, const float* h_dec,
-        float ra0, float dec0, float* h_l, float* h_m, float* h_n);
+void oskar_ra_dec_to_rel_lmn_f(int num_points, const float* h_ra,
+        const float* h_dec, float ra0_rad, float dec0_rad, float* h_l,
+        float* h_m, float* h_n);
 
 /**
  * @brief
@@ -72,18 +74,43 @@ int oskar_ra_dec_to_rel_lmn_f(int n, const float* h_ra, const float* h_dec,
  *
  * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
  *
- * @param[in] n      The number of points.
- * @param[in] d_ra     The input position Right Ascensions in radians.
- * @param[in] d_dec    The input position Declinations in radians.
- * @param[in] ra0    The Right Ascension of the reference point in radians.
- * @param[in] dec0   The Declination of the reference point in radians.
- * @param[out] d_l   The l-direction-cosines relative to the reference point.
- * @param[out] d_m   The m-direction-cosines relative to the reference point.
- * @param[out] d_n   The n-direction-cosines relative to the reference point.
+ * @param[in] num_points The number of points.
+ * @param[in] h_ra       The input position Right Ascensions in radians.
+ * @param[in] h_dec      The input position Declinations in radians.
+ * @param[in] ra0_rad    The Right Ascension of the reference point in radians.
+ * @param[in] dec0_rad   The Declination of the reference point in radians.
+ * @param[out] h_l       The l-direction-cosines relative to the reference point.
+ * @param[out] h_m       The m-direction-cosines relative to the reference point.
+ * @param[out] h_n       The n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-int oskar_ra_dec_to_rel_lmn_d(int n, const double* h_ra, const double* h_dec,
-        double ra0, double dec0, double* h_l, double* h_m, double* h_n);
+void oskar_ra_dec_to_rel_lmn_d(int num_points, const double* h_ra,
+        const double* h_dec, double ra0_rad, double dec0_rad, double* h_l,
+        double* h_m, double* h_n);
+
+/**
+ * @brief
+ * Equatorial to relative 3D direction cosines (wrapper function).
+ *
+ * @details
+ * This function computes the l,m,n direction cosines of the specified points
+ * relative to the reference point.
+ *
+ * Note that the n-positions are given by sqrt(1 - l*l - m*m) - 1.
+ *
+ * @param[in] num_points The number of points.
+ * @param[in] ra         The input position Right Ascensions in radians.
+ * @param[in] dec        The input position Declinations in radians.
+ * @param[in] ra0_rad    The Right Ascension of the reference point in radians.
+ * @param[in] dec0_rad   The Declination of the reference point in radians.
+ * @param[out] l         The l-direction-cosines relative to the reference point.
+ * @param[out] m         The m-direction-cosines relative to the reference point.
+ * @param[out] n         The n-direction-cosines relative to the reference point.
+ */
+OSKAR_EXPORT
+void oskar_ra_dec_to_rel_lmn(int num_points, const oskar_Mem* ra,
+        const oskar_Mem* dec, double ra0_rad, double dec0_rad, oskar_Mem* l,
+        oskar_Mem* m, oskar_Mem* n,  int* status);
 
 #ifdef __cplusplus
 }

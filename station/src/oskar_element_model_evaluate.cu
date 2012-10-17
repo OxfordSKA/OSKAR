@@ -183,7 +183,7 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
         int num_points, const oskar_Mem* l, const oskar_Mem* m,
         const oskar_Mem* n, oskar_Mem* theta, oskar_Mem* phi, int* status)
 {
-    int spline_x = 0, spline_y = 0;
+    int spline_x = 0, spline_y = 0, computed_angles = 0;
 
     /* Check all inputs. */
     if (!model || !output || !l || !m || !n || !theta || !phi || !status)
@@ -234,6 +234,7 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
             delta_phi_x = PI/2 - orientation_x;
             oskar_hor_lmn_to_modified_theta_phi(theta, phi,
                     delta_phi_x, num_points, l, m, n, status);
+            computed_angles = 1;
 
             /* Evaluate spline pattern for dipole X. */
             oskar_spline_data_evaluate(output, 0, 8, &model->theta_re_x,
@@ -251,6 +252,7 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
             delta_phi_x = orientation_x - PI/2; /* TODO check the order. */
             oskar_hor_lmn_to_modified_theta_phi(theta, phi,
                     delta_phi_x, num_points, l, m, n, status);
+            computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole X. */
             oskar_evaluate_dipole_pattern(output, num_points, theta, phi, 1,
@@ -264,6 +266,7 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
             delta_phi_y = -orientation_y;
             oskar_hor_lmn_to_modified_theta_phi(theta, phi,
                     delta_phi_y, num_points, l, m, n, status);
+            computed_angles = 1;
 
             /* Evaluate spline pattern for dipole Y. */
             oskar_spline_data_evaluate(output, 4, 8, &model->theta_re_y,
@@ -281,11 +284,20 @@ void oskar_element_model_evaluate(const oskar_ElementModel* model,
             delta_phi_y = orientation_y - PI/2; /* TODO check the order. */
             oskar_hor_lmn_to_modified_theta_phi(theta, phi,
                     delta_phi_y, num_points, l, m, n, status);
+            computed_angles = 1;
 
             /* Evaluate dipole pattern for dipole Y. */
             oskar_evaluate_dipole_pattern(output, num_points, theta, phi, 0,
                     status);
         }
+    }
+
+    /* Compute theta values for tapering, if not already done. */
+    if (model->taper_type != OSKAR_ELEMENT_MODEL_TAPER_NONE && !computed_angles)
+    {
+        oskar_hor_lmn_to_modified_theta_phi(theta, phi,
+                0, num_points, l, m, n, status);
+        computed_angles = 1;
     }
 
     /* Apply element tapering, if specified. */

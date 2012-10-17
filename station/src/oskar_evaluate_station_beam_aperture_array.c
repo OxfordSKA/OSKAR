@@ -72,23 +72,25 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
             array = (oskar_mem_is_scalar(beam->type) ?
                     beam : &work->array_pattern);
 
-            /* Evaluate array factor. */
+            /* Evaluate array pattern. */
             oskar_evaluate_array_pattern(array, station,
                     beam_x, beam_y, beam_z, num_points, x, y, z,
-                    &work->weights, &work->weights_error, curand_states, status);
+                    &work->weights, &work->weights_error, curand_states,
+                    status);
 
-            /* Normalise array beam if required. */
+            /* Normalise array response if required. */
             if (station->normalise_beam)
                 oskar_mem_scale_real(array, 1.0/station->num_elements, status);
         }
 
         /* Get pointer to element pattern. */
-        if (station->element_pattern->type != OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC)
-            element = (oskar_mem_is_matrix(beam->type) ? beam : &work->G_matrix);
+        if (station->use_polarised_elements)
+            element = (oskar_mem_is_matrix(beam->type) ?
+                    beam : &work->element_pattern_matrix);
         else
-            element = (!array ? beam : &work->G_scalar);
+            element = (!array ? beam : &work->element_pattern_scalar);
 
-        /* Evaluate element factor. */
+        /* Evaluate element pattern. */
         oskar_element_model_evaluate(station->element_pattern,
                 element, station->orientation_x, station->orientation_y,
                 num_points, x, y, z, &work->theta_modified,
@@ -97,7 +99,8 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         /* Element-wise multiply to join array and element pattern. */
         if (array && element)
         {
-            oskar_mem_element_multiply(beam, array, element, num_points, status);
+            oskar_mem_element_multiply(beam, array, element, num_points,
+                    status);
         }
         else if (array && oskar_mem_is_matrix(beam->type))
         {
@@ -107,9 +110,9 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         }
     }
 
-    /* Different element model per detector in the station */
-    /* Can't separate E and G evaluation */
-    else /* (!station->single_element_model) */
+    /* Different element model per detector in the station. */
+    /* Can't separate array and element evaluation. */
+    else
     {
         /* Must evaluate array pattern, so check that this is enabled. */
         if (!station->enable_array_pattern)
@@ -123,7 +126,7 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
                     beam_y, beam_z, num_points, x, y, z, &work->weights,
                     &work->weights_error, curand_states, status);
 
-            /* Normalise array beam if required. */
+            /* Normalise array response if required. */
             if (station->normalise_beam)
                 oskar_mem_scale_real(beam, 1.0/station->num_elements, status);
         }

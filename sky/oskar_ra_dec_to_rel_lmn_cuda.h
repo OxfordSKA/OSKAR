@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ extern "C" {
  * @param[out] d_n   The n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-int oskar_ra_dec_to_rel_lmn_cuda_f(int n, const float* d_ra,
+void oskar_ra_dec_to_rel_lmn_cuda_f(int n, const float* d_ra,
         const float* d_dec, float ra0, float dec0, float* d_l, float* d_m,
         float* d_n);
 
@@ -83,7 +83,7 @@ int oskar_ra_dec_to_rel_lmn_cuda_f(int n, const float* d_ra,
  * @param[out] d_n   The n-direction-cosines relative to the reference point.
  */
 OSKAR_EXPORT
-int oskar_ra_dec_to_rel_lmn_cuda_d(int n, const double* d_ra,
+void oskar_ra_dec_to_rel_lmn_cuda_d(int n, const double* d_ra,
         const double* d_dec, double ra0, double dec0, double* d_l, double* d_m,
         double* d_n);
 

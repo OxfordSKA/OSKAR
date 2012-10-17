@@ -26,22 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-
-#include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_telescope_model_location.h"
-#include "math/oskar_Jones.h"
 #include "math/oskar_jones_get_station_pointer.h"
-#include "sky/oskar_SkyModel.h"
 #include "sky/oskar_sky_model_location.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "station/oskar_evaluate_source_relative_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
-#include "station/oskar_WorkStationBeam.h"
 #include "utility/oskar_mem_insert.h"
-#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,15 +70,8 @@ void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
     if (!telescope->station || telescope->num_stations == 0)
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
-    /* Check data are on the GPU. */
-    if (E->data.location != OSKAR_LOCATION_GPU ||
-            oskar_sky_model_location(sky) != OSKAR_LOCATION_GPU ||
-            oskar_telescope_model_location(telescope) != OSKAR_LOCATION_GPU)
-        *status = OSKAR_ERR_BAD_LOCATION;
-
-    /* Evaluate the station beam for each station, at each source position. */
-    /* - A number of optimisations are possible, switch on these ... */
-
+    /* Evaluate the station beam for each station at each source position. */
+    /* A number of optimisations are possible, so switch on these. */
     if (telescope->use_common_sky)
     {
         /* Optimisation 1: only evaluate one beam and copy. */
@@ -113,8 +98,8 @@ void oskar_evaluate_jones_E(oskar_Jones* E, const oskar_SkyModel* sky,
     }
 }
 
-
-/* Optimisation 1:
+/*
+ * Optimisation 1:
  * With a common sky (horizon) and identical stations, all station beams
  * will be the same. This function evaluates the beam once (for station 0) and
  * then copies it into the other station indices in the Jones matrix structure.
@@ -143,35 +128,25 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
     oskar_evaluate_source_horizontal_lmn(sky->num_sources,
             &work->hor_x, &work->hor_y, &work->hor_z, &sky->RA, &sky->Dec,
             station0, gast, status);
+    oskar_jones_get_station_pointer(&E0, E, 0, status);
 
-    switch (station0->station_type)
+    if (station0->station_type == OSKAR_STATION_TYPE_AA)
     {
-        case OSKAR_STATION_TYPE_AA:
-        {
-            oskar_jones_get_station_pointer(&E0, E, 0, status);
-            oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, beam_n,
-                    sky->num_sources, OSKAR_BEAM_COORDS_HORIZONTAL,
-                    &work->hor_x, &work->hor_y, &work->hor_z, &work->hor_z,
-                    work, curand_state, status);
-            break;
-        }
-        case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
-        {
-            oskar_evaluate_source_relative_lmn(sky->num_sources,
-                    &work->rel_l, &work->rel_m, &work->rel_n, &sky->RA,
-                    &sky->Dec, station0, status);
-            oskar_jones_get_station_pointer(&E0, E, 0, status);
-            oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, beam_n,
-                    sky->num_sources, OSKAR_BEAM_COORDS_PHASE_CENTRE,
-                    &work->rel_l, &work->rel_m, &work->rel_n, &work->hor_z,
-                    work, curand_state, status);
-            break;
-        }
-        default:
-        {
-            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
-            break;
-        }
+        oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, beam_n,
+                sky->num_sources, OSKAR_BEAM_COORDS_HORIZONTAL,
+                &work->hor_x, &work->hor_y, &work->hor_z, &work->hor_z,
+                work, curand_state, status);
+    }
+    else if (station0->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+    {
+        oskar_evaluate_station_beam(&E0, station0, beam_l, beam_m, beam_n,
+                sky->num_sources, OSKAR_BEAM_COORDS_PHASE_CENTRE,
+                &sky->rel_l, &sky->rel_m, &sky->rel_n, &work->hor_z,
+                work, curand_state, status);
+    }
+    else
+    {
+        *status = OSKAR_ERR_SETTINGS_TELESCOPE;
     }
 
     /* Copy E for station 0 into memory for other stations. */
@@ -183,8 +158,8 @@ static void evaluate_E_common_sky_identical_stations(oskar_Jones* E,
     }
 }
 
-
-/* Optimisation 2:
+/*
+ * Optimisation 2:
  * With a common sky (horizon) but different stations, while all station
  * beams must be evaluated separately, the beam coordinates can be shared
  * and only evaluated once.
@@ -212,43 +187,33 @@ static void evaluate_E_common_sky_different_stations(oskar_Jones* E,
     {
         oskar_Mem E_station;
         oskar_StationModel* station = &telescope->station[i];
+        oskar_jones_get_station_pointer(&E_station, E, i, status);
 
-        switch (station->station_type)
+        if (station->station_type == OSKAR_STATION_TYPE_AA)
         {
-            case OSKAR_STATION_TYPE_AA:
-            {
-                oskar_jones_get_station_pointer(&E_station, E, i, status);
-                oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
-                        beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_HORIZONTAL, &work->hor_x,
-                        &work->hor_y, &work->hor_z, &work->hor_z, work,
-                        curand_state, status);
-                break;
-            }
-            case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
-            {
-                oskar_evaluate_source_relative_lmn(sky->num_sources,
-                        &work->rel_l, &work->rel_m, &work->rel_n, &sky->RA,
-                        &sky->Dec, station, status);
-                oskar_jones_get_station_pointer(&E_station, E, 0, status);
-                oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
-                        beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_PHASE_CENTRE, &work->rel_l,
-                        &work->rel_m, &work->rel_n, &work->hor_z, work,
-                        curand_state, status);
-                break;
-            }
-            default:
-            {
-                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
-                break;
-            }
+            oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
+                    beam_n, sky->num_sources,
+                    OSKAR_BEAM_COORDS_HORIZONTAL, &work->hor_x,
+                    &work->hor_y, &work->hor_z, &work->hor_z, work,
+                    curand_state, status);
+        }
+        else if (station->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+        {
+            oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
+                    beam_n, sky->num_sources,
+                    OSKAR_BEAM_COORDS_PHASE_CENTRE, &sky->rel_l,
+                    &sky->rel_m, &sky->rel_n, &work->hor_z, work,
+                    curand_state, status);
+        }
+        else
+        {
+            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         }
     }
 }
 
-
-/* No optimisation:
+/*
+ * No optimisation:
  * Full E evaluation where the beam evaluated for each station, each having a
  * different set of sky coordinates.
  */
@@ -273,37 +238,27 @@ static void evaluate_E_different_sky(oskar_Jones* E,
         oskar_evaluate_source_horizontal_lmn(sky->num_sources,
                 &work->hor_x, &work->hor_y, &work->hor_z, &sky->RA, &sky->Dec,
                 station, gast, status);
+        oskar_jones_get_station_pointer(&E_station, E, i, status);
 
-        switch (station->station_type)
+        if (station->station_type == OSKAR_STATION_TYPE_AA)
         {
-            case OSKAR_STATION_TYPE_AA:
-            {
-                oskar_jones_get_station_pointer(&E_station, E, i, status);
-                oskar_evaluate_station_beam(&E_station, station, beam_l,
-                        beam_m, beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_HORIZONTAL,
-                        &work->hor_x, &work->hor_y, &work->hor_z, &work->hor_z,
-                        work, curand_state, status);
-                break;
-            }
-            case OSKAR_STATION_TYPE_GAUSSIAN_BEAM:
-            {
-                oskar_evaluate_source_relative_lmn(sky->num_sources,
-                        &work->rel_l, &work->rel_m, &work->rel_n, &sky->RA,
-                        &sky->Dec, station, status);
-                oskar_jones_get_station_pointer(&E_station, E, 0, status);
-                oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
-                        beam_n, sky->num_sources,
-                        OSKAR_BEAM_COORDS_PHASE_CENTRE, &work->rel_l,
-                        &work->rel_m, &work->rel_n, &work->hor_z, work,
-                        curand_state, status);
-                break;
-            }
-            default:
-            {
-                *status = OSKAR_ERR_SETTINGS_TELESCOPE;
-                break;
-            }
+            oskar_evaluate_station_beam(&E_station, station, beam_l,
+                    beam_m, beam_n, sky->num_sources,
+                    OSKAR_BEAM_COORDS_HORIZONTAL,
+                    &work->hor_x, &work->hor_y, &work->hor_z, &work->hor_z,
+                    work, curand_state, status);
+        }
+        else if (station->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+        {
+            oskar_evaluate_station_beam(&E_station, station, beam_l, beam_m,
+                    beam_n, sky->num_sources,
+                    OSKAR_BEAM_COORDS_PHASE_CENTRE, &sky->rel_l,
+                    &sky->rel_m, &sky->rel_n, &work->hor_z, work,
+                    curand_state, status);
+        }
+        else
+        {
+            *status = OSKAR_ERR_SETTINGS_TELESCOPE;
         }
     }
 }

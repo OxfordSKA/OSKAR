@@ -24,7 +24,6 @@ set(station_SRC
     src/oskar_evaluate_dipole_pattern.c
     src/oskar_evaluate_jones_E.c
     src/oskar_evaluate_source_horizontal_lmn.c
-    src/oskar_evaluate_source_relative_lmn.c
     src/oskar_evaluate_station_beam_aperture_array.c
     src/oskar_evaluate_element_weights_dft_cuda.cu
     src/oskar_evaluate_element_weights_dft.c

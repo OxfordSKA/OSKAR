@@ -48,14 +48,11 @@ void oskar_work_station_beam_free(oskar_WorkStationBeam* work, int* status)
     oskar_mem_free(&work->hor_x, status);
     oskar_mem_free(&work->hor_y, status);
     oskar_mem_free(&work->hor_z, status);
-    oskar_mem_free(&work->rel_l, status);
-    oskar_mem_free(&work->rel_m, status);
-    oskar_mem_free(&work->rel_n, status);
     oskar_mem_free(&work->weights, status);
     oskar_mem_free(&work->weights_error, status);
     oskar_mem_free(&work->array_pattern, status);
-    oskar_mem_free(&work->G_matrix, status);
-    oskar_mem_free(&work->G_scalar, status);
+    oskar_mem_free(&work->element_pattern_matrix, status);
+    oskar_mem_free(&work->element_pattern_scalar, status);
 }
 
 #ifdef __cplusplus

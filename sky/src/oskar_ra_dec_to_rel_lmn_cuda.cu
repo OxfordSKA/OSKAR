@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,40 +30,42 @@
 #include "math/cudak/oskar_cudak_sph_to_lm.h"
 #include "sky/cudak/oskar_cudak_lm_to_n.h"
 
-// Single precision.
-int oskar_ra_dec_to_rel_lmn_cuda_f(int n, const float* d_ra,
+/* Single precision. */
+void oskar_ra_dec_to_rel_lmn_cuda_f(int num_points, const float* d_ra,
         const float* d_dec, float ra0, float dec0, float* d_l, float* d_m,
         float* d_n)
 {
-    // Compute l,m-direction-cosines of RA, Dec relative to reference point.
-    const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
-    const float cosDec0 = cosf(dec0);
-    const float sinDec0 = sinf(dec0);
-    oskar_cudak_sph_to_lm_f OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+    float cosDec0, sinDec0;
+    int num_blocks, num_threads = 256;
 
-    // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_f OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_l, d_m, d_n);
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    /* Compute l,m-direction-cosines of RA, Dec relative to reference point. */
+    num_blocks = (num_points + num_threads - 1) / num_threads;
+    cosDec0 = cosf(dec0);
+    sinDec0 = sinf(dec0);
+    oskar_cudak_sph_to_lm_f OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_points, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+
+    /* Compute n-direction-cosines of points from l and m. */
+    oskar_cudak_lm_to_n_f OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points,
+            d_l, d_m, d_n);
 }
 
-// Double precision.
-int oskar_ra_dec_to_rel_lmn_cuda_d(int n, const double* d_ra,
+/* Double precision. */
+void oskar_ra_dec_to_rel_lmn_cuda_d(int num_points, const double* d_ra,
         const double* d_dec, double ra0, double dec0, double* d_l, double* d_m,
         double* d_n)
 {
-    // Compute l,m-direction-cosines of RA, Dec relative to reference point.
-    const int n_thd = 256;
-    const int n_blk = (n + n_thd - 1) / n_thd;
-    const double cosDec0 = cos(dec0);
-    const double sinDec0 = sin(dec0);
-    oskar_cudak_sph_to_lm_d OSKAR_CUDAK_CONF(n_blk, n_thd)
-            (n, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+    double cosDec0, sinDec0;
+    int num_blocks, num_threads = 256;
 
-    // Compute n-direction-cosines of points from l and m.
-    oskar_cudak_lm_to_n_d OSKAR_CUDAK_CONF(n_blk, n_thd) (n, d_l, d_m, d_n);
-    cudaDeviceSynchronize();
-    return cudaPeekAtLastError();
+    /* Compute l,m-direction-cosines of RA, Dec relative to reference point. */
+    num_blocks = (num_points + num_threads - 1) / num_threads;
+    cosDec0 = cos(dec0);
+    sinDec0 = sin(dec0);
+    oskar_cudak_sph_to_lm_d OSKAR_CUDAK_CONF(num_blocks, num_threads) (
+            num_points, d_ra, d_dec, ra0, cosDec0, sinDec0, d_l, d_m);
+
+    /* Compute n-direction-cosines of points from l and m. */
+    oskar_cudak_lm_to_n_d OSKAR_CUDAK_CONF(num_blocks, num_threads) (num_points,
+            d_l, d_m, d_n);
 }

@@ -40,9 +40,9 @@
 #include "math/oskar_sph_from_lm.h"
 #include "sky/oskar_SkyModel.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
+#include "sky/oskar_ra_dec_to_rel_lmn.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "station/oskar_evaluate_source_relative_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
@@ -58,8 +58,6 @@
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
 #include "utility/oskar_vector_types.h"
-
-#include "utility/oskar_mem_binary_file_write.h"
 
 #include <cmath>
 #include <QtCore/QTime>
@@ -200,6 +198,17 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
         oskar_Mem beam_pattern(beam_pattern_data_type, OSKAR_LOCATION_GPU,
                 num_pixels);
+        oskar_Mem l(type, OSKAR_LOCATION_GPU);
+        oskar_Mem m(type, OSKAR_LOCATION_GPU);
+        oskar_Mem n(type, OSKAR_LOCATION_GPU);
+
+        // Evaluate source relative l,m,n values if not an aperture array.
+        if (tel_gpu.station[station_id].station_type != OSKAR_STATION_TYPE_AA)
+        {
+            oskar_ra_dec_to_rel_lmn(num_pixels, &RA, &Dec,
+                    tel_gpu.ra0_rad, tel_gpu.dec0_rad, &l, &m, &n,
+                    &err);
+        }
 
         // Loop over channels.
         oskar_log_section(log, "Starting simulation...");
@@ -227,7 +236,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
             oskar_StationModel* station = &(telescope.station[station_id]);
             int station_type = station->station_type;
 
-            // Start simulation.
+            // Loop over times.
             for (int t = 0; t < num_times; ++t)
             {
                 // Start time for the data dump, in MJD(UTC).
@@ -255,14 +264,10 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 }
                 else if (station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
                 {
-                    oskar_evaluate_source_relative_lmn(num_pixels,
-                            &work.rel_l, &work.rel_m, &work.rel_n,
-                            &RA, &Dec, station, &err);
                     oskar_evaluate_station_beam(&beam_pattern, station,
                             beam_l, beam_m, beam_n, num_pixels,
                             OSKAR_BEAM_COORDS_PHASE_CENTRE,
-                            &work.rel_l, &work.rel_m, &work.rel_n,
-                            &work.hor_z, &work, &curand_state, &err);
+                            &l, &m, &n, &work.hor_z, &work, &curand_state, &err);
                 }
                 else
                 {
@@ -344,22 +349,24 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         // Convert complex values to power (amplitude of complex number).
         if (type == OSKAR_SINGLE)
         {
-            float* image_data = (float*)image_cube.data;
+            float x, y, *image_data = (float*)image_cube.data;
             float2* complex_data = (float2*)complex_cube.data;
             for (int i = 0; i < num_pixels_total; ++i)
             {
-                image_data[i] = sqrt(complex_data[i].x*complex_data[i].x +
-                        complex_data[i].y*complex_data[i].y);
+                x = complex_data[i].x;
+                y = complex_data[i].y;
+                image_data[i] = sqrt(x*x + y*y);
             }
         }
         else if (type == OSKAR_DOUBLE)
         {
-            double* image_data = (double*)image_cube.data;
+            double x, y, *image_data = (double*)image_cube.data;
             double2* complex_data = (double2*)complex_cube.data;
             for (int i = 0; i < num_pixels_total; ++i)
             {
-                image_data[i] = sqrt(complex_data[i].x*complex_data[i].x +
-                        complex_data[i].y*complex_data[i].y);
+                x = complex_data[i].x;
+                y = complex_data[i].y;
+                image_data[i] = sqrt(x*x + y*y);
             }
         }
 
