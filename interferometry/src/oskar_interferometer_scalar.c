@@ -83,6 +83,16 @@ void oskar_interferometer_scalar(oskar_Mem* vis_amp, oskar_Log* log,
     oskar_WorkStationBeam work;
     oskar_CurandState curand_state;
 
+    /* Check all inputs. */
+    if (!vis_amp || !sky || !telescope || !settings || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Always clear the output array to ensure that all visibilities are zero
      * if there are never any visible sources in the sky model. */
     oskar_mem_clear_contents(vis_amp, status);

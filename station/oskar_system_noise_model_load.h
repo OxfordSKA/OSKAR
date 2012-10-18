@@ -26,12 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_SYSTEM_NOISE_MODEL_LOAD_CST_H_
-#define OSKAR_SYSTEM_NOISE_MODEL_LOAD_CST_H_
+#ifndef OSKAR_SYSTEM_NOISE_MODEL_LOAD_H_
+#define OSKAR_SYSTEM_NOISE_MODEL_LOAD_H_
 
 /**
- * @file oskar_system_noise_model_load_cst.h
+ * @file oskar_system_noise_model_load.h
  */
 
 #include "oskar_global.h"
@@ -43,18 +42,20 @@ extern "C" {
 
 /**
  * @brief
+ * TODO Needs brief description.
  *
  * @details
+ * TODO Needs details.
  *
  * @param filename
  * @param data
  * @return
  */
 OSKAR_EXPORT
-int oskar_system_noise_model_load_cst(oskar_Mem* data, const char* filename);
+int oskar_system_noise_model_load(oskar_Mem* data, const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SYSTEM_NOISE_MODEL_LOAD_CST_H_ */
+#endif /* OSKAR_SYSTEM_NOISE_MODEL_LOAD_H_ */

@@ -72,6 +72,8 @@ const char* oskar_get_error_string(int error)
             return "incompatible OSKAR version";
         case OSKAR_ERR_BAD_UNITS:
             return "invalid units";
+        case OSKAR_ERR_LOCATION_MISMATCH:
+            return "location mismatch";
         case OSKAR_ERR_SPLINE_COEFF_FAIL:
             return "spline coefficient computation failed";
         case OSKAR_ERR_SPLINE_EVAL_FAIL:
@@ -106,6 +108,9 @@ const char* oskar_get_error_string(int error)
             return "incompatible double format";
         case OSKAR_ERR_BINARY_TAG_TOO_LONG:
             return "extended binary tag too long";
+
+        case OSKAR_ERR_CUDA_NOT_AVAILABLE:
+            return "CUDA not available";
 
         /* -500 to -550: Settings errors */
         case OSKAR_ERR_SETTINGS:

@@ -32,7 +32,7 @@
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_type.h"
 #include "interferometry/oskar_telescope_model_resize.h"
-#include "station/oskar_system_noise_model_load_cst.h"
+#include "station/oskar_system_noise_model_load.h"
 #include "station/oskar_station_model_init.h"
 
 #include "utility/oskar_log_message.h"
@@ -219,7 +219,7 @@ static int load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
             return OSKAR_ERR_FILE_IO;
 
         // Load the file
-        err = oskar_system_noise_model_load_cst(freqs, filename.constData());
+        err = oskar_system_noise_model_load(freqs, filename.constData());
         if (err) return err;
     }
 
@@ -314,7 +314,7 @@ static int load_noise_rms(const oskar_Settings* settings,
             if (QFile::exists(data_files[rms_file]))
             {
                 file = data_files[rms_file].toAscii();
-                err = oskar_system_noise_model_load_cst(stddev, file.constData());
+                err = oskar_system_noise_model_load(stddev, file.constData());
                 if (err) return err;
             }
             // Sensitivity
@@ -323,7 +323,7 @@ static int load_noise_rms(const oskar_Settings* settings,
 
                 oskar_Mem sensitivity(type, OSKAR_LOCATION_CPU, num_freqs);
                 file = data_files[sensitivity_file].toAscii();
-                err = oskar_system_noise_model_load_cst(&sensitivity, file.constData());
+                err = oskar_system_noise_model_load(&sensitivity, file.constData());
                 if (err) return err;
 
                 err = sensitivity_to_rms(&noise->rms, &sensitivity,
@@ -336,17 +336,17 @@ static int load_noise_rms(const oskar_Settings* settings,
                     QFile::exists(data_files[efficiency_file]))
             {
                 file = data_files[t_sys_file].toAscii();
-                err = oskar_system_noise_model_load_cst(&t_sys, file.constData());
+                err = oskar_system_noise_model_load(&t_sys, file.constData());
                 if (err) return err;
 
                 oskar_Mem area(type, OSKAR_LOCATION_CPU, num_freqs);
                 file = data_files[area_file].toAscii();
-                err = oskar_system_noise_model_load_cst(&area, file.constData());
+                err = oskar_system_noise_model_load(&area, file.constData());
                 if (err) return err;
 
                 oskar_Mem efficiency(type, OSKAR_LOCATION_CPU, num_freqs);
                 file = data_files[efficiency_file].toAscii();
-                err = oskar_system_noise_model_load_cst(&efficiency, file.constData());
+                err = oskar_system_noise_model_load(&efficiency, file.constData());
                 if (err) return err;
 
                 // FIXME update for efficiency....
@@ -367,14 +367,14 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[rms_file].toAscii();
-                    err = oskar_system_noise_model_load_cst(stddev, file.constData());
+                    err = oskar_system_noise_model_load(stddev, file.constData());
                     if (err) return err;
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     const char* file = ns->value.rms.file;
-                    err = oskar_system_noise_model_load_cst(stddev, file);
+                    err = oskar_system_noise_model_load(stddev, file);
                     if (err) return err;
                     break;
                 }
@@ -401,14 +401,14 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[sensitivity_file].toAscii();
-                    err = oskar_system_noise_model_load_cst(&sensitivity, file.constData());
+                    err = oskar_system_noise_model_load(&sensitivity, file.constData());
                     if (err) return err;
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.sensitivity.file;
-                    err = oskar_system_noise_model_load_cst(&sensitivity, file);
+                    err = oskar_system_noise_model_load(&sensitivity, file);
                     if (err) return err;
                     break;
                 }
@@ -437,14 +437,14 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[sensitivity_file].toAscii();
-                    err = oskar_system_noise_model_load_cst(&t_sys, file.constData());
+                    err = oskar_system_noise_model_load(&t_sys, file.constData());
                     if (err) return err;
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.t_sys.file;
-                    err = oskar_system_noise_model_load_cst(&t_sys, file);
+                    err = oskar_system_noise_model_load(&t_sys, file);
                     if (err) return err;
                     break;
                 }
@@ -466,14 +466,14 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[area_file].toAscii();
-                    err = oskar_system_noise_model_load_cst(&area, file.constData());
+                    err = oskar_system_noise_model_load(&area, file.constData());
                     if (err) return err;
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.area.file;
-                    err = oskar_system_noise_model_load_cst(&area, file);
+                    err = oskar_system_noise_model_load(&area, file);
                     if (err) return err;
                     break;
                 }
@@ -495,14 +495,14 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[area_file].toAscii();
-                    err = oskar_system_noise_model_load_cst(&efficiency, file.constData());
+                    err = oskar_system_noise_model_load(&efficiency, file.constData());
                     if (err) return err;
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.efficiency.file;
-                    err = oskar_system_noise_model_load_cst(&efficiency, file);
+                    err = oskar_system_noise_model_load(&efficiency, file);
                     if (err) return err;
                     break;
                 }

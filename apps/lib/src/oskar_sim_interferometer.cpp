@@ -155,13 +155,15 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     oskar_log_section(log, "Starting simulation...");
     QTime timer;
     timer.start();
-    int num_channels = settings.obs.num_channels;
-    for (int c = 0; c < num_channels; ++c)
+    for (int c = 0; c < settings.obs.num_channels; ++c)
     {
-        double frequency = settings.obs.start_frequency_hz +
+        double frequency;
+        oskar_Mem vis_amp;
+
+        frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
         oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
-                c + 1, num_channels, frequency / 1e6);
+                c + 1, settings.obs.num_channels, frequency / 1e6);
 
         // Use OpenMP dynamic scheduling for loop over chunks.
 #pragma omp parallel for schedule(dynamic, 1)
@@ -177,7 +179,6 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
             // Set the device to use for the chunk.
             error = cudaSetDevice(device_id);
-            if (error) continue;
 
             // Run simulation for this chunk.
             oskar_interferometer(&(vis_temp[thread_id]), log,
@@ -190,11 +191,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 #pragma omp barrier
         if (error) return error;
 
-        oskar_Mem vis_amp;
+        // Accumulate each chunk into global vis structure for this channel.
         oskar_visibilities_get_channel_amps(&vis_amp, &vis_global, c, &error);
-        if (error) return error;
-
-        // Accumulate into global vis structure.
         for (int i = 0; i < num_devices; ++i)
         {
             oskar_mem_add(&vis_amp, &vis_amp, &vis_acc[i], &error);
@@ -203,6 +201,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
             oskar_mem_clear_contents(&vis_acc[i], &error);
         }
     }
+    if (error) return error;
 
     // Add uncorrelated system noise to the visibilities.
     if (settings.interferometer.noise.enable)

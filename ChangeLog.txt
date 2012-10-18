@@ -1,39 +1,40 @@
-2012-mm-dd  OSKAR 2.x.y-beta
+2012-10-19  OSKAR 2.1.0-beta
 
     * Fixed a bug which caused visibility data from sky model chunks containing
       no sources to be accumulated incorrectly.
 
-    * Fixed simulation of bandwidth smearing for extended sources.
-
     * Fixed a bug which caused a list of CUDA device IDs to be ignored if
       specified inside quotes.
 
-    * Fixed a problem in the OSKAR imager where selection of certain
-      time and channel ranges incorrectly resulted in an error message, making
-      it impossible to image a subset of the data cube.
+    * Fixed a bug in the OSKAR imager where selection of certain time and
+      channel ranges incorrectly resulted in an error message, making it
+      impossible to image a subset of the data cube.
+
+    * Fixed simulation of bandwidth smearing for extended sources.
+
+    * Added options to allow time-average smearing to be performed analytically.
+
+    * Added options and updated the telescope model to allow uncorrelated
+      noise to be added to the visibility data on a per-station basis.
 
     * Added options to allow an image to be made away from the observation
       phase centre.
 
-    * Added the ability to add uncorrelated noise to the visibility data.
+    * Added options to allow an element pattern to have a cosine or Gaussian
+      tapering function.
+
+    * Added MATLAB function for plotting of visibility data.
 
     * Removed message printing when fitting ellipses to Gaussian sources, as
       this could result in an unhelpful number of warning messages.
 
-    * Added oskar_image_stats application to report various statistics
-      about an OSKAR image.
-      #### TODO if this change is added into the release it needs app doc ###
+    * Updated all telescope model settings for improved clarity.
 
     * Updated options for writing image files.
-      #### TODO if this change is kept make sure to update settings doc
-           and example data ###
 
-    * The settings GUI now allows for the visibility of certain options to be
-      based on the value of another option. The display of various settings
-      have been updated to make use of this facility.
-
-    * Added MATLAB function for plotting of visibility data.
-
+    * The settings GUI now allows for options to be disabled based on the
+      value of another option. The display of various settings has been updated
+      to make use of this facility.
 
 2012-07-27  OSKAR 2.0.4-beta
 

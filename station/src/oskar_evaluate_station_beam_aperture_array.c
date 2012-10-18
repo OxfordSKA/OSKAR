@@ -118,6 +118,13 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         if (!station->enable_array_pattern)
             *status = OSKAR_ERR_SETTINGS;
 
+        /* Can't use tapered elements here, for the moment. */
+        if (station->element_pattern->taper_type != OSKAR_ELEMENT_MODEL_TAPER_NONE)
+            *status = OSKAR_ERR_FUNCTION_NOT_AVAILABLE;
+
+        /* Check if safe to proceed. */
+        if (*status) return;
+
         /* Check that there are no spline coefficients. */
         if (!station->element_pattern->theta_re_x.coeff.data)
         {
@@ -140,7 +147,6 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     /* Blank (zero) sources below the horizon. */
     oskar_blank_below_horizon(beam, z, num_points, status);
 }
-
 
 #ifdef __cplusplus
 }

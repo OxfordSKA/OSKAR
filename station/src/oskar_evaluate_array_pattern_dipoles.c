@@ -35,6 +35,8 @@
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_mem_type_check.h"
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -115,7 +117,7 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
                     (const double*)l->data,
                     (const double*)m->data,
                     (const double*)n->data,
-                    (double4c*)beam);
+                    (double4c*)beam->data);
             oskar_cuda_check_error(status);
         }
         else if (type == OSKAR_SINGLE)
@@ -132,7 +134,7 @@ void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
                     (const float*)l->data,
                     (const float*)m->data,
                     (const float*)n->data,
-                    (float4c*)beam);
+                    (float4c*)beam->data);
             oskar_cuda_check_error(status);
         }
         else

@@ -98,7 +98,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 /* Load into a temporary structure. */
                 binary_file_error = 0;
                 oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
-                oskar_log_message(log, 0, "Loading source file %s ...", filename);
+                oskar_log_message(log, 0, "Loading source file '%s'...",
+                        filename);
 
                 /* Try to read sky model as a binary file first. */
                 /* If this fails, read it as an ASCII file. */
@@ -210,6 +211,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             oskar_sky_model_set_source(&temp, i, ra, dec, 1.0, 0.0, 0.0, 0.0,
                     0.0, 0.0, 0.0, 0.0, 0.0, &error);
         }
+        if (error) return error;
 
         /* Apply filters and extended source over-ride. */
         error = set_up_filter(&temp, &settings->sky.generator.healpix.filter,
@@ -319,14 +321,16 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         oskar_log_message(log, 0, "Computing source direction cosines...");
         for (int i = 0; i < *num_chunks; ++i)
         {
-            /* Compute all source direction cosines relative to phase centre. */
-            oskar_sky_model_compute_relative_lmn(sky_chunks[i],
+            oskar_SkyModel* sky_chunk = &((*sky_chunks)[i]);
+
+            /* Compute source direction cosines relative to phase centre. */
+            oskar_sky_model_compute_relative_lmn(sky_chunk,
                     settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
             if (error) return error;
 
             /* Gather statistics on chunk set. */
-            total_sources += (sky_chunks[i])->num_sources;
-            if ((sky_chunks[i])->use_extended) ++num_extended_chunks;
+            total_sources += sky_chunk->num_sources;
+            if (sky_chunk->use_extended) ++num_extended_chunks;
         }
         oskar_log_message(log, 1, "done.");
 

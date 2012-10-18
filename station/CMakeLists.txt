@@ -52,7 +52,7 @@ set(station_SRC
     src/oskar_system_noise_model_copy.c
     src/oskar_system_noise_model_free.c
     src/oskar_system_noise_model_init.c
-    src/oskar_system_noise_model_load_cst.c
+    src/oskar_system_noise_model_load.c
     src/oskar_work_station_beam_free.c
     src/oskar_work_station_beam_init.c
     src/oskar_WorkStationBeam.cpp

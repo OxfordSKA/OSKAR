@@ -199,9 +199,9 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
                 else
                     return OSKAR_ERR_SETTINGS_TELESCOPE;
                 ep->taper.cosine_power =
-                        s.value("cosine_power", 0.0).toDouble();
+                        s.value("cosine_power", 1.0).toDouble();
                 ep->taper.gaussian_fwhm_rad =
-                        s.value("gaussian_fwhm_deg", 0.0).toDouble() * D2R;
+                        s.value("gaussian_fwhm_deg", 45.0).toDouble() * D2R;
             }
             s.endGroup(); // End taper group.
         }
@@ -212,7 +212,7 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
     // Gaussian beam settings.
     s.beginGroup("gaussian_beam");
     {
-        tel->gaussian_beam.fwhm_deg = s.value("fwhm_deg", 0.0).toDouble();
+        tel->gaussian_beam.fwhm_deg = s.value("fwhm_deg", 1.0).toDouble();
     }
     s.endGroup(); // End Gaussian beam group
 

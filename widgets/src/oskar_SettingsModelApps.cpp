@@ -35,8 +35,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_simulator();
     init_settings_sky_model();
     init_settings_observation();
-//    init_settings_telescope_model();
-    init_settings_telescope_model2();
+    init_settings_telescope_model();
     init_settings_interferometer();
     init_settings_beampattern();
     init_settings_image();
@@ -80,8 +79,6 @@ oskar_SettingsModelApps::~oskar_SettingsModelApps()
 {
 }
 
-
-// private methods
 
 void oskar_SettingsModelApps::init_settings_simulator()
 {
@@ -402,6 +399,7 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "text file (useful for debugging). Leave blank if not required.");
 }
 
+
 void oskar_SettingsModelApps::init_settings_observation()
 {
     QString k, group;
@@ -447,204 +445,8 @@ void oskar_SettingsModelApps::init_settings_observation()
             "number of beam pattern snapshots for beam pattern simulations.");
 }
 
+
 void oskar_SettingsModelApps::init_settings_telescope_model()
-{
-    QString k, group;
-    QStringList options;
-
-    group = "telescope";
-    setLabel(group, "Telescope model settings");
-
-    k = group + "/config_directory";
-    declare(k, "Telescope directory",
-            oskar_SettingsItem::TELESCOPE_DIR_NAME, QVariant(), true);
-    setTooltip(k, "Path to a directory containing the telescope configuration "
-            "data. See the accompanying documentation for a description of "
-            "an OSKAR telescope model directory.");
-    k = group + "/longitude_deg";
-    declare(k, "Longitude [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Telescope (east) longitude, in degrees.");
-    k = group + "/latitude_deg";
-    declare(k, "Latitude [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Telescope latitude, in degrees.");
-    k = group + "/altitude_m";
-    declare(k, "Altitude [m]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Telescope altitude, in metres.");
-
-    // Station settings
-    group = "telescope/station";
-    setLabel(group, "Station settings");
-    options.clear();
-    options << "Aperture Array"
-            << "Gaussian beam";
-    k = group + "/station_type";
-    declare(k, "Station type", options);
-    setTooltip(k, "The type of stations in the interferometer.");
-    k = group + "/use_polarised_elements";
-    declare(k, "Use polarised elements", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true, then treat antennas as polarised; if false, "
-            "treat them as point-like.");
-    k = group + "/ignore_custom_element_patterns";
-    declare(k, "Ignore custom element patterns", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, then ignore any custom embedded element pattern "
-            "data files. If the option to use polarised elements is set, "
-            "then antennas will be treated as ideal dipoles.");
-    k = group + "/evaluate_array_factor";
-    declare(k, "Evaluate array factor (Jones E)", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true, then the contribution to the station beam from "
-            "the array factor (given by beamforming the antennas in the "
-            "station) is evaluated. If false, then the array factor is "
-            "ignored.");
-    k = group + "/evaluate_element_factor";
-    declare(k, "Evaluate element factor (Jones G)", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true, then the contribution to the station beam from "
-            "the element factor (given by the antenna response) is "
-            "evaluated. If false, then the element factor is ignored.");
-    k = group + "/normalise_beam";
-    declare(k, "Normalise array beam", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, the station beam will be normalised by dividing "
-            "by the number of antennas in the station to give a nominal "
-            "peak value of 1.0; if false, then no normalisation is "
-            "performed.");
-    k = group + "/gaussian_beam_fwhm_deg";
-    declare(k, "Gaussian beam FWHM override (deg)", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "The FWHM of the Gaussian beam of all stations. Used if the "
-            "station type is set to <b>'Gaussian beam'</b>.");
-    setDependency(k, "telescope/station/station_type", "Gaussian beam");
-
-    group = "telescope/station/element";
-    setLabel(group, "Element settings (overrides)");
-    k = group + "/gain";
-    declare(k, "Element gain", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Mean element amplitude gain factor. "
-            "If set (and > 0.0), this will override the contents of the station files.");
-    k = group + "/gain_error_fixed";
-    declare(k, "Element gain std.dev. (systematic)", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Systematic element amplitude gain standard deviation. "
-            "If set, this will override the contents of the station files.");
-    k = group + "/gain_error_time";
-    declare(k, "Element gain std.dev. (time-variable)", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Time-variable element amplitude gain standard deviation. "
-            "If set, this will override the contents of the station files.");
-    k = group + "/phase_error_fixed_deg";
-    declare(k, "Element phase std.dev. (systematic) [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Systematic element phase standard deviation. "
-            "If set, this will override the contents of the station files.");
-    k = group + "/phase_error_time_deg";
-    declare(k, "Element phase std.dev. (time-variable) [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "Time-variable element phase standard deviation. "
-            "If set, this will override the contents of the station files.");
-    k = group + "/position_error_xy_m";
-    declare(k, "Element (x,y) position std.dev. [m]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "The standard deviation of the antenna xy-position "
-            "uncertainties. If set, this will override the "
-            "contents of the station files.");
-    k = group + "/x_orientation_error_deg";
-    declare(k, "Element X-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "The standard deviation of the antenna X-dipole orientation "
-            "error. If set, this will override the contents of the station files.");
-    k = group + "/y_orientation_error_deg";
-    declare(k, "Element Y-dipole orientation std.dev. [deg]", oskar_SettingsItem::DOUBLE);
-    setTooltip(k, "The standard deviation of the antenna Y-dipole orientation "
-            "error. If set, this will override the contents "
-            "of the station files.");
-    k = group + "/seed_gain_errors";
-    declare(k, "Random seed (systematic gain errors)", oskar_SettingsItem::RANDOM_SEED);
-    setTooltip(k, "Random number generator seed used for systematic gain "
-            "error distribution.");
-    k = group + "/seed_phase_errors";
-    declare(k, "Random seed (systematic phase errors)", oskar_SettingsItem::RANDOM_SEED);
-    setTooltip(k, "Random number generator seed used for systematic phase "
-            "error distribution.");
-    k = group + "/seed_time_variable_errors";
-    declare(k, "Random seed (time-variable errors)", oskar_SettingsItem::RANDOM_SEED);
-    setTooltip(k, "Random number generator seed used for time variable error "
-            "distributions.");
-    k = group + "/seed_position_xy_errors";
-    declare(k, "Random seed (x,y position errors)", oskar_SettingsItem::RANDOM_SEED);
-    setTooltip(k, "Random number generator seed used for antenna xy-position "
-            "error distribution.");
-    k = group + "/seed_x_orientation_error";
-    declare(k, "Random seed (X-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
-    setTooltip(k, "Random number generator seed used for antenna X dipole "
-            "orientation error distribution.");
-    k = group + "/seed_y_orientation_error";
-    declare(k, "Random seed (Y-dipole orientation errors)", oskar_SettingsItem::RANDOM_SEED);
-    setTooltip(k, "Random number generator seed used for antenna Y dipole "
-            "orientation error distribution.");
-
-    // Element pattern fitting parameters.
-    group = "telescope/station/element_fit";
-    setLabel(group, "Element pattern fitting parameters");
-    k = group + "/ignore_data_at_pole";
-    declare(k, "Ignore data at poles", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "If true, then numerical element pattern data points at "
-            "theta = 0 and theta = 180 degrees are ignored.");
-    k = group + "/ignore_data_below_horizon";
-    declare(k, "Ignore data below horizon", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true, then numerical element pattern data points at "
-            "theta > 90 degrees are ignored.");
-    k = group + "/overlap_angle_deg";
-    declare(k, "Overlap angle [deg]", oskar_SettingsItem::DOUBLE, 9.0);
-    setTooltip(k, "The amount of overlap used for copying numerical element "
-            "pattern data for phi < 0 and phi > 360 degrees. Use carefully "
-            "to minimise discontinuity at phi = 0.");
-    k = group + "/weight_boundaries";
-    declare(k, "Weighting at boundaries", oskar_SettingsItem::DOUBLE, 2.0);
-    setTooltip(k, "The weight given to numerical element pattern data at "
-            "phi = 0 and phi = 360 degrees, relative to 1.0. Use "
-            "carefully to minimise discontinuity at phi = 0.");
-    k = group + "/weight_overlap";
-    declare(k, "Weighting in overlap region", oskar_SettingsItem::DOUBLE, 1.0);
-    setTooltip(k, "The weight given to numerical element pattern data at "
-            "phi < 0 and phi > 360 degrees, relative to 1.0. Use "
-            "carefully to minimise discontinuity at phi = 0.");
-    //registerSetting("telescope/station/element_fit/use_common_set", "Use common set", oskar_SettingsItem::BOOL, true);
-
-    group = "telescope/station/element_fit/all";
-    setLabel(group, "Common settings (used for all surfaces)");
-    k = group + "/search_for_best_fit";
-    declare(k, "Search for best fit", oskar_SettingsItem::BOOL, true);
-    setTooltip(k, "If true (the default), then any numerical element pattern "
-            "data will be fitted with smoothing splines, where the smoothness "
-            "factor is selected to give the requested average fractional "
-            "error. If false, the supplied smoothness factor is used instead.");
-    k = group + "/average_fractional_error";
-    declare(k, "Average fractional error", oskar_SettingsItem::DOUBLE, 0.02);
-    setTooltip(k, "The target average fractional error between the fitted "
-            "surface and the numerical element pattern input data. "
-            "Choose this value carefully. A value that is too small may "
-            "introduce fitting artefacts, or may cause the fitting procedure "
-            "to fail. A value that is too large will cause detail to be lost "
-            "in the fitted surface.");
-    k = group + "/average_fractional_error_factor_increase";
-    declare(k, "Average fractional error factor increase", oskar_SettingsItem::DOUBLE, 1.5);
-    setTooltip(k, "If the fitting procedure fails, this value gives the "
-            "factor by which to increase the allowed average fractional "
-            "error between the fitted surface and the numerical element "
-            "pattern input data, before trying again. Must be > 1.0.");
-    k = group + "/eps_float";
-    declare(k, "Epsilon (single precision)", oskar_SettingsItem::DOUBLE, 1e-4);
-    setTooltip(k, "The value of epsilon used for fitting in single precision. "
-            "Suggested value approx. 1e-04.");
-    k = group + "/eps_double";
-    declare(k, "Epsilon (double precision)", oskar_SettingsItem::DOUBLE, 1e-8);
-    setTooltip(k, "The value of epsilon used for fitting in double precision. "
-            "Suggested value approx. 1e-08.");
-    k = group + "/smoothness_factor_override";
-    declare(k, "Smoothness factor override", oskar_SettingsItem::DOUBLE, 1.0);
-    setTooltip(k, "Smoothness factor used to fit smoothing splines to "
-            "numerical element pattern data, if not searching for a "
-            "best fit. Use only if you really know what you're doing!");
-
-    k = "telescope/output_config_directory";
-    declare(k, "Output telescope directory", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip(k, "Path used to save the final telescope model directory, "
-            "excluding any element pattern data (useful for debugging). "
-            "Leave blank if not required.");
-}
-
-void oskar_SettingsModelApps::init_settings_telescope_model2()
 {
     QString k, root, group;
     QStringList options;
@@ -671,6 +473,9 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
 
     k = root + "/station_type";
     declare(k, "Station type", QStringList() << "Aperture array" << "Gaussian beam");
+    setTooltip(k, "The type of each station in the interferometer. A simple, "
+            "time-invariant Gaussian station beam can be used instead of an "
+            "aperture array beam if required for testing.");
 
     // Aperture array settings.
     group = root + "/aperture_array";
@@ -699,8 +504,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     setLabel(group, "Element settings (overrides)");
     setDependency(group, k_enable_array, true);
 //    k = group + "/apodisation_type";
-//    declare(k, "Apodisation type", QStringList() << "None"
-//            << "Hann" << "Hamming" << "(etc)");
+//    declare(k, "Apodisation type", QStringList() << "None");
     k = group + "/gain";
     declare(k, "Element gain", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Mean element amplitude gain factor. "
@@ -775,9 +579,9 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     // Element pattern numerical option.
     QString k_numerical = group + "/enable_numerical";
     declare(k_numerical, "Enable numerical patterns if present", oskar_SettingsItem::BOOL, true);
-    setTooltip(k_numerical, "Make use of any available numerical element "
-            "pattern files. If numerical pattern data are missing, the "
-            "functional type will be used instead.");
+    setTooltip(k_numerical, "If <b>true</b>, make use of any available "
+            "numerical element pattern files. If numerical pattern data "
+            "are missing, the functional type will be used instead.");
 
     // Element pattern fitting parameters.
     group = root + "/aperture_array/element_pattern/fit";
@@ -850,19 +654,28 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     k = group + "/type";
     declare(k, "Tapering type", QStringList() << "None"
             << "Cosine" << "Gaussian");
+    setTooltip(k, "The type of tapering function to apply to the element "
+            "pattern.");
     k = group + "/cosine_power";
-    declare(k, "Cosine power", oskar_SettingsItem::DOUBLE);
+    declare(k, "Cosine power", oskar_SettingsItem::DOUBLE, 1.0);
     setDependency(k, group + "/type", "Cosine");
+    setTooltip(k, "If a cosine element taper is selected, this setting gives "
+            "the power of the cosine function.");
     k = group + "/gaussian_fwhm_deg";
-    declare(k, "Gaussian FWHM [deg]", oskar_SettingsItem::DOUBLE);
+    declare(k, "Gaussian FWHM [deg]", oskar_SettingsItem::DOUBLE, 45.0);
     setDependency(k, group + "/type", "Gaussian");
+    setTooltip(k, "If a Gaussian element taper is selected, this setting gives "
+            "the full-width half maximum value of the Gaussian, in degrees.");
 
     // Gaussian beam settings.
     group = root + "/gaussian_beam";
     setLabel(group, "Gaussian station beam settings");
     setDependency(group, root + "/station_type", "Gaussian beam");
     k = group + "/fwhm_deg";
-    declare(k, "Gaussian FWHM [deg]", oskar_SettingsItem::DOUBLE);
+    declare(k, "Gaussian FWHM [deg]", oskar_SettingsItem::DOUBLE, 1.0);
+    setTooltip(k, "For stations using a simple Gaussian beam, this setting "
+            "gives the full-width half maximum value of the Gaussian "
+            "station beam, in degrees.");
 
     // Output directory.
     k = root + "/output_directory";
@@ -925,11 +738,11 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             setDependency(key, root, options[3]);
             setTooltip(key, "Number of frequencies.");
             key = root + "/start";
-            declare(key, "Start frequency (Hz)", oskar_SettingsItem::DOUBLE);
+            declare(key, "Start frequency [Hz]", oskar_SettingsItem::DOUBLE);
             setDependency(key, root, options[3]);
             setTooltip(key, "Start frequency, in Hz.");
             key = root + "/inc";
-            declare(key, "Frequency increment (Hz)", oskar_SettingsItem::DOUBLE);
+            declare(key, "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
             setDependency(key, root, options[3]);
             setTooltip(key, "End frequency, in Hz.");
         }
@@ -986,11 +799,11 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 setDependency(key, root, options[1]);
                 setTooltip(key, "RMS flux density data file.");
                 key = root + "/start";
-                declare(key, "Start (Jy)", oskar_SettingsItem::DOUBLE);
+                declare(key, "Start [Jy]", oskar_SettingsItem::DOUBLE);
                 setDependency(key, root, options[2]);
                 setTooltip(key, "RMS flux density range start value, in Jy.");
                 key = root + "/end";
-                declare(key, "End (Jy)", oskar_SettingsItem::DOUBLE);
+                declare(key, "End [Jy]", oskar_SettingsItem::DOUBLE);
                 setDependency(key, root, options[2]);
                 setTooltip(key, "RMS flux density range end value, in Jy.");
             }
@@ -1023,11 +836,11 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 setDependency(key, root, options[1]);
                 setTooltip(key, "Data file containing noise sensitivity value(s).");
                 key = root + "/start";
-                declare(key, "Start (Jy)", oskar_SettingsItem::DOUBLE);
+                declare(key, "Start [Jy]", oskar_SettingsItem::DOUBLE);
                 setDependency(key, root, options[2]);
                 setTooltip(key, "Sensitivity range start value, in Jy.");
                 key = root  + "/end";
-                declare(key, "End (Jy)", oskar_SettingsItem::DOUBLE);
+                declare(key, "End [Jy]", oskar_SettingsItem::DOUBLE);
                 setDependency(key, root, options[2]);
                 setTooltip(key, "Sensitivity range end value, in Jy.");
             }
@@ -1066,11 +879,11 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                     setDependency(key, root, options[1]);
                     setTooltip(key, "Data file containing system temperature value(s).");
                     key = root + "/start";
-                    declare(key, "Start (K)", oskar_SettingsItem::DOUBLE);
+                    declare(key, "Start [K]", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
                     setTooltip(key, "System temperature range start value, in K.");
                     key = root + "/end";
-                    declare(key, "End (K)", oskar_SettingsItem::DOUBLE);
+                    declare(key, "End [K]", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
                     setTooltip(key, "System temperature range end value, in K.");
                 }
@@ -1102,12 +915,12 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                     setDependency(key, root, options[1]);
                     setTooltip(key, "Data file containing effective area value(s).");
                     key = root + "/start";
-                    declare(key, "Start (square metres)", oskar_SettingsItem::DOUBLE);
+                    declare(key, "Start [square metres]", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
                     setTooltip(key, "Effective area range start value, in "
                             "m<sup>2</sup>.");
                     key = root + "/end";
-                    declare(key, "End (square metres)", oskar_SettingsItem::DOUBLE);
+                    declare(key, "End [square metres]", oskar_SettingsItem::DOUBLE);
                     setDependency(key, root, options[2]);
                     setTooltip(key, "Effective area range end value, in "
                             "m<sup>2</sup>.");
@@ -1262,6 +1075,7 @@ void oskar_SettingsModelApps::init_settings_beampattern()
 #endif
 }
 
+
 void oskar_SettingsModelApps::init_settings_image()
 {
     QString k, group;
@@ -1359,8 +1173,6 @@ void oskar_SettingsModelApps::init_settings_image()
     declare(k, "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to the input OSKAR visibility data file.");
 
-    // TODO update documentation on these settings.
-    // TODO nest options somehow..?
     k = group + "/root";
     declare(k, "Output image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path consisting of the root of the image filename "

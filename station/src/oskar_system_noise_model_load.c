@@ -26,8 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#include "station/oskar_system_noise_model_load_cst.h"
+#include "station/oskar_system_noise_model_load.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
@@ -40,9 +39,7 @@
 extern "C" {
 #endif
 
-/* FIXME Why is this called _cst? (Should it be _csv?) */
-
-int oskar_system_noise_model_load_cst(oskar_Mem* mem, const char* filename)
+int oskar_system_noise_model_load(oskar_Mem* mem, const char* filename)
 {
     int status = OSKAR_SUCCESS, n = 0;
     char* line = NULL;
@@ -112,7 +109,6 @@ int oskar_system_noise_model_load_cst(oskar_Mem* mem, const char* filename)
 
     return status;
 }
-
 
 #ifdef __cplusplus
 }

@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_STATION_BEAM_AA_H_
-#define OSKAR_EVALUATE_STATION_BEAM_AA_H_
+#ifndef OSKAR_EVALUATE_STATION_BEAM_APERTURE_ARRAY_H_
+#define OSKAR_EVALUATE_STATION_BEAM_APERTURE_ARRAY_H_
 
 /**
- * @file oskar_evaluate_station_beam_AA.h
+ * @file oskar_evaluate_station_beam_aperture_array.h
  */
 
 #include "oskar_global.h"
@@ -44,8 +44,8 @@ extern "C" {
 #endif
 
 /**
- * @brief Evaluates the station beam (E-Jones) for an aperture array (AA)
- * station.
+ * @brief
+ * Evaluates the station beam (E-Jones) for an aperture array station.
  *
  * @details
  * The beam is evaluated at points defined by the horizontal Cartesian
@@ -75,7 +75,7 @@ extern "C" {
  * @param[in]     work          Structure containing temporary work buffers
  * @param[in]     curand_states Array of CUDA random number states used
  *                              for various station model errors.
- * @param[in/out] status        OSKAR status code.
+ * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
@@ -84,9 +84,8 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         const oskar_Mem* z, oskar_WorkStationBeam* work,
         oskar_CurandState* curand_states, int* status);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_STATION_BEAM_AA_H_ */
+#endif /* OSKAR_EVALUATE_STATION_BEAM_APERTURE_ARRAY_H_ */
