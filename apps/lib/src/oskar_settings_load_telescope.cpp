@@ -98,6 +98,13 @@ int oskar_settings_load_telescope(oskar_SettingsTelescope* tel,
             s.beginGroup("element");
             {
                 oskar_SettingsArrayElement* ae = &aa->array_pattern.element;
+
+                temp = s.value("apodisation_type", "None").toString();
+                if (temp.startsWith("N", Qt::CaseInsensitive))
+                    ae->apodisation_type = 0;
+                else
+                    return OSKAR_ERR_SETTINGS_TELESCOPE;
+
                 ae->gain = s.value("gain", 0.0).toDouble();
                 ae->gain_error_fixed =
                         s.value("gain_error_fixed", 0.0).toDouble();

@@ -122,10 +122,14 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
 
     /* GSM file settings. */
     depth = 1;
-    LVS0("Input GSM file", s->sky.gsm_file);
-    ++depth;
-    oskar_log_settings_sky_filter(log, depth, &s->sky.gsm_filter);
-    oskar_log_settings_sky_extended(log, depth, &s->sky.gsm_extended_sources);
+    if (s->sky.gsm_file)
+    {
+        LVS0("Input GSM file", s->sky.gsm_file);
+        ++depth;
+        oskar_log_settings_sky_filter(log, depth, &s->sky.gsm_filter);
+        oskar_log_settings_sky_extended(log, depth,
+                &s->sky.gsm_extended_sources);
+    }
 
     /* Random power-law generator settings. */
     depth = 1;
@@ -201,7 +205,7 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
     LV("Frequency inc [Hz]", "%.3e", s->obs.frequency_inc_hz);
     LV("Start time (MJD)", "%f", s->obs.start_mjd_utc);
     LV("Num. time steps", "%d", s->obs.num_time_steps);
-    LV("Length [sec]", "%f", s->obs.length_seconds);
+    LV("Length [sec]", "%.1f", s->obs.length_seconds);
 }
 
 
@@ -415,8 +419,8 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
     oskar_log_message(log, depth, "Interferometer settings");
     depth = 1;
 
-    LV("Channel bandwidth [Hz]", "%f", s->interferometer.channel_bandwidth_hz);
-    LV("Time average [sec]", "%f", s->interferometer.time_average_sec);
+    LV("Channel bandwidth [Hz]", "%.3e", s->interferometer.channel_bandwidth_hz);
+    LV("Time average [sec]", "%.2f", s->interferometer.time_average_sec);
     LVI("Num. visibility ave.", s->interferometer.num_vis_ave);
     LVI("Num. fringe ave.", s->interferometer.num_fringe_ave);
     LVB("Use common sky (short baseline approximation)",
