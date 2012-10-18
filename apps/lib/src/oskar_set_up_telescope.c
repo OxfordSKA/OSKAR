@@ -157,6 +157,19 @@ static void set_metadata(oskar_TelescopeModel *telescope, const oskar_Settings* 
         telescope->station[i].use_polarised_elements =
                 !(aa->element_pattern.functional_type ==
                         OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC);
+
+        /* Set element pattern data, if element structure exists. */
+        if (telescope->station[i].element_pattern)
+        {
+            telescope->station[i].element_pattern->type =
+                    aa->element_pattern.functional_type;
+            telescope->station[i].element_pattern->taper_type =
+                    aa->element_pattern.taper.type;
+            telescope->station[i].element_pattern->cos_power =
+                    aa->element_pattern.taper.cosine_power;
+            telescope->station[i].element_pattern->gaussian_fwhm_rad =
+                    aa->element_pattern.taper.gaussian_fwhm_rad;
+        }
     }
 }
 

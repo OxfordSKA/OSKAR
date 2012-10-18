@@ -54,6 +54,12 @@ void oskar_curand_state_init(oskar_CurandState* state, int num_states,
         return;
     }
 
+    /* Initialise. */
+    state->state = 0;
+    state->num_states = 0;
+    if (num_states == 0)
+        return;
+
     /* Allocate memory for states. */
     cudaMalloc((void**)&(state->state), num_states * sizeof(curandStateXORWOW));
     state->num_states = num_states;

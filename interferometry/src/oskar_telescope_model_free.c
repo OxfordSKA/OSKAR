@@ -58,6 +58,7 @@ void oskar_telescope_model_free(oskar_TelescopeModel* telescope, int* status)
     /* Free the station array. */
     free(telescope->station);
     telescope->station = NULL;
+    telescope->num_stations = 0;
 }
 
 #ifdef __cplusplus

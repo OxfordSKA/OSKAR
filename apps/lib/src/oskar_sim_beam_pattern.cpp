@@ -32,6 +32,9 @@
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "fits/oskar_fits_image_write.h"
 #include "interferometry/oskar_TelescopeModel.h"
+#include "interferometry/oskar_telescope_model_copy.h"
+#include "interferometry/oskar_telescope_model_free.h"
+#include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
 #include "imaging/oskar_Image.h"
@@ -44,6 +47,8 @@
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "station/oskar_evaluate_station_beam.h"
+#include "station/oskar_work_station_beam_free.h"
+#include "station/oskar_work_station_beam_init.h"
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_log_error.h"
@@ -52,8 +57,10 @@
 #include "utility/oskar_log_settings.h"
 #include "utility/oskar_Log.h"
 #include "utility/oskar_Mem.h"
-#include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_copy.h"
+#include "utility/oskar_mem_free.h"
+#include "utility/oskar_mem_init.h"
+#include "utility/oskar_mem_insert.h"
 #include "utility/oskar_mem_type_check.h"
 #include "utility/oskar_Settings.h"
 #include "utility/oskar_settings_free.h"
@@ -187,26 +194,28 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
     // All GPU memory used within these braces.
     {
-        // Copy telescope model to GPU.
-        oskar_TelescopeModel tel_gpu(&tel_cpu, OSKAR_LOCATION_GPU);
+        oskar_Mem RA, Dec, beam_pattern, l, m, n;
+        oskar_WorkStationBeam work;
 
         // Copy RA and Dec to GPU.
-        oskar_Mem RA(&RA_cpu, OSKAR_LOCATION_GPU);
-        oskar_Mem Dec(&Dec_cpu, OSKAR_LOCATION_GPU);
+        oskar_mem_init(&RA, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
+        oskar_mem_init(&Dec, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
+        oskar_mem_copy(&RA, &RA_cpu, &err);
+        oskar_mem_copy(&Dec, &Dec_cpu, &err);
 
-        // Declare work array and GPU memory for a beam pattern.
-        oskar_WorkStationBeam work(type, OSKAR_LOCATION_GPU);
-        oskar_Mem beam_pattern(beam_pattern_data_type, OSKAR_LOCATION_GPU,
-                num_pixels);
-        oskar_Mem l(type, OSKAR_LOCATION_GPU);
-        oskar_Mem m(type, OSKAR_LOCATION_GPU);
-        oskar_Mem n(type, OSKAR_LOCATION_GPU);
+        // Initialise work array and GPU memory for a beam pattern.
+        oskar_work_station_beam_init(&work, type, OSKAR_LOCATION_GPU, &err);
+        oskar_mem_init(&beam_pattern, beam_pattern_data_type,
+                OSKAR_LOCATION_GPU, num_pixels, 1, &err);
+        oskar_mem_init(&l, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
+        oskar_mem_init(&m, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
+        oskar_mem_init(&n, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
 
         // Evaluate source relative l,m,n values if not an aperture array.
-        if (tel_gpu.station[station_id].station_type != OSKAR_STATION_TYPE_AA)
+        if (tel_cpu.station[station_id].station_type != OSKAR_STATION_TYPE_AA)
         {
             oskar_ra_dec_to_rel_lmn(num_pixels, &RA, &Dec,
-                    tel_gpu.ra0_rad, tel_gpu.dec0_rad, &l, &m, &n,
+                    tel_cpu.ra0_rad, tel_cpu.dec0_rad, &l, &m, &n,
                     &err);
         }
 
@@ -215,38 +224,45 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         timer.start();
         for (int c = 0; c < num_channels; ++c)
         {
-            // Initialise the random number generator.
             oskar_CurandState curand_state;
-            oskar_curand_state_init(&curand_state, tel_gpu.max_station_size,
-                    tel_gpu.seed_time_variable_station_element_errors, 0, 0,
+            oskar_TelescopeModel telescope;
+            oskar_StationModel* station;
+            double frequency;
+
+            // Initialise local data structures.
+            oskar_curand_state_init(&curand_state, tel_cpu.max_station_size,
+                    tel_cpu.seed_time_variable_station_element_errors, 0, 0,
                     &err);
 
             // Get the channel frequency.
-            double frequency = settings.obs.start_frequency_hz +
+            frequency = settings.obs.start_frequency_hz +
                     c * settings.obs.frequency_inc_hz;
             oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                     c + 1, num_channels, frequency / 1e6);
 
             // Copy the telescope model and scale coordinates to radians.
-            oskar_TelescopeModel telescope(&tel_gpu, OSKAR_LOCATION_GPU);
+            oskar_telescope_model_init(&telescope, type, OSKAR_LOCATION_GPU,
+                    tel_cpu.num_stations, &err);
+            oskar_telescope_model_copy(&telescope, &tel_cpu, &err);
             oskar_telescope_model_multiply_by_wavenumber(&telescope,
                     frequency, &err);
-
-            // Get pointer to the station.
-            oskar_StationModel* station = &(telescope.station[station_id]);
-            int station_type = station->station_type;
 
             // Loop over times.
             for (int t = 0; t < num_times; ++t)
             {
+                double beam_l, beam_m, beam_n, t_dump, gast;
+
+                // Check error code.
+                if (err) continue;
+
                 // Start time for the data dump, in MJD(UTC).
                 oskar_log_message(log, 1, "Snapshot %4d/%d",
                         t+1, num_times);
-                double t_dump = obs_start_mjd_utc + t * dt_dump;
-                double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+                t_dump = obs_start_mjd_utc + t * dt_dump;
+                gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
                 // Evaluate horizontal l,m,n for beam phase centre and sources.
-                double beam_l, beam_m, beam_n;
+                station = &(telescope.station[station_id]);
                 oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
                         &beam_n, station, gast, &err);
                 oskar_evaluate_source_horizontal_lmn(num_pixels,
@@ -254,7 +270,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                         station, gast, &err);
 
                 // Evaluate the station beam.
-                if (station_type == OSKAR_STATION_TYPE_AA)
+                if (station->station_type == OSKAR_STATION_TYPE_AA)
                 {
                     oskar_evaluate_station_beam(&beam_pattern, station,
                             beam_l, beam_m, beam_n, num_pixels,
@@ -262,7 +278,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                             &work.hor_x, &work.hor_y, &work.hor_z,
                             &work.hor_z, &work, &curand_state, &err);
                 }
-                else if (station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
+                else if (station->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
                 {
                     oskar_evaluate_station_beam(&beam_pattern, station,
                             beam_l, beam_m, beam_n, num_pixels,
@@ -276,7 +292,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
                 // Copy beam pattern back to host memory.
                 oskar_mem_copy(&beam_cpu, &beam_pattern, &err);
-                if (err) return err;
+                if (err) continue;
 
                 // Save complex beam pattern data in the right order.
                 // Cube has dimension order (from slowest to fastest):
@@ -327,12 +343,25 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
             } // Time loop
 
-            // Free the CURAND state memory.
+            // Free memory.
             oskar_curand_state_free(&curand_state, &err);
+            oskar_telescope_model_free(&telescope, &err);
         } // Channel loop
+
+        // Free memory.
+        oskar_mem_free(&RA, &err);
+        oskar_mem_free(&Dec, &err);
+        oskar_mem_free(&beam_pattern, &err);
+        oskar_mem_free(&l, &err);
+        oskar_mem_free(&m, &err);
+        oskar_mem_free(&n, &err);
+        oskar_work_station_beam_free(&work, &err);
     } // GPU memory section
     oskar_log_section(log, "Simulation completed in %.3f sec.",
             timer.elapsed() / 1e3);
+
+    // Check error code.
+    if (err) return err;
 
     // Write out complex data if required.
     if (settings.beam_pattern.oskar_image_complex)

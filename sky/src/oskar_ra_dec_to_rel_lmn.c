@@ -30,6 +30,7 @@
 #include "sky/oskar_ra_dec_to_rel_lmn_cuda.h"
 #include "math/oskar_sph_to_lm.h"
 #include "sky/oskar_lm_to_n.h"
+#include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_cuda_check_error.h"
 #include <math.h>
 

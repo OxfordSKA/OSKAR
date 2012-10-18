@@ -698,9 +698,9 @@ void oskar_SettingsModelApps::init_settings_telescope_model2()
     group = root + "/aperture_array/array_pattern/element";
     setLabel(group, "Element settings (overrides)");
     setDependency(group, k_enable_array, true);
-    k = group + "/apodisation_type";
-    declare(k, "Apodisation type", QStringList() << "None"
-            << "Hann" << "Hamming" << "(etc)");
+//    k = group + "/apodisation_type";
+//    declare(k, "Apodisation type", QStringList() << "None"
+//            << "Hann" << "Hamming" << "(etc)");
     k = group + "/gain";
     declare(k, "Element gain", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Mean element amplitude gain factor. "
