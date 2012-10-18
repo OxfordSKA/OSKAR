@@ -31,17 +31,14 @@
 #include "apps/lib/oskar_set_up_telescope.h"
 #include "apps/lib/oskar_sim_beam_pattern.h"
 #include "fits/oskar_fits_image_write.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_telescope_model_copy.h"
 #include "interferometry/oskar_telescope_model_free.h"
 #include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_multiply_by_wavenumber.h"
 #include "imaging/oskar_evaluate_image_lm_grid.h"
-#include "imaging/oskar_Image.h"
 #include "imaging/oskar_image_resize.h"
 #include "imaging/oskar_image_write.h"
 #include "math/oskar_sph_from_lm.h"
-#include "sky/oskar_SkyModel.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_ra_dec_to_rel_lmn.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
@@ -55,8 +52,6 @@
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
 #include "utility/oskar_log_settings.h"
-#include "utility/oskar_Log.h"
-#include "utility/oskar_Mem.h"
 #include "utility/oskar_mem_copy.h"
 #include "utility/oskar_mem_free.h"
 #include "utility/oskar_mem_init.h"
@@ -207,9 +202,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
         oskar_work_station_beam_init(&work, type, OSKAR_LOCATION_GPU, &err);
         oskar_mem_init(&beam_pattern, beam_pattern_data_type,
                 OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_mem_init(&l, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_mem_init(&m, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
-        oskar_mem_init(&n, type, OSKAR_LOCATION_GPU, num_pixels, 1, &err);
+        oskar_mem_init(&l, type, OSKAR_LOCATION_GPU, 0, 1, &err);
+        oskar_mem_init(&m, type, OSKAR_LOCATION_GPU, 0, 1, &err);
+        oskar_mem_init(&n, type, OSKAR_LOCATION_GPU, 0, 1, &err);
 
         // Evaluate source relative l,m,n values if not an aperture array.
         if (tel_cpu.station[station_id].station_type != OSKAR_STATION_TYPE_AA)
