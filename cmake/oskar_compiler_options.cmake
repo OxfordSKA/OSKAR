@@ -20,6 +20,8 @@ set(BUILD_SHARED_LIBS ON)
 # Set general compiler flags.
 # ------------------------------------------------------------------------------
 if (NOT WIN32)
+    #set(CMAKE_CXX_FLAGS_RELEASE "-O2 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT -fvisibility=hidden")
+    #set(CMAKE_C_FLAGS_RELEASE   "-O2 -fPIC -DNDEBUG -fvisibility=hidden")
     set(CMAKE_CXX_FLAGS_RELEASE "-O2 -fPIC -DNDEBUG -DQT_NO_DEBUG -DQT_NO_DEBUG_OUTPUT")
     set(CMAKE_C_FLAGS_RELEASE   "-O2 -fPIC -DNDEBUG")
 
@@ -27,6 +29,7 @@ if (NOT WIN32)
     set(CMAKE_C_FLAGS_DEBUG   "-O0 -fPIC -g -Wall")
 
     if (CMAKE_COMPILER_IS_GNUCC)
+        #set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fvisibility=hidden")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wextra")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pedantic")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wcast-align")
@@ -37,6 +40,7 @@ if (NOT WIN32)
     endif ()
 
     if (CMAKE_COMPILER_IS_GNUCXX)
+        #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fvisibility=hidden")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wextra")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pedantic")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcast-align")
@@ -47,11 +51,13 @@ if (NOT WIN32)
     endif ()
 
     if (${CMAKE_C_COMPILER} MATCHES "icc.*$")
+        set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -Wcheck")
         set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -wd2259")
         set(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -wd1125")
     endif ()
 
     if (${CMAKE_CXX_COMPILER} MATCHES "icpc.*$")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wcheck")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd2259")
         set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -wd1125")
     endif ()

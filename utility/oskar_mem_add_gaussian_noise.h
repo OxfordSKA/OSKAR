@@ -40,6 +40,7 @@
 extern "C" {
 #endif
 
+OSKAR_EXPORT
 void oskar_mem_add_gaussian_noise(oskar_Mem* mem, double stddev, double mean,
         int* status);
 
