@@ -33,6 +33,8 @@
  * @file oskar_ms_append_vis1.h
  */
 
+#include "oskar_global.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -59,6 +61,7 @@ extern "C" {
  * @param[in] interval The visibility interval length in seconds.
  * @param[in] times The times at which each visibility is taken.
  */
+OSKAR_MS_EXPORT
 void oskar_ms_append_vis1(const char* name, int nv, const double* u,
         const double* v, const double* w, const double* vis, const int* ant1,
         const int* ant2, double exposure, double interval,

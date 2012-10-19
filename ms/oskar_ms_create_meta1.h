@@ -33,6 +33,8 @@
  * @file oskar_ms_create_meta1.h
  */
 
+#include "oskar_global.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -55,6 +57,7 @@ extern "C" {
  * @param[in] az The antenna z positions in metres, in ITRS frame (length na).
  * @param[in] freq The observing frequency, in Hertz.
  */
+OSKAR_MS_EXPORT
 void oskar_ms_create_meta1(const char* name, double ra, double dec,
         int na, const double* ax, const double* ay, const double* az,
         double freq);
