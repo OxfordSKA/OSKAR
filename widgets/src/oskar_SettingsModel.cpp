@@ -673,15 +673,15 @@ void oskar_SettingsModel::setValue(const QString& key, const QVariant& value)
     setData(idx, value, Qt::EditRole);
 }
 
-QHash<QString, QVariant> oskar_SettingsModel::settings() const
-{
-    QHash<QString, QVariant> hash;
-    foreach (oskar_SettingsItem* item, itemHash_)
-    {
-        hash.insert(item->key(), item->valueOrDefault());
-    }
-    return hash;
-}
+//QHash<QString, QVariant> oskar_SettingsModel::settings() const
+//{
+//    QHash<QString, QVariant> hash;
+//    foreach (oskar_SettingsItem* item, itemHash_)
+//    {
+//        hash.insert(item->key(), item->valueOrDefault());
+//    }
+//    return hash;
+//}
 
 QString oskar_SettingsModel::version() const
 {

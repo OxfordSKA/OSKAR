@@ -103,7 +103,7 @@ public:
     void setLabel(const QString& key, const QString& label);
     void setTooltip(const QString& key, const QString& tooltip);
     void setValue(const QString& key, const QVariant& value);
-    QHash<QString, QVariant> settings() const;
+    //QHash<QString, QVariant> settings() const;
     QString version() const;
 
 private:
