@@ -569,7 +569,6 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     setLabel(group, "Element pattern settings");
 
     // Element pattern functional type.
-    group = root + "/aperture_array/element_pattern";
     k = group + "/functional_type";
     declare(k, "Functional pattern type", QStringList() << "Geometric dipole"
             << "Isotropic (unpolarised)");
@@ -660,7 +659,7 @@ void oskar_SettingsModelApps::init_settings_telescope_model()
     declare(k, "Cosine power", oskar_SettingsItem::DOUBLE, 1.0);
     setDependency(k, group + "/type", "Cosine");
     setTooltip(k, "If a cosine element taper is selected, this setting gives "
-            "the power of the cosine function.");
+            "the power of the cosine(theta) function.");
     k = group + "/gaussian_fwhm_deg";
     declare(k, "Gaussian FWHM [deg]", oskar_SettingsItem::DOUBLE, 45.0);
     setDependency(k, group + "/type", "Gaussian");
@@ -744,7 +743,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
             key = root + "/inc";
             declare(key, "Frequency increment [Hz]", oskar_SettingsItem::DOUBLE);
             setDependency(key, root, options[3]);
-            setTooltip(key, "End frequency, in Hz.");
+            setTooltip(key, "Frequency increment, in Hz.");
         }
 
         // --- Noise values.
@@ -770,7 +769,7 @@ void oskar_SettingsModelApps::init_settings_system_noise_model(const QString& ro
                 "</ul>"
                 "<i>Note: Noise values are interpreted as a function of "
                 "frequency. The list of frequencies to which noise values "
-                "correspond, is based upon the value of the the noise frequency "
+                "correspond is based upon the value of the noise frequency "
                 "specification.</i>.");
 
         // --- RMS flux density
