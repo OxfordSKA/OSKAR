@@ -50,15 +50,16 @@ extern "C" {
  * This function initialises an empty visibility structure in CPU
  * memory, which is filled during the simulation.
  *
- * @param[in,out] vis   Pointer to empty or uninitialised visibility structure.
- * @param[in] settings  A pointer to the settings structure.
- * @param[in] telescope A pointer to the telescope model.
- * @param[in] type      The type of the visibility data (must be complex type).
+ * @param[in,out] vis    Pointer to empty or uninitialised visibility structure.
+ * @param[in] settings   A pointer to the settings structure.
+ * @param[in] telescope  A pointer to the telescope model.
+ * @param[in] type       The type of the visibility data (must be complex type).
+ * @param[in,out] status Status return code.
  */
 OSKAR_APPS_EXPORT
-int oskar_set_up_visibilities(oskar_Visibilities* vis,
+void oskar_set_up_visibilities(oskar_Visibilities* vis,
         const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
-        int type);
+        int type, int* status);
 
 #ifdef __cplusplus
 }

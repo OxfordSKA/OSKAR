@@ -42,25 +42,31 @@
 extern "C" {
 #endif
 
-int oskar_set_up_visibilities(oskar_Visibilities* vis,
+void oskar_set_up_visibilities(oskar_Visibilities* vis,
         const oskar_Settings* settings, const oskar_TelescopeModel* telescope,
-        int type)
+        int type, int* status)
 {
-    int error = 0, num_stations, num_channels;
+    int num_stations, num_channels;
 
-    /* Sanity check on inputs. */
-    if (!vis || !settings || !telescope)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!vis || !settings || !telescope || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check the type. */
     if (!oskar_mem_is_complex(type))
-        return OSKAR_ERR_BAD_DATA_TYPE;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 
     /* Initialise the global visibility structure on the CPU. */
     num_stations = telescope->num_stations;
     num_channels = settings->obs.num_channels;
     oskar_visibilities_init(vis, type, OSKAR_LOCATION_CPU,
-            num_channels, settings->obs.num_time_steps, num_stations, &error);
+            num_channels, settings->obs.num_time_steps, num_stations, status);
 
     /* Add meta-data. */
     vis->freq_start_hz = settings->obs.start_frequency_hz;
@@ -72,14 +78,12 @@ int oskar_set_up_visibilities(oskar_Visibilities* vis,
     vis->phase_centre_dec_deg = settings->obs.dec0_rad * 180.0 / M_PI;
 
     /* Add settings file path. */
-    oskar_mem_copy(&vis->settings_path, &settings->settings_path, &error);
+    oskar_mem_copy(&vis->settings_path, &settings->settings_path, status);
 
     /* Copy station coordinates from telescope model. */
-    oskar_mem_copy(&vis->x_metres, &telescope->station_x, &error);
-    oskar_mem_copy(&vis->y_metres, &telescope->station_y, &error);
-    oskar_mem_copy(&vis->z_metres, &telescope->station_z, &error);
-
-    return error;
+    oskar_mem_copy(&vis->x_metres, &telescope->station_x, status);
+    oskar_mem_copy(&vis->y_metres, &telescope->station_y, status);
+    oskar_mem_copy(&vis->z_metres, &telescope->station_z, status);
 }
 
 #ifdef __cplusplus
