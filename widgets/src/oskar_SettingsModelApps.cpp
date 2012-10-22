@@ -1172,7 +1172,7 @@ void oskar_SettingsModelApps::init_settings_image()
     declare(k, "Input OSKAR visibility data file", oskar_SettingsItem::INPUT_FILE_NAME);
     setTooltip(k, "Path to the input OSKAR visibility data file.");
 
-    k = group + "/root";
+    k = group + "/root_path";
     declare(k, "Output image root path", oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path consisting of the root of the image filename "
             "used to save the output image. The full filename will be "

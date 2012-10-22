@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -126,7 +126,7 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
     }
 
     bool overwrite = s.value("overwrite", true).toBool();
-    t = s.value("root").toByteArray();
+    t = s.value("root_path").toByteArray();
     if (t.size() > 0)
     {
         t += "_" + type;
@@ -183,25 +183,6 @@ int oskar_settings_load_image(oskar_SettingsImage* im,
             strcpy(im->oskar_image, filename.constData());
         }
     }
-
-#if 0
-    t = s.value("oskar_image_root").toByteArray();
-    if (t.size() > 0)
-    {
-        // Construct filename from root.
-        t += "_" + type + ".img";
-        im->oskar_image = (char*)malloc(t.size() + 1);
-        strcpy(im->oskar_image, t.constData());
-    }
-
-    t = s.value("fits_image_root").toByteArray();
-    if (t.size() > 0)
-    {
-        t += "_" + type + ".fits";
-        im->fits_image = (char*)malloc(t.size() + 1);
-        strcpy(im->fits_image, t.constData());
-    }
-#endif
 
     return OSKAR_SUCCESS;
 }
