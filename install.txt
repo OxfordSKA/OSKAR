@@ -1,13 +1,13 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.0-beta                                     Last update: 18 June 2012 |
+| OSKAR 2.1-beta                                  Last update: 23 October 2012 |
 +------------------------------------------------------------------------------+
 
 1. Introduction
 --------------------------------------------------------------------------------
 The OSKAR simulation package can be built and installed by following the simple
 steps described below. The build system makes use of CMake (www.cmake.org) and
-is currently targeted at LINUX systems. Mac OS X (Darwin) and Microsoft Windows
-installs may be possible, but are not currently supported.
+is currently targeted at Linux and Mac OS X systems. Installation under
+Microsoft Windows may be possible, but is not currently supported.
 
 
 2. Dependencies
@@ -70,7 +70,7 @@ These are listed below.
 
     * -DCUDA_ARCH=<arch> (default: 2.0)
         Sets the target architecture for the compilation of CUDA device code.
-        <arch> must be one of either: 1.3, 2.0, 2.1 or ALL.
+        <arch> must be one of either: 1.3, 2.0, 2.1, 3.0 or ALL.
         (Note: 1.1 architecture may also work if running in single precision,
         although this architecture isn't officially supported by OSKAR.)
 
@@ -82,58 +82,61 @@ Advanced Build Options:
     * -DCMAKE_BUILD_TYPE=<release or debug> (default: release)
         Build OSKAR in release or debug mode.
 
-    * -DLAPACK_LIB_DIR=<path> (default: searches the default system library paths)
-        Specifies a custom path in which to look for the LAPACK library (liblapack.so).
+    * -DLAPACK_LIB_DIR=<path> (default: searches the system library paths)
+        Specifies a custom path in which to look for the LAPACK library
+        (liblapack.so).
         NOTE: This should only be used in special cases, where the version
         of LAPACK installed in the system library path can't be used to build
         OSKAR.
 
-    * -DCBLAS_LIB_DIR=<path> (default: searches the default system library paths)
+    * -DCBLAS_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a custom path in which to look for the CBLAS library
-        (atlas: libcblas.so, gsl: libgslcblas.so)
+        (ATLAS: libcblas.so; GSL: libgslcblas.so).
         NOTE: This should only be used in special cases, where the version
         of CBLAS installed in the system library path can't be used to build
         OSKAR.
 
-    * -DCFITSIO_LIB_DIR=<path> (default: searches the default system library paths)
+    * -DCFITSIO_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a custom path in which to look for the CFITSIO library
-        (libcfitsio.so)
+        (libcfitsio.so).
         NOTE: This should only be used in special cases, where the version
         of CFITSIO installed in the system library path can't be used to build
         OSKAR.
 
-    * -DCFITSIO_INC_DIR=<path> (default: searches the default system include paths)
+    * -DCFITSIO_INC_DIR=<path> (default: searches the system include paths)
         Specifies a custom path in which to look for the CFITSIO library
         headers (fitsio.h and others).
         NOTE: This should only be used in special cases, where the version
-        of CFITSIO headers installed in system include path can't be used to build
-        OSKAR.
+        of CFITSIO headers installed in system include path can't be used to
+        build OSKAR.
 
-    * -DCPPUNIT_LIB_DIR=<path> (default: searches the default system library paths)
+    * -DCPPUNIT_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a custom path in which to look for the CPPUNIT library
         (libcppunit.so).
         Note: This should only be used in special cases, where the version of
-        CPPUNIT installed in the system library path can't be used to build OSKAR.
+        CPPUNIT installed in the system library path can't be used to build
+        OSKAR.
 
-    * -DCPPUNIT_INC_DIR=<path> (default: searches the default system include paths)
+    * -DCPPUNIT_INC_DIR=<path> (default: searches the system include paths)
         Specifies a custom path in which to look for the CPPUNIT library headers.
         This is the path to the top level cppunit include folder.
         Note: This should only be used in special cases, where the version of
-        CPPUNIT headers installed in system include path can't be used to build
-        OSKAR.
+        CPPUNIT headers installed in the system include path can't be used to
+        build OSKAR.
 
-    * -DCASACORE_LIB_DIR=<path> (default: searches the default system library paths)
+    * -DCASACORE_LIB_DIR=<path> (default: searches the system library paths)
         Specifies a custom path in which to look for the CasaCore libraries
         (libcasa_ms.so and others).
         Note: This should only be used in special cases, where the version of
-        CasaCore installed in the system library path can't be used to build OSKAR.
+        CasaCore installed in the system library path can't be used to build
+        OSKAR.
 
-    * -DCASACORE_INC_DIR=<path> (default: searches the default system include paths)
+    * -DCASACORE_INC_DIR=<path> (default: searches the system include paths)
         Specifies a custom path in which to look for the CasaCore library headers.
         This is the path to the top level casacore include folder.
         Note: This should only be used in special cases, where the version of
-        CasaCore headers installed in system include path can't be used to build
-        OSKAR.
+        CasaCore headers installed in system include path can't be used to
+        build OSKAR.
 
 
 3.2. Environment Variables
@@ -169,7 +172,8 @@ from the build directory:
 
 All the unit tests should pass. If any fail, please report this by copying
 the terminal output and sending it, together with a description of the hardware
-in your machine and your version of OSKAR, to the email address:
+in your machine, your operating system version and your version of OSKAR, to
+the following email address:
 
     oskar@oerc.ox.ac.uk
 

@@ -1,4 +1,4 @@
-2012-10-19  OSKAR 2.1.0-beta
+2012-10-23  OSKAR 2.1.0-beta
 
     * Fixed a bug which caused visibility data from sky model chunks containing
       no sources to be accumulated incorrectly.

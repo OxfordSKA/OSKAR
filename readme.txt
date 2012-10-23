@@ -1,5 +1,5 @@
 +------------------------------------------------------------------------------+
-| OSKAR 2.0-beta                                     Last update: 13 June 2012 |
+| OSKAR 2.1-beta                                  Last update: 23 October 2012 |
 +------------------------------------------------------------------------------+
 
 1. OSKAR: The Open Square Kilometre Array Radio Telescope Simulator
@@ -62,10 +62,6 @@ Each of the top level module folders listed above will contain the following
 folders.
 
 (module)
- |--- cudak     : CUDA kernels.
- |    |
- |    |---src
- |
  |--- src       : C/C++ source code for module.
  |
  |--- test      : module tests / unit tests.
@@ -78,11 +74,11 @@ folders.
 
 3.1 Libraries
 --------------------------------------------------------------------------------
-* oskar                 : Main OSKAR simulation library.
-* oskar_apps            : Application utility library.
-* oskar_fits            : FITS interface library.
-* oskar_ms              : Measurement set writer.
-* oskar_widgets         : Qt Widgets.
+* oskar                    : Main OSKAR simulation library.
+* oskar_apps               : Application utility library.
+* oskar_fits               : FITS interface library.
+* oskar_ms                 : Measurement Set writer.
+* oskar_widgets            : Qt Widgets.
 
 3.2 Applications
 --------------------------------------------------------------------------------
@@ -102,5 +98,5 @@ An experimental MATLAB interface consisting of functions for:
 
 3.4 Unit tests
 --------------------------------------------------------------------------------
-A number of unit test binaries are build, and can be found in the module/test
+A number of unit test binaries are built, and can be found in the module/test
 directories.
