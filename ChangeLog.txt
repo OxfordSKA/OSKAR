@@ -1,3 +1,8 @@
+2012-xx-yy  OSKAR 2.1.1-beta
+
+    * Added option to use all CUDA devices found on the system, instead of
+      specifying the list of device IDs. This is now the default behaviour.
+
 2012-10-23  OSKAR 2.1.0-beta
 
     * Fixed a bug which caused visibility data from sky model chunks containing

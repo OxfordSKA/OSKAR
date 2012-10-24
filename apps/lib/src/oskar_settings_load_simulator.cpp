@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,8 @@
 
 #include "apps/lib/oskar_settings_load_simulator.h"
 
+#include <cuda_runtime_api.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -51,11 +53,33 @@ int oskar_settings_load_simulator(oskar_SettingsSimulator* sim,
 
     // Get the device IDs to use.
     QStringList devsList;
-    QVariant devs = s.value("cuda_device_ids", "0");
-    if (devs.type() == QVariant::StringList)
-        devsList = devs.toStringList();
-    else if (devs.type() == QVariant::String)
-        devsList = devs.toString().split(",");
+    QVariant devs = s.value("cuda_device_ids", "all");
+    if (devs.toString() == "all")
+    {
+        int num_devices = 0;
+
+        // Query the number of devices in the system.
+        cudaError_t error = cudaGetDeviceCount(&num_devices);
+        if (error != cudaSuccess || num_devices == 0)
+        {
+            fprintf(stderr, "Unable to determine number of CUDA devices: %s\n",
+                    cudaGetErrorString(error));
+            return error;
+        }
+
+        // Append all device IDs to device list.
+        for (int i = 0; i < num_devices; ++i)
+        {
+            devsList.append(QString::number(i));
+        }
+    }
+    else
+    {
+        if (devs.type() == QVariant::StringList)
+            devsList = devs.toStringList();
+        else if (devs.type() == QVariant::String)
+            devsList = devs.toString().split(",");
+    }
     sim->num_cuda_devices = devsList.size();
     sim->cuda_device_ids = (int*)malloc(devsList.size() * sizeof(int));
     for (int i = 0; i < devsList.size(); ++i)

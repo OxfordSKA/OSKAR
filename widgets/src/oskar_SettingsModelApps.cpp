@@ -98,9 +98,9 @@ void oskar_SettingsModelApps::init_settings_simulator()
     setTooltip(k, "Maximum number of sources processed concurrently on a "
             "single GPU.");
     k = group + "/cuda_device_ids";
-    declare(k, "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST, 0);
+    declare(k, "CUDA device IDs to use", oskar_SettingsItem::INT_CSV_LIST, "all");
     setTooltip(k, "A comma-separated string containing device (GPU) IDs to "
-            "use on a multi-GPU system.");
+            "use on a multi-GPU system, or 'all' to use all devices.");
 }
 
 
