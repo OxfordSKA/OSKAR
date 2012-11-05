@@ -41,7 +41,7 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
     int arch, device_count = 0;
     cudaError_t error;
     struct cudaDeviceProp device_prop;
-    size_t total_memory, free_memory;
+    size_t total_memory = 0, free_memory = 0;
 
     /* Set CUDA device. */
     cudaSetDevice(id);
@@ -52,6 +52,7 @@ void oskar_cuda_device_info_scan(oskar_CudaDeviceInfo* device, int id)
     device->compute.capability.minor = 0;
     device->supports_double = 0;
     device->global_memory_size = 0;
+    device->free_memory = 0;
     device->num_multiprocessors = 0;
     device->num_cores = 0;
     device->gpu_clock = 0;
