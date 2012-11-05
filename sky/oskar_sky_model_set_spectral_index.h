@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,26 +26,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_EVALUATE_BASELINE_NOISE_STDDEV_H_
-#define OSKAR_EVALUATE_BASELINE_NOISE_STDDEV_H_
+#ifndef OSKAR_SKY_MODEL_SET_SPECTRAL_INDEX_H_
+#define OSKAR_SKY_MODEL_SET_SPECTRAL_INDEX_H_
 
 /**
- * @file oskar_evaluate_baseline_noise_stddev.h
+ * @file oskar_sky_model_set_spectral_index.h
  */
 
 #include "oskar_global.h"
+#include "sky/oskar_SkyModel.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_evaluate_baseline_noise_stddev(double* stddev, int num_channels,
-        double* flux_density, double bandwidth, double integration_time);
-
+/**
+ * @brief
+ * Sets source spectral index data into a sky model.
+ *
+ * @details
+ * This function sets sky model data for a single source at the given index.
+ * The sky model must already be large enough to hold the source data.
+ *
+ * @param[out] sky           Pointer to sky model.
+ * @param[in] index          Source index in sky model to set.
+ * @param[in] ref_frequency  Source reference frequency in Hz.
+ * @param[in] spectral_index Source spectral index.
+ * @param[in,out] status     Status return code.
+ */
+OSKAR_EXPORT
+void oskar_sky_model_set_spectral_index(oskar_SkyModel* sky, int index,
+        double ref_frequency, double spectral_index, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_BASELINE_NOISE_STDDEV_H_ */
+#endif /* OSKAR_SKY_MODEL_SET_SPECTRAL_INDEX_H_ */

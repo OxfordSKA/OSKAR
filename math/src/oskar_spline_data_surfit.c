@@ -146,6 +146,7 @@ void oskar_spline_data_surfit(oskar_SplineData* spline, oskar_Log* log,
 
     /* Check if safe to proceed. */
     if (*status) return;
+    if (num_points <= 0) return;
 
     /* Check that parameters are within allowed ranges. */
     if (settings->average_fractional_error_factor_increase <= 1.0)

@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <mex.h>
 
 #include "oskar_global.h"
@@ -41,7 +40,6 @@
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     // Read options from MATLAB
-
     if (num_in != 9 || num_out > 1)
     {
         mexErrMsgTxt(
@@ -81,14 +79,14 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
     // Load the telescope model station layout file
     int err = OSKAR_SUCCESS;
     oskar_TelescopeModel telescope(OSKAR_DOUBLE, OSKAR_LOCATION_CPU, 0);
-    err = oskar_telescope_model_load_station_coords(&telescope, filename, lon, lat, alt);
+    oskar_telescope_model_load_station_coords(&telescope, filename,
+            lon, lat, alt, &err);
     if (err)
     {
         mexErrMsgIdAndTxt("OSKAR:error",
                 "\nError reading OSKAR station layout file file: '%s'.\nERROR: %s.",
                 filename, oskar_get_error_string(err));
     }
-
 
     // Create data arrays to hold uvw baseline coordinates.
     int num_baselines = telescope.num_baselines();

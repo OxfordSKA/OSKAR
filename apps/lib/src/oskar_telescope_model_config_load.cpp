@@ -33,16 +33,12 @@
 #include "station/oskar_station_model_type.h"
 #include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_load_config.h"
-#include "math/oskar_random_gaussian.h"
-#include "utility/oskar_mem_set_value_real.h"
-#include "utility/oskar_log_message.h"
 #include "utility/oskar_log_error.h"
 #include "utility/oskar_get_error_string.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QStringList>
 #include <QtCore/QHash>
-#include <math.h>
 
 #include <cstdlib>
 
@@ -161,9 +157,9 @@ static int load_layout(oskar_TelescopeModel* telescope,
     QByteArray path = dir.filePath(file).toAscii();
 
     // Load the station positions.
-    error = oskar_telescope_model_load_station_coords(telescope,
+    oskar_telescope_model_load_station_coords(telescope,
             path, settings->longitude_rad, settings->latitude_rad,
-            settings->altitude_m);
+            settings->altitude_m, &error);
     if (error) return error;
 
     // Check that there are the right number of stations.

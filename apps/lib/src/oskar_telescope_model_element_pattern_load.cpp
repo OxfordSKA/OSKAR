@@ -210,21 +210,20 @@ static int load_element_patterns(oskar_Log* log, const oskar_SettingsTelescope* 
                 oskar_log_message(log, 0, "Loading CST element "
                         "pattern data (X): %s", element_file_x);
                 oskar_log_message(log, 0, "");
-                error = oskar_element_model_load_cst(station->element_pattern,
+                oskar_element_model_load_cst(station->element_pattern,
                         log, 1, element_file_x,
-                        &settings->aperture_array.element_pattern.fit);
-                if (error) return error;
+                        &settings->aperture_array.element_pattern.fit, &error);
             }
             if (element_file_y)
             {
                 oskar_log_message(log, 0, "Loading CST element "
                         "pattern data (Y): %s", element_file_y);
                 oskar_log_message(log, 0, "");
-                error = oskar_element_model_load_cst(station->element_pattern,
+                oskar_element_model_load_cst(station->element_pattern,
                         log, 2, element_file_y,
-                        &settings->aperture_array.element_pattern.fit);
-                if (error) return error;
+                        &settings->aperture_array.element_pattern.fit, &error);
             }
+            if (error) return error;
 
             // Store pointer to the element model for these files.
             models.insert(files, station->element_pattern);

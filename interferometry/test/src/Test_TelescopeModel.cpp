@@ -107,8 +107,8 @@ void Test_TelescopeModel::test_load_telescope_cpu()
                 OSKAR_LOCATION_CPU);
 
         // Fill the telescope structure.
-        status = oskar_telescope_model_load_station_coords(tel_cpu,
-                telescope_file_name, longitude, latitude, altitude);
+        oskar_telescope_model_load_station_coords(tel_cpu, telescope_file_name,
+                longitude, latitude, altitude, &status);
         CPPUNIT_ASSERT_EQUAL(0, status);
         for (int i = 0; i < n_stations; ++i)
         {

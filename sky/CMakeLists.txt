@@ -45,6 +45,7 @@ set(sky_SRC
     src/oskar_sky_model_scale_by_spectral_index.cu
     src/oskar_sky_model_set_gaussian_parameters.c
     src/oskar_sky_model_set_source.c
+    src/oskar_sky_model_set_spectral_index.c
     src/oskar_sky_model_split.c
     src/oskar_sky_model_type.c
     src/oskar_sky_model_write.c

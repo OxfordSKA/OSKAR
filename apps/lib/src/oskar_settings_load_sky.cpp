@@ -284,5 +284,17 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     // End generator group.
     s.endGroup();
 
+    // Spectral index override settings.
+    s.beginGroup("spectral_index");
+    sky->spectral_index.override = s.value("override", false).toBool();
+    sky->spectral_index.ref_frequency_hz =
+            s.value("ref_frequency_hz", 0.0).toDouble();
+    sky->spectral_index.mean = s.value("mean", 0.0).toDouble();
+    sky->spectral_index.std_dev = s.value("std_dev", 0.0).toDouble();
+    temp = s.value("seed").toString();
+    sky->spectral_index.seed = (temp.toUpper() == "TIME" ||
+            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    s.endGroup();
+
     return OSKAR_SUCCESS;
 }

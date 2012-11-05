@@ -68,16 +68,17 @@ extern "C" {
  *
  * The theta dimension is assumed to be the fastest varying.
  *
- * @param[out] data     Pointer to element model data structure to fill.
- * @param[in,out] log   Pointer to log structure to use.
- * @param[in]  filename Data file name.
- * @param[in]  port     Port number to load: 1 for X dipole, 2 for Y dipole.
- * @param[in]  settings Pointer to settings structure used for surface fitting.
+ * @param[out] data      Pointer to element model data structure to fill.
+ * @param[in,out] log    Pointer to log structure to use.
+ * @param[in]  filename  Data file name.
+ * @param[in]  port      Port number to load: 1 for X dipole, 2 for Y dipole.
+ * @param[in]  settings  Pointer to settings structure used for surface fitting.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
+void oskar_element_model_load_cst(oskar_ElementModel* data, oskar_Log* log,
         int port, const char* filename,
-        const oskar_SettingsElementFit* settings);
+        const oskar_SettingsElementFit* settings, int* status);
 
 #ifdef __cplusplus
 }

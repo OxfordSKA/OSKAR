@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,16 +59,17 @@ extern "C" {
  *
  * The geodetic longitude and latitude of the origin must also be supplied.
  *
- * @param telescope  Telescope model structure to be populated.
- * @param filename   File name path to a telescope coordinate file.
- * @param longitude  Telescope centre longitude, in radians.
- * @param latitude   Telescope centre latitude, in radians.
- * @param altitude   Telescope centre altitude, in metres.
+ * @param[in,out] telescope  Telescope model structure to be populated.
+ * @param[in] filename       File name path to a telescope coordinate file.
+ * @param[in] longitude      Telescope centre longitude, in radians.
+ * @param[in] latitude       Telescope centre latitude, in radians.
+ * @param[in] altitude       Telescope centre altitude, in metres.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
+void oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         const char* filename, double longitude, double latitude,
-        double altitude);
+        double altitude, int* status);
 
 #ifdef __cplusplus
 }

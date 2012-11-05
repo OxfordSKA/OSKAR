@@ -187,6 +187,22 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         oskar_log_settings_sky_extended(log, depth, &gen->extended_sources);
     }
 
+    /* Spectral index override settings. */
+    depth = 1;
+    if (s->sky.spectral_index.override)
+    {
+        oskar_log_message(log, depth, "Spectral index overrides");
+        ++depth;
+        LVB("Override", s->sky.spectral_index.override);
+        LV("Reference frequency [Hz]", "%.3e",
+                s->sky.spectral_index.ref_frequency_hz);
+        LV("Spectral index mean", "%.3f", s->sky.spectral_index.mean);
+        LV("Spectral index standard deviation", "%.3f",
+                s->sky.spectral_index.std_dev);
+        LVI("Random seed", s->sky.spectral_index.seed);
+        ++depth;
+    }
+
     /* Output OSKAR sky model file settings. */
     depth = 1;
     LVS0("Output OSKAR sky model text file", s->sky.output_text_file);

@@ -33,8 +33,6 @@
 #include "interferometry/oskar_telescope_model_resize.h"
 #include "interferometry/oskar_telescope_model_set_station_coords.h"
 #include "interferometry/oskar_telescope_model_type.h"
-#include "interferometry/oskar_TelescopeModel.h"
-#include "station/oskar_StationModel.h"
 #include "utility/oskar_getline.h"
 #include "utility/oskar_string_to_array.h"
 #include <stdio.h>
@@ -44,29 +42,41 @@
 extern "C" {
 #endif
 
-int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
+void oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
         const char* filename, double longitude, double latitude,
-        double altitude)
+        double altitude, int* status)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
     size_t bufsize = 0;
-    int n = 0, type = 0, err = 0;
+    int n = 0, type = 0;
     FILE* file;
 
-    /* Check that all pointers are not NULL. */
-    if (telescope == NULL || filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!telescope || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check type. */
     type = oskar_telescope_model_type(telescope);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 
     /* Open the file. */
     file = fopen(filename, "r");
     if (!file)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Store the telescope centre longitude, latitude, and altitude. */
     telescope->longitude_rad = longitude;
@@ -94,11 +104,11 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
          * telescope->num_stations = n is finally set. */
         if (telescope->num_stations <= n)
         {
-            oskar_telescope_model_resize(telescope, n + 1, &err);
-            if (err)
+            oskar_telescope_model_resize(telescope, n + 1, status);
+            if (*status)
             {
                 fclose(file);
-                return err;
+                return;
             }
         }
 
@@ -107,12 +117,12 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
                 &par[0], &par[1], &par[2], longitude, latitude, &x, &y, &z);
 
         /* Store the offset geocentric and horizon plane coordinates. */
-        err = oskar_telescope_model_set_station_coords(telescope, n, x, y, z,
-                par[0], par[1], par[2]);
-        if (err)
+        oskar_telescope_model_set_station_coords(telescope, n, x, y, z,
+                par[0], par[1], par[2], status);
+        if (*status)
         {
             fclose(file);
-            return err;
+            return;
         }
 
         /* Convert to ECEF, then to station longitude, latitude, altitude. */
@@ -136,8 +146,6 @@ int oskar_telescope_model_load_station_coords(oskar_TelescopeModel* telescope,
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);
-
-    return OSKAR_SUCCESS;
 }
 
 #ifdef __cplusplus

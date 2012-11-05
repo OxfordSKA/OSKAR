@@ -29,47 +29,64 @@
 #include "interferometry/oskar_telescope_model_save_station_coords.h"
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_type.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include <stdio.h>
-#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_save_station_coords(
-        const oskar_TelescopeModel* telescope, const char* filename)
+void oskar_telescope_model_save_station_coords(
+        const oskar_TelescopeModel* telescope, const char* filename,
+        int* status)
 {
     int i, type, location;
     FILE* file;
 
-    /* Sanity check on inputs. */
-    if (telescope == NULL || filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!telescope || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check type and location. */
     type = oskar_telescope_model_type(telescope);
     location = oskar_telescope_model_location(telescope);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
     if (location != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     /* Check coordinate units are in metres. */
     if (telescope->coord_units != OSKAR_METRES)
-        return OSKAR_ERR_BAD_UNITS;
+    {
+        *status = OSKAR_ERR_BAD_UNITS;
+        return;
+    }
 
     /* Open the file. */
     file = fopen(filename, "w");
     if (!file)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Save the position of each station. */
     fprintf(file, "# Number of stations  = %i\n", telescope->num_stations);
     fprintf(file, "# Longitude [radians] = %f\n", telescope->longitude_rad);
     fprintf(file, "# Latitude [radians]  = %f\n", telescope->latitude_rad);
     fprintf(file, "# Altitude [metres]   = %f\n", telescope->altitude_m);
-    fprintf(file, "# Local horizontal x(east), y(north), z(zenith) [metres]\n");
+    fprintf(file, "# Local horizontal x(east), y(north), z(up) [metres]\n");
     if (type == OSKAR_SINGLE)
     {
         const float *x_hor, *y_hor, *z_hor;
@@ -97,8 +114,6 @@ int oskar_telescope_model_save_station_coords(
 
     /* Close the file. */
     fclose(file);
-
-    return 0;
 }
 
 #ifdef __cplusplus

@@ -27,7 +27,6 @@
  */
 
 #include "interferometry/oskar_telescope_model_config_override.h"
-#include "interferometry/oskar_telescope_model_load_station_coords.h"
 #include "station/oskar_station_model_type.h"
 #include "math/oskar_random_gaussian.h"
 #include "utility/oskar_mem_set_value_real.h"

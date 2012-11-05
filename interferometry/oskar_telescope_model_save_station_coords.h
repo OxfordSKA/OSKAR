@@ -57,12 +57,14 @@ extern "C" {
  * and the z-axis to the local zenith. The origin is the tangent point with the
  * Earth's ellipsoid.
  *
- * @param telescope  Telescope model structure to save.
- * @param filename   File name path to a telescope coordinate file.
+ * @param[in] telescope  Telescope model structure to save.
+ * @param[in] filename   File name path to a telescope coordinate file.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_save_station_coords(
-        const oskar_TelescopeModel* telescope, const char* filename);
+void oskar_telescope_model_save_station_coords(
+        const oskar_TelescopeModel* telescope, const char* filename,
+        int* status);
 
 #ifdef __cplusplus
 }

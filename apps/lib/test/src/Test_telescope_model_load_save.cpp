@@ -115,8 +115,8 @@ void Test_telescope_model_load_save::test_1_level()
     // Populate a telescope model.
     for (int i = 0; i < num_stations; ++i)
     {
-        err = oskar_telescope_model_set_station_coords(&telescope, i,
-                0.0, 0.0, 0.0, (double) i, (double) (2 * i), (double) (3 * i));
+        oskar_telescope_model_set_station_coords(&telescope, i, 0.0, 0.0, 0.0,
+                (double) i, (double) (2 * i), (double) (3 * i), &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         oskar_station_model_resize(&telescope.station[i], num_elements, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
@@ -200,8 +200,8 @@ void Test_telescope_model_load_save::test_2_level()
     // Populate a telescope model.
     for (int i = 0; i < num_stations; ++i)
     {
-        err = oskar_telescope_model_set_station_coords(&telescope, i,
-                0.0, 0.0, 0.0, (double) i, (double) (2 * i), (double) (3 * i));
+        oskar_telescope_model_set_station_coords(&telescope, i, 0.0, 0.0, 0.0,
+                (double) i, (double) (2 * i), (double) (3 * i), &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         oskar_station_model_resize(&telescope.station[i], num_tiles, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);

@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "matlab/sky/lib/oskar_mex_sky_from_matlab_struct.h"
 #include "utility/oskar_get_error_string.h"
 #include "sky/oskar_sky_model_init.h"
@@ -39,13 +38,11 @@ static void struct_error(const char* msg)
             msg);
 }
 
-
 static void field_error(const char* msg)
 {
     mexErrMsgIdAndTxt("OSKAR:ERROR", "Invalid input sky model structure "
             "(missing field: %s).\n", msg);
 }
-
 
 void oskar_mex_sky_from_matlab_struct(oskar_SkyModel* sky, const mxArray* mxSky)
 {
@@ -75,8 +72,8 @@ void oskar_mex_sky_from_matlab_struct(oskar_SkyModel* sky, const mxArray* mxSky)
             "Q",
             "U",
             "V",
-            "spectral_index",
             "reference_freq",
+            "spectral_index",
             "FWHM_Major",
             "FWHM_Minor",
             "position_angle"
@@ -95,10 +92,10 @@ void oskar_mex_sky_from_matlab_struct(oskar_SkyModel* sky, const mxArray* mxSky)
     if (!mxU) field_error(fields[6]);
     mxArray* mxV = mxGetField(mxSky, 0, fields[7]);
     if (!mxV) field_error(fields[7]);
-    mxArray* mxSPIX = mxGetField(mxSky, 0, fields[8]);
-    if (!mxSPIX) field_error(fields[8]);
-    mxArray* mxRefFreq = mxGetField(mxSky, 0, fields[9]);
-    if (!mxRefFreq) field_error(fields[9]);
+    mxArray* mxRefFreq = mxGetField(mxSky, 0, fields[8]);
+    if (!mxRefFreq) field_error(fields[8]);
+    mxArray* mxSPIX = mxGetField(mxSky, 0, fields[9]);
+    if (!mxSPIX) field_error(fields[9]);
     mxArray* mxFWHM_Maj = mxGetField(mxSky, 0, fields[10]);
     if (!mxFWHM_Maj) field_error(fields[10]);
     mxArray* mxFWHM_Min = mxGetField(mxSky, 0, fields[11]);
@@ -126,8 +123,8 @@ void oskar_mex_sky_from_matlab_struct(oskar_SkyModel* sky, const mxArray* mxSky)
     memcpy(sky->Q.data, mxGetData(mxQ), mem_size);
     memcpy(sky->U.data, mxGetData(mxU), mem_size);
     memcpy(sky->V.data, mxGetData(mxV), mem_size);
-    memcpy(sky->spectral_index.data, mxGetData(mxSPIX), mem_size);
     memcpy(sky->reference_freq.data, mxGetData(mxRefFreq), mem_size);
+    memcpy(sky->spectral_index.data, mxGetData(mxSPIX), mem_size);
     memcpy(sky->FWHM_major.data, mxGetData(mxFWHM_Maj), mem_size);
     memcpy(sky->FWHM_minor.data, mxGetData(mxFWHM_Min), mem_size);
     memcpy(sky->position_angle.data, mxGetData(mxPA), mem_size);

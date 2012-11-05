@@ -155,6 +155,24 @@ struct OSKAR_EXPORT oskar_SettingsSkyGenerator
 typedef struct oskar_SettingsSkyGenerator oskar_SettingsSkyGenerator;
 
 /**
+ * @struct oskar_SettingsSkySpectralIndex
+ *
+ * @brief Structure to hold all sky model spectral index overrides.
+ *
+ * @details
+ * The structure holds parameters for the sky model spectral index overrides.
+ */
+struct OSKAR_EXPORT oskar_SettingsSkySpectralIndex
+{
+    int override;
+    double ref_frequency_hz;
+    double mean;
+    double std_dev;
+    int seed;
+};
+typedef struct oskar_SettingsSkySpectralIndex oskar_SettingsSkySpectralIndex;
+
+/**
  * @struct oskar_SettingsSky
  *
  * @brief Structure to hold sky model settings.
@@ -176,6 +194,8 @@ struct OSKAR_EXPORT oskar_SettingsSky
     char* output_text_file; /**< Optional name of output sky model text file. */
     char* output_binary_file; /**< Optional name of output sky model binary file. */
     oskar_SettingsSkyGenerator generator; /**< Generator parameters. */
+
+    oskar_SettingsSkySpectralIndex spectral_index; /**< Spectral index overrides. */
 
     int num_fits_files;    /**< Number of FITS files to load. */
     char** fits_file;      /**< List of FITS input sky model files. */

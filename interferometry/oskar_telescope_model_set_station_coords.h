@@ -48,19 +48,20 @@ extern "C" {
  * This function sets the coordinates of the specified station in the telescope
  * model, transferring data to the GPU if necessary.
  *
- * @param[in] dst   Telescope model structure to copy into.
- * @param[in] index Station array index to set.
- * @param[in] x     Station x position (ECEF).
- * @param[in] y     Station y position (ECEF).
- * @param[in] z     Station z position (ECEF).
- * @param[in] x_hor Station x position (horizon plane).
- * @param[in] y_hor Station y position (horizon plane).
- * @param[in] z_hor Station z position (horizon plane).
+ * @param[in] dst        Telescope model structure to copy into.
+ * @param[in] index      Station array index to set.
+ * @param[in] x          Station x position (ECEF).
+ * @param[in] y          Station y position (ECEF).
+ * @param[in] z          Station z position (ECEF).
+ * @param[in] x_hor      Station x position (horizon plane).
+ * @param[in] y_hor      Station y position (horizon plane).
+ * @param[in] z_hor      Station z position (horizon plane).
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
+void oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
         int index, double x, double y, double z,
-        double x_hor, double y_hor, double z_hor);
+        double x_hor, double y_hor, double z_hor, int* status);
 
 #ifdef __cplusplus
 }

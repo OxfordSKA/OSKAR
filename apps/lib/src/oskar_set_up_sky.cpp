@@ -32,6 +32,7 @@
 #endif
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
+#include "math/oskar_random_gaussian.h"
 #include "math/oskar_random_power_law.h"
 #include "math/oskar_random_broken_power_law.h"
 #include "sky/oskar_evaluate_gaussian_source_parameters.h"
@@ -47,6 +48,7 @@
 #include "sky/oskar_sky_model_save.h"
 #include "sky/oskar_sky_model_set_gaussian_parameters.h"
 #include "sky/oskar_sky_model_set_source.h"
+#include "sky/oskar_sky_model_set_spectral_index.h"
 #include "sky/oskar_sky_model_write.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_log_section.h"
@@ -317,6 +319,30 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
     {
         /* Perform final pre-processing on chunk set. */
         int total_sources = 0, num_extended_chunks = 0;
+
+        if (settings->sky.spectral_index.override)
+        {
+            double mean, std_dev, ref_freq, val;
+            mean = settings->sky.spectral_index.mean;
+            std_dev = settings->sky.spectral_index.std_dev;
+            ref_freq = settings->sky.spectral_index.ref_frequency_hz;
+            srand(settings->sky.spectral_index.seed);
+            oskar_log_message(log, 0, "Overriding source spectral index values...");
+            for (int i = 0; i < *num_chunks; ++i)
+            {
+                oskar_SkyModel* sky_chunk = &((*sky_chunks)[i]);
+
+                /* Override source spectral index values. */
+                for (int j = 0; j < sky_chunk->num_sources; ++j)
+                {
+                    val = oskar_random_gaussian(NULL) * std_dev + mean;
+                    oskar_sky_model_set_spectral_index(sky_chunk, j,
+                            ref_freq, val, &error);
+                }
+            }
+            if (error) return error;
+            oskar_log_message(log, 1, "done.");
+        }
 
         oskar_log_message(log, 0, "Computing source direction cosines...");
         for (int i = 0; i < *num_chunks; ++i)

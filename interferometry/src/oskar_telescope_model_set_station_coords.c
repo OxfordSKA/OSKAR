@@ -34,27 +34,37 @@
 #include "interferometry/oskar_telescope_model_location.h"
 #include "interferometry/oskar_telescope_model_set_station_coords.h"
 #include "interferometry/oskar_telescope_model_type.h"
-#include "interferometry/oskar_TelescopeModel.h"
 #include "utility/oskar_mem_element_size.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
+void oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
         int index, double x, double y, double z,
-        double x_hor, double y_hor, double z_hor)
+        double x_hor, double y_hor, double z_hor, int* status)
 {
     int type, location;
 
+    /* Check all inputs. */
+    if (!dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Check range. */
     if (index >= dst->num_stations)
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
-    /* Get the data type. */
+    /* Get the data type and location. */
     type = oskar_telescope_model_type(dst);
-
-    /* Get the data location. */
     location = oskar_telescope_model_location(dst);
 
     if (location == OSKAR_LOCATION_CPU)
@@ -67,7 +77,6 @@ int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
             ((double*)dst->station_x_hor.data)[index] = x_hor;
             ((double*)dst->station_y_hor.data)[index] = y_hor;
             ((double*)dst->station_z_hor.data)[index] = z_hor;
-            return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -77,10 +86,9 @@ int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
             ((float*)dst->station_x_hor.data)[index] = (float)x_hor;
             ((float*)dst->station_y_hor.data)[index] = (float)y_hor;
             ((float*)dst->station_z_hor.data)[index] = (float)z_hor;
-            return 0;
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
@@ -101,7 +109,6 @@ int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_z_hor.data) + offset_bytes, &z_hor,
                     element_size, cudaMemcpyHostToDevice);
-            return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -124,13 +131,12 @@ int oskar_telescope_model_set_station_coords(oskar_TelescopeModel* dst,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->station_z_hor.data) + offset_bytes, &tz_hor,
                     element_size, cudaMemcpyHostToDevice);
-            return 0;
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    return OSKAR_ERR_BAD_LOCATION;
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

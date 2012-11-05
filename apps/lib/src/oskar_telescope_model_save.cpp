@@ -78,8 +78,8 @@ static int oskar_telescope_model_save_private(const oskar_TelescopeModel* telesc
     {
         // Write the station coordinates.
         QByteArray coord_path = dir.filePath(config_name).toAscii();
-        error = oskar_telescope_model_save_station_coords(telescope,
-                coord_path);
+        oskar_telescope_model_save_station_coords(telescope, coord_path,
+                &error);
         if (error) return error;
 
         // Get the number of stations.

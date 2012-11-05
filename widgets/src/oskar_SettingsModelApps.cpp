@@ -386,6 +386,32 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "(from North to East), in degrees.");
 #endif
 
+    // Spectral index settings.
+    group = "sky/spectral_index";
+    setLabel(group, "Spectral index override settings");
+    QString spix_override_key = "sky/spectral_index/override";
+    declare(spix_override_key, "Override source spectral index values",
+            oskar_SettingsItem::BOOL);
+    setTooltip(spix_override_key, "If <b>true</b>, override all source "
+            "spectral index values using the parameters below.");
+    k = "sky/spectral_index/ref_frequency_hz";
+    declare(k, "Reference frequency [Hz]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Reference frequency of all sources in the final sky model.");
+    setDependency(k, spix_override_key, true);
+    k = "sky/spectral_index/mean";
+    declare(k, "Spectral index mean", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Mean spectral index of all sources in the final sky model.");
+    setDependency(k, spix_override_key, true);
+    k = "sky/spectral_index/std_dev";
+    declare(k, "Spectral index std. dev.", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Standard deviation of spectral index values for all "
+            "sources in the final sky model.");
+    setDependency(k, spix_override_key, true);
+    k = "sky/spectral_index/seed";
+    declare(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
+    setTooltip(k, "Random number generator seed used for random distribution.");
+    setDependency(k, spix_override_key, true);
+
     k = "sky/output_binary_file";
     declare(k, "Output OSKAR sky model binary file",
             oskar_SettingsItem::OUTPUT_FILE_NAME);
