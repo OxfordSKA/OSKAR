@@ -29,7 +29,7 @@
 #   http://public.kitware.com/Bug/view.php?id=8207
 #
 
-set(LIB_NAMES mex mat mx eng) 
+set(LIB_NAMES mex mat mx eng)
 
 SET(MATLAB_FOUND FALSE)
 IF(WIN32)
@@ -73,7 +73,7 @@ ELSE( WIN32 )
       SET(MATLAB_ROOT /opt/matlab)
     ENDIF($ENV{MATLAB_ROOT})
   ENDIF(NOT MATLAB_ROOT)
-  
+
   IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
     # ==== x86 ====
@@ -82,24 +82,26 @@ ELSE( WIN32 )
       /usr/local/MATLAB/R2011a/bin/glnx86
       /usr/local/MATLAB/R2011b/bin/glnx86
       /usr/local/MATLAB/R2012a/bin/glnx86
+      /usr/local/MATLAB/R2012b/bin/glnx86
     )
-  
+
     foreach (lib ${LIB_NAMES})
         string(TOUPPER ${lib} _LIB)
-        find_library(MATLAB_${_LIB}_LIBRARY ${lib} 
+        find_library(MATLAB_${_LIB}_LIBRARY ${lib}
             HINTS $ENV{MATLAB_ROOT}/bin/glnx86/
             PATHS ${MATLAB_LIB_PATHS}
         )
     endforeach ()
-      
+
   ELSE(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  
+
     # ==== x86_64 ====
     set(MATLAB_LIB_PATHS
       /usr/local/MATLAB/R2010b/bin/glnxa64
       /usr/local/MATLAB/R2011a/bin/glnxa64
       /usr/local/MATLAB/R2011b/bin/glnxa64
       /usr/local/MATLAB/R2012a/bin/glnxa64
+      /usr/local/MATLAB/R2012b/bin/glnxa64
       /usr/local/matlab/bin/glnxa64
       /data/MATLAB/R2012a/bin/glnxa64
       /Applications/MATLAB_R2011a.app/bin/maci64
@@ -109,19 +111,19 @@ ELSE( WIN32 )
 
     foreach (lib ${LIB_NAMES})
         string(TOUPPER ${lib} _LIB)
-        find_library(MATLAB_${_LIB}_LIBRARY ${lib} 
+        find_library(MATLAB_${_LIB}_LIBRARY ${lib}
             HINTS $ENV{MATLAB_ROOT}/bin/glnxa64/
             PATHS ${MATLAB_LIB_PATHS}
         )
     endforeach ()
-    
+
   ENDIF(CMAKE_SIZEOF_VOID_P EQUAL 4)
 
   # HACK: find_library doesnt seem to be able to find versioned libraries... :(
-  if (NOT APPLE)    
+  if (NOT APPLE)
     find_file(MATLAB_QT_QTCORE_LIBRARY libQtCore.so.4
         HINTS $ENV{MATLAB_ROOT}/bin/glnxa64/
-        PATHS ${MATLAB_LIB_PATHS} 
+        PATHS ${MATLAB_LIB_PATHS}
         NO_DEFAULT_PATH)
   else ()
     find_package(Qt4 4.6 QUIET)
@@ -137,6 +139,7 @@ ELSE( WIN32 )
     /usr/local/MATLAB/R2011a/extern/include
     /usr/local/MATLAB/R2011b/extern/include
     /usr/local/MATLAB/R2012a/extern/include
+    /usr/local/MATLAB/R2012b/extern/include
     /usr/local/matlab/extern/include
     /data/MATLAB/R2011b/extern/include
     /data/MATLAB/R2012a/extern/include
@@ -158,7 +161,7 @@ IF(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES)
 ENDIF(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES)
 
 # Find the MATLAB binary path
-find_path(MATLAB_BINARY_DIR mex 
+find_path(MATLAB_BINARY_DIR mex
     HINTS
     $ENV{MATLAB_ROOT}
     PATHS
@@ -166,6 +169,7 @@ find_path(MATLAB_BINARY_DIR mex
     /usr/local/MATLAB/2011a/bin
     /usr/local/MATLAB/2011b/bin
     /usr/local/MATLAB/2012a/bin
+    /usr/local/MATLAB/2012b/bin
     /data/MATLAB/R2012a/bin
     /Applications/MATLAB_R2011a.app/bin
     /Applications/MATLAB_R2012a.app/bin
