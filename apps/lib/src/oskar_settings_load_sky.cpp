@@ -167,6 +167,59 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             s.value("spectral_index", 0.0).toDouble();
     s.endGroup();
 
+    // Input HEALPix FITS files.
+    list = s.value("healpix_fits_file").toStringList();
+    sky->num_healpix_fits_files = list.size();
+    sky->healpix_fits_file = (char**)malloc(sky->num_healpix_fits_files *
+            sizeof(char*));
+    for (int i = 0; i < sky->num_healpix_fits_files; ++i)
+    {
+        t = list[i].toAscii();
+        sky->healpix_fits_file[i] = (char*)malloc(t.size() + 1);
+        strcpy(sky->healpix_fits_file[i], t.constData());
+    }
+
+    // HEALPix FITS import settings.
+    s.beginGroup("healpix_fits_file");
+    temp = s.value("coord_sys").toString();
+    if (temp.startsWith('G', Qt::CaseInsensitive))
+        sky->healpix_fits.coord_sys = OSKAR_COORD_SYS_GALACTIC;
+    else
+        sky->healpix_fits.coord_sys = OSKAR_COORD_SYS_EQUATORIAL;
+    temp = s.value("map_units").toString();
+    if (temp.startsWith("mK", Qt::CaseInsensitive))
+        sky->healpix_fits.map_units = OSKAR_MAP_UNITS_MK_PER_SR;
+    else if (temp.startsWith("K", Qt::CaseInsensitive))
+        sky->healpix_fits.map_units = OSKAR_MAP_UNITS_K_PER_SR;
+    else
+        sky->healpix_fits.map_units = OSKAR_MAP_UNITS_JY;
+    // HEALPix FITS file filter.
+    s.beginGroup("filter");
+    temp = s.value("flux_min", "min").toString();
+    if (temp.compare("min", Qt::CaseInsensitive) == 0)
+        sky->healpix_fits.filter.flux_min = 0.0;
+    else
+        sky->healpix_fits.filter.flux_min = temp.toDouble();
+    temp = s.value("flux_max", "max").toString();
+    if (temp.compare("max", Qt::CaseInsensitive) == 0)
+        sky->healpix_fits.filter.flux_max = 0.0;
+    else
+        sky->healpix_fits.filter.flux_max = temp.toDouble();
+    sky->healpix_fits.filter.radius_inner =
+            s.value("radius_inner_deg").toDouble() * D2R;
+    sky->healpix_fits.filter.radius_outer =
+            s.value("radius_outer_deg", 180.0).toDouble() * D2R;
+    s.endGroup();
+    s.beginGroup("extended_sources");
+    sky->healpix_fits.extended_sources.FWHM_major =
+            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    sky->healpix_fits.extended_sources.FWHM_minor =
+                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    sky->healpix_fits.extended_sources.position_angle =
+                s.value("position_angle").toDouble() * D2R;
+    s.endGroup();
+    s.endGroup();
+
     // Generator settings.
     s.beginGroup("generator");
 
@@ -230,7 +283,7 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     if (temp.compare("min", Qt::CaseInsensitive) == 0)
         sky->generator.random_broken_power_law.filter.flux_min = 0.0;
     else
-        sky->generator.random_power_law.filter.flux_min = temp.toDouble();
+        sky->generator.random_broken_power_law.filter.flux_min = temp.toDouble();
     temp = s.value("flux_max", "max").toString();
     if (temp.compare("max", Qt::CaseInsensitive) == 0)
         sky->generator.random_broken_power_law.filter.flux_max = 0.0;

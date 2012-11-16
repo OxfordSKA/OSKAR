@@ -29,6 +29,7 @@
 #include "apps/lib/oskar_set_up_sky.h"
 #ifndef OSKAR_NO_FITS
 #include "fits/oskar_fits_to_sky_model.h"
+#include "fits/oskar_fits_healpix_to_sky_model.h"
 #endif
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
@@ -100,7 +101,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
                 /* Load into a temporary structure. */
                 binary_file_error = 0;
                 oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
-                oskar_log_message(log, 0, "Loading source file '%s'...",
+                oskar_log_message(log, 0, "Loading source file '%s' ...",
                         filename);
 
                 /* Try to read sky model as a binary file first. */
@@ -173,12 +174,49 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             {
                 /* Load into a temporary structure. */
                 oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
-                oskar_log_message(log, 0, "Loading FITS file %s ...", filename);
+                oskar_log_message(log, 0, "Loading FITS file '%s' ...",
+                        filename);
                 error = oskar_fits_to_sky_model(log, filename, &temp,
                         settings->sky.fits_file_settings.spectral_index,
                         settings->sky.fits_file_settings.min_peak_fraction,
                         settings->sky.fits_file_settings.noise_floor,
                         settings->sky.fits_file_settings.downsample_factor);
+                if (error) return error;
+
+                /* Append to chunks. */
+                error = oskar_sky_model_append_to_set(num_chunks, sky_chunks,
+                        max_sources_per_chunk, &temp);
+                if (error) return error;
+
+                oskar_log_message(log, 1, "done.");
+            }
+        }
+    }
+
+    /* Load HEALPix FITS image files. */
+    for (int i = 0; i < settings->sky.num_healpix_fits_files; ++i)
+    {
+        filename = settings->sky.healpix_fits_file[i];
+        if (filename)
+        {
+            if (strlen(filename) > 0)
+            {
+                /* Load into a temporary structure. */
+                oskar_SkyModel temp(type, OSKAR_LOCATION_CPU);
+                oskar_log_message(log, 0, "Loading HEALPix FITS file '%s' ...",
+                        filename);
+                oskar_fits_healpix_to_sky_model(log, filename,
+                        &settings->sky.healpix_fits, &temp, &error);
+                if (error) return error;
+
+                /* Apply filters and extended source over-ride. */
+                error = set_up_filter(&temp, &settings->sky.healpix_fits.filter,
+                        settings->obs.ra0_rad, settings->obs.dec0_rad);
+                if (error) return error;
+                error = set_up_extended(&temp,
+                        &settings->sky.healpix_fits.extended_sources, log,
+                        settings->obs.ra0_rad, settings->obs.dec0_rad,
+                        zero_failed_sources);
                 if (error) return error;
 
                 /* Append to chunks. */
