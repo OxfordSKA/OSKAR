@@ -131,6 +131,59 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
                 &s->sky.gsm_extended_sources);
     }
 
+    /* Input FITS file settings. */
+    depth = 1;
+    if (s->sky.num_fits_files > 0)
+    {
+        oskar_log_message(log, depth, "Input FITS file(s)");
+        ++depth;
+        ++depth;
+        for (i = 0; i < s->sky.num_fits_files; ++i)
+        {
+            oskar_log_message(log, depth, "File %2d: %s", i,
+                    s->sky.fits_file[i]);
+        }
+        --depth;
+        LVI("Downsample factor", s->sky.fits_file_settings.downsample_factor);
+        LV("Minimum fraction of peak", "%.2f",
+                s->sky.fits_file_settings.min_peak_fraction);
+        LV("Noise floor [Jy/pixel]", "%.3e",
+                s->sky.fits_file_settings.noise_floor);
+        LV("Spectral index", "%.1f", s->sky.fits_file_settings.spectral_index);
+    }
+
+    /* Input HEALPix FITS file settings. */
+    depth = 1;
+    if (s->sky.healpix_fits.num_files > 0)
+    {
+        oskar_log_message(log, depth, "Input HEALPix FITS file(s)");
+        ++depth;
+        ++depth;
+        for (i = 0; i < s->sky.healpix_fits.num_files; ++i)
+        {
+            oskar_log_message(log, depth, "File %2d: %s", i,
+                    s->sky.healpix_fits.file[i]);
+        }
+        --depth;
+        if (s->sky.healpix_fits.coord_sys == OSKAR_COORD_SYS_GALACTIC)
+            LVS("Coordinate system", "Galactic");
+        else if (s->sky.healpix_fits.coord_sys == OSKAR_COORD_SYS_EQUATORIAL)
+            LVS("Coordinate system", "Equatorial");
+        else
+            LVS("Coordinate system", "Unknown");
+        if (s->sky.healpix_fits.map_units == OSKAR_MAP_UNITS_MK_PER_SR)
+            LVS("Map units", "mK/sr");
+        else if (s->sky.healpix_fits.map_units == OSKAR_MAP_UNITS_K_PER_SR)
+            LVS("Map units", "K/sr");
+        else if (s->sky.healpix_fits.map_units == OSKAR_MAP_UNITS_JY)
+            LVS("Map units", "Jy/pixel");
+        else
+            LVS("Map units", "Unknown");
+        oskar_log_settings_sky_filter(log, depth, &s->sky.healpix_fits.filter);
+        oskar_log_settings_sky_extended(log, depth,
+                &s->sky.healpix_fits.extended_sources);
+    }
+
     /* Random power-law generator settings. */
     depth = 1;
     if (s->sky.generator.random_power_law.num_sources != 0)
@@ -646,40 +699,6 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
     LVS0("Input OSKAR visibility file", s->image.input_vis_data);
     LVS0("Output OSKAR image file", s->image.oskar_image);
     LVS0("Output FITS image file", s->image.fits_image);
-}
-
-void oskar_log_settings(oskar_Log* log, const oskar_Settings* s,
-        const char* filename)
-{
-    int depth = 0;
-
-    /* Print name of settings file. */
-    LVS0("OSKAR settings file", filename);
-
-    /* Print simulator settings. */
-    oskar_log_settings_simulator(log, s);
-
-    /* Print sky settings. */
-    oskar_log_settings_sky(log, s);
-
-    /* Print observation settings. */
-    oskar_log_settings_observation(log, s);
-
-    /* Print telescope settings. */
-    oskar_log_settings_telescope(log, s);
-
-    /* Print interferometer settings */
-    if (s->interferometer.oskar_vis_filename || s->interferometer.ms_filename ||
-            s->interferometer.image_interferometer_output)
-        oskar_log_settings_interferometer(log, s);
-
-    /* Print beam pattern settings. */
-    if (s->beam_pattern.size > 0)
-        oskar_log_settings_beam_pattern(log, s);
-
-    /* Print image settings. */
-    if (s->image.size > 0)
-        oskar_log_settings_image(log, s);
 }
 
 #ifdef __cplusplus

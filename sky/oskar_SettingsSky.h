@@ -86,8 +86,10 @@ typedef struct oskar_SettingsSkyFits oskar_SettingsSkyFits;
  */
 struct OSKAR_EXPORT oskar_SettingsSkyHealpixFits
 {
-    int coord_sys;            /**< Coordinate system to apply (enumerator). */
-    int map_units;            /**< Units of input map (enumerator). */
+    int num_files;  /**< Number of HEALPix-FITS files to load. */
+    char** file;    /**< List of HEALPix-FITS input sky model files. */
+    int coord_sys;  /**< Coordinate system to apply (enumerator). */
+    int map_units;  /**< Units of input map (enumerator). */
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
 };
@@ -226,8 +228,6 @@ struct OSKAR_EXPORT oskar_SettingsSky
     char** fits_file;      /**< List of FITS input sky model files. */
     oskar_SettingsSkyFits fits_file_settings;
 
-    int num_healpix_fits_files;  /**< Number of HEALPix-FITS files to load. */
-    char** healpix_fits_file;    /**< List of HEALPix-FITS input sky model files. */
     oskar_SettingsSkyHealpixFits healpix_fits;
 };
 typedef struct oskar_SettingsSky oskar_SettingsSky;

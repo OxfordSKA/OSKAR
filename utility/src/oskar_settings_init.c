@@ -47,7 +47,9 @@ int oskar_settings_init(oskar_Settings* settings)
     settings->sky.output_binary_file = NULL;
     settings->sky.output_text_file = NULL;
     settings->sky.num_fits_files = 0;
+    settings->sky.healpix_fits.num_files= 0;
     settings->sky.fits_file = NULL;
+    settings->sky.healpix_fits.file = NULL;
     settings->telescope.input_directory = NULL;
     settings->telescope.output_directory = NULL;
     settings->interferometer.ms_filename = NULL;

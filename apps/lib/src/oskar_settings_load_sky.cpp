@@ -44,6 +44,10 @@
 #define D2R M_PI/180.0
 #define ARCSEC2RAD M_PI/648000.0
 
+static void get_extended_params(QSettings& s, oskar_SettingsSkyExtendedSources* ext);
+static void get_filter_params(QSettings& s, oskar_SettingsSkyFilter* flt);
+static int get_seed(const QVariant& t);
+
 extern "C"
 int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
 {
@@ -82,30 +86,8 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
 
     // Input OSKAR sky model filter.
     s.beginGroup("oskar_source_file");
-    s.beginGroup("filter");
-    temp = s.value("flux_min", "min").toString();
-    if (temp.compare("min", Qt::CaseInsensitive) == 0)
-        sky->input_sky_filter.flux_min = 0.0;
-    else
-        sky->input_sky_filter.flux_min = temp.toDouble();
-    temp = s.value("flux_max", "max").toString();
-    if (temp.compare("max", Qt::CaseInsensitive) == 0)
-        sky->input_sky_filter.flux_max = 0.0;
-    else
-        sky->input_sky_filter.flux_max = temp.toDouble();
-    sky->input_sky_filter.radius_inner =
-            s.value("radius_inner_deg").toDouble() * D2R;
-    sky->input_sky_filter.radius_outer =
-            s.value("radius_outer_deg", 180.0).toDouble() * D2R;
-    s.endGroup();
-    s.beginGroup("extended_sources");
-    sky->input_sky_extended_sources.FWHM_major =
-            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
-    sky->input_sky_extended_sources.FWHM_minor =
-                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
-    sky->input_sky_extended_sources.position_angle =
-                s.value("position_angle").toDouble() * D2R;
-    s.endGroup();
+    get_filter_params(s, &sky->input_sky_filter);
+    get_extended_params(s, &sky->input_sky_extended_sources);
     s.endGroup();
 
     // GSM file.
@@ -118,30 +100,8 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
 
     // GSM filter.
     s.beginGroup("gsm_file");
-    s.beginGroup("filter");
-    temp = s.value("flux_min").toString();
-    if (temp.compare("min", Qt::CaseInsensitive) == 0)
-        sky->gsm_filter.flux_min = 0.0;
-    else
-        sky->gsm_filter.flux_min = temp.toDouble();
-    temp = s.value("flux_max").toString();
-    if (temp.compare("max", Qt::CaseInsensitive) == 0)
-        sky->gsm_filter.flux_max = 0.0;
-    else
-        sky->gsm_filter.flux_max = temp.toDouble();
-    sky->gsm_filter.radius_inner =
-            s.value("radius_inner_deg").toDouble() * D2R;
-    sky->gsm_filter.radius_outer =
-            s.value("radius_outer_deg", 180.0).toDouble() * D2R;
-    s.endGroup();
-    s.beginGroup("extended_sources");
-    sky->gsm_extended_sources.FWHM_major =
-            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
-    sky->gsm_extended_sources.FWHM_minor =
-                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
-    sky->gsm_extended_sources.position_angle =
-                s.value("position_angle").toDouble() * D2R;
-    s.endGroup();
+    get_filter_params(s, &sky->gsm_filter);
+    get_extended_params(s, &sky->gsm_extended_sources);
     s.endGroup();
 
     // Input FITS files.
@@ -168,25 +128,25 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     s.endGroup();
 
     // Input HEALPix FITS files.
-    list = s.value("healpix_fits_file").toStringList();
-    sky->num_healpix_fits_files = list.size();
-    sky->healpix_fits_file = (char**)malloc(sky->num_healpix_fits_files *
+    s.beginGroup("healpix_fits");
+    list = s.value("file").toStringList();
+    sky->healpix_fits.num_files = list.size();
+    sky->healpix_fits.file = (char**)malloc(sky->healpix_fits.num_files *
             sizeof(char*));
-    for (int i = 0; i < sky->num_healpix_fits_files; ++i)
+    for (int i = 0; i < sky->healpix_fits.num_files; ++i)
     {
         t = list[i].toAscii();
-        sky->healpix_fits_file[i] = (char*)malloc(t.size() + 1);
-        strcpy(sky->healpix_fits_file[i], t.constData());
+        sky->healpix_fits.file[i] = (char*)malloc(t.size() + 1);
+        strcpy(sky->healpix_fits.file[i], t.constData());
     }
 
     // HEALPix FITS import settings.
-    s.beginGroup("healpix_fits_file");
-    temp = s.value("coord_sys").toString();
+    temp = s.value("coord_sys", "Galactic").toString();
     if (temp.startsWith('G', Qt::CaseInsensitive))
         sky->healpix_fits.coord_sys = OSKAR_COORD_SYS_GALACTIC;
     else
         sky->healpix_fits.coord_sys = OSKAR_COORD_SYS_EQUATORIAL;
-    temp = s.value("map_units").toString();
+    temp = s.value("map_units", "mK/sr").toString();
     if (temp.startsWith("mK", Qt::CaseInsensitive))
         sky->healpix_fits.map_units = OSKAR_MAP_UNITS_MK_PER_SR;
     else if (temp.startsWith("K", Qt::CaseInsensitive))
@@ -194,30 +154,8 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     else
         sky->healpix_fits.map_units = OSKAR_MAP_UNITS_JY;
     // HEALPix FITS file filter.
-    s.beginGroup("filter");
-    temp = s.value("flux_min", "min").toString();
-    if (temp.compare("min", Qt::CaseInsensitive) == 0)
-        sky->healpix_fits.filter.flux_min = 0.0;
-    else
-        sky->healpix_fits.filter.flux_min = temp.toDouble();
-    temp = s.value("flux_max", "max").toString();
-    if (temp.compare("max", Qt::CaseInsensitive) == 0)
-        sky->healpix_fits.filter.flux_max = 0.0;
-    else
-        sky->healpix_fits.filter.flux_max = temp.toDouble();
-    sky->healpix_fits.filter.radius_inner =
-            s.value("radius_inner_deg").toDouble() * D2R;
-    sky->healpix_fits.filter.radius_outer =
-            s.value("radius_outer_deg", 180.0).toDouble() * D2R;
-    s.endGroup();
-    s.beginGroup("extended_sources");
-    sky->healpix_fits.extended_sources.FWHM_major =
-            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
-    sky->healpix_fits.extended_sources.FWHM_minor =
-                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
-    sky->healpix_fits.extended_sources.position_angle =
-                s.value("position_angle").toDouble() * D2R;
-    s.endGroup();
+    get_filter_params(s, &sky->healpix_fits.filter);
+    get_extended_params(s, &sky->healpix_fits.extended_sources);
     s.endGroup();
 
     // Generator settings.
@@ -230,34 +168,10 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->generator.random_power_law.flux_min = s.value("flux_min").toDouble();
     sky->generator.random_power_law.flux_max = s.value("flux_max").toDouble();
     sky->generator.random_power_law.power = s.value("power").toDouble();
-    temp = s.value("seed").toString();
-    sky->generator.random_power_law.seed = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    sky->generator.random_power_law.seed = get_seed(s.value("seed"));
     // Random power-law generator filter.
-    s.beginGroup("filter");
-    temp = s.value("flux_min", "min").toString();
-    if (temp.compare("min", Qt::CaseInsensitive) == 0)
-        sky->generator.random_power_law.filter.flux_min = 0.0;
-    else
-        sky->generator.random_power_law.filter.flux_min = temp.toDouble();
-    temp = s.value("flux_max", "max").toString();
-    if (temp.compare("max", Qt::CaseInsensitive) == 0)
-        sky->generator.random_power_law.filter.flux_max = 0.0;
-    else
-        sky->generator.random_power_law.filter.flux_max = temp.toDouble();
-    sky->generator.random_power_law.filter.radius_inner =
-            s.value("radius_inner_deg").toDouble() * D2R;
-    sky->generator.random_power_law.filter.radius_outer =
-            s.value("radius_outer_deg", 180.0).toDouble() * D2R;
-    s.endGroup();
-    s.beginGroup("extended_sources");
-    sky->generator.random_power_law.extended_sources.FWHM_major =
-            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
-    sky->generator.random_power_law.extended_sources.FWHM_minor =
-                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
-    sky->generator.random_power_law.extended_sources.position_angle =
-                s.value("position_angle").toDouble() * D2R;
-    s.endGroup();
+    get_filter_params(s, &sky->generator.random_power_law.filter);
+    get_extended_params(s, &sky->generator.random_power_law.extended_sources);
     s.endGroup();
 
     // Random broken-power-law generator settings.
@@ -274,64 +188,18 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             s.value("power1").toDouble();
     sky->generator.random_broken_power_law.power2 =
             s.value("power2").toDouble();
-    temp = s.value("seed").toString();
-    sky->generator.random_broken_power_law.seed = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    sky->generator.random_broken_power_law.seed = get_seed(s.value("seed"));
     // Random broken-power-law generator filter.
-    s.beginGroup("filter");
-    temp = s.value("flux_min", "min").toString();
-    if (temp.compare("min", Qt::CaseInsensitive) == 0)
-        sky->generator.random_broken_power_law.filter.flux_min = 0.0;
-    else
-        sky->generator.random_broken_power_law.filter.flux_min = temp.toDouble();
-    temp = s.value("flux_max", "max").toString();
-    if (temp.compare("max", Qt::CaseInsensitive) == 0)
-        sky->generator.random_broken_power_law.filter.flux_max = 0.0;
-    else
-        sky->generator.random_broken_power_law.filter.flux_max = temp.toDouble();
-    sky->generator.random_broken_power_law.filter.radius_inner =
-            s.value("radius_inner_deg").toDouble() * D2R;
-    sky->generator.random_broken_power_law.filter.radius_outer =
-            s.value("radius_outer_deg", 180.0).toDouble() * D2R;
-    s.endGroup();
-    s.beginGroup("extended_sources");
-    sky->generator.random_broken_power_law.extended_sources.FWHM_major =
-            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
-    sky->generator.random_broken_power_law.extended_sources.FWHM_minor =
-                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
-    sky->generator.random_broken_power_law.extended_sources.position_angle =
-                s.value("position_angle").toDouble() * D2R;
-    s.endGroup();
+    get_filter_params(s, &sky->generator.random_broken_power_law.filter);
+    get_extended_params(s, &sky->generator.random_broken_power_law.extended_sources);
     s.endGroup();
 
     // HEALPix generator settings.
     s.beginGroup("healpix");
     sky->generator.healpix.nside = s.value("nside", 0).toInt();
     // HEALPix generator filter.
-    s.beginGroup("filter");
-    temp = s.value("flux_min", "min").toString();
-    if (temp.compare("min", Qt::CaseInsensitive) == 0)
-        sky->generator.healpix.filter.flux_min = 0.0;
-    else
-        sky->generator.healpix.filter.flux_min = temp.toDouble();
-    temp = s.value("flux_max", "max").toString();
-    if (temp.compare("max", Qt::CaseInsensitive) == 0)
-        sky->generator.healpix.filter.flux_max = 0.0;
-    else
-        sky->generator.healpix.filter.flux_max = temp.toDouble();
-    sky->generator.healpix.filter.radius_inner =
-            s.value("radius_inner_deg").toDouble() * D2R;
-    sky->generator.healpix.filter.radius_outer =
-            s.value("radius_outer_deg", 180.0).toDouble() * D2R;
-    s.endGroup();
-    s.beginGroup("extended_sources");
-    sky->generator.healpix.extended_sources.FWHM_major =
-            s.value("FWHM_major").toDouble() * ARCSEC2RAD;
-    sky->generator.healpix.extended_sources.FWHM_minor =
-                s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
-    sky->generator.healpix.extended_sources.position_angle =
-                s.value("position_angle").toDouble() * D2R;
-    s.endGroup();
+    get_filter_params(s, &sky->generator.healpix.filter);
+    get_extended_params(s, &sky->generator.healpix.extended_sources);
     s.endGroup();
 
     // End generator group.
@@ -344,10 +212,44 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
             s.value("ref_frequency_hz", 0.0).toDouble();
     sky->spectral_index.mean = s.value("mean", 0.0).toDouble();
     sky->spectral_index.std_dev = s.value("std_dev", 0.0).toDouble();
-    temp = s.value("seed").toString();
-    sky->spectral_index.seed = (temp.toUpper() == "TIME" ||
-            temp.toInt() < 0) ? (int)time(NULL) : temp.toInt();
+    sky->spectral_index.seed = get_seed(s.value("seed"));
     s.endGroup();
 
     return OSKAR_SUCCESS;
+}
+
+static void get_extended_params(QSettings& s,
+        oskar_SettingsSkyExtendedSources* ext)
+{
+    s.beginGroup("extended_sources");
+    ext->FWHM_major = s.value("FWHM_major").toDouble() * ARCSEC2RAD;
+    ext->FWHM_minor = s.value("FWHM_minor").toDouble() * ARCSEC2RAD;
+    ext->position_angle = s.value("position_angle").toDouble() * D2R;
+    s.endGroup();
+}
+
+static void get_filter_params(QSettings& s, oskar_SettingsSkyFilter* flt)
+{
+    QString temp;
+    s.beginGroup("filter");
+    temp = s.value("flux_min", "min").toString();
+    if (temp.compare("min", Qt::CaseInsensitive) == 0)
+        flt->flux_min = 0.0;
+    else
+        flt->flux_min = temp.toDouble();
+    temp = s.value("flux_max", "max").toString();
+    if (temp.compare("max", Qt::CaseInsensitive) == 0)
+        flt->flux_max = 0.0;
+    else
+        flt->flux_max = temp.toDouble();
+    flt->radius_inner = s.value("radius_inner_deg").toDouble() * D2R;
+    flt->radius_outer = s.value("radius_outer_deg", 180.0).toDouble() * D2R;
+    s.endGroup();
+}
+
+static int get_seed(const QVariant& t)
+{
+    QString str = t.toString().toUpper();
+    int val = str.toInt();
+    return (str == "TIME" || val < 0) ? (int)time(NULL) : val;
 }

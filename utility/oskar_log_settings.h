@@ -132,21 +132,6 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s);
 OSKAR_EXPORT
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s);
 
-/**
- * @brief
- * Writes all settings to a log.
- *
- * @details
- * This function writes all settings to a log.
- *
- * @param[out,in] log   Pointer to a log structure.
- * @param[in] s         Pointer to a populated settings structure.
- * @param[in] filename  String containing the name of the settings file.
- */
-OSKAR_EXPORT
-void oskar_log_settings(oskar_Log* log, const oskar_Settings* s,
-        const char* filename);
-
 #ifdef __cplusplus
 }
 #endif

@@ -215,6 +215,61 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     setTooltip(k, "The spectral index of each pixel.");
 #endif
 
+#ifndef OSKAR_NO_FITS
+    // HEALPix FITS file import settings.
+    group = "sky/healpix_fits";
+    setLabel(group, "HEALPix FITS file settings");
+
+    k = group + "/file";
+    declare(k, "Input HEALPix FITS file", oskar_SettingsItem::INPUT_FILE_LIST);
+    setTooltip(k, "Paths to one or more HEALPix FITS files, ordered using the "
+            "HEALPix RING scheme (NEST schemes are not supported).");
+    k = group + "/coord_sys";
+    declare(k, "Coordinate system", QStringList() << "Galactic" << "Equatorial");
+    setTooltip(k, "The spherical coordinate system used for the HEALPix "
+            "representation.");
+    k = group + "/map_units";
+    declare(k, "Map units", QStringList() <<
+            "mK/sr (Temperature per steradian)" <<
+            "K/sr (Temperature per steradian)" <<
+            "Jy/pixel (Jansky per pixel)");
+    setTooltip(k, "The physical units of pixels in the input map.");
+
+    group = "sky/healpix_fits/filter";
+    setLabel(group, "Filter settings");
+    k = group + "/flux_min";
+    declare(k, "Flux density min [Jy]", oskar_SettingsItem::DOUBLE_MIN, "min");
+    setTooltip(k, "Minimum flux density allowed by the filter, in Jy.");
+    k = group + "/flux_max";
+    declare(k, "Flux density max [Jy]", oskar_SettingsItem::DOUBLE_MAX, "max");
+    setTooltip(k, "Maximum flux density allowed by the filter, in Jy.");
+    k = group + "/radius_inner_deg";
+    declare(k, "Inner radius from phase centre [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minimum angular distance from phase centre allowed by the "
+            "filter, in degrees.");
+    k = group + "/radius_outer_deg";
+    declare(k, "Outer radius from phase centre [deg]", oskar_SettingsItem::DOUBLE, 180.0);
+    setTooltip(k, "Maximum angular distance from phase centre allowed by the "
+            "filter, in degrees.");
+
+#if !(defined(OSKAR_NO_CBLAS) || defined(OSKAR_NO_LAPACK))
+    group = "sky/healpix_fits/extended_sources";
+    setLabel(group, "Extended source settings");
+    k = group + "/FWHM_major";
+    declare(k, "Major axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Major axis FWHM of all sources in this group, in arc "
+            "seconds.");
+    k = group + "/FWHM_minor";
+    declare(k, "Minor axis FWHM [arcsec]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Minor axis FWHM of all sources in this group, in arc "
+            "seconds.");
+    k = group + "/position_angle";
+    declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
+    setTooltip(k, "Position angle of all extended sources in this group "
+            "(from North to East), in degrees.");
+#endif
+#endif
+
     // Sky model generator settings.
     setLabel("sky/generator", "Generators");
 

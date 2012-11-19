@@ -194,9 +194,9 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
     }
 
     /* Load HEALPix FITS image files. */
-    for (int i = 0; i < settings->sky.num_healpix_fits_files; ++i)
+    for (int i = 0; i < settings->sky.healpix_fits.num_files; ++i)
     {
-        filename = settings->sky.healpix_fits_file[i];
+        filename = settings->sky.healpix_fits.file[i];
         if (filename)
         {
             if (strlen(filename) > 0)

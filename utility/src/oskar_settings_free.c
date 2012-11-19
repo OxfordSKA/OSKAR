@@ -42,6 +42,8 @@ int oskar_settings_free(oskar_Settings* settings)
     /* Free all settings arrays. */
     free(settings->sim.cuda_device_ids);
     settings->sim.cuda_device_ids = NULL;
+
+    /* Free FITS file names. */
     for (i = 0; i < settings->sky.num_fits_files; ++i)
     {
         free(settings->sky.fits_file[i]);
@@ -49,8 +51,21 @@ int oskar_settings_free(oskar_Settings* settings)
     }
     free(settings->sky.fits_file);
     settings->sky.fits_file = NULL;
+
+    /* Free HEALPix FITS file names. */
+    for (i = 0; i < settings->sky.healpix_fits.num_files; ++i)
+    {
+        free(settings->sky.healpix_fits.file[i]);
+        settings->sky.healpix_fits.file[i] = NULL;
+    }
+    free(settings->sky.healpix_fits.file);
+    settings->sky.healpix_fits.file = NULL;
+
+    /* Free GSM file name. */
     free(settings->sky.gsm_file);
     settings->sky.gsm_file = NULL;
+
+    /* Free OSKAR sky model file names. */
     for (i = 0; i < settings->sky.num_sky_files; ++i)
     {
         free(settings->sky.input_sky_file[i]);
@@ -58,18 +73,26 @@ int oskar_settings_free(oskar_Settings* settings)
     }
     free(settings->sky.input_sky_file);
     settings->sky.input_sky_file = NULL;
+
+    /* Free output sky model file names. */
     free(settings->sky.output_binary_file);
     settings->sky.output_binary_file = NULL;
     free(settings->sky.output_text_file);
     settings->sky.output_text_file = NULL;
+
+    /* Free telescope directory names. */
     free(settings->telescope.input_directory);
     settings->telescope.input_directory = NULL;
     free(settings->telescope.output_directory);
     settings->telescope.output_directory = NULL;
+
+    /* Free interferometer output file names. */
     free(settings->interferometer.ms_filename);
     settings->interferometer.ms_filename = NULL;
     free(settings->interferometer.oskar_vis_filename);
     settings->interferometer.oskar_vis_filename = NULL;
+
+    /* Free beam pattern file names. */
     free(settings->beam_pattern.oskar_image_complex);
     settings->beam_pattern.oskar_image_complex = NULL;
     free(settings->beam_pattern.oskar_image_phase);
@@ -80,6 +103,8 @@ int oskar_settings_free(oskar_Settings* settings)
     settings->beam_pattern.fits_image_phase = NULL;
     free(settings->beam_pattern.fits_image_power);
     settings->beam_pattern.fits_image_power = NULL;
+
+    /* Free imager file names. */
     free(settings->image.input_vis_data);
     settings->image.input_vis_data = NULL;
     free(settings->image.oskar_image);
