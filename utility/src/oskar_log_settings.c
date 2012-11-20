@@ -86,15 +86,15 @@ static void oskar_log_settings_sky_extended(oskar_Log* log, int depth,
 static void oskar_log_settings_sky_filter(oskar_Log* log, int depth,
         const oskar_SettingsSkyFilter* f)
 {
+    if (f->flux_min != 0.0)
+        LV("Filter flux min [Jy]", "%.3e", f->flux_min);
+    if (f->flux_max != 0.0)
+        LV("Filter flux max [Jy]", "%.3e", f->flux_max);
     if (!(f->radius_inner == 0.0 && f->radius_outer >= M_PI / 2.0))
     {
         LV("Filter radius inner [deg]", "%.3f", f->radius_inner * R2D);
         LV("Filter radius outer [deg]", "%.3f", f->radius_outer * R2D);
     }
-    if (f->flux_min != 0.0)
-        LV("Filter flux min [Jy]", "%.3e", f->flux_min);
-    if (f->flux_max != 0.0)
-        LV("Filter flux max [Jy]", "%.3e", f->flux_max);
 }
 
 void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
@@ -217,7 +217,7 @@ void oskar_log_settings_sky(oskar_Log* log, const oskar_Settings* s)
         LV("Flux max [Jy]", "%.3e", gen->flux_max);
         LV("Power law index 1", "%.3f", gen->power1);
         LV("Power law index 2", "%.3f", gen->power2);
-        LV("Threshold [Jy]", "%.3f", gen->threshold);
+        LV("Threshold [Jy]", "%.3e", gen->threshold);
         LVI("Random seed", gen->seed);
         ++depth;
         oskar_log_settings_sky_filter(log, depth, &gen->filter);
