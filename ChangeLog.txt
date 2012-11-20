@@ -1,3 +1,11 @@
+2012-xx-yy  OSKAR-2.2.0-beta
+
+    * Added options to override reference frequency and spectral index
+      data for all sources in the sky model.
+
+    * Added options to load HEALPix-format FITS files (with RING ordering)
+      as a sky model component.
+
 2012-11-20  OSKAR 2.1.1-beta
 
     * Fixed a bug in the MATLAB sky model load and save functions which
