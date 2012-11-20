@@ -215,7 +215,6 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     setTooltip(k, "The spectral index of each pixel.");
 #endif
 
-#if 0
 #ifndef OSKAR_NO_FITS
     // HEALPix FITS file import settings.
     group = "sky/healpix_fits";
@@ -268,7 +267,6 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     declare(k, "Position angle [deg]", oskar_SettingsItem::DOUBLE);
     setTooltip(k, "Position angle of all extended sources in this group "
             "(from North to East), in degrees.");
-#endif
 #endif
 #endif
 
@@ -443,7 +441,6 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "(from North to East), in degrees.");
 #endif
 
-#if 0
     // Spectral index settings.
     group = "sky/spectral_index";
     setLabel(group, "Spectral index override settings");
@@ -469,7 +466,6 @@ void oskar_SettingsModelApps::init_settings_sky_model()
     declare(k, "Random seed", oskar_SettingsItem::RANDOM_SEED);
     setTooltip(k, "Random number generator seed used for random distribution.");
     setDependency(k, spix_override_key, true);
-#endif
 
     k = "sky/output_binary_file";
     declare(k, "Output OSKAR sky model binary file",
