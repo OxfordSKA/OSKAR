@@ -1,13 +1,13 @@
-2012-xx-yy  OSKAR 2.1.1-beta
+2012-11-20  OSKAR 2.1.1-beta
 
     * Fixed a bug in the MATLAB sky model load and save functions which
       caused the reference frequency and spectral index columns to be swapped.
 
+    * Fixed a bug which set the minimum flux for the random power law generator
+      filter to that used for the random broken power law generator filter.
+
     * Added option to use all CUDA devices found on the system, instead of
       specifying the list of device IDs. This is now the default behaviour.
-
-    * Added options to override reference frequency and spectral index
-      data for all sources in the sky model.
 
 2012-10-23  OSKAR 2.1.0-beta
 
