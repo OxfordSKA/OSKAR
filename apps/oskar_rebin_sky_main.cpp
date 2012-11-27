@@ -26,9 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cuda_runtime_api.h>
 #include "sky/oskar_rebin_sky_cuda.h"
 #include "sky/oskar_SkyModel.h"
+#include "sky/oskar_sky_model_copy.h"
+#include "sky/oskar_sky_model_free.h"
+#include "sky/oskar_sky_model_init.h"
+#include "sky/oskar_sky_model_load.h"
+#include "sky/oskar_sky_model_save.h"
+#include "utility/oskar_cuda_check_error.h"
 #include "utility/oskar_get_error_string.h"
+#include "utility/oskar_mem_clear_contents.h"
 #include "utility/oskar_log_error.h"
 
 #include <cstdio>
@@ -36,24 +44,32 @@
 
 int main(int argc, char** argv)
 {
-    int error = OSKAR_SUCCESS;
+    oskar_SkyModel input, output, input_gpu, output_gpu;
+    int error = 0;
 
     // Parse command line.
-    if (argc != 2)
+    if (argc != 3)
     {
         fprintf(stderr, "Usage: $ oskar_rebin_sky [input sky file] "
                 "[output sky file]\n");
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
 
+    // Initialise sky models.
+    oskar_sky_model_init(&input, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0, &error);
+    oskar_sky_model_init(&output, OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0, &error);
+    oskar_sky_model_init(&input_gpu, OSKAR_SINGLE, OSKAR_LOCATION_GPU, 0, &error);
+    oskar_sky_model_init(&output_gpu, OSKAR_SINGLE, OSKAR_LOCATION_GPU, 0, &error);
+
     // Load input and output sky models.
-    oskar_SkyModel input, output;
+    printf("Loading input '%s'\n", argv[1]);
     oskar_sky_model_load(&input, argv[1], &error);
     if (error)
     {
         fprintf(stderr, "Error loading input sky file.\n");
         return OSKAR_ERR_FILE_IO;
     }
+    printf("Loading output '%s'\n", argv[2]);
     oskar_sky_model_load(&output, argv[2], &error);
     if (error)
     {
@@ -61,7 +77,29 @@ int main(int argc, char** argv)
         return OSKAR_ERR_FILE_IO;
     }
 
+    // Copy sky models to GPU.
+    oskar_sky_model_copy(&input_gpu, &input, &error);
+    oskar_sky_model_copy(&output_gpu, &output, &error);
+
     // Rebin flux in input sky to output source positions.
+    oskar_mem_clear_contents(&output_gpu.I, &error);
+    oskar_rebin_sky_cuda_f(input_gpu.num_sources, output_gpu.num_sources,
+            (const float*)(input_gpu.RA), (const float*)(input_gpu.Dec),
+            (const float*)(input_gpu.I), (const float*)(output_gpu.RA),
+            (const float*)(output_gpu.Dec), (float*)(output_gpu.I));
+    oskar_cuda_check_error(&error);
+    if (error)
+        fprintf(stderr, "CUDA error (%s).\n", oskar_get_error_string(error));
+
+    // Write new sky model out.
+    oskar_sky_model_copy(&output, &output_gpu, &error);
+    oskar_sky_model_save(argv[2], &output, &error);
+
+    // Free sky models.
+    oskar_sky_model_free(&input, &error);
+    oskar_sky_model_free(&output, &error);
+    oskar_sky_model_free(&input_gpu, &error);
+    oskar_sky_model_free(&output_gpu, &error);
 
     return error;
 }

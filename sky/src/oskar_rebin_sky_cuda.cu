@@ -59,8 +59,6 @@ void oskar_rebin_sky_cuda_f(int num_in, int num_out, const float* lon_in,
         chunk_size = num_in - chunk_start;
         if (chunk_size > max_chunk_size)
             chunk_size = max_chunk_size;
-        printf("Chunk index, start, size: %d, %d, %d\n",
-                i, chunk_start, chunk_size);
 
         /* Set up thread blocks and call the kernel. */
         num_blocks = (chunk_size + num_threads - 1) / num_threads;
