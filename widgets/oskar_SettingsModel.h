@@ -105,6 +105,7 @@ public:
     void setValue(const QString& key, const QVariant& value);
     //QHash<QString, QVariant> settings() const;
     QString version() const;
+    void setVersion(const QString& value = QString(OSKAR_VERSION_STR));
 
 private:
     void append(const QString& key, const QString& subkey, int type,
@@ -117,13 +118,14 @@ private:
     int numModified(const QModelIndex& parent) const;
     void restoreAll(const QModelIndex& parent = QModelIndex());
     void saveFromParentIndex(const QModelIndex& parent);
-    void setVersion();
+    void writeVersion();
 
     QSettings* settings_;
     oskar_SettingsItem* rootItem_;
     QHash<QString, oskar_SettingsItem*> itemHash_;
     QStringList iterationKeys_;
     QStringList outputKeys_;
+    QString version_;
 };
 
 class OSKAR_WIDGETS_EXPORT oskar_SettingsModelFilter : public QSortFilterProxyModel

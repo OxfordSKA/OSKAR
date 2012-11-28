@@ -39,7 +39,8 @@
 oskar_SettingsModel::oskar_SettingsModel(QObject* parent)
 : QAbstractItemModel(parent),
   settings_(NULL),
-  rootItem_(NULL)
+  rootItem_(NULL),
+  version_(OSKAR_VERSION_STR)
 {
     // Set up the root item.
     rootItem_ = new oskar_SettingsItem(QString(), QString(),
@@ -440,7 +441,7 @@ void oskar_SettingsModel::saveSettingsFile(const QString& filename)
 
         // Create new settings object from supplied filename.
         settings_ = new QSettings(filename, QSettings::IniFormat);
-        setVersion();
+        writeVersion();
 
         // Set the contents of the file.
         saveFromParentIndex(QModelIndex());
@@ -570,7 +571,7 @@ bool oskar_SettingsModel::setData(const QModelIndex& idx,
             // Set the data in the settings file.
             if ((role != LoadRole) && settings_)
             {
-                setVersion();
+                writeVersion();
                 if (data.isNull())
                     settings_->remove(item->key());
                 else
@@ -690,6 +691,11 @@ QString oskar_SettingsModel::version() const
     return QString();
 }
 
+void oskar_SettingsModel::setVersion(const QString& value)
+{
+    version_ = value;
+}
+
 
 // Private methods.
 
@@ -798,13 +804,13 @@ void oskar_SettingsModel::saveFromParentIndex(const QModelIndex& parent)
     }
 }
 
-void oskar_SettingsModel::setVersion()
+void oskar_SettingsModel::writeVersion()
 {
     if (settings_)
     {
         // Write a version key only if it doesn't already exist in the file.
         if (!settings_->contains("version"))
-            settings_->setValue("version", OSKAR_VERSION_STR);
+            settings_->setValue("version", version_);
     }
 }
 
