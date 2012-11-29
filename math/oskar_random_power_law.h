@@ -45,7 +45,6 @@ extern "C" {
  *
  * @details
  * This function returns a random number from a power-law distribution.
- * Note that if the power is exactly -1.0, this function will always return 0.0.
  *
  * The random number generator may be seeded by calling srand() prior to this
  * function.

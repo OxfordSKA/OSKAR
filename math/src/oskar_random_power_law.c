@@ -29,6 +29,7 @@
 #include "math/oskar_random_power_law.h"
 #include <math.h>
 #include <stdlib.h>
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,11 +38,23 @@ extern "C" {
 double oskar_random_power_law(double min, double max, double power)
 {
     double r, b0, b1;
-    if (power == -1.0) return 0.0;
+
+    if ((min <= 0) || (max < min))
+        return 0.0;
+
     r = (double)rand() / ((double)RAND_MAX + 1.0);
-    b0 = pow(min, power + 1.0);
-    b1 = pow(max, power + 1.0);
-    return pow(((b1 - b0) * r + b0), (1.0 / (power + 1.0)));
+
+    if (fabs(power + 1.0) < DBL_EPSILON)
+    {
+        b0 = log(max);
+        b1 = log(min);
+        return exp((b0 - b1) * r + b1);
+    }
+    else {
+        b0 = pow(min, power + 1.0);
+        b1 = pow(max, power + 1.0);
+        return pow(((b1 - b0) * r + b0), (1.0 / (power + 1.0)));
+    }
 }
 
 #ifdef __cplusplus
