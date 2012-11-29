@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,25 +35,26 @@
 extern "C" {
 #endif
 
-double oskar_random_power_law(double min, double max, double power)
+double oskar_random_power_law(double min, double max, double index)
 {
     double r, b0, b1;
 
-    if ((min <= 0) || (max < min))
+    if ((min <= 0.0) || (max < min))
         return 0.0;
 
     r = (double)rand() / ((double)RAND_MAX + 1.0);
 
-    if (fabs(power + 1.0) < DBL_EPSILON)
+    if (fabs(index + 1.0) < DBL_EPSILON)
     {
         b0 = log(max);
         b1 = log(min);
         return exp((b0 - b1) * r + b1);
     }
-    else {
-        b0 = pow(min, power + 1.0);
-        b1 = pow(max, power + 1.0);
-        return pow(((b1 - b0) * r + b0), (1.0 / (power + 1.0)));
+    else
+    {
+        b0 = pow(min, index + 1.0);
+        b1 = pow(max, index + 1.0);
+        return pow(((b1 - b0) * r + b0), (1.0 / (index + 1.0)));
     }
 }
 

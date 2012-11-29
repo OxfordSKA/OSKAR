@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,10 +51,10 @@ extern "C" {
  *
  * @param[in] min   The minimum number to return.
  * @param[in] max   The maximum number to return.
- * @param[in] power The slope (index) of the power-law distribution.
+ * @param[in] index The slope (index) of the power-law distribution.
  */
 OSKAR_EXPORT
-double oskar_random_power_law(double min, double max, double power);
+double oskar_random_power_law(double min, double max, double index);
 
 #ifdef __cplusplus
 }

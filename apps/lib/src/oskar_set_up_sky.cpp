@@ -282,6 +282,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         srand(settings->sky.generator.random_power_law.seed);
         oskar_log_message(log, 0,
                 "Generating random power law source distribution...");
+        // Cannot parallelise here, since rand() is not thread safe.
         for (int i = 0; i < g->num_sources; ++i)
         {
             double ra, dec, b;
@@ -320,6 +321,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         srand(settings->sky.generator.random_broken_power_law.seed);
         oskar_log_message(log, 0,
                 "Generating random broken power law source distribution...");
+        // Cannot parallelise here, since rand() is not thread safe.
         for (int i = 0; i < g->num_sources; ++i)
         {
             double ra, dec, b;
