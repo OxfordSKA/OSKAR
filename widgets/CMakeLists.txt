@@ -2,7 +2,7 @@
 # src/widgets/CMakeLists.txt
 #
 
-if (QT4_FOUND AND CUDA_FOUND)
+if (QT4_FOUND)
 
     include_directories(${QT_INCLUDE_DIR})
 
@@ -53,4 +53,4 @@ if (QT4_FOUND AND CUDA_FOUND)
     # Tests
     add_subdirectory(test)
 
-endif (QT4_FOUND AND CUDA_FOUND)
+endif (QT4_FOUND)
