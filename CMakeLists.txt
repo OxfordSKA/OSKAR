@@ -2,9 +2,11 @@
 # src/CMakeLists.txt (top level CMakeLists.txt)
 #
 
-# HACK FOR OS X to prevent the C++ compiler using clang
+# HACK FOR OS X to prevent the C++ compiler using clang.
+# This is because clang doesnt have OpenMP support. 
 if (APPLE AND NOT CMAKE_CXX_COMPILER)
     set(CMAKE_CXX_COMPILER g++)
+    set(CMAKE_C_COMPILER gcc)
 endif()
 
 # === Set the project name and specify the required CMAKE version.

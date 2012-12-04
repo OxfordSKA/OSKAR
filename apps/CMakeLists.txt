@@ -39,6 +39,10 @@ if (CUDA_FOUND)
     # BINARY: oskar_rebin_sky
     set(name oskar_rebin_sky)
     oskar_app(${name} ${name}_main.cpp)
+    
+    # BINARY: oskar_visibilities_add
+    set(name oskar_visibilities_add)
+    oskar_app(${name} ${name}_main.cpp)
 
     #if (CFITSIO_FOUND)
     #    # BINARY: oskar_fits_to_sky_model
