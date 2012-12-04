@@ -40,17 +40,22 @@
 #include <cmath>
 #include <iostream>
 #include <cfloat>
+#include <vector>
+#include <iomanip>
 
 using namespace ez;
 using namespace std;
 
+// -----------------------------------------------------------------------------
 void set_options(ezOptionParser& opt);
 void print_usage(ezOptionParser& opt);
 bool check_options(ezOptionParser& opt);
+vector<string> getInputFiles(ezOptionParser& opt);
 bool isCompatible(const oskar_Visibilities& vis1, const oskar_Visibilities& vis2);
 void add_visibilities(oskar_Visibilities& out, const oskar_Visibilities& in1,
         const oskar_Visibilities& in2);
 void print_error(int status, const char* message);
+// -----------------------------------------------------------------------------
 
 int main(int argc, const char** argv)
 {
@@ -62,69 +67,92 @@ int main(int argc, const char** argv)
         return 1;
 
     // Capture options ========================================================
-    string in1_path, in2_path, out_path;
-    bool visFirst = ((int)opt.firstArgs.size() == 3) &&
-            ((int)opt.lastArgs.size() == 0);
-    if (visFirst) {
-        in1_path = *opt.firstArgs[1];
-        in2_path = *opt.firstArgs[2];
-    }
-    else {
-        in1_path = *opt.lastArgs[0];
-        in2_path = *opt.lastArgs[1];
-    }
+    string out_path;
     opt.get("-o")->getString(out_path);
-
-    cout << "in1 = " << in1_path << endl;
-    cout << "in2 = " << in2_path << endl;
-    cout << "out = " << out_path << endl;
-
-    // Load input data ========================================================
-    int status = OSKAR_SUCCESS;
-    oskar_Visibilities in1_vis;
-    oskar_Visibilities in2_vis;
-    oskar_visibilities_read(&in1_vis, in1_path.c_str(), &status);
-    oskar_visibilities_read(&in2_vis, in2_path.c_str(), &status);
-    if (status != OSKAR_SUCCESS)
-        print_error(status, "Failed to read visibility data files.");
-
-    // Sanity checks ==========================================================
-    int vis1_n = in1_vis.num_baselines * in1_vis.num_times * in1_vis.num_channels;
-    int vis2_n = in2_vis.num_baselines * in2_vis.num_times * in2_vis.num_channels;
-
-    cout << "vis1 num data points = " << vis1_n << endl;
-    cout << "vis2 num data points = " << vis2_n << endl;
-
-    // TODO get this to return a more useful message.!
-    if (!isCompatible(in1_vis, in2_vis))
-    {
-        cerr << "ERROR: Input visibility data must match!" << endl;
-        return 1;
+    vector<string> in_files = getInputFiles(opt);
+    cout << "Output visibility file = " << out_path << endl;
+    cout << "Combining the " << in_files.size() << " input files:" << endl;
+    for (int i = 0; i < (int)in_files.size(); ++i) {
+        cout << "  [" << setw(2) << i << "] " << in_files[i] << endl;
     }
-    // TODO handle cases where they are not compatible but can be concatenated?
 
-    // Create output data =====================================================
-    int amp_type = in1_vis.amplitude.type;
-    int num_channels = in1_vis.num_channels;
-    int num_times = in1_vis.num_times;
-    int num_stations = in1_vis.num_stations;
-    oskar_Visibilities out_vis;
-    oskar_visibilities_init(&out_vis, amp_type, OSKAR_LOCATION_CPU, num_channels,
+    // Add the data. ==========================================================
+    int status = OSKAR_SUCCESS;
+
+    // Load the first visibility structure.
+    oskar_Visibilities in1;
+    oskar_visibilities_read(&in1, in_files[0].c_str(), &status);
+    int amp_type = in1.amplitude.type;
+    int num_channels = in1.num_channels;
+    int num_times = in1.num_times;
+    int num_stations = in1.num_stations;
+    if (status != OSKAR_SUCCESS) {
+        string msg = "Failed to read visibility data file " + in_files[0];
+        print_error(status, msg.c_str());
+    }
+
+    // Create an output visibility data structure.
+    oskar_Visibilities out;
+    oskar_visibilities_init(&out, amp_type, OSKAR_LOCATION_CPU, num_channels,
             num_times, num_stations, &status);
-    oskar_visibilities_copy(&out_vis, &in1_vis, &status);
     if (status != OSKAR_SUCCESS)
         print_error(status, "Failed to initialise output visibility structure.");
 
-    // Add ====================================================================
-    add_visibilities(out_vis, in1_vis, in2_vis);
+    // Copy the first input visibility data file into the output data structure.
+    oskar_visibilities_copy(&out, &in1, &status);
+
+    // Loop over other visibility files and combine.
+    for (int i = 1; i < (int)in_files.size(); ++i)
+    {
+        oskar_Visibilities in2;
+        oskar_visibilities_read(&in2, in_files[i].c_str(), &status);
+        if (status != OSKAR_SUCCESS) {
+            string msg = "Failed to read visibility data file " + in_files[i];
+            print_error(status, msg.c_str());
+        }
+        if (!isCompatible(out, in2))
+        {
+            cerr << "ERROR: Input visibility data must match!" << endl;
+            return 1;
+        }
+        add_visibilities(out, out, in2);
+    }
+    if (status != OSKAR_SUCCESS)
+        print_error(status, "Failed to read visibility data files.");
 
     // Write output data ======================================================
-    oskar_visibilities_write(&out_vis, 0, out_path.c_str(), &status);
+    oskar_visibilities_write(&out, 0, out_path.c_str(), &status);
     if (status != OSKAR_SUCCESS)
         print_error(status, "Failed writing output visibility structure to file.");
 
     return 0;
 }
+
+vector<string> getInputFiles(ezOptionParser& opt)
+{
+    vector<string> files;
+    bool visFirst = ((int)opt.firstArgs.size() >= 3) &&
+            ((int)opt.lastArgs.size() == 0);
+
+    if (visFirst)
+    {
+        // Note starts at 1 as index 0 == the program name.
+        for (int i = 1; i < (int)opt.firstArgs.size(); ++i)
+        {
+            files.push_back(*opt.firstArgs[i]);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < (int)opt.lastArgs.size(); ++i)
+        {
+            files.push_back(*opt.lastArgs[i]);
+        }
+    }
+
+    return files;
+}
+
 
 void print_error(int status, const char* message)
 {
@@ -187,9 +215,12 @@ void set_options(ezOptionParser& opt)
     opt.overview = string(80, '-') + "\n" +
             "OSKAR application to combine visibility files" +
             "\n" + string(80, '-');
-    opt.syntax = "\n  $ oskar_visibilities_add [OPTIONS] input1.vis input2.vis";
+    opt.syntax = "\n  $ oskar_visibilities_add [OPTIONS] inputFile(s)...";
     opt.example =
             "  $ oskar_visibilities_add file1.vis file2.vis\n"
+            "  $ oskar_visibilities_add file1.vis file2.vis -o combined.vis\n"
+            "  $ oskar_visibilities_add file1.vis file2.vis file3.vis\n"
+            "  $ oskar_visibilities_add *.vis\n"
             "\n"
             ;
     opt.footer =
@@ -222,7 +253,7 @@ bool check_options(ezOptionParser& opt)
     std::vector<std::string> badOptions;
     if(!opt.gotRequired(badOptions)) {
         for(int i=0; i < (int)badOptions.size(); ++i)
-            cerr << "ERROR: Missing required option " << badOptions[i] << ".\n\n";
+            cerr << "\nERROR: Missing required option " << badOptions[i] << ".\n\n";
         print_usage(opt);
         return false;
     }
@@ -230,18 +261,19 @@ bool check_options(ezOptionParser& opt)
     if(!opt.gotExpected(badOptions)) {
         for(int i=0; i < (int)badOptions.size(); ++i)
         {
-            cerr << "ERROR: Got unexpected number of arguments for option ";
+            cerr << "\nERROR: Got unexpected number of arguments for option ";
             cerr << badOptions[i] << ".\n\n";
         }
         print_usage(opt);
         return false;
     }
 
-    bool visFirst = ((int)opt.firstArgs.size() == 3) &&
+    bool visFirst = ((int)opt.firstArgs.size() >= 3) &&
             ((int)opt.lastArgs.size() == 0);
     bool visEnd = ((int)opt.firstArgs.size() == 1) &&
-            ((int)opt.lastArgs.size() == 2);
+            ((int)opt.lastArgs.size() >= 2);
     if (!visFirst && !visEnd) {
+        cerr << "\nERROR: Please provide 2 or more visibility files to combine.\n\n";
         print_usage(opt);
         return false;
     }
