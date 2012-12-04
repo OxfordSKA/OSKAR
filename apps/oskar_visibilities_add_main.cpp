@@ -203,7 +203,7 @@ void set_options(ezOptionParser& opt)
             "-h", "-help", "--help", "--usage");
     opt.add("", 0, 0, 0, "Display the OSKAR version.",
             "-v", "--version");
-    opt.add("out.vis", 0, 1, 0, "Output visibility filename (default=out.vis).",
+    opt.add("out.vis", 0, 1, 0, "Output visibility filename (optional, default=out.vis).",
             "-o", "--output");
 }
 
