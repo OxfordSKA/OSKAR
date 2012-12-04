@@ -1,0 +1,7 @@
+-d 0
++e tmp.20
+-f 3.14159265
+-fl -2.1e-20,-.2,-.001,0,1,1e10
+-nl 0,1,2,3,4,5,6,7,8,9,10
+-s "A default string."
+-sl "string list item1",item2,"list # item3",2000/1/1

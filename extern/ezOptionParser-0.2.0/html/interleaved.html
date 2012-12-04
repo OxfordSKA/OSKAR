@@ -1,0 +1,34 @@
+<html>
+<body>
+<pre>
+Demo of automatic usage message creation.
+
+USAGE: usage [OPTIONS]
+
+OPTIONS:
+
+-f, -flg, --flag
+
+   Simple flag with a very long help description that will be split
+   automatically into a two column format when usage is printed for this
+   program. Newlines will also help with justification.
+
+-h, -help, --help, --usage ARG
+
+   Display usage instructions.
+   There is a choice of three different layouts for description alignment. Your
+   choice can be any one of the following to suit your style:
+   
+   0 - align (default)
+   1 - interleave
+   2 - stagger
+
+EXAMPLES:
+
+usage -h
+
+usage v0.0.0 Copyright (C) 2011 Remik Ziemlinski
+This program is free and without warranty.
+</pre>
+</body>
+</html>
