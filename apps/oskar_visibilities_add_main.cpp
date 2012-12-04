@@ -215,7 +215,7 @@ void set_options(ezOptionParser& opt)
     opt.overview = string(80, '-') + "\n" +
             "OSKAR application to combine visibility files" +
             "\n" + string(80, '-');
-    opt.syntax = "\n  $ oskar_visibilities_add [OPTIONS] inputFile(s)...";
+    opt.syntax = "\n  $ oskar_visibilities_add [OPTIONS] input_file(s)...";
     opt.example =
             "  $ oskar_visibilities_add file1.vis file2.vis\n"
             "  $ oskar_visibilities_add file1.vis file2.vis -o combined.vis\n"
