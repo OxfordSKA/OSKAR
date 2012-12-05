@@ -26,150 +26,217 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "oskar_global.h"
-#include "imaging/oskar_Image.h"
-#include "imaging/oskar_ImageStats.h"
-#include "imaging/oskar_image_get_stats.h"
-#include "imaging/oskar_image_read.h"
-#include "utility/oskar_get_error_string.h"
+#include <oskar_global.h>
+#include <imaging/oskar_Image.h>
+#include <imaging/oskar_ImageStats.h>
+#include <imaging/oskar_image_get_stats.h>
+#include <imaging/oskar_image_read.h>
+#include <utility/oskar_get_error_string.h>
+
+#include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
 
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <string>
+#include <cmath>
+#include <iostream>
+#include <cfloat>
+#include <vector>
+#include <iomanip>
 
-void usage(bool verbose = false);
+using namespace ez;
+using namespace std;
 
-int main(int argc, char** argv)
+// ----------------------------------------------------------------------------
+void set_options(ezOptionParser& opt);
+void print_usage(ezOptionParser& opt);
+bool check_options(ezOptionParser& opt);
+vector<string> getInputFiles(ezOptionParser& opt);
+void print_error(int status, const char* message);
+// ----------------------------------------------------------------------------
+
+int main(int argc, const char** argv)
 {
-    int error = OSKAR_SUCCESS;
+    // Register options =======================================================
+    ezOptionParser opt;
+    set_options(opt);
+    opt.parse(argc, argv);
+    if (!check_options(opt))
+        return OSKAR_FAIL;
 
-    // Parse the command line
-    if (argc < 2)
-    {
-        usage();
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
-
-    for (int i = 1; i < argc; ++i)
-    {
-        if (strcmp(argv[i], "-h") == 0)
-        {
-            usage(true);
-            return OSKAR_SUCCESS;
-        }
-    }
-
-    // Retrieve the command arguments.
-    const char* filename = argv[1];
-    int p = 0, t = 0, c = 0;
-    bool exp_format = false;
-    if (argc == 6)
-    {
-        if ((strcmp(argv[5], "e") == 0))
-            exp_format = true;
-        else if ((strcmp(argv[5], "f") == 0))
-            exp_format = false;
-        else
-        {
-            fprintf(stderr, "ERROR: Unrecognised print format specified "
-                    "(argument 5), allowed values are 'f' or 'e'\n");
-            return OSKAR_ERR_INVALID_ARGUMENT;
-        }
-        c = atoi(argv[4]);
-        t = atoi(argv[3]);
-        p = atoi(argv[2]);
-    }
-    else if (argc == 5)
-    {
-        c = atoi(argv[4]);
-        t = atoi(argv[3]);
-        p = atoi(argv[2]);
-    }
-    else if (argc == 4)
-    {
-        t = atoi(argv[3]);
-        p = atoi(argv[2]);
-    }
-    else if (argc == 3)
-    {
-        p = atoi(argv[2]);
+    // Retrieve options =======================================================
+    int channel, pol, time;
+    // TODO allow comma separated lists for channel, pol, time index...?
+    opt.get("-c")->getInt(channel);
+    opt.get("-p")->getInt(pol);
+    opt.get("-t")->getInt(time);
+    vector<string> files = getInputFiles(opt);
+    cout << "#"<< endl;
+    cout << "# Statistics for the following images:" << endl;
+    for (int i = 0; i < (int)files.size(); ++i) {
+        cout << "#  [" << setw(2) << i << "] " << files[i] << endl;
     }
 
-    // Create the log.
-    try
+    cout << "#" << endl;
+    cout << "# Data index:" << endl;
+    cout << "#   Channel .... = " << channel << endl;
+    cout << "#   Polarisation = " << pol << endl;
+    cout << "#   Time ....... = " << time << endl;
+    cout << "#" << endl;
+
+    // Generate the statistics ================================================
+    int status = OSKAR_SUCCESS;
+    FILE* out = stdout;
+    string sformat = "% -6.3e";
+    string sep = ", ";
+
+    fprintf(out, "#\n");
+    fprintf(out, "# file index, minimum, maximum, mean, variance, standard deviation, RMS\n");
+    fprintf(out, "#\n");
+    for (int i = 0; i < (int)files.size(); ++i)
     {
-        // Load the image into memory.
         oskar_Image image;
-        oskar_image_read(&image, filename, 0, &error);
-        if (error)
-        {
-            fprintf(stderr, "ERROR: Failed to open specified image file: %s.\n",
-                    oskar_get_error_string(error));
-            return error;
+        oskar_image_read(&image, files[i].c_str(), 0, &status);
+        if (status != OSKAR_SUCCESS) {
+            string msg = "Failed to read image file " + files[i];
+            print_error(status, msg.c_str());
+            return status;
         }
-
-        // Calculate the image stats
         oskar_ImageStats stats;
-        oskar_image_get_stats(&stats, &image, p, t, c, &error);
-        if (error)
-        {
-            fprintf(stderr, "ERROR: Failed evaluate image statistics: %s.\n",
-                    oskar_get_error_string(error));
-            if (OSKAR_ERR_DIMENSION_MISMATCH)
-            {
-                fprintf(stderr, "  Check specified image indices are valid.\n");
-            }
-            return error;
+        oskar_image_get_stats(&stats, &image, pol, time, channel, &status);
+        if (status != OSKAR_SUCCESS) {
+            string msg = "Failed to evaluate image statistics for: " + files[i];
+            print_error(status, msg.c_str());
+            return status;
         }
-        if (exp_format)
-            printf("%e, %e, %e, %e, %e, %e\n", stats.min, stats.max, stats.mean,
-                    stats.rms, stats.var, stats.std);
-        else
-            printf("%f, %f, %f, %f, %f, %f\n", stats.min, stats.max, stats.mean,
-                    stats.rms, stats.var, stats.std);
-
-    }
-    catch (int code)
-    {
-        error = code;
-    }
-
-    // Check for errors.
-    if (error)
-    {
-        fprintf(stderr, "ERROR: Run failed with code %i: %s.\n", error,
-                oskar_get_error_string(error));
+        fprintf(out, "%3i", i);
+        fprintf(out, "%s", sep.c_str());
+        fprintf(out, sformat.c_str(), stats.min);
+        fprintf(out, "%s", sep.c_str());
+        fprintf(out, sformat.c_str(), stats.max);
+        fprintf(out, "%s", sep.c_str());
+        fprintf(out, sformat.c_str(), stats.mean);
+        fprintf(out, "%s", sep.c_str());
+        fprintf(out, sformat.c_str(), stats.var);
+        fprintf(out, "%s", sep.c_str());
+        fprintf(out, sformat.c_str(), stats.std);
+        fprintf(out, "%s", sep.c_str());
+        fprintf(out, sformat.c_str(), stats.rms);
+        fprintf(out, "\n");
     }
 
-    return error;
+    return status;
 }
 
-void usage(bool verbose)
+void print_usage(ezOptionParser& opt)
 {
-    fprintf(stderr, "Usage:\n");
-    fprintf(stderr, "  oskar_image_stats [OSKAR image] <polarisation> <time> <channel> <print format>\n");
-    fprintf(stderr, "\n");
-    if (verbose)
+    string usage;
+    opt.getUsage(usage);
+    cout << usage;
+}
+
+void set_options(ezOptionParser& opt)
+{
+    opt.overview = string(80, '-') + "\n" +
+            "Application to evaluate OSKAR binary image file statistics." +
+            "\n" + string(80, '-');
+    opt.syntax = "\n  $ oskar_image_stats [OPTIONS] image_file(s)...";
+    opt.example =
+            "  $ oskar_image_stats file.img\n"
+            "  $ oskar_image_stats *.img\n"
+            "  $ oskar_image_stats *.img -c 1 -t 2 -p 3\n"
+            "\n"
+            ;
+    opt.footer =
+            "|" + std::string(80, '-') + "\n"
+            "| OSKAR (version " + OSKAR_VERSION_STR + ")\n"
+            "| Copyright (C) 2012, The University of Oxford.\n"
+            "| This program is free and without warranty.\n"
+            "|" + std::string(80, '-') + "\n";
+    // add(default, required?, num args, delimiter, message, flag token(s), ...)
+    opt.add("", 0, 0, 0, "Display usage instructions.", "-h", "-help", "--help",
+            "--usage");
+    opt.add("", 0, 0, 0, "Display the OSKAR version.", "-v", "--version");
+    opt.add("0", 0, 1, 0, "Polaristation index (optional, default=0)", "-p",
+            "--polarisation");
+    opt.add("0", 0, 1, 0, "Time index (optional, default=0)", "-t", "--time");
+    opt.add("0", 0, 1, 0, "Channel index (optional, default=0)", "-c",
+            "--channel");
+}
+
+
+bool check_options(ezOptionParser& opt)
+{
+    if (opt.isSet("-h")) {
+        print_usage(opt);
+        return false;
+    }
+
+    if (opt.isSet("-v")) {
+         cout << "OSKAR version " <<OSKAR_VERSION_STR << endl;
+         return false;
+    }
+
+    std::vector<std::string> badOptions;
+    if(!opt.gotRequired(badOptions)) {
+        for(int i=0; i < (int)badOptions.size(); ++i)
+            cerr << "\nERROR: Missing required option " << badOptions[i] << ".\n\n";
+        print_usage(opt);
+        return false;
+    }
+
+    if(!opt.gotExpected(badOptions)) {
+        for(int i=0; i < (int)badOptions.size(); ++i)
+        {
+            cerr << "\nERROR: Got unexpected number of arguments for option ";
+            cerr << badOptions[i] << ".\n\n";
+        }
+        print_usage(opt);
+        return false;
+    }
+
+    int num_req = 1; // Number of image files required;
+    bool visFirst = ((int)opt.firstArgs.size() >= (num_req+1)) &&
+            ((int)opt.lastArgs.size() == 0);
+    bool visEnd = ((int)opt.firstArgs.size() == 1) &&
+            ((int)opt.lastArgs.size() >= num_req);
+    if (!visFirst && !visEnd) {
+        cerr << "\nERROR: Please provide 1 or more image files.\n\n";
+        print_usage(opt);
+        return false;
+    }
+
+    return true;
+}
+
+
+vector<string> getInputFiles(ezOptionParser& opt)
+{
+    vector<string> files;
+    bool filesFirst = ((int)opt.firstArgs.size() >= 3) &&
+            ((int)opt.lastArgs.size() == 0);
+    if (filesFirst)
     {
-        fprintf(stderr, "Arguments:\n");
-        fprintf(stderr, "  OSKAR image (required): OSKAR image file path:\n");
-        fprintf(stderr, "  polarisation (optional, default=0): index into the image cube\n");
-        fprintf(stderr, "  time (optional, default=0): index into the image cube\n");
-        fprintf(stderr, "  channel (optional, default=0): index into the image cube\n");
-        fprintf(stderr, "  print format (optional, default='f'): print format for output string, 'e' or 'f'\n");
-        fprintf(stderr, "\n");
-        fprintf(stderr, "Output:\n");
-        fprintf(stderr, "  A comma separated list of image statistics in the following format:\n");
-        fprintf(stderr, "    min, max, mean, rms, variance, std.dev.\n" );
-        fprintf(stderr, "\n");
-        fprintf(stderr, "Example:\n");
-        fprintf(stderr, "  $ oskar_image_stats my_image.img 1 2 3 f\n");
+        // Note starts at 1 as index 0 == the binary name.
+        for (int i = 1; i < (int)opt.firstArgs.size(); ++i)
+        {
+            files.push_back(*opt.firstArgs[i]);
+        }
     }
     else
     {
-        fprintf(stderr, "  For more detailed usage information run with '-h'\n");
+        for (int i = 0; i < (int)opt.lastArgs.size(); ++i)
+        {
+            files.push_back(*opt.lastArgs[i]);
+        }
     }
-    fprintf(stderr, "\n");
+    return files;
 }
 
+void print_error(int status, const char* message)
+{
+    cerr << "ERROR[" << status << "] " << message << endl;
+    cerr << "REASON = " << oskar_get_error_string(status) << endl;
+}
 

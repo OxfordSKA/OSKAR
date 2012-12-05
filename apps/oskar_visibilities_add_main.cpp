@@ -64,9 +64,9 @@ int main(int argc, const char** argv)
     set_options(opt);
     opt.parse(argc, argv);
     if (!check_options(opt))
-        return 1;
+        return OSKAR_FAIL;
 
-    // Capture options ========================================================
+    // Retrieve options ========================================================
     string out_path;
     opt.get("-o")->getString(out_path);
     vector<string> in_files = getInputFiles(opt);
@@ -89,14 +89,17 @@ int main(int argc, const char** argv)
     if (status != OSKAR_SUCCESS) {
         string msg = "Failed to read visibility data file " + in_files[0];
         print_error(status, msg.c_str());
+        return status;
     }
 
     // Create an output visibility data structure.
     oskar_Visibilities out;
     oskar_visibilities_init(&out, amp_type, OSKAR_LOCATION_CPU, num_channels,
             num_times, num_stations, &status);
-    if (status != OSKAR_SUCCESS)
+    if (status != OSKAR_SUCCESS) {
         print_error(status, "Failed to initialise output visibility structure.");
+        return status;
+    }
 
     // Copy the first input visibility data file into the output data structure.
     oskar_visibilities_copy(&out, &in1, &status);
@@ -109,23 +112,28 @@ int main(int argc, const char** argv)
         if (status != OSKAR_SUCCESS) {
             string msg = "Failed to read visibility data file " + in_files[i];
             print_error(status, msg.c_str());
+            return status;
         }
         if (!isCompatible(out, in2))
         {
             cerr << "ERROR: Input visibility data must match!" << endl;
-            return 1;
+            return status;
         }
         add_visibilities(out, out, in2);
     }
-    if (status != OSKAR_SUCCESS)
+    if (status != OSKAR_SUCCESS) {
         print_error(status, "Failed to read visibility data files.");
+        return status;
+    }
 
     // Write output data ======================================================
     oskar_visibilities_write(&out, 0, out_path.c_str(), &status);
-    if (status != OSKAR_SUCCESS)
+    if (status != OSKAR_SUCCESS) {
         print_error(status, "Failed writing output visibility structure to file.");
+        return status;
+    }
 
-    return 0;
+    return status;
 }
 
 vector<string> getInputFiles(ezOptionParser& opt)
@@ -213,8 +221,14 @@ void print_usage(ezOptionParser& opt)
 void set_options(ezOptionParser& opt)
 {
     opt.overview = string(80, '-') + "\n" +
-            "OSKAR application to combine visibility files" +
-            "\n" + string(80, '-');
+            "Application to combine OSKAR binary visibility files.\n"
+//            "\n"
+//            "Adds together the complex amplitudes contained in the specified\n"
+//            "visibility data files. A new combined data file is produced.\n"
+//            "Note: While basic checking of dimensions and meta-data is\n"
+//            "please make sure that the data files being added together\n"
+//            "are compatible for this procedure to ensure sensible results!\n"
+            + string(80, '-');
     opt.syntax = "\n  $ oskar_visibilities_add [OPTIONS] input_file(s)...";
     opt.example =
             "  $ oskar_visibilities_add file1.vis file2.vis\n"
