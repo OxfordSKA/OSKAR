@@ -34,6 +34,11 @@
 #include <utility/oskar_get_error_string.h>
 #include <utility/oskar_mem_add.h>
 
+#include <utility/oskar_mem_free.h> // used?
+#include <utility/oskar_mem_init.h> // used?
+#include <utility/oskar_mem_clear_contents.h> // used?
+
+
 #include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
 
 #include <string>
@@ -70,10 +75,13 @@ int main(int argc, const char** argv)
     string out_path;
     opt.get("-o")->getString(out_path);
     vector<string> in_files = getInputFiles(opt);
-    cout << "Output visibility file = " << out_path << endl;
-    cout << "Combining the " << in_files.size() << " input files:" << endl;
-    for (int i = 0; i < (int)in_files.size(); ++i) {
-        cout << "  [" << setw(2) << i << "] " << in_files[i] << endl;
+    bool verbose = opt.isSet("-q") ? false : true;
+    if (verbose) {
+        cout << "Output visibility file = " << out_path << endl;
+        cout << "Combining the " << in_files.size() << " input files:" << endl;
+        for (int i = 0; i < (int)in_files.size(); ++i) {
+            cout << "  [" << setw(2) << i << "] " << in_files[i] << endl;
+        }
     }
 
     // Add the data. ==========================================================
@@ -103,6 +111,14 @@ int main(int argc, const char** argv)
 
     // Copy the first input visibility data file into the output data structure.
     oskar_visibilities_copy(&out, &in1, &status);
+    oskar_mem_clear_contents(&out.settings_path, &status);
+    // TODO write some sort of tag into here to indicate this is an
+    // accumulated visibility data set...
+    if (status != OSKAR_SUCCESS) {
+        print_error(status, "Failed to clear settings path.");
+        return status;
+    }
+
 
     // Loop over other visibility files and combine.
     for (int i = 1; i < (int)in_files.size(); ++i)
@@ -250,6 +266,7 @@ void set_options(ezOptionParser& opt)
             "-v", "--version");
     opt.add("out.vis", 0, 1, 0, "Output visibility filename (optional, default=out.vis).",
             "-o", "--output");
+    opt.add("", 0, 0, 0, "Disable messages (optional).", "-q", "--quiet");
 }
 
 bool check_options(ezOptionParser& opt)
