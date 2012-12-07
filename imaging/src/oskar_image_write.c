@@ -41,6 +41,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,20 +96,26 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     /* If settings path is set, write out the data. */
     if (image->settings_path.data)
     {
-        oskar_Mem temp;
+        if (strlen(image->settings_path.data) > 0)
+        {
+            oskar_Mem temp;
+            /* Write the settings path. */
+            oskar_mem_binary_stream_write(&image->settings_path, stream,
+                    OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, idx, 0,
+                    status);
 
-        /* Write the settings path. */
-        oskar_mem_binary_stream_write(&image->settings_path, stream,
-                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, idx, 0,
-                status);
-
-        /* Write the settings file. */
-        oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
-        oskar_mem_binary_file_read_raw(&temp,
-                (const char*) image->settings_path.data, status);
-        oskar_mem_binary_stream_write(&temp, stream,
-                OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0, status);
-        oskar_mem_free(&temp, status);
+            /* Check the file exists */
+            if (oskar_file_exists((const char*)image->settings_path.data))
+            {
+                /* Write the settings file. */
+                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
+                oskar_mem_binary_file_read_raw(&temp,
+                        (const char*) image->settings_path.data, status);
+                oskar_mem_binary_stream_write(&temp, stream,
+                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0, status);
+                oskar_mem_free(&temp, status);
+            }
+        }
     }
 
     /* If log exists, then write it out. */
