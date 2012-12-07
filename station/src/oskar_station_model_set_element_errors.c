@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,11 +44,21 @@
 extern "C" {
 #endif
 
-int oskar_station_model_set_element_errors(oskar_StationModel* dst,
+void oskar_station_model_set_element_errors(oskar_StationModel* dst,
         int index, double gain, double gain_error, double phase_offset,
-        double phase_error)
+        double phase_error, int* status)
 {
     int type, location;
+
+    /* Check all inputs. */
+    if (!dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Convert phases to radians */
     phase_offset *= M_PI / 180.0;
@@ -56,21 +66,29 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
 
     /* Check range. */
     if (index >= dst->num_elements)
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
     /* Get the data type. */
-    if (dst->gain.type != dst->gain_error.type ||
-            dst->gain.type != dst->phase_offset.type ||
-            dst->gain.type != dst->phase_error.type)
-        return OSKAR_ERR_TYPE_MISMATCH;
     type = dst->gain.type;
+    if (type != dst->gain_error.type || type != dst->phase_offset.type ||
+            type != dst->phase_error.type)
+    {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
 
     /* Get the data location. */
-    if (dst->gain.location != dst->gain_error.location ||
-            dst->gain.location != dst->phase_offset.location ||
-            dst->gain.location != dst->phase_error.location)
-        return OSKAR_ERR_BAD_LOCATION;
     location = dst->gain.location;
+    if (location != dst->gain_error.location ||
+            location != dst->phase_offset.location ||
+            location != dst->phase_error.location)
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     if (location == OSKAR_LOCATION_CPU)
     {
@@ -80,7 +98,6 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
             ((double*)dst->gain_error.data)[index] = gain_error;
             ((double*)dst->phase_offset.data)[index] = phase_offset;
             ((double*)dst->phase_error.data)[index] = phase_error;
-            return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -88,10 +105,9 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
             ((float*)dst->gain_error.data)[index] = (float) gain_error;
             ((float*)dst->phase_offset.data)[index] = (float) phase_offset;
             ((float*)dst->phase_error.data)[index] = (float) phase_error;
-            return 0;
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
@@ -109,7 +125,6 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
                     &phase_offset, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_error.data) + offset_bytes,
                     &phase_error, element_size, cudaMemcpyHostToDevice);
-            return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -126,13 +141,12 @@ int oskar_station_model_set_element_errors(oskar_StationModel* dst,
                     &t_phase_offset, element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->phase_error.data) + offset_bytes,
                     &t_phase_error, element_size, cudaMemcpyHostToDevice);
-            return 0;
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    return OSKAR_ERR_BAD_LOCATION;
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus

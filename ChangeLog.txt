@@ -1,5 +1,9 @@
 2012-xx-yy  OSKAR-2.2.0-beta
 
+    * Improved robustness of random-power-law source generators.
+
+    * Improved reported error message if visibility file cannot be opened.
+
     * Added options to override reference frequency and spectral index
       data for all sources in the sky model.
 

@@ -34,6 +34,9 @@
 
 #include "interferometry/oskar_TelescopeModel.h"
 #include "interferometry/oskar_SettingsTelescope.h"
+#include "interferometry/oskar_telescope_model_copy.h"
+#include "interferometry/oskar_telescope_model_free.h"
+#include "interferometry/oskar_telescope_model_init.h"
 #include "interferometry/oskar_telescope_model_set_station_coords.h"
 #include "station/oskar_StationModel.h"
 #include "station/oskar_station_model_init.h"
@@ -123,9 +126,9 @@ void Test_telescope_model_load_save::test_1_level()
 
         for (int j = 0; j < num_elements; ++j)
         {
-            err = oskar_station_model_set_element_coords(&telescope.station[i],
+            oskar_station_model_set_element_coords(&telescope.station[i],
                     j, (double) (10 * i + j), (double) (20 * i + j),
-                    (double) (30 * i + j), 0.0, 0.0, 0.0);
+                    (double) (30 * i + j), 0.0, 0.0, 0.0, &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
@@ -210,9 +213,9 @@ void Test_telescope_model_load_save::test_2_level()
 
         for (int j = 0; j < num_tiles; ++j)
         {
-            err = oskar_station_model_set_element_coords(&telescope.station[i],
+            oskar_station_model_set_element_coords(&telescope.station[i],
                     j, (double) (10 * i + j), (double) (20 * i + j),
-                    (double) (30 * i + j), 0.0, 0.0, 0.0);
+                    (double) (30 * i + j), 0.0, 0.0, 0.0, &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
             oskar_station_model_init(&telescope.station[i].child[j],
                     OSKAR_SINGLE, OSKAR_LOCATION_CPU, num_elements, &err);
@@ -220,10 +223,10 @@ void Test_telescope_model_load_save::test_2_level()
 
             for (int k = 0; k < num_elements; ++k)
             {
-                err = oskar_station_model_set_element_coords(&telescope.station[i].child[j],
+                oskar_station_model_set_element_coords(&telescope.station[i].child[j],
                         k, (double) (100 * i + 10 * j + k),
                         (double) (200 * i + 20 * j + k),
-                        (double) (300 * i + 30 * j + k), 0.0, 0.0, 0.0);
+                        (double) (300 * i + 30 * j + k), 0.0, 0.0, 0.0, &err);
                 CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
             }
         }
@@ -290,6 +293,54 @@ void Test_telescope_model_load_save::test_2_level()
             }
         }
     }
+
+    // Copy the telescope model to a new structure.
+    oskar_TelescopeModel telescope3;
+    oskar_telescope_model_init(&telescope3, OSKAR_SINGLE, OSKAR_LOCATION_CPU,
+            0, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+    oskar_telescope_model_copy(&telescope3, &telescope2, &err);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
+
+    // Check the contents.
+    CPPUNIT_ASSERT_EQUAL(telescope.num_stations, telescope3.num_stations);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(telescope.longitude_rad,
+            telescope3.longitude_rad, 1e-10);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(telescope.latitude_rad,
+            telescope3.latitude_rad, 1e-10);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(telescope.altitude_m,
+            telescope3.altitude_m, 1e-10);
+
+    for (int i = 0; i < num_stations; ++i)
+    {
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_x_hor)[i],
+                ((float*)telescope3.station_x_hor)[i], 1e-5);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_y_hor)[i],
+                ((float*)telescope3.station_y_hor)[i], 1e-5);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station_z_hor)[i],
+                ((float*)telescope3.station_z_hor)[i], 1e-5);
+
+        for (int j = 0; j < num_tiles; ++j)
+        {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].x_weights)[j],
+                    ((float*)telescope3.station[i].x_weights)[j], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].y_weights)[j],
+                    ((float*)telescope3.station[i].y_weights)[j], 1e-5);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].z_weights)[j],
+                    ((float*)telescope3.station[i].z_weights)[j], 1e-5);
+
+            for (int k = 0; k < num_elements; ++k)
+            {
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].x_weights)[k],
+                        ((float*)telescope3.station[i].child[j].x_weights)[k], 1e-5);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].y_weights)[k],
+                        ((float*)telescope3.station[i].child[j].y_weights)[k], 1e-5);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(((float*)telescope.station[i].child[j].z_weights)[k],
+                        ((float*)telescope3.station[i].child[j].z_weights)[k], 1e-5);
+            }
+        }
+    }
+    oskar_telescope_model_free(&telescope3, &err);
 
     // Remove test directory.
     oskar_remove_dir(path);

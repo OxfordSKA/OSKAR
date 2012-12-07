@@ -27,8 +27,11 @@
  */
 
 #include "interferometry/oskar_telescope_model_copy.h"
+#include "interferometry/oskar_telescope_model_location.h"
+#include "interferometry/oskar_telescope_model_type.h"
 #include "interferometry/oskar_TelescopeModel.h"
 #include "station/oskar_station_model_copy.h"
+#include "station/oskar_station_model_init.h"
 #include "utility/oskar_mem_copy.h"
 #include <stdlib.h>
 
@@ -51,6 +54,23 @@ void oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     /* Check if safe to proceed. */
     if (*status) return;
 
+    /* Ensure there is enough room in the station array. */
+    if (dst->num_stations < src->num_stations)
+    {
+        int type, location;
+        type = oskar_telescope_model_type(dst);
+        location = oskar_telescope_model_location(dst);
+        dst->station = realloc(dst->station,
+                src->num_stations * sizeof(oskar_StationModel));
+
+        /* Initialise any newly created stations. */
+        for (i = dst->num_stations; i < src->num_stations; ++i)
+        {
+            oskar_station_model_init(&dst->station[i], type, location, 0,
+                    status);
+        }
+    }
+
     /* Copy the meta-data. */
     dst->num_stations = src->num_stations;
     dst->max_station_size = src->max_station_size;
@@ -67,10 +87,6 @@ void oskar_telescope_model_copy(oskar_TelescopeModel* dst,
     dst->wavelength_metres = src->wavelength_metres;
     dst->bandwidth_hz = src->bandwidth_hz;
     dst->time_average_sec = src->time_average_sec;
-
-    /* Ensure there is enough room in the station array. */
-    dst->station = realloc(dst->station,
-            src->num_stations * sizeof(oskar_StationModel));
 
     /* Copy each station. */
     for (i = 0; i < src->num_stations; ++i)

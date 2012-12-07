@@ -86,6 +86,13 @@ void oskar_visibilities_read(oskar_Visibilities* vis, const char* filename,
     oskar_binary_file_read_int(filename, &index, grp,
             OSKAR_VIS_TAG_AMP_TYPE, 0, &amp_type, status);
 
+    /* Check if safe to proceed. */
+    if (*status)
+    {
+        oskar_binary_tag_index_free(&index, status);
+        return;
+    }
+
     /* Create the visibility structure. */
     oskar_visibilities_init(vis, amp_type, OSKAR_LOCATION_CPU,
             num_channels, num_times, num_stations, status);

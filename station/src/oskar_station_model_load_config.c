@@ -85,59 +85,34 @@ int oskar_station_model_load_config(oskar_StationModel* station,
 
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
-        {
             oskar_station_model_resize(station, n + 100, &err);
-            if (err)
-            {
-                fclose(file);
-                return err;
-            }
-        }
 
         /* Store the data. */
-        err = oskar_station_model_set_element_coords(station, n,
-                par[0], par[1], par[2], par[3], par[4], par[5]);
-        if (err)
-        {
-            fclose(file);
-            return err;
-        }
-        err = oskar_station_model_set_element_errors(station, n,
-                par[6], par[7], par[8], par[9]);
-        if (err)
-        {
-            fclose(file);
-            return err;
-        }
-        err = oskar_station_model_set_element_weight(station, n,
-                par[10], par[11]);
-        if (err)
-        {
-            fclose(file);
-            return err;
-        }
-        err = oskar_station_model_set_element_orientation(station, n,
-                par[12], par[13]);
-        if (err)
-        {
-            fclose(file);
-            return err;
-        }
+        oskar_station_model_set_element_coords(station, n,
+                par[0], par[1], par[2], par[3], par[4], par[5], &err);
+        oskar_station_model_set_element_errors(station, n,
+                par[6], par[7], par[8], par[9], &err);
+        oskar_station_model_set_element_weight(station, n,
+                par[10], par[11], &err);
+        oskar_station_model_set_element_orientation(station, n,
+                par[12], par[13], &err);
 
+        /* Increment element counter. */
         ++n;
     }
 
-    /* Record the number of elements loaded. */
-    station->num_elements = n;
-
-    /* Set the coordinate units to metres. */
-    station->coord_units = OSKAR_METRES;
+    /* Record number of elements loaded, and set coordinate units to metres. */
+    if (!err)
+    {
+        station->num_elements = n;
+        station->coord_units = OSKAR_METRES;
+    }
 
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);
 
-    return 0;
+    return err;
 }
 
 #ifdef __cplusplus

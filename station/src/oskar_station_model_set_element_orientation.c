@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,15 +44,28 @@
 extern "C" {
 #endif
 
-int oskar_station_model_set_element_orientation(oskar_StationModel* dst,
-        int index, double orientation_x, double orientation_y)
+void oskar_station_model_set_element_orientation(oskar_StationModel* dst,
+        int index, double orientation_x, double orientation_y, int* status)
 {
     int type, location;
     size_t element_size, offset_bytes;
 
+    /* Check all inputs. */
+    if (!dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Check range. */
     if (index >= dst->num_elements)
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
     /* Get the data type. */
     type = dst->cos_orientation_x.type;
@@ -97,7 +110,7 @@ int oskar_station_model_set_element_orientation(oskar_StationModel* dst,
                     &sin_y, element_size, cudaMemcpyHostToDevice);
         }
         else
-            return OSKAR_ERR_BAD_LOCATION;
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
     else if (type == OSKAR_SINGLE)
     {
@@ -126,12 +139,10 @@ int oskar_station_model_set_element_orientation(oskar_StationModel* dst,
                     &sin_y, element_size, cudaMemcpyHostToDevice);
         }
         else
-            return OSKAR_ERR_BAD_LOCATION;
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
     else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return 0;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
 #ifdef __cplusplus

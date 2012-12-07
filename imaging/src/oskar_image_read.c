@@ -72,6 +72,14 @@ void oskar_image_read(oskar_Image* image, const char* filename, int idx,
     oskar_binary_stream_read_int(stream, &index, grp,
             OSKAR_IMAGE_TAG_DATA_TYPE, idx, &type, status);
 
+    /* Check if safe to proceed. */
+    if (*status)
+    {
+        oskar_binary_tag_index_free(&index, status);
+        fclose(stream);
+        return;
+    }
+
     /* Initialise the image. */
     oskar_image_init(image, type, OSKAR_LOCATION_CPU, status);
 

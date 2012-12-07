@@ -32,6 +32,7 @@
 #include "utility/oskar_binary_stream_write.h"
 #include "utility/oskar_binary_stream_write_header.h"
 #include "utility/oskar_binary_stream_write_metadata.h"
+#include "utility/oskar_file_exists.h"
 #include "utility/oskar_log_file_data.h"
 #include "utility/oskar_log_message.h"
 #include "utility/oskar_mem_binary_stream_write.h"
@@ -98,7 +99,6 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
     {
         if (strlen(image->settings_path.data) > 0)
         {
-            oskar_Mem temp;
             /* Write the settings path. */
             oskar_mem_binary_stream_write(&image->settings_path, stream,
                     OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS_PATH, idx, 0,
@@ -108,11 +108,14 @@ void oskar_image_write(const oskar_Image* image, oskar_Log* log,
             if (oskar_file_exists((const char*)image->settings_path.data))
             {
                 /* Write the settings file. */
-                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1, status);
+                oskar_Mem temp;
+                oskar_mem_init(&temp, OSKAR_CHAR, OSKAR_LOCATION_CPU, 0, 1,
+                        status);
                 oskar_mem_binary_file_read_raw(&temp,
                         (const char*) image->settings_path.data, status);
                 oskar_mem_binary_stream_write(&temp, stream,
-                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0, status);
+                        OSKAR_TAG_GROUP_SETTINGS, OSKAR_TAG_SETTINGS, idx, 0,
+                        status);
                 oskar_mem_free(&temp, status);
             }
         }

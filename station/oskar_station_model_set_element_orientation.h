@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,10 +52,11 @@ extern "C" {
  * @param[in] index            Element array index to set.
  * @param[in] orientation_x    Azimuth of the element's x dipole axis, in degrees.
  * @param[in] orientation_y    Azimuth of the element's y dipole axis, in degrees.
+ * @param[in,out] status       Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_set_element_orientation(oskar_StationModel* dst,
-        int index, double orientation_x, double orientation_y);
+void oskar_station_model_set_element_orientation(oskar_StationModel* dst,
+        int index, double orientation_x, double orientation_y, int* status);
 
 #ifdef __cplusplus
 }

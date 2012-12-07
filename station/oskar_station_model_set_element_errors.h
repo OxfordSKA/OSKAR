@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,11 +54,12 @@ extern "C" {
  * @param[in] gain_error    Element gain error.
  * @param[in] phase_offset  Element phase offset, in degrees.
  * @param[in] phase_error   Element phase error, in degrees.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_set_element_errors(oskar_StationModel* dst,
+void oskar_station_model_set_element_errors(oskar_StationModel* dst,
         int index, double gain, double gain_error, double phase_offset,
-        double phase_error);
+        double phase_error, int* status);
 
 #ifdef __cplusplus
 }

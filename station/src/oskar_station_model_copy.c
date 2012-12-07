@@ -30,10 +30,13 @@
 #include "station/oskar_element_model_init.h"
 #include "station/oskar_element_model_type.h"
 #include "station/oskar_station_model_copy.h"
+#include "station/oskar_station_model_init.h"
 #include "station/oskar_station_model_location.h"
+#include "station/oskar_station_model_type.h"
 #include "utility/oskar_mem_copy.h"
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +45,8 @@ extern "C" {
 void oskar_station_model_copy(oskar_StationModel* dst,
         const oskar_StationModel* src, int* status)
 {
+    int i = 0;
+
     /* Check all inputs. */
     if (!src || !dst || !status)
     {
@@ -89,6 +94,35 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     oskar_mem_copy(&dst->cos_orientation_y, &src->cos_orientation_y, status);
     oskar_mem_copy(&dst->sin_orientation_y, &src->sin_orientation_y, status);
 
+    /* Copy child stations. */
+    if (src->child)
+    {
+        /* Allocate array to hold child stations, if required. */
+        if (!dst->child)
+        {
+            int location = 0;
+            location = oskar_station_model_location(dst);
+            dst->child = (oskar_StationModel*) malloc(src->num_elements *
+                    sizeof(oskar_StationModel));
+
+            /* Initialise each child station. */
+            for (i = 0; i < src->num_elements; ++i)
+            {
+                int type;
+                type = oskar_station_model_type(&src->child[i]);
+                oskar_station_model_init(&dst->child[i], type, location,
+                        src->child[i].num_elements, status);
+            }
+        }
+
+        /* Recursively copy each child station & set parent pointer for each. */
+        for (i = 0; i < src->num_elements; ++i)
+        {
+            oskar_station_model_copy(&dst->child[i], &src->child[i], status);
+            dst->child[i].parent = dst;
+        }
+    }
+
     /* TODO Work out how to deal with element pattern data properly! */
     if (src->element_pattern)
     {
@@ -101,8 +135,6 @@ void oskar_station_model_copy(oskar_StationModel* dst,
         oskar_element_model_copy(dst->element_pattern,
                 src->element_pattern, status);
     }
-
-    /* TODO Work out how to deal with child stations. */
 }
 
 #ifdef __cplusplus

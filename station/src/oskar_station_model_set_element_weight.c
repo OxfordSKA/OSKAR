@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,53 +39,64 @@
 extern "C" {
 #endif
 
-int oskar_station_model_set_element_weight(oskar_StationModel* dst,
-		int index, double re, double im)
+void oskar_station_model_set_element_weight(oskar_StationModel* dst,
+        int index, double re, double im, int* status)
 {
-	int type, location;
-	size_t element_size, offset_bytes;
+    int type, location;
+    size_t element_size, offset_bytes;
 
-	/* Check range. */
+    /* Check all inputs. */
+    if (!dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Check range. */
     if (index >= dst->num_elements)
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
-	/* Get the data type. */
-	type = dst->weight.type;
-	location = dst->weight.location;
+    /* Get the data type. */
+    type = dst->weight.type;
+    location = dst->weight.location;
     element_size = oskar_mem_element_size(type);
     offset_bytes = index * element_size;
 
     /* Check the type. */
     if (type == OSKAR_DOUBLE_COMPLEX)
     {
-    	double2 w;
-    	w.x = re; w.y = im;
+        double2 w;
+        w.x = re; w.y = im;
 
-    	if (location == OSKAR_LOCATION_CPU)
-    		((double2*)dst->weight.data)[index] = w;
-    	else if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_LOCATION_CPU)
+            ((double2*)dst->weight.data)[index] = w;
+        else if (location == OSKAR_LOCATION_GPU)
             cudaMemcpy((char*)(dst->weight.data) + offset_bytes, &w,
-            		element_size, cudaMemcpyHostToDevice);
-    	else
-    		return OSKAR_ERR_BAD_LOCATION;
+                    element_size, cudaMemcpyHostToDevice);
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
     else if (type == OSKAR_SINGLE_COMPLEX)
     {
-    	float2 w;
-    	w.x = (float)re; w.y = (float)im;
+        float2 w;
+        w.x = (float)re; w.y = (float)im;
 
-    	if (location == OSKAR_LOCATION_CPU)
-    		((float2*)dst->weight.data)[index] = w;
-    	else if (location == OSKAR_LOCATION_GPU)
+        if (location == OSKAR_LOCATION_CPU)
+            ((float2*)dst->weight.data)[index] = w;
+        else if (location == OSKAR_LOCATION_GPU)
             cudaMemcpy((char*)(dst->weight.data) + offset_bytes, &w,
-            		element_size, cudaMemcpyHostToDevice);
-    	else
-    		return OSKAR_ERR_BAD_LOCATION;
+                    element_size, cudaMemcpyHostToDevice);
+        else
+            *status = OSKAR_ERR_BAD_LOCATION;
     }
     else
-    	return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return 0;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
 #ifdef __cplusplus

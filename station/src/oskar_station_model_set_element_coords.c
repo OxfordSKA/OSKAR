@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, The University of Oxford
+ * Copyright (c) 2012, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,16 +41,29 @@
 extern "C" {
 #endif
 
-int oskar_station_model_set_element_coords(oskar_StationModel* dst,
+void oskar_station_model_set_element_coords(oskar_StationModel* dst,
         int index, double x, double y, double z, double delta_x,
-        double delta_y, double delta_z)
+        double delta_y, double delta_z, int* status)
 {
     int type, location;
     double x_weights, y_weights, z_weights, x_signal, y_signal, z_signal;
 
+    /* Check all inputs. */
+    if (!dst || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     /* Check range. */
     if (index >= dst->num_elements)
-        return OSKAR_ERR_OUT_OF_RANGE;
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
+        return;
+    }
 
     /* Get the data type and location. */
     type = oskar_station_model_type(dst);
@@ -78,7 +91,6 @@ int oskar_station_model_set_element_coords(oskar_StationModel* dst,
             ((double*)dst->x_signal.data)[index] = x_signal;
             ((double*)dst->y_signal.data)[index] = y_signal;
             ((double*)dst->z_signal.data)[index] = z_signal;
-            return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -88,10 +100,9 @@ int oskar_station_model_set_element_coords(oskar_StationModel* dst,
             ((float*)dst->x_signal.data)[index] = (float)x_signal;
             ((float*)dst->y_signal.data)[index] = (float)y_signal;
             ((float*)dst->z_signal.data)[index] = (float)z_signal;
-            return 0;
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
     else if (location == OSKAR_LOCATION_GPU)
     {
@@ -112,7 +123,6 @@ int oskar_station_model_set_element_coords(oskar_StationModel* dst,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->z_signal.data) + offset_bytes, &z_signal,
                     element_size, cudaMemcpyHostToDevice);
-            return 0;
         }
         else if (type == OSKAR_SINGLE)
         {
@@ -135,13 +145,12 @@ int oskar_station_model_set_element_coords(oskar_StationModel* dst,
                     element_size, cudaMemcpyHostToDevice);
             cudaMemcpy((char*)(dst->z_signal.data) + offset_bytes, &tzs,
                     element_size, cudaMemcpyHostToDevice);
-            return 0;
         }
         else
-            return OSKAR_ERR_BAD_DATA_TYPE;
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
-
-    return OSKAR_ERR_BAD_LOCATION;
+    else
+        *status = OSKAR_ERR_BAD_LOCATION;
 }
 
 #ifdef __cplusplus
