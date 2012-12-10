@@ -49,8 +49,9 @@
  * - Modified source phi values [real scalar].
  * - Beamforming weights [complex scalar].
  * - Beamforming weights error [complex scalar].
- * - Element factor (G) [complex matrix].
- * - Array factor (E) [complex scalar].
+ * - Element pattern [complex matrix and complex scalar].
+ * - Array pattern [complex scalar].
+ * - Hierarchy work array [complex scalar].
  *
  * Depending on the mode of operation, not all of these arrays will be used.
  */
@@ -69,6 +70,7 @@ struct OSKAR_EXPORT oskar_WorkStationBeam
     oskar_Mem element_pattern_matrix;  /* Complex matrix. */
     oskar_Mem element_pattern_scalar;  /* Complex scalar. */
     oskar_Mem array_pattern;           /* Complex scalar. */
+    oskar_Mem hierarchy_work;          /* Complex scalar. */
 
     /* TODO cuda random number states could go here...? */
 

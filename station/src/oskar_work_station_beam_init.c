@@ -62,6 +62,8 @@ void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
             location, 0, 1, status);
     oskar_mem_init(&work->element_pattern_scalar, (type | OSKAR_COMPLEX),
             location, 0, 1, status);
+    oskar_mem_init(&work->hierarchy_work, (type | OSKAR_COMPLEX),
+            location, 0, 1, status);
 }
 
 #ifdef __cplusplus

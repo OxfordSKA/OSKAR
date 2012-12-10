@@ -26,14 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_DFTW_C2C_2D_CUDA_H_
-#define OSKAR_DFTW_C2C_2D_CUDA_H_
+#ifndef OSKAR_DFTW_M2M_3D_CUDA_H_
+#define OSKAR_DFTW_M2M_3D_CUDA_H_
 
 /**
- * @file oskar_dftw_c2c_2d_cuda.h
+ * @file oskar_dftw_m2m_3d_cuda.h
  */
 
 #include "oskar_global.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,12 +42,12 @@ extern "C" {
 
 /**
  * @brief
- * CUDA function to perform a 2D complex-to-complex single-precision DFT using
- * supplied weights.
+ * CUDA function to perform a 3D complex-matrix-to-complex-matrix
+ * single-precision DFT using supplied weights.
  *
  * @details
- * This CUDA function performs a 2D complex-to-complex DFT using the supplied
- * complex weights and complex input data.
+ * This CUDA function performs a 3D complex-matrix-to-complex-matrix DFT using
+ * the supplied complex weights and complex input data.
  *
  * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
  *
@@ -63,27 +64,29 @@ extern "C" {
  * @param[in] n_in         Number of input points.
  * @param[in] d_x_in       Array of input x positions.
  * @param[in] d_y_in       Array of input y positions.
+ * @param[in] d_z_in       Array of input z positions.
  * @param[in] d_weights_in Array of complex DFT weights.
  * @param[in] n_out        Number of output points.
  * @param[in] d_x_out      Array of output 1/x positions.
  * @param[in] d_y_out      Array of output 1/y positions.
+ * @param[in] d_z_out      Array of output 1/z positions.
  * @param[in] d_data       Array of complex input data (size n_out * n_in).
  * @param[out] d_output    Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
-void oskar_dftw_c2c_2d_cuda_f(int n_in, const float* d_x_in,
-        const float* d_y_in, const float2* d_weights_in, int n_out,
-        const float* d_x_out, const float* d_y_out, const float2* d_data,
-        float2* d_output);
+void oskar_dftw_m2m_3d_cuda_f(int n_in, const float* d_x_in,
+        const float* d_y_in, const float* d_z_in, const float2* d_weights_in,
+        int n_out, const float* d_x_out, const float* d_y_out,
+        const float* d_z_out, const float4c* d_data, float4c* d_output);
 
 /**
  * @brief
- * CUDA function to perform a 2D complex-to-complex double-precision DFT using
- * supplied weights.
+ * CUDA function to perform a 3D complex-matrix-to-complex-matrix
+ * double-precision DFT using supplied weights.
  *
  * @details
- * This CUDA function performs a 2D complex-to-complex DFT using the supplied
- * complex weights and complex input data.
+ * This CUDA function performs a 3D complex-matrix-to-complex-matrix DFT using
+ * the supplied complex weights and complex input data.
  *
  * The input positions must be pre-multiplied by a factor k (= 2pi / lambda).
  *
@@ -100,29 +103,31 @@ void oskar_dftw_c2c_2d_cuda_f(int n_in, const float* d_x_in,
  * @param[in] n_in         Number of input points.
  * @param[in] d_x_in       Array of input x positions.
  * @param[in] d_y_in       Array of input y positions.
+ * @param[in] d_z_in       Array of input z positions.
  * @param[in] d_weights_in Array of complex DFT weights.
  * @param[in] n_out        Number of output points.
  * @param[in] d_x_out      Array of output 1/x positions.
  * @param[in] d_y_out      Array of output 1/y positions.
+ * @param[in] d_z_out      Array of output 1/z positions.
  * @param[in] d_data       Array of complex input data (size n_out * n_in).
  * @param[out] d_output    Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
-void oskar_dftw_c2c_2d_cuda_d(int n_in, const double* d_x_in,
-        const double* d_y_in, const double2* d_weights_in, int n_out,
-        const double* d_x_out, const double* d_y_out, const double2* d_data,
-        double2* d_output);
+void oskar_dftw_m2m_3d_cuda_d(int n_in, const double* d_x_in,
+        const double* d_y_in, const double* d_z_in, const double2* d_weights_in,
+        int n_out, const double* d_x_out, const double* d_y_out,
+        const double* d_z_out, const double4c* d_data, double4c* d_output);
 
 #ifdef __CUDACC__
 
 /**
  * @brief
- * CUDA kernel to perform a 2D complex-to-complex single-precision DFT using
- * supplied weights.
+ * CUDA kernel to perform a 3D complex-matrix-to-complex-matrix
+ * single-precision DFT using supplied weights.
  *
  * @details
- * This CUDA kernel performs a 2D complex-to-complex DFT using the supplied
- * complex weights and complex input data.
+ * This CUDA kernel performs a 3D complex-matrix-to-complex-matrix DFT using
+ * the supplied complex weights and complex input data.
  *
  * Each thread evaluates a single output point, looping over all the input
  * points while performing a complex multiply-accumulate with the supplied
@@ -141,29 +146,32 @@ void oskar_dftw_c2c_2d_cuda_d(int n_in, const double* d_x_in,
  * @param[in] n_in         Number of input points.
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
+ * @param[in] z_in         Array of input z positions.
  * @param[in] weights_in   Array of complex DFT weights.
  * @param[in] n_out        Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
+ * @param[in] z_out        Array of output 1/z positions.
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[in] data         Array of complex input data (size n_out * n_in).
  * @param[out] output      Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
 __global__
-void oskar_dftw_c2c_2d_cudak_f(const int n_in, const float* x_in,
-        const float* y_in, const float2* weights_in, const int n_out,
-        const float* x_out, const float* y_out, const int max_in_chunk,
-        const float2* data, float2* output);
+void oskar_dftw_m2m_3d_cudak_f(const int n_in, const float* x_in,
+        const float* y_in, const float* z_in, const float2* weights_in,
+        const int n_out, const float* x_out, const float* y_out,
+        const float* z_out, const int max_in_chunk, const float4c* data,
+        float4c* output);
 
 /**
  * @brief
- * CUDA kernel to perform a 2D complex-to-complex double-precision DFT using
- * supplied weights.
+ * CUDA kernel to perform a 3D complex-matrix-to-complex-matrix
+ * double-precision DFT using supplied weights.
  *
  * @details
- * This CUDA kernel performs a 2D complex-to-complex DFT using the supplied
- * complex weights and complex input data.
+ * This CUDA kernel performs a 3D complex-matrix-to-complex-matrix DFT using
+ * the supplied complex weights and complex input data.
  *
  * Each thread evaluates a single output point, looping over all the input
  * points while performing a complex multiply-accumulate with the supplied
@@ -182,20 +190,23 @@ void oskar_dftw_c2c_2d_cudak_f(const int n_in, const float* x_in,
  * @param[in] n_in         Number of input points.
  * @param[in] x_in         Array of input x positions.
  * @param[in] y_in         Array of input y positions.
+ * @param[in] z_in         Array of input z positions.
  * @param[in] weights_in   Array of complex DFT weights.
  * @param[in] n_out        Number of output points.
  * @param[in] x_out        Array of output 1/x positions.
  * @param[in] y_out        Array of output 1/y positions.
+ * @param[in] z_out        Array of output 1/z positions.
  * @param[in] max_in_chunk Maximum input points per chunk.
  * @param[in] data         Array of complex input data (size n_out * n_in).
  * @param[out] output      Array of computed output points (see note, above).
  */
 OSKAR_EXPORT
 __global__
-void oskar_dftw_c2c_2d_cudak_d(const int n_in, const double* x_in,
-        const double* y_in, const double2* weights_in, const int n_out,
-        const double* x_out, const double* y_out, const int max_in_chunk,
-        const double2* data, double2* output);
+void oskar_dftw_m2m_3d_cudak_d(const int n_in, const double* x_in,
+        const double* y_in, const double* z_in, const double2* weights_in,
+        const int n_out, const double* x_out, const double* y_out,
+        const double* z_out, const int max_in_chunk, const double4c* data,
+        double4c* output);
 
 #endif /* __CUDACC__ */
 
@@ -203,4 +214,4 @@ void oskar_dftw_c2c_2d_cudak_d(const int n_in, const double* x_in,
 }
 #endif
 
-#endif /* OSKAR_DFTW_C2C_2D_CUDA_H_ */
+#endif /* OSKAR_DFTW_M2M_3D_CUDA_H_ */
