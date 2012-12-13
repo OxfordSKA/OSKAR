@@ -1619,6 +1619,8 @@ bool ezOptionParser::exportFile(const char * filename, bool all) {
 
   return true;
 }
+// NOTE importFile() disabled as it causes a compiler warning and is not used.
+#if 0
 /* ################################################################### */
 // Does not overwrite current options.
 // Returns true if file was read successfully.
@@ -1739,6 +1741,7 @@ bool ezOptionParser::importFile(const char * filename, char comment) {
 
   return true;
 }
+#endif
 /* ################################################################### */
 int ezOptionParser::isSet(const char * name) {
   std::string sname(name);
