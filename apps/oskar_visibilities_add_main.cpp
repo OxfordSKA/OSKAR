@@ -33,13 +33,8 @@
 #include <interferometry/oskar_visibilities_copy.h>
 #include <utility/oskar_get_error_string.h>
 #include <utility/oskar_mem_add.h>
-
-#include <utility/oskar_mem_free.h> // used?
-#include <utility/oskar_mem_init.h> // used?
-#include <utility/oskar_mem_clear_contents.h> // used?
-
-
-#include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
+#include <utility/oskar_mem_clear_contents.h>
+#include <apps/lib/oskar_OptionParser.h>
 
 #include <string>
 #include <cmath>
@@ -48,14 +43,11 @@
 #include <vector>
 #include <iomanip>
 
-using namespace ez;
 using namespace std;
 
 // -----------------------------------------------------------------------------
-void set_options(ezOptionParser& opt);
-void print_usage(ezOptionParser& opt);
-bool check_options(ezOptionParser& opt);
-vector<string> getInputFiles(ezOptionParser& opt);
+void set_options(oskar_OptionParser& opt);
+bool check_options(oskar_OptionParser& opt);
 bool isCompatible(const oskar_Visibilities& vis1, const oskar_Visibilities& vis2);
 void add_visibilities(oskar_Visibilities& out, const oskar_Visibilities& in1,
         const oskar_Visibilities& in2);
@@ -65,7 +57,7 @@ void print_error(int status, const char* message);
 int main(int argc, const char** argv)
 {
     // Register options =======================================================
-    ezOptionParser opt;
+    oskar_OptionParser opt;
     set_options(opt);
     opt.parse(argc, argv);
     if (!check_options(opt))
@@ -74,7 +66,7 @@ int main(int argc, const char** argv)
     // Retrieve options ========================================================
     string out_path;
     opt.get("-o")->getString(out_path);
-    vector<string> in_files = getInputFiles(opt);
+    vector<string> in_files = opt.getInputFiles();
     bool verbose = opt.isSet("-q") ? false : true;
     if (verbose) {
         cout << "Output visibility file = " << out_path << endl;
@@ -119,7 +111,6 @@ int main(int argc, const char** argv)
         return status;
     }
 
-
     // Loop over other visibility files and combine.
     for (int i = 1; i < (int)in_files.size(); ++i)
     {
@@ -151,32 +142,6 @@ int main(int argc, const char** argv)
 
     return status;
 }
-
-vector<string> getInputFiles(ezOptionParser& opt)
-{
-    vector<string> files;
-    bool visFirst = ((int)opt.firstArgs.size() >= 3) &&
-            ((int)opt.lastArgs.size() == 0);
-
-    if (visFirst)
-    {
-        // Note starts at 1 as index 0 == the program name.
-        for (int i = 1; i < (int)opt.firstArgs.size(); ++i)
-        {
-            files.push_back(*opt.firstArgs[i]);
-        }
-    }
-    else
-    {
-        for (int i = 0; i < (int)opt.lastArgs.size(); ++i)
-        {
-            files.push_back(*opt.lastArgs[i]);
-        }
-    }
-
-    return files;
-}
-
 
 void print_error(int status, const char* message)
 {
@@ -225,43 +190,15 @@ bool isCompatible(const oskar_Visibilities& v1, const oskar_Visibilities& v2)
     return true;
 }
 
-
-void print_usage(ezOptionParser& opt)
+void set_options(oskar_OptionParser& opt)
 {
-    string usage;
-    opt.getUsage(usage);
-    cout << usage;
-}
-
-
-void set_options(ezOptionParser& opt)
-{
-    opt.overview = string(80, '-') + "\n" +
-            "Application to combine OSKAR binary visibility files.\n"
-//            "\n"
-//            "Adds together the complex amplitudes contained in the specified\n"
-//            "visibility data files. A new combined data file is produced.\n"
-//            "Note: While basic checking of dimensions and meta-data is\n"
-//            "please make sure that the data files being added together\n"
-//            "are compatible for this procedure to ensure sensible results!\n"
-            + string(80, '-');
-    opt.syntax = "\n  $ oskar_visibilities_add [OPTIONS] input_file(s)...";
-    opt.example =
-            "  $ oskar_visibilities_add file1.vis file2.vis\n"
-            "  $ oskar_visibilities_add file1.vis file2.vis -o combined.vis\n"
-            "  $ oskar_visibilities_add file1.vis file2.vis file3.vis\n"
-            "  $ oskar_visibilities_add *.vis\n"
-            "\n"
-            ;
-    opt.footer =
-            "|" + std::string(80, '-') + "\n"
-            "| OSKAR (version " + OSKAR_VERSION_STR + ")\n"
-            "| Copyright (C) 2012, The University of Oxford.\n"
-            "| This program is free and without warranty.\n"
-            "|" + std::string(80, '-') + "\n";
+    opt.setOverview("Application to combine OSKAR binary visibility files.");
+    opt.setSyntax("oskar_visibilties_add [OPTIONS] input_file(s)...");
+    opt.addExample("oskar_visibilities_add file1.vis file2.vis");
+    opt.addExample("oskar_visibilities_add file1.vis file2.vis -o combined.vis");
+    opt.addExample("oskar_visibilities_add file1.vis file2.vis file3.vis");
+    opt.addExample("oskar_visibilities_add *.vis");
     // add(default, required?, num args, delimiter, msg, flag token(s), ...)
-    opt.add("", 0, 0, 0, "Display usage instructions.",
-            "-h", "-help", "--help", "--usage");
     opt.add("", 0, 0, 0, "Display the OSKAR version.",
             "-v", "--version");
     opt.add("out.vis", 0, 1, 0, "Output visibility filename (optional, default=out.vis).",
@@ -269,10 +206,10 @@ void set_options(ezOptionParser& opt)
     opt.add("", 0, 0, 0, "Disable messages (optional).", "-q", "--quiet");
 }
 
-bool check_options(ezOptionParser& opt)
+bool check_options(oskar_OptionParser& opt)
 {
     if (opt.isSet("-h")) {
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 
@@ -285,7 +222,7 @@ bool check_options(ezOptionParser& opt)
     if(!opt.gotRequired(badOptions)) {
         for(int i=0; i < (int)badOptions.size(); ++i)
             cerr << "\nERROR: Missing required option " << badOptions[i] << ".\n\n";
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 
@@ -295,7 +232,7 @@ bool check_options(ezOptionParser& opt)
             cerr << "\nERROR: Got unexpected number of arguments for option ";
             cerr << badOptions[i] << ".\n\n";
         }
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 
@@ -305,7 +242,7 @@ bool check_options(ezOptionParser& opt)
             ((int)opt.lastArgs.size() >= 2);
     if (!visFirst && !visEnd) {
         cerr << "\nERROR: Please provide 2 or more visibility files to combine.\n\n";
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 

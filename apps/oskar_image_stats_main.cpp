@@ -32,8 +32,7 @@
 #include <imaging/oskar_image_get_stats.h>
 #include <imaging/oskar_image_read.h>
 #include <utility/oskar_get_error_string.h>
-
-#include "extern/ezOptionParser-0.2.0/ezOptionParser.hpp"
+#include <apps/lib/oskar_OptionParser.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -45,21 +44,18 @@
 #include <vector>
 #include <iomanip>
 
-using namespace ez;
 using namespace std;
 
 // ----------------------------------------------------------------------------
-void set_options(ezOptionParser& opt);
-void print_usage(ezOptionParser& opt);
-bool check_options(ezOptionParser& opt);
-vector<string> getInputFiles(ezOptionParser& opt);
+void set_options(oskar_OptionParser& opt);
+bool check_options(oskar_OptionParser& opt);
 void print_error(int status, const char* message);
 // ----------------------------------------------------------------------------
 
 int main(int argc, const char** argv)
 {
     // Register options =======================================================
-    ezOptionParser opt;
+    oskar_OptionParser opt;
     set_options(opt);
     opt.parse(argc, argv);
     if (!check_options(opt))
@@ -71,7 +67,7 @@ int main(int argc, const char** argv)
     opt.get("-c")->getInt(channel);
     opt.get("-p")->getInt(pol);
     opt.get("-t")->getInt(time);
-    vector<string> files = getInputFiles(opt);
+    vector<string> files = opt.getInputFiles(1);
     cout << "#"<< endl;
     cout << "# Statistics for the following images:" << endl;
     for (int i = 0; i < (int)files.size(); ++i) {
@@ -129,34 +125,16 @@ int main(int argc, const char** argv)
     return status;
 }
 
-void print_usage(ezOptionParser& opt)
-{
-    string usage;
-    opt.getUsage(usage);
-    cout << usage;
-}
 
-void set_options(ezOptionParser& opt)
+void set_options(oskar_OptionParser& opt)
 {
-    opt.overview = string(80, '-') + "\n" +
-            "Application to evaluate OSKAR binary image file statistics." +
-            "\n" + string(80, '-');
-    opt.syntax = "\n  $ oskar_image_stats [OPTIONS] image_file(s)...";
-    opt.example =
-            "  $ oskar_image_stats file.img\n"
-            "  $ oskar_image_stats *.img\n"
-            "  $ oskar_image_stats *.img -c 1 -t 2 -p 3\n"
-            "\n"
-            ;
-    opt.footer =
-            "|" + std::string(80, '-') + "\n"
-            "| OSKAR (version " + OSKAR_VERSION_STR + ")\n"
-            "| Copyright (C) 2012, The University of Oxford.\n"
-            "| This program is free and without warranty.\n"
-            "|" + std::string(80, '-') + "\n";
+    opt.setOverview("Application to evaluate OSKAR binary image file statistics.");
+    opt.setSyntax("oskar_image_stats [OPTIONS] image_file(s)...");
+    opt.addExample("oskar_image_stats file.img");
+    opt.addExample("oskar_image_stats *.img");
+    opt.addExample("oskar_image_stats *.img -c 1 -t 2 -p 3");
+
     // add(default, required?, num args, delimiter, message, flag token(s), ...)
-    opt.add("", 0, 0, 0, "Display usage instructions.", "-h", "-help", "--help",
-            "--usage");
     opt.add("", 0, 0, 0, "Display the OSKAR version.", "-v", "--version");
     opt.add("0", 0, 1, 0, "Polaristation index (optional, default=0)", "-p",
             "--polarisation");
@@ -166,10 +144,10 @@ void set_options(ezOptionParser& opt)
 }
 
 
-bool check_options(ezOptionParser& opt)
+bool check_options(oskar_OptionParser& opt)
 {
     if (opt.isSet("-h")) {
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 
@@ -182,7 +160,7 @@ bool check_options(ezOptionParser& opt)
     if(!opt.gotRequired(badOptions)) {
         for(int i=0; i < (int)badOptions.size(); ++i)
             cerr << "\nERROR: Missing required option " << badOptions[i] << ".\n\n";
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 
@@ -192,7 +170,7 @@ bool check_options(ezOptionParser& opt)
             cerr << "\nERROR: Got unexpected number of arguments for option ";
             cerr << badOptions[i] << ".\n\n";
         }
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 
@@ -203,36 +181,13 @@ bool check_options(ezOptionParser& opt)
             ((int)opt.lastArgs.size() >= num_req);
     if (!visFirst && !visEnd) {
         cerr << "\nERROR: Please provide 1 or more image files.\n\n";
-        print_usage(opt);
+        opt.printUsage();
         return false;
     }
 
     return true;
 }
 
-
-vector<string> getInputFiles(ezOptionParser& opt)
-{
-    vector<string> files;
-    bool filesFirst = ((int)opt.firstArgs.size() >= 3) &&
-            ((int)opt.lastArgs.size() == 0);
-    if (filesFirst)
-    {
-        // Note starts at 1 as index 0 == the binary name.
-        for (int i = 1; i < (int)opt.firstArgs.size(); ++i)
-        {
-            files.push_back(*opt.firstArgs[i]);
-        }
-    }
-    else
-    {
-        for (int i = 0; i < (int)opt.lastArgs.size(); ++i)
-        {
-            files.push_back(*opt.lastArgs[i]);
-        }
-    }
-    return files;
-}
 
 void print_error(int status, const char* message)
 {
