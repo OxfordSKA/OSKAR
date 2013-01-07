@@ -23,7 +23,8 @@ if (CASACORE_FOUND)
     set_target_properties(oskar_ms PROPERTIES
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE
-        SOVERSION ${OSKAR_VERSION})
+        SOVERSION ${OSKAR_VERSION}
+        VERSION ${OSKAR_VERSION})
     install(TARGETS oskar_ms DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
     # ==== Recurse into test subdirectory.

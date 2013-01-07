@@ -45,7 +45,8 @@ if (QT4_FOUND)
     set_target_properties(oskar_widgets PROPERTIES
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE
-        SOVERSION ${OSKAR_VERSION})
+        SOVERSION ${OSKAR_VERSION}
+        VERSION ${OSKAR_VERSION})
     install(TARGETS oskar_widgets DESTINATION ${OSKAR_LIB_INSTALL_DIR})
 
     # Tests
