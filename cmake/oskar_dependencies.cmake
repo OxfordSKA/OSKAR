@@ -166,11 +166,9 @@ if (MATLAB_FOUND AND CUDA_FOUND)
     message("-- INFO:   - OSKAR MATLAB interface functions")
 endif ()
 if (CPPUNIT_FOUND)
-    message("-- INFO:   - CppUnit unit test binaries")
+    message("-- INFO:   - CppUnit unit test binaries (where available)")
 endif ()
 message("===============================================================================")
-
-
 
 
 message("===============================================================================")
