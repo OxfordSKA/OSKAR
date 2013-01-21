@@ -157,6 +157,33 @@ if (CUDA_FOUND)
     add_definitions(-DCUDA_ARCH=${CUDA_ARCH})
 endif (CUDA_FOUND)
 
+set(VERBOSE ON)
+
+if (VERBOSE)
+    message(STATUS "")
+    message(STATUS "Compliler:")
+    message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+    message(STATUS "")
+    message(STATUS "  C++ flags:")
+    message(STATUS "    all: ${CMAKE_CXX_FLAGS}")
+    message(STATUS "    Release: ${CMAKE_CXX_FLAGS_RELEASE}")
+    message(STATUS "    RelWithDebInfo: ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+    message(STATUS "    debug: ${CMAKE_CXX_FLAGS_DEBUG}")
+    message(STATUS "")
+    message(STATUS "  C flags:")
+    message(STATUS "    all: ${CMAKE_C_FLAGS}")
+    message(STATUS "    Release: ${CMAKE_C_FLAGS_RELEASE}")
+    message(STATUS "    RelWithDebInfo: ${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+    message(STATUS "    debug: ${CMAKE_C_FLAGS_DEBUG}")
+    message(STATUS "")
+    message(STATUS "  CUDA:")
+    message(STATUS "    all: ${CUDA_NVCC_FLAGS}")
+    message(STATUS "    Release: ${CUDA_NVCC_FLAGS_RELEASE}")
+    message(STATUS "    RelWithDebInfo: ${CUDA_NVCC_FLAGS_RELWITHDEBINFO}")
+    message(STATUS "    debug: ${CUDA_NVCCC_FLAGS_DEBUG}")
+    message(STATUS "")
+endif (VERBOSE)
+
 
 # Set MATLAB mex function compiler flags.
 # ------------------------------------------------------------------------------
