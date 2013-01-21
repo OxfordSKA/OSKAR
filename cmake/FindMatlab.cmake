@@ -132,18 +132,18 @@ ELSE( WIN32 )
     find_file(MATLAB_QT_QTCORE_LIBRARY libQtXml.so.4
         HINTS $ENV{MATLAB_ROOT}/bin/glnxa64/
         PATHS ${MATLAB_LIB_PATHS}
-        NO_DEFAULT_PATH)    
-  else ()
-    find_library(MATLAB_QT_QTCORE_LIBRARY QtCore 
-        HINTS 
-        /Applications/MATLAB_R2012b.app/bin/maci64 
         NO_DEFAULT_PATH)
-    find_library(MATLAB_QT_QTGUI_LIBRARY QtGui 
-        HINTS 
+  else ()
+    find_library(MATLAB_QT_QTCORE_LIBRARY QtCore
+        HINTS
         /Applications/MATLAB_R2012b.app/bin/maci64
         NO_DEFAULT_PATH)
-    find_library(MATLAB_QT_QTXML_LIBRARY QtXml 
-        HINTS 
+    find_library(MATLAB_QT_QTGUI_LIBRARY QtGui
+        HINTS
+        /Applications/MATLAB_R2012b.app/bin/maci64
+        NO_DEFAULT_PATH)
+    find_library(MATLAB_QT_QTXML_LIBRARY QtXml
+        HINTS
         /Applications/MATLAB_R2012b.app/bin/maci64
         NO_DEFAULT_PATH)
     #find_package(Qt4 4.6 QUIET)
@@ -181,7 +181,7 @@ IF(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES)
 ENDIF(MATLAB_INCLUDE_DIR AND MATLAB_LIBRARIES)
 
 # Find the MATLAB binary path
-find_path(MATLAB_BINARY_DIR mex
+find_path(MATLAB_BINARY_DIR matlab
     HINTS
     $ENV{MATLAB_ROOT}
     PATHS
