@@ -56,7 +56,7 @@ ENDMACRO(CDR)
 # Macro to build and install apps that depend on Qt.
 #
 # Usage:
-#   oskar_app(name
+#   qt_app(name
 #         [NO_INSTALL]
 #         source1 source2 ...
 #         [QT_MOC_SRC source1 source2 ...]
