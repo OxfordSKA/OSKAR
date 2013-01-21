@@ -39,7 +39,7 @@ if (CUDA_FOUND)
     # BINARY: oskar_rebin_sky
     set(name oskar_rebin_sky)
     oskar_app(${name} ${name}_main.cpp)
-    
+
     # BINARY: oskar_visibilities_add
     set(name oskar_visibilities_add)
     oskar_app(${name} ${name}_main.cpp)
@@ -50,6 +50,11 @@ if (CUDA_FOUND)
     #    oskar_app(${name} ${name}_main.cpp EXTRA_LIBS oskar_fits)
     #endif ()
 endif ()
+
+# TODO work out what deps this has.
+set(name oskar_sim_tec_screen)
+oskar_app(${name} ${name}_main.cpp
+    EXTRA_LIBS oskar_apps)
 
 if (QT4_FOUND AND CUDA_FOUND)
     # Build oskar_app library
