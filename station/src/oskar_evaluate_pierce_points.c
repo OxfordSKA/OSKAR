@@ -28,7 +28,9 @@
 
 
 #include "station/oskar_evaluate_pierce_points.h"
+#include "interferometry/oskar_geocentric_cartesian_to_geodetic_spherical.h"
 #include <math.h>
+#include <stdio.h>
 
 static void create_rot_matrix(double* R, double lon, double lat);
 static void matrix_multiply(double* v_out, double* M, double* v_in);
@@ -124,12 +126,11 @@ void oskar_evaluate_pierce_points(
         pp_z = station_z_ecef + (diff_vector_ECEF[2] * scale);
 
         /* Convert coordinates to long., lat. */
-        /* TODO find out which version to use, lon, lat on geoid vs
-         * lon, lat on shpere */
-        pp_lon = atan2(pp_y, pp_x);
-        pp_lat = asin(pp_z/sqrt(pp_x*pp_x + pp_y*pp_y + pp_z*pp_z));
-//        oskar_geocentric_cartesian_to_geodetic_spherical(1, &pp_x, &pp_y,
-//                &pp_z, &pp_lon, &pp_lat, &pp_alt);
+        oskar_geocentric_cartesian_to_geodetic_spherical(
+                1, &pp_x, &pp_y, &pp_z,
+                &pp_lon, &pp_lat, &pp_alt);
+
+//        printf("pp_alt = %f\n", pp_alt/1000.0);
 
         if (type == OSKAR_DOUBLE)
         {
@@ -150,20 +151,20 @@ void oskar_evaluate_pierce_points(
    3x3 matrix, row-major order. */
 void create_rot_matrix(double* R, double lon, double lat)
 {
-    double cosl = cos(lon);
-    double sinl = sin(lon);
+    double cosl   = cos(lon);
+    double sinl   = sin(lon);
     double cosphi = cos(lat);
     double sinphi = sin(lat);
 
     R[0] = -sinl;
-    R[1] = -sinphi*cosl;
-    R[2] = cosphi * cosl;
-    R[3] = cosl;
-    R[4] = -sinphi*sinl;
-    R[5] = cosphi * sinl;
-    R[6] = 0.0;
-    R[7] = cosphi;
-    R[8] = sinphi;
+    R[1] = -sinphi * cosl;
+    R[2] =  cosphi * cosl;
+    R[3] =  cosl;
+    R[4] = -sinphi * sinl;
+    R[5] =  cosphi * sinl;
+    R[6] =  0.0;
+    R[7] =  cosphi;
+    R[8] =  sinphi;
 }
 
 /* row-major matrix vector multiply. */

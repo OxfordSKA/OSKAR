@@ -54,6 +54,7 @@ int main(int argc, char** argv)
     try
     {
         // Run simulation.
+        // TODO options &/or command line args...!
         error = oskar_sim_tec_screen(argv[1], &log);
     }
     catch (int code)

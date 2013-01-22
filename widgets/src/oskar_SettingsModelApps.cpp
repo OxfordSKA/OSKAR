@@ -39,6 +39,7 @@ oskar_SettingsModelApps::oskar_SettingsModelApps(QObject* parent)
     init_settings_interferometer();
     init_settings_beampattern();
     init_settings_image();
+    init_settings_ionosphere();
 
 #if 0
     // THESE ARE FOR TESTING ONLY - Remove this section.
@@ -1281,3 +1282,36 @@ void oskar_SettingsModelApps::init_settings_image()
             "<br>"
             "where N starts at 1 and is incremented for each new image created.");
 }
+
+void oskar_SettingsModelApps::init_settings_ionosphere()
+{
+    QString k, group;
+    QStringList options;
+
+    group = "ionosphere";
+    setLabel(group, "Ionosphereic model settings (Z-Jones)");
+    setTooltip(group, "...");
+
+    k = group + "/enable";
+    declare(k, "Enable", oskar_SettingsItem::BOOL, true);
+    setTooltip(k, "...");
+
+    group = group + "/TID";
+    setLabel(group, "TID");
+    setTooltip(group, "...");
+    setDependency(group, "ionosphere/enable", true);
+
+    options.clear();
+    options << "Default parameters"
+            << "Configuration file";
+
+    k = group + "/config_type";
+    declare(k, "Configuration type", options, 0);
+
+    k = group + "/filename";
+    declare(k, "TID parameter file", oskar_SettingsItem::INPUT_FILE_NAME);
+    setTooltip(group, "...");
+    setDependency(k, group + "/config_type", options[1]);
+}
+
+

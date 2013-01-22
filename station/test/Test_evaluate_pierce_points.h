@@ -48,10 +48,12 @@ class Test_evaluate_pierce_points : public CppUnit::TestFixture
     public:
         CPPUNIT_TEST_SUITE(Test_evaluate_pierce_points);
         CPPUNIT_TEST(test1);
+        CPPUNIT_TEST(test2);
         CPPUNIT_TEST_SUITE_END();
 
     public:
         void test1();
+        void test2();
 };
 
 // Register the test class.

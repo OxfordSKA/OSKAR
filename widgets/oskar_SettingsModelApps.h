@@ -53,6 +53,7 @@ private:
     void init_settings_system_noise_model(const QString& root);
     void init_settings_beampattern();
     void init_settings_image();
+    void init_settings_ionosphere();
 };
 
 #endif /* OSKAR_SETTINGS_MODEL_APPS_H_ */
