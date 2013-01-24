@@ -202,7 +202,7 @@ void Test_evaluate_pierce_points::test2()
     oskar_mem_init(&pp_lat, type, location, n, OSKAR_TRUE, &status);
     oskar_mem_init(&pp_path, type, location, n, OSKAR_TRUE, &status);
     oskar_evaluate_pierce_points(&pp_lon, &pp_lat, &pp_path, lon, lat, alt,
-            x, y, z, height, n, &hor_x, &hor_y, &hor_z);
+            x, y, z, height, n, &hor_x, &hor_y, &hor_z, &status);
 
     printf("\n%s\n", __PRETTY_FUNCTION__);
     printf("pierce point [%i]:\n", 0);

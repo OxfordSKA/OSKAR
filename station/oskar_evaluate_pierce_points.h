@@ -49,30 +49,34 @@ extern "C" {
  * which was developed by Maaijke Mevius and Ilse van Bemmel and
  * can be found in the meqtrees cattery repository.
  *
- * @param pierce_point_lon      Array of pierce point longitudes, in radians.
- * @param pierce_point_lat      Array of pierce point latitudes, in radians.
- * @param relative_path_length  Array of relative path lengths in the direction
- *                              of the pierce point from the station
- *                              [sec(alpha_prime)].
- * @param station_lon           Station longitude, in radians.
- * @param station_lat           Station latitude, in radians.
- * @param station_alt           Station altitude, in metres.
- * @param station_x_ecef        Station x (earth centred, earth fixed
+ * Possible problems:
+ * - Pierce points below the horizon are still evaluated.
+ *
+ * @param[out] pierce_point_lon      Array of pierce point longitudes, in radians.
+ * @param[out] pierce_point_lat      Array of pierce point latitudes, in radians.
+ * @param[out] relative_path_length  Array of relative path lengths in the direction
+ *                                   of the pierce point from the station
+ *                                   [sec(alpha_prime)].
+ * @param[in] station_lon       Station longitude, in radians.
+ * @param[in] station_lat       Station latitude, in radians.
+ * @param[in] station_alt       Station altitude, in metres.
+ * @param[in] station_x_ecef    Station x (earth centred, earth fixed
  *                              /ITRF/geocentric) coordinate.
- * @param station_x_ecef        Station y (earth centred, earth fixed
+ * @param[in] station_x_ecef    Station y (earth centred, earth fixed
  *                              /ITRF/geocentric) coordinate.
- * @param station_z_ecef        Station z (earth centred, earth fixed
+ * @param[in] station_z_ecef    Station z (earth centred, earth fixed
  *                              /ITRF/geocentric) coordinate.
- * @param screen_height_m       Height of the screen though which to calculate
+ * @param[in] screen_height_m   Height of the screen though which to calculate
  *                              pierce points, in metres.
- * @param num_directions        Number of directions for which to calculate
+ * @param[in] num_directions    Number of directions for which to calculate
  *                              pierce points.
- * @param hor_x                 Array of horizontal x direction cosines for
+ * @param[in] hor_x             Array of horizontal x direction cosines for
  *                              which to evaluate pierce points.
- * @param hor_y                 Array of horizontal y direction cosines for
+ * @param[in] hor_y             Array of horizontal y direction cosines for
  *                              which to evaluate pierce points.
- * @param hor_z                 Array of horizontal z direction cosines for
+ * @param[in] hor_z             Array of horizontal z direction cosines for
  *                              which to evaluate pierce points.
+ * @param[in/out] status        Error status code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_pierce_points(
@@ -89,7 +93,8 @@ void oskar_evaluate_pierce_points(
         int num_directions,
         oskar_Mem* hor_x,
         oskar_Mem* hor_y,
-        oskar_Mem* hor_z);
+        oskar_Mem* hor_z,
+        int* status);
 
 #ifdef __cplusplus
 }

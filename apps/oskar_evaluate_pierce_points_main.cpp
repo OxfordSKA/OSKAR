@@ -241,7 +241,7 @@ int main(int argc, char** argv)
 
                 oskar_evaluate_pierce_points(&pp_st_lon, &pp_st_lat, &pp_st_rel_path,
                         lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
-                        num_sources, &hor_x, &hor_y, &hor_z);
+                        num_sources, &hor_x, &hor_y, &hor_z, &error);
                 printf("\n");
             }
 
