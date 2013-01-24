@@ -1293,25 +1293,72 @@ void oskar_SettingsModelApps::init_settings_ionosphere()
     setTooltip(group, "...");
 
     k = group + "/enable";
-    declare(k, "Enable", oskar_SettingsItem::BOOL, true);
+    declare(k, "Enable", oskar_SettingsItem::BOOL, false);
     setTooltip(k, "...");
 
-    group = group + "/TID";
-    setLabel(group, "TID");
-    setTooltip(group, "...");
-    setDependency(group, "ionosphere/enable", true);
+    k = group + "/height_km";
+    declare(k, "Height of TEC screen (km)", oskar_SettingsItem::DOUBLE, 300.0);
+    setTooltip(k, "...");
 
-    options.clear();
-    options << "Default parameters"
-            << "Configuration file";
+    // TID group
+    {
+        group = group + "/TID";
+        setLabel(group, "Travelling ionospheric disturbance (TID) parameters");
+        setTooltip(group, "...");
+        setDependency(group, "ionosphere/enable", true);
 
-    k = group + "/config_type";
-    declare(k, "Configuration type", options, 0);
+        k = group + "/enable";
+        declare(k, "Enable", oskar_SettingsItem::BOOL, true);
+        setTooltip(k, "Enable the TID component of the MIM evaluation");
 
-    k = group + "/filename";
-    declare(k, "TID parameter file", oskar_SettingsItem::INPUT_FILE_NAME);
-    setTooltip(group, "...");
-    setDependency(k, group + "/config_type", options[1]);
+        options.clear();
+        options << "Component model"
+                << "Configuration file";
+        k = group + "/config_type";
+        declare(k, "Configuration type", options, 0);
+
+        k = group + "/components";
+        setLabel(k, "TID Components");
+        setDependency(k, group + "/config_type", options[0]);
+
+        k = group + "/components/0";
+        setLabel(k, "Component 1");
+        setDependency(k, group + "/config_type", options[0]);
+
+        k = group + "/components/0/theta";
+        declare(k, "Direction [deg]", oskar_SettingsItem::INT);
+        setTooltip(k, "...");
+        setDependency(k, group + "/config_type", options[0]);
+
+        k = group + "/components/1";
+        setLabel(k, "Component 1");
+        setDependency(k, group + "/config_type", options[0]);
+
+        k = group + "/components/1/theta";
+        declare(k, "Theta1 [deg]", oskar_SettingsItem::INT);
+        setTooltip(k, "...");
+        setDependency(k, group + "/config_type", options[0]);
+
+        k = group + "/component_file";
+        declare(k, "TID parameter file", oskar_SettingsItem::INPUT_FILE_NAME);
+        setTooltip(group, "...");
+        setDependency(k, group + "/config_type", options[1]);
+    }
+
+    //
+    group = "ionosphere/output";
+    setLabel(group, "Ouputs");
+
+    k = group + "/pierce_point_file";
+    declare(k, "Pierce point file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "File used to record pierce points. This is an OSKAR binary "
+            "format scatter data file.");
+    setDependency(k, group + "/enable", true);
+
+    k = group + "/tec_file";
+    declare(k, "TEC screen file", oskar_SettingsItem::OUTPUT_FILE_NAME);
+    setTooltip(k, "File used to record evaluated TEC values.");
+    setDependency(k, group + "/enable", true);
 }
 
 

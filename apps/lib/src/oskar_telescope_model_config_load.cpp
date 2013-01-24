@@ -166,13 +166,13 @@ static int load_layout(oskar_TelescopeModel* telescope,
     if (num_stations > 0)
     {
         if (num_stations != telescope->num_stations)
-            return OSKAR_ERR_SETUP_FAIL;
+            return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
     }
     else
     {
         // TODO There are no station directories.
         // Still need to set up the stations, though.
-        return OSKAR_ERR_SETUP_FAIL;
+        return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
     }
 
     return error;

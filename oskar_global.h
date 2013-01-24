@@ -188,14 +188,17 @@ enum {
     /* Indicates an error relating to the image settings */
     OSKAR_ERR_SETTINGS_IMAGE           = -508,
 
+    /* Indicates an error relating to ionospheric model settings */
+    OSKAR_ERR_SETTINGS_IONOSPHERE      = -509,
+
     /* Indicates a failure to setup a model data structure */
     OSKAR_ERR_SETUP_FAIL               = -600,
 
     /* Indicates a failure to setup the telescope model */
-    OSKAR_ERR_SETUP_FAIL_TELESCOPE     = -601,
+    OSKAR_ERR_SETUP_FAIL_TELESCOPE     = -700,
 
     /* Indicates a failure to setup the telescope model */
-    OSKAR_ERR_SETUP_FAIL_SKY           = -602,
+    OSKAR_ERR_SETUP_FAIL_SKY           = -800,
 
     /* Indicates that an unknown error occurred. */
     OSKAR_ERR_UNKNOWN                  = -1000,

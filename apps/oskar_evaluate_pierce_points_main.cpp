@@ -38,8 +38,15 @@
 #include <utility/oskar_mem_free.h>
 #include <utility/oskar_mem_get_pointer.h>
 
+#include <utility/oskar_BinaryTag.h>
+#include "utility/oskar_mem_binary_stream_write.h"
+#include <utility/oskar_binary_stream_write.h>
+#include <utility/oskar_binary_stream_write_header.h>
+#include <utility/oskar_binary_stream_write_metadata.h>
+
 #include <interferometry/oskar_TelescopeModel.h>
 #include <interferometry/oskar_telescope_model_free.h>
+#include <interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h>
 
 #include <apps/lib/oskar_settings_load.h>
 #include <apps/lib/oskar_set_up_telescope.h>
@@ -47,7 +54,8 @@
 #include <sky/oskar_SkyModel.h>
 #include <sky/oskar_sky_model_free.h>
 #include <sky/oskar_ra_dec_to_hor_lmn.h>
-#include <sky/oskar_mjd_to_lmst.h>
+#include <sky/oskar_mjd_to_last_fast.h>
+#include <sky/oskar_mjd_to_gast_fast.h>
 
 #include <station/oskar_StationModel.h>
 #include <station/oskar_evaluate_pierce_points.h>
@@ -57,6 +65,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <cstring>
+#include <string>
 
 static void check_error(int error, oskar_Log* log);
 
@@ -82,6 +92,8 @@ int main(int argc, char** argv)
         // =====================================================
 
         // 0) load settings.
+        // TODO load ionospheric (Z-Jones) settings.
+        // Need to define an output for pierce points.
         const char* settings_file = argv[1];
         oskar_Settings settings;
         error = oskar_settings_load(&settings, &log, settings_file);
@@ -89,6 +101,8 @@ int main(int argc, char** argv)
         // Force an error if not in double precision!
         if (settings.sim.double_precision != OSKAR_TRUE)
             check_error(OSKAR_ERR_BAD_DATA_TYPE, &log);
+
+        log.keep_file = OSKAR_FALSE;
 
         // 1) load telescope (station positions)
         oskar_TelescopeModel tel;
@@ -130,49 +144,169 @@ int main(int argc, char** argv)
         double* x_ = (double*)(tel.station_x.data);
         double* y_ = (double*)(tel.station_y.data);
         double* z_ = (double*)(tel.station_z.data);
-        for (int i = 0; i < num_stations; ++i)
+
+        // TODO handle time properly and add time loop.
+        int num_times = settings.obs.num_time_steps;
+        double obs_start_mjd_utc = settings.obs.start_mjd_utc;
+        double dt_dump = settings.obs.dt_dump_days;
+
+//        printf("start time = %f days\n", obs_start_mjd_utc);
+//        printf("t_inc = %f days\n", dt_dump);
+
+        // Open file to write (stream) to.
+        const char* filename = "temp_pp.dat";
+        FILE* stream;
+        stream = fopen(filename, "wb");
+        if (stream == NULL)
+            check_error(OSKAR_ERR_FILE_IO, &log);
+        oskar_binary_stream_write_header(stream, &error);
+        oskar_binary_stream_write_metadata(stream, &error);
+        enum {
+            TIME_IDX       = 0,
+            FREQ_IDX       = 1,
+            TIME_MJD_UTC   = 2,
+            FREQ_HZ        = 3,
+            NUM_FIELDS     = 4,
+            NUM_FIELD_TAGS = 5,
+            HEADER_OFFSET  = 10,
+            DATA           = 0,
+            DIMS           = 1,
+            LABEL          = 2,
+            UNITS          = 3,
+            GRP            = OSKAR_TAG_GROUP_TIME_FREQ_DATA
+        };
+
+        std::string label1 = "pp_lon";
+        std::string label2 = "pp_lat";
+        std::string label3 = "pp_path";
+        std::string units = "radians";
+        std::string units2 = "";
+        oskar_Mem dims1, dims2;
+        oskar_mem_init(&dims1, OSKAR_INT, location, 2, owner, &error);
+        oskar_mem_init(&dims2, OSKAR_INT, location, 2, owner, &error);
+        ((int*)dims1.data)[0] = num_pp;
+        ((int*)dims1.data)[1] = 1;
+        ((int*)dims2.data)[0] = num_pp;
+        ((int*)dims2.data)[1] = 1;
+
+        for (int t = 0; t < num_times; ++t)
         {
-            oskar_StationModel* station = &tel.station[i];
-            double lon = station->longitude_rad;
-            double lat = station->latitude_rad;
-            double alt = station->altitude_m;
-            double mjd = 0.0;
-            double x_ecef = x_[i];
-            double y_ecef = y_[i];
-            double z_ecef = z_[i];
-            printf("r = %f\n",
-                    sqrt(x_ecef*x_ecef + y_ecef*y_ecef + z_ecef*z_ecef));
-            printf("station-%02i, lon = % -.4f, lat = % -.4f, "
-                    "x = % -.4e, y = % -.3e, z = % -.3e (sources = %i)\n",
-                    i, lon * (180./M_PI), lat * (180./M_PI),
-                    x_ecef, y_ecef, z_ecef, num_sources);
-            double lst = oskar_mjd_to_lmst_d(mjd, lon);
-            oskar_ra_dec_to_hor_lmn_d(chunk->num_sources,
-                    (double*)chunk->RA.data, (double*)chunk->Dec.data,
-                    lst, lat, (double*)hor_x.data, (double*)hor_y.data,
-                    (double*)hor_x.data);
+            double t_dump = obs_start_mjd_utc + t * dt_dump; // MJD UTC
+//            printf(">>>>>>>> time = %f MJD <<<<<<<<\n", t_dump+dt_dump/2.0);
+            double gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
+//            printf(">>>>>>>> time = %f gast <<<<<<<<\n", gast);
+//            printf("\n");
 
-            // 4) loop over telescope (stations) and compute p.p.
+            // TODO function to convert gast to date time (or mjd to date time)
+            // (so it can be displayed.)
 
-            int offset = i * num_sources;
-            oskar_mem_get_pointer(&pp_st_lon, &pp_lon, offset, num_sources,
+            //printf("time %i - %f\n", t, gast);
+
+            for (int i = 0; i < num_stations; ++i)
+            {
+                oskar_StationModel* station = &tel.station[i];
+                double lon = station->longitude_rad;
+                double lat = station->latitude_rad;
+                double alt = station->altitude_m;
+                double x_ecef, y_ecef, z_ecef;
+                oskar_offset_geocentric_cartesian_to_geocentric_cartesian(
+                        1, &x_[i], &y_[i], &z_[i], lon, lat,
+                        alt, &x_ecef, &y_ecef, &z_ecef);
+                double last = gast + lon;
+                oskar_ra_dec_to_hor_lmn_d(chunk->num_sources,
+                        (double*)chunk->RA.data, (double*)chunk->Dec.data,
+                        last, lat, (double*)hor_x.data, (double*)hor_y.data,
+                        (double*)hor_z.data);
+
+//                printf("> st %i\n", i);
+//                printf("lon=%f, gast=%f, last=%f, lat=%f\n",
+//                        lon*180./M_PI, gast,
+//                        last, lat*180./M_PI);
+//                printf("ra=%f, dec=%f, x=%f, y=%f, z=%f\n",
+//                        ((double*)chunk->RA.data)[0]*180./M_PI,
+//                        ((double*)chunk->Dec.data)[0]*180./M_PI,
+//                        ((double*)hor_x.data)[0],
+//                        ((double*)hor_y.data)[0],
+//                        ((double*)hor_z.data)[0]
+//                );
+
+                // 4) loop over telescope (stations) and compute p.p.
+                int offset = i * num_sources;
+                oskar_mem_get_pointer(&pp_st_lon, &pp_lon, offset, num_sources,
+                        &error);
+                oskar_mem_get_pointer(&pp_st_lat, &pp_lat, offset, num_sources,
+                        &error);
+                oskar_mem_get_pointer(&pp_st_rel_path, &pp_rel_path, offset, num_sources,
+                        &error);
+
+                oskar_evaluate_pierce_points(&pp_st_lon, &pp_st_lat, &pp_st_rel_path,
+                        lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
+                        num_sources, &hor_x, &hor_y, &hor_z);
+                printf("\n");
+            }
+
+            if (error) continue;
+
+            int index = t; // could be = (num_times * f) + t if we have frequency data
+            const int num_fields = 3;
+            const int num_field_tags = 4;
+            double freq_hz = 0.0;
+            int freq_idx = 0;
+
+            // Write the header TAGS
+            oskar_binary_stream_write_int(stream, GRP, TIME_IDX, index, t,
                     &error);
-            oskar_mem_get_pointer(&pp_st_lat, &pp_lat, offset, num_sources,
-                    &error);
-            oskar_mem_get_pointer(&pp_st_rel_path, &pp_rel_path, offset, num_sources,
-                    &error);
-            oskar_evaluate_pierce_points(&pp_st_lon, &pp_st_lat, &pp_st_rel_path,
-                    lon, lat, alt, x_ecef, y_ecef, z_ecef, screen_height_m,
-                    num_sources, &hor_x, &hor_y, &hor_z);
+            oskar_binary_stream_write_double(stream, GRP, FREQ_IDX, index,
+                    freq_idx, &error);
+            oskar_binary_stream_write_double(stream, GRP, TIME_MJD_UTC, index,
+                    t_dump, &error);
+            oskar_binary_stream_write_double(stream, GRP, FREQ_HZ, index,
+                    freq_hz, &error);
+            oskar_binary_stream_write_int(stream, GRP, NUM_FIELDS, index,
+                    num_fields, &error);
+            oskar_binary_stream_write_int(stream, GRP, NUM_FIELD_TAGS, index,
+                    num_field_tags, &error);
+
+            // Write data TAGS (fields)
+            int field, tagID;
+            field = 0;
+            tagID = HEADER_OFFSET + (num_field_tags * field);
+            oskar_mem_binary_stream_write(&pp_lon, stream, GRP, tagID + DATA,
+                    index, 0, &error);
+            oskar_mem_binary_stream_write(&dims1, stream, GRP, tagID  + DIMS,
+                    index, 0, &error);
+            oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
+                    index, label1.size()+1, label1.c_str(), &error);
+            oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + UNITS,
+                    index, units.size()+1, units.c_str(), &error);
+            field = 1;
+            tagID = HEADER_OFFSET + (num_field_tags * field);
+            oskar_mem_binary_stream_write(&pp_lat, stream, GRP, tagID + DATA,
+                    index, 0, &error);
+            oskar_mem_binary_stream_write(&dims2, stream, GRP, tagID  + DIMS,
+                    index, 0, &error);
+            oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
+                    index, label2.size()+1, label2.c_str(), &error);
+            oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + UNITS,
+                    index, units.size()+1, units.c_str(), &error);
+            field = 2;
+            tagID = HEADER_OFFSET + (num_field_tags * field);
+            oskar_mem_binary_stream_write(&pp_rel_path, stream, GRP, tagID + DATA,
+                    index, 0, &error);
+            oskar_mem_binary_stream_write(&dims2, stream, GRP, tagID  + DIMS,
+                    index, 0, &error);
+            oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + LABEL,
+                    index, label3.size()+1, label3.c_str(), &error);
+            oskar_binary_stream_write(stream, OSKAR_CHAR, GRP, tagID + UNITS,
+                    index, units2.size()+1, units2.c_str(), &error);
+
+            if (error)
+                printf("Something when wrong writing binary data...\n");
+
         }
 
-        // 5) save p.p. to file for plotting (lon., lat., path len.)
-        double *lon_ = (double*)pp_lon.data;
-        double *lat_ = (double*)pp_lat.data;
-        for (int i = 0; i < num_pp; ++i)
-        {
-            fprintf(stderr, "%02i % 10.5f % 10.5f\n", i, lon_[i], lat_[i]);
-        }
+        // Close the OSKAR binary data file
+        fclose(stream);
 
         // clean up memory
         oskar_mem_free(&hor_x, &error);
@@ -184,8 +318,11 @@ int main(int argc, char** argv)
         oskar_mem_free(&pp_st_lon, &error);
         oskar_mem_free(&pp_st_lat, &error);
         oskar_mem_free(&pp_st_rel_path, &error);
+        oskar_mem_free(&dims1, &error);
+        oskar_mem_free(&dims2, &error);
         oskar_telescope_model_free(&tel, &error);
         oskar_sky_model_free(&sky[0], &error);
+
         free(sky);
     }
     catch (int code)
@@ -195,8 +332,6 @@ int main(int argc, char** argv)
 
     // Check for errors.
     check_error(error, &log);
-
-
 
     return error;
 }

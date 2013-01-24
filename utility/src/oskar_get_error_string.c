@@ -131,6 +131,8 @@ const char* oskar_get_error_string(int error)
             return "beam pattern settings error";
         case OSKAR_ERR_SETTINGS_IMAGE:
             return "image settings error";
+        case OSKAR_ERR_SETTINGS_IONOSPHERE:
+            return "ionospheric model settings error";
 
         /* -600 to -620: Data model setup errors */
         case OSKAR_ERR_SETUP_FAIL:

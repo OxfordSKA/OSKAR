@@ -56,6 +56,7 @@ void oskar_evaluate_pierce_points(
         oskar_Mem* hor_z)
 {
     double norm_xyz, earth_radius_m;
+    double x, y, z;
     int i, type;
     double rot_matrix[9];
     double diff_vector_ENU[3];
@@ -87,16 +88,19 @@ void oskar_evaluate_pierce_points(
            ENU frame. Vector from station to pierce point. */
         if (type == OSKAR_DOUBLE)
         {
-            diff_vector_ENU[0] = ((double*)hor_x->data)[i];
-            diff_vector_ENU[1] = ((double*)hor_y->data)[i];
-            diff_vector_ENU[2] = ((double*)hor_z->data)[i];
+            x = ((double*)hor_x->data)[i];
+            y = ((double*)hor_y->data)[i];
+            z = ((double*)hor_z->data)[i];
         }
         else
         {
-            diff_vector_ENU[0] = (double)((float*)hor_x->data)[i];
-            diff_vector_ENU[1] = (double)((float*)hor_y->data)[i];
-            diff_vector_ENU[2] = (double)((float*)hor_z->data)[i];
+            x = (double)((float*)hor_x->data)[i];
+            y = (double)((float*)hor_y->data)[i];
+            z = (double)((float*)hor_z->data)[i];
         }
+        diff_vector_ENU[0] = x;
+        diff_vector_ENU[1] = y;
+        diff_vector_ENU[2] = z;
 
         /* Convert unit vector to ECEF frame. */
         matrix_multiply(diff_vector_ECEF, rot_matrix, diff_vector_ENU);
@@ -111,8 +115,12 @@ void oskar_evaluate_pierce_points(
         if (fabs(diff_vector_ENU[2] - 1.0) > 1.0e-10)
         {
             double el, cos_el;
-            el = asin(diff_vector_ENU[2]);
+//            el2 = atan2(z, sqrt(x*x+y*y));
+            el = asin(z);
+//            printf("***** (%f %f %f) el = %f [%f]\n", x,y,z,el*180.0/M_PI,el2*180.0/M_PI);
             cos_el = cos(el);
+            // FIXME if elevation of the pierce point goes below the horizon...
+            // (already solved by source masking below horizon?)
             arg = (cos_el * norm_xyz) / (earth_radius_m + screen_height_m);
             alpha_prime = asin(arg);
             pp_sec = 1.0/cos(alpha_prime);

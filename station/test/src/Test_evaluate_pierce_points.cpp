@@ -48,39 +48,30 @@ void Test_evaluate_pierce_points::test1()
     printf("\n%s\n", __PRETTY_FUNCTION__);
     // ====== INPUTS =========================================================
 
-//    // Centre of telescope (long./lat. of reference station ?!).
-//    double tel_lon_deg = 0.0;
-//    double tel_lat_deg = 40.0;
-//    double tel_alt_m = 0.0;
-
     // Station lon/lat coordinates (for which pierce points are evaluated)
     double st_lon_deg = 0.0;
     double st_lat_deg = 45.0;
-    double st_alt_m = 0.0;
+    double st_alt_m   = 0.0;
+
+    // Source position.
+    double az_deg = 0.0;
+    double el_deg = 80.0;
+    // Ionosphere.
+    double height_km = 300;
 
     // Station co-ordinates (horizontal x,y,z - as in 'layout' file).
     double st_hor_x = 0.0;
     double st_hor_y = 0.0;
     double st_hor_z = 0.0;
 
-    // Source position.
-    double az_deg = 0.0;
-    double el_deg = 80.0;
-
-    // Ionosphere.
-    double height_km = 300;
-
     // Notes:
     // - based on make_pp from PiercePoints.py (meqtrees-cattery/Lions)
-    // - assuming this is the reference station.
 
     // ========================================================================
 
     double deg2rad = M_PI/180.0;
     double st_lon_rad = st_lon_deg * deg2rad;
     double st_lat_rad = st_lat_deg * deg2rad;
-//    double tel_lon_rad = tel_lon_deg * deg2rad;
-//    double tel_lat_rad = tel_lat_deg * deg2rad;
     double el_rad = el_deg * deg2rad;
     double az_rad = az_deg * deg2rad;
     double height_m = height_km * 1000.0;
@@ -97,9 +88,6 @@ void Test_evaluate_pierce_points::test1()
     // == Create rot_matrix.
     double rot_matrix[9];
     create_rot_matrix(rot_matrix, st_lon_rad, st_lat_rad);
-
-//    double ref_rot_matrix[9];
-//    create_rot_matrix(ref_rot_matrix, tel_lon_rad, tel_lat_rad);
 
     // == station, source loop (ref: line 58)
     double norm_xyz = sqrt(st_x*st_x + st_y*st_y + st_z*st_z);
@@ -151,7 +139,6 @@ void Test_evaluate_pierce_points::test1()
     double pp_y = st_y + (diff_vector_ITRF[1] * scale);
     double pp_z = st_z + (diff_vector_ITRF[2] * scale);
 
-
     double pp_lon, pp_lat, pp_alt;
     oskar_geocentric_cartesian_to_geodetic_spherical(
             1, &pp_x, &pp_y, &pp_z,
@@ -171,9 +158,9 @@ void Test_evaluate_pierce_points::test2()
     // >>>>>> Inputs. <<<<<<<<<
 
     // Pierce point settings (screen height, az, el of source)
+    double az     = 0.0 * (M_PI/180.);
+    double el     = 80.0 * (M_PI/180.);
     double height = 300. * 1000.;
-    double az = 0.0 * (M_PI/180.);
-    double el = 45.0 * (M_PI/180.);
 
     // Station position (longitude, latitude, altitude)
     double lon = 0.0 * (M_PI/180.);

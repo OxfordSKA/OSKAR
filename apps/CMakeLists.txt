@@ -54,12 +54,14 @@ endif ()
 # TODO work out what deps this has.
 set(name oskar_sim_tec_screen)
 oskar_app(${name} ${name}_main.cpp
-    EXTRA_LIBS oskar_apps)
+    EXTRA_LIBS oskar_apps
+    NO_INSTALL)
 
 # TODO work out what deps this has.
 set(name oskar_evaluate_pierce_points)
 oskar_app(${name} ${name}_main.cpp
-    EXTRA_LIBS oskar_apps)
+    EXTRA_LIBS oskar_apps
+    NO_INSTALL)
 
 if (QT4_FOUND AND CUDA_FOUND)
     # Build oskar_app library

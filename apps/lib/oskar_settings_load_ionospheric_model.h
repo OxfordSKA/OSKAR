@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,48 +26,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_MIM_H_
-#define OSKAR_SETTINGS_MIM_H_
+
+#ifndef OSKAR_SETTINGS_LOAD_IONOSPHERIC_MODEL_H_
+#define OSKAR_SETTINGS_LOAD_IONOSPHERIC_MODEL_H_
 
 /**
- * @file oskar_SettingsMIM.h
+ * @file oskar_settings_load_ionospheric_model.h
  */
 
 #include "oskar_global.h"
+#include "sky/oskar_SettingsMIM.h"
 
-/**
- * @struct oskar_SettingsTID
- *
- * @brief Structure to hold TID settings.
- */
-struct OSKAR_EXPORT oskar_SettingsTID
-{
-    double amp;             // Relative amplitude
-    double wavelength;      // in km
-    double speed;           // km/h
-    double theta;           // deg
-};
-typedef struct oskar_SettingsTID oskar_SettingsTID;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/**
- * @struct oskar_SettingsMIM
- *
- * @brief Structure to hold MIM settings.
- *
- * @details
- * The structure holds parameters for the ionospheric model.
- */
-struct OSKAR_EXPORT oskar_SettingsMIM
-{
-    int enable;
-    double tec0;
-    double height_km;
+OSKAR_APPS_EXPORT
+int oskar_settings_load_ionospheric_model(oskar_SettingsMIM* settings,
+        const char* filename);
 
-    int enableTID;
-    int num_tid_components;
-    char* component_file;
-    oskar_SettingsTID* tid;
-};
-typedef struct oskar_SettingsMIM oskar_SettingsMIM;
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* OSKAR_SETTINGS_MIM_H_ */
+#endif /* OSKAR_SETTINGS_LOAD_IONOSPHERIC_MODEL_H_ */

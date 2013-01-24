@@ -49,12 +49,16 @@
 void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
 {
     int err = 0;
-    if (num_in != 2 || num_out > 1)
+    if (num_in < 2 || num_in > 3 || num_out > 1)
     {
-        mexErrMsgTxt("Usage: records = read_group(filename, group)\n");
+        mexErrMsgTxt("Usage: \n"
+                "   records = read_group(filename, group, [index])\n"
+                "\n"
+                "If [index] is specified, only that index is read from the "
+                "binary file. If [index] is not specified, all records "
+                "with the specified group are read irrespective of their user "
+                "index value.");
     }
-
-
 
     // Get input arguments.
     char filename[STR_LENGTH];
@@ -79,6 +83,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mexErrMsgIdAndTxt("OSKAR:ERROR", "Unable to open file (%s)\n.", filename);
     }
 
+    int read_idx = -1;
+    if (num_in == 3)
+        read_idx = mxGetScalar(in[2]);
 
     // Create binary tag index (the record header?)
     oskar_BinaryTagIndex* index = NULL;
@@ -89,32 +96,41 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
                 "failed with code %i: %s.\n", err, oskar_get_error_string(err));
     }
 
-
-
-
-
-
     // Find out how many records are in the specified group.
+    // with index, if specified.
     int num_records = 0;
     for (int i  = 0; i < index->num_tags; ++i)
     {
         if (is_extended && index->extended[i])
         {
             if (strcmp(index->name_group[i], group.name) == 0)
-                ++num_records;
+            {
+                if ((read_idx >= 0 && index->user_index[i] == read_idx) || read_idx < 0)
+                    ++num_records;
+            }
         }
         else if (!is_extended && !index->extended[i])
         {
             if (index->id_group[i] == group.id)
-                ++num_records;
+            {
+                if ((read_idx >= 0 && index->user_index[i] == read_idx) || read_idx < 0)
+                    ++num_records;
+            }
         }
     }
-    if (is_extended)
-        mexPrintf("Number of records found with group <%s> = %i\n", group.name,
-                num_records);
-    else
-        mexPrintf("Number of records found with group <%i> = %i\n", group.id,
-                num_records);
+
+//    if (is_extended && read_idx < 0)
+//        mexPrintf("Number of records found with group <%s> = %i\n", group.name,
+//                num_records);
+//    else if (is_extended && read_idx >= 0)
+//        mexPrintf("Number of records found with group <%s> in index <%i> = %i\n",
+//                group.name, read_idx, num_records);
+//    else if (!is_extended && read_idx < 0)
+//        mexPrintf("Number of records found with group <%i> = %i\n", group.id,
+//                num_records);
+//    else
+//        mexPrintf("Number of records found with group <%i> in index <%i> = %i\n",
+//                group.id, read_idx, num_records);
 
     fflush(stdout);
 
@@ -129,6 +145,9 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         mxArray* data_ = NULL;
         void* data = NULL;
         mwSize m = 0;
+        if (read_idx >= 0 && index->user_index[i] != read_idx)
+            continue;
+
         switch (index->data_type[i])
         {
             case OSKAR_CHAR:
@@ -298,7 +317,7 @@ void mexFunction(int num_out, mxArray** out, int num_in, const mxArray** in)
         {
             if (index->id_group[i] == group.id)
             {
-                mexPrintf("RECORD: i = %i/%i, k = %i/%i\n", i, index->num_tags, k, num_records);
+//                mexPrintf("RECORD: i = %i/%i, k = %i/%i\n", i, index->num_tags, k, num_records);
                 mxSetField(out[0], k, fields[0],
                         mxCreateString(oskar_get_data_type_string(index->data_type[i])));
                 mxSetField(out[0], k, fields[1], mxCreateDoubleScalar((double)index->id_group[i]));
