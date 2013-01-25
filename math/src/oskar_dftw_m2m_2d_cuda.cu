@@ -139,9 +139,9 @@ void oskar_dftw_m2m_2d_cudak_f(const int n_in, const float* x_in,
                     float2 w = cw[i];
                     t = weight.x; // Re-use register and copy the real part.
                     weight.x *= w.x;
-                    weight.x -= w.y * weight.y;
+                    weight.x += w.y * weight.y;
                     weight.y *= w.x;
-                    weight.y += w.y * t;
+                    weight.y -= w.y * t;
                 }
 
                 // Complex multiply-accumulate input signal and weight.
@@ -240,9 +240,9 @@ void oskar_dftw_m2m_2d_cudak_d(const int n_in, const double* x_in,
                     double2 w = cw[i];
                     t = weight.x; // Re-use register and copy the real part.
                     weight.x *= w.x;
-                    weight.x -= w.y * weight.y;
+                    weight.x += w.y * weight.y;
                     weight.y *= w.x;
-                    weight.y += w.y * t;
+                    weight.y -= w.y * t;
                 }
 
                 // Complex multiply-accumulate input signal and weight.

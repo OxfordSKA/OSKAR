@@ -23,6 +23,7 @@ set(utility_SRC
     src/oskar_cuda_info_create.c
     src/oskar_cuda_info_free.c
     src/oskar_cuda_info_log.c
+    src/oskar_cuda_mem_log.c
     src/oskar_curand_state_free.c
     src/oskar_curand_state_init.cu
     src/oskar_endian.c

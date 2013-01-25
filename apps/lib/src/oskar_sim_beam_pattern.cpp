@@ -46,6 +46,7 @@
 #include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "station/oskar_work_station_beam_free.h"
 #include "station/oskar_work_station_beam_init.h"
+#include "utility/oskar_cuda_mem_log.h"
 #include "utility/oskar_curand_state_free.h"
 #include "utility/oskar_curand_state_init.h"
 #include "utility/oskar_log_error.h"
@@ -262,7 +263,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 if (type == OSKAR_SINGLE)
                 {
                     float2* bp = (float2*)complex_cube.data + offset;
-                    if (oskar_mem_is_scalar(beam_pattern_data_type))
+                    if (oskar_mem_is_scalar(beam_cpu.type))
                     {
                         float2* tc = (float2*)beam_cpu.data;
                         for (int i = 0; i < num_pixels; ++i)
@@ -283,7 +284,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 else if (type == OSKAR_DOUBLE)
                 {
                     double2* bp = (double2*)complex_cube.data + offset;
-                    if (oskar_mem_is_scalar(beam_pattern_data_type))
+                    if (oskar_mem_is_scalar(beam_cpu.type))
                     {
                         double2* tc = (double2*)beam_cpu.data;
                         for (int i = 0; i < num_pixels; ++i)
@@ -303,6 +304,9 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 }
 
             } // Time loop
+
+            // Record GPU memory usage.
+            oskar_cuda_mem_log(log, 1, 0);
 
             // Free memory.
             oskar_curand_state_free(&curand_state, &err);
