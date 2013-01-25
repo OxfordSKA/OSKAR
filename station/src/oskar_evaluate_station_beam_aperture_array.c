@@ -198,6 +198,7 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         int i, work_size;
         oskar_Mem* signal;
 
+        /* FIXME In general, need to have a hierarchy work array per depth. */
         /* Get pointer to a work array of the right type. */
         signal = (oskar_mem_is_matrix(beam->type)) ?
                 &work->hierarchy_work_matrix : &work->hierarchy_work_scalar;

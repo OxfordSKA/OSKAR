@@ -7,12 +7,12 @@ if (CPPUNIT_FOUND)
     set(station_test_SRC
         src/CppUnitMain.cpp
         #src/Test_dipole_pattern.cu
-        #src/Test_element_weights_errors.cpp
-        #src/Test_evaluate_jones_E.cpp
+        src/Test_element_weights_errors.cpp
+        src/Test_evaluate_jones_E.cpp
         src/Test_evaluate_pierce_points.cpp
-        #src/Test_evaluate_station_beam_dipoles.cpp
-        #src/Test_evaluate_station_beam.cpp
-        #src/Test_StationModel.cpp
+        src/Test_evaluate_station_beam_dipoles.cpp
+        src/Test_evaluate_station_beam.cpp
+        src/Test_StationModel.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})

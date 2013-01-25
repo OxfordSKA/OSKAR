@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,6 +70,8 @@ struct OSKAR_EXPORT oskar_WorkStationBeam
     oskar_Mem element_pattern_matrix;  /* Complex matrix. */
     oskar_Mem element_pattern_scalar;  /* Complex scalar. */
     oskar_Mem array_pattern;           /* Complex scalar. */
+
+    /* FIXME In general, need to have a hierarchy work array per depth level. */
     oskar_Mem hierarchy_work_matrix;   /* Complex matrix. */
     oskar_Mem hierarchy_work_scalar;   /* Complex scalar. */
 
