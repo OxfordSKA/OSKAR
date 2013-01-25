@@ -82,7 +82,6 @@ endif ()
 # ------------------------------------------------------------------------------
 if (APPLE)
     set(CMAKE_INSTALL_NAME_DIR "@rpath")
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 endif (APPLE)
 
 # Set CUDA releated compiler flags.
