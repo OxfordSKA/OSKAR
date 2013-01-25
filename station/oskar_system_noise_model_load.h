@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,11 @@ extern "C" {
  *
  * @param filename
  * @param data
- * @return
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_system_noise_model_load(oskar_Mem* data, const char* filename);
+void oskar_system_noise_model_load(oskar_Mem* data, const char* filename,
+        int* status);
 
 #ifdef __cplusplus
 }

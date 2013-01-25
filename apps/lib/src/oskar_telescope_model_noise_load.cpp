@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 
 #include "apps/lib/oskar_telescope_model_noise_load.h"
 
@@ -61,68 +60,80 @@ static const char area_file[]        = "area.txt";
 static const char efficiency_file[]  = "efficiency.txt";
 
 // Private function prototypes
-static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
+static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         const oskar_Settings* settings, const QDir& cwd,
         oskar_StationModel* station, int depth, QHash<QString, QString>& files,
-        QHash<QString, oskar_Mem*>& loaded);
-static int load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
-        const QString& filepath);
+        QHash<QString, oskar_Mem*>& loaded, int* status);
+static void load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
+        const QString& filepath, int* status);
 static void update_noise_files(QHash<QString, QString>& files, const QDir& dir);
-static int load_noise_rms(const oskar_Settings* s,
+static void load_noise_rms(const oskar_Settings* s,
         oskar_SystemNoiseModel* noise, QHash<QString, QString>& data_files,
-        QHash<QString, oskar_Mem*>& loaded);
-static int sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
-        int num_freqs, double bandwidth, double integration_time);
-static int t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
+        QHash<QString, oskar_Mem*>& loaded, int* status);
+static void sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
+        int num_freqs, double bandwidth, double integration_time, int* status);
+static void t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
         const oskar_Mem* area, const oskar_Mem* efficiency, int num_freqs,
-        double bandwidth, double integration_time);
+        double bandwidth, double integration_time, int* status);
+static void evaluate_range(oskar_Mem* values, int num_values, double start,
+        double end, int* status);
 
-static int evaluate_range(oskar_Mem* values, int num_values, double start, double end);
-
-int oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
-        oskar_Log* log, const oskar_Settings* settings)
+void oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
+        oskar_Log* log, const oskar_Settings* settings, int* status)
 {
+    // Check all inputs.
+    if (!telescope || !settings || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    // Check if safe to proceed.
+    if (*status) return;
+
     if (!settings->interferometer.noise.enable)
-        return OSKAR_SUCCESS;
+        return;
 
     QHash<QString, QString> files;
     QHash<QString, oskar_Mem*> loaded;
 
     QDir telescope_dir(settings->telescope.input_directory);
-    if (!telescope_dir.exists()) return OSKAR_ERR_FILE_IO;
+    if (!telescope_dir.exists())
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     // Check that the telescope model is in CPU memory.
     if (oskar_telescope_model_location(telescope) != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
-
-    int status = OSKAR_SUCCESS;
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
+    }
 
     // Load element data by scanning the directory structure and loading
     // the element files deepest in the tree.
-    status = load_directories(telescope, log, settings, telescope_dir, NULL,
-            0, files, loaded);
-    if (status)
-    {
-        oskar_log_error(log, "Loading noise files (%s).", oskar_get_error_string(status));
-        return status;
-    }
-
-    return OSKAR_SUCCESS;
+    load_directories(telescope, log, settings, telescope_dir, NULL,
+            0, files, loaded, status);
+    if (*status)
+        oskar_log_error(log, "Loading noise files (%s).",
+                oskar_get_error_string(*status));
 }
 
 
 // Private functions
 
-static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
+static void load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         const oskar_Settings* settings, const QDir& cwd,
         oskar_StationModel* station, int depth, QHash<QString, QString>& files,
-        QHash<QString, oskar_Mem*>& loaded)
+        QHash<QString, oskar_Mem*>& loaded, int* status)
 {
-    int err = OSKAR_SUCCESS;
+    // Check if safe to proceed.
+    if (*status) return;
 
     // Don't go below depth 1 (stations) as currently
     // OSKAR has no mechanism to deal with sub-station detector noise.
-    if (depth > 1) return OSKAR_SUCCESS;
+    if (depth > 1) return;
 
     // Update the dictionary of noise files for the current station directory.
     update_noise_files(files, cwd);
@@ -136,7 +147,7 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
     // (by oskar_telescope_load_config() for example), allocate them.
     if (depth == 0 && telescope->station == NULL)
     {
-        oskar_telescope_model_resize(telescope, num_children, &err);
+        oskar_telescope_model_resize(telescope, num_children, status);
     }
     else if (depth > 0 && num_children > 0 && station->child == NULL)
     {
@@ -144,15 +155,17 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         station->child = (oskar_StationModel*) malloc(num_children *
                 sizeof(oskar_StationModel));
         if (!station->child)
-            return OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+        {
+            *status = OSKAR_ERR_MEMORY_ALLOC_FAILURE;
+            return;
+        }
 
         for (int i = 0; i < num_children; ++i)
         {
             oskar_station_model_init(&station->child[i], type,
-                    OSKAR_LOCATION_CPU, 0, &err);
+                    OSKAR_LOCATION_CPU, 0, status);
         }
     }
-    if (err) return err;
 
     // Load noise frequency values. (noise files can only be at depth 0).
     if (depth == 0)
@@ -160,22 +173,17 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         // Load the values into the memory of station 0 and copy to
         // noise structures of other stations.
         oskar_Mem* freqs = &(telescope->station[0].noise.frequency);
-        err = load_noise_freqs(settings, freqs, files[freq_file]);
-        if (err) return err;
+        load_noise_freqs(settings, freqs, files[freq_file], status);
         for (int i = 1; i < num_children; ++i)
         {
             oskar_Mem* dst = &(telescope->station[i].noise.frequency);
-            oskar_mem_copy(dst, freqs, &err);
-            if (err) return err;
+            oskar_mem_copy(dst, freqs, status);
         }
     }
 
     // Noise files can't currently be deeper than depth 1 (stations).
     if (num_children == 0 && depth <= 1)
-    {
-        int err = load_noise_rms(settings, &station->noise, files, loaded);
-        if (err) return err;
-    }
+        load_noise_rms(settings, &station->noise, files, loaded, status);
 
     // Loop over, and descend into the child stations.
     for (int i = 0; i < num_children; ++i)
@@ -188,21 +196,19 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         QDir child_dir(cwd.filePath(children[i]));
 
         // Load this (child) station.
-        err = load_directories(telescope, log, settings, child_dir, s,
-                depth + 1, files, loaded);
-        if (err) return err;
+        load_directories(telescope, log, settings, child_dir, s,
+                depth + 1, files, loaded, status);
     }
-
-
-    return OSKAR_SUCCESS;
 }
 
-static int load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
-        const QString& filepath)
+static void load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
+        const QString& filepath, int* status)
 {
+    /* Check if safe to proceed. */
+    if (*status) return;
+
     const oskar_SettingsSystemNoise* noise = &s->interferometer.noise;
     const oskar_SettingsObservation* obs = &s->obs;
-    int err = OSKAR_SUCCESS;
 
     // Load frequency data array from a file.
     if (noise->freq.specification == OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL ||
@@ -214,13 +220,15 @@ static int load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
         else
             filename = QByteArray(noise->freq.file);
 
-        // Check if the file exists
+        // Check if the file exists.
         if (!QFile::exists(QString(filename)))
-            return OSKAR_ERR_FILE_IO;
+        {
+            *status = OSKAR_ERR_FILE_IO;
+            return;
+        }
 
-        // Load the file
-        err = oskar_system_noise_model_load(freqs, filename.constData());
-        if (err) return err;
+        // Load the file.
+        oskar_system_noise_model_load(freqs, filename.constData(), status);
     }
 
     // Generate frequency data array.
@@ -240,27 +248,21 @@ static int load_noise_freqs(const oskar_Settings* s, oskar_Mem* freqs,
             start = noise->freq.start;
             inc = noise->freq.inc;
         }
-        oskar_mem_realloc(freqs, num_freqs, &err);
-        if (err) return err;
+        oskar_mem_realloc(freqs, num_freqs, status);
+        if (*status) return;
         if (freqs->type == OSKAR_DOUBLE)
         {
             double* freqs_ = (double*)freqs->data;
             for (int i = 0; i < num_freqs; ++i)
-            {
                 freqs_[i] = start + i * inc;
-            }
         }
         else
         {
             float* freqs_ = (float*)freqs->data;
             for (int i = 0; i < num_freqs; ++i)
-            {
                 freqs_[i] = start + i * inc;
-            }
         }
     }
-
-    return OSKAR_SUCCESS;
 }
 
 static void update_noise_files(QHash<QString, QString>& files, const QDir& dir)
@@ -284,13 +286,15 @@ static void update_noise_files(QHash<QString, QString>& files, const QDir& dir)
         files[QString(efficiency_file)] = dir.absoluteFilePath(efficiency_file);
 }
 
-static int load_noise_rms(const oskar_Settings* settings,
+static void load_noise_rms(const oskar_Settings* settings,
         oskar_SystemNoiseModel* noise, QHash<QString, QString>& data_files,
-        QHash<QString, oskar_Mem*>& /*loaded*/)
+        QHash<QString, oskar_Mem*>& /*loaded*/, int* status)
 {
+    // Check if safe to proceed.
+    if (*status) return;
+
     const oskar_SettingsSystemNoise* ns = &settings->interferometer.noise;
     int type = settings->sim.double_precision ? OSKAR_DOUBLE : OSKAR_SINGLE;
-    int err = OSKAR_SUCCESS;
     oskar_Mem* stddev = &noise->rms;
     QByteArray file;
     int num_freqs = noise->frequency.num_elements;
@@ -301,7 +305,8 @@ static int load_noise_rms(const oskar_Settings* settings,
 
     if (bandwidth < DBL_MIN || integration_time < DBL_MIN)
     {
-        return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+        *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+        return;
     }
 
     // Telescope model priority.
@@ -314,21 +319,17 @@ static int load_noise_rms(const oskar_Settings* settings,
             if (QFile::exists(data_files[rms_file]))
             {
                 file = data_files[rms_file].toAscii();
-                err = oskar_system_noise_model_load(stddev, file.constData());
-                if (err) return err;
+                oskar_system_noise_model_load(stddev, file.constData(), status);
             }
             // Sensitivity
             else if (QFile::exists(data_files[sensitivity_file]))
             {
-
                 oskar_Mem sensitivity(type, OSKAR_LOCATION_CPU, num_freqs);
                 file = data_files[sensitivity_file].toAscii();
-                err = oskar_system_noise_model_load(&sensitivity, file.constData());
-                if (err) return err;
-
-                err = sensitivity_to_rms(&noise->rms, &sensitivity,
-                        num_freqs, bandwidth, integration_time);
-                if (err) return err;
+                oskar_system_noise_model_load(&sensitivity, file.constData(),
+                        status);
+                sensitivity_to_rms(&noise->rms, &sensitivity,
+                        num_freqs, bandwidth, integration_time, status);
             }
             // T_sys, A_eff and efficiency
             else if (QFile::exists(data_files[t_sys_file]) &&
@@ -336,26 +337,25 @@ static int load_noise_rms(const oskar_Settings* settings,
                     QFile::exists(data_files[efficiency_file]))
             {
                 file = data_files[t_sys_file].toAscii();
-                err = oskar_system_noise_model_load(&t_sys, file.constData());
-                if (err) return err;
+                oskar_system_noise_model_load(&t_sys, file.constData(), status);
 
                 oskar_Mem area(type, OSKAR_LOCATION_CPU, num_freqs);
                 file = data_files[area_file].toAscii();
-                err = oskar_system_noise_model_load(&area, file.constData());
-                if (err) return err;
+                oskar_system_noise_model_load(&area, file.constData(), status);
 
                 oskar_Mem efficiency(type, OSKAR_LOCATION_CPU, num_freqs);
                 file = data_files[efficiency_file].toAscii();
-                err = oskar_system_noise_model_load(&efficiency, file.constData());
-                if (err) return err;
+                oskar_system_noise_model_load(&efficiency, file.constData(),
+                        status);
 
                 // FIXME update for efficiency....
-                err = t_sys_to_rms(&noise->rms, &t_sys, &area, &efficiency,
-                        num_freqs, bandwidth, integration_time);
-                if (err) return err;
+                t_sys_to_rms(&noise->rms, &t_sys, &area, &efficiency,
+                        num_freqs, bandwidth, integration_time, status);
             }
             else
-                return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+            {
+                *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+            }
             break;
         }
 
@@ -367,28 +367,26 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[rms_file].toAscii();
-                    err = oskar_system_noise_model_load(stddev, file.constData());
-                    if (err) return err;
+                    oskar_system_noise_model_load(stddev, file.constData(),
+                            status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     const char* file = ns->value.rms.file;
-                    err = oskar_system_noise_model_load(stddev, file);
-                    if (err) return err;
+                    oskar_system_noise_model_load(stddev, file, status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_RANGE:
                 {
                     double start = ns->value.rms.start;
                     double end = ns->value.rms.end;
-                    err = evaluate_range(stddev, num_freqs, start, end);
-                    if (err) return err;
+                    evaluate_range(stddev, num_freqs, start, end, status);
                     break;
                 }
                 default:
-                    return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            };
+                    *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+            }
             break;
         }
 
@@ -401,31 +399,28 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[sensitivity_file].toAscii();
-                    err = oskar_system_noise_model_load(&sensitivity, file.constData());
-                    if (err) return err;
+                    oskar_system_noise_model_load(&sensitivity,
+                            file.constData(), status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.sensitivity.file;
-                    err = oskar_system_noise_model_load(&sensitivity, file);
-                    if (err) return err;
+                    oskar_system_noise_model_load(&sensitivity, file, status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_RANGE:
                 {
                     double start = ns->value.sensitivity.start;
                     double end = ns->value.sensitivity.end;
-                    err = evaluate_range(&sensitivity, num_freqs, start, end);
-                    if (err) return err;
+                    evaluate_range(&sensitivity, num_freqs, start, end, status);
                     break;
                 }
                 default:
-                    return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            };
-            err = sensitivity_to_rms(stddev, &sensitivity, num_freqs,
-                    bandwidth, integration_time);
-            if (err) return err;
+                    *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+            }
+            sensitivity_to_rms(stddev, &sensitivity, num_freqs, bandwidth,
+                    integration_time, status);
             break;
         }
 
@@ -437,28 +432,27 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[sensitivity_file].toAscii();
-                    err = oskar_system_noise_model_load(&t_sys, file.constData());
-                    if (err) return err;
+                    oskar_system_noise_model_load(&t_sys, file.constData(),
+                            status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.t_sys.file;
-                    err = oskar_system_noise_model_load(&t_sys, file);
-                    if (err) return err;
+                    oskar_system_noise_model_load(&t_sys, file, status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_RANGE:
                 {
                     double start = ns->value.t_sys.start;
                     double end = ns->value.t_sys.end;
-                    err = evaluate_range(&t_sys, num_freqs, start, end);
-                    if (err) return err;
+                    evaluate_range(&t_sys, num_freqs, start, end, status);
                     break;
                 }
                 default:
-                    return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            }; // switch (t_sys.override)
+                    *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+            } // switch (t_sys.override)
+            if (*status) return;
 
             oskar_Mem area(type, OSKAR_LOCATION_CPU, num_freqs);
             switch (ns->value.area.override)
@@ -466,28 +460,27 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[area_file].toAscii();
-                    err = oskar_system_noise_model_load(&area, file.constData());
-                    if (err) return err;
+                    oskar_system_noise_model_load(&area, file.constData(),
+                            status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.area.file;
-                    err = oskar_system_noise_model_load(&area, file);
-                    if (err) return err;
+                    oskar_system_noise_model_load(&area, file, status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_RANGE:
                 {
                     double start = ns->value.area.start;
                     double end = ns->value.area.end;
-                    err = evaluate_range(&area, num_freqs, start, end);
-                    if (err) return err;
+                    evaluate_range(&area, num_freqs, start, end, status);
                     break;
                 }
                 default:
-                    return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
-            }; // switch (area.override)
+                    *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+            } // switch (area.override)
+            if (*status) return;
 
             oskar_Mem efficiency(type, OSKAR_LOCATION_CPU, num_freqs);
             switch (ns->value.efficiency.override)
@@ -495,169 +488,198 @@ static int load_noise_rms(const oskar_Settings* settings,
                 case OSKAR_SYSTEM_NOISE_NO_OVERRIDE:
                 {
                     file = data_files[area_file].toAscii();
-                    err = oskar_system_noise_model_load(&efficiency, file.constData());
-                    if (err) return err;
+                    oskar_system_noise_model_load(&efficiency,
+                            file.constData(), status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_DATA_FILE:
                 {
                     file = ns->value.efficiency.file;
-                    err = oskar_system_noise_model_load(&efficiency, file);
-                    if (err) return err;
+                    oskar_system_noise_model_load(&efficiency, file, status);
                     break;
                 }
                 case OSKAR_SYSTEM_NOISE_RANGE:
                 {
                     double start = ns->value.efficiency.start;
                     double end = ns->value.efficiency.end;
-                    err = evaluate_range(&efficiency, num_freqs, start, end);
-                    if (err) return err;
+                    evaluate_range(&efficiency, num_freqs, start, end, status);
                     break;
                 }
                 default:
-                    return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+                    *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
             }; // switch (efficiency.override)
 
-            err = t_sys_to_rms(stddev, &t_sys, &area, &efficiency, num_freqs,
-                    bandwidth, integration_time);
-            if (err) return err;
-
+            t_sys_to_rms(stddev, &t_sys, &area, &efficiency, num_freqs,
+                    bandwidth, integration_time, status);
+            if (*status) return;
             break;
         }
         default:
         {
-            return OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+            *status = OSKAR_ERR_SETTINGS_INTERFEROMETER_NOISE;
+            return;
         }
     }; // [ switch(noise.value.specification) ]
+    if (*status) return;
 
     // Sanity check...
     if (num_freqs != stddev->num_elements)
     {
-        return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
     }
-
-    return OSKAR_SUCCESS;
 }
 
-static int sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
-        int num_freqs, double bandwidth, double integration_time)
+static void sensitivity_to_rms(oskar_Mem* rms, const oskar_Mem* sensitivity,
+        int num_freqs, double bandwidth, double integration_time, int* status)
 {
-    int err = 0; /* FIXME Replace with status code. */
+    int i, type;
+    double factor;
 
-    double factor = 1.0 / sqrt(2.0 * bandwidth * integration_time);
+    /* Check all inputs. */
+    if (!rms || !sensitivity || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
-    if (rms == NULL || sensitivity == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check if safe to proceed. */
+    if (*status) return;
 
+    /* Get type and check consistency. */
+    type = rms->type;
+    if (sensitivity->type != type)
+    {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
     if (sensitivity->num_elements != num_freqs)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     if (rms->num_elements != num_freqs)
     {
-        oskar_mem_realloc(rms, num_freqs, &err);
-        if (err) return err;
+        oskar_mem_realloc(rms, num_freqs, status);
+        if (*status) return;
     }
 
-    if (sensitivity->type == OSKAR_DOUBLE && rms->type == OSKAR_DOUBLE)
+    factor = 1.0 / sqrt(2.0 * bandwidth * integration_time);
+    if (type == OSKAR_DOUBLE)
     {
         const double* sensitivity_ = (const double*)sensitivity->data;
         double* stddev_ = (double*)rms->data;
-        for (int i = 0; i < num_freqs; ++i)
+        for (i = 0; i < num_freqs; ++i)
             stddev_[i] = sensitivity_[i] * factor;
     }
-    else if (sensitivity->type == OSKAR_SINGLE && rms->type == OSKAR_SINGLE)
+    else if (type == OSKAR_SINGLE)
     {
         const float* sensitivity_ = (const float*)sensitivity->data;
         float* stddev_ = (float*)rms->data;
-        for (int i = 0; i < num_freqs; ++i)
+        for (i = 0; i < num_freqs; ++i)
             stddev_[i] = sensitivity_[i] * factor;
     }
     else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return OSKAR_SUCCESS;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
-static int t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
+static void t_sys_to_rms(oskar_Mem* rms, const oskar_Mem* t_sys,
         const oskar_Mem* area, const oskar_Mem* efficiency, int num_freqs,
-        double bandwidth, double integration_time)
+        double bandwidth, double integration_time, int* status)
 {
-    double k_B = 1.3806488e-23;
-    double factor = (2.0 * k_B * 1.0e26) / sqrt(2.0 * bandwidth * integration_time);
-    int err = 0; /* FIXME Replace with status code. */
+    int i, type;
+    double factor, k_B = 1.3806488e-23;
 
-    if (rms == NULL || t_sys == NULL || area == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!rms || !t_sys || !area || !efficiency || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
 
+    /* Check if safe to proceed. */
+    if (*status) return;
+
+    /* Get type and check consistency. */
+    type = rms->type;
+    if (t_sys->type != type || area->type != type || efficiency->type != type)
+    {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+        return;
+    }
     if (t_sys->num_elements != num_freqs || area->num_elements != num_freqs)
-        return OSKAR_ERR_DIMENSION_MISMATCH;
+    {
+        *status = OSKAR_ERR_DIMENSION_MISMATCH;
+        return;
+    }
 
     if (rms->num_elements != num_freqs)
     {
-        oskar_mem_realloc(rms, num_freqs, &err);
-        if (err) return err;
+        oskar_mem_realloc(rms, num_freqs, status);
+        if (*status) return;
     }
 
-    if (t_sys->type == OSKAR_DOUBLE && area->type == OSKAR_DOUBLE && rms->type == OSKAR_DOUBLE)
+    factor = (2.0 * k_B * 1.0e26) / sqrt(2.0 * bandwidth * integration_time);
+    if (type == OSKAR_DOUBLE)
     {
         const double* t_sys_ = (const double*)t_sys->data;
         const double* area_ = (const double*)area->data;
         const double* efficiency_ = (const double*)efficiency->data;
         double* rms_ = (double*)rms->data;
-        for (int i = 0; i < num_freqs; ++i)
+        for (i = 0; i < num_freqs; ++i)
             rms_[i] = (t_sys_[i] / (area_[i] * efficiency_[i])) * factor;
     }
-    else if (t_sys->type == OSKAR_SINGLE && area->type == OSKAR_SINGLE && rms->type == OSKAR_SINGLE)
+    else if (type == OSKAR_SINGLE)
     {
         const float* t_sys_ = (const float*)t_sys->data;
         const float* area_ = (const float*)area->data;
         const float* efficiency_ = (const float*)efficiency->data;
         float* rms_ = (float*)rms->data;
-        for (int i = 0; i < num_freqs; ++i)
+        for (i = 0; i < num_freqs; ++i)
             rms_[i] = (t_sys_[i] / (area_[i] * efficiency_[i])) * factor;
     }
     else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return OSKAR_SUCCESS;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
-static int evaluate_range(oskar_Mem* values, int num_values, double start, double end)
+static void evaluate_range(oskar_Mem* values, int num_values, double start,
+        double end, int* status)
 {
-    int err = 0; /* FIXME Replace with status code. */
-    if (!values) return OSKAR_ERR_INVALID_ARGUMENT;
+    int i;
+
+    /* Check all inputs. */
+    if (!values || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     double inc = (end - start) / (double)num_values;
-
     if (values->num_elements != num_values)
     {
-        oskar_mem_realloc(values, num_values, &err);
-        if (err) return err;
+        oskar_mem_realloc(values, num_values, status);
+        if (*status) return;
     }
 
     if (values->type == OSKAR_DOUBLE)
     {
         double* values_ = (double*)values->data;
-        for (int i = 0; i < num_values; ++i)
-        {
+        for (i = 0; i < num_values; ++i)
             values_[i] = start + i * inc;
-        }
     }
     else if (values->type == OSKAR_SINGLE)
     {
         float* values_ = (float*)values->data;
-        for (int i = 0; i < num_values; ++i)
-        {
+        for (i = 0; i < num_values; ++i)
             values_[i] = start + i * inc;
-        }
     }
     else
-        return OSKAR_ERR_BAD_DATA_TYPE;
-
-    return OSKAR_SUCCESS;
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
 }
 
 #ifdef __cplusplus
 }
 #endif
-

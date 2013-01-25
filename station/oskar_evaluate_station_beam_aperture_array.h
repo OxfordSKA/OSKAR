@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,44 +45,68 @@ extern "C" {
 
 /**
  * @brief
- * Evaluates the station beam (E-Jones) for an aperture array station.
+ * Evaluates the station beam for an aperture array station.
  *
  * @details
+ * This top-level function evaluates the beam for an aperture array station,
+ * including any possible child stations and/or element models within the
+ * station.
+ *
+ * The supplied station model must be fully set-up on entry, and must include
+ * the element positions, the required beam coordinates, and all associated
+ * options and meta-data necessary for beamforming. In particular, element
+ * coordinates within the station should be in radians (i.e. pre-multiplied
+ * by the wavenumber). Checks are made to ensure that data are in the correct
+ * form before being used.
+ *
  * The beam is evaluated at points defined by the horizontal Cartesian
- * coordinates x,y,z.
+ * direction cosines given in the vectors x,y,z. The output \p beam array
+ * must be of the correct data type for the station element:
+ * for example, it is an error to use polarised elements and supply a scalar
+ * type for the output data. If in doubt, an output type of complex matrix will
+ * always be acceptable, although it may be significantly slower for isotropic
+ * elements.
  *
- * TODO better description of what this does
+ * The work structure holds pointers to memory blocks used by routines which
+ * are called by this wrapper. The structure must be initialised, but may be
+ * empty. In this case, the internal buffers will be resized to the correct
+ * dimensions on first use. Subsequent calls to this function should ideally
+ * re-use the same work structure to ensure optimum performance and no needless
+ * memory reallocation.
  *
- * TODO better description of how to call this function... examples..?
+ * The pointer to the structure holding random number states must be
+ * initialised.
  *
  * Notes:
- * - work buffer .... TODO what parts of this is used how to set up
  * - curand_states .. TODO how to set up this buffer
  *
- * @param[out]    beam          Station beam returned
- * @param[in]     station       Station model structure
- * @param[in]     beam_x        Beam direction in horizontal coordinates.
- * @param[in]     beam_y        Beam direction in horizontal coordinates.
- * @param[in]     beam_z        Beam direction in horizontal coordinates.
+ * @param[out]    beam          Station beam evaluated at x,y,z positions.
+ * @param[in]     station       Fully populated station model structure.
  * @param[in]     num_points    Number of coordinates at which to evaluate
- *                              the beam pattern
+ *                              the beam.
  * @param[in]     x             Array of horizontal x coordinates at which to
  *                              evaluate the beam.
  * @param[in]     y             Array of horizontal y coordinates at which to
  *                              evaluate the beam.
  * @param[in]     z             Array of horizontal z coordinates at which to
  *                              evaluate the beam.
- * @param[in]     work          Structure containing temporary work buffers
- * @param[in]     curand_states Array of CUDA random number states used
- *                              for various station model errors.
+ * @param[in]     gast          The Greenwich Apparent Sidereal Time (as MJD).
+ *                              NOTE may soon be replaced with a structure for
+ *                              more precise equatorial to horizontal coordinate
+ *                              conversion.
+ * @param[in]     work          Initialised structure containing temporary work
+ *                              buffers.
+ * @param[in]     curand_states Initialised structure of CURAND random-number
+ *                              states used to model various errors at the
+ *                              station-level.
  * @param[in,out] status        Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
-        const oskar_StationModel* station, double beam_x, double beam_y,
-        double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
-        const oskar_Mem* z, oskar_WorkStationBeam* work,
-        oskar_CurandState* curand_states, int* status);
+        const oskar_StationModel* station, int num_points, const oskar_Mem* x,
+        const oskar_Mem* y, const oskar_Mem* z, double gast,
+        oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
+        int* status);
 
 #ifdef __cplusplus
 }

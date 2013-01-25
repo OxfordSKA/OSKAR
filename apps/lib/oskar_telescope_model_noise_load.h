@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 /**
  * @file oskar_telescope_model_noise_load.h
- * TODO this isnt really just a loader... better function name?
+ * TODO This isn't really just a loader... better function name?
  */
 
 #include "oskar_global.h"
@@ -45,20 +45,19 @@ extern "C" {
 
 /**
  * @brief
- * Populates the noise std.dev. of an OSKAR telescope model.
+ * Populates the noise standard deviation of an OSKAR telescope model.
  *
  * @details
  * Based on the settings and the files in the telescope model directory.
  *
- * @param telescope Telescope structure pointer
- * @param log       Pointer to log structure.
- * @param settings  Pointer to settings structure.
- *
- * @return An OSKAR error code.
+ * @param[out]    telescope Telescope structure pointer.
+ * @param[in,out] log       Pointer to log structure.
+ * @param[in]     settings  Pointer to settings structure.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_APPS_EXPORT
-int oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
-        oskar_Log* log, const oskar_Settings* settings);
+void oskar_telescope_model_noise_load(oskar_TelescopeModel* telescope,
+        oskar_Log* log, const oskar_Settings* settings, int* status);
 
 #ifdef __cplusplus
 }

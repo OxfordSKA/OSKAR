@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,53 +47,69 @@ static const char layout_file[] = "layout.txt";
 
 // Private function prototypes
 //==============================================================================
-static int load_directories(oskar_TelescopeModel* telescope,
-        oskar_Log* log, const oskar_SettingsTelescope* settings,
-        const QDir& cwd, oskar_StationModel* station, int depth);
+static void load_directories(oskar_TelescopeModel* telescope,
+        const oskar_SettingsTelescope* settings,
+        const QDir& cwd, oskar_StationModel* station, int depth, int* status);
 
-static int load_layout(oskar_TelescopeModel* telescope,
+static void load_layout(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings, const QDir& dir,
-        int num_stations);
+        int num_stations, int* status);
 
-static int load_config(oskar_StationModel* station, const QDir& dir);
+static void load_config(oskar_StationModel* station, const QDir& dir,
+        int* status);
 
-static int allocate_children(oskar_StationModel* station, int num_station_dirs,
-        int type);
+static void allocate_children(oskar_StationModel* station,
+        int num_station_dirs, int type, int* status);
 //==============================================================================
 
 
 extern "C"
-int oskar_telescope_model_config_load(oskar_TelescopeModel* telescope,
-        oskar_Log* log, const oskar_SettingsTelescope* settings)
+void oskar_telescope_model_config_load(oskar_TelescopeModel* telescope,
+        oskar_Log* log, const oskar_SettingsTelescope* settings, int* status)
 {
-    int status = OSKAR_SUCCESS;
+    // Check all inputs.
+    if (!telescope || !settings || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    // Check if safe to proceed.
+    if (*status) return;
 
     // Check that the directory exists.
     QDir telescope_dir(settings->input_directory);
-    if (!telescope_dir.exists()) return OSKAR_ERR_FILE_IO;
+    if (!telescope_dir.exists())
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     // Check that the telescope model is in CPU memory.
     if (oskar_telescope_model_location(telescope) != OSKAR_LOCATION_CPU)
-        return OSKAR_ERR_BAD_LOCATION;
-
-    // Load the layout.txt and config.txt files from the telescope directory tree.
-    status = load_directories(telescope, log, settings, telescope_dir, NULL, 0);
-    if (status)
     {
-        oskar_log_error(log, "Failed to load telescope layout and configuration (%s).",
-                oskar_get_error_string(status));
-        return status;
+        *status = OSKAR_ERR_BAD_LOCATION;
+        return;
     }
 
-    return status;
+    // Load layout.txt and config.txt files from the telescope directory tree.
+    load_directories(telescope, settings, telescope_dir, NULL, 0, status);
+    if (*status)
+    {
+        oskar_log_error(log, "Failed to load telescope model (%s).",
+                oskar_get_error_string(*status));
+    }
 }
 
 // Private functions
 
-static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
+static void load_directories(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings, const QDir& cwd,
-        oskar_StationModel* station, int depth)
+        oskar_StationModel* station, int depth, int* status)
 {
+    // Check if safe to proceed.
+    if (*status) return;
+
     // Get a list of all (child) stations in this directory, sorted by name.
     QStringList children;
     children = cwd.entryList(QDir::AllDirs | QDir::NoDotAndDotDot, QDir::Name);
@@ -102,23 +118,21 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
     // Load the interferometer layout if we're at depth 0 (top level directory).
     if (depth == 0)
     {
-        int err = load_layout(telescope, settings, cwd, num_children);
-        if (err) return err;
+        load_layout(telescope, settings, cwd, num_children, status);
     }
     // At some other depth in the directory tree, load the station config.txt
     else
     {
-        int err = load_config(station, cwd);
-        if (err) return err;
+        load_config(station, cwd, status);
 
-        // If any children exist allocate storage for them in the model.
+        // If any children exist, allocate storage for them in the model.
         if (num_children > 0)
         {
             int type = oskar_telescope_model_type(telescope);
-            int err = allocate_children(station, num_children, type);
-            if (err) return err;
+            allocate_children(station, num_children, type, status);
         }
     }
+    if (*status) return;
 
     // Loop over and descend into all child stations.
     for (int i = 0; i < num_children; ++i)
@@ -131,27 +145,28 @@ static int load_directories(oskar_TelescopeModel* telescope, oskar_Log* log,
         QDir child_dir(cwd.filePath(children[i]));
 
         // Load this (child) station.
-        int err = load_directories(telescope, log, settings, child_dir, s, depth + 1);
-        if (err) return err;
+        load_directories(telescope, settings, child_dir, s, depth + 1, status);
     }
-
-    return OSKAR_SUCCESS;
 }
 
-
-static int load_layout(oskar_TelescopeModel* telescope,
+static void load_layout(oskar_TelescopeModel* telescope,
         const oskar_SettingsTelescope* settings, const QDir& dir,
-        int num_stations)
+        int num_stations, int* status)
 {
-    int error = OSKAR_SUCCESS;
+    // Check if safe to proceed.
+    if (*status) return;
 
-    // Check for presence of "layout.txt" then "config.txt" (in that order)
+    // Check for presence of "layout.txt" then "config.txt" (in that order).
     const char* file = NULL;
     if (dir.exists(layout_file))
         file = layout_file;
     else if (dir.exists(config_file))
         file = config_file;
-    else return OSKAR_ERR_SETUP_FAIL;
+    else
+    {
+        *status = OSKAR_ERR_SETUP_FAIL;
+        return;
+    }
 
     // Get the full path to the file.
     QByteArray path = dir.filePath(file).toAscii();
@@ -159,64 +174,57 @@ static int load_layout(oskar_TelescopeModel* telescope,
     // Load the station positions.
     oskar_telescope_model_load_station_coords(telescope,
             path, settings->longitude_rad, settings->latitude_rad,
-            settings->altitude_m, &error);
-    if (error) return error;
+            settings->altitude_m, status);
+    if (*status) return;
 
     // Check that there are the right number of stations.
     if (num_stations > 0)
     {
         if (num_stations != telescope->num_stations)
-            return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+            *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
     }
     else
     {
         // TODO There are no station directories.
         // Still need to set up the stations, though.
-        return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
+        *status = OSKAR_ERR_SETUP_FAIL_TELESCOPE;
     }
-
-    return error;
 }
 
-
-static int load_config(oskar_StationModel* station, const QDir& dir)
+static void load_config(oskar_StationModel* station, const QDir& dir,
+        int* status)
 {
-    int error = OSKAR_SUCCESS;
-
     // Check for presence of "config.txt".
     if (dir.exists(config_file))
     {
         QByteArray path = dir.filePath(config_file).toAscii();
-        error = oskar_station_model_load_config(station, path);
-        if (error) return error;
+        oskar_station_model_load_config(station, path, status);
     }
     else
-        return OSKAR_ERR_SETUP_FAIL;
-
-    return error;
+        *status = OSKAR_ERR_SETUP_FAIL;
 }
 
-
-static int allocate_children(oskar_StationModel* station, int num_children, int type)
+static void allocate_children(oskar_StationModel* station, int num_children,
+        int type, int* status)
 {
-    int error = OSKAR_SUCCESS;
+    // Check if safe to proceed.
+    if (*status) return;
 
     // Check that there are the right number of stations.
     if (num_children != station->num_elements)
-        return OSKAR_ERR_SETUP_FAIL;
+    {
+        *status = OSKAR_ERR_SETUP_FAIL;
+        return;
+    }
 
     // Allocate memory for child station array.
-    station->child = (oskar_StationModel*) malloc(num_children * sizeof(oskar_StationModel));
+    station->child = (oskar_StationModel*) malloc(num_children *
+            sizeof(oskar_StationModel));
 
     // Initialise each child station.
     for (int i = 0; i < num_children; ++i)
     {
-        oskar_station_model_init(&station->child[i], type, OSKAR_LOCATION_CPU, 0, &error);
-        if (error) return error;
+        oskar_station_model_init(&station->child[i], type,
+                OSKAR_LOCATION_CPU, 0, status);
     }
-
-    return error;
 }
-
-
-

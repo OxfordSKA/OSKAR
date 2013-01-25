@@ -26,59 +26,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "station/oskar_station_model_scale_coords.h"
-#include "station/oskar_station_model_multiply_by_wavenumber.h"
-#include <math.h>
+#ifndef OSKAR_GAUSSIAN_H_
+#define OSKAR_GAUSSIAN_H_
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+/**
+ * @file oskar_gaussian.h
+ */
+
+#include "oskar_global.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void oskar_station_model_multiply_by_wavenumber(oskar_StationModel* station,
-        double frequency_hz, int* status)
-{
-    double wavenumber;
+OSKAR_EXPORT
+void oskar_gaussian_f(float2* z, int n, const float* x,
+        const float* y, float std);
 
-    /* Check all inputs. */
-    if (!station || !status)
-    {
-        oskar_set_invalid_argument(status);
-        return;
-    }
+OSKAR_EXPORT
+void oskar_gaussian_mf(float4c* z, int n, const float* x,
+        const float* y, float std);
 
-    /* Check if safe to proceed. */
-    if (*status) return;
+OSKAR_EXPORT
+void oskar_gaussian_d(double2* z, int n, const double* x,
+        const double* y, double std);
 
-    /* Check and update current units. */
-    if (station->coord_units != OSKAR_METRES)
-    {
-        *status = OSKAR_ERR_BAD_UNITS;
-        return;
-    }
-    station->coord_units = OSKAR_RADIANS;
-
-    /* Scale metres to radians by multiplying by the wavenumber. */
-    wavenumber = 2.0 * M_PI * frequency_hz / 299792458.0;
-    oskar_station_model_scale_coords(station, wavenumber, status);
-
-    /* Recursive call to scale all child stations. */
-    if (station->child)
-    {
-        int i;
-        for (i = 0; i < station->num_elements; ++i)
-        {
-            oskar_StationModel* child;
-            child = &station->child[i];
-            oskar_station_model_multiply_by_wavenumber(child, frequency_hz,
-                    status);
-        }
-    }
-}
+OSKAR_EXPORT
+void oskar_gaussian_md(double4c* z, int n, const double* x,
+        const double* y, double std);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* OSKAR_GAUSSIAN_H_ */

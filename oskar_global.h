@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -224,6 +224,18 @@ enum {
     OSKAR_FALSE = 0,
     OSKAR_TRUE  = 1
 };
+
+
+/**
+ * @brief
+ * Enumerator to define type of spherical coordinate longitude and latitude
+ * values.
+ */
+enum {
+    OSKAR_SPHERICAL_TYPE_EQUATORIAL,
+    OSKAR_SPHERICAL_TYPE_HORIZONTAL
+};
+
 
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
 #    define OSKAR_OS_WIN32

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,8 +71,9 @@ void oskar_station_model_copy(oskar_StationModel* dst,
     dst->longitude_rad = src->longitude_rad;
     dst->latitude_rad = src->latitude_rad;
     dst->altitude_m = src->altitude_m;
-    dst->ra0_rad = src->ra0_rad;
-    dst->dec0_rad = src->dec0_rad;
+    dst->beam_longitude_rad = src->beam_longitude_rad;
+    dst->beam_latitude_rad = src->beam_latitude_rad;
+    dst->beam_coord_type = src->beam_coord_type;
     dst->normalise_beam = src->normalise_beam;
     dst->enable_array_pattern = src->enable_array_pattern;
     dst->gaussian_beam_fwhm_deg = src->gaussian_beam_fwhm_deg;
@@ -115,11 +116,10 @@ void oskar_station_model_copy(oskar_StationModel* dst,
             }
         }
 
-        /* Recursively copy each child station & set parent pointer for each. */
+        /* Recursively copy each child station. */
         for (i = 0; i < src->num_elements; ++i)
         {
             oskar_station_model_copy(&dst->child[i], &src->child[i], status);
-            dst->child[i].parent = dst;
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@ public:
         INPUT_FILE_NAME,    /**< Input file name string data type. */
         INPUT_FILE_LIST,    /**< Input file string list data type. */
         INT_CSV_LIST,       /**< Integer list data type (comma-separated). */
+        DOUBLE_CSV_LIST,    /**< Double-precision list data type (comma-separated). */
         OPTIONS,            /**< Option list data type. */
         RANDOM_SEED,        /**< Random seed data type. */
         AXIS_RANGE,

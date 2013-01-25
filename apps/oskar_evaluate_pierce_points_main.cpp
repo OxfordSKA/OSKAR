@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 
         // 1) load telescope (station positions)
         oskar_TelescopeModel tel;
-        error = oskar_set_up_telescope(&tel, &log, &settings);
+        oskar_set_up_telescope(&tel, &log, &settings, &error);
         check_error(error, &log);
 
         // 2) load sky model

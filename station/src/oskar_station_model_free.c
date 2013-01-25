@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,15 +89,14 @@ void oskar_station_model_free(oskar_StationModel* model, int* status)
     model->single_element_model = OSKAR_TRUE;
     model->orientation_x = M_PI / 2.0;
     model->orientation_y = 0.0;
-
-    model->parent = NULL;
     model->element_pattern = NULL;
 
     model->longitude_rad = 0.0;
     model->latitude_rad = 0.0;
     model->altitude_m = 0.0;
-    model->ra0_rad = 0.0;
-    model->dec0_rad = 0.0;
+    model->beam_longitude_rad = 0.0;
+    model->beam_latitude_rad = 0.0;
+    model->beam_coord_type = 0;
     model->normalise_beam = OSKAR_FALSE;
     model->enable_array_pattern = OSKAR_TRUE;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -114,11 +114,11 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
                 /* Apply filters and extended source over-ride. */
                 error = set_up_filter(&temp, &settings->sky.input_sky_filter,
-                        settings->obs.ra0_rad, settings->obs.dec0_rad);
+                        settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
                 if (error) return error;
                 error = set_up_extended(&temp,
                         &settings->sky.input_sky_extended_sources, log,
-                        settings->obs.ra0_rad, settings->obs.dec0_rad,
+                        settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                         zero_failed_sources);
                 if (error) return error;
 
@@ -146,11 +146,11 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
             /* Apply filters and extended source over-ride. */
             error = set_up_filter(&temp, &settings->sky.gsm_filter,
-                    settings->obs.ra0_rad, settings->obs.dec0_rad);
+                    settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
             if (error) return error;
             error = set_up_extended(&temp,
                     &settings->sky.gsm_extended_sources, log,
-                    settings->obs.ra0_rad, settings->obs.dec0_rad,
+                    settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                     zero_failed_sources);
             if (error) return error;
 
@@ -211,11 +211,11 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
                 /* Apply filters and extended source over-ride. */
                 error = set_up_filter(&temp, &settings->sky.healpix_fits.filter,
-                        settings->obs.ra0_rad, settings->obs.dec0_rad);
+                        settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
                 if (error) return error;
                 error = set_up_extended(&temp,
                         &settings->sky.healpix_fits.extended_sources, log,
-                        settings->obs.ra0_rad, settings->obs.dec0_rad,
+                        settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                         zero_failed_sources);
                 if (error) return error;
 
@@ -255,11 +255,11 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
         /* Apply filters and extended source over-ride. */
         error = set_up_filter(&temp, &settings->sky.generator.healpix.filter,
-                settings->obs.ra0_rad, settings->obs.dec0_rad);
+                settings->obs.ra0_rad[0], settings->obs.dec0_rad[0]);
         if (error) return error;
         error = set_up_extended(&temp,
                 &settings->sky.generator.healpix.extended_sources, log,
-                settings->obs.ra0_rad, settings->obs.dec0_rad,
+                settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                 zero_failed_sources);
         if (error) return error;
 
@@ -294,11 +294,11 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         if (error) return error;
 
         /* Apply filters and extended source over-ride. */
-        error = set_up_filter(&temp, &g->filter, settings->obs.ra0_rad,
-                settings->obs.dec0_rad);
+        error = set_up_filter(&temp, &g->filter, settings->obs.ra0_rad[0],
+                settings->obs.dec0_rad[0]);
         if (error) return error;
         error = set_up_extended(&temp, &g->extended_sources, log,
-                settings->obs.ra0_rad, settings->obs.dec0_rad,
+                settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                 zero_failed_sources);
         if (error) return error;
 
@@ -334,11 +334,11 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
         if (error) return error;
 
         /* Apply filters and extended source over-ride. */
-        error = set_up_filter(&temp, &g->filter, settings->obs.ra0_rad,
-                settings->obs.dec0_rad);
+        error = set_up_filter(&temp, &g->filter, settings->obs.ra0_rad[0],
+                settings->obs.dec0_rad[0]);
         if (error) return error;
         error = set_up_extended(&temp, &g->extended_sources, log,
-                settings->obs.ra0_rad, settings->obs.dec0_rad,
+                settings->obs.ra0_rad[0], settings->obs.dec0_rad[0],
                 zero_failed_sources);
         if (error) return error;
 
@@ -391,7 +391,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
             /* Compute source direction cosines relative to phase centre. */
             oskar_sky_model_compute_relative_lmn(sky_chunk,
-                    settings->obs.ra0_rad, settings->obs.dec0_rad, &error);
+                    settings->obs.ra0_rad[0], settings->obs.dec0_rad[0], &error);
             if (error) return error;
 
             /* Gather statistics on chunk set. */

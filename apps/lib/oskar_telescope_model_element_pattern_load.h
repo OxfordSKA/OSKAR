@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,24 +45,24 @@ extern "C" {
 /**
  * @brief
  * Loads the element_pattern_(x/y)_cst.txt files from a telescope model
- * directory populating the relevant parts of an OSKAR telescope model structure.
+ * directory, populating the relevant parts of an OSKAR telescope model
+ * structure.
  *
  * @details
  * The telescope model must already be allocated in CPU memory.
  *
- * It is expected that oskar_telescope_model_load_config() has been called first
- * in order to allocate the telescope model to the correct number of stations
+ * Note that oskar_telescope_model_load_config() should have been called first
+ * to allocate the telescope model for the correct number of stations
  * and/or child elements.
  *
  * @param[out]    telescope  Pointer to empty telescope model structure to fill.
  * @param[in,out] log        Pointer to log structure to use.
  * @param[in]     settings   Pointer to telescope model settings.
- *
- * @return An OSKAR error code.
+ * @param[in,out] status     Status return code.
  */
 OSKAR_APPS_EXPORT
-int oskar_telescope_model_element_pattern_load(oskar_TelescopeModel* telescope,
-        oskar_Log* log, const oskar_SettingsTelescope* settings);
+void oskar_telescope_model_element_pattern_load(oskar_TelescopeModel* telescope,
+        oskar_Log* log, const oskar_SettingsTelescope* settings, int* status);
 
 #ifdef __cplusplus
 }

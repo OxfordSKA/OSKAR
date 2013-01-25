@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,10 +53,11 @@ extern "C" {
  * @param[in,out] telescope Pointer to empty or uninitialised telescope model.
  * @param[in,out] log       A pointer to the log structure to use.
  * @param[in] settings      A pointer to the settings structure.
+ * @param[in,out] status    Status return code.
  */
 OSKAR_APPS_EXPORT
-int oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
-        const oskar_Settings* settings);
+void oskar_set_up_telescope(oskar_TelescopeModel *telescope, oskar_Log* log,
+        const oskar_Settings* settings, int* status);
 
 #ifdef __cplusplus
 }

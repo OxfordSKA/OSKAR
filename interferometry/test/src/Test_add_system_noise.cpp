@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,8 +134,11 @@ void Test_add_system_noise::test_rms()
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Evaluate baseline coordinates
-    settings.obs.ra0_rad = telescope.ra0_rad;
-    settings.obs.dec0_rad = telescope.dec0_rad;
+    settings.obs.num_pointing_levels = 1;
+    settings.obs.ra0_rad = (double*) malloc(sizeof(double));
+    settings.obs.dec0_rad = (double*) malloc(sizeof(double));
+    settings.obs.ra0_rad[0] = telescope.ra0_rad;
+    settings.obs.dec0_rad[0] = telescope.dec0_rad;
     settings.obs.start_frequency_hz = vis.freq_start_hz;
     settings.obs.num_channels = num_channels;
     settings.obs.frequency_inc_hz = vis.freq_inc_hz;

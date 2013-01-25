@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,75 +26,68 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_EVALUATE_STATION_BEAM_H_
-#define OSKAR_EVALUATE_STATION_BEAM_H_
+#ifndef OSKAR_EVALUATE_ARRAY_PATTERN_HIERARCHICAL_H_
+#define OSKAR_EVALUATE_ARRAY_PATTERN_HIERARCHICAL_H_
 
 /**
- * @file oskar_evaluate_station_beam.h
+ * @file oskar_evaluate_array_pattern_hierarchical.h
  */
 
 #include "oskar_global.h"
-#include "station/oskar_StationModel.h"
-#include "station/oskar_WorkStationBeam.h"
 #include "utility/oskar_Mem.h"
+#include "station/oskar_StationModel.h"
 #include "utility/oskar_CurandState.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-enum OSKAR_STATION_BEAM_COORD_TYPE
-{
-    OSKAR_BEAM_COORDS_HORIZONTAL,
-    OSKAR_BEAM_COORDS_PHASE_CENTRE
-};
-typedef enum OSKAR_STATION_BEAM_COORD_TYPE oskar_station_beam_coord_type;
-
 /**
  * @brief Evaluates the value of a station beam at a number of discrete
  * positions for the given station and beam direction. This is equivalent
- * to the E-Jones matrices for a given station.
+ * to the Array Factor or scalar E-Jones.
  *
  * @details
- * The detailed description of processing performed by this function will
- * depend on the presence of element pattern and hierarchical layout information
- * within the station structure.
+ * The station beam amplitudes are evaluated using a DFT on the GPU, so
+ * all memory passed to and returned from this function must be allocated
+ * on the device.
  *
  * Note:
  * - Station x,y,z coordinates used by this function are assumed to be in
  * radians (i.e. pre-multiplied by the wavenumber).
- * - Mask (\p horizon_mask) values are used to remove sources below the horizon
- * (i.e. where the value is less than 0).
+ * - The \p weights buffer must be allocated on the GPU of complex type
+ * matching the same floating point precision as the rest of the memory
+ * passed to the function.
+ * - The \p signal buffer must hold the signals for every point in the sky and
+ * every station. The source dimension is the fastest varying.
  *
  * @param[out] beam          Array of station complex beam amplitudes returned.
  * @param[in]  station       Station model structure.
- * @param[in]  beam_x        Beam phase centre x-coordinate.
- * @param[in]  beam_y        Beam phase centre y-coordinate.
- * @param[in]  beam_z        Beam phase centre z-coordinate.
+ * @param[in]  beam_x        Beam phase centre component along x.
+ * @param[in]  beam_y        Beam phase centre component along y.
+ * @param[in]  beam_z        Beam phase centre component along z.
  * @param[in]  num_points    Number of points at which to evaluate beam.
- * @param[in] coord_type     Coordinate type enumerator.
- * @param[in]  x             Array of direction cosines along x for which the
- *                           beam should be evaluated.
- * @param[in]  y             Array of direction cosines along y for which the
- *                           beam should be evaluated.
- * @param[in]  z             Array of direction cosines along z for which the
- *                           beam should be evaluated.
- * @param[in]  horizon_mask  Array of source horizon mask values
- *                           (values > 0 mean the source is above the horizon).
- * @param[in]  work          Pointer to a work buffer.
- * @param[in]  curand_states Structure holding a set of curand states.
+ * @param[in]  x             Array of horizontal x direction components at
+ *                           which the beam should be evaluated.
+ * @param[in]  y             Array of horizontal y direction components at
+ *                           which the beam should be evaluated.
+ * @param[in]  z             Array of horizontal z direction components at
+ *                           which the beam should be evaluated.
+ * @param[in]  signal        Array of input signals (see note, above).
+ * @param[in]  weights       Work buffer used to evaluate DFT weights.
+ * @param[in]  weights_error Work buffer used to evaluate DFT weights errors.
+ * @param[in]  curand_state  Structure holding a set of CURAND states.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
-void oskar_evaluate_station_beam(oskar_Mem* beam,
+void oskar_evaluate_array_pattern_hierarchical(oskar_Mem* beam,
         const oskar_StationModel* station, double beam_x, double beam_y,
-        double beam_z, int num_points, oskar_station_beam_coord_type coord_type,
-        const oskar_Mem* x, const oskar_Mem* y, const oskar_Mem* z,
-        const oskar_Mem* horizon_mask, oskar_WorkStationBeam* work,
-        oskar_CurandState* curand_states, int* status);
+        double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, const oskar_Mem* signal, oskar_Mem* weights,
+        oskar_Mem* weights_error, oskar_CurandState* curand_state, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_STATION_BEAM_H_ */
+#endif /* OSKAR_EVALUATE_ARRAY_PATTERN_HIERARCHICAL_H_ */

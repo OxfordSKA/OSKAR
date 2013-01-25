@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,8 @@ int oskar_settings_init(oskar_Settings* settings)
 
     /* Initialise all array pointers to NULL. */
     settings->sim.cuda_device_ids = NULL;
+    settings->obs.ra0_rad = NULL;
+    settings->obs.dec0_rad = NULL;
     settings->sky.num_sky_files = 0;
     settings->sky.input_sky_file = NULL;
     settings->sky.gsm_file = NULL;

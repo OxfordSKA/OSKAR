@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,20 +38,24 @@
 
 static const char config_name[] = "config.txt";
 
-static int oskar_telescope_model_save_private(const oskar_TelescopeModel* telescope,
-        const char* dir_path, oskar_StationModel* station, int depth);
+static void oskar_telescope_model_save_private(
+        const oskar_TelescopeModel* telescope,
+        const char* dir_path, oskar_StationModel* station, int depth,
+        int* status);
 
 extern "C"
-int oskar_telescope_model_save(const oskar_TelescopeModel* telescope,
-        const char* dir_path)
+void oskar_telescope_model_save(const oskar_TelescopeModel* telescope,
+        const char* dir_path, int* status)
 {
-    return oskar_telescope_model_save_private(telescope, dir_path, NULL, 0);
+    oskar_telescope_model_save_private(telescope, dir_path, NULL, 0, status);
 }
 
-static int oskar_telescope_model_save_private(const oskar_TelescopeModel* telescope,
-        const char* dir_path, oskar_StationModel* station, int depth)
+static void oskar_telescope_model_save_private(
+        const oskar_TelescopeModel* telescope,
+        const char* dir_path, oskar_StationModel* station, int depth,
+        int* status)
 {
-    int error = 0, num_stations = 0;
+    int num_stations = 0;
 
     if (depth == 0)
     {
@@ -61,7 +65,10 @@ static int oskar_telescope_model_save_private(const oskar_TelescopeModel* telesc
         if (dir.exists())
         {
             if (!oskar_remove_dir(dir_path))
-                return OSKAR_ERR_FILE_IO;
+            {
+                *status = OSKAR_ERR_FILE_IO;
+                return;
+            }
         }
     }
 
@@ -79,8 +86,7 @@ static int oskar_telescope_model_save_private(const oskar_TelescopeModel* telesc
         // Write the station coordinates.
         QByteArray coord_path = dir.filePath(config_name).toAscii();
         oskar_telescope_model_save_station_coords(telescope, coord_path,
-                &error);
-        if (error) return error;
+                status);
 
         // Get the number of stations.
         num_stations = telescope->num_stations;
@@ -89,8 +95,7 @@ static int oskar_telescope_model_save_private(const oskar_TelescopeModel* telesc
     {
         // Write the station configuration.
         QByteArray config_path = dir.filePath(config_name).toAscii();
-        error = oskar_station_model_save_config(config_path, station);
-        if (error) return error;
+        oskar_station_model_save_config(config_path, station, status);
 
         // Get the number of stations.
         if (station->child)
@@ -107,9 +112,7 @@ static int oskar_telescope_model_save_private(const oskar_TelescopeModel* telesc
         s = (depth == 0) ? &telescope->station[i] : &station->child[i];
 
         // Save this station.
-        error = oskar_telescope_model_save_private(telescope, station_name,
-                s, depth + 1);
+        oskar_telescope_model_save_private(telescope, station_name,
+                s, depth + 1, status);
     }
-
-    return error;
 }

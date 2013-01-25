@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,8 @@ oskar_SettingsItem::oskar_SettingsItem(const QString& key,
         const QStringList& options, oskar_SettingsItem* parent)
 {
     // Set default defaults.
-    if (type == DOUBLE || type == DOUBLE_MAX || type == DOUBLE_MIN)
+    if (type == DOUBLE || type == DOUBLE_MAX || type == DOUBLE_MIN ||
+            type == DOUBLE_CSV_LIST)
         defaultValue_ = 0.0;
     else if (type == INT || type == INT_UNSIGNED || type == RANDOM_SEED)
         defaultValue_ = 0;

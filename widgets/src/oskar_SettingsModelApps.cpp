@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -490,11 +490,11 @@ void oskar_SettingsModelApps::init_settings_observation()
     setLabel(group, "Observation settings");
 
     k = group + "/phase_centre_ra_deg";
-    declare(k, "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE);
+    declare(k, "Phase centre RA [deg]", oskar_SettingsItem::DOUBLE_CSV_LIST);
     setTooltip(k, "Right Ascension of the observation pointing "
             "(phase centre), in degrees.");
     k = group + "/phase_centre_dec_deg";
-    declare(k, "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE);
+    declare(k, "Phase centre Dec [deg]", oskar_SettingsItem::DOUBLE_CSV_LIST);
     setTooltip(k, "Declination of the observation pointing (phase centre), "
             "in degrees.");
     k = group + "/start_frequency_hz";

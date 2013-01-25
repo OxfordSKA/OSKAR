@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,12 +109,12 @@ void Test_TelescopeModel::test_load_telescope_cpu()
         // Fill the telescope structure.
         oskar_telescope_model_load_station_coords(tel_cpu, telescope_file_name,
                 longitude, latitude, altitude, &status);
-        CPPUNIT_ASSERT_EQUAL(0, status);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
         for (int i = 0; i < n_stations; ++i)
         {
             sprintf(station_name, "%s_%d.dat", station_base, i);
-            status = oskar_station_model_load_config(&(tel_cpu->station[i]), station_name);
-            CPPUNIT_ASSERT_EQUAL(0, status);
+            oskar_station_model_load_config(&(tel_cpu->station[i]), station_name, &status);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
             CPPUNIT_ASSERT_EQUAL(n_elements, tel_cpu->station[i].num_elements);
         }
 

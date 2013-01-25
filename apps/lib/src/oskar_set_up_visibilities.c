@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,8 @@ void oskar_set_up_visibilities(oskar_Visibilities* vis,
     vis->time_start_mjd_utc = settings->obs.start_mjd_utc;
     vis->time_inc_seconds = settings->obs.dt_dump_days * 86400.0;
     vis->channel_bandwidth_hz = settings->obs.start_frequency_hz;
-    vis->phase_centre_ra_deg = settings->obs.ra0_rad * 180.0 / M_PI;
-    vis->phase_centre_dec_deg = settings->obs.dec0_rad * 180.0 / M_PI;
+    vis->phase_centre_ra_deg = settings->obs.ra0_rad[0] * 180.0 / M_PI;
+    vis->phase_centre_dec_deg = settings->obs.dec0_rad[0] * 180.0 / M_PI;
 
     /* Add settings file path. */
     oskar_mem_copy(&vis->settings_path, &settings->settings_path, status);

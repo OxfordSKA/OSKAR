@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,23 +40,54 @@
 #include <QtCore/QDate>
 #include <QtCore/QTime>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+static QStringList get_list(QVariant v)
+{
+    QStringList list;
+    if (v.type() == QVariant::StringList)
+        list = v.toStringList();
+    else if (v.type() == QVariant::String)
+        list = v.toString().split(",");
+    return list;
+}
 
 extern "C"
 int oskar_settings_load_observation(oskar_SettingsObservation* obs,
         oskar_Log* log, const char* filename)
 {
     QByteArray t;
+    QVariant v;
     QSettings s(QString(filename), QSettings::IniFormat);
 
     s.beginGroup("observation");
     {
-        // Get pointing direction.
-        obs->ra0_rad = s.value("phase_centre_ra_deg").toDouble() * M_PI / 180.0;
-        obs->dec0_rad = s.value("phase_centre_dec_deg").toDouble() * M_PI / 180.0;
+        // Get pointing direction(s) as string lists.
+        QStringList ra_list, dec_list;
+        ra_list = get_list(s.value("phase_centre_ra_deg", "0.0"));
+        dec_list = get_list(s.value("phase_centre_dec_deg", "0.0"));
+
+        // Check lists are the same length.
+        if (ra_list.size() != dec_list.size())
+        {
+            oskar_log_error(log, "RA and Dec coordinate arrays "
+                    "must be the same length.");
+            return OSKAR_ERR_SETTINGS_OBSERVATION;
+        }
+
+        // Allocate memory for pointing data and copy to settings arrays.
+        obs->num_pointing_levels = ra_list.size();
+        obs->ra0_rad  = (double*)malloc(ra_list.size() * sizeof(double));
+        obs->dec0_rad = (double*)malloc(dec_list.size() * sizeof(double));
+        for (int i = 0; i < obs->num_pointing_levels; ++i)
+        {
+            obs->ra0_rad[i] = ra_list[i].toDouble() * M_PI / 180.0;
+            obs->dec0_rad[i] = dec_list[i].toDouble() * M_PI / 180.0;
+        }
 
         // Get frequency / channel data.
         obs->start_frequency_hz   = s.value("start_frequency_hz").toDouble();

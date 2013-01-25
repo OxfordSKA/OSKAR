@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -267,8 +267,22 @@ void oskar_log_settings_observation(oskar_Log* log, const oskar_Settings* s)
     int depth = 0;
     oskar_log_message(log, depth, "Observation settings");
     depth = 1;
-    LV("Phase centre RA [deg]", "%.3f", s->obs.ra0_rad * R2D);
-    LV("Phase centre Dec [deg]", "%.3f", s->obs.dec0_rad * R2D);
+    if (s->obs.num_pointing_levels == 1)
+    {
+        LV("Phase centre RA [deg]", "%.3f", s->obs.ra0_rad[0] * R2D);
+        LV("Phase centre Dec [deg]", "%.3f", s->obs.dec0_rad[0] * R2D);
+    }
+    else
+    {
+        int i = 0;
+        for (i = 0; i < s->obs.num_pointing_levels; ++i)
+        {
+            oskar_log_value(log, depth, w, "Phase centre RA [deg]", "(%d) %.3f",
+                    i, s->obs.ra0_rad[i] * R2D);
+            oskar_log_value(log, depth, w, "Phase centre Dec [deg]", "(%d) %.3f",
+                    i, s->obs.dec0_rad[i] * R2D);
+        }
+    }
     LV("Start frequency [Hz]", "%.3e", s->obs.start_frequency_hz);
     LV("Num. frequency channels", "%d", s->obs.num_channels);
     LV("Frequency inc [Hz]", "%.3e", s->obs.frequency_inc_hz);
@@ -542,7 +556,7 @@ void oskar_log_settings_interferometer(oskar_Log* log, const oskar_Settings* s)
             case OSKAR_SYSTEM_NOISE_TELESCOPE_MODEL:
             { value = "Telescope model (default priority)"; break; }
             case OSKAR_SYSTEM_NOISE_RMS:
-            { value = "RMS Flux density"; break; }
+            { value = "RMS flux density"; break; }
             case OSKAR_SYSTEM_NOISE_SENSITIVITY:
             { value = "Sensitivity"; break; }
             case OSKAR_SYSTEM_NOISE_SYS_TEMP:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,28 +42,40 @@
 extern "C" {
 #endif
 
-int oskar_station_model_load_config(oskar_StationModel* station,
-        const char* filename)
+void oskar_station_model_load_config(oskar_StationModel* station,
+        const char* filename, int* status)
 {
     /* Declare the line buffer and counter. */
     char* line = NULL;
     size_t bufsize = 0;
-    int n = 0, type = 0, err = 0;
+    int n = 0, type = 0;
     FILE* file;
 
-    /* Check that all pointers are not NULL. */
-    if (station == NULL || filename == NULL)
-        return OSKAR_ERR_INVALID_ARGUMENT;
+    /* Check all inputs. */
+    if (!station || !filename || !status)
+    {
+        oskar_set_invalid_argument(status);
+        return;
+    }
+
+    /* Check if safe to proceed. */
+    if (*status) return;
 
     /* Check type. */
     type = oskar_station_model_type(station);
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
-        return OSKAR_ERR_BAD_DATA_TYPE;
+    {
+        *status = OSKAR_ERR_BAD_DATA_TYPE;
+        return;
+    }
 
     /* Open the file. */
     file = fopen(filename, "r");
     if (!file)
-        return OSKAR_ERR_FILE_IO;
+    {
+        *status = OSKAR_ERR_FILE_IO;
+        return;
+    }
 
     /* Loop over each line in the file. */
     while (oskar_getline(&line, &bufsize, file) != OSKAR_ERR_EOF)
@@ -85,24 +97,24 @@ int oskar_station_model_load_config(oskar_StationModel* station,
 
         /* Ensure enough space in arrays. */
         if (n % 100 == 0)
-            oskar_station_model_resize(station, n + 100, &err);
+            oskar_station_model_resize(station, n + 100, status);
 
         /* Store the data. */
         oskar_station_model_set_element_coords(station, n,
-                par[0], par[1], par[2], par[3], par[4], par[5], &err);
+                par[0], par[1], par[2], par[3], par[4], par[5], status);
         oskar_station_model_set_element_errors(station, n,
-                par[6], par[7], par[8], par[9], &err);
+                par[6], par[7], par[8], par[9], status);
         oskar_station_model_set_element_weight(station, n,
-                par[10], par[11], &err);
+                par[10], par[11], status);
         oskar_station_model_set_element_orientation(station, n,
-                par[12], par[13], &err);
+                par[12], par[13], status);
 
         /* Increment element counter. */
         ++n;
     }
 
     /* Record number of elements loaded, and set coordinate units to metres. */
-    if (!err)
+    if (!(*status))
     {
         station->num_elements = n;
         station->coord_units = OSKAR_METRES;
@@ -111,8 +123,6 @@ int oskar_station_model_load_config(oskar_StationModel* station,
     /* Free the line buffer and close the file. */
     if (line) free(line);
     fclose(file);
-
-    return err;
 }
 
 #ifdef __cplusplus

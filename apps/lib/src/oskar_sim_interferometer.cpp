@@ -114,7 +114,7 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
     // Set up the telescope model.
     oskar_TelescopeModel tel_cpu;
-    error = oskar_set_up_telescope(&tel_cpu, log, &settings);
+    oskar_set_up_telescope(&tel_cpu, log, &settings, &error);
     if (error) return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
 
     // Set up the sky model array.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,10 @@ int oskar_settings_free(oskar_Settings* settings)
     /* Free all settings arrays. */
     free(settings->sim.cuda_device_ids);
     settings->sim.cuda_device_ids = NULL;
+    free(settings->obs.ra0_rad);
+    settings->obs.ra0_rad = NULL;
+    free(settings->obs.dec0_rad);
+    settings->obs.dec0_rad = NULL;
 
     /* Free FITS file names. */
     for (i = 0; i < settings->sky.num_fits_files; ++i)

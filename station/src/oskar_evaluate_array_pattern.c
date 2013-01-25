@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,15 +41,15 @@ extern "C" {
 #endif
 
 void oskar_evaluate_array_pattern(oskar_Mem* beam,
-        const oskar_StationModel* station, double l_beam, double m_beam,
-        double n_beam, int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
+        const oskar_StationModel* station, double beam_x, double beam_y,
+        double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, oskar_Mem* weights, oskar_Mem* weights_error,
         oskar_CurandState* curand_state, int* status)
 {
     int type, location;
 
     /* Check all inputs. */
-    if (!beam || !station || !l || !m || !n || !weights || !weights_error ||
+    if (!beam || !station || !x || !y || !z || !weights || !weights_error ||
             !curand_state || !status)
     {
         oskar_set_invalid_argument(status);
@@ -65,9 +65,9 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
 
     /* Check data are co-located. */
     if (beam->location != location ||
-            l->location != location ||
-            m->location != location ||
-            n->location != location ||
+            x->location != location ||
+            y->location != location ||
+            z->location != location ||
             weights->location != location ||
             weights_error->location != location)
         *status = OSKAR_ERR_LOCATION_MISMATCH;
@@ -82,7 +82,7 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
             oskar_mem_is_matrix(beam->type) ||
             oskar_mem_is_matrix(weights->type))
         *status = OSKAR_ERR_BAD_DATA_TYPE;
-    if (l->type != type || m->type != type || n->type != type ||
+    if (x->type != type || y->type != type || z->type != type ||
             oskar_mem_base_type(beam->type) != type ||
             oskar_mem_base_type(weights->type) != type)
         *status = OSKAR_ERR_TYPE_MISMATCH;
@@ -93,7 +93,7 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
 
     /* Generate the beamforming weights. */
     oskar_evaluate_element_weights(weights, weights_error, station,
-            l_beam, m_beam, n_beam, curand_state, status);
+            beam_x, beam_y, beam_z, curand_state, status);
 
     /* Check if safe to proceed. */
     if (*status) return;
@@ -111,9 +111,9 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
                         (const double*)station->y_signal.data,
                         (const double*)station->z_signal.data,
                         (const double2*)weights->data, num_points,
-                        (const double*)l->data,
-                        (const double*)m->data,
-                        (const double*)n->data,
+                        (const double*)x->data,
+                        (const double*)y->data,
+                        (const double*)z->data,
                         (double2*)beam->data);
             }
             else
@@ -122,8 +122,8 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
                         (const double*)station->x_signal.data,
                         (const double*)station->y_signal.data,
                         (const double2*)weights->data, num_points,
-                        (const double*)l->data,
-                        (const double*)m->data,
+                        (const double*)x->data,
+                        (const double*)y->data,
                         (double2*)beam->data);
             }
             oskar_cuda_check_error(status);
@@ -137,9 +137,9 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
                         (const float*)station->y_signal.data,
                         (const float*)station->z_signal.data,
                         (const float2*)weights->data, num_points,
-                        (const float*)l->data,
-                        (const float*)m->data,
-                        (const float*)n->data,
+                        (const float*)x->data,
+                        (const float*)y->data,
+                        (const float*)z->data,
                         (float2*)beam->data);
             }
             else
@@ -148,8 +148,8 @@ void oskar_evaluate_array_pattern(oskar_Mem* beam,
                         (const float*)station->x_signal.data,
                         (const float*)station->y_signal.data,
                         (const float2*)weights->data, num_points,
-                        (const float*)l->data,
-                        (const float*)m->data,
+                        (const float*)x->data,
+                        (const float*)y->data,
                         (float2*)beam->data);
             }
             oskar_cuda_check_error(status);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,32 +26,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_CUDAK_GAUSSIAN_H_
-#define OSKAR_CUDAK_GAUSSIAN_H_
+#ifndef OSKAR_GAUSSIAN_CUDA_H_
+#define OSKAR_GAUSSIAN_CUDA_H_
 
 /**
- * @file oskar_cudak_gaussian.h
+ * @file oskar_gaussian_cuda.h
  */
 
 #include "oskar_global.h"
 #include "utility/oskar_vector_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+OSKAR_EXPORT
+void oskar_gaussian_cuda_f(float2* z, int n, const float* x,
+        const float* y, float std);
+
+OSKAR_EXPORT
+void oskar_gaussian_cuda_mf(float4c* z, int n, const float* x,
+        const float* y, float std);
+
+OSKAR_EXPORT
+void oskar_gaussian_cuda_d(double2* z, int n, const double* x,
+        const double* y, double std);
+
+OSKAR_EXPORT
+void oskar_gaussian_cuda_md(double4c* z, int n, const double* x,
+        const double* y, double std);
+
+#ifdef __CUDACC__
+
+OSKAR_EXPORT
 __global__
-void oskar_cudak_gaussian_f(float2* z, int n, const float* x, const float* y,
-        float std);
+void oskar_gaussian_cudak_f(float2* z, const int n, const float* x,
+        const float* y, const float inv_2_var);
 
+OSKAR_EXPORT
 __global__
-void oskar_cudak_gaussian_d(double2* z, int n, const double* x, const double* y,
-        double std);
+void oskar_gaussian_cudak_mf(float4c* z, const int n, const float* x,
+        const float* y, const float inv_2_var);
 
+OSKAR_EXPORT
 __global__
-void oskar_cudak_gaussian_mf(float4c* z, int n, const float* x, const float* y,
-        float std);
+void oskar_gaussian_cudak_d(double2* z, const int n, const double* x,
+        const double* y, const double inv_2_var);
 
+OSKAR_EXPORT
 __global__
-void oskar_cudak_gaussian_md(double4c* z, int n, const double* x, const double* y,
-        double std);
+void oskar_gaussian_cudak_md(double4c* z, const int n, const double* x,
+        const double* y, const double inv_2_var);
 
-#endif /* OSKAR_CUDAK_GAUSSIAN_H_ */
+#endif /* __CUDACC__ */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* OSKAR_GAUSSIAN_CUDA_H_ */

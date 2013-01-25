@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,8 +45,9 @@
  */
 struct OSKAR_EXPORT oskar_SettingsObservation
 {
-    double ra0_rad;
-    double dec0_rad;
+    int num_pointing_levels;
+    double* ra0_rad;
+    double* dec0_rad;
 
     double start_frequency_hz;
     int num_channels;

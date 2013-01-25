@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,31 +77,29 @@ extern "C" {
  * - The \p weights buffer must be allocated on the GPU of complex type
  * matching the same floating point precision as the rest of the memory
  * passed to the function.
- * - Horizontal n (\p hor_n) coordinates are used to remove sources below the
- * horizon (i.e. where n < 0).
  *
  * @param[out] beam          Array of output Jones matrices per source.
  * @param[in]  station       Station model structure.
- * @param[in]  l_beam        Beam phase centre horizontal l (component along x).
- * @param[in]  m_beam        Beam phase centre horizontal m (component along y).
- * @param[in]  n_beam        Beam phase centre horizontal n (component along z).
+ * @param[in]  beam_x        Beam phase centre component along x.
+ * @param[in]  beam_y        Beam phase centre component along y.
+ * @param[in]  beam_z        Beam phase centre component along z.
  * @param[in]  num_points    Number of points at which to evaluate beam.
- * @param[in]  l             Array of horizontal l directions for which the beam
- *                           should be evaluated (component along x).
- * @param[in]  m             Array of horizontal m directions for which the beam
- *                           should be evaluated (component along y).
- * @param[in]  n             Array of horizontal m directions for which the beam
- *                           should be evaluated (component along z).
+ * @param[in]  x             Array of horizontal x direction components at
+ *                           which the beam should be evaluated.
+ * @param[in]  y             Array of horizontal y direction components at
+ *                           which the beam should be evaluated.
+ * @param[in]  z             Array of horizontal z direction components at
+ *                           which the beam should be evaluated.
  * @param[in]  weights       Work buffer used to evaluate DFT weights.
  * @param[in]  weights_error Work buffer used to evaluate DFT weights errors.
- * @param[in]  curand_state  Structure holding a set of curand states.
+ * @param[in]  curand_state  Structure holding a set of CURAND states.
  * @param[in,out] status     Status return code.
  */
 OSKAR_EXPORT
 void oskar_evaluate_array_pattern_dipoles(oskar_Mem* beam,
-        const oskar_StationModel* station, double l_beam, double m_beam,
-        double n_beam, int num_points, const oskar_Mem* l, const oskar_Mem* m,
-        const oskar_Mem* n, oskar_Mem* weights, oskar_Mem* weights_error,
+        const oskar_StationModel* station, double beam_x, double beam_y,
+        double beam_z, int num_points, const oskar_Mem* x, const oskar_Mem* y,
+        const oskar_Mem* z, oskar_Mem* weights, oskar_Mem* weights_error,
         oskar_CurandState* curand_state, int* status);
 
 #ifdef __cplusplus

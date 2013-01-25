@@ -3,7 +3,6 @@
 #
 
 set(math_cuda_kernels_SRC
-    src/oskar_cudak_gaussian.cu
     src/oskar_cudak_sph_to_lm.cu
     src/oskar_cudak_vec_sub_sr.cu
 )

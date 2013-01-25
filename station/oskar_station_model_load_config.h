@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,11 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_STATION_MODEL_LOAD_CONFIGURATION_H_
-#define OSKAR_STATION_MODEL_LOAD_CONFIGURATION_H_
+#ifndef OSKAR_STATION_MODEL_LOAD_CONFIG_H_
+#define OSKAR_STATION_MODEL_LOAD_CONFIG_H_
 
 /**
- * @file oskar_station_model_load_configuration.h
+ * @file oskar_station_model_load_config.h
  */
 
 #include "oskar_global.h"
@@ -71,21 +71,16 @@ extern "C" {
  * x-axis points to the local geographic East, the y-axis to local
  * geographic North, and the z-axis to the local zenith.
  *
- * @param[out] station Pointer to destination data structure to fill.
- * @param[in] filename Name of the data file to load.
- *
- * @return
- * This function returns a code to indicate if there were errors in execution:
- * - A return code of 0 indicates no error.
- * - A positive return code indicates a CUDA error.
- * - A negative return code indicates an OSKAR error.
+ * @param[out] station   Pointer to destination data structure to fill.
+ * @param[in] filename   Name of the data file to load.
+ * @param[in,out] status Status return code.
  */
 OSKAR_EXPORT
-int oskar_station_model_load_config(oskar_StationModel* station,
-        const char* filename);
+void oskar_station_model_load_config(oskar_StationModel* station,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_STATION_MODEL_LOAD_CONFIGURATION_H_ */
+#endif /* OSKAR_STATION_MODEL_LOAD_CONFIG_H_ */

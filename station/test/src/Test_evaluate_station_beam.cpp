@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 #include "station/test/Test_evaluate_station_beam.h"
 
 #include "oskar_global.h"
-#include "station/oskar_evaluate_station_beam.h"
+#include "station/oskar_evaluate_station_beam_aperture_array.h"
 #include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_station_model_save_config.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"
@@ -99,8 +99,8 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     station_cpu.num_elements = num_antennas;
 
     // Set the station beam direction.
-    station_cpu.ra0_rad  = 0.0;
-    station_cpu.dec0_rad = M_PI_2;
+    station_cpu.beam_longitude_rad  = 0.0;
+    station_cpu.beam_latitude_rad = M_PI_2;
 
     // Set the station meta-data.
     station_cpu.element_pattern->type = OSKAR_ELEMENT_MODEL_TYPE_ISOTROPIC;
@@ -115,13 +115,7 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
     oskar_station_model_multiply_by_wavenumber(&station_gpu, frequency, &error);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
-    // Evaluate horizontal l,m,n for beam phase centre.
-    double beam_l, beam_m, beam_n;
-    oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m, &beam_n,
-            &station_gpu, gast, &error);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
-
-    // Evalute horizontal l,m positions at which to generate the beam pattern.
+    // Evaluate horizontal l,m positions at which to generate the beam pattern.
     int image_size = 401;
     double fov_deg = 30.0;
     int num_pixels = image_size * image_size;
@@ -156,21 +150,19 @@ void Test_evaluate_station_beam::evaluate_test_pattern()
 
     station_gpu.array_is_3d = 0;
     TIMER_START
-    oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL,
-            &l_gpu, &m_gpu, &n_gpu,
-            &n_gpu, &work, &curand_state, &error);
+    oskar_evaluate_station_beam_aperture_array(&beam_pattern, &station_gpu,
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, &curand_state,
+            &error);
     cudaDeviceSynchronize();
-    TIMER_STOP("Finished station beam (2D)");
+    TIMER_STOP("Finished aperture array station beam (2D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
     station_gpu.array_is_3d = 1;
     TIMER_START
-    oskar_evaluate_station_beam(&beam_pattern, &station_gpu, beam_l,
-            beam_m, beam_n, num_pixels, OSKAR_BEAM_COORDS_HORIZONTAL,
-            &l_gpu, &m_gpu, &n_gpu,
-            &n_gpu, &work, &curand_state, &error);
+    oskar_evaluate_station_beam_aperture_array(&beam_pattern, &station_gpu,
+            num_pixels, &l_gpu, &m_gpu, &n_gpu, gast, &work, &curand_state,
+            &error);
     cudaDeviceSynchronize();
-    TIMER_STOP("Finished station beam (3D)");
+    TIMER_STOP("Finished aperture array station beam (3D)");
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(error), 0, error);
 
     // Copy beam pattern back to CPU.
@@ -215,11 +207,13 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         oskar_linspace_d((double*)x.data, -lm_minmax, lm_minmax, size);
         oskar_Mem l(type, location, num_points);
         oskar_Mem m(type, location, num_points);
+        oskar_Mem horizon_mask(type, location, num_points);
         oskar_meshgrid_d((double*)l.data, (double*)m.data,
                 (double*)x.data, size, (double*)x.data, size);
         oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
 
-        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m,
+                &horizon_mask, fwhm, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
         // Write output to file.
@@ -240,11 +234,13 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
         oskar_linspace_f((float*)x.data, -lm_minmax, lm_minmax, size);
         oskar_Mem l(type, location, num_points);
         oskar_Mem m(type, location, num_points);
+        oskar_Mem horizon_mask(type, location, num_points);
         oskar_meshgrid_f((float*)l.data, (float*)m.data,
                 (float*)x.data, size, (float*)x.data, size);
         oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
 
-        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m,
+                &horizon_mask, fwhm, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
         // Write output to file.
@@ -271,19 +267,19 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
 
         oskar_Mem l(&lcpu, location);
         oskar_Mem m(&mcpu, location);
+        oskar_Mem horizon_mask(type, location, num_points);
         oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
 
-        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m,
+                &horizon_mask, fwhm, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-
-        oskar_Mem beam_cpu(&beam, OSKAR_LOCATION_CPU);
 
         // Write output to file.
         if (save_results)
         {
             const char* filename = "temp_beam_double_gpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements, &err);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }
@@ -302,19 +298,19 @@ void Test_evaluate_station_beam::evaluate_gaussian_pattern()
 
         oskar_Mem l(&lcpu, location);
         oskar_Mem m(&mcpu, location);
+        oskar_Mem horizon_mask(type, location, num_points);
         oskar_Mem beam(type | OSKAR_COMPLEX, location, num_points);
 
-        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m, fwhm, &err);
+        oskar_evaluate_station_beam_gaussian(&beam, num_points, &l, &m,
+                &horizon_mask, fwhm, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
-
-        oskar_Mem beam_cpu(&beam, OSKAR_LOCATION_CPU);
 
         // Write output to file.
         if (save_results)
         {
             const char* filename = "temp_beam_single_gpu.dat";
             remove(filename);
-            oskar_mem_binary_file_write(&beam_cpu, filename, 0, 0, 0, beam.num_elements, &err);
+            oskar_mem_binary_file_write(&beam, filename, 0, 0, 0, beam.num_elements, &err);
             CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
         }
     }

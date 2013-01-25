@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,12 +50,11 @@ extern "C" {
  *
  * @param[out] telescope  Pointer to telescope model structure to save.
  * @param[in]  dir_path   Path to a telescope model directory structure.
- *
- * @return An OSKAR error code.
+ * @param[in,out] status  Status return code.
  */
 OSKAR_APPS_EXPORT
-int oskar_telescope_model_save(const oskar_TelescopeModel* telescope,
-        const char* dir_path);
+void oskar_telescope_model_save(const oskar_TelescopeModel* telescope,
+        const char* dir_path, int* status);
 
 #ifdef __cplusplus
 }

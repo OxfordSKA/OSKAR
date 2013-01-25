@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,10 +35,27 @@
 
 #include "oskar_global.h"
 #include "utility/oskar_Mem.h"
+#include "utility/oskar_vector_types.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+OSKAR_EXPORT
+void oskar_blank_below_horizon_matrix_f(float4c* jones, int num_sources,
+        const float* mask);
+
+OSKAR_EXPORT
+void oskar_blank_below_horizon_scalar_f(float2* jones, int num_sources,
+        const float* mask);
+
+OSKAR_EXPORT
+void oskar_blank_below_horizon_matrix_d(double4c* jones, int num_sources,
+        const double* mask);
+
+OSKAR_EXPORT
+void oskar_blank_below_horizon_scalar_d(double2* jones, int num_sources,
+        const double* mask);
 
 /**
  * @brief
@@ -50,8 +67,6 @@ extern "C" {
  *
  * For sources where the mask value is negative, the corresponding element
  * of the Jones data array is set to zero.
- *
- * Note that both arrays must be in GPU memory.
  *
  * @param[in,out] data    Array of Jones matrices or scalars per source.
  * @param[in] mask        Array of mask values.

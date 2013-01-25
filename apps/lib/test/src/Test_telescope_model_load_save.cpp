@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ void Test_telescope_model_load_save::test_0_level()
         // Populate the telescope model.
         // TODO?
 
-        err = oskar_telescope_model_save(&telescope, path);
+        oskar_telescope_model_save(&telescope, path, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     }
 
@@ -89,7 +89,7 @@ void Test_telescope_model_load_save::test_0_level()
         strcpy(settings.input_directory, path);
 
         oskar_TelescopeModel telescope;
-        err = oskar_telescope_model_config_load(&telescope, NULL, &settings);
+        oskar_telescope_model_config_load(&telescope, NULL, &settings, &err);
         CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
         free(settings.input_directory);
@@ -134,7 +134,7 @@ void Test_telescope_model_load_save::test_1_level()
     }
 
     // Save the telescope model.
-    err = oskar_telescope_model_save(&telescope, path);
+    oskar_telescope_model_save(&telescope, path, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Load it back again.
@@ -146,7 +146,7 @@ void Test_telescope_model_load_save::test_1_level()
     settings.aperture_array.element_pattern.enable_numerical_patterns = false;
     strcpy(settings.input_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-    err = oskar_telescope_model_config_load(&telescope2, NULL, &settings);
+    oskar_telescope_model_config_load(&telescope2, NULL, &settings, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     free(settings.input_directory);
 
@@ -233,7 +233,7 @@ void Test_telescope_model_load_save::test_2_level()
     }
 
     // Save the telescope model.
-    err = oskar_telescope_model_save(&telescope, path);
+    oskar_telescope_model_save(&telescope, path, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     // Add an element pattern file.
@@ -251,7 +251,7 @@ void Test_telescope_model_load_save::test_2_level()
     settings.aperture_array.element_pattern.enable_numerical_patterns = false;
     strcpy(settings.input_directory, path);
     oskar_TelescopeModel telescope2(OSKAR_SINGLE, OSKAR_LOCATION_CPU, 0);
-    err = oskar_telescope_model_config_load(&telescope2, NULL, &settings);
+    oskar_telescope_model_config_load(&telescope2, NULL, &settings, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
     free(settings.input_directory);
 
@@ -358,6 +358,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
     // -- different modes of getting stddev and freq data.
 
     QString root = "./temp_test_noise_rms";
+    int err = 0;
     int num_stations = 2;
     int depth = 0;
     int num_values = 5;
@@ -400,7 +401,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
     settings.interferometer.channel_bandwidth_hz = 1;
 
 
-    int err = oskar_telescope_model_noise_load(&telescope, NULL, &settings);
+    oskar_telescope_model_noise_load(&telescope, NULL, &settings, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     CPPUNIT_ASSERT_EQUAL(telescope.num_stations, num_stations);
@@ -443,6 +444,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_rms()
 void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
 {
     QString root = "./temp_test_noise_sensitivity";
+    int err = 0;
     int num_stations = 2;
     int depth = 1;
     int num_values = 5;
@@ -491,7 +493,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
     double integration_time = settings.obs.length_seconds /
             (double)settings.obs.num_time_steps;
 
-    int err = oskar_telescope_model_noise_load(&telescope, NULL, &settings);
+    oskar_telescope_model_noise_load(&telescope, NULL, &settings, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     CPPUNIT_ASSERT_EQUAL(telescope.num_stations, num_stations);
@@ -534,6 +536,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_sensitivity()
 void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
 {
     QString root = "./temp_test_noise_t_sys";
+    int err = 0;
     int num_stations = 2;
     int depth = 1;
     int num_values = 5;
@@ -597,7 +600,7 @@ void Test_telescope_model_load_save::test_load_telescope_noise_t_sys()
     double integration_time = settings.obs.length_seconds /
             (double)settings.obs.num_time_steps;
 
-    int err = oskar_telescope_model_noise_load(&telescope, NULL, &settings);
+    oskar_telescope_model_noise_load(&telescope, NULL, &settings, &err);
     CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(err), 0, err);
 
     CPPUNIT_ASSERT_EQUAL(telescope.num_stations, num_stations);

@@ -19,6 +19,7 @@ set(station_SRC
     src/oskar_evaluate_array_pattern.c
     src/oskar_evaluate_array_pattern_dipoles_cuda.cu
     src/oskar_evaluate_array_pattern_dipoles.c
+    src/oskar_evaluate_array_pattern_hierarchical.c
     src/oskar_evaluate_beam_horizontal_lmn.c
     src/oskar_evaluate_dipole_pattern_cuda.cu
     src/oskar_evaluate_dipole_pattern.c
@@ -32,8 +33,9 @@ set(station_SRC
     src/oskar_evaluate_element_weights_errors.c
     src/oskar_evaluate_element_weights.c
     src/oskar_evaluate_flux_density.c
-    src/oskar_evaluate_station_beam_gaussian.cu
-    src/oskar_evaluate_station_beam.c
+    src/oskar_evaluate_station_beam_aperture_array.c
+    src/oskar_evaluate_station_beam_gaussian.c
+    src/oskar_evaluate_source_horizontal_lmn.c
     src/oskar_station_model_analyse.c
     src/oskar_station_model_copy.c
     src/oskar_station_model_free.c

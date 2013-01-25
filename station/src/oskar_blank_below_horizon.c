@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,87 @@
 #include "station/oskar_blank_below_horizon.h"
 #include "station/oskar_blank_below_horizon_cuda.h"
 #include "utility/oskar_cuda_check_error.h"
-#include "utility/oskar_Mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Single precision. */
+void oskar_blank_below_horizon_matrix_f(float4c* jones, int num_sources,
+        const float* mask)
+{
+    int i;
+
+    for (i = 0; i < num_sources; ++i)
+    {
+        if (mask[i] < 0.0f)
+        {
+            jones[i].a.x = 0.0f;
+            jones[i].a.y = 0.0f;
+            jones[i].b.x = 0.0f;
+            jones[i].b.y = 0.0f;
+            jones[i].c.x = 0.0f;
+            jones[i].c.y = 0.0f;
+            jones[i].d.x = 0.0f;
+            jones[i].d.y = 0.0f;
+        }
+    }
+}
+
+void oskar_blank_below_horizon_scalar_f(float2* jones, int num_sources,
+        const float* mask)
+{
+    int i;
+
+    for (i = 0; i < num_sources; ++i)
+    {
+        if (mask[i] < 0.0f)
+        {
+            jones[i].x = 0.0f;
+            jones[i].y = 0.0f;
+        }
+    }
+}
+
+/* Double precision. */
+void oskar_blank_below_horizon_matrix_d(double4c* jones, int num_sources,
+        const double* mask)
+{
+    int i;
+
+    for (i = 0; i < num_sources; ++i)
+    {
+        if (mask[i] < 0.0)
+        {
+            jones[i].a.x = 0.0;
+            jones[i].a.y = 0.0;
+            jones[i].b.x = 0.0;
+            jones[i].b.y = 0.0;
+            jones[i].c.x = 0.0;
+            jones[i].c.y = 0.0;
+            jones[i].d.x = 0.0;
+            jones[i].d.y = 0.0;
+        }
+    }
+}
+
+void oskar_blank_below_horizon_scalar_d(double2* jones, int num_sources,
+        const double* mask)
+{
+    int i;
+
+    for (i = 0; i < num_sources; ++i)
+    {
+        if (mask[i] < 0.0)
+        {
+            jones[i].x = 0.0;
+            jones[i].y = 0.0;
+        }
+    }
+}
+
+
+/* Wrapper. */
 void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
         int num_sources, int* status)
 {
@@ -102,7 +177,28 @@ void oskar_blank_below_horizon(oskar_Mem* data, const oskar_Mem* mask,
     }
     else
     {
-        *status = OSKAR_ERR_BAD_LOCATION;
+        if (type == OSKAR_SINGLE_COMPLEX_MATRIX)
+        {
+            oskar_blank_below_horizon_matrix_f
+            ((float4c*)data->data, num_sources, (const float*)mask->data);
+        }
+        else if (type == OSKAR_SINGLE_COMPLEX)
+        {
+            oskar_blank_below_horizon_scalar_f
+            ((float2*)data->data, num_sources, (const float*)mask->data);
+        }
+        else if (type == OSKAR_DOUBLE_COMPLEX_MATRIX)
+        {
+            oskar_blank_below_horizon_matrix_d
+            ((double4c*)data->data, num_sources, (const double*)mask->data);
+        }
+        else if (type == OSKAR_DOUBLE_COMPLEX)
+        {
+            oskar_blank_below_horizon_scalar_d
+            ((double2*)data->data, num_sources, (const double*)mask->data);
+        }
+        else
+            *status = OSKAR_ERR_BAD_DATA_TYPE;
     }
 }
 

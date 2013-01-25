@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,15 +35,23 @@
 #include "utility/oskar_mem_element_size.h"
 #include <limits.h>
 
-#include <vector_types.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef MAX
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
-#endif
+static void max_station_size(oskar_StationModel* s, int* max_elements)
+{
+    int i = 0;
+    *max_elements = (s->num_elements > *max_elements) ?
+            s->num_elements : *max_elements;
+    if (s->child)
+    {
+        for (i = 0; i < s->num_elements; ++i)
+        {
+            max_station_size(&s->child[i], max_elements);
+        }
+    }
+}
 
 void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
 {
@@ -59,26 +67,23 @@ void oskar_telescope_model_analyse(oskar_TelescopeModel* model, int* status)
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Set flags. */
-    finished_identical_station_check = 0;
+    /* Set default flags. */
     model->identical_stations = 1;
+    finished_identical_station_check = 0;
 
-    /* Find the maximum station size. */
+    /* Recursively find the maximum number of elements in any station. */
     num_stations = model->num_stations;
-    model->max_station_size = -INT_MAX;
+    model->max_station_size = 0;
     for (i = 0; i < num_stations; ++i)
     {
-        model->max_station_size = MAX(model->station[i].num_elements,
-                model->max_station_size);
+        max_station_size(&model->station[i], &model->max_station_size);
     }
 
-    /* Analyse each station. */
+    /* Recursively analyse each station. */
     for (i = 0; i < num_stations; ++i)
     {
-        oskar_StationModel* s;
-        s = &model->station[i];
-        oskar_station_model_analyse(s, &finished_identical_station_check,
-                status);
+        oskar_station_model_analyse(&model->station[i],
+                &finished_identical_station_check, status);
     }
 
     /* Check if safe to proceed. */

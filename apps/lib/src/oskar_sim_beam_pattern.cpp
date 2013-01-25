@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,9 @@
 #include "math/oskar_sph_from_lm.h"
 #include "sky/oskar_mjd_to_gast_fast.h"
 #include "sky/oskar_ra_dec_to_rel_lmn.h"
-#include "station/oskar_evaluate_beam_horizontal_lmn.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
-#include "station/oskar_evaluate_station_beam.h"
+#include "station/oskar_evaluate_station_beam_aperture_array.h"
+#include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "station/oskar_work_station_beam_free.h"
 #include "station/oskar_work_station_beam_init.h"
 #include "utility/oskar_curand_state_free.h"
@@ -109,7 +109,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
 
     // Get the telescope model.
     oskar_TelescopeModel tel_cpu;
-    err = oskar_set_up_telescope(&tel_cpu, log, &settings);
+    oskar_set_up_telescope(&tel_cpu, log, &settings, &err);
     if (err) return OSKAR_ERR_SETUP_FAIL_TELESCOPE;
 
     // Get the beam pattern settings.
@@ -148,15 +148,15 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
     {
         oskar_evaluate_image_lm_grid_f(image_size, image_size, fov, fov,
                 grid_l, grid_m);
-        oskar_sph_from_lm_f(num_pixels, settings.obs.ra0_rad,
-                settings.obs.dec0_rad, grid_l, grid_m, RA_cpu, Dec_cpu);
+        oskar_sph_from_lm_f(num_pixels, settings.obs.ra0_rad[0],
+                settings.obs.dec0_rad[0], grid_l, grid_m, RA_cpu, Dec_cpu);
     }
     else if (type == OSKAR_DOUBLE)
     {
         oskar_evaluate_image_lm_grid_d(image_size, image_size, fov, fov,
                 grid_l, grid_m);
-        oskar_sph_from_lm_d(num_pixels, settings.obs.ra0_rad,
-                settings.obs.dec0_rad, grid_l, grid_m, RA_cpu, Dec_cpu);
+        oskar_sph_from_lm_d(num_pixels, settings.obs.ra0_rad[0],
+                settings.obs.dec0_rad[0], grid_l, grid_m, RA_cpu, Dec_cpu);
     }
 
     // All GPU memory used within these braces.
@@ -216,7 +216,7 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
             // Loop over times.
             for (int t = 0; t < num_times; ++t)
             {
-                double beam_l, beam_m, beam_n, t_dump, gast;
+                double t_dump, gast;
 
                 // Check error code.
                 if (err) continue;
@@ -227,10 +227,8 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 t_dump = obs_start_mjd_utc + t * dt_dump;
                 gast = oskar_mjd_to_gast_fast(t_dump + dt_dump / 2.0);
 
-                // Evaluate horizontal l,m,n for beam phase centre and sources.
+                // Evaluate horizontal x,y,z directions for source positions.
                 station = &(telescope.station[station_id]);
-                oskar_evaluate_beam_horizontal_lmn(&beam_l, &beam_m,
-                        &beam_n, station, gast, &err);
                 oskar_evaluate_source_horizontal_lmn(num_pixels,
                         &work.hor_x, &work.hor_y, &work.hor_z, &RA, &Dec,
                         station, gast, &err);
@@ -238,18 +236,15 @@ int oskar_sim_beam_pattern(const char* settings_file, oskar_Log* log)
                 // Evaluate the station beam.
                 if (station->station_type == OSKAR_STATION_TYPE_AA)
                 {
-                    oskar_evaluate_station_beam(&beam_pattern, station,
-                            beam_l, beam_m, beam_n, num_pixels,
-                            OSKAR_BEAM_COORDS_HORIZONTAL,
-                            &work.hor_x, &work.hor_y, &work.hor_z,
-                            &work.hor_z, &work, &curand_state, &err);
+                    oskar_evaluate_station_beam_aperture_array(&beam_pattern,
+                            station, num_pixels, &work.hor_x, &work.hor_y,
+                            &work.hor_z, gast, &work, &curand_state, &err);
                 }
                 else if (station->station_type == OSKAR_STATION_TYPE_GAUSSIAN_BEAM)
                 {
-                    oskar_evaluate_station_beam(&beam_pattern, station,
-                            beam_l, beam_m, beam_n, num_pixels,
-                            OSKAR_BEAM_COORDS_PHASE_CENTRE, &l, &m, &n,
-                            &work.hor_z, &work, &curand_state, &err);
+                    oskar_evaluate_station_beam_gaussian(&beam_pattern,
+                            num_pixels, &l, &m, &work.hor_z,
+                            station->gaussian_beam_fwhm_deg, &err);
                 }
                 else
                 {
@@ -446,8 +441,8 @@ static void oskar_set_up_beam_pattern(oskar_Image* image,
     /* Set beam pattern meta-data. */
     image->image_type         = (num_pols == 1) ?
             OSKAR_IMAGE_TYPE_BEAM_SCALAR : OSKAR_IMAGE_TYPE_BEAM_POLARISED;
-    image->centre_ra_deg      = settings->obs.ra0_rad * 180.0 / M_PI;
-    image->centre_dec_deg     = settings->obs.dec0_rad * 180.0 / M_PI;
+    image->centre_ra_deg      = settings->obs.ra0_rad[0] * 180.0 / M_PI;
+    image->centre_dec_deg     = settings->obs.dec0_rad[0] * 180.0 / M_PI;
     image->fov_ra_deg         = settings->beam_pattern.fov_deg;
     image->fov_dec_deg        = settings->beam_pattern.fov_deg;
     image->freq_start_hz      = settings->obs.start_frequency_hz;

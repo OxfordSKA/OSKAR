@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
 #include "station/oskar_station_model_load_config.h"
 #include "station/oskar_StationModel.h"
 #include "utility/oskar_vector_types.h"
+#include "utility/oskar_get_error_string.h"
 
 #include <cmath>
 #include <cstdio>
@@ -60,6 +61,7 @@ void Test_StationModel::tearDown()
 void Test_StationModel::test_load_single()
 {
     // Create the test file.
+    int status = 0;
     const char* filename = "test.dat";
     FILE* file = fopen(filename, "w");
     int n_elements = 100;
@@ -72,7 +74,8 @@ void Test_StationModel::test_load_single()
 
     // Load the data.
     oskar_StationModel station_model(OSKAR_SINGLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load_config(&station_model, filename);
+    oskar_station_model_load_config(&station_model, filename, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     // Check the coordinates.
     CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);
@@ -109,6 +112,7 @@ void Test_StationModel::test_load_single()
 void Test_StationModel::test_load_double()
 {
     // Create the test file.
+    int status = 0;
     const char* filename = "test.dat";
     FILE* file = fopen(filename, "w");
     int n_elements = 100;
@@ -121,7 +125,8 @@ void Test_StationModel::test_load_double()
 
     // Load the data.
     oskar_StationModel station_model(OSKAR_DOUBLE, OSKAR_LOCATION_CPU);
-    oskar_station_model_load_config(&station_model, filename);
+    oskar_station_model_load_config(&station_model, filename, &status);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(oskar_get_error_string(status), 0, status);
 
     // Check the coordinates.
     CPPUNIT_ASSERT_EQUAL(n_elements, station_model.num_elements);

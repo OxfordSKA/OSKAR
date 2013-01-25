@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,8 @@ extern "C" {
 void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
         int location, int* status)
 {
+    int complex_matrix;
+
     /* Check all inputs. */
     if (!work || !status)
     {
@@ -43,9 +45,14 @@ void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
         return;
     }
 
+    /* Check the base type is correct. */
     if (type != OSKAR_SINGLE && type != OSKAR_DOUBLE)
         *status = OSKAR_ERR_BAD_DATA_TYPE;
 
+    /* Set complex matrix type. */
+    complex_matrix = OSKAR_COMPLEX | OSKAR_MATRIX;
+
+    /* Initialise arrays. */
     oskar_mem_init(&work->horizon_mask, OSKAR_INT, location, 0, 1, status);
     oskar_mem_init(&work->theta_modified, type, location, 0, 1, status);
     oskar_mem_init(&work->phi_modified, type, location, 0, 1, status);
@@ -58,11 +65,13 @@ void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
             location, 0, 1, status);
     oskar_mem_init(&work->array_pattern, (type | OSKAR_COMPLEX),
             location, 0, 1, status);
-    oskar_mem_init(&work->element_pattern_matrix, (type | OSKAR_COMPLEX | OSKAR_MATRIX),
+    oskar_mem_init(&work->element_pattern_matrix, (type | complex_matrix),
             location, 0, 1, status);
     oskar_mem_init(&work->element_pattern_scalar, (type | OSKAR_COMPLEX),
             location, 0, 1, status);
-    oskar_mem_init(&work->hierarchy_work, (type | OSKAR_COMPLEX),
+    oskar_mem_init(&work->hierarchy_work_matrix, (type | complex_matrix),
+            location, 0, 1, status);
+    oskar_mem_init(&work->hierarchy_work_scalar, (type | OSKAR_COMPLEX),
             location, 0, 1, status);
 }
 

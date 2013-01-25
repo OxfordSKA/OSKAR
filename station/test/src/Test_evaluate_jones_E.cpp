@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,8 +90,8 @@ void Test_evaluate_jones_E::evaluate_e()
     oskar_meshgrid_f(station_cpu.x_weights, station_cpu.y_weights, x_pos, station_dim,
             x_pos, station_dim);
     free(x_pos);
-    station_cpu.ra0_rad  = 0.0;
-    station_cpu.dec0_rad = M_PI_2;
+    station_cpu.beam_longitude_rad  = 0.0;
+    station_cpu.beam_latitude_rad = M_PI_2;
 
     // Set the station meta-data.
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
 #include "station/test/Test_evaluate_station_beam_dipoles.h"
 
 #include "station/oskar_evaluate_array_pattern_dipoles_cuda.h"
-#include "station/oskar_evaluate_station_beam.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_Mem.h"
 #include "utility/oskar_vector_types.h"

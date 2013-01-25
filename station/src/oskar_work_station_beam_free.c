@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,8 @@ void oskar_work_station_beam_free(oskar_WorkStationBeam* work, int* status)
     oskar_mem_free(&work->array_pattern, status);
     oskar_mem_free(&work->element_pattern_matrix, status);
     oskar_mem_free(&work->element_pattern_scalar, status);
-    oskar_mem_free(&work->hierarchy_work, status);
+    oskar_mem_free(&work->hierarchy_work_matrix, status);
+    oskar_mem_free(&work->hierarchy_work_scalar, status);
 }
 
 #ifdef __cplusplus

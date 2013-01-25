@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -168,6 +168,18 @@ QWidget* oskar_SettingsDelegate::createEditor(QWidget* parent,
             connect(list, SIGNAL(activated(int)),
                     this, SLOT(commitAndCloseEditor(int)));
             editor = list;
+            break;
+        }
+        case oskar_SettingsItem::DOUBLE_CSV_LIST:
+        {
+            // Floating-point arrays.
+            QLineEdit* line = new QLineEdit(parent);
+            QValidator* validator = new QRegExpValidator(
+                    QRegExp("^[+-]?\\d+(?:\\.\\d+)?(,[+-]?\\d+(?:\\.\\d+)?)*$"),
+                    line);
+            line->setFrame(false);
+            line->setValidator(validator);
+            editor = line;
             break;
         }
         default:
