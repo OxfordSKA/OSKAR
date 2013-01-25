@@ -78,6 +78,13 @@ elseif (MSVC)
 endif ()
 
 
+# Rpath settings for OS X
+# ------------------------------------------------------------------------------
+if (APPLE)
+    set(CMAKE_INSTALL_NAME_DIR "@rpath")
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+endif (APPLE)
+
 # Set CUDA releated compiler flags.
 # ------------------------------------------------------------------------------
 if (CUDA_FOUND)
@@ -188,7 +195,7 @@ endif (VERBOSE)
 # Set MATLAB mex function compiler flags.
 # ------------------------------------------------------------------------------
 if (MATLAB_FOUND)
-    # TODO the MEXFILE extension should probably be set by FindMatlab.cmake... 
+    # TODO the MEXFILE extension should probably be set by FindMatlab.cmake...
     if (APPLE)
         set(MATLAB_MEXFILE_EXT mexmaci64)
         # TODO ... find a way to avoid these link directories

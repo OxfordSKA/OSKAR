@@ -88,7 +88,7 @@ void oskar_evaluate_pierce_points(
     /* Check type consistency */
     type = hor_x->type;
     if (pierce_point_lat->type != type || pierce_point_lon->type != type ||
-            relative_path_length != type || hor_y->type != type ||
+            relative_path_length->type != type || hor_y->type != type ||
             hor_z->type != type)
     {
         *status = OSKAR_ERR_BAD_DATA_TYPE;
