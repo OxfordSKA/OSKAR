@@ -29,7 +29,7 @@
 #include "apps/lib/oskar_sim_tec_screen.h"
 
 #include <sky/oskar_evaluate_mim_tid_tec.h>
-#include <sky/oskar_SettingsMIM.h>
+#include <sky/oskar_SettingsIonosphere.h>
 
 #include <utility/oskar_Mem.h>
 #include <utility/oskar_mem_init.h>
@@ -61,7 +61,7 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     int status = OSKAR_SUCCESS;
 
     // Settings.
-    oskar_SettingsMIM settings;
+    oskar_SettingsIonosphere settings;
     settings.TEC0 = 1.0;  // 1.,5.,10.
     settings.num_TID_screens = 1;
     settings.TID = (oskar_SettingsTIDscreen*)malloc(sizeof(oskar_SettingsTIDscreen)

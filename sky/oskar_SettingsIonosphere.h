@@ -26,8 +26,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OSKAR_SETTINGS_MIM_H_
-#define OSKAR_SETTINGS_MIM_H_
+#ifndef OSKAR_SETTINGS_IONOSHERE_H_
+#define OSKAR_SETTINGS_IONOSHERE_H_
 
 /**
  * @file oskar_SettingsMIM.h
@@ -52,14 +52,14 @@ struct OSKAR_EXPORT oskar_SettingsTIDscreen
 typedef struct oskar_SettingsTIDscreen oskar_SettingsTIDscreen;
 
 /**
- * @struct oskar_SettingsMIM
+ * @struct oskar_SettingsIonosphere
  *
  * @brief Structure to hold MIM settings.
  *
  * @details
  * The structure holds parameters for the ionospheric model.
  */
-struct OSKAR_EXPORT oskar_SettingsMIM
+struct OSKAR_EXPORT oskar_SettingsIonosphere
 {
     int enable;            // Flag to enable/disable MIM evaluation.
     double min_elevation;  // Minimum elevation for MIM evaluation, in radians.
@@ -67,8 +67,9 @@ struct OSKAR_EXPORT oskar_SettingsMIM
     double TEC0;           // Zero offset TEC value.
 
     int num_TID_screens;   // Number of TID TEC screens evaluated.
+    char** TID_files;      // TID settings files (one for each screen height).
     oskar_SettingsTIDscreen* TID; // Array of TID screen structures.
 };
-typedef struct oskar_SettingsMIM oskar_SettingsMIM;
+typedef struct oskar_SettingsIonosphere oskar_SettingsIonosphere;
 
-#endif /* OSKAR_SETTINGS_MIM_H_ */
+#endif /* OSKAR_SETTINGS_IONOSHERE_H_ */

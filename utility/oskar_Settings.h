@@ -31,6 +31,7 @@
 
 #include "imaging/oskar_SettingsImage.h"
 #include "sky/oskar_SettingsSky.h"
+#include "sky/oskar_SettingsIonosphere.h"
 #include "station/oskar_SettingsBeamPattern.h"
 #include "interferometry/oskar_SettingsObservation.h"
 #include "interferometry/oskar_SettingsTelescope.h"
@@ -56,6 +57,7 @@ struct OSKAR_EXPORT oskar_Settings
     oskar_SettingsInterferometer interferometer;
     oskar_SettingsBeamPattern beam_pattern;
     oskar_SettingsImage image;
+    oskar_SettingsIonosphere ionosphere;
 
 #ifdef __cplusplus
     oskar_Settings();

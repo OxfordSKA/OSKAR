@@ -29,6 +29,7 @@
 #include "utility/oskar_settings_init.h"
 #include "utility/oskar_mem_init.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,6 +71,9 @@ int oskar_settings_init(oskar_Settings* settings)
     noise->value.t_sys.file = NULL;
     noise->value.area.file = NULL;
     noise->value.efficiency.file = NULL;
+    settings->ionosphere.num_TID_screens = 0;
+    settings->ionosphere.TID_files = NULL;
+    settings->ionosphere.TID = NULL;
 
     /* Initialise pathname to settings file. */
     oskar_mem_init(&settings->settings_path, OSKAR_CHAR,

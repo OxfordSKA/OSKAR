@@ -27,10 +27,14 @@
  */
 
 
-#include "apps/lib/oskar_settings_load_ionospheric_model.h"
+#include "apps/lib/oskar_settings_load_ionosphere.h"
+
+#include <QtCore/QString>
+#include <QtCore/QByteArray>
+#include <QtCore/QSettings>
 
 extern "C"
-int oskar_settings_load_ionospheric_model(oskar_SettingsMIM* mim,
+int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* mim,
         const char* filename)
 {
     QString temp;
@@ -45,8 +49,5 @@ int oskar_settings_load_ionospheric_model(oskar_SettingsMIM* mim,
 
     s.endGroup(); // TID
 
-
     return OSKAR_SUCCESS;
 }
-
-

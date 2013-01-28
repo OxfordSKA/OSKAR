@@ -29,7 +29,7 @@
 #include "sky/test/Test_load_TID_parameter_file.h"
 
 #include "sky/oskar_load_TID_parameter_file.h"
-#include "sky/oskar_SettingsMIM.h"
+#include "sky/oskar_SettingsIonosphere.h"
 
 #include "utility/oskar_get_error_string.h"
 

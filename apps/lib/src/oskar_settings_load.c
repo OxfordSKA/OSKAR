@@ -30,6 +30,7 @@
 #include "apps/lib/oskar_settings_load_beam_pattern.h"
 #include "apps/lib/oskar_settings_load_image.h"
 #include "apps/lib/oskar_settings_load_interferomter.h"
+#include "apps/lib/oskar_settings_load_ionosphere.h"
 #include "apps/lib/oskar_settings_load_observation.h"
 #include "apps/lib/oskar_settings_load_simulator.h"
 #include "apps/lib/oskar_settings_load_sky.h"
@@ -68,6 +69,8 @@ int oskar_settings_load(oskar_Settings* settings, oskar_Log* log,
     error = oskar_settings_load_interferometer(&settings->interferometer, filename);
     if (error) return error;
     error = oskar_settings_load_image(&settings->image, filename);
+    if (error) return error;
+    error = oskar_settings_load_ionosphere(&settings->ionosphere, filename);
     if (error) return error;
 
     /* Save the path to the settings file. */

@@ -27,26 +27,26 @@
  */
 
 
-#ifndef OSKAR_SETTINGS_LOAD_IONOSPHERIC_MODEL_H_
-#define OSKAR_SETTINGS_LOAD_IONOSPHERIC_MODEL_H_
+#ifndef OSKAR_SETTINGS_LOAD_IONOSPHERE_H_
+#define OSKAR_SETTINGS_LOAD_IONOSPHERE_H_
 
 /**
- * @file oskar_settings_load_ionospheric_model.h
+ * @file oskar_settings_load_ionosphere.h
  */
 
 #include "oskar_global.h"
-#include "sky/oskar_SettingsMIM.h"
+#include "sky/oskar_SettingsIonosphere.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 OSKAR_APPS_EXPORT
-int oskar_settings_load_ionospheric_model(oskar_SettingsMIM* settings,
+int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         const char* filename);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_SETTINGS_LOAD_IONOSPHERIC_MODEL_H_ */
+#endif /* OSKAR_SETTINGS_LOAD_IONOSPHERE_H_ */
