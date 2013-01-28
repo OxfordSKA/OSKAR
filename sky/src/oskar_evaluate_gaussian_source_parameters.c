@@ -55,7 +55,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         const oskar_Mem* FWHM_major, const oskar_Mem* FWHM_minor,
         const oskar_Mem* position_angle, const oskar_Mem* RA,
         const oskar_Mem* Dec, int zero_failed_sources, oskar_Mem* I,
-        double ra0, double dec0)
+        oskar_Mem* Q, oskar_Mem* U, oskar_Mem* V, double ra0, double dec0)
 {
     int i, j, err = 0, num_failed = 0;
     double a, b, c;
@@ -75,7 +75,11 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
             FWHM_minor->type == OSKAR_DOUBLE &&
             position_angle->type == OSKAR_DOUBLE &&
             RA->type == OSKAR_DOUBLE &&
-            Dec->type == OSKAR_DOUBLE)
+            Dec->type == OSKAR_DOUBLE &&
+            I->type == OSKAR_DOUBLE &&
+            Q->type == OSKAR_DOUBLE &&
+            U->type == OSKAR_DOUBLE &&
+            V->type == OSKAR_DOUBLE)
     {
         type = OSKAR_DOUBLE;
     }
@@ -86,7 +90,11 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
             FWHM_minor->type == OSKAR_SINGLE &&
             position_angle->type == OSKAR_SINGLE &&
             RA->type == OSKAR_SINGLE &&
-            Dec->type == OSKAR_SINGLE)
+            Dec->type == OSKAR_SINGLE &&
+            I->type == OSKAR_SINGLE &&
+            Q->type == OSKAR_SINGLE &&
+            U->type == OSKAR_SINGLE &&
+            V->type == OSKAR_SINGLE)
     {
         type = OSKAR_SINGLE;
     }
@@ -95,8 +103,9 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         return OSKAR_ERR_BAD_DATA_TYPE;
     }
 
-    if (gaussian_a == NULL || gaussian_b == NULL || gaussian_c == NULL ||
-            FWHM_major == NULL || FWHM_minor == NULL || position_angle == NULL)
+    if (!gaussian_a || !gaussian_b || !gaussian_c || !FWHM_major ||
+            !FWHM_minor || !position_angle || !RA || !Dec ||
+            !I || !Q || !U || !V)
     {
         return OSKAR_ERR_INVALID_ARGUMENT;
     }
@@ -106,7 +115,13 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
             num_sources > position_angle->num_elements ||
             num_sources > gaussian_a->num_elements ||
             num_sources > gaussian_b->num_elements ||
-            num_sources > gaussian_c->num_elements)
+            num_sources > gaussian_c->num_elements ||
+            num_sources > RA->num_elements ||
+            num_sources > Dec->num_elements ||
+            num_sources > I->num_elements ||
+            num_sources > Q->num_elements ||
+            num_sources > U->num_elements ||
+            num_sources > V->num_elements)
     {
         return OSKAR_ERR_DIMENSION_MISMATCH;
     }
@@ -117,7 +132,13 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
             gaussian_c->location != OSKAR_LOCATION_CPU ||
             FWHM_major->location != OSKAR_LOCATION_CPU ||
             FWHM_minor->location != OSKAR_LOCATION_CPU ||
-            position_angle->location != OSKAR_LOCATION_CPU)
+            position_angle->location != OSKAR_LOCATION_CPU ||
+            RA->location != OSKAR_LOCATION_CPU ||
+            Dec->location != OSKAR_LOCATION_CPU ||
+            I->location != OSKAR_LOCATION_CPU ||
+            Q->location != OSKAR_LOCATION_CPU ||
+            U->location != OSKAR_LOCATION_CPU ||
+            V->location != OSKAR_LOCATION_CPU)
     {
         return OSKAR_ERR_BAD_LOCATION;
     }
@@ -169,6 +190,9 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
                 if (zero_failed_sources) ((double*)I->data)[i] = 0.0;
+                if (zero_failed_sources) ((double*)Q->data)[i] = 0.0;
+                if (zero_failed_sources) ((double*)U->data)[i] = 0.0;
+                if (zero_failed_sources) ((double*)V->data)[i] = 0.0;
                 ++num_failed;
                 err = 0;
                 continue;
@@ -229,6 +253,9 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
             if (err == OSKAR_ERR_ELLIPSE_FIT_FAILED)
             {
                 if (zero_failed_sources) ((float*)I->data)[i] = 0.0;
+                if (zero_failed_sources) ((float*)Q->data)[i] = 0.0;
+                if (zero_failed_sources) ((float*)U->data)[i] = 0.0;
+                if (zero_failed_sources) ((float*)V->data)[i] = 0.0;
                 ++num_failed;
                 err = 0;
                 continue;

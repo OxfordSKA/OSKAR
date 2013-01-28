@@ -79,7 +79,10 @@ extern "C" {
  * @param Dec             Source declination array
  * @param zero_failed_sources Bool to set to zero the amplitude of sources
  *                        where the Gaussian solution fails
- * @param I               Unpolarised source flux density.
+ * @param I               Array of source flux densities.
+ * @param Q               Array of source flux densities.
+ * @param U               Array of source flux densities.
+ * @param V               Array of source flux densities.
  * @param ra0             Right ascension of the observation phase centre
  * @param dec0            Declination of the observation phase centre
  *
@@ -91,7 +94,7 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
         const oskar_Mem* FWHM_major, const oskar_Mem* FWHM_minor,
         const oskar_Mem* position_angle, const oskar_Mem* RA,
         const oskar_Mem* Dec, int zero_failed_sources, oskar_Mem* I,
-        double ra0, double dec0);
+        oskar_Mem* Q, oskar_Mem* U, oskar_Mem* V, double ra0, double dec0);
 
 #ifdef __cplusplus
 }

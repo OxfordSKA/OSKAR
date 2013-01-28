@@ -229,6 +229,8 @@ struct OSKAR_EXPORT oskar_SettingsSky
     oskar_SettingsSkyFits fits_file_settings;
 
     oskar_SettingsSkyHealpixFits healpix_fits;
+
+    int zero_failed_gaussians; /**< Zero (remove) sources with failed Gaussian with solutions */
 };
 typedef struct oskar_SettingsSky oskar_SettingsSky;
 

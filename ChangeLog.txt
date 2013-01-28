@@ -13,6 +13,9 @@
     * Updated the mex function which reads OSKAR binary tag groups so that
       it is possible to specify a user index from which to load the group.
 
+    * Added (sky model) option to remove sources for which Gaussian width
+      solutions have failed.
+
 2012-11-20  OSKAR 2.1.1-beta
 
     * Fixed a bug in the MATLAB sky model load and save functions which

@@ -479,6 +479,17 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             oskar_SettingsItem::OUTPUT_FILE_NAME);
     setTooltip(k, "Path used to save the final sky model structure as a "
             "text file (useful for debugging). Leave blank if not required.");
+
+    k = "sky/advanced";
+    setLabel(k, "Advanced settings");
+
+    k = "sky/advanced/zero_failed_gaussians";
+    declare(k, "Remove failed Gaussian sources", oskar_SettingsItem::BOOL, false);
+    setTooltip(k, "If <b>true</b>, remove (set to zero) sources for which "
+            "Gaussian width parameter solutions have failed. This can occur "
+            "for sources very close to the horizon. If <b>false</b> (the "
+            "default), sources with failed Gaussian parameter solutions are "
+            "modelled as point sources.");
 }
 
 
@@ -1289,76 +1300,37 @@ void oskar_SettingsModelApps::init_settings_ionosphere()
     QStringList options;
 
     group = "ionosphere";
-    setLabel(group, "Ionosphereic model settings (Z-Jones)");
-    setTooltip(group, "...");
+    setLabel(group, "Ionosphereic model (Z-Jones) settings");
+    setTooltip(group, "Settings describing a simple, 2-dimensional ionospheric "
+            "phase screen model.");
 
     k = group + "/enable";
     declare(k, "Enable", oskar_SettingsItem::BOOL, false);
-    setTooltip(k, "...");
+    setTooltip(k, "Enable evaluation of the Z-Jones when performing "
+            "interferometric simulations.");
 
-    k = group + "/height_km";
-    declare(k, "Height of TEC screen (km)", oskar_SettingsItem::DOUBLE, 300.0);
-    setTooltip(k, "...");
+    k = group + "/min_elevation_deg";
+    declare(k, "Minimum elevation (deg)", oskar_SettingsItem::DOUBLE, 0.0);
+    setTooltip(k, "Minimum elevation for which ionospheric phase values are "
+            "evaluated. Below this specified elevation, no ionospheric phase "
+            "values are applied. This setting is provided as TEC screen "
+            "evaluation functions may be poorly defined very far away from "
+            "the phase centre.");
+    setDependency(k, group+"/enable", true);
 
-    // TID group
-    {
-        group = group + "/TID";
-        setLabel(group, "Travelling ionospheric disturbance (TID) parameters");
-        setTooltip(group, "...");
-        setDependency(group, "ionosphere/enable", true);
+    k = group + "/TEC0";
+    declare(k, "Zero offset TEC value", oskar_SettingsItem::DOUBLE, 1.0);
+    setTooltip(k, "The underlying value of constant TEC. This is used to scale "
+            "the differential TEC values evaluated for the Z-Jones phase "
+            "calculation.");
+    setDependency(k, group+"/enable", true);
 
-        k = group + "/enable";
-        declare(k, "Enable", oskar_SettingsItem::BOOL, true);
-        setTooltip(k, "Enable the TID component of the MIM evaluation");
+    k = group + "/TID_file";
+    declare(k, "TID parameter file(s)", oskar_SettingsItem::INPUT_FILE_LIST);
+    setTooltip(k, "Comma separated list to filename paths of OSKAR TID "
+            "parameter files.");
+    setDependency(k, group+"/enable", true);
 
-        options.clear();
-        options << "Component model"
-                << "Configuration file";
-        k = group + "/config_type";
-        declare(k, "Configuration type", options, 0);
-
-        k = group + "/components";
-        setLabel(k, "TID Components");
-        setDependency(k, group + "/config_type", options[0]);
-
-        k = group + "/components/0";
-        setLabel(k, "Component 1");
-        setDependency(k, group + "/config_type", options[0]);
-
-        k = group + "/components/0/theta";
-        declare(k, "Direction [deg]", oskar_SettingsItem::INT);
-        setTooltip(k, "...");
-        setDependency(k, group + "/config_type", options[0]);
-
-        k = group + "/components/1";
-        setLabel(k, "Component 1");
-        setDependency(k, group + "/config_type", options[0]);
-
-        k = group + "/components/1/theta";
-        declare(k, "Theta1 [deg]", oskar_SettingsItem::INT);
-        setTooltip(k, "...");
-        setDependency(k, group + "/config_type", options[0]);
-
-        k = group + "/component_file";
-        declare(k, "TID parameter file", oskar_SettingsItem::INPUT_FILE_NAME);
-        setTooltip(group, "...");
-        setDependency(k, group + "/config_type", options[1]);
-    }
-
-    //
-    group = "ionosphere/output";
-    setLabel(group, "Ouputs");
-
-    k = group + "/pierce_point_file";
-    declare(k, "Pierce point file", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip(k, "File used to record pierce points. This is an OSKAR binary "
-            "format scatter data file.");
-    setDependency(k, group + "/enable", true);
-
-    k = group + "/tec_file";
-    declare(k, "TEC screen file", oskar_SettingsItem::OUTPUT_FILE_NAME);
-    setTooltip(k, "File used to record evaluated TEC values.");
-    setDependency(k, group + "/enable", true);
 }
 
 

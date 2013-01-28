@@ -57,8 +57,9 @@
 #include "utility/oskar_log_warning.h"
 #include "utility/oskar_get_error_string.h"
 
-#include <math.h>
-#include <string.h>
+#include <cmath>
+#include <cstring>
+#include <cstdlib>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -86,7 +87,7 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
 
     /* Bool switch to set to zero the amplitude of sources where no Gaussian
      * source solution can be found. */
-    int zero_failed_sources = OSKAR_FALSE;
+    int zero_failed_sources = settings->sky.zero_failed_gaussians;
 
     /* Load OSKAR sky files. */
     for (int i = 0; i < settings->sky.num_sky_files; ++i)
@@ -486,14 +487,11 @@ static int set_up_extended(oskar_SkyModel* sky,
     if (error) return error;
 
     /* Evaluate extended source parameters. */
-    /* FIXME Added sky->I as a hack to see if zeroing failed sources
-     * makes a significant difference to simulations. */
-    /* FIXME If this hack stays, must also zero Stokes Q, U, V as well. */
     error = oskar_evaluate_gaussian_source_parameters(log, sky->num_sources,
             &sky->gaussian_a, &sky->gaussian_b, &sky->gaussian_c,
             &sky->FWHM_major, &sky->FWHM_minor, &sky->position_angle,
-            &sky->RA, &sky->Dec, zero_failed_sources, &sky->I, ra0_rad,
-            dec0_rad);
+            &sky->RA, &sky->Dec, zero_failed_sources, &sky->I, &sky->Q,
+            &sky->U, &sky->V, ra0_rad, dec0_rad);
 #endif
     return error;
 }

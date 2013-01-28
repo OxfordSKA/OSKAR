@@ -215,6 +215,8 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     sky->spectral_index.seed = get_seed(s.value("seed"));
     s.endGroup();
 
+    sky->zero_failed_gaussians = s.value("advanced/zero_failed_gaussians", false).toBool();
+
     return OSKAR_SUCCESS;
 }
 
