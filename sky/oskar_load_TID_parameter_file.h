@@ -27,45 +27,26 @@
  */
 
 
-#ifndef OSKAR_EVALUATE_MIM_TID_TEC_H_
-#define OSKAR_EVALUATE_MIM_TID_TEC_H_
+#ifndef OSKAR_LOAD_TID_PARAMETER_FILE_H_
+#define OSKAR_LOAD_TID_PARAMETER_FILE_H_
 
 /**
- * @file oskar_evaluate_mim_tid_tec.h
+ * @file oskar_load_TID_parameter_file.h
  */
 
 #include "oskar_global.h"
 #include "sky/oskar_SettingsMIM.h"
-#include "utility/oskar_Mem.h"
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief
- * Evaluates a TEC screen for a TID MIM.
- *
- * @param tec             Array of TEC values at the specified longitude and
- *                        latitude positions.
- * @param num_directions  Number of directions at which to evaluate the TEC.
- * @param lon             Array of longitudes, in radians.
- * @param lat             Array of latitudes, in radians.
- * @param rel_path_length Array of relative path lengths in the direction of
- *                        pierce point from the station.
- * @param TEC0            Zero offset TEC value.
- * @param TID             Settings structure describing the TID screen
- *                        components.
- * @param gast
- */
 OSKAR_EXPORT
-void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
-        oskar_Mem* lat, oskar_Mem* rel_path_length, double TEC0,
-        oskar_SettingsTIDscreen* TID, double gast);
+void oskar_load_TID_parameter_file(oskar_SettingsTIDscreen* settings,
+        const char* filename, int* status);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_MIM_TID_TEC_H_ */
+#endif /* OSKAR_LOAD_TID_PARAMETER_FILE_H_ */

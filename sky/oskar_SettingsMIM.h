@@ -40,14 +40,16 @@
  *
  * @brief Structure to hold TID settings.
  */
-struct OSKAR_EXPORT oskar_SettingsTID
+struct OSKAR_EXPORT oskar_SettingsTIDscreen
 {
-    double amp;             // Relative amplitude
-    double wavelength;      // in km
-    double speed;           // km/h
-    double theta;           // deg
+    double height_km;       // Height of the TID screen, in kilometers
+    int num_components;     // Number of TID components
+    double* amp;            // Relative amplitude
+    double* wavelength;     // in km
+    double* speed;          // km/h
+    double* theta;          // deg
 };
-typedef struct oskar_SettingsTID oskar_SettingsTID;
+typedef struct oskar_SettingsTIDscreen oskar_SettingsTIDscreen;
 
 /**
  * @struct oskar_SettingsMIM
@@ -59,14 +61,13 @@ typedef struct oskar_SettingsTID oskar_SettingsTID;
  */
 struct OSKAR_EXPORT oskar_SettingsMIM
 {
-    int enable;
-    double tec0;
-    double height_km;
+    int enable;            // Flag to enable/disable MIM evaluation.
+    double min_elevation;  // Minimum elevation for MIM evaluation, in radians.
 
-    int enableTID;
-    int num_tid_components;
-    char* component_file;
-    oskar_SettingsTID* tid;
+    double TEC0;           // Zero offset TEC value.
+
+    int num_TID_screens;   // Number of TID TEC screens evaluated.
+    oskar_SettingsTIDscreen* TID; // Array of TID screen structures.
 };
 typedef struct oskar_SettingsMIM oskar_SettingsMIM;
 

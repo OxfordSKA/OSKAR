@@ -26,46 +26,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef OSKAR_EVALUATE_MIM_TID_TEC_H_
-#define OSKAR_EVALUATE_MIM_TID_TEC_H_
+#ifndef TEST_LOAD_TID_PARAMETER_FILE_H_
+#define TEST_LOAD_TID_PARAMETER_FILE_H_
 
 /**
- * @file oskar_evaluate_mim_tid_tec.h
+ * @file Test_load_TID_parameter_file.h
  */
 
-#include "oskar_global.h"
-#include "sky/oskar_SettingsMIM.h"
-#include "utility/oskar_Mem.h"
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <cppunit/extensions/HelperMacros.h>
 
 /**
- * @brief
- * Evaluates a TEC screen for a TID MIM.
+ * @brief Unit test class that uses CppUnit.
  *
- * @param tec             Array of TEC values at the specified longitude and
- *                        latitude positions.
- * @param num_directions  Number of directions at which to evaluate the TEC.
- * @param lon             Array of longitudes, in radians.
- * @param lat             Array of latitudes, in radians.
- * @param rel_path_length Array of relative path lengths in the direction of
- *                        pierce point from the station.
- * @param TEC0            Zero offset TEC value.
- * @param TID             Settings structure describing the TID screen
- *                        components.
- * @param gast
+ * @details
+ * This class uses the CppUnit testing framework to perform unit tests
+ * on the class it is named after.
  */
-OSKAR_EXPORT
-void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
-        oskar_Mem* lat, oskar_Mem* rel_path_length, double TEC0,
-        oskar_SettingsTIDscreen* TID, double gast);
+class Test_load_TID_parameter_file : public CppUnit::TestFixture
+{
+    public:
+        CPPUNIT_TEST_SUITE(Test_load_TID_parameter_file);
+        CPPUNIT_TEST(test_load);
+        CPPUNIT_TEST_SUITE_END();
 
-#ifdef __cplusplus
-}
-#endif
+    public:
+        void test_load();
+};
 
-#endif /* OSKAR_EVALUATE_MIM_TID_TEC_H_ */
+// Register the test class.
+CPPUNIT_TEST_SUITE_REGISTRATION(Test_load_TID_parameter_file);
+
+#endif // TEST_LOAD_TID_PARAMETER_FILE_H_

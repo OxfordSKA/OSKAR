@@ -9,6 +9,7 @@ if (CPPUNIT_FOUND)
         src/Test_coord_transforms.cpp
         src/Test_SkyModel.cpp
         src/Test_generators.cpp
+        src/Test_load_TID_parameter_file.cpp
     )
 
     include_directories(${CPPUNIT_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})

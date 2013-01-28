@@ -15,6 +15,7 @@ set(sky_SRC
     src/oskar_ha_dec_to_az_el.c
     src/oskar_ha_dec_to_hor_lmn.c
     src/oskar_lm_to_n.c
+    src/oskar_load_TID_parameter_file.c
     src/oskar_mjd_to_gast_fast.c
     src/oskar_mjd_to_gmst.c
     src/oskar_mjd_to_last_fast.c

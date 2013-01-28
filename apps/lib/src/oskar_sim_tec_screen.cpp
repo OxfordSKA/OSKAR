@@ -62,31 +62,39 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
 
     // Settings.
     oskar_SettingsMIM settings;
-    settings.tec0 = 1.0; // 1.,5.,10.
-    settings.height_km = 300.0;
-    settings.num_tid_components = 3;
-    settings.tid = (oskar_SettingsTID*) malloc(sizeof(oskar_SettingsTID)
-            * settings.num_tid_components);
-    int comp = 0;
-    settings.tid[comp].amp = 0.2; // relative amplitude (to TEC0)
-    settings.tid[comp].speed = 200; // km/h
-    settings.tid[comp].theta = 25.0;  // degrees
-    settings.tid[comp].wavelength = 300.0; // km
-    comp++;
-    settings.tid[comp].amp = 0.05; // relative amplitude (to TEC0)
-    settings.tid[comp].speed = 300; // km/h
-    settings.tid[comp].theta = -60.0;  // degrees
-    settings.tid[comp].wavelength = 100.0; // km
-    comp++;
-    settings.tid[comp].amp = 0.3; // relative amplitude (to TEC0)
-    settings.tid[comp].speed = -80; // km/h
-    settings.tid[comp].theta = -40.0;  // degrees
-    settings.tid[comp].wavelength = 800.0; // km
-    comp++;
-    settings.tid[comp].amp = 0.05; // relative amplitude (to TEC0)
-    settings.tid[comp].speed = 20; // km/h
-    settings.tid[comp].theta = 5.0;  // degrees
-    settings.tid[comp].wavelength = 2000.0; // km
+    settings.TEC0 = 1.0;  // 1.,5.,10.
+    settings.num_TID_screens = 1;
+    settings.TID = (oskar_SettingsTIDscreen*)malloc(sizeof(oskar_SettingsTIDscreen)
+            * settings.num_TID_screens);
+
+    settings.TID[0].height_km = 300.0;
+
+    settings.TID[0].num_components = 4;
+    settings.TID[0].amp = (double*)malloc(settings.TID[0].num_components * sizeof(double));
+    settings.TID[0].speed = (double*)malloc(settings.TID[0].num_components * sizeof(double));
+    settings.TID[0].wavelength = (double*)malloc(settings.TID[0].num_components * sizeof(double));
+    settings.TID[0].theta = (double*)malloc(settings.TID[0].num_components * sizeof(double));
+
+    int c = 0;
+    settings.TID[0].amp[c] = 0.2;
+    settings.TID[0].speed[c] = 200;
+    settings.TID[0].theta[c] = 25.0;
+    settings.TID[0].wavelength[c] = 300.0;
+    c++;
+    settings.TID[0].amp[c] = 0.05;
+    settings.TID[0].speed[c] = 300.0;
+    settings.TID[0].theta[c] = -60.0;
+    settings.TID[0].wavelength[c] = 100.0;
+    c++;
+    settings.TID[0].amp[c] = 0.3;
+    settings.TID[0].speed[c] = -80.0;
+    settings.TID[0].theta[c] = -40.0;
+    settings.TID[0].wavelength[c] = 800.0;
+    c++;
+    settings.TID[0].amp[c] = 0.5;
+    settings.TID[0].speed[c] = 150.0;
+    settings.TID[0].theta[c] = 80.0;
+    settings.TID[0].wavelength[c] = 10000.0;
 
     int im_size = 512;
     int num_pixels = im_size * im_size;
@@ -147,7 +155,8 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
         oskar_mem_get_pointer(&tec_screen, &(tec_image.data), offset,
                 num_pixels, &status);
         oskar_evaluate_tid_mim(&tec_screen, num_pixels,
-                &pp_lon, &pp_lat, &pp_rel_path, &settings, gast);
+                &pp_lon, &pp_lat, &pp_rel_path, settings.TEC0,
+                &(settings.TID[0]), gast);
     }
 
     if (!status)
@@ -162,7 +171,11 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     oskar_mem_free(&pp_lat, &status);
     oskar_mem_free(&pp_rel_path, &status);
     oskar_image_free(&tec_image, &status);
-    free(settings.tid);
+    free(settings.TID[0].amp);
+    free(settings.TID[0].speed);
+    free(settings.TID[0].wavelength);
+    free(settings.TID[0].theta);
+    free(settings.TID);
 
     return status;
 }

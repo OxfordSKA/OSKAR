@@ -37,7 +37,7 @@ extern "C" {
 
 void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
         oskar_Mem* lat, oskar_Mem* rel_path_length,
-        oskar_SettingsMIM* settings, double gast)
+        double TEC0, oskar_SettingsTIDscreen* TID, double gast)
 {
     int i, j, type;
     double pp_lon, pp_lat;
@@ -52,15 +52,14 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
     type = tec->type;
 
     /* Loop over TIDs */
-    for (i = 0; i < settings->num_tid_components; ++i)
+    for (i = 0; i < TID->num_components; ++i)
     {
-        tec0 = settings->tec0;
-        amp = settings->tid[i].amp;
+        amp = TID->amp[i];
         // convert from km to rads
-        w = settings->tid[i].wavelength / (earth_radius + settings->height_km);
-        th = settings->tid[i].theta * M_PI/180.;
+        w = TID->wavelength[i] / (earth_radius + TID->height_km);
+        th = TID->theta[i] * M_PI/180.;
         // convert from km/h to rad/s
-        v = (settings->tid[i].speed/(earth_radius+settings->height_km)) / 3600;
+        v = (TID->speed[i]/(earth_radius + TID->height_km)) / 3600;
 
         time = gast * 86400.0; // days->sec
 
@@ -74,11 +73,11 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
                 pp_sec = ((double*)rel_path_length->data)[j];
 //                printf("%f %f %f -> %f\n", 2.0*M_PI/w, cos(th) * pp_lon, v* time,
 //                        (2.0*M_PI/w) * (cos(th)*pp_lon - v*time));
-                pp_tec = pp_sec * amp * tec0 * (
+                pp_tec = pp_sec * amp * TEC0 * (
                         cos( (2.0*M_PI/w) * (cos(th)*pp_lon - v*time) ) +
                         cos( (2.0*M_PI/w) * (sin(th)*pp_lat - v*time) )
                         );
-                //pp_tec += tec0;
+                pp_tec += TEC0;
 //                printf("c=%i d=%i %f %f %f %f\n", i, j, pp_lon, pp_lat, pp_sec, pp_tec);
                 ((double*)tec->data)[j] += pp_tec;
             }
@@ -87,11 +86,11 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
                 pp_lon = (double)((float*)lon->data)[j];
                 pp_lat = (double)((float*)lat->data)[j];
                 pp_sec = (double)((float*)rel_path_length->data)[j];
-                pp_tec = pp_sec * amp * tec0 * (
+                pp_tec = pp_sec * amp * TEC0 * (
                         cos( (2.0*M_PI/w) * (cos(th)*pp_lon - v*time) ) +
                         cos( (2.0*M_PI/w) * (sin(th)*pp_lat - v*time) )
                 );
-                pp_tec += tec0;
+                pp_tec += TEC0;
                 ((float*)tec->data)[j] += (float)pp_tec;
             }
         } // loop over directions

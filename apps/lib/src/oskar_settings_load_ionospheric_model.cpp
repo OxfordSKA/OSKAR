@@ -39,62 +39,12 @@ int oskar_settings_load_ionospheric_model(oskar_SettingsMIM* mim,
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("ionosphere");
 
-    mim->enable = (int)s.value("enable", false).toBool();
-    mim->height_km = (double)s.value("height_km", 300.0).toDouble();
-
-    s.beginGroup("TID");
-    mim->enableTID = (int)s.value("enable", true).toBool();
-
-    temp = s.value("config_type", "Component model").toString().toUpper();
-    if (temp.startsWith("COMP"))
-    {
-        mim->num_tid_components = 2;
-        mim->tid = (oskar_SettingsTID*) malloc(
-                sizeof(oskar_SettingsTID) * mim->num_tid_components);
-        s.beginGroup("components");
-        int g = 0;
-        s.beginGroup("0");
-        mim->tid[g].amp = s.value("amp", 0.0).toDouble();
-        mim->tid[g].theta = s.value("theta", 0.0).toDouble();
-        mim->tid[g].speed = s.value("speed", 0.0).toDouble();
-        mim->tid[g].wavelength = s.value("wavelength", 0.0).toDouble();
-        s.endGroup(); // 0
-        g = 1;
-        s.beginGroup("1");
-        mim->tid[g].amp = s.value("amp", 0.0).toDouble();
-        mim->tid[g].theta = s.value("theta", 0.0).toDouble();
-        mim->tid[g].speed = s.value("speed", 0.0).toDouble();
-        mim->tid[g].wavelength = s.value("wavelength", 0.0).toDouble();
-        s.endGroup(); // 1
-        s.endGroup(); // components
-
-    }
-    else if (temp.startsWith("CONF"))
-    {
-        t = s.value("").toByteArray();
-        if (t.size() > 0)
-        {
-            mim->component_file = (char*)malloc(t.size() + 1);
-            strcpy(mim->component_file, t.constData());
-        }
-        else
-            return OSKAR_ERR_SETTINGS_IONOSPHERE;
-
-        // TODO read the component file!
-    }
-    else
-    {
-        return OSKAR_ERR_SETTINGS_IONOSPHERE;
-    }
+    mim->enable = (int)s.value("enable", true).toBool();
+    mim->min_elevation = (double)s.value("min_elevation_deg", 0.0).toDouble();
+    mim->TEC0 = (double)s.value("TEC0", 1.0).toDouble();
 
     s.endGroup(); // TID
 
-
-    s.beginGroup("output");
-
-    s.endGroup();
-
-    s.endGroup(); // ionosphere
 
     return OSKAR_SUCCESS;
 }
