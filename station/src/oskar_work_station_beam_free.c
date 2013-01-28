@@ -35,6 +35,8 @@ extern "C" {
 
 void oskar_work_station_beam_free(oskar_WorkStationBeam* work, int* status)
 {
+    int i;
+
     /* Check all inputs. */
     if (!work || !status)
     {
@@ -53,8 +55,12 @@ void oskar_work_station_beam_free(oskar_WorkStationBeam* work, int* status)
     oskar_mem_free(&work->array_pattern, status);
     oskar_mem_free(&work->element_pattern_matrix, status);
     oskar_mem_free(&work->element_pattern_scalar, status);
-    oskar_mem_free(&work->hierarchy_work_matrix, status);
-    oskar_mem_free(&work->hierarchy_work_scalar, status);
+
+    for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
+    {
+        oskar_mem_free(&work->hierarchy_work_matrix[i], status);
+        oskar_mem_free(&work->hierarchy_work_scalar[i], status);
+    }
 }
 
 #ifdef __cplusplus

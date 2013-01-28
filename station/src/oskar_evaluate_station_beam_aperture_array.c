@@ -46,6 +46,8 @@
 extern "C" {
 #endif
 
+#define MAX_CHUNK_SIZE 49152
+
 /* Private function, used for recursive calls. */
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         const oskar_StationModel* station, int num_points, const oskar_Mem* x,
@@ -60,6 +62,9 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
         oskar_WorkStationBeam* work, oskar_CurandState* curand_states,
         int* status)
 {
+    int start;
+    oskar_Mem c_beam, c_x, c_y, c_z;
+
     /* Check all inputs. */
     if (!beam || !station || !x || !y || !z || !work || !curand_states ||
             !status)
@@ -71,9 +76,26 @@ void oskar_evaluate_station_beam_aperture_array(oskar_Mem* beam,
     /* Check if safe to proceed. */
     if (*status) return;
 
-    /* Start recursive call at depth 0. */
-    oskar_evaluate_station_beam_aperture_array_private(beam, station,
-            num_points, x, y, z, gast, work, curand_states, 0, status);
+    /* Split up list of input points into manageable chunks. */
+    for (start = 0; start < num_points; start += MAX_CHUNK_SIZE)
+    {
+        int chunk_size;
+
+        /* Get size of current chunk. */
+        chunk_size = num_points - start;
+        if (chunk_size > MAX_CHUNK_SIZE) chunk_size = MAX_CHUNK_SIZE;
+
+        /* Get pointers to start of chunk input data. */
+        oskar_mem_get_pointer(&c_beam, beam, start, chunk_size, status);
+        oskar_mem_get_pointer(&c_x, x, start, chunk_size, status);
+        oskar_mem_get_pointer(&c_y, y, start, chunk_size, status);
+        oskar_mem_get_pointer(&c_z, z, start, chunk_size, status);
+
+        /* Start recursive call at depth 0. */
+        oskar_evaluate_station_beam_aperture_array_private(&c_beam, station,
+                chunk_size, &c_x, &c_y, &c_z, gast, work, curand_states, 0,
+                status);
+    }
 }
 
 static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
@@ -91,6 +113,13 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
     if (station->coord_units != OSKAR_RADIANS)
     {
         *status = OSKAR_ERR_BAD_UNITS;
+        return;
+    }
+
+    /* Check that the maximum depth in the hierarchy has not been exceeded. */
+    if (depth >= OSKAR_MAX_STATION_DEPTH)
+    {
+        *status = OSKAR_ERR_OUT_OF_RANGE;
         return;
     }
 
@@ -198,10 +227,10 @@ static void oskar_evaluate_station_beam_aperture_array_private(oskar_Mem* beam,
         int i, work_size;
         oskar_Mem* signal;
 
-        /* FIXME In general, need to have a hierarchy work array per depth. */
         /* Get pointer to a work array of the right type. */
         signal = (oskar_mem_is_matrix(beam->type)) ?
-                &work->hierarchy_work_matrix : &work->hierarchy_work_scalar;
+                &work->hierarchy_work_matrix[depth] :
+                &work->hierarchy_work_scalar[depth];
 
         /* Ensure enough space in the work array. */
         work_size = station->num_elements * num_points;

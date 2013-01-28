@@ -36,7 +36,7 @@ extern "C" {
 void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
         int location, int* status)
 {
-    int complex_matrix;
+    int i, complex_matrix;
 
     /* Check all inputs. */
     if (!work || !status)
@@ -69,10 +69,14 @@ void oskar_work_station_beam_init(oskar_WorkStationBeam* work, int type,
             location, 0, 1, status);
     oskar_mem_init(&work->element_pattern_scalar, (type | OSKAR_COMPLEX),
             location, 0, 1, status);
-    oskar_mem_init(&work->hierarchy_work_matrix, (type | complex_matrix),
-            location, 0, 1, status);
-    oskar_mem_init(&work->hierarchy_work_scalar, (type | OSKAR_COMPLEX),
-            location, 0, 1, status);
+
+    for (i = 0; i < OSKAR_MAX_STATION_DEPTH; ++i)
+    {
+        oskar_mem_init(&work->hierarchy_work_matrix[i], (type | complex_matrix),
+                location, 0, 1, status);
+        oskar_mem_init(&work->hierarchy_work_scalar[i], (type | OSKAR_COMPLEX),
+                location, 0, 1, status);
+    }
 }
 
 #ifdef __cplusplus
