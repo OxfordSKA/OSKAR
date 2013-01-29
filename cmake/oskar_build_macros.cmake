@@ -75,7 +75,7 @@ ENDMACRO(CDR)
 macro(QT_APP)
     parse_arguments(APP   # prefix
         "QT_MOC_SRC;EXTRA_LIBS" # arg names
-        "NO_INSTALL"      # option names
+        "NO_INSTALL"   # option names
         ${ARGN}
     )
     CAR(APP_NAME ${APP_DEFAULT_ARGS})
@@ -99,13 +99,39 @@ macro(QT_APP)
     add_executable(${target} ${APP_SOURCES})
     target_link_libraries(${target}
         ${QT_QTCORE_LIBRARY} # default libs
-        ${APP_EXTRA_LIBS}                     # extra libs
+        ${APP_EXTRA_LIBS}    # extra libs
     )
     set_target_properties(${target} PROPERTIES
         OUTPUT_NAME   ${APP_NAME}
         INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
         INSTALL_RPATH_USE_LINK_PATH TRUE
     )
+
+    # FIXME hack for now to only build the oskar.app (make this an option?)
+    set(OSX_APP FALSE)
+    if (${APP_NAME} STREQUAL "oskar")
+        set(OSX_APP TRUE)
+    endif ()
+    if (APPLE AND OSX_APP)
+        set(target "${APP_NAME}_osx_app")
+        add_executable(${target} MACOSX_BUNDLE ${APP_SOURCES})
+        set(MACOSX_BUNDLE_BUNDLE_NAME ${APP_NAME})
+        set(MACOSX_BUNDLE_ICON_FILE ${PROJECT_SOURCE_DIR}/widgets/icons/icon.icns)
+        #add_custom_command(TARGET ${target} POST_BUILD
+        #    COMMAND mkdir ARGS ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app/Contents/Resources
+        #    COMMAND cp ARGS ${MACOSX_BUNDLE_ICON_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${APP_NAME}.app/Contents/Resources
+        #    #COMMAND cp ARGS *.qm ${CMAKE_CURRENT_BINARY_DIR}/${target}.app/Content/Resources
+        #)
+        target_link_libraries(${target}
+            ${QT_QTCORE_LIBRARY} # default libs
+            ${APP_EXTRA_LIBS}    # extra libs
+        )
+        set_target_properties(${target} PROPERTIES
+            OUTPUT_NAME   ${APP_NAME}
+            INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${OSKAR_LIB_INSTALL_DIR}
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+        )
+    endif (APPLE AND OSX_APP)
 
     # Create the install target if the NO_INSTALL option isn't specified.
     if (NOT APP_NO_INSTALL)
