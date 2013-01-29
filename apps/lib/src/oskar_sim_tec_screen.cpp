@@ -28,6 +28,9 @@
 
 #include "apps/lib/oskar_sim_tec_screen.h"
 
+#include "apps/lib/oskar_settings_load.h"
+#include "utility/oskar_settings_free.h"
+
 #include <sky/oskar_evaluate_mim_tid_tec.h>
 #include <sky/oskar_SettingsIonosphere.h>
 
@@ -61,40 +64,10 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     int status = OSKAR_SUCCESS;
 
     // Settings.
-    oskar_SettingsIonosphere settings;
-    settings.TEC0 = 1.0;  // 1.,5.,10.
-    settings.num_TID_screens = 1;
-    settings.TID = (oskar_SettingsTIDscreen*)malloc(sizeof(oskar_SettingsTIDscreen)
-            * settings.num_TID_screens);
+    oskar_Settings settings;
+    oskar_settings_load(&settings, log, settings_file);
 
-    settings.TID[0].height_km = 300.0;
-
-    settings.TID[0].num_components = 4;
-    settings.TID[0].amp = (double*)malloc(settings.TID[0].num_components * sizeof(double));
-    settings.TID[0].speed = (double*)malloc(settings.TID[0].num_components * sizeof(double));
-    settings.TID[0].wavelength = (double*)malloc(settings.TID[0].num_components * sizeof(double));
-    settings.TID[0].theta = (double*)malloc(settings.TID[0].num_components * sizeof(double));
-
-    int c = 0;
-    settings.TID[0].amp[c] = 0.2;
-    settings.TID[0].speed[c] = 200;
-    settings.TID[0].theta[c] = 25.0;
-    settings.TID[0].wavelength[c] = 300.0;
-    c++;
-    settings.TID[0].amp[c] = 0.05;
-    settings.TID[0].speed[c] = 300.0;
-    settings.TID[0].theta[c] = -60.0;
-    settings.TID[0].wavelength[c] = 100.0;
-    c++;
-    settings.TID[0].amp[c] = 0.3;
-    settings.TID[0].speed[c] = -80.0;
-    settings.TID[0].theta[c] = -40.0;
-    settings.TID[0].wavelength[c] = 800.0;
-    c++;
-    settings.TID[0].amp[c] = 0.5;
-    settings.TID[0].speed[c] = 150.0;
-    settings.TID[0].theta[c] = 80.0;
-    settings.TID[0].wavelength[c] = 10000.0;
+    oskar_SettingsIonosphere* MIM = &settings.ionosphere;
 
     int im_size = 512;
     int num_pixels = im_size * im_size;
@@ -105,7 +78,7 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     double lon0 = 0. * M_PI/180.;;
     double lat0 = 0. * M_PI/180.;
 
-    int num_times = 400;
+    int num_times = 2; // 400
     double t0 = 0.0;
     double tinc = (3.0 * 60) / (86400.); // sec->days
 
@@ -155,8 +128,8 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
         oskar_mem_get_pointer(&tec_screen, &(tec_image.data), offset,
                 num_pixels, &status);
         oskar_evaluate_tid_mim(&tec_screen, num_pixels,
-                &pp_lon, &pp_lat, &pp_rel_path, settings.TEC0,
-                &(settings.TID[0]), gast);
+                &pp_lon, &pp_lat, &pp_rel_path, MIM->TEC0,
+                &(MIM->TID[0]), gast);
     }
 
     if (!status)
@@ -171,11 +144,6 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     oskar_mem_free(&pp_lat, &status);
     oskar_mem_free(&pp_rel_path, &status);
     oskar_image_free(&tec_image, &status);
-    free(settings.TID[0].amp);
-    free(settings.TID[0].speed);
-    free(settings.TID[0].wavelength);
-    free(settings.TID[0].theta);
-    free(settings.TID);
 
     return status;
 }

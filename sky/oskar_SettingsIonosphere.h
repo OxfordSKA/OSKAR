@@ -42,10 +42,10 @@
  */
 struct OSKAR_EXPORT oskar_SettingsTIDscreen
 {
-    double height_km;       // Height of the TID screen, in kilometers
+    double height_km;       // Height of the TID screen, in km
     int num_components;     // Number of TID components
     double* amp;            // Relative amplitude
-    double* wavelength;     // in km
+    double* wavelength;     // km
     double* speed;          // km/h
     double* theta;          // deg
 };

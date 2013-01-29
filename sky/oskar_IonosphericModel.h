@@ -26,44 +26,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <utility/oskar_get_error_string.h>
-#include <utility/oskar_log_error.h>
-#include <utility/oskar_log_message.h>
-#include <utility/oskar_Log.h>
 
-#include <apps/lib/oskar_sim_tec_screen.h>
+#ifndef OSKAR_IONOSPHERICMODEL_H_
+#define OSKAR_IONOSPHERICMODEL_H_
 
-#include <cstdlib>
-#include <cstdio>
+/**
+ * @file oskar_IonosphericModel.h
+ */
 
-int main(int argc, char** argv)
+#include "oskar_global.h"
+
+struct OSKAR_EXPORT oskar_IonosphericModel
 {
-    int error = OSKAR_SUCCESS;
+    // TODO
+    // this should include memory arrays  for pp, (tec screen?) & phase ?
+    // have to work out use of work buffers
 
-    // Parse command line.
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: $ oskar_sim_tec_screen [settings file]\n");
-        return OSKAR_ERR_INVALID_ARGUMENT;
-    }
+};
 
-    // Create the log.
-    oskar_Log log;
-    oskar_log_message(&log, 0, "Running binary %s", argv[0]);
 
-    try
-    {
-        // Run simulation.
-        error = oskar_sim_tec_screen(argv[1], &log);
-    }
-    catch (int code)
-    {
-        error = code;
-    }
-
-    // Check for errors.
-    if (error)
-        oskar_log_error(&log, "Run failed: %s.", oskar_get_error_string(error));
-
-    return error;
-}
+#endif /* OSKAR_IONOSPHERICMODEL_H_ */

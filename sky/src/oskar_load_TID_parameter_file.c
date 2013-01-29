@@ -48,6 +48,7 @@ void oskar_load_TID_parameter_file(oskar_SettingsTIDscreen* TID,
     int n = 0, type = 0;
     FILE* file;
 
+    /* Initialise TID component arrays */
     TID->num_components = 0;
     TID->amp = NULL;
     TID->speed = NULL;

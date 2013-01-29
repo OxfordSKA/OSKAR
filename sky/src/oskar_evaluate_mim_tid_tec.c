@@ -71,14 +71,11 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
                 pp_lon = ((double*)lon->data)[j];
                 pp_lat = ((double*)lat->data)[j];
                 pp_sec = ((double*)rel_path_length->data)[j];
-//                printf("%f %f %f -> %f\n", 2.0*M_PI/w, cos(th) * pp_lon, v* time,
-//                        (2.0*M_PI/w) * (cos(th)*pp_lon - v*time));
                 pp_tec = pp_sec * amp * TEC0 * (
                         cos( (2.0*M_PI/w) * (cos(th)*pp_lon - v*time) ) +
                         cos( (2.0*M_PI/w) * (sin(th)*pp_lat - v*time) )
                         );
                 pp_tec += TEC0;
-//                printf("c=%i d=%i %f %f %f %f\n", i, j, pp_lon, pp_lat, pp_sec, pp_tec);
                 ((double*)tec->data)[j] += pp_tec;
             }
             else

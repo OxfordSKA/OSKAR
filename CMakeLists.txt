@@ -3,7 +3,7 @@
 #
 
 # HACK FOR OS X to prevent the C++ compiler using clang.
-# This is because clang doesnt have OpenMP support. 
+# This is because clang doesnt have OpenMP support.
 if (APPLE AND NOT CMAKE_CXX_COMPILER)
     set(CMAKE_CXX_COMPILER g++)
     set(CMAKE_C_COMPILER gcc)

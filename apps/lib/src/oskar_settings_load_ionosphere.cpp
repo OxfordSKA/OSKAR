@@ -28,26 +28,41 @@
 
 
 #include "apps/lib/oskar_settings_load_ionosphere.h"
+#include "sky/oskar_load_TID_parameter_file.h"
 
 #include <QtCore/QString>
 #include <QtCore/QByteArray>
 #include <QtCore/QSettings>
+#include <QtCore/QStringList>
 
 extern "C"
-int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* mim,
+int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         const char* filename)
 {
     QString temp;
     QByteArray t;
+    QStringList list;
+    int status = OSKAR_SUCCESS;
 
     QSettings s(QString(filename), QSettings::IniFormat);
     s.beginGroup("ionosphere");
+    settings->enable = (int)s.value("enable", true).toBool();
+    settings->min_elevation = (double)s.value("min_elevation_deg", 0.0).toDouble();
+    settings->TEC0 = (double)s.value("TEC0", 1.0).toDouble();
+    list = s.value("TID_file").toStringList();
+    settings->num_TID_screens = list.size();
+    settings->TID_files = (char**)malloc(settings->num_TID_screens*sizeof(char*));
+    settings->TID = (oskar_SettingsTIDscreen*)malloc(
+            settings->num_TID_screens*sizeof(oskar_SettingsTIDscreen));
+    for (int i = 0; i < settings->num_TID_screens; ++i)
+    {
+        t = list[i].toAscii();
+        settings->TID_files[i] = (char*)malloc(t.size() + 1);
+        strcpy(settings->TID_files[i], t.constData());
+        oskar_load_TID_parameter_file(&settings->TID[i], settings->TID_files[i],
+                &status);
+    }
+    s.endGroup(); // ionosphere
 
-    mim->enable = (int)s.value("enable", true).toBool();
-    mim->min_elevation = (double)s.value("min_elevation_deg", 0.0).toDouble();
-    mim->TEC0 = (double)s.value("TEC0", 1.0).toDouble();
-
-    s.endGroup(); // TID
-
-    return OSKAR_SUCCESS;
+    return status;
 }

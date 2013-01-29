@@ -29,6 +29,7 @@
 #include "utility/oskar_settings_free.h"
 #include "utility/oskar_mem_free.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -129,6 +130,25 @@ int oskar_settings_free(oskar_Settings* settings)
     noise->value.area.file = NULL;
     free(noise->value.efficiency.file);
     noise->value.efficiency.file = NULL;
+
+    /* Free ionosphere settings */
+    for (i = 0; i < settings->ionosphere.num_TID_screens; ++i)
+    {
+        free(settings->ionosphere.TID_files[i]);
+        settings->ionosphere.TID_files[i] = NULL;
+        free(settings->ionosphere.TID[i].amp);
+        settings->ionosphere.TID[i].amp = NULL;
+        free(settings->ionosphere.TID[i].speed);
+        settings->ionosphere.TID[i].speed = NULL;
+        free(settings->ionosphere.TID[i].theta);
+        settings->ionosphere.TID[i].theta = NULL;
+        free(settings->ionosphere.TID[i].wavelength);
+        settings->ionosphere.TID[i].wavelength = NULL;
+    }
+    free(settings->ionosphere.TID);
+    settings->ionosphere.TID = NULL;
+    free(settings->ionosphere.TID_files);
+    settings->ionosphere.TID_files = NULL;
 
     /* Free pathname to settings file. */
     oskar_mem_free(&settings->settings_path, &err);
