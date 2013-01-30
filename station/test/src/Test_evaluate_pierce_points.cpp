@@ -145,7 +145,7 @@ void Test_evaluate_pierce_points::test1()
             &pp_lon, &pp_lat, &pp_alt);
 
     printf("  pierce point: x=%f, y=%f, z=%f\n", pp_x, pp_y, pp_z);
-    double norm_pp = sqrt(pp_x*pp_x+pp_y*pp_y+pp_z*pp_z);
+//    double norm_pp = sqrt(pp_x*pp_x+pp_y*pp_y+pp_z*pp_z);
     printf("  pierce point: lon=%f, lat=%f (alt=%f km)\n",
             pp_lon*180.0/M_PI,
             pp_lat*180./M_PI,

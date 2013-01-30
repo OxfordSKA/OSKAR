@@ -38,37 +38,38 @@
 /**
  * @struct oskar_SettingsTID
  *
- * @brief Structure to hold TID settings.
+ * @brief Structure to hold travelling ionospheric disturbance (TID) settings.
  */
 struct OSKAR_EXPORT oskar_SettingsTIDscreen
 {
-    double height_km;       // Height of the TID screen, in km
-    int num_components;     // Number of TID components
-    double* amp;            // Relative amplitude
-    double* wavelength;     // km
-    double* speed;          // km/h
-    double* theta;          // deg
+    double height_km;       /* Height of the TID screen, km */
+    int num_components;     /* Number of TID components in the screen */
+    double* amp;            /* Relative amplitude compared to TEC0 */
+    double* wavelength;     /* km */
+    double* speed;          /* km/h */
+    double* theta;          /* deg. */
 };
 typedef struct oskar_SettingsTIDscreen oskar_SettingsTIDscreen;
+
 
 /**
  * @struct oskar_SettingsIonosphere
  *
- * @brief Structure to hold MIM settings.
+ * @brief Structure to hold Ionospheric model settings.
  *
  * @details
  * The structure holds parameters for the ionospheric model.
  */
 struct OSKAR_EXPORT oskar_SettingsIonosphere
 {
-    int enable;            // Flag to enable/disable MIM evaluation.
-    double min_elevation;  // Minimum elevation for MIM evaluation, in radians.
+    int enable;            /* Flag to enable/disable MIM evaluation. */
+    double min_elevation;  /* Minimum elevation for MIM evaluation, in radians. */
 
-    double TEC0;           // Zero offset TEC value.
+    double TEC0;           /* Zero offset TEC value. */
 
-    int num_TID_screens;   // Number of TID TEC screens evaluated.
-    char** TID_files;      // TID settings files (one for each screen height).
-    oskar_SettingsTIDscreen* TID; // Array of TID screen structures.
+    int num_TID_screens;   /* Number of TID TEC screens evaluated. */
+    char** TID_files;      /* TID settings files (one for each screen height). */
+    oskar_SettingsTIDscreen* TID; /* Array of TID screen structures. */
 };
 typedef struct oskar_SettingsIonosphere oskar_SettingsIonosphere;
 

@@ -66,9 +66,9 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
     // Settings.
     oskar_Settings settings;
     oskar_settings_load(&settings, log, settings_file);
-
     oskar_SettingsIonosphere* MIM = &settings.ionosphere;
 
+    // FIXME remove lots of the hard-coded options in this app.
     int im_size = 512;
     int num_pixels = im_size * im_size;
     int type = OSKAR_DOUBLE;

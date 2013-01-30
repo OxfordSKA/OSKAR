@@ -43,10 +43,9 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
     double pp_lon, pp_lat;
     double pp_sec;
     double pp_tec;
-    double tec0;
     double amp, w, th, v; /* TID parameters */
     double time;
-    double earth_radius = 6365.0; // km -- FIXME
+    double earth_radius = 6365.0; /* km -- FIXME */
 
     /* TODO check types, dimensions etc of memory */
     type = tec->type;
@@ -55,13 +54,13 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
     for (i = 0; i < TID->num_components; ++i)
     {
         amp = TID->amp[i];
-        // convert from km to rads
+        /* convert from km to rads */
         w = TID->wavelength[i] / (earth_radius + TID->height_km);
         th = TID->theta[i] * M_PI/180.;
-        // convert from km/h to rad/s
+        /* convert from km/h to rad/s */
         v = (TID->speed[i]/(earth_radius + TID->height_km)) / 3600;
 
-        time = gast * 86400.0; // days->sec
+        time = gast * 86400.0; /* days->sec */
 
         /* Loop over directions */
         for (j = 0; j < num_directions; ++j)
@@ -90,8 +89,8 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
                 pp_tec += TEC0;
                 ((float*)tec->data)[j] += (float)pp_tec;
             }
-        } // loop over directions
-    } // loop over components.
+        } /* loop over directions */
+    } /* loop over components. */
 }
 
 

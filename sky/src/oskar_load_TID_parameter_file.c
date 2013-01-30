@@ -45,7 +45,7 @@ void oskar_load_TID_parameter_file(oskar_SettingsTIDscreen* TID,
     /* Declare the line buffer and counter. */
     char* line = NULL;
     size_t bufsize = 0;
-    int n = 0, type = 0;
+    int n = 0;
     FILE* file;
 
     /* Initialise TID component arrays */
@@ -78,8 +78,6 @@ void oskar_load_TID_parameter_file(oskar_SettingsTIDscreen* TID,
     {
         int read = 0;
 
-//        printf("[%i] %s\n", n, line);
-
         /* Ignore comment lines (lines starting with '#'). */
         if (line[0] == '#') continue;
 
@@ -88,27 +86,18 @@ void oskar_load_TID_parameter_file(oskar_SettingsTIDscreen* TID,
         {
             read = oskar_string_to_array_d(line, 1, &TID->height_km);
             if (read != 1) continue;
-//            printf("---> reading height...\n");
             ++n;
         }
-//        /* Read the TEC0 value */
-//        else if (n == 1)
-//        {
-//            read = oskar_string_to_array_d(line, 1, &TID->TEC0);
-//            if (read != 1) continue;
-////            printf("---> reading TEC0...\n");
-//            ++n;
-//        }
         /* Read TID components */
         else
         {
+            size_t newSize;
             double par[] = {0.0, 0.0, 0.0, 0.0};
             read = oskar_string_to_array_d(line, sizeof(par)/sizeof(double), par);
             if (read != 4) continue;
-//            printf("---> reading component... %i\n", TID->num_components);
 
             /* Resize component arrays. */
-            size_t newSize = (TID->num_components+1) * sizeof(double);
+            newSize = (TID->num_components+1) * sizeof(double);
             TID->amp = (double*)realloc(TID->amp, newSize);
             TID->speed = (double*)realloc(TID->speed, newSize);
             TID->wavelength = (double*)realloc(TID->wavelength, newSize);
