@@ -11,7 +11,7 @@ endif()
 
 # === Set the project name and specify the required CMAKE version.
 project(OSKAR CXX C)
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 # === Project version.
 set(OSKAR_VERSION_MAJOR 2)
