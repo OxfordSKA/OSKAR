@@ -30,6 +30,9 @@
 #include "apps/lib/oskar_settings_load_ionosphere.h"
 #include "sky/oskar_load_TID_parameter_file.h"
 
+#include <cstring>
+#include <cstdlib>
+
 #include <QtCore/QString>
 #include <QtCore/QByteArray>
 #include <QtCore/QSettings>
