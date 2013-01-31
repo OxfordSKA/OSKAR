@@ -29,6 +29,7 @@
 #include "utility/oskar_mem_add.h"
 #include "utility/oskar_mem_type_check.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {

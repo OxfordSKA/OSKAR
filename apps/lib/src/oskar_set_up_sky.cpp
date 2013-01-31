@@ -249,7 +249,8 @@ int oskar_set_up_sky(int* num_chunks, oskar_SkyModel** sky_chunks,
             double ra, dec;
             oskar_healpix_pix_to_angles_ring(nside, i, &dec, &ra);
             dec = M_PI / 2.0 - dec;
-            oskar_sky_model_set_source(&temp, i, ra, dec, 1.0, 0.0, 0.0, 0.0,
+            oskar_sky_model_set_source(&temp, i, ra, dec,
+                    settings->sky.generator.healpix.amplitude, 0.0, 0.0, 0.0,
                     0.0, 0.0, 0.0, 0.0, 0.0, &error);
         }
         if (error) return error;

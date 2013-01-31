@@ -197,6 +197,7 @@ int oskar_settings_load_sky(oskar_SettingsSky* sky, const char* filename)
     // HEALPix generator settings.
     s.beginGroup("healpix");
     sky->generator.healpix.nside = s.value("nside", 0).toInt();
+    sky->generator.healpix.amplitude = s.value("amplitude", 1.0).toDouble();
     // HEALPix generator filter.
     get_filter_params(s, &sky->generator.healpix.filter);
     get_extended_params(s, &sky->generator.healpix.extended_sources);

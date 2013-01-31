@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utility/oskar_vector_types.h"
 #include "station/oskar_blank_below_horizon.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"
 #include "math/oskar_gaussian.h"

@@ -16,6 +16,9 @@
     * Added (sky model) option to remove sources for which Gaussian width
       solutions have failed.
 
+    * Added the ability to specify the amplitude of points when specifying
+      generated HEALPix source grids.
+
 2012-11-20  OSKAR 2.1.1-beta
 
     * Fixed a bug in the MATLAB sky model load and save functions which

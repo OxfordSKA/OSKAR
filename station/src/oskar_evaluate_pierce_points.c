@@ -148,12 +148,12 @@ void oskar_evaluate_pierce_points(
         scale = screen_height_m;
         pp_sec = 1.0;
 
-        /* If the direction is directly towards the zenith we dont have to
+        /* If the direction is directly towards the zenith we don't have to
            calculate anything as the length is simply the screen height! */
         if (fabs(diff_vector_ENU[2] - 1.0) > 1.0e-10)
         {
             double el, cos_el;
-            el = asin(z);
+            el = asin(z); /* FIXME check this way of evaluating elevation is stable */
             cos_el = cos(el);
             arg = (cos_el * norm_xyz) / (earth_radius_m + screen_height_m);
             alpha_prime = asin(arg);

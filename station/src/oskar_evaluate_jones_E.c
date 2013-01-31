@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,10 +26,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "station/oskar_evaluate_jones_E.h"
+
 #include "interferometry/oskar_telescope_model_location.h"
 #include "math/oskar_jones_get_station_pointer.h"
 #include "sky/oskar_sky_model_location.h"
-#include "station/oskar_evaluate_jones_E.h"
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "station/oskar_evaluate_station_beam_aperture_array.h"
 #include "station/oskar_evaluate_station_beam_gaussian.h"

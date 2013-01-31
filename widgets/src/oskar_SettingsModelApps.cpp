@@ -407,7 +407,9 @@ void oskar_SettingsModelApps::init_settings_sky_model()
             "activate the HEALPix generator, which will produce points "
             "evenly spaced over the whole sky. The total number of points "
             "is 12 * Nside * Nside.");
-
+    k = group + "/amplitude";
+    declare(k, "Amplitude", oskar_SettingsItem::DOUBLE, 1.0);
+    setTooltip(k, "Amplitude assigned to generated HEALPix points, in Jy.");
     group = "sky/generator/healpix/filter";
     setLabel(group, "Filter settings");
     k = "sky/generator/healpix/filter/flux_min";

@@ -162,6 +162,7 @@ struct OSKAR_EXPORT oskar_SettingsSkyGeneratorHealpix
     oskar_SettingsSkyFilter filter;
     oskar_SettingsSkyExtendedSources extended_sources;
     int nside;
+    double amplitude;
 };
 typedef struct oskar_SettingsSkyGeneratorHealpix oskar_SettingsSkyGeneratorHealpix;
 
