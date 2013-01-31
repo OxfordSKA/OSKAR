@@ -280,9 +280,18 @@ int oskar_evaluate_gaussian_source_parameters(oskar_Log* log, int num_sources,
     /* Print a warning if fitting failed for some sources. */
     if (num_failed > 0)
     {
-        oskar_log_warning(log, "Gaussian ellipse solution failed "
-                "for %i sources. These sources will be simulated as point objects.",
-                num_failed);
+        if (zero_failed_sources)
+        {
+            oskar_log_warning(log, "Gaussian ellipse solution failed for %i "
+                    "sources. These sources will not be removed from the sky "
+                    "model.",  num_failed);
+        }
+        else
+        {
+            oskar_log_warning(log, "Gaussian ellipse solution failed for %i "
+                    "sources. These sources will be simulated as point objects.",
+                    num_failed);
+        }
     }
 
     /* clean up */

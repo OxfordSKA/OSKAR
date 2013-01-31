@@ -28,8 +28,8 @@
 
 #include "apps/lib/oskar_set_up_sky.h"
 #ifndef OSKAR_NO_FITS
-#include "fits/oskar_fits_to_sky_model.h"
-#include "fits/oskar_fits_healpix_to_sky_model.h"
+#   include "fits/oskar_fits_to_sky_model.h"
+#   include "fits/oskar_fits_healpix_to_sky_model.h"
 #endif
 #include "math/oskar_healpix_nside_to_npix.h"
 #include "math/oskar_healpix_pix_to_angles_ring.h"
