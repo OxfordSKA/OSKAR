@@ -26,12 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "sky/oskar_evaluate_jones_Z.h"
 
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "math/oskar_jones_get_station_pointer.h"
+#include "interferometry/oskar_offset_geocentric_cartesian_to_geocentric_cartesian.h"
 #include "utility/oskar_vector_types.h"
+#include "station/oskar_evaluate_pierce_points.h"
+#include "utility/oskar_mem_add.h"
+#include "sky/oskar_evaluate_mim_tid_tec.h"
+
+#include "math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,6 +54,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
     int i, j;
     /* Station position in ECEF frame */
     double station_x, station_y, station_z;
+    double2* Z_;
 
     /* Check all inputs. */
     if (!Z || !sky || !telescope || !settings || !work || !status)
@@ -78,15 +84,15 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
 
         /* Evaluate horizontal x,y,z source positions (for which to evaluate
          * pierce points) */
-        oskar_evaluate_source_lmn(sky->num_sources, &work->hor_x,
+        oskar_evaluate_source_horizontal_lmn(sky->num_sources, &work->hor_x,
                 &work->hor_y, &work->hor_z, &sky->RA, &sky->Dec,
                 station, gast, status);
 
         /* Obtain station coordinates in the ECEF frame. */
         oskar_offset_geocentric_cartesian_to_geocentric_cartesian(1,
-                ((double*)telescope->station_x.data)[i],
-                ((double*)telescope->station_y.data)[i],
-                ((double*)telescope->station_z.data)[i],
+                &((double*)telescope->station_x.data)[i],
+                &((double*)telescope->station_y.data)[i],
+                &((double*)telescope->station_z.data)[i],
                 station->longitude_rad, station->latitude_rad,
                 station->altitude_m, &station_x, &station_y, &station_z);
 
@@ -102,16 +108,16 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
         oskar_evaluate_TEC(work, sky->num_sources, settings, gast, status);
 
         /* Get a pointer to the Jones matrices for the station */
-        oskar_Jones_get_statation_pointer(&Z_station, Z, i, status);
+        oskar_jones_get_station_pointer(&Z_station, Z, i, status);
 
         /* Z Jones = scalar Jones matrix */
-        double2* Z_ = (double2*)Z_station.data;
+        Z_ = (double2*)Z_station.data;
 
         /* Populate the Jones matrix with ionospheric phase */
         for (j = 0; j < sky->num_sources; ++j)
         {
             double arg = telescope->wavelength_metres * 25. *
-                    ((double*)work->total_TEC->data)[j];
+                    ((double*)work->total_TEC.data)[j];
 
             /* Initialise as an unit scalar Z = (1 + 0i) i.e. no phase change */
             Z_[j].x = 1.0;
@@ -119,7 +125,7 @@ void oskar_evaluate_jones_Z(oskar_Jones* Z, const oskar_SkyModel* sky,
 
             /* If the pierce point is below the minimum specified elevation
              * don't evaluate a phase */
-            if (asin(((double*)work->hor_z->data)[j]) < settings->min_elevation)
+            if (asin(((double*)work->hor_z.data)[j]) < settings->min_elevation)
                 continue;
 
             /* Z phase == exp(i * lambda * 25 * tec) */
@@ -146,7 +152,7 @@ static void oskar_evaluate_TEC(oskar_WorkJonesZ* work, int num_pp,
         /* Evaluate TEC values for the screen */
         oskar_evaluate_tid_mim(&work->screen_TEC, num_pp, &work->pp_lon,
                 &work->pp_lat, &work->pp_rel_path, settings->TEC0,
-                settings->TID[i], gast);
+                &settings->TID[i], gast);
 
         /* Accumulate into total TEC */
         /* FIXME addition is not physical for more than one TEC screen in the

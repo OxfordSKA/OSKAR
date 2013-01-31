@@ -1302,7 +1302,7 @@ void oskar_SettingsModelApps::init_settings_ionosphere()
     QStringList options;
 
     group = "ionosphere";
-    setLabel(group, "Ionosphereic model (Z-Jones) settings");
+    setLabel(group, "Ionospheric model (Z-Jones) settings");
     setTooltip(group, "Settings describing a simple, 2-dimensional ionospheric "
             "phase screen model.");
 

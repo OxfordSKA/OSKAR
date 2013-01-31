@@ -46,20 +46,20 @@
  */
 struct OSKAR_EXPORT oskar_WorkJonesZ
 {
-    oskar_Mem* hor_x;        /* Pierce point horizontal x coordinate */
-    oskar_Mem* hor_y;        /* Pierce point horizontal y coordinate */
-    oskar_Mem* hor_z;        /* Pierce point horizontal z coordinate */
+    oskar_Mem hor_x;        /* Pierce point horizontal x coordinate */
+    oskar_Mem hor_y;        /* Pierce point horizontal y coordinate */
+    oskar_Mem hor_z;        /* Pierce point horizontal z coordinate */
 
-    oskar_Mem* pp_lon;       /* Pierce point longitude, in radians */
-    oskar_Mem* pp_lat;       /* Pierce point latitude, in radians */
-    oskar_Mem* pp_rel_path;  /* Pierce point relative path length.
+    oskar_Mem pp_lon;       /* Pierce point longitude, in radians */
+    oskar_Mem pp_lat;       /* Pierce point latitude, in radians */
+    oskar_Mem pp_rel_path;  /* Pierce point relative path length.
                                 (the extra path, relative to the vertical for
                                 the ionospheric column defined by the pierce
                                 point) */
-    oskar_Mem* pp_mask;      /* Elevation mask */
+    oskar_Mem pp_mask;      /* Elevation mask */
 
-    oskar_Mem* screen_TEC;    /* TEC screen values for each pierce point */
-    oskar_Mem* total_TEC;     /* Total TEC values for each pierce point */
+    oskar_Mem screen_TEC;    /* TEC screen values for each pierce point */
+    oskar_Mem total_TEC;     /* Total TEC values for each pierce point */
 };
 
 typedef struct oskar_WorkJonesZ oskar_WorkJonesZ;
