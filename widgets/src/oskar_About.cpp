@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,7 +115,7 @@ oskar_About::oskar_About(QWidget *parent) : QDialog(parent)
         paragraph.setBottomMargin(10);
         QTextCursor cursor(licenseText);
         cursor.setBlockFormat(paragraph);
-        cursor.insertText("Copyright (c) 2011-2012, The University of Oxford. "
+        cursor.insertText("Copyright (c) 2011-2013, The University of Oxford. "
                 "\nAll rights reserved.");
         cursor.insertList(QTextListFormat::ListDecimal);
         cursor.insertText("Redistributions of source code must retain the "
