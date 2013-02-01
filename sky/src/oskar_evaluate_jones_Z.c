@@ -42,6 +42,7 @@
 #include "sky/oskar_sky_model_init.h"
 #include "sky/oskar_sky_model_free.h"
 #include "sky/oskar_sky_model_copy.h"
+#include "utility/oskar_mem_set_value_real.h"
 
 #include "math.h"
 #include "stdio.h"
