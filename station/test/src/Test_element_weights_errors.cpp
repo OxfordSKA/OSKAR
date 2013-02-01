@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <vector_functions.h>
 #include "station/test/Test_element_weights_errors.h"
 #include "station/oskar_evaluate_element_weights_errors.h"
 #include "utility/oskar_curand_state_init.h"
@@ -35,11 +36,6 @@
 #include "utility/oskar_mem_element_multiply.h"
 #include "utility/oskar_mem_init.h"
 #include "utility/oskar_mem_set_value_real.h"
-#include "utility/oskar_Mem.h"
-
-#include <vector_functions.h>
-#include "utility/oskar_vector_types.h"
-#include "oskar_global.h"
 
 #include <stdio.h>
 #include <stdlib.h>
