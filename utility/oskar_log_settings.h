@@ -132,6 +132,21 @@ void oskar_log_settings_beam_pattern(oskar_Log* log, const oskar_Settings* s);
 OSKAR_EXPORT
 void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s);
 
+
+/**
+ * @brief
+ * Writes ionosphere settings to a log.
+ *
+ * @details
+ * This function writes ionosphere settings to a log.
+ *
+ * @param[out,in] log  Pointer to a log structure.
+ * @param[in] s        Pointer to a populated settings structure.
+ */
+OSKAR_EXPORT
+void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s);
+
+
 #ifdef __cplusplus
 }
 #endif

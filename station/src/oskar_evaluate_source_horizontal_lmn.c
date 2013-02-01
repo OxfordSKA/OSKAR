@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, The University of Oxford
+ * Copyright (c) 2012-2013, The University of Oxford
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #include "station/oskar_evaluate_source_horizontal_lmn.h"
 #include "sky/oskar_ra_dec_to_hor_lmn_cuda.h"
+#include "sky/oskar_ra_dec_to_hor_lmn.h"
 #include "utility/oskar_mem_realloc.h"
 #include "utility/oskar_cuda_check_error.h"
 #include <stdio.h>
@@ -41,6 +42,7 @@ void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
         const oskar_StationModel* station, double gast, int* status)
 {
     double last;
+    int type, loc;
 
     /* Check all inputs. */
     if (!RA || !Dec || !station || !l || !m || !n || !status)
@@ -51,14 +53,6 @@ void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
 
     /* Check if safe to proceed. */
     if (*status) return;
-
-    /* Make sure the arrays are on the GPU. */
-    if (l->location != OSKAR_LOCATION_GPU ||
-            m->location != OSKAR_LOCATION_GPU ||
-            n->location != OSKAR_LOCATION_GPU ||
-            RA->location != OSKAR_LOCATION_GPU ||
-            Dec->location != OSKAR_LOCATION_GPU)
-        *status = OSKAR_ERR_BAD_LOCATION;
 
     /* Check that the dimensions are correct. */
     if (num_sources > RA->num_elements || num_sources > Dec->num_elements)
@@ -76,36 +70,88 @@ void oskar_evaluate_source_horizontal_lmn(int num_sources, oskar_Mem* l,
     if (!RA->data || !Dec->data || !l->data || !m->data || !n->data)
         *status = OSKAR_ERR_MEMORY_NOT_ALLOCATED;
 
+    if (RA->type == OSKAR_DOUBLE && Dec->type == OSKAR_DOUBLE &&
+            l->type == OSKAR_DOUBLE && m->type == OSKAR_DOUBLE &&
+            n->type == OSKAR_DOUBLE)
+    {
+        type = OSKAR_DOUBLE;
+    }
+    else if (RA->type == OSKAR_SINGLE && Dec->type == OSKAR_SINGLE &&
+            l->type == OSKAR_SINGLE && m->type == OSKAR_SINGLE &&
+            n->type == OSKAR_SINGLE)
+    {
+        type = OSKAR_SINGLE;
+    }
+    else
+    {
+        *status = OSKAR_ERR_TYPE_MISMATCH;
+    }
+
+    if (l->location == OSKAR_LOCATION_GPU &&
+            m->location == OSKAR_LOCATION_GPU &&
+            n->location == OSKAR_LOCATION_GPU &&
+            RA->location == OSKAR_LOCATION_GPU &&
+            Dec->location == OSKAR_LOCATION_GPU)
+    {
+        loc = OSKAR_LOCATION_GPU;
+    }
+    else if (l->location == OSKAR_LOCATION_CPU &&
+            m->location == OSKAR_LOCATION_CPU &&
+            n->location == OSKAR_LOCATION_CPU &&
+            RA->location == OSKAR_LOCATION_CPU &&
+            Dec->location == OSKAR_LOCATION_CPU)
+    {
+        loc = OSKAR_LOCATION_CPU;
+    }
+    else
+    {
+        *status = OSKAR_ERR_BAD_LOCATION;
+    }
+
     /* Check if safe to proceed. */
     if (*status) return;
 
     /* Local Apparent Sidereal Time, in radians. */
     last = gast + station->longitude_rad;
 
-    /* Double precision. */
-    if (RA->type == OSKAR_DOUBLE && Dec->type == OSKAR_DOUBLE &&
-            l->type == OSKAR_DOUBLE && m->type == OSKAR_DOUBLE &&
-            n->type == OSKAR_DOUBLE)
+    /* Make sure the arrays are on the GPU. */
+    if (loc == OSKAR_LOCATION_GPU)
     {
-        oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, (double*)(RA->data),
-                (double*)(Dec->data), last, station->latitude_rad,
-                (double*)(l->data), (double*)(m->data), (double*)(n->data));
-        oskar_cuda_check_error(status);
-    }
+        /* Double precision. */
+        if (type == OSKAR_DOUBLE)
+        {
+            oskar_ra_dec_to_hor_lmn_cuda_d(num_sources, (double*)(RA->data),
+                    (double*)(Dec->data), last, station->latitude_rad,
+                    (double*)(l->data), (double*)(m->data), (double*)(n->data));
+            oskar_cuda_check_error(status);
+        }
 
-    /* Single precision. */
-    else if (RA->type == OSKAR_SINGLE && Dec->type == OSKAR_SINGLE &&
-            l->type == OSKAR_SINGLE && m->type == OSKAR_SINGLE &&
-            n->type == OSKAR_SINGLE)
-    {
-        oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, (float*)(RA->data),
-                (float*)(Dec->data), (float)last, (float)station->latitude_rad,
-                (float*)(l->data), (float*)(m->data), (float*)(n->data));
-        oskar_cuda_check_error(status);
+        /* Single precision. */
+        else
+        {
+            oskar_ra_dec_to_hor_lmn_cuda_f(num_sources, (float*)(RA->data),
+                    (float*)(Dec->data), (float)last, (float)station->latitude_rad,
+                    (float*)(l->data), (float*)(m->data), (float*)(n->data));
+            oskar_cuda_check_error(status);
+        }
     }
     else
     {
-        *status = OSKAR_ERR_TYPE_MISMATCH;
+        /* Double precision. */
+        if (type == OSKAR_DOUBLE)
+        {
+            oskar_ra_dec_to_hor_lmn_d(num_sources, (double*)(RA->data),
+                    (double*)(Dec->data), last, station->latitude_rad,
+                    (double*)(l->data), (double*)(m->data), (double*)(n->data));
+        }
+
+        /* Single precision. */
+        else
+        {
+            oskar_ra_dec_to_hor_lmn_f(num_sources, (float*)(RA->data),
+                    (float*)(Dec->data), (float)last, (float)station->latitude_rad,
+                    (float*)(l->data), (float*)(m->data), (float*)(n->data));
+        }
     }
 }
 

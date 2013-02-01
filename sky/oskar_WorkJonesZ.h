@@ -56,12 +56,31 @@ struct OSKAR_EXPORT oskar_WorkJonesZ
                                 (the extra path, relative to the vertical for
                                 the ionospheric column defined by the pierce
                                 point) */
-    oskar_Mem pp_mask;      /* Elevation mask */
 
     oskar_Mem screen_TEC;    /* TEC screen values for each pierce point */
     oskar_Mem total_TEC;     /* Total TEC values for each pierce point */
 };
 
 typedef struct oskar_WorkJonesZ oskar_WorkJonesZ;
+
+
+/* Utility functions -- TODO move to their own source files? */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void oskar_work_jones_z_init(oskar_WorkJonesZ* work, int type, int location,
+        int* status);
+
+void oskar_work_jones_z_resize(oskar_WorkJonesZ* work, int n, int* status);
+
+void oskar_work_jones_z_free(oskar_WorkJonesZ* work, int* status);
+
+int oskar_work_jones_z_type(oskar_WorkJonesZ* work);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* OSKAR_WORK_JONES_Z_H_ */

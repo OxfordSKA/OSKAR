@@ -27,7 +27,8 @@
  */
 
 
-#include "sky/oskar_evaluate_mim_tid_tec.h"
+#include "sky/oskar_evaluate_TEC_TID.h"
+#include "utility/oskar_mem_set_value_real.h"
 #include "math.h"
 #include "stdio.h"
 
@@ -35,7 +36,7 @@
 extern "C" {
 #endif
 
-void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
+void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
         oskar_Mem* lat, oskar_Mem* rel_path_length,
         double TEC0, oskar_SettingsTIDscreen* TID, double gast)
 {
@@ -46,9 +47,12 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
     double amp, w, th, v; /* TID parameters */
     double time;
     double earth_radius = 6365.0; /* km -- FIXME */
+    int status = OSKAR_SUCCESS;
 
     /* TODO check types, dimensions etc of memory */
     type = tec->type;
+
+    oskar_mem_set_value_real(tec, 0.0, &status);
 
     /* Loop over TIDs */
     for (i = 0; i < TID->num_components; ++i)
@@ -88,6 +92,7 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
                 );
                 pp_tec += TEC0;
                 ((float*)tec->data)[j] += (float)pp_tec;
+                printf("pp_tec = %f %f\n", pp_tec, ((float*)tec->data)[j]);
             }
         } /* loop over directions */
     } /* loop over components. */

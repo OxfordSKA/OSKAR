@@ -10,7 +10,7 @@ set(sky_SRC
     src/oskar_evaluate_jones_R_cuda.cu
     src/oskar_evaluate_jones_R.c
     src/oskar_evaluate_jones_Z.c
-    src/oskar_evaluate_mim_tid_tec.c
+    src/oskar_evaluate_TEC_TID.c
     src/oskar_galactic_to_fk5.c
     src/oskar_generate_random_coordinate.c
     src/oskar_ha_dec_to_az_el.c
@@ -54,6 +54,7 @@ set(sky_SRC
     src/oskar_sky_model_type.c
     src/oskar_sky_model_write.c
     src/oskar_SkyModel.cpp
+    src/oskar_WorkJonesZ.c
 )
 
 # Add the CUDA kernels.

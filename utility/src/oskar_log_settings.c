@@ -715,6 +715,18 @@ void oskar_log_settings_image(oskar_Log* log, const oskar_Settings* s)
     LVS0("Output FITS image file", s->image.fits_image);
 }
 
+void oskar_log_settings_ionosphere(oskar_Log* log, const oskar_Settings* s)
+{
+    int depth = 0;
+    oskar_log_message(log, depth, "Ionosphere (Z Jones) settings");
+    depth = 1;
+    LVB("Enabled", s->ionosphere.enable);
+    LV("Minimum elevation (deg)", "%.3f%", s->ionosphere.min_elevation * 180./M_PI);
+    LV("TEC0", "%.3f%", s->ionosphere.TEC0);
+    LVI("Number of TID screens", s->ionosphere.num_TID_screens);
+}
+
+
 #ifdef __cplusplus
 }
 #endif

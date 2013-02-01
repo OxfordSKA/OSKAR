@@ -31,7 +31,7 @@
 #include "apps/lib/oskar_settings_load.h"
 #include "utility/oskar_settings_free.h"
 
-#include <sky/oskar_evaluate_mim_tid_tec.h>
+#include <sky/oskar_evaluate_TEC_TID.h>
 #include <sky/oskar_SettingsIonosphere.h>
 
 #include <utility/oskar_Mem.h>
@@ -127,7 +127,7 @@ int oskar_sim_tec_screen(const char* settings_file, oskar_Log* log)
         int offset = num_pixels * i;
         oskar_mem_get_pointer(&tec_screen, &(tec_image.data), offset,
                 num_pixels, &status);
-        oskar_evaluate_tid_mim(&tec_screen, num_pixels,
+        oskar_evaluate_TEC_TID(&tec_screen, num_pixels,
                 &pp_lon, &pp_lat, &pp_rel_path, MIM->TEC0,
                 &(MIM->TID[0]), gast);
     }

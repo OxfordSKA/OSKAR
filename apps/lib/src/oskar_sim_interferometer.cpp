@@ -92,6 +92,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
     oskar_log_settings_observation(log, &settings);
     oskar_log_settings_telescope(log, &settings);
     oskar_log_settings_interferometer(log, &settings);
+    oskar_log_settings_ionosphere(log, &settings);
+
     if (settings.interferometer.image_interferometer_output)
         oskar_log_settings_image(log, &settings);
 
@@ -160,6 +162,8 @@ int oskar_sim_interferometer(const char* settings_file, oskar_Log* log)
 
         frequency = settings.obs.start_frequency_hz +
                 c * settings.obs.frequency_inc_hz;
+        tel_cpu.wavelength_metres = 299792458.0 / frequency;
+
         oskar_log_message(log, 0, "Channel %3d/%d [%.4f MHz]",
                 c + 1, settings.obs.num_channels, frequency / 1e6);
 

@@ -27,11 +27,11 @@
  */
 
 
-#ifndef OSKAR_EVALUATE_MIM_TID_TEC_H_
-#define OSKAR_EVALUATE_MIM_TID_TEC_H_
+#ifndef OSKAR_EVALUATE_TEC_TID_H_
+#define OSKAR_EVALUATE_TEC_TID_H_
 
 /**
- * @file oskar_evaluate_mim_tid_tec.h
+ * @file oskar_evaluate_TEC_TID.h
  */
 
 #include "oskar_global.h"
@@ -60,7 +60,7 @@ extern "C" {
  * @param gast
  */
 OSKAR_EXPORT
-void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
+void oskar_evaluate_TEC_TID(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
         oskar_Mem* lat, oskar_Mem* rel_path_length, double TEC0,
         oskar_SettingsTIDscreen* TID, double gast);
 
@@ -68,4 +68,4 @@ void oskar_evaluate_tid_mim(oskar_Mem* tec, int num_directions, oskar_Mem* lon,
 }
 #endif
 
-#endif /* OSKAR_EVALUATE_MIM_TID_TEC_H_ */
+#endif /* OSKAR_EVALUATE_TEC_TID_H_ */

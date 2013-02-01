@@ -38,6 +38,8 @@
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 
+#include <cmath>
+
 extern "C"
 int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
         const char* filename)
@@ -51,6 +53,8 @@ int oskar_settings_load_ionosphere(oskar_SettingsIonosphere* settings,
     s.beginGroup("ionosphere");
     settings->enable = (int)s.value("enable", true).toBool();
     settings->min_elevation = (double)s.value("min_elevation_deg", 0.0).toDouble();
+    settings->min_elevation *= M_PI/180.0; // Convert to radians.
+
     settings->TEC0 = (double)s.value("TEC0", 1.0).toDouble();
     list = s.value("TID_file").toStringList();
     settings->num_TID_screens = list.size();
